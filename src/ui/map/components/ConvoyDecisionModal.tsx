@@ -31,6 +31,11 @@ const DECISION_COPY: Record<ConvoyDecision, { labelKey: MessageKey; detailKey: M
     },
 };
 
+function formatConvoyDecision(decision: ConvoyDecision | undefined): string {
+    if (!decision) return t('convoyDecision.state.none');
+    return t(`convoyDecision.state.${decision}` as MessageKey);
+}
+
 export function ConvoyDecisionModal({ convoy, onClose, onDecide }: ConvoyDecisionModalProps) {
     const [pendingDecision, setPendingDecision] = useState<ConvoyDecision | null>(null);
     const [error, setError] = useState<string | null>(null);

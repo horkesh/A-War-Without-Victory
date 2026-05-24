@@ -26,12 +26,12 @@ import { formatTurnLabel } from '../utils/formatters';
 import { getArmyReserveToolbarSignal } from '../utils/armyReserveSeverity';
 import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../utils/warroomReturn';
 import { openChronicle } from '../utils/shellNavigation';
+import { t } from '../i18n/index.js';
 import {
     buildPreAdvanceCommandReviewView,
     formatPreAdvanceGateBlockTitle,
 } from '../data/preAdvanceCommandReview';
 import { Z } from '../../shared/zIndex';
-import { t } from '../i18n';
 
 /**
  * Pre-Advance review-queue severity tone derived directly from the canonical
@@ -71,6 +71,7 @@ function CommandAuthorityGauge({ current, max }: { current: number; max: number 
     const pct = max > 0 ? Math.round((current / max) * 100) : 0;
     const color = pct >= 60 ? 'text-emerald-400' : pct >= 30 ? 'text-amber-400' : 'text-red-400';
     const barColor = pct >= 60 ? 'bg-emerald-400/70' : pct >= 30 ? 'bg-amber-400/70' : 'bg-red-400/70';
+    const authorityLabel = t('toolbar.commandAuthority.ariaLabel', { current, max });
     return (
         <div
             className="flex items-center gap-1.5"
@@ -165,8 +166,8 @@ export function PresidentialToolbar({
     const advanceGateTitle = advanceBlocked
         ? formatPreAdvanceGateBlockTitle(preAdvanceReview)
         : !ipc.isAvailable
-            ? 'Advance turn requires the desktop app.'
-            : 'Advance turn';
+            ? t('toolbar.advance.requiresDesktop')
+            : t('toolbar.advance.title');
 
     const handleAdvanceTurn = useCallback(async () => {
         if (advanceBlocked) {

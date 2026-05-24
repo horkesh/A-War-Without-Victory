@@ -6,7 +6,9 @@
 
 import type { CostLedger } from '../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult } from '../../../sim/endgame/endgame_comparison.js';
-import { t } from '../i18n';
+import { formatHistoricalDivergenceNote } from '../data/historicalDivergenceNotes.js';
+import { t, useLocale } from '../i18n';
+export { formatHistoricalDivergenceNote } from '../data/historicalDivergenceNotes.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Formatting helpers (exported for testing)
@@ -15,37 +17,41 @@ import { t } from '../i18n';
 /** Format a duration delta as a human-readable string. */
 export function formatDurationDelta(deltaWeeks: number, historicalWeeks: number): string {
     if (deltaWeeks > 0) {
-        return `${deltaWeeks} weeks longer than the historical ${historicalWeeks} weeks`;
+        return t('warCost.duration.longer', { deltaWeeks, historicalWeeks });
     } else if (deltaWeeks < 0) {
-        return `${Math.abs(deltaWeeks)} weeks shorter than the historical ${historicalWeeks} weeks`;
+        return t('warCost.duration.shorter', { deltaWeeks: Math.abs(deltaWeeks), historicalWeeks });
     }
-    return `Exactly the historical ${historicalWeeks} weeks`;
+    return t('warCost.duration.exact', { historicalWeeks });
 }
 
 /** Format a ratio as a percentage string with direction indicator. */
 export function formatCasualtyRatio(ratio: number): string {
     const index = Math.round(ratio * 100);
-    return `Military casualty index ${index} (historical reference = 100)`;
+    return t('warCost.casualtyIndex', { index });
 }
 
 /** Format territory divergence entry. */
 export function formatTerritoryDivergence(key: string, delta: number): string {
-    const label = key === 'RBiH_HRHB_Federation' ? 'Federation' : key;
-    if (Math.abs(delta) < 0.5) return `${label}: within historical range`;
-    const dir = delta > 0 ? 'more' : 'less';
-    return `${label}: ${Math.abs(delta).toFixed(1)}% ${dir} than Dayton baseline`;
+    const label = key === 'RBiH_HRHB_Federation' ? t('warCost.federation') : key;
+    if (Math.abs(delta) < 0.5) return t('warCost.territoryWithinRange', { label });
+    const directionKey = delta > 0 ? 'warCost.direction.more' : 'warCost.direction.less';
+    return t('warCost.territoryDivergence', {
+        label,
+        delta: Math.abs(delta).toFixed(1),
+        direction: t(directionKey),
+    });
 }
 
 function formatExitClass(exitClass: string | undefined): string {
     const labels: Record<string, string> = {
-        decisive_success: 'Decisive Success',
-        partial_success: 'Partial Success',
-        failed: 'Failed',
-        aborted: 'Aborted',
-        did_not_launch: 'Did Not Launch',
-        t3_authorized_no_offensive: 'Defensive Commitment',
+        decisive_success: t('warCost.exit.decisiveSuccess'),
+        partial_success: t('warCost.exit.partialSuccess'),
+        failed: t('warCost.exit.failed'),
+        aborted: t('warCost.exit.aborted'),
+        did_not_launch: t('warCost.exit.didNotLaunch'),
+        t3_authorized_no_offensive: t('warCost.exit.defensiveCommitment'),
     };
-    return labels[exitClass ?? ''] ?? 'Pending Outcome';
+    return labels[exitClass ?? ''] ?? t('warCost.exit.pendingOutcome');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -58,6 +64,7 @@ export interface WarCostSummaryProps {
 }
 
 export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) {
+    useLocale();
     const opportunityLedger = costLedger.operation_opportunities;
 
     return (
@@ -197,7 +204,7 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
                     <div className="space-y-1">
                         {comparison.divergence_notes.map((note, i) => (
                             <div key={i} className="text-[10px] text-text-secondary leading-relaxed">
-                                {note}
+                                {formatHistoricalDivergenceNote(note)}
                             </div>
                         ))}
                     </div>

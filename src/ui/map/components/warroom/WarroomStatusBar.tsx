@@ -228,7 +228,7 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
             : 'border-amber-700 text-amber-500 bg-amber-950/40'
         }`}
       >
-        {isWar ? 'WAR' : 'PEACE'}
+        {isWar ? t('warroom.status.phase.war') : t('warroom.status.phase.peace')}
       </span>
 
       {/* Decision Room priority pulse */}

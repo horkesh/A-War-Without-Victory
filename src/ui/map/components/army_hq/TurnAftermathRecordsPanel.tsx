@@ -48,6 +48,10 @@ function signalClass(severity: TurnAftermathView['signals'][number]['severity'])
     return 'border-panel-border/50 text-text-secondary bg-black/10';
 }
 
+function enumLabel(prefix: string, value: string): string {
+    return t(`${prefix}.${value}` as MessageKey);
+}
+
 function RecordMetric({ label, value, detail }: { label: string; value: string; detail: string }) {
     return (
         <div className="rounded border border-panel-border/50 bg-panel-bg/50 px-2 py-1.5">
@@ -78,7 +82,7 @@ function TurnAftermathRecordCard({ view, isLatest, isFocused }: { view: TurnAfte
                     <div className="flex flex-wrap items-center gap-2">
                         <div className="text-[12px] font-bold text-text-primary">{view.dateLabel}</div>
                         <span className={`rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${toneClass(view.tone)}`}>
-                            {view.tone}
+                            {enumLabel('turnAftermath.tone', view.tone)}
                         </span>
                         <span className={`rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${costClass(view.cost.severity)}`}>
                             {t('records.costSeverity', { severity: view.cost.severity })}
@@ -123,7 +127,7 @@ function TurnAftermathRecordCard({ view, isLatest, isFocused }: { view: TurnAfte
                         {signalPreview.map((signal) => (
                             <div key={signal.id} className={`min-w-0 rounded border px-2 py-1 ${signalClass(signal.severity)}`}>
                                 <div className="truncate text-[10px] font-semibold">{signal.label}</div>
-                                <div className="truncate text-[8px] uppercase tracking-[0.1em] opacity-75">{signal.kind} / {signal.detail}</div>
+                                <div className="truncate text-[8px] uppercase tracking-[0.1em] opacity-75">{enumLabel('turnAftermath.signal.kind', signal.kind)} / {signal.detail}</div>
                             </div>
                         ))}
                     </div>
@@ -136,7 +140,7 @@ function TurnAftermathRecordCard({ view, isLatest, isFocused }: { view: TurnAfte
                         <div className="rounded border border-panel-border/40 bg-black/10 px-2 py-1.5">
                             <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">{t('records.leadTerritorialNote')}</div>
                             <div className="truncate text-[11px] font-semibold text-text-primary">{firstFlip.label}</div>
-                            <div className="text-[9px] uppercase tracking-[0.1em] text-text-secondary">{firstFlip.direction}</div>
+                            <div className="text-[9px] uppercase tracking-[0.1em] text-text-secondary">{enumLabel('turnAftermath.direction', firstFlip.direction)}</div>
                         </div>
                     )}
                     {firstAction && (
@@ -231,7 +235,7 @@ export function TurnAftermathRecordsPanel() {
                         <div className="mt-1 max-w-3xl text-[11px] text-text-secondary">{pulse.briefing}</div>
                     </div>
                     <span className={`rounded border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${momentumClass(pulse.momentum)}`}>
-                        {pulse.momentum}
+                        {enumLabel('turnAftermath.momentum', pulse.momentum)}
                     </span>
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-4">
@@ -250,7 +254,7 @@ export function TurnAftermathRecordsPanel() {
                         <div className="mt-1 max-w-3xl text-[11px] text-text-secondary">{campaignCost.briefing}</div>
                     </div>
                     <span className={`rounded border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${costClass(campaignCost.severity)}`}>
-                        {campaignCost.severity}
+                        {enumLabel('turnAftermath.severity', campaignCost.severity)}
                     </span>
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
@@ -281,7 +285,7 @@ export function TurnAftermathRecordsPanel() {
                                 <div className="mt-0.5 flex flex-wrap items-center gap-2">
                                     <span className="text-[11px] font-semibold text-text-primary">{campaignCost.mostCostlyTurn.dateLabel}</span>
                                     <span className={`rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${costClass(campaignCost.mostCostlyTurn.severity)}`}>
-                                        {campaignCost.mostCostlyTurn.severity}
+                                        {enumLabel('turnAftermath.severity', campaignCost.mostCostlyTurn.severity)}
                                     </span>
                                 </div>
                                 <div className="mt-1 text-[9px] text-text-secondary">

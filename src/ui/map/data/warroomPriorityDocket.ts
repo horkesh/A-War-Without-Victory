@@ -6,6 +6,7 @@ import {
   type PreAdvanceCommandReviewSourceHandoff,
   type PreAdvanceCommandReviewStatus,
 } from './preAdvanceCommandReview';
+import { t } from '../i18n';
 
 export type WarroomPriorityDocketTone = 'danger' | 'attention' | 'clear' | 'quiet';
 
@@ -41,14 +42,23 @@ function docketTone(
 }
 
 function formatSummary(metrics: PreAdvanceCommandReviewMetrics): string {
-  return `${metrics.advanceReviewCount} advance item${metrics.advanceReviewCount === 1 ? '' : 's'} / ${metrics.urgentCount} urgent / ${metrics.pendingReviews} pending`;
+  return t('warroom.docket.summary', {
+    advanceReviewCount: metrics.advanceReviewCount,
+    advanceItemLabel: t(metrics.advanceReviewCount === 1 ? 'warroom.docket.advanceItem.one' : 'warroom.docket.advanceItem.many'),
+    urgentCount: metrics.urgentCount,
+    pendingReviews: metrics.pendingReviews,
+  });
 }
 
 function formatSourceHandoffSummary(
   sourceHandoffs: WarroomPriorityDocketSourceHandoff[],
   urgentCount: number,
 ): string {
-  return `${sourceHandoffs.length} source handoff${sourceHandoffs.length === 1 ? '' : 's'} / ${urgentCount} urgent`;
+  return t('warroom.docket.sourceHandoffSummary', {
+    sourceHandoffCount: sourceHandoffs.length,
+    sourceHandoffLabel: t(sourceHandoffs.length === 1 ? 'warroom.docket.sourceHandoff.one' : 'warroom.docket.sourceHandoff.many'),
+    urgentCount,
+  });
 }
 
 export function buildWarroomPriorityDocketView(input: WarroomPriorityDocketInput): WarroomPriorityDocketView {
@@ -63,7 +73,7 @@ export function buildWarroomPriorityDocketView(input: WarroomPriorityDocketInput
     summary: formatSummary(review.metrics),
     sourceHandoffSummary: formatSourceHandoffSummary(review.sourceHandoffs, review.metrics.urgentCount),
     canOpenBoard: review.canReviewPriorities,
-    openBoardLabel: 'Open Decision Room',
+    openBoardLabel: t('warroom.docket.openDecisionRoom'),
     items: review.items.slice(0, safeLimit),
     sourceHandoffs: review.sourceHandoffs,
     metrics: review.metrics,

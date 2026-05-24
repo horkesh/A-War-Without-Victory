@@ -1,8 +1,9 @@
 /**
- * Main Menu — full-screen landing page.
+ * Main Menu - full-screen landing page.
  * Two-tier layout: primary actions (New Game, Continue, Tutorial)
  * and secondary actions (Load, Settings, Credits).
  */
+import { type ReactNode } from 'react';
 import { Z } from '../../shared/zIndex';
 import { SUPPORTED_LOCALES, t, useLocale, type Locale } from '../i18n';
 
@@ -85,7 +86,7 @@ export function MainMenu({ hasSave, onNewGame, onContinue, onLoadGame, onSetting
     );
 }
 
-function MenuButton({ children, onClick, primary }: { children: React.ReactNode; onClick: () => void; primary?: boolean }) {
+function MenuButton({ children, onClick, primary }: { children: ReactNode; onClick: () => void; primary?: boolean }) {
     return (
         <button
             type="button"

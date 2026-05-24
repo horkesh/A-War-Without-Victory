@@ -3,6 +3,7 @@
  * Each event is a color-coded card with turn number, icon, and text.
  */
 import type { SettlementTimelineEvent, TimelineEventType } from '../utils/buildSettlementTimeline';
+import { getActiveLocale, t, type Locale } from '../i18n/index.js';
 
 const EVENT_STYLES: Record<TimelineEventType, { icon: string; color: string; bg: string }> = {
     control_flip:       { icon: '⚑', color: 'text-amber-400',    bg: 'border-amber-400/40' },
@@ -19,12 +20,16 @@ const EVENT_STYLES: Record<TimelineEventType, { icon: string; color: string; bg:
     ethnic_shift:       { icon: '◐', color: 'text-purple-400',   bg: 'border-purple-400/30' },
 };
 
-function turnToDate(turn: number): string {
+const SHORT_MONTHS_BY_LOCALE: Record<Locale, readonly string[]> = {
+    en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    bcs: ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'],
+};
+
+export function formatSettlementTimelineTurnDate(turn: number): string {
     // Turn 0 = April 6, 1992. Each turn = 7 days.
     const start = new Date(1992, 3, 6); // April 6, 1992
     const d = new Date(start.getTime() + turn * 7 * 24 * 60 * 60 * 1000);
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    return `${d.getDate()} ${SHORT_MONTHS_BY_LOCALE[getActiveLocale()][d.getMonth()]} ${d.getFullYear()}`;
 }
 
 interface Props {
@@ -35,7 +40,7 @@ export function SettlementTimeline({ events }: Props) {
     if (events.length === 0) {
         return (
             <div className="py-4 text-center text-text-secondary text-[11px] italic">
-                No recorded events at this settlement.
+                {t('settlementTimeline.empty')}
             </div>
         );
     }
@@ -62,7 +67,7 @@ export function SettlementTimeline({ events }: Props) {
                     <div className="flex items-center gap-2 mb-1">
                         <div className="w-[9px] h-[9px] rounded-full bg-panel-border/60 border border-panel-border relative z-10 -ml-[0.5px]" />
                         <span className="text-[9px] font-mono text-text-secondary tracking-wider">
-                            {turnToDate(group.turn)}
+                            {formatSettlementTimelineTurnDate(group.turn)}
                         </span>
                     </div>
 
@@ -90,7 +95,10 @@ export function SettlementTimeline({ events }: Props) {
                                             )}
                                             {event.casualties && (
                                                 <div className="text-[9px] text-text-secondary font-mono">
-                                                    Casualties: {event.casualties.attacker} att / {event.casualties.defender} def
+                                                    {t('settlementTimeline.casualties', {
+                                                        attacker: event.casualties.attacker,
+                                                        defender: event.casualties.defender,
+                                                    })}
                                                 </div>
                                             )}
                                         </div>

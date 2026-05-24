@@ -16,12 +16,13 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
 import { createElement } from 'react';
 import type { LoadedGameState } from '../../src/ui/map/data/types';
 import type { GameVerdict, FactionVerdict } from '../../src/state/negotiation_types';
 import type { CostLedger } from '../../src/sim/endgame/cost_ledger';
 import type { ComparisonResult } from '../../src/sim/endgame/endgame_comparison';
+import { setLocale } from '../../src/ui/map/i18n';
 
 // ── Mock store + IPC ────────────────────────────────────────────────────────
 
@@ -91,6 +92,13 @@ function endgame(ov?: Partial<LoadedGameState>): LoadedGameState {
             outcome_type: 'termination',
             outcome_label: 'Stalemate',
             turn: 188, date: '1995-10-01', duration_weeks: 188,
+            dayton_result: {
+                territorial_packages_accepted: ['package_a'],
+                territorial_packages_rejected: ['package_b'],
+                institutional_choices: { presidency: 'decentralized' },
+                final_territory_split: { RS: 49, Federation: 51 },
+                patron_overrides_applied: ['belgrade_pressure'],
+            },
             faction_verdicts: {
                 RBiH: makeFV('RBiH', {
                     grade: 'A', pyrrhic_score: 65,
@@ -145,7 +153,10 @@ function renderVS() {
 
 describe('VerdictScreen interaction — faction tab switching', () => {
     beforeEach(() => { storeState = { loadedGameState: endgame() }; });
-    afterEach(cleanup);
+    afterEach(() => {
+        cleanup();
+        setLocale('en');
+    });
 
     it('default selected faction is RBiH', () => {
         renderVS();
@@ -227,12 +238,86 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('Multi-ethnic state endures')).toBeDefined();
         expect(screen.getByText(/War Cost/)).toBeDefined();
     });
+
+    it('renders localized rich verdict chrome when BCS is selected', () => {
+        setLocale('bcs');
+
+        const { container } = renderVS();
+        const warCostSection = container.querySelector('[data-tutorial-step="cost-ledger"]');
+        expect(warCostSection).toBeDefined();
+        const warCost = within(warCostSection as HTMLElement);
+
+        expect(screen.getByRole('button', { name: 'Izvjestaj' })).toBeDefined();
+        expect(screen.getByRole('button', { name: 'Obracun' })).toBeDefined();
+        expect(screen.getByText('Najmanje losa verzija tragedije')).toBeDefined();
+        expect(screen.getByRole('button', { name: 'Pogledaj svoj rat' })).toBeDefined();
+        expect(screen.getByRole('button', { name: 'Nova igra' })).toBeDefined();
+        expect(screen.getByText('Pirov rezultat')).toBeDefined();
+        expect(screen.getAllByText('Dimenzije kapitala').length).toBeGreaterThanOrEqual(1);
+        expect(screen.queryByText('Military Credibility')).toBeNull();
+        expect(screen.getByText('Vojni kredibilitet')).toBeDefined();
+        expect(screen.getByText('Teritorijalni legitimitet')).toBeDefined();
+        expect(screen.getByText('Medjunarodni polozaj')).toBeDefined();
+        expect(screen.getByText('Povjerenje patrona')).toBeDefined();
+        expect(screen.getByText('Unutrasnja kohezija')).toBeDefined();
+        expect(screen.getByText('Pregovaracka poluga')).toBeDefined();
+        expect(screen.getAllByText('Zavrsna statistika').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByText('Teritorija')).toBeDefined();
+        expect(screen.getByText('Cijena rata i historijsko poredjenje')).toBeDefined();
+        expect(screen.getByText('Ukupno poginulih vojnika')).toBeDefined();
+        expect(screen.getAllByText('Trajanje rata').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByText('Historijsko odstupanje')).toBeDefined();
+        expect(warCost.queryByText('War lasted 6 weeks longer')).toBeNull();
+        expect(warCost.queryByText('Srebrenica genocide occurred')).toBeNull();
+        expect(warCost.getByText('Rat je trajao 6 sedmica duze.')).toBeDefined();
+        expect(warCost.getByText('Genocid u Srebrenici se dogodio.')).toBeDefined();
+        expect(screen.getByText('Fokus')).toBeDefined();
+        expect(screen.getByText('Ishod')).toBeDefined();
+        expect(screen.getByText('Signal cijene')).toBeDefined();
+        expect(screen.getByText('Sazetak za dijeljenje')).toBeDefined();
+        expect(screen.getByRole('button', { name: 'Kopiraj' })).toBeDefined();
+        expect(screen.queryByText('Survival')).toBeNull();
+        expect(screen.getAllByText('Opstanak').length).toBeGreaterThanOrEqual(2);
+        expect(screen.getAllByText('Daytonski sporazum').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByText('Prihvaceni paketi:')).toBeDefined();
+        expect(screen.getByText('Odbijeni paketi:')).toBeDefined();
+        expect(screen.getByText('Institucije:')).toBeDefined();
+        expect(screen.getByText('Konacna podjela:')).toBeDefined();
+        expect(screen.getByText('Patronska nadjacavanja:')).toBeDefined();
+        expect(screen.queryByText('package_a')).toBeNull();
+        expect(screen.queryByText('package_b')).toBeNull();
+        expect(screen.queryByText('presidency: decentralized')).toBeNull();
+        expect(screen.queryByText('belgrade_pressure')).toBeNull();
+        expect(screen.getByText('Paket A')).toBeDefined();
+        expect(screen.getByText('Paket B')).toBeDefined();
+        expect(screen.getByText('Predsjednistvo: decentralizovano')).toBeDefined();
+        expect(screen.getByText('Pritisak iz Beograda')).toBeDefined();
+        expect(screen.getByText('Poredjenje prekretnica')).toBeDefined();
+        expect(screen.getByText('Historija')).toBeDefined();
+        expect(screen.getByText('Ti')).toBeDefined();
+        expect(screen.getByText('Razlika')).toBeDefined();
+        expect(screen.getByText('Status')).toBeDefined();
+        expect(screen.getAllByText('Trajanje rata').length).toBeGreaterThanOrEqual(2);
+        expect(screen.getByText('S188')).toBeDefined();
+        expect(screen.getByText('6s kasno')).toBeDefined();
+        expect(screen.getByText('Kasno')).toBeDefined();
+        expect(screen.getByText('Kampanja je zavrsila 6 sedmica kasnije od historijske reference.')).toBeDefined();
+
+        fireEvent.click(screen.getByText('VRS'));
+
+        expect(screen.getByText('Medjunarodna osuda')).toBeDefined();
+        expect(screen.queryByText(/Condemned for genocide/i)).toBeNull();
+        expect(screen.getByText('Osudjeno zbog genocida - medjunarodni sudski postupci su neizbjezni')).toBeDefined();
+    });
 });
 
 // ── APP-ROUTE PROOF: Endgame reachability ───────────────────────────────────
 
 describe('VerdictScreen route — endgame reachability', () => {
-    afterEach(cleanup);
+    afterEach(() => {
+        cleanup();
+        setLocale('en');
+    });
 
     it('renders nothing when loadedGameState is null (non-game state)', () => {
         storeState = { loadedGameState: null };
@@ -258,6 +343,20 @@ describe('VerdictScreen route — endgame reachability', () => {
         storeState = { loadedGameState: endgame({ gameVerdict: undefined }) };
         renderVS();
         expect(screen.getByText('Final Standings')).toBeDefined();
+    });
+
+    it('renders localized FallbackGameOver copy when BCS is selected', () => {
+        setLocale('bcs');
+        storeState = { loadedGameState: endgame({ gameVerdict: undefined }) };
+
+        renderVS();
+
+        expect(screen.getByText('Pat pozicija')).toBeDefined();
+        expect(screen.getByText('Konacni poredak')).toBeDefined();
+        expect(screen.getByText('1 OSID pod kontrolom')).toBeDefined();
+        expect(screen.getByText('Kampanja je trajala 188 sedmica (3 godina, 32 sedmica)')).toBeDefined();
+        expect(screen.getByRole('button', { name: 'Pogledaj svoj rat' })).toBeDefined();
+        expect(screen.getByRole('button', { name: 'Nova igra' })).toBeDefined();
     });
 
     it('renders verdict path when verdict present and gameOver true', () => {

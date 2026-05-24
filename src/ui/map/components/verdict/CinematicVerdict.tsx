@@ -2,8 +2,9 @@ import type { CostLedger } from '../../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult } from '../../../../sim/endgame/endgame_comparison.js';
 import type { GameVerdict } from '../../../../state/negotiation_types.js';
 import { buildVerdictScene, type VerdictSceneTone } from '../../data/verdictScene.js';
+import { formatHistoricalDivergenceNote } from '../../data/historicalDivergenceNotes.js';
 import { buildVerdictShareSummary } from '../../data/verdictShareSummary.js';
-import { t } from '../../i18n';
+import { t, useLocale } from '../../i18n';
 
 export interface CinematicVerdictProps {
     verdict: GameVerdict;
@@ -40,6 +41,7 @@ export function CinematicVerdict({
     dateLabel,
     durationLabel,
 }: CinematicVerdictProps) {
+    useLocale();
     const scene = buildVerdictScene({
         verdict,
         costLedger,
@@ -100,7 +102,7 @@ export function CinematicVerdict({
                             {comparisonCallouts.map(callout => (
                                 <div key={callout} className="border-l-2 pl-2 text-[10px] leading-relaxed text-text-secondary sm:pl-3 sm:text-[11px]"
                                      style={{ borderLeftColor: accent }}>
-                                    {callout}
+                                    {formatHistoricalDivergenceNote(callout)}
                                 </div>
                             ))}
                         </div>

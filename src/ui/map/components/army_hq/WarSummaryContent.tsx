@@ -24,6 +24,10 @@ const SUMMARY_SECTIONS: Array<[SummaryFocusSection, MessageKey]> = [
     ['capital', 'warSummary.tab.capital'],
 ];
 
+function enumLabel(prefix: string, value: string): string {
+    return t(`${prefix}.${value}` as MessageKey);
+}
+
 interface WarSummaryContentProps {
     focusSection?: SummaryFocusSection;
 }

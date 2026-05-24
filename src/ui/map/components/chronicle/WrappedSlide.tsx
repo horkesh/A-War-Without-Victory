@@ -1,6 +1,8 @@
 import React from 'react';
 import { SpiderChart } from './SpiderChart.js';
 import type { WrappedSlide as WrappedSlideType } from './generateWrappedSlides.js';
+import { formatHistoricalDivergenceNote } from '../../data/historicalDivergenceNotes.js';
+import { useLocale } from '../../i18n';
 
 const FACTION_TINTS: Record<string, string> = {
     RBiH: 'rgba(74, 154, 85, 0.15)',
@@ -27,6 +29,7 @@ export const WrappedSlideComponent = React.memo(function WrappedSlideComponent({
     total,
     faction,
 }: WrappedSlideProps) {
+    useLocale();
     const tint = faction ? (FACTION_TINTS[faction] ?? 'rgba(196, 163, 90, 0.10)') : 'rgba(196, 163, 90, 0.10)';
     const accent = faction ? (FACTION_ACCENT[faction] ?? '#c4a35a') : '#c4a35a';
 
@@ -104,7 +107,7 @@ function renderHeroContent(slide: WrappedSlideType, accent: string, faction?: st
                     {slide.bullets && slide.bullets.length > 0 && (
                         <ul className="max-w-sm text-left text-[11px] text-white/60 leading-relaxed mt-2 space-y-2">
                             {slide.bullets.map((bullet, idx) => (
-                                <li key={`${slide.id}-bullet-${idx}`}>{bullet}</li>
+                                <li key={`${slide.id}-bullet-${idx}`}>{formatHistoricalDivergenceNote(bullet)}</li>
                             ))}
                         </ul>
                     )}

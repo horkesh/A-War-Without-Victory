@@ -56,21 +56,38 @@ const TOLERANCE_MESSAGE_KEYS: Record<Tolerance, MessageKey> = {
 };
 
 // WP1c: title attributes for each pill
-const PILL_TITLES: Record<string, string> = {
-    sector_attack: 'Sector Attack \u2014 Commits 3-8 brigades to push on a single sector front. Lowest risk. 4-8 turns typical.',
-    general_offensive: 'General Offensive \u2014 Corps-wide multi-axis assault. High risk, high reward. All sectors engaged.',
-    strategic_defense: 'Strategic Defense \u2014 Hold current positions and absorb enemy attacks. Minimal offensive action.',
-    reorganization: 'Reorganization \u2014 Pull back to rest and refit. No combat operations. Recovers cohesion and fatigue.',
-    feint: 'Feint \u2014 Simulated attack to draw enemy reserves away from the real schwerpunkt.',
-    probe: 'Probe \u2014 Reconnaissance in force. Tests enemy strength with limited commitment.',
-    methodical: 'Methodical \u2014 Deliberate pace with thorough preparation. Lower casualties but slower progress.',
-    standard: 'Standard \u2014 Normal operational tempo. Balanced between speed and losses.',
-    all_out: 'All-Out \u2014 Maximum speed and aggression. Heavy casualties expected.',
-    decisive_victory: 'Decisive Only \u2014 Brigades only attack when force ratio exceeds 2.0x. Very conservative.',
-    victory: 'Victory Required \u2014 Brigades attack when force ratio exceeds 1.5x. Conservative.',
-    costly_victory: 'Accept Costly \u2014 Brigades continue attacking through costly outcomes (1.0x ratio). Standard tolerance.',
-    stalemate: 'Accept Stalemate \u2014 Brigades press even through inconclusive outcomes (0.7x ratio). Aggressive.',
-    repulsed: 'REGARDLESS \u2014 Brigades attack even into predicted defeat (0.5x ratio). Expect heavy losses. Last resort only.',
+const PILL_TITLE_KEYS: Record<string, MessageKey> = {
+    sector_attack: 'opsPlanning.param.title.sectorAttack',
+    general_offensive: 'opsPlanning.param.title.generalOffensive',
+    strategic_defense: 'opsPlanning.param.title.strategicDefense',
+    reorganization: 'opsPlanning.param.title.reorganization',
+    feint: 'opsPlanning.param.title.feint',
+    probe: 'opsPlanning.param.title.probe',
+    methodical: 'opsPlanning.param.title.methodical',
+    standard: 'opsPlanning.param.title.standard',
+    all_out: 'opsPlanning.param.title.allOut',
+    decisive_victory: 'opsPlanning.param.title.decisiveVictory',
+    victory: 'opsPlanning.param.title.victory',
+    costly_victory: 'opsPlanning.param.title.costlyVictory',
+    stalemate: 'opsPlanning.param.title.stalemate',
+    repulsed: 'opsPlanning.param.title.repulsed',
+};
+
+const PILL_LABEL_KEYS: Record<string, MessageKey> = {
+    sector_attack: 'opsPlanning.param.label.sectorAttack',
+    general_offensive: 'opsPlanning.param.label.generalOffensive',
+    strategic_defense: 'opsPlanning.param.label.strategicDefense',
+    reorganization: 'opsPlanning.param.label.reorganization',
+    feint: 'opsPlanning.param.label.feint',
+    probe: 'opsPlanning.param.label.probe',
+    methodical: 'opsPlanning.param.label.methodical',
+    standard: 'opsPlanning.param.label.standard',
+    all_out: 'opsPlanning.param.label.allOut',
+    decisive_victory: 'opsPlanning.param.label.decisiveVictory',
+    victory: 'opsPlanning.param.label.victory',
+    costly_victory: 'opsPlanning.param.label.costlyVictory',
+    stalemate: 'opsPlanning.param.label.stalemate',
+    repulsed: 'opsPlanning.param.label.repulsed',
 };
 
 function pillClass(isActive: boolean): string {
@@ -148,7 +165,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                         key={opType}
                         type="button"
                         onClick={() => onUpdate({ opType })}
-                        title={PILL_TITLES[opType]}
+                        title={t(PILL_TITLE_KEYS[opType])}
                         className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider transition-all flex flex-col items-center
                             ${pillClass(plan.opType === opType)}`}
                     >
@@ -167,7 +184,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                         key={tempo}
                         type="button"
                         onClick={() => onUpdate({ tempo })}
-                        title={PILL_TITLES[tempo]}
+                        title={t(PILL_TITLE_KEYS[tempo])}
                         className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider transition-all flex flex-col items-center
                             ${pillClass(plan.tempo === tempo)}`}
                     >
@@ -189,7 +206,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                             key={tolerance}
                             type="button"
                             onClick={() => onUpdate({ tolerance })}
-                            title={PILL_TITLES[tolerance]}
+                            title={t(PILL_TITLE_KEYS[tolerance])}
                             className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider transition-all flex flex-col items-center
                                 ${isDanger ? dangerPillClass(isActive) : pillClass(isActive)}`}
                         >

@@ -30,23 +30,24 @@ import { buildGhostEntries, type BuiltGhostEntry } from '../../../sim/codex/dyna
 import { ReplayScrubber } from './replay/index.js';
 import { Z } from '../../shared/zIndex.js';
 import { CinematicVerdict } from './verdict/CinematicVerdict.js';
-import { t } from '../i18n';
+import { t, useLocale, type MessageKey } from '../i18n';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Outcome Class & Condemnation Helpers (exported for testing)
 // ═══════════════════════════════════════════════════════════════════════════
 
 export function formatOutcomeClass(oc: string | undefined): string {
-    const labels: Record<string, string> = {
-        strategic_success: 'Strategic Success',
-        survival: 'Survival',
-        negotiated_escape: 'Negotiated Escape',
-        pyrrhic_success: 'Pyrrhic Success',
-        hollow_victory: 'Hollow Victory',
-        failure: 'Failure',
-        collapse: 'Collapse',
+    const labels: Record<string, MessageKey> = {
+        strategic_success: 'verdict.outcome.strategicSuccess',
+        survival: 'verdict.outcome.survival',
+        negotiated_escape: 'verdict.outcome.negotiatedEscape',
+        pyrrhic_success: 'verdict.outcome.pyrrhicSuccess',
+        hollow_victory: 'verdict.outcome.hollowVictory',
+        failure: 'verdict.outcome.failure',
+        collapse: 'verdict.outcome.collapse',
     };
-    return labels[oc ?? ''] ?? 'Unknown';
+    const key = labels[oc ?? ''];
+    return key ? t(key) : t('verdict.outcome.unknown');
 }
 
 export function getOutcomeClassStyle(oc: string | undefined): string {
@@ -63,11 +64,12 @@ export function getOutcomeClassStyle(oc: string | undefined): string {
 }
 
 export function formatCondemnationFlag(flag: string): string {
-    const labels: Record<string, string> = {
-        genocide_condemnation: 'Condemned for genocide \u2014 international tribunal proceedings inevitable',
-        civilian_atrocities: 'Condemned for systematic atrocities against civilian population',
+    const labels: Record<string, MessageKey> = {
+        genocide_condemnation: 'verdict.condemnation.genocide',
+        civilian_atrocities: 'verdict.condemnation.civilianAtrocities',
     };
-    return labels[flag] ?? flag.replace(/_/g, ' ');
+    const key = labels[flag];
+    return key ? t(key) : flag.replace(/_/g, ' ');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -157,24 +159,28 @@ function statusFromDelta(deltaWeeks: number | null): MilestoneComparisonStatus {
 }
 
 function formatMilestoneStatus(status: MilestoneComparisonStatus): string {
-    const labels: Record<MilestoneComparisonStatus, string> = {
-        early: 'Early',
-        late: 'Late',
-        on_time: 'On Time',
-        absent: 'Absent',
+    const labels: Record<MilestoneComparisonStatus, MessageKey> = {
+        early: 'verdict.milestone.status.early',
+        late: 'verdict.milestone.status.late',
+        on_time: 'verdict.milestone.status.onTime',
+        absent: 'verdict.milestone.status.absent',
     };
-    return labels[status];
+    return t(labels[status]);
 }
 
 function formatWeekLabel(week: number | null): string {
-    return week === null ? 'Not recorded' : `W${week}`;
+    return week === null
+        ? t('verdict.milestone.notRecorded')
+        : t('verdict.milestone.weekLabel', { week });
 }
 
 function formatDeltaLabel(deltaWeeks: number | null): string {
-    if (deltaWeeks === null) return 'No player match';
-    if (deltaWeeks === 0) return 'On historical week';
-    const direction = deltaWeeks < 0 ? 'early' : 'late';
-    return `${Math.abs(deltaWeeks)}w ${direction}`;
+    if (deltaWeeks === null) return t('verdict.milestone.noPlayerMatch');
+    if (deltaWeeks === 0) return t('verdict.milestone.onHistoricalWeek');
+    const direction = deltaWeeks < 0
+        ? t('verdict.milestone.direction.early')
+        : t('verdict.milestone.direction.late');
+    return t('verdict.milestone.delta', { weeks: Math.abs(deltaWeeks), direction });
 }
 
 function rowFromMilestone(milestone: MilestoneComparison): EndgameMilestoneRow {
@@ -216,20 +222,20 @@ export function buildMilestoneComparisonRows(
     const historicalWeek = costLedger.war_duration_weeks - comparison.duration_delta_weeks;
     const deltaWeeks = comparison.duration_delta_weeks;
     const status = statusFromDelta(deltaWeeks);
-    const timingPhrase = deltaWeeks < 0
-        ? `${Math.abs(deltaWeeks)} weeks earlier`
-        : `${deltaWeeks} weeks later`;
+    const timingDirection = deltaWeeks < 0
+        ? t('verdict.milestone.summary.direction.earlier')
+        : t('verdict.milestone.summary.direction.later');
 
     return [rowFromMilestone({
         id: 'war_duration',
-        label: 'War Duration',
+        label: t('verdict.milestone.warDuration'),
         historical_week: historicalWeek,
         player_week: costLedger.war_duration_weeks,
         delta_weeks: deltaWeeks,
         status,
         summary: deltaWeeks === 0
-            ? 'The campaign reached its end on the historical reference week.'
-            : `The campaign ended ${timingPhrase} than the historical reference.`,
+            ? t('verdict.milestone.summary.onTime')
+            : t('verdict.milestone.summary.delta', { weeks: Math.abs(deltaWeeks), direction: timingDirection }),
     })];
 }
 
@@ -266,11 +272,11 @@ const GRADE_COLORS: Record<string, string> = {
 
 type VerdictLowerSection = 'report' | 'reckoning' | 'codex' | 'replay';
 
-const LOWER_SECTION_LABELS: Record<VerdictLowerSection, string> = {
-    report: 'Report',
-    reckoning: 'Reckoning',
-    codex: 'Codex',
-    replay: 'Replay',
+const LOWER_SECTION_LABEL_KEYS: Record<VerdictLowerSection, MessageKey> = {
+    report: 'verdict.lowerSection.report',
+    reckoning: 'verdict.lowerSection.reckoning',
+    codex: 'verdict.lowerSection.codex',
+    replay: 'verdict.lowerSection.replay',
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -281,6 +287,7 @@ export function VerdictScreen() {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const startReplayInspection = useGameStore((s) => s.startReplayInspection);
     const ipc = useIPC();
+    useLocale();
     const [selectedFaction, setSelectedFaction] = useState<string>('RBiH');
     const [activeLowerSection, setActiveLowerSection] = useState<VerdictLowerSection>('report');
 
@@ -400,7 +407,7 @@ export function VerdictScreen() {
                                             }`}
                                             aria-pressed={active}
                                         >
-                                            {LOWER_SECTION_LABELS[section]}
+                                            {t(LOWER_SECTION_LABEL_KEYS[section])}
                                         </button>
                                     );
                                 })}
@@ -530,27 +537,27 @@ export function VerdictScreen() {
                 {/* Footer */}
                 <div className="shrink-0 border-t border-panel-border bg-panel-card/30 px-4 py-2 sm:px-6 sm:py-4">
                     <div className="mb-2 text-center text-[9px] italic text-text-secondary/60 sm:mb-3">
-                        The least bad version of a tragedy
+                        {t('verdict.footer.tagline')}
                     </div>
                     <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
                         <button
                             onClick={() => useGameStore.getState().setWrappedOpen(true)}
                             className="min-h-8 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
                         >
-                            View Your War
+                            {t('gameOver.viewYourWar')}
                         </button>
                         <button
                             onClick={() => window.location.reload()}
                             className="min-h-8 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
                         >
-                            New Game
+                            {t('gameOver.newGame')}
                         </button>
                         {ipc.isAvailable && (
                             <button
                                 onClick={() => ipc.loadStateDialog?.()}
                                 className="min-h-8 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
                             >
-                                Load Save
+                                {t('gameOver.loadSave')}
                             </button>
                         )}
                     </div>
@@ -565,11 +572,12 @@ export function VerdictScreen() {
 // ═══════════════════════════════════════════════════════════════════════════
 
 export function EndgameMilestoneComparison({ rows }: { rows: EndgameMilestoneRow[] }) {
+    useLocale();
     return (
         <div className="px-6 pb-5 space-y-2"
              data-awwv-milestone-comparison={rows.length}>
             <div className="text-[9px] uppercase tracking-[0.3em] text-text-secondary font-semibold">
-                Milestone Comparison
+                {t('verdict.milestone.title')}
             </div>
             <div className="space-y-2">
                 {rows.map(row => (
@@ -585,10 +593,10 @@ export function EndgameMilestoneComparison({ rows }: { rows: EndgameMilestoneRow
                                 {row.summary}
                             </div>
                         </div>
-                        <MilestoneCell label="History" value={row.historicalWeekLabel} />
-                        <MilestoneCell label="You" value={row.playerWeekLabel} />
-                        <MilestoneCell label="Delta" value={row.deltaLabel} />
-                        <MilestoneCell label="Status" value={row.statusLabel} />
+                        <MilestoneCell label={t('verdict.milestone.cell.history')} value={row.historicalWeekLabel} />
+                        <MilestoneCell label={t('verdict.milestone.cell.you')} value={row.playerWeekLabel} />
+                        <MilestoneCell label={t('verdict.milestone.cell.delta')} value={row.deltaLabel} />
+                        <MilestoneCell label={t('verdict.milestone.cell.status')} value={row.statusLabel} />
                     </div>
                 ))}
             </div>
@@ -625,6 +633,7 @@ export function FactionReport({
     personnel: number;
     daytonResult?: import('../../../state/negotiation_types.js').DaytonResult;
 }) {
+    useLocale();
     const color = FACTION_HEX[verdict.faction] ?? '#888';
     const cap = verdict.capital_breakdown;
 
@@ -633,7 +642,7 @@ export function FactionReport({
             {/* Pyrrhic Score Hero — always-visible primary signal, NOT collapsible. */}
             <div data-testid="faction-report-score" className="text-center py-4">
                 <div className="text-[9px] uppercase tracking-[0.3em] text-text-secondary mb-1">
-                    Pyrrhic Score
+                    {t('verdict.report.pyrrhicScore')}
                 </div>
                 <div className="text-[48px] font-bold tabular-nums leading-none"
                      style={{ color }}>
@@ -656,7 +665,7 @@ export function FactionReport({
                 {verdict.condemnation_flags && verdict.condemnation_flags.length > 0 && (
                     <div className="mt-3 p-3 rounded bg-red-950/40 border border-red-800/40">
                         <div className="text-[9px] uppercase tracking-wider text-red-400/80 font-semibold mb-1.5">
-                            International Condemnation
+                            {t('verdict.report.internationalCondemnation')}
                         </div>
                         {verdict.condemnation_flags.map((flag: string, i: number) => (
                             <div key={i} className="text-[10px] text-red-300/90 leading-relaxed">
@@ -685,14 +694,14 @@ export function FactionReport({
             >
                 <summary className="sm:hidden cursor-pointer list-none flex items-center justify-between rounded border border-panel-border bg-panel-card px-3 py-2 mb-2">
                     <span className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold">
-                        Capital Dimensions
+                        {t('verdict.report.capitalDimensions')}
                     </span>
                     <span className="text-[9px] uppercase tracking-[0.12em] text-text-muted">
-                        {verdict.dimension_grades.length} bars
+                        {t('verdict.report.dimensionBars', { count: verdict.dimension_grades.length })}
                     </span>
                 </summary>
                 <div className="hidden sm:block text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-3">
-                    Capital Dimensions
+                    {t('verdict.report.capitalDimensions')}
                 </div>
                 <div className="space-y-2">
                     {verdict.dimension_grades.map((dg) => (
@@ -709,43 +718,43 @@ export function FactionReport({
             >
                 <summary className="sm:hidden cursor-pointer list-none flex items-center justify-between rounded border border-panel-border bg-panel-card px-3 py-2 mb-2">
                     <span className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold">
-                        Final Statistics
+                        {t('verdict.report.finalStatistics')}
                     </span>
                     <span className="text-[9px] uppercase tracking-[0.12em] text-text-muted">
-                        Tap to toggle
+                        {t('verdict.report.tapToToggle')}
                     </span>
                 </summary>
                 <div className="hidden sm:block text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-3">
-                    Final Statistics
+                    {t('verdict.report.finalStatistics')}
                 </div>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
-                    <StatRow label="Territory" value={`${((factionOsids / totalOsids) * 100).toFixed(1)}% (${factionOsids} OSIDs)`} />
+                    <StatRow label={t('verdict.report.stat.territory')} value={`${((factionOsids / totalOsids) * 100).toFixed(1)}% (${factionOsids} OSIDs)`} />
                     {cap && (
                         <>
-                            <StatRow label="Territory (km2)" value={`${Math.round(cap.territory_controlled_km2).toLocaleString()} km\u00b2`} />
-                            <StatRow label="Active Brigades" value={String(brigadeCount)} />
-                            <StatRow label="Personnel" value={personnel.toLocaleString()} />
-                            <StatRow label="Casualties Inflicted" value={cap.military_casualties_inflicted.toLocaleString()} />
-                            <StatRow label="Casualties Taken" value={cap.military_casualties_taken.toLocaleString()} />
-                            <StatRow label="Civilians Protected" value={cap.civilians_under_protection.toLocaleString()} />
-                            <StatRow label="Refugees Created" value={cap.refugees_created.toLocaleString()} />
-                            <StatRow label="Refugees Received" value={cap.refugees_received.toLocaleString()} />
-                            <StatRow label="Operations Launched" value={String(cap.operations_launched)} />
-                            <StatRow label="Operations Successful" value={String(cap.operations_successful)} />
+                            <StatRow label={t('verdict.report.stat.territoryKm2')} value={`${Math.round(cap.territory_controlled_km2).toLocaleString()} km\u00b2`} />
+                            <StatRow label={t('verdict.report.stat.activeBrigades')} value={String(brigadeCount)} />
+                            <StatRow label={t('verdict.report.stat.personnel')} value={personnel.toLocaleString()} />
+                            <StatRow label={t('verdict.report.stat.casualtiesInflicted')} value={cap.military_casualties_inflicted.toLocaleString()} />
+                            <StatRow label={t('verdict.report.stat.casualtiesTaken')} value={cap.military_casualties_taken.toLocaleString()} />
+                            <StatRow label={t('verdict.report.stat.civiliansProtected')} value={cap.civilians_under_protection.toLocaleString()} />
+                            <StatRow label={t('verdict.report.stat.refugeesCreated')} value={cap.refugees_created.toLocaleString()} />
+                            <StatRow label={t('verdict.report.stat.refugeesReceived')} value={cap.refugees_received.toLocaleString()} />
+                            <StatRow label={t('verdict.report.stat.operationsLaunched')} value={String(cap.operations_launched)} />
+                            <StatRow label={t('verdict.report.stat.operationsSuccessful')} value={String(cap.operations_successful)} />
                             {cap.enclaves_held.length > 0 && (
-                                <StatRow label="Enclaves Held" value={cap.enclaves_held.map(titleCase).join(', ')} />
+                                <StatRow label={t('verdict.report.stat.enclavesHeld')} value={cap.enclaves_held.map(titleCase).join(', ')} />
                             )}
                             {cap.enclaves_lost.length > 0 && (
-                                <StatRow label="Enclaves Lost" value={cap.enclaves_lost.map(titleCase).join(', ')} />
+                                <StatRow label={t('verdict.report.stat.enclavesLost')} value={cap.enclaves_lost.map(titleCase).join(', ')} />
                             )}
                             {cap.peace_plans_accepted.length > 0 && (
-                                <StatRow label="Plans Accepted" value={cap.peace_plans_accepted.join(', ')} />
+                                <StatRow label={t('verdict.report.stat.plansAccepted')} value={cap.peace_plans_accepted.join(', ')} />
                             )}
                             {cap.peace_plans_rejected.length > 0 && (
-                                <StatRow label="Plans Rejected" value={cap.peace_plans_rejected.join(', ')} />
+                                <StatRow label={t('verdict.report.stat.plansRejected')} value={cap.peace_plans_rejected.join(', ')} />
                             )}
                             {cap.war_crimes_events > 0 && (
-                                <StatRow label="War Crimes Events" value={String(cap.war_crimes_events)} />
+                                <StatRow label={t('verdict.report.stat.warCrimesEvents')} value={String(cap.war_crimes_events)} />
                             )}
                         </>
                     )}
@@ -787,7 +796,7 @@ export function FactionReport({
                             <div>
                                 <span className="text-text-primary font-semibold">{t('verdict.institutions')} </span>
                                 {Object.entries(daytonResult.institutional_choices)
-                                    .map(([k, v]) => `${k}: ${v}`)
+                                    .map(([k, v]) => `${formatDaytonInstitutionLabel(k)}: ${formatDaytonInstitutionValue(v)}`)
                                     .join('; ')}
                             </div>
                         )}
@@ -816,6 +825,53 @@ export function FactionReport({
 // Sub-components
 // ═══════════════════════════════════════════════════════════════════════════
 
+function formatDimensionLabel(dg: DimensionGrade): string {
+    const labels: Record<string, MessageKey> = {
+        military_credibility: 'verdict.dimension.militaryCredibility',
+        territorial_legitimacy: 'verdict.dimension.territorialLegitimacy',
+        international_standing: 'verdict.dimension.internationalStanding',
+        patron_confidence: 'verdict.dimension.patronConfidence',
+        internal_cohesion: 'verdict.dimension.internalCohesion',
+        negotiating_leverage: 'verdict.dimension.negotiatingLeverage',
+    };
+    const key = labels[dg.dimension];
+    return key ? t(key) : dg.label;
+}
+
+function formatDaytonPackageLabel(id: string): string {
+    const labels: Record<string, MessageKey> = {
+        package_a: 'verdict.dayton.package.packageA',
+        package_b: 'verdict.dayton.package.packageB',
+    };
+    const key = labels[id];
+    return key ? t(key) : id;
+}
+
+function formatDaytonInstitutionLabel(key: string): string {
+    const labels: Record<string, MessageKey> = {
+        presidency: 'verdict.dayton.institution.presidency',
+    };
+    const messageKey = labels[key];
+    return messageKey ? t(messageKey) : key;
+}
+
+function formatDaytonInstitutionValue(value: string): string {
+    const labels: Record<string, MessageKey> = {
+        decentralized: 'verdict.dayton.institutionValue.decentralized',
+        centralized: 'verdict.dayton.institutionValue.centralized',
+    };
+    const key = labels[value];
+    return key ? t(key) : value;
+}
+
+function formatDaytonPatronOverride(id: string): string {
+    const labels: Record<string, MessageKey> = {
+        belgrade_pressure: 'verdict.dayton.patronOverride.belgradePressure',
+    };
+    const key = labels[id];
+    return key ? t(key) : id;
+}
+
 function DimensionBar({ dg, factionColor }: { dg: DimensionGrade; factionColor: string }) {
     const gradeColor = GRADE_COLORS[dg.grade] ?? '#9a9080';
     const barWidth = Math.max(2, Math.min(100, dg.score));
@@ -823,7 +879,7 @@ function DimensionBar({ dg, factionColor }: { dg: DimensionGrade; factionColor: 
     return (
         <div className="flex items-center gap-3">
             <div className="w-[140px] text-[10px] text-text-secondary truncate">
-                {dg.label}
+                {formatDimensionLabel(dg)}
             </div>
             <div className="flex-1 h-2 bg-black/30 rounded-full overflow-hidden">
                 <div
@@ -858,14 +914,36 @@ function titleCase(s: string): string {
 // Fallback (no verdict data — simple game over display)
 // ═══════════════════════════════════════════════════════════════════════════
 
-const OUTCOME_LABELS: Record<string, { title: string; subtitle: string }> = {
-    victory_RBiH: { title: 'Republic of Bosnia and Herzegovina Prevails', subtitle: 'The multi-ethnic state endures -- but at what cost?' },
-    victory_RS: { title: 'Republika Srpska Achieves Its Aims', subtitle: 'The Serb entity consolidates -- but the land is emptied.' },
-    victory_HRHB: { title: 'Herzeg-Bosnia Secures Its Territory', subtitle: 'The Croatian entity holds -- but the alliance is shattered.' },
-    timeout_stalemate: { title: 'Stalemate', subtitle: 'The war grinds to exhaustion. No side achieves its aims.' },
-    faction_collapse: { title: 'Faction Collapse', subtitle: 'A faction has been driven from the field.' },
-    ceasefire: { title: 'Ceasefire', subtitle: 'The guns fall silent -- for now.' },
+const FALLBACK_OUTCOME_LABEL_KEYS: Record<string, { title: MessageKey; subtitle: MessageKey }> = {
+    victory_RBiH: { title: 'gameOver.outcome.victory_RBiH.title', subtitle: 'gameOver.outcome.victory_RBiH.subtitle' },
+    victory_RS: { title: 'gameOver.outcome.victory_RS.title', subtitle: 'gameOver.outcome.victory_RS.subtitle' },
+    victory_HRHB: { title: 'gameOver.outcome.victory_HRHB.title', subtitle: 'gameOver.outcome.victory_HRHB.subtitle' },
+    timeout_stalemate: { title: 'gameOver.outcome.timeout_stalemate.title', subtitle: 'gameOver.outcome.timeout_stalemate.subtitle' },
+    faction_collapse: { title: 'gameOver.outcome.faction_collapse.title', subtitle: 'gameOver.outcome.faction_collapse.subtitle' },
+    ceasefire: { title: 'gameOver.outcome.ceasefire.title', subtitle: 'gameOver.outcome.ceasefire.subtitle' },
 };
+
+function fallbackOutcomeDisplay(outcome?: string): { title: string; subtitle: string } {
+    if (!outcome) return { title: t('gameOver.fallback.title'), subtitle: '' };
+    const keys = FALLBACK_OUTCOME_LABEL_KEYS[outcome];
+    return keys ? { title: t(keys.title), subtitle: t(keys.subtitle) } : { title: outcome.replace(/_/g, ' '), subtitle: '' };
+}
+
+function formatFallbackOsidsControlled(count: number): string {
+    return t(count === 1 ? 'gameOver.osidControlled.one' : 'gameOver.osidControlled.many', { count });
+}
+
+function formatFallbackActiveBrigades(count: number): string {
+    return t(count === 1 ? 'gameOver.activeBrigade.one' : 'gameOver.activeBrigade.many', { count });
+}
+
+function formatFallbackYearCount(count: number): string {
+    return t(count === 1 ? 'gameOver.year.one' : 'gameOver.year.many', { count });
+}
+
+function formatFallbackWeekCount(count: number): string {
+    return t(count === 1 ? 'gameOver.week.one' : 'gameOver.week.many', { count });
+}
 
 function FallbackGameOver({
     date, turn, years, weeks, factionIds, factionOsids, totalOsids, factionBrigades, outcome, ipc,
@@ -881,9 +959,8 @@ function FallbackGameOver({
     outcome?: string;
     ipc: { isAvailable: boolean; loadStateDialog?: () => void };
 }) {
-    const display = outcome
-        ? (OUTCOME_LABELS[outcome] ?? { title: outcome.replace(/_/g, ' '), subtitle: '' })
-        : { title: 'Game Over', subtitle: '' };
+    useLocale();
+    const display = fallbackOutcomeDisplay(outcome);
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm"
@@ -919,8 +996,8 @@ function FallbackGameOver({
                                     <span className="text-[11px] text-text-primary tabular-nums font-bold">{pct}%</span>
                                 </div>
                                 <div className="flex gap-4 text-[10px] text-text-secondary">
-                                    <span>{osids} OSIDs controlled</span>
-                                    <span>{brigades} active brigades</span>
+                                    <span>{formatFallbackOsidsControlled(osids)}</span>
+                                    <span>{formatFallbackActiveBrigades(brigades)}</span>
                                 </div>
                                 <div className="mt-1.5 h-1.5 bg-black/30 rounded-full overflow-hidden">
                                     <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
@@ -929,7 +1006,11 @@ function FallbackGameOver({
                         );
                     })}
                     <div className="text-[10px] text-text-secondary text-center pt-2 border-t border-panel-border">
-                        Campaign lasted {turn} weeks ({years} years, {weeks} weeks)
+                        {t('gameOver.campaignLasted', {
+                            turn,
+                            years: formatFallbackYearCount(years),
+                            weeks: formatFallbackWeekCount(weeks),
+                        })}
                     </div>
                 </div>
                 <div className="px-6 py-4 border-t border-panel-border bg-panel-card/30 flex justify-center gap-3">
@@ -937,20 +1018,20 @@ function FallbackGameOver({
                         onClick={() => useGameStore.getState().setWrappedOpen(true)}
                         className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors"
                     >
-                        View Your War
+                        {t('gameOver.viewYourWar')}
                     </button>
                     <button
                         onClick={() => window.location.reload()}
                         className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors"
                     >
-                        New Game
+                        {t('gameOver.newGame')}
                     </button>
                     {ipc.isAvailable && (
                         <button
                             onClick={() => ipc.loadStateDialog?.()}
                             className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors"
                         >
-                            Load Save
+                            {t('gameOver.loadSave')}
                         </button>
                     )}
                 </div>

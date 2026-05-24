@@ -1,14 +1,17 @@
 /**
- * Credits screen — studio, sources, acknowledgments, dedication.
+ * Credits screen - studio, sources, acknowledgments, dedication.
  */
+import { type ReactNode } from 'react';
 import { Z } from '../../shared/zIndex';
-import { t } from '../i18n';
+import { t, useLocale } from '../i18n';
 
 interface CreditsScreenProps {
     onClose: () => void;
 }
 
 export function CreditsScreen({ onClose }: CreditsScreenProps) {
+    const [locale] = useLocale();
+
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm"
              style={{ zIndex: Z.MODAL_HARD }}>
@@ -71,7 +74,7 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
     );
 }
 
-function CreditSection({ title, children }: { title: string; children: React.ReactNode }) {
+function CreditSection({ title, children }: { title: string; children: ReactNode }) {
     return (
         <div className="mb-4">
             <div className="text-[9px] uppercase tracking-[0.2em] text-[#c4a35a]/60 font-bold mb-1">{title}</div>

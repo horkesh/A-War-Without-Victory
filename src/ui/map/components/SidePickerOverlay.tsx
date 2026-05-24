@@ -3,8 +3,8 @@ import { getFactionFlag, getArmyName } from '../utils/factionAssets';
 import { AWWV_APP_VERSION } from '../utils/appVersion';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
-import { t } from '../i18n';
 import { Icon } from './icons/Icon';
+import { t, useLocale } from '../i18n';
 
 interface SidePickerOverlayProps {
   isOpen: boolean;
@@ -23,6 +23,8 @@ export function SidePickerOverlay({
   onClose,
   onSelectFaction,
 }: SidePickerOverlayProps) {
+  const [locale] = useLocale();
+
   return (
     <Modal
       isOpen={isOpen}

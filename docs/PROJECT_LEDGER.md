@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-24] ui(i18n): batch Bosnian localization surfaces
+
+**Type:** UI/content localization batch. No simulation behavior, combat math, operation tuning, scenario data, OOB data, save schema, calibration constants, or event ordering changed.
+
+**Why:** The roadmap branch still carried a large set of compatible Bosnian BCS UI localization slices. The user explicitly requested finishing localization quickly and avoiding Croatian/Serbian/ekavica forms.
+
+**Change:** Batched main menu, pause/settings, credits, side picker, game-over/verdict, war-cost, Codex, turn-after-action, War Summary, Chief of Staff, letter-home templates, Warroom/Decision Room, presidential inbox/toolbar, convoy decision, settlement timeline, shared date formatting, and operations planning parameter localization. Added associated implemented reports and focused i18n tests.
+
+**Verification:** Focused localization/UI tests, typecheck, diff hygiene, and a Bosnian-marker scan are required before push for this batch.
+
+**Artifacts:** `src/ui/map/i18n/messages.bcs.ts`; `src/ui/map/i18n/messages.en.ts`; `src/ui/map/components/**`; `src/ui/map/data/**`; `data/templates/letter_home_templates.json`; `tests/ui/*i18n*.test.ts`; `docs/40_reports/implemented/20260523_BCS_*.md`.
+
+---
+
 ## [2026-05-24] ui(audio): batch soundscape cue pipeline
 
 **Type:** UI/audio feedback batch. No simulation behavior, combat math, operation tuning, scenario data, OOB data, save schema, calibration constants, or event ordering changed.

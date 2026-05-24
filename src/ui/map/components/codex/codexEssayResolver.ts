@@ -2,6 +2,7 @@ import type { ComparisonResult } from '../../../../sim/endgame/endgame_compariso
 import type { CostLedger, CostLedgerAnnotation, CostLedgerFinding } from '../../../../sim/endgame/cost_ledger.js';
 import { strictCompare } from '../../../../state/validateGameState.js';
 import type { Locale } from '../../i18n';
+import { formatHistoricalDivergenceNote } from '../../data/historicalDivergenceNotes.js';
 
 export interface DynamicSection {
     id?: string;
@@ -88,7 +89,9 @@ function isTruthyValue(value: string | number | boolean | undefined): boolean {
 function comparisonNotes(context: CodexRenderContext): string[] {
     const raw = context.historicalComparison?.divergence_notes;
     return Array.isArray(raw)
-        ? raw.filter((note): note is string => typeof note === 'string' && note.trim().length > 0)
+        ? raw
+            .filter((note): note is string => typeof note === 'string' && note.trim().length > 0)
+            .map(formatHistoricalDivergenceNote)
         : [];
 }
 

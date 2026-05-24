@@ -1,10 +1,10 @@
 /**
- * Game Over Modal — shown when state.meta.game_over is true.
+ * Game Over Modal - shown when state.meta.game_over is true.
  * Displays outcome, faction standings, and options (New Game / Load).
  *
  * Migrated to the shared `<Modal>` wrapper in
  * LANE-V094-MODAL-DISMISSIBLE-EXTENSION. Terminal modal: `dismissible={false}`
- * (no ESC, no click-outside) — the only valid close path is starting a new
+ * (no ESC, no click-outside) - the only valid close path is starting a new
  * game (`window.location.reload()`) or loading a save (which replaces the
  * game state and clears `gameOver`). No `onClose` callback exists or is
  * needed.
@@ -14,25 +14,27 @@ import { FACTION_COLORS } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
-import { t } from '../i18n';
+import { t, useLocale, type MessageKey } from '../i18n';
 
-const OUTCOME_LABELS: Record<string, { title: string; subtitle: string }> = {
-    victory_RBiH: { title: 'Republic of Bosnia and Herzegovina Prevails', subtitle: 'The multi-ethnic state endures — but at what cost?' },
-    victory_RS: { title: 'Republika Srpska Achieves Its Aims', subtitle: 'The Serb entity consolidates — but the land is emptied.' },
-    victory_HRHB: { title: 'Herzeg-Bosnia Secures Its Territory', subtitle: 'The Croatian entity holds — but the alliance is shattered.' },
-    timeout_stalemate: { title: 'Stalemate', subtitle: 'The war grinds to exhaustion. No side achieves its aims. Another such victory and all are undone.' },
-    faction_collapse: { title: 'Faction Collapse', subtitle: 'A faction has been driven from the field.' },
-    ceasefire: { title: 'Ceasefire', subtitle: 'The guns fall silent — for now.' },
+const OUTCOME_LABEL_KEYS: Record<string, { title: MessageKey; subtitle: MessageKey }> = {
+    victory_RBiH: { title: 'gameOver.outcome.victory_RBiH.title', subtitle: 'gameOver.outcome.victory_RBiH.subtitle' },
+    victory_RS: { title: 'gameOver.outcome.victory_RS.title', subtitle: 'gameOver.outcome.victory_RS.subtitle' },
+    victory_HRHB: { title: 'gameOver.outcome.victory_HRHB.title', subtitle: 'gameOver.outcome.victory_HRHB.subtitle' },
+    timeout_stalemate: { title: 'gameOver.outcome.timeout_stalemate.title', subtitle: 'gameOver.outcome.timeout_stalemate.subtitle' },
+    faction_collapse: { title: 'gameOver.outcome.faction_collapse.title', subtitle: 'gameOver.outcome.faction_collapse.subtitle' },
+    ceasefire: { title: 'gameOver.outcome.ceasefire.title', subtitle: 'gameOver.outcome.ceasefire.subtitle' },
 };
 
 function getOutcomeDisplay(outcome?: string): { title: string; subtitle: string } {
     if (!outcome) return { title: t('gameOver.title'), subtitle: '' };
-    return OUTCOME_LABELS[outcome] ?? { title: outcome.replace(/_/g, ' '), subtitle: '' };
+    const labelKeys = OUTCOME_LABEL_KEYS[outcome];
+    return labelKeys ? { title: t(labelKeys.title), subtitle: t(labelKeys.subtitle) } : { title: outcome.replace(/_/g, ' '), subtitle: '' };
 }
 
 export function GameOverModal() {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const ipc = useIPC();
+    useLocale();
 
     if (!loadedGameState?.gameOver) return null;
     const isOpen = true;
@@ -41,7 +43,7 @@ export function GameOverModal() {
     const turn = loadedGameState.turn ?? 0;
     const date = loadedGameState.metadata?.date ?? t('operationsPanel.turnCount', { turn });
 
-    // Gather territory stats from controlBySettlement
+    // Gather territory stats from controlBySettlement.
     const controllers = loadedGameState.controlBySettlement ?? {};
     const factionOsids: Record<string, number> = {};
     for (const controller of Object.values(controllers)) {
@@ -51,7 +53,7 @@ export function GameOverModal() {
     }
     const totalOsids = Object.keys(controllers).length || 1;
 
-    // Gather formation counts
+    // Gather formation counts.
     const formations = loadedGameState.formations ?? [];
     const factionBrigades: Record<string, number> = {};
     for (const f of formations) {

@@ -12,6 +12,7 @@ import type { InvestmentPanelMunInfo, Phase0DirectiveState } from './InvestmentP
 import { InvestmentPanel } from './InvestmentPanel.js';
 import { SettlementInfoPanel } from './SettlementInfoPanel.js';
 import { getPlayerSafeMunicipalityName, getPlayerSafeSettlementName } from '../../map/utils/playerSafeText.js';
+import { getActiveLocale, type Locale } from '../../map/i18n/index.js';
 
 /** GeoJSON Position [x, y] or [x, y, z]. */
 type Position = [number, number] | [number, number, number];
@@ -54,12 +55,16 @@ const ETHNICITY_COLORS: Record<string, string> = {
 const ZOOM_FACTORS = [1, 2.5, 5];
 const ZOOM_LABELS = ['STRATEGIC', 'OPERATIONAL', 'TACTICAL'];
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-function formatTurnDate(turn: number): string {
+const SHORT_MONTHS_BY_LOCALE: Record<Locale, readonly string[]> = {
+    en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    bcs: ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'],
+};
+
+export function formatWarPlanningTurnDate(turn: number): string {
     const start = new Date(1991, 8, 1);
     const d = new Date(start);
     d.setDate(d.getDate() + turn * 7);
-    return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+    return `${d.getDate()} ${SHORT_MONTHS_BY_LOCALE[getActiveLocale()][d.getMonth()]} ${d.getFullYear()}`;
 }
 
 export class WarPlanningMap {
@@ -546,7 +551,7 @@ export class WarPlanningMap {
         const el = this.container.querySelector('.war-planning-map-turn') as HTMLElement;
         if (!el) return;
         const turn = this.gameState?.meta?.turn ?? 0;
-        const date = formatTurnDate(turn);
+        const date = formatWarPlanningTurnDate(turn);
         el.textContent = `W${turn} — ${date}`;
     }
 

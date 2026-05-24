@@ -15,59 +15,61 @@ import { deriveInboxItems, countActionableItems, hasBlockingItems } from '../dat
 import type { InboxItem, InboxSeverity } from '../data/inboxItems';
 import { DETAIL_PANEL_STYLE } from './panelRail';
 import { resolvePlayerFacingFaction } from '../../shared/playerVisibility';
-import { t } from '../i18n';
+import { t, type MessageKey } from '../i18n';
 
-const OPENING_BRIEFS: Record<string, { title: string; bullets: string[] }> = {
+const OPENING_BRIEFS: Record<string, { titleKey: MessageKey; bulletKeys: MessageKey[] }> = {
     RBiH: {
-        title: 'Republic of Bosnia and Herzegovina',
-        bullets: [
-            'Hold Sarajevo, Tuzla, Zenica, Bihac, and other urban anchors while the army forms under fire.',
-            'Keep the international record visible: diplomacy, civilian harm, and military survival are linked.',
-            'Use Army HQ and the Decision Room to set priorities and approve operations through commanders.',
+        titleKey: 'inbox.openingBrief.RBiH.title',
+        bulletKeys: [
+            'inbox.openingBrief.RBiH.bullet.0',
+            'inbox.openingBrief.RBiH.bullet.1',
+            'inbox.openingBrief.RBiH.bullet.2',
         ],
     },
     RS: {
-        title: 'Republika Srpska',
-        bullets: [
-            'Exploit inherited JNA armor, artillery, and logistics before international pressure narrows the window.',
-            'Secure connected territory and protect the Posavina corridor linking eastern and western holdings.',
-            'Use Army HQ and the Decision Room to balance offensive pressure against exhaustion and legitimacy cost.',
+        titleKey: 'inbox.openingBrief.RS.title',
+        bulletKeys: [
+            'inbox.openingBrief.RS.bullet.0',
+            'inbox.openingBrief.RS.bullet.1',
+            'inbox.openingBrief.RS.bullet.2',
         ],
     },
     HRHB: {
-        title: 'Herzeg-Bosna',
-        bullets: [
-            'Protect Herzegovina and exposed Croat communities in central Bosnia while avoiding overextension.',
-            'Manage the Sarajevo alliance and Zagreb patron pressure; either can shift faster than the front.',
-            'Use Army HQ and the Decision Room to choose when to cooperate, resist, negotiate, or stand down.',
+        titleKey: 'inbox.openingBrief.HRHB.title',
+        bulletKeys: [
+            'inbox.openingBrief.HRHB.bullet.0',
+            'inbox.openingBrief.HRHB.bullet.1',
+            'inbox.openingBrief.HRHB.bullet.2',
         ],
     },
 };
 
-const SEVERITY_STYLES: Record<InboxSeverity, { badge: string; border: string; label: string }> = {
-    blocking: { badge: 'bg-red-500 text-white', border: 'border-red-500/40', label: 'BLOCKING' },
-    urgent: { badge: 'bg-amber-500 text-white', border: 'border-amber-500/30', label: 'URGENT' },
-    normal: { badge: 'bg-sky-600 text-white', border: 'border-sky-600/20', label: '' },
-    info: { badge: 'bg-stone-600 text-stone-300', border: 'border-stone-600/20', label: '' },
+const SEVERITY_STYLES: Record<InboxSeverity, { badge: string; border: string; labelKey: MessageKey | null }> = {
+    blocking: { badge: 'bg-red-500 text-white', border: 'border-red-500/40', labelKey: 'inbox.severity.blocking' },
+    urgent: { badge: 'bg-amber-500 text-white', border: 'border-amber-500/30', labelKey: 'inbox.severity.urgent' },
+    normal: { badge: 'bg-sky-600 text-white', border: 'border-sky-600/20', labelKey: null },
+    info: { badge: 'bg-stone-600 text-stone-300', border: 'border-stone-600/20', labelKey: null },
 };
 
-const TYPE_LABELS: Record<string, string> = {
-    event_decision: 'DECISION',
-    peace_plan: 'PEACE PLAN',
-    dayton_negotiation: 'DAYTON',
-    convoy_decision: 'CONVOY',
-    paramilitary_request: 'PARAMILITARY',
-    reserve_request: 'RESERVE',
-    officer_event: 'PERSONNEL',
-    operation_opportunity: 'OPPORTUNITY',
-    autonomy_proposal: 'PROPOSAL',
-    intelligence_notification: 'INTEL',
-    situation: 'SITUATION',
-};
+function typeLabel(type: string): string {
+    if (type === 'event_decision') return t('inbox.type.eventDecision');
+    if (type === 'peace_plan') return t('inbox.type.peacePlan');
+    if (type === 'dayton_negotiation') return t('inbox.type.dayton');
+    if (type === 'convoy_decision') return t('inbox.type.convoy');
+    if (type === 'paramilitary_request') return t('inbox.type.paramilitary');
+    if (type === 'reserve_request') return t('inbox.type.reserve');
+    if (type === 'officer_event') return t('inbox.type.personnel');
+    if (type === 'operation_opportunity') return t('inbox.type.opportunity');
+    if (type === 'autonomy_proposal') return t('inbox.type.proposal');
+    if (type === 'intelligence_notification') return t('inbox.type.intel');
+    if (type === 'situation') return t('inbox.type.situation');
+    return type.toUpperCase();
+}
 
 function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) {
     const style = SEVERITY_STYLES[item.severity];
-    const typeLabel = TYPE_LABELS[item.type] ?? item.type.toUpperCase();
+    const cardTypeLabel = typeLabel(item.type);
+    const severityLabel = style.labelKey ? t(style.labelKey) : '';
     const isActionable = item.action !== 'none';
 
     if (item.type === 'intelligence_notification') {
@@ -75,7 +77,7 @@ function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) 
             <div className={`w-full text-left p-2.5 rounded border ${style.border} bg-panel-card`}>
                 <div className="flex items-center gap-1.5 mb-1">
                     <span className={`text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${style.badge}`}>
-                        {typeLabel}
+                        {cardTypeLabel}
                     </span>
                     <button
                         type="button"
@@ -105,11 +107,11 @@ function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) 
         >
             <div className="flex items-center gap-1.5 mb-1">
                 <span className={`text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${style.badge}`}>
-                    {style.label || typeLabel}
+                    {severityLabel || cardTypeLabel}
                 </span>
-                {style.label && (
+                {severityLabel && (
                     <span className="text-[8px] font-bold uppercase tracking-widest text-text-secondary">
-                        {typeLabel}
+                        {cardTypeLabel}
                     </span>
                 )}
                 {(item.updateCount ?? 1) > 1 && (
@@ -139,14 +141,14 @@ function OpeningBrief({
     return (
         <div className="p-3 rounded border border-accent-gold/30 bg-gradient-to-b from-panel-card to-transparent mb-3">
             <div className="text-[9px] font-bold uppercase tracking-widest text-accent-gold mb-1.5">
-                Presidential Brief
+                {t('inbox.openingBrief.label')}
             </div>
-            <div className="text-[12px] font-bold text-text-primary mb-1">{brief.title}</div>
+            <div className="text-[12px] font-bold text-text-primary mb-1">{t(brief.titleKey)}</div>
             <ul className="space-y-1 text-[10px] text-text-secondary leading-relaxed">
-                {brief.bullets.map((bullet) => (
-                    <li key={bullet} className="flex gap-2">
+                {brief.bulletKeys.map((bulletKey) => (
+                    <li key={bulletKey} className="flex gap-2">
                         <span className="mt-[0.45em] h-1 w-1 shrink-0 rounded-full bg-accent-gold/70" />
-                        <span>{bullet}</span>
+                        <span>{t(bulletKey)}</span>
                     </li>
                 ))}
             </ul>
@@ -159,14 +161,14 @@ function OpeningBrief({
                     }}
                     className="text-[9px] font-bold uppercase tracking-widest text-accent-gold hover:text-white transition-colors"
                 >
-                    Open Decision Room
+                    {t('inbox.openDecisionRoom')}
                 </button>
                 <button
                     type="button"
                     onClick={onDismiss}
                     className="text-[9px] font-bold uppercase tracking-widest text-text-secondary hover:text-white transition-colors"
                 >
-                    Read later
+                    {t('inbox.openingBrief.readLater')}
                 </button>
             </div>
         </div>
@@ -332,6 +334,8 @@ export function InboxBadge({ onClick }: { onClick: () => void }) {
             </button>
         );
     }
+
+    const decisionLabel = t(count === 1 ? 'inbox.badge.decision.one' : 'inbox.badge.decision.many');
 
     return (
         <button

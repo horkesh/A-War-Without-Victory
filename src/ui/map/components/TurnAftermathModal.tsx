@@ -8,7 +8,7 @@
 import type { TurnAftermathTopAction, TurnAftermathView } from '../data/turnAftermath';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
-import { t } from '../i18n';
+import { t, type MessageKey } from '../i18n';
 
 interface TurnAftermathModalProps {
   isOpen: boolean;
@@ -50,6 +50,10 @@ function signalTone(severity: TurnAftermathView['signals'][number]['severity']):
   if (severity === 'urgent') return 'border-red-400/30 text-red-300 bg-red-950/20';
   if (severity === 'notable') return 'border-amber-400/30 text-amber-300 bg-amber-950/20';
   return 'border-white/10 text-text-secondary bg-white/[0.03]';
+}
+
+function enumLabel(prefix: string, value: string): string {
+  return t(`${prefix}.${value}` as MessageKey);
 }
 
 function memoryToneClasses(tone: TurnAftermathView['judgment']['memoryTone']): string {
@@ -94,7 +98,7 @@ export function TurnAftermathModal({
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <h2 className="text-xl font-bold text-text-primary">{view.dateLabel}</h2>
               <span className={`rounded border px-2 py-1 text-[10px] font-mono uppercase tracking-[0.18em] ${toneClasses(view.tone)}`}>
-                {view.tone}
+                {enumLabel('turnAftermath.tone', view.tone)}
               </span>
             </div>
             <div className="mt-1 text-sm text-text-secondary">{view.headline}</div>
@@ -132,7 +136,7 @@ export function TurnAftermathModal({
                       <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-text-secondary">{flip.significance.replace(/_/g, ' ')}</div>
                     </div>
                     <span className={`rounded border px-2 py-1 text-[10px] font-mono uppercase ${flip.direction === 'gain' ? 'border-emerald-400/30 text-emerald-300' : flip.direction === 'loss' ? 'border-red-400/30 text-red-300' : 'border-white/10 text-text-secondary'}`}>
-                      {flip.direction}
+                      {enumLabel('turnAftermath.direction', flip.direction)}
                     </span>
                   </div>
                 ))}
@@ -151,7 +155,7 @@ export function TurnAftermathModal({
                 ) : signalPreview.map((signal) => (
                   <div key={signal.id} className={`px-3 py-2 ${signalTone(signal.severity)}`}>
                     <div className="truncate text-sm font-semibold">{signal.label}</div>
-                    <div className="text-[10px] font-mono uppercase tracking-[0.14em] opacity-75">{signal.kind} / {signal.detail}</div>
+                    <div className="text-[10px] font-mono uppercase tracking-[0.14em] opacity-75">{enumLabel('turnAftermath.signal.kind', signal.kind)} / {signal.detail}</div>
                   </div>
                 ))}
               </div>
@@ -163,7 +167,7 @@ export function TurnAftermathModal({
                   {t('turnAftermath.turnCost')}
                 </div>
                 <span className={`rounded border px-2 py-0.5 text-[9px] font-mono uppercase tracking-[0.16em] ${costSeverityClasses(view.cost.severity)}`}>
-                  {view.cost.severity}
+                  {enumLabel('turnAftermath.severity', view.cost.severity)}
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-2 p-3 text-sm">
@@ -185,7 +189,7 @@ export function TurnAftermathModal({
                   <div className="mt-1 text-[11px] leading-5 opacity-80">{view.judgment.detail}</div>
                 </div>
                 <span className="shrink-0 rounded border border-current/30 px-2 py-0.5 text-[9px] font-mono uppercase tracking-[0.14em] opacity-80">
-                  {view.judgment.memoryTone}
+                  {enumLabel('turnAftermath.memoryTone', view.judgment.memoryTone)}
                 </span>
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2">

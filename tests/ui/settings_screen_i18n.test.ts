@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createElement } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { LOCALE_STORAGE_KEY } from '../../src/ui/map/i18n';
+import { LOCALE_STORAGE_KEY, setLocale } from '../../src/ui/map/i18n';
 import { SettingsScreen } from '../../src/ui/map/components/SettingsScreen';
 
 describe('SettingsScreen localization control', () => {
@@ -31,5 +31,16 @@ describe('SettingsScreen localization control', () => {
         expect(screen.getByRole('heading', { name: 'Postavke' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Zatvori' })).toBeTruthy();
         expect(window.localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('bcs');
+    });
+
+    it('renders BCS audio settings copy when BCS is selected', () => {
+        setLocale('bcs');
+
+        render(createElement(SettingsScreen, { onClose: () => {} }));
+
+        expect(screen.getByRole('button', { name: 'Zvuk' })).toBeTruthy();
+        expect(screen.getByText('Zvucna slika')).toBeTruthy();
+        expect(screen.getByText('Dozvoli audio signale takticke karte')).toBeTruthy();
+        expect(screen.getByRole('slider', { name: 'Glavna jacina zvuka' })).toBeTruthy();
     });
 });

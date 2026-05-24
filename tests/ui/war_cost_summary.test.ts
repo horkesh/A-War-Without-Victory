@@ -9,12 +9,18 @@
  * Tests pure formatting functions only — no React rendering.
  */
 
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect } from 'vitest';
 import {
     formatDurationDelta,
     formatCasualtyRatio,
+    formatHistoricalDivergenceNote,
     formatTerritoryDivergence,
 } from '../../src/ui/map/components/WarCostSummary';
+import { setLocale } from '../../src/ui/map/i18n';
+
+afterEach(() => {
+    setLocale('en');
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // formatDurationDelta
@@ -88,5 +94,30 @@ describe('formatTerritoryDivergence', () => {
     it('reports within historical range for zero delta', () => {
         const result = formatTerritoryDivergence('RS', 0);
         expect(result).toBe('RS: within historical range');
+    });
+});
+
+describe('formatHistoricalDivergenceNote', () => {
+    it('preserves English generated duration notes by default', () => {
+        expect(formatHistoricalDivergenceNote('War lasted 12 weeks shorter than the historical 188 weeks'))
+            .toBe('War lasted 12 weeks shorter than the historical 188 weeks');
+        expect(formatHistoricalDivergenceNote('War lasted exactly the historical 188 weeks'))
+            .toBe('War lasted exactly the historical 188 weeks');
+    });
+
+    it('preserves unknown source-authored notes as fallback', () => {
+        expect(formatHistoricalDivergenceNote('A source-authored divergence note'))
+            .toBe('A source-authored divergence note');
+    });
+
+    it('localizes generated territory and casualty notes in BCS', () => {
+        setLocale('bcs');
+
+        expect(formatHistoricalDivergenceNote('Federation controlled 54.0% territory vs historical 51%'))
+            .toBe('Federacija je kontrolisala 54.0% teritorije naspram historijskih 51%.');
+        expect(formatHistoricalDivergenceNote('RS controlled 47.5% territory vs historical 49%'))
+            .toBe('RS je kontrolisao 47.5% teritorije naspram historijskih 49%.');
+        expect(formatHistoricalDivergenceNote('Total military casualties were 72% of historical levels'))
+            .toBe('Ukupni vojni gubici bili su 72% historijskog nivoa.');
     });
 });

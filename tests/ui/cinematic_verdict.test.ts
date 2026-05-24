@@ -3,10 +3,10 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { CinematicVerdict } from '../../src/ui/map/components/verdict/CinematicVerdict';
+import { setLocale } from '../../src/ui/map/i18n';
 import type { CostLedger } from '../../src/sim/endgame/cost_ledger';
 import type { ComparisonResult } from '../../src/sim/endgame/endgame_comparison';
 import type { FactionVerdict, GameVerdict, OutcomeClass } from '../../src/state/negotiation_types';
-import { setLocale } from '../../src/ui/map/i18n';
 
 function factionVerdict(faction: string, outcomeClass: OutcomeClass, score: number): FactionVerdict {
     return {

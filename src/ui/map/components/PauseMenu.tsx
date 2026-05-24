@@ -1,8 +1,9 @@
 /**
  * In-game pause menu — triggered by Escape when no other modal is open.
  */
+import { type ReactNode } from 'react';
 import { Z } from '../../shared/zIndex';
-import { t } from '../i18n';
+import { t, useLocale } from '../i18n';
 
 interface PauseMenuProps {
     onResume: () => void;
@@ -13,6 +14,8 @@ interface PauseMenuProps {
 }
 
 export function PauseMenu({ onResume, onSave, onSettings, onMainMenu, onQuit }: PauseMenuProps) {
+    const [locale] = useLocale();
+
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/45"
              style={{ zIndex: Z.PAUSE_MENU }}>
@@ -49,7 +52,7 @@ export function PauseMenu({ onResume, onSave, onSettings, onMainMenu, onQuit }: 
     );
 }
 
-function PauseButton({ children, onClick, danger }: { children: React.ReactNode; onClick: () => void; danger?: boolean }) {
+function PauseButton({ children, onClick, danger }: { children: ReactNode; onClick: () => void; danger?: boolean }) {
     return (
         <button
             type="button"

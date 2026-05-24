@@ -60,7 +60,9 @@ export function setLocale(nextLocale: Locale, storage: LocaleStorage | undefined
 }
 
 export function getActiveLocale(): Locale {
-    const storedLocale = getLocale();
+    const storage = getBrowserStorage();
+    if (!storage) return activeLocale;
+    const storedLocale = getLocale(storage);
     activeLocale = storedLocale === activeLocale ? activeLocale : storedLocale;
     return activeLocale;
 }

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import {
   buildPresidentialDecisionRoomView,
   type PresidentialDecisionRoomCard,
@@ -6,6 +6,7 @@ import {
 import type { LoadedGameState, OperationOpportunityProposalView, PlayerDecisionSummaryView } from '../../src/ui/map/data/types.js';
 import type { OperationalSitrepView } from '../../src/ui/shared/operational_sitrep_views.js';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 
 function makeSummary(overrides: Partial<TurnSummary> = {}): TurnSummary {
   return {
@@ -149,6 +150,10 @@ const severityRank: Record<PresidentialDecisionRoomCard['severity'], number> = {
 };
 
 describe('buildPresidentialDecisionRoomView', () => {
+  afterEach(() => {
+    setLocale('en');
+  });
+
   it('builds deterministic severity-sorted priority cards from existing player-facing read models', () => {
     const state = makeState({
       presidentialReviewQueue: {
@@ -445,6 +450,102 @@ describe('buildPresidentialDecisionRoomView', () => {
       headline: 'Review before advance',
       cardIds: ['review:pending', 'opportunity:opp_alpha', 'sitrep:front-exposed', 'turn:24:hard-turn'],
     });
+  });
+
+  it('localizes Decision Room lane, loop, lens, and source-handoff chrome in BCS mode', () => {
+    setLocale('bcs');
+    const state = makeState({
+      presidentialReviewQueue: {
+        pendingCount: 2,
+        criticalCount: 1,
+        eventDecisionCount: 1,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 1,
+      },
+      operationOpportunityProposals: [makeOpportunity({ expires_turn: 24 })],
+      operationalSitrep: makeSitrep(),
+      commandBriefing: {
+        headline: 'Critical command alert.',
+        criticalCount: 1,
+        pendingCount: 1,
+        items: [
+          {
+            id: 'briefing:zeta',
+            kind: 'command',
+            severity: 'critical',
+            title: 'Corps command strain rising',
+            detail: 'Staff reports command friction around the main effort.',
+            target: { type: 'corps', corpsId: 'arbih_3rd_corps' },
+          },
+        ],
+      },
+      latestTurnSummary: makeSummary({
+        turn: 24,
+        territory_net: { RBiH: -1 },
+        displacement_total: 1600,
+      }),
+      turnSummaries: [makeSummary({ turn: 23, territory_net: { RBiH: 1 } })],
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const questionsById = Object.fromEntries(view.commandQuestions.map((question) => [question.id, question]));
+    const loopsById = Object.fromEntries(view.loopSteps.map((step) => [step.id, step]));
+    const handoffsById = Object.fromEntries(view.sourceHandoffs.map((handoff) => [handoff.id, handoff]));
+
+    expect(view.lenses.map((lens) => lens.label)).toContain('Sve');
+    expect(view.lenses.map((lens) => lens.label)).toContain('Prilika');
+    expect(questionsById.urgent.label).toBe('Hitno');
+    expect(questionsById.pending.label).toBe('Odluke');
+    expect(questionsById.advance.summary).toContain('stavke za napredovanje');
+    expect(loopsById.brief.label).toBe('Brifing');
+    expect(loopsById.execute.label).toBe('Izvrsi');
+    expect(loopsById.cost.summary).toContain('stavke cijene');
+    expect(loopsById.report.summary).toContain('zapisana poteza');
+    expect(handoffsById['army-hq-briefing'].label).toBe('Brifing Staba armije');
+    expect(handoffsById['turn-aftermath-records'].label).toBe('Zapisi posljedica poteza');
+    expect(handoffsById.chronicle.actionLabel).toBe('Otvori Hroniku');
+    expect(view.commandQuestions.map((question) => question.label)).not.toContain('Urgent');
+    expect(view.loopSteps.map((step) => step.label)).not.toContain('Execute');
+  });
+
+  it('localizes Decision Room generated decision card prose in BCS mode', () => {
+    setLocale('bcs');
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        presidentialReviewQueue: {
+          pendingCount: 2,
+          criticalCount: 1,
+          eventDecisionCount: 1,
+          commandInterpretationCount: 1,
+          personnelDirectiveCount: 0,
+          operationOpportunityCount: 1,
+        },
+        playerDecisionSummary: makePlayerDecisionSummary(),
+        pendingParamilitaryRequests: [
+          { faction: 'RS', strength: 600, target_osid: 'op:zvornik:zvornik_2', estimated_civilian_risk: 42, mode: 'offensive' },
+        ],
+        operationalSitrep: makeSitrep(),
+        latestTurnSummary: makeSummary({
+          turn: 24,
+          territory_net: { RBiH: -1 },
+          displacement_total: 1600,
+        }),
+        turnSummaries: [makeSummary({ turn: 23, territory_net: { RBiH: 1 } })],
+      }),
+    });
+
+    const cardsById = Object.fromEntries(view.cards.map((card) => [card.id, card]));
+
+    expect(cardsById['review:pending'].title).toBe('Predsjednicki pregledi na cekanju');
+    expect(cardsById['review:pending'].sourceOwner).toBe('Predsjednicki red pregleda');
+    expect(cardsById['review:pending'].evidence).toContain('2 na cekanju');
+    expect(cardsById['paramilitary:pending'].title).toBe('Odobrenje paravojske na cekanju');
+    expect(cardsById['paramilitary:pending'].evidence).toContain('rizik ratnih zlocina');
+    expect(cardsById['manifest:peace_plan'].title).toBe('Odgovor na mirovni plan na cekanju');
+    expect(cardsById['sitrep:front-exposed'].title).toBe('Operativni SITREP');
+    expect(cardsById['chronicle:review-memory'].title).toBe('Pamcenje Hronike azurirano');
+    expect(cardsById['review:pending'].title).not.toBe('Presidential reviews pending');
   });
 
   it('builds the full presidential product loop as handoffs to existing owners', () => {

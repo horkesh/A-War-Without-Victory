@@ -7,8 +7,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore.js';
 import essayIndex from '../../../../data/scenarios/essays/essay_index.json';
 import { resolveCodexEssay, type EssayEntry } from './codex/codexEssayResolver.js';
-import { Z } from '../../shared/zIndex.js';
 import { t, useLocale } from '../i18n';
+import { Z } from '../../shared/zIndex.js';
 
 const YEARS = [1992, 1993, 1994, 1995] as const;
 
@@ -26,6 +26,12 @@ function CategoryBadge({ category }: { category: string }) {
             {category}
         </span>
     );
+}
+
+function formatAvailableCount(count: number): string {
+    return count === 1
+        ? t('codex.available.one')
+        : t('codex.available.many', { count });
 }
 
 interface CodexPanelProps {

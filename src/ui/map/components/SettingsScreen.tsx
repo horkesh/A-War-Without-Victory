@@ -194,7 +194,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
 
     const allSections: Array<{ id: string; title: string }> = [
         ...(tutorialDismissed ? [{ id: 'gameplay', title: t('settings.tab.gameplay') }] : []),
-        { id: 'audio', title: 'Audio' },
+        { id: 'audio', title: t('settings.tab.audio') },
         { id: 'a11y', title: t('settings.tab.a11y') },
         { id: 'language', title: t('settings.tab.language') },
         { id: 'diagnostics', title: t('settings.tab.diagnostics') },
@@ -261,11 +261,14 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                     )}
                     {activeSection === 'audio' && (
                         <>
-                            <SettingRow label="Soundscape" description="Allow tactical-map audio cues">
+                            <SettingRow
+                                label={t('settings.audio.soundscape.label')}
+                                description={t('settings.audio.soundscape.description')}
+                            >
                                 <BoundToggleSwitch
                                     checked={!audioPreferences.muted}
                                     onChange={setSoundscapeEnabled}
-                                    ariaLabel="Toggle soundscape audio"
+                                    ariaLabel={t('settings.audio.soundscape.ariaLabel')}
                                 />
                             </SettingRow>
                             <SettingRow label={t('settings.masterVolume.label')} description={t('settings.masterVolume.description')}>

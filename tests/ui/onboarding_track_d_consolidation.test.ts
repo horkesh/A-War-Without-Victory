@@ -95,8 +95,8 @@ describe('Track D onboarding consolidation', () => {
   it('keeps the opening presidential briefs as three scan bullets plus read-later affordance', () => {
     const source = readFileSync('src/ui/map/components/PresidentialInbox.tsx', 'utf8');
 
-    expect(source).toContain('bullets: [');
-    expect(source).toContain('Read later');
+    expect(source).toContain('bulletKeys: [');
+    expect(source).toContain('inbox.openingBrief.readLater');
     expect(source).not.toContain('You command through Army HQ and your corps commanders. You set strategic direction and approve operations');
   });
 

@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createElement } from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { setLocale } from '../../src/ui/map/i18n';
 
 let storeState: Record<string, any> = { loadedGameState: null };
 
@@ -42,6 +43,7 @@ describe('CodexPanel dynamic essay proof', () => {
 
     afterEach(() => {
         cleanup();
+        setLocale('en');
     });
 
     it('surfaces Srebrenica as a ghost entry when the rupture never occurred', () => {
@@ -73,6 +75,18 @@ describe('CodexPanel dynamic essay proof', () => {
         ).toBeTruthy();
     });
 
+    it('localizes BCS empty-selection Codex chrome', () => {
+        setLocale('bcs');
+
+        renderPanel();
+
+        expect(screen.getByText('Kodeks')).toBeTruthy();
+        expect(screen.getByText('0 eseja dostupno')).toBeTruthy();
+        expect(screen.getByText('Izaberi esej')).toBeTruthy();
+        expect(screen.queryByText('Select an essay')).toBeNull();
+        expect(screen.getByText(/Historijski eseji se otvaraju/)).toBeTruthy();
+    });
+
     it('renders live divergence notes inside the Dayton essay after game over', () => {
         storeState = {
             loadedGameState: {
@@ -99,6 +113,38 @@ describe('CodexPanel dynamic essay proof', () => {
         expect(screen.getAllByText('Player War Divergence')).toHaveLength(2);
         expect(screen.getByText('War lasted 6 weeks longer than the historical 182 weeks')).toBeTruthy();
         expect(screen.getByText('Federation controlled 54.0% territory vs historical 51%')).toBeTruthy();
+    });
+
+    it('localizes generated BCS divergence notes inside dynamic Codex essays', () => {
+        setLocale('bcs');
+        storeState = {
+            loadedGameState: {
+                firedEvents: [firedEvent('dayton_signed_1995')],
+                gameOver: true,
+                historicalComparison: {
+                    duration_delta_weeks: 6,
+                    territory_divergence: { RS: -3 },
+                    casualty_ratio: 0.9,
+                    displacement_ratio: 0.95,
+                    rupture_divergence: [],
+                    divergence_notes: [
+                        'War lasted 6 weeks longer than the historical 182 weeks',
+                        'Federation controlled 54.0% territory vs historical 51%',
+                    ],
+                },
+            },
+        };
+
+        renderPanel();
+        fireEvent.click(screen.getByText('1995'));
+        fireEvent.click(screen.getByText('The Dayton Agreement: Ending the War, Freezing the Questions'));
+
+        expect(screen.getAllByText('Odstupanje igracevog rata')).toHaveLength(2);
+        expect(screen.queryByText('Player War Divergence')).toBeNull();
+        expect(screen.getByText('Historijski kontekst')).toBeTruthy();
+        expect(screen.queryByText('War lasted 6 weeks longer than the historical 182 weeks')).toBeNull();
+        expect(screen.getByText('Rat je trajao 6 sedmica duze od historijskih 182 sedmica.')).toBeTruthy();
+        expect(screen.getByText('Federacija je kontrolisala 54.0% teritorije naspram historijskih 51%.')).toBeTruthy();
     });
 
     it('renders Cost Ledger prosecutorial findings in Codex endgame essays', () => {

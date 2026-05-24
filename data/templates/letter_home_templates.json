@@ -5,150 +5,175 @@
       "id": "kia_off_01",
       "casualty_type": "kia_offensive",
       "text_template": "{rank} {name}, age {age}, from {municipality}. Volunteered for {brigade} in the first weeks of the war. Killed during the assault on {circumstance}. He leaves behind a wife, {wife_name}, and two children he had not seen in four months.",
+      "text_template_bcs": "{rank} {name}, star {age}, iz {municipality}. Dobrovoljno se javio u {brigade} u prvim sedmicama rata. Poginuo tokom napada na {circumstance}. Iza sebe ostavlja suprugu {wife_name} i dvoje djece koje nije vidio cetiri mjeseca.",
       "required_fields": ["rank", "name", "age", "municipality", "brigade", "circumstance", "wife_name"]
     },
     {
       "id": "kia_off_02",
       "casualty_type": "kia_offensive",
       "text_template": "{name}, {age} years old. A metalworker from {municipality} before the war. Died of wounds sustained during {brigade}'s advance on {circumstance}. The field medic's report notes he was conscious when they reached him. He asked about the outcome of the attack.",
+      "text_template_bcs": "{name}, {age} godina. Prije rata metalac iz {municipality}. Preminuo od rana zadobijenih tokom napredovanja jedinice {brigade} prema {circumstance}. Izvjestaj bolnicara navodi da je bio pri svijesti kada su dosli do njega. Pitao je za ishod napada.",
       "required_fields": ["name", "age", "municipality", "brigade", "circumstance"]
     },
     {
       "id": "kia_off_03",
       "casualty_type": "kia_offensive",
       "text_template": "Lance Corporal {name}, age {age}, {brigade}. Originally from {municipality}. KIA during the operation near {circumstance}. His personal effects -- a photograph, a house key, forty-seven marks -- were forwarded to his mother, {wife_name}, at {displacement_municipality}.",
+      "text_template_bcs": "Kaplar {name}, star {age}, {brigade}. Porijeklom iz {municipality}. Poginuo tokom operacije kod {circumstance}. Njegove licne stvari -- fotografija, kucni kljuc, cetrdeset sedam maraka -- poslane su majci {wife_name} u {displacement_municipality}.",
       "required_fields": ["name", "age", "brigade", "municipality", "circumstance", "wife_name", "displacement_municipality"]
     },
     {
       "id": "kia_off_04",
       "casualty_type": "kia_offensive",
       "text_template": "{name} of {municipality}. Age {age}. Assigned to {brigade} after mobilization. Killed in action at {circumstance} during an assault that gained two hundred metres of ground. His unit took eleven casualties in the same engagement. The ground was not held.",
+      "text_template_bcs": "{name} iz {municipality}. Star {age}. Nakon mobilizacije rasporedjen u {brigade}. Poginuo kod {circumstance} tokom napada koji je osvojio dvjesto metara terena. Njegova jedinica imala je jedanaest gubitaka u istom okrsaju. Teren nije zadrzan.",
       "required_fields": ["name", "municipality", "age", "brigade", "circumstance"]
     },
     {
       "id": "kia_off_05",
       "casualty_type": "kia_offensive",
       "text_template": "Corporal {name}, {age}, from {municipality}. Former schoolteacher. Served with {brigade} since the summer. Killed leading his section forward at {circumstance}. His commanding officer noted he had requested transfer to a quieter sector the previous week. The request was still being processed.",
+      "text_template_bcs": "Kaplar {name}, {age}, iz {municipality}. Bivsi ucitelj. Od ljeta je sluzio u {brigade}. Poginuo vodeci odjeljenje naprijed kod {circumstance}. Njegov komandir je zabiljezio da je prethodne sedmice trazio premjestaj na mirniji sektor. Zahtjev je jos bio u obradi.",
       "required_fields": ["name", "age", "municipality", "brigade", "circumstance"]
     },
     {
       "id": "kia_def_01",
       "casualty_type": "kia_defensive",
       "text_template": "{rank} {name}, age {age}, {brigade}. From {municipality}. Killed defending positions near {circumstance} during an enemy assault. His trench was overrun at approximately 0430. Three other soldiers from his village died in the same action.",
+      "text_template_bcs": "{rank} {name}, star {age}, {brigade}. Iz {municipality}. Poginuo braneci polozaje kod {circumstance} tokom neprijateljskog napada. Njegov rov pregazen je oko 04:30. Jos tri vojnika iz njegovog sela poginula su u istoj akciji.",
       "required_fields": ["rank", "name", "age", "brigade", "municipality", "circumstance"]
     },
     {
       "id": "kia_def_02",
       "casualty_type": "kia_defensive",
       "text_template": "{name}, age {age}. A farmer from the hills above {municipality}. Enlisted with {brigade} when the front reached his district. Killed by mortar fire while holding a defensive line at {circumstance}. He had been on the front line for nine consecutive weeks without rotation.",
+      "text_template_bcs": "{name}, star {age}. Zemljoradnik s brda iznad {municipality}. Stupio u {brigade} kada je front stigao do njegovog kraja. Poginuo od minobacacke vatre drzeci odbrambenu liniju kod {circumstance}. Bio je na prvoj liniji devet uzastopnih sedmica bez smjene.",
       "required_fields": ["name", "age", "municipality", "brigade", "circumstance"]
     },
     {
       "id": "kia_def_03",
       "casualty_type": "kia_defensive",
       "text_template": "Private {name} of {municipality}, age {age}. Killed during the defense of {circumstance}. {brigade} reported his position was hit by concentrated artillery before the infantry assault. His wife {wife_name} received the notification at {displacement_municipality}. She had last spoken to him by telephone eleven days earlier.",
+      "text_template_bcs": "Redov {name} iz {municipality}, star {age}. Poginuo tokom odbrane {circumstance}. {brigade} je prijavila da je njegov polozaj pogodila koncentrisana artiljerija prije pjesadijskog napada. Supruga {wife_name} primila je obavijest u {displacement_municipality}. Posljednji put su razgovarali telefonom jedanaest dana ranije.",
       "required_fields": ["name", "municipality", "age", "circumstance", "brigade", "wife_name", "displacement_municipality"]
     },
     {
       "id": "kia_def_04",
       "casualty_type": "kia_defensive",
       "text_template": "{name}, {age}, of {municipality}. Assigned to {brigade}. Died at his position near {circumstance} during a sustained enemy attack. The sector held, but at a cost of fourteen killed. His name appears on the unit's casualty roll between two men from the same neighbourhood.",
+      "text_template_bcs": "{name}, {age}, iz {municipality}. Rasporedjen u {brigade}. Umro na svom polozaju kod {circumstance} tokom dugotrajnog neprijateljskog napada. Sektor je izdrzao, ali po cijenu cetrnaest poginulih. Njegovo ime stoji u spisku gubitaka jedinice izmedju dvojice ljudi iz istog komsiluka.",
       "required_fields": ["name", "age", "municipality", "brigade", "circumstance"]
     },
     {
       "id": "kia_def_05",
       "casualty_type": "kia_defensive",
       "text_template": "Sergeant {name}, age {age}, {brigade}. Originally from {municipality}. KIA at {circumstance} while organizing the withdrawal of wounded from an exposed trench line. The battalion commander's report describes his actions as having prevented additional casualties. His family at {displacement_municipality} was informed the following day.",
+      "text_template_bcs": "Vodnik {name}, star {age}, {brigade}. Porijeklom iz {municipality}. Poginuo kod {circumstance} dok je organizovao izvlacenje ranjenih sa izlozene rovovske linije. Izvjestaj komandanta bataljona navodi da su njegovi postupci sprijecili dodatne gubitke. Porodica u {displacement_municipality} obavijestena je sljedeceg dana.",
       "required_fields": ["name", "age", "brigade", "municipality", "circumstance", "displacement_municipality"]
     },
     {
       "id": "kia_siege_01",
       "casualty_type": "kia_siege",
       "text_template": "{name}, age {age}, of {municipality}. {brigade}. Killed by a sniper round while crossing an intersection at {circumstance}. He was carrying water. The crossing had been designated high-risk for three weeks. There was no alternative route.",
+      "text_template_bcs": "{name}, star {age}, iz {municipality}. {brigade}. Pogodjen snajperskim metkom dok je prelazio raskrsnicu kod {circumstance}. Nosio je vodu. Prelaz je tri sedmice bio oznacen kao visokorizican. Nije bilo drugog puta.",
       "required_fields": ["name", "age", "municipality", "brigade", "circumstance"]
     },
     {
       "id": "kia_siege_02",
       "casualty_type": "kia_siege",
       "text_template": "{rank} {name}, {age} years old. Born in {municipality}. Serving with {brigade} in the siege perimeter at {circumstance}. Killed by shrapnel from a mortar round that struck the trench line during the afternoon bombardment. His wife {wife_name} lives two kilometres from where he died. She heard the impact.",
+      "text_template_bcs": "{rank} {name}, {age} godina. Rodjen u {municipality}. Sluzio u {brigade} na opsadnom obrucu kod {circumstance}. Poginuo od gelera minobacacke granate koja je pogodila rovovsku liniju tokom popodnevnog granatiranja. Supruga {wife_name} zivi dva kilometra od mjesta gdje je poginuo. Cula je udar.",
       "required_fields": ["rank", "name", "age", "municipality", "brigade", "circumstance", "wife_name"]
     },
     {
       "id": "kia_siege_03",
       "casualty_type": "kia_siege",
       "text_template": "{name} of {municipality}, age {age}. {brigade}. Died of wounds sustained during shelling at {circumstance}. He had survived three previous woundings. The field hospital recorded cause of death as haemorrhage. Insufficient blood supply for transfusion.",
+      "text_template_bcs": "{name} iz {municipality}, star {age}. {brigade}. Preminuo od rana zadobijenih tokom granatiranja kod {circumstance}. Prezivio je tri ranija ranjavanja. Poljska bolnica evidentirala je uzrok smrti kao krvarenje. Nije bilo dovoljno krvi za transfuziju.",
       "required_fields": ["name", "municipality", "age", "brigade", "circumstance"]
     },
     {
       "id": "kia_siege_04",
       "casualty_type": "kia_siege",
       "text_template": "Private {name}, age {age}, from {municipality}. Assigned to {brigade}. Killed at {circumstance} by a direct hit on his observation post. He had been posted there for rotating shifts since the siege began. His mother, {wife_name}, asked the unit to return his journal. It was not recovered.",
+      "text_template_bcs": "Redov {name}, star {age}, iz {municipality}. Rasporedjen u {brigade}. Poginuo kod {circumstance} od direktnog pogotka u njegovu osmatracnicu. Od pocetka opsade tamo je bio na smjenskim dezurstvima. Majka {wife_name} trazila je od jedinice da vrati njegov dnevnik. Nije pronadjen.",
       "required_fields": ["name", "age", "municipality", "brigade", "circumstance", "wife_name"]
     },
     {
       "id": "kia_siege_05",
       "casualty_type": "kia_siege",
       "text_template": "{name}, {age}, of {municipality}. A carpenter before the war, now {brigade}. Shot and killed at {circumstance} while repairing a section of barricade after dark. The work had been postponed twice due to sniper activity. On the third night, the unit commander decided it could not wait any longer.",
+      "text_template_bcs": "{name}, {age}, iz {municipality}. Prije rata stolar, sada {brigade}. Pogodjen i ubijen kod {circumstance} dok je poslije mraka popravljao dio barikade. Posao je dvaput odgadjan zbog snajperske aktivnosti. Trece noci komandir jedinice odlucio je da se vise ne moze cekati.",
       "required_fields": ["name", "age", "municipality", "brigade", "circumstance"]
     },
     {
       "id": "wia_01",
       "casualty_type": "wia",
       "text_template": "{rank} {name}, age {age}, {brigade}. Wounded by shrapnel at {circumstance}. Evacuated to {hospital}. Right leg amputated below the knee. Expected to survive. He asked the surgeon when he could return to his unit.",
+      "text_template_bcs": "{rank} {name}, star {age}, {brigade}. Ranjen gelerima kod {circumstance}. Evakuisan u {hospital}. Desna noga amputirana ispod koljena. Ocekuje se da prezivi. Pitao je hirurga kada se moze vratiti u jedinicu.",
       "required_fields": ["rank", "name", "age", "brigade", "circumstance", "hospital"]
     },
     {
       "id": "wia_02",
       "casualty_type": "wia",
       "text_template": "{name}, {age}, from {municipality}. {brigade}. Sustained gunshot wounds during fighting at {circumstance}. Currently at {hospital} in serious condition. His wife {wife_name} has been unable to reach the hospital due to road closures. She does not know his status.",
+      "text_template_bcs": "{name}, {age}, iz {municipality}. {brigade}. Zadobio prostrelne rane tokom borbi kod {circumstance}. Trenutno je u {hospital} u teskom stanju. Supruga {wife_name} ne moze do bolnice zbog zatvorenih puteva. Ne zna u kakvom je stanju.",
       "required_fields": ["name", "age", "municipality", "brigade", "circumstance", "hospital", "wife_name"]
     },
     {
       "id": "wia_03",
       "casualty_type": "wia",
       "text_template": "Private {name} of {municipality}, age {age}. Multiple fragment wounds sustained at {circumstance} during mortar bombardment. Transferred to {hospital}. Burns to upper body. The medical officer's report notes the hospital is operating at three times its designed capacity. No anaesthetic was available for the procedure.",
+      "text_template_bcs": "Redov {name} iz {municipality}, star {age}. Vise gelerskih rana zadobio kod {circumstance} tokom minobacackog bombardovanja. Prebacen u {hospital}. Opekotine gornjeg dijela tijela. Izvjestaj medicinskog oficira navodi da bolnica radi s trostrukim opterecenjem. Za zahvat nije bilo anestetika.",
       "required_fields": ["name", "municipality", "age", "circumstance", "hospital"]
     },
     {
       "id": "wia_04",
       "casualty_type": "wia",
       "text_template": "Corporal {name}, {age}, {brigade}. Wounded during operations near {circumstance}. Lost sight in his left eye. Evacuated to {hospital} where he remains under observation. A former mechanic from {municipality}, he had requested assignment to the maintenance section. The request was denied due to manpower shortages.",
+      "text_template_bcs": "Kaplar {name}, {age}, {brigade}. Ranjen tokom operacija kod {circumstance}. Izgubio vid na lijevom oku. Evakuisan u {hospital}, gdje je ostao pod nadzorom. Bivsi mehanicar iz {municipality}, trazio je raspored u odjeljenje odrzavanja. Zahtjev je odbijen zbog manjka ljudstva.",
       "required_fields": ["name", "age", "brigade", "circumstance", "hospital", "municipality"]
     },
     {
       "id": "wia_05",
       "casualty_type": "wia",
       "text_template": "{name}, age {age}, of {municipality}. {brigade}. Shot through the shoulder at {circumstance}. Carried to the aid station by two soldiers who themselves had minor wounds. At {hospital}, the surgeon removed the round with improvised instruments. He will not raise that arm again. He is nineteen years old.",
+      "text_template_bcs": "{name}, star {age}, iz {municipality}. {brigade}. Pogodjen kroz rame kod {circumstance}. Do previjalista su ga prenijela dvojica vojnika koji su i sami imali lakse rane. U {hospital} hirurg je izvadio metak improvizovanim instrumentima. Tu ruku vise nece podici. Ima devetnaest godina.",
       "required_fields": ["name", "age", "municipality", "brigade", "circumstance", "hospital"]
     },
     {
       "id": "mia_01",
       "casualty_type": "mia",
       "text_template": "{rank} {name}, age {age}, {brigade}. Listed missing following the loss of positions at {circumstance}. Last seen by his squad leader during the withdrawal. His family in {displacement_municipality} has received no further information. His wife {wife_name} visits the Red Cross office each Thursday.",
+      "text_template_bcs": "{rank} {name}, star {age}, {brigade}. Vodi se kao nestao nakon gubitka polozaja kod {circumstance}. Posljednji put ga je vidio vodja odjeljenja tokom povlacenja. Porodica u {displacement_municipality} nije dobila dodatne informacije. Supruga {wife_name} svakog cetvrtka odlazi u kancelariju Crvenog krsta.",
       "required_fields": ["rank", "name", "age", "brigade", "circumstance", "displacement_municipality", "wife_name"]
     },
     {
       "id": "mia_02",
       "casualty_type": "mia",
       "text_template": "{name} of {municipality}, age {age}. {brigade}. Failed to report after the engagement at {circumstance}. Neither his unit nor the enemy have confirmed his status. His personal file lists a wife and infant daughter at {displacement_municipality}. The file has been annotated: \"Missing -- fate unknown.\"",
+      "text_template_bcs": "{name} iz {municipality}, star {age}. {brigade}. Nije se javio nakon okrsaja kod {circumstance}. Ni njegova jedinica ni neprijatelj nisu potvrdili njegov status. U licnom dosjeu navedene su supruga i kcerka dojenche u {displacement_municipality}. Dosje je oznacen: \"Nestao -- sudbina nepoznata.\"",
       "required_fields": ["name", "municipality", "age", "brigade", "circumstance", "displacement_municipality"]
     },
     {
       "id": "mia_03",
       "casualty_type": "mia",
       "text_template": "Private {name}, {age}, from {municipality}. Missing since the action at {circumstance}. {brigade} reports that his section was cut off during the enemy advance and could not be reached. Three other soldiers from the same section are also unaccounted for. No contact has been established.",
+      "text_template_bcs": "Redov {name}, {age}, iz {municipality}. Nestao od akcije kod {circumstance}. {brigade} izvjestava da je njegovo odjeljenje odsjeceno tokom neprijateljskog napredovanja i da mu se nije moglo prici. Jos tri vojnika iz istog odjeljenja nisu evidentirana. Kontakt nije uspostavljen.",
       "required_fields": ["name", "age", "municipality", "circumstance", "brigade"]
     },
     {
       "id": "mia_04",
       "casualty_type": "mia",
       "text_template": "{name}, age {age}, {brigade}. From {municipality}. Disappeared during the confusion of the retreat from {circumstance}. Witnesses report he was wounded and moving toward the rear when contact was lost. His mother {wife_name} was told he is classified as missing. She was not told what that means.",
+      "text_template_bcs": "{name}, star {age}, {brigade}. Iz {municipality}. Nestao u pometnji povlacenja iz {circumstance}. Svjedoci navode da je bio ranjen i kretao se prema pozadini kada je kontakt izgubljen. Majci {wife_name} receno je da se vodi kao nestao. Nije joj receno sta to znaci.",
       "required_fields": ["name", "age", "brigade", "municipality", "circumstance", "wife_name"]
     },
     {
       "id": "mia_05",
       "casualty_type": "mia",
       "text_template": "Corporal {name}, {age}, of {municipality}. {brigade}. Missing in action at {circumstance}. His commanding officer filed the report with the notation: \"Every effort to locate.\" The unit moved forward the next day. No search was conducted. The front does not wait.",
+      "text_template_bcs": "Kaplar {name}, {age}, iz {municipality}. {brigade}. Nestao u akciji kod {circumstance}. Njegov komandir predao je izvjestaj s napomenom: \"Uloziti svaki napor da se pronadje.\" Jedinica je sljedeceg dana krenula naprijed. Potraga nije provedena. Front ne ceka.",
       "required_fields": ["name", "age", "municipality", "brigade", "circumstance"]
     }
   ],

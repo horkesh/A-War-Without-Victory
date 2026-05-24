@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { buildTurnAftermathCampaignCost, buildTurnAftermathCampaignPulse, buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, buildTurnAftermathView, filterTurnAftermathRecords } from '../../src/ui/map/data/turnAftermath.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 
 function makeSummary(overrides: Partial<TurnSummary> = {}): TurnSummary {
   return {
@@ -56,6 +57,10 @@ function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
 }
 
 describe('buildTurnAftermathView', () => {
+  afterEach(() => {
+    setLocale('en');
+  });
+
   it('returns null without a loaded next state', () => {
     expect(buildTurnAftermathView({ nextState: null })).toBeNull();
   });
@@ -268,6 +273,45 @@ describe('buildTurnAftermathView', () => {
     expect(view?.cost.severity).toBe('low');
   });
 
+  it('localizes generated aftermath prose when BCS is selected', () => {
+    setLocale('bcs');
+
+    const view = buildTurnAftermathView({
+      nextState: makeState({
+        latestTurnSummary: makeSummary({
+          territory_net: { RBiH: 2 },
+          battles: [{
+            osid: 'op:test:a',
+            attacker_faction: 'RBiH',
+            defender_faction: 'RS',
+            primary_attacker_id: 'a',
+            primary_defender_id: 'b',
+            all_attacker_ids: ['a'],
+            outcome: 'victory' as never,
+            attacker_casualties: 12,
+            defender_casualties: 20,
+            territory_flipped: true,
+            was_concentrated: false,
+          }],
+          displacement_total: 80,
+          formation_destructions: [{ formation_id: 'lost', formation_name: 'Lost', faction: 'RBiH' }],
+        }),
+      }),
+    });
+
+    expect(view?.dateLabel).toBe('24 jun 1992');
+    expect(view?.headline).toBe('Neto teritorijalni dobitak: +2 OSID-a.');
+    expect(view?.narrativeLine).toBe('Sedmica zavrsava osvojenim prostorom, ali knjiga troska jos odreduje cijenu napredovanja.');
+    expect(view?.cost.reasons).toEqual(['12 prijateljskih gubitaka', '1 formacija unistena', '80 raseljenih']);
+    expect(view?.judgment).toEqual({
+      headline: 'Tezak potez je usao u zapis.',
+      detail: 'Registar troska poteza je kritican: 12 prijateljskih gubitaka / 1 formacija unistena / 80 raseljenih.',
+      memoryTone: 'cost',
+      primarySurface: 'chronicle',
+      secondarySurface: 'codex',
+    });
+  });
+
   it('builds newest-first persistent records from turn summaries with latest-summary fallback', () => {
     const turn10 = makeSummary({ turn: 10, territory_net: { RBiH: -1 } });
     const turn11 = makeSummary({ turn: 11, territory_net: { RBiH: 0 } });
@@ -413,6 +457,69 @@ describe('buildTurnAftermathView', () => {
       displacedThisTurn: 4000,
       ownFormationsDestroyed: 1,
     });
+  });
+
+  it('localizes campaign pulse and campaign cost archive prose when BCS is selected', () => {
+    setLocale('bcs');
+
+    const turn18 = makeSummary({
+      turn: 18,
+      territory_net: { RBiH: -2 },
+      displacement_total: 4000,
+      formation_destructions: [{ formation_id: 'arbih_lost_a', formation_name: 'Lost A', faction: 'RBiH' }],
+      battles: [{
+        osid: 'op:test:a',
+        attacker_faction: 'RBiH',
+        defender_faction: 'RS',
+        primary_attacker_id: 'a',
+        primary_defender_id: 'b',
+        all_attacker_ids: ['a'],
+        outcome: 'defeat' as never,
+        attacker_casualties: 40,
+        defender_casualties: 10,
+        territory_flipped: false,
+        was_concentrated: false,
+      }],
+    });
+    const turn19 = makeSummary({ turn: 19, territory_net: { RBiH: 1 } });
+    const turn20 = makeSummary({
+      turn: 20,
+      territory_net: { RBiH: 3 },
+      displacement_total: 1200,
+      formation_destructions: [{ formation_id: 'arbih_lost_b', formation_name: 'Lost B', faction: 'RBiH' }],
+      battles: [{
+        osid: 'op:test:b',
+        attacker_faction: 'RS',
+        defender_faction: 'RBiH',
+        primary_attacker_id: 'c',
+        primary_defender_id: 'd',
+        all_attacker_ids: ['c'],
+        outcome: 'breakthrough' as never,
+        attacker_casualties: 40,
+        defender_casualties: 120,
+        territory_flipped: true,
+        was_concentrated: false,
+      }],
+    });
+    const state = makeState({
+      turn: 20,
+      latestTurnSummary: turn20,
+      turnSummaries: [turn18, turn19],
+    });
+
+    const records = buildTurnAftermathRecordViews({ state });
+    const pulse = buildTurnAftermathCampaignPulse(records);
+    const cost = buildTurnAftermathCampaignCost({ state });
+
+    expect(pulse.briefing).toBe('Arhivski prozor je miran: nema vecih pomjeranja ili troskova u vidljivim zapisima.');
+    expect(cost.headline).toBe('Cijena kampanje je kriticna.');
+    expect(cost.briefing).toBe('3 zabiljezena poteza: 160 prijateljskih gubitaka, 5200 raseljenih, +2 neto OSID-a, 0.31 protivnickih gubitaka po prijateljskom gubitku.');
+    expect(cost.topDrivers).toEqual([
+      '5200 raseljenih',
+      '2 vlastite formacije unistene',
+      '2 teska poteza',
+      '160 prijateljskih gubitaka',
+    ]);
   });
 
   it('returns a quiet active campaign cost shell without archived records', () => {

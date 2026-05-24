@@ -12,20 +12,21 @@ import { generateLetterHome } from '../../../../sim/letter_home.js';
 import type { LetterHomeInput } from '../../../../sim/letter_home.js';
 import letterHomeData from '../../../../../data/templates/letter_home_templates.json';
 import type { CommandStrainLabel } from '../../data/command_strain.js';
+import { getActiveLocale, t, type MessageKey } from '../../i18n';
 
 // ── CoS identity ────────────────────────────────────────────────────
 
 interface CoSProfile {
     name: string;
     rank: string;
-    title: string;
+    titleKey: MessageKey;
     tone: 'cautious' | 'precise' | 'aggressive';
 }
 
 const COS_PROFILES: Record<string, CoSProfile> = {
-    RS: { name: 'Manojlo Milovanović', rank: 'Gen.', title: 'Chief of Main Staff', tone: 'precise' },
-    RBiH: { name: 'Jovan Divjak', rank: 'Gen.', title: 'Deputy Commander', tone: 'cautious' },
-    HRHB: { name: 'Milivoj Petković', rank: 'Gen.', title: 'Chief of Main Staff', tone: 'aggressive' },
+    RS: { name: 'Manojlo Milovanović', rank: 'Gen.', titleKey: 'chiefOfStaff.title.mainStaff', tone: 'precise' },
+    RBiH: { name: 'Jovan Divjak', rank: 'Gen.', titleKey: 'chiefOfStaff.title.deputyCommander', tone: 'cautious' },
+    HRHB: { name: 'Milivoj Petković', rank: 'Gen.', titleKey: 'chiefOfStaff.title.mainStaff', tone: 'aggressive' },
 };
 
 // ── Segment types ───────────────────────────────────────────────────
@@ -40,77 +41,105 @@ function link(label: string, corpsId: string): LinkSegment { return { type: 'lin
 
 // ── Tone phrases ────────────────────────────────────────────────────
 
-const GREETINGS: Record<CoSProfile['tone'], string[]> = {
+const GREETINGS: Record<CoSProfile['tone'], MessageKey[]> = {
     cautious: [
-        'Commander, I must bring several matters to your attention.',
-        'Commander, the situation requires careful consideration.',
-        'Commander, I have concerns that need your attention.',
+        'chiefOfStaff.greeting.cautious.0',
+        'chiefOfStaff.greeting.cautious.1',
+        'chiefOfStaff.greeting.cautious.2',
     ],
     precise: [
-        'Commander, here is the current situation assessment.',
-        'Commander, reporting on operational status.',
-        'Commander, the following requires your decision.',
+        'chiefOfStaff.greeting.precise.0',
+        'chiefOfStaff.greeting.precise.1',
+        'chiefOfStaff.greeting.precise.2',
     ],
     aggressive: [
-        'Commander, we need to act on several fronts.',
-        'Commander, the situation demands decisive action.',
-        'Commander, I have updates requiring immediate attention.',
+        'chiefOfStaff.greeting.aggressive.0',
+        'chiefOfStaff.greeting.aggressive.1',
+        'chiefOfStaff.greeting.aggressive.2',
     ],
 };
 
-function pickPhrase(phrases: string[], turn: number): string {
-    return phrases[turn % phrases.length];
+function pickPhrase(phrases: MessageKey[], turn: number): string {
+    return t(phrases[turn % phrases.length]);
+}
+
+function countLabel(count: number, one: MessageKey, many: MessageKey): string {
+    return t(count === 1 ? one : many);
 }
 
 // ── Generator ───────────────────────────────────────────────────────
 
 const BATTLE_PHRASES: Record<CoSProfile['tone'], (won: number, lost: number, total: number) => string> = {
-    cautious: (w, l, t) => {
-        if (l > w) return `We fought ${t} engagement${t > 1 ? 's' : ''} — results are concerning, with ${l} unfavorable outcome${l > 1 ? 's' : ''}.`;
-        if (w > 0) return `${t} engagement${t > 1 ? 's' : ''} this turn. ${w} went in our favor, but every battle costs us.`;
-        return `${t} engagement${t > 1 ? 's' : ''} this turn, mostly inconclusive.`;
+    cautious: (w, l, total) => {
+        if (l > w) return t('chiefOfStaff.battle.cautious.losing', { total, totalS: total > 1 ? 's' : '', lost: l, lostS: l > 1 ? 's' : '' });
+        if (w > 0) return t('chiefOfStaff.battle.cautious.winning', { total, totalS: total > 1 ? 's' : '', won: w });
+        return t('chiefOfStaff.battle.cautious.inconclusive', { total, totalS: total > 1 ? 's' : '' });
     },
-    precise: (w, l, t) => `${t} engagement${t > 1 ? 's' : ''} this turn: ${w} favorable, ${l} unfavorable, ${t - w - l} inconclusive.`,
-    aggressive: (w, l, t) => {
-        if (w > l) return `We fought ${t} battle${t > 1 ? 's' : ''} and won ${w}. Good, but we need to keep pressing.`;
-        if (l > 0) return `${t} engagement${t > 1 ? 's' : ''} — we took ${l} hit${l > 1 ? 's' : ''}. We need to hit back harder.`;
-        return `${t} engagement${t > 1 ? 's' : ''}, mostly stalemates. We need to break through.`;
+    precise: (w, l, total) => t('chiefOfStaff.battle.precise.summary', {
+        total,
+        engagementLabel: countLabel(total, 'chiefOfStaff.count.engagement.one', 'chiefOfStaff.count.engagement.many'),
+        won: w,
+        lost: l,
+        inconclusive: total - w - l,
+    }),
+    aggressive: (w, l, total) => {
+        if (w > l) return t('chiefOfStaff.battle.aggressive.winning', {
+            total,
+            battleLabel: countLabel(total, 'chiefOfStaff.count.battle.one', 'chiefOfStaff.count.battle.many'),
+            won: w,
+        });
+        if (l > 0) return t('chiefOfStaff.battle.aggressive.losing', {
+            total,
+            engagementLabel: countLabel(total, 'chiefOfStaff.count.engagement.one', 'chiefOfStaff.count.engagement.many'),
+            lost: l,
+            hitLabel: countLabel(l, 'chiefOfStaff.count.hit.one', 'chiefOfStaff.count.hit.many'),
+        });
+        return t('chiefOfStaff.battle.aggressive.stalemate', {
+            total,
+            engagementLabel: countLabel(total, 'chiefOfStaff.count.engagement.one', 'chiefOfStaff.count.engagement.many'),
+        });
     },
 };
 
 const TERRITORY_PHRASES: Record<CoSProfile['tone'], (gained: number, lost: number) => string> = {
     cautious: (g, l) => {
-        if (l > 0 && g === 0) return `We lost ${l} position${l > 1 ? 's' : ''} this turn. This is deeply troubling.`;
-        if (g > 0 && l === 0) return `We gained ${g} position${g > 1 ? 's' : ''} — encouraging, but we must consolidate.`;
-        if (g > 0 && l > 0) return `Mixed results: gained ${g}, lost ${l} position${l > 1 ? 's' : ''}.`;
+        if (l > 0 && g === 0) return t('chiefOfStaff.territory.cautious.lostOnly', { lost: l, lostS: l > 1 ? 's' : '' });
+        if (g > 0 && l === 0) return t('chiefOfStaff.territory.cautious.gainedOnly', { gained: g, gainedS: g > 1 ? 's' : '' });
+        if (g > 0 && l > 0) return t('chiefOfStaff.territory.cautious.mixed', { gained: g, lost: l, lostS: l > 1 ? 's' : '' });
         return '';
     },
     precise: (g, l) => {
         if (g === 0 && l === 0) return '';
-        return `Territory changes: +${g} gained, -${l} lost.`;
+        return t('chiefOfStaff.territory.precise.summary', { gained: g, lost: l });
     },
     aggressive: (g, l) => {
-        if (l > 0 && g === 0) return `We lost ${l} position${l > 1 ? 's' : ''} — unacceptable. We need to take them back.`;
-        if (g > 0 && l === 0) return `Took ${g} position${g > 1 ? 's' : ''}. Good. Keep going.`;
-        if (g > 0 && l > 0) return `Gained ${g} but lost ${l} — we need to be smarter about where we commit.`;
+        if (l > 0 && g === 0) return t('chiefOfStaff.territory.aggressive.lostOnly', {
+            lost: l,
+            positionLabel: countLabel(l, 'chiefOfStaff.count.position.one', 'chiefOfStaff.count.position.many'),
+        });
+        if (g > 0 && l === 0) return t('chiefOfStaff.territory.aggressive.gainedOnly', {
+            gained: g,
+            positionLabel: countLabel(g, 'chiefOfStaff.count.position.one', 'chiefOfStaff.count.position.many'),
+        });
+        if (g > 0 && l > 0) return t('chiefOfStaff.territory.aggressive.mixed', { gained: g, lost: l });
         return '';
     },
 };
 
 // ── Strain paragraph phrases ─────────────────────────────────────────
 
-const STRAIN_PHRASES: Record<CoSProfile['tone'], Record<'strained' | 'compromised', (corpsName: string) => string>> = {
+const STRAIN_PHRASES: Record<CoSProfile['tone'], Record<'strained' | 'compromised', MessageKey>> = {
     cautious: {
-        strained: (n) => `I must note that command relations with ${n} remain under strain following recent presidential interventions. The staff are compliant but the relationship requires careful management.`,
-        compromised: (n) => `I am deeply concerned about the command relationship with ${n}. Repeated direct interventions have created serious institutional friction. The staff are executing orders, but their confidence in the chain of command has been damaged.`,
+        strained: 'chiefOfStaff.strain.cautious.strained',
+        compromised: 'chiefOfStaff.strain.cautious.compromised',
     },
     precise: {
-        strained: (n) => `Command Authority Status: ${n} command relationship is under strain. Recent direct interventions have introduced friction into the planning cycle. Staff cohesion remains functional.`,
-        compromised: (n) => `Command Authority Status: ${n} command relationship is compromised. Repeated direct interventions have created institutional friction. Recommend restoring delegated command before further operations.`,
+        strained: 'chiefOfStaff.strain.precise.strained',
+        compromised: 'chiefOfStaff.strain.precise.compromised',
     },
     aggressive: {
-        strained: (n) => `${n} staff are still with us, but the overrides have left a mark. They'll execute, but we've spent some goodwill. Worth keeping in mind before the next intervention.`,
-        compromised: (n) => `The situation with ${n} is serious. Too many overrides have damaged the command relationship. The staff are carrying out orders but operating under pressure. We need to let them run their own operations for a while.`,
+        strained: 'chiefOfStaff.strain.aggressive.strained',
+        compromised: 'chiefOfStaff.strain.aggressive.compromised',
     },
 };
 
@@ -131,7 +160,7 @@ function buildStrainParagraphs(state: LoadedGameState, faction: string, tone: Co
         const label: CommandStrainLabel | undefined = corps.commandStrainLabel;
         if (!label || label === 'healthy') continue;
         const corpsName = corps.name ?? corps.id;
-        const phrase = STRAIN_PHRASES[tone][label](corpsName);
+        const phrase = t(STRAIN_PHRASES[tone][label], { corpsName });
         paragraphs.push([text(phrase)]);
     }
     return paragraphs;
@@ -188,10 +217,10 @@ export function generateCoSBriefing(
         paragraphs.push([
             text(pickPhrase(GREETINGS[tone], turn) + ' '),
             text(tone === 'cautious'
-                ? 'The situation is stable for now, but we should remain vigilant.'
+                ? t('chiefOfStaff.stable.cautious')
                 : tone === 'precise'
-                    ? 'No critical issues. All sectors maintaining adequate readiness.'
-                    : 'Things are quiet — too quiet. We should be planning our next move.'),
+                    ? t('chiefOfStaff.stable.precise')
+                    : t('chiefOfStaff.stable.aggressive')),
         ]);
     } else {
         const segments: Segment[] = [text(pickPhrase(GREETINGS[tone], turn) + ' ')];
@@ -202,15 +231,15 @@ export function generateCoSBriefing(
             const corpsName = cohesionItem.title.split(' cohesion')[0];
             const corpsId = cohesionItem.corpsId;
             if (tone === 'cautious') {
-                segments.push(text('I am concerned about '));
+                segments.push(text(t('chiefOfStaff.alert.cohesion.cautious.prefix')));
                 segments.push(corpsId ? link(corpsName, corpsId) : text(corpsName));
-                segments.push(text(' — their cohesion is dangerously low. We should consider reorganization. '));
+                segments.push(text(t('chiefOfStaff.alert.cohesion.cautious.suffix')));
             } else if (tone === 'precise') {
                 segments.push(corpsId ? link(corpsName, corpsId) : text(corpsName));
-                segments.push(text(' reports critical cohesion. Force readiness degraded. Recommend reorganization. '));
+                segments.push(text(t('chiefOfStaff.alert.cohesion.precise.suffix')));
             } else {
                 segments.push(corpsId ? link(corpsName, corpsId) : text(corpsName));
-                segments.push(text(' is in trouble. We need to reinforce them or pull them back. '));
+                segments.push(text(t('chiefOfStaff.alert.cohesion.aggressive.suffix')));
             }
             count++;
         }
@@ -220,16 +249,16 @@ export function generateCoSBriefing(
             const opName = opItem.title.replace(/^Op /, '').replace(/ awaits.*/, '');
             const corpsId = opItem.corpsId;
             if (tone === 'cautious') {
-                segments.push(text('Operation '));
+                segments.push(text(t('chiefOfStaff.alert.operation.cautious.prefix')));
                 segments.push(corpsId ? link(opName, corpsId) : text(opName));
-                segments.push(text(' awaits your authorization. I recommend reviewing force ratios first. '));
+                segments.push(text(t('chiefOfStaff.alert.operation.cautious.suffix')));
             } else if (tone === 'precise') {
-                segments.push(text('Operation '));
+                segments.push(text(t('chiefOfStaff.alert.operation.precise.prefix')));
                 segments.push(corpsId ? link(opName, corpsId) : text(opName));
-                segments.push(text(' has completed preparation. Awaiting GO/NO-GO decision. '));
+                segments.push(text(t('chiefOfStaff.alert.operation.precise.suffix')));
             } else {
                 segments.push(corpsId ? link(opName, corpsId) : text(opName));
-                segments.push(text(' is ready to launch. The longer we wait, the more the enemy prepares. '));
+                segments.push(text(t('chiefOfStaff.alert.operation.aggressive.suffix')));
             }
             count++;
         }
@@ -239,16 +268,16 @@ export function generateCoSBriefing(
             const sectorName = thinItem.title.replace(/^Thin front: /, '');
             const corpsId = thinItem.corpsId;
             if (tone === 'cautious') {
-                segments.push(text('Our line at '));
+                segments.push(text(t('chiefOfStaff.alert.defense.cautious.prefix')));
                 segments.push(corpsId ? link(sectorName, corpsId) : text(sectorName));
-                segments.push(text(' is dangerously thin. If the enemy probes there, we may not hold. '));
+                segments.push(text(t('chiefOfStaff.alert.defense.cautious.suffix')));
             } else if (tone === 'precise') {
-                segments.push(text('Sector '));
+                segments.push(text(t('chiefOfStaff.alert.defense.precise.prefix')));
                 segments.push(corpsId ? link(sectorName, corpsId) : text(sectorName));
-                segments.push(text(' is undermanned relative to frontage. Vulnerability: high. '));
+                segments.push(text(t('chiefOfStaff.alert.defense.precise.suffix')));
             } else {
                 segments.push(corpsId ? link(sectorName, corpsId) : text(sectorName));
-                segments.push(text(' is exposed — one push and the line breaks. We need brigades there now. '));
+                segments.push(text(t('chiefOfStaff.alert.defense.aggressive.suffix')));
             }
             count++;
         }
@@ -259,9 +288,9 @@ export function generateCoSBriefing(
             // Canonical corps-level readout lives in CommandRelationshipSection;
             // this line stays at army-wide narrative scope and avoids fake certainty.
             segments.push(text(
-                tone === 'cautious' ? 'War exhaustion is narrowing our offensive latitude across the theater.'
-                    : tone === 'precise' ? 'Faction war exhaustion is limiting sustainable offensive tempo. Corps-level detail in Command Relationship.'
-                        : 'The men are tired, but so is the enemy. Push through or lose initiative.',
+                tone === 'cautious' ? t('chiefOfStaff.exhaustion.cautious')
+                    : tone === 'precise' ? t('chiefOfStaff.exhaustion.precise')
+                        : t('chiefOfStaff.exhaustion.aggressive'),
             ));
             count++;
         }
@@ -308,6 +337,7 @@ function buildLetterHomeInput(state: LoadedGameState, faction: string): LetterHo
     return {
         turn,
         faction,
+        locale: getActiveLocale(),
         factionKilled,
         factionWounded,
         factionMissing,
@@ -329,6 +359,7 @@ interface ChiefOfStaffBriefingProps {
 export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorpsClick }: ChiefOfStaffBriefingProps) {
     const profile = COS_PROFILES[faction];
     const turn = gameState.turn ?? 0;
+    const profileTitle = profile ? t(profile.titleKey) : '';
 
     const paragraphs = useMemo(
         () => generateCoSBriefing(briefingItems, gameState, faction),
@@ -347,16 +378,16 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
         <div className="bg-[#f5f0e8] border border-neutral-300 rounded-lg overflow-hidden flex flex-col min-h-[220px] max-h-[320px] shadow-md relative">
             {/* Stamp */}
             <div className="absolute top-2 right-3 opacity-[0.08] font-black text-xl -rotate-12 select-none uppercase text-neutral-800 pointer-events-none">
-                BRIEFING
+                {t('chiefOfStaff.header.stamp')}
             </div>
 
             {/* Header */}
             <div className="px-3 py-1.5 border-b border-neutral-300/60 bg-[#ebe5d8]">
-                <div className="text-[8px] uppercase font-bold text-neutral-500 tracking-[0.2em]">Daily Briefing — {turnToDateString(turn)}</div>
+                <div className="text-[8px] uppercase font-bold text-neutral-500 tracking-[0.2em]">{t('chiefOfStaff.header.dailyBriefing')} — {turnToDateString(turn)}</div>
                 <div className="text-[11px] font-bold text-neutral-800 mt-0.5">
                     {profile.rank} {profile.name}
                 </div>
-                <div className="text-[8px] text-neutral-500 italic">{profile.title}</div>
+                <div className="text-[8px] text-neutral-500 italic">{profileTitle}</div>
             </div>
 
             {/* Body — missive text with inline links */}
@@ -399,7 +430,7 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
             {/* Footer — signature line */}
             <div className="px-3 py-1 border-t border-neutral-300/60 bg-[#ebe5d8]">
                 <div className="text-[8px] text-neutral-400 italic text-right">
-                    — {profile.rank} {profile.name.split(' ').pop()}, {profile.title}
+                    — {profile.rank} {profile.name.split(' ').pop()}, {profileTitle}
                 </div>
             </div>
         </div>

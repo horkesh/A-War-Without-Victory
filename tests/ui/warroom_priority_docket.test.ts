@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildWarroomPriorityDocketView } from '../../src/ui/map/data/warroomPriorityDocket.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 import type { LoadedGameState, OperationOpportunityProposalView } from '../../src/ui/map/data/types.js';
 import type { OperationalSitrepView } from '../../src/ui/shared/operational_sitrep_views.js';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
@@ -198,5 +199,35 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(view.sourceHandoffs).toEqual([]);
     expect(view.sourceHandoffSummary).toBe('0 source handoffs / 0 urgent');
     expect(view.canOpenBoard).toBe(false);
+  });
+
+  it('localizes Warroom docket summary chrome in BCS mode', () => {
+    setLocale('bcs');
+    const state = makeState({
+      presidentialReviewQueue: {
+        pendingCount: 2,
+        criticalCount: 1,
+        eventDecisionCount: 1,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 1,
+      },
+      operationOpportunityProposals: [makeOpportunity()],
+      operationalSitrep: makeSitrep(),
+      latestTurnSummary: makeSummary({
+        turn: 41,
+        displacement_total: 1800,
+      }),
+    });
+
+    const view = buildWarroomPriorityDocketView({ state, limit: 3 });
+    setLocale('en');
+
+    expect(view.summary).toBe('4 stavke za napredovanje / 4 hitno / 2 na cekanju');
+    expect(view.sourceHandoffSummary).toBe('3 izvorna prijenosa / 4 hitno');
+    expect(view.openBoardLabel).toBe('Otvori sobu odluka');
+    expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('advance items');
+    expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('source handoffs');
+    expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('Open Decision Room');
   });
 });

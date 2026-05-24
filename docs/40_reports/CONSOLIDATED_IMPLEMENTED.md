@@ -2,6 +2,108 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BCS Operations Planning parameter localization:** [implemented/20260523_BCS_OPS_PLANNING_PARAMETER_LOCALIZATION.md](implemented/20260523_BCS_OPS_PLANNING_PARAMETER_LOCALIZATION.md) - Ops phase-gate messages and PlanParameters operation-name/type/tempo/tolerance/support chrome now render through English/BCS localization.
+
+**Latest BCS Convoy Decision chrome localization:** [implemented/20260523_BCS_CONVOY_DECISION_CHROME_LOCALIZATION.md](implemented/20260523_BCS_CONVOY_DECISION_CHROME_LOCALIZATION.md) - Humanitarian convoy decision modal chrome/prose and War Summary inline convoy action buttons now render through English/BCS localization.
+
+**Latest BCS War Summary situation chrome localization:** [implemented/20260523_BCS_WAR_SUMMARY_SITUATION_CHROME_LOCALIZATION.md](implemented/20260523_BCS_WAR_SUMMARY_SITUATION_CHROME_LOCALIZATION.md) - War Summary non-overview convoy, local-support, OPSEC, and diplomacy headings/empty states plus OPSEC operation-health labels now render through English/BCS localization.
+
+**Latest BCS Presidential Toolbar chrome localization:** [implemented/20260523_BCS_PRESIDENTIAL_TOOLBAR_CHROME_LOCALIZATION.md](implemented/20260523_BCS_PRESIDENTIAL_TOOLBAR_CHROME_LOCALIZATION.md) - Tactical-map toolbar primary labels, titles, advance copy, current-turn suffix, and command-authority accessibility text now render through English/BCS localization.
+
+**Latest BCS Settlement Timeline localization:** [implemented/20260523_BCS_SETTLEMENT_TIMELINE_LOCALIZATION.md](implemented/20260523_BCS_SETTLEMENT_TIMELINE_LOCALIZATION.md) - Settlement timeline dates, empty state, and component-owned casualty row now render through deterministic English/BCS localization.
+
+**Latest BCS War Planning map date formatting:** [implemented/20260523_BCS_WAR_PLANNING_MAP_DATE_FORMATTING.md](implemented/20260523_BCS_WAR_PLANNING_MAP_DATE_FORMATTING.md) - War Planning map turn-date labels now use deterministic English/BCS short month tables keyed by active locale.
+
+**Latest BCS Warroom date formatting:** [implemented/20260523_BCS_WARROOM_DATE_FORMATTING.md](implemented/20260523_BCS_WARROOM_DATE_FORMATTING.md) - Warroom date, month-year, week, and short toolbar labels now use deterministic English/BCS month tables keyed by active locale.
+
+**Latest BCS map shared date formatting:** [implemented/20260523_BCS_MAP_SHARED_DATE_FORMATTING.md](implemented/20260523_BCS_MAP_SHARED_DATE_FORMATTING.md) - Tactical-map shared turn date labels now use deterministic English/BCS short month tables keyed by active locale.
+
+**Latest BCS Decision Room card prose localization:** [implemented/20260523_BCS_DECISION_ROOM_CARD_PROSE_LOCALIZATION.md](implemented/20260523_BCS_DECISION_ROOM_CARD_PROSE_LOCALIZATION.md) - Decision Room owned generated card titles, explanations, evidence, source owners, and action labels now render through the English/BCS substrate while source-provided external prose remains a separate localization target.
+
+**Latest BCS Decision Room read-model chrome localization:** [implemented/20260523_BCS_DECISION_ROOM_READ_MODEL_CHROME_LOCALIZATION.md](implemented/20260523_BCS_DECISION_ROOM_READ_MODEL_CHROME_LOCALIZATION.md) - Decision Room category lenses, command lanes, product-loop labels/fallbacks, count summaries, source-handoff labels, and handoff actions now render through the English/BCS substrate.
+
+**Latest BCS Presidential Inbox chrome localization:** [implemented/20260523_BCS_PRESIDENTIAL_INBOX_CHROME_LOCALIZATION.md](implemented/20260523_BCS_PRESIDENTIAL_INBOX_CHROME_LOCALIZATION.md) - Presidential Inbox panel title, situation divider, severity/type badges, notification dismiss, update chip, opening briefs, quiet state, and toolbar badge titles now render through the English/BCS substrate.
+
+**Latest BCS Decision Room panel chrome localization:** [implemented/20260523_BCS_DECISION_ROOM_PANEL_CHROME_LOCALIZATION.md](implemented/20260523_BCS_DECISION_ROOM_PANEL_CHROME_LOCALIZATION.md) - Army HQ Decision Room panel title, advanced toggle/metrics, loop headings, dossier labels, source handoff headings, and review-before-advance section labels now render through the English/BCS substrate.
+
+**Latest BCS Decision Room advance-readiness localization:** [implemented/20260523_BCS_DECISION_ROOM_ADVANCE_READINESS_LOCALIZATION.md](implemented/20260523_BCS_DECISION_ROOM_ADVANCE_READINESS_LOCALIZATION.md) - Decision Room advance-readiness headlines, active-dossier advance badge, and pre-advance pending-decision gate title now render through the English/BCS substrate.
+
+**Latest BCS Warroom status bar localization:** [implemented/20260523_BCS_WARROOM_STATUS_BAR_LOCALIZATION.md](implemented/20260523_BCS_WARROOM_STATUS_BAR_LOCALIZATION.md) - Warroom status bar phase, priority, advance, docket panel, empty-state, urgency-title, and category badge labels now render through the English/BCS substrate.
+
+**Latest BCS Warroom priority docket localization:** [implemented/20260523_BCS_WARROOM_PRIORITY_DOCKET_LOCALIZATION.md](implemented/20260523_BCS_WARROOM_PRIORITY_DOCKET_LOCALIZATION.md) - Warroom priority docket summary, source-handoff summary, and open-Decision-Room label now render through the English/BCS substrate.
+
+**Latest BCS Letter Home localization:** [implemented/20260523_BCS_LETTER_HOME_LOCALIZATION.md](implemented/20260523_BCS_LETTER_HOME_LOCALIZATION.md) - Chief of Staff Letter Home now passes active locale into the deterministic generator, and all 25 shipped casualty vignette templates carry BCS prose.
+
+**Latest BCS Chief of Staff header localization:** [implemented/20260523_BCS_CHIEF_OF_STAFF_HEADER_LOCALIZATION.md](implemented/20260523_BCS_CHIEF_OF_STAFF_HEADER_LOCALIZATION.md) - Army HQ Chief of Staff briefing stamp, daily-briefing label, and staff title chrome now render through the English/BCS substrate.
+
+**Latest BCS Chief of Staff combat-tone localization:** [implemented/20260523_BCS_CHIEF_OF_STAFF_COMBAT_TONE_LOCALIZATION.md](implemented/20260523_BCS_CHIEF_OF_STAFF_COMBAT_TONE_LOCALIZATION.md) - Army HQ Chief of Staff precise/aggressive combat and territory summary prose now renders through the English/BCS substrate.
+
+**Latest BCS Chief of Staff command-strain localization:** [implemented/20260523_BCS_CHIEF_OF_STAFF_COMMAND_STRAIN_LOCALIZATION.md](implemented/20260523_BCS_CHIEF_OF_STAFF_COMMAND_STRAIN_LOCALIZATION.md) - Army HQ Chief of Staff command-strain institutional warning prose now renders through the English/BCS substrate for all briefing tones.
+
+**Latest BCS Chief of Staff alert-tone localization:** [implemented/20260523_BCS_CHIEF_OF_STAFF_ALERT_TONE_LOCALIZATION.md](implemented/20260523_BCS_CHIEF_OF_STAFF_ALERT_TONE_LOCALIZATION.md) - Army HQ Chief of Staff precise/aggressive cohesion, operation, and thin-front alert prose now renders through the English/BCS substrate.
+
+**Latest BCS Chief of Staff alert localization:** [implemented/20260523_BCS_CHIEF_OF_STAFF_ALERT_LOCALIZATION.md](implemented/20260523_BCS_CHIEF_OF_STAFF_ALERT_LOCALIZATION.md) - Army HQ Chief of Staff cautious-tone cohesion, operation, and thin-front alert prose now renders through the English/BCS substrate.
+
+**Latest BCS Chief of Staff exhaustion localization:** [implemented/20260523_BCS_CHIEF_OF_STAFF_EXHAUSTION_LOCALIZATION.md](implemented/20260523_BCS_CHIEF_OF_STAFF_EXHAUSTION_LOCALIZATION.md) - Army HQ Chief of Staff war-exhaustion warning prose now renders through the English/BCS substrate for all briefing tones.
+
+**Latest BCS Chief of Staff combat/territory localization:** [implemented/20260523_BCS_CHIEF_OF_STAFF_COMBAT_TERRITORY_LOCALIZATION.md](implemented/20260523_BCS_CHIEF_OF_STAFF_COMBAT_TERRITORY_LOCALIZATION.md) - Army HQ Chief of Staff cautious-tone battle and territory summary prose now renders through the English/BCS substrate while preserving existing summary derivation.
+
+**Latest BCS Chief of Staff stable briefing localization:** [implemented/20260523_BCS_CHIEF_OF_STAFF_STABLE_BRIEFING_LOCALIZATION.md](implemented/20260523_BCS_CHIEF_OF_STAFF_STABLE_BRIEFING_LOCALIZATION.md) - Army HQ Chief of Staff stable/no-alert greeting bank and baseline prose now render through the English/BCS substrate while preserving deterministic turn-based phrase selection.
+
+**Latest BCS War Summary overview localization:** [implemented/20260523_BCS_WAR_SUMMARY_OVERVIEW_LOCALIZATION.md](implemented/20260523_BCS_WAR_SUMMARY_OVERVIEW_LOCALIZATION.md) - Army HQ War Summary overview territory, military-strength, displacement, SITREP, civilian-impact, full-faction labels, and staff-assessment prose now render through the English/BCS substrate.
+
+**Latest BCS War Summary campaign-cost localization:** [implemented/20260523_BCS_WAR_SUMMARY_CAMPAIGN_COST_LOCALIZATION.md](implemented/20260523_BCS_WAR_SUMMARY_CAMPAIGN_COST_LOCALIZATION.md) - Army HQ War Summary title, subsection tabs, campaign-cost labels/severity, and campaign-drag labels/detail copy now render through the English/BCS substrate.
+
+**Latest BCS Turn Aftermath archive localization:** [implemented/20260523_BCS_TURN_AFTERMATH_ARCHIVE_LOCALIZATION.md](implemented/20260523_BCS_TURN_AFTERMATH_ARCHIVE_LOCALIZATION.md) - Turn Aftermath campaign pulse/cost archive prose, cost-driver labels, Army HQ Records filters, metric labels/details, badges, and empty states now render through the English/BCS substrate.
+
+**Latest BCS Turn Aftermath localization:** [implemented/20260523_BCS_TURN_AFTERMATH_LOCALIZATION.md](implemented/20260523_BCS_TURN_AFTERMATH_LOCALIZATION.md) - Turn Aftermath modal chrome, metrics, empty states, enum badges, generated headlines, narrative lines, cost reasons, strategic-signal wrapper labels, and judgment prose now render through the English/BCS substrate.
+
+**Latest BCS Codex chrome localization:** [implemented/20260523_BCS_CODEX_CHROME_LOCALIZATION.md](implemented/20260523_BCS_CODEX_CHROME_LOCALIZATION.md) - `CodexPanel` title, essay-count line, empty/locked instructions, ghost/context labels, dynamic-section labels, pending text, and source heading now render through the English/BCS substrate.
+
+**Latest BCS Codex/Chronicle comparison localization:** [implemented/20260523_BCS_CODEX_CHRONICLE_COMPARISON_LOCALIZATION.md](implemented/20260523_BCS_CODEX_CHRONICLE_COMPARISON_LOCALIZATION.md) - Codex dynamic comparison notes, Chronicle endgame cards, and Chronicle Wrapped comparison bullets now render current generated historical-comparison note shapes through the shared English/BCS formatter.
+
+**Latest BCS Cinematic Verdict comparison localization:** [implemented/20260523_BCS_CINEMATIC_VERDICT_COMPARISON_LOCALIZATION.md](implemented/20260523_BCS_CINEMATIC_VERDICT_COMPARISON_LOCALIZATION.md) - `CinematicVerdict` visible comparison callouts and verdict share-summary comparison lines now reuse the localized historical-divergence note formatter.
+
+**Latest BCS War Cost divergence-note localization:** [implemented/20260523_BCS_WAR_COST_DIVERGENCE_NOTES_LOCALIZATION.md](implemented/20260523_BCS_WAR_COST_DIVERGENCE_NOTES_LOCALIZATION.md) - `WarCostSummary` known generated historical divergence-note shapes now render through localized mappings with raw source-note fallback.
+
+**Latest BCS Verdict Dayton-value localization:** [implemented/20260523_BCS_VERDICT_DAYTON_VALUES_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_DAYTON_VALUES_LOCALIZATION.md) - rich `VerdictScreen` Dayton package, institution, and patron-override values now render through stable localized mappings with raw source fallback.
+
+**Latest BCS Verdict dimension-label localization:** [implemented/20260523_BCS_VERDICT_DIMENSION_LABELS_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_DIMENSION_LABELS_LOCALIZATION.md) - rich `VerdictScreen` negotiating-capital dimension labels now render through stable localized dimension-ID mappings with source-label fallback.
+
+**Latest BCS Verdict condemnation localization:** [implemented/20260523_BCS_VERDICT_CONDEMNATION_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_CONDEMNATION_LOCALIZATION.md) - rich `VerdictScreen` known condemnation notice body text now renders through the existing English/BCS localization substrate.
+
+**Latest BCS Verdict outcome-class localization:** [implemented/20260523_BCS_VERDICT_OUTCOME_CLASS_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_OUTCOME_CLASS_LOCALIZATION.md) - rich `VerdictScreen` faction-tab and report outcome-class badges now render through the existing English/BCS localization substrate.
+
+**Latest BCS Verdict milestone localization:** [implemented/20260523_BCS_VERDICT_MILESTONE_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_MILESTONE_LOCALIZATION.md) - rich `VerdictScreen` milestone-comparison chrome and fallback duration-row labels now render through the existing English/BCS localization substrate.
+
+**Latest BCS Verdict scene-prose localization:** [implemented/20260523_BCS_VERDICT_SCENE_PROSE_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_SCENE_PROSE_LOCALIZATION.md) - deterministic verdict scene headlines, subheadlines, and default Cost Ledger fallback/totals prose now render through the existing English/BCS localization substrate.
+
+**Latest BCS Verdict share-summary localization:** [implemented/20260523_BCS_VERDICT_SHARE_SUMMARY_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_SHARE_SUMMARY_LOCALIZATION.md) - verdict share-summary wrapper text and outcome-class labels now render through the existing English/BCS localization substrate.
+
+**Latest BCS Verdict Dayton-label localization:** [implemented/20260523_BCS_VERDICT_DAYTON_LABELS_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_DAYTON_LABELS_LOCALIZATION.md) - rich `VerdictScreen` FactionReport Dayton detail labels now render through the existing English/BCS localization substrate.
+
+**Latest BCS Cinematic Verdict chrome localization:** [implemented/20260523_BCS_CINEMATIC_VERDICT_CHROME_LOCALIZATION.md](implemented/20260523_BCS_CINEMATIC_VERDICT_CHROME_LOCALIZATION.md) - `CinematicVerdict` static metric labels, campaign/not-recorded fallback text, share-summary heading, and copy button now render through the existing English/BCS localization substrate.
+
+**Latest BCS War Cost Summary localization:** [implemented/20260523_BCS_WAR_COST_SUMMARY_LOCALIZATION.md](implemented/20260523_BCS_WAR_COST_SUMMARY_LOCALIZATION.md) - `WarCostSummary` static labels, section headings, opportunity labels, exit-class labels, source prefix, and helper formatter strings now render through the existing English/BCS localization substrate.
+
+**Latest BCS Verdict report-label localization:** [implemented/20260523_BCS_VERDICT_REPORT_LABELS_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_REPORT_LABELS_LOCALIZATION.md) - the rich `VerdictScreen` FactionReport static headings, mobile report toggles, and final-stat row labels now render through the existing English/BCS localization substrate.
+
+**Latest BCS Verdict chrome localization:** [implemented/20260523_BCS_VERDICT_CHROME_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_CHROME_LOCALIZATION.md) - the rich `VerdictScreen` mobile lower-section tabs and footer chrome now render through the existing English/BCS localization substrate.
+
+**Latest BCS Verdict fallback localization:** [implemented/20260523_BCS_VERDICT_FALLBACK_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_FALLBACK_LOCALIZATION.md) - the no-verdict `VerdictScreen` fallback now renders outcome, final standings, metric rows, campaign duration, and footer actions through the existing English/BCS localization substrate.
+
+**Latest BCS Game Over localization:** [implemented/20260523_BCS_GAME_OVER_LOCALIZATION.md](implemented/20260523_BCS_GAME_OVER_LOCALIZATION.md) - the fallback Game Over modal now renders outcome, final standings, faction metric lines, campaign duration, and footer actions through the existing English/BCS localization substrate.
+
+**Latest BCS Side Picker localization:** [implemented/20260523_BCS_SIDE_PICKER_LOCALIZATION.md](implemented/20260523_BCS_SIDE_PICKER_LOCALIZATION.md) - the new-campaign side picker now renders its title, force suffix, load/continue controls, file input label, and close action through the existing English/BCS localization substrate.
+
+**Latest BCS Credits localization:** [implemented/20260523_BCS_CREDITS_LOCALIZATION.md](implemented/20260523_BCS_CREDITS_LOCALIZATION.md) - the Credits screen now renders title, section headings, source framing, dedication, and close affordances through the existing English/BCS localization substrate.
+
+**Latest BCS Main Menu localization:** [implemented/20260523_BCS_MAIN_MENU_LOCALIZATION.md](implemented/20260523_BCS_MAIN_MENU_LOCALIZATION.md) - the full-screen Main Menu now renders publisher line, theater/date line, primary actions, and secondary actions through the existing English/BCS localization substrate.
+
+**Latest BCS Settings Audio localization:** [implemented/20260523_BCS_SETTINGS_AUDIO_LOCALIZATION.md](implemented/20260523_BCS_SETTINGS_AUDIO_LOCALIZATION.md) - the Settings Audio tab, soundscape row, master-volume row, and associated aria labels now render through the existing English/BCS localization substrate.
+
+**Latest BCS pause menu localization:** [implemented/20260523_BCS_PAUSE_MENU_LOCALIZATION.md](implemented/20260523_BCS_PAUSE_MENU_LOCALIZATION.md) - the in-game pause menu now renders title, shortcut, actions, overlay label, and preserved-planning notice through the existing English/BCS localization substrate.
+
 **Latest soundscape observer wiring:** [implemented/20260523_SOUNDSCAPE_OBSERVER_WIRING.md](implemented/20260523_SOUNDSCAPE_OBSERVER_WIRING.md) - the tactical-map root now mounts a remount-safe observer that turns newly observed loaded-state turn summaries into silent-bus cue calls while suppressing initial hydration.
 
 **Latest soundscape cooldown suppression:** [implemented/20260523_SOUNDSCAPE_COOLDOWN_SUPPRESSION.md](implemented/20260523_SOUNDSCAPE_COOLDOWN_SUPPRESSION.md) - the silent audio bus now honors cue cooldown metadata when callers provide explicit timestamps, without adding wall-clock reads or playback IO.
