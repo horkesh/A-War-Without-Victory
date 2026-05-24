@@ -10150,6 +10150,22 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 
 ---
 
+## [2026-05-24] docs(roadmap): add command-board dispatch layer
+
+**Type:** Roadmap/process documentation.
+
+**Change:** Added `docs/plans/COMMAND_BOARD.md` as the operational command board for active roadmap/backlog work. The board separates `ACTIVE`, `OWNED-ELSEWHERE`, `GATED`, `OPERATOR-ONLY`, `MONITOR`, and `CLOSED` lanes, and gives each active row a concrete owner lane, next action, verification expectation, and stop gate. Linked the autonomous remaining-work matrix and Master Roadmap to the command-board layer so the older roadmap remains a historical master thread while the new board acts as the current dispatch surface.
+
+**Determinism:** Documentation-only. No runtime code, scenario data, generated artifacts, or simulation outputs changed.
+
+**Verification:** `git diff --check` passed.
+
+**Roadmap delta:** Future roadmap closeout is not complete unless the command board, relevant coverage/backlog/rating docs, and ledger all agree on the lane status.
+
+**Artifacts:** `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-18-autonomous-remaining-work-coverage-matrix.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-23] fix(ci): restore merged baseline regression gates
 
 **Type:** CI repair + truce predicate correction + test contract refresh + baseline-output manifest refresh.

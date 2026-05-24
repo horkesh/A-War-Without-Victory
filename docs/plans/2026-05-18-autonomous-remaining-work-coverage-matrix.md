@@ -8,6 +8,8 @@
 
 **Tech Stack:** Markdown planning, existing roadmap/backlog/report documents, existing Vitest/typecheck/build/scenario validation commands.
 
+**Command-board layer:** Use `docs/plans/COMMAND_BOARD.md` as the current dispatch board. This matrix remains the fuller coverage index; the command board is the compact operational view with active status, owner lane, next action, verification, and stop gate.
+
 ---
 
 ## Coverage Rules
@@ -17,6 +19,7 @@
 3. Treat this matrix as a dispatcher over the existing lane banks; do not duplicate implementation.
 4. When a lane closes, update this matrix, the dispatch index, the relevant master doc, and `docs/PROJECT_LEDGER.md`.
 5. If a row says gated or operator-only, Claude may prepare evidence, inventories, packet drafts, and tests, but must not claim the gate closed.
+6. Keep `docs/plans/COMMAND_BOARD.md` in lockstep with this matrix. A row is not operationally current unless the command board names its status, next action, verification expectation, and stop gate.
 
 ## Gated Decision Research Baseline
 
