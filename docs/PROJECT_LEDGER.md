@@ -1,4 +1,31 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-25] fix(strategic-depth): correct VRS_2KK_CORPS_ID to match OOB
+
+**Type:** Single-character data-correctness fix in `src/sim/combat/strategic_depth.ts`. Activates a designed-but-dead historical mechanism. No engine logic, scenario data, save schema, event ordering, or operation behavior changed.
+
+**Why:** The `VRS_2KK_CORPS_ID` constant was hard-coded as `'2nd_krajina_corps'` but the actual engine OOB id is `vrs_2nd_krajina` per `data/source/oob_corps.json:19`. Consequence: the `SVK_PARTNER_DEPTH_BONUS` mechanism (1.4× strategic_depth multiplier for RS corps near the Croatian Krajina border while `svkActive` resolves true) has been permanently dead since the strategic_depth module shipped. Per the module's own header comment (lines 14-20) this mechanism was supposed to fire pre-Storm and collapse post-Storm to model the historical VRS 2nd Krajina Corps' loss of rear-area depth after SVK destruction (ICTY Gotovina IT-06-90-T; Mladić MICT-13-56 §3437-3450; BB v2 ch. 28).
+
+**Change:** `VRS_2KK_CORPS_ID: FormationId = '2nd_krajina_corps'` → `'vrs_2nd_krajina'`. Plus ICTY citations strengthened in the constant's comment. Single line edit.
+
+**Verification:**
+- `npx vitest run tests/operation_opportunities_catalog.test.ts tests/jna_phantom_brigades.test.ts tests/event_timeline_integrity.test.ts --reporter=dot`: 75/75 PASS.
+- 188w pre-fix (n4 committed at `3438798c`): hash `9b373d7d0f2698af`, match_ratio 0.807584, 27/27 anchors, 5/6 benchmarks, HRHB 86/RBiH 302/RS 324, 33 AARs.
+- 188w post-fix (n10 on worktree): hash `f6f289bf9ff1a9a8`, **match_ratio 0.807584 (unchanged)**, 27/27 anchors, 5/6 benchmarks, HRHB 86/RBiH 302/RS 324 (unchanged), 33 AARs (unchanged).
+- **712/712 OSID political_controllers byte-identical to n4.**
+- Single formation field diff between n4 and n10: `vrs_2nd_krajina.strategic_depth: 0.6 → 0.84`. No other field, no other formation, no other subsystem affected.
+
+**Outcome:** Sacred-rule-clean dead-code activation. The mechanism is now mechanically alive (vrs_2nd_krajina.strategic_depth correctly carries the +40% partner-buffer pre-Storm), but the combat consequence is zero in the current engine because `strategic_depth` is not consumed by `computeDefenderPower` or `computeAttackerPower` in `src/sim/combat/combat_math.ts` — only intended as a slow cohesion-recovery-rate feed (per module header line 8-9). Over a 14-turn Mistral 2 window the cohesion-recovery divergence does not register.
+
+This commit is preparatory for downstream engine work that would wire `strategic_depth` into defender power directly (would require dedicated lane with TDD + historian sign-off + baseline-refresh authorization). Without that downstream consumer, the fix has no immediate territorial impact, but with the typo in place the substrate for that consumer would not have existed.
+
+**Sacred rules:** Canonical faction IDs only. Faction-symmetric flag (geographic gate via corps id, not faction hard-code). Deterministic. No init OSID overrides. No `avoided_osids_by_faction`. `hvo_main_staff` not used as launcher. `docs/10_canon/FORAWWV.md` not edited.
+
+**Historical basis:** ICTY Gotovina IT-06-90-T (VRS 2KK strategic depth loss post-Storm as element of joint criminal enterprise context); ICTY Mladić MICT-13-56 §3437-3450 (refugee paralysis effects on RS rear logistics); BB v2 ch. 28 (VRS Krajina post-Storm collapse). Module header at `strategic_depth.ts:14-20` cites ICTY Gotovina as the canonical history for the SVK partner buffer mechanism.
+
+**Artifacts:** `src/sim/combat/strategic_depth.ts`.
+
+---
+
 ## [2026-05-24] calibration(events): extend NATO Deliberate Force suppression window
 
 **Type:** Single-change calibration on `data/scenarios/events/war_1995.json`. Behavior change confined to late-war combat math via `equipment_quality_modifier` lifetime. No new ops, predicates, scenario data, save-schema, or engine logic. Follows Round 1 catalog wiring (`63da06e7`) on the same lane.
