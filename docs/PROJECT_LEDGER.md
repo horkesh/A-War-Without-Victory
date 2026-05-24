@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-24] docs(ratings): reconcile Army HQ control status
+
+**Type:** Documentation truth reconciliation only. No UI behavior, simulation behavior, save schema, scenario data, generated artifact, or test contract changed.
+
+**Why:** `GAME_STATE_RATING_MASTER.md` still claimed Army HQ emergency posture bulk-apply lacked confirmation and that header exits were duplicated, but current source and tests show both GUI-audit slices are already closed.
+
+**Change:** Updated the Army HQ rating row to reflect the existing confirmation dialog, bridge-unavailable disabled feedback, and header-exit de-duplication. The remaining Army HQ lift is now narrowed to first-paint hierarchy for the top BRIEFING grid.
+
+**Verification:** `npx.cmd vitest run tests\ui\emergency_posture_confirm.test.ts tests\ui\gui_audit_dead_controls.test.ts --reporter=dot` passed 7/7. No baseline run was needed because no runtime/source files changed.
+
+---
+
 ## [2026-05-24] ui(warroom): tighten calendar and advance affordance
 
 **Type:** UI polish/read-model presentation only. No simulation behavior, save schema, scenario data, generated artifact, combat math, event ordering, or advance-turn logic changed.
