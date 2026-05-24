@@ -38,9 +38,9 @@ Tasks:
 | Calibration / army arc / HVO-HV operations | `docs/plans/2026-05-24-owned-branch-acceptance-execution-plan.md` plus calibration branch handoff | owned-elsewhere acceptance packet | Use acceptance plan for verification/merge criteria; do not author calibration while external branch owns it. |
 | Event system presidential core upgrade | `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md` | execution-grade | Use as the template for other lane upgrades. |
 | Dynamic Codex and sensitive-history consequence arcs | `docs/plans/2026-05-24-codex-sensitive-history-execution-plan.md` | execution-grade | Use for safe Codex inventory/correction, sensitive-history packets, and dynamic consequence arcs. |
-| Sector/frontline performance residuals | `docs/plans/2026-05-20-sector-performance-next-target-plan.md`, `docs/plans/2026-05-18-sector-reconstruction-performance-plan.md` | needs expansion | Add profile-first command packet and forbid unmeasured caches. |
-| Optional `GameState` schema contract | `docs/plans/2026-05-20-strict-null-post-factionid-roadmap.md`, `docs/plans/2026-05-20-strict-null-schema-boundary-validation-plan.md` | needs expansion | Add optional-field family phases with migration/default/validator proof. |
-| Save/load/replay and generated-artifact stability | `docs/plans/2026-05-18-autonomous-save-replay-determinism-bank.md`, `docs/plans/2026-05-17-save-migration-hardening-plan.md` | needs expansion | Add artifact-owner map and generated-output stop gates. |
+| Sector/frontline performance residuals | `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md` Phase 1 | execution-grade | Use profile-first sector phase with hash/artifact gates. |
+| Optional `GameState` schema contract | `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md` Phase 2 | execution-grade | Use optional-field family phase with migration/default/validator proof. |
+| Save/load/replay and generated-artifact stability | `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md` Phase 3 | execution-grade | Use artifact-owner and replay determinism phase. |
 | Localization Bosnian LQA | `docs/plans/2026-05-17-bcs-localization-plan.md` | needs expansion | Add Bosnian LQA leak checklist and native-review gate. |
 | Intel surprise / ambush depth | `docs/plans/2026-05-17-intel-extensions-plan.md` | needs expansion | Add hidden-truth/player-safe verification gates. |
 | Supply/logistics comprehension outside GUI branch | `docs/plans/2026-05-17-supply-design-completion-plan.md` plus logistics plans | needs expansion | Add read-model-only boundary and GUI collision gate. |
@@ -67,9 +67,9 @@ Stop gate:
 | Calibration / army arc / HVO-HV operations | `docs/plans/2026-05-24-owned-branch-acceptance-execution-plan.md` plus calibration branch handoff | Acceptance packet available. Continue avoiding implementation while owned elsewhere. |
 | Event system presidential core upgrade | `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md` | Already execution-grade. Keep as template. |
 | Dynamic Codex and sensitive-history consequence arcs | `docs/plans/2026-05-24-codex-sensitive-history-execution-plan.md` | Execution-grade for Codex sweep and sensitive-history packets; notification residuals may still need a narrower packet. |
-| Sector/frontline performance residuals | `docs/plans/2026-05-20-sector-performance-next-target-plan.md`, `docs/plans/2026-05-18-sector-reconstruction-performance-plan.md` | Add profile-first external-agent packet, exact profiling commands, byte-stability gates, and forbidden unmeasured caches. |
-| Optional `GameState` schema contract | `docs/plans/2026-05-20-strict-null-post-factionid-roadmap.md`, `docs/plans/2026-05-20-strict-null-schema-boundary-validation-plan.md` | Convert optional-field classification into phase packets with migration/validator/test commands. |
-| Save/load/replay and generated-artifact stability | `docs/plans/2026-05-18-autonomous-save-replay-determinism-bank.md`, `docs/plans/2026-05-17-save-migration-hardening-plan.md` | Add artifact-owner map, generated-output command ownership, and baseline-refresh stop gates. |
+| Sector/frontline performance residuals | `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md` Phase 1 | Execution-grade. |
+| Optional `GameState` schema contract | `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md` Phase 2 | Execution-grade. |
+| Save/load/replay and generated-artifact stability | `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md` Phase 3 | Execution-grade. |
 | Localization Bosnian LQA | `docs/plans/2026-05-17-bcs-localization-plan.md` | Add Bosnian-specific LQA checklist, Croatian/Serbian leakage gates, and native-review handoff packet. |
 
 Phase 1 closeout:
