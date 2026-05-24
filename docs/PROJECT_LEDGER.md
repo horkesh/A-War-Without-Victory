@@ -10198,6 +10198,20 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 
 ---
 
+## [2026-05-24] docs(localization): harden Bosnian LQA plan
+
+**Type:** Roadmap/localization planning.
+
+**Change:** Added an execution-grade Bosnian localization LQA plan with inventory, Croatian/Serbian leakage audit, string-family fixes, visual-fit checks, and native-review gates. Updated the Command Board and active hardening matrix to route the P1 localization row through the new packet.
+
+**Determinism:** Documentation-only. No runtime code, scenario data, generated artifacts, saves, or baselines changed.
+
+**Verification:** `git diff --check` - PASS.
+
+**Artifacts:** `docs/plans/2026-05-24-bosnian-localization-lqa-execution-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-active-plan-hardening-pass.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-24] docs(engine): harden engine quality residual plans
 
 **Type:** Roadmap/engine planning.

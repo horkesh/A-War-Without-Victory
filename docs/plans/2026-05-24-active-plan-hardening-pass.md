@@ -41,7 +41,7 @@ Tasks:
 | Sector/frontline performance residuals | `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md` Phase 1 | execution-grade | Use profile-first sector phase with hash/artifact gates. |
 | Optional `GameState` schema contract | `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md` Phase 2 | execution-grade | Use optional-field family phase with migration/default/validator proof. |
 | Save/load/replay and generated-artifact stability | `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md` Phase 3 | execution-grade | Use artifact-owner and replay determinism phase. |
-| Localization Bosnian LQA | `docs/plans/2026-05-17-bcs-localization-plan.md` | needs expansion | Add Bosnian LQA leak checklist and native-review gate. |
+| Localization Bosnian LQA | `docs/plans/2026-05-24-bosnian-localization-lqa-execution-plan.md` | execution-grade | Use Bosnian leakage audit, string-family fixes, visual-fit, and native-review gates. |
 | Intel surprise / ambush depth | `docs/plans/2026-05-17-intel-extensions-plan.md` | needs expansion | Add hidden-truth/player-safe verification gates. |
 | Supply/logistics comprehension outside GUI branch | `docs/plans/2026-05-17-supply-design-completion-plan.md` plus logistics plans | needs expansion | Add read-model-only boundary and GUI collision gate. |
 | Officer/OOB/source attribution and essay rosters | `docs/plans/2026-05-17-officer-character-mini-bio-plan.md` plus OOB/source plans | needs expansion | Add source hierarchy and historian review triggers. |
@@ -70,7 +70,7 @@ Stop gate:
 | Sector/frontline performance residuals | `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md` Phase 1 | Execution-grade. |
 | Optional `GameState` schema contract | `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md` Phase 2 | Execution-grade. |
 | Save/load/replay and generated-artifact stability | `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md` Phase 3 | Execution-grade. |
-| Localization Bosnian LQA | `docs/plans/2026-05-17-bcs-localization-plan.md` | Add Bosnian-specific LQA checklist, Croatian/Serbian leakage gates, and native-review handoff packet. |
+| Localization Bosnian LQA | `docs/plans/2026-05-24-bosnian-localization-lqa-execution-plan.md` | Execution-grade. |
 
 Phase 1 closeout:
 
