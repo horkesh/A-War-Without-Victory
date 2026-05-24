@@ -10446,3 +10446,21 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `data/derived/startup/apr_1992_initial_save.json`, `data/scenarios/events/war_1995.json`, `src/ui/map/components/SettingsScreen.tsx`, `tools/diagnostics/output/save_migration_drift.json`, fast-slice test contracts, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-24] fix(ui): show headless run formations on map inspection
+
+**Type:** UI visibility fallback + diagnostic artifact inspection fix.
+
+**Change:** Updated map formation visibility so headless/debug saves without `meta.player_faction` project all formations onto the tactical map instead of projecting zero markers. Player-faction saves still preserve the existing fog rule: all own formations plus only fog-visible enemy formations. Added a focused regression test covering the no-player-faction map inspection path.
+
+**Determinism:** UI projection-only. No simulation behavior, save schema, scenario data, operation tuning, randomness, timestamps, initial OSID overrides, avoided-OSID lists, or faction-ID model changes were introduced.
+
+**Verification:**
+- `npx.cmd vitest run tests/ui_player_visibility.test.ts --reporter=dot` - 11/11 PASS.
+- Headless artifact projection scan - recent no-player-faction saves now project 234, 248, and 236 formation markers instead of 0.
+- `npm.cmd run typecheck` - PASS.
+- `git diff --check` - PASS with only the existing CRLF normalization warning on `tests/ui_player_visibility.test.ts`.
+
+**Artifacts:** `src/ui/shared/playerVisibility.ts`, `tests/ui_player_visibility.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---

@@ -78,7 +78,7 @@ export function filterPlayerFacingMovementsByOsid(
 export function filterPlayerVisibleMapFormations(state: LoadedGameState | null | undefined): FormationView[] {
   if (!state?.formations) return [];
   const playerFaction = resolvePlayerFacingFaction(state);
-  if (!playerFaction) return [];
+  if (!playerFaction) return state.formations;
 
   const visibleEnemyOsids = new Set(state.fogOfWar?.visibleEnemyOsids ?? []);
   return state.formations.filter((formation) => (
