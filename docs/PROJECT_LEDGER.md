@@ -1,4 +1,51 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-25] calibration(combat-math): wire strategic_depth into defender power
+
+**Type:** Combat-math hot-path edit + baseline refresh. The new multiplier propagates through every defender power computation in every battle in every scenario. Faction-symmetric (no faction id hard-code), deterministic (pure math), gated `!== 1.0` for byte-stability on no-effect path.
+
+**Why:** After Round 7 (`0e6b45db`) corrected the VRS_2KK_CORPS_ID typo and activated the SVK_PARTNER_DEPTH_BONUS mechanism, scenario expert confirmed `strategic_depth` was not consumed by `computeDefenderPower` or `computeAttackerPower` in `src/sim/combat/combat_math.ts` — the field was decorative for direct combat math, intended only as a slow cohesion-recovery-rate feed. The historian's M2 cascade (SVK destruction → strategic depth lost → VRS Krajina coordination collapse, citing ICTY Gotovina IT-06-90-T + Mladić MICT-13-56 §3437-3450 + BB v2 §28) requires `strategic_depth` to enter direct defender power so the post-Storm collapse signature can flip Mistral 1/2 / Southern Move force ratios. This commit wires the consumer.
+
+**Change:** Four edits in `src/sim/combat/combat_math.ts`:
+1. `import { getStrategicDepth } from './strategic_depth.js'`
+2. Added `strategicDepthMult: number` field to `DefenderPowerBreakdown` interface with documentation cross-referencing `strategic_depth.ts`.
+3. Added new gated multiplier block in `computeDefenderPowerBreakdown` after `cascadeMult`. Formula `mult = 0.5 + 0.5 * depth`:
+   - depth=1.0 (default; corps without computed depth) → 1.0 (byte-stable historical path)
+   - depth=0.84 (vrs_2nd_krajina pre-Storm w/ SVK buffer from Round 7) → 0.92
+   - depth=0.60 (typical post-Storm or independent corps) → 0.80
+   - depth=0.42 (theoretical post-Storm 0.7× collapse if implemented) → 0.71
+   - depth=0.10 (floor) → 0.55
+4. Added `strategicDepthMult` to the return object.
+
+Plus single-file baseline refresh: `data/derived/scenario/baselines/manifest.json` regenerated via `UPDATE_BASELINES=1 npm run test:baselines`. No prior trim decisions to preserve — manifest already tracked the full 8-artifact list across all 3 scenarios (apr1992_52w, baseline_ops_4w, noop_4w).
+
+**Verification:**
+- `npx tsc --noEmit -p tsconfig.json`: clean (exit 0).
+- `npx vitest run tests/operation_opportunities_catalog.test.ts tests/event_timeline_integrity.test.ts tests/jna_phantom_brigades.test.ts --reporter=dot`: 75/75 PASS.
+- 40w canary: pre-fix `7dab9e30e1f196d2` → post-fix `8e1098bee7d89ee7` (first 40w drift in the lane; expected for hot-path edit).
+- 188w pre-fix (n10 committed at `0e6b45db`): hash `f6f289bf9ff1a9a8`, match_ratio 0.807584, 27/27 anchors, 5/6 benchmarks, HRHB 86/RBiH 302/RS 324, 33 AARs.
+- 188w post-fix (n12 on worktree): hash `149007813baa5123`, **match_ratio 0.814607 (+0.70 pp)**, **27/27 anchors**, **6/6 benchmarks (consolidate_gains t40 restored, +1)**, **HRHB 87/RBiH 296/RS 329 (HRHB +1, RBiH −6 overshoot reduced, RS +5 toward painted)**, 37 AARs (+4 RS counter-offensives launched).
+- 11 of 17 OSID flips toward painted target (65% improvement rate). Notable: Drina enclave correction (4 spurious n4 RBiH gains around srebrenica/rogatica/vlasenica correctly flipped to RS-painted); first HRHB territorial gain (`op:glamoc:pribelja` RS→HRHB, painted HRHB).
+- All 16 tracked sensitive-history events fire at identical turns vs n10 (Srebrenica/Žepa/Goražde anchors hold; `srebrenica_falls_1995`, `srebrenica_genocide_1995`, `zepa_falls_1995`, `operation_storm_1995`, `nato_deliberate_force_1995`, `hv_ammo_transfusion_post_storm_1995` all identical turns).
+- `npm run test:baselines` GREEN post-refresh: "Baseline regression: all scenarios match."
+
+**Outcome:** Largest single-round gain in the 8-round lane. +0.70 pp match_ratio (0.807584 → 0.814607). First 6/6 benchmark pass in the lane (`consolidate_gains` t40 dev moved from −0.054 to −0.047, now within ±0.05 tolerance). First HRHB territorial gain in 8 rounds. Drina enclave correction moves sim toward historical accuracy in the most sensitive zone. Zero sensitive-history regressions.
+
+**Notable concerns (not blockers):**
+- Mistral 1 + Mistral 2 NEVER engaged combat in n12 (launch-feasibility predictor correctly judges them infeasible vs stronger defenders). The +1 HRHB OSID came via emergent control flip from defender contraction, NOT via Mistral op success. This is *more* historically accurate (a real commander wouldn't launch a 0.24-ratio assault), but the lane's "HRHB capture via op" hypothesis is dead. Closing the HRHB Mistral capture gap requires downstream lanes: (a) proper `state.meta.svk_corps_active` flag flip at Operation Storm so post-Storm depth collapses from 0.84 → 0.6 (or 0.42 with the documented 0.7× collapse), and (b) per-turn multi-brigade dispatch fix (Q2 Lanchester-stranding from `attack_resolution_osid.ts:638/704/858/902/1003`) so axis multi-brigade stacks reach battle resolution.
+- 2 Sarajevo siege OSIDs leaked RS→RBiH (`op:ilidza:kasindo`, `op:ilidza:rakovica_2`, painted RS) — no anchor break, but VRS Sarajevo Romanija defender weakened at edges.
+- 2 Bihać/Krupa OSIDs reverted (Round 2 NATO gains partially erased: `op:bihac:trubar`, `op:bosanski_petrovac:vrtoce`) — net 5C theater flat (2 new gains balance 2 reversions).
+- 4 new RS counter-offensives launched (AAR count 33 → 37). Worth a follow-up scan to confirm they're historically plausible RS late-war probes, not artifacts.
+
+**Sacred rules:** Faction-symmetric (`0.5 + 0.5 * depth` formula gates off per-corps `strategic_depth` field, not faction id). Deterministic (pure math, no Math.random, no Date.now, sorted iteration where applicable). No init OSID overrides. No `avoided_osids_by_faction`. Canonical faction IDs only. `hvo_main_staff` not used as launcher. `docs/10_canon/FORAWWV.md` not edited.
+
+**Historical basis:** ICTY Gotovina IT-06-90-T (VRS 2KK strategic depth loss post-Storm as element of joint criminal enterprise context); ICTY Mladić MICT-13-56 §3437-3450 (refugee paralysis effects on RS rear logistics); BB v2 §28 (VRS Krajina post-Storm collapse mechanism — "the corps did not lose battles, it lost coordination"). Universal military principle: rear depth → sustained effective combat power.
+
+**Baseline refresh justification:** behavior change is intentional (expert-recommended, historically grounded), deterministic (pure function), and bounded to one new gated multiplier. All 3 baseline-regression scenarios (apr1992_52w, baseline_ops_4w, noop_4w) refreshed surgically — no artifact-list expansion, just hash updates. Post-refresh `test:baselines` green.
+
+**Artifacts:** `src/sim/combat/combat_math.ts`; `data/derived/scenario/baselines/manifest.json`.
+
+---
+
 ## [2026-05-25] fix(strategic-depth): correct VRS_2KK_CORPS_ID to match OOB
 
 **Type:** Single-character data-correctness fix in `src/sim/combat/strategic_depth.ts`. Activates a designed-but-dead historical mechanism. No engine logic, scenario data, save schema, event ordering, or operation behavior changed.

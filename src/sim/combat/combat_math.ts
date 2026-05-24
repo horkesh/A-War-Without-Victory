@@ -35,6 +35,7 @@ import { ensureBrigadeComposition } from './equipment_effects.js';
 import type { Osid } from './osid_adjacency.js';
 import { getHomeDistanceMult } from './home_distance.js';
 import { getActiveEquipmentQualityMultiplier, getCascadePenaltyForOsid } from '../events/active_modifiers.js';
+import { getStrategicDepth } from './strategic_depth.js';
 
 type CombatMathProfileTimer = <T>(labelSuffix: string, fn: () => T) => T;
 
@@ -66,6 +67,11 @@ export interface DefenderPowerBreakdown {
      *  (byte-stable historical path). <1.0× when an adjacent OSID just flipped
      *  this turn. Source: `getCascadePenaltyForOsid`. */
     cascadeMult: number;
+    /** Fall-1995 mechanic E-B3 consumer: 1.0× when defender corps has full
+     *  strategic_depth (1.0). <1.0× when depth is reduced (rear-area paralysis,
+     *  partner-buffer loss, frontage overstretch). Formula: 0.5 + 0.5×depth.
+     *  Source: `getStrategicDepth(corps formation)` from strategic_depth.ts. */
+    strategicDepthMult: number;
     power: number;
 }
 
@@ -1503,6 +1509,40 @@ export function computeDefenderPowerBreakdown(
     );
     if (cascadeMult !== 1.0) power *= cascadeMult;
 
+    // ── Fall-1995 mechanic E-B3 consumer: strategic_depth → defender power ──
+    // Lower strategic_depth (lost partner buffer, frontage overstretch, rear-
+    // area paralysis from neighboring-faction collapse) reduces defender
+    // effective combat power. Formula: mult = 0.5 + 0.5*depth.
+    //   depth=1.0 (default) → 1.0 (no effect; byte-stable historical path)
+    //   depth=0.84 (vrs_2nd_krajina pre-Storm w/ SVK partner buffer) → 0.92
+    //   depth=0.60 (typical post-Storm or independent corps) → 0.80
+    //   depth=0.42 (post-Storm 0.7× collapse if applied) → 0.71
+    //   depth=0.10 (floor) → 0.55
+    // Faction-symmetric: gates off the per-corps strategic_depth field computed
+    // by strategic_depth.ts, not faction id. Default 1.0 from getStrategicDepth
+    // means corps without computed depth produce zero behavior change.
+    //
+    // Historical basis: ICTY Gotovina IT-06-90-T + Mladić MICT-13-56 §3437-3450
+    // + BB v2 §28 — VRS Krajina post-Storm collapse stemmed from loss of rear
+    // depth (SVK destruction + 165k refugee paralysis + frontage overstretch
+    // from 30→50-60 km/bde), not from direct battle attrition. The corps did
+    // not lose battles — it lost coordination. Universal military principle:
+    // rear depth → sustained effective combat power.
+    //
+    // Byte-stability: gated `!== 1.0` so corps with default depth produce no
+    // behavior change vs the historical pre-consumer code path.
+    let strategicDepthMult = 1.0;
+    if (formation.corps_id) {
+        const defenderCorps = state.military.formations?.[formation.corps_id];
+        if (defenderCorps) {
+            const defenderDepth = getStrategicDepth(defenderCorps);
+            if (defenderDepth < 1.0) {
+                strategicDepthMult = 0.5 + 0.5 * defenderDepth;
+            }
+        }
+    }
+    if (strategicDepthMult !== 1.0) power *= strategicDepthMult;
+
     return {
         base,
         postureMult,
@@ -1525,6 +1565,7 @@ export function computeDefenderPowerBreakdown(
         equipmentQualityMult: eqMult,
         multiAxisMult,
         cascadeMult,
+        strategicDepthMult,
         power,
     };
 }
