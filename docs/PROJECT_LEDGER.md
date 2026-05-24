@@ -10198,6 +10198,20 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 
 ---
 
+## [2026-05-24] docs(process): close active plan hardening pass
+
+**Type:** Roadmap/process planning.
+
+**Change:** Marked the active plan hardening pass complete for current command-board rows. The matrix now records execution-grade or explicit owned/operator/canon-gated routes for every active, gated, operator-only, and owned-elsewhere lane, with future dispatches governed by `PLAN_EXECUTION_STANDARD.md`.
+
+**Determinism:** Documentation-only. No runtime code, scenario data, generated artifacts, saves, or baselines changed.
+
+**Verification:** `git diff --check` - PASS.
+
+**Artifacts:** `docs/plans/2026-05-24-active-plan-hardening-pass.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-24] docs(roadmap): harden P2 P3 readiness plans
 
 **Type:** Roadmap/process planning.

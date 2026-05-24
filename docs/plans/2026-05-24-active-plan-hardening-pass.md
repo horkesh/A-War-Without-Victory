@@ -1,7 +1,7 @@
 # Active Plan Hardening Pass
 
 **Date:** 2026-05-24
-**Status:** ACTIVE docs/process lane
+**Status:** COMPLETE for current command-board rows
 **Owner lane:** Roadmap/process lane
 **Related command-board row:** Branch/CI/release hygiene plus all active/gated rows
 **Standard:** `docs/plans/PLAN_EXECUTION_STANDARD.md`
@@ -20,7 +20,7 @@ Improve all current command-board lanes first. Do not rewrite closed historical 
 
 ## Phase 0 - Standard and Inventory
 
-Status: **IN PROGRESS**
+Status: **COMPLETE**
 
 Tasks:
 
@@ -66,7 +66,7 @@ Stop gate:
 | GUI polish / presidential shell | `docs/plans/2026-05-24-owned-branch-acceptance-execution-plan.md` plus GUI branch handoff | Acceptance packet available. Continue avoiding implementation while owned elsewhere. |
 | Calibration / army arc / HVO-HV operations | `docs/plans/2026-05-24-owned-branch-acceptance-execution-plan.md` plus calibration branch handoff | Acceptance packet available. Continue avoiding implementation while owned elsewhere. |
 | Event system presidential core upgrade | `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md` | Already execution-grade. Keep as template. |
-| Dynamic Codex and sensitive-history consequence arcs | `docs/plans/2026-05-24-codex-sensitive-history-execution-plan.md` | Execution-grade for Codex sweep and sensitive-history packets; notification residuals may still need a narrower packet. |
+| Dynamic Codex and sensitive-history consequence arcs | `docs/plans/2026-05-24-codex-sensitive-history-execution-plan.md` | Execution-grade for Codex sweep, sensitive-history packets, notification residuals, and consequence arcs. |
 | Sector/frontline performance residuals | `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md` Phase 1 | Execution-grade. |
 | Optional `GameState` schema contract | `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md` Phase 2 | Execution-grade. |
 | Save/load/replay and generated-artifact stability | `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md` Phase 3 | Execution-grade. |
@@ -77,6 +77,8 @@ Phase 1 closeout:
 - Each P0/P1 lane has either an execution-grade plan or a documented reason it is owned elsewhere/operator-gated.
 - `COMMAND_BOARD.md` links exact plan files where useful.
 - Ledger records the phase.
+
+Status: **COMPLETE** for current command-board rows.
 
 ## Phase 2 - P2/P3 Plans
 
@@ -95,13 +97,15 @@ Phase 2 closeout:
 - Every P2/P3 lane has a standard-compliant handoff or an explicit operator/canon gate.
 - `COMMAND_BOARD.md` remains concise and points to the controlling packet.
 
+Status: **COMPLETE** for current command-board rows.
+
 ## Phase 3 - Future Plan Gate
 
 Tasks:
 
 - [x] Add the standard to the command-board maintenance rules.
 - [x] Update `docs/plans/2026-05-18-autonomous-dispatch-index.md` to require execution-grade plans for future dispatches.
-- [ ] Add a lightweight check/audit command only if useful; do not over-automate prose.
+- [x] No separate audit command added; current board/matrix review is sufficient and avoids over-automating prose.
 
 ## Required Closeout
 
