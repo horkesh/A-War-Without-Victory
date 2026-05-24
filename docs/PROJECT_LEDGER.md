@@ -267,6 +267,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] diagnostic(strict-null): add optional interface summary
+
+**Type:** Strict-null diagnostic/test/docs tooling. No simulation behavior, save schema, migration, scenario data, UI behavior, calibration/army-arc tuning, combat math, operation behavior, event content, turn ordering, painted target, or serialized output contract changed.
+
+**Why:** The optional `GameState` contract lane needed an interface-level summary so future work can choose bounded owner slices from evidence instead of scanning the full 486-field domain list.
+
+**Change:** Added `--field-interfaces` to `tools/diagnostics/strict_null_inventory.cjs`, grouping optional `GameState` fields by interface and domain. Added CLI coverage in `tests/strict_null_inventory.test.ts` and report `docs/40_reports/implemented/20260522_STRICT_NULL_OPTIONAL_INTERFACE_SUMMARY.md`.
+
+**Determinism / output impact:** Diagnostic/reporting only. No source schema, runtime state, generated output, serialization, or scenario behavior changed.
+
+**Verification:** `npx.cmd vitest run tests\strict_null_inventory.test.ts --reporter=dot` passed 4/4. `node tools\diagnostics\strict_null_inventory.cjs --field-interfaces` emitted deterministic JSON. `git diff --check` passed.
+
+**Artifacts:** `tools/diagnostics/strict_null_inventory.cjs`; `tests/strict_null_inventory.test.ts`; `docs/40_reports/implemented/20260522_STRICT_NULL_OPTIONAL_INTERFACE_SUMMARY.md`.
+
+**Roadmap delta:** Future optional-field work now has executable interface grouping. Current largest groups are `MilitaryState` (111), `FormationState` (65), and `CorpsOperation` (58).
+
+---
+
 ## [2026-05-22] diagnostic(notifications): classify blocked residuals
 
 **Type:** Event-notification diagnostic/test/docs guard. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, painted target, or feature-flag behavior changed.

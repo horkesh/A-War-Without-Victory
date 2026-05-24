@@ -1,5 +1,7 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
+**Strict-null optional interface summary addendum 2026-05-22:** `tools/diagnostics/strict_null_inventory.cjs --field-interfaces` now groups optional `GameState` fields by interface/domain. Current largest groups are `MilitaryState` (111), `FormationState` (65), and `CorpsOperation` (58), which should drive future owned optional-field slices. Report: `docs/40_reports/implemented/20260522_STRICT_NULL_OPTIONAL_INTERFACE_SUMMARY.md`. On top of:
+
 **Event notification blocked residual classification addendum 2026-05-22:** Phase D notification content backfill now has an executable policy-residual state: `tools/diagnostics/event_notification_residuals.cjs` reports 2 rows / 4 missing blocks, all classified as `blocked-sensitive`, with 0 unclassified residual blocks. Report: `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_BLOCKED_RESIDUAL_CLASSIFICATION.md`. On top of:
 
 **Event notification Srebrenica demilitarization addendum 2026-05-22:** Phase D notification content backfill now closes `srebrenica_demilitarization_1993` with complete non-source recipient coverage grounded in existing row text, ICTY Krstic support, and agreement records. Residual Phase D notification scope is now 2 rows / 4 blocks, both blocked-sensitive front-visit press options. Report: `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_SREBRENICA_DEMILITARIZATION.md`. On top of:

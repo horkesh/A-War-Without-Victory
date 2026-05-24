@@ -56,6 +56,11 @@ export interface RendererState {
                     domain_counts: Record<string, number>;
                     fields_by_domain: Record<string, string[]>;
                 };
+                optional_field_interfaces: {
+                    total: number;
+                    interfaces: Array<{ interface: string; domain: string; count: number; fields: string[] }>;
+                    by_domain: Record<string, Array<{ interface: string; count: number }>>;
+                };
             };
             stableStringify: (value: unknown) => string;
         };
@@ -85,6 +90,16 @@ export interface RendererState {
             'StateMeta.player_faction',
         ]);
         expect(inventory.optional_field_domains.fields_by_domain.ui_adapter).toEqual(['RendererState.selectedOsid']);
+        expect(inventory.optional_field_interfaces.interfaces).toEqual([
+            { interface: 'GameState', domain: 'state', count: 1, fields: ['meta'] },
+            { interface: 'RendererState', domain: 'ui_adapter', count: 1, fields: ['selectedOsid'] },
+            { interface: 'SimCoreState', domain: 'sim', count: 1, fields: ['readiness'] },
+            { interface: 'StateMeta', domain: 'state', count: 1, fields: ['player_faction'] },
+        ]);
+        expect(inventory.optional_field_interfaces.by_domain.state).toEqual([
+            { interface: 'GameState', count: 1 },
+            { interface: 'StateMeta', count: 1 },
+        ]);
 
         const once = diagnostic.stableStringify(inventory);
         const twice = diagnostic.stableStringify(diagnostic.buildInventory(TMP_ROOT));
@@ -95,6 +110,7 @@ export interface RendererState {
             'generated_by',
             'hotspots',
             'optional_field_domains',
+            'optional_field_interfaces',
             'scanned_root',
         ]);
     });
@@ -162,6 +178,43 @@ export interface DerivedSummary {
                 state: ['GameState.meta', 'StateMeta.player_faction'],
             },
             unknown_justifications: [],
+        });
+    });
+
+    it('emits field-interface-only CLI JSON for owned optional-field slicing', () => {
+        write(join(TMP_ROOT, 'src', 'state', 'game_state.ts'), `
+export interface GameState {
+  meta?: StateMeta;
+}
+export interface StateMeta {
+  player_faction?: FactionId;
+  max_turns?: number;
+}
+export interface MilitaryState {
+  watched_operations?: unknown[];
+}
+`);
+
+        const json = execFileSync(
+            process.execPath,
+            ['tools/diagnostics/strict_null_inventory.cjs', '--field-interfaces', TMP_ROOT],
+            { cwd: process.cwd(), encoding: 'utf8' },
+        );
+
+        expect(JSON.parse(json)).toMatchObject({
+            total: 4,
+            interfaces: [
+                { interface: 'StateMeta', domain: 'state', count: 2, fields: ['max_turns', 'player_faction'] },
+                { interface: 'GameState', domain: 'state', count: 1, fields: ['meta'] },
+                { interface: 'MilitaryState', domain: 'sim', count: 1, fields: ['watched_operations'] },
+            ],
+            by_domain: {
+                sim: [{ interface: 'MilitaryState', count: 1 }],
+                state: [
+                    { interface: 'StateMeta', count: 2 },
+                    { interface: 'GameState', count: 1 },
+                ],
+            },
         });
     });
 });
