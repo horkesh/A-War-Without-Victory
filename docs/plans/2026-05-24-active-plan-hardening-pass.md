@@ -42,13 +42,13 @@ Tasks:
 | Optional `GameState` schema contract | `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md` Phase 2 | execution-grade | Use optional-field family phase with migration/default/validator proof. |
 | Save/load/replay and generated-artifact stability | `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md` Phase 3 | execution-grade | Use artifact-owner and replay determinism phase. |
 | Localization Bosnian LQA | `docs/plans/2026-05-24-bosnian-localization-lqa-execution-plan.md` | execution-grade | Use Bosnian leakage audit, string-family fixes, visual-fit, and native-review gates. |
-| Intel surprise / ambush depth | `docs/plans/2026-05-17-intel-extensions-plan.md` | needs expansion | Add hidden-truth/player-safe verification gates. |
-| Supply/logistics comprehension outside GUI branch | `docs/plans/2026-05-17-supply-design-completion-plan.md` plus logistics plans | needs expansion | Add read-model-only boundary and GUI collision gate. |
-| Officer/OOB/source attribution and essay rosters | `docs/plans/2026-05-17-officer-character-mini-bio-plan.md` plus OOB/source plans | needs expansion | Add source hierarchy and historian review triggers. |
-| Soundscape and high-value assets | `docs/plans/2026-05-17-soundscape-integration-plan.md`, `docs/plans/2026-05-17-soundscape-kickoff-audio-stub-plan.md`, product/assets bank | needs split | Separate repo-wirable substrate from approval-gated assets. |
-| Telemetry/playtest diagnostics | `docs/plans/2026-05-17-telemetry-crash-reporting-plan.md`, playtest readiness plans | needs expansion | Add default-off/no-upload and privacy proof. |
-| Packaging/signing/clean VM/store/press/trailer | platform/launch plans | operator checklist only | Convert to operator proof checklist packets. |
-| FORAWWV/open design decisions | canon decision-prep bank | operator/canon checklist only | Prepare decision packets only; do not edit `docs/10_canon/FORAWWV.md`. |
+| Intel surprise / ambush depth | `docs/plans/2026-05-24-p2-p3-readiness-execution-plan.md` Phase 1 | execution-grade | Use hidden-truth/player-safe gates and focused proof. |
+| Supply/logistics comprehension outside GUI branch | `docs/plans/2026-05-24-p2-p3-readiness-execution-plan.md` Phase 2 | execution-grade | Use read-model-only boundary and GUI collision gate. |
+| Officer/OOB/source attribution and essay rosters | `docs/plans/2026-05-24-p2-p3-readiness-execution-plan.md` Phase 3 | execution-grade | Use citation, uncertainty, and historian review gates. |
+| Soundscape and high-value assets | `docs/plans/2026-05-24-p2-p3-readiness-execution-plan.md` Phase 4 | execution-grade | Use substrate-vs-approval asset gates. |
+| Telemetry/playtest diagnostics | `docs/plans/2026-05-24-p2-p3-readiness-execution-plan.md` Phase 5 | execution-grade | Use default-off/no-upload and privacy gates. |
+| Packaging/signing/clean VM/store/press/trailer | `docs/plans/2026-05-24-p2-p3-readiness-execution-plan.md` Phase 6 | operator checklist only | Use operator-proof boundaries. |
+| FORAWWV/open design decisions | `docs/plans/2026-05-24-p2-p3-readiness-execution-plan.md` Phase 7 | operator/canon checklist only | Use decision packets only; do not edit `docs/10_canon/FORAWWV.md`. |
 
 Verification:
 
@@ -82,13 +82,13 @@ Phase 1 closeout:
 
 | Lane | Candidate plan(s) | Hardening action |
 | --- | --- | --- |
-| Intel surprise / ambush depth | `docs/plans/2026-05-17-intel-extensions-plan.md` | Add hidden-truth/player-safe gates, exact combat/AAR tests, scenario hash rules. |
-| Supply/logistics comprehension outside GUI branch | `docs/plans/2026-05-17-supply-design-completion-plan.md`, logistics plans | Add read-model-only boundary, GUI collision rules, and no-new-authority gates. |
-| Officer/OOB/source attribution and essay rosters | `docs/plans/2026-05-17-officer-character-mini-bio-plan.md`, OOB/source plans | Add source hierarchy, identity uncertainty gates, roster tests, and historian review triggers. |
-| Soundscape and high-value assets | `docs/plans/2026-05-17-soundscape-integration-plan.md`, `docs/plans/2026-05-17-soundscape-kickoff-audio-stub-plan.md`, product/assets bank | Split repo-wirable substrate from user/operator asset approval. |
-| Telemetry/playtest diagnostics | `docs/plans/2026-05-17-telemetry-crash-reporting-plan.md`, playtest readiness plans | Add default-off/no-upload proof, provider decision gates, and privacy stop gates. |
-| Packaging, signing, clean VM, store, press, trailer | platform/launch plans | Convert to operator checklist packets; repo agents may prepare artifacts but not claim external proof. |
-| FORAWWV / open design decisions | canon decision-prep bank | Add decision-packet template only; no implementation or FORAWWV edits. |
+| Intel surprise / ambush depth | `docs/plans/2026-05-24-p2-p3-readiness-execution-plan.md` Phase 1 | Execution-grade. |
+| Supply/logistics comprehension outside GUI branch | `docs/plans/2026-05-24-p2-p3-readiness-execution-plan.md` Phase 2 | Execution-grade. |
+| Officer/OOB/source attribution and essay rosters | `docs/plans/2026-05-24-p2-p3-readiness-execution-plan.md` Phase 3 | Execution-grade. |
+| Soundscape and high-value assets | `docs/plans/2026-05-24-p2-p3-readiness-execution-plan.md` Phase 4 | Execution-grade with approval gates. |
+| Telemetry/playtest diagnostics | `docs/plans/2026-05-24-p2-p3-readiness-execution-plan.md` Phase 5 | Execution-grade. |
+| Packaging, signing, clean VM, store, press, trailer | `docs/plans/2026-05-24-p2-p3-readiness-execution-plan.md` Phase 6 | Operator checklist packet available. |
+| FORAWWV / open design decisions | `docs/plans/2026-05-24-p2-p3-readiness-execution-plan.md` Phase 7 | Canon decision-packet route available. |
 
 Phase 2 closeout:
 

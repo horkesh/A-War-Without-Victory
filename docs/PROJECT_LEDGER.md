@@ -10198,6 +10198,20 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 
 ---
 
+## [2026-05-24] docs(roadmap): harden P2 P3 readiness plans
+
+**Type:** Roadmap/process planning.
+
+**Change:** Added an execution-grade P2/P3 readiness plan covering intel, supply/logistics comprehension, officer/OOB/source attribution, soundscape/assets, telemetry/playtest diagnostics, operator-only packaging/release evidence, and FORAWWV/open decision packets. Updated the Command Board and hardening matrix so every remaining P2/P3 row has a phase-specific handoff with verification and stop gates.
+
+**Determinism:** Documentation-only. No runtime code, scenario data, generated artifacts, saves, or baselines changed.
+
+**Verification:** `git diff --check` - PASS.
+
+**Artifacts:** `docs/plans/2026-05-24-p2-p3-readiness-execution-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-active-plan-hardening-pass.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-24] docs(localization): harden Bosnian LQA plan
 
 **Type:** Roadmap/localization planning.
