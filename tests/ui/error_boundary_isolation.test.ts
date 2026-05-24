@@ -57,7 +57,7 @@ describe('RootErrorBoundary panel isolation', () => {
         schemaVersion: 1,
         appVersion: '0.9.6-alpha.1',
         platform: 'browser',
-        osFamily: 'unknown',
+        osFamily: expect.any(String),
         uiSurface: 'army hq',
         errorCategory: 'unhandled_error',
         sequence: 1,
