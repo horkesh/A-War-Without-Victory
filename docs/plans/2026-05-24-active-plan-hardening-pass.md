@@ -26,8 +26,29 @@ Tasks:
 
 - [x] Add `docs/plans/PLAN_EXECUTION_STANDARD.md`.
 - [x] Add this hardening pass as the controlling matrix.
-- [ ] For each command-board row, identify the active handoff plan or plans.
-- [ ] Mark each plan as `execution-grade`, `needs expansion`, `needs split`, `operator checklist only`, or `closed/no rewrite`.
+- [x] For each command-board row, identify the active handoff plan or plans.
+- [x] Mark each plan as `execution-grade`, `needs expansion`, `needs split`, `operator checklist only`, `owned-elsewhere acceptance packet`, or `closed/no rewrite`.
+
+### Command-Board Inventory
+
+| Lane | Active handoff source | Current classification | Next hardening action |
+| --- | --- | --- | --- |
+| Branch/CI/release hygiene | `docs/plans/2026-05-20-release-evidence-ci-proof-packet-plan.md`, `docs/plans/2026-05-18-autonomous-merge-pr-evidence-plan.md` | needs expansion | Merge into one current-tip execution packet with explicit dirty-file, CI-poll, proof freshness, and operator-only gates. |
+| GUI polish / presidential shell | `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`, `docs/plans/2026-05-24-presidential-blocker-flow-plan.md`, `docs/plans/2026-05-24-presidential-ui-redesign-research.md` | owned-elsewhere acceptance packet | Prepare review/merge packet only; do not rewrite GUI implementation while GUI branch is active. |
+| Calibration / army arc / HVO-HV operations | calibration branch prompt, `docs/40_reports/CALIBRATION_MASTER.md`, HVO synthesis reports | owned-elsewhere acceptance packet | Prepare verification/merge acceptance criteria; do not author calibration while external branch owns it. |
+| Event system presidential core upgrade | `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md` | execution-grade | Use as the template for other lane upgrades. |
+| Dynamic Codex and sensitive-history consequence arcs | `docs/plans/2026-05-18-autonomous-content-codex-arc-bank.md`, `docs/plans/2026-05-17-two-level-event-surfacing-and-codex-visibility-plan.md`, notification sensitive-content plans | needs split | Split safe Codex audit, sensitive-history gated prose, and notification residuals. |
+| Sector/frontline performance residuals | `docs/plans/2026-05-20-sector-performance-next-target-plan.md`, `docs/plans/2026-05-18-sector-reconstruction-performance-plan.md` | needs expansion | Add profile-first command packet and forbid unmeasured caches. |
+| Optional `GameState` schema contract | `docs/plans/2026-05-20-strict-null-post-factionid-roadmap.md`, `docs/plans/2026-05-20-strict-null-schema-boundary-validation-plan.md` | needs expansion | Add optional-field family phases with migration/default/validator proof. |
+| Save/load/replay and generated-artifact stability | `docs/plans/2026-05-18-autonomous-save-replay-determinism-bank.md`, `docs/plans/2026-05-17-save-migration-hardening-plan.md` | needs expansion | Add artifact-owner map and generated-output stop gates. |
+| Localization Bosnian LQA | `docs/plans/2026-05-17-bcs-localization-plan.md` | needs expansion | Add Bosnian LQA leak checklist and native-review gate. |
+| Intel surprise / ambush depth | `docs/plans/2026-05-17-intel-extensions-plan.md` | needs expansion | Add hidden-truth/player-safe verification gates. |
+| Supply/logistics comprehension outside GUI branch | `docs/plans/2026-05-17-supply-design-completion-plan.md` plus logistics plans | needs expansion | Add read-model-only boundary and GUI collision gate. |
+| Officer/OOB/source attribution and essay rosters | `docs/plans/2026-05-17-officer-character-mini-bio-plan.md` plus OOB/source plans | needs expansion | Add source hierarchy and historian review triggers. |
+| Soundscape and high-value assets | `docs/plans/2026-05-17-soundscape-integration-plan.md`, `docs/plans/2026-05-17-soundscape-kickoff-audio-stub-plan.md`, product/assets bank | needs split | Separate repo-wirable substrate from approval-gated assets. |
+| Telemetry/playtest diagnostics | `docs/plans/2026-05-17-telemetry-crash-reporting-plan.md`, playtest readiness plans | needs expansion | Add default-off/no-upload and privacy proof. |
+| Packaging/signing/clean VM/store/press/trailer | platform/launch plans | operator checklist only | Convert to operator proof checklist packets. |
+| FORAWWV/open design decisions | canon decision-prep bank | operator/canon checklist only | Prepare decision packets only; do not edit `docs/10_canon/FORAWWV.md`. |
 
 Verification:
 
@@ -79,7 +100,7 @@ Phase 2 closeout:
 Tasks:
 
 - [x] Add the standard to the command-board maintenance rules.
-- [ ] Update `docs/plans/2026-05-18-autonomous-dispatch-index.md` to require execution-grade plans for future dispatches.
+- [x] Update `docs/plans/2026-05-18-autonomous-dispatch-index.md` to require execution-grade plans for future dispatches.
 - [ ] Add a lightweight check/audit command only if useful; do not over-automate prose.
 
 ## Required Closeout

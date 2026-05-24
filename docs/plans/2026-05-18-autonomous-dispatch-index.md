@@ -8,6 +8,8 @@
 
 **Tech Stack:** Markdown planning, existing Vitest/typecheck/build/scenario commands, existing ledger/report workflow.
 
+**Execution standard:** Any plan used for a fresh external-agent handoff must satisfy `docs/plans/PLAN_EXECUTION_STANDARD.md`, or the first task is to harden that plan through `docs/plans/2026-05-24-active-plan-hardening-pass.md`. Older lane banks remain useful as source material, but they are not automatically execution-grade.
+
 ---
 
 ## Dispatch Rule 0 - Always Verify The Branch State
@@ -109,6 +111,15 @@ If Claude asks what to do next after Batch 36:
    - GR-2/GR-3 roster locks.
    - GR-7 PR and merge evidence pack.
 5. If the user asks for all remaining work or a full-day autonomous assignment, start from the remaining-work coverage matrix and pair one code lane with one support/evidence lane.
+
+## Execution-Grade Dispatch Gate
+
+Before handing a lane to an external agent:
+
+1. Confirm the command-board row has owner lane, next action, verification, and stop gate.
+2. Confirm the selected plan names allowed files, forbidden files, tests-first target, verification commands, docs/ledger closeout, and stop gates.
+3. If any of those are missing, route first to `docs/plans/2026-05-24-active-plan-hardening-pass.md` and harden the plan without implementing the feature.
+4. If the row is `OWNED-ELSEWHERE`, prepare an acceptance/merge packet instead of implementation instructions.
 
 ## Merge Readiness Gate
 
