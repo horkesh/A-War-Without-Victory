@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-24] ui(audio): batch soundscape cue pipeline
+
+**Type:** UI/audio feedback batch. No simulation behavior, combat math, operation tuning, scenario data, OOB data, save schema, calibration constants, or event ordering changed.
+
+**Why:** The soundscape queue had compatible staged work for making authored cues observable without introducing nondeterministic audio logic.
+
+**Change:** Added cue readiness metadata, a pure event-to-cue adapter, cooldown suppression in the audio engine, and an `AudioCueObserver` that watches map state turn changes and emits eligible cue requests.
+
+**Verification:** Focused audio tests, typecheck, and diff hygiene are required before push for this batch.
+
+**Artifacts:** `src/ui/map/audio/sound_manifest.ts`; `src/ui/map/audio/audio_event_adapter.ts`; `src/ui/map/audio/audio_engine.ts`; `src/ui/map/components/AudioCueObserver.tsx`; `tests/ui/audio_*.test.ts`; `docs/40_reports/implemented/20260523_SOUNDSCAPE_*.md`.
+
+---
+
 ## [2026-05-24] ui(roadmap): batch GUI audit follow-through surfaces
 
 **Type:** UI/read-model improvement batch. No combat math, operation tuning, scenario data, OOB data, save schema, calibration constants, or event ordering changed. The command-briefing slice changes serialized `state.military.last_briefing` only by reading existing canonical state paths.

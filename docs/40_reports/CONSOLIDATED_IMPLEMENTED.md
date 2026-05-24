@@ -2,6 +2,14 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest soundscape observer wiring:** [implemented/20260523_SOUNDSCAPE_OBSERVER_WIRING.md](implemented/20260523_SOUNDSCAPE_OBSERVER_WIRING.md) - the tactical-map root now mounts a remount-safe observer that turns newly observed loaded-state turn summaries into silent-bus cue calls while suppressing initial hydration.
+
+**Latest soundscape cooldown suppression:** [implemented/20260523_SOUNDSCAPE_COOLDOWN_SUPPRESSION.md](implemented/20260523_SOUNDSCAPE_COOLDOWN_SUPPRESSION.md) - the silent audio bus now honors cue cooldown metadata when callers provide explicit timestamps, without adding wall-clock reads or playback IO.
+
+**Latest soundscape event adapter:** [implemented/20260523_SOUNDSCAPE_EVENT_ADAPTER.md](implemented/20260523_SOUNDSCAPE_EVENT_ADAPTER.md) - a pure UI adapter now maps newly observed turn summaries, decisive battles, fired events, and completed operation AARs to stable cue requests without playback side effects.
+
+**Latest soundscape cue metadata readiness:** [implemented/20260523_SOUNDSCAPE_CUE_METADATA_READINESS.md](implemented/20260523_SOUNDSCAPE_CUE_METADATA_READINESS.md) - the tactical-map audio manifest now records cooldown, missing-asset status, and reduced-motion policy metadata for every silent placeholder cue.
+
 **Latest launch high concept:** [../50_launch/marketing/high_concept.md](../50_launch/marketing/high_concept.md) - launch-facing one-pager now separates playable-now scope, pending operator evidence, and future/gated claims with traceable evidence pointers.
 
 **Latest diplomacy actor stance prose:** [implemented/20260523_DIPLOMACY_ACTOR_STANCE_PROSE.md](implemented/20260523_DIPLOMACY_ACTOR_STANCE_PROSE.md) - Diplomacy actor rows now render deterministic public-safe stance prose from existing support, constraint, isolation, and sanctions bands.

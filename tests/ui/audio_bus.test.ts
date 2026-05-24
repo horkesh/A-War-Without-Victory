@@ -26,12 +26,24 @@ describe('audio bus stub', () => {
 
     it('records requested cues only after explicit enablement but still performs no playback IO', async () => {
         setEnabled(true);
-        await playCue('peace_plan_offered');
+        await playCue('peace_plan_offered', 1000);
 
         expect(isAudioEnabled()).toBe(true);
         expect(getAudioState().lastCueId).toBe('peace_plan_offered');
+        expect(getAudioState().acceptedCueCount).toBe(1);
         expect(globalThis.fetch).not.toHaveBeenCalled();
         expect(globalThis.AudioContext).not.toHaveBeenCalled();
+    });
+
+    it('suppresses repeated cues inside their deterministic cooldown window', async () => {
+        setEnabled(true);
+
+        await playCue('stinger_dayton_ceasefire', 1000);
+        await playCue('stinger_dayton_ceasefire', 1200);
+        await playCue('stinger_dayton_ceasefire', 2600);
+
+        expect(getAudioState().lastCueId).toBe('stinger_dayton_ceasefire');
+        expect(getAudioState().acceptedCueCount).toBe(2);
     });
 
     it('clamps bus volumes deterministically by kind', () => {
