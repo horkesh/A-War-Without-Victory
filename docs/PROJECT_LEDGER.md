@@ -10150,6 +10150,22 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 
 ---
 
+## [2026-05-24] docs(process): enforce orchestrator-only Pyrrhic workflow
+
+**Type:** Process rule update + local skill maintenance.
+
+**Change:** Adopted the user-directed operating rule that Codex should default to Orchestrator, dispatch Pyrrhic specialists for non-trivial investigation/implementation, and require a different specialist or Process QA to review before closeout. Updated repo `.claude/skills/orchestrator/SKILL.md`, `docs/20_engineering/AGENT_WORKFLOW.md`, added an audit report, and updated the live local Codex orchestrator skill under `C:\Users\User\.codex\skills\orchestrator\SKILL.md`.
+
+**Determinism:** Documentation/process-only. No runtime code, scenario data, generated artifacts, or simulation outputs changed.
+
+**Verification:** `git diff --check` passed.
+
+**Roadmap delta:** Strengthens the command-board workflow by making Orchestrator routing and independent specialist review mandatory for substantive work.
+
+**Artifacts:** `.claude/skills/orchestrator/SKILL.md`, `docs/20_engineering/AGENT_WORKFLOW.md`, `docs/40_reports/audits/20260524_ORCHESTRATOR_ONLY_PROCESS_ENFORCEMENT.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-24] docs(process): refresh stale skill and agent references
 
 **Type:** Process/tooling documentation + local skill maintenance.
