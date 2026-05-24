@@ -1,4 +1,30 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-24] calibration(events): extend NATO Deliberate Force suppression window
+
+**Type:** Single-change calibration on `data/scenarios/events/war_1995.json`. Behavior change confined to late-war combat math via `equipment_quality_modifier` lifetime. No new ops, predicates, scenario data, save-schema, or engine logic. Follows Round 1 catalog wiring (`63da06e7`) on the same lane.
+
+**Why:** Round 1 catalog wiring landed HV 1995 phantoms in 3 HVO axes (Mistral 1 glamoc, Mistral 2 drvar-grahovo, Southern Move mrkonjić) but match_ratio held byte-identical at 0.797753 with HRHB shortfall unchanged (86/107 painted). Op-effectiveness investigation (scenario-creator-runner-tester) traced the gap to combat-math: Mistral 1/2 attack ratios stayed 0.24-0.35 against forest-highland-entrenched VRS Krajina defenders. The expert flagged that `nato_deliberate_force_1995.equipment_quality_modifier RS×0.70` fires correctly but its `duration_turns: 4` expires at turn 169 — before the Mistral 2/Southern Move window opens.
+
+**Change:** `nato_deliberate_force_1995.effects[].equipment_quality_modifier` `duration_turns: 4 → 10`. NATO Deliberate Force's RS×0.70 combat-power suppression now covers turns 165-174 (the prior window) plus the documented post-campaign multi-week C2 / ammunition-depot degradation window through the Mistral 2 / Southern Move attack period.
+
+**Verification:**
+- `npx vitest run tests/event_timeline_integrity.test.ts tests/operation_opportunities_catalog.test.ts tests/jna_phantom_brigades.test.ts --reporter=dot`: 75/75 PASS.
+- 40w canary pre/post: byte-identical `7dab9e30e1f196d2` (NATO fires turn ≥165, outside 40w window).
+- 188w n2 (pre, Round 1 baseline): hash `4e0c20cc47f2ae0f`, match_ratio 0.797753, 27/27 anchors, 5/6 benchmarks.
+- 188w n4 (post, Round 2): hash `9b373d7d0f2698af`, **match_ratio 0.807584 (+0.98 pp)**, 27/27 anchors, 5/6 benchmarks.
+
+**Outcome:** 7 painted-RBiH OSIDs flip RS→RBiH (`op:bihac:orasac_2`, `op:bihac:trubar`, `op:bosanska_krupa:arapusa_2`, `op:bosanska_krupa:donji_dubovik_2`, `op:bosanska_krupa:ivanjska_2`, `op:bosanska_krupa:vranjska_2`, `op:bosanski_petrovac:vrtoce`). All in the historical Bihać/Krupa/Petrovac salient where ARBiH 5th Corps fought Op Sana 95 (BB v2 ch. 28.6 "Roads of Salvation" / Op Sana corridor). RBiH 295 → 302 (Δ painted +5 → +12), RS 331 → 324 (Δ painted +16 → +9), net redistribution toward painted target. Mistral 1/2 ratios remain ~0.25-0.35 against Krajina forest-highland defenders; HRHB count unchanged at 86. No anchor regressions; no ops fired/dropped (33 AAR entries in both n2 and n4); no Cincar/rupture/eastern-enclave changes.
+
+**Sacred rules:** Canonical faction IDs only (RS suppressed, RBiH benefits). No init OSID overrides. No `avoided_osids_by_faction`. Deterministic (single integer event-data change). `hvo_main_staff` not used as launcher. `docs/10_canon/FORAWWV.md` not edited.
+
+**Historical basis:** BB v2 ch. 28 — NATO Operation Deliberate Force ran Aug 30 to Sep 20 1995 (≈3 weeks ≈ ~3 sim turns of direct sortie activity); the documented multi-week degradation of VRS combat power that the campaign caused extended through Sep-Oct 1995, the same window in which the Federation ground offensive succeeded. The 4-turn (~1-month) authored window was a conservative undershoot of the historical 10-turn effect arc.
+
+**Round 3 declined on historical-fidelity grounds:** The scenario expert recommended wiring `hv_ammo_transfusion_post_storm_1995` to also apply `equipment_quality_modifier` HRHB×1.15. The historian (citing ICTY *Prlić et al.* IT-04-74 + *Gotovina et al.* IT-06-90) found the HV→HVO logistical relationship was a *standing condition* since January 1993 under Croatia's "overall control" finding, and the fall-1995 HRHB combat augmentation is *already modeled* by the 8 `HV_PHANTOM_DEFS_1995` brigades with full Croatian-army-tier equipment. Adding an HRHB modifier would double-count the same historical fact. Lane closes at Round 2.
+
+**Artifacts:** `data/scenarios/events/war_1995.json`; updated `docs/40_reports/implemented/20260524_HVO_HV_PHANTOM_CATALOG_WIRING.md`.
+
+---
+
 ## [2026-05-24] feat(catalog): wire 3 HV 1995 phantoms into fall-1995 HVO axes
 
 **Type:** Catalog data + phantom data fixes. Behavior changes are confined to the late-war HVO operation axes (Mistral 1, Mistral 2, Southern Move) and to two HV 1995 expeditionary phantom spawn locations. No engine/predicate/event-ordering/scenario-data/save-schema changes.

@@ -3,13 +3,24 @@
 **Date:** 2026-05-24
 **Branch:** `claude/calibration-historical-army-arc-2026-05-24`
 **Lane:** calibration / historical army arc / HVO-HV operations
-**Status:** Implementation-complete; HRHB OSID-shortfall residue deferred.
+**Status:** Implementation-complete across 2 rounds; HRHB Mistral combat-effectiveness gap deferred to follow-up lane.
 
 ## Summary
 
-The 2026-05-23 HV expeditionary phantom packet (8 new `hv_*_1995` defs spawning at turn 150, withdrawing at turn 188) shipped mechanically but had no consumer in the operation opportunity catalog. Of the 8 phantoms, 0 entered any operation AAR `participating_brigades` list in the pre-edit n2009 188w run.
+This lane delivered two committed rounds on top of the 2026-05-23 fall-1995 packet baseline (n2009 hash `dad09d050b76f32c`, match_ratio 0.797753):
 
-This lane (a) wires 3 of the 8 phantoms into existing fall-1995 HVO axes, (b) corrects an invalid `location_osid` shared by 2 phantoms, and (c) preserves the byte-identical OSID political_controllers state of the n2009 main-HEAD baseline. **It does not move the HRHB OSID gap (-21 vs painted oct1995); that requires combat-effectiveness work outside the catalog layer.**
+| Round | Commit | Change | match_ratio | Anchors | Notable outcome |
+|---|---|---|---|---|---|
+| 1 | `63da06e7 feat(catalog): wire HV 1995 phantoms into HVO fall-1995 axes` | 3 phantom catalog additions + 2 location_osid fixes + Option E re-route | 0.797753 (no change) | 27/27 | Mistral 2 AAR restored; 2 of 3 newly-wired phantoms participate in AARs; 712/712 OSID byte-identical to n2009 |
+| 2 | `3438798c calibration(events): extend NATO Deliberate Force suppression window` | `nato_deliberate_force_1995` `duration_turns: 4 → 10` | **0.807584 (+0.98 pp)** | 27/27 | 7 painted-RBiH OSIDs flip RBiH (Bihać/Krupa/Petrovac salient, BB v2 ch. 28.6 Op Sana corridor); RS overshoot reduced |
+
+Round 1 reframed: the 2026-05-23 HV expeditionary phantom packet (8 new `hv_*_1995` defs spawning at turn 150, withdrawing at turn 188) shipped mechanically but had no consumer in the operation opportunity catalog. Round 1 wired 3 of the 8 phantoms into existing fall-1995 HVO axes and corrected an invalid `location_osid` shared by 2 phantoms. Net OSID control unchanged but catalog hygiene + AAR audit-trail restored.
+
+Round 2 then unblocked a related mechanism: NATO Deliberate Force's `equipment_quality_modifier RS×0.70` was authored with `duration_turns: 4`, expiring at turn 169 — before the documented late-war RS combat-power degradation window. Extending to 10 turns covers the historical Aug 30 – Sep 20 NATO campaign and its multi-week C2/depot-loss aftermath (BB v2 ch. 28). The change benefited ARBiH 5th Corps (Bihać/Krupa) where attack ratios were near 1.0 and just needed a nudge; it did *not* help HVO Mistral (Krajina forest-highland defenders too dominant for a 30% RS-side reduction to flip ratios from 0.24 to >1.0).
+
+**Round 3 was scoped, dispatched to historian, and DECLINED on historical-fidelity grounds.** The expert proposal was to wire HRHB `equipment_quality_modifier ×1.15` to the existing `hv_ammo_transfusion_post_storm_1995` event (or author a new HV→HVO support event). Historian finding (citing ICTY *Prlić et al.* IT-04-74 + *Gotovina et al.* IT-06-90): HV→HVO logistical relationship was a *standing condition* from January 1993 under Croatia's "overall control" finding, not a 1995 event. The fall-1995 HRHB combat augmentation is *already modeled* by the 8 `HV_PHANTOM_DEFS_1995` brigades with full Croatian-army-tier equipment; adding an HRHB equipment_quality_modifier would double-count the same historical fact. The asymmetric ARBiH×1.15 (no phantoms attached) vs HRHB (phantoms attached) is the correct historical shape.
+
+The HRHB Mistral gap (-21 OSIDs vs painted oct1995) requires structural engine work (multi-brigade per-turn coordination, defender modifier-stack tuning for entrenched-Krajina forest-highland) and is deferred to follow-up lanes.
 
 ## Pre-edit Diagnostic (n2009)
 
