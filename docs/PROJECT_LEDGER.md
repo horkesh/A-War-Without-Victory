@@ -267,6 +267,61 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] perf(map/scenario): use cursors in FIFO BFS queues
+
+**Type:** Deterministic map/scenario/desktop/event graph traversal performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** After the combat and state-supply queue-cursor slices, the remaining true FIFO graph traversals outside archived/UI/semantic queue code were in front-region derivation, anomaly diagnostics, early-war OOB overstack search, holdout supply cleanup, event corridor-severed predicates, and desktop movement-order contiguity validation. These can use head cursors without changing traversal or output ordering.
+
+**Change:** `src/map/front_regions.ts`, `src/scenario/anomaly_detector.ts`, `src/scenario/oob_early_war_entry.ts`, `src/sim/early_war/settlement_control.ts`, `src/sim/events/event_types.ts`, and `src/desktop/desktop_sim.ts` now use monotonic head cursors in targeted FIFO BFS loops. `tests/map_scenario_queue_cursor.test.ts` adds static guards for those regions.
+
+**Determinism / output impact:** Compute-only. No cache, timestamps, randomness, iteration-order relaxation, or output-schema change. Queue insertion order, adjacency iteration, layer-depth accounting, early exits, sorted output comparators, and state mutation semantics are unchanged.
+
+**Verification:** Red characterization `npx.cmd vitest run tests\map_scenario_queue_cursor.test.ts --reporter=dot` failed before implementation because all targeted regions still contained `.shift()`. After implementation, focused map/scenario tests passed 80/80: `tests\map_scenario_queue_cursor.test.ts`, `tests\artifact_determinism.test.ts`, `tests\treaty_apply_military.test.ts`, `tests\anomaly_detector_sector_subtype.test.ts`, `tests\anomaly_detector_deployment_truth.test.ts`, `tests\brigade_stacking_sector_truth.test.ts`, `tests\oob_early_war_entry.test.ts`, `tests\settlement_control.test.ts`, `tests\condition_evaluator.test.ts`, and `tests\consequence_pressure_c2_patron_distance.test.ts`. Source grep found no `.shift()` in the six targeted files. `npm.cmd run typecheck` passed. Fresh 40w run `runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n7` completed at final hash `30abd0696b9d7e24`; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n7` passed with 0 unresolved assignments, 0 false owners, 0 disconnected sectors, 0 empty contested sectors, 0 missed legal floor donors, and 0 wide undefended front gaps. `npm.cmd run test:baselines` passed with all scenarios matching. `git diff --check` passed.
+
+**Blocked check:** `tests\startup_snapshot_contract.test.ts` and `tests\desktop_sim_bundle_smoke.test.ts` were attempted because `src/desktop/desktop_sim.ts` is touched, but both are blocked by pre-existing baked startup snapshot drift for `data\derived\startup\apr_1992_initial_save.json`. This slice does not refresh that generated artifact.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_MAP_SCENARIO_BFS_QUEUE_CURSOR.md`.
+
+**Roadmap delta:** Extends queue-cursor cleanup to the remaining reviewed FIFO graph traversals outside combat/state supply. Remaining `.shift()` sites are classified as semantic queues, priority queues, UI buffers, CLI harnesses, test examples, or archived code unless a future narrow lane proves otherwise.
+
+---
+
+## [2026-05-23] perf(state): use cursors in supply BFS queues
+
+**Type:** Deterministic state/supply derivation performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** The state-layer supply and enclave paths still had several true FIFO BFS loops using `Array.shift()`: supply reachability, corridor bridge classification, adequate-state derivation, OSID heartland grouping, siege critical-pocket grouping, sustainability surrounded-search, and enclave component grouping. These can use the same deterministic head-cursor dequeue pattern without changing traversal or output ordering.
+
+**Change:** `src/state/supply_reachability.ts`, `src/state/supply_state_derivation.ts`, `src/state/supply_reserves.ts`, `src/state/sustainability.ts`, and `src/state/enclave_integrity.ts` now use monotonic head cursors in the targeted FIFO BFS loops. `tests/state_supply_queue_cursor.test.ts` adds static guards for those regions.
+
+**Determinism / output impact:** Compute-only. No cache, timestamps, randomness, iteration-order relaxation, or output-schema change. Queue insertion order, adjacency iteration, sorted output comparators, and state mutation semantics are unchanged. This preserves Engine Invariants v0.9.0 Section 4 supply propagation ordering and the stable-ordering / byte-identical rerun expectations in the Determinism Test Matrix.
+
+**Verification:** Red characterization `npx.cmd vitest run tests\state_supply_queue_cursor.test.ts --reporter=dot` failed before implementation because all targeted state BFS regions still contained `.shift()`. After implementation, focused state/supply tests passed 65/65: `tests\state_supply_queue_cursor.test.ts`, `tests\supply_reachability.test.ts`, `tests\supply_reachability_osid.test.ts`, `tests\supply_bridge_finding_tarjan.test.ts`, `tests\supply_bridge_finding_property.test.ts`, `tests\supply_cascade_deterministic_order.test.ts`, `tests\supply_reserves_phase_b.test.ts`, `tests\sustainability.test.ts`, and `tests\enclave_integrity.test.ts`. Source grep found no `.shift()` in the five targeted state files. `npm.cmd run typecheck` passed. Fresh 40w run `runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n6` completed at final hash `30abd0696b9d7e24`; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n6` passed with 0 unresolved assignments, 0 false owners, 0 disconnected sectors, 0 empty contested sectors, 0 missed legal floor donors, and 0 wide undefended front gaps. `npm.cmd run test:baselines` passed with all scenarios matching. `git diff --check` passed.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_STATE_SUPPLY_BFS_QUEUE_CURSOR.md`.
+
+**Roadmap delta:** Extends the queue-cursor performance cleanup from combat/sector into state supply derivation while keeping the same rule: only true FIFO graph traversals are candidates; semantic queues, priority queues, UI buffers, and archived code remain out of scope unless separately designed.
+
+---
+## [2026-05-23] perf(combat): use cursor in return-to-corps BFS
+
+**Type:** Deterministic bot-order evaluator performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** The remaining live combat FIFO queue-shift candidate was the return-to-corps evaluator BFS in `bot_brigade_eval_front.ts`. This path searches friendly territory for a first step back toward own-corps territory; it can use the same deterministic head-cursor dequeue pattern without changing traversal or parent-map semantics.
+
+**Change:** `src/sim/combat/bot_brigade_eval_front.ts` now uses `let head = 0; while (head < queue.length && !targetFound) { const curr = queue[head++]!; ... }` in the return-to-corps BFS. `tests/combat_movement_queue_cursor.test.ts` adds a static guard for that region.
+
+**Determinism / output impact:** Compute-only. No cache, timestamps, randomness, iteration-order relaxation, or output-schema change. Queue insertion order, adjacency iteration, target selection, and walk-back behavior are unchanged.
+
+**Verification:** Red characterization `npx.cmd vitest run tests\combat_movement_queue_cursor.test.ts --reporter=dot` failed before implementation because the return-to-corps BFS region still contained `.shift()`. After implementation, focused evaluator tests passed 36/36: `tests\combat_movement_queue_cursor.test.ts`, `tests\brigade_front_distribution.test.ts`, and `tests\brigade_home_return.test.ts`. Source grep found no `.shift()` in `src\sim\combat\bot_brigade_eval_front.ts`. `npm.cmd run typecheck` passed. Fresh 40w run `runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n5` completed at final hash `30abd0696b9d7e24`; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n5` passed with 0 unresolved assignments, 0 false owners, 0 disconnected sectors, 0 empty contested sectors, 0 missed legal floor donors, and 0 wide undefended front gaps. `npm.cmd run test:baselines` passed with all scenarios matching. `git diff --check` passed.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_COMBAT_EVALUATOR_BFS_QUEUE_CURSOR.md`.
+
+**Roadmap delta:** Closes the last reviewed live combat FIFO BFS queue-shift site. Remaining live `src/sim/combat` `.shift()` sites are semantic queues or priority-style queues and should not be converted without a separate design/profiling pass.
+
+---
+
 ## [2026-05-23] perf(combat): use head cursors in graph BFS queues
 
 **Type:** Deterministic combat graph performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.

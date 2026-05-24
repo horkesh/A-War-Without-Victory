@@ -37,4 +37,18 @@ describe('combat movement BFS queue cursor contracts', () => {
         expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
         expect(region).not.toMatch(/\bperformance\.now\s*\(/);
     });
+
+    it('return-to-corps evaluator BFS uses a head cursor, not Array.shift()', () => {
+        const raw = readFileSync(resolve('src/sim/combat/bot_brigade_eval_front.ts'), 'utf8');
+        const region = regionBetween(
+            raw,
+            "returnToCorpsProfileTime('.returnToCorps.bfs'",
+            "returnToCorpsProfileTime('.returnToCorps.walkBack'",
+        );
+
+        expect(region).not.toContain('.shift()');
+        expect(region).not.toMatch(/\bDate\.now\s*\(/);
+        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
+    });
 });

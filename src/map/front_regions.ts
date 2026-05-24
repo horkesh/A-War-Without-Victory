@@ -83,8 +83,9 @@ export function computeFrontRegions(state: GameState, derivedFrontEdges: FrontEd
             const queue: string[] = [startId];
             visited.add(startId);
 
-            while (queue.length > 0) {
-                const currentId = queue.shift()!;
+            let head = 0;
+            while (head < queue.length) {
+                const currentId = queue[head++]!;
                 componentEdgeIds.push(currentId);
                 const current = edgeById.get(currentId);
                 if (!current) continue;
@@ -127,4 +128,3 @@ export function computeFrontRegions(state: GameState, derivedFrontEdges: FrontEd
 
     return { schema: 1, turn: state.meta.turn, regions };
 }
-

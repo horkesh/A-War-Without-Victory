@@ -130,8 +130,9 @@ function isBridgeInSubgraph(
     const visited = new Set<string>();
     const queue: string[] = [a];
     visited.add(a);
-    while (queue.length > 0) {
-        const cur = queue.shift()!;
+    let head = 0;
+    while (head < queue.length) {
+        const cur = queue[head++]!;
         const neighbors = adjacencyMap[cur] ?? [];
         for (const n of neighbors) {
             if (visited.has(n)) continue;
@@ -242,8 +243,9 @@ export function deriveSupplyState(
         const adequateVisited = new Set<string>();
         const queue: string[] = [...sources];
         for (const s of sources) adequateVisited.add(s);
-        while (queue.length > 0) {
-            const cur = queue.shift()!;
+        let head = 0;
+        while (head < queue.length) {
+            const cur = queue[head++]!;
             const neighbors = adjacencyMap[cur] ?? [];
             for (const n of neighbors) {
                 if (adequateVisited.has(n)) continue;
@@ -388,8 +390,9 @@ function isBridgeInSubgraphOsidLegacy(
     const visited = new Set<string>();
     const queue: string[] = [a];
     visited.add(a);
-    while (queue.length > 0) {
-        const cur = queue.shift()!;
+    let head = 0;
+    while (head < queue.length) {
+        const cur = queue[head++]!;
         const neighbors = adjacency.get(cur) ?? [];
         for (const n of neighbors) {
             if (visited.has(n)) continue;
@@ -663,8 +666,9 @@ function findHeartlandComponent(
         const component = new Set<string>();
         const queue = [start];
         visited.add(start);
-        while (queue.length > 0) {
-            const node = queue.shift()!;
+        let head = 0;
+        while (head < queue.length) {
+            const node = queue[head++]!;
             component.add(node);
             const neighbors = adjacency.get(node) ?? [];
             for (const n of neighbors) {
@@ -716,8 +720,9 @@ function computeFactionSupplyState(
     const adequateVisited = new Set<string>();
     const queue: string[] = [...sources];
     for (const s of sources) adequateVisited.add(s);
-    while (queue.length > 0) {
-        const cur = queue.shift()!;
+    let head = 0;
+    while (head < queue.length) {
+        const cur = queue[head++]!;
         const neighbors = adjacency.get(cur) ?? [];
         for (const n of neighbors) {
             if (adequateVisited.has(n)) continue;

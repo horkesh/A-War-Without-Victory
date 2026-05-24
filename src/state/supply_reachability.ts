@@ -67,8 +67,9 @@ export function runSupplyBfs(params: SupplyBfsParams): SupplyBfsResult {
     }
 
     // BFS: traverse controlled neighbors + optional corridor edges
-    while (queue.length > 0) {
-        const current = queue.shift()!;
+    let head = 0;
+    while (head < queue.length) {
+        const current = queue[head++]!;
         for (const neighbor of getNeighbors(current)) {
             if (visited.has(neighbor)) continue;
             const edgeId = current < neighbor ? `${current}__${neighbor}` : `${neighbor}__${current}`;

@@ -122,8 +122,9 @@ function computeCriticalPockets(
         const component = new Set<string>();
         const queue = [start];
         visited.add(start);
-        while (queue.length > 0) {
-            const node = queue.shift()!;
+        let head = 0;
+        while (head < queue.length) {
+            const node = queue[head++]!;
             component.add(node);
             const neighbors = adjacency.get(node) ?? [];
             for (const n of neighbors) {

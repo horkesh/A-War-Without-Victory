@@ -457,8 +457,9 @@ function findNearestOverstackedOsid(
     let layerSize = 1;
     let nextLayerSize = 0;
 
-    while (queue.length > 0 && depth <= maxHops) {
-        const current = queue.shift()!;
+    let head = 0;
+    while (head < queue.length && depth <= maxHops) {
+        const current = queue[head++]!;
         layerSize--;
 
         // Check if this OSID is over-stacked (2+ brigades remaining)

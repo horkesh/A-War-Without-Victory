@@ -790,8 +790,9 @@ function detectDisconnectedSectorTerritory(state: GameState, adjacency: Map<stri
             let size = 0;
             const queue: string[] = [startOsid];
             visited.add(startOsid);
-            while (queue.length > 0) {
-                const current = queue.shift()!;
+            let head = 0;
+            while (head < queue.length) {
+                const current = queue[head++]!;
                 size++;
                 const neighbors = adjacency.get(current) ?? [];
                 for (const n of neighbors) {
@@ -1093,8 +1094,9 @@ export function detectBrigadeFarFromHome(state: GameState, adjacency: Map<string
         const queue: Array<{ osid: string; dist: number }> = [{ osid: start, dist: 0 }];
         visited.add(start);
 
-        while (queue.length > 0) {
-            const cur = queue.shift()!;
+        let head = 0;
+        while (head < queue.length) {
+            const cur = queue[head++]!;
             if (cur.osid === target) {
                 found = true;
                 distance = cur.dist;
