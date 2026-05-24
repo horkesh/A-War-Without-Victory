@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest HVO Southern Move catalog:** [implemented/20260524_HVO_SOUTHERN_MOVE_CATALOG.md](implemented/20260524_HVO_SOUTHERN_MOVE_CATALOG.md) - Mistral 2 now owns Drvar/Grahovo plus Sipovo only, while `southern_move_95` covers Mrkonjic Grad from Sipovo staging under `hvo_tomislavgrad`.
+
 **Latest BCS Operations Planning parameter localization:** [implemented/20260523_BCS_OPS_PLANNING_PARAMETER_LOCALIZATION.md](implemented/20260523_BCS_OPS_PLANNING_PARAMETER_LOCALIZATION.md) - Ops phase-gate messages and PlanParameters operation-name/type/tempo/tolerance/support chrome now render through English/BCS localization.
 
 **Latest BCS Convoy Decision chrome localization:** [implemented/20260523_BCS_CONVOY_DECISION_CHROME_LOCALIZATION.md](implemented/20260523_BCS_CONVOY_DECISION_CHROME_LOCALIZATION.md) - Humanitarian convoy decision modal chrome/prose and War Summary inline convoy action buttons now render through English/BCS localization.

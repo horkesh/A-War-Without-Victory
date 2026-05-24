@@ -10057,6 +10057,23 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 
 ---
 
+## [2026-05-24] feat(catalog): add HVO Southern Move opportunity
+
+**Type:** Simulation catalog authoring + late-war HVO/HV calibration substrate.
+
+**Change:** Split the late-war western Bosnia Federation catalog so Mistral 2 owns Drvar/Grahovo and Sipovo only, while the new HRHB `southern_move_95` opportunity covers the Mrkonjic Grad chain after Sipovo staging anchors are HRHB-held. The new opportunity is hosted on `hvo_tomislavgrad`, uses HRHB-tagged HVO/HV brigades, gates against the VRS 1st Krajina weakness trajectory, and leaves Operation Una to the existing HV-only negative-control logic.
+
+**Determinism:** Pure catalog/predicate authoring. No randomization, timestamps, scenario data edits, initial OSID overrides, avoided-OSID lists, faction-ID changes, or combat outcome tuning were introduced.
+
+**Verification:**
+- `npx.cmd vitest run tests\operation_opportunities_federation_western_bosnia_catalog.test.ts --reporter=dot` - 9/9 PASS.
+- `npm.cmd run typecheck` - PASS.
+- `git diff --check` - PASS with the existing CRLF normalization warning on the touched catalog test.
+
+**Artifacts:** `src/sim/combat/operation_opportunity_catalog_federation_western_bosnia.ts`, `tests/operation_opportunities_federation_western_bosnia_catalog.test.ts`, `docs/40_reports/implemented/20260524_HVO_SOUTHERN_MOVE_CATALOG.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-23] fix(ci): restore merged baseline regression gates
 
 **Type:** CI repair + truce predicate correction + test contract refresh + baseline-output manifest refresh.

@@ -11,6 +11,7 @@ import {
 import {
     FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES,
     MISTRAL_2_95_OPPORTUNITY,
+    SOUTHERN_MOVE_95_OPPORTUNITY,
 } from '../src/sim/combat/operation_opportunity_catalog_federation_western_bosnia.js';
 import { OPERATION_STORM_EVENT_ID } from '../src/sim/combat/operation_storm_theater.js';
 import { _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
@@ -41,20 +42,36 @@ const MISTRAL_OBJECTIVES = [
     'op:sipovo:sipovo_2',
     'op:sipovo:volari_2',
     'op:sipovo:pribeljci_2',
-    'op:mrkonjic_grad:gerzovo_2',
-    'op:mrkonjic_grad:mrkonjic_grad_2',
-    'op:mrkonjic_grad:bjelajce_2',
-    'op:mrkonjic_grad:baljvine_2',
-    'op:mrkonjic_grad:majdan_2',
-    'op:mrkonjic_grad:podrasnica_2',
 ];
 
 const MISTRAL_BRIGADES = [
     'hvo_1st_guard_abb',
-    'hrhb_kralj_petar_kreimir_iv_brigade',
-    'hrhb_kralj_tomislav_brigade',
     'hv_4th_guards_split',
-    'hv_7th_guards_varazdin',
+    'hvo_2nd_guard_mechanized',
+    'hvo_3rd_guard_jastrebovi',
+    'hvo_rama_brigade',
+];
+
+const SOUTHERN_MOVE_STAGING_ANCHORS = [
+    'op:sipovo:sipovo_2',
+    'op:sipovo:pribeljci_2',
+];
+
+const SOUTHERN_MOVE_OBJECTIVES = [
+    'op:mrkonjic_grad:gerzovo_2',
+    'op:mrkonjic_grad:majdan_2',
+    'op:mrkonjic_grad:podrasnica_2',
+    'op:mrkonjic_grad:mrkonjic_grad_2',
+    'op:mrkonjic_grad:bjelajce_2',
+    'op:mrkonjic_grad:baljvine_2',
+];
+
+const SOUTHERN_MOVE_BRIGADES = [
+    'hvo_1st_guard_abb',
+    'hvo_2nd_guard_mechanized',
+    'hvo_3rd_guard_jastrebovi',
+    'hv_4th_guards_brigade_1995',
+    'hv_7th_guards_brigade_1995',
 ];
 
 function makeCommand(opts: { addCommanderState?: boolean; axisCoordinationLow?: boolean } = {}): CorpsCommandState {
@@ -168,6 +185,47 @@ function buildMistralState(opts: {
     } as unknown as GameState;
 }
 
+function buildSouthernMoveState(opts: {
+    turn: number;
+    stagingHeld?: boolean;
+    objectivesHeldByRs?: boolean;
+    addCommanderState?: boolean;
+    axisCoordinationLow?: boolean;
+}): GameState {
+    const state = buildMistralState({
+        turn: opts.turn,
+        addCommanderState: opts.addCommanderState,
+        axisCoordinationLow: opts.axisCoordinationLow,
+    });
+    const controllers = state.political!.political_controllers as Record<string, FactionId>;
+    for (const osid of SOUTHERN_MOVE_STAGING_ANCHORS) {
+        controllers[osid] = (opts.stagingHeld ?? true) ? 'HRHB' : 'RS';
+    }
+    for (const osid of SOUTHERN_MOVE_OBJECTIVES) {
+        controllers[osid] = (opts.objectivesHeldByRs ?? true) ? 'RS' : 'HRHB';
+    }
+    for (const id of SOUTHERN_MOVE_BRIGADES) {
+        state.military.formations[id] ??= {
+            id,
+            name: id,
+            faction: 'HRHB',
+            own_corps_cmd: 'hvo_tomislavgrad',
+            strength: 1500,
+            officer_quality: opts.axisCoordinationLow ? 0.25 : 0.72,
+            cohesion: opts.axisCoordinationLow ? 34 : 70,
+            morale: opts.axisCoordinationLow ? 40 : 72,
+            composition: {
+                tanks: 1,
+                artillery: 2,
+                tank_condition: { operational: 1 },
+                artillery_condition: { operational: 2 },
+            },
+            tags: id.startsWith('hv_') ? ['hv_origin'] : [],
+        } as unknown as GameState['military']['formations'][string];
+    }
+    return state;
+}
+
 function addVrsKrajinaDefenderCorps(
     state: GameState,
     opts: { degraded?: boolean; equipmentMultiplier?: number } = {},
@@ -239,15 +297,17 @@ function addVrsKrajinaDefenderCorps(
 describe('Federation / Western Bosnia operation opportunity catalog', () => {
     it('exposes Mistral 2 through its family export and the canonical catalog', () => {
         expect(FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES.map(op => op.opportunity_id))
-            .toEqual(['mistral_1_95', 'mistral_2_95', 'jajce_95']);
+            .toEqual(['mistral_1_95', 'mistral_2_95', 'southern_move_95', 'jajce_95']);
         expect(OPERATION_OPPORTUNITY_CATALOG.some(d => d.opportunity_id === 'mistral_2_95')).toBe(true);
+        expect(OPERATION_OPPORTUNITY_CATALOG.some(d => d.opportunity_id === 'southern_move_95')).toBe(true);
         expect(_TRIGGERED_OPS.some(def => def.name === 'Operation Mistral 2')).toBe(false);
         expect(MISTRAL_2_95_OPPORTUNITY.family).toBe('federation_western_bosnia');
         expect(MISTRAL_2_95_OPPORTUNITY.tier).toBe('T1');
         expect(MISTRAL_2_95_OPPORTUNITY.faction).toBe('HRHB');
         expect(MISTRAL_2_95_OPPORTUNITY.primary_corps).toBe('hvo_tomislavgrad');
         expect(MISTRAL_2_95_OPPORTUNITY.variants?.map(v => v.variant_id).sort())
-            .toEqual(['drvar_grahovo_axis', 'sipovo_mrkonjic_axis']);
+            .toEqual(['drvar_grahovo_axis', 'sipovo_axis']);
+        expect(SOUTHERN_MOVE_95_OPPORTUNITY.primary_corps).toBe('hvo_tomislavgrad');
     });
 
     it('surfaces Mistral 2 after Storm rupture and Cincar/Kupres dependency anchors are live', () => {
@@ -262,7 +322,7 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
         expect(proposal!.status).toBe('eligible_pending_review');
         expect(proposal!.last_axis_evaluation).toHaveLength(10);
         expect(proposal!.redirect_variants?.map(v => v.variant_id).sort())
-            .toEqual(['drvar_grahovo_axis', 'sipovo_mrkonjic_axis']);
+            .toEqual(['drvar_grahovo_axis', 'sipovo_axis']);
         expect(isOpportunityEligible(
             MISTRAL_2_95_OPPORTUNITY,
             evaluateAxes(state, 180, MISTRAL_2_95_OPPORTUNITY),
@@ -327,6 +387,55 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
         const op = state.military.corps_command!.hvo_tomislavgrad.active_operations[0];
         expect(op.name).toBe('Operation Mistral 2');
         expect(op.axes).toHaveLength(2);
-        expect(op.axes!.map(axis => axis.axis_id).sort()).toEqual(['mistral_drvar_grahovo', 'mistral_sipovo_mrkonjic']);
+        expect(op.axes!.map(axis => axis.axis_id).sort()).toEqual(['mistral_drvar_grahovo', 'mistral_sipovo']);
+        expect(op.axes!.flatMap(axis => axis.objectives))
+            .not.toContain('op:mrkonjic_grad:mrkonjic_grad_2');
+    });
+
+    it('surfaces Southern Move after Sipovo staging anchors are held', () => {
+        const state = buildSouthernMoveState({ turn: 182 });
+        runOpportunityEvaluationStep(state, 182);
+
+        const proposal = state.military.operation_opportunities
+            ?.find(p => p.opportunity_id === 'southern_move_95');
+
+        expect(proposal).toBeDefined();
+        expect(proposal!.proposal_id).toBe('OPP_182_southern_move_95');
+        expect(proposal!.status).toBe('eligible_pending_review');
+        expect(isOpportunityEligible(
+            SOUTHERN_MOVE_95_OPPORTUNITY,
+            evaluateAxes(state, 182, SOUTHERN_MOVE_95_OPPORTUNITY),
+        )).toBe(true);
+    });
+
+    it('blocks Southern Move before window, without Sipovo staging, or without enemy targets', () => {
+        const cases = [
+            buildSouthernMoveState({ turn: 181 }),
+            buildSouthernMoveState({ turn: 189 }),
+            buildSouthernMoveState({ turn: 182, stagingHeld: false }),
+            buildSouthernMoveState({ turn: 182, objectivesHeldByRs: false }),
+        ];
+
+        for (const state of cases) {
+            runOpportunityEvaluationStep(state, state.meta.turn);
+            expect((state.military.operation_opportunities ?? [])
+                .find(p => p.opportunity_id === 'southern_move_95')).toBeUndefined();
+        }
+    });
+
+    it('spawns Southern Move as a Mrkonjic-only operation through the canonical path', () => {
+        const state = buildSouthernMoveState({ turn: 182 });
+        runOpportunityEvaluationStep(state, 182);
+        const proposalId = buildProposalId('southern_move_95', 182);
+
+        const approved = applyOpportunityDecision(state, 182, proposalId, 'approve');
+
+        expect(approved?.status).toBe('approved');
+        const op = state.military.corps_command!.hvo_tomislavgrad.active_operations
+            .find(activeOp => activeOp.name === 'Operation Southern Move');
+        expect(op).toBeDefined();
+        expect(op!.axes).toHaveLength(1);
+        expect(op!.axes![0].axis_id).toBe('southern_move_mrkonjic');
+        expect(op!.axes![0].objectives).toEqual(SOUTHERN_MOVE_OBJECTIVES);
     });
 });

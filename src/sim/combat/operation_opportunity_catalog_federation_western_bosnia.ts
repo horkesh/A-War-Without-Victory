@@ -61,18 +61,22 @@ const MISTRAL_DRVAR_GRAHOVO_OBJECTIVES: readonly string[] = [
     'op:bosansko_grahovo:ugarci',
 ];
 
-// Wave 24A (2026-05-23): reordered Mrkonjić sub-sequence per catalog-sweep
-// audit (docs/40_reports/audits/20260523_CATALOG_ADJACENCY_SWEEP.md §b-mistral2).
-// Prior order placed mrkonjic_grad_2 (the town) at step 7 — but its only
-// shoulder approaches at that point are RS-held majdan_2 + podrasnica_2.
-// Reorder takes the shoulder OSIDs first, then the town becomes adjacent to
-// captured friendly OSIDs and falls naturally. Šipovo prefix unchanged.
-const MISTRAL_SIPOVO_MRKONJIC_OBJECTIVES: readonly string[] = [
+// Mistral 2 owns the Drvar/Grahovo and Sipovo exploitation. Mrkonjic Grad is
+// modeled separately as Southern Move after Sipovo staging anchors are held.
+const MISTRAL_SIPOVO_OBJECTIVES: readonly string[] = [
     'op:sipovo:brdjani',
     'op:sipovo:gornji_mujdzici_2',
     'op:sipovo:sipovo_2',
     'op:sipovo:volari_2',
     'op:sipovo:pribeljci_2',
+];
+
+const SOUTHERN_MOVE_STAGING_ANCHORS: readonly string[] = [
+    'op:sipovo:sipovo_2',
+    'op:sipovo:pribeljci_2',
+];
+
+const SOUTHERN_MOVE_MRKONJIC_OBJECTIVES: readonly string[] = [
     'op:mrkonjic_grad:gerzovo_2',
     'op:mrkonjic_grad:majdan_2',
     'op:mrkonjic_grad:podrasnica_2',
@@ -83,7 +87,7 @@ const MISTRAL_SIPOVO_MRKONJIC_OBJECTIVES: readonly string[] = [
 
 const MISTRAL_TARGETS: readonly string[] = [
     ...MISTRAL_DRVAR_GRAHOVO_OBJECTIVES,
-    ...MISTRAL_SIPOVO_MRKONJIC_OBJECTIVES,
+    ...MISTRAL_SIPOVO_OBJECTIVES,
 ];
 
 const MISTRAL_READINESS_FLOOR = 0.36;
@@ -109,8 +113,8 @@ const MISTRAL_AXES: readonly OpportunityAxisDef[] = [
         staging_osid: STAGING_LIVNO_MISI,
     },
     {
-        axis_id: 'mistral_sipovo_mrkonjic',
-        name: 'Sipovo / Mrkonjic Axis',
+        axis_id: 'mistral_sipovo',
+        name: 'Sipovo Axis',
         corps: SECONDARY_CORPS,
         // Wave 28: substituted 3 inactive HRHB brigades with 2 live HVO Guards
         // brigades. Kralj Petar Krešimir IV + Kralj Tomislav + HV 7th Guards
@@ -121,7 +125,7 @@ const MISTRAL_AXES: readonly OpportunityAxisDef[] = [
             'hvo_3rd_guard_jastrebovi' as FormationId,
             'hvo_rama_brigade' as FormationId,
         ],
-        objectives: MISTRAL_SIPOVO_MRKONJIC_OBJECTIVES,
+        objectives: MISTRAL_SIPOVO_OBJECTIVES,
         staging_osid: STAGING_LIVNO,
     },
 ];
@@ -145,10 +149,10 @@ const MISTRAL_DRVAR_GRAHOVO_AXIS: readonly OpportunityAxisDef[] = [
     },
 ];
 
-const MISTRAL_SIPOVO_MRKONJIC_AXIS: readonly OpportunityAxisDef[] = [
+const MISTRAL_SIPOVO_AXIS: readonly OpportunityAxisDef[] = [
     {
-        axis_id: 'mistral_sipovo_mrkonjic',
-        name: 'Sipovo / Mrkonjic Axis',
+        axis_id: 'mistral_sipovo',
+        name: 'Sipovo Axis',
         corps: SECONDARY_CORPS,
         // Wave 28: substituted 3 inactive HRHB brigades with 2 live HVO Guards
         // brigades. Kralj Petar Krešimir IV + Kralj Tomislav + HV 7th Guards
@@ -159,7 +163,7 @@ const MISTRAL_SIPOVO_MRKONJIC_AXIS: readonly OpportunityAxisDef[] = [
             'hvo_3rd_guard_jastrebovi' as FormationId,
             'hvo_rama_brigade' as FormationId,
         ],
-        objectives: MISTRAL_SIPOVO_MRKONJIC_OBJECTIVES,
+        objectives: MISTRAL_SIPOVO_OBJECTIVES,
         staging_osid: STAGING_LIVNO,
     },
 ];
@@ -329,9 +333,9 @@ export const MISTRAL_2_95_OPPORTUNITY: OperationOpportunityDef = {
             staging_osid: STAGING_LIVNO_MISI,
         },
         {
-            variant_id: 'sipovo_mrkonjic_axis',
-            name: 'Sipovo / Mrkonjic Axis',
-            axes: MISTRAL_SIPOVO_MRKONJIC_AXIS,
+            variant_id: 'sipovo_axis',
+            name: 'Sipovo Axis',
+            axes: MISTRAL_SIPOVO_AXIS,
             staging_osid: STAGING_LIVNO,
         },
     ],
@@ -358,6 +362,157 @@ export const MISTRAL_2_95_OPPORTUNITY: OperationOpportunityDef = {
 // therefore gates on `isPreStormWesternTheater(state)` (inverted sense of
 // Mistral 2's alliance_context predicate) — Storm must not yet have fired.
 // ═══════════════════════════════════════════════════════════════════════════
+
+const SOUTHERN_MOVE_READINESS_FLOOR = 0.36;
+const SOUTHERN_MOVE_AXIS_COORDINATION_FLOOR = 0.35;
+const SOUTHERN_MOVE_SUPPLY_PRESSURE_CEILING = 90;
+const SOUTHERN_MOVE_DEFENDER_WEAKNESS_FLOOR = 0.20;
+
+const SOUTHERN_MOVE_AXES: readonly OpportunityAxisDef[] = [
+    {
+        axis_id: 'southern_move_mrkonjic',
+        name: 'Mrkonjic Grad Axis',
+        corps: SECONDARY_CORPS,
+        brigades: [
+            'hvo_1st_guard_abb' as FormationId,
+            'hvo_2nd_guard_mechanized' as FormationId,
+            'hvo_3rd_guard_jastrebovi' as FormationId,
+            'hv_4th_guards_brigade_1995' as FormationId,
+            'hv_7th_guards_brigade_1995' as FormationId,
+        ],
+        objectives: SOUTHERN_MOVE_MRKONJIC_OBJECTIVES,
+        staging_osid: 'op:sipovo:sipovo_2',
+    },
+];
+
+const dateWindowSouthernMove: AxisPredicate = (_state, turn) => {
+    if (turn < 182) return { green: false, reason: 'Southern Move window not yet open' };
+    if (turn > 188) return { green: false, reason: 'Southern Move window has closed' };
+    return { green: true, reason: 'within Southern Move Oct 1995 window' };
+};
+
+const politicalAuthorizationSouthernMove = politicalAuthorizationMistral;
+
+const corpsReadinessSouthernMove: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[SECONDARY_CORPS]) {
+        return { green: false, reason: 'HVO Tomislavgrad command not present for Southern Move' };
+    }
+    const traits = computeCorpsOperationReadiness(state, SECONDARY_CORPS as FormationId);
+    if (traits.operation_readiness < SOUTHERN_MOVE_READINESS_FLOOR) {
+        return { green: false, reason: 'HVO/HV readiness below Southern Move operation floor' };
+    }
+    return { green: true, reason: 'HVO/HV readiness sufficient for Southern Move' };
+};
+
+const logisticsSouthernMove: AxisPredicate = (state) => {
+    const pressure = getFactionLiveSupplyPressure(state, 'HRHB');
+    if (pressure >= SOUTHERN_MOVE_SUPPLY_PRESSURE_CEILING) {
+        return { green: false, reason: 'HRHB supply pressure too high for Southern Move' };
+    }
+    return { green: true, reason: 'HRHB supply pressure within Southern Move margin' };
+};
+
+const stagingAccessSouthernMove: AxisPredicate = (state) => {
+    for (const osid of SOUTHERN_MOVE_STAGING_ANCHORS) {
+        const ctrl = getPoliticalControllerOSID(state, osid, undefined);
+        if (ctrl !== 'HRHB') {
+            return { green: false, reason: 'Sipovo staging anchors are not HRHB-held for Southern Move' };
+        }
+    }
+    return { green: true, reason: 'Sipovo staging anchors are open for Southern Move' };
+};
+
+const weatherSeasonSouthernMove: AxisPredicate = (_state, turn) => {
+    if (turn > 188) return { green: false, reason: 'late-autumn weather threatens Southern Move tempo' };
+    return { green: true, reason: 'October western Bosnia conditions support Southern Move' };
+};
+
+const commanderConfidenceSouthernMove: AxisPredicate = (state) => {
+    const secondaryState = state.military.corps_command?.[SECONDARY_CORPS]?.commander_state;
+    if (!secondaryState) {
+        return { green: false, reason: 'HVO/HV commander state unavailable for Southern Move' };
+    }
+    return { green: true, reason: 'HVO/HV commander state present for Southern Move' };
+};
+
+const enemyWeaknessSouthernMove: AxisPredicate = (state, turn) => {
+    let enemyHeld = 0;
+    for (const osid of SOUTHERN_MOVE_MRKONJIC_OBJECTIVES) {
+        const ctrl = getPoliticalControllerOSID(state, osid, undefined);
+        if (ctrl === 'RS') enemyHeld++;
+    }
+    if (enemyHeld === 0) {
+        return { green: false, reason: 'no Southern Move objectives remain in enemy hands' };
+    }
+    const trajectory = evaluateDefenderTrajectoryWeakness(state, {
+        defenderCorpsId: VRS_1ST_KRAJINA_DEFENDER_CORPS,
+        defenderFaction: 'RS',
+        currentTurn: turn,
+        weaknessFloor: SOUTHERN_MOVE_DEFENDER_WEAKNESS_FLOOR,
+        label: 'VRS 1st Krajina',
+    });
+    if (trajectory.available) {
+        return { green: trajectory.green, reason: trajectory.reason };
+    }
+    return { green: true, reason: 'Southern Move objectives remain in enemy hands' };
+};
+
+const allianceContextSouthernMove = allianceContextMistral;
+
+const forceQualitySouthernMove: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[SECONDARY_CORPS]) {
+        return { green: false, reason: 'HVO Tomislavgrad command not present for Southern Move' };
+    }
+    const traits = computeCorpsOperationReadiness(state, SECONDARY_CORPS as FormationId);
+    if (traits.axis_coordination < SOUTHERN_MOVE_AXIS_COORDINATION_FLOOR) {
+        return { green: false, reason: 'HVO/HV axis coordination below Southern Move threshold' };
+    }
+    return { green: true, reason: 'HVO/HV axis coordination supports Southern Move' };
+};
+
+export const SOUTHERN_MOVE_95_OPPORTUNITY: OperationOpportunityDef = {
+    opportunity_id: 'southern_move_95',
+    name: 'Operation Southern Move',
+    tier: 'T1',
+    faction: 'HRHB',
+    primary_corps: SECONDARY_CORPS,
+    family: 'federation_western_bosnia',
+    axes: SOUTHERN_MOVE_AXES,
+    staging_osid: 'op:sipovo:sipovo_2',
+    planning_duration: 2,
+    min_attack_outcome: 'repulsed',
+    citations: [
+        'docs/40_reports/proposals/20260523_HVO_CATALOG_SYNTHESIS.md - Southern Move HVO/HV catalog synthesis',
+        'src/sim/combat/triggered_operations.ts - legacy late-war western Bosnia operation footprint',
+    ],
+    historical_exit_class: 'decisive_success',
+    prerequisites: {
+        date_window: 'required',
+        political_authorization: 'required',
+        corps_readiness: 'required',
+        logistics: 'optional',
+        staging_access: 'required',
+        weather_season: 'optional',
+        commander_confidence: 'optional',
+        enemy_weakness: 'required',
+        alliance_context: 'required',
+        force_quality: 'optional',
+        min_optional_axes: 2,
+    },
+    evaluators: {
+        date_window: dateWindowSouthernMove,
+        political_authorization: politicalAuthorizationSouthernMove,
+        corps_readiness: corpsReadinessSouthernMove,
+        logistics: logisticsSouthernMove,
+        staging_access: stagingAccessSouthernMove,
+        weather_season: weatherSeasonSouthernMove,
+        commander_confidence: commanderConfidenceSouthernMove,
+        enemy_weakness: enemyWeaknessSouthernMove,
+        alliance_context: allianceContextSouthernMove,
+        force_quality: forceQualitySouthernMove,
+    },
+    staff_recommendation: 'approve',
+};
 
 const MISTRAL_1_DEFENDER_WEAKNESS_FLOOR = 0.20;
 const MISTRAL_1_READINESS_FLOOR = 0.36;
@@ -991,5 +1146,6 @@ export const JAJCE_95_OPPORTUNITY: OperationOpportunityDef = {
 export const FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES: readonly OperationOpportunityDef[] = [
     MISTRAL_1_95_OPPORTUNITY,
     MISTRAL_2_95_OPPORTUNITY,
+    SOUTHERN_MOVE_95_OPPORTUNITY,
     JAJCE_95_OPPORTUNITY,
 ];
