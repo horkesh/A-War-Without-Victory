@@ -52,13 +52,14 @@ const ADJACENT_FRIENDLY_SATURATION = 8;
 const SVK_PARTNER_DEPTH_BONUS = 1.4;
 
 /**
- * VRS 2nd Krajina Corps id (where applicable in current OOB). Only applied
- * for SVK partner buffer because historically 2KK was the formation whose
- * depth collapsed when SVK dissolved. Faction symmetry: the gate is the
- * `svk_corps_active` flag, not corps name — but only this corps has the
- * geography that benefits in practice.
+ * VRS 2nd Krajina Corps id (per current OOB at data/source/oob_corps.json:19).
+ * Only applied for SVK partner buffer because historically 2KK was the
+ * formation whose depth collapsed when SVK dissolved (ICTY Gotovina IT-06-90-T;
+ * Mladić MICT-13-56 §3437–3450). Faction symmetry: the gate is the
+ * `svk_corps_active` flag + this corps id, not faction identity — but only
+ * this corps has the geography that benefits in practice.
  */
-const VRS_2KK_CORPS_ID: FormationId = '2nd_krajina_corps';
+const VRS_2KK_CORPS_ID: FormationId = 'vrs_2nd_krajina';
 
 export interface CorpsAdjacency {
     /** Friendly-controlled OSIDs adjacent to (or inside) the corps' AOR. */
