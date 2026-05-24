@@ -10198,6 +10198,20 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 
 ---
 
+## [2026-05-24] docs(process): add owned-branch acceptance packet
+
+**Type:** Roadmap/process planning.
+
+**Change:** Added an execution-grade acceptance plan for owned-elsewhere branches, covering handoff intake, local proof, lane-specific verification, accept/fix/reject recommendations, and post-acceptance cleanup. Updated the Command Board and hardening matrix so GUI and calibration branches are reviewed through this packet rather than re-authored while owned elsewhere.
+
+**Determinism:** Documentation-only. No runtime code, scenario data, generated artifacts, saves, or baselines changed.
+
+**Verification:** `git diff --check` - PASS.
+
+**Artifacts:** `docs/plans/2026-05-24-owned-branch-acceptance-execution-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-active-plan-hardening-pass.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-24] docs(process): harden branch CI release hygiene plan
 
 **Type:** Roadmap/process planning.
