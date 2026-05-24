@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-24] ui(roadmap): batch GUI audit follow-through surfaces
+
+**Type:** UI/read-model improvement batch. No combat math, operation tuning, scenario data, OOB data, save schema, calibration constants, or event ordering changed. The command-briefing slice changes serialized `state.military.last_briefing` only by reading existing canonical state paths.
+
+**Why:** The GUI visual audit follow-through queue still had several already-authored, compatible surface improvements stranded on the roadmap branch. The user requested faster batching over commit preservation.
+
+**Change:** Batched the Warroom diplomacy telephone route, diplomacy timeline/needle hints, command-briefing canonical signal reads, supply corridor briefing visibility, chronicle completed-operation commander spotlight, Army HQ personnel trait and mobilization chips, and Settings Escape ownership. Added the associated implemented reports and roadmap/backlog links.
+
+**Verification:** Focused UI/briefing tests, typecheck, and diff hygiene are required before push for this batch.
+
+**Artifacts:** `src/ui/map/App.tsx`; `src/ui/map/components/DiplomacyPanel.tsx`; `src/ui/map/components/SettingsScreen.tsx`; `src/ui/map/components/army_hq/PersonnelContent.tsx`; `src/ui/map/components/chronicle/generateChronicleEntries.ts`; `src/sim/briefing/collect_briefing.ts`; `tests/command_briefing.test.ts`; `tests/ui/*`; `docs/40_reports/implemented/20260523_*`.
+
+---
+
 ## [2026-05-24] chore(warroom): sync public clickable-region mirrors
 
 **Type:** Warroom public-asset mirror synchronization. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.

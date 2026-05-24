@@ -78,4 +78,109 @@ describe('assembleCommandBriefing', () => {
         // First item should be critical (peace plan), second warning (cohesion)
         expect(briefing.items[0].severity).toBe('critical');
     });
+
+    it('counts active operations by the owning corps formation faction', () => {
+        const state = makeState({
+            formations: {
+                arbih_1st_corps: { faction: 'RBiH', kind: 'corps_asset', status: 'active', name: '1st Corps' },
+                vrs_1st_krajina: { faction: 'RS', kind: 'corps_asset', status: 'active', name: '1st Krajina Corps' },
+            },
+            corps_command: {
+                arbih_1st_corps: {
+                    active_operations: [
+                        { id: 'op_a', name: 'Operation A' },
+                        { id: 'op_b', name: 'Operation B' },
+                    ],
+                },
+                vrs_1st_krajina: {
+                    active_operations: [
+                        { id: 'op_enemy', name: 'Enemy Operation' },
+                    ],
+                },
+            },
+        });
+        const briefing = assembleCommandBriefing(state, 'RBiH');
+        const activeOps = briefing.items.find(i => i.id === 'mil-active-ops');
+        expect(activeOps).toBeDefined();
+        expect(activeOps!.title).toContain('2 active operations');
+        expect(activeOps!.detail).toContain('2 corps-level operations');
+    });
+
+    it('flags disrupted brigades from the canonical formation field', () => {
+        const state = makeState({
+            formations: {
+                brig_a: { faction: 'RBiH', kind: 'brigade', status: 'active', disrupted_turns: 1 },
+                brig_b: { faction: 'RBiH', kind: 'brigade', status: 'active', disrupted_turns: 2 },
+                brig_c: { faction: 'RBiH', kind: 'brigade', status: 'active', disrupted_turns: 3 },
+                brig_enemy: { faction: 'RS', kind: 'brigade', status: 'active', disrupted_turns: 3 },
+            },
+        });
+        const briefing = assembleCommandBriefing(state, 'RBiH');
+        const disrupted = briefing.items.find(i => i.id === 'mil-disrupted');
+        expect(disrupted).toBeDefined();
+        expect(disrupted!.severity).toBe('warning');
+        expect(disrupted!.title).toContain('3 brigades disrupted');
+    });
+
+    it('flags prolonged enclave isolation from political enclave resilience', () => {
+        const state = makeState();
+        state.political = {
+            enclave_resilience: {
+                bihac: { resilience: 18, isolation_turns: 16, hardening_active: true },
+                gorazde: { resilience: 28, isolation_turns: 4, hardening_active: false },
+            },
+        };
+        const briefing = assembleCommandBriefing(state, 'RBiH');
+        const enclave = briefing.items.find(i => i.id === 'hum-enclave-bihac');
+        expect(enclave).toBeDefined();
+        expect(enclave!.section).toBe('humanitarian');
+        expect(enclave!.severity).toBe('critical');
+        expect(enclave!.detail).toContain('Isolated for 16 turns');
+    });
+
+    it('summarizes player-faction supply state and corridor risk from canonical supply reports', () => {
+        const state = makeState();
+        state.supply_state_by_osid = {
+            schema: 1,
+            turn: 10,
+            factions: [
+                {
+                    faction_id: 'RBiH',
+                    by_osid: [
+                        { osid: 'op:sa:sarajevo_1', state: 'critical' },
+                        { osid: 'op:tu:tuzla_1', state: 'strained' },
+                        { osid: 'op:ze:zenica_1', state: 'adequate' },
+                    ],
+                },
+                {
+                    faction_id: 'RS',
+                    by_osid: [
+                        { osid: 'op:pr:prijedor_1', state: 'critical' },
+                    ],
+                },
+            ],
+        };
+        state.supply_corridors_osid = {
+            schema: 1,
+            turn: 10,
+            corridors: [
+                { faction_id: 'RBiH', edge_id: 'a__b', state: 'brittle' },
+                { faction_id: 'RBiH', edge_id: 'b__c', state: 'cut' },
+                { faction_id: 'RS', edge_id: 'x__y', state: 'cut' },
+            ],
+        };
+
+        const briefing = assembleCommandBriefing(state, 'RBiH');
+        const supply = briefing.items.find(i => i.id === 'log-supply');
+
+        expect(supply).toBeDefined();
+        expect(supply!.section).toBe('logistics');
+        expect(supply!.severity).toBe('critical');
+        expect(supply!.title).toBe('Supply lines critically exposed');
+        expect(supply!.detail).toContain('1 critical');
+        expect(supply!.detail).toContain('1 strained');
+        expect(supply!.detail).toContain('1 cut corridor');
+        expect(supply!.detail).toContain('1 brittle corridor');
+        expect(supply!.detail).not.toContain('Prijedor');
+    });
 });

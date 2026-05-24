@@ -26,6 +26,7 @@ export function PersonnelContent() {
         const activeOfficers = officers.filter(o => o.status === 'active');
         const reserveOfficers = officers.filter(o => o.status === 'reserve');
         const reserves = state.factionReserves?.[faction];
+        const mobilization = state.mobilizationSummary?.[faction];
 
         const brigadesByCorps = new Map<string, typeof brigades>();
         for (const b of brigades) {
@@ -43,6 +44,7 @@ export function PersonnelContent() {
             activeOfficers,
             reserveOfficers,
             reserves,
+            mobilization,
             brigadesByCorps,
         };
     }, [state, faction]);
@@ -62,6 +64,34 @@ export function PersonnelContent() {
                     <StatCard label={t('personnel.supplyReserve')} value={data.reserves ? Math.round(data.reserves.generalSupply ?? 0).toString() : '-'} />
                 </div>
             </div>
+
+            {data.mobilization && (
+                <div className="bg-panel-card border border-panel-border rounded-lg p-3">
+                    <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
+                        MOBILIZATION
+                    </div>
+                    <div className="grid grid-cols-5 gap-3">
+                        <StatCard label="Available Pool" value={formatWholeNumber(data.mobilization.total_available)} />
+                        <StatCard label="Committed" value={formatWholeNumber(data.mobilization.total_committed)} />
+                        <StatCard label="Exhausted" value={formatWholeNumber(data.mobilization.total_exhausted)} />
+                        <StatCard label="Strategic Reserve" value={formatWholeNumber(data.mobilization.strategic_reserve)} />
+                        <StatCard label="Exhaustion" value={`${data.mobilization.exhaustion_pct.toFixed(1)}%`} />
+                    </div>
+                    {data.mobilization.top_pools.length > 0 && (
+                        <div className="mt-3 pt-2 border-t border-panel-border/50">
+                            <div className="text-[9px] uppercase tracking-wider text-text-secondary/60 mb-1">Largest Available Pools</div>
+                            <div className="grid grid-cols-2 gap-1.5">
+                                {data.mobilization.top_pools.map((pool) => (
+                                    <div key={pool.mun_id} className="flex items-center justify-between gap-3 text-[10px] px-2 py-1 rounded-sm bg-panel-bg border border-panel-border/40">
+                                        <span className="text-text-secondary truncate">{formatPoolName(pool.mun_id)}</span>
+                                        <span className="text-text-primary tabular-nums font-mono shrink-0">{formatWholeNumber(pool.available)}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
 
             <div className="bg-panel-card border border-panel-border rounded-lg p-3">
                 <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
@@ -97,13 +127,23 @@ export function PersonnelContent() {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                     {data.activeOfficers.map(o => (
-                        <div key={o.id} className="flex items-center justify-between px-2.5 py-1.5 border border-panel-border/50 rounded-md bg-panel-bg text-[10px]">
-                            <div className="min-w-0">
+                        <div key={o.id} className="flex items-start justify-between gap-3 px-2.5 py-1.5 border border-panel-border/50 rounded-md bg-panel-bg text-[10px]">
+                            <div className="min-w-0 flex-1">
                                 <div className="font-bold text-text-primary truncate">{o.name}</div>
                                 <div className="text-text-secondary/60 text-[9px] uppercase">
                                     {o.rank?.replace(/_/g, ' ')}
                                     {o.assigned_corps_id ? ` - ${data.corpsNameById.get(o.assigned_corps_id) ?? t('personnel.attachedCommand')}` : ''}
                                 </div>
+                                {(o.command_style || o.known_for) && (
+                                    <div className="mt-1 flex flex-wrap gap-1">
+                                        {o.command_style && (
+                                            <OfficerTraitPill label="Doctrinal trait" value={o.command_style} tone="doctrine" />
+                                        )}
+                                        {o.known_for && (
+                                            <OfficerTraitPill label="Narrative trait" value={o.known_for} tone="narrative" />
+                                        )}
+                                    </div>
+                                )}
                             </div>
                             <div className="flex items-center gap-2 shrink-0 tabular-nums font-mono">
                                 <span style={{ color: getRatingColor(o.competence) }}>C:{o.competence.toFixed(1)}</span>
@@ -126,6 +166,39 @@ export function PersonnelContent() {
                 )}
             </div>
         </div>
+    );
+}
+
+function formatPoolName(munId: string): string {
+    return munId
+        .split(/[_-]+/)
+        .filter(Boolean)
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(' ');
+}
+
+function formatWholeNumber(value: number): string {
+    return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value);
+}
+
+function OfficerTraitPill({
+    label,
+    value,
+    tone,
+}: {
+    label: string;
+    value: string;
+    tone: 'doctrine' | 'narrative';
+}) {
+    const toneClass = tone === 'doctrine'
+        ? 'border-cyan-500/35 bg-cyan-500/10 text-cyan-100'
+        : 'border-amber-500/35 bg-amber-500/10 text-amber-100';
+
+    return (
+        <span className={`inline-flex max-w-full items-center gap-1 rounded-sm border px-1.5 py-0.5 ${toneClass}`}>
+            <span className="shrink-0 text-[7px] font-bold uppercase tracking-[0.12em] opacity-75">{label}</span>
+            <span className="min-w-0 truncate text-[8px] text-text-primary">{value}</span>
+        </span>
     );
 }
 

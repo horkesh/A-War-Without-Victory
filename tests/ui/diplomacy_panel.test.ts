@@ -51,6 +51,23 @@ function makeView(overrides: Partial<DiplomacyView> = {}): DiplomacyView {
         activeConsequences: [
             { id: 'international_sanctions', label: 'International sanctions' },
         ],
+        negotiationTimeline: [
+            {
+                id: 'proposal:peace:vance_owen',
+                label: 'Vance-Owen Peace Plan',
+                detail: 'Awaiting presidential response',
+                turn: 40,
+                confidence: 'known',
+            },
+        ],
+        needleHints: [
+            {
+                id: 'pressure:sarajevo_siege_visibility',
+                label: 'Reduce Sarajevo siege visibility',
+                detail: 'Sarajevo siege visibility is high.',
+                confidence: 'known',
+            },
+        ],
         ...overrides,
     };
 }
@@ -63,9 +80,12 @@ describe('DiplomacyPanel', () => {
 
         expect(screen.getByRole('dialog', { name: /diplomacy/i })).toBeTruthy();
         expect(screen.getAllByText('Serbia').length).toBeGreaterThan(0);
-        expect(screen.getByText('Vance-Owen Peace Plan')).toBeTruthy();
+        expect(screen.getAllByText('Vance-Owen Peace Plan').length).toBeGreaterThan(0);
         expect(screen.getByText('Sarajevo siege visibility')).toBeTruthy();
         expect(screen.getByText('International sanctions')).toBeTruthy();
+        expect(screen.getByText('Negotiation Timeline')).toBeTruthy();
+        expect(screen.getByText('What Moves The Needle')).toBeTruthy();
+        expect(screen.getByText('Reduce Sarajevo siege visibility')).toBeTruthy();
     });
 
     it('renders an empty state without active diplomacy signals', () => {
@@ -77,6 +97,8 @@ describe('DiplomacyPanel', () => {
                 externalActors: [],
                 pressureReasons: [],
                 activeConsequences: [],
+                negotiationTimeline: [],
+                needleHints: [],
             }),
             onClose: vi.fn(),
         }));

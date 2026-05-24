@@ -101,6 +101,10 @@ describe('buildDiplomacyView', () => {
             'Drina blockade pressure',
             'International sanctions',
         ]);
+        expect(view.negotiationTimeline.map((entry) => entry.label)).toContain('Vance-Owen Peace Plan');
+        expect(view.negotiationTimeline.map((entry) => entry.label)).toContain('International sanctions');
+        expect(view.needleHints.map((hint) => hint.label)).toContain('Ease Serbia constraint');
+        expect(view.needleHints.map((hint) => hint.label)).toContain('Reduce Sarajevo siege visibility');
     });
 
     it('returns a stable empty view when diplomacy state has not been populated', () => {
@@ -115,5 +119,7 @@ describe('buildDiplomacyView', () => {
         expect(view.activeProposals).toEqual([]);
         expect(view.externalActors).toEqual([]);
         expect(view.pressureReasons).toEqual([]);
+        expect(view.negotiationTimeline).toEqual([]);
+        expect(view.needleHints).toEqual([]);
     });
 });

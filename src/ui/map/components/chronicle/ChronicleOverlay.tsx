@@ -48,6 +48,7 @@ const DOT_COLORS: Record<ChronicleCardType, string> = {
     diplomatic: '#8855aa',
     narrative: '#d5c9bc',
     cost: '#d28a3a',
+    personnel: '#75a9b8',
 };
 
 export type ChronicleViewMode = 'entries' | 'chapters';

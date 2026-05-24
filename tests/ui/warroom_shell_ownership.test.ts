@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 import { shouldShowWarroomReturn } from '../../src/ui/map/utils/warroomReturn.js';
+import { regionToShellHandoff } from '../../src/ui/map/components/warroom/WarroomShellLayer.js';
 
 function read(path: string): string {
     return readFileSync(path, 'utf8');
@@ -41,5 +42,9 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
 
         expect(source).toContain('dedupeCommandQuestionHeadlines');
         expect(source).toContain('seenHeadlines');
+    });
+
+    it('routes the Warroom diplomacy telephone to the dedicated diplomacy panel', () => {
+        expect(regionToShellHandoff('diplomatic_telephone')).toEqual({ kind: 'diplomacy' });
     });
 });

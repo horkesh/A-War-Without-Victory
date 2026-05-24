@@ -40,6 +40,22 @@ describe('DiplomacyPanel player truth', () => {
                 { key: 'negotiation_momentum', label: 'Negotiation momentum', band: 'medium', confidence: 'uncertain' },
             ],
             activeConsequences: [],
+            negotiationTimeline: [
+                {
+                    id: 'proposal:dayton',
+                    label: 'Dayton negotiation menu',
+                    detail: 'Menu prepared',
+                    confidence: 'known',
+                },
+            ],
+            needleHints: [
+                {
+                    id: 'pressure:sarajevo_siege_visibility',
+                    label: 'Reduce Sarajevo siege visibility',
+                    detail: 'Sarajevo siege visibility is high.',
+                    confidence: 'likely',
+                },
+            ],
         };
 
         render(createElement(DiplomacyPanel, { view, onClose: vi.fn() }));
