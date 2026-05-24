@@ -108,6 +108,9 @@ const MISTRAL_AXES: readonly OpportunityAxisDef[] = [
             'hvo_1st_guard_abb' as FormationId,
             'hv_4th_guards_split' as FormationId,
             'hvo_2nd_guard_mechanized' as FormationId,
+            // HV OG West 1995 phantom — corps=hvo_tomislavgrad matches axis host;
+            // pulls Drvar exploitation mass per BB v2 ch. 28 + HVO catalog synthesis §2.2.
+            'hv_112th_infantry_1995' as FormationId,
         ],
         objectives: MISTRAL_DRVAR_GRAHOVO_OBJECTIVES,
         staging_osid: STAGING_LIVNO_MISI,
@@ -143,6 +146,9 @@ const MISTRAL_DRVAR_GRAHOVO_AXIS: readonly OpportunityAxisDef[] = [
             'hvo_1st_guard_abb' as FormationId,
             'hv_4th_guards_split' as FormationId,
             'hvo_2nd_guard_mechanized' as FormationId,
+            // HV OG West 1995 phantom — corps=hvo_tomislavgrad matches axis host;
+            // pulls Drvar exploitation mass per BB v2 ch. 28 + HVO catalog synthesis §2.2.
+            'hv_112th_infantry_1995' as FormationId,
         ],
         objectives: MISTRAL_DRVAR_GRAHOVO_OBJECTIVES,
         staging_osid: STAGING_LIVNO_MISI,
@@ -379,6 +385,8 @@ const SOUTHERN_MOVE_AXES: readonly OpportunityAxisDef[] = [
             'hvo_3rd_guard_jastrebovi' as FormationId,
             'hv_4th_guards_brigade_1995' as FormationId,
             'hv_7th_guards_brigade_1995' as FormationId,
+            // HV OG West 1995 phantom — corps=hvo_tomislavgrad matches axis host.
+            'hv_134th_hgr_1995' as FormationId,
         ],
         objectives: SOUTHERN_MOVE_MRKONJIC_OBJECTIVES,
         staging_osid: 'op:sipovo:sipovo_2',
@@ -598,6 +606,11 @@ const MISTRAL_1_AXES: readonly OpportunityAxisDef[] = [
         brigades: [
             'hrhb_kralj_petar_kreimir_iv_brigade' as FormationId,
             'hrhb_kralj_tomislav_brigade' as FormationId,
+            // HV OG West 1995 phantom — corps=hvo_tomislavgrad matches axis host.
+            // Wired to the Glamoč axis (not Grahovo) to avoid extending the
+            // shared-brigade grahovo axis past Mistral 2's t175 launch window —
+            // preserves Mistral 2 AAR archive cleanup (recovery → operation_history).
+            'hv_7th_hgr_1995' as FormationId,
         ],
         objectives: MISTRAL_1_GLAMOC_OBJECTIVES,
         staging_osid: STAGING_TOMISLAVGRAD,

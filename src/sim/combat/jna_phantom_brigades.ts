@@ -364,7 +364,11 @@ const HV_PHANTOM_DEFS_1995: PhantomDef[] = [
         name: 'HV 7th Guards Brigade (Varaždin, OG North)',
         corps_id: 'hvo_central_bosnia' as FormationId,
         faction: 'HRHB',
-        location_osid: 'op:tomislavgrad:tomislavgrad_2',
+        // Canonical OSID is op:duvno:tomislavgrad_2 (Duvno = pre-1990 muni name
+        // for Tomislavgrad). Prior 'op:tomislavgrad:tomislavgrad_2' did not exist
+        // in data/derived/operational/osid_areas.json, so this phantom spawned
+        // into a void and could not be sector-classified.
+        location_osid: 'op:duvno:tomislavgrad_2',
         spawn_turn: 150,
         withdrawal_turn: 188,
         tanks: 30, artillery: 25, apcs: 10,
@@ -401,7 +405,8 @@ const HV_PHANTOM_DEFS_1995: PhantomDef[] = [
         name: 'HV 141st Reserve Infantry Brigade (OG South)',
         corps_id: 'hvo_southeast_herzegovina' as FormationId,
         faction: 'HRHB',
-        location_osid: 'op:tomislavgrad:tomislavgrad_2',
+        // Canonical OSID is op:duvno:tomislavgrad_2 (Duvno = pre-1990 muni name).
+        location_osid: 'op:duvno:tomislavgrad_2',
         spawn_turn: 150,
         withdrawal_turn: 188,
         tanks: 8, artillery: 10, apcs: 6,

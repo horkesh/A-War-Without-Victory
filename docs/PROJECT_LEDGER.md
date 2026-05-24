@@ -1,4 +1,41 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-24] feat(catalog): wire 3 HV 1995 phantoms into fall-1995 HVO axes
+
+**Type:** Catalog data + phantom data fixes. Behavior changes are confined to the late-war HVO operation axes (Mistral 1, Mistral 2, Southern Move) and to two HV 1995 expeditionary phantom spawn locations. No engine/predicate/event-ordering/scenario-data/save-schema changes.
+
+**Why:** Session handoff 2026-05-23 documented that the 8 HV 1995 expeditionary phantom packet (commits `deef41e2`, `ea8d17e8`, `910f5e27`) shipped mechanically but produced zero territorial impact because HVO catalog axes did not reference them — phantoms spawned at turn 150 and idled through withdrawal at turn 188. The HRHB OSID shortfall (n2003: 86 vs painted 107, −21) clusters 91% in the Western Bosnia Mistral / Southern Move target band where the phantoms would have operated.
+
+Additional discovery: two phantoms had invalid `location_osid: 'op:tomislavgrad:tomislavgrad_2'`. That OSID does not exist in `data/derived/operational/osid_areas.json`; canonical key is `op:duvno:tomislavgrad_2` (Duvno = pre-1990 municipality name).
+
+**Change:** Six catalog/data edits in two files:
+
+1. `mistral_1_glamoc.brigades` += `hv_7th_hgr_1995` (Mistral 1's Glamoč Shoulder axis). NOTE: placed on glamoc instead of the historically-direct grahovo axis so that Mistral 1 doesn't extend its execution past Mistral 2's t175 launch window — this preserves Mistral 2's recovery → `operation_history` archive cleanup.
+2. `mistral_drvar_grahovo.brigades` += `hv_112th_infantry_1995` (Mistral 2's Drvar/Grahovo axis, both main MISTRAL_AXES and variant MISTRAL_DRVAR_GRAHOVO_AXIS for consistency).
+3. `southern_move_mrkonjic.brigades` += `hv_134th_hgr_1995` (Southern Move's Mrkonjić Grad axis — wired in advance; Southern Move's staging_access requires Šipovo HRHB-held which the engine currently fails to deliver, so the wiring is dormant until that chain dependency resolves).
+4. `hv_7th_guards_brigade_1995.location_osid` corrected from `op:tomislavgrad:tomislavgrad_2` → `op:duvno:tomislavgrad_2`.
+5. `hv_141st_reserve_brigade_1995.location_osid` same correction.
+
+All 3 phantom additions are same-corps fit (`hvo_tomislavgrad` axis host matches phantom `corps_id`), avoiding cross-corps reconciler drain risk. The remaining 5 of 8 phantoms (`hv_4th_guards_brigade_1995`, `hv_7th_guards_brigade_1995`, `hv_1st_guards_brigade_1995`, `hv_126th_hgr_1995`, `hv_141st_reserve_brigade_1995`) are cross-corps (assigned `hvo_southeast_herzegovina` / `hvo_central_bosnia`) and remain unwired pending a separate `jna_phantom_brigades.ts` re-homing decision under historical/canon review.
+
+**Verification:**
+- `npx tsc --noEmit -p tsconfig.json`: clean (UI workspace `npm install` required first on fresh worktree).
+- `npx vitest run tests/operation_opportunities_catalog.test.ts tests/sector_offensive_idle_recovery.test.ts tests/jna_phantom_brigades.test.ts --reporter=dot`: 71/71 PASS.
+- 40w canary (`npm run sim:scenario:run:40w`): pre-edit `7dab9e30e1f196d2` ≡ post-edit `7dab9e30e1f196d2` (byte-identical; phantoms spawn t150 outside 40w window).
+- 188w pre-edit baseline (n2009 on main HEAD `67bdd0c3`): hash `dad09d050b76f32c`, match_ratio 79.78%, 27/27 anchors, 5/6 benchmarks.
+- 188w post-edit (n2 on claude HEAD `92e99205` + 6 edits): hash `4e0c20cc47f2ae0f`, match_ratio 79.78%, 27/27 anchors, 5/6 benchmarks. **712/712 OSID political_controllers byte-identical to n2009.**
+- `node tools/diagnose_run.cjs` on n2: 0 errors, 29 drift warnings (typical late-war pattern, not lane-attributable).
+- `node tools/validate_run_consistency.cjs` on n2: 9 FAILs ALL in eastern Bosnia (vrs_drina:2/3, vrs_east_bosnian:1, srebrenica edges, vlasenica:bacici) + intel-system pre-existing on main; categorically outside lane scope.
+- `npm run test:baselines`: "Baseline regression: all scenarios match."
+- `git diff --check`: clean.
+
+**Outcome:** match_ratio unchanged (79.78% in both runs). HRHB sim count unchanged (86/107 painted). Lane delivers catalog hygiene + audit-trail correctness, not territorial gain. 2 of 3 newly-wired phantoms (`hv_7th_hgr_1995`, `hv_112th_infantry_1995`) now appear in operation AAR `participating_brigades`. Mistral 2's `operation_history` AAR is restored (was lost in an intermediate run when Mistral 1 extended by one turn). The HRHB OSID gap remains; root cause is op-effectiveness (Mistral 1/2 capture 0/X objectives despite launching), not catalog wiring — investigation deferred to follow-up lane.
+
+**Sacred rules:** All preserved. Canonical faction IDs (RBiH/RS/HRHB) only. HV phantoms remain HRHB-attached. No initial OSID overrides. No `avoided_osids_by_faction`. Determinism preserved (catalog brigade lists are static arrays sorted via `strictCompare` at runtime). Ops-only attacks unchanged. `hvo_main_staff` not used as launcher. FORAWWV.md not edited.
+
+**Artifacts:** `src/sim/combat/operation_opportunity_catalog_federation_western_bosnia.ts`; `src/sim/combat/jna_phantom_brigades.ts`; `docs/40_reports/implemented/20260524_HVO_HV_PHANTOM_CATALOG_WIRING.md`.
+
+---
+
 ## [2026-05-24] feat(chronicle): add campaign recap synthesis
 
 **Type:** UI/data presentation only. No simulation behavior, save schema, scenario data, generated artifact, combat math, event ordering, or engine output changed.
