@@ -152,7 +152,7 @@
 
 **Latest event-notification narrative-tone slice:** [implemented/20260522_EVENT_NOTIFICATION_NARRATIVE_TONE_1992.md](implemented/20260522_EVENT_NOTIFICATION_NARRATIVE_TONE_1992.md) - `rs_strategic_goals` and `rbih_state_identity` now have complete non-source recipient notification coverage; Phase D residual dropped to 18 rows / 82 blocks before the Washington-timing slice.
 
-**Latest strict-null optional GameState contract guard:** [implemented/20260522_STRICT_NULL_OPTIONAL_GAMESTATE_CONTRACT_GUARD.md](implemented/20260522_STRICT_NULL_OPTIONAL_GAMESTATE_CONTRACT_GUARD.md) - The remaining strict-null lane is now pinned as a 486-field optional `GameState` contract floor split by domain (`sim` 304, `state` 174, `derived` 8, no unknown bucket) with 3 retained `as unknown` boundary casts and zero counted `as FactionId`, `as any`, dot non-null, or index non-null sites.
+**Latest strict-null Warroom fallback-region cleanup:** [implemented/20260524_STRICT_NULL_WARROOM_FALLBACK_REGION_TYPES.md](implemented/20260524_STRICT_NULL_WARROOM_FALLBACK_REGION_TYPES.md) - The production strict-null escape floor is now zero for counted `as FactionId`, `as unknown`, `as any`, dot non-null, and index non-null sites. The remaining strict-null lane is the 486-field optional `GameState` contract floor split by domain (`sim` 304, `state` 174, `derived` 8, no unknown bucket).
 
 **Strict-null GameStateAdapter tail:** [implemented/20260522_STRICT_NULL_GAME_STATE_ADAPTER_TAIL.md](implemented/20260522_STRICT_NULL_GAME_STATE_ADAPTER_TAIL.md) - `src/ui/map/data/GameStateAdapter.ts` now contributes zero counted `as_any_casts` and `as_factionid_casts`; the current top-level strict-null floor is guarded by the optional GameState contract report.
 

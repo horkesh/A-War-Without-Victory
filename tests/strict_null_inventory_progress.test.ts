@@ -523,7 +523,7 @@ describe('strict null inventory progress', () => {
 
         expect(current.counts).toMatchObject({
             as_factionid_casts: 0,
-            as_unknown_casts: 3,
+            as_unknown_casts: 0,
             as_any_casts: 0,
             non_null_assertions_dot: 0,
             non_null_assertions_index: 0,

@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-24] refactor(strict-null): type warroom fallback regions
+
+**Type:** Strict-null UI boundary cleanup. No simulation behavior, combat math, operation tuning, scenario data, OOB data, save schema, calibration constants, event ordering, or Warroom navigation behavior changed.
+
+**Why:** The current strict-null diagnostic floor still retained three production `as unknown` casts at the Warroom fallback region JSON boundary after the optional `GameState` contract guard was pinned.
+
+**Change:** Added a typed `WarroomRegionManifest` boundary for the three fallback Warroom region JSON imports, normalized JSON `number[][]` polygons into `[number, number][]`, and removed the `as unknown as { regions: WarroomRegion[] }` chains. Updated the strict-null progress guard to pin `as_unknown_casts` at zero.
+
+**Verification:** `node tools\diagnostics\strict_null_inventory.cjs` reports `as_factionid_casts 0`, `as_unknown_casts 0`, `as_any_casts 0`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, and `optional_fields_game_state 486`. `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts tests\warroom_shell_layer.test.ts --reporter=dot` passed 128/128.
+
+**Artifacts:** `src/ui/map/components/warroom/WarroomShellLayer.tsx`; `tests/strict_null_inventory_progress.test.ts`; `docs/40_reports/implemented/20260524_STRICT_NULL_WARROOM_FALLBACK_REGION_TYPES.md`.
+
+---
+
 ## [2026-05-24] ui(i18n): batch Bosnian localization surfaces
 
 **Type:** UI/content localization batch. No simulation behavior, combat math, operation tuning, scenario data, OOB data, save schema, calibration constants, or event ordering changed.

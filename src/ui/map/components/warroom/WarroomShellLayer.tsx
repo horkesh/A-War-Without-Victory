@@ -45,6 +45,18 @@ interface WarroomRegion {
   tooltip?: string;
 }
 
+interface WarroomRegionManifestRegion {
+  id: string;
+  type?: string;
+  bounds: WarroomRegionBounds;
+  polygon?: number[][];
+  tooltip?: string;
+}
+
+interface WarroomRegionManifest {
+  regions: WarroomRegionManifestRegion[];
+}
+
 interface WarroomMapOverlayModel {
   outlinePaths: string[];
   territoryPaths: string[];
@@ -509,10 +521,34 @@ function WarroomHotspot({ region, onClick }: WarroomHotspotProps) {
 
 // ── Region data by faction ─────────────────────────────────────────────────
 
+const FALLBACK_REGION_MANIFESTS_BY_FACTION: Record<string, WarroomRegionManifest> = {
+  RBiH: fallbackRbihRegions,
+  RS: fallbackRsRegions,
+  HRHB: fallbackHrhbRegions,
+};
+
+function normalizeWarroomRegionPolygon(points: number[][] | undefined): [number, number][] | undefined {
+  if (!points) return undefined;
+  const polygon = points
+    .filter((point) => point.length >= 2 && Number.isFinite(point[0]) && Number.isFinite(point[1]))
+    .map((point): [number, number] => [point[0], point[1]]);
+  return polygon.length >= 3 ? polygon : undefined;
+}
+
+function normalizeWarroomRegions(manifest: WarroomRegionManifest): WarroomRegion[] {
+  return manifest.regions.map((region) => ({
+    id: region.id,
+    type: region.type,
+    bounds: region.bounds,
+    polygon: normalizeWarroomRegionPolygon(region.polygon),
+    tooltip: region.tooltip,
+  }));
+}
+
 const FALLBACK_REGIONS_BY_FACTION: Record<string, WarroomRegion[]> = {
-  RBiH: (fallbackRbihRegions as unknown as { regions: WarroomRegion[] }).regions,
-  RS: (fallbackRsRegions as unknown as { regions: WarroomRegion[] }).regions,
-  HRHB: (fallbackHrhbRegions as unknown as { regions: WarroomRegion[] }).regions,
+  RBiH: normalizeWarroomRegions(FALLBACK_REGION_MANIFESTS_BY_FACTION.RBiH),
+  RS: normalizeWarroomRegions(FALLBACK_REGION_MANIFESTS_BY_FACTION.RS),
+  HRHB: normalizeWarroomRegions(FALLBACK_REGION_MANIFESTS_BY_FACTION.HRHB),
 };
 
 const CANONICAL_REGION_URLS_BY_FACTION: Record<string, string> = {
