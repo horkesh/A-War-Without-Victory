@@ -6,7 +6,7 @@ import { ChronicleRibbon, ChronicleRibbonScrubber } from './ChronicleSpine.js';
 import { CHRONICLE_FILTERS, chronicleFilterLabel, countChronicleEntriesByFilter, filterChronicleEntries } from './ChronicleReviewFilters.js';
 import { turnToDateString } from '../../utils/formatters.js';
 import { openArmyHQAftermathRecord, openArmyHQOperationHistory } from '../../utils/shellNavigation.js';
-import { buildChronicleChapters } from '../../data/chronicleChapters.js';
+import { buildChronicleCampaignRecap, buildChronicleChapters } from '../../data/chronicleChapters.js';
 import type { ChronicleEntry, ChronicleCardType } from './generateChronicleEntries.js';
 import type { ChronicleFilterId } from './ChronicleReviewFilters.js';
 import type { ChronicleChapter } from '../../data/chronicleChapters.js';
@@ -117,8 +117,37 @@ function ChronicleChapterView({
         );
     }
 
+    const recap = buildChronicleCampaignRecap(chapters);
+    const recapThread = recap ? chronicleFilterLabel(CHRONICLE_FILTERS.find(filter => filter.id === recap.dominantType) ?? CHRONICLE_FILTERS[0]) : '';
+
     return (
         <div className="mx-auto flex max-w-5xl flex-col gap-3 px-6 py-5">
+            {recap && (
+                <section
+                    className="rounded-sm border border-amber-400/20 bg-amber-950/10 px-4 py-3"
+                    aria-label={t('chronicle.recapTitle')}
+                >
+                    <div className="text-[9px] font-mono uppercase tracking-[0.18em] text-amber-300/80">
+                        {t('chronicle.recapTitle')}
+                    </div>
+                    <p className="mt-1 text-[12px] leading-relaxed text-stone-300">
+                        {t('chronicle.recapBody', {
+                            chapters: recap.chapterCount,
+                            range: recap.monthRange,
+                            entries: recap.entryCount,
+                            thread: recapThread,
+                            headlines: recap.headlineCount,
+                        })}
+                    </p>
+                    <p className="mt-1 text-[10px] font-mono uppercase tracking-[0.08em] text-stone-500">
+                        {t('chronicle.recapArc', {
+                            opening: recap.openingChapterTitle,
+                            closing: recap.closingChapterTitle,
+                            signals: recap.signalChapterCount,
+                        })}
+                    </p>
+                </section>
+            )}
             {chapters.map(chapter => (
                 <section
                     key={chapter.id}

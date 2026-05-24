@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildChronicleChapters } from '../../src/ui/map/data/chronicleChapters.js';
+import { buildChronicleCampaignRecap, buildChronicleChapters } from '../../src/ui/map/data/chronicleChapters.js';
 import type { ChronicleEntry } from '../../src/ui/map/components/chronicle/generateChronicleEntries.js';
 
 function entry(turn: number, title: string, overrides: Partial<ChronicleEntry> = {}): ChronicleEntry {
@@ -114,5 +114,32 @@ describe('buildChronicleChapters', () => {
 
         expect(chapters[0].title).toBe('Survival Defense');
         expect(chapters[0].monthLabels).toEqual(['Apr 1992', 'May 1992', 'Jun 1992']);
+    });
+
+    it('synthesizes a deterministic campaign recap across chapters', () => {
+        const chapters = buildChronicleChapters(
+            [
+                entry(1, 'Cost of the week', { type: 'cost', headline: true } as Partial<ChronicleEntry>),
+                entry(2, 'Front line holds', { type: 'combat' } as Partial<ChronicleEntry>),
+                entry(14, 'Political rupture', {
+                    type: 'political',
+                    headline: true,
+                    metadata: { sensitiveSignals: ['rupture'] },
+                } as Partial<ChronicleEntry>),
+            ],
+            { player_faction: 'RBiH', military: { war_timeline: timeline } },
+        );
+
+        expect(buildChronicleCampaignRecap(chapters)).toEqual({
+            id: 'chronicle-campaign-recap-1-14',
+            chapterCount: 2,
+            entryCount: 3,
+            headlineCount: 2,
+            monthRange: 'Apr 1992-Jul 1992',
+            dominantType: 'combat',
+            signalChapterCount: 1,
+            openingChapterTitle: 'Survival Defense',
+            closingChapterTitle: 'Local Counterattacks',
+        });
     });
 });

@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-24] feat(chronicle): add campaign recap synthesis
+
+**Type:** UI/data presentation only. No simulation behavior, save schema, scenario data, generated artifact, combat math, event ordering, or engine output changed.
+
+**Why:** The Chronicle chapter lane already grouped entries into deterministic chapter summaries, but the rating master still identified the missing higher-level recap that makes the Chronicle read as a campaign story rather than only a filtered ledger.
+
+**Change:** Added `buildChronicleCampaignRecap(...)` over existing chapter inputs, surfaced the recap at the top of Chapter view, localized its chrome/body in English and Bosnian BCS, and updated the Chronicle rating row from B+ to A- with the remaining work narrowed to presentation polish and visual evidence.
+
+**Verification:** `npx.cmd vitest run tests\ui\chronicle_chapters.test.ts --reporter=dot` passed 7/7; `npm.cmd run typecheck` passed; `git diff --check` passed. No baseline run was needed because this is derived UI presentation only.
+
+**Artifacts:** `src/ui/map/data/chronicleChapters.ts`; `src/ui/map/components/chronicle/ChronicleOverlay.tsx`; `src/ui/map/i18n/messages.en.ts`; `src/ui/map/i18n/messages.bcs.ts`; `tests/ui/chronicle_chapters.test.ts`; `docs/40_reports/GAME_STATE_RATING_MASTER.md`.
+
+---
+
 ## [2026-05-24] docs(ratings): reconcile Army HQ control status
 
 **Type:** Documentation truth reconciliation only. No UI behavior, simulation behavior, save schema, scenario data, generated artifact, or test contract changed.
