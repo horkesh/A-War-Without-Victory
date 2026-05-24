@@ -10198,6 +10198,20 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 
 ---
 
+## [2026-05-24] docs(content): harden Codex sensitive-history plan
+
+**Type:** Roadmap/content planning.
+
+**Change:** Added an execution-grade Codex and sensitive-history plan that separates safe factual correction, gated sensitive-history packets, and dynamic live-state consequence arcs. Updated the Command Board and active hardening matrix to route the P1 Codex lane through the new packet before runtime content changes.
+
+**Determinism:** Documentation-only. No runtime code, scenario data, generated artifacts, saves, or baselines changed.
+
+**Verification:** `git diff --check` - PASS.
+
+**Artifacts:** `docs/plans/2026-05-24-codex-sensitive-history-execution-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-active-plan-hardening-pass.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-24] docs(process): add owned-branch acceptance packet
 
 **Type:** Roadmap/process planning.
