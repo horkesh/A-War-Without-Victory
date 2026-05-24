@@ -11,10 +11,10 @@ That made the surface inconsistent with the rest of the tactical shell: Escape a
 
 ## Change
 
-- Migrated `EventModal` from the bespoke `GlassPanel` overlay path to an explicit modal-style overlay with the same dismissal semantics.
+- Migrated `EventModal` from the bespoke `GlassPanel` overlay path to the shared `Modal` wrapper.
 - Kept the existing dispatch-paper body and acknowledgement button.
 - Routed the acknowledgement button, Escape key, close affordance, and backdrop click through the same `onAcknowledge` path.
-- Added a labelled dialog contract via `aria-labelledby="event-modal-title"`.
+- Added a labelled dialog contract via `ariaLabelledBy="event-modal-title"`.
 - Added a jsdom regression covering button, Escape, backdrop, and labelled-dialog behavior.
 
 ## Verification

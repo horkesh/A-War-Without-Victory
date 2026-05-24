@@ -1337,7 +1337,7 @@
 
 **Why:** The 2026-05-22 GUI visual audit identified the non-decision event dispatch modal as inconsistent with the shared modal stack: it could only be dismissed through the acknowledgement button, Escape did not dismiss it, and it did not expose a labelled dialog role.
 
-**Change:** Migrated `EventModal` from the bespoke `GlassPanel` overlay path to an explicit modal-style overlay while preserving the dispatch-paper content. The acknowledgement button, header close affordance, Escape key, and backdrop click now all route through `onAcknowledge`; the panel has a labelled dialog contract via `event-modal-title`. Added a jsdom regression for button/Escape/backdrop dismissal and dialog labelling.
+**Change:** Migrated `EventModal` from the bespoke `GlassPanel` overlay path to the shared `Modal` wrapper while preserving the dispatch-paper content. The acknowledgement button, header close affordance, Escape key, and backdrop click now all route through `onAcknowledge`; the panel has a labelled dialog contract via `event-modal-title`. Added a jsdom regression for button/Escape/backdrop dismissal and dialog labelling.
 
 **Verification:** Red run `npx.cmd vitest run tests\ui\event_modal_dismissal.test.ts --reporter=dot` failed before the patch because Escape did not acknowledge and no labelled dialog existed; after the patch it passed 2/2.
 
