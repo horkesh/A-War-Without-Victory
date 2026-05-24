@@ -10198,6 +10198,20 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 
 ---
 
+## [2026-05-24] fix(sector): assign startup interior brigades to rear sector ownership
+
+**Type:** Sector ownership / desktop startup invariant.
+
+**Change:** Startup sector reconciliation now keeps same-corps, same-component interior brigades sector-owned as rear brigades when they can path through friendly territory to an own-corps sector. The deep-rear fallback is explicitly scoped to turn-0 startup construction, writes only the brigade's current OSID into the owning sector's rear territory, and leaves live-turn sector reconciliation behavior byte-identical to the accepted baselines. Desktop `createStateFromScenario(... initialStateOnly)` also wraps the in-memory startup builder in the existing routine-console diagnostics suppression scope, so normal Electron campaign start does not print routine sector-repair chatter while developers can still force it with `AWWV_FORCE_ROUTINE_DIAGNOSTICS=1`.
+
+**Determinism:** Deterministic BFS and stable tie-breaks (`distance`, load, `sector_id`). Scenario data, save schema, and accepted baseline hashes are unchanged.
+
+**Verification:** `npx.cmd vitest run tests/brigade_territory_reconciliation.test.ts tests/desktop_campaign_start_contract.test.ts tests/routine_console_diagnostics.test.ts --reporter=dot` - PASS (3 files / 37 tests). `createStateFromScenario('data/scenarios/apr1992_definitive_52w.json', process.cwd(), { initialStateOnly: true })` - PASS: `unresolved_sector_brigades=[]`, `rs_17th_klju_light_infantry` rear-owned by `sector:vrs_2nd_krajina:2`. `npm.cmd run typecheck` - PASS. `git diff --check` - PASS (CRLF normalization warning only on `tests/brigade_territory_reconciliation.test.ts`). `npm.cmd run test:baselines` - PASS, `Baseline regression: all scenarios match.`
+
+**Artifacts:** `src/sim/combat/brigade_assignment.ts`, `src/sim/combat/corps_front_sectors.ts`, `src/scenario/scenario_runner.ts`, `tests/brigade_territory_reconciliation.test.ts`, `tests/desktop_campaign_start_contract.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-24] docs(process): close active plan hardening pass
 
 **Type:** Roadmap/process planning.

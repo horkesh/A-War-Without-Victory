@@ -124,6 +124,87 @@ function friendlyDistanceToAny(
     return null;
 }
 
+function friendlyPathToAny(
+    startOsid: string,
+    targets: Set<string>,
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>,
+    maxHops = 30
+): string[] | null {
+    if (!startOsid || targets.size === 0) return null;
+    if (targets.has(startOsid)) return [startOsid];
+    const visited = new Set<string>([startOsid]);
+    const parent = new Map<string, string>();
+    let frontier: string[] = [startOsid];
+    for (let hop = 1; hop <= maxHops; hop++) {
+        const next: string[] = [];
+        for (const osid of frontier.sort(strictCompare)) {
+            const neighbors = [...(adjacency.get(osid as Osid) ?? [])].sort(strictCompare);
+            for (const nb of neighbors) {
+                if (visited.has(nb)) continue;
+                visited.add(nb);
+                if (!friendlyOsids.has(nb)) continue;
+                parent.set(nb, osid);
+                if (targets.has(nb)) {
+                    const path = [nb];
+                    let cursor = nb;
+                    while (parent.has(cursor)) {
+                        cursor = parent.get(cursor)!;
+                        path.push(cursor);
+                    }
+                    return path.reverse();
+                }
+                next.push(nb);
+            }
+        }
+        if (next.length === 0) break;
+        frontier = next;
+    }
+    return null;
+}
+
+function nearestSameCorpsRearSectorInComponent(
+    locationOsid: string,
+    corpsId: string | undefined,
+    brigComp: number,
+    sectorNeed: Array<{ sector: CorpsFrontSector; need: number; comp: number }>,
+    sectorFrontOsidSets: Map<CorpsFrontSector, Set<string>>,
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>,
+): CorpsFrontSector | null {
+    if (!corpsId) return null;
+    const candidates = sectorNeed
+        .map((sn) => {
+            if (sn.sector.corps_id !== corpsId || sn.comp !== brigComp) return null;
+            const claimOsids = new Set<string>([
+                ...sn.sector.territory_osids,
+                ...(sectorFrontOsidSets.get(sn.sector) ?? new Set<string>()),
+            ]);
+            const dist = friendlyDistanceToAny(
+                locationOsid,
+                claimOsids,
+                adjacency,
+                friendlyOsids,
+                Number.MAX_SAFE_INTEGER,
+            );
+            if (dist == null) return null;
+            const load =
+                sn.sector.assigned_brigade_ids.length
+                + sn.sector.reserve_brigade_ids.length
+                + (sn.sector.rear_brigade_ids?.length ?? 0);
+            return { sector: sn.sector, dist, need: sn.need, load };
+        })
+        .filter((candidate): candidate is { sector: CorpsFrontSector; dist: number; need: number; load: number } => candidate != null)
+        .sort((a, b) =>
+            a.dist - b.dist
+            || b.need - a.need
+            || a.load - b.load
+            || strictCompare(a.sector.sector_id, b.sector.sector_id)
+        );
+
+    return candidates[0]?.sector ?? null;
+}
+
 export function buildOneHopReserveBand(
     frontSet: Set<string>,
     adjacency: Map<Osid, Osid[]>,
@@ -779,6 +860,22 @@ export function classifyBrigadesByTerritory(
                 if (isMovementOwnedHomeReturn(state, bid, f) || isMovementOwnedReturnToCorps(state, bid, f, sectors)) {
                     continue;
                 }
+                if ((state?.meta?.turn ?? 0) === 0) {
+                    const rearSector = nearestSameCorpsRearSectorInComponent(
+                        f.location_osid,
+                        corpsId,
+                        brigComp,
+                        sectorNeed,
+                        sectorFrontOsidSets,
+                        adjacency,
+                        friendlyOsids,
+                    );
+                    if (rearSector) {
+                        rearSector.rear_brigade_ids ??= [];
+                        rearSector.rear_brigade_ids.push(bid);
+                        continue;
+                    }
+                }
                 if (REAR_GUARD_CORPS.has(corpsId)) {
                     emitRoutineConsoleWarn(`[brigade_assignment] [PROVISIONAL] UNASSIGNED ${bid}: rear-guard corps brigade cannot reach any same-component sector`);
                     continue;
@@ -1137,9 +1234,12 @@ export function enforcePhysicalSectorOwnership(
  * writers have run, but its own corps still has a sector that truthfully owns
  * its current location, attach it back to that sector.
  *
- * This is not a permissive fallback. Candidates must already own the brigade's
- * current position by frontline, sector territory, or one-hop reserve truth, and the
- * final owner must match the brigade's resolved corps.
+ * This is not a permissive fallback. Primary candidates must already own the
+ * brigade's current position by frontline, sector territory, or one-hop reserve
+ * truth, and the final owner must match the brigade's resolved corps. If no
+ * primary claim exists but the brigade can still path through friendly territory
+ * to an own-corps sector, keep its current OSID sector-owned as a deep rear
+ * position rather than serializing it as ownerless.
  */
 export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
     sectors: CorpsFrontSector[],
@@ -1147,20 +1247,30 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
     faction: FactionId,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
+    options?: { allowDeepRearOwnership?: boolean },
 ): void {
-    const assigned = new Set<FormationId>();
-    for (const sector of sectors) {
-        for (const bid of sector.assigned_brigade_ids) assigned.add(bid);
-        for (const bid of sector.reserve_brigade_ids) assigned.add(bid);
-        for (const bid of sector.rear_brigade_ids ?? []) assigned.add(bid);
-    }
-
     const sectorClaims = sectors.map((sector) => {
         const frontSet = getSectorFrontOsids(sector);
         const territorySet = new Set(sector.territory_osids);
         const oneHopBehind = buildOneHopReserveBand(frontSet, adjacency, friendlyOsids);
         return { sector, frontSet, territorySet, oneHopBehind };
     });
+
+    const assigned = new Set<FormationId>();
+    for (const { sector, frontSet, territorySet, oneHopBehind } of sectorClaims) {
+        for (const bid of sector.assigned_brigade_ids) {
+            const locationOsid = formations[bid]?.location_osid;
+            if (locationOsid && frontSet.has(locationOsid)) assigned.add(bid);
+        }
+        for (const bid of sector.reserve_brigade_ids) {
+            const locationOsid = formations[bid]?.location_osid;
+            if (locationOsid && oneHopBehind.has(locationOsid)) assigned.add(bid);
+        }
+        for (const bid of sector.rear_brigade_ids ?? []) {
+            const locationOsid = formations[bid]?.location_osid;
+            if (locationOsid && territorySet.has(locationOsid)) assigned.add(bid);
+        }
+    }
 
     const formIds = Object.keys(formations).sort(strictCompare);
     for (const fid of formIds) {
@@ -1209,6 +1319,48 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
                 || strictCompare(a.sector.sector_id, b.sector.sector_id)
             );
 
+        if (candidates.length === 0 && options?.allowDeepRearOwnership === true) {
+            const rearCandidates = sectorClaims
+                .map(({ sector, frontSet, territorySet, oneHopBehind }) => {
+                    if (sector.corps_id !== corpsId) return null;
+                    const claimOsids = new Set<string>([
+                        ...frontSet,
+                        ...territorySet,
+                        ...oneHopBehind,
+                    ]);
+                    const path = friendlyPathToAny(
+                        locationOsid,
+                        claimOsids,
+                        adjacency,
+                        friendlyOsids,
+                        Number.MAX_SAFE_INTEGER,
+                    );
+                    if (!path) return null;
+                    const dist = path.length - 1;
+                    const load =
+                        sector.assigned_brigade_ids.length
+                        + sector.reserve_brigade_ids.length
+                        + (sector.rear_brigade_ids?.length ?? 0);
+                    return { sector, dist, load, path };
+                })
+                .filter((candidate): candidate is { sector: CorpsFrontSector; dist: number; load: number; path: string[] } => candidate != null)
+                .sort((a, b) =>
+                    a.dist - b.dist
+                    || a.load - b.load
+                    || strictCompare(a.sector.sector_id, b.sector.sector_id)
+                );
+            const rearBest = rearCandidates[0];
+            if (!rearBest) continue;
+            rearBest.sector.rear_brigade_ids ??= [];
+            rearBest.sector.rear_brigade_ids.push(fid);
+            rearBest.sector.territory_osids = [...new Set([
+                ...rearBest.sector.territory_osids,
+                locationOsid,
+            ])].sort(strictCompare);
+            assigned.add(fid);
+            emitRoutineConsoleWarn(`[brigade_assignment] Rehomed ${fid} into truthful sector owner ${rearBest.sector.sector_id} (deep-rear)`);
+            continue;
+        }
         if (candidates.length === 0) continue;
         const best = candidates[0]!;
         if (best.claim === 'front') {

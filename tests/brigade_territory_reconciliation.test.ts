@@ -164,6 +164,49 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
         expect(sector2.assigned_brigade_ids).not.toContain('brig_depth');
     });
 
+    it('keeps same-corps same-component interior brigades sector-owned as rear brigades', () => {
+        const sector = makeSector(
+            'sector:vrs_2nd_krajina:0',
+            'vrs_2nd_krajina',
+            [makeSubSeg('front', ['op:m:front'], ['op:m:enemy'], 3)],
+            ['op:m:front'],
+        );
+        const rearChain = Array.from({ length: 36 }, (_, i) => `op:m:rear_${i}`);
+        const brigade = makeFormation({
+            id: 'rs_17th_klju_light_infantry',
+            corps_id: 'vrs_2nd_krajina',
+            location_osid: rearChain[0],
+            home_osid: rearChain[0],
+        });
+        const formations: Record<FormationId, FormationState> = {
+            rs_17th_klju_light_infantry: brigade,
+        };
+        const links: [string, string][] = [];
+        for (let i = 0; i < rearChain.length - 1; i++) {
+            links.push([rearChain[i]!, rearChain[i + 1]!]);
+        }
+        links.push([rearChain[rearChain.length - 1]!, 'op:m:front']);
+        const adjacency = makeAdjacency(links);
+        const friendlyOsids = new Set<string>(['op:m:front', ...rearChain]);
+        const componentOf = makeComponentOf(
+            Object.fromEntries(['op:m:front', ...rearChain].map((osid) => [osid, 0])),
+        );
+        const commanderProfiles = new Map<string, CorpsCommanderProfile>();
+
+        classifyBrigadesByTerritory(
+            [sector],
+            'RS' as FactionId,
+            formations,
+            adjacency,
+            friendlyOsids,
+            componentOf,
+            commanderProfiles,
+        );
+
+        expect(sector.assigned_brigade_ids).toEqual([]);
+        expect(sector.rear_brigade_ids).toEqual(['rs_17th_klju_light_infantry']);
+    });
+
     it('brigade on front OSID still uses Phase 1 (regression guard)', () => {
         // Brigade is on a front OSID — Phase 1 should claim it.
         // Phase 1.5 must not double-assign it.

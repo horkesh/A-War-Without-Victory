@@ -3289,6 +3289,11 @@ export async function createStateFromScenario(
         const content = await readFile(result.paths.initial_save, 'utf8');
         return deserializeState(content);
     }
-    const { state } = await buildScenarioStartupState(scenario, baseDir);
-    return state;
+    pushRoutineConsoleDiagnosticsSuppressed();
+    try {
+        const { state } = await buildScenarioStartupState(scenario, baseDir);
+        return state;
+    } finally {
+        popRoutineConsoleDiagnosticsSuppressed();
+    }
 }

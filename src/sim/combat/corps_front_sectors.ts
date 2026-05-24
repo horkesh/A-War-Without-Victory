@@ -1086,6 +1086,7 @@ export function applyFinalSectorOwnerTruthPass(
                 faction,
                 adjacency,
                 friendlyOsids,
+                { allowDeepRearOwnership: (state.meta?.turn ?? 0) === 0 },
             ));
         _perfTime('applyFinalSectorOwnerTruthPass:rescue-adjacent', () =>
             rescueAdjacentLiveOwnersForEmptyFrontSectors(
@@ -1795,7 +1796,14 @@ function recoverDroppedFrontEdges(
             reclassifyRearBrigades(factionSectors, formations, adjacency, friendlyOsids);
             deduplicateBrigadesAcrossSectors(factionSectors);
             enforcePhysicalSectorOwnership(factionSectors, formations, adjacency, friendlyOsids);
-            rehomeUnassignedBrigadesToPhysicalSectorOwners(factionSectors, formations, faction, adjacency, friendlyOsids);
+            rehomeUnassignedBrigadesToPhysicalSectorOwners(
+                factionSectors,
+                formations,
+                faction,
+                adjacency,
+                friendlyOsids,
+                { allowDeepRearOwnership: (state.meta?.turn ?? 0) === 0 },
+            );
             reclassifyRearBrigades(factionSectors, formations, adjacency, friendlyOsids);
             recomputeSectorPowerAndThreat(factionSectors, formations, faction, state);
         }
@@ -1981,7 +1989,14 @@ function sealMergedSectorTruth(
 
         _perfTime('sealMergedSectorTruth:dedup-brigades', () => deduplicateBrigadesAcrossSectors(factionSectors));
         _perfTime('sealMergedSectorTruth:enforce-ownership', () => enforcePhysicalSectorOwnership(factionSectors, formations, adjacency, friendlyOsids));
-        _perfTime('sealMergedSectorTruth:rehome-unassigned', () => rehomeUnassignedBrigadesToPhysicalSectorOwners(factionSectors, formations, faction, adjacency, friendlyOsids));
+        _perfTime('sealMergedSectorTruth:rehome-unassigned', () => rehomeUnassignedBrigadesToPhysicalSectorOwners(
+            factionSectors,
+            formations,
+            faction,
+            adjacency,
+            friendlyOsids,
+            { allowDeepRearOwnership: (state.meta?.turn ?? 0) === 0 },
+        ));
         _perfTime('sealMergedSectorTruth:dedup-brigades', () => deduplicateBrigadesAcrossSectors(factionSectors));
         _perfTime('sealMergedSectorTruth:ensure-coverage', () => ensureMinimumSectorCoverage(factionSectors, formations, adjacency, friendlyOsids, componentOf, state, _perfTime));
         _perfTime('sealMergedSectorTruth:reclassify-rear', () => reclassifyRearBrigades(factionSectors, formations, adjacency, friendlyOsids));
@@ -1991,7 +2006,14 @@ function sealMergedSectorTruth(
             const refreshedFactionSectors = Object.values(sectors).filter((sector) => sector.faction === faction);
             _perfTime('sealMergedSectorTruth:dedup-brigades', () => deduplicateBrigadesAcrossSectors(refreshedFactionSectors));
             _perfTime('sealMergedSectorTruth:enforce-ownership', () => enforcePhysicalSectorOwnership(refreshedFactionSectors, formations, adjacency, friendlyOsids));
-            _perfTime('sealMergedSectorTruth:rehome-unassigned', () => rehomeUnassignedBrigadesToPhysicalSectorOwners(refreshedFactionSectors, formations, faction, adjacency, friendlyOsids));
+            _perfTime('sealMergedSectorTruth:rehome-unassigned', () => rehomeUnassignedBrigadesToPhysicalSectorOwners(
+                refreshedFactionSectors,
+                formations,
+                faction,
+                adjacency,
+                friendlyOsids,
+                { allowDeepRearOwnership: (state.meta?.turn ?? 0) === 0 },
+            ));
             _perfTime('sealMergedSectorTruth:dedup-brigades', () => deduplicateBrigadesAcrossSectors(refreshedFactionSectors));
             _perfTime('sealMergedSectorTruth:ensure-coverage', () => ensureMinimumSectorCoverage(refreshedFactionSectors, formations, adjacency, friendlyOsids, componentOf, state, _perfTime));
             _perfTime('sealMergedSectorTruth:reclassify-rear', () => reclassifyRearBrigades(refreshedFactionSectors, formations, adjacency, friendlyOsids));
@@ -2902,7 +2924,14 @@ function buildFactionSectors(
         // Step 8d: Reattach any now-unassigned brigades whose current locations are still
         // truthfully owned by an existing sector.
         _perfTime(`buildFactionSectors:${faction}:post-classification-truth-normalization:rehome-unassigned`, () => {
-            rehomeUnassignedBrigadesToPhysicalSectorOwners(sectors, formations, faction, adjacency, friendlyOsids);
+            rehomeUnassignedBrigadesToPhysicalSectorOwners(
+                sectors,
+                formations,
+                faction,
+                adjacency,
+                friendlyOsids,
+                { allowDeepRearOwnership: (state.meta?.turn ?? 0) === 0 },
+            );
         });
 
         // Step 8e: Re-normalize reserve/frontline roles after truthful rehome.
