@@ -267,6 +267,96 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] docs(strict-null): classify FactionState optionals
+
+**Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
+
+**Why:** `FactionState` contributes ten counted optionals, but inspection shows they span independent faction subsystems: patron, embargo, maintenance, capability progression, command capacity, negotiation, and Phase 0 declaration/capital lifecycle. Core faction identity is already required.
+
+**Change:** Added `docs/40_reports/audits/20260523_STRICT_NULL_FACTIONSTATE_OPTIONAL_FIELDS.md` and updated the 40_reports index, consolidated backlog, strict-null phase ledger, and master roadmap. The audit classifies the fields as subsystem-specific schema/default/migration work rather than generic optional-promotion targets.
+
+**Determinism / output impact:** Documentation/process only. No runtime code or serialized state shape changed. The strict-null inventory remains at zero counted casts/assertions and 477 optional `GameState` fields.
+
+**Verification:** `node tools\diagnostics\strict_null_inventory.cjs --field-interfaces`; `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot`; `git diff --check`.
+
+**Artifacts:** `docs/40_reports/audits/20260523_STRICT_NULL_FACTIONSTATE_OPTIONAL_FIELDS.md`.
+
+**Roadmap delta:** Burns down the `FactionState` optional-field group by classification. Future promotion requires subsystem-specific schema/default/migration proof.
+
+---
+
+## [2026-05-23] docs(strict-null): classify event provenance optionals
+
+**Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, displacement math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
+
+**Why:** `ControlEvent`, `DisplacementEvent`, and `DisplacementState` contribute nine counted optionals, but inspection shows they are provenance/detail enrichments layered onto required control-change identity, displacement event accounting, and municipality-level displacement counters.
+
+**Change:** Added `docs/40_reports/audits/20260523_STRICT_NULL_EVENT_PROVENANCE_OPTIONAL_FIELDS.md` and updated the 40_reports index, consolidated backlog, strict-null phase ledger, and master roadmap. The audit classifies battle/brigade joins, municipality/OSID provenance, causer attribution, faction-split arrivals, and OSID-level displacement maps as event-schema work rather than generic optional-promotion targets.
+
+**Determinism / output impact:** Documentation/process only. No runtime code or serialized state shape changed. The strict-null inventory remains at zero counted casts/assertions and 477 optional `GameState` fields.
+
+**Verification:** `node tools\diagnostics\strict_null_inventory.cjs --field-interfaces`; `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot`; `git diff --check`.
+
+**Artifacts:** `docs/40_reports/audits/20260523_STRICT_NULL_EVENT_PROVENANCE_OPTIONAL_FIELDS.md`.
+
+**Roadmap delta:** Burns down the `ControlEvent`, `DisplacementEvent`, and `DisplacementState` optional-field groups by classification. Future promotion requires event-provenance/schema work with compatibility handling for older or non-combat rows.
+
+---
+
+## [2026-05-23] docs(strict-null): classify GameState top-level optionals
+
+**Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
+
+**Why:** Top-level `GameState` contributes five counted optionals. Inspection shows they are persisted history buffers, a transient paramilitary decision queue, and paramilitary policy/count fields whose save-migration default shape already needs focused reconciliation before any requiredness change.
+
+**Change:** Added `docs/40_reports/audits/20260523_STRICT_NULL_GAMESTATE_TOP_LEVEL_OPTIONAL_FIELDS.md` and updated the 40_reports index, consolidated backlog, strict-null phase ledger, and master roadmap. The audit classifies `turn_summaries`, `operation_history`, `pending_paramilitary_requests`, `paramilitary_policy`, and `paramilitary_deployment_count` as top-level save-contract fields requiring a dedicated schema lane rather than generic optional promotion.
+
+**Determinism / output impact:** Documentation/process only. No runtime code or serialized state shape changed. The strict-null inventory remains at zero counted casts/assertions and 477 optional `GameState` fields.
+
+**Verification:** `node tools\diagnostics\strict_null_inventory.cjs --field-interfaces`; `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot`; `git diff --check`.
+
+**Artifacts:** `docs/40_reports/audits/20260523_STRICT_NULL_GAMESTATE_TOP_LEVEL_OPTIONAL_FIELDS.md`.
+
+**Roadmap delta:** Burns down the top-level `GameState` optional-field group by classification. Future promotion requires a top-level save-contract/migration lane with roundtrip proof.
+
+---
+
+## [2026-05-23] docs(strict-null): classify Tier1 eligibility optionals
+
+**Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, collapse thresholds, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
+
+**Why:** `Tier1EntityEligibilityState` contributes five counted optionals, but inspection shows the persisted collapse eligibility contract already has required `domains`, `persistence`, `suppressed`, and `immune` fields. The counted fields are nested diagnostic-detail fields under `debug` / `debug.gates`.
+
+**Change:** Added `docs/40_reports/audits/20260523_STRICT_NULL_TIER1_ELIGIBILITY_OPTIONAL_FIELDS.md` and updated the 40_reports index, consolidated backlog, strict-null phase ledger, and master roadmap. The audit classifies `debug`, `gates`, `authority`, `cohesion`, and `spatial` as optional diagnostic gate detail rather than missing required Phase 3C/3D state.
+
+**Determinism / output impact:** Documentation/process only. No runtime code or serialized state shape changed. The strict-null inventory remains at zero counted casts/assertions and 477 optional `GameState` fields.
+
+**Verification:** `node tools\diagnostics\strict_null_inventory.cjs --field-interfaces`; `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot`; `git diff --check`.
+
+**Artifacts:** `docs/40_reports/audits/20260523_STRICT_NULL_TIER1_ELIGIBILITY_OPTIONAL_FIELDS.md`.
+
+**Roadmap delta:** Burns down the `Tier1EntityEligibilityState` optional-field group by classification. Future promotion requires a Tier-1 diagnostic-output/schema lane, not generic strict-null cleanup.
+
+---
+
+## [2026-05-23] docs(strict-null): classify municipality optionals
+
+**Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
+
+**Why:** `MunicipalityState` and `OrganizationalPenetration` are adjacent `state` optional-field groups. Current scenario init and organizational-penetration seeding often populate them, but consumers intentionally preserve sparse/minimal-state fallbacks and `jna_presence` remains an additive optional signal outside the formula output.
+
+**Change:** Added `docs/40_reports/audits/20260523_STRICT_NULL_MUNICIPALITY_OPTIONAL_FIELDS.md` and updated the 40_reports index, consolidated backlog, strict-null phase ledger, and master roadmap. The audit classifies the 15 combined optionals as sparse multi-phase municipality state, seeded organizational factors, placeholder authority/legitimacy fields, or additive support signals.
+
+**Determinism / output impact:** Documentation/process only. No runtime code or serialized state shape changed. The strict-null inventory remains at zero counted casts/assertions and 477 optional `GameState` fields.
+
+**Verification:** `node tools\diagnostics\strict_null_inventory.cjs --field-interfaces`; `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot`; `git diff --check`.
+
+**Artifacts:** `docs/40_reports/audits/20260523_STRICT_NULL_MUNICIPALITY_OPTIONAL_FIELDS.md`.
+
+**Roadmap delta:** Burns down the `MunicipalityState` and `OrganizationalPenetration` optional-field groups by classification. Future promotion requires a municipality-state schema/default/migration lane with baseline and save-roundtrip proof.
+
+---
+
 ## [2026-05-23] docs(strict-null): classify PendingProposalReview optionals
 
 **Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
