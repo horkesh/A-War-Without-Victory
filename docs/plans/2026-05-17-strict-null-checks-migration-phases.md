@@ -50,6 +50,35 @@ Phase 1 through Phase 6 remain mandatory order. No source migration phase may st
 | 5 | UI adapter | 0 remaining after 2026-05-22 adapter tail (was 63) | 0 | >5 renderer consumers | MEDIUM | Boundary-cleanup lane CLOSED 2026-05-22; former Batch 48 retained sites now route through adapter-local helpers and typed UI faction definitions |
 | 6 | Renderer + warroom | 74 | 0 | UI-local repeated consumers | LOW | Inventory only; source deferred |
 
+## 2026-05-22 Current Escape Floor / Optional GameState Contract Floor
+
+The major counted strict-null escape lanes are closed, with a small retained `as unknown` boundary tail:
+
+| Category | Count |
+|---|---:|
+| `as_factionid_casts` | 0 |
+| `as_unknown_casts` | 3 |
+| `as_any_casts` | 0 |
+| `non_null_assertions_dot` | 0 |
+| `non_null_assertions_index` | 0 |
+| `optional_fields_game_state` | 486 |
+
+The remaining lane is optional `GameState` contract/schema work. The guarded optional-field domain floor is:
+
+| Domain | Count |
+|---|---:|
+| `sim` | 304 |
+| `state` | 174 |
+| `derived` | 8 |
+| `scenario` | 0 |
+| `ipc` | 0 |
+| `ui_adapter` | 0 |
+| `unknown` | 0 |
+
+Guard: `tests/strict_null_inventory_progress.test.ts` pins the current counted escape floor and domain split; `tests/strict_null_inventory.test.ts` covers the `--field-domains` CLI surface. Report: `docs/40_reports/implemented/20260522_STRICT_NULL_OPTIONAL_GAMESTATE_CONTRACT_GUARD.md`.
+
+Next strict-null source work must classify small owned optional-field groups by save/default/validator readiness before making any field required. Broad optional-field removal is forbidden.
+
 ## Phase File Assignment
 
 Each listed file is assigned to exactly one phase. Files outside this first strict-null lane remain tracked by the baseline artifact and should be assigned by a later ledger expansion before they are migrated.
@@ -453,7 +482,7 @@ Deferred / stop-gated (≈ 175 sites; documented per-class in the classification
 
 `strictNullChecks` migration is NOT closed; closing requires Batches A + B + C + save-shape/behavior lane + UI/engine FactionId unification + validator type-tightening lane.
 
-2026-05-22 update: the deferred cast/assertion list above is retained as historical classification context only. The GameStateAdapter tail closed the last visible counted escape lane, so current strict-null work is no longer broad cast/assertion cleanup; it is the 477-field optional `GameState` contract/schema/defaulting lane.
+2026-05-22 update: the deferred cast/assertion list above is retained as historical classification context only. The GameStateAdapter tail closed the largest counted escape lanes, so current strict-null work is no longer broad cast/assertion cleanup; it is the 486-field optional `GameState` contract/schema/defaulting lane plus the small retained `as unknown` boundary tail.
 
 ## Source Migration Status
 
@@ -495,4 +524,4 @@ No source phase was completed in this lane. Current worktree status shows unrela
 - `src/ui/map/data/GameStateAdapter.ts` is now closed for inventory-counted `as_any_casts` and `as_factionid_casts`, and the Phase 5 adapter assertion is pinned at exact zero across all counted escape/assertion categories.
 - Delta from the save-migration tail: top-level `as_any_casts` 8 -> 0 and `as_factionid_casts` 2 -> 0; `as_unknown_casts`, `non_null_assertions_dot`, and `non_null_assertions_index` remain 0.
 - Verification: `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts tests\adapter_field_completeness.test.ts tests\game_state_adapter_estimated_civilian_risk.test.ts tests\ui_adapter_boundary.test.ts tests\ui_map_game_state_adapter.test.ts --reporter=dot` PASS 148/148, `npm.cmd run typecheck` PASS, `npm.cmd run desktop:map:build` PASS with existing Vite warnings, `git diff --check` PASS, and current inventory proof from `node tools\diagnostics\strict_null_inventory.cjs`.
-- Remaining strict-null work: 477 optional `GameState` fields. This is a contract/schema/default-decision lane, not a remaining cast/assertion cleanup lane.
+- Remaining strict-null work: 486 optional `GameState` fields plus 3 retained `as unknown` boundary casts. This is primarily a contract/schema/default-decision lane, not broad cast/assertion cleanup.

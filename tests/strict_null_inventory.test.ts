@@ -125,4 +125,43 @@ export interface StateMeta {
             },
         });
     });
+
+    it('emits field-domain-only CLI JSON for the optional GameState schema lane', () => {
+        write(join(TMP_ROOT, 'src', 'state', 'game_state.ts'), `
+export interface GameState {
+  meta?: StateMeta;
+}
+export interface StateMeta {
+  player_faction?: FactionId;
+}
+export interface SimCoreState {
+  readiness?: number;
+}
+export interface DerivedSummary {
+  total?: number;
+}
+`);
+
+        const json = execFileSync(
+            process.execPath,
+            ['tools/diagnostics/strict_null_inventory.cjs', '--field-domains', TMP_ROOT],
+            { cwd: process.cwd(), encoding: 'utf8' },
+        );
+
+        expect(JSON.parse(json)).toMatchObject({
+            total: 4,
+            domain_counts: {
+                derived: 1,
+                sim: 1,
+                state: 2,
+                unknown: 0,
+            },
+            fields_by_domain: {
+                derived: ['DerivedSummary.total'],
+                sim: ['SimCoreState.readiness'],
+                state: ['GameState.meta', 'StateMeta.player_faction'],
+            },
+            unknown_justifications: [],
+        });
+    });
 });

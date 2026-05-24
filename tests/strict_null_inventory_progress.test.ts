@@ -491,7 +491,13 @@ interface InventoryCategory {
 }
 
 interface StrictNullInventory {
+    counts: Record<string, number>;
     categories: Record<string, InventoryCategory>;
+    optional_field_domains: {
+        total: number;
+        domain_counts: Record<string, number>;
+        unknown_justifications: unknown[];
+    };
 }
 
 function phaseCount(inventory: StrictNullInventory, category: EscapeCategory, files: readonly string[]): number {
@@ -500,6 +506,34 @@ function phaseCount(inventory: StrictNullInventory, category: EscapeCategory, fi
 }
 
 describe('strict null inventory progress', () => {
+    it('pins the optional GameState contract domain floor after current escape closeout', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+
+        expect(current.counts).toMatchObject({
+            as_factionid_casts: 0,
+            as_unknown_casts: 3,
+            as_any_casts: 0,
+            non_null_assertions_dot: 0,
+            non_null_assertions_index: 0,
+            optional_fields_game_state: 486,
+        });
+        expect(current.optional_field_domains.total).toBe(486);
+        expect(current.optional_field_domains.domain_counts).toMatchObject({
+            derived: 8,
+            ipc: 0,
+            scenario: 0,
+            sim: 304,
+            state: 174,
+            ui_adapter: 0,
+            unknown: 0,
+        });
+        expect(current.optional_field_domains.unknown_justifications).toEqual([]);
+    });
+
     it('keeps Phase 1 state-schema escape hatches at or below the accepted deferred ceiling', () => {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {

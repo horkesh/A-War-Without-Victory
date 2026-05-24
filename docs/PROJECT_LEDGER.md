@@ -318,6 +318,17 @@
 **Artifacts:** `data/scenarios/events/war_1992.json`; `tests/sim/events/event_notification_content_backfill.test.ts`; `tests/sim/events/event_notification_residuals_diagnostic.test.ts`; `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_1992_HISTORIAN_ROWS.md`.
 
 **Roadmap delta:** Phase D notification residual drops from 5 rows / 20 blocks to 3 rows / 10 blocks. The remaining rows are `srebrenica_demilitarization_1993` and the two blocked-sensitive front-visit press options.
+## [2026-05-22] diagnostic(strict-null): pin optional GameState contract floor
+
+**Type:** Strict-null diagnostic/test/docs guard. No simulation behavior, save schema, migration, scenario data, UI behavior, calibration/army-arc tuning, combat math, operation behavior, event content, turn ordering, painted target, or serialized output contract changed.
+
+**Why:** The live strict-null inventory had drifted past the older 477-field floor. The remaining optional `GameState` count needed an executable current contract rather than a vague "still optional" backlog note.
+
+**Change:** Added a strict-null progress assertion that pins the current counted escape floor and the optional `GameState` domain split: 486 total optional fields, with `sim` 304, `state` 174, `derived` 8, and `unknown` 0. Current counted escapes are `as_factionid_casts 0`, `as_unknown_casts 3`, `as_any_casts 0`, `non_null_assertions_dot 0`, and `non_null_assertions_index 0`. Added CLI test coverage for `tools/diagnostics/strict_null_inventory.cjs --field-domains`. Added report `docs/40_reports/implemented/20260522_STRICT_NULL_OPTIONAL_GAMESTATE_CONTRACT_GUARD.md` and propagated the new floor through roadmap/backlog/phase-ledger indexes.
+
+**Verification:** `npx.cmd vitest run tests\strict_null_inventory.test.ts tests\strict_null_inventory_progress.test.ts --reporter=dot` passed locally.
+
+**Roadmap delta:** Remaining strict-null work is now explicitly the optional `GameState` field contract/schema lane. Future work must classify small owned field groups by save/default/validator readiness before promoting required fields; broad optional-field removal is not allowed.
 
 ---
 
