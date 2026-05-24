@@ -1,8 +1,8 @@
 # Sector Enemy Personnel Index
 
-**Date:** 2026-05-23  
-**Status:** Implemented and locally verified  
-**Lane:** Sector performance / buildFactionSectors brigade-classification  
+**Date:** 2026-05-23
+**Status:** Implemented and locally verified
+**Lane:** Sector performance / buildFactionSectors brigade-classification
 **Scope:** Invocation-local enemy-personnel indexing in sector brigade assignment. No scenario data, combat math, operation behavior, save schema, UI, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
 
 ## Summary
