@@ -10421,3 +10421,41 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `data/derived/startup/apr_1992_initial_save.json`, `data/scenarios/events/war_1995.json`, `src/ui/map/components/SettingsScreen.tsx`, `tools/diagnostics/output/save_migration_drift.json`, fast-slice test contracts, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-25] calibration(combat-math): op-axis 2-hop concentration support
+
+**Type:** Calibration round — engine multiplier change wired at brigade-AI eval-time and battle resolution. Single-change-per-calibration discipline. Faction-symmetric; no init OSID override; no avoided_osids_by_faction; no Math.random / timestamps; no FORAWWV edit. Doctrine: an attacker brigade participating in a corps operation gets a concentration bonus reflecting same-axis op-mates within striking distance, simulating theater-level coordination distinct from per-OSID multi-brigade stacking.
+
+**Change:** New shared helper `countAxisConcentrationSupport` in `src/sim/combat/corps_operation_helpers.ts` performs a 2-hop BFS from the target OSID and counts same-axis op-mates with distance weighting (target/1-hop = 1.0 contribution, 2-hop = 0.5, floored to int, attackers already at the OSID excluded). Wired at two gate-points:
+
+1. `src/sim/combat/bot_brigade_eval_attack.ts` (~L290) replaces the prior `getTacticalAdjacentOsids`-filtered `adjacentOperationParticipants` predicate. The prior predicate excluded HV phantoms staged 2+ hops from late-1995 objectives (Mistral 1/2/Southern Move), causing `estimateConcentratedOutcome` to stay null and `canDirectAttackObjective` to fail on solo prediction even when 4-brigade axes were assembled.
+
+2. `src/sim/combat/attack_resolution_osid.ts` (~L653) augments the `getConcentrationBonus(attackerFormations.length)` call with `effectiveAttackerCount = attackerFormations.length + countAxisConcentrationSupport(...)`, clamped via `Math.min(4, …)` to stay within the existing `CONCENTRATION_BONUS_CAP = 0.30`. Uses `findBrigadeOperationAnywhere` + `getBrigadeAxis` (already-canonical helpers) to extract the axis-scoped brigade set.
+
+Same-axis (not full op) scope keeps the bonus from amplifying cross-axis ops like the Sarajevo ring (SRK has 5+ brigades clustered tight; the same-axis filter caps Sarajevo amplification at the existing 1-axis brigade count). Distance weighting (1-hop=1.0, 2-hop=0.5, floored) keeps tight clusters' contribution at most 2 instead of 4, conservative relative to a flat 1-hop predicate.
+
+**Determinism:** axis brigades iterated via `[...assigned_brigades].sort(strictCompare)`. BFS frontier is deterministic via the existing `adjacency: Map<Osid, Osid[]>` whose neighbor lists are sorted at construction (`osid_adjacency.ts:56`). No `Math.random`, no timestamps. The `getConcentrationBonus` clamp arithmetic is identical to existing path when `effectiveAttackerCount === attackerFormations.length`.
+
+**Verification:**
+- `npx tsc --noEmit` — PASS.
+- `npm run test:baselines` — manifest refresh required (`UPDATE_BASELINES=1`); re-run after refresh: "Baseline regression: all scenarios match".
+- 188w `apr1992_definitive_188w` n20 hash `36d81baf6f5a5130` (vs prior R11 n17 `875c40288d5ac87b`).
+- Scenario-creator-runner-tester independent verdict: GO.
+
+**Outcome (R11 n17 → R13b n20, painted oct1995 target):**
+- Painted match_ratio (area-weighted, 712 OSIDs, 51,337 km² total): **0.789080 → 0.791904 (+0.002824)** — ≈ +145 km² net.
+- OSID-count match: 583/712 → 584/712 (+1 net).
+- Per-faction final counts: HRHB 87 → 86 (−1); RBiH 299 → 305 (+6); RS 326 → 321 (−5). RS moves closer to painted target (315).
+- **All 27 anchors PASS** in both runs, zero diff, zero actual_controller divergence on any anchor OSID.
+- **6/6 bot benchmarks PASS** in both runs; `actual_control_share` byte-identical at turns 20 and 40 → divergence is purely post-w40 (late-war), consistent with the helper firing only when op axes execute and brigades stage near objectives.
+- Battle count identical (369). Outcome distribution shifts marginal categories upward by one class: victory 14 → 22 (+8), decisive 217 → 232 (+15), costly_victory 39 → 31 (−8), repulsed 36 → 29 (−7), stalemate 42 → 34 (−8), catastrophic unchanged (21).
+- 7 R13b-only flips, 5 R11-only flips: net +6 painted-match improvements (Sana 95 Krajina pocket: kolonic_2/prkosi/vodjenica/bosanski_petrovac_2 → RBiH; donji_vakuf:oborci_2 → RBiH; glamoc:stekerovci_2 → HRHB historical HVO gain) vs net −5 regressions (krnjeusa lost, kovacevci_2 wrong-direction, pribelja un-captured because HVO mass redirected to stekerovci, plus 2 unhistorical Tuzla 2nd Corps eastward flips at kalesija:gojcin_2 and sekovici:sekovici_2). Sarajevo ring, Drina, Srebrenica direction unchanged in both runs.
+- HVO Mistral capture arc (drvar_2 / sipovo_2 / jajce_3 / mrkonjic_grad_2 / bosansko_grahovo_2) unchanged: **zero HRHB attacks** in either run, structural gap not caused or fixed by R13b.
+
+**Sensitive-history compliance:** Ring-1 / no §6 / faction-symmetric mechanism with asymmetric outcome. No FORAWWV / painted target / OOB / political_controllers / enclave_resilience / scenario-event-data touch. Combat-math number tuned within the existing CONCENTRATION_BONUS_CAP envelope.
+
+**Watch-item for next round:** Tuzla 2nd Corps eastward push at gojcin_2 + sekovici_2 is unhistorical. If subsequent rounds amplify this drift, tighten hop-2 weight (e.g., 0.33) or restrict same-axis support to brigades whose `corps_id` matches the operation's owning corps.
+
+**Artifacts:** `src/sim/combat/corps_operation_helpers.ts`, `src/sim/combat/bot_brigade_eval_attack.ts`, `src/sim/combat/attack_resolution_osid.ts`, `data/derived/scenario/baselines/manifest.json`, `docs/PROJECT_LEDGER.md`.
+
+---

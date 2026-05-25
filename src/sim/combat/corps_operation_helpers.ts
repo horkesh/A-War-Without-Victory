@@ -127,6 +127,59 @@ export function removeOperation(cmd: CorpsCommandState, op: CorpsOperation): voi
     if (idx >= 0) cmd.active_operations.splice(idx, 1);
 }
 
+/**
+ * R13b operational concentration support count.
+ *
+ * Counts same-axis op-mates within 2 hops of target with distance weighting:
+ *   target OSID + 1-hop neighbour = 1.0 contribution
+ *   2-hop neighbour              = 0.5 contribution
+ * Floored to int for getConcentrationBonus. Excludes brigades already in
+ * `attackerIds` (those add via attackerFormations.length directly).
+ *
+ * Doctrine: a brigade attacking with axis-mates within striking distance
+ * is concentrated even if only one is hitting THIS OSID this turn. 2-hop
+ * window captures HV expeditionary phantoms staged 2+ hops from objectives
+ * (livno/duvno → drvar) without over-amplifying tight clusters (Sarajevo,
+ * Drina) where 5+ stacked brigades cap at 2 instead of 4.
+ *
+ * Deterministic: axisBrigades iterated via strictCompare-sorted copy.
+ */
+export function countAxisConcentrationSupport(
+    state: GameState,
+    axisBrigades: readonly FormationId[],
+    attackerIds: ReadonlySet<FormationId>,
+    adjacency: Map<string, readonly string[]>,
+    targetOsid: string,
+    maxHops = 2,
+): number {
+    const hopByOsid = new Map<string, number>();
+    hopByOsid.set(targetOsid, 0);
+    let frontier: string[] = [targetOsid];
+    for (let h = 1; h <= maxHops; h++) {
+        const next: string[] = [];
+        for (const o of frontier) {
+            const nbrs = adjacency.get(o) ?? [];
+            for (const nbr of nbrs) {
+                if (!hopByOsid.has(nbr)) {
+                    hopByOsid.set(nbr, h);
+                    next.push(nbr);
+                }
+            }
+        }
+        frontier = next;
+    }
+    let weighted = 0;
+    for (const bid of [...axisBrigades].sort(strictCompare)) {
+        if (attackerIds.has(bid)) continue;
+        const f = state.military.formations?.[bid];
+        if (!f?.location_osid || f.status !== 'active') continue;
+        const hop = hopByOsid.get(f.location_osid);
+        if (hop === undefined) continue;
+        weighted += hop <= 1 ? 1.0 : 0.5;
+    }
+    return Math.floor(weighted);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // CorpsOperation factory functions — canonical construction entry points.
 // ALL CorpsOperation objects must be built via one of these factories.
