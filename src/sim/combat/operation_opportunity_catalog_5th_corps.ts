@@ -80,26 +80,29 @@ const KRUPA_VALLEY_OBJECTIVES = [
     'op:bosanska_krupa:gornja_suvaja',
 ];
 
-// Wave 24B (2026-05-23): reordered for OSID-adjacency reachability per the
-// catalog-sweep audit (docs/40_reports/audits/20260523_CATALOG_ADJACENCY_SWEEP.md
-// §b-sana). Prior order had two mid-sequence gaps: trubar (step 3) had no
-// captured neighbor at that point, and bosanski_petrovac_2 (step 6) was
-// approached from the wrong shoulder. New chain: ripac → racic → orasac_2 →
-// trubar (now adjacent to orasac_2) → vrtoce → kolonic_2 → vodjenica → prkosi
-// → bosanski_petrovac_2 (now adjacent to multiple captured) → dobro_selo_2 →
-// krnjeusa → jasenovac_2.
+// R15 (2026-05-25): removed trubar from the sequence — trubar is NOT adjacent
+// to vrtoce (confirmed from operational_contact_graph.json), so the prior chain
+// orasac_2 → trubar → vrtoce was geometrically broken. When trubar took 3
+// consecutive failed attacks MAX_CONSECUTIVE_FAILURES_ON_CURRENT skip fired,
+// jumping the objective to vrtoce while trubar was still RS; brigades at
+// orasac_2 then attacked trubar as an intermediate, accumulating spurious vrtoce
+// failure counts and stalling the axis before the Petrovac cluster could be
+// reached. Fix: vrtoce placed directly after orasac_2 (orasac_2→vrtoce IS
+// adjacent). trubar and krnjeusa are removed; both captured by consolidation
+// (trubar adjacent to captured orasac_2; krnjeusa adjacent to captured vrtoce +
+// gornja_suvaja on the sana_krupa axis). Verified adjacency chain (all ✓):
+//   orasac_2 → vrtoce → prkosi → vodjenica → kolonic_2 →
+//   bosanski_petrovac_2 → dobro_selo_2 → jasenovac_2
 const BIHAC_PETROVAC_OBJECTIVES = [
     'op:bihac:ripac',
     'op:bihac:racic',
     'op:bihac:orasac_2',
-    'op:bihac:trubar',
     'op:bosanski_petrovac:vrtoce',
-    'op:bosanski_petrovac:kolonic_2',
-    'op:bosanski_petrovac:vodjenica',
     'op:bosanski_petrovac:prkosi',
+    'op:bosanski_petrovac:vodjenica',
+    'op:bosanski_petrovac:kolonic_2',
     'op:bosanski_petrovac:bosanski_petrovac_2',
     'op:bosanski_petrovac:dobro_selo_2',
-    'op:bosanski_petrovac:krnjeusa',
     'op:bosanski_petrovac:jasenovac_2',
 ];
 
