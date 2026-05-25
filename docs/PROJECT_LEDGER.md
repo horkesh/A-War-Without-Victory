@@ -13,6 +13,24 @@
 
 ---
 
+## [2026-05-25] fix(events): close Phase 3 modal-first event decision blockers
+
+**Type:** Event pending-decision payload correction + UI authority hardening + focused regression coverage.
+
+**Change:** Extended authored event decision dossier metadata from `EventDefinition` into real `pending_event_decisions` output: narrative, category, situation, historical/source notes, alternate source, staff assessment, and trigger evidence are copied only when authored. Renamed the modal-facing generic `rationale` field to `staff_assessment` and rendered trigger evidence as authored player-facing evidence. Removed inline event response execution from `PresidentialAttentionPanel`; Army HQ now summarizes pending event decisions while `App`/`EventDecisionModal` remain the only event response execution path. No production event JSON or scenario data was changed.
+
+**Determinism:** Serialization-only metadata copy for pending player decisions plus UI presentation changes. No randomness, timestamps, production event authoring, scenario data, operation tuning, initial OSID overrides, avoided-OSID lists, or faction model changes were introduced. Pending decision ordering and response resolution remain unchanged.
+
+**Verification:**
+- `npx.cmd vitest run tests/event_decisions.test.ts tests/ui/event_decision_modal_phase3.test.ts tests/ui/event_decision_auto_launch_contract.test.ts --reporter=dot` - 21/21 PASS after first confirming the new tests failed against the pre-fix code.
+- `npx.cmd vitest run tests/ui/decision_family_modals.test.ts tests/ui/modal_stack_priority.test.ts tests/ui/presidential_blockers.test.ts tests/ui/inbox_items.test.ts tests/player_decision_manifest.test.ts tests/event_decisions.test.ts tests/ui/event_decision_modal_phase3.test.ts tests/ui/event_decision_auto_launch_contract.test.ts --reporter=dot` - 61/61 PASS.
+- `git diff --check` - PASS.
+- `npm.cmd run typecheck` - blocked by unrelated map dependency/type availability in this worktree (`maplibre-gl`, `pmtiles`, Deck.gl packages, `@vitejs/plugin-react`) plus follow-on implicit-any errors in those map files. The correction-owned `App.tsx` category mismatch was fixed; rerun no longer lists changed files.
+
+**Artifacts:** `src/sim/events/event_types.ts`, `src/sim/events/evaluate_events.ts`, `src/ui/map/data/types.ts`, `src/ui/map/components/EventDecisionModal.tsx`, `src/ui/map/components/army_hq/PresidentialAttentionPanel.tsx`, `tests/event_decisions.test.ts`, `tests/ui/event_decision_auto_launch_contract.test.ts`, `tests/ui/event_decision_modal_phase3.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-25] test(ui): align merge CI contracts
 
 **Type:** Test/copy contract follow-up. No simulation calibration, scenario data, combat math, event ordering, or Claude calibration branch work changed.
@@ -10550,5 +10568,23 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 - `git diff --check` - PASS.
 
 **Artifacts:** `src/sim/events/event_types.ts`, `src/sim/events/bot_response.ts`, `src/sim/events/ai_default_response.ts`, `src/sim/events/evaluate_events.ts`, `tools/diagnostics/event_taxonomy_report.ts`, `tests/event_decisions.test.ts`, `tests/sim/events/event_taxonomy_report.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-25] feat(ui): make event decisions modal-first presidential dossiers
+
+**Type:** UI decision-flow hardening + modal read-model presentation.
+
+**Change:** Hardened the tactical-map event decision auto-launch path so pending player-faction decisions open directly as `EventDecisionModal`, sort deterministically by required/blocking status, `turn_fired`, and `event_id`, continue opening same-turn decisions after one resolves, reset stale active modal state on save load, and keep the modal open when `respondToEventDecision` returns `{ ok: false }`. Expanded `EventDecisionModal` into a presidential dossier showing situation/narrative, category/source note, faction/turn, historical-default marker and calibration note, option descriptions, mechanical consequence rows, no-immediate-effect fallback, and the Chronicle/Army HQ Records trail.
+
+**Determinism:** UI/read-model only. No simulation behavior, production event JSON, scenario data, save migration, randomness, timestamps, operation tuning, initial OSID overrides, avoided-OSID lists, or faction model changes were introduced. Ordering is pure and deterministic over pending decision payload fields.
+
+**Verification:**
+- `npx.cmd vitest run tests/ui/event_decision_modal_phase3.test.ts tests/ui/event_decision_auto_launch_contract.test.ts --reporter=dot` - 6/6 PASS.
+- `npx.cmd vitest run tests/ui/decision_family_modals.test.ts tests/ui/modal_stack_priority.test.ts tests/ui/presidential_blockers.test.ts tests/ui/inbox_items.test.ts tests/player_decision_manifest.test.ts tests/event_decisions.test.ts tests/ui/event_decision_modal_phase3.test.ts tests/ui/event_decision_auto_launch_contract.test.ts --reporter=dot` - 59/59 PASS.
+- `npm.cmd run typecheck` - blocked by the worktree's existing missing map dependency/type declarations (`maplibre-gl`, `pmtiles`, Deck.gl packages, `@vitejs/plugin-react`) and related implicit-any fallout in map files outside this slice; no changed file remains in the error list after fixing the modal formatter.
+- `git diff --check` - PASS.
+
+**Artifacts:** `src/ui/map/App.tsx`, `src/ui/map/components/EventDecisionModal.tsx`, `src/ui/map/data/types.ts`, `tests/ui/event_decision_auto_launch_contract.test.ts`, `tests/ui/event_decision_modal_phase3.test.ts`, `docs/PROJECT_LEDGER.md`.
 
 ---

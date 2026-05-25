@@ -257,6 +257,16 @@ export function evaluateEvents(
                 state.military.pending_event_decisions.push({
                     event_id: def.id,
                     event_title: text,
+                    ...(def.narrative ? { narrative: def.narrative } : {}),
+                    ...(def.category ? { category: def.category } : {}),
+                    ...(def.situation ? { situation: def.situation } : {}),
+                    ...(def.staff_assessment ? { staff_assessment: def.staff_assessment } : {}),
+                    ...(def.trigger_evidence && def.trigger_evidence.length > 0
+                        ? { trigger_evidence: [...def.trigger_evidence] }
+                        : {}),
+                    ...(def.historical_source ? { historical_source: def.historical_source } : {}),
+                    ...(def.source_note ? { source_note: def.source_note } : {}),
+                    ...(def.source ? { source: def.source } : {}),
                     turn_fired: currentTurn,
                     response_options: def.response_options,
                     faction: respondingFaction,

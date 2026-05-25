@@ -286,6 +286,40 @@ describe('Event Decisions', () => {
         ]);
     });
 
+    it('pending event decisions carry authored dossier fields from real evaluation output', () => {
+        const state = makeMinimalState('RBiH');
+        const rng = () => 0.5;
+
+        evaluateEvents(state, rng, 5, [
+            {
+                ...DECISION_EVENT,
+                id: 'test_authored_dossier_event',
+                title: 'Authored Dossier Event',
+                narrative: 'Authored player-facing narrative for the modal dossier.',
+                category: 'diplomatic',
+                historical_source: 'Synthetic historical packet',
+                source_note: 'Synthetic source note',
+                source: 'Synthetic source field',
+                staff_assessment: 'Staff assesses this as a player-facing policy choice.',
+                trigger_evidence: ['Ceasefire talks opened', 'Cabinet requested a response'],
+            },
+        ]);
+
+        const pending = state.military.pending_event_decisions![0];
+        expect(pending).toMatchObject({
+            event_id: 'test_authored_dossier_event',
+            event_title: 'Authored Dossier Event',
+            narrative: 'Authored player-facing narrative for the modal dossier.',
+            category: 'diplomatic',
+            historical_source: 'Synthetic historical packet',
+            source_note: 'Synthetic source note',
+            source: 'Synthetic source field',
+            staff_assessment: 'Staff assesses this as a player-facing policy choice.',
+            trigger_evidence: ['Ceasefire talks opened', 'Cabinet requested a response'],
+        });
+        expect('rationale' in pending).toBe(false);
+    });
+
     it('resolveEventDecision applies effects and removes pending', () => {
         const state = makeMinimalState('RBiH');
         state.military.pending_event_decisions = [

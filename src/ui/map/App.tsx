@@ -79,7 +79,7 @@ import { useDesktopSession } from './hooks/useDesktopSession';
 import { useIPC } from './desktop/useIPC';
 import { resolvePlayerFacingFaction } from '../shared/playerVisibility';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
-import type { SummaryFocusSection } from './data/types';
+import type { LoadedGameState, SummaryFocusSection } from './data/types';
 import type { InboxItem } from './data/inboxItems';
 import type { PreAdvanceCommandReviewItem } from './data/preAdvanceCommandReview';
 import type { PresidentialDecisionRoomNavigationTarget } from './data/presidentialDecisionRoom';
@@ -100,6 +100,31 @@ declare global {
     handleManualSaveLoad?: (json: unknown) => Promise<void>;
     handleContinueLastRun?: () => Promise<void>;
   }
+}
+
+type PendingEventDecisionView = NonNullable<LoadedGameState['pendingEventDecisions']>[number];
+
+function comparePendingEventDecisionPriority(a: PendingEventDecisionView, b: PendingEventDecisionView): number {
+  const aRequired = a.requires_player_response === true ? 0 : 1;
+  const bRequired = b.requires_player_response === true ? 0 : 1;
+  if (aRequired !== bRequired) return aRequired - bRequired;
+  if (a.turn_fired !== b.turn_fired) return a.turn_fired - b.turn_fired;
+  if (a.event_id < b.event_id) return -1;
+  if (a.event_id > b.event_id) return 1;
+  return 0;
+}
+
+function selectNextPendingEventDecision(
+  decisions: LoadedGameState['pendingEventDecisions'],
+  playerFaction: string | null,
+  excludedEventId: string | null = null,
+): PendingEventDecisionView | null {
+  if (!playerFaction) return null;
+  const playerDecisions = (decisions ?? [])
+    .filter((decision) => decision.faction === playerFaction)
+    .filter((decision) => decision.event_id !== excludedEventId)
+    .sort(comparePendingEventDecisionPriority);
+  return playerDecisions[0] ?? null;
 }
 
 function CommanderSelectionModalWrapper() {
@@ -300,8 +325,7 @@ function App() {
   const [selectedOfficerMatterId, setSelectedOfficerMatterId] = useState<string | null>(null);
   const [selectedIntelligenceBriefId, setSelectedIntelligenceBriefId] = useState<string | null>(null);
   const [selectedCounterOfferId, setSelectedCounterOfferId] = useState<string | null>(null);
-  /** Last turn we evaluated for auto-launch. Prevents re-launching on every render. */
-  const [lastAutoLaunchTurn, setLastAutoLaunchTurn] = useState<number>(-1);
+  const [recentlyAcceptedEventDecisionId, setRecentlyAcceptedEventDecisionId] = useState<string | null>(null);
   const [selectedConvoyDecisionId, setSelectedConvoyDecisionId] = useState<string | null>(null);
   const [recruitmentLoading, setRecruitmentLoading] = useState(false);
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
@@ -315,6 +339,8 @@ function App() {
   useEffect(() => {
     setDismissedPeacePlanKey(null);
     setAcknowledgedEventIds(new Set());
+    setActiveEventDecisionId(null);
+    setRecentlyAcceptedEventDecisionId(null);
   }, [stateFingerprint]);
 
   useEffect(() => {
@@ -459,22 +485,34 @@ function App() {
   // [[player_identity_and_command]] — "Goal is to play as president, making such
   // decisions that then impact the war through different modifiers." The modal
   // is dismissible only via response, so the IPC respond path is the only exit.
-  // Once-per-turn gate via `lastAutoLaunchTurn` prevents re-launch on every render.
   useEffect(() => {
-    const turn = loadedGameState?.turn ?? -1;
-    if (turn < 0) return;
-    if (turn === lastAutoLaunchTurn) return;
     if (activeEventDecisionId !== null) return;
     if (showPeacePlanModal) return;
-    const decisions = loadedGameState?.pendingEventDecisions ?? [];
-    if (decisions.length === 0) {
-      setLastAutoLaunchTurn(turn);
-      return;
+    const nextDecision = selectNextPendingEventDecision(
+      loadedGameState?.pendingEventDecisions,
+      playerFaction,
+      recentlyAcceptedEventDecisionId,
+    );
+    if (nextDecision) setActiveEventDecisionId(nextDecision.event_id);
+  }, [loadedGameState?.pendingEventDecisions, playerFaction, activeEventDecisionId, showPeacePlanModal, recentlyAcceptedEventDecisionId]);
+
+  useEffect(() => {
+    if (activeEventDecisionId === null) return;
+    const stillPending = (loadedGameState?.pendingEventDecisions ?? [])
+      .some((decision) => decision.event_id === activeEventDecisionId && decision.faction === playerFaction);
+    if (!stillPending) {
+      setActiveEventDecisionId(null);
     }
-    const first = decisions.find((d) => d.faction === playerFaction);
-    if (first) setActiveEventDecisionId(first.event_id);
-    setLastAutoLaunchTurn(turn);
-  }, [loadedGameState?.turn, loadedGameState?.pendingEventDecisions, playerFaction, activeEventDecisionId, lastAutoLaunchTurn, showPeacePlanModal]);
+  }, [loadedGameState?.pendingEventDecisions, playerFaction, activeEventDecisionId]);
+
+  useEffect(() => {
+    if (recentlyAcceptedEventDecisionId === null) return;
+    const stillPending = (loadedGameState?.pendingEventDecisions ?? [])
+      .some((decision) => decision.event_id === recentlyAcceptedEventDecisionId && decision.faction === playerFaction);
+    if (!stillPending) {
+      setRecentlyAcceptedEventDecisionId(null);
+    }
+  }, [loadedGameState?.pendingEventDecisions, playerFaction, recentlyAcceptedEventDecisionId]);
 
   // Auto-dismiss non-decision events after 4 seconds
   useEffect(() => {
@@ -1060,19 +1098,22 @@ function App() {
       {activeEventDecisionId !== null && (() => {
         const decision = (loadedGameState?.pendingEventDecisions ?? [])
           .find((d) => d.event_id === activeEventDecisionId && d.faction === playerFaction);
-        if (!decision) {
-          // Decision already resolved or filtered out for current faction — clear state.
-          setActiveEventDecisionId(null);
-          return null;
-        }
+        if (!decision) return null;
         return (
           <EventDecisionModal
             decision={decision}
             onRespond={async (eventId, responseId) => {
               if (ipc.isAvailable) {
-                await ipc.respondToEventDecision(eventId, responseId);
+                const result = await ipc.respondToEventDecision(eventId, responseId);
+                if (result.ok === true) {
+                  setRecentlyAcceptedEventDecisionId(eventId);
+                  setActiveEventDecisionId(null);
+                } else {
+                  setLoadError(result.error ?? 'Failed to record event decision.');
+                }
+                return;
               }
-              setActiveEventDecisionId(null);
+              setLoadError('Event decisions are available in desktop mode only.');
             }}
           />
         );

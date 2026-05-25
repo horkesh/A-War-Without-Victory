@@ -370,6 +370,12 @@ export interface EventDefinition {
     narrative?: string;
     /** Event category for UI grouping and badge display. */
     category?: EventCategory;
+    /** Optional player-facing situation summary for decision dossiers. */
+    situation?: string;
+    /** Optional authored/player-facing staff assessment for decision dossiers. */
+    staff_assessment?: string;
+    /** Optional authored/player-facing trigger evidence for decision dossiers. */
+    trigger_evidence?: string[];
     /** Optional illustration asset path (relative to assets dir). */
     image?: string;
     trigger: EventTrigger;
@@ -424,12 +430,32 @@ export interface EventDefinition {
     enables_events?: string[];
     /** ICTY/BB citation for historical grounding. */
     historical_source?: string;
+    /** Optional compact source note for player-facing dossiers. */
+    source_note?: string;
+    /** Optional alternate source field for imported/authored event packets. */
+    source?: string;
 }
 
 /** A pending decision awaiting player response. Stored on MilitaryState. */
 export interface PendingEventDecision {
     event_id: string;
     event_title: string;
+    /** Authored player-facing narrative copied from EventDefinition when present. */
+    narrative?: string;
+    /** Authored category copied from EventDefinition when present. */
+    category?: EventCategory;
+    /** Authored player-facing situation summary copied from EventDefinition when present. */
+    situation?: string;
+    /** Authored/player-facing staff assessment copied from EventDefinition when present. */
+    staff_assessment?: string;
+    /** Authored/player-facing trigger evidence copied from EventDefinition when present. */
+    trigger_evidence?: string[];
+    /** Authored historical citation copied from EventDefinition when present. */
+    historical_source?: string;
+    /** Authored compact source note copied from EventDefinition when present. */
+    source_note?: string;
+    /** Authored alternate source field copied from EventDefinition when present. */
+    source?: string;
     turn_fired: number;
     response_options: EventResponseOption[];
     /** Which faction must respond. */

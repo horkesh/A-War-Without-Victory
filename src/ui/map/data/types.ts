@@ -1247,13 +1247,26 @@ export interface LoadedGameState {
     pendingEventDecisions?: Array<{
         event_id: string;
         event_title: string;
+        narrative?: string;
+        situation?: string;
+        staff_assessment?: string;
+        trigger_evidence?: string[];
+        category?: import('../../../sim/events/event_types.js').EventCategory;
+        historical_source?: string;
+        source_note?: string;
+        source?: string;
         turn_fired: number;
         faction: string;
+        requires_player_response?: boolean;
+        historical_default_response_id?: string;
         response_options: Array<{
             id: string;
             label: string;
             description?: string;
+            historical_marker?: 'historical_default' | 'counterfactual';
             effects: import('../../../sim/events/event_types.js').EventEffect[];
+            sets_flags?: Record<string, string | number | boolean>;
+            dimension_shifts?: import('../../../sim/events/event_types.js').DimensionShift[];
         }>;
     }>;
 
