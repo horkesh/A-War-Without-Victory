@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-25] test(ui): align merge CI contracts
+
+**Type:** Test/copy contract follow-up. No simulation calibration, scenario data, combat math, event ordering, or Claude calibration branch work changed.
+
+**Why:** The pushed presidential desk merge exposed stale CI contracts in the fast test slice: onboarding copy still expected retired Decision Room wording and mixed-case toolbar labels, while the strict-null GameState optional-field floor did not reflect the merged contract.
+
+**Change:** Updated the authored English onboarding step and English i18n copy to use the rendered uppercase toolbar command names, updated the onboarding spotlight test to the President's Desk wording, and refreshed the strict-null optional GameState floor/domain split to the merged inventory.
+
+**Verification:** `npx.cmd vitest run tests/onboarding_spotlight_targets.test.ts tests/strict_null_inventory_progress.test.ts --reporter=dot` passed 2/2 files and 93/93 tests; `npm.cmd run typecheck` passed; `git diff --check` passed.
+
+**Artifacts:** `src/ui/map/components/onboarding/onboardingSteps.ts`; `src/ui/map/i18n/messages.en.ts`; `tests/onboarding_spotlight_targets.test.ts`; `tests/strict_null_inventory_progress.test.ts`.
+
+---
+
 ## [2026-05-25] merge(ui): integrate presidential desk flow
 
 **Type:** UI/desktop shell merge. No simulation calibration, scenario data, combat math, event ordering, or Claude calibration branch work changed intentionally.
@@ -10,6 +24,34 @@
 **Verification:** Merge conflict-marker scan passed for `<<<<<<<`/`>>>>>>>`; `git diff --check` passed; `npm.cmd run typecheck` passed; `npx.cmd vitest run tests/ui tests/desktop_packaging_contract.test.ts tests/desktop_officer_decision_history.test.ts tests/humanitarian_convoy_lifecycle.test.ts tests/load_error_toast.test.ts tests/paramilitary_sweep.test.ts tests/ui_adapter_boundary.test.ts tests/ui_map_order_actions.test.ts tests/ui_player_visibility.test.ts --reporter=dot` passed 177/177 files and 1037/1037 tests; `npm.cmd run desktop:map:build` passed with existing Vite chunk/externalization warnings.
 
 **Artifacts:** `src/ui/map/App.tsx`; `src/ui/map/components/presidential_desk/*`; `src/ui/map/components/*Modal.tsx`; `src/ui/map/components/PresidentialInbox.tsx`; `src/ui/map/components/PresidentialToolbar.tsx`; `src/ui/map/components/army_hq/*`; `src/ui/map/components/chronicle/generateChronicleEntries.ts`; `src/ui/map/data/decisionConsequenceLedger.ts`; `src/ui/map/data/decisionSurfaceRegistry.ts`; `src/ui/map/data/presidentialBlockers.ts`; `src/ui/map/data/presidentialDeskAssets.ts`; `src/ui/map/assets/presidential_desk/**/*.webp`; `src/ui/warroom/assets/hq_presidential_desk_1992.webp`; `src/desktop/officer_decision_history.cjs`; `tests/ui/*`; `docs/40_reports/GUI_MASTER.md`; `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`; `docs/plans/2026-05-24-gui-ai-asset-brief.md`.
+
+---
+
+## [2026-05-25] docs(events): make event upgrade modal-first after GUI merge
+
+**Type:** Roadmap governance + event-system product direction.
+
+**Change:** Reconciled the Command Board with the landed presidential GUI restructure, marking the GUI polish / presidential shell row closed on mainline evidence. Updated the event-system presidential-core plan so Phase 3 is no longer a Decision Room crisis-brief lane; required player event decisions must auto-pop as modal presidential dossiers with situation, player-facing rationale/evidence, visible historical/default choice marker, authored narration, compact source notes, numeric/mechanical consequences, risk/uncertainty, and consequence-record trail. The plan now treats historical bot defaults as the calibration path while preserving player counterfactual choices through event effects.
+
+**Determinism:** Documentation-only. No runtime code, event data, scenario data, generated artifacts, saves, or baselines changed.
+
+**Verification:** `git diff --check` - PASS.
+
+**Artifacts:** `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-25] docs(roadmap): assign Codex command-board ownership
+
+**Type:** Roadmap governance / command-board ownership.
+
+**Change:** Made Codex the explicit maintainer of `docs/plans/COMMAND_BOARD.md` on `main`, with branch agents owning only their assigned rows until their claims are verified. Updated the Master Roadmap addendum so the ownership rule is visible from the roadmap entrypoint.
+
+**Determinism:** Documentation-only. No runtime code, scenario data, generated artifacts, saves, or baselines changed.
+
+**Verification:** `git diff --check` - PASS.
+
+**Artifacts:** `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
 

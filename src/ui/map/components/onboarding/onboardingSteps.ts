@@ -79,7 +79,7 @@ const AUTHORED_STEPS: ReadonlyArray<OnboardingStepDef> = [
         title: 'The Brief',
         titleKey: 'onboarding.03.title',
         bodyKey: 'onboarding.03.body',
-        body: "The field toolbar keeps map inspection close: War Map gives the field situation, Records opens the Army HQ records view, and Codex keeps historical context close. Read the desk packet first; the President's Desk is where inspection becomes action.",
+        body: "The field toolbar keeps map inspection close: WAR MAP gives the field situation, RECORDS opens the Army HQ records view, and CODEX keeps historical context close. Read the desk packet first; the President's Desk is where inspection becomes action.",
         target_ui_element: 'presidential-toolbar',
     },
     {

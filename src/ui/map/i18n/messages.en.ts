@@ -916,7 +916,7 @@ export const enMessages = {
     'onboarding.02.title': 'Reading the Map',
     'onboarding.02.body': 'Faction colors show political control. Front edges mark where your forces meet the enemy. Click a settlement to inspect it; click a front edge to inspect the sector. The map is a record, not a control panel - orders flow through your staff.',
     'onboarding.03.title': 'The Brief',
-    'onboarding.03.body': "The field toolbar keeps map inspection close: War Map gives the field situation, Records opens the Army HQ records view, and Codex keeps historical context close. Read the desk packet first; the President's Desk is where inspection becomes action.",
+    'onboarding.03.body': "The field toolbar keeps map inspection close: WAR MAP gives the field situation, RECORDS opens the Army HQ records view, and CODEX keeps historical context close. Read the desk packet first; the President's Desk is where inspection becomes action.",
     'onboarding.04.title': 'Inspect Before You Decide',
     'onboarding.04.body': 'The Warroom status bar shows the current phase, priorities, and pending reviews. The priority docket lists what your staff flags as urgent. Open Army HQ to drill into corps readiness, supply, and command friction before you commit.',
     'onboarding.05.title': "President's Desk",
