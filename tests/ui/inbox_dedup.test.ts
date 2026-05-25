@@ -110,7 +110,7 @@ describe('Presidential Inbox officer event dedupe', () => {
         expect(onAction).toHaveBeenCalledWith('army_hq_personnel', 'officer:officer_available:ratko_mladic');
     });
 
-    it('renders a quiet-inbox decision room capsule when no decisions are pending', () => {
+    it('renders a quiet-inbox desk capsule when no decisions are pending', () => {
         const onAction = vi.fn();
         useGameStore.setState({
             loadedGameState: makeLoadedState({ turn: 12 }),
@@ -120,13 +120,13 @@ describe('Presidential Inbox officer event dedupe', () => {
 
         render(createElement(PresidentialInbox, { onAction }));
 
-        expect(screen.getByText('Decision Room')).toBeTruthy();
+        expect(screen.getByText("President's Desk")).toBeTruthy();
         expect(screen.getByText('Chronicle')).toBeTruthy();
         expect(screen.getByText('No orders are waiting on your desk.')).toBeTruthy();
         expect(screen.queryByText('No pending decisions.')).toBeNull();
 
-        fireEvent.click(screen.getByRole('button', { name: /open decision room/i }));
-        expect(onAction).toHaveBeenCalledWith('army_hq_briefing', 'empty:decision-room');
+        fireEvent.click(screen.getByRole('button', { name: /open desk/i }));
+        expect(onAction).toHaveBeenCalledWith('army_hq_briefing', 'empty:desk');
     });
 
     it('localizes quiet inbox shell copy in BCS mode', () => {
@@ -143,7 +143,7 @@ describe('Presidential Inbox officer event dedupe', () => {
         expect(screen.getByText('Predsjednicki inbox')).toBeTruthy();
         expect(screen.getByText('Komandno dezurstvo')).toBeTruthy();
         expect(screen.getByText('Na stolu nema naredbi koje cekaju vasu odluku.')).toBeTruthy();
-        expect(screen.getByText('Otvori sobu odluka')).toBeTruthy();
+        expect(screen.getByText('Otvori sto')).toBeTruthy();
         expect(screen.queryByText('Presidential Inbox')).toBeNull();
     });
 

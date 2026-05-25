@@ -21,6 +21,7 @@ const {
 } = require('./autonomy_ipc_contract.cjs');
 const { computeCorpsCommandStrain } = require('./command_strain.cjs');
 const { stageConvoyDecisionOnState } = require('./convoy_ipc_contract.cjs');
+const { fileOfficerDecisionRecord } = require('./officer_decision_history.cjs');
 const RUNTIME_PROBE_MODE = process.env.AWWV_DESKTOP_RUNTIME_PROBE === '1';
 
 /** Project root (dev) or resources root (packaged). Used for data paths and desktop sim. */
@@ -2854,12 +2855,14 @@ app.whenReady().then(() => {
         const evt = events.find(e => e.event_id === eventId);
         if (evt) {
           evt.acknowledged = true;
+          let decision = 'acknowledged';
           if (evt.override_action === 'override-officer-interpretation') {
             // Look up the corps_id from the event (set by interpretStanceOrder / interpretOperationLaunch / interpretOperationHalt)
             const corpsId = evt.corps_id;
             if (corpsId) {
               const { overrideInterpretation } = await import('../sim/combat/order_interpretation.js');
               overrideInterpretation(state, corpsId, eventId);
+              decision = 'override_confirmed';
               // Restore the original ordered stance if this was a stance interpretation event
               const corpsCommand = state.military?.corps_command?.[corpsId];
               if (corpsCommand && evt.original_order?.stance) {
@@ -2867,6 +2870,7 @@ app.whenReady().then(() => {
               }
             }
           }
+          fileOfficerDecisionRecord(state, evt, decision);
         }
       }
       currentGameStateJson = sim.serializeState(state);
@@ -2904,7 +2908,13 @@ app.whenReady().then(() => {
       const events = state.military?.pending_officer_events;
       if (events) {
         const evt = events.find(e => e.event_id === eventId);
-        if (evt) evt.acknowledged = true;
+        if (evt) {
+          evt.acknowledged = true;
+          fileOfficerDecisionRecord(state, evt, 'replacement_accepted', {
+            new_officer_id: newOfficerId,
+            outgoing_officer_id: currentOfficerId,
+          });
+        }
       }
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
@@ -3212,4 +3222,3 @@ app.on('window-all-closed', () => {
   if (RUNTIME_PROBE_MODE) return;
   app.quit();
 });
-

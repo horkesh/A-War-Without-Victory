@@ -82,7 +82,7 @@ function countBlockingDecisions(state: LoadedGameState | null): number {
 export function formatPreAdvanceGateBlockTitle(view: { blockingDecisionCount: number }): string {
   const count = view.blockingDecisionCount;
   const noun = count === 1 ? 'decision' : 'decisions';
-  return `Resolve ${count} pending ${noun} to continue. Opens Decision Room review.`;
+  return `Resolve ${count} pending ${noun} to continue. Opens the President's Desk.`;
 }
 
 export function buildPreAdvanceCommandReviewView(input: PreAdvanceCommandReviewInput): PreAdvanceCommandReviewView {

@@ -69,6 +69,20 @@ describe('LoadErrorToast — save-load error toast', () => {
     expect(html).toContain('ERROR');
   });
 
+  it('T3b - maps raw engine error keys before rendering player-facing copy', () => {
+    const onDismiss = vi.fn();
+    const html = renderToStaticMarkup(
+      createElement(LoadErrorToast, {
+        message: 'pending_required_decisions',
+        onDismiss,
+        positioning: 'static',
+      }),
+    );
+
+    expect(html).toContain('Presidential decisions are still unsigned');
+    expect(html).not.toContain('pending_required_decisions');
+  });
+
   it('T4 — dismiss button click invokes onDismiss callback', () => {
     const onDismiss = vi.fn();
     const { getByTestId, unmount } = render(

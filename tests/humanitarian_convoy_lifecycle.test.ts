@@ -334,6 +334,43 @@ describe('applyHumanitarianConvoyDecisions', () => {
         expect(state.military.pending_convoy_decisions).toEqual([remaining]);
     });
 
+    it('files consumed convoy decisions into deterministic history records', () => {
+        const state = makeState({
+            military: {
+                pending_convoy_decisions: [
+                    makeConvoy({ id: 'convoy:64:ENCL_alpha:RS', route_faction: 'RS', decision: 'allow', supply_amount: 0.5 }),
+                    makeConvoy({ id: 'convoy:64:ENCL_beta:HRHB', target_enclave: 'ENCL_beta', route_faction: 'HRHB', decision: 'block', supply_amount: 0.4 }),
+                ],
+                general_supply_reserve: { RBiH: 20, RS: 40 },
+            } as Partial<GameState['military']> as GameState['military'],
+        });
+
+        applyHumanitarianConvoyDecisions(state);
+
+        expect(state.military.convoy_decision_history).toEqual([
+            {
+                id: 'convoy:64:ENCL_alpha:RS',
+                turn: 64,
+                target_enclave: 'ENCL_alpha',
+                route_faction: 'RS',
+                target_faction: 'RBiH',
+                supply_amount: 0.5,
+                decision: 'allow',
+                decided_by: 'player',
+            },
+            {
+                id: 'convoy:64:ENCL_beta:HRHB',
+                turn: 64,
+                target_enclave: 'ENCL_beta',
+                route_faction: 'HRHB',
+                target_faction: 'RBiH',
+                supply_amount: 0.4,
+                decision: 'block',
+                decided_by: 'bot',
+            },
+        ]);
+    });
+
     it('early-returns without mutating IVP when the pending queue is empty', () => {
         const state = makeState({
             military: {

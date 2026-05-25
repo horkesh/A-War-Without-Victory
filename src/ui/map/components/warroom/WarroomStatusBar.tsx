@@ -193,11 +193,7 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
   };
 
   const handleAdvance = () => {
-    if (advanceBlocked && onReviewPriorities) {
-      setPriorityDocketOpen(false);
-      onReviewPriorities();
-      return;
-    }
+    if (advanceBlocked) setPriorityDocketOpen(false);
     setAdvanceTurnPending(true);
   };
 

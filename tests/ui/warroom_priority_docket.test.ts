@@ -158,16 +158,17 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(first.items[0]).toMatchObject({
       category: 'decision',
       severity: 'blocking',
-      actionLabel: 'Review Queue',
-      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+      actionLabel: 'Open Desk',
+      navigationTarget: { kind: 'inbox' },
     });
     expect(first.sourceHandoffs.map((handoff) => handoff.id)).toEqual([
+      'presidential-inbox',
       'army-hq-briefing',
       'army-hq-summary',
       'turn-aftermath-records',
     ]);
-    expect(first.sourceHandoffSummary).toBe('3 source handoffs / 4 urgent');
-    expect(first.openBoardLabel).toBe('Open Decision Room');
+    expect(first.sourceHandoffSummary).toBe('4 source handoffs / 4 urgent');
+    expect(first.openBoardLabel).toBe('Open Desk');
   });
 
   it('keeps a quiet clear state available without inventing docket rows', () => {

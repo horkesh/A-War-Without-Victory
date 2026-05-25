@@ -503,6 +503,70 @@ export interface ArmyReserveQueueView {
     leadCriticalDescription?: string;
 }
 
+export interface ReserveRequestDecisionRecordView {
+    request_id: string;
+    turn: number;
+    faction: string;
+    corps_id: string;
+    brigade_id: string | null;
+    outcome: 'accepted' | 'declined' | 'terminated' | string;
+    reason: string;
+    decided_by: 'army_ai' | 'player' | string;
+    purpose: 'offensive' | 'defensive' | string;
+    why_needed: string;
+    how_to_use: string;
+}
+
+export interface PeacePlanDecisionRecordView {
+    planId: string;
+    planName: string;
+    turnOffered: number;
+    playerFaction: string;
+    playerResponse: 'accepted' | 'rejected' | 'pending';
+    responses: Record<string, 'accepted' | 'rejected' | 'pending'>;
+    resolved: boolean;
+}
+
+export interface ConvoyDecisionRecordView {
+    id: string;
+    turn: number;
+    target_enclave: string;
+    route_faction: string;
+    target_faction: string;
+    supply_amount: number;
+    decision: 'allow' | 'block' | 'divert';
+    decided_by: 'player' | 'bot';
+}
+
+export interface ParamilitaryDecisionRecordView {
+    id: string;
+    turn: number;
+    target_osid: string;
+    faction: string;
+    strength: number;
+    decision: 'allow' | 'deny' | 'regular';
+    estimated_civilian_risk?: number;
+}
+
+export interface OfficerDecisionRecordView {
+    id: string;
+    turn: number;
+    faction: string;
+    event_id: string;
+    event_type: string;
+    officer_id: string;
+    officer_name: string;
+    current_commander_id?: string;
+    current_commander_name?: string;
+    corps_id?: string;
+    corps_name?: string;
+    decision: 'acknowledged' | 'override_confirmed' | 'replacement_accepted';
+    new_officer_id?: string;
+    new_officer_name?: string;
+    outgoing_officer_id?: string;
+    outgoing_officer_name?: string;
+}
+
 export type OperationOpportunityRecordStatus =
     | 'eligible_pending_review'
     | 'delayed'
@@ -927,6 +991,16 @@ export interface LoadedGameState {
     playerDecisionSummary?: PlayerDecisionSummaryView;
     /** Canonical Army Reserve management queue summary derived from pending reserve requests. */
     armyReserveQueue?: ArmyReserveQueueView;
+    /** Filed Army reserve decisions for Records/Desk consequence trail. */
+    reserveRequestHistory?: ReserveRequestDecisionRecordView[];
+    /** Filed diplomatic peace-plan decisions for Records/Chronicle consequence trail. */
+    peacePlanHistory?: PeacePlanDecisionRecordView[];
+    /** Filed humanitarian convoy decisions for Records/Chronicle consequence trail. */
+    convoyDecisionHistory?: ConvoyDecisionRecordView[];
+    /** Filed paramilitary authorization decisions for Records/Chronicle consequence trail. */
+    paramilitaryDecisionHistory?: ParamilitaryDecisionRecordView[];
+    /** Filed officer/personnel decisions for Records/Desk consequence trail. */
+    officerDecisionHistory?: OfficerDecisionRecordView[];
     /** Read-only Army HQ opportunity ledger: proposal -> decision -> AAR outcome. */
     operationOpportunityRecords?: OperationOpportunityRecordView[];
     /** Summary counts for Army HQ opportunity records. */
@@ -1246,4 +1320,3 @@ export interface LoadedGameState {
         proposed_value?: string;
     }>;
 }
-

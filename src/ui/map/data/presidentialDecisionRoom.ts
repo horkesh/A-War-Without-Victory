@@ -8,6 +8,7 @@ import {
 } from './turnAftermath';
 import { buildPlayerSupplyVisibility } from './playerSupplyVisibility';
 import { buildPlayerArmyCoPushbackVisibility } from './playerArmyCoPushbackVisibility';
+import { getDecisionSurface } from './decisionSurfaceRegistry';
 
 export type PresidentialDecisionRoomCategory =
   | 'decision'
@@ -166,6 +167,12 @@ type CandidateCard = Omit<PresidentialDecisionRoomCard, 'sortKey'> & {
   sourceSort: string;
 };
 
+type ManifestModalFamilyId = 'peace_plan' | 'dayton_negotiation' | 'convoy_decision';
+
+function isManifestModalFamilyId(value: string): value is ManifestModalFamilyId {
+  return value === 'peace_plan' || value === 'dayton_negotiation' || value === 'convoy_decision';
+}
+
 const LARGE_SORT = 999999;
 
 const SEVERITY_RANK: Record<PresidentialDecisionRoomSeverity, number> = {
@@ -304,10 +311,10 @@ function addReviewCard(state: LoadedGameState, cards: CandidateCard[]): void {
       ? 'A decision queue item needs your response before the next turn can proceed.'
       : 'Army HQ has unresolved command review work on the desk.',
     sourceOwner: 'Presidential review queue',
-    sourceLabel: 'Army HQ Briefing',
-    actionLabel: 'Review Queue',
+    sourceLabel: 'Presidential Inbox',
+    actionLabel: 'Open Desk',
     evidence,
-    navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+    navigationTarget: { kind: 'inbox' },
     urgencySort: queue.eventDecisionCount > 0 ? 0 : 10,
     sourceSort: 'review',
   });
@@ -317,16 +324,17 @@ function addParamilitaryReviewCard(state: LoadedGameState, cards: CandidateCard[
   const requests = state.pendingParamilitaryRequests ?? [];
   if (requests.length === 0) return;
 
+  const surface = getDecisionSurface('paramilitary_request');
   const totalStrength = requests.reduce((sum, request) => sum + request.strength, 0);
   cards.push({
     id: 'paramilitary:pending',
     category: 'decision',
     severity: 'blocking',
-    title: 'Paramilitary authorization pending',
+    title: surface.playerLabel,
     explanation: 'Paramilitary deployment requests require an explicit presidential decision before the turn should advance.',
     sourceOwner: 'Presidential Inbox',
-    sourceLabel: 'Paramilitary review',
-    actionLabel: 'Open Inbox',
+    sourceLabel: surface.sourceLabel,
+    actionLabel: surface.actionLabel,
     evidence: [
       `${requests.length} deployment ${pluralize(requests.length, 'request')}`,
       `estimated strength ${totalStrength}`,
@@ -343,49 +351,30 @@ function addManifestDecisionCards(state: LoadedGameState, cards: CandidateCard[]
   if (!summary || summary.blockingCount <= 0) return;
 
   const existingIds = new Set(cards.map((card) => card.id));
-  const cardSpecs: Record<string, {
-    title: string;
-    explanation: string;
-    sourceLabel: string;
-    actionLabel: string;
-  }> = {
-    peace_plan: {
-      title: 'Peace plan response pending',
-      explanation: 'A formal peace proposal still needs presidential review before the turn advances.',
-      sourceLabel: 'Peace proposal',
-      actionLabel: 'Open Inbox',
-    },
-    dayton_negotiation: {
-      title: 'Dayton negotiation pending',
-      explanation: 'The Dayton negotiation package requires a submitted presidential position.',
-      sourceLabel: 'Dayton talks',
-      actionLabel: 'Open Inbox',
-    },
-    convoy_decision: {
-      title: 'Humanitarian convoy decision pending',
-      explanation: 'A convoy request still needs an allow, block, or divert decision on the owning surface.',
-      sourceLabel: 'Convoy review',
-      actionLabel: 'Open Inbox',
-    },
+  const explanations: Record<ManifestModalFamilyId, string> = {
+    peace_plan: 'A formal peace proposal still needs presidential review before the turn advances.',
+    dayton_negotiation: 'The Dayton negotiation package requires a submitted presidential position.',
+    convoy_decision: 'A convoy request still needs an allow, block, or divert decision on the owning surface.',
   };
 
   for (const family of summary.families) {
     const blockingCount = family.blockingCount ?? (family.gatePolicy === 'advisory' ? 0 : family.count);
     if (blockingCount <= 0) continue;
     if (family.id === 'event_decision' || family.id === 'paramilitary_request') continue;
-    const spec = cardSpecs[family.id];
-    if (!spec) continue;
+    if (!isManifestModalFamilyId(family.id)) continue;
+    const explanation = explanations[family.id];
+    const surface = getDecisionSurface(family.id);
     const id = `manifest:${family.id}`;
     if (existingIds.has(id)) continue;
     cards.push({
       id,
       category: 'decision',
       severity: 'blocking',
-      title: spec.title,
-      explanation: spec.explanation,
+      title: `${surface.playerLabel} pending`,
+      explanation,
       sourceOwner: 'Presidential decision manifest',
-      sourceLabel: spec.sourceLabel,
-      actionLabel: spec.actionLabel,
+      sourceLabel: surface.sourceLabel,
+      actionLabel: surface.actionLabel,
       evidence: [`${blockingCount} pending ${pluralize(blockingCount, 'item')}`],
       navigationTarget: { kind: 'inbox' },
       urgencySort: -1,
@@ -511,7 +500,7 @@ function addArmyCoPushbackCard(state: LoadedGameState, cards: CandidateCard[]): 
     title: view.headline,
     explanation: view.rationale,
     sourceOwner: 'Army HQ pushback',
-    sourceLabel: 'Decision Room',
+    sourceLabel: 'Staff priorities',
     actionLabel: 'Review Pushback',
     evidence: view.evidence,
     navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
@@ -806,6 +795,13 @@ function describeSourceHandoffTarget(
       id: 'counter-offer-docket',
       label: 'Counter-offer docket',
       actionLabel: 'Review Counter',
+    };
+  }
+  if (target.kind === 'inbox') {
+    return {
+      id: 'presidential-inbox',
+      label: 'Presidential Inbox',
+      actionLabel: 'Open Desk',
     };
   }
   if (target.kind === 'chronicle') {

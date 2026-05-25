@@ -1136,6 +1136,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: Read `docs/40_reports/MAP_GEOMETRY_MASTER.md` before any polygon/front-line/geometry work. Covers: polygon topology gaps, shared arc issue, vertex snapping approach, edges_viewer diagnostic.
 
 ## User Directives
+1. **[2026-05-24] Ship visible increments before broad hardening**
+   Do instead: For UI asset/wiring tasks, first make the direct visible change, run a focused smoke/test pass, and report concrete progress. Add broad tests/docs/cleanup after the user-visible path works. Do not spend long blocks expanding scope while the requested visible change is still absent.
 1. **[2026-05-09] Codex owns future repo work**
    Do instead: Treat Claude/subagent/older handoff notes as claim sets to verify locally; Codex is the active owner for planning, implementation, verification, docs, and cleanup from here forward.
 2. **[Standing] working-on.md — task continuity across compaction**
@@ -1154,8 +1156,6 @@ After EVERY scenario run, the orchestrator:
    Do instead: Only generate replay with `--video` flag.
 9. **[2026-02-28] Canonical map is React+MapLibre**
    Do instead: `npm run dev:map`. Legacy map_hoi.html / tactical_map.html are archived.
-10. **[2026-04-03] Test discovery must be automatic**
-   Do instead: Treat `tools/test/discover_test_files.mjs` as the single authority for classifying Vitest vs `node:test` files. Do not reintroduce hand-maintained Vitest include lists; new regression files should become runnable by convention.
 
 ## Calibration
 1. **[2026-05-22] COHA expiry must clear combat suppression**

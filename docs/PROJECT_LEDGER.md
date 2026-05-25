@@ -1,4 +1,505 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-25] chore(ui): prepare presidential desk branch for merge
+
+**Type:** Merge-readiness cleanup and verification.
+
+**Change:** Removed untracked raw PNG generation-source folders from the merge set, kept only runtime `.webp` assets and referenced GUI audit/verification screenshots, and updated the GUI AI asset brief to state that large generation sources should stay outside git unless a future art pipeline explicitly requires them. Corrected the paramilitary inbox regression contract so existing pending paramilitary requests remain visible even when the generation policy is no longer `ask`; a pending queue is still an advance blocker until resolved.
+
+**Determinism:** Verification and UI/test contract cleanup only. No simulation RNG, scenario data, turn ordering, or resolver semantics changed beyond preserving player-facing visibility of already-pending blocker queues.
+
+**Verification:**
+- `npm.cmd run typecheck` - PASS.
+- `npx.cmd vitest run tests/ui/paramilitary_inbox_items.test.ts tests/ui/presidential_blockers.test.ts tests/paramilitary_sweep.test.ts --reporter=dot` - 38/38 PASS.
+- `npx.cmd vitest run tests/ui tests/desktop_packaging_contract.test.ts tests/desktop_officer_decision_history.test.ts tests/humanitarian_convoy_lifecycle.test.ts tests/load_error_toast.test.ts tests/paramilitary_sweep.test.ts tests/ui_adapter_boundary.test.ts tests/ui_map_order_actions.test.ts --reporter=dot` - 974/974 PASS.
+- `npm.cmd run desktop:map:build` - PASS with existing non-fatal Vite externalization/chunk-size warnings.
+
+**Artifacts:** `docs/plans/2026-05-24-gui-ai-asset-brief.md`, `tests/ui/paramilitary_inbox_items.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add personnel-change consequence still
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential Records/Chronicle consequence set needs a personnel-change still for resolved officer, staff review, and replacement outcomes.
+
+**Change:** Accepted the generated personnel-folder desk image as suitable, center-crop/resized it from `2752 x 1536` PNG to the exact `1280 x 720` consequence-still contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/consequence_stills/consequence_personnel_change.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/consequence_personnel_change_source.png`.
+
+**Verification:** Output metadata is `1280 x 720` WebP. Visual spot check confirmed no watermark, no baked UI artifacts, no visible face, no readable classification stamps or `PERSONNEL` / `SECRET` labels, and an appropriate closed-folder/obscured-photo/desk-lamp aftermath cue for Records/Chronicle use.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/consequence_stills/consequence_personnel_change.webp`, `src/ui/map/assets/presidential_desk/source/consequence_personnel_change_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] fix(ui): remove media from compact Chronicle cards
+
+**Type:** UI regression fix.
+
+**Change:** Removed consequence still rendering from `ChronicleCard`. The Chronicle timeline reuses this card in compressed expandable stacks, and full-width images inside the compact cards collapsed the entry text into unreadable bands and interfered with expansion affordances. Consequence imagery remains available through the decision ledger metadata and is still rendered on Desk/Records surfaces where there is enough space.
+
+**Determinism:** UI rendering only. No state, simulation, resolver, scenario, RNG, or serialization changes.
+
+**Verification:**
+- `npx.cmd vitest run tests/ui/chronicle_decision_ledger.test.ts tests/ui/chronicle_endgame_mount.test.ts tests/ui/chronicle_chapter_ui.test.ts --reporter=dot` - 6/6 PASS.
+- `npm.cmd run typecheck` - PASS.
+
+**Artifacts:** `src/ui/map/components/chronicle/ChronicleCard.tsx`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] fix(ui): contain turn aftermath modal layout
+
+**Type:** UI layout fix.
+
+**Change:** Reworked `TurnAftermathModal` content sizing so the metric cards no longer force a horizontal scrollbar or collide with Strategic Signals. The modal now uses minmax-safe grid columns, a 2x2 metric block in the narrower left column, horizontal overflow clipping on the scroll body, and breakable metric labels/details.
+
+**Determinism:** UI layout only. No state, simulation, resolver, RNG, scenario, or serialization changes.
+
+**Verification:**
+- `npx.cmd vitest run tests/ui/records_button_behavior.test.ts tests/ui/turn_aftermath.test.ts --reporter=dot` - 13/13 PASS.
+- `npm.cmd run typecheck` - PASS.
+
+**Artifacts:** `src/ui/map/components/TurnAftermathModal.tsx`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] feat(ui): wire presidential desk image assets into decision surfaces
+
+**Type:** UI asset integration + decision surface visual pass.
+
+**Change:** Added a central presidential desk asset registry and wired the new desk background, packet thumbnails, decision-modal headers, and consequence stills into the President's Desk, decision family modals, Recent Consequences, Army HQ decision records, and Chronicle decision ledger entries. Packet cards now show family-specific document thumbnails; filed decisions now carry consequence imagery across the desk and record surfaces.
+
+**Determinism:** UI-only asset mapping. No simulation logic, resolver behavior, RNG, scenario data, or serialized state ordering changed.
+
+**Verification:**
+- `npx.cmd vitest run tests/ui/presidential_desk_assets.test.ts tests/ui/president_desk_shell.test.ts tests/ui/decision_family_modals.test.ts tests/ui/chronicle_decision_ledger.test.ts --reporter=dot` - 14/14 PASS after red/green cycle.
+- `npx.cmd vitest run tests/ui/presidential_desk_assets.test.ts tests/ui/president_desk_shell.test.ts tests/ui/decision_family_modals.test.ts tests/ui/convoy_decision_modal.test.ts tests/ui/paramilitary_review_modal.test.ts tests/ui/peace_plan_modal.test.ts --reporter=dot` - 22/22 PASS.
+- `npm.cmd run typecheck` - PASS.
+
+**Artifacts:** `src/ui/map/data/presidentialDeskAssets.ts`, `src/ui/map/components/presidential_desk/PresidentDeskShell.tsx`, `src/ui/map/components/presidential_desk/DecisionCard.tsx`, `src/ui/map/components/presidential_desk/ConsequenceStrip.tsx`, `src/ui/map/components/DecisionModalImageHeader.tsx`, `src/ui/map/components/ReserveRequestModal.tsx`, `src/ui/map/components/OfficerMatterModal.tsx`, `src/ui/map/components/IntelligenceBriefModal.tsx`, `src/ui/map/components/CounterOfferModal.tsx`, `src/ui/map/components/ConvoyDecisionModal.tsx`, `src/ui/map/components/ParamilitaryReviewModal.tsx`, `src/ui/map/components/PeacePlanModal.tsx`, `src/ui/map/components/DaytonNegotiationModal.tsx`, `src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.tsx`, `src/ui/map/components/chronicle/ChronicleCard.tsx`, `src/ui/map/components/chronicle/generateChronicleEntries.ts`, `tests/ui/presidential_desk_assets.test.ts`, `tests/ui/president_desk_shell.test.ts`, `tests/ui/decision_family_modals.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add humanitarian-access consequence still
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential Records/Chronicle consequence set needs a humanitarian-access still for resolved convoy and aid-route outcomes.
+
+**Change:** Accepted the generated aid-access route-map image after applying a light final blur to avoid readable pseudo-form text. Resized it from `2752 x 1536` PNG to the exact `1280 x 720` consequence-still contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/consequence_stills/consequence_humanitarian_access.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/consequence_humanitarian_access_source.png`.
+
+**Verification:** Output metadata is `1280 x 720` WebP. Visual spot check confirmed no watermark, no baked UI artifacts, no aid logos, manifest table, checklist grid, convoy vehicles, or people; the unlabeled route map, pencil, and administrative forms give an appropriate sober humanitarian-access aftermath cue.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/consequence_stills/consequence_humanitarian_access.webp`, `src/ui/map/assets/presidential_desk/source/consequence_humanitarian_access_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add public-pressure consequence still
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential Records/Chronicle consequence set needs a public-pressure still for media scrutiny and political pressure outcomes.
+
+**Change:** Accepted the generated press-clipping office image as suitable, center-crop/resized it from `2752 x 1536` PNG to the exact `1280 x 720` consequence-still contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/consequence_stills/consequence_public_pressure.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/consequence_public_pressure_source.png`.
+
+**Verification:** Output metadata is `1280 x 720` WebP. Visual spot check confirmed no watermark, no baked UI artifacts, no people, flags, TV screen, or protest crowd, and no legible headlines; the phone, envelopes, newspapers, and press-clipping board give an appropriate restrained public-pressure aftermath cue.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/consequence_stills/consequence_public_pressure.webp`, `src/ui/map/assets/presidential_desk/source/consequence_public_pressure_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add reserve-deployment consequence still
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential Records/Chronicle consequence set needs a reserve-deployment still for resolved reserve allocation and Army HQ reinforcement outcomes.
+
+**Change:** Accepted the generated staff-desk/radio/map image as suitable, center-crop/resized it from `2752 x 1536` PNG to the exact `1280 x 720` consequence-still contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/consequence_stills/consequence_reserve_deployment.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/consequence_reserve_deployment_source.png`.
+
+**Verification:** Output metadata is `1280 x 720` WebP. Visual spot check confirmed no watermark, no baked UI artifacts, no soldiers, weapons, insignia, unit names, or readable operational labels, and an appropriate idle radio/map/paperwork aftermath composition for Records/Chronicle use.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/consequence_stills/consequence_reserve_deployment.webp`, `src/ui/map/assets/presidential_desk/source/consequence_reserve_deployment_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add negotiated-settlement consequence still
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential Records/Chronicle consequence set needs a negotiated-settlement still for resolved peace-plan and settlement outcomes.
+
+**Change:** Accepted the generated empty negotiation-room image as suitable, center-crop/resized it from `2752 x 1536` PNG to the exact `1280 x 720` consequence-still contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/consequence_stills/consequence_negotiated_settlement.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/consequence_negotiated_settlement_source.png`.
+
+**Verification:** Output metadata is `1280 x 720` WebP. Visual spot check confirmed no watermark, no baked UI artifacts, no people or flags, no readable record text, and an appropriate empty negotiation table with folders, maps, ashtray, and cold coffee for Records/Chronicle aftermath use.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/consequence_stills/consequence_negotiated_settlement.webp`, `src/ui/map/assets/presidential_desk/source/consequence_negotiated_settlement_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add intelligence packet thumbnail
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential Desk packet-card set needs an intelligence thumbnail for reconnaissance, classified brief, and notification cards.
+
+**Change:** Accepted the generated intelligence dossier image after using a tighter crop and light final blur to avoid readable folder headings and code fragments. Cropped from `2400 x 1792` PNG using `{ left: 520, top: 180, width: 1760, height: 1320 }`, resized to the exact `640 x 480` packet-thumbnail contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/packet_thumbnails/packet_thumb_intelligence.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/packet_thumb_intelligence_source.png`.
+
+**Verification:** Output metadata is `640 x 480` WebP. Visual spot check confirmed no watermark, no baked UI artifacts, no readable codes, and a clear reconnaissance-photo/redaction/magnifier cue suitable for small intelligence packet cards.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/packet_thumbnails/packet_thumb_intelligence.webp`, `src/ui/map/assets/presidential_desk/source/packet_thumb_intelligence_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add convoy packet thumbnail
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential Desk packet-card set needs a humanitarian convoy thumbnail for aid-access and convoy-route decision cards.
+
+**Change:** Accepted the generated convoy route-packet image as suitable, center-crop/resized it from `2400 x 1792` PNG to the exact `640 x 480` packet-thumbnail contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/packet_thumbnails/packet_thumb_convoy.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/packet_thumb_convoy_source.png`.
+
+**Verification:** Output metadata is `640 x 480` WebP. Visual spot check confirmed no watermark, no baked UI artifacts, no aid logos, no readable manifest/checklist text, and a clear unlabeled route-map/pencil/weathered-paper cue suitable for small convoy packet cards.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/packet_thumbnails/packet_thumb_convoy.webp`, `src/ui/map/assets/presidential_desk/source/packet_thumb_convoy_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add paramilitary packet thumbnail
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential Desk packet-card set needs a paramilitary/internal-security thumbnail for authorization and civilian-risk decision cards.
+
+**Change:** Accepted the generated internal-security folder/map image as suitable, center-crop/resized it from `2400 x 1792` PNG to the exact `640 x 480` packet-thumbnail contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/packet_thumbnails/packet_thumb_paramilitary.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/packet_thumb_paramilitary_source.png`.
+
+**Verification:** Output metadata is `640 x 480` WebP. Visual spot check confirmed no watermark, no baked UI artifacts, no large warning stamps or readable caution labels, and a clear red-brown case-folder/municipal-map/internal-security paperwork cue suitable for small packet cards.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/packet_thumbnails/packet_thumb_paramilitary.webp`, `src/ui/map/assets/presidential_desk/source/packet_thumb_paramilitary_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add officer-matter packet thumbnail
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential Desk packet-card set needs an officer/personnel thumbnail for staff review, replacement, and personnel acknowledgement cards.
+
+**Change:** Accepted the generated officer/personnel file image as suitable, center-crop/resized it from `2400 x 1792` PNG to the exact `640 x 480` packet-thumbnail contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/packet_thumbnails/packet_thumb_officer_matter.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/packet_thumb_officer_matter_source.png`.
+
+**Verification:** Output metadata is `640 x 480` WebP. Visual spot check confirmed no watermark, no baked UI artifacts, no visible face, no readable classification label, and a clear blank-folder/obscured-photo/personnel-file cue suitable for small packet cards.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/packet_thumbnails/packet_thumb_officer_matter.webp`, `src/ui/map/assets/presidential_desk/source/packet_thumb_officer_matter_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add reserve-request packet thumbnail
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential Desk packet-card set needs a reserve-request thumbnail for Army HQ reinforcement and reserve allocation cards.
+
+**Change:** Accepted the generated reserve-request paperwork/radio image after using a tighter crop to avoid readable telephone keypad numbers. Cropped from `2400 x 1792` PNG using `{ left: 120, top: 300, width: 1920, height: 1440 }`, resized to the exact `640 x 480` packet-thumbnail contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/packet_thumbnails/packet_thumb_reserve_request.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/packet_thumb_reserve_request_source.png`.
+
+**Verification:** Output metadata is `640 x 480` WebP. Visual spot check confirmed no watermark, no baked UI artifacts, no readable keypad numbers, and a clear handset/request-form/map/pencil cue suitable for small reserve-request packet cards.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/packet_thumbnails/packet_thumb_reserve_request.webp`, `src/ui/map/assets/presidential_desk/source/packet_thumb_reserve_request_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add peace-plan packet thumbnail
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential Desk packet-card set needs a peace-plan thumbnail for negotiation and territorial proposal cards.
+
+**Change:** Accepted the generated peace-plan folder/map image as suitable, center-crop/resized it from `2400 x 1792` PNG to the exact `640 x 480` packet-thumbnail contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/packet_thumbnails/packet_thumb_peace_plan.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/packet_thumb_peace_plan_source.png`.
+
+**Verification:** Output metadata is `640 x 480` WebP. Visual spot check confirmed no watermark, no baked UI artifacts, no readable labels, and a clear folder/fountain-pen/Bosnia-like map cue suitable for small packet cards.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/packet_thumbnails/packet_thumb_peace_plan.webp`, `src/ui/map/assets/presidential_desk/source/packet_thumb_peace_plan_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add event decision packet thumbnail
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential Desk packet-card set needs a generic event-decision thumbnail for urgent decision cards and fallback-free visual scanning.
+
+**Change:** Accepted the generated desk-packet image as suitable, center-crop/resized it from `2400 x 1792` PNG to the exact `640 x 480` packet-thumbnail contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/packet_thumbnails/packet_thumb_event_decision.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/packet_thumb_event_decision_source.png`.
+
+**Verification:** Output metadata is `640 x 480` WebP. Visual spot check confirmed no watermark, no baked UI artifacts, no readable labels or stamps, and a strong unlabeled folder/paperclip/blurred-document cue suitable for small packet cards.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/packet_thumbnails/packet_thumb_event_decision.webp`, `src/ui/map/assets/presidential_desk/source/packet_thumb_event_decision_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add counter-offer decision header
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential decision modal set needs a counter-offer header image for negotiation response and territorial proposal decision surfaces.
+
+**Change:** Accepted the regenerated counter-offer negotiation image as suitable, center-crop/resized it from `3584 x 1184` PNG to the exact `1536 x 512` modal-header contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/decision_headers/decision_header_counter_offer.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/decision_header_counter_offer_source.png`.
+
+**Verification:** Output metadata is `1536 x 512` WebP. Visual spot check confirmed no watermark, no baked UI artifacts, no embedded title text, strong left-side negative space, and an appropriate Bosnia-like map/folder/coffee negotiation composition. Any map labels reduce to background texture at final header size.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/decision_headers/decision_header_counter_offer.webp`, `src/ui/map/assets/presidential_desk/source/decision_header_counter_offer_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add paramilitary internal-security decision header
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential decision modal set needs an internal-security header image for paramilitary authorization and civilian-risk decision surfaces.
+
+**Change:** Accepted the regenerated internal-security case-folder image as suitable, center-crop/resized it from `3584 x 1184` PNG to the exact `1536 x 512` modal-header contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/decision_headers/decision_header_paramilitary.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/decision_header_paramilitary_source.png`.
+
+**Verification:** Output metadata is `1536 x 512` WebP. Visual spot check confirmed no watermark, no large readable warning labels, no baked UI artifacts, strong dark left-side title space, and appropriate internal-security map/folder/paperwork cues.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/decision_headers/decision_header_paramilitary.webp`, `src/ui/map/assets/presidential_desk/source/decision_header_paramilitary_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add personnel matter decision header
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential decision modal set needs a personnel matter header image for officer replacement, staff review, and personnel acknowledgement surfaces.
+
+**Change:** Accepted the regenerated personnel dossier image as suitable, center-crop/resized it from `3584 x 1184` PNG to the exact `1536 x 512` modal-header contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/decision_headers/decision_header_personnel.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/decision_header_personnel_source.png`.
+
+**Verification:** Output metadata is `1536 x 512` WebP. Visual spot check confirmed no readable title/classification labels, no visible face, no watermark or baked UI artifacts, and a clean personnel-folder/photo-obscured dossier read.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/decision_headers/decision_header_personnel.webp`, `src/ui/map/assets/presidential_desk/source/decision_header_personnel_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add humanitarian convoy decision header
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential decision modal set needs a humanitarian convoy header image for aid-access and convoy-route decision surfaces.
+
+**Change:** Accepted the regenerated route-packet image as suitable, center-crop/resized it from `3584 x 1184` PNG to the exact `1536 x 512` modal-header contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/decision_headers/decision_header_humanitarian_convoy.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/decision_header_humanitarian_convoy_source.png`.
+
+**Verification:** Output metadata is `1536 x 512` WebP. Visual spot check confirmed no readable text, no watermark, no baked UI artifacts, clear route-map/paperwork signal, and quiet left-side space for modal title overlay.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/decision_headers/decision_header_humanitarian_convoy.webp`, `src/ui/map/assets/presidential_desk/source/decision_header_humanitarian_convoy_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add intelligence brief decision header
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential decision modal set needs an intelligence header image for reconnaissance, notification, and classified brief surfaces.
+
+**Change:** Accepted the generated intelligence dossier image as suitable after cropping out the generated dark lower band. Cropped from `3584 x 1184` PNG using `{ left: 450, top: 40, width: 2460, height: 820 }`, resized to the exact `1536 x 512` modal-header contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/decision_headers/decision_header_intelligence.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/decision_header_intelligence_source.png`.
+
+**Verification:** Output metadata is `1536 x 512` WebP. Visual spot check confirmed the baked lower band was removed, no watermark or UI artifacts remain, and the final header retains reconnaissance photos, redactions, and magnifier props suitable for title overlay.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/decision_headers/decision_header_intelligence.webp`, `src/ui/map/assets/presidential_desk/source/decision_header_intelligence_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add military staff decision header
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential decision modal set needs a military staff/request header image for Army HQ, reserve, and operational-advice decision surfaces.
+
+**Change:** Accepted the generated staff-office map/radio image as suitable, center-crop/resized it from `3584 x 1184` PNG to the exact `1536 x 512` modal-header contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/decision_headers/decision_header_military_staff.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/decision_header_military_staff_source.png`.
+
+**Verification:** Output metadata is `1536 x 512` WebP. Visual spot check confirmed no watermark or baked UI artifacts, with military map/radio/staff paperwork props and restrained green office tone suitable for title overlay.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/decision_headers/decision_header_military_staff.webp`, `src/ui/map/assets/presidential_desk/source/decision_header_military_staff_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add diplomatic decision header
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential decision modal set needs a diplomatic header image for peace-plan, negotiation, and counter-proposal surfaces.
+
+**Change:** Accepted the generated diplomatic paperwork image as suitable, center-crop/resized it from `3584 x 1184` PNG to the exact `1536 x 512` modal-header contract, converted it to WebP quality 84, and saved it as `src/ui/map/assets/presidential_desk/decision_headers/decision_header_diplomacy.webp`. Preserved the original PNG as raw provenance at `src/ui/map/assets/presidential_desk/source/decision_header_diplomacy_source.png`.
+
+**Verification:** Output metadata is `1536 x 512` WebP. Visual spot check confirmed no watermark or baked UI artifacts, with clean left-side room for modal title overlay and diplomatic document/map props concentrated center/right.
+
+**Artifacts:** `src/ui/map/assets/presidential_desk/decision_headers/decision_header_diplomacy.webp`, `src/ui/map/assets/presidential_desk/source/decision_header_diplomacy_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] asset(ui): add 1992 presidential desk background
+
+**Type:** UI asset addition only. No code, simulation behavior, scenario data, event ordering, calibration values, or generated simulation outputs changed.
+
+**Why:** The presidential Desk flow needs a clean Warroom room plate with natural left-side negative space for app-rendered overlays and no baked UI elements.
+
+**Change:** Accepted the generated presidential office image as suitable, verified it already matched the `2752 x 1536` room-plate contract, converted it to WebP quality 86, and saved it as `src/ui/warroom/assets/hq_presidential_desk_1992.webp`. Preserved the original PNG as raw provenance at `src/ui/warroom/assets/raw_sora/presidential_desk/hq_presidential_desk_1992_source.png`.
+
+**Verification:** Source image metadata was `2752 x 1536` PNG; output metadata is `2752 x 1536` WebP. Visual spot check confirmed no baked UI panels, good left negative space, period-appropriate desk/radio/map props, and acceptable window exposure.
+
+**Artifacts:** `src/ui/warroom/assets/hq_presidential_desk_1992.webp`, `src/ui/warroom/assets/raw_sora/presidential_desk/hq_presidential_desk_1992_source.png`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] docs(ui): specify presidential GUI asset dimensions and drop paths
+
+**Type:** Documentation-only asset intake clarification. No code, simulation behavior, scenario data, generated outputs, or asset files changed.
+
+**Why:** The presidential GUI asset brief named the desired image categories but did not give exact dimensions, filenames, or target folders, which would make later AI asset creation and integration ambiguous.
+
+**Change:** Expanded `docs/plans/2026-05-24-gui-ai-asset-brief.md` with exact dimensions, delivery formats, suggested filenames, final drop paths, raw-candidate folders, and a first-delivery checklist. The brief now distinguishes Warroom room plates under `src/ui/warroom/assets/` from decision UI assets under `src/ui/map/assets/presidential_desk/`.
+
+**Follow-up:** Folded dimensions, final filenames, and drop paths directly into the prompt text so each AI-generation prompt is copy-paste ready without cross-referencing the intake tables.
+
+**Follow-up 2:** Tightened the presidential desk background prompt after reviewing the first Gemini output: the new prompt explicitly forbids baked UI panels/card placeholders, reserves the left third as natural dark office space for app-rendered overlays, asks for softer window exposure, and adds watermark/interface elements to the negative prompt.
+
+**Follow-up 3:** Rejected a humanitarian convoy header candidate because its manifest/table text remained too readable after trial crops. No asset was kept. Tightened the humanitarian convoy prompt to request an unlabeled route packet and explicitly forbid manifest tables, checklist grids, readable handwriting, numbers, stamps/icons, calculators, keyboards, and modern electronics.
+
+**Follow-up 4:** Rejected a personnel matter header candidate because readable `PERSONNEL` / `SECRET` labels and office equipment were too prominent. No asset was kept. Tightened the personnel prompt to require blank folder tabs, unreadable pseudo-text only, fully obscured photo areas, and no readable classification stamps or modern computer/printer/keyboard equipment.
+
+**Follow-up 5:** Rejected a paramilitary/internal security header candidate because it included a visible Gemini watermark and large readable warning text. No asset was kept. Tightened the prompt to forbid large warning stamps, caution/classification labels, readable headlines, logos, watermarks, symbolic icons, weapons, gore, soldiers, and action-scene framing.
+
+**Follow-up 6:** Rejected a counter-offer header candidate because it included large embedded title text, a Gemini watermark, and a modern U.S.-centric map. No asset was kept. Tightened the counter-offer prompt to require Bosnia/Balkan-like territorial negotiation materials, plain left-side overlay space, and no embedded typography, modern national maps, logos, or watermarks.
+
+**Follow-up 7:** Expanded the desk packet thumbnail and consequence still prompts based on accepted/rejected asset review. The brief now embeds exact dimensions, filenames, drop paths, shared negative prompts, small-card readability guidance, and Records/Chronicle aftermath framing directly into those generation prompts.
+
+**Determinism:** Documentation-only. No asset pipeline, import ordering, or runtime behavior changed.
+
+**Verification:** Documentation review only; no tests required because no code or data changed. `git diff --check` remains clean except the known CRLF warning on `src/ui/map/App.tsx` from the broader branch.
+
+**Artifacts:** `docs/plans/2026-05-24-gui-ai-asset-brief.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] chore(ui): refresh presidential loop smoke and final GUI verification
+
+**Type:** UI verification/tooling and player-facing copy cleanup. No combat math, scenario data, calibration values, event ordering, or generated simulation outputs changed.
+
+**Why:** The full GUI restructure needed final evidence for the redesigned presidential loop instead of the retired top-level Decision Room/Chronicle smoke path. The advance clearance packet also still used terse `OPS` / `Hard Turns` labels that read like internal shorthand rather than presidential briefing copy.
+
+**Change:** Updated Decision Room/Advance metric copy to `Opportunities` and `Costly Turns`. Updated `tools/ui/presidential_loop_smoke.cjs` so it uses system Chrome when Puppeteer's bundled browser is absent, defaults to a clean RBiH side-picker campaign, and validates the current loop: President's Desk, Call Army HQ, War Summary inspection, Advance Clearance, Records, and return to Desk. Recorded the final browser/DOM and smoke evidence in the GUI restructure plan.
+
+**Determinism:** Tooling/UI copy only. The smoke seeds a deterministic side-picker campaign and writes screenshots/summary artifacts; it does not alter scenario data or simulation logic.
+
+**Verification:** `node tools\ui\presidential_loop_smoke.cjs` passed against `http://127.0.0.1:3001/?view=warroom`. Targeted regression suite passed: `npx.cmd vitest run tests\ui\pre_advance_command_review.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts tests\ui\shell_navigation_ownership.test.ts tests\ui\decision_family_modals.test.ts --reporter=dot` (5 files, 22 tests). Broad GUI regression passed: `npx.cmd vitest run tests\ui\decision_family_modals.test.ts tests\ui\decision_surface_registry.test.ts tests\ui\error_copy_contract.test.ts tests\ui\modal_stack_priority.test.ts tests\ui\personnel_player_safe_display.test.ts tests\ui\president_desk_shell.test.ts tests\ui\presidential_blockers.test.ts tests\ui\shell_navigation_ownership.test.ts tests\ui\panel_rail_ownership.test.ts tests\ui\decision_consequence_trail.test.ts tests\ui\decision_consequence_records_panel.test.ts tests\ui\chronicle_decision_ledger.test.ts tests\ui\chronicle_chapters.test.ts tests\ui\chronicle_chapter_ui.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts tests\ui\inbox_dedup.test.ts tests\ui\coachmark_layer.test.ts tests\ui\onboarding_track_d_consolidation.test.ts tests\presidential_decision_room_counter_offer.test.ts tests\ui_adapter_boundary.test.ts --reporter=dot` (21 files, 89 tests). `npm.cmd run typecheck` passed. `git diff --check` passed with only the known CRLF warning on `src/ui/map/App.tsx`.
+
+**Artifacts:** `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tools/ui/presidential_loop_smoke.cjs`, `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`, `docs/40_reports/GUI_MASTER.md`, `docs/40_reports/implemented/visual_validation/20260524_presidential_desk_flow/summary.json`.
+
+---
+
+## [2026-05-24] feat(ui): add counter-offer modal and dedupe Chronicle decision cards
+
+**Type:** UI modal/routing and Chronicle read-model change. No combat math, scenario data, calibration values, event ordering, or generated outputs changed.
+
+**Why:** Counter-offer cards had a registry modal owner but the live navigation path returned success without opening a resolver. Chronicle could also show the same resolved decision twice: once as a generic turn-summary event and once as a filed decision-ledger consequence.
+
+**Change:** Added `CounterOfferModal` and wired App-level pre-advance/Warroom review targets to open it for `counter-offer` navigation. The modal displays the cited plan, response type, split, institutional model, source, and rider, and can submit the displayed proposal through the existing desktop `submitCounterOffer` IPC bridge. Chronicle now collects filed decision event ids and suppresses matching `turnSummaries[].events_fired` cards so the decision ledger is the single owner for resolved decision consequences.
+
+**Determinism:** UI/read-model only. Chronicle suppression is deterministic by event id. No save-state mutation is introduced by the Chronicle change; the counter-offer modal calls the existing deterministic counter-offer IPC path only when the player clicks the submit action.
+
+**Verification:** Red/green counter-offer modal/routing suite passed: `npx.cmd vitest run tests\ui\decision_family_modals.test.ts tests\presidential_decision_room_counter_offer.test.ts tests\ui\pre_advance_command_review.test.ts tests\ui\warroom_priority_docket.test.ts --reporter=dot` (4 files, 14 tests). Red/green Chronicle duplicate suite passed: `npx.cmd vitest run tests\ui\chronicle_decision_ledger.test.ts --reporter=dot` (1 file, 2 tests). `npm.cmd run typecheck` passed after the modal slice.
+
+**Artifacts:** `src/ui/map/components/CounterOfferModal.tsx`, `src/ui/map/App.tsx`, `src/ui/map/components/chronicle/generateChronicleEntries.ts`, `tests/ui/decision_family_modals.test.ts`, `tests/ui/chronicle_decision_ledger.test.ts`, `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`, `docs/40_reports/GUI_MASTER.md`.
+
+---
+
+## [2026-05-24] feat(ui): file officer/personnel decision consequences
+
+**Type:** Desktop IPC history filing plus UI read-model and Records/Desk presentation change. No combat math, scenario data, calibration values, event ordering, or generated outputs changed.
+
+**Why:** Officer/personnel decisions had modal and Inbox surfaces, but acknowledgements and replacement acceptances were only marked on transient `pending_officer_events`. After those pending events aged out, the President's Desk and Records could not explain what the player had decided.
+
+**Change:** Added packaged desktop helper `src/desktop/officer_decision_history.cjs` and wired `acknowledge-officer-event` / `accept-officer-replacement` to file deterministic `state.military.officer_decision_history` records. `GameStateAdapter` now projects player-faction officer decision history with player-safe officer/corps names. The shared decision consequence ledger now emits `Officer personnel` records for acknowledgements, overrides, and accepted replacements.
+
+**Determinism:** Officer records are deduped by deterministic id and sorted by turn then id. No random, wall-clock, or renderer-only state is introduced.
+
+**Canon mapping:** This is an audit/presentation layer over existing presidential personnel agency. It preserves existing officer assignment and interpretation mechanics and only persists the player-facing consequence record.
+
+**Verification:** Red/green focused suite passed: `npx.cmd vitest run tests\desktop_officer_decision_history.test.ts tests\ui\decision_consequence_trail.test.ts tests\ui_adapter_boundary.test.ts tests\desktop_packaging_contract.test.ts --reporter=dot` (4 files, 30 tests). Expanded affected consequence suite passed: `npx.cmd vitest run tests\humanitarian_convoy_lifecycle.test.ts tests\paramilitary_sweep.test.ts tests\desktop_officer_decision_history.test.ts tests\desktop_packaging_contract.test.ts tests\ui\decision_consequence_trail.test.ts tests\ui\decision_consequence_records_panel.test.ts tests\ui\chronicle_decision_ledger.test.ts tests\ui_adapter_boundary.test.ts --reporter=dot` (8 files, 81 tests). `npm.cmd run typecheck` passed.
+
+**Artifacts:** `src/desktop/officer_decision_history.cjs`, `src/desktop/electron-main.cjs`, `src/state/game_state.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/data/decisionConsequenceLedger.ts`, `src/ui/map/data/types.ts`, `tests/desktop_officer_decision_history.test.ts`, `tests/desktop_packaging_contract.test.ts`, `tests/ui/decision_consequence_trail.test.ts`, `tests/ui_adapter_boundary.test.ts`.
+
+---
+
+## [2026-05-24] feat(ui): add decision consequence trail read-model
+
+**Type:** UI read-model and Records/Desk presentation change only. No simulation behavior, save schema, scenario data, event ordering, combat math, calibration values, or generated outputs changed.
+
+**Why:** The presidential GUI restructure requires each decision to leave a visible trace after resolution. Before this slice, the Desk showed generic recent consequence counts, and Records separated AAR/operations/opportunities without a concise presidential decision log.
+
+**Change:** Added `src/ui/map/data/decisionConsequenceLedger.ts`, deriving player-facing consequence entries from existing filed decision events and operation opportunity records. President's Desk Recent Consequences now shows filed decision count plus the latest decision records. Army HQ Records now includes a Decision Log tab backed by `DecisionConsequenceRecordsPanel`.
+
+**Verification:** `npm.cmd run typecheck` passed. Focused tests passed: `npx.cmd vitest run tests\ui\decision_consequence_trail.test.ts tests\ui\decision_consequence_records_panel.test.ts tests\ui\president_desk_shell.test.ts --reporter=dot` (3 files, 8 tests).
+
+**Plans:** `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`.
+
+---
+
+## [2026-05-24] feat(ui): simplify tactical map command toolbar
+
+**Type:** UI shell/navigation change only. No simulation behavior, save schema, scenario data, event ordering, combat math, calibration values, or generated outputs changed.
+
+**Why:** The tactical map toolbar duplicated too many shell owners at once: Warroom, Chronicle, Summary, Records, Ops, Events, Codex, Inbox, reserve, command authority, advance, and dev controls. That reinforced the confusing multi-panel state the GUI restructure is meant to remove.
+
+**Change:** `PresidentialToolbar` now presents a smaller field command set: Desk, War Map, Army HQ, Records, Codex, and Advance. Summary/Ops/Events/Chronicle are no longer top-level toolbar buttons. Dev load/run/save controls are collapsed behind a dev drawer. Desk, War Map, Army HQ, Records, and Codex navigation clear map-owned selected context and incompatible store-owned overlays before switching owner. `App.tsx` wires the toolbar Desk action back to the Warroom/President's Desk surface.
+
+**Follow-up change:** Added tactical detail rail ownership gating: selection/inbox/entity detail rails do not render while Operations, Army HQ, Codex, or Chronicle owns the active surface.
+
+**Follow-up change:** Tactical map chrome now mounts only while `appScreen === 'game'`; the Warroom/President's Desk shell no longer renders the tactical toolbar, OOB rail, command briefing, or tactical right rails underneath it.
+
+**Verification:** `npm.cmd run typecheck` passed. Focused toolbar regression suite passed: `npx.cmd vitest run tests\ui\shell_navigation_ownership.test.ts tests\ui\records_button_behavior.test.ts tests\ui\stale_state_resets.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts tests\ui\presidential_toolbar_severity_pip.test.ts --reporter=dot` (5 files, 19 tests). Panel ownership regression passed: `npx.cmd vitest run tests\ui\panel_rail_ownership.test.ts tests\ui\shell_navigation_ownership.test.ts --reporter=dot` (2 files, 6 tests after shell-ownership assertion). Broader GUI restructure slice passed: `npx.cmd vitest run tests\ui\decision_family_modals.test.ts tests\ui\decision_surface_registry.test.ts tests\ui\error_copy_contract.test.ts tests\ui\modal_stack_priority.test.ts tests\ui\personnel_player_safe_display.test.ts tests\ui\president_desk_shell.test.ts tests\ui\presidential_blockers.test.ts tests\ui\shell_navigation_ownership.test.ts tests\ui\panel_rail_ownership.test.ts tests\ui\decision_consequence_trail.test.ts tests\ui\decision_consequence_records_panel.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts --reporter=dot` (13 files, 38 tests). `npm.cmd run desktop:map:build` passed with existing Vite/browser-external/chunk-size warnings. Browser DOM verification on `http://127.0.0.1:3001/?view=warroom` after loading latest run confirmed the Warroom/Desk no longer exposes tactical toolbar buttons or the OOB `COMMAND/SITUATION` rail.
+
+**Plans:** `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`.
+
+---
+
+## [2026-05-24] feat(ui): add presidential decision surface registry foundation
+
+**Type:** UI routing/read-model and player-facing copy change only. No simulation behavior, save schema, scenario data, event ordering, combat math, calibration values, or generated outputs changed.
+
+**Why:** The GUI had multiple partial owners for presidential decisions: Inbox, Decision Room, Advance review, Warroom docket, and modal routing all duplicated labels and routes. That made blockers confusing and allowed raw engine keys such as `pending_required_decisions` to leak into player-visible UI.
+
+**Change:** Added `src/ui/map/data/decisionSurfaceRegistry.ts` as the UI contract for manifest-backed decision families plus supplemental counter-offer, intelligence, and situation surfaces. Inbox derivation, presidential blocker derivation, and Decision Room/pre-advance manifest cards now consume registry actions/copy. Pending paramilitary requests now surface as blocking desk decisions whenever player-faction requests exist, even when `paramilitaryPolicy` is absent from renderer state. Added `src/ui/map/utils/errorCopy.ts` and applied it in advance-turn failure handling and `LoadErrorToast` so raw error keys map to player-safe copy.
+
+**Verification:** Focused UI suite passed: `npx.cmd vitest run tests\ui\decision_surface_registry.test.ts tests\ui\pre_advance_command_review.test.ts tests\ui\presidential_decision_room.test.ts tests\ui\presidential_blockers.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui_map_order_actions.test.ts tests\load_error_toast.test.ts tests\ui\error_copy_contract.test.ts --reporter=dot` (9 files, 47 tests). `npm.cmd run typecheck` passed. `git diff --check` completed with no whitespace errors; it reported only the existing CRLF warning for `src/ui/map/App.tsx`.
+
+**Plans:** `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`.
+
+---
+
+## [2026-05-24] docs(gui): full presidential GUI restructure audit plan
+
+**Type:** Documentation and planning only. No simulation behavior, save schema, scenario data, event ordering, combat math, calibration values, generated saves, or runtime UI behavior changed by this entry.
+
+**Why:** User feedback made clear that isolated blocker fixes are insufficient. The GUI needs a systematic restructure around the presidential loop: desk packet, decision modals, Army HQ calls, tactical inspection, advance clearance, and consequence review.
+
+**Change:** Expanded `docs/plans/2026-05-24-gui-shell-reorganization-scope.md` from a short scope note into a full browser-audit-backed implementation plan. The plan inventories Warroom, President's Inbox, Decision Room, Advance, Army HQ briefing/personnel, Tactical Map, Records/Chronicle, Codex, modal routing, raw-copy leaks, and asset strategy. `docs/40_reports/GUI_MASTER.md` now links the plan as the current GUI restructuring reference.
+
+**Verification:** Local GUI surfaces were inspected in browser at `http://127.0.0.1:3002/?view=warroom`, with audit screenshots stored under `docs/plans/gui-audit-*.png`. `git diff --check` completed with no whitespace errors; it reported only the existing CRLF warning for `src/ui/map/App.tsx`.
+
+**Plans:** `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`.
+
+---
+
+## [2026-05-24] fix(ui): route presidential blockers to direct decision owners
+
+**Type:** UI flow/read-model change only. No simulation behavior, save schema, scenario data, event ordering, combat math, calibration values, or generated outputs changed.
+
+**Why:** The presidential Inbox could flag blocking work, but blocked ADVANCE routed players into the Army HQ Decision Room, where the review card was indirect and confusing. This left players blocked without a clear clickable owner for the actual decision.
+
+**Change:** Added `src/ui/map/data/presidentialBlockers.ts` as the direct blocker read model for event, peace-plan, Dayton, paramilitary, and convoy decisions. `AdvanceTurnModal` now lists concrete blockers with owner-specific actions before the general pre-advance review list. Warroom ADVANCE opens the advance modal even when blocked instead of detouring to Decision Room. Decision Room review cards now route unresolved presidential reviews to the Inbox, while Army HQ remains a briefing/advice source. Convoy Inbox copy no longer exposes raw route faction/enclave ids.
+
+**Verification:** Focused UI Vitest suite passed: `npx.cmd vitest run tests\ui\presidential_blockers.test.ts tests\ui\inbox_items.test.ts tests\ui\inbox_dedup.test.ts tests\ui_presidential_decision_room_wiring.test.ts tests\ui\presidential_decision_room.test.ts tests\ui\pre_advance_command_review.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts tests\ui_shell_navigation.test.ts --reporter=dot` (9 files, 86 tests). `npm.cmd run typecheck` passed.
+
+**Plans:** `docs/plans/2026-05-24-presidential-blocker-flow-plan.md`; `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`.
+
+---
+
 ## [2026-05-24] chore(warroom): sync public clickable-region mirrors
 
 **Type:** Warroom public-asset mirror synchronization. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
@@ -9336,5 +9837,106 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 - `git diff --check` - PASS with only CRLF normalization warnings on touched tests.
 
 **Artifacts:** `data/derived/startup/apr_1992_initial_save.json`, `data/scenarios/events/war_1995.json`, `src/ui/map/components/SettingsScreen.tsx`, `tools/diagnostics/output/save_migration_drift.json`, fast-slice test contracts, `docs/PROJECT_LEDGER.md`.
+
+---
+## [2026-05-24] feat(ui): presidential desk decision flow restructure
+
+**Type:** UI flow restructure + player-facing copy hardening + modal ownership + planning docs.
+
+**Change:** Added a decision-surface registry and routed inbox, pre-advance review, blockers, and Decision Room labels through player-facing surface metadata. Added a President's Desk shell, direct single-blocker advance resolution, reserve/personnel/intelligence decision-family modals, and modal priority gating so event decisions do not auto-launch over an active peace-plan modal. Reworked Army HQ briefing into two continuous lanes and replaced raw personnel `C:`/`A:` stat notation with labeled quality chips. Reserve inbox copy now uses player-facing corps names from formations instead of formatting ids.
+
+**Determinism:** UI-only. No simulation state, scenario data, random ordering, timers, or baseline outputs changed. New view derivation remains deterministic and sorted through existing UI data paths.
+
+**Verification:**
+- `npm.cmd run typecheck` - PASS.
+- `npx.cmd vitest run tests\ui\decision_surface_registry.test.ts tests\ui\pre_advance_command_review.test.ts tests\ui\presidential_decision_room.test.ts tests\ui\presidential_blockers.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui_map_order_actions.test.ts tests\load_error_toast.test.ts tests\ui\error_copy_contract.test.ts --reporter=dot` - PASS.
+- `npx.cmd vitest run tests\ui\decision_family_modals.test.ts tests\ui\president_desk_shell.test.ts tests\ui\personnel_player_safe_display.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts tests\ui\presidential_blockers.test.ts tests\ui\decision_surface_registry.test.ts tests\ui\error_copy_contract.test.ts --reporter=dot` - 23/23 PASS.
+- `npx.cmd vitest run tests\ui_presidential_decision_room_wiring.test.ts tests\ui\error_boundary_isolation.test.ts tests\ui\president_desk_shell.test.ts tests\ui\decision_family_modals.test.ts tests\ui\personnel_player_safe_display.test.ts --reporter=dot` - 21/21 PASS.
+- `npx.cmd vitest run tests\ui\inbox_items.test.ts tests\ui\modal_stack_priority.test.ts --reporter=dot` - 31/31 PASS.
+- Browser screenshot smoke against `npm.cmd run dev:map -- --host 127.0.0.1 --port 3001` captured President's Desk, peace-plan modal priority, Army HQ, and personnel screens under `docs/plans/gui-verify-*.png`.
+
+**Artifacts:** `src/ui/map/data/decisionSurfaceRegistry.ts`, `src/ui/map/data/presidentialBlockers.ts`, `src/ui/map/utils/errorCopy.ts`, `src/ui/map/components/presidential_desk/*`, `src/ui/map/components/ReserveRequestModal.tsx`, `src/ui/map/components/OfficerMatterModal.tsx`, `src/ui/map/components/IntelligenceBriefModal.tsx`, `src/ui/map/App.tsx`, `src/ui/map/components/army_hq/*`, `tests/ui/*`, `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`, `docs/plans/2026-05-24-gui-ai-asset-brief.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] chore(ui): retire Decision Room route language from player flow
+
+**Type:** UI copy/route cleanup + shell ownership guard.
+
+**Change:** Replaced remaining player-facing `Open Inbox` / `Open Decision Room` advance and Warroom docket actions with `Open Desk`, changed quiet-inbox/opening-brief handoff ids to Desk-oriented ids, updated coachmark/onboarding copy to teach President's Desk as the decision owner, and removed the hidden retired `InboxBadge` toolbar route from the tactical field toolbar.
+
+**Determinism:** UI-only. No simulation state, scenario data, serialization, RNG, or ordering changed.
+
+**Verification:**
+- `npx.cmd vitest run tests\ui\pre_advance_command_review.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui\inbox_dedup.test.ts tests\ui\shell_navigation_ownership.test.ts --reporter=dot` - 19/19 PASS after red/green cycle.
+- `npx.cmd vitest run tests\ui\pre_advance_command_review.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui\inbox_dedup.test.ts tests\ui\shell_navigation_ownership.test.ts tests\ui\coachmark_layer.test.ts tests\ui\onboarding_track_d_consolidation.test.ts --reporter=dot` - 30/30 PASS.
+- `npx.cmd vitest run tests\ui\decision_family_modals.test.ts tests\ui\decision_surface_registry.test.ts tests\ui\error_copy_contract.test.ts tests\ui\modal_stack_priority.test.ts tests\ui\personnel_player_safe_display.test.ts tests\ui\president_desk_shell.test.ts tests\ui\presidential_blockers.test.ts tests\ui\shell_navigation_ownership.test.ts tests\ui\panel_rail_ownership.test.ts tests\ui\decision_consequence_trail.test.ts tests\ui\decision_consequence_records_panel.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts tests\ui\inbox_dedup.test.ts tests\ui\coachmark_layer.test.ts tests\ui\onboarding_track_d_consolidation.test.ts --reporter=dot` - 55/55 PASS.
+- `npm.cmd run typecheck` - PASS.
+- `npm.cmd run desktop:map:build` - PASS with existing Vite externalization/chunk-size warnings.
+- `npm.cmd run desktop:release:check` - PASS, including tactical-map build, desktop sim bundle, and Warroom build.
+- `npm.cmd run desktop:package:probe` - PASS. Packaged Electron booted Warroom plus operational/sandbox tactical-map windows, loaded startup `RBiH` state, and verified packaged game-state and turn-report pushes through the desktop bridge.
+- Browser DOM verification against `http://127.0.0.1:3001/?view=warroom` after loading latest run confirmed `PRESIDENT'S DESK` is visible and `Decision Room`, `Open Inbox`, `pending_required_decisions`, and tactical `COMMAND/SITUATION` rail copy are not visible under the Desk.
+- `git diff --check` - PASS with only the existing CRLF normalization warning on `src/ui/map/App.tsx`.
+
+**Artifacts:** `src/ui/map/data/preAdvanceCommandReview.ts`, `src/ui/map/data/warroomPriorityDocket.ts`, `src/ui/map/data/presidentialDecisionRoom.ts`, `src/ui/map/components/PresidentialInbox.tsx`, `src/ui/map/components/PresidentialToolbar.tsx`, `src/ui/map/components/CoachmarkLayer.tsx`, `src/ui/map/components/onboarding/onboardingSteps.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, focused UI tests, `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] feat(ui): extend decision consequence ledger to reserves and Chronicle
+
+**Type:** UI consequence-trail expansion + adapter projection.
+
+**Change:** Exposed persisted Army reserve decision history (`reserve_request_history`) through `LoadedGameState.reserveRequestHistory`, added accepted/declined/terminated reserve decisions to the shared decision consequence ledger, and projected shared ledger records into Chronicle timeline cards. This makes a reserve decision traceable across Desk Recent Consequences, Army HQ Records Decision Log, and Chronicle.
+
+**Determinism:** UI/adapter projection only. No simulation mutation, scenario data, RNG, or serialized state ordering changed. Adapter history projection is deterministically sorted by turn, corps id, and request id.
+
+**Verification:**
+- `npx.cmd vitest run tests\ui\decision_consequence_trail.test.ts --reporter=dot` - 4/4 PASS after red/green cycle.
+- `npx.cmd vitest run tests\ui\chronicle_decision_ledger.test.ts tests\ui\decision_consequence_trail.test.ts --reporter=dot` - 5/5 PASS after red/green cycle.
+- `npx.cmd vitest run tests\ui\decision_consequence_trail.test.ts tests\ui\decision_consequence_records_panel.test.ts tests\ui\chronicle_decision_ledger.test.ts tests\ui\chronicle_chapters.test.ts tests\ui\chronicle_chapter_ui.test.ts tests\ui\president_desk_shell.test.ts --reporter=dot` - 17/17 PASS.
+- `npm.cmd run typecheck` - PASS.
+
+**Artifacts:** `src/ui/map/data/types.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/data/decisionConsequenceLedger.ts`, `src/ui/map/components/chronicle/generateChronicleEntries.ts`, `tests/ui/decision_consequence_trail.test.ts`, `tests/ui/chronicle_decision_ledger.test.ts`, `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] feat(ui): surface resolved peace-plan consequences
+
+**Type:** UI consequence-trail expansion + adapter projection.
+
+**Change:** Exposed persisted negotiation `peace_plan_history` through `LoadedGameState.peacePlanHistory`, then added resolved peace-plan responses to the shared decision consequence ledger. Added endgame `gameVerdict.dayton_result` as a Dayton settlement consequence record. Resolved peace proposals and Dayton settlements now show player-facing summaries in the same Desk/Records/Chronicle consequence path as filed event, operation-opportunity, and Army reserve decisions.
+
+**Determinism:** UI/adapter projection only. No simulation mutation, scenario data, serialization, RNG, or save-state ordering changed. Peace-plan history projection is deterministically sorted by offered turn and plan id.
+
+**Verification:**
+- `npx.cmd vitest run tests\ui\decision_consequence_trail.test.ts tests\ui_adapter_boundary.test.ts --reporter=dot` - 20/20 PASS after red/green cycle for peace-plan history.
+- `npx.cmd vitest run tests\ui\decision_consequence_trail.test.ts --reporter=dot` - 6/6 PASS after red/green cycle for Dayton settlement history.
+- `npx.cmd vitest run tests\ui\decision_consequence_trail.test.ts tests\ui\decision_consequence_records_panel.test.ts tests\ui\chronicle_decision_ledger.test.ts tests\ui\chronicle_chapters.test.ts tests\ui\chronicle_chapter_ui.test.ts tests\ui\president_desk_shell.test.ts tests\ui_adapter_boundary.test.ts --reporter=dot` - 34/34 PASS.
+- `npm.cmd run typecheck` - PASS.
+- `npx.cmd vitest run tests\ui\decision_family_modals.test.ts tests\ui\decision_surface_registry.test.ts tests\ui\error_copy_contract.test.ts tests\ui\modal_stack_priority.test.ts tests\ui\personnel_player_safe_display.test.ts tests\ui\president_desk_shell.test.ts tests\ui\presidential_blockers.test.ts tests\ui\shell_navigation_ownership.test.ts tests\ui\panel_rail_ownership.test.ts tests\ui\decision_consequence_trail.test.ts tests\ui\decision_consequence_records_panel.test.ts tests\ui\chronicle_decision_ledger.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts tests\ui\inbox_dedup.test.ts tests\ui\coachmark_layer.test.ts tests\ui\onboarding_track_d_consolidation.test.ts tests\ui_adapter_boundary.test.ts --reporter=dot` - 73/73 PASS.
+- `npm.cmd run desktop:map:build` - PASS with existing Vite externalization/chunk-size warnings.
+- Browser DOM/screenshot verification against `http://127.0.0.1:3001/?view=warroom` confirmed the Desk is visible and no `pending_required_decisions`, `Open Inbox`, `Decision Room`, raw `C:`/`A:` stats, or tactical `COMMAND/SITUATION` rail copy is visible.
+
+**Artifacts:** `src/ui/map/data/types.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/data/decisionConsequenceLedger.ts`, `tests/ui/decision_consequence_trail.test.ts`, `tests/ui_adapter_boundary.test.ts`, `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`, `docs/plans/gui-verify-warroom-after-peace-ledger.png`, `docs/40_reports/GUI_MASTER.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] feat(ui): file convoy and paramilitary decision consequences
+
+**Type:** Resolver history + UI consequence-trail expansion.
+
+**Change:** Added deterministic filed histories for resolved humanitarian convoy choices (`military.convoy_decision_history`) and resolved paramilitary authorization choices (`paramilitary_decision_history`). Exposed both through the UI adapter with player-faction filtering, then added Humanitarian convoy and Paramilitary authorization entries to the shared decision consequence ledger used by Desk, Records, and Chronicle.
+
+**Determinism:** Additive persisted decision records only. No random ordering, timestamps, control changes, or balance tuning were introduced. Convoy history is sorted by turn then convoy id; paramilitary history is sorted by turn then record id. Resolver effects remain unchanged except for filing the auditable choice record.
+
+**Canon mapping:** Rulebook v0.9.0 Â§16.3 lists convoy approvals and constrained supply-agency decisions as war-phase player agency, and Engine Invariants v0.9.0 Â§14.8a tracks paramilitary lifecycle and deployment count. The new records are audit/history outputs for already-resolved choices; they do not alter combat, control, or authorization mechanics.
+
+**Verification:**
+- `npx.cmd vitest run tests\humanitarian_convoy_lifecycle.test.ts tests\paramilitary_sweep.test.ts --reporter=dot` - 49/49 PASS after red/green cycle.
+- `npx.cmd vitest run tests\ui\decision_consequence_trail.test.ts tests\ui_adapter_boundary.test.ts --reporter=dot` - 24/24 PASS after red/green cycle.
+- `npx.cmd vitest run tests\humanitarian_convoy_lifecycle.test.ts tests\paramilitary_sweep.test.ts tests\ui\decision_consequence_trail.test.ts tests\ui\decision_consequence_records_panel.test.ts tests\ui\chronicle_decision_ledger.test.ts tests\ui_adapter_boundary.test.ts --reporter=dot` - 75/75 PASS.
+- `npm.cmd run typecheck` - PASS.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/serializeGameState.ts`, `src/state/supply_reserves.ts`, `src/sim/combat/paramilitary_sweep.ts`, `src/ui/map/data/types.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/data/decisionConsequenceLedger.ts`, `tests/humanitarian_convoy_lifecycle.test.ts`, `tests/paramilitary_sweep.test.ts`, `tests/ui/decision_consequence_trail.test.ts`, `tests/ui_adapter_boundary.test.ts`, `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`, `docs/PROJECT_LEDGER.md`.
 
 ---

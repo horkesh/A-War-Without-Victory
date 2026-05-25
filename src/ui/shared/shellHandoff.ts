@@ -1,5 +1,5 @@
 export type ArmyHQTab = 'briefing' | 'summary' | 'records' | 'personnel';
-export type ArmyHQRecordsSubTab = 'aftermath' | 'aar' | 'ops' | 'opportunities';
+export type ArmyHQRecordsSubTab = 'aftermath' | 'aar' | 'ops' | 'decisions' | 'opportunities';
 
 export type ShellHandoffCommand =
   | {

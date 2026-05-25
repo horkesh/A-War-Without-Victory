@@ -100,7 +100,7 @@ describe('Track D onboarding consolidation', () => {
     expect(source).not.toContain('You command through Army HQ and your corps commanders. You set strategic direction and approve operations');
   });
 
-  it.each(['RBiH', 'RS', 'HRHB'] as const)('routes the %s opening brief primary action to the Decision Room', (faction) => {
+  it.each(['RBiH', 'RS', 'HRHB'] as const)('routes the %s opening brief primary action to the President desk', (faction) => {
     const onAction = vi.fn();
     useGameStore.setState({
       loadedGameState: minimalState({ phase: 'war', turn: 0, player_faction: faction }),
@@ -109,9 +109,9 @@ describe('Track D onboarding consolidation', () => {
     });
 
     render(createElement(PresidentialInbox, { onAction }));
-    fireEvent.click(screen.getByRole('button', { name: /open decision room/i }));
+    fireEvent.click(screen.getByRole('button', { name: /open desk/i }));
 
-    expect(onAction).toHaveBeenCalledWith('army_hq_briefing', 'opening-brief:decision-room');
+    expect(onAction).toHaveBeenCalledWith('army_hq_briefing', 'opening-brief:desk');
     expect(useGameStore.getState().openingBriefDismissed).toBe(true);
   });
 

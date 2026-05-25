@@ -22,10 +22,15 @@ export interface ChronicleEntry {
         operationAarId?: string;
         operationOutcome?: string;
         costLedgerRef?: string;
+        decisionRecordId?: string;
         codexRef?: string;
         sensitiveSignals?: Array<'atrocity' | 'rupture'>;
+        imageUrl?: string;
     };
 }
+
+import { buildDecisionConsequenceLedger, type DecisionConsequenceRecord } from '../../data/decisionConsequenceLedger.js';
+import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets.js';
 
 import {
     getPlayerSafeDisplayLabel,
@@ -249,6 +254,37 @@ function buildOperationHistoryEntries(state: any, playerFaction: string | null):
     return entries;
 }
 
+function decisionRecordType(record: DecisionConsequenceRecord): ChronicleCardType {
+    if (record.family === 'Army reserve' || record.family === 'Operation opportunity') return 'military';
+    if (record.family.toLowerCase().includes('peace')) return 'diplomatic';
+    return 'political';
+}
+
+function buildDecisionLedgerEntries(state: any): ChronicleEntry[] {
+    return buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER).map((record) => ({
+        id: `decision-ledger-${record.id}`,
+        turn: record.turn,
+        type: decisionRecordType(record),
+        headline: record.recordTarget === 'chronicle',
+        title: record.title,
+        detail: record.detail,
+        metadata: {
+            decisionRecordId: record.id,
+            imageUrl: getConsequenceStillForRecord(record),
+        },
+    }));
+}
+
+function collectDecisionEventIds(state: any): Set<string> {
+    const ids = new Set<string>();
+    for (const event of Array.isArray(state?.firedEvents) ? state.firedEvents : []) {
+        if (event?.isDecision === true && typeof event.id === 'string') {
+            ids.add(event.id);
+        }
+    }
+    return ids;
+}
+
 export function generateChronicleEntries(state: any): ChronicleEntry[] {
     if (!state || !state.turnSummaries || !Array.isArray(state.turnSummaries)) {
         return [];
@@ -256,6 +292,7 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
 
     const entries: ChronicleEntry[] = [];
     const playerFaction = typeof state.player_faction === 'string' ? state.player_faction : null;
+    const decisionEventIds = collectDecisionEventIds(state);
 
     for (const summary of state.turnSummaries) {
         const turn = summary.turn;
@@ -283,6 +320,7 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
         if (Array.isArray(summary.events_fired)) {
             for (const event of summary.events_fired) {
                 const id = event.id || '';
+                if (decisionEventIds.has(id)) continue;
                 const title = event.text || event.id || 'Unknown event';
 
                 if (isDiplomaticEvent(id)) {
@@ -366,6 +404,7 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
 
     entries.push(...buildEndgameComparisonEntries(state));
     entries.push(...buildOperationHistoryEntries(state, playerFaction));
+    entries.push(...buildDecisionLedgerEntries(state));
     entries.sort((a, b) => a.turn - b.turn);
     return entries;
 }

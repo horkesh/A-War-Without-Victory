@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-05-22 (GUI visual audit retired chrome removal H9)
+**Updated:** 2026-05-24 (presidential GUI restructure in progress; tactical toolbar simplification and consequence-ledger expansion logged)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,8 @@
 
 | Need | Go to |
 |------|--------|
+| **Full presidential GUI restructure audit and plan** | [../plans/2026-05-24-gui-shell-reorganization-scope.md](../plans/2026-05-24-gui-shell-reorganization-scope.md) - current branch plan and implementation evidence for reorganizing President's Desk, Warroom, Army HQ, Tactical Map, Records/Chronicle, Codex, decision modals, advance clearance, player-safe copy, and AI asset use. The current loop smoke validates Desk -> Army HQ -> inspection -> Advance Clearance -> Records -> Desk. |
+| **President's Desk consequence ledger expansion** | [../plans/2026-05-24-gui-shell-reorganization-scope.md](../plans/2026-05-24-gui-shell-reorganization-scope.md) - current branch implementation note for the shared decision consequence ledger: filed event decisions, operation opportunities, Army reserve history, peace/Dayton results, convoy decisions, paramilitary authorizations, and officer/personnel decisions now feed Desk/Records/Chronicle from persisted UI-safe projections; duplicate Chronicle event cards are suppressed when the decision ledger owns the same resolved event. |
 | **GUI visual audit retired chrome removal H9** | [implemented/20260522_GUI_AUDIT_RETIRED_CHROME_REMOVAL_H9.md](implemented/20260522_GUI_AUDIT_RETIRED_CHROME_REMOVAL_H9.md) - ninth Batch H slice from the 2026-05-22 GUI visual audit: unused retired tactical chrome files were deleted after import review, with a guard keeping them off disk. |
 | **GUI visual audit Army HQ commander empty-state H8** | [implemented/20260522_GUI_AUDIT_ARMY_HQ_COMMANDER_EMPTY_STATE_H8.md](implemented/20260522_GUI_AUDIT_ARMY_HQ_COMMANDER_EMPTY_STATE_H8.md) - eighth Batch H slice from the 2026-05-22 GUI visual audit: Army HQ commander lookup now falls back to active flattened officer data when sidecar state rows are absent. |
 | **GUI visual audit Warroom desk map H7** | [implemented/20260522_GUI_AUDIT_WARROOM_DESK_MAP_H7.md](implemented/20260522_GUI_AUDIT_WARROOM_DESK_MAP_H7.md) - seventh Batch H slice from the 2026-05-22 GUI visual audit: the Warroom desk-map projection now fills more of its hotspot and uses stronger paper/frame/ink contrast. |

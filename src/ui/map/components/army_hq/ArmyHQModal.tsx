@@ -452,19 +452,31 @@ export function ArmyHQModal() {
                              * Summary, OOB summaries, and Command Relationship.
                              */}
                             {!expandedCorpsId && (
-                                <div className="grid grid-cols-1 gap-2 mb-2 items-start lg:grid-cols-12">
+                                <div className="grid grid-cols-1 gap-3 mb-3 items-start xl:grid-cols-[minmax(0,1.12fr)_minmax(22rem,0.88fr)]">
                                     {/* Briefing band — Chief of Staff (primary document) */}
-                                    <div className="lg:col-span-7">
+                                    <div className="min-w-0 space-y-3">
                                         <ChiefOfStaffBriefing
                                             briefingItems={data.briefingItems}
                                             gameState={state}
                                             faction={faction}
                                             onCorpsClick={navigateToCorps}
                                         />
+
+                                        <RootErrorBoundary zone="decision room">
+                                            <PresidentialDecisionRoomPanel />
+                                        </RootErrorBoundary>
+
+                                        <RootErrorBoundary zone="presidential decisions">
+                                            <PresidentialAttentionPanel
+                                                gameState={state}
+                                                playerFaction={faction}
+                                                onOpenArmyReserve={handleOpenArmyReserve}
+                                            />
+                                        </RootErrorBoundary>
                                     </div>
 
                                     {/* Evidence / Action band */}
-                                    <div className="lg:col-span-5 flex flex-col gap-2">
+                                    <div className="min-w-0 flex flex-col gap-2">
                                         {/* Commander dossier — friendly identity + mini-bio */}
                                         <div className="bg-panel-card border border-emerald-500/20 rounded-lg p-2.5">
                                             <div className="text-[8px] uppercase tracking-[0.22em] text-emerald-300/80 font-bold mb-1 pb-1 border-b border-emerald-500/15">
@@ -510,32 +522,13 @@ export function ArmyHQModal() {
                                             faction={faction}
                                             compositeScore={state.negotiatingCapital?.[faction]}
                                         />
+
+                                        <SituationBriefing
+                                            items={data.briefingItems}
+                                            onNavigate={handleBriefingNavigate}
+                                        />
                                     </div>
                                 </div>
-                            )}
-
-                            {!expandedCorpsId && (
-                                <RootErrorBoundary zone="decision room">
-                                    <PresidentialDecisionRoomPanel />
-                                </RootErrorBoundary>
-                            )}
-
-                            {!expandedCorpsId && (
-                                <RootErrorBoundary zone="presidential decisions">
-                                    <PresidentialAttentionPanel
-                                        gameState={state}
-                                        playerFaction={faction}
-                                        onOpenArmyReserve={handleOpenArmyReserve}
-                                    />
-                                </RootErrorBoundary>
-                            )}
-
-                            {/* Situation Briefing */}
-                            {!expandedCorpsId && (
-                                <SituationBriefing
-                                    items={data.briefingItems}
-                                    onNavigate={handleBriefingNavigate}
-                                />
                             )}
 
                             {/* Corps Cards */}

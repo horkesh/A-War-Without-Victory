@@ -7,6 +7,7 @@ import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import { PresidentialToolbar } from '../../src/ui/map/components/PresidentialToolbar.js';
 import { WarroomStatusBar } from '../../src/ui/map/components/warroom/WarroomStatusBar.js';
+import { AdvanceTurnModal } from '../../src/ui/map/components/warroom/AdvanceTurnModal.js';
 import { advanceTurnAndSync } from '../../src/ui/map/desktop/orderActions.js';
 
 vi.mock('../../src/ui/map/desktop/orderActions.js', () => ({
@@ -115,7 +116,7 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(useGameStore.getState().advanceTurnPending).toBe(false);
   });
 
-  it('Warroom ADVANCE routes a blocked turn to the Decision Room callback when available', () => {
+  it('Warroom ADVANCE opens the advance review modal even when the turn is blocked', () => {
     const onReviewPriorities = vi.fn();
     setLoadedState(makeState({
       presidentialReviewQueue: {
@@ -131,11 +132,26 @@ describe('ADVANCE_TURN gated feedback', () => {
     render(createElement(WarroomStatusBar, { onReviewPriorities }));
 
     const button = screen.getByRole('button', { name: /resolve 2 pending decisions to continue/i });
-    expect(button.getAttribute('title')).toContain('Decision Room');
+    expect(button.getAttribute('title')).toContain('Resolve 2 pending decisions');
 
     fireEvent.click(button);
 
-    expect(onReviewPriorities).toHaveBeenCalledTimes(1);
+    expect(onReviewPriorities).not.toHaveBeenCalled();
+    expect(useGameStore.getState().advanceTurnPending).toBe(true);
+  });
+
+  it('advance clearance opens a single hard blocker resolver directly', async () => {
+    const onResolveBlocker = vi.fn();
+    setLoadedState(makeState({
+      pendingParamilitaryRequests: [
+        { faction: 'RS', target_osid: 'bratunac_1', strength: 120, estimated_civilian_risk: 14 },
+      ],
+    }));
+    useGameStore.setState({ advanceTurnPending: true, osidDisplayNames: { bratunac_1: 'Bratunac' } });
+
+    render(createElement(AdvanceTurnModal, { onResolveBlocker }));
+
+    expect(onResolveBlocker).toHaveBeenCalledWith('paramilitary_review', 'paramilitary:40');
     expect(useGameStore.getState().advanceTurnPending).toBe(false);
   });
 });

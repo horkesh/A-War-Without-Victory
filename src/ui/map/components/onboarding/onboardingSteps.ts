@@ -10,7 +10,7 @@ import type { MessageKey } from '../../i18n';
  *   02 map       →  inspect surface (Map)
  *   03 brief     →  Brief        — Army HQ briefing toolbar entry
  *   04 inspect   →  Inspect      — Warroom status bar + priority docket
- *   05 decide    →  Decide       — Decision Room pre-advance review
+ *   05 decide    ->  Decide       - President's Desk pre-advance review
  *   06 execute   →  Execute      — Operations approve / decline / force-launch
  *   07 report    →  Report       — Turn aftermath, what changed
  *   08 judge     →  Judge        — Cost Ledger, why your choices mattered
@@ -63,7 +63,7 @@ const AUTHORED_STEPS: ReadonlyArray<OnboardingStepDef> = [
         title: 'You Are the President',
         titleKey: 'onboarding.01.title',
         bodyKey: 'onboarding.01.body',
-        body: 'The opening presidential brief gives your starting position in three scan points. Read it, then use the toolbar and Decision Room to inspect what needs attention. This tutorial covers the loop: brief, inspect, decide, execute, report, judge, then advance into consequences.',
+        body: "The opening presidential brief gives your starting position in three scan points. Read it, then use the President's Desk and Army HQ to inspect what needs attention. This tutorial covers the loop: brief, inspect, decide, execute, report, judge, then advance into consequences.",
         target_ui_element: null,
     },
     {
@@ -79,7 +79,7 @@ const AUTHORED_STEPS: ReadonlyArray<OnboardingStepDef> = [
         title: 'The Brief',
         titleKey: 'onboarding.03.title',
         bodyKey: 'onboarding.03.body',
-        body: 'The toolbar is your staff desk. SUMMARY gives the field situation, RECORDS opens the Army HQ records view, CHRONICLE replays the campaign, and CODEX keeps historical context close. Read the brief first; the Decision Room is where inspection becomes action.',
+        body: "The field toolbar keeps map inspection close: War Map gives the field situation, Records opens the Army HQ records view, and Codex keeps historical context close. Read the desk packet first; the President's Desk is where inspection becomes action.",
         target_ui_element: 'presidential-toolbar',
     },
     {
@@ -92,10 +92,10 @@ const AUTHORED_STEPS: ReadonlyArray<OnboardingStepDef> = [
     },
     {
         id: '05_decide',
-        title: 'The Decision Room',
+        title: "President's Desk",
         titleKey: 'onboarding.05.title',
         bodyKey: 'onboarding.05.body',
-        body: 'Before you advance the turn, the Decision Room surfaces every pending choice. Each row links back to the panel it came from -- open it, decide, return. Resolve what you can; defer what you must.',
+        body: "Before you advance the turn, the President's Desk surfaces every pending choice. Each row opens its resolver or the staff panel it came from -- open it, decide, return. Resolve what you can; defer what you must.",
         target_ui_element: 'decision-room',
     },
     {

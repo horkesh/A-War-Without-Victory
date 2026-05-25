@@ -30,6 +30,11 @@ import {
   type PreAdvanceCommandReviewItem,
   type PreAdvanceCommandReviewStatus,
 } from '../../data/preAdvanceCommandReview';
+import {
+  derivePresidentialBlockers,
+  type PresidentialBlocker,
+} from '../../data/presidentialBlockers';
+import type { InboxItem } from '../../data/inboxItems';
 import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presidentialDecisionRoomNavigation';
 import { Z } from '../../../shared/zIndex';
 import { Modal } from '../../../shared/Modal';
@@ -49,6 +54,7 @@ import {
 export interface AdvanceTurnModalProps {
   onReviewPriorities?: () => void;
   onReviewItem?: (item: PreAdvanceCommandReviewItem) => void;
+  onResolveBlocker?: (action: InboxItem['action'], itemId: string) => void;
 }
 
 function statusClass(status: PreAdvanceCommandReviewStatus): string {
@@ -123,7 +129,44 @@ function ReviewItemRow({
   );
 }
 
-export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTurnModalProps) {
+function BlockerRow({
+  blocker,
+  disabled,
+  onResolve,
+}: {
+  blocker: PresidentialBlocker;
+  disabled: boolean;
+  onResolve: (blocker: PresidentialBlocker) => void;
+}) {
+  return (
+    <div className="border border-red-500/45 bg-red-950/25 px-2 py-1.5">
+      <div className="flex min-w-0 items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-1">
+            <span className="border border-red-500/45 bg-red-950/45 px-1 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-red-300">
+              Required
+            </span>
+            <span className="border border-panel-border/55 bg-black/15 px-1 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-text-muted">
+              {blocker.type.replace(/_/g, ' ')}
+            </span>
+          </div>
+          <div className="mt-1 truncate text-[11px] font-bold text-text-primary">{blocker.title}</div>
+          <div className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-text-secondary">{blocker.summary}</div>
+        </div>
+        <button
+          type="button"
+          onClick={() => onResolve(blocker)}
+          disabled={disabled}
+          className="shrink-0 border border-red-400/45 bg-red-400/10 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.1em] text-red-200 transition-colors hover:bg-red-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
+        >
+          {blocker.actionLabel}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBlocker }: AdvanceTurnModalProps) {
   const pending = useGameStore((s) => s.advanceTurnPending);
   const setPending = useGameStore((s) => s.setAdvanceTurnPending);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
@@ -135,6 +178,10 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
   const [advancing, setAdvancing] = useState(false);
   const review = useMemo(
     () => buildPreAdvanceCommandReviewView({ state: loadedGameState, osidNameMap: osidDisplayNames }),
+    [loadedGameState, osidDisplayNames],
+  );
+  const blockers = useMemo(
+    () => derivePresidentialBlockers(loadedGameState, osidDisplayNames),
     [loadedGameState, osidDisplayNames],
   );
 
@@ -270,6 +317,21 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
     openPresidentialDecisionRoomNavigationTarget(item.navigationTarget);
   };
 
+  const handleResolveBlocker = (blocker: PresidentialBlocker) => {
+    if (advancing) return;
+    setPending(false);
+    onResolveBlocker?.(blocker.action, blocker.id);
+  };
+
+  useEffect(() => {
+    if (!pending || advancing) return;
+    if (blockers.length !== 1) return;
+    const [blocker] = blockers;
+    if (!blocker) return;
+    setPending(false);
+    onResolveBlocker?.(blocker.action, blocker.id);
+  }, [advancing, blockers, onResolveBlocker, pending, setPending]);
+
   return (
     <Modal
       isOpen={pending}
@@ -311,6 +373,22 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
               <MetricCell label={t('decisionRoom.metric.hardTurns')} value={review.metrics.hardTurns} />
             </div>
           </section>
+
+          {blockers.length > 0 && (
+            <section className="space-y-1.5">
+              <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-red-300">
+                Resolve before advancing
+              </div>
+              {blockers.map((blocker) => (
+                <BlockerRow
+                  key={blocker.id}
+                  blocker={blocker}
+                  disabled={advancing}
+                  onResolve={handleResolveBlocker}
+                />
+              ))}
+            </section>
+          )}
 
           <section className="space-y-1.5">
             {review.items.length === 0 ? (

@@ -14,6 +14,7 @@ import type { EnclaveResilienceEntry, EnclaveState, FactionId, GameState, Pendin
 import type { EdgeRecord } from '../map/settlements.js';
 import { clamp01 } from '../utils/math.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from './supply_state_derivation.js';
+import { strictCompare } from './validateGameState.js';
 import { isGrazAccordsActive } from '../sim/local_truces.js';
 import { EMBARGO_PHASE_CAPS, resolveActiveEmbargoPhase } from './embargo.js';
 import {
@@ -594,9 +595,13 @@ export function applyHumanitarianConvoyDecisions(state: GameState): void {
     if (!state.military.general_supply_reserve) state.military.general_supply_reserve = {};
     const playerFaction = getPlayerFaction(state);
     const remaining: PendingConvoyDecision[] = [];
+    const history = Array.isArray(state.military.convoy_decision_history)
+        ? [...state.military.convoy_decision_history]
+        : [];
 
     for (const convoy of pending.sort((a, b) => a.id.localeCompare(b.id))) {
         let decision = convoy.decision;
+        const wasPlayerFiled = Boolean(playerFaction && convoy.route_faction === playerFaction && decision);
         if (!decision) {
             if (playerFaction && convoy.route_faction === playerFaction) {
                 remaining.push(convoy);
@@ -609,6 +614,16 @@ export function applyHumanitarianConvoyDecisions(state: GameState): void {
         const targetFaction = state.political.enclaves?.find((enclave) => enclave.id === convoy.target_enclave)?.faction_id ?? 'RBiH';
         const ivpMult = convoy.route_faction === 'HRHB' ? 0.6 : 1.0;
         const routePatron = ensurePatronState(state, convoy.route_faction);
+        history.push({
+            id: convoy.id,
+            turn: state.meta?.turn ?? 0,
+            target_enclave: convoy.target_enclave,
+            route_faction: convoy.route_faction,
+            target_faction: targetFaction,
+            supply_amount: convoy.supply_amount,
+            decision,
+            decided_by: wasPlayerFiled ? 'player' : 'bot',
+        });
 
         if (decision === 'allow') {
             state.military.general_supply_reserve[targetFaction] = Math.min(100, (state.military.general_supply_reserve[targetFaction] ?? 0) + convoy.supply_amount);
@@ -626,6 +641,9 @@ export function applyHumanitarianConvoyDecisions(state: GameState): void {
     }
 
     state.military.pending_convoy_decisions = remaining;
+    state.military.convoy_decision_history = history.sort((a, b) =>
+        a.turn !== b.turn ? a.turn - b.turn : strictCompare(a.id, b.id)
+    );
 }
 
 export function applySmugglingAllocation(state: GameState): void {

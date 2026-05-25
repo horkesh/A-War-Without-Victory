@@ -213,6 +213,189 @@ describe('UI Adapter Boundary Discipline', () => {
     expect(parsed.pendingPeacePlan?.institutionalModel).toBe('10_provinces');
   });
 
+  it('adapter exposes resolved peace-plan history as player-facing decision records', () => {
+    const rawState: any = {
+      meta: { turn: 41, phase: 'war', player_faction: 'RS' },
+      military: {
+        formations: {},
+        negotiation: {
+          peace_plan_history: [
+            {
+              plan_id: 'vance_owen',
+              turn_offered: 40,
+              responses: {
+                RBiH: 'accepted',
+                RS: 'rejected',
+                HRHB: 'accepted',
+              },
+              resolved: true,
+            },
+          ],
+        },
+      },
+      political: { political_controllers: {} },
+    };
+
+    const parsed = parseGameState(rawState);
+
+    expect(parsed.peacePlanHistory).toEqual([
+      {
+        planId: 'vance_owen',
+        planName: 'Vance-Owen Peace Plan',
+        turnOffered: 40,
+        playerFaction: 'RS',
+        playerResponse: 'rejected',
+        responses: {
+          RBiH: 'accepted',
+          RS: 'rejected',
+          HRHB: 'accepted',
+        },
+        resolved: true,
+      },
+    ]);
+  });
+
+  it('adapter exposes resolved convoy and paramilitary histories for the player faction', () => {
+    const rawState: any = {
+      meta: { turn: 65, phase: 'war', player_faction: 'RS' },
+      military: {
+        formations: {},
+        convoy_decision_history: [
+          {
+            id: 'convoy:64:srebrenica:RS',
+            turn: 64,
+            target_enclave: 'srebrenica',
+            route_faction: 'RS',
+            target_faction: 'RBiH',
+            supply_amount: 0.5,
+            decision: 'allow',
+            decided_by: 'player',
+          },
+          {
+            id: 'convoy:64:bihac:HRHB',
+            turn: 64,
+            target_enclave: 'bihac',
+            route_faction: 'HRHB',
+            target_faction: 'RBiH',
+            supply_amount: 0.4,
+            decision: 'block',
+            decided_by: 'bot',
+          },
+        ],
+      },
+      pending_paramilitary_requests: [],
+      paramilitary_decision_history: [
+        {
+          id: 'paramilitary:5:D',
+          turn: 5,
+          target_osid: 'D',
+          faction: 'RS',
+          strength: 150,
+          decision: 'allow',
+          estimated_civilian_risk: 12,
+        },
+        {
+          id: 'paramilitary:5:E',
+          turn: 5,
+          target_osid: 'E',
+          faction: 'HRHB',
+          strength: 90,
+          decision: 'deny',
+        },
+      ],
+      political: { political_controllers: {} },
+    };
+
+    const parsed = parseGameState(rawState);
+
+    expect(parsed.convoyDecisionHistory).toEqual([
+      {
+        id: 'convoy:64:srebrenica:RS',
+        turn: 64,
+        target_enclave: 'srebrenica',
+        route_faction: 'RS',
+        target_faction: 'RBiH',
+        supply_amount: 0.5,
+        decision: 'allow',
+        decided_by: 'player',
+      },
+    ]);
+    expect(parsed.paramilitaryDecisionHistory).toEqual([
+      {
+        id: 'paramilitary:5:D',
+        turn: 5,
+        target_osid: 'D',
+        faction: 'RS',
+        strength: 150,
+        decision: 'allow',
+        estimated_civilian_risk: 12,
+      },
+    ]);
+  });
+
+  it('adapter exposes resolved officer decision history for the player faction', () => {
+    const rawState: any = {
+      meta: { turn: 12, phase: 'war', player_faction: 'RS' },
+      military: {
+        formations: {
+          vrs_drina_corps: { id: 'vrs_drina_corps', name: 'Drina Corps' },
+        },
+        named_officer_data: [
+          { id: 'new_commander', name: 'Gen. New Commander', competence: 4, aggressiveness: 3, defensive_skill: 4 },
+          { id: 'old_commander', name: 'Gen. Old Commander', competence: 3, aggressiveness: 2, defensive_skill: 3 },
+        ],
+        officer_decision_history: [
+          {
+            id: 'officer:9:evt-a:replacement_accepted',
+            turn: 9,
+            faction: 'RS',
+            event_id: 'evt-a',
+            event_type: 'replacement_suggested',
+            officer_id: 'new_commander',
+            current_commander_id: 'old_commander',
+            corps_id: 'vrs_drina_corps',
+            decision: 'replacement_accepted',
+            new_officer_id: 'new_commander',
+            outgoing_officer_id: 'old_commander',
+          },
+          {
+            id: 'officer:9:evt-b:acknowledged',
+            turn: 9,
+            faction: 'HRHB',
+            event_id: 'evt-b',
+            event_type: 'order_pushback',
+            officer_id: 'hrhb_commander',
+            decision: 'acknowledged',
+          },
+        ],
+      },
+      political: { political_controllers: {} },
+    };
+
+    const parsed = parseGameState(rawState);
+
+    expect(parsed.officerDecisionHistory).toEqual([
+      {
+        id: 'officer:9:evt-a:replacement_accepted',
+        turn: 9,
+        faction: 'RS',
+        event_id: 'evt-a',
+        event_type: 'replacement_suggested',
+        officer_id: 'new_commander',
+        officer_name: 'Gen. New Commander',
+        current_commander_id: 'old_commander',
+        current_commander_name: 'Gen. Old Commander',
+        corps_id: 'vrs_drina_corps',
+        corps_name: 'Drina Corps',
+        decision: 'replacement_accepted',
+        new_officer_id: 'new_commander',
+        new_officer_name: 'Gen. New Commander',
+        outgoing_officer_id: 'old_commander',
+        outgoing_officer_name: 'Gen. Old Commander',
+      },
+    ]);
+  });
+
   /**
    * Dayton trigger ownership: pipeline owns initiation, adapter only reads.
    *

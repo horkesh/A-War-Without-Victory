@@ -63,7 +63,7 @@ export function buildWarroomPriorityDocketView(input: WarroomPriorityDocketInput
     summary: formatSummary(review.metrics),
     sourceHandoffSummary: formatSourceHandoffSummary(review.sourceHandoffs, review.metrics.urgentCount),
     canOpenBoard: review.canReviewPriorities,
-    openBoardLabel: 'Open Decision Room',
+    openBoardLabel: 'Open Desk',
     items: review.items.slice(0, safeLimit),
     sourceHandoffs: review.sourceHandoffs,
     metrics: review.metrics,
