@@ -10588,3 +10588,21 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `src/ui/map/App.tsx`, `src/ui/map/components/EventDecisionModal.tsx`, `src/ui/map/data/types.ts`, `tests/ui/event_decision_auto_launch_contract.test.ts`, `tests/ui/event_decision_modal_phase3.test.ts`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-25] test(events): add Phase 4 event acceptance diagnostic
+
+**Type:** Deterministic diagnostic + acceptance tests.
+
+**Change:** Added `event_acceptance_report.ts` to consume the catalog taxonomy report and classify Phase 4 production-authoring readiness without editing production event JSON. The report emits stable JSON for required-response readiness, missing explicit historical defaults/markers, source-blocked and missing-source-note debt, sensitive/Ring-gated rows, source/design default blockers, scheduled-only trigger debt, and the Product/Historian-approved authoring packet split: four approved first-packet rows, three conditional rows requiring trigger/predicate cleanup, and one deferred late-war row requiring 188-week proof.
+
+**Determinism:** Diagnostic-only. No runtime behavior, save schema, scenario data, production event content, randomness, timestamps, operation tuning, initial OSID overrides, avoided-OSID lists, or faction model changes were introduced. Report ordering is derived from the deterministic taxonomy row order plus explicit policy lists.
+
+**Verification:**
+- `npx.cmd vitest run tests\sim\events\event_acceptance_report.test.ts tests\sim\events\event_taxonomy_report.test.ts --reporter=dot` - 21/21 PASS.
+- `npx.cmd tsx tools\diagnostics\event_acceptance_report.ts --json` - PASS; current catalog remains `NOT_READY`: 247 rows, 36 required-response rows, 0 production modal-ready, 36 missing explicit defaults/markers, 16 source-blocked, 36 missing authored source notes, 8 sensitive-gated, 5 source/default/counterfactual blocked.
+- `npm.cmd run typecheck` - blocked by this worktree's existing missing UI map dependency/type declarations (`maplibre-gl`, `pmtiles`, Deck.gl packages, `@vitejs/plugin-react`) and related implicit-any fallout outside this diagnostic slice.
+- `git diff --check` - PASS.
+
+**Artifacts:** `tools/diagnostics/event_acceptance_report.ts`, `tests/sim/events/event_acceptance_report.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
