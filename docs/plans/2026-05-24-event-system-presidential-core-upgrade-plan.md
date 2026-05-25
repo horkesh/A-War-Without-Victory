@@ -4,7 +4,7 @@
 **Status:** ACTIVE external-agent execution plan / not yet implemented
 **Owner lane:** Event-system product/engine lane
 **Related board row:** `Command Board -> Event system presidential core upgrade`
-**Do not collide with:** calibration / army-arc branch, GUI polish branch
+**Do not collide with:** calibration / army-arc branch. The 2026-05-25 presidential GUI restructure is merged; use its Decision Surface Registry, President's Desk, modal stack rules, and consequence ledger instead of inventing another decision surface.
 
 ## Purpose
 
@@ -14,6 +14,7 @@ Upgrade the event system from a mostly functional event/catalog substrate into t
 - some events are multi-choice presidential decisions;
 - choices alter flags, dimensions, constraints, modifiers, downstream event eligibility, and endgame/cost interpretation;
 - historical outcomes emerge through pressure, state prerequisites, and bot historical defaults rather than calendar railroading.
+- when a player-facing decision event fires, a non-dismissible modal opens directly on the player's screen with the situation, evidence, presidential rationale, historical baseline, options, numeric/mechanical consequences, uncertainty, and the future record trail.
 
 The current substrate is not being replaced. The plan hardens the existing event loader/evaluator/resolver, then adds authoring taxonomy, richer presidential decision projection, pressure/dilemma authoring, and acceptance tests.
 
@@ -41,15 +42,17 @@ Every new event packet must classify its trigger as one of:
 - Event catalog: 247 valid events across `war_1992.json`, `war_1993.json`, `war_1994.json`, `war_1995.json`, and `consequences.json`.
 - Current shape: 44 events with `response_options`, 203 no-choice events.
 - Choice ownership: RBiH 20, RS 18, HRHB 6.
+- GUI substrate: the 2026-05-25 presidential desk merge already provides President's Desk, central Decision Surface Registry, direct hard-blocker modal routing, modal stack priority, and consequence-ledger/Records/Chronicle trails.
 - Canon target from `Game_Bible_v0_9_0.md`: roughly 60% decision / 30% consequence / 10% forced events.
 - Current design gap: about 18% choice events, too many calendar/headline rows, too few pressure-driven presidential dilemmas.
+- Presentation gap: required decisions need EU-style explicit historical/default markers, authored narration, and visible citations/source notes, not just generic option buttons.
 - Engine/spec gap: `Systems_Manual_v0_9_0.md` describes max 3 events, overflow queueing, and mutex prevention, while live code currently uses a 4-event cap, no overflow queue, and no mutex enforcement.
 - Current technical blockers:
   - `evaluateEvents` caps fireable events at 4 per turn and slices overflow silently.
   - event loading can fail open for missing/malformed files.
   - equal-priority event sorting lacks a full canonical tie-break.
   - full 247-row catalog schema validation is incomplete.
-  - `PendingEventDecision` underfeeds the UI: title/options arrive, but narrative, category, risks, flags, dimension shifts, source context, and notification previews do not.
+  - `PendingEventDecision` underfeeds the modal: title/options arrive, but narrative, category, rationale, historical baseline, risks, flags, dimension shifts, numeric effect previews, source context, and notification/consequence previews do not.
   - `validateGameState` covers `pending_event_notifications`, but not `pending_event_decisions`, `event_decision_log`, or most active event modifier arrays.
   - some event condition/type fields are declared but weakly tested or partially implemented.
 
@@ -63,7 +66,8 @@ Every new event packet must classify its trigger as one of:
 - No 7th Corps simulation.
 - No sensitive-history leverification: atrocity remains consequence/reflection, not an optimization button.
 - No FORAWWV edits.
-- No broad GUI shell rewrite; crisis-brief work must reuse existing Decision Room / Inbox / modal authority.
+- No broad GUI shell rewrite; player-facing decision work must reuse the merged President's Desk, Decision Surface Registry, existing modal stack, and consequence ledger.
+- No hidden model reasoning text. The modal should show player-facing rationale, evidence, staff assessment, historical baseline, and consequence explanation.
 
 ## External-Agent Execution Contract
 
@@ -80,6 +84,7 @@ Session start requirements:
 - [ ] Read `docs/20_engineering/PYRRHIC_PLANNING_RULES.md`.
 - [ ] Read this plan in full.
 - [ ] Read `docs/plans/COMMAND_BOARD.md` row `Event system presidential core upgrade`.
+- [ ] Read `docs/40_reports/GUI_MASTER.md` and `docs/plans/2026-05-24-gui-shell-reorganization-scope.md` current implementation evidence so event work uses the landed President's Desk/modal registry instead of reopening GUI ownership.
 - [ ] Read `docs/plans/MASTER_ROADMAP.md` latest event-system addendum.
 - [ ] Inspect current event-system files before editing:
   - `src/sim/events/event_types.ts`
@@ -102,11 +107,11 @@ Global stop rule: if any task needs a canon ruling, sensitive-history judgment, 
 
 - Phase 1 / Workstream A may add diagnostics/tests only; it must not alter event firing.
 - Phase 2 / Workstream B may alter loader/evaluator safety but must not add historical content.
-- Phase 3 / Workstream C may expose existing event data to UI read models but must not create a new decision authority.
+- Phase 3 / Workstream C must make required event decisions modal-first and may enrich the modal payload/read model; it must not create a new decision authority.
 - Phase 4 / Workstream E must establish acceptance proof before Phase 5 content expansion.
 - Phase 5 / Workstream D must proceed one historical packet at a time; do not batch multiple theaters or years into one commit.
 - Any save-shape change requires migration/default/validator tests in the same slice.
-- Any scenario hash drift requires an explanation tied to event ordering, queueing, migration/defaults, or authored content before acceptance.
+- Any scenario hash drift requires an explanation tied to event ordering, queueing, migration/defaults, bot-choice policy, or authored content before acceptance.
 
 ## Workstream A - Contract, Inventory, and Taxonomy
 
@@ -249,105 +254,92 @@ Stop gates:
 - Any bypass of canonical `evaluate-events` pipeline entrypoint.
 - Implementation contradicts Systems Manual cap/queue/mutex text without explicit plan/doc update.
 
-## Workstream C - Presidential Crisis Brief Read Model
+## Workstream C - Modal-First Presidential Event Decisions
 
-**Goal:** make event decisions feel like real presidential dossiers without rewriting the UI shell.
+**Goal:** when a player-facing event decision fires, the player is clearly interrupted by a full presidential decision modal. The modal is the primary resolver. President's Desk, Inbox, Advance Clearance, Warroom docket, Records, and Chronicle may summarize or deep-link, but they must not be the only place the player learns what happened.
 
 Architecture:
 
 - Blocking execution stays in `src/ui/map/components/EventDecisionModal.tsx` and `src/ui/map/App.tsx`.
-- Inbox fast-path stays in `src/ui/map/data/inboxItems.ts` and `src/ui/map/App.tsx`.
-- Decision Room remains the review owner through `src/ui/map/data/presidentialDecisionRoom.ts`.
-- Warroom/pre-advance stay projections through `src/ui/map/data/preAdvanceCommandReview.ts` and `src/ui/map/data/warroomPriorityDocket.ts`.
-- Do not change `GameStateAdapter` unless the brief needs a field not already exposed.
+- `App.tsx` already auto-launches the first player-faction `pendingEventDecisions` entry; this work hardens that contract and tests it as a must-not-regress rule.
+- Inbox/Desk/Advance/Warroom routes stay projections through the merged `decisionSurfaceRegistry.ts`, `presidentialBlockers.ts`, `preAdvanceCommandReview.ts`, and `warroomPriorityDocket.ts`.
+- Decision Room may retain staff-priority synthesis, but it must not be the primary event resolver.
+- Consequences route through the merged decision consequence ledger, Army HQ Records, and Chronicle decision ledger; do not create a second event-history owner.
 
-Add pure builder:
+Required modal payload:
 
-- `src/ui/map/data/presidentialCrisisBrief.ts`
-
-Recommended shape:
-
-```ts
-export interface PresidentialCrisisBriefView {
-  status: 'blocked' | 'urgent' | 'clear' | 'unavailable';
-  headline: string;
-  summary: string;
-  blockingCount: number;
-  modalRequiredCount: number;
-  advisoryCount: number;
-  items: PresidentialCrisisBriefItem[];
-  primaryAction: PresidentialDecisionRoomNavigationTarget;
-}
-
-export interface PresidentialCrisisBriefItem {
-  id: string;
-  familyId: PlayerDecisionFamilyId | 'sitrep' | 'hard_turn';
-  severity: 'blocking' | 'critical' | 'warning' | 'info';
-  title: string;
-  detail: string;
-  actionLabel: string;
-  navigationTarget: PresidentialDecisionRoomNavigationTarget;
-  evidence: string[];
-}
-```
+- situation: title, narrative, category, respondent faction, turn/date, source context;
+- why this is on the president's desk: live-state trigger evidence, prerequisite flags/events, relevant pressure metrics, and staff assessment;
+- historical baseline: which option is historical, why bots choose it for calibration, and what historical/default path the current run is being compared against;
+- options: every response label plus short policy meaning; the historical/default option must be visibly marked in the modal in an EU-style way, such as `Historical choice`, `Historical default`, or `AI historical path`;
+- numeric/mechanical consequences: flags set, dimension shifts, morale/cohesion/supply/patron/alliance/equipment/constraint modifiers, duration, affected faction, and whether an effect is immediate or delayed;
+- risks and uncertainty: what is known, what is staff estimate, and what may emerge later;
+- narration and grounding: a short authored historical narrative, a staff interpretation paragraph, and source notes/citations compact enough for the modal with a route to deeper Codex/Records context;
+- record trail: where the resolved decision will appear after response.
 
 Rules:
 
-- Inputs: `LoadedGameState | null`, optional `osidNameMap`.
-- Derive from existing `playerDecisionSummary`, `pendingEventDecisions`, `pendingPeacePlan`, `pendingDayton`, `pendingConvoyDecisions`, `pendingParamilitaryRequests`, `operationalSitrep`, and `latestTurnSummary`.
-- Do not serialize this. Do not add engine state.
-- Route executable blockers to existing targets only: Inbox, Army HQ Briefing, Army HQ Summary, or aftermath/record targets already owned by the shell.
-- Sort deterministically: severity rank, family manifest order, ID via strict lexical compare.
+- Do not serialize UI-only modal view models unless the underlying event payload cannot carry the required data.
+- Prefer enriching `PendingEventDecision` at the engine boundary when the modal needs authored narrative/source/options/effects that must persist until response.
+- Do not expose hidden enemy truth. Trigger evidence must be player-safe or phrased as staff assessment.
+- Do not show hidden model reasoning. Show deterministic, player-facing rationale/evidence and consequence explanation.
+- Historical bot calibration contract: bots use the historical/default response for calibration; authors must put the historical option first and label the modal's historical/default option clearly. Player alternatives are valid counterfactual branches through event effects, not army micromanagement.
+- Historical label contract: every required-response event must identify exactly one historical/default option. If there is no defensible historical default, the event must be marked source/design-blocked instead of silently falling back to option 0.
+- Narrative contract: every required-response event must carry player-facing narrative and historical grounding. Bare mechanical choice rows are insufficient for presidential-core events.
+- Sort and present multiple pending player decisions deterministically: blocking severity, turn fired, event ID.
 
 Implementation order:
 
-1. Add `presidentialCrisisBrief.ts` with pure `buildPresidentialCrisisBriefView({ state, osidNameMap })`.
-2. Import it into `presidentialDecisionRoom.ts` and add `crisisBrief: PresidentialCrisisBriefView` to `PresidentialDecisionRoomView`.
-3. In `buildPresidentialDecisionRoomView`, compute `crisisBrief` once after state/player-faction guards and before card finalization.
-4. Update `PresidentialDecisionRoomPanel.tsx` to render a compact top band above command questions: headline, summary, top 3 executable rows, and one primary action button.
-5. Add i18n keys in `messages.en.ts` and `messages.bcs.ts`.
-6. Harden event modal rows where `option.effects` is absent.
-7. Preserve active modal state on IPC failure.
+1. Add a red UI test proving a pending event decision auto-opens `EventDecisionModal` and is not only reachable through Decision Room/Desk.
+2. Extend `PendingEventDecision` and/or a pure modal view builder with narrative, category, historical source, trigger/rationale evidence, historical option metadata, and consequence preview rows.
+3. Replace the compact current modal body with a dossier layout: situation, rationale/evidence, options, numeric consequences, risk, and record trail.
+4. Harden missing-effect and missing-source fallbacks so the modal stays readable but diagnostics flag weak authoring.
+5. Preserve active modal state and selected response on IPC failure; do not clear the modal until the engine accepts the response.
+6. After resolution, ensure the consequence ledger/Records/Chronicle path records the selected response and major consequence rows.
 
 Tests:
 
-- Add `tests/ui/presidential_crisis_brief.test.ts`:
-  - blocked state with event + paramilitary + convoy sorts event/paramilitary first;
-  - modal-required decisions contribute to `modalRequiredCount`;
-  - advisory reserve/officer items do not make status `blocked`;
-  - no state returns `unavailable`;
-  - deterministic repeat build returns identical item IDs.
-- Extend `tests/ui/presidential_decision_room.test.ts`:
-  - `view.crisisBrief` exists;
-  - crisis primary action routes to an existing owner, not a new modal/queue;
-  - English and Bosnian strings localize.
-- Extend `tests/ui/pre_advance_command_review.test.ts` only if pre-advance consumes the new brief. Preferred: do not consume it yet.
-- Add targeted modal tests for options with and without `effects`, IPC failure, and hidden-truth non-leakage.
+- Add or extend modal tests:
+  - pending player event auto-opens the modal on turn entry;
+  - modal contains narrative/situation, rationale/evidence, visible historical/default marker, numeric consequence rows, source note, and record trail;
+  - option with no effects renders an explicit no-immediate-mechanical-effect row and is flagged by taxonomy diagnostics;
+  - IPC failure keeps the modal open;
+  - no hidden raw IDs, raw state keys, or enemy-only truth leak into the modal.
+- Extend event taxonomy tests:
+  - every required-response event reports modal-readiness fields;
+  - every bot-calibrated event has exactly one historical/default option and it is first unless Product Manager records an explicit exception;
+  - every required-response event has narrative text and `historical_source` or a source-blocked finding;
+  - non-`historical` bot response logic is reported as calibration debt unless explicitly exempted by Product Manager.
 
 Verification:
 
 ```powershell
-npx.cmd vitest run tests/ui/presidential_crisis_brief.test.ts tests/ui/presidential_decision_room.test.ts tests/ui/pre_advance_command_review.test.ts tests/ui/event_modal_dismissal.test.ts tests/player_decision_manifest.test.ts --reporter=dot
+npx.cmd vitest run tests/ui/decision_family_modals.test.ts tests/ui/modal_stack_priority.test.ts tests/ui/presidential_blockers.test.ts tests/ui/decision_consequence_trail.test.ts tests/ui/decision_consequence_records_panel.test.ts tests/ui/inbox_items.test.ts tests/player_decision_manifest.test.ts tests/event_decisions.test.ts --reporter=dot
 npm.cmd run typecheck
 npm.cmd run desktop:map:build
 ```
 
-Baseline regression is normally not required if this is pure UI/read-model projection from already persisted state. It is required if the slice changes event queue shape, save fields, resolver behavior, scenario serialization, or generated artifacts.
+Baseline regression is normally not required if this is pure UI/read-model projection from already persisted state. It is required if the slice changes event queue shape, save fields, bot-choice behavior, resolver behavior, scenario serialization, or generated artifacts.
 
 Collision risks:
 
-- `src/ui/map/data/presidentialDecisionRoom.ts`
-- `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx`
-- `src/ui/map/i18n/messages.en.ts`
-- `src/ui/map/i18n/messages.bcs.ts`
+- `src/ui/map/components/EventDecisionModal.tsx`
 - `src/ui/map/App.tsx`
-- `src/ui/map/data/GameStateAdapter.ts`
+- `src/ui/map/data/decisionSurfaceRegistry.ts`
+- `src/ui/map/data/decisionConsequenceLedger.ts`
+- `src/ui/map/data/types.ts`
+- `src/sim/events/event_types.ts`
+- `src/sim/events/evaluate_events.ts`
+- `src/sim/events/resolve_decision.ts`
+- `data/scenarios/events/*.json`
 
 Stop gates:
 
-- Collision with active GUI branch.
-- Hidden enemy truth exposed through crisis brief context.
-- New event queue/ledger that duplicates Decision Room or Inbox authority.
+- Player decision is only visible in Decision Room/Desk and does not auto-pop.
+- Hidden enemy truth exposed through modal rationale.
+- Hidden model reasoning text exposed instead of player-facing evidence/rationale.
+- Bot calibration path can choose non-historical options without explicit Product Manager approval.
+- New event queue/ledger duplicates President's Desk, modal, Records, or Chronicle authority.
 
 ## Workstream D - Historical Pressure and Dilemma Authoring
 
@@ -357,9 +349,11 @@ Authoring rules:
 
 1. Emergence first: every event must fire from state pressure, incident, threshold, duration, or compound predicates. Calendar windows are bounding guards only.
 2. Historical option first: bot calibration assumes `response_options[0]` is the historical choice when using `bot_response_logic: "historical"`.
-3. Sensitive-history gate: atrocity is consequence, not lever. No player options that select, tune, mitigate, optimize, or bargain with atrocity.
-4. Source gate: no BB/ICTY/source-supported claim, no authored row. If source support is missing, create a research blocker.
-5. Delete test: if removing an event changes no state, no decision pressure, no Cost Ledger annotation, and no future trigger, cut or rewrite it.
+3. Historical-choice marker: every decision option set must mark the historical/default option explicitly in data or derived modal view so the player can see the historical path before choosing.
+4. Narrative first-class: every presidential decision needs authored narration, staff interpretation, and a consequence preview. It should read like a presidential briefing, not a spreadsheet row.
+5. Sensitive-history gate: atrocity is consequence, not lever. No player options that select, tune, mitigate, optimize, or bargain with atrocity.
+6. Source gate: no BB/ICTY/source-supported claim, no authored row. If source support is missing, create a research blocker.
+7. Delete test: if removing an event changes no state, no decision pressure, no Cost Ledger annotation, and no future trigger, cut or rewrite it.
 
 Trigger emergence classes:
 
@@ -410,6 +404,7 @@ Authoring packet order:
 Source gates:
 
 - Gate A: BB/ICTY citation required for historical factual claims. Unsupported facts become `source_blocked`.
+- Gate A2: Player-facing modal narration must expose a compact source note or citation label; deeper citations may route to Codex/Records, but the modal cannot hide the historical basis.
 - Gate B: if a row touches atrocity, detention camps, siege starvation, safe areas, genocide, or massacre, classify Ring 1/2/3 before writing.
 - Gate C: if the row would create a new rupture, stop. That requires separate Historian + Game Designer + user approval.
 - Gate D: if the row makes atrocity a player-selected tactic, stop. Refuse the design.
@@ -515,15 +510,15 @@ Execute Workstream B. If this phase changes event ordering, cap behavior, queuei
 
 Handoff: Determinism Auditor signs off on ordering, cap behavior, and hash movement explanation.
 
-### Phase 3 - Presidential Crisis Brief Read Model
+### Phase 3 - Modal-First Presidential Event Decisions
 
 **Assigned to:** UI/UX Developer + Technical Architect
 **Reviewers:** Modern Wargame Expert, QA Engineer
-**Goal:** expose pending event decisions as presidential dossiers without creating a new queue or authority.
+**Goal:** expose pending event decisions as auto-popping presidential modal dossiers without creating a new queue or authority.
 
-Execute Workstream C. Avoid `App.tsx` and `GameStateAdapter.ts` unless absolutely necessary.
+Execute Workstream C. `App.tsx` may be touched only to harden the existing auto-launch/modal-state contract; avoid `GameStateAdapter.ts` unless the modal needs a field not already exposed.
 
-Handoff: UI/UX hands QA a screenshot or visual artifact plus test command output when GUI ownership permits browser/Electron proof.
+Handoff: UI/UX hands QA a screenshot or visual artifact plus test command output proving the event modal auto-pops, explains rationale/evidence, shows numeric consequences, preserves IPC-failure state, and records the consequence trail.
 
 ### Phase 4 - Acceptance Diagnostics Before Authoring
 
@@ -543,7 +538,7 @@ Handoff: Product Manager chooses first authoring packet from diagnostic gaps.
 
 Execute Workstream D one packet per commit unless Product Manager changes priority in `COMMAND_BOARD.md`.
 
-Handoff: Historian signs source status; Canon reviewer signs sensitive-history boundaries; QA signs deterministic acceptance.
+Handoff: Historian signs source status; Canon reviewer signs sensitive-history boundaries; QA signs deterministic acceptance. Product Manager verifies every authored decision labels the historical/default option first so bot calibration stays on the historical path while players can choose counterfactual branches.
 
 ## Save-Schema Gate
 
@@ -575,13 +570,13 @@ For event-system slices, this applies to `military.pending_event_decisions`, `mi
 Use this prompt when assigning the lane to an external agent:
 
 ```text
-Role and objective: You are the implementation agent for the AWWV Event System Presidential Core Upgrade. Execute docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md one phase at a time, starting with the next unfinished phase recorded in docs/plans/COMMAND_BOARD.md. The goal is to make events an emergent presidential-impact system, not a calendar script.
+Role and objective: You are the implementation agent for the AWWV Event System Presidential Core Upgrade. Execute docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md one phase at a time, starting with the next unfinished phase recorded in docs/plans/COMMAND_BOARD.md. The goal is to make events an emergent presidential-impact system, not a calendar script. Required player decisions must auto-pop as modal presidential dossiers with situation, evidence/rationale, historical/default option, numeric consequences, risk, and record trail.
 
 Canon references: Read .claude/napkin.md, docs/20_engineering/PYRRHIC_PLANNING_RULES.md, docs/plans/COMMAND_BOARD.md, docs/plans/MASTER_ROADMAP.md latest event-system addendum, docs/10_canon/Game_Bible_v0_9_0.md, docs/10_canon/Rulebook_v0_9_0.md, docs/10_canon/Systems_Manual_v0_9_0.md, docs/20_engineering/DETERMINISM_TEST_MATRIX.md, docs/20_engineering/SAVE_SCHEMA_EVOLUTION.md, and the full event upgrade plan before editing. Inspect src/sim/events/*, src/state/player_decision_manifest.ts, src/state/game_state.ts, src/state/validateGameState.ts, and all five data/scenarios/events/*.json files.
 
 Determinism and ledger constraints: No timestamps, randomness, environment-dependent logic, or nondeterministic iteration. Stable ordering is required for candidates, queues, diagnostics, persisted output, and migrations. Do not add save fields without migration/default/validator tests. Append docs/PROJECT_LEDGER.md for behavior/output/scenario/data/roadmap changes; add docs/PROJECT_LEDGER_KNOWLEDGE.md only for reusable process or design lessons. Do not edit docs/10_canon/FORAWWV.md.
 
-STOP AND ASK triggers: Canon conflicts or canon silence on required decision; determinism or stable ordering cannot be guaranteed; ledger update requirement is unclear; scope expands beyond prompt objective; GUI/calibration branch collision; sensitive-history judgment required; scenario hash drift is unexplained; save-schema default could affect scenario output without sign-off; event design would make atrocity a player lever; ordinary war/diplomacy/enclave/patron/alliance/command event is calendar-primary without an exogenous reason.
+STOP AND ASK triggers: Canon conflicts or canon silence on required decision; determinism or stable ordering cannot be guaranteed; ledger update requirement is unclear; scope expands beyond prompt objective; calibration branch collision; sensitive-history judgment required; scenario hash drift is unexplained; save-schema default could affect scenario output without sign-off; event design would make atrocity a player lever; ordinary war/diplomacy/enclave/patron/alliance/command event is calendar-primary without an exogenous reason; modal copy would expose hidden model reasoning or hidden enemy truth; bot calibration would choose a non-historical response without Product Manager approval.
 
 Output format and validation: Work one phase per commit. In your final handoff, include changed files, phase completed, tests run with pass/fail, scenario hash/baseline result if applicable, drift explanation if any, docs/ledger updates, and next unfinished phase. Run the slice-specific verification in the plan. Before claiming final acceptance, run npm.cmd run typecheck, npm.cmd test, npm.cmd run test:baselines when behavior/output can move, npm.cmd run desktop:map:build for UI slices, and git diff --check.
 ```
@@ -597,7 +592,7 @@ Every closed phase must update planning state if status, scope, owner, verificat
 - next executable action;
 - verification/proof actually run;
 - active stop gate if the lane is blocked;
-- whether the next slice is taxonomy, hardening, crisis brief, acceptance, or authoring.
+- whether the next slice is taxonomy, hardening, modal-first event decisions, acceptance, or authoring.
 
 `docs/plans/MASTER_ROADMAP.md` must receive a short addendum only when a workstream or authoring packet closes. The addendum must include:
 

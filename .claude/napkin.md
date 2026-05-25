@@ -1136,6 +1136,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: Read `docs/40_reports/MAP_GEOMETRY_MASTER.md` before any polygon/front-line/geometry work. Covers: polygon topology gaps, shared arc issue, vertex snapping approach, edges_viewer diagnostic.
 
 ## User Directives
+1. **[2026-05-25] Codex acts as Orchestrator, not implementer, for Pyrrhic work**
+   Do instead: Dispatch the right Pyrrhic specialist agents/skills for investigation, implementation, and independent review; parallelize independent lanes whenever file ownership is non-overlapping. Codex/Orchestrator routes, synthesizes, records, and escalates rather than doing substantive specialist work directly.
 1. **[2026-05-24] Ship visible increments before broad hardening**
    Do instead: For UI asset/wiring tasks, first make the direct visible change, run a focused smoke/test pass, and report concrete progress. Add broad tests/docs/cleanup after the user-visible path works. Do not spend long blocks expanding scope while the requested visible change is still absent.
 1. **[2026-05-09] Codex owns future repo work**
