@@ -1375,7 +1375,10 @@
     "trigger": {
       "turn_min": 183,
       "turn_max": 185,
-      "phase": "war"
+      "phase": "war",
+      "requires_events": [
+        "federation_ground_offensive_1995"
+      ]
     },
     "once": true,
     "responding_faction": "RBiH",

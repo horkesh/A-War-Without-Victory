@@ -10643,3 +10643,22 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `data/scenarios/events/war_1994.json`, `tools/diagnostics/event_acceptance_report.ts`, `tests/sim/events/event_acceptance_report.test.ts`, `tests/sim/events/event_taxonomy_report.test.ts`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-25] data(events): clean Holbrooke scheduled-only trigger debt
+
+**Type:** Event trigger cleanup + focused acceptance tests.
+
+**Change:** Added the minimal data-only prerequisite `requires_events: ["federation_ground_offensive_1995"]` to `holbrooke_ceasefire_demand_oct95`, removing its scheduled-only required-response blocker without authoring metadata/default fields. `operation_lukavac_93` was intentionally left calendar-only and blocked after Historian/Product constraints rejected the broad `territory_percentage RS > 0.48` predicate as insufficiently local/player-safe for Igman/Sarajevo-route pressure.
+
+**Determinism:** Data-only trigger gate using existing deterministic event prerequisite vocabulary. No new condition type, runtime code, save schema, metadata/default authoring, randomness, timestamps, operation tuning, initial OSID overrides, avoided-OSID lists, or faction model changes were introduced.
+
+**Verification:**
+- `npx.cmd vitest run tests\sim\events\event_acceptance_report.test.ts tests\sim\events\event_taxonomy_report.test.ts tests\event_timeline_integrity.test.ts tests\sim\political\phase5c_holbrooke_events.test.ts --reporter=dot` - 60/60 PASS.
+- `npx.cmd tsx tools\diagnostics\event_acceptance_report.ts --json` - PASS; catalog remains `NOT_READY`: 247 events, 36 required-response, 5 production modal-ready, 31 missing explicit defaults/markers/source notes, 16 source-blocked, 8 sensitive-gated, 5 source/default/counterfactual blocked, 2 scheduled-only required-response rows. Holbrooke is now `state_or_pressure`; Lukavac remains `scheduled_only` with `scheduled_only_trigger_needs_predicate_cleanup_or_exogenous_waiver`.
+- `npm.cmd run sim:scenario:run -- --scenario data\scenarios\apr1992_definitive_188w.json --unique --out runs` - PASS; run `runs\apr1992_definitive_188w__b9af2327fe0c3c10__w188_n0`, final hash `dad09d050b76f32c`. Event proof: `federation_ground_offensive_1995` fired at turn 172, `holbrooke_ceasefire_demand_oct95` fired at turn 183, `operation_lukavac_93` fired at turn 65.
+- `npm.cmd run typecheck` - blocked by this worktree's existing missing UI map dependency/type declarations outside this slice (`maplibre-gl`, `pmtiles`, Deck.gl packages, `@vitejs/plugin-react`) and related implicit-any fallout.
+- `git diff --check` - PASS.
+
+**Artifacts:** `data/scenarios/events/war_1995.json`, `tests/event_timeline_integrity.test.ts`, `tests/sim/events/event_acceptance_report.test.ts`, `tests/sim/political/phase5c_holbrooke_events.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---

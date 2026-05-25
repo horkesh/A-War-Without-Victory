@@ -114,6 +114,21 @@ describe('event acceptance diagnostic report', () => {
         }
     });
 
+    it('cleans Holbrooke scheduled-only debt while leaving Lukavac blocked pending local trigger proof', () => {
+        const report = buildEventAcceptanceReport();
+        const lukavac = report.required_response_rows.find((entry) => entry.id === 'operation_lukavac_93');
+        const holbrooke = report.required_response_rows.find((entry) => entry.id === 'holbrooke_ceasefire_demand_oct95');
+
+        expect(lukavac).toBeDefined();
+        expect(lukavac!.trigger_gate).toBe('scheduled_only');
+        expect(lukavac!.blocking_reasons).toContain('scheduled_only_trigger_needs_predicate_cleanup_or_exogenous_waiver');
+
+        expect(holbrooke).toBeDefined();
+        expect(holbrooke!.trigger_gate).toBe('state_or_pressure');
+        expect(holbrooke!.blocking_reasons).not.toContain('scheduled_only_trigger_needs_predicate_cleanup_or_exogenous_waiver');
+        expect(report.scheduled_only_rows.map((row) => row.id)).not.toContain('holbrooke_ceasefire_demand_oct95');
+    });
+
     it('marks the approved first authoring packet as production modal-ready only after safe-first JSON authoring', () => {
         const report = buildEventAcceptanceReport();
 

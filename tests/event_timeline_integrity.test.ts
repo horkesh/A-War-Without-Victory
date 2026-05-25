@@ -104,6 +104,12 @@ describe('Event timeline historical integrity', () => {
         expect(fgo.trigger.requires_events).toContain('nato_deliberate_force_1995');
     });
 
+    it('Holbrooke ceasefire demand requires the Federation ground offensive', () => {
+        const holbrooke = allEvents.find((e: any) => e.id === 'holbrooke_ceasefire_demand_oct95');
+        expect(holbrooke).toBeDefined();
+        expect(holbrooke.trigger.requires_events).toContain('federation_ground_offensive_1995');
+    });
+
     it('no anachronistic Mostar siege event exists in 1992 file', () => {
         expect(all1992.find((e: any) => e.id === 'mostar_siege_begins_1992')).toBeUndefined();
     });

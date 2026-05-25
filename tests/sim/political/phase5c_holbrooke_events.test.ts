@@ -61,6 +61,11 @@ describe('v0.8.2 Phase 5c — Holbrooke 1995 Shuttle Diplomacy Events', () => {
         expect(ev.requires_player_response).toBe(true);
     });
 
+    it('holbrooke_ceasefire_demand_oct95 requires the Federation ground offensive before it can fire', () => {
+        const ev = allEvents.find((e: any) => e.id === 'holbrooke_ceasefire_demand_oct95');
+        expect(ev.trigger.requires_events).toContain('federation_ground_offensive_1995');
+    });
+
     // ── bot_response_logic ────────────────────────────────────────────────────
 
     it('all three Phase 5c events have bot_response_logic strategic_weighted', () => {
