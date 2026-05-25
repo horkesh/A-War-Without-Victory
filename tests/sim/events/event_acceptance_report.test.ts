@@ -26,7 +26,6 @@ const EXPECTED_APPROVED_FIRST_PACKET = [
 
 const EXPECTED_CONDITIONAL_PACKET = [
     'operation_lukavac_93',
-    'carter_ceasefire_1994',
     'holbrooke_ceasefire_demand_oct95',
 ];
 
@@ -54,6 +53,10 @@ const EXPECTED_FIRST_PACKET_DEFAULTS = new Map([
     ['belgrade_embargo_rs_1994', 'defiant'],
 ]);
 
+const EXPECTED_PACKET_2A_DEFAULTS = new Map([
+    ['carter_ceasefire_1994', 'respect'],
+]);
+
 function loadEventFixtures(file: string): EventFixture[] {
     return JSON.parse(readFileSync(file, 'utf8')) as EventFixture[];
 }
@@ -66,13 +69,13 @@ describe('event acceptance diagnostic report', () => {
         expect(JSON.stringify(first)).toBe(JSON.stringify(second));
         expect(first.summary.total_events).toBe(247);
         expect(first.summary.required_response_events).toBe(36);
-        expect(first.summary.production_modal_authoring_ready_events).toBe(4);
+        expect(first.summary.production_modal_authoring_ready_events).toBe(5);
         expect(first.summary.acceptance_status).toBe('NOT_READY');
         expect(first.summary.full_catalog_accepted).toBe(false);
-        expect(first.summary.missing_historical_default_response_id_events).toBe(32);
-        expect(first.summary.missing_historical_marker_events).toBe(32);
+        expect(first.summary.missing_historical_default_response_id_events).toBe(31);
+        expect(first.summary.missing_historical_marker_events).toBe(31);
         expect(first.summary.source_blocked_events).toBeGreaterThan(0);
-        expect(first.summary.missing_source_note_events).toBe(32);
+        expect(first.summary.missing_source_note_events).toBe(31);
     });
 
     it('lists the approved first production authoring packet candidates without changing JSON content', () => {
@@ -83,6 +86,32 @@ describe('event acceptance diagnostic report', () => {
         expect(report.approved_first_authoring_packet_candidates.every((row) => row.candidate_status === 'APPROVED_FIRST_PACKET')).toBe(true);
         expect(report.conditional_authoring_packet_candidates.map((row) => row.id)).toEqual(EXPECTED_CONDITIONAL_PACKET);
         expect(report.deferred_authoring_packet_candidates.map((row) => row.id)).toEqual(EXPECTED_DEFERRED_PACKET);
+    });
+
+    it('does not report Carter as conditional cleanup once the external guardrail row is ready', () => {
+        const report = buildEventAcceptanceReport();
+        const carter = report.required_response_rows.find((row) => row.id === 'carter_ceasefire_1994');
+
+        expect(carter).toBeDefined();
+        expect(carter!.production_modal_authoring_ready).toBe(true);
+        expect(carter!.blocking_reasons).toEqual([]);
+        expect(carter!.trigger_gate).toBe('external_or_exogenous');
+        expect(carter!.candidate_status).toBeNull();
+        expect(report.conditional_authoring_packet_candidates.map((row) => row.id)).not.toContain('carter_ceasefire_1994');
+    });
+
+    it('keeps Lukavac and Holbrooke conditional and not production modal-ready', () => {
+        const report = buildEventAcceptanceReport();
+
+        expect(report.conditional_authoring_packet_candidates.map((row) => row.id)).toEqual(EXPECTED_CONDITIONAL_PACKET);
+        for (const id of EXPECTED_CONDITIONAL_PACKET) {
+            const row = report.required_response_rows.find((entry) => entry.id === id);
+
+            expect(row, id).toBeDefined();
+            expect(row!.candidate_status, id).toBe('CONDITIONAL_TRIGGER_CLEANUP_REQUIRED');
+            expect(row!.production_modal_authoring_ready, id).toBe(false);
+            expect(row!.blocking_reasons.length, id).toBeGreaterThan(0);
+        }
     });
 
     it('marks the approved first authoring packet as production modal-ready only after safe-first JSON authoring', () => {
@@ -97,21 +126,28 @@ describe('event acceptance diagnostic report', () => {
             expect(row.has_source_note, row.id).toBe(true);
             expect(row.sensitive_gate, row.id).toBe('clear');
         }
-        expect(report.production_modal_authoring_ready_rows.map((row) => row.id)).toEqual(EXPECTED_APPROVED_FIRST_PACKET);
+        expect(report.production_modal_authoring_ready_rows.map((row) => row.id)).toEqual([
+            ...EXPECTED_APPROVED_FIRST_PACKET,
+            'carter_ceasefire_1994',
+        ]);
         expect(report.summary.acceptance_status).toBe('NOT_READY');
         expect(report.summary.full_catalog_accepted).toBe(false);
     });
 
-    it('keeps each approved first-packet historical default at option 0 with exactly one marker', () => {
+    it('keeps each authored packet historical default at option 0 with exactly one marker', () => {
         const fixtures = [
             ...loadEventFixtures('data/scenarios/events/war_1992.json'),
             ...loadEventFixtures('data/scenarios/events/war_1993.json'),
             ...loadEventFixtures('data/scenarios/events/war_1994.json'),
         ];
+        const expectedDefaults = new Map([
+            ...EXPECTED_FIRST_PACKET_DEFAULTS,
+            ...EXPECTED_PACKET_2A_DEFAULTS,
+        ]);
 
-        for (const id of EXPECTED_APPROVED_FIRST_PACKET) {
+        for (const id of expectedDefaults.keys()) {
             const event = fixtures.find((entry) => entry.id === id);
-            const expectedDefault = EXPECTED_FIRST_PACKET_DEFAULTS.get(id);
+            const expectedDefault = expectedDefaults.get(id);
             const options = event?.response_options ?? [];
             const markedOptions = options.filter((option) => option.historical_marker === 'historical_default');
 

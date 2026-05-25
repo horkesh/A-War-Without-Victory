@@ -55,9 +55,9 @@ describe('event taxonomy diagnostic report', () => {
         expect(report.summary.choice_rows_with_title_and_narrative).toBe(44);
         expect(report.summary.choice_rows_with_source).toBe(22);
         expect(report.summary.required_response_rows_with_source).toBe(20);
-        expect(report.summary.historical_default_markers).toBe(4);
-        expect(report.summary.historical_default_ids).toBe(4);
-        expect(report.summary.modal_ready_events).toBe(4);
+        expect(report.summary.historical_default_markers).toBe(5);
+        expect(report.summary.historical_default_ids).toBe(5);
+        expect(report.summary.modal_ready_events).toBe(5);
     });
 
     it('requires required-response choice rows to declare a valid responding faction', () => {
@@ -127,8 +127,9 @@ describe('event taxonomy diagnostic report', () => {
             'hrhb_political_goal',
             'rs_assembly_rejects_voplan_1993',
             'belgrade_embargo_rs_1994',
+            'carter_ceasefire_1994',
         ]);
-        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(4);
+        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(5);
     });
 
     it('counts event-level historical defaults and validates they reference an existing option id', () => {

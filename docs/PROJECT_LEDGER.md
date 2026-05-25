@@ -10625,3 +10625,21 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `data/scenarios/events/war_1992.json`, `data/scenarios/events/war_1993.json`, `data/scenarios/events/war_1994.json`, `tests/sim/events/event_acceptance_report.test.ts`, `tests/sim/events/event_taxonomy_report.test.ts`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-25] data(events): author Carter ceasefire packet 2A default metadata
+
+**Type:** Event content authoring + acceptance diagnostic expectation update.
+
+**Change:** Production-authored only `carter_ceasefire_1994` for Phase 5 packet 2A. Added `historical_default_response_id: "respect"`, option-0 `historical_marker: "historical_default"`, compact source note, player-facing staff assessment, and trigger evidence that explicitly frames the turn window as an external diplomatic-calendar guardrail rather than a fake battlefield predicate. The existing trigger, timing, effects, response order, and notifications were left unchanged. `operation_lukavac_93`, `holbrooke_ceasefire_demand_oct95`, `us_halts_federation_advance_1995`, and sensitive/source-blocked rows were not authored.
+
+**Determinism:** Authored metadata/data-only. No event timing, trigger predicates, effects, response ordering, save schema, randomness, timestamps, operation tuning, initial OSID overrides, avoided-OSID lists, or faction model changes were introduced. Diagnostic ordering remains deterministic; Carter is no longer reported as conditional trigger-cleanup debt once modal-ready under the external/exogenous guardrail, while `operation_lukavac_93` and `holbrooke_ceasefire_demand_oct95` remain conditional/not ready.
+
+**Verification:**
+- `npx.cmd vitest run tests\sim\events\event_acceptance_report.test.ts tests\sim\events\event_taxonomy_report.test.ts tests\event_decisions.test.ts tests\event_timeline_integrity.test.ts --reporter=dot` - 57/57 PASS.
+- `npx.cmd tsx tools\diagnostics\event_acceptance_report.ts --json` - PASS; catalog remains `NOT_READY`: 247 events, 36 required-response, 5 production modal-ready, 31 missing explicit defaults/markers/source notes, 16 source-blocked, 8 sensitive-gated, 5 source/default/counterfactual blocked, 2 scheduled-only required-response rows, 2 conditional candidates (`operation_lukavac_93`, `holbrooke_ceasefire_demand_oct95`).
+- `npx.cmd tsx tools\diagnostics\event_taxonomy_report.ts --json` - PASS; 247 events, 44 choice events, 36 required-response, 5 historical default ids, 5 historical default markers, 5 modal-ready events, 214 warnings, 0 errors.
+- `npm.cmd run typecheck` - blocked by existing missing UI map dependency/type declarations outside this slice (`maplibre-gl`, `pmtiles`, Deck.gl packages, `@vitejs/plugin-react`) and related implicit-any fallout.
+
+**Artifacts:** `data/scenarios/events/war_1994.json`, `tools/diagnostics/event_acceptance_report.ts`, `tests/sim/events/event_acceptance_report.test.ts`, `tests/sim/events/event_taxonomy_report.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---

@@ -78,7 +78,6 @@ export const APPROVED_FIRST_AUTHORING_PACKET_CANDIDATES = [
 
 export const CONDITIONAL_AUTHORING_PACKET_CANDIDATES = [
     'operation_lukavac_93',
-    'carter_ceasefire_1994',
     'holbrooke_ceasefire_demand_oct95',
 ] as const;
 
