@@ -1,4 +1,25 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-25] fix(sana): repair BIHAC_PETROVAC_OBJECTIVES adjacency gap (R15)
+
+**Type:** Data fix — objective sequence correction in `operation_opportunity_catalog_5th_corps.ts`.
+
+**Why:** `BIHAC_PETROVAC_OBJECTIVES` had a geometric gap at `orasac_2 → trubar → vrtoce`: trubar is NOT adjacent to vrtoce (confirmed from `operational_contact_graph.json`). When trubar required 3+ consecutive failed attacks, `MAX_CONSECUTIVE_FAILURES_ON_CURRENT=3` fired, jumping the objective to vrtoce while trubar was still RS. Brigades at orasac_2 then attacked trubar as an intermediate, accumulating spurious vrtoce failure counts and stalling the axis before the Bosanski Petrovac cluster could be reached. Root introduced by Wave 24B (2026-05-23) which moved trubar to step 4 without verifying trubar→vrtoce adjacency.
+
+**Change:** `src/sim/combat/operation_opportunity_catalog_5th_corps.ts` — `BIHAC_PETROVAC_OBJECTIVES`:
+- Removed `op:bihac:trubar` (trubar NOT adjacent to vrtoce; captured by consolidation from RBiH-held orasac_2)
+- Removed `op:bosanski_petrovac:krnjeusa` (not reachable from dobro_pelo_2; captured by consolidation)
+- New sequence (all adjacencies verified): ripac → racic → orasac_2 → vrtoce → prkosi → vodjenica → kolonic_2 → bosanski_petrovac_2 → dobro_pelo_2 → jasenovac_2
+
+**Verification:**
+- `npx tsc --noEmit`: clean.
+- 188w R14a baseline (pre-fix): hash `e2d9dbe9d3565790`, match 79.2%, HRHB=90/RBiH=295/RS=327, 27/27 anchors, 6/6 benchmarks. Op Sana: 4/12 obj captured (bihac_petrovac axis stalled before Petrovac cluster).
+- 188w R15 (post-fix): hash `59560840d2b4d976`, match **82.0% area-weighted / 83.8% count** (597/712), HRHB=90/RBiH=301(+6)/RS=321(−6), 6/6 benchmarks. Op Sana: **16/16 objectives captured**.
+- Bosanski Petrovac cluster: vrtoce/prkosi/vodjenica/kolonic_2/dobro_pelo_2/jasenovac_2 all RS→RBiH; bosanski_petrovac_2 net-zero (VRS captured → Op Sana recaptured → final=RBiH). Regression fully resolved.
+- Operations Expert pre-change checklist: all painted-control, staging-adjacency, brigade-corps_id, shared-brigade checks passed.
+- Scenario Expert GO verdict: +2.8pp area-weighted match, historically correct Bosanski Petrovac captures per BB1 pp.417/419-420.
+
+**Outcome:** Largest single-change match improvement in recent calibration history (+2.8pp area-weighted). Op Sana correctly captures the full Una-Sana basin. New KRAJINA mismatches (orasac_2/racic/ripac showing painted=RS, sim=RBiH) are expected Oct 1995 captures not in jan1993 painted target.
+
 ## [2026-05-25] calibration(combat-math): VRS Krajina post-Storm coordination-collapse penalty
 
 **Type:** New gated combat-math defender multiplier modeling the historian-identified M2 mechanism (post-Storm VRS Krajina coordination collapse). Faction-symmetric in structure (corps-id list, same pattern as VRS_2KK_CORPS_ID SVK partner buffer). Gated by `state.meta.operation_storm_triggered === true` for byte-stable pre-Storm path. Sacred-rule clean.
