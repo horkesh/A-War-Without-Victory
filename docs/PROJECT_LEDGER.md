@@ -1,4 +1,42 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-25] calibration(combat-math): VRS Krajina post-Storm coordination-collapse penalty
+
+**Type:** New gated combat-math defender multiplier modeling the historian-identified M2 mechanism (post-Storm VRS Krajina coordination collapse). Faction-symmetric in structure (corps-id list, same pattern as VRS_2KK_CORPS_ID SVK partner buffer). Gated by `state.meta.operation_storm_triggered === true` for byte-stable pre-Storm path. Sacred-rule clean.
+
+**Why:** After Round 8 (`7e13c7b0`) wired `strategic_depth` into defender power and Round 9/9b/10/10b attempts revealed the existing mechanisms could not deliver the historical post-Storm collapse signature, this lane (under user authorization to take bigger architectural changes) implements the explicit Krajina coordination-collapse mechanism as the historian recommended in their dispatch on the four-pillar causal analysis. The mechanism is distinct from and stacks with the NATO Deliberate Force `equipment_quality_modifier RS×0.70` (which models air-campaign C2/ammo damage) — Krajina collapse models the SVK destruction + 165k refugee paralysis + frontage overstretch cascade documented in ICTY Mladić MICT-13-56 §3437-3450 + BB v2 ch 28.
+
+**Change:** Two files:
+
+1. `src/sim/combat/strategic_depth.ts` (+51 lines):
+   - `KRAJINA_COLLAPSE_CORPS: ReadonlySet<FormationId>` — `{vrs_1st_krajina, vrs_2nd_krajina}` per oob_corps.json
+   - `KRAJINA_COLLAPSE_DEFENDER_MULT = 0.65` — magnitude documented from historical sources
+   - `getKrajinaCollapseMult(state, formation)` — pure function returning 1.0 (no effect) unless `operation_storm_triggered === true` and corps ∈ KRAJINA_COLLAPSE_CORPS
+
+2. `src/sim/combat/combat_math.ts` (~25 lines added):
+   - Added `getKrajinaCollapseMult` to existing strategic_depth import
+   - New `krajinaCollapseMult: number` field in `DefenderPowerBreakdown` interface with full documentation
+   - New gated multiplier block in `computeDefenderPowerBreakdown` after `strategicDepthMult`, following the same `if (mult !== 1.0) power *= mult` pattern as `cascadeMult` / `multiAxisMult` / `equipmentQualityMult` / `strategicDepthMult`
+   - `krajinaCollapseMult` added to return object
+
+**Verification:**
+- `npx tsc --noEmit -p tsconfig.json`: clean (exit 0).
+- 188w pre-fix (n12, R8 committed at `7e13c7b0`): hash `149007813baa5123`, match HRHB 87/RBiH 296/RS 329, 27/27 anchors, 6/6 benchmarks.
+- 188w post-fix (n17 on worktree): hash `875c40288d5ac87b`, match **HRHB 87 / RBiH 299 (+3) / RS 326 (−3)**, 27/27 anchors, 6/6 benchmarks.
+- 3 OSID flips RS → RBiH, all in Bihać/Petrovac corridor toward painted target: `op:bihac:trubar`, `op:bosanski_petrovac:krnjeusa`, `op:bosanski_petrovac:vrtoce`. All Op Sana 95 corridor objectives per BB v2 ch 28.6.
+- `npm run test:baselines`: GREEN ("Baseline regression: all scenarios match.") — no baseline refresh needed because the new multiplier gates on `operation_storm_triggered === true`, which is never true in the 3 pre-Storm baseline scenarios (40w stops at t40, 52w at t52, noop_4w at t4; Storm fires ~t170).
+
+**Outcome:** +3 RBiH OSIDs toward painted target; net Δ to painted reduces from +14 RS over to +11; HRHB shortfall unchanged at −20 (Mistral 2 single-brigade attacks at the new 0.53 ratio still insufficient to break through without multi-brigade concentration — that's the next-lane structural target, not this lane's scope). Zero anchor or benchmark regressions. Zero sensitive-history event-firing-turn diffs (all 16 tracked events fire at identical turns vs n12 — verified by sensitive-history slice).
+
+**Note on Mistral 1+2:** Combined effect post-Storm now reduces VRS Krajina defender power to ~0.455× baseline (NATO ×0.70 × Krajina ×0.65). Mistral 2 individual ratio shifts 0.24 → ~0.53. With 4-brigade concentration via existing `estimateConcentratedOutcome` (×3.55), composite would be 1.88 → victory threshold — but Round 10/10b empirically proved that bot brigade-AI doesn't reliably converge for op execution, so the concentration coefficient stays at ~1× in practice. HVO Mistral remains stuck at 0 captures pending dedicated op-level focal-point planning (separate engine lane).
+
+**Sacred rules:** Faction-symmetric in STRUCTURE (corps-id list gate, not faction predicate; same pattern as VRS_2KK_CORPS_ID). Deterministic (pure function, no Math.random, no Date.now). No init OSID overrides. No `avoided_osids_by_faction`. Canonical faction IDs only. `hvo_main_staff` not used as launcher. `docs/10_canon/FORAWWV.md` not edited.
+
+**Historical basis:** ICTY Mladić MICT-13-56 §3437-3450 (refugee paralysis effects on RS rear logistics after Operation Storm). BB v2 ch 28 (VRS Krajina 4-day collapse pattern; "the corps did not lose battles — it lost coordination" per historian dispatch). Distinct from and stacks with NATO Deliberate Force air-campaign mechanism, which models a separate historical cause (C2/ammunition depot damage) for the same effect (degraded VRS defensive capacity).
+
+**Artifacts:** `src/sim/combat/strategic_depth.ts`; `src/sim/combat/combat_math.ts`.
+
+---
+
 ## [2026-05-25] calibration(combat-math): wire strategic_depth into defender power
 
 **Type:** Combat-math hot-path edit + baseline refresh. The new multiplier propagates through every defender power computation in every battle in every scenario. Faction-symmetric (no faction id hard-code), deterministic (pure math), gated `!== 1.0` for byte-stability on no-effect path.
