@@ -4,6 +4,8 @@ import { Z } from '../../shared/zIndex';
 import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
+import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
+import { DecisionModalImageHeader } from './DecisionModalImageHeader';
 
 type ParamilitaryDecision = 'allow' | 'deny';
 
@@ -26,6 +28,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
     const requests = useMemo(() => state?.pendingParamilitaryRequests ?? [], [state?.pendingParamilitaryRequests]);
     const [decisions, setDecisions] = useState<Record<string, ParamilitaryDecision>>({});
     const [submitting, setSubmitting] = useState(false);
+    const headerImage = getDecisionHeaderForFamily('paramilitary_request');
 
     useEffect(() => {
         if (!isOpen) return;
@@ -90,17 +93,18 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
             panelClassName="w-[min(92vw,680px)] max-h-[88vh] overflow-hidden rounded-lg border border-red-500/35 bg-panel-bg text-text-primary shadow-2xl"
         >
             <div className="flex max-h-[88vh] flex-col">
-                <div className="border-b border-panel-border bg-red-950/25 px-5 py-4">
-                    <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-red-300">
-                        Presidential Decision Required
-                    </div>
-                    <h2 id="paramilitary-review-title" className="mt-1 text-[18px] font-bold">
-                        Paramilitary Authorization
-                    </h2>
-                    <p className="mt-2 text-[12px] leading-relaxed text-text-secondary">
-                        Approving these deployments can capture territory quickly, but paramilitary operations carry
-                        a serious risk of war crimes, civilian casualties, and international consequences.
-                    </p>
+                {headerImage && (
+                    <DecisionModalImageHeader
+                        imageUrl={headerImage}
+                        imageAlt="Internal security desk"
+                        eyebrow="Presidential Decision Required"
+                        title="Paramilitary Authorization"
+                        titleId="paramilitary-review-title"
+                        description="Approving these deployments can capture territory quickly, but paramilitary operations carry a serious risk of war crimes, civilian casualties, and international consequences."
+                        accentClassName="text-red-300"
+                    />
+                )}
+                <div className="border-b border-panel-border bg-red-950/25 px-5 py-3">
                     <div className="mt-3 flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary">
                         <span className="rounded border border-panel-border bg-panel-card px-2 py-1">
                             {requests.length} request{requests.length === 1 ? '' : 's'}

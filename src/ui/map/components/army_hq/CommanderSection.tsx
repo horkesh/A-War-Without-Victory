@@ -145,9 +145,15 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
                                                 </span>
                                             )}
                                         </div>
-                                        <div className="flex items-center gap-4 shrink-0 text-[11px] tabular-nums font-mono">
-                                            <span style={{ color: getRatingColor(officer.competence) }}>C:{officer.competence.toFixed(1)}</span>
-                                            <span style={{ color: getRatingColor(officer.aggressiveness) }}>A:{officer.aggressiveness.toFixed(1)}</span>
+                                        <div className="flex items-center gap-2 shrink-0 text-[10px] tabular-nums font-mono">
+                                            <span title={`Command: ${officer.competence.toFixed(1)}`}>
+                                                <span className="mr-1 text-[8px] uppercase tracking-[0.12em] text-text-secondary/70">Command</span>
+                                                <span style={{ color: getRatingColor(officer.competence) }}>{officer.competence.toFixed(1)}</span>
+                                            </span>
+                                            <span title={`Initiative: ${officer.aggressiveness.toFixed(1)}`}>
+                                                <span className="mr-1 text-[8px] uppercase tracking-[0.12em] text-text-secondary/70">Initiative</span>
+                                                <span style={{ color: getRatingColor(officer.aggressiveness) }}>{officer.aggressiveness.toFixed(1)}</span>
+                                            </span>
                                         </div>
                                     </button>
                                 );

@@ -7,12 +7,14 @@ import { OperationHistoryPanel } from '../OperationHistoryPanel';
 import { useGameStore } from '../../store/gameStore';
 import { OpportunityLedgerPanel } from './OpportunityLedgerPanel';
 import { TurnAftermathRecordsPanel } from './TurnAftermathRecordsPanel';
+import { DecisionConsequenceRecordsPanel } from './DecisionConsequenceRecordsPanel';
 import { t, type MessageKey } from '../../i18n';
 
 const SUB_TABS = [
     { id: 'aftermath' as const, labelKey: 'recordsContent.tab.aftermath' },
     { id: 'aar' as const, labelKey: 'recordsContent.tab.aar' },
     { id: 'ops' as const, labelKey: 'recordsContent.tab.ops' },
+    { id: 'decisions' as const, labelKey: 'recordsContent.tab.decisions' },
     { id: 'opportunities' as const, labelKey: 'recordsContent.tab.opportunities' },
 ];
 
@@ -59,6 +61,7 @@ export function RecordsContent() {
             {subTab === 'aftermath' && <TurnAftermathRecordsPanel />}
             {subTab === 'aar' && <AARPanel isOpen={true} onClose={() => {}} embedded />}
             {subTab === 'ops' && <OperationHistoryPanel isOpen={true} onClose={() => {}} embedded />}
+            {subTab === 'decisions' && <DecisionConsequenceRecordsPanel />}
             {subTab === 'opportunities' && <OpportunityLedgerPanel />}
         </div>
     );

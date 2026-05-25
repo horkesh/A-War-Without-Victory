@@ -23,6 +23,7 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'pending_paramilitary_requests',
     'paramilitary_policy',
     'paramilitary_deployment_count',
+    'paramilitary_decision_history',
     'military',
     'political',
     'displacement'
@@ -133,4 +134,3 @@ export function serializeGameState(state: GameState, space?: number): string {
     }
     return JSON.stringify(serializable);
 }
-

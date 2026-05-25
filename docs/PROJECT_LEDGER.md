@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-25] merge(ui): integrate presidential desk flow
+
+**Type:** UI/desktop shell merge. No simulation calibration, scenario data, combat math, event ordering, or Claude calibration branch work changed intentionally.
+
+**Why:** The presidential GUI restructure branch needed to land on current `main` without regressing the newer Warroom polish, localization, Chronicle recap, player-safe personnel presentation, or calibration-adjacent mainline changes.
+
+**Change:** Integrated the President's Desk flow, direct presidential blocker routing, modal-first decision families, advance-clearance copy, decision consequence ledger, Army HQ decision records, Chronicle decision-ledger entries, player-facing error copy, packaged officer-decision history helper, and runtime WebP desk/packet/header/consequence assets. Conflict resolution kept current `main` localization/player-safe text and layered the desk routing and consequence registry on top. The merge keeps runtime `.webp` assets and GUI audit/verification screenshots; raw image-generation source folders remain outside the merge set.
+
+**Verification:** Merge conflict-marker scan passed for `<<<<<<<`/`>>>>>>>`; `git diff --check` passed; `npm.cmd run typecheck` passed; `npx.cmd vitest run tests/ui tests/desktop_packaging_contract.test.ts tests/desktop_officer_decision_history.test.ts tests/humanitarian_convoy_lifecycle.test.ts tests/load_error_toast.test.ts tests/paramilitary_sweep.test.ts tests/ui_adapter_boundary.test.ts tests/ui_map_order_actions.test.ts tests/ui_player_visibility.test.ts --reporter=dot` passed 177/177 files and 1037/1037 tests; `npm.cmd run desktop:map:build` passed with existing Vite chunk/externalization warnings.
+
+**Artifacts:** `src/ui/map/App.tsx`; `src/ui/map/components/presidential_desk/*`; `src/ui/map/components/*Modal.tsx`; `src/ui/map/components/PresidentialInbox.tsx`; `src/ui/map/components/PresidentialToolbar.tsx`; `src/ui/map/components/army_hq/*`; `src/ui/map/components/chronicle/generateChronicleEntries.ts`; `src/ui/map/data/decisionConsequenceLedger.ts`; `src/ui/map/data/decisionSurfaceRegistry.ts`; `src/ui/map/data/presidentialBlockers.ts`; `src/ui/map/data/presidentialDeskAssets.ts`; `src/ui/map/assets/presidential_desk/**/*.webp`; `src/ui/warroom/assets/hq_presidential_desk_1992.webp`; `src/desktop/officer_decision_history.cjs`; `tests/ui/*`; `docs/40_reports/GUI_MASTER.md`; `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`; `docs/plans/2026-05-24-gui-ai-asset-brief.md`.
+
+---
+
 ## [2026-05-24] feat(chronicle): add campaign recap synthesis
 
 **Type:** UI/data presentation only. No simulation behavior, save schema, scenario data, generated artifact, combat math, event ordering, or engine output changed.

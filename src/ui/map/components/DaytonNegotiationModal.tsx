@@ -34,6 +34,7 @@ import { getPlayerFacingFaction } from '../../shared/playerFacingLabels';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { t } from '../i18n';
+import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 
 type DaytonData = NonNullable<LoadedGameState['pendingDayton']>;
 
@@ -51,6 +52,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
     const playerFaction = getPlayerFacingFaction(useGameStore((s) => s.loadedGameState));
+    const headerImage = getDecisionHeaderForFamily('dayton_negotiation');
 
     const [demands, setDemands] = useState<Set<string>>(new Set());
     const [concessions, setConcessions] = useState<Set<string>>(new Set());
@@ -144,6 +146,14 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
             <>
                 {/* Header */}
                 <div className="relative px-8 pt-8 pb-4 border-b-2 border-[#8a7a60]/30">
+                    {headerImage && (
+                        <img
+                            src={headerImage}
+                            alt="Diplomatic negotiation header"
+                            className="absolute inset-x-0 top-0 h-28 w-full object-cover opacity-35"
+                        />
+                    )}
+                    <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#1b130c]/35 to-transparent" />
                     <div className="absolute top-4 right-4 text-[9px] uppercase tracking-widest text-[#8a7a60]/60 font-bold rotate-[-8deg] border-2 border-[#8a7a60]/30 px-2 py-1 rounded">
                         DIPLOMATIC — CLASSIFIED
                     </div>

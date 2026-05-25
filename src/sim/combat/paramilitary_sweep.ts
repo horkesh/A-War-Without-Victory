@@ -699,8 +699,24 @@ export function resolvePlayerParamilitaryDecisions(state: GameState): Paramilita
 
     const turn = state.meta?.turn ?? 0;
     let spawnIndex = 0;
+    const history = Array.isArray(state.paramilitary_decision_history)
+        ? [...state.paramilitary_decision_history]
+        : [];
 
-    for (const req of requests) {
+    for (const req of [...requests].sort((a, b) => strictCompare(a.target_osid, b.target_osid))) {
+        if (req.decision === 'allow' || req.decision === 'deny' || req.decision === 'regular') {
+            history.push({
+                id: `paramilitary:${turn}:${req.target_osid}`,
+                turn,
+                target_osid: req.target_osid,
+                faction: req.faction,
+                strength: req.strength,
+                decision: req.decision,
+                ...(typeof req.estimated_civilian_risk === 'number'
+                    ? { estimated_civilian_risk: req.estimated_civilian_risk }
+                    : {}),
+            });
+        }
         if (req.decision === 'allow') {
             spawnParamilitary(state, req.faction, req.target_osid, turn, spawnIndex, report);
             spawnIndex++;
@@ -708,5 +724,8 @@ export function resolvePlayerParamilitaryDecisions(state: GameState): Paramilita
     }
 
     state.pending_paramilitary_requests = [];
+    state.paramilitary_decision_history = history.sort((a, b) =>
+        a.turn !== b.turn ? a.turn - b.turn : strictCompare(a.id, b.id)
+    );
     return report;
 }

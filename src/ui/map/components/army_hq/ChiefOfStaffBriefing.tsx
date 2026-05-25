@@ -375,7 +375,7 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
     if (!profile || paragraphs.length === 0) return null;
 
     return (
-        <div className="bg-[#f5f0e8] border border-neutral-300 rounded-lg overflow-hidden flex flex-col min-h-[220px] max-h-[320px] shadow-md relative">
+        <div className="bg-[#f5f0e8] border border-neutral-300 rounded-lg overflow-hidden flex flex-col min-h-[150px] max-h-[220px] shadow-md relative">
             {/* Stamp */}
             <div className="absolute top-2 right-3 opacity-[0.08] font-black text-xl -rotate-12 select-none uppercase text-neutral-800 pointer-events-none">
                 {t('chiefOfStaff.header.stamp')}

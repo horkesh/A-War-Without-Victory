@@ -9,6 +9,20 @@ import { getRatingColor } from '../../utils/officerCharacter';
 import { t, useLocale } from '../../i18n';
 import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
+function OfficerQualityChip({ label, value }: { label: string; value: number }) {
+    return (
+        <span
+            className="inline-flex items-center gap-1 rounded border border-panel-border/50 bg-black/20 px-1.5 py-0.5"
+            title={`${label}: ${value.toFixed(1)}`}
+        >
+            <span className="text-[8px] uppercase tracking-[0.12em] text-text-secondary">{label}</span>
+            <span className="font-mono text-[10px] font-bold tabular-nums" style={{ color: getRatingColor(value) }}>
+                {value.toFixed(1)}
+            </span>
+        </span>
+    );
+}
+
 export function PersonnelContent() {
     const [locale] = useLocale();
     const state = useGameStore((s) => s.loadedGameState);
@@ -125,10 +139,10 @@ export function PersonnelContent() {
                 <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
                     {t('personnel.officerRoster', { active: data.activeOfficers.length, reserve: data.reserveOfficers.length })}
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2 xl:grid-cols-3">
                     {data.activeOfficers.map(o => (
-                        <div key={o.id} className="flex items-start justify-between gap-3 px-2.5 py-1.5 border border-panel-border/50 rounded-md bg-panel-bg text-[10px]">
-                            <div className="min-w-0 flex-1">
+                        <div key={o.id} className="border border-panel-border/50 rounded-md bg-panel-bg px-2.5 py-2 text-[10px]">
+                            <div className="min-w-0">
                                 <div className="font-bold text-text-primary truncate">{o.name}</div>
                                 <div className="text-text-secondary/60 text-[9px] uppercase">
                                     {o.rank?.replace(/_/g, ' ')}
@@ -145,9 +159,12 @@ export function PersonnelContent() {
                                     </div>
                                 )}
                             </div>
-                            <div className="flex items-center gap-2 shrink-0 tabular-nums font-mono">
-                                <span style={{ color: getRatingColor(o.competence) }}>C:{o.competence.toFixed(1)}</span>
-                                <span style={{ color: getRatingColor(o.aggressiveness) }}>A:{o.aggressiveness.toFixed(1)}</span>
+                            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                                <OfficerQualityChip label="Command" value={o.competence} />
+                                <OfficerQualityChip label="Initiative" value={o.aggressiveness} />
+                                {typeof o.defensive_skill === 'number' && (
+                                    <OfficerQualityChip label="Defense" value={o.defensive_skill} />
+                                )}
                             </div>
                         </div>
                     ))}

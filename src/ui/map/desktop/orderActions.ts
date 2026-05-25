@@ -2,6 +2,7 @@ import type { IPC } from './useIPC';
 import type { LoadedGameState } from '../data/types';
 import { buildTurnAftermathView, type TurnAftermathReportInput, type TurnAftermathView } from '../data/turnAftermath';
 import type { LastTurnReport, StagedOrder } from '../store/gameStore';
+import { playerFacingErrorCopy } from '../utils/errorCopy';
 
 interface AdvanceTurnDeps {
     ipc: IPC;
@@ -51,7 +52,7 @@ export async function advanceTurnAndSync({
     const previousState = getCurrentState?.() ?? null;
     const result = await ipc.advanceTurn();
     if (!result.ok || !result.stateJson) {
-        setLoadError(result.error ?? 'Advance turn failed.');
+        setLoadError(playerFacingErrorCopy(result.error ?? 'Advance turn failed.'));
         return;
     }
     clearStagedOrders();

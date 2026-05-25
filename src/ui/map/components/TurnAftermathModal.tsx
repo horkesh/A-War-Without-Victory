@@ -87,7 +87,7 @@ export function TurnAftermathModal({
       closeOnBackdropClick={false}
       ariaLabelledBy="turn-aftermath-title"
       backdropClassName="bg-black/70 px-4"
-      panelClassName="w-full max-w-4xl max-h-[86vh] overflow-hidden border border-white/15 bg-[#101018] shadow-2xl"
+      panelClassName="w-full max-w-6xl max-h-[86vh] overflow-hidden border border-white/15 bg-[#101018] shadow-2xl"
     >
       <>
         <div className="flex items-start justify-between gap-4 border-b border-white/10 bg-black/30 px-5 py-4">
@@ -113,9 +113,9 @@ export function TurnAftermathModal({
           </button>
         </div>
 
-        <div className="grid max-h-[62vh] gap-4 overflow-auto p-5 lg:grid-cols-[1.15fr_0.85fr]">
-          <section className="space-y-4">
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="grid max-h-[62vh] min-w-0 gap-4 overflow-y-auto overflow-x-hidden p-5 lg:grid-cols-[minmax(18rem,0.95fr)_minmax(0,1.35fr)]">
+          <section className="min-w-0 space-y-4">
+            <div className="grid grid-cols-2 gap-3">
               <Metric label={t('turnAftermath.metric.territory')} value={formatSigned(view.territory.friendlyNet)} detail={t('turnAftermath.detail.gainedLost', { gained: view.territory.gains, lost: view.territory.losses })} />
               <Metric label={t('turnAftermath.metric.battles')} value={String(view.combat.friendlyBattleCount)} detail={t('turnAftermath.detail.total', { count: view.combat.battleCount })} />
               <Metric label={t('turnAftermath.metric.casualties')} value={String(view.combat.friendlyCasualties)} detail={t('turnAftermath.detail.opposing', { count: view.combat.opposingCasualties })} />
@@ -144,7 +144,7 @@ export function TurnAftermathModal({
             </div>
           </section>
 
-          <section className="space-y-4">
+          <section className="min-w-0 space-y-4">
             <div className="border border-white/10 bg-black/20">
               <div className="border-b border-white/10 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary">
                 {t('turnAftermath.strategicSignals')}
@@ -154,7 +154,7 @@ export function TurnAftermathModal({
                   <div className="px-3 py-3 text-sm text-text-secondary">{t('turnAftermath.noSignals')}</div>
                 ) : signalPreview.map((signal) => (
                   <div key={signal.id} className={`px-3 py-2 ${signalTone(signal.severity)}`}>
-                    <div className="truncate text-sm font-semibold">{signal.label}</div>
+                    <div className="min-w-0 truncate text-sm font-semibold">{signal.label}</div>
                     <div className="text-[10px] font-mono uppercase tracking-[0.14em] opacity-75">{enumLabel('turnAftermath.signal.kind', signal.kind)} / {signal.detail}</div>
                   </div>
                 ))}
@@ -259,10 +259,10 @@ function Metric({
   compact?: boolean;
 }) {
   return (
-    <div className={`border border-white/10 bg-white/[0.03] ${compact ? 'px-3 py-2' : 'px-3 py-3'}`}>
-      <div className="text-[9px] font-mono uppercase tracking-[0.16em] text-text-secondary">{label}</div>
+    <div className={`min-w-0 overflow-hidden border border-white/10 bg-white/[0.03] ${compact ? 'px-3 py-2' : 'px-3 py-3'}`}>
+      <div className="break-words text-[9px] font-mono uppercase tracking-[0.12em] text-text-secondary">{label}</div>
       <div className="mt-1 text-lg font-bold tabular-nums text-text-primary">{value}</div>
-      <div className="text-[10px] text-text-secondary">{detail}</div>
+      <div className="break-words text-[10px] text-text-secondary">{detail}</div>
     </div>
   );
 }
