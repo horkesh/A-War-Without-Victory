@@ -10639,3 +10639,27 @@ Same-axis (not full op) scope keeps the bonus from amplifying cross-axis ops lik
 **Artifacts:** `src/sim/combat/pre_planned_operations.ts`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## 2026-05-25 — 188w Calibration R24 (Regression −0.70pp, REVERTED)
+
+**R24: Op Podrinje Sweep srebrenica_ring valid chain — REGRESSION −0.70pp, REVERTED.**
+
+- Change: replaced broken srebrenica_ring axis (staging slapasnica NOT adj vranesevici — Sacred Rule 3 violation) with valid chain: `slapasnica → donji_potocari_2 → milacevici → srebrenica_2 → ljeskovik_2 → sulice_2`. All adjacencies verified from `operational_contact_graph.json`. All objectives painted=RS.
+- Result: `match_ratio = 0.838483` (**−0.70pp vs R22 84.55%**). Run: `n29`.
+- OSID control delta vs R22: HRHB 78/107 (−5), RBiH 251/290 (−5), RS 268/315 (+5).
+- **6/6 bot benchmarks PASS. 26/27 anchors** (improved from 23/27 — boljanic_2, petrovo_2, vozuca_2, brijesnica_donja_2 all NOW PASS; srebrenica_2 NEW FAIL: 40w anchor expects RBiH but sim=RS correctly).
+
+**Cascade analysis (root cause):** Srebrenica Ring op firing (vrs_drina corps, Op Podrinje Sweep) changes Drina Corps brigade attrition → cascades via 188w dynamics → alters VRS 2nd Krajina brigade states at t175 → reverses the R22 bosansko_grahovo/Sipovo HRHB cascade. HRHB-cascade losses (~1098 km²) >> Srebrenica RS gains (~310 km²) → net −0.70pp. The two cascades are mutually incompatible at current sim state.
+
+**Discovery — cajnice blocked:** cajnice OSIDs have nodes in `operational_contact_graph.json` but ZERO edges — any op staging from cajnice_2 gets `no_approach_osid` immediately.
+
+**State of srebrenica_ring:** Original broken axis restored with explanatory comment. Remains permanently zero-effect (slapasnica not adj vranesevici) — documented as intentional hold until Drina/Krajina cascade decoupling is resolved.
+
+**R25 candidates (low Drina Corps disturbance):**
+1. **Op Visegrad stall** (vrs_herzegovina): no_approach_osid at wi=4. Reorder ops queue or delay available_from. Potential: medjedja_2 (36.8 km²) + kamenica_2 (31 km²). Different corps from vrs_drina — low HRHB cascade risk.
+2. **Herzegovina region mismatches** (painted=RS sim=RBiH): nevesinje:hrusta_2, nevesinje:sopilja — vrs_herzegovina corps, isolated from Drina.
+3. **Sarajevo/Trnovo region** (trnovo, delijas, kijevo_2 painted=RS sim=RBiH): SRK defensive domain.
+
+**Artifacts:** `src/sim/combat/pre_planned_operations.ts`, `.claude/napkin.md`, `docs/PROJECT_LEDGER.md`.
+
+---

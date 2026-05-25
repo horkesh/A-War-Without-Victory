@@ -191,6 +191,14 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'rs_1st_milii',
                     'rs_1st_birac',
                 ],
+                // BROKEN AXIS — never fires. DO NOT FIX without addressing cascade coupling below.
+                // slapasnica NOT adj vranesevici (Sacred Rule 3 violation) → axis produces zero effects.
+                // Subsequent broken links: zapolje_2→mala_daljegosta_2, mala_daljegosta_2→obadi, obadi→brezovice_2.
+                // R24 2026-05-25: replaced with valid chain slapasnica→donji_potocari_2→milacevici→srebrenica_2
+                //   →ljeskovik_2→sulice_2. Result: Srebrenica correctly RS (+6 OSIDs), BUT reversed the R22
+                //   bosansko_grahovo/Sipovo HRHB cascade (−6 large-area HRHB OSIDs). Net: −0.70pp REGRESSION.
+                //   REVERTED (commit 82a8e2c9-era context). The two cascades are mutually incompatible at
+                //   current sim state. Fix Srebrenica only after decoupling from VRS 2nd Krajina brigade states.
                 objectives: [
                     'op:bratunac:vranesevici',
                     'op:bratunac:zapolje_2',
