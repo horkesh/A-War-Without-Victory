@@ -360,11 +360,15 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'rs_foa_brigade',
                     'rs_bilea_brigade',
                 ],
-                // foca_3 → prevrac (RS waypoint) → kolovarice (RBiH; painted RS — valid target).
+                // foca_3 → patkovina (RBiH; painted RS) → prevrac (RS waypoint) → kolovarice (RBiH; painted RS).
+                // R22 2026-05-25: inserted patkovina before prevrac.
+                // foca_3 adj patkovina ✓, patkovina adj prevrac ✓, prevrac adj kolovarice ✓ (all verified).
+                // patkovina 89.2 km²; painted RS; sim=RBiH — legitimate target.
                 // ustipraca_2 removed (painted RBiH, caused DRINA over-capture in n1243).
                 // VRS historically pressed the Goražde enclave from the west (BB2 p.289).
                 objectives: [
-                    'op:foca:prevrac',              // RS waypoint (foca_3-adjacent); stripped at execution
+                    'op:foca:patkovina',            // RBiH-held; painted RS — R22 insertion, foca_3-adjacent
+                    'op:foca:prevrac',              // RS waypoint (patkovina-adjacent); stripped at execution
                     'op:gorazde:kolovarice',         // RBiH-held; painted RS — legitimate enclave approach target
                 ],
                 staging_osid: 'op:foca:foca_3',
