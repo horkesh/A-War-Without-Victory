@@ -200,9 +200,17 @@
     "requires_player_response": true,
     "responding_faction": "RBiH",
     "bot_response_logic": "historical",
+    "historical_default_response_id": "civic",
+    "source_note": "Karadzic judgment context on Bosnia's statehood dispute; ARBiH composition and Divjak are cited for wartime multi-ethnic service.",
+    "staff_assessment": "The Sarajevo Presidency preserves its civic claim and international posture by keeping the republic defined around equal citizenship, while accepting friction with harder wartime national currents.",
+    "trigger_evidence": [
+      "The May 1992 platform debate is before the Presidency.",
+      "Wartime mobilization is forcing Sarajevo to state the political basis of the republic it claims to defend."
+    ],
     "response_options": [
       {
         "id": "civic",
+        "historical_marker": "historical_default",
         "label": "Civic multi-ethnic republic",
         "description": "One republic, all citizens equal. Serbs and Croats serve alongside Bosniaks. The world respects this. Your nationalists resent it.",
         "effects": [
@@ -360,9 +368,17 @@
     "requires_player_response": true,
     "responding_faction": "HRHB",
     "bot_response_logic": "historical",
+    "historical_default_response_id": "croat_republic",
+    "source_note": "Kordic and Prlic judgments, plus Zagreb meeting and Kljuic-removal context, ground Herceg-Bosna's separatist political project.",
+    "staff_assessment": "Herceg-Bosna leadership gains patron alignment and clearer institutional cohesion by following Zagreb, but the choice makes cooperation with Sarajevo more fragile.",
+    "trigger_evidence": [
+      "Zagreb's directive and Herceg-Bosna institutions are already shaping HVO policy.",
+      "HVO and ARBiH forces still share anti-VRS fronts, making the political direction operationally urgent."
+    ],
     "response_options": [
       {
         "id": "croat_republic",
+        "historical_marker": "historical_default",
         "label": "Croat republic — follow Zagreb",
         "description": "Herceg-Bosna is a Croat political entity. We will control our territory along the old Banovina borders. Zagreb provides arms, officers, and purpose. The Bosniaks will become adversaries.",
         "effects": [

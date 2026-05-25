@@ -10606,3 +10606,22 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `tools/diagnostics/event_acceptance_report.ts`, `tests/sim/events/event_acceptance_report.test.ts`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-25] data(events): author Phase 5 packet 1 safe-first required-response defaults
+
+**Type:** Event content authoring + acceptance diagnostic test update.
+
+**Change:** Production-authored only the four approved non-sensitive Phase 5 packet 1 required-response events: `rbih_state_identity`, `hrhb_political_goal`, `rs_assembly_rejects_voplan_1993`, and `belgrade_embargo_rs_1994`. Each now has the approved `historical_default_response_id`, exactly one option-0 `historical_marker: "historical_default"`, compact player-facing `source_note`, institution-specific `staff_assessment`, and concrete `trigger_evidence`. The RS Assembly row received option-level bot-scoring preview metadata so the existing acceptance diagnostic can classify both options as mechanically previewable without changing effects or response order. Sensitive/Ring-gated, conditional, deferred, late-war, and source-blocked rows were not authored.
+
+**Determinism:** Authored metadata/data-only. No event timing, trigger predicates, effects, response ordering, save schema, randomness, timestamps, operation tuning, initial OSID overrides, avoided-OSID lists, or faction model changes were introduced. Historical bot selection remains deterministic through existing `bot_response_logic: "historical"` and the explicit option-0 defaults.
+
+**Verification:**
+- `npx.cmd vitest run tests\sim\events\event_acceptance_report.test.ts tests\sim\events\event_taxonomy_report.test.ts tests\event_decisions.test.ts --reporter=dot` - 37/37 PASS.
+- `npx.cmd tsx tools\diagnostics\event_acceptance_report.ts --json` - PASS; catalog remains `NOT_READY`: 247 events, 36 required-response, 4 production modal-ready, 32 missing explicit defaults/markers/source notes, 16 source-blocked, 8 sensitive-gated, 5 source/default/counterfactual blocked, 2 scheduled-only required-response rows.
+- `npx.cmd tsx tools\diagnostics\event_taxonomy_report.ts --json` - PASS; 247 events, 44 choice events, 36 required-response, 4 historical default ids, 4 historical default markers, 4 modal-ready events, 215 warnings, 0 errors.
+- `npm.cmd run typecheck` - blocked by existing missing UI map dependency/type declarations outside this slice (`maplibre-gl`, `pmtiles`, Deck.gl packages, `@vitejs/plugin-react`) and related implicit-any fallout.
+- `git diff --check` - PASS.
+
+**Artifacts:** `data/scenarios/events/war_1992.json`, `data/scenarios/events/war_1993.json`, `data/scenarios/events/war_1994.json`, `tests/sim/events/event_acceptance_report.test.ts`, `tests/sim/events/event_taxonomy_report.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---

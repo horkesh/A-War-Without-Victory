@@ -1455,6 +1455,13 @@
     "requires_player_response": true,
     "responding_faction": "RS",
     "bot_response_logic": "historical",
+    "historical_default_response_id": "accept_rejection",
+    "source_note": "Karadzic judgment and RS Assembly proceedings summarize the Pale rejection of Vance-Owen and the follow-on referendum.",
+    "staff_assessment": "Pale leadership can preserve assembly cohesion by accepting the rejection, but doing so deepens patron pressure and leaves the international plan dead.",
+    "trigger_evidence": [
+      "Vance-Owen has already been presented in the event chain.",
+      "The RS Assembly rejected the plan at Pale after Karadzic's signature."
+    ],
     "effect": {
       "kind": "narrative",
       "text": "The Assembly has spoken. The Vance-Owen plan is dead. The war continues on Pale's terms."
@@ -1462,6 +1469,7 @@
     "response_options": [
       {
         "id": "accept_rejection",
+        "historical_marker": "historical_default",
         "label": "Accept the assembly's vote",
         "description": "The people have spoken. Reject international pressure and continue the war. Internal cohesion is preserved but Serbia is furious.",
         "effects": [
@@ -1492,7 +1500,9 @@
             "dimension": "internal_cohesion",
             "delta": 10
           }
-        ]
+        ],
+        "aggression_affinity": 0.5,
+        "risk_level": 0.7
       },
       {
         "id": "override_assembly",
@@ -1526,7 +1536,9 @@
             "dimension": "internal_cohesion",
             "delta": -20
           }
-        ]
+        ],
+        "aggression_affinity": -0.6,
+        "risk_level": 0.8
       }
     ],
     "notifications_to_other_factions": {

@@ -55,7 +55,9 @@ describe('event taxonomy diagnostic report', () => {
         expect(report.summary.choice_rows_with_title_and_narrative).toBe(44);
         expect(report.summary.choice_rows_with_source).toBe(22);
         expect(report.summary.required_response_rows_with_source).toBe(20);
-        expect(report.summary.historical_default_markers).toBe(0);
+        expect(report.summary.historical_default_markers).toBe(4);
+        expect(report.summary.historical_default_ids).toBe(4);
+        expect(report.summary.modal_ready_events).toBe(4);
     });
 
     it('requires required-response choice rows to declare a valid responding faction', () => {
@@ -120,8 +122,13 @@ describe('event taxonomy diagnostic report', () => {
         const requiredRows = report.rows.filter((row) => row.requires_player_response);
 
         expect(requiredRows).toHaveLength(36);
-        expect(requiredRows.filter((row) => row.modal_ready)).toEqual([]);
-        expect(requiredRows.every((row) => classifyEventTaxonomy(row) !== 'finished_modal_ready')).toBe(true);
+        expect(requiredRows.filter((row) => row.modal_ready).map((row) => row.id)).toEqual([
+            'rbih_state_identity',
+            'hrhb_political_goal',
+            'rs_assembly_rejects_voplan_1993',
+            'belgrade_embargo_rs_1994',
+        ]);
+        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(4);
     });
 
     it('counts event-level historical defaults and validates they reference an existing option id', () => {

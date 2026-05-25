@@ -693,6 +693,13 @@
     "requires_player_response": true,
     "responding_faction": "RS",
     "bot_response_logic": "historical",
+    "historical_default_response_id": "defiant",
+    "source_note": "Balkan Battlegrounds Vol. II summarizes the Belgrade-Pale break after the Contact Group crisis.",
+    "staff_assessment": "Pale leadership can hold its rejectionist line by defying Belgrade, but the choice trades internal cohesion for sharper supply pressure and a weaker patron relationship.",
+    "trigger_evidence": [
+      "The Contact Group plan has entered the event chain.",
+      "Belgrade sanctions follow the RS rejection of the map."
+    ],
     "effect": {
       "kind": "supply_delta",
       "faction": "RS",
@@ -717,6 +724,7 @@
     "response_options": [
       {
         "id": "defiant",
+        "historical_marker": "historical_default",
         "label": "Defy Belgrade",
         "description": "We do not need Belgrade's permission to defend our people. Reject the Contact Group map and accept the consequences.",
         "effects": [
