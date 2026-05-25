@@ -10585,3 +10585,37 @@ Same-axis (not full op) scope keeps the bonus from amplifying cross-axis ops lik
 **Artifacts:** `src/sim/combat/pre_planned_operations.ts`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## 2026-05-25 — 188w Calibration R21 (Zero-Delta) + R22 (+2.11pp, NEW BASELINE)
+
+**R21: Op Visegrad kamenica_2 removal — ZERO-DELTA, REVERTED.**
+- Change: removed `op:visegrad:kamenica_2` from Op Visegrad visegrad_seizure objectives.
+- Result: hash `c891f2c3e47787a5`, match_ratio identical (0.824438). Op Visegrad enters `recovery_reason: "no_approach_osid"` at wi=4 — the front-edge graph has no entries for visegrad_2's neighbors at wi=1-3 (early war, fronts not established). Op never executes. kamenica_2 removal was irrelevant.
+- Reverted. R20 baseline (82.44%) unchanged.
+
+**R22: Op Foca foca_valley patkovina insertion — ACCEPTED, NEW BASELINE.**
+- Commit: `ac4f95ce`. File: `src/sim/combat/pre_planned_operations.ts`.
+- Change: inserted `op:foca:patkovina` before `op:foca:prevrac` in foca_valley axis objectives. Chain: `foca_3 → patkovina → prevrac → kolovarice`. All adjacencies verified (operational_contact_graph.json).
+- Painted match_ratio: **0.82443800 → 0.84550600 (+2.1068pp)**. Run: `n27`, hash `2714e1e4ad08b0ed`.
+- OSID control: HRHB=97, RBiH=309, RS=306 (vs painted HRHB=107, RBiH=290, RS=315).
+- **6/6 bot benchmarks PASS. 23/27 anchors** (same 4 failures as R20).
+- **Per-faction correctly placed:** HRHB 83/107 (+11 vs R20), RBiH 256/290 (same), RS 263/315 (+4).
+
+**Op Foca foca_valley execution:** Planning wi=5-9, execution wi=10-12. patkovina captured at wi=10 (captures=1), then LOST by wi=188 (final=RBiH). **Direct patkovina gain = 0.** Entire +2.11pp is CASCADE.
+
+**Cascade anatomy:** Patkovina insertion changes rs_foa_brigade/rs_bilea_brigade combat in Foča area (wi=10-12) → different brigade attrition states propagate 188w → late-war HV/HRHB sector operations capture HRHB-painted Grahovo/Sipovo territory:
+- bosansko_grahovo_2 (220.5 km²), crni_lug (385.5 km²), malesevci (100.5 km²), ugarci (78.1 km²) — all RS→HRHB, painted=HRHB ✓
+- sipovo:brdjani (107.8 km²), sipovo:gornji_mujdzici_2 (139.1 km²), sipovo:sipovo_2 (66.3 km²) — all RS→HRHB, painted=HRHB ✓
+- titov_drvar:drvar_2/prekaja_2/sipovljani_2 remain RS — Drvar regression did NOT trigger ✓
+
+**Anchor analysis:** Same as R20 — 23/27 (2 phantom: vozuca_2, brijesnica_donja_2; 2 genuine: boljanic_2, petrovo_2).
+
+**R23 candidates:**
+1. Op Foca extension: add ustikolina (46 km², adj patkovina ✓) to foca_valley chain — low cascade risk since area is contained.
+2. cajnice:miljeno_2 (71.3 km², 4 RS neighbors incl. cajnice_2): new axis on Op Foca with rs_ajnie_brigade.
+3. Op Visegrad stall: reorder vrs_herzegovina ops queue (Foca before Visegrad) so fronts are established when Visegrad fires.
+4. donje_zesce (71.8 km², starts RS → ends RBiH): defensive issue, needs VRS Herzegovina sector strengthening.
+
+**Artifacts:** `src/sim/combat/pre_planned_operations.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
