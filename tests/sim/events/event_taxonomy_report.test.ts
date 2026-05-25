@@ -53,11 +53,11 @@ describe('event taxonomy diagnostic report', () => {
         expect(report.summary.no_choice_events).toBe(203);
         expect(report.summary.required_response_events).toBe(36);
         expect(report.summary.choice_rows_with_title_and_narrative).toBe(44);
-        expect(report.summary.choice_rows_with_source).toBe(25);
-        expect(report.summary.required_response_rows_with_source).toBe(23);
-        expect(report.summary.historical_default_markers).toBe(12);
-        expect(report.summary.historical_default_ids).toBe(12);
-        expect(report.summary.modal_ready_events).toBe(12);
+        expect(report.summary.choice_rows_with_source).toBe(29);
+        expect(report.summary.required_response_rows_with_source).toBe(27);
+        expect(report.summary.historical_default_markers).toBe(16);
+        expect(report.summary.historical_default_ids).toBe(16);
+        expect(report.summary.modal_ready_events).toBe(16);
     });
 
     it('requires required-response choice rows to declare a valid responding faction', () => {
@@ -125,9 +125,13 @@ describe('event taxonomy diagnostic report', () => {
         expect(requiredRows.filter((row) => row.modal_ready).map((row) => row.id)).toEqual([
             'rbih_state_identity',
             'hrhb_political_goal',
+            'gornji_vakuf_clashes_1993',
+            'ic_pressure_vopp_engagement',
+            'vance_owen_plan_1993',
             'rs_assembly_rejects_voplan_1993',
             'operation_lukavac_93',
             'os_rbih_tactical_acceptance_1993',
+            'strategic_posture_review_hrhb',
             'washington_agreement_1994',
             'contact_group_plan_1994',
             'belgrade_embargo_rs_1994',
@@ -136,7 +140,7 @@ describe('event taxonomy diagnostic report', () => {
             'dayton_talks_begin_1995',
             'csq_patron_recovery_offer',
         ]);
-        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(12);
+        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(16);
     });
 
     it('classifies packet 3 target rows as finished modal-ready after authored defaults and source notes', () => {
@@ -170,6 +174,31 @@ describe('event taxonomy diagnostic report', () => {
             ['washington_agreement_1994', 'accept'],
             ['contact_group_plan_1994', 'accept'],
             ['dayton_talks_begin_1995', 'accept'],
+        ] as const) {
+            const row = report.rows.find((entry) => entry.id === id);
+            expect(row, id).toBeDefined();
+            expect(row!.modal_ready, id).toBe(true);
+            expect(row!.row_classification, id).toBe('finished_modal_ready');
+            expect(row!.historical_default_response_id, id).toBe(expectedDefault);
+            expect(row!.historical_default_option_id, id).toBe(expectedDefault);
+            expect(row!.bot_response_logic, id).toBe('historical');
+            expect(row!.has_option_descriptions, id).toBe(true);
+            expect(row!.has_numeric_option_previews, id).toBe(true);
+            expect(row!.findings, id).not.toEqual(expect.arrayContaining([
+                expect.objectContaining({ code: 'historical_default_bot_logic_mismatch' }),
+                expect.objectContaining({ code: 'missing_historical_default_marker' }),
+            ]));
+        }
+    });
+
+    it('classifies the 1993 required-response packet as finished modal-ready after authored defaults and source notes', () => {
+        const report = buildEventTaxonomyReport(loadCatalogRows());
+
+        for (const [id, expectedDefault] of [
+            ['gornji_vakuf_clashes_1993', 'escalate'],
+            ['ic_pressure_vopp_engagement', 'acknowledge_pressure'],
+            ['vance_owen_plan_1993', 'accept'],
+            ['strategic_posture_review_hrhb', 'press_croat_objectives'],
         ] as const) {
             const row = report.rows.find((entry) => entry.id === id);
             expect(row, id).toBeDefined();

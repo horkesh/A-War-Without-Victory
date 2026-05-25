@@ -465,6 +465,35 @@ describe('Event Decisions', () => {
         }
     });
 
+    it('1993 required-response packet rows expose historical defaults and dossier fields for modal decisions', () => {
+        const fixtures = [
+            loadEventFromFile('data/scenarios/events/war_1993.json', 'gornji_vakuf_clashes_1993'),
+            loadEventFromFile('data/scenarios/events/war_1993.json', 'ic_pressure_vopp_engagement'),
+            loadEventFromFile('data/scenarios/events/war_1993.json', 'vance_owen_plan_1993'),
+            loadEventFromFile('data/scenarios/events/war_1993.json', 'strategic_posture_review_hrhb'),
+        ];
+
+        expect(fixtures.map((event) => [event.id, event.bot_response_logic, event.historical_default_response_id])).toEqual([
+            ['gornji_vakuf_clashes_1993', 'historical', 'escalate'],
+            ['ic_pressure_vopp_engagement', 'historical', 'acknowledge_pressure'],
+            ['vance_owen_plan_1993', 'historical', 'accept'],
+            ['strategic_posture_review_hrhb', 'historical', 'press_croat_objectives'],
+        ]);
+
+        for (const event of fixtures) {
+            const options = event.response_options ?? [];
+            expect(typeof event.historical_source, event.id).toBe('string');
+            expect(typeof event.source_note, event.id).toBe('string');
+            expect(typeof event.staff_assessment, event.id).toBe('string');
+            expect(event.trigger_evidence, event.id).toEqual(expect.arrayContaining([expect.any(String)]));
+            expect(options[0]?.id, event.id).toBe(event.historical_default_response_id);
+            expect(options.filter((option) => option.historical_marker === 'historical_default').map((option) => option.id), event.id)
+                .toEqual([event.historical_default_response_id]);
+            expect(options.every((option) => typeof option.description === 'string'), event.id).toBe(true);
+            expect(options.every((option) => typeof option.risk_level === 'number' && typeof option.aggression_affinity === 'number'), event.id).toBe(true);
+        }
+    });
+
     it('resolveEventDecision applies effects and removes pending', () => {
         const state = makeMinimalState('RBiH');
         state.military.pending_event_decisions = [

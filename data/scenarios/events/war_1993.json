@@ -17,6 +17,15 @@
     "requires_player_response": true,
     "responding_faction": "HRHB",
     "bot_response_logic": "historical",
+    "historical_source": "Balkan Battlegrounds Vol. II pp.448, 452; docs/40_reports/1993_EVENT_RESEARCH.md.",
+    "source_note": "BB Vol. II frames Gornji Vakuf as an early 1993 HVO-ARBiH escalation around the Vance-Owen provincial map; the local response choice is a command posture abstraction.",
+    "staff_assessment": "Escalating reinforces the local HVO position but deepens the command split with ARBiH; a ceasefire contains the front at the cost of initiative and morale.",
+    "trigger_evidence": [
+      "Alliance cohesion has fallen below the cooperation threshold.",
+      "The Vance-Owen provincial map has made central Bosnia command boundaries contested.",
+      "HVO and ARBiH units are already fighting around Gornji Vakuf."
+    ],
+    "historical_default_response_id": "escalate",
     "pressure": {
       "base_rate": 2,
       "threshold": 4,
@@ -39,7 +48,7 @@
     "effects": [
       {
         "kind": "narrative",
-        "text": "HVO and ARBiH forces fight a pitched battle at Gornji Vakuf. The Vance-Owen provincial map becomes a pretext for Croat territorial grabs."
+        "text": "HVO and ARBiH forces fight a pitched battle at Gornji Vakuf. The Vance-Owen provincial map becomes a command boundary for a wider local escalation."
       }
     ],
     "response_options": [
@@ -47,6 +56,9 @@
         "id": "escalate",
         "label": "Respond with force",
         "description": "Send reinforcements to Gornji Vakuf. Escalates the confrontation significantly.",
+        "historical_marker": "historical_default",
+        "aggression_affinity": 0.7,
+        "risk_level": 0.7,
         "effects": [
           {
             "kind": "alliance_change",
@@ -63,6 +75,8 @@
         "id": "negotiate",
         "label": "Seek a local ceasefire",
         "description": "Attempt to contain the fighting. De-escalates but does not resolve underlying tensions.",
+        "aggression_affinity": -0.5,
+        "risk_level": 0.4,
         "effects": [
           {
             "kind": "alliance_change",
@@ -84,7 +98,7 @@
         },
         "RS": {
           "headline": "HVO and ARBiH fighting intensifies",
-          "body": "Herceg-Bosna answers the Gornji Vakuf clashes with force. Pale analysts see the Vance-Owen provincial map becoming a pretext for deeper Croat-Bosniak fighting."
+          "body": "Herceg-Bosna answers the Gornji Vakuf clashes with force. Pale analysts see the Vance-Owen provincial map becoming a boundary dispute for deeper Croat-Bosniak fighting."
         }
       },
       "negotiate": {
@@ -102,7 +116,7 @@
   {
     "id": "ic_pressure_vopp_engagement",
     "title": "Western Powers Press Sarajevo: Engage with Vance-Owen",
-    "narrative": "Western capitals make clear that continued international support depends on Sarajevo engaging seriously with the Vance-Owen Peace Plan. Lord Owen warns that Bosnian refusal risks isolating the government internationally.",
+    "narrative": "Western capitals and mediators increase pressure on Sarajevo to engage seriously with the Vance-Owen Peace Plan. The diplomatic sequence signals that refusal would risk isolating the government internationally.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 38,
@@ -111,10 +125,19 @@
     },
     "once": true,
     "responding_faction": "RBiH",
-    "bot_response_logic": "strategic_weighted",
+    "bot_response_logic": "historical",
     "requires_player_response": true,
     "priority": 50,
     "auto_resolve_turns": 2,
+    "historical_source": "Balkan Battlegrounds Vol. I pp.6-8; UN S/25479; UNSCR 820.",
+    "source_note": "The pressure is inferred from the Vance-Owen diplomatic sequence and Western/UN escalation around April 1993; this row avoids attributing an unsourced direct warning to any single mediator.",
+    "staff_assessment": "Acknowledging the pressure preserves international confidence but costs leverage and internal cohesion; resisting protects Sarajevo's position while risking diplomatic isolation.",
+    "trigger_evidence": [
+      "The Vance-Owen process is entering its final acceptance window.",
+      "UN S/25479 and UNSCR 820 show international pressure escalating around the plan.",
+      "Sarajevo's continued engagement is becoming central to preserving Western diplomatic support."
+    ],
+    "historical_default_response_id": "acknowledge_pressure",
     "effect": {
       "kind": "narrative",
       "text": "Western capitals press Sarajevo to engage seriously with the Vance-Owen Peace Plan or risk international isolation."
@@ -130,6 +153,8 @@
       {
         "id": "acknowledge_pressure",
         "label": "Acknowledge the message",
+        "description": "Engage the Vance-Owen process to preserve Western confidence, while accepting some loss of leverage and domestic cohesion.",
+        "historical_marker": "historical_default",
         "aggression_affinity": -0.3,
         "risk_level": 0.2,
         "dimension_shifts": [
@@ -153,6 +178,7 @@
       {
         "id": "resist_patron",
         "label": "Maintain our position",
+        "description": "Hold Sarajevo's negotiating line despite mediator and Western pressure, preserving claims but risking international confidence.",
         "aggression_affinity": 0.5,
         "risk_level": 0.7,
         "dimension_shifts": [
@@ -188,7 +214,7 @@
       "resist_patron": {
         "HRHB": {
           "headline": "Sarajevo holds its Vance-Owen line",
-          "body": "RBiH maintains its position despite Western warnings about isolation. HVO staff see Sarajevo preserving negotiating leverage while risking patron confidence."
+          "body": "RBiH maintains its position despite mounting mediator and Western pressure. HVO staff see Sarajevo preserving negotiating leverage while risking patron confidence."
         },
         "RS": {
           "headline": "Sarajevo resists mediator pressure",
@@ -200,7 +226,7 @@
   {
     "id": "vance_owen_plan_1993",
     "title": "Vance-Owen Peace Plan Presented",
-    "narrative": "The Vance-Owen Peace Plan proposes dividing Bosnia into ten semi-autonomous provinces based on ethnic and geographic criteria. The plan is endorsed by the Bosnian Croats and reluctantly by the Bosniaks, but the Bosnian Serb assembly in Pale rejects it, dooming the most comprehensive peace effort to date.",
+    "narrative": "The Vance-Owen Peace Plan proposes dividing Bosnia into ten semi-autonomous provinces based on ethnic and geographic criteria. The Bosnian Croat leadership endorses it, and RBiH reluctantly signs and accepts under pressure, but the Bosnian Serb assembly in Pale rejects it, dooming the most comprehensive peace effort to date.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 39,
@@ -210,7 +236,16 @@
     "once": true,
     "requires_player_response": true,
     "responding_faction": "RBiH",
-    "bot_response_logic": "capital_based",
+    "bot_response_logic": "historical",
+    "historical_source": "Balkan Battlegrounds Vol. I pp.6-8; UN S/25479; UNSCR 820.",
+    "source_note": "The row represents Sarajevo's reluctant acceptance of the Vance-Owen framework under diplomatic pressure; it does not present the plan as a moral settlement or a delivered peace.",
+    "staff_assessment": "Acceptance keeps Sarajevo aligned with Western diplomacy and shifts pressure toward Pale, but it means tolerating an externally drafted ten-province formula. Rejection preserves claims while damaging credibility.",
+    "trigger_evidence": [
+      "The Vance-Owen Peace Plan has been formally presented.",
+      "Western and UN diplomacy is pressing the parties toward signatures.",
+      "Pale's assembly response remains the decisive obstacle after Sarajevo's pressured acceptance."
+    ],
+    "historical_default_response_id": "accept",
     "pressure": {
       "base_rate": 3,
       "threshold": 3,
@@ -235,6 +270,9 @@
         "id": "accept",
         "label": "Accept the Vance-Owen Plan",
         "description": "Accepting improves international credibility and may bring relief, but legitimizes territorial losses.",
+        "historical_marker": "historical_default",
+        "aggression_affinity": -0.5,
+        "risk_level": 0.5,
         "effects": [
           {
             "kind": "negotiation_capital",
@@ -253,6 +291,8 @@
         "id": "reject",
         "label": "Reject the Vance-Owen Plan",
         "description": "Rejection preserves territorial claims but damages standing with the international community.",
+        "aggression_affinity": 0.4,
+        "risk_level": 0.7,
         "effects": [
           {
             "kind": "negotiation_capital",
@@ -3311,6 +3351,15 @@
     "requires_player_response": true,
     "responding_faction": "HRHB",
     "bot_response_logic": "historical",
+    "historical_source": "Balkan Battlegrounds Vol. I pp.215, 217-218; docs/40_reports/REAL_WAR_MASTER.md; docs/50_research/icty_hrhb_political_goal.md.",
+    "source_note": "This is a posture abstraction for mid-1993 HRHB strategy before the Washington Agreement; the historical path keeps pressure on Bosnian Croat objectives while later Federation choices remain timing-sensitive counterfactuals here.",
+    "staff_assessment": "Pressing Croat objectives matches the mid-1993 posture but raises diplomatic and alliance costs. Coordination with RBiH or early Federation acceptance are possible player branches, not the historical default at this date.",
+    "trigger_evidence": [
+      "The Croat-Bosniak war is active and degrading the alliance.",
+      "Zagreb-HRHB strategic coupling is shaping HVO posture.",
+      "The Washington Agreement has not yet created the later Federation framework."
+    ],
+    "historical_default_response_id": "press_croat_objectives",
     "pressure": {
       "base_rate": 1,
       "threshold": 11,
@@ -3359,7 +3408,8 @@
       {
         "id": "press_croat_objectives",
         "label": "Press Bosnian Croat territorial objectives",
-        "description": "Secure HVO holdings in Herzegovina and push for more. Morale rises among the faithful — but international pressure mounts and the Bosniak alliance, if it was ever real, is finished.",
+        "description": "Secure HVO holdings and keep pressure on contested fronts. Morale rises inside the hardline camp, but international pressure mounts and coordination with ARBiH deteriorates further.",
+        "historical_marker": "historical_default",
         "effects": [
           {
             "kind": "morale_change",
@@ -3399,7 +3449,7 @@
       {
         "id": "coordinate_rbih",
         "label": "Coordinate with the Bosniaks",
-        "description": "Seek tactical coordination with ARBiH against the VRS. Zagreb may be displeased, but the Washington Agreement's logic is sound: a unified front is more powerful than two wars at once.",
+        "description": "Seek tactical coordination with ARBiH against the VRS before the Washington framework exists. This is a counterfactual early turn toward a unified front and risks friction with Zagreb.",
         "effects": [
           {
             "kind": "alliance_change",
@@ -3471,7 +3521,7 @@
       {
         "id": "sue_for_peace_hrhb",
         "label": "Accept the Federation framework",
-        "description": "The war with the Bosniaks has cost Herceg-Bosna more than it can bear. The Federation of Bosnia and Herzegovina offers a path to coexistence — and to Croatian recognition in Europe. Zagreb presses for it. The hardliners in Mostar will never forgive you.",
+        "description": "Move early toward the Federation framework before Washington makes it viable. This counterfactual can restore international standing, but it is timing-sensitive and risks a severe internal backlash.",
         "effects": [
           {
             "kind": "alliance_change",

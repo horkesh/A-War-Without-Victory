@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] data(events): author 1993 modal packet
+
+**Type:** Event JSON authoring + focused diagnostics/tests/docs. No trigger, timing, response-id, option-order, effect, schema, UI, runtime, or scenario calibration behavior changed.
+
+**Change:** Authored the next four source-backed required-response rows in `data/scenarios/events/war_1993.json`: `gornji_vakuf_clashes_1993`, `ic_pressure_vopp_engagement`, `vance_owen_plan_1993`, and `strategic_posture_review_hrhb`. Each now has `historical_source`, authored `source_note`, `staff_assessment`, `trigger_evidence`, option-0 `historical_default_response_id`, exactly one option-level `historical_marker: "historical_default"`, complete option descriptions/risk/aggression previews, and `bot_response_logic: "historical"` where needed. Wording keeps Gornji as command-escalation/local-ceasefire framing, treats IC pressure as inferred mediator/Western pressure, frames Vance-Owen as reluctant RBiH acceptance under pressure, and keeps HRHB posture/Federation alternatives timing-sensitive before Washington.
+
+**Diagnostics:** Event acceptance is still `NOT_READY`, with production modal-ready rows 12 -> 16 and missing defaults/markers/source notes 24 -> 20. Event taxonomy reports 247 rows, 44 choice events, 36 required-response rows, 16 modal-ready rows, and 195 warnings / 0 errors.
+
+**Verification:** `npx.cmd vitest run tests/sim/events/event_acceptance_report.test.ts tests/sim/events/event_taxonomy_report.test.ts tests/event_decisions.test.ts` passed 54/54 after a red pass confirmed the new assertions failed against the unauthored rows. Broader verification is recorded in the session report/commit notes.
+
+**Artifacts:** `data/scenarios/events/war_1993.json`; `tests/sim/events/event_acceptance_report.test.ts`; `tests/sim/events/event_taxonomy_report.test.ts`; `tests/event_decisions.test.ts`; `docs/plans/COMMAND_BOARD.md`; `docs/plans/MASTER_ROADMAP.md`; `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-25] diagnostics(events): add Phase 1 event taxonomy report
 
 **Type:** Tooling/test diagnostic only. Behavior-neutral: no runtime behavior, event JSON, UI, save schema, resolver, simulation calibration, combat math, or event-ordering changes.
