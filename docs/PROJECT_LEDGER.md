@@ -10553,3 +10553,35 @@ Same-axis (not full op) scope keeps the bonus from amplifying cross-axis ops lik
 **Artifacts:** `src/sim/local_truces.ts`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-25] calibration(R20): fix Op Foca kalinovik broken link -> 82.44%
+
+**Type:** Calibration round — single objective removed from pre_planned_operations.ts. Single-change-per-calibration discipline. No init OSID override; no avoided_osids_by_faction; no Math.random / timestamps; no FORAWWV edit.
+
+**Change:** Removed `op:kalinovik:varos_2` from Operation Foca kalinovik axis objectives in `src/sim/combat/pre_planned_operations.ts`. Root cause: `varos_2 adj golubici_2 = FALSE` (verified in `data/derived/operational/operational_contact_graph.json`). With varos_2 in the chain, brigades marching from vlaholje through varos_2 could not reach golubici_2, causing eligible_attacker_count=0 and axis stall. Fix chain: `kalinovik_2 → vlaholje → golubici_2 → sela_2` — all adjacencies verified. varos_2 is already RS-controlled at t0 (stripped at execution regardless); its removal has zero effect on varos_2 control.
+
+**Verification:**
+- `npx tsc --noEmit` — PASS.
+- 188w `apr1992_definitive_188w` n25 hash `f3396a9a7ce26008` (vs R19 n24 `46a9b7d119e8cbd8` — non-zero delta).
+
+**Outcome (R19 n24 → R20 n25, painted oct1995 target):**
+- Painted match_ratio (area-weighted): **0.821629 → 0.824438 (+0.002809)** ≈ +144 km² net.
+- OSID control: HRHB=86, RBiH=313, RS=313 (vs painted HRHB=107, RBiH=290, RS=315).
+- **6/6 bot benchmarks PASS** (RS consolidate_gains at t40 now passes: actual=0.504 vs expected=0.553 +/-0.05 → PASS; was failing in R19).
+- Op Foca kalinovik: golubici_2 captured (80.8 km², painted RS); sela_2 not captured (brigade_attrition at w13 — rs_gacko_brigade march + jna_kalinovik_to_tg withdrawal by w10 left too few brigades). Op Foca rated ★★☆☆☆ 1/3 obj partial (was ★☆☆☆☆ 0/4 failure).
+- Op Vlasic Ridge (ARBiH 3rd Corps) now succeeds 5/5 obj vs 1/5 in R19 — cascade from Foca fix changing brigade attrition states; historically more accurate for ARBiH 1994-95 Vlasic operations.
+
+**Anchor analysis (reported 23/27, effective 25/27):**
+- **2 phantom failures** (anchor definitions wrong for 188w Oct 1995 end state): `vozuca_2` and `brijesnica_donja_2` both have anchor expected_controller=RS (correct for w40 Jan 1993) but painted_oct1995=RBiH. R20 sim=RBiH is CORRECT per Dayton. In R19, these were "passing" while actually wrong (sim=RS ≠ painted=RBiH). `HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992` is used for all run durations; needs `HistoricalEpochOsidAnchor` at_week=188 entries for 188w-specific assertions.
+- **2 genuine cascade failures**: `boljanic_2` (Doboj, painted=RS sim=RBiH) and `petrovo_2` (Gracanica, painted=RS sim=RBiH). Root cause: Vlasic Ridge 5/5 success freed ARBiH 3rd Corps brigades that pushed northeast into Doboj/Gracanica.
+
+**Sensitive-history compliance:** Ring-1 / no §6. Mechanically correct data fix — removing a broken link that was a genuine operational_contact_graph adjacency error. No FORAWWV / painted target / OOB / political_controllers / local_truces touch.
+
+**R21 candidates:**
+1. Anchor definition fix: add `HistoricalEpochOsidAnchor` (at_week=188) entries correcting vozuca_2→RBiH and brijesnica_donja_2→RBiH for 188w anchor reporting.
+2. boljanic_2 + petrovo_2 cascade: investigate Vlasic Ridge 5/5 cascade into Doboj/Gracanica; VRS 1st Krajina defensive sector stance.
+3. Op Visegrad drinsko→kamenica_2 broken link: swap drinsko with prelovo_2 (verified adjacent). Expected gain: ~85 km² + potential follow-on.
+
+**Artifacts:** `src/sim/combat/pre_planned_operations.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
