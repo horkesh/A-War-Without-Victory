@@ -10662,3 +10662,41 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `data/scenarios/events/war_1995.json`, `tests/event_timeline_integrity.test.ts`, `tests/sim/events/event_acceptance_report.test.ts`, `tests/sim/political/phase5c_holbrooke_events.test.ts`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-25] data(events): author Holbrooke ceasefire historical default metadata
+
+**Type:** Event content authoring + acceptance diagnostic expectation update.
+
+**Change:** Production-authored only `holbrooke_ceasefire_demand_oct95` for the Phase 5 Holbrooke metadata/default slice. Added `historical_default_response_id: "accept_ceasefire"`, option-0 `historical_marker: "historical_default"`, compact source-bounded source note, RBiH-facing staff assessment, visible trigger evidence tied to October 1995 ceasefire diplomacy and Federation/RBiH northwestern offensive momentum, and changed Holbrooke `bot_response_logic` to `"historical"` so bots follow the calibration baseline. Option descriptions were tightened to preview the existing mechanical tradeoff without changing response order, trigger/timing/faction, effects, dimension shifts, flags, or notifications. Diagnostics now warn on explicit historical-default rows whose bot logic is not historical and keep them out of modal-ready/production-ready counts. `operation_lukavac_93`, `us_halts_federation_advance_1995`, and sensitive/source-blocked rows were not authored.
+
+**Determinism:** Authored metadata/data-only plus deterministic diagnostic gating. No event timing, trigger predicates, effects, response ordering, save schema, randomness, timestamps, operation tuning, initial OSID overrides, avoided-OSID lists, or faction model changes were introduced. Diagnostic ordering remains deterministic; Holbrooke is now modal-ready while the full catalog remains `NOT_READY`. The new guard also keeps the existing Carter ceasefire row out of ready counts until its authored historical default uses historical bot logic or an explicit waiver is introduced.
+
+**Verification:**
+- `npx.cmd vitest run tests\sim\events\event_acceptance_report.test.ts tests\sim\events\event_taxonomy_report.test.ts tests\event_decisions.test.ts tests\event_timeline_integrity.test.ts tests\sim\political\phase5c_holbrooke_events.test.ts --reporter=dot` - PASS; 76/76 tests.
+- `npx.cmd tsx tools\diagnostics\event_acceptance_report.ts --json` - PASS; catalog remains `NOT_READY`: 247 events, 36 required-response, 5 production modal-ready, 30 missing explicit defaults/markers/source notes, 16 source-blocked, 8 sensitive-gated, 5 default/counterfactual blocked, 2 scheduled-only required-response rows, 1 conditional candidate, 1 deferred candidate.
+- `npx.cmd tsx tools\diagnostics\event_taxonomy_report.ts --json` - PASS; 247 events, 44 choice events, 36 required-response, 6 historical default ids, 6 historical default markers, 5 modal-ready events, 214 warnings, 0 errors.
+- `npm.cmd run typecheck` - blocked by existing missing UI map dependency/type declarations outside this slice (`maplibre-gl`, `pmtiles`, Deck.gl packages, `@vitejs/plugin-react`) and related implicit-any fallout.
+- `git diff --check` - PASS.
+
+**Artifacts:** `data/scenarios/events/war_1995.json`, `tools/diagnostics/event_acceptance_report.ts`, `tools/diagnostics/event_taxonomy_report.ts`, `tests/sim/events/event_acceptance_report.test.ts`, `tests/sim/events/event_taxonomy_report.test.ts`, `tests/sim/political/phase5c_holbrooke_events.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-25] data(events): align Carter ceasefire bot logic with historical default
+
+**Type:** Event calibration contract correction + diagnostic expectation update.
+
+**Change:** Changed only `carter_ceasefire_1994` `bot_response_logic` from `"capital_based"` to `"historical"` because the row already has explicit historical-default metadata (`historical_default_response_id: "respect"` and option-0 `historical_marker: "historical_default"`). The stricter diagnostic guard added in the Holbrooke slice now treats Carter as modal-ready again, and focused tests expect no explicit historical-default row to use non-historical bot logic.
+
+**Determinism:** Data-only bot-selection correction for an authored historical-default baseline. No event timing, trigger predicates, response order, effects, source notes, option text, sensitive rows, source-blocked rows, save schema, randomness, operation tuning, initial OSID overrides, or avoided-OSID lists changed.
+
+**Verification:**
+- `npx.cmd vitest run tests\sim\events\event_acceptance_report.test.ts tests\sim\events\event_taxonomy_report.test.ts tests\event_decisions.test.ts tests\event_timeline_integrity.test.ts tests\sim\political\phase5c_holbrooke_events.test.ts --reporter=dot` - PASS; 76/76 tests.
+- `npx.cmd tsx tools\diagnostics\event_acceptance_report.ts --json` - PASS; catalog remains `NOT_READY`: 247 events, 36 required-response, 6 production modal-ready, 30 missing explicit defaults/markers/source notes, 16 source-blocked, 8 sensitive-gated, 5 default/counterfactual blocked, 2 scheduled-only required-response rows, 1 conditional candidate, 1 deferred candidate.
+- `npx.cmd tsx tools\diagnostics\event_taxonomy_report.ts --json` - PASS; 247 events, 44 choice events, 36 required-response, 6 historical default ids, 6 historical default markers, 6 modal-ready events, 213 warnings, 0 errors.
+- `git diff --check` - PASS.
+- `npm.cmd run typecheck` - blocked by existing missing UI map dependency/type declarations outside this slice (`maplibre-gl`, `pmtiles`, Deck.gl packages, `@vitejs/plugin-react`) and related implicit-any fallout.
+
+**Artifacts:** `data/scenarios/events/war_1994.json`, `tests/sim/events/event_acceptance_report.test.ts`, `tests/sim/events/event_taxonomy_report.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---

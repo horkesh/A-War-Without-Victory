@@ -535,6 +535,14 @@ export function collectCatalogFindings(rows: EventTaxonomyRow[]): EventTaxonomyF
         ) {
             findings.push(finding(row, 'accept_first_historical_default_conflict', 'warning', 'accept_first preserves option 0, but historical_default_response_id points to a different option.'));
         }
+        if (
+            row.requires_player_response &&
+            row.historical_default_response_id !== null &&
+            row.has_historical_default_marker &&
+            row.bot_response_logic !== 'historical'
+        ) {
+            findings.push(finding(row, 'historical_default_bot_logic_mismatch', 'warning', 'Explicit historical-default calibration rows must use bot_response_logic historical.'));
+        }
     }
 
     for (const [id, matches] of [...byId.entries()].sort(([a], [b]) => strictCompare(a, b))) {
@@ -561,7 +569,7 @@ export function buildEventTaxonomyReport(rows: EventTaxonomyRow[] = loadCatalogR
         const rowFindings = findingsByRow.get(`${row.file}:${row.id}`) ?? [];
         const modalReady =
             row.modal_ready &&
-            !rowFindings.some((entry) => ['missing_source', 'sensitive_history_review', 'missing_historical_default_marker', 'historical_default_unavailable'].includes(entry.code));
+            !rowFindings.some((entry) => ['missing_source', 'sensitive_history_review', 'missing_historical_default_marker', 'historical_default_unavailable', 'historical_default_bot_logic_mismatch'].includes(entry.code));
         const nextRow = { ...row, modal_ready: modalReady, findings: rowFindings };
         return { ...nextRow, row_classification: classifyEventTaxonomy(nextRow) };
     });

@@ -1028,7 +1028,7 @@
     "once": true,
     "requires_player_response": true,
     "responding_faction": "RBiH",
-    "bot_response_logic": "capital_based",
+    "bot_response_logic": "historical",
     "historical_default_response_id": "respect",
     "source_note": "Carter Center archives, Balkan Battlegrounds Vol. II Ch. 12, and the ICTY Karadzic Judgment ground the winter COHA.",
     "staff_assessment": "Sarajevo can preserve diplomatic credibility by honoring the Carter pause, while using the lower tempo to rebuild under scrutiny.",

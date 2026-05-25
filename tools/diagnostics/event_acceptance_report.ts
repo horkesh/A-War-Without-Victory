@@ -29,6 +29,7 @@ export type EventAcceptanceRow = {
     has_source_note: boolean;
     has_historical_default_response_id: boolean;
     has_historical_marker: boolean;
+    bot_response_logic: string | null;
     historical_default_option0: boolean | null;
     sensitive_gate: 'clear' | 'sensitive_or_ring_review' | 'ring3_refused';
     default_block_status: 'clear' | 'source_or_design_blocked' | 'counterfactual_blocked';
@@ -78,7 +79,6 @@ export const APPROVED_FIRST_AUTHORING_PACKET_CANDIDATES = [
 
 export const CONDITIONAL_AUTHORING_PACKET_CANDIDATES = [
     'operation_lukavac_93',
-    'holbrooke_ceasefire_demand_oct95',
 ] as const;
 
 export const DEFERRED_AUTHORING_PACKET_CANDIDATES = [
@@ -183,6 +183,9 @@ function blockingReasonsFor(row: EventTaxonomyRow): string[] {
 
     if (row.historical_default_response_id === null) reasons.push('missing_historical_default_response_id');
     if (!row.has_historical_default_marker) reasons.push('missing_historical_marker');
+    if (row.historical_default_response_id !== null && row.has_historical_default_marker && row.bot_response_logic !== 'historical') {
+        reasons.push('historical_default_requires_historical_bot_logic');
+    }
     if (defaultOption0 === false) reasons.push('historical_default_not_option0');
     if (row.historical_source_status === 'missing') reasons.push('source_blocked');
     if (!sourceNoteIsAuthored(row)) reasons.push('missing_source_note');
@@ -215,6 +218,7 @@ function toAcceptanceRow(row: EventTaxonomyRow): EventAcceptanceRow {
         has_source_note: sourceNoteIsAuthored(row),
         has_historical_default_response_id: row.historical_default_response_id !== null,
         has_historical_marker: row.has_historical_default_marker,
+        bot_response_logic: row.bot_response_logic,
         historical_default_option0: historicalDefaultOption0(row),
         sensitive_gate: sensitiveGateFor(row),
         default_block_status: defaultBlockStatusFor(row),

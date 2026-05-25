@@ -26,7 +26,6 @@ const EXPECTED_APPROVED_FIRST_PACKET = [
 
 const EXPECTED_CONDITIONAL_PACKET = [
     'operation_lukavac_93',
-    'holbrooke_ceasefire_demand_oct95',
 ];
 
 const EXPECTED_DEFERRED_PACKET = ['us_halts_federation_advance_1995'];
@@ -57,6 +56,10 @@ const EXPECTED_PACKET_2A_DEFAULTS = new Map([
     ['carter_ceasefire_1994', 'respect'],
 ]);
 
+const EXPECTED_PACKET_2B_DEFAULTS = new Map([
+    ['holbrooke_ceasefire_demand_oct95', 'accept_ceasefire'],
+]);
+
 function loadEventFixtures(file: string): EventFixture[] {
     return JSON.parse(readFileSync(file, 'utf8')) as EventFixture[];
 }
@@ -69,13 +72,13 @@ describe('event acceptance diagnostic report', () => {
         expect(JSON.stringify(first)).toBe(JSON.stringify(second));
         expect(first.summary.total_events).toBe(247);
         expect(first.summary.required_response_events).toBe(36);
-        expect(first.summary.production_modal_authoring_ready_events).toBe(5);
+        expect(first.summary.production_modal_authoring_ready_events).toBe(6);
         expect(first.summary.acceptance_status).toBe('NOT_READY');
         expect(first.summary.full_catalog_accepted).toBe(false);
-        expect(first.summary.missing_historical_default_response_id_events).toBe(31);
-        expect(first.summary.missing_historical_marker_events).toBe(31);
+        expect(first.summary.missing_historical_default_response_id_events).toBe(30);
+        expect(first.summary.missing_historical_marker_events).toBe(30);
         expect(first.summary.source_blocked_events).toBeGreaterThan(0);
-        expect(first.summary.missing_source_note_events).toBe(31);
+        expect(first.summary.missing_source_note_events).toBe(30);
     });
 
     it('lists the approved first production authoring packet candidates without changing JSON content', () => {
@@ -88,11 +91,12 @@ describe('event acceptance diagnostic report', () => {
         expect(report.deferred_authoring_packet_candidates.map((row) => row.id)).toEqual(EXPECTED_DEFERRED_PACKET);
     });
 
-    it('does not report Carter as conditional cleanup once the external guardrail row is ready', () => {
+    it('counts Carter as production-ready once its historical default uses historical bot logic', () => {
         const report = buildEventAcceptanceReport();
         const carter = report.required_response_rows.find((row) => row.id === 'carter_ceasefire_1994');
 
         expect(carter).toBeDefined();
+        expect(carter!.bot_response_logic).toBe('historical');
         expect(carter!.production_modal_authoring_ready).toBe(true);
         expect(carter!.blocking_reasons).toEqual([]);
         expect(carter!.trigger_gate).toBe('external_or_exogenous');
@@ -100,7 +104,21 @@ describe('event acceptance diagnostic report', () => {
         expect(report.conditional_authoring_packet_candidates.map((row) => row.id)).not.toContain('carter_ceasefire_1994');
     });
 
-    it('keeps Lukavac and Holbrooke conditional and not production modal-ready', () => {
+    it('blocks explicit historical-default rows from production readiness unless bot logic is historical', () => {
+        const report = buildEventAcceptanceReport();
+        const holbrooke = report.required_response_rows.find((row) => row.id === 'holbrooke_ceasefire_demand_oct95');
+        const mismatchedRows = report.required_response_rows.filter((row) =>
+            row.has_historical_default_response_id &&
+            row.has_historical_marker &&
+            row.bot_response_logic !== 'historical'
+        );
+
+        expect(holbrooke).toBeDefined();
+        expect(holbrooke!.bot_response_logic).toBe('historical');
+        expect(mismatchedRows.map((row) => row.id)).toEqual([]);
+    });
+
+    it('keeps Lukavac conditional and not production modal-ready', () => {
         const report = buildEventAcceptanceReport();
 
         expect(report.conditional_authoring_packet_candidates.map((row) => row.id)).toEqual(EXPECTED_CONDITIONAL_PACKET);
@@ -144,6 +162,7 @@ describe('event acceptance diagnostic report', () => {
         expect(report.production_modal_authoring_ready_rows.map((row) => row.id)).toEqual([
             ...EXPECTED_APPROVED_FIRST_PACKET,
             'carter_ceasefire_1994',
+            'holbrooke_ceasefire_demand_oct95',
         ]);
         expect(report.summary.acceptance_status).toBe('NOT_READY');
         expect(report.summary.full_catalog_accepted).toBe(false);
@@ -154,10 +173,12 @@ describe('event acceptance diagnostic report', () => {
             ...loadEventFixtures('data/scenarios/events/war_1992.json'),
             ...loadEventFixtures('data/scenarios/events/war_1993.json'),
             ...loadEventFixtures('data/scenarios/events/war_1994.json'),
+            ...loadEventFixtures('data/scenarios/events/war_1995.json'),
         ];
         const expectedDefaults = new Map([
             ...EXPECTED_FIRST_PACKET_DEFAULTS,
             ...EXPECTED_PACKET_2A_DEFAULTS,
+            ...EXPECTED_PACKET_2B_DEFAULTS,
         ]);
 
         for (const id of expectedDefaults.keys()) {

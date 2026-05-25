@@ -68,16 +68,17 @@ describe('v0.8.2 Phase 5c — Holbrooke 1995 Shuttle Diplomacy Events', () => {
 
     // ── bot_response_logic ────────────────────────────────────────────────────
 
-    it('all three Phase 5c events have bot_response_logic strategic_weighted', () => {
+    it('keeps RS Phase 5c events strategic_weighted while Holbrooke ceasefire uses historical calibration', () => {
         const ids = [
             'holbrooke_us_belgrade_channel_1995',
             'deliberate_force_rs_compliance_1995',
-            'holbrooke_ceasefire_demand_oct95',
         ];
         for (const id of ids) {
             const ev = allEvents.find((e: any) => e.id === id);
             expect(ev.bot_response_logic, `${id} should have bot_response_logic strategic_weighted`).toBe('strategic_weighted');
         }
+        const holbrooke = allEvents.find((e: any) => e.id === 'holbrooke_ceasefire_demand_oct95');
+        expect(holbrooke.bot_response_logic).toBe('historical');
     });
 
     // ── responding_faction ────────────────────────────────────────────────────

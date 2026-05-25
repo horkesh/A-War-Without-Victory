@@ -55,9 +55,9 @@ describe('event taxonomy diagnostic report', () => {
         expect(report.summary.choice_rows_with_title_and_narrative).toBe(44);
         expect(report.summary.choice_rows_with_source).toBe(22);
         expect(report.summary.required_response_rows_with_source).toBe(20);
-        expect(report.summary.historical_default_markers).toBe(5);
-        expect(report.summary.historical_default_ids).toBe(5);
-        expect(report.summary.modal_ready_events).toBe(5);
+        expect(report.summary.historical_default_markers).toBe(6);
+        expect(report.summary.historical_default_ids).toBe(6);
+        expect(report.summary.modal_ready_events).toBe(6);
     });
 
     it('requires required-response choice rows to declare a valid responding faction', () => {
@@ -128,8 +128,9 @@ describe('event taxonomy diagnostic report', () => {
             'rs_assembly_rejects_voplan_1993',
             'belgrade_embargo_rs_1994',
             'carter_ceasefire_1994',
+            'holbrooke_ceasefire_demand_oct95',
         ]);
-        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(5);
+        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(6);
     });
 
     it('counts event-level historical defaults and validates they reference an existing option id', () => {
@@ -205,6 +206,36 @@ describe('event taxonomy diagnostic report', () => {
                 id: 'diagnostic_accept_first_conflict_fixture',
             }),
         ]));
+    });
+
+    it('surfaces explicit historical defaults with non-historical bot logic as calibration debt', () => {
+        const row = {
+            ...loadCatalogRows()[0],
+            id: 'diagnostic_historical_default_bot_logic_fixture',
+            bot_response_logic: 'strategic_weighted',
+            requires_player_response: true,
+            response_options: [
+                { id: 'historical', label: 'Historical', description: 'Historical option' },
+                { id: 'alternate', label: 'Alternate', description: 'Alternate option' },
+            ],
+            historical_default_response_id: 'historical',
+            historical_default_option_id: 'historical',
+            has_historical_default_marker: true,
+            modal_ready: true,
+            findings: [],
+        };
+
+        const report = buildEventTaxonomyReport([row]);
+
+        expect(report.findings).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                code: 'historical_default_bot_logic_mismatch',
+                severity: 'warning',
+                id: 'diagnostic_historical_default_bot_logic_fixture',
+            }),
+        ]));
+        expect(report.rows[0].modal_ready).toBe(false);
+        expect(report.rows[0].row_classification).toBe('required_response_debt');
     });
 
     it('marks source/sensitive blocked defaults as unavailable instead of ordinary missing metadata', () => {

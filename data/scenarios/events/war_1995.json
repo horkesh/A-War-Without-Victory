@@ -1383,7 +1383,14 @@
     "once": true,
     "responding_faction": "RBiH",
     "requires_player_response": true,
-    "bot_response_logic": "strategic_weighted",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "accept_ceasefire",
+    "source_note": "Holbrooke, To End a War, and US State Department Oct. 5-12, 1995 records ground the ceasefire demand.",
+    "staff_assessment": "US pressure seeks to freeze Federation momentum and preserve the Dayton path. Accepting the ceasefire preserves US backing and diplomatic legitimacy while sacrificing offensive momentum; continuing offensive risks patron support/diplomatic legitimacy. The historical default is a calibration baseline, not a recommendation.",
+    "trigger_evidence": [
+      "Visible October 1995 diplomacy: Holbrooke presses for a ceasefire to keep negotiations moving toward Dayton.",
+      "The Federation/RBiH northwestern offensive has active public momentum, making the halt demand politically immediate."
+    ],
     "effect": {
       "kind": "narrative",
       "text": "Holbrooke demands ARBiH halt its northwestern offensive and accept a ceasefire to open the path to Dayton."
@@ -1400,7 +1407,8 @@
       {
         "id": "accept_ceasefire",
         "label": "Accept the ceasefire -- go to Dayton",
-        "description": "Halt the advance and agree to a two-month ceasefire. US support is preserved, international standing rises, and the path to Dayton opens.",
+        "description": "Halt the advance and agree to a two-month ceasefire. US backing and international standing are preserved while offensive momentum is frozen for the Dayton path.",
+        "historical_marker": "historical_default",
         "effects": [],
         "dimension_shifts": [
           {
@@ -1425,7 +1433,7 @@
       {
         "id": "continue_offensive",
         "label": "Continue the offensive -- maximum territory before Dayton",
-        "description": "Defy Holbrooke. Push further gains before the ceasefire is forced. Military credibility rises, but US support and international standing take serious damage.",
+        "description": "Defy Holbrooke and keep pressing for additional gains. Military credibility rises, but continuing offensive risks patron support/diplomatic legitimacy.",
         "effects": [],
         "dimension_shifts": [
           {
