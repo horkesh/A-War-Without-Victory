@@ -56,7 +56,9 @@ export type EventTaxonomyRow = {
     has_narrative: boolean;
     has_source_note: boolean;
     has_historical_default_marker: boolean;
+    historical_default_response_id: string | null;
     historical_default_option_id: string | null;
+    historical_default_unavailable_reason: string | null;
     has_option_descriptions: boolean;
     has_numeric_option_previews: boolean;
     modal_ready: boolean;
@@ -74,6 +76,8 @@ export type EventTaxonomyReport = {
         choice_rows_with_source: number;
         required_response_rows_with_source: number;
         historical_default_markers: number;
+        historical_default_ids: number;
+        historical_default_unavailable_events: number;
         modal_ready_events: number;
         duplicate_event_ids: string[];
         findings: number;
@@ -147,6 +151,22 @@ const SENSITIVE_KEYWORDS = [
     'srebrenica',
     'war crime',
 ];
+
+const HISTORICAL_DEFAULT_BLOCKED_IDS = new Set([
+    'srebrenica_demilitarization_1993',
+    'karadzic_mladic_split_1995',
+]);
+
+const SENSITIVE_DEFAULT_BLOCKED_IDS = new Set([
+    'rs_strategic_goals',
+    'drina_cleansing_decision_1992',
+    'concentration_camps_revealed_1992',
+    'srebrenica_demilitarization_1993',
+    'visit_to_front_hrhb',
+    'visit_to_front_rs',
+    'un_hostage_crisis_1995',
+    'nato_ultimatum_sarajevo_1994',
+]);
 
 function strictCompare(a: string, b: string): number {
     if (a < b) return -1;
@@ -284,10 +304,14 @@ function notificationCoverage(event: JsonRecord, responseIds: string[]): EventTa
 }
 
 function findHistoricalDefaultOptionId(event: JsonRecord): string | null {
+    const eventLevelDefault = textOrNull(event.historical_default_response_id);
+    if (eventLevelDefault !== null) return eventLevelDefault;
+
     const options = Array.isArray(event.response_options) ? event.response_options : [];
     for (const option of options) {
         if (!isRecord(option)) continue;
         const hasMarker =
+            option.historical_marker === 'historical_default' ||
             option.historical_default === true ||
             option.is_historical_default === true ||
             option.default === 'historical' ||
@@ -300,6 +324,13 @@ function findHistoricalDefaultOptionId(event: JsonRecord): string | null {
 function sensitiveKeywordsFor(row: Pick<EventTaxonomyRow, 'id' | 'title' | 'narrative' | 'category'>): string[] {
     const haystack = [row.id, row.title, row.narrative, row.category].filter(Boolean).join(' ').toLowerCase();
     return SENSITIVE_KEYWORDS.filter((keyword) => haystack.includes(keyword));
+}
+
+function historicalDefaultUnavailableReason(row: Pick<EventTaxonomyRow, 'id' | 'is_choice_event'>): string | null {
+    if (SENSITIVE_DEFAULT_BLOCKED_IDS.has(row.id)) return 'sensitive_history_review_required';
+    if (HISTORICAL_DEFAULT_BLOCKED_IDS.has(row.id)) return 'source_or_design_blocked';
+    if (row.is_choice_event && row.id.startsWith('csq_')) return 'counterfactual_consequence_offer';
+    return null;
 }
 
 export function classifyTriggerEmergence(row: EventTaxonomyRow): string {
@@ -339,6 +370,7 @@ function buildRow(event: JsonRecord, file: string, fileIndex: number, catalogInd
     const numericKinds = numericConsequenceKinds(effects);
     const historicalSource = textOrNull(event.historical_source) ?? textOrNull(event.source);
     const sourceNote = textOrNull(event.source_note) ?? textOrNull(event.historical_source_note) ?? historicalSource;
+    const historicalDefaultResponseId = textOrNull(event.historical_default_response_id);
     const historicalDefaultOptionId = findHistoricalDefaultOptionId(event);
     const hasNumericOptionPreviews = responseOptions.length > 0 && responseOptions.every((option) => {
         const original = (event.response_options as unknown[]).find((entry) => isRecord(entry) && textOrNull(entry.id) === option.id);
@@ -386,7 +418,9 @@ function buildRow(event: JsonRecord, file: string, fileIndex: number, catalogInd
         has_narrative: textOrNull(event.narrative) !== null,
         has_source_note: sourceNote !== null,
         has_historical_default_marker: historicalDefaultOptionId !== null,
+        historical_default_response_id: historicalDefaultResponseId,
         historical_default_option_id: historicalDefaultOptionId,
+        historical_default_unavailable_reason: null,
         has_option_descriptions: responseOptions.length > 0 && responseOptions.every((option) => option.description !== null),
         has_numeric_option_previews: hasNumericOptionPreviews,
         modal_ready: false,
@@ -399,12 +433,14 @@ function buildRow(event: JsonRecord, file: string, fileIndex: number, catalogInd
     row.sensitive_history_keywords = sensitiveKeywordsFor(row);
     row.sensitive_history_ring = row.sensitive_history_keywords.length > 0 ? 'risk' : 'none';
     row.sensitive_history_status = row.sensitive_history_keywords.length > 0 ? 'review_required' : 'clear';
+    row.historical_default_unavailable_reason = historicalDefaultUnavailableReason(row);
     row.modal_ready =
         row.requires_player_response &&
         row.has_title &&
         row.has_narrative &&
         row.has_source_note &&
         row.has_historical_default_marker &&
+        row.historical_default_unavailable_reason === null &&
         row.has_option_descriptions &&
         row.has_numeric_option_previews &&
         row.sensitive_history_status === 'clear';
@@ -485,6 +521,20 @@ export function collectCatalogFindings(rows: EventTaxonomyRow[]): EventTaxonomyF
         if (row.requires_player_response && !row.has_historical_default_marker) {
             findings.push(finding(row, 'missing_historical_default_marker', 'warning', 'Required-response event has no explicit historical default option marker.'));
         }
+        if (row.historical_default_unavailable_reason !== null) {
+            findings.push(finding(row, 'historical_default_unavailable', 'warning', `Historical default unavailable: ${row.historical_default_unavailable_reason}.`));
+        }
+        if (row.historical_default_response_id !== null && !nonEmptyOptionIds.includes(row.historical_default_response_id)) {
+            findings.push(finding(row, 'invalid_historical_default_response_id', 'error', `historical_default_response_id ${row.historical_default_response_id} does not match a response option id.`));
+        }
+        if (
+            row.bot_response_logic === 'accept_first' &&
+            row.historical_default_response_id !== null &&
+            nonEmptyOptionIds.length > 0 &&
+            row.historical_default_response_id !== nonEmptyOptionIds[0]
+        ) {
+            findings.push(finding(row, 'accept_first_historical_default_conflict', 'warning', 'accept_first preserves option 0, but historical_default_response_id points to a different option.'));
+        }
     }
 
     for (const [id, matches] of [...byId.entries()].sort(([a], [b]) => strictCompare(a, b))) {
@@ -511,7 +561,7 @@ export function buildEventTaxonomyReport(rows: EventTaxonomyRow[] = loadCatalogR
         const rowFindings = findingsByRow.get(`${row.file}:${row.id}`) ?? [];
         const modalReady =
             row.modal_ready &&
-            !rowFindings.some((entry) => ['missing_source', 'sensitive_history_review', 'missing_historical_default_marker'].includes(entry.code));
+            !rowFindings.some((entry) => ['missing_source', 'sensitive_history_review', 'missing_historical_default_marker', 'historical_default_unavailable'].includes(entry.code));
         const nextRow = { ...row, modal_ready: modalReady, findings: rowFindings };
         return { ...nextRow, row_classification: classifyEventTaxonomy(nextRow) };
     });
@@ -530,6 +580,8 @@ export function buildEventTaxonomyReport(rows: EventTaxonomyRow[] = loadCatalogR
             choice_rows_with_source: reportRows.filter((row) => row.is_choice_event && row.historical_source_status === 'present').length,
             required_response_rows_with_source: reportRows.filter((row) => row.requires_player_response && row.historical_source_status === 'present').length,
             historical_default_markers: reportRows.filter((row) => row.has_historical_default_marker).length,
+            historical_default_ids: reportRows.filter((row) => row.historical_default_response_id !== null).length,
+            historical_default_unavailable_events: reportRows.filter((row) => row.historical_default_unavailable_reason !== null).length,
             modal_ready_events: reportRows.filter((row) => row.modal_ready).length,
             duplicate_event_ids: duplicateEventIds,
             findings: findings.length,

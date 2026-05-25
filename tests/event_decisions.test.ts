@@ -6,11 +6,18 @@
  * Tests pass event definitions via the registry parameter (no global mutation).
  */
 
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect } from 'vitest';
 import type { GameState } from '../src/state/game_state';
 import type { EventDefinition } from '../src/sim/events/event_types';
 import { resolveEventDecision } from '../src/sim/events/resolve_decision';
 import { evaluateEvents } from '../src/sim/events/evaluate_events';
+
+const ORIGINAL_TWO_LEVEL_FLAG = process.env.AWWV_TWO_LEVEL_NOTIFICATIONS;
+
+afterEach(() => {
+    if (ORIGINAL_TWO_LEVEL_FLAG === undefined) delete process.env.AWWV_TWO_LEVEL_NOTIFICATIONS;
+    else process.env.AWWV_TWO_LEVEL_NOTIFICATIONS = ORIGINAL_TWO_LEVEL_FLAG;
+});
 
 function makeMinimalState(playerFaction?: string): GameState {
     return {
@@ -52,6 +59,32 @@ const DECISION_EVENT: EventDefinition = {
             label: 'Reject the proposal',
             description: 'Maintains current position.',
             effects: [{ kind: 'morale_change', faction: 'RBiH', delta: -5 }],
+        },
+    ],
+};
+
+const EXPLICIT_HISTORICAL_EVENT: EventDefinition = {
+    id: 'test_explicit_historical_event',
+    title: 'Explicit historical default test',
+    trigger: { turn_min: 5, turn_max: 5, phase: 'war' },
+    effect: { kind: 'narrative', text: 'A choice with a non-first historical default fires.' },
+    once: true,
+    responding_faction: 'RBiH',
+    requires_player_response: true,
+    bot_response_logic: 'historical',
+    historical_default_response_id: 'historical_path',
+    response_options: [
+        {
+            id: 'counterfactual_path',
+            label: 'Counterfactual path',
+            historical_marker: 'counterfactual',
+            effects: [{ kind: 'supply_delta', faction: 'RBiH', delta: -7 }],
+        },
+        {
+            id: 'historical_path',
+            label: 'Historical path',
+            historical_marker: 'historical_default',
+            effects: [{ kind: 'supply_delta', faction: 'RBiH', delta: 13 }],
         },
     ],
 };
@@ -128,6 +161,89 @@ describe('Event Decisions', () => {
         expect(state.military.pending_event_decisions ?? []).toHaveLength(0);
     });
 
+    it('bot historical logic chooses explicit historical_default_response_id instead of option 0', () => {
+        const state = makeMinimalState(undefined);
+        const initialSupply = state.military.general_supply_reserve!['RBiH'];
+        const rng = () => 0.5;
+
+        evaluateEvents(state, rng, 5, [EXPLICIT_HISTORICAL_EVENT]);
+
+        expect(state.military.general_supply_reserve!['RBiH']).toBe(initialSupply + 13);
+        expect(state.military.event_decision_log).toEqual([
+            {
+                event_id: 'test_explicit_historical_event',
+                response_id: 'historical_path',
+                decision_source: 'bot_v1',
+                faction: 'RBiH',
+                turn: 5,
+            },
+        ]);
+    });
+
+    it('accept_first preserves option 0 even when an explicit historical default points elsewhere', () => {
+        const state = makeMinimalState(undefined);
+        const initialSupply = state.military.general_supply_reserve!['RBiH'];
+        const rng = () => 0.5;
+
+        evaluateEvents(state, rng, 5, [
+            {
+                ...EXPLICIT_HISTORICAL_EVENT,
+                id: 'test_accept_first_conflict_event',
+                bot_response_logic: 'accept_first',
+            },
+        ]);
+
+        expect(state.military.general_supply_reserve!['RBiH']).toBe(initialSupply - 7);
+        expect(state.military.event_decision_log?.[0]?.response_id).toBe('counterfactual_path');
+    });
+
+    it('two-level bot default keeps accept_first on option 0 when explicit historical default points to option 2', () => {
+        process.env.AWWV_TWO_LEVEL_NOTIFICATIONS = 'true';
+        const state = makeMinimalState(undefined);
+        const initialSupply = state.military.general_supply_reserve!['RBiH'];
+        const rng = () => 0.5;
+
+        evaluateEvents(state, rng, 5, [
+            {
+                ...EXPLICIT_HISTORICAL_EVENT,
+                id: 'test_two_level_accept_first_conflict_event',
+                bot_response_logic: 'accept_first',
+                historical_default_response_id: 'historical_option_2',
+                response_options: [
+                    {
+                        id: 'option_0',
+                        label: 'Option 0',
+                        historical_marker: 'counterfactual',
+                        effects: [{ kind: 'supply_delta', faction: 'RBiH', delta: -7 }],
+                    },
+                    {
+                        id: 'option_1',
+                        label: 'Option 1',
+                        historical_marker: 'counterfactual',
+                        effects: [{ kind: 'supply_delta', faction: 'RBiH', delta: 3 }],
+                    },
+                    {
+                        id: 'historical_option_2',
+                        label: 'Historical option 2',
+                        historical_marker: 'historical_default',
+                        effects: [{ kind: 'supply_delta', faction: 'RBiH', delta: 13 }],
+                    },
+                ],
+            },
+        ]);
+
+        expect(state.military.general_supply_reserve!['RBiH']).toBe(initialSupply - 7);
+        expect(state.military.event_decision_log).toEqual([
+            {
+                event_id: 'test_two_level_accept_first_conflict_event',
+                response_id: 'option_0',
+                decision_source: 'bot_ai_default',
+                faction: 'RBiH',
+                turn: 5,
+            },
+        ]);
+    });
+
     it('bot auto-responds once with reject_all (picks last option)', () => {
         const state = makeMinimalState(undefined);
         const initialSupply = state.military.general_supply_reserve!['RS'];
@@ -154,6 +270,20 @@ describe('Event Decisions', () => {
             faction: 'RS',
             requires_player_response: true,
         });
+    });
+
+    it('pending event decisions carry historical default metadata for modal marking', () => {
+        const state = makeMinimalState('RBiH');
+        const rng = () => 0.5;
+
+        evaluateEvents(state, rng, 5, [EXPLICIT_HISTORICAL_EVENT]);
+
+        const pending = state.military.pending_event_decisions![0];
+        expect(pending.historical_default_response_id).toBe('historical_path');
+        expect(pending.response_options.map((option) => [option.id, option.historical_marker])).toEqual([
+            ['counterfactual_path', 'counterfactual'],
+            ['historical_path', 'historical_default'],
+        ]);
     });
 
     it('resolveEventDecision applies effects and removes pending', () => {

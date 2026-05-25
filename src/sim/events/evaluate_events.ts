@@ -261,6 +261,9 @@ export function evaluateEvents(
                     response_options: def.response_options,
                     faction: respondingFaction,
                     requires_player_response: def.requires_player_response,
+                    ...(def.historical_default_response_id
+                        ? { historical_default_response_id: def.historical_default_response_id }
+                        : {}),
                     ...(isTwoLevelNotificationsEnabled()
                         ? { notifications_to_other_factions: def.notifications_to_other_factions }
                         : {}),
@@ -283,7 +286,12 @@ export function evaluateEvents(
                     applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
                     decisionSource = 'bot_political';
                 } else {
-                    chosen = pickBotResponseV1(def.response_options, def.bot_response_logic, DEFAULT_BOT_COMMANDER);
+                    chosen = pickBotResponseV1(
+                        def.response_options,
+                        def.bot_response_logic,
+                        DEFAULT_BOT_COMMANDER,
+                        def.historical_default_response_id,
+                    );
                     applyEventEffects(state, chosen.effects ?? []);
                     // Apply flags and dimension shifts from the chosen response option
                     applyDefinitionFlags(state, chosen.sets_flags);

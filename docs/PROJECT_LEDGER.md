@@ -10534,3 +10534,21 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `src/ui/shared/playerVisibility.ts`, `tests/ui_player_visibility.test.ts`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-25] feat(events): add Phase 2 historical-default event contract
+
+**Type:** Event engine contract + deterministic bot behavior + taxonomy diagnostics.
+
+**Change:** Added event-level `historical_default_response_id` and response-level `historical_marker` metadata, carried authored historical-default ids into `pending_event_decisions`, and made `bot_response_logic: 'historical'` prefer a valid explicit historical default before falling back to the legacy option-0 behavior. `accept_first` remains the documented option-0 invariant and diagnostics now warn when it conflicts with a non-first explicit historical default. The event taxonomy diagnostic now counts explicit default ids/markers, reports invalid historical default ids, keeps required-response missing defaults visible as modal/calibration debt, and labels source/sensitive/counterfactual rows where a historical default is unavailable pending authoring review.
+
+**Determinism:** Deterministic selection only. No randomness, timestamps, production event JSON authoring, save migration, scenario data, operation tuning, or new faction ids were introduced. Ordering and serialization remain stable; the new pending-decision field is authored metadata copied from the firing event definition.
+
+**Verification:**
+- `npx.cmd vitest run tests\event_decisions.test.ts tests\ai_commander_event_decision.test.ts tests\sim\events\event_taxonomy_report.test.ts --reporter=dot` - 47/47 PASS.
+- `npx.cmd tsx tools\diagnostics\event_taxonomy_report.ts --json` - current catalog remains debt-visible: 247 events, 44 choice events, 36 required-response events, 0 historical default ids/markers, 14 historical-default-unavailable rows, 0 modal-ready events, 219 warnings, 0 errors.
+- `npm.cmd run typecheck` - blocked by missing UI map dependencies/types in this worktree (`maplibre-gl`, `pmtiles`, Deck.gl packages, `@vitejs/plugin-react`) and related implicit-any errors; no new event-contract files appeared in the error list.
+- `git diff --check` - PASS.
+
+**Artifacts:** `src/sim/events/event_types.ts`, `src/sim/events/bot_response.ts`, `src/sim/events/ai_default_response.ts`, `src/sim/events/evaluate_events.ts`, `tools/diagnostics/event_taxonomy_report.ts`, `tests/event_decisions.test.ts`, `tests/sim/events/event_taxonomy_report.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---

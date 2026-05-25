@@ -123,4 +123,127 @@ describe('event taxonomy diagnostic report', () => {
         expect(requiredRows.filter((row) => row.modal_ready)).toEqual([]);
         expect(requiredRows.every((row) => classifyEventTaxonomy(row) !== 'finished_modal_ready')).toBe(true);
     });
+
+    it('counts event-level historical defaults and validates they reference an existing option id', () => {
+        const row = {
+            ...loadCatalogRows()[0],
+            id: 'diagnostic_explicit_historical_default_fixture',
+            requires_player_response: true,
+            response_options: [
+                { id: 'counterfactual', label: 'Counterfactual', description: 'Alternative path' },
+                { id: 'historical', label: 'Historical', description: 'Historical path' },
+            ],
+            historical_default_response_id: 'historical',
+            historical_default_option_id: 'historical',
+            has_historical_default_marker: true,
+            findings: [],
+        };
+
+        const report = buildEventTaxonomyReport([row]);
+
+        expect(report.summary.historical_default_ids).toBe(1);
+        expect(report.summary.historical_default_markers).toBe(1);
+        expect(report.findings.filter((finding) => finding.code === 'invalid_historical_default_response_id')).toEqual([]);
+    });
+
+    it('surfaces invalid historical_default_response_id as a taxonomy finding', () => {
+        const row = {
+            ...loadCatalogRows()[0],
+            id: 'diagnostic_invalid_historical_default_fixture',
+            requires_player_response: true,
+            response_options: [
+                { id: 'first', label: 'First', description: 'First option' },
+                { id: 'second', label: 'Second', description: 'Second option' },
+            ],
+            historical_default_response_id: 'missing_option',
+            historical_default_option_id: 'missing_option',
+            has_historical_default_marker: true,
+            findings: [],
+        };
+
+        const findings = collectCatalogFindings([row]);
+
+        expect(findings).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                code: 'invalid_historical_default_response_id',
+                severity: 'error',
+                id: 'diagnostic_invalid_historical_default_fixture',
+            }),
+        ]));
+    });
+
+    it('surfaces accept_first conflicts with explicit non-first historical defaults as calibration debt', () => {
+        const row = {
+            ...loadCatalogRows()[0],
+            id: 'diagnostic_accept_first_conflict_fixture',
+            bot_response_logic: 'accept_first',
+            requires_player_response: true,
+            response_options: [
+                { id: 'first', label: 'First', description: 'First option' },
+                { id: 'historical', label: 'Historical', description: 'Historical option' },
+            ],
+            historical_default_response_id: 'historical',
+            historical_default_option_id: 'historical',
+            has_historical_default_marker: true,
+            findings: [],
+        };
+
+        const findings = collectCatalogFindings([row]);
+
+        expect(findings).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                code: 'accept_first_historical_default_conflict',
+                severity: 'warning',
+                id: 'diagnostic_accept_first_conflict_fixture',
+            }),
+        ]));
+    });
+
+    it('marks source/sensitive blocked defaults as unavailable instead of ordinary missing metadata', () => {
+        const report = buildEventTaxonomyReport(loadCatalogRows());
+        const blockedIds = [
+            'srebrenica_demilitarization_1993',
+            'karadzic_mladic_split_1995',
+            'un_hostage_crisis_1995',
+            'visit_to_front_rs',
+        ];
+
+        for (const id of blockedIds) {
+            const row = report.rows.find((entry) => entry.id === id);
+            expect(row, id).toBeDefined();
+            expect(row!.historical_default_unavailable_reason).not.toBeNull();
+            expect(row!.findings).toEqual(expect.arrayContaining([
+                expect.objectContaining({
+                    code: 'historical_default_unavailable',
+                    severity: 'warning',
+                }),
+            ]));
+            expect(row!.modal_ready).toBe(false);
+        }
+    });
+
+    it('treats csq consequence/counterfactual choice rows as blocked for inferred historical defaults', () => {
+        const row = {
+            ...loadCatalogRows()[0],
+            id: 'csq_counterfactual_offer_fixture',
+            requires_player_response: true,
+            response_options: [
+                { id: 'take_offer', label: 'Take offer', description: 'Counterfactual offer' },
+                { id: 'decline_offer', label: 'Decline offer', description: 'Counterfactual refusal' },
+            ],
+            historical_default_unavailable_reason: 'counterfactual_consequence_offer',
+            findings: [],
+        };
+
+        const report = buildEventTaxonomyReport([row]);
+
+        expect(report.summary.historical_default_unavailable_events).toBe(1);
+        expect(report.rows[0].historical_default_unavailable_reason).toBe('counterfactual_consequence_offer');
+        expect(report.findings).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                code: 'historical_default_unavailable',
+                id: 'csq_counterfactual_offer_fixture',
+            }),
+        ]));
+    });
 });

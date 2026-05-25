@@ -318,6 +318,8 @@ export interface EventResponseOption {
     label: string;
     /** Optional longer description of consequences. */
     description?: string;
+    /** Player-facing marker for historical/default calibration context. */
+    historical_marker?: 'historical_default' | 'counterfactual';
     /** Effects applied when this response is chosen. */
     effects: EventEffect[];
     // v0.6.0 metagame fields
@@ -384,6 +386,8 @@ export interface EventDefinition {
     once?: boolean;
     /** Player choice options. When present, each affected faction must respond. */
     response_options?: EventResponseOption[];
+    /** Explicit response option id used as the historical/default calibration path. */
+    historical_default_response_id?: string;
     /** Canonical faction that must respond to this event (bot auto-respond path).
      *  Explicit over soft convention. When absent, fallback chain in evaluate_events.ts applies.
      *  Phase 3 hardening: author new events with this field set. */
@@ -432,6 +436,8 @@ export interface PendingEventDecision {
     faction: FactionId;
     /** If true, the player must resolve this decision before advancing the turn. */
     requires_player_response?: boolean;
+    /** Explicit historical/default option id for modal display, when authored. */
+    historical_default_response_id?: string;
     /** Sparse authored notification text carried until the player resolves this decision. */
     notifications_to_other_factions?: EventNotificationTextByResponse;
 }
