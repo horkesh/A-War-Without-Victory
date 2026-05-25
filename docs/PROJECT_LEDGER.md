@@ -10663,3 +10663,26 @@ Same-axis (not full op) scope keeps the bonus from amplifying cross-axis ops lik
 **Artifacts:** `src/sim/combat/pre_planned_operations.ts`, `.claude/napkin.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## 2026-05-25 — 188w Calibration R25 (Regression −1.97pp, REVERTED)
+
+**R25: Op Prsten trnovo_push axis (SRK) — REGRESSION −1.97pp, REVERTED.**
+
+- Change: added `trnovo_push` axis to Op Prsten (vrs_sarajevo_romanija). Staging: gornja_presjenica (RS, home of rs_trnovo_brigade). Chain: gornja_presjenica→trnovo (3 segs)→kijevo_2 (2 segs)→delijas (3 segs). All adjacencies verified. All 3 objectives painted=RS, start RBiH (~245 km² potential). rs_trnovo_brigade + rs_1st_romanija_infantry not in any prior op.
+- Result: `match_ratio = 0.825843` (**−1.97pp vs R22**). Run: `n30`, hash `52acec0c774e0404`. Never committed.
+- OSID delta vs R22: HRHB 72/107 (−11), RBiH 257/290 (+1), RS 259/315 (−4).
+
+**CRITICAL FINDING — Cascade Universality:** The R22 HRHB cascade (bosansko_grahovo/Sipovo) is disrupted by ops on EVERY corps tested:
+- R24: vrs_drina (Srebrenica Ring) → −0.70pp, HRHB −5
+- R25: vrs_sarajevo_romanija (trnovo_push) → −1.97pp, HRHB −11
+
+Any new offensive op — regardless of geographic location or corps — creates new combat, changes brigade attrition profiles, and eventually alters the VRS 2nd Krajina brigade states at t175 that produce the HRHB Grahovo/Sipovo captures. The 188w sim is chaotic enough that even a distant-corps perturbation propagates to reverse the cascade.
+
+**Conclusion: R22 at 84.55% is a practical ceiling for the pre_planned_operations.ts additive single-change approach.** Further improvement requires one of:
+1. Making the HRHB cascade mechanically robust (engine-level: VRS 2nd Krajina brigade state stabilization).
+2. A purely-subtractive change (REMOVE an incorrect VRS objective) — reduces rather than adds combat; lower cascade risk.
+3. A different calibration domain: OOB data, scenario parameters, combat math.
+
+**Artifacts:** no committed changes (edit never committed). `docs/PROJECT_LEDGER.md` updated.
+
+---
