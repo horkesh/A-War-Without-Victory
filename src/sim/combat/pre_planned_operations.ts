@@ -362,6 +362,8 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 ],
                 // foca_3 → patkovina (RBiH; painted RS) → prevrac (RS waypoint) → kolovarice (RBiH; painted RS).
                 // R22 2026-05-25: inserted patkovina before prevrac.
+                // R23 2026-05-25: ustikolina inserted then REVERTED — zero-delta (identical political_controllers,
+                //   84.55% unchanged). Patkovina captured at wi=10 and lost before wi=188; ustikolina never captured.
                 // foca_3 adj patkovina ✓, patkovina adj prevrac ✓, prevrac adj kolovarice ✓ (all verified).
                 // patkovina 89.2 km²; painted RS; sim=RBiH — legitimate target.
                 // ustipraca_2 removed (painted RBiH, caused DRINA over-capture in n1243).
