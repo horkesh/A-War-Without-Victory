@@ -259,8 +259,21 @@ const MAX_MOVEMENT_ONLY_EXECUTION_TURNS = 4;
  *  operation is terminated early. This fires BEFORE the per-axis cap
  *  (MAX_TOTAL_FAILURES=5) for single-axis operations, cutting suicidal
  *  attack runs from 5 turns to 3. Multi-axis operations making any progress
- *  (≥1 capture) are exempt and run to their full per-axis budget. */
-const MAX_OPERATION_ZERO_PROGRESS_FAILURES = 3;
+ *  (≥1 capture) are exempt and run to their full per-axis budget.
+ *
+ *  R14a (2026-05-25): raised from 3 → 5. With R8 strategic_depth +
+ *  R11 Krajina-collapse + R13b op-axis 2-hop concentration stacking
+ *  for post-Storm RS-Krajina defenders, the asymptotic per-attempt
+ *  capture probability at hardened staging OSIDs (e.g. Mistral 1 at
+ *  crni_lug) is non-trivial — but n20 telemetry showed Mistral 1 hits
+ *  the 3-failure axis stall after 4 attempts (axisFailures=4, captures=0)
+ *  before that probability gets enough rolls. 5 gives multi-axis ops
+ *  two more chances to break a hard defender, while staying well below
+ *  the absolute MAX_TOTAL_FAILURES = 8 ceiling that backstops pathological
+ *  Operacija-Izlaz-style marathons (per Issue #29 / REAL_WAR_MASTER).
+ *  Faction-symmetric: applies to any multi-axis op of any faction.
+ */
+const MAX_OPERATION_ZERO_PROGRESS_FAILURES = 5;
 
 /** Consecutive catastrophic outcomes on the same objective before axis stalls.
  *  A desperate attack at bad odds can happen once — commanders sometimes gamble.

@@ -10459,3 +10459,46 @@ Same-axis (not full op) scope keeps the bonus from amplifying cross-axis ops lik
 **Artifacts:** `src/sim/combat/corps_operation_helpers.ts`, `src/sim/combat/bot_brigade_eval_attack.ts`, `src/sim/combat/attack_resolution_osid.ts`, `data/derived/scenario/baselines/manifest.json`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-25] calibration(sector-offensive): raise multi-axis zero-progress backstop 3 → 5
+
+**Type:** Calibration round — single-constant change on the multi-axis zero-progress abort threshold. Single-change-per-calibration discipline. Faction-symmetric; no init OSID override; no avoided_osids_by_faction; no Math.random / timestamps; no FORAWWV edit. Targeted at HVO Western Bosnia Mistral / Cincar / Oštrica / Zima multi-axis ops that hit hardened post-Cincar VRS Krajina defenders at op-staging OSIDs (e.g. crni_lug, halapic, novo_selo_2) and previously stalled after exactly 3 failures despite the stacked R8/R11/R13b attacker amplification.
+
+**Change:** `src/sim/combat/sector_offensive.ts:263` — `MAX_OPERATION_ZERO_PROGRESS_FAILURES = 3 → 5`. The R13b per-axis backstop (lines 1475-1487) trips when `axisFailures >= 3 && axisCaptures === 0 && axisAttempts >= 1`. With the R8 strategic_depth + R11 Krajina-collapse + R13b op-axis 2-hop concentration stack producing non-trivial per-attempt capture probability against post-Storm RS Krajina, the 3-failure budget cut off the cascade before enough rolls accumulated. The per-axis `MAX_TOTAL_FAILURES = 8` ceiling for multi-axis ops (line 238) remains as the absolute Operacija-Izlaz-style marathon backstop (Issue #29 / REAL_WAR_MASTER.md), and `MAX_TOTAL_FAILURES_SINGLE_AXIS = 4` (line 246) is unchanged.
+
+**Determinism:** Pure constant change. No control flow modification. No new helper. No new state field.
+
+**Verification:**
+- `npx tsc --noEmit` — PASS.
+- `npm run test:baselines` — manifest refresh required (`UPDATE_BASELINES=1`); re-run after refresh: "Baseline regression: all scenarios match".
+- 188w `apr1992_definitive_188w` n22 hash `e2d9dbe9d3565790` (vs R13b n20 `36d81baf6f5a5130`).
+- Scenario-creator-runner-tester independent verdict: **GO** (no tuning needed).
+
+**Outcome (R13b n20 → R14a n22, painted oct1995 target, area-weighted via `osid_areas.json`):**
+- Painted match_ratio: 0.791904 → 0.791786 (Δ = −0.000118, well inside ±0.001 tolerance band).
+- OSID-count match: 584/712 → 584/712 (identical net match count; **8 improved / 8 regressed** flip ledger).
+- Per-faction final counts: HRHB 86 → **90 (+4, closer to historical 107)**; RBiH 305 → 295 (−10); RS 321 → 327 (+6).
+- **All 27 anchors PASS** in both runs, zero diff, zero actual_controller divergence.
+- **6/6 bot benchmarks PASS** in both runs; `actual_control_share` byte-identical to 6 decimals across all evaluations — divergence purely post-w40 late-war.
+- Battle count 369 → 367 (−2). Outcome shift: longer attempt budget → fewer decisive_victory (232 → 199, −33), more repulsed (29 → 45, +16), more costly_victory (31 → 38, +7), more stalemate (34 → 41, +7), more victory (22 → 24, +2). Consistent with multi-axis ops surviving more attempt rolls.
+
+**HVO Western Bosnia (user-directed focus zone) — the intended target:**
+- **Operation Mistral 1** changed `recovery_reason: max_failures → zero_eligible_axis` after 2 turns because **upstream HVO ops captured Mistral 1's downstream targets first**:
+  - **Operacija Oštrica (t111–117)** captured **op:glamoc:pribelja** (painted HRHB ✓, restoring R11 marquee gain lost in R13b)
+  - **Operacija Zima (t119–128)** captured **op:glamoc:halapic** + **op:kupres:novo_selo_2** (painted HRHB ✓)
+  - **Operacija Obzor (t169–177)** captured **op:bosansko_grahovo:crni_lug** (painted HRHB ✓) — the Mode B "multi-axis hardened-defender survives via 5-failure budget" exemplar
+  - **Operation Cincar/Kupres** captured **op:kupres:novo_selo_2** at t128 (recovery_reason changed from `no_approach_osid`)
+- **Operacija Kuna / Oseka** disappeared from the AAR — the upstream Oštrica/Zima cascade pre-empted their spawn windows. Cleaner sequence.
+- **Tuzla 2nd Corps watch-item RESOLVED**: `kalesija:gojcin_2` and `sekovici:sekovici_2` both no longer flip RBiH (painted RS ✓ — the R13b ledger's flagged unhistorical eastward push reverted).
+- **Sarajevo ring net +1 painted match**: `ilidza:rakovica_2` and `ilidza:kasindo` both correctly RS (painted RS); `trnovo:gornja_presjenica` regresses RBiH→RS (painted RBiH).
+- **Bosanski Petrovac cluster regression cost**: `bosanski_petrovac_2`, `kolonic_2`, `prkosi`, `vodjenica`, `vrtoce` all RBiH→RS in R14a (painted RBiH miss × 5). Acceptable area-cost absorbed by HVO gains.
+
+**Sensitive-history compliance:** Ring-1 / no §6 / faction-symmetric. No FORAWWV / painted target / OOB / political_controllers / enclave_resilience / scenario-event-data touch.
+
+**Resolved watch-item from R13b:** Tuzla 2nd Corps eastward push at gojcin_2/sekovici_2 — no longer flips unhistorically.
+
+**New watch-items for next round:** (a) Bosanski Petrovac 5-OSID regression cluster; if subsequent rounds amplify this drift, look at brigade-AI eligibility for ARBiH 5th Corps Sana 95; (b) Trnovo gornja_presjenica regression.
+
+**Artifacts:** `src/sim/combat/sector_offensive.ts`, `data/derived/scenario/baselines/manifest.json`, `docs/PROJECT_LEDGER.md`.
+
+---
