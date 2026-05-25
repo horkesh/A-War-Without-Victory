@@ -10619,3 +10619,23 @@ Same-axis (not full op) scope keeps the bonus from amplifying cross-axis ops lik
 **Artifacts:** `src/sim/combat/pre_planned_operations.ts`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## 2026-05-25 — 188w Calibration R23 (Zero-Delta, REVERTED)
+
+**R23: Op Foca foca_valley ustikolina insertion — ZERO-DELTA, REVERTED.**
+
+- Change: inserted `op:foca:ustikolina` between patkovina and prevrac in foca_valley axis. Chain: `foca_3 → patkovina → ustikolina → prevrac → kolovarice`. All adjacencies verified.
+- Result: `match_ratio = 0.845506` — **IDENTICAL to R22**. Political controllers byte-identical (0 diffs between n27/n28). RS personnel −14 (noise). Run: `n28`, hash `464e94581ba05180`. **REVERTED** (`82a8e2c9`).
+
+**Root cause:** patkovina is captured at wi=10 and LOST before wi=188. Brigades cannot advance from patkovina to ustikolina once patkovina is retaken. Any further foca_valley chain extensions beyond patkovina are unreachable. ustikolina final state: RBiH (never captured in n28).
+
+**Key lesson:** foca_valley chain extensions beyond patkovina are a dead end. The R22 +2.11pp was from combat pattern cascade, not patkovina hold duration. Foca op tempo (wi=10-12) is too short to progress past patkovina before brigade recovery.
+
+**R24 candidates:**
+1. cajnice:miljeno_2 (71.3 km², painted=RS, sim=RBiH): new cajnice axis on Op Foca. cajnice_2 adj miljeno_2 ✓, rs_cajnice_brigade staging at cajnice_2. Single objective. Cascade risk: LOW.
+2. Op Visegrad stall: reorder vrs_herzegovina ops queue so Visegrad fires after fronts established.
+3. donje_zesce (71.8 km², RS→RBiH during 188w): defensive issue.
+
+**Artifacts:** `src/sim/combat/pre_planned_operations.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
