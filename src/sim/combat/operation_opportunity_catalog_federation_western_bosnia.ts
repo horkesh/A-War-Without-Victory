@@ -33,7 +33,10 @@ const VRS_KRAJINA_DEFENDER_CORPS = 'vrs_2nd_krajina' as FormationId;
 // — VRS w188 morale 12.6/cohesion 26.5 vs RBiH 89.5/73.6). Forensics:
 // docs/40_reports/audits/20260522_FORENSICS_5_BLOCKED_ARBIH_OPS.md §3
 // mistral_2_95. Re-tune empirically against painted Oct 1995 once 188w
-// deltas land.
+// deltas land. NOTE 2026-05-25: floor is bypassed when vrs_2nd_krajina has
+// no active subordinates (evaluateDefenderTrajectoryWeakness returns
+// available=false → always green). Floor 0.20 and 0.28 produced identical
+// hashes — the cascade is combat-math driven, not floor-gated.
 const MISTRAL_DEFENDER_WEAKNESS_FLOOR = 0.20;
 
 const STAGING_LIVNO_MISI = 'op:livno:misi_2';

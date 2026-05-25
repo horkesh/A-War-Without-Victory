@@ -10523,3 +10523,33 @@ Same-axis (not full op) scope keeps the bonus from amplifying cross-axis ops lik
 **Artifacts:** `src/sim/combat/sector_offensive.ts`, `data/derived/scenario/baselines/manifest.json`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-25] calibration(graz-truces): fix Op Jackal political-block bug in shouldGrazBlockAttack
+
+**Type:** Calibration round — single-line logic fix in `src/sim/local_truces.ts`. Single-change-per-calibration discipline. No init OSID override; no avoided_osids_by_faction; no Math.random / timestamps; no FORAWWV edit.
+
+**Change:** `shouldGrazBlockAttack()` in `src/sim/local_truces.ts` — added `&& !isEastHerzegovinaPair(corpsId)` to the general HRHB→RS ceasefire block (previously lines 222-225). Root cause: `hvo_southeast_herzegovina` is in the east Graz pair (`GRAZ_CORPS_PAIRS_EAST`) but was NOT in `GRAZ_EXEMPT_HRHB_CORPS`. The general block returned `true` for any HRHB corps not in the exempt set, making the east-pair time-gated logic (lines 231-248) unreachable. That time-gated logic correctly permits the east pair to attack RS before Op Jackal completes (`graz_east_herzegovina_active_turn` not yet set). With the fix, `hvo_southeast_herzegovina` falls through to the time-gated branch, which returns `false` (not blocked) for wi=9-12 when Op Jackal is executing.
+
+**Evidence for root cause:** R15 weekly_report shows `recovery_reason=political_blocked` at wi=12 for Op Jackal. With fix: wi=9-11 PLANNING, wi=12 EXECUTION (obj=rotimlja_2, captures=1), wi=13 RECOVERY complete, captures=2.
+
+**Verification:**
+- `npx tsc --noEmit` — PASS (confirmed pre-run).
+- 188w `apr1992_definitive_188w` n24 hash `46a9b7d119e8cbd8` (vs R15 n19 `59560840d2b4d976` — non-zero delta ✓).
+- Scenario-creator-runner-tester panel: Op Jackal ★★★★★ 2/2 obj (w8-w14). No Mistral 2 cascade.
+
+**Outcome (R15 n19 → R19 n24, painted oct1995 target):**
+- Painted match_ratio (area-weighted, 712 OSIDs): **0.820000 → 0.821629 (+0.001629)** ≈ +82 km² net.
+- OSID-count: HRHB sim=85, RBiH sim=301, RS sim=326 (vs painted HRHB=107, RBiH=290, RS=315).
+- Expected gain from Jackal: +145 km² (hodbina_2 54 km² + rotimlja_2 91 km²). Actual net +82 km² — ~63 km² offset by extra HRHB sector offensives during the brief unblock window (wi=9-12).
+- **Mistral 2:** NO cascade. drvar_2/prekaja_2/sipovljani_2 remain RS. hvo_tomislavgrad probes only, captures=0.
+- **Anchors:** 27/27 PASS (unchanged from R15).
+- **Bot benchmarks:** 5/6 (RS consolidate_gains t40 FAIL: actual=50.3% vs expected=55.3% — pre-existing from R15, not caused by this change).
+- Operation history: Op Jackal ★★★★★ 2/2 obj 1.9:1 exchange. Op Foca ★☆☆☆☆ 0/4 obj (kalinovik axis broken link still unfixed — R20 candidate).
+
+**Sensitive-history compliance:** Ring-1 / no §6. Logic fix restoring historically correct behavior (Graz Accords did NOT block HRHB operations in southeast Herzegovina before Op Jackal completed — the east-pair truce only activated after). No FORAWWV / painted target / OOB / political_controllers touch.
+
+**R20 candidate:** Op Foca kalinovik axis broken link — remove `varos_2` from objectives (varos_2 adj golubici_2 = FALSE), chain becomes vlaholje → golubici_2 → sela_2. Expected gain: golubici_2 (80.8 km²) + sela_2 (120.7 km²) ≈ +201 km². Cascade risk: LOW (early-war, Herzegovina Corps, far from VRS 2nd Krajina). See `calibration_r16_r17_cascade_findings.md` for adjacency verification and secondary concerns (rs_gacko_brigade march distance, jna_kalinovik_to_tg no-weapons/w10 withdrawal).
+
+**Artifacts:** `src/sim/local_truces.ts`, `docs/PROJECT_LEDGER.md`.
+
+---

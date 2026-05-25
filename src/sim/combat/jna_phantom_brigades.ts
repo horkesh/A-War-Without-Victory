@@ -298,7 +298,11 @@ const HV_PHANTOM_DEFS: PhantomDef[] = [
         name: 'HV 1st Guards Brigade TG (Tigrovi)',
         corps_id: 'hvo_southeast_herzegovina' as FormationId,
         faction: 'HRHB',
-        location_osid: 'op:stolac:rotimlja_2',
+        // R17 2026-05-25: moved from op:stolac:rotimlja_2 (RS-held at t0 —
+        // brigade stranded in hostile territory, never reached staging, zero
+        // fatigue across 188w). capljina_2 is Op Jackal staging, adjacent to
+        // tasovcici_2 (first objective).
+        location_osid: 'op:capljina:capljina_2',
         withdrawal_turn: 24,
         tanks: 12, artillery: 10, apcs: 8,
         no_equipment_handoff: true,
