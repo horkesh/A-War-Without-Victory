@@ -53,11 +53,11 @@ describe('event taxonomy diagnostic report', () => {
         expect(report.summary.no_choice_events).toBe(203);
         expect(report.summary.required_response_events).toBe(36);
         expect(report.summary.choice_rows_with_title_and_narrative).toBe(44);
-        expect(report.summary.choice_rows_with_source).toBe(29);
-        expect(report.summary.required_response_rows_with_source).toBe(27);
-        expect(report.summary.historical_default_markers).toBe(16);
-        expect(report.summary.historical_default_ids).toBe(16);
-        expect(report.summary.modal_ready_events).toBe(16);
+        expect(report.summary.choice_rows_with_source).toBe(30);
+        expect(report.summary.required_response_rows_with_source).toBe(28);
+        expect(report.summary.historical_default_markers).toBe(17);
+        expect(report.summary.historical_default_ids).toBe(17);
+        expect(report.summary.modal_ready_events).toBe(17);
     });
 
     it('requires required-response choice rows to declare a valid responding faction', () => {
@@ -133,6 +133,7 @@ describe('event taxonomy diagnostic report', () => {
             'os_rbih_tactical_acceptance_1993',
             'strategic_posture_review_hrhb',
             'washington_agreement_1994',
+            'ic_rbih_restraint_post_washington',
             'contact_group_plan_1994',
             'belgrade_embargo_rs_1994',
             'carter_ceasefire_1994',
@@ -140,7 +141,7 @@ describe('event taxonomy diagnostic report', () => {
             'dayton_talks_begin_1995',
             'csq_patron_recovery_offer',
         ]);
-        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(16);
+        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(17);
     });
 
     it('classifies packet 3 target rows as finished modal-ready after authored defaults and source notes', () => {
@@ -214,6 +215,24 @@ describe('event taxonomy diagnostic report', () => {
                 expect.objectContaining({ code: 'missing_historical_default_marker' }),
             ]));
         }
+    });
+
+    it('classifies the Washington restraint row as finished modal-ready after authored defaults and source notes', () => {
+        const report = buildEventTaxonomyReport(loadCatalogRows());
+        const row = report.rows.find((entry) => entry.id === 'ic_rbih_restraint_post_washington');
+
+        expect(row).toBeDefined();
+        expect(row!.modal_ready).toBe(true);
+        expect(row!.row_classification).toBe('finished_modal_ready');
+        expect(row!.historical_default_response_id).toBe('acknowledge_pressure');
+        expect(row!.historical_default_option_id).toBe('acknowledge_pressure');
+        expect(row!.bot_response_logic).toBe('historical');
+        expect(row!.has_option_descriptions).toBe(true);
+        expect(row!.has_numeric_option_previews).toBe(true);
+        expect(row!.findings).not.toEqual(expect.arrayContaining([
+            expect.objectContaining({ code: 'historical_default_bot_logic_mismatch' }),
+            expect.objectContaining({ code: 'missing_historical_default_marker' }),
+        ]));
     });
 
     it('counts event-level historical defaults and validates they reference an existing option id', () => {

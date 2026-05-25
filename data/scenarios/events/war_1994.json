@@ -449,6 +449,14 @@
     "once": true,
     "responding_faction": "RBiH",
     "bot_response_logic": "historical",
+    "historical_default_response_id": "acknowledge_pressure",
+    "historical_source": "Balkan Battlegrounds Vol. I pp.21-22; Washington Agreement text, Mar. 18 1994; Contact Group diplomacy chronology, May-July 1994.",
+    "source_note": "Balkan Battlegrounds traces the post-Washington diplomatic lane through Federation institution-building, Contact Group shuttle diplomacy, ceasefire pressure, and the 51/49 settlement framework.",
+    "staff_assessment": "Acknowledging the Western warning preserves patron confidence after Washington, but it costs Sarajevo some negotiating leverage and frustrates commanders who see a military opening.",
+    "trigger_evidence": [
+      "The turn 106-114 window follows the formal Washington Agreement period.",
+      "The same diplomatic lane leads into Contact Group pressure and ceasefire proposals rather than unrestricted Federation offensives."
+    ],
     "requires_player_response": true,
     "priority": 50,
     "auto_resolve_turns": 2,
@@ -467,6 +475,8 @@
       {
         "id": "acknowledge_pressure",
         "label": "Acknowledge the message",
+        "description": "Historical posture: temper offensive planning to keep Western support intact. Patron confidence +8, negotiating leverage -5, internal cohesion -3.",
+        "historical_marker": "historical_default",
         "aggression_affinity": -0.3,
         "risk_level": 0.2,
         "dimension_shifts": [
@@ -490,6 +500,7 @@
       {
         "id": "resist_patron",
         "label": "Maintain our position",
+        "description": "Keep pressure on the front despite Western caution. Patron confidence -10, negotiating leverage +6, military credibility +3.",
         "aggression_affinity": 0.5,
         "risk_level": 0.7,
         "dimension_shifts": [

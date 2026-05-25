@@ -15,6 +15,25 @@
 
 ---
 
+## [2026-05-26] data(events): author Washington restraint modal row
+
+**Type:** Event content authoring + roadmap/ledger update.
+
+**Change:** Production-authored only `ic_rbih_restraint_post_washington` in `data/scenarios/events/war_1994.json`. Added `historical_default_response_id: "acknowledge_pressure"`, a single option-0 `historical_marker: "historical_default"`, compact historical source and source note, staff assessment, trigger evidence, and numeric option descriptions. Existing bot logic was already `historical`, so bot/headless selection remains on the historical option. Effects, trigger timing, response IDs, option order, faction, priority, and notifications were left unchanged. Other remaining rows were deferred because the safe autonomous set is now stop-gated by sensitive-history review, source/design default blockers, explicit user exclusions, or 188w proof.
+
+**Determinism:** Authored metadata/copy only. No event trigger predicates, timing, response order, effects, flags, dimension shifts, factions, save schema, randomness, timestamps, operation tuning, initial OSID overrides, avoided-OSID lists, or runtime/UI/schema code changed. Full catalog remains `NOT_READY`; production modal-ready required-response rows rise from 16 to 17.
+
+**Verification:**
+- `node -e "const fs=require('fs'); for (const p of ['data/scenarios/events/war_1992.json','data/scenarios/events/war_1993.json','data/scenarios/events/war_1994.json','data/scenarios/events/war_1995.json','data/scenarios/events/consequences.json']) JSON.parse(fs.readFileSync(p,'utf8')); console.log('event JSON parse ok')"` - PASS.
+- `F:\A-War-Without-Victory\node_modules\.bin\tsx.cmd tools\diagnostics\event_acceptance_report.ts --json` - PASS; catalog remains `NOT_READY`: 247 events, 36 required-response, 17 production modal-ready, 19 missing explicit defaults/markers/source notes, 8 source-blocked, 8 sensitive-gated, 5 default/counterfactual blocked, 1 scheduled-only required-response row.
+- `F:\A-War-Without-Victory\node_modules\.bin\tsx.cmd tools\diagnostics\event_taxonomy_report.ts --json` - PASS; 247 events, 44 choice events, 36 required-response, 17 historical default ids, 17 historical default markers, 13 historical-default-unavailable rows, 17 modal-ready events, 193 warnings, 0 errors.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\sim\events\event_acceptance_report.test.ts tests\sim\events\event_taxonomy_report.test.ts tests\event_decisions.test.ts --reporter=dot` - PASS; 56/56 tests.
+- `npx.cmd tsx ...` forms are blocked in this dependency-less worktree because `node_modules` is absent; verification used the main workspace's installed `tsx.cmd` while running from the forked worktree.
+
+**Artifacts:** `data/scenarios/events/war_1994.json`, `tests/sim/events/event_acceptance_report.test.ts`, `tests/sim/events/event_taxonomy_report.test.ts`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-25] diagnostics(events): add Phase 1 event taxonomy report
 
 **Type:** Tooling/test diagnostic only. Behavior-neutral: no runtime behavior, event JSON, UI, save schema, resolver, simulation calibration, combat math, or event-ordering changes.
