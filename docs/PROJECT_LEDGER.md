@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-25] diagnostics(events): add Phase 1 event taxonomy report
+
+**Type:** Tooling/test diagnostic only. Behavior-neutral: no runtime behavior, event JSON, UI, save schema, resolver, simulation calibration, combat math, or event-ordering changes.
+
+**Why:** Phase 1 event-taxonomy work needed a fixed-scope diagnostic over the current event catalog to expose event authoring inventory, modal-readiness gaps, historical/default marker debt, source debt, and sensitive-history review surfaces without changing how events fire or resolve.
+
+**Change:** Added a five-file event catalog taxonomy diagnostic with JSON/text reporting and focused tests. Current inventory reports 247 total events, 44 choice events, 36 required-response events, 0 modal-ready events, and 205 warnings. The diagnostic surfaces historical/default marker debt, source debt, and sensitive-history review candidates for follow-up authoring/review work.
+
+**Verification:** `npx.cmd vitest run tests\sim\events\event_taxonomy_report.test.ts --reporter=dot` passed; CLI JSON smoke passed. Broad typecheck was not clean due pre-existing/missing UI map dependencies per the implementer report, not because of the event-taxonomy diagnostic changes.
+
+**Artifacts:** `tools/diagnostics/event_taxonomy_report.ts`; `tests/sim/events/event_taxonomy_report.test.ts`.
+
+---
+
 ## [2026-05-25] test(ui): align merge CI contracts
 
 **Type:** Test/copy contract follow-up. No simulation calibration, scenario data, combat math, event ordering, or Claude calibration branch work changed.
