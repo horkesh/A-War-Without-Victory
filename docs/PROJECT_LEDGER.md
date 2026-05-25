@@ -10700,3 +10700,23 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `data/scenarios/events/war_1994.json`, `tests/sim/events/event_acceptance_report.test.ts`, `tests/sim/events/event_taxonomy_report.test.ts`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-25] data(events): clean Lukavac scheduled-only trigger debt
+
+**Type:** Event trigger cleanup + runtime gate correction + acceptance/pressure coverage.
+
+**Change:** Moved `operation_lukavac_93` off scheduled-only required-response debt without authoring full modal/default/source metadata. Preserved `turn_min: 65`, `turn_max: 72`, and `phase: "war"`. Added a local player-safe trigger requiring `sarajevo_siege_active === true` and RS control of Trnovo at threshold `0.5`, plus pressure readiness `base_rate: 1`, `threshold: 2`, `decay_rate: 1` with +1 route-proxy bonuses for RS control of `op:hadzici:lokve`, `op:hadzici:pazaric`, and `op:hadzici:tarcin_2`. Removed Lukavac from the conditional trigger-cleanup candidate packet; it remains blocked from production modal readiness by existing missing default/source/preview metadata debt.
+
+**Determinism:** Trigger/pressure predicates use existing deterministic condition and pressure substrates. A follow-up runtime correction makes pressure events re-check their trigger before firing, so accumulated readiness can decay without bypassing a closed local gate. No new condition type, save schema, response order, effects, source/default authoring, randomness, timestamps, operation tuning, initial OSID overrides, avoided-OSID lists, or faction model changes were introduced. Diagnostics now classify Lukavac as `state_or_pressure`; full catalog acceptance remains `NOT_READY`.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\sim\events\event_acceptance_report.test.ts --reporter=dot` failed 4 expected Lukavac cleanup assertions before data/diagnostic changes; `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\pressure_system.test.ts --reporter=dot` failed the new Lukavac pressure fixture before the pressure block existed; `npx.cmd vitest run tests\event_decisions.test.ts --reporter=dot` failed 2/16 after adding the closed-gate full-path regression and before the runtime fix.
+- `npx.cmd vitest run tests\sim\events\event_acceptance_report.test.ts tests\event_timeline_integrity.test.ts tests\pressure_system.test.ts tests\event_conditions.test.ts tests\event_decisions.test.ts --reporter=dot` - PASS; 73/73 tests.
+- `npx.cmd tsx tools\diagnostics\event_acceptance_report.ts --json` - PASS; catalog remains `NOT_READY`: 247 events, 36 required-response, 6 production modal-ready, 30 missing explicit defaults/markers/source notes, 16 source-blocked, 8 sensitive-gated, 5 default/counterfactual blocked, 1 scheduled-only required-response row, 0 conditional candidates, 1 deferred candidate. Lukavac reports `trigger_gate: "state_or_pressure"` and no scheduled-only blocker.
+- `npx.cmd tsx tools\diagnostics\event_taxonomy_report.ts --json` - PASS; 247 events, 44 choice events, 36 required-response, 6 historical default ids, 6 historical default markers, 6 modal-ready events, 213 warnings, 0 errors.
+- `git diff --check` - PASS.
+- `npm.cmd run typecheck` - blocked by existing missing UI map dependency/type declarations outside this slice (`maplibre-gl`, `pmtiles`, Deck.gl packages, `@vitejs/plugin-react`) and related implicit-any fallout.
+
+**Artifacts:** `data/scenarios/events/war_1993.json`, `src/sim/events/evaluate_events.ts`, `tools/diagnostics/event_acceptance_report.ts`, `tests/sim/events/event_acceptance_report.test.ts`, `tests/pressure_system.test.ts`, `tests/event_decisions.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---

@@ -78,7 +78,6 @@ export const APPROVED_FIRST_AUTHORING_PACKET_CANDIDATES = [
 ] as const;
 
 export const CONDITIONAL_AUTHORING_PACKET_CANDIDATES = [
-    'operation_lukavac_93',
 ] as const;
 
 export const DEFERRED_AUTHORING_PACKET_CANDIDATES = [

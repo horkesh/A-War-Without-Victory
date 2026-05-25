@@ -13,6 +13,13 @@ import {
 
 type EventFixture = {
     id?: string;
+    trigger?: {
+        turn_min?: number;
+        turn_max?: number;
+        phase?: string;
+        condition?: unknown;
+    };
+    pressure?: unknown;
     historical_default_response_id?: string;
     response_options?: Array<{ id?: string; historical_marker?: string }>;
 };
@@ -24,9 +31,7 @@ const EXPECTED_APPROVED_FIRST_PACKET = [
     'belgrade_embargo_rs_1994',
 ];
 
-const EXPECTED_CONDITIONAL_PACKET = [
-    'operation_lukavac_93',
-];
+const EXPECTED_CONDITIONAL_PACKET: string[] = [];
 
 const EXPECTED_DEFERRED_PACKET = ['us_halts_federation_advance_1995'];
 
@@ -62,6 +67,17 @@ const EXPECTED_PACKET_2B_DEFAULTS = new Map([
 
 function loadEventFixtures(file: string): EventFixture[] {
     return JSON.parse(readFileSync(file, 'utf8')) as EventFixture[];
+}
+
+function collectConditionTypes(condition: unknown): string[] {
+    if (typeof condition !== 'object' || condition === null || Array.isArray(condition)) return [];
+    const record = condition as Record<string, unknown>;
+    const current = typeof record.type === 'string' ? [record.type] : [];
+    const nested = Array.isArray(record.conditions)
+        ? record.conditions.flatMap((entry) => collectConditionTypes(entry))
+        : [];
+    const singleNested = collectConditionTypes(record.condition);
+    return [...current, ...nested, ...singleNested].sort();
 }
 
 describe('event acceptance diagnostic report', () => {
@@ -118,33 +134,60 @@ describe('event acceptance diagnostic report', () => {
         expect(mismatchedRows.map((row) => row.id)).toEqual([]);
     });
 
-    it('keeps Lukavac conditional and not production modal-ready', () => {
+    it('keeps Lukavac out of the conditional cleanup packet while leaving modal authoring blocked', () => {
         const report = buildEventAcceptanceReport();
+        const lukavac = report.required_response_rows.find((entry) => entry.id === 'operation_lukavac_93');
 
         expect(report.conditional_authoring_packet_candidates.map((row) => row.id)).toEqual(EXPECTED_CONDITIONAL_PACKET);
-        for (const id of EXPECTED_CONDITIONAL_PACKET) {
-            const row = report.required_response_rows.find((entry) => entry.id === id);
-
-            expect(row, id).toBeDefined();
-            expect(row!.candidate_status, id).toBe('CONDITIONAL_TRIGGER_CLEANUP_REQUIRED');
-            expect(row!.production_modal_authoring_ready, id).toBe(false);
-            expect(row!.blocking_reasons.length, id).toBeGreaterThan(0);
-        }
+        expect(lukavac).toBeDefined();
+        expect(lukavac!.candidate_status).toBeNull();
+        expect(lukavac!.production_modal_authoring_ready).toBe(false);
+        expect(lukavac!.blocking_reasons.length).toBeGreaterThan(0);
     });
 
-    it('cleans Holbrooke scheduled-only debt while leaving Lukavac blocked pending local trigger proof', () => {
+    it('cleans Holbrooke and Lukavac scheduled-only debt with state or pressure gates', () => {
         const report = buildEventAcceptanceReport();
         const lukavac = report.required_response_rows.find((entry) => entry.id === 'operation_lukavac_93');
         const holbrooke = report.required_response_rows.find((entry) => entry.id === 'holbrooke_ceasefire_demand_oct95');
 
         expect(lukavac).toBeDefined();
-        expect(lukavac!.trigger_gate).toBe('scheduled_only');
-        expect(lukavac!.blocking_reasons).toContain('scheduled_only_trigger_needs_predicate_cleanup_or_exogenous_waiver');
+        expect(lukavac!.trigger_gate).toBe('state_or_pressure');
+        expect(lukavac!.blocking_reasons).not.toContain('scheduled_only_trigger_needs_predicate_cleanup_or_exogenous_waiver');
+        expect(report.scheduled_only_rows.map((row) => row.id)).not.toContain('operation_lukavac_93');
 
         expect(holbrooke).toBeDefined();
         expect(holbrooke!.trigger_gate).toBe('state_or_pressure');
         expect(holbrooke!.blocking_reasons).not.toContain('scheduled_only_trigger_needs_predicate_cleanup_or_exogenous_waiver');
         expect(report.scheduled_only_rows.map((row) => row.id)).not.toContain('holbrooke_ceasefire_demand_oct95');
+    });
+
+    it('authors Lukavac with the local Sarajevo and Trnovo trigger plus Hadzici route pressure proxies', () => {
+        const event = loadEventFixtures('data/scenarios/events/war_1993.json')
+            .find((entry) => entry.id === 'operation_lukavac_93');
+        const trigger = event?.trigger;
+        const pressure = event?.pressure as {
+            base_rate?: number;
+            threshold?: number;
+            decay_rate?: number;
+            modifiers?: Array<{ condition?: { type?: string; osid?: string; faction?: string }; rate_bonus?: number }>;
+        } | undefined;
+
+        expect(event).toBeDefined();
+        expect(trigger).toMatchObject({ turn_min: 65, turn_max: 72, phase: 'war' });
+        expect(trigger?.condition).toEqual({
+            type: 'and',
+            conditions: [
+                { type: 'flag_equals', flag: 'sarajevo_siege_active', value: true },
+                { type: 'faction_controls_municipality', faction: 'RS', municipality: 'trnovo', threshold: 0.5 },
+            ],
+        });
+        expect(collectConditionTypes(trigger?.condition)).not.toContain('territory_percentage');
+        expect(pressure).toMatchObject({ base_rate: 1, threshold: 2, decay_rate: 1 });
+        expect(pressure?.modifiers).toEqual([
+            { condition: { type: 'territory_control', osid: 'op:hadzici:lokve', faction: 'RS' }, rate_bonus: 1 },
+            { condition: { type: 'territory_control', osid: 'op:hadzici:pazaric', faction: 'RS' }, rate_bonus: 1 },
+            { condition: { type: 'territory_control', osid: 'op:hadzici:tarcin_2', faction: 'RS' }, rate_bonus: 1 },
+        ]);
     });
 
     it('marks the approved first authoring packet as production modal-ready only after safe-first JSON authoring', () => {

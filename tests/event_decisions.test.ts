@@ -7,10 +7,12 @@
  */
 
 import { afterEach, describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
 import type { GameState } from '../src/state/game_state';
 import type { EventDefinition } from '../src/sim/events/event_types';
 import { resolveEventDecision } from '../src/sim/events/resolve_decision';
 import { evaluateEvents } from '../src/sim/events/evaluate_events';
+import { updateEventReadiness } from '../src/sim/events/pressure_system';
 
 const ORIGINAL_TWO_LEVEL_FLAG = process.env.AWWV_TWO_LEVEL_NOTIFICATIONS;
 
@@ -37,6 +39,30 @@ function makeMinimalState(playerFaction?: string): GameState {
         displacement: {} as any,
         economic: {} as any,
     } as unknown as GameState;
+}
+
+function loadLukavacEvent(): EventDefinition {
+    const events = JSON.parse(readFileSync('data/scenarios/events/war_1993.json', 'utf8')) as EventDefinition[];
+    const lukavac = events.find((event) => event.id === 'operation_lukavac_93');
+    if (!lukavac) throw new Error('operation_lukavac_93 fixture not found');
+    return lukavac;
+}
+
+function makeLukavacReadyState(): GameState {
+    const state = makeMinimalState('RS');
+    state.meta.turn = 65;
+    state.military.event_flags = { sarajevo_siege_active: true };
+    state.military.event_readiness = {};
+    state.political = {
+        political_controllers: {
+            'op:trnovo:trnovo_2': 'RS',
+            'op:trnovo:dejcici': 'RBiH',
+            'op:hadzici:lokve': 'RS',
+            'op:hadzici:pazaric': 'RS',
+            'op:hadzici:tarcin_2': 'RS',
+        },
+    } as any;
+    return state;
 }
 
 const DECISION_EVENT: EventDefinition = {
@@ -270,6 +296,66 @@ describe('Event Decisions', () => {
             faction: 'RS',
             requires_player_response: true,
         });
+    });
+
+    it('queues Lukavac for the RS player when readiness and runtime gates are open', () => {
+        const lukavac = loadLukavacEvent();
+        const state = makeLukavacReadyState();
+
+        updateEventReadiness(state, [lukavac]);
+        expect(state.military.event_readiness?.operation_lukavac_93).toBeGreaterThan(lukavac.pressure!.threshold);
+
+        const report = evaluateEvents(state, () => 0, 65, [lukavac]);
+
+        expect(report.fired).toEqual([{ id: 'operation_lukavac_93', text: lukavac.title }]);
+        expect(state.military.pending_event_decisions).toHaveLength(1);
+        expect(state.military.pending_event_decisions![0]).toMatchObject({
+            event_id: 'operation_lukavac_93',
+            event_title: lukavac.title,
+            faction: 'RS',
+            requires_player_response: true,
+        });
+        expect(state.military.fired_event_ids).toContain('operation_lukavac_93');
+        expect(state.military.event_readiness?.operation_lukavac_93).toBe(0);
+    });
+
+    it('does not queue Lukavac when the Sarajevo siege gate closes after readiness crosses threshold', () => {
+        const lukavac = loadLukavacEvent();
+        const state = makeLukavacReadyState();
+
+        updateEventReadiness(state, [lukavac]);
+        expect(state.military.event_readiness?.operation_lukavac_93).toBe(4);
+
+        state.military.event_flags = { sarajevo_siege_active: false };
+        updateEventReadiness(state, [lukavac]);
+        expect(state.military.event_readiness?.operation_lukavac_93).toBe(3);
+
+        const report = evaluateEvents(state, () => 0, 65, [lukavac]);
+
+        expect(report.fired.map((event) => event.id)).not.toContain('operation_lukavac_93');
+        expect(state.military.pending_event_decisions ?? []).toHaveLength(0);
+        expect(state.military.fired_event_ids ?? []).not.toContain('operation_lukavac_93');
+    });
+
+    it('does not queue Lukavac when the Trnovo gate closes after readiness crosses threshold', () => {
+        const lukavac = loadLukavacEvent();
+        const state = makeLukavacReadyState();
+
+        updateEventReadiness(state, [lukavac]);
+        expect(state.military.event_readiness?.operation_lukavac_93).toBe(4);
+
+        state.political.political_controllers = {
+            ...state.political.political_controllers,
+            'op:trnovo:trnovo_2': 'RBiH',
+        };
+        updateEventReadiness(state, [lukavac]);
+        expect(state.military.event_readiness?.operation_lukavac_93).toBe(3);
+
+        const report = evaluateEvents(state, () => 0, 65, [lukavac]);
+
+        expect(report.fired.map((event) => event.id)).not.toContain('operation_lukavac_93');
+        expect(state.military.pending_event_decisions ?? []).toHaveLength(0);
+        expect(state.military.fired_event_ids ?? []).not.toContain('operation_lukavac_93');
     });
 
     it('pending event decisions carry historical default metadata for modal marking', () => {

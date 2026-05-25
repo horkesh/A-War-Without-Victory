@@ -204,7 +204,9 @@ export function evaluateEvents(
 
         // Pressure-based vs trigger-based evaluation
         if (def.pressure) {
-            // Pressure events: fire when readiness >= threshold
+            // Pressure events: readiness can persist briefly after a trigger gate closes;
+            // require the trigger to still match before allowing the event to fire.
+            if (!triggerMatches(def, state, currentTurn, edges)) continue;
             if (!isEventReady(state, def)) continue;
         } else {
             // Legacy events: use triggerMatches

@@ -1911,7 +1911,54 @@
     "trigger": {
       "turn_min": 65,
       "turn_max": 72,
-      "phase": "war"
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "sarajevo_siege_active",
+            "value": true
+          },
+          {
+            "type": "faction_controls_municipality",
+            "faction": "RS",
+            "municipality": "trnovo",
+            "threshold": 0.5
+          }
+        ]
+      }
+    },
+    "pressure": {
+      "base_rate": 1,
+      "threshold": 2,
+      "decay_rate": 1,
+      "modifiers": [
+        {
+          "condition": {
+            "type": "territory_control",
+            "osid": "op:hadzici:lokve",
+            "faction": "RS"
+          },
+          "rate_bonus": 1
+        },
+        {
+          "condition": {
+            "type": "territory_control",
+            "osid": "op:hadzici:pazaric",
+            "faction": "RS"
+          },
+          "rate_bonus": 1
+        },
+        {
+          "condition": {
+            "type": "territory_control",
+            "osid": "op:hadzici:tarcin_2",
+            "faction": "RS"
+          },
+          "rate_bonus": 1
+        }
+      ]
     },
     "once": true,
     "requires_player_response": true,
