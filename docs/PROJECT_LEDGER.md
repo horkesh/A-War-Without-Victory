@@ -10686,3 +10686,31 @@ Any new offensive op — regardless of geographic location or corps — creates 
 **Artifacts:** no committed changes (edit never committed). `docs/PROJECT_LEDGER.md` updated.
 
 ---
+
+## 2026-05-26 — 188w Calibration R26 (+1.26pp, NEW BASELINE)
+
+**R26: `srebrenica_falls_1995` control_change — ACCEPTED, NEW BASELINE.**
+
+- Commit: `1572f1be`. File: `data/scenarios/events/war_1995.json`.
+- Change: added `control_change` effect (faction: RS, 9 OSIDs) to the `effects[]` array of `srebrenica_falls_1995`. The event was already firing in every run (~turn 163, rate 3.5/turn, threshold 8) but had no territorial effect.
+- Painted match_ratio: **0.845506 → 0.858146 (+1.2640pp)**. Run: `n31`, hash `155442771692fb47`.
+- OSID control: HRHB=97, RBiH=309, RS=315 (matched 611/712).
+- **HRHB 83/107 — R22 bosansko_grahovo/Sipovo cascade fully preserved.**
+- RS 272/315 (+9 vs R22) — all 9 Srebrenica enclave OSIDs correctly RS at wi=188.
+
+**Why it worked without cascade disruption:** Event-based `control_change` adds NO new combat operations. Brigade attrition paths are unchanged. The R22 patkovina cascade (which drove the HRHB gains) survived intact. This confirms the design principle: Srebrenica must be handled via the event system, not pre_planned_operations.ts.
+
+**Srebrenica OSID verification (final_save n31):** srebrenica_2=RS, donji_potocari_2=RS, milacevici=RS, ljeskovik_2=RS, sulice_2=RS, bostahovine_2=RS, luka_2=RS, suceska=RS, radovcici=RS — all 9 correct.
+
+**Precondition flags confirmed set in R22/R26:** srebrenica_enclave_formed=true, srebrenica_demilitarized=true, coha_expired=true, rrf_deployed=true, un_hostage_crisis_occurred=true. Event gate: turns 160-185, enclave_formed AND demilitarized AND pressure threshold 8.
+
+**Rupture consequence gap (non-blocking):** `rupture_consequences = 0` despite all c1/c2/c3/c4 conditions being met. Root cause: turn pipeline evaluates `evaluateRuptureConsequences()` before event effects apply, so srebrenica_2 still reads RBiH at rupture-check time on the turn the event fires. Condemnation flag never records. Territorial calibration correct; rupture timing needs a follow-up fix (call rupture eval after event effects, or on the following turn).
+
+**srebrenica_ring axis:** Remains broken in pre_planned_operations.ts — intentionally correct. Op-based capture was never the right mechanism.
+
+**R27 candidates:**
+1. **Rupture consequence timing fix** — call `evaluateRuptureConsequences()` after event `control_change` effects apply. Engine change, non-calibration.
+2. **Srebrenica precondition event chain** (item 2 from design): VRS blockade decision (~turn 155) → salt/medicine embargo (~turn 158) → Mladic strangulation order (~turn 162). Feeds `srebrenica_falls_1995` rate modifiers.
+3. **Further calibration improvements** — compare R26 mismatch list vs R22 to find next tractable target.
+
+**Artifacts:** `data/scenarios/events/war_1995.json`, `docs/PROJECT_LEDGER.md`.
