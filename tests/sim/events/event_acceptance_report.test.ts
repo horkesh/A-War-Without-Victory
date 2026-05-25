@@ -71,6 +71,12 @@ const EXPECTED_PACKET_3_DEFAULTS = new Map([
     ['csq_patron_recovery_offer', 'accept_recovery'],
 ]);
 
+const EXPECTED_PACKET_4_DEFAULTS = new Map([
+    ['washington_agreement_1994', 'accept'],
+    ['contact_group_plan_1994', 'accept'],
+    ['dayton_talks_begin_1995', 'accept'],
+]);
+
 function loadEventFixtures(file: string): EventFixture[] {
     return JSON.parse(readFileSync(file, 'utf8')) as EventFixture[];
 }
@@ -94,13 +100,13 @@ describe('event acceptance diagnostic report', () => {
         expect(JSON.stringify(first)).toBe(JSON.stringify(second));
         expect(first.summary.total_events).toBe(247);
         expect(first.summary.required_response_events).toBe(36);
-        expect(first.summary.production_modal_authoring_ready_events).toBe(9);
+        expect(first.summary.production_modal_authoring_ready_events).toBe(12);
         expect(first.summary.acceptance_status).toBe('NOT_READY');
         expect(first.summary.full_catalog_accepted).toBe(false);
-        expect(first.summary.missing_historical_default_response_id_events).toBe(27);
-        expect(first.summary.missing_historical_marker_events).toBe(27);
+        expect(first.summary.missing_historical_default_response_id_events).toBe(24);
+        expect(first.summary.missing_historical_marker_events).toBe(24);
         expect(first.summary.source_blocked_events).toBeGreaterThan(0);
-        expect(first.summary.missing_source_note_events).toBe(27);
+        expect(first.summary.missing_source_note_events).toBe(24);
     });
 
     it('lists the approved first production authoring packet candidates without changing JSON content', () => {
@@ -145,6 +151,19 @@ describe('event acceptance diagnostic report', () => {
 
         expect(report.conditional_authoring_packet_candidates.map((row) => row.id)).toEqual(EXPECTED_CONDITIONAL_PACKET);
         for (const id of EXPECTED_PACKET_3_DEFAULTS.keys()) {
+            const row = report.required_response_rows.find((entry) => entry.id === id);
+            expect(row, id).toBeDefined();
+            expect(row!.candidate_status, id).toBeNull();
+            expect(row!.production_modal_authoring_ready, id).toBe(true);
+            expect(row!.blocking_reasons, id).toEqual([]);
+            expect(row!.bot_response_logic, id).toBe('historical');
+        }
+    });
+
+    it('counts the diplomatic packet rows as production modal-ready with no residual blockers', () => {
+        const report = buildEventAcceptanceReport();
+
+        for (const id of EXPECTED_PACKET_4_DEFAULTS.keys()) {
             const row = report.required_response_rows.find((entry) => entry.id === id);
             expect(row, id).toBeDefined();
             expect(row!.candidate_status, id).toBeNull();
@@ -217,9 +236,12 @@ describe('event acceptance diagnostic report', () => {
             'rs_assembly_rejects_voplan_1993',
             'operation_lukavac_93',
             'os_rbih_tactical_acceptance_1993',
+            'washington_agreement_1994',
+            'contact_group_plan_1994',
             'belgrade_embargo_rs_1994',
             'carter_ceasefire_1994',
             'holbrooke_ceasefire_demand_oct95',
+            'dayton_talks_begin_1995',
             'csq_patron_recovery_offer',
         ]);
         expect(report.summary.acceptance_status).toBe('NOT_READY');
@@ -239,6 +261,7 @@ describe('event acceptance diagnostic report', () => {
             ...EXPECTED_PACKET_2A_DEFAULTS,
             ...EXPECTED_PACKET_2B_DEFAULTS,
             ...EXPECTED_PACKET_3_DEFAULTS,
+            ...EXPECTED_PACKET_4_DEFAULTS,
         ]);
 
         for (const id of expectedDefaults.keys()) {

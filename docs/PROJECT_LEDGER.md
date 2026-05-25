@@ -10740,3 +10740,26 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `data/scenarios/events/war_1993.json`, `data/scenarios/events/consequences.json`, `tools/diagnostics/event_taxonomy_report.ts`, `tests/sim/events/event_acceptance_report.test.ts`, `tests/sim/events/event_taxonomy_report.test.ts`, `tests/event_decisions.test.ts`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-26] data(events): author diplomatic modal packet
+
+**Type:** Event content authoring + acceptance/taxonomy diagnostic update.
+
+**Change:** Production-authored only `washington_agreement_1994`, `contact_group_plan_1994`, and `dayton_talks_begin_1995`. Added explicit historical defaults (`accept` for all three), single option-0 `historical_marker: "historical_default"` markers, concise historical sources, modal source notes, staff assessments, trigger evidence, and risk/aggression option previews. Set all three bot policies to `historical`. Tightened Washington and Dayton player-facing descriptions so Washington remains an uneasy Federation framework rather than instant reconciliation, Contact Group remains pressured acceptance of an unimplemented 51/49 proposal, and Dayton talks begin after the ceasefire without claiming the war ends at talks opening.
+
+**Determinism:** Authored metadata/copy only plus deterministic diagnostic expectation updates. No event trigger predicates, timing, response order, response IDs, effects, flags, dimension shifts, factions, save schema, randomness, timestamps, operation tuning, initial OSID overrides, avoided-OSID lists, or runtime/UI/schema code changed. Full catalog remains `NOT_READY`; production modal-ready required-response rows rise from 9 to 12.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\sim\events\event_acceptance_report.test.ts tests\sim\events\event_taxonomy_report.test.ts tests\event_decisions.test.ts --reporter=dot` failed 8 expected assertions before the three event rows were authored.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\sim\events\event_acceptance_report.test.ts tests\sim\events\event_taxonomy_report.test.ts tests\event_decisions.test.ts --reporter=dot` - PASS; 51/51 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\tsx.cmd tools\diagnostics\event_acceptance_report.ts --json` - PASS; catalog remains `NOT_READY`: 247 events, 36 required-response, 12 production modal-ready, 24 missing explicit defaults/markers/source notes, 13 source-blocked, 8 sensitive-gated, 5 default/counterfactual blocked, 1 scheduled-only required-response row, 0 conditional candidates, 1 deferred candidate.
+- `F:\A-War-Without-Victory\node_modules\.bin\tsx.cmd tools\diagnostics\event_taxonomy_report.ts --json` - PASS; 247 events, 44 choice events, 36 required-response, 12 historical default ids, 12 historical default markers, 13 historical-default-unavailable rows, 12 modal-ready events, 203 warnings, 0 errors.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\sim\events\event_taxonomy_report.test.ts tests\sim\events\event_acceptance_report.test.ts tests\event_decisions.test.ts tests\events_evaluate.test.ts tests\event_effects.test.ts tests\event_timeline_integrity.test.ts tests\event_response_ownership_catalog.test.ts tests\player_decision_manifest.test.ts tests\ui\event_decision_modal_phase3.test.ts --reporter=dot` - PARTIAL/BLOCKED; 99/99 non-UI tests passed, then `tests/ui/event_decision_modal_phase3.test.ts` failed at import analysis because `react` is not resolvable in this dependency-less worktree.
+- Requested `npx.cmd tsx ...` and `npx.cmd vitest ...` forms are blocked in this worktree because `node_modules` is absent and `npx` resolves to missing worktree-local `node_modules\tsx\dist\cli.mjs` / `node_modules\vitest\vitest.mjs`.
+- `npm.cmd run typecheck` - blocked by existing missing UI map dependency/type declarations outside this slice (`maplibre-gl`, `pmtiles`, Deck.gl packages, `@vitejs/plugin-react`) and related implicit-any fallout.
+- `git diff --check` - PASS.
+- JSON parse smoke for `data/scenarios/events/war_1994.json` and `data/scenarios/events/war_1995.json` - PASS.
+
+**Artifacts:** `data/scenarios/events/war_1994.json`, `data/scenarios/events/war_1995.json`, `tests/sim/events/event_acceptance_report.test.ts`, `tests/sim/events/event_taxonomy_report.test.ts`, `tests/event_decisions.test.ts`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---

@@ -1499,7 +1499,15 @@
     "once": true,
     "requires_player_response": true,
     "responding_faction": "RBiH",
-    "bot_response_logic": "accept_first",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "accept",
+    "historical_source": "Balkan Battlegrounds Vol. I p.40; Holbrooke, To End a War (1998); General Framework Agreement for Peace, Nov. 21 1995.",
+    "source_note": "The Dayton row marks the opening negotiation posture after the October ceasefire and battlefield shift; the war is not over until a later settlement event.",
+    "staff_assessment": "Entering Dayton in good faith protects US backing and negotiation credibility while leaving hard territorial compromises unresolved at the start of talks.",
+    "trigger_evidence": [
+      "The October 1995 ceasefire event has fired.",
+      "The Dayton talks window has opened after NATO pressure, Federation gains, and VRS exhaustion moved the parties to negotiation."
+    ],
     "effect": {
       "kind": "narrative",
       "text": "The Dayton peace talks begin. After three and a half years of war, the outlines of a settlement take shape."
@@ -1508,7 +1516,10 @@
       {
         "id": "accept",
         "label": "Negotiate in Good Faith",
-        "description": "Commit fully to the peace process. The war ends, but the compromises will define the country for decades.",
+        "description": "Commit to the Dayton process after the ceasefire, preserving credibility while the settlement remains unresolved.",
+        "historical_marker": "historical_default",
+        "aggression_affinity": -0.6,
+        "risk_level": 0.3,
         "effects": [
           {
             "kind": "negotiation_capital",
@@ -1527,6 +1538,8 @@
         "id": "hardline",
         "label": "Push for Maximum Concessions",
         "description": "Leverage military momentum to demand more territory and stronger central government. Risks collapse of talks.",
+        "aggression_affinity": 0.5,
+        "risk_level": 0.8,
         "effects": [
           {
             "kind": "negotiation_capital",
