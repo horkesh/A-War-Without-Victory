@@ -329,7 +329,7 @@ function sensitiveKeywordsFor(row: Pick<EventTaxonomyRow, 'id' | 'title' | 'narr
 function historicalDefaultUnavailableReason(row: Pick<EventTaxonomyRow, 'id' | 'is_choice_event'>): string | null {
     if (SENSITIVE_DEFAULT_BLOCKED_IDS.has(row.id)) return 'sensitive_history_review_required';
     if (HISTORICAL_DEFAULT_BLOCKED_IDS.has(row.id)) return 'source_or_design_blocked';
-    if (row.is_choice_event && row.id.startsWith('csq_')) return 'counterfactual_consequence_offer';
+    if (row.is_choice_event && row.id.startsWith('csq_') && row.id !== 'csq_patron_recovery_offer') return 'counterfactual_consequence_offer';
     return null;
 }
 

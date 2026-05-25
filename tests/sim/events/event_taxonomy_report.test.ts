@@ -55,9 +55,9 @@ describe('event taxonomy diagnostic report', () => {
         expect(report.summary.choice_rows_with_title_and_narrative).toBe(44);
         expect(report.summary.choice_rows_with_source).toBe(22);
         expect(report.summary.required_response_rows_with_source).toBe(20);
-        expect(report.summary.historical_default_markers).toBe(6);
-        expect(report.summary.historical_default_ids).toBe(6);
-        expect(report.summary.modal_ready_events).toBe(6);
+        expect(report.summary.historical_default_markers).toBe(9);
+        expect(report.summary.historical_default_ids).toBe(9);
+        expect(report.summary.modal_ready_events).toBe(9);
     });
 
     it('requires required-response choice rows to declare a valid responding faction', () => {
@@ -126,11 +126,38 @@ describe('event taxonomy diagnostic report', () => {
             'rbih_state_identity',
             'hrhb_political_goal',
             'rs_assembly_rejects_voplan_1993',
+            'operation_lukavac_93',
+            'os_rbih_tactical_acceptance_1993',
             'belgrade_embargo_rs_1994',
             'carter_ceasefire_1994',
             'holbrooke_ceasefire_demand_oct95',
+            'csq_patron_recovery_offer',
         ]);
-        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(6);
+        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(9);
+    });
+
+    it('classifies packet 3 target rows as finished modal-ready after authored defaults and source notes', () => {
+        const report = buildEventTaxonomyReport(loadCatalogRows());
+
+        for (const [id, expectedDefault] of [
+            ['operation_lukavac_93', 'comply'],
+            ['os_rbih_tactical_acceptance_1993', 'accept_for_optics'],
+            ['csq_patron_recovery_offer', 'accept_recovery'],
+        ] as const) {
+            const row = report.rows.find((entry) => entry.id === id);
+            expect(row, id).toBeDefined();
+            expect(row!.modal_ready, id).toBe(true);
+            expect(row!.row_classification, id).toBe('finished_modal_ready');
+            expect(row!.historical_default_response_id, id).toBe(expectedDefault);
+            expect(row!.historical_default_option_id, id).toBe(expectedDefault);
+            expect(row!.bot_response_logic, id).toBe('historical');
+            expect(row!.has_option_descriptions, id).toBe(true);
+            expect(row!.has_numeric_option_previews, id).toBe(true);
+            expect(row!.findings, id).not.toEqual(expect.arrayContaining([
+                expect.objectContaining({ code: 'historical_default_bot_logic_mismatch' }),
+                expect.objectContaining({ code: 'missing_historical_default_marker' }),
+            ]));
+        }
     });
 
     it('counts event-level historical defaults and validates they reference an existing option id', () => {

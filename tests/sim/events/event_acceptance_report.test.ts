@@ -65,6 +65,12 @@ const EXPECTED_PACKET_2B_DEFAULTS = new Map([
     ['holbrooke_ceasefire_demand_oct95', 'accept_ceasefire'],
 ]);
 
+const EXPECTED_PACKET_3_DEFAULTS = new Map([
+    ['operation_lukavac_93', 'comply'],
+    ['os_rbih_tactical_acceptance_1993', 'accept_for_optics'],
+    ['csq_patron_recovery_offer', 'accept_recovery'],
+]);
+
 function loadEventFixtures(file: string): EventFixture[] {
     return JSON.parse(readFileSync(file, 'utf8')) as EventFixture[];
 }
@@ -88,13 +94,13 @@ describe('event acceptance diagnostic report', () => {
         expect(JSON.stringify(first)).toBe(JSON.stringify(second));
         expect(first.summary.total_events).toBe(247);
         expect(first.summary.required_response_events).toBe(36);
-        expect(first.summary.production_modal_authoring_ready_events).toBe(6);
+        expect(first.summary.production_modal_authoring_ready_events).toBe(9);
         expect(first.summary.acceptance_status).toBe('NOT_READY');
         expect(first.summary.full_catalog_accepted).toBe(false);
-        expect(first.summary.missing_historical_default_response_id_events).toBe(30);
-        expect(first.summary.missing_historical_marker_events).toBe(30);
+        expect(first.summary.missing_historical_default_response_id_events).toBe(27);
+        expect(first.summary.missing_historical_marker_events).toBe(27);
         expect(first.summary.source_blocked_events).toBeGreaterThan(0);
-        expect(first.summary.missing_source_note_events).toBe(30);
+        expect(first.summary.missing_source_note_events).toBe(27);
     });
 
     it('lists the approved first production authoring packet candidates without changing JSON content', () => {
@@ -134,15 +140,18 @@ describe('event acceptance diagnostic report', () => {
         expect(mismatchedRows.map((row) => row.id)).toEqual([]);
     });
 
-    it('keeps Lukavac out of the conditional cleanup packet while leaving modal authoring blocked', () => {
+    it('counts the packet 3 rows as production modal-ready with no residual blockers', () => {
         const report = buildEventAcceptanceReport();
-        const lukavac = report.required_response_rows.find((entry) => entry.id === 'operation_lukavac_93');
 
         expect(report.conditional_authoring_packet_candidates.map((row) => row.id)).toEqual(EXPECTED_CONDITIONAL_PACKET);
-        expect(lukavac).toBeDefined();
-        expect(lukavac!.candidate_status).toBeNull();
-        expect(lukavac!.production_modal_authoring_ready).toBe(false);
-        expect(lukavac!.blocking_reasons.length).toBeGreaterThan(0);
+        for (const id of EXPECTED_PACKET_3_DEFAULTS.keys()) {
+            const row = report.required_response_rows.find((entry) => entry.id === id);
+            expect(row, id).toBeDefined();
+            expect(row!.candidate_status, id).toBeNull();
+            expect(row!.production_modal_authoring_ready, id).toBe(true);
+            expect(row!.blocking_reasons, id).toEqual([]);
+            expect(row!.bot_response_logic, id).toBe('historical');
+        }
     });
 
     it('cleans Holbrooke and Lukavac scheduled-only debt with state or pressure gates', () => {
@@ -203,9 +212,15 @@ describe('event acceptance diagnostic report', () => {
             expect(row.sensitive_gate, row.id).toBe('clear');
         }
         expect(report.production_modal_authoring_ready_rows.map((row) => row.id)).toEqual([
-            ...EXPECTED_APPROVED_FIRST_PACKET,
+            'rbih_state_identity',
+            'hrhb_political_goal',
+            'rs_assembly_rejects_voplan_1993',
+            'operation_lukavac_93',
+            'os_rbih_tactical_acceptance_1993',
+            'belgrade_embargo_rs_1994',
             'carter_ceasefire_1994',
             'holbrooke_ceasefire_demand_oct95',
+            'csq_patron_recovery_offer',
         ]);
         expect(report.summary.acceptance_status).toBe('NOT_READY');
         expect(report.summary.full_catalog_accepted).toBe(false);
@@ -217,11 +232,13 @@ describe('event acceptance diagnostic report', () => {
             ...loadEventFixtures('data/scenarios/events/war_1993.json'),
             ...loadEventFixtures('data/scenarios/events/war_1994.json'),
             ...loadEventFixtures('data/scenarios/events/war_1995.json'),
+            ...loadEventFixtures('data/scenarios/events/consequences.json'),
         ];
         const expectedDefaults = new Map([
             ...EXPECTED_FIRST_PACKET_DEFAULTS,
             ...EXPECTED_PACKET_2A_DEFAULTS,
             ...EXPECTED_PACKET_2B_DEFAULTS,
+            ...EXPECTED_PACKET_3_DEFAULTS,
         ]);
 
         for (const id of expectedDefaults.keys()) {

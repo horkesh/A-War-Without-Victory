@@ -48,6 +48,13 @@ function loadLukavacEvent(): EventDefinition {
     return lukavac;
 }
 
+function loadEventFromFile(file: string, eventId: string): EventDefinition {
+    const events = JSON.parse(readFileSync(file, 'utf8')) as EventDefinition[];
+    const event = events.find((entry) => entry.id === eventId);
+    if (!event) throw new Error(`${eventId} fixture not found`);
+    return event;
+}
+
 function makeLukavacReadyState(): GameState {
     const state = makeMinimalState('RS');
     state.meta.turn = 65;
@@ -404,6 +411,31 @@ describe('Event Decisions', () => {
             trigger_evidence: ['Ceasefire talks opened', 'Cabinet requested a response'],
         });
         expect('rationale' in pending).toBe(false);
+    });
+
+    it('packet 3 authored rows expose historical defaults and dossier fields for modal decisions', () => {
+        const fixtures = [
+            loadEventFromFile('data/scenarios/events/war_1993.json', 'operation_lukavac_93'),
+            loadEventFromFile('data/scenarios/events/war_1993.json', 'os_rbih_tactical_acceptance_1993'),
+            loadEventFromFile('data/scenarios/events/consequences.json', 'csq_patron_recovery_offer'),
+        ];
+
+        expect(fixtures.map((event) => [event.id, event.bot_response_logic, event.historical_default_response_id])).toEqual([
+            ['operation_lukavac_93', 'historical', 'comply'],
+            ['os_rbih_tactical_acceptance_1993', 'historical', 'accept_for_optics'],
+            ['csq_patron_recovery_offer', 'historical', 'accept_recovery'],
+        ]);
+
+        for (const event of fixtures) {
+            const options = event.response_options ?? [];
+            expect(typeof event.source_note, event.id).toBe('string');
+            expect(typeof event.staff_assessment, event.id).toBe('string');
+            expect(event.trigger_evidence, event.id).toEqual(expect.arrayContaining([expect.any(String)]));
+            expect(options.filter((option) => option.historical_marker === 'historical_default').map((option) => option.id), event.id)
+                .toEqual([event.historical_default_response_id]);
+            expect(options.every((option) => typeof option.description === 'string'), event.id).toBe(true);
+            expect(options.every((option) => typeof option.risk_level === 'number' || typeof option.aggression_affinity === 'number'), event.id).toBe(true);
+        }
     });
 
     it('resolveEventDecision applies effects and removes pending', () => {

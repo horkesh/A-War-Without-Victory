@@ -1906,7 +1906,7 @@
   {
     "id": "operation_lukavac_93",
     "title": "Operation Lukavac 93 — VRS Offensive on Igman",
-    "narrative": "The VRS launches Operation Lukavac 93 with 15,000 troops against ARBiH positions on Mount Igman and Bjelasnica, aiming to sever Sarajevo's last supply route. VRS forces capture the Igman road on August 4, bringing the city to the brink of total isolation. The offensive provokes the first credible NATO threat of air strikes, forcing VRS withdrawal under a UN-brokered agreement by August 14.",
+    "narrative": "The VRS launches Operation Lukavac 93 with 15,000 troops against ARBiH positions on Mount Igman and Bjelasnica, aiming to sever Sarajevo's last supply route. VRS forces capture the Igman road on August 4, bringing the city to the brink of total isolation. The offensive provokes the first credible NATO threat of air strikes and a UN-brokered withdrawal demand.",
     "category": "military",
     "trigger": {
       "turn_min": 65,
@@ -1964,6 +1964,14 @@
     "requires_player_response": true,
     "responding_faction": "RS",
     "bot_response_logic": "historical",
+    "historical_default_response_id": "comply",
+    "source_note": "Pascal, Balkan Battlegrounds II pp.410-411 frames Lukavac 93 as VRS pressure from Rogoj/Trnovo toward Igman and Bjelasnica after ARBiH Gorazde corridor pressure, threatening Sarajevo's supply link and creating the UN-NATO pressure path for withdrawal.",
+    "staff_assessment": "The advance has created a local military gain, but holding Igman now risks converting a battlefield success into a direct confrontation with NATO and further patron pressure.",
+    "trigger_evidence": [
+      "ARBiH pressure toward the Gorazde corridor has drawn VRS attention to the Rogoj-Trnovo axis.",
+      "RS control around Trnovo and pressure on Hadzici route proxies indicate a credible threat to the Igman-Bjelasnica supply link.",
+      "UN and NATO warnings are visible enough that withdrawal is a live political-military option, not a guaranteed outcome."
+    ],
     "effect": {
       "kind": "narrative",
       "text": "VRS forces have seized the Igman road. Sarajevo faces total isolation — and NATO is issuing its first genuine ultimatum."
@@ -1971,6 +1979,7 @@
     "response_options": [
       {
         "id": "comply",
+        "historical_marker": "historical_default",
         "label": "Comply with withdrawal demand",
         "description": "Pull back from Igman under the UN-brokered agreement. Avoids NATO strikes but concedes the strategic gain.",
         "effects": [
@@ -2007,7 +2016,9 @@
             "dimension": "international_standing",
             "delta": 5
           }
-        ]
+        ],
+        "aggression_affinity": -0.3,
+        "risk_level": 0.4
       },
       {
         "id": "defy_nato",
@@ -2046,7 +2057,9 @@
             "dimension": "international_standing",
             "delta": -20
           }
-        ]
+        ],
+        "aggression_affinity": 0.6,
+        "risk_level": 0.9
       }
     ],
     "notifications_to_other_factions": {
@@ -2433,13 +2446,21 @@
     },
     "once": true,
     "responding_faction": "RBiH",
-    "bot_response_logic": "strategic_weighted",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "accept_for_optics",
     "requires_player_response": true,
     "priority": 50,
     "historical_source": "ICTY IT-95-5/18-T (Karadzic trial, Izetbegovic O-S initialing, August 1993). Owen, David. Balkan Odyssey (1995).",
+    "source_note": "ICTY Karadzic trial material and Owen's Balkan Odyssey support the player-facing framing that Izetbegovic could initial the Owen-Stoltenberg plan tactically while expecting RS rejection of the allocation.",
+    "staff_assessment": "Acceptance can improve Sarajevo's diplomatic posture if Pale rejects the allocation, but it also lends temporary legitimacy to an ethnic-republic formula the government opposes.",
+    "trigger_evidence": [
+      "The Owen-Stoltenberg plan has already reached the event chain.",
+      "The row's source basis frames RBiH tactical acceptance around expected RS rejection.",
+      "The choice is presented as optics and leverage, not as certainty about the final settlement."
+    ],
     "effect": {
       "kind": "narrative",
-      "text": "The Owen-Stoltenberg plan reaches the Bosnian government. Izetbegovic must decide whether to accept — knowing RS will reject it — or refuse partition on principle."
+      "text": "The Owen-Stoltenberg plan reaches the Bosnian government. Izetbegovic must decide whether to accept — anticipating likely RS rejection — or refuse partition on principle."
     },
     "dimension_shifts": [
       { "faction": "RBiH", "dimension": "patron_confidence", "delta": -5 }
@@ -2447,8 +2468,11 @@
     "response_options": [
       {
         "id": "accept_for_optics",
-        "label": "Accept (RS will reject — international gain)",
+        "historical_marker": "historical_default",
+        "label": "Accept (likely RS rejection — international gain)",
+        "description": "Initial the plan to put diplomatic pressure on Pale while accepting that the partition formula carries political cost.",
         "aggression_affinity": -0.2,
+        "risk_level": 0.4,
         "dimension_shifts": [
           { "faction": "RBiH", "dimension": "international_standing", "delta": 10 },
           { "faction": "RBiH", "dimension": "patron_confidence", "delta": 8 }
@@ -2458,7 +2482,9 @@
       {
         "id": "reject_sincerely",
         "label": "Reject (refuse partition on principle)",
+        "description": "Refuse the partition framework outright, preserving the sovereignty claim while giving up the immediate isolation play against RS.",
         "aggression_affinity": 0.4,
+        "risk_level": 0.6,
         "dimension_shifts": [
           { "faction": "RBiH", "dimension": "international_standing", "delta": -8 },
           { "faction": "RBiH", "dimension": "negotiating_leverage", "delta": 6 }
