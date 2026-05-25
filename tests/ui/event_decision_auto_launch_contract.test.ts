@@ -27,6 +27,22 @@ describe('event decision modal auto-launch contract', () => {
     expect(autoLaunchEffect).not.toContain('openArmyHQTab');
   });
 
+  it('renders the selected pending event decision payload as the primary modal surface', () => {
+    const app = readApp();
+    const modalRenderBlock = app.slice(
+      app.indexOf('{activeEventDecisionId !== null'),
+      app.indexOf('<ConvoyDecisionModal'),
+    );
+
+    expect(modalRenderBlock).toContain('(loadedGameState?.pendingEventDecisions ?? [])');
+    expect(modalRenderBlock).toContain('d.event_id === activeEventDecisionId && d.faction === playerFaction');
+    expect(modalRenderBlock).toContain('<EventDecisionModal');
+    expect(modalRenderBlock).toContain('decision={decision}');
+    expect(modalRenderBlock).not.toContain('PresidentialAttentionPanel');
+    expect(modalRenderBlock).not.toContain('PresidentDeskShell');
+    expect(modalRenderBlock).not.toContain('openPresidentialDecisionRoomNavigationTarget');
+  });
+
   it('orders multiple pending decisions by required/blocking status, turn, then event id without a once-per-turn gate', () => {
     const app = readApp();
 
