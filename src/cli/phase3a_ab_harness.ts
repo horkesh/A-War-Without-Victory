@@ -73,7 +73,9 @@ function createProlongedSiegeState(): GameState {
                 exhausted: 0,
                 updated_turn: 0
             }
-        }
+        },
+    army_co_decision_traces: {},
+    army_corps_directives_by_faction: {}
   },
   displacement: {
     displacement_state: {
@@ -127,7 +129,9 @@ function createTemporaryEncirclementState(): GameState {
                 exhausted: 0,
                 updated_turn: 0
             }
-        }
+        },
+    army_co_decision_traces: {},
+    army_corps_directives_by_faction: {}
   },
   displacement: {
     displacement_state: {
@@ -174,7 +178,9 @@ function createCorridorLifelineState(): GameState {
                 exhausted: 0,
                 updated_turn: 0
             }
-        }
+        },
+    army_co_decision_traces: {},
+    army_corps_directives_by_faction: {}
   },
   displacement: {
     displacement_state: {
@@ -230,7 +236,9 @@ function createMultiPocketStressState(): GameState {
             'MUN_A': { mun_id: 'MUN_A', faction: 'RBiH', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 },
             'MUN_B': { mun_id: 'MUN_B', faction: 'RS', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 },
             'MUN_C': { mun_id: 'MUN_C', faction: 'HRHB', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 }
-        }
+        },
+    army_co_decision_traces: {},
+    army_corps_directives_by_faction: {}
   },
   displacement: {
     displacement_state: {
@@ -273,7 +281,9 @@ function createAsymmetricCollapseState(): GameState {
     militia_pools: {
             'MUN_A': { mun_id: 'MUN_A', faction: 'RBiH', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 },
             'MUN_B': { mun_id: 'MUN_B', faction: 'RS', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 }
-        }
+        },
+    army_co_decision_traces: {},
+    army_corps_directives_by_faction: {}
   },
   displacement: {
     displacement_state: {

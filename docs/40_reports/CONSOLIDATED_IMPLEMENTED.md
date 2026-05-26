@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest army command schema contract:** [implemented/20260526_ARMY_COMMAND_SCHEMA_CONTRACT.md](implemented/20260526_ARMY_COMMAND_SCHEMA_CONTRACT.md) - A2/C1 command observability records `military.army_co_decision_traces` and `military.army_corps_directives_by_faction` are now required persisted v10 contracts with migration/validator tests.
+
 **Latest Bihac / 5th Corps operational wording:** [implemented/20260526_BIHAC_5TH_CORPS_OPERATIONAL_WORDING.md](implemented/20260526_BIHAC_5TH_CORPS_OPERATIONAL_WORDING.md) - Bihać/5th Corps event and Codex prose now use bounded Operation Grmeč and Operation Sana wording with BB2 pp. 536-538 source support.
 
 **Latest HVO Southern Move catalog:** [implemented/20260524_HVO_SOUTHERN_MOVE_CATALOG.md](implemented/20260524_HVO_SOUTHERN_MOVE_CATALOG.md) - Mistral 2 now owns Drvar/Grahovo plus Sipovo only, while `southern_move_95` covers Mrkonjic Grad from Sipovo staging under `hvo_tomislavgrad`.
@@ -156,7 +158,7 @@
 
 **Latest event-notification narrative-tone slice:** [implemented/20260522_EVENT_NOTIFICATION_NARRATIVE_TONE_1992.md](implemented/20260522_EVENT_NOTIFICATION_NARRATIVE_TONE_1992.md) - `rs_strategic_goals` and `rbih_state_identity` now have complete non-source recipient notification coverage; Phase D residual dropped to 18 rows / 82 blocks before the Washington-timing slice.
 
-**Latest strict-null Warroom fallback-region cleanup:** [implemented/20260524_STRICT_NULL_WARROOM_FALLBACK_REGION_TYPES.md](implemented/20260524_STRICT_NULL_WARROOM_FALLBACK_REGION_TYPES.md) - The production strict-null escape floor is now zero for counted `as FactionId`, `as unknown`, `as any`, dot non-null, and index non-null sites. The remaining strict-null lane is the 486-field optional `GameState` contract floor split by domain (`sim` 304, `state` 174, `derived` 8, no unknown bucket).
+**Latest strict-null Warroom fallback-region cleanup:** [implemented/20260524_STRICT_NULL_WARROOM_FALLBACK_REGION_TYPES.md](implemented/20260524_STRICT_NULL_WARROOM_FALLBACK_REGION_TYPES.md) - The production strict-null escape floor is now zero for counted `as FactionId`, `as unknown`, `as any`, dot non-null, and index non-null sites. The remaining strict-null lane is the 492-field optional `GameState` contract floor split by domain (`sim` 305, `state` 179, `derived` 8, no unknown bucket) after the army command schema contract promotion.
 
 **Strict-null GameStateAdapter tail:** [implemented/20260522_STRICT_NULL_GAME_STATE_ADAPTER_TAIL.md](implemented/20260522_STRICT_NULL_GAME_STATE_ADAPTER_TAIL.md) - `src/ui/map/data/GameStateAdapter.ts` now contributes zero counted `as_any_casts` and `as_factionid_casts`; the current top-level strict-null floor is guarded by the optional GameState contract report.
 
@@ -344,3 +346,10 @@
 - Reused pass-local front-edge metadata in corps sector construction while retaining lazy direct-call fallback behavior.
 - Preserved final hash `f219401f4a17f311`; comparable 40w profile wall time improved from 103.310s to 91.556s.
 - Report: `docs/40_reports/implemented/20260526_SECTOR_EDGE_METADATA_LOOKUP_REUSE.md`
+
+# 2026-05-26 - Army command schema contract
+
+- Promoted `military.army_co_decision_traces` and `military.army_corps_directives_by_faction` from optional `MilitaryState` fields to required persisted v10 contracts.
+- Added v10 required-field validation, current-version rejection tests, legacy v1/v9 migration proof, and current-version fixture alignment.
+- Strict-null counted escape categories remain zero; optional `GameState` field inventory is now 492 (`sim` 305, `state` 179, `derived` 8).
+- Report: `docs/40_reports/implemented/20260526_ARMY_COMMAND_SCHEMA_CONTRACT.md`

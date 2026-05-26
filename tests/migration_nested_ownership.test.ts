@@ -55,6 +55,8 @@ function migrationFixture(overrides: Record<string, unknown> = {}): Record<strin
             army_theatre_assignment: {},
             assignable_front_segments: [],
             brigade_front_assignment: {},
+            army_co_decision_traces: {},
+            army_corps_directives_by_faction: {},
         },
         political: {
             political_controllers: {},
@@ -94,6 +96,8 @@ describe('nested migration ownership contracts', () => {
             army_theatre_assignment: {},
             assignable_front_segments: [],
             brigade_front_assignment: {},
+            army_co_decision_traces: {},
+            army_corps_directives_by_faction: {},
         },
         political: {
             political_controllers: {},
@@ -142,6 +146,8 @@ describe('nested migration ownership contracts', () => {
             assignable_front_segments: [],
             brigade_front_assignment: {},
             war_militia_strength: { m1: { RBiH: 10 } },
+            army_co_decision_traces: {},
+            army_corps_directives_by_faction: {},
         },
         political: {
             political_controllers: {},

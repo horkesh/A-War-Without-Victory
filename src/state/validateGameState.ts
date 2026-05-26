@@ -102,6 +102,8 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 5, path: 'military.assignable_front_segments', check: Array.isArray },
     { version: 5, path: 'military.brigade_front_assignment', check: isRecord },
     { version: 5, path: 'military.militia_pools', check: isRecord },
+    { version: 10, path: 'military.army_co_decision_traces', check: isRecord },
+    { version: 10, path: 'military.army_corps_directives_by_faction', check: isRecord },
 ];
 
 /**
@@ -586,7 +588,7 @@ export function validateGameStateShape(
 
         // ── A2 substrate (LANE-NIGHTSHIFT-A2-ARMY-CO-LOOP-SUBSTRATE) ──────────
         // DDR-cited per audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md
-        // (eee308e0). All-optional fields; backward-compatible with pre-A2 saves.
+        // (eee308e0). Top-level record is required as of v10; nested metadata stays optional.
 
         // army_co_decision_traces: per-faction append-only "why" log.
         if ('army_co_decision_traces' in mil && mil.army_co_decision_traces !== undefined) {
@@ -624,7 +626,7 @@ export function validateGameStateShape(
 
         // ── C1 substrate (LANE-NIGHTSHIFT-C1-CORPS-DIRECTIVE-CONSUMER-WIRE) ───
         // DDR: docs/40_reports/audits/20260506_C_LANE_BOT_CORPS_ORDERS_CONSUMER_DDR.md
-        // (57cec91c). Optional field; backward-compatible with pre-C1 saves.
+        // (57cec91c). Top-level record is required as of v10; nested metadata stays optional.
         // Per-faction × per-corps directive map written by A3, read by briefing.
         if ('army_corps_directives_by_faction' in mil && mil.army_corps_directives_by_faction !== undefined) {
             const slot = mil.army_corps_directives_by_faction;

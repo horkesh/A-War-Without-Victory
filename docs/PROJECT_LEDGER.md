@@ -10872,3 +10872,28 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `src/sim/combat/sector_building.ts`, `src/sim/combat/corps_front_sectors.ts`, `tests/sector_partition_instrumentation.test.ts`, `docs/40_reports/implemented/20260526_SECTOR_EDGE_METADATA_LOOKUP_REUSE.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`.
 
 ---
+
+## [2026-05-26] test(state): require army command trace records
+
+**Type:** Save schema contract hardening + strict-null Phase 2 slice.
+
+**Change:** Promoted the A2/C1 army-command observability records `military.army_co_decision_traces` and `military.army_corps_directives_by_faction` from optional `MilitaryState` fields to required persisted v10 contracts. Added v10 required-field validation, current-version rejection tests, legacy v1/v9 migration assertions proving `{}` materialization, and current-version synthetic fixture alignment across CLI/UI/test harness literals. Left nested directive/trace metadata optional and did not change command behavior, event behavior, scenario content, UI behavior, or combat output.
+
+**Determinism:** Schema/default-only change. Empty-record defaults are inert; no new randomness, timestamps, iteration order, event timing, command decision logic, scenario data, generated combat output, or serialized derived-state cache was introduced. Determinism review found no ordering or scenario-behavior risk. Baseline regression remained byte-identical.
+
+**Strict-null inventory:** Counted escape categories remain zero: `as_factionid_casts 0`, `as_unknown_casts 0`, `as_any_casts 0`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`. Optional `GameState` field inventory is now `492`, split as `sim 305`, `state 179`, `derived 8`, `unknown 0`.
+
+**Verification:**
+- `node tools\diagnostics\strict_null_inventory.cjs` - PASS; `optional_fields_game_state 492`.
+- `node tools\diagnostics\strict_null_inventory.cjs --field-domains` - PASS; `sim 305`, `state 179`, `derived 8`, `unknown 0`.
+- `node tools\diagnostics\save_migration_drift_audit.cjs` - PASS; `0 anonymous defaults`.
+- `npx.cmd vitest run tests\save_migration_validator_rejection.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_round_trip_contract.test.ts tests\a2_army_co_substrate.test.ts tests\a3_army_order_interpretation.test.ts tests\c1_corps_directive_consumer.test.ts tests\corps_front_sector_corps_ownership.test.ts tests\emergency_retreat_reachability.test.ts tests\final_sector_reserve_band_truth.test.ts tests\final_sector_truth_reconciliation.test.ts tests\final_sector_truth_reconciliation_cache.test.ts tests\hvo_central_bosnia_sectors.test.ts tests\sector_split_brigade_assignment.test.ts tests\sector_truth_audit.test.ts --reporter=dot` - PASS; 107/107 tests.
+- `npx.cmd vitest run tests\save_migration.test.ts tests\save_migration_drift_audit.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts tests\save_migration_round_trip_contract.test.ts tests\migration_nested_ownership.test.ts tests\startup_snapshot_contract.test.ts --reporter=dot` - PASS; 37/37 tests.
+- `npx.cmd vitest run tests\serialize_gamestate_stability.test.ts tests\serialize_gamestate_rejects_wrappers.test.ts tests\serialize_gamestate_no_derived_fields.test.ts tests\integration_save_load.test.ts --reporter=dot` - PASS; 14/14 tests.
+- `npm.cmd run typecheck` - PASS after installing the nested tactical-map package in the worktree, matching CI dependency ownership.
+- `npm.cmd run test:baselines` - PASS; baseline regression all scenarios match.
+- `git diff --check` - PASS.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/validateGameState.ts`, direct current-version `MilitaryState` fixtures in CLI/UI/tests, `tests/save_migration_validator_rejection.test.ts`, `tests/save_migration_versioned_steps.test.ts`, `tests/migration_nested_ownership.test.ts`, `tools/diagnostics/output/save_migration_drift.json`, `docs/40_reports/implemented/20260526_ARMY_COMMAND_SCHEMA_CONTRACT.md`, `docs/40_reports/CONSOLIDATED_BACKLOG.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`.
+
+---

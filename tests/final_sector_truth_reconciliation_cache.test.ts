@@ -84,6 +84,8 @@ function makeState(): { state: GameState; edges: EdgeRecord[] } {
             front_posture_regions: {},
             front_pressure: {},
             militia_pools: {},
+            army_co_decision_traces: {},
+            army_corps_directives_by_faction: {},
         } as GameState['military'],
         political: {
             political_controllers: {

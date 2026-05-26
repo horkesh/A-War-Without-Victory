@@ -2177,7 +2177,7 @@ last_gathering_turn?: Record<string, number>;
  * Bounded by trim policy (A3 owns trim/GC). Entries sorted by turn ascending
  * for deterministic serialization.
  */
-army_co_decision_traces?: Record<string, Array<{
+army_co_decision_traces: Record<string, Array<{
     turn: number;
     campaign_role: string;
     rationale: string;
@@ -2197,7 +2197,8 @@ army_co_decision_traces?: Record<string, Array<{
  * Reader: briefing.ts → `assembleCampaignIntent` overlays
  * `frontPriority.role` → `briefing.campaign_role`. Faction-symmetric mechanism;
  * faction-asymmetric data lands via B2 leader profiles → B1 producer → A3
- * verb-translation. Backward-compatible with pre-C1 saves (always optional).
+ * verb-translation. Required as of save schema v10; legacy saves migrate this
+ * top-level record to `{}`. Nested directive metadata remains optional.
  *
  * Env flag `C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED=true` short-circuits
  * BOTH the persist path (A3) and the read path (briefing) for byte-stable A/B.
@@ -2207,7 +2208,7 @@ army_co_decision_traces?: Record<string, Array<{
  * `{corps_id, role: 'primary'|'secondary'|'economy'|'contain', deviated: boolean}`
  * plus optional directive vocabulary metadata.
  */
-army_corps_directives_by_faction?: Record<string, Record<string, {
+army_corps_directives_by_faction: Record<string, Record<string, {
     corps_id: string;
     role: 'primary' | 'secondary' | 'economy' | 'contain';
     /** Optional political directive intensity copied through from A3. */

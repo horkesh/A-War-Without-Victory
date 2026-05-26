@@ -94,11 +94,31 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('rejects a current-version save missing military army CO decision traces', () => {
+        const state = currentVersionState();
+        delete state.military.army_co_decision_traces;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v10[\s\S]*military\.army_co_decision_traces/
+        );
+    });
+
+    it('rejects a current-version save missing military army corps directives by faction', () => {
+        const state = currentVersionState();
+        delete state.military.army_corps_directives_by_faction;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v10[\s\S]*military\.army_corps_directives_by_faction/
+        );
+    });
+
     it('migrates a v1 save before applying current-version required-field validation', () => {
         const state = currentVersionState();
         state.schema_version = 1;
         delete state.meta.referendum_held;
         delete state.political.negotiation_status;
+        delete state.military.army_co_decision_traces;
+        delete state.military.army_corps_directives_by_faction;
         delete state.displacement.displacement_humanitarian_aggregates;
 
         const migrated = deserializeState(JSON.stringify(state));
@@ -111,6 +131,8 @@ describe('save migration validator hardening', () => {
             last_offer_turn: null,
             last_counter_turn: {},
         });
+        expect(migrated.military.army_co_decision_traces).toEqual({});
+        expect(migrated.military.army_corps_directives_by_faction).toEqual({});
         expect(migrated.displacement.displacement_humanitarian_aggregates).toEqual({});
     });
 });
