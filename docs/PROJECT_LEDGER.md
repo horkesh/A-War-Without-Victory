@@ -1,4 +1,23 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] test(save): lock H2.4 sweep artifact ownership
+
+**Type:** Save/replay generated-artifact stability + static ownership guard.
+
+**Change:** Added an ownership matrix row and static guard for the committed `data/derived/scenario/sweeps/h2_4/h2_4_sweep/` artifact tree. The guard verifies `npm.cmd run sim:scenario:sweep` remains the owner command, the runner keeps the fixed `h2_4_sweep` id and stable JSON writer, the committed aggregate JSON/Markdown stay aligned, every committed run directory has the fixed per-run artifact set, run metadata agrees with run summaries, and the four directories outside `aggregate_summary` are explicitly retained instead of silently deleted. No sweep rerun, generated artifact refresh, run-directory deletion, scenario data, calibration tuning, event prose, save schema, combat logic, or gameplay behavior changed.
+
+**Determinism:** Static documentation/test-only slice. It classifies already committed scenario-derived artifacts and guards stable ownership without writing generated outputs. Future refreshes or deletion remain gated by scenario/calibration approval.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\scenario_sweep_artifact_ownership.test.ts --reporter=dot` failed before the ownership row existed.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\scenario_sweep_artifact_ownership.test.ts --reporter=dot` - PASS.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\scenario_harness_contracts.test.ts --reporter=dot` - PASS; 21/21 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\tsc.cmd --noEmit -p tsconfig.json` - PASS after temporarily linking this worktree's missing dependency folders to the root dependency install; the temporary junctions/cache were removed after verification.
+- `git diff --check` - PASS.
+
+**Artifacts:** `tests/scenario_sweep_artifact_ownership.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/implemented/20260526_H24_SWEEP_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] test(save): lock baseline ops sensitivity artifact ownership
 
 **Type:** Save/replay generated-artifact stability + static ownership guard.

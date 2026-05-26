@@ -138,7 +138,7 @@ Stop gates:
 
 **Owner:** scenario-harness-engineer
 **Reviewers:** determinism-auditor, QA engineer
-**Current status:** Static ownership slices are closed for replay manifest path/equivalence, transient replay sidecars, save-migration drift byte identity/static ownership, `latest_run_final_save.json` map-copy byte-equivalence, baseline manifest artifact-set ownership, startup snapshot ownership, and baseline-ops sensitivity committed artifact ownership. The next slice should remain a mapped artifact-owner check before changing writes.
+**Current status:** Static ownership slices are closed for replay manifest path/equivalence, transient replay sidecars, save-migration drift byte identity/static ownership, `latest_run_final_save.json` map-copy byte-equivalence, baseline manifest artifact-set ownership, startup snapshot ownership, baseline-ops sensitivity committed artifact ownership, and H2.4 sweep committed artifact ownership. The next slice should remain a mapped artifact-owner check before changing writes.
 
 Steps:
 
