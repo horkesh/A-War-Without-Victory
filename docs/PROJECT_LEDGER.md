@@ -1,4 +1,21 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] test(save): lock recruitment test matrix artifact ownership
+
+**Type:** Save/replay generated-artifact stability + static ownership guard.
+
+**Change:** Added an ownership matrix row and static guard for the committed `data/derived/scenario/recruitment_test_matrix_2026_02_11/` artifact tree. The guard verifies the ownership docs mention the tree, classify it as retained static evidence, name this static validation test, enumerate the retained run directories, preserve the failed `_tmp_player_choice_recruitment_4w__acc3c9d910eb73d8__w4` player-choice recruitment evidence with `failure_report.*`, and keep every committed run directory on its fixed per-run artifact shape and 4w metadata. No scenario rerun, generated artifact refresh, run-directory deletion, scenario data, calibration tuning, event prose, save schema, combat logic, or gameplay behavior changed.
+
+**Determinism:** Static documentation/test-only slice. It classifies already committed scenario-derived artifacts and guards stable ownership without writing generated outputs. Future recruitment-matrix evidence should be captured as a new dated tree, not by overwriting this retained 2026-02-11 evidence.
+
+**Verification:**
+- Dependency context: this worktree has no `node_modules\.bin\vitest.cmd` shim, so the repo-local `.\vitest.cmd` wrapper was used for focused Vitest runs.
+- Red first: `.\vitest.cmd run tests\recruitment_test_matrix_artifact_ownership.test.ts --reporter=dot` failed before the ownership row existed.
+- `.\vitest.cmd run tests\recruitment_test_matrix_artifact_ownership.test.ts --reporter=dot` - PASS.
+
+**Artifacts:** `tests/recruitment_test_matrix_artifact_ownership.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/implemented/20260526_RECRUITMENT_TEST_MATRIX_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] state(save): require Phase F displacement capacity maps
 
 **Type:** Save schema contract hardening + strict-null Phase 2 slice.

@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest recruitment test matrix artifact ownership:** [implemented/20260526_RECRUITMENT_TEST_MATRIX_ARTIFACT_OWNERSHIP.md](implemented/20260526_RECRUITMENT_TEST_MATRIX_ARTIFACT_OWNERSHIP.md) - A static guard now locks the committed 2026-02-11 recruitment test matrix tree, retained run-directory classification including failed `_tmp_player_choice_recruitment_4w` evidence, and per-run artifact shape without refreshing scenario outputs.
+
 **Latest H2.4 sweep artifact ownership:** [implemented/20260526_H24_SWEEP_ARTIFACT_OWNERSHIP.md](implemented/20260526_H24_SWEEP_ARTIFACT_OWNERSHIP.md) - A static guard now locks the committed H2.4 sweep tree, owner command, validation tests, aggregate summary rows, retained run-directory classification, and per-run artifact shape without refreshing scenario outputs.
 
 **Latest baseline ops sensitivity artifact ownership:** [implemented/20260526_BASELINE_OPS_SENSITIVITY_ARTIFACT_OWNERSHIP.md](implemented/20260526_BASELINE_OPS_SENSITIVITY_ARTIFACT_OWNERSHIP.md) - A static guard now locks the committed H1.11 sensitivity artifact trees, owner command, validation tests, retained run2 classification, and byte-identity expectations without refreshing scenario outputs.
