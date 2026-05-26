@@ -1,4 +1,24 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] test(ui): prove event decision modal in live browser shell
+
+**Type:** UI proof tooling + focused regression coverage. No event content, runtime event logic, scenario data, save schema, simulation calibration, combat math, or baseline artifact semantics changed.
+
+**Change:** Added a real-data modal catalog render test and a live browser smoke proof for event decisions. `tests/ui/event_decision_modal_catalog.test.ts` renders every current production modal-ready required-response row through `EventDecisionModal` and checks authored situation/narration, source note, staff assessment, trigger evidence, historical-default signaling, option descriptions, and mechanical consequence previews. `tools/ui/event_modal_browser_smoke.cjs` starts the Vite map shell, loads the startup save through the live app save-load path, injects real event row `rbih_state_identity` into `military.pending_event_decisions`, and verifies the dialog opens directly with historical/source/staff/trigger/numeric consequence text rather than being buried in Decision Room or President's Desk. Windows process cleanup was hardened so the smoke tracks the real Vite server, kills only owned exact-port listeners, and verifies port cleanup after the run.
+
+**Determinism:** Test/tool-only. No randomness, timestamps in persisted outputs, event ordering, trigger predicates, effects, response ordering, state schema, scenario data, operation tuning, initial OSID overrides, avoided-OSID lists, or baseline-owned artifacts changed. Smoke evidence is written under ignored `.tmp_event_modal_browser_proof/`.
+
+**Verification:**
+- `git diff --check HEAD~3..HEAD` - PASS.
+- `node --check tools\ui\event_modal_browser_smoke.cjs` - PASS.
+- `node tools\ui\event_modal_browser_smoke.cjs` - PASS; live browser evidence confirms `rbih_state_identity` opens as a direct event decision dialog with `Historical default`, source note, staff assessment, trigger evidence, and numeric consequences including `morale +3` and `international standing +15`; cleanup reports port 3227 is not listening.
+- `npx.cmd vitest run tests\ui\event_decision_modal_catalog.test.ts tests\ui\event_decision_auto_launch_contract.test.ts tests\ui\event_decision_modal_phase3.test.ts tests\ui\modal_stack_priority.test.ts tests\event_decisions.test.ts tests\sim\events\event_acceptance_report.test.ts tests\sim\events\event_taxonomy_report.test.ts --reporter=dot` - PASS; 66/66 tests.
+- `npm.cmd run typecheck` - PASS.
+- `npm.cmd run test:baselines` - PASS; `Baseline regression: all scenarios match.`
+
+**Artifacts:** `tests/ui/event_decision_modal_catalog.test.ts`, `tests/ui/event_decision_auto_launch_contract.test.ts`, `tools/ui/event_modal_browser_smoke.cjs`, `docs/40_reports/implemented/20260526_EVENT_MODAL_BROWSER_PROOF.md`.
+
+---
+
 ## [2026-05-26] data(events): author 1993 modal packet
 
 **Type:** Event JSON authoring + focused diagnostics/tests/docs. This intentionally changes bot/headless calibration behavior for the authored 1993 decision rows by moving them to explicit historical defaults. No trigger, timing, response-id, option-order, response effect, schema, UI, or runtime code changed.
