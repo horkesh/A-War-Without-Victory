@@ -1,4 +1,22 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] test(save): lock latest-run final-save static artifact ownership
+
+**Type:** Save/replay generated-artifact stability + static ownership guard.
+
+**Change:** Added a static guard for `data/derived/latest_run_final_save.json` ownership across the generated-artifact matrix, scenario run scripts, the scenario runner `--map` copy helper, validation tests, transient default policy, and paired-ledger refresh requirement. No scenario rerun, generated artifact refresh, save schema change, calibration tuning, combat logic, event content, UI behavior, or scenario output changed.
+
+**Determinism:** Static docs/test-only slice. The guard reads committed source/docs and does not write artifacts. `data/derived/latest_run_final_save.json` remains transient by default unless a future refresh is intentionally committed with a paired ledger entry.
+
+**Verification:**
+- Red first: `.\vitest.cmd run tests\scenario_latest_run_final_save_artifact_ownership.test.ts --reporter=dot` failed before docs alignment because the ownership row did not name the validation guard.
+- `.\vitest.cmd run tests\scenario_latest_run_final_save_artifact_ownership.test.ts --reporter=dot` - PASS; 1/1 test.
+- `.\vitest.cmd run tests\scenario_latest_run_final_save_artifact_ownership.test.ts tests\scenario_latest_run_final_save_map_copy.test.ts tests\save_load_real_roundtrip.test.ts tests\adapter_field_completeness.test.ts --reporter=dot` - PASS; 35/35 tests.
+- `git diff --check` - PASS.
+
+**Artifacts:** `tests/scenario_latest_run_final_save_artifact_ownership.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/implemented/20260526_LATEST_RUN_FINAL_SAVE_STATIC_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] state(save): require displacement operational records
 
 **Type:** Save schema contract hardening + strict-null Phase 2 slice.
