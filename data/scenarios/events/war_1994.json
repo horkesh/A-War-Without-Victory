@@ -882,7 +882,7 @@
   {
     "id": "bihac_5th_corps_offensive_1994",
     "title": "5th Corps Breaks Out of Bihac",
-    "narrative": "General Dudakovic and the 5th Corps have achieved the impossible. After crushing Abdic's breakaway forces, the besieged garrison launches Operation Grmec, striking south and east from the Bihac pocket. The Grabez plateau falls in days. Over 100 square kilometers of territory change hands as ARBiH brigades advance toward Bosanska Krupa. The VRS is caught off guard.",
+    "narrative": "In October 1994, General Atif Dudakovic and ARBiH 5th Corps launched Operation Grmec from the Bihac pocket toward VRS positions south and east of Bihac, including the Grabez and Grmec approaches toward Bosanska Krupa. The attack gained ground outside the pocket before a later VRS, RSK, and APWB counteroffensive forced 5th Corps back toward Bihac.",
     "category": "military",
     "trigger": {
       "turn_min": 129,
@@ -919,7 +919,7 @@
       },
       {
         "kind": "narrative",
-        "text": "The 5th Corps breaks out of the Bihac pocket. VRS positions on the Grabez plateau are overrun."
+        "text": "The 5th Corps advances from the Bihac pocket toward the Grabez and Grmec approaches before the later counteroffensive."
       }
     ],
     "dimension_shifts": [
@@ -932,7 +932,8 @@
     "sets_flags": {
       "bihac_breakout_occurred": true
     },
-    "historical_source": "BB Vol. II, Ch. 11. ICTY Karadzic Judgment. 5th Corps operational records."
+    "historical_source": "BB Vol. II pp. 536-538; ICTY Karadzic Judgment; 5th Corps operational records.",
+    "source_note": "BB2 pp. 536-538 provide the Bihac/APWB and 5th Corps order-of-battle/source trail; runtime wording is bounded to actor, window, direction, named places, and immediate operational result."
   },
   {
     "id": "operation_cincar_1994",

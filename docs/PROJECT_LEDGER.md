@@ -10835,3 +10835,22 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `data/scenarios/events/war_1994.json`, `data/scenarios/events/war_1995.json`, `tests/sim/events/event_acceptance_report.test.ts`, `tests/sim/events/event_taxonomy_report.test.ts`, `tests/event_decisions.test.ts`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-26] data(codex): bound Bihac / 5th Corps operational wording
+
+**Type:** Safe factual content correction + Codex regression guard.
+
+**Change:** Corrected only Bihać / ARBiH 5th Corps operational wording in the 1994 Bihac breakout and 1995 Operation Sana event/Codex rows. Replaced cinematic or overbroad claims (`achieved the impossible`, `crushing Abdic`, `sweeps south and east`, `spearheads the largest`) with bounded actor/date/window/direction/place/result wording. Added BB2 pp.536-538 to the affected Codex source lists and source notes, and added a focused localization/Codex test guard for the corrected claims.
+
+**Determinism:** Text-only event and Codex content changes. No event triggers, effects, flags, response order, scenario control, OOB, combat tuning, calibration, save schema, generated artifacts, randomness, timestamps, or scenario hash-affecting mechanics changed.
+
+**Verification:**
+- Red first: `npx.cmd vitest run tests/ui/codex_essay_localization.test.ts --reporter=dot` failed the new Bihać / 5th Corps operational-boundary assertion before the content correction.
+- `rg -n "5th Corps sweeps west|sweeps west|westward sweep|achieved the impossible|crushing Abdic|sweeps south and east|methodical and devastating|sheer determination|spearheads the largest|cleanses|ethnic|massacre|detention|camp|civilian|refugee" data\scenarios\events\war_1994.json data\scenarios\events\war_1995.json data\scenarios\essays\bihac_5th_corps_offensive_1994.json data\scenarios\essays\operation_sana_1995.json data\scenarios\essays\essay_index.json tests\ui\codex_essay_localization.test.ts` - PASS for removed operational phrases; remaining hits are existing excluded sensitive-history rows and negative test assertions.
+- `node tools/diagnostics/event_notification_residuals.cjs --json` - PASS; 2 residual rows / 4 missing blocks remain, all classified `blocked-sensitive`.
+- `npx.cmd vitest run tests/ui/codex_essay_localization.test.ts tests/ui/codex_essay_vocab_integration.test.ts tests/codex_source_quality.test.ts tests/event_timeline_integrity.test.ts --reporter=dot` - PASS; 73/73 tests.
+- `git diff --check` - PASS.
+
+**Artifacts:** `data/scenarios/events/war_1994.json`, `data/scenarios/events/war_1995.json`, `data/scenarios/essays/bihac_5th_corps_offensive_1994.json`, `data/scenarios/essays/operation_sana_1995.json`, `data/scenarios/essays/essay_index.json`, `tests/ui/codex_essay_localization.test.ts`, `docs/40_reports/implemented/20260526_BIHAC_5TH_CORPS_OPERATIONAL_WORDING.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
+
+---

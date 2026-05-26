@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Bihac / 5th Corps operational wording:** [implemented/20260526_BIHAC_5TH_CORPS_OPERATIONAL_WORDING.md](implemented/20260526_BIHAC_5TH_CORPS_OPERATIONAL_WORDING.md) - Bihać/5th Corps event and Codex prose now use bounded Operation Grmeč and Operation Sana wording with BB2 pp. 536-538 source support.
+
 **Latest HVO Southern Move catalog:** [implemented/20260524_HVO_SOUTHERN_MOVE_CATALOG.md](implemented/20260524_HVO_SOUTHERN_MOVE_CATALOG.md) - Mistral 2 now owns Drvar/Grahovo plus Sipovo only, while `southern_move_95` covers Mrkonjic Grad from Sipovo staging under `hvo_tomislavgrad`.
 
 **Latest BCS Operations Planning parameter localization:** [implemented/20260523_BCS_OPS_PLANNING_PARAMETER_LOCALIZATION.md](implemented/20260523_BCS_OPS_PLANNING_PARAMETER_LOCALIZATION.md) - Ops phase-gate messages and PlanParameters operation-name/type/tempo/tolerance/support chrome now render through English/BCS localization.

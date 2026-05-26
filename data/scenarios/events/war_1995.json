@@ -1140,7 +1140,7 @@
   {
     "id": "operation_sana_1995",
     "title": "Operation Sana -- The 5th Corps Advances",
-    "narrative": "Three years of siege end in a single week. The 5th Corps -- the same formation that held the Bihac pocket against VRS, RSK, and Abdic's forces combined -- breaks out in force. Operation Sana sweeps south and east. Bosanski Petrovac falls. Bosanska Krupa falls. Sanski Most is captured on October 12. The 5th Corps, which spent three years defending the most isolated pocket in Bosnia, now spearheads the largest ARBiH territorial gain of the entire war.",
+    "narrative": "In September and October 1995, the ARBiH 5th Corps advanced from the Bihac pocket toward Bosanski Petrovac, Kljuc, Bosanska Krupa, and Sanski Most. Bosanski Petrovac fell on 15 September, Kljuc two days later, and Sanski Most on 10 October. The advance shifted RS-held western Bosnia toward the 49 percent Dayton line before the October ceasefire.",
     "category": "military",
     "trigger": {
       "turn_min": 179,
@@ -1169,7 +1169,7 @@
       },
       {
         "kind": "narrative",
-        "text": "The 5th Corps breaks out of the Bihac pocket. Operation Sana captures Sanski Most, Bosanski Petrovac, and Bosanska Krupa. RS territory approaches the 49% Dayton line."
+        "text": "The 5th Corps advances from the Bihac pocket toward Bosanski Petrovac, Kljuc, Bosanska Krupa, and Sanski Most."
       }
     ],
     "dimension_shifts": [
@@ -1192,7 +1192,7 @@
     "sets_flags": {
       "operation_sana_occurred": true
     },
-    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). BB Vol. II, Ch. 15."
+    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). BB Vol. II Ch. 15; BB Vol. II pp. 536-538 for 5th Corps/Bihac source trail."
   },
   {
     "id": "ceasefire_1995",
