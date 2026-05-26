@@ -475,13 +475,7 @@
         "kind": "control_change",
         "faction": "RS",
         "osids": [
-          "op:rogatica:zepa_2",
-          "op:rudo:gornja_strmica",
-          "op:visegrad:medjedja_2",
-          "op:vlasenica:pomol_2",
-          "op:gorazde:slatina_2",
-          "op:gorazde:sopotnica",
-          "op:gorazde:ustipraca_2"
+          "op:rogatica:zepa_2"
         ]
       },
       {
@@ -731,14 +725,6 @@
         "delta": -5
       },
       {
-        "kind": "control_change",
-        "faction": "HRHB",
-        "osids": [
-          "op:glamoc:kovacevci_2",
-          "op:glamoc:pribelja"
-        ]
-      },
-      {
         "kind": "narrative",
         "text": "Grahovo and Glamoc fall to HV-HVO forces. The Knin-Banja Luka supply road is severed, isolating the RSK."
       }
@@ -801,25 +787,6 @@
         "kind": "supply_delta",
         "faction": "RS",
         "delta": -15
-      },
-      {
-        "kind": "control_change",
-        "faction": "HRHB",
-        "osids": [
-          "op:bosansko_grahovo:bosansko_grahovo_2",
-          "op:bosansko_grahovo:malesevci",
-          "op:bosansko_grahovo:ugarci"
-        ]
-      },
-      {
-        "kind": "control_change",
-        "faction": "RBiH",
-        "osids": [
-          "op:kljuc:hadzici",
-          "op:kljuc:kljuc_2",
-          "op:kljuc:krasulje_2",
-          "op:kljuc:sanica_2"
-        ]
       },
       {
         "kind": "narrative",
@@ -1173,30 +1140,6 @@
     },
     "effects": [
       {
-        "kind": "control_change",
-        "faction": "HRHB",
-        "osids": [
-          "op:jajce:barevo_2",
-          "op:jajce:bravnice",
-          "op:jajce:jajce_3",
-          "op:jajce:jezero_2",
-          "op:jajce:lupnica",
-          "op:jajce:prisoje",
-          "op:jajce:vinac_2",
-          "op:mrkonjic_grad:baljvine_2",
-          "op:mrkonjic_grad:bjelajce_2",
-          "op:mrkonjic_grad:gerzovo_2",
-          "op:mrkonjic_grad:majdan_2",
-          "op:mrkonjic_grad:mrkonjic_grad_2",
-          "op:mrkonjic_grad:podrasnica_2",
-          "op:sipovo:brdjani",
-          "op:sipovo:gornji_mujdzici_2",
-          "op:sipovo:pribeljci_2",
-          "op:sipovo:sipovo_2",
-          "op:sipovo:volari_2"
-        ]
-      },
-      {
         "kind": "morale_change",
         "faction": "RS",
         "delta": -8
@@ -1263,21 +1206,6 @@
       "delta": 10
     },
     "effects": [
-      {
-        "kind": "control_change",
-        "faction": "RBiH",
-        "osids": [
-          "op:sanski_most:budimlic_japra_2",
-          "op:sanski_most:ilidza_2",
-          "op:sanski_most:jelasinovci",
-          "op:sanski_most:kljevci",
-          "op:sanski_most:lusci_palanka_2",
-          "op:sanski_most:ostra_luka",
-          "op:sanski_most:sanski_most_2",
-          "op:sanski_most:skucani_vakuf_2",
-          "op:sanski_most:stari_majdan"
-        ]
-      },
       {
         "kind": "morale_change",
         "faction": "RS",

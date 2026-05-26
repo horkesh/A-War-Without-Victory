@@ -211,6 +211,34 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
+        corps: 'vrs_drina',
+        faction: 'RS',
+        name: 'Operation Pracha River',
+        staging_osid: 'op:rogatica:stara_gora',
+        available_from: 9,
+        min_attack_outcome: 'repulsed',
+        axes: [
+            {
+                axis_id: 'pracha_encirclement',
+                name: 'Prača Encirclement',
+                brigades: [
+                    'rs_1st_podrinje',
+                    'rs_5th_podrinje',
+                ],
+                // BB2 p.409: May–Jun 1993 TG "Višegrad" (Drina Corps), Prača River offensive.
+                // Staging stara_gora (RS init) adj brcigovo ✓; brcigovo adj sopotnica ✓; sopotnica adj ustipraca_2 ✓
+                // All three objectives painted RBiH Jan 1993. ustipraca_2 terminus: non-chain neighbors RS-painted.
+                // slatina_2 excluded — adj gorazde_2, cascade risk (belongs to Op Zvezda 94, Apr 1994).
+                objectives: [
+                    'op:rogatica:brcigovo',
+                    'op:gorazde:sopotnica',
+                    'op:gorazde:ustipraca_2',
+                ],
+                staging_osid: 'op:rogatica:stara_gora',
+            },
+        ],
+    },
+    {
         corps: 'vrs_herzegovina',
         faction: 'RS',
         name: 'Operation Visegrad',
@@ -288,6 +316,57 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:ilijas:sirovine',
                 ],
                 staging_osid: 'op:ilijas:podlugovi',
+            },
+        ],
+    },
+    {
+        // Operation Trnovo — VRS Sarajevo-Romanija Corps (SRK) secures the Trnovo cluster
+        // south of Sarajevo. Historically, SRK held the Trnovo area throughout the war
+        // (BB2 p.289). rs_trnovo_brigade home OSID is gornja_presjenica (RS from init).
+        //
+        // Painted control (Sacred Rule 4):
+        //   gornja_presjenica = RS (staging — not an objective)
+        //   kijevo_2         = RS (RS waypoint — strips at execution, not a real objective)
+        //   delijas          = RBiH (painted) — valid RS attack objective
+        //   trnovo           = RBiH (painted) — valid RS attack objective
+        //   praca/podgrab    = RS/RBiH but not adjacent to any RS staging — excluded
+        //
+        // Adjacency (verified in operational_contact_graph.json):
+        //   gornja_presjenica adj kijevo_2  ✓
+        //   gornja_presjenica adj trnovo    ✓
+        //   kijevo_2          adj delijas   ✓
+        //   trnovo adj pale:praca/podgrab   ✗ — pale cluster excluded (broken chain)
+        //
+        // available_from: 6 — matches rs_trnovo_brigade availability.
+        // No explicit SRK queue needed — deferred-ops loop in injectPrePlannedOperations
+        // handles available_from automatically.
+        corps: 'vrs_sarajevo_romanija',
+        faction: 'RS',
+        name: 'Operation Trnovo',
+        staging_osid: 'op:trnovo:gornja_presjenica',
+        available_from: 6,
+        min_attack_outcome: 'repulsed',
+        axes: [
+            {
+                // gornja_presjenica → kijevo_2 (RS waypoint, strips) → delijas (RBiH-painted)
+                axis_id: 'trnovo_east',
+                name: 'Trnovo East — Delijas',
+                brigades: ['rs_trnovo_brigade'],
+                objectives: [
+                    'op:trnovo:kijevo_2',   // RS waypoint (painted RS, strips at execution)
+                    'op:trnovo:delijas',     // RBiH-painted, persistent RBiH mismatch
+                ],
+                staging_osid: 'op:trnovo:gornja_presjenica',
+            },
+            {
+                // gornja_presjenica → trnovo (RBiH-painted, directly adjacent)
+                axis_id: 'trnovo_town',
+                name: 'Trnovo Town',
+                brigades: ['rs_trnovo_brigade'],
+                objectives: [
+                    'op:trnovo:trnovo',     // RBiH-painted, persistent RBiH mismatch
+                ],
+                staging_osid: 'op:trnovo:gornja_presjenica',
             },
         ],
     },
@@ -892,7 +971,7 @@ export function injectPrePlannedOperations(state: GameState, adjacency?: Map<Osi
     if (injectedCorps.has('vrs_drina')) {
         const cmd = corpsCommand['vrs_drina'];
         if (cmd && !cmd.queued_operations) {
-            cmd.queued_operations = ['Operation Podrinje Sweep'];
+            cmd.queued_operations = ['Operation Podrinje Sweep', 'Operation Pracha River'];
         }
     }
 
