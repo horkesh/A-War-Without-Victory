@@ -1,4 +1,23 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] test(artifacts): lock data-derived debug transient ownership
+
+**Type:** Save/replay generated-artifact stability + static ownership guard.
+
+**Change:** Added a static guard and generated-artifact ownership row for `data/derived/_debug/**`. The guard proves `.gitignore` covers `data/derived/_debug/`, the ownership matrix classifies the tree as default-transient with no committed files and owner varying by diagnostic script, and `git ls-files data/derived/_debug` stays empty. No event content, calibration, scenario output, run artifact, save schema, migration, validator, or generated artifact bytes changed.
+
+**Determinism:** Static docs/test-only slice. The guard reads committed docs and git metadata only; it does not run scenarios, write artifacts, alter serialization, or touch deterministic simulation paths. `data/derived/_debug/**` remains transient unless a future diagnostic is intentionally promoted through a narrower matrix row and validation test.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\vitest.cmd run tests\data_derived_debug_artifact_ownership.test.ts --reporter=dot` failed before docs alignment because the ownership matrix had no `data/derived/_debug/**` row.
+- `F:\A-War-Without-Victory\vitest.cmd run tests\data_derived_debug_artifact_ownership.test.ts --reporter=dot` - PASS; 1/1 test.
+- `F:\A-War-Without-Victory\vitest.cmd run tests\diagnostics_output_artifact_ownership.test.ts tests\desktop_packaging_contract.test.ts tests\desktop_packaging_extraresources_filter.test.ts --reporter=dot` - PASS; 10/10 tests.
+- `git ls-files data/derived/_debug` - PASS; no tracked files returned.
+- `git diff --check` - PASS.
+
+**Artifacts:** `tests/data_derived_debug_artifact_ownership.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/implemented/20260526_DATA_DERIVED_DEBUG_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] test(save): lock latest-run final-save static artifact ownership
 
 **Type:** Save/replay generated-artifact stability + static ownership guard.

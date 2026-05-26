@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest data-derived debug artifact ownership:** [implemented/20260526_DATA_DERIVED_DEBUG_ARTIFACT_OWNERSHIP.md](implemented/20260526_DATA_DERIVED_DEBUG_ARTIFACT_OWNERSHIP.md) - A static guard now locks `data/derived/_debug/**` as ignored, default-transient diagnostic scratch with no committed files and owner varying by diagnostic script.
+
 **Latest diagnostics output artifact ownership:** [implemented/20260526_DIAGNOSTICS_OUTPUT_ARTIFACT_OWNERSHIP.md](implemented/20260526_DIAGNOSTICS_OUTPUT_ARTIFACT_OWNERSHIP.md) - A static guard now locks `tools/diagnostics/output/save_migration_drift.json` as the only committed diagnostics output artifact and keeps unlisted `tools/diagnostics/output/*.json` files default-transient until a matrix row exists.
 
 **Latest displacement civilian-casualties schema contract:** [implemented/20260526_DISPLACEMENT_CIVILIAN_CASUALTIES_SCHEMA_CONTRACT.md](implemented/20260526_DISPLACEMENT_CIVILIAN_CASUALTIES_SCHEMA_CONTRACT.md) - `displacement.civilian_casualties` is now a required persisted v19 record with `{}` migration proof, current-version nested casualty validation, empty-map first-write regression coverage, run-summary non-empty gating, and strict-null floor 465.
