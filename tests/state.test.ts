@@ -89,6 +89,7 @@ const baseState: GameState = {
         displacement_origin_dest_arrivals: {},
         displacement_recent_by_turn: {},
         displacement_camp_state: {},
+        civilian_casualties: {},
         displacement_state: {},
         hostile_takeover_timers: {},
         minority_flight_state: {},

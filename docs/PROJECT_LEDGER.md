@@ -1,27 +1,4 @@
 <!-- LEDGER ARCHIVE POINTERS -->
-## [2026-05-26] state(save): require displacement civilian casualties
-
-**Type:** Save schema contract hardening + strict-null Phase 2 slice.
-
-**Change:** Promoted `displacement.civilian_casualties` from optional to required persisted v19 state. The v19 migration materializes legacy saves with an inert `{}` default; current-version validation rejects missing/non-record casualty maps and malformed entries whose `killed` or `fled_abroad` values are absent, non-numeric, non-finite, or negative. The scenario runner now emits the run-summary casualty block only when the map contains at least one finite non-zero casualty record.
-
-**Writer hardening:** Fixed the non-empty-map trap in `recordCivilianDisplacementCasualties(...)`: a migrated save can legitimately start with `civilian_casualties: {}`, and the writer now creates the first per-faction bucket before incrementing so first records are not silently dropped. Migration intentionally does not preseed all factions.
-
-**Determinism:** Schema/default-only migration uses an empty record and no time, randomness, I/O, environment reads, or unordered traversal. The writer fix preserves deterministic per-call state mutation.
-
-**Strict-null inventory:** Counted escape categories remain zero. Optional `GameState` field inventory is now `465`, split as `sim 298`, `state 159`, `derived 8`, `unknown 0`.
-
-**Verification:**
-- Red first: `npx.cmd vitest run tests/save_migration_validator_rejection.test.ts tests/save_migration_versioned_steps.test.ts tests/save_migration_round_trip_contract.test.ts tests/displacement_civilian_casualties_contract.test.ts` failed before production changes because v19 was absent, malformed casualty maps were accepted, v18 migration left the field undefined, the empty-map writer dropped first records, and the run-summary helper was absent.
-- Focused green during implementation: `npx.cmd vitest run tests/save_migration_validator_rejection.test.ts tests/save_migration_versioned_steps.test.ts tests/save_migration_round_trip_contract.test.ts tests/displacement_civilian_casualties_contract.test.ts` - PASS; 91/91 tests.
-- `node tools/diagnostics/strict_null_inventory.cjs` - PASS; `optional_fields_game_state 465`, counted escape categories all zero.
-- `node tools/diagnostics/strict_null_inventory.cjs --field-domains` - PASS; total 465, `sim 298`, `state 159`, `derived 8`, `unknown 0`.
-- `node tools/diagnostics/save_migration_drift_audit.cjs` - PASS; `save migration drift audit: 0 anonymous defaults`.
-
-**Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, `src/state/displacement_state_utils.ts`, `src/scenario/scenario_runner.ts`, `tests/displacement_civilian_casualties_contract.test.ts`, save-migration/strict-null tests and fixtures, `tools/diagnostics/output/save_migration_drift.json`, strict-null diagnostic JSON, roadmap/command-board/engine-plan docs, `docs/40_reports/implemented/20260526_DISPLACEMENT_CIVILIAN_CASUALTIES_SCHEMA_CONTRACT.md`, `docs/PROJECT_LEDGER.md`.
-
----
-
 ## [2026-05-26] test(save): lock latest-run final-save static artifact ownership
 
 **Type:** Save/replay generated-artifact stability + static ownership guard.
@@ -11427,5 +11404,32 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 - `git diff --check` - PASS.
 
 **Artifacts:** `tests/state.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-26] state(save): require displacement civilian casualties
+
+**Type:** Save schema contract hardening + strict-null Phase 2 slice.
+
+**Change:** Promoted `displacement.civilian_casualties` from optional to required persisted v19 state. The v19 migration materializes legacy saves with an inert `{}` default; current-version validation rejects missing/non-record casualty maps and malformed entries whose `killed` or `fled_abroad` values are absent, non-numeric, non-finite, or negative. The scenario runner now emits the run-summary casualty block only when the map contains at least one finite non-zero casualty record.
+
+**Writer hardening:** Fixed the non-empty-map trap in `recordCivilianDisplacementCasualties(...)`: a migrated save can legitimately start with `civilian_casualties: {}`, and the writer now creates the first per-faction bucket before incrementing so first records are not silently dropped. Migration intentionally does not preseed all factions.
+
+**Determinism:** Schema/default-only migration uses an empty record and no time, randomness, I/O, environment reads, or unordered traversal. The writer fix preserves deterministic per-call state mutation.
+
+**Strict-null inventory:** Counted escape categories remain zero. Optional `GameState` field inventory is now `465`, split as `sim 298`, `state 159`, `derived 8`, `unknown 0`.
+
+**Verification:**
+- Red first: `npx.cmd vitest run tests/save_migration_validator_rejection.test.ts tests/save_migration_versioned_steps.test.ts tests/save_migration_round_trip_contract.test.ts tests/displacement_civilian_casualties_contract.test.ts` failed before production changes because v19 was absent, malformed casualty maps were accepted, v18 migration left the field undefined, the empty-map writer dropped first records, and the run-summary helper was absent.
+- Focused green during implementation: `npx.cmd vitest run tests/save_migration_validator_rejection.test.ts tests/save_migration_versioned_steps.test.ts tests/save_migration_round_trip_contract.test.ts tests/displacement_civilian_casualties_contract.test.ts` - PASS; 91/91 tests.
+- Post-hotfix integration first failed `tests/state.test.ts` because the v19 required field was missing from the current-schema base round-trip fixture; fixed by adding `civilian_casualties: {}` beside the v18 displacement map defaults.
+- Merged focused pack: `.\vitest.cmd run tests\save_migration_validator_rejection.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_round_trip_contract.test.ts tests\save_migration_drift_audit.test.ts tests\save_migration_counter_offers.test.ts tests\strict_null_inventory_progress.test.ts tests\state\player_faction_contract.test.ts tests\migration_nested_ownership.test.ts tests\displacement_civilian_casualties_contract.test.ts tests\state.test.ts --reporter=dot` - PASS; 196/196 tests.
+- `node tools/diagnostics/strict_null_inventory.cjs` - PASS; `optional_fields_game_state 465`, counted escape categories all zero.
+- `node tools/diagnostics/strict_null_inventory.cjs --field-domains` - PASS; total 465, `sim 298`, `state 159`, `derived 8`, `unknown 0`.
+- `node tools/diagnostics/save_migration_drift_audit.cjs` - PASS; `save migration drift audit: 0 anonymous defaults`.
+- `npx.cmd tsc --noEmit -p tsconfig.json --pretty false` - PASS.
+- `git diff --check` - PASS.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, `src/state/displacement_state_utils.ts`, `src/scenario/scenario_runner.ts`, `tests/state.test.ts`, `tests/displacement_civilian_casualties_contract.test.ts`, save-migration/strict-null tests and fixtures, `tools/diagnostics/output/save_migration_drift.json`, strict-null diagnostic JSON, roadmap/command-board/engine-plan docs, `docs/40_reports/implemented/20260526_DISPLACEMENT_CIVILIAN_CASUALTIES_SCHEMA_CONTRACT.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
