@@ -1,12 +1,12 @@
 # Sector Truth Reconciliation Byte-Identity Plan
 
 **Date:** 2026-05-26
-**Status:** ACTIVE execution-grade plan
+**Status:** ACTIVE execution-grade plan; Phase 1 slice executed 2026-05-26
 **Owner lane:** Engine-quality sector/frontline performance lane
 **Related command-board row:** P1 Sector/frontline performance residuals
 **Collision rules:** Planning target is sector/frontline engine performance only. Do not mix with calibration, event content, GUI, save-schema, or generated-artifact ownership work.
 **Phase covered:** Next bounded implementation slice after fresh profile evidence on `main`.
-**Current next action:** Implement Phase 1 only: profile-confirm, add red/green equivalence tests, then optimize the measured final-sector-truth/partitioning hotspot with byte-identical proof.
+**Current next action:** Re-profile from preserved hash `f219401f4a17f311` before choosing any further final-sector-truth/partitioning target. The 2026-05-26 Phase 1 slice reused invocation-local sorted corps groups in `ensureMinimumSectorCoverage(...)` and did not prove a full scenario speedup.
 
 ## Purpose
 

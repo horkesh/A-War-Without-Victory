@@ -359,6 +359,12 @@
 - Preserved final hash `f219401f4a17f311`; comparable 40w profile wall time improved from 103.310s to 91.556s.
 - Report: `docs/40_reports/implemented/20260526_SECTOR_EDGE_METADATA_LOOKUP_REUSE.md`
 
+# 2026-05-26 - Sector coverage sorted corps group reuse
+
+- Reused one invocation-local strict-sorted `sectorsByCorps.entries()` view inside `ensureMinimumSectorCoverage(...)` instead of resorting the same corps groups across coverage passes.
+- Preserved final hash `f219401f4a17f311` and baseline regression; local phase buckets improved while full profile wall time remained noisy, so no scenario speedup is claimed.
+- Report: `docs/40_reports/implemented/20260526_SECTOR_COVERAGE_CORPS_GROUP_REUSE.md`
+
 # 2026-05-26 - Army command schema contract
 
 - Promoted `military.army_co_decision_traces` and `military.army_corps_directives_by_faction` from optional `MilitaryState` fields to required persisted v10 contracts.

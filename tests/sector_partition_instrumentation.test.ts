@@ -443,6 +443,24 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(region).not.toMatch(/\bperformance\.now\s*\(/);
     });
 
+    it('static contract: ensureMinimumSectorCoverage reuses invocation-local sorted corps groups', () => {
+        const raw = readFileSync(resolve('src/sim/combat/brigade_assignment.ts'), 'utf8');
+        const startIdx = raw.indexOf('export function ensureMinimumSectorCoverage(');
+        const endIdx = raw.indexOf('\n}\n', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        const declaration = region.indexOf('const sortedCorpsSectorGroups');
+        expect(declaration).toBeGreaterThanOrEqual(0);
+
+        const afterDeclaration = region.slice(declaration);
+        expect(afterDeclaration).not.toContain('[...sectorsByCorps.entries()].sort');
+        expect(region).not.toMatch(/\bDate\.now\s*\(/);
+        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
+    });
+
     it('static contract: sector brigade assignment reuses enemy personnel indexes', () => {
         const raw = readFileSync(resolve('src/sim/combat/brigade_assignment.ts'), 'utf8');
         expect(raw).toContain('function countActiveEnemyPersonnelByOsid(');

@@ -11047,3 +11047,25 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, direct current-version displacement fixtures in CLI/UI/tests, `tests/save_migration_validator_rejection.test.ts`, `tests/save_migration_versioned_steps.test.ts`, `tests/state/displacement_event_log.test.ts`, `tests/strict_null_inventory_progress.test.ts`, `docs/40_reports/implemented/20260526_DISPLACEMENT_AGGREGATE_SCHEMA_CONTRACT.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-26] perf(sectors): reuse sorted corps groups in minimum coverage
+
+**Type:** Deterministic sector/frontline performance optimization + static contract coverage.
+
+**Change:** Executed Phase 1 of `docs/plans/2026-05-26-sector-truth-reconciliation-byte-identity-plan.md` with one invocation-local optimization in `ensureMinimumSectorCoverage(...)`. The function now builds the strict-sorted `sectorsByCorps.entries()` view once per call and reuses it across the existing minimum-coverage passes instead of rematerializing and resorting the same corps groups in each pass.
+
+**Determinism:** Function-local array reuse only. No save schema, scenario/event/OOB data, calibration constants, GUI, baseline artifacts, generated artifacts, cross-turn cache, module-level cache, randomness, timestamps, or mutable `Map`/`Set` state leakage changed. Existing strict corps ordering is preserved.
+
+**Verification:**
+- Red static contract test failed before implementation because `sortedCorpsSectorGroups` was absent; passed after implementation.
+- Focused sector tests - PASS, 5 files / 41 tests.
+- `npm.cmd run typecheck` - PASS after adding ignored dependency junctions for this worktree.
+- Profiled 40w proof - PASS; clean pre-change hash `f219401f4a17f311`, post-change hash `f219401f4a17f311`.
+- `npm.cmd run test:baselines` - PASS; baseline regression all scenarios match.
+- `git diff --check` - PASS.
+
+**Performance evidence:** Local profile phase buckets improved (`reconcile-final-sector-truth` 9555.383ms -> 8079.037ms; `partition-corps-front-sectors` 11060.971ms -> 8860.342ms), but total profile wall time worsened 112.01s -> 117.96s and the comparable pre-change `sealMergedSectorTruth:ensure-coverage` sidecar was overwritten. Treat the result as byte-identity proven with mixed/noisy performance evidence, not a claimed scenario speedup.
+
+**Artifacts:** `src/sim/combat/brigade_assignment.ts`, `tests/sector_partition_instrumentation.test.ts`, `docs/40_reports/implemented/20260526_SECTOR_COVERAGE_CORPS_GROUP_REUSE.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/2026-05-26-sector-truth-reconciliation-byte-identity-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---

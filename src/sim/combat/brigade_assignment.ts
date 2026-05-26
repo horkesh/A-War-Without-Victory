@@ -1556,6 +1556,8 @@ export function ensureMinimumSectorCoverage(
         list.push(s);
         sectorsByCorps.set(s.corps_id, list);
     }
+    const sortedCorpsSectorGroups = [...sectorsByCorps.entries()]
+        .sort((a, b) => strictCompare(a[0], b[0]));
 
     // ── Hoisted shared closures ──
     // `needed` and the density-floor constants are declared at function-body scope
@@ -1578,7 +1580,7 @@ export function ensureMinimumSectorCoverage(
     // territory_osids, it belongs there regardless of component boundaries.
     // No BFS required — the brigade is already there.
     perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-front', () => {
-    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+    for (const [, corpsSectors] of sortedCorpsSectorGroups) {
         const zeroFrontSectors = corpsSectors
             .filter(s => s.assigned_brigade_ids.length === 0 && s.length_edges > 0)
             .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
@@ -1638,7 +1640,7 @@ export function ensureMinimumSectorCoverage(
     });
 
     perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned', () => {
-    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+    for (const [, corpsSectors] of sortedCorpsSectorGroups) {
         for (const sector of corpsSectors) {
             if (sector.assigned_brigade_ids.length > 0) continue;
 
@@ -1796,7 +1798,7 @@ export function ensureMinimumSectorCoverage(
     // DENSITY_FLOOR_EDGES_PER_BRIGADE / DENSITY_FLOOR_THREAT_GATE / `needed`
     // are hoisted to function-body scope above so Phase E can reference them.
 
-    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+    for (const [, corpsSectors] of sortedCorpsSectorGroups) {
         const underStaffed = corpsSectors
             .filter(s =>
                 s.assigned_brigade_ids.length > 0
@@ -1858,7 +1860,7 @@ export function ensureMinimumSectorCoverage(
     const EQUALIZATION_MAX_RECIP_DENSITY = 0.25;
     const EQUALIZATION_MAX_TRANSFERS = 1;
 
-    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+    for (const [, corpsSectors] of sortedCorpsSectorGroups) {
         const overDense = corpsSectors
             .filter(s =>
                 s.assigned_brigade_ids.length > 1
@@ -1922,7 +1924,7 @@ export function ensureMinimumSectorCoverage(
     const PASS_7D_DONOR_MIN_DENSITY = 0.75;
     const PASS_7D_MAX_TRANSFERS = 2;
 
-    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+    for (const [, corpsSectors] of sortedCorpsSectorGroups) {
         const recipients = corpsSectors
             .filter(s =>
                 s.assigned_brigade_ids.length > 0
@@ -1994,7 +1996,7 @@ export function ensureMinimumSectorCoverage(
     // sibling sector to donate. This fixes quiet floor deficits without
     // cannibalizing another sector or requiring threat-gated rescue.
     perfTime('ensureMinimumSectorCoverage:severe-rescue:quiet-self-relief', () => {
-    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+    for (const [, corpsSectors] of sortedCorpsSectorGroups) {
         for (const sector of corpsSectors) {
             if (sector.assigned_brigade_ids.length === 0) continue;
             const deficit = Math.max(0, needed(sector) - sector.assigned_brigade_ids.length);
@@ -2048,7 +2050,7 @@ export function ensureMinimumSectorCoverage(
     const FLOOR_COMPLETION_MAX_HOPS = LOCAL_FRONT_RELIEF_MAX_HOPS;
     const FLOOR_COMPLETION_MAX_TRANSFERS = 2;
 
-    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+    for (const [, corpsSectors] of sortedCorpsSectorGroups) {
         const recipients = corpsSectors
             .filter((sector) =>
                 sector.assigned_brigade_ids.length > 0
@@ -2165,7 +2167,7 @@ export function ensureMinimumSectorCoverage(
         role === 'rear' ? 0 : role === 'reserve' ? 1 : 2
     );
 
-    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+    for (const [, corpsSectors] of sortedCorpsSectorGroups) {
         const recipients = corpsSectors
             .filter((sector) =>
                 sector.assigned_brigade_ids.length > 0
