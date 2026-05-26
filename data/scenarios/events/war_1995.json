@@ -471,6 +471,13 @@
         "delta": -10
       },
       {
+        "kind": "control_change",
+        "faction": "RS",
+        "osids": [
+          "op:rogatica:zepa_2"
+        ]
+      },
+      {
         "kind": "narrative",
         "text": "Zepa falls to the VRS. A second UN safe area is overrun in two weeks, deepening the international crisis."
       }

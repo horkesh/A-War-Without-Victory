@@ -673,6 +673,13 @@
         "war_crimes_delta": 2
       },
       {
+        "kind": "control_change",
+        "faction": "RBiH",
+        "osids": [
+          "op:tuzla:simin_han_2"
+        ]
+      },
+      {
         "kind": "narrative",
         "text": "The Brčanska Malta ambush kills over 50 JNA soldiers. Belgrade and the international community condemn the attack. TDF forces secure the Simin Han barracks complex. VRS high command redirects forces toward the Tuzla corridor."
       }
@@ -1718,6 +1725,14 @@
       "delta": 3
     },
     "effects": [
+      {
+        "kind": "control_change",
+        "faction": "RBiH",
+        "osids": [
+          "op:gorazde:glamoc",
+          "op:gorazde:kamen"
+        ]
+      },
       {
         "kind": "narrative",
         "text": "Operation Circle consolidates the Gorazde pocket. ARBiH forces secure the enclave perimeter, pushing VRS from outlying settlements."
