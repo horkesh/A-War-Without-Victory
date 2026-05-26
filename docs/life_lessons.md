@@ -1,10 +1,16 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 241 lessons across 9 topic files.
+> Last restructured: 2026-04-11. 243 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
 ## New Lessons (2026-05-26)
+
+### [Calibration] Rule 4 violations are NOT uniformly safe to remove — wrong-capture vs attrition-sink distinction — see `docs/life_lessons/calibration.md`
+- Krivajevici (R29) was in the mismatch list (sim=RS, painted=RBiH — VRS CAPTURING it incorrectly) → removing safe: +9 count. Hotonj (R31) NOT in mismatch list (sim=RBiH, correctly matched — VRS FAILING to capture it, attrition-sink) → removing freed brigades from futile combat → −17 count. Before removing any Rule 4 violation, check `compare_painted_vs_sim.cjs`: if OSID is in mismatch → wrong-capture (safe); if NOT in mismatch → attrition-sink (load-bearing, do not remove).
+
+### [Calibration] Event-based control_change is cascade-safe for historically datable territory changes — see `docs/life_lessons/calibration.md`
+- R32 added control_change to `operation_storm_1995` for 9 Sanski Most OSIDs (painted=RBiH, sim=RS): +6 count / +0.8pp area, HRHB cascade intact (120 vs 121). Same pattern as R26 Srebrenica (+9). Events fire at turn 174+, after all combat ops resolved → no brigade attrition cascade. For "RS holds territory at Dayton that history liberated", add control_change to the existing event in `war_1995.json` rather than modifying op objectives.
 
 ### [Calibration] Audit ALL existing op objectives for Rule 4 violations — not just new ones — see `docs/life_lessons/calibration.md`
 - krivajevici (Op Prsten, ilijas_ring) was a painted=RBiH VRS objective that sat undetected until a calibration mismatch flagged it. Removing it as a one-line subtractive change produced +9 correctly placed OSIDs (+2.7pp area). Rule: before any calibration session, run a bulk audit of all op objectives against `painted_control_oct1995.json` — cross-faction objectives are Rule 4 violations regardless of when they were written.
