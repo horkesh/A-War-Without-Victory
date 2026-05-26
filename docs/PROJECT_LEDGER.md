@@ -1,4 +1,22 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] test(save): align CI fixtures with required schema fields
+
+**Type:** Branch/CI/release hygiene + save-schema fixture repair.
+
+**Change:** Aligned stale current-schema fixtures with the required fields introduced by the event decision log and political war substrate schema-contract slices. The tracked latest-run final-save fixture now includes `military.event_decision_log: []`; direct current-version political fixtures in nested migration ownership, counter-offer migration, and player-faction contract tests now include empty political war substrate records. No production code, migration logic, validator logic, event prose, GUI behavior, scenario source data, combat logic, calibration tuning, or non-empty save values changed.
+
+**Determinism:** Empty required-record fixture alignment only. The tracked generated save fixture changed by adding an inert empty audit-log array and normalizing the final newline. No randomness, timestamps, ordering, scenario runner write path, serialization logic, or scenario outputs were regenerated.
+
+**Verification:**
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\migration_nested_ownership.test.ts --reporter=dot` - PASS; 4/4 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\front_edge_foca_shared_border_real_save.test.ts tests\migration_nested_ownership.test.ts tests\real_save_sector_truth_contracts.test.ts tests\save_load_real_roundtrip.test.ts tests\save_migration_counter_offers.test.ts tests\sector_partition_buildCorpsFrontSectors_integration.test.ts tests\state\player_faction_contract.test.ts --reporter=dot` - PASS; 34/34 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\tsc.cmd --noEmit -p tsconfig.json` - PASS.
+- `git diff --check` - PASS.
+
+**Artifacts:** `data/derived/latest_run_final_save.json`, `tests/migration_nested_ownership.test.ts`, `tests/save_migration_counter_offers.test.ts`, `tests/state/player_faction_contract.test.ts`, `docs/40_reports/implemented/20260526_CI_SCHEMA_FIXTURE_ALIGNMENT.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] state(save): require political war substrate records
 
 **Type:** Save schema contract hardening + strict-null Phase 2 slice.

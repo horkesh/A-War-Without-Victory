@@ -36391,6 +36391,7 @@
         "faction": "RS"
       }
     ],
+    "event_decision_log": [],
     "event_fire_counts": {
       "arms_embargo_impact_1992": 1,
       "battle_of_the_barracks_sarajevo": 1,

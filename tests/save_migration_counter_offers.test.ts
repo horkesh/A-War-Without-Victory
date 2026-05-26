@@ -52,6 +52,12 @@ function legacySave(): any {
             negotiation_ledger: [],
             supply_rights: { corridors: [] },
             municipalities: {},
+            war_consolidation_until: {},
+            war_control_strain: {},
+            war_supply_pressure: {},
+            war_supply_condition: {},
+            war_exhaustion: {},
+            war_exhaustion_local: {},
         },
         displacement: {
             displacement_event_log: [],

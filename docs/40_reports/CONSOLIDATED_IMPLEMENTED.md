@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest CI schema fixture alignment:** [implemented/20260526_CI_SCHEMA_FIXTURE_ALIGNMENT.md](implemented/20260526_CI_SCHEMA_FIXTURE_ALIGNMENT.md) - Stale current-schema fixtures and the tracked latest-run final-save fixture now include required empty event/political records so Baseline Regression exercises the current save contract without production behavior changes.
+
 **Latest political war substrate schema contract:** [implemented/20260526_POLITICAL_WAR_SUBSTRATE_SCHEMA_CONTRACT.md](implemented/20260526_POLITICAL_WAR_SUBSTRATE_SCHEMA_CONTRACT.md) - Six political war substrate records are now required persisted v6/v7 contract fields with current-version rejection coverage, legacy `{}` migration proof, and strict-null floor 481.
 
 **Latest startup snapshot artifact ownership:** [implemented/20260526_STARTUP_SNAPSHOT_ARTIFACT_OWNERSHIP.md](implemented/20260526_STARTUP_SNAPSHOT_ARTIFACT_OWNERSHIP.md) - A static guard now locks the April 1992 startup snapshot artifact owner, validation commands, npm script mapping, source key/path, and builder wrapper calls without refreshing the generated startup save or claiming byte proof.
@@ -389,3 +391,9 @@
 - Added a static guard for `tools/diagnostics/output/save_migration_drift.json` ownership across generated-artifact docs, diagnostic script write path, committed JSON `generated_by`, and deterministic script constraints.
 - Preserved migration logic, validator logic, artifact bytes, scenario outputs, replay behavior, event prose, GUI, and calibration data.
 - Report: `docs/40_reports/implemented/20260526_SAVE_MIGRATION_DRIFT_ARTIFACT_OWNERSHIP.md`
+
+# 2026-05-26 - CI schema fixture alignment
+
+- Added required empty `military.event_decision_log` and political war substrate records to stale current-schema test fixtures and the tracked latest-run final-save fixture.
+- Preserved production code, migration logic, validator logic, event prose, GUI behavior, scenario source data, combat logic, and calibration tuning.
+- Report: `docs/40_reports/implemented/20260526_CI_SCHEMA_FIXTURE_ALIGNMENT.md`
