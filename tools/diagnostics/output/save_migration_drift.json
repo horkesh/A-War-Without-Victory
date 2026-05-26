@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 14,
-  "registered_migration_count": 14,
-  "strict_required_field_count": 36,
+  "latest_schema_version": 15,
+  "registered_migration_count": 15,
+  "strict_required_field_count": 42,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -61,6 +61,10 @@
     {
       "version": 14,
       "description": "Loaded gameplay player_faction contract default for legacy saves. Sensitive: yes; default RBiH. Headless harness runs are exempt — they intentionally leave player_faction undefined so the event evaluator routes every event through bot auto-respond."
+    },
+    {
+      "version": 15,
+      "description": "Persisted military event bookkeeping substrate defaults. Sensitive: no."
     }
   ],
   "required_fields": [
@@ -207,6 +211,30 @@
     {
       "version": 14,
       "path": "military.event_decision_log"
+    },
+    {
+      "version": 15,
+      "path": "military.enabled_event_ids"
+    },
+    {
+      "version": 15,
+      "path": "military.event_fire_counts"
+    },
+    {
+      "version": 15,
+      "path": "military.event_flags"
+    },
+    {
+      "version": 15,
+      "path": "military.event_last_fired_turn"
+    },
+    {
+      "version": 15,
+      "path": "military.event_readiness"
+    },
+    {
+      "version": 15,
+      "path": "military.fired_event_ids"
     }
   ]
 }

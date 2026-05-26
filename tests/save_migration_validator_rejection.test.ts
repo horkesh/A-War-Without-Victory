@@ -55,6 +55,12 @@ function currentVersionState(): any {
             army_co_decision_traces: {},
             army_corps_directives_by_faction: {},
             event_decision_log: [],
+            fired_event_ids: [],
+            event_readiness: {},
+            event_fire_counts: {},
+            event_last_fired_turn: {},
+            event_flags: {},
+            enabled_event_ids: [],
         },
         political: {
             political_controllers: {},
@@ -122,6 +128,22 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it.each([
+        ['fired_event_ids', 15],
+        ['event_readiness', 15],
+        ['event_fire_counts', 15],
+        ['event_last_fired_turn', 15],
+        ['event_flags', 15],
+        ['enabled_event_ids', 15],
+    ])('rejects a current-version save missing military event bookkeeping substrate %s', (field, version) => {
+        const state = currentVersionState();
+        delete state.military[field];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            new RegExp(`Save schema validation failed after migration[\\s\\S]*v${version}[\\s\\S]*military\\.${field}`)
+        );
+    });
+
     it('rejects a current-version save missing displacement event log', () => {
         const state = currentVersionState();
         delete state.displacement.displacement_event_log;
@@ -181,6 +203,12 @@ describe('save migration validator hardening', () => {
         delete state.military.army_co_decision_traces;
         delete state.military.army_corps_directives_by_faction;
         delete state.military.event_decision_log;
+        delete state.military.fired_event_ids;
+        delete state.military.event_readiness;
+        delete state.military.event_fire_counts;
+        delete state.military.event_last_fired_turn;
+        delete state.military.event_flags;
+        delete state.military.enabled_event_ids;
         delete state.displacement.displacement_event_log;
         delete state.displacement.displacement_humanitarian_aggregates;
         delete state.displacement.displacement_origin_dest_arrivals;
@@ -199,6 +227,12 @@ describe('save migration validator hardening', () => {
         expect(migrated.military.army_co_decision_traces).toEqual({});
         expect(migrated.military.army_corps_directives_by_faction).toEqual({});
         expect(migrated.military.event_decision_log).toEqual([]);
+        expect(migrated.military.fired_event_ids).toEqual([]);
+        expect(migrated.military.event_readiness).toEqual({});
+        expect(migrated.military.event_fire_counts).toEqual({});
+        expect(migrated.military.event_last_fired_turn).toEqual({});
+        expect(migrated.military.event_flags).toEqual({});
+        expect(migrated.military.enabled_event_ids).toEqual([]);
         expect(migrated.displacement.displacement_event_log).toEqual([]);
         expect(migrated.displacement.displacement_humanitarian_aggregates).toEqual({});
         expect(migrated.displacement.displacement_origin_dest_arrivals).toEqual({});

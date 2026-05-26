@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(14);
+        expect(getLatestSchemaVersion()).toBe(15);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -82,6 +82,12 @@ describe('versioned save migration steps', () => {
         expect(state.military.army_co_decision_traces).toEqual({});
         expect(state.military.army_corps_directives_by_faction).toEqual({});
         expect(state.military.event_decision_log).toEqual([]);
+        expect(state.military.fired_event_ids).toEqual([]);
+        expect(state.military.event_readiness).toEqual({});
+        expect(state.military.event_fire_counts).toEqual({});
+        expect(state.military.event_last_fired_turn).toEqual({});
+        expect(state.military.event_flags).toEqual({});
+        expect(state.military.enabled_event_ids).toEqual([]);
         expect(state.political.supply_rights).toEqual({ corridors: [] });
         expect(state.political.war_consolidation_until).toEqual({});
         expect(state.political.war_control_strain).toEqual({});
@@ -138,5 +144,19 @@ describe('versioned save migration steps', () => {
 
         expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
         expect(state.military.event_decision_log).toEqual([]);
+    });
+
+    it('materializes v15 event bookkeeping defaults for v14 saves', () => {
+        const state = minimalLegacyState(14);
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.fired_event_ids).toEqual([]);
+        expect(state.military.event_readiness).toEqual({});
+        expect(state.military.event_fire_counts).toEqual({});
+        expect(state.military.event_last_fired_turn).toEqual({});
+        expect(state.military.event_flags).toEqual({});
+        expect(state.military.enabled_event_ids).toEqual([]);
     });
 });

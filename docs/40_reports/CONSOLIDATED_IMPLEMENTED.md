@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest event bookkeeping schema contract:** [implemented/20260526_EVENT_BOOKKEEPING_SCHEMA_CONTRACT.md](implemented/20260526_EVENT_BOOKKEEPING_SCHEMA_CONTRACT.md) - Six military event bookkeeping records are now required persisted v15 contract fields with current-version rejection coverage, legacy empty-default migration proof, and strict-null floor 475.
+
 **Latest CI schema fixture alignment:** [implemented/20260526_CI_SCHEMA_FIXTURE_ALIGNMENT.md](implemented/20260526_CI_SCHEMA_FIXTURE_ALIGNMENT.md) - Stale current-schema fixtures and the tracked latest-run final-save fixture now include required empty event/political records so Baseline Regression exercises the current save contract without production behavior changes.
 
 **Latest political war substrate schema contract:** [implemented/20260526_POLITICAL_WAR_SUBSTRATE_SCHEMA_CONTRACT.md](implemented/20260526_POLITICAL_WAR_SUBSTRATE_SCHEMA_CONTRACT.md) - Six political war substrate records are now required persisted v6/v7 contract fields with current-version rejection coverage, legacy `{}` migration proof, and strict-null floor 481.
@@ -397,3 +399,9 @@
 - Added required empty `military.event_decision_log` and political war substrate records to stale current-schema test fixtures and the tracked latest-run final-save fixture.
 - Preserved production code, migration logic, validator logic, event prose, GUI behavior, scenario source data, combat logic, and calibration tuning.
 - Report: `docs/40_reports/implemented/20260526_CI_SCHEMA_FIXTURE_ALIGNMENT.md`
+
+# 2026-05-26 - Event bookkeeping schema contract
+
+- Promoted `military.fired_event_ids`, `military.event_readiness`, `military.event_fire_counts`, `military.event_last_fired_turn`, `military.event_flags`, and `military.enabled_event_ids` to required persisted v15 contracts.
+- Added v15 migration/default, current-version rejection, strict-null inventory, and direct-fixture alignment proof without changing event eligibility or response behavior.
+- Report: `docs/40_reports/implemented/20260526_EVENT_BOOKKEEPING_SCHEMA_CONTRACT.md`

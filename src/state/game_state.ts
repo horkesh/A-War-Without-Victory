@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 14 as const;
+export const CURRENT_SCHEMA_VERSION = 15 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -2244,7 +2244,7 @@ friction_events?: import('../sim/combat/warlord_friction.js').FrictionEvent[];
 /** Negotiation capital, patron relationships, peace plan history. */
 negotiation?: import('./negotiation_types.js').NegotiationState;
 /** Event IDs that have already fired (prevents re-fire for once-only events). */
-fired_event_ids?: string[];
+fired_event_ids: string[];
 /** Pending event decisions awaiting player response. */
 pending_event_decisions?: import('../sim/events/event_types.js').PendingEventDecision[];
 /** Structured audit trail of every event-decision resolution — bot or player.
@@ -2327,15 +2327,15 @@ bot_priority_shifts?: Array<{
 }>;
 // v0.6.0 emergent event system state
 /** Pressure system readiness counters per event ID. */
-event_readiness?: Record<string, number>;
+event_readiness: Record<string, number>;
 /** How many times each event has fired (for recurrence tracking). */
-event_fire_counts?: Record<string, number>;
+event_fire_counts: Record<string, number>;
 /** Turn number when each event last fired (for cooldown tracking). */
-event_last_fired_turn?: Record<string, number>;
-/** Named flags set by player decisions — read by downstream events. */
-event_flags?: Record<string, string | number | boolean>;
+event_last_fired_turn: Record<string, number>;
+/** General event flag bus for event decisions, chains, and downstream event consumers. */
+event_flags: Record<string, string | number | boolean>;
 /** Event IDs unlocked by event chains (enables_events). */
-enabled_event_ids?: string[];
+enabled_event_ids: string[];
 /** Phantom brigade IDs that have ever been spawned by `spawnJnaPhantomBrigades`.
  *  Prevents re-spawn after withdrawal — when a phantom withdraws, its formation
  *  entry is removed from `formations[]` entirely, so the spawn function's

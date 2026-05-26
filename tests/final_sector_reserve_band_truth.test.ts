@@ -74,6 +74,12 @@ describe('final sector reserve-band truth', () => {
                 army_co_decision_traces: {},
                 army_corps_directives_by_faction: {},
                 event_decision_log: [],
+            fired_event_ids: [],
+            event_readiness: {},
+            event_fire_counts: {},
+            event_last_fired_turn: {},
+            event_flags: {},
+            enabled_event_ids: [],
             } as GameState['military'],
             political: {
                 political_controllers: {
@@ -174,6 +180,12 @@ describe('final sector reserve-band truth', () => {
                 army_co_decision_traces: {},
                 army_corps_directives_by_faction: {},
                 event_decision_log: [],
+            fired_event_ids: [],
+            event_readiness: {},
+            event_fire_counts: {},
+            event_last_fired_turn: {},
+            event_flags: {},
+            enabled_event_ids: [],
             } as GameState['military'],
             political: {
                 political_controllers: {
@@ -277,6 +289,12 @@ describe('final sector reserve-band truth', () => {
                 army_co_decision_traces: {},
                 army_corps_directives_by_faction: {},
                 event_decision_log: [],
+            fired_event_ids: [],
+            event_readiness: {},
+            event_fire_counts: {},
+            event_last_fired_turn: {},
+            event_flags: {},
+            enabled_event_ids: [],
             } as GameState['military'],
             political: {
                 political_controllers: {

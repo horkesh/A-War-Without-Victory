@@ -115,6 +115,12 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 10, path: 'military.army_co_decision_traces', check: isRecord },
     { version: 10, path: 'military.army_corps_directives_by_faction', check: isRecord },
     { version: 14, path: 'military.event_decision_log', check: Array.isArray },
+    { version: 15, path: 'military.fired_event_ids', check: Array.isArray },
+    { version: 15, path: 'military.event_readiness', check: isRecord },
+    { version: 15, path: 'military.event_fire_counts', check: isRecord },
+    { version: 15, path: 'military.event_last_fired_turn', check: isRecord },
+    { version: 15, path: 'military.event_flags', check: isRecord },
+    { version: 15, path: 'military.enabled_event_ids', check: Array.isArray },
 ];
 
 /**

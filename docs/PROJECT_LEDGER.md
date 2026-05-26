@@ -1,4 +1,28 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] state(save): require event bookkeeping records
+
+**Type:** Save schema contract hardening + strict-null Phase 2 slice.
+
+**Change:** Promoted six military event bookkeeping substrate fields from optional `MilitaryState` fields to required persisted v15 contracts: `military.fired_event_ids`, `military.event_readiness`, `military.event_fire_counts`, `military.event_last_fired_turn`, `military.event_flags`, and `military.enabled_event_ids`. The v15 migration materializes legacy saves with inert empty defaults (`[]` for event ID arrays, `{}` for records), current-version validator coverage rejects missing fields, and direct current-version `MilitaryState` literals in CLI/warroom/test fixtures were aligned. This does not add `enabled_event_ids` gating semantics, change event eligibility, event ordering, event prose, event response selection, scenario data, GUI behavior, combat logic, or calibration tuning.
+
+**Determinism:** Schema/default-only change. Defaults are empty records/arrays and the migration is pure in-place state patching with no randomness, timestamps, I/O, environment reads, or unordered traversal. Persisted output shape changes only by materializing empty event bookkeeping containers for legacy saves.
+
+**Strict-null inventory:** Counted escape categories remain zero. Optional `GameState` field inventory is now `475`, split as `sim 298`, `state 169`, `derived 8`, `unknown 0`.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_validator_rejection.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_drift_audit.test.ts tests\strict_null_inventory_progress.test.ts --reporter=dot` failed 12/123 before production changes because current v14 saves accepted missing bookkeeping records, legacy saves left them undefined, schema version remained 14, and strict-null inventory remained 481.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_validator_rejection.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_drift_audit.test.ts tests\strict_null_inventory_progress.test.ts --reporter=dot` - PASS; 123/123 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\recurrence.test.ts tests\event_decisions.test.ts tests\pressure_system.test.ts tests\sim\events\two_level_surfacing.test.ts --reporter=dot` - PASS; 41/41 tests.
+- `node tools\diagnostics\strict_null_inventory.cjs --field-domains` - PASS; total 475, `sim 298`, `state 169`, `derived 8`, `unknown 0`.
+- `F:\A-War-Without-Victory\node_modules\.bin\tsc.cmd --noEmit -p tsconfig.json` - PASS after temporarily linking this worktree's missing `src\ui\map\node_modules` to the root dependency install; the temporary junction was removed after verification.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\corps_front_sector_corps_ownership.test.ts tests\emergency_retreat_reachability.test.ts tests\final_sector_reserve_band_truth.test.ts tests\final_sector_truth_reconciliation.test.ts tests\final_sector_truth_reconciliation_cache.test.ts tests\hvo_central_bosnia_sectors.test.ts tests\sector_split_brigade_assignment.test.ts tests\sector_truth_audit.test.ts --reporter=dot` - PASS; 37/37 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_counter_offers.test.ts tests\save_migration_validator_rejection.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_drift_audit.test.ts tests\strict_null_inventory_progress.test.ts --reporter=dot` - PASS; 125/125 tests.
+- `git diff --check` - PASS.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, direct `MilitaryState` fixtures in CLI/UI/tests, `tests/save_migration_validator_rejection.test.ts`, `tests/save_migration_versioned_steps.test.ts`, `tests/save_migration_counter_offers.test.ts`, `tests/strict_null_inventory_progress.test.ts`, `tools/diagnostics/output/save_migration_drift.json`, `docs/40_reports/implemented/20260526_EVENT_BOOKKEEPING_SCHEMA_CONTRACT.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] test(save): align CI fixtures with required schema fields
 
 **Type:** Branch/CI/release hygiene + save-schema fixture repair.

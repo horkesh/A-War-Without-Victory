@@ -76,7 +76,13 @@ function createProlongedSiegeState(): GameState {
         },
     army_co_decision_traces: {},
     army_corps_directives_by_faction: {},
-    event_decision_log: []
+    event_decision_log: [],
+    fired_event_ids: [],
+    event_readiness: {},
+    event_fire_counts: {},
+    event_last_fired_turn: {},
+    event_flags: {},
+    enabled_event_ids: []
   },
   displacement: {
     displacement_state: {
@@ -144,7 +150,13 @@ function createTemporaryEncirclementState(): GameState {
         },
     army_co_decision_traces: {},
     army_corps_directives_by_faction: {},
-    event_decision_log: []
+    event_decision_log: [],
+    fired_event_ids: [],
+    event_readiness: {},
+    event_fire_counts: {},
+    event_last_fired_turn: {},
+    event_flags: {},
+    enabled_event_ids: []
   },
   displacement: {
     displacement_state: {
@@ -205,7 +217,13 @@ function createCorridorLifelineState(): GameState {
         },
     army_co_decision_traces: {},
     army_corps_directives_by_faction: {},
-    event_decision_log: []
+    event_decision_log: [],
+    fired_event_ids: [],
+    event_readiness: {},
+    event_fire_counts: {},
+    event_last_fired_turn: {},
+    event_flags: {},
+    enabled_event_ids: []
   },
   displacement: {
     displacement_state: {
@@ -275,7 +293,13 @@ function createMultiPocketStressState(): GameState {
         },
     army_co_decision_traces: {},
     army_corps_directives_by_faction: {},
-    event_decision_log: []
+    event_decision_log: [],
+    fired_event_ids: [],
+    event_readiness: {},
+    event_fire_counts: {},
+    event_last_fired_turn: {},
+    event_flags: {},
+    enabled_event_ids: []
   },
   displacement: {
     displacement_state: {
@@ -332,7 +356,13 @@ function createAsymmetricCollapseState(): GameState {
         },
     army_co_decision_traces: {},
     army_corps_directives_by_faction: {},
-    event_decision_log: []
+    event_decision_log: [],
+    fired_event_ids: [],
+    event_readiness: {},
+    event_fire_counts: {},
+    event_last_fired_turn: {},
+    event_flags: {},
+    enabled_event_ids: []
   },
   displacement: {
     displacement_state: {

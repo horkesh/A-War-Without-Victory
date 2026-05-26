@@ -558,3 +558,18 @@ registerMigration({
         }
     },
 });
+
+registerMigration({
+    version: 15,
+    description: 'Persisted military event bookkeeping substrate defaults. Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        if (!mil) return;
+        ensureArray(mil, 'fired_event_ids');
+        ensureRecord(mil, 'event_readiness');
+        ensureRecord(mil, 'event_fire_counts');
+        ensureRecord(mil, 'event_last_fired_turn');
+        ensureRecord(mil, 'event_flags');
+        ensureArray(mil, 'enabled_event_ids');
+    },
+});
