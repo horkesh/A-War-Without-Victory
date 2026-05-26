@@ -87,7 +87,8 @@ function createProlongedSiegeState(): GameState {
                 lost_population: 0,
                 last_updated_turn: 0
             }
-        }
+        },
+    displacement_event_log: []
   },
         political: {}
     };
@@ -143,7 +144,8 @@ function createTemporaryEncirclementState(): GameState {
                 lost_population: 0,
                 last_updated_turn: 0
             }
-        }
+        },
+    displacement_event_log: []
   },
         political: {}
     };
@@ -192,7 +194,8 @@ function createCorridorLifelineState(): GameState {
                 lost_population: 0,
                 last_updated_turn: 0
             }
-        }
+        },
+    displacement_event_log: []
   },
         political: {}
     };
@@ -245,7 +248,8 @@ function createMultiPocketStressState(): GameState {
             'MUN_A': { mun_id: 'MUN_A', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
             'MUN_B': { mun_id: 'MUN_B', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
             'MUN_C': { mun_id: 'MUN_C', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
-        }
+        },
+    displacement_event_log: []
   },
         political: {}
     };
@@ -289,7 +293,8 @@ function createAsymmetricCollapseState(): GameState {
     displacement_state: {
             'MUN_A': { mun_id: 'MUN_A', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
             'MUN_B': { mun_id: 'MUN_B', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
-        }
+        },
+    displacement_event_log: []
   },
         political: {}
     };

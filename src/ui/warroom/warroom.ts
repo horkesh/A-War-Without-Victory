@@ -185,7 +185,7 @@ class WarroomApp {
             ],
             military,
             political,
-            displacement: {},
+            displacement: { displacement_event_log: [] },
         };
         this.gameState = mockState;
 

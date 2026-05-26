@@ -22,7 +22,7 @@ function makeState(): GameState {
             war_alliance_rbih_hrhb: -0.2,
             political_controllers: {},
         } as any,
-        displacement: {},
+        displacement: { displacement_event_log: [] },
     } as GameState;
 }
 

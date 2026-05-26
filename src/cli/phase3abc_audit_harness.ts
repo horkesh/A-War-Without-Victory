@@ -699,7 +699,8 @@ function createBaseState(seedName: string): GameState {
     army_corps_directives_by_faction: {}
   },
   displacement: {
-    displacement_state: {}
+    displacement_state: {},
+    displacement_event_log: []
   },
         political: {}
     };

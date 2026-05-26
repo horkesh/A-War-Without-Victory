@@ -47,7 +47,7 @@ function makeCeasefireState(progress: number): GameState {
                 bilateral_corps_release_progress: { HRHB: progress },
             },
         } as any,
-        displacement: {},
+        displacement: { displacement_event_log: [] },
     } as GameState;
 }
 

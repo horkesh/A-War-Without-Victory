@@ -112,6 +112,15 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('rejects a current-version save missing displacement event log', () => {
+        const state = currentVersionState();
+        delete state.displacement.displacement_event_log;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v7[\s\S]*displacement\.displacement_event_log/
+        );
+    });
+
     it('migrates a v1 save before applying current-version required-field validation', () => {
         const state = currentVersionState();
         state.schema_version = 1;
@@ -119,6 +128,7 @@ describe('save migration validator hardening', () => {
         delete state.political.negotiation_status;
         delete state.military.army_co_decision_traces;
         delete state.military.army_corps_directives_by_faction;
+        delete state.displacement.displacement_event_log;
         delete state.displacement.displacement_humanitarian_aggregates;
 
         const migrated = deserializeState(JSON.stringify(state));
@@ -133,6 +143,7 @@ describe('save migration validator hardening', () => {
         });
         expect(migrated.military.army_co_decision_traces).toEqual({});
         expect(migrated.military.army_corps_directives_by_faction).toEqual({});
+        expect(migrated.displacement.displacement_event_log).toEqual([]);
         expect(migrated.displacement.displacement_humanitarian_aggregates).toEqual({});
     });
 });

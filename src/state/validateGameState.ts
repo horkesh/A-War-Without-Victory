@@ -102,6 +102,7 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 5, path: 'military.assignable_front_segments', check: Array.isArray },
     { version: 5, path: 'military.brigade_front_assignment', check: isRecord },
     { version: 5, path: 'military.militia_pools', check: isRecord },
+    { version: 7, path: 'displacement.displacement_event_log', check: Array.isArray },
     { version: 10, path: 'military.army_co_decision_traces', check: isRecord },
     { version: 10, path: 'military.army_corps_directives_by_faction', check: isRecord },
 ];
@@ -787,4 +788,3 @@ export function validateGameStateShape(
     }
     return { ok: true };
 }
-

@@ -78,7 +78,7 @@ function baseState(turn: number, opts: {
             war_alliance_rbih_hrhb: opts.alliance ?? 1.0,
             political_controllers: {},
         } as GameState['political'],
-        displacement: {} as GameState['displacement'],
+        displacement: { displacement_event_log: [] } as GameState['displacement'],
     } as unknown as GameState;
 }
 
@@ -214,6 +214,7 @@ describe('LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH — event predicates', () => {
                     lost_population: 0, last_updated_turn: 30,
                 } as any,
             },
+            displacement_event_log: [],
         } as GameState['displacement'];
         evaluateEvents(state, rng, 30, ALL_EVENTS);
         expect(state.military.fired_event_ids).toContain('csq_refugee_absorption_strain');

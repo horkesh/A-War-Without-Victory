@@ -53,7 +53,7 @@ function makeState(washingtonSigned = false): GameState {
                 allied_mixed_municipalities: washingtonSigned ? ['travnik'] : [],
             },
         } as any,
-        displacement: {},
+        displacement: { displacement_event_log: [] },
     } as GameState;
 }
 

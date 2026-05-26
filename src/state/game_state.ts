@@ -2508,7 +2508,7 @@ displacement_camp_state?: Record<MunicipalityId, DisplacementCampState>;
 /** War phase: non-takeover minority flight state (per settlement). Canon: displacement redesign 2026-02-17. */
 minority_flight_state?: Record<SettlementId, MinorityFlightStateEntry>;
 /** Cumulative displacement event log, sorted by (turn, origin_mun). */
-displacement_event_log?: DisplacementEvent[];
+displacement_event_log: DisplacementEvent[];
 sustainability_state?: Record<MunicipalityId, SustainabilityState>;
 /** Peace-phase §4.4: displacement initiated turn per municipality (hook only; no population change). */
 war_displacement_initiated?: Record<MunicipalityId, number>;

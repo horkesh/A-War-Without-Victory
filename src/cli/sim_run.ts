@@ -40,7 +40,7 @@ async function main(): Promise<void> {
     army_corps_directives_by_faction: {}
   },
   political: {},
-  displacement: {}
+  displacement: { displacement_event_log: [] }
 };
 
     await prepareNewGameState(initial, graph);

@@ -48,7 +48,7 @@ function buildLinearTopology(): {
             army_co_decision_traces: {},
             army_corps_directives_by_faction: {},
         },
-        displacement: {},
+        displacement: { displacement_event_log: [] },
         political: {
             political_controllers: {
                 'op:test:a': 'RBiH',

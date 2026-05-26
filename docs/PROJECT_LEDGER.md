@@ -1,4 +1,28 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] test(state): require displacement event log
+
+**Type:** Save schema contract hardening + strict-null Phase 2 slice.
+
+**Change:** Promoted `displacement.displacement_event_log` from optional `DisplacementDomainState` field to required persisted v7 contract field. Added v7 required-field validation, a current-version rejection test for saves missing the log, and a legacy v1 migration assertion proving the existing v7 migration materializes `[]` before current-version validation. Added empty event logs to direct synthetic current-version fixtures in CLI harnesses, UI startup stubs, and focused tests. Regenerated the save migration drift artifact; strict required fields now total 26. Did not promote displacement humanitarian aggregates, origin/destination arrivals, recent-by-turn caches, pending event notifications, event decision logs, or derived caches.
+
+**Determinism:** Schema/default-only change. Empty-array migration was already present at v7 and remains inert. No displacement mechanics, append ordering, event production, scenario data, event data, GUI code, baselines, randomness, timestamps, operation tuning, initial OSID overrides, avoided-OSID lists, or serialized derived-state cache changed.
+
+**Strict-null inventory:** Counted escape categories remain zero: `as_factionid_casts 0`, `as_unknown_casts 0`, `as_any_casts 0`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`. Optional `GameState` field inventory is now `491`, split as `sim 305`, `state 178`, `derived 8`, `unknown 0`.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_validator_rejection.test.ts --reporter=dot` failed because current-version saves missing `displacement.displacement_event_log` did not throw.
+- `node tools\diagnostics\strict_null_inventory.cjs` - PASS; `optional_fields_game_state 491`.
+- `node tools\diagnostics\strict_null_inventory.cjs --field-domains` - PASS; `sim 305`, `state 178`, `derived 8`, `unknown 0`.
+- `node tools\diagnostics\save_migration_drift_audit.cjs` - PASS; `0 anonymous defaults`.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_validator_rejection.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_round_trip_contract.test.ts tests\migration_nested_ownership.test.ts tests\morale_displacement_schema.test.ts tests\state\displacement_event_log.test.ts tests\alliance_phase0_handoff.test.ts tests\alliance_territorial_incidents.test.ts tests\bilateral_ceasefire_redeployment.test.ts tests\bilateral_displacement_cascade.test.ts tests\bilateral_formation_diversion.test.ts tests\bilateral_front_edges.test.ts tests\consequence_breadth_v2.test.ts tests\emergency_retreat_reachability.test.ts tests\washington_joint_pressure.test.ts --reporter=dot` - PASS; 98/98 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\tsc.cmd --noEmit -p tsconfig.json` - PASS after temporarily linking this dependency-light worktree to the already-installed map UI dependency folder; junction removed after the run.
+- `F:\A-War-Without-Victory\node_modules\.bin\tsx.cmd tools\scenario_runner\run_baseline_regression.ts` - PASS; `Baseline regression: all scenarios match`.
+- `git diff --check` - PASS.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/validateGameState.ts`, direct current-version displacement fixtures in CLI/UI/tests, `tests/save_migration_validator_rejection.test.ts`, `tools/diagnostics/output/save_migration_drift.json`, `docs/40_reports/implemented/20260526_DISPLACEMENT_EVENT_LOG_SCHEMA_CONTRACT.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] test(state): prove save migration drift artifact byte identity
 
 **Type:** Generated-artifact determinism test/docs. No migration code, save schema, scenario data, event data, GUI code, baseline artifact, calibration tuning, combat math, or generated artifact content changed.

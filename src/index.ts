@@ -29,7 +29,7 @@ const initial: GameState = {
     army_corps_directives_by_faction: {}
   },
   political: {},
-  displacement: {}
+  displacement: { displacement_event_log: [] }
 };
 
 async function main(): Promise<void> {

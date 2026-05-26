@@ -99,7 +99,7 @@ function makeState(faction: FactionId, corpsIds: string[]): GameState {
                 allied_mixed_municipalities: ['busovaca', 'travnik', 'vitez'],
             },
         } as any,
-        displacement: {},
+        displacement: { displacement_event_log: [] },
     } as GameState;
 }
 
