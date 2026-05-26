@@ -800,6 +800,16 @@
         ]
       },
       {
+        "kind": "control_change",
+        "faction": "RBiH",
+        "osids": [
+          "op:kljuc:hadzici",
+          "op:kljuc:kljuc_2",
+          "op:kljuc:krasulje_2",
+          "op:kljuc:sanica_2"
+        ]
+      },
+      {
         "kind": "narrative",
         "text": "Operation Storm shatters the Republic of Serbian Krajina. The strategic balance in the western Balkans shifts decisively against Serb forces."
       }
@@ -1248,11 +1258,7 @@
           "op:sanski_most:ostra_luka",
           "op:sanski_most:sanski_most_2",
           "op:sanski_most:skucani_vakuf_2",
-          "op:sanski_most:stari_majdan",
-          "op:kljuc:hadzici",
-          "op:kljuc:kljuc_2",
-          "op:kljuc:krasulje_2",
-          "op:kljuc:sanica_2"
+          "op:sanski_most:stari_majdan"
         ]
       },
       {
