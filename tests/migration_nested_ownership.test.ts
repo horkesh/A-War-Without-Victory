@@ -64,6 +64,7 @@ function migrationFixture(overrides: Record<string, unknown> = {}): Record<strin
             event_last_fired_turn: {},
             event_flags: {},
             enabled_event_ids: [],
+            phantoms_spawned: [],
         },
         political: {
             political_controllers: {},
@@ -131,6 +132,7 @@ describe('nested migration ownership contracts', () => {
             event_last_fired_turn: {},
             event_flags: {},
             enabled_event_ids: [],
+            phantoms_spawned: [],
         },
         political: {
             political_controllers: {},
@@ -194,6 +196,7 @@ describe('nested migration ownership contracts', () => {
             event_last_fired_turn: {},
             event_flags: {},
             enabled_event_ids: [],
+            phantoms_spawned: [],
         },
         political: {
             political_controllers: {},

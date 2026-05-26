@@ -11433,3 +11433,28 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, `src/state/displacement_state_utils.ts`, `src/scenario/scenario_runner.ts`, `tests/state.test.ts`, `tests/displacement_civilian_casualties_contract.test.ts`, save-migration/strict-null tests and fixtures, `tools/diagnostics/output/save_migration_drift.json`, strict-null diagnostic JSON, roadmap/command-board/engine-plan docs, `docs/40_reports/implemented/20260526_DISPLACEMENT_CIVILIAN_CASUALTIES_SCHEMA_CONTRACT.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-26] state(save): require military phantom spawned markers
+
+**Type:** Save schema contract hardening + strict-null Phase 2 slice.
+
+**Change:** Promoted `military.phantoms_spawned` from optional to required persisted v20 state. The v20 migration materializes legacy saves with an inert `[]` default while preserving any existing array order, contents, and duplicates. Current-version validation now rejects missing or malformed `military.phantoms_spawned` values unless they are string arrays.
+
+**Determinism:** Schema/default-only migration uses an empty array and no time, randomness, I/O, environment reads, sorting, deduplication, or unordered traversal. Existing arrays are left in-place by the migration helper.
+
+**Strict-null inventory:** Counted escape categories remain zero. Optional `GameState` field inventory is now `464`, split as `sim 297`, `state 159`, `derived 8`, `unknown 0`.
+
+**Verification:**
+- Stop-condition check: committed/current save fixture `data/derived/startup/apr_1992_initial_save.json` has 22 `phantoms_spawned` entries, all strings.
+- Red first: `npx.cmd vitest run tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts tests\migration_nested_ownership.test.ts tests\save_migration_round_trip_contract.test.ts tests\state.test.ts --reporter=dot` - FAIL before production changes because schema v20 was absent, v19 migration left `military.phantoms_spawned` undefined, and current-version validation accepted missing/malformed values.
+- `git status --short --branch` - PASS; isolated worktree on `codex/v20-phantoms-spawned-contract`.
+- `node tools\diagnostics\strict_null_inventory.cjs` - PASS; `optional_fields_game_state 464`, counted escape categories all zero.
+- `node tools\diagnostics\strict_null_inventory.cjs --field-domains` - PASS; total 464, `sim 297`, `state 159`, `derived 8`, `unknown 0`.
+- `node tools\diagnostics\save_migration_drift_audit.cjs` - PASS; `save migration drift audit: 0 anonymous defaults`.
+- `npx.cmd vitest run tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts tests\migration_nested_ownership.test.ts tests\save_migration_round_trip_contract.test.ts tests\save_migration_drift_audit.test.ts tests\strict_null_inventory_progress.test.ts tests\state.test.ts --reporter=dot` - PASS; 196/196 tests.
+- `npx.cmd tsc --noEmit -p tsconfig.json --pretty false` - PASS.
+- `git diff --check` - PASS.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, current-version fixture literals, save-migration/strict-null tests and v19 fixture, `tools/diagnostics/output/save_migration_drift.json`, roadmap/command-board/engine-plan docs, `docs/40_reports/implemented/20260526_PHANTOMS_SPAWNED_SCHEMA_CONTRACT.md`, `docs/PROJECT_LEDGER.md`.
+
+---

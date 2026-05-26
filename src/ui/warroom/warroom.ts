@@ -168,6 +168,7 @@ class WarroomApp {
             event_last_fired_turn: {},
             event_flags: {},
             enabled_event_ids: [],
+            phantoms_spawned: [],
         };
         const political: GameState['political'] = {
             political_controllers: politicalControllers,

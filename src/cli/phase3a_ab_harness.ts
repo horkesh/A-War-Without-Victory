@@ -82,7 +82,8 @@ function createProlongedSiegeState(): GameState {
     event_fire_counts: {},
     event_last_fired_turn: {},
     event_flags: {},
-    enabled_event_ids: []
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
   displacement: {
     displacement_state: {
@@ -165,7 +166,8 @@ function createTemporaryEncirclementState(): GameState {
     event_fire_counts: {},
     event_last_fired_turn: {},
     event_flags: {},
-    enabled_event_ids: []
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
   displacement: {
     displacement_state: {
@@ -241,7 +243,8 @@ function createCorridorLifelineState(): GameState {
     event_fire_counts: {},
     event_last_fired_turn: {},
     event_flags: {},
-    enabled_event_ids: []
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
   displacement: {
     displacement_state: {
@@ -326,7 +329,8 @@ function createMultiPocketStressState(): GameState {
     event_fire_counts: {},
     event_last_fired_turn: {},
     event_flags: {},
-    enabled_event_ids: []
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
   displacement: {
     displacement_state: {
@@ -398,7 +402,8 @@ function createAsymmetricCollapseState(): GameState {
     event_fire_counts: {},
     event_last_fired_turn: {},
     event_flags: {},
-    enabled_event_ids: []
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
   displacement: {
     displacement_state: {

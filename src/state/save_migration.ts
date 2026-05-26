@@ -615,3 +615,13 @@ registerMigration({
         ensureRecord(disp, 'civilian_casualties');
     },
 });
+
+registerMigration({
+    version: 20,
+    description: 'JNA phantom spawned marker persisted default. Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        if (!mil) return;
+        ensureArray(mil, 'phantoms_spawned');
+    },
+});

@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 19,
-  "registered_migration_count": 19,
-  "strict_required_field_count": 52,
+  "latest_schema_version": 20,
+  "registered_migration_count": 20,
+  "strict_required_field_count": 53,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -81,6 +81,10 @@
     {
       "version": 19,
       "description": "Displacement civilian casualty persisted default. Sensitive: no."
+    },
+    {
+      "version": 20,
+      "description": "JNA phantom spawned marker persisted default. Sensitive: no."
     }
   ],
   "required_fields": [
@@ -291,6 +295,10 @@
     {
       "version": 19,
       "path": "displacement.civilian_casualties"
+    },
+    {
+      "version": 20,
+      "path": "military.phantoms_spawned"
     }
   ]
 }

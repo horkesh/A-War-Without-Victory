@@ -994,6 +994,7 @@ describe('post-merge misassignment relocation', () => {
             event_last_fired_turn: {},
             event_flags: {},
             enabled_event_ids: [],
+            phantoms_spawned: [],
             } as GameState['military'],
             political: {
                 political_controllers: {

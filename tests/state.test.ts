@@ -60,6 +60,7 @@ const baseState: GameState = {
         event_last_fired_turn: {},
         event_flags: {},
         enabled_event_ids: [],
+        phantoms_spawned: [],
         negotiation: {
             capital: {},
             patron_relationships: {},

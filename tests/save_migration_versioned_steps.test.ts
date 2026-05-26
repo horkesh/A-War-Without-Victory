@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(19);
+        expect(getLatestSchemaVersion()).toBe(20);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -88,6 +88,7 @@ describe('versioned save migration steps', () => {
         expect(state.military.event_last_fired_turn).toEqual({});
         expect(state.military.event_flags).toEqual({});
         expect(state.military.enabled_event_ids).toEqual([]);
+        expect(state.military.phantoms_spawned).toEqual([]);
         expect(state.political.supply_rights).toEqual({ corridors: [] });
         expect(state.political.war_consolidation_until).toEqual({});
         expect(state.political.war_control_strain).toEqual({});
@@ -221,5 +222,25 @@ describe('versioned save migration steps', () => {
 
         expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
         expect(state.displacement.civilian_casualties).toEqual({});
+    });
+
+    it('materializes v20 phantom-spawn marker defaults for v19 saves', () => {
+        const state = minimalLegacyState(19);
+        delete state.military.phantoms_spawned;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.phantoms_spawned).toEqual([]);
+    });
+
+    it('preserves existing v20 phantom-spawn marker order and contents for v19 saves', () => {
+        const state = minimalLegacyState(19);
+        state.military.phantoms_spawned = ['phantom_b', 'phantom_a', 'phantom_b'];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.phantoms_spawned).toEqual(['phantom_b', 'phantom_a', 'phantom_b']);
     });
 });
