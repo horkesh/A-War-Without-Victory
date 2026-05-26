@@ -69,6 +69,7 @@ function buildLinearTopology(): {
             settlement_displacement: {},
             settlement_displacement_started_turn: {},
             municipality_displacement: {},
+            civilian_casualties: {},
         },
         political: {
             political_controllers: {

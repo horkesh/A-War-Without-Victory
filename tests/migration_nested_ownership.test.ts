@@ -93,6 +93,7 @@ function migrationFixture(overrides: Record<string, unknown> = {}): Record<strin
             settlement_displacement_started_turn: {},
             municipality_displacement: {},
             sustainability_state: {},
+            civilian_casualties: {},
         },
         ...overrides,
     };
@@ -222,6 +223,7 @@ describe('nested migration ownership contracts', () => {
             hostile_takeover_timers: {},
             displacement_camp_state: {},
             sustainability_state: {},
+            civilian_casualties: {},
         },
         }));
 

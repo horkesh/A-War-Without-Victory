@@ -65,6 +65,20 @@ function isRecord(value: unknown): value is Record<string, unknown> {
     return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
+function isFiniteNonNegativeNumber(value: unknown): value is number {
+    return typeof value === 'number' && Number.isFinite(value) && value >= 0;
+}
+
+function isCivilianCasualtiesRecord(value: unknown): boolean {
+    if (!isRecord(value)) return false;
+    for (const entry of Object.values(value)) {
+        if (!isRecord(entry)) return false;
+        if (!isFiniteNonNegativeNumber(entry.killed)) return false;
+        if (!isFiniteNonNegativeNumber(entry.fled_abroad)) return false;
+    }
+    return true;
+}
+
 function isCanonicalPlayerFaction(value: unknown): boolean {
     return typeof value === 'string' && CANONICAL_PLAYER_FACTIONS.includes(value as typeof CANONICAL_PLAYER_FACTIONS[number]);
 }
@@ -130,6 +144,7 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 18, path: 'displacement.displacement_state', check: isRecord },
     { version: 18, path: 'displacement.minority_flight_state', check: isRecord },
     { version: 18, path: 'displacement.sustainability_state', check: isRecord },
+    { version: 19, path: 'displacement.civilian_casualties', check: isCivilianCasualtiesRecord },
 ];
 
 /**

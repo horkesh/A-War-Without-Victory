@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(18);
+        expect(getLatestSchemaVersion()).toBe(19);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -102,6 +102,7 @@ describe('versioned save migration steps', () => {
         expect(state.displacement.settlement_displacement).toEqual({});
         expect(state.displacement.settlement_displacement_started_turn).toEqual({});
         expect(state.displacement.municipality_displacement).toEqual({});
+        expect(state.displacement.civilian_casualties).toEqual({});
     });
 
     it('materializes v8 displacement aggregate defaults for v7 saves', () => {
@@ -129,6 +130,7 @@ describe('versioned save migration steps', () => {
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},
             displacement_recent_by_turn: {},
+            civilian_casualties: {},
             hostile_takeover_timers: {},
             minority_flight_state: {},
             municipality_displacement: {},
@@ -209,5 +211,15 @@ describe('versioned save migration steps', () => {
         expect(state.displacement.displacement_state).toEqual({});
         expect(state.displacement.minority_flight_state).toEqual({});
         expect(state.displacement.sustainability_state).toEqual({});
+    });
+
+    it('materializes v19 civilian casualty defaults for v18 saves', () => {
+        const state = minimalLegacyState(18);
+        delete state.displacement.civilian_casualties;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.displacement.civilian_casualties).toEqual({});
     });
 });

@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest displacement civilian-casualties schema contract:** [implemented/20260526_DISPLACEMENT_CIVILIAN_CASUALTIES_SCHEMA_CONTRACT.md](implemented/20260526_DISPLACEMENT_CIVILIAN_CASUALTIES_SCHEMA_CONTRACT.md) - `displacement.civilian_casualties` is now a required persisted v19 record with `{}` migration proof, current-version nested casualty validation, empty-map first-write regression coverage, run-summary non-empty gating, and strict-null floor 465.
+
 **Latest displacement lazy-map schema contract:** [implemented/20260526_DISPLACEMENT_LAZY_MAP_SCHEMA_CONTRACT.md](implemented/20260526_DISPLACEMENT_LAZY_MAP_SCHEMA_CONTRACT.md) - `displacement_state`, `minority_flight_state`, and `sustainability_state` are now required persisted v18 records with current-version rejection coverage, v17 `{}` migration proof, pre-v18 top-level rescue, current v18 residue guarding, and strict-null floor 466.
 
 **Latest displacement operational schema contract:** [implemented/20260526_DISPLACEMENT_OPERATIONAL_SCHEMA_CONTRACT.md](implemented/20260526_DISPLACEMENT_OPERATIONAL_SCHEMA_CONTRACT.md) - Three displacement operational substrate records are now required persisted v17 contract fields with current-version rejection coverage, v16 `{}` migration proof, pre-v17 top-level rescue, malformed v17 top-level residue guarding, and strict-null floor 469.

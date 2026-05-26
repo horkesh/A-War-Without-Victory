@@ -91,7 +91,8 @@ async function main(): Promise<void> {
     displacement_recent_by_turn: {},
     settlement_displacement: {},
     settlement_displacement_started_turn: {},
-    municipality_displacement: {}
+    municipality_displacement: {},
+    civilian_casualties: {}
   }
 };
 

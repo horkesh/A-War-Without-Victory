@@ -606,3 +606,12 @@ registerMigration({
         ensureRecord(disp, 'sustainability_state');
     },
 });
+
+registerMigration({
+    version: 19,
+    description: 'Displacement civilian casualty persisted default. Sensitive: no.',
+    migrate: (state) => {
+        const disp = ensureDisplacementRoot(state);
+        ensureRecord(disp, 'civilian_casualties');
+    },
+});

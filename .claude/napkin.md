@@ -1189,6 +1189,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: When adding code that mutates formations, political_controllers, or operations, the pipeline assertions will catch invariant violations at runtime. If an assertion fires, fix the source — never disable the assertion. Files: `assert_control_events.ts`, `assert_operation_lifecycle.ts`, `assert_formation_territory.ts`, `corps_front_sectors.ts` (assertSectorBrigadesActive + assertBrigadeReachability).
 
 ## Engine Runtime Patterns
+1. **[2026-05-26] Empty migration records need first-write tests**
+   Do instead: When a required save field migrates to `{}` and runtime writers address nested keys, add a regression proving the first nested write from `{}` succeeds; do not rely on outer-map initialization alone.
 1. **[2026-03-05] Takeover displacement off-by-one FIXED**
    Do instead: `processDisplacementTakeover` uses `currentTurn === warStartTurn + 1`. `runTurn()` increments turn BEFORE phases.
 2. **[2026-03-08] Phase I/II terminology fully removed — Peace/War only**

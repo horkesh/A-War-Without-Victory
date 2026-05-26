@@ -212,6 +212,7 @@ class WarroomApp {
                 settlement_displacement: {},
                 settlement_displacement_started_turn: {},
                 municipality_displacement: {},
+                civilian_casualties: {},
             },
         };
         this.gameState = mockState;

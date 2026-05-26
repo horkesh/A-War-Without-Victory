@@ -106,7 +106,8 @@ function createProlongedSiegeState(): GameState {
     sustainability_state: {},
     settlement_displacement: {},
     settlement_displacement_started_turn: {},
-    municipality_displacement: {}
+    municipality_displacement: {},
+    civilian_casualties: {}
   },
         political: {
             war_consolidation_until: {},
@@ -188,7 +189,8 @@ function createTemporaryEncirclementState(): GameState {
     sustainability_state: {},
     settlement_displacement: {},
     settlement_displacement_started_turn: {},
-    municipality_displacement: {}
+    municipality_displacement: {},
+    civilian_casualties: {}
   },
         political: {
             war_consolidation_until: {},
@@ -263,7 +265,8 @@ function createCorridorLifelineState(): GameState {
     sustainability_state: {},
     settlement_displacement: {},
     settlement_displacement_started_turn: {},
-    municipality_displacement: {}
+    municipality_displacement: {},
+    civilian_casualties: {}
   },
         political: {
             war_consolidation_until: {},
@@ -342,7 +345,8 @@ function createMultiPocketStressState(): GameState {
     sustainability_state: {},
     settlement_displacement: {},
     settlement_displacement_started_turn: {},
-    municipality_displacement: {}
+    municipality_displacement: {},
+    civilian_casualties: {}
   },
         political: {
             war_consolidation_until: {},
@@ -412,7 +416,8 @@ function createAsymmetricCollapseState(): GameState {
     sustainability_state: {},
     settlement_displacement: {},
     settlement_displacement_started_turn: {},
-    municipality_displacement: {}
+    municipality_displacement: {},
+    civilian_casualties: {}
   },
         political: {
             war_consolidation_until: {},

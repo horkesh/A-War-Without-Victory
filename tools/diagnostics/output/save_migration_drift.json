@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 18,
-  "registered_migration_count": 18,
-  "strict_required_field_count": 51,
+  "latest_schema_version": 19,
+  "registered_migration_count": 19,
+  "strict_required_field_count": 52,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -77,6 +77,10 @@
     {
       "version": 18,
       "description": "Displacement lazy-map persisted defaults. Sensitive: no."
+    },
+    {
+      "version": 19,
+      "description": "Displacement civilian casualty persisted default. Sensitive: no."
     }
   ],
   "required_fields": [
@@ -283,6 +287,10 @@
     {
       "version": 18,
       "path": "displacement.sustainability_state"
+    },
+    {
+      "version": 19,
+      "path": "displacement.civilian_casualties"
     }
   ]
 }

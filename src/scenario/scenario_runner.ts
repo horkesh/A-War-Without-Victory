@@ -292,6 +292,30 @@ export function canonicalizeStartupState(state: GameState): { state: GameState; 
     };
 }
 
+export function hasCivilianCasualtyRecords(casualties: unknown): boolean {
+    if (casualties == null || typeof casualties !== 'object' || Array.isArray(casualties)) {
+        return false;
+    }
+    for (const entry of Object.values(casualties as Record<string, unknown>)) {
+        if (entry == null || typeof entry !== 'object' || Array.isArray(entry)) continue;
+        const row = entry as Record<string, unknown>;
+        const killed = row.killed;
+        const fledAbroad = row.fled_abroad;
+        if (
+            typeof killed === 'number' &&
+            Number.isFinite(killed) &&
+            killed >= 0 &&
+            typeof fledAbroad === 'number' &&
+            Number.isFinite(fledAbroad) &&
+            fledAbroad >= 0 &&
+            killed + fledAbroad > 0
+        ) {
+            return true;
+        }
+    }
+    return false;
+}
+
 /** H1.11: Scope for baseline_ops displacement (derived-only; no new mechanics). */
 export type BaselineOpsScopeMode = 'all_front_active' | 'static_front_only' | 'fluid_front_only';
 
@@ -2901,7 +2925,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     takeover_displacement_weekly: takeoverDisplacementWeekly
                 }
                 : {}),
-            ...(attackResolutionSummary.weeks_at_war > 0 && state.displacement.civilian_casualties
+            ...(attackResolutionSummary.weeks_at_war > 0 && hasCivilianCasualtyRecords(state.displacement.civilian_casualties)
                 ? { civilian_casualties: state.displacement.civilian_casualties }
                 : {}),
             ...(botBenchmarkSummary ? { bot_benchmark_evaluation: botBenchmarkSummary } : {}),

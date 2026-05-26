@@ -78,6 +78,7 @@ function currentVersionState(): any {
         },
         displacement: {
             displacement_state: {},
+            civilian_casualties: {},
             war_displacement_initiated: {},
             hostile_takeover_timers: {},
             displacement_camp_state: {},
@@ -237,6 +238,40 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('rejects a current-version save missing displacement civilian casualties', () => {
+        const state = currentVersionState();
+        delete state.displacement.civilian_casualties;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v19[\s\S]*displacement\.civilian_casualties/
+        );
+    });
+
+    it('rejects a current-version save with non-object displacement civilian casualties', () => {
+        const state = currentVersionState();
+        state.displacement.civilian_casualties = [];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v19[\s\S]*displacement\.civilian_casualties/
+        );
+    });
+
+    it.each([
+        ['missing killed', { fled_abroad: 0 }],
+        ['missing fled_abroad', { killed: 0 }],
+        ['negative killed', { killed: -1, fled_abroad: 0 }],
+        ['negative fled_abroad', { killed: 0, fled_abroad: -1 }],
+        ['non-finite killed', { killed: Number.POSITIVE_INFINITY, fled_abroad: 0 }],
+        ['non-numeric fled_abroad', { killed: 0, fled_abroad: '0' }],
+    ])('rejects a current-version save with malformed displacement civilian casualties entry: %s', (_name, entry) => {
+        const state = currentVersionState();
+        state.displacement.civilian_casualties = { RBiH: entry };
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v19[\s\S]*displacement\.civilian_casualties/
+        );
+    });
+
     it('rejects a current-version save missing nested displacement lazy maps even with legacy top-level residue', () => {
         const state = currentVersionState();
         delete state.displacement.displacement_state;
@@ -318,6 +353,7 @@ describe('save migration validator hardening', () => {
         delete state.displacement.displacement_state;
         delete state.displacement.minority_flight_state;
         delete state.displacement.sustainability_state;
+        delete state.displacement.civilian_casualties;
         delete state.displacement.displacement_humanitarian_aggregates;
         delete state.displacement.displacement_origin_dest_arrivals;
         delete state.displacement.displacement_recent_by_turn;
@@ -348,6 +384,7 @@ describe('save migration validator hardening', () => {
         expect(migrated.displacement.displacement_state).toEqual({});
         expect(migrated.displacement.minority_flight_state).toEqual({});
         expect(migrated.displacement.sustainability_state).toEqual({});
+        expect(migrated.displacement.civilian_casualties).toEqual({});
         expect(migrated.displacement.displacement_humanitarian_aggregates).toEqual({});
         expect(migrated.displacement.displacement_origin_dest_arrivals).toEqual({});
         expect(migrated.displacement.displacement_recent_by_turn).toEqual({});
@@ -467,5 +504,16 @@ describe('save migration validator hardening', () => {
         expect(Object.prototype.hasOwnProperty.call(migrated, 'displacement_state')).toBe(false);
         expect(Object.prototype.hasOwnProperty.call(migrated, 'minority_flight_state')).toBe(false);
         expect(Object.prototype.hasOwnProperty.call(migrated, 'sustainability_state')).toBe(false);
+    });
+
+    it('materializes v19 civilian casualties for v18 saves', () => {
+        const state = currentVersionState();
+        state.schema_version = 18;
+        delete state.displacement.civilian_casualties;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.displacement.civilian_casualties).toEqual({});
     });
 });

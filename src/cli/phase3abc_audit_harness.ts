@@ -718,7 +718,8 @@ function createBaseState(seedName: string): GameState {
     sustainability_state: {},
     settlement_displacement: {},
     settlement_displacement_started_turn: {},
-    municipality_displacement: {}
+    municipality_displacement: {},
+    civilian_casualties: {}
   },
         political: {
             war_consolidation_until: {},

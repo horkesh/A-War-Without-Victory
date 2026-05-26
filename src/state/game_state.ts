@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 18 as const;
+export const CURRENT_SCHEMA_VERSION = 19 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -2519,7 +2519,7 @@ settlement_displacement_started_turn: Record<SettlementId, number>;
 /** Municipality-level displacement (capacity degradation) [0, 1]. Monotonic; never decreases. */
 municipality_displacement: Record<MunicipalityId, number>;
 /** Cumulative civilian displacement casualties (killed, fled_abroad) by ethnicity-aligned faction. */
-civilian_casualties?: CivilianCasualtiesByFaction;
+civilian_casualties: CivilianCasualtiesByFaction;
 /**
  * Per-faction cumulative humanitarian aggregates (LANE D-PRE substrate).
  * Bounded ~3 factions x 3 ethnicities x 3 numbers = 27 numbers total
