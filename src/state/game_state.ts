@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 15 as const;
+export const CURRENT_SCHEMA_VERSION = 16 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -2513,11 +2513,11 @@ sustainability_state?: Record<MunicipalityId, SustainabilityState>;
 /** Peace-phase §4.4: displacement initiated turn per municipality (hook only; no population change). */
 war_displacement_initiated?: Record<MunicipalityId, number>;
 /** Settlement-level displacement (capacity degradation) [0, 1]. Monotonic; never decreases. */
-settlement_displacement?: Record<SettlementId, number>;
+settlement_displacement: Record<SettlementId, number>;
 /** Turn when displacement began at this settlement (optional; for reporting only). */
-settlement_displacement_started_turn?: Record<SettlementId, number>;
+settlement_displacement_started_turn: Record<SettlementId, number>;
 /** Municipality-level displacement (capacity degradation) [0, 1]. Monotonic; never decreases. */
-municipality_displacement?: Record<MunicipalityId, number>;
+municipality_displacement: Record<MunicipalityId, number>;
 /** Cumulative civilian displacement casualties (killed, fled_abroad) by ethnicity-aligned faction. */
 civilian_casualties?: CivilianCasualtiesByFaction;
 /**

@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(15);
+        expect(getLatestSchemaVersion()).toBe(16);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -99,6 +99,9 @@ describe('versioned save migration steps', () => {
         expect(state.displacement.displacement_humanitarian_aggregates).toEqual({});
         expect(state.displacement.displacement_origin_dest_arrivals).toEqual({});
         expect(state.displacement.displacement_recent_by_turn).toEqual({});
+        expect(state.displacement.settlement_displacement).toEqual({});
+        expect(state.displacement.settlement_displacement_started_turn).toEqual({});
+        expect(state.displacement.municipality_displacement).toEqual({});
     });
 
     it('materializes v8 displacement aggregate defaults for v7 saves', () => {
@@ -112,7 +115,7 @@ describe('versioned save migration steps', () => {
         expect(state.displacement.displacement_recent_by_turn).toEqual({});
     });
 
-    it('materializes displacement root and v8 aggregates for legacy saves without displacement state', () => {
+    it('materializes displacement root and aggregate/capacity records for legacy saves without displacement state', () => {
         const state = minimalLegacyState(1);
         delete state.displacement;
 
@@ -124,6 +127,9 @@ describe('versioned save migration steps', () => {
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},
             displacement_recent_by_turn: {},
+            municipality_displacement: {},
+            settlement_displacement: {},
+            settlement_displacement_started_turn: {},
         });
     });
 
@@ -158,5 +164,16 @@ describe('versioned save migration steps', () => {
         expect(state.military.event_last_fired_turn).toEqual({});
         expect(state.military.event_flags).toEqual({});
         expect(state.military.enabled_event_ids).toEqual([]);
+    });
+
+    it('materializes v16 displacement capacity map defaults for v15 saves', () => {
+        const state = minimalLegacyState(15);
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.displacement.settlement_displacement).toEqual({});
+        expect(state.displacement.settlement_displacement_started_turn).toEqual({});
+        expect(state.displacement.municipality_displacement).toEqual({});
     });
 });

@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 15,
-  "registered_migration_count": 15,
-  "strict_required_field_count": 42,
+  "latest_schema_version": 16,
+  "registered_migration_count": 16,
+  "strict_required_field_count": 45,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -65,6 +65,10 @@
     {
       "version": 15,
       "description": "Persisted military event bookkeeping substrate defaults. Sensitive: no."
+    },
+    {
+      "version": 16,
+      "description": "Phase F displacement capacity map defaults. Sensitive: no."
     }
   ],
   "required_fields": [
@@ -235,6 +239,18 @@
     {
       "version": 15,
       "path": "military.fired_event_ids"
+    },
+    {
+      "version": 16,
+      "path": "displacement.municipality_displacement"
+    },
+    {
+      "version": 16,
+      "path": "displacement.settlement_displacement"
+    },
+    {
+      "version": 16,
+      "path": "displacement.settlement_displacement_started_turn"
     }
   ]
 }

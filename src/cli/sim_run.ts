@@ -58,7 +58,10 @@ async function main(): Promise<void> {
     displacement_event_log: [],
     displacement_humanitarian_aggregates: {},
     displacement_origin_dest_arrivals: {},
-    displacement_recent_by_turn: {}
+    displacement_recent_by_turn: {},
+    settlement_displacement: {},
+    settlement_displacement_started_turn: {},
+    municipality_displacement: {}
   }
 };
 

@@ -99,7 +99,7 @@ test('validateGameStateShape returns ok for GameState with Phase F fields', () =
 
 test('validateGameStateShape returns ok for GameState with only some Phase F fields', () => {
     const state = phaseFGameStateFixture();
-    delete state.displacement.settlement_displacement_started_turn;
+    delete (state.displacement as Partial<typeof state.displacement>).settlement_displacement_started_turn;
     const result = validateGameStateShape(state);
     expect(result.ok).toBe(true);
 });

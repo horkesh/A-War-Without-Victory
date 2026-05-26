@@ -1,4 +1,29 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] state(save): require Phase F displacement capacity maps
+
+**Type:** Save schema contract hardening + strict-null Phase 2 slice.
+
+**Change:** Promoted three Phase F displacement capacity maps from optional `DisplacementDomainState` fields to required persisted v16 contracts: `displacement.settlement_displacement`, `displacement.settlement_displacement_started_turn`, and `displacement.municipality_displacement`. The v16 migration materializes legacy saves with inert empty `{}` defaults, current-version validator coverage rejects missing fields, and direct current-version `DisplacementDomainState` literals in CLI/warroom/test fixtures were aligned. Current-version serializer canonicalization no longer silently repairs these three maps after migration, and legacy top-level Phase F capacity rescue is now limited to pre-v16 saves, so malformed v16 saves fail validation instead of being backfilled. This does not change displacement mechanics, event prose, scenario data, calibration tuning, combat logic, GUI behavior, or generated scenario outputs.
+
+**Determinism:** Schema/default-only change. Defaults are empty records and the migration is pure in-place state patching with no randomness, timestamps, I/O, environment reads, or unordered traversal. Persisted output shape changes only by materializing empty displacement capacity containers for legacy saves.
+
+**Strict-null inventory:** Counted escape categories remain zero. Optional `GameState` field inventory is now `472`, split as `sim 298`, `state 166`, `derived 8`, `unknown 0`.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_validator_rejection.test.ts --reporter=dot` and `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\strict_null_inventory_progress.test.ts --reporter=dot` failed before production changes because current v15 saves accepted missing capacity maps, legacy saves left them undefined, schema version remained 15, and strict-null inventory remained 475.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_validator_rejection.test.ts tests\save_migration_round_trip_contract.test.ts tests\save_migration_drift_audit.test.ts tests\save_migration_counter_offers.test.ts --reporter=dot` - PASS; 48/48 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_validator_rejection.test.ts tests\state\player_faction_contract.test.ts --reporter=dot` - PASS; 32/32 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_versioned_steps.test.ts tests\save_migration_drift_artifact_ownership.test.ts tests\save_migration_drift_audit.test.ts tests\migration_nested_ownership.test.ts tests\displacement_pipeline_state_schema.test.ts tests\save_migration_validator_rejection.test.ts tests\save_migration_round_trip_contract.test.ts tests\save_migration_counter_offers.test.ts tests\strict_null_inventory_progress.test.ts tests\state\player_faction_contract.test.ts --reporter=dot` - PASS; 164/164 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\state.test.ts tests\migration_nested_ownership.test.ts tests\save_migration_round_trip_contract.test.ts tests\save_migration_validator_rejection.test.ts tests\strict_null_inventory_progress.test.ts --reporter=dot` - PASS; 144/144 tests.
+- `node tools\diagnostics\strict_null_inventory.cjs` - PASS; `optional_fields_game_state 472`, counted escape categories all zero.
+- `node tools\diagnostics\strict_null_inventory.cjs --field-domains` - PASS; total 472, `sim 298`, `state 166`, `derived 8`, `unknown 0`.
+- `npx.cmd tsc --noEmit -p tsconfig.json --pretty false` - PASS.
+- `git diff --check` - PASS.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/serialize.ts`, `src/state/validateGameState.ts`, direct `DisplacementDomainState` fixtures in CLI/UI/tests, `tests/fixtures/save_migration/v15_displacement_capacity_maps.json`, `tests/save_migration_validator_rejection.test.ts`, `tests/save_migration_counter_offers.test.ts`, `tests/save_migration_drift_audit.test.ts`, `tests/save_migration_versioned_steps.test.ts`, `tests/state/player_faction_contract.test.ts`, `tests/strict_null_inventory_progress.test.ts`, `tools/diagnostics/output/save_migration_drift.json`, `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`, `docs/40_reports/implemented/20260526_PHASE_F_DISPLACEMENT_CAPACITY_SCHEMA_CONTRACT.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] test(save): lock H2.4 sweep artifact ownership
 
 **Type:** Save/replay generated-artifact stability + static ownership guard.

@@ -38,6 +38,12 @@ function minimalState(overrides: Record<string, unknown> = {}): Record<string, u
             army_co_decision_traces: {},
             army_corps_directives_by_faction: {},
             event_decision_log: [],
+            fired_event_ids: [],
+            event_readiness: {},
+            event_fire_counts: {},
+            event_last_fired_turn: {},
+            event_flags: {},
+            enabled_event_ids: [],
         },
         political: {
             political_controllers: {},
@@ -57,6 +63,9 @@ function minimalState(overrides: Record<string, unknown> = {}): Record<string, u
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},
             displacement_recent_by_turn: {},
+            settlement_displacement: {},
+            settlement_displacement_started_turn: {},
+            municipality_displacement: {},
         },
         ...overrides,
     };

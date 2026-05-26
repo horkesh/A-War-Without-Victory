@@ -573,3 +573,14 @@ registerMigration({
         ensureArray(mil, 'enabled_event_ids');
     },
 });
+
+registerMigration({
+    version: 16,
+    description: 'Phase F displacement capacity map defaults. Sensitive: no.',
+    migrate: (state) => {
+        const disp = ensureDisplacementRoot(state);
+        ensureRecord(disp, 'settlement_displacement');
+        ensureRecord(disp, 'settlement_displacement_started_turn');
+        ensureRecord(disp, 'municipality_displacement');
+    },
+});

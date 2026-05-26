@@ -84,6 +84,9 @@ function migrationFixture(overrides: Record<string, unknown> = {}): Record<strin
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},
             displacement_recent_by_turn: {},
+            settlement_displacement: {},
+            settlement_displacement_started_turn: {},
+            municipality_displacement: {},
         },
         ...overrides,
     };
@@ -204,6 +207,9 @@ describe('nested migration ownership contracts', () => {
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},
             displacement_recent_by_turn: {},
+            settlement_displacement: {},
+            settlement_displacement_started_turn: {},
+            municipality_displacement: {},
             war_displacement_initiated: { m1: 4 },
         },
         }));
@@ -223,6 +229,7 @@ describe('nested migration ownership contracts', () => {
 
     it('migrateState materializes missing nested Phase F sibling defaults under displacement', () => {
         const payload = JSON.stringify(migrationFixture({
+        schema_version: 15,
         displacement: {
             displacement_event_log: [],
             displacement_humanitarian_aggregates: {},
@@ -242,6 +249,7 @@ describe('nested migration ownership contracts', () => {
     it('migrateState rescues legacy top-level residue into nested owners before defaulting', () => {
         const payload = JSON.stringify({
             ...migrationFixture({
+                schema_version: 15,
                 political: {
                     political_controllers: {},
                     negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },

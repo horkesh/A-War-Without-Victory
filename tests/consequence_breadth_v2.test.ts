@@ -83,6 +83,9 @@ function baseState(turn: number, opts: {
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},
             displacement_recent_by_turn: {},
+            settlement_displacement: {},
+            settlement_displacement_started_turn: {},
+            municipality_displacement: {},
         } as GameState['displacement'],
     } as unknown as GameState;
 }
@@ -223,6 +226,9 @@ describe('LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH — event predicates', () => {
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},
             displacement_recent_by_turn: {},
+            settlement_displacement: {},
+            settlement_displacement_started_turn: {},
+            municipality_displacement: {},
         } as GameState['displacement'];
         evaluateEvents(state, rng, 30, ALL_EVENTS);
         expect(state.military.fired_event_ids).toContain('csq_refugee_absorption_strain');

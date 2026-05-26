@@ -121,6 +121,9 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 15, path: 'military.event_last_fired_turn', check: isRecord },
     { version: 15, path: 'military.event_flags', check: isRecord },
     { version: 15, path: 'military.enabled_event_ids', check: Array.isArray },
+    { version: 16, path: 'displacement.settlement_displacement', check: isRecord },
+    { version: 16, path: 'displacement.settlement_displacement_started_turn', check: isRecord },
+    { version: 16, path: 'displacement.municipality_displacement', check: isRecord },
 ];
 
 /**
@@ -401,7 +404,7 @@ export function validateGameStateShape(
 
     // War phase: AoR keys removed (brigade_municipality_assignment, brigade_mun_orders not validated; legacy load may strip)
 
-    // Phase F: displacement state (stored; monotonic [0, 1]; missing maps treated as empty)
+    // Phase F: displacement state (stored; monotonic [0, 1]); current v16 saves require capacity maps.
     const displacement = s.displacement;
     if (isRecord(displacement)) {
         if ('settlement_displacement' in displacement && displacement.settlement_displacement !== undefined) {

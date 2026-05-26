@@ -52,6 +52,9 @@ function makeCeasefireState(progress: number): GameState {
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},
             displacement_recent_by_turn: {},
+            settlement_displacement: {},
+            settlement_displacement_started_turn: {},
+            municipality_displacement: {},
         },
     } as GameState;
 }

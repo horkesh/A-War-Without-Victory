@@ -183,6 +183,29 @@ describe('save migration validator hardening', () => {
     });
 
     it.each([
+        'settlement_displacement',
+        'settlement_displacement_started_turn',
+        'municipality_displacement',
+    ])('rejects a current-version save missing Phase F displacement capacity record %s', (field) => {
+        const state = currentVersionState();
+        delete state.displacement[field];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            new RegExp(`Save schema validation failed after migration[\\s\\S]*v16[\\s\\S]*displacement\\.${field}`)
+        );
+    });
+
+    it('rejects a current-version save missing nested Phase F capacity maps even with legacy top-level residue', () => {
+        const state = currentVersionState();
+        delete state.displacement.settlement_displacement;
+        state.settlement_displacement = { legacy_sid: 0.1 };
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v16[\s\S]*displacement\.settlement_displacement/
+        );
+    });
+
+    it.each([
         ['displacement_humanitarian_aggregates', []],
         ['displacement_origin_dest_arrivals', []],
         ['displacement_recent_by_turn', null],
@@ -237,5 +260,38 @@ describe('save migration validator hardening', () => {
         expect(migrated.displacement.displacement_humanitarian_aggregates).toEqual({});
         expect(migrated.displacement.displacement_origin_dest_arrivals).toEqual({});
         expect(migrated.displacement.displacement_recent_by_turn).toEqual({});
+    });
+
+    it('materializes v16 Phase F displacement capacity records for v15 saves', () => {
+        const state = currentVersionState();
+        state.schema_version = 15;
+        delete state.displacement.settlement_displacement;
+        delete state.displacement.settlement_displacement_started_turn;
+        delete state.displacement.municipality_displacement;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.displacement.settlement_displacement).toEqual({});
+        expect(migrated.displacement.settlement_displacement_started_turn).toEqual({});
+        expect(migrated.displacement.municipality_displacement).toEqual({});
+    });
+
+    it('rescues legacy top-level Phase F capacity maps for v15 saves before v16 validation', () => {
+        const state = currentVersionState();
+        state.schema_version = 15;
+        delete state.displacement.settlement_displacement;
+        delete state.displacement.settlement_displacement_started_turn;
+        delete state.displacement.municipality_displacement;
+        state.settlement_displacement = { legacy_sid: 0.1 };
+        state.settlement_displacement_started_turn = { legacy_sid: 2 };
+        state.municipality_displacement = { legacy_mun: 0.2 };
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.displacement.settlement_displacement).toEqual({ legacy_sid: 0.1 });
+        expect(migrated.displacement.settlement_displacement_started_turn).toEqual({ legacy_sid: 2 });
+        expect(migrated.displacement.municipality_displacement).toEqual({ legacy_mun: 0.2 });
     });
 });
