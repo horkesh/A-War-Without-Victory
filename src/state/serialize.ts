@@ -125,6 +125,12 @@ function migrateState(raw: unknown): GameState {
         'settlement_displacement',
     ] as const;
     const allowLegacyPhaseFCapacityTopLevel = version === undefined || version < 16;
+    const displacementOperationalKeys = [
+        'war_displacement_initiated',
+        'hostile_takeover_timers',
+        'displacement_camp_state',
+    ] as const;
+    const allowLegacyDisplacementOperationalTopLevel = version === undefined || version < 17;
 
     rescueLegacyTopLevelFields(candidate, mil, [
         'theatres',
@@ -154,13 +160,15 @@ function migrateState(raw: unknown): GameState {
         'war_exhaustion_local',
     ]);
     rescueLegacyTopLevelFields(candidate, disp, [
-        'war_displacement_initiated',
-        'hostile_takeover_timers',
-        'displacement_camp_state',
         'displacement_humanitarian_aggregates',
         'displacement_origin_dest_arrivals',
         'displacement_recent_by_turn',
     ]);
+    if (allowLegacyDisplacementOperationalTopLevel) {
+        rescueLegacyTopLevelFields(candidate, disp, displacementOperationalKeys);
+    } else {
+        deleteLegacyTopLevelFields(candidate, displacementOperationalKeys);
+    }
     if (allowLegacyPhaseFCapacityTopLevel) {
         rescueLegacyTopLevelFields(candidate, disp, phaseFCapacityKeys);
     } else {
@@ -168,7 +176,9 @@ function migrateState(raw: unknown): GameState {
     }
 
     applyMigrations(candidate);
-    canonicalizeCurrentFields(candidate);
+    canonicalizeCurrentFields(candidate, {
+        allowDisplacementOperationalDefaults: allowLegacyDisplacementOperationalTopLevel,
+    });
 
     delete candidate.brigade_aor;
     delete candidate.brigade_aor_orders;
@@ -203,13 +213,15 @@ function migrateState(raw: unknown): GameState {
         'war_exhaustion_local',
     ]);
     sweepLegacyTopLevelFields(candidate, candidate.displacement, [
-        'war_displacement_initiated',
-        'hostile_takeover_timers',
-        'displacement_camp_state',
         'displacement_humanitarian_aggregates',
         'displacement_origin_dest_arrivals',
         'displacement_recent_by_turn',
     ]);
+    if (allowLegacyDisplacementOperationalTopLevel) {
+        sweepLegacyTopLevelFields(candidate, candidate.displacement, displacementOperationalKeys);
+    } else {
+        deleteLegacyTopLevelFields(candidate, displacementOperationalKeys);
+    }
     if (allowLegacyPhaseFCapacityTopLevel) {
         sweepLegacyTopLevelFields(candidate, candidate.displacement, phaseFCapacityKeys);
     } else {
@@ -227,7 +239,10 @@ function sortedKeys(record: Record<string, unknown>): string[] {
     return Object.keys(record).sort(strictCompare);
 }
 
-function canonicalizeCurrentFields(candidate: Record<string, any>): void {
+function canonicalizeCurrentFields(
+    candidate: Record<string, any>,
+    options: { allowDisplacementOperationalDefaults: boolean },
+): void {
     const mil = candidate.military;
     const pol = candidate.political;
     const disp = candidate.displacement;
@@ -284,7 +299,9 @@ function canonicalizeCurrentFields(candidate: Record<string, any>): void {
         if (mil && mil.war_jna === undefined) {
             mil.war_jna = { transition_begun: false, withdrawal_progress: 0, asset_transfer_rs: 0 };
         }
-        if (disp && disp.war_displacement_initiated === undefined) disp.war_displacement_initiated = {};
+        if (options.allowDisplacementOperationalDefaults && disp && disp.war_displacement_initiated === undefined) {
+            disp.war_displacement_initiated = {};
+        }
     }
 
 }

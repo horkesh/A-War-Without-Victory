@@ -29,7 +29,7 @@ describe('save migration drift audit diagnostic', () => {
             fields: Array<{ field: string }>;
         };
 
-        expect(report.latest_schema_version).toBe(16);
+        expect(report.latest_schema_version).toBe(17);
         expect(report.anonymous_default_count).toBe(0);
         expect(report.fields).toEqual([]);
     });

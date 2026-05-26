@@ -23,6 +23,9 @@ function makeState(): GameState {
             political_controllers: {},
         } as any,
         displacement: {
+            war_displacement_initiated: {},
+            hostile_takeover_timers: {},
+            displacement_camp_state: {},
             displacement_event_log: [],
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},

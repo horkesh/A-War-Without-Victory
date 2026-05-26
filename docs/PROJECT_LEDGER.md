@@ -1,4 +1,27 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] state(save): require displacement operational records
+
+**Type:** Save schema contract hardening + strict-null Phase 2 slice.
+
+**Change:** Promoted three displacement operational substrate records from optional `DisplacementDomainState` fields to required persisted v17 contracts: `displacement.hostile_takeover_timers`, `displacement.displacement_camp_state`, and `displacement.war_displacement_initiated`. The v17 migration materializes legacy saves with inert empty `{}` defaults, current-version validator coverage rejects missing fields, direct current-version fixtures were aligned, current-version top-level legacy residue no longer silently repairs malformed v17 saves, and pre-v17 top-level rescue is preserved. This does not change displacement mechanics, event prose, scenario data, calibration tuning, GUI behavior, combat logic, or generated scenario outputs.
+
+**Determinism:** Schema/default-only change. Defaults are empty records and the migration is pure in-place state patching with no randomness, timestamps, I/O, environment reads, or unordered traversal. Persisted output shape changes only by materializing empty displacement operational containers for legacy saves.
+
+**Strict-null inventory:** Counted escape categories remain zero. Optional `GameState` field inventory is now `469`, split as `sim 298`, `state 163`, `derived 8`, `unknown 0`.
+
+**Verification:**
+- Red first: `.\vitest.cmd run tests\save_migration_validator_rejection.test.ts tests\save_migration_versioned_steps.test.ts --reporter=dot` failed before production changes because latest schema remained 16, current-version saves accepted missing displacement operational records, and v16 saves left the records undefined.
+- `.\vitest.cmd run tests\save_migration_validator_rejection.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_round_trip_contract.test.ts tests\save_migration_drift_audit.test.ts tests\save_migration_counter_offers.test.ts tests\strict_null_inventory_progress.test.ts tests\state\player_faction_contract.test.ts tests\migration_nested_ownership.test.ts --reporter=dot` - PASS; 166/166 tests.
+- `node tools\diagnostics\strict_null_inventory.cjs` - PASS; `optional_fields_game_state 469`, counted escape categories all zero.
+- `node tools\diagnostics\strict_null_inventory.cjs --field-domains` - PASS; total 469, `sim 298`, `state 163`, `derived 8`, `unknown 0`.
+- `node tools\diagnostics\save_migration_drift_audit.cjs` - PASS; `save migration drift audit: 0 anonymous defaults`.
+- `npx.cmd tsc --noEmit -p tsconfig.json --pretty false` - PASS.
+- `git diff --check` - PASS.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/serialize.ts`, `src/state/validateGameState.ts`, direct `DisplacementDomainState` fixtures in CLI/UI/tests, `tests/fixtures/save_migration/v16_displacement_operational_contract.json`, `tests/save_migration_validator_rejection.test.ts`, `tests/save_migration_counter_offers.test.ts`, `tests/save_migration_drift_audit.test.ts`, `tests/save_migration_versioned_steps.test.ts`, `tests/save_migration_round_trip_contract.test.ts`, `tests/migration_nested_ownership.test.ts`, `tests/state/player_faction_contract.test.ts`, `tests/strict_null_inventory_progress.test.ts`, `tools/diagnostics/output/save_migration_drift.json`, `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`, `docs/40_reports/implemented/20260526_DISPLACEMENT_OPERATIONAL_SCHEMA_CONTRACT.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] test(save): lock recruitment test matrix artifact ownership
 
 **Type:** Save/replay generated-artifact stability + static ownership guard.

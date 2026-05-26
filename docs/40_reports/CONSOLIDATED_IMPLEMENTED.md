@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest displacement operational schema contract:** [implemented/20260526_DISPLACEMENT_OPERATIONAL_SCHEMA_CONTRACT.md](implemented/20260526_DISPLACEMENT_OPERATIONAL_SCHEMA_CONTRACT.md) - Three displacement operational substrate records are now required persisted v17 contract fields with current-version rejection coverage, v16 `{}` migration proof, pre-v17 top-level rescue, malformed v17 top-level residue guarding, and strict-null floor 469.
+
 **Latest recruitment test matrix artifact ownership:** [implemented/20260526_RECRUITMENT_TEST_MATRIX_ARTIFACT_OWNERSHIP.md](implemented/20260526_RECRUITMENT_TEST_MATRIX_ARTIFACT_OWNERSHIP.md) - A static guard now locks the committed 2026-02-11 recruitment test matrix tree, retained run-directory classification including failed `_tmp_player_choice_recruitment_4w` evidence, and per-run artifact shape without refreshing scenario outputs.
 
 **Latest H2.4 sweep artifact ownership:** [implemented/20260526_H24_SWEEP_ARTIFACT_OWNERSHIP.md](implemented/20260526_H24_SWEEP_ARTIFACT_OWNERSHIP.md) - A static guard now locks the committed H2.4 sweep tree, owner command, validation tests, aggregate summary rows, retained run-directory classification, and per-run artifact shape without refreshing scenario outputs.

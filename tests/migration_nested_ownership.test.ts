@@ -84,6 +84,9 @@ function migrationFixture(overrides: Record<string, unknown> = {}): Record<strin
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},
             displacement_recent_by_turn: {},
+            war_displacement_initiated: {},
+            hostile_takeover_timers: {},
+            displacement_camp_state: {},
             settlement_displacement: {},
             settlement_displacement_started_turn: {},
             municipality_displacement: {},
@@ -211,6 +214,8 @@ describe('nested migration ownership contracts', () => {
             settlement_displacement_started_turn: {},
             municipality_displacement: {},
             war_displacement_initiated: { m1: 4 },
+            hostile_takeover_timers: {},
+            displacement_camp_state: {},
         },
         }));
 

@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(16);
+        expect(getLatestSchemaVersion()).toBe(17);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -123,13 +123,16 @@ describe('versioned save migration steps', () => {
 
         expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
         expect(state.displacement).toEqual({
+            displacement_camp_state: {},
             displacement_event_log: [],
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},
             displacement_recent_by_turn: {},
+            hostile_takeover_timers: {},
             municipality_displacement: {},
             settlement_displacement: {},
             settlement_displacement_started_turn: {},
+            war_displacement_initiated: {},
         });
     });
 
@@ -175,5 +178,19 @@ describe('versioned save migration steps', () => {
         expect(state.displacement.settlement_displacement).toEqual({});
         expect(state.displacement.settlement_displacement_started_turn).toEqual({});
         expect(state.displacement.municipality_displacement).toEqual({});
+    });
+
+    it('materializes v17 displacement operational contract defaults for v16 saves', () => {
+        const state = minimalLegacyState(16);
+        delete state.displacement.war_displacement_initiated;
+        delete state.displacement.hostile_takeover_timers;
+        delete state.displacement.displacement_camp_state;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.displacement.war_displacement_initiated).toEqual({});
+        expect(state.displacement.hostile_takeover_timers).toEqual({});
+        expect(state.displacement.displacement_camp_state).toEqual({});
     });
 });

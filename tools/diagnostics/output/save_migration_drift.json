@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 16,
-  "registered_migration_count": 16,
-  "strict_required_field_count": 45,
+  "latest_schema_version": 17,
+  "registered_migration_count": 17,
+  "strict_required_field_count": 48,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -69,6 +69,10 @@
     {
       "version": 16,
       "description": "Phase F displacement capacity map defaults. Sensitive: no."
+    },
+    {
+      "version": 17,
+      "description": "Displacement operational substrate defaults. Sensitive: no."
     }
   ],
   "required_fields": [
@@ -251,6 +255,18 @@
     {
       "version": 16,
       "path": "displacement.settlement_displacement_started_turn"
+    },
+    {
+      "version": 17,
+      "path": "displacement.displacement_camp_state"
+    },
+    {
+      "version": 17,
+      "path": "displacement.hostile_takeover_timers"
+    },
+    {
+      "version": 17,
+      "path": "displacement.war_displacement_initiated"
     }
   ]
 }

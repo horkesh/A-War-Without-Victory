@@ -183,6 +183,32 @@ describe('save migration validator hardening', () => {
     });
 
     it.each([
+        ['war_displacement_initiated', 17],
+        ['hostile_takeover_timers', 17],
+        ['displacement_camp_state', 17],
+    ])('rejects a current-version save missing displacement operational substrate %s', (field, version) => {
+        const state = currentVersionState();
+        delete state.displacement[field];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            new RegExp(`Save schema validation failed after migration[\\s\\S]*v${version}[\\s\\S]*displacement\\.${field}`)
+        );
+    });
+
+    it.each([
+        ['war_displacement_initiated', []],
+        ['hostile_takeover_timers', null],
+        ['displacement_camp_state', []],
+    ])('rejects a current-version save with invalid displacement operational substrate %s', (field, value) => {
+        const state = currentVersionState();
+        state.displacement[field] = value;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            new RegExp(`Save schema validation failed after migration[\\s\\S]*v17[\\s\\S]*displacement\\.${field}`)
+        );
+    });
+
+    it.each([
         'settlement_displacement',
         'settlement_displacement_started_turn',
         'municipality_displacement',
@@ -202,6 +228,16 @@ describe('save migration validator hardening', () => {
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
             /Save schema validation failed after migration[\s\S]*v16[\s\S]*displacement\.settlement_displacement/
+        );
+    });
+
+    it('rejects a current-version save missing nested displacement operational maps even with legacy top-level residue', () => {
+        const state = currentVersionState();
+        delete state.displacement.hostile_takeover_timers;
+        state.hostile_takeover_timers = { legacy_osid: { mun_id: 'legacy', from_faction: 'RBiH', to_faction: 'RS', started_turn: 1 } };
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v17[\s\S]*displacement\.hostile_takeover_timers/
         );
     });
 
@@ -233,6 +269,9 @@ describe('save migration validator hardening', () => {
         delete state.military.event_flags;
         delete state.military.enabled_event_ids;
         delete state.displacement.displacement_event_log;
+        delete state.displacement.war_displacement_initiated;
+        delete state.displacement.hostile_takeover_timers;
+        delete state.displacement.displacement_camp_state;
         delete state.displacement.displacement_humanitarian_aggregates;
         delete state.displacement.displacement_origin_dest_arrivals;
         delete state.displacement.displacement_recent_by_turn;
@@ -257,6 +296,9 @@ describe('save migration validator hardening', () => {
         expect(migrated.military.event_flags).toEqual({});
         expect(migrated.military.enabled_event_ids).toEqual([]);
         expect(migrated.displacement.displacement_event_log).toEqual([]);
+        expect(migrated.displacement.war_displacement_initiated).toEqual({});
+        expect(migrated.displacement.hostile_takeover_timers).toEqual({});
+        expect(migrated.displacement.displacement_camp_state).toEqual({});
         expect(migrated.displacement.displacement_humanitarian_aggregates).toEqual({});
         expect(migrated.displacement.displacement_origin_dest_arrivals).toEqual({});
         expect(migrated.displacement.displacement_recent_by_turn).toEqual({});
@@ -293,5 +335,46 @@ describe('save migration validator hardening', () => {
         expect(migrated.displacement.settlement_displacement).toEqual({ legacy_sid: 0.1 });
         expect(migrated.displacement.settlement_displacement_started_turn).toEqual({ legacy_sid: 2 });
         expect(migrated.displacement.municipality_displacement).toEqual({ legacy_mun: 0.2 });
+    });
+
+    it('materializes v17 displacement operational records for v16 saves', () => {
+        const state = currentVersionState();
+        state.schema_version = 16;
+        delete state.displacement.war_displacement_initiated;
+        delete state.displacement.hostile_takeover_timers;
+        delete state.displacement.displacement_camp_state;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.displacement.war_displacement_initiated).toEqual({});
+        expect(migrated.displacement.hostile_takeover_timers).toEqual({});
+        expect(migrated.displacement.displacement_camp_state).toEqual({});
+    });
+
+    it('rescues legacy top-level displacement operational records for v16 saves before v17 validation', () => {
+        const state = currentVersionState();
+        state.schema_version = 16;
+        delete state.displacement.war_displacement_initiated;
+        delete state.displacement.hostile_takeover_timers;
+        delete state.displacement.displacement_camp_state;
+        state.war_displacement_initiated = { legacy_mun: 4 };
+        state.hostile_takeover_timers = {
+            legacy_osid: { mun_id: 'legacy_mun', from_faction: 'RBiH', to_faction: 'RS', started_turn: 2 },
+        };
+        state.displacement_camp_state = {
+            legacy_mun: { mun_id: 'legacy_mun', population: 12, started_turn: 2 },
+        };
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.displacement.war_displacement_initiated).toEqual({ legacy_mun: 4 });
+        expect(migrated.displacement.hostile_takeover_timers).toEqual({
+            legacy_osid: { mun_id: 'legacy_mun', from_faction: 'RBiH', to_faction: 'RS', started_turn: 2 },
+        });
+        expect(migrated.displacement.displacement_camp_state).toEqual({
+            legacy_mun: { mun_id: 'legacy_mun', population: 12, started_turn: 2 },
+        });
     });
 });

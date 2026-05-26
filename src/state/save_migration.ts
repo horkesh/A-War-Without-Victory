@@ -584,3 +584,14 @@ registerMigration({
         ensureRecord(disp, 'municipality_displacement');
     },
 });
+
+registerMigration({
+    version: 17,
+    description: 'Displacement operational substrate defaults. Sensitive: no.',
+    migrate: (state) => {
+        const disp = ensureDisplacementRoot(state);
+        ensureRecord(disp, 'war_displacement_initiated');
+        ensureRecord(disp, 'hostile_takeover_timers');
+        ensureRecord(disp, 'displacement_camp_state');
+    },
+});
