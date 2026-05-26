@@ -284,7 +284,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 objectives: [
                     'op:ilijas:medojevici',
                     'op:ilijas:dragoradi',
-                    'op:ilijas:krivajevici',
+                    // krivajevici removed: painted=RBiH (Sacred Rule 4) and not adjacent to sirovine
                     'op:ilijas:sirovine',
                 ],
                 staging_osid: 'op:ilijas:podlugovi',
@@ -655,7 +655,16 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
     },
 ];
 
-const ARBIH_PRE_PLANNED: PrePlannedOp[] = [];
+const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
+    // R28 BLOCKED: Op Sana 95 on arbih_5th_corps caused regression (−6, −1pp).
+    // Root cause: triggered "Operation Sana" already runs on 5th Corps at w175-188.
+    // Op Sana 95 queued behind it, stayed in planning, brigade marching from
+    // bosanska_krupa sectors let VRS capture jasenica_2 + 5 adjacents. Zero captures.
+    // Sanski Most / Ključ mismatches require either:
+    //   (a) extending the existing triggered Operation Sana to include sanski_most axis, OR
+    //   (b) a separate synthetic corps op, OR
+    //   (c) an event-based control_change (triggered by RSK collapse 1995).
+];
 
 // v0.4.7: Mostar Hills axis removed from Op Jackal — vranjevici/kruzanj painted RS
 const ALL_PRE_PLANNED: PrePlannedOp[] = [...VRS_PRE_PLANNED, ...HRHB_PRE_PLANNED, ...ARBIH_PRE_PLANNED];
