@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest startup snapshot artifact ownership:** [implemented/20260526_STARTUP_SNAPSHOT_ARTIFACT_OWNERSHIP.md](implemented/20260526_STARTUP_SNAPSHOT_ARTIFACT_OWNERSHIP.md) - A static guard now locks the April 1992 startup snapshot artifact owner, validation commands, npm script mapping, source key/path, and builder wrapper calls without refreshing the generated startup save or claiming byte proof.
+
 **Latest sector current profile evidence:** [implemented/20260526_SECTOR_CURRENT_PROFILE_EVIDENCE_CLOSEOUT.md](implemented/20260526_SECTOR_CURRENT_PROFILE_EVIDENCE_CLOSEOUT.md) - Fresh 40w sector/frontline profiling preserved final hash `f219401f4a17f311`; top measured buckets are `reconcile-final-sector-truth`, `partition-corps-front-sectors`, and `sealMergedSectorTruth:ensure-coverage`, with next code work gated to byte-identical final-sector-truth/partition planning.
 
 **Latest run final-save map-copy ownership:** [implemented/20260526_LATEST_RUN_FINAL_SAVE_MAP_COPY_OWNERSHIP.md](implemented/20260526_LATEST_RUN_FINAL_SAVE_MAP_COPY_OWNERSHIP.md) - The scenario runner `--map` final-save copy now has an exported helper and a temp-root byte-equivalence test that proves `data/derived/latest_run_final_save.json` receives source-identical bytes without touching the tracked artifact.

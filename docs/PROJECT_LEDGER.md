@@ -1,4 +1,22 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] test(startup): lock startup snapshot artifact ownership
+
+**Type:** Static generated-artifact ownership guard + docs closeout.
+
+**Change:** Added `tests/startup_snapshot_artifact_ownership.test.ts` to lock `data/derived/startup/apr_1992_initial_save.json` ownership across `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `package.json`, `src/scenario/startup_snapshot.ts`, and `tools/scenario_runner/build_startup_snapshot.ts`. The guard requires the ownership row to name `npm.cmd run desktop:startup-snapshot:build`, `npm.cmd run desktop:startup-snapshot:check`, `tests/startup_snapshot_contract.test.ts`, and `tests/save_migration_round_trip_contract.test.ts`; requires npm scripts to map to `tsx tools/scenario_runner/build_startup_snapshot.ts --write/--check`; requires the startup snapshot source to own only the `apr_1992` key and the same artifact path; and requires the builder wrapper to import/call `writeStartupSnapshot` and `validateStartupSnapshot`.
+
+**Determinism:** Static test and documentation-only ownership proof. No startup snapshot build command, generated startup save refresh, scenario runner write path, replay finalizer, save migration, desktop startup behavior, baseline refresh, scenario data, randomness, timestamps, or serialization ordering changed. This does not claim byte identity for `data/derived/startup/apr_1992_initial_save.json`.
+
+**Verification:**
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\startup_snapshot_artifact_ownership.test.ts --reporter=dot` - PASS; 1/1 test.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\startup_snapshot_contract.test.ts tests\save_migration_round_trip_contract.test.ts --reporter=dot` - PASS; 20/20 tests.
+- `npm.cmd run desktop:startup-snapshot:check` - PASS; reported `Startup snapshot OK` for `data\derived\startup\apr_1992_initial_save.json`.
+- `git diff --check` - PASS.
+
+**Artifacts:** `tests/startup_snapshot_artifact_ownership.test.ts`, `docs/40_reports/implemented/20260526_STARTUP_SNAPSHOT_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] test(harness): prove latest-run final-save map-copy ownership
 
 **Type:** Scenario harness generated-artifact ownership + Phase 3 save/replay stability slice.
