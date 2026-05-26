@@ -473,16 +473,6 @@
       {
         "kind": "narrative",
         "text": "Zepa falls to the VRS. A second UN safe area is overrun in two weeks, deepening the international crisis."
-      },
-      {
-        "kind": "control_change",
-        "faction": "RS",
-        "osids": [
-          "op:rogatica:zepa_2",
-          "op:vlasenica:pomol_2",
-          "op:visegrad:medjedja_2",
-          "op:rudo:gornja_strmica"
-        ]
       }
     ]
   },
@@ -791,26 +781,6 @@
         "delta": -15
       },
       {
-        "kind": "control_change",
-        "faction": "RBiH",
-        "osids": [
-          "op:sanski_most:stari_majdan",
-          "op:sanski_most:sanski_most_2",
-          "op:sanski_most:ilidza_2",
-          "op:sanski_most:budimlic_japra_2",
-          "op:sanski_most:jelasinovci",
-          "op:sanski_most:kljevci",
-          "op:sanski_most:lusci_palanka_2",
-          "op:sanski_most:ostra_luka",
-          "op:sanski_most:skucani_vakuf_2",
-          "op:bihac:trubar",
-          "op:kljuc:kljuc_2",
-          "op:kljuc:hadzici",
-          "op:kljuc:krasulje_2",
-          "op:kljuc:sanica_2"
-        ]
-      },
-      {
         "kind": "narrative",
         "text": "Operation Storm shatters the Republic of Serbian Krajina. The strategic balance in the western Balkans shifts decisively against Serb forces."
       }
@@ -1074,55 +1044,7 @@
       "kind": "narrative",
       "text": "NATO's Operation Deliberate Force strikes VRS artillery, ammunition dumps, and command nodes. The question is whether Pale complies or absorbs the punishment."
     },
-    "effects": [
-      {
-        "kind": "control_change",
-        "faction": "RS",
-        "osids": [
-          "op:pale:praca",
-          "op:nevesinje:hrusta_2",
-          "op:nevesinje:sopilja",
-          "op:doboj:grapska_gornja_2",
-          "op:doboj:makljenovac",
-          "op:teslic:kamenica_2",
-          "op:trnovo:delijas",
-          "op:trnovo:kijevo_2",
-          "op:trnovo:trnovo",
-          "op:mostar:vranjevici_2",
-          "op:mostar:kruzanj_2",
-          "op:bosanski_samac:domaljevac_2",
-          "op:brcko:brka_2",
-          "op:orasje:ostra_luka",
-          "op:ugljevik:jasikovac",
-          "op:ugljevik:srednja_trnova_2",
-          "op:zvornik:djulici",
-          "op:banja_luka:melina_2",
-          "op:banja_luka:pavici_2",
-          "op:kljuc:cadjavica",
-          "op:kljuc:donje_ratkovo_2",
-          "op:pale:podgrab",
-          "op:cajnice:miljeno_2",
-          "op:foca:donje_zesce",
-          "op:foca:mazlina",
-          "op:foca:patkovina",
-          "op:foca:ustikolina",
-          "op:gorazde:podkozara_donja_2",
-          "op:gorazde:slatina_2",
-          "op:gorazde:sopotnica",
-          "op:gorazde:ustipraca_2",
-          "op:kalinovik:sela_2",
-          "op:kalinovik:varos_2",
-          "op:rogatica:varosiste_2",
-          "op:hadzici:misevici_2",
-          "op:kalesija:seher_2",
-          "op:kladanj:kladanj_3",
-          "op:kladanj:staric_2",
-          "op:konjic:bijela_2",
-          "op:konjic:sitnik",
-          "op:olovo:gurdici_2"
-        ]
-      }
-    ],
+    "effects": [],
     "dimension_shifts": [
       {
         "faction": "RS",
@@ -1225,27 +1147,6 @@
         "delta": -10
       },
       {
-        "kind": "control_change",
-        "faction": "HRHB",
-        "osids": [
-          "op:jajce:jajce_3",
-          "op:jajce:lupnica",
-          "op:jajce:vinac_2",
-          "op:titov_drvar:drvar_2",
-          "op:titov_drvar:sipovljani_2",
-          "op:bosansko_grahovo:bosansko_grahovo_2",
-          "op:kupres:kupres_2",
-          "op:kupres:goravci"
-        ]
-      },
-      {
-        "kind": "control_change",
-        "faction": "RBiH",
-        "osids": [
-          "op:jajce:grdovo"
-        ]
-      },
-      {
         "kind": "narrative",
         "text": "Jajce is recaptured after three years. HV-HVO forces sweep through western Bosnia, collapsing VRS positions across a 2,000 km2 front."
       }
@@ -1310,14 +1211,6 @@
       {
         "kind": "narrative",
         "text": "The 5th Corps breaks out of the Bihac pocket. Operation Sana captures Sanski Most, Bosanski Petrovac, and Bosanska Krupa. RS territory approaches the 49% Dayton line."
-      },
-      {
-        "kind": "control_change",
-        "faction": "RBiH",
-        "osids": [
-          "op:bosanski_novi:krslje_2",
-          "op:bosanski_novi:matavazi_2"
-        ]
       }
     ],
     "dimension_shifts": [
