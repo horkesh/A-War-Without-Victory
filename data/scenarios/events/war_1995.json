@@ -464,7 +464,7 @@
       {
         "kind": "control_change",
         "faction": "RS",
-        "osids": ["op:rogatica:zepa_2", "op:vlasenica:pomol_2", "op:visegrad:medjedja_2"]
+        "osids": ["op:rogatica:zepa_2", "op:vlasenica:pomol_2", "op:visegrad:medjedja_2", "op:rudo:gornja_strmica"]
       }
     ]
   },
