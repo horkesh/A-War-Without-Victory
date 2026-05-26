@@ -676,7 +676,8 @@
         "kind": "control_change",
         "faction": "RBiH",
         "osids": [
-          "op:tuzla:simin_han_2"
+          "op:tuzla:simin_han_2",
+          "op:zvornik:rastosnica_2"
         ]
       },
       {
