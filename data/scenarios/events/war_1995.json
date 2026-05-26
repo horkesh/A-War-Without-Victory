@@ -791,6 +791,25 @@
         "delta": -15
       },
       {
+        "kind": "control_change",
+        "faction": "HRHB",
+        "osids": [
+          "op:bosansko_grahovo:bosansko_grahovo_2",
+          "op:bosansko_grahovo:malesevci",
+          "op:bosansko_grahovo:ugarci"
+        ]
+      },
+      {
+        "kind": "control_change",
+        "faction": "RBiH",
+        "osids": [
+          "op:kljuc:hadzici",
+          "op:kljuc:kljuc_2",
+          "op:kljuc:krasulje_2",
+          "op:kljuc:sanica_2"
+        ]
+      },
+      {
         "kind": "narrative",
         "text": "Operation Storm shatters the Republic of Serbian Krajina. The strategic balance in the western Balkans shifts decisively against Serb forces."
       }
