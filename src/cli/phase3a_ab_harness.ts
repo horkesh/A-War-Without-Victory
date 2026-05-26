@@ -75,7 +75,8 @@ function createProlongedSiegeState(): GameState {
             }
         },
     army_co_decision_traces: {},
-    army_corps_directives_by_faction: {}
+    army_corps_directives_by_faction: {},
+    event_decision_log: []
   },
   displacement: {
     displacement_state: {
@@ -135,7 +136,8 @@ function createTemporaryEncirclementState(): GameState {
             }
         },
     army_co_decision_traces: {},
-    army_corps_directives_by_faction: {}
+    army_corps_directives_by_faction: {},
+    event_decision_log: []
   },
   displacement: {
     displacement_state: {
@@ -188,7 +190,8 @@ function createCorridorLifelineState(): GameState {
             }
         },
     army_co_decision_traces: {},
-    army_corps_directives_by_faction: {}
+    army_corps_directives_by_faction: {},
+    event_decision_log: []
   },
   displacement: {
     displacement_state: {
@@ -250,7 +253,8 @@ function createMultiPocketStressState(): GameState {
             'MUN_C': { mun_id: 'MUN_C', faction: 'HRHB', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 }
         },
     army_co_decision_traces: {},
-    army_corps_directives_by_faction: {}
+    army_corps_directives_by_faction: {},
+    event_decision_log: []
   },
   displacement: {
     displacement_state: {
@@ -299,7 +303,8 @@ function createAsymmetricCollapseState(): GameState {
             'MUN_B': { mun_id: 'MUN_B', faction: 'RS', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 }
         },
     army_co_decision_traces: {},
-    army_corps_directives_by_faction: {}
+    army_corps_directives_by_faction: {},
+    event_decision_log: []
   },
   displacement: {
     displacement_state: {

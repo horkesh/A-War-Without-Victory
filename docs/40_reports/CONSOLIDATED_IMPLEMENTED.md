@@ -10,6 +10,8 @@
 
 **Latest save migration drift byte identity:** [implemented/20260526_SAVE_MIGRATION_DRIFT_BYTE_IDENTITY.md](implemented/20260526_SAVE_MIGRATION_DRIFT_BYTE_IDENTITY.md) - The save migration drift audit test now proves its committed diagnostic artifact regenerates byte-for-byte and restores committed bytes on failure.
 
+**Latest event decision log schema contract:** [implemented/20260526_EVENT_DECISION_LOG_SCHEMA_CONTRACT.md](implemented/20260526_EVENT_DECISION_LOG_SCHEMA_CONTRACT.md) - `military.event_decision_log` is now a required persisted v14 contract field with legacy `[]` migration and current-version validator rejection coverage.
+
 **Latest displacement aggregate schema contract:** [implemented/20260526_DISPLACEMENT_AGGREGATE_SCHEMA_CONTRACT.md](implemented/20260526_DISPLACEMENT_AGGREGATE_SCHEMA_CONTRACT.md) - The v8 displacement aggregate records are now required persisted contract fields with current-version rejection tests and v1/v7 migration proof for `{}` defaults.
 
 **Latest displacement event log schema contract:** [implemented/20260526_DISPLACEMENT_EVENT_LOG_SCHEMA_CONTRACT.md](implemented/20260526_DISPLACEMENT_EVENT_LOG_SCHEMA_CONTRACT.md) - `displacement.displacement_event_log` is now a required persisted v7 contract field with legacy `[]` migration and current-version validator rejection coverage.

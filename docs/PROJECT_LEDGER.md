@@ -17,6 +17,28 @@
 
 ---
 
+## [2026-05-26] state(save): require event decision log contract
+
+**Type:** Save schema contract hardening + strict-null Phase 2 slice.
+
+**Change:** Promoted `military.event_decision_log` from optional `MilitaryState` field to required persisted v14 contract. The v14 migration now materializes missing legacy values as `[]`, the shape validator rejects current-version saves missing the field, focused save-migration tests cover current-version rejection and v1/v13 legacy defaulting, and the save-migration drift artifact records the new v14 required path. Direct `MilitaryState` fixtures were aligned with empty `event_decision_log: []` defaults. The committed April 1992 startup snapshot was refreshed only to add `military.event_decision_log: []` and normalize the final newline. No event JSON, modal prose, historical content, scenario data, calibration data, combat logic, or event ordering changed.
+
+**Determinism:** Schema/default-only change. The default is an empty append-only audit-log array and migration remains deterministic. No randomness, timestamps, unordered iteration, scenario-output logic, generated scenario artifacts, or serialization ordering changes were introduced.
+
+**Strict-null inventory:** Counted escape categories remain zero. Optional `GameState` field inventory is now `487`, split as `sim 304`, `state 175`, `derived 8`, `unknown 0`.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_validator_rejection.test.ts tests\save_migration_versioned_steps.test.ts --reporter=dot` failed before production changes because current v14 saves missing `military.event_decision_log` were accepted and legacy migration returned `undefined`.
+- `node tools\diagnostics\strict_null_inventory.cjs --field-domains` - PASS; `optional_fields_game_state 487`, `sim 304`, `state 175`, `derived 8`, `unknown 0`.
+- `node tools\diagnostics\save_migration_drift_audit.cjs` - PASS; `0 anonymous defaults`.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_validator_rejection.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_round_trip_contract.test.ts tests\event_decisions.test.ts tests\save_migration_drift_audit.test.ts tests\strict_null_inventory_progress.test.ts --reporter=dot` - PASS; 145/145 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\tsc.cmd --noEmit -p tsconfig.json` - PASS after adding an ignored local dependency junction for this isolated worktree's missing `src\ui\map\node_modules`.
+- `git diff --check` - PASS.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, direct `MilitaryState` fixtures in `src/cli`, `src/index.ts`, `src/ui/warroom`, and focused tests, `data/derived/startup/apr_1992_initial_save.json`, `tests/save_migration_validator_rejection.test.ts`, `tests/save_migration_versioned_steps.test.ts`, `tests/strict_null_inventory_progress.test.ts`, `tools/diagnostics/output/save_migration_drift.json`, `docs/40_reports/implemented/20260526_EVENT_DECISION_LOG_SCHEMA_CONTRACT.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] test(harness): prove latest-run final-save map-copy ownership
 
 **Type:** Scenario harness generated-artifact ownership + Phase 3 save/replay stability slice.

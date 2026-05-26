@@ -2254,7 +2254,7 @@ pending_event_decisions?: import('../sim/events/event_types.js').PendingEventDec
  *  existing `fired_events[]` records that the event fired; this records WHICH
  *  option won. Writers: `recordEventDecision` in evaluate_events.ts (bot paths)
  *  and resolve_decision.ts (player path). Reader: Chronicle / audit surfaces. */
-event_decision_log?: Array<{
+event_decision_log: Array<{
     event_id: string;
     response_id: string;
     decision_source: 'bot_political' | 'bot_v1' | 'bot_ai_default' | 'player';

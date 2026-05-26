@@ -26,7 +26,8 @@ const initial: GameState = {
     front_pressure: {},
     militia_pools: {},
     army_co_decision_traces: {},
-    army_corps_directives_by_faction: {}
+    army_corps_directives_by_faction: {},
+    event_decision_log: []
   },
   political: {},
   displacement: {

@@ -54,6 +54,7 @@ function currentVersionState(): any {
             war_jna: { transition_begun: false, withdrawal_progress: 0, asset_transfer_rs: 0 },
             army_co_decision_traces: {},
             army_corps_directives_by_faction: {},
+            event_decision_log: [],
         },
         political: {
             political_controllers: {},
@@ -112,6 +113,15 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('rejects a current-version save missing military event decision log', () => {
+        const state = currentVersionState();
+        delete state.military.event_decision_log;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v14[\s\S]*military\.event_decision_log/
+        );
+    });
+
     it('rejects a current-version save missing displacement event log', () => {
         const state = currentVersionState();
         delete state.displacement.displacement_event_log;
@@ -154,6 +164,7 @@ describe('save migration validator hardening', () => {
         delete state.political.negotiation_status;
         delete state.military.army_co_decision_traces;
         delete state.military.army_corps_directives_by_faction;
+        delete state.military.event_decision_log;
         delete state.displacement.displacement_event_log;
         delete state.displacement.displacement_humanitarian_aggregates;
         delete state.displacement.displacement_origin_dest_arrivals;
@@ -171,6 +182,7 @@ describe('save migration validator hardening', () => {
         });
         expect(migrated.military.army_co_decision_traces).toEqual({});
         expect(migrated.military.army_corps_directives_by_faction).toEqual({});
+        expect(migrated.military.event_decision_log).toEqual([]);
         expect(migrated.displacement.displacement_event_log).toEqual([]);
         expect(migrated.displacement.displacement_humanitarian_aggregates).toEqual({});
         expect(migrated.displacement.displacement_origin_dest_arrivals).toEqual({});

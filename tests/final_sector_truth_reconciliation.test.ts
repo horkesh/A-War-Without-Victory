@@ -65,6 +65,7 @@ function makeState(): { state: GameState; edges: EdgeRecord[] } {
             militia_pools: {},
             army_co_decision_traces: {},
             army_corps_directives_by_faction: {},
+            event_decision_log: [],
         } as GameState['military'],
         political: {
             political_controllers: {
@@ -139,6 +140,7 @@ describe('final sector truth reconciliation', () => {
                 militia_pools: {},
                 army_co_decision_traces: {},
                 army_corps_directives_by_faction: {},
+                event_decision_log: [],
             } as GameState['military'],
             political: {
                 political_controllers: {

@@ -545,6 +545,7 @@ registerMigration({
     migrate: (state) => {
         const meta = asRecord(state.meta);
         if (!meta) return;
+        ensureArray(asRecord(state.military), 'event_decision_log');
         // Headless harness exemption: when scenario_runner has marked this as a
         // headless run, do not backfill player_faction. Backfilling to 'RBiH'
         // causes events with `responding_faction: 'RBiH'` and

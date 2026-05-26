@@ -53,6 +53,7 @@ const baseState: GameState = {
         brigade_front_assignment: {},
         army_co_decision_traces: {},
         army_corps_directives_by_faction: {},
+        event_decision_log: [],
         negotiation: {
             capital: {},
             patron_relationships: {},

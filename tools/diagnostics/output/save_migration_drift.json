@@ -2,7 +2,7 @@
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
   "latest_schema_version": 14,
   "registered_migration_count": 14,
-  "strict_required_field_count": 29,
+  "strict_required_field_count": 30,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -179,6 +179,10 @@
     {
       "version": 10,
       "path": "military.army_corps_directives_by_faction"
+    },
+    {
+      "version": 14,
+      "path": "military.event_decision_log"
     }
   ]
 }

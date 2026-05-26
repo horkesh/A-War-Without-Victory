@@ -37,6 +37,7 @@ function minimalState(overrides: Record<string, unknown> = {}): Record<string, u
             militia_pools: {},
             army_co_decision_traces: {},
             army_corps_directives_by_faction: {},
+            event_decision_log: [],
         },
         political: {
             political_controllers: {},

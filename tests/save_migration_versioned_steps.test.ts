@@ -81,6 +81,7 @@ describe('versioned save migration steps', () => {
         expect(state.military.negotiation.pending_counter_offers).toEqual([]);
         expect(state.military.army_co_decision_traces).toEqual({});
         expect(state.military.army_corps_directives_by_faction).toEqual({});
+        expect(state.military.event_decision_log).toEqual([]);
         expect(state.political.supply_rights).toEqual({ corridors: [] });
         expect(state.displacement.displacement_event_log).toEqual([]);
         expect(state.displacement.displacement_humanitarian_aggregates).toEqual({});
@@ -122,5 +123,14 @@ describe('versioned save migration steps', () => {
         expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
         expect(state.military.army_co_decision_traces).toEqual({});
         expect(state.military.army_corps_directives_by_faction).toEqual({});
+    });
+
+    it('materializes v14 event decision log default for v13 saves', () => {
+        const state = minimalLegacyState(13);
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.event_decision_log).toEqual([]);
     });
 });
