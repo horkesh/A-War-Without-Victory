@@ -3,7 +3,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { spawn } = require('node:child_process');
+const { spawn, spawnSync } = require('node:child_process');
 
 const ROOT = process.cwd();
 const PORT = Number(process.env.AWWV_EVENT_MODAL_SMOKE_PORT || 3227);
@@ -71,30 +71,82 @@ async function waitForServer(url, timeoutMs = 45000) {
   throw new Error(`Timed out waiting for dev server at ${url}`);
 }
 
+async function waitForPortClosed(port, timeoutMs = 5000) {
+  const started = Date.now();
+  while (Date.now() - started < timeoutMs) {
+    if (getPortListenerPids(port).length === 0) return true;
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  return getPortListenerPids(port).length === 0;
+}
+
+function getPortListenerPids(port) {
+  if (process.platform !== 'win32') return [];
+  const result = spawnSync('netstat.exe', ['-ano'], { encoding: 'utf8' });
+  if (result.error || result.status !== 0) return [];
+  const marker = `:${port}`;
+  const pids = new Set();
+  for (const line of result.stdout.split(/\r?\n/)) {
+    const columns = line.trim().split(/\s+/);
+    if (columns.length < 5 || columns[0] !== 'TCP') continue;
+    const [protocol, localAddress, , state, pid] = columns;
+    if (protocol === 'TCP' && state === 'LISTENING' && localAddress.includes(marker)) {
+      pids.add(pid);
+    }
+  }
+  return Array.from(pids).map((pid) => Number(pid)).filter(Number.isInteger);
+}
+
+function getWindowsCommandLine(pid) {
+  const command = `(Get-CimInstance Win32_Process -Filter "ProcessId = ${pid}").CommandLine`;
+  const result = spawnSync('powershell.exe', ['-NoProfile', '-Command', command], {
+    encoding: 'utf8',
+    windowsHide: true,
+  });
+  return result.status === 0 ? result.stdout.trim() : '';
+}
+
+function resolveViteBin() {
+  const packageJsonPath = require.resolve('vite/package.json', { paths: [ROOT] });
+  const packageJson = readJson(packageJsonPath);
+  return path.join(path.dirname(packageJsonPath), packageJson.bin.vite);
+}
+
+function isOwnedViteListener(pid, trackedPid) {
+  if (pid === trackedPid) return true;
+  const commandLine = getWindowsCommandLine(pid).toLowerCase();
+  const normalizedRoot = ROOT.toLowerCase();
+  return commandLine.includes('vite')
+    && commandLine.includes('vite.config.ts')
+    && commandLine.includes(String(PORT))
+    && commandLine.includes(normalizedRoot);
+}
+
+function taskkill(pid) {
+  spawnSync('taskkill.exe', ['/pid', String(pid), '/T', '/F'], {
+    stdio: 'ignore',
+    windowsHide: true,
+  });
+}
+
 function startDevServer() {
-  const command = process.platform === 'win32' ? process.env.ComSpec || 'cmd.exe' : 'npm';
-  const args = process.platform === 'win32'
-    ? [
-      '/d',
-      '/s',
-      '/c',
-      `npm.cmd run dev:map -- --host 127.0.0.1 --port ${PORT} --strictPort`,
-    ]
-    : [
-      'run',
-      'dev:map',
-      '--',
-      '--host',
-      '127.0.0.1',
-      '--port',
-      String(PORT),
-      '--strictPort',
-    ];
+  const command = process.execPath;
+  const args = [
+    resolveViteBin(),
+    '--config',
+    path.join(ROOT, 'src', 'ui', 'map', 'vite.config.ts'),
+    '--host',
+    '127.0.0.1',
+    '--port',
+    String(PORT),
+    '--strictPort',
+  ];
   let stopping = false;
   const child = spawn(command, args, {
     cwd: ROOT,
     stdio: ['ignore', 'pipe', 'pipe'],
     env: { ...process.env, BROWSER: 'none' },
+    windowsHide: true,
   });
 
   let log = '';
@@ -117,17 +169,11 @@ function startDevServer() {
     child,
     getLog: () => log,
     stop: async () => {
-      if (child.exitCode !== null) return;
       stopping = true;
       if (process.platform === 'win32') {
-        spawn(process.env.ComSpec || 'cmd.exe', [
-          '/d',
-          '/s',
-          '/c',
-          `taskkill /pid ${child.pid} /T /F`,
-        ], { stdio: 'ignore' });
+        if (child.exitCode === null) taskkill(child.pid);
       } else {
-        child.kill();
+        if (child.exitCode === null) child.kill();
       }
       await new Promise((resolve) => {
         const timeout = setTimeout(resolve, 5000);
@@ -135,7 +181,21 @@ function startDevServer() {
           clearTimeout(timeout);
           resolve();
         });
+        if (child.exitCode !== null) {
+          clearTimeout(timeout);
+          resolve();
+        }
       });
+      if (process.platform === 'win32' && !(await waitForPortClosed(PORT))) {
+        const listeners = getPortListenerPids(PORT);
+        const ownedListeners = listeners.filter((pid) => isOwnedViteListener(pid, child.pid));
+        for (const pid of ownedListeners) taskkill(pid);
+      }
+      if (process.platform === 'win32' && !(await waitForPortClosed(PORT))) {
+        const listeners = getPortListenerPids(PORT);
+        throw new Error(`Dev server cleanup left port ${PORT} listening on pid(s): ${listeners.join(', ')}`);
+      }
+      console.log(`[event-modal-smoke] dev server cleanup verified: port ${PORT} is not listening`);
     },
   };
 }
