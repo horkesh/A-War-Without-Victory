@@ -727,6 +727,14 @@
         "delta": -5
       },
       {
+        "kind": "control_change",
+        "faction": "HRHB",
+        "osids": [
+          "op:glamoc:kovacevci_2",
+          "op:glamoc:pribelja"
+        ]
+      },
+      {
         "kind": "narrative",
         "text": "Grahovo and Glamoc fall to HV-HVO forces. The Knin-Banja Luka supply road is severed, isolating the RSK."
       }
