@@ -68,6 +68,9 @@ function migrationFixture(overrides: Record<string, unknown> = {}): Record<strin
         },
         displacement: {
             displacement_event_log: [],
+            displacement_humanitarian_aggregates: {},
+            displacement_origin_dest_arrivals: {},
+            displacement_recent_by_turn: {},
         },
         ...overrides,
     };
@@ -160,6 +163,9 @@ describe('nested migration ownership contracts', () => {
         },
         displacement: {
             displacement_event_log: [],
+            displacement_humanitarian_aggregates: {},
+            displacement_origin_dest_arrivals: {},
+            displacement_recent_by_turn: {},
             war_displacement_initiated: { m1: 4 },
         },
         }));
@@ -181,6 +187,9 @@ describe('nested migration ownership contracts', () => {
         const payload = JSON.stringify(migrationFixture({
         displacement: {
             displacement_event_log: [],
+            displacement_humanitarian_aggregates: {},
+            displacement_origin_dest_arrivals: {},
+            displacement_recent_by_turn: {},
             settlement_displacement: { SID_001: 0.25 },
         },
         }));
@@ -202,6 +211,9 @@ describe('nested migration ownership contracts', () => {
                 },
                 displacement: {
                     displacement_event_log: [],
+                    displacement_humanitarian_aggregates: {},
+                    displacement_origin_dest_arrivals: {},
+                    displacement_recent_by_turn: {},
                 },
             }),
             negotiation_ledger: [

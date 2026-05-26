@@ -2,7 +2,7 @@
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
   "latest_schema_version": 14,
   "registered_migration_count": 14,
-  "strict_required_field_count": 26,
+  "strict_required_field_count": 29,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -159,6 +159,18 @@
     {
       "version": 7,
       "path": "displacement.displacement_event_log"
+    },
+    {
+      "version": 8,
+      "path": "displacement.displacement_humanitarian_aggregates"
+    },
+    {
+      "version": 8,
+      "path": "displacement.displacement_origin_dest_arrivals"
+    },
+    {
+      "version": 8,
+      "path": "displacement.displacement_recent_by_turn"
     },
     {
       "version": 10,

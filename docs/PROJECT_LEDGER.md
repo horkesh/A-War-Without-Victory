@@ -11069,3 +11069,22 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `src/sim/combat/brigade_assignment.ts`, `tests/sector_partition_instrumentation.test.ts`, `docs/40_reports/implemented/20260526_SECTOR_COVERAGE_CORPS_GROUP_REUSE.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/2026-05-26-sector-truth-reconciliation-byte-identity-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-26] test(state): repair v8 displacement fixture coverage
+
+**Type:** CI fixture repair for save-schema contract hardening.
+
+**Change:** Added required v8 displacement aggregate empty records to two current-schema test fixture families that still only provided `displacement_event_log: []`, then refreshed the deterministic save-migration drift diagnostic output so the three v8 aggregate paths are part of the committed required-field inventory. This repairs Fast unit test failures in `tests/migration_nested_ownership.test.ts`, `tests/state/player_faction_contract.test.ts`, and `tests/save_migration_drift_audit.test.ts` after the v8 displacement aggregate contract became required.
+
+**Determinism:** Test-only fixture defaults plus generated diagnostic-contract refresh from `node tools\diagnostics\save_migration_drift_audit.cjs`. No production code, scenario data, save migration logic, simulation behavior, or baseline outputs changed.
+
+**Verification:**
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\migration_nested_ownership.test.ts tests\state\player_faction_contract.test.ts --reporter=dot` - PASS; 6/6 tests.
+- `node tools\diagnostics\save_migration_drift_audit.cjs` - PASS; `0 anonymous defaults`.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\migration_nested_ownership.test.ts tests\state\player_faction_contract.test.ts tests\save_migration_drift_audit.test.ts --reporter=dot` - PASS; 7/7 tests.
+- `npm.cmd run test:vitest:fast` - PASS.
+- `git diff --check` - PASS.
+
+**Artifacts:** `tests/migration_nested_ownership.test.ts`, `tests/state/player_faction_contract.test.ts`, `tools/diagnostics/output/save_migration_drift.json`, `docs/PROJECT_LEDGER.md`.
+
+---
