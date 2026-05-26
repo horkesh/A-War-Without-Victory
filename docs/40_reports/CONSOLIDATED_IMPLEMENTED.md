@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest sector current profile evidence:** [implemented/20260526_SECTOR_CURRENT_PROFILE_EVIDENCE_CLOSEOUT.md](implemented/20260526_SECTOR_CURRENT_PROFILE_EVIDENCE_CLOSEOUT.md) - Fresh 40w sector/frontline profiling preserved final hash `f219401f4a17f311`; top measured buckets are `reconcile-final-sector-truth`, `partition-corps-front-sectors`, and `sealMergedSectorTruth:ensure-coverage`, with next code work gated to byte-identical final-sector-truth/partition planning.
+
 **Latest run final-save map-copy ownership:** [implemented/20260526_LATEST_RUN_FINAL_SAVE_MAP_COPY_OWNERSHIP.md](implemented/20260526_LATEST_RUN_FINAL_SAVE_MAP_COPY_OWNERSHIP.md) - The scenario runner `--map` final-save copy now has an exported helper and a temp-root byte-equivalence test that proves `data/derived/latest_run_final_save.json` receives source-identical bytes without touching the tracked artifact.
 
 **Latest save migration drift byte identity:** [implemented/20260526_SAVE_MIGRATION_DRIFT_BYTE_IDENTITY.md](implemented/20260526_SAVE_MIGRATION_DRIFT_BYTE_IDENTITY.md) - The save migration drift audit test now proves its committed diagnostic artifact regenerates byte-for-byte and restores committed bytes on failure.

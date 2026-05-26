@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest sector current profile evidence** | [implemented/20260526_SECTOR_CURRENT_PROFILE_EVIDENCE_CLOSEOUT.md](implemented/20260526_SECTOR_CURRENT_PROFILE_EVIDENCE_CLOSEOUT.md) - Fresh sector/frontline profiling preserves final hash `f219401f4a17f311`; top buckets are final sector truth reconciliation, corps-front partitioning, and `sealMergedSectorTruth:ensure-coverage`, with next work gated to byte-identical bounded planning. |
 | **Latest run final-save map-copy ownership** | [implemented/20260526_LATEST_RUN_FINAL_SAVE_MAP_COPY_OWNERSHIP.md](implemented/20260526_LATEST_RUN_FINAL_SAVE_MAP_COPY_OWNERSHIP.md) - The scenario runner `--map` final-save copy now has an exported helper and a temp-root byte-equivalence test that proves `data/derived/latest_run_final_save.json` receives source-identical bytes without touching the tracked artifact. |
 | **Latest save migration drift byte identity** | [implemented/20260526_SAVE_MIGRATION_DRIFT_BYTE_IDENTITY.md](implemented/20260526_SAVE_MIGRATION_DRIFT_BYTE_IDENTITY.md) - The save migration drift audit test now proves its committed diagnostic artifact regenerates byte-for-byte and restores committed bytes on failure. |
 | **Latest displacement event log schema contract** | [implemented/20260526_DISPLACEMENT_EVENT_LOG_SCHEMA_CONTRACT.md](implemented/20260526_DISPLACEMENT_EVENT_LOG_SCHEMA_CONTRACT.md) - `displacement.displacement_event_log` is now a required persisted v7 contract field with legacy `[]` migration and current-version validator rejection coverage. |

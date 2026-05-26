@@ -10992,3 +10992,19 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `src/state/game_state.ts`, `src/state/validateGameState.ts`, direct current-version `MilitaryState` fixtures in CLI/UI/tests, `tests/save_migration_validator_rejection.test.ts`, `tests/save_migration_versioned_steps.test.ts`, `tests/migration_nested_ownership.test.ts`, `tools/diagnostics/output/save_migration_drift.json`, `docs/40_reports/implemented/20260526_ARMY_COMMAND_SCHEMA_CONTRACT.md`, `docs/40_reports/CONSOLIDATED_BACKLOG.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`.
 
 ---
+
+## [2026-05-26] docs(perf): close out fresh sector profile evidence
+
+**Type:** Docs-only profiling evidence closeout; ignored generated artifacts remain unstaged.
+
+**Change:** Added a 40_reports implemented evidence closeout for the fresh sector/frontline profiling run with final hash `f219401f4a17f311`. Captured the measured hotspots: `reconcile-final-sector-truth` at 7413.161ms / 7.429% / 185.329ms per call, `partition-corps-front-sectors` at 7115.483ms / 7.131% / 177.887ms per call, and `sealMergedSectorTruth:ensure-coverage` at 2135.188ms / 12.383% of sector partition timing. Updated the implemented index, 40_reports README, and Command Board sector/frontline row so next work starts from the fresh profile and targets only bounded byte-identical final-sector-truth reconciliation/partitioning.
+
+**Determinism:** Documentation-only evidence capture. No source code, scenario data, save schema, canon, simulation behavior, generated profile artifact ownership, randomness, timestamps, or serialized outputs changed. Profile artifacts under `data/derived/_debug` and `runs_perf` remain ignored and unstaged.
+
+**Verification:**
+- `git diff --check` - PASS.
+- `git status --short --ignored` - PASS; tracked changes are docs only, with profile outputs remaining ignored.
+
+**Artifacts:** `docs/40_reports/implemented/20260526_SECTOR_CURRENT_PROFILE_EVIDENCE_CLOSEOUT.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---
