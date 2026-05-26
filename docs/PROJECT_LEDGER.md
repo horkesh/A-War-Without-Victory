@@ -11412,3 +11412,20 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `tests/save_migration_drift_artifact_ownership.test.ts`, `docs/40_reports/implemented/20260526_SAVE_MIGRATION_DRIFT_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-26] test(state): align round-trip fixture with v18 displacement maps
+
+**Type:** CI fixture repair for save-schema contract hardening.
+
+**Change:** Added the required v18 displacement lazy-map defaults to the current-schema base state used by `tests/state.test.ts`, so `serializeState(...) -> deserializeState(...)` compares against the same schema shape that `deserializeState(...)` now guarantees.
+
+**Determinism:** Test-only fixture alignment. No production code, migration behavior, scenario data, replay behavior, event data, baseline outputs, randomness, timestamps, or generated artifacts changed.
+
+**Verification:**
+- `.\vitest.cmd run tests\state.test.ts --reporter=dot` - PASS; 4/4 tests after adding a temporary worktree `node_modules` junction to the parent checkout's installed dependencies and removing it afterward.
+- `.\vitest.cmd run tests\state.test.ts tests\save_migration_validator_rejection.test.ts tests\save_migration_versioned_steps.test.ts --reporter=dot` - PASS; 62/62 tests.
+- `git diff --check` - PASS.
+
+**Artifacts:** `tests/state.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
