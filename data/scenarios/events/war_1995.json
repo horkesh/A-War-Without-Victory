@@ -474,7 +474,10 @@
         "kind": "control_change",
         "faction": "RS",
         "osids": [
-          "op:rogatica:zepa_2"
+          "op:rogatica:zepa_2",
+          "op:rudo:gornja_strmica",
+          "op:visegrad:medjedja_2",
+          "op:vlasenica:pomol_2"
         ]
       },
       {
