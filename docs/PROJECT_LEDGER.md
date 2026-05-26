@@ -1,4 +1,19 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] test(save): align v15 fast fixtures
+
+**Type:** Branch/CI/release hygiene + save-schema fixture repair.
+
+**Change:** Repaired Baseline Regression fixture drift after the v15 event-bookkeeping schema contract. Current-schema nested migration and state serialization fixtures now include empty `military.fired_event_ids`, `military.event_readiness`, `military.event_fire_counts`, `military.event_last_fired_turn`, `military.event_flags`, and `military.enabled_event_ids`; the save-migration round-trip fixture set now includes `v14_event_decision_log.json` so v14-to-v15 migration coverage is represented. No production logic, scenario source data, generated run output, event prose, calibration tuning, combat logic, or gameplay behavior changed.
+
+**Determinism:** Test/fixture-only alignment with inert empty records. The new fixture is a static legacy save input used to prove deterministic migration/serialization stability.
+
+**Verification:**
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\migration_nested_ownership.test.ts tests\save_migration_round_trip_contract.test.ts tests\state.test.ts --reporter=dot` - PASS; 24/24 tests.
+
+**Artifacts:** `tests/migration_nested_ownership.test.ts`, `tests/state.test.ts`, `tests/fixtures/save_migration/v14_event_decision_log.json`, `docs/40_reports/implemented/20260526_V15_FAST_FIXTURE_ALIGNMENT.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] state(save): require event bookkeeping records
 
 **Type:** Save schema contract hardening + strict-null Phase 2 slice.
