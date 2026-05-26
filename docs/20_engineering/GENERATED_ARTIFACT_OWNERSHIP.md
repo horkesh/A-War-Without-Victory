@@ -37,7 +37,7 @@ with Codex/user sign-off.
 | `runs/<scenario_run>/replay_save_sequence.json` | `runScenario(...)` via `streamFinalizeReplaySaveSequenceFromJsonl(...)` | `tests/replay_save_emit.test.ts`; `tests/scenario_continue_from_save_equivalence.test.ts`; `tests/replay_player.test.ts` | Do not commit. | Transient full-state replay sidecar emitted beside the scenario run. |
 | `runs/<scenario_run>/replay_save_manifest.json` | `runScenario(...)` via the replay save finalizer manifest writer | `tests/replay_save_emit.test.ts`; `tests/scenario_continue_from_save_equivalence.test.ts`; `tests/replay_player.test.ts` | Do not commit. | Transient sparse replay sidecar emitted beside `replay_save_sequence.json`. |
 | `runs/<scenario_run>/...` | `npm.cmd run sim:scenario:run:*` | None. | Transient. Not committed. | Always transient. |
-| `tools/diagnostics/output/*.json` (other than `save_migration_drift.json`) | Owner script under `tools/diagnostics/`. If unclear, the artifact does not belong in `git`. | Per-artifact diagnostic test if one exists. | Committed only when the diagnostic is part of canonical regression evidence. | Default transient. |
+| `tools/diagnostics/output/*.json` (other than `save_migration_drift.json`) | Owner script under `tools/diagnostics/`. If unclear, the artifact does not belong in `git`. | Per-artifact diagnostic test if one exists. | Committed only when the diagnostic is part of canonical regression evidence; unlisted diagnostic artifacts must not be committed without a matrix row first. | Default transient. |
 
 ## Determinism contract
 
