@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest save migration drift byte identity:** [implemented/20260526_SAVE_MIGRATION_DRIFT_BYTE_IDENTITY.md](implemented/20260526_SAVE_MIGRATION_DRIFT_BYTE_IDENTITY.md) - The save migration drift audit test now proves its committed diagnostic artifact regenerates byte-for-byte and restores committed bytes on failure.
+
 **Latest replay manifest ownership equivalence:** [implemented/20260526_REPLAY_MANIFEST_OWNERSHIP_EQUIVALENCE.md](implemented/20260526_REPLAY_MANIFEST_OWNERSHIP_EQUIVALENCE.md) - Scenario runs now expose `replay_save_manifest` path metadata and save-continue tests compare sparse manifest tails against uninterrupted runs; replay sidecars are explicitly transient in generated-artifact ownership docs.
 
 **Latest army command schema contract:** [implemented/20260526_ARMY_COMMAND_SCHEMA_CONTRACT.md](implemented/20260526_ARMY_COMMAND_SCHEMA_CONTRACT.md) - A2/C1 command observability records `military.army_co_decision_traces` and `military.army_corps_directives_by_faction` are now required persisted v10 contracts with migration/validator tests.
