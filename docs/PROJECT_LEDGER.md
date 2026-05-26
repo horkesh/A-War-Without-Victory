@@ -1,4 +1,21 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] docs(events): capture gated event modal decision packet
+
+**Type:** Documentation/process decision packet. No event JSON, runtime event logic, UI code, scenario data, save schema, simulation calibration, combat math, or baseline artifact semantics changed.
+
+**Change:** Added `docs/40_reports/proposals/20260526_EVENT_MODAL_GATED_DECISION_PACKET.md`, updated the Command Board event-system row, and reconciled `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md` so future dispatches start from the 17/36 implemented/gated state instead of the stale "not yet implemented" baseline. Product and Historian triage agree that the remaining 19 non-ready required-response rows are not safe for broad autonomous modal prose because they are sensitive-history gated, source/design blocked, counterfactual-default blocked, or deferred for 188-week/endgame proof. The next event-system action is approval triage, not another blind authoring packet.
+
+**Determinism:** Docs-only. No randomness, timestamps in persisted outputs, event ordering, trigger predicates, effects, response ordering, bot logic, state schema, scenario data, operation tuning, initial OSID overrides, avoided-OSID lists, or baseline-owned artifacts changed.
+
+**Verification:**
+- `git status --short --branch` before edits showed `## main...origin/main` after pushing `6c55bd23`.
+- `npx.cmd tsx tools\diagnostics\event_acceptance_report.ts --json` - PASS; 247 events, 36 required-response rows, 17 modal-ready rows, catalog `NOT_READY`.
+- `npx.cmd tsx tools\diagnostics\event_taxonomy_report.ts --json` - PASS; 247 events, 44 choice events, 36 required-response rows, 17 modal-ready rows, 193 warnings, 0 errors.
+
+**Artifacts:** `docs/40_reports/proposals/20260526_EVENT_MODAL_GATED_DECISION_PACKET.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`.
+
+---
+
 ## [2026-05-26] test(ui): prove event decision modal in live browser shell
 
 **Type:** UI proof tooling + focused regression coverage. No event content, runtime event logic, scenario data, save schema, simulation calibration, combat math, or baseline artifact semantics changed.

@@ -1,7 +1,7 @@
 # Event System Presidential Core Upgrade Plan
 
 **Date:** 2026-05-24
-**Status:** ACTIVE external-agent execution plan / not yet implemented
+**Status:** ACTIVE external-agent execution plan / partially implemented, gated for further authoring
 **Owner lane:** Event-system product/engine lane
 **Related board row:** `Command Board -> Event system presidential core upgrade`
 **Do not collide with:** calibration / army-arc branch. The 2026-05-25 presidential GUI restructure is merged; use its Decision Surface Registry, President's Desk, modal stack rules, and consequence ledger instead of inventing another decision surface.
@@ -41,18 +41,19 @@ Every new event packet must classify its trigger as one of:
 
 - Event catalog: 247 valid events across `war_1992.json`, `war_1993.json`, `war_1994.json`, `war_1995.json`, and `consequences.json`.
 - Current shape: 44 events with `response_options`, 203 no-choice events.
+- Required-response modal authoring: 17/36 rows are production modal-ready as of 2026-05-26. The catalog remains `NOT_READY`; the remaining 19 required-response rows are gated by sensitive-history approval, source/design default blockers, counterfactual-default blockers, or 188-week/endgame proof. Use `docs/40_reports/proposals/20260526_EVENT_MODAL_GATED_DECISION_PACKET.md` before authoring any additional row.
 - Choice ownership: RBiH 20, RS 18, HRHB 6.
-- GUI substrate: the 2026-05-25 presidential desk merge already provides President's Desk, central Decision Surface Registry, direct hard-blocker modal routing, modal stack priority, and consequence-ledger/Records/Chronicle trails.
+- GUI substrate: the 2026-05-25 presidential desk merge and 2026-05-26 event-modal proof provide President's Desk, central Decision Surface Registry, direct hard-blocker modal routing, modal stack priority, consequence-ledger/Records/Chronicle trails, data-driven modal catalog coverage, and live browser-shell proof that player event decisions open directly as modal dossiers.
 - Canon target from `Game_Bible_v0_9_0.md`: roughly 60% decision / 30% consequence / 10% forced events.
 - Current design gap: about 18% choice events, too many calendar/headline rows, too few pressure-driven presidential dilemmas.
-- Presentation gap: required decisions need EU-style explicit historical/default markers, authored narration, and visible citations/source notes, not just generic option buttons.
+- Presentation gap: the modal-first substrate and 17 production-authored rows now have EU-style explicit historical/default markers, authored narration, visible citations/source notes, staff assessment, trigger evidence, and numeric consequence previews. Remaining presentation work is gated content approval, not generic modal substrate.
 - Engine/spec gap: `Systems_Manual_v0_9_0.md` describes max 3 events, overflow queueing, and mutex prevention, while live code currently uses a 4-event cap, no overflow queue, and no mutex enforcement.
 - Current technical blockers:
   - `evaluateEvents` caps fireable events at 4 per turn and slices overflow silently.
   - event loading can fail open for missing/malformed files.
   - equal-priority event sorting lacks a full canonical tie-break.
   - full 247-row catalog schema validation is incomplete.
-  - `PendingEventDecision` underfeeds the modal: title/options arrive, but narrative, category, rationale, historical baseline, risks, flags, dimension shifts, numeric effect previews, source context, and notification/consequence previews do not.
+  - Further required-response modal authoring is blocked until the exact historical/default label and prose boundary are approved for the remaining sensitive, counterfactual, abstract, or source-weak rows.
   - `validateGameState` covers `pending_event_notifications`, but not `pending_event_decisions`, `event_decision_log`, or most active event modifier arrays.
   - some event condition/type fields are declared but weakly tested or partially implemented.
 
