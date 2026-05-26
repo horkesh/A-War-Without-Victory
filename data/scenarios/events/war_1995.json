@@ -11,7 +11,11 @@
       "requires_events": [
         "carter_ceasefire_1994"
       ],
-      "condition": { "type": "flag_equals", "flag": "carter_ceasefire_active", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "carter_ceasefire_active",
+        "value": true
+      }
     },
     "once": true,
     "effect": {
@@ -184,9 +188,18 @@
     "responding_faction": "RS",
     "bot_response_logic": "historical",
     "pressure": {
-      "base_rate": 3.0, "threshold": 3, "decay_rate": 0,
+      "base_rate": 3,
+      "threshold": 3,
+      "decay_rate": 0,
       "modifiers": [
-        { "condition": { "type": "flag_equals", "flag": "operation_flash_occurred", "value": true }, "rate_bonus": 1.0 }
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "operation_flash_occurred",
+            "value": true
+          },
+          "rate_bonus": 1
+        }
       ]
     },
     "effect": {
@@ -464,7 +477,12 @@
       {
         "kind": "control_change",
         "faction": "RS",
-        "osids": ["op:rogatica:zepa_2", "op:vlasenica:pomol_2", "op:visegrad:medjedja_2", "op:rudo:gornja_strmica"]
+        "osids": [
+          "op:rogatica:zepa_2",
+          "op:vlasenica:pomol_2",
+          "op:visegrad:medjedja_2",
+          "op:rudo:gornja_strmica"
+        ]
       }
     ]
   },
@@ -578,7 +596,7 @@
       {
         "kind": "equipment_quality_modifier",
         "faction": "RS",
-        "multiplier": 0.70,
+        "multiplier": 0.7,
         "duration_turns": 10
       },
       {
@@ -638,7 +656,11 @@
       "turn_min": 168,
       "turn_max": 170,
       "phase": "war",
-      "condition": { "type": "flag_equals", "flag": "un_hostage_crisis_occurred", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "un_hostage_crisis_occurred",
+        "value": true
+      }
     },
     "once": true,
     "effect": {
@@ -738,9 +760,18 @@
     },
     "once": true,
     "pressure": {
-      "base_rate": 3.0, "threshold": 3, "decay_rate": 0,
+      "base_rate": 3,
+      "threshold": 3,
+      "decay_rate": 0,
       "modifiers": [
-        { "condition": { "type": "flag_equals", "flag": "grahovo_glamoc_captured", "value": true }, "rate_bonus": 3.0 }
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "grahovo_glamoc_captured",
+            "value": true
+          },
+          "rate_bonus": 3
+        }
       ]
     },
     "effect": {
@@ -1047,7 +1078,14 @@
       {
         "kind": "control_change",
         "faction": "RS",
-        "osids": ["op:pale:praca", "op:nevesinje:hrusta_2", "op:nevesinje:sopilja", "op:doboj:grapska_gornja_2", "op:doboj:makljenovac"]
+        "osids": [
+          "op:pale:praca",
+          "op:nevesinje:hrusta_2",
+          "op:nevesinje:sopilja",
+          "op:doboj:grapska_gornja_2",
+          "op:doboj:makljenovac",
+          "op:teslic:kamenica_2"
+        ]
       }
     ],
     "dimension_shifts": [
@@ -1241,7 +1279,10 @@
       {
         "kind": "control_change",
         "faction": "RBiH",
-        "osids": ["op:bosanski_novi:krslje_2", "op:bosanski_novi:matavazi_2"]
+        "osids": [
+          "op:bosanski_novi:krslje_2",
+          "op:bosanski_novi:matavazi_2"
+        ]
       }
     ],
     "dimension_shifts": [
