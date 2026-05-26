@@ -1,4 +1,22 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] test(save): lock baseline ops sensitivity artifact ownership
+
+**Type:** Save/replay generated-artifact stability + static ownership guard.
+
+**Change:** Added an ownership matrix row and static guard for the committed `data/derived/scenario/baseline_ops_sensitivity*/` artifact trees. The guard verifies `npm.cmd run sim:scenario:baseline-ops:sensitivity` remains the owner command, the CLI default output stays on the primary tree, the sensitivity producer uses stable JSON writers, the per-run artifact set is fixed, `baseline_ops_sensitivity_run2` mirrors the primary tree, and every retained file is byte-identical except the expected path-bearing `run_meta.json` `out_dir` values. The existing H1.11 validation timeout was widened so the scenario-heavy proof can complete on current runtime. No scenario harness artifact refresh, deletion, calibration tuning, event prose, save schema, combat logic, or gameplay behavior changed.
+
+**Determinism:** Static documentation/test-only slice. It classifies already committed scenario-derived artifacts and guards stable ownership without writing generated outputs. Future refreshes or deletion remain gated by scenario/calibration approval.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\baseline_ops_sensitivity_artifact_ownership.test.ts --reporter=dot` failed before the ownership row existed.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\baseline_ops_sensitivity_artifact_ownership.test.ts --reporter=dot` - PASS.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\h1_11_baseline_ops_sensitivity.test.ts tests\baseline_ops_sensitivity_artifact_ownership.test.ts --reporter=dot` - PASS; 4/4 tests.
+- `git diff --check` - PASS.
+
+**Artifacts:** `tests/baseline_ops_sensitivity_artifact_ownership.test.ts`, `tests/h1_11_baseline_ops_sensitivity.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/implemented/20260526_BASELINE_OPS_SENSITIVITY_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] state(save): require event bookkeeping records
 
 **Type:** Save schema contract hardening + strict-null Phase 2 slice.

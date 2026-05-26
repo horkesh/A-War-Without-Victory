@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest baseline ops sensitivity artifact ownership:** [implemented/20260526_BASELINE_OPS_SENSITIVITY_ARTIFACT_OWNERSHIP.md](implemented/20260526_BASELINE_OPS_SENSITIVITY_ARTIFACT_OWNERSHIP.md) - A static guard now locks the committed H1.11 sensitivity artifact trees, owner command, validation tests, retained run2 classification, and byte-identity expectations without refreshing scenario outputs.
+
 **Latest event bookkeeping schema contract:** [implemented/20260526_EVENT_BOOKKEEPING_SCHEMA_CONTRACT.md](implemented/20260526_EVENT_BOOKKEEPING_SCHEMA_CONTRACT.md) - Six military event bookkeeping records are now required persisted v15 contract fields with current-version rejection coverage, legacy empty-default migration proof, and strict-null floor 475.
 
 **Latest CI schema fixture alignment:** [implemented/20260526_CI_SCHEMA_FIXTURE_ALIGNMENT.md](implemented/20260526_CI_SCHEMA_FIXTURE_ALIGNMENT.md) - Stale current-schema fixtures and the tracked latest-run final-save fixture now include required empty event/political records so Baseline Regression exercises the current save contract without production behavior changes.
