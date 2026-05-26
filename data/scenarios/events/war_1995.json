@@ -1142,6 +1142,25 @@
     },
     "effects": [
       {
+        "kind": "control_change",
+        "faction": "HRHB",
+        "osids": [
+          "op:jajce:barevo_2",
+          "op:jajce:bravnice",
+          "op:jajce:jajce_3",
+          "op:jajce:jezero_2",
+          "op:jajce:lupnica",
+          "op:jajce:prisoje",
+          "op:jajce:vinac_2",
+          "op:mrkonjic_grad:baljvine_2",
+          "op:mrkonjic_grad:bjelajce_2",
+          "op:mrkonjic_grad:gerzovo_2",
+          "op:mrkonjic_grad:majdan_2",
+          "op:mrkonjic_grad:mrkonjic_grad_2",
+          "op:mrkonjic_grad:podrasnica_2"
+        ]
+      },
+      {
         "kind": "morale_change",
         "faction": "RS",
         "delta": -8
