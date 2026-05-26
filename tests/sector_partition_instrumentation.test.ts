@@ -341,6 +341,45 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(region).not.toMatch(/\bperformance\.now\s*\(/);
     });
 
+    it('static contract: buildFactionSectors passes shared edge metadata into buildMultiSectorsForCorps', () => {
+        const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
+        const startIdx = raw.indexOf('function buildFactionSectors(');
+        const endIdx = raw.indexOf('// Re-exports for backward compatibility', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        const compact = region.replace(/\s+/g, ' ');
+        const callMatch = compact.match(/buildMultiSectorsForCorps\((?<args>[^;]+?)\)\s*,\s*\)/);
+
+        expect(callMatch?.groups?.args).toBeTruthy();
+        const args = callMatch!.groups!.args;
+        expect(args).toContain('_perfTime, edgeMeta');
+        expect(args).not.toMatch(/friendlyOsids,\s*_perfTime\s*$/);
+    });
+
+    it('static contract: buildMultiSectorsForCorps reuses shared metadata and keeps fallback lookup lazy', () => {
+        const raw = readFileSync(resolve('src/sim/combat/sector_building.ts'), 'utf8');
+        const startIdx = raw.indexOf('export function buildMultiSectorsForCorps(');
+        const endIdx = raw.indexOf('/**\n * Recursively split sub-segments', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        const compact = region.replace(/\s+/g, ' ');
+
+        expect(compact).toMatch(/sharedFrontEdgeMeta\?:\s*FrontEdgeMetaLookup/);
+        expect(compact).toMatch(/let\s+frontEdgeLookup:\s*Map<string,\s*FrontEdgeMeta>\s*\|\s*null\s*=\s*null/);
+        const frontEdgeStatement = compact.match(/const\s+frontEdge\s*=\s*(?<expr>[^;]+);/)?.groups?.expr;
+        expect(frontEdgeStatement).toBeTruthy();
+        expect(frontEdgeStatement).toMatch(/^sharedFrontEdgeMeta\?\.get\(eid\)\s*\?\?/);
+        expect(frontEdgeStatement).toContain('(frontEdgeLookup ??= new Map(osidFrontEdges.map(');
+        expect(frontEdgeStatement).toContain(')).get(eid)');
+
+        expect(compact).not.toMatch(/const\s+frontEdgeLookup\s*=\s*new Map\(osidFrontEdges\.map\(/);
+        expect(compact).not.toMatch(/for\s*\(const eid of edgeIds\)[^{]*{[^}]*const\s+frontEdgeLookup\s*=\s*new Map/);
+    });
+
     it('static contract: buildSectorFromSubSegments has deterministic child attribution labels', () => {
         const raw = readFileSync(resolve('src/sim/combat/sector_building.ts'), 'utf8');
         const startIdx = raw.indexOf('export function buildSectorFromSubSegments(');

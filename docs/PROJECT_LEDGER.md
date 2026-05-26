@@ -10854,3 +10854,21 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `data/scenarios/events/war_1994.json`, `data/scenarios/events/war_1995.json`, `data/scenarios/essays/bihac_5th_corps_offensive_1994.json`, `data/scenarios/essays/operation_sana_1995.json`, `data/scenarios/essays/essay_index.json`, `tests/ui/codex_essay_localization.test.ts`, `docs/40_reports/implemented/20260526_BIHAC_5TH_CORPS_OPERATIONAL_WORDING.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-26] perf(sectors): reuse front-edge metadata lookup
+
+**Type:** Deterministic sector performance optimization + contract coverage.
+
+**Change:** Hoisted the already-built `buildCorpsFrontSectors(...)` front-edge metadata map into `buildMultiSectorsForCorps(...)` so each corps no longer rebuilds a full `osidFrontEdges` lookup before filtering its own `edgeIds`. The per-corps `edgeIds` loop remains the writer order, selected edge metadata is copied into a fresh local map, and the old local lookup path remains as a lazy fallback for direct/synthetic callers.
+
+**Determinism:** Invocation-local read-only metadata reuse only. No save schema, sector IDs, response/order timing, scenario data, serialized cache, randomness, timestamps, cross-turn state, or output artifacts changed. Determinism reviewer found no ordering/cache-leak risk; focused integration tests and baselines kept sector output byte-equivalent.
+
+**Verification:**
+- `npx.cmd vitest run tests\sector_partition_instrumentation.test.ts tests\sector_partition_buildCorpsFrontSectors_integration.test.ts --reporter=dot` - PASS; 27/27 tests.
+- `npm.cmd run test:baselines` - PASS; baseline regression all scenarios match.
+- `git diff --check` - PASS.
+- Post-change safe 40w profile: `npx.cmd tsx tools/perf/profile_scenario.ts --scenario data/scenarios/apr1992_definitive_40w.json --out runs_perf/sector_edge_lookup_post_profile --report data/derived/_debug/sector_edge_lookup_post_profile_40w.json` - PASS; final hash `f219401f4a17f311`; wall time 103.310s -> 91.556s; `partition-corps-front-sectors` 7122.405ms -> 6503.316ms.
+
+**Artifacts:** `src/sim/combat/sector_building.ts`, `src/sim/combat/corps_front_sectors.ts`, `tests/sector_partition_instrumentation.test.ts`, `docs/40_reports/implemented/20260526_SECTOR_EDGE_METADATA_LOOKUP_REUSE.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`.
+
+---

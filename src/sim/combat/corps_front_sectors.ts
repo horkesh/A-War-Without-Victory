@@ -2689,7 +2689,7 @@ function buildFactionSectors(
             _perfTime(`buildFactionSectors:${faction}:corps-sector-construction:${corpsId}:multi-sector-build`, () => buildMultiSectorsForCorps(
                 state, corpsId, faction, edgeIds, osidFrontEdges,
                 adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, formations, reverseMap, centroids, friendlyOsids,
-                _perfTime,
+                _perfTime, edgeMeta,
             )),
         );
 

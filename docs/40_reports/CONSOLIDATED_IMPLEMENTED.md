@@ -338,3 +338,9 @@
 - Sequenced War Begins, tutorial, and first-turn orientation; routed Presidential Inbox situation cards into Army HQ BRIEFING; and moved the Chief of Staff report above Presidential Decision Room synthesis.
 - Filtered faction-owned event, proposal, reserve, and officer inbox cards to the current player faction.
 - Report: `docs/40_reports/implemented/20260516_FIRST_RUN_INBOX_HQ_FLOW_POLISH.md`
+
+# 2026-05-26 - Sector edge metadata lookup reuse
+
+- Reused pass-local front-edge metadata in corps sector construction while retaining lazy direct-call fallback behavior.
+- Preserved final hash `f219401f4a17f311`; comparable 40w profile wall time improved from 103.310s to 91.556s.
+- Report: `docs/40_reports/implemented/20260526_SECTOR_EDGE_METADATA_LOOKUP_REUSE.md`
