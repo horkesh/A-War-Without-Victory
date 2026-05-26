@@ -1047,7 +1047,7 @@
       {
         "kind": "control_change",
         "faction": "RS",
-        "osids": ["op:pale:praca", "op:nevesinje:hrusta_2", "op:nevesinje:sopilja"]
+        "osids": ["op:pale:praca", "op:nevesinje:hrusta_2", "op:nevesinje:sopilja", "op:doboj:grapska_gornja_2", "op:doboj:makljenovac"]
       }
     ],
     "dimension_shifts": [
