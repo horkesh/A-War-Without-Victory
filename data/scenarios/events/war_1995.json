@@ -1229,6 +1229,11 @@
       {
         "kind": "narrative",
         "text": "The 5th Corps breaks out of the Bihac pocket. Operation Sana captures Sanski Most, Bosanski Petrovac, and Bosanska Krupa. RS territory approaches the 49% Dayton line."
+      },
+      {
+        "kind": "control_change",
+        "faction": "RBiH",
+        "osids": ["op:bosanski_novi:krslje_2", "op:bosanski_novi:matavazi_2"]
       }
     ],
     "dimension_shifts": [
