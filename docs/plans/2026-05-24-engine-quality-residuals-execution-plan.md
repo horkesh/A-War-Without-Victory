@@ -138,7 +138,7 @@ Stop gates:
 
 **Owner:** scenario-harness-engineer
 **Reviewers:** determinism-auditor, QA engineer
-**Current status:** Static ownership slices are closed for replay manifest path/equivalence, replay sidecar static ownership including `replay_sequence.jsonl` / `replay_timeline.json`, save-migration drift byte identity/static ownership, `latest_run_final_save.json` map-copy byte-equivalence/static ownership, baseline manifest artifact-set ownership, startup snapshot ownership, baseline-ops sensitivity committed artifact ownership, H2.4 sweep committed artifact ownership, recruitment test matrix committed artifact ownership, diagnostics-output wildcard/static ownership, and `data/derived/_debug/**` transient ownership. The next slice should remain a mapped artifact-owner check before changing writes.
+**Current status:** Static ownership slices are closed for replay manifest path/equivalence, replay sidecar static ownership including `replay_sequence.jsonl` / `replay_timeline.json`, save-migration drift byte identity/static ownership, `latest_run_final_save.json` map-copy byte-equivalence/static ownership, baseline manifest artifact-set ownership, startup snapshot ownership, baseline-ops sensitivity committed artifact ownership, H2.4 sweep committed artifact ownership, recruitment test matrix committed artifact ownership, diagnostics-output wildcard/static ownership, `data/derived/_debug/**` transient ownership, and committed terrain PMTiles ownership. The next slice should remain a mapped artifact-owner check before changing writes.
 
 Steps:
 

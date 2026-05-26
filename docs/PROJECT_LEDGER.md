@@ -1,4 +1,24 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] test(tiles): lock terrain PMTiles artifact ownership
+
+**Type:** Static generated-artifact ownership guard + docs closeout.
+
+**Change:** Added `tests/terrain_tiles_artifact_ownership.test.ts` and generated-artifact ownership rows for `data/derived/tiles/hillshade.pmtiles`, `data/derived/tiles/osm.pmtiles`, and `data/derived/tiles/terrain.pmtiles`. The guard verifies the rows exist, the PMTiles files are tracked, Git attributes treat them as LFS binary artifacts, and `tests/desktop_pmtiles_protocol_route.test.ts` remains the consumer guard for PMTiles URL rewriting and range responses.
+
+**Determinism:** Static test and documentation-only ownership clarification. No PMTiles bytes, terrain artifacts, scenario outputs, event content, calibration data, save schema, migrations, validators, replay behavior, randomness, timestamps, or generated artifact payloads changed.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\vitest.cmd run tests\terrain_tiles_artifact_ownership.test.ts --reporter=dot` - FAIL before the doc update because `data/derived/tiles/hillshade.pmtiles` was not listed in the ownership matrix.
+- `git check-attr filter diff merge text -- data/derived/tiles/hillshade.pmtiles data/derived/tiles/osm.pmtiles data/derived/tiles/terrain.pmtiles` - PASS; all three files report `filter: lfs`, `diff: lfs`, `merge: lfs`, and `text: unset`.
+- `F:\A-War-Without-Victory\vitest.cmd run tests\terrain_tiles_artifact_ownership.test.ts --reporter=dot` - PASS; 1/1 test.
+- `F:\A-War-Without-Victory\vitest.cmd run tests\desktop_pmtiles_protocol_route.test.ts --reporter=dot` - PASS; 5/5 tests.
+- `git diff --check` - PASS.
+- `git status --short -- data/derived/tiles; git diff --name-only -- data/derived/tiles` - PASS; no output, confirming no tracked PMTiles bytes changed.
+
+**Artifacts:** `tests/terrain_tiles_artifact_ownership.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/implemented/20260526_TERRAIN_TILES_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] test(artifacts): lock data-derived debug transient ownership
 
 **Type:** Save/replay generated-artifact stability + static ownership guard.

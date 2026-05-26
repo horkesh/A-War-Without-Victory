@@ -431,3 +431,9 @@
 - Promoted `military.fired_event_ids`, `military.event_readiness`, `military.event_fire_counts`, `military.event_last_fired_turn`, `military.event_flags`, and `military.enabled_event_ids` to required persisted v15 contracts.
 - Added v15 migration/default, current-version rejection, strict-null inventory, and direct-fixture alignment proof without changing event eligibility or response behavior.
 - Report: `docs/40_reports/implemented/20260526_EVENT_BOOKKEEPING_SCHEMA_CONTRACT.md`
+
+# 2026-05-26 - Terrain PMTiles artifact ownership
+
+- Added a static generated-artifact ownership guard for `hillshade.pmtiles`, `osm.pmtiles`, and `terrain.pmtiles`.
+- Documented the committed PMTiles as terrain/tile pipeline-owned Git LFS binary artifacts with desktop PMTiles route/range consumer coverage.
+- Report: `docs/40_reports/implemented/20260526_TERRAIN_TILES_ARTIFACT_OWNERSHIP.md`
