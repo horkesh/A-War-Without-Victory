@@ -2434,9 +2434,9 @@ enclaves?: EnclaveState[];
 /** System 6: Sarajevo exception state. */
 sarajevo_state?: SarajevoState;
 /** Turn (inclusive) until which municipality cannot flip control; keyed by MunicipalityId. */
-war_consolidation_until?: Record<MunicipalityId, number>;
+war_consolidation_until: Record<MunicipalityId, number>;
 /** Control strain accumulated per municipality; Peace-phase §4.5. */
-war_control_strain?: Record<MunicipalityId, number>;
+war_control_strain: Record<MunicipalityId, number>;
 /** RBiH–HRHB alliance relationship [-1, 1]; Peace-phase §4.8. */
 war_alliance_rbih_hrhb?: number;
 /** Peace-phase §4.8: RBiH–HRHB bilateral state (war tracking, ceasefire, Washington Agreement). */
@@ -2444,13 +2444,13 @@ rbih_hrhb_state?: RbihHrhbState;
 /** B4: Coercion pressure [0, 1] per municipality; reduces flip threshold (makes flip easier). Scenario/init can supply (e.g. Prijedor, Zvornik). */
 coercion_pressure_by_municipality?: Record<MunicipalityId, number>;
 /** Cumulative supply pressure per faction [0, 100]; higher = worse. Live current supply readers should prefer war_supply_condition via supply_condition.ts helpers. */
-war_supply_pressure?: Record<FactionId, number>;
+war_supply_pressure: Record<FactionId, number>;
 /** Live faction supply condition [0, 100] derived from current OSID supply state; higher = better. */
-war_supply_condition?: Record<FactionId, number>;
+war_supply_condition: Record<FactionId, number>;
 /** Faction-level exhaustion (monotonic, irreversible). Engine Invariants §8. */
-war_exhaustion?: Record<FactionId, number>;
+war_exhaustion: Record<FactionId, number>;
 /** Optional local (per-settlement) exhaustion accumulator; monotonic when present. */
-war_exhaustion_local?: Record<SettlementId, number>;
+war_exhaustion_local: Record<SettlementId, number>;
 /** Enclave resilience per enclave ID. Phase C: EnclaveResilienceEntry; old saves: bare number. */
 enclave_resilience?: Record<string, number | EnclaveResilienceEntry>;
 /** Phase 0 event log: array of per-turn event arrays. Index = turn number. */

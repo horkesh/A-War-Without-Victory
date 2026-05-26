@@ -56,7 +56,7 @@ function makeRBiHState(turn: number, flags: Record<string, string | number | boo
         political: {
             war_alliance_rbih_hrhb: 0.5,
             political_controllers: {},
-        } as GameState['political'],
+        } as unknown as GameState['political'],
     } as unknown as GameState;
 }
 
@@ -219,7 +219,7 @@ function makeBihacChainState(turn: number, opts: {
                 'op:bihac:bihac_1': bihacSupply,
                 'op:bihac:bihac_2': bihacSupply,
             },
-        } as GameState['political'],
+        } as unknown as GameState['political'],
     } as unknown as GameState;
 }
 
@@ -352,7 +352,7 @@ function makeRSChainState(
         political: {
             war_alliance_rbih_hrhb: 0.5,
             political_controllers: {},
-        } as GameState['political'],
+        } as unknown as GameState['political'],
     } as unknown as GameState;
 }
 
@@ -519,7 +519,7 @@ function makeChain1State(
         political: {
             war_alliance_rbih_hrhb: 0.5,
             political_controllers: pc,
-        } as GameState['political'],
+        } as unknown as GameState['political'],
     } as unknown as GameState;
 }
 

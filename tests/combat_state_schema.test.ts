@@ -98,7 +98,7 @@ describe('war phase state schema', () => {
 
     it('accepts GameState with only some War phase fields', () => {
         const state = warPhaseGameStateFixture();
-        delete (state.political as Record<string, unknown>).war_exhaustion_local;
+        delete (state.political as unknown as Record<string, unknown>).war_exhaustion_local;
         const result = validateGameStateShape(state);
         expect(result.ok).toBe(true);
     });

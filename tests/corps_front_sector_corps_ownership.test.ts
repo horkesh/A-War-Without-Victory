@@ -101,7 +101,7 @@ function makeState(): GameState {
                 'op:enemy:b4': 'RBiH',
                 'op:enemy:b5': 'RBiH',
             },
-        } as GameState['political'],
+        } as unknown as GameState['political'],
         displacement: {} as GameState['displacement'],
     } as GameState;
 }

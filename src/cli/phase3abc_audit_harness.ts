@@ -706,7 +706,14 @@ function createBaseState(seedName: string): GameState {
     displacement_origin_dest_arrivals: {},
     displacement_recent_by_turn: {}
   },
-        political: {}
+        political: {
+            war_consolidation_until: {},
+            war_control_strain: {},
+            war_supply_pressure: {},
+            war_supply_condition: {},
+            war_exhaustion: {},
+            war_exhaustion_local: {}
+        }
     };
 }
 

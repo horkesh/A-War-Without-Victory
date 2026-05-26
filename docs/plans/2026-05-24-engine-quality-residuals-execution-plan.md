@@ -110,7 +110,7 @@ Stop gates:
 
 **Owner:** systems-programmer
 **Reviewers:** save/schema QA, canon-compliance-reviewer when behavior can move
-**Current status:** In progress. Closed persisted-contract slices: v7 `displacement.displacement_event_log`, v8 `displacement.displacement_humanitarian_aggregates`, v8 `displacement.displacement_origin_dest_arrivals`, v8 `displacement.displacement_recent_by_turn`, v10 `military.army_co_decision_traces`, v10 `military.army_corps_directives_by_faction`, and v14 `military.event_decision_log`. Current optional-field floor is 487 (`sim` 304, `state` 175, `derived` 8). Next slice should start from the current strict-null inventory and classify one remaining optional-field family before edits.
+**Current status:** In progress. Closed persisted-contract slices: v6 `political.war_consolidation_until`, v6 `political.war_control_strain`, v7 `political.war_supply_pressure`, v7 `political.war_supply_condition`, v7 `political.war_exhaustion`, v7 `political.war_exhaustion_local`, v7 `displacement.displacement_event_log`, v8 `displacement.displacement_humanitarian_aggregates`, v8 `displacement.displacement_origin_dest_arrivals`, v8 `displacement.displacement_recent_by_turn`, v10 `military.army_co_decision_traces`, v10 `military.army_corps_directives_by_faction`, and v14 `military.event_decision_log`. Current optional-field floor is 481 (`sim` 304, `state` 169, `derived` 8). Next slice should start from the current strict-null inventory and classify one remaining optional-field family before edits.
 
 Steps:
 

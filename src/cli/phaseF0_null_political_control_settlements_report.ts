@@ -33,7 +33,14 @@ async function main(): Promise<void> {
     army_corps_directives_by_faction: {},
     event_decision_log: []
   },
-  political: {},
+  political: {
+    war_consolidation_until: {},
+    war_control_strain: {},
+    war_supply_pressure: {},
+    war_supply_condition: {},
+    war_exhaustion: {},
+    war_exhaustion_local: {}
+  },
   displacement: {
     displacement_event_log: [],
     displacement_humanitarian_aggregates: {},

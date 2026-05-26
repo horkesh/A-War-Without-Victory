@@ -998,7 +998,7 @@ describe('post-merge misassignment relocation', () => {
                     'op:enemy:a': 'RBiH',
                     'op:enemy:b': 'RBiH',
                 },
-            } as GameState['political'],
+            } as unknown as GameState['political'],
             displacement: {} as GameState['displacement'],
         } as GameState;
 

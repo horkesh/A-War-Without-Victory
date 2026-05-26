@@ -83,6 +83,12 @@ describe('versioned save migration steps', () => {
         expect(state.military.army_corps_directives_by_faction).toEqual({});
         expect(state.military.event_decision_log).toEqual([]);
         expect(state.political.supply_rights).toEqual({ corridors: [] });
+        expect(state.political.war_consolidation_until).toEqual({});
+        expect(state.political.war_control_strain).toEqual({});
+        expect(state.political.war_supply_pressure).toEqual({});
+        expect(state.political.war_supply_condition).toEqual({});
+        expect(state.political.war_exhaustion).toEqual({});
+        expect(state.political.war_exhaustion_local).toEqual({});
         expect(state.displacement.displacement_event_log).toEqual([]);
         expect(state.displacement.displacement_humanitarian_aggregates).toEqual({});
         expect(state.displacement.displacement_origin_dest_arrivals).toEqual({});

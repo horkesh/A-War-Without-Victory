@@ -132,6 +132,22 @@ describe('save migration validator hardening', () => {
     });
 
     it.each([
+        ['war_consolidation_until', 6],
+        ['war_control_strain', 6],
+        ['war_supply_pressure', 7],
+        ['war_supply_condition', 7],
+        ['war_exhaustion', 7],
+        ['war_exhaustion_local', 7],
+    ])('rejects a current-version save missing political war substrate record %s', (field, version) => {
+        const state = currentVersionState();
+        delete state.political[field];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            new RegExp(`Save schema validation failed after migration[\\s\\S]*v${version}[\\s\\S]*political\\.${field}`)
+        );
+    });
+
+    it.each([
         'displacement_humanitarian_aggregates',
         'displacement_origin_dest_arrivals',
         'displacement_recent_by_turn',

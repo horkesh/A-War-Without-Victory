@@ -44,7 +44,7 @@ function makeState(): GameState {
                     bravo: { authority_mult: 1, cohesion_mult: 1, supply_mult: 1, pressure_cap_mult: 1 },
                 },
             },
-        } as GameState['political'],
+        } as unknown as GameState['political'],
         displacement: {} as GameState['displacement'],
     };
 }

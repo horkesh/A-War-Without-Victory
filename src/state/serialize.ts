@@ -259,16 +259,12 @@ function canonicalizeCurrentFields(candidate: Record<string, any>): void {
     }
 
     const hasAnyPhaseI =
-        (pol && pol.war_consolidation_until !== undefined) ||
         (mil && mil.war_militia_strength !== undefined) ||
-        (pol && pol.war_control_strain !== undefined) ||
         (mil && mil.war_jna !== undefined) ||
         (pol && pol.war_alliance_rbih_hrhb !== undefined) ||
         (disp && disp.war_displacement_initiated !== undefined);
     if (hasAnyPhaseI) {
-        if (pol && pol.war_consolidation_until === undefined) pol.war_consolidation_until = {};
         if (mil && mil.war_militia_strength === undefined) mil.war_militia_strength = {};
-        if (pol && pol.war_control_strain === undefined) pol.war_control_strain = {};
         if (mil && mil.war_jna === undefined) {
             mil.war_jna = { transition_begun: false, withdrawal_progress: 0, asset_transfer_rs: 0 };
         }

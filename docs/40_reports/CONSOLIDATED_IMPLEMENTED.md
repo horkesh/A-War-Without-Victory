@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest political war substrate schema contract:** [implemented/20260526_POLITICAL_WAR_SUBSTRATE_SCHEMA_CONTRACT.md](implemented/20260526_POLITICAL_WAR_SUBSTRATE_SCHEMA_CONTRACT.md) - Six political war substrate records are now required persisted v6/v7 contract fields with current-version rejection coverage, legacy `{}` migration proof, and strict-null floor 481.
+
 **Latest startup snapshot artifact ownership:** [implemented/20260526_STARTUP_SNAPSHOT_ARTIFACT_OWNERSHIP.md](implemented/20260526_STARTUP_SNAPSHOT_ARTIFACT_OWNERSHIP.md) - A static guard now locks the April 1992 startup snapshot artifact owner, validation commands, npm script mapping, source key/path, and builder wrapper calls without refreshing the generated startup save or claiming byte proof.
 
 **Latest sector current profile evidence:** [implemented/20260526_SECTOR_CURRENT_PROFILE_EVIDENCE_CLOSEOUT.md](implemented/20260526_SECTOR_CURRENT_PROFILE_EVIDENCE_CLOSEOUT.md) - Fresh 40w sector/frontline profiling preserved final hash `f219401f4a17f311`; top measured buckets are `reconcile-final-sector-truth`, `partition-corps-front-sectors`, and `sealMergedSectorTruth:ensure-coverage`, with next code work gated to byte-identical final-sector-truth/partition planning.

@@ -63,6 +63,12 @@ function buildLinearTopology(): {
                 'op:test:d': 'RBiH',    // isolated pocket
                 'op:test:e': 'RBiH',    // isolated pocket
             },
+            war_consolidation_until: {},
+            war_control_strain: {},
+            war_supply_pressure: {},
+            war_supply_condition: {},
+            war_exhaustion: {},
+            war_exhaustion_local: {},
         },
     };
 

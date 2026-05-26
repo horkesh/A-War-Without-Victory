@@ -82,7 +82,7 @@ describe('final sector reserve-band truth', () => {
                     'op:rear': 'RS',
                     'op:enemy': 'RBiH',
                 },
-            } as GameState['political'],
+            } as unknown as GameState['political'],
             displacement: {} as GameState['displacement'],
         } as GameState;
 
@@ -183,7 +183,7 @@ describe('final sector reserve-band truth', () => {
                     'op:rear_heavy': 'RS',
                     'op:enemy': 'RBiH',
                 },
-            } as GameState['political'],
+            } as unknown as GameState['political'],
             displacement: {} as GameState['displacement'],
         } as GameState;
 
@@ -287,7 +287,7 @@ describe('final sector reserve-band truth', () => {
                     'op:enemy_a': 'RBiH',
                     'op:enemy_b': 'RBiH',
                 },
-            } as GameState['political'],
+            } as unknown as GameState['political'],
             displacement: {} as GameState['displacement'],
         } as GameState;
 

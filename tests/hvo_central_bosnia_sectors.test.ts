@@ -134,7 +134,7 @@ function makeState(alliance: number): GameState {
                 'op:busovaca:busovaca_rbih_1': 'RBiH',
             },
             war_alliance_rbih_hrhb: alliance,
-        } as GameState['political'],
+        } as unknown as GameState['political'],
         displacement: {} as GameState['displacement'],
     } as GameState;
     return state;

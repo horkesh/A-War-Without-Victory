@@ -363,7 +363,7 @@ function makeSealingState(): { state: GameState; edges: EdgeRecord[] } {
                 'op:test:front': 'RS',
                 'op:test:enemy': 'RBiH',
             },
-        } as GameState['political'],
+        } as unknown as GameState['political'],
         displacement: {} as GameState['displacement'],
     } as GameState;
 

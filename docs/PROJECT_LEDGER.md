@@ -1,4 +1,27 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] state(save): require political war substrate records
+
+**Type:** Save schema contract hardening + strict-null Phase 2 slice.
+
+**Change:** Promoted six political war substrate records from optional `PoliticalState` fields to required persisted contracts: v6 `political.war_consolidation_until`, v6 `political.war_control_strain`, v7 `political.war_supply_pressure`, v7 `political.war_supply_condition`, v7 `political.war_exhaustion`, and v7 `political.war_exhaustion_local`. Existing v6/v7 migrations already materialize these fields as `{}` for legacy saves; focused tests now prove both current-version rejection and v1 legacy defaulting. The validator required-field inventory and save migration drift artifact now include all six paths. Current-version serializer canonicalization no longer silently repairs the two promoted v6 political records after migrations, so missing current saves reject instead of being backfilled. Minimal direct `PoliticalState` fixtures were aligned with empty records where needed. No event JSON, modal prose, historical content, calibration/scenario outputs, sector/combat control logic, non-empty supply/exhaustion values, or supply/exhaustion scaling changed.
+
+**Determinism:** Schema/default-only change. All legacy defaults are empty records already owned by deterministic migrations. The only runtime-adjacent adjustment replaces a required-record delete path with `{}` assignment when no live supply condition can be derived and retains an in-memory-builder backstop for cumulative supply pressure, preserving empty-record semantics without introducing randomness, timestamps, unordered iteration, scenario-output movement, or serialization-order changes.
+
+**Strict-null inventory:** Counted escape categories remain zero. Optional `GameState` field inventory is now `481`, split as `sim 304`, `state 169`, `derived 8`, `unknown 0`.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_validator_rejection.test.ts tests\save_migration_versioned_steps.test.ts --reporter=dot` failed 6/24 before production changes because current v14 saves missing the six political war substrate records were accepted.
+- `node tools\diagnostics\strict_null_inventory.cjs --field-domains` - PASS; total 481, `sim 304`, `state 169`, `derived 8`, `unknown 0`.
+- `node tools\diagnostics\save_migration_drift_audit.cjs` - PASS; `0 anonymous defaults`, strict required field count 36.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_validator_rejection.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_round_trip_contract.test.ts tests\save_migration_drift_audit.test.ts tests\strict_null_inventory_progress.test.ts tests\supply_pressure_vs_condition_reconciliation.test.ts tests\production_facilities_a3.test.ts --reporter=dot` - PASS; 135/135 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\combat_supply_pressure.test.ts --reporter=dot` - PASS; 8/8 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\tsc.cmd --noEmit -p tsconfig.json` - PASS after temporarily linking the worktree Map UI dependency directory to the root dependency install; the temporary junction was removed after verification.
+- `git diff --check` - PASS.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/validateGameState.ts`, `src/state/serialize.ts`, `src/sim/combat/supply_pressure.ts`, direct `PoliticalState` fixtures in CLI/UI/tests, `tests/save_migration_validator_rejection.test.ts`, `tests/save_migration_versioned_steps.test.ts`, `tests/strict_null_inventory_progress.test.ts`, `tools/diagnostics/output/save_migration_drift.json`, `docs/40_reports/implemented/20260526_POLITICAL_WAR_SUBSTRATE_SCHEMA_CONTRACT.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] test(startup): lock startup snapshot artifact ownership
 
 **Type:** Static generated-artifact ownership guard + docs closeout.

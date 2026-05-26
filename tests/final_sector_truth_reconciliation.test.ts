@@ -73,7 +73,7 @@ function makeState(): { state: GameState; edges: EdgeRecord[] } {
                 'op:test:front': 'RS',
                 'op:test:enemy': 'RBiH',
             },
-        } as GameState['political'],
+        } as unknown as GameState['political'],
         displacement: {} as GameState['displacement'],
     } as GameState;
 
@@ -149,7 +149,7 @@ describe('final sector truth reconciliation', () => {
                     'op:test:enemy': 'RBiH',
                     'op:test:island': 'RS',
                 },
-            } as GameState['political'],
+            } as unknown as GameState['political'],
             displacement: {} as GameState['displacement'],
         } as GameState;
 

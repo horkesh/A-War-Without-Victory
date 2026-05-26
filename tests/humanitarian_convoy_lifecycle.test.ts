@@ -134,7 +134,7 @@ describe('evaluateHumanitarianConvoys', () => {
                         collapsed: false,
                     },
                 ],
-            } as GameState['political'],
+            } as unknown as GameState['political'],
         });
 
         expect(evaluateHumanitarianConvoys(state, convoyEdges)).toEqual([]);
@@ -161,7 +161,7 @@ describe('evaluateHumanitarianConvoys', () => {
                         collapsed: false,
                     },
                 ],
-            } as GameState['political'],
+            } as unknown as GameState['political'],
         });
         const edges: EdgeRecord[] = [{ a: 'alpha_a', b: 'friendly_route' } as EdgeRecord];
 
@@ -173,7 +173,7 @@ describe('evaluateHumanitarianConvoys', () => {
         const state = makeState({
             political: {
                 enclaves: [makeState().political.enclaves![0]],
-            } as GameState['political'],
+            } as unknown as GameState['political'],
         });
 
         const created = evaluateHumanitarianConvoys(state, convoyEdges);
@@ -196,7 +196,7 @@ describe('evaluateHumanitarianConvoys', () => {
             } as Partial<GameState['military']> as GameState['military'],
             political: {
                 enclaves: [makeState().political.enclaves![0]],
-            } as GameState['political'],
+            } as unknown as GameState['political'],
         });
 
         expect(evaluateHumanitarianConvoys(state, convoyEdges)).toEqual([]);
@@ -257,7 +257,7 @@ describe('applyHumanitarianConvoyDecisions', () => {
                     composite_ivp: composite,
                     last_major_shift: null,
                 },
-            } as GameState['political'],
+            } as unknown as GameState['political'],
         });
 
         applyHumanitarianConvoyDecisions(state);

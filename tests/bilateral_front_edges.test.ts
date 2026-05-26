@@ -19,7 +19,7 @@ function makeState(alliance: number, turn = 40): GameState {
         political: {
             war_alliance_rbih_hrhb: alliance,
             political_controllers: { a: 'RBiH', b: 'HRHB' }
-        } as GameState['political'],
+        } as unknown as GameState['political'],
         displacement: {
             displacement_event_log: [],
             displacement_humanitarian_aggregates: {},
