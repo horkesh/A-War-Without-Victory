@@ -1,4 +1,20 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] test(state): repair displacement schema CI fixtures
+
+**Type:** CI fixture repair for required displacement event log contract.
+
+**Change:** Updated fast-suite legacy migration fixtures to include the minimal `displacement.displacement_event_log: []` shape required after the v7 contract promotion, and corrected the strict-null optional `GameState` pin from `492` to `491` with the state-domain count from `179` to `178`.
+
+**Determinism:** Test fixture/count correction only. No schema, migration, validator, runtime logic, scenario data, generated artifact, baseline, randomness, timestamp, ordering, or real scenario run changed.
+
+**Verification:**
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\identity_migration.test.ts tests\state\player_faction_contract.test.ts tests\strict_null_inventory_progress.test.ts --reporter=dot` - PASS; 102/102 tests.
+- `git diff --check` - PASS.
+
+**Artifacts:** `tests/identity_migration.test.ts`, `tests/state/player_faction_contract.test.ts`, `tests/strict_null_inventory_progress.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] test(state): require displacement event log
 
 **Type:** Save schema contract hardening + strict-null Phase 2 slice.

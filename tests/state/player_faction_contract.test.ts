@@ -45,7 +45,7 @@ function minimalState(overrides: Record<string, unknown> = {}): Record<string, u
             negotiation_ledger: [],
             supply_rights: { corridors: [] },
         },
-        displacement: {},
+        displacement: { displacement_event_log: [] },
         ...overrides,
     };
 }
