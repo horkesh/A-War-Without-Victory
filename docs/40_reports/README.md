@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest replay manifest ownership equivalence** | [implemented/20260526_REPLAY_MANIFEST_OWNERSHIP_EQUIVALENCE.md](implemented/20260526_REPLAY_MANIFEST_OWNERSHIP_EQUIVALENCE.md) - Scenario runs now expose `replay_save_manifest` path metadata and save-continue tests compare sparse manifest tails against uninterrupted runs; replay sidecars are explicitly transient in generated-artifact ownership docs. |
 | **Latest army command schema contract** | [implemented/20260526_ARMY_COMMAND_SCHEMA_CONTRACT.md](implemented/20260526_ARMY_COMMAND_SCHEMA_CONTRACT.md) - A2/C1 command observability records `military.army_co_decision_traces` and `military.army_corps_directives_by_faction` are now required persisted v10 contracts with migration/validator tests. |
 | **Latest Bihac / 5th Corps operational wording** | [implemented/20260526_BIHAC_5TH_CORPS_OPERATIONAL_WORDING.md](implemented/20260526_BIHAC_5TH_CORPS_OPERATIONAL_WORDING.md) - Bihać/5th Corps event and Codex prose now use bounded Operation Grmeč and Operation Sana wording with BB2 pp. 536-538 source support. |
 | **Latest HVO Southern Move catalog** | [implemented/20260524_HVO_SOUTHERN_MOVE_CATALOG.md](implemented/20260524_HVO_SOUTHERN_MOVE_CATALOG.md) - Mistral 2 now owns Drvar/Grahovo plus Sipovo only, while `southern_move_95` covers Mrkonjic Grad from Sipovo staging under `hvo_tomislavgrad`. |

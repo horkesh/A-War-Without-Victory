@@ -1,4 +1,26 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] test(scenario): expose replay manifest path and prove save-continue manifest equivalence
+
+**Type:** Scenario harness path metadata + replay determinism tests/docs. No scenario data, event data, GUI presentation, baseline artifacts, save schema, migrations, simulation calibration, combat math, or committed generated artifacts changed.
+
+**Change:** Added `RunScenarioResult.paths.replay_save_manifest` so callers can locate the sparse `replay_save_manifest.json` sidecar that the desktop loader consumes before the full replay sequence. Extended `tests/scenario_continue_from_save_equivalence.test.ts` so resumed-run sparse manifest frames must equal the uninterrupted-run manifest tail, matching the existing full `replay_save_sequence.json` tail proof. Added a replay emit assertion for the sibling manifest path, documented replay sidecars as transient run outputs in `GENERATED_ARTIFACT_OWNERSHIP.md`, and corrected stale determinism matrix references to the consolidated `tests/scenario_harness_contracts.test.ts` H1.1/H2.4 gates. Also repaired the red main Baseline Regression from the prior schema-contract commit by updating current/claimed-v12/v13 test fixtures to include the now-required v10 army command trace records and pinning the strict-null optional field floor at 492.
+
+**Determinism:** Path metadata and tests only. The equivalence test still asserts final save hash/byte equality and now also proves sparse replay manifest equivalence. No randomness, timestamps, unordered traversal, event ordering, trigger predicates, operation tuning, initial OSID overrides, avoided-OSID lists, or baseline-owned artifacts changed.
+
+**Verification:**
+- Red check: focused save-continue test failed before implementation because `fullRun.paths.replay_save_manifest` was `undefined`.
+- CI triage: main Baseline Regression for `82d37276` failed in fast tests because three fixtures/count pins still expected the pre-v10-contract shape; fixed in this follow-up branch.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\scenario_continue_from_save_equivalence.test.ts tests\replay_save_emit.test.ts tests\replay_player.test.ts --reporter=dot` - PASS; 18/18 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_counter_offers.test.ts tests\state\player_faction_contract.test.ts tests\strict_null_inventory_progress.test.ts --reporter=dot` - PASS; 95/95 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\scenario_continue_from_save_equivalence.test.ts tests\replay_save_emit.test.ts tests\replay_player.test.ts tests\docs_truth_no_skip_guard.test.ts tests\startup_snapshot_contract.test.ts --reporter=dot` - PASS; 25/25 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\tsc.cmd --noEmit -p tsconfig.json` - PASS after temporarily linking this dependency-light worktree to the already-installed map UI dependency folder; junction removed after the run.
+- `npm.cmd run test:baselines` - PASS after temporarily linking this dependency-light worktree to the already-installed root dependency folder; `Baseline regression: all scenarios match`; junction removed after the run.
+- `git diff --check` - PASS.
+
+**Artifacts:** `src/scenario/scenario_runner.ts`, `tests/scenario_continue_from_save_equivalence.test.ts`, `tests/replay_save_emit.test.ts`, `tests/save_migration_counter_offers.test.ts`, `tests/state/player_faction_contract.test.ts`, `tests/strict_null_inventory_progress.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/20_engineering/DETERMINISM_TEST_MATRIX.md`, `docs/40_reports/implemented/20260526_REPLAY_MANIFEST_OWNERSHIP_EQUIVALENCE.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] docs(events): capture gated event modal decision packet
 
 **Type:** Documentation/process decision packet. No event JSON, runtime event logic, UI code, scenario data, save schema, simulation calibration, combat math, or baseline artifact semantics changed.

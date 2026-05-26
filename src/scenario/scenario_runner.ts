@@ -361,6 +361,8 @@ export interface RunScenarioResult {
         replay_sequence_log: string;
         /** LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: end-of-run consolidated GameState[] artifact. */
         replay_save_sequence: string;
+        /** Sparse replay summary manifest emitted beside replay_save_sequence.json. */
+        replay_save_manifest: string;
         /** LANE D-CONTENT (Path A): per-turn displacement event JSONL stream (events written before per-turn buffer clear). */
         displacement_event_log: string;
         /** Optional list of deterministic weekly save paths (save_w1..save_wN). */
@@ -1963,6 +1965,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     // empty strings — consumers should treat empty as "absent".
                     replay_sequence_log: '',
                     replay_save_sequence: '',
+                    replay_save_manifest: '',
                     replay: '',
                     run_summary: join(outDir, 'run_summary.json'),
                     control_delta: join(outDir, 'control_delta.json'),
@@ -2715,6 +2718,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 replaySequencePath,
             )
         );
+        const replaySaveManifestPath = join(outDir, 'replay_save_manifest.json');
 
         let endDiagnosticsStart = timingStart(emitTimingJson);
         const anomalyReports: AnomalyReport[] = runAnomalyDetection(state);
@@ -3127,6 +3131,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 brigade_temporal_log: brigadeTemporalLogPath,
                 replay_sequence_log: replaySequencePath,
                 replay_save_sequence: replaySaveSequencePath,
+                replay_save_manifest: replaySaveManifestPath,
                 replay: replayPath ?? '',
                 run_summary: runSummaryPath,
                 control_delta: controlDeltaPath,

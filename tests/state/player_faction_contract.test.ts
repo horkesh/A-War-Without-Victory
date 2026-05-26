@@ -35,6 +35,8 @@ function minimalState(overrides: Record<string, unknown> = {}): Record<string, u
             assignable_front_segments: [],
             brigade_front_assignment: {},
             militia_pools: {},
+            army_co_decision_traces: {},
+            army_corps_directives_by_faction: {},
         },
         political: {
             political_controllers: {},

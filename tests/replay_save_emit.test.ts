@@ -317,8 +317,10 @@ describe('LANE-REPLAY-SAVE-SEQUENCE replay save emit', () => {
 
             const sequencePath = await finalizeReplaySaveSequence(dir, frames);
             expect(sequencePath).toBe(join(dir, 'replay_save_sequence.json'));
+            const manifestPath = sequencePath.replace(/replay_save_sequence\.json$/, 'replay_save_manifest.json');
+            expect(manifestPath).toBe(join(dir, 'replay_save_manifest.json'));
 
-            const manifestBytes = await readFile(join(dir, 'replay_save_manifest.json'), 'utf8');
+            const manifestBytes = await readFile(manifestPath, 'utf8');
             const manifest = JSON.parse(manifestBytes) as {
                 schema_version: number;
                 frame_count: number;
