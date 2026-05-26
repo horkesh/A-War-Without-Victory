@@ -19,6 +19,23 @@
 
 ---
 
+## [2026-05-27] test(meta): lock generated artifact ownership matrix contract
+
+**Type:** Static generated-artifact ownership meta-guard + docs closeout.
+
+**Change:** Added `tests/generated_artifact_ownership_matrix_contract.test.ts` to parse `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md` and enforce matrix row shape, unique repo-relative POSIX artifact keys, existing cited test paths, committed `tests/*artifact_ownership.test.ts` row references, and explicit `Default transient` / `Do not commit` language on transient catch-all rows. Updated the matrix to cite existing ownership tests for startup snapshot, save migration drift, diagnostics output, and to make generic run/diagnostic transient catch-all policy language exact.
+
+**Determinism:** Static test and documentation-only ownership clarification. No event content, calibration data, scenario outputs, run outputs, save schema, migrations, validators, scenario runner behavior, randomness, timestamps, serialization logic, or generated artifact bytes changed.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\vitest.cmd run tests\generated_artifact_ownership_matrix_contract.test.ts --reporter=dot` - FAIL before doc fixes because `tests/diagnostics_output_artifact_ownership.test.ts` was not referenced by any matrix row.
+- Focused green: `F:\A-War-Without-Victory\vitest.cmd run tests\generated_artifact_ownership_matrix_contract.test.ts --reporter=dot` - PASS; 1/1 test.
+- Final verification is in the implementation worker response for this change.
+
+**Artifacts:** `tests/generated_artifact_ownership_matrix_contract.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/implemented/20260527_GENERATED_ARTIFACT_OWNERSHIP_MATRIX_META_GUARD.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] test(artifacts): lock data-derived debug transient ownership
 
 **Type:** Save/replay generated-artifact stability + static ownership guard.
