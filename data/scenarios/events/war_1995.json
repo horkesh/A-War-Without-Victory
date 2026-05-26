@@ -1141,6 +1141,24 @@
         "delta": -10
       },
       {
+        "kind": "control_change",
+        "faction": "HRHB",
+        "osids": [
+          "op:jajce:jajce_3",
+          "op:jajce:lupnica",
+          "op:jajce:vinac_2",
+          "op:titov_drvar:drvar_2",
+          "op:titov_drvar:sipovljani_2"
+        ]
+      },
+      {
+        "kind": "control_change",
+        "faction": "RBiH",
+        "osids": [
+          "op:jajce:grdovo"
+        ]
+      },
+      {
         "kind": "narrative",
         "text": "Jajce is recaptured after three years. HV-HVO forces sweep through western Bosnia, collapsing VRS positions across a 2,000 km2 front."
       }
