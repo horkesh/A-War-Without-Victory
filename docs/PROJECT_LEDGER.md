@@ -11008,3 +11008,19 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `docs/40_reports/implemented/20260526_SECTOR_CURRENT_PROFILE_EVIDENCE_CLOSEOUT.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-26] docs(plan): sector truth reconciliation byte-identity handoff
+
+**Type:** Docs-only execution plan and command-board routing update.
+
+**Change:** Added an execution-grade sector/frontline performance plan for the next bounded implementation slice from the fresh profile evidence. The plan targets only `reconcile-final-sector-truth`, `partition-corps-front-sectors`, and `sealMergedSectorTruth:ensure-coverage`; names candidate modules/functions, red/green sector equivalence tests, byte-identity/hash proof, baseline gates, generated-artifact policy, stop gates, and a copy-ready worker prompt. Updated the Command Board sector row to use the new plan as the next action.
+
+**Determinism:** Documentation-only planning change. No source code, scenario data, save schema, canon, generated artifacts, randomness, timestamps, baseline fixtures, or simulation behavior changed. The implementation plan explicitly forbids broad caches and requires invocation-local ownership with no mutable `Map`/`Set` leakage.
+
+**Verification:**
+- `git diff --check` - PASS.
+- `git status --short` - PASS; tracked changes are docs only.
+
+**Artifacts:** `docs/plans/2026-05-26-sector-truth-reconciliation-byte-identity-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---
