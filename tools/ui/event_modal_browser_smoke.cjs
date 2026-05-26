@@ -84,17 +84,21 @@ function getPortListenerPids(port) {
   if (process.platform !== 'win32') return [];
   const result = spawnSync('netstat.exe', ['-ano'], { encoding: 'utf8' });
   if (result.error || result.status !== 0) return [];
-  const marker = `:${port}`;
   const pids = new Set();
   for (const line of result.stdout.split(/\r?\n/)) {
     const columns = line.trim().split(/\s+/);
     if (columns.length < 5 || columns[0] !== 'TCP') continue;
     const [protocol, localAddress, , state, pid] = columns;
-    if (protocol === 'TCP' && state === 'LISTENING' && localAddress.includes(marker)) {
+    if (protocol === 'TCP' && state === 'LISTENING' && extractLocalPort(localAddress) === port) {
       pids.add(pid);
     }
   }
-  return Array.from(pids).map((pid) => Number(pid)).filter(Number.isInteger);
+  return Array.from(pids).map((pid) => Number(pid)).filter((pid) => Number.isInteger(pid) && pid > 0);
+}
+
+function extractLocalPort(localAddress) {
+  const match = String(localAddress).match(/:(\d+)$/);
+  return match ? Number(match[1]) : null;
 }
 
 function getWindowsCommandLine(pid) {
@@ -112,14 +116,30 @@ function resolveViteBin() {
   return path.join(path.dirname(packageJsonPath), packageJson.bin.vite);
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function commandLineIncludesWorktreeRoot(commandLine) {
+  const normalizedCommandLine = commandLine.toLowerCase().replace(/\//g, '\\');
+  const normalizedRoot = ROOT.toLowerCase().replace(/\//g, '\\');
+  return normalizedCommandLine.includes(normalizedRoot);
+}
+
+function commandLineHasExactPortArgument(commandLine, port) {
+  const escapedPort = escapeRegExp(String(port));
+  const exactPortArg = new RegExp(`(?:^|\\s)--port(?:=|\\s+)["']?${escapedPort}["']?(?=$|\\s)`, 'i');
+  return exactPortArg.test(commandLine);
+}
+
 function isOwnedViteListener(pid, trackedPid) {
   if (pid === trackedPid) return true;
-  const commandLine = getWindowsCommandLine(pid).toLowerCase();
-  const normalizedRoot = ROOT.toLowerCase();
-  return commandLine.includes('vite')
-    && commandLine.includes('vite.config.ts')
-    && commandLine.includes(String(PORT))
-    && commandLine.includes(normalizedRoot);
+  const commandLine = getWindowsCommandLine(pid);
+  const lowerCommandLine = commandLine.toLowerCase();
+  return lowerCommandLine.includes('vite')
+    && lowerCommandLine.includes('vite.config.ts')
+    && commandLineIncludesWorktreeRoot(commandLine)
+    && commandLineHasExactPortArgument(commandLine, PORT);
 }
 
 function taskkill(pid) {
