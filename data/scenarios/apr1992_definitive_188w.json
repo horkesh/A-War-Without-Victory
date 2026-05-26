@@ -5,6 +5,9 @@
   "weeks": 188,
   "init_control": "apr1992",
   "init_control_mode": "hybrid_1992",
+  "osid_control_overrides": {
+    "op:zvornik:rastosnica_2": "RBiH"
+  },
   "init_formations": "apr1992",
   "init_formations_oob": true,
   "war_timeline": "apr1992",
