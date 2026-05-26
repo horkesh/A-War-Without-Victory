@@ -4,6 +4,8 @@
 
 **Latest phantom-spawn marker schema contract:** [implemented/20260526_PHANTOMS_SPAWNED_SCHEMA_CONTRACT.md](implemented/20260526_PHANTOMS_SPAWNED_SCHEMA_CONTRACT.md) - `military.phantoms_spawned` is now a required persisted v20 `string[]` with `[]` migration proof, current-version string-array validation, order/content preservation coverage, and strict-null floor 464.
 
+**Latest diagnostics output artifact ownership:** [implemented/20260526_DIAGNOSTICS_OUTPUT_ARTIFACT_OWNERSHIP.md](implemented/20260526_DIAGNOSTICS_OUTPUT_ARTIFACT_OWNERSHIP.md) - A static guard now locks `tools/diagnostics/output/save_migration_drift.json` as the only committed diagnostics output artifact and keeps unlisted `tools/diagnostics/output/*.json` files default-transient until a matrix row exists.
+
 **Latest displacement civilian-casualties schema contract:** [implemented/20260526_DISPLACEMENT_CIVILIAN_CASUALTIES_SCHEMA_CONTRACT.md](implemented/20260526_DISPLACEMENT_CIVILIAN_CASUALTIES_SCHEMA_CONTRACT.md) - `displacement.civilian_casualties` is now a required persisted v19 record with `{}` migration proof, current-version nested casualty validation, empty-map first-write regression coverage, run-summary non-empty gating, and strict-null floor 465.
 
 **Latest displacement lazy-map schema contract:** [implemented/20260526_DISPLACEMENT_LAZY_MAP_SCHEMA_CONTRACT.md](implemented/20260526_DISPLACEMENT_LAZY_MAP_SCHEMA_CONTRACT.md) - `displacement_state`, `minority_flight_state`, and `sustainability_state` are now required persisted v18 records with current-version rejection coverage, v17 `{}` migration proof, pre-v18 top-level rescue, current v18 residue guarding, and strict-null floor 466.

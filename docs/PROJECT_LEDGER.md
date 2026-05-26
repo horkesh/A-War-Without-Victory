@@ -11353,6 +11353,22 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 
 ---
 
+## [2026-05-26] docs(diagnostics): close diagnostics output artifact ownership
+
+**Type:** Docs/process closeout for generated-artifact ownership guard.
+
+**Change:** Added the implemented closeout report for `tests/diagnostics_output_artifact_ownership.test.ts` and the `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md` diagnostics output policy. Updated the 40_reports README, consolidated implemented index, Command Board Save/load/replay row, and engine-quality Phase 3 plan to mark diagnostics-output wildcard/static ownership closed and to name the focused guard command.
+
+**Determinism:** Documentation-only closeout. No code, tests, generated diagnostic output, scenario data, save schema, replay behavior, baseline output, randomness, timestamps, serialization behavior, or artifact bytes changed.
+
+**Verification:**
+- `git diff --check` - PASS.
+- `rg -n "DIAGNOSTICS_OUTPUT_ARTIFACT_OWNERSHIP|diagnostics output artifact ownership|Diagnostics output ownership proof|diagnostics-output wildcard/static ownership" docs/40_reports/README.md docs/40_reports/CONSOLIDATED_IMPLEMENTED.md docs/plans/COMMAND_BOARD.md docs/PROJECT_LEDGER.md` - PASS; report/index/board/ledger references present.
+
+**Artifacts:** `docs/40_reports/implemented/20260526_DIAGNOSTICS_OUTPUT_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] test(baselines): lock baseline artifact-set ownership
 
 **Type:** Static generated-artifact ownership guard + docs closeout.
