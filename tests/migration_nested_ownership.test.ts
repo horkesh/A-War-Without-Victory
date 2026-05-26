@@ -80,16 +80,19 @@ function migrationFixture(overrides: Record<string, unknown> = {}): Record<strin
             war_exhaustion_local: {},
         },
         displacement: {
+            displacement_state: {},
             displacement_event_log: [],
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},
             displacement_recent_by_turn: {},
+            minority_flight_state: {},
             war_displacement_initiated: {},
             hostile_takeover_timers: {},
             displacement_camp_state: {},
             settlement_displacement: {},
             settlement_displacement_started_turn: {},
             municipality_displacement: {},
+            sustainability_state: {},
         },
         ...overrides,
     };
@@ -206,16 +209,19 @@ describe('nested migration ownership contracts', () => {
             war_exhaustion_local: {},
         },
         displacement: {
+            displacement_state: {},
             displacement_event_log: [],
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},
             displacement_recent_by_turn: {},
+            minority_flight_state: {},
             settlement_displacement: {},
             settlement_displacement_started_turn: {},
             municipality_displacement: {},
             war_displacement_initiated: { m1: 4 },
             hostile_takeover_timers: {},
             displacement_camp_state: {},
+            sustainability_state: {},
         },
         }));
 
@@ -295,5 +301,68 @@ describe('nested migration ownership contracts', () => {
         expect(Object.prototype.hasOwnProperty.call(hydrated, 'negotiation_ledger')).toBe(false);
         expect(Object.prototype.hasOwnProperty.call(hydrated, 'supply_rights')).toBe(false);
         expect(Object.prototype.hasOwnProperty.call(hydrated, 'settlement_displacement')).toBe(false);
+    });
+
+    it('migrateState preserves pre-v18 top-level displacement lazy-map rescue but not v18 residue repair', () => {
+        const legacyPayload = JSON.stringify({
+            ...migrationFixture({
+                schema_version: 17,
+                displacement: {
+                    displacement_event_log: [],
+                    displacement_humanitarian_aggregates: {},
+                    displacement_origin_dest_arrivals: {},
+                    displacement_recent_by_turn: {},
+                    settlement_displacement: {},
+                    settlement_displacement_started_turn: {},
+                    municipality_displacement: {},
+                    war_displacement_initiated: {},
+                    hostile_takeover_timers: {},
+                    displacement_camp_state: {},
+                },
+            }),
+            displacement_state: { legacy_mun: { original_population: 10, displaced_out: 0, displaced_in: 0, lost_population: 0 } },
+            minority_flight_state: { legacy_sid: { settlement_id: 'legacy_sid', flight_turn: 1 } },
+            sustainability_state: { legacy_mun: { mun_id: 'legacy_mun', sustainability_score: 1, collapsed: false } },
+        });
+
+        const hydratedLegacy = deserializeState(legacyPayload) as any;
+
+        expect(hydratedLegacy.displacement.displacement_state).toEqual({
+            legacy_mun: { original_population: 10, displaced_out: 0, displaced_in: 0, lost_population: 0 },
+        });
+        expect(hydratedLegacy.displacement.minority_flight_state).toEqual({
+            legacy_sid: { settlement_id: 'legacy_sid', flight_turn: 1 },
+        });
+        expect(hydratedLegacy.displacement.sustainability_state).toEqual({
+            legacy_mun: { mun_id: 'legacy_mun', sustainability_score: 1, collapsed: false },
+        });
+        expect(Object.prototype.hasOwnProperty.call(hydratedLegacy, 'displacement_state')).toBe(false);
+        expect(Object.prototype.hasOwnProperty.call(hydratedLegacy, 'minority_flight_state')).toBe(false);
+        expect(Object.prototype.hasOwnProperty.call(hydratedLegacy, 'sustainability_state')).toBe(false);
+
+        const currentPayload = JSON.stringify({
+            ...migrationFixture({
+                schema_version: CURRENT_SCHEMA_VERSION,
+                displacement: {
+                    displacement_event_log: [],
+                    displacement_humanitarian_aggregates: {},
+                    displacement_origin_dest_arrivals: {},
+                    displacement_recent_by_turn: {},
+                    settlement_displacement: {},
+                    settlement_displacement_started_turn: {},
+                    municipality_displacement: {},
+                    war_displacement_initiated: {},
+                    hostile_takeover_timers: {},
+                    displacement_camp_state: {},
+                },
+            }),
+            displacement_state: { legacy_mun: { original_population: 10, displaced_out: 0, displaced_in: 0, lost_population: 0 } },
+            minority_flight_state: { legacy_sid: { settlement_id: 'legacy_sid', flight_turn: 1 } },
+            sustainability_state: { legacy_mun: { mun_id: 'legacy_mun', sustainability_score: 1, collapsed: false } },
+        });
+
+        expect(() => deserializeState(currentPayload)).toThrow(
+            /Save schema validation failed after migration[\s\S]*v18[\s\S]*displacement\.displacement_state/
+        );
     });
 });

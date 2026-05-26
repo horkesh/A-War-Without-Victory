@@ -17,6 +17,30 @@
 
 ---
 
+## [2026-05-26] state(save): require displacement lazy maps
+
+**Type:** Save schema contract hardening + strict-null Phase 2 slice.
+
+**Change:** Promoted exactly three displacement lazy maps from optional `DisplacementDomainState` fields to required persisted v18 contracts: `displacement.displacement_state`, `displacement.minority_flight_state`, and `displacement.sustainability_state`. The v18 migration materializes legacy saves with inert empty `{}` defaults, current-version validator coverage rejects missing or invalid nested records, direct current-version fixtures/literals were aligned, current v18 top-level legacy residue no longer silently repairs malformed saves, and pre-v18 top-level rescue is preserved. `displacement.civilian_casualties` remains optional and was not included.
+
+**Determinism:** Schema/default-only change. Defaults are empty records and the migration is a pure in-place state patch with no randomness, timestamps, I/O, environment reads, or unordered traversal. Persisted output shape changes only by materializing empty displacement lazy-map containers for legacy saves.
+
+**Strict-null inventory:** Counted escape categories remain zero. Optional `GameState` field inventory is now `466`, split as `sim 298`, `state 160`, `derived 8`, `unknown 0`.
+
+**Verification:**
+- Red first: `npx.cmd vitest run tests/save_migration_validator_rejection.test.ts tests/save_migration_versioned_steps.test.ts tests/migration_nested_ownership.test.ts --reporter=dot` failed before production changes because current-version saves accepted missing lazy maps, v17 saves left the records undefined, and pre-v18 top-level rescue was absent.
+- Focused green during implementation: `npx.cmd vitest run tests/save_migration_validator_rejection.test.ts tests/save_migration_versioned_steps.test.ts tests/migration_nested_ownership.test.ts --reporter=dot` - PASS; 63/63 tests.
+- `.\vitest.cmd run tests\save_migration_validator_rejection.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_round_trip_contract.test.ts tests\save_migration_drift_audit.test.ts tests\save_migration_counter_offers.test.ts tests\strict_null_inventory_progress.test.ts tests\state\player_faction_contract.test.ts tests\migration_nested_ownership.test.ts --reporter=dot` - PASS; 178/178 tests.
+- `node tools\diagnostics\strict_null_inventory.cjs` - PASS; `optional_fields_game_state 466`, counted escape categories all zero.
+- `node tools\diagnostics\strict_null_inventory.cjs --field-domains` - PASS; total 466, `sim 298`, `state 160`, `derived 8`, `unknown 0`.
+- `node tools\diagnostics\save_migration_drift_audit.cjs` - PASS; `save migration drift audit: 0 anonymous defaults`.
+- `npx.cmd tsc --noEmit -p tsconfig.json --pretty false` - PASS.
+- `git diff --check` - PASS with CRLF normalization warnings only.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/serialize.ts`, `src/state/validateGameState.ts`, direct `DisplacementDomainState` fixtures in CLI/UI/tests, `tests/fixtures/save_migration/v17_displacement_lazy_maps.json`, save-migration/strict-null tests, `tools/diagnostics/output/save_migration_drift.json`, `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`, `docs/40_reports/implemented/20260526_DISPLACEMENT_LAZY_MAP_SCHEMA_CONTRACT.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] state(save): require displacement operational records
 
 **Type:** Save schema contract hardening + strict-null Phase 2 slice.

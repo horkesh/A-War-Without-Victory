@@ -77,13 +77,16 @@ function currentVersionState(): any {
             war_exhaustion_local: {},
         },
         displacement: {
+            displacement_state: {},
             war_displacement_initiated: {},
             hostile_takeover_timers: {},
             displacement_camp_state: {},
+            minority_flight_state: {},
             settlement_displacement: {},
             settlement_displacement_started_turn: {},
             municipality_displacement: {},
             displacement_event_log: [],
+            sustainability_state: {},
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},
             displacement_recent_by_turn: {},
@@ -209,6 +212,46 @@ describe('save migration validator hardening', () => {
     });
 
     it.each([
+        'displacement_state',
+        'minority_flight_state',
+        'sustainability_state',
+    ])('rejects a current-version save missing displacement lazy map %s', (field) => {
+        const state = currentVersionState();
+        delete state.displacement[field];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            new RegExp(`Save schema validation failed after migration[\\s\\S]*v18[\\s\\S]*displacement\\.${field}`)
+        );
+    });
+
+    it.each([
+        ['displacement_state', []],
+        ['minority_flight_state', null],
+        ['sustainability_state', []],
+    ])('rejects a current-version save with invalid displacement lazy map %s', (field, value) => {
+        const state = currentVersionState();
+        state.displacement[field] = value;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            new RegExp(`Save schema validation failed after migration[\\s\\S]*v18[\\s\\S]*displacement\\.${field}`)
+        );
+    });
+
+    it('rejects a current-version save missing nested displacement lazy maps even with legacy top-level residue', () => {
+        const state = currentVersionState();
+        delete state.displacement.displacement_state;
+        delete state.displacement.minority_flight_state;
+        delete state.displacement.sustainability_state;
+        state.displacement_state = { legacy_mun: { original_population: 10, displaced_out: 0, displaced_in: 0, lost_population: 0 } };
+        state.minority_flight_state = { legacy_sid: { settlement_id: 'legacy_sid', flight_turn: 1 } };
+        state.sustainability_state = { legacy_mun: { mun_id: 'legacy_mun', sustainability_score: 1, collapsed: false } };
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v18[\s\S]*displacement\.displacement_state/
+        );
+    });
+
+    it.each([
         'settlement_displacement',
         'settlement_displacement_started_turn',
         'municipality_displacement',
@@ -272,6 +315,9 @@ describe('save migration validator hardening', () => {
         delete state.displacement.war_displacement_initiated;
         delete state.displacement.hostile_takeover_timers;
         delete state.displacement.displacement_camp_state;
+        delete state.displacement.displacement_state;
+        delete state.displacement.minority_flight_state;
+        delete state.displacement.sustainability_state;
         delete state.displacement.displacement_humanitarian_aggregates;
         delete state.displacement.displacement_origin_dest_arrivals;
         delete state.displacement.displacement_recent_by_turn;
@@ -299,6 +345,9 @@ describe('save migration validator hardening', () => {
         expect(migrated.displacement.war_displacement_initiated).toEqual({});
         expect(migrated.displacement.hostile_takeover_timers).toEqual({});
         expect(migrated.displacement.displacement_camp_state).toEqual({});
+        expect(migrated.displacement.displacement_state).toEqual({});
+        expect(migrated.displacement.minority_flight_state).toEqual({});
+        expect(migrated.displacement.sustainability_state).toEqual({});
         expect(migrated.displacement.displacement_humanitarian_aggregates).toEqual({});
         expect(migrated.displacement.displacement_origin_dest_arrivals).toEqual({});
         expect(migrated.displacement.displacement_recent_by_turn).toEqual({});
@@ -376,5 +425,47 @@ describe('save migration validator hardening', () => {
         expect(migrated.displacement.displacement_camp_state).toEqual({
             legacy_mun: { mun_id: 'legacy_mun', population: 12, started_turn: 2 },
         });
+    });
+
+    it('materializes v18 displacement lazy maps for v17 saves', () => {
+        const state = currentVersionState();
+        state.schema_version = 17;
+        delete state.displacement.displacement_state;
+        delete state.displacement.minority_flight_state;
+        delete state.displacement.sustainability_state;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.displacement.displacement_state).toEqual({});
+        expect(migrated.displacement.minority_flight_state).toEqual({});
+        expect(migrated.displacement.sustainability_state).toEqual({});
+    });
+
+    it('rescues legacy top-level displacement lazy maps for v17 saves before v18 validation', () => {
+        const state = currentVersionState();
+        state.schema_version = 17;
+        delete state.displacement.displacement_state;
+        delete state.displacement.minority_flight_state;
+        delete state.displacement.sustainability_state;
+        state.displacement_state = { legacy_mun: { original_population: 10, displaced_out: 0, displaced_in: 0, lost_population: 0 } };
+        state.minority_flight_state = { legacy_sid: { settlement_id: 'legacy_sid', flight_turn: 1 } };
+        state.sustainability_state = { legacy_mun: { mun_id: 'legacy_mun', sustainability_score: 1, collapsed: false } };
+
+        const migrated = deserializeState(JSON.stringify(state)) as any;
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.displacement.displacement_state).toEqual({
+            legacy_mun: { original_population: 10, displaced_out: 0, displaced_in: 0, lost_population: 0 },
+        });
+        expect(migrated.displacement.minority_flight_state).toEqual({
+            legacy_sid: { settlement_id: 'legacy_sid', flight_turn: 1 },
+        });
+        expect(migrated.displacement.sustainability_state).toEqual({
+            legacy_mun: { mun_id: 'legacy_mun', sustainability_score: 1, collapsed: false },
+        });
+        expect(Object.prototype.hasOwnProperty.call(migrated, 'displacement_state')).toBe(false);
+        expect(Object.prototype.hasOwnProperty.call(migrated, 'minority_flight_state')).toBe(false);
+        expect(Object.prototype.hasOwnProperty.call(migrated, 'sustainability_state')).toBe(false);
     });
 });

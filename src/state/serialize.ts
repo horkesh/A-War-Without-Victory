@@ -131,6 +131,12 @@ function migrateState(raw: unknown): GameState {
         'displacement_camp_state',
     ] as const;
     const allowLegacyDisplacementOperationalTopLevel = version === undefined || version < 17;
+    const displacementLazyMapKeys = [
+        'displacement_state',
+        'minority_flight_state',
+        'sustainability_state',
+    ] as const;
+    const allowLegacyDisplacementLazyMapTopLevel = version === undefined || version < 18;
 
     rescueLegacyTopLevelFields(candidate, mil, [
         'theatres',
@@ -168,6 +174,11 @@ function migrateState(raw: unknown): GameState {
         rescueLegacyTopLevelFields(candidate, disp, displacementOperationalKeys);
     } else {
         deleteLegacyTopLevelFields(candidate, displacementOperationalKeys);
+    }
+    if (allowLegacyDisplacementLazyMapTopLevel) {
+        rescueLegacyTopLevelFields(candidate, disp, displacementLazyMapKeys);
+    } else {
+        deleteLegacyTopLevelFields(candidate, displacementLazyMapKeys);
     }
     if (allowLegacyPhaseFCapacityTopLevel) {
         rescueLegacyTopLevelFields(candidate, disp, phaseFCapacityKeys);
@@ -221,6 +232,11 @@ function migrateState(raw: unknown): GameState {
         sweepLegacyTopLevelFields(candidate, candidate.displacement, displacementOperationalKeys);
     } else {
         deleteLegacyTopLevelFields(candidate, displacementOperationalKeys);
+    }
+    if (allowLegacyDisplacementLazyMapTopLevel) {
+        sweepLegacyTopLevelFields(candidate, candidate.displacement, displacementLazyMapKeys);
+    } else {
+        deleteLegacyTopLevelFields(candidate, displacementLazyMapKeys);
     }
     if (allowLegacyPhaseFCapacityTopLevel) {
         sweepLegacyTopLevelFields(candidate, candidate.displacement, phaseFCapacityKeys);

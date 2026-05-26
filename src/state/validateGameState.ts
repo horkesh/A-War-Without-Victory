@@ -127,6 +127,9 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 17, path: 'displacement.war_displacement_initiated', check: isRecord },
     { version: 17, path: 'displacement.hostile_takeover_timers', check: isRecord },
     { version: 17, path: 'displacement.displacement_camp_state', check: isRecord },
+    { version: 18, path: 'displacement.displacement_state', check: isRecord },
+    { version: 18, path: 'displacement.minority_flight_state', check: isRecord },
+    { version: 18, path: 'displacement.sustainability_state', check: isRecord },
 ];
 
 /**

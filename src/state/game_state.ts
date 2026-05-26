@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 17 as const;
+export const CURRENT_SCHEMA_VERSION = 18 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -2500,16 +2500,16 @@ graz_east_herzegovina_active_turn?: number;
 }
 
 export interface DisplacementDomainState {
-displacement_state?: Record<MunicipalityId, DisplacementState>;
+displacement_state: Record<MunicipalityId, DisplacementState>;
 /** War phase: delayed hostile takeover timers (per OSID). */
 hostile_takeover_timers: Record<string, HostileTakeoverTimerState>;
 /** War phase: temporary camp holding pools before rerouting (per municipality). */
 displacement_camp_state: Record<MunicipalityId, DisplacementCampState>;
 /** War phase: non-takeover minority flight state (per settlement). Canon: displacement redesign 2026-02-17. */
-minority_flight_state?: Record<SettlementId, MinorityFlightStateEntry>;
+minority_flight_state: Record<SettlementId, MinorityFlightStateEntry>;
 /** Cumulative displacement event log, sorted by (turn, origin_mun). */
 displacement_event_log: DisplacementEvent[];
-sustainability_state?: Record<MunicipalityId, SustainabilityState>;
+sustainability_state: Record<MunicipalityId, SustainabilityState>;
 /** Peace-phase §4.4: displacement initiated turn per municipality (hook only; no population change). */
 war_displacement_initiated: Record<MunicipalityId, number>;
 /** Settlement-level displacement (capacity degradation) [0, 1]. Monotonic; never decreases. */

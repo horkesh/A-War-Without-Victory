@@ -37,6 +37,9 @@ function makeState(): GameState {
             political_controllers: {}
         } as GameState['political'],
         displacement: {
+            displacement_state: {},
+            minority_flight_state: {},
+            sustainability_state: {},
             war_displacement_initiated: {},
             hostile_takeover_timers: {},
             displacement_camp_state: {},

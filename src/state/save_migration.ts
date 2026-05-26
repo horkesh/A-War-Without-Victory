@@ -595,3 +595,14 @@ registerMigration({
         ensureRecord(disp, 'displacement_camp_state');
     },
 });
+
+registerMigration({
+    version: 18,
+    description: 'Displacement lazy-map persisted defaults. Sensitive: no.',
+    migrate: (state) => {
+        const disp = ensureDisplacementRoot(state);
+        ensureRecord(disp, 'displacement_state');
+        ensureRecord(disp, 'minority_flight_state');
+        ensureRecord(disp, 'sustainability_state');
+    },
+});

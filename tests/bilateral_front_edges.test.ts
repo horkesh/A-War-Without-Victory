@@ -21,6 +21,9 @@ function makeState(alliance: number, turn = 40): GameState {
             political_controllers: { a: 'RBiH', b: 'HRHB' }
         } as unknown as GameState['political'],
         displacement: {
+            displacement_state: {},
+            minority_flight_state: {},
+            sustainability_state: {},
             war_displacement_initiated: {},
             hostile_takeover_timers: {},
             displacement_camp_state: {},

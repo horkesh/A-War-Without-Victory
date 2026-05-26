@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(17);
+        expect(getLatestSchemaVersion()).toBe(18);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -123,15 +123,18 @@ describe('versioned save migration steps', () => {
 
         expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
         expect(state.displacement).toEqual({
+            displacement_state: {},
             displacement_camp_state: {},
             displacement_event_log: [],
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},
             displacement_recent_by_turn: {},
             hostile_takeover_timers: {},
+            minority_flight_state: {},
             municipality_displacement: {},
             settlement_displacement: {},
             settlement_displacement_started_turn: {},
+            sustainability_state: {},
             war_displacement_initiated: {},
         });
     });
@@ -192,5 +195,19 @@ describe('versioned save migration steps', () => {
         expect(state.displacement.war_displacement_initiated).toEqual({});
         expect(state.displacement.hostile_takeover_timers).toEqual({});
         expect(state.displacement.displacement_camp_state).toEqual({});
+    });
+
+    it('materializes v18 displacement lazy-map defaults for v17 saves', () => {
+        const state = minimalLegacyState(17);
+        delete state.displacement.displacement_state;
+        delete state.displacement.minority_flight_state;
+        delete state.displacement.sustainability_state;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.displacement.displacement_state).toEqual({});
+        expect(state.displacement.minority_flight_state).toEqual({});
+        expect(state.displacement.sustainability_state).toEqual({});
     });
 });

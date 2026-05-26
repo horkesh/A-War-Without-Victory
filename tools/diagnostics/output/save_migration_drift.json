@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 17,
-  "registered_migration_count": 17,
-  "strict_required_field_count": 48,
+  "latest_schema_version": 18,
+  "registered_migration_count": 18,
+  "strict_required_field_count": 51,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -73,6 +73,10 @@
     {
       "version": 17,
       "description": "Displacement operational substrate defaults. Sensitive: no."
+    },
+    {
+      "version": 18,
+      "description": "Displacement lazy-map persisted defaults. Sensitive: no."
     }
   ],
   "required_fields": [
@@ -267,6 +271,18 @@
     {
       "version": 17,
       "path": "displacement.war_displacement_initiated"
+    },
+    {
+      "version": 18,
+      "path": "displacement.displacement_state"
+    },
+    {
+      "version": 18,
+      "path": "displacement.minority_flight_state"
+    },
+    {
+      "version": 18,
+      "path": "displacement.sustainability_state"
     }
   ]
 }
