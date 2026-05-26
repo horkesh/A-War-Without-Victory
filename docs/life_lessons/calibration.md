@@ -3,6 +3,12 @@
 
 ---
 
+### [Calibration] Pre-Storm HRHB control_change events (week ≤172) cascade into Sanski Most/Kljuc area (2026-05-26) — NEW
+- **Context**: R36 added `op:bosansko_grahovo:bosansko_grahovo_2` (HRHB) to `operation_summer_95` (fires week 172, pre-Storm). Result: −3 count regression. HRHB brigades swept Sanski Most/kljuc area in weeks 172–174 before Storm locked RBiH territory → `budimlic_japra_2` and `lusci_palanka_2` (fixed in R32) reverted to RS; new HRHB over-captures appeared (jasenovac_2, maricka_2, donja_kozica). Same OSID (bosansko_grahovo_2) via `operation_mistral_2_1995` (fires week 179, post-Storm) produced +1 count with zero cascade in R37.
+- **Wrong approach**: Adding HRHB `control_change` to any event that fires at week 172 or earlier. The HRHB brigades are still active in the Sanski Most/kljuc area during pre-Storm weeks; locking HRHB territory there displaces their front-line commitment and cascades into previously-fixed RBiH OSIDs.
+- **Right approach**: HRHB `control_change` events must fire at week 175+ (post-Storm). By then, Storm has already locked the Sanski Most corridor for RBiH; HRHB advances are additive rather than displacing. `operation_mistral_2_1995` (week 179) and any other post-Storm HRHB events are safe vehicles.
+- **Do instead**: Before adding any HRHB control_change to an event, verify `turn_min` ≥ 175 (week 175 = turn 175 in 188w sim). If the event fires earlier, find or create a post-Storm vehicle instead.
+
 ### [Calibration] Event-based control_change is cascade-safe for historically datable territorial changes (2026-05-26) — NEW
 - **Context**: R32 added a `control_change` (faction: RBiH) to the existing `operation_storm_1995` event in `war_1995.json` for 9 Sanski Most OSIDs — all painted=RBiH but sim=RS. Result: +6 count / +0.8pp area. HRHB_sim=120 (was 121, −1) — cascade essentially intact. Same pattern as R26 Srebrenica (+9 with zero cascade disruption). R31 hotonj removal (op change) was −17; R32 event change was +6. Same map area, completely different outcome.
 - **Wrong approach**: Attempting to fix "VRS holds territory it shouldn't at Dayton" mismatches via pre-planned op objective removal. Removing objectives that VRS was failing to capture (attrition-sinks) frees brigades from futile combat earlier → cascade disruption. The problem is brigade commitment timing, not territory capture.
