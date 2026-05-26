@@ -1228,6 +1228,21 @@
     },
     "effects": [
       {
+        "kind": "control_change",
+        "faction": "RBiH",
+        "osids": [
+          "op:sanski_most:budimlic_japra_2",
+          "op:sanski_most:ilidza_2",
+          "op:sanski_most:jelasinovci",
+          "op:sanski_most:kljevci",
+          "op:sanski_most:lusci_palanka_2",
+          "op:sanski_most:ostra_luka",
+          "op:sanski_most:sanski_most_2",
+          "op:sanski_most:skucani_vakuf_2",
+          "op:sanski_most:stari_majdan"
+        ]
+      },
+      {
         "kind": "morale_change",
         "faction": "RS",
         "delta": -8
