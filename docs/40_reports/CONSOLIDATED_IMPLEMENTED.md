@@ -371,3 +371,9 @@
 - Added v10 required-field validation, current-version rejection tests, legacy v1/v9 migration proof, and current-version fixture alignment.
 - Strict-null counted escape categories remain zero; optional `GameState` field inventory is now 488 (`sim` 305, `state` 175, `derived` 8).
 - Report: `docs/40_reports/implemented/20260526_ARMY_COMMAND_SCHEMA_CONTRACT.md`
+
+# 2026-05-26 - Baseline artifact-set ownership
+
+- Added a static guard that keeps scenario baseline `manifest.artifacts[]`, runner default artifacts, scenario `expected_files`/hash keys, and generated-artifact ownership docs aligned.
+- Updated the baseline manifest ownership row to explicitly name the `.json`, `.md`, and `.jsonl` hashed run outputs while stating that only `manifest.json` is committed under `data/derived/scenario/baselines/`.
+- Report: `docs/40_reports/implemented/20260526_BASELINE_ARTIFACT_SET_OWNERSHIP.md`

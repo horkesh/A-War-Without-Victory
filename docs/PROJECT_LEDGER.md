@@ -11088,3 +11088,22 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `tests/migration_nested_ownership.test.ts`, `tests/state/player_faction_contract.test.ts`, `tools/diagnostics/output/save_migration_drift.json`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-26] test(baselines): lock baseline artifact-set ownership
+
+**Type:** Static generated-artifact ownership guard + docs closeout.
+
+**Change:** Added `tests/baseline_artifact_ownership.test.ts` to lock the scenario baseline manifest artifact/hash-key set across `data/derived/scenario/baselines/manifest.json` `artifacts[]`, every scenario `expected_files` and hash-key set, the `tools/scenario_runner/run_baseline_regression.ts` default artifact list, and the generated-artifact ownership matrix. Updated `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md` so the committed owner is explicitly only `manifest.json`, while `end_report.md`, `weekly_report.jsonl`, and the JSON artifact names are documented as hashed run outputs stored in the manifest.
+
+**Determinism:** Static test and documentation-only ownership clarification. No scenario data, calibration data, runner write behavior, save schema, baseline hashes, generated scenario outputs, randomness, timestamps, serialization logic, or committed baseline payload files changed; no per-scenario baseline payload files are tracked.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\baseline_artifact_ownership.test.ts --reporter=dot` - FAIL before the doc update because the ownership row did not name the baseline manifest's hashed run artifacts.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\baseline_artifact_ownership.test.ts --reporter=dot` - PASS; 1/1 test.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\baseline_artifact_ownership.test.ts tests\baseline_regression_ci_guardrails.test.ts --reporter=dot` - PASS; 2/2 tests.
+- `git diff --check` - PASS.
+- `git ls-files data/derived/scenario/baselines` - PASS; only `data/derived/scenario/baselines/manifest.json` is tracked.
+
+**Artifacts:** `tests/baseline_artifact_ownership.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/implemented/20260526_BASELINE_ARTIFACT_SET_OWNERSHIP.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---
