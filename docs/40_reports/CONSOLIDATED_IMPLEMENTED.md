@@ -383,3 +383,9 @@
 - Added a static guard that keeps scenario baseline `manifest.artifacts[]`, runner default artifacts, scenario `expected_files`/hash keys, and generated-artifact ownership docs aligned.
 - Updated the baseline manifest ownership row to explicitly name the `.json`, `.md`, and `.jsonl` hashed run outputs while stating that only `manifest.json` is committed under `data/derived/scenario/baselines/`.
 - Report: `docs/40_reports/implemented/20260526_BASELINE_ARTIFACT_SET_OWNERSHIP.md`
+
+# 2026-05-26 - Save migration drift artifact ownership
+
+- Added a static guard for `tools/diagnostics/output/save_migration_drift.json` ownership across generated-artifact docs, diagnostic script write path, committed JSON `generated_by`, and deterministic script constraints.
+- Preserved migration logic, validator logic, artifact bytes, scenario outputs, replay behavior, event prose, GUI, and calibration data.
+- Report: `docs/40_reports/implemented/20260526_SAVE_MIGRATION_DRIFT_ARTIFACT_OWNERSHIP.md`

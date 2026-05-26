@@ -11170,3 +11170,21 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `tests/baseline_artifact_ownership.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/implemented/20260526_BASELINE_ARTIFACT_SET_OWNERSHIP.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-26] test(save-migration): lock drift artifact ownership
+
+**Type:** Static generated-artifact ownership guard + docs closeout.
+
+**Change:** Added `tests/save_migration_drift_artifact_ownership.test.ts` to lock ownership for `tools/diagnostics/output/save_migration_drift.json` across the generated-artifact ownership matrix, diagnostic script write path, committed JSON `generated_by`, and deterministic script constraints. The guard verifies the owner command is `node tools/diagnostics/save_migration_drift_audit.cjs`, validation names `tests/save_migration_drift_audit.test.ts`, policy says the artifact is committed and refreshed after every migration registry change, the diagnostic writes only the documented output path, timestamp/random APIs are absent, and emitted field/path collections retain explicit stable sort clauses.
+
+**Determinism:** Static test and documentation-only closeout. No migration logic, validator logic, artifact bytes, scenario outputs, replay behavior, event prose, GUI, calibration data, randomness, timestamps, serialization behavior, or generated artifact contents changed.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_drift_artifact_ownership.test.ts --reporter=dot` - FAIL before the new test existed with `No test files found`.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_drift_artifact_ownership.test.ts tests\save_migration_drift_audit.test.ts --reporter=dot` - PASS; 2/2 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\baseline_artifact_ownership.test.ts tests\startup_snapshot_artifact_ownership.test.ts tests\save_migration_drift_artifact_ownership.test.ts --reporter=dot` - PASS; 3/3 tests.
+- `F:\A-War-Without-Victory\node_modules\.bin\tsc.cmd --noEmit -p tsconfig.json` - PASS after adding a temporary worktree `src\ui\map\node_modules` junction to the parent checkout's installed map dependencies and removing it afterward.
+
+**Artifacts:** `tests/save_migration_drift_artifact_ownership.test.ts`, `docs/40_reports/implemented/20260526_SAVE_MIGRATION_DRIFT_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---
