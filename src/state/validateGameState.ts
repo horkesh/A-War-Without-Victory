@@ -103,6 +103,9 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 5, path: 'military.brigade_front_assignment', check: isRecord },
     { version: 5, path: 'military.militia_pools', check: isRecord },
     { version: 7, path: 'displacement.displacement_event_log', check: Array.isArray },
+    { version: 8, path: 'displacement.displacement_humanitarian_aggregates', check: isRecord },
+    { version: 8, path: 'displacement.displacement_origin_dest_arrivals', check: isRecord },
+    { version: 8, path: 'displacement.displacement_recent_by_turn', check: isRecord },
     { version: 10, path: 'military.army_co_decision_traces', check: isRecord },
     { version: 10, path: 'military.army_corps_directives_by_faction', check: isRecord },
 ];

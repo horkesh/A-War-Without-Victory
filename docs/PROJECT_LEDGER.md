@@ -11024,3 +11024,26 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `docs/plans/2026-05-26-sector-truth-reconciliation-byte-identity-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-26] test(state): require displacement aggregate records
+
+**Type:** Save schema contract hardening + strict-null Phase 2 slice.
+
+**Change:** Promoted the v8 displacement aggregate records `displacement.displacement_humanitarian_aggregates`, `displacement.displacement_origin_dest_arrivals`, and `displacement.displacement_recent_by_turn` from optional `DisplacementDomainState` fields to required persisted contracts. Added v8 required-field validation, current-version missing/invalid rejection tests for all three records, v1/v7 migration proof that legacy saves materialize them as `{}`, explicit no-`displacement`-root legacy migration coverage for `displacement_event_log: []` plus the three v8 aggregate records, sparse displacement empty-state test updates, and direct current-version fixture defaults in focused CLI/UI/test harness literals. No scenario data, event data, generated artifacts, combat logic, phase ordering, GUI behavior, or baseline outputs changed.
+
+**Determinism:** Schema/default-only change. Empty-record defaults are inert, migration order remains versioned and deterministic, and validator checks require only simple record presence. No randomness, timestamps, unordered iteration, scenario-output logic, generated artifact writes, or serialization ordering changes were introduced. Baseline regression was not run because this slice does not affect simulation behavior beyond the expected empty-map persisted schema shape.
+
+**Strict-null inventory:** Counted escape categories remain zero: `as_factionid_casts 0`, `as_unknown_casts 0`, `as_any_casts 0`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`. Optional `GameState` field inventory is now `488`, split as `sim 305`, `state 175`, `derived 8`, `unknown 0`.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_validator_rejection.test.ts --reporter=dot` failed 6/11 before the validator change because current-version saves missing or invalidating the v8 aggregate records did not throw.
+- Red first for absent-root legacy compatibility: `node F:\A-War-Without-Victory\node_modules\vitest\vitest.mjs run tests/save_migration_versioned_steps.test.ts` failed 1/5 before the migration fix because `state.displacement` stayed `undefined`.
+- `node tools\diagnostics\strict_null_inventory.cjs` - PASS; `optional_fields_game_state 488`.
+- `node tools\diagnostics\strict_null_inventory.cjs --field-domains` - PASS; `sim 305`, `state 175`, `derived 8`, `unknown 0`.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\save_migration_validator_rejection.test.ts tests\save_migration_versioned_steps.test.ts tests\state\displacement_event_log.test.ts tests\strict_null_inventory_progress.test.ts --reporter=dot` - PASS; 128/128 tests.
+- `npm.cmd run typecheck` - PASS after linking this worktree's `src\ui\map\node_modules` to the already-installed parent tactical-map dependency folder.
+- `git diff --check` - PASS.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, direct current-version displacement fixtures in CLI/UI/tests, `tests/save_migration_validator_rejection.test.ts`, `tests/save_migration_versioned_steps.test.ts`, `tests/state/displacement_event_log.test.ts`, `tests/strict_null_inventory_progress.test.ts`, `docs/40_reports/implemented/20260526_DISPLACEMENT_AGGREGATE_SCHEMA_CONTRACT.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---

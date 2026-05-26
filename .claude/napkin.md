@@ -882,6 +882,8 @@ After EVERY scenario run, the orchestrator:
     Do instead: Use 20w/30w checkpoint runs for iteration; reserve 52w for acceptance only.
 
 ## Shell & Platform
+1. **[2026-05-26] Worktree root typecheck needs nested map dependencies**
+   Do instead: If `npm.cmd run typecheck` in a worktree fails on `maplibre-gl`, `pmtiles`, `@deck.gl/*`, or `@vitejs/plugin-react` module resolution while the parent checkout has `src/ui/map/node_modules`, create a local worktree junction for `src/ui/map/node_modules` or install inside `src/ui/map`; do not change tracked TS to mask dependency resolution.
 1. **[2026-03-05] Existing-dir file generation: prefer `apply_patch` or script files**
    Do instead: Use `apply_patch` for manual edits. For bulk/generated content, write a short script file and run it.
 2. **[2026-02-07] Windows shell separator**
@@ -901,9 +903,6 @@ After EVERY scenario run, the orchestrator:
    Do instead: **`deckFormationCounters` defaults `true`** — clean NATO IconLayer counters only (enrichments stripped). MapLibre `formation-markers`/`formation-labels` hidden. Zoom-interpolation: `16px` @ Z6 to `40px` @ Z14. **Settlement labels**: Deck.gl TextLayer (27 cities) — MapLibre symbol layers globally broken (0 rendered features). `fontSettings: { sdf: true }`, `characterSet: 'auto'` for Bosnian diacritics. `setSettlementLabelData()` feeds from `buildMajorCityLabelGeoJSON`. Sarajevo 5 muns merged to one label.
 9. **[2026-03-26] UI screenshot automation on Windows uses Edge with puppeteer-core**
    Do instead: For scripted screenshot capture in this repo (root `package.json` has `"type":"module"`), use a temporary `.cjs` script with `puppeteer-core` and `executablePath: "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"`. Avoid `.js` scripts with `require()` because they fail under ESM.
-10. **[2026-03-26] Peace Plan modal can silently pollute UI verification screenshots**
-   Do instead: Before capturing map UI screenshots, dismiss blocking overlays first (especially `PeacePlanModal` via `Reject Plan`/`Accept Plan`), then verify the target surface is visible in the first capture before batch runs.
-
 ## GUI / Map
 1. **[2026-03-27] Command sidebar `top` is global crest clearance — looks empty on the left**
    Do instead: Before changing `--awwv-toolbar-clearance`, read [20260327_COMMAND_SIDEBAR_LAYOUT_KNOWLEDGE.md](../docs/40_reports/implemented/20260327_COMMAND_SIDEBAR_LAYOUT_KNOWLEDGE.md). Left rail shares clearance with crest; **split variable or z-index overlap** if tightening; re-verify `PresidentialToolbar`, dev strip, `CommandBriefingLayer`.

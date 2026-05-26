@@ -47,7 +47,12 @@ function makeCeasefireState(progress: number): GameState {
                 bilateral_corps_release_progress: { HRHB: progress },
             },
         } as any,
-        displacement: { displacement_event_log: [] },
+        displacement: {
+            displacement_event_log: [],
+            displacement_humanitarian_aggregates: {},
+            displacement_origin_dest_arrivals: {},
+            displacement_recent_by_turn: {},
+        },
     } as GameState;
 }
 

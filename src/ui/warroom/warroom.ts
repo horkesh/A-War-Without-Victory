@@ -185,7 +185,12 @@ class WarroomApp {
             ],
             military,
             political,
-            displacement: { displacement_event_log: [] },
+            displacement: {
+                displacement_event_log: [],
+                displacement_humanitarian_aggregates: {},
+                displacement_origin_dest_arrivals: {},
+                displacement_recent_by_turn: {},
+            },
         };
         this.gameState = mockState;
 

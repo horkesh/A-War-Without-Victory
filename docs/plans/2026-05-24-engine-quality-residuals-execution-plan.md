@@ -110,6 +110,7 @@ Stop gates:
 
 **Owner:** systems-programmer
 **Reviewers:** save/schema QA, canon-compliance-reviewer when behavior can move
+**Current status:** In progress. Closed persisted-contract slices: v7 `displacement.displacement_event_log`, v8 `displacement.displacement_humanitarian_aggregates`, v8 `displacement.displacement_origin_dest_arrivals`, v8 `displacement.displacement_recent_by_turn`, v10 `military.army_co_decision_traces`, and v10 `military.army_corps_directives_by_faction`. Next slice should start from the current strict-null inventory and classify one remaining optional-field family before edits.
 
 Steps:
 

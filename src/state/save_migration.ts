@@ -60,6 +60,14 @@ function ensureArray(parent: Record<string, any> | undefined, key: string): any[
     return parent[key];
 }
 
+function ensureDisplacementRoot(state: GameState): Record<string, any> {
+    const root = state as Record<string, any>;
+    const existing = asRecord(root.displacement);
+    if (existing) return existing;
+    root.displacement = {};
+    return root.displacement;
+}
+
 function sanitizeNegotiationStatus(pol: Record<string, any>, turn: number): void {
     if (!pol.negotiation_status || typeof pol.negotiation_status !== 'object' || Array.isArray(pol.negotiation_status)) {
         pol.negotiation_status = { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null, last_counter_turn: {} };
@@ -437,6 +445,8 @@ registerMigration({
             ensureRecord(disp, 'settlement_displacement_started_turn');
             ensureRecord(disp, 'municipality_displacement');
             ensureArray(disp, 'displacement_event_log');
+        } else {
+            ensureArray(ensureDisplacementRoot(state), 'displacement_event_log');
         }
     },
 });
@@ -445,8 +455,8 @@ registerMigration({
     version: 8,
     description: 'Phase E/F humanitarian aggregate defaults. Sensitive: no.',
     migrate: (state) => {
-        const disp = asRecord(state.displacement);
-        if (!disp) return;
+        const disp = ensureDisplacementRoot(state);
+        ensureArray(disp, 'displacement_event_log');
         ensureRecord(disp, 'displacement_humanitarian_aggregates');
         ensureRecord(disp, 'displacement_origin_dest_arrivals');
         ensureRecord(disp, 'displacement_recent_by_turn');

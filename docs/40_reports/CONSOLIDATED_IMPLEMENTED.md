@@ -8,6 +8,8 @@
 
 **Latest save migration drift byte identity:** [implemented/20260526_SAVE_MIGRATION_DRIFT_BYTE_IDENTITY.md](implemented/20260526_SAVE_MIGRATION_DRIFT_BYTE_IDENTITY.md) - The save migration drift audit test now proves its committed diagnostic artifact regenerates byte-for-byte and restores committed bytes on failure.
 
+**Latest displacement aggregate schema contract:** [implemented/20260526_DISPLACEMENT_AGGREGATE_SCHEMA_CONTRACT.md](implemented/20260526_DISPLACEMENT_AGGREGATE_SCHEMA_CONTRACT.md) - The v8 displacement aggregate records are now required persisted contract fields with current-version rejection tests and v1/v7 migration proof for `{}` defaults.
+
 **Latest displacement event log schema contract:** [implemented/20260526_DISPLACEMENT_EVENT_LOG_SCHEMA_CONTRACT.md](implemented/20260526_DISPLACEMENT_EVENT_LOG_SCHEMA_CONTRACT.md) - `displacement.displacement_event_log` is now a required persisted v7 contract field with legacy `[]` migration and current-version validator rejection coverage.
 
 **Latest replay manifest ownership equivalence:** [implemented/20260526_REPLAY_MANIFEST_OWNERSHIP_EQUIVALENCE.md](implemented/20260526_REPLAY_MANIFEST_OWNERSHIP_EQUIVALENCE.md) - Scenario runs now expose `replay_save_manifest` path metadata and save-continue tests compare sparse manifest tails against uninterrupted runs; replay sidecars are explicitly transient in generated-artifact ownership docs.
@@ -168,7 +170,7 @@
 
 **Latest event-notification narrative-tone slice:** [implemented/20260522_EVENT_NOTIFICATION_NARRATIVE_TONE_1992.md](implemented/20260522_EVENT_NOTIFICATION_NARRATIVE_TONE_1992.md) - `rs_strategic_goals` and `rbih_state_identity` now have complete non-source recipient notification coverage; Phase D residual dropped to 18 rows / 82 blocks before the Washington-timing slice.
 
-**Latest strict-null Warroom fallback-region cleanup:** [implemented/20260524_STRICT_NULL_WARROOM_FALLBACK_REGION_TYPES.md](implemented/20260524_STRICT_NULL_WARROOM_FALLBACK_REGION_TYPES.md) - The production strict-null escape floor is now zero for counted `as FactionId`, `as unknown`, `as any`, dot non-null, and index non-null sites. The remaining strict-null lane is the 492-field optional `GameState` contract floor split by domain (`sim` 305, `state` 179, `derived` 8, no unknown bucket) after the army command schema contract promotion.
+**Latest strict-null Warroom fallback-region cleanup:** [implemented/20260524_STRICT_NULL_WARROOM_FALLBACK_REGION_TYPES.md](implemented/20260524_STRICT_NULL_WARROOM_FALLBACK_REGION_TYPES.md) - The production strict-null escape floor is now zero for counted `as FactionId`, `as unknown`, `as any`, dot non-null, and index non-null sites. The remaining strict-null lane is the 488-field optional `GameState` contract floor split by domain (`sim` 305, `state` 175, `derived` 8, no unknown bucket) after the displacement aggregate schema contract promotion.
 
 **Strict-null GameStateAdapter tail:** [implemented/20260522_STRICT_NULL_GAME_STATE_ADAPTER_TAIL.md](implemented/20260522_STRICT_NULL_GAME_STATE_ADAPTER_TAIL.md) - `src/ui/map/data/GameStateAdapter.ts` now contributes zero counted `as_any_casts` and `as_factionid_casts`; the current top-level strict-null floor is guarded by the optional GameState contract report.
 
@@ -361,5 +363,5 @@
 
 - Promoted `military.army_co_decision_traces` and `military.army_corps_directives_by_faction` from optional `MilitaryState` fields to required persisted v10 contracts.
 - Added v10 required-field validation, current-version rejection tests, legacy v1/v9 migration proof, and current-version fixture alignment.
-- Strict-null counted escape categories remain zero; optional `GameState` field inventory is now 492 (`sim` 305, `state` 179, `derived` 8).
+- Strict-null counted escape categories remain zero; optional `GameState` field inventory is now 488 (`sim` 305, `state` 175, `derived` 8).
 - Report: `docs/40_reports/implemented/20260526_ARMY_COMMAND_SCHEMA_CONTRACT.md`

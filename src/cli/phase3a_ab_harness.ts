@@ -88,7 +88,10 @@ function createProlongedSiegeState(): GameState {
                 last_updated_turn: 0
             }
         },
-    displacement_event_log: []
+    displacement_event_log: [],
+    displacement_humanitarian_aggregates: {},
+    displacement_origin_dest_arrivals: {},
+    displacement_recent_by_turn: {}
   },
         political: {}
     };
@@ -145,7 +148,10 @@ function createTemporaryEncirclementState(): GameState {
                 last_updated_turn: 0
             }
         },
-    displacement_event_log: []
+    displacement_event_log: [],
+    displacement_humanitarian_aggregates: {},
+    displacement_origin_dest_arrivals: {},
+    displacement_recent_by_turn: {}
   },
         political: {}
     };
@@ -195,7 +201,10 @@ function createCorridorLifelineState(): GameState {
                 last_updated_turn: 0
             }
         },
-    displacement_event_log: []
+    displacement_event_log: [],
+    displacement_humanitarian_aggregates: {},
+    displacement_origin_dest_arrivals: {},
+    displacement_recent_by_turn: {}
   },
         political: {}
     };
@@ -249,7 +258,10 @@ function createMultiPocketStressState(): GameState {
             'MUN_B': { mun_id: 'MUN_B', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
             'MUN_C': { mun_id: 'MUN_C', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
         },
-    displacement_event_log: []
+    displacement_event_log: [],
+    displacement_humanitarian_aggregates: {},
+    displacement_origin_dest_arrivals: {},
+    displacement_recent_by_turn: {}
   },
         political: {}
     };
@@ -294,7 +306,10 @@ function createAsymmetricCollapseState(): GameState {
             'MUN_A': { mun_id: 'MUN_A', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
             'MUN_B': { mun_id: 'MUN_B', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
         },
-    displacement_event_log: []
+    displacement_event_log: [],
+    displacement_humanitarian_aggregates: {},
+    displacement_origin_dest_arrivals: {},
+    displacement_recent_by_turn: {}
   },
         political: {}
     };

@@ -121,6 +121,32 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it.each([
+        'displacement_humanitarian_aggregates',
+        'displacement_origin_dest_arrivals',
+        'displacement_recent_by_turn',
+    ])('rejects a current-version save missing displacement aggregate record %s', (field) => {
+        const state = currentVersionState();
+        delete state.displacement[field];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            new RegExp(`Save schema validation failed after migration[\\s\\S]*v8[\\s\\S]*displacement\\.${field}`)
+        );
+    });
+
+    it.each([
+        ['displacement_humanitarian_aggregates', []],
+        ['displacement_origin_dest_arrivals', []],
+        ['displacement_recent_by_turn', null],
+    ])('rejects a current-version save with invalid displacement aggregate record %s', (field, value) => {
+        const state = currentVersionState();
+        state.displacement[field] = value;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            new RegExp(`Save schema validation failed after migration[\\s\\S]*v8[\\s\\S]*displacement\\.${field}`)
+        );
+    });
+
     it('migrates a v1 save before applying current-version required-field validation', () => {
         const state = currentVersionState();
         state.schema_version = 1;
@@ -130,6 +156,8 @@ describe('save migration validator hardening', () => {
         delete state.military.army_corps_directives_by_faction;
         delete state.displacement.displacement_event_log;
         delete state.displacement.displacement_humanitarian_aggregates;
+        delete state.displacement.displacement_origin_dest_arrivals;
+        delete state.displacement.displacement_recent_by_turn;
 
         const migrated = deserializeState(JSON.stringify(state));
 
@@ -145,5 +173,7 @@ describe('save migration validator hardening', () => {
         expect(migrated.military.army_corps_directives_by_faction).toEqual({});
         expect(migrated.displacement.displacement_event_log).toEqual([]);
         expect(migrated.displacement.displacement_humanitarian_aggregates).toEqual({});
+        expect(migrated.displacement.displacement_origin_dest_arrivals).toEqual({});
+        expect(migrated.displacement.displacement_recent_by_turn).toEqual({});
     });
 });

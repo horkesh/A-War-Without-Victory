@@ -2538,7 +2538,7 @@ civilian_casualties?: CivilianCasualtiesByFaction;
  * Inner key: ethnicity ('RBiH' | 'RS' | 'HRHB' as ethnicity-aligned faction).
  * Value: cumulative counts.
  */
-displacement_humanitarian_aggregates?: Record<string, Record<string, {
+displacement_humanitarian_aggregates: Record<string, Record<string, {
     /** Sum of (displaced + killed + fled_abroad) for events caused_by this faction with this ethnicity. */
     refugees_created: number;
     /** Sum of `settled` for events whose dest_osid was controlled by this faction at append time. */
@@ -2563,7 +2563,7 @@ displacement_humanitarian_aggregates?: Record<string, Record<string, {
  *   accumulated across all turns. Only events with dest_mun !== origin_mun
  *   and settled > 0 contribute (matches consumer's filter at line 193-195).
  */
-displacement_origin_dest_arrivals?: Record<string, Record<string, number>>;
+displacement_origin_dest_arrivals: Record<string, Record<string, number>>;
 /**
  * Per-turn refugee-created totals for recent narrative windows.
  *
@@ -2575,5 +2575,5 @@ displacement_origin_dest_arrivals?: Record<string, Record<string, number>>;
  * Key: turn number serialized as an object key.
  * Value: sum of displaced + killed + fled_abroad for events on that turn.
  */
-displacement_recent_by_turn?: Record<number, number>;
+displacement_recent_by_turn: Record<number, number>;
 }

@@ -527,15 +527,15 @@ describe('strict null inventory progress', () => {
             as_any_casts: 0,
             non_null_assertions_dot: 0,
             non_null_assertions_index: 0,
-            optional_fields_game_state: 491,
+            optional_fields_game_state: 488,
         });
-        expect(current.optional_field_domains.total).toBe(491);
+        expect(current.optional_field_domains.total).toBe(488);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 8,
             ipc: 0,
             scenario: 0,
             sim: 305,
-            state: 178,
+            state: 175,
             ui_adapter: 0,
             unknown: 0,
         });

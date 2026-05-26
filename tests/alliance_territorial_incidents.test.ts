@@ -36,7 +36,12 @@ function makeState(): GameState {
             war_alliance_rbih_hrhb: 0.5,
             political_controllers: {}
         } as GameState['political'],
-        displacement: { displacement_event_log: [] }
+        displacement: {
+            displacement_event_log: [],
+            displacement_humanitarian_aggregates: {},
+            displacement_origin_dest_arrivals: {},
+            displacement_recent_by_turn: {},
+        }
     } as GameState;
 }
 

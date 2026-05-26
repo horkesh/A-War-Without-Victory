@@ -84,6 +84,34 @@ describe('versioned save migration steps', () => {
         expect(state.political.supply_rights).toEqual({ corridors: [] });
         expect(state.displacement.displacement_event_log).toEqual([]);
         expect(state.displacement.displacement_humanitarian_aggregates).toEqual({});
+        expect(state.displacement.displacement_origin_dest_arrivals).toEqual({});
+        expect(state.displacement.displacement_recent_by_turn).toEqual({});
+    });
+
+    it('materializes v8 displacement aggregate defaults for v7 saves', () => {
+        const state = minimalLegacyState(7);
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.displacement.displacement_humanitarian_aggregates).toEqual({});
+        expect(state.displacement.displacement_origin_dest_arrivals).toEqual({});
+        expect(state.displacement.displacement_recent_by_turn).toEqual({});
+    });
+
+    it('materializes displacement root and v8 aggregates for legacy saves without displacement state', () => {
+        const state = minimalLegacyState(1);
+        delete state.displacement;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.displacement).toEqual({
+            displacement_event_log: [],
+            displacement_humanitarian_aggregates: {},
+            displacement_origin_dest_arrivals: {},
+            displacement_recent_by_turn: {},
+        });
     });
 
     it('materializes v10 command substrate defaults for v9 saves', () => {
