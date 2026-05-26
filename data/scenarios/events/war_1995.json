@@ -1043,7 +1043,13 @@
       "kind": "narrative",
       "text": "NATO's Operation Deliberate Force strikes VRS artillery, ammunition dumps, and command nodes. The question is whether Pale complies or absorbs the punishment."
     },
-    "effects": [],
+    "effects": [
+      {
+        "kind": "control_change",
+        "faction": "RS",
+        "osids": ["op:pale:praca", "op:nevesinje:hrusta_2", "op:nevesinje:sopilja"]
+      }
+    ],
     "dimension_shifts": [
       {
         "faction": "RS",
