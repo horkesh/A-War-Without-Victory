@@ -11493,3 +11493,19 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, current-version fixture literals, save-migration/strict-null tests and v19 fixture, `tools/diagnostics/output/save_migration_drift.json`, roadmap/command-board/engine-plan docs, `docs/40_reports/implemented/20260526_PHANTOMS_SPAWNED_SCHEMA_CONTRACT.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+## [2026-05-26] test(replay): lock replay sidecar artifact ownership
+
+**Type:** Static generated-artifact ownership guard + docs closeout.
+
+**Change:** Added `tests/replay_artifact_ownership.test.ts` and ownership matrix rows for `runs/<scenario_run>/replay_sequence.jsonl` and `runs/<scenario_run>/replay_timeline.json`. The guard keeps existing replay sidecar rows present, verifies `replay_sequence.jsonl` write/finalize/`streamFinalizeReplaySaveSequenceFromJsonl(...)` consumption paths in `src/scenario/scenario_runner.ts`, verifies `replay_timeline.json` is gated by `emitWeeklySavesForVideo`, and verifies `git ls-files runs` is empty.
+
+**Determinism:** Static test and documentation-only ownership clarification. No scenario runs, generated artifacts, save schema, migrations, validators, event content, calibration data, scenario outputs, randomness, timestamps, serialization logic, or replay write behavior changed.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\vitest.cmd run tests\replay_artifact_ownership.test.ts --reporter=dot` - FAIL before the doc update because `replay_sequence.jsonl` was not listed in the ownership matrix.
+- `F:\A-War-Without-Victory\vitest.cmd run tests\replay_artifact_ownership.test.ts --reporter=dot` - PASS; 1/1 test.
+- Final focused replay pack and diff checks are recorded in `docs/40_reports/implemented/20260526_REPLAY_SIDECAR_ARTIFACT_OWNERSHIP.md`.
+
+**Artifacts:** `tests/replay_artifact_ownership.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/implemented/20260526_REPLAY_SIDECAR_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---

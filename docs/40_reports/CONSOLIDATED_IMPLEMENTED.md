@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest replay sidecar artifact ownership:** [implemented/20260526_REPLAY_SIDECAR_ARTIFACT_OWNERSHIP.md](implemented/20260526_REPLAY_SIDECAR_ARTIFACT_OWNERSHIP.md) - A static guard now locks `runs/<scenario_run>/replay_sequence.jsonl` and `runs/<scenario_run>/replay_timeline.json` as transient scenario runner/video replay sidecars, including `emitWeeklySavesForVideo` gating and `runs/` no-commit proof.
+
 **Latest data-derived debug artifact ownership:** [implemented/20260526_DATA_DERIVED_DEBUG_ARTIFACT_OWNERSHIP.md](implemented/20260526_DATA_DERIVED_DEBUG_ARTIFACT_OWNERSHIP.md) - A static guard now locks `data/derived/_debug/**` as ignored, default-transient diagnostic scratch with no committed files and owner varying by diagnostic script.
 
 **Latest phantom-spawn marker schema contract:** [implemented/20260526_PHANTOMS_SPAWNED_SCHEMA_CONTRACT.md](implemented/20260526_PHANTOMS_SPAWNED_SCHEMA_CONTRACT.md) - `military.phantoms_spawned` is now a required persisted v20 `string[]` with `[]` migration proof, current-version string-array validation, order/content preservation coverage, and strict-null floor 464.
