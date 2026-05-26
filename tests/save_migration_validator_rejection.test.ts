@@ -61,6 +61,7 @@ function currentVersionState(): any {
             event_last_fired_turn: {},
             event_flags: {},
             enabled_event_ids: [],
+            phantoms_spawned: [],
         },
         political: {
             political_controllers: {},
@@ -515,5 +516,45 @@ describe('save migration validator hardening', () => {
 
         expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
         expect(migrated.displacement.civilian_casualties).toEqual({});
+    });
+
+    it('materializes v20 phantom-spawn markers for v19 saves', () => {
+        const state = currentVersionState();
+        state.schema_version = 19;
+        delete state.military.phantoms_spawned;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.phantoms_spawned).toEqual([]);
+    });
+
+    it('preserves v19 phantom-spawn marker order and contents', () => {
+        const state = currentVersionState();
+        state.schema_version = 19;
+        state.military.phantoms_spawned = ['jna_phantom_b', 'jna_phantom_a', 'jna_phantom_b'];
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.phantoms_spawned).toEqual(['jna_phantom_b', 'jna_phantom_a', 'jna_phantom_b']);
+    });
+
+    it('rejects current-version saves missing phantom-spawn markers', () => {
+        const state = currentVersionState();
+        delete state.military.phantoms_spawned;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v20[\s\S]*military\.phantoms_spawned/
+        );
+    });
+
+    it('rejects current-version saves with malformed phantom-spawn markers', () => {
+        const state = currentVersionState();
+        state.military.phantoms_spawned = ['valid', 42];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v20[\s\S]*military\.phantoms_spawned/
+        );
     });
 });

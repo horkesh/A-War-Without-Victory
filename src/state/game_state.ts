@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 19 as const;
+export const CURRENT_SCHEMA_VERSION = 20 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -2344,7 +2344,7 @@ enabled_event_ids: string[];
  *  This marker is the canonical "has been spawned" set. Append-only; never
  *  cleared. See `docs/40_reports/proposals/20260523_HV_EXPEDITIONARY_GHOST_DESIGN.md`
  *  + n2004 regression diagnosis. */
-phantoms_spawned?: string[];
+phantoms_spawned: string[];
 /** Event-imposed constraints on military operations. */
 event_constraints?: import('../sim/events/event_constraints.js').EventConstraints;
 /** AI commander decision log for replay determinism. */

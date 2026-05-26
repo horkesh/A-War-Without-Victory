@@ -79,6 +79,10 @@ function isCivilianCasualtiesRecord(value: unknown): boolean {
     return true;
 }
 
+function isStringArray(value: unknown): boolean {
+    return Array.isArray(value) && value.every((entry) => typeof entry === 'string');
+}
+
 function isCanonicalPlayerFaction(value: unknown): boolean {
     return typeof value === 'string' && CANONICAL_PLAYER_FACTIONS.includes(value as typeof CANONICAL_PLAYER_FACTIONS[number]);
 }
@@ -145,6 +149,7 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 18, path: 'displacement.minority_flight_state', check: isRecord },
     { version: 18, path: 'displacement.sustainability_state', check: isRecord },
     { version: 19, path: 'displacement.civilian_casualties', check: isCivilianCasualtiesRecord },
+    { version: 20, path: 'military.phantoms_spawned', check: isStringArray },
 ];
 
 /**
