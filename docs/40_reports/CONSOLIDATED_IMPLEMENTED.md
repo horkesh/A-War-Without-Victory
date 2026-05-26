@@ -4,6 +4,8 @@
 
 **Latest baseline ops sensitivity artifact ownership:** [implemented/20260526_BASELINE_OPS_SENSITIVITY_ARTIFACT_OWNERSHIP.md](implemented/20260526_BASELINE_OPS_SENSITIVITY_ARTIFACT_OWNERSHIP.md) - A static guard now locks the committed H1.11 sensitivity artifact trees, owner command, validation tests, retained run2 classification, and byte-identity expectations without refreshing scenario outputs.
 
+**Latest v15 fast fixture alignment:** [implemented/20260526_V15_FAST_FIXTURE_ALIGNMENT.md](implemented/20260526_V15_FAST_FIXTURE_ALIGNMENT.md) - Stale fast-suite schema fixtures now include inert v15 event bookkeeping records and a v14 round-trip fixture covers the v15 migration path after Baseline Regression exposed fixture drift.
+
 **Latest event bookkeeping schema contract:** [implemented/20260526_EVENT_BOOKKEEPING_SCHEMA_CONTRACT.md](implemented/20260526_EVENT_BOOKKEEPING_SCHEMA_CONTRACT.md) - Six military event bookkeeping records are now required persisted v15 contract fields with current-version rejection coverage, legacy empty-default migration proof, and strict-null floor 475.
 
 **Latest CI schema fixture alignment:** [implemented/20260526_CI_SCHEMA_FIXTURE_ALIGNMENT.md](implemented/20260526_CI_SCHEMA_FIXTURE_ALIGNMENT.md) - Stale current-schema fixtures and the tracked latest-run final-save fixture now include required empty event/political records so Baseline Regression exercises the current save contract without production behavior changes.
