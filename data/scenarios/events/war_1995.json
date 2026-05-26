@@ -767,7 +767,11 @@
           "op:sanski_most:lusci_palanka_2",
           "op:sanski_most:ostra_luka",
           "op:sanski_most:skucani_vakuf_2",
-          "op:bihac:trubar"
+          "op:bihac:trubar",
+          "op:kljuc:kljuc_2",
+          "op:kljuc:hadzici",
+          "op:kljuc:krasulje_2",
+          "op:kljuc:sanica_2"
         ]
       },
       {
