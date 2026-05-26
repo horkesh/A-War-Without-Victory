@@ -10714,3 +10714,36 @@ Any new offensive op — regardless of geographic location or corps — creates 
 3. **Further calibration improvements** — compare R26 mismatch list vs R22 to find next tractable target.
 
 **Artifacts:** `data/scenarios/events/war_1995.json`, `docs/PROJECT_LEDGER.md`.
+
+## 2026-05-27 — 188w Calibration n73-n80 (Honest Organic Baseline + Op Trnovo)
+
+**Design directive:** Sim must produce IEBL-alignment naturally. No fake CCs except 14 approved OSIDs across 4 events (srebrenica_falls_1995 ×10, zepa_falls_1995 ×1, battle_of_the_barracks_tuzla ×1, gorazde_pocket_consolidation_1992 ×2).
+
+**n73 — CC Strip, HONEST BASELINE: 613/712 (86.1%), area 84.0%**
+- Stripped ALL non-approved CCs from `war_1995.json`: operation_summer_95 Glamoč×2, operation_storm_1995 HRHB Bosansko Grahovo×3 + RBiH Ključ×4, operation_mistral_2_1995 Jajce×7+Mrkonjić Grad×6+Sipovo×5, operation_sana_1995 Sanski Most×9.
+- Retained only the 14 approved OSIDs. Commit `84216f74` (batch with n74-n79).
+
+**n74-n77 — Zero-delta experiments (reverted/no-effect)**
+- n74: `ceasefire_1995` RS morale delta:5 test → zero-delta, reverted.
+- n75-n76: Op Podrinje Sweep rogatica_sokolac axis restoration → zero-delta (brigades too far from staging; zero_eligible_axis).
+- n77: Op Pracha River `available_from:56` added → zero-delta (never fires; brigades rs_1st_podrinje+rs_5th_podrinje 6-8 hops from stara_gora).
+
+**n78 — Op Pracha River cascade: 616/712 (86.5%, +3), area 84.9% — NEW BASELINE**
+- Changed Op Pracha River `available_from: 56 → 9`. Op still fires with zero_eligible_axis (same march-distance problem). Mechanism: earlier op-failure/recovery timing shifts vrs_drina brigade allocation, producing a beneficial cascade: CENTRAL_BOSNIA −3 (bosansko_grahovo×3 now HRHB), HERZEGOVINA −2 (kovacevci_2+pribelja+sipovljani_2 now HRHB), KRAJINA +2 (skender_vakuf×4 new regression). Net +3.
+- Hash: `8f35abe83f9d2ce5`.
+
+**n79 — Op Trnovo defined (queue bug → never fires): ~0 delta expected**
+- Added `Operation Trnovo` (vrs_sarajevo_romanija) targeting kijevo_2→delijas + trnovo from gornja_presjenica staging (RS init, rs_trnovo_brigade, available_from:6). Root cause of non-firing: deferred-ops loop skips SRK because Prsten was directly injected; no explicit SRK queue wired. Op Prsten completes at w9-10 but queue empty → Trnovo never injects. Score TBD (likely ≈ n78).
+
+**n80 — SRK queue fix: Op Prsten → Op Trnovo (IN PROGRESS)**
+- Added explicit SRK queue: `cmd.queued_operations = ['Operation Trnovo']` after Prsten injection. Mirrors vrs_drina pattern. Trnovo injects at ~w10 after Prsten completes. Potential: +3 (kijevo_2+delijas+trnovo all painted RS oct1995, all start RBiH). rs_trnovo_brigade 500 personnel — single brigade, may struggle vs entrenched defenders.
+
+**Enclave mechanics research (user directive)**
+- HVO-ARBiH: Žepče enclave (3 OSIDs) fails because ARBiH 2nd Corps ~9k overwhelms hrhb_111th (700 pers). Engine has NO BFS encirclement detection — bot AI treats surrounded enclave as regular objective. Fix requires: BFS isolation check + bot avoidance + supply penalty. Cannot fix in calibration session; needs gameplay-programmer. Design ceiling: do NOT attempt CCs for Žepče.
+- Srebrenica: srebrenica_ring axis intentionally broken (cascade-coupled to VRS 2nd Krajina). srebrenica_falls_1995 CC (10 OSIDs) is approved workaround.
+- Žepa: zepa_2 organically capturable from stara_gora (adjacent). arbih_285th_light weak (48 cohesion). Op could make zepa_falls_1995 CC redundant; low priority since CC already covers it.
+
+**Op Podrinje Sweep root cause (confirmed)**
+- rs_1st_vlasenica, rs_5th_podrinje, rs_1st_podrinje all home NE Drina Corps (Bratunac/Vlasenica). stara_gora staging is 6-8 hops away. Aggressive commander forces execution in 3-5 turns → brigades never adjacent to brcigovo. Zero captures across entire 188w run. Any vrs_drina Rogatica-area op will fail unless brigades are replaced with ones homed near Rogatica.
+
+**Artifacts:** `src/sim/combat/pre_planned_operations.ts`, `data/scenarios/events/war_1995.json`, `memory/baseline_honest_zero_cc.md`, `memory/enclave_mechanics_research.md`.

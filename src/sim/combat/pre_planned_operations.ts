@@ -975,6 +975,15 @@ export function injectPrePlannedOperations(state: GameState, adjacency?: Map<Osi
         }
     }
 
+    // Queue SRK: Operation Prsten → Operation Trnovo
+    // Prsten completes ~w9-10; Trnovo (available_from:6) injects immediately after.
+    if (injectedCorps.has('vrs_sarajevo_romanija')) {
+        const cmd = corpsCommand['vrs_sarajevo_romanija'];
+        if (cmd && !cmd.queued_operations) {
+            cmd.queued_operations = ['Operation Trnovo'];
+        }
+    }
+
     // Queue 1KK ops: Prijedor → Corridor → Jajce → Donji Vakuf → Bosanski Novi
     // Corridor fires 2nd (historically June-July 1992 ~w10-16), Jajce 3rd (~w20-25),
     // Donji Vakuf 4th (after Jajce completes). Previous n1145 regression: DV was moved
