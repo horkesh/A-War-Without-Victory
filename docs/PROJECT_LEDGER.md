@@ -1,4 +1,21 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-26] test(harness): prove latest-run final-save map-copy ownership
+
+**Type:** Scenario harness generated-artifact ownership + Phase 3 save/replay stability slice.
+
+**Change:** Extracted the scenario runner `--map` copy of `final_save.json` into exported helper `copyFinalSaveToLatestRun(finalSavePath, repoRoot)`, preserving the existing CLI behavior and tactical-map log text. Added a focused temp-root Vitest that writes a temporary `final_save.json`, calls the helper, and asserts `data/derived/latest_run_final_save.json` bytes equal the source bytes without touching the real tracked artifact. Updated generated-artifact ownership docs so `data/derived/latest_run_final_save.json` has an explicit validation command instead of `None`.
+
+**Determinism:** File-copy ownership proof only. No scenario data, event data, save schema, simulation behavior, generated artifact, baseline, randomness, timestamp, ordering, or real `--map` run changed. The copied artifact remains transient by default unless intentionally promoted.
+
+**Verification:**
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\scenario_latest_run_final_save_map_copy.test.ts --reporter=dot` - PASS; 1/1 test.
+- `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\scenario_latest_run_final_save_map_copy.test.ts tests\save_load_real_roundtrip.test.ts tests\adapter_field_completeness.test.ts --reporter=dot` - PASS after temporarily linking this dependency-light worktree to the already-installed root and map UI dependency folders; 34/34 tests.
+- `git diff --check` - PASS.
+
+**Artifacts:** `tools/scenario_runner/run_scenario.ts`, `tests/scenario_latest_run_final_save_map_copy.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/implemented/20260526_LATEST_RUN_FINAL_SAVE_MAP_COPY_OWNERSHIP.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] test(state): repair displacement schema CI fixtures
 
 **Type:** CI fixture repair for required displacement event log contract.
