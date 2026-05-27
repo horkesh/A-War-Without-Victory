@@ -6,10 +6,11 @@
  * but error-level findings now block injection so stale or impossible
  * historical operation content dies honestly before buildOperation runs.
  *
- * Six checks:
+ * Seven checks:
  *   A. all_objectives_owned  — every objective on an axis is already faction-controlled
  *   B. brigade_missing / brigade_ineligible — formation absent or ineligible
  *   C. staging_adjacency — staging OSID not adjacent to first enemy objective
+ *   C2. chain_gap — consecutive objectives not adjacent in the static graph (warning-only)
  *   D. axis_empty — axis has 0 valid brigades or 0 valid objectives
  *   E. op_empty — all axes would be dropped
  *   F. objective_overlap — objective already targeted by another active corps operation
@@ -29,6 +30,7 @@ import type { Osid } from './osid_adjacency.js';
 
 export type OpInjectionCheck =
     | 'staging_adjacency'
+    | 'chain_gap'
     | 'brigade_missing'
     | 'brigade_ineligible'
     | 'all_objectives_owned'
@@ -196,6 +198,29 @@ export function validateOpAtInjection(
                         check: 'staging_adjacency',
                         detail: `Staging "${staging}" not adjacent to first objective "${firstObjective}" in march order`,
                         severity: 'error',
+                        turn,
+                    });
+                }
+            }
+        }
+
+        // ── Check C2: chain_gap (only when adjacency provided) ──────────
+        // Verifies that consecutive objective pairs are adjacent in the static graph.
+        // A gap means the axis will stall after capturing obj[i] — brigades cannot
+        // march to obj[i+1] without an intermediate objective. Warning-only: runtime
+        // may still succeed via bot fills or static-graph approach-OSID fallback.
+        if (adjacency && axisDef.objectives.length >= 2) {
+            for (let i = 0; i < axisDef.objectives.length - 1; i++) {
+                const a = axisDef.objectives[i]!;
+                const b = axisDef.objectives[i + 1]!;
+                const aNeighbors = adjacency.get(a) ?? [];
+                if (!aNeighbors.includes(b)) {
+                    warnings.push({
+                        op_name: def.name,
+                        axis_id: axisDef.axis_id,
+                        check: 'chain_gap',
+                        detail: `Objective chain gap: "${a}" not adjacent to "${b}" (positions ${i} → ${i + 1})`,
+                        severity: 'warning',
                         turn,
                     });
                 }

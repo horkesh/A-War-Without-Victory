@@ -10879,3 +10879,67 @@ Any new offensive op — regardless of geographic location or corps — creates 
 **Sensitive-history compliance:** Ring-1 / no §6. Engine lifecycle fix — no FORAWWV, no painted target overrides, no avoided_osids_by_faction, no init OSID overrides.
 
 **Artifacts:** `src/sim/combat/sector_offensive.ts`, `src/sim/combat/pre_planned_operations.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-27] calibration(n126): brcigovo removed from Op Podrinje Sweep → 91.9% (40w)
+
+**Type:** Op objective removal — Sacred Rule 4 violation fix + dead-end axis repair.
+
+**Root cause:** `op:rogatica:brcigovo` was the second objective in Op Podrinje Sweep's rogatica_sokolac axis. Two problems: (1) brcigovo is painted RBiH → VRS objective violates Sacred Rule 4; (2) brcigovo is NOT adjacent to kovanj → axis stalled after capturing brcigovo, blocking kovanj and all downstream OSIDs.
+
+**Change:** Removed `'op:rogatica:brcigovo'` from rogatica_sokolac axis objectives. New sequence: rogatica_2 → kovanj → kramer_selo_2 → knezina_2 → meljine_2 → godjenje_2 → nevacka_3. rogatica_2 IS adjacent to kovanj ✓. Op Pracha River (available_from=9) still targets brcigovo via stara_gora (separate op, sequential on vrs_drina).
+
+**Files changed:**
+- `src/sim/combat/pre_planned_operations.ts` — removed 1 line from rogatica_sokolac objectives
+
+**Results (n126 vs n118 baseline 653/712):**
+- **654/712 (91.9%) — +1 vs baseline, zero regressions**
+- Fixes: `op:hanpijesak:godjenje_2` (paint=RS, was=RBiH — axis unblocked downstream), `op:teslic:kamenica_2` (paint=RS, was=HRHB — positive cascade)
+- `op:rogatica:brcigovo` over-capture eliminated (now correctly RBiH)
+- `op:rogatica:kovanj`, `op:rogatica:kramer_selo_2`, `op:sokolac:knezina_2` all correct RS
+- Hash: `fba6dae6c6ea0420`
+- Commit: ec2e4e60
+
+**Sensitive-history compliance:** Ring-1 / no §6. Op objective data fix — no engine code changes, no FORAWWV, no painted target overrides, no init OSID overrides.
+
+---
+
+## [2026-05-28] engine: 3 pre-planned op engine fixes — static adjacency fallback, preparation bypass, chain_gap validation
+
+**Type:** Engine lifecycle fix — three structural rigidities causing pre-planned ops to silently abort.
+
+**Problem:** 6+ pre-planned ops (Koridor, Prijedor, Podrinje Sweep, Pracha River, Foca, Trnovo) were entering planning→recovery with 0 captures because: (1) `collectObjectiveApproachOsids` required live front edges which don't exist near deep objectives early in the run; (2) pre-planned ops were blocked by the full preparation state machine (intel→force_staging→supply→assessment→ready) even though they represent scripted historical operations; (3) no validation warned about broken objective adjacency chains at injection time.
+
+**Change 1 — Static OSID adjacency fallback (`sector_offensive_launch_helpers.ts`):**
+- Added `buildStaticOsidAdjacency(edges: EdgeRecord[]): Map<string, string[]>` — builds adjacency map from `operational_contact_graph.json` (712 OSIDs, 2047 edges).
+- Added Path 3 static fallback in `collectObjectiveApproachOsids` after existing Path 2 sub-segment scan. When live front edges and sub-segment scan both fail, falls back to static neighbors.
+- Threaded `staticAdjacency?: Map<string, string[]>` through `areParticipantsReadyForExecution`, `classifyAxisOpeningAttack`, `evaluateOpeningAttackReadiness`, `reconcilePlanningObjectives`.
+- **Critical scoping fix:** `staticAdjacency` is intentionally NOT passed to `areParticipantsReadyForExecution` — physical march positioning is required there. Static adjacency is only used in `evaluateOpeningAttackReadiness` and `reconcilePlanningObjectives`.
+- Entry point in `war_phases.ts`: `buildStaticOsidAdjacency(od.edges)` called once per turn, passed to `advanceSectorOffensives`.
+
+**Change 2 — Pre-planned ops bypass preparation state machine (`operation_preparation.ts`):**
+- Pre-planned ops (`op.is_pre_planned === true`) skip intel→force_staging→supply→assessment and go directly to `preparation_sub_phase='ready'`, `commander_assessment='launch'`.
+- Eliminates ASSEMBLY_TIMEOUT_TURNS (5-turn cap) blocking pre-planned ops from ever reaching execution.
+
+**Change 3 — `chain_gap` validation warning (`operation_validation.ts`):**
+- Added `'chain_gap'` check (Check C2) to `validateOpAtInjection`. Warns (severity='warning', non-blocking) when consecutive objectives are not adjacent in the static graph.
+- Helps detect broken axis chains at injection time rather than silently at runtime.
+
+**n133 verification (52w):**
+- Op Prijedor: 7 captures, completed ✅
+- Op Koridor: 6 captures, max_failures ✅
+- Op Podrinje Sweep: 5 captures, completed ✅
+- Op Pracha River: 6 captures, max_failures ✅
+- Op Foca: reaches execution, 0 captures (combat-odds issue, separate data fix needed)
+- Op Trnovo: reaches execution w31, 0 captures (late start + single brigade, separate fix needed)
+- Op Visegrad: zero_eligible_axis (known data issue — objective chain broken after drinsko removal, separate fix needed)
+
+**Files changed:**
+- `src/sim/combat/sector_offensive_launch_helpers.ts` — Path 3 static fallback + `buildStaticOsidAdjacency`
+- `src/sim/combat/sector_offensive.ts` — threading + `areParticipantsReadyForExecution` scoping fix
+- `src/sim/turn_phases/war_phases.ts` — static adjacency entry point
+- `src/sim/combat/operation_preparation.ts` — pre-planned bypass
+- `src/sim/combat/operation_validation.ts` — chain_gap check C2
+
+**Sensitive-history compliance:** Ring-1 / no §6. Engine lifecycle fix — no FORAWWV, no painted target overrides, no avoided_osids_by_faction, no init OSID overrides.

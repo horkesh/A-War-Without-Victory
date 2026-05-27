@@ -137,6 +137,7 @@ import { correctMarchOrders, correctTransitStates } from '../combat/commander_ma
 import { evaluateHomeReturn } from '../combat/brigade_home_return.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
 import { advanceSectorOffensives, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
+import { buildStaticOsidAdjacency } from '../combat/sector_offensive_launch_helpers.js';
 // LANE-2026-05-02: estimateForceRatio defender-modifier integration — terrain cache for advance-sector-offensives
 import { buildTerrainCache } from '../combat/combat_predictor.js';
 import { processJnaWithdrawals, spawnJnaPhantomBrigades } from '../combat/jna_phantom_brigades.js';
@@ -929,7 +930,8 @@ export const warPhases: NamedPhase[] = [
                 }
                 terrainMultByOsid = buildTerrainCache(od.opData.operationalToCanonical, terrainData);
             }
-            const prepEvents = advanceSectorOffensives(context.state, supplyByOsid, terrainMultByOsid);
+            const staticAdjacency = od?.edges ? buildStaticOsidAdjacency(od.edges) : undefined;
+            const prepEvents = advanceSectorOffensives(context.state, supplyByOsid, terrainMultByOsid, staticAdjacency);
             if (prepEvents.length > 0) {
                 context.report.preparation_events = prepEvents;
             }
