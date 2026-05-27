@@ -451,3 +451,9 @@
 - Added the required empty `paramilitary_decision_history` field to the nested migration ownership current-schema fixture.
 - Closed the Baseline Regression fast-test failure without changing production migration or validation logic.
 - Report: `docs/40_reports/implemented/20260527_MIGRATION_NESTED_OWNERSHIP_V21_FIXTURE.md`
+
+# 2026-05-27 - Event state shape validation
+
+- Added validation for pending event decisions, event decision logs, and active event modifier arrays when present in GameState.
+- Preserved schema version, migration behavior, event firing, event prose, GUI behavior, and scenario output.
+- Report: `docs/40_reports/implemented/20260527_EVENT_STATE_SHAPE_VALIDATION.md`

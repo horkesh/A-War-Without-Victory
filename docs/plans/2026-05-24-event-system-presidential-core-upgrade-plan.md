@@ -1,7 +1,7 @@
 # Event System Presidential Core Upgrade Plan
 
 **Date:** 2026-05-24
-**Status:** ACTIVE external-agent execution plan / Workstream A baseline closed, Workstream B evaluator ordering, overflow visibility, loader fail-closed, and row-level structural validation slices closed
+**Status:** ACTIVE external-agent execution plan / Workstream A baseline closed, Workstream B evaluator ordering, overflow visibility, loader fail-closed, row-level structural validation, and event state shape validation slices closed
 **Owner lane:** Event-system product/engine lane
 **Related board row:** `Command Board -> Event system presidential core upgrade`
 **Do not collide with:** calibration / army-arc branch. The 2026-05-25 presidential GUI restructure is merged; use its Decision Surface Registry, President's Desk, modal stack rules, and consequence ledger instead of inventing another decision surface.
@@ -55,7 +55,7 @@ Every new event packet must classify its trigger as one of:
   - Semantic catalog validation is still incomplete; taxonomy remains the owner for effect/condition vocabulary, sensitive-history policy, modal readiness, source/default blocking, and trigger-authoring classification.
   - full 247-row semantic catalog schema validation is incomplete.
   - Further required-response modal authoring is blocked until the exact historical/default label and prose boundary are approved for the remaining sensitive, counterfactual, abstract, or source-weak rows.
-  - `validateGameState` covers `pending_event_notifications`, but not `pending_event_decisions`, `event_decision_log`, or most active event modifier arrays.
+  - `validateGameStateShape` now covers `pending_event_notifications`, `pending_event_decisions`, `event_decision_log`, `event_aggression_modifiers`, `recruitment_modifiers`, and `equipment_quality_modifiers` when present.
   - some event condition/type fields are declared but weakly tested or partially implemented.
 
 ## Non-Goals

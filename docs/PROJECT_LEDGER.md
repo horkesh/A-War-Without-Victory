@@ -1,4 +1,22 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] state(events): validate event decision and modifier state shape
+
+**Type:** Event-system save-shape validation.
+
+**Change:** Added lightweight `validateGameStateShape(...)` checks for optional `military.pending_event_decisions`, `military.event_decision_log`, `military.event_aggression_modifiers`, `military.recruitment_modifiers`, and `military.equipment_quality_modifiers` when present. Added focused tests for valid rows and malformed pending decisions, decision-log rows, and modifier arrays.
+
+**Determinism:** Validation-only change. No schema version, migration/default behavior, event catalog, event ordering, event firing, bot choice policy, GUI behavior, scenario output, replay output, generated artifact, or calibration data changed.
+
+**Verification:**
+- `F:\A-War-Without-Victory\vitest.cmd run tests\event_state_shape_validation.test.ts tests\state.test.ts tests\event_decisions.test.ts tests\events_evaluate.test.ts --reporter=dot` - PASS; 50/50 tests.
+- `F:\A-War-Without-Victory\vitest.cmd run tests\save_migration_validator_rejection.test.ts tests\save_load_real_roundtrip.test.ts tests\migration_nested_ownership.test.ts tests\state.test.ts --reporter=dot` - PASS; 88/88 tests.
+- `npm.cmd run typecheck` - PASS.
+- `git diff --check` - PASS.
+
+**Artifacts:** `src/state/validateGameState.ts`, `tests/event_state_shape_validation.test.ts`, `docs/40_reports/implemented/20260527_EVENT_STATE_SHAPE_VALIDATION.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-27] test(save): align nested migration fixture with v21 schema
 
 **Type:** CI fixture alignment.

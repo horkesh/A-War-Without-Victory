@@ -69,6 +69,18 @@ function isFiniteNonNegativeNumber(value: unknown): value is number {
     return typeof value === 'number' && Number.isFinite(value) && value >= 0;
 }
 
+function isFiniteNumber(value: unknown): value is number {
+    return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isNonNegativeInteger(value: unknown): value is number {
+    return typeof value === 'number' && Number.isInteger(value) && value >= 0;
+}
+
+function isNonEmptyString(value: unknown): value is string {
+    return typeof value === 'string' && value.length > 0;
+}
+
 function isCivilianCasualtiesRecord(value: unknown): boolean {
     if (!isRecord(value)) return false;
     for (const entry of Object.values(value)) {
@@ -87,6 +99,10 @@ function isCanonicalPlayerFaction(value: unknown): boolean {
     return typeof value === 'string' && CANONICAL_PLAYER_FACTIONS.includes(value as typeof CANONICAL_PLAYER_FACTIONS[number]);
 }
 
+function isEventDecisionSource(value: unknown): boolean {
+    return value === 'bot_political' || value === 'bot_v1' || value === 'bot_ai_default' || value === 'player';
+}
+
 function getPathValue(root: unknown, path: string): unknown {
     let current: unknown = root;
     for (const part of path.split('.')) {
@@ -94,6 +110,99 @@ function getPathValue(root: unknown, path: string): unknown {
         current = (current as Record<string, unknown>)[part];
     }
     return current;
+}
+
+function validatePendingEventDecisions(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.pending_event_decisions must be an array when present');
+        return;
+    }
+
+    value.forEach((decision, i) => {
+        if (!isRecord(decision)) {
+            errors.push(`military.pending_event_decisions[${i}] must be an object`);
+            return;
+        }
+        for (const key of ['event_id', 'event_title']) {
+            if (!isNonEmptyString(decision[key])) {
+                errors.push(`military.pending_event_decisions[${i}].${key} must be a non-empty string`);
+            }
+        }
+        if (!isNonNegativeInteger(decision.turn_fired)) {
+            errors.push(`military.pending_event_decisions[${i}].turn_fired must be a non-negative integer`);
+        }
+        if (!Array.isArray(decision.response_options)) {
+            errors.push(`military.pending_event_decisions[${i}].response_options must be an array`);
+        }
+        if (!isCanonicalPlayerFaction(decision.faction)) {
+            errors.push(`military.pending_event_decisions[${i}].faction must be one of: RBiH, RS, HRHB`);
+        }
+        if ('requires_player_response' in decision && decision.requires_player_response !== undefined && typeof decision.requires_player_response !== 'boolean') {
+            errors.push(`military.pending_event_decisions[${i}].requires_player_response must be boolean when present`);
+        }
+        if ('historical_default_response_id' in decision && decision.historical_default_response_id !== undefined && !isNonEmptyString(decision.historical_default_response_id)) {
+            errors.push(`military.pending_event_decisions[${i}].historical_default_response_id must be a non-empty string when present`);
+        }
+        if ('trigger_evidence' in decision && decision.trigger_evidence !== undefined && !isStringArray(decision.trigger_evidence)) {
+            errors.push(`military.pending_event_decisions[${i}].trigger_evidence must be a string array when present`);
+        }
+    });
+}
+
+function validateEventDecisionLog(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.event_decision_log must be an array when present');
+        return;
+    }
+
+    value.forEach((entry, i) => {
+        if (!isRecord(entry)) {
+            errors.push(`military.event_decision_log[${i}] must be an object`);
+            return;
+        }
+        for (const key of ['event_id', 'response_id']) {
+            if (!isNonEmptyString(entry[key])) {
+                errors.push(`military.event_decision_log[${i}].${key} must be a non-empty string`);
+            }
+        }
+        if (!isEventDecisionSource(entry.decision_source)) {
+            errors.push(`military.event_decision_log[${i}].decision_source must be one of: bot_political, bot_v1, bot_ai_default, player`);
+        }
+        if (entry.faction !== null && !isCanonicalPlayerFaction(entry.faction)) {
+            errors.push(`military.event_decision_log[${i}].faction must be null or one of: RBiH, RS, HRHB`);
+        }
+        if (!isNonNegativeInteger(entry.turn)) {
+            errors.push(`military.event_decision_log[${i}].turn must be a non-negative integer`);
+        }
+    });
+}
+
+function validateExpiringFactionNumberModifiers(
+    value: unknown,
+    path: string,
+    numericField: string,
+    errors: string[],
+): void {
+    if (!Array.isArray(value)) {
+        errors.push(`${path} must be an array when present`);
+        return;
+    }
+
+    value.forEach((modifier, i) => {
+        if (!isRecord(modifier)) {
+            errors.push(`${path}[${i}] must be an object`);
+            return;
+        }
+        if (!isCanonicalPlayerFaction(modifier.faction)) {
+            errors.push(`${path}[${i}].faction must be one of: RBiH, RS, HRHB`);
+        }
+        if (!isFiniteNumber(modifier[numericField])) {
+            errors.push(`${path}[${i}].${numericField} must be a finite number`);
+        }
+        if (!isNonNegativeInteger(modifier.expires_turn)) {
+            errors.push(`${path}[${i}].expires_turn must be a non-negative integer`);
+        }
+    });
 }
 
 const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
@@ -315,6 +424,21 @@ export function validateGameStateShape(
 
     // Peace phase: optional early-war fields live under state.military/state.political
     const military = s.military as Record<string, unknown>;
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'pending_event_decisions' in military && military.pending_event_decisions !== undefined) {
+        validatePendingEventDecisions(military.pending_event_decisions, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'event_decision_log' in military && military.event_decision_log !== undefined) {
+        validateEventDecisionLog(military.event_decision_log, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'event_aggression_modifiers' in military && military.event_aggression_modifiers !== undefined) {
+        validateExpiringFactionNumberModifiers(military.event_aggression_modifiers, 'military.event_aggression_modifiers', 'delta', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'recruitment_modifiers' in military && military.recruitment_modifiers !== undefined) {
+        validateExpiringFactionNumberModifiers(military.recruitment_modifiers, 'military.recruitment_modifiers', 'pool_multiplier', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'equipment_quality_modifiers' in military && military.equipment_quality_modifiers !== undefined) {
+        validateExpiringFactionNumberModifiers(military.equipment_quality_modifiers, 'military.equipment_quality_modifiers', 'multiplier', errors);
+    }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'pending_event_notifications' in military && military.pending_event_notifications !== undefined) {
         const notifications = military.pending_event_notifications;
         if (!Array.isArray(notifications)) {
