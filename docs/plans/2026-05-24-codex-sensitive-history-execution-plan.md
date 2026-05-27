@@ -6,7 +6,7 @@
 **Related command-board row:** P1 Dynamic Codex and sensitive-history consequence arcs
 **Collision rules:** May edit Codex/content diagnostics and safe factual prose. Must stop before new sensitive-history framing, unsupported historical claims, or mechanics that turn atrocities into player levers.
 **Phase covered:** Safe Codex sweep, source-backed correction, sensitive-history packet preparation, and dynamic consequence arcs.
-**Current next action:** Prepare gated review packets for the three remaining uncited event rows, then dynamic consequence arcs.
+**Current next action:** Review `docs/40_reports/proposals/20260527_CODEX_GATED_EVENT_ROW_REVIEW_PACKET.md`, then prepare dynamic consequence arc packets.
 
 ## Purpose
 
@@ -124,7 +124,7 @@ Stop gates:
 
 **Owner:** documentation-specialist
 **Reviewers:** historian, canon-compliance-reviewer
-**Status:** IN PROGRESS. Deliberate Force and Mistral 2 operational overclaim wording closed 2026-05-27 by `docs/40_reports/implemented/20260527_CODEX_SAFE_FACTUAL_CORRECTIONS_PHASE1.md`. The Srebrenica/Zepa provenance-only source-note packet closed by `docs/40_reports/implemented/20260527_CODEX_SENSITIVE_HISTORY_SOURCE_NOTES_PHASE1.md`; the broader event source-note packet closed by `docs/40_reports/implemented/20260527_CODEX_EVENT_SOURCE_NOTES_PHASE2.md`. Remaining uncited event rows are gated review items, not blind source-note work. Do not touch sensitive-history levers or counterfactual atrocity/prevention framing without review.
+**Status:** IN PROGRESS. Deliberate Force and Mistral 2 operational overclaim wording closed 2026-05-27 by `docs/40_reports/implemented/20260527_CODEX_SAFE_FACTUAL_CORRECTIONS_PHASE1.md`. The Srebrenica/Zepa provenance-only source-note packet closed by `docs/40_reports/implemented/20260527_CODEX_SENSITIVE_HISTORY_SOURCE_NOTES_PHASE1.md`; the broader event source-note packet closed by `docs/40_reports/implemented/20260527_CODEX_EVENT_SOURCE_NOTES_PHASE2.md`. Remaining uncited event rows are packeted in `docs/40_reports/proposals/20260527_CODEX_GATED_EVENT_ROW_REVIEW_PACKET.md` and require review before runtime edits. Do not touch sensitive-history levers or counterfactual atrocity/prevention framing without review.
 
 Steps:
 

@@ -11876,3 +11876,18 @@ Also replaced the new `as unknown as JsonObject` pressure read in `src/sim/event
 **Artifacts:** `data/scenarios/events/war_1992.json`, `data/scenarios/events/war_1993.json`, `data/scenarios/events/war_1994.json`, `data/scenarios/events/war_1995.json`, `tests/codex_sensitive_history_source_notes.test.ts`, `docs/40_reports/implemented/20260527_CODEX_EVENT_SOURCE_NOTES_PHASE2.md`, `docs/plans/2026-05-24-codex-sensitive-history-execution-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-27] codex: packet remaining gated event rows
+
+**Type:** Review packet / docs-only gate.
+
+**Change:** Added `docs/40_reports/proposals/20260527_CODEX_GATED_EVENT_ROW_REVIEW_PACKET.md` for the three remaining uncited event rows: `croat_bosniak_war_begins_1993`, `visit_to_front_hrhb`, and `federation_ground_offensive_1995`. Updated the execution plan, command board, and reports index to point future work at the packet instead of blind runtime edits.
+
+**Determinism:** Documentation-only. No event JSON, narrative text, triggers, effects, response options, bot response logic, save schema, scenario setup, UI routing, generated artifacts, or calibration behavior changed.
+
+**Verification:**
+- `git diff --check` - PASS.
+
+**Artifacts:** `docs/40_reports/proposals/20260527_CODEX_GATED_EVENT_ROW_REVIEW_PACKET.md`, `docs/plans/2026-05-24-codex-sensitive-history-execution-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
+
+---
