@@ -58,6 +58,10 @@ function baseState(overrides: Record<string, unknown> = {}): Record<string, unkn
             used_operation_names: {},
             pending_officer_events: [],
             officer_decision_history: [],
+            cascade_penalties: [],
+            offensive_ops_suppressions: [],
+            alliance_locks: [],
+            bot_priority_shifts: [],
         },
         political: {
             political_controllers: {},
@@ -105,7 +109,7 @@ function validateWithMilitary(militaryOverrides: Record<string, unknown>) {
 }
 
 describe('event state shape validation', () => {
-    it('accepts valid pending decisions, decision log rows, event modifier arrays, cost annotations, and officer queues', () => {
+    it('accepts valid pending decisions, decision log rows, event modifier arrays, cost annotations, officer queues, and consequence runtime queues', () => {
         const result = validateWithMilitary({
             pending_event_decisions: [{
                 event_id: 'rbih_state_identity',
@@ -169,6 +173,10 @@ describe('event state shape validation', () => {
                 corps_id: 'arbih_1st_corps',
                 decision: 'override_confirmed',
             }],
+            cascade_penalties: [{ osid: 'op:banja_luka:west', multiplier: 0.85, expires_turn: 178 }],
+            offensive_ops_suppressions: [{ faction: 'RS', expires_turn: 180, reason: 'holbrooke_halt' }],
+            alliance_locks: [{ mode: 'floor', value: 0.8, expires_turn: 120 }],
+            bot_priority_shifts: [{ faction: 'RBiH', add_objectives: ['obj_a'], remove_objectives: ['obj_b'], expires_turn: 170 }],
         });
 
         expect(result).toEqual({ ok: true });
@@ -396,6 +404,38 @@ describe('event state shape validation', () => {
                 'military.officer_decision_history[0].new_officer_id must be a non-empty string when present',
                 'military.officer_decision_history[0].outgoing_officer_id must be a non-empty string when present',
                 'military.officer_decision_history[1] must be an object',
+            ]),
+        });
+    });
+
+    it('rejects malformed consequence runtime effect queues', () => {
+        const result = validateWithMilitary({
+            cascade_penalties: [{ osid: '', multiplier: Number.POSITIVE_INFINITY, expires_turn: -1 }, 42],
+            offensive_ops_suppressions: [{ faction: 'JNA', expires_turn: 1.5, reason: 7 }, 42],
+            alliance_locks: [{ mode: 'middle', value: Number.NaN, expires_turn: -1 }, 42],
+            bot_priority_shifts: [{ faction: 'UN', add_objectives: ['ok', 7], remove_objectives: 'bad', expires_turn: -1 }, 42],
+        });
+
+        expect(result).toEqual({
+            ok: false,
+            errors: expect.arrayContaining([
+                'military.cascade_penalties[0].osid must be a non-empty string',
+                'military.cascade_penalties[0].multiplier must be a finite number',
+                'military.cascade_penalties[0].expires_turn must be a non-negative integer',
+                'military.cascade_penalties[1] must be an object',
+                'military.offensive_ops_suppressions[0].faction must be one of: RBiH, RS, HRHB',
+                'military.offensive_ops_suppressions[0].expires_turn must be a non-negative integer',
+                'military.offensive_ops_suppressions[0].reason must be a string when present',
+                'military.offensive_ops_suppressions[1] must be an object',
+                'military.alliance_locks[0].mode must be one of: floor, ceiling',
+                'military.alliance_locks[0].value must be a finite number',
+                'military.alliance_locks[0].expires_turn must be a non-negative integer',
+                'military.alliance_locks[1] must be an object',
+                'military.bot_priority_shifts[0].faction must be one of: RBiH, RS, HRHB',
+                'military.bot_priority_shifts[0].add_objectives must be a string array when present',
+                'military.bot_priority_shifts[0].remove_objectives must be a string array when present',
+                'military.bot_priority_shifts[0].expires_turn must be a non-negative integer',
+                'military.bot_priority_shifts[1] must be an object',
             ]),
         });
     });

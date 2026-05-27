@@ -717,3 +717,15 @@ registerMigration({
         ensureArray(mil, 'officer_decision_history');
     },
 });
+
+registerMigration({
+    version: 31,
+    description: 'Persisted consequence runtime effect queue defaults. Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        ensureArray(mil, 'cascade_penalties');
+        ensureArray(mil, 'offensive_ops_suppressions');
+        ensureArray(mil, 'alliance_locks');
+        ensureArray(mil, 'bot_priority_shifts');
+    },
+});

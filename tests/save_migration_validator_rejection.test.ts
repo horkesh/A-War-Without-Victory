@@ -76,6 +76,10 @@ function currentVersionState(): any {
             used_operation_names: {},
             pending_officer_events: [],
             officer_decision_history: [],
+            cascade_penalties: [],
+            offensive_ops_suppressions: [],
+            alliance_locks: [],
+            bot_priority_shifts: [],
             pending_event_decisions: [],
             pending_event_notifications: [],
             phantoms_spawned: [],
@@ -1220,6 +1224,101 @@ describe('save migration validator hardening', () => {
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
             /Save schema validation failed after migration[\s\S]*military\.officer_decision_history\[0\]\.id must be a non-empty string[\s\S]*military\.officer_decision_history\[0\]\.event_id must be a non-empty string[\s\S]*military\.officer_decision_history\[0\]\.event_type must be a non-empty string[\s\S]*military\.officer_decision_history\[0\]\.officer_id must be a non-empty string[\s\S]*military\.officer_decision_history\[0\]\.turn must be a non-negative integer[\s\S]*military\.officer_decision_history\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.officer_decision_history\[0\]\.decision must be one of: acknowledged, override_confirmed, replacement_accepted[\s\S]*military\.officer_decision_history\[0\]\.current_commander_id must be a non-empty string when present[\s\S]*military\.officer_decision_history\[0\]\.corps_id must be a non-empty string when present[\s\S]*military\.officer_decision_history\[0\]\.new_officer_id must be a non-empty string when present[\s\S]*military\.officer_decision_history\[0\]\.outgoing_officer_id must be a non-empty string when present[\s\S]*military\.officer_decision_history\[1\] must be an object/
+        );
+    });
+
+    it('materializes v31 consequence runtime effect queues for v30 saves', () => {
+        const state = currentVersionState();
+        state.schema_version = 30;
+        delete state.military.cascade_penalties;
+        delete state.military.offensive_ops_suppressions;
+        delete state.military.alliance_locks;
+        delete state.military.bot_priority_shifts;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.cascade_penalties).toEqual([]);
+        expect(migrated.military.offensive_ops_suppressions).toEqual([]);
+        expect(migrated.military.alliance_locks).toEqual([]);
+        expect(migrated.military.bot_priority_shifts).toEqual([]);
+    });
+
+    it('preserves v30 consequence runtime effect queue order and contents', () => {
+        const state = currentVersionState();
+        state.schema_version = 30;
+        state.military.cascade_penalties = [
+            { osid: 'op:banja_luka:west', multiplier: 0.85, expires_turn: 178 },
+            { osid: 'op:kljuc:center', multiplier: 0.9, expires_turn: 179 },
+        ];
+        state.military.offensive_ops_suppressions = [
+            { faction: 'RS', expires_turn: 180, reason: 'holbrooke_halt' },
+            { faction: 'RBiH', expires_turn: 181 },
+        ];
+        state.military.alliance_locks = [
+            { mode: 'floor', value: 0.8, expires_turn: 120 },
+            { mode: 'ceiling', value: 0.55, expires_turn: 90 },
+        ];
+        state.military.bot_priority_shifts = [
+            { faction: 'RBiH', add_objectives: ['obj_b', 'obj_a'], expires_turn: 170 },
+            { faction: 'HRHB', remove_objectives: ['obj_c'], expires_turn: 171 },
+        ];
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.cascade_penalties?.map((entry) => entry.osid)).toEqual(['op:banja_luka:west', 'op:kljuc:center']);
+        expect(migrated.military.offensive_ops_suppressions?.map((entry) => entry.faction)).toEqual(['RS', 'RBiH']);
+        expect(migrated.military.alliance_locks?.map((entry) => entry.mode)).toEqual(['floor', 'ceiling']);
+        expect(migrated.military.bot_priority_shifts?.map((entry) => entry.faction)).toEqual(['RBiH', 'HRHB']);
+        expect(migrated.military.bot_priority_shifts?.[0].add_objectives).toEqual(['obj_b', 'obj_a']);
+    });
+
+    it('rejects current-version saves missing consequence runtime effect queues', () => {
+        const missingCascade = currentVersionState();
+        delete missingCascade.military.cascade_penalties;
+        const missingSuppressions = currentVersionState();
+        delete missingSuppressions.military.offensive_ops_suppressions;
+        const missingLocks = currentVersionState();
+        delete missingLocks.military.alliance_locks;
+        const missingShifts = currentVersionState();
+        delete missingShifts.military.bot_priority_shifts;
+
+        expect(() => deserializeState(JSON.stringify(missingCascade))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v31[\s\S]*military\.cascade_penalties/
+        );
+        expect(() => deserializeState(JSON.stringify(missingSuppressions))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v31[\s\S]*military\.offensive_ops_suppressions/
+        );
+        expect(() => deserializeState(JSON.stringify(missingLocks))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v31[\s\S]*military\.alliance_locks/
+        );
+        expect(() => deserializeState(JSON.stringify(missingShifts))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v31[\s\S]*military\.bot_priority_shifts/
+        );
+    });
+
+    it('rejects current-version saves with malformed consequence runtime effect queues', () => {
+        const state = currentVersionState();
+        state.military.cascade_penalties = [
+            { osid: '', multiplier: Number.POSITIVE_INFINITY, expires_turn: -1 },
+            42,
+        ];
+        state.military.offensive_ops_suppressions = [
+            { faction: 'JNA', expires_turn: 1.5, reason: 7 },
+            42,
+        ];
+        state.military.alliance_locks = [
+            { mode: 'middle', value: Number.NaN, expires_turn: -1 },
+            42,
+        ];
+        state.military.bot_priority_shifts = [
+            { faction: 'UN', add_objectives: ['ok', 7], remove_objectives: 'bad', expires_turn: -1 },
+            42,
+        ];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.cascade_penalties\[0\]\.osid must be a non-empty string[\s\S]*military\.cascade_penalties\[0\]\.multiplier must be a finite number[\s\S]*military\.cascade_penalties\[0\]\.expires_turn must be a non-negative integer[\s\S]*military\.cascade_penalties\[1\] must be an object[\s\S]*military\.offensive_ops_suppressions\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.offensive_ops_suppressions\[0\]\.expires_turn must be a non-negative integer[\s\S]*military\.offensive_ops_suppressions\[0\]\.reason must be a string when present[\s\S]*military\.offensive_ops_suppressions\[1\] must be an object[\s\S]*military\.alliance_locks\[0\]\.mode must be one of: floor, ceiling[\s\S]*military\.alliance_locks\[0\]\.value must be a finite number[\s\S]*military\.alliance_locks\[0\]\.expires_turn must be a non-negative integer[\s\S]*military\.alliance_locks\[1\] must be an object[\s\S]*military\.bot_priority_shifts\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.bot_priority_shifts\[0\]\.add_objectives must be a string array when present[\s\S]*military\.bot_priority_shifts\[0\]\.remove_objectives must be a string array when present[\s\S]*military\.bot_priority_shifts\[0\]\.expires_turn must be a non-negative integer[\s\S]*military\.bot_priority_shifts\[1\] must be an object/
         );
     });
 });

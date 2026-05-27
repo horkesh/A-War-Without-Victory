@@ -1120,11 +1120,14 @@
     "war_start_turn": 0
   },
   "military": {
+    "alliance_locks": [],
     "army_co_decision_traces": {},
     "army_corps_directives_by_faction": {},
     "army_theatre_assignment": {},
     "assignable_front_segments": [],
+    "bot_priority_shifts": [],
     "brigade_front_assignment": {},
+    "cascade_penalties": [],
     "command_authority": {
       "current": 100,
       "lifetime_spent": 0,
@@ -33795,6 +33798,7 @@
       "peace_plan_history": [],
       "pending_counter_offers": []
     },
+    "offensive_ops_suppressions": [],
     "officer_decision_history": [],
     "pending_convoy_decisions": [],
     "pending_event_decisions": [],
@@ -43328,5 +43332,5 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 30
+  "schema_version": 31
 }

@@ -134,6 +134,10 @@ function isOfficerDecision(value: unknown): boolean {
     return value === 'acknowledged' || value === 'override_confirmed' || value === 'replacement_accepted';
 }
 
+function isAllianceLockMode(value: unknown): boolean {
+    return value === 'floor' || value === 'ceiling';
+}
+
 function isOrderSnapshotType(value: unknown): boolean {
     return value === 'stance_change'
         || value === 'operation_launch'
@@ -396,6 +400,105 @@ function validateExpiringFactionNumberModifiers(
         }
         if (!isNonNegativeInteger(modifier.expires_turn)) {
             errors.push(`${path}[${i}].expires_turn must be a non-negative integer`);
+        }
+    });
+}
+
+function validateCascadePenalties(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.cascade_penalties must be an array when present');
+        return;
+    }
+
+    value.forEach((penalty, i) => {
+        const path = `military.cascade_penalties[${i}]`;
+        if (!isRecord(penalty)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        if (!isNonEmptyString(penalty.osid)) {
+            errors.push(`${path}.osid must be a non-empty string`);
+        }
+        if (!isFiniteNumber(penalty.multiplier)) {
+            errors.push(`${path}.multiplier must be a finite number`);
+        }
+        if (!isNonNegativeInteger(penalty.expires_turn)) {
+            errors.push(`${path}.expires_turn must be a non-negative integer`);
+        }
+    });
+}
+
+function validateOffensiveOpsSuppressions(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.offensive_ops_suppressions must be an array when present');
+        return;
+    }
+
+    value.forEach((suppression, i) => {
+        const path = `military.offensive_ops_suppressions[${i}]`;
+        if (!isRecord(suppression)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        if (!isCanonicalPlayerFaction(suppression.faction)) {
+            errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+        }
+        if (!isNonNegativeInteger(suppression.expires_turn)) {
+            errors.push(`${path}.expires_turn must be a non-negative integer`);
+        }
+        if ('reason' in suppression && suppression.reason !== undefined && typeof suppression.reason !== 'string') {
+            errors.push(`${path}.reason must be a string when present`);
+        }
+    });
+}
+
+function validateAllianceLocks(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.alliance_locks must be an array when present');
+        return;
+    }
+
+    value.forEach((lock, i) => {
+        const path = `military.alliance_locks[${i}]`;
+        if (!isRecord(lock)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        if (!isAllianceLockMode(lock.mode)) {
+            errors.push(`${path}.mode must be one of: floor, ceiling`);
+        }
+        if (!isFiniteNumber(lock.value)) {
+            errors.push(`${path}.value must be a finite number`);
+        }
+        if (!isNonNegativeInteger(lock.expires_turn)) {
+            errors.push(`${path}.expires_turn must be a non-negative integer`);
+        }
+    });
+}
+
+function validateBotPriorityShifts(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.bot_priority_shifts must be an array when present');
+        return;
+    }
+
+    value.forEach((shift, i) => {
+        const path = `military.bot_priority_shifts[${i}]`;
+        if (!isRecord(shift)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        if (!isCanonicalPlayerFaction(shift.faction)) {
+            errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+        }
+        if ('add_objectives' in shift && shift.add_objectives !== undefined && !isStringArray(shift.add_objectives)) {
+            errors.push(`${path}.add_objectives must be a string array when present`);
+        }
+        if ('remove_objectives' in shift && shift.remove_objectives !== undefined && !isStringArray(shift.remove_objectives)) {
+            errors.push(`${path}.remove_objectives must be a string array when present`);
+        }
+        if (!isNonNegativeInteger(shift.expires_turn)) {
+            errors.push(`${path}.expires_turn must be a non-negative integer`);
         }
     });
 }
@@ -728,6 +831,10 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 29, path: 'military.used_operation_names', check: isNonNegativeIntegerRecord },
     { version: 30, path: 'military.pending_officer_events', check: Array.isArray },
     { version: 30, path: 'military.officer_decision_history', check: Array.isArray },
+    { version: 31, path: 'military.cascade_penalties', check: Array.isArray },
+    { version: 31, path: 'military.offensive_ops_suppressions', check: Array.isArray },
+    { version: 31, path: 'military.alliance_locks', check: Array.isArray },
+    { version: 31, path: 'military.bot_priority_shifts', check: Array.isArray },
 ];
 
 /**
@@ -939,6 +1046,18 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'officer_decision_history' in military && military.officer_decision_history !== undefined) {
         validateOfficerDecisionHistory(military.officer_decision_history, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'cascade_penalties' in military && military.cascade_penalties !== undefined) {
+        validateCascadePenalties(military.cascade_penalties, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'offensive_ops_suppressions' in military && military.offensive_ops_suppressions !== undefined) {
+        validateOffensiveOpsSuppressions(military.offensive_ops_suppressions, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'alliance_locks' in military && military.alliance_locks !== undefined) {
+        validateAllianceLocks(military.alliance_locks, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'bot_priority_shifts' in military && military.bot_priority_shifts !== undefined) {
+        validateBotPriorityShifts(military.bot_priority_shifts, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'pending_event_notifications' in military && military.pending_event_notifications !== undefined) {
         const notifications = military.pending_event_notifications;

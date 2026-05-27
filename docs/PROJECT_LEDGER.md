@@ -1,4 +1,24 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] state(events): make consequence runtime queues a v31 save contract
+
+**Type:** Save-schema/default contract slice.
+
+**Change:** Bumped `CURRENT_SCHEMA_VERSION` to 31 and added migration v31 for `military.cascade_penalties`, `military.offensive_ops_suppressions`, `military.alliance_locks`, and `military.bot_priority_shifts` with inert `[]` defaults. Current-version save validation now rejects missing or malformed consequence runtime queue rows using current writer/consumer shapes. `military.event_constraints` is intentionally out of scope. The v30 fixture plus focused migration/validator tests prove default materialization and existing row order/content preservation. The TypeScript optional markers remain in `GameState` for legacy/in-memory runtime compatibility.
+
+**Determinism:** Migration is pure and preserves existing array order. `tools/diagnostics/output/save_migration_drift.json` was regenerated to v31 / 31 migrations / 74 strict required fields. The startup snapshot was rebuilt to the v31 persisted save contract. No event prose/content, bot historical choices, operation opportunities, GUI routing, scenario calibration, sector/frontline behavior, replay artifacts, or operation launch behavior changed.
+
+**Verification:**
+- Red proof before production change: focused migration/validator/round-trip/state tests failed on missing v31 migration/default/validator coverage.
+- `npx.cmd vitest run tests\consequence_effects.test.ts tests\consequence_consumers.test.ts tests\consequence_chains.test.ts tests\event_state_shape_validation.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts tests\save_migration_round_trip_contract.test.ts tests\save_migration_drift_audit.test.ts tests\state.test.ts --reporter=dot` - PASS; 273/273 tests.
+- `npm.cmd run desktop:startup-snapshot:check` - PASS.
+- `npm.cmd run typecheck` - PASS.
+- `node tools\diagnostics\strict_null_inventory.cjs` - PASS; counted escape categories remain 0 and optional-field floor remains 465.
+- `git diff --check` - PASS.
+- Independent save/schema QA review - no blockers; confirmed v31 promotes only the four consequence runtime queues, leaves `military.event_constraints` out of scope, keeps TypeScript optionals, and validates row shapes against real writers and consumers.
+- Independent determinism/artifact review - no blockers; confirmed no event prose/content, bot historical choice logic, operation opportunities, GUI/desktop routing, scenario calibration, sector/frontline behavior, replay artifacts, operation launch behavior, or `event_constraints` changes. Generated artifact drift is explained by schema v31 only.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, save/state/consequence tests, `tests/fixtures/save_migration/v30_consequence_runtime_queues.json`, `tools/diagnostics/output/save_migration_drift.json`, `data/derived/startup/apr_1992_initial_save.json`, `docs/40_reports/implemented/20260527_CONSEQUENCE_RUNTIME_QUEUE_SCHEMA_CONTRACT.md`, command-board/roadmap/plan docs.
+
 ## [2026-05-27] state(convoys): make convoy decision queues a v27 save contract
 
 **Type:** Save-schema/default contract slice.

@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest consequence runtime queue schema contract:** [implemented/20260527_CONSEQUENCE_RUNTIME_QUEUE_SCHEMA_CONTRACT.md](implemented/20260527_CONSEQUENCE_RUNTIME_QUEUE_SCHEMA_CONTRACT.md) - Consequence runtime queues are now required persisted v31 save/load contracts with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no event or operation behavior change.
+
 **Latest officer decision queue schema contract:** [implemented/20260527_OFFICER_DECISION_QUEUE_SCHEMA_CONTRACT.md](implemented/20260527_OFFICER_DECISION_QUEUE_SCHEMA_CONTRACT.md) - Officer pending/history queues are now required persisted v30 save/load contracts with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no officer behavior change.
 
 **Latest triggered-operation bookkeeping schema contract:** [implemented/20260527_TRIGGERED_OPERATION_BOOKKEEPING_SCHEMA_CONTRACT.md](implemented/20260527_TRIGGERED_OPERATION_BOOKKEEPING_SCHEMA_CONTRACT.md) - Triggered-operation accepted/declined/used-name records are now required persisted v29 save/load contracts with `{}` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no operation behavior change.

@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(30);
+        expect(getLatestSchemaVersion()).toBe(31);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -102,6 +102,10 @@ describe('versioned save migration steps', () => {
         expect(state.military.used_operation_names).toEqual({});
         expect(state.military.pending_officer_events).toEqual([]);
         expect(state.military.officer_decision_history).toEqual([]);
+        expect(state.military.cascade_penalties).toEqual([]);
+        expect(state.military.offensive_ops_suppressions).toEqual([]);
+        expect(state.military.alliance_locks).toEqual([]);
+        expect(state.military.bot_priority_shifts).toEqual([]);
         expect(state.military.pending_event_decisions).toEqual([]);
         expect(state.military.pending_event_notifications).toEqual([]);
         expect(state.military.phantoms_spawned).toEqual([]);
@@ -888,5 +892,82 @@ describe('versioned save migration steps', () => {
             'officer:9:officer:event-a:replacement_accepted',
         ]);
         expect(state.military.officer_decision_history[1].outgoing_officer_id).toBe('old_a');
+    });
+
+    it('materializes v31 consequence runtime effect queues for v30 saves', () => {
+        const state = minimalLegacyState(30);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [];
+        state.military.convoy_decision_history = [];
+        state.military.pending_reserve_requests = [];
+        state.military.reserve_request_history = [];
+        state.military.triggered_operations_accepted = {};
+        state.military.declined_operations = {};
+        state.military.used_operation_names = {};
+        state.military.pending_officer_events = [];
+        state.military.officer_decision_history = [];
+        delete state.military.cascade_penalties;
+        delete state.military.offensive_ops_suppressions;
+        delete state.military.alliance_locks;
+        delete state.military.bot_priority_shifts;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.cascade_penalties).toEqual([]);
+        expect(state.military.offensive_ops_suppressions).toEqual([]);
+        expect(state.military.alliance_locks).toEqual([]);
+        expect(state.military.bot_priority_shifts).toEqual([]);
+    });
+
+    it('preserves existing v31 consequence runtime effect queue order and contents for v30 saves', () => {
+        const state = minimalLegacyState(30);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [];
+        state.military.convoy_decision_history = [];
+        state.military.pending_reserve_requests = [];
+        state.military.reserve_request_history = [];
+        state.military.triggered_operations_accepted = {};
+        state.military.declined_operations = {};
+        state.military.used_operation_names = {};
+        state.military.pending_officer_events = [];
+        state.military.officer_decision_history = [];
+        state.military.cascade_penalties = [
+            { osid: 'op:banja_luka:west', multiplier: 0.85, expires_turn: 178 },
+            { osid: 'op:kljuc:center', multiplier: 0.9, expires_turn: 179 },
+        ];
+        state.military.offensive_ops_suppressions = [
+            { faction: 'RS', expires_turn: 180, reason: 'holbrooke_halt' },
+            { faction: 'RBiH', expires_turn: 181 },
+        ];
+        state.military.alliance_locks = [
+            { mode: 'floor', value: 0.8, expires_turn: 120 },
+            { mode: 'ceiling', value: 0.55, expires_turn: 90 },
+        ];
+        state.military.bot_priority_shifts = [
+            { faction: 'RBiH', add_objectives: ['obj_b', 'obj_a'], expires_turn: 170 },
+            { faction: 'HRHB', remove_objectives: ['obj_c'], expires_turn: 171 },
+        ];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.cascade_penalties.map((entry: any) => entry.osid)).toEqual(['op:banja_luka:west', 'op:kljuc:center']);
+        expect(state.military.offensive_ops_suppressions.map((entry: any) => entry.faction)).toEqual(['RS', 'RBiH']);
+        expect(state.military.alliance_locks.map((entry: any) => entry.mode)).toEqual(['floor', 'ceiling']);
+        expect(state.military.bot_priority_shifts.map((entry: any) => entry.faction)).toEqual(['RBiH', 'HRHB']);
+        expect(state.military.bot_priority_shifts[0].add_objectives).toEqual(['obj_b', 'obj_a']);
     });
 });
