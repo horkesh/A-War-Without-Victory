@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(21);
+        expect(getLatestSchemaVersion()).toBe(22);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -88,6 +88,7 @@ describe('versioned save migration steps', () => {
         expect(state.military.event_last_fired_turn).toEqual({});
         expect(state.military.event_flags).toEqual({});
         expect(state.military.enabled_event_ids).toEqual([]);
+        expect(state.military.event_overflow_queue).toEqual([]);
         expect(state.military.phantoms_spawned).toEqual([]);
         expect(state.paramilitary_decision_history).toEqual([]);
         expect(state.political.supply_rights).toEqual({ corridors: [] });
@@ -283,5 +284,25 @@ describe('versioned save migration steps', () => {
                 estimated_civilian_risk: 12,
             },
         ]);
+    });
+
+    it('materializes v22 event overflow queue defaults for v21 saves', () => {
+        const state = minimalLegacyState(21);
+        delete state.military.event_overflow_queue;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.event_overflow_queue).toEqual([]);
+    });
+
+    it('preserves existing v22 event overflow queue order and contents for v21 saves', () => {
+        const state = minimalLegacyState(21);
+        state.military.event_overflow_queue = ['overflow_b', 'overflow_a', 'overflow_b'];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.event_overflow_queue).toEqual(['overflow_b', 'overflow_a', 'overflow_b']);
     });
 });

@@ -62,6 +62,7 @@ function currentVersionState(): any {
             event_last_fired_turn: {},
             event_flags: {},
             enabled_event_ids: [],
+            event_overflow_queue: [],
             phantoms_spawned: [],
         },
         political: {
@@ -348,6 +349,7 @@ describe('save migration validator hardening', () => {
         delete state.military.event_last_fired_turn;
         delete state.military.event_flags;
         delete state.military.enabled_event_ids;
+        delete state.military.event_overflow_queue;
         delete state.displacement.displacement_event_log;
         delete state.displacement.war_displacement_initiated;
         delete state.displacement.hostile_takeover_timers;
@@ -379,6 +381,7 @@ describe('save migration validator hardening', () => {
         expect(migrated.military.event_last_fired_turn).toEqual({});
         expect(migrated.military.event_flags).toEqual({});
         expect(migrated.military.enabled_event_ids).toEqual([]);
+        expect(migrated.military.event_overflow_queue).toEqual([]);
         expect(migrated.displacement.displacement_event_log).toEqual([]);
         expect(migrated.displacement.war_displacement_initiated).toEqual({});
         expect(migrated.displacement.hostile_takeover_timers).toEqual({});
@@ -585,6 +588,35 @@ describe('save migration validator hardening', () => {
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
             /Save schema validation failed after migration[\s\S]*v21[\s\S]*paramilitary_decision_history/
+        );
+    });
+
+    it('materializes v22 event overflow queue for v21 saves', () => {
+        const state = currentVersionState();
+        state.schema_version = 21;
+        delete state.military.event_overflow_queue;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.event_overflow_queue).toEqual([]);
+    });
+
+    it('rejects current-version saves missing event overflow queue', () => {
+        const state = currentVersionState();
+        delete state.military.event_overflow_queue;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v22[\s\S]*military\.event_overflow_queue/
+        );
+    });
+
+    it('rejects current-version saves with malformed event overflow queue', () => {
+        const state = currentVersionState();
+        state.military.event_overflow_queue = ['valid_event', 42];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v22[\s\S]*military\.event_overflow_queue/
         );
     });
 });

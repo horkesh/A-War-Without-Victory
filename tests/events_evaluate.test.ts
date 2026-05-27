@@ -174,6 +174,94 @@ test('evaluateEvents: five eligible same-priority same-turn events fire four and
     assert.ok(!state.military.fired_event_ids?.includes('overflow_e'), 'overflowed event must not be tracked as fired');
 });
 
+test('evaluateEvents: stores overflowed ids in the persisted overflow queue', () => {
+    const state = minimalState('war', 13);
+    const registry = [
+        makeEligibleEvent('queue_a', { priority: 1, turnMin: 13 }),
+        makeEligibleEvent('queue_b', { priority: 1, turnMin: 13 }),
+        makeEligibleEvent('queue_c', { priority: 1, turnMin: 13 }),
+        makeEligibleEvent('queue_d', { priority: 1, turnMin: 13 }),
+        makeEligibleEvent('queue_e', { priority: 1, turnMin: 13 }),
+        makeEligibleEvent('queue_f', { priority: 1, turnMin: 13 }),
+    ];
+
+    const result = evaluateEvents(state, createRng('overflow-queue-store'), 13, registry);
+
+    assert.deepStrictEqual(result.overflowed_ids, ['queue_e', 'queue_f']);
+    assert.deepStrictEqual(state.military.event_overflow_queue, ['queue_e', 'queue_f']);
+});
+
+test('evaluateEvents: clears queued ids outside war phase', () => {
+    const state = minimalState('peace', 13);
+    state.military.event_overflow_queue = ['queued_war_only'];
+
+    const result = evaluateEvents(state, createRng('overflow-queue-peace'), 13, [
+        makeEligibleEvent('queued_war_only', { priority: 1, turnMin: 13 }),
+    ]);
+
+    assert.deepStrictEqual(result.fired, []);
+    assert.deepStrictEqual(result.overflowed_ids, []);
+    assert.deepStrictEqual(state.military.event_overflow_queue, []);
+});
+
+test('evaluateEvents: re-enters queued ids but canonical order controls firing and overflow', () => {
+    const state = minimalState('war', 14);
+    state.military.event_overflow_queue = ['queued_z', 'queued_z', 'missing_old'];
+    const registry = [
+        makeEligibleEvent('new_a', { priority: 1, turnMin: 14 }),
+        makeEligibleEvent('new_b', { priority: 1, turnMin: 14 }),
+        makeEligibleEvent('new_c', { priority: 1, turnMin: 14 }),
+        makeEligibleEvent('new_d', { priority: 1, turnMin: 14 }),
+        makeEligibleEvent('queued_z', { priority: 100, turnMin: 14 }),
+    ];
+
+    const result = evaluateEvents(state, createRng('overflow-queue-priority'), 14, registry);
+
+    assert.deepStrictEqual(result.fired.map((event) => event.id), [
+        'new_a',
+        'new_b',
+        'new_c',
+        'new_d',
+    ]);
+    assert.deepStrictEqual(result.overflowed_ids, ['queued_z']);
+    assert.deepStrictEqual(state.military.event_overflow_queue, ['queued_z']);
+});
+
+test('evaluateEvents: drops queued ids that no longer pass normal gates', () => {
+    const state = minimalState('war', 15);
+    state.military.event_overflow_queue = ['stale_turn', 'blocked_by_cooldown'];
+    state.military.event_last_fired_turn = { blocked_by_cooldown: 14 };
+    const registry = [
+        makeEligibleEvent('stale_turn', { priority: 1, turnMin: 16 }),
+        makeEligibleEvent('blocked_by_cooldown', { priority: 1, turnMin: 15, cooldownTurns: 3 }),
+    ];
+
+    const result = evaluateEvents(state, createRng('overflow-queue-stale'), 15, registry);
+
+    assert.deepStrictEqual(result.fired, []);
+    assert.deepStrictEqual(result.overflowed_ids, []);
+    assert.deepStrictEqual(state.military.event_overflow_queue, []);
+});
+
+test('evaluateEvents: does not queue mutex-suppressed ids', () => {
+    const state = minimalState('war', 16);
+    const registry = [
+        makeEligibleEvent('mutex_queue_a', { priority: 1, turnMin: 16, mutexGroup: 'shared' }),
+        makeEligibleEvent('mutex_queue_b', { priority: 1, turnMin: 16, mutexGroup: 'shared' }),
+        makeEligibleEvent('plain_queue_a', { priority: 1, turnMin: 16 }),
+        makeEligibleEvent('plain_queue_b', { priority: 1, turnMin: 16 }),
+        makeEligibleEvent('plain_queue_c', { priority: 1, turnMin: 16 }),
+        makeEligibleEvent('plain_queue_d', { priority: 1, turnMin: 16 }),
+    ];
+
+    const result = evaluateEvents(state, createRng('overflow-queue-mutex'), 16, registry);
+
+    assert.deepStrictEqual(result.mutex_suppressed_ids, ['mutex_queue_b']);
+    assert.deepStrictEqual(result.overflowed_ids, ['plain_queue_d']);
+    assert.deepStrictEqual(state.military.event_overflow_queue, ['plain_queue_d']);
+    assert.ok(!state.military.event_overflow_queue.includes('mutex_queue_b'));
+});
+
 test('evaluateEvents: shuffled five-event registry fires canonical first four deterministically', () => {
     const state = minimalState('war', 20);
     const registry = [

@@ -193,6 +193,40 @@ function recordEnabledEvents(state: GameState, enablesEvents: string[] | undefin
     }
 }
 
+function uniqueStringsInOrder(values: readonly unknown[] | undefined): string[] {
+    if (!Array.isArray(values)) return [];
+    const seen = new Set<string>();
+    const ids: string[] = [];
+    for (const value of values) {
+        if (typeof value !== 'string' || seen.has(value)) continue;
+        seen.add(value);
+        ids.push(value);
+    }
+    return ids;
+}
+
+function isCandidateEligible(
+    def: EventDefinition,
+    state: GameState,
+    rng: Rng,
+    currentTurn: number,
+    edges?: EdgeRecord[],
+): boolean {
+    if (!canEventFire(def, state, currentTurn)) return false;
+
+    if (def.pressure) {
+        // Pressure events: readiness can persist briefly after a trigger gate closes;
+        // require the trigger to still match before allowing the event to fire.
+        if (!triggerMatches(def, state, currentTurn, edges)) return false;
+        if (!isEventReady(state, def)) return false;
+    } else if (!triggerMatches(def, state, currentTurn, edges)) {
+        return false;
+    }
+
+    if (def.probability != null && rng() >= def.probability) return false;
+    return true;
+}
+
 /** Default moderate commander profile for bot response selection. */
 const DEFAULT_BOT_COMMANDER = { aggressiveness: 3, competence: 3 };
 
@@ -227,6 +261,7 @@ export function evaluateEvents(
     const fired: FiredEvent[] = [];
     const phase = state.meta.phase;
     if (phase !== 'war') {
+        state.military.event_overflow_queue = [];
         return { fired, candidates_considered: 0, overflowed: false, overflowed_ids: [], mutex_suppressed_ids: [] };
     }
 
@@ -238,36 +273,42 @@ export function evaluateEvents(
     const playerFaction = state.meta.player_faction;
 
     const events = registry ?? getEventRegistry();
+    const canonicalEvents = [...events].sort(compareEventCandidates);
+    const eventsById = new Map<string, EventDefinition>();
+    for (const def of canonicalEvents) {
+        if (!eventsById.has(def.id)) {
+            eventsById.set(def.id, def);
+        }
+    }
 
     // Phase 1: Collect candidates
-    const candidates: EventDefinition[] = [];
-    for (const def of events) {
-        // Recurrence/once gating
-        if (!canEventFire(def, state, currentTurn)) continue;
-
-        // Pressure-based vs trigger-based evaluation
-        if (def.pressure) {
-            // Pressure events: readiness can persist briefly after a trigger gate closes;
-            // require the trigger to still match before allowing the event to fire.
-            if (!triggerMatches(def, state, currentTurn, edges)) continue;
-            if (!isEventReady(state, def)) continue;
-        } else {
-            // Legacy events: use triggerMatches
-            if (!triggerMatches(def, state, currentTurn, edges)) continue;
+    const queuedIds = uniqueStringsInOrder(state.military.event_overflow_queue);
+    const queuedIdSet = new Set(queuedIds);
+    const queuedCandidates: EventDefinition[] = [];
+    for (const id of queuedIds) {
+        const def = eventsById.get(id);
+        if (!def) continue;
+        if (isCandidateEligible(def, state, rng, currentTurn, edges)) {
+            queuedCandidates.push(def);
         }
+    }
 
-        // Probability gate (applies to both paths)
-        if (def.probability != null) {
-            if (rng() >= def.probability) continue;
+    const newCandidates: EventDefinition[] = [];
+    const seenNewIds = new Set<string>();
+    for (const def of canonicalEvents) {
+        if (queuedIdSet.has(def.id) || seenNewIds.has(def.id)) continue;
+        if (isCandidateEligible(def, state, rng, currentTurn, edges)) {
+            newCandidates.push(def);
+            seenNewIds.add(def.id);
         }
-
-        candidates.push(def);
     }
 
     // Phase 2: Sort canonically, suppress same-turn mutex siblings, then cap.
+    const candidates = [...queuedCandidates, ...newCandidates];
     candidates.sort(compareEventCandidates);
     const mutexFiltered = filterMutexCandidates(candidates);
     const overflowedIds = mutexFiltered.candidates.slice(MAX_EVENTS_PER_TURN).map((def) => def.id);
+    state.military.event_overflow_queue = overflowedIds;
     const toFire = mutexFiltered.candidates.slice(0, MAX_EVENTS_PER_TURN);
 
     // Phase 3: Fire selected events

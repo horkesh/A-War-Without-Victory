@@ -1,5 +1,6 @@
 {
   "displacement": {
+    "civilian_casualties": {},
     "displacement_camp_state": {},
     "displacement_event_log": [],
     "displacement_humanitarian_aggregates": {},
@@ -973,9 +974,11 @@
         "to_faction": "RS"
       }
     },
+    "minority_flight_state": {},
     "municipality_displacement": {},
     "settlement_displacement": {},
     "settlement_displacement_started_turn": {},
+    "sustainability_state": {},
     "war_displacement_initiated": {}
   },
   "factions": [
@@ -1119,7 +1122,6 @@
   "military": {
     "army_co_decision_traces": {},
     "army_corps_directives_by_faction": {},
-    "event_decision_log": [],
     "army_theatre_assignment": {},
     "assignable_front_segments": [],
     "brigade_front_assignment": {},
@@ -12478,6 +12480,14 @@
         "unstaffed_front": true
       }
     },
+    "enabled_event_ids": [],
+    "event_decision_log": [],
+    "event_fire_counts": {},
+    "event_flags": {},
+    "event_last_fired_turn": {},
+    "event_overflow_queue": [],
+    "event_readiness": {},
+    "fired_event_ids": [],
     "formation_spawn_directive": {
       "kind": "both"
     },
@@ -39498,6 +39508,7 @@
       }
     }
   },
+  "paramilitary_decision_history": [],
   "political": {
     "ceasefire": {},
     "coercion_pressure_by_municipality": {
@@ -43302,5 +43313,5 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 14
+  "schema_version": 22
 }

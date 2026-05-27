@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] events: persist event overflow queue
+
+**Type:** Event-system Workstream B behavior + save-schema slice.
+
+**Change:** Added save schema v22 `military.event_overflow_queue` with migration default, current-version shape validation, save-migration fixtures, focused evaluator tests, startup snapshot refresh, and baseline manifest refresh. `evaluateEvents(...)` now persists ids delayed only by the four-event cap, re-resolves and re-gates queued ids before later firing, combines them with newly eligible candidates, applies canonical ordering plus same-turn mutex filtering, and replaces the queue with the next post-cap overflow ids. Non-war evaluation clears the queue.
+
+**Determinism:** Queue contents are event ids only, de-duplicated in order, sorted by the existing canonical event comparator after combination with new candidates, and serialized through the save schema. Mutex-suppressed, stale, trigger-blocked, phase-blocked, recurrence/cooldown-blocked, and probability-failed ids are not retained. No event JSON, historical prose, GUI ownership, bot historical-default policy, operation tuning, randomness source, or calibration logic changed. Baseline hashes moved because persisted save bytes now include schema v22 and the empty queue; event firing sequence matched the latest preserved 52-week baseline comparison.
+
+**Verification:** Focused event/save suites PASS; save-migration block PASS; event/effects/timeline/consequence block PASS; `npm.cmd run desktop:startup-snapshot:build` PASS; `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS after documented baseline manifest refresh; `git diff --check` PASS before docs updates.
+
+**Artifacts:** `src/sim/events/evaluate_events.ts`, `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, event/save tests, `tests/fixtures/save_migration/v21_event_overflow_queue.json`, `tools/diagnostics/output/save_migration_drift.json`, `data/derived/startup/apr_1992_initial_save.json`, `data/derived/scenario/baselines/manifest.json`, `docs/40_reports/implemented/20260527_EVENT_OVERFLOW_QUEUE_IMPLEMENTATION.md`, command-board/roadmap/canon docs.
+
+---
+
 ## [2026-05-27] docs(events): packet persisted overflow queue schema
 
 **Type:** Event-system schema decision packet.

@@ -260,6 +260,7 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 19, path: 'displacement.civilian_casualties', check: isCivilianCasualtiesRecord },
     { version: 20, path: 'military.phantoms_spawned', check: isStringArray },
     { version: 21, path: 'paramilitary_decision_history', check: Array.isArray },
+    { version: 22, path: 'military.event_overflow_queue', check: isStringArray },
 ];
 
 /**
@@ -429,6 +430,9 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'event_decision_log' in military && military.event_decision_log !== undefined) {
         validateEventDecisionLog(military.event_decision_log, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'event_overflow_queue' in military && military.event_overflow_queue !== undefined && !isStringArray(military.event_overflow_queue)) {
+        errors.push('military.event_overflow_queue must be a string array when present');
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'event_aggression_modifiers' in military && military.event_aggression_modifiers !== undefined) {
         validateExpiringFactionNumberModifiers(military.event_aggression_modifiers, 'military.event_aggression_modifiers', 'delta', errors);

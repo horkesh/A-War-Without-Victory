@@ -633,3 +633,11 @@ registerMigration({
         ensureArray(asRecord(state), 'paramilitary_decision_history');
     },
 });
+
+registerMigration({
+    version: 22,
+    description: 'Persisted military event overflow queue defaults. Sensitive: no.',
+    migrate: (state) => {
+        ensureArray(asRecord(state.military), 'event_overflow_queue');
+    },
+});

@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 21,
-  "registered_migration_count": 21,
-  "strict_required_field_count": 54,
+  "latest_schema_version": 22,
+  "registered_migration_count": 22,
+  "strict_required_field_count": 55,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -89,6 +89,10 @@
     {
       "version": 21,
       "description": "Top-level paramilitary decision history persisted default. Sensitive: no."
+    },
+    {
+      "version": 22,
+      "description": "Persisted military event overflow queue defaults. Sensitive: no."
     }
   ],
   "required_fields": [
@@ -307,6 +311,10 @@
     {
       "version": 21,
       "path": "paramilitary_decision_history"
+    },
+    {
+      "version": 22,
+      "path": "military.event_overflow_queue"
     }
   ]
 }

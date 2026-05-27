@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 21 as const;
+export const CURRENT_SCHEMA_VERSION = 22 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -2245,6 +2245,8 @@ friction_events?: import('../sim/combat/warlord_friction.js').FrictionEvent[];
 negotiation?: import('./negotiation_types.js').NegotiationState;
 /** Event IDs that have already fired (prevents re-fire for once-only events). */
 fired_event_ids: string[];
+/** Event IDs delayed only by the per-turn event cap. Re-evaluated before new candidates. */
+event_overflow_queue?: string[];
 /** Pending event decisions awaiting player response. */
 pending_event_decisions?: import('../sim/events/event_types.js').PendingEventDecision[];
 /** Structured audit trail of every event-decision resolution — bot or player.

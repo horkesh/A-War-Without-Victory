@@ -33,6 +33,7 @@ function minimalState(): GameState {
             assignable_front_segments: [],
             brigade_front_assignment: {},
             militia_pools: {},
+            event_overflow_queue: ['overflow_notice'],
             pending_event_notifications: [
                 {
                     notification_id: 'rs_strategic_goals:RS:RBiH',
@@ -71,6 +72,7 @@ describe('event notification serialization', () => {
         const hydrated = deserializeState(payload);
 
         expect(hydrated.military.pending_event_notifications).toEqual(original.military.pending_event_notifications);
+        expect(hydrated.military.event_overflow_queue).toEqual(['overflow_notice']);
         expect(serializeState(hydrated)).toBe(payload);
     });
 

@@ -41,6 +41,7 @@ function baseState(overrides: Record<string, unknown> = {}): Record<string, unkn
             event_last_fired_turn: {},
             event_flags: {},
             enabled_event_ids: [],
+            event_overflow_queue: [],
             phantoms_spawned: [],
         },
         political: {
@@ -111,6 +112,7 @@ describe('event state shape validation', () => {
             event_aggression_modifiers: [{ faction: 'RS', delta: 0.2, expires_turn: 14 }],
             recruitment_modifiers: [{ faction: 'RBiH', pool_multiplier: 1.1, expires_turn: 20 }],
             equipment_quality_modifiers: [{ faction: 'HRHB', multiplier: 0.95, expires_turn: 18 }],
+            event_overflow_queue: ['delayed_event_a', 'delayed_event_b'],
         });
 
         expect(result).toEqual({ ok: true });
@@ -184,6 +186,24 @@ describe('event state shape validation', () => {
                 'military.recruitment_modifiers[0].pool_multiplier must be a finite number',
                 'military.recruitment_modifiers[0].expires_turn must be a non-negative integer',
                 'military.equipment_quality_modifiers must be an array when present',
+            ]),
+        });
+    });
+
+    it('rejects malformed event overflow queues', () => {
+        const nonArray = validateWithMilitary({ event_overflow_queue: 'bad' });
+        const nonStringEntry = validateWithMilitary({ event_overflow_queue: ['ok', 7] });
+
+        expect(nonArray).toEqual({
+            ok: false,
+            errors: expect.arrayContaining([
+                'military.event_overflow_queue must be a string array when present',
+            ]),
+        });
+        expect(nonStringEntry).toEqual({
+            ok: false,
+            errors: expect.arrayContaining([
+                'military.event_overflow_queue must be a string array when present',
             ]),
         });
     });

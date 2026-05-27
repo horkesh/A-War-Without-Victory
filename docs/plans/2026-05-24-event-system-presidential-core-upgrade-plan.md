@@ -1,7 +1,7 @@
 # Event System Presidential Core Upgrade Plan
 
 **Date:** 2026-05-24
-**Status:** ACTIVE external-agent execution plan / Workstream A baseline closed, Workstream B evaluator ordering, overflow visibility, loader fail-closed, row-level structural validation, event state shape validation, and mutex filtering slices closed
+**Status:** ACTIVE external-agent execution plan / Workstream A baseline closed, Workstream B evaluator ordering, overflow visibility, loader fail-closed, row-level structural validation, event state shape validation, mutex filtering, and persisted overflow queue slices closed
 **Owner lane:** Event-system product/engine lane
 **Related board row:** `Command Board -> Event system presidential core upgrade`
 **Do not collide with:** calibration / army-arc branch. The 2026-05-25 presidential GUI restructure is merged; use its Decision Surface Registry, President's Desk, modal stack rules, and consequence ledger instead of inventing another decision surface.
@@ -48,10 +48,10 @@ Every new event packet must classify its trigger as one of:
 - Canon target from `Game_Bible_v0_9_0.md`: roughly 60% decision / 30% consequence / 10% forced events.
 - Current design gap: about 18% choice events, too many calendar/headline rows, too few pressure-driven presidential dilemmas.
 - Presentation gap: the modal-first substrate and 17 production-authored rows now have EU-style explicit historical/default markers, authored narration, visible citations/source notes, staff assessment, trigger evidence, and numeric consequence previews. Remaining presentation work is gated content approval, not generic modal substrate.
-- Engine/spec gap: live code uses a 4-event cap with same-turn mutex filtering and overflow diagnostics; persisted overflow queueing remains unimplemented.
+- Engine/spec gap: live code uses a 4-event cap with same-turn mutex filtering, overflow diagnostics, and v22 persisted overflow queueing. Semantic catalog validation remains incomplete.
 - Current technical blockers:
-  - `evaluateEvents` caps fireable events at 4 per turn. Overflow is now visible through additive report fields, and same-turn `mutex_group` siblings are filtered before the cap, but there is still no queue/backlog persistence.
-  - Mutex/overflow behavior is packeted at `docs/40_reports/proposals/20260527_EVENT_MUTEX_OVERFLOW_DECISION_PACKET.md`; persisted overflow queueing is specified at `docs/40_reports/proposals/20260527_EVENT_OVERFLOW_QUEUE_SCHEMA_PACKET.md` but remains unimplemented.
+  - `evaluateEvents` caps fireable events at 4 per turn. Overflow is visible through additive report fields; same-turn `mutex_group` siblings are filtered before the cap; and ids delayed only by the cap persist in `military.event_overflow_queue` for re-evaluation on later turns.
+  - Mutex/overflow behavior is packeted at `docs/40_reports/proposals/20260527_EVENT_MUTEX_OVERFLOW_DECISION_PACKET.md`; persisted overflow queueing is implemented from `docs/40_reports/proposals/20260527_EVENT_OVERFLOW_QUEUE_SCHEMA_PACKET.md` as save schema v22.
   - Loader structural validation now rejects missing/blank ids, malformed triggers, non-finite turn bounds, malformed `requires_events`, missing/kindless primary effects, malformed effect arrays, and malformed response-option id/label/effects arrays.
   - Semantic catalog validation is still incomplete; taxonomy remains the owner for effect/condition vocabulary, sensitive-history policy, modal readiness, source/default blocking, and trigger-authoring classification.
   - full 247-row semantic catalog schema validation is incomplete.
@@ -517,14 +517,16 @@ Handoff: QA receives diagnostic output and confirms all 247 catalog rows are rep
 
 **Assigned to:** Systems Programmer / Gameplay Programmer
 **Reviewers:** Determinism Auditor, QA Engineer
-**Status:** IN PROGRESS. Evaluator ordering/overflow visibility and loader fail-closed slices closed 2026-05-27.
+**Status:** IN PROGRESS. Evaluator ordering/overflow visibility, loader fail-closed, row validation, state validation, mutex filtering, and persisted overflow queue slices closed 2026-05-27.
 **Goal:** harden the substrate before more presidential decisions depend on it.
 
 Closed evaluator slice: `compareEventCandidates(...)` now orders eligible candidates by `priority`, `trigger.turn_min ?? Number.MAX_SAFE_INTEGER`, then event id before the unchanged four-event cap. `EventsEvaluationReport` now returns additive `candidates_considered`, `overflowed`, `overflowed_ids`, and `mutex_suppressed_ids` fields. Same-turn `mutex_group` filtering runs after canonical sorting and before the cap. The loaded 247-row catalog has a no-drift test proving current stable priority-only order and canonical comparator order are identical.
 
 Closed loader slice: `loadEventDefinitions(...)` now fails closed when any of the fixed five required event files is missing, malformed JSON, or valid non-array JSON. `loadEventDefinitionsFromDir(...)` is a deterministic test seam using the same fixed file order, filter, and sort path. Valid current catalog behavior remains 247 rows, sorted by `trigger.turn_min ?? Number.MAX_SAFE_INTEGER` then event id.
 
-Next executable slice: add row-level catalog schema validation or produce the mutex/queue decision packet before changing live event firing. Do not implement event prose, persisted queue/backlog, save-shape changes, or mutex behavior without the relevant stop-gate proof.
+Closed overflow queue slice: save schema v22 adds `military.event_overflow_queue` as persisted event ids delayed only by the cap. Legacy saves materialize an empty queue; current-version saves reject missing or malformed queues. Queued ids are de-duplicated, resolved through the current registry, re-gated for phase/trigger/pressure/recurrence/cooldown/probability, combined with newly eligible candidates, canonically sorted, mutex-filtered, capped, and replaced with the next post-cap overflow ids. Non-war evaluation clears the queue.
+
+Next executable slice: add semantic catalog validation before changing event prose or further live event firing. Do not implement additional event prose without `docs/40_reports/proposals/20260526_EVENT_MODAL_GATED_DECISION_PACKET.md` approval.
 
 If this phase changes event ordering, cap behavior, queueing, mutex, or migration defaults, run baseline regression and explain drift before acceptance.
 

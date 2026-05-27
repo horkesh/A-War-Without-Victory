@@ -463,3 +463,10 @@
 - Added same-turn `mutex_group` filtering after canonical event candidate sorting and before the unchanged four-event cap.
 - Added additive `mutex_suppressed_ids` diagnostics; persisted overflow queueing remains deferred.
 - Report: `docs/40_reports/implemented/20260527_EVENT_MUTEX_FILTERING.md`
+
+# 2026-05-27 - Event overflow queue implementation
+
+- Added persisted save-schema v22 `military.event_overflow_queue` for events delayed only by the four-event cap.
+- Queued ids are re-resolved, re-gated, canonically sorted with new candidates, mutex-filtered, capped, and replaced by the next post-cap overflow ids.
+- Refreshed startup/baseline generated artifacts for schema-byte drift; event JSON, prose, GUI, bot historical-default policy, and calibration logic are unchanged.
+- Report: `docs/40_reports/implemented/20260527_EVENT_OVERFLOW_QUEUE_IMPLEMENTATION.md`

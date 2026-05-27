@@ -2,15 +2,15 @@
 
 **Date:** 2026-05-27
 **Owner lane:** Event-system product/engine lane
-**Status:** Proposal / implementation gate
+**Status:** Implemented 2026-05-27 / superseded by implementation report
 
 ## Purpose
 
-Persisting event overflow is the remaining behavior/schema gap after mutex filtering. The evaluator now reports overflow ids, but overflowed events are not guaranteed to re-enter evaluation next turn. This packet defines the implementation boundary for a future queue slice.
+Persisting event overflow was the remaining behavior/schema gap after mutex filtering. The 2026-05-27 implementation adds this queue as save schema v22 and follows the semantics below; see `docs/40_reports/implemented/20260527_EVENT_OVERFLOW_QUEUE_IMPLEMENTATION.md` for verification and drift proof.
 
 ## Recommended State Shape
 
-Add one persisted military field:
+Implemented persisted military field:
 
 ```ts
 event_overflow_queue: string[];
@@ -26,8 +26,6 @@ Semantics:
 
 ## Migration and Validation
 
-If implemented:
-
 - Increment save schema version.
 - Legacy saves materialize `military.event_overflow_queue = []`.
 - Current-version saves reject missing or non-string-array `military.event_overflow_queue`.
@@ -36,7 +34,7 @@ If implemented:
 
 ## Re-Evaluation Semantics
 
-Recommended first implementation:
+Implemented first-pass semantics:
 
 1. At event evaluation start, read queued ids.
 2. Resolve ids against the current event registry.
@@ -69,7 +67,7 @@ Rationale: queued overflow is priority memory, not a guarantee that an event fir
 
 ## Scenario Proof
 
-Before accepting the queue slice:
+Acceptance proof used:
 
 - Run focused evaluator/save tests.
 - Run `npm.cmd run typecheck`.
