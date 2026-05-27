@@ -791,6 +791,23 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('rejects current-version saves with pending event staff recommendations missing from response options', () => {
+        const state = currentVersionState();
+        state.military.pending_event_decisions = [{
+            event_id: 'visit_to_front_rbih',
+            event_title: 'Visit to the Front',
+            turn_fired: 84,
+            response_options: [{ id: 'stay_capital_rbih', label: 'Stay in Sarajevo' }],
+            faction: 'RBiH',
+            requires_player_response: true,
+            staff_recommended_response_id: 'missing',
+        }];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.pending_event_decisions\[0\]\.staff_recommended_response_id must match a response option id/
+        );
+    });
+
     it('materializes v25 event modifiers for v24 saves', () => {
         const state = currentVersionState();
         state.schema_version = 24;

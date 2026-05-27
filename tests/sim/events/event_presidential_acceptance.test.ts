@@ -15,7 +15,8 @@ describe('event presidential acceptance diagnostic', () => {
         expect(first.summary.catalog_required_response_events).toBe(36);
         expect(first.summary.catalog_production_modal_authoring_ready_events).toBe(catalog.production_modal_authoring_ready_rows.length);
         expect(first.summary.catalog_acceptance_status).toBe('NOT_READY');
-        expect(first.summary.probed_event_count).toBe(catalog.production_modal_authoring_ready_rows.length);
+        expect(first.summary.probed_event_count).toBe(17);
+        expect(first.summary.staff_recommendation_modal_ready_skipped_count).toBe(1);
         expect(first.summary.status).toBe('READY');
         expect(first.failures).toEqual([]);
     });

@@ -424,6 +424,8 @@ export interface EventDefinition {
     response_options?: EventResponseOption[];
     /** Explicit response option id used as the historical/default calibration path. */
     historical_default_response_id?: string;
+    /** Explicit response option id used as non-historical staff advice for abstract decisions. */
+    staff_recommended_response_id?: string;
     /** Canonical faction that must respond to this event (bot auto-respond path).
      *  Explicit over soft convention. When absent, fallback chain in evaluate_events.ts applies.
      *  Phase 3 hardening: author new events with this field set. */
@@ -494,6 +496,8 @@ export interface PendingEventDecision {
     requires_player_response?: boolean;
     /** Explicit historical/default option id for modal display, when authored. */
     historical_default_response_id?: string;
+    /** Explicit non-historical staff recommendation option id for modal display, when authored. */
+    staff_recommended_response_id?: string;
     /** Sparse authored notification text carried until the player resolves this decision. */
     notifications_to_other_factions?: EventNotificationTextByResponse;
 }

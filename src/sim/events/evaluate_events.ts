@@ -362,6 +362,9 @@ export function evaluateEvents(
                     ...(def.historical_default_response_id
                         ? { historical_default_response_id: def.historical_default_response_id }
                         : {}),
+                    ...(def.staff_recommended_response_id
+                        ? { staff_recommended_response_id: def.staff_recommended_response_id }
+                        : {}),
                     ...(isTwoLevelNotificationsEnabled()
                         ? { notifications_to_other_factions: def.notifications_to_other_factions }
                         : {}),

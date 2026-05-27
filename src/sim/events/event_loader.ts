@@ -299,6 +299,13 @@ function validateEventRow(row: unknown, filename: string, rowIndex: number): voi
             failRow(filename, rowIndex, `historical_default_response_id must match a response option id: ${row.historical_default_response_id}`);
         }
     }
+    if (hasOwn(row, 'staff_recommended_response_id') && isNonEmptyString(row.staff_recommended_response_id)) {
+        const options = Array.isArray(row.response_options) ? row.response_options.filter(isObject) : [];
+        const optionIds = new Set(options.map((option) => option.id).filter((id): id is string => typeof id === 'string'));
+        if (!optionIds.has(row.staff_recommended_response_id)) {
+            failRow(filename, rowIndex, `staff_recommended_response_id must match a response option id: ${row.staff_recommended_response_id}`);
+        }
+    }
     if (hasOwn(row, 'pressure')) {
         validatePressure(row.pressure, filename, rowIndex);
     }

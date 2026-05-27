@@ -1259,6 +1259,7 @@ export interface LoadedGameState {
         faction: string;
         requires_player_response?: boolean;
         historical_default_response_id?: string;
+        staff_recommended_response_id?: string;
         response_options: Array<{
             id: string;
             label: string;

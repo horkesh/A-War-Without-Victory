@@ -1,4 +1,36 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] docs(events): scope full event database and alternate timelines
+
+**Type:** Event-system roadmap/proposal packet.
+
+**Change:** Added `docs/40_reports/proposals/20260527_EVENT_DATABASE_ALTERNATE_TIMELINES_SCOPE.md` from Orchestrator-dispatched Historian/Game Designer and Technical Architect findings. The packet scopes the next event-system phase as a source-backed historical/counterfactual database with RS/RBiH/HRHB event-family inventory, alternate timelines, causal opens/closes, material consequences, and explicit sensitive-history stop gates.
+
+**Determinism:** Documentation/proposal only. No event JSON, runtime behavior, bot choice, save schema, scenario output, GUI route, or generated artifact changed.
+
+**Verification:** `git diff --check` - PASS as part of event-system closeout.
+
+**Artifacts:** `docs/40_reports/proposals/20260527_EVENT_DATABASE_ALTERNATE_TIMELINES_SCOPE.md`, report index, command-board/roadmap linkage.
+
+## [2026-05-27] feat(events): separate staff recommendations from historical defaults
+
+**Type:** Event modal/data/diagnostic authoring slice.
+
+**Change:** Added `staff_recommended_response_id` to event definitions, pending decisions, UI data types, loader validation, event evaluation output, taxonomy diagnostics, acceptance diagnostics, presidential-acceptance diagnostics, and the event decision modal. `visit_to_front_rbih`, `visit_to_front_rs`, and `visit_to_front_hrhb` now have neutral command-presence source notes, trigger evidence, and staff recommendation IDs. `visit_to_front_rbih` is production modal-ready through a `Staff recommendation`; RS/HRHB remain gated by sensitive/source review. Unsupported trip-specific visit prose was removed or narrowed. Sensitive-history effect coupling was corrected in gated RS/HRHB options: `visit_drina_front` no longer writes `war_crimes_delta`, and press-tour options now carry scrutiny costs instead of international/patron rewards.
+
+**Determinism:** Staff recommendation metadata is player-facing/diagnostic metadata only. It does not change bot historical calibration, event firing order, response resolution, save schema version, scenario data, operation behavior, or generated artifacts. The RS/HRHB effect corrections can change outcomes only if those gated `visit_to_front_*` options are selected by a player or strategic bot; the change removes sensitive-history reward/war-crimes coupling rather than adding a new decision surface. Current diagnostics remain 247 events / 44 choice / 36 required-response rows; production modal-ready required-response rows move 17 -> 18 and missing approved-default debt is 16 because `visit_to_front_*` now uses non-historical staff recommendations. Raw missing historical-default counts remain 19.
+
+**Verification:**
+- `npx.cmd vitest run tests\event_loader.test.ts tests\event_decisions.test.ts tests\sim\events\event_taxonomy_report.test.ts tests\sim\events\event_acceptance_report.test.ts tests\ui\event_decision_modal_phase3.test.ts tests\ui\event_decision_modal_catalog.test.ts --reporter=dot` - PASS; 92/92 tests.
+- `npx.cmd vitest run tests\sim\events\event_presidential_acceptance.test.ts tests\events_evaluate.test.ts tests\player_decision_manifest.test.ts --reporter=dot` - PASS; 37/37 tests.
+- `npx.cmd vitest run tests\event_decisions.test.ts tests\event_state_shape_validation.test.ts tests\save_migration_validator_rejection.test.ts tests\sim\events\event_acceptance_report.test.ts tests\sim\events\event_taxonomy_report.test.ts tests\sim\events\event_presidential_acceptance.test.ts tests\ui\event_decision_modal_catalog.test.ts tests\ui\event_decision_modal_phase3.test.ts --reporter=dot` - PASS; 189/189 tests.
+- `npx.cmd vitest run tests\event_loader.test.ts tests\event_decisions.test.ts tests\event_state_shape_validation.test.ts tests\save_migration_validator_rejection.test.ts tests\sim\events\event_taxonomy_report.test.ts tests\sim\events\event_acceptance_report.test.ts tests\sim\events\event_presidential_acceptance.test.ts tests\events_evaluate.test.ts tests\player_decision_manifest.test.ts tests\ui\event_decision_modal_phase3.test.ts tests\ui\event_decision_modal_catalog.test.ts --reporter=dot` - PASS; 245/245 tests.
+- `npx.cmd tsx tools\diagnostics\event_taxonomy_report.ts --json | Out-Null; npx.cmd tsx tools\diagnostics\event_acceptance_report.ts --json | Out-Null; npx.cmd tsx tools\diagnostics\event_presidential_acceptance.ts --json | Out-Null` - PASS.
+- `npm.cmd run typecheck` - PASS.
+- `git diff --check` - PASS.
+- Independent Historian/Game Designer and Technical QA reviews - no blockers after follow-up fixes.
+
+**Artifacts:** `data/scenarios/events/war_1993.json`, `src/sim/events/event_types.ts`, `src/sim/events/event_loader.ts`, `src/sim/events/evaluate_events.ts`, `src/state/validateGameState.ts`, `src/ui/map/components/EventDecisionModal.tsx`, `src/ui/map/data/types.ts`, event diagnostics, focused tests, `docs/40_reports/implemented/20260527_EVENT_STAFF_RECOMMENDATION_DEFAULTS.md`, command-board/roadmap/plan docs.
+
 ## [2026-05-27] test(diagnostics): lock force-quality diagnostic artifact ownership
 
 **Type:** Save/replay generated-artifact stability + static ownership guard.

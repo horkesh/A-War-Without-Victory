@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest event staff recommendation defaults:** [implemented/20260527_EVENT_STAFF_RECOMMENDATION_DEFAULTS.md](implemented/20260527_EVENT_STAFF_RECOMMENDATION_DEFAULTS.md) - Abstract command-presence events now carry visible `Staff recommendation` metadata separate from historical defaults. `visit_to_front_rbih` becomes the 18th production modal-ready required-response row, while RS/HRHB visit rows remain gated and historical bot calibration is unchanged.
+
 **Latest event expansion roadmap contract:** [implemented/20260527_EVENT_EXPANSION_ROADMAP_CONTRACT.md](implemented/20260527_EVENT_EXPANSION_ROADMAP_CONTRACT.md) - Event expansion is now scoped as a gated full historical/counterfactual database with branch-visibility diagnostics first, a foundational decisions packet second, explicit historical labels, historical bot calibration, causal branch opens/closes, detailed modal explanations, and no broad authoring until source/default/sensitive gates are satisfied.
 
 **Latest force-quality diagnostic artifact ownership:** [implemented/20260527_FORCE_QUALITY_DIAGNOSTIC_ARTIFACT_OWNERSHIP.md](implemented/20260527_FORCE_QUALITY_DIAGNOSTIC_ARTIFACT_OWNERSHIP.md) - A static guard now locks the four committed `tools/diagnostics/_force_quality_*.md` diagnostics as retained force-quality evidence rather than transient run output or current calibration truth.

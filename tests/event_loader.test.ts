@@ -475,6 +475,13 @@ test('loadEventDefinitionsFromDir throws on semantic enum and response metadata 
         })],
         /Invalid event row in war_1992\.json\[0\]: historical_default_response_id must match a response option id: reject/,
     );
+    assertCatalogRowsThrow(
+        [validCatalogRow({
+            response_options: [{ id: 'accept', label: 'Accept' }],
+            staff_recommended_response_id: 'brief_staff',
+        })],
+        /Invalid event row in war_1992\.json\[0\]: staff_recommended_response_id must match a response option id: brief_staff/,
+    );
 });
 
 test('loadEventDefinitionsFromDir throws on duplicate ids and unknown event references', () => {

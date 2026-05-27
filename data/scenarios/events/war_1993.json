@@ -3642,7 +3642,7 @@
   {
     "id": "visit_to_front_rbih",
     "title": "Visit to the Front",
-    "narrative": "Your chief of staff suggests a presidential visit to the front. The troops have been fighting for months without seeing their president. A visit would lift spirits — but it also means time away from Sarajevo, exposure to risk, and a political signal about which theater you prioritize. The tunnels to the city are open. The road to Tuzla is guarded. General Dudakovic's men in Bihac have received no official visit since the war began. Where will you go?",
+    "narrative": "Your chief of staff suggests a presidential visit to the front. The troops have been fighting for months without seeing their president. A visit would lift spirits — but it also means time away from Sarajevo, exposure to risk, and a political signal about which theater you prioritize. Sarajevo, Tuzla, and Bihac each carry different command and diplomatic costs. Where will you go?",
     "category": "command",
     "trigger": {
       "turn_min": 84,
@@ -3652,6 +3652,14 @@
     "requires_player_response": true,
     "responding_faction": "RBiH",
     "bot_response_logic": "strategic_weighted",
+    "staff_recommended_response_id": "stay_capital_rbih",
+    "historical_source": "Design provenance: fictionalized recurring command-presence abstraction approved by docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md; no specific historical trip/default is claimed.",
+    "source_note": "Staff-recommendation row only: this abstracts presidential command presence and does not claim a specific historical visit.",
+    "staff_assessment": "Staff recommends staying in Sarajevo when diplomatic and command demands are high; a front visit can still be chosen for morale, cohesion, or international signaling.",
+    "trigger_evidence": [
+      "Recurring command-presence pressure is active after prolonged front-line strain.",
+      "The staff recommendation is an abstract command judgment, not a sourced historical default."
+    ],
     "pressure": {
       "base_rate": 1,
       "threshold": 13,
@@ -3772,7 +3780,7 @@
       {
         "id": "visit_bihac",
         "label": "Visit the Bihac pocket — 5th Corps",
-        "description": "You visit General Dudakovic's isolated command. His men have held the Bihac pocket without relief or recognition for months. The visit costs logistics resources — but the 5th Corps has earned a presidential handshake.",
+        "description": "You visit General Dudakovic's isolated command. The pocket has held under severe pressure and limited relief. The visit costs logistics resources, but it tells 5th Corps that Sarajevo has not forgotten it.",
         "effects": [
           {
             "kind": "morale_change",
@@ -3925,7 +3933,7 @@
   {
     "id": "visit_to_front_rs",
     "title": "Visit to the Front",
-    "narrative": "Your generals suggest a presidential tour of the front. The VRS soldier is loyal — but loyalty is a currency spent by long campaigns and poor rations. Mladic visits corps. The president must also be seen. The Posavina corridor is under constant pressure. Sarajevo's siege is the world's most-watched front. The Drina Corps holds the east. Where will Republika Srpska's president be seen today?",
+    "narrative": "Your generals suggest a presidential tour of the front. The VRS soldier is loyal — but loyalty is a currency spent by long campaigns and poor rations. The Posavina corridor is under constant pressure. Sarajevo draws international scrutiny. The Drina Corps holds the east. Where will Republika Srpska's president be seen today?",
     "category": "command",
     "trigger": {
       "turn_min": 84,
@@ -3935,6 +3943,14 @@
     "requires_player_response": true,
     "responding_faction": "RS",
     "bot_response_logic": "strategic_weighted",
+    "staff_recommended_response_id": "stay_pale_rs",
+    "historical_source": "Design provenance: fictionalized recurring command-presence abstraction approved by docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md; no specific historical trip/default is claimed.",
+    "source_note": "Staff-recommendation row only: this abstracts command presence and does not claim a specific historical presidential tour.",
+    "staff_assessment": "Staff recommends staying in Pale when assembly and external contacts are active; front visits can still be chosen for morale, cohesion, or signaling at a cost.",
+    "trigger_evidence": [
+      "Recurring command-presence pressure is active after prolonged front-line strain.",
+      "The staff recommendation is an abstract command judgment, not a sourced historical default."
+    ],
     "pressure": {
       "base_rate": 1,
       "threshold": 13,
@@ -4050,7 +4066,7 @@
       {
         "id": "visit_drina_front",
         "label": "Visit the Drina Corps area",
-        "description": "You travel east to the Drina Corps. General Zivanovic's men hold the eastern front — Zepa, Gorazde, the enclaves. Your presence there is noted internationally.",
+        "description": "You travel east to the Drina Corps. General Zivanovic's men hold the eastern front — Zepa, Gorazde, the enclaves. Your presence there lifts corps morale while drawing additional international scrutiny.",
         "effects": [
           {
             "kind": "morale_change",
@@ -4058,9 +4074,9 @@
             "delta": 5
           },
           {
-            "kind": "humanitarian_impact",
+            "kind": "patron_pressure",
             "faction": "RS",
-            "war_crimes_delta": 1
+            "delta": 3
           }
         ],
         "dimension_shifts": [
@@ -4117,7 +4133,7 @@
       {
         "id": "visit_press_rs",
         "label": "Visit with international press",
-        "description": "You invite foreign journalists to accompany you. The tour becomes a media opportunity — demonstrating confidence, normalcy, and RS authority over its territory.",
+        "description": "You invite foreign journalists to accompany you. The tour becomes a media event about command confidence and political messaging, but it also increases outside scrutiny of RS conduct and front-line conditions.",
         "effects": [
           {
             "kind": "morale_change",
@@ -4127,14 +4143,14 @@
           {
             "kind": "patron_pressure",
             "faction": "RS",
-            "delta": -5
+            "delta": 2
           }
         ],
         "dimension_shifts": [
           {
             "faction": "RS",
             "dimension": "international_standing",
-            "delta": 8
+            "delta": -2
           },
           {
             "faction": "RS",
@@ -4193,7 +4209,7 @@
   {
     "id": "visit_to_front_hrhb",
     "title": "Visit to the Front",
-    "narrative": "Your defence minister suggests a presidential tour of HVO positions. The Croatian fighters in Herzegovina have heard your words on the radio — they need to see your face. Central Bosnia is bleeding. Herzegovina holds. The Neretva front defines Herceg-Bosna's southern boundary. A visit is overdue. Where will the president of the Croatian Community be seen?",
+    "narrative": "Your defence minister suggests a presidential tour of HVO positions. HVO soldiers have endured a long campaign and expect visible political attention. Central Bosnia is under pressure. Herzegovina holds. The Neretva front shapes Herceg-Bosna's southern position. Where will the president of the Croatian Community be seen?",
     "category": "command",
     "trigger": {
       "turn_min": 84,
@@ -4203,6 +4219,14 @@
     "requires_player_response": true,
     "responding_faction": "HRHB",
     "bot_response_logic": "strategic_weighted",
+    "staff_recommended_response_id": "stay_mostar_hrhb",
+    "historical_source": "Design provenance: fictionalized recurring command-presence abstraction approved by docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md; no specific historical trip/default is claimed.",
+    "source_note": "Staff-recommendation row only: this abstracts HVO command presence and does not claim a specific historical presidential tour.",
+    "staff_assessment": "Staff recommends staying in Mostar when Zagreb and monitoring contacts are active; a front visit can still be chosen for morale, cohesion, or signaling at a cost.",
+    "trigger_evidence": [
+      "Recurring command-presence pressure is active after prolonged front-line strain.",
+      "The staff recommendation is an abstract command judgment, not a sourced historical default."
+    ],
     "pressure": {
       "base_rate": 1,
       "threshold": 13,
@@ -4245,7 +4269,7 @@
       {
         "id": "visit_mostar_front",
         "label": "Visit the Mostar front",
-        "description": "You tour HVO positions around the city. East Mostar is under blockade and your soldiers hold the western bank. The international press watches every step you take here.",
+        "description": "You tour HVO positions around the city. The Mostar front is politically exposed and closely watched. The visit lifts morale, but it also increases international attention on HVO conduct.",
         "effects": [
           {
             "kind": "morale_change",
@@ -4385,7 +4409,7 @@
       {
         "id": "visit_press_hrhb",
         "label": "Visit with international press",
-        "description": "You invite European and American journalists. The tour is managed: show the HVO as defenders, show civilians on the Croatian side, avoid the detention camps. It is politics dressed as a front-line visit.",
+        "description": "You invite European and American journalists. The tour becomes a media event about HVO command confidence, but it also increases outside scrutiny of front-line conditions and treatment of civilians.",
         "effects": [
           {
             "kind": "morale_change",
@@ -4395,14 +4419,14 @@
           {
             "kind": "patron_pressure",
             "faction": "HRHB",
-            "delta": -6
+            "delta": 2
           }
         ],
         "dimension_shifts": [
           {
             "faction": "HRHB",
             "dimension": "international_standing",
-            "delta": 8
+            "delta": -2
           },
           {
             "faction": "HRHB",

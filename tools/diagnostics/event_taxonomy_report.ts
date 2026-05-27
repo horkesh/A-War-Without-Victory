@@ -71,6 +71,7 @@ export type EventTaxonomyRow = {
     has_historical_default_marker: boolean;
     historical_default_response_id: string | null;
     historical_default_option_id: string | null;
+    staff_recommended_response_id: string | null;
     historical_default_unavailable_reason: string | null;
     has_option_descriptions: boolean;
     has_numeric_option_previews: boolean;
@@ -127,6 +128,12 @@ const SENSITIVE_KEYWORDS = [
 const HISTORICAL_DEFAULT_BLOCKED_IDS = new Set([
     'srebrenica_demilitarization_1993',
     'karadzic_mladic_split_1995',
+]);
+
+const STAFF_RECOMMENDATION_DEFAULT_IDS = new Set([
+    'visit_to_front_rbih',
+    'visit_to_front_rs',
+    'visit_to_front_hrhb',
 ]);
 
 const SENSITIVE_DEFAULT_BLOCKED_IDS = new Set([
@@ -393,6 +400,7 @@ function sensitiveKeywordsFor(row: Pick<EventTaxonomyRow, 'id' | 'title' | 'narr
 
 function historicalDefaultUnavailableReason(row: Pick<EventTaxonomyRow, 'id' | 'is_choice_event'>): string | null {
     if (SENSITIVE_DEFAULT_BLOCKED_IDS.has(row.id)) return 'sensitive_history_review_required';
+    if (STAFF_RECOMMENDATION_DEFAULT_IDS.has(row.id)) return null;
     if (HISTORICAL_DEFAULT_BLOCKED_IDS.has(row.id)) return 'source_or_design_blocked';
     if (row.is_choice_event && row.id.startsWith('csq_') && row.id !== 'csq_patron_recovery_offer') return 'counterfactual_consequence_offer';
     return null;
@@ -474,6 +482,7 @@ export function buildEventTaxonomyRow(event: JsonRecord, file: string, fileIndex
     const sourceNote = textOrNull(event.source_note) ?? textOrNull(event.historical_source_note) ?? historicalSource;
     const historicalDefaultResponseId = textOrNull(event.historical_default_response_id);
     const historicalDefaultOptionId = findHistoricalDefaultOptionId(event);
+    const staffRecommendedResponseId = textOrNull(event.staff_recommended_response_id);
     const hasNumericOptionPreviews = responseOptions.length > 0 && responseOptions.every((option) => {
         const original = (event.response_options as unknown[]).find((entry) => isRecord(entry) && textOrNull(entry.id) === option.id);
         if (!isRecord(original)) return false;
@@ -524,6 +533,7 @@ export function buildEventTaxonomyRow(event: JsonRecord, file: string, fileIndex
         has_historical_default_marker: historicalDefaultOptionId !== null,
         historical_default_response_id: historicalDefaultResponseId,
         historical_default_option_id: historicalDefaultOptionId,
+        staff_recommended_response_id: staffRecommendedResponseId,
         historical_default_unavailable_reason: null,
         has_option_descriptions: responseOptions.length > 0 && responseOptions.every((option) => option.description !== null),
         has_numeric_option_previews: hasNumericOptionPreviews,
@@ -540,13 +550,15 @@ export function buildEventTaxonomyRow(event: JsonRecord, file: string, fileIndex
     row.sensitive_history_ring = row.sensitive_history_keywords.length > 0 ? 'risk' : 'none';
     row.sensitive_history_status = row.sensitive_history_keywords.length > 0 ? 'review_required' : 'clear';
     row.historical_default_unavailable_reason = historicalDefaultUnavailableReason(row);
+    const hasApprovedDefault =
+        (row.has_historical_default_marker && row.historical_default_unavailable_reason === null) ||
+        (STAFF_RECOMMENDATION_DEFAULT_IDS.has(row.id) && row.staff_recommended_response_id !== null);
     row.modal_ready =
         row.requires_player_response &&
         row.has_title &&
         row.has_narrative &&
         row.has_source_note &&
-        row.has_historical_default_marker &&
-        row.historical_default_unavailable_reason === null &&
+        hasApprovedDefault &&
         row.has_option_descriptions &&
         row.has_numeric_option_previews &&
         row.sensitive_history_status === 'clear';
@@ -630,8 +642,15 @@ export function collectCatalogFindings(rows: EventTaxonomyRow[]): EventTaxonomyF
         if (row.sensitive_history_status !== 'clear') {
             findings.push(finding(row, 'sensitive_history_review', 'warning', `Sensitive-history keyword review required: ${row.sensitive_history_keywords.join(', ')}.`));
         }
-        if (row.requires_player_response && !row.has_historical_default_marker) {
+        if (row.requires_player_response && !row.has_historical_default_marker && !STAFF_RECOMMENDATION_DEFAULT_IDS.has(row.id)) {
             findings.push(finding(row, 'missing_historical_default_marker', 'warning', 'Required-response event has no explicit historical default option marker.'));
+        }
+        if (
+            row.requires_player_response &&
+            STAFF_RECOMMENDATION_DEFAULT_IDS.has(row.id) &&
+            row.staff_recommended_response_id === null
+        ) {
+            findings.push(finding(row, 'missing_staff_recommendation', 'warning', 'Abstract required-response event has no explicit staff recommendation.'));
         }
         if (row.historical_default_unavailable_reason !== null) {
             findings.push(finding(row, 'historical_default_unavailable', 'warning', `Historical default unavailable: ${row.historical_default_unavailable_reason}.`));
@@ -702,6 +721,7 @@ export function buildEventTaxonomyReport(rows: EventTaxonomyRow[] = loadCatalogR
                 'missing_historical_source',
                 'sensitive_history_review',
                 'missing_historical_default_marker',
+                'missing_staff_recommendation',
                 'historical_default_unavailable',
                 'historical_default_bot_logic_mismatch',
                 'finished_row_has_legacy_calendar_pending_conversion',

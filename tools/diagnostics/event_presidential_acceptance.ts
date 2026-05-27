@@ -66,6 +66,7 @@ export type PresidentialAcceptanceReport = {
         catalog_production_modal_authoring_ready_events: number;
         catalog_acceptance_status: 'READY' | 'NOT_READY';
         probed_event_count: number;
+        staff_recommendation_modal_ready_skipped_count: number;
         player_surfaced_count: number;
         player_resolved_log_count: number;
         headless_auto_resolved_count: number;
@@ -269,7 +270,10 @@ export function buildEventPresidentialAcceptanceReport(): PresidentialAcceptance
     let duplicateOrMissingDefinitionCount = 0;
 
     const readyRows = [...catalogAcceptance.production_modal_authoring_ready_rows]
+        .filter((row) => row.has_historical_default_response_id)
         .sort((a, b) => strictCompare(a.id, b.id));
+    const staffRecommendationModalReadySkippedCount =
+        catalogAcceptance.production_modal_authoring_ready_rows.length - readyRows.length;
     for (const readyRow of readyRows) {
         const definitions = definitionsById.get(readyRow.id) ?? [];
         if (definitions.length !== 1) {
@@ -295,6 +299,7 @@ export function buildEventPresidentialAcceptanceReport(): PresidentialAcceptance
             catalog_production_modal_authoring_ready_events: catalogAcceptance.summary.production_modal_authoring_ready_events,
             catalog_acceptance_status: catalogAcceptance.summary.acceptance_status,
             probed_event_count: rows.length,
+            staff_recommendation_modal_ready_skipped_count: staffRecommendationModalReadySkippedCount,
             player_surfaced_count: rows.filter((row) => row.player_surface.status === 'surfaced').length,
             player_resolved_log_count: rows.filter((row) => row.player_resolve.status === 'resolved').length,
             headless_auto_resolved_count: rows.filter((row) => row.headless_auto.status === 'auto_resolved').length,
@@ -310,7 +315,8 @@ export function buildEventPresidentialAcceptanceReport(): PresidentialAcceptance
 
 function printTextReport(report: PresidentialAcceptanceReport): void {
     process.stdout.write(`Event presidential acceptance diagnostic: ${report.summary.status}\n`);
-    process.stdout.write(`Probed production modal-ready events: ${report.summary.probed_event_count}\n`);
+    process.stdout.write(`Probed historical-default modal-ready events: ${report.summary.probed_event_count}\n`);
+    process.stdout.write(`Skipped staff-recommendation modal-ready events: ${report.summary.staff_recommendation_modal_ready_skipped_count}\n`);
     process.stdout.write(`Player surfaced: ${report.summary.player_surfaced_count}; player resolved logs: ${report.summary.player_resolved_log_count}; headless auto-resolved: ${report.summary.headless_auto_resolved_count}\n`);
     process.stdout.write(`Failures: ${report.summary.failure_count}; stuck pending: ${report.summary.stuck_pending_count}\n`);
 }

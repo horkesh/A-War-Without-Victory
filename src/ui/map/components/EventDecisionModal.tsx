@@ -192,6 +192,10 @@ function isHistoricalOption(option: EventResponseOption, decision: EventDecision
     return option.id === decision.historical_default_response_id || option.historical_marker === 'historical_default';
 }
 
+function isStaffRecommendedOption(option: EventResponseOption, decision: EventDecisionDossier): boolean {
+    return option.id === decision.staff_recommended_response_id;
+}
+
 function ResponseButton({
     option,
     decision,
@@ -204,6 +208,7 @@ function ResponseButton({
     onChoose: () => void;
 }) {
     const historical = isHistoricalOption(option, decision);
+    const staffRecommended = !historical && isStaffRecommendedOption(option, decision);
     return (
         <div className="rounded border border-panel-border bg-panel-card/90 p-3">
             <button
@@ -223,12 +228,25 @@ function ResponseButton({
                             Historical default
                         </span>
                     )}
+                    {staffRecommended && (
+                        <span
+                            className="rounded-sm border border-sky-400/60 bg-sky-500/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-sky-200"
+                            title="Staff recommendation for an abstract command decision. This is not a historical default and does not control bot calibration."
+                        >
+                            Staff recommendation
+                        </span>
+                    )}
                 </span>
             </button>
             {historical && (
                 <p className="mt-2 text-[11px] leading-relaxed text-text-secondary">
                     AI historical path for calibration. Bot-controlled factions choose this option in historical mode.
                     The player may choose any option.{sourceNote ? ` Source: ${sourceNote}.` : ''}
+                </p>
+            )}
+            {staffRecommended && (
+                <p className="mt-2 text-[11px] leading-relaxed text-text-secondary">
+                    Staff recommendation for this abstract command decision. This is not a historical default and does not control bot calibration.
                 </p>
             )}
             {option.description && (

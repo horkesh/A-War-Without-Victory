@@ -86,6 +86,29 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(screen.queryByText('Correct choice')).toBeNull();
   });
 
+  it('renders staff recommendation separately from historical calibration defaults', () => {
+    render(React.createElement(EventDecisionModal, {
+      decision: {
+        event_id: 'visit_to_front_rbih',
+        event_title: 'Visit to the Front',
+        narrative: 'Staff asks whether the president should remain in the capital or visit a front.',
+        turn_fired: 84,
+        faction: 'RBiH',
+        staff_recommended_response_id: 'stay_capital_rbih',
+        response_options: [
+          { id: 'stay_capital_rbih', label: 'Stay in Sarajevo', effects: [] },
+          { id: 'visit_front', label: 'Visit the front', effects: [] },
+        ],
+      },
+      onRespond: () => undefined,
+    }));
+
+    expect(screen.getByText('Staff recommendation')).toBeTruthy();
+    expect(screen.getByText(/not a historical default and does not control bot calibration/i)).toBeTruthy();
+    expect(screen.queryByText('Historical default')).toBeNull();
+    expect(screen.queryByText(/AI historical path for calibration/)).toBeNull();
+  });
+
   it('renders future-consequence cards only for response options that include branch metadata', () => {
     render(React.createElement(EventDecisionModal, {
       decision: {

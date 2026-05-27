@@ -54,11 +54,11 @@ describe('event taxonomy diagnostic report', () => {
         expect(report.summary.no_choice_events).toBe(203);
         expect(report.summary.required_response_events).toBe(36);
         expect(report.summary.choice_rows_with_title_and_narrative).toBe(44);
-        expect(report.summary.choice_rows_with_source).toBe(30);
-        expect(report.summary.required_response_rows_with_source).toBe(28);
+        expect(report.summary.choice_rows_with_source).toBe(33);
+        expect(report.summary.required_response_rows_with_source).toBe(31);
         expect(report.summary.historical_default_markers).toBe(17);
         expect(report.summary.historical_default_ids).toBe(17);
-        expect(report.summary.modal_ready_events).toBe(17);
+        expect(report.summary.modal_ready_events).toBe(18);
         expect(new Map(report.rows
             .filter((row) => row.future_consequence_count > 0)
             .map((row) => [row.id, row.future_consequence_count]))).toEqual(new Map([
@@ -233,6 +233,7 @@ describe('event taxonomy diagnostic report', () => {
             'operation_lukavac_93',
             'os_rbih_tactical_acceptance_1993',
             'strategic_posture_review_hrhb',
+            'visit_to_front_rbih',
             'washington_agreement_1994',
             'ic_rbih_restraint_post_washington',
             'contact_group_plan_1994',
@@ -242,7 +243,7 @@ describe('event taxonomy diagnostic report', () => {
             'dayton_talks_begin_1995',
             'csq_patron_recovery_offer',
         ]);
-        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(17);
+        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(18);
     });
 
     it('classifies packet 3 target rows as finished modal-ready after authored defaults and source notes', () => {

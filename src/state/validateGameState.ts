@@ -221,6 +221,14 @@ function validatePendingEventDecisions(value: unknown, errors: string[]): void {
             ) {
                 errors.push(`military.pending_event_decisions[${i}].historical_default_response_id must match a response option id`);
             }
+            if (
+                'staff_recommended_response_id' in decision
+                && decision.staff_recommended_response_id !== undefined
+                && isNonEmptyString(decision.staff_recommended_response_id)
+                && !responseOptionIds.has(decision.staff_recommended_response_id)
+            ) {
+                errors.push(`military.pending_event_decisions[${i}].staff_recommended_response_id must match a response option id`);
+            }
         }
         if (!isCanonicalPlayerFaction(decision.faction)) {
             errors.push(`military.pending_event_decisions[${i}].faction must be one of: RBiH, RS, HRHB`);
@@ -230,6 +238,9 @@ function validatePendingEventDecisions(value: unknown, errors: string[]): void {
         }
         if ('historical_default_response_id' in decision && decision.historical_default_response_id !== undefined && !isNonEmptyString(decision.historical_default_response_id)) {
             errors.push(`military.pending_event_decisions[${i}].historical_default_response_id must be a non-empty string when present`);
+        }
+        if ('staff_recommended_response_id' in decision && decision.staff_recommended_response_id !== undefined && !isNonEmptyString(decision.staff_recommended_response_id)) {
+            errors.push(`military.pending_event_decisions[${i}].staff_recommended_response_id must be a non-empty string when present`);
         }
         if ('trigger_evidence' in decision && decision.trigger_evidence !== undefined && !isStringArray(decision.trigger_evidence)) {
             errors.push(`military.pending_event_decisions[${i}].trigger_evidence must be a string array when present`);

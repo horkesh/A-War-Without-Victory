@@ -111,13 +111,14 @@ describe('event acceptance diagnostic report', () => {
         expect(JSON.stringify(first)).toBe(JSON.stringify(second));
         expect(first.summary.total_events).toBe(247);
         expect(first.summary.required_response_events).toBe(36);
-        expect(first.summary.production_modal_authoring_ready_events).toBe(17);
+        expect(first.summary.production_modal_authoring_ready_events).toBe(18);
         expect(first.summary.acceptance_status).toBe('NOT_READY');
         expect(first.summary.full_catalog_accepted).toBe(false);
+        expect(first.summary.missing_approved_default_events).toBe(16);
         expect(first.summary.missing_historical_default_response_id_events).toBe(19);
         expect(first.summary.missing_historical_marker_events).toBe(19);
         expect(first.summary.source_blocked_events).toBeGreaterThan(0);
-        expect(first.summary.missing_source_note_events).toBe(17);
+        expect(first.summary.missing_source_note_events).toBe(14);
     });
 
     it('lists the approved first production authoring packet candidates without changing JSON content', () => {
@@ -277,6 +278,7 @@ describe('event acceptance diagnostic report', () => {
             'operation_lukavac_93',
             'os_rbih_tactical_acceptance_1993',
             'strategic_posture_review_hrhb',
+            'visit_to_front_rbih',
             'washington_agreement_1994',
             'ic_rbih_restraint_post_washington',
             'contact_group_plan_1994',

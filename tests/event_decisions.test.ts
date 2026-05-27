@@ -365,18 +365,39 @@ describe('Event Decisions', () => {
         expect(state.military.fired_event_ids ?? []).not.toContain('operation_lukavac_93');
     });
 
-    it('pending event decisions carry historical default metadata for modal marking', () => {
+    it('pending event decisions carry historical and staff recommendation metadata for modal marking', () => {
         const state = makeMinimalState('RBiH');
         const rng = () => 0.5;
 
-        evaluateEvents(state, rng, 5, [EXPLICIT_HISTORICAL_EVENT]);
+        evaluateEvents(state, rng, 5, [{
+            ...EXPLICIT_HISTORICAL_EVENT,
+            staff_recommended_response_id: 'counterfactual_path',
+        }]);
 
         const pending = state.military.pending_event_decisions![0];
         expect(pending.historical_default_response_id).toBe('historical_path');
+        expect(pending.staff_recommended_response_id).toBe('counterfactual_path');
         expect(pending.response_options.map((option) => [option.id, option.historical_marker])).toEqual([
             ['counterfactual_path', 'counterfactual'],
             ['historical_path', 'historical_default'],
         ]);
+    });
+
+    it('real RBiH visit-to-front row queues with staff recommendation but no historical default', () => {
+        const event = {
+            ...loadEventFromFile('data/scenarios/events/war_1993.json', 'visit_to_front_rbih'),
+            trigger: { turn_min: 5, turn_max: 5, phase: 'war' as const },
+            pressure: undefined,
+        };
+        const state = makeMinimalState('RBiH');
+
+        evaluateEvents(state, () => 0, 5, [event]);
+
+        const pending = state.military.pending_event_decisions![0];
+        expect(pending.event_id).toBe('visit_to_front_rbih');
+        expect(pending.staff_recommended_response_id).toBe('stay_capital_rbih');
+        expect(pending.historical_default_response_id).toBeUndefined();
+        expect(pending.response_options.map((option) => option.id)).toContain('stay_capital_rbih');
     });
 
     it('pending event decisions carry authored dossier fields from real evaluation output', () => {

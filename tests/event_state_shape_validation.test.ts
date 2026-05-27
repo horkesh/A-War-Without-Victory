@@ -119,6 +119,7 @@ describe('event state shape validation', () => {
                 faction: 'RBiH',
                 requires_player_response: true,
                 historical_default_response_id: 'civic',
+                staff_recommended_response_id: 'civic',
                 trigger_evidence: ['turn window opened'],
             }],
             event_decision_log: [{
@@ -196,6 +197,7 @@ describe('event state shape validation', () => {
                     faction: 'JNA',
                     requires_player_response: 'yes',
                     historical_default_response_id: '',
+                    staff_recommended_response_id: '',
                     trigger_evidence: [7],
                 },
                 {
@@ -215,6 +217,7 @@ describe('event state shape validation', () => {
                     ],
                     faction: 'RBiH',
                     historical_default_response_id: 'missing',
+                    staff_recommended_response_id: 'missing_staff',
                 },
             ],
         });
@@ -233,11 +236,13 @@ describe('event state shape validation', () => {
                 'military.pending_event_decisions[0].faction must be one of: RBiH, RS, HRHB',
                 'military.pending_event_decisions[0].requires_player_response must be boolean when present',
                 'military.pending_event_decisions[0].historical_default_response_id must be a non-empty string when present',
+                'military.pending_event_decisions[0].staff_recommended_response_id must be a non-empty string when present',
                 'military.pending_event_decisions[0].trigger_evidence must be a string array when present',
                 'military.pending_event_decisions[1].response_options must not be empty',
                 'military.pending_event_decisions[2].response_options[0].effects[0] must be an object with a non-empty kind',
                 'military.pending_event_decisions[2].response_options[1].id must be unique within response_options: same',
                 'military.pending_event_decisions[2].historical_default_response_id must match a response option id',
+                'military.pending_event_decisions[2].staff_recommended_response_id must match a response option id',
             ]),
         });
     });
