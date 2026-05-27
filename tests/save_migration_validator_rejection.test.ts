@@ -63,6 +63,7 @@ function currentVersionState(): any {
             event_flags: {},
             enabled_event_ids: [],
             event_overflow_queue: [],
+            pending_event_decisions: [],
             pending_event_notifications: [],
             phantoms_spawned: [],
         },
@@ -351,6 +352,7 @@ describe('save migration validator hardening', () => {
         delete state.military.event_flags;
         delete state.military.enabled_event_ids;
         delete state.military.event_overflow_queue;
+        delete state.military.pending_event_decisions;
         delete state.military.pending_event_notifications;
         delete state.displacement.displacement_event_log;
         delete state.displacement.war_displacement_initiated;
@@ -384,6 +386,7 @@ describe('save migration validator hardening', () => {
         expect(migrated.military.event_flags).toEqual({});
         expect(migrated.military.enabled_event_ids).toEqual([]);
         expect(migrated.military.event_overflow_queue).toEqual([]);
+        expect(migrated.military.pending_event_decisions).toEqual([]);
         expect(migrated.military.pending_event_notifications).toEqual([]);
         expect(migrated.displacement.displacement_event_log).toEqual([]);
         expect(migrated.displacement.war_displacement_initiated).toEqual({});
@@ -649,6 +652,119 @@ describe('save migration validator hardening', () => {
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
             /Save schema validation failed after migration[\s\S]*v23[\s\S]*military\.pending_event_notifications/
+        );
+    });
+
+    it('materializes v24 pending event decisions for v23 saves', () => {
+        const state = currentVersionState();
+        state.schema_version = 23;
+        delete state.military.pending_event_decisions;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.pending_event_decisions).toEqual([]);
+    });
+
+    it('rejects current-version saves missing pending event decisions', () => {
+        const state = currentVersionState();
+        delete state.military.pending_event_decisions;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v24[\s\S]*military\.pending_event_decisions/
+        );
+    });
+
+    it('rejects current-version saves with malformed pending event decisions', () => {
+        const state = currentVersionState();
+        state.military.pending_event_decisions = {};
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v24[\s\S]*military\.pending_event_decisions/
+        );
+    });
+
+    it('rejects current-version saves with malformed pending event decision response options', () => {
+        const state = currentVersionState();
+        state.military.pending_event_decisions = [{
+            event_id: 'rbih_state_identity',
+            event_title: 'What Is Bosnia?',
+            turn_fired: 2,
+            response_options: [42],
+            faction: 'RBiH',
+            requires_player_response: true,
+        }];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.pending_event_decisions\[0\]\.response_options\[0\] must be an object/
+        );
+    });
+
+    it('rejects current-version saves with empty pending event decision response options', () => {
+        const state = currentVersionState();
+        state.military.pending_event_decisions = [{
+            event_id: 'rbih_state_identity',
+            event_title: 'What Is Bosnia?',
+            turn_fired: 2,
+            response_options: [],
+            faction: 'RBiH',
+            requires_player_response: true,
+        }];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.pending_event_decisions\[0\]\.response_options must not be empty/
+        );
+    });
+
+    it('rejects current-version saves with duplicate pending event decision response ids', () => {
+        const state = currentVersionState();
+        state.military.pending_event_decisions = [{
+            event_id: 'rbih_state_identity',
+            event_title: 'What Is Bosnia?',
+            turn_fired: 2,
+            response_options: [
+                { id: 'same', label: 'First' },
+                { id: 'same', label: 'Second' },
+            ],
+            faction: 'RBiH',
+            requires_player_response: true,
+        }];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.pending_event_decisions\[0\]\.response_options\[1\]\.id must be unique within response_options: same/
+        );
+    });
+
+    it('rejects current-version saves with malformed pending event decision response effects', () => {
+        const state = currentVersionState();
+        state.military.pending_event_decisions = [{
+            event_id: 'rbih_state_identity',
+            event_title: 'What Is Bosnia?',
+            turn_fired: 2,
+            response_options: [{ id: 'civic', label: 'Civic multi-ethnic republic', effects: [42] }],
+            faction: 'RBiH',
+            requires_player_response: true,
+        }];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.pending_event_decisions\[0\]\.response_options\[0\]\.effects\[0\] must be an object with a non-empty kind/
+        );
+    });
+
+    it('rejects current-version saves with pending event historical defaults missing from response options', () => {
+        const state = currentVersionState();
+        state.military.pending_event_decisions = [{
+            event_id: 'rbih_state_identity',
+            event_title: 'What Is Bosnia?',
+            turn_fired: 2,
+            response_options: [{ id: 'civic', label: 'Civic multi-ethnic republic' }],
+            faction: 'RBiH',
+            requires_player_response: true,
+            historical_default_response_id: 'missing',
+        }];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.pending_event_decisions\[0\]\.historical_default_response_id must match a response option id/
         );
     });
 });

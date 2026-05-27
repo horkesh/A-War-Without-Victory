@@ -133,6 +133,50 @@ function validatePendingEventDecisions(value: unknown, errors: string[]): void {
         }
         if (!Array.isArray(decision.response_options)) {
             errors.push(`military.pending_event_decisions[${i}].response_options must be an array`);
+        } else {
+            if (decision.response_options.length === 0) {
+                errors.push(`military.pending_event_decisions[${i}].response_options must not be empty`);
+            }
+            const responseOptionIds = new Set<string>();
+            decision.response_options.forEach((option, optionIndex) => {
+                const optionPath = `military.pending_event_decisions[${i}].response_options[${optionIndex}]`;
+                if (!isRecord(option)) {
+                    errors.push(`${optionPath} must be an object`);
+                    return;
+                }
+                if (!isNonEmptyString(option.id)) {
+                    errors.push(`${optionPath}.id must be a non-empty string`);
+                } else if (responseOptionIds.has(option.id)) {
+                    errors.push(`${optionPath}.id must be unique within response_options: ${option.id}`);
+                } else {
+                    responseOptionIds.add(option.id);
+                }
+                if (!isNonEmptyString(option.label)) {
+                    errors.push(`${optionPath}.label must be a non-empty string`);
+                }
+                if ('effect' in option && option.effect !== undefined) {
+                    if (!isRecord(option.effect) || !isNonEmptyString(option.effect.kind)) {
+                        errors.push(`${optionPath}.effect must be an object with a non-empty kind`);
+                    }
+                }
+                if ('effects' in option && option.effects !== undefined && !Array.isArray(option.effects)) {
+                    errors.push(`${optionPath}.effects must be an array when present`);
+                } else if (Array.isArray(option.effects)) {
+                    option.effects.forEach((effect, effectIndex) => {
+                        if (!isRecord(effect) || !isNonEmptyString(effect.kind)) {
+                            errors.push(`${optionPath}.effects[${effectIndex}] must be an object with a non-empty kind`);
+                        }
+                    });
+                }
+            });
+            if (
+                'historical_default_response_id' in decision
+                && decision.historical_default_response_id !== undefined
+                && isNonEmptyString(decision.historical_default_response_id)
+                && !responseOptionIds.has(decision.historical_default_response_id)
+            ) {
+                errors.push(`military.pending_event_decisions[${i}].historical_default_response_id must match a response option id`);
+            }
         }
         if (!isCanonicalPlayerFaction(decision.faction)) {
             errors.push(`military.pending_event_decisions[${i}].faction must be one of: RBiH, RS, HRHB`);
@@ -262,6 +306,7 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 21, path: 'paramilitary_decision_history', check: Array.isArray },
     { version: 22, path: 'military.event_overflow_queue', check: isStringArray },
     { version: 23, path: 'military.pending_event_notifications', check: Array.isArray },
+    { version: 24, path: 'military.pending_event_decisions', check: Array.isArray },
 ];
 
 /**

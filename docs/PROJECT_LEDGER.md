@@ -1,4 +1,20 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] state(events): make pending event decisions a v24 save contract
+
+**Type:** Save-schema/default contract slice.
+
+**Change:** Bumped `CURRENT_SCHEMA_VERSION` to 24 and added migration v24 for `military.pending_event_decisions` with an inert `[]` default. Current-version save validation now rejects missing or malformed pending decision queues, including empty or malformed response-option elements, duplicate response IDs, malformed response effects, and historical defaults that do not match a response option. The v23 fixture plus focused migration/validator tests prove default materialization and order/content preservation. The TypeScript optional marker remains in `GameState` for legacy/in-memory runtime compatibility.
+
+**Determinism:** Migration is pure and preserves existing array order. `tools/diagnostics/output/save_migration_drift.json` was regenerated to v24 / 24 migrations / 57 strict required fields. The startup snapshot was rebuilt to the v24 persisted save contract. No runtime event firing, event JSON/prose, event ordering, bot choice, GUI behavior, scenario data, consequence logic, or calibration tuning changed.
+
+**Verification:**
+- Red proof before production change: focused migration/validator/roundtrip tests failed on missing v24 migration/default/validator coverage.
+- `npx.cmd vitest run tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts tests\save_migration_round_trip_contract.test.ts tests\event_state_shape_validation.test.ts tests\state\player_faction_contract.test.ts tests\state\serialize.notifications.test.ts tests\state.test.ts tests\ui_adapter_boundary.test.ts tests\sim\autonomy\autonomy_phase_e_block.test.ts tests\integration_save_load.test.ts tests\save_migration_counter_offers.test.ts tests\migration_nested_ownership.test.ts tests\save_migration_drift_audit.test.ts --reporter=dot` - PASS; 180/180 tests.
+- `npm.cmd run typecheck` - PASS.
+- `node tools\diagnostics\strict_null_inventory.cjs` - PASS; optional-field floor remains 465.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, save/state tests, `tests/fixtures/save_migration/v23_pending_event_decisions.json`, `tools/diagnostics/output/save_migration_drift.json`, `data/derived/startup/apr_1992_initial_save.json`, `docs/40_reports/implemented/20260527_PENDING_EVENT_DECISIONS_SCHEMA_CONTRACT.md`, command-board/roadmap/plan docs.
+
 ## [2026-05-27] state(events): make pending event notifications a v23 save contract
 
 **Type:** Save-schema/default contract slice.

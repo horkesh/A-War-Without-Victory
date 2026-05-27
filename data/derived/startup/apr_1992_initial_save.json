@@ -33790,6 +33790,8 @@
       "peace_plan_history": [],
       "pending_counter_offers": []
     },
+    "pending_event_decisions": [],
+    "pending_event_notifications": [],
     "phantoms_spawned": [
       "jna_uzice_corps_tg",
       "jna_mostar_garrison_tg",
@@ -43313,5 +43315,5 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 22
+  "schema_version": 24
 }

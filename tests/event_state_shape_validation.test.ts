@@ -121,16 +121,39 @@ describe('event state shape validation', () => {
 
     it('rejects malformed pending event decisions', () => {
         const result = validateWithMilitary({
-            pending_event_decisions: [{
-                event_id: '',
-                event_title: 42,
-                turn_fired: -1,
-                response_options: 'bad',
-                faction: 'JNA',
-                requires_player_response: 'yes',
-                historical_default_response_id: '',
-                trigger_evidence: [7],
-            }],
+            pending_event_decisions: [
+                {
+                    event_id: '',
+                    event_title: 42,
+                    turn_fired: -1,
+                    response_options: [
+                        42,
+                        { id: '', label: 7, effect: 42, effects: 'bad' },
+                    ],
+                    faction: 'JNA',
+                    requires_player_response: 'yes',
+                    historical_default_response_id: '',
+                    trigger_evidence: [7],
+                },
+                {
+                    event_id: 'empty_options',
+                    event_title: 'Empty Options',
+                    turn_fired: 1,
+                    response_options: [],
+                    faction: 'RBiH',
+                },
+                {
+                    event_id: 'bad_nested_options',
+                    event_title: 'Bad Nested Options',
+                    turn_fired: 1,
+                    response_options: [
+                        { id: 'same', label: 'A', effects: [42] },
+                        { id: 'same', label: 'B' },
+                    ],
+                    faction: 'RBiH',
+                    historical_default_response_id: 'missing',
+                },
+            ],
         });
 
         expect(result).toEqual({
@@ -139,11 +162,19 @@ describe('event state shape validation', () => {
                 'military.pending_event_decisions[0].event_id must be a non-empty string',
                 'military.pending_event_decisions[0].event_title must be a non-empty string',
                 'military.pending_event_decisions[0].turn_fired must be a non-negative integer',
-                'military.pending_event_decisions[0].response_options must be an array',
+                'military.pending_event_decisions[0].response_options[0] must be an object',
+                'military.pending_event_decisions[0].response_options[1].id must be a non-empty string',
+                'military.pending_event_decisions[0].response_options[1].label must be a non-empty string',
+                'military.pending_event_decisions[0].response_options[1].effect must be an object with a non-empty kind',
+                'military.pending_event_decisions[0].response_options[1].effects must be an array when present',
                 'military.pending_event_decisions[0].faction must be one of: RBiH, RS, HRHB',
                 'military.pending_event_decisions[0].requires_player_response must be boolean when present',
                 'military.pending_event_decisions[0].historical_default_response_id must be a non-empty string when present',
                 'military.pending_event_decisions[0].trigger_evidence must be a string array when present',
+                'military.pending_event_decisions[1].response_options must not be empty',
+                'military.pending_event_decisions[2].response_options[0].effects[0] must be an object with a non-empty kind',
+                'military.pending_event_decisions[2].response_options[1].id must be unique within response_options: same',
+                'military.pending_event_decisions[2].historical_default_response_id must match a response option id',
             ]),
         });
     });

@@ -72,7 +72,6 @@ describe('counter-offer save migration', () => {
     it('moves old saves to current schema and materializes neutral counter-offer defaults', () => {
         const hydrated = deserializeState(JSON.stringify(legacySave()));
 
-        expect(CURRENT_SCHEMA_VERSION).toBe(23);
         expect(hydrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
         expect(hydrated.meta.player_faction).toBe('RBiH');
         expect(hydrated.military.negotiation?.pending_counter_offers).toEqual([]);

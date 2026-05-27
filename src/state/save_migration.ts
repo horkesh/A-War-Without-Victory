@@ -649,3 +649,11 @@ registerMigration({
         ensureArray(asRecord(state.military), 'pending_event_notifications');
     },
 });
+
+registerMigration({
+    version: 24,
+    description: 'Persisted pending event decision queue defaults. Sensitive: no.',
+    migrate: (state) => {
+        ensureArray(asRecord(state.military), 'pending_event_decisions');
+    },
+});

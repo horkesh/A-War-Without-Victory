@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(23);
+        expect(getLatestSchemaVersion()).toBe(24);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -89,6 +89,7 @@ describe('versioned save migration steps', () => {
         expect(state.military.event_flags).toEqual({});
         expect(state.military.enabled_event_ids).toEqual([]);
         expect(state.military.event_overflow_queue).toEqual([]);
+        expect(state.military.pending_event_decisions).toEqual([]);
         expect(state.military.pending_event_notifications).toEqual([]);
         expect(state.military.phantoms_spawned).toEqual([]);
         expect(state.paramilitary_decision_history).toEqual([]);
@@ -371,6 +372,72 @@ describe('versioned save migration steps', () => {
                 headline: 'First notification',
                 body: 'First notification body.',
                 consumed: true,
+            },
+        ]);
+    });
+
+    it('materializes v24 pending event decision defaults for v23 saves', () => {
+        const state = minimalLegacyState(23);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        delete state.military.pending_event_decisions;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_event_decisions).toEqual([]);
+    });
+
+    it('preserves existing v24 pending event decision order and contents for v23 saves', () => {
+        const state = minimalLegacyState(23);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [
+            {
+                event_id: 'event_b',
+                event_title: 'Second decision',
+                turn_fired: 4,
+                response_options: [{ id: 'historical_b', label: 'Historical B' }],
+                faction: 'RS',
+                requires_player_response: true,
+                historical_default_response_id: 'historical_b',
+                trigger_evidence: ['second trigger'],
+            },
+            {
+                event_id: 'event_a',
+                event_title: 'First decision',
+                turn_fired: 3,
+                response_options: [{ id: 'historical_a', label: 'Historical A' }],
+                faction: 'RBiH',
+                requires_player_response: true,
+                historical_default_response_id: 'historical_a',
+                trigger_evidence: ['first trigger'],
+            },
+        ];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_event_decisions).toEqual([
+            {
+                event_id: 'event_b',
+                event_title: 'Second decision',
+                turn_fired: 4,
+                response_options: [{ id: 'historical_b', label: 'Historical B' }],
+                faction: 'RS',
+                requires_player_response: true,
+                historical_default_response_id: 'historical_b',
+                trigger_evidence: ['second trigger'],
+            },
+            {
+                event_id: 'event_a',
+                event_title: 'First decision',
+                turn_fired: 3,
+                response_options: [{ id: 'historical_a', label: 'Historical A' }],
+                faction: 'RBiH',
+                requires_player_response: true,
+                historical_default_response_id: 'historical_a',
+                trigger_evidence: ['first trigger'],
             },
         ]);
     });
