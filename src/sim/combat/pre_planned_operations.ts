@@ -178,7 +178,6 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 ],
                 objectives: [
                     'op:rogatica:rogatica_2',
-                    'op:rogatica:brcigovo',
                     'op:rogatica:kovanj',
                     'op:rogatica:kramer_selo_2',
                     'op:sokolac:knezina_2',
