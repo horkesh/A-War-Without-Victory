@@ -1,6 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import {
+    KNOWN_EVENT_CONDITION_TYPE_SET,
+    KNOWN_EVENT_EFFECT_KIND_SET,
+    VALID_EVENT_FACTION_SET,
+} from '../../src/sim/events/event_vocabulary';
 
 type JsonRecord = Record<string, unknown>;
 
@@ -98,63 +103,6 @@ const CATALOG_FILES = [
     'data/scenarios/events/war_1995.json',
     'data/scenarios/events/consequences.json',
 ] as const;
-
-const VALID_FACTIONS = new Set(['RBiH', 'RS', 'HRHB']);
-
-const KNOWN_EFFECT_KINDS = new Set([
-    'aggression_modifier',
-    'alliance_change',
-    'alliance_lock',
-    'bot_priority_shift',
-    'cohesion_change',
-    'control_change',
-    'cost_ledger_annotation',
-    'doctrine_constraint',
-    'equipment_grant',
-    'equipment_quality_modifier',
-    'guerrilla_threat',
-    'humanitarian_impact',
-    'morale_change',
-    'narrative',
-    'negotiation_capital',
-    'offensive_ops_suppression',
-    'patron_pressure',
-    'recruitment_modifier',
-    'supply_delta',
-]);
-
-const KNOWN_CONDITION_TYPES = new Set([
-    'alliance_above',
-    'alliance_below',
-    'alliance_drift',
-    'and',
-    'corridor_severed',
-    'dimension_above',
-    'dimension_below',
-    'displaced_in_aggregate',
-    'enclave_resilience_aggregate',
-    'enclave_supply_status',
-    'event_fire_count',
-    'faction_controls_municipality',
-    'flag_at_least',
-    'flag_equals',
-    'flag_not_set',
-    'metric_compare_factions',
-    'morale_average_below',
-    'not',
-    'operation_completed',
-    'or',
-    'paramilitary_mode_equals',
-    'patron_pressure_above',
-    'siege_active',
-    'supply_above',
-    'supply_below',
-    'territory_control',
-    'territory_loss_window',
-    'territory_percentage',
-    'war_crimes_above',
-    'week_since_event',
-]);
 
 const SENSITIVE_KEYWORDS = [
     'atrocity',
@@ -544,7 +492,7 @@ export function collectCatalogFindings(rows: EventTaxonomyRow[]): EventTaxonomyF
 
         if (row.requires_player_response && row.responding_faction === null) {
             findings.push(finding(row, 'missing_responding_faction', 'error', 'Required-response event has no responding_faction.'));
-        } else if (row.requires_player_response && !VALID_FACTIONS.has(row.responding_faction ?? '')) {
+        } else if (row.requires_player_response && !VALID_EVENT_FACTION_SET.has(row.responding_faction ?? '')) {
             findings.push(finding(row, 'invalid_responding_faction', 'error', `Invalid responding_faction ${row.responding_faction}.`));
         }
 
@@ -569,12 +517,12 @@ export function collectCatalogFindings(rows: EventTaxonomyRow[]): EventTaxonomyF
         }
 
         for (const kind of row.effect_kinds) {
-            if (!KNOWN_EFFECT_KINDS.has(kind)) {
+            if (!KNOWN_EVENT_EFFECT_KIND_SET.has(kind)) {
                 findings.push(finding(row, 'unknown_effect_kind', 'warning', `Unknown effect kind ${kind}.`));
             }
         }
         for (const type of row.condition_types) {
-            if (!KNOWN_CONDITION_TYPES.has(type)) {
+            if (!KNOWN_EVENT_CONDITION_TYPE_SET.has(type)) {
                 findings.push(finding(row, 'unknown_condition_type', 'warning', `Unknown condition type ${type}.`));
             }
         }

@@ -218,6 +218,17 @@ test('loadEventDefinitionsFromDir throws on non-finite trigger turn bound', () =
         [validCatalogRow({ trigger: { turn_max: '12' } })],
         /Invalid event row in war_1992\.json\[0\]: trigger\.turn_max must be a finite number when present/,
     );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ trigger: { turn_min: 5, turn_max: 4 } })],
+        /Invalid event row in war_1992\.json\[0\]: trigger\.turn_min must be less than or equal to trigger\.turn_max/,
+    );
+});
+
+test('loadEventDefinitionsFromDir throws on unknown trigger phase', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({ trigger: { turn_min: 0, phase: 'peace' } })],
+        /Invalid event row in war_1992\.json\[0\]: trigger\.phase must be "war" when present/,
+    );
 });
 
 test('loadEventDefinitionsFromDir throws on malformed requires_events', () => {
@@ -228,6 +239,17 @@ test('loadEventDefinitionsFromDir throws on malformed requires_events', () => {
     assertCatalogRowsThrow(
         [validCatalogRow({ trigger: { turn_min: 0, requires_events: ['event_a', 2] } })],
         /Invalid event row in war_1992\.json\[0\]: trigger\.requires_events must be a string array when present/,
+    );
+});
+
+test('loadEventDefinitionsFromDir throws on malformed enables_events', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({ enables_events: 'event_a' })],
+        /Invalid event row in war_1992\.json\[0\]: enables_events must be a string array when present/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ enables_events: ['event_a', 2] })],
+        /Invalid event row in war_1992\.json\[0\]: enables_events must be a string array when present/,
     );
 });
 
@@ -254,6 +276,17 @@ test('loadEventDefinitionsFromDir throws on missing or non-string effect.kind', 
     assertCatalogRowsThrow(
         [validCatalogRow({ effect: { kind: '' } })],
         /Invalid event row in war_1992\.json\[0\]: effect\.kind must be a non-empty string/,
+    );
+});
+
+test('loadEventDefinitionsFromDir throws on unknown effect kind', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({ effect: { kind: 'new_unregistered_effect' } })],
+        /Invalid event row in war_1992\.json\[0\]: effect\.kind must be a known event effect kind: new_unregistered_effect/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ effects: [{ kind: 'new_unregistered_effect' }] })],
+        /Invalid event row in war_1992\.json\[0\]: effects\[0\]\.kind must be a known event effect kind: new_unregistered_effect/,
     );
 });
 
@@ -296,6 +329,113 @@ test('loadEventDefinitionsFromDir throws on malformed response_options', () => {
     assertCatalogRowsThrow(
         [validCatalogRow({ response_options: [{ id: 'accept', label: 'Accept', effects: [{ kind: '' }] }] })],
         /Invalid event row in war_1992\.json\[0\]: response_options\[0\]\.effects\[0\]\.kind must be a non-empty string/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({
+            response_options: [
+                { id: 'accept', label: 'Accept' },
+                { id: 'accept', label: 'Accept again' },
+            ],
+        })],
+        /Invalid event row in war_1992\.json\[0\]: response_options\[1\]\.id must be unique within response_options: accept/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ response_options: [{ id: 'accept', label: 'Accept', effect: { kind: '' } }] })],
+        /Invalid event row in war_1992\.json\[0\]: response_options\[0\]\.effect\.kind must be a non-empty string/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ response_options: [{ id: 'accept', label: 'Accept', effects: [{ kind: 'new_unregistered_effect' }] }] })],
+        /Invalid event row in war_1992\.json\[0\]: response_options\[0\]\.effects\[0\]\.kind must be a known event effect kind: new_unregistered_effect/,
+    );
+});
+
+test('loadEventDefinitionsFromDir throws on unknown condition types', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({ trigger: { turn_min: 0, condition: { type: 'new_condition_type' } } })],
+        /Invalid event row in war_1992\.json\[0\]: trigger\.condition\.type must be a known event condition type: new_condition_type/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({
+            trigger: {
+                turn_min: 0,
+                condition: {
+                    type: 'and',
+                    conditions: [
+                        { type: 'flag_equals', flag: 'fixture', value: true },
+                        { type: 'new_nested_condition' },
+                    ],
+                },
+            },
+        })],
+        /Invalid event row in war_1992\.json\[0\]: trigger\.condition\.conditions\[1\]\.type must be a known event condition type: new_nested_condition/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({
+            pressure: {
+                base_rate: 1,
+                threshold: 1,
+                decay_rate: 0,
+                modifiers: [{ condition: { type: 'new_pressure_condition' }, rate_bonus: 1 }],
+            },
+        })],
+        /Invalid event row in war_1992\.json\[0\]: pressure\.modifiers\[0\]\.condition\.type must be a known event condition type: new_pressure_condition/,
+    );
+});
+
+test('loadEventDefinitionsFromDir throws on semantic enum and response metadata violations', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({ category: 'unknown_category' })],
+        /Invalid event row in war_1992\.json\[0\]: category must be a known event category when present: unknown_category/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ bot_response_logic: 'random_choice' })],
+        /Invalid event row in war_1992\.json\[0\]: bot_response_logic must be a known response logic when present: random_choice/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ probability: 2 })],
+        /Invalid event row in war_1992\.json\[0\]: probability must be between 0 and 1 when present/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ once: 'yes' })],
+        /Invalid event row in war_1992\.json\[0\]: once must be a boolean when present/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ requires_player_response: 'true' })],
+        /Invalid event row in war_1992\.json\[0\]: requires_player_response must be a boolean when present/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ responding_faction: 'XYZ' })],
+        /Invalid event row in war_1992\.json\[0\]: responding_faction must be a valid event faction: XYZ/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ requires_player_response: true })],
+        /Invalid event row in war_1992\.json\[0\]: responding_faction must be a non-empty string for required-response events/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({
+            response_options: [{ id: 'accept', label: 'Accept' }],
+            historical_default_response_id: 'reject',
+        })],
+        /Invalid event row in war_1992\.json\[0\]: historical_default_response_id must match a response option id: reject/,
+    );
+});
+
+test('loadEventDefinitionsFromDir throws on duplicate ids and unknown event references', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow(), validCatalogRow()],
+        /Duplicate event id\(s\) in required event catalog: valid_event/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ trigger: { turn_min: 0, requires_events: ['missing_event'] } })],
+        /Unknown event reference\(s\) in required event catalog: valid_event->missing_event/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ enables_events: ['missing_event'] })],
+        /Unknown event reference\(s\) in required event catalog: valid_event->missing_event/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ trigger: { turn_min: 0, condition: { type: 'week_since_event', event_id: 'missing_event' } } })],
+        /Unknown event reference\(s\) in required event catalog: valid_event->missing_event/,
     );
 });
 

@@ -1,4 +1,21 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] events(loader): fail closed on semantic catalog violations
+
+**Type:** Event-system Workstream B semantic validation.
+
+**Change:** Added shared event semantic vocabulary at `src/sim/events/event_vocabulary.ts` and wired both runtime loading and taxonomy diagnostics to it. `loadEventDefinitions(...)` now rejects unknown effect kinds, unknown recursive trigger/pressure condition types, invalid category/bot/probability/boolean/phase/range fields, duplicate response option ids, invalid historical default response ids, missing required-response factions, invalid responding factions, duplicate event ids, and unresolved event references from `requires_events`, `enables_events`, `week_since_event`, and `event_fire_count`.
+
+**Determinism:** Validation-only startup hardening for malformed catalogs. The current five-file catalog still loads as 247 rows and taxonomy output remains 247 rows / 44 choice events / 36 required-response rows / 17 modal-ready rows / 180 warnings / 0 errors. No event JSON, historical prose, evaluator behavior, save schema, migrations, GUI ownership, bot-choice policy, scenario data, generated artifacts, randomness, or calibration tuning changed.
+
+**Verification:**
+- `node node_modules\vitest\vitest.mjs run tests\event_loader.test.ts tests\sim\events\event_taxonomy_report.test.ts tests\event_timeline_integrity.test.ts --reporter=dot` - PASS; 65/65 tests.
+- `npx.cmd tsx tools\diagnostics\event_taxonomy_report.ts --json` - PASS; 247 events, 180 warnings, 0 errors.
+- `npm.cmd run typecheck` - PASS.
+
+**Artifacts:** `src/sim/events/event_vocabulary.ts`, `src/sim/events/event_loader.ts`, `tools/diagnostics/event_taxonomy_report.ts`, `tests/event_loader.test.ts`, `docs/40_reports/implemented/20260527_EVENT_LOADER_SEMANTIC_VALIDATION.md`, command-board/roadmap/plan docs.
+
+---
+
 ## [2026-05-27] events: persist event overflow queue
 
 **Type:** Event-system Workstream B behavior + save-schema slice.

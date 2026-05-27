@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest event loader semantic validation:** [implemented/20260527_EVENT_LOADER_SEMANTIC_VALIDATION.md](implemented/20260527_EVENT_LOADER_SEMANTIC_VALIDATION.md) - Runtime event loading now shares vocabulary with taxonomy diagnostics and fails closed for unknown effect/condition semantics, duplicate IDs, unresolved event references, invalid response defaults, and declared enum/range violations while preserving the current 247-row catalog.
+
 **Latest generated artifact ownership matrix meta-guard:** [implemented/20260527_GENERATED_ARTIFACT_OWNERSHIP_MATRIX_META_GUARD.md](implemented/20260527_GENERATED_ARTIFACT_OWNERSHIP_MATRIX_META_GUARD.md) - A static meta-contract now keeps the generated artifact ownership matrix shape, POSIX artifact keys, cited tests, ownership-test row references, and transient catch-all policy language aligned.
 
 **Latest replay sidecar artifact ownership:** [implemented/20260526_REPLAY_SIDECAR_ARTIFACT_OWNERSHIP.md](implemented/20260526_REPLAY_SIDECAR_ARTIFACT_OWNERSHIP.md) - A static guard now locks `runs/<scenario_run>/replay_sequence.jsonl` and `runs/<scenario_run>/replay_timeline.json` as transient scenario runner/video replay sidecars, including `emitWeeklySavesForVideo` gating and `runs/` no-commit proof.
