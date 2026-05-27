@@ -1687,7 +1687,6 @@
                 "objective_capture_count": 0,
                 "objectives": [
                   "op:visegrad:visegrad_2",
-                  "op:visegrad:drinsko",
                   "op:visegrad:kamenica_2",
                   "op:visegrad:medjedja_2"
                 ],
@@ -1712,7 +1711,6 @@
             "name": "Operation Visegrad",
             "objectives": [
               "op:visegrad:visegrad_2",
-              "op:visegrad:drinsko",
               "op:visegrad:kamenica_2",
               "op:visegrad:medjedja_2"
             ],
