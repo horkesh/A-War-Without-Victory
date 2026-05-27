@@ -338,8 +338,10 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         //   trnovo adj pale:praca/podgrab   ✗ — pale cluster excluded (broken chain)
         //
         // available_from: 6 — matches rs_trnovo_brigade availability.
-        // No explicit SRK queue needed — deferred-ops loop in injectPrePlannedOperations
-        // handles available_from automatically.
+        // SRK queue is explicit (see queue block below): Prsten → Trnovo.
+        // Two brigades required (sector_attack MIN=2):
+        //   rs_trnovo_brigade: home gornja_presjenica — already at staging, east axis
+        //   rs_igman_brigade:  home misevici_2 (Hadžići) — marches to staging, town axis
         corps: 'vrs_sarajevo_romanija',
         faction: 'RS',
         name: 'Operation Trnovo',
@@ -362,7 +364,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 // gornja_presjenica → trnovo (RBiH-painted, directly adjacent)
                 axis_id: 'trnovo_town',
                 name: 'Trnovo Town',
-                brigades: ['rs_trnovo_brigade'],
+                brigades: ['rs_igman_brigade'],
                 objectives: [
                     'op:trnovo:trnovo',     // RBiH-painted, persistent RBiH mismatch
                 ],

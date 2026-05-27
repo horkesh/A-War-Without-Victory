@@ -10747,3 +10747,19 @@ Any new offensive op — regardless of geographic location or corps — creates 
 - rs_1st_vlasenica, rs_5th_podrinje, rs_1st_podrinje all home NE Drina Corps (Bratunac/Vlasenica). stara_gora staging is 6-8 hops away. Aggressive commander forces execution in 3-5 turns → brigades never adjacent to brcigovo. Zero captures across entire 188w run. Any vrs_drina Rogatica-area op will fail unless brigades are replaced with ones homed near Rogatica.
 
 **Artifacts:** `src/sim/combat/pre_planned_operations.ts`, `data/scenarios/events/war_1995.json`, `memory/baseline_honest_zero_cc.md`, `memory/enclave_mechanics_research.md`.
+
+**n80 (aborted) — `&` shell bug killed tsx process. Partial run, no final_save.**
+
+**n81-n82 — Op Trnovo brigade_attrition: sector_attack requires MIN 2 brigades (zero-delta)**
+- With only rs_trnovo_brigade assigned (both axes shared same brigade), `activeBrigadeCount=1 < minRequired=2` → immediate brigade_attrition abort every time.
+- Added rs_igman_brigade (home misevici_2, Hadžići, 600 pers) to trnovo_town axis. Still zero-delta in n81.
+- Debug trace (n82/n83) revealed: `formations['rs_igman_brigade'] = null` for 11 consecutive injection attempts — brigade doesn't spawn until ~w29. Op cannot inject until both brigades exist in game state.
+
+**n83 — Op Trnovo fires (w30), 0 captures, +1 cascade: 617/712 (86.7%) — NEW BASELINE**
+- Op Trnovo injects at w30 (after rs_igman_brigade spawns). Both brigades in op. BUT:
+  1. rs_trnovo_brigade killed at w34 (500 pers → 0, ARBiH attacks during planning phase)
+  2. rs_igman_brigade marches toward Ilidža sector during planning (sector assignment overrides staging march)
+  3. Op recovers with 0 captures
+- +1 gain from cascade: rs_igman_brigade committed to Op Trnovo changes SRK brigade allocation → indirect cascade → op:titov_drvar:drvar_2 flips HRHB (was RS). Emergent brigade-allocation cascade, not a fake CC.
+- Hash: `TBD` (n83, clean run needed to confirm).
+- Trnovo cluster (kijevo_2/delijas/trnovo) still uncapturable with current brigade assignments. Requires OOB fix (increase rs_trnovo_brigade personnel) or engine fix (enclave protection during planning).
