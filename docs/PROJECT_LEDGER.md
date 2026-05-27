@@ -11546,3 +11546,24 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `tests/replay_artifact_ownership.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/implemented/20260526_REPLAY_SIDECAR_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-27] perf(sector): tighten coverage target selection loop
+
+**Type:** Byte-identical sector/frontline performance slice.
+
+**Change:** Updated the active sector performance plan and command board to use `5d94adbfdb09bbda` as the current clean pre-change hash, with `f219401f4a17f311` superseded as save-shape/schema drift only. In `ensureMinimumSectorCoverage(...)`, replaced the `pickVacantLocalFrontTarget(...)` filter/map/filter candidate pipeline with a deterministic ordered loop and the same final sort, and reused invocation-local movement state/order views in repeated severe-rescue eligibility checks. A broader invocation-local front OSID view cache was tested and rejected before closeout because it preserved the hash but regressed the measured child timing.
+
+**Determinism:** Final 40w profile hash stayed `5d94adbfdb09bbda`. The code slice does not change sector packet ordering, assignment ordering, scenario data, event content, calibration data, save schema, migrations, validators, generated artifact bytes, UI, randomness, or serialization. The only generated outputs were ignored transient profile artifacts under `runs_perf/` and `data/derived/_debug/`.
+
+**Verification:**
+- `F:\A-War-Without-Victory\vitest.cmd run tests\sector_partition_instrumentation.test.ts tests\sector_severe_undercoverage_rebalance.test.ts tests\sector_coverage_truth_preservation.test.ts tests\rear_sector_bucket_truth.test.ts --reporter=dot` - PASS; 43/43 tests.
+- `F:\A-War-Without-Victory\vitest.cmd run tests\final_sector_truth_reconciliation_cache.test.ts tests\final_sector_truth_reconciliation.test.ts tests\sector_partition_buildCorpsFrontSectors_integration.test.ts tests\sector_partition_instrumentation.test.ts tests\war_phase_step_order.test.ts --reporter=dot` - PASS; 43/43 tests.
+- `npm.cmd run typecheck` - PASS.
+- `$env:PERF_PROFILE_SECTOR_PARTITION='true'; npx.cmd tsx tools/perf/profile_scenario.ts --scenario data/scenarios/apr1992_definitive_40w.json --out runs_perf/sector_truth_reconciliation_post_profile --report data/derived/_debug/sector_truth_reconciliation_post_profile_40w.json` - PASS; final hash `5d94adbfdb09bbda`.
+- Same-machine `origin/main` child timing check: `sealMergedSectorTruth:ensure-coverage` 2171.6060ms, `:floor-completion` 805.3171ms, `:zero-assigned` 816.1526ms.
+- Post-slice child timing: `sealMergedSectorTruth:ensure-coverage` 2175.6227ms, `:floor-completion` 807.0146ms, `:zero-assigned` 798.6458ms.
+- `npm.cmd run test:baselines` - FAIL locally on pre-existing/platform-bound `apr1992_52w` `final_save.json` manifest mismatch (`814386ed9ce2fa96...` expected, `e11a68b2da3d...` actual); reversing only this runtime slice and rerunning produced the same mismatch, so it is not attributed to this slice.
+
+**Artifacts:** `src/sim/combat/brigade_assignment.ts`, `tests/sector_partition_instrumentation.test.ts`, `docs/plans/2026-05-20-sector-performance-next-target-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/40_reports/audits/20260518_MASTER_BACKLOG_EXECUTION_QUEUE.md`, `docs/40_reports/implemented/20260527_SECTOR_COVERAGE_TARGET_SELECTION_LOOP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
