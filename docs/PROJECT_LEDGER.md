@@ -10763,3 +10763,18 @@ Any new offensive op — regardless of geographic location or corps — creates 
 - +1 gain from cascade: rs_igman_brigade committed to Op Trnovo changes SRK brigade allocation → indirect cascade → op:titov_drvar:drvar_2 flips HRHB (was RS). Emergent brigade-allocation cascade, not a fake CC.
 - Hash: `TBD` (n83, clean run needed to confirm).
 - Trnovo cluster (kijevo_2/delijas/trnovo) still uncapturable with current brigade assignments. Requires OOB fix (increase rs_trnovo_brigade personnel) or engine fix (enclave protection during planning).
+
+**n85 — confirmatory clean run: 617/712 (86.7%), hash `f7ce0cbecb6df839` — CONFIRMED BASELINE**
+- Identical score to n83. rs_igman_brigade on trnovo_town axis, SRK queue wired, debug logs stripped.
+- Note: n84 was accidentally run as 52w (wrong npm script). n85 = correct 188w.
+- Anchors 22/27 (failures: srebrenica_2, vozuca_2, zepa_2, petrovo_2, brijesnica_donja_2). Benchmarks 6/6.
+
+**n86 — rs_trnovo_brigade 500→1200 personnel: 606/712 (85.1%) — REGRESSION, REVERTED**
+- Change: `oob_brigades.json` initial_personnel 500→1200 for rs_trnovo_brigade.
+- Net: -11 OSIDs vs n85 baseline. HRHB collapsed from 85/107 → 72/107 (-13 HRHB).
+- Regression cluster: Bosansko Grahovo (4), Šipovo (5), Titov Drvar (2), Glamoč (2) — all HRHB-painted, flipped RS.
+- Mechanism: Larger SRK brigade shifted army-wide force allocation → VRS 1st Krajina over-extended into Op Mistral zone (Grahovo/Šipovo/Drvar), preventing HVO from taking those OSIDs.
+- Gains: +7 (brčko:donji_rahic, skakava_donja, gornji_vakuf:zdrimci, jajce:grdovo, novi_travnik:rat_2, teslic:kamenica_2, zepce:viniste_2).
+- Lesson: VRS OOB personnel bumps cascade through army-wide resource allocation into Op Mistral zone (HVO operations). Do NOT use personnel increases as calibration levers for SRK brigades.
+- Reverted to 500. Op Trnovo OOB fix is not viable as an isolated single change. Need different approach.
+- Hash: `25cf86b904f9dbd3`.
