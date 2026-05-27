@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(24);
+        expect(getLatestSchemaVersion()).toBe(25);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -89,6 +89,9 @@ describe('versioned save migration steps', () => {
         expect(state.military.event_flags).toEqual({});
         expect(state.military.enabled_event_ids).toEqual([]);
         expect(state.military.event_overflow_queue).toEqual([]);
+        expect(state.military.event_aggression_modifiers).toEqual([]);
+        expect(state.military.recruitment_modifiers).toEqual([]);
+        expect(state.military.equipment_quality_modifiers).toEqual([]);
         expect(state.military.pending_event_decisions).toEqual([]);
         expect(state.military.pending_event_notifications).toEqual([]);
         expect(state.military.phantoms_spawned).toEqual([]);
@@ -439,6 +442,58 @@ describe('versioned save migration steps', () => {
                 historical_default_response_id: 'historical_a',
                 trigger_evidence: ['first trigger'],
             },
+        ]);
+    });
+
+    it('materializes v25 event modifier defaults for v24 saves', () => {
+        const state = minimalLegacyState(24);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        delete state.military.event_aggression_modifiers;
+        delete state.military.recruitment_modifiers;
+        delete state.military.equipment_quality_modifiers;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.event_aggression_modifiers).toEqual([]);
+        expect(state.military.recruitment_modifiers).toEqual([]);
+        expect(state.military.equipment_quality_modifiers).toEqual([]);
+    });
+
+    it('preserves existing v25 event modifier order and contents for v24 saves', () => {
+        const state = minimalLegacyState(24);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [
+            { faction: 'RS', delta: 0.2, expires_turn: 12 },
+            { faction: 'RBiH', delta: -0.1, expires_turn: 13 },
+        ];
+        state.military.recruitment_modifiers = [
+            { faction: 'RBiH', pool_multiplier: 1.1, expires_turn: 14 },
+            { faction: 'HRHB', pool_multiplier: 0.95, expires_turn: 15 },
+        ];
+        state.military.equipment_quality_modifiers = [
+            { faction: 'HRHB', multiplier: 1.05, expires_turn: 16 },
+            { faction: 'RS', multiplier: 0.9, expires_turn: 17 },
+        ];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.event_aggression_modifiers).toEqual([
+            { faction: 'RS', delta: 0.2, expires_turn: 12 },
+            { faction: 'RBiH', delta: -0.1, expires_turn: 13 },
+        ]);
+        expect(state.military.recruitment_modifiers).toEqual([
+            { faction: 'RBiH', pool_multiplier: 1.1, expires_turn: 14 },
+            { faction: 'HRHB', pool_multiplier: 0.95, expires_turn: 15 },
+        ]);
+        expect(state.military.equipment_quality_modifiers).toEqual([
+            { faction: 'HRHB', multiplier: 1.05, expires_turn: 16 },
+            { faction: 'RS', multiplier: 0.9, expires_turn: 17 },
         ]);
     });
 });

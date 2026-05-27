@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 24,
-  "registered_migration_count": 24,
-  "strict_required_field_count": 57,
+  "latest_schema_version": 25,
+  "registered_migration_count": 25,
+  "strict_required_field_count": 60,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -101,6 +101,10 @@
     {
       "version": 24,
       "description": "Persisted pending event decision queue defaults. Sensitive: no."
+    },
+    {
+      "version": 25,
+      "description": "Persisted event modifier queue defaults. Sensitive: no."
     }
   ],
   "required_fields": [
@@ -331,6 +335,18 @@
     {
       "version": 24,
       "path": "military.pending_event_decisions"
+    },
+    {
+      "version": 25,
+      "path": "military.equipment_quality_modifiers"
+    },
+    {
+      "version": 25,
+      "path": "military.event_aggression_modifiers"
+    },
+    {
+      "version": 25,
+      "path": "military.recruitment_modifiers"
     }
   ]
 }

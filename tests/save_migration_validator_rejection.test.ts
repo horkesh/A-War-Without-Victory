@@ -63,6 +63,9 @@ function currentVersionState(): any {
             event_flags: {},
             enabled_event_ids: [],
             event_overflow_queue: [],
+            event_aggression_modifiers: [],
+            recruitment_modifiers: [],
+            equipment_quality_modifiers: [],
             pending_event_decisions: [],
             pending_event_notifications: [],
             phantoms_spawned: [],
@@ -352,6 +355,9 @@ describe('save migration validator hardening', () => {
         delete state.military.event_flags;
         delete state.military.enabled_event_ids;
         delete state.military.event_overflow_queue;
+        delete state.military.event_aggression_modifiers;
+        delete state.military.recruitment_modifiers;
+        delete state.military.equipment_quality_modifiers;
         delete state.military.pending_event_decisions;
         delete state.military.pending_event_notifications;
         delete state.displacement.displacement_event_log;
@@ -386,6 +392,9 @@ describe('save migration validator hardening', () => {
         expect(migrated.military.event_flags).toEqual({});
         expect(migrated.military.enabled_event_ids).toEqual([]);
         expect(migrated.military.event_overflow_queue).toEqual([]);
+        expect(migrated.military.event_aggression_modifiers).toEqual([]);
+        expect(migrated.military.recruitment_modifiers).toEqual([]);
+        expect(migrated.military.equipment_quality_modifiers).toEqual([]);
         expect(migrated.military.pending_event_decisions).toEqual([]);
         expect(migrated.military.pending_event_notifications).toEqual([]);
         expect(migrated.displacement.displacement_event_log).toEqual([]);
@@ -765,6 +774,59 @@ describe('save migration validator hardening', () => {
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
             /Save schema validation failed after migration[\s\S]*military\.pending_event_decisions\[0\]\.historical_default_response_id must match a response option id/
+        );
+    });
+
+    it('materializes v25 event modifiers for v24 saves', () => {
+        const state = currentVersionState();
+        state.schema_version = 24;
+        delete state.military.event_aggression_modifiers;
+        delete state.military.recruitment_modifiers;
+        delete state.military.equipment_quality_modifiers;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.event_aggression_modifiers).toEqual([]);
+        expect(migrated.military.recruitment_modifiers).toEqual([]);
+        expect(migrated.military.equipment_quality_modifiers).toEqual([]);
+    });
+
+    it('rejects current-version saves missing event aggression modifiers', () => {
+        const state = currentVersionState();
+        delete state.military.event_aggression_modifiers;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v25[\s\S]*military\.event_aggression_modifiers/
+        );
+    });
+
+    it('rejects current-version saves missing recruitment modifiers', () => {
+        const state = currentVersionState();
+        delete state.military.recruitment_modifiers;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v25[\s\S]*military\.recruitment_modifiers/
+        );
+    });
+
+    it('rejects current-version saves missing equipment quality modifiers', () => {
+        const state = currentVersionState();
+        delete state.military.equipment_quality_modifiers;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v25[\s\S]*military\.equipment_quality_modifiers/
+        );
+    });
+
+    it('rejects current-version saves with malformed event modifiers', () => {
+        const state = currentVersionState();
+        state.military.event_aggression_modifiers = {};
+        state.military.recruitment_modifiers = [{ faction: 'RBiH', pool_multiplier: 'bad', expires_turn: 1 }];
+        state.military.equipment_quality_modifiers = [{ faction: 'JNA', multiplier: 1.1, expires_turn: -1 }];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.event_aggression_modifiers[\s\S]*military\.recruitment_modifiers\[0\]\.pool_multiplier must be a finite number[\s\S]*military\.equipment_quality_modifiers\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.equipment_quality_modifiers\[0\]\.expires_turn must be a non-negative integer/
         );
     });
 });

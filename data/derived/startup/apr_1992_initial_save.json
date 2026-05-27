@@ -12481,6 +12481,8 @@
       }
     },
     "enabled_event_ids": [],
+    "equipment_quality_modifiers": [],
+    "event_aggression_modifiers": [],
     "event_decision_log": [],
     "event_fire_counts": {},
     "event_flags": {},
@@ -33908,6 +33910,7 @@
         "war_crimes_policy": "tolerate"
       }
     },
+    "recruitment_modifiers": [],
     "recruitment_state": {
       "equipment_points_trickle": {
         "HRHB": 4,
@@ -43315,5 +43318,5 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 24
+  "schema_version": 25
 }

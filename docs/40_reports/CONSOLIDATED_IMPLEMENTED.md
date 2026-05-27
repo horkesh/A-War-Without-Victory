@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest event modifier schema contract:** [implemented/20260527_EVENT_MODIFIER_SCHEMA_CONTRACT.md](implemented/20260527_EVENT_MODIFIER_SCHEMA_CONTRACT.md) - Active event modifier queues are now required persisted v25 save/load contracts with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no event behavior change.
+
 **Latest pending event decisions schema contract:** [implemented/20260527_PENDING_EVENT_DECISIONS_SCHEMA_CONTRACT.md](implemented/20260527_PENDING_EVENT_DECISIONS_SCHEMA_CONTRACT.md) - `military.pending_event_decisions` is now a required persisted v24 save/load contract with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no event behavior change.
 
 **Latest pending event notifications schema contract:** [implemented/20260527_PENDING_EVENT_NOTIFICATIONS_SCHEMA_CONTRACT.md](implemented/20260527_PENDING_EVENT_NOTIFICATIONS_SCHEMA_CONTRACT.md) - `military.pending_event_notifications` is now a required persisted v23 save/load contract with `[]` legacy migration, current-version missing/malformed rejection coverage, drift report proof, and no runtime notification-emission change.

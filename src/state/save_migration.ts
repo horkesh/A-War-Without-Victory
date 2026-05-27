@@ -657,3 +657,14 @@ registerMigration({
         ensureArray(asRecord(state.military), 'pending_event_decisions');
     },
 });
+
+registerMigration({
+    version: 25,
+    description: 'Persisted event modifier queue defaults. Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        ensureArray(mil, 'event_aggression_modifiers');
+        ensureArray(mil, 'recruitment_modifiers');
+        ensureArray(mil, 'equipment_quality_modifiers');
+    },
+});
