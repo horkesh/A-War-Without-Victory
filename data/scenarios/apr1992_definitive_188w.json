@@ -32,7 +32,8 @@
     "op:hanpijesak:godjenje_2": "RS",
     "op:kalinovik:varos_2": "RS",
     "op:rogatica:varosiste_2": "RS",
-    "op:rudo:gornja_strmica": "RS"
+    "op:rudo:gornja_strmica": "RS",
+    "op:ugljevik:jasikovac": "RS"
   },
   "init_formations": "apr1992",
   "init_formations_oob": true,
@@ -71,7 +72,10 @@
   "enable_rbih_hrhb_dynamics": true,
   "rbih_hrhb_war_earliest_week": 26,
   "comms_override_by_corps": {
-    "arbih_1st_corps": { "before_turn": 18, "mode": "radio" }
+    "arbih_1st_corps": {
+      "before_turn": 18,
+      "mode": "radio"
+    }
   },
   "coercion_pressure_by_municipality": {
     "prijedor": 0.9,

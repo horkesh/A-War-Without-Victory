@@ -1053,6 +1053,13 @@ export function advanceSectorOffensives(
                 }
                 const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op);
                 if (!forcedLaunch && !openingReadiness.executable) {
+                    // stagedEarly fires via isCommittedInTransitTo when a brigade is en-route
+                    // to its approach OSID but not yet settled. Its CURRENT location may not be
+                    // adjacent to the objective, so evaluateOpeningAttackReadiness fails even though
+                    // the brigade will be in position next turn. Give one turn for march completion.
+                    if (stagedEarly && elapsed <= planDuration + PLANNING_INVALIDATION_GRACE_TURNS) {
+                        continue;
+                    }
                     beginRecovery(op, turn, openingReadiness.blocker ?? 'no_launch_readiness', state);
                     continue;
                 }
@@ -2052,9 +2059,12 @@ export function reevaluateWeakenedOperations(state: GameState): void {
         // Recovery-phase operations are already winding down.
         if (op.phase === 'recovery') continue;
 
-        // Count active participating brigades and total personnel
+        // Count active participating brigades and total personnel.
+        // Always use participating_brigades (consistent with how initial_strength is set in
+        // operation_aar.ts). getAllAxisBrigades would under-count when reconcilePlanningObjectives
+        // prunes a stale axis but leaves its brigades in participating_brigades.
         const multiAxis = isMultiAxis(op);
-        const allBrigadeIds = multiAxis ? getAllAxisBrigades(op) : op.participating_brigades;
+        const allBrigadeIds = op.participating_brigades;
         let activeBrigadeCount = 0;
         let totalPersonnel = 0;
         for (const bid of allBrigadeIds) {

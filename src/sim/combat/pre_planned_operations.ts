@@ -78,7 +78,12 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         name: 'Operation Koridor',
         staging_osid: 'op:bijeljina:dvorovi_2',
         min_attack_outcome: 'repulsed',
-        planning_duration: 3,
+        // planning_duration:9 — 1st_bijeljina marches dvorovi_2→crnjelovo_donje(w2)→potocari_2(w4)
+        // →brcko(w6)→in_transit brcko→donji_rahic(w8)→settled donji_rahic(w9). stagedEarly fires
+        // at w8 via isCommittedInTransitTo(donji_rahic); evaluateOpeningAttackReadiness fails
+        // because brcko is not adjacent to krepsic. elapsed(8)<=9+2=11 → sector_offensive
+        // in-transit grace holds → brigade settles at donji_rahic at w9 → krepsic attack succeeds.
+        planning_duration: 9,
         axes: [
             {
                 axis_id: 'brcko_corridor',

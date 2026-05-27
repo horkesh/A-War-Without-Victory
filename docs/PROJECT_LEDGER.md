@@ -10847,3 +10847,35 @@ Any new offensive op — regardless of geographic location or corps — creates 
 - Score: 618/712 (86.8%), +1 vs n85. Anchors: 22/27 (same 5 failures). Benchmarks: 6/6.
 - grdovo: RS→RBiH (painted: RBiH). ✓
 - Commit: 89853268.
+
+---
+
+## [2026-05-27] calibration(Op Koridor): in-transit grace + participating_brigades fix → 91.7% (40w)
+
+**Type:** Two co-dependent engine fixes — one lifecycle timing fix + one attrition counting fix. Together they form the complete Op Koridor blitz-phase timing fix. Single logical change tracked across n109–n117 diagnostic runs.
+
+**Root cause chain (discovered via n109–n116 diagnostic runs):**
+
+1. `isPrePlannedBlitz = true` for RS w0–w12 skips preparation entirely.
+2. `stagedEarly` fires at w8 via `isCommittedInTransitTo(donji_rahic)` when `rs_1st_bijeljina` is in-transit brcko→donji_rahic. Its CURRENT location (brcko) is not adjacent to krepsic.
+3. `evaluateOpeningAttackReadiness` fails → in n112, op recovered immediately with `zero_eligible_axis`.
+4. **Fix 1 (sector_offensive.ts):** When `stagedEarly && elapsed <= planDuration + PLANNING_INVALIDATION_GRACE_TURNS`, wait 1 turn instead of recovering. Brigade settles at donji_rahic next turn → attack succeeds. `planning_duration: 9` (added n111, made intentional).
+5. After Fix 1 (n113), a new abort emerged: `power_attrition (2998/7600, threshold 0.5)` from `reevaluateWeakenedOperations` at w8 while op is still in planning.
+6. Root cause of power_attrition: `reconcilePlanningObjectives` removes `posavina_flank` axis when all its objectives become RS-controlled (samac_2, modrica etc.). But `participating_brigades` retains posavina brigades (6 total). `getAllAxisBrigades` returns only brcko brigades (3) → totalPersonnel=2998. `initial_strength=7600` was set from all 6 brigades by `operation_aar.ts`. 2998 < 7600×0.5 → false abort.
+7. **Fix 2 (sector_offensive.ts):** In `reevaluateWeakenedOperations`, use `op.participating_brigades` instead of `getAllAxisBrigades(op)` for activeBrigadeCount/totalPersonnel. Consistent with how `initial_strength` is set (from `participating_brigades` in `operation_aar.ts`). Per-axis stall check unaffected (still uses `axis.assigned_brigades`).
+
+**Files changed:**
+- `src/sim/combat/sector_offensive.ts` — in-transit grace at evaluateOpeningAttackReadiness failure; participating_brigades fix for reevaluateWeakenedOperations
+- `src/sim/combat/pre_planned_operations.ts` — planning_duration: 9 + explanatory comment
+
+**Results (n117 vs zero-CC baseline n78, 40w apr1992_definitive_40w vs jan1993 target):**
+- **match_ratio: 0.917135 (653/712) — up from 86.5% (616/712) = +37 OSIDs = +5.2pp**
+- Anchors: **27/27** (vs 22/27 in n78)
+- Benchmarks: **6/6**
+- Op Koridor: ★★★★★ **2/2 obj success** (w0–w11), 7.7:1 exchange ratio
+- Per-faction: HRHB 73/80 (91.3%), RBiH 225/247 (91.1%), RS 355/385 (92.2%)
+- Hash: `262c6016f24253ce`
+
+**Sensitive-history compliance:** Ring-1 / no §6. Engine lifecycle fix — no FORAWWV, no painted target overrides, no avoided_osids_by_faction, no init OSID overrides.
+
+**Artifacts:** `src/sim/combat/sector_offensive.ts`, `src/sim/combat/pre_planned_operations.ts`, `docs/PROJECT_LEDGER.md`.

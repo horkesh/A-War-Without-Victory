@@ -93,15 +93,17 @@ function makeMinimalState(): GameState {
 
 describe('pre-planned operations', () => {
     it('defines the current pre-planned operation catalog', () => {
-        assert.equal(_ALL_PRE_PLANNED.length, 13);
+        assert.equal(_ALL_PRE_PLANNED.length, 15);
         assert.deepEqual(
             _ALL_PRE_PLANNED.map((def) => def.name),
             [
                 'Operation Koridor',
                 'Operation Drina',
                 'Operation Podrinje Sweep',
+                'Operation Pracha River',
                 'Operation Visegrad',
                 'Operation Prsten',
+                'Operation Trnovo',
                 'Operation Herzegovina',
                 'Operation Foca',
                 'Operation Prijedor',
@@ -128,7 +130,7 @@ describe('pre-planned operations', () => {
         );
 
         assert.equal(state.military.corps_command?.vrs_drina?.active_operations[0]?.name, 'Operation Drina');
-        assert.deepEqual(state.military.corps_command?.vrs_drina?.queued_operations, ['Operation Podrinje Sweep']);
+        assert.deepEqual(state.military.corps_command?.vrs_drina?.queued_operations, ['Operation Podrinje Sweep', 'Operation Pracha River']);
 
         assert.equal(state.military.corps_command?.hvo_southeast_herzegovina?.queued_operations?.[0], 'Operation Jackal');
     });
@@ -165,7 +167,7 @@ describe('pre-planned operations', () => {
         const koridor = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Koridor');
         assert.ok(koridor);
         assert.equal(koridor!.min_attack_outcome, 'repulsed');
-        assert.equal(koridor!.planning_duration, 3);
+        assert.equal(koridor!.planning_duration, 9);
     });
 
     it('lists op:brcko:brcko as a brcko_corridor axis objective in alphabetical order', () => {
@@ -255,10 +257,10 @@ describe('pre-planned operations', () => {
             phase: 'planning',
             participating_brigades: ['rs_foa_brigade'],
             objectives: [
+                'op:foca:patkovina',
                 'op:foca:prevrac',
                 'op:gorazde:kolovarice',
                 'op:kalinovik:vlaholje',
-                'op:kalinovik:varos_2',
                 'op:kalinovik:golubici_2',
                 'op:kalinovik:sela_2',
             ],

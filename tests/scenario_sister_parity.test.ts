@@ -42,7 +42,6 @@ const INTENTIONALLY_INLINE_ONLY = new Set([
 const KNOWN_GAPS_ALLOW_LIST = new Set<string>([
     // Deferred per #29 — not yet addressed
     'supply_reserves_enabled',
-    'enable_rbih_hrhb_dynamics',
 ]);
 
 function loadScenario(name: string): Record<string, unknown> {
