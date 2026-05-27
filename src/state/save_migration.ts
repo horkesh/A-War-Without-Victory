@@ -676,3 +676,13 @@ registerMigration({
         ensureArray(asRecord(state.military), 'cost_ledger_annotations');
     },
 });
+
+registerMigration({
+    version: 27,
+    description: 'Persisted humanitarian convoy decision queue defaults. Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        ensureArray(mil, 'pending_convoy_decisions');
+        ensureArray(mil, 'convoy_decision_history');
+    },
+});

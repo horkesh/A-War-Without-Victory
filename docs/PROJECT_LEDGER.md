@@ -1,4 +1,25 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] state(convoys): make convoy decision queues a v27 save contract
+
+**Type:** Save-schema/default contract slice.
+
+**Change:** Bumped `CURRENT_SCHEMA_VERSION` to 27 and added migration v27 for `military.pending_convoy_decisions` and `military.convoy_decision_history` with inert `[]` defaults. Current-version save validation now rejects missing or malformed convoy pending/history queues. The v26 fixture plus focused migration/validator tests prove default materialization and order/content preservation. The TypeScript optional markers remain in `GameState` for legacy/in-memory runtime compatibility.
+
+**Determinism:** Migration is pure and preserves existing array order. `tools/diagnostics/output/save_migration_drift.json` was regenerated to v27 / 27 migrations / 63 strict required fields. The startup snapshot was rebuilt to the v27 persisted save contract. No convoy generation, convoy resolution, supply amount math, bot default decision, GUI behavior, scenario data, event content, or calibration tuning changed.
+
+**Verification:**
+- Red proof before production change: focused migration/validator tests failed on missing v27 migration/default/validator coverage.
+- `npx.cmd vitest run tests\humanitarian_convoy_lifecycle.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts --reporter=dot` - PASS; 134/134 tests after production change.
+- Expanded schema/behavior pack - PASS; 187/187 tests.
+- `npm.cmd run desktop:startup-snapshot:check` - PASS.
+- `npm.cmd run typecheck` - PASS.
+- `node tools\diagnostics\strict_null_inventory.cjs` - PASS; optional-field floor remains 465.
+- `git diff --check` - PASS.
+- Independent save/schema QA found no blockers and ran a 163-test focused save/migration pack.
+- Independent determinism/artifact review found no behavior-surface drift and confirmed generated artifacts are schema-v27 only.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, save/state/convoy tests, `tests/fixtures/save_migration/v26_convoy_decisions.json`, `tools/diagnostics/output/save_migration_drift.json`, `data/derived/startup/apr_1992_initial_save.json`, `docs/40_reports/implemented/20260527_CONVOY_DECISION_SCHEMA_CONTRACT.md`, command-board/roadmap/plan docs.
+
 ## [2026-05-27] state(endgame): make cost ledger annotations a v26 save contract
 
 **Type:** Save-schema/default contract slice.

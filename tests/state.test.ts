@@ -65,6 +65,8 @@ const baseState: GameState = {
         recruitment_modifiers: [],
         equipment_quality_modifiers: [],
         cost_ledger_annotations: [],
+        pending_convoy_decisions: [],
+        convoy_decision_history: [],
         pending_event_decisions: [],
         pending_event_notifications: [],
         phantoms_spawned: [],

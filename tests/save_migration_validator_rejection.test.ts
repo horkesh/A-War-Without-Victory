@@ -67,6 +67,8 @@ function currentVersionState(): any {
             recruitment_modifiers: [],
             equipment_quality_modifiers: [],
             cost_ledger_annotations: [],
+            pending_convoy_decisions: [],
+            convoy_decision_history: [],
             pending_event_decisions: [],
             pending_event_notifications: [],
             phantoms_spawned: [],
@@ -860,6 +862,49 @@ describe('save migration validator hardening', () => {
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
             /Save schema validation failed after migration[\s\S]*military\.cost_ledger_annotations\[0\]\.event_id must be a non-empty string[\s\S]*military\.cost_ledger_annotations\[0\]\.tag must be a non-empty string[\s\S]*military\.cost_ledger_annotations\[0\]\.turn must be a non-negative integer[\s\S]*military\.cost_ledger_annotations\[0\]\.text must be a string when present[\s\S]*military\.cost_ledger_annotations\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.cost_ledger_annotations\[1\] must be an object/
+        );
+    });
+
+    it('materializes v27 convoy decision queues for v26 saves', () => {
+        const state = currentVersionState();
+        state.schema_version = 26;
+        delete state.military.pending_convoy_decisions;
+        delete state.military.convoy_decision_history;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.pending_convoy_decisions).toEqual([]);
+        expect(migrated.military.convoy_decision_history).toEqual([]);
+    });
+
+    it('rejects current-version saves missing convoy decision queues', () => {
+        const missingPending = currentVersionState();
+        delete missingPending.military.pending_convoy_decisions;
+        const missingHistory = currentVersionState();
+        delete missingHistory.military.convoy_decision_history;
+
+        expect(() => deserializeState(JSON.stringify(missingPending))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v27[\s\S]*military\.pending_convoy_decisions/
+        );
+        expect(() => deserializeState(JSON.stringify(missingHistory))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v27[\s\S]*military\.convoy_decision_history/
+        );
+    });
+
+    it('rejects current-version saves with malformed convoy decision queues', () => {
+        const state = currentVersionState();
+        state.military.pending_convoy_decisions = [
+            { id: '', target_enclave: 42, route_faction: 'JNA', supply_amount: -1, decision: 'approve' },
+            42,
+        ];
+        state.military.convoy_decision_history = [
+            { id: '', turn: 1.5, target_enclave: '', route_faction: 'JNA', target_faction: 'UN', supply_amount: Number.POSITIVE_INFINITY, decision: 'approve', decided_by: 'staff' },
+            42,
+        ];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.pending_convoy_decisions\[0\]\.id must be a non-empty string[\s\S]*military\.pending_convoy_decisions\[0\]\.route_faction must be one of: RBiH, RS, HRHB[\s\S]*military\.pending_convoy_decisions\[1\] must be an object[\s\S]*military\.convoy_decision_history\[0\]\.turn must be a non-negative integer[\s\S]*military\.convoy_decision_history\[0\]\.decided_by must be one of: player, bot[\s\S]*military\.convoy_decision_history\[1\] must be an object/
         );
     });
 });

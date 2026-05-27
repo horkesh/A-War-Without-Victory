@@ -278,6 +278,75 @@ function validateCostLedgerAnnotations(value: unknown, errors: string[]): void {
     });
 }
 
+function isConvoyDecision(value: unknown): boolean {
+    return value === 'allow' || value === 'block' || value === 'divert';
+}
+
+function validatePendingConvoyDecisions(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.pending_convoy_decisions must be an array when present');
+        return;
+    }
+
+    value.forEach((decision, i) => {
+        if (!isRecord(decision)) {
+            errors.push(`military.pending_convoy_decisions[${i}] must be an object`);
+            return;
+        }
+        for (const key of ['id', 'target_enclave']) {
+            if (!isNonEmptyString(decision[key])) {
+                errors.push(`military.pending_convoy_decisions[${i}].${key} must be a non-empty string`);
+            }
+        }
+        if (!isCanonicalPlayerFaction(decision.route_faction)) {
+            errors.push(`military.pending_convoy_decisions[${i}].route_faction must be one of: RBiH, RS, HRHB`);
+        }
+        if (!isFiniteNonNegativeNumber(decision.supply_amount)) {
+            errors.push(`military.pending_convoy_decisions[${i}].supply_amount must be a finite non-negative number`);
+        }
+        if ('decision' in decision && decision.decision !== undefined && !isConvoyDecision(decision.decision)) {
+            errors.push(`military.pending_convoy_decisions[${i}].decision must be one of: allow, block, divert when present`);
+        }
+    });
+}
+
+function validateConvoyDecisionHistory(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.convoy_decision_history must be an array when present');
+        return;
+    }
+
+    value.forEach((decision, i) => {
+        if (!isRecord(decision)) {
+            errors.push(`military.convoy_decision_history[${i}] must be an object`);
+            return;
+        }
+        for (const key of ['id', 'target_enclave']) {
+            if (!isNonEmptyString(decision[key])) {
+                errors.push(`military.convoy_decision_history[${i}].${key} must be a non-empty string`);
+            }
+        }
+        if (!isNonNegativeInteger(decision.turn)) {
+            errors.push(`military.convoy_decision_history[${i}].turn must be a non-negative integer`);
+        }
+        if (!isCanonicalPlayerFaction(decision.route_faction)) {
+            errors.push(`military.convoy_decision_history[${i}].route_faction must be one of: RBiH, RS, HRHB`);
+        }
+        if (!isCanonicalPlayerFaction(decision.target_faction)) {
+            errors.push(`military.convoy_decision_history[${i}].target_faction must be one of: RBiH, RS, HRHB`);
+        }
+        if (!isFiniteNonNegativeNumber(decision.supply_amount)) {
+            errors.push(`military.convoy_decision_history[${i}].supply_amount must be a finite non-negative number`);
+        }
+        if (!isConvoyDecision(decision.decision)) {
+            errors.push(`military.convoy_decision_history[${i}].decision must be one of: allow, block, divert`);
+        }
+        if (decision.decided_by !== 'player' && decision.decided_by !== 'bot') {
+            errors.push(`military.convoy_decision_history[${i}].decided_by must be one of: player, bot`);
+        }
+    });
+}
+
 const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 3, path: 'meta.referendum_held', check: (v) => typeof v === 'boolean' },
     { version: 3, path: 'meta.referendum_turn', check: (v) => v === null || Number.isInteger(v) },
@@ -340,6 +409,8 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 25, path: 'military.recruitment_modifiers', check: Array.isArray },
     { version: 25, path: 'military.equipment_quality_modifiers', check: Array.isArray },
     { version: 26, path: 'military.cost_ledger_annotations', check: Array.isArray },
+    { version: 27, path: 'military.pending_convoy_decisions', check: Array.isArray },
+    { version: 27, path: 'military.convoy_decision_history', check: Array.isArray },
 ];
 
 /**
@@ -524,6 +595,12 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'cost_ledger_annotations' in military && military.cost_ledger_annotations !== undefined) {
         validateCostLedgerAnnotations(military.cost_ledger_annotations, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'pending_convoy_decisions' in military && military.pending_convoy_decisions !== undefined) {
+        validatePendingConvoyDecisions(military.pending_convoy_decisions, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'convoy_decision_history' in military && military.convoy_decision_history !== undefined) {
+        validateConvoyDecisionHistory(military.convoy_decision_history, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'pending_event_notifications' in military && military.pending_event_notifications !== undefined) {
         const notifications = military.pending_event_notifications;

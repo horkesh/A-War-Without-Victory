@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 26,
-  "registered_migration_count": 26,
-  "strict_required_field_count": 61,
+  "latest_schema_version": 27,
+  "registered_migration_count": 27,
+  "strict_required_field_count": 63,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -109,6 +109,10 @@
     {
       "version": 26,
       "description": "Persisted cost ledger annotation defaults. Sensitive: no."
+    },
+    {
+      "version": 27,
+      "description": "Persisted humanitarian convoy decision queue defaults. Sensitive: no."
     }
   ],
   "required_fields": [
@@ -355,6 +359,14 @@
     {
       "version": 26,
       "path": "military.cost_ledger_annotations"
+    },
+    {
+      "version": 27,
+      "path": "military.convoy_decision_history"
+    },
+    {
+      "version": 27,
+      "path": "military.pending_convoy_decisions"
     }
   ]
 }

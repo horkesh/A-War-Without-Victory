@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(26);
+        expect(getLatestSchemaVersion()).toBe(27);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -93,6 +93,8 @@ describe('versioned save migration steps', () => {
         expect(state.military.recruitment_modifiers).toEqual([]);
         expect(state.military.equipment_quality_modifiers).toEqual([]);
         expect(state.military.cost_ledger_annotations).toEqual([]);
+        expect(state.military.pending_convoy_decisions).toEqual([]);
+        expect(state.military.convoy_decision_history).toEqual([]);
         expect(state.military.pending_event_decisions).toEqual([]);
         expect(state.military.pending_event_notifications).toEqual([]);
         expect(state.military.phantoms_spawned).toEqual([]);
@@ -533,6 +535,56 @@ describe('versioned save migration steps', () => {
         expect(state.military.cost_ledger_annotations).toEqual([
             { event_id: 'paramilitary_sweep', tag: 'paramilitary_findings', text: 'First finding', turn: 8, faction: 'RBiH' },
             { event_id: 'arms_embargo', tag: 'diplomatic_cost', turn: 9 },
+        ]);
+    });
+
+    it('materializes v27 convoy decision defaults for v26 saves', () => {
+        const state = minimalLegacyState(26);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        delete state.military.pending_convoy_decisions;
+        delete state.military.convoy_decision_history;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_convoy_decisions).toEqual([]);
+        expect(state.military.convoy_decision_history).toEqual([]);
+    });
+
+    it('preserves existing v27 convoy decision order and contents for v26 saves', () => {
+        const state = minimalLegacyState(26);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [
+            { id: 'convoy:8:ENCL_a:RS', target_enclave: 'ENCL_a', route_faction: 'RS', supply_amount: 0.5, decision: 'allow' },
+            { id: 'convoy:9:ENCL_b:HRHB', target_enclave: 'ENCL_b', route_faction: 'HRHB', supply_amount: 0.4 },
+        ];
+        state.military.convoy_decision_history = [
+            { id: 'convoy:7:ENCL_c:RS', turn: 7, target_enclave: 'ENCL_c', route_faction: 'RS', target_faction: 'RBiH', supply_amount: 0.3, decision: 'block', decided_by: 'bot' },
+            { id: 'convoy:8:ENCL_d:HRHB', turn: 8, target_enclave: 'ENCL_d', route_faction: 'HRHB', target_faction: 'RBiH', supply_amount: 0.6, decision: 'divert', decided_by: 'player' },
+        ];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_convoy_decisions).toEqual([
+            { id: 'convoy:8:ENCL_a:RS', target_enclave: 'ENCL_a', route_faction: 'RS', supply_amount: 0.5, decision: 'allow' },
+            { id: 'convoy:9:ENCL_b:HRHB', target_enclave: 'ENCL_b', route_faction: 'HRHB', supply_amount: 0.4 },
+        ]);
+        expect(state.military.convoy_decision_history).toEqual([
+            { id: 'convoy:7:ENCL_c:RS', turn: 7, target_enclave: 'ENCL_c', route_faction: 'RS', target_faction: 'RBiH', supply_amount: 0.3, decision: 'block', decided_by: 'bot' },
+            { id: 'convoy:8:ENCL_d:HRHB', turn: 8, target_enclave: 'ENCL_d', route_faction: 'HRHB', target_faction: 'RBiH', supply_amount: 0.6, decision: 'divert', decided_by: 'player' },
         ]);
     });
 });

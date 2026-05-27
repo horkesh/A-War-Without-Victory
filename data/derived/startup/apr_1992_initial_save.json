@@ -1131,6 +1131,7 @@
       "max": 100,
       "spent_this_turn": 0
     },
+    "convoy_decision_history": [],
     "corps_command": {
       "arbih_1st_corps": {
         "active_ogs": [],
@@ -33793,6 +33794,7 @@
       "peace_plan_history": [],
       "pending_counter_offers": []
     },
+    "pending_convoy_decisions": [],
     "pending_event_decisions": [],
     "pending_event_notifications": [],
     "phantoms_spawned": [
@@ -43319,5 +43321,5 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 26
+  "schema_version": 27
 }

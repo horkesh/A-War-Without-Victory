@@ -51,6 +51,8 @@ function minimalState(overrides: Record<string, unknown> = {}): Record<string, u
             recruitment_modifiers: [],
             equipment_quality_modifiers: [],
             cost_ledger_annotations: [],
+            pending_convoy_decisions: [],
+            convoy_decision_history: [],
             phantoms_spawned: [],
         },
         political: {

@@ -49,6 +49,8 @@ function baseState(overrides: Record<string, unknown> = {}): Record<string, unkn
             recruitment_modifiers: [],
             equipment_quality_modifiers: [],
             cost_ledger_annotations: [],
+            pending_convoy_decisions: [],
+            convoy_decision_history: [],
         },
         political: {
             political_controllers: {},
