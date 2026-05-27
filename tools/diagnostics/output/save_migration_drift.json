@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 25,
-  "registered_migration_count": 25,
-  "strict_required_field_count": 60,
+  "latest_schema_version": 26,
+  "registered_migration_count": 26,
+  "strict_required_field_count": 61,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -105,6 +105,10 @@
     {
       "version": 25,
       "description": "Persisted event modifier queue defaults. Sensitive: no."
+    },
+    {
+      "version": 26,
+      "description": "Persisted cost ledger annotation defaults. Sensitive: no."
     }
   ],
   "required_fields": [
@@ -347,6 +351,10 @@
     {
       "version": 25,
       "path": "military.recruitment_modifiers"
+    },
+    {
+      "version": 26,
+      "path": "military.cost_ledger_annotations"
     }
   ]
 }

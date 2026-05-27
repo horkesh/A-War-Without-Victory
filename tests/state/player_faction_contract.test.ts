@@ -45,7 +45,12 @@ function minimalState(overrides: Record<string, unknown> = {}): Record<string, u
             event_flags: {},
             enabled_event_ids: [],
             event_overflow_queue: [],
+            pending_event_decisions: [],
             pending_event_notifications: [],
+            event_aggression_modifiers: [],
+            recruitment_modifiers: [],
+            equipment_quality_modifiers: [],
+            cost_ledger_annotations: [],
             phantoms_spawned: [],
         },
         political: {

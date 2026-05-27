@@ -66,6 +66,7 @@ function currentVersionState(): any {
             event_aggression_modifiers: [],
             recruitment_modifiers: [],
             equipment_quality_modifiers: [],
+            cost_ledger_annotations: [],
             pending_event_decisions: [],
             pending_event_notifications: [],
             phantoms_spawned: [],
@@ -827,6 +828,38 @@ describe('save migration validator hardening', () => {
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
             /Save schema validation failed after migration[\s\S]*military\.event_aggression_modifiers[\s\S]*military\.recruitment_modifiers\[0\]\.pool_multiplier must be a finite number[\s\S]*military\.equipment_quality_modifiers\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.equipment_quality_modifiers\[0\]\.expires_turn must be a non-negative integer/
+        );
+    });
+
+    it('materializes v26 cost ledger annotations for v25 saves', () => {
+        const state = currentVersionState();
+        state.schema_version = 25;
+        delete state.military.cost_ledger_annotations;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.cost_ledger_annotations).toEqual([]);
+    });
+
+    it('rejects current-version saves missing cost ledger annotations', () => {
+        const state = currentVersionState();
+        delete state.military.cost_ledger_annotations;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v26[\s\S]*military\.cost_ledger_annotations/
+        );
+    });
+
+    it('rejects current-version saves with malformed cost ledger annotations', () => {
+        const state = currentVersionState();
+        state.military.cost_ledger_annotations = [
+            { event_id: '', tag: 7, text: 42, turn: -1, faction: 'JNA' },
+            42,
+        ];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.cost_ledger_annotations\[0\]\.event_id must be a non-empty string[\s\S]*military\.cost_ledger_annotations\[0\]\.tag must be a non-empty string[\s\S]*military\.cost_ledger_annotations\[0\]\.turn must be a non-negative integer[\s\S]*military\.cost_ledger_annotations\[0\]\.text must be a string when present[\s\S]*military\.cost_ledger_annotations\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.cost_ledger_annotations\[1\] must be an object/
         );
     });
 });

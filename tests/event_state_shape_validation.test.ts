@@ -42,8 +42,13 @@ function baseState(overrides: Record<string, unknown> = {}): Record<string, unkn
             event_flags: {},
             enabled_event_ids: [],
             event_overflow_queue: [],
+            pending_event_decisions: [],
             pending_event_notifications: [],
             phantoms_spawned: [],
+            event_aggression_modifiers: [],
+            recruitment_modifiers: [],
+            equipment_quality_modifiers: [],
+            cost_ledger_annotations: [],
         },
         political: {
             political_controllers: {},
@@ -91,7 +96,7 @@ function validateWithMilitary(militaryOverrides: Record<string, unknown>) {
 }
 
 describe('event state shape validation', () => {
-    it('accepts valid pending decisions, decision log rows, and event modifier arrays', () => {
+    it('accepts valid pending decisions, decision log rows, event modifier arrays, and cost annotations', () => {
         const result = validateWithMilitary({
             pending_event_decisions: [{
                 event_id: 'rbih_state_identity',
@@ -113,6 +118,10 @@ describe('event state shape validation', () => {
             event_aggression_modifiers: [{ faction: 'RS', delta: 0.2, expires_turn: 14 }],
             recruitment_modifiers: [{ faction: 'RBiH', pool_multiplier: 1.1, expires_turn: 20 }],
             equipment_quality_modifiers: [{ faction: 'HRHB', multiplier: 0.95, expires_turn: 18 }],
+            cost_ledger_annotations: [
+                { event_id: 'paramilitary_sweep', tag: 'paramilitary_findings', text: 'Verified finding', turn: 8, faction: 'RBiH' },
+                { event_id: 'external_pressure', tag: 'diplomatic_cost', turn: 9 },
+            ],
             event_overflow_queue: ['delayed_event_a', 'delayed_event_b'],
         });
 
@@ -218,6 +227,27 @@ describe('event state shape validation', () => {
                 'military.recruitment_modifiers[0].pool_multiplier must be a finite number',
                 'military.recruitment_modifiers[0].expires_turn must be a non-negative integer',
                 'military.equipment_quality_modifiers must be an array when present',
+            ]),
+        });
+    });
+
+    it('rejects malformed cost ledger annotations', () => {
+        const result = validateWithMilitary({
+            cost_ledger_annotations: [
+                { event_id: '', tag: 7, text: 42, turn: -1, faction: 'JNA' },
+                42,
+            ],
+        });
+
+        expect(result).toEqual({
+            ok: false,
+            errors: expect.arrayContaining([
+                'military.cost_ledger_annotations[0].event_id must be a non-empty string',
+                'military.cost_ledger_annotations[0].tag must be a non-empty string',
+                'military.cost_ledger_annotations[0].turn must be a non-negative integer',
+                'military.cost_ledger_annotations[0].text must be a string when present',
+                'military.cost_ledger_annotations[0].faction must be one of: RBiH, RS, HRHB',
+                'military.cost_ledger_annotations[1] must be an object',
             ]),
         });
     });

@@ -249,6 +249,35 @@ function validateExpiringFactionNumberModifiers(
     });
 }
 
+function validateCostLedgerAnnotations(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.cost_ledger_annotations must be an array when present');
+        return;
+    }
+
+    value.forEach((annotation, i) => {
+        if (!isRecord(annotation)) {
+            errors.push(`military.cost_ledger_annotations[${i}] must be an object`);
+            return;
+        }
+        if (!isNonEmptyString(annotation.event_id)) {
+            errors.push(`military.cost_ledger_annotations[${i}].event_id must be a non-empty string`);
+        }
+        if (!isNonEmptyString(annotation.tag)) {
+            errors.push(`military.cost_ledger_annotations[${i}].tag must be a non-empty string`);
+        }
+        if (!isNonNegativeInteger(annotation.turn)) {
+            errors.push(`military.cost_ledger_annotations[${i}].turn must be a non-negative integer`);
+        }
+        if ('text' in annotation && annotation.text !== undefined && typeof annotation.text !== 'string') {
+            errors.push(`military.cost_ledger_annotations[${i}].text must be a string when present`);
+        }
+        if ('faction' in annotation && annotation.faction !== undefined && !isCanonicalPlayerFaction(annotation.faction)) {
+            errors.push(`military.cost_ledger_annotations[${i}].faction must be one of: RBiH, RS, HRHB`);
+        }
+    });
+}
+
 const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 3, path: 'meta.referendum_held', check: (v) => typeof v === 'boolean' },
     { version: 3, path: 'meta.referendum_turn', check: (v) => v === null || Number.isInteger(v) },
@@ -310,6 +339,7 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 25, path: 'military.event_aggression_modifiers', check: Array.isArray },
     { version: 25, path: 'military.recruitment_modifiers', check: Array.isArray },
     { version: 25, path: 'military.equipment_quality_modifiers', check: Array.isArray },
+    { version: 26, path: 'military.cost_ledger_annotations', check: Array.isArray },
 ];
 
 /**
@@ -491,6 +521,9 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'equipment_quality_modifiers' in military && military.equipment_quality_modifiers !== undefined) {
         validateExpiringFactionNumberModifiers(military.equipment_quality_modifiers, 'military.equipment_quality_modifiers', 'multiplier', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'cost_ledger_annotations' in military && military.cost_ledger_annotations !== undefined) {
+        validateCostLedgerAnnotations(military.cost_ledger_annotations, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'pending_event_notifications' in military && military.pending_event_notifications !== undefined) {
         const notifications = military.pending_event_notifications;

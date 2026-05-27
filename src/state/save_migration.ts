@@ -668,3 +668,11 @@ registerMigration({
         ensureArray(mil, 'equipment_quality_modifiers');
     },
 });
+
+registerMigration({
+    version: 26,
+    description: 'Persisted cost ledger annotation defaults. Sensitive: no.',
+    migrate: (state) => {
+        ensureArray(asRecord(state.military), 'cost_ledger_annotations');
+    },
+});

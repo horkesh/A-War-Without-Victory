@@ -1,4 +1,19 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] state(endgame): make cost ledger annotations a v26 save contract
+
+**Type:** Save-schema/default contract slice.
+
+**Change:** Bumped `CURRENT_SCHEMA_VERSION` to 26 and added migration v26 for `military.cost_ledger_annotations` with an inert `[]` default. Current-version save validation now rejects missing or malformed annotation queues/entries, including empty `event_id`/`tag`, invalid `turn`, non-string `text`, and non-canonical optional `faction`. The v25 fixture plus focused migration/validator tests prove default materialization and order/content preservation. The TypeScript optional marker remains in `GameState` for legacy/in-memory runtime compatibility.
+
+**Determinism:** Migration is pure and preserves existing array order. `tools/diagnostics/output/save_migration_drift.json` was regenerated to v26 / 26 migrations / 61 strict required fields. The startup snapshot was rebuilt to the v26 persisted save contract. No runtime event firing, event JSON/prose, cost-ledger templates, paramilitary sweep behavior, negotiation capital math, GUI behavior, scenario data, consequence scoring, or calibration tuning changed.
+
+**Verification:**
+- Red proof before production change: focused migration/validator tests failed on missing v26 migration/default/validator coverage.
+- `npx.cmd vitest run tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts tests\event_state_shape_validation.test.ts --reporter=dot` - PASS; 117/117 tests after production change.
+- Expanded schema/behavior pack passed all non-generated-artifact tests; stale drift artifact mismatch was expected before regeneration.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, save/state tests, `tests/fixtures/save_migration/v25_cost_ledger_annotations.json`, `tools/diagnostics/output/save_migration_drift.json`, `data/derived/startup/apr_1992_initial_save.json`, `docs/40_reports/implemented/20260527_COST_LEDGER_ANNOTATION_SCHEMA_CONTRACT.md`, command-board/roadmap/plan docs.
+
 ## [2026-05-27] state(events): make active event modifiers a v25 save contract
 
 **Type:** Save-schema/default contract slice.

@@ -12480,6 +12480,7 @@
         "unstaffed_front": true
       }
     },
+    "cost_ledger_annotations": [],
     "enabled_event_ids": [],
     "equipment_quality_modifiers": [],
     "event_aggression_modifiers": [],
@@ -43318,5 +43319,5 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 25
+  "schema_version": 26
 }
