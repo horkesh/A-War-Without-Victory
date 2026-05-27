@@ -87,7 +87,11 @@
     "op:doboj:makljenovac": "RS",
     "op:maglaj:donja_bocinja_2": "RS",
     "op:maglaj:gornja_bocinja": "RS",
-    "op:teslic:kamenica_2": "RS"
+    "op:teslic:kamenica_2": "RS",
+    "op:hanpijesak:godjenje_2": "RS",
+    "op:kalinovik:varos_2": "RS",
+    "op:rogatica:varosiste_2": "RS",
+    "op:rudo:gornja_strmica": "RS"
   },
   "avoided_osids_by_faction": {}
 }
