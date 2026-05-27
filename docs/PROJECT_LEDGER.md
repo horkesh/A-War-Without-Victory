@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] docs(events): packet persisted overflow queue schema
+
+**Type:** Event-system schema decision packet.
+
+**Change:** Added `docs/40_reports/proposals/20260527_EVENT_OVERFLOW_QUEUE_SCHEMA_PACKET.md` defining the proposed future `military.event_overflow_queue: string[]` field, migration/default/validator requirements, queue re-evaluation semantics, and scenario proof expectations. No overflow queue implementation was added.
+
+**Determinism:** Documentation-only. No code, event data, schema version, migration, validator, scenario output, generated artifact, or calibration behavior changed.
+
+**Verification:** `git diff --check` - PASS after documentation edits.
+
+**Artifacts:** `docs/40_reports/proposals/20260527_EVENT_OVERFLOW_QUEUE_SCHEMA_PACKET.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-27] events(evaluator): enforce same-turn mutex groups
 
 **Type:** Event evaluator behavior hardening.

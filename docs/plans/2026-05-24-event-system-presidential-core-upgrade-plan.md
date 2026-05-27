@@ -51,7 +51,7 @@ Every new event packet must classify its trigger as one of:
 - Engine/spec gap: live code uses a 4-event cap with same-turn mutex filtering and overflow diagnostics; persisted overflow queueing remains unimplemented.
 - Current technical blockers:
   - `evaluateEvents` caps fireable events at 4 per turn. Overflow is now visible through additive report fields, and same-turn `mutex_group` siblings are filtered before the cap, but there is still no queue/backlog persistence.
-  - Mutex/overflow behavior is packeted at `docs/40_reports/proposals/20260527_EVENT_MUTEX_OVERFLOW_DECISION_PACKET.md`; persisted overflow queueing remains deferred to a schema/migration slice.
+  - Mutex/overflow behavior is packeted at `docs/40_reports/proposals/20260527_EVENT_MUTEX_OVERFLOW_DECISION_PACKET.md`; persisted overflow queueing is specified at `docs/40_reports/proposals/20260527_EVENT_OVERFLOW_QUEUE_SCHEMA_PACKET.md` but remains unimplemented.
   - Loader structural validation now rejects missing/blank ids, malformed triggers, non-finite turn bounds, malformed `requires_events`, missing/kindless primary effects, malformed effect arrays, and malformed response-option id/label/effects arrays.
   - Semantic catalog validation is still incomplete; taxonomy remains the owner for effect/condition vocabulary, sensitive-history policy, modal readiness, source/default blocking, and trigger-authoring classification.
   - full 247-row semantic catalog schema validation is incomplete.
