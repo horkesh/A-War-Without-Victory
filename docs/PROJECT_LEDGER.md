@@ -1,4 +1,21 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] events(diagnostics): add presidential acceptance proof
+
+**Type:** Event-system Workstream E acceptance diagnostic.
+
+**Change:** Added `tools/diagnostics/event_presidential_acceptance.ts` and focused tests. The diagnostic takes the 17 production modal-ready rows from `buildEventAcceptanceReport()`, joins them to real loaded event definitions, neutralizes only trigger/pressure gates for probe execution, and verifies player-faction surfacing, player historical-default resolution logs, headless historical auto-resolution, no stuck pending decisions, and stable consequence traces.
+
+**Determinism:** Diagnostic/test-only change. It uses `evaluateEvents(...)`, `resolveEventDecision(...)`, `event_decision_log`, sorted rows/failures, and `stableStringify(...)` for JSON output. No event JSON, historical prose, evaluator behavior, save schema, migrations, GUI ownership, bot-choice policy, scenario outputs, baseline artifacts, generated artifacts, randomness, or calibration tuning changed.
+
+**Verification:**
+- `node node_modules\vitest\vitest.mjs run tests\sim\events\event_presidential_acceptance.test.ts tests\events_evaluate.test.ts tests\event_decisions.test.ts tests\player_decision_manifest.test.ts --reporter=dot` - PASS; 57/57 tests.
+- `npx.cmd tsx tools\diagnostics\event_presidential_acceptance.ts --json` - PASS; status `READY`, 17 probed, 17 player surfaced, 17 player resolved logs, 17 headless auto-resolved, 0 failures, 0 stuck pending.
+- `npm.cmd run typecheck` - PASS.
+
+**Artifacts:** `tools/diagnostics/event_presidential_acceptance.ts`, `tests/sim/events/event_presidential_acceptance.test.ts`, `docs/40_reports/implemented/20260527_EVENT_PRESIDENTIAL_ACCEPTANCE_DIAGNOSTIC.md`, command-board/roadmap/plan docs.
+
+---
+
 ## [2026-05-27] events(loader): fail closed on semantic catalog violations
 
 **Type:** Event-system Workstream B semantic validation.

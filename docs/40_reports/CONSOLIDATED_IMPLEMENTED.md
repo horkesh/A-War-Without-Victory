@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest event presidential acceptance diagnostic:** [implemented/20260527_EVENT_PRESIDENTIAL_ACCEPTANCE_DIAGNOSTIC.md](implemented/20260527_EVENT_PRESIDENTIAL_ACCEPTANCE_DIAGNOSTIC.md) - A deterministic diagnostic now proves all 17 production modal-ready required-response rows surface for the responding player, resolve to exactly one player decision-log entry, and auto-resolve headlessly on historical defaults with no stuck pending decisions.
+
 **Latest event loader semantic validation:** [implemented/20260527_EVENT_LOADER_SEMANTIC_VALIDATION.md](implemented/20260527_EVENT_LOADER_SEMANTIC_VALIDATION.md) - Runtime event loading now shares vocabulary with taxonomy diagnostics and fails closed for unknown effect/condition semantics, duplicate IDs, unresolved event references, invalid response defaults, and declared enum/range violations while preserving the current 247-row catalog.
 
 **Latest generated artifact ownership matrix meta-guard:** [implemented/20260527_GENERATED_ARTIFACT_OWNERSHIP_MATRIX_META_GUARD.md](implemented/20260527_GENERATED_ARTIFACT_OWNERSHIP_MATRIX_META_GUARD.md) - A static meta-contract now keeps the generated artifact ownership matrix shape, POSIX artifact keys, cited tests, ownership-test row references, and transient catch-all policy language aligned.

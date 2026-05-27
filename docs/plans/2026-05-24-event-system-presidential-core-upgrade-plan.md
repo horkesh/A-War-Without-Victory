@@ -1,7 +1,7 @@
 # Event System Presidential Core Upgrade Plan
 
 **Date:** 2026-05-24
-**Status:** ACTIVE external-agent execution plan / Workstream A baseline closed, Workstream B evaluator ordering, overflow visibility, loader fail-closed, row-level structural validation, semantic catalog validation, event state shape validation, mutex filtering, and persisted overflow queue slices closed
+**Status:** ACTIVE external-agent execution plan / Workstream A baseline closed, Workstream B evaluator ordering, overflow visibility, loader fail-closed, row-level structural validation, semantic catalog validation, event state shape validation, mutex filtering, and persisted overflow queue slices closed; Workstream E presidential acceptance diagnostic closed
 **Owner lane:** Event-system product/engine lane
 **Related board row:** `Command Board -> Event system presidential core upgrade`
 **Do not collide with:** calibration / army-arc branch. The 2026-05-25 presidential GUI restructure is merged; use its Decision Surface Registry, President's Desk, modal stack rules, and consequence ledger instead of inventing another decision surface.
@@ -49,6 +49,7 @@ Every new event packet must classify its trigger as one of:
 - Current design gap: about 18% choice events, too many calendar/headline rows, too few pressure-driven presidential dilemmas.
 - Presentation gap: the modal-first substrate and 17 production-authored rows now have EU-style explicit historical/default markers, authored narration, visible citations/source notes, staff assessment, trigger evidence, and numeric consequence previews. Remaining presentation work is gated content approval, not generic modal substrate.
 - Engine/spec gap: live code uses a 4-event cap with same-turn mutex filtering, overflow diagnostics, and v22 persisted overflow queueing. Runtime semantic catalog validation now fails closed for registered effect/condition vocabulary, declared enum/range fields, duplicate ids, and unresolved event references.
+- Acceptance proof gap: Workstream E now has a deterministic presidential routing diagnostic proving the 17 current production modal-ready rows surface for the responding player, resolve to player decision logs, and auto-resolve headlessly on historical defaults. Catalog readiness remains `NOT_READY` because 19 required-response rows still need gated content/source/default decisions.
 - Current technical blockers:
   - `evaluateEvents` caps fireable events at 4 per turn. Overflow is visible through additive report fields; same-turn `mutex_group` siblings are filtered before the cap; and ids delayed only by the cap persist in `military.event_overflow_queue` for re-evaluation on later turns.
   - Mutex/overflow behavior is packeted at `docs/40_reports/proposals/20260527_EVENT_MUTEX_OVERFLOW_DECISION_PACKET.md`; persisted overflow queueing is implemented from `docs/40_reports/proposals/20260527_EVENT_OVERFLOW_QUEUE_SCHEMA_PACKET.md` as save schema v22.
@@ -438,6 +439,8 @@ Stop gates:
 
 **Goal:** prove the system is becoming the heart of play, not just a larger catalog.
 
+**Status:** CLOSED for current production modal-ready acceptance proof as of 2026-05-27. `tools/diagnostics/event_presidential_acceptance.ts` probes all 17 production modal-ready rows from `buildEventAcceptanceReport()`, neutralizes only trigger/pressure gates, and verifies player surfacing, player resolution logs, headless historical auto-resolution, and stable consequence traces.
+
 File targets:
 
 - Add `tools/diagnostics/event_presidential_acceptance.ts`.
@@ -456,6 +459,14 @@ Verification:
 
 ```powershell
 npx.cmd vitest run <new president impact acceptance diagnostic tests> tests/events_evaluate.test.ts tests/event_decisions.test.ts tests/player_decision_manifest.test.ts --reporter=dot
+npm.cmd run typecheck
+```
+
+Closed proof:
+
+```powershell
+node node_modules\vitest\vitest.mjs run tests\sim\events\event_presidential_acceptance.test.ts tests\events_evaluate.test.ts tests\event_decisions.test.ts tests\player_decision_manifest.test.ts --reporter=dot
+npx.cmd tsx tools\diagnostics\event_presidential_acceptance.ts --json
 npm.cmd run typecheck
 ```
 
