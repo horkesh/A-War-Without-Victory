@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 28,
-  "registered_migration_count": 28,
-  "strict_required_field_count": 65,
+  "latest_schema_version": 29,
+  "registered_migration_count": 29,
+  "strict_required_field_count": 68,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -117,6 +117,10 @@
     {
       "version": 28,
       "description": "Persisted army reserve request queue and decision history defaults. Sensitive: no."
+    },
+    {
+      "version": 29,
+      "description": "Persisted triggered-operation bookkeeping record defaults. Sensitive: no."
     }
   ],
   "required_fields": [
@@ -379,6 +383,18 @@
     {
       "version": 28,
       "path": "military.reserve_request_history"
+    },
+    {
+      "version": 29,
+      "path": "military.declined_operations"
+    },
+    {
+      "version": 29,
+      "path": "military.triggered_operations_accepted"
+    },
+    {
+      "version": 29,
+      "path": "military.used_operation_names"
     }
   ]
 }

@@ -696,3 +696,14 @@ registerMigration({
         ensureArray(mil, 'reserve_request_history');
     },
 });
+
+registerMigration({
+    version: 29,
+    description: 'Persisted triggered-operation bookkeeping record defaults. Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        ensureRecord(mil, 'triggered_operations_accepted');
+        ensureRecord(mil, 'declined_operations');
+        ensureRecord(mil, 'used_operation_names');
+    },
+});

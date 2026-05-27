@@ -71,6 +71,9 @@ function currentVersionState(): any {
             convoy_decision_history: [],
             pending_reserve_requests: [],
             reserve_request_history: [],
+            triggered_operations_accepted: {},
+            declined_operations: {},
+            used_operation_names: {},
             pending_event_decisions: [],
             pending_event_notifications: [],
             phantoms_spawned: [],
@@ -1039,6 +1042,99 @@ describe('save migration validator hardening', () => {
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
             /Save schema validation failed after migration[\s\S]*military\.pending_reserve_requests\[0\]\.corps_id must be a non-empty string[\s\S]*military\.pending_reserve_requests\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.pending_reserve_requests\[0\]\.reason must be one of: offensive_support, defensive_gap, exploitation, enclave_relief[\s\S]*military\.pending_reserve_requests\[0\]\.priority must be a finite number[\s\S]*military\.pending_reserve_requests\[0\]\.travel_hops must be a non-negative integer[\s\S]*military\.pending_reserve_requests\[1\] must be an object[\s\S]*military\.reserve_request_history\[0\]\.turn must be a non-negative integer[\s\S]*military\.reserve_request_history\[0\]\.outcome must be one of: accepted, declined, terminated[\s\S]*military\.reserve_request_history\[0\]\.decided_by must be one of: army_ai, player[\s\S]*military\.reserve_request_history\[1\] must be an object/
+        );
+    });
+
+    it('materializes v29 triggered-operation bookkeeping records for v28 saves', () => {
+        const state = currentVersionState();
+        state.schema_version = 28;
+        delete state.military.triggered_operations_accepted;
+        delete state.military.declined_operations;
+        delete state.military.used_operation_names;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.triggered_operations_accepted).toEqual({});
+        expect(migrated.military.declined_operations).toEqual({});
+        expect(migrated.military.used_operation_names).toEqual({});
+    });
+
+    it('preserves v28 triggered-operation bookkeeping records', () => {
+        const state = currentVersionState();
+        state.schema_version = 28;
+        state.military.triggered_operations_accepted = {
+            'Operation B': 12,
+            'Operation A': 9,
+        };
+        state.military.declined_operations = {
+            'Operation D': { declined_turn: 13, decline_count: 2 },
+            'Operation C': { declined_turn: 8, decline_count: 1 },
+        };
+        state.military.used_operation_names = {
+            'Name B': 11,
+            'Name A': 10,
+        };
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(Object.keys(migrated.military.triggered_operations_accepted ?? {})).toEqual(['Operation B', 'Operation A']);
+        expect(migrated.military.triggered_operations_accepted).toEqual({
+            'Operation B': 12,
+            'Operation A': 9,
+        });
+        expect(Object.keys(migrated.military.declined_operations ?? {})).toEqual(['Operation D', 'Operation C']);
+        expect(migrated.military.declined_operations).toEqual({
+            'Operation D': { declined_turn: 13, decline_count: 2 },
+            'Operation C': { declined_turn: 8, decline_count: 1 },
+        });
+        expect(Object.keys(migrated.military.used_operation_names ?? {})).toEqual(['Name B', 'Name A']);
+        expect(migrated.military.used_operation_names).toEqual({
+            'Name B': 11,
+            'Name A': 10,
+        });
+    });
+
+    it('rejects current-version saves missing triggered-operation bookkeeping records', () => {
+        const missingAccepted = currentVersionState();
+        delete missingAccepted.military.triggered_operations_accepted;
+        const missingDeclined = currentVersionState();
+        delete missingDeclined.military.declined_operations;
+        const missingNames = currentVersionState();
+        delete missingNames.military.used_operation_names;
+
+        expect(() => deserializeState(JSON.stringify(missingAccepted))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v29[\s\S]*military\.triggered_operations_accepted/
+        );
+        expect(() => deserializeState(JSON.stringify(missingDeclined))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v29[\s\S]*military\.declined_operations/
+        );
+        expect(() => deserializeState(JSON.stringify(missingNames))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v29[\s\S]*military\.used_operation_names/
+        );
+    });
+
+    it('rejects current-version saves with malformed triggered-operation bookkeeping records', () => {
+        const state = currentVersionState();
+        state.military.triggered_operations_accepted = {
+            ok: 1,
+            negative: -1,
+            fractional: 1.5,
+        };
+        state.military.declined_operations = {
+            ok: { declined_turn: 2, decline_count: 1 },
+            negative: { declined_turn: -1, decline_count: 1 },
+            missing: { declined_turn: 2 },
+            non_object: 3,
+        };
+        state.military.used_operation_names = {
+            ok: 3,
+            bad: '3',
+        };
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.triggered_operations_accepted\.negative must be a non-negative integer[\s\S]*military\.triggered_operations_accepted\.fractional must be a non-negative integer[\s\S]*military\.declined_operations\.negative\.declined_turn must be a non-negative integer[\s\S]*military\.declined_operations\.missing\.decline_count must be a non-negative integer[\s\S]*military\.declined_operations\.non_object must be an object[\s\S]*military\.used_operation_names\.bad must be a non-negative integer/
         );
     });
 });

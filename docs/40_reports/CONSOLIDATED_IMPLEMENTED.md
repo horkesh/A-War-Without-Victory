@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest triggered-operation bookkeeping schema contract:** [implemented/20260527_TRIGGERED_OPERATION_BOOKKEEPING_SCHEMA_CONTRACT.md](implemented/20260527_TRIGGERED_OPERATION_BOOKKEEPING_SCHEMA_CONTRACT.md) - Triggered-operation accepted/declined/used-name records are now required persisted v29 save/load contracts with `{}` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no operation behavior change.
+
 **Latest reserve request schema contract:** [implemented/20260527_RESERVE_REQUEST_SCHEMA_CONTRACT.md](implemented/20260527_RESERVE_REQUEST_SCHEMA_CONTRACT.md) - Reserve pending/history queues are now required persisted v28 save/load contracts with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no reserve behavior change.
 
 **Latest convoy decision schema contract:** [implemented/20260527_CONVOY_DECISION_SCHEMA_CONTRACT.md](implemented/20260527_CONVOY_DECISION_SCHEMA_CONTRACT.md) - Convoy pending/history queues are now required persisted v27 save/load contracts with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no convoy behavior change.

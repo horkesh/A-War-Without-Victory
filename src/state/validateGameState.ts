@@ -95,6 +95,21 @@ function isStringArray(value: unknown): boolean {
     return Array.isArray(value) && value.every((entry) => typeof entry === 'string');
 }
 
+function isNonNegativeIntegerRecord(value: unknown): boolean {
+    if (!isRecord(value)) return false;
+    return Object.values(value).every(isNonNegativeInteger);
+}
+
+function isDeclinedOperationRecord(value: unknown): boolean {
+    if (!isRecord(value)) return false;
+    for (const entry of Object.values(value)) {
+        if (!isRecord(entry)) return false;
+        if (!isNonNegativeInteger(entry.declined_turn)) return false;
+        if (!isNonNegativeInteger(entry.decline_count)) return false;
+    }
+    return true;
+}
+
 function isCanonicalPlayerFaction(value: unknown): boolean {
     return typeof value === 'string' && CANONICAL_PLAYER_FACTIONS.includes(value as typeof CANONICAL_PLAYER_FACTIONS[number]);
 }
@@ -474,6 +489,38 @@ function validateReserveRequestHistory(value: unknown, errors: string[]): void {
     });
 }
 
+function validateNonNegativeIntegerRecord(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+    for (const [key, turn] of Object.entries(value)) {
+        if (!isNonNegativeInteger(turn)) {
+            errors.push(`${path}.${key} must be a non-negative integer`);
+        }
+    }
+}
+
+function validateDeclinedOperationRecord(value: unknown, errors: string[]): void {
+    const path = 'military.declined_operations';
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+    for (const [key, entry] of Object.entries(value)) {
+        if (!isRecord(entry)) {
+            errors.push(`${path}.${key} must be an object`);
+            continue;
+        }
+        if (!isNonNegativeInteger(entry.declined_turn)) {
+            errors.push(`${path}.${key}.declined_turn must be a non-negative integer`);
+        }
+        if (!isNonNegativeInteger(entry.decline_count)) {
+            errors.push(`${path}.${key}.decline_count must be a non-negative integer`);
+        }
+    }
+}
+
 const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 3, path: 'meta.referendum_held', check: (v) => typeof v === 'boolean' },
     { version: 3, path: 'meta.referendum_turn', check: (v) => v === null || Number.isInteger(v) },
@@ -540,6 +587,9 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 27, path: 'military.convoy_decision_history', check: Array.isArray },
     { version: 28, path: 'military.pending_reserve_requests', check: Array.isArray },
     { version: 28, path: 'military.reserve_request_history', check: Array.isArray },
+    { version: 29, path: 'military.triggered_operations_accepted', check: isNonNegativeIntegerRecord },
+    { version: 29, path: 'military.declined_operations', check: isDeclinedOperationRecord },
+    { version: 29, path: 'military.used_operation_names', check: isNonNegativeIntegerRecord },
 ];
 
 /**
@@ -736,6 +786,15 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'reserve_request_history' in military && military.reserve_request_history !== undefined) {
         validateReserveRequestHistory(military.reserve_request_history, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'triggered_operations_accepted' in military && military.triggered_operations_accepted !== undefined) {
+        validateNonNegativeIntegerRecord(military.triggered_operations_accepted, 'military.triggered_operations_accepted', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'declined_operations' in military && military.declined_operations !== undefined) {
+        validateDeclinedOperationRecord(military.declined_operations, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'used_operation_names' in military && military.used_operation_names !== undefined) {
+        validateNonNegativeIntegerRecord(military.used_operation_names, 'military.used_operation_names', errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'pending_event_notifications' in military && military.pending_event_notifications !== undefined) {
         const notifications = military.pending_event_notifications;

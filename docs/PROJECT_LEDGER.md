@@ -118,6 +118,32 @@
 
 ---
 
+## [2026-05-27] state(operations): make triggered-operation bookkeeping a v29 save contract
+
+**Type:** Save-schema/default contract slice.
+
+**Change:** Bumped `CURRENT_SCHEMA_VERSION` to 29 and added migration v29 for `military.triggered_operations_accepted`, `military.declined_operations`, and `military.used_operation_names` with inert `{}` defaults. Current-version save validation now rejects missing or malformed records and conservatively validates accepted/name turns plus declined turn/count values as non-negative integers. The v28 fixture plus focused migration/validator tests prove default materialization and existing row order/content preservation. The TypeScript optional markers remain in `GameState` for legacy/in-memory runtime compatibility.
+
+**Determinism:** Migration is pure and preserves existing record insertion order and contents. `tools/diagnostics/output/save_migration_drift.json` was regenerated to v29 / 29 migrations / 68 strict required fields. The startup snapshot was rebuilt to the v29 persisted save contract. No operation opportunity proposals/resolutions, event prose, bot choices, calibration, scenario data, sector/frontline behavior, GUI routing, or replay artifacts changed beyond schema-owned generated outputs.
+
+**Verification:**
+- Red proof before production change: `npx.cmd vitest run tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts tests\save_migration_round_trip_contract.test.ts tests\save_migration_drift_audit.test.ts` failed on missing v29 migration/default/validator coverage and expected fixture/schema mismatch.
+- Green proof after production change: `npx.cmd vitest run tests\save_migration.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts tests\save_migration_round_trip_contract.test.ts tests\save_migration_drift_audit.test.ts tests\startup_snapshot_contract.test.ts --reporter=dot` - PASS; 169/169 tests.
+- `node tools\diagnostics\save_migration_drift_audit.cjs` - PASS; `save migration drift audit: 0 anonymous defaults`.
+- `npm.cmd run desktop:startup-snapshot:check` - FAIL before rebuild with startup snapshot drift.
+- `npm.cmd run desktop:startup-snapshot:build` - PASS; wrote `data/derived/startup/apr_1992_initial_save.json`.
+- `npm.cmd run desktop:startup-snapshot:check` - PASS; startup snapshot OK.
+- Parent verification with triggered-operation/sector-offensive coverage passed, 199/199 tests.
+- `npm.cmd run typecheck` - PASS.
+- `node tools\diagnostics\strict_null_inventory.cjs` - PASS; optional-field floor remains 465.
+- `git diff --check` - PASS.
+- Independent save/schema QA found no blockers and confirmed validator strictness against triggered-operation/name writers.
+- Independent determinism/artifact review found no behavior-surface drift and confirmed generated artifacts are schema-v29 only.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, `tests/save_migration_versioned_steps.test.ts`, `tests/save_migration_validator_rejection.test.ts`, `tests/save_migration_drift_audit.test.ts`, `tests/fixtures/save_migration/v28_triggered_operation_bookkeeping.json`, `tools/diagnostics/output/save_migration_drift.json`, `data/derived/startup/apr_1992_initial_save.json`, `docs/40_reports/implemented/20260527_TRIGGERED_OPERATION_BOOKKEEPING_SCHEMA_CONTRACT.md`, `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`, `docs/10_canon/Systems_Manual_v0_9_0.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-27] state(reserves): make reserve request queues a v28 save contract
 
 **Type:** Save schema contract.

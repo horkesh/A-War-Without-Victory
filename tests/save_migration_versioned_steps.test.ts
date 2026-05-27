@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(28);
+        expect(getLatestSchemaVersion()).toBe(29);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -97,6 +97,9 @@ describe('versioned save migration steps', () => {
         expect(state.military.convoy_decision_history).toEqual([]);
         expect(state.military.pending_reserve_requests).toEqual([]);
         expect(state.military.reserve_request_history).toEqual([]);
+        expect(state.military.triggered_operations_accepted).toEqual({});
+        expect(state.military.declined_operations).toEqual({});
+        expect(state.military.used_operation_names).toEqual({});
         expect(state.military.pending_event_decisions).toEqual([]);
         expect(state.military.pending_event_notifications).toEqual([]);
         expect(state.military.phantoms_spawned).toEqual([]);
@@ -694,5 +697,76 @@ describe('versioned save migration steps', () => {
         expect(state.military.reserve_request_history.map((record: any) => record.request_id)).toEqual(['reserve:hist-b', 'reserve:hist-a']);
         expect(state.military.reserve_request_history[0].brigade_id).toBe('arbih_guards');
         expect(state.military.reserve_request_history[1].brigade_id).toBeNull();
+    });
+
+    it('materializes v29 triggered-operation bookkeeping records for v28 saves', () => {
+        const state = minimalLegacyState(28);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [];
+        state.military.convoy_decision_history = [];
+        state.military.pending_reserve_requests = [];
+        state.military.reserve_request_history = [];
+        delete state.military.triggered_operations_accepted;
+        delete state.military.declined_operations;
+        delete state.military.used_operation_names;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.triggered_operations_accepted).toEqual({});
+        expect(state.military.declined_operations).toEqual({});
+        expect(state.military.used_operation_names).toEqual({});
+    });
+
+    it('preserves existing v29 triggered-operation bookkeeping row order and contents for v28 saves', () => {
+        const state = minimalLegacyState(28);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [];
+        state.military.convoy_decision_history = [];
+        state.military.pending_reserve_requests = [];
+        state.military.reserve_request_history = [];
+        state.military.triggered_operations_accepted = {
+            'Operation B': 12,
+            'Operation A': 9,
+        };
+        state.military.declined_operations = {
+            'Operation D': { declined_turn: 13, decline_count: 2 },
+            'Operation C': { declined_turn: 8, decline_count: 1 },
+        };
+        state.military.used_operation_names = {
+            'Name B': 11,
+            'Name A': 10,
+        };
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(Object.keys(state.military.triggered_operations_accepted)).toEqual(['Operation B', 'Operation A']);
+        expect(state.military.triggered_operations_accepted).toEqual({
+            'Operation B': 12,
+            'Operation A': 9,
+        });
+        expect(Object.keys(state.military.declined_operations)).toEqual(['Operation D', 'Operation C']);
+        expect(state.military.declined_operations).toEqual({
+            'Operation D': { declined_turn: 13, decline_count: 2 },
+            'Operation C': { declined_turn: 8, decline_count: 1 },
+        });
+        expect(Object.keys(state.military.used_operation_names)).toEqual(['Name B', 'Name A']);
+        expect(state.military.used_operation_names).toEqual({
+            'Name B': 11,
+            'Name A': 10,
+        });
     });
 });

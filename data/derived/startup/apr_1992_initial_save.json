@@ -12482,6 +12482,7 @@
       }
     },
     "cost_ledger_annotations": [],
+    "declined_operations": {},
     "enabled_event_ids": [],
     "equipment_quality_modifiers": [],
     "event_aggression_modifiers": [],
@@ -34151,7 +34152,9 @@
     },
     "reserve_request_history": [],
     "theatres": {},
+    "triggered_operations_accepted": {},
     "unresolved_sector_brigades": [],
+    "used_operation_names": {},
     "war_front_edges_osid": [
       {
         "a": "op:banja_luka:banja_luka_2",
@@ -43323,5 +43326,5 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 28
+  "schema_version": 29
 }
