@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest painted-compare artifact ownership:** [implemented/20260527_PAINTED_COMPARE_ARTIFACT_OWNERSHIP.md](implemented/20260527_PAINTED_COMPARE_ARTIFACT_OWNERSHIP.md) - A static guard now locks the five committed `tools/diagnostics/_phase5a_painted_compares/*.txt` diagnostics as intentional Phase 5a painted-vs-sim evidence rather than transient run output.
+
 **Latest consequence runtime queue schema contract:** [implemented/20260527_CONSEQUENCE_RUNTIME_QUEUE_SCHEMA_CONTRACT.md](implemented/20260527_CONSEQUENCE_RUNTIME_QUEUE_SCHEMA_CONTRACT.md) - Consequence runtime queues are now required persisted v31 save/load contracts with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no event or operation behavior change.
 
 **Latest officer decision queue schema contract:** [implemented/20260527_OFFICER_DECISION_QUEUE_SCHEMA_CONTRACT.md](implemented/20260527_OFFICER_DECISION_QUEUE_SCHEMA_CONTRACT.md) - Officer pending/history queues are now required persisted v30 save/load contracts with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no officer behavior change.

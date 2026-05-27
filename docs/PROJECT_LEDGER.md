@@ -1,4 +1,19 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] test(diagnostics): lock painted-compare artifact ownership
+
+**Type:** Save/replay generated-artifact stability + static ownership guard.
+
+**Change:** Added `tests/painted_compare_artifact_ownership.test.ts` and a generated-artifact ownership row for `tools/diagnostics/_phase5a_painted_compares/*.txt`. The guard proves the five expected painted-compare diagnostics are Git-tracked, listed in the Phase 5a raw-data report, connected to the fresh painted-compare analysis, referenced by the ownership matrix, and classified as committed diagnostic evidence rather than transient `runs/` output.
+
+**Determinism:** Documentation/test-only ownership slice. No schema bump, runtime behavior change, scenario/calibration output refresh, operation-opportunity change, event prose/content change, GUI routing change, sector/frontline logic change, replay writer change, or painted-compare artifact byte change.
+
+**Verification:**
+- `npx.cmd vitest run tests\generated_artifact_ownership_matrix_contract.test.ts tests\painted_compare_artifact_ownership.test.ts --reporter=dot` - PASS; 2/2 tests.
+- `npm.cmd run typecheck` - PASS.
+- `git diff --check` - PASS.
+
+**Artifacts:** `tests/painted_compare_artifact_ownership.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/40_reports/implemented/20260527_PAINTED_COMPARE_ARTIFACT_OWNERSHIP.md`, report indexes.
+
 ## [2026-05-27] state(events): make consequence runtime queues a v31 save contract
 
 **Type:** Save-schema/default contract slice.
