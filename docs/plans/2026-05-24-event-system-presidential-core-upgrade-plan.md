@@ -1,7 +1,7 @@
 # Event System Presidential Core Upgrade Plan
 
 **Date:** 2026-05-24
-**Status:** ACTIVE external-agent execution plan / Workstream A baseline closed, Workstream B evaluator ordering, overflow visibility, and loader fail-closed slices closed
+**Status:** ACTIVE external-agent execution plan / Workstream A baseline closed, Workstream B evaluator ordering, overflow visibility, loader fail-closed, and row-level structural validation slices closed
 **Owner lane:** Event-system product/engine lane
 **Related board row:** `Command Board -> Event system presidential core upgrade`
 **Do not collide with:** calibration / army-arc branch. The 2026-05-25 presidential GUI restructure is merged; use its Decision Surface Registry, President's Desk, modal stack rules, and consequence ledger instead of inventing another decision surface.
@@ -51,9 +51,9 @@ Every new event packet must classify its trigger as one of:
 - Engine/spec gap: `Systems_Manual_v0_9_0.md` describes max 3 events, overflow queueing, and mutex prevention, while live code currently uses a 4-event cap, no overflow queue, and no mutex enforcement.
 - Current technical blockers:
   - `evaluateEvents` caps fireable events at 4 per turn. Overflow is now visible through additive report fields, but there is still no queue/backlog persistence.
-  - Row-level catalog schema validation is still incomplete; loader now fails closed for missing, malformed, or non-array required files.
-  - equal-priority event sorting lacks a full canonical tie-break.
-  - full 247-row catalog schema validation is incomplete.
+  - Loader structural validation now rejects missing/blank ids, malformed triggers, non-finite turn bounds, malformed `requires_events`, missing/kindless primary effects, malformed effect arrays, and malformed response-option id/label/effects arrays.
+  - Semantic catalog validation is still incomplete; taxonomy remains the owner for effect/condition vocabulary, sensitive-history policy, modal readiness, source/default blocking, and trigger-authoring classification.
+  - full 247-row semantic catalog schema validation is incomplete.
   - Further required-response modal authoring is blocked until the exact historical/default label and prose boundary are approved for the remaining sensitive, counterfactual, abstract, or source-weak rows.
   - `validateGameState` covers `pending_event_notifications`, but not `pending_event_decisions`, `event_decision_log`, or most active event modifier arrays.
   - some event condition/type fields are declared but weakly tested or partially implemented.

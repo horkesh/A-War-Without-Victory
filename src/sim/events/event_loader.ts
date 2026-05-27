@@ -30,6 +30,102 @@ const EVENT_FILES = [
     'consequences.json',
 ];
 
+type JsonObject = Record<string, unknown>;
+
+function isObject(value: unknown): value is JsonObject {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isNonEmptyString(value: unknown): value is string {
+    return typeof value === 'string' && value.trim().length > 0;
+}
+
+function hasOwn(obj: JsonObject, key: string): boolean {
+    return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+function failRow(filename: string, rowIndex: number, message: string): never {
+    throw new Error(`Invalid event row in ${filename}[${rowIndex}]: ${message}`);
+}
+
+function validateKindedObject(value: unknown, path: string, filename: string, rowIndex: number): void {
+    if (!isObject(value)) {
+        failRow(filename, rowIndex, `${path} must be a non-null object`);
+    }
+    if (!isNonEmptyString(value.kind)) {
+        failRow(filename, rowIndex, `${path}.kind must be a non-empty string`);
+    }
+}
+
+function validateKindedArray(value: unknown, path: string, filename: string, rowIndex: number): void {
+    if (!Array.isArray(value)) {
+        failRow(filename, rowIndex, `${path} must be an array when present`);
+    }
+
+    value.forEach((entry, entryIndex) => {
+        validateKindedObject(entry, `${path}[${entryIndex}]`, filename, rowIndex);
+    });
+}
+
+function validateResponseOptions(value: unknown, filename: string, rowIndex: number): void {
+    if (!Array.isArray(value)) {
+        failRow(filename, rowIndex, 'response_options must be an array when present');
+    }
+
+    value.forEach((option, optionIndex) => {
+        const path = `response_options[${optionIndex}]`;
+        if (!isObject(option)) {
+            failRow(filename, rowIndex, `${path} must be a non-null object`);
+        }
+        if (!isNonEmptyString(option.id)) {
+            failRow(filename, rowIndex, `${path}.id must be a non-empty string`);
+        }
+        if (!isNonEmptyString(option.label)) {
+            failRow(filename, rowIndex, `${path}.label must be a non-empty string`);
+        }
+        if (hasOwn(option, 'effects')) {
+            validateKindedArray(option.effects, `${path}.effects`, filename, rowIndex);
+        }
+    });
+}
+
+function validateEventRow(row: unknown, filename: string, rowIndex: number): void {
+    if (!isObject(row)) {
+        failRow(filename, rowIndex, 'row must be a non-null object');
+    }
+    if (!isNonEmptyString(row.id)) {
+        failRow(filename, rowIndex, 'id must be a non-empty string');
+    }
+    if (!isObject(row.trigger)) {
+        failRow(filename, rowIndex, 'trigger must be a non-null object');
+    }
+
+    if (hasOwn(row.trigger, 'turn_min') && (typeof row.trigger.turn_min !== 'number' || !Number.isFinite(row.trigger.turn_min))) {
+        failRow(filename, rowIndex, 'trigger.turn_min must be a finite number when present');
+    }
+    if (hasOwn(row.trigger, 'turn_max') && (typeof row.trigger.turn_max !== 'number' || !Number.isFinite(row.trigger.turn_max))) {
+        failRow(filename, rowIndex, 'trigger.turn_max must be a finite number when present');
+    }
+    if (hasOwn(row.trigger, 'requires_events')) {
+        const requiresEvents = row.trigger.requires_events;
+        if (!Array.isArray(requiresEvents) || !requiresEvents.every((id) => typeof id === 'string')) {
+            failRow(filename, rowIndex, 'trigger.requires_events must be a string array when present');
+        }
+    }
+
+    validateKindedObject(row.effect, 'effect', filename, rowIndex);
+    if (hasOwn(row, 'effects')) {
+        validateKindedArray(row.effects, 'effects', filename, rowIndex);
+    }
+    if (hasOwn(row, 'response_options')) {
+        validateResponseOptions(row.response_options, filename, rowIndex);
+    }
+}
+
+function validateEventRows(rows: unknown[], filename: string): void {
+    rows.forEach((row, rowIndex) => validateEventRow(row, filename, rowIndex));
+}
+
 /**
  * Load a single required event JSON file. Required catalog files fail closed:
  * missing, malformed, or non-array JSON is a loader error.
@@ -52,6 +148,8 @@ function loadRequiredEventFile(eventsDir: string, filename: string): EventDefini
     if (!Array.isArray(parsed)) {
         throw new Error(`Required event file ${filename} must contain a JSON array`);
     }
+
+    validateEventRows(parsed, filename);
 
     return parsed as EventDefinition[];
 }

@@ -56,6 +56,34 @@ function writeMinimalCatalog(targetDir: string): void {
     });
 }
 
+function validCatalogRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+    return {
+        id: 'valid_event',
+        trigger: { turn_min: 0, phase: 'war' },
+        effect: { kind: 'narrative', text: 'Valid event fired.' },
+        once: true,
+        ...overrides,
+    };
+}
+
+function writeCatalogRows(targetDir: string, rows: unknown[]): void {
+    mkdirSync(targetDir, { recursive: true });
+    for (const filename of REQUIRED_EVENT_FILES) {
+        const fileRows = filename === 'war_1992.json' ? rows : [];
+        writeFileSync(resolve(targetDir, filename), JSON.stringify(fileRows, null, 2), 'utf8');
+    }
+}
+
+function assertCatalogRowsThrow(rows: unknown[], expected: RegExp): void {
+    const dir = makeTempEventsDir();
+    writeCatalogRows(dir, rows);
+
+    assert.throws(
+        () => loadEventDefinitionsFromDir(0, dir),
+        expected,
+    );
+}
+
 test('loadEventDefinitions(0) returns the current 247-row catalog', () => {
     const loaded = loadEventDefinitions(0);
 
@@ -130,4 +158,159 @@ test('one bad required file does not silently drop while returning partial valid
         () => loadEventDefinitionsFromDir(0, dir),
         /Required event file war_1995\.json must contain a JSON array/,
     );
+});
+
+test('loadEventDefinitionsFromDir throws on non-object row', () => {
+    assertCatalogRowsThrow(
+        [null],
+        /Invalid event row in war_1992\.json\[0\]: row must be a non-null object/,
+    );
+    assertCatalogRowsThrow(
+        [[]],
+        /Invalid event row in war_1992\.json\[0\]: row must be a non-null object/,
+    );
+    assertCatalogRowsThrow(
+        [42],
+        /Invalid event row in war_1992\.json\[0\]: row must be a non-null object/,
+    );
+});
+
+test('loadEventDefinitionsFromDir throws on missing or blank id', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({ id: undefined })],
+        /Invalid event row in war_1992\.json\[0\]: id must be a non-empty string/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ id: '   ' })],
+        /Invalid event row in war_1992\.json\[0\]: id must be a non-empty string/,
+    );
+});
+
+test('loadEventDefinitionsFromDir throws on missing or non-object trigger', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({ trigger: undefined })],
+        /Invalid event row in war_1992\.json\[0\]: trigger must be a non-null object/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ trigger: [] })],
+        /Invalid event row in war_1992\.json\[0\]: trigger must be a non-null object/,
+    );
+});
+
+test('loadEventDefinitionsFromDir throws on non-finite trigger turn bound', () => {
+    const dir = makeTempEventsDir();
+    writeCatalogRows(dir, []);
+    writeFileSync(
+        resolve(dir, 'war_1992.json'),
+        '[{"id":"bad_turn","trigger":{"turn_min":1e999},"effect":{"kind":"narrative"}}]',
+        'utf8',
+    );
+
+    assert.throws(
+        () => loadEventDefinitionsFromDir(0, dir),
+        /Invalid event row in war_1992\.json\[0\]: trigger\.turn_min must be a finite number when present/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ trigger: { turn_min: null } })],
+        /Invalid event row in war_1992\.json\[0\]: trigger\.turn_min must be a finite number when present/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ trigger: { turn_max: '12' } })],
+        /Invalid event row in war_1992\.json\[0\]: trigger\.turn_max must be a finite number when present/,
+    );
+});
+
+test('loadEventDefinitionsFromDir throws on malformed requires_events', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({ trigger: { turn_min: 0, requires_events: 'event_a' } })],
+        /Invalid event row in war_1992\.json\[0\]: trigger\.requires_events must be a string array when present/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ trigger: { turn_min: 0, requires_events: ['event_a', 2] } })],
+        /Invalid event row in war_1992\.json\[0\]: trigger\.requires_events must be a string array when present/,
+    );
+});
+
+test('loadEventDefinitionsFromDir throws on missing or non-object effect', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({ effect: undefined })],
+        /Invalid event row in war_1992\.json\[0\]: effect must be a non-null object/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ effect: [] })],
+        /Invalid event row in war_1992\.json\[0\]: effect must be a non-null object/,
+    );
+});
+
+test('loadEventDefinitionsFromDir throws on missing or non-string effect.kind', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({ effect: {} })],
+        /Invalid event row in war_1992\.json\[0\]: effect\.kind must be a non-empty string/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ effect: { kind: 7 } })],
+        /Invalid event row in war_1992\.json\[0\]: effect\.kind must be a non-empty string/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ effect: { kind: '' } })],
+        /Invalid event row in war_1992\.json\[0\]: effect\.kind must be a non-empty string/,
+    );
+});
+
+test('loadEventDefinitionsFromDir throws on malformed effects', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({ effects: { kind: 'narrative' } })],
+        /Invalid event row in war_1992\.json\[0\]: effects must be an array when present/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ effects: [null] })],
+        /Invalid event row in war_1992\.json\[0\]: effects\[0\] must be a non-null object/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ effects: [{ kind: '   ' }] })],
+        /Invalid event row in war_1992\.json\[0\]: effects\[0\]\.kind must be a non-empty string/,
+    );
+});
+
+test('loadEventDefinitionsFromDir throws on malformed response_options', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({ response_options: { id: 'accept', label: 'Accept' } })],
+        /Invalid event row in war_1992\.json\[0\]: response_options must be an array when present/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ response_options: [null] })],
+        /Invalid event row in war_1992\.json\[0\]: response_options\[0\] must be a non-null object/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ response_options: [{ id: '', label: 'Accept' }] })],
+        /Invalid event row in war_1992\.json\[0\]: response_options\[0\]\.id must be a non-empty string/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ response_options: [{ id: 'accept', label: ' ' }] })],
+        /Invalid event row in war_1992\.json\[0\]: response_options\[0\]\.label must be a non-empty string/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ response_options: [{ id: 'accept', label: 'Accept', effects: 'bad' }] })],
+        /Invalid event row in war_1992\.json\[0\]: response_options\[0\]\.effects must be an array when present/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ response_options: [{ id: 'accept', label: 'Accept', effects: [{ kind: '' }] }] })],
+        /Invalid event row in war_1992\.json\[0\]: response_options\[0\]\.effects\[0\]\.kind must be a non-empty string/,
+    );
+});
+
+test('loadEventDefinitionsFromDir accepts a response option without effects', () => {
+    const dir = makeTempEventsDir();
+    writeCatalogRows(dir, [
+        validCatalogRow({
+            response_options: [
+                { id: 'accept', label: 'Accept' },
+            ],
+        }),
+    ]);
+
+    const loaded = loadEventDefinitionsFromDir(0, dir);
+
+    assert.strictEqual(loaded.length, 1);
+    assert.strictEqual(loaded[0]?.id, 'valid_event');
 });

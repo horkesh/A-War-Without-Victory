@@ -1,4 +1,23 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] events(loader): fail closed on structurally invalid catalog rows
+
+**Type:** Event loader structural validation + Workstream B closeout.
+
+**Change:** Added row-level validation to `loadEventDefinitions(...)` after required-file JSON parsing and before the `EventDefinition[]` cast. The loader now rejects malformed row objects, missing/blank ids, malformed triggers, non-finite `turn_min`/`turn_max`, malformed `requires_events`, missing or kindless primary effects, malformed optional `effects`, and malformed optional `response_options`. Response options may still omit `effects`, matching the current catalog. Added focused loader tests for every failure family and the no-effects response-option allowance.
+
+**Determinism:** Structural load-time validation only. No event data, event ordering, evaluator behavior, scenario state, save schema, migrations, bot choices, GUI behavior, random sources, generated artifacts, or calibration outputs changed. The current catalog still loads as 247 rows and the taxonomy report remains 247 events / 180 warnings / 0 errors.
+
+**Verification:**
+- `F:\A-War-Without-Victory\vitest.cmd run tests\event_loader.test.ts tests\sim\events\event_taxonomy_report.test.ts --reporter=dot` - PASS; 40/40 tests.
+- `F:\A-War-Without-Victory\vitest.cmd run tests\events_evaluate.test.ts tests\event_timeline_integrity.test.ts tests\consequence_chains.test.ts --reporter=dot` - PASS; 91/91 tests.
+- `npx.cmd tsx tools\diagnostics\event_taxonomy_report.ts --json` - PASS; 247 events, 180 warnings, 0 errors.
+- `npm.cmd run typecheck` - PASS.
+- `git diff --check` - PASS with only the existing line-ending warning on `src/sim/events/event_loader.ts`.
+
+**Artifacts:** `src/sim/events/event_loader.ts`, `tests/event_loader.test.ts`, `docs/40_reports/implemented/20260527_EVENT_LOADER_ROW_VALIDATION.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-26] test(tiles): lock terrain PMTiles artifact ownership
 
 **Type:** Static generated-artifact ownership guard + docs closeout.

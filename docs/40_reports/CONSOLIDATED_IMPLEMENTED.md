@@ -439,3 +439,9 @@
 - Added a static generated-artifact ownership guard for `hillshade.pmtiles`, `osm.pmtiles`, and `terrain.pmtiles`.
 - Documented the committed PMTiles as terrain/tile pipeline-owned Git LFS binary artifacts with desktop PMTiles route/range consumer coverage.
 - Report: `docs/40_reports/implemented/20260526_TERRAIN_TILES_ARTIFACT_OWNERSHIP.md`
+
+# 2026-05-27 - Event loader row validation
+
+- Added structural row validation to the event loader before parsed JSON is cast to `EventDefinition[]`.
+- Invalid ids, triggers, turn bounds, `requires_events`, primary effects, effect arrays, and response options now fail closed while preserving the 247-row catalog baseline.
+- Report: `docs/40_reports/implemented/20260527_EVENT_LOADER_ROW_VALIDATION.md`
