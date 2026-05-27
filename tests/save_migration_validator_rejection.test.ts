@@ -74,6 +74,8 @@ function currentVersionState(): any {
             triggered_operations_accepted: {},
             declined_operations: {},
             used_operation_names: {},
+            pending_officer_events: [],
+            officer_decision_history: [],
             pending_event_decisions: [],
             pending_event_notifications: [],
             phantoms_spawned: [],
@@ -1135,6 +1137,89 @@ describe('save migration validator hardening', () => {
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
             /Save schema validation failed after migration[\s\S]*military\.triggered_operations_accepted\.negative must be a non-negative integer[\s\S]*military\.triggered_operations_accepted\.fractional must be a non-negative integer[\s\S]*military\.declined_operations\.negative\.declined_turn must be a non-negative integer[\s\S]*military\.declined_operations\.missing\.decline_count must be a non-negative integer[\s\S]*military\.declined_operations\.non_object must be an object[\s\S]*military\.used_operation_names\.bad must be a non-negative integer/
+        );
+    });
+
+    it('materializes v30 officer decision queues for v29 saves', () => {
+        const state = currentVersionState();
+        state.schema_version = 29;
+        delete state.military.pending_officer_events;
+        delete state.military.officer_decision_history;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.pending_officer_events).toEqual([]);
+        expect(migrated.military.officer_decision_history).toEqual([]);
+    });
+
+    it('rejects current-version saves missing officer decision queues', () => {
+        const missingPending = currentVersionState();
+        delete missingPending.military.pending_officer_events;
+        const missingHistory = currentVersionState();
+        delete missingHistory.military.officer_decision_history;
+
+        expect(() => deserializeState(JSON.stringify(missingPending))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v30[\s\S]*military\.pending_officer_events/
+        );
+        expect(() => deserializeState(JSON.stringify(missingHistory))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v30[\s\S]*military\.officer_decision_history/
+        );
+    });
+
+    it('rejects current-version saves with malformed pending officer events', () => {
+        const state = currentVersionState();
+        state.military.pending_officer_events = [
+            {
+                event_id: '',
+                type: 'unknown_event',
+                faction: 'JNA',
+                turn: -1,
+                officer_id: '',
+                current_commander_id: '',
+                corps_id: '',
+                acknowledged: 'no',
+                reason: 42,
+                overridable: 'yes',
+                override_action: 7,
+                original_order: {
+                    order_type: 'invalid_order',
+                    corps_id: 42,
+                    stance: 7,
+                    objectives: ['ok', 7],
+                    delay_turns: -1,
+                },
+                interpreted_order: 42,
+            },
+            42,
+        ];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.pending_officer_events\[0\]\.event_id must be a non-empty string[\s\S]*military\.pending_officer_events\[0\]\.type must be a known OfficerEventType[\s\S]*military\.pending_officer_events\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.pending_officer_events\[0\]\.turn must be a non-negative integer[\s\S]*military\.pending_officer_events\[0\]\.officer_id must be a non-empty string[\s\S]*military\.pending_officer_events\[0\]\.acknowledged must be boolean[\s\S]*military\.pending_officer_events\[0\]\.current_commander_id must be a non-empty string when present[\s\S]*military\.pending_officer_events\[0\]\.corps_id must be a non-empty string when present[\s\S]*military\.pending_officer_events\[0\]\.reason must be a string when present[\s\S]*military\.pending_officer_events\[0\]\.overridable must be boolean when present[\s\S]*military\.pending_officer_events\[0\]\.override_action must be a string when present[\s\S]*military\.pending_officer_events\[0\]\.original_order\.order_type must be a valid order_type[\s\S]*military\.pending_officer_events\[0\]\.original_order\.corps_id must be a string[\s\S]*military\.pending_officer_events\[0\]\.original_order\.stance must be a string when present[\s\S]*military\.pending_officer_events\[0\]\.original_order\.objectives must be a string array when present[\s\S]*military\.pending_officer_events\[0\]\.original_order\.delay_turns must be a non-negative integer when present[\s\S]*military\.pending_officer_events\[0\]\.interpreted_order must be an object[\s\S]*military\.pending_officer_events\[1\] must be an object/
+        );
+    });
+
+    it('rejects current-version saves with malformed officer decision history', () => {
+        const state = currentVersionState();
+        state.military.officer_decision_history = [
+            {
+                id: '',
+                turn: -1,
+                faction: 'JNA',
+                event_id: '',
+                event_type: '',
+                officer_id: '',
+                decision: 'ignored',
+                current_commander_id: '',
+                corps_id: '',
+                new_officer_id: '',
+                outgoing_officer_id: '',
+            },
+            42,
+        ];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.officer_decision_history\[0\]\.id must be a non-empty string[\s\S]*military\.officer_decision_history\[0\]\.event_id must be a non-empty string[\s\S]*military\.officer_decision_history\[0\]\.event_type must be a non-empty string[\s\S]*military\.officer_decision_history\[0\]\.officer_id must be a non-empty string[\s\S]*military\.officer_decision_history\[0\]\.turn must be a non-negative integer[\s\S]*military\.officer_decision_history\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.officer_decision_history\[0\]\.decision must be one of: acknowledged, override_confirmed, replacement_accepted[\s\S]*military\.officer_decision_history\[0\]\.current_commander_id must be a non-empty string when present[\s\S]*military\.officer_decision_history\[0\]\.corps_id must be a non-empty string when present[\s\S]*military\.officer_decision_history\[0\]\.new_officer_id must be a non-empty string when present[\s\S]*military\.officer_decision_history\[0\]\.outgoing_officer_id must be a non-empty string when present[\s\S]*military\.officer_decision_history\[1\] must be an object/
         );
     });
 });

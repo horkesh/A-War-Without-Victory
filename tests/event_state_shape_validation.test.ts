@@ -51,6 +51,13 @@ function baseState(overrides: Record<string, unknown> = {}): Record<string, unkn
             cost_ledger_annotations: [],
             pending_convoy_decisions: [],
             convoy_decision_history: [],
+            pending_reserve_requests: [],
+            reserve_request_history: [],
+            triggered_operations_accepted: {},
+            declined_operations: {},
+            used_operation_names: {},
+            pending_officer_events: [],
+            officer_decision_history: [],
         },
         political: {
             political_controllers: {},
@@ -98,7 +105,7 @@ function validateWithMilitary(militaryOverrides: Record<string, unknown>) {
 }
 
 describe('event state shape validation', () => {
-    it('accepts valid pending decisions, decision log rows, event modifier arrays, and cost annotations', () => {
+    it('accepts valid pending decisions, decision log rows, event modifier arrays, cost annotations, and officer queues', () => {
         const result = validateWithMilitary({
             pending_event_decisions: [{
                 event_id: 'rbih_state_identity',
@@ -125,6 +132,43 @@ describe('event state shape validation', () => {
                 { event_id: 'external_pressure', tag: 'diplomatic_cost', turn: 9 },
             ],
             event_overflow_queue: ['delayed_event_a', 'delayed_event_b'],
+            pending_officer_events: [{
+                event_id: 'officer:event-a',
+                type: 'order_modified',
+                faction: 'RBiH',
+                turn: 12,
+                officer_id: 'commander_a',
+                acknowledged: false,
+                current_commander_id: 'old_a',
+                corps_id: 'arbih_1st_corps',
+                reason: '',
+                overridable: true,
+                override_action: 'confirm_order_override',
+                original_order: {
+                    order_type: 'operation_launch',
+                    corps_id: '',
+                    operation_name: 'Operation A',
+                    objectives: ['obj_a'],
+                    delay_turns: 0,
+                },
+                interpreted_order: {
+                    order_type: 'operation_launch',
+                    corps_id: 'arbih_1st_corps',
+                    directive_verb: 'attack',
+                    opportunity_id: 'opp_a',
+                },
+            }],
+            officer_decision_history: [{
+                id: 'officer:12:officer:event-a:override_confirmed',
+                turn: 12,
+                faction: 'RBiH',
+                event_id: 'officer:event-a',
+                event_type: 'order_modified',
+                officer_id: 'commander_a',
+                current_commander_id: 'old_a',
+                corps_id: 'arbih_1st_corps',
+                decision: 'override_confirmed',
+            }],
         });
 
         expect(result).toEqual({ ok: true });
@@ -268,6 +312,90 @@ describe('event state shape validation', () => {
             ok: false,
             errors: expect.arrayContaining([
                 'military.event_overflow_queue must be a string array when present',
+            ]),
+        });
+    });
+
+    it('rejects malformed pending officer events', () => {
+        const result = validateWithMilitary({
+            pending_officer_events: [{
+                event_id: '',
+                type: 'not_real',
+                faction: 'JNA',
+                turn: -1,
+                officer_id: '',
+                current_commander_id: '',
+                corps_id: '',
+                acknowledged: 'false',
+                reason: 7,
+                overridable: 'yes',
+                override_action: 42,
+                original_order: {
+                    order_type: 'bad',
+                    corps_id: 42,
+                    objectives: ['ok', 7],
+                    delay_turns: -1,
+                },
+                interpreted_order: 42,
+            }, 42],
+        });
+
+        expect(result).toEqual({
+            ok: false,
+            errors: expect.arrayContaining([
+                'military.pending_officer_events[0].event_id must be a non-empty string',
+                'military.pending_officer_events[0].type must be a known OfficerEventType',
+                'military.pending_officer_events[0].faction must be one of: RBiH, RS, HRHB',
+                'military.pending_officer_events[0].turn must be a non-negative integer',
+                'military.pending_officer_events[0].officer_id must be a non-empty string',
+                'military.pending_officer_events[0].acknowledged must be boolean',
+                'military.pending_officer_events[0].current_commander_id must be a non-empty string when present',
+                'military.pending_officer_events[0].corps_id must be a non-empty string when present',
+                'military.pending_officer_events[0].reason must be a string when present',
+                'military.pending_officer_events[0].overridable must be boolean when present',
+                'military.pending_officer_events[0].override_action must be a string when present',
+                'military.pending_officer_events[0].original_order.order_type must be a valid order_type',
+                'military.pending_officer_events[0].original_order.corps_id must be a string',
+                'military.pending_officer_events[0].original_order.objectives must be a string array when present',
+                'military.pending_officer_events[0].original_order.delay_turns must be a non-negative integer when present',
+                'military.pending_officer_events[0].interpreted_order must be an object',
+                'military.pending_officer_events[1] must be an object',
+            ]),
+        });
+    });
+
+    it('rejects malformed officer decision history', () => {
+        const result = validateWithMilitary({
+            officer_decision_history: [{
+                id: '',
+                turn: -1,
+                faction: 'JNA',
+                event_id: '',
+                event_type: '',
+                officer_id: '',
+                decision: 'ignored',
+                current_commander_id: '',
+                corps_id: '',
+                new_officer_id: '',
+                outgoing_officer_id: '',
+            }, 42],
+        });
+
+        expect(result).toEqual({
+            ok: false,
+            errors: expect.arrayContaining([
+                'military.officer_decision_history[0].id must be a non-empty string',
+                'military.officer_decision_history[0].turn must be a non-negative integer',
+                'military.officer_decision_history[0].faction must be one of: RBiH, RS, HRHB',
+                'military.officer_decision_history[0].event_id must be a non-empty string',
+                'military.officer_decision_history[0].event_type must be a non-empty string',
+                'military.officer_decision_history[0].officer_id must be a non-empty string',
+                'military.officer_decision_history[0].decision must be one of: acknowledged, override_confirmed, replacement_accepted',
+                'military.officer_decision_history[0].current_commander_id must be a non-empty string when present',
+                'military.officer_decision_history[0].corps_id must be a non-empty string when present',
+                'military.officer_decision_history[0].new_officer_id must be a non-empty string when present',
+                'military.officer_decision_history[0].outgoing_officer_id must be a non-empty string when present',
+                'military.officer_decision_history[1] must be an object',
             ]),
         });
     });

@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest officer decision queue schema contract:** [implemented/20260527_OFFICER_DECISION_QUEUE_SCHEMA_CONTRACT.md](implemented/20260527_OFFICER_DECISION_QUEUE_SCHEMA_CONTRACT.md) - Officer pending/history queues are now required persisted v30 save/load contracts with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no officer behavior change.
+
 **Latest triggered-operation bookkeeping schema contract:** [implemented/20260527_TRIGGERED_OPERATION_BOOKKEEPING_SCHEMA_CONTRACT.md](implemented/20260527_TRIGGERED_OPERATION_BOOKKEEPING_SCHEMA_CONTRACT.md) - Triggered-operation accepted/declined/used-name records are now required persisted v29 save/load contracts with `{}` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no operation behavior change.
 
 **Latest reserve request schema contract:** [implemented/20260527_RESERVE_REQUEST_SCHEMA_CONTRACT.md](implemented/20260527_RESERVE_REQUEST_SCHEMA_CONTRACT.md) - Reserve pending/history queues are now required persisted v28 save/load contracts with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no reserve behavior change.

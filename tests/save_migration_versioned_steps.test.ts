@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(29);
+        expect(getLatestSchemaVersion()).toBe(30);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -100,6 +100,8 @@ describe('versioned save migration steps', () => {
         expect(state.military.triggered_operations_accepted).toEqual({});
         expect(state.military.declined_operations).toEqual({});
         expect(state.military.used_operation_names).toEqual({});
+        expect(state.military.pending_officer_events).toEqual([]);
+        expect(state.military.officer_decision_history).toEqual([]);
         expect(state.military.pending_event_decisions).toEqual([]);
         expect(state.military.pending_event_notifications).toEqual([]);
         expect(state.military.phantoms_spawned).toEqual([]);
@@ -768,5 +770,123 @@ describe('versioned save migration steps', () => {
             'Name B': 11,
             'Name A': 10,
         });
+    });
+
+    it('materializes v30 officer decision queues for v29 saves', () => {
+        const state = minimalLegacyState(29);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [];
+        state.military.convoy_decision_history = [];
+        state.military.pending_reserve_requests = [];
+        state.military.reserve_request_history = [];
+        state.military.triggered_operations_accepted = {};
+        state.military.declined_operations = {};
+        state.military.used_operation_names = {};
+        delete state.military.pending_officer_events;
+        delete state.military.officer_decision_history;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_officer_events).toEqual([]);
+        expect(state.military.officer_decision_history).toEqual([]);
+    });
+
+    it('preserves existing v30 officer event and history row order and contents for v29 saves', () => {
+        const state = minimalLegacyState(29);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [];
+        state.military.convoy_decision_history = [];
+        state.military.pending_reserve_requests = [];
+        state.military.reserve_request_history = [];
+        state.military.triggered_operations_accepted = {};
+        state.military.declined_operations = {};
+        state.military.used_operation_names = {};
+        state.military.pending_officer_events = [
+            {
+                event_id: 'officer:event-b',
+                type: 'order_modified',
+                faction: 'RBiH',
+                turn: 12,
+                officer_id: 'commander_b',
+                corps_id: 'arbih_1st_corps',
+                acknowledged: false,
+                reason: '',
+                overridable: true,
+                override_action: 'confirm_order_override',
+                original_order: {
+                    order_type: 'operation_launch',
+                    corps_id: '',
+                    operation_name: 'Operation B',
+                    objectives: ['obj_b', 'obj_a'],
+                    delay_turns: 0,
+                },
+                interpreted_order: {
+                    order_type: 'operation_launch',
+                    corps_id: 'arbih_1st_corps',
+                    operation_name: 'Operation B',
+                    directive_verb: 'attack',
+                    opportunity_id: 'opp_b',
+                },
+            },
+            {
+                event_id: 'officer:event-a',
+                type: 'replacement_suggested',
+                faction: 'RS',
+                turn: 9,
+                officer_id: 'commander_a',
+                current_commander_id: 'old_a',
+                corps_id: 'vrs_drina_corps',
+                acknowledged: true,
+            },
+        ];
+        state.military.officer_decision_history = [
+            {
+                id: 'officer:12:officer:event-b:override_confirmed',
+                turn: 12,
+                faction: 'RBiH',
+                event_id: 'officer:event-b',
+                event_type: 'order_modified',
+                officer_id: 'commander_b',
+                corps_id: 'arbih_1st_corps',
+                decision: 'override_confirmed',
+            },
+            {
+                id: 'officer:9:officer:event-a:replacement_accepted',
+                turn: 9,
+                faction: 'RS',
+                event_id: 'officer:event-a',
+                event_type: 'replacement_suggested',
+                officer_id: 'commander_a',
+                current_commander_id: 'old_a',
+                corps_id: 'vrs_drina_corps',
+                new_officer_id: 'commander_a',
+                outgoing_officer_id: 'old_a',
+                decision: 'replacement_accepted',
+            },
+        ];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_officer_events.map((event: any) => event.event_id)).toEqual(['officer:event-b', 'officer:event-a']);
+        expect(state.military.pending_officer_events[0].original_order.objectives).toEqual(['obj_b', 'obj_a']);
+        expect(state.military.officer_decision_history.map((entry: any) => entry.id)).toEqual([
+            'officer:12:officer:event-b:override_confirmed',
+            'officer:9:officer:event-a:replacement_accepted',
+        ]);
+        expect(state.military.officer_decision_history[1].outgoing_officer_id).toBe('old_a');
     });
 });

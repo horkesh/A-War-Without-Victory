@@ -44,6 +44,8 @@
 
 ## Closed Or Monitor Lanes
 
+**Optional `GameState` schema contract update 2026-05-27:** v30 is closed for `military.pending_officer_events` and `military.officer_decision_history` with inert `[]` legacy migration defaults, current-version missing/malformed rejection, row-order/content preservation, officer runtime round-trip proof, refreshed save-migration drift output, and rebuilt startup snapshot. Continue the active row by classifying the next optional-field family; do not reopen officer behavior, desktop IPC routing, UI mapping, operation opportunities, event prose/content, bot choices, scenario data, sector/frontline behavior, GUI routing, or replay artifacts from this schema slice.
+
 | Lane | Current Disposition |
 | --- | --- |
 | Counted strict-null escape cleanup | CLOSED at zero counted `as_factionid_casts`, `as_unknown_casts`, `as_any_casts`, dot/index non-null assertions. Remaining work is optional-field contract, not escape cleanup. |

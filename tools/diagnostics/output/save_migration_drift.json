@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 29,
-  "registered_migration_count": 29,
-  "strict_required_field_count": 68,
+  "latest_schema_version": 30,
+  "registered_migration_count": 30,
+  "strict_required_field_count": 70,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -121,6 +121,10 @@
     {
       "version": 29,
       "description": "Persisted triggered-operation bookkeeping record defaults. Sensitive: no."
+    },
+    {
+      "version": 30,
+      "description": "Persisted officer decision queue and history defaults. Sensitive: no."
     }
   ],
   "required_fields": [
@@ -395,6 +399,14 @@
     {
       "version": 29,
       "path": "military.used_operation_names"
+    },
+    {
+      "version": 30,
+      "path": "military.officer_decision_history"
+    },
+    {
+      "version": 30,
+      "path": "military.pending_officer_events"
     }
   ]
 }

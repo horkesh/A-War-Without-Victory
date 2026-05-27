@@ -707,3 +707,13 @@ registerMigration({
         ensureRecord(mil, 'used_operation_names');
     },
 });
+
+registerMigration({
+    version: 30,
+    description: 'Persisted officer decision queue and history defaults. Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        ensureArray(mil, 'pending_officer_events');
+        ensureArray(mil, 'officer_decision_history');
+    },
+});

@@ -118,6 +118,31 @@ function isEventDecisionSource(value: unknown): boolean {
     return value === 'bot_political' || value === 'bot_v1' || value === 'bot_ai_default' || value === 'player';
 }
 
+function isOfficerEventType(value: unknown): boolean {
+    return value === 'officer_available'
+        || value === 'replacement_suggested'
+        || value === 'order_pushback'
+        || value === 'order_modified'
+        || value === 'order_refused'
+        || value === 'order_exceeded'
+        || value === 'officer_relieved'
+        || value === 'army_directive_pushback'
+        || value === 'army_co_proposes_op';
+}
+
+function isOfficerDecision(value: unknown): boolean {
+    return value === 'acknowledged' || value === 'override_confirmed' || value === 'replacement_accepted';
+}
+
+function isOrderSnapshotType(value: unknown): boolean {
+    return value === 'stance_change'
+        || value === 'operation_launch'
+        || value === 'operation_halt'
+        || value === 'brigade_reassign'
+        || value === 'political_directive'
+        || value === 'army_co_proposed_op';
+}
+
 function getPathValue(root: unknown, path: string): unknown {
     let current: unknown = root;
     for (const part of path.split('.')) {
@@ -232,6 +257,117 @@ function validateEventDecisionLog(value: unknown, errors: string[]): void {
         }
         if (!isNonNegativeInteger(entry.turn)) {
             errors.push(`military.event_decision_log[${i}].turn must be a non-negative integer`);
+        }
+    });
+}
+
+function validateOrderSnapshot(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isOrderSnapshotType(value.order_type)) {
+        errors.push(`${path}.order_type must be a valid order_type`);
+    }
+    if (typeof value.corps_id !== 'string') {
+        errors.push(`${path}.corps_id must be a string`);
+    }
+    for (const key of ['stance', 'operation_name', 'directive_verb', 'opportunity_id']) {
+        if (key in value && value[key] !== undefined && typeof value[key] !== 'string') {
+            errors.push(`${path}.${key} must be a string when present`);
+        }
+    }
+    if ('objectives' in value && value.objectives !== undefined && !isStringArray(value.objectives)) {
+        errors.push(`${path}.objectives must be a string array when present`);
+    }
+    if ('delay_turns' in value && value.delay_turns !== undefined && !isNonNegativeInteger(value.delay_turns)) {
+        errors.push(`${path}.delay_turns must be a non-negative integer when present`);
+    }
+}
+
+function validatePendingOfficerEvents(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.pending_officer_events must be an array when present');
+        return;
+    }
+
+    value.forEach((event, i) => {
+        const path = `military.pending_officer_events[${i}]`;
+        if (!isRecord(event)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        if (!isNonEmptyString(event.event_id)) {
+            errors.push(`${path}.event_id must be a non-empty string`);
+        }
+        if (!isOfficerEventType(event.type)) {
+            errors.push(`${path}.type must be a known OfficerEventType`);
+        }
+        if (!isCanonicalPlayerFaction(event.faction)) {
+            errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+        }
+        if (!isNonNegativeInteger(event.turn)) {
+            errors.push(`${path}.turn must be a non-negative integer`);
+        }
+        if (!isNonEmptyString(event.officer_id)) {
+            errors.push(`${path}.officer_id must be a non-empty string`);
+        }
+        if (typeof event.acknowledged !== 'boolean') {
+            errors.push(`${path}.acknowledged must be boolean`);
+        }
+        for (const key of ['current_commander_id', 'corps_id']) {
+            if (key in event && event[key] !== undefined && !isNonEmptyString(event[key])) {
+                errors.push(`${path}.${key} must be a non-empty string when present`);
+            }
+        }
+        if ('reason' in event && event.reason !== undefined && typeof event.reason !== 'string') {
+            errors.push(`${path}.reason must be a string when present`);
+        }
+        if ('overridable' in event && event.overridable !== undefined && typeof event.overridable !== 'boolean') {
+            errors.push(`${path}.overridable must be boolean when present`);
+        }
+        if ('override_action' in event && event.override_action !== undefined && typeof event.override_action !== 'string') {
+            errors.push(`${path}.override_action must be a string when present`);
+        }
+        if ('original_order' in event && event.original_order !== undefined) {
+            validateOrderSnapshot(event.original_order, `${path}.original_order`, errors);
+        }
+        if ('interpreted_order' in event && event.interpreted_order !== undefined) {
+            validateOrderSnapshot(event.interpreted_order, `${path}.interpreted_order`, errors);
+        }
+    });
+}
+
+function validateOfficerDecisionHistory(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.officer_decision_history must be an array when present');
+        return;
+    }
+
+    value.forEach((entry, i) => {
+        const path = `military.officer_decision_history[${i}]`;
+        if (!isRecord(entry)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        for (const key of ['id', 'event_id', 'event_type', 'officer_id']) {
+            if (!isNonEmptyString(entry[key])) {
+                errors.push(`${path}.${key} must be a non-empty string`);
+            }
+        }
+        if (!isNonNegativeInteger(entry.turn)) {
+            errors.push(`${path}.turn must be a non-negative integer`);
+        }
+        if (!isCanonicalPlayerFaction(entry.faction)) {
+            errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+        }
+        if (!isOfficerDecision(entry.decision)) {
+            errors.push(`${path}.decision must be one of: acknowledged, override_confirmed, replacement_accepted`);
+        }
+        for (const key of ['current_commander_id', 'corps_id', 'new_officer_id', 'outgoing_officer_id']) {
+            if (key in entry && entry[key] !== undefined && !isNonEmptyString(entry[key])) {
+                errors.push(`${path}.${key} must be a non-empty string when present`);
+            }
         }
     });
 }
@@ -590,6 +726,8 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 29, path: 'military.triggered_operations_accepted', check: isNonNegativeIntegerRecord },
     { version: 29, path: 'military.declined_operations', check: isDeclinedOperationRecord },
     { version: 29, path: 'military.used_operation_names', check: isNonNegativeIntegerRecord },
+    { version: 30, path: 'military.pending_officer_events', check: Array.isArray },
+    { version: 30, path: 'military.officer_decision_history', check: Array.isArray },
 ];
 
 /**
@@ -795,6 +933,12 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'used_operation_names' in military && military.used_operation_names !== undefined) {
         validateNonNegativeIntegerRecord(military.used_operation_names, 'military.used_operation_names', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'pending_officer_events' in military && military.pending_officer_events !== undefined) {
+        validatePendingOfficerEvents(military.pending_officer_events, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'officer_decision_history' in military && military.officer_decision_history !== undefined) {
+        validateOfficerDecisionHistory(military.officer_decision_history, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'pending_event_notifications' in military && military.pending_event_notifications !== undefined) {
         const notifications = military.pending_event_notifications;

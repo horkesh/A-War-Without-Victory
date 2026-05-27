@@ -33795,9 +33795,11 @@
       "peace_plan_history": [],
       "pending_counter_offers": []
     },
+    "officer_decision_history": [],
     "pending_convoy_decisions": [],
     "pending_event_decisions": [],
     "pending_event_notifications": [],
+    "pending_officer_events": [],
     "pending_reserve_requests": [],
     "phantoms_spawned": [
       "jna_uzice_corps_tg",
@@ -43326,5 +43328,5 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 29
+  "schema_version": 30
 }
