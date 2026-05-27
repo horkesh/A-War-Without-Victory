@@ -6,7 +6,7 @@
 **Related command-board row:** P1 Dynamic Codex and sensitive-history consequence arcs
 **Collision rules:** May edit Codex/content diagnostics and safe factual prose. Must stop before new sensitive-history framing, unsupported historical claims, or mechanics that turn atrocities into player levers.
 **Phase covered:** Safe Codex sweep, source-backed correction, sensitive-history packet preparation, and dynamic consequence arcs.
-**Current next action:** Continue source-note packet review for remaining sensitive-history rows, then prepare gated review packets for dynamic consequence arcs.
+**Current next action:** Prepare gated review packets for the three remaining uncited event rows, then dynamic consequence arcs.
 
 ## Purpose
 
@@ -124,7 +124,7 @@ Stop gates:
 
 **Owner:** documentation-specialist
 **Reviewers:** historian, canon-compliance-reviewer
-**Status:** IN PROGRESS. Deliberate Force and Mistral 2 operational overclaim wording closed 2026-05-27 by `docs/40_reports/implemented/20260527_CODEX_SAFE_FACTUAL_CORRECTIONS_PHASE1.md`. The first Srebrenica/Zepa provenance-only source-note packet closed 2026-05-27 by `docs/40_reports/implemented/20260527_CODEX_SENSITIVE_HISTORY_SOURCE_NOTES_PHASE1.md`. Continue source-note packet review for remaining sensitive-history rows. Do not touch sensitive-history levers or counterfactual atrocity/prevention framing without review.
+**Status:** IN PROGRESS. Deliberate Force and Mistral 2 operational overclaim wording closed 2026-05-27 by `docs/40_reports/implemented/20260527_CODEX_SAFE_FACTUAL_CORRECTIONS_PHASE1.md`. The Srebrenica/Zepa provenance-only source-note packet closed by `docs/40_reports/implemented/20260527_CODEX_SENSITIVE_HISTORY_SOURCE_NOTES_PHASE1.md`; the broader event source-note packet closed by `docs/40_reports/implemented/20260527_CODEX_EVENT_SOURCE_NOTES_PHASE2.md`. Remaining uncited event rows are gated review items, not blind source-note work. Do not touch sensitive-history levers or counterfactual atrocity/prevention framing without review.
 
 Steps:
 
@@ -164,6 +164,17 @@ node tools\diagnostics\codex_sensitive_claim_inventory.cjs --json
 ```
 
 Diagnostic delta: source status moved 189 cited / 79 uncited -> 196 cited / 72 uncited with total claims stable at 296.
+
+Closed proof for second source-note packet:
+
+```powershell
+npx.cmd vitest run tests\codex_sensitive_history_source_notes.test.ts tests\event_timeline_integrity.test.ts tests\codex_sensitive_claim_inventory.test.ts tests\codex_source_quality.test.ts --reporter=dot
+node --check tools\diagnostics\codex_sensitive_claim_inventory.cjs
+node tools\diagnostics\codex_sensitive_claim_inventory.cjs --json
+git diff --check
+```
+
+Diagnostic delta: source status moved 196 cited / 72 uncited -> 224 cited / 44 uncited with total claims stable at 296. The only remaining uncited event rows are `croat_bosniak_war_begins_1993`, `visit_to_front_hrhb`, and `federation_ground_offensive_1995`, all gated for narrative/operational review.
 
 ## Phase 2 - Sensitive-History Review Packets
 

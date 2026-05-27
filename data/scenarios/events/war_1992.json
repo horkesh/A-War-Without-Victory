@@ -574,6 +574,7 @@
     "id": "battle_of_the_barracks_sarajevo",
     "title": "Battle of the Barracks — Sarajevo",
     "narrative": "TDF units and Green Berets storm JNA barracks across Sarajevo. The Maršal Tito barracks and Viktor Bubanj complex are seized after fierce fighting. Tanks, APCs, and artillery pieces are captured — the first heavy weapons in ARBiH hands. JNA soldiers are taken prisoner. Belgrade vows retaliation.",
+    "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
     "category": "military",
     "trigger": {
       "turn_min": 4,
@@ -641,6 +642,7 @@
     "id": "battle_of_the_barracks_tuzla",
     "title": "Battle of the Barracks — Tuzla",
     "narrative": "The Tuzla column incident: JNA's 92nd Motorized Brigade is ambushed on Brčanska Malta while withdrawing from the city. In the chaos, TDF forces seize the barracks complex with its armored vehicles and artillery depot. Over 50 JNA soldiers are killed — the bloodiest barracks seizure in Bosnia. The captured equipment transforms 2nd Corps capability.",
+    "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
     "category": "military",
     "trigger": {
       "turn_min": 4,
@@ -715,6 +717,7 @@
     "id": "battle_of_the_barracks_zenica",
     "title": "Battle of the Barracks — Zenica",
     "narrative": "ARBiH forces seize the JNA barracks in Zenica, capturing artillery pieces and ammunition stores. The Zenica garrison, weakened by Bosniak desertions, offers limited resistance. The captured equipment is distributed to 3rd Corps formations defending central Bosnia.",
+    "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
     "category": "military",
     "trigger": {
       "turn_min": 4,
@@ -766,6 +769,7 @@
     "id": "battle_of_the_barracks_visoko",
     "title": "Battle of the Barracks — Visoko",
     "narrative": "The small JNA depot at Visoko is overrun by local TDF. A handful of armored vehicles and mortar tubes are captured. The symbolic victory boosts morale among defenders of the Sarajevo approaches.",
+    "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
     "category": "military",
     "trigger": {
       "turn_min": 4,
@@ -1232,6 +1236,7 @@
     "id": "drina_valley_ethnic_cleansing_1992",
     "title": "Drina Valley Campaign Accelerates",
     "narrative": "VRS and paramilitary forces systematically expel the Bosniak population from towns along the Drina River valley. Višegrad, Foča, Zvornik, and Bratunac witness mass killings, forced deportations, and the destruction of mosques. The campaign aims to create a contiguous Serb-held corridor along the Serbian border.",
+    "source_note": "Existing ICTY/UN and project sources ground the row's provenance and institutional context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "humanitarian",
     "trigger": {
       "turn_min": 8,
@@ -1297,6 +1302,7 @@
     "id": "operation_corridor_1992",
     "title": "Operation Corridor — VRS Breaks Through at Brcko",
     "narrative": "The VRS launches Operation Corridor to link the Krajina region with Serbia proper through the narrow Posavina corridor near Brcko. Fierce fighting against HVO and ARBiH forces gradually widens the corridor, establishing a critical supply and communication link that sustains the western Bosnian Serb entity.",
+    "source_note": "Existing event/essay/project sources ground the row's institutional and operational context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "military",
     "trigger": {
       "turn_min": 12,
@@ -1592,6 +1598,7 @@
     "id": "london_conference_1992",
     "title": "London Conference on Yugoslavia",
     "narrative": "The international community convenes in London to address the escalating Bosnian crisis. Western leaders demand an end to ethnic cleansing and the lifting of sieges. The conference produces declarations but no enforcement mechanism, establishing a pattern of diplomatic engagement without military commitment.",
+    "source_note": "Existing event/essay/project sources ground the row's institutional and diplomatic context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 16,
@@ -1841,6 +1848,7 @@
     "id": "hvo_arbih_tensions_rise_1992",
     "title": "HVO-ARBiH Clash at Prozor",
     "narrative": "The fragile alliance between the HVO and ARBiH fractures openly at Prozor in central Bosnia. HVO forces attack Bosniak civilians and ARBiH positions in a calculated bid to assert Croat control over the town. Further clashes erupt near Novi Travnik. The incidents mark the first serious military confrontation between the two nominal allies.",
+    "source_note": "Existing event/essay/project sources ground the row's institutional and operational context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "political",
     "trigger": {
       "turn_min": 20,
@@ -1905,6 +1913,7 @@
     "id": "jajce_falls_1992",
     "title": "Jajce Falls to VRS Forces",
     "narrative": "The strategic town of Jajce in central Bosnia falls to the VRS after a prolonged siege. The loss is a major blow to both the ARBiH and HVO, who blame each other for failing to coordinate the defense. Tens of thousands of civilians flee westward, and recriminations between the two forces deepen the growing rift.",
+    "source_note": "Existing Jajce essay and project sources ground the row's institutional and operational context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "territorial",
     "trigger": {
       "turn_min": 28,

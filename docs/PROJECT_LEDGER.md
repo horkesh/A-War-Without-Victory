@@ -11858,3 +11858,21 @@ Also replaced the new `as unknown as JsonObject` pressure read in `src/sim/event
 **Artifacts:** `data/scenarios/events/war_1992.json`, `data/scenarios/events/war_1993.json`, `data/scenarios/events/war_1995.json`, `tests/codex_sensitive_history_source_notes.test.ts`, `docs/40_reports/implemented/20260527_CODEX_SENSITIVE_HISTORY_SOURCE_NOTES_PHASE1.md`, `docs/plans/2026-05-24-codex-sensitive-history-execution-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-27] codex: add cleared event provenance source notes
+
+**Type:** Event source-note packet.
+
+**Change:** Added provenance-only `source_note` fields to 15 additional event rows cleared by historian/canon review: barracks/JNA equipment-transfer rows, Operation Corridor, London Conference, Prozor/Jajce, central Bosnia fighting, Ahmici, Markale, and anti-sniping rows. Extended `tests/codex_sensitive_history_source_notes.test.ts` to keep both general and barracks-specific boundary phrases in place.
+
+**Determinism:** Text/test/docs only. No narrative text, triggers, effects, response ids, dimension shifts, bot response logic, save schema, scenario setup, UI routing, generated artifacts, or calibration parameters changed. Three uncited event rows remain gated for narrative/operational review rather than source-note treatment.
+
+**Verification:**
+- `npx.cmd vitest run tests\codex_sensitive_history_source_notes.test.ts tests\event_timeline_integrity.test.ts tests\codex_sensitive_claim_inventory.test.ts tests\codex_source_quality.test.ts --reporter=dot` - PASS; 25/25 tests.
+- `node --check tools\diagnostics\codex_sensitive_claim_inventory.cjs` - PASS.
+- `node tools\diagnostics\codex_sensitive_claim_inventory.cjs --json` - PASS; 176 files / 296 claims / 245 stop-gated; source status 224 cited / 44 uncited.
+- `git diff --check` - PASS; emitted existing CRLF normalization warning for `data/scenarios/events/war_1992.json`.
+
+**Artifacts:** `data/scenarios/events/war_1992.json`, `data/scenarios/events/war_1993.json`, `data/scenarios/events/war_1994.json`, `data/scenarios/events/war_1995.json`, `tests/codex_sensitive_history_source_notes.test.ts`, `docs/40_reports/implemented/20260527_CODEX_EVENT_SOURCE_NOTES_PHASE2.md`, `docs/plans/2026-05-24-codex-sensitive-history-execution-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
+
+---
