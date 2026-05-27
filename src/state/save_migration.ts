@@ -625,3 +625,11 @@ registerMigration({
         ensureArray(mil, 'phantoms_spawned');
     },
 });
+
+registerMigration({
+    version: 21,
+    description: 'Top-level paramilitary decision history persisted default. Sensitive: no.',
+    migrate: (state) => {
+        ensureArray(asRecord(state), 'paramilitary_decision_history');
+    },
+});

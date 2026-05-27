@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(20);
+        expect(getLatestSchemaVersion()).toBe(21);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -89,6 +89,7 @@ describe('versioned save migration steps', () => {
         expect(state.military.event_flags).toEqual({});
         expect(state.military.enabled_event_ids).toEqual([]);
         expect(state.military.phantoms_spawned).toEqual([]);
+        expect(state.paramilitary_decision_history).toEqual([]);
         expect(state.political.supply_rights).toEqual({ corridors: [] });
         expect(state.political.war_consolidation_until).toEqual({});
         expect(state.political.war_control_strain).toEqual({});
@@ -242,5 +243,45 @@ describe('versioned save migration steps', () => {
 
         expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
         expect(state.military.phantoms_spawned).toEqual(['phantom_b', 'phantom_a', 'phantom_b']);
+    });
+
+    it('materializes v21 paramilitary decision history defaults for v20 saves', () => {
+        const state = minimalLegacyState(20);
+        delete state.paramilitary_decision_history;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.paramilitary_decision_history).toEqual([]);
+    });
+
+    it('preserves existing v21 paramilitary decision history order and contents for v20 saves', () => {
+        const state = minimalLegacyState(20);
+        state.paramilitary_decision_history = [
+            {
+                id: 'paramilitary:5:op:zvornik:kozluk_2',
+                turn: 5,
+                target_osid: 'op:zvornik:kozluk_2',
+                faction: 'RS',
+                strength: 80,
+                decision: 'allow',
+                estimated_civilian_risk: 12,
+            },
+        ];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.paramilitary_decision_history).toEqual([
+            {
+                id: 'paramilitary:5:op:zvornik:kozluk_2',
+                turn: 5,
+                target_osid: 'op:zvornik:kozluk_2',
+                faction: 'RS',
+                strength: 80,
+                decision: 'allow',
+                estimated_civilian_risk: 12,
+            },
+        ]);
     });
 });

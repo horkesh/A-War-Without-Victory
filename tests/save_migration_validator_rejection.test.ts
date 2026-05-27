@@ -39,6 +39,7 @@ function currentVersionState(): any {
                 declaration_turn: null,
             },
         ],
+        paramilitary_decision_history: [],
         military: {
             front_segments: {},
             theatres: {},
@@ -555,6 +556,35 @@ describe('save migration validator hardening', () => {
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
             /Save schema validation failed after migration[\s\S]*v20[\s\S]*military\.phantoms_spawned/
+        );
+    });
+
+    it('materializes v21 paramilitary decision history for v20 saves', () => {
+        const state = currentVersionState();
+        state.schema_version = 20;
+        delete state.paramilitary_decision_history;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.paramilitary_decision_history).toEqual([]);
+    });
+
+    it('rejects current-version saves missing paramilitary decision history', () => {
+        const state = currentVersionState();
+        delete state.paramilitary_decision_history;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v21[\s\S]*paramilitary_decision_history/
+        );
+    });
+
+    it('rejects current-version saves with malformed paramilitary decision history', () => {
+        const state = currentVersionState();
+        state.paramilitary_decision_history = {};
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v21[\s\S]*paramilitary_decision_history/
         );
     });
 });

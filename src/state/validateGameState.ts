@@ -150,6 +150,7 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 18, path: 'displacement.sustainability_state', check: isRecord },
     { version: 19, path: 'displacement.civilian_casualties', check: isCivilianCasualtiesRecord },
     { version: 20, path: 'military.phantoms_spawned', check: isStringArray },
+    { version: 21, path: 'paramilitary_decision_history', check: Array.isArray },
 ];
 
 /**

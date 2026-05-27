@@ -11567,3 +11567,42 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `src/sim/combat/brigade_assignment.ts`, `tests/sector_partition_instrumentation.test.ts`, `docs/plans/2026-05-20-sector-performance-next-target-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/40_reports/audits/20260518_MASTER_BACKLOG_EXECUTION_QUEUE.md`, `docs/40_reports/implemented/20260527_SECTOR_COVERAGE_TARGET_SELECTION_LOOP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-27] state(save): require paramilitary decision history in migrated saves
+
+**Type:** Save schema contract hardening, bounded Optional `GameState` Phase 2 slice.
+
+**Change:** Added schema v21 for the top-level `paramilitary_decision_history` persisted audit/history field. Legacy v20-and-older saves now materialize an inert `[]` default, current-version validation rejects missing or malformed values, and the save-migration roundtrip fixture set now includes a v20 fixture for this transition. The TypeScript field remains optional to avoid broad fixture churn; the contract is enforced at migrated/current save boundaries.
+
+**Determinism:** Schema/default-only migration uses an empty array and no time, randomness, I/O, environment reads, sorting, deduplication, or unordered traversal. Existing history arrays are preserved in place.
+
+**Strict-null inventory:** Counted escape categories remain zero. Optional `GameState` field inventory remains `464`, split as `sim 297`, `state 159`, `derived 8`, `unknown 0`, because this slice intentionally closes the persisted save contract without promoting the TypeScript optional marker.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\vitest.cmd run tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts --reporter=dot` - FAIL before production changes because schema v21 was absent, v20 migration left `paramilitary_decision_history` undefined, and current-version validation accepted missing/malformed values.
+- Focused save/default/validator/roundtrip/static pack: `F:\A-War-Without-Victory\vitest.cmd run tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts tests\save_migration_round_trip_contract.test.ts tests\strict_null_inventory_progress.test.ts --reporter=dot` - PASS; 192/192 tests.
+- `node tools\diagnostics\strict_null_inventory.cjs --field-domains` - PASS; total 464, `sim 297`, `state 159`, `derived 8`, `unknown 0`.
+- `npx.cmd tsc --noEmit` - PASS.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, `tests/save_migration_versioned_steps.test.ts`, `tests/save_migration_validator_rejection.test.ts`, `tests/fixtures/save_migration/v20_paramilitary_decision_history.json`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-27] test(replay): lock replay save finalizer artifact ownership
+
+**Type:** Static generated-artifact ownership guard + docs closeout.
+
+**Change:** Added `tests/replay_save_finalizer_artifact_ownership.test.ts` and cited it from the ownership matrix rows for `runs/<scenario_run>/replay_save_sequence.json` and `runs/<scenario_run>/replay_save_manifest.json`. The guard verifies the matrix classifies both finalizer sidecars as transient/do-not-commit outputs, checks the `streamFinalizeReplaySaveSequenceFromJsonl(...)` sequence path, manifest writer path, scenario-runner finalizer call, scenario-runner manifest path reporting, and confirms `git ls-files runs` remains empty.
+
+**Determinism:** Static test and documentation-only ownership clarification. No scenario runs, generated artifacts, committed PMTiles bytes, scenario-derived artifacts, save schema, migrations, validators, event content, calibration data, serialization logic, randomness, timestamps, or replay write behavior changed.
+
+**Verification:**
+- Red first: `F:\A-War-Without-Victory\vitest.cmd run tests\replay_save_finalizer_artifact_ownership.test.ts --reporter=dot` - FAIL before the ownership-matrix update because the `replay_save_sequence.json` row did not cite this focused ownership test.
+- `F:\A-War-Without-Victory\vitest.cmd run tests\replay_save_finalizer_artifact_ownership.test.ts --reporter=dot` - PASS; 1/1 test.
+- `F:\A-War-Without-Victory\vitest.cmd run tests\replay_save_finalizer_artifact_ownership.test.ts tests\generated_artifact_ownership_matrix_contract.test.ts --reporter=dot` - PASS; 2/2 tests.
+- `git diff --check` - PASS.
+- `git status --short -- data\derived tools\diagnostics\output runs` - PASS; no generated artifact byte changes reported.
+
+**Artifacts:** `tests/replay_save_finalizer_artifact_ownership.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
