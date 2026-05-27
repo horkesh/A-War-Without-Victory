@@ -932,8 +932,6 @@ const JAJCE_STAGING_ANCHORS: readonly string[] = [
 //   any Jajce-municipality OSID. Belongs to the Mistral 2 Šipovo/Mrkonjić
 //   axis footprint, never reachable from a 3rd-corps approach.
 const JAJCE_NEAR_OBJECTIVES: readonly string[] = [
-    'op:donji_vakuf:oborci_2',
-    'op:donji_vakuf:torlakovac_2',
     'op:jajce:grdovo',
 ];
 
