@@ -686,3 +686,13 @@ registerMigration({
         ensureArray(mil, 'convoy_decision_history');
     },
 });
+
+registerMigration({
+    version: 28,
+    description: 'Persisted army reserve request queue and decision history defaults. Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        ensureArray(mil, 'pending_reserve_requests');
+        ensureArray(mil, 'reserve_request_history');
+    },
+});

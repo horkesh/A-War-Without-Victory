@@ -69,6 +69,8 @@ function currentVersionState(): any {
             cost_ledger_annotations: [],
             pending_convoy_decisions: [],
             convoy_decision_history: [],
+            pending_reserve_requests: [],
+            reserve_request_history: [],
             pending_event_decisions: [],
             pending_event_notifications: [],
             phantoms_spawned: [],
@@ -905,6 +907,138 @@ describe('save migration validator hardening', () => {
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
             /Save schema validation failed after migration[\s\S]*military\.pending_convoy_decisions\[0\]\.id must be a non-empty string[\s\S]*military\.pending_convoy_decisions\[0\]\.route_faction must be one of: RBiH, RS, HRHB[\s\S]*military\.pending_convoy_decisions\[1\] must be an object[\s\S]*military\.convoy_decision_history\[0\]\.turn must be a non-negative integer[\s\S]*military\.convoy_decision_history\[0\]\.decided_by must be one of: player, bot[\s\S]*military\.convoy_decision_history\[1\] must be an object/
+        );
+    });
+
+    it('materializes v28 reserve request queues for v27 saves', () => {
+        const state = currentVersionState();
+        state.schema_version = 27;
+        delete state.military.pending_reserve_requests;
+        delete state.military.reserve_request_history;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.pending_reserve_requests).toEqual([]);
+        expect(migrated.military.reserve_request_history).toEqual([]);
+    });
+
+    it('preserves v27 reserve request queue order and contents', () => {
+        const state = currentVersionState();
+        state.schema_version = 27;
+        state.military.pending_reserve_requests = [
+            {
+                request_id: 'reserve:req-b',
+                corps_id: 'arbih_1st_corps',
+                faction: 'RBiH',
+                reason: 'offensive_support',
+                priority: 80,
+                raw_priority: 90,
+                travel_hops: 2,
+                turn_requested: 12,
+                description: 'Support the active operation.',
+                suggested_brigade_id: 'arbih_guards',
+            },
+            {
+                request_id: 'reserve:req-a',
+                corps_id: 'arbih_2nd_corps',
+                faction: 'RBiH',
+                reason: 'defensive_gap',
+                priority: 60,
+                raw_priority: 70,
+                travel_hops: 1,
+                turn_requested: 13,
+                description: 'Reinforce a thin sector.',
+                suggested_brigade_id: null,
+            },
+        ];
+        state.military.reserve_request_history = [
+            {
+                request_id: 'reserve:hist-b',
+                turn: 14,
+                faction: 'RBiH',
+                corps_id: 'arbih_1st_corps',
+                brigade_id: 'arbih_guards',
+                outcome: 'accepted',
+                reason: 'Approved for immediate deployment.',
+                decided_by: 'player',
+                purpose: 'offensive',
+                why_needed: 'Exploit the breach.',
+                how_to_use: 'Commit as the main effort.',
+            },
+            {
+                request_id: 'reserve:hist-a',
+                turn: 15,
+                faction: 'RS',
+                corps_id: 'vrs_1st_krajina',
+                brigade_id: null,
+                outcome: 'declined',
+                reason: 'No suitable brigade available.',
+                decided_by: 'army_ai',
+                purpose: 'defensive',
+                why_needed: 'Hold a threatened sector.',
+                how_to_use: 'Stiffen the line.',
+            },
+        ];
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.pending_reserve_requests?.map((request) => request.request_id)).toEqual(['reserve:req-b', 'reserve:req-a']);
+        expect(migrated.military.reserve_request_history?.map((record) => record.request_id)).toEqual(['reserve:hist-b', 'reserve:hist-a']);
+    });
+
+    it('rejects current-version saves missing reserve request queues', () => {
+        const missingPending = currentVersionState();
+        delete missingPending.military.pending_reserve_requests;
+        const missingHistory = currentVersionState();
+        delete missingHistory.military.reserve_request_history;
+
+        expect(() => deserializeState(JSON.stringify(missingPending))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v28[\s\S]*military\.pending_reserve_requests/
+        );
+        expect(() => deserializeState(JSON.stringify(missingHistory))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v28[\s\S]*military\.reserve_request_history/
+        );
+    });
+
+    it('rejects current-version saves with malformed reserve request queues', () => {
+        const state = currentVersionState();
+        state.military.pending_reserve_requests = [
+            {
+                request_id: '',
+                corps_id: 42,
+                faction: 'JNA',
+                reason: 'panic',
+                priority: Number.POSITIVE_INFINITY,
+                raw_priority: '90',
+                travel_hops: -1,
+                turn_requested: 1.5,
+                description: '',
+                suggested_brigade_id: 42,
+                purpose: 'urgent',
+            },
+            42,
+        ];
+        state.military.reserve_request_history = [
+            {
+                request_id: '',
+                turn: -1,
+                faction: 'JNA',
+                corps_id: '',
+                brigade_id: 42,
+                outcome: 'approved',
+                reason: '',
+                decided_by: 'staff',
+                purpose: 'urgent',
+                why_needed: 42,
+                how_to_use: '',
+            },
+            42,
+        ];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.pending_reserve_requests\[0\]\.corps_id must be a non-empty string[\s\S]*military\.pending_reserve_requests\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.pending_reserve_requests\[0\]\.reason must be one of: offensive_support, defensive_gap, exploitation, enclave_relief[\s\S]*military\.pending_reserve_requests\[0\]\.priority must be a finite number[\s\S]*military\.pending_reserve_requests\[0\]\.travel_hops must be a non-negative integer[\s\S]*military\.pending_reserve_requests\[1\] must be an object[\s\S]*military\.reserve_request_history\[0\]\.turn must be a non-negative integer[\s\S]*military\.reserve_request_history\[0\]\.outcome must be one of: accepted, declined, terminated[\s\S]*military\.reserve_request_history\[0\]\.decided_by must be one of: army_ai, player[\s\S]*military\.reserve_request_history\[1\] must be an object/
         );
     });
 });

@@ -347,6 +347,133 @@ function validateConvoyDecisionHistory(value: unknown, errors: string[]): void {
     });
 }
 
+function isReserveRequestReason(value: unknown): boolean {
+    return value === 'offensive_support' || value === 'defensive_gap' || value === 'exploitation' || value === 'enclave_relief';
+}
+
+function isReserveRequestProvenanceDriver(value: unknown): boolean {
+    return value === 'active_operation' || value === 'sector_threat' || value === 'captured_objectives' || value === 'commander_request';
+}
+
+function isCommanderRequestPriority(value: unknown): boolean {
+    return value === 'critical' || value === 'high' || value === 'medium' || value === 'low';
+}
+
+function isReserveRequestPurpose(value: unknown): boolean {
+    return value === 'offensive' || value === 'defensive';
+}
+
+function isReserveDecisionOutcome(value: unknown): boolean {
+    return value === 'accepted' || value === 'declined' || value === 'terminated';
+}
+
+function validatePendingReserveRequests(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.pending_reserve_requests must be an array when present');
+        return;
+    }
+
+    value.forEach((request, i) => {
+        if (!isRecord(request)) {
+            errors.push(`military.pending_reserve_requests[${i}] must be an object`);
+            return;
+        }
+        for (const key of ['corps_id', 'faction', 'description']) {
+            if (!isNonEmptyString(request[key])) {
+                errors.push(`military.pending_reserve_requests[${i}].${key} must be a non-empty string`);
+            }
+        }
+        if ('request_id' in request && request.request_id !== undefined && !isNonEmptyString(request.request_id)) {
+            errors.push(`military.pending_reserve_requests[${i}].request_id must be a non-empty string when present`);
+        }
+        if (!isCanonicalPlayerFaction(request.faction)) {
+            errors.push(`military.pending_reserve_requests[${i}].faction must be one of: RBiH, RS, HRHB`);
+        }
+        if (!isReserveRequestReason(request.reason)) {
+            errors.push(`military.pending_reserve_requests[${i}].reason must be one of: offensive_support, defensive_gap, exploitation, enclave_relief`);
+        }
+        if (!isFiniteNumber(request.priority)) {
+            errors.push(`military.pending_reserve_requests[${i}].priority must be a finite number`);
+        }
+        if (!isFiniteNumber(request.raw_priority)) {
+            errors.push(`military.pending_reserve_requests[${i}].raw_priority must be a finite number`);
+        }
+        if (!isNonNegativeInteger(request.travel_hops)) {
+            errors.push(`military.pending_reserve_requests[${i}].travel_hops must be a non-negative integer`);
+        }
+        if (!isNonNegativeInteger(request.turn_requested)) {
+            errors.push(`military.pending_reserve_requests[${i}].turn_requested must be a non-negative integer`);
+        }
+        if (request.suggested_brigade_id !== null && !isNonEmptyString(request.suggested_brigade_id)) {
+            errors.push(`military.pending_reserve_requests[${i}].suggested_brigade_id must be null or a non-empty string`);
+        }
+        if ('provenance_driver' in request && request.provenance_driver !== undefined && !isReserveRequestProvenanceDriver(request.provenance_driver)) {
+            errors.push(`military.pending_reserve_requests[${i}].provenance_driver must be one of: active_operation, sector_threat, captured_objectives, commander_request`);
+        }
+        if ('commander_request_priority' in request && request.commander_request_priority !== undefined && !isCommanderRequestPriority(request.commander_request_priority)) {
+            errors.push(`military.pending_reserve_requests[${i}].commander_request_priority must be one of: critical, high, medium, low`);
+        }
+        if ('commander_request_brigades_needed' in request && request.commander_request_brigades_needed !== undefined && !isNonNegativeInteger(request.commander_request_brigades_needed)) {
+            errors.push(`military.pending_reserve_requests[${i}].commander_request_brigades_needed must be a non-negative integer when present`);
+        }
+        for (const key of ['commander_focus_zone_id', 'operation_name', 'operation_phase', 'operation_preparation_sub_phase', 'why_needed', 'how_to_use']) {
+            if (key in request && request[key] !== undefined && !isNonEmptyString(request[key])) {
+                errors.push(`military.pending_reserve_requests[${i}].${key} must be a non-empty string when present`);
+            }
+        }
+        for (const key of ['sector_threat_ratio', 'operation_momentum']) {
+            if (key in request && request[key] !== undefined && !isFiniteNumber(request[key])) {
+                errors.push(`military.pending_reserve_requests[${i}].${key} must be a finite number when present`);
+            }
+        }
+        for (const key of ['sector_assigned_brigade_count', 'operation_objective_capture_count']) {
+            if (key in request && request[key] !== undefined && !isNonNegativeInteger(request[key])) {
+                errors.push(`military.pending_reserve_requests[${i}].${key} must be a non-negative integer when present`);
+            }
+        }
+        if ('purpose' in request && request.purpose !== undefined && !isReserveRequestPurpose(request.purpose)) {
+            errors.push(`military.pending_reserve_requests[${i}].purpose must be one of: offensive, defensive when present`);
+        }
+    });
+}
+
+function validateReserveRequestHistory(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.reserve_request_history must be an array when present');
+        return;
+    }
+
+    value.forEach((record, i) => {
+        if (!isRecord(record)) {
+            errors.push(`military.reserve_request_history[${i}] must be an object`);
+            return;
+        }
+        for (const key of ['request_id', 'faction', 'corps_id', 'reason', 'why_needed', 'how_to_use']) {
+            if (!isNonEmptyString(record[key])) {
+                errors.push(`military.reserve_request_history[${i}].${key} must be a non-empty string`);
+            }
+        }
+        if (!isNonNegativeInteger(record.turn)) {
+            errors.push(`military.reserve_request_history[${i}].turn must be a non-negative integer`);
+        }
+        if (!isCanonicalPlayerFaction(record.faction)) {
+            errors.push(`military.reserve_request_history[${i}].faction must be one of: RBiH, RS, HRHB`);
+        }
+        if (record.brigade_id !== null && !isNonEmptyString(record.brigade_id)) {
+            errors.push(`military.reserve_request_history[${i}].brigade_id must be null or a non-empty string`);
+        }
+        if (!isReserveDecisionOutcome(record.outcome)) {
+            errors.push(`military.reserve_request_history[${i}].outcome must be one of: accepted, declined, terminated`);
+        }
+        if (record.decided_by !== 'army_ai' && record.decided_by !== 'player') {
+            errors.push(`military.reserve_request_history[${i}].decided_by must be one of: army_ai, player`);
+        }
+        if (!isReserveRequestPurpose(record.purpose)) {
+            errors.push(`military.reserve_request_history[${i}].purpose must be one of: offensive, defensive`);
+        }
+    });
+}
+
 const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 3, path: 'meta.referendum_held', check: (v) => typeof v === 'boolean' },
     { version: 3, path: 'meta.referendum_turn', check: (v) => v === null || Number.isInteger(v) },
@@ -411,6 +538,8 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 26, path: 'military.cost_ledger_annotations', check: Array.isArray },
     { version: 27, path: 'military.pending_convoy_decisions', check: Array.isArray },
     { version: 27, path: 'military.convoy_decision_history', check: Array.isArray },
+    { version: 28, path: 'military.pending_reserve_requests', check: Array.isArray },
+    { version: 28, path: 'military.reserve_request_history', check: Array.isArray },
 ];
 
 /**
@@ -601,6 +730,12 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'convoy_decision_history' in military && military.convoy_decision_history !== undefined) {
         validateConvoyDecisionHistory(military.convoy_decision_history, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'pending_reserve_requests' in military && military.pending_reserve_requests !== undefined) {
+        validatePendingReserveRequests(military.pending_reserve_requests, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'reserve_request_history' in military && military.reserve_request_history !== undefined) {
+        validateReserveRequestHistory(military.reserve_request_history, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'pending_event_notifications' in military && military.pending_event_notifications !== undefined) {
         const notifications = military.pending_event_notifications;

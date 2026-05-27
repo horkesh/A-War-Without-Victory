@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(27);
+        expect(getLatestSchemaVersion()).toBe(28);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -95,6 +95,8 @@ describe('versioned save migration steps', () => {
         expect(state.military.cost_ledger_annotations).toEqual([]);
         expect(state.military.pending_convoy_decisions).toEqual([]);
         expect(state.military.convoy_decision_history).toEqual([]);
+        expect(state.military.pending_reserve_requests).toEqual([]);
+        expect(state.military.reserve_request_history).toEqual([]);
         expect(state.military.pending_event_decisions).toEqual([]);
         expect(state.military.pending_event_notifications).toEqual([]);
         expect(state.military.phantoms_spawned).toEqual([]);
@@ -586,5 +588,111 @@ describe('versioned save migration steps', () => {
             { id: 'convoy:7:ENCL_c:RS', turn: 7, target_enclave: 'ENCL_c', route_faction: 'RS', target_faction: 'RBiH', supply_amount: 0.3, decision: 'block', decided_by: 'bot' },
             { id: 'convoy:8:ENCL_d:HRHB', turn: 8, target_enclave: 'ENCL_d', route_faction: 'HRHB', target_faction: 'RBiH', supply_amount: 0.6, decision: 'divert', decided_by: 'player' },
         ]);
+    });
+
+    it('materializes v28 reserve request queues for v27 saves', () => {
+        const state = minimalLegacyState(27);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [];
+        state.military.convoy_decision_history = [];
+        delete state.military.pending_reserve_requests;
+        delete state.military.reserve_request_history;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_reserve_requests).toEqual([]);
+        expect(state.military.reserve_request_history).toEqual([]);
+    });
+
+    it('preserves existing v28 reserve request order and contents for v27 saves', () => {
+        const state = minimalLegacyState(27);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [];
+        state.military.convoy_decision_history = [];
+        state.military.pending_reserve_requests = [
+            {
+                request_id: 'reserve:req-b',
+                corps_id: 'arbih_1st_corps',
+                faction: 'RBiH',
+                reason: 'offensive_support',
+                provenance_driver: 'active_operation',
+                priority: 80,
+                raw_priority: 90,
+                travel_hops: 2,
+                turn_requested: 12,
+                description: 'Support the active operation.',
+                suggested_brigade_id: 'arbih_guards',
+                purpose: 'offensive',
+                why_needed: 'Exploit the breach.',
+                how_to_use: 'Commit as the main effort.',
+            },
+            {
+                request_id: 'reserve:req-a',
+                corps_id: 'arbih_2nd_corps',
+                faction: 'RBiH',
+                reason: 'defensive_gap',
+                provenance_driver: 'sector_threat',
+                priority: 60,
+                raw_priority: 70,
+                travel_hops: 1,
+                turn_requested: 13,
+                description: 'Reinforce a thin sector.',
+                suggested_brigade_id: null,
+                purpose: 'defensive',
+                why_needed: 'Hold a threatened sector.',
+                how_to_use: 'Stiffen the line.',
+            },
+        ];
+        state.military.reserve_request_history = [
+            {
+                request_id: 'reserve:hist-b',
+                turn: 14,
+                faction: 'RBiH',
+                corps_id: 'arbih_1st_corps',
+                brigade_id: 'arbih_guards',
+                outcome: 'accepted',
+                reason: 'Approved for immediate deployment.',
+                decided_by: 'player',
+                purpose: 'offensive',
+                why_needed: 'Exploit the breach.',
+                how_to_use: 'Commit as the main effort.',
+            },
+            {
+                request_id: 'reserve:hist-a',
+                turn: 15,
+                faction: 'RS',
+                corps_id: 'vrs_1st_krajina',
+                brigade_id: null,
+                outcome: 'declined',
+                reason: 'No suitable brigade available.',
+                decided_by: 'army_ai',
+                purpose: 'defensive',
+                why_needed: 'Hold a threatened sector.',
+                how_to_use: 'Stiffen the line.',
+            },
+        ];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_reserve_requests.map((request: any) => request.request_id)).toEqual(['reserve:req-b', 'reserve:req-a']);
+        expect(state.military.pending_reserve_requests[0].description).toBe('Support the active operation.');
+        expect(state.military.pending_reserve_requests[1].suggested_brigade_id).toBeNull();
+        expect(state.military.reserve_request_history.map((record: any) => record.request_id)).toEqual(['reserve:hist-b', 'reserve:hist-a']);
+        expect(state.military.reserve_request_history[0].brigade_id).toBe('arbih_guards');
+        expect(state.military.reserve_request_history[1].brigade_id).toBeNull();
     });
 });

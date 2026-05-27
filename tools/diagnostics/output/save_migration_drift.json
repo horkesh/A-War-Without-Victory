@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 27,
-  "registered_migration_count": 27,
-  "strict_required_field_count": 63,
+  "latest_schema_version": 28,
+  "registered_migration_count": 28,
+  "strict_required_field_count": 65,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -113,6 +113,10 @@
     {
       "version": 27,
       "description": "Persisted humanitarian convoy decision queue defaults. Sensitive: no."
+    },
+    {
+      "version": 28,
+      "description": "Persisted army reserve request queue and decision history defaults. Sensitive: no."
     }
   ],
   "required_fields": [
@@ -367,6 +371,14 @@
     {
       "version": 27,
       "path": "military.pending_convoy_decisions"
+    },
+    {
+      "version": 28,
+      "path": "military.pending_reserve_requests"
+    },
+    {
+      "version": 28,
+      "path": "military.reserve_request_history"
     }
   ]
 }

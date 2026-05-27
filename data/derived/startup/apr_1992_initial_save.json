@@ -33797,6 +33797,7 @@
     "pending_convoy_decisions": [],
     "pending_event_decisions": [],
     "pending_event_notifications": [],
+    "pending_reserve_requests": [],
     "phantoms_spawned": [
       "jna_uzice_corps_tg",
       "jna_mostar_garrison_tg",
@@ -34148,6 +34149,7 @@
         "RS": 6
       }
     },
+    "reserve_request_history": [],
     "theatres": {},
     "unresolved_sector_brigades": [],
     "war_front_edges_osid": [
@@ -43321,5 +43323,5 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 27
+  "schema_version": 28
 }

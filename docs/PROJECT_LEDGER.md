@@ -118,6 +118,32 @@
 
 ---
 
+## [2026-05-27] state(reserves): make reserve request queues a v28 save contract
+
+**Type:** Save schema contract.
+
+**Change:** Bumped `CURRENT_SCHEMA_VERSION` to 28 and added migration v28 for `military.pending_reserve_requests` and `military.reserve_request_history` with inert `[]` defaults. Current-version save validation now rejects missing or malformed reserve pending/history queues and conservatively validates existing `ArmyReserveRequest` / `ArmyReserveDecisionRecord` row shapes. The v27 fixture plus focused migration/validator tests prove default materialization and order/content preservation. The TypeScript optional markers remain in `GameState` for legacy/in-memory runtime compatibility.
+
+**Determinism:** Migration is pure and preserves existing array order. `tools/diagnostics/output/save_migration_drift.json` was regenerated to v28 / 28 migrations / 65 strict required fields. The startup snapshot was rebuilt to the v28 persisted save contract. No reserve generation, approval, recall, bot choice, GUI routing, scenario data, event content, sector/frontline code, replay artifacts, or calibration tuning changed.
+
+**Verification:**
+- Red proof before production change: `npx.cmd vitest run tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts tests\save_migration_round_trip_contract.test.ts --reporter=dot` failed on missing v28 version/default/validator coverage.
+- `npx.cmd vitest run tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts tests\save_migration_round_trip_contract.test.ts --reporter=dot` - PASS; 151/151 tests.
+- `node tools\diagnostics\save_migration_drift_audit.cjs` - PASS; `save migration drift audit: 0 anonymous defaults`.
+- `npm.cmd run desktop:startup-snapshot:build` - PASS; wrote `data/derived/startup/apr_1992_initial_save.json`.
+- `npx.cmd vitest run tests\save_migration_drift_audit.test.ts --reporter=dot` - PASS; 1/1 test.
+- `npx.cmd vitest run tests\startup_snapshot_contract.test.ts --reporter=dot` - PASS; 5/5 tests.
+- Parent verification: `npx.cmd vitest run tests\army_reserve_system.test.ts tests\reserve_request_identity_boundary.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts tests\save_migration_round_trip_contract.test.ts tests\save_migration_drift_audit.test.ts --reporter=dot` - PASS; 191/191 tests.
+- `npm.cmd run desktop:startup-snapshot:check` - PASS.
+- `npm.cmd run typecheck` - PASS.
+- `git diff --check` - PASS.
+- Independent save/schema QA found no blockers and confirmed validator strictness against real reserve writers.
+- Independent determinism/artifact review found no behavior-surface drift and confirmed generated artifacts are schema-v28 only.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, `tests/save_migration_versioned_steps.test.ts`, `tests/save_migration_validator_rejection.test.ts`, `tests/save_migration_drift_audit.test.ts`, `tests/fixtures/save_migration/v27_reserve_requests.json`, `tools/diagnostics/output/save_migration_drift.json`, `data/derived/startup/apr_1992_initial_save.json`, `docs/40_reports/implemented/20260527_RESERVE_REQUEST_SCHEMA_CONTRACT.md`, `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`, `docs/10_canon/Systems_Manual_v0_9_0.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-27] events: persist event overflow queue
 
 **Type:** Event-system Workstream B behavior + save-schema slice.
