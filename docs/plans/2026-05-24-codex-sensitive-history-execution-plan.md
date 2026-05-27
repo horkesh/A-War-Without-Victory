@@ -6,7 +6,7 @@
 **Related command-board row:** P1 Dynamic Codex and sensitive-history consequence arcs
 **Collision rules:** May edit Codex/content diagnostics and safe factual prose. Must stop before new sensitive-history framing, unsupported historical claims, or mechanics that turn atrocities into player levers.
 **Phase covered:** Safe Codex sweep, source-backed correction, sensitive-history packet preparation, and dynamic consequence arcs.
-**Current next action:** Source-note packets for Srebrenica/Zepa event rows; sensitive-history packets remain gated.
+**Current next action:** Continue source-note packet review for remaining sensitive-history rows, then prepare gated review packets for dynamic consequence arcs.
 
 ## Purpose
 
@@ -124,7 +124,7 @@ Stop gates:
 
 **Owner:** documentation-specialist
 **Reviewers:** historian, canon-compliance-reviewer
-**Status:** IN PROGRESS. Deliberate Force and Mistral 2 operational overclaim wording closed 2026-05-27 by `docs/40_reports/implemented/20260527_CODEX_SAFE_FACTUAL_CORRECTIONS_PHASE1.md`. Continue with source-note packets for Srebrenica/Zepa event rows. Do not touch sensitive-history levers or counterfactual atrocity/prevention framing without review.
+**Status:** IN PROGRESS. Deliberate Force and Mistral 2 operational overclaim wording closed 2026-05-27 by `docs/40_reports/implemented/20260527_CODEX_SAFE_FACTUAL_CORRECTIONS_PHASE1.md`. The first Srebrenica/Zepa provenance-only source-note packet closed 2026-05-27 by `docs/40_reports/implemented/20260527_CODEX_SENSITIVE_HISTORY_SOURCE_NOTES_PHASE1.md`. Continue source-note packet review for remaining sensitive-history rows. Do not touch sensitive-history levers or counterfactual atrocity/prevention framing without review.
 
 Steps:
 
@@ -155,6 +155,15 @@ node tools\diagnostics\codex_sensitive_claim_inventory.cjs --json
 ```
 
 Diagnostic delta: 176 files scanned, 296 claims, 245 stop-gated claims. Safe factual correction count moved 52 -> 51.
+
+Closed proof for first source-note packet:
+
+```powershell
+npx.cmd vitest run tests\codex_sensitive_history_source_notes.test.ts tests\event_timeline_integrity.test.ts tests\codex_sensitive_claim_inventory.test.ts --reporter=dot
+node tools\diagnostics\codex_sensitive_claim_inventory.cjs --json
+```
+
+Diagnostic delta: source status moved 189 cited / 79 uncited -> 196 cited / 72 uncited with total claims stable at 296.
 
 ## Phase 2 - Sensitive-History Review Packets
 

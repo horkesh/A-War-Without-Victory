@@ -1024,6 +1024,7 @@
     "id": "srebrenica_enclave_forms_1992",
     "title": "Srebrenica Pocket Crystallizes",
     "narrative": "Under the command of Naser Oric, Bosniak forces in the Drina Valley consolidate a defensive perimeter around Srebrenica. Despite being vastly outgunned, local TDF fighters and volunteers launch raids on surrounding VRS positions, establishing a tenuous enclave that shelters tens of thousands of displaced civilians.",
+    "source_note": "Existing Srebrenica arc sources ground the row's enclave-formation context and institutional setting. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "military",
     "trigger": {
       "turn_min": 6,

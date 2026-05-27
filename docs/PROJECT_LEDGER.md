@@ -14,8 +14,6 @@
 
 **Artifacts:** `tools/diagnostics/event_presidential_acceptance.ts`, `tests/sim/events/event_presidential_acceptance.test.ts`, `docs/40_reports/implemented/20260527_EVENT_PRESIDENTIAL_ACCEPTANCE_DIAGNOSTIC.md`, command-board/roadmap/plan docs.
 
----
-
 ## [2026-05-27] events(loader): fail closed on semantic catalog violations
 
 **Type:** Event-system Workstream B semantic validation.
@@ -11842,5 +11840,21 @@ Also replaced the new `as unknown as JsonObject` pressure read in `src/sim/event
 - `node tools\diagnostics\codex_sensitive_claim_inventory.cjs --json` - PASS; parsed live baseline 176 files / 296 claims / 245 stop-gated.
 
 **Artifacts:** `data/scenarios/events/war_1995.json`, `tests/codex_safe_factual_corrections.test.ts`, `docs/40_reports/implemented/20260527_CODEX_SAFE_FACTUAL_CORRECTIONS_PHASE1.md`, `docs/40_reports/audits/20260527_CODEX_SENSITIVE_CLAIM_INVENTORY_PHASE0.md`, `docs/plans/2026-05-24-codex-sensitive-history-execution-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-27] codex: add Srebrenica/Zepa provenance source notes
+
+**Type:** Sensitive-history source-note packet.
+
+**Change:** Added provenance-only `source_note` fields to seven Srebrenica/Zepa event rows across `war_1992.json`, `war_1993.json`, and `war_1995.json`. Added `tests/codex_sensitive_history_source_notes.test.ts` to require the notes to remain bounded and to reject prohibited gameplay framing.
+
+**Determinism:** Text/test/docs only. No narrative text, triggers, effects, response ids, dimension shifts, bot response logic, save schema, scenario setup, UI routing, generated artifacts, or calibration parameters changed. The notes do not approve sensitive-history prose rewrites or dynamic consequence arcs.
+
+**Verification:**
+- `npx.cmd vitest run tests\codex_sensitive_history_source_notes.test.ts tests\event_timeline_integrity.test.ts tests\codex_sensitive_claim_inventory.test.ts --reporter=dot` - PASS; 23/23 tests.
+- `node tools\diagnostics\codex_sensitive_claim_inventory.cjs --json` - PASS; 176 files / 296 claims / 245 stop-gated; source status 196 cited / 72 uncited.
+
+**Artifacts:** `data/scenarios/events/war_1992.json`, `data/scenarios/events/war_1993.json`, `data/scenarios/events/war_1995.json`, `tests/codex_sensitive_history_source_notes.test.ts`, `docs/40_reports/implemented/20260527_CODEX_SENSITIVE_HISTORY_SOURCE_NOTES_PHASE1.md`, `docs/plans/2026-05-24-codex-sensitive-history-execution-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
 
 ---

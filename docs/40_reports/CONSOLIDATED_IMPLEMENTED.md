@@ -488,3 +488,10 @@
 - Added a content regression test to keep the removed phrases from returning.
 - No triggers, effects, bot policy, save schema, calibration data, or sensitive-history mechanics changed.
 - Report: `docs/40_reports/implemented/20260527_CODEX_SAFE_FACTUAL_CORRECTIONS_PHASE1.md`
+
+# 2026-05-27 - Codex sensitive-history source notes Phase 1
+
+- Added provenance-only source notes to seven Srebrenica/Zepa event rows without changing narrative text or mechanics.
+- Added a content regression test to keep the notes bounded away from casualty, causality, prohibited-choice, and alternate-outcome prevention framing.
+- Current inventory remains 176 files / 296 claims / 245 stop-gated; cited source status improved to 196 and uncited dropped to 72.
+- Report: `docs/40_reports/implemented/20260527_CODEX_SENSITIVE_HISTORY_SOURCE_NOTES_PHASE1.md`

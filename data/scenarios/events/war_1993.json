@@ -832,6 +832,7 @@
     "id": "morillon_enters_srebrenica_1993",
     "title": "General Morillon Enters Srebrenica",
     "narrative": "UNPROFOR Commander General Philippe Morillon reaches the besieged Srebrenica enclave after months of convoy blockades. Confronted by desperate civilians, he publicly declares 'You are now under the protection of the United Nations. I will never abandon you.' His personal guarantee raises hopes but lacks any enforcement mechanism.",
+    "source_note": "ICTY Krstic and MSF sources ground the row's Srebrenica convoy and UNPROFOR context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "humanitarian",
     "trigger": {
       "turn_min": 48,
@@ -883,6 +884,7 @@
     "id": "srebrenica_shelling_1993",
     "title": "Srebrenica Under Heavy Bombardment",
     "narrative": "The VRS intensifies its assault on the Srebrenica enclave, systematically shelling the overcrowded town. Thousands of refugees huddle in schools and public buildings as artillery rounds fall indiscriminately. General Morillon's dramatic personal guarantee becomes a symbol of the UN's agonizing position.",
+    "source_note": "Existing Srebrenica arc sources ground the row's siege and humanitarian context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "humanitarian",
     "trigger": {
       "turn_min": 49,
@@ -1106,6 +1108,7 @@
     "id": "un_resolution_819_srebrenica_1993",
     "title": "UN Resolution 819 — Srebrenica Safe Area",
     "narrative": "The UN Security Council passes Resolution 819, declaring Srebrenica a 'safe area' free from armed attack or any hostile act, and demanding an immediate VRS ceasefire and unimpeded humanitarian access. The declaration creates a promise of protection without committing the military means to enforce it.",
+    "source_note": "UNSCR 819 grounds the row's safe-area mandate and diplomatic context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 54,
@@ -1198,6 +1201,7 @@
     "id": "srebrenica_demilitarization_1993",
     "title": "Srebrenica Demilitarization Agreement",
     "narrative": "Under intense international pressure following the VRS assault on Srebrenica, Generals Mladic and Halilovic sign a demilitarization agreement on April 17-18: the ARBiH is to surrender weapons under UNPROFOR supervision in exchange for a ceasefire and UN troop deployment. Implementation is flawed on both sides — the ARBiH hides weapons while the VRS continues to restrict humanitarian convoys.",
+    "source_note": "ICTY Krstic and the Halilovic-Mladic agreement ground the row's demilitarization context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 54,
