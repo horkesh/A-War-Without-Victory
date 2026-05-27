@@ -474,3 +474,10 @@
 - Queued ids are re-resolved, re-gated, canonically sorted with new candidates, mutex-filtered, capped, and replaced by the next post-cap overflow ids.
 - Refreshed startup/baseline generated artifacts for schema-byte drift; event JSON, prose, GUI, bot historical-default policy, and calibration logic are unchanged.
 - Report: `docs/40_reports/implemented/20260527_EVENT_OVERFLOW_QUEUE_IMPLEMENTATION.md`
+
+# 2026-05-27 - Codex sensitive-claim inventory Phase 0
+
+- Added a deterministic read-only diagnostic for Codex, chronicle, notification, event, and consequence prose surfaces.
+- Current live baseline scans 176 files and reports 297 claims, including 245 stop-gated review items.
+- No prose, citations, event behavior, UI rendering, scenario data, or sensitive-history mechanics changed.
+- Report: `docs/40_reports/audits/20260527_CODEX_SENSITIVE_CLAIM_INVENTORY_PHASE0.md`

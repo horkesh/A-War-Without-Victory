@@ -11804,3 +11804,26 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `src/sim/events/event_loader.ts`, `tests/event_loader.test.ts`, `docs/40_reports/implemented/20260527_EVENT_LOADER_FAIL_CLOSED.md`, `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-27] codex: add sensitive-claim Phase 0 inventory diagnostic
+
+**Type:** Read-only content diagnostic + roadmap closeout.
+
+**Change:** Added `tools/diagnostics/codex_sensitive_claim_inventory.cjs` and fixture coverage in `tests/codex_sensitive_claim_inventory.test.ts`. The diagnostic scans bounded Codex, ghost-entry, essay, event, consequence, chronicle, notification, and Codex/read-model surfaces; emits canonical JSON or markdown; classifies matched operational overclaim, sensitive-history, and scaffold terms into conservative review queues; and records explicit stop gates (`none`, `historian`, `sensitive_history`, `mechanics`, `canon`). Live baseline: 176 files, 297 claims, 245 stop-gated.
+
+Also replaced the new `as unknown as JsonObject` pressure read in `src/sim/events/event_loader.ts` with a typed intersection read (`EventDefinition & { pressure?: unknown }`) so the strict-null inventory remains at zero counted `as_unknown_casts` and the Baseline Regression failure from the prior pushes is addressed.
+
+**Determinism:** Read-only diagnostic/test/docs only. Traversal, JSON keys, term lists, rows, summaries, and JSON output are explicitly sorted. No timestamps, randomness, locale collation, generated artifacts, prose rewrites, citations, event behavior, UI rendering, scenario data, save schema, calibration logic, or sensitive-history mechanics changed. Heuristic labels are routing labels, not historical judgments.
+
+**Verification:**
+- Red first: `npx.cmd vitest run tests\codex_sensitive_claim_inventory.test.ts --reporter=dot` - FAIL before the diagnostic module existed.
+- `npx.cmd vitest run tests\codex_sensitive_claim_inventory.test.ts tests\codex_source_quality.test.ts --reporter=dot` - PASS; 4/4 tests.
+- `node --check tools\diagnostics\codex_sensitive_claim_inventory.cjs` - PASS.
+- `node tools\diagnostics\codex_sensitive_claim_inventory.cjs --json` - PASS; parsed live baseline 176 files / 297 claims / 245 stop-gated.
+- `npx.cmd vitest run tests\codex_sensitive_claim_inventory.test.ts tests\codex_source_quality.test.ts tests\strict_null_inventory_progress.test.ts tests\event_loader.test.ts --reporter=dot` - PASS; 118/118 tests.
+- `npm.cmd run typecheck` - PASS.
+- `git diff --check` - PASS with only the existing CRLF normalization warning for `src/sim/events/event_loader.ts`.
+
+**Artifacts:** `tools/diagnostics/codex_sensitive_claim_inventory.cjs`, `tests/codex_sensitive_claim_inventory.test.ts`, `src/sim/events/event_loader.ts`, `docs/40_reports/audits/20260527_CODEX_SENSITIVE_CLAIM_INVENTORY_PHASE0.md`, `docs/plans/2026-05-24-codex-sensitive-history-execution-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
+
+---

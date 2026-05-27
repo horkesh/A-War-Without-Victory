@@ -297,7 +297,7 @@ function collectConditionEventRefs(condition: unknown): string[] {
 function collectEventRefs(row: EventDefinition): string[] {
     const refs = [...(row.trigger.requires_events ?? []), ...(row.enables_events ?? [])];
     refs.push(...collectConditionEventRefs(row.trigger.condition));
-    const pressure = (row as unknown as JsonObject).pressure;
+    const pressure = (row as EventDefinition & { pressure?: unknown }).pressure;
     if (isObject(pressure) && Array.isArray(pressure.modifiers)) {
         for (const modifier of pressure.modifiers) {
             if (isObject(modifier)) refs.push(...collectConditionEventRefs(modifier.condition));

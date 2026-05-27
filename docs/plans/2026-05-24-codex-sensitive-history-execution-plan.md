@@ -6,7 +6,7 @@
 **Related command-board row:** P1 Dynamic Codex and sensitive-history consequence arcs
 **Collision rules:** May edit Codex/content diagnostics and safe factual prose. Must stop before new sensitive-history framing, unsupported historical claims, or mechanics that turn atrocities into player levers.
 **Phase covered:** Safe Codex sweep, source-backed correction, sensitive-history packet preparation, and dynamic consequence arcs.
-**Current next action:** Phase 0 inventory and Phase 1 safe factual correction queue.
+**Current next action:** Phase 1 safe factual correction queue from the Phase 0 inventory baseline; sensitive-history packets remain gated.
 
 ## Purpose
 
@@ -83,6 +83,7 @@ Decision packet rule:
 
 **Owner:** historian plus documentation-specialist
 **Reviewers:** canon-compliance-reviewer, product-manager
+**Status:** CLOSED 2026-05-27 for diagnostic inventory. Tool: `tools/diagnostics/codex_sensitive_claim_inventory.cjs`; report: `docs/40_reports/audits/20260527_CODEX_SENSITIVE_CLAIM_INVENTORY_PHASE0.md`.
 
 Steps:
 
@@ -103,6 +104,16 @@ rg -n "5th Corps sweeps west|sweeps west|sweep" src data docs tests
 git diff --check
 ```
 
+Closed proof:
+
+```powershell
+npx.cmd vitest run tests\codex_sensitive_claim_inventory.test.ts tests\codex_source_quality.test.ts --reporter=dot
+node --check tools\diagnostics\codex_sensitive_claim_inventory.cjs
+node tools\diagnostics\codex_sensitive_claim_inventory.cjs --json
+```
+
+Baseline result: 176 files scanned, 297 claims, 245 stop-gated claims. Risk counts are 52 `safe_factual_correction`, 238 `sensitive_history_gated`, and 7 `dynamic_state_candidate`.
+
 Stop gates:
 
 - source corpus insufficient;
@@ -113,6 +124,7 @@ Stop gates:
 
 **Owner:** documentation-specialist
 **Reviewers:** historian, canon-compliance-reviewer
+**Status:** NEXT. Start with the Phase 0 queue: Deliberate Force and Mistral 2 operational overclaim wording, then source-note packets for Srebrenica/Zepa event rows. Do not touch sensitive-history levers or counterfactual atrocity/prevention framing without review.
 
 Steps:
 
