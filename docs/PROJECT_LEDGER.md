@@ -12129,3 +12129,18 @@ Also replaced the new `as unknown as JsonObject` pressure read in `src/sim/event
 **Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, `tests/fixtures/save_migration/v29_officer_decision_queues.json`, `tests/save_migration_versioned_steps.test.ts`, `tests/save_migration_validator_rejection.test.ts`, `tests/event_state_shape_validation.test.ts`, `tests/desktop_officer_decision_history.test.ts`, `tests/migration_nested_ownership.test.ts`, `tests/save_migration_drift_audit.test.ts`, `tests/state.test.ts`, `tools/diagnostics/output/save_migration_drift.json`, `data/derived/startup/apr_1992_initial_save.json`, `docs/10_canon/Systems_Manual_v0_9_0.md`, `docs/40_reports/implemented/20260527_OFFICER_DECISION_QUEUE_SCHEMA_CONTRACT.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-27] codex: packet event foundational decisions
+
+**Type:** Event-system decision packet / docs-only gate.
+
+**Change:** Added `docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md` from Historian, Game Designer, and Technical Architect/QA findings. The packet approves label taxonomy (`Historical default`, `Historical response`, `Counterfactual staff path`, `Staff recommendation`, `Blocked`), source standards, sensitive-history rulings, material-consequence minimums, technical boundaries for `future_consequences`, and the next behavior-neutral visible slice: add branch metadata to four approved rows and render it in the existing event modal without changing evaluator behavior.
+
+**Determinism:** Documentation-only. No event JSON, triggers, effects, response options, bot response logic, runtime branch behavior, save schema, scenario setup, UI code, generated artifacts, or calibration behavior changed.
+
+**Verification:**
+- `git diff --check` - PASS.
+
+**Artifacts:** `docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md`, `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
+
+---
