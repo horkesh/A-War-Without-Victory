@@ -1,7 +1,7 @@
 # Emergent Event System — Design Document
 
 **Date:** 2026-03-21
-**Status:** APPROVED — ready for implementation planning
+**Status:** SUPERSEDED for implementation details by `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`
 **Scope:** v0.6.0 (infrastructure + 1992 events), v0.6.x (full event set), command autonomy backlog v0.7+
 **Authors:** Orchestrator + full Pyrrhic team brainstorm
 
@@ -379,7 +379,7 @@ An RS bot at 40% territory and high exhaustion accepts a peace plan it would rej
 - **~80 events authored** for 52-week scenario
 - **~60 fire** per playthrough (some are conditional/branching)
 - **~15-20 decision events** requiring player input
-- **Hard cap: 3 events per turn** (overflow queued to next turn)
+- **Current implementation cap: 4 events per turn** with same-turn `mutex_group` filtering before the cap and diagnostic overflow reporting. Persisted overflow queueing remains deferred to a later save-schema slice.
 - **Average: 1.5 events/turn** (higher early war, lower mid/late)
 
 ### Frequency by Phase

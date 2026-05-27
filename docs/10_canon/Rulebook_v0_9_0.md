@@ -547,7 +547,7 @@ The event system presents the player with political and strategic decisions thro
 
 **Recurring decisions** — some events fire multiple times with escalating stakes. Options narrow as the player defers.
 
-**Maximum 3 events per turn.** Overflow queued to next turn by priority.
+**Maximum 4 events per turn.** Candidates are sorted by priority, trigger week, then event id. Events sharing a `mutex_group` cannot co-fire in the same turn; only the first candidate in canonical order remains eligible. Overflow is visible to diagnostics and may be persisted by a future queue slice.
 
 ## 18. Victory Conditions
 

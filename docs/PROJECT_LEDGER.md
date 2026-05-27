@@ -1,4 +1,20 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] events(evaluator): enforce same-turn mutex groups
+
+**Type:** Event evaluator behavior hardening.
+
+**Change:** Added `filterMutexCandidates(...)` and applied same-turn `mutex_group` filtering after canonical candidate sort and before the unchanged four-event cap. `EventsEvaluationReport` now includes additive `mutex_suppressed_ids`. Current catalog has no authored `mutex_group` rows, so no current event data path is expected to drift.
+
+**Determinism:** Deterministic sorted-candidate filtering only. No cap change, persisted overflow queue, save schema, migration, event data, event prose, GUI behavior, random source, generated artifact, or calibration tuning changed.
+
+**Verification:**
+- `F:\A-War-Without-Victory\vitest.cmd run tests\events_evaluate.test.ts tests\event_timeline_integrity.test.ts tests\consequence_chains.test.ts tests\event_state_shape_validation.test.ts --reporter=dot` - PASS; 98/98 tests.
+- `npm.cmd run typecheck` - PASS.
+
+**Artifacts:** `src/sim/events/evaluate_events.ts`, `tests/events_evaluate.test.ts`, `docs/40_reports/implemented/20260527_EVENT_MUTEX_FILTERING.md`, `docs/10_canon/Rulebook_v0_9_0.md`, `docs/10_canon/Systems_Manual_v0_9_0.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`, `docs/plans/2026-03-21-emergent-event-system-design.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-27] docs(events): packet mutex and overflow queue decision
 
 **Type:** Event-system behavior decision packet.

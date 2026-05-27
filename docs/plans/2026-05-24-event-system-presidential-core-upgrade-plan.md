@@ -1,7 +1,7 @@
 # Event System Presidential Core Upgrade Plan
 
 **Date:** 2026-05-24
-**Status:** ACTIVE external-agent execution plan / Workstream A baseline closed, Workstream B evaluator ordering, overflow visibility, loader fail-closed, row-level structural validation, and event state shape validation slices closed
+**Status:** ACTIVE external-agent execution plan / Workstream A baseline closed, Workstream B evaluator ordering, overflow visibility, loader fail-closed, row-level structural validation, event state shape validation, and mutex filtering slices closed
 **Owner lane:** Event-system product/engine lane
 **Related board row:** `Command Board -> Event system presidential core upgrade`
 **Do not collide with:** calibration / army-arc branch. The 2026-05-25 presidential GUI restructure is merged; use its Decision Surface Registry, President's Desk, modal stack rules, and consequence ledger instead of inventing another decision surface.
@@ -48,10 +48,10 @@ Every new event packet must classify its trigger as one of:
 - Canon target from `Game_Bible_v0_9_0.md`: roughly 60% decision / 30% consequence / 10% forced events.
 - Current design gap: about 18% choice events, too many calendar/headline rows, too few pressure-driven presidential dilemmas.
 - Presentation gap: the modal-first substrate and 17 production-authored rows now have EU-style explicit historical/default markers, authored narration, visible citations/source notes, staff assessment, trigger evidence, and numeric consequence previews. Remaining presentation work is gated content approval, not generic modal substrate.
-- Engine/spec gap: `Systems_Manual_v0_9_0.md` describes max 3 events, overflow queueing, and mutex prevention, while live code currently uses a 4-event cap, no overflow queue, and no mutex enforcement.
+- Engine/spec gap: live code uses a 4-event cap with same-turn mutex filtering and overflow diagnostics; persisted overflow queueing remains unimplemented.
 - Current technical blockers:
-  - `evaluateEvents` caps fireable events at 4 per turn. Overflow is now visible through additive report fields, but there is still no queue/backlog persistence.
-  - Mutex/overflow behavior is packeted at `docs/40_reports/proposals/20260527_EVENT_MUTEX_OVERFLOW_DECISION_PACKET.md`. Recommended next behavior slice: enforce same-turn `mutex_group` filtering before the cap, keep cap 4, and defer persisted overflow queueing to a schema/migration slice.
+  - `evaluateEvents` caps fireable events at 4 per turn. Overflow is now visible through additive report fields, and same-turn `mutex_group` siblings are filtered before the cap, but there is still no queue/backlog persistence.
+  - Mutex/overflow behavior is packeted at `docs/40_reports/proposals/20260527_EVENT_MUTEX_OVERFLOW_DECISION_PACKET.md`; persisted overflow queueing remains deferred to a schema/migration slice.
   - Loader structural validation now rejects missing/blank ids, malformed triggers, non-finite turn bounds, malformed `requires_events`, missing/kindless primary effects, malformed effect arrays, and malformed response-option id/label/effects arrays.
   - Semantic catalog validation is still incomplete; taxonomy remains the owner for effect/condition vocabulary, sensitive-history policy, modal readiness, source/default blocking, and trigger-authoring classification.
   - full 247-row semantic catalog schema validation is incomplete.
@@ -520,7 +520,7 @@ Handoff: QA receives diagnostic output and confirms all 247 catalog rows are rep
 **Status:** IN PROGRESS. Evaluator ordering/overflow visibility and loader fail-closed slices closed 2026-05-27.
 **Goal:** harden the substrate before more presidential decisions depend on it.
 
-Closed evaluator slice: `compareEventCandidates(...)` now orders eligible candidates by `priority`, `trigger.turn_min ?? Number.MAX_SAFE_INTEGER`, then event id before the unchanged four-event cap. `EventsEvaluationReport` now returns additive `candidates_considered`, `overflowed`, and `overflowed_ids` fields. The loaded 247-row catalog has a no-drift test proving current stable priority-only order and canonical comparator order are identical.
+Closed evaluator slice: `compareEventCandidates(...)` now orders eligible candidates by `priority`, `trigger.turn_min ?? Number.MAX_SAFE_INTEGER`, then event id before the unchanged four-event cap. `EventsEvaluationReport` now returns additive `candidates_considered`, `overflowed`, `overflowed_ids`, and `mutex_suppressed_ids` fields. Same-turn `mutex_group` filtering runs after canonical sorting and before the cap. The loaded 247-row catalog has a no-drift test proving current stable priority-only order and canonical comparator order are identical.
 
 Closed loader slice: `loadEventDefinitions(...)` now fails closed when any of the fixed five required event files is missing, malformed JSON, or valid non-array JSON. `loadEventDefinitionsFromDir(...)` is a deterministic test seam using the same fixed file order, filter, and sort path. Valid current catalog behavior remains 247 rows, sorted by `trigger.turn_min ?? Number.MAX_SAFE_INTEGER` then event id.
 

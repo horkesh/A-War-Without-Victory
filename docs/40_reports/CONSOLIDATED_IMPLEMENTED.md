@@ -457,3 +457,9 @@
 - Added validation for pending event decisions, event decision logs, and active event modifier arrays when present in GameState.
 - Preserved schema version, migration behavior, event firing, event prose, GUI behavior, and scenario output.
 - Report: `docs/40_reports/implemented/20260527_EVENT_STATE_SHAPE_VALIDATION.md`
+
+# 2026-05-27 - Event mutex filtering
+
+- Added same-turn `mutex_group` filtering after canonical event candidate sorting and before the unchanged four-event cap.
+- Added additive `mutex_suppressed_ids` diagnostics; persisted overflow queueing remains deferred.
+- Report: `docs/40_reports/implemented/20260527_EVENT_MUTEX_FILTERING.md`

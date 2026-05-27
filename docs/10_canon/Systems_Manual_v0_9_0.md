@@ -592,7 +592,7 @@ Bot factions always pick historical option for foundational decisions.
 
 #### §7.10.8 Event Queue
 
-Maximum 3 events per turn. Candidates sorted by `priority` (lower fires first, default 100). Overflow queued to next turn. `mutex_group` field prevents two events in same group from co-firing (not yet implemented — deferred to v0.6.2).
+Maximum 4 events per turn. Candidates are sorted by `priority` (lower fires first, default 100), `trigger.turn_min`, then event id. Same-turn `mutex_group` filtering runs after sorting and before the cap: the first candidate in a group remains eligible and later same-group candidates are suppressed for that turn. Overflow is reported through evaluator diagnostics; persisted overflow queueing is not yet implemented and requires a future save-schema/migration slice.
 
 ### 7.11 Corps Diagnostic Fields
 

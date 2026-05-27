@@ -33,6 +33,7 @@ export interface EventsEvaluationReport {
     candidates_considered: number;
     overflowed: boolean;
     overflowed_ids: string[];
+    mutex_suppressed_ids: string[];
 }
 
 /** Canonical candidate ordering before the per-turn cap is applied. */
@@ -46,6 +47,32 @@ export function compareEventCandidates(a: EventDefinition, b: EventDefinition): 
     if (a.id < b.id) return -1;
     if (a.id > b.id) return 1;
     return 0;
+}
+
+/** Keep the first event per mutex group in canonical order and suppress later same-turn siblings. */
+export function filterMutexCandidates(candidates: EventDefinition[]): {
+    candidates: EventDefinition[];
+    mutex_suppressed_ids: string[];
+} {
+    const seenGroups = new Set<string>();
+    const filtered: EventDefinition[] = [];
+    const mutexSuppressedIds: string[] = [];
+
+    for (const candidate of candidates) {
+        const group = candidate.mutex_group;
+        if (group == null || group.length === 0) {
+            filtered.push(candidate);
+            continue;
+        }
+        if (seenGroups.has(group)) {
+            mutexSuppressedIds.push(candidate.id);
+            continue;
+        }
+        seenGroups.add(group);
+        filtered.push(candidate);
+    }
+
+    return { candidates: filtered, mutex_suppressed_ids: mutexSuppressedIds };
 }
 
 /** Collect all effects from an event definition (primary + additional). */
@@ -200,7 +227,7 @@ export function evaluateEvents(
     const fired: FiredEvent[] = [];
     const phase = state.meta.phase;
     if (phase !== 'war') {
-        return { fired, candidates_considered: 0, overflowed: false, overflowed_ids: [] };
+        return { fired, candidates_considered: 0, overflowed: false, overflowed_ids: [], mutex_suppressed_ids: [] };
     }
 
     // Ensure fired_event_ids array exists
@@ -237,10 +264,11 @@ export function evaluateEvents(
         candidates.push(def);
     }
 
-    // Phase 2: Sort canonically and cap at MAX_EVENTS_PER_TURN.
+    // Phase 2: Sort canonically, suppress same-turn mutex siblings, then cap.
     candidates.sort(compareEventCandidates);
-    const overflowedIds = candidates.slice(MAX_EVENTS_PER_TURN).map((def) => def.id);
-    const toFire = candidates.slice(0, MAX_EVENTS_PER_TURN);
+    const mutexFiltered = filterMutexCandidates(candidates);
+    const overflowedIds = mutexFiltered.candidates.slice(MAX_EVENTS_PER_TURN).map((def) => def.id);
+    const toFire = mutexFiltered.candidates.slice(0, MAX_EVENTS_PER_TURN);
 
     // Phase 3: Fire selected events
     for (const def of toFire) {
@@ -362,5 +390,6 @@ export function evaluateEvents(
         candidates_considered: candidates.length,
         overflowed: overflowedIds.length > 0,
         overflowed_ids: overflowedIds,
+        mutex_suppressed_ids: mutexFiltered.mutex_suppressed_ids,
     };
 }

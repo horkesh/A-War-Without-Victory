@@ -6,7 +6,7 @@
 
 import assert from 'node:assert';
 import { test } from 'vitest';
-import { compareEventCandidates, evaluateEvents } from '../src/sim/events/evaluate_events.js';
+import { compareEventCandidates, evaluateEvents, filterMutexCandidates } from '../src/sim/events/evaluate_events.js';
 import { loadEventDefinitions } from '../src/sim/events/event_loader.js';
 import type { EventDefinition, Rng } from '../src/sim/events/event_types.js';
 import { triggerMatches } from '../src/sim/events/event_types.js';
@@ -92,7 +92,7 @@ const TEST_REGISTRY: EventDefinition[] = [...TEST_HISTORICAL, ...TEST_RANDOM];
 
 function makeEligibleEvent(
     id: string,
-    options: { priority?: number; turnMin?: number; cooldownTurns?: number } = {},
+    options: { priority?: number; turnMin?: number; cooldownTurns?: number; mutexGroup?: string } = {},
 ): EventDefinition {
     return {
         id,
@@ -102,6 +102,7 @@ function makeEligibleEvent(
         },
         effect: { kind: 'narrative', text: `${id} fired.` },
         ...(options.priority != null ? { priority: options.priority } : {}),
+        ...(options.mutexGroup != null ? { mutex_group: options.mutexGroup } : {}),
         ...(options.cooldownTurns != null
             ? { recurrence: { max_fires: 10, cooldown_turns: options.cooldownTurns, escalation: 'static' as const } }
             : {}),
@@ -128,6 +129,25 @@ test('compareEventCandidates: sorts by priority, trigger turn_min, missing turn_
         'priority_1_missing_turn',
         'priority_10_turn_1',
     ]);
+});
+
+test('filterMutexCandidates: keeps first canonical event per mutex group and reports suppressed ids', () => {
+    const sorted = [
+        makeEligibleEvent('same_group_first', { priority: 1, turnMin: 12, mutexGroup: 'group_a' }),
+        makeEligibleEvent('ungrouped_between', { priority: 1, turnMin: 12 }),
+        makeEligibleEvent('same_group_second', { priority: 1, turnMin: 12, mutexGroup: 'group_a' }),
+        makeEligibleEvent('other_group_first', { priority: 1, turnMin: 12, mutexGroup: 'group_b' }),
+        makeEligibleEvent('other_group_second', { priority: 1, turnMin: 12, mutexGroup: 'group_b' }),
+    ];
+
+    const result = filterMutexCandidates(sorted);
+
+    assert.deepStrictEqual(result.candidates.map((event) => event.id), [
+        'same_group_first',
+        'ungrouped_between',
+        'other_group_first',
+    ]);
+    assert.deepStrictEqual(result.mutex_suppressed_ids, ['same_group_second', 'other_group_second']);
 });
 
 test('evaluateEvents: five eligible same-priority same-turn events fire four and report overflow exactly', () => {
@@ -208,6 +228,53 @@ test('evaluateEvents: recurrence cooldown-blocked event is excluded before overf
     ]);
     assert.deepStrictEqual(result.overflowed_ids, ['overflow_after_gates']);
     assert.ok(!result.overflowed_ids.includes('blocked_by_cooldown'));
+});
+
+test('evaluateEvents: mutex suppression happens after canonical sort and before the per-turn cap', () => {
+    const state = minimalState('war', 40);
+    const registry = [
+        makeEligibleEvent('cap_d', { priority: 1, turnMin: 40 }),
+        makeEligibleEvent('mutex_b', { priority: 1, turnMin: 40, mutexGroup: 'shared' }),
+        makeEligibleEvent('cap_c', { priority: 1, turnMin: 40 }),
+        makeEligibleEvent('overflow_e', { priority: 1, turnMin: 40 }),
+        makeEligibleEvent('mutex_a', { priority: 1, turnMin: 40, mutexGroup: 'shared' }),
+        makeEligibleEvent('cap_f', { priority: 1, turnMin: 40 }),
+    ];
+
+    const result = evaluateEvents(state, createRng('mutex-before-cap'), 40, registry);
+
+    assert.strictEqual(result.candidates_considered, 6);
+    assert.deepStrictEqual(result.mutex_suppressed_ids, ['mutex_b']);
+    assert.deepStrictEqual(result.fired.map((event) => event.id), [
+        'cap_c',
+        'cap_d',
+        'cap_f',
+        'mutex_a',
+    ]);
+    assert.deepStrictEqual(result.overflowed_ids, ['overflow_e']);
+});
+
+test('evaluateEvents: shuffled mutex registry yields deterministic suppression and overflow ids', () => {
+    const makeRegistry = () => [
+        makeEligibleEvent('z_overflow', { priority: 1, turnMin: 41 }),
+        makeEligibleEvent('b_group_second', { priority: 1, turnMin: 41, mutexGroup: 'group_b' }),
+        makeEligibleEvent('a_group_second', { priority: 1, turnMin: 41, mutexGroup: 'group_a' }),
+        makeEligibleEvent('a_group_first', { priority: 1, turnMin: 41, mutexGroup: 'group_a' }),
+        makeEligibleEvent('b_group_first', { priority: 1, turnMin: 41, mutexGroup: 'group_b' }),
+        makeEligibleEvent('c_plain', { priority: 1, turnMin: 41 }),
+        makeEligibleEvent('d_plain', { priority: 1, turnMin: 41 }),
+    ];
+    const stateA = minimalState('war', 41);
+    const stateB = minimalState('war', 41);
+
+    const resultA = evaluateEvents(stateA, createRng('mutex-shuffle'), 41, makeRegistry());
+    const resultB = evaluateEvents(stateB, createRng('mutex-shuffle'), 41, makeRegistry().reverse());
+
+    assert.deepStrictEqual(resultA.fired.map((event) => event.id), resultB.fired.map((event) => event.id));
+    assert.deepStrictEqual(resultA.mutex_suppressed_ids, resultB.mutex_suppressed_ids);
+    assert.deepStrictEqual(resultA.overflowed_ids, resultB.overflowed_ids);
+    assert.deepStrictEqual(resultA.mutex_suppressed_ids, ['a_group_second', 'b_group_second']);
+    assert.deepStrictEqual(resultA.overflowed_ids, ['z_overflow']);
 });
 
 test('triggerMatches: phase filter — war event does not match peace state', () => {
