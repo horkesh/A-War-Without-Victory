@@ -48,6 +48,7 @@ export type EventTaxonomyRow = {
     };
     historical_source_status: 'present' | 'missing';
     historical_source: string | null;
+    is_historically_specific: boolean;
     source_note: string | null;
     sensitive_history_ring: 'none' | 'risk';
     sensitive_history_status: 'clear' | 'review_required';
@@ -62,6 +63,8 @@ export type EventTaxonomyRow = {
     has_option_descriptions: boolean;
     has_numeric_option_previews: boolean;
     modal_ready: boolean;
+    presidential_decision_valid: boolean;
+    catalog_action: 'keep' | 'rewrite' | 'cut' | 'source-blocked' | 'sensitive-gated';
     row_classification: string;
     findings: EventTaxonomyFinding[];
 };
@@ -102,15 +105,21 @@ const KNOWN_EFFECT_KINDS = new Set([
     'aggression_modifier',
     'alliance_change',
     'alliance_lock',
+    'bot_priority_shift',
     'cohesion_change',
+    'control_change',
     'cost_ledger_annotation',
+    'doctrine_constraint',
     'equipment_grant',
     'equipment_quality_modifier',
+    'guerrilla_threat',
     'humanitarian_impact',
     'morale_change',
     'narrative',
     'negotiation_capital',
+    'offensive_ops_suppression',
     'patron_pressure',
+    'recruitment_modifier',
     'supply_delta',
 ]);
 
@@ -119,11 +128,13 @@ const KNOWN_CONDITION_TYPES = new Set([
     'alliance_below',
     'alliance_drift',
     'and',
+    'corridor_severed',
     'dimension_above',
     'dimension_below',
     'displaced_in_aggregate',
     'enclave_resilience_aggregate',
     'enclave_supply_status',
+    'event_fire_count',
     'faction_controls_municipality',
     'flag_at_least',
     'flag_equals',
@@ -131,12 +142,18 @@ const KNOWN_CONDITION_TYPES = new Set([
     'metric_compare_factions',
     'morale_average_below',
     'not',
+    'operation_completed',
+    'or',
     'paramilitary_mode_equals',
     'patron_pressure_above',
+    'siege_active',
+    'supply_above',
     'supply_below',
+    'territory_control',
     'territory_loss_window',
     'territory_percentage',
     'war_crimes_above',
+    'week_since_event',
 ]);
 
 const SENSITIVE_KEYWORDS = [
@@ -210,6 +227,14 @@ function collectConditionTypes(condition: unknown): string[] {
         : [];
     const singleNested = collectConditionTypes(condition.condition);
     return uniqueSorted([...current, ...nested, ...singleNested]);
+}
+
+function collectPressureConditionTypes(pressure: unknown): string[] {
+    if (!isRecord(pressure) || !Array.isArray(pressure.modifiers)) return [];
+    return uniqueSorted(pressure.modifiers.flatMap((modifier) => {
+        if (!isRecord(modifier)) return [];
+        return collectConditionTypes(modifier.condition);
+    }));
 }
 
 function collectEffects(event: JsonRecord): JsonRecord[] {
@@ -333,7 +358,38 @@ function historicalDefaultUnavailableReason(row: Pick<EventTaxonomyRow, 'id' | '
     return null;
 }
 
+function hasLegacyCalendarDebt(row: Pick<EventTaxonomyRow, 'trigger_emergence_class'>): boolean {
+    return row.trigger_emergence_class === 'legacy_calendar_pending_conversion';
+}
+
+function isHistoricallySpecific(event: JsonRecord, file: string, historicalSource: string | null): boolean {
+    if (typeof event.is_historically_specific === 'boolean') return event.is_historically_specific;
+    if (typeof event.historically_specific === 'boolean') return event.historically_specific;
+    if (historicalSource !== null) return true;
+    return file !== 'data/scenarios/events/consequences.json';
+}
+
+function isPresidentialDecisionValid(row: Pick<EventTaxonomyRow,
+    'requires_player_response' | 'modal_ready' | 'sensitive_history_status' | 'trigger_emergence_class'
+>): boolean {
+    return row.requires_player_response &&
+        row.modal_ready &&
+        row.sensitive_history_status === 'clear' &&
+        !hasLegacyCalendarDebt(row);
+}
+
+function classifyCatalogAction(row: Pick<EventTaxonomyRow,
+    'modal_ready' | 'is_choice_event' | 'requires_player_response' | 'historical_source_status' | 'sensitive_history_status'
+>): EventTaxonomyRow['catalog_action'] {
+    if (row.sensitive_history_status !== 'clear') return 'sensitive-gated';
+    if (row.historical_source_status === 'missing') return 'source-blocked';
+    if (row.modal_ready) return 'keep';
+    if (row.requires_player_response || row.is_choice_event) return 'rewrite';
+    return 'keep';
+}
+
 export function classifyTriggerEmergence(row: EventTaxonomyRow): string {
+    if (hasLegacyCalendarDebt(row)) return 'legacy_calendar_pending_conversion';
     const parts: string[] = [];
     if (row.trigger_turn_min !== null || row.trigger_turn_max !== null) parts.push('scheduled');
     if (row.requires.length > 0) parts.push('requires_event');
@@ -343,6 +399,7 @@ export function classifyTriggerEmergence(row: EventTaxonomyRow): string {
 }
 
 export function classifyEventTaxonomy(row: EventTaxonomyRow): string {
+    if (hasLegacyCalendarDebt(row) && row.modal_ready) return 'required_response_debt';
     if (row.modal_ready) return 'finished_modal_ready';
     if (row.requires_player_response) return 'required_response_debt';
     if (row.is_choice_event) return 'choice_event_debt';
@@ -355,7 +412,10 @@ function buildRow(event: JsonRecord, file: string, fileIndex: number, catalogInd
     const requires = Array.isArray(trigger.requires_events)
         ? trigger.requires_events.filter((value): value is string => typeof value === 'string')
         : [];
-    const conditionTypes = collectConditionTypes(trigger.condition);
+    const conditionTypes = uniqueSorted([
+        ...collectConditionTypes(trigger.condition),
+        ...collectPressureConditionTypes(event.pressure),
+    ]);
     const responseOptions = (Array.isArray(event.response_options) ? event.response_options : [])
         .filter(isRecord)
         .map((option) => ({
@@ -369,6 +429,7 @@ function buildRow(event: JsonRecord, file: string, fileIndex: number, catalogInd
     const effectKinds = uniqueSorted(effects.map((effect) => textOrNull(effect.kind) ?? 'unknown'));
     const numericKinds = numericConsequenceKinds(effects);
     const historicalSource = textOrNull(event.historical_source) ?? textOrNull(event.source);
+    const historicallySpecific = isHistoricallySpecific(event, file, historicalSource);
     const sourceNote = textOrNull(event.source_note) ?? textOrNull(event.historical_source_note) ?? historicalSource;
     const historicalDefaultResponseId = textOrNull(event.historical_default_response_id);
     const historicalDefaultOptionId = findHistoricalDefaultOptionId(event);
@@ -410,6 +471,7 @@ function buildRow(event: JsonRecord, file: string, fileIndex: number, catalogInd
         notification_coverage: notificationCoverage(event, responseIds),
         historical_source_status: historicalSource ? 'present' : 'missing',
         historical_source: historicalSource,
+        is_historically_specific: historicallySpecific,
         source_note: sourceNote,
         sensitive_history_ring: 'none',
         sensitive_history_status: 'clear',
@@ -424,11 +486,13 @@ function buildRow(event: JsonRecord, file: string, fileIndex: number, catalogInd
         has_option_descriptions: responseOptions.length > 0 && responseOptions.every((option) => option.description !== null),
         has_numeric_option_previews: hasNumericOptionPreviews,
         modal_ready: false,
+        presidential_decision_valid: false,
+        catalog_action: 'keep',
         row_classification: 'inventory_only',
         findings: [],
     };
 
-    row.trigger_emergence_class = classifyTriggerEmergence(row);
+    row.trigger_emergence_class = textOrNull(event.trigger_emergence_class) ?? textOrNull(event.emergence_class) ?? classifyTriggerEmergence(row);
     row.trigger_driver = row.condition_types.length > 0 ? 'condition' : row.requires.length > 0 ? 'requires_event' : row.trigger_turn_min !== null ? 'turn' : 'unknown';
     row.sensitive_history_keywords = sensitiveKeywordsFor(row);
     row.sensitive_history_ring = row.sensitive_history_keywords.length > 0 ? 'risk' : 'none';
@@ -444,6 +508,8 @@ function buildRow(event: JsonRecord, file: string, fileIndex: number, catalogInd
         row.has_option_descriptions &&
         row.has_numeric_option_previews &&
         row.sensitive_history_status === 'clear';
+    row.presidential_decision_valid = isPresidentialDecisionValid(row);
+    row.catalog_action = classifyCatalogAction(row);
     row.row_classification = classifyEventTaxonomy(row);
     return row;
 }
@@ -515,6 +581,9 @@ export function collectCatalogFindings(rows: EventTaxonomyRow[]): EventTaxonomyF
         if (row.historical_source_status === 'missing') {
             findings.push(finding(row, 'missing_source', 'warning', 'Event has no historical_source or source field.'));
         }
+        if (row.is_historically_specific && row.historical_source_status === 'missing') {
+            findings.push(finding(row, 'missing_historical_source', 'warning', 'Historically specific event has no historical_source or source field.'));
+        }
         if (row.sensitive_history_status !== 'clear') {
             findings.push(finding(row, 'sensitive_history_review', 'warning', `Sensitive-history keyword review required: ${row.sensitive_history_keywords.join(', ')}.`));
         }
@@ -543,6 +612,9 @@ export function collectCatalogFindings(rows: EventTaxonomyRow[]): EventTaxonomyF
         ) {
             findings.push(finding(row, 'historical_default_bot_logic_mismatch', 'warning', 'Explicit historical-default calibration rows must use bot_response_logic historical.'));
         }
+        if (hasLegacyCalendarDebt(row) && (row.modal_ready || row.row_classification === 'finished_modal_ready')) {
+            findings.push(finding(row, 'finished_row_has_legacy_calendar_pending_conversion', 'error', 'Finished event rows must not keep legacy_calendar_pending_conversion trigger debt.'));
+        }
     }
 
     for (const [id, matches] of [...byId.entries()].sort(([a], [b]) => strictCompare(a, b))) {
@@ -569,9 +641,27 @@ export function buildEventTaxonomyReport(rows: EventTaxonomyRow[] = loadCatalogR
         const rowFindings = findingsByRow.get(`${row.file}:${row.id}`) ?? [];
         const modalReady =
             row.modal_ready &&
-            !rowFindings.some((entry) => ['missing_source', 'sensitive_history_review', 'missing_historical_default_marker', 'historical_default_unavailable', 'historical_default_bot_logic_mismatch'].includes(entry.code));
-        const nextRow = { ...row, modal_ready: modalReady, findings: rowFindings };
-        return { ...nextRow, row_classification: classifyEventTaxonomy(nextRow) };
+            !rowFindings.some((entry) => [
+                'missing_source',
+                'missing_historical_source',
+                'sensitive_history_review',
+                'missing_historical_default_marker',
+                'historical_default_unavailable',
+                'historical_default_bot_logic_mismatch',
+                'finished_row_has_legacy_calendar_pending_conversion',
+            ].includes(entry.code));
+        const nextRow = {
+            ...row,
+            modal_ready: modalReady,
+            findings: rowFindings,
+        };
+        const presidentialDecisionValid = isPresidentialDecisionValid(nextRow);
+        const withDecisionFields = {
+            ...nextRow,
+            presidential_decision_valid: presidentialDecisionValid,
+            catalog_action: classifyCatalogAction({ ...nextRow, modal_ready: modalReady }),
+        };
+        return { ...withDecisionFields, row_classification: classifyEventTaxonomy(withDecisionFields) };
     });
 
     const duplicateEventIds = uniqueSorted(

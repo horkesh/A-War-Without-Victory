@@ -1,7 +1,7 @@
 # Event System Presidential Core Upgrade Plan
 
 **Date:** 2026-05-24
-**Status:** ACTIVE external-agent execution plan / partially implemented, gated for further authoring
+**Status:** ACTIVE external-agent execution plan / Workstream A baseline closed, Workstream B hardening next
 **Owner lane:** Event-system product/engine lane
 **Related board row:** `Command Board -> Event system presidential core upgrade`
 **Do not collide with:** calibration / army-arc branch. The 2026-05-25 presidential GUI restructure is merged; use its Decision Surface Registry, President's Desk, modal stack rules, and consequence ledger instead of inventing another decision surface.
@@ -42,6 +42,7 @@ Every new event packet must classify its trigger as one of:
 - Event catalog: 247 valid events across `war_1992.json`, `war_1993.json`, `war_1994.json`, `war_1995.json`, and `consequences.json`.
 - Current shape: 44 events with `response_options`, 203 no-choice events.
 - Required-response modal authoring: 17/36 rows are production modal-ready as of 2026-05-26. The catalog remains `NOT_READY`; the remaining 19 required-response rows are gated by sensitive-history approval, source/design default blockers, counterfactual-default blockers, or 188-week/endgame proof. Use `docs/40_reports/proposals/20260526_EVENT_MODAL_GATED_DECISION_PACKET.md` before authoring any additional row.
+- Workstream A taxonomy baseline is closed as of 2026-05-27. `tools/diagnostics/event_taxonomy_report.ts` is the pure catalog report used by `tools/diagnostics/event_acceptance_report.ts`; it preserves stable file order, deterministic row sorting, duplicate-id checks across all five files, required-response ownership checks, response option ID/label checks, effect/condition vocabulary checks including pressure modifiers, missing historical-source findings for historically specific rows, sensitive-history presidential-decision blocking, catalog action classification, and legacy-calendar debt blocking for finished rows. Current diagnostic output: 247 rows, 44 choice events, 36 required-response rows, 17 modal-ready rows, 180 warnings, 0 errors.
 - Choice ownership: RBiH 20, RS 18, HRHB 6.
 - GUI substrate: the 2026-05-25 presidential desk merge and 2026-05-26 event-modal proof provide President's Desk, central Decision Surface Registry, direct hard-blocker modal routing, modal stack priority, consequence-ledger/Records/Chronicle trails, data-driven modal catalog coverage, and live browser-shell proof that player event decisions open directly as modal dossiers.
 - Canon target from `Game_Bible_v0_9_0.md`: roughly 60% decision / 30% consequence / 10% forced events.
@@ -495,11 +496,21 @@ Handoff: Systems Programmer owns Phase 1. Product Manager verifies the baseline 
 
 **Assigned to:** Systems Programmer
 **Reviewers:** QA Engineer, Canon Compliance Reviewer, Historian for source-status fields
+**Status:** CLOSED 2026-05-27 as Workstream A baseline.
 **Goal:** make the full catalog auditable before expanding it.
 
-Execute Workstream A. Do not alter firing behavior.
+Executed Workstream A without event JSON, firing, evaluator, loader, save-schema, or sensitive-history content changes. The taxonomy report remains a pure diagnostic module and the acceptance report continues to import `buildEventTaxonomyReport`, `loadCatalogRows`, and `EventTaxonomyRow` compatibly.
 
-Handoff: QA receives diagnostic output and confirms all catalog rows are represented exactly once.
+Verification run for closeout:
+
+```powershell
+npx.cmd vitest run tests\sim\events\event_acceptance_report.test.ts tests\sim\events\event_taxonomy_report.test.ts --reporter=dot
+npx.cmd vitest run tests\event_timeline_integrity.test.ts --reporter=dot
+npx.cmd tsx tools\diagnostics\event_taxonomy_report.ts --json
+npm.cmd run typecheck
+```
+
+Handoff: QA receives diagnostic output and confirms all 247 catalog rows are represented exactly once. Next executable slice is Workstream B - Loader, Ordering, Cap, and Save Safety.
 
 ### Phase 2 - Loader, Ordering, Cap, and Save Safety
 

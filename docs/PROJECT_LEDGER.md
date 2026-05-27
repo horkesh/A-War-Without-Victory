@@ -17,8 +17,6 @@
 
 **Artifacts:** `tests/terrain_tiles_artifact_ownership.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/implemented/20260526_TERRAIN_TILES_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
 
----
-
 ## [2026-05-27] test(meta): lock generated artifact ownership matrix contract
 
 **Type:** Static generated-artifact ownership meta-guard + docs closeout.
@@ -11604,5 +11602,24 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 - `git status --short -- data\derived tools\diagnostics\output runs` - PASS; no generated artifact byte changes reported.
 
 **Artifacts:** `tests/replay_save_finalizer_artifact_ownership.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-27] events: close taxonomy Workstream A baseline
+
+**Type:** Behavior-neutral event diagnostic/test hardening.
+
+**Change:** Hardened the existing `tools/diagnostics/event_taxonomy_report.ts` module in place rather than creating a duplicate tool. The diagnostic now covers pressure modifier condition types, the current live event effect/condition vocabulary, historically specific missing-source findings, catalog action classification, presidential-decision validity, sensitive-history blocking, and legacy-calendar debt blocking for finished rows. Updated the event-system plan, command board, master roadmap addendum, and implementation report to make Workstream B the next executable event-system slice.
+
+**Determinism:** Diagnostic/test/docs only. No event JSON, loader, evaluator, firing behavior, save schema, scenario data, GUI ownership, generated artifacts, sensitive-history decisions, or calibration boundaries changed.
+
+**Verification:**
+- Red first: `npx.cmd vitest run tests\sim\events\event_taxonomy_report.test.ts --reporter=dot` - FAIL before implementation on the new Workstream A hardening expectations.
+- `npx.cmd vitest run tests\sim\events\event_acceptance_report.test.ts tests\sim\events\event_taxonomy_report.test.ts --reporter=dot` - PASS; 40/40 tests.
+- `npx.cmd vitest run tests\event_timeline_integrity.test.ts --reporter=dot` - PASS; 19/19 tests.
+- `npx.cmd tsx tools\diagnostics\event_taxonomy_report.ts --json` - PASS; 247 rows, 44 choice events, 36 required-response rows, 17 modal-ready rows, 180 warnings, 0 errors.
+- `npm.cmd run typecheck` - PASS.
+
+**Artifacts:** `tools/diagnostics/event_taxonomy_report.ts`, `tests/sim/events/event_taxonomy_report.test.ts`, `docs/40_reports/implemented/20260527_EVENT_TAXONOMY_WORKSTREAM_A_BASELINE.md`, `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---

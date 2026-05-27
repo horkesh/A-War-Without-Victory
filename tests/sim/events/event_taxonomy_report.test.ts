@@ -103,6 +103,34 @@ describe('event taxonomy diagnostic report', () => {
         expect(fixtureFindings.some((finding) => finding.code === 'unknown_condition_type')).toBe(true);
     });
 
+    it('includes pressure modifier condition types in taxonomy and validates them against the event vocabulary', () => {
+        const rows = loadCatalogRows();
+        const lukavac = rows.find((row) => row.id === 'operation_lukavac_93');
+        const fixture = {
+            ...rows[0],
+            id: 'unknown_pressure_condition_fixture',
+            condition_types: ['new_pressure_condition_type'],
+            findings: [],
+        };
+
+        expect(lukavac).toBeDefined();
+        expect(lukavac!.condition_types).toContain('territory_control');
+        expect(collectCatalogFindings([lukavac!]).filter((finding) => finding.code === 'unknown_condition_type')).toEqual([]);
+        expect(collectCatalogFindings([fixture])).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                code: 'unknown_condition_type',
+                id: 'unknown_pressure_condition_fixture',
+            }),
+        ]));
+    });
+
+    it('treats all live EventEffect and EventCondition kinds in the current catalog as known vocabulary', () => {
+        const findings = collectCatalogFindings(loadCatalogRows());
+
+        expect(findings.filter((finding) => finding.code === 'unknown_effect_kind')).toEqual([]);
+        expect(findings.filter((finding) => finding.code === 'unknown_condition_type')).toEqual([]);
+    });
+
     it('flags sensitive-history examples and keeps them out of finished modal-ready classification', () => {
         const report = buildEventTaxonomyReport(loadCatalogRows());
         const sensitiveIds = ['drina_cleansing_decision_1992', 'un_hostage_crisis_1995', 'rs_strategic_goals'];
@@ -114,7 +142,57 @@ describe('event taxonomy diagnostic report', () => {
             expect(row!.findings.some((finding) => finding.code === 'sensitive_history_review')).toBe(true);
             expect(row!.modal_ready).toBe(false);
             expect(row!.row_classification).not.toBe('finished_modal_ready');
+            expect(row!.presidential_decision_valid).toBe(false);
+            expect(row!.catalog_action).toBe('sensitive-gated');
         }
+    });
+
+    it('reports missing historical sources for historically specific rows without changing readiness by auto-fix', () => {
+        const row = {
+            ...loadCatalogRows()[0],
+            id: 'historically_specific_missing_source_fixture',
+            historical_source_status: 'missing' as const,
+            historical_source: null,
+            source_note: null,
+            is_historically_specific: true,
+            findings: [],
+        };
+
+        const report = buildEventTaxonomyReport([row]);
+
+        expect(report.rows[0].is_historically_specific).toBe(true);
+        expect(report.rows[0].historical_source).toBeNull();
+        expect(report.findings).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                code: 'missing_historical_source',
+                id: 'historically_specific_missing_source_fixture',
+                severity: 'warning',
+            }),
+        ]));
+    });
+
+    it('prevents finished presidential-decision rows from retaining legacy calendar conversion debt', () => {
+        const row = {
+            ...loadCatalogRows()[1],
+            id: 'legacy_calendar_finished_fixture',
+            trigger_emergence_class: 'legacy_calendar_pending_conversion',
+            row_classification: 'finished_modal_ready',
+            modal_ready: true,
+            presidential_decision_valid: true,
+            findings: [],
+        };
+
+        const report = buildEventTaxonomyReport([row]);
+
+        expect(report.rows[0].presidential_decision_valid).toBe(false);
+        expect(report.rows[0].row_classification).not.toBe('finished_modal_ready');
+        expect(report.findings).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                code: 'finished_row_has_legacy_calendar_pending_conversion',
+                id: 'legacy_calendar_finished_fixture',
+                severity: 'error',
+            }),
+        ]));
     });
 
     it('keeps current required-response debt visible until source and historical-default markers exist', () => {
