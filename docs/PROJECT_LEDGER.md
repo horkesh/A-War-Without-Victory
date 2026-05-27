@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] docs(events): packet mutex and overflow queue decision
+
+**Type:** Event-system behavior decision packet.
+
+**Change:** Added `docs/40_reports/proposals/20260527_EVENT_MUTEX_OVERFLOW_DECISION_PACKET.md` documenting the canon/live mismatch around event caps, overflow queueing, and `mutex_group` enforcement. The packet recommends implementing same-turn mutex filtering before the cap while keeping the live cap at 4, and deferring persisted overflow queueing to a separate schema/migration slice.
+
+**Determinism:** Documentation-only. No code, event data, save schema, migration, validator, scenario output, generated artifact, or calibration behavior changed.
+
+**Verification:** `git diff --check` - PASS after documentation edits.
+
+**Artifacts:** `docs/40_reports/proposals/20260527_EVENT_MUTEX_OVERFLOW_DECISION_PACKET.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-27] state(events): validate event decision and modifier state shape
 
 **Type:** Event-system save-shape validation.
