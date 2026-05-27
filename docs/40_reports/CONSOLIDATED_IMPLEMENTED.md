@@ -445,3 +445,9 @@
 - Added structural row validation to the event loader before parsed JSON is cast to `EventDefinition[]`.
 - Invalid ids, triggers, turn bounds, `requires_events`, primary effects, effect arrays, and response options now fail closed while preserving the 247-row catalog baseline.
 - Report: `docs/40_reports/implemented/20260527_EVENT_LOADER_ROW_VALIDATION.md`
+
+# 2026-05-27 - Migration nested ownership v21 fixture alignment
+
+- Added the required empty `paramilitary_decision_history` field to the nested migration ownership current-schema fixture.
+- Closed the Baseline Regression fast-test failure without changing production migration or validation logic.
+- Report: `docs/40_reports/implemented/20260527_MIGRATION_NESTED_OWNERSHIP_V21_FIXTURE.md`

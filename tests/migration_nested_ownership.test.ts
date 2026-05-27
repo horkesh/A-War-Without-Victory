@@ -96,6 +96,7 @@ function migrationFixture(overrides: Record<string, unknown> = {}): Record<strin
             sustainability_state: {},
             civilian_casualties: {},
         },
+        paramilitary_decision_history: [],
         ...overrides,
     };
 }

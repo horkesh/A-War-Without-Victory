@@ -1,4 +1,19 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] test(save): align nested migration fixture with v21 schema
+
+**Type:** CI fixture alignment.
+
+**Change:** Added required empty `paramilitary_decision_history` to `tests/migration_nested_ownership.test.ts`'s current-schema fixture. This fixes the Baseline Regression fast-test failure where nested migration ownership tests deserialized a v21 fixture missing the v21 top-level required field.
+
+**Determinism:** Test fixture only. No production migration logic, validators, event content, scenario outputs, save artifacts, replay behavior, or calibration data changed.
+
+**Verification:**
+- `F:\A-War-Without-Victory\vitest.cmd run tests\migration_nested_ownership.test.ts tests\save_load_real_roundtrip.test.ts tests\save_migration_counter_offers.test.ts tests\save_migration_drift_audit.test.ts tests\state.test.ts --reporter=dot` - PASS; 27/27 tests.
+
+**Artifacts:** `tests/migration_nested_ownership.test.ts`, `docs/40_reports/implemented/20260527_MIGRATION_NESTED_OWNERSHIP_V21_FIXTURE.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-27] events(loader): fail closed on structurally invalid catalog rows
 
 **Type:** Event loader structural validation + Workstream B closeout.
