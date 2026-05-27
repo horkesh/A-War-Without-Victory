@@ -30,6 +30,22 @@ const MAX_EVENTS_PER_TURN = 4;
 
 export interface EventsEvaluationReport {
     fired: FiredEvent[];
+    candidates_considered: number;
+    overflowed: boolean;
+    overflowed_ids: string[];
+}
+
+/** Canonical candidate ordering before the per-turn cap is applied. */
+export function compareEventCandidates(a: EventDefinition, b: EventDefinition): number {
+    const priorityDelta = (a.priority ?? 100) - (b.priority ?? 100);
+    if (priorityDelta !== 0) return priorityDelta;
+
+    const turnDelta = (a.trigger.turn_min ?? Number.MAX_SAFE_INTEGER) - (b.trigger.turn_min ?? Number.MAX_SAFE_INTEGER);
+    if (turnDelta !== 0) return turnDelta;
+
+    if (a.id < b.id) return -1;
+    if (a.id > b.id) return 1;
+    return 0;
 }
 
 /** Collect all effects from an event definition (primary + additional). */
@@ -184,7 +200,7 @@ export function evaluateEvents(
     const fired: FiredEvent[] = [];
     const phase = state.meta.phase;
     if (phase !== 'war') {
-        return { fired };
+        return { fired, candidates_considered: 0, overflowed: false, overflowed_ids: [] };
     }
 
     // Ensure fired_event_ids array exists
@@ -221,8 +237,9 @@ export function evaluateEvents(
         candidates.push(def);
     }
 
-    // Phase 2: Sort by priority (lower first, default 100) and cap at MAX_EVENTS_PER_TURN
-    candidates.sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100));
+    // Phase 2: Sort canonically and cap at MAX_EVENTS_PER_TURN.
+    candidates.sort(compareEventCandidates);
+    const overflowedIds = candidates.slice(MAX_EVENTS_PER_TURN).map((def) => def.id);
     const toFire = candidates.slice(0, MAX_EVENTS_PER_TURN);
 
     // Phase 3: Fire selected events
@@ -340,5 +357,10 @@ export function evaluateEvents(
         }
     }
 
-    return { fired };
+    return {
+        fired,
+        candidates_considered: candidates.length,
+        overflowed: overflowedIds.length > 0,
+        overflowed_ids: overflowedIds,
+    };
 }

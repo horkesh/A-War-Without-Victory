@@ -11623,3 +11623,22 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `tools/diagnostics/event_taxonomy_report.ts`, `tests/sim/events/event_taxonomy_report.test.ts`, `docs/40_reports/implemented/20260527_EVENT_TAXONOMY_WORKSTREAM_A_BASELINE.md`, `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-27] events: harden evaluator ordering and expose overflow diagnostics
+
+**Type:** Event-system Workstream B engine hardening + CI schema-test correction.
+
+**Change:** Added exported `compareEventCandidates(...)` and applied canonical event candidate ordering by `priority`, `trigger.turn_min ?? Number.MAX_SAFE_INTEGER`, then event id before the unchanged four-event cap. `EventsEvaluationReport` now exposes additive `candidates_considered`, `overflowed`, and `overflowed_ids` fields so same-turn crowding is visible without adding queue/backlog persistence. The loaded 247-row catalog no-drift test proves current catalog order is unchanged by the comparator. Also corrected stale broad save/state test expectations and regenerated `tools/diagnostics/output/save_migration_drift.json` so CI recognizes the already-shipped v21 `paramilitary_decision_history` migrated/current save contract.
+
+**Determinism:** Comparator uses numeric priority/turn bounds and strict event-id comparison only. Report fields are derived, not persisted. Cap remains 4; overflowed events are not fired, applied, logged, or recorded. No event JSON, historical prose, GUI ownership, save fields, migrations, validators, scenario data, calibration logic, randomness, timestamps, or generated run artifacts changed. Residual pre-existing risk remains that probabilistic event RNG is consumed during candidate collection in deterministic registry order before sorting.
+
+**Verification:**
+- `F:\A-War-Without-Victory\vitest.cmd run tests\events_evaluate.test.ts tests\save_load_real_roundtrip.test.ts tests\save_migration_counter_offers.test.ts tests\save_migration_drift_audit.test.ts tests\state.test.ts --reporter=dot` - PASS; 44/44 tests.
+- `F:\A-War-Without-Victory\vitest.cmd run tests\determinism_static_scan_r1_5.test.ts --reporter=dot` - PASS; 1/1 test.
+- `npm.cmd run typecheck` - PASS.
+- `git diff --check` - PASS with only the existing line-ending warning on `tests/events_evaluate.test.ts`.
+- Independent Determinism/QA review found no defects; additive report fields are caller-safe because pipeline callers read `result.fired`.
+
+**Artifacts:** `src/sim/events/evaluate_events.ts`, `tests/events_evaluate.test.ts`, `tests/save_load_real_roundtrip.test.ts`, `tests/save_migration_counter_offers.test.ts`, `tests/save_migration_drift_audit.test.ts`, `tests/state.test.ts`, `tools/diagnostics/output/save_migration_drift.json`, `docs/40_reports/implemented/20260527_EVENT_EVALUATOR_ORDERING_OVERFLOW.md`, `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---

@@ -100,6 +100,7 @@ const baseState: GameState = {
         sustainability_state: {},
         war_displacement_initiated: {},
     } as any,
+    paramilitary_decision_history: [],
 };
 
 describe('state serialization contracts', () => {

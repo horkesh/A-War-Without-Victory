@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 20,
-  "registered_migration_count": 20,
-  "strict_required_field_count": 53,
+  "latest_schema_version": 21,
+  "registered_migration_count": 21,
+  "strict_required_field_count": 54,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -85,6 +85,10 @@
     {
       "version": 20,
       "description": "JNA phantom spawned marker persisted default. Sensitive: no."
+    },
+    {
+      "version": 21,
+      "description": "Top-level paramilitary decision history persisted default. Sensitive: no."
     }
   ],
   "required_fields": [
@@ -299,6 +303,10 @@
     {
       "version": 20,
       "path": "military.phantoms_spawned"
+    },
+    {
+      "version": 21,
+      "path": "paramilitary_decision_history"
     }
   ]
 }
