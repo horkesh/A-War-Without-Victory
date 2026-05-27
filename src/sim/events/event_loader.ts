@@ -31,23 +31,29 @@ const EVENT_FILES = [
 ];
 
 /**
- * Load a single event JSON file. Returns empty array if file is missing or malformed.
+ * Load a single required event JSON file. Required catalog files fail closed:
+ * missing, malformed, or non-array JSON is a loader error.
  */
-function loadEventFile(filename: string): EventDefinition[] {
-    const filepath = resolve(EVENTS_DIR, filename);
+function loadRequiredEventFile(eventsDir: string, filename: string): EventDefinition[] {
+    const filepath = resolve(eventsDir, filename);
     if (!existsSync(filepath)) {
-        return [];
+        throw new Error(`Required event file missing: ${filename}`);
     }
+
+    const content = readFileSync(filepath, 'utf8');
+    let parsed: unknown;
     try {
-        const content = readFileSync(filepath, 'utf8');
-        const parsed = JSON.parse(content);
-        if (!Array.isArray(parsed)) {
-            return [];
-        }
-        return parsed as EventDefinition[];
-    } catch {
-        return [];
+        parsed = JSON.parse(content);
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        throw new Error(`Failed to parse required event file ${filename}: ${message}`);
     }
+
+    if (!Array.isArray(parsed)) {
+        throw new Error(`Required event file ${filename} must contain a JSON array`);
+    }
+
+    return parsed as EventDefinition[];
 }
 
 /**
@@ -57,11 +63,11 @@ function loadEventFile(filename: string): EventDefinition[] {
  *
  * @param scenarioStartWeek - The scenario's start week (0 = April 6, 1992). Events before this are excluded.
  */
-export function loadEventDefinitions(scenarioStartWeek: number): EventDefinition[] {
+export function loadEventDefinitionsFromDir(scenarioStartWeek: number, eventsDir: string): EventDefinition[] {
     const allEvents: EventDefinition[] = [];
 
     for (const filename of EVENT_FILES) {
-        const events = loadEventFile(filename);
+        const events = loadRequiredEventFile(eventsDir, filename);
         allEvents.push(...events);
     }
 
@@ -83,4 +89,8 @@ export function loadEventDefinitions(scenarioStartWeek: number): EventDefinition
     });
 
     return filtered;
+}
+
+export function loadEventDefinitions(scenarioStartWeek: number): EventDefinition[] {
+    return loadEventDefinitionsFromDir(scenarioStartWeek, EVENTS_DIR);
 }

@@ -11642,3 +11642,21 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `src/sim/events/evaluate_events.ts`, `tests/events_evaluate.test.ts`, `tests/save_load_real_roundtrip.test.ts`, `tests/save_migration_counter_offers.test.ts`, `tests/save_migration_drift_audit.test.ts`, `tests/state.test.ts`, `tools/diagnostics/output/save_migration_drift.json`, `docs/40_reports/implemented/20260527_EVENT_EVALUATOR_ORDERING_OVERFLOW.md`, `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-27] events: fail closed on required catalog loader errors
+
+**Type:** Event-system Workstream B loader hardening.
+
+**Change:** `loadEventDefinitions(...)` now treats the fixed five event catalog files as required inputs and throws when any file is missing, malformed JSON, or valid non-array JSON. Added `loadEventDefinitionsFromDir(...)` as a deterministic test seam that uses the same required file list, start-week filter, and `(trigger.turn_min ?? Number.MAX_SAFE_INTEGER, id)` sort path as production. Current valid catalog behavior remains 247 rows.
+
+**Determinism:** Valid catalog file order remains fixed, no filesystem enumeration is introduced, sorting remains numeric turn lower bound then strict id comparison, and no event JSON/prose/content, evaluator firing behavior, save schema, migrations, validators, scenario data, calibration logic, randomness, timestamps, or generated artifacts changed. Residual pre-existing work: row-level parsed event objects are still cast to `EventDefinition[]` without full schema validation.
+
+**Verification:**
+- `F:\A-War-Without-Victory\vitest.cmd run tests\event_loader.test.ts tests\events_evaluate.test.ts tests\event_timeline_integrity.test.ts tests\consequence_chains.test.ts --reporter=dot` - PASS; 98/98 tests.
+- `npm.cmd run typecheck` - PASS.
+- `git diff --check` - PASS with only the existing line-ending warning on `src/sim/events/event_loader.ts`.
+- Independent QA/Determinism review found no blocking defects; the directory-injected loader seam is deterministic and Windows/Linux-safe.
+
+**Artifacts:** `src/sim/events/event_loader.ts`, `tests/event_loader.test.ts`, `docs/40_reports/implemented/20260527_EVENT_LOADER_FAIL_CLOSED.md`, `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---

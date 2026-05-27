@@ -1,7 +1,7 @@
 # Event System Presidential Core Upgrade Plan
 
 **Date:** 2026-05-24
-**Status:** ACTIVE external-agent execution plan / Workstream A baseline closed, Workstream B evaluator ordering and overflow visibility closed, loader hardening next
+**Status:** ACTIVE external-agent execution plan / Workstream A baseline closed, Workstream B evaluator ordering, overflow visibility, and loader fail-closed slices closed
 **Owner lane:** Event-system product/engine lane
 **Related board row:** `Command Board -> Event system presidential core upgrade`
 **Do not collide with:** calibration / army-arc branch. The 2026-05-25 presidential GUI restructure is merged; use its Decision Surface Registry, President's Desk, modal stack rules, and consequence ledger instead of inventing another decision surface.
@@ -51,7 +51,7 @@ Every new event packet must classify its trigger as one of:
 - Engine/spec gap: `Systems_Manual_v0_9_0.md` describes max 3 events, overflow queueing, and mutex prevention, while live code currently uses a 4-event cap, no overflow queue, and no mutex enforcement.
 - Current technical blockers:
   - `evaluateEvents` caps fireable events at 4 per turn. Overflow is now visible through additive report fields, but there is still no queue/backlog persistence.
-  - event loading can fail open for missing/malformed files.
+  - Row-level catalog schema validation is still incomplete; loader now fails closed for missing, malformed, or non-array required files.
   - equal-priority event sorting lacks a full canonical tie-break.
   - full 247-row catalog schema validation is incomplete.
   - Further required-response modal authoring is blocked until the exact historical/default label and prose boundary are approved for the remaining sensitive, counterfactual, abstract, or source-weak rows.
@@ -516,12 +516,14 @@ Handoff: QA receives diagnostic output and confirms all 247 catalog rows are rep
 
 **Assigned to:** Systems Programmer / Gameplay Programmer
 **Reviewers:** Determinism Auditor, QA Engineer
-**Status:** IN PROGRESS. Evaluator ordering and overflow visibility slice closed 2026-05-27.
+**Status:** IN PROGRESS. Evaluator ordering/overflow visibility and loader fail-closed slices closed 2026-05-27.
 **Goal:** harden the substrate before more presidential decisions depend on it.
 
 Closed evaluator slice: `compareEventCandidates(...)` now orders eligible candidates by `priority`, `trigger.turn_min ?? Number.MAX_SAFE_INTEGER`, then event id before the unchanged four-event cap. `EventsEvaluationReport` now returns additive `candidates_considered`, `overflowed`, and `overflowed_ids` fields. The loaded 247-row catalog has a no-drift test proving current stable priority-only order and canonical comparator order are identical.
 
-Next executable slice: harden `event_loader.ts` so the fixed five required event files fail closed for missing, malformed, or non-array JSON, with focused loader tests. Do not implement mutex, queue/backlog persistence, save-shape changes, or event prose in the loader slice.
+Closed loader slice: `loadEventDefinitions(...)` now fails closed when any of the fixed five required event files is missing, malformed JSON, or valid non-array JSON. `loadEventDefinitionsFromDir(...)` is a deterministic test seam using the same fixed file order, filter, and sort path. Valid current catalog behavior remains 247 rows, sorted by `trigger.turn_min ?? Number.MAX_SAFE_INTEGER` then event id.
+
+Next executable slice: add row-level catalog schema validation or produce the mutex/queue decision packet before changing live event firing. Do not implement event prose, persisted queue/backlog, save-shape changes, or mutex behavior without the relevant stop-gate proof.
 
 If this phase changes event ordering, cap behavior, queueing, mutex, or migration defaults, run baseline regression and explain drift before acceptance.
 
