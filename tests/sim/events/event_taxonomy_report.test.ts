@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
     buildEventTaxonomyReport,
+    buildEventTaxonomyRow,
     classifyEventTaxonomy,
     classifyTriggerEmergence,
     collectCatalogFindings,
@@ -58,6 +59,9 @@ describe('event taxonomy diagnostic report', () => {
         expect(report.summary.historical_default_markers).toBe(17);
         expect(report.summary.historical_default_ids).toBe(17);
         expect(report.summary.modal_ready_events).toBe(17);
+        expect(report.rows.every((row) => row.future_consequence_count === 0)).toBe(true);
+        expect(report.rows.flatMap((row) => row.future_consequence_opens_events)).toEqual([]);
+        expect(report.rows.flatMap((row) => row.future_consequence_closes_events)).toEqual([]);
     });
 
     it('requires required-response choice rows to declare a valid responding faction', () => {
@@ -359,6 +363,146 @@ describe('event taxonomy diagnostic report', () => {
                 id: 'diagnostic_invalid_historical_default_fixture',
             }),
         ]));
+    });
+
+    it('summarizes valid future consequence metadata for later modal diagnostics', () => {
+        const row = buildEventTaxonomyRow({
+            id: 'diagnostic_future_consequence_fixture',
+            trigger: { turn_min: 0, phase: 'war' },
+            effect: { kind: 'narrative', text: 'Fixture.' },
+            response_options: [{
+                id: 'accept',
+                label: 'Accept',
+                description: 'Accept the branch.',
+                future_consequences: [{
+                    id: 'accept_branch',
+                    label: 'Later branch',
+                    timing: 'next_turn',
+                    certainty: 'conditional',
+                    opens_events: ['diagnostic_followup_fixture'],
+                    closes_events: ['diagnostic_future_consequence_fixture'],
+                    opens_flags: ['accepted_branch'],
+                    closes_flags: ['rejected_branch'],
+                    material_effect_refs: ['supply_delta.RBiH'],
+                    explanation: 'Accepting makes the later branch visible.',
+                }],
+            }],
+        }, 'data/scenarios/events/war_1992.json', 0, 0);
+        const followup = buildEventTaxonomyRow({
+            id: 'diagnostic_followup_fixture',
+            trigger: { turn_min: 1, phase: 'war' },
+            effect: { kind: 'narrative', text: 'Followup.' },
+        }, 'data/scenarios/events/war_1992.json', 0, 1);
+
+        const report = buildEventTaxonomyReport([row, followup]);
+
+        expect(report.rows[0].future_consequence_count).toBe(1);
+        expect(report.rows[0].future_consequence_opens_events).toEqual(['diagnostic_followup_fixture']);
+        expect(report.rows[0].future_consequence_closes_events).toEqual(['diagnostic_future_consequence_fixture']);
+        expect(report.rows[0].future_consequence_opens_flags).toEqual(['accepted_branch']);
+        expect(report.rows[0].future_consequence_closes_flags).toEqual(['rejected_branch']);
+        expect(report.rows[0].future_consequence_material_effect_refs).toEqual(['supply_delta.RBiH']);
+        expect(report.findings.filter((finding) => finding.code.startsWith('malformed_future_consequence'))).toEqual([]);
+        expect(report.findings.filter((finding) => finding.code === 'dangling_future_consequence_event')).toEqual([]);
+    });
+
+    it('surfaces malformed future consequence metadata as taxonomy findings', () => {
+        const row = buildEventTaxonomyRow({
+            id: 'diagnostic_malformed_future_consequence_fixture',
+            title: 'Malformed Future Consequence Fixture',
+            narrative: 'Fixture narrative.',
+            trigger: { turn_min: 0, phase: 'war' },
+            effect: { kind: 'narrative', text: 'Fixture.' },
+            requires_player_response: true,
+            responding_faction: 'RBiH',
+            historical_source: 'Diagnostic source.',
+            source_note: 'Diagnostic source note.',
+            historical_default_response_id: 'accept',
+            bot_response_logic: 'historical',
+            response_options: [{
+                id: 'accept',
+                label: 'Accept',
+                description: 'Accept the branch.',
+                historical_marker: 'historical_default',
+                risk_level: 0.1,
+                future_consequences: [{
+                    id: 'branch',
+                    label: 'Branch',
+                    timing: 'soon',
+                    certainty: 'guaranteed',
+                    explanation: 'Malformed timing.',
+                }],
+            }],
+        }, 'data/scenarios/events/war_1992.json', 0, 0);
+
+        expect(row.modal_ready).toBe(true);
+
+        const report = buildEventTaxonomyReport([row]);
+        const findings = report.findings;
+
+        expect(findings).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                code: 'malformed_future_consequence',
+                severity: 'error',
+                id: 'diagnostic_malformed_future_consequence_fixture',
+            }),
+        ]));
+        expect(report.rows[0].modal_ready).toBe(false);
+        expect(report.rows[0].presidential_decision_valid).toBe(false);
+        expect(report.rows[0].row_classification).toBe('required_response_debt');
+    });
+
+    it('surfaces dangling future consequence opens/closes event ids as findings', () => {
+        const row = buildEventTaxonomyRow({
+            id: 'diagnostic_dangling_future_consequence_fixture',
+            title: 'Dangling Future Consequence Fixture',
+            narrative: 'Fixture narrative.',
+            trigger: { turn_min: 0, phase: 'war' },
+            effect: { kind: 'narrative', text: 'Fixture.' },
+            requires_player_response: true,
+            responding_faction: 'RBiH',
+            historical_source: 'Diagnostic source.',
+            source_note: 'Diagnostic source note.',
+            historical_default_response_id: 'accept',
+            bot_response_logic: 'historical',
+            response_options: [{
+                id: 'accept',
+                label: 'Accept',
+                description: 'Accept the branch.',
+                historical_marker: 'historical_default',
+                risk_level: 0.1,
+                future_consequences: [{
+                    id: 'branch',
+                    label: 'Branch',
+                    timing: 'future',
+                    certainty: 'risk',
+                    opens_events: ['missing_open_event'],
+                    closes_events: ['missing_close_event'],
+                    explanation: 'Dangling branch references.',
+                }],
+            }],
+        }, 'data/scenarios/events/war_1992.json', 0, 0);
+
+        expect(row.modal_ready).toBe(true);
+
+        const report = buildEventTaxonomyReport([row]);
+        const findings = report.findings;
+
+        expect(findings).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                code: 'dangling_future_consequence_event',
+                severity: 'error',
+                message: expect.stringContaining('opens_events missing_open_event'),
+            }),
+            expect.objectContaining({
+                code: 'dangling_future_consequence_event',
+                severity: 'error',
+                message: expect.stringContaining('closes_events missing_close_event'),
+            }),
+        ]));
+        expect(report.rows[0].modal_ready).toBe(false);
+        expect(report.rows[0].presidential_decision_valid).toBe(false);
+        expect(report.rows[0].row_classification).toBe('required_response_debt');
     });
 
     it('surfaces accept_first conflicts with explicit non-first historical defaults as calibration debt', () => {

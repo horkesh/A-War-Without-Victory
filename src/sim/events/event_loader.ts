@@ -39,6 +39,8 @@ type JsonObject = Record<string, unknown>;
 
 const VALID_CATEGORIES = new Set(['military', 'political', 'humanitarian', 'diplomatic', 'economic', 'command', 'territorial']);
 const VALID_BOT_RESPONSE_LOGIC = new Set(['accept_first', 'reject_all', 'capital_based', 'capital_weighted', 'historical', 'personality_weighted', 'strategic_weighted']);
+const VALID_FUTURE_CONSEQUENCE_TIMING = new Set(['immediate', 'next_turn', 'future', 'endgame']);
+const VALID_FUTURE_CONSEQUENCE_CERTAINTY = new Set(['guaranteed', 'conditional', 'risk']);
 
 function isObject(value: unknown): value is JsonObject {
     return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -84,6 +86,45 @@ function validateKindedArray(value: unknown, path: string, filename: string, row
     });
 }
 
+function validateStringArray(value: unknown, path: string, filename: string, rowIndex: number): void {
+    if (!Array.isArray(value) || !value.every((entry) => typeof entry === 'string')) {
+        failRow(filename, rowIndex, `${path} must be a string array when present`);
+    }
+}
+
+function validateFutureConsequences(value: unknown, path: string, filename: string, rowIndex: number): void {
+    if (!Array.isArray(value)) {
+        failRow(filename, rowIndex, `${path} must be an array when present`);
+    }
+
+    value.forEach((entry, entryIndex) => {
+        const consequencePath = `${path}[${entryIndex}]`;
+        if (!isObject(entry)) {
+            failRow(filename, rowIndex, `${consequencePath} must be a non-null object`);
+        }
+        if (!isNonEmptyString(entry.id)) {
+            failRow(filename, rowIndex, `${consequencePath}.id must be a non-empty string`);
+        }
+        if (!isNonEmptyString(entry.label)) {
+            failRow(filename, rowIndex, `${consequencePath}.label must be a non-empty string`);
+        }
+        if (!isNonEmptyString(entry.explanation)) {
+            failRow(filename, rowIndex, `${consequencePath}.explanation must be a non-empty string`);
+        }
+        if (!isNonEmptyString(entry.timing) || !VALID_FUTURE_CONSEQUENCE_TIMING.has(entry.timing)) {
+            failRow(filename, rowIndex, `${consequencePath}.timing must be one of immediate, next_turn, future, endgame`);
+        }
+        if (!isNonEmptyString(entry.certainty) || !VALID_FUTURE_CONSEQUENCE_CERTAINTY.has(entry.certainty)) {
+            failRow(filename, rowIndex, `${consequencePath}.certainty must be one of guaranteed, conditional, risk`);
+        }
+        for (const key of ['opens_events', 'closes_events', 'opens_flags', 'closes_flags', 'material_effect_refs']) {
+            if (hasOwn(entry, key)) {
+                validateStringArray(entry[key], `${consequencePath}.${key}`, filename, rowIndex);
+            }
+        }
+    });
+}
+
 function validateResponseOptions(value: unknown, filename: string, rowIndex: number): void {
     if (!Array.isArray(value)) {
         failRow(filename, rowIndex, 'response_options must be an array when present');
@@ -110,6 +151,9 @@ function validateResponseOptions(value: unknown, filename: string, rowIndex: num
         }
         if (hasOwn(option, 'effects')) {
             validateKindedArray(option.effects, `${path}.effects`, filename, rowIndex);
+        }
+        if (hasOwn(option, 'future_consequences')) {
+            validateFutureConsequences(option.future_consequences, `${path}.future_consequences`, filename, rowIndex);
         }
     });
 }
@@ -294,9 +338,20 @@ function collectConditionEventRefs(condition: unknown): string[] {
     return refs;
 }
 
+function collectFutureConsequenceEventRefs(row: EventDefinition): string[] {
+    const refs: string[] = [];
+    for (const option of row.response_options ?? []) {
+        for (const consequence of option.future_consequences ?? []) {
+            refs.push(...(consequence.opens_events ?? []), ...(consequence.closes_events ?? []));
+        }
+    }
+    return refs;
+}
+
 function collectEventRefs(row: EventDefinition): string[] {
     const refs = [...(row.trigger.requires_events ?? []), ...(row.enables_events ?? [])];
     refs.push(...collectConditionEventRefs(row.trigger.condition));
+    refs.push(...collectFutureConsequenceEventRefs(row));
     const pressure = (row as EventDefinition & { pressure?: unknown }).pressure;
     if (isObject(pressure) && Array.isArray(pressure.modifiers)) {
         for (const modifier of pressure.modifiers) {

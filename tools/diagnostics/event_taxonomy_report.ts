@@ -46,6 +46,13 @@ export type EventTaxonomyRow = {
     dimension_shifts: string[];
     has_numeric_consequences: boolean;
     numeric_consequence_kinds: string[];
+    future_consequence_count: number;
+    future_consequence_opens_events: string[];
+    future_consequence_closes_events: string[];
+    future_consequence_opens_flags: string[];
+    future_consequence_closes_flags: string[];
+    future_consequence_material_effect_refs: string[];
+    future_consequence_shape_errors: string[];
     notification_coverage: {
         has_notifications_to_other_factions: boolean;
         response_options_with_notifications: number;
@@ -132,6 +139,9 @@ const SENSITIVE_DEFAULT_BLOCKED_IDS = new Set([
     'un_hostage_crisis_1995',
     'nato_ultimatum_sarajevo_1994',
 ]);
+
+const VALID_FUTURE_CONSEQUENCE_TIMING = new Set(['immediate', 'next_turn', 'future', 'endgame']);
+const VALID_FUTURE_CONSEQUENCE_CERTAINTY = new Set(['guaranteed', 'conditional', 'risk']);
 
 function strictCompare(a: string, b: string): number {
     if (a < b) return -1;
@@ -255,6 +265,88 @@ function numericConsequenceKinds(effects: JsonRecord[]): string[] {
     return uniqueSorted(kinds);
 }
 
+function isStringArray(value: unknown): value is string[] {
+    return Array.isArray(value) && value.every((entry) => typeof entry === 'string');
+}
+
+type FutureConsequenceSummary = Pick<EventTaxonomyRow,
+    'future_consequence_count' |
+    'future_consequence_opens_events' |
+    'future_consequence_closes_events' |
+    'future_consequence_opens_flags' |
+    'future_consequence_closes_flags' |
+    'future_consequence_material_effect_refs' |
+    'future_consequence_shape_errors'
+>;
+
+function collectFutureConsequenceSummary(event: JsonRecord): FutureConsequenceSummary {
+    let count = 0;
+    const opensEvents: string[] = [];
+    const closesEvents: string[] = [];
+    const opensFlags: string[] = [];
+    const closesFlags: string[] = [];
+    const materialEffectRefs: string[] = [];
+    const shapeErrors: string[] = [];
+    const options = Array.isArray(event.response_options) ? event.response_options : [];
+
+    options.forEach((option, optionIndex) => {
+        if (!isRecord(option) || !Object.prototype.hasOwnProperty.call(option, 'future_consequences')) return;
+        const optionId = textOrNull(option.id) ?? `response_options[${optionIndex}]`;
+        if (!Array.isArray(option.future_consequences)) {
+            shapeErrors.push(`${optionId}.future_consequences must be an array when present`);
+            return;
+        }
+
+        count += option.future_consequences.length;
+        option.future_consequences.forEach((consequence, consequenceIndex) => {
+            const path = `${optionId}.future_consequences[${consequenceIndex}]`;
+            if (!isRecord(consequence)) {
+                shapeErrors.push(`${path} must be a non-null object`);
+                return;
+            }
+            for (const key of ['id', 'label', 'explanation'] as const) {
+                if (textOrNull(consequence[key]) === null) {
+                    shapeErrors.push(`${path}.${key} must be a non-empty string`);
+                }
+            }
+            const timing = textOrNull(consequence.timing);
+            if (timing === null || !VALID_FUTURE_CONSEQUENCE_TIMING.has(timing)) {
+                shapeErrors.push(`${path}.timing must be one of immediate, next_turn, future, endgame`);
+            }
+            const certainty = textOrNull(consequence.certainty);
+            if (certainty === null || !VALID_FUTURE_CONSEQUENCE_CERTAINTY.has(certainty)) {
+                shapeErrors.push(`${path}.certainty must be one of guaranteed, conditional, risk`);
+            }
+
+            const appendStringArray = (key: string, target: string[]) => {
+                if (!Object.prototype.hasOwnProperty.call(consequence, key)) return;
+                const value = consequence[key];
+                if (!isStringArray(value)) {
+                    shapeErrors.push(`${path}.${key} must be a string array when present`);
+                    return;
+                }
+                target.push(...value);
+            };
+
+            appendStringArray('opens_events', opensEvents);
+            appendStringArray('closes_events', closesEvents);
+            appendStringArray('opens_flags', opensFlags);
+            appendStringArray('closes_flags', closesFlags);
+            appendStringArray('material_effect_refs', materialEffectRefs);
+        });
+    });
+
+    return {
+        future_consequence_count: count,
+        future_consequence_opens_events: uniqueSorted(opensEvents),
+        future_consequence_closes_events: uniqueSorted(closesEvents),
+        future_consequence_opens_flags: uniqueSorted(opensFlags),
+        future_consequence_closes_flags: uniqueSorted(closesFlags),
+        future_consequence_material_effect_refs: uniqueSorted(materialEffectRefs),
+        future_consequence_shape_errors: shapeErrors.sort(strictCompare),
+    };
+}
+
 function notificationCoverage(event: JsonRecord, responseIds: string[]): EventTaxonomyRow['notification_coverage'] {
     const notifications = isRecord(event.notifications_to_other_factions) ? event.notifications_to_other_factions : null;
     const withNotifications: string[] = [];
@@ -355,7 +447,7 @@ export function classifyEventTaxonomy(row: EventTaxonomyRow): string {
     return 'inventory_only';
 }
 
-function buildRow(event: JsonRecord, file: string, fileIndex: number, catalogIndex: number): EventTaxonomyRow {
+export function buildEventTaxonomyRow(event: JsonRecord, file: string, fileIndex: number, catalogIndex: number): EventTaxonomyRow {
     const trigger = isRecord(event.trigger) ? event.trigger : {};
     const requires = Array.isArray(trigger.requires_events)
         ? trigger.requires_events.filter((value): value is string => typeof value === 'string')
@@ -376,6 +468,7 @@ function buildRow(event: JsonRecord, file: string, fileIndex: number, catalogInd
     const effects = collectEffects(event);
     const effectKinds = uniqueSorted(effects.map((effect) => textOrNull(effect.kind) ?? 'unknown'));
     const numericKinds = numericConsequenceKinds(effects);
+    const futureConsequenceSummary = collectFutureConsequenceSummary(event);
     const historicalSource = textOrNull(event.historical_source) ?? textOrNull(event.source);
     const historicallySpecific = isHistoricallySpecific(event, file, historicalSource);
     const sourceNote = textOrNull(event.source_note) ?? textOrNull(event.historical_source_note) ?? historicalSource;
@@ -416,6 +509,7 @@ function buildRow(event: JsonRecord, file: string, fileIndex: number, catalogInd
         dimension_shifts: collectDimensionShifts(event),
         has_numeric_consequences: numericKinds.length > 0,
         numeric_consequence_kinds: numericKinds,
+        ...futureConsequenceSummary,
         notification_coverage: notificationCoverage(event, responseIds),
         historical_source_status: historicalSource ? 'present' : 'missing',
         historical_source: historicalSource,
@@ -464,7 +558,7 @@ function buildRow(event: JsonRecord, file: string, fileIndex: number, catalogInd
 
 export function loadCatalogRows(): EventTaxonomyRow[] {
     const rows = CATALOG_FILES.flatMap((file, fileIndex) =>
-        readJsonArray(file).map((event, catalogIndex) => buildRow(event, file, fileIndex, catalogIndex)),
+        readJsonArray(file).map((event, catalogIndex) => buildEventTaxonomyRow(event, file, fileIndex, catalogIndex)),
     );
 
     return rows.sort((a, b) => {
@@ -484,6 +578,7 @@ function finding(row: EventTaxonomyRow, code: string, severity: EventTaxonomyFin
 export function collectCatalogFindings(rows: EventTaxonomyRow[]): EventTaxonomyFinding[] {
     const findings: EventTaxonomyFinding[] = [];
     const byId = new Map<string, EventTaxonomyRow[]>();
+    const allEventIds = new Set(rows.map((row) => row.id).filter((id) => id.length > 0));
 
     for (const row of rows) {
         const existing = byId.get(row.id) ?? [];
@@ -563,6 +658,19 @@ export function collectCatalogFindings(rows: EventTaxonomyRow[]): EventTaxonomyF
         if (hasLegacyCalendarDebt(row) && (row.modal_ready || row.row_classification === 'finished_modal_ready')) {
             findings.push(finding(row, 'finished_row_has_legacy_calendar_pending_conversion', 'error', 'Finished event rows must not keep legacy_calendar_pending_conversion trigger debt.'));
         }
+        for (const shapeError of row.future_consequence_shape_errors) {
+            findings.push(finding(row, 'malformed_future_consequence', 'error', shapeError));
+        }
+        for (const id of row.future_consequence_opens_events) {
+            if (!allEventIds.has(id)) {
+                findings.push(finding(row, 'dangling_future_consequence_event', 'error', `future_consequences opens_events ${id} does not match a catalog event id.`));
+            }
+        }
+        for (const id of row.future_consequence_closes_events) {
+            if (!allEventIds.has(id)) {
+                findings.push(finding(row, 'dangling_future_consequence_event', 'error', `future_consequences closes_events ${id} does not match a catalog event id.`));
+            }
+        }
     }
 
     for (const [id, matches] of [...byId.entries()].sort(([a], [b]) => strictCompare(a, b))) {
@@ -597,6 +705,8 @@ export function buildEventTaxonomyReport(rows: EventTaxonomyRow[] = loadCatalogR
                 'historical_default_unavailable',
                 'historical_default_bot_logic_mismatch',
                 'finished_row_has_legacy_calendar_pending_conversion',
+                'malformed_future_consequence',
+                'dangling_future_consequence_event',
             ].includes(entry.code));
         const nextRow = {
             ...row,

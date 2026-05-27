@@ -347,6 +347,63 @@ test('loadEventDefinitionsFromDir throws on malformed response_options', () => {
         [validCatalogRow({ response_options: [{ id: 'accept', label: 'Accept', effects: [{ kind: 'new_unregistered_effect' }] }] })],
         /Invalid event row in war_1992\.json\[0\]: response_options\[0\]\.effects\[0\]\.kind must be a known event effect kind: new_unregistered_effect/,
     );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ response_options: [{ id: 'accept', label: 'Accept', future_consequences: {} }] })],
+        /Invalid event row in war_1992\.json\[0\]: response_options\[0\]\.future_consequences must be an array when present/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ response_options: [{ id: 'accept', label: 'Accept', future_consequences: [null] }] })],
+        /Invalid event row in war_1992\.json\[0\]: response_options\[0\]\.future_consequences\[0\] must be a non-null object/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({
+            response_options: [{
+                id: 'accept',
+                label: 'Accept',
+                future_consequences: [{
+                    id: 'branch',
+                    label: 'Branch',
+                    timing: 'soon',
+                    certainty: 'guaranteed',
+                    explanation: 'Shows later branch visibility.',
+                }],
+            }],
+        })],
+        /Invalid event row in war_1992\.json\[0\]: response_options\[0\]\.future_consequences\[0\]\.timing must be one of immediate, next_turn, future, endgame/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({
+            response_options: [{
+                id: 'accept',
+                label: 'Accept',
+                future_consequences: [{
+                    id: 'branch',
+                    label: 'Branch',
+                    timing: 'future',
+                    certainty: 'maybe',
+                    explanation: 'Shows later branch visibility.',
+                }],
+            }],
+        })],
+        /Invalid event row in war_1992\.json\[0\]: response_options\[0\]\.future_consequences\[0\]\.certainty must be one of guaranteed, conditional, risk/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({
+            response_options: [{
+                id: 'accept',
+                label: 'Accept',
+                future_consequences: [{
+                    id: 'branch',
+                    label: 'Branch',
+                    timing: 'future',
+                    certainty: 'conditional',
+                    opens_events: ['known_event', 7],
+                    explanation: 'Shows later branch visibility.',
+                }],
+            }],
+        })],
+        /Invalid event row in war_1992\.json\[0\]: response_options\[0\]\.future_consequences\[0\]\.opens_events must be a string array when present/,
+    );
 });
 
 test('loadEventDefinitionsFromDir throws on unknown condition types', () => {
@@ -437,6 +494,23 @@ test('loadEventDefinitionsFromDir throws on duplicate ids and unknown event refe
         [validCatalogRow({ trigger: { turn_min: 0, condition: { type: 'week_since_event', event_id: 'missing_event' } } })],
         /Unknown event reference\(s\) in required event catalog: valid_event->missing_event/,
     );
+    assertCatalogRowsThrow(
+        [validCatalogRow({
+            response_options: [{
+                id: 'accept',
+                label: 'Accept',
+                future_consequences: [{
+                    id: 'branch',
+                    label: 'Branch',
+                    timing: 'future',
+                    certainty: 'conditional',
+                    opens_events: ['missing_event'],
+                    explanation: 'Shows later branch visibility.',
+                }],
+            }],
+        })],
+        /Unknown event reference\(s\) in required event catalog: valid_event->missing_event/,
+    );
 });
 
 test('loadEventDefinitionsFromDir accepts a response option without effects', () => {
@@ -453,4 +527,46 @@ test('loadEventDefinitionsFromDir accepts a response option without effects', ()
 
     assert.strictEqual(loaded.length, 1);
     assert.strictEqual(loaded[0]?.id, 'valid_event');
+});
+
+test('loadEventDefinitionsFromDir accepts valid response option future_consequences metadata without gating runtime behavior', () => {
+    const dir = makeTempEventsDir();
+    writeCatalogRows(dir, [
+        validCatalogRow({
+            id: 'valid_event',
+            response_options: [{
+                id: 'accept',
+                label: 'Accept',
+                future_consequences: [{
+                    id: 'accept_branch',
+                    label: 'Later branch',
+                    timing: 'next_turn',
+                    certainty: 'conditional',
+                    opens_events: ['followup_event'],
+                    closes_events: ['valid_event'],
+                    opens_flags: ['accepted_branch'],
+                    closes_flags: ['rejected_branch'],
+                    material_effect_refs: ['supply_delta.RBiH'],
+                    explanation: 'Accepting makes the later branch visible.',
+                }],
+            }],
+        }),
+        validCatalogRow({ id: 'followup_event', trigger: { turn_min: 1, phase: 'war' } }),
+    ]);
+
+    const loaded = loadEventDefinitionsFromDir(0, dir);
+
+    assert.strictEqual(loaded.length, 2);
+    assert.deepStrictEqual(loaded.find((event) => event.id === 'valid_event')?.response_options?.[0]?.future_consequences, [{
+        id: 'accept_branch',
+        label: 'Later branch',
+        timing: 'next_turn',
+        certainty: 'conditional',
+        opens_events: ['followup_event'],
+        closes_events: ['valid_event'],
+        opens_flags: ['accepted_branch'],
+        closes_flags: ['rejected_branch'],
+        material_effect_refs: ['supply_delta.RBiH'],
+        explanation: 'Accepting makes the later branch visible.',
+    }]);
 });

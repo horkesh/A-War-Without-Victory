@@ -173,6 +173,25 @@
 
 ---
 
+## [2026-05-27] events(diagnostics): add branch-visibility roadmap and metadata contract
+
+**Type:** Behavior-neutral event diagnostics and roadmap contract.
+
+**Change:** Updated the event-system presidential core plan and command board to record the approved event-expansion direction: full historical/counterfactual event database, explicit historical/default labels, historical bot calibration, causal branch opens/closes, detailed modal explanations, and material consequences. Replaced the open-ended closeout sequence with a six-phase gated sequence: baseline, branch-visibility metadata/diagnostics, foundational decisions packet, predicate/consequence substrate, modal explanation pass, and gated authoring waves. Added optional response-option `future_consequences` metadata for branch visibility, loader validation for shape/enums/string-array fields and dangling opened/closed event ids, taxonomy summaries/findings, and readiness blocking for malformed/dangling metadata. Added an implementation report and registered it in the reports index and consolidated implemented index.
+
+**Determinism:** Behavior-neutral diagnostics/type/test/docs slice. No event JSON, scenario data, save schema, generated artifacts, UI behavior, event firing, runtime evaluator gating, bot choices, or calibration behavior changed. Broad event authoring remains blocked until sensitive-history, source, and historical-default gates are satisfied. The next content/product step is the foundational decisions packet.
+
+**Verification:**
+- `npx.cmd vitest run tests/event_loader.test.ts tests/sim/events/event_taxonomy_report.test.ts tests/sim/events/event_acceptance_report.test.ts tests/sim/events/event_presidential_acceptance.test.ts tests/events_evaluate.test.ts tests/event_decisions.test.ts tests/player_decision_manifest.test.ts --reporter=dot` - PASS; 124/124 tests.
+- `npx.cmd tsx tools/diagnostics/event_taxonomy_report.ts --json` - PASS.
+- `npm.cmd run typecheck` - PASS.
+- `git diff --check` - PASS.
+- Independent review - fixed blockers on readiness gating and docs scope consistency.
+
+**Artifacts:** `src/sim/events/event_types.ts`, `src/sim/events/event_loader.ts`, `tools/diagnostics/event_taxonomy_report.ts`, event diagnostics tests, `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/40_reports/implemented/20260527_EVENT_EXPANSION_ROADMAP_CONTRACT.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-27] state(operations): make triggered-operation bookkeeping a v29 save contract
 
 **Type:** Save-schema/default contract slice.

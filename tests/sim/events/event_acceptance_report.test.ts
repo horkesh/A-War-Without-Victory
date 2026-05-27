@@ -117,7 +117,7 @@ describe('event acceptance diagnostic report', () => {
         expect(first.summary.missing_historical_default_response_id_events).toBe(19);
         expect(first.summary.missing_historical_marker_events).toBe(19);
         expect(first.summary.source_blocked_events).toBeGreaterThan(0);
-        expect(first.summary.missing_source_note_events).toBe(19);
+        expect(first.summary.missing_source_note_events).toBe(17);
     });
 
     it('lists the approved first production authoring packet candidates without changing JSON content', () => {

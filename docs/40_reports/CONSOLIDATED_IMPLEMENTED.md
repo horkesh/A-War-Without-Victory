@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest event expansion roadmap contract:** [implemented/20260527_EVENT_EXPANSION_ROADMAP_CONTRACT.md](implemented/20260527_EVENT_EXPANSION_ROADMAP_CONTRACT.md) - Event expansion is now scoped as a gated full historical/counterfactual database with branch-visibility diagnostics first, a foundational decisions packet second, explicit historical labels, historical bot calibration, causal branch opens/closes, detailed modal explanations, and no broad authoring until source/default/sensitive gates are satisfied.
+
 **Latest force-quality diagnostic artifact ownership:** [implemented/20260527_FORCE_QUALITY_DIAGNOSTIC_ARTIFACT_OWNERSHIP.md](implemented/20260527_FORCE_QUALITY_DIAGNOSTIC_ARTIFACT_OWNERSHIP.md) - A static guard now locks the four committed `tools/diagnostics/_force_quality_*.md` diagnostics as retained force-quality evidence rather than transient run output or current calibration truth.
 
 **Latest painted-compare artifact ownership:** [implemented/20260527_PAINTED_COMPARE_ARTIFACT_OWNERSHIP.md](implemented/20260527_PAINTED_COMPARE_ARTIFACT_OWNERSHIP.md) - A static guard now locks the five committed `tools/diagnostics/_phase5a_painted_compares/*.txt` diagnostics as intentional Phase 5a painted-vs-sim evidence rather than transient run output.
@@ -531,3 +533,10 @@
 - Extended the content regression test to cover barracks, Corridor, London Conference, Prozor/Jajce, central Bosnia, Ahmici, Markale, and anti-sniping rows.
 - Current inventory remains 176 files / 296 claims / 245 stop-gated; cited source status improved to 224 and uncited dropped to 44.
 - Report: `docs/40_reports/implemented/20260527_CODEX_EVENT_SOURCE_NOTES_PHASE2.md`
+
+# 2026-05-27 - Event expansion roadmap contract
+
+- Reframed event expansion as a gated full historical/counterfactual database program.
+- Implemented branch-visibility metadata/diagnostics as the immediate safe slice, followed by a foundational decisions packet before broad authoring.
+- Preserved the sensitive-history, source, and historical-default gates; no event JSON, runtime behavior, save schema, GUI, scenario output, or calibration behavior changed.
+- Report: `docs/40_reports/implemented/20260527_EVENT_EXPANSION_ROADMAP_CONTRACT.md`

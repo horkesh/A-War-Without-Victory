@@ -310,6 +310,34 @@ export type EventEffect =
     // Fall-1995 mechanic E-A5
     | EventEffectOffensiveOpsSuppression;
 
+export type EventFutureConsequenceTiming = 'immediate' | 'next_turn' | 'future' | 'endgame';
+export type EventFutureConsequenceCertainty = 'guaranteed' | 'conditional' | 'risk';
+
+/** Player-facing branch-visibility metadata for response options.
+ *  Diagnostic/UI contract only: evaluators do not use this for gating. */
+export interface EventFutureConsequence {
+    /** Stable metadata id unique enough for the owning response option. */
+    id: string;
+    /** Short player-facing summary label. */
+    label: string;
+    /** When the consequence becomes visible or relevant. */
+    timing: EventFutureConsequenceTiming;
+    /** How certain the consequence is if this response is chosen. */
+    certainty: EventFutureConsequenceCertainty;
+    /** Event IDs this response can make available later. Diagnostic metadata only. */
+    opens_events?: string[];
+    /** Event IDs this response can foreclose later. Diagnostic metadata only. */
+    closes_events?: string[];
+    /** Flag IDs this response can make available later. Diagnostic metadata only. */
+    opens_flags?: string[];
+    /** Flag IDs this response can foreclose later. Diagnostic metadata only. */
+    closes_flags?: string[];
+    /** References to material effect previews or effect-kind summaries. */
+    material_effect_refs?: string[];
+    /** Player-facing explanation of the branch visibility. */
+    explanation: string;
+}
+
 /** A player/bot response option for decision events. */
 export interface EventResponseOption {
     /** Response identifier, e.g. 'accept', 'reject', 'negotiate'. */
@@ -335,6 +363,8 @@ export interface EventResponseOption {
     aggression_affinity?: number;
     /** Bot scoring hint: cautious commanders avoid high risk. [0, 1] */
     risk_level?: number;
+    /** Optional player-facing future branch visibility metadata. */
+    future_consequences?: EventFutureConsequence[];
 }
 
 /** Event category for UI display and filtering. */
