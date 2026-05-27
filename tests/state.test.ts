@@ -61,6 +61,7 @@ const baseState: GameState = {
         event_flags: {},
         enabled_event_ids: [],
         event_overflow_queue: [],
+        pending_event_notifications: [],
         phantoms_spawned: [],
         negotiation: {
             capital: {},

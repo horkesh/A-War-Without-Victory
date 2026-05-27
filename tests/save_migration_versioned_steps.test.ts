@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(22);
+        expect(getLatestSchemaVersion()).toBe(23);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -89,6 +89,7 @@ describe('versioned save migration steps', () => {
         expect(state.military.event_flags).toEqual({});
         expect(state.military.enabled_event_ids).toEqual([]);
         expect(state.military.event_overflow_queue).toEqual([]);
+        expect(state.military.pending_event_notifications).toEqual([]);
         expect(state.military.phantoms_spawned).toEqual([]);
         expect(state.paramilitary_decision_history).toEqual([]);
         expect(state.political.supply_rights).toEqual({ corridors: [] });
@@ -304,5 +305,73 @@ describe('versioned save migration steps', () => {
 
         expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
         expect(state.military.event_overflow_queue).toEqual(['overflow_b', 'overflow_a', 'overflow_b']);
+    });
+
+    it('materializes v23 pending event notification defaults for v22 saves', () => {
+        const state = minimalLegacyState(22);
+        state.military.event_overflow_queue = [];
+        delete state.military.pending_event_notifications;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_event_notifications).toEqual([]);
+    });
+
+    it('preserves existing v23 pending event notification order and contents for v22 saves', () => {
+        const state = minimalLegacyState(22);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [
+            {
+                notification_id: 'event_b:RS:RBiH',
+                event_id: 'event_b',
+                source_faction: 'RS',
+                target_faction: 'RBiH',
+                response_id: 'historical_b',
+                surfaced_on_turn: 4,
+                headline: 'Second notification',
+                body: 'Second notification body.',
+                consumed: false,
+            },
+            {
+                notification_id: 'event_a:HRHB:RBiH',
+                event_id: 'event_a',
+                source_faction: 'HRHB',
+                target_faction: 'RBiH',
+                response_id: 'historical_a',
+                surfaced_on_turn: 3,
+                headline: 'First notification',
+                body: 'First notification body.',
+                consumed: true,
+            },
+        ];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_event_notifications).toEqual([
+            {
+                notification_id: 'event_b:RS:RBiH',
+                event_id: 'event_b',
+                source_faction: 'RS',
+                target_faction: 'RBiH',
+                response_id: 'historical_b',
+                surfaced_on_turn: 4,
+                headline: 'Second notification',
+                body: 'Second notification body.',
+                consumed: false,
+            },
+            {
+                notification_id: 'event_a:HRHB:RBiH',
+                event_id: 'event_a',
+                source_faction: 'HRHB',
+                target_faction: 'RBiH',
+                response_id: 'historical_a',
+                surfaced_on_turn: 3,
+                headline: 'First notification',
+                body: 'First notification body.',
+                consumed: true,
+            },
+        ]);
     });
 });

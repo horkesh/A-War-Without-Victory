@@ -63,6 +63,7 @@ function currentVersionState(): any {
             event_flags: {},
             enabled_event_ids: [],
             event_overflow_queue: [],
+            pending_event_notifications: [],
             phantoms_spawned: [],
         },
         political: {
@@ -350,6 +351,7 @@ describe('save migration validator hardening', () => {
         delete state.military.event_flags;
         delete state.military.enabled_event_ids;
         delete state.military.event_overflow_queue;
+        delete state.military.pending_event_notifications;
         delete state.displacement.displacement_event_log;
         delete state.displacement.war_displacement_initiated;
         delete state.displacement.hostile_takeover_timers;
@@ -382,6 +384,7 @@ describe('save migration validator hardening', () => {
         expect(migrated.military.event_flags).toEqual({});
         expect(migrated.military.enabled_event_ids).toEqual([]);
         expect(migrated.military.event_overflow_queue).toEqual([]);
+        expect(migrated.military.pending_event_notifications).toEqual([]);
         expect(migrated.displacement.displacement_event_log).toEqual([]);
         expect(migrated.displacement.war_displacement_initiated).toEqual({});
         expect(migrated.displacement.hostile_takeover_timers).toEqual({});
@@ -617,6 +620,35 @@ describe('save migration validator hardening', () => {
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
             /Save schema validation failed after migration[\s\S]*v22[\s\S]*military\.event_overflow_queue/
+        );
+    });
+
+    it('materializes v23 pending event notifications for v22 saves', () => {
+        const state = currentVersionState();
+        state.schema_version = 22;
+        delete state.military.pending_event_notifications;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.pending_event_notifications).toEqual([]);
+    });
+
+    it('rejects current-version saves missing pending event notifications', () => {
+        const state = currentVersionState();
+        delete state.military.pending_event_notifications;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v23[\s\S]*military\.pending_event_notifications/
+        );
+    });
+
+    it('rejects current-version saves with malformed pending event notifications', () => {
+        const state = currentVersionState();
+        state.military.pending_event_notifications = {};
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v23[\s\S]*military\.pending_event_notifications/
         );
     });
 });

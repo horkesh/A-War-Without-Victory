@@ -48,7 +48,7 @@ Every new event packet must classify its trigger as one of:
 - Canon target from `Game_Bible_v0_9_0.md`: roughly 60% decision / 30% consequence / 10% forced events.
 - Current design gap: about 18% choice events, too many calendar/headline rows, too few pressure-driven presidential dilemmas.
 - Presentation gap: the modal-first substrate and 17 production-authored rows now have EU-style explicit historical/default markers, authored narration, visible citations/source notes, staff assessment, trigger evidence, and numeric consequence previews. Remaining presentation work is gated content approval, not generic modal substrate.
-- Engine/spec gap: live code uses a 4-event cap with same-turn mutex filtering, overflow diagnostics, and v22 persisted overflow queueing. Runtime semantic catalog validation now fails closed for registered effect/condition vocabulary, declared enum/range fields, duplicate ids, and unresolved event references.
+- Engine/spec gap: live code uses a 4-event cap with same-turn mutex filtering, overflow diagnostics, and v22 persisted overflow queueing. Runtime semantic catalog validation now fails closed for registered effect/condition vocabulary, declared enum/range fields, duplicate ids, and unresolved event references. Save schema v23 now makes `military.pending_event_notifications` a current-save contract while leaving runtime notification emission unchanged.
 - Acceptance proof gap: Workstream E now has a deterministic presidential routing diagnostic proving the 17 current production modal-ready rows surface for the responding player, resolve to player decision logs, and auto-resolve headlessly on historical defaults. Catalog readiness remains `NOT_READY` because 19 required-response rows still need gated content/source/default decisions.
 - Current technical blockers:
   - `evaluateEvents` caps fireable events at 4 per turn. Overflow is visible through additive report fields; same-turn `mutex_group` siblings are filtered before the cap; and ids delayed only by the cap persist in `military.event_overflow_queue` for re-evaluation on later turns.
@@ -57,7 +57,7 @@ Every new event packet must classify its trigger as one of:
   - Semantic catalog validation now shares effect/condition/faction vocabulary between loader and taxonomy and rejects unknown runtime semantics before the `EventDefinition[]` cast.
   - Taxonomy remains the owner for sensitive-history policy, modal readiness, source/default blocking, and trigger-authoring classification.
   - Further required-response modal authoring is blocked until the exact historical/default label and prose boundary are approved for the remaining sensitive, counterfactual, abstract, or source-weak rows.
-  - `validateGameStateShape` now covers `pending_event_notifications`, `pending_event_decisions`, `event_decision_log`, `event_aggression_modifiers`, `recruitment_modifiers`, and `equipment_quality_modifiers` when present.
+  - `validateGameStateShape` now covers `pending_event_decisions`, `event_decision_log`, `event_aggression_modifiers`, `recruitment_modifiers`, and `equipment_quality_modifiers` when present; v22 current saves require `military.event_overflow_queue`, and v23 current saves require `military.pending_event_notifications`.
   - some event condition/type fields are declared but weakly tested or partially implemented.
 
 ## Non-Goals
@@ -588,6 +588,8 @@ Any field that can appear in `GameState` must follow `docs/20_engineering/SAVE_S
 - If the default can affect scenario output, classify it as sensitive and get sign-off before commit.
 
 For event-system slices, this applies to `military.pending_event_decisions`, `military.event_decision_log`, active event modifiers, pending event notifications, overflow queues/backlogs, and any new decision/read-model state that is persisted.
+
+**Closed v23 note:** `military.pending_event_notifications` now has deterministic `[]` migration/default coverage, current-version missing/malformed rejection coverage, a v22 fixture, and save-migration drift report proof. The TypeScript optional marker is intentionally retained and runtime notification emission remains unchanged.
 
 ## Determinism Risks
 

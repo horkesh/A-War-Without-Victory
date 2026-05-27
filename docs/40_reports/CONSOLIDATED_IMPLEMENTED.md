@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest pending event notifications schema contract:** [implemented/20260527_PENDING_EVENT_NOTIFICATIONS_SCHEMA_CONTRACT.md](implemented/20260527_PENDING_EVENT_NOTIFICATIONS_SCHEMA_CONTRACT.md) - `military.pending_event_notifications` is now a required persisted v23 save/load contract with `[]` legacy migration, current-version missing/malformed rejection coverage, drift report proof, and no runtime notification-emission change.
+
 **Latest event presidential acceptance diagnostic:** [implemented/20260527_EVENT_PRESIDENTIAL_ACCEPTANCE_DIAGNOSTIC.md](implemented/20260527_EVENT_PRESIDENTIAL_ACCEPTANCE_DIAGNOSTIC.md) - A deterministic diagnostic now proves all 17 production modal-ready required-response rows surface for the responding player, resolve to exactly one player decision-log entry, and auto-resolve headlessly on historical defaults with no stuck pending decisions.
 
 **Latest event loader semantic validation:** [implemented/20260527_EVENT_LOADER_SEMANTIC_VALIDATION.md](implemented/20260527_EVENT_LOADER_SEMANTIC_VALIDATION.md) - Runtime event loading now shares vocabulary with taxonomy diagnostics and fails closed for unknown effect/condition semantics, duplicate IDs, unresolved event references, invalid response defaults, and declared enum/range violations while preserving the current 247-row catalog.
@@ -474,6 +476,13 @@
 - Queued ids are re-resolved, re-gated, canonically sorted with new candidates, mutex-filtered, capped, and replaced by the next post-cap overflow ids.
 - Refreshed startup/baseline generated artifacts for schema-byte drift; event JSON, prose, GUI, bot historical-default policy, and calibration logic are unchanged.
 - Report: `docs/40_reports/implemented/20260527_EVENT_OVERFLOW_QUEUE_IMPLEMENTATION.md`
+
+# 2026-05-27 - Pending event notifications schema contract
+
+- Added save schema v23 `military.pending_event_notifications` with an inert `[]` legacy migration default and current-version missing/malformed rejection coverage.
+- Retained the TypeScript optional marker for runtime/legacy compatibility; event notification emission, event JSON/prose, event ordering, GUI behavior, bot choices, scenario data, and calibration logic are unchanged.
+- Refreshed the save-migration drift report to v23 / 23 migrations / 56 strict required fields.
+- Report: `docs/40_reports/implemented/20260527_PENDING_EVENT_NOTIFICATIONS_SCHEMA_CONTRACT.md`
 
 # 2026-05-27 - Codex sensitive-claim inventory Phase 0
 

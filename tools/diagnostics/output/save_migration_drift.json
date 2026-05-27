@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 22,
-  "registered_migration_count": 22,
-  "strict_required_field_count": 55,
+  "latest_schema_version": 23,
+  "registered_migration_count": 23,
+  "strict_required_field_count": 56,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -93,6 +93,10 @@
     {
       "version": 22,
       "description": "Persisted military event overflow queue defaults. Sensitive: no."
+    },
+    {
+      "version": 23,
+      "description": "Persisted event notification queue defaults. Sensitive: no."
     }
   ],
   "required_fields": [
@@ -315,6 +319,10 @@
     {
       "version": 22,
       "path": "military.event_overflow_queue"
+    },
+    {
+      "version": 23,
+      "path": "military.pending_event_notifications"
     }
   ]
 }

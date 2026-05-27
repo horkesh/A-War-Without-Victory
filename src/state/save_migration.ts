@@ -641,3 +641,11 @@ registerMigration({
         ensureArray(asRecord(state.military), 'event_overflow_queue');
     },
 });
+
+registerMigration({
+    version: 23,
+    description: 'Persisted event notification queue defaults. Sensitive: no.',
+    migrate: (state) => {
+        ensureArray(asRecord(state.military), 'pending_event_notifications');
+    },
+});

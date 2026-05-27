@@ -261,6 +261,7 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 20, path: 'military.phantoms_spawned', check: isStringArray },
     { version: 21, path: 'paramilitary_decision_history', check: Array.isArray },
     { version: 22, path: 'military.event_overflow_queue', check: isStringArray },
+    { version: 23, path: 'military.pending_event_notifications', check: Array.isArray },
 ];
 
 /**

@@ -1,4 +1,21 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] state(events): make pending event notifications a v23 save contract
+
+**Type:** Save-schema/default contract slice.
+
+**Change:** Bumped `CURRENT_SCHEMA_VERSION` to 23 and added migration v23 for `military.pending_event_notifications` with an inert `[]` default. Current-version save validation now rejects missing or malformed notification queues, and the v22 fixture plus focused migration/validator tests prove default materialization and order/content preservation. The TypeScript optional marker remains in `GameState` for legacy/in-memory runtime compatibility.
+
+**Determinism:** Migration is pure and preserves existing array order. `tools/diagnostics/output/save_migration_drift.json` was regenerated to v23 / 23 migrations / 56 strict required fields. No runtime event emission, event JSON/prose, event ordering, bot choice, GUI behavior, scenario data, baseline artifacts, generated scenario artifacts, or calibration logic changed.
+
+**Verification:**
+- Red proof before production change: focused migration/notification tests failed on missing v23 migration/default/validator coverage.
+- `npx.cmd vitest run tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts tests\state\serialize.notifications.test.ts --reporter=dot` - PASS; 91/91 tests.
+- `npx.cmd vitest run tests\event_state_shape_validation.test.ts tests\events_evaluate.test.ts tests\save_migration_round_trip_contract.test.ts tests\save_migration_drift_audit.test.ts tests\migration_nested_ownership.test.ts tests\state.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts tests\state\serialize.notifications.test.ts --reporter=dot` - PASS; 160/160 tests.
+- `npx.cmd vitest run tests\save_migration_counter_offers.test.ts tests\state\player_faction_contract.test.ts tests\combat_state_schema.test.ts tests\displacement_pipeline_state_schema.test.ts tests\early_war_state_schema.test.ts tests\emergence_pressure_schema.test.ts tests\game_state_shape.test.ts tests\game_state_no_derived_fields.test.ts tests\turn_pipeline_determinism_smoke.test.ts tests\event_state_shape_validation.test.ts tests\migration_nested_ownership.test.ts tests\state.test.ts --reporter=dot` - PASS; 56/56 tests.
+- `node tools\diagnostics\strict_null_inventory.cjs` - PASS; optional-field floor remains 465.
+
+**Artifacts:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, save/state tests, `tests/fixtures/save_migration/v22_pending_event_notifications.json`, `tools/diagnostics/output/save_migration_drift.json`, `docs/40_reports/implemented/20260527_PENDING_EVENT_NOTIFICATIONS_SCHEMA_CONTRACT.md`, command-board/roadmap/plan docs.
+
 ## [2026-05-27] events(diagnostics): add presidential acceptance proof
 
 **Type:** Event-system Workstream E acceptance diagnostic.
