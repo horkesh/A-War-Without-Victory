@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest force-quality diagnostic artifact ownership:** [implemented/20260527_FORCE_QUALITY_DIAGNOSTIC_ARTIFACT_OWNERSHIP.md](implemented/20260527_FORCE_QUALITY_DIAGNOSTIC_ARTIFACT_OWNERSHIP.md) - A static guard now locks the four committed `tools/diagnostics/_force_quality_*.md` diagnostics as retained force-quality evidence rather than transient run output or current calibration truth.
+
 **Latest painted-compare artifact ownership:** [implemented/20260527_PAINTED_COMPARE_ARTIFACT_OWNERSHIP.md](implemented/20260527_PAINTED_COMPARE_ARTIFACT_OWNERSHIP.md) - A static guard now locks the five committed `tools/diagnostics/_phase5a_painted_compares/*.txt` diagnostics as intentional Phase 5a painted-vs-sim evidence rather than transient run output.
 
 **Latest consequence runtime queue schema contract:** [implemented/20260527_CONSEQUENCE_RUNTIME_QUEUE_SCHEMA_CONTRACT.md](implemented/20260527_CONSEQUENCE_RUNTIME_QUEUE_SCHEMA_CONTRACT.md) - Consequence runtime queues are now required persisted v31 save/load contracts with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no event or operation behavior change.

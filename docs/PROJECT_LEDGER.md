@@ -1,4 +1,24 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] test(diagnostics): lock force-quality diagnostic artifact ownership
+
+**Type:** Save/replay generated-artifact stability + static ownership guard.
+
+**Change:** Added `tests/force_quality_diagnostic_artifact_ownership.test.ts` and a generated-artifact ownership row for `tools/diagnostics/_force_quality_*.md`. The guard proves the four expected force-quality markdown diagnostics are Git-tracked, cross-reference the force-quality raw-data/metrics/synthesis context, are referenced by the ownership matrix, and are classified as committed retained diagnostic evidence rather than transient `runs/` output or current calibration truth.
+
+**Determinism:** Documentation/test-only ownership slice. No schema bump, runtime behavior change, scenario/calibration output refresh, operation-opportunity change, event prose/content change, GUI routing change, sector/frontline logic change, replay writer change, or force-quality artifact byte change.
+
+**Verification:**
+- `npx.cmd vitest run tests\force_quality_diagnostic_artifact_ownership.test.ts --reporter=dot` - PASS; 1/1 tests.
+- `npx.cmd vitest run tests\generated_artifact_ownership_matrix_contract.test.ts tests\force_quality_diagnostic_artifact_ownership.test.ts --reporter=dot` - pre-stage integration check failed as expected in an unstaged handoff: the new guard passed, while the existing meta-guard failed because `git ls-files` cannot see `tests/force_quality_diagnostic_artifact_ownership.test.ts` until the parent stages or commits it.
+- Parent staged verification: `npx.cmd vitest run tests\generated_artifact_ownership_matrix_contract.test.ts tests\force_quality_diagnostic_artifact_ownership.test.ts --reporter=dot` - PASS; 2/2 tests.
+- `npm.cmd run typecheck` - PASS.
+- `git diff --check` - PASS.
+- `git diff --cached --check` - PASS.
+- `git status --short -- tools\diagnostics\_force_quality_*.md` - clean.
+- Independent artifact ownership review - no blockers; confirmed docs/test-only scope, no force-quality artifact bytes changed, the row avoids current-calibration-truth overclaim, and the generated-artifact meta contract remains strict.
+
+**Artifacts:** `tests/force_quality_diagnostic_artifact_ownership.test.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/40_reports/implemented/20260527_FORCE_QUALITY_DIAGNOSTIC_ARTIFACT_OWNERSHIP.md`, report indexes.
+
 ## [2026-05-27] test(diagnostics): lock painted-compare artifact ownership
 
 **Type:** Save/replay generated-artifact stability + static ownership guard.
