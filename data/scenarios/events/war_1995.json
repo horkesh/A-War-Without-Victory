@@ -523,7 +523,7 @@
   {
     "id": "nato_deliberate_force_1995",
     "title": "NATO Operation Deliberate Force",
-    "narrative": "NATO launches Operation Deliberate Force, a sustained air campaign against VRS military targets across Bosnia. Over two weeks, NATO aircraft fly 3,515 sorties and strike ammunition depots, communications facilities, air defenses, and command bunkers. Combined with a Tomahawk cruise missile strike, the campaign devastates VRS military infrastructure and shatters its ability to sustain offensive operations.",
+    "narrative": "NATO launches Operation Deliberate Force, a sustained air campaign against VRS military targets across Bosnia. Over two weeks, NATO aircraft fly 3,515 sorties and strike ammunition depots, communications facilities, air defenses, and command bunkers. Combined with a Tomahawk cruise missile strike, the campaign damages VRS military infrastructure and adds pressure to its ability to sustain operations.",
     "category": "military",
     "trigger": {
       "turn_min": 165,
@@ -563,7 +563,7 @@
       },
       {
         "kind": "narrative",
-        "text": "NATO launches Operation Deliberate Force. Sustained air strikes devastate VRS military infrastructure across Bosnia."
+        "text": "NATO launches Operation Deliberate Force. Sustained air strikes hit VRS military infrastructure across Bosnia."
       }
     ]
   },
@@ -988,7 +988,7 @@
   {
     "id": "deliberate_force_rs_compliance_1995",
     "title": "NATO Airstrikes: Comply or Escalate?",
-    "narrative": "NATO aircraft are striking VRS positions across Bosnia. Holbrooke holds the pause button. Milosevic urges Pale to withdraw heavy weapons from Sarajevo and open supply routes. Defiance means the bombing continues.",
+    "narrative": "NATO aircraft are striking VRS positions across Bosnia. US diplomacy presses Pale to withdraw heavy weapons from Sarajevo and open supply routes. Defiance means the bombing continues.",
     "category": "military",
     "trigger": {
       "turn_min": 178,
@@ -1001,7 +1001,7 @@
     "bot_response_logic": "strategic_weighted",
     "effect": {
       "kind": "narrative",
-      "text": "NATO's Operation Deliberate Force strikes VRS artillery, ammunition dumps, and command nodes. The question is whether Pale complies or absorbs the punishment."
+      "text": "NATO's Operation Deliberate Force strikes VRS artillery, ammunition dumps, and command nodes. The question is whether Pale complies or continues to face NATO air strikes."
     },
     "effects": [],
     "dimension_shifts": [
@@ -1044,8 +1044,8 @@
       },
       {
         "id": "absorb_strikes_hold_position",
-        "label": "Absorb the strikes -- hold every position",
-        "description": "Defy NATO. The bombing continues. Military credibility with hardliners rises briefly, but the sustained strikes degrade VRS combat power.",
+        "label": "Reject NATO demands -- hold positions",
+        "description": "Reject NATO demands. The bombing continues, increasing pressure on VRS command and combat capability.",
         "effects": [],
         "dimension_shifts": [
           {
@@ -1073,7 +1073,7 @@
   {
     "id": "operation_mistral_2_1995",
     "title": "Operation Mistral 2 -- Jajce Recaptured",
-    "narrative": "The Croatian war machine rolls north from Grahovo. Operation Mistral 2 sends the 4th and 7th Guards Brigades -- the same elite formations that took Knin -- into the heart of VRS-held western Bosnia. Sipovo falls. Mrkonjic Grad falls. And on September 13, Jajce -- the symbolic prize lost in October 1992 amid mutual HVO-ARBiH recriminations -- is liberated. Two thousand square kilometers change hands in eight days. The VRS line in western Bosnia is disintegrating.",
+    "narrative": "HV/HVO forces advance from the Grahovo-Glamoc area during Operation Mistral 2. The operation sends the 4th and 7th Guards Brigades -- the same elite formations that took Knin -- against VRS-held positions in western Bosnia. The offensive captures Sipovo and Mrkonjic Grad. On September 13, Jajce -- the symbolic prize lost in October 1992 amid mutual HVO-ARBiH recriminations -- is recaptured. Two thousand square kilometers change hands in eight days. VRS positions in western Bosnia come under severe pressure.",
     "category": "military",
     "trigger": {
       "turn_min": 179,
@@ -1107,7 +1107,7 @@
       },
       {
         "kind": "narrative",
-        "text": "Jajce is recaptured after three years. HV-HVO forces sweep through western Bosnia, collapsing VRS positions across a 2,000 km2 front."
+        "text": "Jajce is recaptured after three years. HV-HVO forces advance through western Bosnia, taking substantial territory and forcing VRS withdrawals."
       }
     ],
     "dimension_shifts": [

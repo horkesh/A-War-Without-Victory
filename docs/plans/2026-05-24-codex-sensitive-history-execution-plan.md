@@ -6,7 +6,7 @@
 **Related command-board row:** P1 Dynamic Codex and sensitive-history consequence arcs
 **Collision rules:** May edit Codex/content diagnostics and safe factual prose. Must stop before new sensitive-history framing, unsupported historical claims, or mechanics that turn atrocities into player levers.
 **Phase covered:** Safe Codex sweep, source-backed correction, sensitive-history packet preparation, and dynamic consequence arcs.
-**Current next action:** Phase 1 safe factual correction queue from the Phase 0 inventory baseline; sensitive-history packets remain gated.
+**Current next action:** Source-note packets for Srebrenica/Zepa event rows; sensitive-history packets remain gated.
 
 ## Purpose
 
@@ -124,7 +124,7 @@ Stop gates:
 
 **Owner:** documentation-specialist
 **Reviewers:** historian, canon-compliance-reviewer
-**Status:** NEXT. Start with the Phase 0 queue: Deliberate Force and Mistral 2 operational overclaim wording, then source-note packets for Srebrenica/Zepa event rows. Do not touch sensitive-history levers or counterfactual atrocity/prevention framing without review.
+**Status:** IN PROGRESS. Deliberate Force and Mistral 2 operational overclaim wording closed 2026-05-27 by `docs/40_reports/implemented/20260527_CODEX_SAFE_FACTUAL_CORRECTIONS_PHASE1.md`. Continue with source-note packets for Srebrenica/Zepa event rows. Do not touch sensitive-history levers or counterfactual atrocity/prevention framing without review.
 
 Steps:
 
@@ -145,6 +145,16 @@ Stop gates:
 - new historical assertion without citation;
 - prose implies victory/atrocity/civilian-harm causality not represented by state;
 - correction requires event/outcome tuning.
+
+Closed proof for first safe-factual slice:
+
+```powershell
+npx.cmd vitest run tests\codex_safe_factual_corrections.test.ts tests\event_timeline_integrity.test.ts tests\sim\events\event_taxonomy_report.test.ts --reporter=dot
+node --check tools\diagnostics\codex_sensitive_claim_inventory.cjs
+node tools\diagnostics\codex_sensitive_claim_inventory.cjs --json
+```
+
+Diagnostic delta: 176 files scanned, 296 claims, 245 stop-gated claims. Safe factual correction count moved 52 -> 51.
 
 ## Phase 2 - Sensitive-History Review Packets
 

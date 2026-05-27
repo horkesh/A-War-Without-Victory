@@ -481,3 +481,10 @@
 - Current live baseline scans 176 files and reports 297 claims, including 245 stop-gated review items.
 - No prose, citations, event behavior, UI rendering, scenario data, or sensitive-history mechanics changed.
 - Report: `docs/40_reports/audits/20260527_CODEX_SENSITIVE_CLAIM_INVENTORY_PHASE0.md`
+
+# 2026-05-27 - Codex safe factual corrections Phase 1
+
+- Replaced cinematic/over-causal Deliberate Force and Mistral 2 wording in `war_1995.json` with bounded operational phrasing.
+- Added a content regression test to keep the removed phrases from returning.
+- No triggers, effects, bot policy, save schema, calibration data, or sensitive-history mechanics changed.
+- Report: `docs/40_reports/implemented/20260527_CODEX_SAFE_FACTUAL_CORRECTIONS_PHASE1.md`

@@ -85,8 +85,8 @@ The historian/canon inventory identified these next safe actions:
 
 Phase 1 should start with safe factual corrections only:
 
-1. Deliberate Force bounded operational wording.
-2. Mistral 2 bounded operational wording.
+1. Deliberate Force bounded operational wording. Closed by `docs/40_reports/implemented/20260527_CODEX_SAFE_FACTUAL_CORRECTIONS_PHASE1.md`.
+2. Mistral 2 bounded operational wording. Closed by `docs/40_reports/implemented/20260527_CODEX_SAFE_FACTUAL_CORRECTIONS_PHASE1.md`.
 3. Source-note packet preparation for Srebrenica/Zepa event rows.
 
 Sensitive-history levers, counterfactual atrocity/prevention framing, and dynamic-state consequence claims remain gated.

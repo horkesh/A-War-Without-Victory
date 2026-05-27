@@ -11827,3 +11827,20 @@ Also replaced the new `as unknown as JsonObject` pressure read in `src/sim/event
 **Artifacts:** `tools/diagnostics/codex_sensitive_claim_inventory.cjs`, `tests/codex_sensitive_claim_inventory.test.ts`, `src/sim/events/event_loader.ts`, `docs/40_reports/audits/20260527_CODEX_SENSITIVE_CLAIM_INVENTORY_PHASE0.md`, `docs/plans/2026-05-24-codex-sensitive-history-execution-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-27] codex: bound Deliberate Force and Mistral 2 event wording
+
+**Type:** Safe factual content correction.
+
+**Change:** Replaced cinematic and over-causal event prose in `data/scenarios/events/war_1995.json` for `nato_deliberate_force_1995`, `deliberate_force_rs_compliance_1995`, and `operation_mistral_2_1995`. The new wording uses bounded operational language: damaged/pressure for Deliberate Force, US diplomacy instead of "pause button," continued air strikes instead of "punishment," and HV/HVO advance / recaptured / severe pressure instead of "war machine," "liberated," "sweep," "collapsing," or "disintegrating." Added `tests/codex_safe_factual_corrections.test.ts` to prevent the removed phrases from returning.
+
+**Determinism:** Text/test/docs only. No event ids, triggers, effects, response ids, dimension shifts, bot response logic, save schema, scenario setup, calibration parameters, UI routing, generated artifacts, or sensitive-history mechanics changed. The change is a wording reduction using existing source context, not a new historical claim.
+
+**Verification:**
+- `npx.cmd vitest run tests\codex_safe_factual_corrections.test.ts tests\event_timeline_integrity.test.ts tests\sim\events\event_taxonomy_report.test.ts --reporter=dot` - PASS; 44/44 tests.
+- `node --check tools\diagnostics\codex_sensitive_claim_inventory.cjs` - PASS.
+- `node tools\diagnostics\codex_sensitive_claim_inventory.cjs --json` - PASS; parsed live baseline 176 files / 296 claims / 245 stop-gated.
+
+**Artifacts:** `data/scenarios/events/war_1995.json`, `tests/codex_safe_factual_corrections.test.ts`, `docs/40_reports/implemented/20260527_CODEX_SAFE_FACTUAL_CORRECTIONS_PHASE1.md`, `docs/40_reports/audits/20260527_CODEX_SENSITIVE_CLAIM_INVENTORY_PHASE0.md`, `docs/plans/2026-05-24-codex-sensitive-history-execution-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
+
+---
