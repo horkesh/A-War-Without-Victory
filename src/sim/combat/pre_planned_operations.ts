@@ -441,6 +441,11 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         faction: 'RS',
         name: 'Operation Foca',
         staging_osid: 'op:foca:foca_3',
+        // planning_duration:6 — kalinovik axis brigades take 5 elapsed turns to reach vlaholje
+        // (adjacent to golubici_2). Default aggressiveness anti-paralysis fires at elapsed=5 (t10=w09),
+        // 1 turn before brigades arrive → zero_eligible_axis. Extending to 6 shifts anti-paralysis
+        // to elapsed=6 (t11=w10) when kalinovik_brigade is already at vlaholje. n93 regression.
+        planning_duration: 6,
         axes: [
             {
                 axis_id: 'foca_valley',

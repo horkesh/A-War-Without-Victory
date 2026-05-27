@@ -1,4 +1,58 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-27] calibration(n105): Op Foca planning_duration:6 — kalinovik anti-paralysis fix
+
+**Type:** Engine parameter fix — single field change in `src/sim/combat/pre_planned_operations.ts`.
+
+**Root cause:** varos_2 RS override (n93) changed rs_kalinovik_brigade's march routing. Brigade now takes 2 extra turns to reach vlaholje (adjacent to golubici_2). Default aggressiveness anti-paralysis fires at elapsed=5 (turn 10 = w09), 1 turn before brigade arrives → `zero_eligible_axis` → Op Foca recovery without executing kalinovik axis. In n93, kalinovik:golubici_2 and kalinovik:sela_2 both regressed RS→RBiH.
+
+**Fix:** `planning_duration: 6` on Operation Foca definition. Shifts anti-paralysis from elapsed=5 to elapsed=6 (turn 11 = w10). By w10, kalinovik_brigade is at vlaholje and adjacent to golubici_2 → eligible → execution succeeds.
+
+**Results (n105 vs n93 baseline):**
+- Wave 1 (52w vs jan1993): **654/712 (91.9%)** [n93: 653/712 (91.7%)] +1
+- kalinovik:golubici_2 FIXED (sim=RS ✓)
+- kalinovik:sela_2 still open at 52w (attack prediction drops after 2 failed attempts; self-corrects by 104w)
+
+**New 4-wave baselines (post-fix):**
+| Wave | Weeks | Target | Run | Count | Area |
+|------|-------|--------|-----|-------|------|
+| 1 | 52w | jan1993 | n105 | 654/712 (91.9%) | 93.8% |
+| 2 | 104w | apr1994 | n102 | 655/712 (92.0%) | 93.8% |
+| 3 | 156w | apr1995 | n103 | 652/712 (91.6%) | 93.4% |
+| 4 | 188w | oct1995 | n104 | 628/712 (88.2%) | 87.4% |
+
+sela_2 confirmed captured by 104w (absent from n102 DRINA mismatch list). Goražde and Srebrenica enclave inner rings remain structural ceiling — RBiH-held pockets until event-driven fall. Wave 4 (188w, 88.2%) reflects Storm/Mistral CC gap, consistent with prior baselines.
+
+**Next:** op:ugljevik:jasikovac RS override (+1, safe — not in any op objectives).
+
+## [2026-05-27] calibration: multi-wave baseline established; n94 kijevo_2 override applied
+
+**Type:** Calibration milestone — multi-wave baselines + n94 change applied.
+
+**Strategy:** Calibrate in sequence: Wave 1 (52w vs jan1993) → Wave 2 (104w vs apr1994) → Wave 3 (156w vs apr1995) → Wave 4 (188w vs oct1995). All four definitive scenario files share 28 canonical `osid_control_overrides` (27 from n93 + kijevo_2).
+
+**BASELINES (pre-n94 kijevo_2 override, 28 overrides):**
+| Wave | Weeks | Target | Run | Count | Area |
+|------|-------|--------|-----|-------|------|
+| 1 | 52w | jan1993 | n93 | 653/712 (91.7%) | 93.7% |
+| 2 | 104w | apr1994 | n94 | 651/712 (91.4%) | 92.8% |
+| 3 | 156w | apr1995 | n100 | 647/712 (90.9%) | 91.7% |
+| 4 | 188w | oct1995 | n96 | 627/712 (88.1%) | 86.5% |
+
+**n94 change (REVERTED):** Added then removed `"op:trnovo:kijevo_2": "RS"` override. Result: 647/712 (−6 vs n93). Override strips kijevo_2 from Op Trnovo east axis → makes delijas the first enemy objective → Op Trnovo fires and captures delijas (RBiH-painted) → net SARAJEVO 0 (kijevo_2 +1, delijas −1). Additional cascade into DRINA −3, CENTRAL_BOSNIA −2, HERZEGOVINA −1 from changed game hash. kijevo_2 is now classified as STRUCTURAL CEILING — cannot fix via override (op-targeted OSID creates cascade) and cannot fix via op repair (design flaw: captures RBiH-painted OSIDs). **Rule established: NEVER add osid_control_overrides for any OSID that is an explicit objective in any pre_planned_operation.**
+
+**Op Trnovo investigation (completed 2026-05-27):**
+- Injection blocked weeks 10-28: rs_igman_brigade not eligible (only 1 participant < MIN=2)
+- Execution fails week 29: rs_igman_brigade at misevici_2, not at staging gornja_presjenica (0 eligible)
+- DESIGN FLAW: even if fixed, net −1 in jan1993 context (kijevo_2 +1, delijas+trnovo −2)
+- Correct fix: scenario override for kijevo_2 (not op repair)
+
+**Structural gaps (documented, not yet fixed):**
+- Goražde enclave cluster (7 OSIDs) — BFS isolation engine gap; expected at all waves
+- Srebrenica enclave cluster — broken ring; appears at 104w+, clears at 188w via event
+- KRAJINA collapse at 188w (−28 OSIDs) — Op Storm CC expansion needed, correct direction
+- kalinovik:golubici_2+sela_2 — persistent RS→RBiH across all waves; next investigation target
+- gornja_presjenica (188w only, painted=RBiH, sim=RS) — consequence of Trnovo staging; accepted
+
 ## [2026-05-25] fix(sana): repair BIHAC_PETROVAC_OBJECTIVES adjacency gap (R15)
 
 **Type:** Data fix — objective sequence correction in `operation_opportunity_catalog_5th_corps.ts`.
