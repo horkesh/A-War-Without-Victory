@@ -540,3 +540,10 @@
 - Implemented branch-visibility metadata/diagnostics as the immediate safe slice, followed by a foundational decisions packet before broad authoring.
 - Preserved the sensitive-history, source, and historical-default gates; no event JSON, runtime behavior, save schema, GUI, scenario output, or calibration behavior changed.
 - Report: `docs/40_reports/implemented/20260527_EVENT_EXPANSION_ROADMAP_CONTRACT.md`
+
+# 2026-05-27 - Event future consequence modal slice
+
+- Added behavior-neutral `future_consequences` metadata to `rbih_state_identity`, `hrhb_political_goal`, `rs_assembly_rejects_voplan_1993`, and `belgrade_embargo_rs_1994`.
+- Rendered future-consequence cards in the existing event decision modal using branch-visibility wording, not runtime open/close claims.
+- Preserved evaluator behavior, response effects, bot choices, save schema, scenario setup, generated artifacts, and calibration behavior.
+- Report: `docs/40_reports/implemented/20260527_EVENT_FUTURE_CONSEQUENCE_MODAL_SLICE.md`

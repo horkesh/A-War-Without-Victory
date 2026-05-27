@@ -59,8 +59,27 @@ describe('event taxonomy diagnostic report', () => {
         expect(report.summary.historical_default_markers).toBe(17);
         expect(report.summary.historical_default_ids).toBe(17);
         expect(report.summary.modal_ready_events).toBe(17);
-        expect(report.rows.every((row) => row.future_consequence_count === 0)).toBe(true);
-        expect(report.rows.flatMap((row) => row.future_consequence_opens_events)).toEqual([]);
+        expect(new Map(report.rows
+            .filter((row) => row.future_consequence_count > 0)
+            .map((row) => [row.id, row.future_consequence_count]))).toEqual(new Map([
+            ['rbih_state_identity', 3],
+            ['hrhb_political_goal', 3],
+            ['rs_assembly_rejects_voplan_1993', 2],
+            ['belgrade_embargo_rs_1994', 2],
+        ]));
+        expect(report.rows.flatMap((row) => row.future_consequence_opens_events)).toEqual([
+            'csq_bosniak_unity_1993',
+            'csq_civic_identity_consolidation_1993',
+            'csq_international_disillusionment_1993',
+            'csq_minority_defections_1992',
+            'csq_pragmatic_coalition_1993',
+            'csq_federation_early_1994',
+            'csq_hvo_central_bosnia_offensive_1993',
+            'csq_joint_offensive_1994',
+            'csq_joint_operations_agreement_1992',
+            'csq_territorial_friction_1993',
+            'csq_zagreb_displeasure_1993',
+        ]);
         expect(report.rows.flatMap((row) => row.future_consequence_closes_events)).toEqual([]);
     });
 

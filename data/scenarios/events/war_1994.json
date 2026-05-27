@@ -780,6 +780,22 @@
         "sets_flags": {
           "rs_belgrade_response": "defiant"
         },
+        "future_consequences": [
+          {
+            "id": "belgrade_defiance_visibility",
+            "label": "Belgrade split hardens",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_flags": [
+              "rs_belgrade_response"
+            ],
+            "material_effect_refs": [
+              "morale_change.RS",
+              "supply_delta.RS"
+            ],
+            "explanation": "Defying Belgrade records rs_belgrade_response as defiant. No current catalog follow-up event directly keys on this value, but the branch remains visible in decision diagnostics."
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "RS",
@@ -814,6 +830,21 @@
         "sets_flags": {
           "rs_belgrade_response": "negotiate"
         },
+        "future_consequences": [
+          {
+            "id": "belgrade_accommodation_visibility",
+            "label": "Accommodation channel",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_flags": [
+              "rs_belgrade_response"
+            ],
+            "material_effect_refs": [
+              "supply_delta.RS"
+            ],
+            "explanation": "Seeking accommodation records rs_belgrade_response as negotiate. No current catalog follow-up event directly keys on this value, but the branch remains visible in decision diagnostics."
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "RS",

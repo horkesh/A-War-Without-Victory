@@ -1,7 +1,7 @@
 # Event System Presidential Core Upgrade Plan
 
 **Date:** 2026-05-24
-**Status:** ACTIVE/GATED external-agent execution plan / Workstream A baseline closed, Workstream B evaluator ordering/overflow visibility, loader fail-closed, row-level structural validation, semantic catalog validation, event state shape validation, mutex filtering, persisted overflow queue, v23 notification queue contract, v24 pending decision queue contract, and v25 active event modifier queue contract slices closed; Workstream E presidential acceptance diagnostic closed; event-expansion roadmap, branch-visibility diagnostics contract, and foundational decisions packet closed behavior-neutrally
+**Status:** ACTIVE/GATED external-agent execution plan / Workstream A baseline closed, Workstream B evaluator ordering/overflow visibility, loader fail-closed, row-level structural validation, semantic catalog validation, event state shape validation, mutex filtering, persisted overflow queue, v23 notification queue contract, v24 pending decision queue contract, and v25 active event modifier queue contract slices closed; Workstream E presidential acceptance diagnostic closed; event-expansion roadmap, branch-visibility diagnostics contract, foundational decisions packet, and first future-consequence modal slice closed behavior-neutrally
 **Owner lane:** Event-system product/engine lane
 **Related board row:** `Command Board -> Event system presidential core upgrade`
 **Do not collide with:** calibration / army-arc branch. The 2026-05-25 presidential GUI restructure is merged; use its Decision Surface Registry, President's Desk, modal stack rules, and consequence ledger instead of inventing another decision surface.
@@ -73,7 +73,7 @@ Contract requirements:
 - Detailed modal explanations: presidential decisions must explain situation, evidence, historical baseline, staff rationale, options, numeric/mechanical consequences, uncertainty, source note, and record trail. The modal must not expose hidden enemy truth or hidden model reasoning.
 - Material consequences: decisions must alter flags, dimensions, constraints, modifiers, event eligibility, notification/Codex/Records trails, or endgame/cost interpretation. Pure wallpaper rows are rewritten, cut, or routed to non-blocking history surfaces.
 
-Current gate remains active: no broad historical/counterfactual content authoring until sensitive-history, source, and historical-default decisions are satisfied. The behavior-neutral branch-visibility metadata/diagnostics slice is closed; it makes event-chain openings/closures auditable without changing event behavior. The foundational decisions packet at `docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md` approves the label taxonomy, source boundaries, sensitive-history rulings, material-consequence minimum, and next behavior-neutral visible slice.
+Current gate remains active: no broad historical/counterfactual content authoring until sensitive-history, source, and historical-default decisions are satisfied. The behavior-neutral branch-visibility metadata/diagnostics slice is closed; it makes event-chain openings/closures auditable without changing event behavior. The foundational decisions packet at `docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md` approves the label taxonomy, source boundaries, sensitive-history rulings, material-consequence minimum, and next behavior-neutral visible slice. That first visible slice is now implemented by `docs/40_reports/implemented/20260527_EVENT_FUTURE_CONSEQUENCE_MODAL_SLICE.md`: four approved rows carry branch-visibility metadata and the event modal renders future-consequence cards without runtime branch gating.
 
 ## Non-Goals
 
@@ -545,7 +545,7 @@ npm.cmd run typecheck
 git diff --check
 ```
 
-Handoff: Product Manager uses the branch-visibility report and foundational decisions packet to dispatch the first visible branch-metadata/modal slice.
+Handoff: Product Manager uses the foundational decisions packet to dispatch the next source/default packet, starting with `visit_to_front_*`, while keeping runtime branch gating deferred.
 
 ### Phase 2 - Foundational Decisions Packet
 
@@ -563,7 +563,7 @@ The packet must settle:
 - material-consequence minimums for presidential decisions;
 - first authoring packet order and reviewer sign-off path.
 
-No broad event JSON/prose authoring proceeds from this phase. The packet approves only the next behavior-neutral visible slice: add `future_consequences` metadata to `rbih_state_identity`, `hrhb_political_goal`, `rs_assembly_rejects_voplan_1993`, and `belgrade_embargo_rs_1994`, then render future-consequence cards in the existing event modal without changing evaluator behavior.
+No broad event JSON/prose authoring proceeds from this phase. The packet approved only the first behavior-neutral visible slice; that slice is now closed for `rbih_state_identity`, `hrhb_political_goal`, `rs_assembly_rejects_voplan_1993`, and `belgrade_embargo_rs_1994`.
 
 Verification:
 
@@ -571,7 +571,7 @@ Verification:
 git diff --check
 ```
 
-Handoff: Technical Architect confirms the approved decisions map to event schema/diagnostic fields before authoring starts; UI/UX then implements modal rendering for future-consequence metadata while gameplay behavior remains unchanged.
+Handoff: Historian/Game Designer prepare the next source/default packet in the approved order. Technical Architect must still approve exact semantics before any runtime branch behavior is implemented.
 
 ### Phase 3 - Predicate and Consequence Substrate
 

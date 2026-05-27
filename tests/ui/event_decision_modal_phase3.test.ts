@@ -85,4 +85,59 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(screen.queryByText('Recommended')).toBeNull();
     expect(screen.queryByText('Correct choice')).toBeNull();
   });
+
+  it('renders future-consequence cards only for response options that include branch metadata', () => {
+    render(React.createElement(EventDecisionModal, {
+      decision: {
+        event_id: 'branch_visibility_review',
+        event_title: 'Branch Visibility Review',
+        turn_fired: 12,
+        faction: 'RS',
+        historical_default_response_id: 'hold_line',
+        response_options: [
+          {
+            id: 'hold_line',
+            label: 'Hold the line',
+            description: 'Keep the current posture.',
+            historical_marker: 'historical_default',
+            effects: [],
+            future_consequences: [
+              {
+                id: 'negotiation_window',
+                label: 'Negotiation window preserved',
+                timing: 'future',
+                certainty: 'conditional',
+                explanation: 'This response can keep a later diplomatic review available if battlefield pressure remains manageable.',
+                opens_events: ['winter_negotiation_review'],
+                closes_events: ['emergency_retrenchment_review'],
+                opens_flags: ['diplomatic_channel_open'],
+                closes_flags: ['hardline_mandate_locked'],
+              },
+            ],
+          },
+          {
+            id: 'press_forward',
+            label: 'Press forward',
+            description: 'Authorize a sharper posture.',
+            historical_marker: 'counterfactual',
+            effects: [],
+          },
+        ],
+      },
+      onRespond: () => undefined,
+    }));
+
+    expect(screen.getByText('Future consequences')).toBeTruthy();
+    expect(screen.getByText('Negotiation window preserved')).toBeTruthy();
+    expect(screen.getByText('Future')).toBeTruthy();
+    expect(screen.getByText('Conditional')).toBeTruthy();
+    expect(screen.getByText('This response can keep a later diplomatic review available if battlefield pressure remains manageable.')).toBeTruthy();
+    expect(screen.getByText('Later eligible events: winter negotiation review')).toBeTruthy();
+    expect(screen.getByText('Later suppressed events: emergency retrenchment review')).toBeTruthy();
+    expect(screen.getByText('Recorded flag context: diplomatic channel open')).toBeTruthy();
+    expect(screen.getByText('Suppressed flag context: hardline mandate locked')).toBeTruthy();
+
+    const pressForward = screen.getByText('Press forward').closest('div');
+    expect(pressForward?.textContent).not.toContain('Future consequences');
+  });
 });

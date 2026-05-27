@@ -223,6 +223,24 @@
         "sets_flags": {
           "rbih_state_identity": "civic"
         },
+        "future_consequences": [
+          {
+            "id": "civic_identity_followthrough",
+            "label": "Civic platform follow-through",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_events": [
+              "csq_civic_identity_consolidation_1993"
+            ],
+            "opens_flags": [
+              "rbih_state_identity"
+            ],
+            "material_effect_refs": [
+              "morale_change.RBiH"
+            ],
+            "explanation": "Choosing the civic platform records rbih_state_identity as civic, making the civic consolidation branch visible if its later conditions are met."
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "RBiH",
@@ -261,6 +279,27 @@
         "sets_flags": {
           "rbih_state_identity": "bosniak_national"
         },
+        "future_consequences": [
+          {
+            "id": "bosniak_identity_followthrough",
+            "label": "Bosniak national branch",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_events": [
+              "csq_minority_defections_1992",
+              "csq_bosniak_unity_1993",
+              "csq_international_disillusionment_1993"
+            ],
+            "opens_flags": [
+              "rbih_state_identity"
+            ],
+            "material_effect_refs": [
+              "morale_change.RBiH",
+              "alliance_change"
+            ],
+            "explanation": "Choosing the Bosniak national line records rbih_state_identity as bosniak_national, making the minority-defection, unity, and diplomatic-disillusionment branches visible if their later conditions are met."
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "RBiH",
@@ -295,6 +334,24 @@
         "sets_flags": {
           "rbih_state_identity": "pragmatic"
         },
+        "future_consequences": [
+          {
+            "id": "pragmatic_identity_followthrough",
+            "label": "Pragmatic coalition branch",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_events": [
+              "csq_pragmatic_coalition_1993"
+            ],
+            "opens_flags": [
+              "rbih_state_identity"
+            ],
+            "material_effect_refs": [
+              "morale_change.RBiH"
+            ],
+            "explanation": "Choosing the pragmatic line records rbih_state_identity as pragmatic, making the pragmatic coalition branch visible if its later conditions are met."
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "RBiH",
@@ -395,6 +452,25 @@
         "sets_flags": {
           "hrhb_political_goal": "croat_republic"
         },
+        "future_consequences": [
+          {
+            "id": "croat_republic_followthrough",
+            "label": "Croat republic pressure path",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_events": [
+              "csq_hvo_central_bosnia_offensive_1993"
+            ],
+            "opens_flags": [
+              "hrhb_political_goal"
+            ],
+            "material_effect_refs": [
+              "alliance_change",
+              "morale_change.HRHB"
+            ],
+            "explanation": "Choosing the Zagreb line records hrhb_political_goal as croat_republic, making the HVO central-Bosnia offensive rupture branch visible if its later conditions are met."
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "HRHB",
@@ -438,6 +514,29 @@
         "sets_flags": {
           "hrhb_political_goal": "united_front"
         },
+        "future_consequences": [
+          {
+            "id": "united_front_followthrough",
+            "label": "United-front branch",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_events": [
+              "csq_joint_operations_agreement_1992",
+              "csq_zagreb_displeasure_1993",
+              "csq_territorial_friction_1993",
+              "csq_federation_early_1994",
+              "csq_joint_offensive_1994"
+            ],
+            "opens_flags": [
+              "hrhb_political_goal"
+            ],
+            "material_effect_refs": [
+              "alliance_change",
+              "morale_change.HRHB"
+            ],
+            "explanation": "Choosing the united-front line records hrhb_political_goal as united_front, making the joint-operations and early-Federation branches visible if their later conditions are met."
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "HRHB",
@@ -477,6 +576,21 @@
         "sets_flags": {
           "hrhb_political_goal": "strategic_ambiguity"
         },
+        "future_consequences": [
+          {
+            "id": "strategic_ambiguity_visibility",
+            "label": "Ambiguity recorded",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_flags": [
+              "hrhb_political_goal"
+            ],
+            "material_effect_refs": [
+              "morale_change.HRHB"
+            ],
+            "explanation": "Choosing ambiguity records hrhb_political_goal as strategic_ambiguity. No current catalog follow-up event directly keys on this value, but the branch remains visible in decision diagnostics."
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "HRHB",

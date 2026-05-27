@@ -1530,6 +1530,19 @@
             "delta": 10
           }
         ],
+        "future_consequences": [
+          {
+            "id": "assembly_rejection_accepted_visibility",
+            "label": "Vance-Owen rejection stands",
+            "timing": "future",
+            "certainty": "guaranteed",
+            "material_effect_refs": [
+              "morale_change.RS",
+              "patron_pressure.RS"
+            ],
+            "explanation": "Accepting the assembly vote does not open or close catalog events by metadata; it makes the political cost branch visible through the existing RS morale and patron-pressure effects."
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "RS",
@@ -1564,6 +1577,19 @@
             "kind": "patron_pressure",
             "faction": "RS",
             "delta": -5
+          }
+        ],
+        "future_consequences": [
+          {
+            "id": "assembly_override_visibility",
+            "label": "Assembly override risk",
+            "timing": "future",
+            "certainty": "risk",
+            "material_effect_refs": [
+              "morale_change.RS",
+              "patron_pressure.RS"
+            ],
+            "explanation": "Attempting to override the assembly does not open or close catalog events by metadata; it makes the internal-fracture branch visible through the existing RS morale and patron-pressure effects."
           }
         ],
         "dimension_shifts": [

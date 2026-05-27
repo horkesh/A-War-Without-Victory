@@ -11,7 +11,13 @@
  * stays on inner panel content (`<ResponseButton>`), NOT on Modal props.
  */
 
-import type { PendingEventDecision, EventResponseOption, EventEffect, DimensionShift } from '../../../sim/events/event_types';
+import type {
+    PendingEventDecision,
+    EventResponseOption,
+    EventEffect,
+    DimensionShift,
+    EventFutureConsequence,
+} from '../../../sim/events/event_types';
 import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
@@ -120,6 +126,68 @@ function EffectPreview({ option }: { option: EventResponseOption }) {
     );
 }
 
+function formatFutureReferenceList(label: string, values: string[] | undefined): string | null {
+    if (!values || values.length === 0) return null;
+    return `${label}: ${values.map((value) => humanizeToken(value).toLowerCase()).join(', ')}`;
+}
+
+function buildFutureReferenceRows(consequence: EventFutureConsequence): string[] {
+    return [
+        formatFutureReferenceList('Later eligible events', consequence.opens_events),
+        formatFutureReferenceList('Later suppressed events', consequence.closes_events),
+        formatFutureReferenceList('Recorded flag context', consequence.opens_flags),
+        formatFutureReferenceList('Suppressed flag context', consequence.closes_flags),
+    ].filter((row): row is string => row !== null);
+}
+
+function FutureConsequenceCard({ consequence }: { consequence: EventFutureConsequence }) {
+    const referenceRows = buildFutureReferenceRows(consequence);
+    return (
+        <li className="rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="text-[11px] font-semibold text-text-primary">
+                    {consequence.label}
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                    <span className="rounded-sm border border-panel-border bg-panel-card px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-text-secondary">
+                        {sentenceToken(consequence.timing)}
+                    </span>
+                    <span className="rounded-sm border border-panel-border bg-panel-card px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-text-secondary">
+                        {sentenceToken(consequence.certainty)}
+                    </span>
+                </div>
+            </div>
+            <p className="mt-1.5 text-[11px] leading-relaxed text-text-secondary">
+                {consequence.explanation}
+            </p>
+            {referenceRows.length > 0 && (
+                <ul className="mt-2 space-y-1 text-[10px] leading-relaxed text-text-muted">
+                    {referenceRows.map((row) => (
+                        <li key={row}>{row}</li>
+                    ))}
+                </ul>
+            )}
+        </li>
+    );
+}
+
+function FutureConsequencePreview({ option }: { option: EventResponseOption }) {
+    const consequences = option.future_consequences ?? [];
+    if (consequences.length === 0) return null;
+    return (
+        <div className="mt-2">
+            <div className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-accent-gold">
+                Future consequences
+            </div>
+            <ul className="space-y-1.5">
+                {consequences.map((consequence) => (
+                    <FutureConsequenceCard key={consequence.id} consequence={consequence} />
+                ))}
+            </ul>
+        </div>
+    );
+}
+
 function isHistoricalOption(option: EventResponseOption, decision: EventDecisionDossier): boolean {
     return option.id === decision.historical_default_response_id || option.historical_marker === 'historical_default';
 }
@@ -169,6 +237,7 @@ function ResponseButton({
                 </p>
             )}
             <EffectPreview option={option} />
+            <FutureConsequencePreview option={option} />
         </div>
     );
 }

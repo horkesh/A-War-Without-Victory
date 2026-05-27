@@ -12144,3 +12144,22 @@ Also replaced the new `as unknown as JsonObject` pressure read in `src/sim/event
 **Artifacts:** `docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md`, `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-27] codex: render event future consequences
+
+**Type:** Event data/UI branch-visibility slice.
+
+**Change:** Added behavior-neutral `future_consequences` metadata to the four approved first-packet event rows (`rbih_state_identity`, `hrhb_political_goal`, `rs_assembly_rejects_voplan_1993`, `belgrade_embargo_rs_1994`) and rendered that metadata as future-consequence cards in the existing `EventDecisionModal`. The cards show timing, certainty, explanation, later eligible/suppressed branch context, and recorded/suppressed flag context. Canon review corrected initial UI labels that overclaimed open/close runtime behavior.
+
+**Determinism:** Event firing, triggers, effects, response ids, response order, bot response logic, historical markers, save schema, scenario setup, generated artifacts, runtime branch gating, and calibration behavior are unchanged. Metadata is copied with existing response options for display/diagnostics only.
+
+**Verification:**
+- `npx.cmd vitest run tests\event_loader.test.ts tests\sim\events\event_taxonomy_report.test.ts tests\sim\events\event_acceptance_report.test.ts tests\sim\events\event_presidential_acceptance.test.ts tests\events_evaluate.test.ts tests\event_decisions.test.ts tests\player_decision_manifest.test.ts tests\ui\event_decision_modal_phase3.test.ts tests\ui\event_decision_modal_catalog.test.ts --reporter=dot` - PASS; 128/128 tests.
+- `npx.cmd tsx tools\diagnostics\event_taxonomy_report.ts --json` - PASS.
+- `npx.cmd tsx tools\diagnostics\event_acceptance_report.ts --json` - PASS.
+- `npm.cmd run typecheck` - PASS.
+- `git diff --check` - PASS; emitted existing CRLF normalization warning for `data/scenarios/events/war_1992.json`.
+
+**Artifacts:** `data/scenarios/events/war_1992.json`, `data/scenarios/events/war_1993.json`, `data/scenarios/events/war_1994.json`, `src/ui/map/components/EventDecisionModal.tsx`, `tests/sim/events/event_taxonomy_report.test.ts`, `tests/ui/event_decision_modal_phase3.test.ts`, `docs/40_reports/implemented/20260527_EVENT_FUTURE_CONSEQUENCE_MODAL_SLICE.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/README.md`, `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
