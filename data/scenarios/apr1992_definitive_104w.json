@@ -82,6 +82,11 @@
     "op:sokolac:sasevci_2": "RS",
     "op:travnik:cukle_2": "RBiH",
     "op:travnik:ovcarevo_2": "RBiH",
-    "op:zvornik:rastosnica_2": "RBiH"
+    "op:zvornik:rastosnica_2": "RBiH",
+    "op:doboj:grapska_gornja_2": "RS",
+    "op:doboj:makljenovac": "RS",
+    "op:maglaj:donja_bocinja_2": "RS",
+    "op:maglaj:gornja_bocinja": "RS",
+    "op:teslic:kamenica_2": "RS"
   }
 }
