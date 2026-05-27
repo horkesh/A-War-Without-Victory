@@ -67,6 +67,11 @@ const SANA_DEFENDER_WEAKNESS_FLOOR = 0.20;
 // ─── Staging anchors (5th Corps holds these throughout the pocket arc) ──────
 const STAGING_BIHAC = 'op:bihac:bihac_2';
 const STAGING_KRUPA_OTOKA = 'op:bosanska_krupa:otoka_2';
+// jasenica_2 is adjacent to lusci_palanka_2 (15 shared segments) — the first
+// SANSKI_KLJUC follow-on objective. otoka_2 has zero adjacency to lusci_palanka_2,
+// so staging there produces no_approach_osid. jasenica_2 is captured by
+// sana_krupa before the follow-on fires (it's in KRUPA_VALLEY_OBJECTIVES).
+const STAGING_JASENICA = 'op:bosanska_krupa:jasenica_2';
 
 // ─── Sana objectives (BB1 pp.417, 419-420; identical roster to legacy
 //     scripted Sana in triggered_operations.ts so painted-truth comparison
@@ -206,7 +211,7 @@ const SANA_FOLLOW_ON_AXES: readonly OpportunityAxisDef[] = [
             'arbih_517th_light' as FormationId,
         ],
         objectives: SANSKI_KLJUC_OBJECTIVES,
-        staging_osid: STAGING_KRUPA_OTOKA,
+        staging_osid: STAGING_JASENICA,
     },
 ];
 
@@ -397,7 +402,7 @@ export const SANA_95_FOLLOW_ON_OPPORTUNITY: OperationOpportunityDef = {
     primary_corps: PRIMARY_CORPS,
     family: 'fifth_corps',
     axes: SANA_FOLLOW_ON_AXES,
-    staging_osid: STAGING_KRUPA_OTOKA,
+    staging_osid: STAGING_JASENICA,
     planning_duration: 3,
     min_attack_outcome: 'repulsed',
     citations: [

@@ -10778,3 +10778,18 @@ Any new offensive op — regardless of geographic location or corps — creates 
 - Lesson: VRS OOB personnel bumps cascade through army-wide resource allocation into Op Mistral zone (HVO operations). Do NOT use personnel increases as calibration levers for SRK brigades.
 - Reverted to 500. Op Trnovo OOB fix is not viable as an isolated single change. Need different approach.
 - Hash: `25cf86b904f9dbd3`.
+
+**n87 — Jajce window t178→t175 (FAILED, reverted): no_approach_osid recovery**
+- Change: dateWindowJajce open at turn 175 instead of 178 (3 turns earlier).
+- Op fires at t175, enters planning, recovery at w181 with no_approach_osid.
+- Root cause: oborci_2 and torlakovac_2 are RBiH from scenario start (initial_control). Including them as objectives meant collectObjectiveApproachOsids(['oborci_2']) = empty → no_approach_osid recovery.
+- Reverted window to t178. Solution: remove the pre-captured friendly objectives from the axis.
+
+**n88 — Jajce 95 NEAR axis stripped to grdovo only: 618/712 (86.8%) — NEW BASELINE**
+- Change: `JAJCE_NEAR_OBJECTIVES` reduced from `[oborci_2, torlakovac_2, grdovo]` → `['op:jajce:grdovo']`.
+- oborci_2 and torlakovac_2 start as RBiH and never change — they were invalid enemy objectives.
+- With grdovo as sole objective, approach via oborci_2/torvakovac_2 (RBiH, adjacent to RS grdovo) = valid.
+- Op fires at t178, planning through t183, execution t184-188, grdovo captured.
+- Score: 618/712 (86.8%), +1 vs n85. Anchors: 22/27 (same 5 failures). Benchmarks: 6/6.
+- grdovo: RS→RBiH (painted: RBiH). ✓
+- Commit: 89853268.
