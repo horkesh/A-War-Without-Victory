@@ -1,0 +1,262 @@
+digraph event_family {
+  rankdir=LR;
+  node [shape=box, style=filled];
+  edge [fontsize=8];
+
+  // Legend
+  subgraph cluster_legend {
+    label="Legend";
+    style=dashed;
+    legend_rs [label="RS family", fillcolor=lightcoral];
+    legend_rbih [label="RBiH family", fillcolor=lightblue];
+    legend_hrhb [label="HRHB family", fillcolor=lightgreen];
+    legend_cross [label="Cross-faction", fillcolor=lightyellow];
+    legend_ring3 [label="Ring 3 sensitive", fillcolor=white, color=red, penwidth=2];
+  }
+
+  subgraph cluster__no_family_ {
+    label="<no-family>";
+    style=filled;
+    color=white;
+    "csq_bosniak_unity_1993" [label="csq_bosniak_unity_1993", fillcolor=white];
+    "csq_civic_identity_consolidation_1993" [label="csq_civic_identity_consolidation_1993", fillcolor=white];
+    "csq_international_disillusionment_1993" [label="csq_international_disillusionment_1993", fillcolor=white];
+    "csq_minority_defections_1992" [label="csq_minority_defections_1992", fillcolor=white];
+    "csq_paramilitary_authorization_refused" [label="csq_paramilitary_authorization_refused", fillcolor=white];
+    "csq_pragmatic_coalition_1993" [label="csq_pragmatic_coalition_1993", fillcolor=white];
+  }
+  subgraph cluster_rbih_apwb_response {
+    label="rbih_apwb_response";
+    style=filled;
+    color=lightblue;
+    "abdic_apwb_declared_1993" [label="abdic_apwb_declared_1993", fillcolor=lightblue];
+  }
+  subgraph cluster_rbih_bihac_response {
+    label="rbih_bihac_response";
+    style=filled;
+    color=lightblue;
+    "bihac_5th_corps_offensive_1994" [label="bihac_5th_corps_offensive_1994", fillcolor=lightblue];
+  }
+  subgraph cluster_rbih_contact_group_response {
+    label="rbih_contact_group_response";
+    style=filled;
+    color=lightblue;
+    "rbih_contact_group_response_1994" [label="rbih_contact_group_response_1994", fillcolor=lightblue];
+  }
+  subgraph cluster_rbih_dayton_response {
+    label="rbih_dayton_response";
+    style=filled;
+    color=lightblue;
+    "dayton_talks_begin_1995" [label="dayton_talks_begin_1995", fillcolor=lightblue];
+  }
+  subgraph cluster_rbih_embargo_response {
+    label="rbih_embargo_response";
+    style=filled;
+    color=lightblue;
+    "rbih_arms_embargo_lift_advocacy_1993" [label="rbih_arms_embargo_lift_advocacy_1993", fillcolor=lightblue];
+  }
+  subgraph cluster_rbih_federation_integration {
+    label="rbih_federation_integration";
+    style=filled;
+    color=lightblue;
+    "rbih_federation_army_integration_1994" [label="rbih_federation_army_integration_1994", fillcolor=lightblue];
+  }
+  subgraph cluster_rbih_late_war_response {
+    label="rbih_late_war_response";
+    style=filled;
+    color=lightblue;
+    "rbih_late_war_offensive_1995" [label="rbih_late_war_offensive_1995", fillcolor=lightblue];
+  }
+  subgraph cluster_rbih_minority_retention {
+    label="rbih_minority_retention";
+    style=filled;
+    color=lightblue;
+    "rbih_minority_retention_1992" [label="rbih_minority_retention_1992", fillcolor=lightblue];
+  }
+  subgraph cluster_rbih_nato_response {
+    label="rbih_nato_response";
+    style=filled;
+    color=lightblue;
+    "rbih_nato_ultimatum_compliance_1994" [label="rbih_nato_ultimatum_compliance_1994", fillcolor=lightblue];
+  }
+  subgraph cluster_rbih_owen_stoltenberg_response {
+    label="rbih_owen_stoltenberg_response";
+    style=filled;
+    color=lightblue;
+    "os_rbih_tactical_acceptance_1993" [label="os_rbih_tactical_acceptance_1993", fillcolor=lightblue];
+  }
+  subgraph cluster_rbih_paramilitary_policy {
+    label="rbih_paramilitary_policy";
+    style=filled;
+    color=lightblue;
+    "rbih_paramilitary_policy_1992" [label="rbih_paramilitary_policy_1992", fillcolor=lightblue];
+  }
+  subgraph cluster_rbih_reintegration_response {
+    label="rbih_reintegration_response";
+    style=filled;
+    color=lightblue;
+    "rbih_reintegration_offers_1993" [label="rbih_reintegration_offers_1993", fillcolor=lightblue];
+  }
+  subgraph cluster_rbih_srebrenica_response {
+    label="rbih_srebrenica_response";
+    style=filled;
+    color=lightblue;
+    "srebrenica_demilitarization_1993" [label="srebrenica_demilitarization_1993", fillcolor=lightblue];
+  }
+  subgraph cluster_rbih_state_identity {
+    label="rbih_state_identity";
+    style=filled;
+    color=lightblue;
+    "rbih_state_identity" [label="rbih_state_identity", fillcolor=lightblue];
+  }
+  subgraph cluster_rbih_vance_owen_acceptance {
+    label="rbih_vance_owen_acceptance";
+    style=filled;
+    color=lightblue;
+    "vance_owen_plan_1993" [label="vance_owen_plan_1993", fillcolor=lightblue];
+  }
+  subgraph cluster_rbih_washington_response {
+    label="rbih_washington_response";
+    style=filled;
+    color=lightblue;
+    "rbih_washington_agreement_1994" [label="rbih_washington_agreement_1994", fillcolor=lightblue];
+  }
+
+  // Edges
+  "rbih_paramilitary_policy_1992" -> "csq_international_disillusionment_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_paramilitary_policy_1992" -> "csq_paramilitary_authorization_refused" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "abdic_apwb_declared_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "abdic_apwb_declared_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "abdic_apwb_declared_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "abdic_apwb_declared_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "abdic_apwb_declared_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "abdic_apwb_declared_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "abdic_apwb_declared_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "abdic_apwb_declared_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "abdic_apwb_declared_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "bihac_5th_corps_offensive_1994" [color=blue, label="enables"];
+  "rbih_state_identity" -> "bihac_5th_corps_offensive_1994" [color=blue, label="enables"];
+  "rbih_state_identity" -> "bihac_5th_corps_offensive_1994" [color=blue, label="enables"];
+  "rbih_state_identity" -> "bihac_5th_corps_offensive_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "bihac_5th_corps_offensive_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "bihac_5th_corps_offensive_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "bihac_5th_corps_offensive_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "bihac_5th_corps_offensive_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "bihac_5th_corps_offensive_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "csq_bosniak_unity_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "csq_civic_identity_consolidation_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "csq_international_disillusionment_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "csq_minority_defections_1992" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "csq_pragmatic_coalition_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "dayton_talks_begin_1995" [color=blue, label="enables"];
+  "rbih_state_identity" -> "dayton_talks_begin_1995" [color=blue, label="enables"];
+  "rbih_state_identity" -> "dayton_talks_begin_1995" [color=blue, label="enables"];
+  "rbih_state_identity" -> "dayton_talks_begin_1995" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "dayton_talks_begin_1995" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "dayton_talks_begin_1995" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "dayton_talks_begin_1995" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "dayton_talks_begin_1995" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "dayton_talks_begin_1995" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "os_rbih_tactical_acceptance_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "os_rbih_tactical_acceptance_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "os_rbih_tactical_acceptance_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "os_rbih_tactical_acceptance_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "os_rbih_tactical_acceptance_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "os_rbih_tactical_acceptance_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "os_rbih_tactical_acceptance_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "os_rbih_tactical_acceptance_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "os_rbih_tactical_acceptance_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_arms_embargo_lift_advocacy_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_arms_embargo_lift_advocacy_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_arms_embargo_lift_advocacy_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_arms_embargo_lift_advocacy_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_arms_embargo_lift_advocacy_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_arms_embargo_lift_advocacy_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_arms_embargo_lift_advocacy_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_arms_embargo_lift_advocacy_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_arms_embargo_lift_advocacy_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_contact_group_response_1994" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_contact_group_response_1994" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_contact_group_response_1994" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_federation_army_integration_1994" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_federation_army_integration_1994" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_federation_army_integration_1994" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_federation_army_integration_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_federation_army_integration_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_federation_army_integration_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_federation_army_integration_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_federation_army_integration_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_federation_army_integration_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_late_war_offensive_1995" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_late_war_offensive_1995" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_late_war_offensive_1995" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_late_war_offensive_1995" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_late_war_offensive_1995" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_late_war_offensive_1995" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_late_war_offensive_1995" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_late_war_offensive_1995" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_late_war_offensive_1995" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_minority_retention_1992" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_minority_retention_1992" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_minority_retention_1992" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_minority_retention_1992" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_minority_retention_1992" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_minority_retention_1992" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_minority_retention_1992" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_minority_retention_1992" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_minority_retention_1992" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_nato_ultimatum_compliance_1994" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_nato_ultimatum_compliance_1994" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_nato_ultimatum_compliance_1994" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_nato_ultimatum_compliance_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_nato_ultimatum_compliance_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_nato_ultimatum_compliance_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_nato_ultimatum_compliance_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_nato_ultimatum_compliance_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_nato_ultimatum_compliance_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_paramilitary_policy_1992" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_paramilitary_policy_1992" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_paramilitary_policy_1992" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_paramilitary_policy_1992" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_paramilitary_policy_1992" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_paramilitary_policy_1992" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_reintegration_offers_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_reintegration_offers_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_reintegration_offers_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_reintegration_offers_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_reintegration_offers_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_reintegration_offers_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_reintegration_offers_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_reintegration_offers_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_reintegration_offers_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_washington_agreement_1994" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_washington_agreement_1994" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_washington_agreement_1994" [color=blue, label="enables"];
+  "rbih_state_identity" -> "rbih_washington_agreement_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_washington_agreement_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_washington_agreement_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_washington_agreement_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_washington_agreement_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "rbih_washington_agreement_1994" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "srebrenica_demilitarization_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "srebrenica_demilitarization_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "srebrenica_demilitarization_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "srebrenica_demilitarization_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "srebrenica_demilitarization_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "srebrenica_demilitarization_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "srebrenica_demilitarization_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "srebrenica_demilitarization_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "srebrenica_demilitarization_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "vance_owen_plan_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "vance_owen_plan_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "vance_owen_plan_1993" [color=blue, label="enables"];
+  "rbih_state_identity" -> "vance_owen_plan_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "vance_owen_plan_1993" [color=gray, label="future_consequence", style=dashed];
+  "rbih_state_identity" -> "vance_owen_plan_1993" [color=gray, label="future_consequence", style=dashed];
+}
