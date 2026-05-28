@@ -1,4 +1,34 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] feat(state): ADR-0005 v2.0 — TG schema scaffold (v18→v19), behavior-flagged
+
+**Type:** Schema migration v18→v19 + sub-flag scaffolding + donor selection stub + invariants test. Phased rollout v2.0 of ADR-0005.
+
+**Change:** First substantive code+schema landing for the Tactical Group system. All TG state present in schema; ALL behavior gated behind sub-flags defaulted off. Per ADR-0005 §Determinism Impact (schema-stable, behavior-flagged) and Tech Architect Q4 (one big bump at v2.0 with all fields, sub-flag gated).
+- **Schema additions in `src/state/game_state.ts`**: types `TgId`, `ArmyHqOpId`, `TgStatus`, `TgDonorContribution`, `TacticalGroup`, `ArmyHqOperation`. Four FormationState donor-accounting fields: `personnel_lent_by_tg`, `equipment_lent_by_tg`, `tg_cooldown_until_turn`, `tg_donations_this_scenario`. Four MilitaryState Records: `tactical_groups`, `army_hq_operations`, `army_hq_last_op_turn`, `army_hq_op_count_by_year`. All optional. `CURRENT_SCHEMA_VERSION` bumped 18→19.
+- **Migration v19 in `src/state/save_migration.ts`**: initializes the four MilitaryState Records as empty `{}`. FormationState fields stay optional (undefined for unaffected brigades). One-way migration; no v19→v18 downgrade path (personnel-lent ledger has no v18 representation).
+- **Sub-flag scaffolding in `src/sim/combat/tactical_group_config.ts`**: `ENABLE_TG_FORMATION`, `ENABLE_TG_COMBAT_SYNTHESIS`, `ENABLE_TG_COHESION_BLEED` — all default false. Per ADR §Phased Rollout: v2.0/v2.2/v2.2/v2.3 lighting up respectively.
+- **`selectDonors` stub in `src/sim/combat/tactical_group_selection.ts`** (new): v2.0 stub returns `[]` empty pool. Comprehensive header docstring documents the full v2.2 algorithm (adjacent-corps rule, 6-gate eligibility filter, deterministic `(distance_hops, source_corps_id, brigade_id)` sort, distance falloff, faction-scope Army HQ opt-in).
+- **Invariants test `tests/tg_invariants.test.ts`** (new): exported `validateTgInvariants(state)` helper + 7 test cases covering Hard Invariants #1/#3/#4/#5/#6 + v18→v19 migration round-trip. Tests pass on empty v2.0 state and correctly flag synthetic violations.
+
+**Determinism:** All TG fields optional; empty Records initialized via migration. Existing `omitEmpty` serializer keeps empty fields out of hash input → byte-identical to v18 baseline. No new sort/iteration; no `Math.random()`/`Date.now()`. Sub-flag-gated behavior; flags-off path is bit-exact with v1 commit `06ee6dcb`.
+
+**Verification:**
+- typecheck (`node_modules/.bin/tsc --noEmit`): clean for v2.0 files (`game_state.ts`, `save_migration.ts`, `tactical_group_config.ts`, `tactical_group_selection.ts`, `tg_invariants.test.ts`).
+- `vitest run tests/tg_invariants.test.ts --reporter=dot`: 7/7 PASS.
+- 40w v2.0 (n2) hash: `3649b3861a87e6ea` — byte-identical to v1 baseline (n0) and v1-on smoke (n1). Schema-stable + behavior-flagged confirmed empirically across three independent runs.
+
+**Artifacts:**
+- `src/state/game_state.ts` (schema additions + version bump 18→19)
+- `src/state/save_migration.ts` (v19 migration)
+- `src/sim/combat/tactical_group_config.ts` (sub-flags)
+- `src/sim/combat/tactical_group_selection.ts` (new, selectDonors stub)
+- `tests/tg_invariants.test.ts` (new, 7 test cases)
+- `data/derived/latest_run_final_save.json` (n2 validation artifact)
+
+**Next:** v2.1 — casualty distribution math (`distributeCasualtiesAcrossTg`), wired but dormant until v2.2 lights up combat synthesis. v2.2 = first calibration shift (donors contribute to combat power; expected +3-8% capture before v2.3 Pyrrhic dampener lands).
+
+---
+
 ## [2026-05-28] feat(combat): ADR-0005 v1 + ADR-0005 r3.1 + ADR-0006 — Tactical Groups foundation accepted
 
 **Type:** Engine design + first-version feature flag + companion ADR. Phased rollout v1 of ADR-0005.

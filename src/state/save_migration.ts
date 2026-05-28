@@ -606,3 +606,23 @@ registerMigration({
         ensureRecord(disp, 'sustainability_state');
     },
 });
+
+registerMigration({
+    version: 19,
+    description: 'ADR-0005 v2.0: Tactical Group + Army HQ Operation state scaffold. '
+        + 'Schema-stable; behavior gated by ENABLE_TACTICAL_GROUPS umbrella flag + sub-flags '
+        + '(enable_tg_formation, enable_tg_combat_synthesis, enable_tg_cohesion_bleed) all '
+        + 'default off. Empty Records omitted from hash via existing omitEmpty serializer → '
+        + 'byte-identical to v18 baseline with flag off. Sensitive: no. One-way migration '
+        + '(no v19→v18 downgrade; personnel-lent ledger has no v18 representation). '
+        + 'FormationState.personnel_lent_by_tg / equipment_lent_by_tg / tg_cooldown_until_turn / '
+        + 'tg_donations_this_scenario stay optional (undefined for unaffected brigades).',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        if (!mil) return;
+        ensureRecord(mil, 'tactical_groups');
+        ensureRecord(mil, 'army_hq_operations');
+        ensureRecord(mil, 'army_hq_last_op_turn');
+        ensureRecord(mil, 'army_hq_op_count_by_year');
+    },
+});

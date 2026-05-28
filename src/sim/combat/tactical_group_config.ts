@@ -1,21 +1,41 @@
 /**
- * Tactical Group (TG) feature flag and configuration constants.
+ * Tactical Group (TG) feature flags and configuration constants.
  *
  * Implements the staged rollout from ADR-0005 (docs/20_engineering/ADR/
  * ADR-0005-tactical-groups-as-primary-ops-path.md). Canonical OG entity is
  * described in Rulebook v0.9.0 §5.7 and Systems Manual v0.9.0 §6.3.
  *
- * v1 scope (this constant only): when ENABLE_TACTICAL_GROUPS=true, the
- * opening-attack readiness gate examines only the axis's anchor brigade
- * (main_brigade) instead of iterating every assigned brigade. Non-anchor
- * brigades become "donor candidates" — present in the participating list
- * (so MIN_OPERATION_PARTICIPANTS gating still passes) but not required to be
- * adjacent to the objective for the op to launch.
+ * Umbrella flag (ENABLE_TACTICAL_GROUPS): when true, the opening-attack
+ * readiness gate examines only the axis's anchor brigade (main_brigade)
+ * instead of iterating every assigned brigade. Non-anchor brigades become
+ * "donor candidates" — present in the participating list (so MIN_OPERATION_
+ * PARTICIPANTS gating still passes) but not required to be adjacent to the
+ * objective for the op to launch.
  *
- * Default: false. Keeps existing calibration baseline byte-identical until
- * an opt-in run validates v1, v2 (donors flat), and v3 (distance falloff).
+ * Sub-flags gate behavior progression per ADR-0005 §Phased Rollout:
+ *   - ENABLE_TG_FORMATION       → v2.0/v2.2 → TG records populated, donors
+ *                                 contribute to combat power synthesis
+ *   - ENABLE_TG_COMBAT_SYNTHESIS → v2.2 → donors contribute to tg.personnel/
+ *                                 equipment; battle uses TG snapshot; donors
+ *                                 absorb 50% of casualties pro-rata
+ *   - ENABLE_TG_COHESION_BLEED  → v2.3 → donor cohesion bleed formula
+ *                                 (donated_fraction × (1 + hops × 0.15) × 15)
+ *                                 + cooldown enforcement
+ *
+ * All flags default false. Schema (v19) ships all TG fields empty; the
+ * existing omitEmpty serializer helper ensures byte-identical hash with
+ * sub-flags off. Sub-flag activation is the calibration-shift gate.
  */
 export const ENABLE_TACTICAL_GROUPS = false;
+
+/** v2.0/v2.2 sub-flag: TG entity formation + combat power synthesis. */
+export const ENABLE_TG_FORMATION = false;
+
+/** v2.2 sub-flag: donor contribution to combat power + casualty distribution. */
+export const ENABLE_TG_COMBAT_SYNTHESIS = false;
+
+/** v2.3 sub-flag: Pyrrhic dampener (donor cohesion bleed + cooldown enforcement). */
+export const ENABLE_TG_COHESION_BLEED = false;
 
 /**
  * Resolve the anchor brigade for an axis under TG semantics.

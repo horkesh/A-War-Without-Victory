@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 18 as const;
+export const CURRENT_SCHEMA_VERSION = 19 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -454,6 +454,78 @@ export interface CorpsOperation {
     force_quality_max_axes_at_launch?: number;
 }
 
+// === Tactical Group / Operational Group entity (ADR-0005 v2.0) ===
+// Canonical OG per Rulebook v0.9.0 §5.7 + Systems Manual v0.9.0 §6.3.
+// Engine internals use TG nomenclature per ADR-0005 decision #18.
+// ADR-0006 separately handles STANDING OGs (corps_front_sectors); these types
+// model TEMPORARY OGs/TGs for offensive operations.
+
+/** Tactical Group identifier. Format: "tg:<corps_id>:<op_id>:<anchor_brigade_id>". */
+export type TgId = string;
+
+/** Army HQ Operation identifier. Format: "ahq:<faction_id>:<scenario_year>:<op_name>". */
+export type ArmyHqOpId = string;
+
+/** TG lifecycle status. */
+export type TgStatus = 'forming' | 'engaged' | 'recovering' | 'dissolved';
+
+/** Per-donor contribution within a TG. See ADR-0005 §Schema. */
+export interface TgDonorContribution {
+    brigade_id: FormationId;
+    source_corps_id: FormationId;
+    /** BFS hops anchor→donor at TG formation; frozen for determinism. */
+    distance_hops: number;
+    personnel_lent: number;
+    heavy_equipment_lent: { tanks: number; artillery: number; aa_systems: number };
+    /** Per-brigade casualty tally (ADR-0005 Hard Invariant #3); pro-rata bookkeeping. */
+    casualties_so_far: number;
+    equipment_losses_so_far: { tanks: number; artillery: number; aa_systems: number };
+    /** Cohesion bleed applied at ready→execution; locked 8 turns. */
+    cohesion_bleed_applied: number;
+}
+
+/** Canonical Operational Group entity (engine TG naming), primary offensive
+ *  ops construct under ADR-0005 v2.0+. Schema-stable from v19; v2.0 ships the
+ *  shape with empty defaults; v2.2 lights it up via sub-flags. */
+export interface TacticalGroup {
+    id: TgId;
+    /** Anchor brigade's parent corps; ownership backref. */
+    corps_id: FormationId;
+    /** Associated CorpsOperation.id, or ArmyHqOpId for faction-scope ops. */
+    op_id: string;
+    /** When set, this TG is part of an Army HQ op (faction-scope donor pool). */
+    army_hq_op_id?: ArmyHqOpId;
+    anchor_brigade_id: FormationId;
+    /** Pre-sorted by brigade_id (strictCompare) for determinism. */
+    donor_contributions: TgDonorContribution[];
+    /** Mirrors anchor.location_osid. */
+    location_osid: string;
+    status: TgStatus;
+    formed_on_turn: number;
+    dissolved_on_turn?: number;
+    /** OG cohesion per canon §6.3; drains per-turn. */
+    cohesion: number;
+}
+
+/** Faction-wide cross-corps offensive entity (Krivaja-95, Vozuća 94, Lukavac 93
+ *  pattern). Capped at most once per year per faction per ADR-0005 §Army HQ
+ *  Operations. v2.0 scaffold; v3.0 wires triggers + pipeline step. */
+export interface ArmyHqOperation {
+    id: ArmyHqOpId;
+    faction_id: FactionId;
+    name: string;
+    /** Corps owning the anchor brigade. */
+    anchor_corps_id: FormationId;
+    /** Same-faction corps with eligible brigades; cross-corps regardless of adjacency. */
+    donor_corps_ids: FormationId[];
+    /** Active TG carrying out the op (set at TG formation). */
+    tg_id?: TgId;
+    status: 'queued' | 'planning' | 'executing' | 'recovering' | 'completed';
+    formed_on_turn: number;
+    /** floor((started_turn - 1) / 52); for the once-per-year gate. */
+    scenario_year: number;
+}
+
 /** Independent sector stances — each sector can differ from its corps stance. */
 export type SectorStance = 'fortify' | 'defend' | 'elastic' | 'active_defense' | 'screening';
 
@@ -787,6 +859,18 @@ export interface FormationState {
      * Used as input to coordination_coherence decay rate. See synthesis §3 E-B3.
      */
     strategic_depth?: number;
+    // === Tactical Group donor accounting (ADR-0005 v2.0) ===
+    // Current donation state — cleared on TG dissolution. Sum of values must
+    // never exceed brigade.personnel. effectivePersonnel = personnel - sum(values).
+    /** Personnel currently lent out to one or more TGs. Hard Invariant #1: at most one TG per brigade. */
+    personnel_lent_by_tg?: Record<TgId, number>;
+    /** Heavy equipment currently lent out to TGs. */
+    equipment_lent_by_tg?: Record<TgId, { tanks: number; artillery: number; aa_systems: number }>;
+    /** Absolute turn count after which brigade is eligible to donate again
+     *  (Hard Invariant #2: TG_DONOR_COOLDOWN_TURNS = 6). */
+    tg_cooldown_until_turn?: number;
+    /** Per-scenario donation count (anti-fire-hose cap; max MAX_DONATIONS_PER_SCENARIO = 6). */
+    tg_donations_this_scenario?: number;
 }
 
 export interface FrontPostureAssignment {
@@ -2377,6 +2461,18 @@ cost_ledger_annotations?: Array<{
     /** Optional faction subject when the annotation is faction-scoped. */
     faction?: FactionId;
 }>;
+// === Tactical Group state (ADR-0005 v2.0) ===
+// Schema-stable from v19; v2.0 ships empty defaults; v2.2 sub-flag lights it up.
+// While ENABLE_TACTICAL_GROUPS=false, empty Records are omitted from hash via
+// existing omitEmpty serializer helper → byte-identical to pre-v19 baseline.
+/** Active Tactical Groups (temporary OGs for offensive ops). Cleared on dissolution. */
+tactical_groups?: Record<TgId, TacticalGroup>;
+/** Army HQ Operations scaffold. v3.0 wires triggers + pipeline step. */
+army_hq_operations?: Record<ArmyHqOpId, ArmyHqOperation>;
+/** Per-faction tracking: most recent Army HQ op firing turn (52-turn cooldown gate). */
+army_hq_last_op_turn?: Record<FactionId, number>;
+/** Per-faction year-bucket Army HQ op count (year-boundary defense; 2/year ceiling). */
+army_hq_op_count_by_year?: Record<FactionId, Record<number, number>>;
 }
 
 /** Presidential command authority — the player's resource for overriding the command chain.
