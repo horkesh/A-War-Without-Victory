@@ -215,6 +215,51 @@ function launchFloorForOp(op: { min_attack_outcome?: string }): number {
     return op.min_attack_outcome === 'repulsed' ? MIN_LAUNCH_FORCE_RATIO_FLOOR_REPULSED : MIN_LAUNCH_FORCE_RATIO_FLOOR;
 }
 
+/**
+ * Phase E MVS — international_standing → op-launch hesitation multiplier.
+ *
+ * Mirrors the canonical `getActiveEquipmentQualityMultiplier` `!== 1.0`
+ * byte-stable consumer pattern (combat_math.ts:1305-1310): when no hesitation
+ * applies, returns 1.0 and consumers MUST gate `if (mult !== 1.0)` so the
+ * historical (no-event, gate-off) path is byte-identical to baseline.
+ *
+ * Magnitude (0.7×) and threshold (< 30) are the orchestrator-accepted
+ * Architect defaults. The threshold matches "diplomatically isolated" — a
+ * commander whose faction has < 30 international_standing hesitates to
+ * launch fresh offensives (UN scrutiny, embargo risk, patron pressure).
+ *
+ * Soft consumer contract: the multiplier MAY be applied to any op-launch
+ * scoring variable (force-ratio estimate, brigade-count floor, etc). The
+ * canonical consumer is `buildOperations` in commander/emit.ts which scales
+ * the `minForOp` threshold upward by `1/mult` when hesitation is active.
+ *
+ * Inputs:
+ * - `intlStanding`: faction's effective international_standing
+ *   (0..100), or `undefined` when the propagation gate is off / the
+ *   briefing field is absent. Undefined → returns 1.0 (no-op).
+ *
+ * Determinism: pure function of one numeric input. No state, no randomness,
+ * no save-state field.
+ */
+export function getIntlStandingOpsHesitationMultiplier(
+    intlStanding: number | undefined,
+): number {
+    if (typeof intlStanding !== 'number') return 1.0;
+    if (intlStanding < INTL_STANDING_OPS_HESITATION_THRESHOLD) {
+        return INTL_STANDING_OPS_HESITATION_MULTIPLIER;
+    }
+    return 1.0;
+}
+
+/** Phase E MVS: international_standing threshold below which a faction's corps
+ *  COs hesitate on op launch. Orchestrator-accepted Architect default. */
+const INTL_STANDING_OPS_HESITATION_THRESHOLD = 30;
+
+/** Phase E MVS: hesitation multiplier applied to op-launch scoring when
+ *  international_standing < threshold. Orchestrator-accepted Architect default.
+ *  Soft pressure (0.7×) — not a hard block. */
+const INTL_STANDING_OPS_HESITATION_MULTIPLIER = 0.7;
+
 /** Corps exhaustion decay per turn when idle (no active operation). */
 const EXHAUSTION_DECAY_IDLE = 3;
 

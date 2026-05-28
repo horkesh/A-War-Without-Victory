@@ -535,6 +535,20 @@ export interface CommanderBriefing {
     readonly campaign_sync_targets: readonly string[];
     /** Canonical A3/C1 directive deviation reason when this corps received a deviated campaign role. */
     readonly campaign_role_deviation_reason?: 'aggressive_preference' | 'cautious_preference' | 'compliance_score_low';
+    /** Phase E MVS: optional propagation of strategic-dimension values into the
+     *  commander briefing surface. Populated by `buildBriefing` only when the
+     *  two-tier political-dimension propagation gate
+     *  (`isIntlStandingOpsHesitationActive`) is ON. Field is OMITTED when the
+     *  gate is OFF — mirrors `campaign_role_deviation_reason`'s optional-field
+     *  pattern. Byte-stability contract: consumers (sector_offensive op-launch
+     *  hesitation) gate on `!== undefined` so the flag-OFF path is identical to
+     *  pre-Phase-E briefings. */
+    readonly political_dimensions?: {
+        /** Effective international_standing value (0..100) for this corps's faction,
+         *  sourced from `state.military.negotiation.strategic_dimensions[faction]
+         *  .international_standing.effective_value`. */
+        readonly international_standing?: number;
+    };
 }
 
 // ---------------------------------------------------------------------------
