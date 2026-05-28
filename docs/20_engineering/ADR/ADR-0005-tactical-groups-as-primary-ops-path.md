@@ -12,6 +12,7 @@ Accepted (2026-05-28) — initial proposal 2026-05-28; major sync after Pyrrhic 
 - **r2 (2026-05-28, AM)** — Hard Invariants section added after lead constraint discussion (one-TG-per-brigade, cooldown, per-brigade casualty).
 - **r3 (2026-05-28, PM)** — major sync. Pyrrhic specialists convened (Historian, Game Designer, Technical Architect, Ops Expert + Gameplay Programmer). All open questions resolved. Army HQ Operations added as a major new section. v2 sub-staging reordered per risk analysis. Status promoted to Accepted.
 - **r3.1 (2026-05-28, PM)** — Companion ADR-0006 added after sector-removal investigation. No scope change to ADR-0005; standing OGs ratified as a separate concern handled by ADR-0006.
+- **r3.2 (2026-05-29)** — Schema-version correction. r3's Technical Architect report cited `CURRENT_SCHEMA_VERSION = 33` (stale info). Actual current version per `src/state/game_state.ts:42` is **18**. All "v33→v34" references corrected to "v18→v19". No design change.
 
 ## Context
 
@@ -374,8 +375,8 @@ Legitimate write sites (recruitment, casualty application, trickle-back) get the
 - **Casualty pro-rata rounding**: integer-only, largest-remainder method, deterministic tiebreak by donor `brigade_id` strictCompare. Documented in `combat_math.ts`.
 - **Donor selection ordering**: `(distance_hops asc, corps_id strictCompare asc, brigade_id strictCompare asc)`. Never sort by personnel (changes turn-to-turn).
 - **Distance hops**: computed once at TG formation, **frozen**. Recomputing each turn introduces graph-version drift risk.
-- **Schema-stable, behavior-flagged.** v34 schema ships with ALL TG fields present and empty. While `enable_tactical_groups = false`, serializer omits empty Records from hash input via existing `omitEmpty` helper. **Goal: n156 baseline `3649b3861a87e6ea` survives byte-identical post-migration with flag off.** Gold-blocker gate before any TG behavior PR merges.
-- **Sub-flag gating.** v2.0/v2.1/v2.2/v2.3 are *behavioral* sub-stages gated by sub-flags within v34 (`enable_tg_formation`, `enable_tg_combat_synthesis`, `enable_tg_cohesion_bleed`). Schema forward-compatible from day 1; behavior turns on incrementally. Pattern from v0.8 `enable_command_chain` rollout.
+- **Schema-stable, behavior-flagged.** v19 schema ships with ALL TG fields present and empty. While `enable_tactical_groups = false`, serializer omits empty Records from hash input via existing `omitEmpty` helper. **Goal: n156 baseline `3649b3861a87e6ea` survives byte-identical post-migration with flag off.** Gold-blocker gate before any TG behavior PR merges.
+- **Sub-flag gating.** v2.0/v2.1/v2.2/v2.3 are *behavioral* sub-stages gated by sub-flags within v19 (`enable_tg_formation`, `enable_tg_combat_synthesis`, `enable_tg_cohesion_bleed`). Schema forward-compatible from day 1; behavior turns on incrementally. Pattern from v0.8 `enable_command_chain` rollout.
 
 ## Phased Rollout
 
@@ -384,7 +385,7 @@ Sub-stages reordered from naïve sequential to **risk-isolated** order per Ops E
 | Stage | Scope | Effort | Calibration impact |
 |---|---|---|---|
 | **v1** | Anchor-only readiness gate. `ENABLE_TACTICAL_GROUPS` flag added. `getAnchorBrigade(axis)` helper. When flag on, `axisHasExecutableOpeningAttack` iterates `[anchor]` only. Combat math unchanged. Anchor takes 100% casualties (identical to today's solo-brigade). | ~150 LOC | Flag off: byte-identical to n156. Flag on: smoke-test only; no production baseline. |
-| **v2.0** | Donor pool selection + TG formation. `tactical_groups` Record populated. `army_hq_operations` scaffold (entity exists, no triggers wired). v33→v34 schema migration ships here (all fields, including v2.1-v2.3 fields). Casualty distribution stays at v1 behavior (100% anchor). | ~250 LOC + migration | Calibration-neutral (donors form but don't fight; flag-gated). n156 baseline preserved with sub-flags off. |
+| **v2.0** | Donor pool selection + TG formation. `tactical_groups` Record populated. `army_hq_operations` scaffold (entity exists, no triggers wired). v18→v19 schema migration ships here (all fields, including v2.1-v2.3 fields). Casualty distribution stays at v1 behavior (100% anchor). | ~250 LOC + migration | Calibration-neutral (donors form but don't fight; flag-gated). n156 baseline preserved with sub-flags off. |
 | **v2.1** | Casualty distribution math (`distributeCasualtiesAcrossTg`). Unit-tested against synthetic battles. Wired but DORMANT until v2.2 — there are no donor casualties yet (donors don't contribute to combat). | ~120 LOC | Calibration-neutral (additive math; dead code path until v2.2 lights it up). |
 | **v2.2** | TG combat power synthesis. Donors contribute to `tg.personnel`/`tg.equipment`. Battles use TG snapshot. **Calibration baseline shifts here.** Distribution code from v2.1 lights up. 60% donation gate enforced. | ~200 LOC | **Highest cascade risk.** Late-war ops transition from "fires-and-fails" to "fires-and-fights." Full anchor/benchmark sweep required. Expect +3-8% capture before Pyrrhic dampener lands at v2.3. |
 | **v2.3** | Cohesion bleed (`donor_cohesion_loss` formula). Cooldown enforcement (`TG_DONOR_COOLDOWN_TURNS`). Same-composition reformation block. Per-scenario donation cap. | ~150 LOC | Pyrrhic dampener. Tunable per-faction multiplier from day 1. |
@@ -404,7 +405,7 @@ Sign-off gates per stage: anchors 27/27, benchmarks 6/6, count % within ±2pp of
 8. **Per-corps concurrent TG cap = 2** (matches typical multi-axis op shape).
 9. **MIN_BRIGADE_PERSONNEL_AFTER_DONATION scaled by brigade kind**: motorized 1000, light infantry 600, militia 400.
 10. **v2 sub-stage order**: v2.0 (formation) → v2.1 (distribution math, dormant) → v2.2 (combat synthesis, calibration shift) → v2.3 (Pyrrhic dampener). Isolates calibration shift to one stage.
-11. **Schema migration**: ONE v33→v34 bump at v2.0 with all fields. Behavior gated by sub-flags within v34.
+11. **Schema migration**: ONE v18→v19 bump at v2.0 with all fields. Behavior gated by sub-flags within v19.
 12. **`effectivePersonnel` enforcement**: build-time ESLint rule + runtime invariant test (belt-and-braces).
 13. **Cross-corps regular TGs**: adjacent-corps allowed (sector-adjacency BFS check). HVO↔ARBiH stays forbidden at all versions.
 14. **Federation coordination**: parallel-axis only, no cross-faction donations even post-Washington.
@@ -424,10 +425,10 @@ Sign-off gates per stage: anchors 27/27, benchmarks 6/6, count % within ±2pp of
 - Amplifies negative-sum identity — every op now bleeds 3-6 brigades, not 1. Reserve doctrine emerges organically as a player strategy.
 
 ### Negative / Risk
-- **Calibration cascade risk** (highest): current baseline depends partly on the stall. v2.2 will shift the baseline; v2.3 must dampen, not over-dampen. Plan: parallel baselines (n156 v33-compat + new v34-with-TG-enabled) until v2.3 stabilizes.
+- **Calibration cascade risk** (highest): current baseline depends partly on the stall. v2.2 will shift the baseline; v2.3 must dampen, not over-dampen. Plan: parallel baselines (n156 v18-compat + new v19-with-TG-enabled) until v2.3 stabilizes.
 - **Effective-personnel cascade** through ~40+ call sites. Mitigation: build-time ESLint rule + runtime invariant test.
 - **Faction asymmetry**: VRS has more brigades per corps → more donor candidates → can spin more TGs. Caps mitigate but don't eliminate. May need per-faction cap tuning post-v2.2.
-- **Schema migration** v33 → v34 — single big bump, schema-stable, behavior-flagged. Migration is one-way (no v34→v33 downgrade — personnel ledger has no v33 representation).
+- **Schema migration** v18 → v19 — single big bump, schema-stable, behavior-flagged. Migration is one-way (no v19→v18 downgrade — personnel ledger has no v18 representation).
 - **Per-brigade history growth**: bounded by rolling 26-turn window. Older entries flushed to lazy-loaded archive. Save size impact: ~1-2% growth over 188w campaign.
 - **Bot AI vs player asymmetry**: bot picks donors automatically; player picks manually. Mitigation: smart defaults (auto-pick per BFS) with one-click override. UI work in post-engine PR.
 - **Cognitive load on player**: every op gains a donor decision. Mitigation: defer to a "Decision Room" affordance with sensible defaults; high-stakes Army HQ ops get a dedicated briefing.
