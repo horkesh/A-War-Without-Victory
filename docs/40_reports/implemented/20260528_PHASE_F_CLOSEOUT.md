@@ -205,3 +205,15 @@ Tests:
 - `tests/sensitive_history_canon_gate_audit_strict_gate.test.ts` — new CI integration test (2 tests). This is the hard-fail rail for future event-authoring regressions.
 
 Determinism preserved: `reward_risk_markers` are stable-sorted before emission; no `Math.random()`, no `Date.now()`, no timestamps. Baseline regression byte-identical (no engine code touched in G3).
+
+## G4 amendment — GitHub Actions CI workflow (2026-05-28)
+
+Phase G Packet 4 wraps the G3 strict gate test into a named, explicit GitHub Actions workflow so the canon-compliance check is visible at PR-review time as a discrete CI surface rather than buried inside the broader `test:vitest:fast` slice (which already runs it implicitly via auto-discovery).
+
+- **New workflow file:** `.github/workflows/event-system-ci.yml` (single job `event-system-validation`, four sequential gates: typecheck → 18-file event-system + Phase E/F suite → F2 strict gate → baseline regression). Triggers on push to `main` / `codex/**` / `feature/**` and on PR to `main`.
+- **Workflow conventions match the existing repo set:** Node 22, `npm install --legacy-peer-deps`, dual workspace install (root + `src/ui/map`), `actions/checkout@v5`, `actions/setup-node@v5`. Mirrors `.github/workflows/baseline-regression.yml` so cache keys and runner behaviour stay consistent.
+- **New catalog README:** `.github/workflows/README.md` documents all five workflows (typecheck, baseline-regression, desktop-release-guard, release, event-system-ci), lists the four event-system gates with the exact local-equivalent commands, and explains the convention notes (Node 22, legacy-peer-deps, map workspace install, action pinning).
+- **Pure additive surface.** The strict gate test, the audit tool, and the baseline regression script were all shipped in earlier packets. G4 only adds the YAML wrapper + the workflows README. No event JSON edits, no engine code edits, no scenario data edits, no canon edits, no baseline refresh.
+- **Pairs with G3.** G3 shipped the test that fails on canon-compliance regressions; G4 ships the CI surface that runs the test at PR time. Together they form the closed loop: authoring drift on §3.6 / §1.3 / atrocity-reward / weak-cost-floor surfaces will now fail a named PR check instead of slipping through review.
+
+Future contributors who edit `data/scenarios/events/*.json` should expect the **Event System CI / Event system validation** check on their PR. The fastest local triage path for a failed Gate 3 (strict gate) is the single-file command documented in `.github/workflows/README.md` under "Run the same checks locally" → Gate 3.

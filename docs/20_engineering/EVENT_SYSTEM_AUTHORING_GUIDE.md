@@ -222,6 +222,8 @@ If your authoring throws at load: **fix the data**. Do not bypass.
 
 In addition to the load-time passes above, a **static CI gate** runs in the test suite at `tests/sensitive_history_canon_gate_audit_strict_gate.test.ts`. This gate loads the real catalog via `buildSensitiveHistoryAudit` and asserts `CRITICAL + WARNING = 0` violations. Future authoring regressions on canon-compliance surfaces (Ring 3 §3.6 guard drift, weak punitive cost floors on sensitive options, atrocity-reward shifts) will **fail at CI time** rather than slipping through review. `INFO` reward_risk violations (e.g. seek_clandestine_arms's §6-reviewed 1.05x recruitment_modifier) are **permitted** and surfaced for visibility only — they do not block CI.
 
+Phase G Packet 4 (2026-05-28) wired this strict gate into the named GitHub Actions workflow `.github/workflows/event-system-ci.yml`. PRs touching event JSON or event-loader code will see an **Event System CI / Event system validation** check that runs four sequential gates: typecheck, the 18-file event-system + Phase E/F suite, the F2 strict canon-compliance gate, and the baseline regression. The baseline-regression workflow already runs the same strict gate implicitly via auto-discovery in `test:vitest:fast`; the new workflow makes it a discrete, named PR surface so reviewers can triage canon-compliance regressions without reading through the broader fast-test output. Local-equivalent commands and convention notes (Node 22, `npm install --legacy-peer-deps`, dual workspace install) are catalogued in `.github/workflows/README.md`.
+
 ---
 
 ## 5. Engine vocabulary (dual-channel architecture)
