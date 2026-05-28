@@ -17,7 +17,10 @@ import type {
     EventEffect,
     DimensionShift,
     EventFutureConsequence,
+    EventDefinition,
 } from '../../../sim/events/event_types';
+import type { GameState } from '../../../state/game_state';
+import { getCausalAncestors } from '../../../sim/events/causality_query';
 import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
@@ -42,6 +45,32 @@ const FACTION_TEXT_CLASS: Record<string, string> = {
 export interface EventDecisionModalProps {
     decision: EventDecisionDossier;
     onRespond: (eventId: string, responseId: string) => void;
+    /**
+     * Phase H Packet 3 — optional event catalog for the Decision Context
+     * panel (Component A per H1 scoping §4.2A). When omitted, the panel
+     * gracefully degrades (no family / source_tier / source-dossier excerpt
+     * rendered from the catalog side). Backward compatible — existing
+     * callers that pass only `decision` + `onRespond` continue to work.
+     */
+    eventCatalog?: ReadonlyMap<string, EventDefinition>;
+    /**
+     * Phase H Packet 3 — optional GameState handle for ancestry lookup via
+     * `getCausalAncestors`. When omitted, the ancestry chain row is
+     * skipped. Backward compatible.
+     */
+    state?: GameState;
+}
+
+/** Phase H Packet 3 — Maximum chars of source dossier excerpt rendered in
+ *  the Decision Context section. Per spec: first 200 chars with "..."
+ *  truncation. */
+const SOURCE_DOSSIER_EXCERPT_MAX_CHARS = 200;
+
+/** Phase H Packet 3 — Truncate a source-note / historical_source string to
+ *  the dossier excerpt limit, appending "..." when truncated. Pure helper. */
+function truncateSourceDossier(text: string): string {
+    if (text.length <= SOURCE_DOSSIER_EXCERPT_MAX_CHARS) return text;
+    return text.slice(0, SOURCE_DOSSIER_EXCERPT_MAX_CHARS) + '...';
 }
 
 function humanizeToken(value: string | undefined): string {
@@ -260,7 +289,74 @@ function ResponseButton({
     );
 }
 
-export function EventDecisionModal({ decision, onRespond }: EventDecisionModalProps) {
+/**
+ * Phase H Packet 3 (Component A — Decision Context expansion) — renders the
+ * event's causal-context substrate (family + source_tier badge, ancestry
+ * chain, source-dossier excerpt). Conservative scope: data display only,
+ * no styling polish. Gracefully omits sub-rows when their inputs are
+ * missing. See `docs/40_reports/proposals/20260528_UI_CODEX_INTEGRATION_SCOPING.md` §4.2A.
+ */
+function DecisionContextSection({
+    decision,
+    eventCatalog,
+    state,
+}: {
+    decision: EventDecisionDossier;
+    eventCatalog?: ReadonlyMap<string, EventDefinition>;
+    state?: GameState;
+}) {
+    // Graceful degradation: if neither catalog nor state is available, omit
+    // the entire section. The existing modal sidebar already shows the
+    // source_note; the Decision Context section adds CAUSAL context only.
+    if (!eventCatalog && !state) return null;
+    const eventDef = eventCatalog?.get(decision.event_id);
+    const family = eventDef?.family;
+    const sourceTier = eventDef?.source_tier;
+    const ancestors = state ? getCausalAncestors(decision.event_id, state) : [];
+    const rawDossier = eventDef?.source_note ?? eventDef?.historical_source ?? null;
+    const dossierExcerpt = rawDossier ? truncateSourceDossier(rawDossier) : null;
+
+    // If catalog provided but the event_id is not in it AND we have no
+    // ancestors to render, omit the section (nothing to show).
+    if (!eventDef && ancestors.length === 0) return null;
+
+    return (
+        <section
+            className="mb-4 rounded border border-panel-border bg-panel-card/80 p-4"
+            data-testid="decision-context-section"
+        >
+            <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold">
+                Decision Context
+            </div>
+            {eventDef && (family || sourceTier) && (
+                <div
+                    className="mb-2 text-[11px] leading-relaxed text-text-secondary"
+                    data-testid="decision-context-family-source"
+                >
+                    Family: {family ?? 'unknown'} | Source: {sourceTier ?? 'unknown'}
+                </div>
+            )}
+            {ancestors.length > 0 && (
+                <div
+                    className="mb-2 text-[11px] leading-relaxed text-text-secondary"
+                    data-testid="decision-context-ancestry"
+                >
+                    Ancestry: {ancestors.join(', ')}
+                </div>
+            )}
+            {dossierExcerpt && (
+                <div
+                    className="text-[11px] leading-relaxed text-text-secondary"
+                    data-testid="decision-context-dossier"
+                >
+                    Source dossier: {dossierExcerpt}
+                </div>
+            )}
+        </section>
+    );
+}
+
+export function EventDecisionModal({ decision, onRespond, eventCatalog, state }: EventDecisionModalProps) {
     const factionColor = FACTION_TEXT_CLASS[decision.faction ?? ''] ?? 'text-accent-gold';
     const category = sentenceToken(decision.category) || 'Presidential decision';
     const sourceNote = decision.source_note ?? decision.historical_source ?? decision.source ?? null;
@@ -347,6 +443,15 @@ export function EventDecisionModal({ decision, onRespond }: EventDecisionModalPr
                         </div>
                     </aside>
                 </div>
+
+                {/* Phase H Packet 3 — Decision Context (Component A) renders
+                    after the dossier sidebar / source-note, before the
+                    response option list. See H1 scoping §4.2A. */}
+                <DecisionContextSection
+                    decision={decision}
+                    eventCatalog={eventCatalog}
+                    state={state}
+                />
 
                 {!hasHistoricalDefault && (
                     <div className="mb-4 rounded border border-accent-gold/30 bg-accent-gold/10 px-4 py-3 text-[12px] leading-relaxed text-text-secondary">

@@ -90,8 +90,8 @@ describe('production modal-ready event catalog rendering', () => {
   it('renders every accepted ready row as a complete player-facing decision modal', () => {
     const report = buildEventAcceptanceReport();
 
-    expect(report.summary.production_modal_authoring_ready_events).toBe(18);
-    expect(report.summary.required_response_events).toBe(36);
+    expect(report.summary.production_modal_authoring_ready_events).toBe(45);
+    expect(report.summary.required_response_events).toBe(65);
 
     for (const row of report.production_modal_authoring_ready_rows) {
       const event = loadEvent(row.file, row.id);
