@@ -24,6 +24,7 @@ import { estimateConcentratedOutcome, isOutcomeSufficientForAttack } from './bot
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { getAllAxisObjectives, getCurrentLaunchObjectives, isMultiAxis } from './sector_offensive_axis_helpers.js';
+import { ENABLE_TACTICAL_GROUPS, getAnchorBrigade } from './tactical_group_config.js';
 
 // BATCH C: launch-readiness probes call `predictAllAdjacentTargets(...)` only
 // to query whether the brigade has a direct-objective adjacency entry; they do
@@ -734,7 +735,21 @@ function classifyAxisOpeningAttack(
         return { executable: false, blocker: 'no_approach_osid' };
     }
 
-    if (!hasAttackFloorParticipant(state, axis.assigned_brigades)) {
+    // TG v1 (ADR-0005): when the tactical-group flag is on, the readiness gate
+    // evaluates only the anchor brigade (main_brigade or first-assigned fallback).
+    // Non-anchor brigades stay in assigned_brigades for downstream combat math
+    // (existing main/support_brigades SUPPORT_POWER_MULT path is unchanged in
+    // v1); they simply no longer block the planning→execution transition by
+    // failing to march to the objective. Flag default off — byte-identical to
+    // legacy behavior. See src/sim/combat/tactical_group_config.ts.
+    const gateBrigades = ENABLE_TACTICAL_GROUPS
+        ? (() => {
+            const anchor = getAnchorBrigade(axis);
+            return anchor ? [anchor] : axis.assigned_brigades;
+        })()
+        : axis.assigned_brigades;
+
+    if (!hasAttackFloorParticipant(state, gateBrigades)) {
         axis.launch_blocker = 'participants_below_attack_floor';
         return { executable: false, blocker: 'participants_below_attack_floor' };
     }
@@ -743,7 +758,7 @@ function classifyAxisOpeningAttack(
         state,
         faction,
         objective,
-        axis.assigned_brigades,
+        gateBrigades,
         adjacency,
         threshold,
     )) {
