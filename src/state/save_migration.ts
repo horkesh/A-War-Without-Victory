@@ -729,3 +729,28 @@ registerMigration({
         ensureArray(mil, 'bot_priority_shifts');
     },
 });
+
+// Phase B Sub-slice B2: shape-only state additions for the Event Database
+// Runtime Semantics packet. No writer/reader is wired yet (Sub-slice B3 lands
+// the eligibility short-circuit and the recordEnabledEvents/recordClosedEvents
+// helpers). Each migration is pure: deterministic empty default, no I/O,
+// logging, time, randomness, or env reads. Packet version-number adjustment:
+// the v1.3 packet referenced v26/v27 but Family A schema-growth shipped
+// v23-v31, so closed_event_ids/event_causality_log land at v32/v33.
+registerMigration({
+    version: 32,
+    description: 'Persisted closed_event_ids array default (event soft foreclosure substrate). Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        ensureArray(mil, 'closed_event_ids');
+    },
+});
+
+registerMigration({
+    version: 33,
+    description: 'Persisted event_causality_log array default (audit trail substrate). Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        ensureArray(mil, 'event_causality_log');
+    },
+});

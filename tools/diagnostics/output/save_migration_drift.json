@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 31,
-  "registered_migration_count": 31,
-  "strict_required_field_count": 74,
+  "latest_schema_version": 33,
+  "registered_migration_count": 33,
+  "strict_required_field_count": 76,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -129,6 +129,14 @@
     {
       "version": 31,
       "description": "Persisted consequence runtime effect queue defaults. Sensitive: no."
+    },
+    {
+      "version": 32,
+      "description": "Persisted closed_event_ids array default (event soft foreclosure substrate). Sensitive: no."
+    },
+    {
+      "version": 33,
+      "description": "Persisted event_causality_log array default (audit trail substrate). Sensitive: no."
     }
   ],
   "required_fields": [
@@ -427,6 +435,14 @@
     {
       "version": 31,
       "path": "military.offensive_ops_suppressions"
+    },
+    {
+      "version": 32,
+      "path": "military.closed_event_ids"
+    },
+    {
+      "version": 33,
+      "path": "military.event_causality_log"
     }
   ]
 }

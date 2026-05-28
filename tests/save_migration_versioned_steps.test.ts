@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(31);
+        expect(getLatestSchemaVersion()).toBe(33);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -106,6 +106,8 @@ describe('versioned save migration steps', () => {
         expect(state.military.offensive_ops_suppressions).toEqual([]);
         expect(state.military.alliance_locks).toEqual([]);
         expect(state.military.bot_priority_shifts).toEqual([]);
+        expect(state.military.closed_event_ids).toEqual([]);
+        expect(state.military.event_causality_log).toEqual([]);
         expect(state.military.pending_event_decisions).toEqual([]);
         expect(state.military.pending_event_notifications).toEqual([]);
         expect(state.military.phantoms_spawned).toEqual([]);

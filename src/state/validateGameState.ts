@@ -138,6 +138,17 @@ function isAllianceLockMode(value: unknown): boolean {
     return value === 'floor' || value === 'ceiling';
 }
 
+/** Phase B Sub-slice B2: enum gate for `CausalityLogEntry.kind`.
+ *  Packet `docs/40_reports/proposals/20260527_EVENT_DATABASE_RUNTIME_SEMANTICS_PACKET.md` §2.3. */
+function isCausalityKind(value: unknown): boolean {
+    return value === 'enables'
+        || value === 'closes'
+        || value === 'opens_flag'
+        || value === 'closes_flag'
+        || value === 'mutex_suppressed'
+        || value === 'overflowed';
+}
+
 function isOrderSnapshotType(value: unknown): boolean {
     return value === 'stance_change'
         || value === 'operation_launch'
@@ -274,6 +285,117 @@ function validateEventDecisionLog(value: unknown, errors: string[]): void {
             errors.push(`military.event_decision_log[${i}].turn must be a non-negative integer`);
         }
     });
+}
+
+/** Phase B Sub-slice B2: shape proof for `military.closed_event_ids`.
+ *  Enforces string[] with no duplicates and canonical `strictCompare` sort
+ *  (packet §3.7 — sort-on-read is the canonical defense against save/reload drift). */
+function validateClosedEventIds(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.closed_event_ids must be a string array when present');
+        return;
+    }
+    let prior: string | null = null;
+    const seen = new Set<string>();
+    for (let i = 0; i < value.length; i++) {
+        const entry = value[i];
+        if (typeof entry !== 'string') {
+            errors.push(`military.closed_event_ids[${i}] must be a string`);
+            continue;
+        }
+        if (seen.has(entry)) {
+            errors.push(`military.closed_event_ids[${i}] must be unique: ${entry}`);
+        } else {
+            seen.add(entry);
+        }
+        if (prior !== null && strictCompare(prior, entry) > 0) {
+            errors.push(`military.closed_event_ids must be sorted via strictCompare (entry at index ${i} breaks order)`);
+        }
+        prior = entry;
+    }
+}
+
+/** Phase B Sub-slice B2: shape proof for `military.event_causality_log`.
+ *  Each entry is a CausalityLogEntry. Log must be sorted on read per
+ *  (turn, from_event, to_event ?? '', to_flag ?? '', kind, source_response_id ?? '')
+ *  via strictCompare. Determinism Auditor Wave 2 ruling (packet §3.7). */
+/** Field-wise tuple compare for causality entries (no string concatenation,
+ *  so component boundaries cannot collide).
+ *  Phase B Sub-slice B3: exported so `evaluate_events.ts` writers share the
+ *  same compare contract as the validator (packet §3.7 — single sort key). */
+export function compareCausalityEntries(
+    a: { turn: number; from_event: string; to_event: string; to_flag: string; kind: string; source_response_id: string },
+    b: { turn: number; from_event: string; to_event: string; to_flag: string; kind: string; source_response_id: string },
+): number {
+    if (a.turn !== b.turn) return a.turn - b.turn;
+    const fe = strictCompare(a.from_event, b.from_event);
+    if (fe !== 0) return fe;
+    const te = strictCompare(a.to_event, b.to_event);
+    if (te !== 0) return te;
+    const tf = strictCompare(a.to_flag, b.to_flag);
+    if (tf !== 0) return tf;
+    const k = strictCompare(a.kind, b.kind);
+    if (k !== 0) return k;
+    return strictCompare(a.source_response_id, b.source_response_id);
+}
+
+function validateEventCausalityLog(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.event_causality_log must be an array when present');
+        return;
+    }
+    type CausalityTupleKey = { turn: number; from_event: string; to_event: string; to_flag: string; kind: string; source_response_id: string };
+    let priorTuple: CausalityTupleKey | null = null;
+    for (let i = 0; i < value.length; i++) {
+        const entry = value[i];
+        if (!isRecord(entry)) {
+            errors.push(`military.event_causality_log[${i}] must be an object`);
+            priorTuple = null;
+            continue;
+        }
+        const path = `military.event_causality_log[${i}]`;
+        let entryValid = true;
+        if (!isNonNegativeInteger(entry.turn)) {
+            errors.push(`${path}.turn must be a non-negative integer`);
+            entryValid = false;
+        }
+        if (!isNonEmptyString(entry.from_event)) {
+            errors.push(`${path}.from_event must be a non-empty string`);
+            entryValid = false;
+        }
+        if (entry.to_event !== null && !isNonEmptyString(entry.to_event)) {
+            errors.push(`${path}.to_event must be null or a non-empty string`);
+            entryValid = false;
+        }
+        if (entry.to_flag !== null && !isNonEmptyString(entry.to_flag)) {
+            errors.push(`${path}.to_flag must be null or a non-empty string`);
+            entryValid = false;
+        }
+        if (!isCausalityKind(entry.kind)) {
+            errors.push(`${path}.kind must be one of: enables, closes, opens_flag, closes_flag, mutex_suppressed, overflowed`);
+            entryValid = false;
+        }
+        if ('source_response_id' in entry && entry.source_response_id !== undefined && !isNonEmptyString(entry.source_response_id)) {
+            errors.push(`${path}.source_response_id must be a non-empty string when present`);
+            entryValid = false;
+        }
+        if (!entryValid) {
+            priorTuple = null;
+            continue;
+        }
+        const tuple: CausalityTupleKey = {
+            turn: entry.turn as number,
+            from_event: entry.from_event as string,
+            to_event: (entry.to_event ?? '') as string,
+            to_flag: (entry.to_flag ?? '') as string,
+            kind: entry.kind as string,
+            source_response_id: (entry.source_response_id ?? '') as string,
+        };
+        if (priorTuple !== null && compareCausalityEntries(priorTuple, tuple) > 0) {
+            errors.push(`military.event_causality_log must be sorted by (turn, from_event, to_event, to_flag, kind, source_response_id) via strictCompare (entry at index ${i} breaks order)`);
+        }
+        priorTuple = tuple;
+    }
 }
 
 function validateOrderSnapshot(value: unknown, path: string, errors: string[]): void {
@@ -846,6 +968,8 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 31, path: 'military.offensive_ops_suppressions', check: Array.isArray },
     { version: 31, path: 'military.alliance_locks', check: Array.isArray },
     { version: 31, path: 'military.bot_priority_shifts', check: Array.isArray },
+    { version: 32, path: 'military.closed_event_ids', check: isStringArray },
+    { version: 33, path: 'military.event_causality_log', check: Array.isArray },
 ];
 
 /**
@@ -1069,6 +1193,12 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'bot_priority_shifts' in military && military.bot_priority_shifts !== undefined) {
         validateBotPriorityShifts(military.bot_priority_shifts, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'closed_event_ids' in military && military.closed_event_ids !== undefined) {
+        validateClosedEventIds(military.closed_event_ids, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'event_causality_log' in military && military.event_causality_log !== undefined) {
+        validateEventCausalityLog(military.event_causality_log, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'pending_event_notifications' in military && military.pending_event_notifications !== undefined) {
         const notifications = military.pending_event_notifications;

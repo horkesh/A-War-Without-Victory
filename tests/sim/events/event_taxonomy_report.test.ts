@@ -13,7 +13,7 @@ describe('event taxonomy diagnostic report', () => {
     it('loads the fixed five-file catalog in deterministic order', () => {
         const rows = loadCatalogRows();
 
-        expect(rows).toHaveLength(247);
+        expect(rows).toHaveLength(274);
         expect([...new Set(rows.map((row) => row.file))]).toEqual([
             'data/scenarios/events/war_1992.json',
             'data/scenarios/events/war_1993.json',
@@ -23,17 +23,17 @@ describe('event taxonomy diagnostic report', () => {
         ]);
         expect(rows.map((row) => `${row.file_index}:${row.catalog_index}:${row.id}`).slice(0, 3)).toEqual([
             '0:0:rs_strategic_goals',
-            '0:1:rbih_state_identity',
-            '0:3:arms_embargo_impact_1992',
+            '0:2:rbih_state_identity',
+            '0:1:rs_paramilitary_policy_1992',
         ]);
     });
 
     it('reports one row per current event id and no duplicate ids', () => {
         const report = buildEventTaxonomyReport(loadCatalogRows());
 
-        expect(report.summary.total_events).toBe(247);
+        expect(report.summary.total_events).toBe(274);
         expect(report.summary.duplicate_event_ids).toEqual([]);
-        expect(new Set(report.rows.map((row) => row.id)).size).toBe(247);
+        expect(new Set(report.rows.map((row) => row.id)).size).toBe(274);
     });
 
     it('classifies trigger emergence from phase, prerequisites, pressure, and condition types', () => {
@@ -50,35 +50,86 @@ describe('event taxonomy diagnostic report', () => {
     it('pins current choice and required-response inventory without changing catalog behavior', () => {
         const report = buildEventTaxonomyReport(loadCatalogRows());
 
-        expect(report.summary.choice_events).toBe(44);
-        expect(report.summary.no_choice_events).toBe(203);
-        expect(report.summary.required_response_events).toBe(36);
-        expect(report.summary.choice_rows_with_title_and_narrative).toBe(44);
-        expect(report.summary.choice_rows_with_source).toBe(33);
-        expect(report.summary.required_response_rows_with_source).toBe(31);
-        expect(report.summary.historical_default_markers).toBe(17);
-        expect(report.summary.historical_default_ids).toBe(17);
-        expect(report.summary.modal_ready_events).toBe(18);
+        expect(report.summary.choice_events).toBe(73);
+        expect(report.summary.no_choice_events).toBe(201);
+        expect(report.summary.required_response_events).toBe(65);
+        expect(report.summary.choice_rows_with_title_and_narrative).toBe(73);
+        expect(report.summary.choice_rows_with_source).toBe(65);
+        expect(report.summary.required_response_rows_with_source).toBe(61);
+        expect(report.summary.historical_default_markers).toBe(56);
+        expect(report.summary.historical_default_ids).toBe(56);
+        expect(report.summary.modal_ready_events).toBe(45);
         expect(new Map(report.rows
             .filter((row) => row.future_consequence_count > 0)
             .map((row) => [row.id, row.future_consequence_count]))).toEqual(new Map([
-            ['rbih_state_identity', 3],
-            ['hrhb_political_goal', 3],
+            ['rs_strategic_goals', 39],
+            ['rbih_state_identity', 42],
+            ['rs_paramilitary_policy_1992', 3],
+            ['hrhb_political_goal', 39],
+            ['rbih_paramilitary_policy_1992', 3],
+            ['hrhb_1992_graz_cooperation_collapse', 2],
             ['rs_assembly_rejects_voplan_1993', 2],
+            ['rbih_nato_ultimatum_compliance_1994', 2],
+            ['rbih_washington_agreement_1994', 2],
             ['belgrade_embargo_rs_1994', 2],
         ]));
         expect(report.rows.flatMap((row) => row.future_consequence_opens_events)).toEqual([
+            'belgrade_embargo_rs_1994',
+            'deliberate_force_rs_compliance_1995',
+            'holbrooke_us_belgrade_channel_1995',
+            'karadzic_mladic_split_1995',
+            'rs_assembly_rejects_voplan_1993',
+            'rs_autonomy_path_decision_1993',
+            'rs_belgrade_pressure_response_1993',
+            'rs_contact_group_response_1994',
+            'rs_dayton_acceptance_1995',
+            'rs_owen_stoltenberg_response_1993',
+            'rs_paramilitary_policy_1992',
+            'rs_washington_rejection_1994',
+            'un_hostage_crisis_1995',
+            'abdic_apwb_declared_1993',
+            'bihac_5th_corps_offensive_1994',
             'csq_bosniak_unity_1993',
             'csq_civic_identity_consolidation_1993',
             'csq_international_disillusionment_1993',
             'csq_minority_defections_1992',
             'csq_pragmatic_coalition_1993',
+            'dayton_talks_begin_1995',
+            'os_rbih_tactical_acceptance_1993',
+            'rbih_arms_embargo_lift_advocacy_1993',
+            'rbih_contact_group_response_1994',
+            'rbih_federation_army_integration_1994',
+            'rbih_late_war_offensive_1995',
+            'rbih_minority_retention_1992',
+            'rbih_nato_ultimatum_compliance_1994',
+            'rbih_paramilitary_policy_1992',
+            'rbih_reintegration_offers_1993',
+            'rbih_washington_agreement_1994',
+            'srebrenica_demilitarization_1993',
+            'vance_owen_plan_1993',
+            'csq_paramilitary_authorization_refused',
             'csq_federation_early_1994',
             'csq_hvo_central_bosnia_offensive_1993',
             'csq_joint_offensive_1994',
             'csq_joint_operations_agreement_1992',
             'csq_territorial_friction_1993',
             'csq_zagreb_displeasure_1993',
+            'hrhb_1992_graz_cooperation_collapse',
+            'hrhb_central_bosnia_defense_1993',
+            'hrhb_contact_group_response_1994',
+            'hrhb_dayton_acceptance_1995',
+            'hrhb_federation_army_integration_1994',
+            'hrhb_federation_overture_1993',
+            'hrhb_owen_stoltenberg_response_1993',
+            'hrhb_territorial_scope_1993',
+            'hrhb_vance_owen_acceptance_1993',
+            'hrhb_washington_agreement_1994',
+            'hv_hvo_cooperation_1995',
+            'zagreb_orders_hrhb_ceasefire',
+            'zagreb_restrains_boban_vopp',
+            'csq_international_disillusionment_1993',
+            'csq_paramilitary_authorization_refused',
+            'gornji_vakuf_clashes_1993',
         ]);
         expect(report.rows.flatMap((row) => row.future_consequence_closes_events)).toEqual([]);
     });
@@ -222,28 +273,55 @@ describe('event taxonomy diagnostic report', () => {
         const report = buildEventTaxonomyReport(loadCatalogRows());
         const requiredRows = report.rows.filter((row) => row.requires_player_response);
 
-        expect(requiredRows).toHaveLength(36);
+        expect(requiredRows).toHaveLength(65);
         expect(requiredRows.filter((row) => row.modal_ready).map((row) => row.id)).toEqual([
             'rbih_state_identity',
             'hrhb_political_goal',
+            'rbih_paramilitary_policy_1992',
+            'hrhb_1992_graz_cooperation_collapse',
+            'rbih_minority_retention_1992',
             'gornji_vakuf_clashes_1993',
             'ic_pressure_vopp_engagement',
             'vance_owen_plan_1993',
+            'hrhb_vance_owen_acceptance_1993',
+            'hrhb_central_bosnia_defense_1993',
             'rs_assembly_rejects_voplan_1993',
+            'hrhb_territorial_scope_1993',
             'operation_lukavac_93',
             'os_rbih_tactical_acceptance_1993',
+            'rbih_arms_embargo_lift_advocacy_1993',
+            'hrhb_owen_stoltenberg_response_1993',
+            'rs_owen_stoltenberg_response_1993',
+            'rs_belgrade_pressure_response_1993',
+            'abdic_apwb_declared_1993',
+            'rbih_reintegration_offers_1993',
             'strategic_posture_review_hrhb',
             'visit_to_front_rbih',
-            'washington_agreement_1994',
+            'hrhb_federation_overture_1993',
+            'rs_autonomy_path_decision_1993',
+            'rbih_nato_ultimatum_compliance_1994',
+            'rs_washington_rejection_1994',
+            'hrhb_washington_agreement_1994',
+            'rbih_washington_agreement_1994',
             'ic_rbih_restraint_post_washington',
             'contact_group_plan_1994',
+            'hrhb_contact_group_response_1994',
+            'rbih_contact_group_response_1994',
+            'rs_contact_group_response_1994',
+            'rbih_federation_army_integration_1994',
             'belgrade_embargo_rs_1994',
+            'hrhb_federation_army_integration_1994',
+            'bihac_5th_corps_offensive_1994',
             'carter_ceasefire_1994',
+            'hv_hvo_cooperation_1995',
+            'rbih_late_war_offensive_1995',
             'holbrooke_ceasefire_demand_oct95',
             'dayton_talks_begin_1995',
+            'hrhb_dayton_acceptance_1995',
+            'rs_dayton_acceptance_1995',
             'csq_patron_recovery_offer',
         ]);
-        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(18);
+        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(45);
     });
 
     it('classifies packet 3 target rows as finished modal-ready after authored defaults and source notes', () => {
@@ -251,7 +329,7 @@ describe('event taxonomy diagnostic report', () => {
 
         for (const [id, expectedDefault] of [
             ['operation_lukavac_93', 'comply'],
-            ['os_rbih_tactical_acceptance_1993', 'accept_for_optics'],
+            ['os_rbih_tactical_acceptance_1993', 'reject_via_assembly'],
             ['csq_patron_recovery_offer', 'accept_recovery'],
         ] as const) {
             const row = report.rows.find((entry) => entry.id === id);
@@ -274,7 +352,7 @@ describe('event taxonomy diagnostic report', () => {
         const report = buildEventTaxonomyReport(loadCatalogRows());
 
         for (const [id, expectedDefault] of [
-            ['washington_agreement_1994', 'accept'],
+            ['hrhb_washington_agreement_1994', 'accept'],
             ['contact_group_plan_1994', 'accept'],
             ['dayton_talks_begin_1995', 'accept'],
         ] as const) {

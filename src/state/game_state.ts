@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 31 as const;
+export const CURRENT_SCHEMA_VERSION = 33 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -1262,7 +1262,7 @@ export interface RbihHrhbState {
      *   the W1-W6 (diplomatic) or P1-P3 (patron-override) gates clearing. The
      *   timing is emergent from gameplay state and may differ from the
      *   historical date.
-     * - The CALENDAR event `washington_agreement_1994` (in
+     * - The CALENDAR event `hrhb_washington_agreement_1994` (in
      *   `state.military.event_last_fired_turn`) fires on a fixed historical
      *   schedule (~w101 from April 1992 = March 18, 1994) regardless of state.
      *
@@ -1992,6 +1992,22 @@ export interface CivilianCasualtiesByFaction {
     [factionId: string]: { killed: number; fled_abroad: number };
 }
 
+/** Audit trail entry for event causality (enables / closes / mutex / overflow / flag-open / flag-close).
+ *  Phase B Sub-slice B2: shape only — no writer wired yet (Sub-slice B3 lands the
+ *  writer surface in `evaluate_events.ts` / `resolve_decision.ts` / `apply_effects.ts`).
+ *  Determinism: log must be sorted at read per
+ *  (turn, from_event, to_event ?? '', to_flag ?? '', kind, source_response_id ?? '')
+ *  via `strictCompare`. See packet
+ *  `docs/40_reports/proposals/20260527_EVENT_DATABASE_RUNTIME_SEMANTICS_PACKET.md` §2.3, §3.4, §3.7. */
+export interface CausalityLogEntry {
+    turn: number;
+    from_event: string;
+    to_event: string | null;
+    to_flag: string | null;
+    kind: 'enables' | 'closes' | 'opens_flag' | 'closes_flag' | 'mutex_suppressed' | 'overflowed';
+    source_response_id?: string;
+}
+
 export interface MilitaryState {
 formations: Record<FormationId, FormationState>;
 front_segments: Record<string, FrontSegmentState>;
@@ -2265,6 +2281,17 @@ event_decision_log: Array<{
 }>;
 /** Informational event notifications for non-source factions. Never blocks turn advance. */
 pending_event_notifications?: import('../sim/events/event_types.js').EventNotification[];
+/** Event ids explicitly foreclosed by a player or bot decision response.
+ *  Sorted, deduped, deterministic. Phase B Sub-slice B2: shape only — no
+ *  writer/reader wired yet (Sub-slice B3 lands eligibility short-circuit
+ *  + recordClosedEvents helper). See packet
+ *  `docs/40_reports/proposals/20260527_EVENT_DATABASE_RUNTIME_SEMANTICS_PACKET.md` §2.3, §3.2. */
+closed_event_ids?: string[];
+/** Audit trail for event causality (enables/closes/mutex/overflow).
+ *  Sorted on read per (turn, from_event, to_event ?? '', to_flag ?? '',
+ *  kind, source_response_id ?? ''). Phase B Sub-slice B2: shape only —
+ *  no writer wired yet (Sub-slice B3). See packet §2.3, §3.4, §3.7. */
+event_causality_log?: CausalityLogEntry[];
 /** Temporary aggression modifiers from events (e.g. VRS fury after barracks seizure). Expires after duration_turns. */
 event_aggression_modifiers?: Array<{ faction: string; delta: number; expires_turn: number }>;
 // ─── v0.9.0 Consequence System state (Phase 1 Session 1) ─────────────────

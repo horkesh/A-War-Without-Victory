@@ -1128,6 +1128,7 @@
     "bot_priority_shifts": [],
     "brigade_front_assignment": {},
     "cascade_penalties": [],
+    "closed_event_ids": [],
     "command_authority": {
       "current": 100,
       "lifetime_spent": 0,
@@ -12489,6 +12490,7 @@
     "enabled_event_ids": [],
     "equipment_quality_modifiers": [],
     "event_aggression_modifiers": [],
+    "event_causality_log": [],
     "event_decision_log": [],
     "event_fire_counts": {},
     "event_flags": {},
@@ -43332,5 +43334,5 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 31
+  "schema_version": 33
 }

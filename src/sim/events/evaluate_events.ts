@@ -6,7 +6,7 @@
  * v0.6.0: recurrence model, priority queue (4/turn cap), pressure integration, dimension shifts.
  */
 
-import type { GameState, FactionId } from '../../state/game_state.js';
+import type { GameState, FactionId, CausalityLogEntry } from '../../state/game_state.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import { getEventRegistry } from './event_registry.js';
 import { applyEventEffects } from './apply_effects.js';
@@ -19,6 +19,7 @@ import { emitEventNotifications, isTwoLevelNotificationsEnabled } from './emit_n
 import { applyDimensionShift, type DimensionStore } from './strategic_dimensions.js';
 import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
 import { pickPoliticalResponse } from '../political/political_event_decision.js';
+import { compareCausalityEntries, strictCompare } from '../../state/validateGameState.js';
 
 /**
  * Maximum events that can fire in a single turn.
@@ -180,17 +181,85 @@ function recordEventFiring(state: GameState, eventId: string, currentTurn: numbe
     state.military.event_last_fired_turn[eventId] = currentTurn;
 }
 
-/** Add enabled event IDs from an event's enables_events list. */
-function recordEnabledEvents(state: GameState, enablesEvents: string[] | undefined): void {
+/** Add enabled event IDs from an event's enables_events list.
+ *  Phase B Sub-slice B3: EXPORTED (was module-private at line 184 in B2/B1).
+ *  Performs dedup-on-append plus canonical sort-on-write via `strictCompare`.
+ *  Sort-on-write is NET-NEW behavior in B3 — the B1/B2 helper only deduped.
+ *  Single-writer discipline: this is the ONLY entry point to
+ *  `state.military.enabled_event_ids` per packet §3.7.
+ *  See packet `docs/40_reports/proposals/20260527_EVENT_DATABASE_RUNTIME_SEMANTICS_PACKET.md` §3.2, §3.7. */
+export function recordEnabledEvents(state: GameState, enablesEvents: string[] | undefined): void {
     if (!enablesEvents || enablesEvents.length === 0) return;
     if (!state.military.enabled_event_ids) {
         state.military.enabled_event_ids = [];
     }
+    const arr = state.military.enabled_event_ids;
+    let mutated = false;
     for (const id of enablesEvents) {
-        if (!state.military.enabled_event_ids.includes(id)) {
-            state.military.enabled_event_ids.push(id);
+        if (!arr.includes(id)) {
+            arr.push(id);
+            mutated = true;
         }
     }
+    if (mutated) {
+        arr.sort(strictCompare);
+    }
+}
+
+/** Add closed event IDs from a response's closes_events_runtime list (and any
+ *  other foreclosure source). Symmetrical to `recordEnabledEvents`.
+ *  Phase B Sub-slice B3: NEW WRITER.
+ *  Performs dedup-on-append plus canonical sort-on-write via `strictCompare`.
+ *  Single-writer discipline: this is the ONLY entry point to
+ *  `state.military.closed_event_ids` per packet §3.7.
+ *  See packet §3.2 (soft foreclosure), §3.3 (response-level runtime arrays). */
+export function recordClosedEvents(state: GameState, closedEvents: string[] | undefined): void {
+    if (!closedEvents || closedEvents.length === 0) return;
+    if (!state.military.closed_event_ids) {
+        state.military.closed_event_ids = [];
+    }
+    const arr = state.military.closed_event_ids;
+    let mutated = false;
+    for (const id of closedEvents) {
+        if (!arr.includes(id)) {
+            arr.push(id);
+            mutated = true;
+        }
+    }
+    if (mutated) {
+        arr.sort(strictCompare);
+    }
+}
+
+/** Append a structured entry to `state.military.event_causality_log`.
+ *  Phase B Sub-slice B3: NEW WRITER.
+ *  Performs dedup (skip identical entries) plus canonical sort-on-write via
+ *  the same `compareCausalityEntries` the validator uses (single source of
+ *  truth — packet §3.7). Single-writer discipline: this is the ONLY entry
+ *  point to `state.military.event_causality_log`. */
+export function recordCausality(state: GameState, entry: CausalityLogEntry): void {
+    if (!state.military.event_causality_log) {
+        state.military.event_causality_log = [];
+    }
+    const log = state.military.event_causality_log;
+    // Normalize to the tuple shape used by compareCausalityEntries (null → '').
+    const tupleOf = (e: CausalityLogEntry) => ({
+        turn: e.turn,
+        from_event: e.from_event,
+        to_event: e.to_event ?? '',
+        to_flag: e.to_flag ?? '',
+        kind: e.kind,
+        source_response_id: e.source_response_id ?? '',
+    });
+    const newTuple = tupleOf(entry);
+    // Dedup: skip identical entries (same compare-tuple).
+    for (const existing of log) {
+        if (compareCausalityEntries(tupleOf(existing), newTuple) === 0) {
+            return;
+        }
+    }
+    log.push(entry);
+    log.sort((a, b) => compareCausalityEntries(tupleOf(a), tupleOf(b)));
 }
 
 function uniqueStringsInOrder(values: readonly unknown[] | undefined): string[] {
@@ -212,6 +281,22 @@ function isCandidateEligible(
     currentTurn: number,
     edges?: EdgeRecord[],
 ): boolean {
+    // Phase B Sub-slice B3: short-circuit on closed/disabled BEFORE pressure or
+    // probability rolls. Packet §3.2, §3.5 — closed events never reach pressure
+    // accumulation; required-enabled events skip eligibility cost when ungated.
+    // 1. Soft foreclosure — `closed_event_ids` overrides everything (including
+    //    recurrence / overflow re-eval). Readiness is NOT zeroed on close, so
+    //    re-opening (Phase D+, manual only) restores prior state.
+    if (state.military.closed_event_ids && state.military.closed_event_ids.includes(def.id)) {
+        return false;
+    }
+    // 2. Opt-in `requires_enabled` gate — event only eligible if id is in
+    //    `enabled_event_ids`. Default false preserves existing catalog behavior.
+    if (def.requires_enabled === true) {
+        const enabled = state.military.enabled_event_ids;
+        if (!enabled || !enabled.includes(def.id)) return false;
+    }
+
     if (!canEventFire(def, state, currentTurn)) return false;
 
     if (def.pressure) {
@@ -225,6 +310,71 @@ function isCandidateEligible(
 
     if (def.probability != null && rng() >= def.probability) return false;
     return true;
+}
+
+/** Apply response-level runtime causality (`enables_events_runtime` /
+ *  `closes_events_runtime`) for a chosen option, writing through the shared
+ *  helpers and recording matching `event_causality_log` entries.
+ *
+ *  Used by both the player path (resolve_decision.ts) and the bot path
+ *  (evaluate_events.ts auto-resolve), so both paths produce IDENTICAL deltas
+ *  to `enabled_event_ids`, `closed_event_ids`, and `event_causality_log` for
+ *  the same choice. Packet §3.3, §3.5.
+ *
+ *  No-op rule per packet §3.3: a close targeting an already-fired event is a
+ *  state no-op (no write to closed_event_ids is needed since closure is
+ *  redundant), but a causality entry is still recorded so the audit trail
+ *  reflects the authoring intent. Same logic for an `enables` target that
+ *  is once-fired. */
+export function applyResponseRuntimeCausality(
+    state: GameState,
+    fromEventId: string,
+    sourceResponseId: string,
+    chosen: { enables_events_runtime?: string[]; closes_events_runtime?: string[] },
+    currentTurn: number,
+): void {
+    const firedIds = state.military.fired_event_ids ?? [];
+
+    // Enables — write to enabled_event_ids (unless target is already once-fired).
+    if (chosen.enables_events_runtime && chosen.enables_events_runtime.length > 0) {
+        const toWrite: string[] = [];
+        for (const targetId of chosen.enables_events_runtime) {
+            if (!firedIds.includes(targetId)) {
+                toWrite.push(targetId);
+            }
+            // Causality entry is recorded for ALL targets (including no-op
+            // already-fired) so the audit trail captures authoring intent.
+            recordCausality(state, {
+                turn: currentTurn,
+                from_event: fromEventId,
+                to_event: targetId,
+                to_flag: null,
+                kind: 'enables',
+                source_response_id: sourceResponseId,
+            });
+        }
+        recordEnabledEvents(state, toWrite);
+    }
+
+    // Closes — write to closed_event_ids (unless target is already fired —
+    // closing it is a no-op since the event already resolved).
+    if (chosen.closes_events_runtime && chosen.closes_events_runtime.length > 0) {
+        const toWrite: string[] = [];
+        for (const targetId of chosen.closes_events_runtime) {
+            if (!firedIds.includes(targetId)) {
+                toWrite.push(targetId);
+            }
+            recordCausality(state, {
+                turn: currentTurn,
+                from_event: fromEventId,
+                to_event: targetId,
+                to_flag: null,
+                kind: 'closes',
+                source_response_id: sourceResponseId,
+            });
+        }
+        recordClosedEvents(state, toWrite);
+    }
 }
 
 /** Default moderate commander profile for bot response selection. */
@@ -307,8 +457,31 @@ export function evaluateEvents(
     const candidates = [...queuedCandidates, ...newCandidates];
     candidates.sort(compareEventCandidates);
     const mutexFiltered = filterMutexCandidates(candidates);
+    // Phase B Sub-slice B3: record mutex-suppressed causality entries (packet §3.4).
+    // Determinism: mutex_suppressed_ids comes from `filterMutexCandidates` which
+    // walks `candidates` in canonical order; entries appended in that order then
+    // sorted by `recordCausality`.
+    for (const suppressedId of mutexFiltered.mutex_suppressed_ids) {
+        recordCausality(state, {
+            turn: currentTurn,
+            from_event: suppressedId,
+            to_event: null,
+            to_flag: null,
+            kind: 'mutex_suppressed',
+        });
+    }
     const overflowedIds = mutexFiltered.candidates.slice(MAX_EVENTS_PER_TURN).map((def) => def.id);
     state.military.event_overflow_queue = overflowedIds;
+    // Phase B Sub-slice B3: record overflow causality entries (packet §3.4).
+    for (const overflowedId of overflowedIds) {
+        recordCausality(state, {
+            turn: currentTurn,
+            from_event: overflowedId,
+            to_event: null,
+            to_flag: null,
+            kind: 'overflowed',
+        });
+    }
     const toFire = mutexFiltered.candidates.slice(0, MAX_EVENTS_PER_TURN);
 
     // Phase 3: Fire selected events
@@ -320,6 +493,21 @@ export function evaluateEvents(
         // Apply dimension_shifts and sets_flags from the definition itself
         applyDefinitionDimensionShifts(state, def.dimension_shifts);
         applyDefinitionFlags(state, def.sets_flags);
+        // Phase B Sub-slice B3: record flag-open causality entries for
+        // event-level `sets_flags` (packet §3.4). Iteration over Object.keys
+        // sorted via strictCompare for determinism (CLAUDE.md sacred rules).
+        if (def.sets_flags) {
+            const flagKeys = Object.keys(def.sets_flags).slice().sort(strictCompare);
+            for (const flagKey of flagKeys) {
+                recordCausality(state, {
+                    turn: currentTurn,
+                    from_event: def.id,
+                    to_event: null,
+                    to_flag: flagKey,
+                    kind: 'opens_flag',
+                });
+            }
+        }
 
         const text = getNarrativeText(def);
         fired.push({ id: def.id, text });
@@ -400,6 +588,10 @@ export function evaluateEvents(
                     decisionSource = 'bot_v1';
                 }
                 recordEventDecision(state, def.id, chosen.id, decisionSource, respondingFaction, currentTurn);
+                // Phase B Sub-slice B3: bot path response-level runtime causality
+                // (packet §3.3, §3.5). Mirror of player path in resolve_decision.ts
+                // — both paths produce identical deltas for the same choice.
+                applyResponseRuntimeCausality(state, def.id, chosen.id, chosen, currentTurn);
                 if (isTwoLevelNotificationsEnabled() && respondingFaction !== null) {
                     emitEventNotifications(
                         state,
@@ -420,7 +612,21 @@ export function evaluateEvents(
         // Record fire count and last-fired turn (for ALL events, not just recurring)
         recordEventFiring(state, def.id, currentTurn);
 
-        // Record enabled events
+        // Record enabled events (event-level `enables_events`).
+        // Phase B Sub-slice B3: Append causality entries for each enabled target
+        // (packet §3.4). Iteration uses authored order; recordCausality sorts
+        // the log canonically before write.
+        if (def.enables_events && def.enables_events.length > 0) {
+            for (const targetId of def.enables_events) {
+                recordCausality(state, {
+                    turn: currentTurn,
+                    from_event: def.id,
+                    to_event: targetId,
+                    to_flag: null,
+                    kind: 'enables',
+                });
+            }
+        }
         recordEnabledEvents(state, def.enables_events);
 
         // Reset pressure readiness after firing (pressure events only)

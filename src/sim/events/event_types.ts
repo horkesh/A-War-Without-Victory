@@ -365,6 +365,34 @@ export interface EventResponseOption {
     risk_level?: number;
     /** Optional player-facing future branch visibility metadata. */
     future_consequences?: EventFutureConsequence[];
+    /**
+     * Phase B Sub-slice B1 (schema-only) — branch tag identifying the canonical
+     * branch state set by this option. Must reference a tag in
+     * `event_families.ts` vocabulary. Loader-validated; evaluator does not
+     * read this field in B1.
+     */
+    branch_tag?: string;
+    /**
+     * Phase B Sub-slice B1 (schema-only) — event ids this response
+     * runtime-enables (writes `state.military.enabled_event_ids`).
+     *
+     * Declared in schema, validated in loader; evaluator wiring lands in
+     * Sub-slice B3. Loader enforces dangling-ref, disjointness from
+     * `closes_events_runtime`, and alignment with at least one
+     * `future_consequences[*].opens_events` entry on the same option.
+     */
+    enables_events_runtime?: string[];
+    /**
+     * Phase B Sub-slice B1 (schema-only) — event ids this response
+     * runtime-closes (writes `state.military.closed_event_ids`).
+     *
+     * Declared in schema, validated in loader; evaluator wiring lands in
+     * Sub-slice B3 (which also adds `closed_event_ids` to MilitaryState in
+     * Sub-slice B2). Loader enforces dangling-ref, disjointness from
+     * `enables_events_runtime`, and alignment with at least one
+     * `future_consequences[*].closes_events` entry on the same option.
+     */
+    closes_events_runtime?: string[];
 }
 
 /** Event category for UI display and filtering. */
@@ -466,6 +494,50 @@ export interface EventDefinition {
     source_note?: string;
     /** Optional alternate source field for imported/authored event packets. */
     source?: string;
+    /**
+     * Phase B Sub-slice B1 (schema-only) — opt-in gate. When true, the event
+     * only fires if its id is in `state.military.enabled_event_ids`.
+     *
+     * Default `false`. Sub-slice B1 introduces this as a presentation-only
+     * flag: NO evaluator gating change in B1; the eligibility short-circuit
+     * lands in Sub-slice B3. Loader rejects unreachable gates (no opener
+     * anywhere in catalog).
+     */
+    requires_enabled?: boolean;
+    /**
+     * Phase B Sub-slice B1 (schema-only) — branch family classification for
+     * diagnostics. Vocabulary in `event_families.ts`. Loader does not
+     * enforce membership of `family` in the section arrays (worksheets use
+     * worksheet-derived slugs beyond the branch-tag set); the field is
+     * surfaced by taxonomy diagnostics in later sub-slices.
+     */
+    family?: string;
+    /**
+     * Phase B Sub-slice B1 (schema-only) — source standard tier per packet
+     * §5. Required by the modal-readiness gate when `historical_source` is
+     * asserted; loader only validates the enum shape in B1.
+     */
+    source_tier?:
+        | 'icty_icj_un'
+        | 'agreement_text'
+        | 'balkan_battlegrounds'
+        | 'corroborated_participant'
+        | 'design_counterfactual'
+        | 'pending';
+    /**
+     * Phase B Sub-slice B1 (schema-only) — authored emergence class per packet
+     * §2.2. Finished modal-ready rows must not be
+     * `'legacy_calendar_pending_conversion'`; loader only validates the
+     * enum shape in B1.
+     */
+    emergence_class?:
+        | 'incident'
+        | 'pressure'
+        | 'threshold'
+        | 'duration'
+        | 'compound'
+        | 'exogenous'
+        | 'legacy_calendar_pending_conversion';
 }
 
 /** A pending decision awaiting player response. Stored on MilitaryState. */

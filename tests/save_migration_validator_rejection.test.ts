@@ -80,6 +80,8 @@ function currentVersionState(): any {
             offensive_ops_suppressions: [],
             alliance_locks: [],
             bot_priority_shifts: [],
+            closed_event_ids: [],
+            event_causality_log: [],
             pending_event_decisions: [],
             pending_event_notifications: [],
             phantoms_spawned: [],

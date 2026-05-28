@@ -56,6 +56,13 @@ export type EventAcceptanceReport = {
         full_catalog_accepted: boolean;
         acceptance_status: AcceptanceStatus;
         not_ready_reason: string;
+        /** Phase B Sub-slice B3 — count of production-ready rows whose any
+         *  response option has runtime causality wiring (packet §3.3).
+         *  Tracks Phase D-F authoring progress on runtime gates. */
+        production_ready_events_with_runtime_causality: number;
+        /** Phase B Sub-slice B3 — count of ALL rows (not just production-ready)
+         *  with any runtime causality wiring. Tracks broader authoring fan-out. */
+        total_events_with_runtime_causality: number;
     };
     required_response_rows: EventAcceptanceRow[];
     production_modal_authoring_ready_rows: EventAcceptanceRow[];
@@ -283,6 +290,19 @@ export function buildEventAcceptanceReport(taxonomyRows: EventTaxonomyRow[] = lo
         defaultBlockedRows.length === 0 &&
         scheduledOnlyRows.length === 0;
 
+    // Phase B Sub-slice B3 — runtime causality wiring counts (packet §3.3).
+    // Diagnostic-only: tracks Phase D-F authoring progress as families gain
+    // `enables_events_runtime` / `closes_events_runtime` wiring.
+    const rowHasRuntimeCausality = (taxonomyRow: EventTaxonomyRow): boolean =>
+        taxonomyRow.response_options_with_enables_runtime > 0 ||
+        taxonomyRow.response_options_with_closes_runtime > 0;
+    const totalEventsWithRuntimeCausality = taxonomyReport.rows.filter(rowHasRuntimeCausality).length;
+    const readyIds = new Set(readyRows.map((row) => row.id));
+    const productionReadyEventsWithRuntimeCausality = taxonomyReport.rows
+        .filter((row) => readyIds.has(row.id))
+        .filter(rowHasRuntimeCausality)
+        .length;
+
     return {
         summary: {
             total_events: taxonomyReport.summary.total_events,
@@ -305,6 +325,8 @@ export function buildEventAcceptanceReport(taxonomyRows: EventTaxonomyRow[] = lo
             not_ready_reason: fullCatalogAccepted
                 ? ''
                 : 'Full catalog remains NOT_READY until production JSON authoring adds explicit historical defaults/source notes, resolves source/design debt, gates or rewrites sensitive rows, and cleans scheduled-only required-response triggers unless exogenous.',
+            production_ready_events_with_runtime_causality: productionReadyEventsWithRuntimeCausality,
+            total_events_with_runtime_causality: totalEventsWithRuntimeCausality,
         },
         required_response_rows: requiredRows,
         production_modal_authoring_ready_rows: readyRows,

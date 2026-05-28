@@ -122,10 +122,12 @@ function makeState(playerFaction: FactionId | null): GameState {
 }
 
 function cloneForProbe(definition: EventDefinition): EventDefinition {
+    // Strip requires_enabled gate in the probe clone so historical-default rows can fire regardless of upstream enablement state.
     return {
         ...definition,
         trigger: { turn_min: PROBE_TURN, turn_max: PROBE_TURN, phase: 'war' },
         pressure: undefined,
+        requires_enabled: false,
     };
 }
 

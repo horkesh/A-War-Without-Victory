@@ -84,10 +84,10 @@ function assertCatalogRowsThrow(rows: unknown[], expected: RegExp): void {
     );
 }
 
-test('loadEventDefinitions(0) returns the current 247-row catalog', () => {
+test('loadEventDefinitions(0) returns the current 274-row catalog', () => {
     const loaded = loadEventDefinitions(0);
 
-    assert.strictEqual(loaded.length, 247);
+    assert.strictEqual(loaded.length, 274);
 });
 
 test('loadEventDefinitions(0) returns deterministic order by trigger turn_min then id', () => {
@@ -534,6 +534,165 @@ test('loadEventDefinitionsFromDir accepts a response option without effects', ()
 
     assert.strictEqual(loaded.length, 1);
     assert.strictEqual(loaded[0]?.id, 'valid_event');
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// Phase D Packet 44 — vocabulary validation tests for dimension_shifts &
+// effect.kind / effects[].kind. Pass A and Pass B are catalog-level static
+// defenses against DEAD-write authoring errors (e.g., naming an EffectKind
+// where a DimensionId is expected).
+// ════════════════════════════════════════════════════════════════════════════
+
+test('Packet 44 Pass A: loadEventDefinitionsFromDir throws on unknown DimensionId in event-level dimension_shifts', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({
+            dimension_shifts: [
+                { faction: 'RBiH', dimension: 'patron_pressure', delta: -5 },
+            ],
+        })],
+        /Unknown DimensionId in dimension_shifts in required event catalog/,
+    );
+});
+
+test('Packet 44 Pass A: loadEventDefinitionsFromDir throws on unknown DimensionId in response-option dimension_shifts', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({
+            response_options: [{
+                id: 'accept',
+                label: 'Accept',
+                dimension_shifts: [
+                    { faction: 'RBiH', dimension: 'alliance_change', delta: -10 },
+                ],
+            }],
+        })],
+        /valid_event#accept\[0\]:alliance_change/,
+    );
+});
+
+test('Packet 44 Pass A: error message lists known DimensionIds and suggests effects[].kind alternative', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({
+            response_options: [{
+                id: 'accept',
+                label: 'Accept',
+                dimension_shifts: [
+                    { faction: 'RBiH', dimension: 'enclave_resilience', delta: -10 },
+                ],
+            }],
+        })],
+        /must be one of \[internal_cohesion, international_standing, military_credibility, negotiating_leverage, patron_confidence, territorial_legitimacy\]\. If you intended an EffectKind, author via effects\[\]\.kind instead/,
+    );
+});
+
+test('Packet 44 Pass A: multiple violations are reported in deterministic sorted order', () => {
+    const dir = makeTempEventsDir();
+    writeCatalogRows(dir, [
+        validCatalogRow({
+            id: 'zeta_row',
+            response_options: [{
+                id: 'opt_z',
+                label: 'Z',
+                dimension_shifts: [
+                    { faction: 'RBiH', dimension: 'patron_pressure', delta: 1 },
+                ],
+            }],
+        }),
+        validCatalogRow({
+            id: 'alpha_row',
+            response_options: [{
+                id: 'opt_a',
+                label: 'A',
+                dimension_shifts: [
+                    { faction: 'RBiH', dimension: 'alliance_change', delta: 1 },
+                ],
+            }],
+        }),
+    ]);
+
+    let captured: Error | undefined;
+    try {
+        loadEventDefinitionsFromDir(0, dir);
+    } catch (err) {
+        captured = err as Error;
+    }
+    assert.ok(captured, 'expected catalog load to throw');
+    const message = captured!.message;
+    // Both entries must appear, sorted (alpha_row before zeta_row).
+    const alphaIdx = message.indexOf('alpha_row#opt_a[0]:alliance_change');
+    const zetaIdx = message.indexOf('zeta_row#opt_z[0]:patron_pressure');
+    assert.ok(alphaIdx >= 0, `alpha_row entry missing in error: ${message}`);
+    assert.ok(zetaIdx >= 0, `zeta_row entry missing in error: ${message}`);
+    assert.ok(alphaIdx < zetaIdx, `entries not sorted (alpha=${alphaIdx}, zeta=${zetaIdx}): ${message}`);
+});
+
+test('Packet 44 Pass A: known DimensionIds pass without throwing', () => {
+    const dir = makeTempEventsDir();
+    writeCatalogRows(dir, [
+        validCatalogRow({
+            id: 'valid_event',
+            response_options: [{
+                id: 'accept',
+                label: 'Accept',
+                dimension_shifts: [
+                    { faction: 'RBiH', dimension: 'military_credibility', delta: -5 },
+                    { faction: 'RBiH', dimension: 'territorial_legitimacy', delta: 3 },
+                    { faction: 'RS', dimension: 'international_standing', delta: -8 },
+                    { faction: 'HRHB', dimension: 'patron_confidence', delta: 2 },
+                    { faction: 'RBiH', dimension: 'internal_cohesion', delta: -1 },
+                    { faction: 'RS', dimension: 'negotiating_leverage', delta: 4 },
+                ],
+            }],
+        }),
+    ]);
+
+    const loaded = loadEventDefinitionsFromDir(0, dir);
+    assert.strictEqual(loaded.length, 1);
+    assert.strictEqual(loaded[0]?.id, 'valid_event');
+});
+
+test('Packet 44 Pass B: loadEventDefinitionsFromDir throws on unknown EffectKind in response-option effects[]', () => {
+    // Pass B is layered on top of validateKindedArray (structural); the
+    // catalog-level pass throws a row-level structural error first. Either
+    // path must reject the unknown kind.
+    assertCatalogRowsThrow(
+        [validCatalogRow({
+            response_options: [{
+                id: 'accept',
+                label: 'Accept',
+                effects: [{ kind: 'imaginary_kind' }],
+            }],
+        })],
+        /imaginary_kind/,
+    );
+});
+
+test('Packet 44 Pass B: loadEventDefinitionsFromDir throws on unknown EffectKind in top-level effect', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({
+            effect: { kind: 'made_up_kind', text: 'x' },
+        })],
+        /made_up_kind/,
+    );
+});
+
+test('Packet 44 Pass A: empty/missing dimension_shifts is permitted', () => {
+    const dir = makeTempEventsDir();
+    writeCatalogRows(dir, [
+        validCatalogRow({ id: 'no_shifts_event' }),
+        validCatalogRow({
+            id: 'empty_shifts_event',
+            trigger: { turn_min: 1, phase: 'war' },
+            dimension_shifts: [],
+            response_options: [{
+                id: 'accept',
+                label: 'Accept',
+                dimension_shifts: [],
+            }],
+        }),
+    ]);
+
+    const loaded = loadEventDefinitionsFromDir(0, dir);
+    assert.strictEqual(loaded.length, 2);
 });
 
 test('loadEventDefinitionsFromDir accepts valid response option future_consequences metadata without gating runtime behavior', () => {

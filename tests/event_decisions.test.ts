@@ -443,7 +443,7 @@ describe('Event Decisions', () => {
 
         expect(fixtures.map((event) => [event.id, event.bot_response_logic, event.historical_default_response_id])).toEqual([
             ['operation_lukavac_93', 'historical', 'comply'],
-            ['os_rbih_tactical_acceptance_1993', 'historical', 'accept_for_optics'],
+            ['os_rbih_tactical_acceptance_1993', 'historical', 'reject_via_assembly'],
             ['csq_patron_recovery_offer', 'historical', 'accept_recovery'],
         ]);
 
@@ -461,13 +461,13 @@ describe('Event Decisions', () => {
 
     it('diplomatic packet rows expose historical defaults and dossier fields for modal decisions', () => {
         const fixtures = [
-            loadEventFromFile('data/scenarios/events/war_1994.json', 'washington_agreement_1994'),
+            loadEventFromFile('data/scenarios/events/war_1994.json', 'hrhb_washington_agreement_1994'),
             loadEventFromFile('data/scenarios/events/war_1994.json', 'contact_group_plan_1994'),
             loadEventFromFile('data/scenarios/events/war_1995.json', 'dayton_talks_begin_1995'),
         ];
 
         expect(fixtures.map((event) => [event.id, event.bot_response_logic, event.historical_default_response_id])).toEqual([
-            ['washington_agreement_1994', 'historical', 'accept'],
+            ['hrhb_washington_agreement_1994', 'historical', 'accept'],
             ['contact_group_plan_1994', 'historical', 'accept'],
             ['dayton_talks_begin_1995', 'historical', 'accept'],
         ]);

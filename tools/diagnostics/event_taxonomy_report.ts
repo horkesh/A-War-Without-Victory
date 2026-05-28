@@ -53,6 +53,19 @@ export type EventTaxonomyRow = {
     future_consequence_closes_flags: string[];
     future_consequence_material_effect_refs: string[];
     future_consequence_shape_errors: string[];
+    /** Phase B Sub-slice B3 — count of response options with non-empty
+     *  `enables_events_runtime` (packet §3.3). Sourced from authored JSON;
+     *  surfaces runtime-causality wiring inventory. */
+    response_options_with_enables_runtime: number;
+    /** Phase B Sub-slice B3 — count of response options with non-empty
+     *  `closes_events_runtime` (packet §3.3). */
+    response_options_with_closes_runtime: number;
+    /** Phase B Sub-slice B3 — union of all `enables_events_runtime` targets
+     *  across response options on this event. Sorted, deduped. */
+    enables_events_runtime: string[];
+    /** Phase B Sub-slice B3 — union of all `closes_events_runtime` targets
+     *  across response options on this event. Sorted, deduped. */
+    closes_events_runtime: string[];
     notification_coverage: {
         has_notifications_to_other_factions: boolean;
         response_options_with_notifications: number;
@@ -96,6 +109,10 @@ export type EventTaxonomyReport = {
         historical_default_unavailable_events: number;
         modal_ready_events: number;
         duplicate_event_ids: string[];
+        /** Phase B Sub-slice B3 — count of events whose any response option
+         *  has `enables_events_runtime` or `closes_events_runtime` populated
+         *  (packet §3.3). Diagnostic-only — no behavior change. */
+        events_with_runtime_causality_wiring: number;
         findings: number;
         errors: number;
         warnings: number;
@@ -285,6 +302,40 @@ type FutureConsequenceSummary = Pick<EventTaxonomyRow,
     'future_consequence_material_effect_refs' |
     'future_consequence_shape_errors'
 >;
+
+/** Phase B Sub-slice B3 — runtime causality wiring summary per event,
+ *  surfaced alongside future_consequences (packet §3.3). */
+type RuntimeCausalitySummary = Pick<EventTaxonomyRow,
+    'response_options_with_enables_runtime' |
+    'response_options_with_closes_runtime' |
+    'enables_events_runtime' |
+    'closes_events_runtime'
+>;
+
+function collectRuntimeCausalitySummary(event: JsonRecord): RuntimeCausalitySummary {
+    const options = Array.isArray(event.response_options) ? event.response_options : [];
+    let enablesCount = 0;
+    let closesCount = 0;
+    const enablesIds: string[] = [];
+    const closesIds: string[] = [];
+    for (const option of options) {
+        if (!isRecord(option)) continue;
+        if (isStringArray(option.enables_events_runtime) && option.enables_events_runtime.length > 0) {
+            enablesCount += 1;
+            enablesIds.push(...option.enables_events_runtime);
+        }
+        if (isStringArray(option.closes_events_runtime) && option.closes_events_runtime.length > 0) {
+            closesCount += 1;
+            closesIds.push(...option.closes_events_runtime);
+        }
+    }
+    return {
+        response_options_with_enables_runtime: enablesCount,
+        response_options_with_closes_runtime: closesCount,
+        enables_events_runtime: uniqueSorted(enablesIds),
+        closes_events_runtime: uniqueSorted(closesIds),
+    };
+}
 
 function collectFutureConsequenceSummary(event: JsonRecord): FutureConsequenceSummary {
     let count = 0;
@@ -477,6 +528,7 @@ export function buildEventTaxonomyRow(event: JsonRecord, file: string, fileIndex
     const effectKinds = uniqueSorted(effects.map((effect) => textOrNull(effect.kind) ?? 'unknown'));
     const numericKinds = numericConsequenceKinds(effects);
     const futureConsequenceSummary = collectFutureConsequenceSummary(event);
+    const runtimeCausalitySummary = collectRuntimeCausalitySummary(event);
     const historicalSource = textOrNull(event.historical_source) ?? textOrNull(event.source);
     const historicallySpecific = isHistoricallySpecific(event, file, historicalSource);
     const sourceNote = textOrNull(event.source_note) ?? textOrNull(event.historical_source_note) ?? historicalSource;
@@ -519,6 +571,7 @@ export function buildEventTaxonomyRow(event: JsonRecord, file: string, fileIndex
         has_numeric_consequences: numericKinds.length > 0,
         numeric_consequence_kinds: numericKinds,
         ...futureConsequenceSummary,
+        ...runtimeCausalitySummary,
         notification_coverage: notificationCoverage(event, responseIds),
         historical_source_status: historicalSource ? 'present' : 'missing',
         historical_source: historicalSource,
@@ -690,6 +743,23 @@ export function collectCatalogFindings(rows: EventTaxonomyRow[]): EventTaxonomyF
                 findings.push(finding(row, 'dangling_future_consequence_event', 'error', `future_consequences closes_events ${id} does not match a catalog event id.`));
             }
         }
+        // Phase B Sub-slice B3 — presentation-vs-runtime alignment finding
+        // (packet §3.3). Every id in `enables_events_runtime` must appear in
+        // some `future_consequences[*].opens_events`; same for closes_runtime
+        // and `future_consequences[*].closes_events`. Player-visible record
+        // must never silently diverge from runtime causality.
+        const presentationOpens = new Set(row.future_consequence_opens_events);
+        for (const id of row.enables_events_runtime) {
+            if (!presentationOpens.has(id)) {
+                findings.push(finding(row, 'runtime_presentation_mismatch', 'error', `enables_events_runtime target ${id} is not declared in any future_consequences[*].opens_events on the same event.`));
+            }
+        }
+        const presentationCloses = new Set(row.future_consequence_closes_events);
+        for (const id of row.closes_events_runtime) {
+            if (!presentationCloses.has(id)) {
+                findings.push(finding(row, 'runtime_presentation_mismatch', 'error', `closes_events_runtime target ${id} is not declared in any future_consequences[*].closes_events on the same event.`));
+            }
+        }
     }
 
     for (const [id, matches] of [...byId.entries()].sort(([a], [b]) => strictCompare(a, b))) {
@@ -760,6 +830,10 @@ export function buildEventTaxonomyReport(rows: EventTaxonomyRow[] = loadCatalogR
             historical_default_unavailable_events: reportRows.filter((row) => row.historical_default_unavailable_reason !== null).length,
             modal_ready_events: reportRows.filter((row) => row.modal_ready).length,
             duplicate_event_ids: duplicateEventIds,
+            events_with_runtime_causality_wiring: reportRows.filter((row) =>
+                row.response_options_with_enables_runtime > 0 ||
+                row.response_options_with_closes_runtime > 0,
+            ).length,
             findings: findings.length,
             errors: findings.filter((entry) => entry.severity === 'error').length,
             warnings: findings.filter((entry) => entry.severity === 'warning').length,
