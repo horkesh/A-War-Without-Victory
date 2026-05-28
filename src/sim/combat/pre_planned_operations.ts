@@ -78,11 +78,13 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         name: 'Operation Koridor',
         staging_osid: 'op:bijeljina:dvorovi_2',
         min_attack_outcome: 'repulsed',
-        // planning_duration:9 — 1st_bijeljina marches dvorovi_2→crnjelovo_donje(w2)→potocari_2(w4)
-        // →brcko(w6)→in_transit brcko→donji_rahic(w8)→settled donji_rahic(w9). stagedEarly fires
-        // at w8 via isCommittedInTransitTo(donji_rahic); evaluateOpeningAttackReadiness fails
-        // because brcko is not adjacent to krepsic. elapsed(8)<=9+2=11 → sector_offensive
-        // in-transit grace holds → brigade settles at donji_rahic at w9 → krepsic attack succeeds.
+        // planning_duration:9 — brcko_corridor brigades stage at donji_rahic (RS init, adjacent
+        // to krepsic). March from dvorovi_2/bukovica_donja to donji_rahic takes ~8 turns via
+        // crnjelovo_donje→brezovo_polje_selo_2→potocari_2→brcko(city)→donji_rahic. Op fires
+        // after force_staging assembly gate (60%) clears at donji_rahic → brigades adjacent to
+        // krepsic at execution time. Previous staging at crnjelovo_donje caused zero_eligible_axis:
+        // posavina_flank readiness triggered multi-axis execution before brcko_corridor brigades
+        // completed their march past brcko(city) to donji_rahic (the only RS-side approach to krepsic).
         planning_duration: 9,
         axes: [
             {
@@ -102,7 +104,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:brcko:potocari_2',
                     'op:brcko:skakava_donja',
                 ],
-                staging_osid: 'op:bijeljina:crnjelovo_donje',
+                staging_osid: 'op:brcko:donji_rahic',
             },
             {
                 axis_id: 'posavina_flank',
