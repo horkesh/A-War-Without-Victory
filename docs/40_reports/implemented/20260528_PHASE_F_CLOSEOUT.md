@@ -180,3 +180,28 @@ Expected: 47 tests GREEN across 4 files (9 + 20 + 12 + 6). Plus `npx tsc --noEmi
 - F3 tool source: `tools/diagnostics/event_family_graph.ts`
 - F5 test source: `tests/phase_d_causality_runtime_integration.test.ts`
 - Phase F suite tests: `tests/event_causality_chain.test.ts`, `tests/sensitive_history_canon_gate_audit.test.ts`, `tests/event_family_graph.test.ts`, `tests/phase_d_causality_runtime_integration.test.ts`
+
+## G3 amendment — F2 heuristic tuning + CI gate (2026-05-28)
+
+Phase G Packet 3 closes the Phase F arc's last open thread: the 3 F2 WARNINGs that the original closeout flagged as "heuristic-interpretation" were re-examined against the canonical 6-DimensionId vocabulary, found to be false-positives caused by an under-scoped punitive marker set, and resolved by broadening + retiering the heuristic. The shipped state of `tools/diagnostics/sensitive_history_canon_gate_audit.ts` is now:
+
+- **Broadened canonical-punitive markers** — negative deltas on any of the 6 canonical DimensionIds (`international_standing`, `internal_cohesion`, `military_credibility`, `patron_confidence`, `negotiating_leverage`, `territorial_legitimacy`) count toward the §4 Cost Ledger floor on a sensitive counterfactual. EffectKinds also count: `alliance_change < 0`, `recruitment_modifier < 1.0`, `equipment_quality_modifier < 1.0`. Pre-G3 the audit only recognised the first three DimensionIds, which is why patron-disinvestment / negotiating-leverage costs on `hrhb_territorial_scope_1993` and `rbih_arms_embargo_lift_advocacy_1993` were not credited and the WARNINGs fired.
+- **New `reward_risk` INFO classification** — positive `territorial_legitimacy` deltas and recruitment/equipment multipliers `> 1.0` on a sensitive-adjacent option now emit an INFO-severity `reward_risk` violation per option. INFO is **observational**: it surfaces §6-reviewed sensitive-design decisions (e.g. seek_clandestine_arms's `recruitment_modifier: 1.05x` carried as `pool_multiplier`) for visibility but does **not** block CI. The CRITICAL `forbidden_recruitment_modifier_above_one` signal is now scoped to **extreme** boosts (`> 1.20x`); the `> 1.0` lower edge is intentionally vacated for §6-reviewed small canonical boosts.
+- **CI gate wired** — new test file `tests/sensitive_history_canon_gate_audit_strict_gate.test.ts` (2 tests) loads the real catalog, runs `buildSensitiveHistoryAudit`, and asserts `CRITICAL + WARNING = 0`. INFO is explicitly permitted. Failure prints every blocking violation with `event_id`, `family`, `kind`, `locator`, and `detail` for rapid author triage.
+
+Real-catalog state on the same Phase D + Phase E corpus (274 events) after G3:
+
+| Severity | Count | Meaning |
+|---|---|---|
+| CRITICAL | 0 | No actual canon violations |
+| WARNING | 0 | No blocking heuristic findings |
+| INFO | 1 | Observational reward_risk on `seek_clandestine_arms` (1.05x `recruitment_modifier (pool_multiplier)`) |
+
+The single INFO is the §6-reviewed clandestine-arms recruitment surface; it is documented here so the next author who scans the diagnostic sees the existing visibility flag and does not mistake it for new authoring drift. The 3 pre-G3 WARNINGs are RESOLVED (no longer fire under the broadened punitive set).
+
+Tests:
+
+- `tests/sensitive_history_canon_gate_audit.test.ts` — grew from 20 to 28 tests covering the broadened punitive vocabulary (patron_confidence / negotiating_leverage / alliance_change negative), the `pool_multiplier` field-name convention, the new 1.20x boundary, and the dual-fire case (positive `territorial_legitimacy` emits both CRITICAL forbidden-shift AND INFO reward_risk).
+- `tests/sensitive_history_canon_gate_audit_strict_gate.test.ts` — new CI integration test (2 tests). This is the hard-fail rail for future event-authoring regressions.
+
+Determinism preserved: `reward_risk_markers` are stable-sorted before emission; no `Math.random()`, no `Date.now()`, no timestamps. Baseline regression byte-identical (no engine code touched in G3).

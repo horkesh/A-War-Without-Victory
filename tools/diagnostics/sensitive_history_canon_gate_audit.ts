@@ -19,7 +19,11 @@
  * `/game-designer` sign-off, but it does prevent silent §3.6 guard drift
  * (missing prohibition text on a Ring 3 row) and the "rewarded atrocity"
  * authoring failure mode (sensitive counterfactual carrying a positive
- * territorial_legitimacy delta or a recruitment_modifier multiplier > 1.0).
+ * territorial_legitimacy delta or a recruitment_modifier multiplier
+ * > RECRUITMENT_MODIFIER_CRITICAL_THRESHOLD = 1.20). Smaller §6-reviewed
+ * boosts (e.g. seek_clandestine_arms 1.05x) surface as INFO reward_risk
+ * for visibility but do NOT block CI; the strict gate test asserts
+ * CRITICAL + WARNING = 0 only.
  *
  * CLI:
  *   node node_modules/tsx/dist/cli.mjs tools/diagnostics/sensitive_history_canon_gate_audit.ts [options]
@@ -109,15 +113,51 @@ export const SENSITIVE_OPTION_ID_PREFIXES: readonly string[] = [
 ] as const;
 
 // ─── Punitive-dimension scoring ────────────────────────────────────────────
-// Negative deltas on any of these dimensions count as a "punitive marker."
+// Negative deltas on any of these DimensionIds count as a "punitive marker."
+// Broadened in Phase G Packet 3 to recognise patron_confidence +
+// negotiating_leverage + territorial_legitimacy as canonical punitives per the
+// 6-DimensionId vocabulary (`memory/engine_dimension_vocabulary.md`). The
+// pre-G3 set (international_standing, internal_cohesion, military_credibility)
+// missed patron disinvestment, diplomatic-capital reduction, and legitimacy
+// erosion — all unambiguously punitive when negative on a sensitive
+// counterfactual.
 const PUNITIVE_DIMENSIONS: readonly string[] = [
     'international_standing',
     'internal_cohesion',
     'military_credibility',
+    'patron_confidence',
+    'negotiating_leverage',
+    'territorial_legitimacy',
+];
+
+// Negative deltas on any of these EffectKinds (effects[].kind) also count as a
+// punitive marker. `alliance_change < 0` = alliance damage; multiplicative
+// modifiers below 1.0 = supply or recruitment degradation. Broadened in G3.
+const PUNITIVE_EFFECT_NEGATIVE_DELTAS: readonly string[] = [
+    'alliance_change',
+];
+
+const PUNITIVE_EFFECT_MULTIPLIERS: readonly string[] = [
+    'recruitment_modifier',
+    'equipment_quality_modifier',
 ];
 
 const FORBIDDEN_POSITIVE_DIMENSIONS: readonly string[] = [
     'territorial_legitimacy',
+];
+
+// Reward-risk dimensions: POSITIVE deltas on these flag as REWARD-RISK on a
+// sensitive-adjacent option even when other cost-floor depth is sufficient.
+const REWARD_RISK_POSITIVE_DIMENSIONS: readonly string[] = [
+    'territorial_legitimacy',
+];
+
+// Reward-risk effects: multiplicative modifiers ABOVE 1.0 flag as REWARD-RISK
+// (recruitment boost or equipment-supply boost on a sensitive-adjacent option
+// is the canonical "atrocity efficiency" anti-pattern §1.3 #5).
+const REWARD_RISK_EFFECT_MULTIPLIERS: readonly string[] = [
+    'recruitment_modifier',
+    'equipment_quality_modifier',
 ];
 
 // ─── Types ────────────────────────────────────────────────────────────────
@@ -129,7 +169,8 @@ export type ViolationKind =
     | 'weak_punitive_floor'
     | 'forbidden_positive_territorial_legitimacy'
     | 'forbidden_recruitment_modifier_above_one'
-    | 'ring3_enabling_target';
+    | 'ring3_enabling_target'
+    | 'reward_risk';
 
 export interface Violation {
     event_id: string;
@@ -295,23 +336,51 @@ function isSensitiveOptionId(optionId: string | null): boolean {
     return false;
 }
 
+/** Threshold (exclusive lower bound) for `recruitment_modifier` CRITICAL.
+ *  Per Phase G Packet 3 design call: §6-reviewed sensitive options may carry
+ *  small recruitment boosts (e.g. seek_clandestine_arms 1.05x), which surface
+ *  as INFO reward_risk for visibility. The CRITICAL forbidden-shift signal is
+ *  scoped to genuine "atrocity-efficiency" boosts above 1.20x. */
+const RECRUITMENT_MODIFIER_CRITICAL_THRESHOLD = 1.20;
+
 interface OptionCostScan {
     punitive_markers: number;
     positive_territorial_legitimacy: boolean;
     recruitment_modifier_above_one: boolean;
+    /** REWARD-RISK signals on a sensitive-adjacent option. Each entry is a
+     *  human-readable marker description (e.g. `recruitment_modifier=1.05
+     *  (pool_multiplier)`, `equipment_quality_modifier=1.1`,
+     *  `territorial_legitimacy +5`). Sorted by `strictCompare` for
+     *  determinism before being emitted as INFO reward_risk violations. G3. */
+    reward_risk_markers: string[];
 }
 
 /** Scan an option's dimension_shifts[] + effects[] for punitive markers and
- *  forbidden positive markers. Pure given input. */
+ *  forbidden positive markers. Pure given input.
+ *
+ *  G3 broadening: the canonical punitive set now covers all 6 DimensionIds
+ *  (negative direction) plus alliance_change negative + recruitment_modifier
+ *  AND equipment_quality_modifier multiplicative below 1.0. REWARD-RISK
+ *  signals (positive territorial_legitimacy, multipliers above 1.0) are
+ *  surfaced separately from `positive_territorial_legitimacy` /
+ *  `recruitment_modifier_above_one` so the existing CRITICAL forbidden-shift
+ *  signals stay byte-stable while the new WARNING reward_risk classification
+ *  is layered on top. The recruitment_modifier multiplier is read from EITHER
+ *  `multiplier` OR `pool_multiplier` because catalog authoring used the latter
+ *  on the Phase D recruitment-modifier effects (e.g. seek_clandestine_arms
+ *  carries `pool_multiplier: 1.05`).
+ */
 export function scanOptionCostFloor(option: unknown): OptionCostScan {
     const scan: OptionCostScan = {
         punitive_markers: 0,
         positive_territorial_legitimacy: false,
         recruitment_modifier_above_one: false,
+        reward_risk_markers: [],
     };
     if (!isRecord(option)) return scan;
     // dimension_shifts[]: count negative deltas on punitive dims; flag any
-    // positive forbidden dim.
+    // positive forbidden dim. Positive on REWARD_RISK dims surfaces as a
+    // separate reward-risk marker (G3).
     const shifts = Array.isArray(option.dimension_shifts) ? option.dimension_shifts : [];
     for (const shift of shifts) {
         if (!isRecord(shift)) continue;
@@ -324,18 +393,62 @@ export function scanOptionCostFloor(option: unknown): OptionCostScan {
         if (FORBIDDEN_POSITIVE_DIMENSIONS.includes(dim) && delta > 0) {
             scan.positive_territorial_legitimacy = true;
         }
+        if (REWARD_RISK_POSITIVE_DIMENSIONS.includes(dim) && delta > 0) {
+            scan.reward_risk_markers.push(`${dim} +${delta}`);
+        }
+        // PUNITIVE_DIMENSIONS includes territorial_legitimacy; intentional
+        // overlap with FORBIDDEN_POSITIVE_DIMENSIONS — negative deltas count
+        // toward cost floor depth; positive deltas trip the CRITICAL
+        // forbidden_positive_territorial_legitimacy signal above.
     }
-    // effects[]: recruitment_modifier with multiplier < 1.0 counts as punitive
-    // marker; multiplier > 1.0 is a forbidden positive.
+    // effects[]: punitive negative deltas on EffectKinds (alliance_change),
+    // punitive multipliers below 1.0 on recruitment_modifier +
+    // equipment_quality_modifier (G3 broadening). Multipliers above 1.0
+    // produce a CRITICAL forbidden-shift signal (recruitment_modifier only,
+    // existing behavior) AND a WARNING reward_risk signal (recruitment +
+    // equipment, G3).
     const effects = Array.isArray(option.effects) ? option.effects : [];
     for (const effect of effects) {
         if (!isRecord(effect)) continue;
-        if (effect.kind !== 'recruitment_modifier') continue;
-        const mult = numberOrNull(effect.multiplier);
-        if (mult === null) continue;
-        if (mult < 1.0) scan.punitive_markers += 1;
-        if (mult > 1.0) scan.recruitment_modifier_above_one = true;
+        const kind = stringOrNull(effect.kind);
+        if (kind === null) continue;
+        if (PUNITIVE_EFFECT_NEGATIVE_DELTAS.includes(kind)) {
+            const delta = numberOrNull(effect.delta);
+            if (delta !== null && delta < 0) {
+                scan.punitive_markers += 1;
+            }
+        }
+        if (PUNITIVE_EFFECT_MULTIPLIERS.includes(kind)) {
+            // Catalog authoring uses `pool_multiplier` (recruitment_modifier)
+            // or `multiplier` (equipment_quality_modifier). Accept either.
+            // Track which field was the source so reward_risk markers can be
+            // human-readable for downstream review.
+            const multiplierVal = numberOrNull(effect.multiplier);
+            const poolMultVal = numberOrNull(effect.pool_multiplier);
+            const mult = multiplierVal ?? poolMultVal;
+            const multSource = multiplierVal !== null ? 'multiplier' : 'pool_multiplier';
+            if (mult !== null) {
+                if (mult < 1.0) {
+                    scan.punitive_markers += 1;
+                }
+                if (mult > 1.0) {
+                    // CRITICAL forbidden_recruitment_modifier_above_one is now
+                    // scoped to genuinely extreme boosts (> 1.20x per G3 design
+                    // call) — small canonical boosts like seek_clandestine_arms
+                    // 1.05x are §6-reviewed and surface only as INFO reward_risk.
+                    if (kind === 'recruitment_modifier' && mult > RECRUITMENT_MODIFIER_CRITICAL_THRESHOLD) {
+                        scan.recruitment_modifier_above_one = true;
+                    }
+                    if (REWARD_RISK_EFFECT_MULTIPLIERS.includes(kind)) {
+                        scan.reward_risk_markers.push(`${kind}=${mult} (${multSource})`);
+                    }
+                }
+            }
+        }
     }
+    // Stable sort: reward_risk_markers are emitted as INFO violations, so
+    // canonical ordering matters for determinism on output.
+    scan.reward_risk_markers.sort(strictCompare);
     return scan;
 }
 
@@ -457,7 +570,7 @@ function evaluateEvent(row: Record<string, unknown>, allRows: unknown[]): EventC
                     family,
                     kind: 'weak_punitive_floor',
                     severity: 'WARNING',
-                    detail: `Sensitive counterfactual option \`${oid}\` has only ${scan.punitive_markers} punitive marker(s); §4 Cost Ledger expects ≥2 negative canonical dimensions (international_standing, internal_cohesion, military_credibility, or recruitment_modifier < 1.0)`,
+                    detail: `Sensitive counterfactual option \`${oid}\` has only ${scan.punitive_markers} punitive marker(s); §4 Cost Ledger expects ≥2 negative canonical markers (any of the 6 DimensionIds: international_standing, internal_cohesion, military_credibility, patron_confidence, negotiating_leverage, territorial_legitimacy; or EffectKinds: alliance_change < 0, recruitment_modifier < 1.0, equipment_quality_modifier < 1.0)`,
                     locator: oid,
                 });
             }
@@ -480,6 +593,24 @@ function evaluateEvent(row: Record<string, unknown>, allRows: unknown[]): EventC
                     kind: 'forbidden_recruitment_modifier_above_one',
                     severity: 'CRITICAL',
                     detail: `Sensitive counterfactual option \`${oid}\` carries recruitment_modifier > 1.0 — violates §1.3 #5 (no "atrocity efficiency" metric)`,
+                    locator: oid,
+                });
+            }
+            // G3 reward-risk: surface positive boosts on a sensitive option
+            // as INFO (observational). These signals do NOT block CI — the
+            // §6 Pyrrhic panel already reviewed and accepted canonical small
+            // boosts like seek_clandestine_arms recruitment_modifier=1.05x.
+            // The CRITICAL forbidden_recruitment_modifier_above_one above
+            // catches extreme boosts (> 1.20x). Per G3 design call: CI
+            // strict gate asserts CRITICAL + WARNING = 0; INFO is permitted.
+            // Emit one aggregated INFO per option with all markers comma-joined.
+            if (scan.reward_risk_markers.length > 0) {
+                violations.push({
+                    event_id: eventId,
+                    family,
+                    kind: 'reward_risk',
+                    severity: 'INFO',
+                    detail: `Sensitive-adjacent option \`${oid}\` carries reward-risk signal(s): ${scan.reward_risk_markers.join(', ')} — observational. Positive multipliers or positive territorial_legitimacy on a sensitive option are §6-reviewed; confirm the offsetting cost-floor depth on this option remains sufficient.`,
                     locator: oid,
                 });
             }
@@ -583,6 +714,7 @@ function computeSummary(
         forbidden_positive_territorial_legitimacy: 0,
         forbidden_recruitment_modifier_above_one: 0,
         ring3_enabling_target: 0,
+        reward_risk: 0,
     };
     const bySeverity = { CRITICAL: 0, WARNING: 0, INFO: 0 };
 

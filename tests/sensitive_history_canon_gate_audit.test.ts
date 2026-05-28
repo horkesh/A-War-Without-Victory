@@ -178,13 +178,71 @@ describe('scanOptionCostFloor', () => {
         expect(scan.positive_territorial_legitimacy).toBe(true);
     });
 
-    it('flags recruitment_modifier > 1.0 as forbidden', () => {
+    it('flags recruitment_modifier > 1.20 as forbidden (extreme boost)', () => {
+        const scan = scanOptionCostFloor({
+            effects: [
+                { kind: 'recruitment_modifier', multiplier: 1.50 },
+            ],
+        });
+        expect(scan.recruitment_modifier_above_one).toBe(true);
+    });
+
+    it('does NOT flag recruitment_modifier 1.15 as CRITICAL forbidden (under 1.20 threshold)', () => {
+        // G3: §6-reviewed small boosts (< 1.20x) surface only as INFO
+        // reward_risk, not as the CRITICAL forbidden-shift signal.
         const scan = scanOptionCostFloor({
             effects: [
                 { kind: 'recruitment_modifier', multiplier: 1.15 },
             ],
         });
-        expect(scan.recruitment_modifier_above_one).toBe(true);
+        expect(scan.recruitment_modifier_above_one).toBe(false);
+        // But it IS picked up as a reward_risk marker.
+        expect(scan.reward_risk_markers.length).toBeGreaterThan(0);
+        expect(scan.reward_risk_markers[0]).toContain('recruitment_modifier=1.15');
+    });
+
+    // ─── G3 broadened punitive-marker vocabulary ─────────────────────────
+    it('counts patron_confidence negative delta as a punitive marker (G3)', () => {
+        const scan = scanOptionCostFloor({
+            dimension_shifts: [
+                { dimension: 'patron_confidence', delta: -20 },
+            ],
+        });
+        expect(scan.punitive_markers).toBe(1);
+    });
+
+    it('counts negotiating_leverage negative delta as a punitive marker (G3)', () => {
+        const scan = scanOptionCostFloor({
+            dimension_shifts: [
+                { dimension: 'negotiating_leverage', delta: -15 },
+            ],
+        });
+        expect(scan.punitive_markers).toBe(1);
+    });
+
+    it('counts alliance_change negative delta as a punitive marker (G3)', () => {
+        const scan = scanOptionCostFloor({
+            effects: [
+                { kind: 'alliance_change', delta: -0.10 },
+            ],
+        });
+        expect(scan.punitive_markers).toBe(1);
+    });
+
+    it('reads recruitment_modifier from pool_multiplier field (G3 catalog convention)', () => {
+        // seek_clandestine_arms in war_1993.json uses `pool_multiplier: 1.05`
+        // rather than `multiplier`. The scan must recognise either.
+        const scan = scanOptionCostFloor({
+            effects: [
+                { kind: 'recruitment_modifier', pool_multiplier: 1.05 },
+            ],
+        });
+        // 1.05 is BELOW the 1.20 CRITICAL threshold → no forbidden signal.
+        expect(scan.recruitment_modifier_above_one).toBe(false);
+        // But it IS surfaced as a reward_risk marker for INFO emission.
+        expect(scan.reward_risk_markers.length).toBe(1);
+        expect(scan.reward_risk_markers[0]).toContain('1.05');
+        expect(scan.reward_risk_markers[0]).toContain('pool_multiplier');
     });
 });
 
@@ -346,6 +404,111 @@ describe('buildSensitiveHistoryAudit', () => {
         const report2 = buildSensitiveHistoryAudit({ rows: [rowA, rowB] });
         expect(report2.violations.map((v) => `${v.severity}|${v.event_id}|${v.kind}|${v.locator ?? ''}`))
             .toEqual(report.violations.map((v) => `${v.severity}|${v.event_id}|${v.kind}|${v.locator ?? ''}`));
+    });
+
+    // ─── G3 reward_risk classification (INFO, not WARNING/CRITICAL) ───────
+    it('emits reward_risk INFO (not CRITICAL/WARNING) for recruitment_modifier 1.05 (pool_multiplier)', () => {
+        // Mirrors seek_clandestine_arms in war_1993.json: punitive cost floor
+        // is sufficient (≥2 punitive markers), but a small recruitment boost
+        // is observational and § 6-reviewed.
+        const row: Record<string, unknown> = {
+            id: 'h6_clandestine_arms_test',
+            family: 'rbih_embargo_response',
+            source_tier: 'balkan_battlegrounds',
+            response_options: [
+                {
+                    id: 'seek_clandestine_arms',
+                    dimension_shifts: [
+                        { faction: 'RBiH', dimension: 'international_standing', delta: -10 },
+                        { faction: 'RBiH', dimension: 'patron_confidence', delta: -8 },
+                    ],
+                    effects: [
+                        { kind: 'recruitment_modifier', pool_multiplier: 1.05 },
+                    ],
+                },
+            ],
+        };
+        const report = buildSensitiveHistoryAudit({ rows: [row] });
+        const event = report.events[0];
+        // Cost floor is PASS (2 punitive markers) — no weak_punitive_floor.
+        expect(event.punitive_cost_floor).toBe('PASS');
+        // No CRITICAL forbidden_recruitment_modifier_above_one (1.05 < 1.20).
+        const critForbidden = event.violations.find(
+            (v) => v.kind === 'forbidden_recruitment_modifier_above_one',
+        );
+        expect(critForbidden).toBeUndefined();
+        // reward_risk fires as INFO.
+        const rewardRisk = event.violations.find((v) => v.kind === 'reward_risk');
+        expect(rewardRisk).toBeDefined();
+        expect(rewardRisk!.severity).toBe('INFO');
+        expect(rewardRisk!.locator).toBe('seek_clandestine_arms');
+        expect(rewardRisk!.detail).toContain('recruitment_modifier=1.05');
+        expect(rewardRisk!.detail).toContain('pool_multiplier');
+    });
+
+    it('emits CRITICAL forbidden_recruitment_modifier_above_one for extreme boost (1.50x)', () => {
+        const row: Record<string, unknown> = {
+            id: 'h6_extreme_recruitment_test',
+            family: 'rbih_embargo_response',
+            source_tier: 'balkan_battlegrounds',
+            response_options: [
+                {
+                    id: 'seek_clandestine_arms',
+                    dimension_shifts: [
+                        { faction: 'RBiH', dimension: 'international_standing', delta: -10 },
+                        { faction: 'RBiH', dimension: 'patron_confidence', delta: -10 },
+                    ],
+                    effects: [
+                        { kind: 'recruitment_modifier', multiplier: 1.50 },
+                    ],
+                },
+            ],
+        };
+        const report = buildSensitiveHistoryAudit({ rows: [row] });
+        const event = report.events[0];
+        const crit = event.violations.find(
+            (v) => v.kind === 'forbidden_recruitment_modifier_above_one',
+        );
+        expect(crit).toBeDefined();
+        expect(crit!.severity).toBe('CRITICAL');
+        expect(crit!.locator).toBe('seek_clandestine_arms');
+        // INFO reward_risk also fires for the same option (informational
+        // surface stays even when CRITICAL forbidden-shift fires above it).
+        const info = event.violations.find((v) => v.kind === 'reward_risk');
+        expect(info).toBeDefined();
+        expect(info!.severity).toBe('INFO');
+    });
+
+    it('dual-fires CRITICAL forbidden_positive_territorial_legitimacy AND INFO reward_risk', () => {
+        // Positive territorial_legitimacy on a sensitive option is BOTH a
+        // CRITICAL forbidden-shift (existing behavior) AND a reward_risk
+        // signal (new G3 surface). Both must fire.
+        const row: Record<string, unknown> = {
+            id: 'h6_positive_legitimacy_test',
+            family: 'hrhb_central_bosnia_response',
+            source_tier: 'balkan_battlegrounds',
+            response_options: [
+                {
+                    id: 'breakout_offensive',
+                    dimension_shifts: [
+                        { faction: 'HRHB', dimension: 'international_standing', delta: -10 },
+                        { faction: 'HRHB', dimension: 'internal_cohesion', delta: -10 },
+                        { faction: 'HRHB', dimension: 'territorial_legitimacy', delta: 5 },
+                    ],
+                },
+            ],
+        };
+        const report = buildSensitiveHistoryAudit({ rows: [row] });
+        const event = report.events[0];
+        const crit = event.violations.find(
+            (v) => v.kind === 'forbidden_positive_territorial_legitimacy',
+        );
+        expect(crit).toBeDefined();
+        expect(crit!.severity).toBe('CRITICAL');
+        const info = event.violations.find((v) => v.kind === 'reward_risk');
+        expect(info).toBeDefined();
+        expect(info!.severity).toBe('INFO');
+        expect(info!.detail).toContain('territorial_legitimacy +5');
     });
 
     it('--family filter narrows to events whose family matches', () => {

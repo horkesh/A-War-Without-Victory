@@ -220,6 +220,8 @@ Reference: `hrhb_camp_exposure_response_1993` Packet 42.
 
 If your authoring throws at load: **fix the data**. Do not bypass.
 
+In addition to the load-time passes above, a **static CI gate** runs in the test suite at `tests/sensitive_history_canon_gate_audit_strict_gate.test.ts`. This gate loads the real catalog via `buildSensitiveHistoryAudit` and asserts `CRITICAL + WARNING = 0` violations. Future authoring regressions on canon-compliance surfaces (Ring 3 §3.6 guard drift, weak punitive cost floors on sensitive options, atrocity-reward shifts) will **fail at CI time** rather than slipping through review. `INFO` reward_risk violations (e.g. seek_clandestine_arms's §6-reviewed 1.05x recruitment_modifier) are **permitted** and surfaced for visibility only — they do not block CI.
+
 ---
 
 ## 5. Engine vocabulary (dual-channel architecture)
@@ -345,7 +347,7 @@ All tools live under `tools/diagnostics/` and run via `node node_modules/tsx/dis
 | `tools/diagnostics/event_acceptance_report.ts` | Modal-ready production status (which rows can be surfaced to the player) |
 | `tools/diagnostics/event_presidential_acceptance.ts` | Bot acceptance proof for `historical_default` rows |
 | `tools/diagnostics/event_causality_chain.ts` (Phase F1) | Runtime causality from a save file — what fired, what enabled, what closed |
-| `tools/diagnostics/sensitive_history_canon_gate_audit.ts` (Phase F2) | Canon §3.6 + §1.3 compliance audit; flags missing guards, weak cost floors, illegal Ring 3 enabling |
+| `tools/diagnostics/sensitive_history_canon_gate_audit.ts` (Phase F2 + G3 tuning) | Canon §3.6 + §1.3 compliance audit; flags missing guards, weak cost floors, illegal Ring 3 enabling. Three severities: **CRITICAL** (hard fail — §3.6 guard drift, atrocity-reward, extreme recruitment boost > 1.20x), **WARNING** (hard fail — weak punitive cost floor < 2 markers on a sensitive option), **INFO** `reward_risk` (observational — §6-reviewed small canonical boosts like 1.05x recruitment_modifier; does NOT block CI). The strict gate at `tests/sensitive_history_canon_gate_audit_strict_gate.test.ts` asserts CRITICAL + WARNING = 0 on the real catalog. |
 | `tools/diagnostics/event_family_graph.ts` (Phase F3) | Static authoring causality graph in DOT / tree / JSON formats |
 | `tools/diagnostics/political_dimensions_snapshot.ts` (Phase E4) | Per-faction dimension state + Phase E sub-flag activation snapshot |
 | `tests/phase_d_causality_runtime_integration.test.ts` (Phase F5) | End-to-end substrate verification — runs a scenario and asserts writers populate logs |
