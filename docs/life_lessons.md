@@ -4,9 +4,14 @@
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
+## New Lessons (2026-05-28)
+
+### [Events] Engine has two write channels for event effects — pick the right one — see `docs/life_lessons/events.md`
+- `dimension_shifts[].dimension` requires a typed `DimensionId` (6 names only); `effects[].kind` requires an `EffectKind` from `EFFECT_KIND_ORDER`. The two vocabularies are disjoint — wrong-channel authoring is a silent DEAD write at runtime. Loader validation (Packet 44, `event_loader.ts:939+1003`) now catches both at catalog load. Pre-validation, 11 DEAD writes had accumulated across 6 packets. See `memory/engine_dimension_vocabulary.md` for the canonical map.
+
 ## New Lessons (2026-05-24)
 
-### [Process] Skills are helper memory, not canon authority - verify live paths before prompts � see `docs/life_lessons/process.md`
+### [Process] Skills are helper memory, not canon authority - verify live paths before prompts � see `docs/life_lessons/process.md`
 - A Claude calibration prompt cited stale v0.6 canon paths because a local role skill was stale. Rule: before generating prompts, handoffs, or agent instructions that cite canon files, run a live path check against `docs/10_canon/`. If a skill disagrees with disk, fix the skill and document the sweep.
 ## New Lessons (2026-05-17)
 
@@ -463,4 +468,4 @@
 | [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 56 | General development process (skim at session start) |
 | [sectors.md](life_lessons/sectors.md) | Sectors, Design | 9 | Sector system, front lines, territory assignment, sub-segments |
 | [platform.md](life_lessons/platform.md) | Platform, Tooling | 4 | Build issues, platform-specific bugs, tooling |
-| [events.md](life_lessons/events.md) | Events | 1 | Event system, flag gates, triggers |
+| [events.md](life_lessons/events.md) | Events | 2 | Event system, flag gates, triggers |

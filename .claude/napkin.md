@@ -987,8 +987,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: Check `isPoliticalControllersAlreadyOsidKeyed()` first. `migratePoliticalControllersToOsidIfNeeded` only for canonical SIDs.
 7. **[2026-02-28] Operational control: majority then plurality**
    Do instead: Assign faction by ethnic majority (>50%), else plurality. Not "first ≥40%".
-8. **[2026-02-22] Pipeline step no-ops for missing data**
-   Do instead: When operational data unavailable, log and skip OSID steps safely rather than crashing.
+8. **[2026-05-28] Event effects route through TWO disjoint vocabularies — pick the channel by the name you need**
+   Do instead: `dimension_shifts[].dimension` requires a `DimensionId` (6 names: `military_credibility`, `territorial_legitimacy`, `international_standing`, `patron_confidence`, `internal_cohesion`, `negotiating_leverage`). `effects[].kind` requires an `EffectKind` (`recruitment_modifier`, `equipment_quality_modifier`, `morale_change`, `patron_pressure`, `alliance_change`, etc.). The two are disjoint — placing a DimensionId under `effects[].kind` (or an EffectKind under `dimension_shifts[].dimension`) is a silent DEAD write. Loader validation (Packet 44, `event_loader.ts:939+1003`) catches both at catalog load. See `memory/engine_dimension_vocabulary.md` for the canonical map + worksheet-name substitution table.
 9. **[2026-03-08] Paramilitary rear pocket cleanup: `paramilitary_sweep.ts`**
    Do instead: Autonomous paramilitary units for rear enemy pocket clusters (1-3 OSIDs, ALL external neighbors faction-controlled). Active w0-20. Faction rates: RS=0.85, HRHB=0.55, RBiH=0.30.
 10. **[2026-03-28] Point-only polygon contacts are not real adjacency — shared_segments >= 1 required**
@@ -1189,7 +1189,11 @@ After EVERY scenario run, the orchestrator:
    Do instead: When adding code that mutates formations, political_controllers, or operations, the pipeline assertions will catch invariant violations at runtime. If an assertion fires, fix the source — never disable the assertion. Files: `assert_control_events.ts`, `assert_operation_lifecycle.ts`, `assert_formation_territory.ts`, `corps_front_sectors.ts` (assertSectorBrigadesActive + assertBrigadeReachability).
 
 ## Engine Runtime Patterns
-1. **[2026-05-26] Empty migration records need first-write tests**
+1. **[2026-05-28] Phase D bot-military isolation is structural — political dimensions do not propagate to ops without explicit wiring**
+   Do instead: Political dimensions write to `FactionCapital.strategic_dimensions[]`; bot combat/military loops (`corps_offensive`, `brigade_assignment`, `sector_offensive`) have ZERO DimensionId reads. Confirmed structural across 45+ Phase D packets including 5+ within-52w firings. If a political dimension needs to influence bot behavior, wire it explicitly behind a feature flag — see Phase E MVS `political_dimension_propagation_gate.ts` (env: `AWWV_POLITICAL_DIMENSION_PROPAGATION_GATE`) for the canonical pattern. Trust the engine: byte-identical baseline regression with flag OFF proves no incidental wiring leaked in.
+2. **[2026-05-28] Loader vocabulary validation catches DEAD-channel authoring — trust catalog load errors**
+   Do instead: `event_loader.ts:939` `validateDimensionShiftVocabulary` + `event_loader.ts:1003` `validateEffectKindVocabulary` fail catalog load on any wrong-channel name. A passing catalog load means every authored DimensionId / EffectKind is in the registered vocabulary; do not re-verify with grep. Pre-Packet-44 audit found 11 silent DEAD writes across 6 packets that would have been caught at load.
+3. **[2026-05-26] Empty migration records need first-write tests**
    Do instead: When a required save field migrates to `{}` and runtime writers address nested keys, add a regression proving the first nested write from `{}` succeeds; do not rely on outer-map initialization alone.
 1. **[2026-03-05] Takeover displacement off-by-one FIXED**
    Do instead: `processDisplacementTakeover` uses `currentTurn === warStartTurn + 1`. `runTurn()` increments turn BEFORE phases.
