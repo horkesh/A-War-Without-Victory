@@ -8,6 +8,8 @@ import { getPlayerFacingFaction } from '../../shared/playerFacingLabels';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 import { Z } from '../../shared/zIndex';
 import { t } from '../i18n';
+import { BranchTagBadgeRow } from './BranchTagBadgeRow';
+import type { EventDefinition } from '../../../sim/events/event_types';
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
 
@@ -17,10 +19,25 @@ const primaryModes = MAP_MODES.filter(m => PRIMARY_MODES.includes(m.id));
 const secondaryModes = MAP_MODES.filter(m => !PRIMARY_MODES.includes(m.id));
 
 /**
+ * Phase H Packet 7 — props for catalog wiring.
+ *
+ * `eventCatalog` is supplied from `App.tsx` (boot-time load via
+ * `loadEventDefinitionsFull`). When provided alongside a player faction
+ * AND a raw GameState handle in `loadedGameState.rawGameState`, the
+ * H4 `BranchTagBadgeRow` is rendered inline in the faction-contextual
+ * indicator zone. Optional + degrades gracefully: existing callers that
+ * mount the strip without props (legacy / test harnesses) continue to
+ * render unchanged.
+ */
+export interface BottomStatusStripProps {
+  eventCatalog?: ReadonlyMap<string, EventDefinition>;
+}
+
+/**
  * Redesigned bottom bar — president's warroom situation ticker.
  * R6: Territory stacked bar with trend arrows. R8: Persistent +MORE expansion.
  */
-export function BottomStatusStrip() {
+export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {}) {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const playerFaction = getPlayerFacingFaction(loadedGameState);
   const playerOperations = useMemo(
@@ -290,6 +307,22 @@ export function BottomStatusStrip() {
               <Icon name="operation" size={10} color="#c4a35a" />
               <span className="text-[9px]">{t('statusStrip.opsCount', { count: playerOperations.length })}</span>
             </span>
+          </>
+        )}
+
+        {/* Phase H Packet 7 — H4 Branch-tag faction badge row mount.
+            The component self-degrades when state / catalog absent or no
+            tags active, so the surrounding divider is conditional on the
+            child rendering. Mount lives inside the faction-contextual
+            indicator zone per H1 §4.2D guidance. */}
+        {playerFaction && eventCatalog && loadedGameState?.rawGameState && (
+          <>
+            <span className="text-white/10">|</span>
+            <BranchTagBadgeRow
+              faction={playerFaction}
+              eventCatalog={eventCatalog}
+              state={loadedGameState.rawGameState}
+            />
           </>
         )}
       </div>

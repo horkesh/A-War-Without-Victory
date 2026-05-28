@@ -4,6 +4,7 @@
  */
 
 import type { OperationalSitrepView } from '../../shared/operational_sitrep_views.js';
+import type { GameState } from '../../../state/game_state.js';
 
 export type FactionId = 'RS' | 'RBiH' | 'HRHB' | null;
 
@@ -1351,4 +1352,22 @@ export interface LoadedGameState {
         current_value?: string;
         proposed_value?: string;
     }>;
+
+    /**
+     * Phase H Packet 7 — runtime-only raw `GameState` handle preserved by
+     * `parseGameState` for UI bridges that need direct causality-substrate
+     * access (`military.fired_event_ids`, `military.event_decision_log`,
+     * `military.event_causality_log`, `military.enabled_event_ids`,
+     * `military.closed_event_ids`).
+     *
+     * Consumers: `EventDecisionModal` (H3 Decision Context ancestry),
+     * `CodexPanel` (H5 Unlock State), `BranchTagBadgeRow` (H4 tag walk),
+     * `generateWrappedSlides` (H6 causality slides).
+     *
+     * NOT persisted to save (re-derived from the same `final_save.json` on
+     * every load). Optional + readonly-by-convention; bridges defensively
+     * read `state.military?.…`. Backward-compatible — existing UI paths
+     * that read only the parsed view continue to work unchanged.
+     */
+    rawGameState?: GameState;
 }
