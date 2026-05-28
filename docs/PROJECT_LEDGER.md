@@ -1,4 +1,33 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-28] feat(combat): ADR-0005 v1 + ADR-0005 r3.1 + ADR-0006 — Tactical Groups foundation accepted
+
+**Type:** Engine design + first-version feature flag + companion ADR. Phased rollout v1 of ADR-0005.
+
+**Change:** Multi-part design closure for the Operational Group / Tactical Group lane:
+- **ADR-0005 r3** Accepted: promote canonical OG entity (Rulebook v0.9.0 §5.7, Systems Manual v0.9.0 §6.3) to primary offensive ops path. Anchor brigade physically commits; donor brigades contribute battalion-equivalent elements with distance falloff, no relocation. 18 decisions ratified, 10 hard invariants, Army HQ Operations as separate tier, NO HVO↔ARBiH cross-faction donations (coordination only), v2 sub-staging reordered v2.0→v2.1→v2.2→v2.3 with calibration shift isolated to v2.2. (Major sync after 4-specialist Pyrrhic convening.)
+- **ADR-0006** Accepted: sectors-as-standing-OGs naming reconciliation. Zero structural code change. Engine's `corps_front_sectors` ARE the canonical standing-OG implementation; `display_name?: string` optional field carries historically-attested labels (Doboj OG 9, TG Drina, OG North/South, OZ Central Bosnia). ADR-0005 handles **temporary** OGs/TGs for offensive ops; ADR-0006 handles **standing** OGs that own defensive AORs.
+- **v1 code**: `ENABLE_TACTICAL_GROUPS` feature flag (default off) + `getAnchorBrigade(axis)` helper in `src/sim/combat/tactical_group_config.ts`. `classifyAxisOpeningAttack` in `sector_offensive_launch_helpers.ts` pre-filters brigade list to `[anchor]` when flag is on. Combat math (main/support_brigades SUPPORT_POWER_MULT path) unchanged.
+
+**Determinism:** Feature flag default off → byte-identical code path. With flag on, `gateBrigades` is the anchor-only list; downstream functions unchanged. Schema additions deferred to v2.0 (single v33→v34 bump with all fields gated by sub-flags).
+
+**Verification:**
+- typecheck: clean (0 errors after src/ui/map sub-workspace install).
+- 40w v1 flag-off (n0): hash `3649b3861a87e6ea` — byte-identical to plain main baseline.
+- 40w v1 flag-on smoke (n1, reverted): hash `3649b3861a87e6ea` — byte-identical. v1 architectural claim proven; anchor-only filtering produces zero behavioral change in 40w because every pre-planned op's first-listed brigade IS the eligible one. 4 known anchor-mispick cases (Op Podrinje Sweep, Op Drina/Op Podrinje shared anchor, Op Visegrad, Op Prsten JNA phantoms) are all 156w+ territory.
+
+**Artifacts:**
+- `docs/20_engineering/ADR/ADR-0005-tactical-groups-as-primary-ops-path.md` (r3.1)
+- `docs/20_engineering/ADR/ADR-0006-sectors-as-standing-operational-groups.md`
+- `src/sim/combat/tactical_group_config.ts` (new)
+- `src/sim/combat/sector_offensive_launch_helpers.ts` (gate change)
+- `docs/40_reports/20260528_ADR_0005_V1_SMOKE_TEST.md` (smoke validation report)
+
+**Commits:** `31c74f02` (ADR-0006), `624782e4` (ADR-0005 r3.1 companion link), `06ee6dcb` (v1 code). Branch: `claude/tactical-groups-2026-05-28`. Worktree: `F:/A-War-Without-Victory/.worktrees/tactical-groups-2026-05-28/`.
+
+**Next:** v2.0 — donor pool selection + TG formation + v33→v34 schema migration. Sub-stage order v2.0 (formation) → v2.1 (distribution math, dormant) → v2.2 (combat synthesis, calibration shift) → v2.3 (Pyrrhic dampener).
+
+---
+
 ## [2026-05-26] test(save): lock latest-run final-save static artifact ownership
 
 **Type:** Save/replay generated-artifact stability + static ownership guard.
