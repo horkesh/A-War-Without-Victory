@@ -243,6 +243,44 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
+        // Operation Zvezda 94 — VRS Drina Corps spring 1994 offensive on Goražde safe area.
+        // Historically: Drina Corps tactical groups pressed from the east and south, reaching
+        // outskirts of Goražde town (BB2 p.289). Fires after Op Pracha River (w41) completes
+        // and frees brigades. Available w100 (~April 1994, contemporaneous with Washington Agreement).
+        //
+        // Staging: podkozara_donja_2 (RS-painted from init, adj slatina_2 ✓)
+        // Objectives: slatina_2 (RBiH-painted, adj gorazde_2 — encirclement approach);
+        //             sopotnica (RBiH-painted, adj slatina_2 — tighten pocket; skipped if already RS)
+        // gorazde_2 excluded: cascade risk documented in Op Pracha River comment (line 233).
+        // Sacred Rule checks: staging adj first objective ✓; no painted-opposite objectives ✓;
+        //   1st/5th Podrinje finish Op Pracha River ~w55-60, then ~40w gap before Zvezda 94 fires at w100 ✓.
+        //   They end Op Pracha River in the Prača corridor, 2-3 hops from podkozara_donja_2 staging ✓.
+        corps: 'vrs_drina',
+        faction: 'RS',
+        name: 'Operation Zvezda 94',
+        staging_osid: 'op:gorazde:podkozara_donja_2',
+        available_from: 100,
+        min_attack_outcome: 'repulsed',
+        planning_duration: 3,
+        axes: [
+            {
+                axis_id: 'gorazde_encirclement',
+                name: 'Goražde Encirclement',
+                brigades: [
+                    'rs_visegrad_brigade',
+                    'rs_1st_podrinje',
+                    'rs_5th_podrinje',
+                ],
+                // podkozara_donja_2 adj slatina_2 ✓; slatina_2 adj sopotnica ✓
+                objectives: [
+                    'op:gorazde:slatina_2',   // RBiH-painted; adj gorazde_2 — encirclement chokepoint
+                    'op:gorazde:sopotnica',   // RBiH-painted; adj slatina_2 — pocket tightener
+                ],
+                staging_osid: 'op:gorazde:podkozara_donja_2',
+            },
+        ],
+    },
+    {
         corps: 'vrs_herzegovina',
         faction: 'RS',
         name: 'Operation Visegrad',
@@ -977,11 +1015,11 @@ export function injectPrePlannedOperations(state: GameState, adjacency?: Map<Osi
         }
     }
 
-    // Queue Drina Corps: Operation Drina → Podrinje Sweep
+    // Queue Drina Corps: Operation Drina → Podrinje Sweep → Pracha River → Zvezda 94 (available_from:100)
     if (injectedCorps.has('vrs_drina')) {
         const cmd = corpsCommand['vrs_drina'];
         if (cmd && !cmd.queued_operations) {
-            cmd.queued_operations = ['Operation Podrinje Sweep', 'Operation Pracha River'];
+            cmd.queued_operations = ['Operation Podrinje Sweep', 'Operation Pracha River', 'Operation Zvezda 94'];
         }
     }
 

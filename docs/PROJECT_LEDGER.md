@@ -1,4 +1,23 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-28] calibration(n149): Op Zvezda 94 brigade fix — 657/712 (92.28%, clean)
+
+**Type:** Op data fix — `src/sim/combat/pre_planned_operations.ts`. Brigade assignment only; no territory change at 40w.
+
+**Root cause:** Op Zvezda 94 (vrs_drina, available_from=100) was assigned rs_1st_vlasenica and rs_1st_birac, which end up in northern Drina (Bratunac/Zvornik area) after completing Op Drina at w5-10. By w100 they are 8-10 hops from staging (`op:gorazde:podkozara_donja_2`), making assembly impossible within available time.
+
+**Fix:** Replace rs_1st_vlasenica + rs_1st_birac → rs_1st_podrinje + rs_5th_podrinje. Both brigades fight the Prača corridor in Op Pracha River (available_from=41, completes ~w55-60), ending 2-3 hops from Goražde staging. ~40w gap between Pracha River completion and Zvezda 94 firing (w100) — no concurrent sharing conflict.
+
+**Historical basis:** The 1st and 5th Podrinje Brigades (Rogatica-based Drina Corps elements) were the primary forces in the spring 1994 Goražde offensive (BB2 p.289), consistent with their prior 1993 Prača corridor operations.
+
+**Also resolved this session:**
+- n145 (n140 equivalent): verified cosmetic RS-init objective trim had zero delta — hash-identical to n139.
+- n147: Op Zvezda 94 queue fix — added 'Operation Zvezda 94' to vrs_drina hardcoded queue. Previously the deferred loop skipped vrs_drina (already in injectedCorps). 657/712, hash `c7b792677dd474e9`.
+- n148 (104w): Zvezda 94 fires at w100 ✓, stays in planning (wrong brigades too far). Diagnosed as brigade location issue.
+- n149: brigade fix confirmed clean. 657/712, hash `c7b792677dd474e9` (identical to n147 — brigade names in source, not GameState). Anchors 27/27. Benchmarks 6/6.
+- n150 (104w pending): validating new brigades assemble correctly.
+
+**Zombie op audit (complete):** After queue fix, all 17 ALL_PRE_PLANNED ops and 7 triggered ops are properly wired. Op Sana 95 (ARBiH) is the only intentionally blocked op (−6 OSID regression documented at line 784-792 of pre_planned_operations.ts).
+
 ## [2026-05-28] calibration(n139): per-axis execution readiness engine fix — 657/712 (92.3%)
 
 **Type:** Engine fix — `src/sim/combat/sector_offensive_launch_helpers.ts`. Also: Op Koridor brcko_corridor staging + brigade-retention fix (n137/n138).
