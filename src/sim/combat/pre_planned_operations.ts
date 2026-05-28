@@ -219,7 +219,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         faction: 'RS',
         name: 'Operation Pracha River',
         staging_osid: 'op:rogatica:stara_gora',
-        available_from: 9,
+        available_from: 41,
         min_attack_outcome: 'repulsed',
         axes: [
             {
@@ -233,6 +233,8 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 // Staging stara_gora (RS init) adj brcigovo ✓; brcigovo adj sopotnica ✓; sopotnica adj ustipraca_2 ✓
                 // All three objectives painted RBiH Jan 1993. ustipraca_2 terminus: non-chain neighbors RS-painted.
                 // slatina_2 excluded — adj gorazde_2, cascade risk (belongs to Op Zvezda 94, Apr 1994).
+                // available_from=41: gates past 40w calibration window (all objectives RBiH-painted at Jan 1993;
+                // VRS temporarily holds this corridor in mid-1993, ARBiH recovers before ceasefire).
                 objectives: [
                     'op:rogatica:brcigovo',
                     'op:gorazde:sopotnica',
@@ -300,7 +302,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 ],
                 objectives: [
                     'op:vogosca:svrake',
-                    'op:vogosca:hotonj',
+                    // hotonj removed: paint=RBiH, Sacred Rule 4 violation.
                 ],
                 staging_osid: 'op:vogosca:vogosca_3',
             },
