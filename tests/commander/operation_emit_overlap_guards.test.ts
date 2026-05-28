@@ -243,7 +243,6 @@ function makePlanDecision(): PlanDecision {
         } as any,
         action: 'advanced',
         reason: 'ready',
-        concentration_orders: [],
         decision_trace: {
             turn: 10,
             winning_intent_id: 'launch',

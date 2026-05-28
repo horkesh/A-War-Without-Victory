@@ -1092,7 +1092,7 @@ describe('empty-objective probe guard', () => {
      * initiative > 0.3, active ops < max slots.
      */
     function makeNullPlanDecision(): PlanDecision {
-        return { action: 'none', plan: null, reason: 'no viable plan available', concentration_orders: [] };
+        return { action: 'none', plan: null, reason: 'no viable plan available' };
     }
 
     function makePassiveDecisions(): DecisionResult {
@@ -1313,7 +1313,7 @@ describe('empty-objective probe guard', () => {
  */
 describe('probe brigade reachability', () => {
     function makeNullPlanDecision(): PlanDecision {
-        return { action: 'none', plan: null, reason: 'no viable plan available', concentration_orders: [] };
+        return { action: 'none', plan: null, reason: 'no viable plan available' };
     }
 
     function makePassiveDecisions(): DecisionResult {
