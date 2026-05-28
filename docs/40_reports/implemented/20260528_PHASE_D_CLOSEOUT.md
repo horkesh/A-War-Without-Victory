@@ -234,3 +234,40 @@ The Phase D structural isolation property (political dimensions write to Faction
 - Engine vocabulary canonical map: `memory/engine_dimension_vocabulary.md` (updated 2026-05-28 with disjoint-channel substitution table).
 - §6 sign-off precedent (thematic): `docs/PROJECT_LEDGER_KNOWLEDGE.md` 2026-05-28 entry.
 - Lesson on dual-write channels: `docs/life_lessons/events.md` 2026-05-28 entry.
+
+## Phase E expansion (Packets 2-4)
+
+After the Phase E MVS landed (Packet 1 — `international_standing → corps ops hesitation`, b40b8e48), the Phase E arc was extended with a second dimension wiring, a combined-flag activation test matrix, and a read-only diagnostic surface. All Phase E expansion work below is gated behind feature flags and does NOT alter baseline behavior with flags default-OFF. Branch unchanged: `codex/diagnostics-output-artifact-doc-closeout`.
+
+### E2 — `internal_cohesion` → bot caution bias (sub-flag gated)
+
+Second dimension wired. Pattern mirrors MVS exactly: gate module new sub-flag + `briefing.ts` conditional spread + `sector_offensive.ts` `getCohesionCautionBiasMultiplier` helper + `emit.ts` consumer chaining via `combinedMult = hesitationMult * cohesionMult`.
+
+- Threshold: cohesion < 40. Multiplier: 0.85× (more conservative than `international_standing`'s 0.7× — cohesion is a slower signal).
+- Sub-flag: `AWWV_PDP_COHESION_CAUTION_BIAS` (default off).
+- 13 new tests; baseline byte-identical with flags OFF.
+
+### E3 — combined-flag-ON activation test matrix
+
+Validates E1 + E2 chain at combined-flag-ON level. 17 new tests across 3 categories: multiplier-product math (7) + briefing integration (4) + consumer-formula replication (6).
+
+- Worked example: both flags ON + `intl_standing=20` + `cohesion=30` + `baseMinForOp=10` → `effectiveMinForOp = Math.ceil(10 / 0.595) = 17` (cumulative 40.5% harder to clear).
+- Off-by-one safety verified at thresholds 30/40 (strict less-than semantics).
+- Zero production code changes; zero bugs found.
+
+### E4 — `political_dimensions` diagnostic surface
+
+New tool: `tools/diagnostics/political_dimensions_snapshot.ts` (336 LOC). 9 tests.
+
+- Per-faction snapshot of typed `DimensionId` state + penalty zones + current sub-flag activation + cumulative multiplier (if active).
+- JSON + human-readable output modes; `--faction` filter; `--save` path argument.
+- **Real-save finding from smoke test (40w run, harness-seed):** All three factions are deeply sub-threshold on `internal_cohesion` — HRHB=2.83, RBiH=0, RS=2.95 (vs threshold 40). When the cohesion sub-flag activates, all three faction corps COs will inherit 0.85× caution-bias. This indicates war-exhaustion is already dominant in the 40w window; cohesion-based hesitation will land hard. Calibration team should review the threshold value before activating.
+
+### Phase E status (end of session)
+
+- 2 of 3 architect-priority dimensions wired (`international_standing` + `internal_cohesion`).
+- 3rd priority (`patron_confidence` → `equipment_quality_modifier` coupling) DEFERRED: natural target site (`combat_math.ts` / `active_modifiers.ts`) intersects calibration agent's parallel work; defer until calibration merges to avoid compounding conflict.
+- 4th priority (`military_credibility`) DEFERRED: same reason (`force_eval.ts` in calibration territory).
+- 50/50 Phase E test suite GREEN (E1 11 + E2 13 + E3 17 + E4 9).
+- All flags default-OFF; baseline regression PASSES byte-identical.
+- Activation procedure: `docs/40_reports/implemented/20260528_PHASE_E_ACTIVATION_PROCEDURE.md`.
