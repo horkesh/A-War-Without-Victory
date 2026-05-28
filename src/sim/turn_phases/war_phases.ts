@@ -166,7 +166,6 @@ import { generateArmyReserveRequests, evaluateArmyReserveAssignments, tickEliteL
 import { buildHomeDistanceCache } from '../combat/home_distance.js';
 import { computeSectorCombatRatings } from '../combat/sector_combat_rating.js';
 import { detectParamilitaryTargets, advanceParamilitaries, detectOffensiveParamilitaryTargets } from '../combat/paramilitary_sweep.js';
-import { consolidateRearPockets } from '../combat/rear_pocket_consolidation.js';
 import { updateStrandedBrigadeLifecycle } from '../combat/stranded_brigade_lifecycle.js';
 import {
     PARAMILITARY_FADE_WEEK,
@@ -814,20 +813,6 @@ export const warPhases: NamedPhase[] = [
                 } else {
                     context.report.paramilitary_sweep = report;
                 }
-            }
-        }
-    },
-    {
-        name: 'consolidate-rear-pockets',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const od = getOperationalData(context);
-            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
-            const report = consolidateRearPockets(
-                context.state, od.edges, od.opData.operationalToCanonical
-            );
-            if (report.total_flipped > 0) {
-                context.report.rear_pocket_consolidation = report;
             }
         }
     },

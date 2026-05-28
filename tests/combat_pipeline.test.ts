@@ -76,23 +76,23 @@ function minimalPhaseIState(): GameState {
 }
 
 describe('runTurn combat pipeline order', () => {
-    it('includes consolidate-rear-pockets after supply-resolution in war phase', async () => {
+    it('includes paramilitary-advance after supply-resolution in war phase', async () => {
         const state = minimalPhaseIIState();
         const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
         const { report } = await runTurn(state, { seed: 'pipeline-ii', settlementEdges: edges });
         const names = report.phases.map((p) => p.name);
         const idxSupply = names.indexOf('supply-resolution');
-        const idxPhaseII = names.indexOf('consolidate-rear-pockets');
+        const idxParaAdv = names.indexOf('paramilitary-advance');
         expect(idxSupply >= 0).toBe(true);
-        expect(idxPhaseII >= 0).toBe(true);
-        expect(idxPhaseII > idxSupply).toBe(true);
+        expect(idxParaAdv >= 0).toBe(true);
+        expect(idxParaAdv > idxSupply).toBe(true);
     });
 
-    it('includes consolidate-rear-pockets on the default war path', async () => {
+    it('includes paramilitary-advance on the default war path', async () => {
         const state = minimalPhaseIState();
         const { report } = await runTurn(state, { seed: 'pipeline-i' });
         const names = report.phases.map((p) => p.name);
-        expect(names.includes('consolidate-rear-pockets')).toBe(true);
+        expect(names.includes('paramilitary-advance')).toBe(true);
         expect(names.includes('phase-i-control-flip')).toBe(false);
     });
 });
