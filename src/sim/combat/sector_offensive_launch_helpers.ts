@@ -810,12 +810,22 @@ export function evaluateOpeningAttackReadiness(
 
     if (isMultiAxis(op) && op.axes) {
         const blockers: OpeningAttackBlocker[] = [];
+        let anyExecutable = false;
+        // True when any non-terminal axis has brigades mid-march (zero_eligible_axis).
+        // A fast-assembling sibling must not drag a slow axis into execution before
+        // its brigades reach the objective — hold until all axes are adjacent.
+        let anyApproaching = false;
         for (const axis of op.axes) {
             if (axis.status === 'complete' || axis.status === 'stalled') continue;
             const result = classifyAxisOpeningAttack(state, corpsId, faction, axis, adjacency, threshold, staticAdjacency);
-            if (result.executable) return { executable: true };
-            if (result.blocker) blockers.push(result.blocker);
+            if (result.executable) {
+                anyExecutable = true;
+            } else {
+                if (result.blocker) blockers.push(result.blocker);
+                if (result.blocker === 'zero_eligible_axis') anyApproaching = true;
+            }
         }
+        if (anyExecutable && !anyApproaching) return { executable: true };
         return { executable: false, blocker: rankOpeningAttackBlocker(blockers) };
     }
 
