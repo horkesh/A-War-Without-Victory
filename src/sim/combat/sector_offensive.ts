@@ -260,6 +260,56 @@ const INTL_STANDING_OPS_HESITATION_THRESHOLD = 30;
  *  Soft pressure (0.7×) — not a hard block. */
 const INTL_STANDING_OPS_HESITATION_MULTIPLIER = 0.7;
 
+/**
+ * Phase E Packet 2 — internal_cohesion → op-launch caution-bias multiplier.
+ *
+ * Mirrors the canonical `getActiveEquipmentQualityMultiplier` `!== 1.0`
+ * byte-stable consumer pattern and the sibling `getIntlStandingOpsHesitation
+ * Multiplier` above. When no caution-bias applies, returns 1.0 and consumers
+ * MUST gate `if (mult !== 1.0)` so the historical (no-event, gate-off) path is
+ * byte-identical to baseline.
+ *
+ * Magnitude (0.85×) is more conservative than the 0.7× intl_standing
+ * hesitation — cohesion is a slower-moving political signal (faction
+ * legitimacy / mobilization frictions / internal dissent) and the bot should
+ * only become modestly more cautious, not dramatically so. Threshold (< 40)
+ * matches the "fraying cohesion" band in scoring.ts cohesion reads.
+ *
+ * Soft consumer contract: the multiplier MAY be applied to any op-launch
+ * scoring variable. The canonical consumer is `buildOperations` in
+ * commander/emit.ts which chains it alongside the intl_standing hesitation
+ * multiplier when scaling the `minForOp` threshold.
+ *
+ * Inputs:
+ * - `cohesion`: faction's effective internal_cohesion (0..100), or
+ *   `undefined` when the propagation gate is off / the briefing field is
+ *   absent. Undefined or non-numeric → returns 1.0 (no-op).
+ *
+ * Determinism: pure function of one numeric input. No state, no randomness,
+ * no save-state field.
+ */
+export function getCohesionCautionBiasMultiplier(
+    cohesion: number | undefined,
+): number {
+    if (typeof cohesion !== 'number') return 1.0;
+    if (Number.isNaN(cohesion)) return 1.0;
+    if (cohesion < COHESION_CAUTION_BIAS_THRESHOLD) {
+        return COHESION_CAUTION_BIAS_MULTIPLIER;
+    }
+    return 1.0;
+}
+
+/** Phase E Packet 2: internal_cohesion threshold below which a faction's
+ *  corps COs become more cautious on op launch. Orchestrator-accepted
+ *  Architect default. */
+const COHESION_CAUTION_BIAS_THRESHOLD = 40;
+
+/** Phase E Packet 2: caution-bias multiplier applied to op-launch scoring
+ *  when internal_cohesion < threshold. Orchestrator-accepted Architect
+ *  default. Softer pressure (0.85×) than the 0.7× intl_standing hesitation
+ *  — cohesion is a slower-moving signal. */
+const COHESION_CAUTION_BIAS_MULTIPLIER = 0.85;
+
 /** Corps exhaustion decay per turn when idle (no active operation). */
 const EXHAUSTION_DECAY_IDLE = 3;
 

@@ -59,7 +59,10 @@ import { analyzeFrontGeometry, type FrontGeometryAssessment } from '../front_geo
 import { strictCompare } from '../../../state/validateGameState.js';
 import { FATIGUE_MAX } from '../../../state/formation_constants.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
-import { isIntlStandingOpsHesitationActive } from '../../political/political_dimension_propagation_gate.js';
+import {
+    isCohesionCautionBiasActive,
+    isIntlStandingOpsHesitationActive,
+} from '../../political/political_dimension_propagation_gate.js';
 
 // ---------------------------------------------------------------------------
 // Default officer personality (used when no named officer is assigned)
@@ -731,6 +734,21 @@ export function buildBriefing(
         const intlStanding = state.military?.negotiation?.strategic_dimensions?.[faction]?.international_standing?.effective_value;
         if (typeof intlStanding === 'number') {
             politicalDimensions = { international_standing: intlStanding };
+        }
+    }
+    // Phase E Packet 2: optional internal_cohesion propagation (independent sub-flag).
+    // When the global propagation switch + cohesion-caution-bias sub-flag are both ON,
+    // surface this faction's effective internal_cohesion onto the briefing so the
+    // op-launch caution-bias gate downstream (sector_offensive emit path) can consume
+    // it without traversing the negotiation substrate. The two sub-flags compose: if
+    // only the cohesion sub-flag is ON (intl_standing OFF), `politicalDimensions` is
+    // created here with internal_cohesion only — and vice versa. Byte-stability
+    // contract identical to MVS: when BOTH sub-flags are OFF, `politicalDimensions`
+    // stays `undefined` and the assembled briefing OMITS `political_dimensions`.
+    if (isCohesionCautionBiasActive()) {
+        const cohesion = state.military?.negotiation?.strategic_dimensions?.[faction]?.internal_cohesion?.effective_value;
+        if (typeof cohesion === 'number') {
+            politicalDimensions = { ...politicalDimensions, internal_cohesion: cohesion };
         }
     }
 

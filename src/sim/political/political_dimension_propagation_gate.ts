@@ -70,7 +70,31 @@ export function setIntlStandingOpsHesitationOverride(value: boolean | null): voi
 }
 
 // ---------------------------------------------------------------------------
-// Combined helper — both tiers required
+// Tier 2: internal_cohesion → bot caution-bias sub-flag (Phase E Packet 2)
+// ---------------------------------------------------------------------------
+
+let _cohesionCautionBiasOverride: boolean | null = null;
+
+/** Returns true when the internal_cohesion → bot caution-bias sub-flag is
+ *  enabled. Reads `process.env.AWWV_PDP_COHESION_CAUTION_BIAS` ('true' or '1')
+ *  unless an override has been set via the setter. Mirrors the
+ *  intl_standing sub-flag pattern; default off until the flag is flipped. */
+export function isCohesionCautionBiasEnabled(): boolean {
+    if (_cohesionCautionBiasOverride !== null) {
+        return _cohesionCautionBiasOverride;
+    }
+    const raw = process.env.AWWV_PDP_COHESION_CAUTION_BIAS;
+    return raw === 'true' || raw === '1';
+}
+
+/** Set the internal_cohesion → caution-bias sub-flag override.
+ *  Pass `null` to clear and fall back to env. Tests-only. */
+export function setCohesionCautionBiasOverride(value: boolean | null): void {
+    _cohesionCautionBiasOverride = value;
+}
+
+// ---------------------------------------------------------------------------
+// Combined helpers — both tiers required
 // ---------------------------------------------------------------------------
 
 /** Combined gate: BOTH the global propagation switch AND the
@@ -82,13 +106,23 @@ export function isIntlStandingOpsHesitationActive(): boolean {
     return isPoliticalDimensionPropagationEnabled() && isIntlStandingOpsHesitationEnabled();
 }
 
+/** Combined gate: BOTH the global propagation switch AND the
+ *  internal_cohesion → caution-bias sub-flag must be ON. Mirrors the
+ *  intl_standing combined predicate. Consumers (briefing assembly,
+ *  sector_offensive launch-gate cohesion multiplier) MUST gate on this and
+ *  take a byte-stable no-op path when false. */
+export function isCohesionCautionBiasActive(): boolean {
+    return isPoliticalDimensionPropagationEnabled() && isCohesionCautionBiasEnabled();
+}
+
 // ---------------------------------------------------------------------------
 // Test isolation helper
 // ---------------------------------------------------------------------------
 
-/** Reset both overrides to null (env-fallback). For test cleanup between
+/** Reset all overrides to null (env-fallback). For test cleanup between
  *  cases. Does not touch env vars. */
 export function resetPoliticalDimensionGates(): void {
     _politicalDimensionPropagationOverride = null;
     _intlStandingOpsHesitationOverride = null;
+    _cohesionCautionBiasOverride = null;
 }

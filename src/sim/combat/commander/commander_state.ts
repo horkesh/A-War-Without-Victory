@@ -548,6 +548,13 @@ export interface CommanderBriefing {
          *  sourced from `state.military.negotiation.strategic_dimensions[faction]
          *  .international_standing.effective_value`. */
         readonly international_standing?: number;
+        /** Phase E Packet 2: effective internal_cohesion value (0..100) for this
+         *  corps's faction, sourced from `state.military.negotiation.strategic_dimensions
+         *  [faction].internal_cohesion.effective_value`. Populated only when the
+         *  two-tier `isCohesionCautionBiasActive` gate is ON. Soft consumer contract:
+         *  sector_offensive `getCohesionCautionBiasMultiplier` scales op-launch
+         *  threshold when value `< 40`. */
+        readonly internal_cohesion?: number;
     };
 }
 
