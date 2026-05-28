@@ -3,10 +3,15 @@
 ## Status
 Accepted (2026-05-28) — initial proposal 2026-05-28; major sync after Pyrrhic specialist convening 2026-05-28.
 
+## Companion ADR
+
+**ADR-0006: Sectors as Standing Operational Groups** — naming-layer reconciliation establishing that the engine's `corps_front_sectors` ARE the canonical standing-OG implementation. ADR-0005 (this doc) handles **temporary** OGs / TGs for offensive operations; ADR-0006 handles the **standing** OGs that own defensive AORs. Read together for the complete operational-group picture.
+
 ## Revision history
 - **r1 (2026-05-28, AM)** — initial proposal. 6 decisions ratified; 3 open questions.
 - **r2 (2026-05-28, AM)** — Hard Invariants section added after lead constraint discussion (one-TG-per-brigade, cooldown, per-brigade casualty).
 - **r3 (2026-05-28, PM)** — major sync. Pyrrhic specialists convened (Historian, Game Designer, Technical Architect, Ops Expert + Gameplay Programmer). All open questions resolved. Army HQ Operations added as a major new section. v2 sub-staging reordered per risk analysis. Status promoted to Accepted.
+- **r3.1 (2026-05-28, PM)** — Companion ADR-0006 added after sector-removal investigation. No scope change to ADR-0005; standing OGs ratified as a separate concern handled by ADR-0006.
 
 ## Context
 
