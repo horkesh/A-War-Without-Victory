@@ -10943,3 +10943,36 @@ Any new offensive op — regardless of geographic location or corps — creates 
 - `src/sim/combat/operation_validation.ts` — chain_gap check C2
 
 **Sensitive-history compliance:** Ring-1 / no §6. Engine lifecycle fix — no FORAWWV, no painted target overrides, no avoided_osids_by_faction, no init OSID overrides.
+
+---
+
+## [2026-05-28] engine: remove consolidateRearPockets — paramilitaries handle isolated pockets (n136)
+
+**Type:** Engine pipeline removal — mechanical correctness fix.
+
+**Root cause of brcigovo (painted=RBiH→sim=RS in n135):** `consolidateRearPockets` silently absorbed brcigovo once Op Podrinje Sweep captured rogatica_2 and Op Visegrad captured medjedja_2, shrinking brcigovo's RBiH cluster from 7 to ≤6 OSIDs. The mechanism produced zero cost — no war crimes, no casualties, no displacement. This was design debt: the paramilitary system already handles isolated pocket detection (BFS-based, same topology) for weeks 0-28, producing civilian casualties, war crimes events, and displacement.
+
+**Decision:** Remove `consolidate-rear-pockets` from pipeline entirely (Option 1). Post-week-28 isolated pockets stay contested — historically appropriate. Paramilitary system (RS 0.85 spawn rate) handles weeks 0-28 with full war crimes wiring.
+
+**n135→n136 delta (40w, jan1993 target):**
+- Fixed (+5): brcigovo (main target), veliki_badic, udurlije, podkozara_donja_2, pjesivac_kula_2
+- New regressions (-6): krepsic, skakava_donja (Brčko/POSAVINA_NE), mazlina (Foča/DRINA), gurdici_2 (Olovo/CENTRAL_BOSNIA), cardak_2 (Zavidovići/CENTRAL_CORRIDOR), djulici (Zvornik/POSAVINA_NE) — all pockets that consolidation was silently absorbing; now stay contested post-week-28.
+- Net: -1 OSID count, mechanically correct
+
+**Results (n136, 40w):**
+- **match_ratio: 0.9213 (656/712) — down from 657/712 (n135)**
+- Anchors: **27/27**
+- Benchmarks: **6/6**
+- Hash: `39d5d0c09a4666c8`
+- Area-weighted: 94.1%
+
+**Files changed:**
+- `src/sim/turn_phases/war_phases.ts` — removed import + consolidate-rear-pockets step (178 steps)
+- `src/sim/turn_pipeline_types.ts` — removed rear_pocket_consolidation field from TurnReport
+- `src/scenario/anomaly_detector.ts` — updated comment
+- `tests/combat_pipeline.test.ts` — checks paramilitary-advance instead of consolidate-rear-pockets
+- `tests/war_phase_step_order.test.ts` — step count 179→178
+
+**Commit:** fdacd5b4
+
+**Sensitive-history compliance:** Ring-1 / no §6. Engine pipeline fix — no FORAWWV, no painted target overrides, no avoided_osids_by_faction, no init OSID overrides.
