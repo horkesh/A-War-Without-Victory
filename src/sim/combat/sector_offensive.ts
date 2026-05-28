@@ -457,6 +457,18 @@ function issuePostOperationReturnMarches(state: GameState, op: CorpsOperation): 
                 && s.territory_osids?.includes(loc) === true);
         if (isInCorpsSectorTerritory) continue;
 
+        // Post-operation capture retention: if the brigade is sitting on an OSID
+        // that is now politically controlled by its own faction — meaning it was
+        // captured during this operation — do not march it home. territory_osids is
+        // derived at the start of the turn (partition-corps-front-sectors runs before
+        // advance-sector-offensives), so freshly-captured OSIDs are not yet reflected
+        // there. The next turn's sector recompute will incorporate the captured OSID
+        // into the corps' territory naturally via the political_controllers BFS.
+        // Without this guard, every participating brigade is marched home from
+        // captured ground, leaving it militarily undefended for one full turn.
+        const controller = getPoliticalControllerOSID(state, loc, undefined);
+        if (controller === f.faction) continue;
+
         // Already home — no march needed
         const homeMun = homeOsid.split(':')[1] ?? '';
         const currentMun = loc.split(':')[1] ?? '';
