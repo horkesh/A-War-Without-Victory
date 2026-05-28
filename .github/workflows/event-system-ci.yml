@@ -6,12 +6,20 @@ name: Event System CI
 # broader Baseline Regression workflow (which runs the same tests implicitly
 # via the test:vitest:fast slice).
 #
+# Phase H Packet 10 (2026-05-29) — extended the test gate with the seven
+# Phase H suites (causality query + six UI integration files, 74 tests) so
+# PR-time enforcement covers the Phase H consequence-visualization layer
+# alongside the Phase B/D/E/F regression substrate.
+#
 # Three layered gates run sequentially:
 #   1. TypeScript typecheck — catches loader / vocabulary / shape errors.
-#   2. Event-system + Phase E/F suite — 18 test files covering loader,
+#   2. Event-system + Phase E/F/H suite — 25 test files covering loader,
 #      decisions, evaluation, taxonomy, presidential acceptance, families,
-#      causality, political-dimension propagation, F2 audit, F3 graph, and
-#      F5 runtime substrate integration.
+#      causality, political-dimension propagation, F2 audit, F3 graph,
+#      F5 runtime substrate integration, and the Phase H causality-query
+#      API + UI consequence-visualization layer (decision-context modal,
+#      faction-branch badges, codex unlock state, chronicle causality
+#      slides, catalog wire-up, decision-history overlay).
 #   3. Phase F2 strict gate (Phase G3) — asserts CRITICAL + WARNING = 0
 #      on the real catalog. This is the canon-compliance hard rail.
 #   4. Baseline regression — byte-identical run-artifact hash check via
@@ -61,7 +69,7 @@ jobs:
       - name: TypeScript typecheck
         run: npx tsc --noEmit
 
-      - name: Event-system + Phase E/F suite
+      - name: Event-system + Phase E/F/H suite
         run: |
           node node_modules/vitest/vitest.mjs run \
             tests/event_loader.test.ts \
@@ -82,6 +90,13 @@ jobs:
             tests/phase_e3_combined_activation.test.ts \
             tests/sensitive_history_canon_gate_audit.test.ts \
             tests/phase_d_causality_runtime_integration.test.ts \
+            tests/causality_query.test.ts \
+            tests/ui/event_decision_modal_decision_context.test.ts \
+            tests/ui/faction_branch_tags_badge.test.ts \
+            tests/ui/codex_panel_unlock_state.test.ts \
+            tests/ui/chronicle_causality_slides.test.ts \
+            tests/ui/catalog_wireup_integration.test.ts \
+            tests/ui/decision_history_overlay.test.ts \
             --reporter=dot
 
       - name: Phase F2 strict gate (canon-compliance hard rail)

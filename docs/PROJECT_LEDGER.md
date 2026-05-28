@@ -1,4 +1,19 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] codex: Phase H Packet 10 (extend G4 CI workflow with Phase H test suite)
+
+- **Type.** CI surface extension. NO code changes. NO event JSON changes. NO scenario data edits. NO canon edits. NO baseline refresh. NO engine touches.
+- **Change.** Extended `.github/workflows/event-system-ci.yml` Gate 2 (test step) to include the 7 Phase H test files alongside the existing 18-file event-system + Phase E/F suite. Renamed step from "Event-system + Phase E/F suite" to "Event-system + Phase E/F/H suite". Files added: `tests/causality_query.test.ts` (H2, 25 tests), `tests/ui/event_decision_modal_decision_context.test.ts` (H3, 5 tests), `tests/ui/faction_branch_tags_badge.test.ts` (H4, 6 tests), `tests/ui/codex_panel_unlock_state.test.ts` (H5, 8 tests), `tests/ui/chronicle_causality_slides.test.ts` (H6, 11 tests), `tests/ui/catalog_wireup_integration.test.ts` (H7, 8 tests), `tests/ui/decision_history_overlay.test.ts` (H8, 11 tests) = 74 new tests. Header comment block updated to document the Phase H Packet 10 extension. README updated: catalog row mentions Phase H scope, Gate 2 section documents 25 test files (18 + 7) / ~434 tests, local-run snippet mirrors the 25-file workflow command exactly.
+- **Approach.** Option A (merge into existing test step) chosen over Option B (separate Phase H step) — Phase H 7-file local run completed in 14.67s, fast enough that separate timing visibility wasn't justified; single-step keeps YAML simple and reduces redundant Vitest startup cost in CI. Workflow LOC: 94 → 110 (+16, header doc expansion + 7 file lines). README LOC: 125 → 144 (+19, new Phase H section under Gate 2 + table-row + local-run snippet sync). Step count preserved at 8.
+- **Verification.**
+  - YAML syntactic validity: `node -e "require('js-yaml').load(...)"` PASS (8 steps, all step names parsed cleanly).
+  - Local 25-file run mirroring Gate 2: 25 files PASS, 434 tests PASS / 5 skipped (283.55s).
+  - `npx tsc --noEmit` clean (no output).
+  - `node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_baseline_regression.ts` PASS — "Baseline regression: all scenarios match."
+  - `git diff --check` exit 0.
+- **Files touched.** `.github/workflows/event-system-ci.yml` (+16 LOC), `.github/workflows/README.md` (+19 LOC), `docs/PROJECT_LEDGER.md` (this entry). No engine, no event JSON, no scenario data, no canon.
+- **Why.** Phase H ships the consequence-visualization layer (causality query API + 6 UI integration suites) but until Packet 10 the PR-time CI gate only ran the Phase E/F substrate tests. With this extension, every PR now enforces the full Phase B/D/E/F/H regression matrix as a discrete named CI surface (not buried inside the broader `test:vitest:fast` slice). Pairs G4 strict-gate infrastructure with full Phase B/D/E/F/H regression protection.
+- **Open follow-ups.** None for this packet. Optional future: split Gate 2 into "substrate" vs "UI" sub-steps for finer-grained CI failure attribution if any UI suite becomes flaky.
+
 ## [2026-05-29] codex: Phase H Packet 9 (Phase G + Phase H closeout docs)
 
 - **Type.** Pure documentation packet. NO code changes. NO tests added. NO event JSON changes. NO scenario data edits. NO canon edits. NO baseline refresh. NO engine touches.

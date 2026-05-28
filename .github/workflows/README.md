@@ -10,11 +10,11 @@ This directory contains the GitHub Actions workflow definitions for A War Withou
 | Baseline Regression | `baseline-regression.yml` | push to `main`, PR to `main` | Multi-job broad gate: typecheck, focused scenario anchor tests, `test:vitest:fast` (137 fast suites, includes the event-system tests via auto-discovery), `test:vitest:scenario`. |
 | Desktop Release Guard | `desktop-release-guard.yml` | push to `main`, PR to `main` | Builds + smoke-tests the Linux AppImage and Windows NSIS desktop packages; uploads the artifacts on every run. |
 | Release | `release.yml` | (see file) | Tagged-release publication pipeline. |
-| **Event System CI** | **`event-system-ci.yml`** | **push to `main` / `codex/**` / `feature/**`, PR to `main`** | **Named, explicit CI surface for event-system validation. Wraps the Phase G3 F2 strict canon-compliance gate so it is visible at PR-review time as a discrete check rather than buried inside the broader fast-test slice.** |
+| **Event System CI** | **`event-system-ci.yml`** | **push to `main` / `codex/**` / `feature/**`, PR to `main`** | **Named, explicit CI surface for event-system validation. Wraps the Phase G3 F2 strict canon-compliance gate so it is visible at PR-review time as a discrete check rather than buried inside the broader fast-test slice. Phase H Packet 10 extended the test gate with 7 Phase H suites (74 tests) for the consequence-visualization layer.** |
 
 ## Event System CI — what it runs
 
-Phase G Packet 4 (2026-05-28) added `event-system-ci.yml` to automate the canon-compliance defense established by the Phase G3 strict gate test (`tests/sensitive_history_canon_gate_audit_strict_gate.test.ts`). The workflow runs four sequential gates in a single `event-system-validation` job:
+Phase G Packet 4 (2026-05-28) added `event-system-ci.yml` to automate the canon-compliance defense established by the Phase G3 strict gate test (`tests/sensitive_history_canon_gate_audit_strict_gate.test.ts`). Phase H Packet 10 (2026-05-29) extended the test gate with the seven Phase H suites (74 tests) so PR-time enforcement covers the consequence-visualization layer alongside the Phase B/D/E/F substrate. The workflow runs four sequential gates in a single `event-system-validation` job:
 
 ### Gate 1 — TypeScript typecheck
 
@@ -24,7 +24,7 @@ npx tsc --noEmit
 
 Catches loader-vocabulary, event-shape, and substrate-writer typing errors.
 
-### Gate 2 — Event-system + Phase E/F suite (18 test files)
+### Gate 2 — Event-system + Phase E/F/H suite (25 test files, ~434 tests)
 
 Loader + decisions + evaluation + acceptance reporting:
 
@@ -50,6 +50,16 @@ Phase E political-dimension propagation + Phase F diagnostics:
 - `tests/sensitive_history_canon_gate_audit.test.ts` (Phase F2 audit unit tests)
 - `tests/phase_d_causality_runtime_integration.test.ts` (Phase F5 runtime integration)
 
+Phase H causality-query API + UI consequence-visualization layer (Packet 10, 74 tests):
+
+- `tests/causality_query.test.ts` (H2 — causality query API, 25 tests)
+- `tests/ui/event_decision_modal_decision_context.test.ts` (H3 — decision-context modal, 5 tests)
+- `tests/ui/faction_branch_tags_badge.test.ts` (H4 — faction-branch badges, 6 tests)
+- `tests/ui/codex_panel_unlock_state.test.ts` (H5 — codex unlock state, 8 tests)
+- `tests/ui/chronicle_causality_slides.test.ts` (H6 — chronicle causality slides, 11 tests)
+- `tests/ui/catalog_wireup_integration.test.ts` (H7 — catalog wire-up, 8 tests)
+- `tests/ui/decision_history_overlay.test.ts` (H8 — decision-history overlay, 11 tests)
+
 ### Gate 3 — Phase F2 strict gate (canon-compliance hard rail)
 
 ```
@@ -74,7 +84,7 @@ SHA256 comparison of run artifacts against committed baselines. Detects engine-b
 # Gate 1
 npx tsc --noEmit
 
-# Gate 2 (one-shot all 18 files)
+# Gate 2 (one-shot all 25 files — Phase E/F substrate + Phase H consequence layer)
 node node_modules/vitest/vitest.mjs run \
   tests/event_loader.test.ts \
   tests/event_loader_runtime_substrate.test.ts \
@@ -94,6 +104,13 @@ node node_modules/vitest/vitest.mjs run \
   tests/phase_e3_combined_activation.test.ts \
   tests/sensitive_history_canon_gate_audit.test.ts \
   tests/phase_d_causality_runtime_integration.test.ts \
+  tests/causality_query.test.ts \
+  tests/ui/event_decision_modal_decision_context.test.ts \
+  tests/ui/faction_branch_tags_badge.test.ts \
+  tests/ui/codex_panel_unlock_state.test.ts \
+  tests/ui/chronicle_causality_slides.test.ts \
+  tests/ui/catalog_wireup_integration.test.ts \
+  tests/ui/decision_history_overlay.test.ts \
   --reporter=dot
 
 # Gate 3 (strict canon-compliance gate; the one to run after editing event JSON)
