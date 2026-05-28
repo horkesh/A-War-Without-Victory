@@ -1,4 +1,27 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-28] calibration(n139): per-axis execution readiness engine fix — 657/712 (92.3%)
+
+**Type:** Engine fix — `src/sim/combat/sector_offensive_launch_helpers.ts`. Also: Op Koridor brcko_corridor staging + brigade-retention fix (n137/n138).
+
+**Root cause (multi-axis timing gap):** `evaluateOpeningAttackReadiness()` returned `{ executable: true }` as soon as ANY non-terminal axis was ready. For Op Koridor, posavina_flank (staging 1 hop from home) hit the 60% assembly gate at w3-4 and pulled the entire op into execution. At that point brcko_corridor brigades were 5 hops mid-march to donji_rahic — not yet adjacent to krepsic — producing `zero_eligible_axis` every execution turn. Result: 0 captures, krepsic and skakava_donja permanently RBiH in sim despite painted=RS.
+
+**Fix (263569bf):** Added `anyApproaching` flag in the multi-axis loop. When any non-terminal axis has `zero_eligible_axis` (brigades mid-march), the function returns `{ executable: false }` instead of firing. The existing `stagedEarly && elapsed ≤ planDuration+2` grace in `sector_offensive.ts` line 1075 holds the op in planning until all axes are adjacent. No new hold mechanism needed.
+
+**Supporting changes:**
+- n137 (50eedd26): brigade-retention fix — `issuePostOperationReturnMarches()` skips home-march when brigade is on a faction-controlled OSID (captured territory retained).
+- n138 (66988ee0): brcko_corridor staging moved crnjelovo_donje → donji_rahic (Sacred Rule 3: staging must be adjacent to first objective; donji_rahic is adjacent to krepsic).
+
+**Results (n139 vs n136 baseline 656/712):**
+- Match: **657/712 (92.3%)** +1
+- POSAVINA_NE: 98/104 (94.2%) +1 — krepsic + skakava_donja now correctly RS
+- DRINA: 95/112 (84.8%) -2 — hash-change variance, no structural cascade
+- CENTRAL_CORRIDOR: 83/92 (90.2%) -1 — variance
+- CENTRAL_BOSNIA: 138/155 (89.0%) +3
+- Op Koridor: held planning until turn 10, 5 captures total, recovery=completed
+- Hash: `826b369dbc2bf3a2`. Anchors: 27/27. Benchmarks: 6/6.
+
+**n140 pending:** trim brcko_corridor RS-init early objectives (brcko, brezovo_polje_selo_2, donji_rahic, potocari_2) — cosmetic, no cascade expected.
+
 ## [2026-05-27] calibration(n105): Op Foca planning_duration:6 — kalinovik anti-paralysis fix
 
 **Type:** Engine parameter fix — single field change in `src/sim/combat/pre_planned_operations.ts`.

@@ -97,11 +97,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'jna_17th_corps_tg',
                 ],
                 objectives: [
-                    'op:brcko:brcko',
-                    'op:brcko:brezovo_polje_selo_2',
-                    'op:brcko:donji_rahic',
                     'op:brcko:krepsic',
-                    'op:brcko:potocari_2',
                     'op:brcko:skakava_donja',
                 ],
                 staging_osid: 'op:brcko:donji_rahic',
