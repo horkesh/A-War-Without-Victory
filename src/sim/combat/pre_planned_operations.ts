@@ -261,7 +261,15 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         staging_osid: 'op:gorazde:podkozara_donja_2',
         available_from: 100,
         min_attack_outcome: 'repulsed',
-        planning_duration: 3,
+        // planning_duration: 10 — extended to allow brigades time to march 6+ hops to staging.
+        // ENGINE LIMITATION (documented 2026-05-28): all vrs_drina brigades are sector-pinned by
+        // bot AI after w46 and do not execute march orders (sector assignment > op march priority).
+        // Op injects at w100 (3 brigades ≥ MIN_OPERATION_PARTICIPANTS=2), issues movement_orders
+        // each planning turn, but eligible_attacker_count stays 0 for all 13 turns → aborts w113
+        // with zero_eligible_axis. Single-brigade variant (1 < MIN=2) never injects at all —
+        // keeping 3-brigade for observability. Requires engine fix: march priority for op-assigned
+        // brigades must override sector defensive assignment. Assign to gameplay-programmer.
+        planning_duration: 10,
         axes: [
             {
                 axis_id: 'gorazde_encirclement',

@@ -1,4 +1,20 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-28] calibration(n154 revert): Op Zvezda 94 — engine limitation documented, 3-brigade state restored
+
+**Type:** Revert + documentation. `src/sim/combat/pre_planned_operations.ts`. No territory change; 40w hash `3649b3861a87e6ea` unchanged.
+
+**Investigation (n150–n154):**
+- n150 (156w, 3-brigade + planning_duration=10): Op Zvezda 94 injects at w100, runs 13 planning turns (W100–W112), aborts W113 `zero_eligible_axis`. movement_order_count=3-4 per week but all brigades stationary throughout (w46–w105).
+- n153 (single-brigade fix attempt): 1 brigade < MIN_OPERATION_PARTICIPANTS=2 → op never injects at all. Invisible in diagnostics. WRONG fix — reverted.
+
+**Root cause confirmed:** All vrs_drina brigades are sector-pinned by bot AI after w46 (rs_visegrad_brigade at zlijeb, rs_1st_podrinje at brgule, rs_5th_podrinje at godjenje_2, rs_65th_protection at han_pijesak_2). Op issues march orders (movement_order_count > 0 confirmed) but brigade movement is never executed — sector assignment overrides op march priority. Eligible=0 for all 13 planning turns regardless of planning_duration.
+
+**Engine gap (assign to gameplay-programmer):** `sector assignment > op march order` in movement priority. Brigade march orders from pre-planned ops must override sector defensive assignments during op planning phase. Affects ALL vrs_drina late-war ops (Pracha River, Zvezda 94). Same root cause as "commander authority gap" session lesson.
+
+**Workaround data-checked and rejected:** Adjacent RBiH OSIDs from brigade locations at w100: zlijeb→ljeskovik_2, godjenje_2→zepa_2/pomol_2, han_pijesak_2→pomol_2. None historically valid for Goražde (Zvezda 94). Redesigning op to target zepa_2 would misrepresent 1994 history; deferred.
+
+**State committed:** 3-brigade (rs_visegrad_brigade + rs_1st_podrinje + rs_5th_podrinje) + planning_duration=10 retained for observability. Identical 156w hash `970d391a4155f966` vs single-brigade. 40w: 657/712 (92.28%), anchors 27/27, benchmarks 6/6, hash `3649b3861a87e6ea`.
+
 ## [2026-05-28] calibration(n149): Op Zvezda 94 brigade fix — 657/712 (92.28%, clean)
 
 **Type:** Op data fix — `src/sim/combat/pre_planned_operations.ts`. Brigade assignment only; no territory change at 40w.
