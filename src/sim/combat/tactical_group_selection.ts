@@ -45,9 +45,11 @@
 
 import type {
     FormationId,
+    FormationState,
     GameState,
     TgDonorContribution,
 } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 
 export interface DonorSelectionContext {
     /** Anchor brigade for the prospective TG. */
@@ -58,16 +60,101 @@ export interface DonorSelectionContext {
     army_hq_op_id?: string;
 }
 
+// === Eligibility thresholds (ADR-0005 §Tier 1 constraints) ===
+const COHESION_HEALTHY_THRESHOLD = 50;
+const MIN_BRIGADE_PERSONNEL_AFTER_DONATION_DEFAULT = 800;
+const DONATION_CAP_FRACTION = 0.30;
+/** v2.2-simplified: uniform donation factor (no distance falloff yet — v2.2b/v3). */
+const V2_2_DONATION_FACTOR = 0.25;
+/** v2.2-simplified: max donors per TG. Caps cascade risk while full sort lands later. */
+const MAX_DONORS_PER_TG_V2_2 = 3;
+
 /**
  * Select donor contributions for a prospective TG.
  *
- * v2.0 stub: always returns []. TG forms as anchor-only.
- * v2.2 will replace with the full algorithm documented in the file header.
+ * **v2.2-simplified** (this revision):
+ *   - Candidate pool = same corps only (adjacent-corps rule deferred to v2.2b
+ *     pending the corps-adjacency cache scaffold)
+ *   - Basic eligibility gates:
+ *       * active status, same faction as anchor
+ *       * cohesion ≥ COHESION_HEALTHY_THRESHOLD
+ *       * not already in a TG (Hard Invariant #1)
+ *       * residual personnel after donation ≥ MIN_BRIGADE_PERSONNEL_AFTER_DONATION
+ *       * not the anchor itself
+ *       * cooldown elapsed if tg_cooldown_until_turn is set
+ *   - Uniform donation: V2_2_DONATION_FACTOR (25%) capped at DONATION_CAP_FRACTION (30%)
+ *   - Sort by (brigade_id strictCompare asc) — distance_hops field set to 0
+ *   - Max donors capped at MAX_DONORS_PER_TG_V2_2 (3)
+ *
+ * v2.2b will extend with: adjacent-corps rule via sector-adjacency BFS;
+ * distance falloff (max(0.10, 1.0 - 0.15*hops)); Army HQ faction-scope opt-in;
+ * per-scenario donation cap; sort by (distance_hops, source_corps_id, brigade_id).
+ *
+ * Returns empty array if anchor not found or no eligible donors.
  */
 export function selectDonors(
-    _state: GameState,
-    _context: DonorSelectionContext,
+    state: GameState,
+    context: DonorSelectionContext,
 ): TgDonorContribution[] {
-    // v2.0: empty donor pool. v2.2 will populate via BFS adjacent-corps walk.
-    return [];
+    const formations = state.military?.formations;
+    if (!formations) return [];
+
+    const anchor = formations[context.anchor_brigade_id];
+    if (!anchor) return [];
+    const anchorCorps = anchor.corps_id;
+    const anchorFaction = anchor.faction;
+    if (!anchorCorps) return [];
+
+    const currentTurn = state.meta?.turn ?? 0;
+
+    // Iterate same-corps candidates, sorted by brigade_id for determinism.
+    const candidates: FormationState[] = Object.keys(formations)
+        .sort(strictCompare)
+        .map(id => formations[id])
+        .filter(f => isEligibleDonor(f, context, anchorCorps, anchorFaction, currentTurn));
+
+    const selected = candidates.slice(0, MAX_DONORS_PER_TG_V2_2);
+
+    return selected.map(donor => buildContribution(donor, anchorCorps));
+}
+
+function isEligibleDonor(
+    f: FormationState,
+    context: DonorSelectionContext,
+    anchorCorps: FormationId,
+    anchorFaction: string,
+    currentTurn: number,
+): boolean {
+    if (f.id === context.anchor_brigade_id) return false;
+    if (f.status !== 'active') return false;
+    if (f.faction !== anchorFaction) return false;
+    if (f.corps_id !== anchorCorps) return false; // v2.2-simplified: same corps only
+    if ((f.cohesion ?? 0) < COHESION_HEALTHY_THRESHOLD) return false;
+    if (Object.keys(f.personnel_lent_by_tg ?? {}).length > 0) return false; // Hard Invariant #1
+    if (f.tg_cooldown_until_turn != null && currentTurn < f.tg_cooldown_until_turn) return false;
+    const personnel = f.personnel ?? 0;
+    const donation = computeDonationPersonnel(personnel);
+    if (personnel - donation < MIN_BRIGADE_PERSONNEL_AFTER_DONATION_DEFAULT) return false;
+    return true;
+}
+
+function computeDonationPersonnel(personnel: number): number {
+    const factor = V2_2_DONATION_FACTOR;
+    const cap = personnel * DONATION_CAP_FRACTION;
+    return Math.floor(Math.min(personnel * factor, cap));
+}
+
+function buildContribution(donor: FormationState, anchorCorps: FormationId): TgDonorContribution {
+    const personnel = donor.personnel ?? 0;
+    const personnelLent = computeDonationPersonnel(personnel);
+    return {
+        brigade_id: donor.id,
+        source_corps_id: donor.corps_id ?? anchorCorps,
+        distance_hops: 0, // v2.2-simplified — actual BFS in v2.2b
+        personnel_lent: personnelLent,
+        heavy_equipment_lent: { tanks: 0, artillery: 0, aa_systems: 0 }, // v2.2-simplified: personnel only
+        casualties_so_far: 0,
+        equipment_losses_so_far: { tanks: 0, artillery: 0, aa_systems: 0 },
+        cohesion_bleed_applied: 0, // v2.3 wires the bleed formula
+    };
 }

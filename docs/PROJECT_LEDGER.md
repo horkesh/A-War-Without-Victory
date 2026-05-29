@@ -1,4 +1,32 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] feat(combat): ADR-0005 v2.2a — TG selectDonors algorithm + lifecycle helpers (unwired)
+
+**Type:** Selection + lifecycle helpers. Phased rollout v2.2a of ADR-0005 — first half of the v2.2 sub-stage, pragmatically split. v2.2b will wire these into the op pipeline + combat path.
+
+**Change:**
+- **selectDonors v2.2-simplified** (`src/sim/combat/tactical_group_selection.ts`): replaces v2.0 empty stub. Same-corps-only candidate pool + 6 eligibility gates (active status, faction match, corps match, cohesion ≥ COHESION_HEALTHY_THRESHOLD=50, no other TG per Hard Invariant #1, cooldown elapsed, residual personnel ≥ MIN_BRIGADE_PERSONNEL_AFTER_DONATION=800). Uniform 25% donation factor capped at 30%. Deterministic sort by `brigade_id` strictCompare. Max 3 donors per TG. Adjacent-corps BFS + distance falloff + Army HQ faction-scope opt-in deferred to v2.2b alongside the corps-adjacency cache scaffold.
+- **formTacticalGroup helper** (new `src/sim/combat/tactical_group_lifecycle.ts`): pure mutation. Validates Hard Invariants #1/#4/#8 (no anchor-in-other-TG, no donor-in-other-TG, no anchor-in-own-donors, no duplicate donors). Creates `TacticalGroup` entry in `state.military.tactical_groups`. Writes `personnel_lent_by_tg` + `equipment_lent_by_tg` on each donor. Donors stored pre-sorted by `brigade_id` (Hard Invariant #4). Returns `{ tg_id, rejection_reason? }` for caller diagnostics.
+- **dissolveTacticalGroup helper** (same file): pure mutation. Clears donor lent fields, removes TG entry, sets `tg_cooldown_until_turn = current_turn + TG_DONOR_COOLDOWN_TURNS (6)` on anchor + each donor (Hard Invariant #2). No casualty application here — that's debited live during battle per ADR-0005 §Trickle-back.
+- **Exports**: `TG_DONOR_COOLDOWN_TURNS` constant for cross-module reuse.
+- **No wiring**: helpers exist but are not called from any runtime code yet. v2.2b adds the wiring under ENABLE_TG_FORMATION + ENABLE_TG_COMBAT_SYNTHESIS sub-flags.
+
+**Determinism:** Pure functions; strictCompare imported from canonical `src/state/validateGameState.ts`; donor list pre-sorted; no `Math.random`/`Date.now`; no Record iteration without sort. selectDonors iterates formations via `Object.keys(...).sort(strictCompare)`.
+
+**Verification:**
+- typecheck: clean for v2.2a files.
+- `vitest run tests/tg_lifecycle.test.ts tests/tg_invariants.test.ts tests/tg_casualty_distribution.test.ts --reporter=dot`: **38/38 PASS** (20 lifecycle + 7 invariants + 11 casualty distribution).
+- 40w v2.2a (n4) hash: `3649b3861a87e6ea` — byte-identical to v1 baseline (n0), v1-on smoke (n1), v2.0 schema bump (n2), v2.1 casualty math (n3). Helpers not yet called from runtime → zero behavioral surface.
+
+**Artifacts:**
+- `src/sim/combat/tactical_group_selection.ts` (replaced stub with v2.2-simplified algorithm)
+- `src/sim/combat/tactical_group_lifecycle.ts` (new — form + dissolve helpers + cooldown constant)
+- `tests/tg_lifecycle.test.ts` (new — 20 test cases covering all 6 selection gates + 5 form rejection reasons + dissolution cooldown round-trip)
+- `data/derived/latest_run_final_save.json` (n4 validation artifact)
+
+**Next (v2.2b):** Wire selectDonors into `operation_preparation.ts` `intel_gathering` phase (gated by ENABLE_TG_FORMATION). Wire `formTacticalGroup` into `ready` transition. Wire TG combat power synthesis + `distributeCasualtiesAcrossTg` into `attack_resolution_osid.ts` (gated by ENABLE_TG_COMBAT_SYNTHESIS). Wire `dissolveTacticalGroup` into `sector_offensive.ts` execution→recovery transition. Then 40w flag-off byte-identical + optional flag-on smoke to observe expected +3-8% calibration shift.
+
+---
+
 ## [2026-05-29] feat(combat): ADR-0005 v2.1 — TG casualty distribution math (dormant)
 
 **Type:** Pure math helper + comprehensive unit tests. Phased rollout v2.1 of ADR-0005. Per Ops Expert sub-stage reorder: ship casualty distribution before combat synthesis so the math is unit-tested in isolation; v2.2 wires it into `attack_resolution_osid.ts` alongside combat-power synthesis.
