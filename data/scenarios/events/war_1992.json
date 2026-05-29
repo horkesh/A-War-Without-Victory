@@ -4600,6 +4600,71 @@
     ]
   },
   {
+    "id": "hvo_arbih_tensions_rise_1992",
+    "title": "HVO-ARBiH Clash at Prozor",
+    "narrative": "The fragile alliance between the HVO and ARBiH fractures openly at Prozor in central Bosnia. HVO forces attack Bosniak civilians and ARBiH positions in a calculated bid to assert Croat control over the town. Further clashes erupt near Novi Travnik. The incidents mark the first serious military confrontation between the two nominal allies.",
+    "source_note": "Existing event/essay/project sources ground the row's institutional and operational context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 20,
+      "turn_max": 35,
+      "phase": "war",
+      "condition": {
+        "type": "alliance_below",
+        "value": 0.7
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "alliance_change",
+      "delta": -0.1
+    },
+    "effects": [
+      {
+        "kind": "narrative",
+        "text": "HVO and ARBiH forces clash at Prozor and Novi Travnik. The fragile alliance between Croats and Bosniaks shows deepening cracks."
+      }
+    ],
+    "pressure": {
+      "base_rate": 1,
+      "threshold": 5,
+      "decay_rate": 0.5,
+      "modifiers": [
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "mostar_liberated",
+            "value": true
+          },
+          "rate_bonus": 0.5
+        },
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "jajce_fell",
+            "value": true
+          },
+          "rate_bonus": 1.5
+        }
+      ]
+    },
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "internal_cohesion",
+        "delta": -5
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "internal_cohesion",
+        "delta": -5
+      }
+    ],
+    "sets_flags": {
+      "hvo_arbih_tensions_rising": true
+    }
+  },
+  {
     "id": "rbih_minority_retention_1992",
     "title": "Sarajevo Records Its Officer Corps Posture",
     "narrative": "ARBiH command at the Sarajevo HQ records its posture toward minority retention. The wartime army still carries substantial Serb and Croat officers and recruits — Gen. Jovan Divjak holds Deputy Commander at HQ Sarajevo, mixed-ethnicity units anchor the city's defense, and the civic-republic platform makes multi-ethnic service a structural foundation of state legitimacy. A Bosniak-nationalist faction inside the SDA presses for ethnic vetting and purges. President Izetbegović and the General Staff weigh the response: retain the multi-ethnic officer corps and recruitment pool (the documented historical posture); execute a gradual purge over several months; mandate immediate ethnic vetting and dismissal; or move to federated single-ethnicity unit structures as a compromise. The decision shapes who fights for the republic, who funds it, and what civic claim the state can advance at the diplomatic table.",
@@ -4866,71 +4931,6 @@
       }
     },
     "historical_source": "Balkan Battlegrounds Vol. II (CIA Office of Russian and European Analysis 2002) — ARBiH composition + General Staff structure + 1st Corps Sarajevo defense. Jovan Divjak, 'Sarajevo, Mon Amour' (Buchet/Chastel 2004) — Divjak's Serb-ethnic ARBiH service as Deputy Commander of the Sarajevo HQ from April 1992 through the war's end. Marko Attila Hoare, 'How Bosnia Armed' (Saqi 2004) — civic-republic posture preserving minority service through the war. ICTY Galić IT-98-29-T Trial Judgement (5 December 2003) + ICTY Dragomir Milošević IT-98-29/1-T (12 December 2007) — Sarajevo defense organization and ARBiH 1st Corps command structure. ICTY Karadžić IT-95-5/18-T Trial Judgment (24 March 2016) Vol. III — ARBiH command structure context. ARBiH command records and General Staff order-of-battle documentation."
-  },
-  {
-    "id": "hvo_arbih_tensions_rise_1992",
-    "title": "HVO-ARBiH Clash at Prozor",
-    "narrative": "The fragile alliance between the HVO and ARBiH fractures openly at Prozor in central Bosnia. HVO forces attack Bosniak civilians and ARBiH positions in a calculated bid to assert Croat control over the town. Further clashes erupt near Novi Travnik. The incidents mark the first serious military confrontation between the two nominal allies.",
-    "source_note": "Existing event/essay/project sources ground the row's institutional and operational context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
-    "category": "political",
-    "trigger": {
-      "turn_min": 20,
-      "turn_max": 35,
-      "phase": "war",
-      "condition": {
-        "type": "alliance_below",
-        "value": 0.7
-      }
-    },
-    "once": true,
-    "effect": {
-      "kind": "alliance_change",
-      "delta": -0.1
-    },
-    "effects": [
-      {
-        "kind": "narrative",
-        "text": "HVO and ARBiH forces clash at Prozor and Novi Travnik. The fragile alliance between Croats and Bosniaks shows deepening cracks."
-      }
-    ],
-    "pressure": {
-      "base_rate": 1,
-      "threshold": 5,
-      "decay_rate": 0.5,
-      "modifiers": [
-        {
-          "condition": {
-            "type": "flag_equals",
-            "flag": "mostar_liberated",
-            "value": true
-          },
-          "rate_bonus": 0.5
-        },
-        {
-          "condition": {
-            "type": "flag_equals",
-            "flag": "jajce_fell",
-            "value": true
-          },
-          "rate_bonus": 1.5
-        }
-      ]
-    },
-    "dimension_shifts": [
-      {
-        "faction": "RBiH",
-        "dimension": "internal_cohesion",
-        "delta": -5
-      },
-      {
-        "faction": "HRHB",
-        "dimension": "internal_cohesion",
-        "delta": -5
-      }
-    ],
-    "sets_flags": {
-      "hvo_arbih_tensions_rising": true
-    }
   },
   {
     "id": "jajce_falls_1992",
