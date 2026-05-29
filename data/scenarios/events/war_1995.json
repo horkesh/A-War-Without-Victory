@@ -1029,331 +1029,6 @@
     "historical_source": "Balkan Battlegrounds Vol. 2 p.644; ICTY Karadžić IT-95-5/18-T Exh. P03978; Tanner 2001 ch.13."
   },
   {
-    "id": "holbrooke_us_belgrade_channel_1995",
-    "title": "Holbrooke Routes Pressure Through Belgrade",
-    "narrative": "Holbrooke has arrived in Belgrade. Milosevic, not Karadzic, is now America's contact for Republika Srpska. The message is clear: accept the US framework or face combined diplomatic and military pressure.",
-    "category": "diplomatic",
-    "family": "rs_holbrooke_response",
-    "source_tier": "icty_icj_un",
-    "emergence_class": "compound",
-    "trigger": {
-      "turn_min": 176,
-      "turn_max": 178,
-      "phase": "war",
-      "condition": {
-        "type": "or",
-        "conditions": [
-          {
-            "type": "flag_equals",
-            "flag": "rs_strategic_goals",
-            "value": "all_six"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "rs_strategic_goals",
-            "value": "selective"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "rs_strategic_goals",
-            "value": "aggressive"
-          }
-        ]
-      }
-    },
-    "requires_enabled": true,
-    "once": true,
-    "responding_faction": "RS",
-    "requires_player_response": false,
-    "bot_response_logic": "strategic_weighted",
-    "historical_default_response_id": "comply_with_belgrade",
-    "effect": {
-      "kind": "narrative",
-      "text": "Holbrooke bypasses Pale and deals with Milosevic as RS proxy. Belgrade now controls the channel to the international community."
-    },
-    "effects": [],
-    "dimension_shifts": [
-      {
-        "faction": "RS",
-        "dimension": "patron_confidence",
-        "delta": -12
-      }
-    ],
-    "response_options": [
-      {
-        "id": "comply_with_belgrade",
-        "branch_tag": "rs_holbrooke_comply",
-        "historical_marker": "historical_default",
-        "label": "Accept the Belgrade channel -- work through Milosevic",
-        "description": "Acknowledge that Milosevic now speaks for RS in Washington's eyes. Patron confidence recovers, but RS loses direct access to the peace process.",
-        "effects": [],
-        "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "patron_confidence",
-            "delta": 10
-          },
-          {
-            "faction": "RS",
-            "dimension": "negotiating_leverage",
-            "delta": -8
-          }
-        ],
-        "aggression_affinity": -0.3,
-        "risk_level": 0.3
-      },
-      {
-        "id": "defy_us_framework",
-        "branch_tag": "rs_holbrooke_defy",
-        "historical_marker": "counterfactual",
-        "label": "Reject the US framework -- Pale speaks for Republika Srpska",
-        "description": "Refuse to be sidelined. Karadzic repudiates the Patriarch Paper delegation and insists on direct Pale representation. Milosevic publicly disowns the Pale leadership; sanctions-relief is foreclosed and the FRY supply pinch tightens. International standing collapses, but RS asserts its political identity.",
-        "effects": [
-          {
-            "kind": "supply_delta",
-            "faction": "RS",
-            "delta": -20
-          },
-          {
-            "kind": "recruitment_modifier",
-            "faction": "RS",
-            "pool_multiplier": 0.85,
-            "duration_turns": 12
-          }
-        ],
-        "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "patron_confidence",
-            "delta": -30
-          },
-          {
-            "faction": "RS",
-            "dimension": "military_credibility",
-            "delta": 4
-          },
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
-            "delta": -15
-          },
-          {
-            "faction": "RS",
-            "dimension": "internal_cohesion",
-            "delta": 5
-          }
-        ],
-        "aggression_affinity": 0.5,
-        "risk_level": 0.7
-      }
-    ],
-    "historical_source": "Holbrooke, To End a War (1998) ch. 8 (Patriarch Paper delegation and Belgrade channel). UN S/1995/780 (Geneva Agreed Basic Principles framework, 8 September 1995). UN S/1995/827 (New York Further Agreed Principles, 26 September 1995). ICTY Karadžić IT-95-5/18-T §§4985-5020 (Patriarch Paper context and Pale acceptance of Belgrade-led delegation). ICTY Milošević IT-02-54-T §§245-298 (Milošević's delegated negotiating authority). BB Vol. II Ch. 15."
-  },
-  {
-    "id": "deliberate_force_rs_compliance_1995",
-    "title": "NATO Airstrikes: Comply or Escalate?",
-    "narrative": "NATO aircraft are striking VRS positions across Bosnia. US diplomacy presses Pale to withdraw heavy weapons from Sarajevo and open supply routes. Defiance means the bombing continues.",
-    "category": "military",
-    "family": "rs_deliberate_force_response",
-    "source_tier": "icty_icj_un",
-    "emergence_class": "compound",
-    "trigger": {
-      "turn_min": 178,
-      "turn_max": 180,
-      "phase": "war",
-      "condition": {
-        "type": "or",
-        "conditions": [
-          {
-            "type": "flag_equals",
-            "flag": "rs_strategic_goals",
-            "value": "all_six"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "rs_strategic_goals",
-            "value": "selective"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "rs_strategic_goals",
-            "value": "aggressive"
-          }
-        ]
-      }
-    },
-    "requires_enabled": true,
-    "once": true,
-    "responding_faction": "RS",
-    "requires_player_response": false,
-    "bot_response_logic": "strategic_weighted",
-    "historical_default_response_id": "withdraw_heavy_weapons",
-    "effect": {
-      "kind": "narrative",
-      "text": "NATO's Operation Deliberate Force strikes VRS artillery, ammunition dumps, and command nodes. The question is whether Pale complies or continues to face NATO air strikes."
-    },
-    "effects": [],
-    "dimension_shifts": [
-      {
-        "faction": "RS",
-        "dimension": "patron_confidence",
-        "delta": -15
-      },
-      {
-        "faction": "RS",
-        "dimension": "international_standing",
-        "delta": -10
-      }
-    ],
-    "response_options": [
-      {
-        "id": "withdraw_heavy_weapons",
-        "branch_tag": "rs_deliberate_force_withdraw",
-        "historical_marker": "historical_default",
-        "label": "Withdraw heavy weapons from Sarajevo exclusion zone",
-        "description": "Comply with NATO demands. The bombing pauses. VRS commanders resist, and internal cohesion suffers, but patron confidence partially recovers.",
-        "effects": [],
-        "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "patron_confidence",
-            "delta": 12
-          },
-          {
-            "faction": "RS",
-            "dimension": "negotiating_leverage",
-            "delta": -5
-          },
-          {
-            "faction": "RS",
-            "dimension": "internal_cohesion",
-            "delta": -5
-          }
-        ],
-        "aggression_affinity": -0.5,
-        "risk_level": 0.4
-      },
-      {
-        "id": "absorb_strikes_hold_position",
-        "branch_tag": "rs_deliberate_force_absorb",
-        "historical_marker": "counterfactual",
-        "label": "Reject NATO demands -- hold positions",
-        "description": "Reject NATO demands. The bombing continues, increasing pressure on VRS command and combat capability. Continued NATO strikes degrade equipment, supply, recruitment, and morale.",
-        "effects": [
-          {
-            "kind": "supply_delta",
-            "faction": "RS",
-            "delta": -15
-          },
-          {
-            "kind": "morale_change",
-            "faction": "RS",
-            "delta": -10
-          },
-          {
-            "kind": "equipment_quality_modifier",
-            "faction": "RS",
-            "multiplier": 0.75,
-            "duration_turns": 26
-          },
-          {
-            "kind": "recruitment_modifier",
-            "faction": "RS",
-            "pool_multiplier": 0.9,
-            "duration_turns": 12
-          }
-        ],
-        "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "patron_confidence",
-            "delta": -15
-          },
-          {
-            "faction": "RS",
-            "dimension": "military_credibility",
-            "delta": -8
-          },
-          {
-            "faction": "RS",
-            "dimension": "internal_cohesion",
-            "delta": 3
-          }
-        ],
-        "aggression_affinity": 0.6,
-        "risk_level": 0.9
-      }
-    ],
-    "historical_source": "NATO Operation Deliberate Force chronology (30 Aug-14 Sep 1995). UN S/1995/755 (30 Aug 1995). ICTY Mladić IT-09-92-T §§4631-4685 (Markale II attribution and Mladić preference for absorption). ICTY Karadžić IT-95-5/18-T §§4940-4982 (Sarajevo TEZ compliance decision and Patriarch Paper command chain). Holbrooke, To End a War (1998), ch. 8."
-  },
-  {
-    "id": "operation_mistral_2_1995",
-    "title": "Operation Mistral 2 -- Jajce Recaptured",
-    "narrative": "HV/HVO forces advance from the Grahovo-Glamoc area during Operation Mistral 2. The operation sends the 4th and 7th Guards Brigades -- the same elite formations that took Knin -- against VRS-held positions in western Bosnia. The offensive captures Sipovo and Mrkonjic Grad. On September 13, Jajce -- the symbolic prize lost in October 1992 amid mutual HVO-ARBiH recriminations -- is recaptured. Two thousand square kilometers change hands in eight days. VRS positions in western Bosnia come under severe pressure.",
-    "category": "military",
-    "trigger": {
-      "turn_min": 179,
-      "turn_max": 180,
-      "phase": "war",
-      "requires_events": [
-        "operation_storm_1995"
-      ]
-    },
-    "once": true,
-    "effect": {
-      "kind": "morale_change",
-      "faction": "HRHB",
-      "delta": 8
-    },
-    "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RS",
-        "delta": -8
-      },
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 5
-      },
-      {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -10
-      },
-      {
-        "kind": "narrative",
-        "text": "Jajce is recaptured after three years. HV-HVO forces advance through western Bosnia, taking substantial territory and forcing VRS withdrawals."
-      }
-    ],
-    "dimension_shifts": [
-      {
-        "faction": "HRHB",
-        "dimension": "military_credibility",
-        "delta": 10
-      },
-      {
-        "faction": "HRHB",
-        "dimension": "territorial_legitimacy",
-        "delta": 15
-      },
-      {
-        "faction": "RS",
-        "dimension": "territorial_legitimacy",
-        "delta": -15
-      },
-      {
-        "faction": "RS",
-        "dimension": "military_credibility",
-        "delta": -10
-      }
-    ],
-    "sets_flags": {
-      "jajce_recaptured": true
-    },
-    "historical_source": "ICTY Gotovina et al. (IT-06-90-T). BB Vol. II, Ch. 15."
-  },
-  {
     "id": "hv_hvo_cooperation_1995",
     "title": "Croatian Army Crosses the Border",
     "narrative": "Zagreb is on the line. With Operation Storm launching on 4 August 1995, HV Guards Brigades have already crossed the international border into Bosnia-Herzegovina to support HVO formations in Livno, Glamoc, and Bosansko Grahovo. Defense Minister Gojko Susak is coordinating directly with Boban's successor and HVO Main Staff in Mostar; Tudjman's transcripts treat the operation as a joint HV-HVO undertaking. The 4th and 7th Guards Brigades — the same elite formations that took Knin — are being readied for the September push into western Bosnia. The HZ HB Presidency must decide the command relationship: accept HV command and integrate openly with Zagreb's operational direction, run HVO operations independently of HV columns, coordinate with the ARBiH 5th Corps inside the Federation framework, or pull HVO back to a neutral observer posture and let the HV operate alone.",
@@ -1870,6 +1545,331 @@
       }
     },
     "historical_source": "Balkan Battlegrounds Vol. II Ch. 15-16 (Operation Sana 13 Sept-10 Oct 1995 — 5th Corps Bihać breakout to Bosanski Petrovac / Ključ / Sanski Most; ARBiH 3rd and 7th Corps central-Bosnia flank operations paired with HV-HVO Mistral 2 in the Vlašić-Donji Vakuf-Jajce-Mrkonjić arc; coordinated September push that recovered approximately 20% of pre-war RS-held territory). Richard Holbrooke, To End a War (Random House 1998) chs. 8-11 (Geneva Agreed Basic Principles 8 September 1995; New York Further Agreed Principles 26 September 1995; October ceasefire diplomacy; Dayton 51:49 territorial framework structurally built on the September military momentum). Alija Izetbegović, Inescapable Questions (Islamic Foundation 2003) — Presidency reasoning on the September offensive decision frame, multi-corps coordination with HVO, and the 51:49 territorial-floor calculus ahead of Dayton. ICTY Krstić Trial Judgement (IT-98-33-T, 2 August 2001) — Srebrenica-rupture strategic context driving the late-1995 ARBiH operational decision frame. ICTY Karadžić IT-95-5/18-T §§4985-5067 — Patriarch Paper of 30 August 1995, Milošević-chaired joint Yugoslav-Bosnian Serb delegation, Geneva and Dayton ratification track on the RS side that made the coordinated Federation offensive feasible without Belgrade rear-area counter-pressure. UN S/1995/770 + S/1995/799 + S/1995/827 (Secretary-General September-October 1995 reports on the western-Bosnia front and the Geneva / New York diplomatic framework). UN S/1995/999 + S/RES/1031 (Dayton General Framework Agreement initialing 21 November 1995 + 15 December 1995 ratification). ICTY Gotovina et al. IT-06-90-T Trial Judgment (15 April 2011) and Appeals Judgment (16 November 2012) — Croatia operations doctrine context and JCE reversal on Krajina civilian-column attribution (canon-gated context, OUT-OF-SCOPE for this packet's consequence rows). ICTY Halilović IT-01-48-T — ARBiH General Staff command-and-control doctrine 1993-1995 (operational context for the multi-corps coordination decision)."
+  },
+  {
+    "id": "holbrooke_us_belgrade_channel_1995",
+    "title": "Holbrooke Routes Pressure Through Belgrade",
+    "narrative": "Holbrooke has arrived in Belgrade. Milosevic, not Karadzic, is now America's contact for Republika Srpska. The message is clear: accept the US framework or face combined diplomatic and military pressure.",
+    "category": "diplomatic",
+    "family": "rs_holbrooke_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 176,
+      "turn_max": 178,
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "all_six"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "selective"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "aggressive"
+          }
+        ]
+      }
+    },
+    "requires_enabled": true,
+    "once": true,
+    "responding_faction": "RS",
+    "requires_player_response": false,
+    "bot_response_logic": "strategic_weighted",
+    "historical_default_response_id": "comply_with_belgrade",
+    "effect": {
+      "kind": "narrative",
+      "text": "Holbrooke bypasses Pale and deals with Milosevic as RS proxy. Belgrade now controls the channel to the international community."
+    },
+    "effects": [],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "patron_confidence",
+        "delta": -12
+      }
+    ],
+    "response_options": [
+      {
+        "id": "comply_with_belgrade",
+        "branch_tag": "rs_holbrooke_comply",
+        "historical_marker": "historical_default",
+        "label": "Accept the Belgrade channel -- work through Milosevic",
+        "description": "Acknowledge that Milosevic now speaks for RS in Washington's eyes. Patron confidence recovers, but RS loses direct access to the peace process.",
+        "effects": [],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": 10
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": -8
+          }
+        ],
+        "aggression_affinity": -0.3,
+        "risk_level": 0.3
+      },
+      {
+        "id": "defy_us_framework",
+        "branch_tag": "rs_holbrooke_defy",
+        "historical_marker": "counterfactual",
+        "label": "Reject the US framework -- Pale speaks for Republika Srpska",
+        "description": "Refuse to be sidelined. Karadzic repudiates the Patriarch Paper delegation and insists on direct Pale representation. Milosevic publicly disowns the Pale leadership; sanctions-relief is foreclosed and the FRY supply pinch tightens. International standing collapses, but RS asserts its political identity.",
+        "effects": [
+          {
+            "kind": "supply_delta",
+            "faction": "RS",
+            "delta": -20
+          },
+          {
+            "kind": "recruitment_modifier",
+            "faction": "RS",
+            "pool_multiplier": 0.85,
+            "duration_turns": 12
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -30
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": 4
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -15
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": 0.5,
+        "risk_level": 0.7
+      }
+    ],
+    "historical_source": "Holbrooke, To End a War (1998) ch. 8 (Patriarch Paper delegation and Belgrade channel). UN S/1995/780 (Geneva Agreed Basic Principles framework, 8 September 1995). UN S/1995/827 (New York Further Agreed Principles, 26 September 1995). ICTY Karadžić IT-95-5/18-T §§4985-5020 (Patriarch Paper context and Pale acceptance of Belgrade-led delegation). ICTY Milošević IT-02-54-T §§245-298 (Milošević's delegated negotiating authority). BB Vol. II Ch. 15."
+  },
+  {
+    "id": "deliberate_force_rs_compliance_1995",
+    "title": "NATO Airstrikes: Comply or Escalate?",
+    "narrative": "NATO aircraft are striking VRS positions across Bosnia. US diplomacy presses Pale to withdraw heavy weapons from Sarajevo and open supply routes. Defiance means the bombing continues.",
+    "category": "military",
+    "family": "rs_deliberate_force_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 178,
+      "turn_max": 180,
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "all_six"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "selective"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "aggressive"
+          }
+        ]
+      }
+    },
+    "requires_enabled": true,
+    "once": true,
+    "responding_faction": "RS",
+    "requires_player_response": false,
+    "bot_response_logic": "strategic_weighted",
+    "historical_default_response_id": "withdraw_heavy_weapons",
+    "effect": {
+      "kind": "narrative",
+      "text": "NATO's Operation Deliberate Force strikes VRS artillery, ammunition dumps, and command nodes. The question is whether Pale complies or continues to face NATO air strikes."
+    },
+    "effects": [],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "patron_confidence",
+        "delta": -15
+      },
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -10
+      }
+    ],
+    "response_options": [
+      {
+        "id": "withdraw_heavy_weapons",
+        "branch_tag": "rs_deliberate_force_withdraw",
+        "historical_marker": "historical_default",
+        "label": "Withdraw heavy weapons from Sarajevo exclusion zone",
+        "description": "Comply with NATO demands. The bombing pauses. VRS commanders resist, and internal cohesion suffers, but patron confidence partially recovers.",
+        "effects": [],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": 12
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": -5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -5
+          }
+        ],
+        "aggression_affinity": -0.5,
+        "risk_level": 0.4
+      },
+      {
+        "id": "absorb_strikes_hold_position",
+        "branch_tag": "rs_deliberate_force_absorb",
+        "historical_marker": "counterfactual",
+        "label": "Reject NATO demands -- hold positions",
+        "description": "Reject NATO demands. The bombing continues, increasing pressure on VRS command and combat capability. Continued NATO strikes degrade equipment, supply, recruitment, and morale.",
+        "effects": [
+          {
+            "kind": "supply_delta",
+            "faction": "RS",
+            "delta": -15
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": -10
+          },
+          {
+            "kind": "equipment_quality_modifier",
+            "faction": "RS",
+            "multiplier": 0.75,
+            "duration_turns": 26
+          },
+          {
+            "kind": "recruitment_modifier",
+            "faction": "RS",
+            "pool_multiplier": 0.9,
+            "duration_turns": 12
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -15
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -8
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 3
+          }
+        ],
+        "aggression_affinity": 0.6,
+        "risk_level": 0.9
+      }
+    ],
+    "historical_source": "NATO Operation Deliberate Force chronology (30 Aug-14 Sep 1995). UN S/1995/755 (30 Aug 1995). ICTY Mladić IT-09-92-T §§4631-4685 (Markale II attribution and Mladić preference for absorption). ICTY Karadžić IT-95-5/18-T §§4940-4982 (Sarajevo TEZ compliance decision and Patriarch Paper command chain). Holbrooke, To End a War (1998), ch. 8."
+  },
+  {
+    "id": "operation_mistral_2_1995",
+    "title": "Operation Mistral 2 -- Jajce Recaptured",
+    "narrative": "HV/HVO forces advance from the Grahovo-Glamoc area during Operation Mistral 2. The operation sends the 4th and 7th Guards Brigades -- the same elite formations that took Knin -- against VRS-held positions in western Bosnia. The offensive captures Sipovo and Mrkonjic Grad. On September 13, Jajce -- the symbolic prize lost in October 1992 amid mutual HVO-ARBiH recriminations -- is recaptured. Two thousand square kilometers change hands in eight days. VRS positions in western Bosnia come under severe pressure.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 179,
+      "turn_max": 180,
+      "phase": "war",
+      "requires_events": [
+        "operation_storm_1995"
+      ]
+    },
+    "once": true,
+    "effect": {
+      "kind": "morale_change",
+      "faction": "HRHB",
+      "delta": 8
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": -8
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 5
+      },
+      {
+        "kind": "supply_delta",
+        "faction": "RS",
+        "delta": -10
+      },
+      {
+        "kind": "narrative",
+        "text": "Jajce is recaptured after three years. HV-HVO forces advance through western Bosnia, taking substantial territory and forcing VRS withdrawals."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "military_credibility",
+        "delta": 10
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "territorial_legitimacy",
+        "delta": 15
+      },
+      {
+        "faction": "RS",
+        "dimension": "territorial_legitimacy",
+        "delta": -15
+      },
+      {
+        "faction": "RS",
+        "dimension": "military_credibility",
+        "delta": -10
+      }
+    ],
+    "sets_flags": {
+      "jajce_recaptured": true
+    },
+    "historical_source": "ICTY Gotovina et al. (IT-06-90-T). BB Vol. II, Ch. 15."
   },
   {
     "id": "operation_sana_1995",
