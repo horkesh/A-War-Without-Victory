@@ -1,4 +1,33 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] codex: 7 Pyrrhic-standard plans for the open/deferred event-system + calibration lanes
+
+**Type:** Docs/planning only. No engine, event-JSON, scenario, or save-schema change; no behavioral or
+output change; no test impact. Seven new plan files under `docs/plans/2026-05-29-*.md` (1470 lines), one per
+open/deferred lane triaged from COMMAND_BOARD:
+
+1. `patron-confidence-military-credibility-wirings-plan.md` — wire the 2 unwired DimensionId ops-consumers
+   behind new `AWWV_PDP_*` sub-flags, default-OFF byte-identical (mirrors the 2 shipped dimensions).
+2. `ring3-sensitive-event-authoring-plan.md` — §6-gated authoring process + 12 enumerated candidates
+   (8 author / 2 Ring-2 / 2 carry a Ring-3-refusal component); refusals flagged (Foča sexual-violence
+   dimension; Srebrenica column "save" lever — §1.3 #10); ICTY-anchored.
+3. `event-alternate-timeline-semantics-packet-plan.md` — reframed as RATIFICATION not build: the runtime
+   branch substrate (`closed_event_ids`/`enabled_event_ids`/`event_causality_log`) is ALREADY wired at
+   save v32/v33; load-bearing risk = the 42 `requires_enabled:true` rows may already have moved baselines,
+   so a byte-identity gate is a hard STOP before any `csq_*` authoring.
+4. `political-dimension-propagation-activation-plan.md` — staged flip (intl_only first; cohesion_only
+   BLOCKED on the divisor fix); answers the 5 readiness questions; measures via J1 ON-vs-OFF flip-set.
+5. `b7-sarajevo-siege-continuous-condition-plan.md` — consolidate the 4 existing siege fragments + add a
+   `SiegeLifelineState` (airlift/tunnel); monotonic cost the player ENDURES, never a relieve-the-siege lever.
+6. `cohesion-divisor-fix-plan.md` — calibration handoff; `/3→/300` + `/6→/600` (missed the 100× rescale at
+   `59511672`); ONE logical run; authorized baseline re-canonicalization.
+7. `fall-1995-deferrals-ea5-ea6-eb1-plan.md` — combat handoff; sequence E-A5→E-A6→E-B1; three one-change runs.
+
+**Review.** Drafted by 7 matched Pyrrhic specialists; independently cleared by two reviewers who did not
+draft them: Canon Compliance + Determinism Auditor (no sacred-rule violations; sensitive-history refusals
+correct; PASS / PASS-WITH-CONDITIONS) and Process QA + Reports Custodian (all COMPLETE; load-bearing
+file:line claims verified real — `game_state.ts:782` unconsumed `coordination_coherence`, v32/v33 substrate
+at `save_migration.ts:740-756`; cross-plan dependencies coherent; no closure-log conflicts; no overclaims).
+
 ## [2026-05-29] codex: pin Fall-1995 deferred combat-math follow-ups (E-A5/E-A6/E-B1) lane
 
 **Type:** Docs/tracking only. No engine, event-JSON, scenario, or save-schema change; no behavioral or
