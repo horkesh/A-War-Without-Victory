@@ -17,12 +17,25 @@
  *   Tier 2 — real-scenario projection (`--run-scenarios`, slow).
  *     For each non-baseline combo, set gate overrides, run the canonical
  *     baseline scenarios in-process via the exported `runScenario` API,
- *     compute artifact-hash deltas against the committed manifest. Always
+ *     compute artifact-hash deltas against the committed manifest. Also runs
+ *     the OFF baseline (`global_off`) once per scenario and computes a true
+ *     ON-vs-OFF territorial flip-set — the flag's ACTUAL effect. Always
  *     resets gates in `finally`. NEVER writes baselines.
  *
- * Determinism: sorted iteration over factions / combos / artifacts. No
- * Math.random, no Date.now, no timestamps. Tier 2 hash compare reads same
- * manifest the baseline-regression CLI reads.
+ *     IMPORTANT — two distinct "deltas" are NOT the same thing:
+ *       • The within-run `control_delta.json` artifact is `after − before`
+ *         (war start → war end). It is the WAR'S NATURAL TRAJECTORY, not the
+ *         flag's effect. Hash-drift on it proves the bot diverged, but its
+ *         numbers must NEVER be read as "the flag flipped N OSIDs".
+ *       • The `territorial_diff` block this tool emits is `ON − OFF`: the
+ *         final control set with the flag ON minus the final control set with
+ *         the flag OFF. THIS is the flag's true magnitude (typically a handful
+ *         of OSIDs). BOT-MILITARY is now asserted on a non-empty ON-vs-OFF
+ *         flip-set, not on within-run control_delta hash drift alone.
+ *
+ * Determinism: sorted iteration over factions / combos / artifacts /
+ * flipped OSIDs (strictCompare). No Math.random, no Date.now, no timestamps.
+ * Tier 2 hash compare reads same manifest the baseline-regression CLI reads.
  *
  * CLI:
  *   node node_modules/tsx/dist/cli.mjs tools/diagnostics/phase_e_activation_simulator.ts [options]
@@ -152,12 +165,44 @@ export type BehavioralDriftSignal =
     | 'BOT-MILITARY'
     | 'NO-DRIFT';
 
+/** One OSID whose controller differs between the flag-ON run and the
+ *  flag-OFF (baseline) run. THIS is the flag's true territorial effect —
+ *  distinct from the within-run control_delta (war start→end trajectory). */
+export interface TerritorialFlip {
+    osid: string;
+    /** Controller in the OFF (baseline / `global_off`) run. */
+    off_controller: string | null;
+    /** Controller in the ON (this combo) run. */
+    on_controller: string | null;
+}
+
+/** The ON-vs-OFF territorial diff for one scenario: which OSIDs ended in a
+ *  different controller because the flag was ON, plus the per-faction net OSID
+ *  count change (ON minus OFF). This is the flag's ACTUAL magnitude. */
+export interface TerritorialDiff {
+    /** True when both ON and OFF final control maps were available to diff. */
+    available: boolean;
+    /** Stable-sorted (strictCompare on OSID) list of flipped OSIDs. */
+    flipped_osids: TerritorialFlip[];
+    /** Total count of flipped OSIDs (ON differs from OFF). */
+    total_flips: number;
+    /** Per-faction net OSID count change: (#OSIDs ON-controls) − (#OSIDs
+     *  OFF-controls). Sorted by controller (strictCompare). Empty when the
+     *  flip-set is empty. */
+    net_control_count_delta: Array<{ controller: string | null; delta: number }>;
+}
+
 export interface ScenarioRunResult {
     scenario_id: string;
     scenario_path: string;
     artifact_drift: ArtifactDriftCell[];
     /** High-level classification of where drift surfaced. */
     behavioral_drift_signal: BehavioralDriftSignal;
+    /** ON-vs-OFF territorial flip-set — the flag's TRUE effect. Distinct from
+     *  the within-run `control_delta.json` artifact (war trajectory). Only
+     *  populated when the OFF baseline control map was captured in the same
+     *  Tier 2 pass; otherwise `available: false`. */
+    territorial_diff: TerritorialDiff;
 }
 
 export interface ComboScenarioRun {
@@ -189,8 +234,14 @@ export interface SimulatorOptions {
     /** Test hook — inject a custom Tier 2 runner so tests don't have to spin
      *  the real `runScenario`. The runner receives the combo + scenario entry
      *  AFTER gate overrides have been set, and returns artifact hashes keyed
-     *  by name. The simulator handles drift classification and gate reset. */
-    tier2RunnerOverride?: ((entry: ManifestScenarioEntry, combo: SimCombo) => Promise<Record<string, string>>) | null;
+     *  by name AND the run's final OSID→controller map (for the ON-vs-OFF
+     *  territorial diff). A legacy plain `Record<string, string>` return is
+     *  still accepted (treated as hashes-only, `controlMap: null`). The
+     *  simulator handles drift classification, territorial diffing, and gate
+     *  reset. */
+    tier2RunnerOverride?:
+        | ((entry: ManifestScenarioEntry, combo: SimCombo) => Promise<Tier2RunnerOutput | Record<string, string>>)
+        | null;
     /** Test hook — inject a manifest object directly instead of reading from
      *  disk. */
     manifestOverride?: BaselineManifest | null;
@@ -212,6 +263,18 @@ export interface BaselineManifest {
     schema_version: number;
     artifacts: string[];
     scenarios: ManifestScenarioEntry[];
+}
+
+/** Map of OSID → controlling faction (or null) read from a run's
+ *  `final_save.json`. Used for the ON-vs-OFF territorial diff. */
+export type ControlMap = Record<string, string | null>;
+
+/** What a Tier 2 runner returns: artifact hashes (for the hash-drift signal,
+ *  which correctly detects ANY divergence) AND the run's final control map
+ *  (for the ON-vs-OFF territorial diff, the flag's true magnitude). */
+export interface Tier2RunnerOutput {
+    hashes: Record<string, string>;
+    controlMap: ControlMap | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -399,28 +462,124 @@ async function loadManifest(): Promise<BaselineManifest> {
     };
 }
 
-function classifyDriftSignal(cells: ArtifactDriftCell[]): BehavioralDriftSignal {
-    // Treat any drift in activity_summary / formation_delta / control_delta /
-    // final_save / end_report / weekly_report as bot-military drift (the
-    // dimension propagation reached the launch-gate and the bot took a
-    // different action). Drift confined to non-bot artifacts is dimension-only.
-    // Today no purely-dimension artifact is baselined; conservatively if any
-    // baselined artifact drifts we report BOT-MILITARY, mirroring the
-    // activation-procedure's Phase E acceptance matrix.
+/** Artifacts whose hash-drift indicates the bot took a different military
+ *  action ON vs OFF. NOTE: `control_delta.json` is a WITHIN-RUN artifact
+ *  (war start→end trajectory); its hash drifting proves divergence but its
+ *  numbers are NOT the flag's territorial effect. The true effect is the
+ *  ON-vs-OFF flip-set passed via `territorialDiff`. */
+const BOT_MILITARY_ARTIFACTS = new Set([
+    'activity_summary.json',
+    'control_delta.json',
+    'end_report.md',
+    'final_save.json',
+    'formation_delta.json',
+    'run_summary.json',
+    'watched_operations.json',
+    'weekly_report.jsonl',
+]);
+
+/**
+ * Classify the behavioral drift signal.
+ *
+ * The classification now KEYS ON the ON-vs-OFF territorial flip-set, not on
+ * within-run `control_delta.json` hash drift alone. Rationale: the original
+ * defect surfaced the war's natural trajectory (within-run control_delta) as
+ * if it were the flag's effect, producing false "absurd cascade" reads.
+ *
+ *   • Non-empty ON-vs-OFF flip-set  → BOT-MILITARY (the flag genuinely changed
+ *     which faction holds territory — its true magnitude).
+ *   • Empty flip-set but a bot-military artifact hash drifted → DIMENSION-ONLY
+ *     (the bot's intermediate behavior / logs differ, but final territory is
+ *     identical ON vs OFF; do NOT cry "cascade").
+ *   • No artifact drift at all → NO-DRIFT.
+ *
+ * When the territorial diff is unavailable (e.g. OFF control map not captured —
+ * a degenerate / test-only path), fall back to the legacy hash-only heuristic
+ * so we never silently under-report.
+ */
+function classifyDriftSignal(
+    cells: ArtifactDriftCell[],
+    territorialDiff: TerritorialDiff,
+): BehavioralDriftSignal {
+    // The ON-vs-OFF flip-set is the AUTHORITATIVE measure of the flag's effect.
+    // A non-empty flip-set is, by definition, a bot-military divergence — assert
+    // it FIRST, independent of artifact-hash drift (the flip-set is ground truth
+    // for the flag's territorial consequence).
+    if (territorialDiff.available && territorialDiff.total_flips > 0) {
+        return 'BOT-MILITARY';
+    }
+
     const driftedArtifacts = cells.filter((c) => c.status === 'DRIFT').map((c) => c.artifact);
     if (driftedArtifacts.length === 0) return 'NO-DRIFT';
-    const botMilitaryArtifacts = new Set([
-        'activity_summary.json',
-        'control_delta.json',
-        'end_report.md',
-        'final_save.json',
-        'formation_delta.json',
-        'run_summary.json',
-        'watched_operations.json',
-        'weekly_report.jsonl',
-    ]);
-    const hasBotMilitary = driftedArtifacts.some((a) => botMilitaryArtifacts.has(a));
+
+    if (territorialDiff.available) {
+        // Diff known and EMPTY: the flag changed intermediate behavior / logs /
+        // within-run trajectory but ended with identical territory ON vs OFF.
+        // This is dimension/behavior-only — do NOT cry "cascade".
+        return 'DIMENSION-ONLY';
+    }
+
+    // Legacy fallback (no ON-vs-OFF diff available): preserve prior behavior.
+    const hasBotMilitary = driftedArtifacts.some((a) => BOT_MILITARY_ARTIFACTS.has(a));
     return hasBotMilitary ? 'BOT-MILITARY' : 'DIMENSION-ONLY';
+}
+
+/**
+ * Compute the ON-vs-OFF territorial diff between an ON control map (this combo)
+ * and the OFF baseline control map (`global_off`). Deterministic: flip-set is
+ * stable-sorted via strictCompare on OSID; net-count delta sorted by controller.
+ *
+ * This is the flag's TRUE territorial effect — categorically distinct from the
+ * within-run `control_delta.json` artifact (which is war start→end trajectory).
+ */
+export function computeTerritorialDiff(
+    onMap: ControlMap | null,
+    offMap: ControlMap | null,
+): TerritorialDiff {
+    if (onMap === null || offMap === null) {
+        return { available: false, flipped_osids: [], total_flips: 0, net_control_count_delta: [] };
+    }
+
+    // Diff over the union of OSID keys so a controller appearing/disappearing
+    // on either side is caught.
+    const osids = Array.from(new Set([...Object.keys(onMap), ...Object.keys(offMap)])).sort(strictCompare);
+    const flips: TerritorialFlip[] = [];
+    for (const osid of osids) {
+        const off = offMap[osid] ?? null;
+        const on = onMap[osid] ?? null;
+        if (off !== on) {
+            flips.push({ osid, off_controller: off, on_controller: on });
+        }
+    }
+    // Already in OSID order from the sorted iteration above.
+
+    // Per-faction net OSID count change: (#ON-controls) − (#OFF-controls),
+    // computed over flipped OSIDs only (unchanged OSIDs net to zero).
+    const deltaMap = new Map<string | null, number>();
+    for (const flip of flips) {
+        if (flip.on_controller !== null) {
+            deltaMap.set(flip.on_controller, (deltaMap.get(flip.on_controller) ?? 0) + 1);
+        }
+        if (flip.off_controller !== null) {
+            deltaMap.set(flip.off_controller, (deltaMap.get(flip.off_controller) ?? 0) - 1);
+        }
+    }
+    const net_control_count_delta = Array.from(deltaMap.entries())
+        .map(([controller, delta]) => ({ controller, delta }))
+        .filter((e) => e.delta !== 0)
+        .sort((a, b) => {
+            if (a.controller === null && b.controller === null) return 0;
+            if (a.controller === null) return 1;
+            if (b.controller === null) return -1;
+            return strictCompare(a.controller, b.controller);
+        });
+
+    return {
+        available: true,
+        flipped_osids: flips,
+        total_flips: flips.length,
+        net_control_count_delta,
+    };
 }
 
 function compareHashes(
@@ -445,13 +604,39 @@ function compareHashes(
     });
 }
 
+/** Read the final OSID→controller map from a run's `final_save.json`. Returns
+ *  null when the artifact is absent or malformed. Deterministic. */
+async function readControlMapFromFinalSave(outDir: string): Promise<ControlMap | null> {
+    const savePath = path.join(outDir, 'final_save.json');
+    if (!existsSync(savePath)) return null;
+    let raw: unknown;
+    try {
+        raw = JSON.parse(await readFile(savePath, 'utf8')) as unknown;
+    } catch {
+        return null;
+    }
+    if (!isRecord(raw)) return null;
+    const political = isRecord(raw.political) ? raw.political : null;
+    const pc = political && isRecord(political.political_controllers)
+        ? political.political_controllers
+        : null;
+    if (!pc) return null;
+    const map: ControlMap = {};
+    for (const osid of Object.keys(pc).sort(strictCompare)) {
+        const v = pc[osid];
+        map[osid] = typeof v === 'string' && v.length > 0 ? v : null;
+    }
+    return map;
+}
+
 /** Default Tier 2 runner — invokes the exported `runScenario` via dynamic
  *  import so the simulator module stays lazy (import only when --run-scenarios
- *  is supplied). Hashes every artifact file present in the manifest. */
+ *  is supplied). Hashes every manifest artifact AND reads the run's final
+ *  control map for the ON-vs-OFF territorial diff. */
 async function defaultTier2Runner(
     entry: ManifestScenarioEntry,
     combo: SimCombo,
-): Promise<Record<string, string>> {
+): Promise<Tier2RunnerOutput> {
     const { runScenario } = await import('../../src/scenario/scenario_runner.js');
     const outDir = path.join(repoRoot(), TIER2_TMP_BASE, combo, entry.id);
     await mkdir(outDir, { recursive: true });
@@ -467,7 +652,20 @@ async function defaultTier2Runner(
         const buf = await readFile(artifactPath);
         hashes[name] = createHash('sha256').update(buf).digest('hex');
     }
-    return hashes;
+    const controlMap = await readControlMapFromFinalSave(result.outDir);
+    return { hashes, controlMap };
+}
+
+/** Normalize a runner return (legacy hashes-only OR the new structured form)
+ *  into a `Tier2RunnerOutput`. */
+function normalizeRunnerOutput(out: Tier2RunnerOutput | Record<string, string>): Tier2RunnerOutput {
+    const asUnknown = out as unknown;
+    if (isRecord(asUnknown) && 'hashes' in asUnknown && isRecord(asUnknown.hashes)) {
+        const structured = asUnknown as unknown as Tier2RunnerOutput;
+        return { hashes: structured.hashes, controlMap: structured.controlMap ?? null };
+    }
+    // Legacy: plain hash map, no control map available.
+    return { hashes: out as Record<string, string>, controlMap: null };
 }
 
 /** Apply gate overrides for a combo. Sub-flag overrides are written verbatim;
@@ -480,34 +678,58 @@ function applyGateForCombo(combo: SimCombo): void {
 }
 
 /** Build the Tier 2 real-scenario projection. Sets per-combo gate overrides,
- *  runs each manifest scenario via the supplied runner, computes artifact
- *  drift. Skips `global_off` (it IS the manifest baseline). Always resets
- *  gates in `finally`. NEVER writes baselines. */
+ *  runs each manifest scenario via the supplied runner, computes artifact-hash
+ *  drift AND the true ON-vs-OFF territorial flip-set.
+ *
+ *  To produce the ON-vs-OFF diff the OFF baseline (`global_off`) is run once
+ *  per scenario in the SAME Tier 2 pass (reusing the existing scenario runs —
+ *  no extra runs beyond the OFF baseline) and its final control map is the
+ *  reference the ON combos diff against. The hash-drift signal still compares
+ *  every combo's artifacts against the committed manifest. Always resets gates
+ *  in `finally`. NEVER writes baselines. */
 export async function buildTier2Projection(
     options: SimulatorOptions = {},
 ): Promise<Tier2Result> {
     const manifest = options.manifestOverride ?? (await loadManifest());
-    const runner = options.tier2RunnerOverride ?? defaultTier2Runner;
+    const rawRunner = options.tier2RunnerOverride ?? defaultTier2Runner;
+    const runner = async (entry: ManifestScenarioEntry, combo: SimCombo): Promise<Tier2RunnerOutput> =>
+        normalizeRunnerOutput(await rawRunner(entry, combo));
     const comboFilter = options.combo ?? null;
 
-    const combos: SimCombo[] = (comboFilter ? [comboFilter] : [...SIM_COMBOS])
+    const onCombos: SimCombo[] = (comboFilter ? [comboFilter] : [...SIM_COMBOS])
         .filter((c) => c !== 'global_off');
 
+    const sortedScenarios = manifest.scenarios.slice().sort((a, b) => strictCompare(a.id, b.id));
     const runs: ComboScenarioRun[] = [];
 
     try {
-        for (const combo of combos) {
+        // Pass 1 — run the OFF baseline (`global_off`) once per scenario to
+        // capture the reference (flag-OFF) final control map. This is the
+        // "OFF" side of the ON-vs-OFF diff. Gates OFF (the gate module's
+        // default), set explicitly for determinism.
+        applyGateForCombo('global_off');
+        const offControlByScenario = new Map<string, ControlMap | null>();
+        for (const entry of sortedScenarios) {
+            const offOut = await runner(entry, 'global_off');
+            offControlByScenario.set(entry.id, offOut.controlMap);
+        }
+
+        // Pass 2 — run each non-baseline combo, compute hash-drift AND the
+        // ON-vs-OFF territorial diff against the captured OFF control map.
+        for (const combo of onCombos) {
             applyGateForCombo(combo);
             const scenarios: ScenarioRunResult[] = [];
-            const sortedScenarios = manifest.scenarios.slice().sort((a, b) => strictCompare(a.id, b.id));
             for (const entry of sortedScenarios) {
-                const actualHashes = await runner(entry, combo);
-                const cells = compareHashes(entry.hashes, actualHashes, manifest.artifacts);
+                const onOut = await runner(entry, combo);
+                const cells = compareHashes(entry.hashes, onOut.hashes, manifest.artifacts);
+                const offMap = offControlByScenario.get(entry.id) ?? null;
+                const territorialDiff = computeTerritorialDiff(onOut.controlMap, offMap);
                 scenarios.push({
                     scenario_id: entry.id,
                     scenario_path: entry.scenario_path,
                     artifact_drift: cells,
-                    behavioral_drift_signal: classifyDriftSignal(cells),
+                    behavioral_drift_signal: classifyDriftSignal(cells, territorialDiff),
+                    territorial_diff: territorialDiff,
                 });
             }
             runs.push({
@@ -582,6 +804,10 @@ function renderTier2(tier2: Tier2Result): string[] {
     const lines: string[] = [];
     lines.push('Phase E activation simulator — Tier 2 (real-scenario projection)');
     lines.push(`  manifest: ${tier2.manifest_path}`);
+    lines.push('  NOTE: artifact-hash DRIFT detects ANY divergence ON vs OFF. The');
+    lines.push('  within-run control_delta.json artifact is the war\'s start→end');
+    lines.push('  TRAJECTORY — NOT the flag effect. The flag\'s ACTUAL effect is the');
+    lines.push('  ON-vs-OFF territorial diff below.');
     lines.push('');
     if (tier2.runs.length === 0) {
         lines.push('  (no combos requested)');
@@ -592,11 +818,30 @@ function renderTier2(tier2: Tier2Result): string[] {
         lines.push(`[combo=${run.combo}]`);
         for (const sc of run.scenarios) {
             lines.push(`  scenario=${sc.scenario_id} signal=${sc.behavioral_drift_signal}`);
+            lines.push('  artifact-hash drift (detects ANY ON-vs-OFF divergence):');
             for (const cell of sc.artifact_drift) {
                 const status = cell.status.padEnd(11, ' ');
                 const exp = (cell.expected_hash ?? '<none>').slice(0, 12);
                 const act = (cell.actual_hash ?? '<none>').slice(0, 12);
-                lines.push(`    ${cell.artifact.padEnd(28, ' ')} ${status} expected=${exp} actual=${act}`);
+                const note = cell.artifact === 'control_delta.json'
+                    ? '  (within-run trajectory — NOT the flag effect)'
+                    : '';
+                lines.push(`    ${cell.artifact.padEnd(28, ' ')} ${status} expected=${exp} actual=${act}${note}`);
+            }
+            // ON-vs-OFF territorial diff — the flag's TRUE effect.
+            const td = sc.territorial_diff;
+            if (!td.available) {
+                lines.push('  ON-vs-OFF territorial diff: <unavailable — no OFF control map captured>');
+            } else if (td.total_flips === 0) {
+                lines.push('  ON-vs-OFF territorial diff (the flag\'s ACTUAL effect): 0 OSIDs flipped');
+            } else {
+                const netStr = td.net_control_count_delta
+                    .map((e) => `${e.controller ?? 'null'}${e.delta >= 0 ? '+' : ''}${e.delta}`)
+                    .join(' ');
+                lines.push(`  ON-vs-OFF territorial diff (the flag's ACTUAL effect): ${td.total_flips} OSID(s) flipped | net: ${netStr}`);
+                for (const flip of td.flipped_osids) {
+                    lines.push(`    ${flip.osid.padEnd(36, ' ')} OFF=${flip.off_controller ?? 'null'} -> ON=${flip.on_controller ?? 'null'}`);
+                }
             }
         }
         lines.push('');

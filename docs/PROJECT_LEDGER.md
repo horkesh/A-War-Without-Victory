@@ -1,4 +1,32 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] codex: J1 activation simulator — Tier 2 ON-vs-OFF territorial flip-set diff (fixes within-run misread)
+
+**Type:** Diagnostic tool + test only. No engine, event-JSON, scenario, or save-schema change.
+Baseline regression PASSES byte-identical ("all scenarios match").
+
+**Defect (adjudication-confirmed).** `tools/diagnostics/phase_e_activation_simulator.ts` Tier 2 only
+hash-compared artifacts and mapped any `control_delta.json` hash-drift → BOT-MILITARY. But
+`control_delta.json` is a WITHIN-RUN total (`computeControlDelta(initial, final)` = war start→end
+trajectory, per `scenario_runner.ts:2968-2969` + `scenario_end_report.ts:182-191`), NOT a flag-ON-vs-OFF
+diff. So the tool surfaced the war's natural territorial trajectory as if it were the flag's effect —
+misleading a reviewer into a false "absurd cascade" conclusion.
+
+**Fix.** Tier 2 now ALSO runs the OFF baseline (`global_off`) once per scenario in the same pass to
+capture the reference final control map, then computes a true ON-vs-OFF `territorial_diff` per combo:
+stable-sorted (strictCompare on OSID) flip-set of OSIDs whose controller differs ON vs OFF, plus
+per-faction net OSID count delta (ON − OFF). This is the flag's ACTUAL magnitude (typically a handful
+of OSIDs). `classifyDriftSignal` now keys BOT-MILITARY on a non-empty ON-vs-OFF flip-set (authoritative),
+not on within-run control_delta hash-drift alone; empty flip-set with drift → DIMENSION-ONLY. Hash
+comparison retained (correctly detects ANY divergence). Text/JSON output relabels within-run
+control_delta as "trajectory — NOT the flag effect" and surfaces the separate territorial diff block.
+Legacy hashes-only runner returns still supported (territorial_diff `available:false`, hash fallback).
+
+**Tests.** `tests/phase_e_activation_simulator.test.ts`: +5 (flip-set derivation; empty flip-set + drifted
+control_delta → DIMENSION-ONLY not BOT-MILITARY; non-empty flip-set → BOT-MILITARY with OSID list + net
+counts; control_delta labeled trajectory; legacy fallback). 18 prior tests still pass (23 total).
+Verified: `vitest run` 23/23, `tsc --noEmit` (tool+test clean), `git diff --check` clean, Tier 1 CLI JSON
+intact, baseline regression byte-identical.
+
 ## [2026-05-29] test-debt + CI-gating remediation (issue #39) — main full-suite red trunk 16 → 6
 
 **Type:** Test/data-only debt burndown + CI-gating fix. No sim behavior, scenario, or save-schema
