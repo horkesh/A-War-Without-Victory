@@ -1,4 +1,35 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] feat(combat): ADR-0005 v3.0 — Army HQ Operations, flag-gated dormant
+
+**Type:** Phased rollout v3.0 of ADR-0005 — the Army HQ Operations sub-stage. All behavior gated behind new sub-flag `ENABLE_TG_ARMY_HQ_OPS` (default false). Ring 1, faction-agnostic. Flag-off byte-identity required and obtained at BOTH gold gates.
+
+**Why:** v2.x lit up faction-internal donor TGs for corps-scope ops. v3.0 adds the rarer, costlier **Army HQ** scope — faction-wide donor pools feeding a small number of strategically decisive operations (Krivaja-95, Vozuća-94, Lukavac-93), capped hard so they cannot become a fire-hose. Implements the 5 readiness decisions ratified for v3.0 (commit `9493a0ed`).
+
+**Change** (commit `9493a0ed`):
+- **Phase A — faction-scope donor pool.** Army HQ ops draw donors faction-wide (not corps-adjacent only); decision-independent and the structural core of the stage.
+- **inject-army-hq-operations war-phase + per-faction frequency gate.** New war-phase step injects eligible Army HQ ops; gated by a 52-turn cooldown plus a hard cap of 2/faction/year.
+- **Phase D — donor recovery-suppression.** Zeroes positive cohesion drift for suppressed donors while preserving the existing floor clamp (suppress = zero-positive-drift only, never clamp below floor; mirrors the `cohesion_drift.ts` OPSEC drift pattern).
+- **Op scripting.** Promotes Krivaja-95 to Army HQ scope (reuses the existing triggered defensive op rather than duplicating to avoid double-firing the `vrs_drina` corps); adds Vozuća-94 + Lukavac-93 (`army_hq_only`, RBiH). Lukavac-93 ships single-anchor + faction-wide donors (multi-TG deferred per ADR).
+- New injection assigns the op commander via `def.faction`. **Known pre-existing item:** the hardcoded-`'RS'` `assignOperationCommander` call site at `triggered_operations.ts:1033` is left untouched here (separate pre-existing bug; not introduced by v3.0).
+- New optional scalar field `op.army_hq_op_id` on `CorpsOperation` (omitEmpty-safe; no migration; schema stays v34). `tg_recent_compositions` and other new fields likewise omitEmpty-safe.
+
+**Determinism:** Two-tier legacy-path skip preserves flag-off behavior; the new injection/suppression code is reached flag-on only. New fields are omitEmpty-safe so flag-off serialization is unchanged. No `Math.random()`/`Date.now()`; sorted iteration preserved.
+
+**Verification:**
+- **Flag-off byte-identical at BOTH gold gates: 40w `78e231e35b08cf53` + 188w `940251e4acaff3d4`** (independently reviewer-verified). The changed code is reached flag-on only, so flag-off byte-identity is by construction.
+- Ring-1 / flag-gated / no calibration shift.
+
+**Files:**
+- `src/sim/combat/tactical_group_config.ts` (`ENABLE_TG_ARMY_HQ_OPS`)
+- `src/sim/combat/tactical_group_selection.ts` (Phase A faction-scope donor pool)
+- `src/sim/turn_phases/war_phases.ts` (inject-army-hq-operations step + frequency gate)
+- `src/sim/combat/cohesion_drift.ts` (Phase D donor recovery-suppression)
+- `src/sim/combat/triggered_operations.ts` (Krivaja-95 promote; Vozuća-94 + Lukavac-93; commander via `def.faction`)
+- `src/state/game_state.ts` (`CorpsOperation.army_hq_op_id`, optional)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
+
 ## [2026-05-29] fix(combat): ADR-0005 #40 — exclude not-yet-injected pre-planned-op brigades from TG donor selection
 
 **Type:** Donor-eligibility correctness fix on the flag-gated TG path. Ring 1, faction-agnostic. Fixes the Op-Trnovo donor-strand bug surfaced in the 188w flag-on smoke (see v2.2b/v2.3 entries).
