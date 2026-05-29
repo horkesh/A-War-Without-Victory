@@ -20,6 +20,7 @@ import type {
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { selectDonors } from '../src/sim/combat/tactical_group_selection.js';
 import {
+    compositionHash,
     dissolveTacticalGroup,
     formTacticalGroup,
     TG_DONOR_COOLDOWN_TURNS,
@@ -263,6 +264,16 @@ describe('dissolveTacticalGroup', () => {
         expect(state.military.formations.d2.tg_cooldown_until_turn).toBe(20 + TG_DONOR_COOLDOWN_TURNS);
     });
 
+    it('records a recent-composition hash on dissolution gated path is flag-off-inert', () => {
+        // ENABLE_TG_COHESION_BLEED is a compile-time const false, so dissolution must NOT
+        // write tg_recent_compositions (byte-identity contract). Asserts the gate holds.
+        const state = stateWith([brigade('anchor'), brigade('d1')]);
+        const donors = selectDonors(state, { anchor_brigade_id: 'anchor', staging_osid: 'op:x:y' });
+        const formed = formTacticalGroup(state, { op_id: 'op1', anchor_brigade_id: 'anchor', donors, current_turn: 5 });
+        dissolveTacticalGroup(state, formed.tg_id!, 5);
+        expect(state.military.tg_recent_compositions).toBeUndefined();
+    });
+
     it('returns dissolved=false for unknown TG id', () => {
         const state = stateWith([brigade('anchor')]);
         const result = dissolveTacticalGroup(state, 'tg:nonexistent', 10);
@@ -285,5 +296,31 @@ describe('dissolveTacticalGroup', () => {
         state.meta.turn = 5 + TG_DONOR_COOLDOWN_TURNS + 1;
         const laterDonors = selectDonors(state, { anchor_brigade_id: 'anchor', staging_osid: 'op:x:y' });
         expect(laterDonors.map(d => d.brigade_id)).toEqual(['d1']);
+    });
+});
+
+// === compositionHash (Hard Invariant #9, v2.3) ===
+
+describe('compositionHash (ADR-0005 Hard Invariant #9)', () => {
+    it('is independent of op_id (anchor + sorted donor ids only)', () => {
+        // The whole point: a different op_id must NOT yield a different composition hash,
+        // otherwise "dissolve and reform same TG via a new op_id" would bypass the block.
+        const h1 = compositionHash('anchor', ['d1', 'd2']);
+        const h2 = compositionHash('anchor', ['d1', 'd2']);
+        expect(h1).toBe(h2);
+    });
+
+    it('is order-independent across donor list (sorted via strictCompare)', () => {
+        expect(compositionHash('anchor', ['d2', 'd1'])).toBe(compositionHash('anchor', ['d1', 'd2']));
+        expect(compositionHash('anchor', ['zzz', 'aaa', 'mmm'])).toBe(compositionHash('anchor', ['aaa', 'mmm', 'zzz']));
+    });
+
+    it('distinguishes different anchors and different donor sets', () => {
+        expect(compositionHash('anchorA', ['d1'])).not.toBe(compositionHash('anchorB', ['d1']));
+        expect(compositionHash('anchor', ['d1'])).not.toBe(compositionHash('anchor', ['d1', 'd2']));
+    });
+
+    it('handles the empty (anchor-only) donor set', () => {
+        expect(compositionHash('anchor', [])).toBe('anchor|');
     });
 });

@@ -38,6 +38,33 @@ export const ENABLE_TG_COMBAT_SYNTHESIS = false;
 export const ENABLE_TG_COHESION_BLEED = false;
 
 /**
+ * v2.3 Pyrrhic dampener constants (ADR-0005 §Pyrrhic cost + §Phased Rollout v2.3).
+ * All gated by ENABLE_TG_COHESION_BLEED; inert when the flag is off.
+ */
+
+/** Base cohesion-bleed scalar in the donor-cohesion-loss formula (ADR §Pyrrhic cost):
+ *  loss = donated_fraction × (1 + bfs_hops × TG_BLEED_HOPS_FACTOR) × TG_COHESION_BLEED_BASE × hqMult. */
+export const TG_COHESION_BLEED_BASE = 15;
+
+/** Per-hop amplification of the distance penalty in the cohesion-bleed formula. */
+export const TG_BLEED_HOPS_FACTOR = 0.15;
+
+/** Army HQ ops double donor cohesion bleed (ADR §Constants reference / §Army HQ Operations). */
+export const ARMY_HQ_COHESION_BLEED_MULT = 2.0;
+
+/**
+ * Per-scenario donation cap (ADR §Schema "Anti-fire-hose"). A brigade may donate to at most
+ * this many TGs over an entire scenario; at/above the cap it is excluded from donor selection.
+ *
+ * Chosen value: 3. The schema doc-comment floats "max 6"; we pick the tighter 3 because the
+ * Pyrrhic intent (ADR §Pyrrhic cost) is to make donation a scarce strategic resource and the
+ * per-faction concurrent caps (4 TGs/faction, 2/corps) already bound simultaneous load. 3
+ * lifetime donations per brigade across a 40-188w scenario keeps reserve-doctrine pressure
+ * meaningful without starving mid-campaign ops. Tunable per calibration.
+ */
+export const MAX_DONATIONS_PER_SCENARIO = 3;
+
+/**
  * v2.2c #3 donation-readiness gate (ADR-0005 §Op lifecycle integration). The
  * anchor's pledged donors must contribute at least this fraction of the anchor's
  * personnel for the op to clear the opening-attack readiness gate; otherwise it is

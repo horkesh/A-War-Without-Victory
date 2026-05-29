@@ -52,6 +52,9 @@ import type {
 import { strictCompare } from '../../state/validateGameState.js';
 // ADR-0005 v2.2c (issue #40): exclude brigades reserved by not-yet-injected pre-planned ops.
 import { getReservedPrePlannedBrigadeIds } from './pre_planned_operations.js';
+// ADR-0005 v2.3: per-scenario donation cap (anti-fire-hose). Gated by ENABLE_TG_COHESION_BLEED so
+// flag-off eligibility is unchanged (byte-identical).
+import { ENABLE_TG_COHESION_BLEED, MAX_DONATIONS_PER_SCENARIO } from './tactical_group_config.js';
 
 export interface DonorSelectionContext {
     /** Anchor brigade for the prospective TG. */
@@ -139,6 +142,9 @@ function isEligibleDonor(
     if ((f.cohesion ?? 0) < COHESION_HEALTHY_THRESHOLD) return false;
     if (Object.keys(f.personnel_lent_by_tg ?? {}).length > 0) return false; // Hard Invariant #1
     if (f.tg_cooldown_until_turn != null && currentTurn < f.tg_cooldown_until_turn) return false;
+    // v2.3 per-scenario donation cap (Hard Invariant / §Schema anti-fire-hose). Only enforced
+    // under ENABLE_TG_COHESION_BLEED; flag-off leaves the eligible set unchanged (byte-identical).
+    if (ENABLE_TG_COHESION_BLEED && (f.tg_donations_this_scenario ?? 0) >= MAX_DONATIONS_PER_SCENARIO) return false;
     const personnel = f.personnel ?? 0;
     const donation = computeDonationPersonnel(personnel);
     if (personnel - donation < MIN_BRIGADE_PERSONNEL_AFTER_DONATION_DEFAULT) return false;

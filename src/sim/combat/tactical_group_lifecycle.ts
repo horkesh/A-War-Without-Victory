@@ -27,6 +27,12 @@ import type {
     TgStatus,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import {
+    ENABLE_TG_COHESION_BLEED,
+    TG_COHESION_BLEED_BASE,
+    TG_BLEED_HOPS_FACTOR,
+    ARMY_HQ_COHESION_BLEED_MULT,
+} from './tactical_group_config.js';
 
 export interface FormTgParams {
     op_id: string;
@@ -92,6 +98,21 @@ export function formTacticalGroup(
         }
     }
 
+    // Hard Invariant #9 (v2.3, ENABLE_TG_COHESION_BLEED): block reforming a TG with the
+    // same composition (anchor + sorted donor ids) while a recently-dissolved instance is
+    // still within its cooldown window. Prevents "dissolve and reform same TG via a different
+    // op_id" abuse. Flag-off: never checked (recent-composition ledger is never written).
+    if (ENABLE_TG_COHESION_BLEED) {
+        const recent = mil.tg_recent_compositions;
+        if (recent) {
+            const hash = compositionHash(params.anchor_brigade_id, params.donors.map(d => d.brigade_id));
+            const blockedUntil = recent[hash];
+            if (blockedUntil != null && params.current_turn < blockedUntil) {
+                return { tg_id: null, rejection_reason: 'same_composition_cooldown' };
+            }
+        }
+    }
+
     const tgId = makeTgId(anchor.corps_id, params.op_id, params.anchor_brigade_id);
 
     // Build the TG entity. donor_contributions stored pre-sorted by brigade_id
@@ -116,7 +137,8 @@ export function formTacticalGroup(
     if (!mil.tactical_groups) mil.tactical_groups = {};
     mil.tactical_groups[tgId] = tg;
 
-    // Mutate state: write per-donor lent fields (Hard Invariant #1).
+    // Mutate state: write per-donor lent fields (Hard Invariant #1) + v2.3 Pyrrhic dampener.
+    const hqMult = params.army_hq_op_id != null ? ARMY_HQ_COHESION_BLEED_MULT : 1.0;
     for (const d of sortedDonors) {
         const donor = formations[d.brigade_id];
         if (!donor.personnel_lent_by_tg) donor.personnel_lent_by_tg = {};
@@ -125,6 +147,25 @@ export function formTacticalGroup(
         if (eq.tanks > 0 || eq.artillery > 0 || eq.aa_systems > 0) {
             if (!donor.equipment_lent_by_tg) donor.equipment_lent_by_tg = {};
             donor.equipment_lent_by_tg[tgId] = { ...eq };
+        }
+
+        // v2.3 (ENABLE_TG_COHESION_BLEED) — ADR-0005 §Pyrrhic cost:
+        //   loss = donated_fraction × (1 + bfs_hops × 0.15) × 15 × (army_hq ? 2.0 : 1.0)
+        // Applied once here at formation (the ADR's "locked 8 turns" lock-against-recovery is a
+        // deferred design note: the donor enters a 6-turn dissolution cooldown anyway, and the
+        // per-turn corps reorganize-recovery path is a faction-wide hot path we leave untouched
+        // to protect byte-identity). Records the applied amount on the contribution for the ledger.
+        // Also increments the per-scenario donation counter (anti-fire-hose cap; selectDonors gates).
+        if (ENABLE_TG_COHESION_BLEED) {
+            const donorPersonnel = donor.personnel ?? 0;
+            const donatedFraction = donorPersonnel > 0 ? d.personnel_lent / donorPersonnel : 0;
+            const rawLoss = donatedFraction * (1 + d.distance_hops * TG_BLEED_HOPS_FACTOR) * TG_COHESION_BLEED_BASE * hqMult;
+            const loss = Math.floor(rawLoss);
+            if (loss > 0) {
+                donor.cohesion = Math.max(0, (donor.cohesion ?? 0) - loss);
+                d.cohesion_bleed_applied = loss;
+            }
+            donor.tg_donations_this_scenario = (donor.tg_donations_this_scenario ?? 0) + 1;
         }
     }
 
@@ -201,6 +242,15 @@ export function dissolveTacticalGroup(
         anchor.tg_cooldown_until_turn = cooldownUntil;
     }
 
+    // Hard Invariant #9 (v2.3, ENABLE_TG_COHESION_BLEED): record this composition's hash so a
+    // same-composition TG cannot reform via a different op_id until the cooldown window elapses.
+    // Flag-off: ledger is never written, so it stays empty/omitted (byte-identical).
+    if (ENABLE_TG_COHESION_BLEED) {
+        if (!mil.tg_recent_compositions) mil.tg_recent_compositions = {};
+        const hash = compositionHash(tg.anchor_brigade_id, tg.donor_contributions.map(d => d.brigade_id));
+        mil.tg_recent_compositions[hash] = cooldownUntil;
+    }
+
     // Remove TG entry.
     delete mil.tactical_groups[tgId];
 
@@ -210,4 +260,14 @@ export function dissolveTacticalGroup(
 /** Canonical TG id format. Frozen by ADR-0005 §Schema. */
 function makeTgId(corpsId: FormationId, opId: string, anchorBrigadeId: FormationId): TgId {
     return `tg:${corpsId}:${opId}:${anchorBrigadeId}`;
+}
+
+/**
+ * Composition hash for Hard Invariant #9 (same-composition reformation block). Deterministic:
+ * anchor id + donor ids sorted via strictCompare. Independent of op_id (that's the whole point —
+ * a different op_id must not let the same brigades re-form the same TG within cooldown).
+ */
+export function compositionHash(anchorBrigadeId: FormationId, donorIds: readonly FormationId[]): string {
+    const sortedDonors = [...donorIds].sort(strictCompare);
+    return `${anchorBrigadeId}|${sortedDonors.join(',')}`;
 }

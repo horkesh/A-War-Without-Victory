@@ -2502,6 +2502,14 @@ army_hq_operations?: Record<ArmyHqOpId, ArmyHqOperation>;
 army_hq_last_op_turn?: Record<FactionId, number>;
 /** Per-faction year-bucket Army HQ op count (year-boundary defense; 2/year ceiling). */
 army_hq_op_count_by_year?: Record<FactionId, Record<number, number>>;
+/**
+ * v2.3 (ADR-0005 Hard Invariant #9): recently-dissolved TG composition hashes →
+ * cooldown-until turn. Blocks reforming a same-composition TG (anchor + sorted donor
+ * ids) within the cooldown window via a different op_id. Written at dissolution and
+ * checked at formation, only while ENABLE_TG_COHESION_BLEED is on; stays empty/omitted
+ * (byte-identical) when the flag is off.
+ */
+tg_recent_compositions?: Record<string, number>;
 }
 
 /** Presidential command authority — the player's resource for overriding the command chain.
