@@ -16207,3 +16207,25 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Artifacts.** `data/scenarios/events/war_1992.json`, `data/scenarios/events/war_1995.json`, `tests/sim/events/event_taxonomy_report.test.ts`, `tests/sim/events/event_acceptance_report.test.ts`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-29] codex: Phase E activation verdict consolidated + investigation records + cohesion-divisor calibration handoff (docs-only)
+
+**Summary.** Documentation-only closeout of the Phase E activation investigation arc. Preserves three at-risk investigation docs, authors the final adjudicated consolidated verdict, and hands the cohesion-divisor fix to the calibration team. No code, event-JSON, test, or baseline changes.
+
+**Adjudicated verdict (independent Determinism Auditor + Technical Architect pass).**
+- **cohesion gate: BLOCKED** — the intentional 100× `war_exhaustion` rescale (commit `59511672`, 2026-05-22) MISSED two linear-term divisors: `src/sim/events/strategic_dimensions.ts:111` still `exhaustion/3` (should be `/300`) and `src/sim/political/political_personality.ts:308-309` still `/6` (should be `/600`). Post-rescale turn-40 exhaustion (~4750-7940) saturates the cohesion base formula, flooring all three factions' `internal_cohesion` base at 0. J3's "~100" exhaustion reading was a STALE-SAVE FOSSIL (byte-identical `100.00133` across factions = old `Math.min(100)` cap), not a live engine state. Fix = complete the rescale sweep; CALIBRATION TEAM owns it (forces baseline refresh). Not a canon violation, not a rescale-revert reason.
+- **intl_only: conditional-GO** — the prior "122-OSID cascade / sign-bug NO-GO" is CORRECTED and withdrawn. `control_delta.json` is a WITHIN-RUN total (war start→end, the historical Serb land-grab), NOT a flag-ON-vs-OFF diff. Consumer arithmetic sign is CORRECT (`ceil(baseMinForOp/0.7)` raises the launch floor = fewer ops; a `/`→`×` change would BREAK it). No bug. intl_only is conditional-GO gated only on a baseline refresh + calibration/user sign-off.
+- **Root cause of the contradiction:** the J1 simulator (`tools/diagnostics/phase_e_activation_simulator.ts`) Tier 2 hash-compares only, surfacing the within-run `control_delta` as if it were a flag effect. Being fixed separately by tooling.
+
+**Three corrections by adjudication.** (1) Track B's "calibration moved the values / merge-rate change" framing → stale-save fossil. (2) War-or-Game's "122-OSID cascade / sign-bug NO-GO" → within-run misread. (3) The J1 simulator reporting defect.
+
+**Routed owners.** Cohesion divisor → calibration team; J1 sim reporting fix → tooling (in progress); activation decisions → user + calibration.
+
+**Artifacts.**
+- New: `docs/40_reports/proposals/20260529_PHASE_E_VERDICT_CONSOLIDATED.md` (authoritative adjudicated verdict).
+- New: `docs/40_reports/20260529_CALIBRATION_HANDOFF_COHESION_DIVISOR.md` (divisor fix handoff).
+- Preserved (were untracked; now committed as audit trail): `docs/40_reports/proposals/20260529_PHASE_E_ACTIVATION_RECOMMENDATION_POSTMERGE.md`, `docs/40_reports/proposals/20260529_WAR_EXHAUSTION_RATE_INVESTIGATION.md`, `docs/40_reports/proposals/20260529_INTL_ONLY_COUPLING_INVESTIGATION.md`.
+
+**Verification.** Documentation-only; no build/test impact. `git diff --check` clean. FORAWWV.md not touched.
+
+---
