@@ -20,13 +20,16 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
     buildTier1Projection,
     buildTier2Projection,
+    computeTerritorialDiff,
     COMBO_GATES,
     parseArgs,
     runSimulator,
     SIM_COMBOS,
     type BaselineManifest,
+    type ControlMap,
     type ManifestScenarioEntry,
     type SimCombo,
+    type Tier2RunnerOutput,
 } from '../tools/diagnostics/phase_e_activation_simulator.js';
 import {
     isCohesionCautionBiasActive,
@@ -253,9 +256,14 @@ describe('Phase E activation simulator — Tier 2 (real-scenario shape)', () => 
             tier2RunnerOverride: runner,
         });
 
-        // 4 non-baseline combos × 1 scenario = 4 invocations.
-        expect(observed.length).toBe(4);
-        expect(observed.map((o) => o.combo)).toEqual(['global_only', 'intl_only', 'cohesion_only', 'both_on']);
+        // The OFF baseline (global_off) is now run once per scenario to capture
+        // the reference control map, THEN 4 non-baseline combos × 1 scenario.
+        // = 1 (global_off) + 4 = 5 invocations.
+        expect(observed.length).toBe(5);
+        expect(observed.map((o) => o.combo)).toEqual(['global_off', 'global_only', 'intl_only', 'cohesion_only', 'both_on']);
+        // The global_off pass runs with global gate OFF.
+        const offObs = observed.find((o) => o.combo === 'global_off')!;
+        expect(offObs.globalActive).toBe(false);
 
         const intlObs = observed.find((o) => o.combo === 'intl_only')!;
         expect(intlObs.globalActive).toBe(true);
@@ -371,5 +379,135 @@ describe('Phase E activation simulator — Tier 2 (real-scenario shape)', () => 
         expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
         expect(isIntlStandingOpsHesitationActive()).toBe(false);
         expect(isCohesionCautionBiasActive()).toBe(false);
+    });
+});
+
+describe('Phase E activation simulator — ON-vs-OFF territorial diff (the flag\'s true effect)', () => {
+    it('computeTerritorialDiff derives the flip-set + net counts from two control maps', () => {
+        const offMap: ControlMap = {
+            'op:a:one': 'RS',
+            'op:a:two': 'RS',
+            'op:b:three': 'RBiH',
+            'op:b:four': 'HRHB',
+        };
+        const onMap: ControlMap = {
+            'op:a:one': 'RS', // unchanged
+            'op:a:two': 'RBiH', // RS -> RBiH
+            'op:b:three': 'RBiH', // unchanged
+            'op:b:four': 'RBiH', // HRHB -> RBiH
+        };
+        const diff = computeTerritorialDiff(onMap, offMap);
+        expect(diff.available).toBe(true);
+        expect(diff.total_flips).toBe(2);
+        // Flip-set stable-sorted by OSID.
+        expect(diff.flipped_osids.map((f) => f.osid)).toEqual(['op:a:two', 'op:b:four']);
+        expect(diff.flipped_osids[0]).toEqual({ osid: 'op:a:two', off_controller: 'RS', on_controller: 'RBiH' });
+        expect(diff.flipped_osids[1]).toEqual({ osid: 'op:b:four', off_controller: 'HRHB', on_controller: 'RBiH' });
+        // Net: RBiH +2 (gained both), RS -1, HRHB -1.
+        const net = Object.fromEntries(diff.net_control_count_delta.map((e) => [e.controller, e.delta]));
+        expect(net).toEqual({ RBiH: 2, RS: -1, HRHB: -1 });
+    });
+
+    it('empty flip-set (ON==OFF control) yields no flips and NO net delta, even when a within-run control_delta hash differs', async () => {
+        // Both ON and OFF runs end with identical final control. But the runner
+        // tampers with control_delta.json's hash (within-run trajectory differs
+        // from the manifest). The OLD tool would have cried BOT-MILITARY on this
+        // within-run drift; the NEW tool must NOT, because ON==OFF territorially.
+        const identicalControl: ControlMap = { 'op:a:one': 'RS', 'op:a:two': 'RBiH' };
+        const runner = async (entry: ManifestScenarioEntry, _combo: SimCombo): Promise<Tier2RunnerOutput> => ({
+            hashes: { ...entry.hashes, 'control_delta.json': 'WITHIN-RUN-TRAJECTORY-DIVERGENT' },
+            controlMap: identicalControl,
+        });
+        const tier2 = await buildTier2Projection({
+            manifestOverride: manifestStub(),
+            tier2RunnerOverride: runner,
+            combo: 'intl_only',
+        });
+        const sc = tier2.runs[0].scenarios[0];
+        // control_delta hash DID drift...
+        const cdCell = sc.artifact_drift.find((c) => c.artifact === 'control_delta.json')!;
+        expect(cdCell.status).toBe('DRIFT');
+        // ...but the ON-vs-OFF territorial diff is empty.
+        expect(sc.territorial_diff.available).toBe(true);
+        expect(sc.territorial_diff.total_flips).toBe(0);
+        expect(sc.territorial_diff.net_control_count_delta).toEqual([]);
+        // ...so the signal is DIMENSION-ONLY, NOT BOT-MILITARY.
+        expect(sc.behavioral_drift_signal).toBe('DIMENSION-ONLY');
+    });
+
+    it('non-empty flip-set yields BOT-MILITARY with the actual flipped OSID list + net counts', async () => {
+        const offControl: ControlMap = { 'op:a:one': 'RS', 'op:a:two': 'RS' };
+        // ON run flips one OSID RS -> RBiH (the flag's real effect: a single OSID).
+        const onControl: ControlMap = { 'op:a:one': 'RS', 'op:a:two': 'RBiH' };
+        const runner = async (entry: ManifestScenarioEntry, combo: SimCombo): Promise<Tier2RunnerOutput> => {
+            if (combo === 'global_off') {
+                return { hashes: { ...entry.hashes }, controlMap: offControl };
+            }
+            return {
+                // Bot artifact hash drifts too (consistent with a real divergence).
+                hashes: { ...entry.hashes, 'activity_summary.json': 'DIVERGENT' },
+                controlMap: onControl,
+            };
+        };
+        const tier2 = await buildTier2Projection({
+            manifestOverride: manifestStub(),
+            tier2RunnerOverride: runner,
+            combo: 'both_on',
+        });
+        const sc = tier2.runs[0].scenarios[0];
+        expect(sc.behavioral_drift_signal).toBe('BOT-MILITARY');
+        expect(sc.territorial_diff.available).toBe(true);
+        expect(sc.territorial_diff.total_flips).toBe(1);
+        expect(sc.territorial_diff.flipped_osids).toEqual([
+            { osid: 'op:a:two', off_controller: 'RS', on_controller: 'RBiH' },
+        ]);
+        const net = Object.fromEntries(sc.territorial_diff.net_control_count_delta.map((e) => [e.controller, e.delta]));
+        expect(net).toEqual({ RBiH: 1, RS: -1 });
+    });
+
+    it('within-run control_delta artifact is surfaced but labeled as trajectory, not the flag effect', async () => {
+        // The control_delta.json artifact remains in the hash-drift block (it
+        // correctly detects divergence), but the flag effect is the SEPARATE
+        // territorial_diff block. Here control_delta does NOT drift, yet the
+        // flag still flips an OSID — proving the two are independent signals.
+        const offControl: ControlMap = { 'op:x:a': 'HRHB' };
+        const onControl: ControlMap = { 'op:x:a': 'RBiH' };
+        const runner = async (entry: ManifestScenarioEntry, combo: SimCombo): Promise<Tier2RunnerOutput> => ({
+            // control_delta.json hash matches the manifest baseline (no within-run drift).
+            hashes: { ...entry.hashes },
+            controlMap: combo === 'global_off' ? offControl : onControl,
+        });
+        const tier2 = await buildTier2Projection({
+            manifestOverride: manifestStub(),
+            tier2RunnerOverride: runner,
+            combo: 'cohesion_only',
+        });
+        const sc = tier2.runs[0].scenarios[0];
+        // Within-run control_delta artifact present and FLAT (trajectory unchanged
+        // vs the manifest) — separate from the flag effect.
+        const cdCell = sc.artifact_drift.find((c) => c.artifact === 'control_delta.json')!;
+        expect(cdCell.status).toBe('FLAT');
+        // ON-vs-OFF territorial diff IS the flag effect: 1 OSID flipped.
+        expect(sc.territorial_diff.total_flips).toBe(1);
+        expect(sc.territorial_diff.flipped_osids[0].osid).toBe('op:x:a');
+        // Flip-set non-empty => BOT-MILITARY even though control_delta artifact is FLAT.
+        expect(sc.behavioral_drift_signal).toBe('BOT-MILITARY');
+    });
+
+    it('legacy hashes-only runner (no control map) leaves territorial_diff unavailable and falls back to hash heuristic', async () => {
+        // Backward-compat: a runner returning a plain Record<string,string>.
+        const runner = async (entry: ManifestScenarioEntry, _combo: SimCombo) => ({
+            ...entry.hashes,
+            'activity_summary.json': 'DIVERGENT',
+        });
+        const tier2 = await buildTier2Projection({
+            manifestOverride: manifestStub(),
+            tier2RunnerOverride: runner,
+            combo: 'intl_only',
+        });
+        const sc = tier2.runs[0].scenarios[0];
+        expect(sc.territorial_diff.available).toBe(false);
+        // Fallback: bot-military artifact drifted => BOT-MILITARY (legacy behavior).
+        expect(sc.behavioral_drift_signal).toBe('BOT-MILITARY');
     });
 });
