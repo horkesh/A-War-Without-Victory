@@ -120,6 +120,16 @@ function makeState(alliance: number): GameState {
             front_posture_regions: {},
             front_pressure: {},
             militia_pools: {},
+            army_co_decision_traces: {},
+            army_corps_directives_by_faction: {},
+            event_decision_log: [],
+            fired_event_ids: [],
+            event_readiness: {},
+            event_fire_counts: {},
+            event_last_fired_turn: {},
+            event_flags: {},
+            enabled_event_ids: [],
+            phantoms_spawned: [],
         } as GameState['military'],
         political: {
             political_controllers: {
@@ -131,7 +141,7 @@ function makeState(alliance: number): GameState {
                 'op:busovaca:busovaca_rbih_1': 'RBiH',
             },
             war_alliance_rbih_hrhb: alliance,
-        } as GameState['political'],
+        } as unknown as GameState['political'],
         displacement: {} as GameState['displacement'],
     } as GameState;
     return state;

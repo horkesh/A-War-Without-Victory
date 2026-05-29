@@ -1,0 +1,227 @@
+digraph event_family {
+  rankdir=LR;
+  node [shape=box, style=filled];
+  edge [fontsize=8];
+
+  // Legend
+  subgraph cluster_legend {
+    label="Legend";
+    style=dashed;
+    legend_rs [label="RS family", fillcolor=lightcoral];
+    legend_rbih [label="RBiH family", fillcolor=lightblue];
+    legend_hrhb [label="HRHB family", fillcolor=lightgreen];
+    legend_cross [label="Cross-faction", fillcolor=lightyellow];
+    legend_ring3 [label="Ring 3 sensitive", fillcolor=white, color=red, penwidth=2];
+  }
+
+  subgraph cluster__no_family_ {
+    label="<no-family>";
+    style=filled;
+    color=white;
+    "csq_paramilitary_authorization_refused" [label="csq_paramilitary_authorization_refused", fillcolor=white];
+  }
+  subgraph cluster_rs_autonomy_response {
+    label="rs_autonomy_response";
+    style=filled;
+    color=lightcoral;
+    "rs_autonomy_path_decision_1993" [label="rs_autonomy_path_decision_1993", fillcolor=lightcoral];
+  }
+  subgraph cluster_rs_belgrade_pressure_response {
+    label="rs_belgrade_pressure_response";
+    style=filled;
+    color=lightcoral;
+    "rs_belgrade_pressure_response_1993" [label="rs_belgrade_pressure_response_1993", fillcolor=lightcoral];
+  }
+  subgraph cluster_rs_belgrade_response {
+    label="rs_belgrade_response";
+    style=filled;
+    color=lightcoral;
+    "belgrade_embargo_rs_1994" [label="belgrade_embargo_rs_1994", fillcolor=lightcoral];
+  }
+  subgraph cluster_rs_command_split {
+    label="rs_command_split";
+    style=filled;
+    color=lightcoral;
+    "karadzic_mladic_split_1995" [label="karadzic_mladic_split_1995", fillcolor=lightcoral];
+  }
+  subgraph cluster_rs_contact_group_response {
+    label="rs_contact_group_response";
+    style=filled;
+    color=lightcoral;
+    "rs_contact_group_response_1994" [label="rs_contact_group_response_1994", fillcolor=lightcoral];
+  }
+  subgraph cluster_rs_dayton_response {
+    label="rs_dayton_response";
+    style=filled;
+    color=lightcoral;
+    "rs_dayton_acceptance_1995" [label="rs_dayton_acceptance_1995", fillcolor=lightcoral];
+  }
+  subgraph cluster_rs_deliberate_force_response {
+    label="rs_deliberate_force_response";
+    style=filled;
+    color=lightcoral;
+    "deliberate_force_rs_compliance_1995" [label="deliberate_force_rs_compliance_1995", fillcolor=lightcoral];
+  }
+  subgraph cluster_rs_holbrooke_response {
+    label="rs_holbrooke_response";
+    style=filled;
+    color=lightcoral;
+    "holbrooke_us_belgrade_channel_1995" [label="holbrooke_us_belgrade_channel_1995", fillcolor=lightcoral];
+  }
+  subgraph cluster_rs_hostage_response {
+    label="rs_hostage_response";
+    style=filled;
+    color=lightcoral;
+    "un_hostage_crisis_1995" [label="un_hostage_crisis_1995", fillcolor=lightcoral];
+  }
+  subgraph cluster_rs_owen_stoltenberg_response {
+    label="rs_owen_stoltenberg_response";
+    style=filled;
+    color=lightcoral;
+    "rs_owen_stoltenberg_response_1993" [label="rs_owen_stoltenberg_response_1993", fillcolor=lightcoral];
+  }
+  subgraph cluster_rs_paramilitary_policy {
+    label="rs_paramilitary_policy";
+    style=filled;
+    color=lightcoral;
+    "rs_paramilitary_policy_1992" [label="rs_paramilitary_policy_1992", fillcolor=lightcoral];
+  }
+  subgraph cluster_rs_strategic_goals {
+    label="rs_strategic_goals";
+    style=filled;
+    color=lightcoral;
+    "rs_strategic_goals" [label="rs_strategic_goals", fillcolor=lightcoral];
+  }
+  subgraph cluster_rs_vopp_response {
+    label="rs_vopp_response";
+    style=filled;
+    color=lightcoral;
+    "rs_assembly_rejects_voplan_1993" [label="rs_assembly_rejects_voplan_1993", fillcolor=lightcoral];
+  }
+  subgraph cluster_rs_washington_response {
+    label="rs_washington_response";
+    style=filled;
+    color=lightcoral;
+    "rs_washington_rejection_1994" [label="rs_washington_rejection_1994", fillcolor=lightcoral];
+  }
+
+  // Edges
+  "rs_paramilitary_policy_1992" -> "csq_paramilitary_authorization_refused" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "belgrade_embargo_rs_1994" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "belgrade_embargo_rs_1994" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "belgrade_embargo_rs_1994" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "belgrade_embargo_rs_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "belgrade_embargo_rs_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "belgrade_embargo_rs_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "belgrade_embargo_rs_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "belgrade_embargo_rs_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "belgrade_embargo_rs_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "belgrade_embargo_rs_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "belgrade_embargo_rs_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "belgrade_embargo_rs_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "deliberate_force_rs_compliance_1995" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "deliberate_force_rs_compliance_1995" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "deliberate_force_rs_compliance_1995" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "deliberate_force_rs_compliance_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "deliberate_force_rs_compliance_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "deliberate_force_rs_compliance_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "deliberate_force_rs_compliance_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "deliberate_force_rs_compliance_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "deliberate_force_rs_compliance_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "holbrooke_us_belgrade_channel_1995" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "holbrooke_us_belgrade_channel_1995" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "holbrooke_us_belgrade_channel_1995" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "holbrooke_us_belgrade_channel_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "holbrooke_us_belgrade_channel_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "holbrooke_us_belgrade_channel_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "holbrooke_us_belgrade_channel_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "holbrooke_us_belgrade_channel_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "holbrooke_us_belgrade_channel_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "karadzic_mladic_split_1995" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "karadzic_mladic_split_1995" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "karadzic_mladic_split_1995" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "karadzic_mladic_split_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "karadzic_mladic_split_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "karadzic_mladic_split_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "karadzic_mladic_split_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "karadzic_mladic_split_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "karadzic_mladic_split_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_assembly_rejects_voplan_1993" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_assembly_rejects_voplan_1993" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_assembly_rejects_voplan_1993" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_assembly_rejects_voplan_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_assembly_rejects_voplan_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_assembly_rejects_voplan_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_assembly_rejects_voplan_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_assembly_rejects_voplan_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_assembly_rejects_voplan_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_autonomy_path_decision_1993" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_autonomy_path_decision_1993" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_autonomy_path_decision_1993" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_autonomy_path_decision_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_autonomy_path_decision_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_autonomy_path_decision_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_autonomy_path_decision_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_autonomy_path_decision_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_autonomy_path_decision_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_belgrade_pressure_response_1993" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_belgrade_pressure_response_1993" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_belgrade_pressure_response_1993" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_belgrade_pressure_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_belgrade_pressure_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_belgrade_pressure_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_belgrade_pressure_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_belgrade_pressure_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_belgrade_pressure_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_contact_group_response_1994" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_contact_group_response_1994" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_contact_group_response_1994" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_dayton_acceptance_1995" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_dayton_acceptance_1995" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_dayton_acceptance_1995" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_dayton_acceptance_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_dayton_acceptance_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_dayton_acceptance_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_dayton_acceptance_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_dayton_acceptance_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_dayton_acceptance_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_owen_stoltenberg_response_1993" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_owen_stoltenberg_response_1993" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_owen_stoltenberg_response_1993" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_owen_stoltenberg_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_owen_stoltenberg_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_owen_stoltenberg_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_owen_stoltenberg_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_owen_stoltenberg_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_owen_stoltenberg_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_paramilitary_policy_1992" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_paramilitary_policy_1992" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_paramilitary_policy_1992" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_paramilitary_policy_1992" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_paramilitary_policy_1992" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_paramilitary_policy_1992" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_washington_rejection_1994" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_washington_rejection_1994" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_washington_rejection_1994" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "rs_washington_rejection_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_washington_rejection_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_washington_rejection_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_washington_rejection_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_washington_rejection_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "rs_washington_rejection_1994" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "un_hostage_crisis_1995" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "un_hostage_crisis_1995" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "un_hostage_crisis_1995" [color=blue, label="enables"];
+  "rs_strategic_goals" -> "un_hostage_crisis_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "un_hostage_crisis_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "un_hostage_crisis_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "un_hostage_crisis_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "un_hostage_crisis_1995" [color=gray, label="future_consequence", style=dashed];
+  "rs_strategic_goals" -> "un_hostage_crisis_1995" [color=gray, label="future_consequence", style=dashed];
+}

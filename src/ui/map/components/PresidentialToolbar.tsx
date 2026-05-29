@@ -16,7 +16,6 @@
 
 import { useRef, useState, useCallback, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { InboxBadge } from './PresidentialInbox';
 import { useIPC } from '../desktop/useIPC';
 import { advanceTurnAndSync } from '../desktop/orderActions';
 import { getTurnAftermathAdvanceDeps } from '../desktop/turnAftermathAdvanceDeps';
@@ -39,21 +38,16 @@ import { Z } from '../../shared/zIndex';
  *
  * NIGHTSHIFT-G5 — On-Map Pre-Advance Severity Pip.
  *
- * The map toolbar `INBOX` badge surfaces actionable count from `inboxItems`,
- * but that is a different aggregation than the canonical presidential review
- * queue used by AdvanceTurnModal / WarroomStatusBar. If the player dismisses
- * AdvanceTurnModal back to the map without resolving review work, there is
- * no persistent on-map severity cue. This helper derives the ring tone from
- * the queue's existing fields (no new state, no engine touch) so the toolbar
- * can render a thin severity ring around the inbox badge.
+ * If the player dismisses AdvanceTurnModal back to the map without resolving
+ * review work, there is no persistent on-map severity cue. This helper derives
+ * the pip tone from the queue's existing fields (no new state, no engine touch).
  *
  * Tone derivation (deterministic, count-threshold based — no random, no time):
  *  - 'blocking' (red)   when `criticalCount > 0`
  *  - 'urgent'   (amber) when `pendingCount  > 5`
  *  - null               otherwise (no ring)
  *
- * Pure visual augment — kept inside the toolbar file so Decision Room /
- * Pre-Advance / Warroom-owned files are untouched.
+ * Pure visual augment kept inside the toolbar file.
  */
 export type PreAdvanceSeverityTone = 'blocking' | 'urgent';
 
@@ -117,6 +111,7 @@ interface PresidentialToolbarProps {
     } | null;
     /** Whether any event has readiness > 50% of threshold. */
     pressureWarning: boolean;
+    onOpenDesk?: () => void;
     onOpenSummary?: () => void;
     onOpenRecords?: () => void;
     onOpenOpsHistory?: () => void;
@@ -128,11 +123,9 @@ export function PresidentialToolbar({
     pendingReviews,
     reserveAttention,
     pressureWarning,
-    onOpenSummary,
+    onOpenDesk,
     onOpenRecords,
-    onOpenOpsHistory,
     onOpenCodex,
-    onOpenEventLog,
 }: PresidentialToolbarProps) {
     const ipc = useIPC();
     const loadedGameState = useGameStore((s) => s.loadedGameState);
@@ -147,6 +140,7 @@ export function PresidentialToolbar({
     const setAdvanceTurnPending = useGameStore((s) => s.setAdvanceTurnPending);
     const devMode = useGameStore((s) => s.devMode);
     const [advancing, setAdvancing] = useState(false);
+    const [devDrawerOpen, setDevDrawerOpen] = useState(false);
 
     const playerFaction = loadedGameState?.player_faction ?? '';
     const crestUrl = getArmyCrest(playerFaction);
@@ -189,25 +183,76 @@ export function PresidentialToolbar({
         }
     }, [advanceBlocked, setAdvanceTurnPending, ipc, advancing, loadSave, clearStagedOrders, setLoadError]);
 
+    const clearFieldPanels = useCallback(() => {
+        const gs = useGameStore.getState();
+        gs.setArmyHQOpen(false);
+        gs.setCodexOpen(false);
+        gs.setChronicleOpen(false);
+        gs.setIsOperationsPanelOpen(false);
+        gs.setOpsPlanningModalOpen(false);
+        gs.setSelectedOsid(null);
+        gs.setSelectedFormationId(null);
+        gs.setSelectedCorpsId(null);
+        gs.setSelectedCorpsFrontSectorId(null);
+        gs.setSelectedArmyId(null);
+        gs.setSelectedArmyHqId(null);
+        gs.setSelectedOperationKey(null);
+        gs.setSelectedOrbatCorpsId(null);
+    }, []);
+
+    const handleOpenDesk = useCallback(() => {
+        clearFieldPanels();
+        if (embedded) {
+            window.parent.postMessage({ type: 'awwv-back-to-hq' }, '*');
+            return;
+        }
+        if (onOpenDesk) {
+            onOpenDesk();
+            return;
+        }
+        void ipc.focusWarroom();
+    }, [clearFieldPanels, embedded, ipc, onOpenDesk]);
+
+    const handleOpenMap = useCallback(() => {
+        clearFieldPanels();
+    }, [clearFieldPanels]);
+
     const handleOpenHQ = useCallback(() => {
         if (!playerFaction) return;
+        clearFieldPanels();
         // NOTE: This is a reopen-with-last-tab dispatch, not a navigation to a
         // specific tab. shellNavigation.openArmyHQTab() would force a specific
         // tab and stomp the user's last-viewed tab, so we keep the two-setter
         // sequence here. Treat this pair as the canonical "reopen HQ" idiom.
         setSelectedArmyId(playerFaction);
         setArmyHQOpen(true);
-    }, [playerFaction, setSelectedArmyId, setArmyHQOpen]);
+    }, [clearFieldPanels, playerFaction, setSelectedArmyId, setArmyHQOpen]);
 
     const handleOpenArmyReserve = useCallback(() => {
         if (!playerFaction || !loadedGameState) return;
+        clearFieldPanels();
         const armyReserveFormation = loadedGameState.formations.find((formation) =>
             formation.faction === playerFaction && formation.kind === 'army_hq',
         );
         if (!armyReserveFormation) return;
         setArmyHQOpen(false);
         setSelectedArmyHqId(armyReserveFormation.id);
-    }, [loadedGameState, playerFaction, setArmyHQOpen, setSelectedArmyHqId]);
+    }, [clearFieldPanels, loadedGameState, playerFaction, setArmyHQOpen, setSelectedArmyHqId]);
+
+    const handleOpenRecords = useCallback(() => {
+        clearFieldPanels();
+        onOpenRecords?.();
+    }, [clearFieldPanels, onOpenRecords]);
+
+    const handleOpenChronicle = useCallback(() => {
+        clearFieldPanels();
+        openChronicle(useGameStore.getState());
+    }, [clearFieldPanels]);
+
+    const handleOpenCodex = useCallback(() => {
+        clearFieldPanels();
+        onOpenCodex?.();
+    }, [clearFieldPanels, onOpenCodex]);
 
     const hasAlerts = pendingReviews > 0 || pressureWarning || (reserveAttention?.pendingCount ?? 0) > 0;
 
@@ -253,29 +298,37 @@ export function PresidentialToolbar({
                 style={{ zIndex: Z.TOOLBAR }}
             >
 
-                {/* LEFT: Date */}
+                {/* LEFT: field navigation and date */}
                 <div className="col-start-1 flex items-center gap-2 min-w-0 pr-2 justify-start">
-                    {showWarroomReturn && (
-                        <button
-                            onClick={() => {
-                                if (embedded) {
-                                    window.parent.postMessage({ type: 'awwv-back-to-hq' }, '*');
-                                    return;
-                                }
-                                void ipc.focusWarroom();
-                            }}
-                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-amber-400 hover:text-amber-300 transition-colors"
-                            title={t('presidentialToolbar.returnToDesk')}
-                        >
-                            {t('presidentialToolbar.warroom')}
-                        </button>
-                    )}
                     <button
-                        onClick={() => openChronicle(useGameStore.getState())}
-                        className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors"
-                        title={t('presidentialToolbar.campaignTimeline')}
+                        type="button"
+                        onClick={handleOpenDesk}
+                        className={`px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] transition-colors ${
+                            showWarroomReturn
+                                ? 'text-amber-400 hover:text-amber-300'
+                                : 'text-text-secondary hover:text-amber-400'
+                        }`}
+                        title={t('presidentialToolbar.returnToDesk')}
                     >
-                        {t('presidentialToolbar.chronicle')}
+                        {t('presidentialToolbar.desk')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleOpenMap}
+                        disabled={!loadedGameState}
+                        className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        title="Clear field selections"
+                    >
+                        {t('presidentialToolbar.warMap')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleOpenHQ}
+                        disabled={!loadedGameState}
+                        className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        title={t('presidentialToolbar.visitArmyHq')}
+                    >
+                        {t('presidentialToolbar.armyHq')}
                     </button>
                     {loadedGameState ? (
                         <span
@@ -290,108 +343,77 @@ export function PresidentialToolbar({
                         </div>
                     )}
                     {devMode && (
-                        <span className="px-1.5 py-0.5 text-[8px] font-mono uppercase tracking-[0.3em] bg-amber-900/40 text-amber-500 border border-amber-500/30 rounded-full">
+                        <button
+                            type="button"
+                            onClick={() => setDevDrawerOpen((open) => !open)}
+                            className="px-1.5 py-0.5 text-[8px] font-mono uppercase tracking-[0.3em] bg-amber-900/40 text-amber-500 border border-amber-500/30 rounded-full hover:bg-amber-900/60"
+                            aria-pressed={devDrawerOpen}
+                        >
                             {t('presidentialToolbar.dev')}
-                        </span>
+                        </button>
                     )}
-                    <div className="flex items-center gap-1 border-l border-white/10 pl-2">
-                        <button
-                            onClick={onOpenSummary}
-                            disabled={!loadedGameState}
-                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                            title={t('presidentialToolbar.fieldSituationBriefing')}
-                        >
-                            {t('presidentialToolbar.summary')}
-                        </button>
-                        <button
-                            onClick={onOpenRecords}
-                            disabled={!loadedGameState}
-                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                            title={t('presidentialToolbar.openRecordsTitle')}
-                        >
-                            {t('presidentialToolbar.records')}
-                        </button>
-                        <button
-                            onClick={onOpenOpsHistory}
-                            disabled={!loadedGameState}
-                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                            title={t('presidentialToolbar.activeOperations')}
-                        >
-                            {t('presidentialToolbar.ops')}
-                        </button>
-                    </div>
                 </div>
 
                 {/* CENTER: reserved for the floating crest. */}
                 <div className="col-start-2 row-start-1 h-full pointer-events-none" aria-hidden="true" />
 
-                {/* RIGHT: Reference, alert badges, command authority, advance turn. */}
+                {/* RIGHT: reference, alert badges, command authority, advance turn. */}
                 <div className="col-start-3 row-start-1 flex items-center justify-end gap-3 min-w-0">
-                    <div className="flex items-center gap-1">
-                        <button
-                            onClick={onOpenEventLog}
-                            disabled={!loadedGameState}
-                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                            title={t('presidentialToolbar.eventLog')}
-                        >
-                            {t('presidentialToolbar.events')}
-                        </button>
-                        <button
-                            onClick={onOpenCodex}
-                            disabled={!loadedGameState}
-                            data-coachmark-id="codex"
-                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                            title={t('presidentialToolbar.historicalReference')}
-                        >
-                            {t('presidentialToolbar.codex')}
-                        </button>
-                    </div>
+                    <button
+                        type="button"
+                        onClick={handleOpenRecords}
+                        disabled={!loadedGameState}
+                        className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        title={t('presidentialToolbar.openRecordsTitle')}
+                    >
+                        {t('presidentialToolbar.records')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleOpenChronicle}
+                        disabled={!loadedGameState}
+                        className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        title={t('presidentialToolbar.chronicleTitle')}
+                    >
+                        {t('presidentialToolbar.chronicle')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleOpenCodex}
+                        disabled={!loadedGameState}
+                        data-coachmark-id="codex"
+                        className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        title={t('presidentialToolbar.historicalReference')}
+                    >
+                        {t('presidentialToolbar.codex')}
+                    </button>
                     {/*
                       NIGHTSHIFT-G5: Pre-Advance Severity Pip.
-                      The InboxBadge surfaces inboxItems count/severity. The ring
+                      The pip surfaces pre-advance review severity. The ring
                       wrapper below adds a complementary thin ring derived from
                       the canonical presidentialReviewQueue so AdvanceTurnModal
                       dismiss → back-to-map persistently signals unresolved
                       pre-advance review work. Visual-only; pointer events stay
                       with the wrapped badge button.
                     */}
-                    <div
+                    <span
                         data-testid="pre-advance-severity-pip"
                         data-severity-tone={preAdvanceSeverityTone ?? 'none'}
-                        className={`relative inline-flex items-center rounded-md ${
+                        className={`h-2 w-2 shrink-0 rounded-full ${
                             preAdvanceSeverityTone === 'blocking'
-                                ? 'ring-1 ring-red-500/70 ring-offset-1 ring-offset-[#0a0a14]'
+                                ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.85)]'
                                 : preAdvanceSeverityTone === 'urgent'
-                                    ? 'ring-1 ring-amber-400/60 ring-offset-1 ring-offset-[#0a0a14]'
-                                    : ''
+                                    ? 'bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.8)]'
+                                    : 'bg-white/10'
                         }`}
                         title={
                             preAdvanceSeverityTone === 'blocking'
                                 ? t('presidentialToolbar.preAdvanceBlocking')
                                 : preAdvanceSeverityTone === 'urgent'
                                     ? t('presidentialToolbar.preAdvanceUrgent')
-                                    : undefined
+                                    : 'No pre-advance alert'
                         }
-                    >
-                        {/* Inbox badge — unified presidential decision queue */}
-                        <InboxBadge onClick={() => {
-                            const gs = useGameStore.getState();
-                            // Close store-owned overlays, then deselect everything to return to inbox home state.
-                            gs.setArmyHQOpen(false);
-                            gs.setCodexOpen(false);
-                            gs.setChronicleOpen(false);
-                            gs.setIsOperationsPanelOpen(false);
-                            gs.setOpsPlanningModalOpen(false);
-                            gs.setSelectedOsid(null);
-                            gs.setSelectedFormationId(null);
-                            gs.setSelectedCorpsId(null);
-                            gs.setSelectedCorpsFrontSectorId(null);
-                            gs.setSelectedArmyId(null);
-                            gs.setSelectedArmyHqId(null);
-                            gs.setSelectedOperationKey(null);
-                            gs.setSelectedOrbatCorpsId(null);
-                        }} />
-                    </div>
+                    />
 
                     {/* Left alert: Pending decisions */}
                     {pendingReviews > 0 && (
@@ -479,7 +501,7 @@ export function PresidentialToolbar({
             </button>
 
             {/* Dev tools strip — compact, below main toolbar */}
-            {devMode && (
+            {devMode && devDrawerOpen && (
                 <div className="fixed top-12 left-0 right-0 z-10 flex items-center gap-2 px-4 py-1 bg-[#0a0a14]/90 border-b border-amber-500/20">
                     <span className="text-[8px] font-mono text-amber-500/60 uppercase tracking-widest mr-2">{t('presidentialToolbar.dev')}</span>
                     <button onClick={() => fileInputRef.current?.click()} disabled={loading} className="px-2 py-0.5 text-[9px] font-mono uppercase bg-black/40 text-text-secondary border border-white/10 rounded hover:text-text-primary hover:border-white/20 transition-colors disabled:opacity-30">{t('presidentialToolbar.load')}</button>

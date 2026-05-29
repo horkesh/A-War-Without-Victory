@@ -1913,6 +1913,11 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         operationOpportunityProposals,
     });
     const pendingReserveRequests = derivePendingReserveRequests(state, playerFaction);
+    const reserveRequestHistory = deriveReserveRequestHistory(state, playerFaction);
+    const peacePlanHistory = derivePeacePlanHistory(state, playerFaction);
+    const convoyDecisionHistory = deriveConvoyDecisionHistory(state, playerFaction);
+    const paramilitaryDecisionHistory = deriveParamilitaryDecisionHistory(state, playerFaction);
+    const officerDecisionHistory = deriveOfficerDecisionHistory(state, playerFaction);
     const armyReserveQueue = deriveArmyReserveQueue({
         pendingReserveRequests,
     });
@@ -2019,6 +2024,11 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         activeOperations: filterPlayerFacingEntriesByFaction(deriveActiveOperations(state), playerFaction),
         brigadeSectorOverride: brigadeSectorOverride && Object.keys(brigadeSectorOverride).length > 0 ? brigadeSectorOverride : undefined,
         pendingReserveRequests,
+        reserveRequestHistory,
+        peacePlanHistory,
+        convoyDecisionHistory,
+        paramilitaryDecisionHistory,
+        officerDecisionHistory,
         pendingParamilitaryRequests,
         paramilitaryPolicy: state.paramilitary_policy === 'always_allow' || state.paramilitary_policy === 'always_deny' || state.paramilitary_policy === 'ask'
             ? state.paramilitary_policy
@@ -2062,6 +2072,13 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         replaySaveManifest: options?.replaySaveManifest && options.replaySaveManifest.frame_count > 0
             ? options.replaySaveManifest
             : undefined,
+        // Phase H Packet 7 — preserve the raw `GameState` so UI bridges (H3
+        // EventDecisionModal, H4 BranchTagBadgeRow, H5 CodexPanel, H6
+        // generateWrappedSlides) can read the causality substrate
+        // (military.fired_event_ids / event_decision_log / event_causality_log
+        // / enabled_event_ids / closed_event_ids) without a parallel adapter
+        // pass. Runtime-only handle; not persisted, no save-schema impact.
+        rawGameState: gameState,
     };
 }
 
@@ -2603,6 +2620,36 @@ function derivePresidentialReviewQueue({
     };
 }
 
+function deriveReserveRequestHistory(
+    state: any,
+    playerFaction: string | null | undefined,
+): LoadedGameState['reserveRequestHistory'] {
+    const records = Array.isArray(state.military?.reserve_request_history)
+        ? state.military.reserve_request_history
+            .map((record: any) => ({
+                request_id: String(record.request_id ?? ''),
+                turn: Number(record.turn ?? 0),
+                faction: String(record.faction ?? ''),
+                corps_id: String(record.corps_id ?? ''),
+                brigade_id: record.brigade_id == null ? null : String(record.brigade_id),
+                outcome: String(record.outcome ?? 'recorded'),
+                reason: String(record.reason ?? ''),
+                decided_by: String(record.decided_by ?? 'player'),
+                purpose: String(record.purpose ?? ''),
+                why_needed: String(record.why_needed ?? ''),
+                how_to_use: String(record.how_to_use ?? ''),
+            }))
+            .filter((record: any) => playerFactionMatch(record.faction, playerFaction))
+            .sort((a: any, b: any) =>
+                b.turn - a.turn
+                || a.corps_id.localeCompare(b.corps_id)
+                || a.request_id.localeCompare(b.request_id),
+            )
+        : [];
+
+    return records.length > 0 ? records : undefined;
+}
+
 function derivePendingReserveRequests(
     state: any,
     playerFaction: string | null | undefined,
@@ -2832,6 +2879,197 @@ function derivePendingPeacePlan(state: any): LoadedGameState['pendingPeacePlan']
             ? pp.bot_responses as Record<string, 'accepted' | 'rejected'>
             : {},
     };
+}
+
+function asPeacePlanResponse(value: unknown): 'accepted' | 'rejected' | 'pending' {
+    return value === 'accepted' || value === 'rejected' || value === 'pending' ? value : 'pending';
+}
+
+function derivePeacePlanHistory(
+    state: any,
+    playerFaction: string | null | undefined,
+): LoadedGameState['peacePlanHistory'] {
+    const history = state.military?.negotiation?.peace_plan_history;
+    if (!Array.isArray(history) || history.length === 0) return undefined;
+    const effectivePlayerFaction = typeof playerFaction === 'string' && playerFaction
+        ? playerFaction
+        : typeof state.meta?.player_faction === 'string'
+            ? state.meta.player_faction
+            : 'RBiH';
+    const planNames = Object.fromEntries(
+        PEACE_PLANS.map((plan) => [
+            plan.id,
+            plan.name,
+        ]),
+    );
+    const records: NonNullable<LoadedGameState['peacePlanHistory']> = [];
+
+    for (const raw of [...history].sort((a, b) => {
+        const turnA = Number.isFinite(a?.turn_offered) ? Number(a.turn_offered) : 0;
+        const turnB = Number.isFinite(b?.turn_offered) ? Number(b.turn_offered) : 0;
+        if (turnA !== turnB) return turnB - turnA;
+        return strictCompare(String(a?.plan_id ?? ''), String(b?.plan_id ?? ''));
+    })) {
+        if (!raw || typeof raw.plan_id !== 'string') continue;
+        const responses: Record<string, 'accepted' | 'rejected' | 'pending'> = {};
+        const rawResponses = raw.responses && typeof raw.responses === 'object' ? raw.responses : {};
+        for (const faction of ['RBiH', 'RS', 'HRHB']) {
+            responses[faction] = asPeacePlanResponse(rawResponses[faction]);
+        }
+        for (const faction of Object.keys(rawResponses).sort(strictCompare)) {
+            if (responses[faction]) continue;
+            responses[faction] = asPeacePlanResponse(rawResponses[faction]);
+        }
+        records.push({
+            planId: raw.plan_id,
+            planName: planNames[raw.plan_id] ?? getPlayerSafeDisplayLabel(raw.plan_id, 'Peace proposal'),
+            turnOffered: Number.isFinite(raw.turn_offered) ? Number(raw.turn_offered) : 0,
+            playerFaction: effectivePlayerFaction,
+            playerResponse: asPeacePlanResponse(responses[effectivePlayerFaction]),
+            responses,
+            resolved: raw.resolved === true,
+        });
+    }
+
+    return records.length > 0 ? records : undefined;
+}
+
+function asConvoyDecision(value: unknown): 'allow' | 'block' | 'divert' | null {
+    return value === 'allow' || value === 'block' || value === 'divert' ? value : null;
+}
+
+function asParamilitaryDecision(value: unknown): 'allow' | 'deny' | 'regular' | null {
+    return value === 'allow' || value === 'deny' || value === 'regular' ? value : null;
+}
+
+function asOfficerDecision(value: unknown): 'acknowledged' | 'override_confirmed' | 'replacement_accepted' | null {
+    return value === 'acknowledged' || value === 'override_confirmed' || value === 'replacement_accepted'
+        ? value
+        : null;
+}
+
+function deriveConvoyDecisionHistory(
+    state: any,
+    playerFaction: string | null | undefined,
+): LoadedGameState['convoyDecisionHistory'] {
+    const history = state.military?.convoy_decision_history;
+    if (!Array.isArray(history) || history.length === 0) return undefined;
+    const records: NonNullable<LoadedGameState['convoyDecisionHistory']> = [];
+
+    for (const raw of [...history].sort((a, b) => {
+        const turnA = Number.isFinite(a?.turn) ? Number(a.turn) : 0;
+        const turnB = Number.isFinite(b?.turn) ? Number(b.turn) : 0;
+        if (turnA !== turnB) return turnB - turnA;
+        return strictCompare(String(a?.id ?? ''), String(b?.id ?? ''));
+    })) {
+        const decision = asConvoyDecision(raw?.decision);
+        if (!raw || typeof raw.id !== 'string' || !decision) continue;
+        const routeFaction = String(raw.route_faction ?? '');
+        if (!playerFactionMatch(routeFaction, playerFaction)) continue;
+        records.push({
+            id: raw.id,
+            turn: Number.isFinite(raw.turn) ? Number(raw.turn) : 0,
+            target_enclave: String(raw.target_enclave ?? ''),
+            route_faction: routeFaction,
+            target_faction: String(raw.target_faction ?? ''),
+            supply_amount: finiteNumber(raw.supply_amount),
+            decision,
+            decided_by: raw.decided_by === 'player' ? 'player' : 'bot',
+        });
+    }
+
+    return records.length > 0 ? records : undefined;
+}
+
+function deriveParamilitaryDecisionHistory(
+    state: any,
+    playerFaction: string | null | undefined,
+): LoadedGameState['paramilitaryDecisionHistory'] {
+    const history = state.paramilitary_decision_history;
+    if (!Array.isArray(history) || history.length === 0) return undefined;
+    const records: NonNullable<LoadedGameState['paramilitaryDecisionHistory']> = [];
+
+    for (const raw of [...history].sort((a, b) => {
+        const turnA = Number.isFinite(a?.turn) ? Number(a.turn) : 0;
+        const turnB = Number.isFinite(b?.turn) ? Number(b.turn) : 0;
+        if (turnA !== turnB) return turnB - turnA;
+        return strictCompare(String(a?.id ?? ''), String(b?.id ?? ''));
+    })) {
+        const decision = asParamilitaryDecision(raw?.decision);
+        if (!raw || typeof raw.id !== 'string' || !decision) continue;
+        const faction = String(raw.faction ?? '');
+        if (!playerFactionMatch(faction, playerFaction)) continue;
+        records.push({
+            id: raw.id,
+            turn: Number.isFinite(raw.turn) ? Number(raw.turn) : 0,
+            target_osid: String(raw.target_osid ?? ''),
+            faction,
+            strength: finiteNumber(raw.strength),
+            decision,
+            ...(typeof raw.estimated_civilian_risk === 'number'
+                ? { estimated_civilian_risk: raw.estimated_civilian_risk }
+                : {}),
+        });
+    }
+
+    return records.length > 0 ? records : undefined;
+}
+
+function deriveOfficerDecisionHistory(
+    state: any,
+    playerFaction: string | null | undefined,
+): LoadedGameState['officerDecisionHistory'] {
+    const history = state.military?.officer_decision_history;
+    if (!Array.isArray(history) || history.length === 0) return undefined;
+    const officerData = state.military?.named_officer_data as Array<Record<string, unknown>> | undefined;
+    const formations = state.military?.formations as Record<string, any> | undefined;
+    const getOfficerName = (id: string | undefined): string | undefined => {
+        if (!id) return undefined;
+        const officer = officerData?.find((entry) => entry.id === id);
+        return getPlayerSafeOfficerName(typeof officer?.name === 'string' ? officer.name : null);
+    };
+    const getCorpsName = (corpsId: string | undefined): string | undefined => {
+        if (!corpsId) return undefined;
+        return getPlayerSafeCorpsName(formations?.[corpsId]?.name ?? null, corpsId);
+    };
+    const records: NonNullable<LoadedGameState['officerDecisionHistory']> = [];
+
+    for (const raw of [...history].sort((a, b) => {
+        const turnA = Number.isFinite(a?.turn) ? Number(a.turn) : 0;
+        const turnB = Number.isFinite(b?.turn) ? Number(b.turn) : 0;
+        if (turnA !== turnB) return turnB - turnA;
+        return strictCompare(String(a?.id ?? ''), String(b?.id ?? ''));
+    })) {
+        const decision = asOfficerDecision(raw?.decision);
+        if (!raw || typeof raw.id !== 'string' || !decision) continue;
+        const faction = String(raw.faction ?? '');
+        if (!playerFactionMatch(faction, playerFaction)) continue;
+        const officerId = String(raw.officer_id ?? '');
+        const currentCommanderId = typeof raw.current_commander_id === 'string' ? raw.current_commander_id : undefined;
+        const newOfficerId = typeof raw.new_officer_id === 'string' ? raw.new_officer_id : undefined;
+        const outgoingOfficerId = typeof raw.outgoing_officer_id === 'string' ? raw.outgoing_officer_id : undefined;
+        const corpsId = typeof raw.corps_id === 'string' ? raw.corps_id : undefined;
+        records.push({
+            id: raw.id,
+            turn: Number.isFinite(raw.turn) ? Number(raw.turn) : 0,
+            faction,
+            event_id: String(raw.event_id ?? ''),
+            event_type: String(raw.event_type ?? 'officer_event'),
+            officer_id: officerId,
+            officer_name: getOfficerName(officerId) ?? 'Staff officer',
+            current_commander_id: currentCommanderId,
+            current_commander_name: getOfficerName(currentCommanderId),
+            corps_id: corpsId,
+            corps_name: getCorpsName(corpsId),
+            decision,
+            new_officer_id: newOfficerId,
+            new_officer_name: getOfficerName(newOfficerId),
+            outgoing_officer_id: outgoingOfficerId,
+            outgoing_officer_name: getOfficerName(outgoingOfficerId),
+        });
+    }
+
+    return records.length > 0 ? records : undefined;
 }
 
 function derivePendingCounterOffers(state: any): LoadedGameState['pendingCounterOffers'] {

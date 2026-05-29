@@ -12,10 +12,10 @@ Identify nondeterminism risks in code or workflows.
 - May recommend changes; do not implement unless explicitly requested.
 
 ## Required reading
-- `docs/DETERMINISM_TEST_MATRIX.md`
-- `docs/10_canon/Engine_Invariants_v0_5_0.md`
+- `docs/20_engineering/DETERMINISM_TEST_MATRIX.md`
+- `docs/10_canon/Engine_Invariants_v0_9_0.md`
 - `docs/PHASE_A_INVARIANTS.md`
-- `docs/CODE_CANON.md`
+- `docs/20_engineering/CODE_CANON.md`
 
 ## Review checklist
 - Stable ordering for sets, maps, and aggregates (explicit sort keys).

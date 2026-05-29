@@ -250,6 +250,9 @@ describe('deriveInboxItems - Dayton and convoy decisions', () => {
 describe('deriveInboxItems — reserve requests', () => {
     it('returns reserve request items with army_reserve action', () => {
         const state = makeStub({
+            formations: [
+                { id: 'first_corps', name: '1st Corps', faction: 'RBiH', kind: 'corps', status: 'active' },
+            ] as LoadedGameState['formations'],
             pendingReserveRequests: [
                 {
                     request_id: 'req_1',
@@ -271,7 +274,8 @@ describe('deriveInboxItems — reserve requests', () => {
         expect(reserveItems).toHaveLength(1);
         expect(reserveItems[0].action).toBe('army_reserve');
         expect(reserveItems[0].severity).toBe('normal');
-        expect(reserveItems[0].subtitle).toContain('First Corps');
+        expect(reserveItems[0].subtitle).toContain('1st Corps');
+        expect(reserveItems[0].subtitle).not.toContain('first_corps');
         expect(reserveItems[0].subtitle).toContain('defensive');
     });
 });

@@ -3,6 +3,12 @@
 **Date:** 2026-05-18
 **Scope:** Parent-side execution queue for the user request to continue implementing the live `MASTER_ROADMAP.md` and `CONSOLIDATED_BACKLOG.md` backlog without stopping for manual prioritization.
 
+## Current Sector Performance Baseline
+
+| Lane | Current clean pre-change hash | Notes |
+|---|---|---|
+| Sector/frontline performance | `5d94adbfdb09bbda` | Supersedes `f219401f4a17f311` for current clean-main sector work. A read-only comparison found the old-to-current drift was save-shape/schema drift only, not sector/frontline behavior drift. |
+
 ## Completed Batch 39 — Strict-null Phase 3 safe early-war + bot slice
 
 | Lane | Status | Source |

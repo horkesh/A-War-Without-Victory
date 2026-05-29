@@ -143,7 +143,6 @@ function makeNullPlanDecision(): PlanDecision {
         plan: null,
         action: 'none',
         reason: 'no plan',
-        concentration_orders: [],
         decision_trace: {
             turn: 1,
             winning_intent_id: null,
@@ -342,7 +341,6 @@ describe('Suite 1 — isIsolatedCapture guard (plan.ts selectOpportunityTargets)
             plan,
             action: 'launched',
             reason: 'plan executing',
-            concentration_orders: [],
             decision_trace: {
                 turn: 5,
                 winning_intent_id: 'launch_opportunity',

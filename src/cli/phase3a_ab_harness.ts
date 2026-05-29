@@ -73,7 +73,17 @@ function createProlongedSiegeState(): GameState {
                 exhausted: 0,
                 updated_turn: 0
             }
-        }
+        },
+    army_co_decision_traces: {},
+    army_corps_directives_by_faction: {},
+    event_decision_log: [],
+    fired_event_ids: [],
+    event_readiness: {},
+    event_fire_counts: {},
+    event_last_fired_turn: {},
+    event_flags: {},
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
   displacement: {
     displacement_state: {
@@ -85,9 +95,29 @@ function createProlongedSiegeState(): GameState {
                 lost_population: 0,
                 last_updated_turn: 0
             }
-        }
+        },
+    war_displacement_initiated: {},
+    hostile_takeover_timers: {},
+    displacement_camp_state: {},
+    minority_flight_state: {},
+    displacement_event_log: [],
+    displacement_humanitarian_aggregates: {},
+    displacement_origin_dest_arrivals: {},
+    displacement_recent_by_turn: {},
+    sustainability_state: {},
+    settlement_displacement: {},
+    settlement_displacement_started_turn: {},
+    municipality_displacement: {},
+    civilian_casualties: {}
   },
-        political: {}
+        political: {
+            war_consolidation_until: {},
+            war_control_strain: {},
+            war_supply_pressure: {},
+            war_supply_condition: {},
+            war_exhaustion: {},
+            war_exhaustion_local: {}
+        }
     };
 }
 
@@ -127,7 +157,17 @@ function createTemporaryEncirclementState(): GameState {
                 exhausted: 0,
                 updated_turn: 0
             }
-        }
+        },
+    army_co_decision_traces: {},
+    army_corps_directives_by_faction: {},
+    event_decision_log: [],
+    fired_event_ids: [],
+    event_readiness: {},
+    event_fire_counts: {},
+    event_last_fired_turn: {},
+    event_flags: {},
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
   displacement: {
     displacement_state: {
@@ -139,9 +179,29 @@ function createTemporaryEncirclementState(): GameState {
                 lost_population: 0,
                 last_updated_turn: 0
             }
-        }
+        },
+    war_displacement_initiated: {},
+    hostile_takeover_timers: {},
+    displacement_camp_state: {},
+    minority_flight_state: {},
+    displacement_event_log: [],
+    displacement_humanitarian_aggregates: {},
+    displacement_origin_dest_arrivals: {},
+    displacement_recent_by_turn: {},
+    sustainability_state: {},
+    settlement_displacement: {},
+    settlement_displacement_started_turn: {},
+    municipality_displacement: {},
+    civilian_casualties: {}
   },
-        political: {}
+        political: {
+            war_consolidation_until: {},
+            war_control_strain: {},
+            war_supply_pressure: {},
+            war_supply_condition: {},
+            war_exhaustion: {},
+            war_exhaustion_local: {}
+        }
     };
 }
 
@@ -174,7 +234,17 @@ function createCorridorLifelineState(): GameState {
                 exhausted: 0,
                 updated_turn: 0
             }
-        }
+        },
+    army_co_decision_traces: {},
+    army_corps_directives_by_faction: {},
+    event_decision_log: [],
+    fired_event_ids: [],
+    event_readiness: {},
+    event_fire_counts: {},
+    event_last_fired_turn: {},
+    event_flags: {},
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
   displacement: {
     displacement_state: {
@@ -186,9 +256,29 @@ function createCorridorLifelineState(): GameState {
                 lost_population: 0,
                 last_updated_turn: 0
             }
-        }
+        },
+    war_displacement_initiated: {},
+    hostile_takeover_timers: {},
+    displacement_camp_state: {},
+    minority_flight_state: {},
+    displacement_event_log: [],
+    displacement_humanitarian_aggregates: {},
+    displacement_origin_dest_arrivals: {},
+    displacement_recent_by_turn: {},
+    sustainability_state: {},
+    settlement_displacement: {},
+    settlement_displacement_started_turn: {},
+    municipality_displacement: {},
+    civilian_casualties: {}
   },
-        political: {}
+        political: {
+            war_consolidation_until: {},
+            war_control_strain: {},
+            war_supply_pressure: {},
+            war_supply_condition: {},
+            war_exhaustion: {},
+            war_exhaustion_local: {}
+        }
     };
 }
 
@@ -230,16 +320,46 @@ function createMultiPocketStressState(): GameState {
             'MUN_A': { mun_id: 'MUN_A', faction: 'RBiH', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 },
             'MUN_B': { mun_id: 'MUN_B', faction: 'RS', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 },
             'MUN_C': { mun_id: 'MUN_C', faction: 'HRHB', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 }
-        }
+        },
+    army_co_decision_traces: {},
+    army_corps_directives_by_faction: {},
+    event_decision_log: [],
+    fired_event_ids: [],
+    event_readiness: {},
+    event_fire_counts: {},
+    event_last_fired_turn: {},
+    event_flags: {},
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
   displacement: {
     displacement_state: {
             'MUN_A': { mun_id: 'MUN_A', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
             'MUN_B': { mun_id: 'MUN_B', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
             'MUN_C': { mun_id: 'MUN_C', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
-        }
+        },
+    war_displacement_initiated: {},
+    hostile_takeover_timers: {},
+    displacement_camp_state: {},
+    minority_flight_state: {},
+    displacement_event_log: [],
+    displacement_humanitarian_aggregates: {},
+    displacement_origin_dest_arrivals: {},
+    displacement_recent_by_turn: {},
+    sustainability_state: {},
+    settlement_displacement: {},
+    settlement_displacement_started_turn: {},
+    municipality_displacement: {},
+    civilian_casualties: {}
   },
-        political: {}
+        political: {
+            war_consolidation_until: {},
+            war_control_strain: {},
+            war_supply_pressure: {},
+            war_supply_condition: {},
+            war_exhaustion: {},
+            war_exhaustion_local: {}
+        }
     };
 }
 
@@ -273,15 +393,45 @@ function createAsymmetricCollapseState(): GameState {
     militia_pools: {
             'MUN_A': { mun_id: 'MUN_A', faction: 'RBiH', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 },
             'MUN_B': { mun_id: 'MUN_B', faction: 'RS', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 }
-        }
+        },
+    army_co_decision_traces: {},
+    army_corps_directives_by_faction: {},
+    event_decision_log: [],
+    fired_event_ids: [],
+    event_readiness: {},
+    event_fire_counts: {},
+    event_last_fired_turn: {},
+    event_flags: {},
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
   displacement: {
     displacement_state: {
             'MUN_A': { mun_id: 'MUN_A', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
             'MUN_B': { mun_id: 'MUN_B', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
-        }
+        },
+    war_displacement_initiated: {},
+    hostile_takeover_timers: {},
+    displacement_camp_state: {},
+    minority_flight_state: {},
+    displacement_event_log: [],
+    displacement_humanitarian_aggregates: {},
+    displacement_origin_dest_arrivals: {},
+    displacement_recent_by_turn: {},
+    sustainability_state: {},
+    settlement_displacement: {},
+    settlement_displacement_started_turn: {},
+    municipality_displacement: {},
+    civilian_casualties: {}
   },
-        political: {}
+        political: {
+            war_consolidation_until: {},
+            war_control_strain: {},
+            war_supply_pressure: {},
+            war_supply_condition: {},
+            war_exhaustion: {},
+            war_exhaustion_local: {}
+        }
     };
 }
 

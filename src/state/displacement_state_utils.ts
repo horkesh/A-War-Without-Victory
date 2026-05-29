@@ -4,7 +4,7 @@
  */
 
 import type { SettlementRecord } from '../map/settlements.js';
-import type { DisplacementState, FactionId, GameState, MunicipalityId } from './game_state.js';
+import type { CivilianCasualtiesByFaction, DisplacementState, FactionId, GameState, MunicipalityId } from './game_state.js';
 
 /** 52w plan Step 6.5.2: true when the faction has at least one brigade present in the municipality (OSID location). */
 export function factionHasBrigadeInMunicipality(
@@ -24,16 +24,12 @@ export function factionHasBrigadeInMunicipality(
     return false;
 }
 
-const FACTION_IDS: FactionId[] = ['HRHB', 'RBiH', 'RS'];
-
-/** Ensure civilian_casualties exists and has all factions. */
-function ensureCivilianCasualties(state: GameState): void {
+/** Ensure civilian_casualties exists without pre-seeding factions. */
+function ensureCivilianCasualties(state: GameState): CivilianCasualtiesByFaction {
     if (!state.displacement.civilian_casualties) {
         state.displacement.civilian_casualties = {};
-        for (const fid of FACTION_IDS) {
-            state.displacement.civilian_casualties[fid] = { killed: 0, fled_abroad: 0 };
-        }
     }
+    return state.displacement.civilian_casualties;
 }
 
 /** Record civilian displacement casualties (killed, fled_abroad) for an ethnicity-aligned faction. */
@@ -43,13 +39,10 @@ export function recordCivilianDisplacementCasualties(
     killed: number,
     fledAbroad: number
 ): void {
-    ensureCivilianCasualties(state);
-    const casualties = state.displacement.civilian_casualties ?? {};
-    const entry = casualties[factionId];
-    if (entry) {
-        entry.killed += killed;
-        entry.fled_abroad += fledAbroad;
-    }
+    const casualties = ensureCivilianCasualties(state);
+    const entry = casualties[factionId] ??= { killed: 0, fled_abroad: 0 };
+    entry.killed += killed;
+    entry.fled_abroad += fledAbroad;
 }
 
 export function getOrInitDisplacementState(

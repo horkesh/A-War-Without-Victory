@@ -34,13 +34,14 @@ All Pyrrhic roles are subject to Process QA validation when they produce work: O
 ## Required reading (for audit)
 
 - `docs/10_canon/context.md` (process canon; §1 defines ledger structure: changelog + thematic knowledge base)
-- `.agent/napkin.md` (corrections, preferences, patterns)
+- `.claude/napkin.md` and `docs/life_lessons.md` (corrections, preferences, patterns)
+- `docs/plans/COMMAND_BOARD.md` (current roadmap/backlog ownership and active-lane status)
 - `docs/PROJECT_LEDGER.md` (append-only changelog; current state and recent entries)
 - `docs/PROJECT_LEDGER_KNOWLEDGE.md` (thematic index; optional update when entry carries reusable knowledge per context.md §1)
 
 ## Checklist (validate — evidence required)
 
-1. **context.md (or docs_index) read before work** — Evidence: stated in handoff note, or work aligns with context (e.g. ledger format, no FORAWWV edit).
+1. **context and command board read before work** — Evidence: stated in handoff note, or work aligns with `docs/10_canon/context.md`, `docs/plans/COMMAND_BOARD.md`, ledger format, and no unauthorized FORAWWV edit.
 2. **PROJECT_LEDGER updated** for behavioral/output/scenario changes per context.md — Evidence: ledger entry appended to `docs/PROJECT_LEDGER.md` (changelog), dated and describing the change. When the change carries reusable knowledge (pattern, decision, lesson), `docs/PROJECT_LEDGER_KNOWLEDGE.md` should be updated per context.md §1 — Evidence: thematic section added/updated or N/A.
 3. **Napkin read at session start** per context.md — Evidence: work aligns with napkin or napkin was updated as needed.
 4. **Commit-per-phase discipline** observed; no multi-phase commits without explicit approval — Evidence: commit message and scope match single phase or approved multi-phase.

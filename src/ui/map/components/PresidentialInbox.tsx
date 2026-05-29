@@ -129,11 +129,11 @@ function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) 
 function OpeningBrief({
     faction,
     onDismiss,
-    onOpenDecisionRoom,
+    onOpenDesk,
 }: {
     faction: string;
     onDismiss: () => void;
-    onOpenDecisionRoom: () => void;
+    onOpenDesk: () => void;
 }) {
     const brief = OPENING_BRIEFS[faction];
     if (!brief) return null;
@@ -156,7 +156,7 @@ function OpeningBrief({
                 <button
                     type="button"
                     onClick={() => {
-                        onOpenDecisionRoom();
+                        onOpenDesk();
                         onDismiss();
                     }}
                     className="text-[9px] font-bold uppercase tracking-widest text-accent-gold hover:text-white transition-colors"
@@ -175,7 +175,7 @@ function OpeningBrief({
     );
 }
 
-function QuietInboxCapsule({ onOpenDecisionRoom }: { onOpenDecisionRoom: () => void }) {
+function QuietInboxCapsule({ onOpenDesk }: { onOpenDesk: () => void }) {
     return (
         <div className="rounded border border-panel-border bg-panel-card/80 p-3 space-y-2">
             <div className="flex items-start justify-between gap-3">
@@ -195,7 +195,7 @@ function QuietInboxCapsule({ onOpenDecisionRoom }: { onOpenDecisionRoom: () => v
             <div className="grid grid-cols-2 gap-1.5">
                 <button
                     type="button"
-                    onClick={onOpenDecisionRoom}
+                    onClick={onOpenDesk}
                     className="rounded border border-accent-gold/25 bg-accent-gold/8 px-2 py-2 text-left hover:bg-accent-gold/12 transition-colors"
                 >
                     <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-accent-gold">
@@ -264,7 +264,7 @@ export function PresidentialInbox({ onAction }: PresidentialInboxProps) {
                     <OpeningBrief
                         faction={playerFaction}
                         onDismiss={() => setBriefDismissed(true)}
-                        onOpenDecisionRoom={() => onAction('army_hq_briefing', 'opening-brief:decision-room')}
+                        onOpenDesk={() => onAction('army_hq_briefing', 'opening-brief:desk')}
                     />
                 )}
 
@@ -283,7 +283,7 @@ export function PresidentialInbox({ onAction }: PresidentialInboxProps) {
 
                 {/* Empty state */}
                 {actionableItems.length === 0 && briefDismissed && (
-                    <QuietInboxCapsule onOpenDecisionRoom={() => onAction('army_hq_briefing', 'empty:decision-room')} />
+                    <QuietInboxCapsule onOpenDesk={() => onAction('army_hq_briefing', 'empty:desk')} />
                 )}
 
                 {/* Situation divider + items */}

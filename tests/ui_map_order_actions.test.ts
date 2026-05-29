@@ -103,7 +103,7 @@ describe('ui map order actions', () => {
       setTurnAftermathOpen,
     });
 
-    expect(setLoadError).toHaveBeenCalledWith('pending_required_decisions');
+    expect(setLoadError).toHaveBeenCalledWith('Presidential decisions are still unsigned. Review the highlighted desk item before advancing.');
     expect(setTurnAftermath).not.toHaveBeenCalled();
     expect(setTurnAftermathOpen).not.toHaveBeenCalled();
   });

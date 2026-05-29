@@ -312,8 +312,7 @@ describe('v0.8.1 Phase 6 — Decision Trace QA', () => {
 
         it('inert path (clearing abandoned plan) does NOT emit decision_trace', () => {
             // previousPlan.status = 'abandoned' → first guard in advanceExistingPlan fires,
-            // returns { plan: null, action: 'none', reason: '...', concentration_orders: [] }
-            // with no decision_trace field
+            // returns { plan: null, action: 'none', reason: '...' } with no decision_trace field
             const plan = makePlan({ status: 'abandoned' });
 
             const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);

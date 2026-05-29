@@ -27,7 +27,22 @@ function makeState(phase0Value?: number): GameState {
                 ? {}
                 : { phase0_relationships: { rbih_rs: 0.5, rbih_hrhb: phase0Value } })
         } as GameState['political'],
-        displacement: {}
+        displacement: {
+            displacement_state: {},
+            minority_flight_state: {},
+            sustainability_state: {},
+            war_displacement_initiated: {},
+            hostile_takeover_timers: {},
+            displacement_camp_state: {},
+            displacement_event_log: [],
+            displacement_humanitarian_aggregates: {},
+            displacement_origin_dest_arrivals: {},
+            displacement_recent_by_turn: {},
+            settlement_displacement: {},
+            settlement_displacement_started_turn: {},
+            municipality_displacement: {},
+            civilian_casualties: {},
+        }
     } as GameState;
 }
 

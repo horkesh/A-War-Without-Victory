@@ -41,6 +41,11 @@ test('initial_save is already in canonical loaded-save form at campaign birth', 
         initialSave,
         'desktop in-memory startup state should match the canonical initial_save exactly',
     );
+    assert.deepStrictEqual(
+        inMemoryState.military.unresolved_sector_brigades ?? [],
+        [],
+        'desktop campaign birth should not leave active brigades outside sector ownership',
+    );
 
     await ensureRemoved(outDir);
 }, 120_000);
@@ -73,6 +78,11 @@ test('desktop startup path uses the in-memory startup builder instead of harness
         createStateBody,
         /const \{ state \} = await buildScenarioStartupState\(scenario, baseDir\);/,
         'desktop initialStateOnly path should use the shared in-memory startup builder',
+    );
+    assert.match(
+        createStateBody,
+        /pushRoutineConsoleDiagnosticsSuppressed\(\);[\s\S]*try \{[\s\S]*buildScenarioStartupState\(scenario, baseDir\)[\s\S]*finally \{[\s\S]*popRoutineConsoleDiagnosticsSuppressed\(\);[\s\S]*\}/,
+        'desktop initialStateOnly path should suppress routine startup diagnostics',
     );
     assert.match(
         createStateBody,

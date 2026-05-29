@@ -146,7 +146,7 @@ describe('buildPreAdvanceCommandReviewView', () => {
     setLocale('en');
   });
 
-  it('projects the Decision Room advance-readiness list for the turn confirmation flow', () => {
+  it('projects the Advance Clearance list with direct Desk routing for presidential decisions', () => {
     const state = makeState({
       presidentialReviewQueue: {
         pendingCount: 2,
@@ -184,23 +184,24 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.items[0]).toMatchObject({
       severity: 'blocking',
       category: 'decision',
-      actionLabel: 'Review Queue',
+      actionLabel: 'Open Desk',
       sourceOwner: 'Presidential review queue',
-      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+      navigationTarget: { kind: 'inbox' },
     });
     expect(view.items.find((item) => item.id === 'turn:31:hard-turn')).toMatchObject({
       actionLabel: 'Open Turn Record',
       navigationTarget: { kind: 'army-hq-aftermath-record', turn: 31 },
     });
     expect(view.sourceHandoffs.map((handoff) => handoff.id)).toEqual([
+      'presidential-inbox',
       'army-hq-briefing',
       'army-hq-summary',
       'turn-aftermath-records',
     ]);
     expect(view.sourceHandoffs[0]).toMatchObject({
-      label: 'Army HQ Briefing',
-      count: 2,
-      cardIds: ['review:pending', 'opportunity:opp_pre_advance'],
+      label: 'Presidential Inbox',
+      count: 1,
+      cardIds: ['review:pending'],
     });
   });
 
@@ -236,7 +237,7 @@ describe('buildPreAdvanceCommandReviewView', () => {
       id: 'paramilitary:pending',
       severity: 'blocking',
       category: 'decision',
-      actionLabel: 'Open Inbox',
+      actionLabel: 'Review deployment',
       navigationTarget: { kind: 'inbox' },
     });
   });
@@ -329,6 +330,7 @@ describe('buildPreAdvanceCommandReviewView', () => {
       review.items.map((item) => [item.id, sourceTargetsById[item.id]]),
     );
     expect(review.sourceHandoffs.map((handoff) => [handoff.id, handoff.navigationTarget])).toEqual([
+      ['presidential-inbox', { kind: 'inbox' }],
       ['army-hq-briefing', { kind: 'army-hq-tab', tab: 'briefing' }],
       ['army-hq-summary', { kind: 'army-hq-tab', tab: 'summary' }],
       ['turn-aftermath-records', { kind: 'army-hq-aftermath-record', turn: 31 }],

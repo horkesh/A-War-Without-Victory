@@ -20,7 +20,7 @@ const EMERGENCY_EVENT_IDS = new Set([
     'nato_deliberate_force_1995',
     'operation_storm_1995',
     'croat_bosniak_war_begins_1993',
-    'washington_agreement_1994',
+    'hrhb_washington_agreement_1994',
 ]);
 
 // ── Corps communication constraints ─────────────────────────────────────────

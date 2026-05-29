@@ -190,6 +190,19 @@ describe('player visibility helpers', () => {
     expect(filterPlayerVisibleMapFormations(state).map((f) => f.id)).toEqual(['own_1', 'enemy_seen']);
   });
 
+  it('keeps all map formations visible when inspecting headless saves without a player faction', () => {
+    const state = {
+      player_faction: null,
+      formations: [
+        { id: 'arbih_1', faction: 'RBiH', name: 'Own Brigade', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:own' },
+        { id: 'rs_1', faction: 'RS', name: 'RS Brigade', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:enemy' },
+        { id: 'hrhb_1', faction: 'HRHB', name: 'HVO Brigade', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:hvo' },
+      ],
+    } as unknown as LoadedGameState;
+
+    expect(filterPlayerVisibleMapFormations(state).map((f) => f.id)).toEqual(['arbih_1', 'rs_1', 'hrhb_1']);
+  });
+
   it('formation geojson excludes enemy formations outside fog visibility', () => {
     const state = {
       player_faction: 'RBiH',

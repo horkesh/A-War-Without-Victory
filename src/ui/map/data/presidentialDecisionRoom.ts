@@ -9,6 +9,7 @@ import {
 import { buildPlayerSupplyVisibility } from './playerSupplyVisibility';
 import { buildPlayerArmyCoPushbackVisibility } from './playerArmyCoPushbackVisibility';
 import { t, type MessageKey } from '../i18n';
+import { getDecisionSurface } from './decisionSurfaceRegistry';
 
 export type PresidentialDecisionRoomCategory =
   | 'decision'
@@ -167,6 +168,12 @@ type CandidateCard = Omit<PresidentialDecisionRoomCard, 'sortKey'> & {
   sourceSort: string;
 };
 
+type ManifestModalFamilyId = 'peace_plan' | 'dayton_negotiation' | 'convoy_decision';
+
+function isManifestModalFamilyId(value: string): value is ManifestModalFamilyId {
+  return value === 'peace_plan' || value === 'dayton_negotiation' || value === 'convoy_decision';
+}
+
 const LARGE_SORT = 999999;
 
 const SEVERITY_RANK: Record<PresidentialDecisionRoomSeverity, number> = {
@@ -305,10 +312,10 @@ function addReviewCard(state: LoadedGameState, cards: CandidateCard[]): void {
       ? t('decisionRoom.card.review.explanation.blocking')
       : t('decisionRoom.card.review.explanation.openWork'),
     sourceOwner: t('decisionRoom.card.review.sourceOwner'),
-    sourceLabel: t('decisionRoom.source.armyHqBriefing'),
-    actionLabel: t('decisionRoom.action.reviewQueue'),
+    sourceLabel: 'Presidential Inbox',
+    actionLabel: 'Open Desk',
     evidence,
-    navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+    navigationTarget: { kind: 'inbox' },
     urgencySort: queue.eventDecisionCount > 0 ? 0 : 10,
     sourceSort: 'review',
   });
@@ -318,6 +325,7 @@ function addParamilitaryReviewCard(state: LoadedGameState, cards: CandidateCard[
   const requests = state.pendingParamilitaryRequests ?? [];
   if (requests.length === 0) return;
 
+  const surface = getDecisionSurface('paramilitary_request');
   const totalStrength = requests.reduce((sum, request) => sum + request.strength, 0);
   cards.push({
     id: 'paramilitary:pending',
@@ -327,7 +335,7 @@ function addParamilitaryReviewCard(state: LoadedGameState, cards: CandidateCard[
     explanation: t('decisionRoom.card.paramilitary.explanation'),
     sourceOwner: t('decisionRoom.card.paramilitary.sourceOwner'),
     sourceLabel: t('decisionRoom.card.paramilitary.sourceLabel'),
-    actionLabel: t('decisionRoom.action.openInbox'),
+    actionLabel: surface.actionLabel,
     evidence: [
       t('decisionRoom.card.paramilitary.evidence.deploymentRequests', { count: requests.length }),
       t('decisionRoom.card.paramilitary.evidence.estimatedStrength', { strength: totalStrength }),
@@ -374,8 +382,9 @@ function addManifestDecisionCards(state: LoadedGameState, cards: CandidateCard[]
     const blockingCount = family.blockingCount ?? (family.gatePolicy === 'advisory' ? 0 : family.count);
     if (blockingCount <= 0) continue;
     if (family.id === 'event_decision' || family.id === 'paramilitary_request') continue;
+    if (!isManifestModalFamilyId(family.id)) continue;
     const spec = cardSpecs[family.id];
-    if (!spec) continue;
+    const surface = getDecisionSurface(family.id);
     const id = `manifest:${family.id}`;
     if (existingIds.has(id)) continue;
     cards.push({
@@ -385,8 +394,8 @@ function addManifestDecisionCards(state: LoadedGameState, cards: CandidateCard[]
       title: t(spec.titleKey),
       explanation: t(spec.explanationKey),
       sourceOwner: t('decisionRoom.card.manifest.sourceOwner'),
-      sourceLabel: t(spec.sourceLabelKey),
-      actionLabel: t(spec.actionLabelKey),
+      sourceLabel: surface.sourceLabel,
+      actionLabel: surface.actionLabel,
       evidence: [t('decisionRoom.card.manifest.evidence.pendingItems', { count: blockingCount })],
       navigationTarget: { kind: 'inbox' },
       urgencySort: -1,
@@ -818,6 +827,13 @@ function describeSourceHandoffTarget(
       id: 'counter-offer-docket',
       label: t('decisionRoom.source.counterOfferDocket'),
       actionLabel: t('decisionRoom.action.reviewCounter'),
+    };
+  }
+  if (target.kind === 'inbox') {
+    return {
+      id: 'presidential-inbox',
+      label: 'Presidential Inbox',
+      actionLabel: 'Open Desk',
     };
   }
   if (target.kind === 'chronicle') {

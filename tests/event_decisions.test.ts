@@ -6,11 +6,20 @@
  * Tests pass event definitions via the registry parameter (no global mutation).
  */
 
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
 import type { GameState } from '../src/state/game_state';
 import type { EventDefinition } from '../src/sim/events/event_types';
 import { resolveEventDecision } from '../src/sim/events/resolve_decision';
 import { evaluateEvents } from '../src/sim/events/evaluate_events';
+import { updateEventReadiness } from '../src/sim/events/pressure_system';
+
+const ORIGINAL_TWO_LEVEL_FLAG = process.env.AWWV_TWO_LEVEL_NOTIFICATIONS;
+
+afterEach(() => {
+    if (ORIGINAL_TWO_LEVEL_FLAG === undefined) delete process.env.AWWV_TWO_LEVEL_NOTIFICATIONS;
+    else process.env.AWWV_TWO_LEVEL_NOTIFICATIONS = ORIGINAL_TWO_LEVEL_FLAG;
+});
 
 function makeMinimalState(playerFaction?: string): GameState {
     return {
@@ -30,6 +39,37 @@ function makeMinimalState(playerFaction?: string): GameState {
         displacement: {} as any,
         economic: {} as any,
     } as unknown as GameState;
+}
+
+function loadLukavacEvent(): EventDefinition {
+    const events = JSON.parse(readFileSync('data/scenarios/events/war_1993.json', 'utf8')) as EventDefinition[];
+    const lukavac = events.find((event) => event.id === 'operation_lukavac_93');
+    if (!lukavac) throw new Error('operation_lukavac_93 fixture not found');
+    return lukavac;
+}
+
+function loadEventFromFile(file: string, eventId: string): EventDefinition {
+    const events = JSON.parse(readFileSync(file, 'utf8')) as EventDefinition[];
+    const event = events.find((entry) => entry.id === eventId);
+    if (!event) throw new Error(`${eventId} fixture not found`);
+    return event;
+}
+
+function makeLukavacReadyState(): GameState {
+    const state = makeMinimalState('RS');
+    state.meta.turn = 65;
+    state.military.event_flags = { sarajevo_siege_active: true };
+    state.military.event_readiness = {};
+    state.political = {
+        political_controllers: {
+            'op:trnovo:trnovo_2': 'RS',
+            'op:trnovo:dejcici': 'RBiH',
+            'op:hadzici:lokve': 'RS',
+            'op:hadzici:pazaric': 'RS',
+            'op:hadzici:tarcin_2': 'RS',
+        },
+    } as any;
+    return state;
 }
 
 const DECISION_EVENT: EventDefinition = {
@@ -52,6 +92,32 @@ const DECISION_EVENT: EventDefinition = {
             label: 'Reject the proposal',
             description: 'Maintains current position.',
             effects: [{ kind: 'morale_change', faction: 'RBiH', delta: -5 }],
+        },
+    ],
+};
+
+const EXPLICIT_HISTORICAL_EVENT: EventDefinition = {
+    id: 'test_explicit_historical_event',
+    title: 'Explicit historical default test',
+    trigger: { turn_min: 5, turn_max: 5, phase: 'war' },
+    effect: { kind: 'narrative', text: 'A choice with a non-first historical default fires.' },
+    once: true,
+    responding_faction: 'RBiH',
+    requires_player_response: true,
+    bot_response_logic: 'historical',
+    historical_default_response_id: 'historical_path',
+    response_options: [
+        {
+            id: 'counterfactual_path',
+            label: 'Counterfactual path',
+            historical_marker: 'counterfactual',
+            effects: [{ kind: 'supply_delta', faction: 'RBiH', delta: -7 }],
+        },
+        {
+            id: 'historical_path',
+            label: 'Historical path',
+            historical_marker: 'historical_default',
+            effects: [{ kind: 'supply_delta', faction: 'RBiH', delta: 13 }],
         },
     ],
 };
@@ -128,6 +194,89 @@ describe('Event Decisions', () => {
         expect(state.military.pending_event_decisions ?? []).toHaveLength(0);
     });
 
+    it('bot historical logic chooses explicit historical_default_response_id instead of option 0', () => {
+        const state = makeMinimalState(undefined);
+        const initialSupply = state.military.general_supply_reserve!['RBiH'];
+        const rng = () => 0.5;
+
+        evaluateEvents(state, rng, 5, [EXPLICIT_HISTORICAL_EVENT]);
+
+        expect(state.military.general_supply_reserve!['RBiH']).toBe(initialSupply + 13);
+        expect(state.military.event_decision_log).toEqual([
+            {
+                event_id: 'test_explicit_historical_event',
+                response_id: 'historical_path',
+                decision_source: 'bot_v1',
+                faction: 'RBiH',
+                turn: 5,
+            },
+        ]);
+    });
+
+    it('accept_first preserves option 0 even when an explicit historical default points elsewhere', () => {
+        const state = makeMinimalState(undefined);
+        const initialSupply = state.military.general_supply_reserve!['RBiH'];
+        const rng = () => 0.5;
+
+        evaluateEvents(state, rng, 5, [
+            {
+                ...EXPLICIT_HISTORICAL_EVENT,
+                id: 'test_accept_first_conflict_event',
+                bot_response_logic: 'accept_first',
+            },
+        ]);
+
+        expect(state.military.general_supply_reserve!['RBiH']).toBe(initialSupply - 7);
+        expect(state.military.event_decision_log?.[0]?.response_id).toBe('counterfactual_path');
+    });
+
+    it('two-level bot default keeps accept_first on option 0 when explicit historical default points to option 2', () => {
+        process.env.AWWV_TWO_LEVEL_NOTIFICATIONS = 'true';
+        const state = makeMinimalState(undefined);
+        const initialSupply = state.military.general_supply_reserve!['RBiH'];
+        const rng = () => 0.5;
+
+        evaluateEvents(state, rng, 5, [
+            {
+                ...EXPLICIT_HISTORICAL_EVENT,
+                id: 'test_two_level_accept_first_conflict_event',
+                bot_response_logic: 'accept_first',
+                historical_default_response_id: 'historical_option_2',
+                response_options: [
+                    {
+                        id: 'option_0',
+                        label: 'Option 0',
+                        historical_marker: 'counterfactual',
+                        effects: [{ kind: 'supply_delta', faction: 'RBiH', delta: -7 }],
+                    },
+                    {
+                        id: 'option_1',
+                        label: 'Option 1',
+                        historical_marker: 'counterfactual',
+                        effects: [{ kind: 'supply_delta', faction: 'RBiH', delta: 3 }],
+                    },
+                    {
+                        id: 'historical_option_2',
+                        label: 'Historical option 2',
+                        historical_marker: 'historical_default',
+                        effects: [{ kind: 'supply_delta', faction: 'RBiH', delta: 13 }],
+                    },
+                ],
+            },
+        ]);
+
+        expect(state.military.general_supply_reserve!['RBiH']).toBe(initialSupply - 7);
+        expect(state.military.event_decision_log).toEqual([
+            {
+                event_id: 'test_two_level_accept_first_conflict_event',
+                response_id: 'option_0',
+                decision_source: 'bot_ai_default',
+                faction: 'RBiH',
+                turn: 5,
+            },
+        ]);
+    });
+
     it('bot auto-responds once with reject_all (picks last option)', () => {
         const state = makeMinimalState(undefined);
         const initialSupply = state.military.general_supply_reserve!['RS'];
@@ -154,6 +303,216 @@ describe('Event Decisions', () => {
             faction: 'RS',
             requires_player_response: true,
         });
+    });
+
+    it('queues Lukavac for the RS player when readiness and runtime gates are open', () => {
+        const lukavac = loadLukavacEvent();
+        const state = makeLukavacReadyState();
+
+        updateEventReadiness(state, [lukavac]);
+        expect(state.military.event_readiness?.operation_lukavac_93).toBeGreaterThan(lukavac.pressure!.threshold);
+
+        const report = evaluateEvents(state, () => 0, 65, [lukavac]);
+
+        expect(report.fired).toEqual([{ id: 'operation_lukavac_93', text: lukavac.title }]);
+        expect(state.military.pending_event_decisions).toHaveLength(1);
+        expect(state.military.pending_event_decisions![0]).toMatchObject({
+            event_id: 'operation_lukavac_93',
+            event_title: lukavac.title,
+            faction: 'RS',
+            requires_player_response: true,
+        });
+        expect(state.military.fired_event_ids).toContain('operation_lukavac_93');
+        expect(state.military.event_readiness?.operation_lukavac_93).toBe(0);
+    });
+
+    it('does not queue Lukavac when the Sarajevo siege gate closes after readiness crosses threshold', () => {
+        const lukavac = loadLukavacEvent();
+        const state = makeLukavacReadyState();
+
+        updateEventReadiness(state, [lukavac]);
+        expect(state.military.event_readiness?.operation_lukavac_93).toBe(4);
+
+        state.military.event_flags = { sarajevo_siege_active: false };
+        updateEventReadiness(state, [lukavac]);
+        expect(state.military.event_readiness?.operation_lukavac_93).toBe(3);
+
+        const report = evaluateEvents(state, () => 0, 65, [lukavac]);
+
+        expect(report.fired.map((event) => event.id)).not.toContain('operation_lukavac_93');
+        expect(state.military.pending_event_decisions ?? []).toHaveLength(0);
+        expect(state.military.fired_event_ids ?? []).not.toContain('operation_lukavac_93');
+    });
+
+    it('does not queue Lukavac when the Trnovo gate closes after readiness crosses threshold', () => {
+        const lukavac = loadLukavacEvent();
+        const state = makeLukavacReadyState();
+
+        updateEventReadiness(state, [lukavac]);
+        expect(state.military.event_readiness?.operation_lukavac_93).toBe(4);
+
+        state.political.political_controllers = {
+            ...state.political.political_controllers,
+            'op:trnovo:trnovo_2': 'RBiH',
+        };
+        updateEventReadiness(state, [lukavac]);
+        expect(state.military.event_readiness?.operation_lukavac_93).toBe(3);
+
+        const report = evaluateEvents(state, () => 0, 65, [lukavac]);
+
+        expect(report.fired.map((event) => event.id)).not.toContain('operation_lukavac_93');
+        expect(state.military.pending_event_decisions ?? []).toHaveLength(0);
+        expect(state.military.fired_event_ids ?? []).not.toContain('operation_lukavac_93');
+    });
+
+    it('pending event decisions carry historical and staff recommendation metadata for modal marking', () => {
+        const state = makeMinimalState('RBiH');
+        const rng = () => 0.5;
+
+        evaluateEvents(state, rng, 5, [{
+            ...EXPLICIT_HISTORICAL_EVENT,
+            staff_recommended_response_id: 'counterfactual_path',
+        }]);
+
+        const pending = state.military.pending_event_decisions![0];
+        expect(pending.historical_default_response_id).toBe('historical_path');
+        expect(pending.staff_recommended_response_id).toBe('counterfactual_path');
+        expect(pending.response_options.map((option) => [option.id, option.historical_marker])).toEqual([
+            ['counterfactual_path', 'counterfactual'],
+            ['historical_path', 'historical_default'],
+        ]);
+    });
+
+    it('real RBiH visit-to-front row queues with staff recommendation but no historical default', () => {
+        const event = {
+            ...loadEventFromFile('data/scenarios/events/war_1993.json', 'visit_to_front_rbih'),
+            trigger: { turn_min: 5, turn_max: 5, phase: 'war' as const },
+            pressure: undefined,
+        };
+        const state = makeMinimalState('RBiH');
+
+        evaluateEvents(state, () => 0, 5, [event]);
+
+        const pending = state.military.pending_event_decisions![0];
+        expect(pending.event_id).toBe('visit_to_front_rbih');
+        expect(pending.staff_recommended_response_id).toBe('stay_capital_rbih');
+        expect(pending.historical_default_response_id).toBeUndefined();
+        expect(pending.response_options.map((option) => option.id)).toContain('stay_capital_rbih');
+    });
+
+    it('pending event decisions carry authored dossier fields from real evaluation output', () => {
+        const state = makeMinimalState('RBiH');
+        const rng = () => 0.5;
+
+        evaluateEvents(state, rng, 5, [
+            {
+                ...DECISION_EVENT,
+                id: 'test_authored_dossier_event',
+                title: 'Authored Dossier Event',
+                narrative: 'Authored player-facing narrative for the modal dossier.',
+                category: 'diplomatic',
+                historical_source: 'Synthetic historical packet',
+                source_note: 'Synthetic source note',
+                source: 'Synthetic source field',
+                staff_assessment: 'Staff assesses this as a player-facing policy choice.',
+                trigger_evidence: ['Ceasefire talks opened', 'Cabinet requested a response'],
+            },
+        ]);
+
+        const pending = state.military.pending_event_decisions![0];
+        expect(pending).toMatchObject({
+            event_id: 'test_authored_dossier_event',
+            event_title: 'Authored Dossier Event',
+            narrative: 'Authored player-facing narrative for the modal dossier.',
+            category: 'diplomatic',
+            historical_source: 'Synthetic historical packet',
+            source_note: 'Synthetic source note',
+            source: 'Synthetic source field',
+            staff_assessment: 'Staff assesses this as a player-facing policy choice.',
+            trigger_evidence: ['Ceasefire talks opened', 'Cabinet requested a response'],
+        });
+        expect('rationale' in pending).toBe(false);
+    });
+
+    it('packet 3 authored rows expose historical defaults and dossier fields for modal decisions', () => {
+        const fixtures = [
+            loadEventFromFile('data/scenarios/events/war_1993.json', 'operation_lukavac_93'),
+            loadEventFromFile('data/scenarios/events/war_1993.json', 'os_rbih_tactical_acceptance_1993'),
+            loadEventFromFile('data/scenarios/events/consequences.json', 'csq_patron_recovery_offer'),
+        ];
+
+        expect(fixtures.map((event) => [event.id, event.bot_response_logic, event.historical_default_response_id])).toEqual([
+            ['operation_lukavac_93', 'historical', 'comply'],
+            ['os_rbih_tactical_acceptance_1993', 'historical', 'reject_via_assembly'],
+            ['csq_patron_recovery_offer', 'historical', 'accept_recovery'],
+        ]);
+
+        for (const event of fixtures) {
+            const options = event.response_options ?? [];
+            expect(typeof event.source_note, event.id).toBe('string');
+            expect(typeof event.staff_assessment, event.id).toBe('string');
+            expect(event.trigger_evidence, event.id).toEqual(expect.arrayContaining([expect.any(String)]));
+            expect(options.filter((option) => option.historical_marker === 'historical_default').map((option) => option.id), event.id)
+                .toEqual([event.historical_default_response_id]);
+            expect(options.every((option) => typeof option.description === 'string'), event.id).toBe(true);
+            expect(options.every((option) => typeof option.risk_level === 'number' || typeof option.aggression_affinity === 'number'), event.id).toBe(true);
+        }
+    });
+
+    it('diplomatic packet rows expose historical defaults and dossier fields for modal decisions', () => {
+        const fixtures = [
+            loadEventFromFile('data/scenarios/events/war_1994.json', 'hrhb_washington_agreement_1994'),
+            loadEventFromFile('data/scenarios/events/war_1994.json', 'contact_group_plan_1994'),
+            loadEventFromFile('data/scenarios/events/war_1995.json', 'dayton_talks_begin_1995'),
+        ];
+
+        expect(fixtures.map((event) => [event.id, event.bot_response_logic, event.historical_default_response_id])).toEqual([
+            ['hrhb_washington_agreement_1994', 'historical', 'accept'],
+            ['contact_group_plan_1994', 'historical', 'accept'],
+            ['dayton_talks_begin_1995', 'historical', 'accept'],
+        ]);
+
+        for (const event of fixtures) {
+            const options = event.response_options ?? [];
+            expect(typeof event.historical_source, event.id).toBe('string');
+            expect(typeof event.source_note, event.id).toBe('string');
+            expect(typeof event.staff_assessment, event.id).toBe('string');
+            expect(event.trigger_evidence, event.id).toEqual(expect.arrayContaining([expect.any(String)]));
+            expect(options[0]?.id, event.id).toBe(event.historical_default_response_id);
+            expect(options.filter((option) => option.historical_marker === 'historical_default').map((option) => option.id), event.id)
+                .toEqual([event.historical_default_response_id]);
+            expect(options.every((option) => typeof option.description === 'string'), event.id).toBe(true);
+            expect(options.every((option) => typeof option.risk_level === 'number' || typeof option.aggression_affinity === 'number'), event.id).toBe(true);
+        }
+    });
+
+    it('1993 required-response packet rows expose historical defaults and dossier fields for modal decisions', () => {
+        const fixtures = [
+            loadEventFromFile('data/scenarios/events/war_1993.json', 'gornji_vakuf_clashes_1993'),
+            loadEventFromFile('data/scenarios/events/war_1993.json', 'ic_pressure_vopp_engagement'),
+            loadEventFromFile('data/scenarios/events/war_1993.json', 'vance_owen_plan_1993'),
+            loadEventFromFile('data/scenarios/events/war_1993.json', 'strategic_posture_review_hrhb'),
+        ];
+
+        expect(fixtures.map((event) => [event.id, event.bot_response_logic, event.historical_default_response_id])).toEqual([
+            ['gornji_vakuf_clashes_1993', 'historical', 'escalate'],
+            ['ic_pressure_vopp_engagement', 'historical', 'acknowledge_pressure'],
+            ['vance_owen_plan_1993', 'historical', 'accept'],
+            ['strategic_posture_review_hrhb', 'historical', 'press_croat_objectives'],
+        ]);
+
+        for (const event of fixtures) {
+            const options = event.response_options ?? [];
+            expect(typeof event.historical_source, event.id).toBe('string');
+            expect(typeof event.source_note, event.id).toBe('string');
+            expect(typeof event.staff_assessment, event.id).toBe('string');
+            expect(event.trigger_evidence, event.id).toEqual(expect.arrayContaining([expect.any(String)]));
+            expect(options[0]?.id, event.id).toBe(event.historical_default_response_id);
+            expect(options.filter((option) => option.historical_marker === 'historical_default').map((option) => option.id), event.id)
+                .toEqual([event.historical_default_response_id]);
+            expect(options.every((option) => typeof option.description === 'string'), event.id).toBe(true);
+            expect(options.every((option) => typeof option.risk_level === 'number' && typeof option.aggression_affinity === 'number'), event.id).toBe(true);
+        }
     });
 
     it('resolveEventDecision applies effects and removes pending', () => {

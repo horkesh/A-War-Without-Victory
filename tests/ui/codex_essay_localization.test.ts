@@ -10,6 +10,14 @@ import {
 const essays = (essayIndex as { essays: EssayEntry[] }).essays;
 const ghostDir = resolve(__dirname, '..', '..', 'data/codex/ghost_entries');
 const ghostBcsDir = resolve(__dirname, '..', '..', 'data/codex/ghost_entries_bcs');
+const war1994Events = JSON.parse(readFileSync(
+    resolve(__dirname, '..', '..', 'data/scenarios/events/war_1994.json'),
+    'utf8',
+)) as Array<{ id: string; narrative?: string; historical_source?: string }>;
+const war1995Events = JSON.parse(readFileSync(
+    resolve(__dirname, '..', '..', 'data/scenarios/events/war_1995.json'),
+    'utf8',
+)) as Array<{ id: string; narrative?: string; historical_source?: string }>;
 
 const forbiddenBcsPatterns = [
     /\btjed/i,
@@ -95,6 +103,33 @@ describe('Codex essay localization coverage', () => {
         expect(corpus).not.toContain('cisti zapad');
         expect(corpus).not.toContain('in mid-october, the strategically important town of ključ');
         expect(corpus).not.toContain('on 11 october, sanski most');
+    });
+
+    it('keeps Bihac and 5th Corps operational prose bounded to sourced facts', () => {
+        const bihacEssay = essays.find((essay) => essay.id === 'essay_bihac_5th_corps_offensive_1994');
+        const sanaEssay = essays.find((essay) => essay.id === 'essay_operation_sana_1995');
+        const bihacEvent = war1994Events.find((event) => event.id === 'bihac_5th_corps_offensive_1994');
+        const sanaEvent = war1995Events.find((event) => event.id === 'operation_sana_1995');
+
+        expect(bihacEssay?.sources).toContain('Balkan Battlegrounds II, pp. 536-538');
+        expect(bihacEvent?.historical_source).toContain('BB Vol. II pp. 536-538');
+        expect(bihacEvent?.narrative).toContain('Operation Grmec from the Bihac pocket toward VRS positions south and east of Bihac');
+        expect(bihacEvent?.narrative).toContain('later VRS, RSK, and APWB counteroffensive');
+        expect(sanaEvent?.narrative).toContain('Bosanski Petrovac fell on 15 September, Kljuc two days later');
+        expect(sanaEssay?.content).toContain('Bosanski Petrovac fell on 15 September, Ključ two days later');
+
+        const corpus = JSON.stringify({
+            bihacEssay,
+            sanaEssay,
+            bihacEvent,
+            sanaEvent,
+        }).toLowerCase();
+        expect(corpus).not.toContain('achieved the impossible');
+        expect(corpus).not.toContain('crushing abdic');
+        expect(corpus).not.toContain('sweeps south and east');
+        expect(corpus).not.toContain('methodical and devastating');
+        expect(corpus).not.toContain('sheer determination');
+        expect(corpus).not.toContain('spearheads the largest');
     });
 
     it('keeps Trusina title specific to perpetrator and place', () => {

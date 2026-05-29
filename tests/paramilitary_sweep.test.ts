@@ -435,6 +435,38 @@ describe('paramilitary_sweep', () => {
             resolvePlayerParamilitaryDecisions(state);
             expect(state.paramilitary_deployment_count).toEqual({ RS: 1 });
         });
+
+        it('files player paramilitary decisions into deterministic history records', () => {
+            const state = makeBaseState({
+                pending_paramilitary_requests: [
+                    { target_osid: 'D', faction: 'RS', strength: 150, decision: 'allow', estimated_civilian_risk: 12 },
+                    { target_osid: 'E', faction: 'RS', strength: 90, decision: 'deny', estimated_civilian_risk: 4 },
+                ],
+            });
+
+            resolvePlayerParamilitaryDecisions(state);
+
+            expect(state.paramilitary_decision_history).toEqual([
+                {
+                    id: 'paramilitary:5:D',
+                    turn: 5,
+                    target_osid: 'D',
+                    faction: 'RS',
+                    strength: 150,
+                    decision: 'allow',
+                    estimated_civilian_risk: 12,
+                },
+                {
+                    id: 'paramilitary:5:E',
+                    turn: 5,
+                    target_osid: 'E',
+                    faction: 'RS',
+                    strength: 90,
+                    decision: 'deny',
+                    estimated_civilian_risk: 4,
+                },
+            ]);
+        });
     });
 
     describe('isEligibleForReinforcement excludes paramilitaries', () => {

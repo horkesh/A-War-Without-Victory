@@ -27,9 +27,6 @@ import type { FactionId, GameState } from '../state/game_state.js';
 /** Week at which the Graz Accords fire (6 May 1992 ≈ week 4 of the scenario). */
 export const GRAZ_ACCORDS_TURN = 4;
 
-/** @deprecated Use GRAZ_ACCORDS_TURN. Alias kept for backward compatibility during migration. */
-export const VIENNA_DECLARATION_TURN = GRAZ_ACCORDS_TURN;
-
 /**
  * Corps pairs bound by the Herzegovina truce.
  * When active, these corps do not generate attack orders against each other's territory.
@@ -95,9 +92,6 @@ export function isGrazAccordsActive(state: GameState): boolean {
     if (!accepted) return false;
     return accepted['RS'] === true && accepted['HRHB'] === true;
 }
-
-/** @deprecated Use isGrazAccordsActive. */
-export const isViennaDeclarationActive = isGrazAccordsActive;
 
 /** Return true if the Herzegovina corps-pair truce is active (not broken). */
 export function isHerzegovinaTruceActive(state: GameState): boolean {
@@ -257,9 +251,6 @@ export function shouldGrazBlockAttack(
     return false;
 }
 
-/** @deprecated Use shouldGrazBlockAttack. */
-export const shouldViennaBlockAttack = shouldGrazBlockAttack;
-
 /**
  * Return extra aggression modifier for `faction` because the opponent broke the truce.
  * Returns TRUCE_BREAK_AGGRESSION_SPIKE for TRUCE_BREAK_SPIKE_TURNS turns after the break.
@@ -310,9 +301,6 @@ export function checkAndFireGrazAccords(state: GameState): string | null {
         + 'Kiseljak pocket forces hold positions. '
         + 'Posavina corridor fighting continues unabated.';
 }
-
-/** @deprecated Use checkAndFireGrazAccords. */
-export const checkAndFireViennaDeclaration = checkAndFireGrazAccords;
 
 /**
  * Record that `faction` broke the RS-HRHB truce by attacking the partner's territory.

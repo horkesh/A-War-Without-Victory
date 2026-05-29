@@ -60,6 +60,14 @@ function ensureArray(parent: Record<string, any> | undefined, key: string): any[
     return parent[key];
 }
 
+function ensureDisplacementRoot(state: GameState): Record<string, any> {
+    const root = state as Record<string, any>;
+    const existing = asRecord(root.displacement);
+    if (existing) return existing;
+    root.displacement = {};
+    return root.displacement;
+}
+
 function sanitizeNegotiationStatus(pol: Record<string, any>, turn: number): void {
     if (!pol.negotiation_status || typeof pol.negotiation_status !== 'object' || Array.isArray(pol.negotiation_status)) {
         pol.negotiation_status = { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null, last_counter_turn: {} };
@@ -437,6 +445,8 @@ registerMigration({
             ensureRecord(disp, 'settlement_displacement_started_turn');
             ensureRecord(disp, 'municipality_displacement');
             ensureArray(disp, 'displacement_event_log');
+        } else {
+            ensureArray(ensureDisplacementRoot(state), 'displacement_event_log');
         }
     },
 });
@@ -445,8 +455,8 @@ registerMigration({
     version: 8,
     description: 'Phase E/F humanitarian aggregate defaults. Sensitive: no.',
     migrate: (state) => {
-        const disp = asRecord(state.displacement);
-        if (!disp) return;
+        const disp = ensureDisplacementRoot(state);
+        ensureArray(disp, 'displacement_event_log');
         ensureRecord(disp, 'displacement_humanitarian_aggregates');
         ensureRecord(disp, 'displacement_origin_dest_arrivals');
         ensureRecord(disp, 'displacement_recent_by_turn');
@@ -535,6 +545,7 @@ registerMigration({
     migrate: (state) => {
         const meta = asRecord(state.meta);
         if (!meta) return;
+        ensureArray(asRecord(state.military), 'event_decision_log');
         // Headless harness exemption: when scenario_runner has marked this as a
         // headless run, do not backfill player_faction. Backfilling to 'RBiH'
         // causes events with `responding_faction: 'RBiH'` and
@@ -545,5 +556,201 @@ registerMigration({
         if (!isCanonicalPlayerFaction(meta.player_faction)) {
             meta.player_faction = 'RBiH';
         }
+    },
+});
+
+registerMigration({
+    version: 15,
+    description: 'Persisted military event bookkeeping substrate defaults. Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        if (!mil) return;
+        ensureArray(mil, 'fired_event_ids');
+        ensureRecord(mil, 'event_readiness');
+        ensureRecord(mil, 'event_fire_counts');
+        ensureRecord(mil, 'event_last_fired_turn');
+        ensureRecord(mil, 'event_flags');
+        ensureArray(mil, 'enabled_event_ids');
+    },
+});
+
+registerMigration({
+    version: 16,
+    description: 'Phase F displacement capacity map defaults. Sensitive: no.',
+    migrate: (state) => {
+        const disp = ensureDisplacementRoot(state);
+        ensureRecord(disp, 'settlement_displacement');
+        ensureRecord(disp, 'settlement_displacement_started_turn');
+        ensureRecord(disp, 'municipality_displacement');
+    },
+});
+
+registerMigration({
+    version: 17,
+    description: 'Displacement operational substrate defaults. Sensitive: no.',
+    migrate: (state) => {
+        const disp = ensureDisplacementRoot(state);
+        ensureRecord(disp, 'war_displacement_initiated');
+        ensureRecord(disp, 'hostile_takeover_timers');
+        ensureRecord(disp, 'displacement_camp_state');
+    },
+});
+
+registerMigration({
+    version: 18,
+    description: 'Displacement lazy-map persisted defaults. Sensitive: no.',
+    migrate: (state) => {
+        const disp = ensureDisplacementRoot(state);
+        ensureRecord(disp, 'displacement_state');
+        ensureRecord(disp, 'minority_flight_state');
+        ensureRecord(disp, 'sustainability_state');
+    },
+});
+
+registerMigration({
+    version: 19,
+    description: 'Displacement civilian casualty persisted default. Sensitive: no.',
+    migrate: (state) => {
+        const disp = ensureDisplacementRoot(state);
+        ensureRecord(disp, 'civilian_casualties');
+    },
+});
+
+registerMigration({
+    version: 20,
+    description: 'JNA phantom spawned marker persisted default. Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        if (!mil) return;
+        ensureArray(mil, 'phantoms_spawned');
+    },
+});
+
+registerMigration({
+    version: 21,
+    description: 'Top-level paramilitary decision history persisted default. Sensitive: no.',
+    migrate: (state) => {
+        ensureArray(asRecord(state), 'paramilitary_decision_history');
+    },
+});
+
+registerMigration({
+    version: 22,
+    description: 'Persisted military event overflow queue defaults. Sensitive: no.',
+    migrate: (state) => {
+        ensureArray(asRecord(state.military), 'event_overflow_queue');
+    },
+});
+
+registerMigration({
+    version: 23,
+    description: 'Persisted event notification queue defaults. Sensitive: no.',
+    migrate: (state) => {
+        ensureArray(asRecord(state.military), 'pending_event_notifications');
+    },
+});
+
+registerMigration({
+    version: 24,
+    description: 'Persisted pending event decision queue defaults. Sensitive: no.',
+    migrate: (state) => {
+        ensureArray(asRecord(state.military), 'pending_event_decisions');
+    },
+});
+
+registerMigration({
+    version: 25,
+    description: 'Persisted event modifier queue defaults. Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        ensureArray(mil, 'event_aggression_modifiers');
+        ensureArray(mil, 'recruitment_modifiers');
+        ensureArray(mil, 'equipment_quality_modifiers');
+    },
+});
+
+registerMigration({
+    version: 26,
+    description: 'Persisted cost ledger annotation defaults. Sensitive: no.',
+    migrate: (state) => {
+        ensureArray(asRecord(state.military), 'cost_ledger_annotations');
+    },
+});
+
+registerMigration({
+    version: 27,
+    description: 'Persisted humanitarian convoy decision queue defaults. Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        ensureArray(mil, 'pending_convoy_decisions');
+        ensureArray(mil, 'convoy_decision_history');
+    },
+});
+
+registerMigration({
+    version: 28,
+    description: 'Persisted army reserve request queue and decision history defaults. Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        ensureArray(mil, 'pending_reserve_requests');
+        ensureArray(mil, 'reserve_request_history');
+    },
+});
+
+registerMigration({
+    version: 29,
+    description: 'Persisted triggered-operation bookkeeping record defaults. Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        ensureRecord(mil, 'triggered_operations_accepted');
+        ensureRecord(mil, 'declined_operations');
+        ensureRecord(mil, 'used_operation_names');
+    },
+});
+
+registerMigration({
+    version: 30,
+    description: 'Persisted officer decision queue and history defaults. Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        ensureArray(mil, 'pending_officer_events');
+        ensureArray(mil, 'officer_decision_history');
+    },
+});
+
+registerMigration({
+    version: 31,
+    description: 'Persisted consequence runtime effect queue defaults. Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        ensureArray(mil, 'cascade_penalties');
+        ensureArray(mil, 'offensive_ops_suppressions');
+        ensureArray(mil, 'alliance_locks');
+        ensureArray(mil, 'bot_priority_shifts');
+    },
+});
+
+// Phase B Sub-slice B2: shape-only state additions for the Event Database
+// Runtime Semantics packet. No writer/reader is wired yet (Sub-slice B3 lands
+// the eligibility short-circuit and the recordEnabledEvents/recordClosedEvents
+// helpers). Each migration is pure: deterministic empty default, no I/O,
+// logging, time, randomness, or env reads. Packet version-number adjustment:
+// the v1.3 packet referenced v26/v27 but Family A schema-growth shipped
+// v23-v31, so closed_event_ids/event_causality_log land at v32/v33.
+registerMigration({
+    version: 32,
+    description: 'Persisted closed_event_ids array default (event soft foreclosure substrate). Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        ensureArray(mil, 'closed_event_ids');
+    },
+});
+
+registerMigration({
+    version: 33,
+    description: 'Persisted event_causality_log array default (audit trail substrate). Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        ensureArray(mil, 'event_causality_log');
     },
 });

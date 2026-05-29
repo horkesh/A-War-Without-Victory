@@ -1,4 +1,5 @@
 import type { FeatureCollection } from 'geojson';
+import type { EventDefinition } from '../../../sim/events/event_types.js';
 import { getPlayerSafeDisplayLabel } from '../utils/playerSafeText.js';
 
 interface PoliticalControlPayload {
@@ -94,6 +95,58 @@ export async function loadEventDefinitions(): Promise<Map<string, EventDefinitio
   }
 
   _eventDefCache = map;
+  return map;
+}
+
+/**
+ * Phase H Packet 7 — browser-side full-`EventDefinition` catalog loader.
+ *
+ * Companion to {@link loadEventDefinitions} (which returns the trimmed
+ * `EventDefinitionView` consumed by `EventModal`). The full canonical
+ * `EventDefinition` shape is required by the Phase H bridges:
+ *   - H3 `EventDecisionModal` Decision Context (family + source_tier)
+ *   - H4 `BranchTagBadgeRow` (response_options[].sets_flags walk)
+ *   - H5 `CodexPanel` Unlock State (family + source_tier per row)
+ *   - H6 `generateWrappedSlides` causality slides (source_note + sets_flags)
+ *
+ * Backwards-compatible: this is an additive export. The existing
+ * `loadEventDefinitions()` view-loader remains the sole consumer for
+ * `EventModal`. Both loaders read the same on-disk JSON; the full loader
+ * preserves every authored field so downstream consumers see canon-typed
+ * records.
+ *
+ * Cached separately from the view cache.
+ */
+let _eventDefFullCache: Map<string, EventDefinition> | null = null;
+
+export async function loadEventDefinitionsFull(): Promise<Map<string, EventDefinition>> {
+  if (_eventDefFullCache) return _eventDefFullCache;
+
+  const files = [
+    '/data/scenarios/events/war_1992.json',
+    '/data/scenarios/events/war_1993.json',
+    '/data/scenarios/events/war_1994.json',
+    '/data/scenarios/events/war_1995.json',
+    '/data/scenarios/events/consequences.json',
+  ];
+
+  const map = new Map<string, EventDefinition>();
+  const results = await Promise.allSettled(files.map(f => fetchJson<unknown[]>(f)));
+  for (const result of results) {
+    if (result.status !== 'fulfilled') continue;
+    if (!Array.isArray(result.value)) continue;
+    for (const raw of result.value) {
+      if (!raw || typeof raw !== 'object') continue;
+      const ev = raw as EventDefinition;
+      if (typeof ev.id !== 'string' || ev.id.length === 0) continue;
+      // Last write wins on duplicate id — matches the engine-side loader's
+      // duplicate-detection error behavior at runtime catalog assembly; we
+      // tolerate here because browser-side bridges only do read-only lookups.
+      map.set(ev.id, ev);
+    }
+  }
+
+  _eventDefFullCache = map;
   return map;
 }
 

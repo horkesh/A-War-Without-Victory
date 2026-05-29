@@ -4,6 +4,7 @@
  */
 
 import type { OperationalSitrepView } from '../../shared/operational_sitrep_views.js';
+import type { GameState } from '../../../state/game_state.js';
 
 export type FactionId = 'RS' | 'RBiH' | 'HRHB' | null;
 
@@ -521,6 +522,70 @@ export interface ArmyReserveQueueView {
     leadCriticalDescription?: string;
 }
 
+export interface ReserveRequestDecisionRecordView {
+    request_id: string;
+    turn: number;
+    faction: string;
+    corps_id: string;
+    brigade_id: string | null;
+    outcome: 'accepted' | 'declined' | 'terminated' | string;
+    reason: string;
+    decided_by: 'army_ai' | 'player' | string;
+    purpose: 'offensive' | 'defensive' | string;
+    why_needed: string;
+    how_to_use: string;
+}
+
+export interface PeacePlanDecisionRecordView {
+    planId: string;
+    planName: string;
+    turnOffered: number;
+    playerFaction: string;
+    playerResponse: 'accepted' | 'rejected' | 'pending';
+    responses: Record<string, 'accepted' | 'rejected' | 'pending'>;
+    resolved: boolean;
+}
+
+export interface ConvoyDecisionRecordView {
+    id: string;
+    turn: number;
+    target_enclave: string;
+    route_faction: string;
+    target_faction: string;
+    supply_amount: number;
+    decision: 'allow' | 'block' | 'divert';
+    decided_by: 'player' | 'bot';
+}
+
+export interface ParamilitaryDecisionRecordView {
+    id: string;
+    turn: number;
+    target_osid: string;
+    faction: string;
+    strength: number;
+    decision: 'allow' | 'deny' | 'regular';
+    estimated_civilian_risk?: number;
+}
+
+export interface OfficerDecisionRecordView {
+    id: string;
+    turn: number;
+    faction: string;
+    event_id: string;
+    event_type: string;
+    officer_id: string;
+    officer_name: string;
+    current_commander_id?: string;
+    current_commander_name?: string;
+    corps_id?: string;
+    corps_name?: string;
+    decision: 'acknowledged' | 'override_confirmed' | 'replacement_accepted';
+    new_officer_id?: string;
+    new_officer_name?: string;
+    outgoing_officer_id?: string;
+    outgoing_officer_name?: string;
+}
+
 export type OperationOpportunityRecordStatus =
     | 'eligible_pending_review'
     | 'delayed'
@@ -945,6 +1010,16 @@ export interface LoadedGameState {
     playerDecisionSummary?: PlayerDecisionSummaryView;
     /** Canonical Army Reserve management queue summary derived from pending reserve requests. */
     armyReserveQueue?: ArmyReserveQueueView;
+    /** Filed Army reserve decisions for Records/Desk consequence trail. */
+    reserveRequestHistory?: ReserveRequestDecisionRecordView[];
+    /** Filed diplomatic peace-plan decisions for Records/Chronicle consequence trail. */
+    peacePlanHistory?: PeacePlanDecisionRecordView[];
+    /** Filed humanitarian convoy decisions for Records/Chronicle consequence trail. */
+    convoyDecisionHistory?: ConvoyDecisionRecordView[];
+    /** Filed paramilitary authorization decisions for Records/Chronicle consequence trail. */
+    paramilitaryDecisionHistory?: ParamilitaryDecisionRecordView[];
+    /** Filed officer/personnel decisions for Records/Desk consequence trail. */
+    officerDecisionHistory?: OfficerDecisionRecordView[];
     /** Read-only Army HQ opportunity ledger: proposal -> decision -> AAR outcome. */
     operationOpportunityRecords?: OperationOpportunityRecordView[];
     /** Summary counts for Army HQ opportunity records. */
@@ -1173,13 +1248,27 @@ export interface LoadedGameState {
     pendingEventDecisions?: Array<{
         event_id: string;
         event_title: string;
+        narrative?: string;
+        situation?: string;
+        staff_assessment?: string;
+        trigger_evidence?: string[];
+        category?: import('../../../sim/events/event_types.js').EventCategory;
+        historical_source?: string;
+        source_note?: string;
+        source?: string;
         turn_fired: number;
         faction: string;
+        requires_player_response?: boolean;
+        historical_default_response_id?: string;
+        staff_recommended_response_id?: string;
         response_options: Array<{
             id: string;
             label: string;
             description?: string;
+            historical_marker?: 'historical_default' | 'counterfactual';
             effects: import('../../../sim/events/event_types.js').EventEffect[];
+            sets_flags?: Record<string, string | number | boolean>;
+            dimension_shifts?: import('../../../sim/events/event_types.js').DimensionShift[];
         }>;
     }>;
 
@@ -1263,4 +1352,22 @@ export interface LoadedGameState {
         current_value?: string;
         proposed_value?: string;
     }>;
+
+    /**
+     * Phase H Packet 7 — runtime-only raw `GameState` handle preserved by
+     * `parseGameState` for UI bridges that need direct causality-substrate
+     * access (`military.fired_event_ids`, `military.event_decision_log`,
+     * `military.event_causality_log`, `military.enabled_event_ids`,
+     * `military.closed_event_ids`).
+     *
+     * Consumers: `EventDecisionModal` (H3 Decision Context ancestry),
+     * `CodexPanel` (H5 Unlock State), `BranchTagBadgeRow` (H4 tag walk),
+     * `generateWrappedSlides` (H6 causality slides).
+     *
+     * NOT persisted to save (re-derived from the same `final_save.json` on
+     * every load). Optional + readonly-by-convention; bridges defensively
+     * read `state.military?.…`. Backward-compatible — existing UI paths
+     * that read only the parsed view continue to work unchanged.
+     */
+    rawGameState?: GameState;
 }

@@ -53,7 +53,22 @@ function makeState(washingtonSigned = false): GameState {
                 allied_mixed_municipalities: washingtonSigned ? ['travnik'] : [],
             },
         } as any,
-        displacement: {},
+        displacement: {
+            displacement_state: {},
+            minority_flight_state: {},
+            sustainability_state: {},
+            war_displacement_initiated: {},
+            hostile_takeover_timers: {},
+            displacement_camp_state: {},
+            displacement_event_log: [],
+            displacement_humanitarian_aggregates: {},
+            displacement_origin_dest_arrivals: {},
+            displacement_recent_by_turn: {},
+            settlement_displacement: {},
+            settlement_displacement_started_turn: {},
+            municipality_displacement: {},
+            civilian_casualties: {},
+        },
     } as GameState;
 }
 

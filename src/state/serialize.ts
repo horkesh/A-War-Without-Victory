@@ -88,6 +88,12 @@ function sweepLegacyTopLevelFields(
     }
 }
 
+function deleteLegacyTopLevelFields(candidate: Record<string, any>, keys: readonly string[]): void {
+    for (const key of keys) {
+        delete candidate[key];
+    }
+}
+
 function migrateState(raw: unknown): GameState {
     if (!raw || typeof raw !== 'object') {
         throw new Error('Cannot migrate: state is not an object');
@@ -113,6 +119,24 @@ function migrateState(raw: unknown): GameState {
     }
     const pol = candidate.political;
     const disp = candidate.displacement;
+    const phaseFCapacityKeys = [
+        'settlement_displacement_started_turn',
+        'municipality_displacement',
+        'settlement_displacement',
+    ] as const;
+    const allowLegacyPhaseFCapacityTopLevel = version === undefined || version < 16;
+    const displacementOperationalKeys = [
+        'war_displacement_initiated',
+        'hostile_takeover_timers',
+        'displacement_camp_state',
+    ] as const;
+    const allowLegacyDisplacementOperationalTopLevel = version === undefined || version < 17;
+    const displacementLazyMapKeys = [
+        'displacement_state',
+        'minority_flight_state',
+        'sustainability_state',
+    ] as const;
+    const allowLegacyDisplacementLazyMapTopLevel = version === undefined || version < 18;
 
     rescueLegacyTopLevelFields(candidate, mil, [
         'theatres',
@@ -142,19 +166,30 @@ function migrateState(raw: unknown): GameState {
         'war_exhaustion_local',
     ]);
     rescueLegacyTopLevelFields(candidate, disp, [
-        'war_displacement_initiated',
-        'settlement_displacement_started_turn',
-        'municipality_displacement',
-        'hostile_takeover_timers',
-        'displacement_camp_state',
-        'settlement_displacement',
         'displacement_humanitarian_aggregates',
         'displacement_origin_dest_arrivals',
         'displacement_recent_by_turn',
     ]);
+    if (allowLegacyDisplacementOperationalTopLevel) {
+        rescueLegacyTopLevelFields(candidate, disp, displacementOperationalKeys);
+    } else {
+        deleteLegacyTopLevelFields(candidate, displacementOperationalKeys);
+    }
+    if (allowLegacyDisplacementLazyMapTopLevel) {
+        rescueLegacyTopLevelFields(candidate, disp, displacementLazyMapKeys);
+    } else {
+        deleteLegacyTopLevelFields(candidate, displacementLazyMapKeys);
+    }
+    if (allowLegacyPhaseFCapacityTopLevel) {
+        rescueLegacyTopLevelFields(candidate, disp, phaseFCapacityKeys);
+    } else {
+        deleteLegacyTopLevelFields(candidate, phaseFCapacityKeys);
+    }
 
     applyMigrations(candidate);
-    canonicalizeCurrentFields(candidate);
+    canonicalizeCurrentFields(candidate, {
+        allowDisplacementOperationalDefaults: allowLegacyDisplacementOperationalTopLevel,
+    });
 
     delete candidate.brigade_aor;
     delete candidate.brigade_aor_orders;
@@ -189,16 +224,25 @@ function migrateState(raw: unknown): GameState {
         'war_exhaustion_local',
     ]);
     sweepLegacyTopLevelFields(candidate, candidate.displacement, [
-        'war_displacement_initiated',
-        'settlement_displacement_started_turn',
-        'municipality_displacement',
-        'hostile_takeover_timers',
-        'displacement_camp_state',
-        'settlement_displacement',
         'displacement_humanitarian_aggregates',
         'displacement_origin_dest_arrivals',
         'displacement_recent_by_turn',
     ]);
+    if (allowLegacyDisplacementOperationalTopLevel) {
+        sweepLegacyTopLevelFields(candidate, candidate.displacement, displacementOperationalKeys);
+    } else {
+        deleteLegacyTopLevelFields(candidate, displacementOperationalKeys);
+    }
+    if (allowLegacyDisplacementLazyMapTopLevel) {
+        sweepLegacyTopLevelFields(candidate, candidate.displacement, displacementLazyMapKeys);
+    } else {
+        deleteLegacyTopLevelFields(candidate, displacementLazyMapKeys);
+    }
+    if (allowLegacyPhaseFCapacityTopLevel) {
+        sweepLegacyTopLevelFields(candidate, candidate.displacement, phaseFCapacityKeys);
+    } else {
+        deleteLegacyTopLevelFields(candidate, phaseFCapacityKeys);
+    }
 
     return candidate;
 }
@@ -211,7 +255,10 @@ function sortedKeys(record: Record<string, unknown>): string[] {
     return Object.keys(record).sort(strictCompare);
 }
 
-function canonicalizeCurrentFields(candidate: Record<string, any>): void {
+function canonicalizeCurrentFields(
+    candidate: Record<string, any>,
+    options: { allowDisplacementOperationalDefaults: boolean },
+): void {
     const mil = candidate.military;
     const pol = candidate.political;
     const disp = candidate.displacement;
@@ -259,29 +306,18 @@ function canonicalizeCurrentFields(candidate: Record<string, any>): void {
     }
 
     const hasAnyPhaseI =
-        (pol && pol.war_consolidation_until !== undefined) ||
         (mil && mil.war_militia_strength !== undefined) ||
-        (pol && pol.war_control_strain !== undefined) ||
         (mil && mil.war_jna !== undefined) ||
         (pol && pol.war_alliance_rbih_hrhb !== undefined) ||
         (disp && disp.war_displacement_initiated !== undefined);
     if (hasAnyPhaseI) {
-        if (pol && pol.war_consolidation_until === undefined) pol.war_consolidation_until = {};
         if (mil && mil.war_militia_strength === undefined) mil.war_militia_strength = {};
-        if (pol && pol.war_control_strain === undefined) pol.war_control_strain = {};
         if (mil && mil.war_jna === undefined) {
             mil.war_jna = { transition_begun: false, withdrawal_progress: 0, asset_transfer_rs: 0 };
         }
-        if (disp && disp.war_displacement_initiated === undefined) disp.war_displacement_initiated = {};
+        if (options.allowDisplacementOperationalDefaults && disp && disp.war_displacement_initiated === undefined) {
+            disp.war_displacement_initiated = {};
+        }
     }
 
-    const hasAnyPhaseF =
-        (disp && disp.settlement_displacement !== undefined) ||
-        (disp && disp.settlement_displacement_started_turn !== undefined) ||
-        (disp && disp.municipality_displacement !== undefined);
-    if (hasAnyPhaseF) {
-        if (disp.settlement_displacement === undefined) disp.settlement_displacement = {};
-        if (disp.settlement_displacement_started_turn === undefined) disp.settlement_displacement_started_turn = {};
-        if (disp.municipality_displacement === undefined) disp.municipality_displacement = {};
-    }
 }

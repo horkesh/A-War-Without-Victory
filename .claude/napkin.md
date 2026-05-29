@@ -112,6 +112,8 @@
 
 **Event JSON edits:** after touching `data/scenarios/events/war_*.json`, run `tests/event_timeline_integrity.test.ts`; keep each year sorted by `trigger.turn_min`, and update explicit corpus counts only when the actual event corpus changes.
 
+**Cleanup-packet pre-flight: calibration-overlap grep is step 1 (2026-05-29).** Every Phase I-style cleanup packet starts with `git diff --name-only origin/main...claude/calibration-historical-army-arc-2026-05-24` (or current calibration branch) and greps each candidate file. ON-OVERLAP → DEFERRED-CALIBRATION (not failure). NOT-ON-OVERLAP → safe to land. Ledger entry must count deferrals positively. Dispatched cleanup agents MUST be given an explicit STOP-and-report clause: if a live consumer surfaces in `src/` + `tests/` + `tools/` that the audit missed, abort the entry — do not power through. Phase I arc fired STOP 5x correctly across Packets I3a/I5/I6. Cleanup proof = `tools/scenario_runner/run_baseline_regression.ts` byte-identical PASS; tsc + vitest alone are necessary but not sufficient. Full lesson set: `docs/life_lessons/process.md` (STOP-safeguard + src+tests+tools audit) + `docs/life_lessons/calibration.md` (byte-identical proof + overlap-deferral triage). Do instead: never skip the pre-flight grep; never trust an audit's "0 importers" without three-scope verification; never claim a cleanup is "done" without the baseline regression PASS line in the ledger entry.
+
 ## Current State (2026-05-15, autonomous commander CPU follow-up)
 
 **Latest baselines:** n1740 40w hash `86ebf26ae0271465` (26/27 anchors, 6/6 benchmarks); n1741 188w hash `a4bf8b8095050881` (26/27 anchors, 6/6 benchmarks, §6 floors PASS; final_save 6.84 MB). Baseline Regression + Desktop Release Guard green at `750e1c14`.
@@ -882,6 +884,8 @@ After EVERY scenario run, the orchestrator:
     Do instead: Use 20w/30w checkpoint runs for iteration; reserve 52w for acceptance only.
 
 ## Shell & Platform
+1. **[2026-05-26] Worktree root typecheck needs nested map dependencies**
+   Do instead: If `npm.cmd run typecheck` in a worktree fails on `maplibre-gl`, `pmtiles`, `@deck.gl/*`, or `@vitejs/plugin-react` module resolution while the parent checkout has `src/ui/map/node_modules`, create a local worktree junction for `src/ui/map/node_modules` or install inside `src/ui/map`; do not change tracked TS to mask dependency resolution.
 1. **[2026-03-05] Existing-dir file generation: prefer `apply_patch` or script files**
    Do instead: Use `apply_patch` for manual edits. For bulk/generated content, write a short script file and run it.
 2. **[2026-02-07] Windows shell separator**
@@ -901,9 +905,6 @@ After EVERY scenario run, the orchestrator:
    Do instead: **`deckFormationCounters` defaults `true`** — clean NATO IconLayer counters only (enrichments stripped). MapLibre `formation-markers`/`formation-labels` hidden. Zoom-interpolation: `16px` @ Z6 to `40px` @ Z14. **Settlement labels**: Deck.gl TextLayer (27 cities) — MapLibre symbol layers globally broken (0 rendered features). `fontSettings: { sdf: true }`, `characterSet: 'auto'` for Bosnian diacritics. `setSettlementLabelData()` feeds from `buildMajorCityLabelGeoJSON`. Sarajevo 5 muns merged to one label.
 9. **[2026-03-26] UI screenshot automation on Windows uses Edge with puppeteer-core**
    Do instead: For scripted screenshot capture in this repo (root `package.json` has `"type":"module"`), use a temporary `.cjs` script with `puppeteer-core` and `executablePath: "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"`. Avoid `.js` scripts with `require()` because they fail under ESM.
-10. **[2026-03-26] Peace Plan modal can silently pollute UI verification screenshots**
-   Do instead: Before capturing map UI screenshots, dismiss blocking overlays first (especially `PeacePlanModal` via `Reject Plan`/`Accept Plan`), then verify the target surface is visible in the first capture before batch runs.
-
 ## GUI / Map
 1. **[2026-03-27] Command sidebar `top` is global crest clearance — looks empty on the left**
    Do instead: Before changing `--awwv-toolbar-clearance`, read [20260327_COMMAND_SIDEBAR_LAYOUT_KNOWLEDGE.md](../docs/40_reports/implemented/20260327_COMMAND_SIDEBAR_LAYOUT_KNOWLEDGE.md). Left rail shares clearance with crest; **split variable or z-index overlap** if tightening; re-verify `PresidentialToolbar`, dev strip, `CommandBriefingLayer`.
@@ -988,8 +989,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: Check `isPoliticalControllersAlreadyOsidKeyed()` first. `migratePoliticalControllersToOsidIfNeeded` only for canonical SIDs.
 7. **[2026-02-28] Operational control: majority then plurality**
    Do instead: Assign faction by ethnic majority (>50%), else plurality. Not "first ≥40%".
-8. **[2026-02-22] Pipeline step no-ops for missing data**
-   Do instead: When operational data unavailable, log and skip OSID steps safely rather than crashing.
+8. **[2026-05-28] Event effects route through TWO disjoint vocabularies — pick the channel by the name you need**
+   Do instead: `dimension_shifts[].dimension` requires a `DimensionId` (6 names: `military_credibility`, `territorial_legitimacy`, `international_standing`, `patron_confidence`, `internal_cohesion`, `negotiating_leverage`). `effects[].kind` requires an `EffectKind` (`recruitment_modifier`, `equipment_quality_modifier`, `morale_change`, `patron_pressure`, `alliance_change`, etc.). The two are disjoint — placing a DimensionId under `effects[].kind` (or an EffectKind under `dimension_shifts[].dimension`) is a silent DEAD write. Loader validation (Packet 44, `event_loader.ts:939+1003`) catches both at catalog load. See `memory/engine_dimension_vocabulary.md` for the canonical map + worksheet-name substitution table.
 9. **[2026-03-08] Paramilitary rear pocket cleanup: `paramilitary_sweep.ts`**
    Do instead: Autonomous paramilitary units for rear enemy pocket clusters (1-3 OSIDs, ALL external neighbors faction-controlled). Active w0-20. Faction rates: RS=0.85, HRHB=0.55, RBiH=0.30.
 10. **[2026-03-28] Point-only polygon contacts are not real adjacency — shared_segments >= 1 required**
@@ -1136,6 +1137,10 @@ After EVERY scenario run, the orchestrator:
    Do instead: Read `docs/40_reports/MAP_GEOMETRY_MASTER.md` before any polygon/front-line/geometry work. Covers: polygon topology gaps, shared arc issue, vertex snapping approach, edges_viewer diagnostic.
 
 ## User Directives
+1. **[2026-05-25] Codex acts as Orchestrator, not implementer, for Pyrrhic work**
+   Do instead: Dispatch the right Pyrrhic specialist agents/skills for investigation, implementation, and independent review; parallelize independent lanes whenever file ownership is non-overlapping. Codex/Orchestrator routes, synthesizes, records, and escalates rather than doing substantive specialist work directly.
+1. **[2026-05-24] Ship visible increments before broad hardening**
+   Do instead: For UI asset/wiring tasks, first make the direct visible change, run a focused smoke/test pass, and report concrete progress. Add broad tests/docs/cleanup after the user-visible path works. Do not spend long blocks expanding scope while the requested visible change is still absent.
 1. **[2026-05-09] Codex owns future repo work**
    Do instead: Treat Claude/subagent/older handoff notes as claim sets to verify locally; Codex is the active owner for planning, implementation, verification, docs, and cleanup from here forward.
 2. **[Standing] working-on.md — task continuity across compaction**
@@ -1154,8 +1159,6 @@ After EVERY scenario run, the orchestrator:
    Do instead: Only generate replay with `--video` flag.
 9. **[2026-02-28] Canonical map is React+MapLibre**
    Do instead: `npm run dev:map`. Legacy map_hoi.html / tactical_map.html are archived.
-10. **[2026-04-03] Test discovery must be automatic**
-   Do instead: Treat `tools/test/discover_test_files.mjs` as the single authority for classifying Vitest vs `node:test` files. Do not reintroduce hand-maintained Vitest include lists; new regression files should become runnable by convention.
 
 ## Calibration
 1. **[2026-05-22] COHA expiry must clear combat suppression**
@@ -1188,22 +1191,26 @@ After EVERY scenario run, the orchestrator:
    Do instead: When adding code that mutates formations, political_controllers, or operations, the pipeline assertions will catch invariant violations at runtime. If an assertion fires, fix the source — never disable the assertion. Files: `assert_control_events.ts`, `assert_operation_lifecycle.ts`, `assert_formation_territory.ts`, `corps_front_sectors.ts` (assertSectorBrigadesActive + assertBrigadeReachability).
 
 ## Engine Runtime Patterns
-1. **[2026-03-05] Takeover displacement off-by-one FIXED**
-   Do instead: `processDisplacementTakeover` uses `currentTurn === warStartTurn + 1`. `runTurn()` increments turn BEFORE phases.
-2. **[2026-03-08] Phase I/II terminology fully removed — Peace/War only**
-   Do instead: No `PhaseI`, `PhaseII` identifiers. `rear_pocket_consolidation.ts` replaces deleted `consolidation_flips.ts`.
-3. **[2026-03-08] Deep merging test mocks with nested state**
-   Do instead: Standard `...overrides` overwrites nested structures entirely. Manually deep merge or spread inside the nested object literal.
-
-4. **[2026-04-03] Sector merge rule â€” shared friendly-side OSIDs are not enough**
-   Do instead: A sector merge is legal only if the merged edge set still forms one contiguous frontline. Never short-circuit adjacency just because sectors share a friendly-side OSID; that is how separate hostile pockets get re-glued into one fake sector.
-
+1. **[2026-05-28] Phase E flag-flip activation requires the canonical procedure doc — do not flip env vars cold**
+   Do instead: Before flipping `AWWV_POLITICAL_DIMENSION_PROPAGATION` or any `AWWV_PDP_*` sub-flag in a baselined run, follow `docs/40_reports/implemented/20260528_PHASE_E_ACTIVATION_PROCEDURE.md`: diagnostic baseline → threshold review → global tier-1 only → first sub-flag with calibration sign-off → next sub-flag. Diagnostic surface is `tools/diagnostics/political_dimensions_snapshot.ts`. Rollback is env-var-only — no save migration. Cohesion thresholds may be over-eager given observed 40w distributions (HRHB=2.83, RBiH=0, RS=2.95 vs threshold 40).
+2. **[2026-05-28] Phase D bot-military isolation is structural — political dimensions do not propagate to ops without explicit wiring**
+   Do instead: Political dimensions write to `FactionCapital.strategic_dimensions[]`; bot combat/military loops (`corps_offensive`, `brigade_assignment`, `sector_offensive`) have ZERO DimensionId reads. Confirmed structural across 45+ Phase D packets including 5+ within-52w firings. If a political dimension needs to influence bot behavior, wire it explicitly behind a feature flag — see Phase E MVS `political_dimension_propagation_gate.ts` (env: `AWWV_POLITICAL_DIMENSION_PROPAGATION_GATE`) for the canonical pattern. Trust the engine: byte-identical baseline regression with flag OFF proves no incidental wiring leaked in.
+3. **[2026-05-28] Loader vocabulary validation catches DEAD-channel authoring — trust catalog load errors**
+   Do instead: `event_loader.ts:939` `validateDimensionShiftVocabulary` + `event_loader.ts:1003` `validateEffectKindVocabulary` fail catalog load on any wrong-channel name. A passing catalog load means every authored DimensionId / EffectKind is in the registered vocabulary; do not re-verify with grep. Pre-Packet-44 audit found 11 silent DEAD writes across 6 packets that would have been caught at load.
+4. **[2026-05-26] Empty migration records need first-write tests**
+   Do instead: When a required save field migrates to `{}` and runtime writers address nested keys, add a regression proving the first nested write from `{}` succeeds; do not rely on outer-map initialization alone.
 5. **[2026-04-03] Sector invariant — one sector = one frontline**
    Do instead: Treat sectors as commanded frontline slices, not OSID/sub-segment buckets. If a saved sector still carries multiple sub-segments, that is invalid state to rebuild or split, not a tolerated variant.
-6. **[2026-04-03] Commander review may not rewrite frontline truth without movement**
+6. **[2026-04-03] Sector merge rule — shared friendly-side OSIDs are not enough**
+   Do instead: A sector merge is legal only if the merged edge set still forms one contiguous frontline. Never short-circuit adjacency just because sectors share a friendly-side OSID; that is how separate hostile pockets get re-glued into one fake sector.
+7. **[2026-04-03] Commander review may not rewrite frontline truth without movement**
    Do instead: If a brigade's current `location_osid` is on a sector frontline, treat that sector as anchored truth. Commander review may stage reserves and rear units, but it must not paper-transfer a physically front-anchored brigade into another sector roster.
-7. **[2026-04-03] Cross-corps enclave rescue needs a physical claim, not just component membership**
+8. **[2026-04-03] Cross-corps enclave rescue needs a physical claim, not just component membership**
    Do instead: `assignCrossCorpsEnclaveDefenders(...)` may rescue a brigade into another same-faction corps sector only when the brigade's current location is already on that sector's frontline or inside its territory. Same-component fallback alone is false sector truth.
+9. **[2026-03-08] Phase I/II terminology fully removed — Peace/War only**
+   Do instead: No `PhaseI`, `PhaseII` identifiers. `rear_pocket_consolidation.ts` replaces deleted `consolidation_flips.ts`.
+10. **[2026-03-05] Takeover displacement off-by-one FIXED**
+    Do instead: `processDisplacementTakeover` uses `currentTurn === warStartTurn + 1`. `runTurn()` increments turn BEFORE phases.
 
 ## Player Shell Discipline
 1. **[2026-04-02] Player-facing operation documents must never print raw OSIDs**

@@ -78,7 +78,22 @@ function baseState(turn: number, opts: {
             war_alliance_rbih_hrhb: opts.alliance ?? 1.0,
             political_controllers: {},
         } as GameState['political'],
-        displacement: {} as GameState['displacement'],
+        displacement: {
+            displacement_state: {},
+            war_displacement_initiated: {},
+            hostile_takeover_timers: {},
+            displacement_camp_state: {},
+            minority_flight_state: {},
+            displacement_event_log: [],
+            displacement_humanitarian_aggregates: {},
+            displacement_origin_dest_arrivals: {},
+            displacement_recent_by_turn: {},
+            sustainability_state: {},
+            settlement_displacement: {},
+            settlement_displacement_started_turn: {},
+            municipality_displacement: {},
+            civilian_casualties: {},
+        } as GameState['displacement'],
     } as unknown as GameState;
 }
 
@@ -214,6 +229,19 @@ describe('LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH — event predicates', () => {
                     lost_population: 0, last_updated_turn: 30,
                 } as any,
             },
+            war_displacement_initiated: {},
+            hostile_takeover_timers: {},
+            displacement_camp_state: {},
+            minority_flight_state: {},
+            displacement_event_log: [],
+            displacement_humanitarian_aggregates: {},
+            displacement_origin_dest_arrivals: {},
+            displacement_recent_by_turn: {},
+            sustainability_state: {},
+            settlement_displacement: {},
+            settlement_displacement_started_turn: {},
+            municipality_displacement: {},
+            civilian_casualties: {},
         } as GameState['displacement'];
         evaluateEvents(state, rng, 30, ALL_EVENTS);
         expect(state.military.fired_event_ids).toContain('csq_refugee_absorption_strain');

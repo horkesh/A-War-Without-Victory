@@ -1,8 +1,20 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-23 (sector enemy-personnel index)
+**Updated:** 2026-05-26 (front-edge metadata lookup reuse)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
+
+---
+
+## 2026-05-26: Front-edge metadata lookup reuse (byte-identical)
+
+**Change:** `buildCorpsFrontSectors(...)` already builds pass-local `globalEdgeMeta`; `buildFactionSectors(...)` now passes that map into `buildMultiSectorsForCorps(...)`. The builder checks shared metadata first and only constructs the old per-corps `osidFrontEdges` lookup through lazy fallback when shared metadata is absent or missing an edge.
+
+**Determinism:** The shared map is invocation-local and read-only at the API boundary. `buildMultiSectorsForCorps(...)` still iterates per-corps `edgeIds` in writer order, copies selected metadata into a fresh local map, and keeps direct/synthetic caller fallback behavior. No cross-turn cache, save field, sector id ordering, scenario data, random source, or serialized output changed.
+
+**Verification:** Focused sector tests passed 27/27, baseline regression passed with all scenarios matching, and `git diff --check` passed. A comparable safe 40w profile preserved final hash `f219401f4a17f311`; wall time moved 103.310s -> 91.556s and `partition-corps-front-sectors` moved 7122.405ms -> 6503.316ms.
+
+**Report:** [implemented/20260526_SECTOR_EDGE_METADATA_LOOKUP_REUSE.md](implemented/20260526_SECTOR_EDGE_METADATA_LOOKUP_REUSE.md)
 
 ---
 

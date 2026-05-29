@@ -35,10 +35,42 @@ async function main(): Promise<void> {
     front_posture: {},
     front_posture_regions: {},
     front_pressure: {},
-    militia_pools: {}
+    militia_pools: {},
+    army_co_decision_traces: {},
+    army_corps_directives_by_faction: {},
+    event_decision_log: [],
+    fired_event_ids: [],
+    event_readiness: {},
+    event_fire_counts: {},
+    event_last_fired_turn: {},
+    event_flags: {},
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
-  political: {},
-  displacement: {}
+  political: {
+    war_consolidation_until: {},
+    war_control_strain: {},
+    war_supply_pressure: {},
+    war_supply_condition: {},
+    war_exhaustion: {},
+    war_exhaustion_local: {}
+  },
+  displacement: {
+    displacement_state: {},
+    minority_flight_state: {},
+    sustainability_state: {},
+    war_displacement_initiated: {},
+    hostile_takeover_timers: {},
+    displacement_camp_state: {},
+    displacement_event_log: [],
+    displacement_humanitarian_aggregates: {},
+    displacement_origin_dest_arrivals: {},
+    displacement_recent_by_turn: {},
+    settlement_displacement: {},
+    settlement_displacement_started_turn: {},
+    municipality_displacement: {},
+    civilian_casualties: {}
+  }
 };
 
     await prepareNewGameState(initial, graph);

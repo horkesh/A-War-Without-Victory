@@ -1,7 +1,7 @@
 /**
  * Phase C Step 3: Militia emergence (Phase_I_Specification_v0_4_0.md §4.2).
  * Converts organizational penetration into militia strength per municipality per faction.
- * Deterministic ordering; no AoR, no fronts.
+ * Deterministic ordering; no fronts.
  */
 
 import type { FactionId, GameState, MunicipalityId, OrganizationalPenetration } from '../../state/game_state.js';

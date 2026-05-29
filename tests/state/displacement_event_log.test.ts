@@ -44,7 +44,12 @@ function defaultControllers(): Record<string, string> {
 
 function buildState(controllers: Record<string, string> = defaultControllers()): GameState {
     return {
-        displacement: {},
+        displacement: {
+            displacement_event_log: [],
+            displacement_humanitarian_aggregates: {},
+            displacement_origin_dest_arrivals: {},
+            displacement_recent_by_turn: {},
+        },
         political: { political_controllers: controllers },
     } as unknown as GameState;
 }
@@ -263,7 +268,7 @@ describe('appendDisplacementEvent — substrate basics', () => {
         });
         const agg = state.displacement.displacement_humanitarian_aggregates!;
         expect(agg).toEqual({});
-        expect(state.displacement.displacement_origin_dest_arrivals).toBeUndefined();
+        expect(state.displacement.displacement_origin_dest_arrivals).toEqual({});
     });
 
     it('does NOT update origin-dest arrivals when dest_mun === origin_mun', () => {
@@ -274,7 +279,7 @@ describe('appendDisplacementEvent — substrate basics', () => {
             ethnicity: 'RBiH', caused_by: 'RS',
             displaced: 0, killed: 0, fled_abroad: 0, settled: 100,
         });
-        expect(state.displacement.displacement_origin_dest_arrivals).toBeUndefined();
+        expect(state.displacement.displacement_origin_dest_arrivals).toEqual({});
     });
 
     it('updates origin-dest arrivals on cross-mun settle', () => {
@@ -558,10 +563,11 @@ describe('appendDisplacementEvent — save/load round-trip', () => {
 
     it('default-empty aggregates round-trip cleanly when no events appended', () => {
         const state = buildState();
-        // No events appended; aggregates are still undefined.
+        // No events appended; persisted aggregate records remain empty.
         const json = JSON.stringify(state);
         const hydrated = JSON.parse(json) as GameState;
-        expect(hydrated.displacement.displacement_humanitarian_aggregates).toBeUndefined();
-        expect(hydrated.displacement.displacement_origin_dest_arrivals).toBeUndefined();
+        expect(hydrated.displacement.displacement_humanitarian_aggregates).toEqual({});
+        expect(hydrated.displacement.displacement_origin_dest_arrivals).toEqual({});
+        expect(hydrated.displacement.displacement_recent_by_turn).toEqual({});
     });
 });

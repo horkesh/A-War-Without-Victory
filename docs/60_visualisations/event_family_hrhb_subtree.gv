@@ -1,0 +1,237 @@
+digraph event_family {
+  rankdir=LR;
+  node [shape=box, style=filled];
+  edge [fontsize=8];
+
+  // Legend
+  subgraph cluster_legend {
+    label="Legend";
+    style=dashed;
+    legend_rs [label="RS family", fillcolor=lightcoral];
+    legend_rbih [label="RBiH family", fillcolor=lightblue];
+    legend_hrhb [label="HRHB family", fillcolor=lightgreen];
+    legend_cross [label="Cross-faction", fillcolor=lightyellow];
+    legend_ring3 [label="Ring 3 sensitive", fillcolor=white, color=red, penwidth=2];
+  }
+
+  subgraph cluster__no_family_ {
+    label="<no-family>";
+    style=filled;
+    color=white;
+    "csq_federation_early_1994" [label="csq_federation_early_1994", fillcolor=white];
+    "csq_hvo_central_bosnia_offensive_1993" [label="csq_hvo_central_bosnia_offensive_1993", fillcolor=white];
+    "csq_joint_offensive_1994" [label="csq_joint_offensive_1994", fillcolor=white];
+    "csq_joint_operations_agreement_1992" [label="csq_joint_operations_agreement_1992", fillcolor=white];
+    "csq_territorial_friction_1993" [label="csq_territorial_friction_1993", fillcolor=white];
+    "csq_zagreb_displeasure_1993" [label="csq_zagreb_displeasure_1993", fillcolor=white];
+  }
+  subgraph cluster_hrhb_central_bosnia_response {
+    label="hrhb_central_bosnia_response";
+    style=filled;
+    color=lightgreen;
+    "hrhb_central_bosnia_defense_1993" [label="hrhb_central_bosnia_defense_1993", fillcolor=lightgreen];
+  }
+  subgraph cluster_hrhb_central_bosnia_war {
+    label="hrhb_central_bosnia_war";
+    style=filled;
+    color=lightgreen;
+    "gornji_vakuf_clashes_1993" [label="gornji_vakuf_clashes_1993", fillcolor=lightgreen];
+  }
+  subgraph cluster_hrhb_contact_group_response {
+    label="hrhb_contact_group_response";
+    style=filled;
+    color=lightgreen;
+    "hrhb_contact_group_response_1994" [label="hrhb_contact_group_response_1994", fillcolor=lightgreen];
+  }
+  subgraph cluster_hrhb_dayton_response {
+    label="hrhb_dayton_response";
+    style=filled;
+    color=lightgreen;
+    "hrhb_dayton_acceptance_1995" [label="hrhb_dayton_acceptance_1995", fillcolor=lightgreen];
+  }
+  subgraph cluster_hrhb_federation_integration {
+    label="hrhb_federation_integration";
+    style=filled;
+    color=lightgreen;
+    "hrhb_federation_army_integration_1994" [label="hrhb_federation_army_integration_1994", fillcolor=lightgreen];
+  }
+  subgraph cluster_hrhb_federation_overture {
+    label="hrhb_federation_overture";
+    style=filled;
+    color=lightgreen;
+    "hrhb_federation_overture_1993" [label="hrhb_federation_overture_1993", fillcolor=lightgreen];
+  }
+  subgraph cluster_hrhb_hv_coordination {
+    label="hrhb_hv_coordination";
+    style=filled;
+    color=lightgreen;
+    "hv_hvo_cooperation_1995" [label="hv_hvo_cooperation_1995", fillcolor=lightgreen];
+  }
+  subgraph cluster_hrhb_owen_stoltenberg_response {
+    label="hrhb_owen_stoltenberg_response";
+    style=filled;
+    color=lightgreen;
+    "hrhb_owen_stoltenberg_response_1993" [label="hrhb_owen_stoltenberg_response_1993", fillcolor=lightgreen];
+  }
+  subgraph cluster_hrhb_political_goal {
+    label="hrhb_political_goal";
+    style=filled;
+    color=lightgreen;
+    "hrhb_1992_graz_cooperation_collapse" [label="hrhb_1992_graz_cooperation_collapse", fillcolor=lightgreen];
+    "hrhb_political_goal" [label="hrhb_political_goal", fillcolor=lightgreen];
+  }
+  subgraph cluster_hrhb_territorial_response {
+    label="hrhb_territorial_response";
+    style=filled;
+    color=lightgreen;
+    "hrhb_territorial_scope_1993" [label="hrhb_territorial_scope_1993", fillcolor=lightgreen];
+  }
+  subgraph cluster_hrhb_vance_owen_response {
+    label="hrhb_vance_owen_response";
+    style=filled;
+    color=lightgreen;
+    "hrhb_vance_owen_acceptance_1993" [label="hrhb_vance_owen_acceptance_1993", fillcolor=lightgreen];
+  }
+  subgraph cluster_hrhb_vopp_response {
+    label="hrhb_vopp_response";
+    style=filled;
+    color=lightgreen;
+    "zagreb_restrains_boban_vopp" [label="zagreb_restrains_boban_vopp", fillcolor=lightgreen];
+  }
+  subgraph cluster_hrhb_washington_response {
+    label="hrhb_washington_response";
+    style=filled;
+    color=lightgreen;
+    "hrhb_washington_agreement_1994" [label="hrhb_washington_agreement_1994", fillcolor=lightgreen];
+  }
+  subgraph cluster_hrhb_zagreb_pressure_response {
+    label="hrhb_zagreb_pressure_response";
+    style=filled;
+    color=lightgreen;
+    "zagreb_orders_hrhb_ceasefire" [label="zagreb_orders_hrhb_ceasefire", fillcolor=lightgreen];
+  }
+
+  // Edges
+  "hrhb_1992_graz_cooperation_collapse" -> "gornji_vakuf_clashes_1993" [color=blue, label="enables"];
+  "hrhb_1992_graz_cooperation_collapse" -> "gornji_vakuf_clashes_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "csq_federation_early_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "csq_hvo_central_bosnia_offensive_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "csq_joint_offensive_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "csq_joint_operations_agreement_1992" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "csq_territorial_friction_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "csq_zagreb_displeasure_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_1992_graz_cooperation_collapse" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_1992_graz_cooperation_collapse" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_1992_graz_cooperation_collapse" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_1992_graz_cooperation_collapse" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_1992_graz_cooperation_collapse" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_1992_graz_cooperation_collapse" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_central_bosnia_defense_1993" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_central_bosnia_defense_1993" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_central_bosnia_defense_1993" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_central_bosnia_defense_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_central_bosnia_defense_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_central_bosnia_defense_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_central_bosnia_defense_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_central_bosnia_defense_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_central_bosnia_defense_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_contact_group_response_1994" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_contact_group_response_1994" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_contact_group_response_1994" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_contact_group_response_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_dayton_acceptance_1995" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_dayton_acceptance_1995" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_dayton_acceptance_1995" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_dayton_acceptance_1995" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_dayton_acceptance_1995" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_dayton_acceptance_1995" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_dayton_acceptance_1995" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_dayton_acceptance_1995" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_dayton_acceptance_1995" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_federation_army_integration_1994" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_federation_army_integration_1994" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_federation_army_integration_1994" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_federation_army_integration_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_federation_army_integration_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_federation_army_integration_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_federation_army_integration_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_federation_army_integration_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_federation_army_integration_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_federation_overture_1993" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_federation_overture_1993" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_federation_overture_1993" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_federation_overture_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_federation_overture_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_federation_overture_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_federation_overture_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_federation_overture_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_federation_overture_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_owen_stoltenberg_response_1993" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_owen_stoltenberg_response_1993" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_owen_stoltenberg_response_1993" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_owen_stoltenberg_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_owen_stoltenberg_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_owen_stoltenberg_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_owen_stoltenberg_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_owen_stoltenberg_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_owen_stoltenberg_response_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_territorial_scope_1993" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_territorial_scope_1993" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_territorial_scope_1993" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_territorial_scope_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_territorial_scope_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_territorial_scope_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_territorial_scope_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_territorial_scope_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_territorial_scope_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_vance_owen_acceptance_1993" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_vance_owen_acceptance_1993" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_vance_owen_acceptance_1993" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_vance_owen_acceptance_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_vance_owen_acceptance_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_vance_owen_acceptance_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_vance_owen_acceptance_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_vance_owen_acceptance_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_vance_owen_acceptance_1993" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_washington_agreement_1994" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_washington_agreement_1994" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_washington_agreement_1994" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hrhb_washington_agreement_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_washington_agreement_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_washington_agreement_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_washington_agreement_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_washington_agreement_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hrhb_washington_agreement_1994" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hv_hvo_cooperation_1995" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hv_hvo_cooperation_1995" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hv_hvo_cooperation_1995" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "hv_hvo_cooperation_1995" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hv_hvo_cooperation_1995" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hv_hvo_cooperation_1995" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hv_hvo_cooperation_1995" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hv_hvo_cooperation_1995" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "hv_hvo_cooperation_1995" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "zagreb_orders_hrhb_ceasefire" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "zagreb_orders_hrhb_ceasefire" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "zagreb_orders_hrhb_ceasefire" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "zagreb_orders_hrhb_ceasefire" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "zagreb_orders_hrhb_ceasefire" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "zagreb_orders_hrhb_ceasefire" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "zagreb_orders_hrhb_ceasefire" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "zagreb_orders_hrhb_ceasefire" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "zagreb_orders_hrhb_ceasefire" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "zagreb_restrains_boban_vopp" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "zagreb_restrains_boban_vopp" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "zagreb_restrains_boban_vopp" [color=blue, label="enables"];
+  "hrhb_political_goal" -> "zagreb_restrains_boban_vopp" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "zagreb_restrains_boban_vopp" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "zagreb_restrains_boban_vopp" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "zagreb_restrains_boban_vopp" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "zagreb_restrains_boban_vopp" [color=gray, label="future_consequence", style=dashed];
+  "hrhb_political_goal" -> "zagreb_restrains_boban_vopp" [color=gray, label="future_consequence", style=dashed];
+}

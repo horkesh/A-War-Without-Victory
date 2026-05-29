@@ -60,15 +60,6 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
         [gameState.pendingOfficerEvents, playerFaction],
     );
 
-    const handleDecisionResponse = async (eventId: string, responseId: string) => {
-        if (!ipc.isAvailable) {
-            setLoadError(t('attention.bridgeUnavailableDecisionError'));
-            return;
-        }
-        const result = await ipc.respondToEventDecision(eventId, responseId);
-        if (!result.ok) setLoadError(result.error ?? t('attention.error.recordDecision'));
-    };
-
     const handleAcknowledgeOfficerEvent = async (eventId: string) => {
         if (!ipc.isAvailable) {
             setLoadError(t('attention.bridgeUnavailablePersonnelError'));
@@ -95,7 +86,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
         }
     };
 
-    if ((!reviewQueue || reviewQueue.pendingCount === 0) && !armyReserveQueue) {
+    if ((!reviewQueue || reviewQueue.pendingCount === 0) && !armyReserveQueue && pendingDecisions.length === 0 && personnelDirectives.length === 0) {
         return (
             <div className="bg-panel-card border border-panel-border rounded-lg p-4 mb-4">
                 <div className="text-[9px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-2 pb-1.5 border-b border-panel-border">
@@ -196,18 +187,8 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                                     {t('attention.decisionRequired')}
                                 </span>
                             </div>
-                            <div className="flex flex-wrap gap-2">
-                                {decision.response_options.map((option) => (
-                                    <button
-                                        key={option.id}
-                                        type="button"
-                                        onClick={() => { void handleDecisionResponse(decision.event_id, option.id); }}
-                                        disabled={!ipc.isAvailable}
-                                        className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border border-panel-border bg-panel-bg text-text-primary transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50"
-                                    >
-                                        {option.label}
-                                    </button>
-                                ))}
+                            <div className="rounded border border-panel-border/70 bg-panel-bg/70 px-3 py-2 text-[10px] leading-relaxed text-text-secondary">
+                                {decision.response_options.length} presidential response{decision.response_options.length === 1 ? '' : 's'} awaiting dossier review.
                             </div>
                         </div>
                     ))}

@@ -46,6 +46,7 @@ describe('identity migration contracts', () => {
                 ceasefire: {},
                 negotiation_ledger: [],
             } as any,
+            displacement: { displacement_event_log: [] },
         };
 
         const serialized = JSON.stringify(rawState);
@@ -88,6 +89,7 @@ describe('identity migration contracts', () => {
                 ceasefire: {},
                 negotiation_ledger: [],
             } as any,
+            displacement: { displacement_event_log: [] },
         };
 
         const serialized = JSON.stringify(rawState);
@@ -129,6 +131,7 @@ describe('identity migration contracts', () => {
                 ceasefire: {},
                 negotiation_ledger: [],
             } as any,
+            displacement: { displacement_event_log: [] },
         };
 
         const serialized = JSON.stringify(rawState);
@@ -170,6 +173,7 @@ describe('identity migration contracts', () => {
                 ceasefire: {},
                 negotiation_ledger: [],
             } as any,
+            displacement: { displacement_event_log: [] },
         };
 
         const serialized = JSON.stringify(rawState);
@@ -203,6 +207,7 @@ describe('identity migration contracts', () => {
             { id: 'NLED_0_ARBiH_gain_0', turn: 0, faction_id: 'ARBiH', kind: 'gain', amount: 10, reason: 'test' }
                 ],
             } as any,
+            displacement: { displacement_event_log: [] },
         };
 
         const serialized = JSON.stringify(rawState);

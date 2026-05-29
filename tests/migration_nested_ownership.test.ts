@@ -55,6 +55,38 @@ function migrationFixture(overrides: Record<string, unknown> = {}): Record<strin
             army_theatre_assignment: {},
             assignable_front_segments: [],
             brigade_front_assignment: {},
+            army_co_decision_traces: {},
+            army_corps_directives_by_faction: {},
+            event_decision_log: [],
+            fired_event_ids: [],
+            event_readiness: {},
+            event_fire_counts: {},
+            event_last_fired_turn: {},
+            event_flags: {},
+            enabled_event_ids: [],
+            event_overflow_queue: [],
+            event_aggression_modifiers: [],
+            recruitment_modifiers: [],
+            equipment_quality_modifiers: [],
+            cost_ledger_annotations: [],
+            pending_convoy_decisions: [],
+            convoy_decision_history: [],
+            pending_reserve_requests: [],
+            reserve_request_history: [],
+            triggered_operations_accepted: {},
+            declined_operations: {},
+            used_operation_names: {},
+            pending_officer_events: [],
+            officer_decision_history: [],
+            cascade_penalties: [],
+            offensive_ops_suppressions: [],
+            alliance_locks: [],
+            bot_priority_shifts: [],
+            closed_event_ids: [],
+            event_causality_log: [],
+            pending_event_decisions: [],
+            pending_event_notifications: [],
+            phantoms_spawned: [],
         },
         political: {
             political_controllers: {},
@@ -63,10 +95,30 @@ function migrationFixture(overrides: Record<string, unknown> = {}): Record<strin
             ceasefire: {},
             negotiation_ledger: [],
             supply_rights: { corridors: [] },
+            war_consolidation_until: {},
+            war_control_strain: {},
+            war_supply_pressure: {},
+            war_supply_condition: {},
+            war_exhaustion: {},
+            war_exhaustion_local: {},
         },
         displacement: {
+            displacement_state: {},
             displacement_event_log: [],
+            displacement_humanitarian_aggregates: {},
+            displacement_origin_dest_arrivals: {},
+            displacement_recent_by_turn: {},
+            minority_flight_state: {},
+            war_displacement_initiated: {},
+            hostile_takeover_timers: {},
+            displacement_camp_state: {},
+            settlement_displacement: {},
+            settlement_displacement_started_turn: {},
+            municipality_displacement: {},
+            sustainability_state: {},
+            civilian_casualties: {},
         },
+        paramilitary_decision_history: [],
         ...overrides,
     };
 }
@@ -94,6 +146,38 @@ describe('nested migration ownership contracts', () => {
             army_theatre_assignment: {},
             assignable_front_segments: [],
             brigade_front_assignment: {},
+            army_co_decision_traces: {},
+            army_corps_directives_by_faction: {},
+            event_decision_log: [],
+            fired_event_ids: [],
+            event_readiness: {},
+            event_fire_counts: {},
+            event_last_fired_turn: {},
+            event_flags: {},
+            enabled_event_ids: [],
+            event_overflow_queue: [],
+            event_aggression_modifiers: [],
+            recruitment_modifiers: [],
+            equipment_quality_modifiers: [],
+            cost_ledger_annotations: [],
+            pending_convoy_decisions: [],
+            convoy_decision_history: [],
+            pending_reserve_requests: [],
+            reserve_request_history: [],
+            triggered_operations_accepted: {},
+            declined_operations: {},
+            used_operation_names: {},
+            pending_officer_events: [],
+            officer_decision_history: [],
+            cascade_penalties: [],
+            offensive_ops_suppressions: [],
+            alliance_locks: [],
+            bot_priority_shifts: [],
+            closed_event_ids: [],
+            event_causality_log: [],
+            pending_event_decisions: [],
+            pending_event_notifications: [],
+            phantoms_spawned: [],
         },
         political: {
             political_controllers: {},
@@ -110,6 +194,12 @@ describe('nested migration ownership contracts', () => {
                     { id: 'c1', treaty_id: 't1', beneficiary: 'RS', scope: { kind: 'region', region_id: 'r1' }, since_turn: 1, until_turn: null },
                 ],
             },
+            war_consolidation_until: {},
+            war_control_strain: {},
+            war_supply_pressure: {},
+            war_supply_condition: {},
+            war_exhaustion: {},
+            war_exhaustion_local: {},
         },
         }));
 
@@ -142,6 +232,38 @@ describe('nested migration ownership contracts', () => {
             assignable_front_segments: [],
             brigade_front_assignment: {},
             war_militia_strength: { m1: { RBiH: 10 } },
+            army_co_decision_traces: {},
+            army_corps_directives_by_faction: {},
+            event_decision_log: [],
+            fired_event_ids: [],
+            event_readiness: {},
+            event_fire_counts: {},
+            event_last_fired_turn: {},
+            event_flags: {},
+            enabled_event_ids: [],
+            event_overflow_queue: [],
+            event_aggression_modifiers: [],
+            recruitment_modifiers: [],
+            equipment_quality_modifiers: [],
+            cost_ledger_annotations: [],
+            pending_convoy_decisions: [],
+            convoy_decision_history: [],
+            pending_reserve_requests: [],
+            reserve_request_history: [],
+            triggered_operations_accepted: {},
+            declined_operations: {},
+            used_operation_names: {},
+            pending_officer_events: [],
+            officer_decision_history: [],
+            cascade_penalties: [],
+            offensive_ops_suppressions: [],
+            alliance_locks: [],
+            bot_priority_shifts: [],
+            closed_event_ids: [],
+            event_causality_log: [],
+            pending_event_decisions: [],
+            pending_event_notifications: [],
+            phantoms_spawned: [],
         },
         political: {
             political_controllers: {},
@@ -151,10 +273,27 @@ describe('nested migration ownership contracts', () => {
             negotiation_ledger: [],
             supply_rights: { corridors: [] },
             war_consolidation_until: { m1: 3 },
+            war_control_strain: {},
+            war_supply_pressure: {},
+            war_supply_condition: {},
+            war_exhaustion: {},
+            war_exhaustion_local: {},
         },
         displacement: {
+            displacement_state: {},
             displacement_event_log: [],
+            displacement_humanitarian_aggregates: {},
+            displacement_origin_dest_arrivals: {},
+            displacement_recent_by_turn: {},
+            minority_flight_state: {},
+            settlement_displacement: {},
+            settlement_displacement_started_turn: {},
+            municipality_displacement: {},
             war_displacement_initiated: { m1: 4 },
+            hostile_takeover_timers: {},
+            displacement_camp_state: {},
+            sustainability_state: {},
+            civilian_casualties: {},
         },
         }));
 
@@ -173,8 +312,12 @@ describe('nested migration ownership contracts', () => {
 
     it('migrateState materializes missing nested Phase F sibling defaults under displacement', () => {
         const payload = JSON.stringify(migrationFixture({
+        schema_version: 15,
         displacement: {
             displacement_event_log: [],
+            displacement_humanitarian_aggregates: {},
+            displacement_origin_dest_arrivals: {},
+            displacement_recent_by_turn: {},
             settlement_displacement: { SID_001: 0.25 },
         },
         }));
@@ -189,13 +332,24 @@ describe('nested migration ownership contracts', () => {
     it('migrateState rescues legacy top-level residue into nested owners before defaulting', () => {
         const payload = JSON.stringify({
             ...migrationFixture({
+                schema_version: 15,
                 political: {
                     political_controllers: {},
                     negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
                     ceasefire: {},
+                    municipalities: {},
+                    war_consolidation_until: {},
+                    war_control_strain: {},
+                    war_supply_pressure: {},
+                    war_supply_condition: {},
+                    war_exhaustion: {},
+                    war_exhaustion_local: {},
                 },
                 displacement: {
                     displacement_event_log: [],
+                    displacement_humanitarian_aggregates: {},
+                    displacement_origin_dest_arrivals: {},
+                    displacement_recent_by_turn: {},
                 },
             }),
             negotiation_ledger: [
@@ -219,5 +373,68 @@ describe('nested migration ownership contracts', () => {
         expect(Object.prototype.hasOwnProperty.call(hydrated, 'negotiation_ledger')).toBe(false);
         expect(Object.prototype.hasOwnProperty.call(hydrated, 'supply_rights')).toBe(false);
         expect(Object.prototype.hasOwnProperty.call(hydrated, 'settlement_displacement')).toBe(false);
+    });
+
+    it('migrateState preserves pre-v18 top-level displacement lazy-map rescue but not v18 residue repair', () => {
+        const legacyPayload = JSON.stringify({
+            ...migrationFixture({
+                schema_version: 17,
+                displacement: {
+                    displacement_event_log: [],
+                    displacement_humanitarian_aggregates: {},
+                    displacement_origin_dest_arrivals: {},
+                    displacement_recent_by_turn: {},
+                    settlement_displacement: {},
+                    settlement_displacement_started_turn: {},
+                    municipality_displacement: {},
+                    war_displacement_initiated: {},
+                    hostile_takeover_timers: {},
+                    displacement_camp_state: {},
+                },
+            }),
+            displacement_state: { legacy_mun: { original_population: 10, displaced_out: 0, displaced_in: 0, lost_population: 0 } },
+            minority_flight_state: { legacy_sid: { settlement_id: 'legacy_sid', flight_turn: 1 } },
+            sustainability_state: { legacy_mun: { mun_id: 'legacy_mun', sustainability_score: 1, collapsed: false } },
+        });
+
+        const hydratedLegacy = deserializeState(legacyPayload) as any;
+
+        expect(hydratedLegacy.displacement.displacement_state).toEqual({
+            legacy_mun: { original_population: 10, displaced_out: 0, displaced_in: 0, lost_population: 0 },
+        });
+        expect(hydratedLegacy.displacement.minority_flight_state).toEqual({
+            legacy_sid: { settlement_id: 'legacy_sid', flight_turn: 1 },
+        });
+        expect(hydratedLegacy.displacement.sustainability_state).toEqual({
+            legacy_mun: { mun_id: 'legacy_mun', sustainability_score: 1, collapsed: false },
+        });
+        expect(Object.prototype.hasOwnProperty.call(hydratedLegacy, 'displacement_state')).toBe(false);
+        expect(Object.prototype.hasOwnProperty.call(hydratedLegacy, 'minority_flight_state')).toBe(false);
+        expect(Object.prototype.hasOwnProperty.call(hydratedLegacy, 'sustainability_state')).toBe(false);
+
+        const currentPayload = JSON.stringify({
+            ...migrationFixture({
+                schema_version: CURRENT_SCHEMA_VERSION,
+                displacement: {
+                    displacement_event_log: [],
+                    displacement_humanitarian_aggregates: {},
+                    displacement_origin_dest_arrivals: {},
+                    displacement_recent_by_turn: {},
+                    settlement_displacement: {},
+                    settlement_displacement_started_turn: {},
+                    municipality_displacement: {},
+                    war_displacement_initiated: {},
+                    hostile_takeover_timers: {},
+                    displacement_camp_state: {},
+                },
+            }),
+            displacement_state: { legacy_mun: { original_population: 10, displaced_out: 0, displaced_in: 0, lost_population: 0 } },
+            minority_flight_state: { legacy_sid: { settlement_id: 'legacy_sid', flight_turn: 1 } },
+            sustainability_state: { legacy_mun: { mun_id: 'legacy_mun', sustainability_score: 1, collapsed: false } },
+        });
+
+        expect(() => deserializeState(currentPayload)).toThrow(
+            /Save schema validation failed after migration[\s\S]*v18[\s\S]*displacement\.displacement_state/
+        );
     });
 });

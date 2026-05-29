@@ -87,7 +87,7 @@ describe('paramilitary Presidential Inbox items', () => {
         expect(paramilitary?.subtitle).toContain('Sensitive History Design Gate');
     });
 
-    it('does not surface pending paramilitary requests when policy is not ask', () => {
+    it('surfaces existing pending paramilitary requests even when policy is not ask', () => {
         const state = makeLoadedState({
             pendingParamilitaryRequests: [
                 { faction: 'RS', strength: 150, target_osid: 'op:bijeljina:bijeljina_2', estimated_civilian_risk: 100 },
@@ -95,6 +95,6 @@ describe('paramilitary Presidential Inbox items', () => {
             paramilitaryPolicy: 'always_allow',
         });
 
-        expect(deriveInboxItems(state, null).some((item) => item.type === 'paramilitary_request')).toBe(false);
+        expect(deriveInboxItems(state, null).some((item) => item.type === 'paramilitary_request')).toBe(true);
     });
 });

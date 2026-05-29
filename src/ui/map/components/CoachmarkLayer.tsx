@@ -19,8 +19,8 @@ export interface CoachmarkDef {
 export const COACHMARKS: ReadonlyArray<CoachmarkDef> = Object.freeze([
   {
     id: 'decision-room',
-    title: 'Decision Room',
-    body: 'Review pending decisions and source handoffs before you advance the week.',
+    title: "President's Desk",
+    body: 'Review pending decisions and staff handoffs before you advance the week.',
     titleKey: 'coachmark.decisionRoom.title',
     bodyKey: 'coachmark.decisionRoom.body',
   },

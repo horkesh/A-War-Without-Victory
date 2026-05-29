@@ -292,6 +292,30 @@ export function canonicalizeStartupState(state: GameState): { state: GameState; 
     };
 }
 
+export function hasCivilianCasualtyRecords(casualties: unknown): boolean {
+    if (casualties == null || typeof casualties !== 'object' || Array.isArray(casualties)) {
+        return false;
+    }
+    for (const entry of Object.values(casualties as Record<string, unknown>)) {
+        if (entry == null || typeof entry !== 'object' || Array.isArray(entry)) continue;
+        const row = entry as Record<string, unknown>;
+        const killed = row.killed;
+        const fledAbroad = row.fled_abroad;
+        if (
+            typeof killed === 'number' &&
+            Number.isFinite(killed) &&
+            killed >= 0 &&
+            typeof fledAbroad === 'number' &&
+            Number.isFinite(fledAbroad) &&
+            fledAbroad >= 0 &&
+            killed + fledAbroad > 0
+        ) {
+            return true;
+        }
+    }
+    return false;
+}
+
 /** H1.11: Scope for baseline_ops displacement (derived-only; no new mechanics). */
 export type BaselineOpsScopeMode = 'all_front_active' | 'static_front_only' | 'fluid_front_only';
 
@@ -361,6 +385,8 @@ export interface RunScenarioResult {
         replay_sequence_log: string;
         /** LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: end-of-run consolidated GameState[] artifact. */
         replay_save_sequence: string;
+        /** Sparse replay summary manifest emitted beside replay_save_sequence.json. */
+        replay_save_manifest: string;
         /** LANE D-CONTENT (Path A): per-turn displacement event JSONL stream (events written before per-turn buffer clear). */
         displacement_event_log: string;
         /** Optional list of deterministic weekly save paths (save_w1..save_wN). */
@@ -1963,6 +1989,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     // empty strings — consumers should treat empty as "absent".
                     replay_sequence_log: '',
                     replay_save_sequence: '',
+                    replay_save_manifest: '',
                     replay: '',
                     run_summary: join(outDir, 'run_summary.json'),
                     control_delta: join(outDir, 'control_delta.json'),
@@ -2715,6 +2742,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 replaySequencePath,
             )
         );
+        const replaySaveManifestPath = join(outDir, 'replay_save_manifest.json');
 
         let endDiagnosticsStart = timingStart(emitTimingJson);
         const anomalyReports: AnomalyReport[] = runAnomalyDetection(state);
@@ -2897,7 +2925,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     takeover_displacement_weekly: takeoverDisplacementWeekly
                 }
                 : {}),
-            ...(attackResolutionSummary.weeks_at_war > 0 && state.displacement.civilian_casualties
+            ...(attackResolutionSummary.weeks_at_war > 0 && hasCivilianCasualtyRecords(state.displacement.civilian_casualties)
                 ? { civilian_casualties: state.displacement.civilian_casualties }
                 : {}),
             ...(botBenchmarkSummary ? { bot_benchmark_evaluation: botBenchmarkSummary } : {}),
@@ -3127,6 +3155,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 brigade_temporal_log: brigadeTemporalLogPath,
                 replay_sequence_log: replaySequencePath,
                 replay_save_sequence: replaySaveSequencePath,
+                replay_save_manifest: replaySaveManifestPath,
                 replay: replayPath ?? '',
                 run_summary: runSummaryPath,
                 control_delta: controlDeltaPath,
@@ -3289,6 +3318,11 @@ export async function createStateFromScenario(
         const content = await readFile(result.paths.initial_save, 'utf8');
         return deserializeState(content);
     }
-    const { state } = await buildScenarioStartupState(scenario, baseDir);
-    return state;
+    pushRoutineConsoleDiagnosticsSuppressed();
+    try {
+        const { state } = await buildScenarioStartupState(scenario, baseDir);
+        return state;
+    } finally {
+        popRoutineConsoleDiagnosticsSuppressed();
+    }
 }

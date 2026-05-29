@@ -56,6 +56,10 @@ describe('real-save round-trip proof', () => {
 
         const originalKeys = Object.keys(original).sort();
         const reserializedKeys = Object.keys(reserialized).sort();
+        if ((original.schema_version ?? 0) < 21) {
+            originalKeys.push('paramilitary_decision_history');
+            originalKeys.sort();
+        }
 
         expect(reserializedKeys).toEqual(originalKeys);
     });

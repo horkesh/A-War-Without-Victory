@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(14);
+        expect(getLatestSchemaVersion()).toBe(33);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -79,8 +79,897 @@ describe('versioned save migration steps', () => {
         });
         expect(state.meta.player_faction).toBe('RBiH');
         expect(state.military.negotiation.pending_counter_offers).toEqual([]);
+        expect(state.military.army_co_decision_traces).toEqual({});
+        expect(state.military.army_corps_directives_by_faction).toEqual({});
+        expect(state.military.event_decision_log).toEqual([]);
+        expect(state.military.fired_event_ids).toEqual([]);
+        expect(state.military.event_readiness).toEqual({});
+        expect(state.military.event_fire_counts).toEqual({});
+        expect(state.military.event_last_fired_turn).toEqual({});
+        expect(state.military.event_flags).toEqual({});
+        expect(state.military.enabled_event_ids).toEqual([]);
+        expect(state.military.event_overflow_queue).toEqual([]);
+        expect(state.military.event_aggression_modifiers).toEqual([]);
+        expect(state.military.recruitment_modifiers).toEqual([]);
+        expect(state.military.equipment_quality_modifiers).toEqual([]);
+        expect(state.military.cost_ledger_annotations).toEqual([]);
+        expect(state.military.pending_convoy_decisions).toEqual([]);
+        expect(state.military.convoy_decision_history).toEqual([]);
+        expect(state.military.pending_reserve_requests).toEqual([]);
+        expect(state.military.reserve_request_history).toEqual([]);
+        expect(state.military.triggered_operations_accepted).toEqual({});
+        expect(state.military.declined_operations).toEqual({});
+        expect(state.military.used_operation_names).toEqual({});
+        expect(state.military.pending_officer_events).toEqual([]);
+        expect(state.military.officer_decision_history).toEqual([]);
+        expect(state.military.cascade_penalties).toEqual([]);
+        expect(state.military.offensive_ops_suppressions).toEqual([]);
+        expect(state.military.alliance_locks).toEqual([]);
+        expect(state.military.bot_priority_shifts).toEqual([]);
+        expect(state.military.closed_event_ids).toEqual([]);
+        expect(state.military.event_causality_log).toEqual([]);
+        expect(state.military.pending_event_decisions).toEqual([]);
+        expect(state.military.pending_event_notifications).toEqual([]);
+        expect(state.military.phantoms_spawned).toEqual([]);
+        expect(state.paramilitary_decision_history).toEqual([]);
         expect(state.political.supply_rights).toEqual({ corridors: [] });
+        expect(state.political.war_consolidation_until).toEqual({});
+        expect(state.political.war_control_strain).toEqual({});
+        expect(state.political.war_supply_pressure).toEqual({});
+        expect(state.political.war_supply_condition).toEqual({});
+        expect(state.political.war_exhaustion).toEqual({});
+        expect(state.political.war_exhaustion_local).toEqual({});
         expect(state.displacement.displacement_event_log).toEqual([]);
         expect(state.displacement.displacement_humanitarian_aggregates).toEqual({});
+        expect(state.displacement.displacement_origin_dest_arrivals).toEqual({});
+        expect(state.displacement.displacement_recent_by_turn).toEqual({});
+        expect(state.displacement.settlement_displacement).toEqual({});
+        expect(state.displacement.settlement_displacement_started_turn).toEqual({});
+        expect(state.displacement.municipality_displacement).toEqual({});
+        expect(state.displacement.civilian_casualties).toEqual({});
+    });
+
+    it('materializes v8 displacement aggregate defaults for v7 saves', () => {
+        const state = minimalLegacyState(7);
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.displacement.displacement_humanitarian_aggregates).toEqual({});
+        expect(state.displacement.displacement_origin_dest_arrivals).toEqual({});
+        expect(state.displacement.displacement_recent_by_turn).toEqual({});
+    });
+
+    it('materializes displacement root and aggregate/capacity records for legacy saves without displacement state', () => {
+        const state = minimalLegacyState(1);
+        delete state.displacement;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.displacement).toEqual({
+            displacement_state: {},
+            displacement_camp_state: {},
+            displacement_event_log: [],
+            displacement_humanitarian_aggregates: {},
+            displacement_origin_dest_arrivals: {},
+            displacement_recent_by_turn: {},
+            civilian_casualties: {},
+            hostile_takeover_timers: {},
+            minority_flight_state: {},
+            municipality_displacement: {},
+            settlement_displacement: {},
+            settlement_displacement_started_turn: {},
+            sustainability_state: {},
+            war_displacement_initiated: {},
+        });
+    });
+
+    it('materializes v10 command substrate defaults for v9 saves', () => {
+        const state = minimalLegacyState(9);
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.army_co_decision_traces).toEqual({});
+        expect(state.military.army_corps_directives_by_faction).toEqual({});
+    });
+
+    it('materializes v14 event decision log default for v13 saves', () => {
+        const state = minimalLegacyState(13);
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.event_decision_log).toEqual([]);
+    });
+
+    it('materializes v15 event bookkeeping defaults for v14 saves', () => {
+        const state = minimalLegacyState(14);
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.fired_event_ids).toEqual([]);
+        expect(state.military.event_readiness).toEqual({});
+        expect(state.military.event_fire_counts).toEqual({});
+        expect(state.military.event_last_fired_turn).toEqual({});
+        expect(state.military.event_flags).toEqual({});
+        expect(state.military.enabled_event_ids).toEqual([]);
+    });
+
+    it('materializes v16 displacement capacity map defaults for v15 saves', () => {
+        const state = minimalLegacyState(15);
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.displacement.settlement_displacement).toEqual({});
+        expect(state.displacement.settlement_displacement_started_turn).toEqual({});
+        expect(state.displacement.municipality_displacement).toEqual({});
+    });
+
+    it('materializes v17 displacement operational contract defaults for v16 saves', () => {
+        const state = minimalLegacyState(16);
+        delete state.displacement.war_displacement_initiated;
+        delete state.displacement.hostile_takeover_timers;
+        delete state.displacement.displacement_camp_state;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.displacement.war_displacement_initiated).toEqual({});
+        expect(state.displacement.hostile_takeover_timers).toEqual({});
+        expect(state.displacement.displacement_camp_state).toEqual({});
+    });
+
+    it('materializes v18 displacement lazy-map defaults for v17 saves', () => {
+        const state = minimalLegacyState(17);
+        delete state.displacement.displacement_state;
+        delete state.displacement.minority_flight_state;
+        delete state.displacement.sustainability_state;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.displacement.displacement_state).toEqual({});
+        expect(state.displacement.minority_flight_state).toEqual({});
+        expect(state.displacement.sustainability_state).toEqual({});
+    });
+
+    it('materializes v19 civilian casualty defaults for v18 saves', () => {
+        const state = minimalLegacyState(18);
+        delete state.displacement.civilian_casualties;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.displacement.civilian_casualties).toEqual({});
+    });
+
+    it('materializes v20 phantom-spawn marker defaults for v19 saves', () => {
+        const state = minimalLegacyState(19);
+        delete state.military.phantoms_spawned;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.phantoms_spawned).toEqual([]);
+    });
+
+    it('preserves existing v20 phantom-spawn marker order and contents for v19 saves', () => {
+        const state = minimalLegacyState(19);
+        state.military.phantoms_spawned = ['phantom_b', 'phantom_a', 'phantom_b'];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.phantoms_spawned).toEqual(['phantom_b', 'phantom_a', 'phantom_b']);
+    });
+
+    it('materializes v21 paramilitary decision history defaults for v20 saves', () => {
+        const state = minimalLegacyState(20);
+        delete state.paramilitary_decision_history;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.paramilitary_decision_history).toEqual([]);
+    });
+
+    it('preserves existing v21 paramilitary decision history order and contents for v20 saves', () => {
+        const state = minimalLegacyState(20);
+        state.paramilitary_decision_history = [
+            {
+                id: 'paramilitary:5:op:zvornik:kozluk_2',
+                turn: 5,
+                target_osid: 'op:zvornik:kozluk_2',
+                faction: 'RS',
+                strength: 80,
+                decision: 'allow',
+                estimated_civilian_risk: 12,
+            },
+        ];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.paramilitary_decision_history).toEqual([
+            {
+                id: 'paramilitary:5:op:zvornik:kozluk_2',
+                turn: 5,
+                target_osid: 'op:zvornik:kozluk_2',
+                faction: 'RS',
+                strength: 80,
+                decision: 'allow',
+                estimated_civilian_risk: 12,
+            },
+        ]);
+    });
+
+    it('materializes v22 event overflow queue defaults for v21 saves', () => {
+        const state = minimalLegacyState(21);
+        delete state.military.event_overflow_queue;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.event_overflow_queue).toEqual([]);
+    });
+
+    it('preserves existing v22 event overflow queue order and contents for v21 saves', () => {
+        const state = minimalLegacyState(21);
+        state.military.event_overflow_queue = ['overflow_b', 'overflow_a', 'overflow_b'];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.event_overflow_queue).toEqual(['overflow_b', 'overflow_a', 'overflow_b']);
+    });
+
+    it('materializes v23 pending event notification defaults for v22 saves', () => {
+        const state = minimalLegacyState(22);
+        state.military.event_overflow_queue = [];
+        delete state.military.pending_event_notifications;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_event_notifications).toEqual([]);
+    });
+
+    it('preserves existing v23 pending event notification order and contents for v22 saves', () => {
+        const state = minimalLegacyState(22);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [
+            {
+                notification_id: 'event_b:RS:RBiH',
+                event_id: 'event_b',
+                source_faction: 'RS',
+                target_faction: 'RBiH',
+                response_id: 'historical_b',
+                surfaced_on_turn: 4,
+                headline: 'Second notification',
+                body: 'Second notification body.',
+                consumed: false,
+            },
+            {
+                notification_id: 'event_a:HRHB:RBiH',
+                event_id: 'event_a',
+                source_faction: 'HRHB',
+                target_faction: 'RBiH',
+                response_id: 'historical_a',
+                surfaced_on_turn: 3,
+                headline: 'First notification',
+                body: 'First notification body.',
+                consumed: true,
+            },
+        ];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_event_notifications).toEqual([
+            {
+                notification_id: 'event_b:RS:RBiH',
+                event_id: 'event_b',
+                source_faction: 'RS',
+                target_faction: 'RBiH',
+                response_id: 'historical_b',
+                surfaced_on_turn: 4,
+                headline: 'Second notification',
+                body: 'Second notification body.',
+                consumed: false,
+            },
+            {
+                notification_id: 'event_a:HRHB:RBiH',
+                event_id: 'event_a',
+                source_faction: 'HRHB',
+                target_faction: 'RBiH',
+                response_id: 'historical_a',
+                surfaced_on_turn: 3,
+                headline: 'First notification',
+                body: 'First notification body.',
+                consumed: true,
+            },
+        ]);
+    });
+
+    it('materializes v24 pending event decision defaults for v23 saves', () => {
+        const state = minimalLegacyState(23);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        delete state.military.pending_event_decisions;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_event_decisions).toEqual([]);
+    });
+
+    it('preserves existing v24 pending event decision order and contents for v23 saves', () => {
+        const state = minimalLegacyState(23);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [
+            {
+                event_id: 'event_b',
+                event_title: 'Second decision',
+                turn_fired: 4,
+                response_options: [{ id: 'historical_b', label: 'Historical B' }],
+                faction: 'RS',
+                requires_player_response: true,
+                historical_default_response_id: 'historical_b',
+                trigger_evidence: ['second trigger'],
+            },
+            {
+                event_id: 'event_a',
+                event_title: 'First decision',
+                turn_fired: 3,
+                response_options: [{ id: 'historical_a', label: 'Historical A' }],
+                faction: 'RBiH',
+                requires_player_response: true,
+                historical_default_response_id: 'historical_a',
+                trigger_evidence: ['first trigger'],
+            },
+        ];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_event_decisions).toEqual([
+            {
+                event_id: 'event_b',
+                event_title: 'Second decision',
+                turn_fired: 4,
+                response_options: [{ id: 'historical_b', label: 'Historical B' }],
+                faction: 'RS',
+                requires_player_response: true,
+                historical_default_response_id: 'historical_b',
+                trigger_evidence: ['second trigger'],
+            },
+            {
+                event_id: 'event_a',
+                event_title: 'First decision',
+                turn_fired: 3,
+                response_options: [{ id: 'historical_a', label: 'Historical A' }],
+                faction: 'RBiH',
+                requires_player_response: true,
+                historical_default_response_id: 'historical_a',
+                trigger_evidence: ['first trigger'],
+            },
+        ]);
+    });
+
+    it('materializes v25 event modifier defaults for v24 saves', () => {
+        const state = minimalLegacyState(24);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        delete state.military.event_aggression_modifiers;
+        delete state.military.recruitment_modifiers;
+        delete state.military.equipment_quality_modifiers;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.event_aggression_modifiers).toEqual([]);
+        expect(state.military.recruitment_modifiers).toEqual([]);
+        expect(state.military.equipment_quality_modifiers).toEqual([]);
+    });
+
+    it('preserves existing v25 event modifier order and contents for v24 saves', () => {
+        const state = minimalLegacyState(24);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [
+            { faction: 'RS', delta: 0.2, expires_turn: 12 },
+            { faction: 'RBiH', delta: -0.1, expires_turn: 13 },
+        ];
+        state.military.recruitment_modifiers = [
+            { faction: 'RBiH', pool_multiplier: 1.1, expires_turn: 14 },
+            { faction: 'HRHB', pool_multiplier: 0.95, expires_turn: 15 },
+        ];
+        state.military.equipment_quality_modifiers = [
+            { faction: 'HRHB', multiplier: 1.05, expires_turn: 16 },
+            { faction: 'RS', multiplier: 0.9, expires_turn: 17 },
+        ];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.event_aggression_modifiers).toEqual([
+            { faction: 'RS', delta: 0.2, expires_turn: 12 },
+            { faction: 'RBiH', delta: -0.1, expires_turn: 13 },
+        ]);
+        expect(state.military.recruitment_modifiers).toEqual([
+            { faction: 'RBiH', pool_multiplier: 1.1, expires_turn: 14 },
+            { faction: 'HRHB', pool_multiplier: 0.95, expires_turn: 15 },
+        ]);
+        expect(state.military.equipment_quality_modifiers).toEqual([
+            { faction: 'HRHB', multiplier: 1.05, expires_turn: 16 },
+            { faction: 'RS', multiplier: 0.9, expires_turn: 17 },
+        ]);
+    });
+
+    it('materializes v26 cost ledger annotation defaults for v25 saves', () => {
+        const state = minimalLegacyState(25);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        delete state.military.cost_ledger_annotations;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.cost_ledger_annotations).toEqual([]);
+    });
+
+    it('preserves existing v26 cost ledger annotation order and contents for v25 saves', () => {
+        const state = minimalLegacyState(25);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [
+            { event_id: 'paramilitary_sweep', tag: 'paramilitary_findings', text: 'First finding', turn: 8, faction: 'RBiH' },
+            { event_id: 'arms_embargo', tag: 'diplomatic_cost', turn: 9 },
+        ];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.cost_ledger_annotations).toEqual([
+            { event_id: 'paramilitary_sweep', tag: 'paramilitary_findings', text: 'First finding', turn: 8, faction: 'RBiH' },
+            { event_id: 'arms_embargo', tag: 'diplomatic_cost', turn: 9 },
+        ]);
+    });
+
+    it('materializes v27 convoy decision defaults for v26 saves', () => {
+        const state = minimalLegacyState(26);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        delete state.military.pending_convoy_decisions;
+        delete state.military.convoy_decision_history;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_convoy_decisions).toEqual([]);
+        expect(state.military.convoy_decision_history).toEqual([]);
+    });
+
+    it('preserves existing v27 convoy decision order and contents for v26 saves', () => {
+        const state = minimalLegacyState(26);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [
+            { id: 'convoy:8:ENCL_a:RS', target_enclave: 'ENCL_a', route_faction: 'RS', supply_amount: 0.5, decision: 'allow' },
+            { id: 'convoy:9:ENCL_b:HRHB', target_enclave: 'ENCL_b', route_faction: 'HRHB', supply_amount: 0.4 },
+        ];
+        state.military.convoy_decision_history = [
+            { id: 'convoy:7:ENCL_c:RS', turn: 7, target_enclave: 'ENCL_c', route_faction: 'RS', target_faction: 'RBiH', supply_amount: 0.3, decision: 'block', decided_by: 'bot' },
+            { id: 'convoy:8:ENCL_d:HRHB', turn: 8, target_enclave: 'ENCL_d', route_faction: 'HRHB', target_faction: 'RBiH', supply_amount: 0.6, decision: 'divert', decided_by: 'player' },
+        ];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_convoy_decisions).toEqual([
+            { id: 'convoy:8:ENCL_a:RS', target_enclave: 'ENCL_a', route_faction: 'RS', supply_amount: 0.5, decision: 'allow' },
+            { id: 'convoy:9:ENCL_b:HRHB', target_enclave: 'ENCL_b', route_faction: 'HRHB', supply_amount: 0.4 },
+        ]);
+        expect(state.military.convoy_decision_history).toEqual([
+            { id: 'convoy:7:ENCL_c:RS', turn: 7, target_enclave: 'ENCL_c', route_faction: 'RS', target_faction: 'RBiH', supply_amount: 0.3, decision: 'block', decided_by: 'bot' },
+            { id: 'convoy:8:ENCL_d:HRHB', turn: 8, target_enclave: 'ENCL_d', route_faction: 'HRHB', target_faction: 'RBiH', supply_amount: 0.6, decision: 'divert', decided_by: 'player' },
+        ]);
+    });
+
+    it('materializes v28 reserve request queues for v27 saves', () => {
+        const state = minimalLegacyState(27);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [];
+        state.military.convoy_decision_history = [];
+        delete state.military.pending_reserve_requests;
+        delete state.military.reserve_request_history;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_reserve_requests).toEqual([]);
+        expect(state.military.reserve_request_history).toEqual([]);
+    });
+
+    it('preserves existing v28 reserve request order and contents for v27 saves', () => {
+        const state = minimalLegacyState(27);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [];
+        state.military.convoy_decision_history = [];
+        state.military.pending_reserve_requests = [
+            {
+                request_id: 'reserve:req-b',
+                corps_id: 'arbih_1st_corps',
+                faction: 'RBiH',
+                reason: 'offensive_support',
+                provenance_driver: 'active_operation',
+                priority: 80,
+                raw_priority: 90,
+                travel_hops: 2,
+                turn_requested: 12,
+                description: 'Support the active operation.',
+                suggested_brigade_id: 'arbih_guards',
+                purpose: 'offensive',
+                why_needed: 'Exploit the breach.',
+                how_to_use: 'Commit as the main effort.',
+            },
+            {
+                request_id: 'reserve:req-a',
+                corps_id: 'arbih_2nd_corps',
+                faction: 'RBiH',
+                reason: 'defensive_gap',
+                provenance_driver: 'sector_threat',
+                priority: 60,
+                raw_priority: 70,
+                travel_hops: 1,
+                turn_requested: 13,
+                description: 'Reinforce a thin sector.',
+                suggested_brigade_id: null,
+                purpose: 'defensive',
+                why_needed: 'Hold a threatened sector.',
+                how_to_use: 'Stiffen the line.',
+            },
+        ];
+        state.military.reserve_request_history = [
+            {
+                request_id: 'reserve:hist-b',
+                turn: 14,
+                faction: 'RBiH',
+                corps_id: 'arbih_1st_corps',
+                brigade_id: 'arbih_guards',
+                outcome: 'accepted',
+                reason: 'Approved for immediate deployment.',
+                decided_by: 'player',
+                purpose: 'offensive',
+                why_needed: 'Exploit the breach.',
+                how_to_use: 'Commit as the main effort.',
+            },
+            {
+                request_id: 'reserve:hist-a',
+                turn: 15,
+                faction: 'RS',
+                corps_id: 'vrs_1st_krajina',
+                brigade_id: null,
+                outcome: 'declined',
+                reason: 'No suitable brigade available.',
+                decided_by: 'army_ai',
+                purpose: 'defensive',
+                why_needed: 'Hold a threatened sector.',
+                how_to_use: 'Stiffen the line.',
+            },
+        ];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_reserve_requests.map((request: any) => request.request_id)).toEqual(['reserve:req-b', 'reserve:req-a']);
+        expect(state.military.pending_reserve_requests[0].description).toBe('Support the active operation.');
+        expect(state.military.pending_reserve_requests[1].suggested_brigade_id).toBeNull();
+        expect(state.military.reserve_request_history.map((record: any) => record.request_id)).toEqual(['reserve:hist-b', 'reserve:hist-a']);
+        expect(state.military.reserve_request_history[0].brigade_id).toBe('arbih_guards');
+        expect(state.military.reserve_request_history[1].brigade_id).toBeNull();
+    });
+
+    it('materializes v29 triggered-operation bookkeeping records for v28 saves', () => {
+        const state = minimalLegacyState(28);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [];
+        state.military.convoy_decision_history = [];
+        state.military.pending_reserve_requests = [];
+        state.military.reserve_request_history = [];
+        delete state.military.triggered_operations_accepted;
+        delete state.military.declined_operations;
+        delete state.military.used_operation_names;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.triggered_operations_accepted).toEqual({});
+        expect(state.military.declined_operations).toEqual({});
+        expect(state.military.used_operation_names).toEqual({});
+    });
+
+    it('preserves existing v29 triggered-operation bookkeeping row order and contents for v28 saves', () => {
+        const state = minimalLegacyState(28);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [];
+        state.military.convoy_decision_history = [];
+        state.military.pending_reserve_requests = [];
+        state.military.reserve_request_history = [];
+        state.military.triggered_operations_accepted = {
+            'Operation B': 12,
+            'Operation A': 9,
+        };
+        state.military.declined_operations = {
+            'Operation D': { declined_turn: 13, decline_count: 2 },
+            'Operation C': { declined_turn: 8, decline_count: 1 },
+        };
+        state.military.used_operation_names = {
+            'Name B': 11,
+            'Name A': 10,
+        };
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(Object.keys(state.military.triggered_operations_accepted)).toEqual(['Operation B', 'Operation A']);
+        expect(state.military.triggered_operations_accepted).toEqual({
+            'Operation B': 12,
+            'Operation A': 9,
+        });
+        expect(Object.keys(state.military.declined_operations)).toEqual(['Operation D', 'Operation C']);
+        expect(state.military.declined_operations).toEqual({
+            'Operation D': { declined_turn: 13, decline_count: 2 },
+            'Operation C': { declined_turn: 8, decline_count: 1 },
+        });
+        expect(Object.keys(state.military.used_operation_names)).toEqual(['Name B', 'Name A']);
+        expect(state.military.used_operation_names).toEqual({
+            'Name B': 11,
+            'Name A': 10,
+        });
+    });
+
+    it('materializes v30 officer decision queues for v29 saves', () => {
+        const state = minimalLegacyState(29);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [];
+        state.military.convoy_decision_history = [];
+        state.military.pending_reserve_requests = [];
+        state.military.reserve_request_history = [];
+        state.military.triggered_operations_accepted = {};
+        state.military.declined_operations = {};
+        state.military.used_operation_names = {};
+        delete state.military.pending_officer_events;
+        delete state.military.officer_decision_history;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_officer_events).toEqual([]);
+        expect(state.military.officer_decision_history).toEqual([]);
+    });
+
+    it('preserves existing v30 officer event and history row order and contents for v29 saves', () => {
+        const state = minimalLegacyState(29);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [];
+        state.military.convoy_decision_history = [];
+        state.military.pending_reserve_requests = [];
+        state.military.reserve_request_history = [];
+        state.military.triggered_operations_accepted = {};
+        state.military.declined_operations = {};
+        state.military.used_operation_names = {};
+        state.military.pending_officer_events = [
+            {
+                event_id: 'officer:event-b',
+                type: 'order_modified',
+                faction: 'RBiH',
+                turn: 12,
+                officer_id: 'commander_b',
+                corps_id: 'arbih_1st_corps',
+                acknowledged: false,
+                reason: '',
+                overridable: true,
+                override_action: 'confirm_order_override',
+                original_order: {
+                    order_type: 'operation_launch',
+                    corps_id: '',
+                    operation_name: 'Operation B',
+                    objectives: ['obj_b', 'obj_a'],
+                    delay_turns: 0,
+                },
+                interpreted_order: {
+                    order_type: 'operation_launch',
+                    corps_id: 'arbih_1st_corps',
+                    operation_name: 'Operation B',
+                    directive_verb: 'attack',
+                    opportunity_id: 'opp_b',
+                },
+            },
+            {
+                event_id: 'officer:event-a',
+                type: 'replacement_suggested',
+                faction: 'RS',
+                turn: 9,
+                officer_id: 'commander_a',
+                current_commander_id: 'old_a',
+                corps_id: 'vrs_drina_corps',
+                acknowledged: true,
+            },
+        ];
+        state.military.officer_decision_history = [
+            {
+                id: 'officer:12:officer:event-b:override_confirmed',
+                turn: 12,
+                faction: 'RBiH',
+                event_id: 'officer:event-b',
+                event_type: 'order_modified',
+                officer_id: 'commander_b',
+                corps_id: 'arbih_1st_corps',
+                decision: 'override_confirmed',
+            },
+            {
+                id: 'officer:9:officer:event-a:replacement_accepted',
+                turn: 9,
+                faction: 'RS',
+                event_id: 'officer:event-a',
+                event_type: 'replacement_suggested',
+                officer_id: 'commander_a',
+                current_commander_id: 'old_a',
+                corps_id: 'vrs_drina_corps',
+                new_officer_id: 'commander_a',
+                outgoing_officer_id: 'old_a',
+                decision: 'replacement_accepted',
+            },
+        ];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.pending_officer_events.map((event: any) => event.event_id)).toEqual(['officer:event-b', 'officer:event-a']);
+        expect(state.military.pending_officer_events[0].original_order.objectives).toEqual(['obj_b', 'obj_a']);
+        expect(state.military.officer_decision_history.map((entry: any) => entry.id)).toEqual([
+            'officer:12:officer:event-b:override_confirmed',
+            'officer:9:officer:event-a:replacement_accepted',
+        ]);
+        expect(state.military.officer_decision_history[1].outgoing_officer_id).toBe('old_a');
+    });
+
+    it('materializes v31 consequence runtime effect queues for v30 saves', () => {
+        const state = minimalLegacyState(30);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [];
+        state.military.convoy_decision_history = [];
+        state.military.pending_reserve_requests = [];
+        state.military.reserve_request_history = [];
+        state.military.triggered_operations_accepted = {};
+        state.military.declined_operations = {};
+        state.military.used_operation_names = {};
+        state.military.pending_officer_events = [];
+        state.military.officer_decision_history = [];
+        delete state.military.cascade_penalties;
+        delete state.military.offensive_ops_suppressions;
+        delete state.military.alliance_locks;
+        delete state.military.bot_priority_shifts;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.cascade_penalties).toEqual([]);
+        expect(state.military.offensive_ops_suppressions).toEqual([]);
+        expect(state.military.alliance_locks).toEqual([]);
+        expect(state.military.bot_priority_shifts).toEqual([]);
+    });
+
+    it('preserves existing v31 consequence runtime effect queue order and contents for v30 saves', () => {
+        const state = minimalLegacyState(30);
+        state.military.event_overflow_queue = [];
+        state.military.pending_event_notifications = [];
+        state.military.pending_event_decisions = [];
+        state.military.event_aggression_modifiers = [];
+        state.military.recruitment_modifiers = [];
+        state.military.equipment_quality_modifiers = [];
+        state.military.cost_ledger_annotations = [];
+        state.military.pending_convoy_decisions = [];
+        state.military.convoy_decision_history = [];
+        state.military.pending_reserve_requests = [];
+        state.military.reserve_request_history = [];
+        state.military.triggered_operations_accepted = {};
+        state.military.declined_operations = {};
+        state.military.used_operation_names = {};
+        state.military.pending_officer_events = [];
+        state.military.officer_decision_history = [];
+        state.military.cascade_penalties = [
+            { osid: 'op:banja_luka:west', multiplier: 0.85, expires_turn: 178 },
+            { osid: 'op:kljuc:center', multiplier: 0.9, expires_turn: 179 },
+        ];
+        state.military.offensive_ops_suppressions = [
+            { faction: 'RS', expires_turn: 180, reason: 'holbrooke_halt' },
+            { faction: 'RBiH', expires_turn: 181 },
+        ];
+        state.military.alliance_locks = [
+            { mode: 'floor', value: 0.8, expires_turn: 120 },
+            { mode: 'ceiling', value: 0.55, expires_turn: 90 },
+        ];
+        state.military.bot_priority_shifts = [
+            { faction: 'RBiH', add_objectives: ['obj_b', 'obj_a'], expires_turn: 170 },
+            { faction: 'HRHB', remove_objectives: ['obj_c'], expires_turn: 171 },
+        ];
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.military.cascade_penalties.map((entry: any) => entry.osid)).toEqual(['op:banja_luka:west', 'op:kljuc:center']);
+        expect(state.military.offensive_ops_suppressions.map((entry: any) => entry.faction)).toEqual(['RS', 'RBiH']);
+        expect(state.military.alliance_locks.map((entry: any) => entry.mode)).toEqual(['floor', 'ceiling']);
+        expect(state.military.bot_priority_shifts.map((entry: any) => entry.faction)).toEqual(['RBiH', 'HRHB']);
+        expect(state.military.bot_priority_shifts[0].add_objectives).toEqual(['obj_b', 'obj_a']);
     });
 });

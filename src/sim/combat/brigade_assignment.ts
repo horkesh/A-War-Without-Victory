@@ -124,6 +124,87 @@ function friendlyDistanceToAny(
     return null;
 }
 
+function friendlyPathToAny(
+    startOsid: string,
+    targets: Set<string>,
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>,
+    maxHops = 30
+): string[] | null {
+    if (!startOsid || targets.size === 0) return null;
+    if (targets.has(startOsid)) return [startOsid];
+    const visited = new Set<string>([startOsid]);
+    const parent = new Map<string, string>();
+    let frontier: string[] = [startOsid];
+    for (let hop = 1; hop <= maxHops; hop++) {
+        const next: string[] = [];
+        for (const osid of frontier.sort(strictCompare)) {
+            const neighbors = [...(adjacency.get(osid as Osid) ?? [])].sort(strictCompare);
+            for (const nb of neighbors) {
+                if (visited.has(nb)) continue;
+                visited.add(nb);
+                if (!friendlyOsids.has(nb)) continue;
+                parent.set(nb, osid);
+                if (targets.has(nb)) {
+                    const path = [nb];
+                    let cursor = nb;
+                    while (parent.has(cursor)) {
+                        cursor = parent.get(cursor)!;
+                        path.push(cursor);
+                    }
+                    return path.reverse();
+                }
+                next.push(nb);
+            }
+        }
+        if (next.length === 0) break;
+        frontier = next;
+    }
+    return null;
+}
+
+function nearestSameCorpsRearSectorInComponent(
+    locationOsid: string,
+    corpsId: string | undefined,
+    brigComp: number,
+    sectorNeed: Array<{ sector: CorpsFrontSector; need: number; comp: number }>,
+    sectorFrontOsidSets: Map<CorpsFrontSector, Set<string>>,
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>,
+): CorpsFrontSector | null {
+    if (!corpsId) return null;
+    const candidates = sectorNeed
+        .map((sn) => {
+            if (sn.sector.corps_id !== corpsId || sn.comp !== brigComp) return null;
+            const claimOsids = new Set<string>([
+                ...sn.sector.territory_osids,
+                ...(sectorFrontOsidSets.get(sn.sector) ?? new Set<string>()),
+            ]);
+            const dist = friendlyDistanceToAny(
+                locationOsid,
+                claimOsids,
+                adjacency,
+                friendlyOsids,
+                Number.MAX_SAFE_INTEGER,
+            );
+            if (dist == null) return null;
+            const load =
+                sn.sector.assigned_brigade_ids.length
+                + sn.sector.reserve_brigade_ids.length
+                + (sn.sector.rear_brigade_ids?.length ?? 0);
+            return { sector: sn.sector, dist, need: sn.need, load };
+        })
+        .filter((candidate): candidate is { sector: CorpsFrontSector; dist: number; need: number; load: number } => candidate != null)
+        .sort((a, b) =>
+            a.dist - b.dist
+            || b.need - a.need
+            || a.load - b.load
+            || strictCompare(a.sector.sector_id, b.sector.sector_id)
+        );
+
+    return candidates[0]?.sector ?? null;
+}
+
 export function buildOneHopReserveBand(
     frontSet: Set<string>,
     adjacency: Map<Osid, Osid[]>,
@@ -779,6 +860,22 @@ export function classifyBrigadesByTerritory(
                 if (isMovementOwnedHomeReturn(state, bid, f) || isMovementOwnedReturnToCorps(state, bid, f, sectors)) {
                     continue;
                 }
+                if ((state?.meta?.turn ?? 0) === 0) {
+                    const rearSector = nearestSameCorpsRearSectorInComponent(
+                        f.location_osid,
+                        corpsId,
+                        brigComp,
+                        sectorNeed,
+                        sectorFrontOsidSets,
+                        adjacency,
+                        friendlyOsids,
+                    );
+                    if (rearSector) {
+                        rearSector.rear_brigade_ids ??= [];
+                        rearSector.rear_brigade_ids.push(bid);
+                        continue;
+                    }
+                }
                 if (REAR_GUARD_CORPS.has(corpsId)) {
                     emitRoutineConsoleWarn(`[brigade_assignment] [PROVISIONAL] UNASSIGNED ${bid}: rear-guard corps brigade cannot reach any same-component sector`);
                     continue;
@@ -1137,9 +1234,12 @@ export function enforcePhysicalSectorOwnership(
  * writers have run, but its own corps still has a sector that truthfully owns
  * its current location, attach it back to that sector.
  *
- * This is not a permissive fallback. Candidates must already own the brigade's
- * current position by frontline, sector territory, or one-hop reserve truth, and the
- * final owner must match the brigade's resolved corps.
+ * This is not a permissive fallback. Primary candidates must already own the
+ * brigade's current position by frontline, sector territory, or one-hop reserve
+ * truth, and the final owner must match the brigade's resolved corps. If no
+ * primary claim exists but the brigade can still path through friendly territory
+ * to an own-corps sector, keep its current OSID sector-owned as a deep rear
+ * position rather than serializing it as ownerless.
  */
 export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
     sectors: CorpsFrontSector[],
@@ -1147,20 +1247,30 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
     faction: FactionId,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
+    options?: { allowDeepRearOwnership?: boolean },
 ): void {
-    const assigned = new Set<FormationId>();
-    for (const sector of sectors) {
-        for (const bid of sector.assigned_brigade_ids) assigned.add(bid);
-        for (const bid of sector.reserve_brigade_ids) assigned.add(bid);
-        for (const bid of sector.rear_brigade_ids ?? []) assigned.add(bid);
-    }
-
     const sectorClaims = sectors.map((sector) => {
         const frontSet = getSectorFrontOsids(sector);
         const territorySet = new Set(sector.territory_osids);
         const oneHopBehind = buildOneHopReserveBand(frontSet, adjacency, friendlyOsids);
         return { sector, frontSet, territorySet, oneHopBehind };
     });
+
+    const assigned = new Set<FormationId>();
+    for (const { sector, frontSet, territorySet, oneHopBehind } of sectorClaims) {
+        for (const bid of sector.assigned_brigade_ids) {
+            const locationOsid = formations[bid]?.location_osid;
+            if (locationOsid && frontSet.has(locationOsid)) assigned.add(bid);
+        }
+        for (const bid of sector.reserve_brigade_ids) {
+            const locationOsid = formations[bid]?.location_osid;
+            if (locationOsid && oneHopBehind.has(locationOsid)) assigned.add(bid);
+        }
+        for (const bid of sector.rear_brigade_ids ?? []) {
+            const locationOsid = formations[bid]?.location_osid;
+            if (locationOsid && territorySet.has(locationOsid)) assigned.add(bid);
+        }
+    }
 
     const formIds = Object.keys(formations).sort(strictCompare);
     for (const fid of formIds) {
@@ -1209,6 +1319,48 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
                 || strictCompare(a.sector.sector_id, b.sector.sector_id)
             );
 
+        if (candidates.length === 0 && options?.allowDeepRearOwnership === true) {
+            const rearCandidates = sectorClaims
+                .map(({ sector, frontSet, territorySet, oneHopBehind }) => {
+                    if (sector.corps_id !== corpsId) return null;
+                    const claimOsids = new Set<string>([
+                        ...frontSet,
+                        ...territorySet,
+                        ...oneHopBehind,
+                    ]);
+                    const path = friendlyPathToAny(
+                        locationOsid,
+                        claimOsids,
+                        adjacency,
+                        friendlyOsids,
+                        Number.MAX_SAFE_INTEGER,
+                    );
+                    if (!path) return null;
+                    const dist = path.length - 1;
+                    const load =
+                        sector.assigned_brigade_ids.length
+                        + sector.reserve_brigade_ids.length
+                        + (sector.rear_brigade_ids?.length ?? 0);
+                    return { sector, dist, load, path };
+                })
+                .filter((candidate): candidate is { sector: CorpsFrontSector; dist: number; load: number; path: string[] } => candidate != null)
+                .sort((a, b) =>
+                    a.dist - b.dist
+                    || a.load - b.load
+                    || strictCompare(a.sector.sector_id, b.sector.sector_id)
+                );
+            const rearBest = rearCandidates[0];
+            if (!rearBest) continue;
+            rearBest.sector.rear_brigade_ids ??= [];
+            rearBest.sector.rear_brigade_ids.push(fid);
+            rearBest.sector.territory_osids = [...new Set([
+                ...rearBest.sector.territory_osids,
+                locationOsid,
+            ])].sort(strictCompare);
+            assigned.add(fid);
+            emitRoutineConsoleWarn(`[brigade_assignment] Rehomed ${fid} into truthful sector owner ${rearBest.sector.sector_id} (deep-rear)`);
+            continue;
+        }
         if (candidates.length === 0) continue;
         const best = candidates[0]!;
         if (best.claim === 'front') {
@@ -1331,6 +1483,8 @@ export function ensureMinimumSectorCoverage(
     perfTime: EnsureMinimumSectorCoveragePerfTimer = (_label, fn) => fn(),
 ): void {
     const opParticipants = buildOperationParticipantSet(state);
+    const brigadeMovementState = state?.military.brigade_movement_state;
+    const brigadeMovementOrders = state?.military.brigade_movement_orders;
     const LOCAL_FRONT_RELIEF_MAX_HOPS = 3;
 
     const distanceToSectorFront = (bid: string, sector: CorpsFrontSector): number | null => {
@@ -1371,16 +1525,14 @@ export function ensureMinimumSectorCoverage(
     ): { target: string; dist: number } | null => {
         const formation = formations[bid];
         if (!formation?.location_osid) return null;
-        const candidates = [...getSectorFrontOsids(sector)]
-            .filter((target) => (activeCounts.get(target) ?? 0) === 0)
-            .map((target) => ({
-                target,
-                dist: bfsDistance(formation.location_osid as string, target, adjacency, friendlyOsids),
-            }))
-            .filter((candidate) =>
-                Number.isFinite(candidate.dist)
-                && candidate.dist <= maxHops)
-            .sort((a, b) => a.dist - b.dist || strictCompare(a.target, b.target));
+        const candidates: Array<{ target: string; dist: number }> = [];
+        for (const target of getSectorFrontOsids(sector)) {
+            if ((activeCounts.get(target) ?? 0) !== 0) continue;
+            const dist = bfsDistance(formation.location_osid, target, adjacency, friendlyOsids);
+            if (!Number.isFinite(dist) || dist > maxHops) continue;
+            candidates.push({ target, dist });
+        }
+        candidates.sort((a, b) => a.dist - b.dist || strictCompare(a.target, b.target));
         return candidates[0] ?? null;
     };
 
@@ -1404,6 +1556,8 @@ export function ensureMinimumSectorCoverage(
         list.push(s);
         sectorsByCorps.set(s.corps_id, list);
     }
+    const sortedCorpsSectorGroups = [...sectorsByCorps.entries()]
+        .sort((a, b) => strictCompare(a[0], b[0]));
 
     // ── Hoisted shared closures ──
     // `needed` and the density-floor constants are declared at function-body scope
@@ -1426,7 +1580,7 @@ export function ensureMinimumSectorCoverage(
     // territory_osids, it belongs there regardless of component boundaries.
     // No BFS required — the brigade is already there.
     perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-front', () => {
-    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+    for (const [, corpsSectors] of sortedCorpsSectorGroups) {
         const zeroFrontSectors = corpsSectors
             .filter(s => s.assigned_brigade_ids.length === 0 && s.length_edges > 0)
             .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
@@ -1486,7 +1640,7 @@ export function ensureMinimumSectorCoverage(
     });
 
     perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned', () => {
-    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+    for (const [, corpsSectors] of sortedCorpsSectorGroups) {
         for (const sector of corpsSectors) {
             if (sector.assigned_brigade_ids.length > 0) continue;
 
@@ -1644,7 +1798,7 @@ export function ensureMinimumSectorCoverage(
     // DENSITY_FLOOR_EDGES_PER_BRIGADE / DENSITY_FLOOR_THREAT_GATE / `needed`
     // are hoisted to function-body scope above so Phase E can reference them.
 
-    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+    for (const [, corpsSectors] of sortedCorpsSectorGroups) {
         const underStaffed = corpsSectors
             .filter(s =>
                 s.assigned_brigade_ids.length > 0
@@ -1706,7 +1860,7 @@ export function ensureMinimumSectorCoverage(
     const EQUALIZATION_MAX_RECIP_DENSITY = 0.25;
     const EQUALIZATION_MAX_TRANSFERS = 1;
 
-    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+    for (const [, corpsSectors] of sortedCorpsSectorGroups) {
         const overDense = corpsSectors
             .filter(s =>
                 s.assigned_brigade_ids.length > 1
@@ -1770,7 +1924,7 @@ export function ensureMinimumSectorCoverage(
     const PASS_7D_DONOR_MIN_DENSITY = 0.75;
     const PASS_7D_MAX_TRANSFERS = 2;
 
-    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+    for (const [, corpsSectors] of sortedCorpsSectorGroups) {
         const recipients = corpsSectors
             .filter(s =>
                 s.assigned_brigade_ids.length > 0
@@ -1842,7 +1996,7 @@ export function ensureMinimumSectorCoverage(
     // sibling sector to donate. This fixes quiet floor deficits without
     // cannibalizing another sector or requiring threat-gated rescue.
     perfTime('ensureMinimumSectorCoverage:severe-rescue:quiet-self-relief', () => {
-    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+    for (const [, corpsSectors] of sortedCorpsSectorGroups) {
         for (const sector of corpsSectors) {
             if (sector.assigned_brigade_ids.length === 0) continue;
             const deficit = Math.max(0, needed(sector) - sector.assigned_brigade_ids.length);
@@ -1861,8 +2015,8 @@ export function ensureMinimumSectorCoverage(
                         if (formation.status !== 'active') return null;
                         if ((formation.disrupted_turns ?? 0) > 0) return null;
                         if (opParticipants.has(entry.bid)) return null;
-                        if (state?.military.brigade_movement_state?.[entry.bid]?.status === 'in_transit') return null;
-                        if (state?.military.brigade_movement_orders?.[entry.bid]) return null;
+                        if (brigadeMovementState?.[entry.bid]?.status === 'in_transit') return null;
+                        if (brigadeMovementOrders?.[entry.bid]) return null;
                         const target = pickVacantLocalFrontTarget(entry.bid, sector, activeCounts, LOCAL_FRONT_RELIEF_MAX_HOPS);
                         if (!target) return null;
                         return { ...entry, target: target.target, dist: target.dist };
@@ -1896,7 +2050,7 @@ export function ensureMinimumSectorCoverage(
     const FLOOR_COMPLETION_MAX_HOPS = LOCAL_FRONT_RELIEF_MAX_HOPS;
     const FLOOR_COMPLETION_MAX_TRANSFERS = 2;
 
-    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+    for (const [, corpsSectors] of sortedCorpsSectorGroups) {
         const recipients = corpsSectors
             .filter((sector) =>
                 sector.assigned_brigade_ids.length > 0
@@ -1941,8 +2095,8 @@ export function ensureMinimumSectorCoverage(
                     if (formation.status !== 'active') return null;
                     if ((formation.disrupted_turns ?? 0) > 0) return null;
                     if (opParticipants.has(entry.bid)) return null;
-                    if (state?.military.brigade_movement_state?.[entry.bid]?.status === 'in_transit') return null;
-                    if (state?.military.brigade_movement_orders?.[entry.bid]) return null;
+                    if (brigadeMovementState?.[entry.bid]?.status === 'in_transit') return null;
+                    if (brigadeMovementOrders?.[entry.bid]) return null;
                     if (claimTypeForSector(entry.donor, entry.bid) !== 'front') return null;
                     if (entry.donor.assigned_brigade_ids.length <= needed(entry.donor)) return null;
 
@@ -2013,7 +2167,7 @@ export function ensureMinimumSectorCoverage(
         role === 'rear' ? 0 : role === 'reserve' ? 1 : 2
     );
 
-    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+    for (const [, corpsSectors] of sortedCorpsSectorGroups) {
         const recipients = corpsSectors
             .filter((sector) =>
                 sector.assigned_brigade_ids.length > 0
@@ -2060,8 +2214,8 @@ export function ensureMinimumSectorCoverage(
                             if (formation.status !== 'active') return null;
                             if ((formation.disrupted_turns ?? 0) > 0) return null;
                             if (opParticipants.has(entry.bid)) return null;
-                            if (state?.military.brigade_movement_state?.[entry.bid]?.status === 'in_transit') return null;
-                            if (state?.military.brigade_movement_orders?.[entry.bid]) return null;
+                            if (brigadeMovementState?.[entry.bid]?.status === 'in_transit') return null;
+                            if (brigadeMovementOrders?.[entry.bid]) return null;
                             if (entry.donorRole === 'front') {
                                 if (claimTypeForSector(entry.donor, entry.bid) !== 'front') return null;
                                 if (entry.donor.assigned_brigade_ids.length <= needed(entry.donor)) return null;
