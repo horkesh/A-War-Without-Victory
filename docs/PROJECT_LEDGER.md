@@ -1,4 +1,41 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] merge: event-system main integrated into calibration arc — new baseline 656/712
+
+**Type:** Branch integration + baseline recanonicalization. Merge commit `295ad0fe` brings
+the event-system branch (`4a554a94`, schema v18→v33, 52 commits: Phase B/D/E/F/G/H/I/J) into
+the calibration arc, plus calibration commit `2cb0b219` (Op Trnovo rework).
+
+**Integration approach:** Chose `git merge` over rebase. Calibration is a long divergent branch
+(84 commits); a literal rebase would have re-conflicted the ledger 26× and `war_1995.json` 31×.
+Merge resolved each conflicting file ONCE and — crucially — preserved calibration's history
+(no force-push needed; the new tip descends from both `bf6ce5ba` and `4a554a94`).
+
+**Conflicts resolved (4):**
+- `data/scenarios/events/war_1995.json` — Operation Deliberate Force RS `equipment_quality_modifier`:
+  kept calibration's `duration_turns:10` over event branch's `4` (both agreed on 0.7 multiplier).
+- `docs/PROJECT_LEDGER.md`, `docs/life_lessons.md`, `docs/life_lessons/calibration.md` — lossless
+  union (both branches' entries preserved; cosmetic chronological re-sort at the merge boundary
+  deferred to a docs pass).
+- Clean auto-merges: `sector_offensive.ts`, `local_truces.ts`, `war_1992.json`, `napkin.md`, `package.json`.
+
+**Verification (4-gate CI, all green):**
+- `tsc --noEmit`: clean on merged tree.
+- Event-system + Phase E/F/H suite: 434 pass / 5 skip (25 files).
+- F2 strict gate: 2 pass (CRITICAL + WARNING = 0 on real catalog).
+- Baseline regression: recanonicalized via `UPDATE_BASELINES=1`; check-mode "all scenarios match".
+
+**Calibration fidelity (scenario-tester GO):** 40w Jan-1993 on merged HEAD (run `n158`, hash
+`a969d44719aaa40e`) = **656/712 (92.13%)** vs pre-merge **657/712 (92.28%)** — net −1 OSID, flat.
+Anchors 27/27, bot benchmarks 6/6, 0 `avoided_osids_by_faction`. The −1 is Op Trnovo no longer
+firing prematurely in 40w (`available_from` 6→69) — MORE historical, since Lukavac-93 was Aug 1993.
+No new ahistorical captures introduced by the event system. **New baseline of record: 656/712.**
+
+**Downstream (calibration-team follow-up, not in this merge):** Phase E activation decisions per
+`docs/40_reports/proposals/20260529_PHASE_E_ACTIVATION_READINESS.md` (cohesion-threshold
+recalibration, activation order, etc.) remain open.
+
+---
+
 ## [2026-05-28] calibration(n154 revert): Op Zvezda 94 — engine limitation documented, 3-brigade state restored
 
 **Type:** Revert + documentation. `src/sim/combat/pre_planned_operations.ts`. No territory change; 40w hash `3649b3861a87e6ea` unchanged.
