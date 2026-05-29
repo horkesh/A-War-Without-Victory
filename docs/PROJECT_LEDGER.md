@@ -1,4 +1,15 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] codex: Phase J Packet 3 (RBiH cohesion=0.00 investigation)
+
+- **Type.** Read-only investigation packet per J2 finding #4. Pure documentation; zero code, zero state mutations, zero event-JSON, zero baselines. No FORAWWV edits.
+- **Scope.** One file: `docs/40_reports/proposals/20260529_RBIH_COHESION_INVESTIGATION.md` (~165 lines). Read-only inspection of `src/sim/events/strategic_dimensions.ts`, `src/sim/turn_phases/war_phases.ts`, `src/sim/events/evaluate_events.ts`, `data/scenarios/events/*.json`, and `data/derived/latest_run_final_save.json` turn-40 fields.
+- **Trigger.** J2 (`docs/40_reports/proposals/20260529_PHASE_E_ACTIVATION_READINESS.md` §9.4) flagged RBiH `internal_cohesion = 0.00` at turn 40 as a suspected floor-clamp artifact rather than a modeled state.
+- **Finding (HIGH confidence).** 0.00 IS a clamp artifact at the canonical `[0,100]` lower bound. Math reconstruction reproduces 0.00 exactly: `base_value = allianceVal(0.376×40) + avgCoh/2(72.63/2) − exhaustion/3(100/3) = 18.288`; `event_modifier = −22` (accumulated from authored event shifts: `rbih_state_identity`, `rbih_paramilitary_policy_1992`, `ic_pressure_vopp_engagement`, `srebrenica_demilitarization_1993`, `ic_rbih_restraint_post_washington`); pre-clamp sum = −3.71; `clamp(−3.71, 0, 100) = 0.00`.
+- **Mechanism.** The clamp at `strategic_dimensions.ts:39,49-50` is canonical by design (per `docs/plans/2026-03-22-dayton-dimension-merge-design.md`), normalizing the strategic-dimension score to `[0,100]` for `computeNegotiatingCapital` and Phase E gates. Pipeline order: `evaluate-events` (`war_phases.ts:303`) → `compute-dimension-bases` (`war_phases.ts:316`). No separate decay function exists.
+- **Impact on J2.** Sharpens but does not change J2's Option C recommendation. RBiH=0.00 is NOT a discriminator data point — pre-clamp composite is `−3.71`, qualitatively the same regime as HRHB (2.83). Threshold-recalibration analysis should be aware of clamp compression at the floor.
+- **Recommendation.** No immediate code change. Suggested FOLLOW-UP packets (NOT executed): (A) LOW-scope — surface `pre_clamp_value` as diagnostic field in `DimensionStore`; (B) LOW-scope — document clamp semantics in `Systems_Manual_v0_9_0.md` + `EMERGENT_CASCADE_ARCHITECTURE.md`; (C) MEDIUM-scope — re-balance formula component weights (deferred until calibration window opens).
+- **Hard constraints honored.** Read-only. No code changes. No staging of `.claude/scheduled_tasks.lock`. No worktree enter. No baseline refresh. No FORAWWV. No untracked debug dirs touched.
+
 ## [2026-05-29] codex: Phase J Packet 2 (Phase E activation readiness report)
 
 - **Type.** Pure documentation synthesis packet + optional Tier 2 empirical probe. Zero production code changed. No FORAWWV edits. No baseline writes.
