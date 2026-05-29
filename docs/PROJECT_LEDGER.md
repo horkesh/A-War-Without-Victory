@@ -20,6 +20,12 @@ modeling** — DEFERRED.
 CLOSED entry) clarifying the closed v0.8.4 "Phase E" is distinct from the event-system
 political-dimension-propagation "Phase E".
 
+**Merge.** Landed on `main` via squash PR #54 (merge commit `008f0a76`), CI green on all required gates
+(`test` / `typecheck` / `scenario-anchors`) plus event-system/desktop checks; branch deleted. Independently
+reviewed (Reports Custodian + Process QA): APPROVE — all 5 lanes survive the closure-log cross-check, no
+overclaim vs the consolidated verdict, lane-2 code citations confirmed real. Review nit closed in follow-up
+commit `d930f037` (added `OPEN`/`DEFERRED` to the COMMAND_BOARD Status Legend).
+
 ## [2026-05-29] codex: J1 activation simulator — Tier 2 ON-vs-OFF territorial flip-set diff (fixes within-run misread)
 
 **Type:** Diagnostic tool + test only. No engine, event-JSON, scenario, or save-schema change.
