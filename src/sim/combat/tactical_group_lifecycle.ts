@@ -155,6 +155,14 @@ export interface DissolveTgResult {
  */
 export const TG_DONOR_COOLDOWN_TURNS = 6;
 
+/**
+ * Anchor cohesion floor for Hard Invariant #6 immediate dissolution. Per canon
+ * Systems Manual v0.9.0 §6.3 ("OGs dissolve at cohesion < 15"). When a TG anchor
+ * falls below this cohesion (or below MIN_ATTACK_PERSONNEL), the TG dissolves
+ * immediately rather than waiting for the next-tick recovery transition.
+ */
+export const TG_ANCHOR_DISSOLVE_COHESION_FLOOR = 15;
+
 export function dissolveTacticalGroup(
     state: GameState,
     tgId: TgId,

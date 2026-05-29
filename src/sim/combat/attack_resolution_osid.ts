@@ -113,6 +113,9 @@ import { SUPPORT_POWER_MULT } from './bot_constants.js';
 // ADR-0005 v2.2b: TG combat-power synthesis + casualty distribution. Flag-gated.
 import { ENABLE_TG_COMBAT_SYNTHESIS } from './tactical_group_config.js';
 import { distributeCasualtiesAcrossTg } from './tactical_group_casualties.js';
+// ADR-0005 v2.2c #2: Hard Invariant #6 — immediate dissolution on anchor destruction.
+import { dissolveTacticalGroup, TG_ANCHOR_DISSOLVE_COHESION_FLOOR } from './tactical_group_lifecycle.js';
+import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import { getEnclaveGarrisonPower, isEnclaveCapital } from './enclave_resilience.js';
 import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
@@ -924,6 +927,20 @@ export function resolveAttackOrdersOsid(
                 applyPersonnelLoss(a, cas);
             }
             a.cohesion = Math.max(0, Math.min(100, (a.cohesion ?? 60) + (COHESION_ATTACKER[outcome] ?? 0)));
+
+            // ADR-0005 v2.2c #2 / Hard Invariant #6: anchor destroyed mid-op → dissolve its TG
+            // immediately (don't wait for the next-tick beginRecovery in sector_offensive.ts).
+            // dissolveTacticalGroup clears donor personnel_lent_by_tg/equipment fields and sets
+            // tg_cooldown_until_turn on anchor + donors; surviving donors keep their already-debited
+            // casualties and return. The territory-revert sub-clause (held OSID → contested unless a
+            // 1-hop friendly non-TG brigade is present) is deferred: a destroyed anchor is a normal
+            // dead physical brigade, so existing brigade-death/control mechanics already vacate its
+            // OSID — TODO-v2.2c-followup to confirm no TG-specific zombie hold remains. Flag-gated.
+            if (ENABLE_TG_COMBAT_SYNTHESIS
+                && ((a.personnel ?? 0) < MIN_ATTACK_PERSONNEL || (a.cohesion ?? 60) < TG_ANCHOR_DISSOLVE_COHESION_FLOOR)) {
+                const anchorTg = findTgForAnchor(state, a.id);
+                if (anchorTg) dissolveTacticalGroup(state, anchorTg.id, state.meta?.turn ?? 0);
+            }
 
             // Sweeping undefended territory is less exhausting than real combat but not free —
             // logistics, occupation duties, scattered resistance, and advance tempo take a toll.
