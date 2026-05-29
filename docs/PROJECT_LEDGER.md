@@ -1,4 +1,45 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] test-debt + CI-gating remediation (issue #39) — main full-suite red trunk 16 → 6
+
+**Type:** Test/data-only debt burndown + CI-gating fix. No sim behavior, scenario, or save-schema
+change; all merged fixes verified hash-neutral / CI-verified to add zero new failures.
+
+**Context.** After the event-system + calibration integration landed on `main` (merge `abf662a0`),
+the Baseline Regression `test` job (full vitest suite) was red with **16 pre-existing failures** —
+10 from the event branch + 6 from the calibration arc. Root cause (issue #39): the full `test` job
+in `baseline-regression.yml` triggered only on `main`/PRs-to-`main`, and the event-system workflow
+gated only a 25-file subset, so feature branches (`codex/**`, `claude/**`) never ran the full suite
+and both contributing branches shipped red.
+
+**Burndown (16 → 6).**
+- **PR #42** (Batch 1, squash `9bbfbd36`): 8 stale-expectation tests (no owner, no risk). Red 16 → 10.
+- **PR #44** (Batch 2 safe, squash `e01c7076`): 3 stale tests + essay-index sync (adapter_field_completeness,
+  ui_adapter_boundary JSDoc regex, codex_essay_localization). CI confirmed exactly 7 remaining. Red 10 → 7.
+- **PR #45** (squash `3f1e1642`): all 4 `war_19xx` event files ordered by `turn_min`, hash-neutral
+  (`a969d44719aaa40e`), turn_min test green, no new failures. Red 7 → 6.
+- 3 further stale-test fixes in flight on `codex/test-debt-batch3-stale`.
+
+**Reclassification.** What issue #39 originally listed as "Batch 3 calibration" failures
+(graz_faction_block, local_truces, fall_1995_hv_depth_priority, etc.) were diagnosed as **stale tests**
+(prod code/data correct), not calibration regressions — moved to the in-flight stale batch.
+
+**CI-gating fix.** **PR #43 (OPEN, held for owner)** adds `codex/**` + `claude/**` to the
+`baseline-regression.yml` push triggers so feature branches can no longer ship a red full suite to
+`main`. Held pending an owner Actions-cost decision (the full ~30-min suite would run on every push
+to those branches).
+
+**Remaining 6 red (owner/calibration-domain — not force-fixed).** `codex_sensitive_history_source_notes`
+(historian: flagged phrase sits inside a negating quotation), `pre_planned_operations` op:brcko:brcko
+(canon decision), `patron_calls_phase4` B12 (owner −10/−25 cost decision), plus the 3 in-flight stale fixes.
+
+**Related.** Concentration off-by-one routed to calibration as **issue #41**. ADR-0005 OG v2.2c/v2.3/#40
+ledger entries are tracked separately on the OG branch.
+
+**Artifacts.** `.github/workflows/baseline-regression.yml` (PR #43), test/data files per PR #42/#44/#45,
+`docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-29] merge: event-system main integrated into calibration arc — new baseline 656/712
 
 **Type:** Branch integration + baseline recanonicalization. Merge commit `295ad0fe` brings
