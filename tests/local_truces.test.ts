@@ -218,6 +218,9 @@ describe('shouldGrazBlockAttack', () => {
 
     it('blocks hvo_southeast_herzegovina attacking RS territory after the east-Herzegovina truce activates', () => {
         const state = makeActiveState();
+        // East-pair truce is time-gated (activates only after Op Jackal ends); set the flag
+        // so the scenario matches the test title.
+        (state.political as any).graz_east_herzegovina_active_turn = 8;
         assert.equal(shouldGrazBlockAttack(state, 'hvo_southeast_herzegovina', 'HRHB', 'op:nevesinje:sopilja', 'RS'), true);
     });
 

@@ -142,7 +142,7 @@ describe('E-B3: Strategic depth per corps', () => {
     test('VRS 2nd Krajina Corps strategic_depth drops after SVK corps deactivates', () => {
         // Build minimal state with VRS 2KK and one sector full of friendly OSIDs.
         const state = makeState(150);
-        const corpsId = '2nd_krajina_corps';
+        const corpsId = 'vrs_2nd_krajina';
         const corps = addCorps(state, corpsId, 'RS');
         state.political.political_controllers = {
             'op:banja_luka:banja_luka_2': 'RS',
