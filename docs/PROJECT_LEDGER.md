@@ -30,6 +30,32 @@
 
 ---
 
+## [2026-05-29] fix(combat): ADR-0005 v3.0 corrections + Farz 95 enrichment (post-shipment activation smoke + historian review)
+
+**Type:** Corrections + enrichment to the v3.0 Army HQ Operations entry above. An activation smoke and a historian review (run AFTER the initial v3.0 entry at commit `13cf5c72`) found a dead-code donor-wiring gap and two historical errors in the shipped op set. Still Ring 1, faction-agnostic, flag-gated (`ENABLE_TG_ARMY_HQ_OPS=false`), flag-off byte-identical at BOTH gold gates. NOT activated — activation remains a future calibration decision.
+
+**Why:** The initial v3.0 shipped the Phase-A faction-scope donor pool UNWIRED — the core mechanic was dead code at runtime — and scripted two ops that did not survive historical scrutiny (a mis-dated Vozuća capture and a fabricated RBiH "Lukavac-93" that collided with the canon VRS op).
+
+**Corrections** (commit `88dfdc2b`):
+- **Donor-wiring gap fixed.** The shipped Phase-A faction-scope donor pool was UNWIRED: `op.army_hq_op_id` was never threaded into the donor-selection context / `formTacticalGroup` / the readiness gate, so Army HQ ops drew ZERO cross-corps donors. Now wired; flag-on verified to draw faction-wide cross-corps donors.
+- **Vozuća → Farz 95 historical fix.** The def was wrongly dated 1994 ("Vozuća 94" / `ahq:RBiH:1994:vozuca_94`). Historian + the project's own `painted_control` truth confirmed the capture was **Sept 1995** (the 1994 attempt failed). Renamed **"Operation Farz 95"** (owner-confirmed codename), id `ahq:RBiH:1995:farz_95`.
+- **Lukavac-93 def DROPPED.** It was a fabricated RBiH op colliding with the real VRS "Operation Lukavac '93" (already canon in `war_1993.json` / `operation_names.ts` as RS). v3.0 now ships only **Krivaja-95** (RS, Srebrenica — unchanged/correct) and **Farz 95** (RBiH).
+
+**Enrichment** (commit `2ac90965`):
+- **Farz 95 objectives** are now the real 3-OSID salient capture `op:zavidovici:vozuca_2 → op:maglaj:gornja_bocinja → op:maglaj:donja_bocinja_2` (all RS@apr1995 → RBiH@oct1995 in painted truth).
+- **Seed brigades** 351st + 328th + 327th + 7th (7th = El Mujahid stand-in; El Mujahid has no OOB id — **flagged for OOB authors**).
+- Flag-on 188w reproduces all 3 OSIDs flipping RBiH via emergent cross-corps draw.
+
+**Verification:**
+- **Flag-off byte-identical at BOTH gold gates: 40w `78e231e35b08cf53` + 188w `940251e4acaff3d4`** (unchanged from the initial v3.0 shipment; the corrected/enriched code is reached flag-on only).
+- Ring-1 / flag-gated / no calibration shift. NOT activated.
+
+**Files (this docs-only follow-up):**
+- `docs/PROJECT_LEDGER.md` (this entry)
+- `docs/20_engineering/ADR/ADR-0005-tactical-groups-as-primary-ops-path.md` (v3.0 row + readiness paragraph + revision-history line)
+
+---
+
 ## [2026-05-29] fix(combat): ADR-0005 #40 — exclude not-yet-injected pre-planned-op brigades from TG donor selection
 
 **Type:** Donor-eligibility correctness fix on the flag-gated TG path. Ring 1, faction-agnostic. Fixes the Op-Trnovo donor-strand bug surfaced in the 188w flag-on smoke (see v2.2b/v2.3 entries).
