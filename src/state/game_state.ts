@@ -514,7 +514,7 @@ export interface TacticalGroup {
     cohesion: number;
 }
 
-/** Faction-wide cross-corps offensive entity (Krivaja-95, Vozuća 94, Lukavac 93
+/** Faction-wide cross-corps offensive entity (Krivaja-95, Farz 95
  *  pattern). Capped at most once per year per faction per ADR-0005 §Army HQ
  *  Operations. v2.0 scaffold; v3.0 wires triggers + pipeline step. */
 export interface ArmyHqOperation {

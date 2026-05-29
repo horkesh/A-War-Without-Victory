@@ -762,6 +762,7 @@ function classifyAxisOpeningAttack(
     adjacency: Map<string, string[]>,
     threshold: PredictedOutcome,
     staticAdjacency?: Map<string, string[]>,
+    armyHqOpId?: CorpsOperation['army_hq_op_id'],
 ): OpeningAttackReadinessResult {
     const objective = axis.objectives[axis.current_objective_index ?? 0];
     if (typeof objective !== 'string' || objective.length === 0) {
@@ -818,7 +819,7 @@ function classifyAxisOpeningAttack(
         const stagingOsid = axis.staging_osid;
         if (anchorId && stagingOsid) {
             const anchorPersonnel = state.military.formations?.[anchorId]?.personnel ?? 0;
-            const donors = selectDonors(state, { anchor_brigade_id: anchorId, staging_osid: stagingOsid });
+            const donors = selectDonors(state, { anchor_brigade_id: anchorId, staging_osid: stagingOsid, army_hq_op_id: armyHqOpId });
             const donated = donors.reduce((sum, d) => sum + d.personnel_lent, 0);
             if (donated < DONATION_READINESS_FRACTION * anchorPersonnel) {
                 axis.launch_blocker = 'insufficient_donation';
@@ -855,7 +856,7 @@ export function evaluateOpeningAttackReadiness(
         let anyApproaching = false;
         for (const axis of op.axes) {
             if (axis.status === 'complete' || axis.status === 'stalled') continue;
-            const result = classifyAxisOpeningAttack(state, corpsId, faction, axis, adjacency, threshold, staticAdjacency);
+            const result = classifyAxisOpeningAttack(state, corpsId, faction, axis, adjacency, threshold, staticAdjacency, op.army_hq_op_id);
             if (result.executable) {
                 anyExecutable = true;
             } else {

@@ -39,7 +39,7 @@ export const ENABLE_TG_COHESION_BLEED = false;
 
 /**
  * v3.0 flag: Army HQ Operations (faction-wide cross-corps offensives — Krivaja-95,
- * Vozuća 94, Lukavac 93 pattern). ADR-0005 §Army HQ Operations + §Phased Rollout v3.0.
+ * Farz 95 pattern). ADR-0005 §Army HQ Operations + §Phased Rollout v3.0.
  *
  * When false (default): the `inject-army-hq-operations` war-phase step is fully inert
  * (early-returns before any read/write), `isEligibleDonor` keeps the exact same-corps

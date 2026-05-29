@@ -38,8 +38,8 @@
  *      the adjacent-corps rule and pull from all same-faction corps. Apply
  *      ARMY_HQ_COHESION_BLEED_MULT = 2.0× at bleed time (v2.3+).
  *
- * v3.0 will wire scenario triggers for Army HQ ops (Krivaja-95, Vozuća 94,
- * Lukavac 93) and the per-faction frequency gate (MAX_ARMY_HQ_OPS_PER_
+ * v3.0 will wire scenario triggers for Army HQ ops (Krivaja-95, Farz 95)
+ * and the per-faction frequency gate (MAX_ARMY_HQ_OPS_PER_
  * FACTION_PER_YEAR = 2, ARMY_HQ_OP_COOLDOWN_TURNS = 52).
  */
 

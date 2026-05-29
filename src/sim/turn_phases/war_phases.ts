@@ -986,8 +986,8 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        // ADR-0005 v3.0: inject faction-wide Army HQ operations (Krivaja-95, Vozuća 94,
-        // Lukavac 93). Runs AFTER inject-queued-operations and BEFORE check-triggered-
+        // ADR-0005 v3.0: inject faction-wide Army HQ operations (Krivaja-95, Farz 95).
+        // Runs AFTER inject-queued-operations and BEFORE check-triggered-
         // operations so the Army HQ path owns its promoted defs exclusively. Fully gated by
         // ENABLE_TG_ARMY_HQ_OPS — injectArmyHqOperations early-returns when the flag is off,
         // so this step is byte-identical-inert in the flag-off path.

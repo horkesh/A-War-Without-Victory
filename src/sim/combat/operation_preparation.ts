@@ -641,12 +641,14 @@ function formTgsAtReadyTransition(
             const donors = selectDonors(state, {
                 anchor_brigade_id: anchorId,
                 staging_osid: stagingOsid,
+                army_hq_op_id: op.army_hq_op_id,
             });
             formTacticalGroup(state, {
                 op_id: op.name,
                 anchor_brigade_id: anchorId,
                 donors,
                 current_turn: currentTurn,
+                army_hq_op_id: op.army_hq_op_id,
             });
         }
         return;
@@ -656,12 +658,14 @@ function formTgsAtReadyTransition(
     const donors = selectDonors(state, {
         anchor_brigade_id: anchorId,
         staging_osid: op.staging_osid,
+        army_hq_op_id: op.army_hq_op_id,
     });
     formTacticalGroup(state, {
         op_id: op.name,
         anchor_brigade_id: anchorId,
         donors,
         current_turn: currentTurn,
+        army_hq_op_id: op.army_hq_op_id,
     });
 }
 

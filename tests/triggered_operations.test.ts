@@ -110,10 +110,12 @@ describe('triggered operations definitions', () => {
         // Operation Sana migrated to the opportunity catalog (LANE B Phase 3,
         // 2026-05-01). Its coverage now lives in
         // tests/operation_opportunities_5th_corps_sana.test.ts.
-        // ADR-0005 v3.0 (2026-05-29): Vozuća 94 + Lukavac 93 added as army_hq_only
-        // RBiH defs (net-new; only fire via the inject-army-hq-operations step when
-        // ENABLE_TG_ARMY_HQ_OPS is on). Inserted after Krivaja-95, before Stupčanica-95.
-        assert.equal(_TRIGGERED_OPS.length, 8);
+        // ADR-0005 v3.0 (2026-05-29): Farz 95 (Vozuća, codename Farz, Sept 1995) added
+        // as an army_hq_only RBiH def (net-new; only fires via the inject-army-hq-operations
+        // step when ENABLE_TG_ARMY_HQ_OPS is on). Inserted after Krivaja-95, before
+        // Stupčanica-95. The fabricated "Lukavac 93" RBiH def was dropped (collided with
+        // the real VRS operation_lukavac_93 event).
+        assert.equal(_TRIGGERED_OPS.length, 7);
         assert.deepEqual(
             _TRIGGERED_OPS.map((def) => def.name),
             [
@@ -122,8 +124,7 @@ describe('triggered operations definitions', () => {
                 'Operation Kotor Varos',
                 'Operation Cerska-Kamenica',
                 'Operation Krivaja-95',
-                'Operation Vozuća 94',
-                'Operation Lukavac 93',
+                'Operation Farz 95',
                 'Operation Stupčanica-95',
             ],
         );

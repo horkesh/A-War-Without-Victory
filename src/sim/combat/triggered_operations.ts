@@ -463,11 +463,13 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         ],
     },
     {
-        // Operation Vozuća 94 — ADR-0005 v3.0 D4. ARBiH Army HQ-conducted offensive
-        // against the VRS-held Vozuća pocket (Zavidovići), the documented BH Army HQ
-        // op with cross-corps donors from 2nd + 3rd Corps (BB2 pp.508-509: "directly
-        // conducted by BH Army HQ"). Modeled as an Army HQ operation (faction-wide RBiH
-        // donor pool) with a SINGLE anchor + faction-wide donors per D4 (multi-TG deferred).
+        // Operation Farz 95 — ADR-0005 v3.0 D4. ARBiH Army HQ-conducted offensive
+        // (codename "Farz", Sept 1995) against the VRS-held Vozuća pocket (Zavidovići),
+        // the documented BH Army HQ op with cross-corps donors from 2nd + 3rd Corps
+        // (BB2 pp.508-509: "directly conducted by BH Army HQ"). Modeled as an Army HQ
+        // operation (faction-wide RBiH donor pool) with a SINGLE anchor + faction-wide
+        // donors per D4 (multi-TG deferred). Capture was 1995, not 1994 (historian-
+        // confirmed: vozuca_2 = RS through apr1995, RBiH by oct1995 in painted truth).
         //
         // Objective: op:zavidovici:vozuca_2 — the one OSID in the pocket that flipped
         // RS→RBiH between apr1995 and oct1995 painted truth. Staging at
@@ -476,9 +478,9 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         // Anchor arbih_351st_liberation (resident at staging). Donor candidates pulled
         // faction-wide by the Army HQ Phase-A selection (e.g. 3rd Corps 328th at cinovici,
         // adjacent to vozuca_2); brigades list seeds the participant set for injection.
-        name: 'Operation Vozuća 94',
+        name: 'Operation Farz 95',
         faction: 'RBiH',
-        army_hq_op_id: 'vozuca_94',
+        army_hq_op_id: 'farz_95',
         army_hq_only: true, // net-new: never fires via legacy triggered path (inert flag-off)
         primary_corps: 'arbih_3rd_corps',
         staging_osid: 'op:zavidovici:hajderovici_2',
@@ -498,42 +500,6 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                     'op:zavidovici:vozuca_2',
                 ],
                 staging_osid: 'op:zavidovici:hajderovici_2',
-            },
-        ],
-    },
-    {
-        // Operation Lukavac 93 — ADR-0005 v3.0 D4. ARBiH 2nd Corps Army HQ operation
-        // (single anchor + faction-wide donors per D4; multi-TG deferred per ADR). Models
-        // ARBiH Main Staff cross-corps effort in the Lukavac/Ozren-foothills sector.
-        //
-        // Objective: op:lukavac:brijesnica_donja_2 — RS→RBiH flip between apr1995 and
-        // oct1995 painted truth. Staging at op:lukavac:dobosnica_2 (RBiH-painted; home of
-        // the 223rd; adjacency verified dobosnica_2 ↔ brijesnica_donja_2). Anchor
-        // arbih_223rd_mountain (resident at staging). Donor arbih_9th_muslim_liberation
-        // (bikodze, adjacent) seeds the participant set; Army HQ Phase-A widens the pool
-        // faction-wide.
-        name: 'Operation Lukavac 93',
-        faction: 'RBiH',
-        army_hq_op_id: 'lukavac_93',
-        army_hq_only: true, // net-new: never fires via legacy triggered path (inert flag-off)
-        primary_corps: 'arbih_2nd_corps',
-        staging_osid: 'op:lukavac:dobosnica_2',
-        planning_duration: 3,
-        min_attack_outcome: 'repulsed',
-        trigger: (_state, turn) => turn >= 160,
-        axes: [
-            {
-                axis_id: 'brijesnica_axis',
-                name: 'Brijesnica Axis',
-                corps: 'arbih_2nd_corps',
-                brigades: [
-                    'arbih_223rd_mountain' as FormationId,
-                    'arbih_9th_muslim_liberation' as FormationId,
-                ],
-                objectives: [
-                    'op:lukavac:brijesnica_donja_2',
-                ],
-                staging_osid: 'op:lukavac:dobosnica_2',
             },
         ],
     },
@@ -1193,7 +1159,7 @@ function armyHqFrequencyGateOpen(state: GameState, faction: FactionId, turn: num
  *
  * Runs as the `inject-army-hq-operations` war-phase step, immediately AFTER
  * `inject-queued-operations` and BEFORE `check-triggered-operations`. Iterates the
- * Army-HQ-promoted defs (Krivaja-95, Vozuća 94, Lukavac 93) in sorted army_hq_op_id
+ * Army-HQ-promoted defs (Krivaja-95, Farz 95) in sorted army_hq_op_id
  * order; injects the FIRST def that clears the frequency gate (Phase C) and the same
  * launch gates the regular triggered path uses. On injection it:
  *   - builds the op via the shared buildOperation machinery,
