@@ -60,7 +60,20 @@ describe('late-1995 triggered operations — catalog', () => {
         }
         // Ordering: legacy four first, late-1995 sensitive-history two after.
         // Sana and Mistral 2 are migrated to opportunity catalogs.
-        assert.deepEqual(names.slice(-2), [...NEW_OP_NAMES]);
+        // ADR-0005 v3.0 (2026-05-29): the army_hq_only defs Vozuća 94 + Lukavac 93
+        // are inserted between Krivaja-95 and Stupčanica-95, so the two sensitive-
+        // history ops are no longer the literal tail-2. Assert instead that both
+        // appear after the four legacy ops (the original intent of this contract).
+        const legacyFour = [
+            'Operation Posavina Corridor',
+            'Operation Herzegovina Consolidation',
+            'Operation Kotor Varos',
+            'Operation Cerska-Kamenica',
+        ];
+        const lastLegacyIdx = Math.max(...legacyFour.map((n) => names.indexOf(n)));
+        for (const name of NEW_OP_NAMES) {
+            assert.ok(names.indexOf(name) > lastLegacyIdx, `expected ${name} after the four legacy ops`);
+        }
     });
 
     it('Operation Krivaja-95 has the expected faction/corps/turn-gate/single-axis shape', () => {

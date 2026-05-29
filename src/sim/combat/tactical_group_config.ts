@@ -38,6 +38,29 @@ export const ENABLE_TG_COMBAT_SYNTHESIS = false;
 export const ENABLE_TG_COHESION_BLEED = false;
 
 /**
+ * v3.0 flag: Army HQ Operations (faction-wide cross-corps offensives — Krivaja-95,
+ * Vozuća 94, Lukavac 93 pattern). ADR-0005 §Army HQ Operations + §Phased Rollout v3.0.
+ *
+ * When false (default): the `inject-army-hq-operations` war-phase step is fully inert
+ * (early-returns before any read/write), `isEligibleDonor` keeps the exact same-corps
+ * filter, and the Phase D recovery-suppression branch never fires. Schema stays v34
+ * (all Army HQ fields already present + omitEmpty-safe). Goal: 40w final_state_hash
+ * `78e231e35b08cf53` byte-identical with this flag off.
+ */
+export const ENABLE_TG_ARMY_HQ_OPS = false;
+
+/**
+ * v3.0 Army HQ frequency gate (ADR-0005 §Constants reference + §Army HQ Operations).
+ * Both gated by ENABLE_TG_ARMY_HQ_OPS; inert when the flag is off.
+ */
+
+/** Max Army HQ ops a faction may launch within one scenario-year bucket (Historian peak ceiling). */
+export const MAX_ARMY_HQ_OPS_PER_FACTION_PER_YEAR = 2;
+
+/** Minimum turn spacing between consecutive Army HQ ops for the same faction (1 year). */
+export const ARMY_HQ_OP_COOLDOWN_TURNS = 52;
+
+/**
  * v2.3 Pyrrhic dampener constants (ADR-0005 §Pyrrhic cost + §Phased Rollout v2.3).
  * All gated by ENABLE_TG_COHESION_BLEED; inert when the flag is off.
  */

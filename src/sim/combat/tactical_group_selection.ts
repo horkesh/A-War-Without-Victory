@@ -54,7 +54,11 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { getReservedPrePlannedBrigadeIds } from './pre_planned_operations.js';
 // ADR-0005 v2.3: per-scenario donation cap (anti-fire-hose). Gated by ENABLE_TG_COHESION_BLEED so
 // flag-off eligibility is unchanged (byte-identical).
-import { ENABLE_TG_COHESION_BLEED, MAX_DONATIONS_PER_SCENARIO } from './tactical_group_config.js';
+import {
+    ENABLE_TG_ARMY_HQ_OPS,
+    ENABLE_TG_COHESION_BLEED,
+    MAX_DONATIONS_PER_SCENARIO,
+} from './tactical_group_config.js';
 
 export interface DonorSelectionContext {
     /** Anchor brigade for the prospective TG. */
@@ -137,7 +141,11 @@ function isEligibleDonor(
     if (f.id === context.anchor_brigade_id) return false;
     if (f.status !== 'active') return false;
     if (f.faction !== anchorFaction) return false;
-    if (f.corps_id !== anchorCorps) return false; // v2.2-simplified: same corps only
+    // ADR-0005 v3.0 Phase A: Army HQ ops draw donors from ALL same-faction corps (cross-corps,
+    // ignores adjacency). Only when the flag is on AND this selection is for an Army HQ op;
+    // otherwise the exact v2.2-simplified same-corps filter is preserved (byte-identical flag-off).
+    const factionScope = ENABLE_TG_ARMY_HQ_OPS && context.army_hq_op_id != null;
+    if (!factionScope && f.corps_id !== anchorCorps) return false; // v2.2-simplified: same corps only
     if (reservedPrePlanned.has(f.id)) return false; // issue #40: reserved for a not-yet-injected pre-planned op
     if ((f.cohesion ?? 0) < COHESION_HEALTHY_THRESHOLD) return false;
     if (Object.keys(f.personnel_lent_by_tg ?? {}).length > 0) return false; // Hard Invariant #1

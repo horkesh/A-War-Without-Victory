@@ -452,6 +452,13 @@ export interface CorpsOperation {
     force_quality_blocked_at_launch?: boolean;
     /** Phase 4: max axes derived from axis_coordination soft gate; 1 means single-axis only. */
     force_quality_max_axes_at_launch?: number;
+
+    // --- Army HQ Operation linkage (ADR-0005 v3.0) ---
+    /** When set, this operation is carried out as part of a faction-wide Army HQ op
+     *  (cross-corps donor pool, doubled cohesion bleed, frequency-capped). Optional
+     *  scalar — omitEmpty-safe, undefined when ENABLE_TG_ARMY_HQ_OPS is off; no schema
+     *  migration (mirrors the v2.3 tg_recent_compositions additive pattern, schema stays v34). */
+    army_hq_op_id?: ArmyHqOpId;
 }
 
 // === Tactical Group / Operational Group entity (ADR-0005 v2.0) ===
@@ -871,6 +878,11 @@ export interface FormationState {
     tg_cooldown_until_turn?: number;
     /** Per-scenario donation count (anti-fire-hose cap; max MAX_DONATIONS_PER_SCENARIO = 6). */
     tg_donations_this_scenario?: number;
+    /** ADR-0005 v3.0 Phase D: absolute turn until which POSITIVE ambient cohesion drift is
+     *  suppressed for a donor on an Army HQ op (recovery-suppression Pyrrhic cost). Never
+     *  clamps below the faction floor; only zeroes upward drift. Set at TG formation; gated
+     *  by ENABLE_TG_ARMY_HQ_OPS so flag-off leaves cohesion_drift byte-identical. */
+    tg_recovery_suppressed_until_turn?: number;
 }
 
 export interface FrontPostureAssignment {

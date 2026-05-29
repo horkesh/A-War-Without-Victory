@@ -143,7 +143,7 @@ import { buildTerrainCache } from '../combat/combat_predictor.js';
 import { processJnaWithdrawals, spawnJnaPhantomBrigades } from '../combat/jna_phantom_brigades.js';
 import { injectQueuedOperation } from '../combat/pre_planned_operations.js';
 import { isSlot0AvailableForQueue } from '../combat/corps_operation_helpers.js';
-import { checkTriggeredOperations } from '../combat/triggered_operations.js';
+import { checkTriggeredOperations, injectArmyHqOperations } from '../combat/triggered_operations.js';
 import { computeMilitiaGarrisons } from '../combat/militia_garrison.js';
 import { activateOGs, updateOGLifecycle } from '../combat/operational_groups.js';
 import { deriveSectorIntel } from '../combat/sector_intel.js';
@@ -983,6 +983,18 @@ export const warPhases: NamedPhase[] = [
                     injectQueuedOperation(context.state, corpsId, adjacency);
                 }
             }
+        }
+    },
+    {
+        // ADR-0005 v3.0: inject faction-wide Army HQ operations (Krivaja-95, Vozuća 94,
+        // Lukavac 93). Runs AFTER inject-queued-operations and BEFORE check-triggered-
+        // operations so the Army HQ path owns its promoted defs exclusively. Fully gated by
+        // ENABLE_TG_ARMY_HQ_OPS — injectArmyHqOperations early-returns when the flag is off,
+        // so this step is byte-identical-inert in the flag-off path.
+        name: 'inject-army-hq-operations',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            injectArmyHqOperations(context.state);
         }
     },
     {
