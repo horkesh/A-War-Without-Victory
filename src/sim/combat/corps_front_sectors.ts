@@ -369,9 +369,19 @@ export function buildCorpsFrontSectors(
     const formations = state.military.formations ?? {};
     const factions = getFactions(state);
     const result: Record<string, CorpsFrontSector> = {};
-    const recoveredFrontClaimSetupCache = nodeProcess?.env?.SECTOR_COLDSTART_CACHE_DISABLED === 'true'
-        ? undefined
-        : new Map<FactionId, RecoveredFrontClaimSetup>();
+    // Recovered-front-claim setup MUST be computed once and shared across both
+    // recoverDroppedFrontEdges passes. The setup's corps→edge partition is derived
+    // from mapOsidsToCorps, which reads brigade location_osid. The FIRST recovery
+    // pass's post-recovery reassignment (rehomeUnassignedBrigadesToPhysicalSectorOwners)
+    // mutates location_osid, so a fresh re-derivation on the SECOND pass would
+    // partition against moved brigades and yield a different edge set (e.g. seed-61
+    // vrs_drina drifts 75→76 edges). Sharing the pre-recovery setup is therefore the
+    // coherent, deterministic truth — NOT an optimization. This cache is unconditional:
+    // the legacy SECTOR_COLDSTART_CACHE_DISABLED escape hatch (which re-derived per
+    // pass) is honored only for the mapOsidsToCorps memoization it was introduced for,
+    // never for this setup, because disabling it reintroduces cross-pass leakage that
+    // breaks cache-ON-vs-OFF byte-equality (G1.5).
+    const recoveredFrontClaimSetupCache = new Map<FactionId, RecoveredFrontClaimSetup>();
 
     for (const faction of factions) {
         const factionSectors = _perfTime(`buildFactionSectors:${faction}`, () => buildFactionSectors(
