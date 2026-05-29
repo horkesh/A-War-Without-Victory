@@ -302,6 +302,76 @@ Hash diverges (wiring is alive — TG records, donor lent ledgers, casualty redi
 **Commits:** `31c74f02` (ADR-0006), `624782e4` (ADR-0005 r3.1 companion link), `06ee6dcb` (v1 code). Branch: `claude/tactical-groups-2026-05-28`. Worktree: `F:/A-War-Without-Victory/.worktrees/tactical-groups-2026-05-28/`.
 
 **Next:** v2.0 — donor pool selection + TG formation + v33→v34 schema migration. Sub-stage order v2.0 (formation) → v2.1 (distribution math, dormant) → v2.2 (combat synthesis, calibration shift) → v2.3 (Pyrrhic dampener).
+
+## [2026-05-29] codex: J1 activation simulator — Tier 2 ON-vs-OFF territorial flip-set diff (fixes within-run misread)
+
+**Type:** Diagnostic tool + test only. No engine, event-JSON, scenario, or save-schema change.
+Baseline regression PASSES byte-identical ("all scenarios match").
+
+**Defect (adjudication-confirmed).** `tools/diagnostics/phase_e_activation_simulator.ts` Tier 2 only
+hash-compared artifacts and mapped any `control_delta.json` hash-drift → BOT-MILITARY. But
+`control_delta.json` is a WITHIN-RUN total (`computeControlDelta(initial, final)` = war start→end
+trajectory, per `scenario_runner.ts:2968-2969` + `scenario_end_report.ts:182-191`), NOT a flag-ON-vs-OFF
+diff. So the tool surfaced the war's natural territorial trajectory as if it were the flag's effect —
+misleading a reviewer into a false "absurd cascade" conclusion.
+
+**Fix.** Tier 2 now ALSO runs the OFF baseline (`global_off`) once per scenario in the same pass to
+capture the reference final control map, then computes a true ON-vs-OFF `territorial_diff` per combo:
+stable-sorted (strictCompare on OSID) flip-set of OSIDs whose controller differs ON vs OFF, plus
+per-faction net OSID count delta (ON − OFF). This is the flag's ACTUAL magnitude (typically a handful
+of OSIDs). `classifyDriftSignal` now keys BOT-MILITARY on a non-empty ON-vs-OFF flip-set (authoritative),
+not on within-run control_delta hash-drift alone; empty flip-set with drift → DIMENSION-ONLY. Hash
+comparison retained (correctly detects ANY divergence). Text/JSON output relabels within-run
+control_delta as "trajectory — NOT the flag effect" and surfaces the separate territorial diff block.
+Legacy hashes-only runner returns still supported (territorial_diff `available:false`, hash fallback).
+
+**Tests.** `tests/phase_e_activation_simulator.test.ts`: +5 (flip-set derivation; empty flip-set + drifted
+control_delta → DIMENSION-ONLY not BOT-MILITARY; non-empty flip-set → BOT-MILITARY with OSID list + net
+counts; control_delta labeled trajectory; legacy fallback). 18 prior tests still pass (23 total).
+Verified: `vitest run` 23/23, `tsc --noEmit` (tool+test clean), `git diff --check` clean, Tier 1 CLI JSON
+intact, baseline regression byte-identical.
+
+## [2026-05-29] test-debt + CI-gating remediation (issue #39) — main full-suite red trunk 16 → 6
+
+**Type:** Test/data-only debt burndown + CI-gating fix. No sim behavior, scenario, or save-schema
+change; all merged fixes verified hash-neutral / CI-verified to add zero new failures.
+
+**Context.** After the event-system + calibration integration landed on `main` (merge `abf662a0`),
+the Baseline Regression `test` job (full vitest suite) was red with **16 pre-existing failures** —
+10 from the event branch + 6 from the calibration arc. Root cause (issue #39): the full `test` job
+in `baseline-regression.yml` triggered only on `main`/PRs-to-`main`, and the event-system workflow
+gated only a 25-file subset, so feature branches (`codex/**`, `claude/**`) never ran the full suite
+and both contributing branches shipped red.
+
+**Burndown (16 → 6).**
+- **PR #42** (Batch 1, squash `9bbfbd36`): 8 stale-expectation tests (no owner, no risk). Red 16 → 10.
+- **PR #44** (Batch 2 safe, squash `e01c7076`): 3 stale tests + essay-index sync (adapter_field_completeness,
+  ui_adapter_boundary JSDoc regex, codex_essay_localization). CI confirmed exactly 7 remaining. Red 10 → 7.
+- **PR #45** (squash `3f1e1642`): all 4 `war_19xx` event files ordered by `turn_min`, hash-neutral
+  (`a969d44719aaa40e`), turn_min test green, no new failures. Red 7 → 6.
+- 3 further stale-test fixes in flight on `codex/test-debt-batch3-stale`.
+
+**Reclassification.** What issue #39 originally listed as "Batch 3 calibration" failures
+(graz_faction_block, local_truces, fall_1995_hv_depth_priority, etc.) were diagnosed as **stale tests**
+(prod code/data correct), not calibration regressions — moved to the in-flight stale batch.
+
+**CI-gating fix.** **PR #43 (OPEN, held for owner)** adds `codex/**` + `claude/**` to the
+`baseline-regression.yml` push triggers so feature branches can no longer ship a red full suite to
+`main`. Held pending an owner Actions-cost decision (the full ~30-min suite would run on every push
+to those branches).
+
+**Remaining 6 red (owner/calibration-domain — not force-fixed).** `codex_sensitive_history_source_notes`
+(historian: flagged phrase sits inside a negating quotation), `pre_planned_operations` op:brcko:brcko
+(canon decision), `patron_calls_phase4` B12 (owner −10/−25 cost decision), plus the 3 in-flight stale fixes.
+
+**Related.** Concentration off-by-one routed to calibration as **issue #41**. ADR-0005 OG v2.2c/v2.3/#40
+ledger entries are tracked separately on the OG branch.
+
+**Artifacts.** `.github/workflows/baseline-regression.yml` (PR #43), test/data files per PR #42/#44/#45,
+`docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-29] merge: event-system main integrated into calibration arc — new baseline 656/712
 
 **Type:** Branch integration + baseline recanonicalization. Merge commit `295ad0fe` brings
@@ -16467,5 +16537,27 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 - §3.6 boundary stays bounded by named-row admissibility: any future option that *temporally* extends the inherited detention is permitted; any option that *expands scope* (new categories, new locations, new seizures) is foreclosed.
 
 **Artifacts.** `data/scenarios/events/war_1992.json`, `data/scenarios/events/war_1995.json`, `tests/sim/events/event_taxonomy_report.test.ts`, `tests/sim/events/event_acceptance_report.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-29] codex: Phase E activation verdict consolidated + investigation records + cohesion-divisor calibration handoff (docs-only)
+
+**Summary.** Documentation-only closeout of the Phase E activation investigation arc. Preserves three at-risk investigation docs, authors the final adjudicated consolidated verdict, and hands the cohesion-divisor fix to the calibration team. No code, event-JSON, test, or baseline changes.
+
+**Adjudicated verdict (independent Determinism Auditor + Technical Architect pass).**
+- **cohesion gate: BLOCKED** — the intentional 100× `war_exhaustion` rescale (commit `59511672`, 2026-05-22) MISSED two linear-term divisors: `src/sim/events/strategic_dimensions.ts:111` still `exhaustion/3` (should be `/300`) and `src/sim/political/political_personality.ts:308-309` still `/6` (should be `/600`). Post-rescale turn-40 exhaustion (~4750-7940) saturates the cohesion base formula, flooring all three factions' `internal_cohesion` base at 0. J3's "~100" exhaustion reading was a STALE-SAVE FOSSIL (byte-identical `100.00133` across factions = old `Math.min(100)` cap), not a live engine state. Fix = complete the rescale sweep; CALIBRATION TEAM owns it (forces baseline refresh). Not a canon violation, not a rescale-revert reason.
+- **intl_only: conditional-GO** — the prior "122-OSID cascade / sign-bug NO-GO" is CORRECTED and withdrawn. `control_delta.json` is a WITHIN-RUN total (war start→end, the historical Serb land-grab), NOT a flag-ON-vs-OFF diff. Consumer arithmetic sign is CORRECT (`ceil(baseMinForOp/0.7)` raises the launch floor = fewer ops; a `/`→`×` change would BREAK it). No bug. intl_only is conditional-GO gated only on a baseline refresh + calibration/user sign-off.
+- **Root cause of the contradiction:** the J1 simulator (`tools/diagnostics/phase_e_activation_simulator.ts`) Tier 2 hash-compares only, surfacing the within-run `control_delta` as if it were a flag effect. Being fixed separately by tooling.
+
+**Three corrections by adjudication.** (1) Track B's "calibration moved the values / merge-rate change" framing → stale-save fossil. (2) War-or-Game's "122-OSID cascade / sign-bug NO-GO" → within-run misread. (3) The J1 simulator reporting defect.
+
+**Routed owners.** Cohesion divisor → calibration team; J1 sim reporting fix → tooling (in progress); activation decisions → user + calibration.
+
+**Artifacts.**
+- New: `docs/40_reports/proposals/20260529_PHASE_E_VERDICT_CONSOLIDATED.md` (authoritative adjudicated verdict).
+- New: `docs/40_reports/20260529_CALIBRATION_HANDOFF_COHESION_DIVISOR.md` (divisor fix handoff).
+- Preserved (were untracked; now committed as audit trail): `docs/40_reports/proposals/20260529_PHASE_E_ACTIVATION_RECOMMENDATION_POSTMERGE.md`, `docs/40_reports/proposals/20260529_WAR_EXHAUSTION_RATE_INVESTIGATION.md`, `docs/40_reports/proposals/20260529_INTL_ONLY_COUPLING_INVESTIGATION.md`.
+
+**Verification.** Documentation-only; no build/test impact. `git diff --check` clean. FORAWWV.md not touched.
 
 ---

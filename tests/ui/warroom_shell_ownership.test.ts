@@ -16,7 +16,7 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(app).toContain("{appScreen === 'game' && <MapModeLegend />}");
         expect(app).toContain("{appScreen === 'game' && <Minimap />}");
         expect(app).toContain("{appScreen === 'game' && (");
-        expect(app).toContain('<BottomStatusStrip />');
+        expect(app).toContain('<BottomStatusStrip eventCatalog={eventCatalogFull} />');
     });
 
     it('offers Warroom return for browser Warroom-launched Army HQ sessions', () => {

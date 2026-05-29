@@ -1025,18 +1025,18 @@ describe('entry-specific: sana_95 family', () => {
             .toBe(true);
     });
 
-    it('axis shape: parent has Krupa 3/6 + Bihac-Petrovac 5/12 (no Sanski-Most/Kljuc); follow-on owns Sanski-Most/Kljuc 4/13', () => {
+    it('axis shape: parent has Krupa 3/6 + Bihac-Petrovac 5/10 (no Sanski-Most/Kljuc); follow-on owns Sanski-Most/Kljuc 4/13', () => {
         const krupa = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_krupa')!;
         expect(krupa.brigades).toHaveLength(3);
         expect(krupa.objectives).toHaveLength(6);
         const bp = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_bihac_petrovac')!;
         expect(bp.brigades).toHaveLength(5);
-        expect(bp.objectives).toHaveLength(12);
+        expect(bp.objectives).toHaveLength(10);
         expect(SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_sanski_most_kljuc'))
             .toBeUndefined();
         // Follow-on shape.
         expect(SANA_95_FOLLOW_ON_OPPORTUNITY.opportunity_id).toBe('sana_95_follow_on');
-        expect(SANA_95_FOLLOW_ON_OPPORTUNITY.staging_osid).toBe('op:bosanska_krupa:otoka_2');
+        expect(SANA_95_FOLLOW_ON_OPPORTUNITY.staging_osid).toBe('op:bosanska_krupa:jasenica_2');
         const sk = SANA_95_FOLLOW_ON_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_sanski_most_kljuc')!;
         expect(sk.brigades).toHaveLength(4);
         expect(sk.objectives).toHaveLength(13);

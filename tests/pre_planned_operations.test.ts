@@ -93,7 +93,7 @@ function makeMinimalState(): GameState {
 
 describe('pre-planned operations', () => {
     it('defines the current pre-planned operation catalog', () => {
-        assert.equal(_ALL_PRE_PLANNED.length, 15);
+        assert.equal(_ALL_PRE_PLANNED.length, 16);
         assert.deepEqual(
             _ALL_PRE_PLANNED.map((def) => def.name),
             [
@@ -101,6 +101,7 @@ describe('pre-planned operations', () => {
                 'Operation Drina',
                 'Operation Podrinje Sweep',
                 'Operation Pracha River',
+                'Operation Zvezda 94',
                 'Operation Visegrad',
                 'Operation Prsten',
                 'Operation Trnovo',
@@ -130,7 +131,7 @@ describe('pre-planned operations', () => {
         );
 
         assert.equal(state.military.corps_command?.vrs_drina?.active_operations[0]?.name, 'Operation Drina');
-        assert.deepEqual(state.military.corps_command?.vrs_drina?.queued_operations, ['Operation Podrinje Sweep', 'Operation Pracha River']);
+        assert.deepEqual(state.military.corps_command?.vrs_drina?.queued_operations, ['Operation Podrinje Sweep', 'Operation Pracha River', 'Operation Zvezda 94']);
 
         assert.equal(state.military.corps_command?.hvo_southeast_herzegovina?.queued_operations?.[0], 'Operation Jackal');
     });
@@ -170,14 +171,22 @@ describe('pre-planned operations', () => {
         assert.equal(koridor!.planning_duration, 9);
     });
 
-    it('lists op:brcko:brcko as a brcko_corridor axis objective in alphabetical order', () => {
+    it('lists the contested brcko_corridor objectives in stable alphabetical order (n140 dropped op:brcko:brcko)', () => {
         const koridor = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Koridor');
         assert.ok(koridor);
         const brckoAxis = koridor!.axes.find((axis) => axis.axis_id === 'brcko_corridor');
         assert.ok(brckoAxis, 'brcko_corridor axis must exist');
+        // n140 (commit 7ce01a9e) deliberately removed op:brcko:brcko: Brčko-city is RS-held
+        // at scenario start, so as a capture objective it was a friendly-skipped no-op.
+        // The axis now drives the two contested targets only.
+        assert.deepEqual(
+            brckoAxis!.objectives,
+            ['op:brcko:krepsic', 'op:brcko:skakava_donja'],
+            'brcko_corridor must target only the two contested OSIDs (no op:brcko:brcko)',
+        );
         assert.ok(
-            brckoAxis!.objectives.includes('op:brcko:brcko'),
-            'brcko_corridor axis must include op:brcko:brcko as a primary urban objective',
+            !brckoAxis!.objectives.includes('op:brcko:brcko'),
+            'op:brcko:brcko must remain dropped (RS-held at start, no-op as a capture objective)',
         );
         // Stable alphabetical ordering — ensures deterministic axis-objective iteration
         const sorted = [...brckoAxis!.objectives].sort();

@@ -888,7 +888,7 @@
           {
             "faction": "HRHB",
             "dimension": "patron_confidence",
-            "delta": -30
+            "delta": -10
           },
           {
             "faction": "HRHB",
@@ -1793,7 +1793,7 @@
     "id": "srebrenica_demilitarization_1993",
     "title": "Srebrenica Demilitarization Agreement",
     "narrative": "Under intense international pressure following the VRS assault on Srebrenica, Generals Mladic and Halilovic sign a demilitarization agreement on April 17-18: the ARBiH is to surrender weapons under UNPROFOR supervision in exchange for a ceasefire and UN troop deployment. Implementation is flawed on both sides — the ARBiH hides weapons while the VRS continues to restrict humanitarian convoys.",
-    "source_note": "ICTY Krstic and the Halilovic-Mladic agreement ground the row's demilitarization context. Per UN A/54/549 (Secretary-General's report on the fall of Srebrenica, 15 November 1999), paragraphs 57-98, and ICTY Krstic IT-98-33-T paragraphs 16-28, fuller compliance under hollow UN protection historically INCREASED enclave vulnerability. The enclave_resilience effect direction on comply_fully reflects this: comply_fully is not a 'prevent genocide' reward (per SENSITIVE_HISTORY_DESIGN_GATE Section 1.3 item 10, 'no gamified prevent-genocide mechanic'). This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "source_note": "ICTY Krstic and the Halilovic-Mladic agreement ground the row's demilitarization context. Per UN A/54/549 (Secretary-General's report on the fall of Srebrenica, 15 November 1999), paragraphs 57-98, and ICTY Krstic IT-98-33-T paragraphs 16-28, fuller compliance under hollow UN protection historically INCREASED enclave vulnerability. The enclave_resilience direction on comply_fully reflects this empirical history, consistent with SENSITIVE_HISTORY_DESIGN_GATE Ring 3 item 10 (no gamified atrocity-prevention surface; the only outcome is the absence of a genocide_condemnation flag). This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "diplomatic",
     "family": "rbih_srebrenica_response",
     "source_tier": "icty_icj_un",
@@ -3834,6 +3834,56 @@
     "historical_source": "UNSCR 713 (25 September 1991) — comprehensive arms embargo on former-Yugoslavia. Balkan Battlegrounds Vol. II (CIA Office of Russian and European Analysis 2002) — 1993-95 ARBiH supply chronology + Silajdžić diplomatic posture + Iran-Croatia arms channel context. Alija Izetbegović, 'Inescapable Questions: Autobiographical Notes' (Islamic Foundation 2003) — UN General Assembly addresses + lift-and-strike argumentation. Richard Holbrooke, 'To End A War' (Random House 1998) chs. 4-6 — Clinton administration deliberation on lift-and-strike, August 1995 endgame. US Senate Foreign Relations Committee records — S.J. Res. 110 of 11 August 1993 (passed 70-30; Clinton vetoed); Dole-Lieberman amendment July-August 1995 (passed 69-29; Clinton vetoed 11 August 1995, override failed). UN A/54/549 (Secretary-General's report on Srebrenica, 15 November 1999) §§ on UNSCR 713 application + lift-and-strike diplomacy. ICTY Sefer Halilović IT-01-48-T Trial Judgment (16 November 2005) — ARBiH General Staff supply situation 1993. ICTY Karadžić IT-95-5/18-T Vol. III — international diplomatic context of Sarajevo's posture. ICTY Hadžihasanović & Kubura IT-01-47-T Trial Judgment (15 March 2006) — 3rd Corps + 7th Muslim Brigade integration context. US Senate Select Committee on Intelligence — 'Iranian Arms to Bosnia' hearings 1996-1997 (declassified portions). US embassy archived reporting on the Iran arms channel (declassified 2005-2010 tranches)."
   },
   {
+    "id": "grabovica_uzdol_massacres_1993",
+    "title": "Grabovica and Uzdol Massacres",
+    "narrative": "During Operation Neretva 93, ARBiH units from Sarajevo commit war crimes against Croat civilians: at least 13 villagers killed at Grabovica on September 8-9, and at least 29 civilians and one HVO POW killed at Uzdol on September 14. ICTY Chief of Staff Sefer Halilovic is indicted but acquitted due to insufficient evidence of effective command control over the perpetrators.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 73,
+      "turn_max": 76,
+      "phase": "war",
+      "requires_events": [
+        "operation_neretva_93_1993"
+      ]
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "humanitarian_impact",
+        "faction": "RBiH",
+        "war_crimes_delta": 2
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": -3
+      },
+      {
+        "kind": "negotiation_capital",
+        "faction": "RBiH",
+        "dimension": "international_credibility",
+        "delta": -10
+      },
+      {
+        "kind": "narrative",
+        "text": "ARBiH atrocities in Herzegovina are documented. No faction in this war holds clean hands."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": -10
+      }
+    ],
+    "historical_source": "ICTY Halilovic Trial Judgment (IT-01-48-T).",
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "RBiH",
+      "war_crimes_delta": 2
+    }
+  },
+  {
     "id": "hrhb_owen_stoltenberg_response_1993",
     "title": "Owen-Stoltenberg: Mostar Records Its Posture",
     "narrative": "Owen and Stoltenberg's Union of Three Republics plan was tabled aboard HMS Invincible on 20 September 1993. The map ratifies Herceg-Bosna as one of three constitutive ethnic republics, with the central-Bosnia and western Herzegovina territorial allocation drawn favorably to Croat claims. Zagreb's directive is unambiguous: Tudjman has signaled to Boban that the HZ HB Presidency is to sign. The Mostar Presidency must record its posture toward the Invincible package — accept the Union of Three Republics framework, reject the plan and break with Zagreb's directive, or condition acceptance on territorial amendments in central Bosnia.",
@@ -4734,56 +4784,6 @@
       }
     },
     "historical_source": "ICTY Krajisnik IT-00-39-T Trial Judgment (27 September 2006) §§1006-1040 (Pale leadership response to Belgrade pressure on diplomatic envelope, 1993-1994). ICTY Karadzic IT-95-5/18-T Trial Judgment (24 March 2016) Vol. III §§4263-4310 (FRY-RS channel friction across the autumn 1993 - August 1994 corridor). ICTY Milosevic IT-02-54-T (FRY-RS channel context for Belgrade-blessed diplomacy; patron-pressure modulation). Richard Holbrooke, To End a War (Random House 1998) chs. 4-5 (Belgrade-Pale split as defining political-military thread of the war's mid-period). David Owen, Balkan Odyssey (Harcourt 1995) ch. 7 (Belgrade-brokered Invincible package and Pale acquiescence pattern). Balkan Battlegrounds Vol. II Ch. 11 (FRY-RS channel modulation through the autumn 1993 Owen-Stoltenberg window)."
-  },
-  {
-    "id": "grabovica_uzdol_massacres_1993",
-    "title": "Grabovica and Uzdol Massacres",
-    "narrative": "During Operation Neretva 93, ARBiH units from Sarajevo commit war crimes against Croat civilians: at least 13 villagers killed at Grabovica on September 8-9, and at least 29 civilians and one HVO POW killed at Uzdol on September 14. ICTY Chief of Staff Sefer Halilovic is indicted but acquitted due to insufficient evidence of effective command control over the perpetrators.",
-    "category": "humanitarian",
-    "trigger": {
-      "turn_min": 73,
-      "turn_max": 76,
-      "phase": "war",
-      "requires_events": [
-        "operation_neretva_93_1993"
-      ]
-    },
-    "once": true,
-    "effects": [
-      {
-        "kind": "humanitarian_impact",
-        "faction": "RBiH",
-        "war_crimes_delta": 2
-      },
-      {
-        "kind": "morale_change",
-        "faction": "HRHB",
-        "delta": -3
-      },
-      {
-        "kind": "negotiation_capital",
-        "faction": "RBiH",
-        "dimension": "international_credibility",
-        "delta": -10
-      },
-      {
-        "kind": "narrative",
-        "text": "ARBiH atrocities in Herzegovina are documented. No faction in this war holds clean hands."
-      }
-    ],
-    "dimension_shifts": [
-      {
-        "faction": "RBiH",
-        "dimension": "international_standing",
-        "delta": -10
-      }
-    ],
-    "historical_source": "ICTY Halilovic Trial Judgment (IT-01-48-T).",
-    "effect": {
-      "kind": "humanitarian_impact",
-      "faction": "RBiH",
-      "war_crimes_delta": 2
-    }
   },
   {
     "id": "abdic_apwb_declared_1993",

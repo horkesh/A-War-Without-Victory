@@ -41,6 +41,8 @@ function baseState(overrides: Record<string, unknown> = {}): Record<string, unkn
             event_last_fired_turn: {},
             event_flags: {},
             enabled_event_ids: [],
+            closed_event_ids: [],
+            event_causality_log: [],
             event_overflow_queue: [],
             pending_event_decisions: [],
             pending_event_notifications: [],
