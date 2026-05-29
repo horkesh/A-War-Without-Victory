@@ -1,4 +1,25 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] codex: track deferred event-system lanes + disambiguate Phase E name-collision
+
+**Type:** Docs/tracking only. No engine, event-JSON, scenario, or save-schema change; no behavioral or
+output change; no test impact.
+
+**COMMAND_BOARD.** Added 5 deferred/open event-system lanes to `docs/plans/COMMAND_BOARD.md` (Active
+Command Board table, after the P2 telemetry row): (1) **Cohesion divisor fix** — OPEN, calibration-owned;
+`strategic_dimensions.ts:111` `/3` and `political_personality.ts:308-309` `/6` missed the 100×
+`war_exhaustion` rescale (commit `59511672`) and should be `/300` and `/600`, currently flooring cohesion
+bases at 0 (handoff `docs/40_reports/20260529_CALIBRATION_HANDOFF_COHESION_DIVISOR.md`); highest priority of
+the five, blocks Phase E cohesion activation. (2) **Political-Dimension Propagation activation** — DEFERRED
+per user; both PDP flags default OFF, baseline byte-identical; verdict
+`docs/40_reports/proposals/20260529_PHASE_E_VERDICT_CONSOLIDATED.md`. (3) **patron_confidence +
+military_credibility dimension wirings** — OPEN/unbuilt; no bot-ops consumers yet. (4) **Ring-3
+sensitive-event authoring backlog** — OPEN/§6-gated. (5) **B7 Sarajevo siege continuous-condition
+modeling** — DEFERRED.
+
+**MASTER_ROADMAP.** Disambiguation note (already present, after the v0.8.4 "Phase E — Turn-Advance Block"
+CLOSED entry) clarifying the closed v0.8.4 "Phase E" is distinct from the event-system
+political-dimension-propagation "Phase E".
+
 ## [2026-05-29] codex: J1 activation simulator — Tier 2 ON-vs-OFF territorial flip-set diff (fixes within-run misread)
 
 **Type:** Diagnostic tool + test only. No engine, event-JSON, scenario, or save-schema change.
