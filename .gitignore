@@ -79,6 +79,7 @@ handoffs/inbox/*.json
 runs_ops_compare/
 runs_probe/
 data/derived/scenario/_baseline_tmp/
+data/derived/scenario/_*/
 
 # Secrets
 .env
