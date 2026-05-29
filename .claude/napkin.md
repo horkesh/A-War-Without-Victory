@@ -112,6 +112,8 @@
 
 **Event JSON edits:** after touching `data/scenarios/events/war_*.json`, run `tests/event_timeline_integrity.test.ts`; keep each year sorted by `trigger.turn_min`, and update explicit corpus counts only when the actual event corpus changes.
 
+**Cleanup-packet pre-flight: calibration-overlap grep is step 1 (2026-05-29).** Every Phase I-style cleanup packet starts with `git diff --name-only origin/main...claude/calibration-historical-army-arc-2026-05-24` (or current calibration branch) and greps each candidate file. ON-OVERLAP → DEFERRED-CALIBRATION (not failure). NOT-ON-OVERLAP → safe to land. Ledger entry must count deferrals positively. Dispatched cleanup agents MUST be given an explicit STOP-and-report clause: if a live consumer surfaces in `src/` + `tests/` + `tools/` that the audit missed, abort the entry — do not power through. Phase I arc fired STOP 5x correctly across Packets I3a/I5/I6. Cleanup proof = `tools/scenario_runner/run_baseline_regression.ts` byte-identical PASS; tsc + vitest alone are necessary but not sufficient. Full lesson set: `docs/life_lessons/process.md` (STOP-safeguard + src+tests+tools audit) + `docs/life_lessons/calibration.md` (byte-identical proof + overlap-deferral triage). Do instead: never skip the pre-flight grep; never trust an audit's "0 importers" without three-scope verification; never claim a cleanup is "done" without the baseline regression PASS line in the ledger entry.
+
 ## Current State (2026-05-15, autonomous commander CPU follow-up)
 
 **Latest baselines:** n1740 40w hash `86ebf26ae0271465` (26/27 anchors, 6/6 benchmarks); n1741 188w hash `a4bf8b8095050881` (26/27 anchors, 6/6 benchmarks, §6 floors PASS; final_save 6.84 MB). Baseline Regression + Desktop Release Guard green at `750e1c14`.

@@ -1,4 +1,29 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] codex: Phase I Packet 7 (memory + napkin + life_lessons curation)
+
+- **Type.** Pure documentation curation. No code changes. Consolidates 27-commit session arc (commits `67eee60a..8bf0ec98` — Phases B/D/E/F/G/H + Phase I1–I6 cleanup) into durable wisdom surfaces.
+- **Scope.** Curate-only. 5 surfaces touched:
+  - `docs/life_lessons/process.md` — added 2 new lessons (STOP-and-report safeguard pattern; audit "0 importers" tri-scope verification).
+  - `docs/life_lessons/calibration.md` — added 2 new lessons (baseline-byte-identical as proof-of-deadness; calibration-overlap deferral as positive triage outcome).
+  - `docs/life_lessons.md` — index updated with New Lessons (2026-05-29) section linking three of the four canonical entries; topic-file counts bumped (process 56→58, calibration 48→50).
+  - `.claude/napkin.md` — added a single back-reference bullet pointing at the four canonical lesson homes; no duplicate content.
+  - `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/` — added `cleanup_packet_discipline.md` (cross-session runbook pointer); MEMORY.md index updated with one-line entry under Roadmap section.
+- **Lessons captured (singular-ownership).**
+  - STOP-and-report safeguard pattern → canonical home `docs/life_lessons/process.md`; napkin one-liner + memory cross-ref.
+  - Audit "0 importers" tri-scope verification (src+tests+tools) → canonical home `docs/life_lessons/process.md`; napkin one-liner + memory cross-ref.
+  - Calibration-overlap deferral as valid triage outcome → canonical home `docs/life_lessons/calibration.md`; napkin one-liner + memory cross-ref.
+  - Baseline-byte-identical as cleanup proof → canonical home `docs/life_lessons/calibration.md`; napkin one-liner + memory cross-ref.
+  - F2 reward_risk INFO classification → already canonical at `memory/engine_dimension_vocabulary.md` "Canonical-punitive markers" section (no duplication).
+  - DimensionId vs EffectKind dual-channel → already canonical at `docs/life_lessons/events.md` (2026-05-28 entry) + `memory/engine_dimension_vocabulary.md` (no duplication).
+  - Pre-flight calibration-overlap grep convention → folded into the calibration-overlap deferral lesson in calibration.md + napkin bullet (single source).
+- **Singular-ownership decisions.** Each lesson has ONE canonical home; the napkin entry is a back-reference pointer (not a duplicate), and the memory cross-ref file is a cross-session runbook pointer (also not a duplicate). The napkin bullet explicitly lists which life_lessons file owns the deep content for each topic.
+- **Cross-references created.** `memory/cleanup_packet_discipline.md` → `engine_dimension_vocabulary.md` + `recruitment_modifier_dead_channel.md` (wikilink-style consistent with existing memory files). `docs/life_lessons/process.md` STOP-safeguard entry → `tryCreateFromPrePlanned` audit-correction precedent. `docs/life_lessons/calibration.md` overlap-deferral entry → references active calibration branch `claude/calibration-historical-army-arc-2026-05-24` so future readers know which branch to grep.
+- **Verification.**
+  - `git diff --check` clean (no whitespace errors).
+  - `npx tsc --noEmit` not re-run (zero code change; type surface unchanged).
+  - No `FORAWWV.md` edits. `.claude/scheduled_tasks.lock` not staged. No worktree usage. No baseline refresh. No untracked debug dirs touched.
+- **Net delta.** +59 lines docs (life_lessons + napkin + memory + ledger). Net -0 LOC code.
+
 ## [2026-05-29] codex: Phase I Packet 6 (zombie code triage; 3 cleaned, 5 deferred-calibration, 2 skipped-consumer, 1 comments-current, 4 deferred-packet/scope)
 
 - **Type.** Zombie-comment + version-transition-residue triage per I1 audit Section 2. THREE entries cleaned (pure comment trims; no code semantics changed). Zero behavior change; baseline regression byte-identical.

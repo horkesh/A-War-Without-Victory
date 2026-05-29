@@ -4,6 +4,17 @@
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
+## New Lessons (2026-05-29)
+
+### [Process] STOP-and-report safeguard prevents broken cleanups when audits recommend deletion — see `docs/life_lessons/process.md`
+- Phase I cleanup arc (Packets I3a/I5/I6) fired the safeguard 5x correctly. Audit recommendations are hypotheses, not commands; dispatched agents must verify across `src/` + `tests/` + `tools/` and STOP if a live consumer is found. Per-entry triage outcomes: CLEANED / SKIPPED-CONSUMER / DEFERRED-CALIBRATION / DEFERRED-PACKET / COMMENTS-CURRENT.
+
+### [Process] Audit "0 importers" claims must be verified across src + tests + tools before deletion — see `docs/life_lessons/process.md`
+- Phase I1 audit's "0 importers" claims were scoped to `src/**` only; Phase I3 aborted 3 separate cleanup cycles when test-file imports surfaced. Pre-deletion grep must cover all three scopes; ambiguous-scope audit text defaults to scoped-to-src.
+
+### [Calibration] Baseline-byte-identical is the proof-of-deadness for cleanup commits — see `docs/life_lessons/calibration.md`
+- Pure dead-code removal must produce zero baseline drift. If `tools/scenario_runner/run_baseline_regression.ts` reports any artifact hash change post-cleanup, the code wasn't dead — restore and re-investigate consumers. Phase I2/I4/I5/I6 all proved byte-identical; I3a's narrowed scope (4 zero-importer exports only) was the corrected version after the broader I3 aborted.
+
 ## New Lessons (2026-05-28)
 
 ### [Events] Engine has two write channels for event effects — pick the right one — see `docs/life_lessons/events.md`
@@ -460,12 +471,12 @@
 
 | File | Topics | Lessons | Load when... |
 |------|--------|---------|-------------|
-| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 48 | Running calibration scenarios, tuning parameters, OOB changes |
+| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 50 | Running calibration scenarios, tuning parameters, OOB changes |
 | [combat.md](life_lessons/combat.md) | Combat, Brigade Distribution, March System | 4 | Combat resolution, brigade movement, march/distribution system |
 | [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 59 | Changing engine structure, state, pipeline, adding systems |
 | [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 10 | Modifying derived data, running data scripts, geometry work |
 | [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 14 | Frontend, map, tactical overlay, modal work |
-| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 56 | General development process (skim at session start) |
+| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 58 | General development process (skim at session start) |
 | [sectors.md](life_lessons/sectors.md) | Sectors, Design | 9 | Sector system, front lines, territory assignment, sub-segments |
 | [platform.md](life_lessons/platform.md) | Platform, Tooling | 4 | Build issues, platform-specific bugs, tooling |
 | [events.md](life_lessons/events.md) | Events | 2 | Event system, flag gates, triggers |
