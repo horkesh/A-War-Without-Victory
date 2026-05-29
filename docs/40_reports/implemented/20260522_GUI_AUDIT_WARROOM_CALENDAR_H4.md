@@ -1,6 +1,6 @@
 # GUI Audit Warroom Calendar H4
 
-**Date:** 2026-05-22  
+**Date:** 2026-05-22
 **Type:** Warroom visual polish fix from the 2026-05-22 GUI visual audit. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or turn-advance logic changed.
 
 ## Why

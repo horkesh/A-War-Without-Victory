@@ -9,9 +9,16 @@ export function selectAIDefaultResponse(def: EventDefinition): EventResponseOpti
     const options = def.response_options ?? [];
     if (options.length === 0) throw new Error(`No response options for event "${def.id}"`);
 
+    if (def.bot_response_logic === 'accept_first') return options[0]!;
+
     const override = CANONICAL_AI_DEFAULT_RESPONSE[def.id];
     if (override) {
         const selected = options.find((option) => option.id === override);
+        if (selected) return selected;
+    }
+
+    if (def.historical_default_response_id) {
+        const selected = options.find((option) => option.id === def.historical_default_response_id);
         if (selected) return selected;
     }
 

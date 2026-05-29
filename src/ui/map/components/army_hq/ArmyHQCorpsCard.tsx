@@ -21,6 +21,7 @@ import { OrbatSection } from './OrbatSection';
 import { CombatRecordSection } from './CombatRecordSection';
 import { FlipCard } from './FlipCard';
 import { deriveStanceInterpretation, deriveCorpsDelegationSummary } from '../../data/command_strain';
+import { t } from '../../i18n';
 
 import type { ReadinessGrade } from './ForceReadiness';
 
@@ -166,7 +167,7 @@ export function ArmyHQCorpsCard({
             // Immediate commit — silence = healthy
             if (!ipc.isAvailable) return;
             void ipc.stageCorpsStanceOrder(corps.id, newStance).then((result) => {
-                if (!result.ok) setLoadError(result.error ?? 'Failed to stage corps stance.');
+                if (!result.ok) setLoadError(result.error ?? t('armyHqCorps.error.stageStance'));
             });
         } else {
             // Show preview panel — player must confirm (or cancel for constrained)
@@ -177,7 +178,7 @@ export function ArmyHQCorpsCard({
     const handleConfirmStance = async () => {
         if (!pendingStance || !ipc.isAvailable) return;
         const result = await ipc.stageCorpsStanceOrder(corps.id, pendingStance);
-        if (!result.ok) setLoadError(result.error ?? 'Failed to stage corps stance.');
+        if (!result.ok) setLoadError(result.error ?? t('armyHqCorps.error.stageStance'));
         setPendingStance(null);
     };
 
@@ -196,7 +197,7 @@ export function ArmyHQCorpsCard({
             {/* Threat badge */}
             {hasThreat && (
                 <div className="absolute top-2 left-2 text-[8px] text-red-400 font-bold animate-pulse tracking-[0.15em] bg-red-500/10 border border-red-500/30 px-1.5 py-0.5 z-10">
-                    ⚠ INCOMING
+                    {t('armyHqCorps.incoming')}
                 </div>
             )}
 
@@ -216,10 +217,10 @@ export function ArmyHQCorpsCard({
                     {data.commander ? (
                         <span>{data.commander.name}</span>
                     ) : (
-                        <span className="italic text-red-500/60">[!] UNASSIGNED</span>
+                        <span className="italic text-red-500/60">{t('armyHqCorps.unassigned')}</span>
                     )}
                     <div className="w-1 h-3 border-l border-panel-border" />
-                    <span className={`font-bold ${gradeColor}`}>EF: {data.eff.grade}</span>
+                    <span className={`font-bold ${gradeColor}`}>{t('armyHqCorps.effectivenessShort', { grade: data.eff.grade })}</span>
                 </div>
 
                 {/* Equipment icons */}
@@ -239,26 +240,26 @@ export function ArmyHQCorpsCard({
                 {/* Line 3: Stats */}
                 <div className="flex items-center gap-4 mt-3 text-[12px] tabular-nums font-mono">
                     <div className="flex flex-col">
-                        <span className="text-[9px] text-text-secondary/60 uppercase tracking-tighter">Personnel</span>
+                        <span className="text-[9px] text-text-secondary/60 uppercase tracking-tighter">{t('armyHqCorps.personnel')}</span>
                         <span className={`font-bold ${data.totalPersonnel >= 8000 ? 'text-emerald-400' : data.totalPersonnel >= 4000 ? 'text-accent-gold' : 'text-red-500'
                             }`}>
                             {data.totalPersonnel.toLocaleString()}
                         </span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-[9px] text-text-secondary/60 uppercase tracking-tighter">Orbat</span>
-                        <span className="text-text-secondary font-bold">{brigades.length} BRG</span>
+                        <span className="text-[9px] text-text-secondary/60 uppercase tracking-tighter">{t('armyHqCorps.orbat')}</span>
+                        <span className="text-text-secondary font-bold">{t('armyHqCorps.brigadeShortCount', { count: brigades.length })}</span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-[9px] text-text-secondary/60 uppercase tracking-tighter">Front</span>
-                        <span className="text-text-secondary font-bold">{sectors.length} SEC</span>
+                        <span className="text-[9px] text-text-secondary/60 uppercase tracking-tighter">{t('armyHqCorps.front')}</span>
+                        <span className="text-text-secondary font-bold">{t('armyHqCorps.sectorShortCount', { count: sectors.length })}</span>
                     </div>
                 </div>
 
                 {/* Active op indicator */}
                 {data.activeOp && (
                     <div className="mt-3 pt-2.5 border-t border-panel-border flex flex-col gap-1">
-                        <span className="text-[9px] text-red-500 font-bold tracking-[0.2em] uppercase">ACTIVE OPERATION</span>
+                        <span className="text-[9px] text-red-500 font-bold tracking-[0.2em] uppercase">{t('armyHqCorps.activeOperation')}</span>
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                             <span className="text-[11px] text-red-400 font-bold truncate uppercase font-mono">
@@ -272,7 +273,7 @@ export function ArmyHQCorpsCard({
                 {data.corpsBattles.length > 0 && (
                     <div className="mt-2.5 flex gap-2">
                         <div className="px-2 py-0.5 bg-red-900/40 border border-red-500/40 text-red-400 text-[9px] font-bold tracking-widest animate-pulse">
-                            CONTACT: {data.corpsBattles.length} ENGAGEMENTS
+                            {t('armyHqCorps.contactEngagements', { count: data.corpsBattles.length })}
                         </div>
                     </div>
                 )}
@@ -288,20 +289,20 @@ export function ArmyHQCorpsCard({
                             }`}
                             title={
                                 data.strainLabel === 'compromised'
-                                    ? 'Repeated presidential intervention has severely undermined command cohesion. Flip card to review and acknowledge friction events.'
-                                    : 'Presidential overrides have strained this command relationship. Flip card to review and acknowledge friction events.'
+                                    ? t('armyHqCorps.commandCompromisedTitle')
+                                    : t('armyHqCorps.commandStrainedTitle')
                             }
                         >
-                            {data.strainLabel === 'compromised' ? '⚠ COMMAND COMPROMISED' : '⚠ COMMAND STRAINED'}
+                            {data.strainLabel === 'compromised' ? t('armyHqCorps.commandCompromised') : t('armyHqCorps.commandStrained')}
                         </div>
                         {/* Friction dot — demoted from badge to dot indicator (back face owns the detail list) */}
                         {data.frictionTypes.length > 0 && (
                             <div
                                 className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold tracking-widest border bg-amber-900/20 border-amber-600/40 text-amber-500"
-                                title="Warlord friction active — flip card to review and acknowledge."
+                                title={t('armyHqCorps.frictionTitle')}
                             >
                                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block" />
-                                FRICTION
+                                {t('armyHqCorps.friction')}
                             </div>
                         )}
                     </div>
@@ -311,10 +312,10 @@ export function ArmyHQCorpsCard({
                     <div className="mt-2.5">
                         <div
                             className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold tracking-widest border bg-amber-900/20 border-amber-600/40 text-amber-500 inline-flex"
-                            title="Warlord friction active — flip card to review and acknowledge."
+                            title={t('armyHqCorps.frictionTitle')}
                         >
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block" />
-                            FRICTION
+                            {t('armyHqCorps.friction')}
                         </div>
                     </div>
                 )}
@@ -344,40 +345,40 @@ export function ArmyHQCorpsCard({
                     onClick={onToggleExpand}
                     className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                 >
-                    <span className="text-[12px] text-text-secondary font-mono">&larr; Back</span>
+                    <span className="text-[12px] text-text-secondary font-mono">&larr; {t('armyHqCorps.back')}</span>
                     <div className="text-[18px] font-bold text-amber-400 uppercase tracking-widest" style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
                         {displayName}
                     </div>
                     <span className={`text-[14px] font-bold font-mono px-2 py-0.5 border border-panel-border bg-panel-bg ${gradeColor}`}>
-                        EF: {data.eff.grade}
+                        {t('armyHqCorps.effectivenessShort', { grade: data.eff.grade })}
                     </span>
                 </button>
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-3 text-[12px] tabular-nums font-mono text-text-secondary uppercase">
-                        <span><b className="text-text-primary">{data.totalPersonnel.toLocaleString()}</b> Pers</span>
-                        <span><b className="text-text-primary">{brigades.length}</b> Brg</span>
-                        <span><b className="text-text-primary">{sectors.length}</b> Sec</span>
+                        <span><b className="text-text-primary">{data.totalPersonnel.toLocaleString()}</b> {t('armyHqCorps.personnelShort')}</span>
+                        <span><b className="text-text-primary">{brigades.length}</b> {t('armyHqCorps.brigadeShort')}</span>
+                        <span><b className="text-text-primary">{sectors.length}</b> {t('armyHqCorps.sectorShort')}</span>
                     </div>
                     {/* Stance dropdown — offensive disabled when command is compromised (strain >= 6) */}
                     <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-text-secondary/60 uppercase tracking-widest">Stance:</span>
+                        <span className="text-[10px] text-text-secondary/60 uppercase tracking-widest">{t('armyHqCorps.stance')}</span>
                         <select
                             value={pendingStance ?? data.stance}
                             onChange={(e) => { handleStanceChange(e.target.value); }}
                             onClick={(e) => e.stopPropagation()}
-                            aria-label={`${displayName} corps stance`}
+                            aria-label={t('armyHqCorps.stanceAria', { corps: displayName })}
                             className="text-[11px] font-bold uppercase bg-panel-bg text-text-primary border border-panel-border rounded px-2 py-1 cursor-pointer focus:outline-none focus:border-amber-400"
                         >
                             <option
                                 value="offensive"
                                 disabled={data.strainLabel === 'compromised'}
-                                title={data.strainLabel === 'compromised' ? 'Not available — command is compromised. Stabilize the command relationship first.' : undefined}
+                                title={data.strainLabel === 'compromised' ? t('armyHqCorps.stanceLockedTitle') : undefined}
                             >
-                                OFFENSIVE{data.strainLabel === 'compromised' ? ' [LOCKED]' : ''}
+                                {t('armyHqCorps.stance.offensive')}{data.strainLabel === 'compromised' ? ` [${t('armyHqCorps.locked')}]` : ''}
                             </option>
-                            <option value="balanced">BALANCED</option>
-                            <option value="defensive">DEFENSIVE</option>
-                            <option value="reorganize">REORGANIZE</option>
+                            <option value="balanced">{t('armyHqCorps.stance.balanced')}</option>
+                            <option value="defensive">{t('armyHqCorps.stance.defensive')}</option>
+                            <option value="reorganize">{t('armyHqCorps.stance.reorganize')}</option>
                         </select>
                     </div>
                 </div>
@@ -391,7 +392,7 @@ export function ArmyHQCorpsCard({
                     <div className={`px-4 py-2 border-b ${isConstrained ? 'border-red-500/20 bg-red-900/10' : 'border-amber-500/20 bg-amber-900/10'}`}>
                         <div className="flex items-center gap-2">
                             <span className={`text-[9px] uppercase font-bold tracking-wider opacity-80 shrink-0 ${isConstrained ? 'text-red-400' : 'text-amber-400'}`}>
-                                Army HQ Interpretation
+                                {t('armyHqCorps.interpretation')}
                             </span>
                         </div>
                         <p className={`text-[10px] leading-snug mt-1 mb-1.5 ${isConstrained ? 'text-red-300' : 'text-amber-300'}`}>
@@ -404,20 +405,20 @@ export function ArmyHQCorpsCard({
                                     onClick={(e) => { e.stopPropagation(); void handleConfirmStance(); }}
                                     className="text-[9px] font-bold uppercase tracking-wider px-2 py-1 border border-amber-600/50 text-amber-400 bg-amber-900/20 hover:bg-amber-900/40 transition-colors"
                                 >
-                                    Confirm Stance Order
+                                    {t('armyHqCorps.confirmStance')}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={(e) => { e.stopPropagation(); handleCancelStance(); }}
                                     className="text-[9px] font-bold uppercase tracking-wider px-2 py-1 border border-panel-border text-text-secondary hover:border-panel-border/80 transition-colors"
                                 >
-                                    Cancel
+                                    {t('common.cancel')}
                                 </button>
                             </div>
                         )}
                         {isBlocked && (
                             <p className="text-[9px] text-text-secondary/60 italic">
-                                Restore the command relationship to unlock this option.
+                                {t('armyHqCorps.restoreRelationship')}
                             </p>
                         )}
                     </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import type { ChronicleEntry, ChronicleCardType } from './generateChronicleEntries.js';
+import { t, useLocale, type MessageKey } from '../../i18n';
 import { formatHistoricalDivergenceNote } from '../../data/historicalDivergenceNotes.js';
-import { useLocale } from '../../i18n';
 
 /** Paper card accent colors — left border + category badge. */
 const CARD_ACCENT: Record<ChronicleCardType, { border: string; badge: string; badgeText: string }> = {
@@ -15,15 +15,15 @@ const CARD_ACCENT: Record<ChronicleCardType, { border: string; badge: string; ba
     personnel:    { border: '#75a9b8', badge: 'bg-cyan-900/35',   badgeText: 'text-cyan-200' },
 };
 
-const CARD_LABELS: Record<ChronicleCardType, string> = {
-    combat: 'COMBAT',
-    political: 'POLITICAL',
-    humanitarian: 'HUMANITARIAN',
-    military: 'MILITARY',
-    diplomatic: 'DIPLOMATIC',
-    narrative: 'NARRATIVE',
-    cost: 'COST',
-    personnel: 'PERSONNEL',
+const CARD_LABEL_KEYS: Record<ChronicleCardType, MessageKey> = {
+    combat: 'chronicle.card.combat',
+    political: 'chronicle.card.political',
+    humanitarian: 'chronicle.card.humanitarian',
+    military: 'chronicle.card.military',
+    personnel: 'chronicle.card.personnel',
+    diplomatic: 'chronicle.card.diplomatic',
+    narrative: 'chronicle.card.narrative',
+    cost: 'chronicle.card.cost',
 };
 
 interface ChronicleCardProps {
@@ -37,8 +37,8 @@ interface ChronicleCardProps {
 export const ChronicleCard = React.memo(function ChronicleCard({ entry }: ChronicleCardProps) {
     useLocale();
     const accent = CARD_ACCENT[entry.type];
-    const label = entry.ghost ? 'GHOST' : CARD_LABELS[entry.type];
-    const detail = entry.detail ? formatHistoricalDivergenceNote(entry.detail) : '';
+    const label = entry.ghost ? t('chronicle.card.ghost') : t(CARD_LABEL_KEYS[entry.type]);
+    const detail = entry.detail ? formatHistoricalDivergenceNote(entry.detail) : entry.detail;
 
     return (
         <div

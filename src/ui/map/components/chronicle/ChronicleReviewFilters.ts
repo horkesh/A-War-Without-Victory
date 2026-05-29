@@ -1,19 +1,24 @@
 import type { ChronicleCardType, ChronicleEntry } from './generateChronicleEntries.js';
+import { t, type MessageKey } from '../../i18n';
 
 export type ChronicleFilterId = 'all' | 'headlines' | ChronicleCardType;
 
-export const CHRONICLE_FILTERS: Array<{ id: ChronicleFilterId; label: string }> = [
-    { id: 'all', label: 'All' },
-    { id: 'headlines', label: 'Headlines' },
-    { id: 'cost', label: 'Cost' },
-    { id: 'combat', label: 'Combat' },
-    { id: 'political', label: 'Political' },
-    { id: 'humanitarian', label: 'Humanitarian' },
-    { id: 'military', label: 'Military' },
-    { id: 'personnel', label: 'Personnel' },
-    { id: 'diplomatic', label: 'Diplomatic' },
-    { id: 'narrative', label: 'Narrative' },
+export const CHRONICLE_FILTERS: Array<{ id: ChronicleFilterId; labelKey: MessageKey }> = [
+    { id: 'all', labelKey: 'chronicle.filter.all' },
+    { id: 'headlines', labelKey: 'chronicle.filter.headlines' },
+    { id: 'cost', labelKey: 'chronicle.filter.cost' },
+    { id: 'combat', labelKey: 'chronicle.filter.combat' },
+    { id: 'political', labelKey: 'chronicle.filter.political' },
+    { id: 'humanitarian', labelKey: 'chronicle.filter.humanitarian' },
+    { id: 'military', labelKey: 'chronicle.filter.military' },
+    { id: 'personnel', labelKey: 'chronicle.filter.personnel' },
+    { id: 'diplomatic', labelKey: 'chronicle.filter.diplomatic' },
+    { id: 'narrative', labelKey: 'chronicle.filter.narrative' },
 ];
+
+export function chronicleFilterLabel(filter: { labelKey: MessageKey }): string {
+    return t(filter.labelKey);
+}
 
 function emptyEntryCounts(): Record<ChronicleFilterId, number> {
     return {

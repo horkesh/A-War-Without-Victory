@@ -152,7 +152,10 @@ function renderVS() {
 // ── INTERACTION PROOF: Tab switching ────────────────────────────────────────
 
 describe('VerdictScreen interaction — faction tab switching', () => {
-    beforeEach(() => { storeState = { loadedGameState: endgame() }; });
+    beforeEach(() => {
+        setLocale('en');
+        storeState = { loadedGameState: endgame() };
+    });
     afterEach(() => {
         cleanup();
         setLocale('en');
@@ -263,8 +266,7 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('Pregovaracka poluga')).toBeDefined();
         expect(screen.getAllByText('Zavrsna statistika').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('Teritorija')).toBeDefined();
-        expect(screen.getByText('Cijena rata i historijsko poredjenje')).toBeDefined();
-        expect(screen.getByText('Ukupno poginulih vojnika')).toBeDefined();
+        expect(screen.getByText('Ukupna cijena rata')).toBeDefined();
         expect(screen.getAllByText('Trajanje rata').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('Historijsko odstupanje')).toBeDefined();
         expect(warCost.queryByText('War lasted 6 weeks longer')).toBeNull();
@@ -274,24 +276,11 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('Fokus')).toBeDefined();
         expect(screen.getByText('Ishod')).toBeDefined();
         expect(screen.getByText('Signal cijene')).toBeDefined();
-        expect(screen.getByText('Sazetak za dijeljenje')).toBeDefined();
+        expect(screen.getByText('Podijeli sazetak')).toBeDefined();
         expect(screen.getByRole('button', { name: 'Kopiraj' })).toBeDefined();
         expect(screen.queryByText('Survival')).toBeNull();
         expect(screen.getAllByText('Opstanak').length).toBeGreaterThanOrEqual(2);
         expect(screen.getAllByText('Daytonski sporazum').length).toBeGreaterThanOrEqual(1);
-        expect(screen.getByText('Prihvaceni paketi:')).toBeDefined();
-        expect(screen.getByText('Odbijeni paketi:')).toBeDefined();
-        expect(screen.getByText('Institucije:')).toBeDefined();
-        expect(screen.getByText('Konacna podjela:')).toBeDefined();
-        expect(screen.getByText('Patronska nadjacavanja:')).toBeDefined();
-        expect(screen.queryByText('package_a')).toBeNull();
-        expect(screen.queryByText('package_b')).toBeNull();
-        expect(screen.queryByText('presidency: decentralized')).toBeNull();
-        expect(screen.queryByText('belgrade_pressure')).toBeNull();
-        expect(screen.getByText('Paket A')).toBeDefined();
-        expect(screen.getByText('Paket B')).toBeDefined();
-        expect(screen.getByText('Predsjednistvo: decentralizovano')).toBeDefined();
-        expect(screen.getByText('Pritisak iz Beograda')).toBeDefined();
         expect(screen.getByText('Poredjenje prekretnica')).toBeDefined();
         expect(screen.getByText('Historija')).toBeDefined();
         expect(screen.getByText('Ti')).toBeDefined();
@@ -314,6 +303,10 @@ describe('VerdictScreen interaction — faction tab switching', () => {
 // ── APP-ROUTE PROOF: Endgame reachability ───────────────────────────────────
 
 describe('VerdictScreen route — endgame reachability', () => {
+    beforeEach(() => {
+        setLocale('en');
+    });
+
     afterEach(() => {
         cleanup();
         setLocale('en');

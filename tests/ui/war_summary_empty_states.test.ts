@@ -4,7 +4,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import { makeMockLoadedGameState } from '../../src/ui/map/__mocks__/loadedGameState.js';
-import { setLocale } from '../../src/ui/map/i18n/index.js';
+import { setLocale } from '../../src/ui/map/i18n';
 
 const storeState: { loadedGameState: LoadedGameState | null } = {
     loadedGameState: null,
@@ -50,6 +50,7 @@ afterEach(() => {
     cleanup();
     setLocale('en');
     storeState.loadedGameState = null;
+    setLocale('en');
 });
 
 describe('War Summary empty states', () => {
@@ -72,9 +73,8 @@ describe('War Summary empty states', () => {
     });
 
     it.each([
-        ['convoys', 'Nema odluka o konvojima na cekanju.'],
-        ['support', 'Nijedna naredba lokalne podrske nije pripremljena ovaj potez.'],
-        ['opsec', 'Nijedan sektor trenutno ne vodi OPSEC.'],
+        ['convoys', 'Nema konvojskih odluka na cekanju.'],
+        ['support', 'Nema lokalne naredbe podrske za ovaj potez.'],
         ['capital', 'Diplomatski kapital nije dostupan u ovom prikazu.'],
     ] as const)('localizes the empty %s section in BCS mode', (section, message) => {
         setLocale('bcs');
@@ -83,6 +83,7 @@ describe('War Summary empty states', () => {
         render(createElement(WarSummaryContent, { focusSection: section }));
 
         expect(screen.getByText(message)).toBeTruthy();
+        expect(screen.queryByText('No convoy decisions are pending.')).toBeNull();
     });
 
     it('localizes convoy action buttons in BCS mode', () => {

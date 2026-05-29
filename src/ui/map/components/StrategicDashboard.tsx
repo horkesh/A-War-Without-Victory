@@ -12,6 +12,7 @@ import { FACTION_HEX_COLORS } from '../utils/theme';
 import osidAreasData from '../../../../data/derived/operational/osid_areas.json';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
+import { t } from '../i18n';
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
 
@@ -147,17 +148,17 @@ export const StrategicDashboard = React.memo(function StrategicDashboard() {
         type="button"
         className="absolute inset-0 cursor-default border-0 bg-transparent p-0"
         onClick={() => setStrategicDashboardOpen(false)}
-        aria-label="Close Strategic Dashboard"
+        aria-label={t('strategicDashboard.close')}
       />
       <div className="relative bg-panel-bg border border-panel-border rounded-lg shadow-2xl w-[640px] max-h-[80vh] overflow-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-panel-border">
           <div>
             <h2 className="text-sm font-bold uppercase tracking-wider text-amber-400">
-              Strategic Dashboard
+              {t('strategicDashboard.title')}
             </h2>
             <p className="text-[10px] text-text-secondary font-mono uppercase tracking-widest mt-0.5">
-              {loadedGameState?.label ? `${loadedGameState.label}` : 'No game loaded'}
+              {loadedGameState?.label ? `${loadedGameState.label}` : t('strategicDashboard.noGameLoaded')}
             </p>
           </div>
           <button

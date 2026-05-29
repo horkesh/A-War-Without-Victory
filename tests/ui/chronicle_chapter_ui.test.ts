@@ -4,8 +4,12 @@ import React, { createElement } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ChronicleViewModeToggle } from '../../src/ui/map/components/chronicle/ChronicleOverlay.js';
+import { setLocale } from '../../src/ui/map/i18n';
 
-afterEach(() => cleanup());
+afterEach(() => {
+    cleanup();
+    setLocale('en');
+});
 
 describe('Chronicle chapter UI controls', () => {
     it('switches between entry list and chapter view without changing the active filter label', () => {
@@ -29,5 +33,21 @@ describe('Chronicle chapter UI controls', () => {
 
         expect(screen.getByText('Lens: Cost')).toBeTruthy();
         expect(screen.getByRole('button', { name: /Chapters/i }).getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('localizes Chronicle review controls in BCS mode', () => {
+        setLocale('bcs');
+
+        render(createElement(ChronicleViewModeToggle, {
+            mode: 'entries',
+            activeFilterLabel: 'Cijena',
+            chapterCount: 2,
+            onModeChange: () => {},
+        }));
+
+        expect(screen.getByRole('button', { name: 'Zapisi' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Poglavlja' })).toBeTruthy();
+        expect(screen.getByText('Fokus: Cijena')).toBeTruthy();
+        expect(screen.getByText('2 poglavlja')).toBeTruthy();
     });
 });

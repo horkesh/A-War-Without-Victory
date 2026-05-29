@@ -24,6 +24,8 @@
  */
 import React, { useEffect, useRef } from 'react';
 import { Z } from '../../shared/zIndex';
+import { t } from '../i18n';
+import { playerFacingErrorCopy } from '../utils/errorCopy';
 
 export interface LoadErrorToastProps {
   /** The error message to display. If null/empty, the toast does not render. */
@@ -51,6 +53,7 @@ export function LoadErrorToast({ message, onDismiss, positioning = 'fixed' }: Lo
   }, [message]);
 
   if (!message) return null;
+  const displayMessage = playerFacingErrorCopy(message);
 
   const positionClass = positioning === 'fixed'
     ? 'fixed top-16 left-1/2 -translate-x-1/2'
@@ -79,13 +82,13 @@ export function LoadErrorToast({ message, onDismiss, positioning = 'fixed' }: Lo
           className="font-mono uppercase tracking-[0.22em] text-[10px] text-red-400 mt-0.5"
           data-testid="load-error-toast-tag"
         >
-          ERROR
+          {t('loadError.error')}
         </div>
         <div
           className="flex-1 font-mono text-[12px] text-text-primary break-words"
           data-testid="load-error-toast-message"
         >
-          {message}
+          {displayMessage}
         </div>
         <button
           ref={buttonRef}
@@ -93,7 +96,7 @@ export function LoadErrorToast({ message, onDismiss, positioning = 'fixed' }: Lo
           onClick={onDismiss}
           className="font-mono text-[12px] text-amber-400 hover:text-amber-300 px-1.5 py-0.5 border border-panel-border rounded focus:outline-none focus:border-amber-400"
           data-testid="load-error-toast-dismiss"
-          aria-label="Dismiss error"
+          aria-label={t('loadError.dismissAria')}
         >
           ×
         </button>

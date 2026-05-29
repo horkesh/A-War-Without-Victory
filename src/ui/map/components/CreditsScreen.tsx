@@ -19,7 +19,7 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
                 type="button"
                 className="absolute inset-0 cursor-default border-0 bg-transparent p-0"
                 onClick={onClose}
-                aria-label={t('credits.closeAriaLabel', undefined, locale)}
+                aria-label={t('credits.closeCredits')}
             />
             <div className="w-[90%] max-w-[480px] max-h-[80vh] overflow-auto rounded-lg border border-[#8a7a60]/30 shadow-2xl p-8"
                  style={{
@@ -29,30 +29,28 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
             >
 
                 <h2 className="text-[18px] text-[#c4a35a] font-bold tracking-wider text-center mb-6">
-                    {t('credits.title', undefined, locale)}
+                    {t('credits.title')}
                 </h2>
 
-                <CreditSection title={t('credits.section.studio', undefined, locale)}>
-                    <p className="text-[#d5c9bc]">Pyrrhic Games</p>
+                <CreditSection title={t('credits.studio')}>
+                    <p className="text-[#d5c9bc]">{t('credits.studioName')}</p>
                 </CreditSection>
 
-                <CreditSection title={t('credits.section.design', undefined, locale)}>
+                <CreditSection title={t('credits.designDevelopment')}>
                     <p className="text-[#d5c9bc]">A War Without Victory</p>
-                    <p className="text-[#8a7a60] text-[11px]">{t('credits.design.subtitle', undefined, locale)}</p>
+                    <p className="text-[#8a7a60] text-[11px]">{t('credits.subtitle')}</p>
                 </CreditSection>
 
-                <CreditSection title={t('credits.section.sources', undefined, locale)}>
+                <CreditSection title={t('credits.historicalSources')}>
                     <p className="text-[#d5c9bc] text-[12px]">
-                        {t('credits.sources.basedOnPrefix', undefined, locale)}{' '}
-                        <em>Balkan Battlegrounds: A Military History of the Yugoslav Conflict, 1990-1995</em>
-                        {' '}(CIA, 2002)
+                        {t('credits.basedOn')} <em>{t('credits.balkanBattlegroundsTitle')}</em> (CIA, 2002)
                     </p>
                     <p className="text-[#8a7a60] text-[11px] mt-1">
-                        {t('credits.sources.additional', undefined, locale)}
+                        {t('credits.additionalSources')}
                     </p>
                 </CreditSection>
 
-                <CreditSection title={t('credits.section.technology', undefined, locale)}>
+                <CreditSection title={t('credits.technology')}>
                     <p className="text-[#8a7a60] text-[11px] leading-relaxed">
                         Electron · React · TypeScript · MapLibre GL JS · Deck.gl · Vite · Vitest · Node.js
                     </p>
@@ -60,7 +58,7 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
 
                 <div className="border-t border-[#8a7a60]/20 pt-4 mt-4">
                     <p className="text-[12px] text-[#8a7a60] text-center italic leading-relaxed">
-                        {t('credits.dedication', undefined, locale)}
+                        {t('credits.dedication')}
                     </p>
                 </div>
 
@@ -68,7 +66,7 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
                     <button type="button" onClick={onClose}
                         className="text-[11px] uppercase tracking-wider text-[#8a7a60] border border-[#8a7a60]/20 px-4 py-2 rounded hover:bg-[#8a7a60]/10 transition-colors"
                         style={{ fontFamily: 'Courier New, monospace' }}>
-                        {t('credits.close', undefined, locale)}
+                        {t('common.close')}
                     </button>
                 </div>
             </div>

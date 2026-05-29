@@ -341,6 +341,45 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(region).not.toMatch(/\bperformance\.now\s*\(/);
     });
 
+    it('static contract: buildFactionSectors passes shared edge metadata into buildMultiSectorsForCorps', () => {
+        const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
+        const startIdx = raw.indexOf('function buildFactionSectors(');
+        const endIdx = raw.indexOf('// Re-exports for backward compatibility', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        const compact = region.replace(/\s+/g, ' ');
+        const callMatch = compact.match(/buildMultiSectorsForCorps\((?<args>[^;]+?)\)\s*,\s*\)/);
+
+        expect(callMatch?.groups?.args).toBeTruthy();
+        const args = callMatch!.groups!.args;
+        expect(args).toContain('_perfTime, edgeMeta');
+        expect(args).not.toMatch(/friendlyOsids,\s*_perfTime\s*$/);
+    });
+
+    it('static contract: buildMultiSectorsForCorps reuses shared metadata and keeps fallback lookup lazy', () => {
+        const raw = readFileSync(resolve('src/sim/combat/sector_building.ts'), 'utf8');
+        const startIdx = raw.indexOf('export function buildMultiSectorsForCorps(');
+        const endIdx = raw.indexOf('/**\n * Recursively split sub-segments', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        const compact = region.replace(/\s+/g, ' ');
+
+        expect(compact).toMatch(/sharedFrontEdgeMeta\?:\s*FrontEdgeMetaLookup/);
+        expect(compact).toMatch(/let\s+frontEdgeLookup:\s*Map<string,\s*FrontEdgeMeta>\s*\|\s*null\s*=\s*null/);
+        const frontEdgeStatement = compact.match(/const\s+frontEdge\s*=\s*(?<expr>[^;]+);/)?.groups?.expr;
+        expect(frontEdgeStatement).toBeTruthy();
+        expect(frontEdgeStatement).toMatch(/^sharedFrontEdgeMeta\?\.get\(eid\)\s*\?\?/);
+        expect(frontEdgeStatement).toContain('(frontEdgeLookup ??= new Map(osidFrontEdges.map(');
+        expect(frontEdgeStatement).toContain(')).get(eid)');
+
+        expect(compact).not.toMatch(/const\s+frontEdgeLookup\s*=\s*new Map\(osidFrontEdges\.map\(/);
+        expect(compact).not.toMatch(/for\s*\(const eid of edgeIds\)[^{]*{[^}]*const\s+frontEdgeLookup\s*=\s*new Map/);
+    });
+
     it('static contract: buildSectorFromSubSegments has deterministic child attribution labels', () => {
         const raw = readFileSync(resolve('src/sim/combat/sector_building.ts'), 'utf8');
         const startIdx = raw.indexOf('export function buildSectorFromSubSegments(');
@@ -371,7 +410,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
     it('static contract: ensureMinimumSectorCoverage has deterministic child attribution labels', () => {
         const raw = readFileSync(resolve('src/sim/combat/brigade_assignment.ts'), 'utf8');
         const startIdx = raw.indexOf('export function ensureMinimumSectorCoverage(');
-        const endIdx = raw.indexOf('\n}\n', startIdx);
+        const endIdx = raw.indexOf('\nexport function deduplicateBrigadesAcrossSectors', startIdx);
         expect(startIdx).toBeGreaterThanOrEqual(0);
         expect(endIdx).toBeGreaterThan(startIdx);
 
@@ -402,6 +441,60 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(region).not.toMatch(/\bDate\.now\s*\(/);
         expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
         expect(region).not.toMatch(/\bperformance\.now\s*\(/);
+    });
+
+    it('static contract: ensureMinimumSectorCoverage reuses invocation-local sorted corps groups', () => {
+        const raw = readFileSync(resolve('src/sim/combat/brigade_assignment.ts'), 'utf8');
+        const startIdx = raw.indexOf('export function ensureMinimumSectorCoverage(');
+        const endIdx = raw.indexOf('\n}\n', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        const declaration = region.indexOf('const sortedCorpsSectorGroups');
+        expect(declaration).toBeGreaterThanOrEqual(0);
+
+        const afterDeclaration = region.slice(declaration);
+        expect(afterDeclaration).not.toContain('[...sectorsByCorps.entries()].sort');
+        expect(region).not.toMatch(/\bDate\.now\s*\(/);
+        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
+    });
+
+    it('static contract: ensureMinimumSectorCoverage reuses invocation-local movement views', () => {
+        const raw = readFileSync(resolve('src/sim/combat/brigade_assignment.ts'), 'utf8');
+        const startIdx = raw.indexOf('export function ensureMinimumSectorCoverage(');
+        const endIdx = raw.indexOf('\nexport function deduplicateBrigadesAcrossSectors', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        expect(region).toContain('const brigadeMovementState = state?.military.brigade_movement_state;');
+        expect(region).toContain('const brigadeMovementOrders = state?.military.brigade_movement_orders;');
+        expect(region).toContain("brigadeMovementState?.[entry.bid]?.status === 'in_transit'");
+        expect(region).toContain('brigadeMovementOrders?.[entry.bid]');
+        expect(region).not.toContain('state?.military.brigade_movement_state?.[entry.bid]');
+        expect(region).not.toContain('state?.military.brigade_movement_orders?.[entry.bid]');
+        expect(region).not.toContain('sectorFrontOsidViews');
+        expect(region).not.toMatch(/\bDate\.now\s*\(/);
+        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
+    });
+
+    it('static contract: pickVacantLocalFrontTarget keeps deterministic loop and final sort', () => {
+        const raw = readFileSync(resolve('src/sim/combat/brigade_assignment.ts'), 'utf8');
+        const startIdx = raw.indexOf('const pickVacantLocalFrontTarget = (');
+        const endIdx = raw.indexOf('\n\n    const moveBrigadeToFrontTarget', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        expect(region).toContain('const candidates: Array<{ target: string; dist: number }> = [];');
+        expect(region).toContain('for (const target of getSectorFrontOsids(sector)) {');
+        expect(region).toContain('candidates.push({ target, dist });');
+        expect(region).toContain('candidates.sort((a, b) => a.dist - b.dist || strictCompare(a.target, b.target));');
+        expect(region).not.toContain('.filter((target)');
+        expect(region).not.toContain('.map((target)');
     });
 
     it('static contract: sector brigade assignment reuses enemy personnel indexes', () => {

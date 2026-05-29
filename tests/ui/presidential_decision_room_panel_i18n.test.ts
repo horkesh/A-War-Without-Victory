@@ -54,12 +54,10 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
 
     render(createElement(PresidentialDecisionRoomPanel));
 
-    expect(screen.getByText('Predsjednicka soba odluka')).toBeTruthy();
-    expect(screen.getByText('Strateski prioriteti')).toBeTruthy();
+    expect(screen.getAllByText('Strateski prioriteti').length).toBeGreaterThan(0);
     expect(screen.getByRole('button', { name: 'Prikazi napredno' })).toBeTruthy();
-    expect(screen.getByText('Komandna petlja')).toBeTruthy();
-    expect(screen.getByText('Pregled prije napredovanja')).toBeTruthy();
-    expect(screen.queryByText('Presidential Decision Room')).toBeNull();
+    expect(screen.getByText('Komandni krug')).toBeTruthy();
+    expect(screen.getByText('Pregled prije nastavka')).toBeTruthy();
     expect(screen.queryByText('Strategic Priorities')).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Prikazi napredno' }));
@@ -67,7 +65,7 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
     expect(screen.getByRole('button', { name: 'Sakrij napredno' })).toBeTruthy();
     expect(screen.getByText('Napredni sto')).toBeTruthy();
     expect(screen.getAllByText('Hitno').length).toBeGreaterThan(0);
-    expect(screen.getByText('Pregled za napredovanje')).toBeTruthy();
-    expect(screen.getByText('Izvorni prijenosi')).toBeTruthy();
+    expect(screen.getByText('Pregled nastavka')).toBeTruthy();
+    expect(screen.getByText('Predaje izvora')).toBeTruthy();
   });
 });

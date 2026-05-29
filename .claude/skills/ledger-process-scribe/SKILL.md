@@ -14,7 +14,7 @@ Ensure process compliance: ledger, commit discipline, and validation.
 ## Required reading
 - `docs/PROJECT_LEDGER.md` (append-only changelog)
 - `docs/PROJECT_LEDGER_KNOWLEDGE.md` (thematic knowledge base — for process/compliance context; see `docs/10_canon/context.md` §1)
-- `docs/20_engineering/CODE_CANON.md` (or `docs/CODE_CANON.md` if present)
+- `docs/20_engineering/CODE_CANON.md` (or `docs/20_engineering/CODE_CANON.md` if present)
 - Relevant phase specs and invariants for the change scope.
 
 ## Review checklist

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { RecruitmentCatalogBrigade } from '../desktop/types';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
+import { t } from '../i18n';
 
 interface RecruitmentModalProps {
   isOpen: boolean;
@@ -51,7 +52,7 @@ export function RecruitmentModal({
       <>
         <div className="px-4 py-3 border-b border-panel-border bg-panel-bg flex items-center justify-between">
           <h2 id="recruitment-title" className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-            Recruitment
+            {t('recruitment.title')}
           </h2>
           <button
             type="button"
@@ -59,7 +60,7 @@ export function RecruitmentModal({
             disabled={loading || applying}
             className="px-2 py-1 text-xs font-mono uppercase tracking-wide bg-panel-bg hover:bg-panel-hover text-text-primary border border-panel-border rounded disabled:opacity-50"
           >
-            Refresh
+            {t('recruitment.refresh')}
           </button>
         </div>
         <div className="p-4 space-y-3">
@@ -69,13 +70,13 @@ export function RecruitmentModal({
               <div className="h-10 w-full bg-panel-card border border-panel-border rounded panel-shimmer" />
             </div>
           ) : available.length === 0 ? (
-            <p className="text-xs text-text-secondary">No brigades available for recruitment.</p>
+            <p className="text-xs text-text-secondary">{t('recruitment.noBrigades')}</p>
           ) : (
             <>
               <label className="block text-xs text-text-secondary">
-                Brigade
+                {t('recruitment.brigade')}
                 <select
-                  aria-label="Recruitment brigade"
+                  aria-label={t('recruitment.brigadeAria')}
                   value={selectedBrigadeId}
                   onChange={(e) => {
                     const id = e.target.value;
@@ -87,15 +88,15 @@ export function RecruitmentModal({
                 >
                   {available.map((b) => (
                     <option key={b.id} value={b.id}>
-                      {b.name} ({b.faction}) - cap {b.capital_cost}, man {b.manpower_cost}
+                      {t('recruitment.optionLabel', { name: b.name, faction: b.faction, cap: b.capital_cost, manpower: b.manpower_cost })}
                     </option>
                   ))}
                 </select>
               </label>
               <label className="block text-xs text-text-secondary">
-                Equipment class
+                {t('recruitment.equipmentClass')}
                 <input
-                  aria-label="Recruitment equipment class"
+                  aria-label={t('recruitment.equipmentClassAria')}
                   value={equipmentClass}
                   onChange={(e) => setEquipmentClass(e.target.value)}
                   className="mt-1 w-full px-2 py-1 bg-panel-bg border border-panel-border rounded text-text-primary"
@@ -110,7 +111,7 @@ export function RecruitmentModal({
             onClick={onClose}
             className="px-3 py-1.5 text-xs font-sans text-text-secondary hover:text-interactive hover:bg-panel-hover rounded border border-panel-border"
           >
-            Close
+            {t('common.close')}
           </button>
           <button
             type="button"
@@ -118,7 +119,7 @@ export function RecruitmentModal({
             onClick={() => onApply(selectedBrigadeId, equipmentClass.trim())}
             className="px-3 py-1.5 text-xs font-sans bg-interactive text-white hover:bg-panel-hover rounded border border-panel-border disabled:opacity-50"
           >
-            {applying ? 'Recruiting...' : 'Recruit'}
+            {applying ? t('recruitment.recruiting') : t('recruitment.recruit')}
           </button>
         </div>
       </>

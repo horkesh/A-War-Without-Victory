@@ -4,6 +4,7 @@
  */
 import type { OpsPlanState } from './types';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
+import { t } from '../../i18n';
 
 interface ObjectiveListProps {
     plan: OpsPlanState;
@@ -64,28 +65,28 @@ export function ObjectiveList({
                         border border-[rgba(180,160,130,0.15)] p-3 flex flex-col">
             <div className="flex items-center justify-between mb-2">
                 <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-accent-gold">
-                    Objectives
+                    {t('opsPlanning.phase.objectives')}
                 </div>
                 <div className="text-[8px] uppercase tracking-[0.16em] text-text-secondary/70">
-                    Planning
+                    {t('opsPlanning.phase.planning')}
                 </div>
             </div>
 
             <div className="grid grid-cols-4 gap-2 mb-3">
                 <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Axis</div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.axis')}</div>
                     <div className="text-[10px] font-bold text-white truncate">{activeAxis.name}</div>
                 </div>
                 <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Objectives</div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.objectives')}</div>
                     <div className="text-[10px] font-bold text-white">{selectedAxisObjectiveCount}</div>
                 </div>
                 <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Brigades</div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.brigades')}</div>
                     <div className="text-[10px] font-bold text-white">{selectedAxisBrigadeCount}</div>
                 </div>
                 <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Available</div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.available')}</div>
                     <div className={`text-[10px] font-bold ${availableObjectiveCount > 0 ? 'text-accent-gold' : 'text-red-300'}`}>
                         {availableObjectiveCount}
                     </div>
@@ -94,7 +95,7 @@ export function ObjectiveList({
 
             {objectives.length === 0 ? (
                 <div className="text-[10px] text-text-secondary/50 italic py-4 text-center">
-                    Click enemy territory on the map to add objectives
+                    {t('opsPlanning.phase.emptyObjectives')}
                 </div>
             ) : (
                 <div className="space-y-1 flex-1 min-h-0 overflow-y-auto pr-1">
@@ -117,7 +118,7 @@ export function ObjectiveList({
                                     className={`text-[12px] transition-colors ${
                                         isSchwerpunkt ? 'text-accent-gold' : 'text-text-secondary/20 hover:text-accent-gold/60'
                                     }`}
-                                    title={isSchwerpunkt ? 'Main effort' : 'Set as main effort'}
+                                    title={isSchwerpunkt ? t('opsPlanning.phase.mainEffort') : t('opsPlanning.phase.setMainEffort')}
                                 >
                                     *
                                 </button>
@@ -153,9 +154,9 @@ export function ObjectiveList({
             )}
 
             <div className="mt-2 rounded border border-[rgba(180,160,130,0.12)] bg-[rgba(180,160,130,0.05)] px-2 py-1.5">
-                <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Staging Area</div>
+                <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.stagingArea')}</div>
                 <div className="text-[10px] text-white truncate">
-                    {selectedStaging ? getOsidDisplayName(selectedStaging, osidDisplayNames) : 'Not set'}
+                    {selectedStaging ? getOsidDisplayName(selectedStaging, osidDisplayNames) : t('opsPlanning.phase.notSet')}
                 </div>
             </div>
 
@@ -187,7 +188,7 @@ export function ObjectiveList({
                                bg-accent-gold/15 text-accent-gold border border-accent-gold/25
                                hover:bg-accent-gold/25 transition-all disabled:cursor-not-allowed disabled:opacity-30"
                 >
-                    {'Request G2 Assessment ->'}
+                    {t('opsPlanning.phase.requestG2')}
                 </button>
             )}
         </div>

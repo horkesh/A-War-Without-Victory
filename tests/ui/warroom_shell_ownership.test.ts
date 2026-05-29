@@ -16,7 +16,7 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(app).toContain("{appScreen === 'game' && <MapModeLegend />}");
         expect(app).toContain("{appScreen === 'game' && <Minimap />}");
         expect(app).toContain("{appScreen === 'game' && (");
-        expect(app).toContain('<BottomStatusStrip />');
+        expect(app).toContain('<BottomStatusStrip eventCatalog={eventCatalogFull} />');
     });
 
     it('offers Warroom return for browser Warroom-launched Army HQ sessions', () => {
@@ -28,9 +28,10 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
 
     it('keeps one explicit Army HQ close control while retaining Field and Warroom exits', () => {
         const modal = read('src/ui/map/components/army_hq/ArmyHQModal.tsx');
-        const closeLabels = modal.match(/aria-label="Close Army Headquarters"/g) ?? [];
+        const closeLabels = modal.match(/aria-label=\{t\('armyHq\.close'\)\}/g) ?? [];
 
         expect(closeLabels).toHaveLength(1);
+        expect(modal).toContain("aria-label={t('armyHq.dismissBackdrop')}");
         expect(modal).toContain('FIELD');
         expect(modal).toContain('WARROOM');
         expect(modal).toContain('shouldShowWarroomReturn');

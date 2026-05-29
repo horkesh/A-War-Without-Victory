@@ -71,6 +71,16 @@ describe('final sector reserve-band truth', () => {
                 front_posture_regions: {},
                 front_pressure: {},
                 militia_pools: {},
+                army_co_decision_traces: {},
+                army_corps_directives_by_faction: {},
+                event_decision_log: [],
+            fired_event_ids: [],
+            event_readiness: {},
+            event_fire_counts: {},
+            event_last_fired_turn: {},
+            event_flags: {},
+            enabled_event_ids: [],
+            phantoms_spawned: [],
             } as GameState['military'],
             political: {
                 political_controllers: {
@@ -79,7 +89,7 @@ describe('final sector reserve-band truth', () => {
                     'op:rear': 'RS',
                     'op:enemy': 'RBiH',
                 },
-            } as GameState['political'],
+            } as unknown as GameState['political'],
             displacement: {} as GameState['displacement'],
         } as GameState;
 
@@ -168,6 +178,16 @@ describe('final sector reserve-band truth', () => {
                 front_posture_regions: {},
                 front_pressure: {},
                 militia_pools: {},
+                army_co_decision_traces: {},
+                army_corps_directives_by_faction: {},
+                event_decision_log: [],
+            fired_event_ids: [],
+            event_readiness: {},
+            event_fire_counts: {},
+            event_last_fired_turn: {},
+            event_flags: {},
+            enabled_event_ids: [],
+            phantoms_spawned: [],
             } as GameState['military'],
             political: {
                 political_controllers: {
@@ -177,7 +197,7 @@ describe('final sector reserve-band truth', () => {
                     'op:rear_heavy': 'RS',
                     'op:enemy': 'RBiH',
                 },
-            } as GameState['political'],
+            } as unknown as GameState['political'],
             displacement: {} as GameState['displacement'],
         } as GameState;
 
@@ -268,6 +288,16 @@ describe('final sector reserve-band truth', () => {
                 front_posture_regions: {},
                 front_pressure: {},
                 militia_pools: {},
+                army_co_decision_traces: {},
+                army_corps_directives_by_faction: {},
+                event_decision_log: [],
+            fired_event_ids: [],
+            event_readiness: {},
+            event_fire_counts: {},
+            event_last_fired_turn: {},
+            event_flags: {},
+            enabled_event_ids: [],
+            phantoms_spawned: [],
             } as GameState['military'],
             political: {
                 political_controllers: {
@@ -278,7 +308,7 @@ describe('final sector reserve-band truth', () => {
                     'op:enemy_a': 'RBiH',
                     'op:enemy_b': 'RBiH',
                 },
-            } as GameState['political'],
+            } as unknown as GameState['political'],
             displacement: {} as GameState['displacement'],
         } as GameState;
 

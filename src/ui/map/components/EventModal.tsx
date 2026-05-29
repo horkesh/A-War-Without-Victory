@@ -10,12 +10,12 @@
  *
  * Uses the shared Modal wrapper with dispatch paper inner content.
  */
-
 import { Icon, type IconName } from './icons/Icon';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import type { EventEffect } from '../../../sim/events/event_types';
 import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
+import { t, type MessageKey } from '../i18n';
 
 /** Display-ready event data for the modal. */
 export interface EventDisplayData {
@@ -42,14 +42,14 @@ const FACTION_COLORS: Record<string, string> = {
     HRHB: '#50b850',
 };
 
-const CATEGORY_CONFIG: Record<string, { bg: string; color: string; label: string; icon: IconName }> = {
-    military: { bg: '#6b3030', color: '#c08080', label: 'MILITARY', icon: 'offensive' },
-    political: { bg: '#4a3a6b', color: '#a090c0', label: 'POLITICAL', icon: 'balanced' },
-    humanitarian: { bg: '#6b5a30', color: '#c0b080', label: 'HUMANITARIAN', icon: 'personnel' },
-    diplomatic: { bg: '#305a6b', color: '#80b0c0', label: 'DIPLOMATIC', icon: 'recon' },
-    economic: { bg: '#3a6b3a', color: '#80c080', label: 'ECONOMIC', icon: 'supply' },
-    command: { bg: '#5a4a3a', color: '#c0a890', label: 'COMMAND', icon: 'star' },
-    territorial: { bg: '#3a5a4a', color: '#80c0a0', label: 'TERRITORIAL', icon: 'home' },
+const CATEGORY_CONFIG: Record<string, { bg: string; color: string; labelKey: MessageKey; icon: IconName }> = {
+    military: { bg: '#6b3030', color: '#c08080', labelKey: 'event.category.military', icon: 'offensive' },
+    political: { bg: '#4a3a6b', color: '#a090c0', labelKey: 'event.category.political', icon: 'balanced' },
+    humanitarian: { bg: '#6b5a30', color: '#c0b080', labelKey: 'event.category.humanitarian', icon: 'personnel' },
+    diplomatic: { bg: '#305a6b', color: '#80b0c0', labelKey: 'event.category.diplomatic', icon: 'recon' },
+    economic: { bg: '#3a6b3a', color: '#80c080', labelKey: 'event.category.economic', icon: 'supply' },
+    command: { bg: '#5a4a3a', color: '#c0a890', labelKey: 'event.category.command', icon: 'star' },
+    territorial: { bg: '#3a5a4a', color: '#80c0a0', labelKey: 'event.category.territorial', icon: 'home' },
 };
 
 const EFFECT_ICONS: Record<string, IconName> = {
@@ -95,7 +95,7 @@ export function describeEventEffect(effect: EventEffect): string {
 }
 
 export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: EventModalProps) {
-    const cat = CATEGORY_CONFIG[event.category] ?? { bg: '#444', color: '#aaa', label: event.category.toUpperCase(), icon: 'star' as IconName };
+    const cat = CATEGORY_CONFIG[event.category] ?? { bg: '#444', color: '#aaa', labelKey: 'event.category.unknown', icon: 'star' as IconName };
     const factions = extractFactions(event.effects);
     const mechanicalEffects = event.effects.filter(e => !e.description.startsWith('[narrative]'));
 
@@ -116,12 +116,12 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                     className="text-accent-gold uppercase tracking-[0.22em] text-[12px] font-black leading-none"
                     style={{ textShadow: '0 0 8px rgba(196,163,90,0.3)' }}
                 >
-                    Event
+                    {t('event.title')}
                 </h2>
                 <button
                     onClick={onAcknowledge}
                     className="text-text-secondary hover:text-accent-gold transition-colors text-base leading-none"
-                    aria-label="Close event"
+                    aria-label={t('common.close')}
                 >
                     &times;
                 </button>
@@ -130,7 +130,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
             {/* Queue indicator */}
             {queueTotal != null && queueTotal > 1 && (
                 <div className="text-right text-xs mb-2" style={{ color: '#8a8578' }}>
-                    {queuePosition ?? 1} of {queueTotal}
+                    {t('event.queuePosition', { position: queuePosition ?? 1, total: queueTotal })}
                 </div>
             )}
 
@@ -164,7 +164,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                 >
                     <div className="flex items-center gap-1.5">
                         <Icon name={cat.icon} size={12} color={cat.color} />
-                        {cat.label}
+                        {cat.labelKey === 'event.category.unknown' ? event.category.toUpperCase() : t(cat.labelKey)}
                     </div>
                 </div>
 
@@ -218,7 +218,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                                 className="text-[10px] uppercase tracking-[0.15em] mb-2 font-bold"
                                 style={{ color: '#8a7e68' }}
                             >
-                                Intelligence Assessment
+                                {t('event.intelligenceAssessment')}
                             </div>
                             <ul className="space-y-1.5">
                                 {mechanicalEffects.map((e, i) => (
@@ -254,7 +254,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                                 (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(60,80,50,0.12)';
                             }}
                         >
-                            Acknowledged
+                            {t('event.acknowledged')}
                         </button>
                     </div>
                 </div>

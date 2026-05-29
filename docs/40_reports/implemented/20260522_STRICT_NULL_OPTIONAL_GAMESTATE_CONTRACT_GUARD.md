@@ -6,7 +6,7 @@
 
 ## Summary
 
-The visible strict-null escape lanes are already closed at zero counted `as FactionId`, `as unknown`, `as any`, dot non-null, and index non-null sites. The remaining strict-null inventory is the optional `GameState` field contract lane.
+The visible strict-null escape lanes are closed after the 2026-05-24 Warroom fallback-region tail: counted `as FactionId`, `as unknown`, `as any`, dot non-null, and index non-null sites are zero. The larger remaining strict-null inventory is the optional `GameState` field contract lane.
 
 This slice pins that lane as an explicit test contract:
 
@@ -17,14 +17,14 @@ This slice pins that lane as an explicit test contract:
 | `as_any_casts` | 0 |
 | `non_null_assertions_dot` | 0 |
 | `non_null_assertions_index` | 0 |
-| `optional_fields_game_state` | 477 |
+| `optional_fields_game_state` | 486 |
 
 Optional-field domain floor:
 
 | Domain | Count |
 |---|---:|
-| `sim` | 296 |
-| `state` | 173 |
+| `sim` | 304 |
+| `state` | 174 |
 | `derived` | 8 |
 | `scenario` | 0 |
 | `ipc` | 0 |
@@ -33,14 +33,16 @@ Optional-field domain floor:
 
 ## Changes
 
-- Added a strict-null progress test that pins the current zero visible escape floor and optional `GameState` domain split.
+- Added a strict-null progress test that pins the current counted escape floor and optional `GameState` domain split.
 - Added CLI test coverage for `tools/diagnostics/strict_null_inventory.cjs --field-domains` so the optional-field schema lane has a stable, machine-readable report surface.
 
 ## Interpretation
 
-This is not a signal to promote optional fields wholesale. The 477 fields remain a save-shape/defaulting review problem. Future work should classify and migrate small owned groups only when loaders, migrations, validators, and baseline behavior prove the required shape.
+This is not a signal to promote optional fields wholesale. The 486 fields remain a save-shape/defaulting review problem. Future work should classify and migrate small owned groups only when loaders, migrations, validators, and baseline behavior prove the required shape.
 
 2026-05-22 follow-up: the derived 8-field slice is classified in `docs/40_reports/audits/20260522_STRICT_NULL_DERIVED_OPTIONAL_FIELDS_CLASSIFICATION.md`. All 8 fields remain intentionally optional today: six are save-shape risks on frozen endgame/end-state snapshots, and two are runtime optional diagnostics.
+
+2026-05-24 follow-up: `docs/40_reports/implemented/20260524_STRICT_NULL_WARROOM_FALLBACK_REGION_TYPES.md` closes the final three production inventory-counted `as_unknown_casts`. The optional `GameState` count remains 486 and is still the active strict-null schema-contract lane.
 
 ## Verification
 

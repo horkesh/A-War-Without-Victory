@@ -7,6 +7,8 @@ const RETAINED_40W_RUN = join(
     'runs',
     'apr1992_definitive_40w__3649b3861a87e6ea__w40_n1864',
 );
+const RETAINED_40W_SUMMARY = join(RETAINED_40W_RUN, 'run_summary.json');
+const RETAINED_40W_REPLAY = join(RETAINED_40W_RUN, 'replay_save_sequence.json');
 
 const WATCH_WINDOWS = [10, 20, 30, 40] as const;
 const WATCH_OSIDS = {
@@ -41,13 +43,13 @@ function getControllers(frame: unknown): Record<string, string> {
 }
 
 describe('supply sensitive-history smoke against retained 40w artifact', () => {
-    it.skipIf(!existsSync(RETAINED_40W_RUN))(
+    it.skipIf(!existsSync(RETAINED_40W_SUMMARY) || !existsSync(RETAINED_40W_REPLAY))(
         'keeps Srebrenica, Zepa, Gorazde, and Bihac supply windows unchanged when retained artifact is present',
         () => {
-            const summary = readJson(join(RETAINED_40W_RUN, 'run_summary.json')) as { final_state_hash?: string };
+            const summary = readJson(RETAINED_40W_SUMMARY) as { final_state_hash?: string };
             expect(summary.final_state_hash).toBe('c0d8212847398b8f');
 
-            const frames = readJson(join(RETAINED_40W_RUN, 'replay_save_sequence.json')) as unknown[];
+            const frames = readJson(RETAINED_40W_REPLAY) as unknown[];
             expect(frames.length).toBeGreaterThanOrEqual(40);
 
             for (const week of WATCH_WINDOWS) {

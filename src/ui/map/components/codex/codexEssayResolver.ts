@@ -1,6 +1,7 @@
 import type { ComparisonResult } from '../../../../sim/endgame/endgame_comparison.js';
 import type { CostLedger, CostLedgerAnnotation, CostLedgerFinding } from '../../../../sim/endgame/cost_ledger.js';
 import { strictCompare } from '../../../../state/validateGameState.js';
+import type { Locale } from '../../i18n';
 import { formatHistoricalDivergenceNote } from '../../data/historicalDivergenceNotes.js';
 
 export interface DynamicSection {
@@ -9,6 +10,11 @@ export interface DynamicSection {
     insert_after_paragraph?: number;
     variant?: 'note' | 'divergence' | 'ghost';
     content: string;
+    localizations?: {
+        bcs?: {
+            content?: string;
+        };
+    };
 }
 
 export interface EssayEntry {
@@ -24,6 +30,15 @@ export interface EssayEntry {
     ghost_when?: string;
     ghost_summary?: string;
     dynamic_sections?: DynamicSection[];
+    localizations?: {
+        bcs?: {
+            title?: string;
+            category?: string;
+            content?: string;
+            ghost_summary?: string;
+            sources?: string[];
+        };
+    };
 }
 
 export interface CodexRenderContext {
@@ -43,7 +58,21 @@ export interface ResolvedEssayParagraph {
 export interface ResolvedEssay {
     isUnlocked: boolean;
     isGhost: boolean;
+    title: string;
+    category: string;
+    sources?: string[];
     paragraphs: ResolvedEssayParagraph[];
+}
+
+type EssayBcsLocalization = NonNullable<EssayEntry['localizations']>['bcs'];
+type DynamicSectionBcsLocalization = NonNullable<DynamicSection['localizations']>['bcs'];
+
+function localizedEssay(essay: EssayEntry, locale: Locale): EssayBcsLocalization | undefined {
+    return locale === 'bcs' ? essay.localizations?.bcs : undefined;
+}
+
+function localizedSection(section: DynamicSection, locale: Locale): DynamicSectionBcsLocalization | undefined {
+    return locale === 'bcs' ? section.localizations?.bcs : undefined;
 }
 
 function tokenizeCondition(condition: string): string[] {
@@ -467,25 +496,35 @@ function interpolateDynamicContent(content: string, context: CodexRenderContext)
     });
 }
 
-function ghostSummary(essay: EssayEntry): string {
+function ghostSummary(essay: EssayEntry, locale: Locale): string {
+    const localized = localizedEssay(essay, locale)?.ghost_summary;
+    if (localized && localized.trim().length > 0) {
+        return localized.trim();
+    }
     if (essay.ghost_summary && essay.ghost_summary.trim().length > 0) {
         return essay.ghost_summary.trim();
     }
-    return 'This historical entry remained unrealized in your war.';
+    return locale === 'bcs'
+        ? 'Ovaj historijski zapis ostao je neostvaren u vasem ratu.'
+        : 'This historical entry remained unrealized in your war.';
 }
 
-export function resolveCodexEssay(essay: EssayEntry, context: CodexRenderContext): ResolvedEssay {
+export function resolveCodexEssay(essay: EssayEntry, context: CodexRenderContext, locale: Locale = 'en'): ResolvedEssay {
+    const localized = localizedEssay(essay, locale);
+    const title = localized?.title?.trim() || essay.title;
+    const category = localized?.category?.trim() || essay.category;
+    const sources = localized?.sources && localized.sources.length > 0 ? localized.sources : essay.sources;
     const eventUnlocked = context.firedEventIds.has(essay.event_id);
     const isGhost = !eventUnlocked && evaluateEssayCondition(essay.ghost_when, context);
     const isUnlocked = eventUnlocked || isGhost;
     if (!isUnlocked) {
-        return { isUnlocked: false, isGhost: false, paragraphs: [] };
+        return { isUnlocked: false, isGhost: false, title, category, sources, paragraphs: [] };
     }
 
-    const canonicalParagraphs = splitParagraphs(essay.content);
+    const canonicalParagraphs = splitParagraphs(localized?.content ?? essay.content);
     const paragraphs: ResolvedEssayParagraph[] = [];
     if (isGhost) {
-        paragraphs.push({ kind: 'ghost', text: ghostSummary(essay), variant: 'ghost' });
+        paragraphs.push({ kind: 'ghost', text: ghostSummary(essay, locale), variant: 'ghost' });
     }
 
     const dynamicInsertions = new Map<number, ResolvedEssayParagraph[]>();
@@ -494,7 +533,8 @@ export function resolveCodexEssay(essay: EssayEntry, context: CodexRenderContext
         if (!section || typeof section.content !== 'string') continue;
         if (section.condition && !evaluateEssayCondition(section.condition, context)) continue;
 
-        const renderedParagraphs = splitParagraphs(interpolateDynamicContent(section.content, context))
+        const content = localizedSection(section, locale)?.content ?? section.content;
+        const renderedParagraphs = splitParagraphs(interpolateDynamicContent(content, context))
             .map((text) => ({
                 kind: 'dynamic' as const,
                 text,
@@ -525,6 +565,9 @@ export function resolveCodexEssay(essay: EssayEntry, context: CodexRenderContext
     return {
         isUnlocked: true,
         isGhost,
+        title,
+        category,
+        sources,
         paragraphs,
     };
 }

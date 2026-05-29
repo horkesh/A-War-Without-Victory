@@ -1244,7 +1244,7 @@ describe('sector frontline contiguity repro', () => {
                     'op:test:e1': 'RBiH',
                     'op:test:e2': 'RBiH',
                 },
-            } as GameState['political'],
+            } as unknown as GameState['political'],
             displacement: {} as GameState['displacement'],
         } as GameState;
 

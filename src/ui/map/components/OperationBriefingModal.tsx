@@ -12,6 +12,7 @@ import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
 import { OrderInterpretationSection } from './army_hq/OrderInterpretationSection';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
+import { t } from '../i18n';
 import { deriveOperationOutcomeCategory, deriveRecommendationExplanation, deriveDelegationContext, deriveOrderInterpretation, deriveInterventionRisk } from '../data/command_strain';
 import type { RecommendationExplanation, ReadinessTrend, DelegationContext } from '../data/command_strain';
 import { COMMAND_AUTHORITY_RECOVERY_PER_TURN, FORCE_LAUNCH_COST } from '../utils/commandAuthority';
@@ -37,7 +38,7 @@ function ReadinessBar({ label, value, thresholdLabel }: { label: string; value: 
         <div className="mb-2">
             <div className="flex justify-between text-[9px] mb-0.5">
                 <span className="uppercase font-bold text-neutral-600">{label}</span>
-                <span className="text-neutral-500">{pct}%{thresholdLabel ? ` (need ${thresholdLabel})` : ''}</span>
+                <span className="text-neutral-500">{pct}%{thresholdLabel ? ` (${t('operationBriefing.need', { threshold: thresholdLabel })})` : ''}</span>
             </div>
             <div className="h-2 bg-panel-border rounded-sm overflow-hidden">
                 <div className={`h-full ${color} transition-all`} style={{ width: `${pct}%` }} />
@@ -49,13 +50,13 @@ function ReadinessBar({ label, value, thresholdLabel }: { label: string; value: 
 function AssessmentBadge({ assessment }: { assessment?: string }) {
     switch (assessment) {
         case 'launch':
-            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-green-950/40 text-green-200 border border-green-500/50">Recommends Launch</span>;
+            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-green-950/40 text-green-200 border border-green-500/50">{t('operationBriefing.recommendsLaunch')}</span>;
         case 'postpone':
-            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-950/40 text-amber-200 border border-amber-500/50">Recommends Postpone</span>;
+            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-950/40 text-amber-200 border border-amber-500/50">{t('operationBriefing.recommendsPostpone')}</span>;
         case 'abort':
-            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-red-950/40 text-red-200 border border-red-500/50">Recommends Abort</span>;
+            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-red-950/40 text-red-200 border border-red-500/50">{t('operationBriefing.recommendsAbort')}</span>;
         default:
-            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-panel-card text-text-muted border border-panel-border">Pending Assessment</span>;
+            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-panel-card text-text-muted border border-panel-border">{t('operationBriefing.pendingAssessment')}</span>;
     }
 }
 
@@ -66,8 +67,8 @@ function AssessmentBadge({ assessment }: { assessment?: string }) {
 function ForceLaunchBadge({ caCost }: { caCost: number }) {
     return (
         <div className="mx-4 mt-3 mb-1 px-3 py-1.5 border border-amber-400/40 bg-amber-950/30 flex items-center gap-2">
-            <span className="text-[10px] uppercase font-bold tracking-wider text-amber-200">Presidential Override — Direct Intervention</span>
-            <span className="text-[9px] text-amber-300" style={{ opacity: 0.7 }}>Cost: {caCost} CA</span>
+            <span className="text-[10px] uppercase font-bold tracking-wider text-amber-200">{t('operationBriefing.presidentialOverride')}</span>
+            <span className="text-[9px] text-amber-300" style={{ opacity: 0.7 }}>{t('operationBriefing.costCa', { cost: caCost })}</span>
         </div>
     );
 }
@@ -87,51 +88,51 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
     return (
         <div className="mx-4 mt-3 mb-1 border border-panel-border bg-panel-card/70">
             <div className="px-3 py-1.5 border-b border-panel-border bg-panel-card">
-                <span className="text-[9px] uppercase font-bold tracking-wider text-neutral-600">Command Record</span>
+                <span className="text-[9px] uppercase font-bold tracking-wider text-neutral-600">{t('operationBriefing.commandRecord')}</span>
             </div>
             <div className="px-3 py-2 space-y-1">
                 <div className="flex items-center gap-2">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">Commander Recommended</span>
+                    <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.commanderRecommended')}</span>
                     <AssessmentBadge assessment={assessmentAtLaunch} />
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">Presidential Decision</span>
+                    <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.presidentialDecision')}</span>
                     {outcomeCategory === 'direct_intervention' ? (
                         <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-950/40 text-amber-200 border border-amber-400">
-                            Direct Intervention
+                            {t('operationBriefing.directIntervention')}
                         </span>
                     ) : outcomeCategory === 'reluctant_compliance' ? (
                         <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-950/30 text-amber-200 border border-amber-500/50">
-                            Approved Against Recommendation
+                            {t('operationBriefing.approvedAgainstRecommendation')}
                         </span>
                     ) : (
                         <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-green-950/40 text-green-200 border border-green-500/50">
-                            Ordinary Compliance
+                            {t('operationBriefing.ordinaryCompliance')}
                         </span>
                     )}
                 </div>
                 {/* Reluctant compliance explanation — command chain complied under presidential direction, no CA spent */}
                 {outcomeCategory === 'reluctant_compliance' && (
                     <div className="flex items-start gap-2 pt-1 border-t border-panel-border mt-1">
-                        <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0 mt-0.5">Interpretation</span>
+                        <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0 mt-0.5">{t('operationBriefing.interpretation')}</span>
                         <p className="text-[10px] text-amber-700 leading-snug">
-                            Launched against the commander's recommendation to {assessmentAtLaunch}. The command chain complied under presidential direction.
+                            {t('operationBriefing.reluctantComplianceDetail', { assessment: assessmentAtLaunch })}
                         </p>
                     </div>
                 )}
                 {/* CA cost row — only when force-launched (Direct Intervention). Reluctant compliance does NOT show CA cost: no CA was spent. */}
                 {wasForce && (
                     <div className="flex items-center gap-2">
-                        <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">Command Authority Spent</span>
+                        <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.commandAuthoritySpent')}</span>
                         <span className="text-[10px] font-mono text-amber-700">{caCost} CA</span>
                     </div>
                 )}
                 {/* Institutional strain follow-through — only when force-launched AND strain > 0 */}
                 {wasForce && corpsStrain > 0 && (
                     <div className="flex items-center gap-2 pt-1 border-t border-panel-border mt-1">
-                        <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">Command Strain</span>
+                        <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.commandStrain')}</span>
                         <span className={`text-[10px] font-mono ${corpsStrainLabel === 'compromised' ? 'text-red-700' : 'text-amber-700'}`}>
-                            {corpsStrainLabel === 'compromised' ? 'Compromised' : 'Strained'} — direct interventions have damaged this command relationship
+                            {t(corpsStrainLabel === 'compromised' ? 'operationBriefing.compromised' : 'operationBriefing.strained')} - {t('operationBriefing.strainDamageDetail')}
                         </span>
                     </div>
                 )}
@@ -241,7 +242,7 @@ function RecommendationDriverSection({ explanation }: {
 
     return (
         <div className="mx-4 my-2 px-3 py-2 border border-panel-border bg-panel-card/70">
-            <div className="text-[9px] uppercase font-bold text-neutral-500 tracking-wider mb-1">Recommendation Driver</div>
+            <div className="text-[9px] uppercase font-bold text-neutral-500 tracking-wider mb-1">{t('operationBriefing.recommendationDriver')}</div>
             <div className="flex items-start gap-2">
                 {explanation.mainBlocker && (
                     <span className="shrink-0 text-[11px] mt-px" aria-hidden="true">
@@ -298,7 +299,7 @@ function OperationConstraintContext({ assessment }: {
 
     return (
         <div className="mx-4 my-2 px-3 py-2 border border-panel-border bg-panel-card/70">
-            <div className="text-[9px] uppercase font-bold text-neutral-500 tracking-wider mb-1">Corps Constraint</div>
+            <div className="text-[9px] uppercase font-bold text-neutral-500 tracking-wider mb-1">{t('operationBriefing.corpsConstraint')}</div>
             <div className="flex items-start gap-2">
                 {badge && (
                     <span className={`shrink-0 text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 border ${badge.className}`}>
@@ -334,28 +335,28 @@ function DirectInterventionSection({ assessment, currentAuth, corpsStrain, corps
     // Wave 3: category-differentiated copy; falls back to generic when null.
     const explanation = interventionRisk
         ?? (assessment === 'abort'
-            ? 'The commander recommends aborting. Forcing launch overrides that assessment.'
-            : 'The commander recommends waiting. Forcing launch overrides that judgment.');
+            ? t('operationBriefing.fallbackAbortRisk')
+            : t('operationBriefing.fallbackPostponeRisk'));
 
     return (
         <div className="mx-4 my-3 border border-amber-400/40 bg-amber-950/30">
             <div className="px-3 py-2 border-b border-amber-400/50 bg-amber-950/40 flex items-center justify-between">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-amber-100">Direct Intervention</span>
-                <span className="text-[9px] uppercase font-bold tracking-wider text-amber-600">Level 3</span>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-amber-200">{t('operationBriefing.directIntervention')}</span>
+                <span className="text-[9px] uppercase font-bold tracking-wider text-amber-300">{t('operationBriefing.level3')}</span>
             </div>
             <div className="px-3 py-2 space-y-2">
                 {/* Compound-risk notice — silence = healthy (no notice at strain 0). */}
                 {corpsStrain > 0 && (
                     <p className="text-[10px] text-amber-100 leading-relaxed border-l-2 border-amber-500/60 pl-2 bg-amber-950/40 py-1">
-                        This corps already carries command strain ({corpsStrainLabel === 'compromised' ? 'Compromised' : 'Strained'}). A further Direct Intervention will compound institutional damage.
+                        {t('operationBriefing.compoundRisk', { strain: t(corpsStrainLabel === 'compromised' ? 'operationBriefing.compromised' : 'operationBriefing.strained') })}
                     </p>
                 )}
                 <p className="text-[10px] text-amber-100 leading-relaxed">{explanation}</p>
                 <div className="flex items-center gap-4 text-[10px] font-mono tabular-nums">
                     <span className="text-neutral-600">
-                        Command Authority: <b className="text-text-primary">{currentAuth}</b> → <b className={canAfford ? 'text-amber-200' : 'text-red-300'}>{canAfford ? remaining : currentAuth}</b> after
+                        {t('operationBriefing.commandAuthority')} <b className="text-text-primary">{currentAuth}</b> → <b className={canAfford ? 'text-amber-200' : 'text-red-300'}>{canAfford ? remaining : currentAuth}</b> {t('operationBriefing.after')}
                     </span>
-                    <span className="text-neutral-500">Cost: {FORCE_LAUNCH_COST} | Recovery: +{RECOVERY_PER_TURN}/turn</span>
+                    <span className="text-neutral-500">{t('operationBriefing.costRecovery', { cost: FORCE_LAUNCH_COST, recovery: RECOVERY_PER_TURN })}</span>
                 </div>
                 <button
                     type="button"
@@ -367,13 +368,13 @@ function DirectInterventionSection({ assessment, currentAuth, corpsStrain, corps
                             : 'bg-panel-card text-neutral-400 border-panel-border cursor-not-allowed'
                     }`}
                     title={canAfford
-                        ? `Spend ${FORCE_LAUNCH_COST} Command Authority to override the command chain`
-                        : `Insufficient Command Authority (${currentAuth}/${FORCE_LAUNCH_COST})`
+                        ? t('operationBriefing.forceLaunchTitle', { cost: FORCE_LAUNCH_COST })
+                        : t('operationBriefing.insufficientAuthority', { current: currentAuth, cost: FORCE_LAUNCH_COST })
                     }
                 >
                     {canAfford
-                        ? `Direct Intervention — Override Command Chain`
-                        : `Insufficient Command Authority (${currentAuth}/${FORCE_LAUNCH_COST})`
+                        ? t('operationBriefing.overrideCommandChain')
+                        : t('operationBriefing.insufficientAuthority', { current: currentAuth, cost: FORCE_LAUNCH_COST })
                     }
                 </button>
             </div>
@@ -469,9 +470,9 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                 {/* Header — operation name + stamp */}
                 <div className="px-4 py-3 border-b-2 border-panel-border bg-panel-card/80 relative">
                     <div className={`absolute top-1 right-3 opacity-15 font-black text-2xl -rotate-12 select-none uppercase ${assessment === 'launch' ? 'text-green-700' : assessment === 'abort' ? 'text-red-700' : 'text-amber-700'}`}>
-                        BRIEFING
+                        {t('operationBriefing.stamp')}
                     </div>
-                    <div id="operation-briefing-title" className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Operations Briefing</div>
+                    <div id="operation-briefing-title" className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">{t('operationBriefing.title')}</div>
                     <div className="text-sm font-bold mt-0.5">{operation.name}</div>
                     <div className="text-[10px] text-neutral-500">{corpsLabel} / {getPlayerSafeMilitaryFactionName(operation.faction)}</div>
                 </div>
@@ -495,11 +496,11 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                 {/* Commander info */}
                 {commander && (
                     <div className="px-4 py-2 border-b border-panel-border bg-panel-card/60">
-                        <div className="text-[9px] uppercase font-bold text-neutral-500 mb-1">Ops Commander</div>
+                        <div className="text-[9px] uppercase font-bold text-neutral-500 mb-1">{t('operationBriefing.opsCommander')}</div>
                         <div className="flex items-center gap-3">
                             <div>
                                 <div className="text-[11px] font-bold">{formatRank(commander.rank)} {commander.name}</div>
-                                <div className="text-[9px] text-neutral-500 italic">{getArchetype(commander)}</div>
+                                <div className="text-[9px] text-text-muted italic">{getArchetype(commander)}</div>
                             </div>
                             <div className="flex gap-2 text-[8px]">
                                 <span className={`font-mono ${getRatingColor(commander.competence)}`}>{formatPips(commander.competence)}</span>
@@ -511,15 +512,15 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
 
                 {/* Readiness gauges */}
                 <div className="px-4 py-3 space-y-1">
-                    <ReadinessBar label="Intelligence" value={intelConf} />
-                    <ReadinessBar label="Supply" value={supplyReady} />
+                    <ReadinessBar label={t('operationBriefing.intelligence')} value={intelConf} />
+                    <ReadinessBar label={t('operationBriefing.supply')} value={supplyReady} />
                     {operation.readiness?.cohesion != null && (
-                        <ReadinessBar label="Force Cohesion" value={operation.readiness.cohesion} />
+                        <ReadinessBar label={t('operationBriefing.forceCohesion')} value={operation.readiness.cohesion} />
                     )}
 
                     {forceBalance && (
                         <div className="flex items-center gap-2 mt-2 pt-2 border-t border-panel-border">
-                            <span className="text-[9px] uppercase font-bold text-neutral-600">Force Balance Estimate</span>
+                            <span className="text-[9px] uppercase font-bold text-neutral-600">{t('operationBriefing.forceBalanceEstimate')}</span>
                             <span className={`text-[11px] font-bold ${forceBalance.toneClass}`}>
                                 {forceBalance.label}
                             </span>
@@ -532,10 +533,10 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
 
                 {/* Assessment badge */}
                 <div className="px-4 py-2 border-t border-panel-border flex items-center gap-3">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500">Commander Assessment:</span>
+                    <span className="text-[9px] uppercase font-bold text-neutral-500">{t('operationBriefing.commanderAssessment')}</span>
                     <AssessmentBadge assessment={assessment} />
                     {postponements > 0 && (
-                        <span className="text-[8px] text-neutral-400">({postponements} prior postponement{postponements > 1 ? 's' : ''})</span>
+                        <span className="text-[8px] text-neutral-400">({t('operationBriefing.priorPostponements', { count: postponements, plural: postponements > 1 ? 's' : '' })})</span>
                     )}
                 </div>
 
@@ -591,14 +592,14 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                         onClick={onLaunch}
                         className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-green-600 hover:bg-green-700 text-white border border-green-700 transition-colors"
                     >
-                        Launch Operation
+                        {t('operationBriefing.launchOperation')}
                     </button>
                     <button
                         type="button"
                         onClick={onOrderProbe}
                         className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 transition-colors"
                     >
-                        Order Probe
+                        {t('operationBriefing.orderProbe')}
                     </button>
                     <button
                         type="button"
@@ -606,14 +607,14 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                         disabled={postponements >= 2}
                         className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-amber-950/50 hover:bg-amber-900/60 text-amber-100 border border-amber-500/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                        Postpone{postponements >= 2 ? ' (max reached)' : ''}
+                        {t('operationBriefing.postpone')}{postponements >= 2 ? ` (${t('operationBriefing.maxReached')})` : ''}
                     </button>
                     <button
                         type="button"
                         onClick={onAbort}
                         className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-red-950/50 hover:bg-red-900/60 text-red-100 border border-red-500/60 transition-colors"
                     >
-                        Abort Operation
+                        {t('operationBriefing.abortOperation')}
                     </button>
                     <div className="flex-1" />
                     <button
@@ -621,7 +622,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                         onClick={onClose}
                         className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-panel-card hover:bg-panel-border text-text-primary border border-panel-border transition-colors"
                     >
-                        Close
+                        {t('common.close')}
                     </button>
                 </div>
             </>

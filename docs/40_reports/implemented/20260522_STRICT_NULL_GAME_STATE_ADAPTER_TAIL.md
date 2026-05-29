@@ -1,6 +1,6 @@
 # Strict-Null GameStateAdapter Tail
 
-**Date:** 2026-05-22  
+**Date:** 2026-05-22
 **Commit scope:** `src/ui/map/data/GameStateAdapter.ts`, strict-null inventory guard, roadmap/ledger docs.
 
 ## Summary

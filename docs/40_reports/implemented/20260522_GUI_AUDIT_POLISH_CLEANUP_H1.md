@@ -1,6 +1,6 @@
 # GUI Audit Polish Cleanup H1
 
-**Date:** 2026-05-22  
+**Date:** 2026-05-22
 **Type:** Tactical-map / Army HQ polish cleanup from the 2026-05-22 GUI visual audit. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
 
 ## Why
@@ -26,7 +26,7 @@ The GUI visual audit Batch H included several source-level polish issues that we
 
 - Red run `npx.cmd vitest run tests\ui\gui_audit_polish_cleanup.test.ts --reporter=dot` failed before the patch because the shared command-authority module did not exist.
 - `npx.cmd vitest run tests\ui\gui_audit_polish_cleanup.test.ts --reporter=dot` passed 5/5 after the patch.
-- Focused surrounding suite `npx.cmd vitest run tests\ui\gui_audit_polish_cleanup.test.ts tests\ui\coachmark_layer.test.ts tests\ui\onboarding_track_d_consolidation.test.ts tests\command_authority_lifecycle.test.ts tests\command_authority_interpretation_review.test.ts tests\modal_migration_2.test.ts tests\ui\modal_palette_unification.test.ts tests\ui\ops_planning_target_discovery.test.ts --reporter=dot` passed 136/136.
+- Focused surrounding suite `npx.cmd vitest run tests\ui\gui_audit_polish_cleanup.test.ts tests\ui\coachmark_layer.test.ts tests\ui\onboarding_track_d_consolidation.test.ts tests\command_authority_lifecycle.test.ts tests\command_authority_interpretation_review.test.ts tests\modal_migration_2.test.ts tests\ui\modal_palette_unification.test.ts tests\ui\ops_planning_target_discovery.test.ts --reporter=dot` passed 145/145.
 - `npm.cmd run typecheck` passed.
 - `npm.cmd run desktop:map:build` passed with the repository's existing Vite warnings.
 - `git diff --check` passed.

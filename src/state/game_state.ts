@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 14 as const;
+export const CURRENT_SCHEMA_VERSION = 34 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -278,7 +278,7 @@ export interface OperationAxis {
      *  See LATE_WAR_OPERATION_COMBAT_DELIVERY_MEGA_LANE Phase C, sector_offensive_launch_helpers.ts. */
     unreachable_at_launch?: boolean;
     /** Typed diagnostic for axes that fail the opening-attack launch gate. */
-    launch_blocker?: 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective';
+    launch_blocker?: 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective' | 'insufficient_donation';
     /** Battles conducted by this axis this turn (reset each turn). */
     battles_this_turn?: number;
     /** Total battles conducted by this axis since operation start. */
@@ -358,7 +358,7 @@ export interface CorpsOperation {
     /** Dig in participating brigades when manually halted. */
     dig_in_on_halt?: boolean;
     /** Reason the operation entered recovery. */
-    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis';
+    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'insufficient_donation';
     /** Named officer commanding this operation (if any). */
     commander_officer_id?: string;
     /** True when this operation was launched from the pre-planned operations catalog
@@ -452,6 +452,85 @@ export interface CorpsOperation {
     force_quality_blocked_at_launch?: boolean;
     /** Phase 4: max axes derived from axis_coordination soft gate; 1 means single-axis only. */
     force_quality_max_axes_at_launch?: number;
+
+    // --- Army HQ Operation linkage (ADR-0005 v3.0) ---
+    /** When set, this operation is carried out as part of a faction-wide Army HQ op
+     *  (cross-corps donor pool, doubled cohesion bleed, frequency-capped). Optional
+     *  scalar — omitEmpty-safe, undefined when ENABLE_TG_ARMY_HQ_OPS is off; no schema
+     *  migration (mirrors the v2.3 tg_recent_compositions additive pattern, schema stays v34). */
+    army_hq_op_id?: ArmyHqOpId;
+}
+
+// === Tactical Group / Operational Group entity (ADR-0005 v2.0) ===
+// Canonical OG per Rulebook v0.9.0 §5.7 + Systems Manual v0.9.0 §6.3.
+// Engine internals use TG nomenclature per ADR-0005 decision #18.
+// ADR-0006 separately handles STANDING OGs (corps_front_sectors); these types
+// model TEMPORARY OGs/TGs for offensive operations.
+
+/** Tactical Group identifier. Format: "tg:<corps_id>:<op_id>:<anchor_brigade_id>". */
+export type TgId = string;
+
+/** Army HQ Operation identifier. Format: "ahq:<faction_id>:<scenario_year>:<op_name>". */
+export type ArmyHqOpId = string;
+
+/** TG lifecycle status. */
+export type TgStatus = 'forming' | 'engaged' | 'recovering' | 'dissolved';
+
+/** Per-donor contribution within a TG. See ADR-0005 §Schema. */
+export interface TgDonorContribution {
+    brigade_id: FormationId;
+    source_corps_id: FormationId;
+    /** BFS hops anchor→donor at TG formation; frozen for determinism. */
+    distance_hops: number;
+    personnel_lent: number;
+    heavy_equipment_lent: { tanks: number; artillery: number; aa_systems: number };
+    /** Per-brigade casualty tally (ADR-0005 Hard Invariant #3); pro-rata bookkeeping. */
+    casualties_so_far: number;
+    equipment_losses_so_far: { tanks: number; artillery: number; aa_systems: number };
+    /** Cohesion bleed applied at ready→execution; locked 8 turns. */
+    cohesion_bleed_applied: number;
+}
+
+/** Canonical Operational Group entity (engine TG naming), primary offensive
+ *  ops construct under ADR-0005 v2.0+. Schema-stable from v19; v2.0 ships the
+ *  shape with empty defaults; v2.2 lights it up via sub-flags. */
+export interface TacticalGroup {
+    id: TgId;
+    /** Anchor brigade's parent corps; ownership backref. */
+    corps_id: FormationId;
+    /** Associated CorpsOperation.id, or ArmyHqOpId for faction-scope ops. */
+    op_id: string;
+    /** When set, this TG is part of an Army HQ op (faction-scope donor pool). */
+    army_hq_op_id?: ArmyHqOpId;
+    anchor_brigade_id: FormationId;
+    /** Pre-sorted by brigade_id (strictCompare) for determinism. */
+    donor_contributions: TgDonorContribution[];
+    /** Mirrors anchor.location_osid. */
+    location_osid: string;
+    status: TgStatus;
+    formed_on_turn: number;
+    dissolved_on_turn?: number;
+    /** OG cohesion per canon §6.3; drains per-turn. */
+    cohesion: number;
+}
+
+/** Faction-wide cross-corps offensive entity (Krivaja-95, Farz 95
+ *  pattern). Capped at most once per year per faction per ADR-0005 §Army HQ
+ *  Operations. v2.0 scaffold; v3.0 wires triggers + pipeline step. */
+export interface ArmyHqOperation {
+    id: ArmyHqOpId;
+    faction_id: FactionId;
+    name: string;
+    /** Corps owning the anchor brigade. */
+    anchor_corps_id: FormationId;
+    /** Same-faction corps with eligible brigades; cross-corps regardless of adjacency. */
+    donor_corps_ids: FormationId[];
+    /** Active TG carrying out the op (set at TG formation). */
+    tg_id?: TgId;
+    status: 'queued' | 'planning' | 'executing' | 'recovering' | 'completed';
+    formed_on_turn: number;
+    /** floor((started_turn - 1) / 52); for the once-per-year gate. */
+    scenario_year: number;
 }
 
 /** Independent sector stances — each sector can differ from its corps stance. */
@@ -766,6 +845,44 @@ export interface FormationState {
     war_story?: BrigadeWarStory;
     /** Corps/Army aggregate combat summary — computed each war turn from subordinate brigade_histories. */
     combat_summary?: CombatSummary;
+
+    // --- Fall-1995 mechanics (corps-level only — used when kind === 'corps') ---
+    /**
+     * Corps operational coordination coherence [0,1]. Default 1.0 (full coherence).
+     * Decays under multi-front simultaneous pressure, adjacent-OSID losses, severed C2
+     * (NATO Deliberate Force / similar), and parallel-command-crisis events.
+     * Thresholds:
+     *  - < 0.7: corps cannot launch new offensive ops
+     *  - < 0.5: brigades cannot be assigned to defend OSIDs > 1 hop from current location
+     *  - < 0.3: corps "fragments" — brigades retreat independently
+     * Models the operational-level coordination failure that destroyed VRS 2KK in Sept 1995
+     * (per `docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md` §3 E-B1).
+     */
+    coordination_coherence?: number;
+    /**
+     * Strategic depth [0,1]. Default 1.0. Computed from friendly-adjacent municipalities,
+     * distance to nearest non-friendly front, and partner-force presence (e.g. SVK arc for
+     * VRS 2KK pre-Storm). Storm event drops 2KK strategic_depth ~0.7 → ~0.1.
+     * Used as input to coordination_coherence decay rate. See synthesis §3 E-B3.
+     */
+    strategic_depth?: number;
+    // === Tactical Group donor accounting (ADR-0005 v2.0) ===
+    // Current donation state — cleared on TG dissolution. Sum of values must
+    // never exceed brigade.personnel. effectivePersonnel = personnel - sum(values).
+    /** Personnel currently lent out to one or more TGs. Hard Invariant #1: at most one TG per brigade. */
+    personnel_lent_by_tg?: Record<TgId, number>;
+    /** Heavy equipment currently lent out to TGs. */
+    equipment_lent_by_tg?: Record<TgId, { tanks: number; artillery: number; aa_systems: number }>;
+    /** Absolute turn count after which brigade is eligible to donate again
+     *  (Hard Invariant #2: TG_DONOR_COOLDOWN_TURNS = 6). */
+    tg_cooldown_until_turn?: number;
+    /** Per-scenario donation count (anti-fire-hose cap; max MAX_DONATIONS_PER_SCENARIO = 6). */
+    tg_donations_this_scenario?: number;
+    /** ADR-0005 v3.0 Phase D: absolute turn until which POSITIVE ambient cohesion drift is
+     *  suppressed for a donor on an Army HQ op (recovery-suppression Pyrrhic cost). Never
+     *  clamps below the faction floor; only zeroes upward drift. Set at TG formation; gated
+     *  by ENABLE_TG_ARMY_HQ_OPS so flag-off leaves cohesion_drift byte-identical. */
+    tg_recovery_suppressed_until_turn?: number;
 }
 
 export interface FrontPostureAssignment {
@@ -884,6 +1001,17 @@ export interface PendingConvoyDecision {
     decision?: 'allow' | 'block' | 'divert';
 }
 
+export interface ConvoyDecisionRecord {
+    id: string;
+    turn: number;
+    target_enclave: string;
+    route_faction: FactionId;
+    target_faction: FactionId;
+    supply_amount: number;
+    decision: 'allow' | 'block' | 'divert';
+    decided_by: 'player' | 'bot';
+}
+
 /** Paramilitary deployment request for a rear enemy pocket. */
 export interface ParamilitaryRequest {
     /** Target OSID to capture. */
@@ -896,6 +1024,30 @@ export interface ParamilitaryRequest {
     estimated_civilian_risk?: number;
     /** Player decision: 'allow' deploys paramilitary, 'deny' skips, 'regular' flags for corps priority. */
     decision?: 'allow' | 'deny' | 'regular';
+}
+
+export interface ParamilitaryDecisionRecord {
+    id: string;
+    turn: number;
+    target_osid: string;
+    faction: FactionId;
+    strength: number;
+    decision: 'allow' | 'deny' | 'regular';
+    estimated_civilian_risk?: number;
+}
+
+export interface OfficerDecisionRecord {
+    id: string;
+    turn: number;
+    faction: FactionId;
+    event_id: string;
+    event_type: string;
+    officer_id: string;
+    current_commander_id?: string;
+    corps_id?: string;
+    decision: 'acknowledged' | 'override_confirmed' | 'replacement_accepted';
+    new_officer_id?: string;
+    outgoing_officer_id?: string;
 }
 
 export type MunicipalitySupportType =
@@ -1206,7 +1358,7 @@ export interface RbihHrhbState {
      *   the W1-W6 (diplomatic) or P1-P3 (patron-override) gates clearing. The
      *   timing is emergent from gameplay state and may differ from the
      *   historical date.
-     * - The CALENDAR event `washington_agreement_1994` (in
+     * - The CALENDAR event `hrhb_washington_agreement_1994` (in
      *   `state.military.event_last_fired_turn`) fires on a fixed historical
      *   schedule (~w101 from April 1992 = March 18, 1994) regardless of state.
      *
@@ -1348,6 +1500,11 @@ export interface StateMeta {
     operation_storm_turn?: number;
     /** War phase §6.3: HV brigades have been spawned (one-shot flag, set after Washington + delay). */
     hv_brigades_spawned?: boolean;
+    /** Synthesis §3 E-B3: Cross-border Republic of Serbian Krajina (SVK) partner
+     *  presence. True from scenario init until Operation Storm fires (~turn 154);
+     *  then set false by the operation_storm_1995 event. Consumed by
+     *  strategic_depth.computeStrategicDepth for VRS 2nd Krajina Corps. */
+    svk_corps_active?: boolean;
     /** Peace-phase §4.8 (historical fidelity): Earliest turn when RBiH–HRHB open war can begin. When turn < this value, RBiH–HRHB treated as allied for flips and alliance cannot drop below ALLIED_THRESHOLD. Default 26 when absent (October 1992 for April 1992 start). */
     rbih_hrhb_war_earliest_turn?: number | null;
     /** Peace-phase §4.8: When false, alliance value is not updated (RBiH–HRHB remain at init_alliance_rbih_hrhb). Set from scenario.enable_rbih_hrhb_dynamics. */
@@ -1847,6 +2004,8 @@ export interface GameState {
     paramilitary_policy?: 'always_allow' | 'always_deny' | 'ask';
     /** Cumulative count of paramilitary deployments per faction (for consequence scaling). */
     paramilitary_deployment_count?: Record<FactionId, number>;
+    /** Filed paramilitary authorization decisions for player-facing consequence records. */
+    paramilitary_decision_history?: ParamilitaryDecisionRecord[];
     military: MilitaryState;
     political: PoliticalState;
     displacement: DisplacementDomainState;
@@ -1927,6 +2086,22 @@ export interface CorpsFrontSubSegment {
 /** Civilian casualties from displacement (killed, fled abroad) per faction (ethnicity-aligned). */
 export interface CivilianCasualtiesByFaction {
     [factionId: string]: { killed: number; fled_abroad: number };
+}
+
+/** Audit trail entry for event causality (enables / closes / mutex / overflow / flag-open / flag-close).
+ *  Phase B Sub-slice B2: shape only — no writer wired yet (Sub-slice B3 lands the
+ *  writer surface in `evaluate_events.ts` / `resolve_decision.ts` / `apply_effects.ts`).
+ *  Determinism: log must be sorted at read per
+ *  (turn, from_event, to_event ?? '', to_flag ?? '', kind, source_response_id ?? '')
+ *  via `strictCompare`. See packet
+ *  `docs/40_reports/proposals/20260527_EVENT_DATABASE_RUNTIME_SEMANTICS_PACKET.md` §2.3, §3.4, §3.7. */
+export interface CausalityLogEntry {
+    turn: number;
+    from_event: string;
+    to_event: string | null;
+    to_flag: string | null;
+    kind: 'enables' | 'closes' | 'opens_flag' | 'closes_flag' | 'mutex_suppressed' | 'overflowed';
+    source_response_id?: string;
 }
 
 export interface MilitaryState {
@@ -2053,6 +2228,13 @@ sector_combat_ratings?: Record<string, SectorCombatRating>;
 sector_intel?: Record<string, SectorIntelRecord[]>;
 /** Home distance cache: formationId → BFS hop distance from home_osid to location_osid. Derived each turn. */
 home_distance_cache?: Record<string, number>;
+/** Fall-1995 mechanic E-A3 (multi-axis simultaneity penalty): count of active
+ *  enemy offensive CorpsOperations (phase==='execution') whose objectives
+ *  include at least one OSID currently controlled by this defender corps's
+ *  faction. Built turn-start in `war_phases.ts` before combat resolution;
+ *  read in `combat_math.ts` `computeDefenderPowerBreakdown`. Keyed by defender
+ *  corps FormationId. Derived each turn (transient cache; safe to drop). */
+active_offensives_against_corps?: Record<FormationId, number>;
 /** Player-issued permanent sector assignments. Overrides bot assignment in classifyBrigadesByTerritory.
  *  Keyed by brigadeId → sector_id. Persists until manually cleared. */
 brigade_sector_override?: Record<string, string>;
@@ -2066,6 +2248,8 @@ named_officers?: Record<string, import('./officer_types.js').NamedOfficerState>;
 airdrop_allocation?: Record<string, number>;
 /** Pending convoy choices generated by IVP/enclave state. */
 pending_convoy_decisions?: PendingConvoyDecision[];
+/** Filed humanitarian convoy decisions for player-facing consequence records. */
+convoy_decision_history?: ConvoyDecisionRecord[];
 /** Player-entered smuggling split by enclave id. */
 smuggling_allocation?: Record<string, { type: 'ammo' | 'food'; amount: number }>;
 /** One-turn municipality-targeted local support orders for asymmetric Phase E player agency. */
@@ -2105,7 +2289,7 @@ last_gathering_turn?: Record<string, number>;
  * Bounded by trim policy (A3 owns trim/GC). Entries sorted by turn ascending
  * for deterministic serialization.
  */
-army_co_decision_traces?: Record<string, Array<{
+army_co_decision_traces: Record<string, Array<{
     turn: number;
     campaign_role: string;
     rationale: string;
@@ -2125,7 +2309,8 @@ army_co_decision_traces?: Record<string, Array<{
  * Reader: briefing.ts → `assembleCampaignIntent` overlays
  * `frontPriority.role` → `briefing.campaign_role`. Faction-symmetric mechanism;
  * faction-asymmetric data lands via B2 leader profiles → B1 producer → A3
- * verb-translation. Backward-compatible with pre-C1 saves (always optional).
+ * verb-translation. Required as of save schema v10; legacy saves migrate this
+ * top-level record to `{}`. Nested directive metadata remains optional.
  *
  * Env flag `C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED=true` short-circuits
  * BOTH the persist path (A3) and the read path (briefing) for byte-stable A/B.
@@ -2135,7 +2320,7 @@ army_co_decision_traces?: Record<string, Array<{
  * `{corps_id, role: 'primary'|'secondary'|'economy'|'contain', deviated: boolean}`
  * plus optional directive vocabulary metadata.
  */
-army_corps_directives_by_faction?: Record<string, Record<string, {
+army_corps_directives_by_faction: Record<string, Record<string, {
     corps_id: string;
     role: 'primary' | 'secondary' | 'economy' | 'contain';
     /** Optional political directive intensity copied through from A3. */
@@ -2162,6 +2347,8 @@ army_corps_directives_by_faction?: Record<string, Record<string, {
 elite_brigade_tracker?: Record<string, EliteBrigadeTracker>;
 /** Pending officer personnel events for player notification (new arrivals, suggested replacements). */
 pending_officer_events?: import('./officer_types.js').PendingOfficerEvent[];
+/** Filed officer/personnel decisions for Records/Desk consequence trail. */
+officer_decision_history?: OfficerDecisionRecord[];
 /** Average competence of active officers per faction (updated each turn). */
 faction_officer_maturity?: Record<string, number>;
 /** Warlord friction events (low-reliability commanders ignoring orders). */
@@ -2169,11 +2356,38 @@ friction_events?: import('../sim/combat/warlord_friction.js').FrictionEvent[];
 /** Negotiation capital, patron relationships, peace plan history. */
 negotiation?: import('./negotiation_types.js').NegotiationState;
 /** Event IDs that have already fired (prevents re-fire for once-only events). */
-fired_event_ids?: string[];
+fired_event_ids: string[];
+/** Event IDs delayed only by the per-turn event cap. Re-evaluated before new candidates. */
+event_overflow_queue?: string[];
 /** Pending event decisions awaiting player response. */
 pending_event_decisions?: import('../sim/events/event_types.js').PendingEventDecision[];
+/** Structured audit trail of every event-decision resolution — bot or player.
+ *  Append-only; one entry per resolution. Distinguishes the three pick paths
+ *  (`bot_political`, `bot_v1`, `player`) so replay + Chronicle UI can show
+ *  "VRS chose `aggressive` branch on turn 1 for rs_strategic_goals". The
+ *  existing `fired_events[]` records that the event fired; this records WHICH
+ *  option won. Writers: `recordEventDecision` in evaluate_events.ts (bot paths)
+ *  and resolve_decision.ts (player path). Reader: Chronicle / audit surfaces. */
+event_decision_log: Array<{
+    event_id: string;
+    response_id: string;
+    decision_source: 'bot_political' | 'bot_v1' | 'bot_ai_default' | 'player';
+    faction: FactionId | null;
+    turn: number;
+}>;
 /** Informational event notifications for non-source factions. Never blocks turn advance. */
 pending_event_notifications?: import('../sim/events/event_types.js').EventNotification[];
+/** Event ids explicitly foreclosed by a player or bot decision response.
+ *  Sorted, deduped, deterministic. Phase B Sub-slice B2: shape only — no
+ *  writer/reader wired yet (Sub-slice B3 lands eligibility short-circuit
+ *  + recordClosedEvents helper). See packet
+ *  `docs/40_reports/proposals/20260527_EVENT_DATABASE_RUNTIME_SEMANTICS_PACKET.md` §2.3, §3.2. */
+closed_event_ids?: string[];
+/** Audit trail for event causality (enables/closes/mutex/overflow).
+ *  Sorted on read per (turn, from_event, to_event ?? '', to_flag ?? '',
+ *  kind, source_response_id ?? ''). Phase B Sub-slice B2: shape only —
+ *  no writer wired yet (Sub-slice B3). See packet §2.3, §3.4, §3.7. */
+event_causality_log?: CausalityLogEntry[];
 /** Temporary aggression modifiers from events (e.g. VRS fury after barracks seizure). Expires after duration_turns. */
 event_aggression_modifiers?: Array<{ faction: string; delta: number; expires_turn: number }>;
 // ─── v0.9.0 Consequence System state (Phase 1 Session 1) ─────────────────
@@ -2202,6 +2416,27 @@ equipment_quality_modifiers?: Array<{
     multiplier: number;
     expires_turn: number;
 }>;
+/** Fall-1995 mechanic E-A4: cascade-pressure penalties on OSIDs adjacent to a
+ *  just-lost OSID. Applied one turn after a control flip; defender power on these
+ *  OSIDs is multiplied by `multiplier` (typically 0.85) until `expires_turn`.
+ *  Models the counter-clockwise collapse pattern (VRS 2KK Sept 1995). Reader:
+ *  `getCascadePenaltyForOsid` in active_modifiers.ts. Writer: control-flip resolution
+ *  in `attack_resolution_osid.ts`. */
+cascade_penalties?: Array<{
+    osid: string;
+    multiplier: number;
+    expires_turn: number;
+}>;
+/** Fall-1995 mechanic E-A5: external-stopping-condition suppression of offensive
+ *  ops for a faction (e.g. Holbrooke's 51:49 halt at Banja Luka). When active,
+ *  the faction cannot launch new offensive operations through the planning gate.
+ *  Reader: `isFactionOffensiveOpsSuppressed` in active_modifiers.ts. Writer:
+ *  `applyOffensiveOpsSuppression` in apply_effects.ts. */
+offensive_ops_suppressions?: Array<{
+    faction: FactionId;
+    expires_turn: number;
+    reason?: string;
+}>;
 /** Active alliance floor/ceiling locks on the RBiH-HRHB alliance value. */
 alliance_locks?: Array<{
     mode: 'floor' | 'ceiling';
@@ -2217,15 +2452,24 @@ bot_priority_shifts?: Array<{
 }>;
 // v0.6.0 emergent event system state
 /** Pressure system readiness counters per event ID. */
-event_readiness?: Record<string, number>;
+event_readiness: Record<string, number>;
 /** How many times each event has fired (for recurrence tracking). */
-event_fire_counts?: Record<string, number>;
+event_fire_counts: Record<string, number>;
 /** Turn number when each event last fired (for cooldown tracking). */
-event_last_fired_turn?: Record<string, number>;
-/** Named flags set by player decisions — read by downstream events. */
-event_flags?: Record<string, string | number | boolean>;
+event_last_fired_turn: Record<string, number>;
+/** General event flag bus for event decisions, chains, and downstream event consumers. */
+event_flags: Record<string, string | number | boolean>;
 /** Event IDs unlocked by event chains (enables_events). */
-enabled_event_ids?: string[];
+enabled_event_ids: string[];
+/** Phantom brigade IDs that have ever been spawned by `spawnJnaPhantomBrigades`.
+ *  Prevents re-spawn after withdrawal — when a phantom withdraws, its formation
+ *  entry is removed from `formations[]` entirely, so the spawn function's
+ *  `if (formations[def.id])` skip-check fails on subsequent turns and would
+ *  re-spawn (and JNA phantoms with `capture_osids` would re-flip controllers).
+ *  This marker is the canonical "has been spawned" set. Append-only; never
+ *  cleared. See `docs/40_reports/proposals/20260523_HV_EXPEDITIONARY_GHOST_DESIGN.md`
+ *  + n2004 regression diagnosis. */
+phantoms_spawned: string[];
 /** Event-imposed constraints on military operations. */
 event_constraints?: import('../sim/events/event_constraints.js').EventConstraints;
 /** AI commander decision log for replay determinism. */
@@ -2258,6 +2502,29 @@ cost_ledger_annotations?: Array<{
     /** Optional faction subject when the annotation is faction-scoped. */
     faction?: FactionId;
 }>;
+// === Tactical Group state (ADR-0005 v2.0) ===
+// v2.0 ships empty defaults via the v34 migration; v2.2 sub-flag lights it up.
+// NOTE: serializeState does NOT strip empty Records (serializeGameState only skips
+// undefined values, not empty {} objects), so the four empty Records the v34 migration
+// creates DO change the serialized final_state_hash (40w a969d44719aaa40e → 78e231e35b08cf53).
+// This is a schema scaffold only — behaviorally/calibration-neutral with flags off, NOT
+// byte-identical to the pre-v34 baseline.
+/** Active Tactical Groups (temporary OGs for offensive ops). Cleared on dissolution. */
+tactical_groups?: Record<TgId, TacticalGroup>;
+/** Army HQ Operations scaffold. v3.0 wires triggers + pipeline step. */
+army_hq_operations?: Record<ArmyHqOpId, ArmyHqOperation>;
+/** Per-faction tracking: most recent Army HQ op firing turn (52-turn cooldown gate). */
+army_hq_last_op_turn?: Record<FactionId, number>;
+/** Per-faction year-bucket Army HQ op count (year-boundary defense; 2/year ceiling). */
+army_hq_op_count_by_year?: Record<FactionId, Record<number, number>>;
+/**
+ * v2.3 (ADR-0005 Hard Invariant #9): recently-dissolved TG composition hashes →
+ * cooldown-until turn. Blocks reforming a same-composition TG (anchor + sorted donor
+ * ids) within the cooldown window via a different op_id. Written at dissolution and
+ * checked at formation, only while ENABLE_TG_COHESION_BLEED is on; stays empty/omitted
+ * (byte-identical) when the flag is off.
+ */
+tg_recent_compositions?: Record<string, number>;
 }
 
 /** Presidential command authority — the player's resource for overriding the command chain.
@@ -2315,9 +2582,9 @@ enclaves?: EnclaveState[];
 /** System 6: Sarajevo exception state. */
 sarajevo_state?: SarajevoState;
 /** Turn (inclusive) until which municipality cannot flip control; keyed by MunicipalityId. */
-war_consolidation_until?: Record<MunicipalityId, number>;
+war_consolidation_until: Record<MunicipalityId, number>;
 /** Control strain accumulated per municipality; Peace-phase §4.5. */
-war_control_strain?: Record<MunicipalityId, number>;
+war_control_strain: Record<MunicipalityId, number>;
 /** RBiH–HRHB alliance relationship [-1, 1]; Peace-phase §4.8. */
 war_alliance_rbih_hrhb?: number;
 /** Peace-phase §4.8: RBiH–HRHB bilateral state (war tracking, ceasefire, Washington Agreement). */
@@ -2325,13 +2592,13 @@ rbih_hrhb_state?: RbihHrhbState;
 /** B4: Coercion pressure [0, 1] per municipality; reduces flip threshold (makes flip easier). Scenario/init can supply (e.g. Prijedor, Zvornik). */
 coercion_pressure_by_municipality?: Record<MunicipalityId, number>;
 /** Cumulative supply pressure per faction [0, 100]; higher = worse. Live current supply readers should prefer war_supply_condition via supply_condition.ts helpers. */
-war_supply_pressure?: Record<FactionId, number>;
+war_supply_pressure: Record<FactionId, number>;
 /** Live faction supply condition [0, 100] derived from current OSID supply state; higher = better. */
-war_supply_condition?: Record<FactionId, number>;
+war_supply_condition: Record<FactionId, number>;
 /** Faction-level exhaustion (monotonic, irreversible). Engine Invariants §8. */
-war_exhaustion?: Record<FactionId, number>;
+war_exhaustion: Record<FactionId, number>;
 /** Optional local (per-settlement) exhaustion accumulator; monotonic when present. */
-war_exhaustion_local?: Record<SettlementId, number>;
+war_exhaustion_local: Record<SettlementId, number>;
 /** Enclave resilience per enclave ID. Phase C: EnclaveResilienceEntry; old saves: bare number. */
 enclave_resilience?: Record<string, number | EnclaveResilienceEntry>;
 /** Phase 0 event log: array of per-turn event arrays. Index = turn number. */
@@ -2381,26 +2648,26 @@ graz_east_herzegovina_active_turn?: number;
 }
 
 export interface DisplacementDomainState {
-displacement_state?: Record<MunicipalityId, DisplacementState>;
+displacement_state: Record<MunicipalityId, DisplacementState>;
 /** War phase: delayed hostile takeover timers (per OSID). */
-hostile_takeover_timers?: Record<string, HostileTakeoverTimerState>;
+hostile_takeover_timers: Record<string, HostileTakeoverTimerState>;
 /** War phase: temporary camp holding pools before rerouting (per municipality). */
-displacement_camp_state?: Record<MunicipalityId, DisplacementCampState>;
+displacement_camp_state: Record<MunicipalityId, DisplacementCampState>;
 /** War phase: non-takeover minority flight state (per settlement). Canon: displacement redesign 2026-02-17. */
-minority_flight_state?: Record<SettlementId, MinorityFlightStateEntry>;
+minority_flight_state: Record<SettlementId, MinorityFlightStateEntry>;
 /** Cumulative displacement event log, sorted by (turn, origin_mun). */
-displacement_event_log?: DisplacementEvent[];
-sustainability_state?: Record<MunicipalityId, SustainabilityState>;
+displacement_event_log: DisplacementEvent[];
+sustainability_state: Record<MunicipalityId, SustainabilityState>;
 /** Peace-phase §4.4: displacement initiated turn per municipality (hook only; no population change). */
-war_displacement_initiated?: Record<MunicipalityId, number>;
+war_displacement_initiated: Record<MunicipalityId, number>;
 /** Settlement-level displacement (capacity degradation) [0, 1]. Monotonic; never decreases. */
-settlement_displacement?: Record<SettlementId, number>;
+settlement_displacement: Record<SettlementId, number>;
 /** Turn when displacement began at this settlement (optional; for reporting only). */
-settlement_displacement_started_turn?: Record<SettlementId, number>;
+settlement_displacement_started_turn: Record<SettlementId, number>;
 /** Municipality-level displacement (capacity degradation) [0, 1]. Monotonic; never decreases. */
-municipality_displacement?: Record<MunicipalityId, number>;
+municipality_displacement: Record<MunicipalityId, number>;
 /** Cumulative civilian displacement casualties (killed, fled_abroad) by ethnicity-aligned faction. */
-civilian_casualties?: CivilianCasualtiesByFaction;
+civilian_casualties: CivilianCasualtiesByFaction;
 /**
  * Per-faction cumulative humanitarian aggregates (LANE D-PRE substrate).
  * Bounded ~3 factions x 3 ethnicities x 3 numbers = 27 numbers total
@@ -2419,7 +2686,7 @@ civilian_casualties?: CivilianCasualtiesByFaction;
  * Inner key: ethnicity ('RBiH' | 'RS' | 'HRHB' as ethnicity-aligned faction).
  * Value: cumulative counts.
  */
-displacement_humanitarian_aggregates?: Record<string, Record<string, {
+displacement_humanitarian_aggregates: Record<string, Record<string, {
     /** Sum of (displaced + killed + fled_abroad) for events caused_by this faction with this ethnicity. */
     refugees_created: number;
     /** Sum of `settled` for events whose dest_osid was controlled by this faction at append time. */
@@ -2444,7 +2711,7 @@ displacement_humanitarian_aggregates?: Record<string, Record<string, {
  *   accumulated across all turns. Only events with dest_mun !== origin_mun
  *   and settled > 0 contribute (matches consumer's filter at line 193-195).
  */
-displacement_origin_dest_arrivals?: Record<string, Record<string, number>>;
+displacement_origin_dest_arrivals: Record<string, Record<string, number>>;
 /**
  * Per-turn refugee-created totals for recent narrative windows.
  *
@@ -2456,5 +2723,5 @@ displacement_origin_dest_arrivals?: Record<string, Record<string, number>>;
  * Key: turn number serialized as an object key.
  * Value: sum of displaced + killed + fled_abroad for events on that turn.
  */
-displacement_recent_by_turn?: Record<number, number>;
+displacement_recent_by_turn: Record<number, number>;
 }

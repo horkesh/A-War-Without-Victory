@@ -3,6 +3,7 @@ import type { EnclaveResilienceView, LoadedGameState } from '../data/types';
 import { AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE, AIRDROP_MAX_SUPPLY_PER_TURN } from '../../../state/supply_reserve_constants';
 import { useIPC } from '../desktop/useIPC';
 import { getPlayerSafeEnclaveName } from '../utils/playerSafeText';
+import { t, type MessageKey } from '../i18n';
 
 interface EnclaveDashboardProps {
   state: LoadedGameState;
@@ -16,30 +17,30 @@ const SUPPLY_CLASSES: Record<'adequate' | 'strained' | 'critical', string> = {
   critical: 'text-red-400',
 };
 
-const AIRDROP_LABELS: Record<'receiving' | 'not_eligible' | 'not_isolated_long_enough', string> = {
-  receiving: 'Receiving',
-  not_eligible: 'Not eligible',
-  not_isolated_long_enough: 'Not isolated long enough',
+const AIRDROP_LABEL_KEYS: Record<'receiving' | 'not_eligible' | 'not_isolated_long_enough', MessageKey> = {
+  receiving: 'enclave.airdrop.receiving',
+  not_eligible: 'enclave.airdrop.notEligible',
+  not_isolated_long_enough: 'enclave.airdrop.notIsolatedLongEnough',
 };
 
 function getEnclaveRisk(enclave: EnclaveResilienceView) {
   if (enclave.supply_state === 'critical' || enclave.resilience <= 8) {
     return {
-      label: 'Critical risk',
-      detail: `Resilience ${enclave.resilience.toFixed(1)} with ${enclave.isolation_turns} isolated turn(s).`,
+      label: t('enclave.risk.critical'),
+      detail: t('enclave.risk.criticalDetail', { resilience: enclave.resilience.toFixed(1), turns: enclave.isolation_turns }),
       className: 'text-red-400',
     };
   }
   if (enclave.supply_state === 'strained' || enclave.isolation_turns >= 4) {
     return {
-      label: 'Heightened risk',
-      detail: `Supply is strained after ${enclave.isolation_turns} isolated turn(s).`,
+      label: t('enclave.risk.heightened'),
+      detail: t('enclave.risk.heightenedDetail', { turns: enclave.isolation_turns }),
       className: 'text-amber-300',
     };
   }
   return {
-    label: 'Holding',
-    detail: 'Current resilience and supply posture remain manageable.',
+    label: t('enclave.risk.holding'),
+    detail: t('enclave.risk.holdingDetail'),
     className: 'text-green-400',
   };
 }
@@ -76,7 +77,7 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
 
   const stageAllocations = async () => {
     const result = await ipc.stageAirdropAllocation(allocations);
-    setActionMessage(result.ok ? 'Airdrop allocation staged.' : (result.error ?? 'Failed to stage airdrop allocation.'));
+    setActionMessage(result.ok ? t('enclave.airdropStaged') : (result.error ?? t('enclave.airdropFailed')));
   };
 
   if (!open) return null;
@@ -88,7 +89,7 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
     >
       <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card border-b border-panel-border">
         <div className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-          Enclave Dashboard
+          {t('enclave.title')}
         </div>
         <button
           type="button"
@@ -102,25 +103,25 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
         {eligibleEnclaveIds.length > 0 && (
           <div className="rounded border border-panel-border bg-panel-card/70 p-3 space-y-2">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-text-secondary">Airdrop budget</span>
+              <span className="text-text-secondary">{t('enclave.airdropBudget')}</span>
               <span className="text-text-primary font-mono">{allocated.toFixed(1)} / {airdropBudget.toFixed(1)}</span>
             </div>
             <div className="h-2 rounded bg-black/30 overflow-hidden">
               <div className="h-full bg-sky-400/80" style={{ width: `${allocatedPct}%` }} />
             </div>
-            <div className="text-[10px] text-text-secondary">Remaining: {remaining.toFixed(1)}</div>
+            <div className="text-[10px] text-text-secondary">{t('enclave.remaining', { value: remaining.toFixed(1) })}</div>
             <button
               type="button"
               onClick={() => void stageAllocations()}
               className="w-full rounded border border-panel-border px-2 py-1 text-[11px] text-text-primary hover:bg-panel-hover"
             >
-              Stage Airdrop Allocation
+              {t('enclave.stageAirdropAllocation')}
             </button>
             {actionMessage && <div className="text-[10px] text-accent-gold">{actionMessage}</div>}
           </div>
         )}
         {enclaves.length === 0 ? (
-          <div className="text-xs text-text-secondary italic">No enclave data.</div>
+          <div className="text-xs text-text-secondary italic">{t('enclave.noData')}</div>
         ) : (
           enclaves.map(([enclaveId, enclave]) => {
             const resiliencePct = Math.max(0, Math.min(100, (enclave.resilience / 30) * 100));
@@ -136,11 +137,11 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                       {getPlayerSafeEnclaveName(enclave.display_name ?? enclaveId)}
                     </div>
                     <div className="text-[10px] uppercase tracking-wide text-text-secondary">
-                      {enclave.faction ?? 'Unknown'}
+                      {enclave.faction ?? t('common.unknown')}
                     </div>
                   </div>
                   <div className={`text-[11px] font-mono ${enclave.hardening_active ? 'text-accent-gold' : 'text-text-secondary'}`}>
-                    {enclave.hardening_active ? 'Hardening active' : 'Hardening inactive'}
+                    {enclave.hardening_active ? t('enclave.hardeningActive') : t('enclave.hardeningInactive')}
                   </div>
                 </div>
 
@@ -153,7 +154,7 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
 
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-text-secondary">Resilience</span>
+                    <span className="text-text-secondary">{t('enclave.resilience')}</span>
                     <span className="text-text-primary font-mono">{enclave.resilience.toFixed(1)} / 30</span>
                   </div>
                   <div className="relative h-2 rounded bg-black/30 overflow-hidden">
@@ -164,16 +165,16 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
 
                 <div className="grid grid-cols-2 gap-2 text-[11px]">
                   <div>
-                    <div className="text-text-secondary">Isolation turns</div>
+                    <div className="text-text-secondary">{t('enclave.isolationTurns')}</div>
                     <div className="text-text-primary font-mono">{enclave.isolation_turns}</div>
                   </div>
                   <div>
-                    <div className="text-text-secondary">Supply state</div>
+                    <div className="text-text-secondary">{t('enclave.supplyState')}</div>
                     <div className={`font-mono uppercase ${SUPPLY_CLASSES[supplyState]}`}>{supplyState}</div>
                   </div>
                   <div className="col-span-2">
-                    <div className="text-text-secondary">Airdrop</div>
-                    <div className="text-text-primary font-mono">{AIRDROP_LABELS[airdropStatus]}</div>
+                    <div className="text-text-secondary">{t('enclave.airdrop')}</div>
+                    <div className="text-text-primary font-mono">{t(AIRDROP_LABEL_KEYS[airdropStatus])}</div>
                   </div>
                   {eligibleEnclaveIdSet.has(enclaveId) && (
                     <div className="col-span-2">
@@ -181,7 +182,7 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                         htmlFor={`enclave-allocation-${enclaveId}`}
                         className="text-text-secondary mb-1 block"
                       >
-                        Allocated supply
+                        {t('enclave.allocatedSupply')}
                       </label>
                       <input
                         id={`enclave-allocation-${enclaveId}`}

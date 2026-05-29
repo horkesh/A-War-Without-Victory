@@ -1,6 +1,6 @@
 # Event Notification Narrative-Tone 1992 Slice
 
-**Date:** 2026-05-22  
+**Date:** 2026-05-22
 **Scope:** Phase D `notifications_to_other_factions` content backfill for the two narrative-tone 1992 foundational-decision rows.
 
 ## Summary

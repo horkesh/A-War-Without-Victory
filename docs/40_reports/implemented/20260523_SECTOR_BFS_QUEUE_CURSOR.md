@@ -1,8 +1,8 @@
 # Sector BFS Queue Cursor
 
-**Date:** 2026-05-23  
-**Status:** Implemented and locally verified  
-**Lane:** EQ-1 / sector split-pieces performance  
+**Date:** 2026-05-23
+**Status:** Implemented and locally verified
+**Lane:** EQ-1 / sector split-pieces performance
 **Scope:** Compute-only BFS queue optimization in sector splitting/building. No scenario data, combat math, operation behavior, save schema, UI, calibration, or output contract changed.
 
 ## Summary

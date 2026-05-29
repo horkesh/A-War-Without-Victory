@@ -1,6 +1,6 @@
 # GUI Audit Map Mode Shortcut Contract H3
 
-**Date:** 2026-05-22  
+**Date:** 2026-05-22
 **Type:** Tactical-map map-mode shortcut/docs contract fix from the 2026-05-22 GUI visual audit. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or map rendering layer semantics changed.
 
 ## Why

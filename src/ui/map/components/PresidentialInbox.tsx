@@ -83,9 +83,9 @@ function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) 
                         type="button"
                         onClick={onClick}
                         className="ml-auto text-[8px] font-bold uppercase tracking-widest text-text-secondary hover:text-white transition-colors"
-                        aria-label={t('inbox.notification.dismissAriaLabel')}
+                        aria-label={t('inbox.dismissIntel')}
                     >
-                        {t('inbox.notification.dismiss')}
+                        {t('inbox.dismiss')}
                     </button>
                 </div>
                 <div className="text-[11px] font-bold text-text-primary leading-tight">{item.title}</div>
@@ -116,7 +116,7 @@ function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) 
                 )}
                 {(item.updateCount ?? 1) > 1 && (
                     <span className="ml-auto text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/8 text-text-secondary border border-white/10">
-                        {t('inbox.updateChip', { count: (item.updateCount ?? 1) - 1 })}
+                        {t('inbox.updates', { count: (item.updateCount ?? 1) - 1 })}
                     </span>
                 )}
             </div>
@@ -129,11 +129,11 @@ function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) 
 function OpeningBrief({
     faction,
     onDismiss,
-    onOpenDecisionRoom,
+    onOpenDesk,
 }: {
     faction: string;
     onDismiss: () => void;
-    onOpenDecisionRoom: () => void;
+    onOpenDesk: () => void;
 }) {
     const brief = OPENING_BRIEFS[faction];
     if (!brief) return null;
@@ -156,7 +156,7 @@ function OpeningBrief({
                 <button
                     type="button"
                     onClick={() => {
-                        onOpenDecisionRoom();
+                        onOpenDesk();
                         onDismiss();
                     }}
                     className="text-[9px] font-bold uppercase tracking-widest text-accent-gold hover:text-white transition-colors"
@@ -175,19 +175,19 @@ function OpeningBrief({
     );
 }
 
-function QuietInboxCapsule({ onOpenDecisionRoom }: { onOpenDecisionRoom: () => void }) {
+function QuietInboxCapsule({ onOpenDesk }: { onOpenDesk: () => void }) {
     return (
         <div className="rounded border border-panel-border bg-panel-card/80 p-3 space-y-2">
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                     <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-accent-gold">
-                        {t('inbox.quiet.commandWatch')}
+                        {t('inbox.commandWatch')}
                     </div>
                     <div className="mt-1 text-[12px] font-bold text-text-primary">
-                        {t('inbox.quiet.noOrders')}
+                        {t('inbox.noOrders')}
                     </div>
                     <div className="mt-1 text-[10px] leading-snug text-text-secondary">
-                        {t('inbox.quiet.body')}
+                        {t('inbox.quietTurn')}
                     </div>
                 </div>
                 <div className="h-2 w-2 shrink-0 rounded-full bg-green-400/80 shadow-[0_0_10px_rgba(74,222,128,0.45)]" />
@@ -195,22 +195,22 @@ function QuietInboxCapsule({ onOpenDecisionRoom }: { onOpenDecisionRoom: () => v
             <div className="grid grid-cols-2 gap-1.5">
                 <button
                     type="button"
-                    onClick={onOpenDecisionRoom}
+                    onClick={onOpenDesk}
                     className="rounded border border-accent-gold/25 bg-accent-gold/8 px-2 py-2 text-left hover:bg-accent-gold/12 transition-colors"
                 >
                     <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-accent-gold">
-                        {t('inbox.quiet.decisionRoom')}
+                        {t('inbox.decisionRoom')}
                     </div>
                     <div className="mt-0.5 text-[10px] leading-snug text-text-secondary">
-                        {t('inbox.quiet.openDecisionRoom')}
+                        {t('inbox.openDecisionRoom')}
                     </div>
                 </button>
                 <div className="rounded border border-panel-border/80 bg-black/10 px-2 py-2">
                     <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-text-primary">
-                        {t('inbox.quiet.chronicle')}
+                        {t('inbox.chronicle')}
                     </div>
                     <div className="mt-0.5 text-[10px] leading-snug text-text-secondary">
-                        {t('inbox.quiet.chronicleDetail')}
+                        {t('inbox.latestRecordFiled')}
                     </div>
                 </div>
             </div>
@@ -264,7 +264,7 @@ export function PresidentialInbox({ onAction }: PresidentialInboxProps) {
                     <OpeningBrief
                         faction={playerFaction}
                         onDismiss={() => setBriefDismissed(true)}
-                        onOpenDecisionRoom={() => onAction('army_hq_briefing', 'opening-brief:decision-room')}
+                        onOpenDesk={() => onAction('army_hq_briefing', 'opening-brief:desk')}
                     />
                 )}
 
@@ -283,7 +283,7 @@ export function PresidentialInbox({ onAction }: PresidentialInboxProps) {
 
                 {/* Empty state */}
                 {actionableItems.length === 0 && briefDismissed && (
-                    <QuietInboxCapsule onOpenDecisionRoom={() => onAction('army_hq_briefing', 'empty:decision-room')} />
+                    <QuietInboxCapsule onOpenDesk={() => onAction('army_hq_briefing', 'empty:desk')} />
                 )}
 
                 {/* Situation divider + items */}
@@ -291,7 +291,7 @@ export function PresidentialInbox({ onAction }: PresidentialInboxProps) {
                     <>
                         <div className="border-t border-panel-border/50 pt-2 mt-2">
                             <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-text-tertiary mb-1.5">
-                                {t('inbox.section.situation')}
+                                {t('inbox.situation')}
                             </div>
                         </div>
                         <div className="space-y-1">
@@ -328,9 +328,9 @@ export function InboxBadge({ onClick }: { onClick: () => void }) {
                 type="button"
                 onClick={onClick}
                 className="text-[9px] font-bold uppercase tracking-[0.1em] text-text-secondary hover:text-text-primary transition-colors px-2 py-1"
-                title={t('inbox.badge.noPendingTitle')}
+                title={t('inbox.badgeTitleEmpty')}
             >
-                {t('inbox.badge.label')}
+                {t('inbox.title')}
             </button>
         );
     }
@@ -346,9 +346,9 @@ export function InboxBadge({ onClick }: { onClick: () => void }) {
                     ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
                     : 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30'
             }`}
-            title={t('inbox.badge.pendingTitle', { count, decisionLabel })}
+            title={t('inbox.badgeTitlePending', { count, decisionWord: t(count === 1 ? 'inbox.pendingDecision.one' : 'inbox.pendingDecision.many') })}
         >
-            {t('inbox.badge.label')} {count}
+            {t('inbox.title')} {count}
         </button>
     );
 }

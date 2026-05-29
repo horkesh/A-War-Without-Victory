@@ -19,6 +19,7 @@ import {
     getCasualtySeverityColor,
     OUTCOME_STYLES,
 } from '../plan_ui/opsConstants';
+import { t } from '../../i18n';
 
 interface RawIntelTabProps {
     prediction: PredictionResult;
@@ -116,7 +117,7 @@ export function RawIntelTab({ prediction }: RawIntelTabProps) {
             {perAxis.length > 0 && (
                 <div className="space-y-2">
                     <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-text-secondary">
-                        Per-Axis Breakdown
+                        {t('opsModal.perAxisBreakdown')}
                     </div>
                     {perAxis.map((axis) => {
                         const axisOutcome = OUTCOME_STYLES[axis.predictedOutcome];
@@ -130,8 +131,8 @@ export function RawIntelTab({ prediction }: RawIntelTabProps) {
                                     </span>
                                 </div>
                                 <div className="flex gap-3 mt-1 text-[9px] text-text-secondary">
-                                    <span>FR: <span className="text-white font-bold">{axis.forceRatio.toFixed(2)}</span></span>
-                                    <span>Def: <span className="text-white font-bold">{axis.defenseStrength.toLocaleString()}</span></span>
+                                    <span>{t('opsModal.forceRatioShort')} <span className="text-white font-bold">{axis.forceRatio.toFixed(2)}</span></span>
+                                    <span>{t('opsModal.defenseShort')} <span className="text-white font-bold">{axis.defenseStrength.toLocaleString()}</span></span>
                                 </div>
                             </div>
                         );

@@ -19,13 +19,21 @@ function getNumericDelta(effect: EventEffect): number | undefined {
 export function pickBotResponseV1(
     options: EventResponseOption[],
     logic: EventDefinition['bot_response_logic'],
-    commander: CommanderProfile
+    commander: CommanderProfile,
+    historicalDefaultResponseId?: string,
 ): EventResponseOption {
     if (options.length === 0) throw new Error('No options to pick from');
     if (options.length === 1) return options[0];
 
-    // Historical: always first option (the historical choice)
-    if (logic === 'historical' || logic === 'accept_first') return options[0];
+    if (logic === 'historical') {
+        const historicalDefault = historicalDefaultResponseId
+            ? options.find((option) => option.id === historicalDefaultResponseId)
+            : undefined;
+        return historicalDefault ?? options[0];
+    }
+
+    // accept_first is a legacy invariant: always first option.
+    if (logic === 'accept_first') return options[0];
 
     // Reject all: always last option
     if (logic === 'reject_all') return options[options.length - 1];

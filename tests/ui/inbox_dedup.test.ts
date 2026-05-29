@@ -7,7 +7,7 @@ import { deriveInboxItems } from '../../src/ui/map/data/inboxItems.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import { PresidentialInbox } from '../../src/ui/map/components/PresidentialInbox.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
-import { setLocale } from '../../src/ui/map/i18n/index.js';
+import { setLocale } from '../../src/ui/map/i18n';
 
 function makeLoadedState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
     return {
@@ -110,7 +110,7 @@ describe('Presidential Inbox officer event dedupe', () => {
         expect(onAction).toHaveBeenCalledWith('army_hq_personnel', 'officer:officer_available:ratko_mladic');
     });
 
-    it('renders a quiet-inbox decision room capsule when no decisions are pending', () => {
+    it('renders a quiet-inbox desk capsule when no decisions are pending', () => {
         const onAction = vi.fn();
         useGameStore.setState({
             loadedGameState: makeLoadedState({ turn: 12 }),
@@ -120,13 +120,31 @@ describe('Presidential Inbox officer event dedupe', () => {
 
         render(createElement(PresidentialInbox, { onAction }));
 
-        expect(screen.getByText('Decision Room')).toBeTruthy();
+        expect(screen.getByText("President's Desk")).toBeTruthy();
         expect(screen.getByText('Chronicle')).toBeTruthy();
         expect(screen.getByText('No orders are waiting on your desk.')).toBeTruthy();
         expect(screen.queryByText('No pending decisions.')).toBeNull();
 
-        fireEvent.click(screen.getByRole('button', { name: /open decision room/i }));
-        expect(onAction).toHaveBeenCalledWith('army_hq_briefing', 'empty:decision-room');
+        fireEvent.click(screen.getByRole('button', { name: /open desk/i }));
+        expect(onAction).toHaveBeenCalledWith('army_hq_briefing', 'empty:desk');
+    });
+
+    it('localizes quiet inbox shell copy in BCS mode', () => {
+        setLocale('bcs');
+        const onAction = vi.fn();
+        useGameStore.setState({
+            loadedGameState: makeLoadedState({ turn: 12 }),
+            openingBriefDismissed: true,
+            osidDisplayNames: null,
+        });
+
+        render(createElement(PresidentialInbox, { onAction }));
+
+        expect(screen.getByText('Predsjednicki inbox')).toBeTruthy();
+        expect(screen.getByText('Komandno dezurstvo')).toBeTruthy();
+        expect(screen.getByText('Na stolu nema naredbi koje cekaju vasu odluku.')).toBeTruthy();
+        expect(screen.getByText('Otvori sto')).toBeTruthy();
+        expect(screen.queryByText('Presidential Inbox')).toBeNull();
     });
 
     it('localizes quiet-inbox capsule chrome in BCS mode', () => {
@@ -140,15 +158,15 @@ describe('Presidential Inbox officer event dedupe', () => {
 
         render(createElement(PresidentialInbox, { onAction }));
 
-        expect(screen.getByText('Komandna straza')).toBeTruthy();
-        expect(screen.getByText('Nijedna naredba ne ceka na vasem stolu.')).toBeTruthy();
-        expect(screen.getByText('Soba odluka')).toBeTruthy();
+        expect(screen.getByText('Komandno dezurstvo')).toBeTruthy();
+        expect(screen.getByText('Na stolu nema naredbi koje cekaju vasu odluku.')).toBeTruthy();
+        expect(screen.getByText('Predsjednicki sto')).toBeTruthy();
         expect(screen.getByText('Hronika')).toBeTruthy();
         expect(screen.queryByText('Command Watch')).toBeNull();
         expect(screen.queryByText('No orders are waiting on your desk.')).toBeNull();
 
-        fireEvent.click(screen.getByRole('button', { name: /otvori sobu odluka/i }));
-        expect(onAction).toHaveBeenCalledWith('army_hq_briefing', 'empty:decision-room');
+        fireEvent.click(screen.getByRole('button', { name: /otvori sto/i }));
+        expect(onAction).toHaveBeenCalledWith('army_hq_briefing', 'empty:desk');
     });
 
     it('localizes opening brief chrome and RBiH scan bullets in BCS mode', () => {
@@ -165,7 +183,7 @@ describe('Presidential Inbox officer event dedupe', () => {
         expect(screen.getByText('Predsjednicki brifing')).toBeTruthy();
         expect(screen.getByText('Republika Bosna i Hercegovina')).toBeTruthy();
         expect(screen.getByText('Drzite Sarajevo, Tuzlu, Zenicu, Bihac i druga urbana uporista dok se armija formira pod vatrom.')).toBeTruthy();
-        expect(screen.getByRole('button', { name: /otvori sobu odluka/i })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /otvori sto/i })).toBeTruthy();
         expect(screen.getByRole('button', { name: /procitaj kasnije/i })).toBeTruthy();
         expect(screen.queryByText('Presidential Brief')).toBeNull();
         expect(screen.queryByText('Read later')).toBeNull();

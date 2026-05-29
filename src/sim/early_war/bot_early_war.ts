@@ -4,7 +4,7 @@
  * Sets front_posture assignments (hold/probe/push) for bot-controlled factions
  * during the Peace phase transitional period (typically 2-8 weeks).
  *
- * Simpler than War phase bot (no corps/brigade hierarchy, no AoR, no OGs).
+ * Simpler than War phase bot (no corps/brigade hierarchy).
  * Uses front edges + faction-specific aggression levels to assign posture.
  *
  * Deterministic: strictCompare ordering, no Math.random().

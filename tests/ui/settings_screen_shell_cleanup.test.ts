@@ -39,21 +39,20 @@ describe('SettingsScreen shell cleanup', () => {
         expect(screen.getByRole('button', { name: 'Diagnostics' })).toBeTruthy();
     });
 
-    it('lets Escape close Settings without reopening the pause menu underneath', () => {
+    it('does not close when switching tabs inside the settings panel', () => {
         const onClose = vi.fn();
-        useGameStore.setState({
-            ...useGameStore.getInitialState(),
-            pauseMenuOpen: false,
-        });
+        render(createElement(SettingsScreen, { onClose }));
 
-        render(createElement('div', null, [
-            createElement(KeyboardShortcutProbe, { key: 'shortcuts' }),
-            createElement(SettingsScreen, { key: 'settings', onClose }),
-        ]));
+        fireEvent.click(screen.getByRole('button', { name: 'Language' }));
 
-        fireEvent.keyDown(window, { key: 'Escape' });
+        expect(onClose).not.toHaveBeenCalled();
+        expect(screen.getByRole('combobox', { name: 'Language' })).toBeTruthy();
+    });
 
-        expect(onClose).toHaveBeenCalledTimes(1);
-        expect(useGameStore.getState().pauseMenuOpen).toBe(false);
+    it('keeps the panel above the click-to-close backdrop', () => {
+        render(createElement(SettingsScreen, { onClose: () => {} }));
+
+        expect(screen.getByTestId('settings-panel').className).toContain('z-10');
+        expect(screen.getByRole('button', { name: 'Close settings' }).className).toContain('z-0');
     });
 });

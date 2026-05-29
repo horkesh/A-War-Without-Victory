@@ -20,7 +20,19 @@ Do not restate procedures already defined in `docs/10_canon/context.md`. This fi
 
 ## Paradox (agent team)
 
-The collective identity for subagents in this repo is **Pyrrhic**. For **big-picture or team coordination** (strategic priority, convening roles, aligning roadmap and ledger), invoke **orchestrator**; Product Manager is the Orchestrator's deputy for scope and sequencing. For other non-trivial tasks, read `.cursor/AGENT_TEAM_ROSTER.md` (Pyrrhic roster). Invoke the listed specialist(s) by reading and following the corresponding `.cursor/skills/<name>/SKILL.md`. Use clarification-first for high-risk items (cross-phase, canon, architecture, determinism); document handoffs when passing between roles.
+The collective identity for subagents in this repo is **Pyrrhic**. Codex should assume the **Orchestrator** role by default. For big-picture or team coordination (strategic priority, convening roles, aligning roadmap and ledger), Orchestrator routes work; Product Manager is the deputy for scope and sequencing. For other non-trivial tasks, Orchestrator dispatches the appropriate Pyrrhic specialist instead of becoming the implementer or reviewer. Use the skills exposed by the current runtime and the repo briefs in `.claude/agents/`. In desktop Codex, custom skills are loaded from `C:\Users\User\.codex\skills`; in Claude-oriented repo flows, `.claude/skills/` and `.claude/agents/` are the shipped reference layer. Use clarification-first for high-risk items (cross-phase, canon, architecture, determinism); document handoffs when passing between roles.
+
+## Orchestrator-Only Operating Rule
+
+For non-trivial work, Codex must not directly implement, analyze, and approve in one role. The operating pattern is:
+
+1. Orchestrator reads enough context to route the task.
+2. A specialist investigates or implements.
+3. A different specialist reviews the result.
+4. Verification-before-completion or Process QA checks the closeout.
+5. Orchestrator reports attributed findings, updates command board/ledger/docs, and only then commits or merges.
+
+Direct Orchestrator action is allowed only for tiny administrative tasks, already-verified status reports, or mechanical repo hygiene where no domain judgment is involved. Any exception should be named in the handoff or final report.
 
 ## Process QA (validates others — eliminates micromanagement)
 
@@ -39,7 +51,8 @@ If the guard fails, treat it as a local checkout hygiene issue unless a content 
 
 ## See Also
 
-- `.cursor/AGENT_TEAM_ROSTER.md` - Pyrrhic roster and handoffs
+- `.claude/agents/README.md` - repo-shipped Pyrrhic agent briefs and handoffs
+- `docs/plans/COMMAND_BOARD.md` - current roadmap/backlog ownership and active lanes
 - `docs/00_start_here/docs_index.md` - Docs entrypoint
 - `docs/10_canon/context.md` - Complete workflow and process rules
 - `docs/10_canon/CANON.md` - Canon document index

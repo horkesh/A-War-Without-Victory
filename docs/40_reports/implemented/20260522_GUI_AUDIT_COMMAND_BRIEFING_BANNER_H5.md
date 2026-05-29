@@ -1,6 +1,6 @@
 # GUI Audit Command Briefing Banner H5
 
-**Date:** 2026-05-22  
+**Date:** 2026-05-22
 **Type:** Tactical-map visual polish fix from the 2026-05-22 GUI visual audit. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or turn-advance logic changed.
 
 ## Why

@@ -1,3 +1,5 @@
+import type { MessageKey } from '../../i18n';
+
 /**
  * v0.9.2 tutorial onboarding — 8-step campaign-loop content (LANE-NIGHTSHIFT-TUTORIAL-CONTENT-V1).
  *
@@ -8,7 +10,7 @@
  *   02 map       →  inspect surface (Map)
  *   03 brief     →  Brief        — Army HQ briefing toolbar entry
  *   04 inspect   →  Inspect      — Warroom status bar + priority docket
- *   05 decide    →  Decide       — Decision Room pre-advance review
+ *   05 decide    ->  Decide       - President's Desk pre-advance review
  *   06 execute   →  Execute      — Operations approve / decline / force-launch
  *   07 report    →  Report       — Turn aftermath, what changed
  *   08 judge     →  Judge        — Cost Ledger, why your choices mattered
@@ -38,6 +40,8 @@ export interface OnboardingStepDef {
     title: string;
     /** Body prose, CoS-briefing voice, 30–60 words. */
     body: string;
+    titleKey: MessageKey;
+    bodyKey: MessageKey;
     /**
      * UI element identifier for spotlight rendering. Components mark themselves
      * with `data-tutorial-step="<step_id>"` so the overlay can locate the
@@ -57,48 +61,64 @@ const AUTHORED_STEPS: ReadonlyArray<OnboardingStepDef> = [
     {
         id: '01_welcome',
         title: 'You Are the President',
-        body: 'The opening presidential brief gives your starting position in three scan points. Read it, then use the toolbar and Decision Room to inspect what needs attention. This tutorial covers the loop: brief, inspect, decide, execute, report, judge, then advance into consequences.',
+        titleKey: 'onboarding.01.title',
+        bodyKey: 'onboarding.01.body',
+        body: "The opening presidential brief gives your starting position in three scan points. Read it, then use the President's Desk and Army HQ to inspect what needs attention. This tutorial covers the loop: brief, inspect, decide, execute, report, judge, then advance into consequences.",
         target_ui_element: null,
     },
     {
         id: '02_map',
         title: 'Reading the Map',
+        titleKey: 'onboarding.02.title',
+        bodyKey: 'onboarding.02.body',
         body: 'Faction colors show political control. Front edges mark where your forces meet the enemy. Click a settlement to inspect it; click a front edge to inspect the sector. The map is a record, not a control panel — orders flow through your staff.',
         target_ui_element: 'map-container',
     },
     {
         id: '03_brief',
         title: 'The Brief',
-        body: 'The toolbar is your staff desk. SUMMARY gives the field situation, RECORDS opens the Army HQ records view, CHRONICLE replays the campaign, and CODEX keeps historical context close. Read the brief first; the Decision Room is where inspection becomes action.',
+        titleKey: 'onboarding.03.title',
+        bodyKey: 'onboarding.03.body',
+        body: "The field toolbar keeps map inspection close: WAR MAP gives the field situation, RECORDS opens the Army HQ records view, and CODEX keeps historical context close. Read the desk packet first; the President's Desk is where inspection becomes action.",
         target_ui_element: 'presidential-toolbar',
     },
     {
         id: '04_inspect',
         title: 'Inspect Before You Decide',
+        titleKey: 'onboarding.04.title',
+        bodyKey: 'onboarding.04.body',
         body: 'The Warroom status bar shows the current phase, priorities, and pending reviews. The priority docket lists what your staff flags as urgent. Open Army HQ to drill into corps readiness, supply, and command friction before you commit.',
         target_ui_element: 'warroom-status-bar',
     },
     {
         id: '05_decide',
-        title: 'The Decision Room',
-        body: 'Before you advance the turn, the Decision Room surfaces every pending choice. Each row links back to the panel it came from -- open it, decide, return. Resolve what you can; defer what you must.',
+        title: "President's Desk",
+        titleKey: 'onboarding.05.title',
+        bodyKey: 'onboarding.05.body',
+        body: "Before you advance the turn, the President's Desk surfaces every pending choice. Each row opens its resolver or the staff panel it came from -- open it, decide, return. Resolve what you can; defer what you must.",
         target_ui_element: 'decision-room',
     },
     {
         id: '06_execute',
         title: 'Operations',
+        titleKey: 'onboarding.06.title',
+        bodyKey: 'onboarding.06.body',
         body: 'Your corps commanders propose operations and present them for your decision when they\'re ready to launch. Approve to authorize, decline to refuse, or force-launch to override their judgment at the cost of command authority. Brigades never attack alone -- every assault flows through a corps operation.',
         target_ui_element: 'army-hq-tab-briefing',
     },
     {
         id: '07_report',
         title: 'Advance and Read the Aftermath',
+        titleKey: 'onboarding.07.title',
+        bodyKey: 'onboarding.07.body',
         body: 'When you advance the turn, the war moves forward by one week. The aftermath panel reports what changed: battles fought, ground gained or lost, casualties, command outcomes. Read it. The next turn begins with the consequences of this one.',
         target_ui_element: 'advance-turn-button',
     },
     {
         id: '08_judge',
         title: 'The Cost Ledger',
+        titleKey: 'onboarding.08.title',
+        bodyKey: 'onboarding.08.body',
         body: 'The Cost Ledger remembers. Every approved operation, every override, every refusal accrues. At the end of the war, the verdict compares your choices against history. There is no winner here — only how heavy the cost, and on whom it fell.',
         target_ui_element: 'cost-ledger',
     },

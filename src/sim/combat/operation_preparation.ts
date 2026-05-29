@@ -70,6 +70,10 @@ import { computeAttackerPower, rankDefendersByPower, getArtillerySuppression } f
 // LANE-2026-05-02-DRINA: enclave-scoped defender aggregation
 import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
+// ADR-0005 v2.2b: TG formation wiring at sub_phase='ready' transition. Flag-gated.
+import { ENABLE_TG_FORMATION, getAnchorBrigade } from './tactical_group_config.js';
+import { selectDonors } from './tactical_group_selection.js';
+import { formTacticalGroup } from './tactical_group_lifecycle.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -602,6 +606,70 @@ function getOpsCommander(
 }
 
 /**
+ * ADR-0005 v2.2b: form Tactical Group(s) at the sub_phase='ready' transition.
+ *
+ * Fires from both first-arrival paths in tickPreparation: anti-paralysis force-launch
+ * AND assessment go-decision. Re-entries from waiting_for_sync→ready are NOT
+ * first arrivals (TG already formed at the prior assessment success) — they do
+ * not call this helper.
+ *
+ * Multi-axis ops: one TG per axis (anchor = main_brigade or first assigned).
+ * Legacy single-axis: one TG from participating_brigades[0] + op.staging_osid.
+ *
+ * Flag-off (default): early-return; byte-identical to pre-wiring.
+ * Flag-on (v2.2b+): writes TG records under state.military.tactical_groups[id]
+ * and sets donor.personnel_lent_by_tg[id] per Hard Invariant #1.
+ *
+ * v2.2c #3 added the 60% donation-readiness gate at the opening-attack readiness
+ * check (sector_offensive_launch_helpers.ts `classifyAxisOpeningAttack`) via a
+ * recomputed selectDonors — no cached `op.donor_pool` field. This helper still
+ * selects + forms at ready; selectDonors is deterministic, so the readiness-gate
+ * pool and this formation pool agree for a given turn's state.
+ */
+function formTgsAtReadyTransition(
+    state: GameState,
+    op: CorpsOperation,
+    currentTurn: number,
+): void {
+    if (!ENABLE_TG_FORMATION) return;
+    if (op.axes && op.axes.length > 0) {
+        for (const axis of op.axes) {
+            const anchorId = getAnchorBrigade(axis);
+            if (!anchorId) continue;
+            const stagingOsid = axis.staging_osid ?? op.staging_osid;
+            if (!stagingOsid) continue;
+            const donors = selectDonors(state, {
+                anchor_brigade_id: anchorId,
+                staging_osid: stagingOsid,
+                army_hq_op_id: op.army_hq_op_id,
+            });
+            formTacticalGroup(state, {
+                op_id: op.name,
+                anchor_brigade_id: anchorId,
+                donors,
+                current_turn: currentTurn,
+                army_hq_op_id: op.army_hq_op_id,
+            });
+        }
+        return;
+    }
+    if (op.participating_brigades.length === 0 || !op.staging_osid) return;
+    const anchorId = op.participating_brigades[0];
+    const donors = selectDonors(state, {
+        anchor_brigade_id: anchorId,
+        staging_osid: op.staging_osid,
+        army_hq_op_id: op.army_hq_op_id,
+    });
+    formTacticalGroup(state, {
+        op_id: op.name,
+        anchor_brigade_id: anchorId,
+        donors,
+        current_turn: currentTurn,
+        army_hq_op_id: op.army_hq_op_id,
+    });
+}
+
+/**
  * Advance the preparation sub-phase for one tick.
  *
  * Called once per turn for each operation in 'planning' phase.
@@ -635,6 +703,23 @@ export function tickPreparation(
 
     op.preparation_turns_elapsed = (op.preparation_turns_elapsed ?? 0) + 1;
 
+    // Pre-planned ops bypass the preparation state machine — objectives, staging,
+    // and timing are author-validated. Skip straight to 'ready' so the outer
+    // planning_duration gate in sector_offensive.ts is the sole launch gate.
+    if (op.is_pre_planned === true) {
+        op.preparation_sub_phase = 'ready';
+        op.commander_assessment = 'launch';
+        return {
+            sub_phase: 'ready',
+            ready: true,
+            probe_ordered: false,
+            intel_confidence: getOperationIntelConfidence(state, op),
+            supply_readiness: supplyReadiness,
+            force_ratio_estimate: 1.0,
+            aborted: false,
+        };
+    }
+
     const confidence = getOperationIntelConfidence(state, op);
     // LANE-2026-05-02: pass supplyByOsid + terrainMultByOsid for honest defender modifiers
     const forceRatio = estimateForceRatio(state, op, competence, confidence, supplyByOsid, terrainMultByOsid);
@@ -660,6 +745,8 @@ export function tickPreparation(
             result.ready = true;
             result.assessment = 'launch';
             op.commander_assessment = 'launch';
+            // ADR-0005 v2.2b: form TG at first-arrival to sub_phase='ready'. Flag-gated.
+            formTgsAtReadyTransition(state, op, state.meta?.turn ?? 0);
         } else {
             // Cautious commanders auto-abort
             result.sub_phase = op.preparation_sub_phase;
@@ -773,6 +860,8 @@ export function tickPreparation(
                     result.sub_phase = 'ready';
                     result.ready = true;
                     result.assessment = 'launch';
+                    // ADR-0005 v2.2b: form TG at first-arrival to sub_phase='ready'. Flag-gated.
+                    formTgsAtReadyTransition(state, op, state.meta?.turn ?? 0);
                 } else if (assessmentScore >= goThreshold - 0.15 && (op.postponement_count ?? 0) < MAX_POSTPONEMENTS) {
                     op.preparation_sub_phase = 'intel_gathering';
                     op.postponement_count = (op.postponement_count ?? 0) + 1;

@@ -208,7 +208,7 @@ describe('buildPresidentialDecisionRoomView', () => {
       id: 'review:pending',
       category: 'decision',
       severity: 'blocking',
-      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+      navigationTarget: { kind: 'inbox' },
     });
     expect(first.cards.find((card) => card.id === 'opportunity:opp_alpha')?.sortKey).toBeLessThan(
       first.cards.find((card) => card.id === 'opportunity:opp_beta')?.sortKey ?? Number.POSITIVE_INFINITY,
@@ -241,7 +241,7 @@ describe('buildPresidentialDecisionRoomView', () => {
 
     expect(view.cards.find((card) => card.id === 'review:pending')).toMatchObject({
       sourceOwner: 'Presidential review queue',
-      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+      navigationTarget: { kind: 'inbox' },
     });
     expect(view.cards.find((card) => card.id === 'opportunity:opp_alpha')).toMatchObject({
       sourceOwner: 'Operation opportunity dossiers',
@@ -304,6 +304,7 @@ describe('buildPresidentialDecisionRoomView', () => {
 
     expect(second.sourceHandoffs).toEqual(first.sourceHandoffs);
     expect(first.sourceHandoffs.map((handoff) => handoff.id)).toEqual([
+      'presidential-inbox',
       'army-hq-briefing',
       'army-hq-summary',
       'army-hq-corps-briefings',
@@ -311,11 +312,18 @@ describe('buildPresidentialDecisionRoomView', () => {
       'army-hq-records-aftermath',
       'chronicle',
     ]);
+    expect(byId['presidential-inbox']).toMatchObject({
+      label: 'Presidential Inbox',
+      count: 1,
+      urgentCount: 1,
+      cardIds: ['review:pending'],
+      navigationTarget: { kind: 'inbox' },
+    });
     expect(byId['army-hq-briefing']).toMatchObject({
       label: 'Army HQ Briefing',
-      count: 3,
-      urgentCount: 2,
-      cardIds: ['review:pending', 'opportunity:opp_alpha', 'opportunity:opp_beta'],
+      count: 2,
+      urgentCount: 1,
+      cardIds: ['opportunity:opp_alpha', 'opportunity:opp_beta'],
       navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
     });
     expect(byId['turn-aftermath-records']).toMatchObject({
@@ -433,7 +441,7 @@ describe('buildPresidentialDecisionRoomView', () => {
       count: 5,
       urgentCount: 5,
       cardIds: ['review:pending', 'opportunity:opp_alpha', 'sitrep:front-exposed'],
-      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+      navigationTarget: { kind: 'inbox' },
     });
     expect(byId.pending).toMatchObject({
       label: 'Decisions',
@@ -611,7 +619,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(byId.decide).toMatchObject({
       label: 'Decide',
       cardIds: ['review:pending', 'opportunity:opp_alpha'],
-      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+      navigationTarget: { kind: 'inbox' },
     });
     expect(byId.execute).toMatchObject({
       label: 'Execute',
@@ -632,7 +640,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
     expect(byId.next).toMatchObject({
       label: 'Next',
-      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+      navigationTarget: { kind: 'inbox' },
     });
   });
 
@@ -757,13 +765,13 @@ describe('buildPresidentialDecisionRoomView', () => {
       title: 'Presidential reviews pending',
       sourceOwner: 'Presidential review queue',
       sourceHandoff: {
-        id: 'army-hq-briefing',
-        cardIds: ['review:pending', 'opportunity:opp_alpha', 'opportunity:opp_beta'],
+        id: 'presidential-inbox',
+        cardIds: ['review:pending'],
       },
-      relatedCardIds: ['opportunity:opp_alpha', 'opportunity:opp_beta'],
+      relatedCardIds: [],
       advanceSensitive: true,
       advanceLabel: 'Review before advance',
-      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+      navigationTarget: { kind: 'inbox' },
     });
     expect(second.activeDossier).toEqual(first.activeDossier);
   });

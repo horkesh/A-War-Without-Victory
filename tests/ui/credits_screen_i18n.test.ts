@@ -36,8 +36,8 @@ describe('CreditsScreen localization', () => {
         expect(screen.getByRole('heading', { name: 'Zasluge' })).toBeTruthy();
         expect(screen.getByText('Dizajn i razvoj')).toBeTruthy();
         expect(screen.getByText('Historijski izvori')).toBeTruthy();
-        expect(screen.getByText('Strateska simulacija Bosanskog rata 1992-1995')).toBeTruthy();
-        expect(screen.getByText('Ova igra je posvecena sjecanju na sve koji su patili u Bosanskom ratu, 1992-1995.')).toBeTruthy();
+        expect(screen.getByText('Strateska simulacija bosanskog rata 1992-1995')).toBeTruthy();
+        expect(screen.getByText('Ova igra je posvecena sjecanju na sve koji su patili u bosanskom ratu, 1992-1995.')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Zatvori' })).toBeTruthy();
     });
 });

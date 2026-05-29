@@ -69,6 +69,7 @@ import {
     getBrigadeAxis
 } from './bot_brigade_ai_osid.js'; // Will need to export these from bot_brigade_ai_osid.ts
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
+import { countAxisConcentrationSupport } from './corps_operation_helpers.js';
 
 export function evaluateHomeDefense(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, loc, adjacency, result, isActiveSectorOperationParticipant, graphAnalysis, adjEnemy } = ctx;
@@ -289,14 +290,21 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 const predictedOutcome = directObjectiveAttack.prediction.predicted_outcome;
                 const axisBrigades = getBrigadeAxis(activeOp, brigade.id)?.assigned_brigades
                     ?? activeOp.participating_brigades ?? [];
+                // R13b op-level concentration: count same-axis op-mates within 2 hops
+                // of the objective with distance weighting (1-hop=1.0, 2-hop=0.5,
+                // floored). Replaces prior tactical-adjacency check which excluded
+                // op-mates staged 2+ hops away (e.g. HV phantoms at livno/duvno
+                // staging for drvar/glamoc objectives, where Mistral 1/2/SM ops
+                // never accumulated >1 supporter and concentratedOutcome stayed null).
                 const adjacentOperationParticipants = sectorAttackProfileTime(
                     '.sectorAttack.executionAdjacentParticipants',
-                    () => axisBrigades.filter((brigadeId) => {
-                        const participant = state.military.formations?.[brigadeId];
-                        if (!participant?.location_osid || participant.status !== 'active') return false;
-                        return getTacticalAdjacentOsids(state, participant.location_osid as Osid, adjacency)
-                            .includes(currentObjective);
-                    }).length
+                    () => countAxisConcentrationSupport(
+                        state,
+                        axisBrigades,
+                        new Set([brigade.id]),
+                        adjacency,
+                        currentObjective as Osid,
+                    )
                 );
                 const concentratedOutcome = adjacentOperationParticipants > 1
                     ? estimateConcentratedOutcome(
@@ -835,6 +843,30 @@ export function evaluateUncontestedOccupation(
                 });
             });
             if (sectorHasBrigades) continue;
+
+            // Wave 18: 1-hop proximity guard. Block walk-in if any active enemy
+            // brigade sits at a neighbor of the target OSID. The previous gates
+            // miss the case where the target itself has no defender but an
+            // adjacent OSID DOES — a 1km-away brigade physically covers the
+            // approach and would not let an enemy unit walk in unopposed.
+            // n1979 forensics found 81% of late-war RBiH OSID captures used
+            // this walk-in path; ARBiH brigades capturing east-Herzegovina rim
+            // OSIDs (foca/gacko/bileca/ljubinje/trebinje) when VRS defenders
+            // sat in adjacent OSIDs is unhistorical. Žepče enclave fell at
+            // t36/t62/t69 via the same path despite HVO 111th Brigade nominally
+            // present in adjacent OSIDs of the enclave.
+            const proximityBlocked = profileTime('.proximityScan', () => {
+                if (!activeFormationLocationsByFaction) return false;
+                const targetNeighbors = adjacency.get(n as Osid) ?? [];
+                for (const nn of targetNeighbors) {
+                    if (nn === loc) continue;
+                    if (hasActiveFormationAtOsid(activeFormationLocationsByFaction, controller, nn as Osid)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            if (proximityBlocked) continue;
 
             // Truly undefended — walk in
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });

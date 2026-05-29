@@ -6,6 +6,7 @@
 import { GlassPanel } from './GlassPanel';
 import { EmptyState } from './EmptyState';
 import { Z } from '../../shared/zIndex';
+import { t } from '../i18n';
 
 /** A single entry in the event log history. */
 export interface EventLogEntry {
@@ -32,11 +33,11 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export function EventLogPanel({ events, onClose }: EventLogPanelProps) {
     return (
-        <GlassPanel position="right" title="Event Log" width="340px" onClose={onClose} zIndex={Z.GLASS_PANEL_EVENT_LOG}>
+        <GlassPanel position="right" title={t('eventLog.title')} width="340px" onClose={onClose} zIndex={Z.GLASS_PANEL_EVENT_LOG}>
             {events.length === 0 ? (
                 <EmptyState
-                    message="No events recorded"
-                    helpText="Awaiting first event."
+                    message={t('eventLog.empty')}
+                    helpText={t('eventLog.emptyHelp')}
                 />
             ) : (
                 <div className="space-y-2">
@@ -54,7 +55,7 @@ export function EventLogPanel({ events, onClose }: EventLogPanelProps) {
                                 {/* Turn + category badge row */}
                                 <div className="flex items-center gap-2 mb-1">
                                     <span className="text-xs font-mono" style={{ color: '#8a8578' }}>
-                                        W{entry.turn}
+                                        {t('eventLog.week', { turn: entry.turn })}
                                     </span>
                                     <span
                                         className="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider"

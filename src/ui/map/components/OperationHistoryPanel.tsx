@@ -13,6 +13,7 @@ import {
 } from '../../shared/playerVisibility';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { deriveOperationOutcomeCategory, buildOperationTrendSummary } from '../data/command_strain';
+import { t } from '../i18n';
 
 // --- Faction styling ---
 const FACTION_COLOR: Record<string, string> = {
@@ -102,14 +103,14 @@ function OutcomeCategoryBadge({ assessmentAtLaunch, wasForce }: {
     if (category === 'direct_intervention') {
         return (
             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/60">
-                ⚠ Direct Intervention
+                {t('operationHistory.directIntervention')}
             </span>
         );
     }
     // reluctant_compliance
     return (
         <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider bg-amber-400/5 text-amber-500/80 border border-amber-400/40">
-            Approved Against Recommendation
+            {t('operationHistory.approvedAgainstRecommendation')}
         </span>
     );
 }
@@ -120,7 +121,7 @@ function FactionTag({ faction }: { faction: string }) {
             className="text-[9px] font-mono px-1 rounded border"
             style={{ color: FACTION_COLOR[faction] ?? '#aaa', borderColor: `${FACTION_COLOR[faction] ?? '#555'}44` }}
         >
-            {getPlayerSafeMilitaryFactionName(faction, 'Unknown force')}
+            {getPlayerSafeMilitaryFactionName(faction, t('operationHistory.unknownForce'))}
         </span>
     );
 }
@@ -142,7 +143,7 @@ function CasualtyLine({ label, cas }: { label: string; cas: { killed: number; wo
     if (total === 0) return null;
     return (
         <div className="text-[10px] text-text-muted tabular-nums">
-            {label}: {total.toLocaleString()} ({cas.killed.toLocaleString()} KIA, {cas.wounded.toLocaleString()} WIA)
+            {t('operationHistory.casualtyLine', { label, total: total.toLocaleString(), killed: cas.killed.toLocaleString(), wounded: cas.wounded.toLocaleString() })}
         </div>
     );
 }
@@ -155,7 +156,7 @@ function ExchangeRatio({ suffered, inflicted }: { suffered: { killed: number; wo
     const color = ratio >= 2.0 ? 'text-green-400' : ratio >= 1.0 ? 'text-amber-400' : 'text-red-400';
     return (
         <span className={`text-[10px] font-mono ${color}`}>
-            Exchange: {ratioStr}:1
+            {t('operationHistory.exchange', { ratio: ratioStr })}
         </span>
     );
 }
@@ -201,17 +202,17 @@ function OperationDeepReview({
     return (
         <div className="rounded border border-panel-border/50 bg-panel-bg/60 p-2.5 space-y-2">
             <div className="flex items-center justify-between gap-3">
-                <div className="text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Operational Deep Review</div>
+                <div className="text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('operationHistory.deepReview')}</div>
                 <div className="text-[10px] text-text-muted tabular-nums">
-                    {op.objectives_captured.length}/{op.objectives_targeted.length} objectives held at end
+                    {t('operationHistory.objectivesHeldCount', { captured: op.objectives_captured.length, targeted: op.objectives_targeted.length })}
                 </div>
             </div>
             <div className="grid gap-1 text-[10px] text-text-secondary sm:grid-cols-2">
-                <span>Result: {formatOutcome(op.outcome)}</span>
-                <span>Attacks: {op.total_attacks.toLocaleString()}</span>
-                <span>Casualties: {suffered.toLocaleString()} suffered / {inflicted.toLocaleString()} inflicted</span>
-                <span>Grade: {op.grade.stars} stars - {op.grade.verdict}</span>
-                <span className="sm:col-span-2">Provenance: {provenance}</span>
+                <span>{t('operationHistory.result', { outcome: formatOutcome(op.outcome) })}</span>
+                <span>{t('operationHistory.attacks', { count: op.total_attacks.toLocaleString() })}</span>
+                <span>{t('operationHistory.casualties', { suffered: suffered.toLocaleString(), inflicted: inflicted.toLocaleString() })}</span>
+                <span>{t('operationHistory.grade', { stars: op.grade.stars, verdict: op.grade.verdict })}</span>
+                <span className="sm:col-span-2">{t('operationHistory.provenance', { provenance })}</span>
             </div>
             {op.objectives_targeted.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
@@ -221,7 +222,7 @@ function OperationDeepReview({
                             return (
                                 <ObjectiveReviewChip
                                     key={osid}
-                                    label={`Captured: ${name}`}
+                                    label={t('operationHistory.capturedObjective', { name })}
                                     className="border-green-400/30 bg-green-400/5 text-green-300"
                                 />
                             );
@@ -230,7 +231,7 @@ function OperationDeepReview({
                             return (
                                 <ObjectiveReviewChip
                                     key={osid}
-                                    label={`Held at end: ${name}`}
+                                    label={t('operationHistory.heldAtEndObjective', { name })}
                                     className="border-amber-300/30 bg-amber-300/5 text-amber-200"
                                 />
                             );
@@ -238,7 +239,7 @@ function OperationDeepReview({
                         return (
                             <ObjectiveReviewChip
                                 key={osid}
-                                label={`Not held: ${name}`}
+                                label={t('operationHistory.notHeldObjective', { name })}
                                 className="border-red-400/30 bg-red-400/5 text-red-300"
                             />
                         );
@@ -294,11 +295,11 @@ function CompletedOpCard({
                         </div>
                         {op.commander_name && (
                             <div className="text-[9px] text-text-muted">
-                                OiC: {op.commander_rank ? `${op.commander_rank} ` : ''}{op.commander_name}
+                                {t('operationHistory.oic', { commander: `${op.commander_rank ? `${op.commander_rank} ` : ''}${op.commander_name}` })}
                             </div>
                         )}
                         <div className="text-[9px] text-text-muted">
-                            {corpsName} | W{op.started_turn}-W{op.ended_turn} ({op.duration_turns}w) | Held at end {objRate}
+                            {t('operationHistory.completedMeta', { corps: corpsName, start: op.started_turn, end: op.ended_turn, duration: op.duration_turns, objectives: objRate })}
                         </div>
                     </div>
                     <div className="flex flex-col items-end shrink-0 gap-0.5">
@@ -328,8 +329,8 @@ function CompletedOpCard({
 
                     {/* Casualties */}
                     <div>
-                        <CasualtyLine label="Suffered" cas={op.casualties_suffered} />
-                        <CasualtyLine label="Inflicted" cas={op.casualties_inflicted} />
+                        <CasualtyLine label={t('operationHistory.suffered')} cas={op.casualties_suffered} />
+                        <CasualtyLine label={t('operationHistory.inflicted')} cas={op.casualties_inflicted} />
                         <div className="flex gap-3 mt-0.5">
                             <ExchangeRatio suffered={op.casualties_suffered} inflicted={op.casualties_inflicted} />
                         </div>
@@ -341,13 +342,13 @@ function CompletedOpCard({
                       op.equipment_captured.tanks + op.equipment_captured.artillery > 0) && (
                         <div className="text-[10px] text-text-muted space-y-0.5">
                             {(op.equipment_lost.tanks > 0 || op.equipment_lost.artillery > 0) && (
-                                <div>Lost: {op.equipment_lost.tanks}T {op.equipment_lost.artillery}A</div>
+                                <div>{t('operationHistory.equipmentLost', { tanks: op.equipment_lost.tanks, artillery: op.equipment_lost.artillery })}</div>
                             )}
                             {(op.equipment_destroyed.tanks > 0 || op.equipment_destroyed.artillery > 0) && (
-                                <div>Destroyed: {op.equipment_destroyed.tanks}T {op.equipment_destroyed.artillery}A</div>
+                                <div>{t('operationHistory.equipmentDestroyed', { tanks: op.equipment_destroyed.tanks, artillery: op.equipment_destroyed.artillery })}</div>
                             )}
                             {(op.equipment_captured.tanks > 0 || op.equipment_captured.artillery > 0) && (
-                                <div className="text-green-400">Captured: {op.equipment_captured.tanks}T {op.equipment_captured.artillery}A</div>
+                                <div className="text-green-400">{t('operationHistory.equipmentCaptured', { tanks: op.equipment_captured.tanks, artillery: op.equipment_captured.artillery })}</div>
                             )}
                         </div>
                     )}
@@ -364,12 +365,12 @@ function CompletedOpCard({
                     {/* Command Record — expanded provenance sentence */}
                     {(op.commander_assessment_at_launch != null || op.force_launched) && (
                         <div className="text-[9px] text-text-muted border-t border-panel-border/30 pt-1.5">
-                            <span className="uppercase font-bold text-text-secondary">Command Record: </span>
+                            <span className="uppercase font-bold text-text-secondary">{t('operationHistory.commandRecord')} </span>
                             {op.force_launched ? (
                                 <>
                                     Commander recommended <span className="font-semibold text-text-primary capitalize">{op.commander_assessment_at_launch ?? 'unknown'}</span>
                                     {' — '}
-                                    <span className="text-amber-400 font-bold">Direct Intervention</span>
+                                    <span className="text-amber-400 font-bold">{t('operationHistory.directIntervention')}</span>
                                     {op.ca_cost_at_launch != null && (
                                         <span className="text-text-muted"> ({op.ca_cost_at_launch} CA spent)</span>
                                     )}
@@ -378,13 +379,13 @@ function CompletedOpCard({
                                 <>
                                     Commander recommended <span className="font-semibold text-text-primary capitalize">{op.commander_assessment_at_launch}</span>
                                     {' — '}
-                                    <span className="text-amber-500/80 font-semibold">Approved Against Recommendation</span>
+                                    <span className="text-amber-500/80 font-semibold">{t('operationHistory.approvedAgainstRecommendation')}</span>
                                 </>
                             ) : (
                                 <>
                                     Commander recommended <span className="font-semibold text-text-primary capitalize">{op.commander_assessment_at_launch}</span>
                                     {' — '}
-                                    <span className="text-green-400 font-semibold">Approved</span>
+                                    <span className="text-green-400 font-semibold">{t('operationHistory.approved')}</span>
                                 </>
                             )}
                         </div>
@@ -392,13 +393,13 @@ function CompletedOpCard({
                     {/* Institutional strain note — only for direct interventions */}
                     {op.force_launched && (
                         <div className="text-[9px] text-amber-500/80 italic">
-                            Note: Direct Intervention contributed to command strain on this corps.
+                            {t('operationHistory.directInterventionStrainNote')}
                         </div>
                     )}
 
                     {captureProvenanceNotice && (
                         <div className="text-[9px] text-amber-300/80 border-t border-panel-border/30 pt-1.5">
-                            <span className="uppercase font-bold text-amber-300">AAR provenance: </span>
+                            <span className="uppercase font-bold text-amber-300">{t('operationHistory.aarProvenance')} </span>
                             {captureProvenanceNotice}
                         </div>
                     )}
@@ -406,7 +407,7 @@ function CompletedOpCard({
                     {/* Objectives */}
                     {op.objectives_targeted.length > 0 && (
                         <div>
-                            <div className="text-[9px] uppercase tracking-wide text-text-secondary mb-0.5">Objectives Held at End</div>
+                            <div className="text-[9px] uppercase tracking-wide text-text-secondary mb-0.5">{t('operationHistory.objectivesHeldAtEnd')}</div>
                             <div className="space-y-0.5">
                                 {op.objectives_targeted.map(osid => {
                                     const heldAtEnd = op.objectives_captured.includes(osid);
@@ -418,7 +419,7 @@ function CompletedOpCard({
                                             </span>
                                             <span className="text-text-primary capitalize">{getOsidDisplayName(osid, osidDisplayNames)}</span>
                                             {heldAtEnd && !loggedDuringOperation && (
-                                                <span className="text-[9px] text-amber-300/80 uppercase tracking-wide">Held at end</span>
+                                                <span className="text-[9px] text-amber-300/80 uppercase tracking-wide">{t('operationHistory.heldAtEnd')}</span>
                                             )}
                                         </div>
                                     );
@@ -426,7 +427,7 @@ function CompletedOpCard({
                             </div>
                             {op.objectives_logged_captured && op.objectives_logged_captured.length > 0 && (
                                 <div className="mt-1 text-[9px] text-text-muted">
-                                    Logged during operation: {op.objectives_logged_captured.map((osid) => getOsidDisplayName(osid, osidDisplayNames)).join(', ')}
+                                    {t('operationHistory.loggedDuringOperation', { objectives: op.objectives_logged_captured.map((osid) => getOsidDisplayName(osid, osidDisplayNames)).join(', ') })}
                                 </div>
                             )}
                         </div>
@@ -435,14 +436,14 @@ function CompletedOpCard({
                     {/* Per-axis breakdown */}
                     {op.axis_summaries && op.axis_summaries.length > 0 && (
                         <div>
-                            <div className="text-[9px] uppercase tracking-wide text-text-secondary mb-0.5">Axes</div>
+                            <div className="text-[9px] uppercase tracking-wide text-text-secondary mb-0.5">{t('operationHistory.axes')}</div>
                             {op.axis_summaries.map(ax => {
                                 const axisCaptured = new Set(ax.objectives_captured);
                                 return (
                                     <div key={ax.axis_id} className="text-[10px] border-l-2 border-panel-border/50 pl-2 mb-1">
                                         <div className="text-text-primary font-semibold">{ax.axis_name}</div>
                                         <div className="text-text-muted">
-                                            Obj {ax.objectives_captured.length}/{ax.objectives_targeted.length} | Attacks {ax.total_attacks}
+                                            {t('operationHistory.axisMeta', { captured: ax.objectives_captured.length, targeted: ax.objectives_targeted.length, attacks: ax.total_attacks })}
                                         </div>
                                         {ax.objectives_targeted.length > 0 && (
                                             <div className="mt-1 flex flex-wrap gap-1">
@@ -452,7 +453,7 @@ function CompletedOpCard({
                                                         return (
                                                             <ObjectiveReviewChip
                                                                 key={osid}
-                                                                label={`Axis captured: ${name}`}
+                                                                label={t('operationHistory.axisCaptured', { name })}
                                                                 className="border-green-400/30 bg-green-400/5 text-green-300"
                                                             />
                                                         );
@@ -461,7 +462,7 @@ function CompletedOpCard({
                                                         return (
                                                             <ObjectiveReviewChip
                                                                 key={osid}
-                                                                label={`Axis held elsewhere: ${name}`}
+                                                                label={t('operationHistory.axisHeldElsewhere', { name })}
                                                                 className="border-amber-300/30 bg-amber-300/5 text-amber-200"
                                                             />
                                                         );
@@ -469,14 +470,14 @@ function CompletedOpCard({
                                                     return (
                                                         <ObjectiveReviewChip
                                                             key={osid}
-                                                            label={`Axis not held: ${name}`}
+                                                            label={t('operationHistory.axisNotHeld', { name })}
                                                             className="border-red-400/30 bg-red-400/5 text-red-300"
                                                         />
                                                     );
                                                 })}
                                             </div>
                                         )}
-                                        <CasualtyLine label="Cas" cas={ax.casualties_suffered} />
+                                        <CasualtyLine label={t('operationHistory.casShort')} cas={ax.casualties_suffered} />
                                     </div>
                                 );
                             })}
@@ -486,7 +487,7 @@ function CompletedOpCard({
                     {/* Weekly timeline */}
                     {op.weekly_log.length > 0 && (
                         <div>
-                            <div className="text-[9px] uppercase tracking-wide text-text-secondary mb-0.5">Weekly Timeline</div>
+                            <div className="text-[9px] uppercase tracking-wide text-text-secondary mb-0.5">{t('operationHistory.weeklyTimeline')}</div>
                             <div className="space-y-0.5 max-h-32 overflow-auto">
                                 {op.weekly_log.map((entry, i) => {
                                     const hasCas = entry.casualties_suffered.killed + entry.casualties_suffered.wounded > 0;
@@ -542,10 +543,10 @@ function ActiveOpCard({ op, corpsName }: { op: ActiveOp; corpsName: string }) {
                         <span className="text-[11px] text-text-primary font-semibold truncate">{op.operation_name}</span>
                     </div>
                     {op.commander_name && (
-                        <div className="text-[9px] text-text-muted">OiC: {op.commander_name}</div>
+                        <div className="text-[9px] text-text-muted">{t('operationHistory.oic', { commander: op.commander_name })}</div>
                     )}
                     <div className="text-[9px] text-text-muted">
-                        {corpsName} | Since W{op.started_turn} | {op.participating_brigades.length} bdes
+                        {t('operationHistory.activeMeta', { corps: corpsName, start: op.started_turn, brigades: op.participating_brigades.length })}
                     </div>
                 </div>
                 <div className="flex flex-col items-end shrink-0 gap-0.5">
@@ -553,7 +554,7 @@ function ActiveOpCard({ op, corpsName }: { op: ActiveOp; corpsName: string }) {
                         {op.phase}
                     </span>
                     <span className="text-[10px] text-text-muted tabular-nums">
-                        Obj {objRate} | {op.attacks} atk
+                        {t('operationHistory.activeProgress', { objectives: objRate, attacks: op.attacks })}
                     </span>
                 </div>
             </div>
@@ -606,16 +607,16 @@ export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHi
         <div>
             <div className="flex border-b border-panel-border mb-3">
                 <button type="button" className={tabClass('active')} onClick={() => setTab('active')}>
-                    Active {active.length > 0 && <span className="ml-1 text-text-muted">({active.length})</span>}
+                    {t('operationHistory.tab.active')} {active.length > 0 && <span className="ml-1 text-text-muted">({active.length})</span>}
                 </button>
                 <button type="button" className={tabClass('history')} onClick={() => setTab('history')}>
-                    History {history.length > 0 && <span className="ml-1 text-text-muted">({history.length})</span>}
+                    {t('operationHistory.tab.history')} {history.length > 0 && <span className="ml-1 text-text-muted">({history.length})</span>}
                 </button>
             </div>
             <div>
                 {tab === 'active' && (
                     active.length === 0 ? (
-                        <div className="text-text-muted text-center py-8 text-[11px]">No active operations.</div>
+                        <div className="text-text-muted text-center py-8 text-[11px]">{t('operationHistory.noActive')}</div>
                     ) : (
                         active.map((op) => (
                             <ActiveOpCard
@@ -628,14 +629,14 @@ export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHi
                 )}
                 {tab === 'history' && (
                     sortedHistory.length === 0 ? (
-                        <div className="text-text-muted text-center py-8 text-[11px]">No completed operations yet.</div>
+                        <div className="text-text-muted text-center py-8 text-[11px]">{t('operationHistory.noCompleted')}</div>
                     ) : (
                         <>
                             {(() => {
                                 const trend = buildOperationTrendSummary(sortedHistory);
                                 return trend.trendNotice ? (
                                     <div className="mb-2 px-2 py-1 rounded bg-amber-500/5 border border-amber-500/20 text-[9px] text-amber-400/80">
-                                        Command relationship: {trend.trendNotice}
+                                        {t('operationHistory.commandRelationship', { notice: trend.trendNotice })}
                                     </div>
                                 ) : null;
                             })()}
@@ -662,14 +663,14 @@ export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHi
             {/* A11y LANE-NIGHTSHIFT-V093-A11Y-LANE-C: backdrop is now a real <button> for keyboard activation. */}
             <button
                 type="button"
-                aria-label="Close Operations panel"
+                aria-label={t('operationHistory.closePanel')}
                 className="absolute inset-0 bg-black/40 pointer-events-auto cursor-default"
                 onClick={onClose}
             />
             <div className="relative panel-slide-in-right pointer-events-auto w-[24rem] max-h-[calc(100vh-4rem)] mt-12 mr-2 flex flex-col bg-panel-bg/97 backdrop-blur-sm border border-panel-border rounded-lg shadow-2xl overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card border-b border-panel-border shrink-0">
-                    <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">Operations</span>
-                    <button type="button" onClick={onClose} aria-label="Close Operations panel" className="text-text-secondary hover:text-interactive text-sm leading-none">&#x2715;</button>
+                    <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">{t('operationHistory.title')}</span>
+                    <button type="button" onClick={onClose} aria-label={t('operationHistory.closePanel')} className="text-text-secondary hover:text-interactive text-sm leading-none">&#x2715;</button>
                 </div>
                 <div className="p-3 overflow-auto flex-1">{body}</div>
             </div>

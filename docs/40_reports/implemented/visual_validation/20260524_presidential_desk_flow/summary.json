@@ -1,0 +1,80 @@
+{
+  "url": "http://127.0.0.1:3001/?view=warroom",
+  "savePath": "side-picker:RBiH",
+  "outDir": "docs/40_reports/implemented/visual_validation/20260524_presidential_desk_flow",
+  "steps": [
+    {
+      "id": "desk",
+      "label": "Desk",
+      "expectedText": "President's Desk",
+      "passed": true,
+      "screenshot": "docs/40_reports/implemented/visual_validation/20260524_presidential_desk_flow/01_desk.png",
+      "probe": {
+        "visibleDialogCount": 0,
+        "emptyRail": false,
+        "visibleButtons": 15
+      }
+    },
+    {
+      "id": "brief",
+      "label": "Brief",
+      "expectedText": "Strategic Priorities",
+      "passed": true,
+      "screenshot": "docs/40_reports/implemented/visual_validation/20260524_presidential_desk_flow/02_brief.png",
+      "probe": {
+        "visibleDialogCount": 1,
+        "emptyRail": false,
+        "visibleButtons": 101
+      }
+    },
+    {
+      "id": "inspect",
+      "label": "Inspect",
+      "expectedText": "War Summary",
+      "passed": true,
+      "screenshot": "docs/40_reports/implemented/visual_validation/20260524_presidential_desk_flow/03_inspect.png",
+      "probe": {
+        "visibleDialogCount": 1,
+        "emptyRail": false,
+        "visibleButtons": 52
+      }
+    },
+    {
+      "id": "execute",
+      "label": "Execute",
+      "expectedText": "Review Before Advance",
+      "passed": true,
+      "screenshot": "docs/40_reports/implemented/visual_validation/20260524_presidential_desk_flow/04_execute.png",
+      "probe": {
+        "visibleDialogCount": 1,
+        "emptyRail": false,
+        "visibleButtons": 20
+      }
+    },
+    {
+      "id": "report",
+      "label": "Report",
+      "expectedText": "Decision Log",
+      "passed": true,
+      "screenshot": "docs/40_reports/implemented/visual_validation/20260524_presidential_desk_flow/05_report.png",
+      "probe": {
+        "visibleDialogCount": 2,
+        "emptyRail": false,
+        "visibleButtons": 53
+      }
+    },
+    {
+      "id": "next",
+      "label": "Next",
+      "expectedText": "President's Desk",
+      "passed": true,
+      "screenshot": "docs/40_reports/implemented/visual_validation/20260524_presidential_desk_flow/06_next.png",
+      "probe": {
+        "visibleDialogCount": 0,
+        "emptyRail": false,
+        "visibleButtons": 15
+      }
+    }
+  ],
+  "passed": true
+}

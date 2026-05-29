@@ -1,6 +1,6 @@
 # GUI Audit Army HQ Commander Empty State H8
 
-**Date:** 2026-05-22  
+**Date:** 2026-05-22
 **Type:** Army HQ data-resolver/UI visibility fix from the 2026-05-22 GUI visual audit. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or turn-advance logic changed.
 
 ## Why

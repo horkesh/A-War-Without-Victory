@@ -17,19 +17,19 @@ afterEach(() => {
 describe('CoachmarkLayer', () => {
   it('shows a first-hover coachmark and persists it in localStorage', () => {
     render(createElement('div', null,
-      createElement('button', { type: 'button', 'data-coachmark-id': 'decision-room' }, 'Decision Room'),
+      createElement('button', { type: 'button', 'data-coachmark-id': 'decision-room' }, "President's Desk"),
       createElement(CoachmarkLayer),
     ));
 
-    fireEvent.mouseOver(screen.getByRole('button', { name: 'Decision Room' }));
+    fireEvent.mouseOver(screen.getByRole('button', { name: "President's Desk" }));
 
-    expect(screen.getByTestId('coachmark-layer').textContent).toContain('Decision Room');
+    expect(screen.getByTestId('coachmark-layer').textContent).toContain("President's Desk");
     expect(window.localStorage.getItem(getCoachmarkStorageKey('decision-room'))).toBe('true');
 
-    fireEvent.mouseOut(screen.getByRole('button', { name: 'Decision Room' }));
+    fireEvent.mouseOut(screen.getByRole('button', { name: "President's Desk" }));
     expect(screen.queryByTestId('coachmark-layer')).toBeNull();
 
-    fireEvent.mouseOver(screen.getByRole('button', { name: 'Decision Room' }));
+    fireEvent.mouseOver(screen.getByRole('button', { name: "President's Desk" }));
     expect(screen.queryByTestId('coachmark-layer')).toBeNull();
   });
 });

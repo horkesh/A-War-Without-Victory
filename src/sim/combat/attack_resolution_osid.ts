@@ -43,7 +43,8 @@ import type {
     FactionId,
     FormationId,
     FormationState,
-    GameState
+    GameState,
+    TacticalGroup,
 } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
@@ -62,7 +63,8 @@ import {
 } from './ethnic_defense.js';
 import { isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import { getPostWashingtonJointPressureMultiplier } from '../early_war/washington_agreement.js';
-import { findBrigadeOperation } from './corps_operation_helpers.js';
+import { findBrigadeOperation, findBrigadeOperationAnywhere, countAxisConcentrationSupport } from './corps_operation_helpers.js';
+import { getBrigadeAxis } from './bot_brigade_ai_osid.js';
 
 // ── Shared combat math ──────────────────────────────────────────────────
 import {
@@ -108,6 +110,12 @@ import {
 // OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR moved to attack_post_battle_effects.ts
 import { isSupportBrigadeOnActiveOp } from './sector_offensive_axis_helpers.js';
 import { SUPPORT_POWER_MULT } from './bot_constants.js';
+// ADR-0005 v2.2b: TG combat-power synthesis + casualty distribution. Flag-gated.
+import { ENABLE_TG_COMBAT_SYNTHESIS } from './tactical_group_config.js';
+import { distributeCasualtiesAcrossTg } from './tactical_group_casualties.js';
+// ADR-0005 v2.2c #2: Hard Invariant #6 — immediate dissolution on anchor destruction.
+import { dissolveTacticalGroup, TG_ANCHOR_DISSOLVE_COHESION_FLOOR } from './tactical_group_lifecycle.js';
+import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import { getEnclaveGarrisonPower, isEnclaveCapital } from './enclave_resilience.js';
 import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
@@ -189,6 +197,79 @@ export { pushSnapEvent };
 export { _findEmergencyRetreatOsid as findEmergencyRetreatOsid };
 export { _displaceFormationsInEnemyTerritory as displaceFormationsInEnemyTerritory };
 
+/**
+ * ADR-0005 v2.2b: locate the active TG anchored on a specific brigade.
+ *
+ * Returns the first non-dissolved TG with `anchor_brigade_id === brigadeId`.
+ * Iterates `tactical_groups` in strictCompare order for determinism.
+ *
+ * Only called when ENABLE_TG_COMBAT_SYNTHESIS is true; otherwise dormant.
+ * Returns null when no TG matches — caller treats the attacker as a solo
+ * physical brigade (v1 behavior).
+ */
+function findTgForAnchor(state: GameState, brigadeId: string): TacticalGroup | null {
+    const tgs = state.military?.tactical_groups;
+    if (!tgs) return null;
+    for (const id of Object.keys(tgs).sort(strictCompare)) {
+        const tg = tgs[id];
+        if (tg && tg.anchor_brigade_id === brigadeId && tg.status !== 'dissolved') return tg;
+    }
+    return null;
+}
+
+/**
+ * ADR-0005 v2.2c: aggregate donor combat power for all TG anchors in an attack,
+ * using each donor's OWN stats (true per-donor power).
+ *
+ * For each donor of a TG anchored on an attacker, the contribution is the donor's
+ * full-force power — `computeAttackerPower(donor, ...)`, which bakes in the donor's
+ * equipment ratio (basePower), supply, disruption, fatigue, officer quality,
+ * heavy-weapons-vs-target-terrain, home-distance (≈1.0 since donors stay home),
+ * and morale — scaled by the donated fraction `personnel_lent / donor.personnel`.
+ * The donated element fights at the ANCHOR's effective posture against the target's
+ * terrain (it reinforces the anchor's assault), but is NOT a physical brigade, so it
+ * does not receive the concentration multiplier (applied by the caller to physical
+ * brigades only, per ADR-0005 §Battle resolution).
+ *
+ * This replaces the v2.2b proxy (which scaled the ANCHOR's per-personnel power by the
+ * total donated fraction); v2.2c reflects donor-specific equipment/supply/cohesion so a
+ * well-equipped donor lends more punch than a militia donor of equal headcount.
+ *
+ * Returned value is the SUM of donor contributions across all TG anchors in
+ * `attackerFormations`. Caller multiplies by coordPenalty × seasonal × tempo.
+ */
+function computeTgDonorPower(
+    state: GameState,
+    attackerFormations: FormationState[],
+    supplyStateByOsid: SupplyStateByOsidReport | null | undefined,
+    targetTerrainMult: number,
+    targetOsid: string,
+): number {
+    const formations = state.military?.formations ?? {};
+    let total = 0;
+    for (const a of attackerFormations) {
+        const tg = findTgForAnchor(state, a.id);
+        if (!tg) continue;
+        const anchorPosture = a.posture ?? 'defend';
+        const atkMult = POSTURE_ATTACK[anchorPosture] ?? 0;
+        const effectivePosture = atkMult > 0 ? anchorPosture : 'attack';
+        for (const d of tg.donor_contributions) {
+            const lent = d.personnel_lent;
+            if (lent <= 0) continue;
+            const donor = formations[d.brigade_id];
+            if (!donor) continue;
+            const donorPersonnel = donor.personnel ?? 0;
+            if (donorPersonnel <= 0) continue;
+            const donorRaw = computeAttackerPower(state, donor, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid);
+            // Cap the lent fraction at 1.0: donor.personnel can drop below personnel_lent
+            // mid-op via the donor's own attrition; a donor never lends more than its current force.
+            const lentFraction = Math.min(1, lent / donorPersonnel);
+            total += donorRaw * lentFraction;
+        }
+    }
+    return total;
+}
+
 function findFriendlySectorIdForOsid(state: GameState, osid: string): string | null {
     const sectors = state.military.corps_front_sectors;
     if (!sectors) return null;
@@ -263,6 +344,58 @@ function buildPublicIntelFrictionAnnotation(
 // moved to attack_retreat_displacement.ts — imported above.
 
 // Types and pushSnapEvent imported from attack_resolution_types.ts above.
+
+/**
+ * Fall-1995 mechanic E-A4: cascade trigger writer.
+ *
+ * When OSID `targetOsid` flips from `prevController` to a new faction in
+ * turn T, every front-edge-adjacent OSID Y still owned by `prevController`
+ * receives a 1-turn defender-power penalty applied in turn T+1.
+ *
+ * Models the counter-clockwise collapse pattern in VRS 2nd Krajina Corps
+ * Sept 1995: adjacent-OSID loss demoralizes/destabilizes the remaining
+ * defenders before they can entrench or reposition.
+ *
+ * Determinism: adjacent OSIDs are iterated in sorted order via strictCompare.
+ * GC: `cleanupExpiredEventModifiers` (in active_modifiers.ts) drops entries
+ *   when `expires_turn <= currentTurn`. The reader filter
+ *   `getCascadePenaltyForOsid` uses `expires_turn > currentTurn`, so
+ *   `expires_turn = turn + 2` means the penalty is active exactly on
+ *   turn `turn+1` and is GC'd at start of turn `turn+2`.
+ * Byte-stability: writes only on a flip with a non-null `prevController`.
+ *
+ * Singular ownership: this writer is the only path that emits cascade entries
+ * for E-A4. Reader: `getCascadePenaltyForOsid` (active_modifiers.ts) consumed
+ * in `computeDefenderPowerBreakdown` (combat_math.ts).
+ *
+ * See docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md §3 E-A4.
+ *
+ * Exported for unit-test isolation; production caller is the OSID-flip site
+ * in `resolveAttackOrdersOsid` below.
+ */
+export function emitCascadePenaltiesOnFlip(
+    state: GameState,
+    targetOsid: string,
+    prevController: FactionId | null,
+    adjacency: ReadonlyMap<string, readonly string[]> | Map<string, string[]>,
+    multiplier: number = 0.85,
+): void {
+    if (!prevController) return;
+    const currentTurn = state.meta?.turn ?? 0;
+    const neighbors = adjacency.get(targetOsid) ?? [];
+    const sortedNeighbors = [...neighbors].sort(strictCompare);
+    const pcMap = state.political?.political_controllers ?? {};
+    const penaltyList = (state.military.cascade_penalties ??= []);
+    for (const neighborOsid of sortedNeighbors) {
+        if (neighborOsid === targetOsid) continue;
+        if (pcMap[neighborOsid] !== prevController) continue;
+        penaltyList.push({
+            osid: neighborOsid,
+            multiplier,
+            expires_turn: currentTurn + 2,
+        });
+    }
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Main resolver
@@ -598,11 +731,30 @@ export function resolveAttackOrdersOsid(
         const targetSlope = slopeByOsid[targetOsid] ?? 0;
         const seasonal = getSeasonalModifiers(currentTurn, startDate, targetSlope);
         const targetTerrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
-        const concentrationBonus = getConcentrationBonus(attackerFormations.length);
+        // R13b op-level concentration mirror: amplify the concentration bonus
+        // when same-axis op-mates are within 2 hops of the target (theater
+        // coordination). Capped at 4 effective via Math.min to stay within
+        // the existing CONCENTRATION_BONUS_CAP=0.30. Same-axis (not whole op)
+        // scope prevents cross-axis amplification on Sarajevo ring / Drina.
+        let effectiveAttackerCount = attackerFormations.length;
+        const opMatch = findBrigadeOperationAnywhere(state, firstAttacker.id);
+        if (opMatch) {
+            const axis = getBrigadeAxis(opMatch.op, firstAttacker.id);
+            const sameAxisBrigades = axis?.assigned_brigades ?? opMatch.op.participating_brigades ?? [];
+            const attackerIds = new Set<FormationId>(attackerFormations.map(a => a.id));
+            effectiveAttackerCount += countAxisConcentrationSupport(
+                state,
+                sameAxisBrigades,
+                attackerIds,
+                adjacency,
+                targetOsid,
+            );
+        }
+        const concentrationBonus = getConcentrationBonus(Math.min(4, effectiveAttackerCount));
         // Formations with attack orders attack at their posture — but postures with
         // zero attack mult (defend, hold, dig_in) use 'attack' as minimum, since the
         // attack order itself implies attack intent. Preserves 'assault' (1.2×) bonus.
-        const attackerPower = attackerFormations.reduce((s, a) => {
+        const physicalPower = attackerFormations.reduce((s, a) => {
             const posture = a.posture ?? 'defend';
             const atkMult = POSTURE_ATTACK[posture] ?? 0;
             const effectivePosture = atkMult > 0 ? posture : 'attack';
@@ -610,8 +762,16 @@ export function resolveAttackOrdersOsid(
             // Support brigades contribute reduced power — main brigade carries the assault
             const supportMult = isSupportBrigadeOnActiveOp(state, a.id, a.corps_id) ? SUPPORT_POWER_MULT : 1.0;
             return s + rawPower * supportMult;
-        }, 0) * coordPenalty * seasonal.attack_mult * concentrationBonus
-            * getWarExhaustionTempoMult(state, attackerFaction); // P7: war exhaustion → attack tempo penalty
+        }, 0);
+        const tempoMult = getWarExhaustionTempoMult(state, attackerFaction); // P7: war exhaustion → attack tempo penalty
+        let attackerPower = physicalPower * coordPenalty * seasonal.attack_mult * concentrationBonus * tempoMult;
+        // ADR-0005 v2.2b: TG donor personnel scales anchor combat output. Donors are
+        // NOT physical brigades sharing frontage; they do NOT get concentrationBonus.
+        // Flag-off: donor branch dead; attackerPower equals the original expression.
+        if (ENABLE_TG_COMBAT_SYNTHESIS) {
+            const donorPower = computeTgDonorPower(state, attackerFormations, supplyStateByOsid, targetTerrainMult, targetOsid);
+            attackerPower += donorPower * coordPenalty * seasonal.attack_mult * tempoMult;
+        }
         defenderPower *= seasonal.defense_mult;
         const attackerIntelConfidence = getAttackIntelConfidence(
             state,
@@ -745,8 +905,42 @@ export function resolveAttackOrdersOsid(
         );
         for (const a of attackerFormations) {
             const cas = casShares.get(a.id) ?? 0;
-            applyPersonnelLoss(a, cas);
+            // ADR-0005 v2.2b: TG anchor distributes casualties to donors per pro-rata
+            // math. Anchor floor ≥50% (Hard Inv); donor cap = personnel_lent (Hard Inv #5).
+            // Flag-off: falls through to the original single-brigade applyPersonnelLoss.
+            if (ENABLE_TG_COMBAT_SYNTHESIS) {
+                const tg = findTgForAnchor(state, a.id);
+                if (tg && tg.donor_contributions.length > 0) {
+                    const dist = distributeCasualtiesAcrossTg(cas, a.id, tg.donor_contributions);
+                    applyPersonnelLoss(a, dist.anchor_casualties);
+                    for (const donorContrib of tg.donor_contributions) {
+                        const donorCas = dist.donor_casualties[donorContrib.brigade_id] ?? 0;
+                        if (donorCas <= 0) continue;
+                        const donor = state.military.formations[donorContrib.brigade_id];
+                        if (donor) applyPersonnelLoss(donor, donorCas);
+                        donorContrib.casualties_so_far += donorCas;
+                    }
+                } else {
+                    applyPersonnelLoss(a, cas);
+                }
+            } else {
+                applyPersonnelLoss(a, cas);
+            }
             a.cohesion = Math.max(0, Math.min(100, (a.cohesion ?? 60) + (COHESION_ATTACKER[outcome] ?? 0)));
+
+            // ADR-0005 v2.2c #2 / Hard Invariant #6: anchor destroyed mid-op → dissolve its TG
+            // immediately (don't wait for the next-tick beginRecovery in sector_offensive.ts).
+            // dissolveTacticalGroup clears donor personnel_lent_by_tg/equipment fields and sets
+            // tg_cooldown_until_turn on anchor + donors; surviving donors keep their already-debited
+            // casualties and return. The territory-revert sub-clause (held OSID → contested unless a
+            // 1-hop friendly non-TG brigade is present) is deferred: a destroyed anchor is a normal
+            // dead physical brigade, so existing brigade-death/control mechanics already vacate its
+            // OSID — TODO-v2.2c-followup to confirm no TG-specific zombie hold remains. Flag-gated.
+            if (ENABLE_TG_COMBAT_SYNTHESIS
+                && ((a.personnel ?? 0) < MIN_ATTACK_PERSONNEL || (a.cohesion ?? 60) < TG_ANCHOR_DISSOLVE_COHESION_FLOOR)) {
+                const anchorTg = findTgForAnchor(state, a.id);
+                if (anchorTg) dissolveTacticalGroup(state, anchorTg.id, state.meta?.turn ?? 0);
+            }
 
             // Sweeping undefended territory is less exhausting than real combat but not free —
             // logistics, occupation duties, scattered resistance, and advance tempo take a toll.
@@ -950,6 +1144,9 @@ export function resolveAttackOrdersOsid(
                 battle_id: battleId,
                 attacker_brigade: firstAttacker.id as string,
             } satisfies ControlEvent);
+
+            // Fall-1995 mechanic E-A4: cascade trigger (writer extracted for testability).
+            emitCascadePenaltiesOnFlip(state, targetOsid, prevController, adjacency);
         }
 
         // ── Increment operation combat feedback counters ──────────────

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+    bcsMessages,
+} from '../src/ui/map/i18n/messages.bcs';
+import {
     DEFAULT_LOCALE,
     LOCALE_STORAGE_KEY,
     getLocale,
@@ -50,5 +53,27 @@ describe('UI localization substrate', () => {
 
         memoryStorage.set(LOCALE_STORAGE_KEY, 'fr');
         expect(getLocale(storage)).toBe<Locale>('en');
+    });
+
+    it('keeps BCS copy free of common Serbian ekavian and Croatian lexical forms', () => {
+        const bcsCopy = Object.values(bcsMessages).join('\n').toLowerCase();
+        const forbiddenPatterns = [
+            /\btjed/,
+            /\bpovij/,
+            /\bstozer/,
+            /\bcasnik/,
+            /\bzapov/,
+            /\bopskr/,
+            /\bsustav/,
+            /\bvreme\b/,
+            /\bsledec/,
+            /\bprocena/,
+            /\bopsta\b/,
+            /\bopstina\b/,
+        ];
+
+        for (const pattern of forbiddenPatterns) {
+            expect(bcsCopy).not.toMatch(pattern);
+        }
     });
 });

@@ -206,11 +206,13 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
              style={{ zIndex: Z.MODAL_HARD }}>
             <button
                 type="button"
-                className="absolute inset-0 cursor-default border-0 bg-transparent p-0"
+                className="absolute inset-0 z-0 cursor-default border-0 bg-transparent p-0"
                 onClick={onClose}
                 aria-label={t('settings.close.ariaLabel')}
             />
-            <div className="w-[90%] max-w-[500px] max-h-[80vh] overflow-auto rounded-lg border border-[#8a7a60]/30 shadow-2xl p-6"
+            <div
+                 data-testid="settings-panel"
+                 className="relative z-10 w-[90%] max-w-[500px] max-h-[80vh] overflow-auto rounded-lg border border-[#8a7a60]/30 shadow-2xl p-6"
                  style={{ background: 'rgba(26, 24, 21, 0.97)' }}
             >
 
@@ -269,10 +271,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                     ariaLabel={t('settings.audio.soundscape.ariaLabel')}
                                 />
                             </SettingRow>
-                            <SettingRow
-                                label={t('settings.audio.masterVolume.label')}
-                                description={t('settings.audio.masterVolume.description')}
-                            >
+                            <SettingRow label={t('settings.masterVolume.label')} description={t('settings.masterVolume.description')}>
                                 <input
                                     type="range"
                                     min="0"
@@ -280,7 +279,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                     step="5"
                                     value={Math.round(audioPreferences.masterVolume * 100)}
                                     onChange={(event) => setMasterVolumePercent(event.target.value)}
-                                    aria-label={t('settings.audio.masterVolume.ariaLabel')}
+                                    aria-label={t('settings.masterVolume.aria')}
                                     className="w-28 accent-[#c4a35a]"
                                 />
                             </SettingRow>

@@ -14,6 +14,8 @@ import { playerFactionMatch } from './playerFactionMatch';
 import { strictCompare } from '../../../state/validateGameState';
 import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
+import { getDecisionSurface } from './decisionSurfaceRegistry';
+import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
 
 export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'intelligence_notification' | 'situation';
 export type InboxSeverity = 'blocking' | 'urgent' | 'normal' | 'info';
@@ -92,6 +94,17 @@ export function deriveInboxItems(
 
     const items: InboxItem[] = [];
     const playerFaction = state.player_faction;
+    const eventSurface = getDecisionSurface('event_decision');
+    const peaceSurface = getDecisionSurface('peace_plan');
+    const daytonSurface = getDecisionSurface('dayton_negotiation');
+    const paramilitarySurface = getDecisionSurface('paramilitary_request');
+    const convoySurface = getDecisionSurface('convoy_decision');
+    const reserveSurface = getDecisionSurface('reserve_request');
+    const officerSurface = getDecisionSurface('officer_event');
+    const operationSurface = getDecisionSurface('operation_opportunity');
+    const autonomySurface = getDecisionSurface('autonomy_proposal');
+    const intelligenceSurface = getDecisionSurface('intelligence_notification');
+    const situationSurface = getDecisionSurface('situation');
 
     // 1. Pending event decisions (BLOCKING — turn won't advance)
     const eventDecisions = state.pendingEventDecisions;
@@ -104,7 +117,7 @@ export function deriveInboxItems(
                 severity: 'blocking',
                 title: evt.event_title ?? 'Decision Required',
                 subtitle: `An event requires your response (turn ${evt.turn_fired}).`,
-                action: 'event_modal',
+                action: eventSurface.inboxAction,
                 priority: 10,
             });
         }
@@ -119,7 +132,7 @@ export function deriveInboxItems(
             severity: 'urgent',
             title: peacePlan.planName ?? 'Peace Proposal',
             subtitle: 'International mediators have presented a peace plan.',
-            action: 'peace_plan_modal',
+            action: peaceSurface.inboxAction,
             priority: 20,
         });
     }
@@ -133,7 +146,7 @@ export function deriveInboxItems(
             severity: 'blocking',
             title: 'Dayton Negotiation',
             subtitle: 'A final peace framework requires your territorial and institutional proposal.',
-            action: 'dayton_modal',
+            action: daytonSurface.inboxAction,
             priority: 22,
         });
     }
@@ -150,7 +163,7 @@ export function deriveInboxItems(
                     severity: 'normal',
                     title,
                     subtitle: detail,
-                    action: 'army_hq_opportunity',
+                    action: operationSurface.inboxAction,
                     priority: 32,
                 });
                 continue;
@@ -161,15 +174,18 @@ export function deriveInboxItems(
                 severity: 'normal',
                 title: 'Command Proposal',
                 subtitle: prop.description || `${prop.domain} proposal requires your review.`,
-                action: 'autonomy_panel',
+                action: autonomySurface.inboxAction,
                 priority: 35,
             });
         }
     }
 
-    // 4. Paramilitary requests
-    const paramilitaryRequests = state.pendingParamilitaryRequests ?? [];
-    if (paramilitaryRequests.length > 0 && state.paramilitaryPolicy === 'ask') {
+    // 4. Paramilitary requests — defensive faction filter so RS-only items
+    //    never surface to RBiH/HRHB inboxes (and vice versa). Upstream may
+    //    already filter, but the inbox is presidential-scoped by contract.
+    const paramilitaryRequests = (state.pendingParamilitaryRequests ?? [])
+        .filter((request) => playerFactionMatch(request.faction, playerFaction));
+    if (paramilitaryRequests.length > 0) {
         const totalStrength = paramilitaryRequests.reduce((sum, request) => sum + request.strength, 0);
         const projectedCivilianRisk = paramilitaryRequests.reduce((sum, request) => sum + request.estimated_civilian_risk, 0);
         const standingImpact = estimateInternationalStandingImpact(paramilitaryRequests.length);
@@ -178,12 +194,12 @@ export function deriveInboxItems(
             id: `paramilitary:${state.turn ?? 0}`,
             type: 'paramilitary_request',
             severity: 'blocking',
-            title: 'Paramilitary Authorization',
+            title: paramilitarySurface.playerLabel,
             subtitle:
                 `${paramilitaryRequests.length} deployment request${paramilitaryRequests.length === 1 ? '' : 's'} near ${samplePlace}; ` +
                 `${projectedCivilianRisk} projected civilian casualties; +${paramilitaryRequests.length} war crimes event${paramilitaryRequests.length === 1 ? '' : 's'}; ` +
                 `${standingImpact} international standing; historical context: Sensitive History Design Gate. Estimated strength ${totalStrength}.`,
-            action: 'paramilitary_review',
+            action: paramilitarySurface.inboxAction,
             priority: 25,
         });
     }
@@ -195,8 +211,8 @@ export function deriveInboxItems(
             type: 'convoy_decision',
             severity: 'normal',
             title: 'Humanitarian Convoy',
-            subtitle: `${convoy.route_faction} route to ${convoy.target_enclave}; ${convoy.supply_amount} supply awaits allow, block, or divert orders.`,
-            action: 'convoy_decision_modal',
+            subtitle: `${convoy.supply_amount} supply is awaiting a presidential instruction: allow, block, or divert the convoy.`,
+            action: convoySurface.inboxAction,
             priority: 38,
         });
     }
@@ -206,14 +222,14 @@ export function deriveInboxItems(
     if (reserveRequests) {
         for (const req of reserveRequests) {
             if (!playerFactionMatch(req.faction, playerFaction)) continue;
-            const corpsName = req.corps_id?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) ?? 'A corps';
+            const corpsName = getPlayerFacingCorpsName(req.corps_id, state.formations, 'An assigned command');
             items.push({
                 id: `reserve:${req.request_id}`,
                 type: 'reserve_request',
                 severity: 'normal',
                 title: 'Reserve Request',
                 subtitle: `${corpsName} requests reinforcement${req.purpose ? ` for ${req.purpose}` : ''}.`,
-                action: 'army_reserve',
+                action: reserveSurface.inboxAction,
                 priority: 40,
             });
         }
@@ -241,7 +257,7 @@ export function deriveInboxItems(
                 subtitle: evt.officer_name ? `Regarding ${evt.officer_name}.` : 'A personnel decision requires attention.',
                 updateCount: events.length,
                 sourceIds: events.map(event => event.event_id),
-                action: 'army_hq_personnel',
+                action: officerSurface.inboxAction,
                 priority: 50,
             });
         }
@@ -258,7 +274,7 @@ export function deriveInboxItems(
             severity: 'info',
             title: notification.headline,
             subtitle: notification.body,
-            action: 'dismiss_intelligence_notification',
+            action: intelligenceSurface.inboxAction,
             priority: 55,
         });
     }
@@ -281,7 +297,7 @@ export function deriveInboxItems(
             subtitle: losses.length === 1
                 ? `Enemy forces captured ${placeName}.`
                 : `Enemy forces captured ${losses.length} positions including ${placeName}.`,
-            action: 'army_hq_briefing',
+            action: situationSurface.inboxAction,
             priority: 60,
         });
     }
@@ -295,7 +311,7 @@ export function deriveInboxItems(
             subtitle: gains.length === 1
                 ? `Your forces secured ${placeName}.`
                 : `Your forces secured ${gains.length} positions including ${placeName}.`,
-            action: 'army_hq_briefing',
+            action: situationSurface.inboxAction,
             priority: 65,
         });
     }
@@ -307,7 +323,7 @@ export function deriveInboxItems(
         severity: 'info',
         title: dateStr,
         subtitle: `Situation as of ${dateStr}.`,
-        action: 'army_hq_briefing',
+        action: situationSurface.inboxAction,
         priority: 99,
     });
 

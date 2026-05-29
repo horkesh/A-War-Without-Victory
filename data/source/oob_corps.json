@@ -13,7 +13,6 @@
     { "id": "arbih_3rd_corps", "faction": "RBiH", "name": "3rd Corps", "hq_mun": "zenica", "hq_osid": "op:zenica:zenica_2", "available_from": 24 },
     { "id": "arbih_4th_corps", "faction": "RBiH", "name": "4th Corps", "hq_mun": "jablanica", "hq_osid": "op:jablanica:jablanica_2", "available_from": 24 },
     { "id": "arbih_5th_corps", "faction": "RBiH", "name": "5th Corps", "hq_mun": "bihac", "hq_osid": "op:bihac:bihac_2", "available_from": 24 },
-    { "id": "arbih_7th_corps", "faction": "RBiH", "name": "7th Corps", "hq_mun": "travnik", "hq_osid": "op:travnik:travnik_2", "available_from": 31 },
     { "id": "vrs_main_staff", "faction": "RS", "name": "Main Staff VRS", "hq_mun": "han_pijesak", "hq_osid": "op:hanpijesak:han_pijesak_2", "kind": "army_hq", "available_from": 0, "initial_officer_quality": 0.75, "initial_cohesion": 72 },
     { "id": "jna_herzegovina_command", "faction": "RS", "name": "JNA Herzegovina Command", "hq_mun": "nevesinje", "hq_osid": "op:nevesinje:sopilja", "available_from": 0 },
     { "id": "vrs_1st_krajina", "faction": "RS", "name": "1st Krajina Corps", "hq_mun": "banja_luka", "hq_osid": "op:banja_luka:banja_luka_2", "available_from": 0 },

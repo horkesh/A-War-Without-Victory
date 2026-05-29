@@ -8,6 +8,7 @@
  */
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Z } from '../../shared/zIndex';
+import { t } from '../i18n';
 
 export interface GlassPanelProps {
     position: 'left' | 'right' | 'overlay' | 'bottom-tray';
@@ -122,7 +123,7 @@ function PanelHeader({ title, onClose }: { title: string; onClose?: () => void }
                 <button
                     onClick={onClose}
                     className="text-text-secondary hover:text-accent-gold transition-colors text-base leading-none"
-                    aria-label="Close panel"
+                    aria-label={t('common.close')}
                 >
                     &times;
                 </button>

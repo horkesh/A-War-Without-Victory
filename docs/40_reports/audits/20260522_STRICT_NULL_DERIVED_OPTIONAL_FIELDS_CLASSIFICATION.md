@@ -10,13 +10,13 @@ The optional `GameState` contract floor remains:
 | Domain | Count |
 |---|---:|
 | `derived` | 8 |
-| `sim` | 296 |
-| `state` | 173 |
+| `sim` | 304 |
+| `state` | 174 |
 | `scenario` | 0 |
 | `ipc` | 0 |
 | `ui_adapter` | 0 |
 | `unknown` | 0 |
-| **Total** | **477** |
+| **Total** | **486** |
 
 ## Classification
 
@@ -41,4 +41,4 @@ No source fields should be promoted to required from this derived group in a cou
 node tools\diagnostics\strict_null_inventory.cjs --field-domains
 ```
 
-The command reports `derived: 8`, `unknown: 0`, and total optional fields `477`.
+The command reports `derived: 8`, `unknown: 0`, and total optional fields `486`.

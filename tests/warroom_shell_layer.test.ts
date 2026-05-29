@@ -48,8 +48,8 @@ describe('regionToShellHandoff', () => {
     expect(regionToShellHandoff('desk_radio')).toEqual({ kind: 'event-log' });
   });
 
-  it('diplomatic_telephone → army-hq summary', () => {
-    expect(regionToShellHandoff('diplomatic_telephone')).toEqual({ kind: 'army-hq', tab: 'summary' });
+  it('diplomatic_telephone → diplomacy panel', () => {
+    expect(regionToShellHandoff('diplomatic_telephone')).toEqual({ kind: 'diplomacy' });
   });
 
   it('wall_calendar_area → advance-turn', () => {
@@ -177,7 +177,7 @@ describe('WarroomShellLayer onNavigate contract', () => {
     expect(setAppScreen).toHaveBeenCalledWith('game');
   });
 
-  it('all mapped regions produce valid ShellHandoffCommands', () => {
+  it('all mapped regions produce valid shell or local Warroom commands', () => {
     const mappedRegions = [
       'wall_flag_area',
       'commander_coatrack',
@@ -191,7 +191,7 @@ describe('WarroomShellLayer onNavigate contract', () => {
     for (const regionId of mappedRegions) {
       const command = regionToShellHandoff(regionId);
       expect(command).toBeDefined();
-      expect(isShellHandoffCommand(command)).toBe(true);
+      expect(isShellHandoffCommand(command) || isWarroomLocalCommand(command)).toBe(true);
     }
   });
 });

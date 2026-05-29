@@ -32,6 +32,9 @@ function legacySave(): any {
             assignable_front_segments: [],
             brigade_front_assignment: {},
             militia_pools: {},
+            army_co_decision_traces: {},
+            army_corps_directives_by_faction: {},
+            event_decision_log: [],
             negotiation: {
                 capital: {},
                 patron_relationships: {},
@@ -49,6 +52,12 @@ function legacySave(): any {
             negotiation_ledger: [],
             supply_rights: { corridors: [] },
             municipalities: {},
+            war_consolidation_until: {},
+            war_control_strain: {},
+            war_supply_pressure: {},
+            war_supply_condition: {},
+            war_exhaustion: {},
+            war_exhaustion_local: {},
         },
         displacement: {
             displacement_event_log: [],
@@ -63,8 +72,7 @@ describe('counter-offer save migration', () => {
     it('moves old saves to current schema and materializes neutral counter-offer defaults', () => {
         const hydrated = deserializeState(JSON.stringify(legacySave()));
 
-        expect(CURRENT_SCHEMA_VERSION).toBe(14);
-        expect(hydrated.schema_version).toBe(14);
+        expect(hydrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
         expect(hydrated.meta.player_faction).toBe('RBiH');
         expect(hydrated.military.negotiation?.pending_counter_offers).toEqual([]);
         expect(hydrated.political.negotiation_status?.last_counter_turn).toEqual({});

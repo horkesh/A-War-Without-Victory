@@ -35,7 +35,9 @@ function makeState(washingtonSigned = false): GameState {
                 d: 'RBiH',
             },
             war_alliance_rbih_hrhb: washingtonSigned ? 0.8 : -0.4,
-            war_exhaustion: { RBiH: 35, HRHB: 30 },
+            // 2026-05-22: rescaled 100× (cap 100→10000, WASH_COMBINED_EXHAUSTION 55→5500)
+            // per forensics memo 20260522_FORENSICS_WAR_EXHAUSTION_CONVERGENCE.md
+            war_exhaustion: { RBiH: 3500, HRHB: 3000 },
             international_visibility_pressure: { negotiation_momentum: 0.8 },
             rbih_hrhb_state: {
                 war_started_turn: 45,
@@ -51,7 +53,22 @@ function makeState(washingtonSigned = false): GameState {
                 allied_mixed_municipalities: washingtonSigned ? ['travnik'] : [],
             },
         } as any,
-        displacement: {},
+        displacement: {
+            displacement_state: {},
+            minority_flight_state: {},
+            sustainability_state: {},
+            war_displacement_initiated: {},
+            hostile_takeover_timers: {},
+            displacement_camp_state: {},
+            displacement_event_log: [],
+            displacement_humanitarian_aggregates: {},
+            displacement_origin_dest_arrivals: {},
+            displacement_recent_by_turn: {},
+            settlement_displacement: {},
+            settlement_displacement_started_turn: {},
+            municipality_displacement: {},
+            civilian_casualties: {},
+        },
     } as GameState;
 }
 

@@ -167,6 +167,7 @@ describe('WarroomShellLayer accessibility proof', () => {
         const source = readFileSync('src/ui/map/components/warroom/WarroomShellLayer.tsx', 'utf8');
         expect(source).not.toContain('Comic Sans MS');
         expect(source).not.toContain("textOverflow: 'ellipsis'");
+        expect(source).not.toMatch(/fontSize:\s*['"][^'"]*vw/i);
         expect(source).toContain('data-testid="warroom-date-board-label"');
     });
 });

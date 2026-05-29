@@ -1,7 +1,7 @@
 # Command Briefing Canonical Paths
 
-**Date:** 2026-05-23  
-**Commit scope:** sim briefing read-model / serialized `last_briefing` truth  
+**Date:** 2026-05-23
+**Commit scope:** sim briefing read-model / serialized `last_briefing` truth
 **Status:** Implemented
 
 ## Summary

@@ -4,6 +4,8 @@ import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { Modal } from '../../shared/Modal';
 import { Z } from '../../shared/zIndex';
 import { t, type MessageKey } from '../i18n';
+import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
+import { DecisionModalImageHeader } from './DecisionModalImageHeader';
 
 type ConvoyDecision = 'allow' | 'block' | 'divert';
 
@@ -15,18 +17,18 @@ interface ConvoyDecisionModalProps {
 
 const DECISION_COPY: Record<ConvoyDecision, { labelKey: MessageKey; detailKey: MessageKey; className: string }> = {
     allow: {
-        labelKey: 'convoyDecision.action.allow.label',
-        detailKey: 'convoyDecision.action.allow.detail',
+        labelKey: 'convoyDecision.allow',
+        detailKey: 'convoyDecision.allowDetail',
         className: 'border-emerald-400/40 bg-emerald-500/12 text-emerald-200 hover:bg-emerald-500/22',
     },
     block: {
-        labelKey: 'convoyDecision.action.block.label',
-        detailKey: 'convoyDecision.action.block.detail',
+        labelKey: 'convoyDecision.block',
+        detailKey: 'convoyDecision.blockDetail',
         className: 'border-red-400/40 bg-red-500/12 text-red-200 hover:bg-red-500/22',
     },
     divert: {
-        labelKey: 'convoyDecision.action.divert.label',
-        detailKey: 'convoyDecision.action.divert.detail',
+        labelKey: 'convoyDecision.divert',
+        detailKey: 'convoyDecision.divertDetail',
         className: 'border-amber-300/45 bg-amber-400/12 text-amber-100 hover:bg-amber-400/22',
     },
 };
@@ -41,6 +43,7 @@ export function ConvoyDecisionModal({ convoy, onClose, onDecide }: ConvoyDecisio
     const [error, setError] = useState<string | null>(null);
 
     if (!convoy) return null;
+    const headerImage = getDecisionHeaderForFamily('convoy_decision');
 
     const handleDecision = async (decision: ConvoyDecision) => {
         setPendingDecision(decision);
@@ -51,7 +54,7 @@ export function ConvoyDecisionModal({ convoy, onClose, onDecide }: ConvoyDecisio
             onClose();
             return;
         }
-        setError(result.error ?? t('convoyDecision.error.stageFailed'));
+        setError(result.error ?? t('convoyDecision.stageFailed'));
     };
 
     return (
@@ -64,44 +67,37 @@ export function ConvoyDecisionModal({ convoy, onClose, onDecide }: ConvoyDecisio
             backdropClassName="bg-black/70 backdrop-blur-sm"
             panelClassName="w-[95%] max-w-[560px] rounded-lg border border-[rgba(180,160,130,0.22)] bg-[rgba(20,18,15,0.96)] shadow-2xl"
         >
-            <div className="p-5 text-text-primary">
-                <div className="flex items-start justify-between gap-4 border-b border-[rgba(180,160,130,0.14)] pb-4">
-                    <div>
-                        <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent-gold">
-                            {t('convoyDecision.title')}
-                        </div>
-                        <h2 id="convoy-decision-title" className="mt-1 text-lg font-bold text-white">
-                            {convoy.target_enclave}
-                        </h2>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="rounded-full border border-[rgba(180,160,130,0.18)] px-3 py-1 text-[11px] text-text-secondary hover:text-white"
-                    >
-                        {t('convoyDecision.close')}
-                    </button>
-                </div>
+            <div className="text-text-primary">
+                {headerImage && (
+                    <DecisionModalImageHeader
+                        imageUrl={headerImage}
+                        imageAlt="Humanitarian convoy"
+                        eyebrow={t('convoyDecision.title')}
+                        title={convoy.target_enclave}
+                        titleId="convoy-decision-title"
+                    />
+                )}
+                <div className="px-5 pb-5">
 
                 <div id="convoy-decision-summary" className="grid grid-cols-3 gap-2 py-4">
                     <div className="rounded border border-[rgba(180,160,130,0.14)] bg-[rgba(180,160,130,0.06)] p-2">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('convoyDecision.field.route')}</div>
+                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('convoyDecision.route')}</div>
                         <div className="mt-1 text-sm font-semibold text-white">
                             {getPlayerSafePoliticalFactionName(convoy.route_faction)}
                         </div>
                     </div>
                     <div className="rounded border border-[rgba(180,160,130,0.14)] bg-[rgba(180,160,130,0.06)] p-2">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('convoyDecision.field.supply')}</div>
+                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('convoyDecision.supply')}</div>
                         <div className="mt-1 text-sm font-semibold text-white">{convoy.supply_amount}</div>
                     </div>
                     <div className="rounded border border-[rgba(180,160,130,0.14)] bg-[rgba(180,160,130,0.06)] p-2">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('convoyDecision.field.staged')}</div>
-                        <div className="mt-1 text-sm font-semibold text-white">{formatConvoyDecision(convoy.decision)}</div>
+                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('convoyDecision.staged')}</div>
+                        <div className="mt-1 text-sm font-semibold text-white capitalize">{convoy.decision ?? t('common.none')}</div>
                     </div>
                 </div>
 
                 <p className="text-[12px] leading-relaxed text-text-secondary">
-                    {t('convoyDecision.summary')}
+                    {t('convoyDecision.body')}
                 </p>
 
                 {error && (
@@ -129,6 +125,16 @@ export function ConvoyDecisionModal({ convoy, onClose, onDecide }: ConvoyDecisio
                             </button>
                         );
                     })}
+                </div>
+                <div className="mt-4 flex justify-end border-t border-panel-border pt-4">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="rounded border border-panel-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary hover:text-text-primary"
+                    >
+                        {t('common.close')}
+                    </button>
+                </div>
                 </div>
             </div>
         </Modal>

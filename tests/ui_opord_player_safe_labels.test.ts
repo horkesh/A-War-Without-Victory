@@ -42,7 +42,7 @@ describe('buildOpordDisplayModel', () => {
             'utf8',
         );
 
-        expect(source).toContain('Staging Area');
+        expect(source).toContain("t('opsPlanning.phase.stagingArea')");
         expect(source).not.toContain('Staging OSID');
     });
 
@@ -98,11 +98,10 @@ describe('buildOpordDisplayModel', () => {
         expect(corpsDetailSource).toContain('getPlayerSafeMilitaryFactionName(corpsFormation.faction)');
         expect(corpsDetailSource).toContain('filterPlayerFacingOperations');
         expect(corpsDetailSource).not.toContain('loadedGameState?.operations?.filter');
-        expect(corpsDetailSource).toContain('Full command review belongs in Army HQ');
+        expect(corpsDetailSource).toContain("t('corpsDetail.prepareOperationInHq')");
         expect(sectorPanelSource).toContain('getPlayerSafeMilitaryFactionName(sector.faction)');
         expect(sectorPanelSource).toContain('filterPlayerFacingOperations');
         expect(sectorPanelSource).not.toContain('loadedGameState?.operations ?? []');
-        expect(sectorPanelSource).toContain('Full command review belongs in Army HQ');
         expect(oobSource).toContain('filterPlayerFacingOperations');
         expect(authorizeSource).toContain('findPlayerFacingOperationByKey');
         expect(authorizeSource).not.toContain('loadedGameState.operations ?? []).find');

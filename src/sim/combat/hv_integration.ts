@@ -189,7 +189,11 @@ function spawnHvBrigade(state: GameState, def: HvBrigadeDef): void {
         morale: def.morale,
         experience: def.experience,
         equipment_class: def.equipment_class,
-        tags: ['hv_origin', `corps:${HV_CORPS_ID}`],
+        // E-B2: tag with both legacy 'hv_origin' (existing readers) and the
+        // synthesis §3 E-B2 'attached_source:hv' so the Una negative-control
+        // gate in sector_offensive.ts can detect HV-dominant operations
+        // without adding a new FormationState field.
+        tags: ['hv_origin', 'attached_source:hv', `corps:${HV_CORPS_ID}`],
         composition: { ...def.composition },
     };
 

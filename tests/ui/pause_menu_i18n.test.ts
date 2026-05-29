@@ -48,6 +48,6 @@ describe('PauseMenu localization', () => {
         expect(screen.getByRole('button', { name: 'Nastavi' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Sacuvaj igru' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Glavni meni' })).toBeTruthy();
-        expect(screen.getByText('Komanda je pauzirana. Stanje planiranja je sacuvano.')).toBeTruthy();
+        expect(screen.getByText('Komanda je pauzirana. Plansko stanje je sacuvano.')).toBeTruthy();
     });
 });

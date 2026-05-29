@@ -47,7 +47,7 @@ describe('OpsPlanningModal draft discard guard', () => {
         const source = readFileSync('src/ui/map/components/ops_modal/OpsPlanningModal.tsx', 'utf8');
         expect(source).not.toContain('let nextAxisCounter');
         expect(source).toContain('requestCloseOpsPlanning');
-        expect(source).toContain('Discard operations draft?');
+        expect(source).toContain("t('opsPlanning.discard.title')");
         expect(source).toContain('getNextAxisId');
     });
 });

@@ -7,6 +7,9 @@ import osidAreasData from '../../../../data/derived/operational/osid_areas.json'
 import { getPlayerFacingFaction } from '../../shared/playerFacingLabels';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 import { Z } from '../../shared/zIndex';
+import { t } from '../i18n';
+import { BranchTagBadgeRow } from './BranchTagBadgeRow';
+import type { EventDefinition } from '../../../sim/events/event_types';
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
 
@@ -16,10 +19,25 @@ const primaryModes = MAP_MODES.filter(m => PRIMARY_MODES.includes(m.id));
 const secondaryModes = MAP_MODES.filter(m => !PRIMARY_MODES.includes(m.id));
 
 /**
+ * Phase H Packet 7 — props for catalog wiring.
+ *
+ * `eventCatalog` is supplied from `App.tsx` (boot-time load via
+ * `loadEventDefinitionsFull`). When provided alongside a player faction
+ * AND a raw GameState handle in `loadedGameState.rawGameState`, the
+ * H4 `BranchTagBadgeRow` is rendered inline in the faction-contextual
+ * indicator zone. Optional + degrades gracefully: existing callers that
+ * mount the strip without props (legacy / test harnesses) continue to
+ * render unchanged.
+ */
+export interface BottomStatusStripProps {
+  eventCatalog?: ReadonlyMap<string, EventDefinition>;
+}
+
+/**
  * Redesigned bottom bar — president's warroom situation ticker.
  * R6: Territory stacked bar with trend arrows. R8: Persistent +MORE expansion.
  */
-export function BottomStatusStrip() {
+export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {}) {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const playerFaction = getPlayerFacingFaction(loadedGameState);
   const playerOperations = useMemo(
@@ -173,7 +191,7 @@ export function BottomStatusStrip() {
               : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
           }`}
         >
-          {moreExpanded ? 'LESS' : secondaryModes.find(m => m.id === mapMode)?.label ?? '+MORE'}
+          {moreExpanded ? t('statusStrip.less') : secondaryModes.find(m => m.id === mapMode)?.label ?? t('statusStrip.more')}
         </button>
 
         {/* R8: Secondary modes — persistent inline extension */}
@@ -201,11 +219,11 @@ export function BottomStatusStrip() {
         type="button"
         className="hidden md:flex items-center gap-2 px-2 shrink-0 cursor-pointer hover:bg-white/5 rounded transition-colors"
         onClick={() => setStrategicDashboardOpen(true)}
-        aria-label="Open Strategic Dashboard"
-        title="Open Strategic Dashboard"
+        aria-label={t('statusStrip.openStrategicDashboard')}
+        title={t('statusStrip.openStrategicDashboard')}
       >
         {/* Player-safe bar */}
-        <div className="flex h-[14px] rounded-sm overflow-hidden w-[180px] border border-white/10" title="Territory control (area-weighted)">
+        <div className="flex h-[14px] rounded-sm overflow-hidden w-[180px] border border-white/10" title={t('statusStrip.territoryControlTitle')}>
           <div
             className="h-full transition-all duration-500 relative group"
             style={{ width: `${playerTerritoryPct}%`, backgroundColor: playerFaction ? (FACTION_HEX_COLORS[playerFaction] ?? '#888') : '#888' }}
@@ -232,7 +250,7 @@ export function BottomStatusStrip() {
         <div className="flex items-center gap-1.5">
           <span className={`flex items-center gap-0.5 font-mono tabular-nums ${playerFaction ? (FACTION_COLORS_SUBTLE[playerFaction] ?? 'text-text-primary') : 'text-text-primary'}`}>
             <span className="text-[11px] font-bold">
-              Friendly {playerTerritoryPct.toFixed(1)}%
+              {t('statusStrip.friendlyPct', { pct: playerTerritoryPct.toFixed(1) })}
               {playerTerritoryTrend && (
                 <span className={`ml-0.5 ${playerTerritoryTrend.includes('\u2191') ? 'text-emerald-400' : playerTerritoryTrend.includes('\u2193') ? 'text-red-400' : 'text-text-secondary/50'}`}>
                   {playerTerritoryTrend}
@@ -242,7 +260,7 @@ export function BottomStatusStrip() {
           </span>
           <span className="text-white/10">|</span>
           <span className="flex items-center gap-0.5 font-mono tabular-nums text-text-secondary">
-            <span className="text-[9px]">Hostile-held {hostileHeldPct.toFixed(1)}%</span>
+            <span className="text-[9px]">{t('statusStrip.hostileHeldPct', { pct: hostileHeldPct.toFixed(1) })}</span>
           </span>
         </div>
       </button>
@@ -275,7 +293,7 @@ export function BottomStatusStrip() {
           <>
             {showAlliance && <span className="text-white/10">|</span>}
             <span className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-white/10 bg-panel-bg/50">
-              <span className="text-[9px] text-white/50 uppercase font-semibold">International:</span>
+              <span className="text-[9px] text-white/50 uppercase font-semibold">{t('statusStrip.international')}:</span>
               <span style={{ color: internationalStatus.color }} className="font-bold uppercase text-[10px] tracking-wider">{internationalStatus.status}</span>
             </span>
           </>
@@ -287,8 +305,24 @@ export function BottomStatusStrip() {
             <span className="text-white/10">|</span>
             <span className="flex items-center gap-1 text-accent-gold">
               <Icon name="operation" size={10} color="#c4a35a" />
-              <span className="text-[9px]">{playerOperations.length} ops</span>
+              <span className="text-[9px]">{t('statusStrip.opsCount', { count: playerOperations.length })}</span>
             </span>
+          </>
+        )}
+
+        {/* Phase H Packet 7 — H4 Branch-tag faction badge row mount.
+            The component self-degrades when state / catalog absent or no
+            tags active, so the surrounding divider is conditional on the
+            child rendering. Mount lives inside the faction-contextual
+            indicator zone per H1 §4.2D guidance. */}
+        {playerFaction && eventCatalog && loadedGameState?.rawGameState && (
+          <>
+            <span className="text-white/10">|</span>
+            <BranchTagBadgeRow
+              faction={playerFaction}
+              eventCatalog={eventCatalog}
+              state={loadedGameState.rawGameState}
+            />
           </>
         )}
       </div>
@@ -305,7 +339,7 @@ export function BottomStatusStrip() {
             layersOpen ? 'bg-white/10 text-text-primary' : 'text-text-secondary/50 hover:text-text-secondary'
           }`}
         >
-          LAYERS
+          {t('statusStrip.layers')}
         </button>
         {layersOpen && (
           <div

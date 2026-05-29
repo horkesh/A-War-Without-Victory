@@ -34,7 +34,8 @@ import {
 import { ensureBrigadeComposition } from './equipment_effects.js';
 import type { Osid } from './osid_adjacency.js';
 import { getHomeDistanceMult } from './home_distance.js';
-import { getActiveEquipmentQualityMultiplier } from '../events/active_modifiers.js';
+import { getActiveEquipmentQualityMultiplier, getCascadePenaltyForOsid } from '../events/active_modifiers.js';
+import { getStrategicDepth, getKrajinaCollapseMult } from './strategic_depth.js';
 
 type CombatMathProfileTimer = <T>(labelSuffix: string, fn: () => T) => T;
 
@@ -58,6 +59,28 @@ export interface DefenderPowerBreakdown {
     homeMult: number;
     moraleMult: number;
     equipmentQualityMult: number;
+    /** Fall-1995 mechanic E-A3: 1.0× when defender corps faces ≤1 enemy offensive
+     *  (byte-stable historical path). 0.9× / 0.8× / 0.7× when facing 2 / 3 / 4+
+     *  simultaneous enemy offensives. Source: `state.military.active_offensives_against_corps`. */
+    multiAxisMult: number;
+    /** Fall-1995 mechanic E-A4: 1.0× when no cascade penalty active on this OSID
+     *  (byte-stable historical path). <1.0× when an adjacent OSID just flipped
+     *  this turn. Source: `getCascadePenaltyForOsid`. */
+    cascadeMult: number;
+    /** Fall-1995 mechanic E-B3 consumer: 1.0× when defender corps has full
+     *  strategic_depth (1.0). <1.0× when depth is reduced (rear-area paralysis,
+     *  partner-buffer loss, frontage overstretch). Formula: 0.5 + 0.5×depth.
+     *  Source: `getStrategicDepth(corps formation)` from strategic_depth.ts. */
+    strategicDepthMult: number;
+    /** Post-Storm VRS Krajina coordination-collapse penalty: 1.0× by default
+     *  (byte-stable historical path). 0.65× for vrs_1st_krajina + vrs_2nd_krajina
+     *  while `operation_storm_triggered === true`. Models the historical loss
+     *  of rear-area cushion + refugee paralysis + frontage overstretch after
+     *  SVK destruction (ICTY Mladić MICT-13-56 §3437–3450; BB v2 ch 28).
+     *  Stacks multiplicatively with NATO Deliberate Force ×0.70 equipment-
+     *  quality suppression (distinct mechanism: rear-area vs C2/ammo damage).
+     *  Source: `getKrajinaCollapseMult` from strategic_depth.ts. */
+    krajinaCollapseMult: number;
     power: number;
 }
 
@@ -1463,6 +1486,90 @@ export function computeDefenderPowerBreakdown(
         getActiveEquipmentQualityMultiplier(state, formation.faction, state.meta.turn ?? 0)
     );
     if (eqMult !== 1.0) power *= eqMult;
+
+    // ── Fall-1995 mechanic E-A3: multi-axis simultaneity penalty ──────────
+    // When the defending corps is facing multiple simultaneous enemy
+    // offensive operations, it cannot laterally redeploy and effective
+    // power degrades by 10% per additional offensive, capped at 4+ offensives
+    // (i.e. min(n-1, 3) → 1.0× / 0.9× / 0.8× / 0.7×).
+    // Source cache: `state.military.active_offensives_against_corps` (built
+    // turn-start in war_phases.ts `build-active-offensives-cache`).
+    // Byte-stability: gated `if (multiAxisMult !== 1.0)` so the historical
+    // single-offensive path is untouched.
+    let multiAxisMult = 1.0;
+    const defenderCorpsId = formation.corps_id;
+    if (defenderCorpsId) {
+        const offensiveCount = state.military.active_offensives_against_corps?.[defenderCorpsId] ?? 0;
+        if (offensiveCount > 1) {
+            const cappedExcess = Math.min(offensiveCount - 1, 3);
+            multiAxisMult = 1.0 - 0.10 * cappedExcess;
+        }
+    }
+    if (multiAxisMult !== 1.0) power *= multiAxisMult;
+
+    // ── Fall-1995 mechanic E-A4: cascade trigger (1-turn adjacency penalty) ──
+    // When an adjacent OSID flipped to the enemy last turn, this defender OSID
+    // receives a 1-turn defender-power penalty. Penalty entries are written in
+    // attack_resolution_osid.ts on flip and GC'd by cleanupExpiredEventModifiers.
+    // Byte-stability: gated `!== 1.0` so the historical (no-cascade) path is
+    // untouched. Reader filters by expires_turn > currentTurn.
+    const cascadeMult = combatMathProfileTime(profileTime, '.cascade', () =>
+        getCascadePenaltyForOsid(state, targetOsid, state.meta.turn ?? 0)
+    );
+    if (cascadeMult !== 1.0) power *= cascadeMult;
+
+    // ── Fall-1995 mechanic E-B3 consumer: strategic_depth → defender power ──
+    // Lower strategic_depth (lost partner buffer, frontage overstretch, rear-
+    // area paralysis from neighboring-faction collapse) reduces defender
+    // effective combat power. Formula: mult = 0.5 + 0.5*depth.
+    //   depth=1.0 (default) → 1.0 (no effect; byte-stable historical path)
+    //   depth=0.84 (vrs_2nd_krajina pre-Storm w/ SVK partner buffer) → 0.92
+    //   depth=0.60 (typical post-Storm or independent corps) → 0.80
+    //   depth=0.42 (post-Storm 0.7× collapse if applied) → 0.71
+    //   depth=0.10 (floor) → 0.55
+    // Faction-symmetric: gates off the per-corps strategic_depth field computed
+    // by strategic_depth.ts, not faction id. Default 1.0 from getStrategicDepth
+    // means corps without computed depth produce zero behavior change.
+    //
+    // Historical basis: ICTY Gotovina IT-06-90-T + Mladić MICT-13-56 §3437-3450
+    // + BB v2 §28 — VRS Krajina post-Storm collapse stemmed from loss of rear
+    // depth (SVK destruction + 165k refugee paralysis + frontage overstretch
+    // from 30→50-60 km/bde), not from direct battle attrition. The corps did
+    // not lose battles — it lost coordination. Universal military principle:
+    // rear depth → sustained effective combat power.
+    //
+    // Byte-stability: gated `!== 1.0` so corps with default depth produce no
+    // behavior change vs the historical pre-consumer code path.
+    let strategicDepthMult = 1.0;
+    if (formation.corps_id) {
+        const defenderCorps = state.military.formations?.[formation.corps_id];
+        if (defenderCorps) {
+            const defenderDepth = getStrategicDepth(defenderCorps);
+            if (defenderDepth < 1.0) {
+                strategicDepthMult = 0.5 + 0.5 * defenderDepth;
+            }
+        }
+    }
+    if (strategicDepthMult !== 1.0) power *= strategicDepthMult;
+
+    // ── Post-Storm VRS Krajina coordination-collapse penalty ─────────────
+    // Distinct from strategicDepthMult (geometric, slow-recovery oriented)
+    // and from equipmentQualityMult (NATO C2/ammo air-campaign damage).
+    // Models the historical 4-day collapse pattern (BB v2 ch 28) caused by
+    // SVK destruction (lost rear cushion) + ~165k Krajina Serb refugee
+    // paralysis through Bosanski Petrovac/Drvar/Glamoč + frontage stretch
+    // from 30 to 50-60 km/bde. The corps did not lose battles — it lost
+    // coordination (ICTY Mladić MICT-13-56 §3437-3450). Engine reproduces
+    // emergently via 0.65× defender power for vrs_1st_krajina + vrs_2nd_krajina
+    // once operation_storm_triggered = true. Stacks with NATO ×0.70 → ~0.455×
+    // combined defender power for these corps post-Storm.
+    // Sacred-rule: faction-symmetric in structure (corps-id list gate, not
+    // faction predicate); gated `!== 1.0` for byte-stable pre-Storm path.
+    const krajinaCollapseMult = combatMathProfileTime(profileTime, '.krajinaCollapse', () =>
+        getKrajinaCollapseMult(state, formation)
+    );
+    if (krajinaCollapseMult !== 1.0) power *= krajinaCollapseMult;
+
     return {
         base,
         postureMult,
@@ -1483,6 +1590,10 @@ export function computeDefenderPowerBreakdown(
         homeMult,
         moraleMult: moralePenalty,
         equipmentQualityMult: eqMult,
+        multiAxisMult,
+        cascadeMult,
+        strategicDepthMult,
+        krajinaCollapseMult,
         power,
     };
 }
@@ -1572,8 +1683,12 @@ export function rankDefendersByPower(
 // P7 — War Exhaustion → Attack Tempo Penalty
 // ═══════════════════════════════════════════════════════════════════════════
 
-const WAR_EXHAUSTION_TEMPO_THRESHOLD_LOW  = 30;
-const WAR_EXHAUSTION_TEMPO_THRESHOLD_HIGH = 80;
+// 2026-05-22: rescaled 30/80 → 3000/8000 alongside war_exhaustion cap 100 → 10000
+// per forensics memo `20260522_FORENSICS_WAR_EXHAUSTION_CONVERGENCE.md` §6.
+// Uniform 100× rescale preserves the original 0-100 percentage-scale semantics
+// (tempo penalty starts at 30% of cap, fully applied at 80% of cap).
+const WAR_EXHAUSTION_TEMPO_THRESHOLD_LOW  = 3000;
+const WAR_EXHAUSTION_TEMPO_THRESHOLD_HIGH = 8000;
 const WAR_EXHAUSTION_TEMPO_MULT_MIN       = 0.85;
 
 /**

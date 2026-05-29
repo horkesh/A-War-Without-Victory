@@ -125,7 +125,7 @@ describe('supply pressure', () => {
 
         updateSupplyPressure(state, [], undefined, undefined, undefined, undefined);
 
-        expect(state.political.war_supply_condition).toBeUndefined();
+        expect(state.political.war_supply_condition).toEqual({});
         expect(state.political.war_supply_pressure).toEqual({ RBiH: 20, RS: 20, HRHB: 20 });
     });
 

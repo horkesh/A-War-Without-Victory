@@ -6,6 +6,7 @@
 import type { LoadedGameState } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { t } from '../i18n';
 
 const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -71,7 +72,7 @@ export function SupplyPanel({ state }: SupplyPanelProps) {
       style={{ bottom: '36px', left: 'calc(15.5rem + 12px)', minWidth: '200px', direction: 'ltr' }}
     >
       <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
-        Logistics
+        {t('supply.logistics')}
       </div>
 
       {/* Reserve bars */}
@@ -83,14 +84,14 @@ export function SupplyPanel({ state }: SupplyPanelProps) {
             return (
               <div key={faction} className="space-y-0.5">
                 <span className={`text-[10px] font-semibold ${color}`}>{getPlayerSafeMilitaryFactionName(faction, faction)}</span>
-                <ReserveBar label="Supply" value={r?.generalSupply ?? 0} color="text-text-secondary" />
-                <ReserveBar label="Ammo" value={r?.heavyMunitions ?? 0} color="text-text-secondary" />
+                <ReserveBar label={t('economy.supply')} value={r?.generalSupply ?? 0} color="text-text-secondary" />
+                <ReserveBar label={t('economy.ammo')} value={r?.heavyMunitions ?? 0} color="text-text-secondary" />
               </div>
             );
           })}
         </div>
       ) : (
-        <div className="text-text-secondary text-[10px] italic">Reserves disabled</div>
+        <div className="text-text-secondary text-[10px] italic">{t('supply.reservesDisabled')}</div>
       )}
 
       {/* Corridor summary */}

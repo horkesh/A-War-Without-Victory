@@ -15,21 +15,25 @@ const DEFAULT_OUT_DIR = path.join(
   'visual_validation',
   '20260518_presidential_loop',
 );
-const DEFAULT_SAVE_PATH = path.join(ROOT, 'data', 'derived', 'latest_run_final_save.json');
+const DEFAULT_SAVE_PATH = '';
 
 const url = process.env.AWWV_LOOP_SMOKE_URL || process.argv[2] || DEFAULT_URL;
 const outDir = process.env.AWWV_LOOP_SMOKE_OUT_DIR || DEFAULT_OUT_DIR;
 const savePath = process.env.AWWV_LOOP_SMOKE_SAVE || DEFAULT_SAVE_PATH;
+const chromeExecutablePath = process.env.PUPPETEER_EXECUTABLE_PATH
+  || process.env.AWWV_CHROME_EXECUTABLE
+  || [
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  ].find((candidate) => fs.existsSync(candidate));
 
 const LOOP_STEPS = [
+  { id: 'desk', label: 'Desk', action: 'observe', expectText: "President's Desk" },
   { id: 'brief', label: 'Brief', action: 'open-hq', expectText: 'Strategic Priorities' },
-  { id: 'inspect', label: 'Inspect', action: 'click-text', text: 'War Summary', expectText: 'War Summary' },
-  { id: 'decide', label: 'Decide', action: 'open-hq', expectText: 'Strategic Priorities' },
-  { id: 'execute', label: 'Execute', action: 'observe', expectText: 'Review Before Advance' },
-  { id: 'report', label: 'Report', action: 'click-text', text: 'RECORDS', expectText: 'RECORDS' },
-  { id: 'cost', label: 'Cost', action: 'click-text', text: 'AFTERMATH', expectText: 'Turn' },
-  { id: 'judge', label: 'Judge', action: 'close-hq-click-text', text: 'CHRONICLE', expectText: 'Chronicle' },
-  { id: 'next', label: 'Next', action: 'open-hq', expectText: 'Strategic Priorities' },
+  { id: 'inspect', label: 'Inspect', action: 'click-text', text: 'WAR SUMMARY', expectText: 'War Summary' },
+  { id: 'execute', label: 'Execute', action: 'open-advance-clearance', expectText: 'Review Before Advance' },
+  { id: 'report', label: 'Report', action: 'click-text', text: 'RECORDS', expectText: 'Decision Log' },
+  { id: 'next', label: 'Next', action: 'close-hq-click-text', text: 'DESK', expectText: "President's Desk" },
 ];
 
 function ensureDir(dir) {
@@ -47,17 +51,26 @@ async function visibleText(page) {
 async function clickByText(page, text) {
   const clicked = await page.evaluate((needle) => {
     const normalizedNeedle = needle.toLowerCase();
-    const candidates = Array.from(document.querySelectorAll('button, [role="button"], a')).reverse();
-    const target = candidates.find((el) => {
+    const candidates = Array.from(document.querySelectorAll('button, [role="button"], a'))
+      .map((el) => {
+        const label = [
+          el.textContent,
+          el.getAttribute('aria-label'),
+          el.getAttribute('title'),
+        ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim().toLowerCase();
+        return { el, label };
+      })
+      .filter(({ el, label }) => {
       const rect = el.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return false;
-      const label = [
-        el.textContent,
-        el.getAttribute('aria-label'),
-        el.getAttribute('title'),
-      ].filter(Boolean).join(' ').toLowerCase();
       return label.includes(normalizedNeedle);
-    });
+      })
+      .sort((a, b) => {
+        const aExact = a.label === normalizedNeedle ? 0 : 1;
+        const bExact = b.label === normalizedNeedle ? 0 : 1;
+        return aExact - bExact || a.label.length - b.label.length;
+      });
+    const target = candidates[0]?.el;
     if (!target) return false;
     target.click();
     return true;
@@ -74,17 +87,26 @@ function delay(ms) {
 async function clickIfText(page, text) {
   return page.evaluate((needle) => {
     const normalizedNeedle = needle.toLowerCase();
-    const candidates = Array.from(document.querySelectorAll('button, [role="button"], a')).reverse();
-    const target = candidates.find((el) => {
+    const candidates = Array.from(document.querySelectorAll('button, [role="button"], a'))
+      .map((el) => {
+        const label = [
+          el.textContent,
+          el.getAttribute('aria-label'),
+          el.getAttribute('title'),
+        ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim().toLowerCase();
+        return { el, label };
+      })
+      .filter(({ el, label }) => {
       const rect = el.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return false;
-      const label = [
-        el.textContent,
-        el.getAttribute('aria-label'),
-        el.getAttribute('title'),
-      ].filter(Boolean).join(' ').toLowerCase();
       return label.includes(normalizedNeedle);
-    });
+      })
+      .sort((a, b) => {
+        const aExact = a.label === normalizedNeedle ? 0 : 1;
+        const bExact = b.label === normalizedNeedle ? 0 : 1;
+        return aExact - bExact || a.label.length - b.label.length;
+      });
+    const target = candidates[0]?.el;
     if (!target) return false;
     target.click();
     return true;
@@ -93,19 +115,30 @@ async function clickIfText(page, text) {
 
 async function openArmyHq(page) {
   const clicked = await page.evaluate(() => {
-    const candidates = Array.from(document.querySelectorAll('button, [role="button"], a')).reverse();
-    const target = candidates.find((el) => {
+    const candidates = Array.from(document.querySelectorAll('button, [role="button"], a'))
+      .map((el) => {
+        const label = [
+          el.textContent,
+          el.getAttribute('aria-label'),
+          el.getAttribute('title'),
+        ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim().toLowerCase();
+        return { el, label };
+      })
+      .filter(({ el, label }) => {
       const rect = el.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return false;
-      const label = [
-        el.textContent,
-        el.getAttribute('aria-label'),
-        el.getAttribute('title'),
-      ].filter(Boolean).join(' ').toLowerCase();
       return label.includes('visit army hq')
+        || label.includes('call army hq')
+        || label === 'army hq'
         || /\barmy\b.*\bhq\b.*\[h\]/.test(label)
         || label.includes('open army hq presidential attention queue');
-    });
+      })
+      .sort((a, b) => {
+        const aExact = a.label === 'call army hq' ? 0 : 1;
+        const bExact = b.label === 'call army hq' ? 0 : 1;
+        return aExact - bExact || a.label.length - b.label.length;
+      });
+    const target = candidates[0]?.el;
     if (!target) return false;
     target.click();
     return true;
@@ -118,10 +151,17 @@ async function openArmyHq(page) {
 }
 
 async function dismissKnownBlockingOverlays(page) {
-  for (const label of ['Review Later', 'Cancel', 'Continue']) {
-    const clicked = await clickIfText(page, label);
-    if (clicked) {
-      await delay(300);
+  for (let attempts = 0; attempts < 4; attempts += 1) {
+    let dismissed = false;
+    for (const label of ['Skip Tutorial', 'Review Later', 'Read Later', 'Dismiss', 'Cancel', 'Continue']) {
+      const clicked = await clickIfText(page, label);
+      if (clicked) {
+        dismissed = true;
+        await delay(300);
+      }
+    }
+    if (!dismissed) {
+      return;
     }
   }
 }
@@ -140,6 +180,11 @@ async function captureStep(page, step, index) {
     await openArmyHq(page);
   } else if (step.action === 'click-text') {
     await clickByText(page, step.text);
+  } else if (step.action === 'open-advance-clearance') {
+    await clickByText(page, 'DESK');
+    await waitForVisibleText(page, "President's Desk");
+    await delay(500);
+    await clickByText(page, 'Advance Clearance');
   } else if (step.action === 'close-hq-click-text') {
     await clickIfText(page, 'Close Army Headquarters');
     await delay(250);
@@ -205,11 +250,22 @@ async function captureStep(page, step, index) {
     await clickIfText(page, 'Close');
     await delay(250);
   }
+  if (step.id === 'report') {
+    await clickIfText(page, 'Close Army Headquarters');
+    await delay(250);
+  }
 
   return result;
 }
 
 async function seedSave(page) {
+  if (!savePath) {
+    await page.waitForFunction(() => (document.body?.innerText ?? '').includes('CHOOSE YOUR FACTION'), { timeout: 15000 });
+    await clickByText(page, 'RBiH');
+    await page.waitForFunction(() => (document.body?.innerText ?? '').includes("PRESIDENT'S DESK"), { timeout: 20000 });
+    await dismissKnownBlockingOverlays(page);
+    return;
+  }
   const saveJson = fs.readFileSync(savePath, 'utf8');
   await page.waitForFunction('typeof window.handleManualSaveLoad === "function"', { timeout: 15000 });
   await page.evaluate(async (jsonText) => {
@@ -225,6 +281,7 @@ async function main() {
   ensureDir(outDir);
   const browser = await puppeteer.launch({
     headless: true,
+    executablePath: chromeExecutablePath,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -236,7 +293,7 @@ async function main() {
 
   const summary = {
     url,
-    savePath: path.relative(ROOT, savePath).replace(/\\/g, '/'),
+    savePath: savePath ? path.relative(ROOT, savePath).replace(/\\/g, '/') : 'side-picker:RBiH',
     outDir: path.relative(ROOT, outDir).replace(/\\/g, '/'),
     steps: [],
     passed: false,

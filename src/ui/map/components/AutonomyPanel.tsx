@@ -16,6 +16,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { GlassPanel } from './GlassPanel';
 import { playerFactionMatch } from '../data/playerFactionMatch';
+import { t, type MessageKey } from '../i18n';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -64,18 +65,18 @@ function getAutonomyBridge(): AutonomyBridge | undefined {
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
-const LEVEL_LABELS: Record<number, string> = {
-    0: 'Full Control',
-    1: 'Assisted',
-    2: 'Delegated',
-    3: 'Observer',
+const LEVEL_LABEL_KEYS: Record<number, MessageKey> = {
+    0: 'autonomy.level.fullControl',
+    1: 'autonomy.level.assisted',
+    2: 'autonomy.level.delegated',
+    3: 'autonomy.level.observer',
 };
 
-const LEVEL_DESCS: Record<number, string> = {
-    0: 'All decisions yours. No AI proposals.',
-    1: 'AI proposes corps stances. You approve each.',
-    2: 'AI executes unless you override.',
-    3: 'Full AI command. You observe.',
+const LEVEL_DESC_KEYS: Record<number, MessageKey> = {
+    0: 'autonomy.level.fullControl.desc',
+    1: 'autonomy.level.assisted.desc',
+    2: 'autonomy.level.delegated.desc',
+    3: 'autonomy.level.observer.desc',
 };
 
 // ── ProposalCard ───────────────────────────────────────────────────────────
@@ -108,8 +109,8 @@ function ProposalCard({ proposal, onAccept, onReject, busy }: ProposalCardProps)
 
     const statusIndicator = resolved
         ? proposal.accepted
-            ? { label: 'Accepted', cls: 'text-green-400 border-green-500/30 bg-green-900/10' }
-            : { label: 'Rejected', cls: 'text-red-400 border-red-500/30 bg-red-900/10' }
+            ? { label: t('autonomy.proposal.accepted'), cls: 'text-green-400 border-green-500/30 bg-green-900/10' }
+            : { label: t('autonomy.proposal.rejected'), cls: 'text-red-400 border-red-500/30 bg-red-900/10' }
         : null;
 
     return (
@@ -123,10 +124,10 @@ function ProposalCard({ proposal, onAccept, onReject, busy }: ProposalCardProps)
             {/* Corps / domain header */}
             <div className="flex items-center justify-between gap-2">
                 <span className="text-[11px] font-mono text-[#c4a04a] font-semibold tracking-wide truncate">
-                    {isOp ? `Op Order — ${corpsLabel}` : corpsLabel}
+                    {isOp ? t('autonomy.proposal.opOrderFor', { corps: corpsLabel }) : corpsLabel}
                 </span>
                 <span className="text-[9px] font-mono text-[#8a8578] uppercase tracking-[0.15em] shrink-0">
-                    {proposal.domain === 'ops' ? 'OP ORDER' : proposal.domain}
+                    {proposal.domain === 'ops' ? t('autonomy.proposal.opOrder') : proposal.domain}
                 </span>
             </div>
 
@@ -156,14 +157,14 @@ function ProposalCard({ proposal, onAccept, onReject, busy }: ProposalCardProps)
                         disabled={busy}
                         className="flex-1 py-1 text-[9px] font-mono uppercase tracking-[0.15em] rounded border border-green-500/25 bg-green-900/15 text-green-300 hover:bg-green-900/30 hover:border-green-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
-                        {isOp ? 'Authorize' : 'Accept'}
+                        {isOp ? t('autonomy.proposal.authorize') : t('autonomy.proposal.accept')}
                     </button>
                     <button
                         onClick={() => onReject(proposal.id)}
                         disabled={busy}
                         className="flex-1 py-1 text-[9px] font-mono uppercase tracking-[0.15em] rounded border border-red-500/25 bg-red-900/10 text-red-400 hover:bg-red-900/25 hover:border-red-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
-                        {isOp ? 'Abort' : 'Reject'}
+                        {isOp ? t('autonomy.proposal.abort') : t('autonomy.proposal.reject')}
                     </button>
                 </div>
             )}
@@ -213,7 +214,7 @@ export function AutonomyPanel({ onClose, playerFaction }: AutonomyPanelProps) {
             const result = await bridge.setAutonomyLevel(level);
             if (!result.ok && result.error) {
                 if (result.error === 'level_2_plus_not_yet_enabled') {
-                    setLevelError('Levels 2–3 are not yet unlocked.');
+                    setLevelError(t('autonomy.levelsLocked'));
                 } else {
                     setLevelError(result.error);
                 }
@@ -259,7 +260,7 @@ export function AutonomyPanel({ onClose, playerFaction }: AutonomyPanelProps) {
     const unresolvedCount = proposals.filter((p) => p.accepted === undefined).length;
 
     return (
-        <GlassPanel position="right" title="Command Autonomy" width="288px" onClose={onClose}>
+        <GlassPanel position="right" title={t('autonomy.title')} width="288px" onClose={onClose}>
             {loading ? (
                 <div className="flex items-center justify-center py-8">
                     <div className="w-5 h-5 border-2 border-[#c4a04a]/40 border-t-[#c4a04a] rounded-full animate-spin" />
@@ -269,14 +270,14 @@ export function AutonomyPanel({ onClose, playerFaction }: AutonomyPanelProps) {
                     {/* IPC unavailable notice */}
                     {!bridge && (
                         <div className="text-[9px] font-mono text-[#8a8578] bg-black/20 border border-white/5 rounded px-2.5 py-1.5">
-                            Autonomy controls require the Electron desktop shell.
+                            {t('autonomy.electronRequired')}
                         </div>
                     )}
 
                     {/* ── Autonomy Level Selector ── */}
                     <div className="space-y-2">
                         <div className="text-[9px] font-mono text-[#8a8578] uppercase tracking-[0.2em]">
-                            Autonomy Level
+                            {t('autonomy.level')}
                         </div>
 
                         {([0, 1, 2, 3] as const).map((level) => {
@@ -310,24 +311,24 @@ export function AutonomyPanel({ onClose, playerFaction }: AutonomyPanelProps) {
                                                     isActive ? 'text-[#c4a04a]' : 'text-[#d4d0c8]'
                                                 }`}
                                             >
-                                                {level} — {LEVEL_LABELS[level]}
+                                                {level} - {t(LEVEL_LABEL_KEYS[level])}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-1.5 shrink-0">
                                             {isPending && (
                                                 <span className="text-[8px] font-mono text-[#c4a04a]/60 uppercase tracking-wide">
-                                                    pending
+                                                    {t('autonomy.pending')}
                                                 </span>
                                             )}
                                             {isLocked && (
                                                 <span className="text-[8px] font-mono text-[#8a8578]/70 uppercase tracking-wide">
-                                                    soon
+                                                    {t('autonomy.soon')}
                                                 </span>
                                             )}
                                         </div>
                                     </div>
                                     <div className="text-[9px] text-[#8a8578] mt-0.5 ml-3.5 leading-snug">
-                                        {LEVEL_DESCS[level]}
+                                        {t(LEVEL_DESC_KEYS[level])}
                                     </div>
                                 </button>
                             );
@@ -346,7 +347,7 @@ export function AutonomyPanel({ onClose, playerFaction }: AutonomyPanelProps) {
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
                                 <div className="text-[9px] font-mono text-[#8a8578] uppercase tracking-[0.2em]">
-                                    Pending AI Proposals
+                                    {t('autonomy.pendingProposals')}
                                 </div>
                                 {unresolvedCount > 0 && (
                                     <span className="text-[9px] font-mono text-[#c4a04a] bg-[#c4a04a]/10 border border-[#c4a04a]/25 rounded px-1.5 py-0.5">
@@ -369,7 +370,7 @@ export function AutonomyPanel({ onClose, playerFaction }: AutonomyPanelProps) {
 
                             {unresolvedCount === 0 && (
                                 <div className="text-[9px] font-mono text-[#8a8578] text-center py-1">
-                                    All proposals resolved.
+                                    {t('autonomy.allResolved')}
                                 </div>
                             )}
                         </div>
@@ -382,7 +383,7 @@ export function AutonomyPanel({ onClose, playerFaction }: AutonomyPanelProps) {
                             disabled={busy}
                             className="w-full py-1 text-[9px] font-mono uppercase tracking-[0.15em] text-[#8a8578] hover:text-[#d4d0c8] border border-white/5 hover:border-white/10 rounded transition-all disabled:opacity-40"
                         >
-                            Refresh
+                            {t('autonomy.refresh')}
                         </button>
                     )}
                 </div>

@@ -103,13 +103,13 @@ export function updateSupplyPressure(
     }
 
     if (!state.political.war_supply_pressure) {
-        (state as GameState & { war_supply_pressure: Record<FactionId, number> }).political.war_supply_pressure = {};
+        state.political.war_supply_pressure = {};
     }
-    const pressure = state.political.war_supply_pressure!;
+    const pressure = state.political.war_supply_pressure;
 
     const liveCondition = deriveFactionSupplyConditionFromOsidReport(supplyStateByOsid);
     if (liveCondition) state.political.war_supply_condition = liveCondition;
-    else delete state.political.war_supply_condition;
+    else state.political.war_supply_condition = {};
 
     for (const fid of factionIds) {
         const overextension = (frontEdgeCountByFaction.get(fid) ?? 0) * PRESSURE_PER_FRONT_EDGE;
@@ -125,4 +125,3 @@ export function updateSupplyPressure(
         pressure[fid] = Math.min(PRESSURE_CAP, current + effectiveIncrement);
     }
 }
-

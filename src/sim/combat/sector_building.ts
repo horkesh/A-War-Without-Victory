@@ -27,6 +27,9 @@ import { deduplicateBrigadesAcrossSectors } from './brigade_assignment.js';
 
 type SectorPartitionPerfTimer = <T>(label: string, fn: () => T) => T;
 
+type FrontEdgeMeta = { a: string; b: string; side_a: string | null; side_b: string | null };
+type FrontEdgeMetaLookup = ReadonlyMap<string, FrontEdgeMeta>;
+
 interface SectorFormationScanIndex {
     assignedCandidateIds: readonly FormationId[];
     enemyPersonnelByLocation: ReadonlyMap<string, number>;
@@ -171,6 +174,7 @@ export function buildMultiSectorsForCorps(
     centroids?: OsidCentroidMap,
     friendlyOsids?: Set<string>,
     perfTime: SectorPartitionPerfTimer = (_label, fn) => fn(),
+    sharedFrontEdgeMeta?: FrontEdgeMetaLookup,
 ): CorpsFrontSector[] {
     if (edgeIds.length === 0) return [];
 
@@ -181,12 +185,11 @@ export function buildMultiSectorsForCorps(
     // control across operational OSIDs and fuse unrelated front arcs into one
     // fake sector line.
     const edgeMeta = perfTime(`buildMultiSectorsForCorps:${corpsId}:edge-meta-lookup`, () => {
-        const nextEdgeMeta = new Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>();
-        const frontEdgeLookup = new Map(
-            osidFrontEdges.map((edge) => [edge.edge_id, edge] as const),
-        );
+        const nextEdgeMeta = new Map<string, FrontEdgeMeta>();
+        let frontEdgeLookup: Map<string, FrontEdgeMeta> | null = null;
         for (const eid of edgeIds) {
-            const frontEdge = frontEdgeLookup.get(eid);
+            const frontEdge = sharedFrontEdgeMeta?.get(eid)
+                ?? (frontEdgeLookup ??= new Map(osidFrontEdges.map((edge) => [edge.edge_id, edge] as const))).get(eid);
             if (frontEdge) {
                 nextEdgeMeta.set(eid, {
                     a: frontEdge.a,

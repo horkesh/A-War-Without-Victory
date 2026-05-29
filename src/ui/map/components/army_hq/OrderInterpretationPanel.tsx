@@ -11,6 +11,7 @@
 import type { LoadedGameState } from '../../data/types';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
+import { t } from '../../i18n';
 import { RELIEF_MORALE_PENALTY } from '../../../../sim/combat/order_interpretation.js';
 
 // Phase 3 interpretation event types only (not personnel events)
@@ -124,7 +125,7 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
                             {showOverride && (
                                 <button
                                     type="button"
-                                    onClick={() => { setLoadError('Order override bridge is not available yet.'); }}
+                                    onClick={() => { setLoadError(t('orderInterpretation.overrideBridgeError')); }}
                                     className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 border ${badge.border} ${badge.text} hover:opacity-80 transition-all font-mono`}
                                 >
                                     OVERRIDE
@@ -133,7 +134,7 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
                         </div>
                         {event.overridable && !showOverride && (
                             <div className="text-[9px] text-amber-300/70 italic">
-                                Override path unavailable until the command-authority bridge exposes a distinct override action.
+                                {t('orderInterpretation.overrideBridgeUnavailable')}
                             </div>
                         )}
                         {event.type === 'order_refused' && event.overridable && (

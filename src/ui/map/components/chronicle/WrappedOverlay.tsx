@@ -4,15 +4,31 @@ import { generateWrappedSlides } from './generateWrappedSlides.js';
 import { WrappedSlideComponent } from './WrappedSlide.js';
 import { getPlayerFacingFaction } from '../../../shared/playerFacingLabels.js';
 import { Z } from '../../../shared/zIndex.js';
+import { t } from '../../i18n';
+import type { EventDefinition } from '../../../../sim/events/event_types.js';
 
-export function WrappedOverlay() {
+/**
+ * Phase H Packet 7 — accepts optional `eventCatalog`. When provided (App-level
+ * boot loader supplies it), {@link generateWrappedSlides} appends the H6
+ * causality slides (F1 foundational_choice / F2 your_divergences / F3
+ * causal_chain_summary) after the canonical 10. Backward compatible: when
+ * omitted, the 10-slide pre-packet output is preserved byte-identical.
+ */
+export interface WrappedOverlayProps {
+    eventCatalog?: ReadonlyMap<string, EventDefinition>;
+}
+
+export function WrappedOverlay({ eventCatalog }: WrappedOverlayProps = {}) {
     const open = useGameStore(s => s.wrappedOpen);
     const setOpen = useGameStore(s => s.setWrappedOpen);
     const state = useGameStore(s => s.loadedGameState);
     const setChronicleOpen = useGameStore(s => s.setChronicleOpen);
     const [currentSlide, setCurrentSlide] = useState(0);
 
-    const slides = useMemo(() => (state ? generateWrappedSlides(state) : []), [state]);
+    const slides = useMemo(
+        () => (state ? generateWrappedSlides(state, eventCatalog) : []),
+        [state, eventCatalog],
+    );
 
     const faction = getPlayerFacingFaction(state);
 
@@ -86,13 +102,13 @@ export function WrappedOverlay() {
                 type="button"
                 className="absolute left-0 top-0 z-10 h-full w-1/2 cursor-pointer border-0 bg-transparent p-0"
                 onClick={handleClick}
-                aria-label="Previous campaign wrapped slide"
+                aria-label={t('wrapped.previousSlide')}
             />
             <button
                 type="button"
                 className="absolute right-0 top-0 z-10 h-full w-1/2 cursor-pointer border-0 bg-transparent p-0"
                 onClick={handleClick}
-                aria-label="Next campaign wrapped slide"
+                aria-label={t('wrapped.nextSlide')}
             />
             <WrappedSlideComponent
                 slide={slides[currentSlide]}
@@ -111,7 +127,7 @@ export function WrappedOverlay() {
                         }}
                         className="px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors cursor-pointer"
                     >
-                        View Chronicle
+                        {t('wrapped.viewChronicle')}
                     </button>
                     <button
                         onClick={(e) => {

@@ -137,7 +137,7 @@ export function scoreTargetFromDirective(
         score += Math.min(-100, nonPriorityPenalty); // Floor at -100 (never free)
     }
 
-    // Directive-driven: avoid zone (legacy — avoid_municipalities removed, but keep for future use)
+    // Directive-driven: avoid zone (OSID-based via directive.avoid_osids; currently empty in production)
     if (_avoidOsidSet.has(osid)) {
         score -= 500;
     }

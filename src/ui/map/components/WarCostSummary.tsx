@@ -6,9 +6,9 @@
 
 import type { CostLedger } from '../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult } from '../../../sim/endgame/endgame_comparison.js';
-export { formatHistoricalDivergenceNote } from '../data/historicalDivergenceNotes.js';
 import { formatHistoricalDivergenceNote } from '../data/historicalDivergenceNotes.js';
 import { t, useLocale } from '../i18n';
+export { formatHistoricalDivergenceNote } from '../data/historicalDivergenceNotes.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Formatting helpers (exported for testing)
@@ -85,7 +85,7 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
                 />
                 <CostRow
                     label={t('warCost.warDuration')}
-                    value={t('warCost.weekCount', { count: costLedger.war_duration_weeks })}
+                    value={t('warCost.weeksValue', { weeks: costLedger.war_duration_weeks })}
                 />
                 <CostRow
                     label={t('warCost.vsHistoricalDuration')}
@@ -137,7 +137,7 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
                                     </span>
                                     {entry.total_attacks > 0 && (
                                         <span className="ml-2">
-                                            {t('warCost.attackCount', { count: entry.total_attacks })}
+                                            {t('warCost.attacks', { count: entry.total_attacks })}
                                         </span>
                                     )}
                                 </div>
@@ -170,7 +170,7 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
                                 <div>{finding.text}</div>
                                 {finding.sources.length > 0 && (
                                     <div className="mt-1 text-[9px] text-text-secondary/75">
-                                        {t('warCost.sources', { sources: finding.sources.join('; ') })}
+                                        {t('warCost.sources')}: {finding.sources.join('; ')}
                                     </div>
                                 )}
                             </div>

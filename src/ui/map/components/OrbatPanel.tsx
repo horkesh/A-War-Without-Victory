@@ -6,6 +6,7 @@ import { FACTION_COLORS } from '../utils/theme';
 import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
 import type { CorpsFrontSectorView } from '../data/types';
+import { t } from '../i18n';
 
 
 export function OrbatPanel() {
@@ -79,7 +80,7 @@ export function OrbatPanel() {
             {/* Panel Header */}
             <div className="bg-panel-header border-b border-panel-border px-4 py-3 flex items-center justify-between shrink-0 relative z-10">
                 <div className="flex flex-col">
-                    <span className="text-[10px] uppercase text-text-secondary tracking-widest font-bold">Order of Battle</span>
+                    <span className="text-[10px] uppercase text-text-secondary tracking-widest font-bold">{t('orbat.orderOfBattle')}</span>
                     <h2 className={`text-lg font-bold uppercase tracking-tight leading-tight ${factionClass}`}>
                         {corps.name}
                     </h2>
@@ -88,7 +89,7 @@ export function OrbatPanel() {
                     type="button"
                     onClick={() => setSelectedOrbatCorpsId(null)}
                     className="w-8 h-8 flex items-center justify-center rounded border border-panel-border bg-panel-bg hover:bg-panel-hover text-text-secondary transition-colors"
-                    title="Close Panel"
+                    title={t('orbat.closePanel')}
                 >
                     &times;
                 </button>
@@ -97,17 +98,17 @@ export function OrbatPanel() {
             <div className="flex-1 overflow-auto p-4 space-y-4">
                 {/* Commander Section */}
                 {commander && (
-                    <OfficerProfile officer={commander} label="Corps Commander" />
+                    <OfficerProfile officer={commander} label={t('formationDetail.corpsCommander')} />
                 )}
 
                 {/* Corps Stats */}
                 <div className="grid grid-cols-2 gap-3">
                     <div className="p-2 bg-black/10 rounded border border-panel-border/30">
-                        <div className="text-[9px] uppercase text-text-secondary font-semibold">Total Personnel</div>
+                        <div className="text-[9px] uppercase text-text-secondary font-semibold">{t('orbat.totalPersonnel')}</div>
                         <div className="text-sm font-mono text-text-primary">{totalPersonnel.toLocaleString()}</div>
                     </div>
                     <div className="p-2 bg-black/10 rounded border border-panel-border/30">
-                        <div className="text-[9px] uppercase text-text-secondary font-semibold">Brigades</div>
+                        <div className="text-[9px] uppercase text-text-secondary font-semibold">{t('orbat.brigades')}</div>
                         <div className="text-sm font-mono text-text-primary">{brigades.length}</div>
                     </div>
                 </div>
@@ -115,7 +116,7 @@ export function OrbatPanel() {
                 {/* Brigades List */}
                 <div className="space-y-1">
                     <div className="text-[10px] uppercase text-text-secondary tracking-wider font-bold mb-2 pb-1 border-b border-panel-border/30">
-                        Subordinate Brigades
+                        {t('orbat.subordinateBrigades')}
                     </div>
                     <div className="divide-y divide-panel-border/30">
                         {brigades.map((b) => (
@@ -157,11 +158,11 @@ export function OrbatPanel() {
             <div className="px-4 py-2 bg-black/40 border-t border-panel-border flex justify-between items-center shrink-0">
                 <span className="text-[9px] font-mono text-text-secondary uppercase">
                     {corpsSectors.length > 0
-                        ? `${corpsSectors.length} sector${corpsSectors.length !== 1 ? 's' : ''}: ${corpsSectors.map((s) => s.display_name).join(', ')}`
-                        : 'No active sectors'
+                        ? t('orbat.sectorSummary', { count: corpsSectors.length, sectors: corpsSectors.map((s) => s.display_name).join(', ') })
+                        : t('orbat.noActiveSectors')
                     }
                 </span>
-                <span className="text-[9px] font-mono text-accent-gold/50 uppercase">AWWV v0.6.0-TAC</span>
+                <span className="text-[9px] font-mono text-accent-gold/50 uppercase">{t('orbat.version')}</span>
             </div>
         </div>
     );

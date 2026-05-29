@@ -315,6 +315,7 @@
       "src/desktop/autonomy_ipc_contract.cjs",
       "src/desktop/command_strain.cjs",
       "src/desktop/convoy_ipc_contract.cjs",
+      "src/desktop/officer_decision_history.cjs",
       "src/desktop/settings_store.cjs"
     ],
     "extraResources": [
@@ -420,6 +421,7 @@
     "husky": "^9.1.7",
     "jsdom": "^25.0.1",
     "lint-staged": "^16.4.0",
+    "playwright": "^1.60.0",
     "puppeteer": "^24.37.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

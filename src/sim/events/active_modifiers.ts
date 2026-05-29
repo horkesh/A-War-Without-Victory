@@ -56,6 +56,48 @@ export function getActiveEquipmentQualityMultiplier(
     return product;
 }
 
+/** Fall-1995 mechanic E-A5: true when the faction has an active
+ *  `offensive_ops_suppressions` entry whose `expires_turn > currentTurn`.
+ *  Consumer: launch-gate in `sector_offensive.ts` refuses new offensive ops.
+ *  Returns false (no-op) when the suppression array is absent or empty.
+ *  See `docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md` §3 E-A5. */
+export function isFactionOffensiveOpsSuppressed(
+    state: GameState,
+    faction: FactionId,
+    currentTurn: number,
+): boolean {
+    const sup = state.military.offensive_ops_suppressions;
+    if (!sup || sup.length === 0) return false;
+    for (const entry of sup) {
+        if (entry.expires_turn <= currentTurn) continue;
+        if (entry.faction !== faction) continue;
+        return true;
+    }
+    return false;
+}
+
+/** Fall-1995 mechanic E-A4: tightest active cascade-pressure multiplier on the
+ *  given OSID. Returns 1.0 (no-op) when no penalty is active. Multiple penalties
+ *  on the same OSID take the most restrictive (lowest) multiplier.
+ *  Consumer: defender power calc in `combat_math.ts`. Writer: control-flip
+ *  resolution in `attack_resolution_osid.ts`.
+ *  See `docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md` §3 E-A4. */
+export function getCascadePenaltyForOsid(
+    state: GameState,
+    osid: string,
+    currentTurn: number,
+): number {
+    const penalties = state.military.cascade_penalties;
+    if (!penalties || penalties.length === 0) return 1.0;
+    let lowest = 1.0;
+    for (const p of penalties) {
+        if (p.expires_turn <= currentTurn) continue;
+        if (p.osid !== osid) continue;
+        if (p.multiplier < lowest) lowest = p.multiplier;
+    }
+    return lowest;
+}
+
 /** Tightest floor and loosest ceiling across active alliance locks. Undefined
  *  when no lock of that mode is active. Multiple locks of the same mode take
  *  the most restrictive value (highest floor, lowest ceiling). */
@@ -160,5 +202,12 @@ export function cleanupExpiredEventModifiers(
     }
     if (mil.bot_priority_shifts) {
         mil.bot_priority_shifts = mil.bot_priority_shifts.filter(s => s.expires_turn > currentTurn);
+    }
+    // Fall-1995 mechanics E-A4 / E-A5
+    if (mil.cascade_penalties) {
+        mil.cascade_penalties = mil.cascade_penalties.filter(p => p.expires_turn > currentTurn);
+    }
+    if (mil.offensive_ops_suppressions) {
+        mil.offensive_ops_suppressions = mil.offensive_ops_suppressions.filter(s => s.expires_turn > currentTurn);
     }
 }

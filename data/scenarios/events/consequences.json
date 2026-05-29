@@ -1868,6 +1868,14 @@
     "responding_faction": "RS",
     "requires_player_response": true,
     "bot_response_logic": "historical",
+    "historical_default_response_id": "accept_recovery",
+    "source_note": "The existing patron-pressure source text frames this as the historical acceptance path under Milosevic pressure in 1995 after partial disavowal and renewed terms for recovery.",
+    "staff_assessment": "Accepting restores some patron confidence but narrows Pale's autonomy; refusing preserves internal room for maneuver while locking in the partial disavowal.",
+    "trigger_evidence": [
+      "The patron_partial_disavowal flag is already set before this offer can fire.",
+      "The offer follows sustained patron pressure rather than a free-standing diplomatic opening.",
+      "The default reflects acceptance under pressure, not certainty about later battlefield or negotiation outcomes."
+    ],
     "effect": {
       "kind": "narrative",
       "text": "Patron offers terms for recovery of the relationship."
@@ -1878,6 +1886,7 @@
     "response_options": [
       {
         "id": "accept_recovery",
+        "historical_marker": "historical_default",
         "label": "Accept the terms",
         "description": "Recover patron confidence; lock cohesion ceiling.",
         "effects": [
@@ -2256,6 +2265,7 @@
     "category": "diplomatic",
     "trigger": {
       "turn_min": 60,
+      "turn_max": 84,
       "phase": "war",
       "condition": {
         "type": "and",

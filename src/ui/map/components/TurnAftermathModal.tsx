@@ -87,13 +87,13 @@ export function TurnAftermathModal({
       closeOnBackdropClick={false}
       ariaLabelledBy="turn-aftermath-title"
       backdropClassName="bg-black/70 px-4"
-      panelClassName="w-full max-w-4xl max-h-[86vh] overflow-hidden border border-white/15 bg-[#101018] shadow-2xl"
+      panelClassName="w-full max-w-6xl max-h-[86vh] overflow-hidden border border-white/15 bg-[#101018] shadow-2xl"
     >
       <>
         <div className="flex items-start justify-between gap-4 border-b border-white/10 bg-black/30 px-5 py-4">
           <div className="min-w-0">
             <div id="turn-aftermath-title" className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-400/70">
-              {t('turnAftermath.modal.title')}
+              {t('turnAftermath.title')}
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <h2 className="text-xl font-bold text-text-primary">{view.dateLabel}</h2>
@@ -109,26 +109,26 @@ export function TurnAftermathModal({
             onClick={onClose}
             className="shrink-0 rounded border border-white/10 px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary hover:border-white/25 hover:text-text-primary"
           >
-            {t('turnAftermath.modal.continue')}
+            {t('turnAftermath.continue')}
           </button>
         </div>
 
-        <div className="grid max-h-[62vh] gap-4 overflow-auto p-5 lg:grid-cols-[1.15fr_0.85fr]">
-          <section className="space-y-4">
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              <Metric label={t('turnAftermath.metric.territory')} value={formatSigned(view.territory.friendlyNet)} detail={t('turnAftermath.metric.territoryDetail', { gained: view.territory.gains, lost: view.territory.losses })} />
-              <Metric label={t('turnAftermath.metric.battles')} value={String(view.combat.friendlyBattleCount)} detail={t('turnAftermath.metric.battlesDetail', { total: view.combat.battleCount })} />
-              <Metric label={t('turnAftermath.metric.casualties')} value={String(view.combat.friendlyCasualties)} detail={t('turnAftermath.metric.casualtiesDetail', { opposing: view.combat.opposingCasualties })} />
-              <Metric label={t('turnAftermath.metric.displaced')} value={String(view.humanitarian.displacedThisTurn)} detail={view.humanitarian.hotspotLabel ?? t('turnAftermath.metric.noHotspot')} />
+        <div className="grid max-h-[62vh] min-w-0 gap-4 overflow-y-auto overflow-x-hidden p-5 lg:grid-cols-[minmax(18rem,0.95fr)_minmax(0,1.35fr)]">
+          <section className="min-w-0 space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <Metric label={t('turnAftermath.metric.territory')} value={formatSigned(view.territory.friendlyNet)} detail={t('turnAftermath.detail.gainedLost', { gained: view.territory.gains, lost: view.territory.losses })} />
+              <Metric label={t('turnAftermath.metric.battles')} value={String(view.combat.friendlyBattleCount)} detail={t('turnAftermath.detail.total', { count: view.combat.battleCount })} />
+              <Metric label={t('turnAftermath.metric.casualties')} value={String(view.combat.friendlyCasualties)} detail={t('turnAftermath.detail.opposing', { count: view.combat.opposingCasualties })} />
+              <Metric label={t('turnAftermath.metric.displaced')} value={String(view.humanitarian.displacedThisTurn)} detail={view.humanitarian.hotspotLabel ?? t('turnAftermath.noHotspot')} />
             </div>
 
             <div className="border border-white/10 bg-black/20">
               <div className="border-b border-white/10 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary">
-                {t('turnAftermath.section.notableTerritory')}
+                {t('turnAftermath.notableTerritory')}
               </div>
               <div className="divide-y divide-white/10">
                 {view.territory.notable.length === 0 ? (
-                  <div className="px-3 py-3 text-sm text-text-secondary">{t('turnAftermath.empty.notableTerritory')}</div>
+                  <div className="px-3 py-3 text-sm text-text-secondary">{t('turnAftermath.noTerritoryFlips')}</div>
                 ) : view.territory.notable.slice(0, 6).map((flip) => (
                   <div key={`${flip.osid}:${flip.from ?? 'none'}:${flip.to ?? 'none'}`} className="flex items-center justify-between gap-3 px-3 py-2">
                     <div className="min-w-0">
@@ -144,17 +144,17 @@ export function TurnAftermathModal({
             </div>
           </section>
 
-          <section className="space-y-4">
+          <section className="min-w-0 space-y-4">
             <div className="border border-white/10 bg-black/20">
               <div className="border-b border-white/10 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary">
-                {t('turnAftermath.section.strategicSignals')}
+                {t('turnAftermath.strategicSignals')}
               </div>
               <div className="divide-y divide-white/10">
                 {signalPreview.length === 0 ? (
-                  <div className="px-3 py-3 text-sm text-text-secondary">{t('turnAftermath.empty.strategicSignals')}</div>
+                  <div className="px-3 py-3 text-sm text-text-secondary">{t('turnAftermath.noSignals')}</div>
                 ) : signalPreview.map((signal) => (
                   <div key={signal.id} className={`px-3 py-2 ${signalTone(signal.severity)}`}>
-                    <div className="truncate text-sm font-semibold">{signal.label}</div>
+                    <div className="min-w-0 truncate text-sm font-semibold">{signal.label}</div>
                     <div className="text-[10px] font-mono uppercase tracking-[0.14em] opacity-75">{enumLabel('turnAftermath.signal.kind', signal.kind)} / {signal.detail}</div>
                   </div>
                 ))}
@@ -164,17 +164,17 @@ export function TurnAftermathModal({
             <div className="border border-white/10 bg-black/20">
               <div className="flex items-center justify-between gap-3 border-b border-white/10 px-3 py-2">
                 <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary">
-                  {t('turnAftermath.section.turnCost')}
+                  {t('turnAftermath.turnCost')}
                 </div>
                 <span className={`rounded border px-2 py-0.5 text-[9px] font-mono uppercase tracking-[0.16em] ${costSeverityClasses(view.cost.severity)}`}>
                   {enumLabel('turnAftermath.severity', view.cost.severity)}
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-2 p-3 text-sm">
-                <Metric label={t('turnAftermath.metric.ownCasualties')} value={String(view.cost.friendlyMilitaryCasualties)} detail={t('turnAftermath.metric.theaterDetail', { theater: view.cost.theaterMilitaryCasualties })} compact />
-                <Metric label={t('turnAftermath.metric.displaced')} value={String(view.cost.displacedThisTurn)} detail={t('turnAftermath.metric.thisTurn')} compact />
-                <Metric label={t('turnAftermath.metric.destroyed')} value={String(view.cost.ownFormationsDestroyed)} detail={t('turnAftermath.metric.ownFormations')} compact />
-                <Metric label={t('turnAftermath.metric.supplySpent')} value={String(view.cost.ownSupplySpent + view.cost.ownHeavyMunitionsSpent)} detail={t('turnAftermath.metric.heavyDetail', { heavy: view.cost.ownHeavyMunitionsSpent })} compact />
+                <Metric label={t('turnAftermath.metric.ownCasualties')} value={String(view.cost.friendlyMilitaryCasualties)} detail={t('turnAftermath.detail.theater', { count: view.cost.theaterMilitaryCasualties })} compact />
+                <Metric label={t('turnAftermath.metric.displaced')} value={String(view.cost.displacedThisTurn)} detail={t('turnAftermath.detail.thisTurn')} compact />
+                <Metric label={t('turnAftermath.metric.destroyed')} value={String(view.cost.ownFormationsDestroyed)} detail={t('turnAftermath.detail.ownFormations')} compact />
+                <Metric label={t('turnAftermath.metric.supplySpent')} value={String(view.cost.ownSupplySpent + view.cost.ownHeavyMunitionsSpent)} detail={t('turnAftermath.detail.heavy', { count: view.cost.ownHeavyMunitionsSpent })} compact />
               </div>
               <div className="border-t border-white/10 px-3 py-2 text-[10px] text-text-secondary">
                 {view.cost.reasons.slice(0, 3).join(' / ')}
@@ -184,7 +184,7 @@ export function TurnAftermathModal({
             <div className={`border px-3 py-3 ${memoryToneClasses(view.judgment.memoryTone)}`}>
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.18em] opacity-70">{t('turnAftermath.section.judgmentMemory')}</div>
+                  <div className="text-[10px] font-mono uppercase tracking-[0.18em] opacity-70">{t('turnAftermath.judgmentMemory')}</div>
                   <div className="mt-1 text-sm font-semibold">{view.judgment.headline}</div>
                   <div className="mt-1 text-[11px] leading-5 opacity-80">{view.judgment.detail}</div>
                 </div>
@@ -194,27 +194,27 @@ export function TurnAftermathModal({
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <button type="button" onClick={onOpenChronicle} className="rounded border border-current/25 px-2 py-1.5 text-[9px] font-mono uppercase tracking-[0.12em] hover:bg-white/10">
-                  {t('turnAftermath.button.chronicle')}
+                  {t('turnAftermath.chronicle')}
                 </button>
                 <button type="button" onClick={onOpenCodex} className="rounded border border-current/25 px-2 py-1.5 text-[9px] font-mono uppercase tracking-[0.12em] hover:bg-white/10">
-                  {t('turnAftermath.button.codex')}
+                  {t('turnAftermath.codex')}
                 </button>
               </div>
             </div>
 
             <div className="border border-white/10 bg-black/20">
               <div className="border-b border-white/10 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary">
-                {t('turnAftermath.section.commandDesk')}
+                {t('turnAftermath.commandDesk')}
               </div>
               <div className="grid grid-cols-2 gap-2 p-3 text-sm">
-                <Metric label={t('turnAftermath.metric.actionable')} value={String(view.nextActions.actionableCount)} detail={t('turnAftermath.metric.blockingDetail', { blocking: view.nextActions.blockingCount })} compact />
-                <Metric label={t('turnAftermath.metric.opportunities')} value={String(view.nextActions.opportunityCount)} detail={t('turnAftermath.metric.armyHq')} compact />
-                <Metric label={t('turnAftermath.metric.reserves')} value={String(view.nextActions.reserveCount)} detail={t('turnAftermath.metric.requests')} compact />
-                <Metric label={t('turnAftermath.metric.officers')} value={String(view.nextActions.officerCount)} detail={t('turnAftermath.metric.personnel')} compact />
+                <Metric label={t('turnAftermath.metric.actionable')} value={String(view.nextActions.actionableCount)} detail={t('turnAftermath.detail.blocking', { count: view.nextActions.blockingCount })} compact />
+                <Metric label={t('turnAftermath.metric.opportunities')} value={String(view.nextActions.opportunityCount)} detail={t('turnAftermath.detail.armyHq')} compact />
+                <Metric label={t('turnAftermath.metric.reserves')} value={String(view.nextActions.reserveCount)} detail={t('turnAftermath.detail.requests')} compact />
+                <Metric label={t('turnAftermath.metric.officers')} value={String(view.nextActions.officerCount)} detail={t('turnAftermath.detail.personnel')} compact />
               </div>
               <div className="divide-y divide-white/10 border-t border-white/10">
                 {!hasTopActions ? (
-                  <div className="px-3 py-3 text-sm text-text-secondary">{t('turnAftermath.empty.commandDesk')}</div>
+                  <div className="px-3 py-3 text-sm text-text-secondary">{t('turnAftermath.noDecisions')}</div>
                 ) : view.nextActions.topItems.map((item) => (
                   <div key={item.id} className={`px-3 py-2 ${actionTone(item)}`}>
                     <div className="truncate text-sm font-semibold">{item.title}</div>
@@ -225,21 +225,21 @@ export function TurnAftermathModal({
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <Metric label={t('turnAftermath.metric.formations')} value={`+${view.formations.ownSpawned} / -${view.formations.ownDestroyed}`} detail={t('turnAftermath.metric.spawnedTotal', { spawned: view.formations.spawned })} />
-              <Metric label={t('turnAftermath.metric.supply')} value={formatSigned(view.supply.ownSupplyDelta)} detail={t('turnAftermath.metric.heavyDelta', { heavy: formatSigned(view.supply.ownHeavyMunitionsDelta) })} />
+              <Metric label={t('turnAftermath.metric.formations')} value={`+${view.formations.ownSpawned} / -${view.formations.ownDestroyed}`} detail={t('turnAftermath.detail.spawnedTotal', { count: view.formations.spawned })} />
+              <Metric label={t('turnAftermath.metric.supply')} value={formatSigned(view.supply.ownSupplyDelta)} detail={t('turnAftermath.detail.heavyValue', { value: formatSigned(view.supply.ownHeavyMunitionsDelta) })} />
             </div>
           </section>
         </div>
 
         <div className="grid grid-cols-3 gap-2 border-t border-white/10 bg-black/30 px-5 py-4">
           <button type="button" onClick={onOpenSummary} className="min-w-0 rounded border border-white/10 px-2 py-2 text-[9px] font-mono uppercase tracking-[0.12em] text-text-secondary hover:border-white/25 hover:text-text-primary sm:px-3 sm:text-[10px] sm:tracking-[0.18em]">
-            {t('turnAftermath.button.warSummary')}
+            {t('turnAftermath.warSummary')}
           </button>
           <button type="button" onClick={onOpenRecords} className="min-w-0 rounded border border-white/10 px-2 py-2 text-[9px] font-mono uppercase tracking-[0.12em] text-text-secondary hover:border-white/25 hover:text-text-primary sm:px-3 sm:text-[10px] sm:tracking-[0.18em]">
-            {t('turnAftermath.button.turnRecords')}
+            {t('turnAftermath.turnRecords')}
           </button>
           <button type="button" onClick={onOpenInbox} className="min-w-0 rounded border border-amber-400/35 bg-amber-400/10 px-2 py-2 text-[9px] font-mono uppercase tracking-[0.12em] text-amber-300 hover:bg-amber-400/20 sm:px-4 sm:text-[10px] sm:tracking-[0.18em]">
-            {t('turnAftermath.button.reviewInbox')}
+            {t('turnAftermath.reviewInbox')}
           </button>
         </div>
       </>
@@ -259,10 +259,10 @@ function Metric({
   compact?: boolean;
 }) {
   return (
-    <div className={`border border-white/10 bg-white/[0.03] ${compact ? 'px-3 py-2' : 'px-3 py-3'}`}>
-      <div className="text-[9px] font-mono uppercase tracking-[0.16em] text-text-secondary">{label}</div>
+    <div className={`min-w-0 overflow-hidden border border-white/10 bg-white/[0.03] ${compact ? 'px-3 py-2' : 'px-3 py-3'}`}>
+      <div className="break-words text-[9px] font-mono uppercase tracking-[0.12em] text-text-secondary">{label}</div>
       <div className="mt-1 text-lg font-bold tabular-nums text-text-primary">{value}</div>
-      <div className="text-[10px] text-text-secondary">{detail}</div>
+      <div className="break-words text-[10px] text-text-secondary">{detail}</div>
     </div>
   );
 }

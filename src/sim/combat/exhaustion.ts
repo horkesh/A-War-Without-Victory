@@ -21,8 +21,14 @@ const EXHAUSTION_PER_STATIC_FRONT = 2;
 /** Exhaustion per point of supply pressure (0–100). */
 const EXHAUSTION_PER_SUPPLY_PRESSURE_POINT = 0.1;
 
-/** Cap exhaustion delta per turn per faction (bounded growth). */
-const MAX_DELTA_PER_TURN = 10;
+/** Cap exhaustion delta per turn per faction (bounded growth).
+ *  2026-05-22 rescale: 10 → 200 (100× alongside saturation cap 100 → 10000) to give
+ *  faction-differentiating inputs (RBiH ~32 static fronts vs HRHB ~8 vs RS ~27)
+ *  room to grow before saturation. Per Engine Invariants §8 the accumulator stays
+ *  monotonic; only the headroom changes. Downstream gate constants (WA, ceasefire,
+ *  combat tempo) rescaled by the same 100× factor — see forensics memo
+ *  `docs/40_reports/audits/20260522_FORENSICS_WAR_EXHAUSTION_CONVERGENCE.md` §6. */
+const MAX_DELTA_PER_TURN = 200;
 
 /**
  * Update war_exhaustion from sector-owned frontline exposure and supply pressure.
@@ -95,15 +101,18 @@ export function updateExhaustion(
         const enclaveResilience = getMaxEnclaveResilienceForFaction(state, fid);
         const enclaveReduction = enclaveResilience * RESILIENCE_EFFECT_SCALE;
         const finalDelta = effectiveDelta * Math.max(0, 1.0 - enclaveReduction);
-        // Phase 1 / #29 sub-issue 5: clamp at 100. The accumulator was previously
-        // unbounded, but threshold consumers (`WASH_COMBINED_EXHAUSTION = 55`,
-        // `CEASEFIRE_HRHB_EXHAUSTION = 35`, `CEASEFIRE_RBIH_EXHAUSTION = 30`)
-        // were authored against a 0-100 percentage scale. Without the clamp,
-        // values accumulate past 1500 per faction in 188w runs, making W6/C2/C3
-        // gates trivially met by t8 and causing WA to fire 41 weeks early
-        // (t60 vs historical w101). 100 is the canonical "fully exhausted"
-        // ceiling per the threshold authors' intent.
-        exhaustion[fid] = Math.min(100, current + finalDelta);
+        // 2026-05-22 (forensics memo `20260522_FORENSICS_WAR_EXHAUSTION_CONVERGENCE.md`):
+        // saturation cap rescaled 100 → 10000 alongside MAX_DELTA_PER_TURN 10 → 200
+        // and all downstream gates (WASH_COMBINED_EXHAUSTION 55→5500,
+        // CEASEFIRE_HRHB_EXHAUSTION 35→3500, CEASEFIRE_RBIH_EXHAUSTION 30→3000,
+        // combat_math tempo thresholds 30/80 → 3000/8000). Uniform 100× rescale
+        // preserves the original 0–100 percentage-scale semantics (Issue #29's
+        // band-aid clamp at 100 was correct re: the consumers' authored scale,
+        // but saturated at t13 destroying faction differentiation — RBiH 32
+        // static fronts and HRHB 8 produce identical cap-hits). The new cap
+        // gives the accumulator headroom for genuine faction differentiation
+        // across 188w runs while keeping all relative gating semantics intact.
+        exhaustion[fid] = Math.min(10000, current + finalDelta);
     }
 }
 

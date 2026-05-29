@@ -72,6 +72,9 @@ import { isEastHerzegovinaPair, isGrazAccordsActive, shouldGrazBlockAttack } fro
 import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
 import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { tickPreparation, hasUnresolvedProbe, autoResolveProbe } from './operation_preparation.js';
+// ADR-0005 v2.2b #45: TG dissolution at execution→recovery. Flag-gated.
+import { ENABLE_TG_FORMATION } from './tactical_group_config.js';
+import { dissolveTacticalGroup } from './tactical_group_lifecycle.js';
 import {
     BRIGADE_LOSS_THRESHOLD,
     COHESION_HEALTHY_THRESHOLD,
@@ -200,6 +203,116 @@ const OBJECTIVE_FAILURE_COOLDOWN_TURNS = 8;
  */
 const MIN_LAUNCH_FORCE_RATIO_FLOOR = 0.3;
 
+/**
+ * Lower launch floor for ops that have explicitly opted into desperate-push
+ * semantics via `min_attack_outcome === 'repulsed'`. The standard 0.3 floor
+ * blocks Federation late-war ops (e.g. Mistral 1 Jun 1995) when depleted
+ * post-Cincar HVO/HV brigades face the full VRS 2nd Krajina line — force
+ * ratios fall sub-0.3 even though the op author has signalled tolerance for
+ * costly outcomes. Honoring that tolerance at the launch gate restores
+ * symmetry with the per-attack outcome predicate.
+ */
+const MIN_LAUNCH_FORCE_RATIO_FLOOR_REPULSED = 0.15;
+
+function launchFloorForOp(op: { min_attack_outcome?: string }): number {
+    return op.min_attack_outcome === 'repulsed' ? MIN_LAUNCH_FORCE_RATIO_FLOOR_REPULSED : MIN_LAUNCH_FORCE_RATIO_FLOOR;
+}
+
+/**
+ * Phase E MVS — international_standing → op-launch hesitation multiplier.
+ *
+ * Mirrors the canonical `getActiveEquipmentQualityMultiplier` `!== 1.0`
+ * byte-stable consumer pattern (combat_math.ts:1305-1310): when no hesitation
+ * applies, returns 1.0 and consumers MUST gate `if (mult !== 1.0)` so the
+ * historical (no-event, gate-off) path is byte-identical to baseline.
+ *
+ * Magnitude (0.7×) and threshold (< 30) are the orchestrator-accepted
+ * Architect defaults. The threshold matches "diplomatically isolated" — a
+ * commander whose faction has < 30 international_standing hesitates to
+ * launch fresh offensives (UN scrutiny, embargo risk, patron pressure).
+ *
+ * Soft consumer contract: the multiplier MAY be applied to any op-launch
+ * scoring variable (force-ratio estimate, brigade-count floor, etc). The
+ * canonical consumer is `buildOperations` in commander/emit.ts which scales
+ * the `minForOp` threshold upward by `1/mult` when hesitation is active.
+ *
+ * Inputs:
+ * - `intlStanding`: faction's effective international_standing
+ *   (0..100), or `undefined` when the propagation gate is off / the
+ *   briefing field is absent. Undefined → returns 1.0 (no-op).
+ *
+ * Determinism: pure function of one numeric input. No state, no randomness,
+ * no save-state field.
+ */
+export function getIntlStandingOpsHesitationMultiplier(
+    intlStanding: number | undefined,
+): number {
+    if (typeof intlStanding !== 'number') return 1.0;
+    if (intlStanding < INTL_STANDING_OPS_HESITATION_THRESHOLD) {
+        return INTL_STANDING_OPS_HESITATION_MULTIPLIER;
+    }
+    return 1.0;
+}
+
+/** Phase E MVS: international_standing threshold below which a faction's corps
+ *  COs hesitate on op launch. Orchestrator-accepted Architect default. */
+const INTL_STANDING_OPS_HESITATION_THRESHOLD = 30;
+
+/** Phase E MVS: hesitation multiplier applied to op-launch scoring when
+ *  international_standing < threshold. Orchestrator-accepted Architect default.
+ *  Soft pressure (0.7×) — not a hard block. */
+const INTL_STANDING_OPS_HESITATION_MULTIPLIER = 0.7;
+
+/**
+ * Phase E Packet 2 — internal_cohesion → op-launch caution-bias multiplier.
+ *
+ * Mirrors the canonical `getActiveEquipmentQualityMultiplier` `!== 1.0`
+ * byte-stable consumer pattern and the sibling `getIntlStandingOpsHesitation
+ * Multiplier` above. When no caution-bias applies, returns 1.0 and consumers
+ * MUST gate `if (mult !== 1.0)` so the historical (no-event, gate-off) path is
+ * byte-identical to baseline.
+ *
+ * Magnitude (0.85×) is more conservative than the 0.7× intl_standing
+ * hesitation — cohesion is a slower-moving political signal (faction
+ * legitimacy / mobilization frictions / internal dissent) and the bot should
+ * only become modestly more cautious, not dramatically so. Threshold (< 40)
+ * matches the "fraying cohesion" band in scoring.ts cohesion reads.
+ *
+ * Soft consumer contract: the multiplier MAY be applied to any op-launch
+ * scoring variable. The canonical consumer is `buildOperations` in
+ * commander/emit.ts which chains it alongside the intl_standing hesitation
+ * multiplier when scaling the `minForOp` threshold.
+ *
+ * Inputs:
+ * - `cohesion`: faction's effective internal_cohesion (0..100), or
+ *   `undefined` when the propagation gate is off / the briefing field is
+ *   absent. Undefined or non-numeric → returns 1.0 (no-op).
+ *
+ * Determinism: pure function of one numeric input. No state, no randomness,
+ * no save-state field.
+ */
+export function getCohesionCautionBiasMultiplier(
+    cohesion: number | undefined,
+): number {
+    if (typeof cohesion !== 'number') return 1.0;
+    if (Number.isNaN(cohesion)) return 1.0;
+    if (cohesion < COHESION_CAUTION_BIAS_THRESHOLD) {
+        return COHESION_CAUTION_BIAS_MULTIPLIER;
+    }
+    return 1.0;
+}
+
+/** Phase E Packet 2: internal_cohesion threshold below which a faction's
+ *  corps COs become more cautious on op launch. Orchestrator-accepted
+ *  Architect default. */
+const COHESION_CAUTION_BIAS_THRESHOLD = 40;
+
+/** Phase E Packet 2: caution-bias multiplier applied to op-launch scoring
+ *  when internal_cohesion < threshold. Orchestrator-accepted Architect
+ *  default. Softer pressure (0.85×) than the 0.7× intl_standing hesitation
+ *  — cohesion is a slower-moving signal. */
+const COHESION_CAUTION_BIAS_MULTIPLIER = 0.85;
+
 /** Corps exhaustion decay per turn when idle (no active operation). */
 const EXHAUSTION_DECAY_IDLE = 3;
 
@@ -222,6 +335,14 @@ const EXHAUSTION_DECAY_ACTIVE = 1;
  *   (c) Reduce to MAX_TOTAL_FAILURES = 3 for multi-axis and keep 5 for single. */
 const MAX_TOTAL_FAILURES = 8;
 
+/** Wave 20: single-axis ops abort faster. Multi-axis ops can sustain 8 failures
+ *  per axis (with multi-axis zero-progress backstop catching pathological cases),
+ *  but single-axis ops where the per-turn brain can't find a viable next attack
+ *  (e.g. Cincar Phase 1 post-bucovaca with strong VRS Kupres garrison) should
+ *  release brigades sooner. The per-axis cap fires earlier so the op enters
+ *  recovery and brigades become available for downstream cascade ops. */
+const MAX_TOTAL_FAILURES_SINGLE_AXIS = 4;
+
 /** Consecutive failures on same objective before skip. */
 const MAX_CONSECUTIVE_FAILURES_ON_CURRENT = 3;
 
@@ -236,8 +357,21 @@ const MAX_MOVEMENT_ONLY_EXECUTION_TURNS = 4;
  *  operation is terminated early. This fires BEFORE the per-axis cap
  *  (MAX_TOTAL_FAILURES=5) for single-axis operations, cutting suicidal
  *  attack runs from 5 turns to 3. Multi-axis operations making any progress
- *  (≥1 capture) are exempt and run to their full per-axis budget. */
-const MAX_OPERATION_ZERO_PROGRESS_FAILURES = 3;
+ *  (≥1 capture) are exempt and run to their full per-axis budget.
+ *
+ *  R14a (2026-05-25): raised from 3 → 5. With R8 strategic_depth +
+ *  R11 Krajina-collapse + R13b op-axis 2-hop concentration stacking
+ *  for post-Storm RS-Krajina defenders, the asymptotic per-attempt
+ *  capture probability at hardened staging OSIDs (e.g. Mistral 1 at
+ *  crni_lug) is non-trivial — but n20 telemetry showed Mistral 1 hits
+ *  the 3-failure axis stall after 4 attempts (axisFailures=4, captures=0)
+ *  before that probability gets enough rolls. 5 gives multi-axis ops
+ *  two more chances to break a hard defender, while staying well below
+ *  the absolute MAX_TOTAL_FAILURES = 8 ceiling that backstops pathological
+ *  Operacija-Izlaz-style marathons (per Issue #29 / REAL_WAR_MASTER).
+ *  Faction-symmetric: applies to any multi-axis op of any faction.
+ */
+const MAX_OPERATION_ZERO_PROGRESS_FAILURES = 5;
 
 /** Consecutive catastrophic outcomes on the same objective before axis stalls.
  *  A desperate attack at bad odds can happen once — commanders sometimes gamble.
@@ -249,6 +383,80 @@ const ALL_OUT_EXTRA_COHESION_COST = 1;
 const BOMBARDMENT_PREP_COST = 2;
 const FEINT_PLANNING_TURNS = 2;
 const PLANNING_INVALIDATION_GRACE_TURNS = 2;
+
+/**
+ * Synthesis §3 E-B2: Operation Una negative-control combat-power cap.
+ * Applied to predictor force_ratio_estimate (which scales linearly with
+ * attacker power) when an operation is HV-dominant and isolated. Tuned
+ * to 0.65 from the historical record: HV-only Una collapsed in 48h with
+ * roughly 1/3 of paper-strength effective power once HVO-native rear
+ * support and local guides were absent.
+ */
+const HV_UNA_NEGATIVE_CONTROL_MULT = 0.65;
+/** §3 E-B2: HV-dominance threshold (>80% of participating brigades HV-tagged). */
+const HV_UNA_DOMINANCE_THRESHOLD = 0.8;
+/** §3 E-B2: tag string written by hv_integration.spawnHvBrigade (E-B2). */
+const HV_ATTACHED_SOURCE_TAG = 'attached_source:hv';
+
+function isHvTaggedBrigade(f: FormationState | undefined): boolean {
+    if (!f?.tags) return false;
+    return f.tags.includes(HV_ATTACHED_SOURCE_TAG) || f.tags.includes('hv_origin');
+}
+
+/**
+ * Negative-control predicate for Operation Una style HV-only thrusts.
+ * Returns true when (a) >80% of the op's participating brigades are HV-tagged
+ * and (b) no HVO-native (non-HV-tagged) HRHB brigade is assigned to any
+ * sector owned by this corps. The corps-sector proxy substitutes for an
+ * explicit 2-hop BFS over operational edges, which is not threaded into
+ * advanceSectorOffensives; it is conservative — a non-HV HRHB brigade in
+ * an adjacent corps' sector would not satisfy the predicate, matching the
+ * "isolated thrust" historical signature.
+ */
+function isHvUnaNegativeControl(
+    state: GameState,
+    op: { participating_brigades: readonly FormationId[]; axes?: readonly { assigned_brigades: readonly FormationId[] }[] },
+    corpsId: FormationId,
+): boolean {
+    const formations = state.military.formations ?? {};
+    const brigadeIds = isMultiAxis(op as CorpsOperation)
+        ? getAllAxisBrigades(op as CorpsOperation)
+        : op.participating_brigades;
+    if (!brigadeIds || brigadeIds.length === 0) return false;
+
+    let hvCount = 0;
+    let total = 0;
+    for (const bid of brigadeIds) {
+        const f = formations[bid];
+        if (!f) continue;
+        total += 1;
+        if (isHvTaggedBrigade(f)) hvCount += 1;
+    }
+    if (total === 0) return false;
+    const hvShare = hvCount / total;
+    if (hvShare <= HV_UNA_DOMINANCE_THRESHOLD) return false;
+
+    // Look for an HVO-native (non-HV-tagged) brigade in any sector owned by
+    // this corps. If one exists, the op is co-deployed — no penalty.
+    const sectors = state.military.corps_front_sectors ?? {};
+    for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sectorId];
+        if (!sector || sector.corps_id !== corpsId) continue;
+        for (const bid of sector.assigned_brigade_ids ?? []) {
+            const f = formations[bid];
+            if (!f) continue;
+            if (f.faction !== 'HRHB') continue;
+            if (!isHvTaggedBrigade(f)) return false;
+        }
+        for (const bid of sector.reserve_brigade_ids ?? []) {
+            const f = formations[bid];
+            if (!f) continue;
+            if (f.faction !== 'HRHB') continue;
+            if (!isHvTaggedBrigade(f)) return false;
+        }
+    }
+    return true;
+}
 
 function sectorContainsFriendlyOsid(
     sector: { territory_osids?: readonly string[]; sub_segments?: readonly { friendly_osids: readonly string[] }[] },
@@ -347,6 +555,18 @@ function issuePostOperationReturnMarches(state: GameState, op: CorpsOperation): 
                 && s.territory_osids?.includes(loc) === true);
         if (isInCorpsSectorTerritory) continue;
 
+        // Post-operation capture retention: if the brigade is sitting on an OSID
+        // that is now politically controlled by its own faction — meaning it was
+        // captured during this operation — do not march it home. territory_osids is
+        // derived at the start of the turn (partition-corps-front-sectors runs before
+        // advance-sector-offensives), so freshly-captured OSIDs are not yet reflected
+        // there. The next turn's sector recompute will incorporate the captured OSID
+        // into the corps' territory naturally via the political_controllers BFS.
+        // Without this guard, every participating brigade is marched home from
+        // captured ground, leaving it militarily undefended for one full turn.
+        const controller = getPoliticalControllerOSID(state, loc, undefined);
+        if (controller === f.faction) continue;
+
         // Already home — no march needed
         const homeMun = homeOsid.split(':')[1] ?? '';
         const currentMun = loc.split(':')[1] ?? '';
@@ -431,6 +651,35 @@ function recordFailedObjectives(cmd: CorpsCommandState, op: CorpsOperation, turn
     }
 }
 
+/**
+ * ADR-0005 v2.2b #45: dissolve every TG anchored to an operation.
+ *
+ * Called from beginRecovery — the single chokepoint for all execution→recovery
+ * transitions (~30 callers). Iterates `tactical_groups` in strictCompare order
+ * (determinism), collects matching ids in a first pass, dissolves in a second
+ * pass (avoids mutating during iteration). Clears donor lent fields and sets
+ * cooldowns per `dissolveTacticalGroup` (lifecycle.ts).
+ *
+ * Only called when ENABLE_TG_FORMATION is on; otherwise dormant. Anchor-
+ * destroyed-mid-op immediate dissolution (Hard Invariant #6) is deferred to
+ * v2.2c — anchor death currently flows through here on the next op tick when
+ * the op aborts to recovery (slight delay; functionally correct).
+ */
+function dissolveTgsForOp(state: GameState, opName: string, currentTurn: number): void {
+    const tgs = state.military?.tactical_groups;
+    if (!tgs) return;
+    const targetIds: string[] = [];
+    for (const id of Object.keys(tgs).sort(strictCompare)) {
+        const tg = tgs[id];
+        if (tg && tg.op_id === opName && tg.status !== 'dissolved') {
+            targetIds.push(id);
+        }
+    }
+    for (const id of targetIds) {
+        dissolveTacticalGroup(state, id, currentTurn);
+    }
+}
+
 function beginRecovery(op: CorpsOperation, turn: number, reason: CorpsOperation['recovery_reason'], state?: GameState): void {
     op.phase = 'recovery';
     op.phase_started_turn = turn;
@@ -439,6 +688,11 @@ function beginRecovery(op: CorpsOperation, turn: number, reason: CorpsOperation[
     // Clean up OPSEC marking when operation leaves active phase
     if (op.sector_id && state && Array.isArray(state.military.opsec_sectors)) {
         state.military.opsec_sectors = state.military.opsec_sectors.filter(s => s !== op.sector_id);
+    }
+    // ADR-0005 v2.2b #45: dissolve TGs anchored to this op. Flag-gated; state-optional
+    // (some callers don't pass state — those callers also can't have created TGs).
+    if (state && ENABLE_TG_FORMATION) {
+        dissolveTgsForOp(state, op.name, turn);
     }
 }
 
@@ -458,6 +712,7 @@ function reconcilePlanningObjectives(
     corpsId: FormationId,
     op: CorpsOperation,
     faction: FactionId,
+    staticAdjacency?: Map<string, string[]>,
 ): 'completed' | 'valid' | 'invalidated' {
     if (isMultiAxis(op) && op.axes) {
         const retainedAxes: OperationAxis[] = [];
@@ -487,7 +742,7 @@ function reconcilePlanningObjectives(
         op.current_objective_index = Math.min(op.current_objective_index ?? 0, filteredObjectives.length - 1);
     }
 
-    const approachOsids = collectObjectiveApproachOsids(state, corpsId, faction, getAllAxisObjectives(op));
+    const approachOsids = collectObjectiveApproachOsids(state, corpsId, faction, getAllAxisObjectives(op), staticAdjacency);
     return approachOsids.size > 0 ? 'valid' : 'invalidated';
 }
 
@@ -660,6 +915,7 @@ export function advanceSectorOffensives(
     state: GameState,
     supplyByOsid?: SupplyStateByOsidReport | null,
     terrainMultByOsid?: Record<string, number>, // LANE-2026-05-02
+    staticAdjacency?: Map<string, string[]>,
 ): PreparationEvent[] {
     const prepEvents: PreparationEvent[] = [];
     const corpsCommand = state.military.corps_command;
@@ -770,7 +1026,7 @@ export function advanceSectorOffensives(
                 op.force_launch !== true &&
                 earlyElapsed > earlyPlanDuration + PLANNING_INVALIDATION_GRACE_TURNS
             ) {
-                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op);
+                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op, staticAdjacency);
                 if (!openingReadiness.executable) {
                     beginRecovery(op, turn, openingReadiness.blocker ?? 'no_launch_readiness', state);
                     continue;
@@ -790,6 +1046,22 @@ export function advanceSectorOffensives(
                 // for honest defender-modifier-aware force-ratio estimation.
                 const prepResult = tickPreparation(state, op, corpsId, faction, op.supply_readiness ?? 1.0, supplyByOsid, terrainMultByOsid);
 
+                // Synthesis §3 E-B2: Operation Una negative-control penalty.
+                // HV-only thrusts without HVO-native co-deployment historically
+                // collapsed in 48 hours (Op. Una, Sept 18-19 1995). When the
+                // operation's brigade roster is >80% HV-tagged AND no
+                // HVO-native HRHB brigade is present in the corps' sectors,
+                // scale the force_ratio_estimate by HV_UNA_NEGATIVE_CONTROL_MULT
+                // (effective combat-power cap × 0.65). Symmetric in shape —
+                // it just happens that the HV is the only foreign attached
+                // source in the current OOB.
+                if (
+                    typeof prepResult.force_ratio_estimate === 'number'
+                    && isHvUnaNegativeControl(state, op, corpsId)
+                ) {
+                    prepResult.force_ratio_estimate = prepResult.force_ratio_estimate * HV_UNA_NEGATIVE_CONTROL_MULT;
+                }
+
                 // Collect preparation event for turn report
                 prepEvents.push({
                     corps_id: corpsId,
@@ -804,7 +1076,7 @@ export function advanceSectorOffensives(
 
                 if (
                     typeof prepResult.force_ratio_estimate === 'number'
-                    && prepResult.force_ratio_estimate < MIN_LAUNCH_FORCE_RATIO_FLOOR
+                    && prepResult.force_ratio_estimate < launchFloorForOp(op)
                 ) {
                     op.force_ratio_estimate = prepResult.force_ratio_estimate;
                     beginRecovery(op, turn, 'defender_power_too_high', state);
@@ -861,12 +1133,12 @@ export function advanceSectorOffensives(
             if (
                 op.force_launch !== true
                 && typeof op.force_ratio_estimate === 'number'
-                && op.force_ratio_estimate < MIN_LAUNCH_FORCE_RATIO_FLOOR
+                && op.force_ratio_estimate < launchFloorForOp(op)
             ) {
                 beginRecovery(op, turn, 'defender_power_too_high', state);
                 continue;
             }
-            const planningObjectiveState = reconcilePlanningObjectives(state, corpsId, op, faction);
+            const planningObjectiveState = reconcilePlanningObjectives(state, corpsId, op, faction, staticAdjacency);
             if (planningObjectiveState === 'completed') {
                 beginRecovery(op, turn, 'completed', state);
                 continue;
@@ -918,6 +1190,7 @@ export function advanceSectorOffensives(
                     corpsId,
                     faction,
                     op,
+                    // staticAdjacency intentionally omitted — physical adjacency required here
                 )) {
                     if (elapsed <= planDuration + PLANNING_INVALIDATION_GRACE_TURNS) {
                         continue;
@@ -925,8 +1198,15 @@ export function advanceSectorOffensives(
                     beginRecovery(op, turn, 'no_launch_readiness', state);
                     continue;
                 }
-                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op);
+                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op, staticAdjacency);
                 if (!forcedLaunch && !openingReadiness.executable) {
+                    // stagedEarly fires via isCommittedInTransitTo when a brigade is en-route
+                    // to its approach OSID but not yet settled. Its CURRENT location may not be
+                    // adjacent to the objective, so evaluateOpeningAttackReadiness fails even though
+                    // the brigade will be in position next turn. Give one turn for march completion.
+                    if (stagedEarly && elapsed <= planDuration + PLANNING_INVALIDATION_GRACE_TURNS) {
+                        continue;
+                    }
                     beginRecovery(op, turn, openingReadiness.blocker ?? 'no_launch_readiness', state);
                     continue;
                 }
@@ -938,7 +1218,7 @@ export function advanceSectorOffensives(
                 if (
                     !forcedLaunch
                     && typeof op.force_ratio_estimate === 'number'
-                    && op.force_ratio_estimate < MIN_LAUNCH_FORCE_RATIO_FLOOR
+                    && op.force_ratio_estimate < launchFloorForOp(op)
                 ) {
                     beginRecovery(op, turn, 'defender_power_too_high', state);
                     continue;
@@ -1336,7 +1616,10 @@ function updateMultiAxisResults(
         // Per-axis cap. The zero-progress backstop (MAX_OPERATION_ZERO_PROGRESS_FAILURES)
         // fires first for single-axis zero-capture operations; this per-axis cap remains
         // the backstop for multi-axis operations making partial progress.
-        if (axis.failure_count >= MAX_TOTAL_FAILURES) {
+        // Wave 20: single-axis ops use a tighter cap so brigades release sooner for
+        // downstream cascade ops (Cincar Phase 1 → Mistral 1).
+        const failureCap = axes.length === 1 ? MAX_TOTAL_FAILURES_SINGLE_AXIS : MAX_TOTAL_FAILURES;
+        if (axis.failure_count >= failureCap) {
             axis.status = 'stalled';
         }
     }
@@ -1923,9 +2206,12 @@ export function reevaluateWeakenedOperations(state: GameState): void {
         // Recovery-phase operations are already winding down.
         if (op.phase === 'recovery') continue;
 
-        // Count active participating brigades and total personnel
+        // Count active participating brigades and total personnel.
+        // Always use participating_brigades (consistent with how initial_strength is set in
+        // operation_aar.ts). getAllAxisBrigades would under-count when reconcilePlanningObjectives
+        // prunes a stale axis but leaves its brigades in participating_brigades.
         const multiAxis = isMultiAxis(op);
-        const allBrigadeIds = multiAxis ? getAllAxisBrigades(op) : op.participating_brigades;
+        const allBrigadeIds = op.participating_brigades;
         let activeBrigadeCount = 0;
         let totalPersonnel = 0;
         for (const bid of allBrigadeIds) {

@@ -4,17 +4,44 @@
     "title": "Zagreb Orders HVO Ceasefire With ARBiH",
     "narrative": "Tuđman accepts a US-brokered ceasefire arrangement and orders Boban to stand down HVO operations against ARBiH. Croatia's EU trajectory and the threat of US sanctions leave Zagreb no choice — the Washington Agreement framework serves Croatian interests better than continued war.",
     "category": "diplomatic",
+    "family": "hrhb_zagreb_pressure_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
     "trigger": {
       "turn_min": 95,
       "turn_max": 103,
-      "phase": "war"
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "croat_republic"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "united_front"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "strategic_ambiguity"
+          }
+        ]
+      }
     },
+    "requires_enabled": true,
     "once": true,
     "responding_faction": "HRHB",
-    "bot_response_logic": "strategic_weighted",
+    "bot_response_logic": "historical",
     "requires_player_response": false,
     "priority": 50,
     "auto_resolve_turns": 2,
+    "historical_default_response_id": "acknowledge_pressure",
+    "historical_source": "Washington Agreement, 1 March 1994; ICTY Prlić et al. IT-04-74-T Trial Judgment (29 May 2013) Vol. 1 §§357-422 and §§556-590 (HZ HB Presidency-Zagreb axis directing the February 1994 ceasefire posture and the Washington Agreement framework preconditions); Vol. 2 §§600-680 (Tudjman-Boban coordination through the Granic-Silajdzic diplomatic channel preceding the 23 February 1994 ceasefire); Granić, Vanjski poslovi (2005) — Granić-Šilajdžić channel record; Tudjman Presidential Transcripts admitted at Prlić (February 1994 set); US State Department Christopher/Redman shuttle records, February 1994; Balkan Battlegrounds Vol. II pp. 506-520.",
+    "source_note": "The February 1994 Zagreb ceasefire order follows the Washington track: with Croatia's EU trajectory and credible US sanctions on the table, Tudjman directs Boban via the Granic-Silajdzic channel to stand down HVO operations against ARBiH (Prlic Vol. 1 §§357-422; Vol. 2 §§556-590, §§600-680; Balkan Battlegrounds Vol. II pp. 506-520). Acknowledge-pressure is the documented historical posture — Boban accepted the directive, opening the Washington Agreement signature window (1 March 1994). Resist-patron is a structurally plausible counterfactual grounded in the analogous patron-resistance precedent at R6 (RS Assembly rejection of VOPP, 5-6 May 1993).",
     "effect": {
       "kind": "narrative",
       "text": "Tuđman orders Boban to stand down HVO operations against ARBiH under the Washington Agreement framework."
@@ -30,6 +57,8 @@
       {
         "id": "acknowledge_pressure",
         "label": "Acknowledge the message",
+        "branch_tag": "hrhb_zagreb_ceasefire_acknowledge",
+        "historical_marker": "historical_default",
         "aggression_affinity": -0.3,
         "risk_level": 0.2,
         "dimension_shifts": [
@@ -53,13 +82,15 @@
       {
         "id": "resist_patron",
         "label": "Maintain our position",
+        "branch_tag": "hrhb_zagreb_ceasefire_resist",
+        "historical_marker": "counterfactual",
         "aggression_affinity": 0.5,
         "risk_level": 0.7,
         "dimension_shifts": [
           {
             "faction": "HRHB",
             "dimension": "patron_confidence",
-            "delta": -10
+            "delta": -25
           },
           {
             "faction": "HRHB",
@@ -79,6 +110,7 @@
     "id": "markale_massacre_1994",
     "title": "First Markale Massacre",
     "narrative": "A mortar shell strikes the Markale marketplace in Sarajevo, killing 68 civilians and wounding over 140. The images of carnage broadcast worldwide provoke outrage and push NATO toward its first decisive action in the Bosnian war. The VRS denies responsibility, but the international community overwhelmingly attributes the attack to Serb forces.",
+    "source_note": "Existing ICTY/UN and same-id essay sources ground the row's provenance and institutional context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "humanitarian",
     "trigger": {
       "turn_min": 96,
@@ -222,6 +254,201 @@
     }
   },
   {
+    "id": "rbih_nato_ultimatum_compliance_1994",
+    "title": "NATO Ultimatum — Sarajevo HWEZ Compliance",
+    "narrative": "Following the North Atlantic Council decision of 9 February 1994, NATO demands the withdrawal of all heavy weapons from a 20-kilometer exclusion zone around Sarajevo by 0001Z on 21 February 1994 or face air strikes. The Heavy Weapons Exclusion Zone regime is symmetric: it applies to VRS positions and to any ARBiH heavy weapons inside the perimeter. The Sarajevo Presidency must record its posture toward the symmetric framing — cooperation with UNPROFOR collection-point inventories, or refusal of the moral-equivalence of withdrawal demands on the besieging army and the defenders.",
+    "category": "diplomatic",
+    "family": "rbih_nato_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 96,
+      "turn_max": 98,
+      "phase": "war",
+      "requires_events": [
+        "markale_massacre_1994"
+      ],
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "civic"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "bosniak_national"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "pragmatic"
+          }
+        ]
+      }
+    },
+    "requires_enabled": true,
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "RBiH",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "rbih_comply_hwez_regime",
+    "historical_source": "NATO North Atlantic Council decision of 9 February 1994 (Heavy Weapons Exclusion Zone ultimatum, NATO Final Communiqué; UN S/1994/154); UN Security Council Resolution 836 (4 June 1993) authorizing UNPROFOR use of force in support of safe areas; UN Security Council Resolution 824 (6 May 1993) declaring Sarajevo a safe area; UN Secretary-General report on the fall of Srebrenica A/54/549 (15 November 1999) §§ on the Sarajevo HWEZ regime; UN Secretary-General reports on UNPROFOR (S/1994/300 series) documenting HWEZ compliance and verification; ICTY Galić Trial Judgement IT-98-29-T (5 December 2003) and Appeal Judgement (30 November 2006) fixing Markale 5 February 1994 attribution to SRK/VRS positions; ICTY Mladić Trial Judgement IT-09-92-T (22 November 2017) on SRK siege as JCE instrument and NATO-enforcement context; ICTY Dragomir Milošević Trial Judgement IT-98-29/1 (12 December 2007); ICTY Karadžić Trial Judgement IT-95-5/18-T (24 March 2016) on Sarajevo siege at RS leadership level; Balkan Battlegrounds Vol. II Sarajevo HWEZ chronology.",
+    "source_note": "RBiH-side companion to existing nato_ultimatum_sarajevo_1994 (RS-facing, sensitive-gated). Per Phase A B9 worksheet (docs/40_reports/research/20260527_EVENT_FAMILY_B9.md) and Wave 1 B-B batch + Phase A vocabulary namespacing decision, this row is a separate RBiH-facing decision event with distinct option ids (rbih_comply_hwez_regime, rbih_defy_hwez_regime) to prevent collision with the RS-side comply_withdraw_hwez/defy_ultimatum_hwez option ids. Branch flags: event_flags.rbih_nato_response = 'comply'|'defy' are distinct from sarajevo_hwez_complied (RS-set). Historical Presidency posture (Izetbegović + Sarajevo Assembly): public framing of NATO action as overdue Western coercion + cooperation with UNPROFOR inspections + acceptance of symmetric application of HWEZ to ARBiH (relatively few heavy weapons inside the perimeter; asymmetric material cost). The counterfactual defy branch is defensible as a posture-of-protest counterfactual sourced in Assembly-debate currents at the time; it was not the documented action of the Presidency.",
+    "staff_assessment": "Comply with the NATO ultimatum and accept the symmetric HWEZ application: cooperate with UNPROFOR collection-point inventories, withdraw any ARBiH heavy weapons inside the 20km perimeter, publicly support NATO enforcement against the VRS. This is the documented Sarajevo posture (Presidency cooperation with HWEZ regime; 12 February 1994 first-day-without-casualty since April 1992 publicly owned as vindication). Defying the ultimatum to protest the moral-equivalence framing would carry significant negotiating-leverage and international-standing costs while jeopardizing the federation and Washington track that arrives in March.",
+    "trigger_evidence": [
+      "The Markale market shelling of 5 February 1994 has fixed Sarajevo as the casus belli for Western coercion against the VRS.",
+      "The North Atlantic Council ultimatum of 9 February 1994 applies symmetrically to ARBiH heavy weapons inside the 20km Sarajevo exclusion zone.",
+      "The Presidency must record its posture toward the symmetric framing before the 21 February 1994 deadline."
+    ],
+    "effect": {
+      "kind": "narrative",
+      "text": "The Sarajevo Presidency convenes to record its posture toward the NATO Heavy Weapons Exclusion Zone regime."
+    },
+    "effects": [
+      {
+        "kind": "narrative",
+        "text": "Izetbegović, Silajdžić, and the Assembly inner circle weigh cooperation with UNPROFOR HWEZ inventories against the symmetric framing's moral-equivalence cost."
+      }
+    ],
+    "response_options": [
+      {
+        "id": "rbih_comply_hwez_regime",
+        "branch_tag": "rbih_nato_comply",
+        "historical_marker": "historical_default",
+        "label": "Withdraw ARBiH heavy weapons from the HWEZ",
+        "description": "Cooperate with UNPROFOR collection-point inventories. Withdraw any ARBiH heavy weapons inside the 20km exclusion zone. Publicly support NATO enforcement against the VRS. Accept the symmetric application of the HWEZ regime as the diplomatic cost of credible Western coercion. This is the documented Sarajevo posture — the Presidency frames the ultimatum as long-overdue Western action and absorbs the relatively low material cost of symmetric application.",
+        "aggression_affinity": -0.3,
+        "risk_level": 0.3,
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 2
+          }
+        ],
+        "sets_flags": {
+          "rbih_nato_response": "comply"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": 8
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 2
+          }
+        ],
+        "future_consequences": [
+          {
+            "id": "rbih_nato_comply_followthrough",
+            "label": "HWEZ cooperation posture follow-through",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_events": [],
+            "opens_flags": [
+              "rbih_nato_response"
+            ],
+            "material_effect_refs": [
+              "morale_change.RBiH",
+              "dimension_shift.RBiH.international_standing",
+              "dimension_shift.RBiH.negotiating_leverage",
+              "dimension_shift.RBiH.internal_cohesion"
+            ],
+            "explanation": "Sarajevo's documented HWEZ cooperation strengthens the diplomatic conditions for the March 1994 Washington Agreement framework and aligns Sarajevo's posture with the NATO-enforcement track that runs through R13 Deliberate Force compliance in 1995. The 12 February 1994 first-day-without-casualty since April 1992 is publicly owned by the Presidency as vindication of the NATO-enforcement posture (UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
+          }
+        ]
+      },
+      {
+        "id": "rbih_defy_hwez_regime",
+        "branch_tag": "rbih_nato_defy",
+        "historical_marker": "counterfactual",
+        "label": "Refuse symmetric application — protest HWEZ to ARBiH",
+        "description": "Publicly object to the symmetric framing's moral-equivalence of victim and aggressor. Refuse ARBiH heavy-weapon withdrawal from the exclusion zone while still benefiting from NATO action against the VRS. Counterfactual posture-of-protest: Assembly-debate currents (1994) on the moral-equivalence framing become the Presidency's recorded position. This jeopardizes Western support and the federation/Washington track that arrives in March; ICFY Co-Chairmen and Washington read the protest as obstructing the only effective coercion against RS.",
+        "aggression_affinity": 0.4,
+        "risk_level": 0.7,
+        "effects": [
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": 10
+          }
+        ],
+        "sets_flags": {
+          "rbih_nato_response": "defy"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": -8
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 3
+          }
+        ],
+        "future_consequences": [
+          {
+            "id": "rbih_nato_defy_followthrough",
+            "label": "HWEZ refusal posture follow-through",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_events": [],
+            "opens_flags": [
+              "rbih_nato_response"
+            ],
+            "material_effect_refs": [
+              "dimension_shift.RBiH.international_standing",
+              "dimension_shift.RBiH.negotiating_leverage",
+              "patron_pressure.RBiH",
+              "dimension_shift.RBiH.internal_cohesion"
+            ],
+            "explanation": "Sarajevo's HWEZ refusal carries international-standing and negotiating-leverage costs that propagate into the March 1994 Washington Agreement deliberations and the federation-track readiness conditions. Per Phase A B9 worksheet §5, the federation framework was historically achieved despite RBiH-Western friction, so the closure of federation precursors is soft rather than direct; the diplomatic conditions on the Washington decision shift adversely without statically blocking the row."
+          }
+        ]
+      }
+    ],
+    "notifications_to_other_factions": {
+      "rbih_comply_hwez_regime": {
+        "RS": {
+          "headline": "Sarajevo accepts NATO HWEZ symmetric application",
+          "body": "RBiH cooperates with UNPROFOR collection-point inventories and publicly supports NATO enforcement. Pale faces a consolidated diplomatic posture in Sarajevo and the credible threat of air strikes if the VRS does not comply with the 21 February deadline."
+        },
+        "HRHB": {
+          "headline": "RBiH supports NATO Sarajevo ultimatum",
+          "body": "Sarajevo's Presidency accepts the symmetric HWEZ regime and cooperates with UNPROFOR. Mostar reads the move as a Federation-aligned diplomatic posture that strengthens the Washington track."
+        }
+      },
+      "rbih_defy_hwez_regime": {
+        "RS": {
+          "headline": "Sarajevo protests symmetric HWEZ application",
+          "body": "RBiH refuses ARBiH heavy-weapon withdrawal under the moral-equivalence framing. Pale reads the protest as friction in the Western coalition and weakening of Sarajevo's negotiating leverage."
+        },
+        "HRHB": {
+          "headline": "RBiH refuses symmetric NATO ultimatum",
+          "body": "Sarajevo's Presidency objects to the HWEZ regime's symmetric application. Mostar weighs whether the protest strengthens or weakens the Federation track now under final US shuttle pressure."
+        }
+      }
+    }
+  },
+  {
     "id": "sarajevo_exclusion_zone_1994",
     "title": "Sarajevo Exclusion Zone Takes Effect",
     "narrative": "Under threat of NATO air strikes, the VRS begins withdrawing heavy weapons from a 20-kilometer exclusion zone around Sarajevo. Hundreds of artillery pieces and mortars are moved or placed under UNPROFOR control at collection points. On February 12, Sarajevo experiences its first day without a single casualty since April 1992. The siege is not lifted, but its deadliest instrument is temporarily muzzled.",
@@ -293,22 +520,298 @@
     ]
   },
   {
-    "id": "washington_agreement_1994",
-    "title": "Washington Agreement Signed",
-    "narrative": "Under heavy American pressure, Bosniak and Bosnian Croat leaders sign the Washington Agreement, ending the Croat-Bosniak war and establishing the Federation of Bosnia and Herzegovina. The agreement transforms the military balance by uniting two of the three warring factions against the VRS and opens Croatian supply lines to the ARBiH.",
+    "id": "rs_washington_rejection_1994",
+    "title": "Washington Agreement — Pale's Non-Engagement",
+    "narrative": "Washington shuttle diplomacy (Christopher, Galbraith, Redman) has produced a bipolar Federation framework between Sarajevo and Mostar — the Croat-Muslim peace and constitutional architecture of the Federation of Bosnia and Herzegovina. Belgrade has been informed; Pale has not been invited. Karadzic and Krajisnik read the framework as a constraint on the Six Strategic Goals: a Federation entity occupying 51 percent of Bosnia narrows the corridor, contests the Drina-valley axis, and forecloses Sarajevo division ahead of any negotiated map. The Pale Assembly must record its written posture toward the Washington track: reject the bipolar Federation as the documented historical line, propose a trilateral alternative that brings RS into a parallel republic frame, condition any engagement on territorial recognition of the Six Goals platform, or accept observer status to maintain a channel to the framework Belgrade has not yet endorsed against.",
     "category": "diplomatic",
+    "family": "rs_washington_response",
+    "source_tier": "agreement_text",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 99,
+      "turn_max": 102,
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "all_six"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "selective"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "aggressive"
+          }
+        ]
+      }
+    },
+    "requires_enabled": true,
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "RS",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "reject_federation",
+    "pressure": {
+      "base_rate": 3,
+      "threshold": 3,
+      "decay_rate": 0
+    },
+    "effect": {
+      "kind": "narrative",
+      "text": "The Pale Assembly records its posture toward the Washington Agreement — the bipolar Federation framework concluded without RS participation."
+    },
+    "source_note": "RS was not a party to the Washington Agreement (1 + 18 March 1994). Karadzic and the Pale leadership read the bipolar Federation framework as a constraint on the Six Strategic Goals platform and treated the diplomatic track as instrumentally hostile rather than worth engaging; the documented historical posture is non-engagement (reject_federation) rather than a counter-proposal or observer-status overture. The X5 packet completes the Washington Agreement cross-faction trio: B10 (`rbih_washington_agreement_1994`, Packet 8) RBiH side; H9 (`hrhb_washington_agreement_1994`, Packet 7) HRHB side; this row RS side. All three are gated on Washington's calendar window (turn 99-102) and on the responding faction's foundational flag (X1 London Conference / X2 Vance-Owen / X3 Owen-Stoltenberg / X4 Contact Group cross-faction pattern from Packets 6/25/28/29). §3.6 forward-looking guard: any future `csq_rs_washington_*` row consuming this row's outcomes MUST NOT re-author cleansing, forced-displacement, civilian-targeting, paramilitary deployment, hostage-taking, or any sensitive-act response option. The Washington Agreement aftermath did include ARBiH-HVO joint pressure on RS (the Federation military integration track culminating in Operation Storm and Operation Mistral in 1995); consequence rows must stay within constitutional/political-strategic scope, not propagandize ethnic-targeting or re-author atrocity surfaces — those remain canon-gated through their existing event surfaces (un_hostage_crisis_1995; deliberate_force_rs_compliance_1995; rs_drina_campaign family slugs; srebrenica_falls_1995). The Washington Agreement signing led historically to the Federation framework that bounded the 1995 joint operations against RS, not to direct RS-targeting cleansing. Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: Belgrade patron-confidence shifts captured via `patron_confidence`; international standing via `international_standing`; negotiating leverage via `negotiating_leverage`; alliance change with RBiH via `alliance_change` (Federation alliance proxy, scaled 0-1); cohesion damage via `internal_cohesion`.",
+    "staff_assessment": "Rejection mirrors the documented Pale Assembly posture and preserves the Six Goals platform claims, but cedes the diplomatic frame entirely to the Federation. Trilateral proposal opens a structurally honest alternative but offends Belgrade by going around Milosevic; conditional engagement preserves the Six Goals platform while keeping a channel open at the cost of patron friction; observer status maximizes international standing at the steepest cohesion cost — Pale hawks read it as capitulation to a framework Karadzic has publicly disdained.",
+    "trigger_evidence": [
+      "The Washington Agreement framework (1 + 18 March 1994) has reached the formal signing milestone.",
+      "RS was not invited to the framework; the Pale Assembly must record its written posture toward the bipolar Federation it sees as a constraint on the Six Goals platform.",
+      "Belgrade has been informed but has not endorsed Pale's response; the patron channel is open for either alignment or defiance on this decision."
+    ],
+    "response_options": [
+      {
+        "id": "reject_federation",
+        "branch_tag": "rs_belgrade_pale_resist",
+        "historical_marker": "historical_default",
+        "label": "Reject the bipolar Federation",
+        "description": "Karadzic and Krajisnik record the documented Pale position: the Washington Agreement is a constraint on the Six Strategic Goals platform. RS will not engage the bipolar framework, will not seek observer status, and will not propose a counter-frame; the Federation track is treated as hostile diplomatic territory. Belgrade is informed; the patron channel registers the rejection without alignment.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 3
+          }
+        ],
+        "sets_flags": {
+          "rs_washington_response": "reject"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -5
+          }
+        ],
+        "aggression_affinity": 0.3,
+        "risk_level": 0.5
+      },
+      {
+        "id": "propose_trilateral",
+        "branch_tag": "rs_belgrade_negotiate",
+        "historical_marker": "counterfactual",
+        "label": "Propose a trilateral framework",
+        "description": "Issue a Pale-side counter-proposal: replace the bipolar Federation with a tripartite framework that recognizes Republika Srpska as a constitutive entity alongside the Bosniak-Croat Federation. Belgrade is bypassed for the diplomatic initiative; Milosevic registers the move as Pale freelancing under Karadzic. International standing rises with the constructive posture; negotiating leverage opens; Federation alliance with RBiH frays slightly as the bipolar architecture is contested.",
+        "effects": [
+          {
+            "kind": "alliance_change",
+            "delta": 0.05
+          }
+        ],
+        "sets_flags": {
+          "rs_washington_response": "trilateral_proposal"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -10
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": 15
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 10
+          }
+        ],
+        "aggression_affinity": -0.1,
+        "risk_level": 0.5
+      },
+      {
+        "id": "conditional_engagement",
+        "branch_tag": "rs_belgrade_negotiate",
+        "historical_marker": "counterfactual",
+        "label": "Engage conditionally",
+        "description": "Indicate Pale will discuss the Washington framework if and only if it acknowledges the Six Strategic Goals — the corridor, the Drina-valley axis, Sarajevo division. Send Krajisnik to Geneva with a written brief; Belgrade is informed and consulted but the channel is Pale-led. The diplomatic posture is open without commitment; international standing rises modestly; Belgrade reads the move as freelance and registers mild patron friction.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 1
+          }
+        ],
+        "sets_flags": {
+          "rs_washington_response": "conditional"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -5
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": 10
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": 0,
+        "risk_level": 0.4
+      },
+      {
+        "id": "accept_observer_status",
+        "branch_tag": "rs_belgrade_pale_acknowledge",
+        "historical_marker": "counterfactual",
+        "label": "Accept observer status",
+        "description": "Acknowledge the bipolar Federation framework as a fact on the ground; accept observer status at the institutional working groups without contesting the constitutional architecture. The Six Strategic Goals platform breaks internally on this option — Pale hawks read observer status as capitulation to a framework Karadzic has publicly disdained. International standing rises sharply; internal cohesion takes the steepest hit. Belgrade tolerates but does not endorse the posture.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": -2
+          }
+        ],
+        "sets_flags": {
+          "rs_washington_response": "observer"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -15
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": 20
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -10
+          }
+        ],
+        "aggression_affinity": -0.3,
+        "risk_level": 0.6
+      }
+    ],
+    "notifications_to_other_factions": {
+      "reject_federation": {
+        "RBiH": {
+          "headline": "Pale ignores the Washington framework",
+          "body": "Karadzic and Krajisnik decline to engage the Federation track. Sarajevo reads the non-engagement as confirmation that RS will treat the Washington framework as hostile diplomatic territory; the Federation track strengthens by default."
+        },
+        "HRHB": {
+          "headline": "RS refuses Washington engagement",
+          "body": "The Pale Assembly records non-engagement with the Federation framework. Mostar reads the move as the Six Goals platform staying intact; RS posture toward the joint anti-VRS Federation hardens."
+        }
+      },
+      "propose_trilateral": {
+        "RBiH": {
+          "headline": "Pale floats a tripartite counter-frame",
+          "body": "Karadzic proposes replacing the bipolar Federation with a tripartite framework that recognizes Republika Srpska alongside the Bosniak-Croat entity. Sarajevo reads the move as a serious diplomatic intervention that contests Washington's architecture; Belgrade is reported to be uneasy with Pale freelancing."
+        },
+        "HRHB": {
+          "headline": "RS proposes trilateral framework",
+          "body": "Pale offers a counter-frame that recognizes Republika Srpska as a constitutive entity alongside the Federation. Mostar reads the proposal as a structural challenge to the Washington bipolar architecture; the Federation track gains friction."
+        }
+      },
+      "conditional_engagement": {
+        "RBiH": {
+          "headline": "Pale opens conditional channel",
+          "body": "RS indicates it will discuss the Washington framework if the Six Strategic Goals are acknowledged. Sarajevo reads the move as a posture-with-reservations that does not endorse the Federation but keeps a diplomatic channel open."
+        },
+        "HRHB": {
+          "headline": "RS opens conditional engagement",
+          "body": "Krajisnik is dispatched to Geneva with a conditional brief tied to the Six Goals platform. Mostar reads the move as Pale temporizing without committing to the Federation framework."
+        }
+      },
+      "accept_observer_status": {
+        "RBiH": {
+          "headline": "Pale accepts Federation observer status",
+          "body": "RS acknowledges the bipolar Federation as a fact on the ground and takes observer status at the institutional working groups. Sarajevo reads the move as a structural concession; Pale hawks are reported to be in open dissent against Karadzic."
+        },
+        "HRHB": {
+          "headline": "RS records observer-status acceptance",
+          "body": "Pale acknowledges the Federation framework without endorsing its constitutional architecture. Mostar reads the move as a partial capitulation that leaves the Six Goals platform internally fractured."
+        }
+      }
+    },
+    "historical_source": "Washington Framework Agreement, 1 March 1994; Constitutional Agreement of the Federation of Bosnia and Herzegovina, 18 March 1994; Preliminary Agreement on Confederation between the Republic of Croatia and the Federation of Bosnia and Herzegovina, 18 March 1994; Vienna Framework Agreement, 26 March 1994; UN S/1994/308. ICTY Karadzic IT-95-5/18-T Trial Judgment (24 March 2016) Vol. III §§3526-3530 (Pale non-engagement posture toward Washington Federation framework as constraint on Six Strategic Goals platform); §§4263-4310 (Contact Group rupture context downstream of Washington framework). Karadzic Closing Argument transcripts (ICTY case archive, T.46952-T.47018) for Pale Assembly internal posture. Richard Holbrooke, To End a War (Random House, 1998), Ch. 4-5 (US shuttle architecture excluding RS; Christopher-Galbraith-Redman track). Balkan Battlegrounds Vol. II Ch. 12 (Washington Agreement signing context; RS non-engagement; Federation framework operational consequences); pp. 451-455 (Sarajevo's instrumental acceptance posture; corresponding Pale non-engagement)."
+  },
+  {
+    "id": "hrhb_washington_agreement_1994",
+    "title": "Washington Agreement Signed",
+    "narrative": "Under heavy American pressure, Bosniak and Bosnian Croat leaders sign the Washington Agreement, ending the Croat-Bosniak war and establishing the Federation of Bosnia and Herzegovina. The agreement changes the military balance by creating a Federation framework against the VRS, though trust, command integration, and supply coordination remain uneven.",
+    "category": "diplomatic",
+    "family": "hrhb_washington_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
     "trigger": {
       "turn_min": 102,
       "turn_max": 102,
       "phase": "war",
       "requires_events": [
         "croat_bosniak_war_begins_1993"
-      ]
+      ],
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "croat_republic"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "united_front"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "strategic_ambiguity"
+          }
+        ]
+      }
     },
+    "requires_enabled": true,
     "once": true,
     "requires_player_response": true,
-    "responding_faction": "RBiH",
-    "bot_response_logic": "accept_first",
+    "responding_faction": "HRHB",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "accept",
+    "historical_source": "Washington Agreement text, 1 + 18 March 1994; Vienna Framework Agreement, 26 March 1994; ICTY Prlic Trial Judgment (IT-04-74-T) Vol. 1 §§452-470 (HR HB institutional continuity) and Vol. 3 §§120-200 (Tudjman transcripts and HR HB Presidency deliberations preceding the signing); Balkan Battlegrounds Vol. II pp.451-455.",
+    "source_note": "Balkan Battlegrounds frames Washington as an externally imposed but necessary Croat-Muslim peace and uneasy anti-VRS alliance, not immediate reconciliation. The OR-trigger on hrhb_political_goal ensures all three H1 branches reach the Washington Agreement decision: U.S. sanctions pressure transmitted via Tudjman makes acceptance the historical-default path regardless of which 1992 line the HZ HB Presidency selected (Prlic Vol. 3 §§120-200).",
+    "staff_assessment": "Accepting the Federation framework ends the two-front Croat-Bosniak war and restores strategic room against the VRS, but staff should expect slow trust-building and uneven joint command.",
+    "trigger_evidence": [
+      "The Croat-Bosniak war has begun in the event chain.",
+      "The formal Washington Agreement calendar milestone has arrived."
+    ],
     "effect": {
       "kind": "alliance_change",
       "delta": 0.8
@@ -322,18 +825,32 @@
       {
         "kind": "morale_change",
         "faction": "HRHB",
-        "delta": 3
+        "delta": 8
+      },
+      {
+        "kind": "cohesion_change",
+        "faction": "HRHB",
+        "delta": 15
+      },
+      {
+        "kind": "cohesion_change",
+        "faction": "RBiH",
+        "delta": 5
       },
       {
         "kind": "narrative",
-        "text": "The Washington Agreement ends the Croat-Bosniak war. The Federation of Bosnia and Herzegovina is established."
+        "text": "The Washington Agreement ends the Croat-Bosniak war. The Federation of Bosnia and Herzegovina is established. HVO units rebuild cohesion under Federation military integration; HRHB-RBiH supply pipelines open."
       }
     ],
     "response_options": [
       {
         "id": "accept",
         "label": "Embrace the Federation",
-        "description": "Full commitment to the Federation opens supply lines and creates a unified front against the VRS.",
+        "description": "Commit to the Federation framework, opening coordination and supply channels while former enemies integrate cautiously.",
+        "branch_tag": "hrhb_washington_accept",
+        "historical_marker": "historical_default",
+        "aggression_affinity": -0.3,
+        "risk_level": 0.3,
         "effects": [
           {
             "kind": "negotiation_capital",
@@ -352,6 +869,10 @@
         "id": "reluctant",
         "label": "Accept with Reservations",
         "description": "Accept the agreement but maintain wariness toward former enemies. Slower integration but preserved autonomy.",
+        "branch_tag": "hrhb_washington_reluctant",
+        "historical_marker": "counterfactual",
+        "aggression_affinity": 0.1,
+        "risk_level": 0.5,
         "effects": [
           {
             "kind": "negotiation_capital",
@@ -381,6 +902,222 @@
         "HRHB": {
           "headline": "RBiH enters Federation warily",
           "body": "Sarajevo accepts the formal Washington settlement but signals continued caution toward former enemies. Mostar gains the Federation framework, though trust and operational integration will need time."
+        }
+      }
+    }
+  },
+  {
+    "id": "rbih_washington_agreement_1994",
+    "title": "Washington Agreement — Sarajevo's Acceptance",
+    "narrative": "Under cumulative US shuttle diplomacy (Christopher, Galbraith, Redman) and the post-Markale NATO ultimatum, the Sarajevo Presidency receives the Washington framework. Izetbegovic and Prime Minister Silajdzic delegate to Washington; the 1 March 1994 framework agreement and the 18 March 1994 constitutional agreement establish the Federation of Bosnia and Herzegovina, with a parallel Preliminary Agreement on Confederation with Croatia witnessed by Tudjman. Acceptance ends the two-front Croat-Bosniak war and reopens Croatian supply lines, but Assembly hardliners and the Silajdzic-track skepticism record the acceptance as instrumental rather than ideological.",
+    "category": "diplomatic",
+    "family": "rbih_washington_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 102,
+      "turn_max": 105,
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "civic"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "bosniak_national"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "pragmatic"
+          }
+        ]
+      }
+    },
+    "requires_enabled": true,
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "RBiH",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "accept",
+    "historical_source": "Washington Framework Agreement, 1 March 1994 (signed in Washington D.C. by RBiH Prime Minister Haris Silajdzic, HRHB representative Kresimir Zubak, and Croatian Foreign Minister Mate Granic); Constitutional Agreement of the Federation of Bosnia and Herzegovina, 18 March 1994 (signed at the White House by RBiH President Alija Izetbegovic, HRHB representative Kresimir Zubak, and Croatian President Franjo Tudjman); Preliminary Agreement on Confederation between the Republic of Croatia and the Federation of Bosnia and Herzegovina, 18 March 1994; Vienna Framework Agreement, 26 March 1994; UN S/1994/308; ICTY Prosecutor v. Prlic et al. (IT-04-74-T) Trial Judgement Vol. 1 §§452-470 (Federation acceptance track and Bosnian Presidency deliberations) and Vol. 3 §§120-200 (Tudjman-Izetbegovic shuttle records); ICTY Prosecutor v. Karadzic (IT-95-5/18-T) Trial Judgement Vol. 1 (Bosnian Serb side reaction context); Balkan Battlegrounds Vol. II pp. 451-455 (Sarajevo's instrumental acceptance posture); Bosnian Presidency Athens-channel records.",
+    "source_note": "Balkan Battlegrounds Vol. II p. 451 frames Sarajevo's acceptance precisely as instrumental: a treaty 'essentially imposed from outside' that the Presidency 'had to seem to be agreeable' to in order to maintain international support and, more decisively, that 'allowed the ARBiH to end its desperate two-front war and concentrate on the crucial conflict with its Bosnian Serb foes.' Acceptance was real and operationally consequential — UNPROFOR took on cease-fire monitoring across Mostar, Vitez, Gornji Vakuf, Prozor, Konjic, and Jablanica within days — but the political stake was instrumental rather than ideological. The OR-trigger on rbih_state_identity ensures all three B1 branches (civic, bosniak_national, pragmatic) reach the Washington decision: US shuttle pressure plus post-Markale NATO ultimatum makes acceptance the historical-default path regardless of which 1992 identity declaration the Sarajevo Presidency selected. This row is the RBiH-side companion to hrhb_washington_agreement_1994 (HRHB-side), per X5 composite worksheet ruling (Game Designer Wave 1: two separate per-faction events coordinated via runtime causality).",
+    "staff_assessment": "Accepting the Federation framework ends the two-front Croat-Bosniak war, reopens Croatian supply lines, and restores diplomatic standing under US auspices, but staff should expect Assembly hardline objections and uneven joint command in the months that follow.",
+    "trigger_evidence": [
+      "The Croat-Bosniak war has reached its diplomatic terminus under US shuttle pressure.",
+      "The formal Washington Agreement calendar milestone (1 + 18 March 1994) has arrived.",
+      "The post-Markale NATO ultimatum and Tudjman's parallel agreement with HRHB have aligned the political conditions for Sarajevo's signature."
+    ],
+    "effect": {
+      "kind": "narrative",
+      "text": "The Sarajevo Presidency receives the Washington framework and must decide its posture toward the Federation of Bosnia and Herzegovina."
+    },
+    "effects": [
+      {
+        "kind": "narrative",
+        "text": "Sarajevo's Presidency convenes to deliberate the Washington Agreement framework. Izetbegovic, Silajdzic, and the Assembly inner circle weigh acceptance against the cost of perpetuating the two-front war."
+      }
+    ],
+    "response_options": [
+      {
+        "id": "accept",
+        "label": "Sign the Federation framework",
+        "description": "Commit fully to the Washington Agreement — sign the 1 March framework, the 18 March constitutional agreement, and accept the Confederation framework with Croatia. End the Croat-Bosniak war and reopen Croatian supply lines for the campaign against the VRS.",
+        "branch_tag": "rbih_washington_accept",
+        "historical_marker": "historical_default",
+        "aggression_affinity": -0.3,
+        "risk_level": 0.3,
+        "effects": [
+          {
+            "kind": "alliance_change",
+            "delta": 0.8
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 5
+          },
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": 15
+          },
+          {
+            "kind": "supply_delta",
+            "faction": "RBiH",
+            "delta": 10
+          }
+        ],
+        "sets_flags": {
+          "rbih_washington_response": "accept"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": 10
+          }
+        ],
+        "future_consequences": [
+          {
+            "id": "rbih_washington_accept_followthrough",
+            "label": "Federation framework acceptance follow-through",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_events": [],
+            "opens_flags": [
+              "rbih_washington_response"
+            ],
+            "material_effect_refs": [
+              "alliance_change",
+              "morale_change.RBiH",
+              "negotiation_capital.RBiH.international_credibility",
+              "supply_delta.RBiH"
+            ],
+            "explanation": "Sarajevo's signature on the Washington framework opens the federation military integration track and positions ARBiH for the 1995 joint offensives (Storm, Mistral, Sana) alongside HVO and HV forces. Croatian supply lines reopen; UNPROFOR cease-fire monitoring takes effect across Mostar, Vitez, Gornji Vakuf, Prozor, Konjic, and Jablanica within days (BB Vol. II p. 451)."
+          }
+        ]
+      },
+      {
+        "id": "reluctant",
+        "label": "Accept under reservations",
+        "description": "Sign the framework under US shuttle pressure but with the Silajdzic-track skepticism on record. The framework holds; execution friction will be higher; Assembly hardliners get the political cover they sought.",
+        "branch_tag": "rbih_washington_reluctant",
+        "historical_marker": "counterfactual",
+        "aggression_affinity": 0.1,
+        "risk_level": 0.5,
+        "effects": [
+          {
+            "kind": "alliance_change",
+            "delta": 0.4
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 2
+          },
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": 5
+          }
+        ],
+        "sets_flags": {
+          "rbih_washington_response": "reluctant"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 3
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": 5
+          }
+        ],
+        "future_consequences": [
+          {
+            "id": "rbih_washington_reluctant_followthrough",
+            "label": "Federation framework with reservations",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_events": [],
+            "opens_flags": [
+              "rbih_washington_response"
+            ],
+            "material_effect_refs": [
+              "alliance_change",
+              "morale_change.RBiH",
+              "negotiation_capital.RBiH.international_credibility"
+            ],
+            "explanation": "Same direction as accept (per BB Vol. II p. 451 — both options are forms of acceptance), but at a different posture. Silajdzic-track skepticism dampens commitment; the federation military integration track still opens but with friction. Counterfactual gradient capturing the same-direction-different-posture register documented in BB Vol. II p. 451."
+          }
+        ]
+      }
+    ],
+    "notifications_to_other_factions": {
+      "accept": {
+        "RS": {
+          "headline": "Sarajevo signs the Federation framework",
+          "body": "RBiH Presidency commits fully to the Washington Agreement. Pale faces a consolidated Federation front, stronger international standing for Sarajevo, and reopened Croatian supply channels."
+        },
+        "HRHB": {
+          "headline": "Sarajevo embraces the Federation",
+          "body": "RBiH accepts the formal Washington framework without reservation. Mostar reads the move as a clear Federation commitment, with joint anti-VRS coordination and Croatian supply access now politically easier to sustain."
+        }
+      },
+      "reluctant": {
+        "RS": {
+          "headline": "Sarajevo accepts with reservations",
+          "body": "RBiH signs onto the formal Washington Agreement while the Silajdzic track keeps distance from its former Croat adversaries. Pale still faces a Federation framework, but Bosniak internal cohesion shows strain."
+        },
+        "HRHB": {
+          "headline": "RBiH enters Federation warily",
+          "body": "Sarajevo accepts the formal Washington settlement but signals continued caution. Mostar gains the Federation framework, though trust and operational integration will need time to consolidate."
         }
       }
     }
@@ -425,7 +1162,15 @@
     },
     "once": true,
     "responding_faction": "RBiH",
-    "bot_response_logic": "strategic_weighted",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "acknowledge_pressure",
+    "historical_source": "Balkan Battlegrounds Vol. I pp.21-22; Washington Agreement text, Mar. 18 1994; Contact Group diplomacy chronology, May-July 1994.",
+    "source_note": "Balkan Battlegrounds traces the post-Washington diplomatic lane through Federation institution-building, Contact Group shuttle diplomacy, ceasefire pressure, and the 51/49 settlement framework.",
+    "staff_assessment": "Acknowledging the Western warning preserves patron confidence after Washington, but it costs Sarajevo some negotiating leverage and frustrates commanders who see a military opening.",
+    "trigger_evidence": [
+      "The turn 106-114 window follows the formal Washington Agreement period.",
+      "The same diplomatic lane leads into Contact Group pressure and ceasefire proposals rather than unrestricted Federation offensives."
+    ],
     "requires_player_response": true,
     "priority": 50,
     "auto_resolve_turns": 2,
@@ -444,6 +1189,8 @@
       {
         "id": "acknowledge_pressure",
         "label": "Acknowledge the message",
+        "description": "Historical posture: temper offensive planning to keep Western support intact. Patron confidence +8, negotiating leverage -5, internal cohesion -3.",
+        "historical_marker": "historical_default",
         "aggression_affinity": -0.3,
         "risk_level": 0.2,
         "dimension_shifts": [
@@ -467,6 +1214,7 @@
       {
         "id": "resist_patron",
         "label": "Maintain our position",
+        "description": "Keep pressure on the front despite Western caution. Patron confidence -10, negotiating leverage +6, military credibility +3.",
         "aggression_affinity": 0.5,
         "risk_level": 0.7,
         "dimension_shifts": [
@@ -600,7 +1348,15 @@
     "once": true,
     "requires_player_response": true,
     "responding_faction": "RBiH",
-    "bot_response_logic": "capital_based",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "accept",
+    "historical_source": "Balkan Battlegrounds Vol. I p.22; Contact Group proposal, July 1994; ICTY Karadzic Trial Judgment (IT-95-5/18-T).",
+    "source_note": "The Contact Group plan created the 51/49 formula and was accepted by Sarajevo under pressure, but it was not implemented after RS rejection.",
+    "staff_assessment": "Acceptance preserves international credibility and keeps Federation diplomacy aligned, but it means accepting an unsatisfying territorial formula rather than a delivered peace.",
+    "trigger_evidence": [
+      "The Contact Group calendar proposal window has arrived.",
+      "The row represents the diplomatic presentation of the 51/49 map, not implementation of the plan."
+    ],
     "effect": {
       "kind": "narrative",
       "text": "The Contact Group demands acceptance of a 51/49 territorial split. Rejection risks further international isolation."
@@ -610,6 +1366,9 @@
         "id": "accept",
         "label": "Accept the Contact Group Plan",
         "description": "Acceptance demonstrates good faith and strengthens the case for international support.",
+        "historical_marker": "historical_default",
+        "aggression_affinity": -0.4,
+        "risk_level": 0.3,
         "effects": [
           {
             "kind": "negotiation_capital",
@@ -628,6 +1387,8 @@
         "id": "reject",
         "label": "Reject the Territorial Division",
         "description": "Rejection risks isolation but refuses to legitimize conquest. The war continues.",
+        "aggression_affinity": 0.5,
+        "risk_level": 0.8,
         "effects": [
           {
             "kind": "negotiation_capital",
@@ -667,22 +1428,1177 @@
     }
   },
   {
+    "id": "rs_contact_group_response_1994",
+    "title": "Contact Group 51/49 — Pale's Response",
+    "narrative": "The Contact Group — the US, UK, France, Germany, and Russia — has presented the 51/49 territorial framework to all three Bosnian factions in early July 1994. The map cedes the corridor narrowly, divides the Drina valley, and leaves Sarajevo as a unified Federation capital. Milosevic has signaled Belgrade's willingness to accept; the Pale Assembly is convening at Bijeljina to record its posture. Your political files require a written response: reject the map and accept the patron rupture that follows, accept the framework and absorb the cost inside the Six Goals platform, or negotiate amendments to the territorial terms.",
+    "category": "diplomatic",
+    "family": "rs_contact_group_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 118,
+      "turn_max": 120,
+      "phase": "war",
+      "requires_events": [
+        "contact_group_plan_1994"
+      ],
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "all_six"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "selective"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "aggressive"
+          }
+        ]
+      }
+    },
+    "requires_enabled": true,
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "RS",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "reject_51_49_plan",
+    "pressure": {
+      "base_rate": 3,
+      "threshold": 3,
+      "decay_rate": 0
+    },
+    "effect": {
+      "kind": "narrative",
+      "text": "The Pale Assembly records its posture toward the Contact Group 51:49 territorial framework."
+    },
+    "source_note": "The Pale Assembly's 3 August 1994 rejection of the Contact Group 51/49 plan is the documented historical posture (Karadzic IT-95-5/18-T §§4263-4310). The X4 packet uses the X1 London Conference cross-faction pattern (Packet 6): one event per faction, each triggered by `contact_group_plan_1994` and gated on the responding faction's foundational flag. §3.6 forward-looking guard: any future `csq_rs_contact_group_*` row consuming this row's outcomes MUST NOT re-author cleansing, forced-displacement, hostage-taking, civilian-targeting, paramilitary deployment, or any sensitive-act response option. The Contact Group response is a diplomatic/patron-axis posture decision; downstream rupture cascades (Belgrade embargo, Patriarch Paper delegation, Deliberate Force, hostage crisis) remain canon-gated through their existing event surfaces. Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: patron-pressure spike captured via `patron_pressure` dimension shift; cohesion damage via `internal_cohesion`; recruitment-pool penalty via `recruitment_modifier` multiplier with duration.",
+    "staff_assessment": "Rejection mirrors the documented Pale Assembly posture and preserves the platform claims, but invites Belgrade's embargo and patron rupture. Acceptance breaks the Six Goals platform internally and incurs cohesion collapse; negotiation forestalls the rupture without yielding the territorial frame.",
+    "trigger_evidence": [
+      "The Contact Group has presented the 51:49 map to all three factions.",
+      "Milosevic has signaled FRY willingness to accept; Pale must record its posture in writing."
+    ],
+    "response_options": [
+      {
+        "id": "reject_51_49_plan",
+        "branch_tag": "rs_belgrade_pale_resist",
+        "historical_marker": "historical_default",
+        "label": "Reject the 51/49 framework",
+        "description": "The Pale Assembly records the documented Bijeljina position: the map is unacceptable on the corridor, the Drina valley, and Sarajevo. The patron rupture is the foreseeable consequence — Belgrade's embargo will follow within weeks.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 3
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 10
+          }
+        ],
+        "sets_flags": {
+          "rs_contact_group_response": "reject"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -15
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -10
+          }
+        ],
+        "aggression_affinity": 0.3,
+        "risk_level": 0.7
+      },
+      {
+        "id": "accept_51_49_plan",
+        "branch_tag": "rs_belgrade_pale_acknowledge",
+        "historical_marker": "counterfactual",
+        "label": "Accept the Contact Group map",
+        "description": "Acknowledge the 51:49 framework. Belgrade's pressure has prevailed; the Six Goals platform breaks internally. Hardline deputies will resign; the recruitment pool contracts as Karadzic's authority is questioned.",
+        "effects": [
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 20
+          },
+          {
+            "kind": "recruitment_modifier",
+            "faction": "RS",
+            "delta": -0.15,
+            "duration_turns": 8
+          }
+        ],
+        "sets_flags": {
+          "rs_contact_group_response": "accept"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -20
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -25
+          },
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": 15
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": 10
+          }
+        ],
+        "aggression_affinity": -0.5,
+        "risk_level": 0.6
+      },
+      {
+        "id": "negotiate_amendments",
+        "branch_tag": "rs_belgrade_negotiate",
+        "historical_marker": "counterfactual",
+        "label": "Negotiate territorial amendments",
+        "description": "Neither accept nor reject. Send Krajisnik to Geneva; demand corridor adjustments and Sarajevo concessions before recording a posture. Belgrade is informed the line is open.",
+        "effects": [
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 5
+          }
+        ],
+        "sets_flags": {
+          "rs_contact_group_response": "negotiate"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -5
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -5
+          }
+        ],
+        "aggression_affinity": -0.1,
+        "risk_level": 0.5
+      }
+    ],
+    "notifications_to_other_factions": {
+      "reject_51_49_plan": {
+        "RBiH": {
+          "headline": "Pale rejects the Contact Group map",
+          "body": "The Bosnian Serb Assembly records the documented Bijeljina position. Sarajevo reads the rejection as confirmation that the Federation track will continue without an RS settlement; Belgrade's embargo is now expected within weeks."
+        },
+        "HRHB": {
+          "headline": "RS Assembly rejects 51/49 framework",
+          "body": "Pale refuses the Contact Group map and accepts the patron-rupture consequences. Mostar sees the Federation track strengthened diplomatically while the military pressure on RS hardens."
+        }
+      },
+      "accept_51_49_plan": {
+        "RBiH": {
+          "headline": "Pale accepts Contact Group map under Belgrade pressure",
+          "body": "The RS Assembly acknowledges the 51:49 framework under Milosevic's pressure. Sarajevo reads the acceptance as a structural breakthrough — but expects hardline deputy resignations and internal cohesion damage on the RS side."
+        },
+        "HRHB": {
+          "headline": "RS records acceptance of 51/49 map",
+          "body": "The Pale Assembly bends to Belgrade's pressure. Mostar sees the Contact Group framework gain its third signature, with hardline RS deputies expected to fracture from Karadzic's authority."
+        }
+      },
+      "negotiate_amendments": {
+        "RBiH": {
+          "headline": "Pale demands Contact Group amendments",
+          "body": "RS leadership stalls rather than reject or accept, demanding corridor adjustments via Geneva. Sarajevo reads the move as a temporizing posture under Belgrade pressure; the embargo decision is deferred but not foreclosed."
+        },
+        "HRHB": {
+          "headline": "RS opens Geneva amendment channel",
+          "body": "Pale neither accepts nor rejects the Contact Group map, opening an amendment channel via Krajisnik. Mostar sees Federation diplomacy hold while RS posture remains undetermined."
+        }
+      }
+    },
+    "historical_source": "Contact Group proposal, July 1994 (US/UK/France/Germany/Russia 51:49 framework). ICTY Karadzic IT-95-5/18-T Trial Judgment §§4263-4310 (Pale Assembly rejection at Bijeljina, 3 August 1994; Karadzic's record of the rejectionist line and the Belgrade rupture that followed). UNSCR 942 (23 September 1994) — Contact Group plan acceptance language and SC condemnation of the Bosnian Serb rejection. UNSCR 943 (23 September 1994) — FRY sanctions modification recording Belgrade's break with Pale. Richard Holbrooke, To End a War (Random House, 1998), Ch. 5 (Contact Group framework and the Bijeljina rejection). Balkan Battlegrounds Vol. II Ch. 12 (FRY embargo onset 4 August 1994)."
+  },
+  {
+    "id": "rbih_contact_group_response_1994",
+    "title": "Contact Group 51/49 — Sarajevo's Response",
+    "narrative": "The Contact Group — the US, UK, France, Germany, and Russia — has presented the 51/49 territorial framework to all three Bosnian factions in early July 1994. The map secures Federation territory at 51 percent and recognizes RS at 49 percent, with Sarajevo as a unified capital and provision for the eastern enclaves under safe-area regime. The Presidency Assembly is convening to record its posture; US shuttle diplomacy (Christopher, Galbraith) presses for acceptance, with reservations on the eastern enclaves. Your political files require a written response: accept the framework under US pressure with reservations on the enclaves, reject the map and preserve the negotiating frame for full liberation, or sign on with public reservations to keep the diplomatic track open without binding the Assembly.",
+    "category": "diplomatic",
+    "family": "rbih_contact_group_response",
+    "source_tier": "agreement_text",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 118,
+      "turn_max": 120,
+      "phase": "war",
+      "requires_events": [
+        "contact_group_plan_1994"
+      ],
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "civic"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "bosniak_national"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "pragmatic"
+          }
+        ]
+      }
+    },
+    "requires_enabled": true,
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "RBiH",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "accept_51_49_plan",
+    "pressure": {
+      "base_rate": 3,
+      "threshold": 3,
+      "decay_rate": 0
+    },
+    "effect": {
+      "kind": "narrative",
+      "text": "The Sarajevo Presidency records its posture toward the Contact Group 51:49 territorial framework."
+    },
+    "source_note": "Sarajevo's documented historical posture was acceptance of the Contact Group plan under US pressure, with reservations on the eastern enclaves and the corridor (Contact Group proposal, July 1994; Holbrooke To End a War Ch. 5). The X4 packet uses the X1 London Conference cross-faction pattern (Packet 6): one event per faction, each triggered by `contact_group_plan_1994` and gated on the responding faction's foundational flag. §3.6 forward-looking guard: any future `csq_rbih_contact_group_*` row consuming this row's outcomes MUST NOT re-author cleansing, forced-displacement, hostage-taking, civilian-targeting, paramilitary deployment, or any sensitive-act response option. The Contact Group response is a diplomatic/patron-axis posture decision; the eastern enclaves question (Srebrenica, Žepa, Goražde) remains canon-gated through `srebrenica_demilitarization_1993` and `gorazde_crisis_1994` event surfaces. Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: US patron-pressure penalty captured via `patron_pressure` dimension shift on the reject counterfactual; negotiating-leverage cost via `negotiating_leverage` dimension shift; international-standing penalty per X1 London pattern.",
+    "staff_assessment": "Acceptance preserves the Washington-track alignment and international standing under US pressure, but binds the Presidency to a 49 percent RS entity that ratifies the eastern-enclave losses. Rejection preserves the negotiating frame for full liberation but invites US patron rupture; public reservations split the difference without binding the Assembly's final ratification.",
+    "trigger_evidence": [
+      "The Contact Group has presented the 51:49 map to all three factions.",
+      "Christopher/Galbraith shuttle pressure has reached Sarajevo; the Presidency must record its posture in writing."
+    ],
+    "response_options": [
+      {
+        "id": "accept_51_49_plan",
+        "branch_tag": "rbih_washington_accept",
+        "historical_marker": "historical_default",
+        "label": "Accept under US pressure with reservations",
+        "description": "Sign on to the Contact Group framework under Christopher's shuttle pressure, with formal reservations on the eastern enclaves and the corridor. The Washington-track alignment holds; the Federation gains the diplomatic frame against RS rejection.",
+        "effects": [
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": 12
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": -10
+          }
+        ],
+        "sets_flags": {
+          "rbih_contact_group_response": "accept"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 15
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": -0.3,
+        "risk_level": 0.3
+      },
+      {
+        "id": "reject_51_49_plan",
+        "branch_tag": "rbih_washington_reluctant",
+        "historical_marker": "counterfactual",
+        "label": "Reject the 51/49 framework",
+        "description": "Refuse the territorial map. Christopher's pressure is the strongest US démarche of the war; defying it incurs US patron rupture and weakens the Federation track. But the negotiating frame for full liberation is preserved.",
+        "effects": [
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": 15
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 3
+          }
+        ],
+        "sets_flags": {
+          "rbih_contact_group_response": "reject"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "patron_confidence",
+            "delta": -25
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": -15
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": 0.4,
+        "risk_level": 0.7
+      },
+      {
+        "id": "accept_with_public_reservations",
+        "branch_tag": "rbih_washington_reluctant",
+        "historical_marker": "counterfactual",
+        "label": "Sign with public reservations",
+        "description": "Sign the Contact Group framework while publicly reserving the Assembly's right to reject the final territorial map on the eastern enclaves. The Washington-track holds tactically; the Assembly retains veto authority for the final ratification.",
+        "effects": [
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": 5
+          }
+        ],
+        "sets_flags": {
+          "rbih_contact_group_response": "reservations"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": -5
+          }
+        ],
+        "aggression_affinity": 0,
+        "risk_level": 0.4
+      }
+    ],
+    "notifications_to_other_factions": {
+      "accept_51_49_plan": {
+        "RS": {
+          "headline": "Sarajevo accepts Contact Group framework",
+          "body": "RBiH accepts the 51:49 map under US pressure with reservations on the eastern enclaves. Pale sees the Federation track strengthened diplomatically; RS rejection becomes the isolated position."
+        },
+        "HRHB": {
+          "headline": "RBiH signs Contact Group framework",
+          "body": "Sarajevo accepts the 51:49 framework under Christopher's pressure. Mostar reads the move as Washington-track consolidation, with Federation diplomacy aligned for the Contact Group signature."
+        }
+      },
+      "reject_51_49_plan": {
+        "RS": {
+          "headline": "Sarajevo refuses Contact Group map",
+          "body": "RBiH defies Christopher's shuttle pressure and rejects the 51:49 framework. Pale reads the rejection as Federation track friction, with Sarajevo betting on full-liberation negotiating frame at the cost of US patron rupture."
+        },
+        "HRHB": {
+          "headline": "RBiH rejects 51/49 plan despite US pressure",
+          "body": "Sarajevo refuses the Contact Group framework. Mostar sees Federation diplomacy under strain and the US démarche defied; the Washington track weakens without yielding the territorial frame."
+        }
+      },
+      "accept_with_public_reservations": {
+        "RS": {
+          "headline": "Sarajevo signs Contact Group plan with reservations",
+          "body": "RBiH signs the 51:49 framework while publicly reserving the Assembly's veto on final ratification of the eastern enclaves. Pale reads the move as Federation diplomacy holding tactically, with the territorial frame still in dispute."
+        },
+        "HRHB": {
+          "headline": "RBiH accepts plan with Assembly veto",
+          "body": "Sarajevo signs the Contact Group framework with public Assembly reservations on the eastern enclaves. Mostar sees Washington-track signature with the final ratification deferred to the Sarajevo Assembly."
+        }
+      }
+    },
+    "historical_source": "Contact Group proposal, July 1994 (US/UK/France/Germany/Russia 51:49 framework). Richard Holbrooke, To End a War (Random House, 1998), Ch. 5 (Contact Group framework, Christopher and Galbraith shuttle diplomacy). Warren Christopher, In the Stream of History (Stanford University Press, 1998) Ch. 7 (US-RBiH shuttle records). UNSCR 942 (23 September 1994) — Contact Group plan and SC welcome of Federation acceptance. Balkan Battlegrounds Vol. II Ch. 12 (Sarajevo Presidency acceptance posture under US pressure)."
+  },
+  {
+    "id": "hrhb_contact_group_response_1994",
+    "title": "Contact Group 51/49 — Mostar's Response",
+    "narrative": "The Contact Group — the US, UK, France, Germany, and Russia — has presented the 51/49 territorial framework to all three Bosnian factions in early July 1994. The map ratifies the Federation entity at 51 percent of Bosnian territory, with Croat constitutive-nation status preserved inside the Federation under the Washington Agreement of March 1994. Zagreb has signaled Tudjman's willingness to direct HZ HB acceptance. The HZ HB Presidency must record its posture: accept the framework as a natural follow-on to the Washington Agreement, reject the map and break with the Federation alliance, or condition acceptance on territorial amendments in central Bosnia.",
+    "category": "diplomatic",
+    "family": "hrhb_contact_group_response",
+    "source_tier": "agreement_text",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 118,
+      "turn_max": 120,
+      "phase": "war",
+      "requires_events": [
+        "contact_group_plan_1994"
+      ],
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "croat_republic"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "united_front"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "strategic_ambiguity"
+          }
+        ]
+      }
+    },
+    "requires_enabled": true,
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "HRHB",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "accept_51_49_plan",
+    "pressure": {
+      "base_rate": 3,
+      "threshold": 3,
+      "decay_rate": 0
+    },
+    "effect": {
+      "kind": "narrative",
+      "text": "The HZ HB Presidency records its posture toward the Contact Group 51:49 territorial framework."
+    },
+    "source_note": "HZ HB's documented historical posture was acceptance of the Contact Group plan via the Federation channel: by July 1994 HR HB was already operating inside the Federation framework established by the Washington Agreement (1 + 18 March 1994), and Zagreb's directive to Boban-successor leadership aligned HR HB with the Contact Group map (Prlic IT-04-74 Vol. 1 §§452-470, Vol. 3 §§120-200; Tudjman Presidential Transcripts admitted at Prlic Vol. 3). The X4 packet uses the X1 London Conference cross-faction pattern (Packet 6): one event per faction, each triggered by `contact_group_plan_1994` and gated on the responding faction's foundational flag. §3.6 forward-looking guard: any future `csq_hrhb_contact_group_*` row consuming this row's outcomes MUST NOT re-author cleansing, forced-displacement, hostage-taking, civilian-targeting, paramilitary deployment, or any sensitive-act response option. The Contact Group response is a diplomatic/patron-axis posture decision; central Bosnia territorial disputes remain canon-gated through their existing event surfaces. Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: Zagreb patron-confidence collapse on reject counterfactual captured via `patron_confidence -20` dimension shift; Federation alliance break captured via `alliance_change -0.10`; international-standing penalty per X1 London pattern.",
+    "staff_assessment": "Acceptance is the natural follow-on to the Washington Agreement and Zagreb's directive — HR HB acts through the Federation channel inside the Croat constitutive-nation status. Rejection breaks the Federation alliance and incurs Tudjman's patron-confidence collapse; conditional acceptance preserves the Federation channel while signaling central Bosnia territorial reservations.",
+    "trigger_evidence": [
+      "The Contact Group has presented the 51:49 map to all three factions.",
+      "Zagreb has signaled Tudjman's willingness to direct HZ HB acceptance via the Federation channel."
+    ],
+    "response_options": [
+      {
+        "id": "accept_51_49_plan",
+        "branch_tag": "hrhb_washington_accept",
+        "historical_marker": "historical_default",
+        "label": "Accept via the Federation channel",
+        "description": "Acknowledge the Contact Group 51:49 framework via the Federation channel established by the Washington Agreement. Zagreb's directive aligns HR HB with the territorial settlement; Croat constitutive-nation status is preserved inside the Federation entity.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 3
+          }
+        ],
+        "sets_flags": {
+          "hrhb_contact_group_response": "accept"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": 10
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "international_standing",
+            "delta": 12
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "negotiating_leverage",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": -0.3,
+        "risk_level": 0.3
+      },
+      {
+        "id": "reject_51_49_plan",
+        "branch_tag": "hrhb_washington_reluctant",
+        "historical_marker": "counterfactual",
+        "label": "Reject the 51/49 framework",
+        "description": "Refuse the Contact Group map. The Federation alliance with RBiH breaks; Tudjman's directive is defied. Zagreb withdraws patron confidence; the Croat-Bosniak war risks reignition without the Federation channel.",
+        "effects": [
+          {
+            "kind": "alliance_change",
+            "delta": -0.1
+          },
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": -3
+          }
+        ],
+        "sets_flags": {
+          "hrhb_contact_group_response": "reject"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": -20
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "international_standing",
+            "delta": -15
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -5
+          }
+        ],
+        "aggression_affinity": 0.3,
+        "risk_level": 0.7
+      },
+      {
+        "id": "accept_with_amendments",
+        "branch_tag": "hrhb_washington_reluctant",
+        "historical_marker": "counterfactual",
+        "label": "Condition acceptance on central Bosnia amendments",
+        "description": "Accept the Contact Group framework but condition the signature on central Bosnia territorial amendments — Vitez, Kiseljak, Busovaca. The Federation channel holds tactically; Zagreb tolerates the conditional posture without full alignment.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 2
+          }
+        ],
+        "sets_flags": {
+          "hrhb_contact_group_response": "amendments"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": -5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "international_standing",
+            "delta": 5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "negotiating_leverage",
+            "delta": 5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": 3
+          }
+        ],
+        "aggression_affinity": 0,
+        "risk_level": 0.4
+      }
+    ],
+    "notifications_to_other_factions": {
+      "accept_51_49_plan": {
+        "RBiH": {
+          "headline": "Mostar accepts Contact Group framework",
+          "body": "HRHB acknowledges the 51:49 map via the Federation channel. Sarajevo reads the move as Washington-track consolidation, with Croat constitutive-nation status preserved inside the Federation entity."
+        },
+        "RS": {
+          "headline": "HZ HB signs Contact Group framework",
+          "body": "Mostar acts through the Federation channel established by the Washington Agreement. Pale sees the Federation track strengthened diplomatically; RS rejection becomes the isolated position."
+        }
+      },
+      "reject_51_49_plan": {
+        "RBiH": {
+          "headline": "Mostar rejects 51/49 map; Federation strained",
+          "body": "HRHB refuses the Contact Group framework. Sarajevo reads the rejection as Federation alliance friction; the Washington track weakens, and the central Bosnia ceasefire frame is at risk."
+        },
+        "RS": {
+          "headline": "HZ HB defies Zagreb on Contact Group map",
+          "body": "Mostar rejects the 51:49 framework despite Tudjman's directive. Pale reads the move as Federation alliance friction, with HRHB betting on local autonomy against the Croat constitutive-nation status inside the Federation."
+        }
+      },
+      "accept_with_amendments": {
+        "RBiH": {
+          "headline": "Mostar conditions acceptance on central Bosnia",
+          "body": "HRHB signs the Contact Group framework with central Bosnia territorial amendments (Vitez, Kiseljak, Busovaca). Sarajevo sees the Federation channel hold tactically while local territorial disputes remain unresolved."
+        },
+        "RS": {
+          "headline": "HZ HB signs with amendments",
+          "body": "Mostar acknowledges the 51:49 framework while conditioning signature on central Bosnia amendments. Pale sees Federation diplomacy holding with internal HR HB-RBiH friction still in play."
+        }
+      }
+    },
+    "historical_source": "Contact Group proposal, July 1994 (US/UK/France/Germany/Russia 51:49 framework). ICTY Prlic et al. IT-04-74-T Trial Judgment (29 May 2013) Vol. 1 §§452-470 (HR HB acceptance via Federation channel) and Vol. 3 §§120-200 (Tudjman Presidential Transcripts on HR HB Contact Group posture). Washington Agreement, 1 + 18 March 1994 (Federation framework). UNSCR 942 (23 September 1994) — Contact Group plan and SC welcome of Federation acceptance. Balkan Battlegrounds Vol. II Ch. 12 (HR HB Contact Group posture via Federation channel)."
+  },
+  {
+    "id": "rbih_federation_army_integration_1994",
+    "title": "Federation Army — How Much to Merge?",
+    "narrative": "The Washington Agreement (1 + 18 March 1994) established the Federation of Bosnia and Herzegovina on paper, with a Federation Army (HVOBiH / VFBiH) charged to integrate ARBiH and HVO into a unified Federation military structure. Six months on, the institutional reality lags the paper architecture. ICRC and UNPROFOR field reports record persistent dual command structures: ARBiH brigades and HVO brigades share the same Federation table-of-organization slot but answer to separate national chains, hold separate logistics depots, and run separate communications nets. US Defense Department liaison and the embassy's defense attaché are pressing the Sarajevo Presidency for a written posture on Federation Army integration depth before the Vienna-track follow-on to Washington. The Bosniak nationalist current in the Assembly resists full integration as a dilution of ARBiH operational independence; the civic-Federation current presses for full integration as the institutional capstone of the Washington framework; Šilajdžić-track skepticism splits the difference. Your political files require a written response: full integration, selective integration, parallel commands (the documented historical posture), or refuse integration.",
+    "category": "command",
+    "family": "rbih_federation_integration",
+    "source_tier": "balkan_battlegrounds",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 120,
+      "turn_max": 123,
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "civic"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "bosniak_national"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "pragmatic"
+          }
+        ]
+      }
+    },
+    "pressure": {
+      "base_rate": 3,
+      "threshold": 3,
+      "decay_rate": 0
+    },
+    "once": true,
+    "requires_enabled": true,
+    "requires_player_response": true,
+    "responding_faction": "RBiH",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "parallel_commands",
+    "effect": {
+      "kind": "narrative",
+      "text": "The Sarajevo Presidency records its posture toward Federation Army (HVOBiH / VFBiH) integration depth."
+    },
+    "source_note": "The Washington Agreement of 1 + 18 March 1994 created the Federation Army (HVOBiH / VFBiH) on paper, but BB Vol. II pp. 451-455 + Ch. 12 frame the post-Washington period precisely as institutional friction: parallel ARBiH and HVO chains of command persisted through the Vienna Framework (26 March 1994), the Contact Group framework (July 1994), and Dayton (November-December 1995); operational integration was nominal rather than substantive. ICRC field reports across Mostar, Vitez, Gornji Vakuf, Prozor, Konjic, and Jablanica document the dual-structure pattern; US embassy archived reporting (Christopher, Galbraith, Redman channels) records repeated Federation Army integration démarches without sustained Sarajevo follow-through. The documented historical action of the Sarajevo Presidency was acceptance of the parallel-commands status quo: civic rhetoric outward, ARBiH operational independence inward. The OR-trigger on rbih_state_identity ensures all three B1 branches (civic, bosniak_national, pragmatic) reach the Federation Army integration decision: US/Contact-Group pressure plus the formal Washington Agreement architecture transmits regardless of which 1992 identity declaration Sarajevo selected. §3.6 forward-looking guard (Wave 2 Canon): any future csq_rbih_federation_* row consuming this row's outcomes MUST NOT carry response options that re-author cleansing, forced-displacement, hostage-taking, civilian-targeting, paramilitary deployment, or any sensitive-act response option. Federation Army integration is a constitutional/operational command-structure decision — not an ethnic-cleansing surface. The Mostar / Central Bosnia detention-camp and forced-displacement events remain canon-gated through their existing event surfaces (Prlic IT-04-74-T Vols. 1-3; hrhb_camp_exposure / h5_croat_bosniak_war_atrocities family slugs). This row's consequence lane stays within legitimate command-structure / patron-axis posture. Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: full_integration → alliance_change +0.20 (Federation alliance proxy) + internal_cohesion -10 (Bosniak nationalist faction friction) + patron_confidence +5 (US/Contact Group reward) + military_credibility +5; selective_integration → alliance_change +0.05 + internal_cohesion -5 + negotiating_leverage -5; parallel_commands (historical_default) → small alliance_change +0.05 + internal_cohesion -2 documenting the friction-tolerated status quo; refuse_integration → alliance_change -0.20 + patron_pressure +25 + international_standing -15 + recruitment_modifier 0.90× / 6 turns. This row is the RBiH-side companion to a future H11 (HRHB-side) Federation Army integration row (per X5 composite worksheet ruling: two separate per-faction events coordinated via runtime causality), authored in a later packet.",
+    "staff_assessment": "Parallel commands preserves ARBiH operational independence and Assembly internal cohesion but accepts the institutional friction cost; full integration captures US/Contact-Group patron reward and Federation alliance consolidation at the price of Bosniak nationalist faction friction; selective integration splits the difference with thinner gains both ways; refuse integration ruptures the Washington framework and incurs a US patron-pressure spike plus international-standing collapse.",
+    "trigger_evidence": [
+      "The Washington Agreement formally established the Federation Army (HVOBiH / VFBiH) on 1 + 18 March 1994.",
+      "ICRC and UNPROFOR field reports across Mostar, Vitez, Gornji Vakuf, Prozor, Konjic, and Jablanica record persistent dual ARBiH-HVO command structures six months after the Federation Army's paper establishment.",
+      "US embassy archived reporting (Christopher / Galbraith / Redman channels) documents repeated Federation Army integration démarches awaiting a written Sarajevo posture."
+    ],
+    "response_options": [
+      {
+        "id": "parallel_commands",
+        "branch_tag": "rbih_federation_parallel_commands",
+        "historical_marker": "historical_default",
+        "label": "Accept parallel commands (status quo)",
+        "description": "Allow the Federation Army to remain a paper architecture: ARBiH and HVO brigades share the Federation table-of-organization slot but retain separate national chains of command, separate logistics depots, and separate communications nets. Civic rhetoric outward, ARBiH operational independence inward — the documented historical posture through Vienna, the Contact Group framework, and Dayton.",
+        "effects": [
+          {
+            "kind": "alliance_change",
+            "delta": 0.05
+          }
+        ],
+        "sets_flags": {
+          "rbih_federation_integration_carrier": "parallel_commands"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -2
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": 2
+          }
+        ],
+        "aggression_affinity": 0,
+        "risk_level": 0.3
+      },
+      {
+        "id": "full_integration",
+        "branch_tag": "rbih_federation_full_integration",
+        "historical_marker": "counterfactual",
+        "label": "Merge ARBiH and HVO into a unified Federation Army",
+        "description": "Push full integration: shared chain of command, unified logistics, joint operational planning. The Federation Army becomes the substantive military institution that Washington put on paper. US embassy and Contact Group reward the move with patron confidence; the Bosniak nationalist current in the Assembly resents the dilution of ARBiH operational independence.",
+        "effects": [
+          {
+            "kind": "alliance_change",
+            "delta": 0.20
+          }
+        ],
+        "sets_flags": {
+          "rbih_federation_integration_carrier": "full_integration"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "patron_confidence",
+            "delta": 5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": 0.1,
+        "risk_level": 0.5
+      },
+      {
+        "id": "selective_integration",
+        "branch_tag": "rbih_federation_selective_integration",
+        "historical_marker": "counterfactual",
+        "label": "Selective integration — shared staff, separate troops",
+        "description": "Integrate at the Federation general-staff level (joint operational planning, shared intelligence) while keeping ARBiH and HVO troop formations under separate national chains. Mid-ground posture: thinner Federation alliance gain, thinner internal-cohesion cost, with negotiating-leverage forgone because the institutional ambiguity weakens Sarajevo's Dayton-track Federation argument.",
+        "effects": [
+          {
+            "kind": "alliance_change",
+            "delta": 0.05
+          }
+        ],
+        "sets_flags": {
+          "rbih_federation_integration_carrier": "selective_integration"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": -5
+          }
+        ],
+        "aggression_affinity": 0,
+        "risk_level": 0.4
+      },
+      {
+        "id": "refuse_integration",
+        "branch_tag": "rbih_federation_refuse_integration",
+        "historical_marker": "counterfactual",
+        "label": "Refuse Federation Army integration",
+        "description": "Reject the Federation Army architecture entirely. ARBiH retains full institutional independence; HVO is treated as a parallel allied force, not a Federation Army subordinate. The Washington framework cracks; US patron pressure surges; the Federation alliance proxy weakens. The Bosniak Assembly hardline current applauds; international standing collapses.",
+        "effects": [
+          {
+            "kind": "alliance_change",
+            "delta": -0.20
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": 25
+          },
+          {
+            "kind": "recruitment_modifier",
+            "faction": "RBiH",
+            "pool_multiplier": 0.90,
+            "duration_turns": 6
+          }
+        ],
+        "sets_flags": {
+          "rbih_federation_integration_carrier": "refuse_integration"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": -15
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "patron_confidence",
+            "delta": -15
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": 0.4,
+        "risk_level": 0.8
+      }
+    ],
+    "notifications_to_other_factions": {
+      "parallel_commands": {
+        "RS": {
+          "headline": "Sarajevo accepts parallel Federation commands",
+          "body": "RBiH allows the Federation Army architecture to remain on paper while ARBiH and HVO retain separate national chains. Pale assesses a Federation framework with persistent institutional friction; military integration is nominal rather than substantive."
+        },
+        "HRHB": {
+          "headline": "Federation Army stays on paper",
+          "body": "Sarajevo accepts the parallel-commands status quo. Mostar reads the move as Bosniak respect for HVO operational independence; the Federation Army architecture holds nominally without forcing institutional merger."
+        }
+      },
+      "full_integration": {
+        "RS": {
+          "headline": "Federation Army merges under unified command",
+          "body": "RBiH commits to full Federation Army integration. Pale faces a substantively unified Federation military structure with shared logistics and joint operational planning; the Washington framework gains institutional teeth."
+        },
+        "HRHB": {
+          "headline": "Sarajevo presses ARBiH-HVO merger",
+          "body": "RBiH demands full Federation Army integration. Mostar weighs the substantive merger against HVO operational independence and Zagreb's patron channel; the Federation alliance consolidates at the price of HRHB autonomy."
+        }
+      },
+      "selective_integration": {
+        "RS": {
+          "headline": "Sarajevo proposes selective Federation integration",
+          "body": "RBiH integrates Federation Army staff functions while keeping troop formations under separate national chains. Pale reads the move as mid-ground Federation consolidation with institutional ambiguity preserved."
+        },
+        "HRHB": {
+          "headline": "Federation Army splits the difference",
+          "body": "Sarajevo proposes shared staff with separate troops. Mostar sees a Federation framework that integrates intelligence and planning while preserving HVO national-chain operational control."
+        }
+      },
+      "refuse_integration": {
+        "RS": {
+          "headline": "Sarajevo refuses Federation Army merger",
+          "body": "RBiH rejects the Federation Army architecture entirely. Pale assesses Washington framework friction at the institutional core; US patron pressure on Sarajevo surges, but the Federation alliance proxy weakens."
+        },
+        "HRHB": {
+          "headline": "Sarajevo breaks with Federation Army",
+          "body": "RBiH refuses Federation Army integration. Mostar sees the Washington framework cracking at the military-institution layer; HVO is treated as a parallel allied force, not a Federation Army subordinate."
+        }
+      }
+    },
+    "historical_source": "Washington Framework Agreement, 1 March 1994 (Federation framework signed in Washington D.C. by RBiH Prime Minister Haris Silajdzic, HRHB representative Kresimir Zubak, and Croatian Foreign Minister Mate Granic); Constitutional Agreement of the Federation of Bosnia and Herzegovina, 18 March 1994 (Federation Army HVOBiH / VFBiH established at White House signing by RBiH President Alija Izetbegovic, HRHB representative Kresimir Zubak, and Croatian President Franjo Tudjman). Vienna Framework Agreement, 26 March 1994 (Federation institutional follow-on). Balkan Battlegrounds Vol. II pp. 451-455 + Ch. 12 (Federation Army parallel-commands pattern through Vienna, Contact Group framework, and Dayton; institutional friction persistence). ICTY Prlic et al. IT-04-74-T Trial Judgment (29 May 2013) Vol. 1 §§452-470 (Federation acceptance track and Bosnian Presidency deliberations) and Vol. 3 §§120-200 (Tudjman-Izetbegovic shuttle records; HVO operational independence inside Federation). ICTY Karadzic IT-95-5/18-T Trial Judgment (24 March 2016) Vol. 1 (Bosnian Serb side reaction to Federation Army institutional fragility). ICRC field reports across Mostar, Vitez, Gornji Vakuf, Prozor, Konjic, and Jablanica (Federation Army dual-structure pattern documentation). US embassy archived reporting Sarajevo channel (Christopher / Galbraith / Redman démarches on Federation Army integration depth)."
+  },
+  {
+    "id": "hrhb_federation_army_integration_1994",
+    "title": "Federation Army — How Far Does Zagreb Let Go?",
+    "narrative": "The Washington Agreement (1 + 18 March 1994) created the Federation of Bosnia and Herzegovina with a Federation Army (HVOBiH / VFBiH) charged to absorb HVO and ARBiH formations into a unified Federation military structure. Six months on, the paper architecture has not bitten. HVO brigades in Central Bosnia, Mostar, and Western Herzegovina hold Federation Army table-of-organization slots on paper but answer through the Mostar Defence Department and the Zagreb-Susak channel, not through the Federation general staff. ICRC and UNPROFOR field reports record persistent dual command structures; US Defense Department liaison presses the Mostar Presidency for a written posture on HVO command-integration depth ahead of the Vienna-track follow-on. The Croat-nationalist current around the late Boban's successors resists full integration as a dilution of HVO operational independence and a forfeit of the Zagreb patron channel; the civic-Federation current presses for full integration as the institutional capstone of the Washington framework; Zubak-track caution splits the difference. Your political files require a written response: full integration, selective integration, parallel commands (the documented historical posture), or refuse integration.",
+    "category": "command",
+    "family": "hrhb_federation_integration",
+    "source_tier": "balkan_battlegrounds",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 121,
+      "turn_max": 124,
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "croat_republic"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "strategic_ambiguity"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "united_front"
+          }
+        ]
+      }
+    },
+    "pressure": {
+      "base_rate": 3,
+      "threshold": 3,
+      "decay_rate": 0
+    },
+    "once": true,
+    "requires_enabled": true,
+    "requires_player_response": true,
+    "responding_faction": "HRHB",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "parallel_commands",
+    "effect": {
+      "kind": "narrative",
+      "text": "The HZ HB / HR HB Presidency records its posture toward Federation Army (HVOBiH / VFBiH) integration depth on the HVO side."
+    },
+    "source_note": "The Washington Agreement of 1 + 18 March 1994 created the Federation Army (HVOBiH / VFBiH) on paper, but BB Vol. II pp. 451-455 + Ch. 12 and the Tudjman Presidential Transcripts admitted at Prlic Vol. 3 frame the post-Washington period precisely as institutional friction on the Croat side: HVO formations retained the Mostar Defence Department chain and the Susak-Tudjman patron channel through the Vienna Framework (26 March 1994), Contact Group framework (July 1994), and Dayton (November-December 1995); operational integration was nominal rather than substantive. Prlic IT-04-74-T Vol. 1 §§452-470 and Vol. 3 §§120-200 document Boban-successor and Zubak-track deliberation; Tudjman-Susak correspondence excerpts admitted at Prlic Vol. 3 record Zagreb's preference for HVO retaining a parallel Croat command line inside the Federation paper architecture. ICRC field reports across Mostar, Vitez, Gornji Vakuf, Prozor, Konjic, and Jablanica document the dual-structure pattern; US embassy archived reporting (Christopher, Galbraith, Redman channels) records repeated Federation Army integration démarches without sustained Mostar follow-through. The documented historical action of the Mostar Presidency was acceptance of the parallel-commands status quo: Federation rhetoric outward, HVO operational independence + Zagreb patron channel inward. The OR-trigger on hrhb_political_goal ensures all three H1 branches (croat_republic, strategic_ambiguity, united_front) reach the Federation Army integration decision: US/Contact-Group pressure plus the formal Washington Agreement architecture transmits regardless of which 1992 identity declaration Mostar selected. §3.6 forward-looking guard (Wave 2 Canon): any future csq_hrhb_federation_* row consuming this row's outcomes MUST NOT carry response options that re-author cleansing, forced-displacement, hostage-taking, civilian-targeting, paramilitary deployment, or any sensitive-act response option. HVO Federation integration is a constitutional/operational command-structure decision — not an ethnic-cleansing surface. The Mostar / Central Bosnia detention-camp and forced-displacement events remain canon-gated through their existing event surfaces (Prlic IT-04-74-T Vols. 1-3; hrhb_camp_exposure / h5_croat_bosniak_war_atrocities family slugs). This row's consequence lane stays within legitimate command-structure / patron-axis posture. Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: full_integration → alliance_change +0.20 (Federation alliance proxy) + internal_cohesion -10 (Croat nationalist faction friction) + patron_confidence -5 (Zagreb loses HVO command lever) + military_credibility +5; selective_integration → alliance_change +0.05 + internal_cohesion -5 + negotiating_leverage -5; parallel_commands (historical_default) → small alliance_change +0.05 + internal_cohesion -2 documenting the friction-tolerated status quo + military_credibility +2; refuse_integration → alliance_change -0.20 + patron_pressure +25 (US/Contact-Group anger) + patron_confidence +10 (Zagreb pleased) + international_standing -15 + recruitment_modifier 0.90× / 6 turns. This row is the HRHB-side companion to Packet 26's B11 (rbih_federation_army_integration_1994) per X5 composite worksheet ruling: two separate per-faction events coordinated via runtime causality.",
+    "staff_assessment": "Parallel commands preserves HVO operational independence and the Zagreb patron channel but accepts the institutional friction cost; full integration captures US/Contact-Group patron reward and Federation alliance consolidation at the price of Croat nationalist faction friction and a Zagreb command-lever forfeit; selective integration splits the difference with thinner gains both ways; refuse integration ruptures the Washington framework and incurs a US patron-pressure spike plus international-standing collapse, with Zagreb pleased but Federation alliance shattered.",
+    "trigger_evidence": [
+      "The Washington Agreement formally established the Federation Army (HVOBiH / VFBiH) on 1 + 18 March 1994.",
+      "ICRC and UNPROFOR field reports across Mostar, Vitez, Gornji Vakuf, Prozor, Konjic, and Jablanica record persistent dual ARBiH-HVO command structures six months after the Federation Army's paper establishment.",
+      "US embassy archived reporting (Christopher / Galbraith / Redman channels) documents repeated Federation Army integration démarches awaiting a written Mostar posture; Tudjman-Susak correspondence admitted at Prlic Vol. 3 records Zagreb's preference for HVO retaining a parallel Croat command line."
+    ],
+    "response_options": [
+      {
+        "id": "parallel_commands",
+        "branch_tag": "hrhb_federation_parallel_commands",
+        "historical_marker": "historical_default",
+        "label": "Accept parallel commands (status quo)",
+        "description": "Allow the Federation Army to remain a paper architecture: HVO and ARBiH brigades share the Federation table-of-organization slot but HVO retains its Mostar Defence Department chain, separate logistics depots, separate communications nets, and the Zagreb-Susak patron channel. Federation rhetoric outward, HVO operational independence inward — the documented historical posture through Vienna, the Contact Group framework, and Dayton.",
+        "effects": [
+          {
+            "kind": "alliance_change",
+            "delta": 0.05
+          }
+        ],
+        "sets_flags": {
+          "hrhb_federation_integration_carrier": "parallel_commands"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -2
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "military_credibility",
+            "delta": 2
+          }
+        ],
+        "aggression_affinity": 0,
+        "risk_level": 0.3
+      },
+      {
+        "id": "full_integration",
+        "branch_tag": "hrhb_federation_full_integration",
+        "historical_marker": "counterfactual",
+        "label": "Merge HVO and ARBiH into a unified Federation Army",
+        "description": "Push full integration: shared chain of command, unified logistics, joint operational planning. HVO brigades subordinate to the Federation general staff. The Federation Army becomes the substantive military institution that Washington put on paper. US embassy and Contact Group reward the move with patron confidence; the Croat-nationalist current around Boban-successor leadership resents the dilution of HVO operational independence; Zagreb loses its parallel-command lever and Susak protests through the Tudjman channel.",
+        "effects": [
+          {
+            "kind": "alliance_change",
+            "delta": 0.20
+          }
+        ],
+        "sets_flags": {
+          "hrhb_federation_integration_carrier": "full_integration"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -10
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": -5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "military_credibility",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": 0.1,
+        "risk_level": 0.5
+      },
+      {
+        "id": "selective_integration",
+        "branch_tag": "hrhb_federation_selective_integration",
+        "historical_marker": "counterfactual",
+        "label": "Selective integration — shared staff, separate troops",
+        "description": "Integrate at the Federation general-staff level (joint operational planning, shared intelligence) while keeping HVO and ARBiH troop formations under separate national chains. Mid-ground posture: thinner Federation alliance gain, thinner internal-cohesion cost, with negotiating-leverage forgone because the institutional ambiguity weakens Mostar's Dayton-track Federation argument.",
+        "effects": [
+          {
+            "kind": "alliance_change",
+            "delta": 0.05
+          }
+        ],
+        "sets_flags": {
+          "hrhb_federation_integration_carrier": "selective_integration"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "negotiating_leverage",
+            "delta": -5
+          }
+        ],
+        "aggression_affinity": 0,
+        "risk_level": 0.4
+      },
+      {
+        "id": "refuse_integration",
+        "branch_tag": "hrhb_federation_refuse_integration",
+        "historical_marker": "counterfactual",
+        "label": "Refuse Federation Army integration",
+        "description": "Reject the Federation Army architecture entirely. HVO retains full institutional independence under the Mostar Defence Department and the Zagreb-Susak patron channel; ARBiH is treated as a parallel allied force, not a Federation Army peer. The Washington framework cracks at the Croat military-institution layer; US patron pressure surges; the Federation alliance proxy weakens. Zagreb is pleased — its parallel-command lever survives — but international standing collapses and the Contact Group framework loses its institutional anchor.",
+        "effects": [
+          {
+            "kind": "alliance_change",
+            "delta": -0.20
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "HRHB",
+            "delta": 25
+          },
+          {
+            "kind": "recruitment_modifier",
+            "faction": "HRHB",
+            "pool_multiplier": 0.90,
+            "duration_turns": 6
+          }
+        ],
+        "sets_flags": {
+          "hrhb_federation_integration_carrier": "refuse_integration"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "international_standing",
+            "delta": -15
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": 10
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": 0.4,
+        "risk_level": 0.8
+      }
+    ],
+    "notifications_to_other_factions": {
+      "parallel_commands": {
+        "RS": {
+          "headline": "Mostar accepts parallel Federation commands",
+          "body": "HRHB allows the Federation Army architecture to remain on paper while HVO and ARBiH retain separate national chains. Pale assesses a Federation framework with persistent institutional friction on the Croat side; HVO military integration is nominal rather than substantive."
+        },
+        "RBiH": {
+          "headline": "HVO retains parallel command chain",
+          "body": "Mostar accepts the parallel-commands status quo. Sarajevo reads the move as HVO preserving the Zagreb-Susak channel and the Mostar Defence Department line; the Federation Army architecture holds nominally without forcing institutional merger on the Croat side."
+        }
+      },
+      "full_integration": {
+        "RS": {
+          "headline": "HVO merges under unified Federation command",
+          "body": "HRHB commits to full Federation Army integration on the Croat side. Pale faces a substantively unified Federation military structure with shared logistics and joint operational planning; the Washington framework gains institutional teeth and the HVO parallel chain dissolves."
+        },
+        "RBiH": {
+          "headline": "Mostar accepts HVO-ARBiH merger",
+          "body": "HRHB commits to full Federation Army integration. Sarajevo welcomes the substantive merger; HVO subordinates to the Federation general staff and the Zagreb-Susak channel loses its parallel-command lever."
+        }
+      },
+      "selective_integration": {
+        "RS": {
+          "headline": "Mostar proposes selective Federation integration",
+          "body": "HRHB integrates Federation Army staff functions on the Croat side while keeping HVO troop formations under the Mostar Defence Department chain. Pale reads the move as mid-ground Federation consolidation with institutional ambiguity preserved on the Croat side."
+        },
+        "RBiH": {
+          "headline": "Federation Army splits the difference on Croat side",
+          "body": "Mostar proposes shared staff with separate troops. Sarajevo sees a Federation framework that integrates intelligence and planning while preserving HVO national-chain operational control."
+        }
+      },
+      "refuse_integration": {
+        "RS": {
+          "headline": "Mostar refuses Federation Army merger",
+          "body": "HRHB rejects the Federation Army architecture entirely on the Croat side. Pale assesses Washington framework friction at the institutional core; US patron pressure on Mostar surges, but the Federation alliance proxy weakens and Zagreb's parallel-command lever survives."
+        },
+        "RBiH": {
+          "headline": "HVO breaks with Federation Army",
+          "body": "HRHB refuses Federation Army integration. Sarajevo sees the Washington framework cracking at the military-institution layer; HVO is treated as a parallel allied force under the Zagreb-Susak channel, not a Federation Army peer."
+        }
+      }
+    },
+    "historical_source": "Washington Framework Agreement, 1 March 1994 (Federation framework signed in Washington D.C. by RBiH Prime Minister Haris Silajdzic, HRHB representative Kresimir Zubak, and Croatian Foreign Minister Mate Granic); Constitutional Agreement of the Federation of Bosnia and Herzegovina, 18 March 1994 (Federation Army HVOBiH / VFBiH established at White House signing by RBiH President Alija Izetbegovic, HRHB representative Kresimir Zubak, and Croatian President Franjo Tudjman). Vienna Framework Agreement, 26 March 1994 (Federation institutional follow-on). Balkan Battlegrounds Vol. II pp. 451-455 + Ch. 12 (Federation Army parallel-commands pattern through Vienna, Contact Group framework, and Dayton; institutional friction persistence on the Croat side via Mostar Defence Department + Zagreb-Susak channel). ICTY Prlic et al. IT-04-74-T Trial Judgment (29 May 2013) Vol. 1 §§452-470 (Federation acceptance track and HZ HB / HR HB Presidency deliberations under Zubak after 5 August 1994) and Vol. 3 §§120-200 (Tudjman-Susak correspondence excerpts; HVO operational independence inside Federation; Mostar Defence Department parallel command). ICTY Karadzic IT-95-5/18-T Trial Judgment (24 March 2016) Vol. 1 (Bosnian Serb side reaction to Federation Army institutional fragility). ICRC field reports across Mostar, Vitez, Gornji Vakuf, Prozor, Konjic, and Jablanica (Federation Army dual-structure pattern documentation). US embassy archived reporting Mostar / Zagreb channel (Christopher / Galbraith / Redman démarches on Federation Army integration depth on the Croat side)."
+  },
+  {
     "id": "belgrade_embargo_rs_1994",
     "title": "Belgrade Breaks with Pale",
     "narrative": "Milosevic has had enough. After the Bosnian Serb assembly rejects the Contact Group plan, Belgrade imposes sanctions on Republika Srpska, closing the border to military supplies and severing the political lifeline that has sustained the war effort. Your army's supply lines from Serbia are now severed. The international community watches to see if this is real or theater.",
     "category": "political",
+    "family": "rs_belgrade_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
     "trigger": {
       "turn_min": 121,
       "turn_max": 122,
       "phase": "war",
       "requires_events": [
         "contact_group_plan_1994"
-      ]
+      ],
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "all_six"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "selective"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "aggressive"
+          }
+        ]
+      }
     },
+    "requires_enabled": true,
     "once": true,
     "requires_player_response": true,
     "responding_faction": "RS",
     "bot_response_logic": "historical",
+    "historical_default_response_id": "negotiate",
+    "source_note": "Balkan Battlegrounds Vol. II summarizes the Belgrade-Pale break after the Contact Group crisis.",
+    "staff_assessment": "Pale leadership can hold its rejectionist line by defying Belgrade, but the choice trades internal cohesion for sharper supply pressure and a weaker patron relationship.",
+    "trigger_evidence": [
+      "The Contact Group plan has entered the event chain.",
+      "Belgrade sanctions follow the RS rejection of the map."
+    ],
     "effect": {
       "kind": "supply_delta",
       "faction": "RS",
@@ -706,46 +2622,9 @@
     ],
     "response_options": [
       {
-        "id": "defiant",
-        "label": "Defy Belgrade",
-        "description": "We do not need Belgrade's permission to defend our people. Reject the Contact Group map and accept the consequences.",
-        "effects": [
-          {
-            "kind": "morale_change",
-            "faction": "RS",
-            "delta": 3
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "RS",
-            "delta": -5
-          }
-        ],
-        "sets_flags": {
-          "rs_belgrade_response": "defiant"
-        },
-        "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "internal_cohesion",
-            "delta": 10
-          },
-          {
-            "faction": "RS",
-            "dimension": "patron_confidence",
-            "delta": -20
-          },
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
-            "delta": -10
-          }
-        ],
-        "aggression_affinity": 0.7,
-        "risk_level": 0.8
-      },
-      {
         "id": "negotiate",
+        "branch_tag": "rs_belgrade_negotiate",
+        "historical_marker": "historical_default",
         "label": "Seek accommodation with Belgrade",
         "description": "Open back-channels to Milosevic. Signal willingness to reconsider the Contact Group map. The embargo may be softened.",
         "effects": [
@@ -758,6 +2637,21 @@
         "sets_flags": {
           "rs_belgrade_response": "negotiate"
         },
+        "future_consequences": [
+          {
+            "id": "belgrade_accommodation_visibility",
+            "label": "Accommodation channel",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_flags": [
+              "rs_belgrade_response"
+            ],
+            "material_effect_refs": [
+              "supply_delta.RS"
+            ],
+            "explanation": "Seeking accommodation records rs_belgrade_response as negotiate. No current catalog follow-up event directly keys on this value, but the branch remains visible in decision diagnostics."
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "RS",
@@ -777,6 +2671,74 @@
         ],
         "aggression_affinity": -0.5,
         "risk_level": 0.4
+      },
+      {
+        "id": "defiant",
+        "branch_tag": "rs_belgrade_defiant",
+        "historical_marker": "counterfactual",
+        "label": "Defy Belgrade",
+        "description": "We do not need Belgrade's permission to defend our people. Reject the Contact Group map and accept the consequences.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 3
+          },
+          {
+            "kind": "supply_delta",
+            "faction": "RS",
+            "delta": -10
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 10
+          },
+          {
+            "kind": "recruitment_modifier",
+            "faction": "RS",
+            "pool_multiplier": 0.9,
+            "duration_turns": 52
+          }
+        ],
+        "sets_flags": {
+          "rs_belgrade_response": "defiant"
+        },
+        "future_consequences": [
+          {
+            "id": "belgrade_defiance_visibility",
+            "label": "Belgrade split hardens",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_flags": [
+              "rs_belgrade_response"
+            ],
+            "material_effect_refs": [
+              "morale_change.RS",
+              "supply_delta.RS"
+            ],
+            "explanation": "Defying Belgrade records rs_belgrade_response as defiant. No current catalog follow-up event directly keys on this value, but the branch remains visible in decision diagnostics."
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 10
+          },
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -20
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -10
+          }
+        ],
+        "aggression_affinity": 0.7,
+        "risk_level": 0.8
       }
     ],
     "notifications_to_other_factions": {
@@ -799,14 +2761,25 @@
           "headline": "RS moves to soften Belgrade break",
           "body": "Pale looks for a way back toward Belgrade after the embargo. Mostar sees reduced immediate supply shock for RS if talks hold, at the cost of visible internal cohesion."
         }
+      },
+      "defiant": {
+        "RBiH": {
+          "headline": "Pale defies Belgrade embargo",
+          "body": "RS rejects Belgrade's pressure and accepts deeper isolation over the Contact Group map. Sarajevo sees a harder Pale line, but also a widening split between RS leadership and its Serbian patron."
+        },
+        "HRHB": {
+          "headline": "RS stands against Belgrade",
+          "body": "Pale chooses defiance despite the border closure and military-supply shock. Mostar sees RS cohesion harden internally while patron confidence and international standing deteriorate."
+        }
       }
     },
-    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). UNSCR 942 (1994). BB Vol. II Ch. 10."
+    "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T, 24 March 2016) paras. 4263-4310 — Belgrade-Pale distancing and Pale's accommodation calculus. UN Security Council Resolutions 943 (23 September 1994), 970 (12 January 1995), and 988 (21 April 1995) — FRY-sanctions suspension framework recognising Belgrade's compliance with the embargo against RS. Balkan Battlegrounds Vol. II pp. 287-314 — Belgrade embargo chronology and VRS operational supply impact."
   },
   {
     "id": "anti_sniping_agreement_1994",
     "title": "Anti-Sniping Agreement in Sarajevo",
     "narrative": "An anti-sniping agreement is reached for Sarajevo, aiming to reduce the daily toll of civilians killed by snipers along the city's exposed boulevards and intersections. Compliance is sporadic, but the agreement represents a small step in civilian protection and provides UNPROFOR with additional monitoring authority.",
+    "source_note": "Existing event/essay/project sources ground the row's institutional and diplomatic context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 123,
@@ -827,14 +2800,38 @@
   {
     "id": "bihac_5th_corps_offensive_1994",
     "title": "5th Corps Breaks Out of Bihac",
-    "narrative": "General Dudakovic and the 5th Corps have achieved the impossible. After crushing Abdic's breakaway forces, the besieged garrison launches Operation Grmec, striking south and east from the Bihac pocket. The Grabez plateau falls in days. Over 100 square kilometers of territory change hands as ARBiH brigades advance toward Bosanska Krupa. The VRS is caught off guard.",
+    "narrative": "Sarajevo Presidency files, autumn 1994. General Atif Dudakovic and the 5th Corps in Bihac are the principal armed expression of the Sarajevo line against the Fikret Abdic / APWB split declared at Velika Kladusa on 27 September 1993. Dudakovic has presented an offensive plan: push from the pocket into Grabez and toward Bosanska Krupa against the VRS, while overrunning APWB-held Velika Kladusa to the north. The political record is in your hands. Press the offensive, hold the perimeter, seek negotiation with APWB and indirect channels to RS/RSK, or accept ceasefire terms that would functionally recognize the APWB split.",
     "category": "military",
+    "family": "rbih_bihac_response",
+    "source_tier": "balkan_battlegrounds",
+    "emergence_class": "compound",
     "trigger": {
       "turn_min": 129,
       "turn_max": 132,
-      "phase": "war"
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "bosniak_national"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "civic"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "pragmatic"
+          }
+        ]
+      }
     },
     "once": true,
+    "requires_enabled": true,
     "pressure": {
       "base_rate": 3,
       "threshold": 3,
@@ -851,33 +2848,261 @@
       ]
     },
     "effect": {
-      "kind": "morale_change",
-      "faction": "RBiH",
-      "delta": 5
+      "kind": "narrative",
+      "text": "The Sarajevo Presidency records a 5th Corps Bihac-pocket posture for autumn 1994."
     },
     "effects": [
       {
-        "kind": "aggression_modifier",
-        "faction": "RS",
-        "delta": 0.15,
-        "duration_turns": 8
-      },
-      {
         "kind": "narrative",
-        "text": "The 5th Corps breaks out of the Bihac pocket. VRS positions on the Grabez plateau are overrun."
+        "text": "Dudakovic and the 5th Corps await the Sarajevo political record on the autumn-1994 Bihac-pocket posture."
       }
     ],
+    "requires_player_response": true,
+    "responding_faction": "RBiH",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "press_offensive",
+    "source_note": "B6 worksheet 2026-05-27 + v1.3 packet §3.6 forward-looking guard: B6 is Ring-2 operational/posture (no atrocity authorization surface). Any future `csq_rbih_bihac_*` row consuming `bihac_5th_corps_1994_response` outcomes MUST NOT re-author atrocity authorization, cleansing, hostage-taking, or any sensitive-act response option. Cost floors on `consolidate_defend` and `accept_ceasefire_terms` per Game Designer Wave 1 review on packet v1.1 edit 13 prevent counterfactual dominance of the historical `press_offensive` line. BB Vol. II pp. 406-417 region (Bihac 1994 chronology, 5th Corps offensive, October high-water mark, November-December counter-attack), UNSCR 958 of 19 November 1994 (NATO close-air-support authority extended to Bihac safe area), NATO 21 November 1994 Udbina airfield close-air-support action.",
+    "staff_assessment": "Pressing the offensive mirrors the documented Dudakovic posture and the historical APWB liquidation (briefly) at Velika Kladusa in late October 1994; the strategic value lies in eliminating the APWB rear threat and catalyzing the international engagement decision tree leading to Operation Storm 1995 and Mistral/Sana 1995. Consolidating the defense reduces immediate casualties but permits APWB persistence and weakens 5th Corps political-recruit posture into 1995. Seeking negotiation signals conditional military pressure to APWB and RS. Accepting ceasefire terms functionally recognizes the APWB split, sharply degrades 5th Corps capability for 1995 operations, and pays a federation-level cohesion cost.",
+    "trigger_evidence": [
+      "The 5th Corps offensive plan from Dudakovic is before the Presidency.",
+      "APWB at Velika Kladusa and VRS positions on Grabez/Bosanska Krupa axis define the autumn-1994 operational picture.",
+      "The Bihac pocket is supplied only through the RSK-controlled UNPROFOR corridor and HVO; political-military posture for autumn 1994 is in question."
+    ],
+    "response_options": [
+      {
+        "id": "press_offensive",
+        "branch_tag": "rbih_abdic_press_offensive",
+        "historical_marker": "historical_default",
+        "label": "Press the offensive — push Grabez, overrun Velika Kladusa",
+        "description": "Authorize Dudakovic's plan. 5th Corps presses into Grabez and toward Bosanska Krupa against VRS positions while overrunning APWB-held Velika Kladusa. The advance achieves operational momentum into late October; the joint VRS/RSK/APWB counter-attack from November rolls the gains back, and the pocket survives only via NATO close-air-support escalation on 21 November 1994.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 5
+          },
+          {
+            "kind": "aggression_modifier",
+            "faction": "RS",
+            "delta": 0.15,
+            "duration_turns": 8
+          },
+          {
+            "kind": "narrative",
+            "text": "The 5th Corps advances from the Bihac pocket toward the Grabez and Grmec approaches before the later joint counteroffensive."
+          }
+        ],
+        "sets_flags": {
+          "bihac_5th_corps_1994_response": "press_offensive",
+          "bihac_breakout_occurred": true
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": 10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 2
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": 2
+          }
+        ],
+        "aggression_affinity": 0.5,
+        "risk_level": 0.7
+      },
+      {
+        "id": "consolidate_defend",
+        "branch_tag": "rbih_abdic_consolidate_defend",
+        "historical_marker": "counterfactual",
+        "label": "Consolidate the defense — hold the perimeter",
+        "description": "Refuse Dudakovic's offensive plan. The 5th Corps holds the Bihac perimeter and does not press into Grabez or against APWB. Immediate casualties drop; APWB persists at Velika Kladusa through 1994-1995; the 5th Corps' political-recruit posture softens without the offensive-momentum narrative. The autumn-1994 NATO escalation decision tree does not engage on the Bihac axis.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": -2
+          },
+          {
+            "kind": "recruitment_modifier",
+            "faction": "RBiH",
+            "pool_multiplier": 0.90,
+            "duration_turns": 6
+          }
+        ],
+        "sets_flags": {
+          "bihac_5th_corps_1994_response": "consolidate_defend"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": -3
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": -3
+          }
+        ],
+        "aggression_affinity": -0.3,
+        "risk_level": 0.4
+      },
+      {
+        "id": "seek_negotiation",
+        "branch_tag": "rbih_abdic_seek_negotiation",
+        "historical_marker": "counterfactual",
+        "label": "Seek negotiation — open Bihac-pocket ceasefire channels",
+        "description": "Direct Dudakovic to open talks with APWB on a Bihac-pocket ceasefire, with indirect channels to RS/RSK. Sarajevo's military pressure on the pocket axis is signaled as conditional. Talks open; no resolution arrives; the autumn-1994 operational picture stalls without the offensive momentum and without the immediate political cost of full recognition.",
+        "effects": [
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": -3
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": 5
+          }
+        ],
+        "sets_flags": {
+          "bihac_5th_corps_1994_response": "seek_negotiation"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": -5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": -1
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "patron_confidence",
+            "delta": 3
+          }
+        ],
+        "aggression_affinity": -0.1,
+        "risk_level": 0.5
+      },
+      {
+        "id": "accept_ceasefire_terms",
+        "branch_tag": "rbih_abdic_accept_ceasefire",
+        "historical_marker": "counterfactual",
+        "label": "Accept ceasefire terms — concede Velika Kladusa to APWB",
+        "description": "Accept the counter-attackers' terms in advance: territorial concession to APWB at Velika Kladusa, halt of all 5th Corps offensive operations. The crisis is averted without NATO escalation. The cost is functional recognition of the APWB split, sharply degraded 5th Corps capability for 1995 operations, and federation-level cohesion damage. The 5th Corps cadres read the decision as Sarajevo betrayal at the moment of crisis.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": -10
+          },
+          {
+            "kind": "recruitment_modifier",
+            "faction": "RBiH",
+            "pool_multiplier": 0.80,
+            "duration_turns": 8
+          }
+        ],
+        "sets_flags": {
+          "bihac_5th_corps_1994_response": "accept_ceasefire_terms"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -20
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": -3
+          }
+        ],
+        "aggression_affinity": -0.5,
+        "risk_level": 0.8
+      }
+    ],
+    "notifications_to_other_factions": {
+      "press_offensive": {
+        "RS": {
+          "headline": "Sarajevo authorizes 5th Corps Bihac offensive",
+          "body": "The Presidency clears Dudakovic to press Grabez and overrun Velika Kladusa. Pale reads the decision as Sarajevo committing to a Bihac-axis military solution; VRS coordinates the counter-attack with RSK and APWB."
+        },
+        "HRHB": {
+          "headline": "5th Corps cleared for autumn-1994 offensive",
+          "body": "Sarajevo authorizes the Bihac-pocket offensive. Mostar reads the decision as Sarajevo holding the line against the Abdic split and signals continued Federation military coordination."
+        }
+      },
+      "consolidate_defend": {
+        "RS": {
+          "headline": "Sarajevo refuses 5th Corps offensive",
+          "body": "The Presidency holds Dudakovic to a defensive posture. Pale reads the decision as Sarajevo tolerating the APWB existence; pressure on the eastern enclaves rises as the Bihac axis quiets."
+        },
+        "HRHB": {
+          "headline": "RBiH adopts defensive Bihac posture",
+          "body": "Sarajevo holds the 5th Corps to the perimeter. Mostar notes the softer Sarajevo line on the internal Bosniak fracture and the absent NATO escalation on the Bihac axis."
+        }
+      },
+      "seek_negotiation": {
+        "RS": {
+          "headline": "Sarajevo seeks Bihac-pocket ceasefire channels",
+          "body": "The Presidency opens talks with APWB and indirect channels through RSK. Pale reads the signal as Sarajevo's military pressure on the Bihac axis being conditional."
+        },
+        "HRHB": {
+          "headline": "RBiH opens Bihac ceasefire negotiations",
+          "body": "Sarajevo seeks talks with APWB and indirect RS/RSK channels. Mostar weighs the precedent for federation-level negotiation discipline."
+        }
+      },
+      "accept_ceasefire_terms": {
+        "RS": {
+          "headline": "Sarajevo accepts Bihac ceasefire terms",
+          "body": "The Presidency concedes Velika Kladusa to APWB and halts 5th Corps offensive operations. Pale reads the decision as the Sarajevo line breaking on the internal Bosniak fracture; the autumn-1994 NATO escalation does not arrive."
+        },
+        "HRHB": {
+          "headline": "RBiH accepts APWB-favorable ceasefire",
+          "body": "Sarajevo accepts the counter-attackers' terms. Mostar notes the federation-level cohesion damage and the degraded 5th Corps capability for 1995 operations."
+        }
+      }
+    },
     "dimension_shifts": [
       {
         "faction": "RBiH",
         "dimension": "military_credibility",
-        "delta": 10
+        "delta": 0
       }
     ],
-    "sets_flags": {
-      "bihac_breakout_occurred": true
-    },
-    "historical_source": "BB Vol. II, Ch. 11. ICTY Karadzic Judgment. 5th Corps operational records."
+    "historical_source": "BB Vol. II pp. 406-417 region (Bihac 1994 chronology; 5th Corps autumn offensive; October high-water mark at Grabez and Velika Kladusa; November-December VRS/RSK/APWB counter-attack). UN Security Council Resolution 958 (19 November 1994) extending NATO close-air-support authority to the Bihac safe area. NATO operation records for the 21 November 1994 Udbina airfield close-air-support action. ICTY Karadzic Trial Judgment (IT-95-5/18-T, 24 March 2016) references the Bihac 1994 crisis as part of the VRS-RS strategic chronology. Balkan Battlegrounds Vol. II Abdic / APWB declaration of 27 September 1993 and APWB military operations through 1994-1995."
   },
   {
     "id": "operation_cincar_1994",
@@ -889,7 +3114,7 @@
       "turn_max": 133,
       "phase": "war",
       "requires_events": [
-        "washington_agreement_1994"
+        "hrhb_washington_agreement_1994"
       ]
     },
     "once": true,
@@ -1010,7 +3235,14 @@
     "once": true,
     "requires_player_response": true,
     "responding_faction": "RBiH",
-    "bot_response_logic": "capital_based",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "respect",
+    "source_note": "Carter Center archives, Balkan Battlegrounds Vol. II Ch. 12, and the ICTY Karadzic Judgment ground the winter COHA.",
+    "staff_assessment": "Sarajevo can preserve diplomatic credibility by honoring the Carter pause, while using the lower tempo to rebuild under scrutiny.",
+    "trigger_evidence": [
+      "External diplomatic calendar: Carter's December 1994 Sarajevo-Pale shuttle and the COHA are modeled as a fixed late-December event.",
+      "The turn 138-139 window is an exogenous calendar guardrail, not a battlefield-state predicate."
+    ],
     "effect": {
       "kind": "narrative",
       "text": "A four-month cessation of hostilities is agreed. The guns fall temporarily silent across Bosnia."
@@ -1032,6 +3264,7 @@
         "id": "respect",
         "label": "Honor the ceasefire",
         "description": "Use the pause to resupply and rebuild. Comply with the agreement's terms. International credibility improves.",
+        "historical_marker": "historical_default",
         "effects": [
           {
             "kind": "aggression_modifier",

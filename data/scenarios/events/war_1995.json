@@ -11,7 +11,11 @@
       "requires_events": [
         "carter_ceasefire_1994"
       ],
-      "condition": { "type": "flag_equals", "flag": "carter_ceasefire_active", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "carter_ceasefire_active",
+        "value": true
+      }
     },
     "once": true,
     "effect": {
@@ -173,20 +177,55 @@
     "id": "un_hostage_crisis_1995",
     "title": "UN Hostages Chained to VRS Targets",
     "narrative": "The VRS response to NATO air strikes near Pale is swift and calculated. Within hours, 377 UN peacekeepers are seized across Bosnian Serb territory. Some are chained to bridges and military installations as human shields against further bombing. The images -- blue-helmeted soldiers handcuffed to ammunition bunkers -- are broadcast worldwide. NATO's air campaign stops. UNPROFOR is paralyzed. The tactic works in the short term. But in the corridors of Washington, London, and Paris, the humiliation is hardening resolve. The rules of engagement are about to change.",
+    "source_note": "Per Sensitive History Design Gate §3 + v1.3 packet §3.6 named-row carve-out: `un_hostage_crisis_1995 → maintain_hostages` is a response-to-existing-state crisis (377 UN peacekeepers already seized per UNSCR 998), not authorization of new hostage-taking. The `paramilitary_policy` field remains the canon-bound player-authorized war-crime surface; no other response-option path authorizes new sensitive acts.",
     "category": "diplomatic",
+    "family": "rs_hostage_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
     "trigger": {
       "turn_min": 160,
       "turn_max": 163,
-      "phase": "war"
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "all_six"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "selective"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "aggressive"
+          }
+        ]
+      }
     },
     "once": true,
+    "requires_enabled": true,
     "requires_player_response": true,
     "responding_faction": "RS",
     "bot_response_logic": "historical",
+    "historical_default_response_id": "release_gradually",
     "pressure": {
-      "base_rate": 3.0, "threshold": 3, "decay_rate": 0,
+      "base_rate": 3,
+      "threshold": 3,
+      "decay_rate": 0,
       "modifiers": [
-        { "condition": { "type": "flag_equals", "flag": "operation_flash_occurred", "value": true }, "rate_bonus": 1.0 }
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "operation_flash_occurred",
+            "value": true
+          },
+          "rate_bonus": 1
+        }
       ]
     },
     "effect": {
@@ -213,6 +252,8 @@
     "response_options": [
       {
         "id": "maintain_hostages",
+        "branch_tag": "rs_hostage_maintain",
+        "historical_marker": "counterfactual",
         "label": "Hold hostages until NATO guarantees no more strikes",
         "description": "Maximum leverage. NATO stops bombing. But every day the hostages remain deepens the diplomatic catastrophe.",
         "effects": [
@@ -248,6 +289,8 @@
       },
       {
         "id": "release_gradually",
+        "branch_tag": "rs_hostage_release_gradual",
+        "historical_marker": "historical_default",
         "label": "Release hostages in exchange for concessions",
         "description": "Trade hostages for guarantees. Some diplomatic damage can be contained. NATO may hesitate to strike again.",
         "effects": [
@@ -314,12 +357,13 @@
     "sets_flags": {
       "un_hostage_crisis_occurred": true
     },
-    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T), Count 11 (hostage-taking). Mladic Judgment (IT-09-92-T). UNSCR 998 (1995)."
+    "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T, 24 March 2016) Count 11 (Taking of Hostages) §§5810-5876. ICTY Karadzic Appeal Judgment (IT-95-5/18-A, 20 March 2019). ICTY Mladic Trial Judgment (IT-09-92-T, 22 November 2017) Count 6 §§5169-5215. UN Security Council Resolution 998 (16 June 1995). UN Secretary-General Report S/1995/444 (30 May 1995). UN General Assembly A/54/549 §§198-215 (Srebrenica fall report context). BB Vol. II pp. 312-321 (operational chronology, 25 May - 18 June 1995)."
   },
   {
     "id": "srebrenica_falls_1995",
     "title": "Srebrenica Falls",
     "narrative": "The VRS overruns the Srebrenica safe area in a carefully planned operation. Dutch UNPROFOR peacekeepers are unable to prevent the advance. In the days that follow, over 8,000 Bosniak men and boys are systematically executed in the worst massacre in Europe since World War II. The fall of Srebrenica becomes a defining moment of the war and of international failure.",
+    "source_note": "Existing Srebrenica arc sources, including ICTY/ICJ and UN reporting, ground the row's provenance. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "humanitarian",
     "trigger": {
       "turn_min": 160,
@@ -396,6 +440,22 @@
         "delta": 20
       },
       {
+        "kind": "control_change",
+        "faction": "RS",
+        "osids": [
+          "op:srebrenica:srebrenica_2",
+          "op:srebrenica:donji_potocari_2",
+          "op:srebrenica:milacevici",
+          "op:srebrenica:ljeskovik_2",
+          "op:srebrenica:sulice_2",
+          "op:srebrenica:bostahovine_2",
+          "op:srebrenica:luka_2",
+          "op:srebrenica:suceska",
+          "op:srebrenica:radovcici",
+          "op:srebrenica:brezovice_2"
+        ]
+      },
+      {
         "kind": "narrative",
         "text": "Srebrenica falls. Over 8,000 Bosniak men and boys are executed in the worst atrocity in Europe since World War II."
       }
@@ -405,6 +465,7 @@
     "id": "zepa_falls_1995",
     "title": "Zepa Enclave Overrun",
     "narrative": "Following the fall of Srebrenica, the VRS turns its attention to the neighboring Zepa enclave. Despite desperate resistance by the small garrison, the enclave falls within two weeks. The civilian population is forcibly expelled. The international community, still reeling from Srebrenica, watches another safe area collapse.",
+    "source_note": "Existing safe-area and Srebrenica/Zepa sources ground the row's provenance and institutional context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "territorial",
     "trigger": {
       "turn_min": 160,
@@ -443,6 +504,13 @@
         "delta": -10
       },
       {
+        "kind": "control_change",
+        "faction": "RS",
+        "osids": [
+          "op:rogatica:zepa_2"
+        ]
+      },
+      {
         "kind": "narrative",
         "text": "Zepa falls to the VRS. A second UN safe area is overrun in two weeks, deepening the international crisis."
       }
@@ -452,6 +520,7 @@
     "id": "second_markale_massacre_1995",
     "title": "Second Markale Massacre",
     "narrative": "A second mortar attack strikes the Markale marketplace in Sarajevo, killing 43 civilians. Coming after Srebrenica and Zepa, the massacre triggers the decisive Western response that has been building for months. NATO Secretary General Willy Claes declares that the threshold for intervention has been crossed.",
+    "source_note": "Existing ICTY/UN and same-id essay sources ground the row's provenance and institutional context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "humanitarian",
     "trigger": {
       "turn_min": 165,
@@ -523,7 +592,7 @@
   {
     "id": "nato_deliberate_force_1995",
     "title": "NATO Operation Deliberate Force",
-    "narrative": "NATO launches Operation Deliberate Force, a sustained air campaign against VRS military targets across Bosnia. Over two weeks, NATO aircraft fly 3,515 sorties and strike ammunition depots, communications facilities, air defenses, and command bunkers. Combined with a Tomahawk cruise missile strike, the campaign devastates VRS military infrastructure and shatters its ability to sustain offensive operations.",
+    "narrative": "NATO launches Operation Deliberate Force, a sustained air campaign against VRS military targets across Bosnia. Over two weeks, NATO aircraft fly 3,515 sorties and strike ammunition depots, communications facilities, air defenses, and command bunkers. Combined with a Tomahawk cruise missile strike, the campaign damages VRS military infrastructure and adds pressure to its ability to sustain operations.",
     "category": "military",
     "trigger": {
       "turn_min": 165,
@@ -556,8 +625,14 @@
         "delta": 10
       },
       {
+        "kind": "equipment_quality_modifier",
+        "faction": "RS",
+        "multiplier": 0.7,
+        "duration_turns": 10
+      },
+      {
         "kind": "narrative",
-        "text": "NATO launches Operation Deliberate Force. Sustained air strikes devastate VRS military infrastructure across Bosnia."
+        "text": "NATO launches Operation Deliberate Force. Sustained air strikes hit VRS military infrastructure across Bosnia."
       }
     ]
   },
@@ -571,7 +646,7 @@
       "turn_max": 200,
       "phase": "war",
       "requires_events": [
-        "washington_agreement_1994",
+        "hrhb_washington_agreement_1994",
         "nato_deliberate_force_1995"
       ]
     },
@@ -612,7 +687,11 @@
       "turn_min": 168,
       "turn_max": 170,
       "phase": "war",
-      "condition": { "type": "flag_equals", "flag": "un_hostage_crisis_occurred", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "un_hostage_crisis_occurred",
+        "value": true
+      }
     },
     "once": true,
     "effect": {
@@ -658,7 +737,7 @@
       "turn_max": 173,
       "phase": "war",
       "requires_events": [
-        "washington_agreement_1994"
+        "hrhb_washington_agreement_1994"
       ]
     },
     "once": true,
@@ -712,9 +791,18 @@
     },
     "once": true,
     "pressure": {
-      "base_rate": 3.0, "threshold": 3, "decay_rate": 0,
+      "base_rate": 3,
+      "threshold": 3,
+      "decay_rate": 0,
       "modifiers": [
-        { "condition": { "type": "flag_equals", "flag": "grahovo_glamoc_captured", "value": true }, "rate_bonus": 3.0 }
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "grahovo_glamoc_captured",
+            "value": true
+          },
+          "rate_bonus": 3
+        }
       ]
     },
     "effect": {
@@ -737,22 +825,50 @@
         "kind": "narrative",
         "text": "Operation Storm shatters the Republic of Serbian Krajina. The strategic balance in the western Balkans shifts decisively against Serb forces."
       }
-    ]
+    ],
+    "sets_flags": {
+      "svk_corps_active": false
+    }
   },
   {
     "id": "karadzic_mladic_split_1995",
     "title": "Karadzic Attempts to Remove Mladic",
     "narrative": "The crisis erupts on the worst possible day. As Croatian forces launch Operation Storm, Karadzic announces from Pale that he is removing Mladic from command and assuming personal control of the army. He blames the general for losing Grahovo and Glamoc. The army's reaction is immediate and hostile -- officers rally behind their commander, ignoring the political leadership. For seven days, Republika Srpska's command structure is paralyzed by an internal power struggle. On August 11, Karadzic is forced to back down. Mladic remains. But the damage is done.",
     "category": "political",
+    "family": "rs_command_split",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
     "trigger": {
       "turn_min": 174,
       "turn_max": 175,
-      "phase": "war"
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "all_six"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "selective"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "aggressive"
+          }
+        ]
+      }
     },
+    "requires_enabled": true,
     "once": true,
     "requires_player_response": true,
     "responding_faction": "RS",
-    "bot_response_logic": "personality_weighted",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "back_down",
     "effect": {
       "kind": "cohesion_change",
       "faction": "RS",
@@ -772,6 +888,8 @@
     "response_options": [
       {
         "id": "remove_mladic",
+        "branch_tag": "rs_mladic_remove",
+        "historical_marker": "counterfactual",
         "label": "Press the dismissal -- assert political control",
         "description": "Force Mladic out. You may lose the army's loyalty, but civilian authority over the military must be established. The officer corps will resist.",
         "effects": [
@@ -784,6 +902,12 @@
             "kind": "morale_change",
             "faction": "RS",
             "delta": -5
+          },
+          {
+            "kind": "equipment_quality_modifier",
+            "faction": "RS",
+            "multiplier": 0.85,
+            "duration_turns": 8
           }
         ],
         "sets_flags": {
@@ -806,6 +930,8 @@
       },
       {
         "id": "back_down",
+        "branch_tag": "rs_mladic_back_down",
+        "historical_marker": "historical_default",
         "label": "Rescind the order -- Mladic stays",
         "description": "Admit defeat. Mladic remains in command. Your authority is diminished, but the army's command structure is preserved at a critical moment.",
         "effects": [
@@ -866,22 +992,599 @@
     "sets_flags": {
       "karadzic_mladic_crisis_occurred": true
     },
-    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). Mladic Judgment (IT-09-92-T). ICTY witness testimony."
+    "historical_source": "ICTY Karadžić Judgment (IT-95-5/18-T) §§5648-5703 (dismissal attempt, officer revolt, 11 Aug 1995 rescission). ICTY Mladić Judgment (IT-09-92-T) §§4762-4778 (command-continuity contextual). UN A/54/549 §§270-280 (Srebrenica fall report contextual reference). Balkan Battlegrounds Vol. 2 pp.358-366 (operational chronology, 25 July - 14 August 1995). ICTY witness testimony (Gvero, Milovanović, Tolimir).",
+    "source_note": "On 4 August 1995 — the day Operation Storm began — Radovan Karadžić issued a decree dismissing General Ratko Mladić from command of the VRS Main Staff. Eighteen senior VRS officers, including all five corps commanders, refused to recognize the dismissal and declared loyalty to Mladić. After seven days of contested authority, Karadžić rescinded the order on 11 August 1995. ICTY Karadžić (IT-95-5/18-T) §§5648-5703 records the episode within the JCE narrative; ICTY Mladić (IT-09-92-T) §§4762-4778 contextualizes the command continuity. The historical action of the RS Presidency was to back down. §3.6 forward-looking guard (Wave 2 Canon): the remove_mladic counterfactual carries no enables_events_runtime in this packet; any future csq_vrs_command_paralysis event authored to consume karadzic_mladic_crisis: \"mladic_removed\" MUST NOT carry response options that re-author paramilitary deployment, cleansing, or hostage-taking. R11 is Ring-2 internal RS command politics; no Ring-1 atrocity surface is authorized by either option."
+  },
+  {
+    "id": "hv_ammo_transfusion_post_storm_1995",
+    "title": "HV Cross-border Ammunition Transfusion to ARBiH 5th Corps",
+    "narrative": "Within days of Operation Storm, Croatian Army logistics begin transferring captured SVK depot stocks across the border to ARBiH 5th Corps. The five-week window between Storm and the launch of Operation Sana sees the besieged Bihać pocket resupplied for the first time since 1992. Ammunition (7.62mm, 82/120mm mortar, 122mm D-30 howitzer), fuel, and small numbers of captured T-55s and BM-21s flow eastward. The transfusion ends the three-year ammunition rationing that had crippled 5th Corps offensive options.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 175,
+      "turn_max": 180,
+      "phase": "war",
+      "requires_events": [
+        "operation_storm_1995"
+      ]
+    },
+    "once": true,
+    "effect": {
+      "kind": "equipment_quality_modifier",
+      "faction": "RBiH",
+      "multiplier": 1.15,
+      "duration_turns": 6
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 8
+      },
+      {
+        "kind": "narrative",
+        "text": "Croatian Army logistics transfer captured SVK depot stocks to ARBiH 5th Corps across the Lika-Petrovo border. Three years of ammunition rationing ends overnight."
+      }
+    ],
+    "historical_source": "Balkan Battlegrounds Vol. 2 p.644; ICTY Karadžić IT-95-5/18-T Exh. P03978; Tanner 2001 ch.13."
+  },
+  {
+    "id": "hv_hvo_cooperation_1995",
+    "title": "Croatian Army Crosses the Border",
+    "narrative": "Zagreb is on the line. With Operation Storm launching on 4 August 1995, HV Guards Brigades have already crossed the international border into Bosnia-Herzegovina to support HVO formations in Livno, Glamoc, and Bosansko Grahovo. Defense Minister Gojko Susak is coordinating directly with Boban's successor and HVO Main Staff in Mostar; Tudjman's transcripts treat the operation as a joint HV-HVO undertaking. The 4th and 7th Guards Brigades — the same elite formations that took Knin — are being readied for the September push into western Bosnia. The HZ HB Presidency must decide the command relationship: accept HV command and integrate openly with Zagreb's operational direction, run HVO operations independently of HV columns, coordinate with the ARBiH 5th Corps inside the Federation framework, or pull HVO back to a neutral observer posture and let the HV operate alone.",
+    "category": "military",
+    "family": "hrhb_hv_coordination",
+    "source_tier": "balkan_battlegrounds",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 175,
+      "turn_max": 178,
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "croat_republic"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "united_front"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "strategic_ambiguity"
+          }
+        ]
+      }
+    },
+    "pressure": {
+      "base_rate": 3,
+      "threshold": 3,
+      "decay_rate": 0
+    },
+    "once": true,
+    "requires_enabled": true,
+    "requires_player_response": true,
+    "responding_faction": "HRHB",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "accept_hv_command",
+    "effect": {
+      "kind": "narrative",
+      "text": "The HZ HB Presidency must take a command-coordination posture toward HV Guards Brigades operating openly inside Bosnia-Herzegovina."
+    },
+    "source_note": "On 4 August 1995 — the opening day of Operation Storm — HV Guards Brigades crossed the international border to operate openly inside Bosnia-Herzegovina alongside HVO units in the Livno-Glamoc-Bosansko Grahovo sector and again during Operation Mistral 2 (Sipovo, Mrkonjic Grad, Jajce, 8-13 September 1995). The historical action of the HZ HB Presidency was to accept HV command coordination per the Susak-Tudjman-Boban-successor channel documented in admitted Tudjman Presidential Transcripts and BB Vol. II Ch. 15. §3.6 forward-looking guard (Wave 2 Canon): any future csq_hrhb_hv_* event authored to consume hv_hvo_cooperation_1995 outcomes MUST NOT carry response options that re-author cleansing, forced-displacement, hostage-taking, civilian-targeting, or any sensitive-act response option. The Operation Storm aftermath is ICTY-litigated (Gotovina/Markac/Cermak IT-06-90-T appeals reversal on JCE) and consequence rows must stay within legitimate military coordination lanes; the Krajina civilian column events and post-Storm Knin/Krajina property crimes remain canon-gated and OUT-OF-SCOPE.",
+    "staff_assessment": "Accepting HV command coordination secures Zagreb's operational and logistical backbone (Guards Brigades, captured SVK depot stocks, ammunition, fuel) for the September push and maximizes HR HB's Dayton negotiating leverage; running independently or coordinating only with ARBiH carries patron-axis cost.",
+    "trigger_evidence": [
+      "HV Guards Brigades are already in Livno-Glamoc-Bosansko Grahovo sector as of 4 August 1995.",
+      "Operation Mistral 2 (Sipovo, Mrkonjic Grad, Jajce) is being planned for September under combined HV-HVO command.",
+      "Susak is in direct channel with the HVO Main Staff in Mostar; Tudjman Presidential Transcripts treat the operation as joint."
+    ],
+    "response_options": [
+      {
+        "id": "accept_hv_command",
+        "branch_tag": "hrhb_hv_support_full",
+        "historical_marker": "historical_default",
+        "label": "Accept HV command coordination",
+        "description": "HVO formations integrate openly with HV Guards Brigades under the Susak-Tudjman operational channel. The 4th and 7th Guards lead Mistral 2; HVO Mostar Corps provides flank security and local infantry. Zagreb's logistical backbone — ammunition, fuel, captured SVK heavy weapons — flows directly to HVO units.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 6
+          }
+        ],
+        "sets_flags": {
+          "hrhb_hv_support_carrier": "accepted"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": 15
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "military_credibility",
+            "delta": 10
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "territorial_legitimacy",
+            "delta": 10
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "negotiating_leverage",
+            "delta": 10
+          }
+        ],
+        "aggression_affinity": 0.7,
+        "risk_level": 0.4
+      },
+      {
+        "id": "independent_hvo_operations",
+        "branch_tag": "hrhb_hv_support_limited",
+        "historical_marker": "counterfactual",
+        "label": "Run HVO operations independently of HV",
+        "description": "HVO refuses joint command and prosecutes its own western-Bosnia objectives without coordinating with HV Guards Brigades. Zagreb withdraws officer secondments, fuel, and ammunition; the HV continues operating but bypasses HVO formations. The Mistral 2 axis loses tempo without combined HV-HVO weight.",
+        "effects": [
+          {
+            "kind": "recruitment_modifier",
+            "faction": "HRHB",
+            "pool_multiplier": 0.85,
+            "duration_turns": 6
+          }
+        ],
+        "sets_flags": {
+          "hrhb_hv_support_carrier": "limited"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": -25
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "military_credibility",
+            "delta": -15
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -10
+          }
+        ],
+        "aggression_affinity": 0.3,
+        "risk_level": 0.7
+      },
+      {
+        "id": "arbih_coordination",
+        "branch_tag": "hrhb_federation_coordinate",
+        "historical_marker": "counterfactual",
+        "label": "Coordinate with ARBiH 5th Corps inside Federation",
+        "description": "HVO realigns command to the Federation framework, coordinating directly with ARBiH 5th Corps (Dudaković) on the Sana / Una axis rather than the HV Guards. Zagreb is unhappy but bound by the Washington Agreement to accept the realignment. The HVO Mostar Corps fights inside a Federation joint-staff structure, not under Susak's direction.",
+        "effects": [
+          {
+            "kind": "patron_pressure",
+            "faction": "HRHB",
+            "delta": 15
+          },
+          {
+            "kind": "alliance_change",
+            "delta": 0.1
+          }
+        ],
+        "sets_flags": {
+          "hrhb_hv_support_carrier": "federation_aligned"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": -10
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -10
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "international_standing",
+            "delta": 10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": 0,
+        "risk_level": 0.5
+      },
+      {
+        "id": "neutral_observer",
+        "branch_tag": "hrhb_hv_support_declined",
+        "historical_marker": "counterfactual",
+        "label": "Pull HVO back; let HV operate alone",
+        "description": "HVO Mostar Corps pulls back to internal HZ HB positions and lets the HV Guards prosecute Mistral 2 without HVO ground participation. Western-Bosnia territorial gains accrue to Zagreb-of-record but bypass HZ HB territorial credit. The Dayton delegation will arrive at the table with thinner ground.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": -4
+          }
+        ],
+        "sets_flags": {
+          "hrhb_hv_support_carrier": "declined"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "territorial_legitimacy",
+            "delta": -15
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -10
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "military_credibility",
+            "delta": -10
+          }
+        ],
+        "aggression_affinity": -0.3,
+        "risk_level": 0.6
+      }
+    ],
+    "notifications_to_other_factions": {
+      "accept_hv_command": {
+        "RBiH": {
+          "headline": "HV and HVO under joint command in western Bosnia",
+          "body": "Mostar accepts open HV operational coordination. Sarajevo reads the September push as a Zagreb-led campaign that will shape the Dayton map; ARBiH 5th Corps coordinates on the Una-Sana axis."
+        },
+        "RS": {
+          "headline": "Croatian Army crosses border openly",
+          "body": "HV Guards Brigades are operating inside Bosnia under joint command with HVO. Pale assesses a multi-axis western-Bosnia offensive with Zagreb's full logistical backbone."
+        }
+      },
+      "independent_hvo_operations": {
+        "RBiH": {
+          "headline": "HVO declines HV command coordination",
+          "body": "Mostar runs its own line. The Mistral 2 axis loses combined HV-HVO weight; Sarajevo sees a fragmented Croat operational picture."
+        },
+        "RS": {
+          "headline": "HVO-HV split visible at the operational seam",
+          "body": "HVO refuses joint command. Pale identifies a coordination gap in the western-Bosnia push that may slow Mistral 2."
+        }
+      },
+      "arbih_coordination": {
+        "RBiH": {
+          "headline": "HVO realigns to Federation joint staff",
+          "body": "Mostar coordinates directly with ARBiH 5th Corps under the Washington Agreement framework. Zagreb is bypassed; the Federation military structure handles the western-Bosnia push."
+        },
+        "RS": {
+          "headline": "HVO-ARBiH joint staff in western Bosnia",
+          "body": "Mostar accepts Federation command coordination with ARBiH 5th Corps. Pale sees a tightened Bosniak-Croat operational alignment ahead of the September offensives."
+        }
+      },
+      "neutral_observer": {
+        "RBiH": {
+          "headline": "HVO pulls back; HV operates alone",
+          "body": "Mostar withdraws to internal HZ HB positions. Sarajevo reads the move as a Croat opt-out from the western-Bosnia push; the territorial dividend will accrue to Zagreb, not to HZ HB."
+        },
+        "RS": {
+          "headline": "HVO sidelined while HV advances",
+          "body": "Mostar declines participation in the western-Bosnia offensive. Pale sees a thinner Croat ground commitment but still faces the full HV Guards Brigades on the Mistral 2 axis."
+        }
+      }
+    },
+    "historical_source": "Balkan Battlegrounds Vol. II Ch. 15 (Operation Storm 4-8 August 1995; Operation Mistral 2 8-13 September 1995; HV Guards Brigades cross-border operations into Bosnia-Herzegovina; Sipovo, Mrkonjic Grad, Jajce recapture). ICTY Gotovina et al. Trial Judgment (IT-06-90-T, 15 April 2011) and Appeals Judgment (16 November 2012) — Croatia operations doctrine and JCE reversal on Krajina civilian-column attribution. ICTY Prlic et al. IT-04-74-T (29 May 2013) Vol. 1 §§591-640 and Vol. 3 — Susak operational channel to HVO Main Staff; Tudjman Presidential Transcripts admitted at Prlic Vol. 3 (Susak coordination with Boban-successor HVO command). Holbrooke, To End a War (1998), Ch. 9-11 (HV-HVO-ARBiH coalition position ahead of Dayton; Krajina recovered, western Bosnia favorable). UN S/1995/770 and S/1995/799 (Secretary-General reports September-October 1995 on western Bosnia front)."
+  },
+  {
+    "id": "rbih_late_war_offensive_1995",
+    "title": "The Final Offensive: Liberate or Negotiate?",
+    "narrative": "The eastern enclaves are lost. Operation Storm has shattered the Krajina Serbs and HV Guards Brigades stand on the international border with Bosnia-Herzegovina. NATO aircraft are striking VRS command nodes across western and central Bosnia under Operation Deliberate Force. The 5th Corps has broken out of the Bihać pocket; the 7th Corps stands ready in central Bosnia; HVO Mostar Corps is integrating openly with HV columns rolling east through Šipovo-Mrkonjić-Jajce. Holbrooke's shuttle is converging on Geneva. The Presidency faces the decisive late-war operational posture: launch coordinated offensives with HV-HVO across western Bosnia and push the 5th Corps deep on the Sana-Una axis to maximize the territorial reintegration of Republika Srpska before the negotiating table closes — or hold the line, wait for diplomacy, or accept de facto partition on the existing Inter-Entity Boundary.",
+    "category": "military",
+    "family": "rbih_late_war_response",
+    "source_tier": "balkan_battlegrounds",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 175,
+      "turn_max": 178,
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "bosniak_national"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "civic"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "pragmatic"
+          }
+        ]
+      }
+    },
+    "pressure": {
+      "base_rate": 3,
+      "threshold": 3,
+      "decay_rate": 0
+    },
+    "once": true,
+    "requires_enabled": true,
+    "requires_player_response": true,
+    "responding_faction": "RBiH",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "launch_coordinated_offensives",
+    "effect": {
+      "kind": "narrative",
+      "text": "The Sarajevo Presidency must take a late-war operational posture toward the post-Storm / Deliberate Force / Mistral-2 window: launch the coordinated offensives that maximize territorial reintegration before Geneva closes, or hold/wait/concede."
+    },
+    "source_note": "Following the July 1995 Srebrenica and Žepa rupture, the 4 August Operation Storm (HV liberation of Krajina), the 30 August-14 September NATO Operation Deliberate Force air campaign, and the joint HV-HVO Operation Mistral 2 (Sipovo / Mrkonjic Grad / Jajce, 8-13 September), the Sarajevo Presidency faced the decisive operational decision for the final war phase. The historical posture was launch_coordinated_offensives: ARBiH 5th Corps under Atif Dudaković executed Operation Sana (Bosanski Petrovac 14 Sept; Ključ 17 Sept; Sanski Most 10 Oct) breaking out of the Bihać pocket; ARBiH 3rd Corps and 7th Corps from central Bosnia provided flank weight against VRS positions in the Vlašić-Donji Vakuf-Jajce-Mrkonjić arc; the HV-HVO Mistral 2 axis advanced east-northeast through western Bosnia. By mid-October 1995 the coordinated offensives had recovered approximately 20% of pre-war RS-held territory and forced RS-Belgrade to the Holbrooke-led negotiation table on terms substantially worse than the mid-1995 Contact Group / Owen-Stoltenberg / Geneva positions. The 5-10 October ceasefire (Holbrooke-brokered, signed Sarajevo) and the November Dayton General Framework Agreement codified the territorial dividend at the 51:49 Federation/RS split. Sources: Balkan Battlegrounds Vol. II Ch. 15-16 (Operation Sana chronology + 5th Corps breakout + 3rd/7th Corps central-Bosnia flank + ARBiH coordination with HV-HVO Mistral 2); Richard Holbrooke, To End a War (Random House 1998) chs. 8-11 (Geneva Agreed Basic Principles 8 Sept; New York Further Agreed Principles 26 Sept; October ceasefire diplomacy; Dayton territorial framework); Alija Izetbegović, Inescapable Questions (Islamic Foundation 2003) chs. on the Final Offensive decision frame + multi-corps coordination + 51:49 territorial-floor calculus; ICTY Krstić IT-98-33-T (2 Aug 2001) §§ on the Srebrenica-rupture strategic context driving the post-July 1995 operational decision; ICTY Karadžić IT-95-5/18-T §§4985-5067 (Patriarch Paper + Belgrade-delegation channel + Dayton ratification track on the RS side that made coordination feasible); UN S/1995/770 + S/1995/799 + S/1995/827 (Secretary-General Sept-Oct 1995 reports on the western-Bosnia front + diplomatic framework); UN S/1995/999 + S/RES/1031 (Dayton General Framework Agreement initialing + 15 Dec 1995 ratification). Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: alliance_lock(hrhb) collapsed to alliance_change (Federation/HRHB joint-operation proxy); territorial_loss / territorial_gain collapsed to territorial_legitimacy (proxy for ~20% RS pre-war territory reintegration in launch_coordinated_offensives historical; opposite-sign in the counterfactual concession arc). §3.6 STRICT forward-looking guard (Wave 2 Canon): any future csq_rbih_late_war_* event authored to consume rbih_late_war_offensive_1995 outcomes MUST NOT carry response options that re-author cleansing, forced-displacement, civilian-targeting, hostage-taking, paramilitary-deployment, ethnic-targeting, or any sensitive-act response option. The historical Operation Sana liberation of western Bosnia did include some Serb-civilian displacement (ICTY context: Sefer Halilović trial IT-01-48-T on ARBiH General Staff command-and-control 1993-95 doctrine; UNHCR Sept-Oct 1995 western-Bosnia displacement reporting; general post-Storm humanitarian fallout in the Sanski Most / Mrkonjić sector; HRW September-October 1995 western-Bosnia reporting) — this packet's DECISION is operational-strategic (multi-corps coordination posture + Federation alliance posture + Dayton-table territorial-floor posture) and the consequence rows MUST NEVER reward displacement / cleansing / civilian-column attack pathways. The Sanski Most / Bosanski Petrovac / Ključ liberation events and the associated humanitarian surfaces remain canon-gated through their existing event surfaces (operation_sana_1995, ceasefire_1995, us_halts_federation_advance_1995). The HV-HVO Operation Storm / Mistral 2 sensitive humanitarian fallout (Krajina civilian columns, post-Storm Knin property crimes — Gotovina/Markač/Čermak IT-06-90-T appeals JCE reversal context) remains canon-gated through hv_hvo_cooperation_1995's §3.6 source_note. Each per-option {opt}_to_late_war_offensive future_consequence explanation downstream of B1 includes the canon-gate prose enumerating the displacement / cleansing prohibition.",
+    "staff_assessment": "The post-Storm + Deliberate Force + Mistral 2 window is the structural maximum for territorial reintegration before Holbrooke's Geneva-New York framework closes the table. Launching coordinated offensives with HV-HVO at the September peak maximizes military credibility, negotiating leverage, and territorial legitimacy at the Dayton table; defensive consolidation, waiting on diplomacy, or accepting partition each cost military credibility and territorial-legitimacy capture, and the accept_partition counterfactual collapses the Federation alliance and the Bosniak-state internal cohesion.",
+    "trigger_evidence": [
+      "ARBiH 5th Corps (Dudaković) has broken out of the Bihać pocket and stands ready for a Sana-Una axis offensive against VRS positions in Bosanski Petrovac, Ključ, and Sanski Most.",
+      "ARBiH 3rd Corps and 7th Corps in central Bosnia stand ready for flank operations in the Vlašić-Donji Vakuf-Jajce-Mrkonjić arc paired with HV-HVO Mistral 2.",
+      "HV-HVO Operation Mistral 2 is rolling east through western Bosnia (Šipovo, Mrkonjić Grad, Jajce recaptured 8-13 September) creating coordination opportunity on the western front.",
+      "NATO Operation Deliberate Force has degraded VRS artillery, ammunition, and command nodes across western and central Bosnia, opening a structurally unique offensive window.",
+      "Holbrooke's shuttle is converging on Geneva (Agreed Basic Principles 8 Sept; New York Further Agreed Principles 26 Sept) — the territorial picture at the negotiating table will be locked by what the ARBiH controls when the ceasefire is signed."
+    ],
+    "response_options": [
+      {
+        "id": "launch_coordinated_offensives",
+        "branch_tag": "rbih_civic",
+        "historical_marker": "historical_default",
+        "label": "Launch coordinated offensives with HV-HVO",
+        "description": "ARBiH 5th Corps executes Operation Sana (Bosanski Petrovac / Ključ / Sanski Most) breaking out of Bihać; 3rd and 7th Corps from central Bosnia provide flank weight in the Vlašić-Jajce-Mrkonjić arc; ARBiH coordinates openly with HV-HVO Mistral 2 axis through the Federation joint-staff framework. By the October ceasefire, approximately 20% of pre-war RS-held territory has been recovered. Holbrooke arrives at Geneva with a substantially improved Bosniak-Croat territorial position.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 5
+          },
+          {
+            "kind": "alliance_change",
+            "delta": 0.1
+          }
+        ],
+        "sets_flags": {
+          "rbih_late_war_offensive": "launched"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": 15
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": 20
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "territorial_legitimacy",
+            "delta": 25
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": 0.7,
+        "risk_level": 0.6
+      },
+      {
+        "id": "defensive_consolidation",
+        "branch_tag": "rbih_federation_parallel_commands",
+        "historical_marker": "counterfactual",
+        "label": "Defensive consolidation -- hold existing front",
+        "description": "ARBiH does not commit to the Sana-Una breakout nor to a central-Bosnia flank operation. 5th Corps consolidates the Bihać pocket; 3rd and 7th Corps hold defensive positions. HVO is left to fight alongside HV alone on the Mistral 2 axis. Holbrooke arrives at Geneva with the pre-September Inter-Entity Boundary intact; Banja Luka and the Krajina remain RS. The Federation alliance frays as the HRHB delegation reads the choice as Bosniak abandonment of the western-Bosnia push.",
+        "effects": [
+          {
+            "kind": "alliance_change",
+            "delta": -0.1
+          }
+        ],
+        "sets_flags": {
+          "rbih_late_war_offensive": "consolidated"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": -20
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": -15
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "territorial_legitimacy",
+            "delta": -10
+          }
+        ],
+        "aggression_affinity": -0.3,
+        "risk_level": 0.5
+      },
+      {
+        "id": "wait_for_diplomacy",
+        "branch_tag": "rbih_dayton_accept",
+        "historical_marker": "counterfactual",
+        "label": "Wait for diplomacy -- defer to Holbrooke",
+        "description": "The Presidency reads Holbrooke's Geneva-New York framework as the principal lever and defers operational tempo to the diplomatic track. ARBiH does not launch the September push; the 5th Corps stays inside the Bihać pocket pending the ceasefire. HVO operations alongside HV continue but without the coordinated ARBiH multi-corps weight. US/Holbrooke will push harder for an early settlement on terms more favorable to RS because the September military pressure that historically forced Dayton's 51:49 split never materializes.",
+        "effects": [
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": 5
+          },
+          {
+            "kind": "alliance_change",
+            "delta": -0.05
+          }
+        ],
+        "sets_flags": {
+          "rbih_late_war_offensive": "deferred"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": -10
+          }
+        ],
+        "aggression_affinity": -0.2,
+        "risk_level": 0.4
+      },
+      {
+        "id": "accept_partition",
+        "branch_tag": "rbih_pragmatic",
+        "historical_marker": "counterfactual",
+        "label": "Accept partition on existing Inter-Entity Boundary",
+        "description": "The Presidency signals to Holbrooke that Sarajevo will ratify the existing post-Srebrenica / pre-Storm Inter-Entity Boundary as the final partition line. ARBiH operations stand down; the 5th Corps does not exit the pocket; the central-Bosnia corps freeze positions. The Federation alliance ruptures as the HRHB delegation reads the choice as a Bosniak concession that forecloses Croat territorial reintegration claims in western Bosnia. International standing collapses on the perception that Sarajevo has conceded de facto partition before the Dayton table opens; internal cohesion fractures as the Assembly nationalist current reads the concession as betrayal of the eastern enclaves and the constitutional unity of BiH.",
+        "effects": [
+          {
+            "kind": "alliance_change",
+            "delta": -0.15
+          }
+        ],
+        "sets_flags": {
+          "rbih_late_war_offensive": "partition_accepted"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": -30
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "territorial_legitimacy",
+            "delta": -40
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -25
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": -15
+          }
+        ],
+        "aggression_affinity": -0.6,
+        "risk_level": 0.8
+      }
+    ],
+    "notifications_to_other_factions": {
+      "launch_coordinated_offensives": {
+        "HRHB": {
+          "headline": "ARBiH commits to coordinated Federation offensives",
+          "body": "Sarajevo greenlights the multi-corps push paired with HV-HVO Mistral 2. Mostar reads the September window as the Federation territorial-reintegration moment ahead of Dayton."
+        },
+        "RS": {
+          "headline": "ARBiH joins HV-HVO multi-front offensive",
+          "body": "5th Corps breaks out of Bihać; 3rd and 7th Corps press the central-Bosnia flank. Pale assesses a coordinated Federation offensive whose September weight will close the late-war territorial picture against RS."
+        }
+      },
+      "defensive_consolidation": {
+        "HRHB": {
+          "headline": "ARBiH holds back from the western-Bosnia push",
+          "body": "Sarajevo declines the September offensive. Mostar reads the choice as Bosniak abandonment of the coordinated push; the Federation alliance frays at the operational seam."
+        },
+        "RS": {
+          "headline": "ARBiH defensive on all sectors",
+          "body": "5th Corps consolidates inside Bihać; central-Bosnia corps hold defensive positions. Pale assesses operational relief on the Sana-Una and central-Bosnia axes."
+        }
+      },
+      "wait_for_diplomacy": {
+        "HRHB": {
+          "headline": "ARBiH defers operational tempo to Geneva",
+          "body": "Sarajevo waits on Holbrooke's framework. Mostar continues alongside HV but without coordinated ARBiH multi-corps weight; the Federation alliance loses tempo at the operational seam."
+        },
+        "RS": {
+          "headline": "ARBiH defers to the diplomatic track",
+          "body": "Sarajevo stands down on the September push and defers to Holbrooke's Geneva-New York framework. Pale reads the deferral as an opportunity to push for early settlement on more favorable terms."
+        }
+      },
+      "accept_partition": {
+        "HRHB": {
+          "headline": "Sarajevo signals partition acceptance",
+          "body": "ARBiH stands down; the Presidency signals Holbrooke that Sarajevo will ratify the existing Inter-Entity Boundary. Mostar reads the concession as Federation-alliance rupture and the foreclosure of Croat territorial claims in western Bosnia."
+        },
+        "RS": {
+          "headline": "Sarajevo concedes the existing IEBL",
+          "body": "ARBiH operations freeze; the Sarajevo Presidency signals partition acceptance. Pale assesses a maximum diplomatic windfall and locks the existing front lines as the basis of the Dayton settlement."
+        }
+      }
+    },
+    "historical_source": "Balkan Battlegrounds Vol. II Ch. 15-16 (Operation Sana 13 Sept-10 Oct 1995 — 5th Corps Bihać breakout to Bosanski Petrovac / Ključ / Sanski Most; ARBiH 3rd and 7th Corps central-Bosnia flank operations paired with HV-HVO Mistral 2 in the Vlašić-Donji Vakuf-Jajce-Mrkonjić arc; coordinated September push that recovered approximately 20% of pre-war RS-held territory). Richard Holbrooke, To End a War (Random House 1998) chs. 8-11 (Geneva Agreed Basic Principles 8 September 1995; New York Further Agreed Principles 26 September 1995; October ceasefire diplomacy; Dayton 51:49 territorial framework structurally built on the September military momentum). Alija Izetbegović, Inescapable Questions (Islamic Foundation 2003) — Presidency reasoning on the September offensive decision frame, multi-corps coordination with HVO, and the 51:49 territorial-floor calculus ahead of Dayton. ICTY Krstić Trial Judgement (IT-98-33-T, 2 August 2001) — Srebrenica-rupture strategic context driving the late-1995 ARBiH operational decision frame. ICTY Karadžić IT-95-5/18-T §§4985-5067 — Patriarch Paper of 30 August 1995, Milošević-chaired joint Yugoslav-Bosnian Serb delegation, Geneva and Dayton ratification track on the RS side that made the coordinated Federation offensive feasible without Belgrade rear-area counter-pressure. UN S/1995/770 + S/1995/799 + S/1995/827 (Secretary-General September-October 1995 reports on the western-Bosnia front and the Geneva / New York diplomatic framework). UN S/1995/999 + S/RES/1031 (Dayton General Framework Agreement initialing 21 November 1995 + 15 December 1995 ratification). ICTY Gotovina et al. IT-06-90-T Trial Judgment (15 April 2011) and Appeals Judgment (16 November 2012) — Croatia operations doctrine context and JCE reversal on Krajina civilian-column attribution (canon-gated context, OUT-OF-SCOPE for this packet's consequence rows). ICTY Halilović IT-01-48-T — ARBiH General Staff command-and-control doctrine 1993-1995 (operational context for the multi-corps coordination decision)."
   },
   {
     "id": "holbrooke_us_belgrade_channel_1995",
     "title": "Holbrooke Routes Pressure Through Belgrade",
     "narrative": "Holbrooke has arrived in Belgrade. Milosevic, not Karadzic, is now America's contact for Republika Srpska. The message is clear: accept the US framework or face combined diplomatic and military pressure.",
     "category": "diplomatic",
+    "family": "rs_holbrooke_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
     "trigger": {
       "turn_min": 176,
       "turn_max": 178,
-      "phase": "war"
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "all_six"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "selective"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "aggressive"
+          }
+        ]
+      }
     },
+    "requires_enabled": true,
     "once": true,
     "responding_faction": "RS",
     "requires_player_response": false,
     "bot_response_logic": "strategic_weighted",
+    "historical_default_response_id": "comply_with_belgrade",
     "effect": {
       "kind": "narrative",
       "text": "Holbrooke bypasses Pale and deals with Milosevic as RS proxy. Belgrade now controls the channel to the international community."
@@ -897,6 +1600,8 @@
     "response_options": [
       {
         "id": "comply_with_belgrade",
+        "branch_tag": "rs_holbrooke_comply",
+        "historical_marker": "historical_default",
         "label": "Accept the Belgrade channel -- work through Milosevic",
         "description": "Acknowledge that Milosevic now speaks for RS in Washington's eyes. Patron confidence recovers, but RS loses direct access to the peace process.",
         "effects": [],
@@ -917,14 +1622,28 @@
       },
       {
         "id": "defy_us_framework",
+        "branch_tag": "rs_holbrooke_defy",
+        "historical_marker": "counterfactual",
         "label": "Reject the US framework -- Pale speaks for Republika Srpska",
-        "description": "Refuse to be sidelined. Karadzic insists on direct representation. International standing suffers, but RS asserts its political identity.",
-        "effects": [],
+        "description": "Refuse to be sidelined. Karadzic repudiates the Patriarch Paper delegation and insists on direct Pale representation. Milosevic publicly disowns the Pale leadership; sanctions-relief is foreclosed and the FRY supply pinch tightens. International standing collapses, but RS asserts its political identity.",
+        "effects": [
+          {
+            "kind": "supply_delta",
+            "faction": "RS",
+            "delta": -20
+          },
+          {
+            "kind": "recruitment_modifier",
+            "faction": "RS",
+            "pool_multiplier": 0.85,
+            "duration_turns": 12
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "RS",
             "dimension": "patron_confidence",
-            "delta": -12
+            "delta": -30
           },
           {
             "faction": "RS",
@@ -934,32 +1653,62 @@
           {
             "faction": "RS",
             "dimension": "international_standing",
-            "delta": -6
+            "delta": -15
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 5
           }
         ],
         "aggression_affinity": 0.5,
         "risk_level": 0.7
       }
     ],
-    "historical_source": "Holbrooke, 'To End a War' (1998) ch. 4-5. ICTY Karadzic Judgment (IT-95-5/18-T)."
+    "historical_source": "Holbrooke, To End a War (1998) ch. 8 (Patriarch Paper delegation and Belgrade channel). UN S/1995/780 (Geneva Agreed Basic Principles framework, 8 September 1995). UN S/1995/827 (New York Further Agreed Principles, 26 September 1995). ICTY Karadžić IT-95-5/18-T §§4985-5020 (Patriarch Paper context and Pale acceptance of Belgrade-led delegation). ICTY Milošević IT-02-54-T §§245-298 (Milošević's delegated negotiating authority). BB Vol. II Ch. 15."
   },
   {
     "id": "deliberate_force_rs_compliance_1995",
     "title": "NATO Airstrikes: Comply or Escalate?",
-    "narrative": "NATO aircraft are striking VRS positions across Bosnia. Holbrooke holds the pause button. Milosevic urges Pale to withdraw heavy weapons from Sarajevo and open supply routes. Defiance means the bombing continues.",
+    "narrative": "NATO aircraft are striking VRS positions across Bosnia. US diplomacy presses Pale to withdraw heavy weapons from Sarajevo and open supply routes. Defiance means the bombing continues.",
     "category": "military",
+    "family": "rs_deliberate_force_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
     "trigger": {
       "turn_min": 178,
       "turn_max": 180,
-      "phase": "war"
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "all_six"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "selective"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "aggressive"
+          }
+        ]
+      }
     },
+    "requires_enabled": true,
     "once": true,
     "responding_faction": "RS",
     "requires_player_response": false,
     "bot_response_logic": "strategic_weighted",
+    "historical_default_response_id": "withdraw_heavy_weapons",
     "effect": {
       "kind": "narrative",
-      "text": "NATO's Operation Deliberate Force strikes VRS artillery, ammunition dumps, and command nodes. The question is whether Pale complies or absorbs the punishment."
+      "text": "NATO's Operation Deliberate Force strikes VRS artillery, ammunition dumps, and command nodes. The question is whether Pale complies or continues to face NATO air strikes."
     },
     "effects": [],
     "dimension_shifts": [
@@ -977,6 +1726,8 @@
     "response_options": [
       {
         "id": "withdraw_heavy_weapons",
+        "branch_tag": "rs_deliberate_force_withdraw",
+        "historical_marker": "historical_default",
         "label": "Withdraw heavy weapons from Sarajevo exclusion zone",
         "description": "Comply with NATO demands. The bombing pauses. VRS commanders resist, and internal cohesion suffers, but patron confidence partially recovers.",
         "effects": [],
@@ -1002,9 +1753,34 @@
       },
       {
         "id": "absorb_strikes_hold_position",
-        "label": "Absorb the strikes -- hold every position",
-        "description": "Defy NATO. The bombing continues. Military credibility with hardliners rises briefly, but the sustained strikes degrade VRS combat power.",
-        "effects": [],
+        "branch_tag": "rs_deliberate_force_absorb",
+        "historical_marker": "counterfactual",
+        "label": "Reject NATO demands -- hold positions",
+        "description": "Reject NATO demands. The bombing continues, increasing pressure on VRS command and combat capability. Continued NATO strikes degrade equipment, supply, recruitment, and morale.",
+        "effects": [
+          {
+            "kind": "supply_delta",
+            "faction": "RS",
+            "delta": -15
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": -10
+          },
+          {
+            "kind": "equipment_quality_modifier",
+            "faction": "RS",
+            "multiplier": 0.75,
+            "duration_turns": 26
+          },
+          {
+            "kind": "recruitment_modifier",
+            "faction": "RS",
+            "pool_multiplier": 0.9,
+            "duration_turns": 12
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "RS",
@@ -1026,12 +1802,12 @@
         "risk_level": 0.9
       }
     ],
-    "historical_source": "NATO ODF records (Aug 30-Sep 14 1995). Holbrooke, 'To End a War' (1998). ICTY Karadzic Judgment (IT-95-5/18-T)."
+    "historical_source": "NATO Operation Deliberate Force chronology (30 Aug-14 Sep 1995). UN S/1995/755 (30 Aug 1995). ICTY Mladić IT-09-92-T §§4631-4685 (Markale II attribution and Mladić preference for absorption). ICTY Karadžić IT-95-5/18-T §§4940-4982 (Sarajevo TEZ compliance decision and Patriarch Paper command chain). Holbrooke, To End a War (1998), ch. 8."
   },
   {
     "id": "operation_mistral_2_1995",
     "title": "Operation Mistral 2 -- Jajce Recaptured",
-    "narrative": "The Croatian war machine rolls north from Grahovo. Operation Mistral 2 sends the 4th and 7th Guards Brigades -- the same elite formations that took Knin -- into the heart of VRS-held western Bosnia. Sipovo falls. Mrkonjic Grad falls. And on September 13, Jajce -- the symbolic prize lost in October 1992 amid mutual HVO-ARBiH recriminations -- is liberated. Two thousand square kilometers change hands in eight days. The VRS line in western Bosnia is disintegrating.",
+    "narrative": "HV/HVO forces advance from the Grahovo-Glamoc area during Operation Mistral 2. The operation sends the 4th and 7th Guards Brigades -- the same elite formations that took Knin -- against VRS-held positions in western Bosnia. The offensive captures Sipovo and Mrkonjic Grad. On September 13, Jajce -- the symbolic prize lost in October 1992 amid mutual HVO-ARBiH recriminations -- is recaptured. Two thousand square kilometers change hands in eight days. VRS positions in western Bosnia come under severe pressure.",
     "category": "military",
     "trigger": {
       "turn_min": 179,
@@ -1065,7 +1841,7 @@
       },
       {
         "kind": "narrative",
-        "text": "Jajce is recaptured after three years. HV-HVO forces sweep through western Bosnia, collapsing VRS positions across a 2,000 km2 front."
+        "text": "Jajce is recaptured after three years. HV-HVO forces advance through western Bosnia, taking substantial territory and forcing VRS withdrawals."
       }
     ],
     "dimension_shifts": [
@@ -1098,7 +1874,7 @@
   {
     "id": "operation_sana_1995",
     "title": "Operation Sana -- The 5th Corps Advances",
-    "narrative": "Three years of siege end in a single week. The 5th Corps -- the same formation that held the Bihac pocket against VRS, RSK, and Abdic's forces combined -- breaks out in force. Operation Sana sweeps south and east. Bosanski Petrovac falls. Bosanska Krupa falls. Sanski Most is captured on October 12. The 5th Corps, which spent three years defending the most isolated pocket in Bosnia, now spearheads the largest ARBiH territorial gain of the entire war.",
+    "narrative": "In September and October 1995, the ARBiH 5th Corps advanced from the Bihac pocket toward Bosanski Petrovac, Kljuc, Bosanska Krupa, and Sanski Most. Bosanski Petrovac fell on 15 September, Kljuc two days later, and Sanski Most on 10 October. The advance shifted RS-held western Bosnia toward the 49 percent Dayton line before the October ceasefire.",
     "category": "military",
     "trigger": {
       "turn_min": 179,
@@ -1127,7 +1903,7 @@
       },
       {
         "kind": "narrative",
-        "text": "The 5th Corps breaks out of the Bihac pocket. Operation Sana captures Sanski Most, Bosanski Petrovac, and Bosanska Krupa. RS territory approaches the 49% Dayton line."
+        "text": "The 5th Corps advances from the Bihac pocket toward Bosanski Petrovac, Kljuc, Bosanska Krupa, and Sanski Most."
       }
     ],
     "dimension_shifts": [
@@ -1150,7 +1926,7 @@
     "sets_flags": {
       "operation_sana_occurred": true
     },
-    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). BB Vol. II, Ch. 15."
+    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). BB Vol. II Ch. 15; BB Vol. II pp. 536-538 for 5th Corps/Bihac source trail."
   },
   {
     "id": "ceasefire_1995",
@@ -1333,12 +2109,22 @@
     "trigger": {
       "turn_min": 183,
       "turn_max": 185,
-      "phase": "war"
+      "phase": "war",
+      "requires_events": [
+        "federation_ground_offensive_1995"
+      ]
     },
     "once": true,
     "responding_faction": "RBiH",
     "requires_player_response": true,
-    "bot_response_logic": "strategic_weighted",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "accept_ceasefire",
+    "source_note": "Holbrooke, To End a War, and US State Department Oct. 5-12, 1995 records ground the ceasefire demand.",
+    "staff_assessment": "US pressure seeks to freeze Federation momentum and preserve the Dayton path. Accepting the ceasefire preserves US backing and diplomatic legitimacy while sacrificing offensive momentum; continuing offensive risks patron support/diplomatic legitimacy. The historical default is a calibration baseline, not a recommendation.",
+    "trigger_evidence": [
+      "Visible October 1995 diplomacy: Holbrooke presses for a ceasefire to keep negotiations moving toward Dayton.",
+      "The Federation/RBiH northwestern offensive has active public momentum, making the halt demand politically immediate."
+    ],
     "effect": {
       "kind": "narrative",
       "text": "Holbrooke demands ARBiH halt its northwestern offensive and accept a ceasefire to open the path to Dayton."
@@ -1355,7 +2141,8 @@
       {
         "id": "accept_ceasefire",
         "label": "Accept the ceasefire -- go to Dayton",
-        "description": "Halt the advance and agree to a two-month ceasefire. US support is preserved, international standing rises, and the path to Dayton opens.",
+        "description": "Halt the advance and agree to a two-month ceasefire. US backing and international standing are preserved while offensive momentum is frozen for the Dayton path.",
+        "historical_marker": "historical_default",
         "effects": [],
         "dimension_shifts": [
           {
@@ -1380,7 +2167,7 @@
       {
         "id": "continue_offensive",
         "label": "Continue the offensive -- maximum territory before Dayton",
-        "description": "Defy Holbrooke. Push further gains before the ceasefire is forced. Military credibility rises, but US support and international standing take serious damage.",
+        "description": "Defy Holbrooke and keep pressing for additional gains. Military credibility rises, but continuing offensive risks patron support/diplomatic legitimacy.",
         "effects": [],
         "dimension_shifts": [
           {
@@ -1435,18 +2222,50 @@
     "title": "Dayton Peace Talks Convene",
     "narrative": "The presidents of Bosnia, Croatia, and Serbia arrive at Wright-Patterson Air Force Base in Dayton, Ohio, for proximity peace talks brokered by US envoy Richard Holbrooke. The military situation — NATO air power, Federation ground gains, and VRS exhaustion — has finally created the conditions for a negotiated settlement. The outcome will define Bosnia's future.",
     "category": "diplomatic",
+    "family": "rbih_dayton_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
     "trigger": {
       "turn_min": 184,
       "turn_max": 210,
       "phase": "war",
       "requires_events": [
         "ceasefire_1995"
-      ]
+      ],
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "civic"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "bosniak_national"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "pragmatic"
+          }
+        ]
+      }
     },
+    "requires_enabled": true,
     "once": true,
     "requires_player_response": true,
     "responding_faction": "RBiH",
-    "bot_response_logic": "accept_first",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "accept",
+    "historical_source": "General Framework Agreement for Peace in Bosnia and Herzegovina (Dayton, initialled 21 Nov 1995; signed Paris 14 Dec 1995; UN S/1995/999); UN S/RES/1031 (15 Dec 1995) — IFOR authorization; UN S/RES/1022 (22 Nov 1995) — sanctions suspension; UN S/RES/1035 (21 Dec 1995) — IPTF establishment; Krstić IT-98-33-T (2 Aug 2001) and IT-98-33-A (19 Apr 2004) — Srebrenica genocide findings establishing the strategic conditions entering Dayton; ICJ Bosnia and Herzegovina v. Serbia and Montenegro Judgment (26 Feb 2007) §§278-297 — Srebrenica genocide affirmation and Dayton entity-structure recognition; Karadžić IT-95-5/18-T (Trial Judgment, 24 Mar 2016) §§5020-5067 — RBiH delegation context and the Patriarch Paper joint-delegation authority; Holbrooke, To End a War (1998). RBiH delegation: President Alija Izetbegović, Foreign Minister Muhamed Šaćirbey, Prime Minister Haris Šilajdžić. Balkan Battlegrounds Vol. II close-out chapters on the late-1995 settlement environment.",
+    "source_note": "The Dayton General Framework Agreement was initialed at Wright-Patterson on 21 November 1995 by Presidents Izetbegović (RBiH), Milošević (FRY, for the Bosnian Serbs under the 30 August 1995 Patriarch Paper delegation), and Tuđman (Croatia), and signed in Paris on 14 December 1995; the eleven annexes establish the Federation/RS dual-entity structure inside a unitary BiH, the 51:49 Inter-Entity Boundary Line, IFOR deployment under UN S/RES/1031, and the High Representative civilian-implementation regime. The RBiH delegation accepted under post-Srebrenica strategic conditions (Krstić IT-98-33-T; ICJ Bosnia v. Serbia 2007) and the Contact Group 51:49 framework; Šilajdžić's documented post-Dayton resignation as Prime Minister (early 1996) reflects the internal current that would have driven a counterfactual hardline rejection per the Owen-Stoltenberg Assembly-rejection precedent (B4).",
+    "staff_assessment": "Acceptance ratifies the Federation/RS dual-entity arrangement and the 51:49 IEBL under duress, preserves RBiH legal continuity through Annex 4, and unlocks Annex 7 refugee-return commitments as partial compensation for the eastern-enclave losses; hardline repudiation walks the Paris signature on the grounds that the IEBL ratifies ethnic-cleansing-driven outcomes, foreclosing Annex 7 implementation, IFOR deployment, and U.S./Holbrooke-mediated stabilization.",
+    "trigger_evidence": [
+      "The October 1995 ceasefire event has fired.",
+      "The Dayton talks window has opened after NATO Operation Deliberate Force, Federation ground gains (Operations Storm and Mistral 2 / Sana), and VRS exhaustion moved the parties to negotiation."
+    ],
     "effect": {
       "kind": "narrative",
       "text": "The Dayton peace talks begin. After three and a half years of war, the outlines of a settlement take shape."
@@ -1454,8 +2273,12 @@
     "response_options": [
       {
         "id": "accept",
-        "label": "Negotiate in Good Faith",
-        "description": "Commit fully to the peace process. The war ends, but the compromises will define the country for decades.",
+        "branch_tag": "rbih_dayton_accept",
+        "label": "Sign the General Framework Agreement",
+        "description": "Sign the Dayton General Framework Agreement on 14 December 1995 in Paris, ratifying the Federation/RS dual-entity arrangement, the 51:49 Inter-Entity Boundary Line including the eastern-enclave territorial outcomes, IFOR deployment under UN S/RES/1031, and Annex 7 refugee-return commitments. The Presidency accepts under duress; Šilajdžić-track skepticism is noted but the alternative is continued war without realistic prospect of recovering eastern enclaves.",
+        "historical_marker": "historical_default",
+        "aggression_affinity": -0.6,
+        "risk_level": 0.3,
         "effects": [
           {
             "kind": "negotiation_capital",
@@ -1468,12 +2291,36 @@
             "faction": "RBiH",
             "delta": 5
           }
+        ],
+        "sets_flags": {
+          "rbih_dayton_acceptance": "accept"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 3
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "patron_confidence",
+            "delta": 2
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -1
+          }
         ]
       },
       {
         "id": "hardline",
-        "label": "Push for Maximum Concessions",
-        "description": "Leverage military momentum to demand more territory and stronger central government. Risks collapse of talks.",
+        "branch_tag": "rbih_dayton_hardline",
+        "label": "Repudiate the Framework — Walk the Paris Signature",
+        "description": "Reject Dayton on the grounds that the Inter-Entity Boundary Line ratifies the eastern-enclave losses (Srebrenica, Žepa) and the dual-entity arrangement entrenches the partition logic of ethnic-cleansing-driven territorial outcomes. The Šilajdžić-track Assembly current prevails over Izetbegović's Presidency; the delegation walks the Paris signature on the institutional precedent of the September 1993 Owen-Stoltenberg Assembly rejection (B4). The Annex 7 refugee-return framework is foreclosed; IFOR deployment is foreclosed; U.S./Holbrooke-mediated stabilization is foreclosed; the war continues without realistic prospect of recovering eastern enclaves.",
+        "historical_marker": "counterfactual",
+        "aggression_affinity": 0.5,
+        "risk_level": 0.8,
         "effects": [
           {
             "kind": "negotiation_capital",
@@ -1485,6 +2332,26 @@
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": 3
+          }
+        ],
+        "sets_flags": {
+          "rbih_dayton_acceptance": "hardline"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": -3
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "patron_confidence",
+            "delta": -30
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 1
           }
         ]
       }
@@ -1551,5 +2418,315 @@
       "dayton_signed": true
     },
     "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). UNSCR 1031 (1995). Dayton General Framework Agreement (1995)."
+  },
+  {
+    "id": "rs_dayton_acceptance_1995",
+    "title": "Pale Ratifies the Patriarch Paper",
+    "narrative": "Milošević has initialed the General Framework Agreement at Wright-Patterson on 21 November 1995 under the Patriarch Paper joint-delegation authority granted by the Pale leadership on 30 August 1995. The text is on the table: Annex 1-A (IFOR, Zone of Separation, heavy-weapons cantonment), Annex 2 (the 51:49 Inter-Entity Boundary Line), Annex 4 (BiH Constitution — Federation/RS dual entities inside a unitary BiH), Annex 7 (refugee return), Annex 10 (the High Representative). Karadžić's objections are loud — Sarajevo unified under Federation control, eastern enclaves lost, the entity inside BiH rather than annexed to FRY. Mladić's reservations on the IFOR terms are recorded. The RS National Assembly must vote: ratify Milošević's signature, or repudiate the delegation and reject the framework.",
+    "category": "diplomatic",
+    "family": "rs_dayton_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 190,
+      "turn_max": 212,
+      "phase": "war",
+      "requires_events": [
+        "ceasefire_1995"
+      ],
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "all_six"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "selective"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "aggressive"
+          }
+        ]
+      }
+    },
+    "requires_enabled": true,
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "RS",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "accept",
+    "historical_source": "General Framework Agreement for Peace in Bosnia and Herzegovina (Dayton, initialled 21 Nov 1995; signed Paris 14 Dec 1995; UN S/1995/999); UN S/RES/1031 (15 Dec 1995) — IFOR authorization; UN S/RES/1022 (22 Nov 1995) — sanctions suspension contingent on Dayton implementation; UN S/RES/1035 (21 Dec 1995) — IPTF establishment; Karadžić IT-95-5/18-T (Trial Judgment, 24 Mar 2016) §§5020-5067 — RS National Assembly ratification of the Patriarch Paper signature, Karadžić's reservations on Sarajevo unification and eastern enclaves, December 1995 internal communications exploring the hardline alternative (§§5025-5040); Mladić IT-09-92-T (Trial Judgment, 22 Nov 2017) §§4750-4795 — VRS compliance with Annex 1-A despite military reservations; Milošević IT-02-54-T (Decision on Motion for Judgment of Acquittal, 16 Jun 2004) §§290-340 — Milošević's signing authority and Dayton commitments; ICJ Bosnia and Herzegovina v. Serbia and Montenegro Judgment (26 Feb 2007) — Dayton as legal terminus of the war and entity-structure recognition. Holbrooke, To End a War (1998).",
+    "source_note": "The Patriarch Paper of 30 August 1995 granted Milošević joint-delegation authority over the Bosnian Serb negotiating position. The Pale leadership's November-December 1995 ratification decision was a discrete political act — Karadžić publicly disagreed with Sarajevo unification and the eastern-enclave provisions but did not repudiate Milošević's authority (Karadžić IT-95-5/18-T §§5020-5067). The RS National Assembly voted to accept the framework in late November 1995 with noted reservations. The hardline counterfactual (Assembly rejection, repudiation of the Patriarch Paper, RS unilateral declaration of independence) was actively considered per Karadžić's December 1995 internal communications (§§5025-5040) and rejected.",
+    "staff_assessment": "Acceptance ratifies Milošević's signature under the Patriarch Paper authority, locks RS as a recognized entity inside BiH along the 51:49 line, secures sanctions relief under UN S/RES/1022, and orders VRS compliance with Annex 1-A; hardline repudiation ruptures the alliance lock with FRY definitively, invites NATO IFOR escalation to active enforcement, places the territorial gains at acute risk because the cessation-of-hostilities baseline is no longer guaranteed, and continues the war as an internationally-supervised low-intensity conflict with the RS as the spoiler party.",
+    "trigger_evidence": [
+      "Milošević has initialed the General Framework Agreement at Dayton on 21 November 1995 under the Patriarch Paper delegation authority.",
+      "The RS National Assembly must vote on ratification; Karadžić's reservations on Sarajevo and the eastern enclaves are recorded."
+    ],
+    "effect": {
+      "kind": "narrative",
+      "text": "The RS National Assembly records its posture on the Dayton General Framework Agreement."
+    },
+    "response_options": [
+      {
+        "id": "accept",
+        "branch_tag": "rs_dayton_accept",
+        "label": "Ratify the Patriarch Paper Signature",
+        "description": "The RS National Assembly accepts the General Framework Agreement under Milošević's signing authority. Order VRS compliance with Annex 1-A: heavy-weapons cantonment, Zone of Separation, IFOR deployment, freedom of movement. Accept the 51:49 Inter-Entity Boundary Line, the Federation/RS entity structure, the unitary BiH constitutional shell with the High Representative, and Sarajevo unification under Federation control. Sanctions relief flows; the war ends; RS as a recognized entity inside BiH secures the territorial gains compatible with the 51:49 line.",
+        "historical_marker": "historical_default",
+        "aggression_affinity": -0.6,
+        "risk_level": 0.3,
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 3
+          }
+        ],
+        "sets_flags": {
+          "rs_dayton_acceptance": "accept"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": 20
+          },
+          {
+            "faction": "RS",
+            "dimension": "territorial_legitimacy",
+            "delta": 15
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -8
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -3
+          }
+        ]
+      },
+      {
+        "id": "hardline",
+        "branch_tag": "rs_dayton_hardline",
+        "label": "Repudiate the Delegation — Declare Independence",
+        "description": "Repudiate Milošević's signature under the Patriarch Paper. The RS National Assembly rejects the General Framework Agreement; declare RS unilateral independence inside the recognized borders of BiH; refuse IFOR deployment and Zone of Separation compliance. Karadžić's December 1995 internal alternative (Karadžić IT-95-5/18-T §§5025-5040) becomes the operative line: hold the maximalist territorial claim and accept whatever international consequences follow.",
+        "historical_marker": "counterfactual",
+        "aggression_affinity": 0.7,
+        "risk_level": 0.9,
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 4
+          }
+        ],
+        "sets_flags": {
+          "rs_dayton_acceptance": "hardline"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -25
+          },
+          {
+            "faction": "RS",
+            "dimension": "territorial_legitimacy",
+            "delta": -20
+          },
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -40
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 10
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": 5
+          }
+        ]
+      }
+    ],
+    "notifications_to_other_factions": {
+      "accept": {
+        "RBiH": {
+          "headline": "Pale ratifies the Patriarch Paper",
+          "body": "The RS National Assembly accepts Milošević's Dayton signature; Karadžić's reservations on Sarajevo and the eastern enclaves are recorded but not operationalized as repudiation. Sarajevo reads the ratification as the cessation-of-hostilities baseline holding under the 51:49 line."
+        },
+        "HRHB": {
+          "headline": "RS Assembly accepts Dayton framework",
+          "body": "Pale ratifies the General Framework Agreement under Milošević's signing authority. Mostar reads the acceptance as the war ending along the 51:49 Inter-Entity Boundary Line; HVO posture pivots to Federation military integration."
+        }
+      },
+      "hardline": {
+        "RBiH": {
+          "headline": "Pale repudiates the Patriarch Paper",
+          "body": "The RS National Assembly rejects Dayton on Karadžić's December internal alternative; RS declares unilateral independence inside BiH borders. Sarajevo reads the move as the cessation-of-hostilities baseline collapsing; the war continues under IFOR enforcement posture."
+        },
+        "HRHB": {
+          "headline": "RS rejects Dayton; war continues",
+          "body": "Pale repudiates Milošević's signature and declares RS independence. Mostar reads the move as the institutional Federation framework holding but the cessation-of-hostilities baseline gone; HV-HVO-ARBiH coalition posture remains warm."
+        }
+      }
+    }
+  },
+  {
+    "id": "hrhb_dayton_acceptance_1995",
+    "title": "Federation Channel — Croat Delegation at Dayton",
+    "narrative": "HR HB acts at Dayton through the Federation channel established by the Washington Agreement of 1 March 1994. Tudjman's directive is clear: the Federation entity within Bosnia-Herzegovina will constitutionally protect Croat constitutive-nation status under Annex 4; HR HB dissolves formally as a parallel state; in exchange Croatia accepts the Federation as the durable Croat political vehicle inside BiH rather than the abandoned 1939 Banovina maximalist project. The post-Storm / Mistral-2 HV-HVO-ARBiH coalition position has maximized Zagreb's leverage. Zubak's HR HB Presidency must record its posture — accept the Federation framework as ratified by Dayton, or capture the Croat delegation position toward rejection.",
+    "category": "diplomatic",
+    "family": "hrhb_dayton_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 190,
+      "turn_max": 212,
+      "phase": "war",
+      "requires_events": [
+        "ceasefire_1995"
+      ],
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "croat_republic"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "united_front"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "strategic_ambiguity"
+          }
+        ]
+      }
+    },
+    "requires_enabled": true,
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "HRHB",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "accept",
+    "historical_source": "General Framework Agreement for Peace in Bosnia and Herzegovina (Dayton, initialled 21 Nov 1995; signed Paris 14 Dec 1995; UN S/1995/999); UN S/RES/1031 (15 Dec 1995) — IFOR authorization; Washington Agreement of 1 March 1994 (predicate); Prlić et al. IT-04-74-T Trial Judgment (29 May 2013) Vol. I §§591-640 — HR HB → Federation transition; HR HB dissolution implementation acts 1996; Prlić Appeals Judgment (29 Nov 2017) §§601-650; ICJ Bosnia and Herzegovina v. Serbia and Montenegro Judgment (26 Feb 2007); Holbrooke, To End a War (1998); Tudjman Presidential Transcripts admitted at Prlić Vol. 3 §§460-485; Balkan Battlegrounds Vol. II operational close-out chapters on Federation military integration through autumn 1995.",
+    "source_note": "HR HB was a constituent component of the Federation delegation at Dayton (not a sovereign signatory in its own right). The Croat delegation's acceptance was institutionally pre-committed by the Washington Agreement and operationally pre-committed by the summer-1995 HV-HVO offensive partnership with ARBiH (Operations Storm, Mistral 2 / Sana). Internal Croat dissatisfaction with the Federation entity (versus a third entity for Croats) existed and surfaces in the deferred H13 third-entity counterfactual family; H12 itself frames the Federation-channel posture decision.",
+    "staff_assessment": "Acceptance through the Federation channel ratifies the Washington Agreement framework as the durable Croat political vehicle inside BiH, dissolves HR HB as a parallel state per the 1996 implementation acts, and unlocks the joint-institution build-out under Annex 4 (BiH Constitution); hardline rejection captures the Federation delegation position toward repudiation, ruptures the Federation framework, withdraws Zagreb's HV expeditionary support (the H11 chain), and isolates HR HB diplomatically.",
+    "trigger_evidence": [
+      "The Croat delegation acts at Dayton through the Federation channel established by the Washington Agreement.",
+      "Tudjman's directive instructs the HR HB Presidency to accept the Federation entity in exchange for constitutionally-protected Croat constitutive-nation status under Annex 4."
+    ],
+    "effect": {
+      "kind": "narrative",
+      "text": "The HR HB Presidency records its posture on the Dayton Federation-channel decision."
+    },
+    "response_options": [
+      {
+        "id": "accept",
+        "branch_tag": "hrhb_dayton_accept",
+        "label": "Sign through the Federation Channel",
+        "description": "The HR HB delegation, acting through the Federation channel, accepts the General Framework Agreement and its annexes including Annex 4 (BiH Constitution), Annex 5 (Arbitration), Annex 7 (Refugees and Displaced Persons), and Annex 1-B (Regional Stabilization). HR HB dissolves as a parallel state into the Federation of BiH per the Washington Agreement implementation; the 1939 Banovina maximalist project is definitively abandoned; the Federation becomes the durable Croat political vehicle inside BiH with constitutionally-protected constitutive-nation status.",
+        "historical_marker": "historical_default",
+        "aggression_affinity": -0.5,
+        "risk_level": 0.3,
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 3
+          }
+        ],
+        "sets_flags": {
+          "hrhb_dayton_acceptance": "accept"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "international_standing",
+            "delta": 2
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": 1
+          }
+        ]
+      },
+      {
+        "id": "hardline",
+        "branch_tag": "hrhb_dayton_hardline",
+        "label": "Capture the Delegation — Reject the Federation Entity",
+        "description": "The HR HB Presidency captures the Croat delegation position toward rejection of the Federation-entity framework. Refuse to dissolve HR HB as a parallel state; walk the Croat delegation back from Federation acceptance on the grounds that constitutive-nation status inside a Federation entity is inferior to a separate Croat political-territorial entity (the pre-Zubak hardline current per Prlić Vol. I §§556-590 and §§621-640). Zagreb's HV expeditionary support is withdrawn; the Federation framework ruptures (the B10/H9 alliance_lock chain collapses); HR HB is diplomatically isolated.",
+        "historical_marker": "counterfactual",
+        "aggression_affinity": 0.4,
+        "risk_level": 0.8,
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 2
+          }
+        ],
+        "sets_flags": {
+          "hrhb_dayton_acceptance": "hardline"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "international_standing",
+            "delta": -3
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": -25
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -2
+          }
+        ]
+      }
+    ],
+    "notifications_to_other_factions": {
+      "accept": {
+        "RBiH": {
+          "headline": "HR HB signs through Federation channel at Dayton",
+          "body": "Mostar accepts the General Framework Agreement through the Croat delegation. Sarajevo reads the Federation framework as ratified and Annex 4 BiH Constitution as the durable institutional basis for the Federation entity."
+        },
+        "RS": {
+          "headline": "Croat delegation ratifies Federation entity",
+          "body": "HR HB dissolves as a parallel state per the Washington Agreement implementation. Pale reads the Federation framework as locked institutionally; the 51:49 Inter-Entity Boundary Line is the operative territorial baseline."
+        }
+      },
+      "hardline": {
+        "RBiH": {
+          "headline": "Mostar rejects Federation entity at Dayton",
+          "body": "The HR HB Presidency captures the Croat delegation toward repudiation of the Federation framework. Sarajevo reads the Federation alliance as rupturing; the post-Washington military integration framework collapses."
+        },
+        "RS": {
+          "headline": "HR HB walks the Croat delegation",
+          "body": "Mostar refuses to dissolve as a parallel state; the Federation entity collapses at the diplomatic gate. Pale reads the Federation framework rupture as opening operational space along the central-Bosnia and Mostar fronts."
+        }
+      }
+    }
   }
 ]

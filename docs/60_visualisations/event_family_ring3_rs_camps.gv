@@ -1,0 +1,25 @@
+digraph event_family {
+  rankdir=LR;
+  node [shape=box, style=filled];
+  edge [fontsize=8];
+
+  // Legend
+  subgraph cluster_legend {
+    label="Legend";
+    style=dashed;
+    legend_rs [label="RS family", fillcolor=lightcoral];
+    legend_rbih [label="RBiH family", fillcolor=lightblue];
+    legend_hrhb [label="HRHB family", fillcolor=lightgreen];
+    legend_cross [label="Cross-faction", fillcolor=lightyellow];
+    legend_ring3 [label="Ring 3 sensitive", fillcolor=white, color=red, penwidth=2];
+  }
+
+  subgraph cluster_rs_camp_exposure_response {
+    label="rs_camp_exposure_response";
+    style=filled;
+    color=lightcoral;
+    "concentration_camps_revealed_1992" [label="concentration_camps_revealed_1992", fillcolor=lightcoral, color=red, penwidth=2];
+  }
+
+  // Edges
+}

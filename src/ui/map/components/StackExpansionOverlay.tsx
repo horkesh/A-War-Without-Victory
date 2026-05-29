@@ -4,6 +4,8 @@ import { FACTION_COLORS } from '../utils/theme';
 import { drawFormationIcon, ICON_WIDTH, ICON_HEIGHT } from '../map/formationIcons';
 import { formationIconId } from '../map/builders/buildFormationsGeoJSON';
 import { Z } from '../../shared/zIndex';
+import { t, useLocale } from '../i18n';
+import { getFormationUnitType, getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 interface StackExpansionOverlayProps {
     osid: string;
@@ -25,7 +27,9 @@ const FormationIconCanvas: React.FC<{ formation: FormationView; className?: stri
         if (!ctx) return;
 
         const iconId = formationIconId(
-            formation.kind === 'corps' || formation.kind === 'army_hq' || formation.kind === 'corps_asset' ? formation.kind : (formation.name.toLowerCase().includes('mountain') ? 'mountain' : 'brigade'),
+            formation.kind === 'corps' || formation.kind === 'army_hq' || formation.kind === 'corps_asset'
+                ? formation.kind
+                : getFormationUnitType(formation) === 'mountain' ? 'mountain' : 'brigade',
             formation.faction,
             formation.posture
         );
@@ -55,6 +59,7 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
     onClose,
     onSelect,
 }) => {
+    const [locale] = useLocale();
     const [isMounted, setIsMounted] = useState(false);
 
     /* Animation states */
@@ -82,7 +87,7 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                 type="button"
                 className={`absolute inset-0 border-0 bg-black/40 p-0 backdrop-blur-md transition-opacity duration-500 ease-out ${isMounted ? 'opacity-100' : 'opacity-0'}`}
                 onClick={onClose}
-                aria-label="Close formation stack"
+                aria-label={t('stackExpansion.closeAria')}
             />
 
             {/* Orbital content */}
@@ -106,6 +111,7 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                     const radius = Math.min(300, baseRadius + total * 12);
                     const tx = Math.cos(angle) * radius;
                     const ty = Math.sin(angle) * radius;
+                    const name = getLocalizedFormationName(f, locale);
 
                     // Staggered delay for each unit
                     const delay = i * 60;
@@ -128,7 +134,7 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                                     e.stopPropagation();
                                     onSelect(f.id);
                                 }}
-                                aria-label={`Select ${f.name}`}
+                                aria-label={t('stackExpansion.selectAria', { name })}
                             >
                                 {/* Shield Glow */}
                                 <div
@@ -142,7 +148,7 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                                 />
 
                                 <div className="bg-black/60 backdrop-blur-sm border border-white/10 px-2 py-0.5 rounded text-[10px] font-mono text-white whitespace-nowrap shadow-xl group-hover:bg-accent-gold group-hover:text-black transition-colors">
-                                    {f.name}
+                                    {name}
                                 </div>
                             </button>
                         </div>
@@ -160,10 +166,10 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                             transition: 'opacity 0.3s 0.5s'
                         }}
                         onClick={onClose}
-                        aria-label="Dismiss formation stack expansion"
+                        aria-label={t('stackExpansion.dismissAria')}
                     >
                         <div className="bg-black/80 border border-white/20 hover:border-accent-gold/50 px-3 py-1 rounded-full text-[9px] text-white/60 tracking-widest font-bold uppercase transition-all hover:scale-105 active:scale-95 whitespace-nowrap shadow-2xl">
-                            Dismiss Expansion
+                            {t('stackExpansion.dismiss')}
                         </div>
                     </button>
                 )}

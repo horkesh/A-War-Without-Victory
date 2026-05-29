@@ -107,7 +107,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `stage-convoy-decision` (invoke)
   - Payload: `{ convoyId: string, decision: 'allow' | 'block' | 'divert' }`
   - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: resolves one pending convoy choice in `state.pending_convoy_decisions`, reserializes, and broadcasts the updated state.
+  - Behavior: resolves one pending convoy choice in `state.military.pending_convoy_decisions`, reserializes, and broadcasts the updated state.
 
 - `stage-municipality-support-order` (invoke)
   - Payload: `{ faction: 'RS' | 'RBiH' | 'HRHB', munId: string, type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }`

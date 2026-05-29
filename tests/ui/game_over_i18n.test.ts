@@ -60,9 +60,9 @@ describe('GameOverModal localization', () => {
         expect(screen.getByRole('dialog', { name: 'Stalemate' })).toBeTruthy();
         expect(screen.getByText('Stalemate')).toBeTruthy();
         expect(screen.getByText('Final Standings')).toBeTruthy();
-        expect(screen.getByText('1 OSID controlled')).toBeTruthy();
-        expect(screen.getAllByText('1 active brigade')).toHaveLength(2);
-        expect(screen.getByText('Campaign lasted 65 weeks (1 year, 13 weeks)')).toBeTruthy();
+        expect(screen.getByText('1 OSIDs controlled')).toBeTruthy();
+        expect(screen.getAllByText('1 active brigades')).toHaveLength(2);
+        expect(screen.getByText('Campaign lasted 65 weeks (1 years, 13 weeks)')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'New Game' })).toBeTruthy();
     });
 
@@ -74,8 +74,8 @@ describe('GameOverModal localization', () => {
         expect(screen.getByRole('dialog', { name: 'Pat pozicija' })).toBeTruthy();
         expect(screen.getByText('Pat pozicija')).toBeTruthy();
         expect(screen.getByText('Konacni poredak')).toBeTruthy();
-        expect(screen.getByText('1 OSID pod kontrolom')).toBeTruthy();
-        expect(screen.getAllByText('1 aktivna brigada')).toHaveLength(2);
+        expect(screen.getByText('1 OSID-a pod kontrolom')).toBeTruthy();
+        expect(screen.getAllByText('1 aktivnih brigada')).toHaveLength(2);
         expect(screen.getByText('Kampanja je trajala 65 sedmica (1 godina, 13 sedmica)')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Nova igra' })).toBeTruthy();
     });

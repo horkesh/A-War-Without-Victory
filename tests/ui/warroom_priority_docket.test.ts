@@ -159,16 +159,17 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(first.items[0]).toMatchObject({
       category: 'decision',
       severity: 'blocking',
-      actionLabel: 'Review Queue',
-      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+      actionLabel: 'Open Desk',
+      navigationTarget: { kind: 'inbox' },
     });
     expect(first.sourceHandoffs.map((handoff) => handoff.id)).toEqual([
+      'presidential-inbox',
       'army-hq-briefing',
       'army-hq-summary',
       'turn-aftermath-records',
     ]);
-    expect(first.sourceHandoffSummary).toBe('3 source handoffs / 4 urgent');
-    expect(first.openBoardLabel).toBe('Open Decision Room');
+    expect(first.sourceHandoffSummary).toBe('4 source handoffs / 4 urgent');
+    expect(first.openBoardLabel).toBe('Open Desk');
   });
 
   it('keeps a quiet clear state available without inventing docket rows', () => {
@@ -224,7 +225,7 @@ describe('buildWarroomPriorityDocketView', () => {
     setLocale('en');
 
     expect(view.summary).toBe('4 stavke za napredovanje / 4 hitno / 2 na cekanju');
-    expect(view.sourceHandoffSummary).toBe('3 izvorna prijenosa / 4 hitno');
+    expect(view.sourceHandoffSummary).toBe('4 izvorna prijenosa / 4 hitno');
     expect(view.openBoardLabel).toBe('Otvori sobu odluka');
     expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('advance items');
     expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('source handoffs');

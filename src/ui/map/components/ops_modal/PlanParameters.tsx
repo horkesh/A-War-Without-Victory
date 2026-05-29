@@ -12,24 +12,47 @@ interface PlanParametersProps {
 }
 
 // WP1b: Per-pill subtitles
-const PILL_SUBTITLE_KEYS: Record<string, MessageKey> = {
+const PILL_SUBTITLES: Record<string, MessageKey> = {
     // OpType
-    sector_attack: 'opsPlanning.param.subtitle.sectorAttack',
-    general_offensive: 'opsPlanning.param.subtitle.generalOffensive',
-    strategic_defense: 'opsPlanning.param.subtitle.strategicDefense',
+    sector_attack: 'opsPlanning.param.subtitle.sector_attack',
+    general_offensive: 'opsPlanning.param.subtitle.general_offensive',
+    strategic_defense: 'opsPlanning.param.subtitle.strategic_defense',
     reorganization: 'opsPlanning.param.subtitle.reorganization',
     feint: 'opsPlanning.param.subtitle.feint',
     probe: 'opsPlanning.param.subtitle.probe',
     // Tempo
     methodical: 'opsPlanning.param.subtitle.methodical',
     standard: 'opsPlanning.param.subtitle.standard',
-    all_out: 'opsPlanning.param.subtitle.allOut',
+    all_out: 'opsPlanning.param.subtitle.all_out',
     // Tolerance
-    decisive_victory: 'opsPlanning.param.subtitle.decisiveVictory',
+    decisive_victory: 'opsPlanning.param.subtitle.decisive_victory',
     victory: 'opsPlanning.param.subtitle.victory',
-    costly_victory: 'opsPlanning.param.subtitle.costlyVictory',
+    costly_victory: 'opsPlanning.param.subtitle.costly_victory',
     stalemate: 'opsPlanning.param.subtitle.stalemate',
     repulsed: 'opsPlanning.param.subtitle.repulsed',
+};
+
+const OP_TYPE_MESSAGE_KEYS: Record<OpType, MessageKey> = {
+    sector_attack: 'opsPlanning.param.opType.sector_attack',
+    general_offensive: 'opsPlanning.param.opType.general_offensive',
+    strategic_defense: 'opsPlanning.param.opType.strategic_defense',
+    reorganization: 'opsPlanning.param.opType.reorganization',
+    feint: 'opsPlanning.param.opType.feint',
+    probe: 'opsPlanning.param.opType.probe',
+};
+
+const TEMPO_MESSAGE_KEYS: Record<Tempo, MessageKey> = {
+    methodical: 'opsPlanning.param.tempo.methodical',
+    standard: 'opsPlanning.param.tempo.standard',
+    all_out: 'opsPlanning.param.tempo.all_out',
+};
+
+const TOLERANCE_MESSAGE_KEYS: Record<Tolerance, MessageKey> = {
+    decisive_victory: 'opsPlanning.param.tolerance.decisive_victory',
+    victory: 'opsPlanning.param.tolerance.victory',
+    costly_victory: 'opsPlanning.param.tolerance.costly_victory',
+    stalemate: 'opsPlanning.param.tolerance.stalemate',
+    repulsed: 'opsPlanning.param.tolerance.repulsed',
 };
 
 // WP1c: title attributes for each pill
@@ -136,7 +159,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
             </div>
 
             {/* Operation type */}
-            <ParamGroup label={t('opsPlanning.param.group.type')} description={t('opsPlanning.param.group.typeDescription')}>
+            <ParamGroup label={t('opsPlanning.param.type')} description={t('opsPlanning.param.typeDescription')}>
                 {OP_TYPES.map((opType) => (
                     <button
                         key={opType}
@@ -146,16 +169,16 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                         className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider transition-all flex flex-col items-center
                             ${pillClass(plan.opType === opType)}`}
                     >
-                        <span>{t(PILL_LABEL_KEYS[opType])}</span>
+                        <span>{t(OP_TYPE_MESSAGE_KEYS[opType])}</span>
                         <span className="text-[9px] font-normal normal-case tracking-normal text-text-secondary/55">
-                            {t(PILL_SUBTITLE_KEYS[opType])}
+                            {t(PILL_SUBTITLES[opType])}
                         </span>
                     </button>
                 ))}
             </ParamGroup>
 
             {/* Tempo */}
-            <ParamGroup label={t('opsPlanning.param.group.tempo')} description={t('opsPlanning.param.group.tempoDescription')}>
+            <ParamGroup label={t('opsPlanning.param.tempo')} description={t('opsPlanning.param.tempoDescription')}>
                 {TEMPOS.map((tempo) => (
                     <button
                         key={tempo}
@@ -165,16 +188,16 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                         className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider transition-all flex flex-col items-center
                             ${pillClass(plan.tempo === tempo)}`}
                     >
-                        <span>{t(PILL_LABEL_KEYS[tempo])}</span>
+                        <span>{t(TEMPO_MESSAGE_KEYS[tempo])}</span>
                         <span className="text-[9px] font-normal normal-case tracking-normal text-text-secondary/55">
-                            {t(PILL_SUBTITLE_KEYS[tempo])}
+                            {t(PILL_SUBTITLES[tempo])}
                         </span>
                     </button>
                 ))}
             </ParamGroup>
 
             {/* Tolerance */}
-            <ParamGroup label={t('opsPlanning.param.group.tolerance')} description={t('opsPlanning.param.group.toleranceDescription')}>
+            <ParamGroup label={t('opsPlanning.param.tolerance')} description={t('opsPlanning.param.toleranceDescription')}>
                 {TOLERANCES.map((tolerance) => {
                     const isDanger = tolerance === 'repulsed';
                     const isActive = plan.tolerance === tolerance;
@@ -187,11 +210,11 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                             className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider transition-all flex flex-col items-center
                                 ${isDanger ? dangerPillClass(isActive) : pillClass(isActive)}`}
                         >
-                            <span>{t(PILL_LABEL_KEYS[tolerance])}</span>
+                            <span>{t(TOLERANCE_MESSAGE_KEYS[tolerance])}</span>
                             <span className={`text-[9px] font-normal normal-case tracking-normal ${
                                 isDanger ? 'text-red-400/70' : 'text-text-secondary/50'
                             }`}>
-                                {t(PILL_SUBTITLE_KEYS[tolerance])}
+                                {t(PILL_SUBTITLES[tolerance])}
                             </span>
                         </button>
                     );
@@ -199,7 +222,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
             </ParamGroup>
 
             {/* Artillery prep toggle */}
-            <ParamGroup label={t('opsPlanning.param.group.support')} description={t('opsPlanning.param.group.supportDescription')}>
+            <ParamGroup label={t('opsPlanning.param.support')} description={t('opsPlanning.param.supportDescription')}>
                 <div className="flex flex-col items-center">
                     <button
                         type="button"
@@ -213,7 +236,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                                 : 'bg-transparent text-text-secondary/70 border border-transparent hover:text-text-secondary hover:bg-[rgba(180,160,130,0.06)]'
                             }`}
                     >
-                        {plan.artilleryPreparation ? t('opsPlanning.param.artyOn') : t('opsPlanning.param.artyOff')}
+                        {plan.artilleryPreparation ? `\u25C6 ${t('opsPlanning.param.artyOn')}` : `\u25C7 ${t('opsPlanning.param.artyOff')}`}
                     </button>
                     {/* WP1e: Artillery prep info text */}
                     <span className={`text-[9px] mt-0.5 ${

@@ -28,14 +28,13 @@ import {
 const repoRoot = resolve(__dirname, '..');
 const read = (p: string) => readFileSync(resolve(repoRoot, p), 'utf8');
 
-// The 8 forms exclusively owned by Lane E (per Phase 0 panel + lane
+// The 7 live forms exclusively owned by Lane E (per Phase 0 panel + lane
 // scope; SettingsScreen is Lane D, RecruitmentModal is Lane A,
-// `army_hq/*` is Lane C, ReplayScrubber already a11y-clean).
+// `army_hq/*` is Lane C, retired chrome is deleted, ReplayScrubber already
+// a11y-clean).
 const AI_SETTINGS_PATH = 'src/ui/map/components/AiSettingsPanel.tsx';
 const PRESIDENTIAL_TOOLBAR_PATH =
     'src/ui/map/components/PresidentialToolbar.tsx';
-const TOP_TOOLBAR_PATH =
-    'src/ui/map/components/_retired_chrome/TopToolbar.tsx';
 const SIDE_PICKER_PATH = 'src/ui/map/components/SidePickerOverlay.tsx';
 const COMMAND_TOPBAR_PATH = 'src/ui/map/components/plan_ui/CommandTopBar.tsx';
 const PLAN_PARAMETERS_PATH = 'src/ui/map/components/ops_modal/PlanParameters.tsx';
@@ -46,7 +45,6 @@ const REPLAY_SCRUBBER_PATH = 'src/ui/map/components/replay/ReplayScrubber.tsx';
 const ALL_LANE_E_FORM_FILES: ReadonlyArray<string> = [
     AI_SETTINGS_PATH,
     PRESIDENTIAL_TOOLBAR_PATH,
-    TOP_TOOLBAR_PATH,
     SIDE_PICKER_PATH,
     COMMAND_TOPBAR_PATH,
     PLAN_PARAMETERS_PATH,
@@ -64,20 +62,20 @@ describe('v0.9.3 a11y Lane E — Forms + inputs + live regions', () => {
     it('T2 — PresidentialToolbar dev inputs carry aria-label', () => {
         const src = read(PRESIDENTIAL_TOOLBAR_PATH);
         // dev RUN_ID text input
-        expect(src).toContain('aria-label="Dev: load run by ID"');
+        expect(src).toContain("aria-label={t('presidentialToolbar.loadRunById')}");
         // hidden file picker
-        expect(src).toContain('aria-label="Dev: load save file"');
+        expect(src).toContain("aria-label={t('presidentialToolbar.loadSaveFile')}");
     });
 
-    it('T3 — retired TopToolbar dev inputs carry aria-label', () => {
-        const src = read(TOP_TOOLBAR_PATH);
-        expect(src).toContain('aria-label="Dev: load run by ID"');
-        expect(src).toContain('aria-label="Dev: load save file"');
+    it('T3 - retired TopToolbar is deleted from the live a11y surface', () => {
+        expect(ALL_LANE_E_FORM_FILES).not.toContain(
+            'src/ui/map/components/_retired_chrome/TopToolbar.tsx',
+        );
     });
 
     it('T4 — SidePickerOverlay hidden file-picker carries aria-label', () => {
         const src = read(SIDE_PICKER_PATH);
-        expect(src).toContain('aria-label="Load save file"');
+        expect(src).toContain("aria-label={t('sidePicker.loadSaveAria')}");
     });
 
     it('T5 — CommandTopBar Directive Name label is htmlFor-bound', () => {
@@ -97,7 +95,7 @@ describe('v0.9.3 a11y Lane E — Forms + inputs + live regions', () => {
         // The visible "Stance" span carries an icon and is kept as a
         // styled section header; the <select> itself must carry the
         // programmatic label.
-        expect(src).toContain('aria-label="Corps stance"');
+        expect(src).toContain("aria-label={t('corpsCard.stanceAria')}");
     });
 
     it('T8 — EnclaveDashboard allocation input is htmlFor-bound (per-enclave id)', () => {
@@ -198,7 +196,7 @@ describe('v0.9.3 a11y Lane E — Forms + inputs + live regions', () => {
         // pre-existing aria-label is part of the form-input
         // accessibility contract; pin it to catch silent regressions.
         const src = read(REPLAY_SCRUBBER_PATH);
-        expect(src).toContain('aria-label="Replay turn scrubber"');
+        expect(src).toContain("aria-label={t('replay.turnScrubber')}");
     });
 
     it('T12 — Faction-symmetric: no faction names appear in any Lane E label/aria string changes', () => {

@@ -123,7 +123,7 @@ export const HISTORICAL_EVENT_ANCHORS_APR1994: readonly HistoricalEventAnchor[] 
     { event_id: 'nato_ultimatum_sarajevo_1994',  expected_week_max: 96,  tolerance: 2, citation: 'BB1 p.222 — NATO+UN ultimatum Feb 1994' },
     { event_id: 'sarajevo_exclusion_zone_1994',  expected_week_max: 98,  tolerance: 2, citation: 'BB1 p.222 — Sarajevo TEZ from Feb 1994' },
     {
-        event_id: 'washington_agreement_1994',
+        event_id: 'hrhb_washington_agreement_1994',
         expected_week_max: 102, tolerance: 3,
         xor_with: ['csq_federation_early_1994'],
         citation: 'BB1 p.227-228 — 18 March 1994. XOR with alt-path consequence (canon §3.3).',

@@ -30,9 +30,10 @@ const EFFECT_KIND_ORDER: Record<string, number> = {
     morale_change: 12,
     narrative: 13,
     negotiation_capital: 14,
-    patron_pressure: 15,
-    recruitment_modifier: 16,
-    supply_delta: 17,
+    offensive_ops_suppression: 15,
+    patron_pressure: 16,
+    recruitment_modifier: 17,
+    supply_delta: 18,
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -111,10 +112,34 @@ function applySingleEffect(state: GameState, effect: EventEffect): void {
         case 'cost_ledger_annotation':
             applyCostLedgerAnnotation(state, effect.tag, effect.text, effect.faction);
             break;
+        case 'offensive_ops_suppression':
+            applyOffensiveOpsSuppression(state, effect.faction, effect.duration_turns, effect.reason);
+            break;
         case 'narrative':
             // No mechanical effect; narrative text is logged via FiredEvent.
             break;
     }
+}
+
+/** Fall-1995 mechanic E-A5: push an offensive-ops suppression entry into
+ *  `state.military.offensive_ops_suppressions`. Consumer: launch-gate in
+ *  `sector_offensive.ts` reads via `isFactionOffensiveOpsSuppressed`.
+ *  See `docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md` §3 E-A5. */
+function applyOffensiveOpsSuppression(
+    state: GameState,
+    faction: FactionId,
+    durationTurns: number,
+    reason?: string,
+): void {
+    if (!state.military.offensive_ops_suppressions) {
+        state.military.offensive_ops_suppressions = [];
+    }
+    const currentTurn = state.meta.turn ?? 0;
+    state.military.offensive_ops_suppressions.push({
+        faction,
+        expires_turn: currentTurn + Math.max(0, durationTurns),
+        reason,
+    });
 }
 
 /** Apply morale delta to all active brigades of the given faction. Clamped [0, 100]. */
@@ -166,14 +191,20 @@ function applyPatronPressure(state: GameState, faction: FactionId, delta: number
 /** Adjust RBiH-HRHB alliance value.
  *  Applies delta, clamps to [-1, 1], then clamps against any active
  *  alliance_locks (floor/ceiling). Active locks override any incoming delta
- *  that would push the value past them. */
+ *  that would push the value past them.
+ *
+ *  Clamp order is ceiling-then-floor so that floor wins when locks contradict
+ *  (e.g. Washington Agreement floor=0.80 simultaneously active with a stale
+ *  recovery-event ceiling=0.55). Floor is the stronger semantic guarantee —
+ *  a minimum that must hold — so a contradictory ceiling cannot pull the
+ *  value below it. */
 function applyAllianceChange(state: GameState, delta: number): void {
     const current = state.political.war_alliance_rbih_hrhb ?? 0;
     let next = clamp(current + delta, -1, 1);
     const currentTurn = state.meta.turn ?? 0;
     const bounds = getActiveAllianceBounds(state, currentTurn);
-    if (bounds.floor != null && next < bounds.floor) next = bounds.floor;
     if (bounds.ceiling != null && next > bounds.ceiling) next = bounds.ceiling;
+    if (bounds.floor != null && next < bounds.floor) next = bounds.floor;
     state.political.war_alliance_rbih_hrhb = next;
 }
 

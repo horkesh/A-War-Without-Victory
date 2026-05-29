@@ -15,6 +15,7 @@ import type { SummaryFocusSection } from '../data/types';
 import { WarSummaryContent } from './army_hq/WarSummaryContent';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
+import { t } from '../i18n';
 
 interface WarSummaryModalProps {
     isOpen: boolean;
@@ -46,7 +47,7 @@ export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose }: 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
                 <div>
                     <div id="war-summary-title" style={{ fontSize: 13, fontWeight: 700, color: '#c4a35a', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                        War Summary
+                        {t('warSummary.title')}
                     </div>
                 </div>
                 <button

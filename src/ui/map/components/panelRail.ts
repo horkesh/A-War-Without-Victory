@@ -153,6 +153,20 @@ export function shouldRenderInboxPanel(
   return primary === 'inbox' && !operationsPanelOpen;
 }
 
+export interface TacticalDetailRailOwnerState {
+  operationsPanelOpen: boolean;
+  armyHQOpen: boolean;
+  codexOpen: boolean;
+  chronicleOpen: boolean;
+}
+
+export function shouldRenderTacticalDetailRails(state: TacticalDetailRailOwnerState): boolean {
+  return !state.operationsPanelOpen
+    && !state.armyHQOpen
+    && !state.codexOpen
+    && !state.chronicleOpen;
+}
+
 export function getPanelRailStyle(
   slot: 'primary' | 'secondary',
   width: string,

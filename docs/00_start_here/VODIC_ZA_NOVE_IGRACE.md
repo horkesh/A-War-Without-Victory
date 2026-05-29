@@ -28,7 +28,7 @@ Svaki potez je jedna sedmica realnog vremena. U svakom potezu:
 
 1. **PROČITAJTE BRIFING** — gore desno otvara se panel „Presidential Inbox" sa brifingom vašeg načelnika štaba (tri ključne tačke). Govori vam šta strateški položaj vaše frakcije zahtijeva.
 2. **INSPEKTIRAJTE** — lijevi panel „Command" pokazuje vašu situaciju. Procenat teritorije, izloženi frontalni sektori, gubici, stanje saveza, međunarodni pritisak. Pročitajte.
-3. **ODLUČITE** — otvorite dugmad na alatnoj traci: `SUMMARY` (statistika rata), `RECORDS` (Štab Armije), `OPS` (operacije), `EVENTS` (dnevnik događaja), `CODEX` (istorijski eseji), `INBOX` (čekajuće odluke). Decision Room (otvara se iz Army HQ → tab „Briefing") je mjesto gdje žive svi izbori koji čekaju vašu odluku.
+3. **ODLUČITE** — otvorite dugmad na alatnoj traci: `SUMMARY` (statistika rata), `RECORDS` (Štab Armije), `OPS` (operacije), `EVENTS` (dnevnik događaja), `CODEX` (historijski eseji), `INBOX` (čekajuće odluke). Decision Room (otvara se iz Army HQ → tab „Briefing") je mjesto gdje žive svi izbori koji čekaju vašu odluku.
 4. **IZVRŠITE** — promijenite stavove korpusa (Defensive / Balanced / Offensive / Reorganize), odobrite ili odbijte operacije koje predlaže štab, prihvatite ili odbijte mirovne planove, riješite paravojne incidente.
 5. **ADVANCE TURN** (dugme gore desno). Simulacija se kreće jednu sedmicu naprijed. Vaši botovi, botovi neprijateljskih frakcija, mehanizam — svi se pomijeraju zajedno.
 6. **PROČITAJTE POSLJEDICE** — modal „Turn Aftermath" iskače sa onim što se promijenilo: vođene bitke, izgubljeno/dobijeno tlo, gubici, ishod komandnih odluka.
@@ -73,12 +73,12 @@ Cijela igra je ova petlja.
 
 Gore u sredini: grb vaše frakcije. Datum i broj poteza gore lijevo. Gore desno, alatna traka s lijeva na desno:
 
-- **CHRONICLE** — istorijska vremenska linija + narativ izveden iz stanja igre.
+- **CHRONICLE** — historijska vremenska linija + narativ izveden iz stanja igre.
 - **SUMMARY** — modal „War Summary": procenat teritorije, vojna snaga, ukupan broj raseljenih, troškovi kampanje, uticaj na civile, IVP. Čitajte ovo svake 4–8 poteza.
-- **RECORDS** — otvara Štab Armije (Army HQ). Četiri taba: Briefing (heartbeat strateških prioriteta), Summary (isto kao War Summary), Records (Turn Aftermath, izvještaj nakon akcije, istorija operacija, prilike), Personnel (puni redoslijed bitke s brigadama).
+- **RECORDS** — otvara Štab Armije (Army HQ). Četiri taba: Briefing (heartbeat strateških prioriteta), Summary (isto kao War Summary), Records (Turn Aftermath, izvještaj nakon akcije, historija operacija, prilike), Personnel (puni redoslijed bitke s brigadama).
 - **OPS** — pogled „field-ops": mapa se pomijera na fokus operacija, predložene operacije štaba se prikazuju desno.
 - **EVENTS** — dnevnik događaja. Rijedak u ranoj fazi rata.
-- **CODEX** — istorijski eseji. 96+ unosa o stvarnim događajima (Bijeljina, Ahmići, operacija Oluja, Dejton itd.). Dinamični odjeljci se povezuju sa stvarnom putanjom vaše partije.
+- **CODEX** — historijski eseji. 96+ unosa o stvarnim događajima (Bijeljina, Ahmići, operacija Oluja, Dejton itd.). Dinamični odjeljci se povezuju sa stvarnom putanjom vaše partije.
 - **INBOX** — broj na Predsjedničkoj poštanskoj kutiji. Prikazuje čekajuće odluke: mirovne planove, kadrovske događaje, konvojske odluke, paravojne preglede.
 - **AUTH** (mjerač) — vaš Command Authority (komandna ovlast). Maksimum 100/100, oporavlja se +2 po potezu. Troši se na nadređenja trećeg nivoa (Level 3): force-launch operacija protiv preporuke komandanta, ručna brigadna naređenja.
 - **ADVANCE TURN** — glavna akcija. Kliknite za pomjeranje jednu sedmicu naprijed.
@@ -122,7 +122,7 @@ Prikazuje **heartbeat petlje proizvoda** — osam kartica u redu:
 - **EXECUTE** — operacije koje čekaju vaše ovlaštenje.
 - **REPORT** — sažetak posljedica poteza.
 - **COST** — trenutna ozbiljnost troškova kampanje.
-- **JUDGE** — ažuriranja sjećanja hronike (šta sada odražava istorijski zapis).
+- **JUDGE** — ažuriranja sjećanja hronike (šta sada odražava historijski zapis).
 - **NEXT** — šta štab predviđa da će zahtijevati vašu pažnju u sljedećem potezu.
 
 I **trake komandne petlje** ispod:
@@ -153,7 +153,7 @@ I **trake komandne petlje** ispod:
 2. **Postavljanje svih korpusa na Offensive odmah.** Vaši korpusi nemaju snabdijevanje ni moral da održe napade svaki potez. Miješajte Defensive (ukopavanje) + Reorganize (odmor) + Offensive (napad) prema situaciji.
 3. **Rano forsiranje pokretanja operacija.** Košta 15 Command Authority. Počinjete sa 100, oporavljate +2 po potezu. Trošite namjerno; požalit ćete ako ste na 20/100 kada se pojavi prava prilika.
 4. **Ignorisanje mirovnih planova.** Svaki je stvarna strateška odluka. Odbijete sve i počinjete sa obavezom da se borite do Dejtona, do kojeg je vaša frakcija akumulirala maksimum ratnih zločina i gubitaka.
-5. **Nečitanje Codex-a.** Istorijski eseji objašnjavaju *zašto* su važni događaji koje vidite. Dinamični odjeljci takođe prate kako vaša partija odstupa od istorije — koristan povratni signal.
+5. **Nečitanje Codex-a.** Historijski eseji objašnjavaju *zašto* su važni događaji koje vidite. Dinamični odjeljci takođe prate kako vaša partija odstupa od historije — koristan povratni signal.
 6. **Briga zbog neprijateljskih jedinica unutar vaše teritorije.** To mogu biti JNA brigade koje se još nisu povukle, paravojne formacije koje nisu vezane ni za jedan front, ili jednostavno se kreću da napadnu. Broj „exposed front sectors" u Operacionom sitrep-u je pouzdaniji od brojanja ikona.
 7. **Miješanje „Friendly %" sa „pobjeđujem"**. Vaš procenat može rasti dok se vaš strateški položaj pogoršava (npr. RS koja zauzima ruralna sela s bošnjačkom većinom podiže RS Friendly %, ali akumulira posljedice MKSJ).
 8. **Tretiranje pokazatelja stava Beograda kao mjerača koji treba maksimizirati.** Beograd SUPPORTIVE je dobar za kratkoročne operacije, ali vas čvršće vezuje za Miloševićev režim, što ima dugoročne IVP troškove. Igrači za RS: postoji stvaran kompromis.
@@ -174,8 +174,8 @@ I **trake komandne petlje** ispod:
 ## 10. Gdje saznati više
 
 U igri:
-- **Codex** (alatna traka) — 96+ istorijskih eseja, dinamični odjeljci koji reaguju na vašu partiju.
-- **Chronicle** (alatna traka) — istorijska vremenska linija vaše partije kako se odvija.
+- **Codex** (alatna traka) — 96+ historijskih eseja, dinamični odjeljci koji reaguju na vašu partiju.
+- **Chronicle** (alatna traka) — historijska vremenska linija vaše partije kako se odvija.
 
 U repozitoriju (za dizajnere / napredne korisnike):
 - `docs/10_canon/Game_Bible_v0_9_0.md` — filozofija dizajna.
@@ -194,7 +194,7 @@ Eksterno:
 
 Ova igra nije fantazija moći. Nije strateška zagonetka koju rješavate. To je simulacija stvarnog rata, sa stvarnim imenima, stvarnim mjestima, stvarnim gubicima i stvarnim posljedicama. Niste namijenjeni da se osjećate dobro zbog svojih izbora.
 
-Codex objašnjava istoriju rata kroz eseje utemeljene na presudama MKSJ-a. Cost Ledger pamti šta ste uradili. Ekran Verdict na kraju partije upoređuje vaše izbore sa stvarnim historijskim ishodom.
+Codex objašnjava historiju rata kroz eseje utemeljene na presudama MKSJ-a. Cost Ledger pamti šta ste uradili. Ekran Verdict na kraju partije upoređuje vaše izbore sa stvarnim historijskim ishodom.
 
 Rat bez pobjede nije slogan. To je iskaz dizajna.
 

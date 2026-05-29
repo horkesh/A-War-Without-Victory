@@ -26,25 +26,9 @@ const OUTCOME_LABEL_KEYS: Record<string, { title: MessageKey; subtitle: MessageK
 };
 
 function getOutcomeDisplay(outcome?: string): { title: string; subtitle: string } {
-    if (!outcome) return { title: t('gameOver.fallback.title'), subtitle: '' };
-    const keys = OUTCOME_LABEL_KEYS[outcome];
-    return keys ? { title: t(keys.title), subtitle: t(keys.subtitle) } : { title: outcome.replace(/_/g, ' '), subtitle: '' };
-}
-
-function formatOsidsControlled(count: number): string {
-    return t(count === 1 ? 'gameOver.osidControlled.one' : 'gameOver.osidControlled.many', { count });
-}
-
-function formatActiveBrigades(count: number): string {
-    return t(count === 1 ? 'gameOver.activeBrigade.one' : 'gameOver.activeBrigade.many', { count });
-}
-
-function formatYearCount(count: number): string {
-    return t(count === 1 ? 'gameOver.year.one' : 'gameOver.year.many', { count });
-}
-
-function formatWeekCount(count: number): string {
-    return t(count === 1 ? 'gameOver.week.one' : 'gameOver.week.many', { count });
+    if (!outcome) return { title: t('gameOver.title'), subtitle: '' };
+    const labelKeys = OUTCOME_LABEL_KEYS[outcome];
+    return labelKeys ? { title: t(labelKeys.title), subtitle: t(labelKeys.subtitle) } : { title: outcome.replace(/_/g, ' '), subtitle: '' };
 }
 
 export function GameOverModal() {
@@ -57,7 +41,7 @@ export function GameOverModal() {
 
     const { title, subtitle } = getOutcomeDisplay(loadedGameState.gameOutcome);
     const turn = loadedGameState.turn ?? 0;
-    const date = loadedGameState.metadata?.date ?? t('gameOver.fallback.turn', { turn });
+    const date = loadedGameState.metadata?.date ?? t('operationsPanel.turnCount', { turn });
 
     // Gather territory stats from controlBySettlement.
     const controllers = loadedGameState.controlBySettlement ?? {};
@@ -93,7 +77,7 @@ export function GameOverModal() {
                 {/* Header */}
                 <div className="px-8 py-6 border-b border-panel-border bg-panel-card/50 text-center">
                     <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-accent-gold/60 mb-2">
-                        {date} - A War Without Victory
+                        {t('gameOver.header', { date })}
                     </div>
                     <div id="game-over-title" className="text-xl font-bold text-text-primary uppercase tracking-wide mb-1">
                         {title}
@@ -121,8 +105,8 @@ export function GameOverModal() {
                                     <span className="text-[11px] text-text-primary tabular-nums font-bold">{pct}%</span>
                                 </div>
                                 <div className="flex gap-4 text-[10px] text-text-secondary">
-                                    <span>{formatOsidsControlled(osids)}</span>
-                                    <span>{formatActiveBrigades(brigades)}</span>
+                                    <span>{t('gameOver.osidsControlled', { count: osids })}</span>
+                                    <span>{t('gameOver.activeBrigades', { count: brigades })}</span>
                                 </div>
                                 <div className="mt-1.5 h-1.5 bg-black/30 rounded-full overflow-hidden">
                                     <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
@@ -132,11 +116,7 @@ export function GameOverModal() {
                     })}
 
                     <div className="text-[10px] text-text-secondary text-center pt-2 border-t border-panel-border">
-                        {t('gameOver.campaignLasted', {
-                            turn,
-                            years: formatYearCount(Math.floor(turn / 52)),
-                            weeks: formatWeekCount(turn % 52),
-                        })}
+                        {t('gameOver.campaignDuration', { weeks: turn, years: Math.floor(turn / 52), remainder: turn % 52 })}
                     </div>
                 </div>
 
@@ -146,7 +126,7 @@ export function GameOverModal() {
                         onClick={() => window.location.reload()}
                         className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors"
                     >
-                        {t('gameOver.newGame')}
+                        {t('mainMenu.newGame')}
                     </button>
                     {ipc.isAvailable && (
                         <button

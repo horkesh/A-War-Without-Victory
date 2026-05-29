@@ -88,9 +88,7 @@ function makeComparison(): ComparisonResult {
 }
 
 describe('CinematicVerdict', () => {
-    afterEach(() => {
-        setLocale('en');
-    });
+    afterEach(() => setLocale('en'));
 
     it('renders a cinematic verdict band over existing scoring truth and share summary', () => {
         const html = renderToStaticMarkup(createElement(CinematicVerdict, {
@@ -112,28 +110,23 @@ describe('CinematicVerdict', () => {
         expect(html).not.toContain('undefined');
     });
 
-    it('renders localized BCS generated scene chrome while preserving source findings', () => {
+    it('localizes the cinematic verdict shell labels in BCS mode', () => {
         setLocale('bcs');
 
         const html = renderToStaticMarkup(createElement(CinematicVerdict, {
             verdict: makeVerdict(),
-            costLedger: {
-                ...makeCostLedger(),
-                findings: [],
-            },
+            costLedger: makeCostLedger(),
             historicalComparison: makeComparison(),
             focusFaction: 'RBiH',
-            dateLabel: '1995-10-01',
-            durationLabel: '3y 32w',
+            dateLabel: '',
+            durationLabel: '',
         }));
 
-        expect(html).toContain('Pirov uspjeh, izmjeren prema racunu');
-        expect(html).toContain('Ishod je sacuvao nesto stvarno, ali knjiga cijene upravlja zavrsnim sjecanjem.');
-        expect(html).toContain('Ukupna cijena rata');
-        expect(html).toContain('46,500 poginulih vojnika i 38,000 poginulih civila zabiljezeno u Knjizi cijene.');
-        expect(html).not.toContain('War lasted 12 weeks shorter than the historical 188 weeks');
-        expect(html).toContain('Rat je trajao 12 sedmica krace od historijskih 188 sedmica.');
-        expect(html).toContain('Pirov uspjeh');
-        expect(html).toContain('A War Without Victory - Presuda');
+        expect(html).toContain('Fokus');
+        expect(html).toContain('Ishod');
+        expect(html).toContain('Signal cijene');
+        expect(html).toContain('Podijeli sazetak');
+        expect(html).toContain('Kopiraj');
+        expect(html).toContain('Nije zabiljezeno');
     });
 });

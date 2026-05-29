@@ -7,6 +7,7 @@ import type {
     DiplomacyView,
     PlayerKnowledgeConfidence,
 } from '../data/types';
+import { t } from '../i18n';
 
 interface DiplomacyPanelProps {
     view: DiplomacyView;
@@ -18,7 +19,7 @@ function titleCase(value: string): string {
 }
 
 function confidenceLabel(confidence: PlayerKnowledgeConfidence): string {
-    return confidence === 'known' ? 'Known' : confidence === 'likely' ? 'Likely' : 'Uncertain';
+    return confidence === 'known' ? t('diplomacy.known') : confidence === 'likely' ? t('diplomacy.likely') : t('diplomacy.uncertain');
 }
 
 function ActorRow({ actor, primary = false }: { actor: DiplomacyActorView; primary?: boolean }) {
@@ -30,20 +31,20 @@ function ActorRow({ actor, primary = false }: { actor: DiplomacyActorView; prima
                         {actor.patronLabel}
                     </div>
                     <div className="mt-1 text-[10px] font-mono uppercase tracking-[0.12em] text-text-secondary">
-                        {actor.faction} channel
+                        {t('diplomacy.factionChannel', { faction: actor.faction })}
                     </div>
                 </div>
                 {actor.sanctionsActive ? (
                     <span className="rounded border border-red-400/30 bg-red-500/10 px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-[0.12em] text-red-300">
-                        Sanctions
+                        {t('diplomacy.sanctions')}
                     </span>
                 ) : null}
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2 text-[10px] font-mono uppercase tracking-[0.1em] text-text-secondary">
-                <span>Support: <b className="text-text-primary">{titleCase(actor.supportBand)}</b></span>
-                <span>Constraint: <b className="text-text-primary">{titleCase(actor.constraintBand)}</b></span>
-                <span>Commitment: <b className="text-text-primary">{titleCase(actor.commitmentBand)}</b></span>
-                <span>Isolation: <b className="text-text-primary">{titleCase(actor.isolationBand)}</b></span>
+                <span>{t('diplomacy.support')} <b className="text-text-primary">{titleCase(actor.supportBand)}</b></span>
+                <span>{t('diplomacy.constraint')} <b className="text-text-primary">{titleCase(actor.constraintBand)}</b></span>
+                <span>{t('diplomacy.commitment')} <b className="text-text-primary">{titleCase(actor.commitmentBand)}</b></span>
+                <span>{t('diplomacy.isolation')} <b className="text-text-primary">{titleCase(actor.isolationBand)}</b></span>
             </div>
             <p className="mt-3 text-[11px] leading-5 text-text-secondary">
                 {actor.stanceSummary}
@@ -136,17 +137,17 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
                 <header className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
                     <div>
                         <h2 id="diplomacy-panel-title" className="text-[13px] font-mono font-bold uppercase tracking-[0.16em] text-amber-300">
-                            Diplomacy
+                            {t('diplomacy.title')}
                         </h2>
                         <div className="mt-1 text-[10px] font-mono uppercase tracking-[0.12em] text-text-secondary">
-                            Patron stance, pressure, proposals
+                            {t('diplomacy.subtitle')}
                         </div>
                     </div>
                     <button
                         type="button"
                         onClick={onClose}
                         className="rounded border border-white/10 px-2 py-1 text-[11px] font-mono font-bold text-text-secondary hover:border-amber-400/40 hover:text-amber-300"
-                        aria-label="Close diplomacy panel"
+                        aria-label={t('diplomacy.closePanel')}
                     >
                         X
                     </button>
@@ -156,27 +157,27 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
                     {!view.hasSignals ? (
                         <div className="rounded border border-white/10 bg-black/20 p-4">
                             <div className="text-[12px] font-mono font-bold uppercase tracking-[0.14em] text-text-primary">
-                                No active diplomatic packet
+                                {t('diplomacy.noPacket')}
                             </div>
                             <p className="mt-2 text-[11px] leading-5 text-text-secondary">
-                                Staff will surface proposals, patron pressure, and international pressure when the state carries them.
+                                {t('diplomacy.noPacketHelp')}
                             </p>
                         </div>
                     ) : null}
 
                     {view.patronStance ? (
-                        <section aria-label="Patron stance">
+                        <section aria-label={t('diplomacy.patronStance')}>
                             <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
-                                Patron Stance
+                                {t('diplomacy.patronStance')}
                             </div>
                             <ActorRow actor={view.patronStance} primary />
                         </section>
                     ) : null}
 
                     {view.activeProposals.length > 0 ? (
-                        <section aria-label="Active proposals">
+                        <section aria-label={t('diplomacy.activeProposals')}>
                             <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
-                                Active Proposals
+                                {t('diplomacy.activeProposals')}
                             </div>
                             <ul className="space-y-2">
                                 {view.activeProposals.map((proposal) => <ProposalRow key={proposal.id} proposal={proposal} />)}
@@ -185,9 +186,9 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
                     ) : null}
 
                     {view.pressureReasons.length > 0 || view.activeConsequences.length > 0 ? (
-                        <section aria-label="International pressure">
+                        <section aria-label={t('diplomacy.internationalPressure')}>
                             <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
-                                International Pressure
+                                {t('diplomacy.internationalPressure')}
                             </div>
                             <div className="rounded border border-white/10 bg-black/20 px-3">
                                 <ul>
@@ -231,9 +232,9 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
                     ) : null}
 
                     {view.externalActors.length > 0 ? (
-                        <section aria-label="External actors">
+                        <section aria-label={t('diplomacy.externalActors')}>
                             <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
-                                External Actors
+                                {t('diplomacy.externalActors')}
                             </div>
                             <div className="space-y-2">
                                 {view.externalActors.map((actor) => <ActorRow key={`${actor.faction}:${actor.patronId}`} actor={actor} />)}

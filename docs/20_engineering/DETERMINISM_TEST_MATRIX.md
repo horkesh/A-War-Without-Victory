@@ -3,8 +3,8 @@
 ## Rules → Gates
 ### No timestamps / wall-clock values
 - Gate: `tests/determinism_static_scan_r1_5.test.ts`
-- Gate: `tests/scenario_determinism_h1_1.test.ts`
-- Gate: `tests/scenario_bots_determinism_h2_4.test.ts`
+- Gate: `tests/scenario_harness_contracts.test.ts` (`H1.1 scenario determinism`)
+- Gate: `tests/scenario_harness_contracts.test.ts` (`H2.4 scenario bots determinism`)
 - Gate: `tools/scenario_runner/run_baseline_regression.ts`
 - Perf sidecars: `tests/scenario_timing_instrumentation.test.ts`, `tests/wall_clock_target_report.test.ts`, and `tests/profile_hotspot_report.test.ts` cover opt-in wall-clock/profile reports that stay outside deterministic saves and scenario truth artifacts.
 
@@ -17,11 +17,11 @@
 
 ### Derived state not serialized as source of truth
 - Code invariant: `src/state/serializeGameState.ts` (denylist + key ordering + wrapper rejection)
-- Gate: `tests/scenario_determinism_h1_1.test.ts`
+- Gate: `tests/scenario_harness_contracts.test.ts` (`H1.1 scenario determinism`)
 
 ### Byte-identical reruns from identical inputs
 - Gate: `tools/scenario_runner/run_baseline_regression.ts`
-- Gate: `tests/scenario_determinism_h1_1.test.ts`
+- Gate: `tests/scenario_harness_contracts.test.ts` (`H1.1 scenario determinism`)
 
 ## System-specific determinism (B1, authority, B4)
 - **events_fired (B1):** Same state + seed + turn → same `report.events_fired`; RNG used only for random-event probability; registry iteration order fixed. **Test:** `tests/events_evaluate.test.ts` (trigger matching, phase/turn bounds, determinism, registry order). Baseline regression implicitly covers event path via scenario outputs.

@@ -23,6 +23,8 @@ import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { playCue } from '../audio/audio_engine';
+import { t } from '../i18n';
+import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 
 const INSTITUTIONAL_LABELS: Record<string, string> = {
     cantonization: 'Ethnic Cantonization',
@@ -61,6 +63,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
     const playerFaction = useGameStore((s) => s.loadedGameState?.player_faction ?? null);
+    const headerImage = getDecisionHeaderForFamily('peace_plan');
     const proposedFactionLabels = {
         RBiH: getPlayerSafePoliticalFactionName('RBiH'),
         RS: getPlayerSafePoliticalFactionName('RS'),
@@ -120,6 +123,14 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
             <>
                 {/* Header — document stamp */}
                 <div className="relative px-8 pt-8 pb-4 border-b-2 border-[#8a7a60]/30">
+                    {headerImage && (
+                        <img
+                            src={headerImage}
+                            alt="Diplomatic decision header"
+                            className="absolute inset-x-0 top-0 h-28 w-full object-cover opacity-35"
+                        />
+                    )}
+                    <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#1b130c]/35 to-transparent" />
                     <div className="absolute top-4 right-4 text-[9px] uppercase tracking-widest text-[#8a7a60]/60 font-bold rotate-[-8deg] border-2 border-[#8a7a60]/30 px-2 py-1 rounded">
                         DIPLOMATIC
                     </div>
@@ -167,7 +178,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                         ))}
                     </div>
                     <div className="text-[11px] text-[#6a5a40] mt-2">
-                        <span className="font-bold text-[#2a2016]">Institutional model:</span>{' '}
+                        <span className="font-bold text-[#2a2016]">{t('peace.institutionalModel')}</span>{' '}
                         {INSTITUTIONAL_LABELS[plan.institutionalModel] ?? plan.institutionalModel.replace(/_/g, ' ')}
                     </div>
                 </div>

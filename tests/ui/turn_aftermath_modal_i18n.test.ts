@@ -93,12 +93,11 @@ describe('TurnAftermathModal localization', () => {
         expect(screen.getByText('Posljedice poteza')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Nastavi' })).toBeTruthy();
         expect(screen.getByText('Teritorija')).toBeTruthy();
-        expect(screen.getByText('Zabiljezena teritorija')).toBeTruthy();
-        expect(screen.getByText('Strateski signali')).toBeTruthy();
+        expect(screen.getByText('1 osvojeno / 0 izgubljeno')).toBeTruthy();
         expect(screen.getByText('Cijena poteza')).toBeTruthy();
         expect(screen.getByText('Sud / sjecanje')).toBeTruthy();
         expect(screen.getByText('Komandni sto')).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Ratni sazetak' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Pregled rata' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Zapisi poteza' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Pregledaj inbox' })).toBeTruthy();
         expect(screen.queryByText('Turn Aftermath')).toBeNull();

@@ -3,6 +3,8 @@ import { useGameStore, type StagedOrder } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
+import { t, useLocale } from '../i18n';
+import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 function formationName(formationId: string, formationNamesById: Map<string, string>): string {
   return getPlayerSafeBrigadeName(formationNamesById.get(formationId));
@@ -19,6 +21,7 @@ function orderTargetLabel(order: StagedOrder, osidDisplayNames: Record<string, s
  * Docks to the left command rail when orders exist; hidden when empty.
  */
 export function OrderQueue() {
+  const [locale] = useLocale();
   const [collapsed, setCollapsed] = useState(false);
   const stagedOrders = useGameStore((s) => s.stagedOrders);
   const removeStagedOrder = useGameStore((s) => s.removeStagedOrder);
@@ -29,7 +32,7 @@ export function OrderQueue() {
   const formationNamesById = new Map<string, string>();
   if (loadedGameState?.formations) {
     for (const f of loadedGameState.formations) {
-      formationNamesById.set(f.id, f.name);
+      formationNamesById.set(f.id, getLocalizedFormationName(f, locale));
     }
   }
 
@@ -81,14 +84,14 @@ export function OrderQueue() {
               onClick={() => clearStagedOrders()}
               className="text-[10px] font-mono uppercase text-text-secondary hover:text-interactive px-1.5 py-0.5 rounded border border-panel-border hover:bg-panel-hover"
             >
-              Clear all
+              {t('orderQueue.clearAll')}
             </button>
           )}
           <button
             type="button"
             onClick={() => setCollapsed(true)}
             className="text-text-secondary hover:text-interactive text-xs leading-none p-0.5"
-            aria-label="Collapse"
+            aria-label={t('orderQueue.collapse')}
           >
             ▼
           </button>

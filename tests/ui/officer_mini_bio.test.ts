@@ -153,7 +153,42 @@ describe('officer mini-bio UI', () => {
 
         expect(source).toContain('commander.bio_short');
         expect(source).toContain('commander.command_style');
-        expect(source).toContain('Service record pending staff review.');
+        expect(source).toContain("t('oob.serviceRecordPending')");
+    });
+
+    it('surfaces command-style and known-for traits in the Personnel roster', () => {
+        const officer = makeOfficer({
+            command_style: 'Methodical staff work',
+            known_for: 'Opening army command',
+        });
+        useGameStore.setState({ loadedGameState: makeLoadedState(officer) });
+
+        render(createElement(PersonnelContent));
+
+        expect(screen.getByText('Doctrinal trait')).toBeTruthy();
+        expect(screen.getByText('Methodical staff work')).toBeTruthy();
+        expect(screen.getByText('Narrative trait')).toBeTruthy();
+        expect(screen.getByText('Opening army command')).toBeTruthy();
+    });
+
+    it('surfaces mobilization pool health in the Personnel roster', () => {
+        useGameStore.setState({ loadedGameState: makeLoadedState(makeOfficer()) });
+
+        render(createElement(PersonnelContent));
+
+        expect(screen.getByText('MOBILIZATION')).toBeTruthy();
+        expect(screen.getByText('Available Pool')).toBeTruthy();
+        expect(screen.getByText('1,234')).toBeTruthy();
+        expect(screen.getByText('Committed')).toBeTruthy();
+        expect(screen.getByText('456')).toBeTruthy();
+        expect(screen.getByText('Exhausted')).toBeTruthy();
+        expect(screen.getByText('310')).toBeTruthy();
+        expect(screen.getByText('Strategic Reserve')).toBeTruthy();
+        expect(screen.getByText('88')).toBeTruthy();
+        expect(screen.getByText('Exhaustion')).toBeTruthy();
+        expect(screen.getByText('25.1%')).toBeTruthy();
+        expect(screen.getByText('Sarajevo')).toBeTruthy();
+        expect(screen.getByText('Bijeljina')).toBeTruthy();
     });
 
     it('surfaces command-style and known-for traits in the Personnel roster', () => {

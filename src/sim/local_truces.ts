@@ -27,9 +27,6 @@ import type { FactionId, GameState } from '../state/game_state.js';
 /** Week at which the Graz Accords fire (6 May 1992 ≈ week 4 of the scenario). */
 export const GRAZ_ACCORDS_TURN = 4;
 
-/** @deprecated Use GRAZ_ACCORDS_TURN. Alias kept for backward compatibility during migration. */
-export const VIENNA_DECLARATION_TURN = GRAZ_ACCORDS_TURN;
-
 /**
  * Corps pairs bound by the Herzegovina truce.
  * When active, these corps do not generate attack orders against each other's territory.
@@ -95,9 +92,6 @@ export function isGrazAccordsActive(state: GameState): boolean {
     if (!accepted) return false;
     return accepted['RS'] === true && accepted['HRHB'] === true;
 }
-
-/** @deprecated Use isGrazAccordsActive. */
-export const isViennaDeclarationActive = isGrazAccordsActive;
 
 /** Return true if the Herzegovina corps-pair truce is active (not broken). */
 export function isHerzegovinaTruceActive(state: GameState): boolean {
@@ -178,9 +172,10 @@ export const GRAZ_EXEMPT_RS_CORPS = new Set([
     'vrs_1st_krajina',
 ]);
 
-/** HRHB corps exempt from Graz — Posavina fighting */
+/** HRHB corps exempt from Graz — Posavina fighting + Cincar/Mistral 1/Jajce */
 export const GRAZ_EXEMPT_HRHB_CORPS = new Set([
     'hvo_northwest_bosnia',  // Orašje pocket — Posavina corridor fighting
+    'hvo_tomislavgrad',  // Op Cincar (Nov 1994) / Mistral 1 (Jun 1995) / Jajce 95 — documented HV-HVO bypasses of Graz against VRS Krajina (BB v2 ch. 28; ICTY Gotovina IT-06-90 §44-58)
 ]);
 
 /**
@@ -214,13 +209,14 @@ export function shouldGrazBlockAttack(
         return true;
     }
 
-    // HRHB → RS faction-level block (bilateral ceasefire)
-    // Op Jackal exemption is handled at the brigade-level (bot_brigade_ai_osid.ts)
-    // where we can check if the target is an actual operation objective.
-    // shouldGrazBlockAttack blocks ALL HRHB→RS attacks; callers exempt op objectives.
+    // HRHB → RS faction-level block (bilateral ceasefire).
+    // East-pair corps (hvo_southeast_herzegovina) are excluded here — their time-gated
+    // truce (not blocked before Op Jackal ends; blocked after) is handled in the
+    // corps-pair block below. All other non-exempt HRHB corps are blocked.
     if (faction === 'HRHB' && (targetController === 'RS')
         && isHerzegovinaTruceActive(state)
-        && !GRAZ_EXEMPT_HRHB_CORPS.has(corpsId)) {
+        && !GRAZ_EXEMPT_HRHB_CORPS.has(corpsId)
+        && !isEastHerzegovinaPair(corpsId)) {
         return true;
     }
 
@@ -228,6 +224,12 @@ export function shouldGrazBlockAttack(
     // West pair (2KK ↔ Tomislavgrad) activates at Graz (w4).
     // East pair (VRS Herz ↔ HVO SE Herz) activates only after Op Jackal ends.
     if (isHerzegovinaTruceActive(state) && isCorpsInGrazPair(corpsId)) {
+        // Honor the per-faction exemption sets in the corps-pair branch too — a
+        // corps explicitly exempt from Graz (e.g. hvo_tomislavgrad for Op Cincar
+        // and downstream Mistral 1 / Jajce cascade) is not blocked even though it
+        // sits in a pair. Otherwise the West-pair branch would always return true.
+        if (faction === 'HRHB' && GRAZ_EXEMPT_HRHB_CORPS.has(corpsId)) return false;
+        if (faction === 'RS' && GRAZ_EXEMPT_RS_CORPS.has(corpsId)) return false;
         if (isWestHerzegovinaPair(corpsId)) {
             return true; // West truce is always active when Graz is active
         }
@@ -248,9 +250,6 @@ export function shouldGrazBlockAttack(
 
     return false;
 }
-
-/** @deprecated Use shouldGrazBlockAttack. */
-export const shouldViennaBlockAttack = shouldGrazBlockAttack;
 
 /**
  * Return extra aggression modifier for `faction` because the opponent broke the truce.
@@ -302,9 +301,6 @@ export function checkAndFireGrazAccords(state: GameState): string | null {
         + 'Kiseljak pocket forces hold positions. '
         + 'Posavina corridor fighting continues unabated.';
 }
-
-/** @deprecated Use checkAndFireGrazAccords. */
-export const checkAndFireViennaDeclaration = checkAndFireGrazAccords;
 
 /**
  * Record that `faction` broke the RS-HRHB truce by attacking the partner's territory.

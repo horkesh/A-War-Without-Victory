@@ -41,6 +41,18 @@ export interface ChronicleChapter {
     };
 }
 
+export interface ChronicleCampaignRecap {
+    id: string;
+    chapterCount: number;
+    entryCount: number;
+    headlineCount: number;
+    monthRange: string;
+    dominantType: ChronicleEntry['type'];
+    signalChapterCount: number;
+    openingChapterTitle: string;
+    closingChapterTitle: string;
+}
+
 function strictCompare(a: string, b: string): number {
     return a < b ? -1 : a > b ? 1 : 0;
 }
@@ -273,4 +285,46 @@ export function buildChronicleChapters(entries: ChronicleEntry[], state: any): C
     }
 
     return chapters.sort((a, b) => a.startTurn - b.startTurn || strictCompare(a.id, b.id));
+}
+
+export function buildChronicleCampaignRecap(chapters: readonly ChronicleChapter[]): ChronicleCampaignRecap | null {
+    if (chapters.length === 0) return null;
+
+    const sorted = [...chapters].sort((a, b) => a.startTurn - b.startTurn || strictCompare(a.id, b.id));
+    const typeCounts = new Map<ChronicleEntry['type'], number>();
+    let entryCount = 0;
+    let headlineCount = 0;
+    let signalChapterCount = 0;
+    const monthLabels: string[] = [];
+
+    for (const chapter of sorted) {
+        if (chapter.signals.atrocity || chapter.signals.rupture) signalChapterCount += 1;
+        monthLabels.push(...chapter.monthLabels);
+        for (const entry of chapter.entries) {
+            entryCount += 1;
+            typeCounts.set(entry.type, (typeCounts.get(entry.type) ?? 0) + 1);
+            if (entry.headline) headlineCount += 1;
+        }
+    }
+
+    const dominantType = Array.from(typeCounts.entries())
+        .sort((a, b) => b[1] - a[1] || strictCompare(chronicleTypeLabel(a[0]), chronicleTypeLabel(b[0])))[0]?.[0] ?? 'narrative';
+    const seenMonths = new Set<string>();
+    const uniqueMonths = monthLabels.filter((label) => {
+        if (seenMonths.has(label)) return false;
+        seenMonths.add(label);
+        return true;
+    });
+
+    return {
+        id: `chronicle-campaign-recap-${sorted[0].startTurn}-${sorted[sorted.length - 1].endTurn}`,
+        chapterCount: sorted.length,
+        entryCount,
+        headlineCount,
+        monthRange: chapterMonthRange(uniqueMonths),
+        dominantType,
+        signalChapterCount,
+        openingChapterTitle: sorted[0].title,
+        closingChapterTitle: sorted[sorted.length - 1].title,
+    };
 }

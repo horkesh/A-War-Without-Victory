@@ -1,8 +1,8 @@
 # Sector Split-Pieces Renumber Elision
 
-**Date:** 2026-05-23  
-**Status:** Implemented and locally verified  
-**Lane:** EQ-1 / sector split-pieces performance  
+**Date:** 2026-05-23
+**Status:** Implemented and locally verified
+**Lane:** EQ-1 / sector split-pieces performance
 **Scope:** Compute-only optimization in final sector geometry enforcement. No scenario data, combat math, operation behavior, save schema, UI, calibration, or output contract changed.
 
 ## Summary

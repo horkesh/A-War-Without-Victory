@@ -73,14 +73,27 @@ describe('scenario continue-from-save equivalence', () => {
       // of the full uninterrupted run.
       const fullReplayRaw = await readFile(fullRun.paths.replay_save_sequence, 'utf8');
       const resumedReplayRaw = await readFile(resumedRun.paths.replay_save_sequence, 'utf8');
+      const fullManifestRaw = await readFile(fullRun.paths.replay_save_manifest, 'utf8');
+      const resumedManifestRaw = await readFile(resumedRun.paths.replay_save_manifest, 'utf8');
       const fullFrames = JSON.parse(fullReplayRaw) as unknown[];
       const resumedFrames = JSON.parse(resumedReplayRaw) as unknown[];
+      const fullManifest = JSON.parse(fullManifestRaw) as { frame_count: number; frames: unknown[] };
+      const resumedManifest = JSON.parse(resumedManifestRaw) as { frame_count: number; frames: unknown[] };
       expect(Array.isArray(fullFrames)).toBe(true);
       expect(Array.isArray(resumedFrames)).toBe(true);
       expect(resumedFrames.length).toBeGreaterThan(0);
       expect(fullFrames.length).toBeGreaterThanOrEqual(resumedFrames.length);
       const fullTailSlice = fullFrames.slice(fullFrames.length - resumedFrames.length);
       expect(JSON.stringify(resumedFrames)).toBe(JSON.stringify(fullTailSlice));
+      expect(Array.isArray(fullManifest.frames)).toBe(true);
+      expect(Array.isArray(resumedManifest.frames)).toBe(true);
+      expect(resumedManifest.frame_count).toBe(resumedManifest.frames.length);
+      expect(fullManifest.frame_count).toBe(fullManifest.frames.length);
+      expect(resumedManifest.frames.length).toBe(resumedFrames.length);
+      const fullManifestTailSlice = fullManifest.frames.slice(
+        fullManifest.frames.length - resumedManifest.frames.length,
+      );
+      expect(JSON.stringify(resumedManifest.frames)).toBe(JSON.stringify(fullManifestTailSlice));
     } finally {
       await ensureRemoved(FULL_OUT);
       await ensureRemoved(SPLIT_OUT);

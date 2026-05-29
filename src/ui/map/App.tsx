@@ -31,13 +31,18 @@ import { EventLogPanel } from './components/EventLogPanel';
 import { AiAdvisorPanel } from './components/AiAdvisorPanel';
 import { AiSettingsPanel } from './components/AiSettingsPanel';
 import { AutonomyPanel } from './components/AutonomyPanel';
-import { PresidentialInbox, InboxBadge } from './components/PresidentialInbox';
+import { PresidentialInbox } from './components/PresidentialInbox';
 import type { EventDisplayData } from './components/EventModal';
 import type { EventLogEntry } from './components/EventLogPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
 import { PeacePlanModal } from './components/PeacePlanModal';
 import { ParamilitaryReviewModal } from './components/ParamilitaryReviewModal';
+import { EventDecisionModal } from './components/EventDecisionModal';
 import { ConvoyDecisionModal } from './components/ConvoyDecisionModal';
+import { ReserveRequestModal } from './components/ReserveRequestModal';
+import { OfficerMatterModal } from './components/OfficerMatterModal';
+import { IntelligenceBriefModal } from './components/IntelligenceBriefModal';
+import { CounterOfferModal } from './components/CounterOfferModal';
 import { DaytonNegotiationModal } from './components/DaytonNegotiationModal';
 import { DiplomacyPanel } from './components/DiplomacyPanel';
 import { MainMenu } from './components/MainMenu';
@@ -50,6 +55,7 @@ import { PeaceWarTransition } from './components/PeaceWarTransition';
 import { ChronicleOverlay } from './components/chronicle/ChronicleOverlay';
 import { WrappedOverlay } from './components/chronicle/WrappedOverlay';
 import { CodexPanel } from './components/CodexPanel';
+import { DecisionHistoryOverlay } from './components/DecisionHistoryOverlay';
 import { CoachmarkLayer } from './components/CoachmarkLayer';
 import { OnboardingOverlay, shouldShowOnboarding } from './components/onboarding';
 import { LoadingSkeleton } from './components/LoadingSkeleton';
@@ -61,10 +67,12 @@ import { AudioCueObserver } from './components/AudioCueObserver';
 import { WarroomShellLayer } from './components/warroom/WarroomShellLayer';
 import { AdvanceTurnModal } from './components/warroom/AdvanceTurnModal';
 import { WarroomStatusBar } from './components/warroom/WarroomStatusBar';
+import { PresidentDeskShell } from './components/presidential_desk/PresidentDeskShell';
 import { RootErrorBoundary } from './components/RootErrorBoundary';
-import { derivePanelRailState, shouldRenderInboxPanel } from './components/panelRail';
+import { derivePanelRailState, shouldRenderInboxPanel, shouldRenderTacticalDetailRails } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
-import { loadLatestRunSaveAsText, loadEventDefinitions } from './data/DataLoader';
+import { loadLatestRunSaveAsText, loadEventDefinitions, loadEventDefinitionsFull } from './data/DataLoader';
+import type { EventDefinition } from '../../sim/events/event_types';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
 import { getPlayerSafeMilitaryFactionName } from './utils/playerSafeText';
@@ -73,7 +81,8 @@ import { useDesktopSession } from './hooks/useDesktopSession';
 import { useIPC } from './desktop/useIPC';
 import { resolvePlayerFacingFaction } from '../shared/playerVisibility';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
-import type { SummaryFocusSection } from './data/types';
+import type { LoadedGameState, SummaryFocusSection } from './data/types';
+import type { InboxItem } from './data/inboxItems';
 import type { PreAdvanceCommandReviewItem } from './data/preAdvanceCommandReview';
 import type { PresidentialDecisionRoomNavigationTarget } from './data/presidentialDecisionRoom';
 import { shouldShowPeaceWarTransition } from './data/peaceWarTransitionGate';
@@ -93,6 +102,31 @@ declare global {
     handleManualSaveLoad?: (json: unknown) => Promise<void>;
     handleContinueLastRun?: () => Promise<void>;
   }
+}
+
+type PendingEventDecisionView = NonNullable<LoadedGameState['pendingEventDecisions']>[number];
+
+function comparePendingEventDecisionPriority(a: PendingEventDecisionView, b: PendingEventDecisionView): number {
+  const aRequired = a.requires_player_response === true ? 0 : 1;
+  const bRequired = b.requires_player_response === true ? 0 : 1;
+  if (aRequired !== bRequired) return aRequired - bRequired;
+  if (a.turn_fired !== b.turn_fired) return a.turn_fired - b.turn_fired;
+  if (a.event_id < b.event_id) return -1;
+  if (a.event_id > b.event_id) return 1;
+  return 0;
+}
+
+function selectNextPendingEventDecision(
+  decisions: LoadedGameState['pendingEventDecisions'],
+  playerFaction: string | null,
+  excludedEventId: string | null = null,
+): PendingEventDecisionView | null {
+  if (!playerFaction) return null;
+  const playerDecisions = (decisions ?? [])
+    .filter((decision) => decision.faction === playerFaction)
+    .filter((decision) => decision.event_id !== excludedEventId)
+    .sort(comparePendingEventDecisionPriority);
+  return playerDecisions[0] ?? null;
 }
 
 function CommanderSelectionModalWrapper() {
@@ -158,10 +192,26 @@ function OperationBriefingModalWrapper() {
   );
 }
 
-function CodexPanelWrapper() {
+function CodexPanelWrapper({
+  eventCatalog,
+}: {
+  eventCatalog?: ReadonlyMap<string, EventDefinition>;
+}) {
   const codexOpen = useGameStore((s) => s.codexOpen);
   const setCodexOpen = useGameStore((s) => s.setCodexOpen);
-  return <CodexPanel isOpen={codexOpen} onClose={() => setCodexOpen(false)} />;
+  // Phase H Packet 7 — supply the catalog + raw GameState to activate the
+  // H5 Unlock State section. Both inputs are required; when either is
+  // absent the section gracefully degrades and the panel renders exactly
+  // as before.
+  const rawGameState = useGameStore((s) => s.loadedGameState?.rawGameState);
+  return (
+    <CodexPanel
+      isOpen={codexOpen}
+      onClose={() => setCodexOpen(false)}
+      eventCatalog={eventCatalog}
+      state={rawGameState}
+    />
+  );
 }
 
 function StrategicDashboardWrapper() {
@@ -241,6 +291,9 @@ function App() {
   );
   const mapMode = useGameStore((s) => s.mapMode);
   const isOperationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
+  const armyHQOpen = useGameStore((s) => s.armyHQOpen);
+  const codexOpen = useGameStore((s) => s.codexOpen);
+  const chronicleOpen = useGameStore((s) => s.chronicleOpen);
   const railState = derivePanelRailState({
     selectedOsid,
     selectedArmyId,
@@ -250,6 +303,12 @@ function App() {
     selectedFormationId,
     selectedOperationKey,
     selectedOrbatCorpsId,
+  });
+  const tacticalDetailRailsVisible = shouldRenderTacticalDetailRails({
+    operationsPanelOpen: isOperationsPanelOpen,
+    armyHQOpen,
+    codexOpen,
+    chronicleOpen,
   });
 
   const [appScreen, setAppScreen] = useState<'game' | 'mainMenu' | 'warroom'>('game');
@@ -276,6 +335,22 @@ function App() {
   const [acknowledgedEventIds, setAcknowledgedEventIds] = useState<Set<string>>(new Set());
   const [dismissedPeacePlanKey, setDismissedPeacePlanKey] = useState<string | null>(null);
   const [paramilitaryReviewOpen, setParamilitaryReviewOpen] = useState(false);
+  /**
+   * Phase H Packet 8 — Decision History overlay open state. Owned at App
+   * root because the overlay is full-screen and may be triggered from
+   * multiple places (currently: 'D' hotkey + future inbox / records
+   * actions). Default closed. See `DecisionHistoryOverlay.tsx`.
+   */
+  const [isDecisionHistoryOpen, setIsDecisionHistoryOpen] = useState(false);
+  /** Active blocking event decision id surfaced as a modal. `null` = no modal.
+   *  Set by (a) inbox click on `event_modal` action, or (b) the auto-launch effect
+   *  below when a new turn surfaces pending decisions for the player faction. */
+  const [activeEventDecisionId, setActiveEventDecisionId] = useState<string | null>(null);
+  const [selectedReserveRequestId, setSelectedReserveRequestId] = useState<string | null>(null);
+  const [selectedOfficerMatterId, setSelectedOfficerMatterId] = useState<string | null>(null);
+  const [selectedIntelligenceBriefId, setSelectedIntelligenceBriefId] = useState<string | null>(null);
+  const [selectedCounterOfferId, setSelectedCounterOfferId] = useState<string | null>(null);
+  const [recentlyAcceptedEventDecisionId, setRecentlyAcceptedEventDecisionId] = useState<string | null>(null);
   const [selectedConvoyDecisionId, setSelectedConvoyDecisionId] = useState<string | null>(null);
   const [recruitmentLoading, setRecruitmentLoading] = useState(false);
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
@@ -283,12 +358,40 @@ function App() {
   const recruitmentCatalogRequestId = useRef(0);
   const initialShellHandoffApplied = useRef(false);
 
+  /**
+   * Phase H Packet 7 — runtime catalog of full canonical `EventDefinition`
+   * records, loaded once at app boot from
+   * `/data/scenarios/events/{war_1992..war_1995,consequences}.json`.
+   * Used by the four Phase H bridges:
+   *   - EventDecisionModal (H3 Decision Context family/source/dossier)
+   *   - CodexPanel (H5 Unlock State family/source-tier per row)
+   *   - BranchTagBadgeRow (H4 sets_flags walk; mounted in BottomStatusStrip)
+   *   - generateWrappedSlides (H6 causality slides — F1/F2/F3)
+   * `undefined` until the fetch resolves; bridges degrade gracefully.
+   */
+  const [eventCatalogFull, setEventCatalogFull] = useState<ReadonlyMap<string, EventDefinition> | undefined>(undefined);
+  useEffect(() => {
+    let cancelled = false;
+    loadEventDefinitionsFull()
+      .then((catalog) => {
+        if (cancelled) return;
+        setEventCatalogFull(catalog);
+      })
+      .catch((err) => {
+        // Non-fatal: bridges already degrade gracefully when catalog is absent.
+        console.warn('[PhaseH] Failed to load event catalog:', err);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
   // Reset dismissal/acknowledgement state when a new save is loaded.
   // Without this, stale flags from a previous save hide real pending items.
   const stateFingerprint = useGameStore((s) => s.lastLoadedStateFingerprint);
   useEffect(() => {
     setDismissedPeacePlanKey(null);
     setAcknowledgedEventIds(new Set());
+    setActiveEventDecisionId(null);
+    setRecentlyAcceptedEventDecisionId(null);
   }, [stateFingerprint]);
 
   useEffect(() => {
@@ -424,6 +527,43 @@ function App() {
     });
     return () => { stale = true; };
   }, [loadedGameState?.turn, loadedGameState?.firedEvents?.length]);
+
+  const pendingPeacePlan = loadedGameState?.pendingPeacePlan;
+  const showPeacePlanModal = shouldShowPeacePlanModal(pendingPeacePlan, dismissedPeacePlanKey);
+
+  // v0.9 presidential design: auto-launch the EventDecisionModal for the first
+  // blocking event decision when a new turn surfaces one. Memory:
+  // [[player_identity_and_command]] — "Goal is to play as president, making such
+  // decisions that then impact the war through different modifiers." The modal
+  // is dismissible only via response, so the IPC respond path is the only exit.
+  useEffect(() => {
+    if (activeEventDecisionId !== null) return;
+    if (showPeacePlanModal) return;
+    const nextDecision = selectNextPendingEventDecision(
+      loadedGameState?.pendingEventDecisions,
+      playerFaction,
+      recentlyAcceptedEventDecisionId,
+    );
+    if (nextDecision) setActiveEventDecisionId(nextDecision.event_id);
+  }, [loadedGameState?.pendingEventDecisions, playerFaction, activeEventDecisionId, showPeacePlanModal, recentlyAcceptedEventDecisionId]);
+
+  useEffect(() => {
+    if (activeEventDecisionId === null) return;
+    const stillPending = (loadedGameState?.pendingEventDecisions ?? [])
+      .some((decision) => decision.event_id === activeEventDecisionId && decision.faction === playerFaction);
+    if (!stillPending) {
+      setActiveEventDecisionId(null);
+    }
+  }, [loadedGameState?.pendingEventDecisions, playerFaction, activeEventDecisionId]);
+
+  useEffect(() => {
+    if (recentlyAcceptedEventDecisionId === null) return;
+    const stillPending = (loadedGameState?.pendingEventDecisions ?? [])
+      .some((decision) => decision.event_id === recentlyAcceptedEventDecisionId && decision.faction === playerFaction);
+    if (!stillPending) {
+      setRecentlyAcceptedEventDecisionId(null);
+    }
+  }, [loadedGameState?.pendingEventDecisions, playerFaction, recentlyAcceptedEventDecisionId]);
 
   // Auto-dismiss non-decision events after 4 seconds
   useEffect(() => {
@@ -597,6 +737,13 @@ function App() {
         e.preventDefault();
         const gs = useGameStore.getState();
         gs.setCodexOpen(!gs.codexOpen);
+      } else if (e.key === 'd' || e.key === 'D') {
+        // Phase H Packet 8 — Decision History overlay hotkey. Toggle behaviour
+        // mirrors Codex (X) / Chronicle (C) for consistency. The overlay's
+        // ESC handler is the canonical close path; this is the second-open
+        // path so the player can dismiss via the same key they opened with.
+        e.preventDefault();
+        setIsDecisionHistoryOpen((prev) => !prev);
       }
     };
     window.addEventListener('keydown', handler);
@@ -627,6 +774,13 @@ function App() {
   };
 
   const reviewPreAdvanceItem = (item: PreAdvanceCommandReviewItem) => {
+    if (item.navigationTarget.kind === 'counter-offer') {
+      setSelectedCounterOfferId(item.navigationTarget.counterOfferId);
+      setAppScreen('game');
+      setSummaryOpen(false);
+      setEventLogOpen(false);
+      return;
+    }
     openPresidentialDecisionRoomNavigationTarget(item.navigationTarget, useGameStore.getState());
     setAppScreen('game');
     setSummaryOpen(false);
@@ -634,10 +788,81 @@ function App() {
   };
 
   const reviewPreAdvanceTarget = (target: PresidentialDecisionRoomNavigationTarget) => {
+    if (target.kind === 'counter-offer') {
+      setSelectedCounterOfferId(target.counterOfferId);
+      setAppScreen('game');
+      setSummaryOpen(false);
+      setEventLogOpen(false);
+      return;
+    }
     openPresidentialDecisionRoomNavigationTarget(target, useGameStore.getState());
     setAppScreen('game');
     setSummaryOpen(false);
     setEventLogOpen(false);
+  };
+
+  const openReservePanelFromDesk = () => {
+    const hqId = playerFaction === 'RS'
+      ? 'vrs_main_staff'
+      : playerFaction === 'HRHB'
+        ? 'hvo_main_staff'
+        : 'arbih_general_staff';
+    useGameStore.getState().setSelectedArmyHqId(hqId);
+    setSelectedReserveRequestId(null);
+    setAppScreen('game');
+    setSummaryOpen(false);
+    setEventLogOpen(false);
+  };
+
+  const openPersonnelFromDesk = () => {
+    openArmyHQTab(useGameStore.getState(), 'personnel');
+    setSelectedOfficerMatterId(null);
+    setAppScreen('game');
+    setSummaryOpen(false);
+    setEventLogOpen(false);
+  };
+
+  const handlePresidentialInboxAction = (action: InboxItem['action'], itemId: string) => {
+    const gs = useGameStore.getState();
+    setSummaryOpen(false);
+    setEventLogOpen(false);
+    if (action === 'army_reserve') {
+      setSelectedReserveRequestId(itemId);
+    }
+    if (action === 'army_hq_personnel') {
+      setSelectedOfficerMatterId(itemId);
+    }
+    if (action === 'event_modal') {
+      const eventId = itemId.startsWith('event:') ? itemId.slice('event:'.length) : itemId;
+      setActiveEventDecisionId(eventId);
+    }
+    if (action === 'army_hq_opportunity') {
+      openArmyHQTab(gs, 'briefing');
+      setAppScreen('game');
+    }
+    if (action === 'army_hq_briefing') {
+      openArmyHQTab(gs, 'briefing');
+      setAppScreen('game');
+    }
+    if (action === 'peace_plan_modal') {
+      setDismissedPeacePlanKey(null);
+    }
+    if (action === 'dayton_modal') {
+      setDismissedPeacePlanKey(null);
+    }
+    if (action === 'paramilitary_review') {
+      setParamilitaryReviewOpen(true);
+    }
+    if (action === 'convoy_decision_modal') {
+      setSelectedConvoyDecisionId(itemId.startsWith('convoy:') ? itemId.slice('convoy:'.length) : itemId);
+    }
+    if (action === 'autonomy_panel') {
+      setAutonomyPanelOpen(true);
+      setAppScreen('game');
+    }
+    if (action === 'dismiss_intelligence_notification') {
+      setSelectedIntelligenceBriefId(itemId);
+    }
   };
 
   const openInboxHome = () => {
@@ -704,9 +929,6 @@ function App() {
     }
   }, []);
 
-  const pendingPeacePlan = loadedGameState?.pendingPeacePlan;
-  const showPeacePlanModal = shouldShowPeacePlanModal(pendingPeacePlan, dismissedPeacePlanKey);
-
   return (
     <div
       className="h-screen w-screen relative"
@@ -725,6 +947,8 @@ function App() {
           Each wrapper uses display:contents so the wrapped components retain
           their existing absolute/fixed positioning unaffected by the new tag.
           Faction-agnostic; UI-only; no sim path touched. */}
+      {appScreen === 'game' && (
+      <>
       <RootErrorBoundary zone="map">
         <MapContainer />
       </RootErrorBoundary>
@@ -747,6 +971,7 @@ function App() {
               }
               : null}
             pressureWarning={loadedGameState?.pressureWarning ?? false}
+            onOpenDesk={() => setAppScreen('warroom')}
             onOpenSummary={() => openSummary()}
             onOpenRecords={() => openArmyHQRecords('aar')}
             onOpenOpsHistory={() => useGameStore.getState().setIsOperationsPanelOpen(true)}
@@ -771,84 +996,25 @@ function App() {
       <RootErrorBoundary zone="right panel">
         <OperationsPanel />
         <OrderQueue />
-        {shouldRenderInboxPanel(railState.primary, isOperationsPanelOpen) && <PresidentialInbox onAction={(action, itemId) => {
-          const gs = useGameStore.getState();
-          if (action === 'army_reserve') {
-            const hqId = playerFaction === 'RS' ? 'vrs_main_staff' : playerFaction === 'HRHB' ? 'hvo_main_staff' : 'arbih_general_staff';
-            gs.setSelectedArmyHqId(hqId);
-          }
-          if (action === 'army_hq_personnel') {
-            // Route through canonical shellNavigation helper — single chokepoint
-            // for Tactical → Army HQ navigation dispatch.
-            openArmyHQTab(gs, 'personnel');
-          }
-          if (action === 'event_modal') {
-            // Presidential event decisions are executed inside PresidentialAttentionPanel
-            // (Army HQ briefing tab). Route the president to that surface; do not execute
-            // here. Inbox is navigation-only for this family; the panel owns IPC.
-            openArmyHQTab(gs, 'briefing');
-          }
-          if (action === 'army_hq_opportunity') {
-            openArmyHQTab(gs, 'briefing');
-          }
-          if (action === 'army_hq_briefing') {
-            openArmyHQTab(gs, 'briefing');
-          }
-          if (action === 'peace_plan_modal') {
-            // Reset dismissal so the PeacePlanModal renders again
-            setDismissedPeacePlanKey(null);
-          }
-          if (action === 'dayton_modal') {
-            setDismissedPeacePlanKey(null);
-          }
-          if (action === 'paramilitary_review') {
-            setParamilitaryReviewOpen(true);
-          }
-          if (action === 'convoy_decision_modal') {
-            setSelectedConvoyDecisionId(itemId.startsWith('convoy:') ? itemId.slice('convoy:'.length) : itemId);
-          }
-          if (action === 'autonomy_panel') {
-            setAutonomyPanelOpen(true);
-          }
-          if (action === 'dismiss_intelligence_notification') {
-            const notificationId = itemId.startsWith('intel:') ? itemId.slice('intel:'.length) : itemId;
-            if (!ipc.isAvailable) {
-              const current = useGameStore.getState().loadedGameState;
-              if (current?.pendingEventNotifications) {
-                useGameStore.setState({
-                  loadedGameState: {
-                    ...current,
-                    pendingEventNotifications: current.pendingEventNotifications.map((notification) => (
-                      notification.notification_id === notificationId
-                        ? { ...notification, consumed: true }
-                        : notification
-                    )),
-                  },
-                });
-              }
-              return;
-            }
-            void ipc.dismissEventNotification(notificationId).then((result) => {
-              if (!result.ok) {
-                setLoadError(result.error ?? 'Failed to dismiss intelligence notification.');
-              }
-            });
-          }
-        }} />}
-        {railState.primary === 'settlement' && <SelectionPanel railSlot="primary" />}
-        {railState.primary === 'sector' && <CorpsFrontPanel railSlot="primary" />}
-        {railState.primary === 'corps' && <CorpsDetail railSlot="primary" />}
+        {tacticalDetailRailsVisible && shouldRenderInboxPanel(railState.primary, isOperationsPanelOpen) && (
+          <PresidentialInbox onAction={handlePresidentialInboxAction} />
+        )}
+        {tacticalDetailRailsVisible && railState.primary === 'settlement' && <SelectionPanel railSlot="primary" />}
+        {tacticalDetailRailsVisible && railState.primary === 'sector' && <CorpsFrontPanel railSlot="primary" />}
+        {tacticalDetailRailsVisible && railState.primary === 'corps' && <CorpsDetail railSlot="primary" />}
         {/* ArmyDetail retired — faction click opens Army HQ modal */}
-        {railState.primary === 'army_reserve' && <ArmyReservePanel railSlot="primary" />}
-        {railState.primary === 'formation' && <FormationDetail railSlot="primary" />}
-        {railState.primary === 'orbat' && <OrbatPanel />}
+        {tacticalDetailRailsVisible && railState.primary === 'army_reserve' && <ArmyReservePanel railSlot="primary" />}
+        {tacticalDetailRailsVisible && railState.primary === 'formation' && <FormationDetail railSlot="primary" />}
+        {tacticalDetailRailsVisible && railState.primary === 'orbat' && <OrbatPanel />}
 
-        {railState.secondary === 'settlement' && <SelectionPanel railSlot="secondary" />}
-        {railState.secondary === 'sector' && <CorpsFrontPanel railSlot="secondary" />}
-        {railState.secondary === 'corps' && <CorpsDetail railSlot="secondary" />}
-        {railState.secondary === 'formation' && <FormationDetail railSlot="secondary" />}
+        {tacticalDetailRailsVisible && railState.secondary === 'settlement' && <SelectionPanel railSlot="secondary" />}
+        {tacticalDetailRailsVisible && railState.secondary === 'sector' && <CorpsFrontPanel railSlot="secondary" />}
+        {tacticalDetailRailsVisible && railState.secondary === 'corps' && <CorpsDetail railSlot="secondary" />}
+        {tacticalDetailRailsVisible && railState.secondary === 'formation' && <FormationDetail railSlot="secondary" />}
       </RootErrorBoundary>
       <Tooltip />
+      </>
+      )}
       {pendingAttackConfirmation && attackerFormation && (
         <AttackConfirmation
           attacker={{ id: attackerFormation.id, name: attackerFormation.name, faction: attackerFormation.faction }}
@@ -912,8 +1078,19 @@ function App() {
         <ArmyHQModal />
       </RootErrorBoundary>
       <ChronicleOverlay />
-      <WrappedOverlay />
-      <CodexPanelWrapper />
+      <WrappedOverlay eventCatalog={eventCatalogFull} />
+      <CodexPanelWrapper eventCatalog={eventCatalogFull} />
+      {/* Phase H Packet 8 — Decision History overlay (Component B per H1 §4.2B).
+          Consumes H2 wave 1 helpers (getPlayerDecisionHistory +
+          getCausalDescendants); same catalog + raw state as CodexPanelWrapper.
+          Trigger: 'D' hotkey (see keyboard shortcut handler). The overlay
+          gracefully degrades when catalog or state is absent. */}
+      <DecisionHistoryOverlay
+        isOpen={isDecisionHistoryOpen}
+        onClose={() => setIsDecisionHistoryOpen(false)}
+        eventCatalog={eventCatalogFull}
+        state={loadedGameState?.rawGameState}
+      />
       <StrategicDashboardWrapper />
       <RootErrorBoundary zone="ops planning">
         <OpsPlanningModal />
@@ -980,6 +1157,38 @@ function App() {
         isOpen={paramilitaryReviewOpen}
         onClose={() => setParamilitaryReviewOpen(false)}
       />
+      {/* v0.9 presidential blocking decision modal.
+          Source: state.military.pending_event_decisions[] filtered by player faction.
+          Surfaced (a) automatically when a new turn brings a new decision (see
+          auto-launch effect above), or (b) when the player clicks the inbox item
+          (event_modal action handler routes here). The modal is non-dismissible;
+          the only exit is to respond, which calls ipc.respondToEventDecision and
+          the engine clears the entry from pending_event_decisions. */}
+      {activeEventDecisionId !== null && (() => {
+        const decision = (loadedGameState?.pendingEventDecisions ?? [])
+          .find((d) => d.event_id === activeEventDecisionId && d.faction === playerFaction);
+        if (!decision) return null;
+        return (
+          <EventDecisionModal
+            decision={decision}
+            eventCatalog={eventCatalogFull}
+            state={loadedGameState?.rawGameState}
+            onRespond={async (eventId, responseId) => {
+              if (ipc.isAvailable) {
+                const result = await ipc.respondToEventDecision(eventId, responseId);
+                if (result.ok === true) {
+                  setRecentlyAcceptedEventDecisionId(eventId);
+                  setActiveEventDecisionId(null);
+                } else {
+                  setLoadError(result.error ?? 'Failed to record event decision.');
+                }
+                return;
+              }
+              setLoadError('Event decisions are available in desktop mode only.');
+            }}
+          />
+        );
+      })()}
       <ConvoyDecisionModal
         convoy={loadedGameState?.pendingConvoyDecisions?.find((convoy) => convoy.id === selectedConvoyDecisionId) ?? null}
         onClose={() => setSelectedConvoyDecisionId(null)}
@@ -988,6 +1197,28 @@ function App() {
             ? ipc.stageConvoyDecision(convoyId, decision)
             : Promise.resolve({ ok: false, error: 'Convoy decisions are available in desktop mode only.' })
         )}
+      />
+      <ReserveRequestModal
+        requestId={selectedReserveRequestId}
+        state={loadedGameState}
+        onClose={() => setSelectedReserveRequestId(null)}
+        onOpenReservePanel={openReservePanelFromDesk}
+      />
+      <OfficerMatterModal
+        itemId={selectedOfficerMatterId}
+        state={loadedGameState}
+        onClose={() => setSelectedOfficerMatterId(null)}
+        onOpenPersonnel={openPersonnelFromDesk}
+      />
+      <IntelligenceBriefModal
+        notificationId={selectedIntelligenceBriefId}
+        state={loadedGameState}
+        onClose={() => setSelectedIntelligenceBriefId(null)}
+      />
+      <CounterOfferModal
+        offerId={selectedCounterOfferId}
+        state={loadedGameState}
+        onClose={() => setSelectedCounterOfferId(null)}
       />
       {/* v0.4.1 Phase 5: Event log panel */}
       {eventLogOpen && (
@@ -1005,6 +1236,7 @@ function App() {
       <AdvanceTurnModal
         onReviewPriorities={reviewPreAdvancePriorities}
         onReviewItem={reviewPreAdvanceItem}
+        onResolveBlocker={handlePresidentialInboxAction}
       />
       {appScreen === 'game' && <MapModeLegend />}
       {appScreen === 'game' && <Minimap />}
@@ -1013,7 +1245,7 @@ function App() {
           aria-label="Map controls and status"
           style={{ display: 'contents' }}
         >
-          <BottomStatusStrip />
+          <BottomStatusStrip eventCatalog={eventCatalogFull} />
         </nav>
       )}
 
@@ -1046,6 +1278,21 @@ function App() {
               if (!warroomCommandStaysInRoom(command)) {
                 setAppScreen('game');
               }
+            }}
+          />
+          <PresidentDeskShell
+            state={loadedGameState}
+            osidNameMap={osidDisplayNames}
+            onAction={handlePresidentialInboxAction}
+            onAdvance={() => useGameStore.getState().setAdvanceTurnPending(true)}
+            onOpenArmyHQ={() => {
+              openArmyHQTab(useGameStore.getState(), 'briefing');
+              setAppScreen('game');
+            }}
+            onOpenMap={() => setAppScreen('game')}
+            onOpenRecords={() => {
+              openArmyHQRecordsSubTab(useGameStore.getState(), 'aftermath');
+              setAppScreen('game');
             }}
           />
           <WarroomStatusBar

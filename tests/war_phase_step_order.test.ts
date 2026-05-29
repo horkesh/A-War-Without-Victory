@@ -38,6 +38,10 @@ describe('war-phase step ordering', () => {
         // Operation casualties must be attributed after attacks resolve
         assertBefore('resolve-attack-orders', 'attribute-operation-casualties');
 
+        // ADR-0005 v3.0: Army HQ ops inject after queued ops and before triggered ops
+        assertBefore('inject-queued-operations', 'inject-army-hq-operations');
+        assertBefore('inject-army-hq-operations', 'check-triggered-operations');
+
         // Live operation rosters must be reconciled before sector offensives advance
         assertBefore('jna-phantom-withdrawals', 'reconcile-live-operation-truth');
         assertBefore('reconcile-live-operation-truth', 'advance-sector-offensives');
@@ -150,6 +154,8 @@ describe('war-phase step ordering', () => {
         // +1 from clear-displacement-event-log (LANE-NIGHTSHIFT-V093-LANE-D-CONTENT-V2-PATH-A, 834f59f9, 2026-05-08)
         // +1 from apply-siege-morale-drain (LANE-NIGHTSHIFT-SRK-SIEGE-DEFENDER-MORALE-PHASE-1, 2026-05-08; runs after morale-drift, default-off shadow flag SIEGE_MORALE_DRAIN_ENABLED)
         // +1 from resolve-counter-offers (B3 negotiation counter-offer docket, 2026-05-17)
-        expect(stepNames.length).toBe(177);
+        // -1 from consolidate-rear-pockets removed (2026-05-28; paramilitaries handle isolated pockets)
+        // +1 from inject-army-hq-operations (ADR-0005 v3.0 Army HQ ops, flag-gated ENABLE_TG_ARMY_HQ_OPS, 2026-05-29)
+        expect(stepNames.length).toBe(179);
     });
 });

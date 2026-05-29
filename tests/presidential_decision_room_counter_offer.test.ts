@@ -54,7 +54,7 @@ describe('Presidential Decision Room counter-offer surface', () => {
             category: 'counter_offer',
             severity: 'blocking',
             title: 'Counter-offer from HRHB',
-            sourceOwner: 'Negotiation counter-offer docket',
+            sourceOwner: 'Counter-offer docket',
             sourceLabel: 'Owen-Stoltenberg Plan',
             actionLabel: 'Review Counter',
             navigationTarget: { kind: 'counter-offer', counterOfferId: 'HRHB_001' },

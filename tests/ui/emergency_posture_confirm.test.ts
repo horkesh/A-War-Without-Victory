@@ -6,6 +6,7 @@ import { createElement } from 'react';
 import { ArmyHQModal } from '../../src/ui/map/components/army_hq/ArmyHQModal.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import { setLocale } from '../../src/ui/map/i18n';
 
 function makeLoadedState(): LoadedGameState {
     return {
@@ -59,6 +60,7 @@ describe('Army HQ emergency posture confirmation', () => {
 
     afterEach(() => {
         cleanup();
+        setLocale('en');
         delete (window as unknown as { awwv?: Record<string, unknown> }).awwv;
         useGameStore.setState(useGameStore.getInitialState());
     });
@@ -81,5 +83,25 @@ describe('Army HQ emergency posture confirmation', () => {
         await waitFor(() => expect(stageCorpsStanceOrder).toHaveBeenCalledTimes(2));
         expect(stageCorpsStanceOrder).toHaveBeenNthCalledWith(1, 'vrs_1st_krajina', 'defensive');
         expect(stageCorpsStanceOrder).toHaveBeenNthCalledWith(2, 'vrs_drina', 'defensive');
+    });
+
+    it('localizes Army HQ shell chrome and emergency posture dialog in BCS mode', () => {
+        setLocale('bcs');
+        render(createElement(ArmyHQModal));
+
+        expect(screen.getByRole('dialog', { name: 'Stab armije' })).toBeTruthy();
+        expect(screen.getByRole('tab', { name: 'BRIFING' })).toBeTruthy();
+        expect(screen.getByRole('tab', { name: 'SAZETAK' })).toBeTruthy();
+        expect(screen.getByRole('tab', { name: 'ZAPISI' })).toBeTruthy();
+        expect(screen.getByRole('tab', { name: 'LJUDSTVO' })).toBeTruthy();
+
+        fireEvent.change(screen.getByRole('combobox'), { target: { value: 'defensive' } });
+
+        const confirmDialog = screen.getByRole('dialog', { name: 'Potvrdi hitnu naredbu polozaja' });
+        expect(confirmDialog).toBeTruthy();
+        expect(screen.getByText('Potvrdi masovnu naredbu')).toBeTruthy();
+        expect(confirmDialog.textContent).toContain('SVE U ODBRANU');
+        expect(screen.getByText(/pripremiti istu naredbu polozaja za sva 2 korpusa/)).toBeTruthy();
+        expect(screen.queryByText('Confirm Bulk Order')).toBeNull();
     });
 });

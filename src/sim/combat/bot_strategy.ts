@@ -430,8 +430,6 @@ export interface ArmyOperationPriority {
     min_outcome: 'decisive_victory' | 'victory' | 'costly_victory' | 'stalemate' | 'repulsed';
     /** Additional direct OSID targets (additive with target_municipalities, does NOT override it). */
     target_osids?: string[];
-    /** Municipality patterns for OSIDs to avoid. */
-    avoid_municipalities?: string[];
     /**
      * Municipalities whose friendly front OSIDs should be added to hold_osids.
      * These are defended regardless of corps stance — hold_municipalities runs

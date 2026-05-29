@@ -427,7 +427,7 @@ Report: [20260303_OFFICERS_SYSTEM_IMPLEMENTATION.md](../40_reports/implemented/2
 
 **Tracking:** Per-brigade `EliteBrigadeTracker` records cumulative loan episodes (`EliteLoanEpisode`) with corps, reason, turns deployed, casualties taken, battles fought, OSIDs captured, and KIA inflicted. `EliteLoanState` on each eligible formation tracks current loan status, start personnel, and degradation.
 
-**State:** `elite_loan_states` (per formation), `elite_brigade_trackers` (per brigade), `pending_reserve_requests`. Pipeline step: `tick-elite-loans` (after `advance-sector-offensives`, before `officer-succession`). Module: `src/sim/combat/army_reserve_system.ts`. Types: `src/state/elite_loan_types.ts`.
+**State:** `elite_loan_states` (per formation), `elite_brigade_trackers` (per brigade), `pending_reserve_requests`, `reserve_request_history`. Pipeline step: `tick-elite-loans` (after `advance-sector-offensives`, before `officer-succession`). Module: `src/sim/combat/army_reserve_system.ts`. Types: `src/state/elite_loan_types.ts`. `pending_reserve_requests` and `reserve_request_history` are required persisted save/load arrays as of save schema v28; legacy saves materialize empty arrays. Triggered-operation bookkeeping records `triggered_operations_accepted`, `declined_operations`, and `used_operation_names` are required persisted save/load records as of save schema v29; legacy saves materialize empty records and current saves validate turn/count values as non-negative integers. Officer decision queues `pending_officer_events` and `officer_decision_history` are required persisted save/load arrays as of save schema v30; legacy saves materialize empty arrays and current saves validate conservative row shape without changing officer behavior. Consequence runtime queues `cascade_penalties`, `offensive_ops_suppressions`, `alliance_locks`, and `bot_priority_shifts` are required persisted save/load arrays as of save schema v31; legacy saves materialize empty arrays and current saves validate conservative row shape without changing consequence behavior.
 
 ### 7.8 Army HQ Gathering (Adaptive Doctrine)
 
@@ -592,7 +592,7 @@ Bot factions always pick historical option for foundational decisions.
 
 #### §7.10.8 Event Queue
 
-Maximum 3 events per turn. Candidates sorted by `priority` (lower fires first, default 100). Overflow queued to next turn. `mutex_group` field prevents two events in same group from co-firing (not yet implemented — deferred to v0.6.2).
+Maximum 4 events per turn. Candidates are sorted by `priority` (lower fires first, default 100), `trigger.turn_min`, then event id. Same-turn `mutex_group` filtering runs after sorting and before the cap: the first candidate in a group remains eligible and later same-group candidates are suppressed for that turn. Events suppressed only by the cap persist as `military.event_overflow_queue` ids in save schema v22, re-enter evaluation on later turns, and are re-gated before they can fire. Mutex-suppressed, stale, phase-blocked, trigger-blocked, recurrence-blocked, cooldown-blocked, or probability-failed ids are not retained in the queue.
 
 ### 7.11 Corps Diagnostic Fields
 

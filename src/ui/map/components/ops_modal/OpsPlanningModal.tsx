@@ -11,6 +11,7 @@ import { usePrediction } from './usePrediction';
 import { OPERATION_NAMES, simpleHash } from '../../../../sim/combat/operation_names';
 import { Z } from '../../../shared/zIndex';
 import { getOpsPhaseAdvanceMessage, getOpsPhaseGateMessage, planHasObjectiveAndBrigade } from './phaseGate';
+import { t } from '../../i18n';
 import { getNextAxisId, hasOpsPlanningDraftAssignments } from './opsPlanningDraft';
 
 function generateOpName(corpsId: string, turn: number, faction: string): string {
@@ -407,10 +408,10 @@ export function OpsPlanningModal() {
                         id="ops-planning-discard-title"
                         className="text-[11px] font-bold uppercase tracking-[0.18em] text-red-300"
                     >
-                        Discard operations draft?
+                        {t('opsPlanning.discard.title')}
                     </div>
                     <p className="mt-2 text-[11px] leading-relaxed text-text-secondary">
-                        This plan already has objectives or brigades assigned. Closing now will abandon the draft.
+                        {t('opsPlanning.discard.body')}
                     </p>
                     <div className="mt-4 flex justify-end gap-2">
                         <button
@@ -420,7 +421,7 @@ export function OpsPlanningModal() {
                                        text-[10px] font-bold uppercase tracking-[0.14em] text-text-secondary
                                        hover:border-accent-gold/35 hover:text-white"
                         >
-                            Keep Planning
+                            {t('opsPlanning.discard.keepPlanning')}
                         </button>
                         <button
                             type="button"
@@ -429,7 +430,7 @@ export function OpsPlanningModal() {
                                        text-[10px] font-bold uppercase tracking-[0.14em] text-red-200
                                        hover:bg-red-500/25"
                         >
-                            Discard Draft
+                            {t('opsPlanning.discard.discardDraft')}
                         </button>
                     </div>
                 </div>
@@ -474,7 +475,7 @@ export function OpsPlanningModal() {
             <button
                 type="button"
                 onClick={requestCloseOpsPlanning}
-                title="Close operations planning (ESC)"
+                title={t('opsModal.closePlanningTitle')}
                 className="absolute top-4 right-4 z-30 w-10 h-10 flex items-center justify-center
                            text-text-secondary hover:text-white rounded-full
                            bg-[rgba(20,18,15,0.6)] hover:bg-[rgba(20,18,15,0.9)]

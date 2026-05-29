@@ -26,7 +26,7 @@ export function getOpsPhaseGateMessage(
     if (target === 'commander') return null;
     if (target === 'plan' && !hasCommander) return t('opsPlanning.gate.selectCommander');
     if ((target === 'g2_assessment' || target === 'authorize') && !planHasObjectiveAndBrigade(plan)) {
-        return t('opsPlanning.gate.addObjectiveAndBrigade');
+        return t('opsPlanning.gate.objectiveAndBrigade');
     }
     if (target === 'authorize' && !g2AssessmentViewed) return t('opsPlanning.gate.reviewG2');
     return null;

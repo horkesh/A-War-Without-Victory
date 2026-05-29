@@ -1,9 +1,46 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 238 lessons across 9 topic files.
+> Last restructured: 2026-04-11. 243 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
+## New Lessons (2026-05-26)
+
+### [Calibration] Rule 4 violations are NOT uniformly safe to remove — wrong-capture vs attrition-sink distinction — see `docs/life_lessons/calibration.md`
+- Krivajevici (R29) was in the mismatch list (sim=RS, painted=RBiH — VRS CAPTURING it incorrectly) → removing safe: +9 count. Hotonj (R31) NOT in mismatch list (sim=RBiH, correctly matched — VRS FAILING to capture it, attrition-sink) → removing freed brigades from futile combat → −17 count. Before removing any Rule 4 violation, check `compare_painted_vs_sim.cjs`: if OSID is in mismatch → wrong-capture (safe); if NOT in mismatch → attrition-sink (load-bearing, do not remove).
+
+### [Calibration] Event-based control_change is cascade-safe for historically datable territory changes — see `docs/life_lessons/calibration.md`
+- R32 added control_change to `operation_storm_1995` for 9 Sanski Most OSIDs (painted=RBiH, sim=RS): +6 count / +0.8pp area, HRHB cascade intact (120 vs 121). Same pattern as R26 Srebrenica (+9). Events fire at turn 174+, after all combat ops resolved → no brigade attrition cascade. For "RS holds territory at Dayton that history liberated", add control_change to the existing event in `war_1995.json` rather than modifying op objectives.
+
+### [Calibration] Audit ALL existing op objectives for Rule 4 violations — not just new ones — see `docs/life_lessons/calibration.md`
+- krivajevici (Op Prsten, ilijas_ring) was a painted=RBiH VRS objective that sat undetected until a calibration mismatch flagged it. Removing it as a one-line subtractive change produced +9 correctly placed OSIDs (+2.7pp area). Rule: before any calibration session, run a bulk audit of all op objectives against `painted_control_oct1995.json` — cross-faction objectives are Rule 4 violations regardless of when they were written.
+
+### [Calibration] Injecting a pre-planned op on a corps with an existing triggered op causes home-base losses even if the op never executes — see `docs/life_lessons/calibration.md`
+- R28: Op Sana 95 (arbih_5th_corps) queued behind a triggered "Operation Sana" and stayed in planning w173-188 with zero captures. Brigade marching toward staging during planning vacated bosanska_krupa defensive sectors → VRS captured 6 correctly-RBiH OSIDs. Net: −6. Rule: before adding any pre-planned op, check `triggered_operations.ts` for existing ops on that corps. If one exists, the pre-planned always queues too late and brigade marching during planning creates defensive gaps with zero upside.
+
+### [Calibration] Subtractive pre-planned op changes are the productive calibration lane — additive changes hit cascade ceiling at R22 — see `docs/life_lessons/calibration.md`
+- Five consecutive additive pre-planned ops (R23/R24/R25/R27/R28) all regressed or were zero-delta. First subtractive change (R29) produced +9 count / +2.7pp area — largest single gain of the calibration arc. Mechanism: adding combat disrupts the HRHB western-Bosnia cascade; removing combat enhances it. Rule: when additive pre_planned changes consistently cascade negatively, switch to auditing existing op objectives for removal candidates (Rule 4 violations, non-adjacent dead-ends, painted-wrong-faction targets).
+
+## New Lessons (2026-05-29)
+
+### [Process] STOP-and-report safeguard prevents broken cleanups when audits recommend deletion — see `docs/life_lessons/process.md`
+- Phase I cleanup arc (Packets I3a/I5/I6) fired the safeguard 5x correctly. Audit recommendations are hypotheses, not commands; dispatched agents must verify across `src/` + `tests/` + `tools/` and STOP if a live consumer is found. Per-entry triage outcomes: CLEANED / SKIPPED-CONSUMER / DEFERRED-CALIBRATION / DEFERRED-PACKET / COMMENTS-CURRENT.
+
+### [Process] Audit "0 importers" claims must be verified across src + tests + tools before deletion — see `docs/life_lessons/process.md`
+- Phase I1 audit's "0 importers" claims were scoped to `src/**` only; Phase I3 aborted 3 separate cleanup cycles when test-file imports surfaced. Pre-deletion grep must cover all three scopes; ambiguous-scope audit text defaults to scoped-to-src.
+
+### [Calibration] Baseline-byte-identical is the proof-of-deadness for cleanup commits — see `docs/life_lessons/calibration.md`
+- Pure dead-code removal must produce zero baseline drift. If `tools/scenario_runner/run_baseline_regression.ts` reports any artifact hash change post-cleanup, the code wasn't dead — restore and re-investigate consumers. Phase I2/I4/I5/I6 all proved byte-identical; I3a's narrowed scope (4 zero-importer exports only) was the corrected version after the broader I3 aborted.
+
+## New Lessons (2026-05-28)
+
+### [Events] Engine has two write channels for event effects — pick the right one — see `docs/life_lessons/events.md`
+- `dimension_shifts[].dimension` requires a typed `DimensionId` (6 names only); `effects[].kind` requires an `EffectKind` from `EFFECT_KIND_ORDER`. The two vocabularies are disjoint — wrong-channel authoring is a silent DEAD write at runtime. Loader validation (Packet 44, `event_loader.ts:939+1003`) now catches both at catalog load. Pre-validation, 11 DEAD writes had accumulated across 6 packets. See `memory/engine_dimension_vocabulary.md` for the canonical map.
+
+## New Lessons (2026-05-24)
+
+### [Process] Skills are helper memory, not canon authority - verify live paths before prompts � see `docs/life_lessons/process.md`
+- A Claude calibration prompt cited stale v0.6 canon paths because a local role skill was stale. Rule: before generating prompts, handoffs, or agent instructions that cite canon files, run a live path check against `docs/10_canon/`. If a skill disagrees with disk, fix the skill and document the sweep.
 ## New Lessons (2026-05-17)
 
 ### [Process] Sub-agent "wrote file" claims with synthetic verification outputs can be fully hallucinated — parent-side Glob audit is mandatory — see `docs/life_lessons/process.md`
@@ -451,12 +488,12 @@
 
 | File | Topics | Lessons | Load when... |
 |------|--------|---------|-------------|
-| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 48 | Running calibration scenarios, tuning parameters, OOB changes |
+| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 50 | Running calibration scenarios, tuning parameters, OOB changes |
 | [combat.md](life_lessons/combat.md) | Combat, Brigade Distribution, March System | 4 | Combat resolution, brigade movement, march/distribution system |
 | [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 59 | Changing engine structure, state, pipeline, adding systems |
 | [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 10 | Modifying derived data, running data scripts, geometry work |
 | [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 14 | Frontend, map, tactical overlay, modal work |
-| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 56 | General development process (skim at session start) |
+| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 58 | General development process (skim at session start) |
 | [sectors.md](life_lessons/sectors.md) | Sectors, Design | 9 | Sector system, front lines, territory assignment, sub-segments |
 | [platform.md](life_lessons/platform.md) | Platform, Tooling | 4 | Build issues, platform-specific bugs, tooling |
-| [events.md](life_lessons/events.md) | Events | 1 | Event system, flag gates, triggers |
+| [events.md](life_lessons/events.md) | Events | 2 | Event system, flag gates, triggers |

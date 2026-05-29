@@ -11,6 +11,7 @@
 
 import { copyFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 import { checkDataPrereqs, formatMissingRemediation } from '../../src/data_prereq/check_data_prereqs.js';
 import { runScenario } from '../../src/scenario/scenario_runner.js';
@@ -18,6 +19,14 @@ import { dumpBotOrdersPerfProfile } from '../../src/sim/combat/_perf_profile_bot
 
 /** Default scenario when user asks to "run scenarios" without specifying one (historical 52w, full OOB). */
 const DEFAULT_SCENARIO = 'data/scenarios/apr1992_historical_52w.json';
+
+export async function copyFinalSaveToLatestRun(finalSavePath: string, repoRoot: string): Promise<string> {
+  const derivedDir = join(repoRoot, 'data', 'derived');
+  await mkdir(derivedDir, { recursive: true });
+  const destPath = join(derivedDir, 'latest_run_final_save.json');
+  await copyFile(finalSavePath, destPath);
+  return destPath;
+}
 
 function parseArgs(): {
   scenario: string;
@@ -131,10 +140,7 @@ async function main(): Promise<void> {
   }
 
   if (enableMap) {
-    const derivedDir = join(process.cwd(), 'data', 'derived');
-    await mkdir(derivedDir, { recursive: true });
-    const destPath = join(derivedDir, 'latest_run_final_save.json');
-    await copyFile(result.paths.final_save, destPath);
+    await copyFinalSaveToLatestRun(result.paths.final_save, process.cwd());
     process.stdout.write('\n--- Tactical map viewer ---\n');
     process.stdout.write('Final state copied to: data/derived/latest_run_final_save.json\n');
     process.stdout.write('To view on map:\n');
@@ -148,12 +154,14 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((err: unknown) => {
-  const withRunDir = err as Error & { run_id?: string; out_dir?: string };
-  if (withRunDir?.out_dir) {
-    process.stderr.write(`Run failed. See ${withRunDir.out_dir}/failure_report.txt\n`);
-  } else {
-    console.error('run_scenario failed', err);
-  }
-  process.exitCode = 1;
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((err: unknown) => {
+    const withRunDir = err as Error & { run_id?: string; out_dir?: string };
+    if (withRunDir?.out_dir) {
+      process.stderr.write(`Run failed. See ${withRunDir.out_dir}/failure_report.txt\n`);
+    } else {
+      console.error('run_scenario failed', err);
+    }
+    process.exitCode = 1;
+  });
+}

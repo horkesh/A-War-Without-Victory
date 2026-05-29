@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { t } from '../i18n';
 import { CRASH_DIAGNOSTICS_APP_VERSION, recordCrashDiagnostic } from '../services/telemetry/crashCapture';
 
 type RootErrorBoundaryProps = {
@@ -46,12 +47,12 @@ export class RootErrorBoundary extends Component<RootErrorBoundaryProps, RootErr
     return (
       <div
         role="status"
-        aria-label={`${this.props.zone} unavailable`}
+        aria-label={t('rootError.unavailableAria', { zone: this.props.zone })}
         data-testid={`root-error-boundary-${this.props.zone.replace(/\s+/g, '-')}`}
         className={boundaryClass(this.props.zone)}
       >
-        <div className="font-semibold text-red-300">{zoneLabel} unavailable</div>
-        <div className="mt-1 text-gray-300">Open another panel or reload the map.</div>
+        <div className="font-semibold text-red-300">{t('rootError.unavailable', { zone: zoneLabel })}</div>
+        <div className="mt-1 text-gray-300">{t('rootError.reloadHint')}</div>
       </div>
     );
   }

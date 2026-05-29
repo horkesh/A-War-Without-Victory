@@ -141,7 +141,7 @@ describe('GUI audit Batch G dead/no-op controls', () => {
         expect(screen.getByText(/override path unavailable/i)).toBeTruthy();
     });
 
-    it('disables presidential decision actions and explains missing desktop bridge', () => {
+    it('summarizes presidential event decisions without exposing response actions in browser view', () => {
         render(createElement(PresidentialAttentionPanel, {
             playerFaction: 'RBiH',
             gameState: makeState({
@@ -164,7 +164,8 @@ describe('GUI audit Batch G dead/no-op controls', () => {
         }));
 
         expect(screen.getByText(/desktop command bridge unavailable/i)).toBeTruthy();
-        expect((screen.getByRole('button', { name: 'Accept' }) as HTMLButtonElement).disabled).toBe(true);
+        expect(screen.getByText(/1 presidential response awaiting dossier review/i)).toBeTruthy();
+        expect(screen.queryByRole('button', { name: 'Accept' })).toBeNull();
     });
 
     it('keeps emergency posture visible but disabled when the desktop bridge is unavailable', () => {

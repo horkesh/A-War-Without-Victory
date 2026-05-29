@@ -22,6 +22,7 @@ import { buildFrontLinesGeoJSON } from '../../map/builders/buildFrontLinesGeoJSO
 import { useGameStore } from '../../store/gameStore';
 import { formatTurnLabel, turnToDateString } from '../../utils/formatters';
 import type { WarroomNavigationCommand } from '../../utils/warroomNavigation';
+import { t } from '../../i18n';
 import { WARROOM_SCENE_URLS } from './warroom-asset-urls';
 import fallbackRbihRegions from '../../../warroom/assets/hq_rbih_regions.json';
 import fallbackRsRegions from '../../../warroom/assets/hq_rs_regions.json';
@@ -42,6 +43,18 @@ interface WarroomRegion {
   bounds: WarroomRegionBounds;
   polygon?: [number, number][];
   tooltip?: string;
+}
+
+interface WarroomRegionManifestRegion {
+  id: string;
+  type?: string;
+  bounds: WarroomRegionBounds;
+  polygon?: number[][];
+  tooltip?: string;
+}
+
+interface WarroomRegionManifest {
+  regions: WarroomRegionManifestRegion[];
 }
 
 interface WarroomMapOverlayModel {
@@ -306,7 +319,7 @@ export function getWarroomBoardDateLabel(
   if (cleanRawDate && cleanRawDate !== 'UNKNOWN') return cleanRawDate;
   const labelDate = state?.label ? formatTurnLabel(state.label).split('·')[0].trim() : '';
   if (labelDate && !labelDate.toLowerCase().startsWith('turn ')) return labelDate;
-  return 'Date Pending';
+  return t('warroomShell.datePending');
 }
 
 function factionInkColor(faction: string | null): string {
@@ -344,7 +357,11 @@ function WarroomProjectedMap({ region, model, playerFaction }: {
         }}
       >
         {model ? (
-          <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" style={{ display: 'block', width: '100%', height: '100%' }}>
+          // viewBox cropped to the projector's actual output region (makeProjector
+          // produces content in [4..96]x[20..80] of a 100x100 space). Cropping
+          // removes the large blank padding that made the map look small on the
+          // corkboard. A slight crop is preferable to large blank borders.
+          <svg viewBox="4 20 92 60" preserveAspectRatio="xMidYMid slice" style={{ display: 'block', width: '100%', height: '100%' }}>
             <rect x="0" y="0" width="100" height="100" fill="rgba(233,222,190,0.9)" />
             <g fill="none" stroke="rgba(66,58,45,0.26)" strokeWidth="0.22">
               {model.outlinePaths.map((path, index) => <path key={`outline-${index}`} d={path} />)}
@@ -371,7 +388,7 @@ function WarroomProjectedMap({ region, model, playerFaction }: {
               textTransform: 'uppercase',
             }}
           >
-            Map updating
+            {t('warroomShell.mapUpdating')}
           </div>
         )}
       </div>
@@ -397,13 +414,16 @@ function WarroomDateBoard({ region, label }: { region: WarroomRegion; label: str
       <div
         data-testid="warroom-date-board-label"
         style={{
-          color: 'rgba(28, 84, 172, 0.86)',
+          // Darker, smaller, less aggressive — reads as a scribbled marker
+          // note rather than a billboarded UI label. Less luminous blue
+          // (was rgba(28,84,172,0.86)) → dark navy ink at higher opacity.
+          color: 'rgba(15, 32, 70, 0.92)',
           fontFamily: '"Segoe Print", "Segoe UI", Arial, sans-serif',
-          fontSize: 'clamp(9px, 1.35vw, 24px)',
-          fontWeight: 700,
+          fontSize: '14px',
+          fontWeight: 600,
           lineHeight: 1.05,
           transform: 'rotate(-1.4deg)',
-          textShadow: '0 0 1px rgba(255,255,255,0.24)',
+          textShadow: 'none',
           whiteSpace: 'normal',
           textAlign: 'center',
           maxWidth: '96%',
@@ -501,10 +521,34 @@ function WarroomHotspot({ region, onClick }: WarroomHotspotProps) {
 
 // ── Region data by faction ─────────────────────────────────────────────────
 
+const FALLBACK_REGION_MANIFESTS_BY_FACTION: Record<string, WarroomRegionManifest> = {
+  RBiH: fallbackRbihRegions,
+  RS: fallbackRsRegions,
+  HRHB: fallbackHrhbRegions,
+};
+
+function normalizeWarroomRegionPolygon(points: number[][] | undefined): [number, number][] | undefined {
+  if (!points) return undefined;
+  const polygon = points
+    .filter((point) => point.length >= 2 && Number.isFinite(point[0]) && Number.isFinite(point[1]))
+    .map((point): [number, number] => [point[0], point[1]]);
+  return polygon.length >= 3 ? polygon : undefined;
+}
+
+function normalizeWarroomRegions(manifest: WarroomRegionManifest): WarroomRegion[] {
+  return manifest.regions.map((region) => ({
+    id: region.id,
+    type: region.type,
+    bounds: region.bounds,
+    polygon: normalizeWarroomRegionPolygon(region.polygon),
+    tooltip: region.tooltip,
+  }));
+}
+
 const FALLBACK_REGIONS_BY_FACTION: Record<string, WarroomRegion[]> = {
-  RBiH: (fallbackRbihRegions as { regions: WarroomRegion[] }).regions,
-  RS: (fallbackRsRegions as { regions: WarroomRegion[] }).regions,
-  HRHB: (fallbackHrhbRegions as { regions: WarroomRegion[] }).regions,
+  RBiH: normalizeWarroomRegions(FALLBACK_REGION_MANIFESTS_BY_FACTION.RBiH),
+  RS: normalizeWarroomRegions(FALLBACK_REGION_MANIFESTS_BY_FACTION.RS),
+  HRHB: normalizeWarroomRegions(FALLBACK_REGION_MANIFESTS_BY_FACTION.HRHB),
 };
 
 const CANONICAL_REGION_URLS_BY_FACTION: Record<string, string> = {
@@ -638,7 +682,7 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker }: WarroomShell
             textTransform: 'uppercase',
           }}
         >
-          Warroom unavailable until a campaign side is selected.
+          {t('warroomShell.unavailable')}
         </div>
         <button
           type="button"
@@ -657,7 +701,7 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker }: WarroomShell
             boxShadow: '0 8px 22px rgba(0,0,0,0.38)',
           }}
         >
-          Open Side Picker
+          {t('warroomShell.openSidePicker')}
         </button>
       </div>
     );

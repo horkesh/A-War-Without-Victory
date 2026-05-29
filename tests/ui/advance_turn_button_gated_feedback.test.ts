@@ -7,6 +7,7 @@ import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import { PresidentialToolbar } from '../../src/ui/map/components/PresidentialToolbar.js';
 import { WarroomStatusBar } from '../../src/ui/map/components/warroom/WarroomStatusBar.js';
+import { AdvanceTurnModal } from '../../src/ui/map/components/warroom/AdvanceTurnModal.js';
 import { advanceTurnAndSync } from '../../src/ui/map/desktop/orderActions.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 
@@ -117,7 +118,7 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(useGameStore.getState().advanceTurnPending).toBe(false);
   });
 
-  it('Warroom ADVANCE routes a blocked turn to the Decision Room callback when available', () => {
+  it('Warroom ADVANCE opens the advance review modal even when the turn is blocked', () => {
     const onReviewPriorities = vi.fn();
     setLoadedState(makeState({
       presidentialReviewQueue: {
@@ -133,11 +134,26 @@ describe('ADVANCE_TURN gated feedback', () => {
     render(createElement(WarroomStatusBar, { onReviewPriorities }));
 
     const button = screen.getByRole('button', { name: /resolve 2 pending decisions to continue/i });
-    expect(button.getAttribute('title')).toContain('Decision Room');
+    expect(button.getAttribute('title')).toContain('Resolve 2 pending decisions');
 
     fireEvent.click(button);
 
-    expect(onReviewPriorities).toHaveBeenCalledTimes(1);
+    expect(onReviewPriorities).not.toHaveBeenCalled();
+    expect(useGameStore.getState().advanceTurnPending).toBe(true);
+  });
+
+  it('advance clearance opens a single hard blocker resolver directly', async () => {
+    const onResolveBlocker = vi.fn();
+    setLoadedState(makeState({
+      pendingParamilitaryRequests: [
+        { faction: 'RS', target_osid: 'bratunac_1', strength: 120, estimated_civilian_risk: 14 },
+      ],
+    }));
+    useGameStore.setState({ advanceTurnPending: true, osidDisplayNames: { bratunac_1: 'Bratunac' } });
+
+    render(createElement(AdvanceTurnModal, { onResolveBlocker }));
+
+    expect(onResolveBlocker).toHaveBeenCalledWith('paramilitary_review', 'paramilitary:40');
     expect(useGameStore.getState().advanceTurnPending).toBe(false);
   });
 
@@ -149,16 +165,16 @@ describe('ADVANCE_TURN gated feedback', () => {
 
     expect(screen.getByText('RAT')).toBeTruthy();
     expect(screen.getByText('PRIORITETI')).toBeTruthy();
-    expect(screen.getByText('NAPRIJED')).toBeTruthy();
+    expect(screen.getByText('NASTAVI')).toBeTruthy();
     expect(screen.queryByText('WAR')).toBeNull();
     expect(screen.queryByText('PRIORITIES')).toBeNull();
     expect(screen.queryByText('ADVANCE')).toBeNull();
 
     fireEvent.click(screen.getByText('PRIORITETI'));
 
-    expect(screen.getByText('Pregled prije napredovanja')).toBeTruthy();
-    expect(screen.getByText('Nijedna ziva stavka stola nece biti zatrpana sljedecim potezom.')).toBeTruthy();
-    expect(screen.getByText('Izvorni prijenosi')).toBeTruthy();
+    expect(screen.getByText('Pregled prije nastavka')).toBeTruthy();
+    expect(screen.getByText('Nijedna ziva stavka stola nece biti zakopana sljedecim potezom.')).toBeTruthy();
+    expect(screen.getByText('Predaje izvora')).toBeTruthy();
   });
 
   it('toolbar localizes the pending-decision advance gate title in BCS mode', () => {
@@ -196,17 +212,17 @@ describe('ADVANCE_TURN gated feedback', () => {
       pressureWarning: false,
     }));
 
-    expect(screen.getByText('HRONIKA')).toBeTruthy();
-    expect(screen.getByText('SAZETAK')).toBeTruthy();
+    expect(screen.getByText('STO')).toBeTruthy();
+    expect(screen.getByText('RATNA MAPA')).toBeTruthy();
+    expect(screen.getByText('ARMIJSKI HQ')).toBeTruthy();
     expect(screen.getByText('ZAPISI')).toBeTruthy();
-    expect(screen.getByText('DOGADJAJI')).toBeTruthy();
+    expect(screen.getByText('HRONIKA')).toBeTruthy();
     expect(screen.getByText('KODEKS')).toBeTruthy();
-    expect(screen.getByText('OVLAST')).toBeTruthy();
     expect(screen.getByText(/Potez 40/)).toBeTruthy();
-    expect(screen.getByText(/NAPRIJED/)).toBeTruthy();
-    expect(screen.getByRole('group', { name: 'Komandno ovlastenje: 4/8' })).toBeTruthy();
-    expect(screen.getByTitle('Hronologija kampanje')).toBeTruthy();
-    expect(screen.getByTitle('Posjeti Stab armije [H]')).toBeTruthy();
+    expect(screen.getByText(/SLJEDECI POTEZ/)).toBeTruthy();
+    expect(screen.getByRole('group', { name: 'Komandni autoritet: 4/8' })).toBeTruthy();
+    expect(screen.getByTitle('Kampanjska hronika')).toBeTruthy();
+    expect(screen.getAllByTitle('Posjeti Armijski HQ [H]').length).toBeGreaterThan(0);
     expect(screen.queryByText('CHRONICLE')).toBeNull();
     expect(screen.queryByText('SUMMARY')).toBeNull();
     expect(screen.queryByText('EVENTS')).toBeNull();
