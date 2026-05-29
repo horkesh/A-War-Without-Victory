@@ -42,6 +42,14 @@ import {
     hasAvailableSlot,
 } from './corps_operation_helpers.js';
 import { evaluateLaunchFeasibility, type LaunchFeasibilityResult } from './sector_offensive_launch_helpers.js';
+// ADR-0005 v3.0 Army HQ Operations: faction-wide cross-corps offensives, frequency-gated.
+import {
+    ENABLE_TG_ARMY_HQ_OPS,
+    MAX_ARMY_HQ_OPS_PER_FACTION_PER_YEAR,
+    ARMY_HQ_OP_COOLDOWN_TURNS,
+    getAnchorBrigade,
+} from './tactical_group_config.js';
+import type { ArmyHqOpId, ArmyHqOperation } from '../../state/game_state.js';
 
 const MIN_OPERATION_PARTICIPANTS = 2;
 
@@ -73,6 +81,18 @@ interface TriggeredOpDef {
     planning_duration: number;
     /** Override minimum attack outcome for brigades in this operation. */
     min_attack_outcome?: CorpsOperation['min_attack_outcome'];
+    /** ADR-0005 v3.0: when set, this triggered op is an Army HQ operation marker
+     *  (faction-wide cross-corps donor pool, doubled cohesion bleed, frequency-capped).
+     *  Marker slug (e.g. "krivaja_95"); the full ArmyHqOpId
+     *  ("ahq:<faction>:<scenario_year>:<slug>") is composed at injection. Injected by the
+     *  `inject-army-hq-operations` war-phase step (gated by ENABLE_TG_ARMY_HQ_OPS). */
+    army_hq_op_id?: string;
+    /** ADR-0005 v3.0: true for defs that exist ONLY for the Army HQ path (net-new ops like
+     *  Vozuća-94 / Lukavac-93). These must NEVER fire via the legacy triggered path — flag-on
+     *  they inject via the AHQ step; flag-off they stay fully inert (the AHQ step early-returns).
+     *  PROMOTED pre-existing defs (Krivaja-95) leave this UNSET so they keep their legacy
+     *  flag-off behavior (188w byte-identity) and only move to the AHQ path when the flag is on. */
+    army_hq_only?: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -404,6 +424,12 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         // bostahovine_2.
         name: 'Operation Krivaja-95',
         faction: 'RS',
+        // ADR-0005 v3.0 D1: PROMOTE the existing Krivaja-95 triggered def to an Army HQ
+        // operation (do NOT add a parallel def — that would double-fire vrs_drina). The
+        // promotion marker spans the donor pool to all same-faction (RS) corps; the existing
+        // t>=170 §6 canonical floor + objectives are unchanged. The full ArmyHqOpId (with
+        // scenario_year) is composed at injection by the inject-army-hq-operations step.
+        army_hq_op_id: 'krivaja_95',
         primary_corps: 'vrs_drina',
         staging_osid: 'op:bratunac:bratunac_2',
         planning_duration: 3,
@@ -433,6 +459,60 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                     'op:srebrenica:suceska',
                 ],
                 staging_osid: 'op:bratunac:bratunac_2',
+            },
+        ],
+    },
+    {
+        // Operation Farz 95 — ADR-0005 v3.0 D4. ARBiH Army HQ-conducted offensive
+        // (codename "Farz", Sept 1995) against the VRS-held Vozuća pocket (Zavidovići),
+        // the documented BH Army HQ op with cross-corps donors from 2nd + 3rd Corps
+        // (BB2 pp.508-509: "directly conducted by BH Army HQ"). Modeled as an Army HQ
+        // operation (faction-wide RBiH donor pool) with a SINGLE anchor + faction-wide
+        // donors per D4 (multi-TG deferred). Capture was 1995, not 1994 (historian-
+        // confirmed: vozuca_2 = RS through apr1995, RBiH by oct1995 in painted truth).
+        //
+        // Objectives (the 3 OSIDs in the salient that flipped RS→RBiH between
+        // apr1995 and oct1995 painted truth, in attack order):
+        //   1. op:zavidovici:vozuca_2     — Vozuća pocket tip
+        //   2. op:maglaj:gornja_bocinja   — Gornja Bočinja
+        //   3. op:maglaj:donja_bocinja_2  — Donja Bočinja
+        // All three verified RS @apr1995 and RBiH @oct1995 in painted truth.
+        // Staging at op:zavidovici:hajderovici_2 (RBiH-painted at all dates; home of
+        // the 351st). Adjacency chain hajderovici_2 ↔ vozuca_2 ↔ gornja_bocinja ↔
+        // donja_bocinja_2 confirmed reachable (single contiguous Zavidovići/Maglaj
+        // salient). Anchor arbih_351st_liberation (resident at staging). Seed brigades
+        // are all arbih_3rd_corps: 351st + 328th (pocket) + 327th Vitezka Mountain
+        // (Maglaj-home, near the Bočinja objectives) + 7th Vitezka Muslim Liberation
+        // (3rd Corps shock bde; historical stand-in for the El Mujahid Detachment,
+        // which has no OOB id). Donor candidates beyond these are pulled faction-wide
+        // by the Army HQ Phase-A selection; the brigades list only seeds the
+        // participant set for injection — the cross-corps donor pool is NOT pinned.
+        name: 'Operation Farz 95',
+        faction: 'RBiH',
+        army_hq_op_id: 'farz_95',
+        army_hq_only: true, // net-new: never fires via legacy triggered path (inert flag-off)
+        primary_corps: 'arbih_3rd_corps',
+        staging_osid: 'op:zavidovici:hajderovici_2',
+        planning_duration: 3,
+        min_attack_outcome: 'repulsed',
+        trigger: (_state, turn) => turn >= 160,
+        axes: [
+            {
+                axis_id: 'vozuca_pocket',
+                name: 'Vozuća Pocket',
+                corps: 'arbih_3rd_corps',
+                brigades: [
+                    'arbih_351st_liberation' as FormationId,
+                    'arbih_328th_mountain' as FormationId,
+                    'arbih_327th_vitezka_mountain' as FormationId,
+                    'arbih_7th_vitezka_muslim_liberation' as FormationId,
+                ],
+                objectives: [
+                    'op:zavidovici:vozuca_2',
+                    'op:maglaj:gornja_bocinja',
+                    'op:maglaj:donja_bocinja_2',
+                ],
+                staging_osid: 'op:zavidovici:hajderovici_2',
             },
         ],
     },
@@ -885,6 +965,15 @@ export function checkTriggeredOperations(state: GameState): string[] {
     const injected: string[] = [];
 
     for (const def of TRIGGERED_OPS) {
+        // ADR-0005 v3.0 — legacy-path exclusion for Army HQ defs:
+        //  (a) army_hq_only defs (net-new Vozuća-94 / Lukavac-93) NEVER fire here, in either
+        //      flag state. Flag-on they inject via the AHQ step; flag-off the AHQ step early-
+        //      returns so they stay fully inert. This keeps 188w flag-off byte-identical.
+        //  (b) PROMOTED pre-existing defs (Krivaja-95: army_hq_op_id set, army_hq_only UNSET)
+        //      are skipped here ONLY when the flag is on (then the AHQ step owns them). Flag-off
+        //      they keep firing via this legacy path exactly as before (188w 940251e4acaff3d4).
+        if (def.army_hq_only) continue;
+        if (ENABLE_TG_ARMY_HQ_OPS && def.army_hq_op_id != null) continue;
         // Already accepted?
         if (state.military.triggered_operations_accepted?.[def.name]) continue;
 
@@ -1044,6 +1133,184 @@ export function checkTriggeredOperations(state: GameState): string[] {
         });
 
         injected.push(def.name);
+    }
+
+    return injected;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ADR-0005 v3.0 — Army HQ Operations injection
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Scenario-year bucket for the once/twice-per-year gate: floor((turn - 1) / 52). */
+function armyHqScenarioYear(turn: number): number {
+    return Math.floor((Math.max(1, turn) - 1) / 52);
+}
+
+/**
+ * ADR-0005 v3.0 Phase C — frequency gate for an Army HQ op for `faction`.
+ *
+ * Both conditions must pass:
+ *   1. Cooldown: turn - army_hq_last_op_turn[faction] >= ARMY_HQ_OP_COOLDOWN_TURNS (52),
+ *      or no prior op for the faction.
+ *   2. Year ceiling: army_hq_op_count_by_year[faction][year] < MAX_ARMY_HQ_OPS_PER_
+ *      FACTION_PER_YEAR (2). Year-boundary defense uses the same floor((turn-1)/52) bucket.
+ *
+ * Pure read; no mutation. Caller increments both trackers at injection.
+ */
+function armyHqFrequencyGateOpen(state: GameState, faction: FactionId, turn: number): boolean {
+    const last = state.military.army_hq_last_op_turn?.[faction];
+    if (last != null && turn - last < ARMY_HQ_OP_COOLDOWN_TURNS) return false;
+    const year = armyHqScenarioYear(turn);
+    const count = state.military.army_hq_op_count_by_year?.[faction]?.[year] ?? 0;
+    if (count >= MAX_ARMY_HQ_OPS_PER_FACTION_PER_YEAR) return false;
+    return true;
+}
+
+/**
+ * ADR-0005 v3.0 Phase B — inject eligible Army HQ operations.
+ *
+ * Runs as the `inject-army-hq-operations` war-phase step, immediately AFTER
+ * `inject-queued-operations` and BEFORE `check-triggered-operations`. Iterates the
+ * Army-HQ-promoted defs (Krivaja-95, Farz 95) in sorted army_hq_op_id
+ * order; injects the FIRST def that clears the frequency gate (Phase C) and the same
+ * launch gates the regular triggered path uses. On injection it:
+ *   - builds the op via the shared buildOperation machinery,
+ *   - composes the full ArmyHqOpId ("ahq:<faction>:<year>:<marker>") and sets
+ *     op.army_hq_op_id + a state.military.army_hq_operations entry,
+ *   - assigns the commander via def.faction (D5 — NOT hardcoded 'RS'),
+ *   - increments army_hq_last_op_turn[faction] + army_hq_op_count_by_year[faction][year]
+ *     (Phase C),
+ *   - applies Phase D recovery-suppression to the anchor + participants.
+ *
+ * Fully gated by ENABLE_TG_ARMY_HQ_OPS — early-returns (no read/write) when off, so the
+ * flag-off path is byte-identical. Returns names of newly injected ops.
+ */
+export function injectArmyHqOperations(state: GameState): string[] {
+    if (!ENABLE_TG_ARMY_HQ_OPS) return [];
+    const turn = state.meta?.turn ?? 0;
+    const cc = state.military.corps_command;
+    if (!cc) return [];
+
+    const injected: string[] = [];
+
+    // Sorted by army_hq_op_id marker for deterministic injection order; inject first eligible.
+    const armyHqDefs = TRIGGERED_OPS
+        .filter((d): d is TriggeredOpDef & { army_hq_op_id: string } => !!d.army_hq_op_id)
+        .sort((a, b) => strictCompare(a.army_hq_op_id, b.army_hq_op_id));
+
+    for (const def of armyHqDefs) {
+        // Already accepted (one shot per def)?
+        if (state.military.triggered_operations_accepted?.[def.name]) continue;
+
+        // Permanently declined (3 strikes)?
+        const declineInfo = state.military.declined_operations?.[def.name];
+        if (declineInfo && declineInfo.decline_count >= MAX_DECLINE_COUNT) continue;
+        if (declineInfo && (turn - declineInfo.declined_turn) < REOFFER_COOLDOWN_TURNS) continue;
+
+        // Trigger condition (existing canonical floor preserved by promotion).
+        if (!def.trigger(state, turn)) continue;
+
+        // Phase C frequency gate: 52-turn cooldown + once-per-year-bucket ceiling.
+        if (!armyHqFrequencyGateOpen(state, def.faction, turn)) continue;
+
+        // Primary corps must be free (Army HQ op still anchors in one corps).
+        const primaryCmd = cc[def.primary_corps];
+        if (!primaryCmd || hasActiveOperation(primaryCmd)) continue;
+
+        // Stale offer with no enemy objectives left?
+        if (!opStillHasEnemyObjectives(state, def)) continue;
+
+        // Resolve live axes (objectives still enemy-held).
+        const liveAxes = def.axes
+            .map((axis) => ({
+                ...axis,
+                objectives: axis.objectives.filter((osid) => {
+                    const controller = getPoliticalControllerOSID(state, osid, undefined);
+                    return controller !== null && controller !== def.faction;
+                }),
+            }))
+            .filter((axis) => axis.objectives.length > 0);
+        if (liveAxes.length === 0) continue;
+        const effectiveDef = { ...def, axes: liveAxes };
+
+        // Validate before building (mirror regular path's blocking checks).
+        const validatable: ValidatableOpDef = {
+            name: effectiveDef.name,
+            faction: effectiveDef.faction,
+            axes: liveAxes.map(a => ({ axis_id: a.axis_id, brigades: a.brigades, objectives: a.objectives, staging_osid: a.staging_osid })),
+            staging_osid: effectiveDef.staging_osid,
+        };
+        const trigWarnings = validateOpAtInjection(validatable, state, undefined, primaryCmd);
+        collectOpInjectionWarnings(state, trigWarnings);
+        if (hasBlockingOpInjectionWarnings(trigWarnings)) continue;
+
+        const result = buildOperation(effectiveDef, state, turn);
+        if ('failure' in result) continue;
+
+        // Compose the canonical ArmyHqOpId and tag the op.
+        const year = armyHqScenarioYear(turn);
+        const ahqId: ArmyHqOpId = `ahq:${def.faction}:${year}:${def.army_hq_op_id}`;
+        result.op.army_hq_op_id = ahqId;
+
+        // Pre-stage participants toward staging (shared with regular path).
+        prestageBrigadesForTriggeredOp(state, effectiveDef);
+
+        // Inject into the anchor's (primary) corps; corps slot bookkeeping unaffected
+        // beyond the active op push, per ADR §Army HQ Operations storage note.
+        primaryCmd.active_operations.push(result.op);
+        // D5: commander assigned via def.faction (NOT hardcoded 'RS') — unblocks ARBiH ops.
+        assignOperationCommander(state, result.op, def.primary_corps, def.faction);
+        primaryCmd.stance = 'offensive';
+
+        // Record the Army HQ operation entity (separate from corps slot bookkeeping).
+        const anchorBrigade = result.op.axes?.[0]
+            ? getAnchorBrigade(result.op.axes[0])
+            : result.op.participating_brigades[0];
+        const ahqOp: ArmyHqOperation = {
+            id: ahqId,
+            faction_id: def.faction,
+            name: def.name,
+            anchor_corps_id: def.primary_corps as FormationId,
+            donor_corps_ids: [],
+            status: 'planning',
+            formed_on_turn: turn,
+            scenario_year: year,
+        };
+        if (!state.military.army_hq_operations) state.military.army_hq_operations = {};
+        state.military.army_hq_operations[ahqId] = ahqOp;
+
+        // Phase C: increment both frequency trackers at injection.
+        if (!state.military.army_hq_last_op_turn) state.military.army_hq_last_op_turn = {};
+        state.military.army_hq_last_op_turn[def.faction] = turn;
+        if (!state.military.army_hq_op_count_by_year) state.military.army_hq_op_count_by_year = {};
+        if (!state.military.army_hq_op_count_by_year[def.faction]) state.military.army_hq_op_count_by_year[def.faction] = {};
+        state.military.army_hq_op_count_by_year[def.faction][year] =
+            (state.military.army_hq_op_count_by_year[def.faction][year] ?? 0) + 1;
+
+        // Phase D: mark anchor + participants for cohesion-recovery suppression while the
+        // Army HQ op is active. Cohesion drift zeroes only POSITIVE drift for these brigades
+        // (never clamps below the faction floor — see cohesion_drift.ts). Suppress for the
+        // op's planning + max lifecycle window.
+        const formations = state.military.formations ?? {};
+        const suppressUntil = turn + ARMY_HQ_OP_COOLDOWN_TURNS; // conservative: bounded by 1-year window
+        const participantIds = new Set<FormationId>(result.op.participating_brigades);
+        if (anchorBrigade) participantIds.add(anchorBrigade as FormationId);
+        for (const bid of [...participantIds].sort(strictCompare)) {
+            const f = formations[bid];
+            if (!f) continue;
+            (f as { tg_recovery_suppressed_until_turn?: number }).tg_recovery_suppressed_until_turn = suppressUntil;
+        }
+
+        // Track acceptance (also keeps the regular triggered path from re-considering).
+        if (!state.military.triggered_operations_accepted) state.military.triggered_operations_accepted = {};
+        state.military.triggered_operations_accepted[def.name] = turn;
+
+        injected.push(def.name);
+        // ADR §Army HQ Operations frequency cap: at most one Army HQ op injected per faction
+        // per gate window — break after the first eligible injection (anchor corps now busy,
+        // trackers updated; subsequent same-faction defs fail the gate next turn).
+        break;
     }
 
     return injected;

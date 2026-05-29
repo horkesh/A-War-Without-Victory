@@ -25,6 +25,9 @@ import { estimateConcentratedOutcome, isOutcomeSufficientForAttack } from './bot
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { getAllAxisObjectives, getCurrentLaunchObjectives, isMultiAxis } from './sector_offensive_axis_helpers.js';
+import { ENABLE_TACTICAL_GROUPS, ENABLE_TG_FORMATION, DONATION_READINESS_FRACTION, getAnchorBrigade } from './tactical_group_config.js';
+// ADR-0005 v2.2c #3: donation-readiness gate recomputes the donor pool here.
+import { selectDonors } from './tactical_group_selection.js';
 
 // BATCH C: launch-readiness probes call `predictAllAdjacentTargets(...)` only
 // to query whether the brigade has a direct-objective adjacency entry; they do
@@ -646,6 +649,7 @@ export type OpeningAttackBlocker =
     | 'participants_below_attack_floor'
     | 'no_approach_osid'
     | 'zero_eligible_axis'
+    | 'insufficient_donation'
     | 'no_launch_readiness';
 
 export interface OpeningAttackReadinessResult {
@@ -758,6 +762,7 @@ function classifyAxisOpeningAttack(
     adjacency: Map<string, string[]>,
     threshold: PredictedOutcome,
     staticAdjacency?: Map<string, string[]>,
+    armyHqOpId?: CorpsOperation['army_hq_op_id'],
 ): OpeningAttackReadinessResult {
     const objective = axis.objectives[axis.current_objective_index ?? 0];
     if (typeof objective !== 'string' || objective.length === 0) {
@@ -772,7 +777,21 @@ function classifyAxisOpeningAttack(
         return { executable: false, blocker: 'no_approach_osid' };
     }
 
-    if (!hasAttackFloorParticipant(state, axis.assigned_brigades)) {
+    // TG v1 (ADR-0005): when the tactical-group flag is on, the readiness gate
+    // evaluates only the anchor brigade (main_brigade or first-assigned fallback).
+    // Non-anchor brigades stay in assigned_brigades for downstream combat math
+    // (existing main/support_brigades SUPPORT_POWER_MULT path is unchanged in
+    // v1); they simply no longer block the planning→execution transition by
+    // failing to march to the objective. Flag default off — byte-identical to
+    // legacy behavior. See src/sim/combat/tactical_group_config.ts.
+    const gateBrigades = ENABLE_TACTICAL_GROUPS
+        ? (() => {
+            const anchor = getAnchorBrigade(axis);
+            return anchor ? [anchor] : axis.assigned_brigades;
+        })()
+        : axis.assigned_brigades;
+
+    if (!hasAttackFloorParticipant(state, gateBrigades)) {
         axis.launch_blocker = 'participants_below_attack_floor';
         return { executable: false, blocker: 'participants_below_attack_floor' };
     }
@@ -781,12 +800,32 @@ function classifyAxisOpeningAttack(
         state,
         faction,
         objective,
-        axis.assigned_brigades,
+        gateBrigades,
         adjacency,
         threshold,
     )) {
         axis.launch_blocker = 'zero_eligible_axis';
         return { executable: false, blocker: 'zero_eligible_axis' };
+    }
+
+    // ADR-0005 v2.2c #3: donation-readiness gate. With TG formation on, the anchor must be
+    // backed by donors pledging ≥ DONATION_READINESS_FRACTION (60%) of its personnel; otherwise
+    // it is a lone-anchor suicide attack and the axis is blocked. selectDonors is recomputed here
+    // (deterministic; a donor lost since planning naturally drops out) rather than reading a cached
+    // op.donor_pool — functionally the same gate, no persisted schema field. Flag-off: skipped, so
+    // byte-identical. The flag-on magnitude (how many ops this blocks) is validated at the 188w smoke.
+    if (ENABLE_TG_FORMATION) {
+        const anchorId = getAnchorBrigade(axis);
+        const stagingOsid = axis.staging_osid;
+        if (anchorId && stagingOsid) {
+            const anchorPersonnel = state.military.formations?.[anchorId]?.personnel ?? 0;
+            const donors = selectDonors(state, { anchor_brigade_id: anchorId, staging_osid: stagingOsid, army_hq_op_id: armyHqOpId });
+            const donated = donors.reduce((sum, d) => sum + d.personnel_lent, 0);
+            if (donated < DONATION_READINESS_FRACTION * anchorPersonnel) {
+                axis.launch_blocker = 'insufficient_donation';
+                return { executable: false, blocker: 'insufficient_donation' };
+            }
+        }
     }
 
     delete axis.launch_blocker;
@@ -817,7 +856,7 @@ export function evaluateOpeningAttackReadiness(
         let anyApproaching = false;
         for (const axis of op.axes) {
             if (axis.status === 'complete' || axis.status === 'stalled') continue;
-            const result = classifyAxisOpeningAttack(state, corpsId, faction, axis, adjacency, threshold, staticAdjacency);
+            const result = classifyAxisOpeningAttack(state, corpsId, faction, axis, adjacency, threshold, staticAdjacency, op.army_hq_op_id);
             if (result.executable) {
                 anyExecutable = true;
             } else {

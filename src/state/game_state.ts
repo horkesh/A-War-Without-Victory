@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 33 as const;
+export const CURRENT_SCHEMA_VERSION = 34 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -278,7 +278,7 @@ export interface OperationAxis {
      *  See LATE_WAR_OPERATION_COMBAT_DELIVERY_MEGA_LANE Phase C, sector_offensive_launch_helpers.ts. */
     unreachable_at_launch?: boolean;
     /** Typed diagnostic for axes that fail the opening-attack launch gate. */
-    launch_blocker?: 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective';
+    launch_blocker?: 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective' | 'insufficient_donation';
     /** Battles conducted by this axis this turn (reset each turn). */
     battles_this_turn?: number;
     /** Total battles conducted by this axis since operation start. */
@@ -358,7 +358,7 @@ export interface CorpsOperation {
     /** Dig in participating brigades when manually halted. */
     dig_in_on_halt?: boolean;
     /** Reason the operation entered recovery. */
-    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis';
+    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'insufficient_donation';
     /** Named officer commanding this operation (if any). */
     commander_officer_id?: string;
     /** True when this operation was launched from the pre-planned operations catalog
@@ -452,6 +452,85 @@ export interface CorpsOperation {
     force_quality_blocked_at_launch?: boolean;
     /** Phase 4: max axes derived from axis_coordination soft gate; 1 means single-axis only. */
     force_quality_max_axes_at_launch?: number;
+
+    // --- Army HQ Operation linkage (ADR-0005 v3.0) ---
+    /** When set, this operation is carried out as part of a faction-wide Army HQ op
+     *  (cross-corps donor pool, doubled cohesion bleed, frequency-capped). Optional
+     *  scalar — omitEmpty-safe, undefined when ENABLE_TG_ARMY_HQ_OPS is off; no schema
+     *  migration (mirrors the v2.3 tg_recent_compositions additive pattern, schema stays v34). */
+    army_hq_op_id?: ArmyHqOpId;
+}
+
+// === Tactical Group / Operational Group entity (ADR-0005 v2.0) ===
+// Canonical OG per Rulebook v0.9.0 §5.7 + Systems Manual v0.9.0 §6.3.
+// Engine internals use TG nomenclature per ADR-0005 decision #18.
+// ADR-0006 separately handles STANDING OGs (corps_front_sectors); these types
+// model TEMPORARY OGs/TGs for offensive operations.
+
+/** Tactical Group identifier. Format: "tg:<corps_id>:<op_id>:<anchor_brigade_id>". */
+export type TgId = string;
+
+/** Army HQ Operation identifier. Format: "ahq:<faction_id>:<scenario_year>:<op_name>". */
+export type ArmyHqOpId = string;
+
+/** TG lifecycle status. */
+export type TgStatus = 'forming' | 'engaged' | 'recovering' | 'dissolved';
+
+/** Per-donor contribution within a TG. See ADR-0005 §Schema. */
+export interface TgDonorContribution {
+    brigade_id: FormationId;
+    source_corps_id: FormationId;
+    /** BFS hops anchor→donor at TG formation; frozen for determinism. */
+    distance_hops: number;
+    personnel_lent: number;
+    heavy_equipment_lent: { tanks: number; artillery: number; aa_systems: number };
+    /** Per-brigade casualty tally (ADR-0005 Hard Invariant #3); pro-rata bookkeeping. */
+    casualties_so_far: number;
+    equipment_losses_so_far: { tanks: number; artillery: number; aa_systems: number };
+    /** Cohesion bleed applied at ready→execution; locked 8 turns. */
+    cohesion_bleed_applied: number;
+}
+
+/** Canonical Operational Group entity (engine TG naming), primary offensive
+ *  ops construct under ADR-0005 v2.0+. Schema-stable from v19; v2.0 ships the
+ *  shape with empty defaults; v2.2 lights it up via sub-flags. */
+export interface TacticalGroup {
+    id: TgId;
+    /** Anchor brigade's parent corps; ownership backref. */
+    corps_id: FormationId;
+    /** Associated CorpsOperation.id, or ArmyHqOpId for faction-scope ops. */
+    op_id: string;
+    /** When set, this TG is part of an Army HQ op (faction-scope donor pool). */
+    army_hq_op_id?: ArmyHqOpId;
+    anchor_brigade_id: FormationId;
+    /** Pre-sorted by brigade_id (strictCompare) for determinism. */
+    donor_contributions: TgDonorContribution[];
+    /** Mirrors anchor.location_osid. */
+    location_osid: string;
+    status: TgStatus;
+    formed_on_turn: number;
+    dissolved_on_turn?: number;
+    /** OG cohesion per canon §6.3; drains per-turn. */
+    cohesion: number;
+}
+
+/** Faction-wide cross-corps offensive entity (Krivaja-95, Farz 95
+ *  pattern). Capped at most once per year per faction per ADR-0005 §Army HQ
+ *  Operations. v2.0 scaffold; v3.0 wires triggers + pipeline step. */
+export interface ArmyHqOperation {
+    id: ArmyHqOpId;
+    faction_id: FactionId;
+    name: string;
+    /** Corps owning the anchor brigade. */
+    anchor_corps_id: FormationId;
+    /** Same-faction corps with eligible brigades; cross-corps regardless of adjacency. */
+    donor_corps_ids: FormationId[];
+    /** Active TG carrying out the op (set at TG formation). */
+    tg_id?: TgId;
+    status: 'queued' | 'planning' | 'executing' | 'recovering' | 'completed';
+    formed_on_turn: number;
+    /** floor((started_turn - 1) / 52); for the once-per-year gate. */
+    scenario_year: number;
 }
 
 /** Independent sector stances — each sector can differ from its corps stance. */
@@ -787,6 +866,23 @@ export interface FormationState {
      * Used as input to coordination_coherence decay rate. See synthesis §3 E-B3.
      */
     strategic_depth?: number;
+    // === Tactical Group donor accounting (ADR-0005 v2.0) ===
+    // Current donation state — cleared on TG dissolution. Sum of values must
+    // never exceed brigade.personnel. effectivePersonnel = personnel - sum(values).
+    /** Personnel currently lent out to one or more TGs. Hard Invariant #1: at most one TG per brigade. */
+    personnel_lent_by_tg?: Record<TgId, number>;
+    /** Heavy equipment currently lent out to TGs. */
+    equipment_lent_by_tg?: Record<TgId, { tanks: number; artillery: number; aa_systems: number }>;
+    /** Absolute turn count after which brigade is eligible to donate again
+     *  (Hard Invariant #2: TG_DONOR_COOLDOWN_TURNS = 6). */
+    tg_cooldown_until_turn?: number;
+    /** Per-scenario donation count (anti-fire-hose cap; max MAX_DONATIONS_PER_SCENARIO = 6). */
+    tg_donations_this_scenario?: number;
+    /** ADR-0005 v3.0 Phase D: absolute turn until which POSITIVE ambient cohesion drift is
+     *  suppressed for a donor on an Army HQ op (recovery-suppression Pyrrhic cost). Never
+     *  clamps below the faction floor; only zeroes upward drift. Set at TG formation; gated
+     *  by ENABLE_TG_ARMY_HQ_OPS so flag-off leaves cohesion_drift byte-identical. */
+    tg_recovery_suppressed_until_turn?: number;
 }
 
 export interface FrontPostureAssignment {
@@ -2406,6 +2502,29 @@ cost_ledger_annotations?: Array<{
     /** Optional faction subject when the annotation is faction-scoped. */
     faction?: FactionId;
 }>;
+// === Tactical Group state (ADR-0005 v2.0) ===
+// v2.0 ships empty defaults via the v34 migration; v2.2 sub-flag lights it up.
+// NOTE: serializeState does NOT strip empty Records (serializeGameState only skips
+// undefined values, not empty {} objects), so the four empty Records the v34 migration
+// creates DO change the serialized final_state_hash (40w a969d44719aaa40e → 78e231e35b08cf53).
+// This is a schema scaffold only — behaviorally/calibration-neutral with flags off, NOT
+// byte-identical to the pre-v34 baseline.
+/** Active Tactical Groups (temporary OGs for offensive ops). Cleared on dissolution. */
+tactical_groups?: Record<TgId, TacticalGroup>;
+/** Army HQ Operations scaffold. v3.0 wires triggers + pipeline step. */
+army_hq_operations?: Record<ArmyHqOpId, ArmyHqOperation>;
+/** Per-faction tracking: most recent Army HQ op firing turn (52-turn cooldown gate). */
+army_hq_last_op_turn?: Record<FactionId, number>;
+/** Per-faction year-bucket Army HQ op count (year-boundary defense; 2/year ceiling). */
+army_hq_op_count_by_year?: Record<FactionId, Record<number, number>>;
+/**
+ * v2.3 (ADR-0005 Hard Invariant #9): recently-dissolved TG composition hashes →
+ * cooldown-until turn. Blocks reforming a same-composition TG (anchor + sorted donor
+ * ids) within the cooldown window via a different op_id. Written at dissolution and
+ * checked at formation, only while ENABLE_TG_COHESION_BLEED is on; stays empty/omitted
+ * (byte-identical) when the flag is off.
+ */
+tg_recent_compositions?: Record<string, number>;
 }
 
 /** Presidential command authority — the player's resource for overriding the command chain.

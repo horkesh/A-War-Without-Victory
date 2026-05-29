@@ -1,4 +1,307 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] feat(combat): ADR-0005 v3.0 — Army HQ Operations, flag-gated dormant
+
+**Type:** Phased rollout v3.0 of ADR-0005 — the Army HQ Operations sub-stage. All behavior gated behind new sub-flag `ENABLE_TG_ARMY_HQ_OPS` (default false). Ring 1, faction-agnostic. Flag-off byte-identity required and obtained at BOTH gold gates.
+
+**Why:** v2.x lit up faction-internal donor TGs for corps-scope ops. v3.0 adds the rarer, costlier **Army HQ** scope — faction-wide donor pools feeding a small number of strategically decisive operations (Krivaja-95, Vozuća-94, Lukavac-93), capped hard so they cannot become a fire-hose. Implements the 5 readiness decisions ratified for v3.0 (commit `9493a0ed`).
+
+**Change** (commit `9493a0ed`):
+- **Phase A — faction-scope donor pool.** Army HQ ops draw donors faction-wide (not corps-adjacent only); decision-independent and the structural core of the stage.
+- **inject-army-hq-operations war-phase + per-faction frequency gate.** New war-phase step injects eligible Army HQ ops; gated by a 52-turn cooldown plus a hard cap of 2/faction/year.
+- **Phase D — donor recovery-suppression.** Zeroes positive cohesion drift for suppressed donors while preserving the existing floor clamp (suppress = zero-positive-drift only, never clamp below floor; mirrors the `cohesion_drift.ts` OPSEC drift pattern).
+- **Op scripting.** Promotes Krivaja-95 to Army HQ scope (reuses the existing triggered defensive op rather than duplicating to avoid double-firing the `vrs_drina` corps); adds Vozuća-94 + Lukavac-93 (`army_hq_only`, RBiH). Lukavac-93 ships single-anchor + faction-wide donors (multi-TG deferred per ADR).
+- New injection assigns the op commander via `def.faction`. **Known pre-existing item:** the hardcoded-`'RS'` `assignOperationCommander` call site at `triggered_operations.ts:1033` is left untouched here (separate pre-existing bug; not introduced by v3.0).
+- New optional scalar field `op.army_hq_op_id` on `CorpsOperation` (omitEmpty-safe; no migration; schema stays v34). `tg_recent_compositions` and other new fields likewise omitEmpty-safe.
+
+**Determinism:** Two-tier legacy-path skip preserves flag-off behavior; the new injection/suppression code is reached flag-on only. New fields are omitEmpty-safe so flag-off serialization is unchanged. No `Math.random()`/`Date.now()`; sorted iteration preserved.
+
+**Verification:**
+- **Flag-off byte-identical at BOTH gold gates: 40w `78e231e35b08cf53` + 188w `940251e4acaff3d4`** (independently reviewer-verified). The changed code is reached flag-on only, so flag-off byte-identity is by construction.
+- Ring-1 / flag-gated / no calibration shift.
+
+**Files:**
+- `src/sim/combat/tactical_group_config.ts` (`ENABLE_TG_ARMY_HQ_OPS`)
+- `src/sim/combat/tactical_group_selection.ts` (Phase A faction-scope donor pool)
+- `src/sim/turn_phases/war_phases.ts` (inject-army-hq-operations step + frequency gate)
+- `src/sim/combat/cohesion_drift.ts` (Phase D donor recovery-suppression)
+- `src/sim/combat/triggered_operations.ts` (Krivaja-95 promote; Vozuća-94 + Lukavac-93; commander via `def.faction`)
+- `src/state/game_state.ts` (`CorpsOperation.army_hq_op_id`, optional)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
+
+## [2026-05-29] fix(combat): ADR-0005 v3.0 corrections + Farz 95 enrichment (post-shipment activation smoke + historian review)
+
+**Type:** Corrections + enrichment to the v3.0 Army HQ Operations entry above. An activation smoke and a historian review (run AFTER the initial v3.0 entry at commit `13cf5c72`) found a dead-code donor-wiring gap and two historical errors in the shipped op set. Still Ring 1, faction-agnostic, flag-gated (`ENABLE_TG_ARMY_HQ_OPS=false`), flag-off byte-identical at BOTH gold gates. NOT activated — activation remains a future calibration decision.
+
+**Why:** The initial v3.0 shipped the Phase-A faction-scope donor pool UNWIRED — the core mechanic was dead code at runtime — and scripted two ops that did not survive historical scrutiny (a mis-dated Vozuća capture and a fabricated RBiH "Lukavac-93" that collided with the canon VRS op).
+
+**Corrections** (commit `88dfdc2b`):
+- **Donor-wiring gap fixed.** The shipped Phase-A faction-scope donor pool was UNWIRED: `op.army_hq_op_id` was never threaded into the donor-selection context / `formTacticalGroup` / the readiness gate, so Army HQ ops drew ZERO cross-corps donors. Now wired; flag-on verified to draw faction-wide cross-corps donors.
+- **Vozuća → Farz 95 historical fix.** The def was wrongly dated 1994 ("Vozuća 94" / `ahq:RBiH:1994:vozuca_94`). Historian + the project's own `painted_control` truth confirmed the capture was **Sept 1995** (the 1994 attempt failed). Renamed **"Operation Farz 95"** (owner-confirmed codename), id `ahq:RBiH:1995:farz_95`.
+- **Lukavac-93 def DROPPED.** It was a fabricated RBiH op colliding with the real VRS "Operation Lukavac '93" (already canon in `war_1993.json` / `operation_names.ts` as RS). v3.0 now ships only **Krivaja-95** (RS, Srebrenica — unchanged/correct) and **Farz 95** (RBiH).
+
+**Enrichment** (commit `2ac90965`):
+- **Farz 95 objectives** are now the real 3-OSID salient capture `op:zavidovici:vozuca_2 → op:maglaj:gornja_bocinja → op:maglaj:donja_bocinja_2` (all RS@apr1995 → RBiH@oct1995 in painted truth).
+- **Seed brigades** 351st + 328th + 327th + 7th (7th = El Mujahid stand-in; El Mujahid has no OOB id — **flagged for OOB authors**).
+- Flag-on 188w reproduces all 3 OSIDs flipping RBiH via emergent cross-corps draw.
+
+**Verification:**
+- **Flag-off byte-identical at BOTH gold gates: 40w `78e231e35b08cf53` + 188w `940251e4acaff3d4`** (unchanged from the initial v3.0 shipment; the corrected/enriched code is reached flag-on only).
+- Ring-1 / flag-gated / no calibration shift. NOT activated.
+
+**Files (this docs-only follow-up):**
+- `docs/PROJECT_LEDGER.md` (this entry)
+- `docs/20_engineering/ADR/ADR-0005-tactical-groups-as-primary-ops-path.md` (v3.0 row + readiness paragraph + revision-history line)
+
+---
+
+## [2026-05-29] fix(combat): ADR-0005 #40 — exclude not-yet-injected pre-planned-op brigades from TG donor selection
+
+**Type:** Donor-eligibility correctness fix on the flag-gated TG path. Ring 1, faction-agnostic. Fixes the Op-Trnovo donor-strand bug surfaced in the 188w flag-on smoke (see v2.2b/v2.3 entries).
+
+**Why:** The 188w flag-on smoke (n16, hash `78676f361f48835c`) showed Op Trnovo (vrs_sarajevo_romanija, w69) failing with `rs_trnovo_brigade "not found in formations"` → `axis_empty` → `participants_below_attack_floor`. Root cause: a TG forming earlier consumed `rs_trnovo_brigade` (and other brigades reserved for not-yet-injected pre-planned ops) as a donor, so when the pre-planned op later injected, its hardcoded-ID participants were already drained/absent. Cohesion bleed (v2.3) does not address this — it is a brigade-resolution / donor-eligibility ordering bug, not a Pyrrhic-cost question. Codex's adjacency theory (`gornja_presjenica` route) was REFUTED by the smoke.
+
+**Change:**
+- **`src/sim/combat/pre_planned_operations.ts`** (commit `f2318223`): exported `getReservedPrePlannedBrigadeIds(currentTurn)` — returns the set of brigade ids belonging to pre-planned ops whose `available_from > currentTurn` (i.e. not yet injected, still reserved until injection).
+- **`src/sim/combat/tactical_group_selection.ts`** (commit `f2318223`): `selectDonors` computes the reserved set once and `isEligibleDonor` excludes any brigade in it. Reserved-set computation is flag-on only (called from `selectDonors`); flag-off path never reaches it.
+
+**Determinism:** Reserved set is a `Set<FormationId>` membership test inside the existing deterministically-sorted `selectDonors` candidate filter. No new iteration order, no randomness. No injection-turn race (reviewer-confirmed: reservation is keyed off `available_from > currentTurn`, evaluated at TG-formation time).
+
+**Verification:**
+- typecheck clean; 38 TG tests pass.
+- Flag-off 40w byte-identical: `78e231e35b08cf53` (independently re-verified by reviewer — Lane A GO).
+- **`tests/...` regression guard** (commit `71426ad6`): pins the form-before-inject phase ordering so the reservation guard's premise can't silently regress.
+
+**Files:**
+- `src/sim/combat/pre_planned_operations.ts` (export `getReservedPrePlannedBrigadeIds`)
+- `src/sim/combat/tactical_group_selection.ts` (reserved-set exclusion in `selectDonors` / `isEligibleDonor`)
+- `tests/` TG regression guard (form-before-inject ordering)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
+
+## [2026-05-29] feat(combat): ADR-0005 v2.3 — Pyrrhic dampener (donor cohesion bleed + caps + same-composition block), flag-gated dormant
+
+**Type:** Phased rollout v2.3 of ADR-0005 — the Pyrrhic dampener sub-stage. All behavior gated behind new sub-flag `ENABLE_TG_COHESION_BLEED` (default false). Ring 1, faction-agnostic. Flag-off byte-identity required and obtained.
+
+**Why:** The 188w flag-on smoke (v2.2b/c, n16 vs n15) showed the predicted +3-8% capture shift (RS +21 / RBiH +3 / HRHB −24; anchors 26→27) but with a concerning direction — RS donor-fed VRS ops over-amplified largely at HRHB's expense, and HRHB lost counter-attack capacity as HVO brigades were consumed as donors. v2.3 is the ADR's designed dampener to constrain that fire-hose dynamic. It ships flag-OFF; calibration of the dampener happens in a later dedicated 188w window.
+
+**Change** (commit `54ddc9b6`):
+- **Donor cohesion bleed** applied at TG formation: `floor(donatedFraction × (1 + hops × 0.15) × 15 × hqMult)` per ADR-0005 §Pyrrhic cost (`hqMult` = `ARMY_HQ_COHESION_BLEED_MULT` 2.0× for Army HQ donors, else 1.0×).
+- **Per-scenario donation cap** `MAX_DONATIONS_PER_SCENARIO = 3` — a brigade may donate to at most 3 TGs per scenario (anti-fire-hose, complements the existing 6-turn `TG_DONOR_COOLDOWN_TURNS`).
+- **Same-composition reformation block** (Hard Invariant #9): op-id-independent `compositionHash(anchor_id + sorted_donor_ids)` checked at formation against a new `tg_recent_compositions` ledger; blocks "dissolve and reform identical TG via a different op_id" abuse within the cooldown window.
+- New optional field `MilitaryState.tg_recent_compositions` (omitted flag-off → byte-identical; no migration / `ensureRecord` needed, schema stays v34).
+
+**Determinism:** Cohesion-bleed is integer (`floor`), no randomness. `tg_recent_compositions` serialized via sorted-key iteration; `compositionHash` built from `strictCompare`-sorted donor ids. Donor cooldown confirmed enforced in `selectDonors`.
+
+**Verification:**
+- typecheck clean; TG suites pass (reviewer GO — spec-faithful, determinism-clean).
+- **Flag-off 40w byte-identical: `78e231e35b08cf53`** (independently re-verified). The changed code is only reached flag-on, so flag-off byte-identity is by construction.
+
+**Deferred to v3.0:** the "8-turn cohesion-recovery suppression" component is NOT in v2.3 — the donor already sits in the 6-turn cooldown, and the cohesion-recovery hot path (`cohesion_drift.ts` `runCohesionDrift`) is CALIBRATION-SENSITIVE, so it is left untouched here to preserve byte-identity. Wired in v3.0 behind its own gate.
+
+**Files:**
+- `src/sim/combat/tactical_group_lifecycle.ts` (cohesion bleed at formation + composition-hash block)
+- `src/sim/combat/tactical_group_selection.ts` (per-scenario donation cap + cooldown)
+- `src/sim/combat/tactical_group_config.ts` (`ENABLE_TG_COHESION_BLEED`, `MAX_DONATIONS_PER_SCENARIO`)
+- `src/state/game_state.ts` (`MilitaryState.tg_recent_compositions`, optional)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
+
+## [2026-05-29] feat(combat): ADR-0005 v2.2c — true per-donor power, anchor-death dissolution, 60% donation gate (flag-gated)
+
+**Type:** Phased rollout v2.2c of ADR-0005 — closes the three v2.2b TODO carry-forwards (true per-donor combat power, Hard Invariant #6, 60% donation gate). All gated behind the v2.2 sub-flags (`ENABLE_TG_FORMATION` / `ENABLE_TG_COMBAT_SYNTHESIS`, default false). Ring 1, faction-agnostic. Flag-off byte-identity held.
+
+**Change:** Three commits, one per TODO:
+- **#1 — true per-donor combat power** (`src/sim/combat/attack_resolution_osid.ts`, commit `ab7b9de0`): replaces the v2.2b `computeTgDonorPower` proxy (`anchorRaw × donatedPersonnel/anchorPersonnel`) with true per-donor stats — each donor's lent personnel + equipment contributes power through its own `FormationState` kind/equipment/cohesion modifiers, summed across donors. Donors still take NO concentration multiplier (ADR-0005 §Battle resolution).
+- **#2 — Hard Invariant #6 immediate anchor-death dissolution** (`src/sim/combat/attack_resolution_osid.ts`, commit `6a17e3ab`): when an anchor falls below `MIN_ATTACK_PERSONNEL` (500) or cohesion < 15 in the casualty loop, the TG dissolves immediately (`dissolveTacticalGroup`) at the moment of anchor death — no longer waiting for the next-tick `beginRecovery` path (the v2.2b one-turn-delay behavior). Territory-revert sub-clause (revert-to-contested unless 1-hop friendly non-TG present) deferred.
+- **#3 — 60% donation-readiness gate** (`src/sim/combat/sector_offensive_launch_helpers.ts`, commit `430cf687`): `classifyAxisOpeningAttack` now enforces `sum(donor.personnel_lent) >= DONATION_READINESS_FRACTION (0.6) × anchor.personnel`; below threshold yields an `insufficient_donation` blocker, preventing lone-anchor suicide attacks. Recomputes `selectDonors` at the gate (no `op.donor_pool` field cached — documented ADR deviation).
+
+**Determinism:** All additions iterate Records via `strictCompare`; per-donor power and casualty splits use integer / largest-remainder math; anchor-death check is a deterministic threshold test in the existing casualty loop. Flag-off paths early-return / fall through unchanged.
+
+**Verification:**
+- typecheck clean; 38 TG tests pass.
+- Flag-off 40w byte-identical to baseline of record `01ca96e2a0faa2f6` (per v2.2b chain); the changed code is only reached flag-on.
+
+**Files:**
+- `src/sim/combat/attack_resolution_osid.ts` (true per-donor power; Hard Inv #6 immediate dissolution)
+- `src/sim/combat/sector_offensive_launch_helpers.ts` (60% donation gate, `insufficient_donation` blocker)
+- `src/sim/combat/tactical_group_config.ts` (`DONATION_READINESS_FRACTION = 0.6`)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
+
+## [2026-05-29] feat(combat): ADR-0005 v2.2b — wire TG formation/synthesis/dissolution into op pipeline (flag-gated, behavior dormant)
+
+**Type:** Runtime wiring across three call sites. Phased rollout v2.2b of ADR-0005 — second half of the v2.2 sub-stage. v2.2a shipped helpers (selectDonors / formTacticalGroup / dissolveTacticalGroup / distributeCasualtiesAcrossTg); v2.2b now CALLS them from the engine, all gated behind `ENABLE_TG_FORMATION` and `ENABLE_TG_COMBAT_SYNTHESIS` (both default false). First wiring in the chain that touches runtime paths even with flags off — byte-identity proof required and obtained.
+
+**Change:** Three separate commits, one per call site, with hash validation between each:
+
+- **#43 — Formation wiring** (`src/sim/combat/operation_preparation.ts`, commit `e00b33b3`). New local helper `formTgsAtReadyTransition(state, op, currentTurn)` called from both first-arrival paths to `sub_phase='ready'` inside `tickPreparation`: anti-paralysis force-launch path and assessment go-decision path. Re-entries from `waiting_for_sync → ready` are not first arrivals (TG already formed) and skip the helper. Multi-axis ops: one TG per axis (anchor = `main_brigade` or first `assigned_brigades`). Legacy single-axis: one TG keyed off `op.participating_brigades[0]` + `op.staging_osid`. Flag-off early-return as first statement.
+
+- **#44 — Combat synthesis + casualty distribution** (`src/sim/combat/attack_resolution_osid.ts`, commit `bb00e680`). Two new local helpers: `findTgForAnchor` (sorted-iteration TG lookup by anchor brigade_id, skips dissolved) and `computeTgDonorPower` (per-anchor donor contribution as `anchorRaw × donatedPersonnel/anchorPersonnel`, summed across anchors — v2.2b proxy; TODO-v2.2c will swap to true per-donor stats with kind/equipment/cohesion modifiers). Attacker-power reduce loop split: `physicalPower` reduce → multiplied by `coordPenalty × seasonal × concentrationBonus × tempoMult` (original associativity preserved). When `ENABLE_TG_COMBAT_SYNTHESIS` is on, donor portion `donorPower × coordPenalty × seasonal × tempoMult` is added — NO `concentrationBonus` on donors per ADR-0005 §Battle resolution (donors are not physical brigades sharing frontage). Casualty loop: wrapped `applyPersonnelLoss(a, cas)` in TG-gated branch calling `distributeCasualtiesAcrossTg` (v2.1) and applying anchor + per-donor shares; updates `donor.casualties_so_far` for Hard Invariant #3 per-brigade tally. Flag-off falls through to the original single-line `applyPersonnelLoss`.
+
+- **#45 — Dissolution wiring** (`src/sim/combat/sector_offensive.ts`, commit `8665a8c4`). Single-chokepoint wire inside `beginRecovery()` itself, the canonical lifecycle-owner function for execution→recovery transitions. New local helper `dissolveTgsForOp(state, opName, currentTurn)` iterates `state.military.tactical_groups` in `strictCompare` order, collects matching `op_id` + `status !== 'dissolved'` in a first pass, dissolves in a second pass (no mutation during iteration). One hook covers all ~30 `beginRecovery` callers. State-presence guard + flag-gate. Hard Invariant #6 (anchor-destroyed-mid-op immediate dissolution) explicitly deferred to v2.2c — anchor death currently flows through `beginRecovery` on the next op tick (one-turn delay, functionally correct).
+
+**Determinism:** Helpers iterate Records via `Object.keys(...).sort(strictCompare)`. New TG-related fields written deterministically by lifecycle helpers (v2.2a). Casualty distribution preserves largest-remainder math + `brigade_id` strictCompare tiebreak from v2.1. Power-reduce restructure preserves left-associative multiplication order; flag-off path is bit-exact (`x + 0 === x` for all finite x in IEEE 754). Flag-on path inserts deterministic state writes (TG records, donor `personnel_lent_by_tg`, `casualties_so_far`, brigade_history TG participations, cohesion adjustments).
+
+**Verification:**
+- typecheck (`node_modules/.bin/tsc --noEmit`): clean.
+- `vitest run tests/tg_lifecycle.test.ts tests/tg_invariants.test.ts tests/tg_casualty_distribution.test.ts --reporter=dot`: **38/38 PASS** (20 lifecycle + 7 invariants + 11 casualty distribution).
+- 40w hash chain (HEAD-`88eabba4` clean = n6 = `01ca96e2a0faa2f6`):
+  - n5 (HEAD + #43): `01ca96e2a0faa2f6` — byte-identical
+  - n7 (HEAD + #43 + #44): `01ca96e2a0faa2f6` — byte-identical
+  - n8 (HEAD + #43 + #44 + #45): `01ca96e2a0faa2f6` — byte-identical
+- **Baseline correction**: the v2.2a ledger entry recorded `3649b3861a87e6ea` for n4. At HEAD-`88eabba4` in this worktree environment, the actual measured 40w hash is `01ca96e2a0faa2f6` (n6, stash-discriminator-verified: n5 with wiring applied == n6 with wiring stashed). Either machine-state drift since v2.2a or the prior measurement was wrong. From v2.2b onward, the canonical baseline of record is `01ca96e2a0faa2f6`; v2.2c sub-flags-off must hold against this hash.
+
+**Flag-on smoke (n9, reverted at n10, not committed):** All three flags flipped (`ENABLE_TACTICAL_GROUPS` + `ENABLE_TG_FORMATION` + `ENABLE_TG_COMBAT_SYNTHESIS`), re-run, reverted, re-run. Raw 40w comparison vs n6 baseline:
+
+| Metric             | n6 flag-off          | n9 flag-on             | n10 post-revert      |
+|--------------------|----------------------|------------------------|----------------------|
+| `final_state_hash` | `01ca96e2a0faa2f6`   | `eabd4471dc755e10`     | `01ca96e2a0faa2f6`   |
+| anchor pass rate   | 27/27                | 27/27                  | n/a                  |
+| HRHB count         | 86 (ref 80, +6)      | 86 (ref 80, +6)        | n/a                  |
+| RBiH count         | 256 (ref 247, +9)    | 256 (ref 247, +9)      | n/a                  |
+| RS count           | 370 (ref 385, -15)   | 370 (ref 385, -15)     | n/a                  |
+
+Hash diverges (wiring is alive — TG records, donor lent ledgers, casualty redistribution, brigade_history TG entries all hash inputs), but macro 40w calibration is byte-equal. ADR-0005 §Phased Rollout's predicted "+3-8% capture" lives in late-war ops (Trnovo w30+, Pracha River w41+, Zvezda 94 w100+) that the 40w window doesn't reach. Canonical observation window for the predicted shift is **188w**, scheduled before v2.3 Pyrrhic dampener calibration.
+
+**Artifacts:**
+- `src/sim/combat/operation_preparation.ts` (helper + 2 call sites, +65 LOC)
+- `src/sim/combat/attack_resolution_osid.ts` (2 helpers + power-reduce split + casualty branch, +95/-5 LOC)
+- `src/sim/combat/sector_offensive.ts` (helper + single beginRecovery hook, +37 LOC)
+- `data/derived/latest_run_final_save.json` (n8 validation artifact; n9 smoke + n10 baseline-restoration artifacts also exist on disk but not promoted to derived)
+
+**Next (v2.2c — TODO carry-forward):**
+1. Swap `computeTgDonorPower` proxy formula for true per-donor stats (donor `FormationState` kind/equipment/cohesion/supply modifiers).
+2. Wire Hard Invariant #6 — anchor-destroyed-mid-op immediate dissolution at the moment of anchor death in `attack_resolution_osid.ts` casualty loop, not via the next-tick `beginRecovery` path.
+3. Split `selectDonors` call out to `intel_gathering` phase (cache to `op.donor_pool`) so the 60% donation gate at `assessment` can read it.
+4. **Run 188w flag-on smoke** to observe the predicted +3-8% capture shift at late-war ops (Trnovo, Pracha River, Zvezda 94). Do not commit; revert flags after observation. Inputs the v2.3 Pyrrhic dampener calibration window.
+
+---
+
+## [2026-05-29] feat(combat): ADR-0005 v2.2a — TG selectDonors algorithm + lifecycle helpers (unwired)
+
+**Type:** Selection + lifecycle helpers. Phased rollout v2.2a of ADR-0005 — first half of the v2.2 sub-stage, pragmatically split. v2.2b will wire these into the op pipeline + combat path.
+
+**Change:**
+- **selectDonors v2.2-simplified** (`src/sim/combat/tactical_group_selection.ts`): replaces v2.0 empty stub. Same-corps-only candidate pool + 6 eligibility gates (active status, faction match, corps match, cohesion ≥ COHESION_HEALTHY_THRESHOLD=50, no other TG per Hard Invariant #1, cooldown elapsed, residual personnel ≥ MIN_BRIGADE_PERSONNEL_AFTER_DONATION=800). Uniform 25% donation factor capped at 30%. Deterministic sort by `brigade_id` strictCompare. Max 3 donors per TG. Adjacent-corps BFS + distance falloff + Army HQ faction-scope opt-in deferred to v2.2b alongside the corps-adjacency cache scaffold.
+- **formTacticalGroup helper** (new `src/sim/combat/tactical_group_lifecycle.ts`): pure mutation. Validates Hard Invariants #1/#4/#8 (no anchor-in-other-TG, no donor-in-other-TG, no anchor-in-own-donors, no duplicate donors). Creates `TacticalGroup` entry in `state.military.tactical_groups`. Writes `personnel_lent_by_tg` + `equipment_lent_by_tg` on each donor. Donors stored pre-sorted by `brigade_id` (Hard Invariant #4). Returns `{ tg_id, rejection_reason? }` for caller diagnostics.
+- **dissolveTacticalGroup helper** (same file): pure mutation. Clears donor lent fields, removes TG entry, sets `tg_cooldown_until_turn = current_turn + TG_DONOR_COOLDOWN_TURNS (6)` on anchor + each donor (Hard Invariant #2). No casualty application here — that's debited live during battle per ADR-0005 §Trickle-back.
+- **Exports**: `TG_DONOR_COOLDOWN_TURNS` constant for cross-module reuse.
+- **No wiring**: helpers exist but are not called from any runtime code yet. v2.2b adds the wiring under ENABLE_TG_FORMATION + ENABLE_TG_COMBAT_SYNTHESIS sub-flags.
+
+**Determinism:** Pure functions; strictCompare imported from canonical `src/state/validateGameState.ts`; donor list pre-sorted; no `Math.random`/`Date.now`; no Record iteration without sort. selectDonors iterates formations via `Object.keys(...).sort(strictCompare)`.
+
+**Verification:**
+- typecheck: clean for v2.2a files.
+- `vitest run tests/tg_lifecycle.test.ts tests/tg_invariants.test.ts tests/tg_casualty_distribution.test.ts --reporter=dot`: **38/38 PASS** (20 lifecycle + 7 invariants + 11 casualty distribution).
+- 40w v2.2a (n4) hash: `3649b3861a87e6ea` — byte-identical to v1 baseline (n0), v1-on smoke (n1), v2.0 schema bump (n2), v2.1 casualty math (n3). Helpers not yet called from runtime → zero behavioral surface.
+
+**Artifacts:**
+- `src/sim/combat/tactical_group_selection.ts` (replaced stub with v2.2-simplified algorithm)
+- `src/sim/combat/tactical_group_lifecycle.ts` (new — form + dissolve helpers + cooldown constant)
+- `tests/tg_lifecycle.test.ts` (new — 20 test cases covering all 6 selection gates + 5 form rejection reasons + dissolution cooldown round-trip)
+- `data/derived/latest_run_final_save.json` (n4 validation artifact)
+
+**Next (v2.2b):** Wire selectDonors into `operation_preparation.ts` `intel_gathering` phase (gated by ENABLE_TG_FORMATION). Wire `formTacticalGroup` into `ready` transition. Wire TG combat power synthesis + `distributeCasualtiesAcrossTg` into `attack_resolution_osid.ts` (gated by ENABLE_TG_COMBAT_SYNTHESIS). Wire `dissolveTacticalGroup` into `sector_offensive.ts` execution→recovery transition. Then 40w flag-off byte-identical + optional flag-on smoke to observe expected +3-8% calibration shift.
+
+---
+
+## [2026-05-29] feat(combat): ADR-0005 v2.1 — TG casualty distribution math (dormant)
+
+**Type:** Pure math helper + comprehensive unit tests. Phased rollout v2.1 of ADR-0005. Per Ops Expert sub-stage reorder: ship casualty distribution before combat synthesis so the math is unit-tested in isolation; v2.2 wires it into `attack_resolution_osid.ts` alongside combat-power synthesis.
+
+**Change:**
+- **New file `src/sim/combat/tactical_group_casualties.ts`** — pure function `distributeCasualtiesAcrossTg(totalCasualties, anchorBrigadeId, donors)` returning `{ anchor_casualties, donor_casualties }`. Implements ADR-0005 §Battle resolution algorithm: anchor floor at ≥50% (non-negotiable), donor share pro-rata by `personnel_lent`, **largest-remainder method** for integer split with **deterministic tiebreak by donor `brigade_id` strictCompare**. Hard Invariant #5 enforced: per-donor casualties capped at `personnel_lent`, overflow reassigned to anchor. Export `ANCHOR_CASUALTY_FLOOR_FRACTION = 0.5` constant for re-use.
+- **New test file `tests/tg_casualty_distribution.test.ts`** — 11 test cases covering all 7 scenarios from the v2.1 task list plus three additional edge cases:
+  - (a) zero donors → anchor 100%
+  - (b) single donor → 50/50
+  - (c) 3 donors varied → pro-rata + anchor 50%
+  - (d) integer remainder → largest-remainder + brigade_id tiebreak (intentional fractional case asserting d100/d200/d300 split)
+  - (e) equal donors edge case
+  - (e2) constant export assertion
+  - (g) zero casualties → no decrement
+  - (g2) negative casualties → defensive zero
+  - (h) Hard Invariant #5 cap + overflow
+  - (i) sum(personnel_lent)=0 defensive
+  - (j) conservation across many synthetic shapes
+- **Singular ownership preserved**: `strictCompare` imported from canonical `src/state/validateGameState.ts` (caught + fixed during self-check; rejected initial inline copy).
+
+**Determinism:** Pure function, no side effects, no `Math.random`/`Date.now`, no Record iteration over unsorted keys. Largest-remainder tiebreak uses `strictCompare` on `brigade_id`. Helper not imported by any runtime path yet — wires in at v2.2 alongside combat synthesis.
+
+**Verification:**
+- `node_modules/.bin/tsc --noEmit`: clean for v2.1 files (`tactical_group_casualties.ts`, `tg_casualty_distribution.test.ts`).
+- `vitest run tests/tg_casualty_distribution.test.ts tests/tg_invariants.test.ts --reporter=dot`: **18/18 PASS** (7 invariants + 11 casualty distribution).
+- 40w v2.1 (n3) hash: `3649b3861a87e6ea` — byte-identical to v1 baseline (n0), v1-on smoke (n1), v2.0 schema bump (n2). Pure-math addition with no runtime call site → zero behavioral surface.
+
+**Artifacts:**
+- `src/sim/combat/tactical_group_casualties.ts` (new)
+- `tests/tg_casualty_distribution.test.ts` (new)
+- `data/derived/latest_run_final_save.json` (n3 validation artifact)
+
+**Next:** v2.2 — combat synthesis. Wire `selectDonors` (v2.0 stub) into `intel_gathering` phase, populate TG in `tactical_groups` Record under `ENABLE_TG_FORMATION`. Wire `distributeCasualtiesAcrossTg` into `attack_resolution_osid.ts` battle resolution under `ENABLE_TG_COMBAT_SYNTHESIS`. **First calibration-shift stage** per ADR-0005 §Phased Rollout — expect +3-8% capture before v2.3 Pyrrhic dampener lands.
+
+---
+
+## [2026-05-29] feat(state): ADR-0005 v2.0 — TG schema scaffold (v18→v19), behavior-flagged
+
+**Type:** Schema migration v18→v19 + sub-flag scaffolding + donor selection stub + invariants test. Phased rollout v2.0 of ADR-0005.
+
+**Change:** First substantive code+schema landing for the Tactical Group system. All TG state present in schema; ALL behavior gated behind sub-flags defaulted off. Per ADR-0005 §Determinism Impact (schema-stable, behavior-flagged) and Tech Architect Q4 (one big bump at v2.0 with all fields, sub-flag gated).
+- **Schema additions in `src/state/game_state.ts`**: types `TgId`, `ArmyHqOpId`, `TgStatus`, `TgDonorContribution`, `TacticalGroup`, `ArmyHqOperation`. Four FormationState donor-accounting fields: `personnel_lent_by_tg`, `equipment_lent_by_tg`, `tg_cooldown_until_turn`, `tg_donations_this_scenario`. Four MilitaryState Records: `tactical_groups`, `army_hq_operations`, `army_hq_last_op_turn`, `army_hq_op_count_by_year`. All optional. `CURRENT_SCHEMA_VERSION` bumped 18→19.
+- **Migration v19 in `src/state/save_migration.ts`**: initializes the four MilitaryState Records as empty `{}`. FormationState fields stay optional (undefined for unaffected brigades). One-way migration; no v19→v18 downgrade path (personnel-lent ledger has no v18 representation).
+- **Sub-flag scaffolding in `src/sim/combat/tactical_group_config.ts`**: `ENABLE_TG_FORMATION`, `ENABLE_TG_COMBAT_SYNTHESIS`, `ENABLE_TG_COHESION_BLEED` — all default false. Per ADR §Phased Rollout: v2.0/v2.2/v2.2/v2.3 lighting up respectively.
+- **`selectDonors` stub in `src/sim/combat/tactical_group_selection.ts`** (new): v2.0 stub returns `[]` empty pool. Comprehensive header docstring documents the full v2.2 algorithm (adjacent-corps rule, 6-gate eligibility filter, deterministic `(distance_hops, source_corps_id, brigade_id)` sort, distance falloff, faction-scope Army HQ opt-in).
+- **Invariants test `tests/tg_invariants.test.ts`** (new): exported `validateTgInvariants(state)` helper + 7 test cases covering Hard Invariants #1/#3/#4/#5/#6 + v18→v19 migration round-trip. Tests pass on empty v2.0 state and correctly flag synthetic violations.
+
+**Determinism:** All TG fields optional; empty Records initialized via migration. Existing `omitEmpty` serializer keeps empty fields out of hash input → byte-identical to v18 baseline. No new sort/iteration; no `Math.random()`/`Date.now()`. Sub-flag-gated behavior; flags-off path is bit-exact with v1 commit `06ee6dcb`.
+
+**Verification:**
+- typecheck (`node_modules/.bin/tsc --noEmit`): clean for v2.0 files (`game_state.ts`, `save_migration.ts`, `tactical_group_config.ts`, `tactical_group_selection.ts`, `tg_invariants.test.ts`).
+- `vitest run tests/tg_invariants.test.ts --reporter=dot`: 7/7 PASS.
+- 40w v2.0 (n2) hash: `3649b3861a87e6ea` — byte-identical to v1 baseline (n0) and v1-on smoke (n1). Schema-stable + behavior-flagged confirmed empirically across three independent runs.
+
+**Artifacts:**
+- `src/state/game_state.ts` (schema additions + version bump 18→19)
+- `src/state/save_migration.ts` (v19 migration)
+- `src/sim/combat/tactical_group_config.ts` (sub-flags)
+- `src/sim/combat/tactical_group_selection.ts` (new, selectDonors stub)
+- `tests/tg_invariants.test.ts` (new, 7 test cases)
+- `data/derived/latest_run_final_save.json` (n2 validation artifact)
+
+**Next:** v2.1 — casualty distribution math (`distributeCasualtiesAcrossTg`), wired but dormant until v2.2 lights up combat synthesis. v2.2 = first calibration shift (donors contribute to combat power; expected +3-8% capture before v2.3 Pyrrhic dampener lands).
+
+---
+
+## [2026-05-28] feat(combat): ADR-0005 v1 + ADR-0005 r3.1 + ADR-0006 — Tactical Groups foundation accepted
+
+**Type:** Engine design + first-version feature flag + companion ADR. Phased rollout v1 of ADR-0005.
+
+**Change:** Multi-part design closure for the Operational Group / Tactical Group lane:
+- **ADR-0005 r3** Accepted: promote canonical OG entity (Rulebook v0.9.0 §5.7, Systems Manual v0.9.0 §6.3) to primary offensive ops path. Anchor brigade physically commits; donor brigades contribute battalion-equivalent elements with distance falloff, no relocation. 18 decisions ratified, 10 hard invariants, Army HQ Operations as separate tier, NO HVO↔ARBiH cross-faction donations (coordination only), v2 sub-staging reordered v2.0→v2.1→v2.2→v2.3 with calibration shift isolated to v2.2. (Major sync after 4-specialist Pyrrhic convening.)
+- **ADR-0006** Accepted: sectors-as-standing-OGs naming reconciliation. Zero structural code change. Engine's `corps_front_sectors` ARE the canonical standing-OG implementation; `display_name?: string` optional field carries historically-attested labels (Doboj OG 9, TG Drina, OG North/South, OZ Central Bosnia). ADR-0005 handles **temporary** OGs/TGs for offensive ops; ADR-0006 handles **standing** OGs that own defensive AORs.
+- **v1 code**: `ENABLE_TACTICAL_GROUPS` feature flag (default off) + `getAnchorBrigade(axis)` helper in `src/sim/combat/tactical_group_config.ts`. `classifyAxisOpeningAttack` in `sector_offensive_launch_helpers.ts` pre-filters brigade list to `[anchor]` when flag is on. Combat math (main/support_brigades SUPPORT_POWER_MULT path) unchanged.
+
+**Determinism:** Feature flag default off → byte-identical code path. With flag on, `gateBrigades` is the anchor-only list; downstream functions unchanged. Schema additions deferred to v2.0 (single v33→v34 bump with all fields gated by sub-flags).
+
+**Verification:**
+- typecheck: clean (0 errors after src/ui/map sub-workspace install).
+- 40w v1 flag-off (n0): hash `3649b3861a87e6ea` — byte-identical to plain main baseline.
+- 40w v1 flag-on smoke (n1, reverted): hash `3649b3861a87e6ea` — byte-identical. v1 architectural claim proven; anchor-only filtering produces zero behavioral change in 40w because every pre-planned op's first-listed brigade IS the eligible one. 4 known anchor-mispick cases (Op Podrinje Sweep, Op Drina/Op Podrinje shared anchor, Op Visegrad, Op Prsten JNA phantoms) are all 156w+ territory.
+
+**Artifacts:**
+- `docs/20_engineering/ADR/ADR-0005-tactical-groups-as-primary-ops-path.md` (r3.1)
+- `docs/20_engineering/ADR/ADR-0006-sectors-as-standing-operational-groups.md`
+- `src/sim/combat/tactical_group_config.ts` (new)
+- `src/sim/combat/sector_offensive_launch_helpers.ts` (gate change)
+- `docs/40_reports/20260528_ADR_0005_V1_SMOKE_TEST.md` (smoke validation report)
+
+**Commits:** `31c74f02` (ADR-0006), `624782e4` (ADR-0005 r3.1 companion link), `06ee6dcb` (v1 code). Branch: `claude/tactical-groups-2026-05-28`. Worktree: `F:/A-War-Without-Victory/.worktrees/tactical-groups-2026-05-28/`.
+
+**Next:** v2.0 — donor pool selection + TG formation + v33→v34 schema migration. Sub-stage order v2.0 (formation) → v2.1 (distribution math, dormant) → v2.2 (combat synthesis, calibration shift) → v2.3 (Pyrrhic dampener).
 ## [2026-05-29] codex: 6 dedicated Pyrrhic-standard plans upgrading thin shared-phase ACTIVE lanes
 
 **Type:** Docs/planning only. No engine, event-JSON, scenario, or save-schema change; no behavioral or

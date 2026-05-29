@@ -83,6 +83,10 @@ const baseState: GameState = {
         pending_event_decisions: [],
         pending_event_notifications: [],
         phantoms_spawned: [],
+        tactical_groups: {},
+        army_hq_operations: {},
+        army_hq_last_op_turn: {},
+        army_hq_op_count_by_year: {},
         negotiation: {
             capital: {},
             patron_relationships: {},

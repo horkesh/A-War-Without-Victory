@@ -60,7 +60,20 @@ describe('late-1995 triggered operations — catalog', () => {
         }
         // Ordering: legacy four first, late-1995 sensitive-history two after.
         // Sana and Mistral 2 are migrated to opportunity catalogs.
-        assert.deepEqual(names.slice(-2), [...NEW_OP_NAMES]);
+        // ADR-0005 v3.0 (2026-05-29): the army_hq_only def Farz 95 (Vozuća) is
+        // inserted between Krivaja-95 and Stupčanica-95, so the two sensitive-
+        // history ops are no longer the literal tail-2. Assert instead that both
+        // appear after the four legacy ops (the original intent of this contract).
+        const legacyFour = [
+            'Operation Posavina Corridor',
+            'Operation Herzegovina Consolidation',
+            'Operation Kotor Varos',
+            'Operation Cerska-Kamenica',
+        ];
+        const lastLegacyIdx = Math.max(...legacyFour.map((n) => names.indexOf(n)));
+        for (const name of NEW_OP_NAMES) {
+            assert.ok(names.indexOf(name) > lastLegacyIdx, `expected ${name} after the four legacy ops`);
+        }
     });
 
     it('Operation Krivaja-95 has the expected faction/corps/turn-gate/single-axis shape', () => {
@@ -154,6 +167,39 @@ describe('late-1995 triggered operations — objective OSIDs are valid + painted
     });
 
     // Sana and Mistral 2 painted-truth assertions migrated to opportunity-catalog test packs.
+
+    it('Farz 95 (army_hq_only) enriched objectives are the 3 apr1995=RS → oct1995=RBiH salient OSIDs', () => {
+        // ADR-0005 v3.0 enrichment: Vozuća salient captured-objective set.
+        const def = _TRIGGERED_OPS.find((d) => d.name === 'Operation Farz 95');
+        assert.ok(def);
+        assert.equal(def!.faction, 'RBiH');
+        assert.equal(def!.primary_corps, 'arbih_3rd_corps');
+        assert.equal(def!.army_hq_op_id, 'farz_95');
+        assert.equal(def!.army_hq_only, true);
+        assert.equal(def!.axes.length, 1);
+        const axis = def!.axes[0]!;
+        assert.equal(axis.axis_id, 'vozuca_pocket');
+        assert.equal(axis.corps, 'arbih_3rd_corps');
+        // Objectives in declared attack order: vozuca_2 → gornja_bocinja → donja_bocinja_2.
+        assert.deepEqual(axis.objectives, [
+            'op:zavidovici:vozuca_2',
+            'op:maglaj:gornja_bocinja',
+            'op:maglaj:donja_bocinja_2',
+        ]);
+        // RBiH-direction flip: each objective RS @apr1995 and RBiH @oct1995.
+        for (const osid of axis.objectives) {
+            assert.equal(apr1995Map[osid], 'RS', `${osid} should be apr1995=RS`);
+            assert.equal(oct1995Map[osid], 'RBiH', `${osid} should be oct1995=RBiH`);
+        }
+        // Seed brigades: all arbih_3rd_corps; anchor 351st resident at staging.
+        assert.deepEqual(axis.brigades, [
+            'arbih_351st_liberation',
+            'arbih_328th_mountain',
+            'arbih_327th_vitezka_mountain',
+            'arbih_7th_vitezka_muslim_liberation',
+        ]);
+        assert.equal(def!.staging_osid, 'op:zavidovici:hajderovici_2');
+    });
 
     it('all new-op objectives are deterministic (each axis preserves declared order, no duplicates)', () => {
         for (const name of NEW_OP_NAMES) {

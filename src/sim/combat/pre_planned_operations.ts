@@ -1157,3 +1157,24 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
 }
 
 export const _ALL_PRE_PLANNED = ALL_PRE_PLANNED;
+
+/**
+ * ADR-0005 v2.2c (issue #40): brigade IDs reserved by pre-planned ops that have NOT yet
+ * injected (`available_from > currentTurn`). These brigades are op-critical anchors/participants
+ * referenced by hardcoded ID; excluding them from TG donor selection prevents donor consumption
+ * from stranding a pre-planned op before it injects — e.g. Op Trnovo at w69, where the flag-on
+ * 188w smoke showed `rs_trnovo_brigade` consumed/gone before injection, so the op failed with
+ * `not found in formations` → axis_empty. A brigade is reserved only until its op's injection
+ * turn; once injected (`available_from <= currentTurn`), the active op owns it and Hard Invariant
+ * #1 (one-TG-per-brigade) governs any further TG membership.
+ */
+export function getReservedPrePlannedBrigadeIds(currentTurn: number): Set<FormationId> {
+    const reserved = new Set<FormationId>();
+    for (const def of ALL_PRE_PLANNED) {
+        if ((def.available_from ?? 0) <= currentTurn) continue;
+        for (const axis of def.axes) {
+            for (const bid of axis.brigades) reserved.add(bid);
+        }
+    }
+    return reserved;
+}

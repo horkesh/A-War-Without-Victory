@@ -475,7 +475,7 @@ describe('Phase B Sub-slice B2 — state shape + save migration', () => {
     });
 
     describe('Gate 38 — drift audit clean', () => {
-        it('save_migration_drift_audit.cjs reports no orphan anonymous defaults at v33', () => {
+        it('save_migration_drift_audit.cjs reports no orphan anonymous defaults at v34', () => {
             const cwd = process.cwd();
             const outputPath = resolve(cwd, 'tools', 'diagnostics', 'output', 'save_migration_drift.json');
 
@@ -487,7 +487,7 @@ describe('Phase B Sub-slice B2 — state shape + save migration', () => {
                 fields: Array<{ field: string }>;
             };
 
-            expect(report.latest_schema_version).toBe(33);
+            expect(report.latest_schema_version).toBe(34);
             expect(report.anonymous_default_count).toBe(0);
             expect(report.fields).toEqual([]);
         });

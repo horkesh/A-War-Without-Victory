@@ -14119,6 +14119,9 @@
         }
       }
     },
+    "army_hq_last_op_turn": {},
+    "army_hq_op_count_by_year": {},
+    "army_hq_operations": {},
     "army_stance": {
       "HRHB": "balanced",
       "RBiH": "balanced",
@@ -118623,6 +118626,7 @@
       "HRHB": 128,
       "RBiH": 0
     },
+    "tactical_groups": {},
     "theatres": {},
     "triggered_operations_accepted": {
       "Operation Cerska-Kamenica": 40,
@@ -141966,7 +141970,7 @@
       "RS": 100
     }
   },
-  "schema_version": 33,
+  "schema_version": 34,
   "turn_summaries": [
     {
       "arc_transitions": [

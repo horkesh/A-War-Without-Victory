@@ -754,3 +754,29 @@ registerMigration({
         ensureArray(mil, 'event_causality_log');
     },
 });
+
+registerMigration({
+    version: 34,
+    description: 'ADR-0005 v2.0: Tactical Group + Army HQ Operation state scaffold. '
+        + 'Schema-stable; behavior gated by ENABLE_TACTICAL_GROUPS umbrella flag + sub-flags '
+        + '(enable_tg_formation, enable_tg_combat_synthesis, enable_tg_cohesion_bleed) all '
+        + 'default off. NOTE: serializeState does NOT strip empty Records (serializeGameState '
+        + 'only skips undefined values, not empty {} objects), so the four empty Records this '
+        + 'migration adds DO change the serialized final_state_hash (40w pre-v34 '
+        + 'a969d44719aaa40e → v34 78e231e35b08cf53). This is a schema scaffold only: '
+        + 'behaviorally and calibration-neutral (identical territory/anchors/benchmarks with '
+        + 'flags off), as expected for a schema-version migration — NOT byte-identical. '
+        + 'Sensitive: no. One-way migration '
+        + '(no v34→v33 downgrade; personnel-lent ledger has no v33 representation). '
+        + 'FormationState.personnel_lent_by_tg / equipment_lent_by_tg / tg_cooldown_until_turn / '
+        + 'tg_donations_this_scenario stay optional (undefined for unaffected brigades). '
+        + 'Renumbered from v19 during the event-system merge (v19 slot taken by displacement civilian casualty).',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        if (!mil) return;
+        ensureRecord(mil, 'tactical_groups');
+        ensureRecord(mil, 'army_hq_operations');
+        ensureRecord(mil, 'army_hq_last_op_turn');
+        ensureRecord(mil, 'army_hq_op_count_by_year');
+    },
+});
