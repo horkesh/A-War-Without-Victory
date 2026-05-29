@@ -302,6 +302,41 @@ Hash diverges (wiring is alive — TG records, donor lent ledgers, casualty redi
 **Commits:** `31c74f02` (ADR-0006), `624782e4` (ADR-0005 r3.1 companion link), `06ee6dcb` (v1 code). Branch: `claude/tactical-groups-2026-05-28`. Worktree: `F:/A-War-Without-Victory/.worktrees/tactical-groups-2026-05-28/`.
 
 **Next:** v2.0 — donor pool selection + TG formation + v33→v34 schema migration. Sub-stage order v2.0 (formation) → v2.1 (distribution math, dormant) → v2.2 (combat synthesis, calibration shift) → v2.3 (Pyrrhic dampener).
+## [2026-05-29] codex: 6 dedicated Pyrrhic-standard plans upgrading thin shared-phase ACTIVE lanes
+
+**Type:** Docs/planning only. No engine, event-JSON, scenario, or save-schema change; no behavioral or
+output change; no test impact. Six new plan files under `docs/plans/2026-05-29-*.md` (1274 lines), each
+upgrading a COMMAND_BOARD ACTIVE lane that was previously covered only as a thin ~30-line phase inside a
+shared multi-phase plan, into a dedicated detailed single-lane plan (depth-matching the prior 7):
+
+1. `intel-surprise-ambush-depth-plan.md` (Gameplay Programmer) — expands p2-p3 Ph1. KEY FINDING: the ambush
+   casualty mechanic is ALREADY SHIPPED + UN-GATED in the baseline (`combat_math.ts:416-440` consumed at
+   `attack_resolution_osid.ts:698-705`); plan retro-gates it behind a justified default-ON umbrella
+   (the one deliberate non-OFF default — a default-OFF flag would wrongly disable shipped behavior) + 3
+   default-OFF depth levers; player surface is attacker-self-state only (no hidden-truth leak).
+2. `supply-logistics-comprehension-plan.md` (UI/UX) — expands p2-p3 Ph2. Read-model + docs ONLY; extends
+   the existing singular `playerSupplyVisibility.ts` owner; engine untouched → byte-identical by
+   construction. Core gap: `presidentialDecisionRoom.ts:485` early-returns unless supply is critical.
+3. `officer-oob-source-attribution-plan.md` (Historian) — expands p2-p3 Ph3. Inventory+citation only.
+   FINDINGS: 98 officers / only 29 with war_crimes_record / 15 with mini-bios; essay prefix mismatch
+   confirmed (index `essay_<slug>` vs disk `<slug>`); 9 unindexed 1992 essays; OOB single blanket citation.
+4. `telemetry-playtest-diagnostics-plan.md` (Platform) — expands p2-p3 Ph5. Local-first, default-OFF,
+   no-network; determinism boundary: sim core stays pure, diagnostics sidecar never feeds back into
+   sim/RNG/save/scenario (all wall-clock in Electron-main/renderer).
+5. `gamestate-schema-contract-plan.md` (Systems) — expands engine-quality-residuals Ph2. Recommends
+   `military.event_constraints` (`game_state.ts:2378`) as validate-when-present (NO eager default — would
+   inject a key legacy saves lack, breaking byte-identity); first nested-object slice.
+6. `save-replay-artifact-stability-plan.md` (Systems) — expands engine-quality-residuals Ph3. Next safe
+   slice = classify the 4 untracked, un-gitignored transient `data/derived/scenario/_*` scratch dirs
+   (gitignore + matrix row + ownership test; classification-only, byte-identical by construction).
+
+**Review.** Drafted by 6 matched specialists; independently cleared by two reviewers who did not draft them:
+Canon Compliance + Determinism Auditor (all PASS / PASS-WITH-CONDITIONS; intel default-ON umbrella verified
+correct against live code; telemetry determinism boundary sound; `event_constraints` validate-when-present
+correct; no sacred-rule violations / hidden-truth leaks) and Process QA + Reports Custodian (5 COMPLETE; the
+save/replay plan's gitignore-verification expectation corrected — top-level-anchored `git ls-files
+'data/derived/scenario/_*'`, since nested tracked `recruitment_test_matrix_*/_tmp*` files exist; all
+load-bearing file:line claims verified real; no closure-log conflicts; no overclaims).
 
 ## [2026-05-29] codex: 7 Pyrrhic-standard plans for the open/deferred event-system + calibration lanes
 
