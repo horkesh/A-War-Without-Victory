@@ -386,16 +386,20 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         //   kijevo_2          adj delijas   ✓
         //   trnovo adj pale:praca/podgrab   ✗ — pale cluster excluded (broken chain)
         //
-        // available_from: 6 — matches rs_trnovo_brigade availability.
+        // available_from: 6 — injects right after Op Prsten recovery (~w4).
         // SRK queue is explicit (see queue block below): Prsten → Trnovo.
-        // Two brigades required (sector_attack MIN=2):
-        //   rs_trnovo_brigade: home gornja_presjenica — already at staging, east axis
-        //   rs_igman_brigade:  home misevici_2 (Hadžići) — marches to staging, town axis
+        // Two brigades, both home gornja_presjenica → eligible at injection, no march needed:
+        //   rs_trnovo_brigade:       home gornja_presjenica — east axis (delijas)
+        //   rs_1st_romanija_infantry: home gornja_presjenica — town axis (trnovo)
+        // Historically: Tactical Group Trnovo (Lukavac 93) drew from multiple SRK formations
+        // including Romanija-area brigades pre-positioned south of Sarajevo (BB2 p.289).
         corps: 'vrs_sarajevo_romanija',
         faction: 'RS',
         name: 'Operation Trnovo',
         staging_osid: 'op:trnovo:gornja_presjenica',
-        available_from: 6,
+        // available_from: 69 — historical Lukavac 93 = August 1993 (~w69). Earlier firing
+        // would capture trnovo/delijas before Jan 1993, breaking the 40w calibration target.
+        available_from: 69,
         min_attack_outcome: 'repulsed',
         axes: [
             {
@@ -413,7 +417,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 // gornja_presjenica → trnovo (RBiH-painted, directly adjacent)
                 axis_id: 'trnovo_town',
                 name: 'Trnovo Town',
-                brigades: ['rs_igman_brigade'],
+                brigades: ['rs_1st_romanija_infantry'],
                 objectives: [
                     'op:trnovo:trnovo',     // RBiH-painted, persistent RBiH mismatch
                 ],
