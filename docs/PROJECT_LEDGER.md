@@ -1,4 +1,26 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] codex: Phase J Packet 1 (Phase E activation simulator)
+
+- **Type.** Pure additive new diagnostic tool + test file. Zero production code changed. No FORAWWV edits. No baseline writes.
+- **Scope.** Two-file packet:
+  - `tools/diagnostics/phase_e_activation_simulator.ts` (~485 LOC) — pre-activation gating tool. Answers "if I flip Phase E flags in production, what changes per scenario?". Companion to `docs/40_reports/implemented/20260528_PHASE_E_ACTIVATION_PROCEDURE.md`.
+  - `tests/phase_e_activation_simulator.test.ts` (~310 LOC, 18 tests).
+- **Architecture.** Two operating tiers:
+  - **Tier 1 — math-only projection (default, sub-second).** For each of 5 canonical flag combinations (`global_off`, `global_only`, `intl_only`, `cohesion_only`, `both_on`) × 3 factions, reads `state.military.negotiation.strategic_dimensions` and computes the op-launch multiplier `sector_offensive.ts` would produce. Reuses canonical `getIntlStandingOpsHesitationMultiplier` + `getCohesionCautionBiasMultiplier` rather than mirroring thresholds.
+  - **Tier 2 — real-scenario projection (`--run-scenarios`, slow).** For each non-baseline combo, sets gate overrides via `setPoliticalDimensionPropagationOverride` / `setIntlStandingOpsHesitationOverride` / `setCohesionCautionBiasOverride`, runs canonical baseline-manifest scenarios in-process via the exported `runScenario` API, hashes artifacts against `data/derived/scenario/baselines/manifest.json`, classifies drift (FLAT / DRIFT / MISSING / NO_BASELINE) and behavioral signal (NO-DRIFT / DIMENSION-ONLY / BOT-MILITARY). Always resets gates in `try/finally`. **NEVER writes baselines** — Tier 2 is hash-comparison only.
+- **CLI surface.** `--save <path>`, `--json`, `--faction RBiH|RS|HRHB`, `--combo <combo-id>`, `--run-scenarios`.
+- **Determinism.** Sorted iteration over factions / combos (declared procedural order) / artifacts (alphabetical). No Math.random, no Date.now, no timestamps. Tier 2 try/finally guarantees gate reset even on runner throw.
+- **Tier 1 smoke (real save, turn 40).** All five combos enumerated. `global_off` / `global_only`: 0/3 factions non-trivial (gate inactive). `intl_only`: 2/3 (HRHB & RS 0.700×; RBiH unaffected, intl=34.76 ≥ 30 threshold). `cohesion_only`: 3/3 (all 0.850×; every faction sub-40). `both_on`: 3/3 — HRHB & RS chain to 0.595×, RBiH only cohesion-multiplied to 0.850×.
+- **Verification matrix.**
+  - `vitest run tests/phase_e_activation_simulator.test.ts tests/political_dimensions_snapshot.test.ts --reporter=dot`: PASS (27/27 — 18 simulator + 9 snapshot).
+  - `npx tsc --noEmit`: PASS clean.
+  - `git diff --check`: exit 0 (no whitespace errors).
+  - Tier 1 smoke: PASS — produces the expected per-combo per-faction projection matrix.
+  - `tools/scenario_runner/run_baseline_regression.ts`: **PASS byte-identical** (all scenarios match — confirms pure additive change has zero production impact).
+  - Tier 2 NOT executed in verification (too slow); test coverage exercises gate override / drift classifier / try-finally reset via injected runners.
+- **Hard constraints honored.** No FORAWWV edits. `.claude/scheduled_tasks.lock` not staged. No worktrees entered. No untracked debug dirs touched. No baseline refresh. Tier 2 never calls `UPDATE_BASELINES`. Reuses gate module override setters + diagnostic-tool architecture (Phase E Packet 4 / E4 pattern from `political_dimensions_snapshot.ts`).
+- **Net LOC delta.** +795 lines (new tool + new tests). Zero existing-file LOC delta.
+
 ## [2026-05-29] codex: Phase I Packet 7 (memory + napkin + life_lessons curation)
 
 - **Type.** Pure documentation curation. No code changes. Consolidates 27-commit session arc (commits `67eee60a..8bf0ec98` — Phases B/D/E/F/G/H + Phase I1–I6 cleanup) into durable wisdom surfaces.
