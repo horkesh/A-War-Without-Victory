@@ -20,6 +20,8 @@
 | `OPERATOR-ONLY` | Repo can prepare templates/support, but real closure requires external machine/account/certificate/store/user evidence. |
 | `MONITOR` | No immediate implementation; watch scenario/profile/QA evidence. |
 | `CLOSED` | Implementation closed; leave only as history or future expansion reference. |
+| `OPEN` | Tracked work not yet started/scheduled; no owner lane actively executing. |
+| `DEFERRED` | Intentionally postponed by decision (user/design); reopen only on the stated reopen criteria. |
 
 ## Active Command Board
 
