@@ -1,4 +1,81 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] fix(combat): ADR-0005 #40 — exclude not-yet-injected pre-planned-op brigades from TG donor selection
+
+**Type:** Donor-eligibility correctness fix on the flag-gated TG path. Ring 1, faction-agnostic. Fixes the Op-Trnovo donor-strand bug surfaced in the 188w flag-on smoke (see v2.2b/v2.3 entries).
+
+**Why:** The 188w flag-on smoke (n16, hash `78676f361f48835c`) showed Op Trnovo (vrs_sarajevo_romanija, w69) failing with `rs_trnovo_brigade "not found in formations"` → `axis_empty` → `participants_below_attack_floor`. Root cause: a TG forming earlier consumed `rs_trnovo_brigade` (and other brigades reserved for not-yet-injected pre-planned ops) as a donor, so when the pre-planned op later injected, its hardcoded-ID participants were already drained/absent. Cohesion bleed (v2.3) does not address this — it is a brigade-resolution / donor-eligibility ordering bug, not a Pyrrhic-cost question. Codex's adjacency theory (`gornja_presjenica` route) was REFUTED by the smoke.
+
+**Change:**
+- **`src/sim/combat/pre_planned_operations.ts`** (commit `f2318223`): exported `getReservedPrePlannedBrigadeIds(currentTurn)` — returns the set of brigade ids belonging to pre-planned ops whose `available_from > currentTurn` (i.e. not yet injected, still reserved until injection).
+- **`src/sim/combat/tactical_group_selection.ts`** (commit `f2318223`): `selectDonors` computes the reserved set once and `isEligibleDonor` excludes any brigade in it. Reserved-set computation is flag-on only (called from `selectDonors`); flag-off path never reaches it.
+
+**Determinism:** Reserved set is a `Set<FormationId>` membership test inside the existing deterministically-sorted `selectDonors` candidate filter. No new iteration order, no randomness. No injection-turn race (reviewer-confirmed: reservation is keyed off `available_from > currentTurn`, evaluated at TG-formation time).
+
+**Verification:**
+- typecheck clean; 38 TG tests pass.
+- Flag-off 40w byte-identical: `78e231e35b08cf53` (independently re-verified by reviewer — Lane A GO).
+- **`tests/...` regression guard** (commit `71426ad6`): pins the form-before-inject phase ordering so the reservation guard's premise can't silently regress.
+
+**Files:**
+- `src/sim/combat/pre_planned_operations.ts` (export `getReservedPrePlannedBrigadeIds`)
+- `src/sim/combat/tactical_group_selection.ts` (reserved-set exclusion in `selectDonors` / `isEligibleDonor`)
+- `tests/` TG regression guard (form-before-inject ordering)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
+
+## [2026-05-29] feat(combat): ADR-0005 v2.3 — Pyrrhic dampener (donor cohesion bleed + caps + same-composition block), flag-gated dormant
+
+**Type:** Phased rollout v2.3 of ADR-0005 — the Pyrrhic dampener sub-stage. All behavior gated behind new sub-flag `ENABLE_TG_COHESION_BLEED` (default false). Ring 1, faction-agnostic. Flag-off byte-identity required and obtained.
+
+**Why:** The 188w flag-on smoke (v2.2b/c, n16 vs n15) showed the predicted +3-8% capture shift (RS +21 / RBiH +3 / HRHB −24; anchors 26→27) but with a concerning direction — RS donor-fed VRS ops over-amplified largely at HRHB's expense, and HRHB lost counter-attack capacity as HVO brigades were consumed as donors. v2.3 is the ADR's designed dampener to constrain that fire-hose dynamic. It ships flag-OFF; calibration of the dampener happens in a later dedicated 188w window.
+
+**Change** (commit `54ddc9b6`):
+- **Donor cohesion bleed** applied at TG formation: `floor(donatedFraction × (1 + hops × 0.15) × 15 × hqMult)` per ADR-0005 §Pyrrhic cost (`hqMult` = `ARMY_HQ_COHESION_BLEED_MULT` 2.0× for Army HQ donors, else 1.0×).
+- **Per-scenario donation cap** `MAX_DONATIONS_PER_SCENARIO = 3` — a brigade may donate to at most 3 TGs per scenario (anti-fire-hose, complements the existing 6-turn `TG_DONOR_COOLDOWN_TURNS`).
+- **Same-composition reformation block** (Hard Invariant #9): op-id-independent `compositionHash(anchor_id + sorted_donor_ids)` checked at formation against a new `tg_recent_compositions` ledger; blocks "dissolve and reform identical TG via a different op_id" abuse within the cooldown window.
+- New optional field `MilitaryState.tg_recent_compositions` (omitted flag-off → byte-identical; no migration / `ensureRecord` needed, schema stays v34).
+
+**Determinism:** Cohesion-bleed is integer (`floor`), no randomness. `tg_recent_compositions` serialized via sorted-key iteration; `compositionHash` built from `strictCompare`-sorted donor ids. Donor cooldown confirmed enforced in `selectDonors`.
+
+**Verification:**
+- typecheck clean; TG suites pass (reviewer GO — spec-faithful, determinism-clean).
+- **Flag-off 40w byte-identical: `78e231e35b08cf53`** (independently re-verified). The changed code is only reached flag-on, so flag-off byte-identity is by construction.
+
+**Deferred to v3.0:** the "8-turn cohesion-recovery suppression" component is NOT in v2.3 — the donor already sits in the 6-turn cooldown, and the cohesion-recovery hot path (`cohesion_drift.ts` `runCohesionDrift`) is CALIBRATION-SENSITIVE, so it is left untouched here to preserve byte-identity. Wired in v3.0 behind its own gate.
+
+**Files:**
+- `src/sim/combat/tactical_group_lifecycle.ts` (cohesion bleed at formation + composition-hash block)
+- `src/sim/combat/tactical_group_selection.ts` (per-scenario donation cap + cooldown)
+- `src/sim/combat/tactical_group_config.ts` (`ENABLE_TG_COHESION_BLEED`, `MAX_DONATIONS_PER_SCENARIO`)
+- `src/state/game_state.ts` (`MilitaryState.tg_recent_compositions`, optional)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
+
+## [2026-05-29] feat(combat): ADR-0005 v2.2c — true per-donor power, anchor-death dissolution, 60% donation gate (flag-gated)
+
+**Type:** Phased rollout v2.2c of ADR-0005 — closes the three v2.2b TODO carry-forwards (true per-donor combat power, Hard Invariant #6, 60% donation gate). All gated behind the v2.2 sub-flags (`ENABLE_TG_FORMATION` / `ENABLE_TG_COMBAT_SYNTHESIS`, default false). Ring 1, faction-agnostic. Flag-off byte-identity held.
+
+**Change:** Three commits, one per TODO:
+- **#1 — true per-donor combat power** (`src/sim/combat/attack_resolution_osid.ts`, commit `ab7b9de0`): replaces the v2.2b `computeTgDonorPower` proxy (`anchorRaw × donatedPersonnel/anchorPersonnel`) with true per-donor stats — each donor's lent personnel + equipment contributes power through its own `FormationState` kind/equipment/cohesion modifiers, summed across donors. Donors still take NO concentration multiplier (ADR-0005 §Battle resolution).
+- **#2 — Hard Invariant #6 immediate anchor-death dissolution** (`src/sim/combat/attack_resolution_osid.ts`, commit `6a17e3ab`): when an anchor falls below `MIN_ATTACK_PERSONNEL` (500) or cohesion < 15 in the casualty loop, the TG dissolves immediately (`dissolveTacticalGroup`) at the moment of anchor death — no longer waiting for the next-tick `beginRecovery` path (the v2.2b one-turn-delay behavior). Territory-revert sub-clause (revert-to-contested unless 1-hop friendly non-TG present) deferred.
+- **#3 — 60% donation-readiness gate** (`src/sim/combat/sector_offensive_launch_helpers.ts`, commit `430cf687`): `classifyAxisOpeningAttack` now enforces `sum(donor.personnel_lent) >= DONATION_READINESS_FRACTION (0.6) × anchor.personnel`; below threshold yields an `insufficient_donation` blocker, preventing lone-anchor suicide attacks. Recomputes `selectDonors` at the gate (no `op.donor_pool` field cached — documented ADR deviation).
+
+**Determinism:** All additions iterate Records via `strictCompare`; per-donor power and casualty splits use integer / largest-remainder math; anchor-death check is a deterministic threshold test in the existing casualty loop. Flag-off paths early-return / fall through unchanged.
+
+**Verification:**
+- typecheck clean; 38 TG tests pass.
+- Flag-off 40w byte-identical to baseline of record `01ca96e2a0faa2f6` (per v2.2b chain); the changed code is only reached flag-on.
+
+**Files:**
+- `src/sim/combat/attack_resolution_osid.ts` (true per-donor power; Hard Inv #6 immediate dissolution)
+- `src/sim/combat/sector_offensive_launch_helpers.ts` (60% donation gate, `insufficient_donation` blocker)
+- `src/sim/combat/tactical_group_config.ts` (`DONATION_READINESS_FRACTION = 0.6`)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
+
 ## [2026-05-29] feat(combat): ADR-0005 v2.2b — wire TG formation/synthesis/dissolution into op pipeline (flag-gated, behavior dormant)
 
 **Type:** Runtime wiring across three call sites. Phased rollout v2.2b of ADR-0005 — second half of the v2.2 sub-stage. v2.2a shipped helpers (selectDonors / formTacticalGroup / dissolveTacticalGroup / distributeCasualtiesAcrossTg); v2.2b now CALLS them from the engine, all gated behind `ENABLE_TG_FORMATION` and `ENABLE_TG_COMBAT_SYNTHESIS` (both default false). First wiring in the chain that touches runtime paths even with flags off — byte-identity proof required and obtained.
