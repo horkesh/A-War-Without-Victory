@@ -2503,9 +2503,12 @@ cost_ledger_annotations?: Array<{
     faction?: FactionId;
 }>;
 // === Tactical Group state (ADR-0005 v2.0) ===
-// Schema-stable from v19; v2.0 ships empty defaults; v2.2 sub-flag lights it up.
-// While ENABLE_TACTICAL_GROUPS=false, empty Records are omitted from hash via
-// existing omitEmpty serializer helper → byte-identical to pre-v19 baseline.
+// v2.0 ships empty defaults via the v34 migration; v2.2 sub-flag lights it up.
+// NOTE: serializeState does NOT strip empty Records (serializeGameState only skips
+// undefined values, not empty {} objects), so the four empty Records the v34 migration
+// creates DO change the serialized final_state_hash (40w a969d44719aaa40e → 78e231e35b08cf53).
+// This is a schema scaffold only — behaviorally/calibration-neutral with flags off, NOT
+// byte-identical to the pre-v34 baseline.
 /** Active Tactical Groups (temporary OGs for offensive ops). Cleared on dissolution. */
 tactical_groups?: Record<TgId, TacticalGroup>;
 /** Army HQ Operations scaffold. v3.0 wires triggers + pipeline step. */

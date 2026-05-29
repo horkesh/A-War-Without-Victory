@@ -22,9 +22,12 @@
  *                                 (donated_fraction × (1 + hops × 0.15) × 15)
  *                                 + cooldown enforcement
  *
- * All flags default false. Schema (v19) ships all TG fields empty; the
- * existing omitEmpty serializer helper ensures byte-identical hash with
- * sub-flags off. Sub-flag activation is the calibration-shift gate.
+ * All flags default false. The v34 migration ships the TG/Army-HQ Records empty.
+ * NOTE: serializeState does NOT strip empty Records (it only skips undefined), so the
+ * v34 scaffold DOES change the serialized hash vs pre-v34 (40w a969d44719aaa40e →
+ * 78e231e35b08cf53) — it is calibration-neutral, not byte-identical. With every flag
+ * off the hash holds steady AT the v34 baseline (78e231e35b08cf53). Sub-flag activation
+ * is the calibration-shift gate.
  */
 export const ENABLE_TACTICAL_GROUPS = false;
 
