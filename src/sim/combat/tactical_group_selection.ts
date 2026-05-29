@@ -50,6 +50,8 @@ import type {
     TgDonorContribution,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+// ADR-0005 v2.2c (issue #40): exclude brigades reserved by not-yet-injected pre-planned ops.
+import { getReservedPrePlannedBrigadeIds } from './pre_planned_operations.js';
 
 export interface DonorSelectionContext {
     /** Anchor brigade for the prospective TG. */
@@ -106,12 +108,15 @@ export function selectDonors(
     if (!anchorCorps) return [];
 
     const currentTurn = state.meta?.turn ?? 0;
+    // Issue #40: brigades reserved by pre-planned ops that have not yet injected must not be
+    // consumed as donors, or the op cannot resolve its hardcoded brigade when it injects.
+    const reservedPrePlanned = getReservedPrePlannedBrigadeIds(currentTurn);
 
     // Iterate same-corps candidates, sorted by brigade_id for determinism.
     const candidates: FormationState[] = Object.keys(formations)
         .sort(strictCompare)
         .map(id => formations[id])
-        .filter(f => isEligibleDonor(f, context, anchorCorps, anchorFaction, currentTurn));
+        .filter(f => isEligibleDonor(f, context, anchorCorps, anchorFaction, currentTurn, reservedPrePlanned));
 
     const selected = candidates.slice(0, MAX_DONORS_PER_TG_V2_2);
 
@@ -124,11 +129,13 @@ function isEligibleDonor(
     anchorCorps: FormationId,
     anchorFaction: string,
     currentTurn: number,
+    reservedPrePlanned: ReadonlySet<FormationId>,
 ): boolean {
     if (f.id === context.anchor_brigade_id) return false;
     if (f.status !== 'active') return false;
     if (f.faction !== anchorFaction) return false;
     if (f.corps_id !== anchorCorps) return false; // v2.2-simplified: same corps only
+    if (reservedPrePlanned.has(f.id)) return false; // issue #40: reserved for a not-yet-injected pre-planned op
     if ((f.cohesion ?? 0) < COHESION_HEALTHY_THRESHOLD) return false;
     if (Object.keys(f.personnel_lent_by_tg ?? {}).length > 0) return false; // Hard Invariant #1
     if (f.tg_cooldown_until_turn != null && currentTurn < f.tg_cooldown_until_turn) return false;
