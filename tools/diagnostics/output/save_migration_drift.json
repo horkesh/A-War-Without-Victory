@@ -1,7 +1,7 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 33,
-  "registered_migration_count": 33,
+  "latest_schema_version": 34,
+  "registered_migration_count": 34,
   "strict_required_field_count": 76,
   "anonymous_default_count": 0,
   "fields": [],
@@ -137,6 +137,10 @@
     {
       "version": 33,
       "description": "Persisted event_causality_log array default (audit trail substrate). Sensitive: no."
+    },
+    {
+      "version": 34,
+      "description": "ADR-0005 v2.0: Tactical Group + Army HQ Operation state scaffold. "
     }
   ],
   "required_fields": [

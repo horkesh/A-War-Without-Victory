@@ -1,5 +1,6 @@
 {
   "displacement": {
+    "civilian_casualties": {},
     "displacement_camp_state": {},
     "displacement_event_log": [],
     "displacement_humanitarian_aggregates": {},
@@ -973,9 +974,11 @@
         "to_faction": "RS"
       }
     },
+    "minority_flight_state": {},
     "municipality_displacement": {},
     "settlement_displacement": {},
     "settlement_displacement_started_turn": {},
+    "sustainability_state": {},
     "war_displacement_initiated": {}
   },
   "factions": [
@@ -1117,17 +1120,25 @@
     "war_start_turn": 0
   },
   "military": {
+    "alliance_locks": [],
     "army_co_decision_traces": {},
     "army_corps_directives_by_faction": {},
+    "army_hq_last_op_turn": {},
+    "army_hq_op_count_by_year": {},
+    "army_hq_operations": {},
     "army_theatre_assignment": {},
     "assignable_front_segments": [],
+    "bot_priority_shifts": [],
     "brigade_front_assignment": {},
+    "cascade_penalties": [],
+    "closed_event_ids": [],
     "command_authority": {
       "current": 100,
       "lifetime_spent": 0,
       "max": 100,
       "spent_this_turn": 0
     },
+    "convoy_decision_history": [],
     "corps_command": {
       "arbih_1st_corps": {
         "active_ogs": [],
@@ -7378,6 +7389,7 @@
         "rear_brigade_ids": [
           "hrhb_6th_brigade_ranko_boban",
           "hrhb_grude_brigade",
+          "hrhb_herceg_stjepan_brigade",
           "hrhb_iroki_brijeg_brigade",
           "hrhb_itluk_brigade",
           "hrhb_ljubuki_brigade",
@@ -7453,6 +7465,7 @@
           "op:posusje:posusje_2",
           "op:posusje:sutina_2",
           "op:posusje:vir_2",
+          "op:prozor:ljubunci_2",
           "op:stolac:prenj"
         ],
         "threat_ratio": 0
@@ -9695,7 +9708,9 @@
         "opposing_factions": [
           "RBiH"
         ],
-        "rear_brigade_ids": [],
+        "rear_brigade_ids": [
+          "rs_17th_klju_light_infantry"
+        ],
         "reserve_brigade_ids": [],
         "sector_id": "sector:vrs_2nd_krajina:2",
         "sector_stance": "defend",
@@ -9726,6 +9741,7 @@
           "op:glamoc:halapic",
           "op:glamoc:pribelja",
           "op:glamoc:stekerovci_2",
+          "op:kljuc:cadjavica",
           "op:kupres:novo_selo_2"
         ],
         "threat_ratio": 0
@@ -12369,6 +12385,19 @@
         "unstaffed_front": true
       }
     },
+    "cost_ledger_annotations": [],
+    "declined_operations": {},
+    "enabled_event_ids": [],
+    "equipment_quality_modifiers": [],
+    "event_aggression_modifiers": [],
+    "event_causality_log": [],
+    "event_decision_log": [],
+    "event_fire_counts": {},
+    "event_flags": {},
+    "event_last_fired_turn": {},
+    "event_overflow_queue": [],
+    "event_readiness": {},
+    "fired_event_ids": [],
     "formation_spawn_directive": {
       "kind": "both"
     },
@@ -19312,7 +19341,11 @@
       "hrhb_herceg_stjepan_brigade": {
         "activation_gated": false,
         "activation_turn": null,
-        "assignment": null,
+        "assignment": {
+          "kind": "sector",
+          "role": "rear",
+          "sector_id": "sector:hvo_southeast_herzegovina:0"
+        },
         "cohesion": 62,
         "composition": {
           "aa_systems": 0,
@@ -22186,7 +22219,11 @@
       "rs_17th_klju_light_infantry": {
         "activation_gated": false,
         "activation_turn": null,
-        "assignment": null,
+        "assignment": {
+          "kind": "sector",
+          "role": "rear",
+          "sector_id": "sector:vrs_2nd_krajina:2"
+        },
         "cohesion": 67,
         "composition": {
           "aa_systems": 2,
@@ -33664,6 +33701,13 @@
       "peace_plan_history": [],
       "pending_counter_offers": []
     },
+    "offensive_ops_suppressions": [],
+    "officer_decision_history": [],
+    "pending_convoy_decisions": [],
+    "pending_event_decisions": [],
+    "pending_event_notifications": [],
+    "pending_officer_events": [],
+    "pending_reserve_requests": [],
     "phantoms_spawned": [
       "jna_uzice_corps_tg",
       "jna_mostar_garrison_tg",
@@ -33780,6 +33824,7 @@
         "war_crimes_policy": "tolerate"
       }
     },
+    "recruitment_modifiers": [],
     "recruitment_state": {
       "equipment_points_trickle": {
         "HRHB": 4,
@@ -34014,10 +34059,12 @@
         "RS": 6
       }
     },
+    "reserve_request_history": [],
+    "tactical_groups": {},
     "theatres": {},
-    "unresolved_sector_brigades": [
-      "rs_17th_klju_light_infantry"
-    ],
+    "triggered_operations_accepted": {},
+    "unresolved_sector_brigades": [],
+    "used_operation_names": {},
     "war_front_edges_osid": [
       {
         "a": "op:banja_luka:banja_luka_2",
@@ -39363,6 +39410,7 @@
       }
     }
   },
+  "paramilitary_decision_history": [],
   "political": {
     "ceasefire": {},
     "coercion_pressure_by_municipality": {
@@ -43168,5 +43216,5 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 14
+  "schema_version": 34
 }
