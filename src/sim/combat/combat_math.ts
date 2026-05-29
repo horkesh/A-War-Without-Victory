@@ -36,6 +36,7 @@ import type { Osid } from './osid_adjacency.js';
 import { getHomeDistanceMult } from './home_distance.js';
 import { getActiveEquipmentQualityMultiplier, getCascadePenaltyForOsid } from '../events/active_modifiers.js';
 import { getStrategicDepth, getKrajinaCollapseMult } from './strategic_depth.js';
+import { isIntelAmbushFrictionEnabled } from './intel_ambush_depth_gate.js';
 
 type CombatMathProfileTimer = <T>(labelSuffix: string, fn: () => T) => T;
 
@@ -417,6 +418,9 @@ export function getIntelAmbushAttackerCasualtyMult(
     confidence: number | null | undefined,
     defenderOpsecActive: boolean,
 ): number {
+    // Retro-gate: umbrella defaults ON (mechanic live = current baseline). When the
+    // operator disables AWWV_INTEL_AMBUSH_FRICTION the mechanic is inert (×1.0).
+    if (!isIntelAmbushFrictionEnabled()) return 1;
     const clampedConfidence = Number.isFinite(confidence)
         ? Math.max(0, Math.min(1, confidence as number))
         : 0;
@@ -430,6 +434,9 @@ export function getIntelAmbushDefenderCasualtyMult(
     confidence: number | null | undefined,
     defenderOpsecActive: boolean,
 ): number {
+    // Retro-gate: umbrella defaults ON (mechanic live = current baseline). When the
+    // operator disables AWWV_INTEL_AMBUSH_FRICTION the mechanic is inert (×1.0).
+    if (!isIntelAmbushFrictionEnabled()) return 1;
     const clampedConfidence = Number.isFinite(confidence)
         ? Math.max(0, Math.min(1, confidence as number))
         : 0;
