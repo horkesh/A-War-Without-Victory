@@ -471,13 +471,22 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         // donors per D4 (multi-TG deferred). Capture was 1995, not 1994 (historian-
         // confirmed: vozuca_2 = RS through apr1995, RBiH by oct1995 in painted truth).
         //
-        // Objective: op:zavidovici:vozuca_2 — the one OSID in the pocket that flipped
-        // RS→RBiH between apr1995 and oct1995 painted truth. Staging at
-        // op:zavidovici:hajderovici_2 (RBiH-painted at all dates; home of the 351st;
-        // adjacency verified hajderovici_2 ↔ vozuca_2 in operational_contact_graph).
-        // Anchor arbih_351st_liberation (resident at staging). Donor candidates pulled
-        // faction-wide by the Army HQ Phase-A selection (e.g. 3rd Corps 328th at cinovici,
-        // adjacent to vozuca_2); brigades list seeds the participant set for injection.
+        // Objectives (the 3 OSIDs in the salient that flipped RS→RBiH between
+        // apr1995 and oct1995 painted truth, in attack order):
+        //   1. op:zavidovici:vozuca_2     — Vozuća pocket tip
+        //   2. op:maglaj:gornja_bocinja   — Gornja Bočinja
+        //   3. op:maglaj:donja_bocinja_2  — Donja Bočinja
+        // All three verified RS @apr1995 and RBiH @oct1995 in painted truth.
+        // Staging at op:zavidovici:hajderovici_2 (RBiH-painted at all dates; home of
+        // the 351st). Adjacency chain hajderovici_2 ↔ vozuca_2 ↔ gornja_bocinja ↔
+        // donja_bocinja_2 confirmed reachable (single contiguous Zavidovići/Maglaj
+        // salient). Anchor arbih_351st_liberation (resident at staging). Seed brigades
+        // are all arbih_3rd_corps: 351st + 328th (pocket) + 327th Vitezka Mountain
+        // (Maglaj-home, near the Bočinja objectives) + 7th Vitezka Muslim Liberation
+        // (3rd Corps shock bde; historical stand-in for the El Mujahid Detachment,
+        // which has no OOB id). Donor candidates beyond these are pulled faction-wide
+        // by the Army HQ Phase-A selection; the brigades list only seeds the
+        // participant set for injection — the cross-corps donor pool is NOT pinned.
         name: 'Operation Farz 95',
         faction: 'RBiH',
         army_hq_op_id: 'farz_95',
@@ -495,9 +504,13 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                 brigades: [
                     'arbih_351st_liberation' as FormationId,
                     'arbih_328th_mountain' as FormationId,
+                    'arbih_327th_vitezka_mountain' as FormationId,
+                    'arbih_7th_vitezka_muslim_liberation' as FormationId,
                 ],
                 objectives: [
                     'op:zavidovici:vozuca_2',
+                    'op:maglaj:gornja_bocinja',
+                    'op:maglaj:donja_bocinja_2',
                 ],
                 staging_osid: 'op:zavidovici:hajderovici_2',
             },
