@@ -215,18 +215,25 @@ function findTgForAnchor(state: GameState, brigadeId: string): TacticalGroup | n
 }
 
 /**
- * ADR-0005 v2.2b: aggregate donor combat power for all TG anchors in an attack.
+ * ADR-0005 v2.2c: aggregate donor combat power for all TG anchors in an attack,
+ * using each donor's OWN stats (true per-donor power).
  *
- * Each anchor's contribution scales the anchor's own per-personnel power across
- * the donor pool: `donorPower += anchorRaw * (donatedPersonnel / anchorPersonnel)`.
- * This is the v2.2b simplification — uses the anchor's stats as proxy for donor
- * combat output. v2.2c will compute per-donor power using donor-specific
- * equipment, cohesion, and supply.
+ * For each donor of a TG anchored on an attacker, the contribution is the donor's
+ * full-force power — `computeAttackerPower(donor, ...)`, which bakes in the donor's
+ * equipment ratio (basePower), supply, disruption, fatigue, officer quality,
+ * heavy-weapons-vs-target-terrain, home-distance (≈1.0 since donors stay home),
+ * and morale — scaled by the donated fraction `personnel_lent / donor.personnel`.
+ * The donated element fights at the ANCHOR's effective posture against the target's
+ * terrain (it reinforces the anchor's assault), but is NOT a physical brigade, so it
+ * does not receive the concentration multiplier (applied by the caller to physical
+ * brigades only, per ADR-0005 §Battle resolution).
  *
- * The returned value is the SUM of donor contributions across all TG anchors
- * in `attackerFormations`. Caller multiplies by coordPenalty, seasonal, and
- * tempo BUT NOT by concentrationBonus (ADR-0005 §Battle resolution: donors are
- * not physical brigades sharing frontage).
+ * This replaces the v2.2b proxy (which scaled the ANCHOR's per-personnel power by the
+ * total donated fraction); v2.2c reflects donor-specific equipment/supply/cohesion so a
+ * well-equipped donor lends more punch than a militia donor of equal headcount.
+ *
+ * Returned value is the SUM of donor contributions across all TG anchors in
+ * `attackerFormations`. Caller multiplies by coordPenalty × seasonal × tempo.
  */
 function computeTgDonorPower(
     state: GameState,
@@ -235,19 +242,27 @@ function computeTgDonorPower(
     targetTerrainMult: number,
     targetOsid: string,
 ): number {
+    const formations = state.military?.formations ?? {};
     let total = 0;
     for (const a of attackerFormations) {
         const tg = findTgForAnchor(state, a.id);
         if (!tg) continue;
-        const anchorPersonnel = a.personnel ?? 0;
-        if (anchorPersonnel <= 0) continue;
-        const donatedPersonnel = tg.donor_contributions.reduce((acc, d) => acc + d.personnel_lent, 0);
-        if (donatedPersonnel <= 0) continue;
-        const posture = a.posture ?? 'defend';
-        const atkMult = POSTURE_ATTACK[posture] ?? 0;
-        const effectivePosture = atkMult > 0 ? posture : 'attack';
-        const anchorRaw = computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid);
-        total += anchorRaw * (donatedPersonnel / anchorPersonnel);
+        const anchorPosture = a.posture ?? 'defend';
+        const atkMult = POSTURE_ATTACK[anchorPosture] ?? 0;
+        const effectivePosture = atkMult > 0 ? anchorPosture : 'attack';
+        for (const d of tg.donor_contributions) {
+            const lent = d.personnel_lent;
+            if (lent <= 0) continue;
+            const donor = formations[d.brigade_id];
+            if (!donor) continue;
+            const donorPersonnel = donor.personnel ?? 0;
+            if (donorPersonnel <= 0) continue;
+            const donorRaw = computeAttackerPower(state, donor, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid);
+            // Cap the lent fraction at 1.0: donor.personnel can drop below personnel_lent
+            // mid-op via the donor's own attrition; a donor never lends more than its current force.
+            const lentFraction = Math.min(1, lent / donorPersonnel);
+            total += donorRaw * lentFraction;
+        }
     }
     return total;
 }
