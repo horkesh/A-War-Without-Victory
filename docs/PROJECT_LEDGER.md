@@ -1,4 +1,15 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] codex: Phase J Packet 2 (Phase E activation readiness report)
+
+- **Type.** Pure documentation synthesis packet + optional Tier 2 empirical probe. Zero production code changed. No FORAWWV edits. No baseline writes.
+- **Scope.** One file: `docs/40_reports/proposals/20260529_PHASE_E_ACTIVATION_READINESS.md` (304 lines). Consumes J1 simulator output (commit `98de2caf`) and Phase E activation procedure (`docs/40_reports/implemented/20260528_PHASE_E_ACTIVATION_PROCEDURE.md`); produces calibration-team-ready go/no-go decision matrix.
+- **Tier 2 probe (empirical).** Ran J1 with `--run-scenarios --combo cohesion_only --json` (~3.5 minutes single-combo). Captured drift cells for cohesion_only × {`apr1992_52w`, `baseline_ops_4w`, `noop_4w`}. Tier 2 scratch dir at `data/derived/scenario/_phase_e_simulator_tmp/cohesion_only/`. Tool reset gate overrides via `try/finally` per design; no baseline writes; no env-var leakage.
+- **Drift profile observed (cohesion_only).** apr1992_52w: bot-military ground-truth artifacts (`control_delta.json`, `formation_delta.json`, `activity_summary.json`, `watched_operations.json`) all FLAT; narrative/snapshot artifacts (`final_save.json`, `run_summary.json`, `end_report.md`, `weekly_report.jsonl`) DRIFT. J1 classifies as `BOT-MILITARY` (conservative label — fires on any artifact in the bot-military set). baseline_ops_4w + noop_4w: all artifacts FLAT.
+- **Threshold analysis surfaced.** `internal_cohesion < 40` produces universal 3/3 trip at turn 40 (HRHB=2.83 / RBiH=0.00 / RS=12.74) — gate functions as unconditional 0.85× rather than as a discriminator. `international_standing < 30` produces selective 2/3 trip (RBiH-at-34.76 spared) matching historical signal.
+- **Architect + Game Designer joint recommendation.** Option C → A → B: recalibrate cohesion threshold to ~10 (restore faction asymmetry; RS retains institutional cohesion matching Pale leadership history pre-August-1995); then activate intl_only (MVS-canonical wiring); then cohesion_only.
+- **Open questions for user.** (1) Approve threshold recalibration value? (2) Approve activation order? (3) Defer until calibration merge? (4) RBiH cohesion=0.00 floor-clamp investigation. (5) Magnitude probe on Tier 2 narrative drift.
+- **Hard constraints honored.** No code changes; no event-JSON; no scenario data. `docs/10_canon/FORAWWV.md` never auto-edited. `.claude/scheduled_tasks.lock` never staged. Locked worktree never entered. Tier 2 ran within 10-min budget. No baseline writes. No emojis.
+
 ## [2026-05-29] codex: Phase J Packet 1 (Phase E activation simulator)
 
 - **Type.** Pure additive new diagnostic tool + test file. Zero production code changed. No FORAWWV edits. No baseline writes.
