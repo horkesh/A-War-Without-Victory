@@ -1,4 +1,53 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] feat(combat): ADR-0005 v2.2b — wire TG formation/synthesis/dissolution into op pipeline (flag-gated, behavior dormant)
+
+**Type:** Runtime wiring across three call sites. Phased rollout v2.2b of ADR-0005 — second half of the v2.2 sub-stage. v2.2a shipped helpers (selectDonors / formTacticalGroup / dissolveTacticalGroup / distributeCasualtiesAcrossTg); v2.2b now CALLS them from the engine, all gated behind `ENABLE_TG_FORMATION` and `ENABLE_TG_COMBAT_SYNTHESIS` (both default false). First wiring in the chain that touches runtime paths even with flags off — byte-identity proof required and obtained.
+
+**Change:** Three separate commits, one per call site, with hash validation between each:
+
+- **#43 — Formation wiring** (`src/sim/combat/operation_preparation.ts`, commit `e00b33b3`). New local helper `formTgsAtReadyTransition(state, op, currentTurn)` called from both first-arrival paths to `sub_phase='ready'` inside `tickPreparation`: anti-paralysis force-launch path and assessment go-decision path. Re-entries from `waiting_for_sync → ready` are not first arrivals (TG already formed) and skip the helper. Multi-axis ops: one TG per axis (anchor = `main_brigade` or first `assigned_brigades`). Legacy single-axis: one TG keyed off `op.participating_brigades[0]` + `op.staging_osid`. Flag-off early-return as first statement.
+
+- **#44 — Combat synthesis + casualty distribution** (`src/sim/combat/attack_resolution_osid.ts`, commit `bb00e680`). Two new local helpers: `findTgForAnchor` (sorted-iteration TG lookup by anchor brigade_id, skips dissolved) and `computeTgDonorPower` (per-anchor donor contribution as `anchorRaw × donatedPersonnel/anchorPersonnel`, summed across anchors — v2.2b proxy; TODO-v2.2c will swap to true per-donor stats with kind/equipment/cohesion modifiers). Attacker-power reduce loop split: `physicalPower` reduce → multiplied by `coordPenalty × seasonal × concentrationBonus × tempoMult` (original associativity preserved). When `ENABLE_TG_COMBAT_SYNTHESIS` is on, donor portion `donorPower × coordPenalty × seasonal × tempoMult` is added — NO `concentrationBonus` on donors per ADR-0005 §Battle resolution (donors are not physical brigades sharing frontage). Casualty loop: wrapped `applyPersonnelLoss(a, cas)` in TG-gated branch calling `distributeCasualtiesAcrossTg` (v2.1) and applying anchor + per-donor shares; updates `donor.casualties_so_far` for Hard Invariant #3 per-brigade tally. Flag-off falls through to the original single-line `applyPersonnelLoss`.
+
+- **#45 — Dissolution wiring** (`src/sim/combat/sector_offensive.ts`, commit `8665a8c4`). Single-chokepoint wire inside `beginRecovery()` itself, the canonical lifecycle-owner function for execution→recovery transitions. New local helper `dissolveTgsForOp(state, opName, currentTurn)` iterates `state.military.tactical_groups` in `strictCompare` order, collects matching `op_id` + `status !== 'dissolved'` in a first pass, dissolves in a second pass (no mutation during iteration). One hook covers all ~30 `beginRecovery` callers. State-presence guard + flag-gate. Hard Invariant #6 (anchor-destroyed-mid-op immediate dissolution) explicitly deferred to v2.2c — anchor death currently flows through `beginRecovery` on the next op tick (one-turn delay, functionally correct).
+
+**Determinism:** Helpers iterate Records via `Object.keys(...).sort(strictCompare)`. New TG-related fields written deterministically by lifecycle helpers (v2.2a). Casualty distribution preserves largest-remainder math + `brigade_id` strictCompare tiebreak from v2.1. Power-reduce restructure preserves left-associative multiplication order; flag-off path is bit-exact (`x + 0 === x` for all finite x in IEEE 754). Flag-on path inserts deterministic state writes (TG records, donor `personnel_lent_by_tg`, `casualties_so_far`, brigade_history TG participations, cohesion adjustments).
+
+**Verification:**
+- typecheck (`node_modules/.bin/tsc --noEmit`): clean.
+- `vitest run tests/tg_lifecycle.test.ts tests/tg_invariants.test.ts tests/tg_casualty_distribution.test.ts --reporter=dot`: **38/38 PASS** (20 lifecycle + 7 invariants + 11 casualty distribution).
+- 40w hash chain (HEAD-`88eabba4` clean = n6 = `01ca96e2a0faa2f6`):
+  - n5 (HEAD + #43): `01ca96e2a0faa2f6` — byte-identical
+  - n7 (HEAD + #43 + #44): `01ca96e2a0faa2f6` — byte-identical
+  - n8 (HEAD + #43 + #44 + #45): `01ca96e2a0faa2f6` — byte-identical
+- **Baseline correction**: the v2.2a ledger entry recorded `3649b3861a87e6ea` for n4. At HEAD-`88eabba4` in this worktree environment, the actual measured 40w hash is `01ca96e2a0faa2f6` (n6, stash-discriminator-verified: n5 with wiring applied == n6 with wiring stashed). Either machine-state drift since v2.2a or the prior measurement was wrong. From v2.2b onward, the canonical baseline of record is `01ca96e2a0faa2f6`; v2.2c sub-flags-off must hold against this hash.
+
+**Flag-on smoke (n9, reverted at n10, not committed):** All three flags flipped (`ENABLE_TACTICAL_GROUPS` + `ENABLE_TG_FORMATION` + `ENABLE_TG_COMBAT_SYNTHESIS`), re-run, reverted, re-run. Raw 40w comparison vs n6 baseline:
+
+| Metric             | n6 flag-off          | n9 flag-on             | n10 post-revert      |
+|--------------------|----------------------|------------------------|----------------------|
+| `final_state_hash` | `01ca96e2a0faa2f6`   | `eabd4471dc755e10`     | `01ca96e2a0faa2f6`   |
+| anchor pass rate   | 27/27                | 27/27                  | n/a                  |
+| HRHB count         | 86 (ref 80, +6)      | 86 (ref 80, +6)        | n/a                  |
+| RBiH count         | 256 (ref 247, +9)    | 256 (ref 247, +9)      | n/a                  |
+| RS count           | 370 (ref 385, -15)   | 370 (ref 385, -15)     | n/a                  |
+
+Hash diverges (wiring is alive — TG records, donor lent ledgers, casualty redistribution, brigade_history TG entries all hash inputs), but macro 40w calibration is byte-equal. ADR-0005 §Phased Rollout's predicted "+3-8% capture" lives in late-war ops (Trnovo w30+, Pracha River w41+, Zvezda 94 w100+) that the 40w window doesn't reach. Canonical observation window for the predicted shift is **188w**, scheduled before v2.3 Pyrrhic dampener calibration.
+
+**Artifacts:**
+- `src/sim/combat/operation_preparation.ts` (helper + 2 call sites, +65 LOC)
+- `src/sim/combat/attack_resolution_osid.ts` (2 helpers + power-reduce split + casualty branch, +95/-5 LOC)
+- `src/sim/combat/sector_offensive.ts` (helper + single beginRecovery hook, +37 LOC)
+- `data/derived/latest_run_final_save.json` (n8 validation artifact; n9 smoke + n10 baseline-restoration artifacts also exist on disk but not promoted to derived)
+
+**Next (v2.2c — TODO carry-forward):**
+1. Swap `computeTgDonorPower` proxy formula for true per-donor stats (donor `FormationState` kind/equipment/cohesion/supply modifiers).
+2. Wire Hard Invariant #6 — anchor-destroyed-mid-op immediate dissolution at the moment of anchor death in `attack_resolution_osid.ts` casualty loop, not via the next-tick `beginRecovery` path.
+3. Split `selectDonors` call out to `intel_gathering` phase (cache to `op.donor_pool`) so the 60% donation gate at `assessment` can read it.
+4. **Run 188w flag-on smoke** to observe the predicted +3-8% capture shift at late-war ops (Trnovo, Pracha River, Zvezda 94). Do not commit; revert flags after observation. Inputs the v2.3 Pyrrhic dampener calibration window.
+
+---
+
 ## [2026-05-29] feat(combat): ADR-0005 v2.2a — TG selectDonors algorithm + lifecycle helpers (unwired)
 
 **Type:** Selection + lifecycle helpers. Phased rollout v2.2a of ADR-0005 — first half of the v2.2 sub-stage, pragmatically split. v2.2b will wire these into the op pipeline + combat path.
