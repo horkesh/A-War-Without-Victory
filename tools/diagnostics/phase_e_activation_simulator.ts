@@ -493,6 +493,12 @@ const BOT_MILITARY_ARTIFACTS = new Set([
  *     identical ON vs OFF; do NOT cry "cascade").
  *   • No artifact drift at all → NO-DRIFT.
  *
+ * Note: a flag that changes force structure (formation_delta) but flips zero
+ * OSIDs is intentionally classified DIMENSION-ONLY here — territory is the
+ * authoritative bot-military signal for this gate; the retained hash comparison
+ * still surfaces any such divergence in output. This is a deliberate labeling
+ * choice, not under-reporting.
+ *
  * When the territorial diff is unavailable (e.g. OFF control map not captured —
  * a degenerate / test-only path), fall back to the legacy hash-only heuristic
  * so we never silently under-report.
