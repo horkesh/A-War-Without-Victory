@@ -1,7 +1,7 @@
 /**
  * Browser-safe War phase turn advance. No Node/fs imports.
  * Used by the warroom when advancing a turn in war phase. Performs turn increment only.
- * AoR phase-out: no AoR init; War phase uses location_osid / OSID fronts.
+ * War phase uses location_osid / OSID fronts.
  * Supply pressure and exhaustion are not run here; for full War phase simulation use runTurn in Node.
  */
 

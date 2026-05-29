@@ -1,4 +1,33 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] codex: Phase I Packet 6 (zombie code triage; 3 cleaned, 5 deferred-calibration, 2 skipped-consumer, 1 comments-current, 4 deferred-packet/scope)
+
+- **Type.** Zombie-comment + version-transition-residue triage per I1 audit Section 2. THREE entries cleaned (pure comment trims; no code semantics changed). Zero behavior change; baseline regression byte-identical.
+- **Scope.** Surgical, per-entry. 15 audit entries triaged:
+  - **#2 (CLEANED).** `src/sim/run_combat_browser.ts:4` — trimmed stale "AoR phase-out: no AoR init" residue from header comment.
+  - **#3 (CLEANED).** `src/sim/early_war/bot_early_war.ts:7` — trimmed "no AoR, no OGs" from bot description.
+  - **#4 (CLEANED).** `src/sim/early_war/militia_emergence.ts:4` — trimmed "no AoR" from determinism note.
+  - **#1 (SKIPPED — consumer).** `src/sim/run_early_war_browser.ts:59-63` `assertNoAoRInEarlyWar` guards the faction-level `areasOfResponsibility` field, which has 30+ live readers/writers across `src/sim`, `src/state`, `src/scenario`. The "AoR phase-out" referenced was the brigade-AoR system, not the faction-AoR field. Guard remains a valid invariant check. STOP-and-report per safeguard.
+  - **#6 (SKIPPED — consumer).** `src/sim/combat/officer_quality_update.ts:163` `learning_rate` legacy field still has a live read branch consuming external timeline-config data. Cannot delete without verifying save-migration upper bound has cleared all scenario JSON usages. STOP-and-report.
+  - **#9 (COMMENTS-CURRENT).** `src/sim/combat/bot_brigade_targeting.ts:140` — already cleaned in Phase I5 commit `4bc1d1d4`. Current text is "OSID-based via directive.avoid_osids; currently empty in production" — accurate. No action.
+  - **#10, #11 (DEFERRED-CALIBRATION).** `src/state/game_state.ts:79-101` + `2062-2075` legacy AoR types — file on calibration overlap.
+  - **#12 (DEFERRED-CALIBRATION).** `src/sim/combat/sector_offensive.ts:2049` `@deprecated evaluateSectorOffensiveLaunch` — file on overlap.
+  - **#13 (DEFERRED-CALIBRATION).** `src/sim/combat/brigade_assignment.ts:1438` `@deprecated warnUnresolvedSectorAssignments` — file on overlap.
+  - **#14 (DEFERRED-CALIBRATION).** `src/sim/turn_pipeline_types.ts:194,247,249` legacy weekly-report fields — file on overlap.
+  - **#5 (DEFERRED-PACKET).** `src/sim/combat/battle_resolution.ts:2,872,950,977,1073` ~1500-line legacy SID battle path — audit explicitly schedules Packet 4 post-calibration-merge. Out of Packet 6 scope.
+  - **#7 (DEFERRED-PACKET).** `src/sim/combat/brigade_aor_legacy.ts` whole-file deletion + 3 test migrations — audit schedules Packet 3. Out of Packet 6 scope.
+  - **#8 (DEFERRED-PACKET).** `src/sim/emergence/aor_instantiation.ts` Phase E vocabulary rename — audit schedules Packet 5 (rename, not deletion). Out of Packet 6 scope.
+  - **#15 (DEFERRED-SCOPE).** `src/ui/warroom/components/InvestmentPanel.ts:10` + 3 other UI stubs — explicitly UI scope, outside engine audit boundary.
+- **Counts.** Cleaned: 3. Calibration-deferred: 5. Consumer-skipped (STOP safeguard): 2. Comments-current: 1. Deferred-packet/scope: 4. Total: 15.
+- **Audit doc correction.** Section 3 Entry #3 (`tryCreateFromPrePlanned`) had wrong file pointer (cited `bot_corps_operations.ts`, actually lives at `src/sim/combat/commander/plan.ts:1130`). Appended `## Corrections` section to `docs/40_reports/proposals/20260529_ENGINE_SIMPLIFICATION_AUDIT.md`.
+- **Net LOC delta.** -3 lines (3 comment-only edits, semantic content preserved).
+- **Verification matrix.**
+  - `npx tsc --noEmit` PASS (clean).
+  - `vitest run tests/event_loader.test.ts --reporter=dot` PASS.
+  - `git diff --check` clean (no whitespace errors).
+  - `tools/scenario_runner/run_baseline_regression.ts` PASS byte-identical (comment-only changes cannot affect determinism).
+- **Stop-safeguard fired.** Twice — entries #1 and #6. Both consumers verified via grep before deciding to skip.
+- **No calibration files touched.** No `FORAWWV.md` edits. No `.claude/scheduled_tasks.lock` staged. No worktree entered. No baseline refresh.
+
 ## [2026-05-29] codex: Phase I Packet 5 (defunct exclusion-claims triage; 1 cleaned, 3 deferred-calibration, 1 skipped-consumer)
 
 - **Type.** Defunct comment-claims-of-exclusion triage per I1 audit Section 3. ONE entry cleaned (dead field declaration removed + misleading comment corrected). Zero behavior change; baseline regression byte-identical.

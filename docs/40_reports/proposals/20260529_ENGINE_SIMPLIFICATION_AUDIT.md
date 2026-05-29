@@ -176,3 +176,7 @@ Delete `concentration_orders` from `PlanDecision`. Zero calibration risk (comman
 ---
 
 **Audit summary.** 11 high-confidence dead-export candidates flagged (7 from one file, `brigade_aor_legacy.ts`, suggesting the entire module is a delete candidate). 15 zombie-comment matches. 5 defunct exclusion-claims (with one — `avoid_municipalities` — directly contradicted by live type declaration). 5 overlapping-ownership candidates (1 HIGH-priority dead field `concentration_orders`, 1 HIGH-priority banned field `avoided_osids_by_faction`, 1 audit-needed `political_controllers` 20-writer surface). 0 truly-dead config flags (all 6 AWWV flags have live consumers). Recommended first remediation: delete `concentration_orders` from `PlanDecision` (small, safe, mechanical). Recommended whale: `brigade_aor_legacy.ts` + chain removal (medium effort, ~1100 line reduction across module + tests).
+
+## Corrections
+
+- **Section 3, Entry #3 (`tryCreateFromPrePlanned`)** — file pointer was wrong. Audit cited `src/sim/combat/bot_corps_operations.ts:20-35` but the function actually lives at `src/sim/combat/commander/plan.ts:1130` (the bot_corps_operations.ts coordinates show the ownership comment block, not the function). Verified 2026-05-29 during Phase I Packet 6 triage via `grep -n "tryCreateFromPrePlanned"`: declaration at `commander/plan.ts:1130`, sole call site at `commander/plan.ts:929`. Recommendation (delete the dead branch) stands unchanged; only the location pointer is corrected.
