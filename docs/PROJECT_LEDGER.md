@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] codex: pin Fall-1995 deferred combat-math follow-ups (E-A5/E-A6/E-B1) lane
+
+**Type:** Docs/tracking only. No engine, event-JSON, scenario, or save-schema change; no behavioral or
+output change; no test impact.
+
+**COMMAND_BOARD.** Pinned the 3 Fall-1995 deferred combat-math follow-ups (E-A5/E-A6/E-B1) as a P3
+DEFERRED lane on `docs/plans/COMMAND_BOARD.md`, owned by the calibration/combat-engine lane (NOT
+event-system), so they aren't orphaned (previously only in `.claude/napkin.md` + the proposal doc
+`docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md`). E-A5 = 51:49 launch-gate consumer
+(would cap the RBiH +29 territorial overshoot); E-A6 = Sloboda 95 / Velika Kladuša rear-clearing op;
+E-B1 = corps coherence decay logic. Stop gate: calibration-owned, do NOT close from the docs/tracking lane.
+
 ## [2026-05-29] codex: track deferred event-system lanes + disambiguate Phase E name-collision
 
 **Type:** Docs/tracking only. No engine, event-JSON, scenario, or save-schema change; no behavioral or
