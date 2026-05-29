@@ -10,7 +10,7 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-**New 188w baseline n2003 = 79.21% (2026-05-23 historical-default + headless contract).** Hash `47438d249146d1af`. Supersedes n1999 (which masked 15 RBiH events queued-pending-forever due to player_faction='RBiH' default in headless runs). Three commits compose the headless undefined-player_faction contract: `f7c8baed` scenario_runner.ts:1412 + `b875f95a` save_migration v14 + `0b7d0d93` validateGameState shape — any future migration / validator touching `state.meta.player_faction` must mirror the `headless_scenario_auto_control === true` exemption clause or the contract re-breaks. Do instead: when investigating "events queued pending forever in headless run", first check player_faction is undefined; when adding state.meta.player_faction handling, add the headless exemption.
+**Current 188w baseline R22 = 84.55% area-weighted (2026-05-25 Op Foca foca_valley patkovina insertion).** Hash `2714e1e4ad08b0ed`. 602/712 matched. Commit `ac4f95ce`. R23 (ustikolina extension) = zero-delta REVERTED — patkovina lost before wi=188, chain beyond it unreachable. R24 (Srebrenica Ring valid chain) = −0.70pp REVERTED — activated Drina Corps op disrupts VRS 2nd Krajina states at t175, reversing R22 bosansko_grahovo/Sipovo HRHB cascade. Two cascades mutually incompatible. cajnice OSIDs have zero contact-graph edges — any cajnice op gets no_approach_osid immediately. Do instead: R25 candidate must avoid Drina Corps (vrs_drina) and must not touch cajnice. Herzegovina/Sarajevo ops (vrs_herzegovina corps) are lower-risk.
 
 **Bots default to `bot_response_logic: 'historical'`; calibrate for the historical-outcome path (2026-05-23 user directive).** Authors must put the historical choice at options[0]. Earlier authoring with political-scoring (`strategic_weighted` / `capital_based`) produced non-historical bot picks (e.g. `strategic_posture_review_hrhb → sue_for_peace_hrhb` at turn 89 mid-1993 — anachronistic; HRHB only suing for peace at Washington March 1994). Three events retuned in commit `8c1e6f5e`: `gornji_vakuf_clashes_1993`, `strategic_posture_review_hrhb`, `ic_rbih_restraint_post_washington` — all now `'historical'`. Player + AI variation is supported but is not the calibration target. Do instead: new decision events default to `'historical'`; only use political-scoring modes when the historical outcome is genuinely contested.
 
@@ -111,6 +111,8 @@
 **2026-05-18 Washington timing reconciliation:** `rbih_hrhb_state.washington_signed` / `washington_turn` is an emergent live RBiH-HRHB framework predicate, while `washington_agreement_1994` is the authored week-102 calendar/narrative event. Do instead: describe live predicate outputs as framework/coordination activation (`rbih_hrhb_framework_activated`) and keep formal historical milestones in `events_fired`; do not retune exhaustion thresholds for this naming/projection split.
 
 **Event JSON edits:** after touching `data/scenarios/events/war_*.json`, run `tests/event_timeline_integrity.test.ts`; keep each year sorted by `trigger.turn_min`, and update explicit corpus counts only when the actual event corpus changes.
+
+**Cleanup-packet pre-flight: calibration-overlap grep is step 1 (2026-05-29).** Every Phase I-style cleanup packet starts with `git diff --name-only origin/main...claude/calibration-historical-army-arc-2026-05-24` (or current calibration branch) and greps each candidate file. ON-OVERLAP → DEFERRED-CALIBRATION (not failure). NOT-ON-OVERLAP → safe to land. Ledger entry must count deferrals positively. Dispatched cleanup agents MUST be given an explicit STOP-and-report clause: if a live consumer surfaces in `src/` + `tests/` + `tools/` that the audit missed, abort the entry — do not power through. Phase I arc fired STOP 5x correctly across Packets I3a/I5/I6. Cleanup proof = `tools/scenario_runner/run_baseline_regression.ts` byte-identical PASS; tsc + vitest alone are necessary but not sufficient. Full lesson set: `docs/life_lessons/process.md` (STOP-safeguard + src+tests+tools audit) + `docs/life_lessons/calibration.md` (byte-identical proof + overlap-deferral triage). Do instead: never skip the pre-flight grep; never trust an audit's "0 importers" without three-scope verification; never claim a cleanup is "done" without the baseline regression PASS line in the ledger entry.
 
 ## Current State (2026-05-15, autonomous commander CPU follow-up)
 
@@ -987,8 +989,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: Check `isPoliticalControllersAlreadyOsidKeyed()` first. `migratePoliticalControllersToOsidIfNeeded` only for canonical SIDs.
 7. **[2026-02-28] Operational control: majority then plurality**
    Do instead: Assign faction by ethnic majority (>50%), else plurality. Not "first ≥40%".
-8. **[2026-02-22] Pipeline step no-ops for missing data**
-   Do instead: When operational data unavailable, log and skip OSID steps safely rather than crashing.
+8. **[2026-05-28] Event effects route through TWO disjoint vocabularies — pick the channel by the name you need**
+   Do instead: `dimension_shifts[].dimension` requires a `DimensionId` (6 names: `military_credibility`, `territorial_legitimacy`, `international_standing`, `patron_confidence`, `internal_cohesion`, `negotiating_leverage`). `effects[].kind` requires an `EffectKind` (`recruitment_modifier`, `equipment_quality_modifier`, `morale_change`, `patron_pressure`, `alliance_change`, etc.). The two are disjoint — placing a DimensionId under `effects[].kind` (or an EffectKind under `dimension_shifts[].dimension`) is a silent DEAD write. Loader validation (Packet 44, `event_loader.ts:939+1003`) catches both at catalog load. See `memory/engine_dimension_vocabulary.md` for the canonical map + worksheet-name substitution table.
 9. **[2026-03-08] Paramilitary rear pocket cleanup: `paramilitary_sweep.ts`**
    Do instead: Autonomous paramilitary units for rear enemy pocket clusters (1-3 OSIDs, ALL external neighbors faction-controlled). Active w0-20. Faction rates: RS=0.85, HRHB=0.55, RBiH=0.30.
 10. **[2026-03-28] Point-only polygon contacts are not real adjacency — shared_segments >= 1 required**
@@ -1189,22 +1191,26 @@ After EVERY scenario run, the orchestrator:
    Do instead: When adding code that mutates formations, political_controllers, or operations, the pipeline assertions will catch invariant violations at runtime. If an assertion fires, fix the source — never disable the assertion. Files: `assert_control_events.ts`, `assert_operation_lifecycle.ts`, `assert_formation_territory.ts`, `corps_front_sectors.ts` (assertSectorBrigadesActive + assertBrigadeReachability).
 
 ## Engine Runtime Patterns
-1. **[2026-03-05] Takeover displacement off-by-one FIXED**
-   Do instead: `processDisplacementTakeover` uses `currentTurn === warStartTurn + 1`. `runTurn()` increments turn BEFORE phases.
-2. **[2026-03-08] Phase I/II terminology fully removed — Peace/War only**
-   Do instead: No `PhaseI`, `PhaseII` identifiers. `rear_pocket_consolidation.ts` replaces deleted `consolidation_flips.ts`.
-3. **[2026-03-08] Deep merging test mocks with nested state**
-   Do instead: Standard `...overrides` overwrites nested structures entirely. Manually deep merge or spread inside the nested object literal.
-
-4. **[2026-04-03] Sector merge rule â€” shared friendly-side OSIDs are not enough**
-   Do instead: A sector merge is legal only if the merged edge set still forms one contiguous frontline. Never short-circuit adjacency just because sectors share a friendly-side OSID; that is how separate hostile pockets get re-glued into one fake sector.
-
+1. **[2026-05-28] Phase E flag-flip activation requires the canonical procedure doc — do not flip env vars cold**
+   Do instead: Before flipping `AWWV_POLITICAL_DIMENSION_PROPAGATION` or any `AWWV_PDP_*` sub-flag in a baselined run, follow `docs/40_reports/implemented/20260528_PHASE_E_ACTIVATION_PROCEDURE.md`: diagnostic baseline → threshold review → global tier-1 only → first sub-flag with calibration sign-off → next sub-flag. Diagnostic surface is `tools/diagnostics/political_dimensions_snapshot.ts`. Rollback is env-var-only — no save migration. Cohesion thresholds may be over-eager given observed 40w distributions (HRHB=2.83, RBiH=0, RS=2.95 vs threshold 40).
+2. **[2026-05-28] Phase D bot-military isolation is structural — political dimensions do not propagate to ops without explicit wiring**
+   Do instead: Political dimensions write to `FactionCapital.strategic_dimensions[]`; bot combat/military loops (`corps_offensive`, `brigade_assignment`, `sector_offensive`) have ZERO DimensionId reads. Confirmed structural across 45+ Phase D packets including 5+ within-52w firings. If a political dimension needs to influence bot behavior, wire it explicitly behind a feature flag — see Phase E MVS `political_dimension_propagation_gate.ts` (env: `AWWV_POLITICAL_DIMENSION_PROPAGATION_GATE`) for the canonical pattern. Trust the engine: byte-identical baseline regression with flag OFF proves no incidental wiring leaked in.
+3. **[2026-05-28] Loader vocabulary validation catches DEAD-channel authoring — trust catalog load errors**
+   Do instead: `event_loader.ts:939` `validateDimensionShiftVocabulary` + `event_loader.ts:1003` `validateEffectKindVocabulary` fail catalog load on any wrong-channel name. A passing catalog load means every authored DimensionId / EffectKind is in the registered vocabulary; do not re-verify with grep. Pre-Packet-44 audit found 11 silent DEAD writes across 6 packets that would have been caught at load.
+4. **[2026-05-26] Empty migration records need first-write tests**
+   Do instead: When a required save field migrates to `{}` and runtime writers address nested keys, add a regression proving the first nested write from `{}` succeeds; do not rely on outer-map initialization alone.
 5. **[2026-04-03] Sector invariant — one sector = one frontline**
    Do instead: Treat sectors as commanded frontline slices, not OSID/sub-segment buckets. If a saved sector still carries multiple sub-segments, that is invalid state to rebuild or split, not a tolerated variant.
-6. **[2026-04-03] Commander review may not rewrite frontline truth without movement**
+6. **[2026-04-03] Sector merge rule — shared friendly-side OSIDs are not enough**
+   Do instead: A sector merge is legal only if the merged edge set still forms one contiguous frontline. Never short-circuit adjacency just because sectors share a friendly-side OSID; that is how separate hostile pockets get re-glued into one fake sector.
+7. **[2026-04-03] Commander review may not rewrite frontline truth without movement**
    Do instead: If a brigade's current `location_osid` is on a sector frontline, treat that sector as anchored truth. Commander review may stage reserves and rear units, but it must not paper-transfer a physically front-anchored brigade into another sector roster.
-7. **[2026-04-03] Cross-corps enclave rescue needs a physical claim, not just component membership**
+8. **[2026-04-03] Cross-corps enclave rescue needs a physical claim, not just component membership**
    Do instead: `assignCrossCorpsEnclaveDefenders(...)` may rescue a brigade into another same-faction corps sector only when the brigade's current location is already on that sector's frontline or inside its territory. Same-component fallback alone is false sector truth.
+9. **[2026-03-08] Phase I/II terminology fully removed — Peace/War only**
+   Do instead: No `PhaseI`, `PhaseII` identifiers. `rear_pocket_consolidation.ts` replaces deleted `consolidation_flips.ts`.
+10. **[2026-03-05] Takeover displacement off-by-one FIXED**
+    Do instead: `processDisplacementTakeover` uses `currentTurn === warStartTurn + 1`. `runTurn()` increments turn BEFORE phases.
 
 ## Player Shell Discipline
 1. **[2026-04-02] Player-facing operation documents must never print raw OSIDs**

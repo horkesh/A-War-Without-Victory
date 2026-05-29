@@ -82,7 +82,8 @@ function createProlongedSiegeState(): GameState {
     event_fire_counts: {},
     event_last_fired_turn: {},
     event_flags: {},
-    enabled_event_ids: []
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
   displacement: {
     displacement_state: {
@@ -106,7 +107,8 @@ function createProlongedSiegeState(): GameState {
     sustainability_state: {},
     settlement_displacement: {},
     settlement_displacement_started_turn: {},
-    municipality_displacement: {}
+    municipality_displacement: {},
+    civilian_casualties: {}
   },
         political: {
             war_consolidation_until: {},
@@ -164,7 +166,8 @@ function createTemporaryEncirclementState(): GameState {
     event_fire_counts: {},
     event_last_fired_turn: {},
     event_flags: {},
-    enabled_event_ids: []
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
   displacement: {
     displacement_state: {
@@ -188,7 +191,8 @@ function createTemporaryEncirclementState(): GameState {
     sustainability_state: {},
     settlement_displacement: {},
     settlement_displacement_started_turn: {},
-    municipality_displacement: {}
+    municipality_displacement: {},
+    civilian_casualties: {}
   },
         political: {
             war_consolidation_until: {},
@@ -239,7 +243,8 @@ function createCorridorLifelineState(): GameState {
     event_fire_counts: {},
     event_last_fired_turn: {},
     event_flags: {},
-    enabled_event_ids: []
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
   displacement: {
     displacement_state: {
@@ -263,7 +268,8 @@ function createCorridorLifelineState(): GameState {
     sustainability_state: {},
     settlement_displacement: {},
     settlement_displacement_started_turn: {},
-    municipality_displacement: {}
+    municipality_displacement: {},
+    civilian_casualties: {}
   },
         political: {
             war_consolidation_until: {},
@@ -323,7 +329,8 @@ function createMultiPocketStressState(): GameState {
     event_fire_counts: {},
     event_last_fired_turn: {},
     event_flags: {},
-    enabled_event_ids: []
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
   displacement: {
     displacement_state: {
@@ -342,7 +349,8 @@ function createMultiPocketStressState(): GameState {
     sustainability_state: {},
     settlement_displacement: {},
     settlement_displacement_started_turn: {},
-    municipality_displacement: {}
+    municipality_displacement: {},
+    civilian_casualties: {}
   },
         political: {
             war_consolidation_until: {},
@@ -394,7 +402,8 @@ function createAsymmetricCollapseState(): GameState {
     event_fire_counts: {},
     event_last_fired_turn: {},
     event_flags: {},
-    enabled_event_ids: []
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
   displacement: {
     displacement_state: {
@@ -412,7 +421,8 @@ function createAsymmetricCollapseState(): GameState {
     sustainability_state: {},
     settlement_displacement: {},
     settlement_displacement_started_turn: {},
-    municipality_displacement: {}
+    municipality_displacement: {},
+    civilian_casualties: {}
   },
         political: {
             war_consolidation_until: {},

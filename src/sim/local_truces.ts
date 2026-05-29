@@ -27,9 +27,6 @@ import type { FactionId, GameState } from '../state/game_state.js';
 /** Week at which the Graz Accords fire (6 May 1992 ≈ week 4 of the scenario). */
 export const GRAZ_ACCORDS_TURN = 4;
 
-/** @deprecated Use GRAZ_ACCORDS_TURN. Alias kept for backward compatibility during migration. */
-export const VIENNA_DECLARATION_TURN = GRAZ_ACCORDS_TURN;
-
 /**
  * Corps pairs bound by the Herzegovina truce.
  * When active, these corps do not generate attack orders against each other's territory.
@@ -95,9 +92,6 @@ export function isGrazAccordsActive(state: GameState): boolean {
     if (!accepted) return false;
     return accepted['RS'] === true && accepted['HRHB'] === true;
 }
-
-/** @deprecated Use isGrazAccordsActive. */
-export const isViennaDeclarationActive = isGrazAccordsActive;
 
 /** Return true if the Herzegovina corps-pair truce is active (not broken). */
 export function isHerzegovinaTruceActive(state: GameState): boolean {
@@ -215,13 +209,14 @@ export function shouldGrazBlockAttack(
         return true;
     }
 
-    // HRHB → RS faction-level block (bilateral ceasefire)
-    // Op Jackal exemption is handled at the brigade-level (bot_brigade_ai_osid.ts)
-    // where we can check if the target is an actual operation objective.
-    // shouldGrazBlockAttack blocks ALL HRHB→RS attacks; callers exempt op objectives.
+    // HRHB → RS faction-level block (bilateral ceasefire).
+    // East-pair corps (hvo_southeast_herzegovina) are excluded here — their time-gated
+    // truce (not blocked before Op Jackal ends; blocked after) is handled in the
+    // corps-pair block below. All other non-exempt HRHB corps are blocked.
     if (faction === 'HRHB' && (targetController === 'RS')
         && isHerzegovinaTruceActive(state)
-        && !GRAZ_EXEMPT_HRHB_CORPS.has(corpsId)) {
+        && !GRAZ_EXEMPT_HRHB_CORPS.has(corpsId)
+        && !isEastHerzegovinaPair(corpsId)) {
         return true;
     }
 
@@ -255,9 +250,6 @@ export function shouldGrazBlockAttack(
 
     return false;
 }
-
-/** @deprecated Use shouldGrazBlockAttack. */
-export const shouldViennaBlockAttack = shouldGrazBlockAttack;
 
 /**
  * Return extra aggression modifier for `faction` because the opponent broke the truce.
@@ -309,9 +301,6 @@ export function checkAndFireGrazAccords(state: GameState): string | null {
         + 'Kiseljak pocket forces hold positions. '
         + 'Posavina corridor fighting continues unabated.';
 }
-
-/** @deprecated Use checkAndFireGrazAccords. */
-export const checkAndFireViennaDeclaration = checkAndFireGrazAccords;
 
 /**
  * Record that `faction` broke the RS-HRHB truce by attacking the partner's territory.

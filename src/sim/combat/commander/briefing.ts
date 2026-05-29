@@ -59,6 +59,10 @@ import { analyzeFrontGeometry, type FrontGeometryAssessment } from '../front_geo
 import { strictCompare } from '../../../state/validateGameState.js';
 import { FATIGUE_MAX } from '../../../state/formation_constants.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
+import {
+    isCohesionCautionBiasActive,
+    isIntlStandingOpsHesitationActive,
+} from '../../political/political_dimension_propagation_gate.js';
 
 // ---------------------------------------------------------------------------
 // Default officer personality (used when no named officer is assigned)
@@ -715,6 +719,39 @@ export function buildBriefing(
         () => collectCampaignIntent(state, faction, corpsId),
     );
 
+    // Phase E MVS: optional political_dimensions propagation (two-tier gated).
+    // When the global propagation switch + intl_standing sub-flag are both ON,
+    // surface this faction's effective international_standing onto the briefing
+    // so the op-launch hesitation gate downstream (sector_offensive emit path)
+    // can consume it without traversing the negotiation substrate directly.
+    //
+    // Byte-stability contract: when the gate is OFF (default), `politicalDimensions`
+    // stays `undefined` and the assembled briefing OMITS `political_dimensions` —
+    // identical shape to pre-Phase-E briefings. Mirrors the optional-field pattern
+    // used for `campaign_role_deviation_reason` below.
+    let politicalDimensions: CommanderBriefing['political_dimensions'] | undefined;
+    if (isIntlStandingOpsHesitationActive()) {
+        const intlStanding = state.military?.negotiation?.strategic_dimensions?.[faction]?.international_standing?.effective_value;
+        if (typeof intlStanding === 'number') {
+            politicalDimensions = { international_standing: intlStanding };
+        }
+    }
+    // Phase E Packet 2: optional internal_cohesion propagation (independent sub-flag).
+    // When the global propagation switch + cohesion-caution-bias sub-flag are both ON,
+    // surface this faction's effective internal_cohesion onto the briefing so the
+    // op-launch caution-bias gate downstream (sector_offensive emit path) can consume
+    // it without traversing the negotiation substrate. The two sub-flags compose: if
+    // only the cohesion sub-flag is ON (intl_standing OFF), `politicalDimensions` is
+    // created here with internal_cohesion only — and vice versa. Byte-stability
+    // contract identical to MVS: when BOTH sub-flags are OFF, `politicalDimensions`
+    // stays `undefined` and the assembled briefing OMITS `political_dimensions`.
+    if (isCohesionCautionBiasActive()) {
+        const cohesion = state.military?.negotiation?.strategic_dimensions?.[faction]?.internal_cohesion?.effective_value;
+        if (typeof cohesion === 'number') {
+            politicalDimensions = { ...politicalDimensions, internal_cohesion: cohesion };
+        }
+    }
+
     // 12. Assemble briefing
     const mustHoldOsids = [
         ...(state.military.must_hold_osids_by_corps?.[corpsId] ?? []),
@@ -765,6 +802,11 @@ export function buildBriefing(
         campaign_sync_targets: campaignIntent.syncTargets,
         ...(campaignIntent.deviationReason !== null
             ? { campaign_role_deviation_reason: campaignIntent.deviationReason }
+            : {}),
+        // Phase E MVS: omit the field entirely when the gate is OFF — preserves
+        // byte-identical briefing shape vs pre-Phase-E baselines.
+        ...(politicalDimensions !== undefined
+            ? { political_dimensions: politicalDimensions }
             : {}),
     };
     return briefing;

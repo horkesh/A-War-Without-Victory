@@ -89,7 +89,7 @@ describe('Event timeline historical integrity', () => {
     });
 
     it('Washington Agreement requires Croat-Bosniak war', () => {
-        const wa = allEvents.find((e: any) => e.id === 'washington_agreement_1994');
+        const wa = allEvents.find((e: any) => e.id === 'hrhb_washington_agreement_1994');
         expect(wa.trigger.requires_events).toContain('croat_bosniak_war_begins_1993');
     });
 
@@ -100,7 +100,7 @@ describe('Event timeline historical integrity', () => {
 
     it('Federation ground offensive requires both Washington and Deliberate Force', () => {
         const fgo = allEvents.find((e: any) => e.id === 'federation_ground_offensive_1995');
-        expect(fgo.trigger.requires_events).toContain('washington_agreement_1994');
+        expect(fgo.trigger.requires_events).toContain('hrhb_washington_agreement_1994');
         expect(fgo.trigger.requires_events).toContain('nato_deliberate_force_1995');
     });
 
@@ -130,7 +130,7 @@ describe('Event timeline historical integrity', () => {
         }
     });
 
-    it('total event count is 116', () => {
-        expect(allEvents.length).toBe(116);
+    it('total event count is 123', () => {
+        expect(allEvents.length).toBe(123);
     });
 });

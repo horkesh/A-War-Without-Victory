@@ -37,7 +37,8 @@ async function main(): Promise<void> {
     event_fire_counts: {},
     event_last_fired_turn: {},
     event_flags: {},
-    enabled_event_ids: []
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
   political: {
     war_consolidation_until: {},
@@ -60,7 +61,8 @@ async function main(): Promise<void> {
     displacement_recent_by_turn: {},
     settlement_displacement: {},
     settlement_displacement_started_turn: {},
-    municipality_displacement: {}
+    municipality_displacement: {},
+    civilian_casualties: {}
   }
 };
 

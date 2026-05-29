@@ -1483,6 +1483,8 @@ export function ensureMinimumSectorCoverage(
     perfTime: EnsureMinimumSectorCoveragePerfTimer = (_label, fn) => fn(),
 ): void {
     const opParticipants = buildOperationParticipantSet(state);
+    const brigadeMovementState = state?.military.brigade_movement_state;
+    const brigadeMovementOrders = state?.military.brigade_movement_orders;
     const LOCAL_FRONT_RELIEF_MAX_HOPS = 3;
 
     const distanceToSectorFront = (bid: string, sector: CorpsFrontSector): number | null => {
@@ -1523,16 +1525,14 @@ export function ensureMinimumSectorCoverage(
     ): { target: string; dist: number } | null => {
         const formation = formations[bid];
         if (!formation?.location_osid) return null;
-        const candidates = [...getSectorFrontOsids(sector)]
-            .filter((target) => (activeCounts.get(target) ?? 0) === 0)
-            .map((target) => ({
-                target,
-                dist: bfsDistance(formation.location_osid as string, target, adjacency, friendlyOsids),
-            }))
-            .filter((candidate) =>
-                Number.isFinite(candidate.dist)
-                && candidate.dist <= maxHops)
-            .sort((a, b) => a.dist - b.dist || strictCompare(a.target, b.target));
+        const candidates: Array<{ target: string; dist: number }> = [];
+        for (const target of getSectorFrontOsids(sector)) {
+            if ((activeCounts.get(target) ?? 0) !== 0) continue;
+            const dist = bfsDistance(formation.location_osid, target, adjacency, friendlyOsids);
+            if (!Number.isFinite(dist) || dist > maxHops) continue;
+            candidates.push({ target, dist });
+        }
+        candidates.sort((a, b) => a.dist - b.dist || strictCompare(a.target, b.target));
         return candidates[0] ?? null;
     };
 
@@ -2015,8 +2015,8 @@ export function ensureMinimumSectorCoverage(
                         if (formation.status !== 'active') return null;
                         if ((formation.disrupted_turns ?? 0) > 0) return null;
                         if (opParticipants.has(entry.bid)) return null;
-                        if (state?.military.brigade_movement_state?.[entry.bid]?.status === 'in_transit') return null;
-                        if (state?.military.brigade_movement_orders?.[entry.bid]) return null;
+                        if (brigadeMovementState?.[entry.bid]?.status === 'in_transit') return null;
+                        if (brigadeMovementOrders?.[entry.bid]) return null;
                         const target = pickVacantLocalFrontTarget(entry.bid, sector, activeCounts, LOCAL_FRONT_RELIEF_MAX_HOPS);
                         if (!target) return null;
                         return { ...entry, target: target.target, dist: target.dist };
@@ -2095,8 +2095,8 @@ export function ensureMinimumSectorCoverage(
                     if (formation.status !== 'active') return null;
                     if ((formation.disrupted_turns ?? 0) > 0) return null;
                     if (opParticipants.has(entry.bid)) return null;
-                    if (state?.military.brigade_movement_state?.[entry.bid]?.status === 'in_transit') return null;
-                    if (state?.military.brigade_movement_orders?.[entry.bid]) return null;
+                    if (brigadeMovementState?.[entry.bid]?.status === 'in_transit') return null;
+                    if (brigadeMovementOrders?.[entry.bid]) return null;
                     if (claimTypeForSector(entry.donor, entry.bid) !== 'front') return null;
                     if (entry.donor.assigned_brigade_ids.length <= needed(entry.donor)) return null;
 
@@ -2214,8 +2214,8 @@ export function ensureMinimumSectorCoverage(
                             if (formation.status !== 'active') return null;
                             if ((formation.disrupted_turns ?? 0) > 0) return null;
                             if (opParticipants.has(entry.bid)) return null;
-                            if (state?.military.brigade_movement_state?.[entry.bid]?.status === 'in_transit') return null;
-                            if (state?.military.brigade_movement_orders?.[entry.bid]) return null;
+                            if (brigadeMovementState?.[entry.bid]?.status === 'in_transit') return null;
+                            if (brigadeMovementOrders?.[entry.bid]) return null;
                             if (entry.donorRole === 'front') {
                                 if (claimTypeForSector(entry.donor, entry.bid) !== 'front') return null;
                                 if (entry.donor.assigned_brigade_ids.length <= needed(entry.donor)) return null;

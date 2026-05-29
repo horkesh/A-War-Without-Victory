@@ -10,6 +10,7 @@ import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supp
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
+import type { EdgeRecord } from '../../map/settlements.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
 import {
     computeAttackerPower,
@@ -257,6 +258,23 @@ export function buildOsidAdjacencyFromFrontEdges(state: GameState): Map<string, 
     return adj;
 }
 
+/** Build a bidirectional OSID adjacency map from the static operational contact graph edges. */
+export function buildStaticOsidAdjacency(edges: EdgeRecord[]): Map<string, string[]> {
+    const adj = new Map<string, string[]>();
+    for (const e of edges) {
+        if (!e.a || !e.b) continue;
+        let listA = adj.get(e.a);
+        if (!listA) { listA = []; adj.set(e.a, listA); }
+        if (!listA.includes(e.b)) listA.push(e.b);
+        if (!e.one_way) {
+            let listB = adj.get(e.b);
+            if (!listB) { listB = []; adj.set(e.b, listB); }
+            if (!listB.includes(e.a)) listB.push(e.a);
+        }
+    }
+    return adj;
+}
+
 export function isStagingCorridorSafe(
     staging: string,
     mainBody: Set<string>,
@@ -340,7 +358,8 @@ export function collectObjectiveApproachOsids(
     state: GameState,
     corpsId: FormationId,
     faction: FactionId,
-    objectives: string[]
+    objectives: string[],
+    staticAdjacency?: Map<string, string[]>,
 ): Set<string> {
     const adjacency = buildOsidAdjacencyFromFrontEdges(state);
     if (adjacency.size > 0) {
@@ -375,7 +394,23 @@ export function collectObjectiveApproachOsids(
         }
     }
 
-    return collectSectorSubsegmentApproachOsids(state, corpsId, objectives);
+    // Path 2: sub-segment scan (original fallback — Wave 11)
+    const subSegmentOsids = collectSectorSubsegmentApproachOsids(state, corpsId, objectives);
+    if (subSegmentOsids.size > 0 || !staticAdjacency) return subSegmentOsids;
+
+    // Path 3: static operational graph — fallback for pre-planned ops in opening turns
+    // before live front edges have formed contact near deep enemy objectives.
+    const staticApproachOsids = new Set<string>();
+    for (const objective of objectives) {
+        for (const neighbor of staticAdjacency.get(objective) ?? []) {
+            const controller = getPoliticalControllerOSID(state, neighbor, undefined);
+            if (controller === faction || isFriendlyFactionCtrl(controller, faction, state)) {
+                staticApproachOsids.add(neighbor);
+            }
+        }
+        if (staticApproachOsids.size > 0) break;
+    }
+    return staticApproachOsids;
 }
 
 // LANE-2026-05-02-IN-TRANSIT-PREDICTOR: shared predicate.
@@ -416,14 +451,15 @@ export function areParticipantsReadyForExecution(
     state: GameState,
     corpsId: FormationId,
     faction: FactionId,
-    operation: CorpsOperation
+    operation: CorpsOperation,
+    staticAdjacency?: Map<string, string[]>,
 ): boolean {
     if (isMultiAxis(operation) && operation.axes) {
         let readyAxisCount = 0;
         for (const axis of operation.axes) {
             const currentObjective = axis.objectives[axis.current_objective_index ?? 0];
             if (typeof currentObjective !== 'string' || currentObjective.length === 0) continue;
-            const axisApproachOsids = collectObjectiveApproachOsids(state, corpsId, faction, [currentObjective]);
+            const axisApproachOsids = collectObjectiveApproachOsids(state, corpsId, faction, [currentObjective], staticAdjacency);
             if (axisApproachOsids.size === 0) {
                 // Phase C diagnostic (Late-War Operation Combat Delivery mega-lane):
                 // mark axis as front-unreachable at launch. Write-only — silent-skip
@@ -463,6 +499,7 @@ export function areParticipantsReadyForExecution(
         corpsId,
         faction,
         getCurrentLaunchObjectives(operation),
+        staticAdjacency,
     );
     let eligibleParticipantCount = 0;
     for (const brigadeId of operation.participating_brigades ?? []) {
@@ -721,6 +758,7 @@ function classifyAxisOpeningAttack(
     axis: NonNullable<CorpsOperation['axes']>[number],
     adjacency: Map<string, string[]>,
     threshold: PredictedOutcome,
+    staticAdjacency?: Map<string, string[]>,
 ): OpeningAttackReadinessResult {
     const objective = axis.objectives[axis.current_objective_index ?? 0];
     if (typeof objective !== 'string' || objective.length === 0) {
@@ -728,7 +766,7 @@ function classifyAxisOpeningAttack(
         return { executable: false, blocker: 'zero_eligible_axis' };
     }
 
-    const approachOsids = collectObjectiveApproachOsids(state, corpsId, faction, [objective]);
+    const approachOsids = collectObjectiveApproachOsids(state, corpsId, faction, [objective], staticAdjacency);
     if (approachOsids.size === 0) {
         axis.unreachable_at_launch = true;
         axis.launch_blocker = 'no_approach_osid';
@@ -775,6 +813,7 @@ export function evaluateOpeningAttackReadiness(
     corpsId: FormationId,
     faction: FactionId,
     op: CorpsOperation,
+    staticAdjacency?: Map<string, string[]>,
 ): OpeningAttackReadinessResult {
     const adjacency = buildOsidAdjacencyFromFrontEdges(state);
     if (adjacency.size === 0 && !isMultiAxis(op)) {
@@ -786,12 +825,22 @@ export function evaluateOpeningAttackReadiness(
 
     if (isMultiAxis(op) && op.axes) {
         const blockers: OpeningAttackBlocker[] = [];
+        let anyExecutable = false;
+        // True when any non-terminal axis has brigades mid-march (zero_eligible_axis).
+        // A fast-assembling sibling must not drag a slow axis into execution before
+        // its brigades reach the objective — hold until all axes are adjacent.
+        let anyApproaching = false;
         for (const axis of op.axes) {
             if (axis.status === 'complete' || axis.status === 'stalled') continue;
-            const result = classifyAxisOpeningAttack(state, corpsId, faction, axis, adjacency, threshold);
-            if (result.executable) return { executable: true };
-            if (result.blocker) blockers.push(result.blocker);
+            const result = classifyAxisOpeningAttack(state, corpsId, faction, axis, adjacency, threshold, staticAdjacency);
+            if (result.executable) {
+                anyExecutable = true;
+            } else {
+                if (result.blocker) blockers.push(result.blocker);
+                if (result.blocker === 'zero_eligible_axis') anyApproaching = true;
+            }
         }
+        if (anyExecutable && !anyApproaching) return { executable: true };
         return { executable: false, blocker: rankOpeningAttackBlocker(blockers) };
     }
 
@@ -799,7 +848,7 @@ export function evaluateOpeningAttackReadiness(
     if (typeof objective !== 'string' || objective.length === 0) {
         return { executable: false, blocker: 'zero_eligible_axis' };
     }
-    const approachOsids = collectObjectiveApproachOsids(state, corpsId, faction, [objective]);
+    const approachOsids = collectObjectiveApproachOsids(state, corpsId, faction, [objective], staticAdjacency);
     if (approachOsids.size === 0) {
         return { executable: false, blocker: 'no_approach_osid' };
     }

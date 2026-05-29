@@ -703,7 +703,8 @@ function createBaseState(seedName: string): GameState {
     event_fire_counts: {},
     event_last_fired_turn: {},
     event_flags: {},
-    enabled_event_ids: []
+    enabled_event_ids: [],
+    phantoms_spawned: []
   },
   displacement: {
     displacement_state: {},
@@ -718,7 +719,8 @@ function createBaseState(seedName: string): GameState {
     sustainability_state: {},
     settlement_displacement: {},
     settlement_displacement_started_turn: {},
-    municipality_displacement: {}
+    municipality_displacement: {},
+    civilian_casualties: {}
   },
         political: {
             war_consolidation_until: {},

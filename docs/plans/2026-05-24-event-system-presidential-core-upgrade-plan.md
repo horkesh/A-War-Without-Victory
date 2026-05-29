@@ -1,7 +1,7 @@
 # Event System Presidential Core Upgrade Plan
 
 **Date:** 2026-05-24
-**Status:** ACTIVE external-agent execution plan / partially implemented, gated for further authoring
+**Status:** ACTIVE/GATED external-agent execution plan / Workstream A baseline closed, Workstream B evaluator ordering/overflow visibility, loader fail-closed, row-level structural validation, semantic catalog validation, event state shape validation, mutex filtering, persisted overflow queue, v23 notification queue contract, v24 pending decision queue contract, and v25 active event modifier queue contract slices closed; Workstream E presidential acceptance diagnostic closed; event-expansion roadmap, branch-visibility diagnostics contract, foundational decisions packet, first future-consequence modal slice, and staff-recommendation default slice closed behavior-neutrally
 **Owner lane:** Event-system product/engine lane
 **Related board row:** `Command Board -> Event system presidential core upgrade`
 **Do not collide with:** calibration / army-arc branch. The 2026-05-25 presidential GUI restructure is merged; use its Decision Surface Registry, President's Desk, modal stack rules, and consequence ledger instead of inventing another decision surface.
@@ -41,21 +41,59 @@ Every new event packet must classify its trigger as one of:
 
 - Event catalog: 247 valid events across `war_1992.json`, `war_1993.json`, `war_1994.json`, `war_1995.json`, and `consequences.json`.
 - Current shape: 44 events with `response_options`, 203 no-choice events.
-- Required-response modal authoring: 17/36 rows are production modal-ready as of 2026-05-26. The catalog remains `NOT_READY`; the remaining 19 required-response rows are gated by sensitive-history approval, source/design default blockers, counterfactual-default blockers, or 188-week/endgame proof. Use `docs/40_reports/proposals/20260526_EVENT_MODAL_GATED_DECISION_PACKET.md` before authoring any additional row.
+- Required-response modal authoring: 18/36 rows are production modal-ready as of 2026-05-27. The catalog remains `NOT_READY`; the remaining rows are gated by sensitive-history approval, source/design default blockers, counterfactual-default blockers, or 188-week/endgame proof. `visit_to_front_rbih` is ready through a non-historical `Staff recommendation`; `visit_to_front_rs` and `visit_to_front_hrhb` remain gated. Use `docs/40_reports/proposals/20260526_EVENT_MODAL_GATED_DECISION_PACKET.md` and `docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md` before authoring any additional row.
+- Workstream A taxonomy baseline is closed as of 2026-05-27. `tools/diagnostics/event_taxonomy_report.ts` is the pure catalog report used by `tools/diagnostics/event_acceptance_report.ts`; it preserves stable file order, deterministic row sorting, duplicate-id checks across all five files, required-response ownership checks, response option ID/label checks, effect/condition vocabulary checks including pressure modifiers, missing historical-source findings for historically specific rows, sensitive-history presidential-decision blocking, catalog action classification, staff-recommendation default classification for approved abstract command rows, and legacy-calendar debt blocking for finished rows. Current diagnostic output after the staff-recommendation slice: 247 rows, 44 choice events, 36 required-response rows, 18 modal-ready rows, 172 warnings, 0 errors.
 - Choice ownership: RBiH 20, RS 18, HRHB 6.
 - GUI substrate: the 2026-05-25 presidential desk merge and 2026-05-26 event-modal proof provide President's Desk, central Decision Surface Registry, direct hard-blocker modal routing, modal stack priority, consequence-ledger/Records/Chronicle trails, data-driven modal catalog coverage, and live browser-shell proof that player event decisions open directly as modal dossiers.
 - Canon target from `Game_Bible_v0_9_0.md`: roughly 60% decision / 30% consequence / 10% forced events.
 - Current design gap: about 18% choice events, too many calendar/headline rows, too few pressure-driven presidential dilemmas.
-- Presentation gap: the modal-first substrate and 17 production-authored rows now have EU-style explicit historical/default markers, authored narration, visible citations/source notes, staff assessment, trigger evidence, and numeric consequence previews. Remaining presentation work is gated content approval, not generic modal substrate.
-- Engine/spec gap: `Systems_Manual_v0_9_0.md` describes max 3 events, overflow queueing, and mutex prevention, while live code currently uses a 4-event cap, no overflow queue, and no mutex enforcement.
+- Presentation gap: the modal-first substrate and 18 production-authored rows now have either EU-style explicit historical/default markers or a separate visible `Staff recommendation` label for abstract non-historical command decisions, plus authored narration, visible citations/source notes, staff assessment, trigger evidence, and numeric consequence previews. Remaining presentation work is gated content approval, not generic modal substrate.
+- Engine/spec gap: live code uses a 4-event cap with same-turn mutex filtering, overflow diagnostics, and v22 persisted overflow queueing. Runtime semantic catalog validation now fails closed for registered effect/condition vocabulary, declared enum/range fields, duplicate ids, and unresolved event references. Save schema v23 now makes `military.pending_event_notifications` a current-save contract while leaving runtime notification emission unchanged; save schema v24 now makes `military.pending_event_decisions` a current-save contract while leaving event decision behavior unchanged; save schema v25 now makes active event modifier queues current-save contracts while leaving event behavior/effect values unchanged.
+- Acceptance proof gap: Workstream E now has a deterministic presidential routing diagnostic proving the historical-default production modal-ready rows surface for the responding player, resolve to player decision logs, and auto-resolve headlessly on historical defaults. Catalog readiness remains `NOT_READY` because remaining required-response rows still need gated content/source/default decisions. The `visit_to_front_rbih` staff-recommendation row is modal-rendered but intentionally does not become a historical bot calibration default.
 - Current technical blockers:
-  - `evaluateEvents` caps fireable events at 4 per turn and slices overflow silently.
-  - event loading can fail open for missing/malformed files.
-  - equal-priority event sorting lacks a full canonical tie-break.
-  - full 247-row catalog schema validation is incomplete.
+  - `evaluateEvents` caps fireable events at 4 per turn. Overflow is visible through additive report fields; same-turn `mutex_group` siblings are filtered before the cap; and ids delayed only by the cap persist in `military.event_overflow_queue` for re-evaluation on later turns.
+  - Mutex/overflow behavior is packeted at `docs/40_reports/proposals/20260527_EVENT_MUTEX_OVERFLOW_DECISION_PACKET.md`; persisted overflow queueing is implemented from `docs/40_reports/proposals/20260527_EVENT_OVERFLOW_QUEUE_SCHEMA_PACKET.md` as save schema v22.
+  - Loader structural validation now rejects missing/blank ids, malformed triggers, non-finite turn bounds, malformed `requires_events`, missing/kindless primary effects, malformed effect arrays, and malformed response-option id/label/effects arrays.
+  - Semantic catalog validation now shares effect/condition/faction vocabulary between loader and taxonomy and rejects unknown runtime semantics before the `EventDefinition[]` cast.
+  - Taxonomy remains the owner for sensitive-history policy, modal readiness, source/default blocking, and trigger-authoring classification.
   - Further required-response modal authoring is blocked until the exact historical/default label and prose boundary are approved for the remaining sensitive, counterfactual, abstract, or source-weak rows.
-  - `validateGameState` covers `pending_event_notifications`, but not `pending_event_decisions`, `event_decision_log`, or most active event modifier arrays.
+  - `validateGameStateShape` now covers `pending_event_decisions`, `event_decision_log`, `event_aggression_modifiers`, `recruitment_modifiers`, and `equipment_quality_modifiers`; v22 current saves require `military.event_overflow_queue`, v23 current saves require `military.pending_event_notifications`, v24 current saves require `military.pending_event_decisions`, and v25 current saves require the three active event modifier arrays.
   - some event condition/type fields are declared but weakly tested or partially implemented.
+
+## User-Approved Event Expansion Contract
+
+The approved direction is a full historical/counterfactual event database, not a small flavor-event patch. Events should become the presidential narrative/mechanical layer that records what historically happened, exposes plausible counterfactual branches, and lets the simulation open or close event chains from live state.
+
+Contract requirements:
+
+- Full database target: cover the historical war arc plus plausible counterfactual branches, with source-gated row status and sensitive-history ring classification before broad prose authoring.
+- Explicit historical labels: every player-facing choice set identifies exactly one historical/default path in data or the derived modal view. If no defensible historical default exists, the row is source/design-blocked.
+- Historical bots for calibration: bot-controlled historical runs use `bot_response_logic: "historical"` and the historical/default option first. Player alternatives remain valid counterfactual branches, but calibration evidence is judged against the historical path unless Product Manager approves a different benchmark.
+- Causal opens/closes: decisions and live predicates must open, suppress, delay, or close downstream chains through flags, dimensions, pressure, event counts, and live substrate. Do not delete a chain by date alone when a counterfactual decision should causally suppress it.
+- Detailed modal explanations: presidential decisions must explain situation, evidence, historical baseline, staff rationale, options, numeric/mechanical consequences, uncertainty, source note, and record trail. The modal must not expose hidden enemy truth or hidden model reasoning.
+- Material consequences: decisions must alter flags, dimensions, constraints, modifiers, event eligibility, notification/Codex/Records trails, or endgame/cost interpretation. Pure wallpaper rows are rewritten, cut, or routed to non-blocking history surfaces.
+
+Current gate remains active: no broad historical/counterfactual content authoring until sensitive-history, source, and historical/default or staff-recommendation decisions are satisfied. The behavior-neutral branch-visibility metadata/diagnostics slice is closed; it makes event-chain openings/closures auditable without changing event behavior. The foundational decisions packet at `docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md` approves the label taxonomy, source boundaries, sensitive-history rulings, material-consequence minimum, and next behavior-neutral visible slice. That first visible slice is implemented by `docs/40_reports/implemented/20260527_EVENT_FUTURE_CONSEQUENCE_MODAL_SLICE.md`: four approved rows carry branch-visibility metadata and the event modal renders future-consequence cards without runtime branch gating. The follow-on staff-recommendation slice is implemented by `docs/40_reports/implemented/20260527_EVENT_STAFF_RECOMMENDATION_DEFAULTS.md`: abstract command-presence rows can show `Staff recommendation` without becoming historical calibration defaults.
+
+## Expanded Historical/Counterfactual Database Direction
+
+The next major event-system phase is a research and architecture lane, not broad JSON authoring. It must build a source-backed database of historical war events and plausible alternate timelines with explicit causal gates and material consequences.
+
+Required branches include:
+
+- RS Six Strategic Goals as a foundational war-aim decision that can gate availability of paramilitary structures and later international/legal/diplomatic consequences, without making atrocities a player lever.
+- HRHB full-alliance-with-ARBiH paths that open earlier joint-operation, federation, and Zagreb-pressure consequences while suppressing some Bosniak-Croat conflict chains.
+- RBiH reintegration and Bosniak-state divergence paths, with political legitimacy, external support, military pressure, and endgame-cost consequences.
+- RS independence, confederation, sanctions, patron-pressure, and military-overstretch paths.
+- HRHB third-entity, federation, and defeat/conquest paths, including alliance locks, material support, morale/cohesion, and diplomatic costs.
+
+Before implementation, the Orchestrator must dispatch Historian/Game Designer and Technical Architect/Product QA lanes to produce:
+
+- event-family inventory and source hierarchy;
+- alternate-timeline decision tree with historical default per decision where defensible;
+- exact runtime semantics for response-level opens/closes, delayed eligibility, material effects, and territory flips;
+- sensitive-history ring classification and refused-lever list;
+- test matrix for historical bot calibration versus player counterfactual divergence.
 
 ## Non-Goals
 
@@ -436,6 +474,8 @@ Stop gates:
 
 **Goal:** prove the system is becoming the heart of play, not just a larger catalog.
 
+**Status:** CLOSED for historical-default production modal-ready acceptance proof as of 2026-05-27. `tools/diagnostics/event_presidential_acceptance.ts` probes the historical-default production modal-ready rows from `buildEventAcceptanceReport()`, neutralizes only trigger/pressure gates, and verifies player surfacing, player resolution logs, headless historical auto-resolution, and stable consequence traces. The later `visit_to_front_rbih` staff-recommendation row is modal-rendered and catalog-covered, but it is intentionally not part of historical bot calibration proof.
+
 File targets:
 
 - Add `tools/diagnostics/event_presidential_acceptance.ts`.
@@ -457,6 +497,14 @@ npx.cmd vitest run <new president impact acceptance diagnostic tests> tests/even
 npm.cmd run typecheck
 ```
 
+Closed proof:
+
+```powershell
+node node_modules\vitest\vitest.mjs run tests\sim\events\event_presidential_acceptance.test.ts tests\events_evaluate.test.ts tests\event_decisions.test.ts tests\player_decision_manifest.test.ts --reporter=dot
+npx.cmd tsx tools\diagnostics\event_presidential_acceptance.ts --json
+npm.cmd run typecheck
+```
+
 Scenario proof:
 
 - For 52-week player-faction proof, use a focused scenario diagnostic or `npm.cmd run sim:scenario:run:default` only if the diagnostic depends on run artifacts.
@@ -464,12 +512,15 @@ Scenario proof:
 
 Baseline regression is required if acceptance diagnostics prove or change scenario behavior/output. It is required before accepting any claim that scenario behavior remains byte-identical.
 
-## Immediately Executable Phase Sequence
+## Six-Phase Expansion Sequence
+
+This sequence supersedes the earlier open-ended authoring waves as the close-in roadmap for the event expansion program. It is based on Product Manager, Technical Architect, and Historian findings: prove branch visibility first, then settle foundational policy decisions, then author in gated packets.
 
 ### Phase 0 - Dispatch and Baseline Lock
 
 **Assigned to:** Product Manager + Systems Programmer
 **Goal:** prove the lane is safe to start and capture the current event substrate before behavior changes.
+**Status:** CLOSED by Workstream A/B/E closeouts for the current substrate.
 
 - [ ] Confirm no branch collision with GUI polish or calibration / army-arc work.
 - [ ] Record current event counts: total events, choice events, no-choice events, choice events by respondent faction.
@@ -489,55 +540,86 @@ Verification:
 npm.cmd run typecheck
 ```
 
-Handoff: Systems Programmer owns Phase 1. Product Manager verifies the baseline summary matches this plan.
+Handoff: Product/Architecture owns Phase 2 foundational decisions packet.
 
-### Phase 1 - Catalog Contract and Taxonomy Diagnostic
+### Phase 1 - Branch Visibility Metadata and Diagnostics
 
-**Assigned to:** Systems Programmer
-**Reviewers:** QA Engineer, Canon Compliance Reviewer, Historian for source-status fields
-**Goal:** make the full catalog auditable before expanding it.
+**Assigned to:** Product Manager + Technical Architect + Systems Programmer
+**Reviewers:** QA Engineer, Historian, Determinism Auditor
+**Status:** CLOSED as behavior-neutral metadata/diagnostics contract.
+**Goal:** make historical/counterfactual branch openings and closures visible without changing event behavior or authoring broad content.
 
-Execute Workstream A. Do not alter firing behavior.
+Implemented behavior-neutral `future_consequences` response-option metadata, loader validation, taxonomy summaries/findings, and focused tests. This classifies branch visibility and blocks malformed/dangling metadata from modal readiness without changing `evaluateEvents`, event JSON prose, event effects, save schema, bot choices, or scenario outputs.
 
-Handoff: QA receives diagnostic output and confirms all catalog rows are represented exactly once.
+Closed outputs:
 
-### Phase 2 - Loader, Ordering, Cap, and Save Safety
+- branch/chain visibility fields in taxonomy diagnostics;
+- loader validation for future-consequence shape, timing/certainty enums, string-array fields, and opened/closed event references;
+- taxonomy errors for malformed or dangling future-consequence metadata that block modal readiness;
+- no broad content authoring.
 
-**Assigned to:** Systems Programmer / Gameplay Programmer
-**Reviewers:** Determinism Auditor, QA Engineer
-**Goal:** harden the substrate before more presidential decisions depend on it.
+Verification:
 
-Execute Workstream B. If this phase changes event ordering, cap behavior, queueing, mutex, or migration defaults, run baseline regression and explain drift before acceptance.
+```powershell
+npm.cmd run typecheck
+git diff --check
+```
 
-Handoff: Determinism Auditor signs off on ordering, cap behavior, and hash movement explanation.
+Handoff: Product Manager uses the foundational decisions packet to dispatch the next source/default packet, starting with `visit_to_front_*`, while keeping runtime branch gating deferred.
 
-### Phase 3 - Modal-First Presidential Event Decisions
+### Phase 2 - Foundational Decisions Packet
+
+**Assigned to:** Product Manager + Historian + Game Designer
+**Reviewers:** Canon Compliance Reviewer, Technical Architect, QA Engineer
+**Status:** CLOSED behavior-neutrally by `docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md`.
+**Goal:** approve the content rules before broad event authoring starts.
+
+The packet must settle:
+
+- historical/default option labeling and allowed exceptions;
+- source standards for BB/ICTY/other citations and modal source notes;
+- sensitive-history ring handling, especially atrocities, detention, genocide, massacre, siege starvation, and safe areas;
+- player-counterfactual boundaries and which branches may suppress, delay, or close historical chains;
+- material-consequence minimums for presidential decisions;
+- first authoring packet order and reviewer sign-off path.
+
+No broad event JSON/prose authoring proceeds from this phase. The packet approved only the first behavior-neutral visible slice; that slice is now closed for `rbih_state_identity`, `hrhb_political_goal`, `rs_assembly_rejects_voplan_1993`, and `belgrade_embargo_rs_1994`.
+
+Verification:
+
+```powershell
+git diff --check
+```
+
+Handoff: Historian/Game Designer prepare the next source/default packet in the approved order. Technical Architect must still approve exact semantics before any runtime branch behavior is implemented.
+
+### Phase 3 - Predicate and Consequence Substrate
+
+**Assigned to:** Technical Architect + Gameplay Programmer
+**Reviewers:** Determinism Auditor, QA Engineer, Canon Compliance Reviewer
+**Goal:** implement only the predicates/effects needed by approved authoring packets.
+
+Work proceeds narrowly from the foundational decisions packet: branch open/close fields, pressure predicates, consequence preview rows, and material effects that are required before content can be honest. Any save-shape change follows the Save-Schema Gate below.
+
+Handoff: QA receives focused predicate/effect tests and a drift statement before content authoring uses the substrate.
+
+### Phase 4 - Modal-First Presidential Explanation Pass
 
 **Assigned to:** UI/UX Developer + Technical Architect
 **Reviewers:** Modern Wargame Expert, QA Engineer
-**Goal:** expose pending event decisions as auto-popping presidential modal dossiers without creating a new queue or authority.
+**Goal:** ensure approved event decisions explain the historical baseline, counterfactual alternatives, causal consequences, source grounding, and record trail in the modal-first resolver.
 
 Execute Workstream C. `App.tsx` may be touched only to harden the existing auto-launch/modal-state contract; avoid `GameStateAdapter.ts` unless the modal needs a field not already exposed.
 
 Handoff: UI/UX hands QA a screenshot or visual artifact plus test command output proving the event modal auto-pops, explains rationale/evidence, shows numeric consequences, preserves IPC-failure state, and records the consequence trail.
 
-### Phase 4 - Acceptance Diagnostics Before Authoring
-
-**Assigned to:** QA Engineer + Scenario Harness Engineer
-**Reviewers:** Product Manager, Determinism Auditor
-**Goal:** define pass/fail proof before adding major new content.
-
-Execute Workstream E. Acceptance diagnostics may fail initially, but failures must be explicit and actionable.
-
-Handoff: Product Manager chooses first authoring packet from diagnostic gaps.
-
-### Phase 5 - Historical Pressure and Dilemma Authoring Waves
+### Phase 5 - Gated Historical and Counterfactual Authoring Waves
 
 **Assigned to:** Historian + Scenario Creator/Runner/Tester + Gameplay Programmer
 **Reviewers:** Game Designer, Canon Compliance Reviewer, QA Engineer
-**Goal:** add pressure-driven presidential content in small reviewable packets.
+**Goal:** add the full historical/counterfactual event database in small reviewable packets only after Phase 1 and Phase 2 gates pass.
 
-Execute Workstream D one packet per commit unless Product Manager changes priority in `COMMAND_BOARD.md`.
+Execute Workstream D one packet per commit unless Product Manager changes priority in `COMMAND_BOARD.md`. Use the existing packet list as the content backlog, but do not treat it as authorization to write prose before the source/default/sensitive gates are satisfied.
 
 Handoff: Historian signs source status; Canon reviewer signs sensitive-history boundaries; QA signs deterministic acceptance. Product Manager verifies every authored decision labels the historical/default option first so bot calibration stays on the historical path while players can choose counterfactual branches.
 
@@ -554,6 +636,8 @@ Any field that can appear in `GameState` must follow `docs/20_engineering/SAVE_S
 - If the default can affect scenario output, classify it as sensitive and get sign-off before commit.
 
 For event-system slices, this applies to `military.pending_event_decisions`, `military.event_decision_log`, active event modifiers, pending event notifications, overflow queues/backlogs, and any new decision/read-model state that is persisted.
+
+**Closed v23 note:** `military.pending_event_notifications` now has deterministic `[]` migration/default coverage, current-version missing/malformed rejection coverage, a v22 fixture, and save-migration drift report proof. The TypeScript optional marker is intentionally retained and runtime notification emission remains unchanged.
 
 ## Determinism Risks
 

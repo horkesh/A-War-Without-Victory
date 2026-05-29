@@ -1,6 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import {
+    KNOWN_EVENT_CONDITION_TYPE_SET,
+    KNOWN_EVENT_EFFECT_KIND_SET,
+    VALID_EVENT_FACTION_SET,
+} from '../../src/sim/events/event_vocabulary';
 
 type JsonRecord = Record<string, unknown>;
 
@@ -41,6 +46,26 @@ export type EventTaxonomyRow = {
     dimension_shifts: string[];
     has_numeric_consequences: boolean;
     numeric_consequence_kinds: string[];
+    future_consequence_count: number;
+    future_consequence_opens_events: string[];
+    future_consequence_closes_events: string[];
+    future_consequence_opens_flags: string[];
+    future_consequence_closes_flags: string[];
+    future_consequence_material_effect_refs: string[];
+    future_consequence_shape_errors: string[];
+    /** Phase B Sub-slice B3 — count of response options with non-empty
+     *  `enables_events_runtime` (packet §3.3). Sourced from authored JSON;
+     *  surfaces runtime-causality wiring inventory. */
+    response_options_with_enables_runtime: number;
+    /** Phase B Sub-slice B3 — count of response options with non-empty
+     *  `closes_events_runtime` (packet §3.3). */
+    response_options_with_closes_runtime: number;
+    /** Phase B Sub-slice B3 — union of all `enables_events_runtime` targets
+     *  across response options on this event. Sorted, deduped. */
+    enables_events_runtime: string[];
+    /** Phase B Sub-slice B3 — union of all `closes_events_runtime` targets
+     *  across response options on this event. Sorted, deduped. */
+    closes_events_runtime: string[];
     notification_coverage: {
         has_notifications_to_other_factions: boolean;
         response_options_with_notifications: number;
@@ -48,6 +73,7 @@ export type EventTaxonomyRow = {
     };
     historical_source_status: 'present' | 'missing';
     historical_source: string | null;
+    is_historically_specific: boolean;
     source_note: string | null;
     sensitive_history_ring: 'none' | 'risk';
     sensitive_history_status: 'clear' | 'review_required';
@@ -58,10 +84,13 @@ export type EventTaxonomyRow = {
     has_historical_default_marker: boolean;
     historical_default_response_id: string | null;
     historical_default_option_id: string | null;
+    staff_recommended_response_id: string | null;
     historical_default_unavailable_reason: string | null;
     has_option_descriptions: boolean;
     has_numeric_option_previews: boolean;
     modal_ready: boolean;
+    presidential_decision_valid: boolean;
+    catalog_action: 'keep' | 'rewrite' | 'cut' | 'source-blocked' | 'sensitive-gated';
     row_classification: string;
     findings: EventTaxonomyFinding[];
 };
@@ -80,6 +109,10 @@ export type EventTaxonomyReport = {
         historical_default_unavailable_events: number;
         modal_ready_events: number;
         duplicate_event_ids: string[];
+        /** Phase B Sub-slice B3 — count of events whose any response option
+         *  has `enables_events_runtime` or `closes_events_runtime` populated
+         *  (packet §3.3). Diagnostic-only — no behavior change. */
+        events_with_runtime_causality_wiring: number;
         findings: number;
         errors: number;
         warnings: number;
@@ -95,49 +128,6 @@ const CATALOG_FILES = [
     'data/scenarios/events/war_1995.json',
     'data/scenarios/events/consequences.json',
 ] as const;
-
-const VALID_FACTIONS = new Set(['RBiH', 'RS', 'HRHB']);
-
-const KNOWN_EFFECT_KINDS = new Set([
-    'aggression_modifier',
-    'alliance_change',
-    'alliance_lock',
-    'cohesion_change',
-    'cost_ledger_annotation',
-    'equipment_grant',
-    'equipment_quality_modifier',
-    'humanitarian_impact',
-    'morale_change',
-    'narrative',
-    'negotiation_capital',
-    'patron_pressure',
-    'supply_delta',
-]);
-
-const KNOWN_CONDITION_TYPES = new Set([
-    'alliance_above',
-    'alliance_below',
-    'alliance_drift',
-    'and',
-    'dimension_above',
-    'dimension_below',
-    'displaced_in_aggregate',
-    'enclave_resilience_aggregate',
-    'enclave_supply_status',
-    'faction_controls_municipality',
-    'flag_at_least',
-    'flag_equals',
-    'flag_not_set',
-    'metric_compare_factions',
-    'morale_average_below',
-    'not',
-    'paramilitary_mode_equals',
-    'patron_pressure_above',
-    'supply_below',
-    'territory_loss_window',
-    'territory_percentage',
-    'war_crimes_above',
-]);
 
 const SENSITIVE_KEYWORDS = [
     'atrocity',
@@ -157,6 +147,12 @@ const HISTORICAL_DEFAULT_BLOCKED_IDS = new Set([
     'karadzic_mladic_split_1995',
 ]);
 
+const STAFF_RECOMMENDATION_DEFAULT_IDS = new Set([
+    'visit_to_front_rbih',
+    'visit_to_front_rs',
+    'visit_to_front_hrhb',
+]);
+
 const SENSITIVE_DEFAULT_BLOCKED_IDS = new Set([
     'rs_strategic_goals',
     'drina_cleansing_decision_1992',
@@ -167,6 +163,9 @@ const SENSITIVE_DEFAULT_BLOCKED_IDS = new Set([
     'un_hostage_crisis_1995',
     'nato_ultimatum_sarajevo_1994',
 ]);
+
+const VALID_FUTURE_CONSEQUENCE_TIMING = new Set(['immediate', 'next_turn', 'future', 'endgame']);
+const VALID_FUTURE_CONSEQUENCE_CERTAINTY = new Set(['guaranteed', 'conditional', 'risk']);
 
 function strictCompare(a: string, b: string): number {
     if (a < b) return -1;
@@ -210,6 +209,14 @@ function collectConditionTypes(condition: unknown): string[] {
         : [];
     const singleNested = collectConditionTypes(condition.condition);
     return uniqueSorted([...current, ...nested, ...singleNested]);
+}
+
+function collectPressureConditionTypes(pressure: unknown): string[] {
+    if (!isRecord(pressure) || !Array.isArray(pressure.modifiers)) return [];
+    return uniqueSorted(pressure.modifiers.flatMap((modifier) => {
+        if (!isRecord(modifier)) return [];
+        return collectConditionTypes(modifier.condition);
+    }));
 }
 
 function collectEffects(event: JsonRecord): JsonRecord[] {
@@ -282,6 +289,122 @@ function numericConsequenceKinds(effects: JsonRecord[]): string[] {
     return uniqueSorted(kinds);
 }
 
+function isStringArray(value: unknown): value is string[] {
+    return Array.isArray(value) && value.every((entry) => typeof entry === 'string');
+}
+
+type FutureConsequenceSummary = Pick<EventTaxonomyRow,
+    'future_consequence_count' |
+    'future_consequence_opens_events' |
+    'future_consequence_closes_events' |
+    'future_consequence_opens_flags' |
+    'future_consequence_closes_flags' |
+    'future_consequence_material_effect_refs' |
+    'future_consequence_shape_errors'
+>;
+
+/** Phase B Sub-slice B3 — runtime causality wiring summary per event,
+ *  surfaced alongside future_consequences (packet §3.3). */
+type RuntimeCausalitySummary = Pick<EventTaxonomyRow,
+    'response_options_with_enables_runtime' |
+    'response_options_with_closes_runtime' |
+    'enables_events_runtime' |
+    'closes_events_runtime'
+>;
+
+function collectRuntimeCausalitySummary(event: JsonRecord): RuntimeCausalitySummary {
+    const options = Array.isArray(event.response_options) ? event.response_options : [];
+    let enablesCount = 0;
+    let closesCount = 0;
+    const enablesIds: string[] = [];
+    const closesIds: string[] = [];
+    for (const option of options) {
+        if (!isRecord(option)) continue;
+        if (isStringArray(option.enables_events_runtime) && option.enables_events_runtime.length > 0) {
+            enablesCount += 1;
+            enablesIds.push(...option.enables_events_runtime);
+        }
+        if (isStringArray(option.closes_events_runtime) && option.closes_events_runtime.length > 0) {
+            closesCount += 1;
+            closesIds.push(...option.closes_events_runtime);
+        }
+    }
+    return {
+        response_options_with_enables_runtime: enablesCount,
+        response_options_with_closes_runtime: closesCount,
+        enables_events_runtime: uniqueSorted(enablesIds),
+        closes_events_runtime: uniqueSorted(closesIds),
+    };
+}
+
+function collectFutureConsequenceSummary(event: JsonRecord): FutureConsequenceSummary {
+    let count = 0;
+    const opensEvents: string[] = [];
+    const closesEvents: string[] = [];
+    const opensFlags: string[] = [];
+    const closesFlags: string[] = [];
+    const materialEffectRefs: string[] = [];
+    const shapeErrors: string[] = [];
+    const options = Array.isArray(event.response_options) ? event.response_options : [];
+
+    options.forEach((option, optionIndex) => {
+        if (!isRecord(option) || !Object.prototype.hasOwnProperty.call(option, 'future_consequences')) return;
+        const optionId = textOrNull(option.id) ?? `response_options[${optionIndex}]`;
+        if (!Array.isArray(option.future_consequences)) {
+            shapeErrors.push(`${optionId}.future_consequences must be an array when present`);
+            return;
+        }
+
+        count += option.future_consequences.length;
+        option.future_consequences.forEach((consequence, consequenceIndex) => {
+            const path = `${optionId}.future_consequences[${consequenceIndex}]`;
+            if (!isRecord(consequence)) {
+                shapeErrors.push(`${path} must be a non-null object`);
+                return;
+            }
+            for (const key of ['id', 'label', 'explanation'] as const) {
+                if (textOrNull(consequence[key]) === null) {
+                    shapeErrors.push(`${path}.${key} must be a non-empty string`);
+                }
+            }
+            const timing = textOrNull(consequence.timing);
+            if (timing === null || !VALID_FUTURE_CONSEQUENCE_TIMING.has(timing)) {
+                shapeErrors.push(`${path}.timing must be one of immediate, next_turn, future, endgame`);
+            }
+            const certainty = textOrNull(consequence.certainty);
+            if (certainty === null || !VALID_FUTURE_CONSEQUENCE_CERTAINTY.has(certainty)) {
+                shapeErrors.push(`${path}.certainty must be one of guaranteed, conditional, risk`);
+            }
+
+            const appendStringArray = (key: string, target: string[]) => {
+                if (!Object.prototype.hasOwnProperty.call(consequence, key)) return;
+                const value = consequence[key];
+                if (!isStringArray(value)) {
+                    shapeErrors.push(`${path}.${key} must be a string array when present`);
+                    return;
+                }
+                target.push(...value);
+            };
+
+            appendStringArray('opens_events', opensEvents);
+            appendStringArray('closes_events', closesEvents);
+            appendStringArray('opens_flags', opensFlags);
+            appendStringArray('closes_flags', closesFlags);
+            appendStringArray('material_effect_refs', materialEffectRefs);
+        });
+    });
+
+    return {
+        future_consequence_count: count,
+        future_consequence_opens_events: uniqueSorted(opensEvents),
+        future_consequence_closes_events: uniqueSorted(closesEvents),
+        future_consequence_opens_flags: uniqueSorted(opensFlags),
+        future_consequence_closes_flags: uniqueSorted(closesFlags),
+        future_consequence_material_effect_refs: uniqueSorted(materialEffectRefs),
+        future_consequence_shape_errors: shapeErrors.sort(strictCompare),
+    };
+}
+
 function notificationCoverage(event: JsonRecord, responseIds: string[]): EventTaxonomyRow['notification_coverage'] {
     const notifications = isRecord(event.notifications_to_other_factions) ? event.notifications_to_other_factions : null;
     const withNotifications: string[] = [];
@@ -328,12 +451,44 @@ function sensitiveKeywordsFor(row: Pick<EventTaxonomyRow, 'id' | 'title' | 'narr
 
 function historicalDefaultUnavailableReason(row: Pick<EventTaxonomyRow, 'id' | 'is_choice_event'>): string | null {
     if (SENSITIVE_DEFAULT_BLOCKED_IDS.has(row.id)) return 'sensitive_history_review_required';
+    if (STAFF_RECOMMENDATION_DEFAULT_IDS.has(row.id)) return null;
     if (HISTORICAL_DEFAULT_BLOCKED_IDS.has(row.id)) return 'source_or_design_blocked';
     if (row.is_choice_event && row.id.startsWith('csq_') && row.id !== 'csq_patron_recovery_offer') return 'counterfactual_consequence_offer';
     return null;
 }
 
+function hasLegacyCalendarDebt(row: Pick<EventTaxonomyRow, 'trigger_emergence_class'>): boolean {
+    return row.trigger_emergence_class === 'legacy_calendar_pending_conversion';
+}
+
+function isHistoricallySpecific(event: JsonRecord, file: string, historicalSource: string | null): boolean {
+    if (typeof event.is_historically_specific === 'boolean') return event.is_historically_specific;
+    if (typeof event.historically_specific === 'boolean') return event.historically_specific;
+    if (historicalSource !== null) return true;
+    return file !== 'data/scenarios/events/consequences.json';
+}
+
+function isPresidentialDecisionValid(row: Pick<EventTaxonomyRow,
+    'requires_player_response' | 'modal_ready' | 'sensitive_history_status' | 'trigger_emergence_class'
+>): boolean {
+    return row.requires_player_response &&
+        row.modal_ready &&
+        row.sensitive_history_status === 'clear' &&
+        !hasLegacyCalendarDebt(row);
+}
+
+function classifyCatalogAction(row: Pick<EventTaxonomyRow,
+    'modal_ready' | 'is_choice_event' | 'requires_player_response' | 'historical_source_status' | 'sensitive_history_status'
+>): EventTaxonomyRow['catalog_action'] {
+    if (row.sensitive_history_status !== 'clear') return 'sensitive-gated';
+    if (row.historical_source_status === 'missing') return 'source-blocked';
+    if (row.modal_ready) return 'keep';
+    if (row.requires_player_response || row.is_choice_event) return 'rewrite';
+    return 'keep';
+}
+
 export function classifyTriggerEmergence(row: EventTaxonomyRow): string {
+    if (hasLegacyCalendarDebt(row)) return 'legacy_calendar_pending_conversion';
     const parts: string[] = [];
     if (row.trigger_turn_min !== null || row.trigger_turn_max !== null) parts.push('scheduled');
     if (row.requires.length > 0) parts.push('requires_event');
@@ -343,6 +498,7 @@ export function classifyTriggerEmergence(row: EventTaxonomyRow): string {
 }
 
 export function classifyEventTaxonomy(row: EventTaxonomyRow): string {
+    if (hasLegacyCalendarDebt(row) && row.modal_ready) return 'required_response_debt';
     if (row.modal_ready) return 'finished_modal_ready';
     if (row.requires_player_response) return 'required_response_debt';
     if (row.is_choice_event) return 'choice_event_debt';
@@ -350,12 +506,15 @@ export function classifyEventTaxonomy(row: EventTaxonomyRow): string {
     return 'inventory_only';
 }
 
-function buildRow(event: JsonRecord, file: string, fileIndex: number, catalogIndex: number): EventTaxonomyRow {
+export function buildEventTaxonomyRow(event: JsonRecord, file: string, fileIndex: number, catalogIndex: number): EventTaxonomyRow {
     const trigger = isRecord(event.trigger) ? event.trigger : {};
     const requires = Array.isArray(trigger.requires_events)
         ? trigger.requires_events.filter((value): value is string => typeof value === 'string')
         : [];
-    const conditionTypes = collectConditionTypes(trigger.condition);
+    const conditionTypes = uniqueSorted([
+        ...collectConditionTypes(trigger.condition),
+        ...collectPressureConditionTypes(event.pressure),
+    ]);
     const responseOptions = (Array.isArray(event.response_options) ? event.response_options : [])
         .filter(isRecord)
         .map((option) => ({
@@ -368,10 +527,14 @@ function buildRow(event: JsonRecord, file: string, fileIndex: number, catalogInd
     const effects = collectEffects(event);
     const effectKinds = uniqueSorted(effects.map((effect) => textOrNull(effect.kind) ?? 'unknown'));
     const numericKinds = numericConsequenceKinds(effects);
+    const futureConsequenceSummary = collectFutureConsequenceSummary(event);
+    const runtimeCausalitySummary = collectRuntimeCausalitySummary(event);
     const historicalSource = textOrNull(event.historical_source) ?? textOrNull(event.source);
+    const historicallySpecific = isHistoricallySpecific(event, file, historicalSource);
     const sourceNote = textOrNull(event.source_note) ?? textOrNull(event.historical_source_note) ?? historicalSource;
     const historicalDefaultResponseId = textOrNull(event.historical_default_response_id);
     const historicalDefaultOptionId = findHistoricalDefaultOptionId(event);
+    const staffRecommendedResponseId = textOrNull(event.staff_recommended_response_id);
     const hasNumericOptionPreviews = responseOptions.length > 0 && responseOptions.every((option) => {
         const original = (event.response_options as unknown[]).find((entry) => isRecord(entry) && textOrNull(entry.id) === option.id);
         if (!isRecord(original)) return false;
@@ -407,9 +570,12 @@ function buildRow(event: JsonRecord, file: string, fileIndex: number, catalogInd
         dimension_shifts: collectDimensionShifts(event),
         has_numeric_consequences: numericKinds.length > 0,
         numeric_consequence_kinds: numericKinds,
+        ...futureConsequenceSummary,
+        ...runtimeCausalitySummary,
         notification_coverage: notificationCoverage(event, responseIds),
         historical_source_status: historicalSource ? 'present' : 'missing',
         historical_source: historicalSource,
+        is_historically_specific: historicallySpecific,
         source_note: sourceNote,
         sensitive_history_ring: 'none',
         sensitive_history_status: 'clear',
@@ -420,37 +586,44 @@ function buildRow(event: JsonRecord, file: string, fileIndex: number, catalogInd
         has_historical_default_marker: historicalDefaultOptionId !== null,
         historical_default_response_id: historicalDefaultResponseId,
         historical_default_option_id: historicalDefaultOptionId,
+        staff_recommended_response_id: staffRecommendedResponseId,
         historical_default_unavailable_reason: null,
         has_option_descriptions: responseOptions.length > 0 && responseOptions.every((option) => option.description !== null),
         has_numeric_option_previews: hasNumericOptionPreviews,
         modal_ready: false,
+        presidential_decision_valid: false,
+        catalog_action: 'keep',
         row_classification: 'inventory_only',
         findings: [],
     };
 
-    row.trigger_emergence_class = classifyTriggerEmergence(row);
+    row.trigger_emergence_class = textOrNull(event.trigger_emergence_class) ?? textOrNull(event.emergence_class) ?? classifyTriggerEmergence(row);
     row.trigger_driver = row.condition_types.length > 0 ? 'condition' : row.requires.length > 0 ? 'requires_event' : row.trigger_turn_min !== null ? 'turn' : 'unknown';
     row.sensitive_history_keywords = sensitiveKeywordsFor(row);
     row.sensitive_history_ring = row.sensitive_history_keywords.length > 0 ? 'risk' : 'none';
     row.sensitive_history_status = row.sensitive_history_keywords.length > 0 ? 'review_required' : 'clear';
     row.historical_default_unavailable_reason = historicalDefaultUnavailableReason(row);
+    const hasApprovedDefault =
+        (row.has_historical_default_marker && row.historical_default_unavailable_reason === null) ||
+        (STAFF_RECOMMENDATION_DEFAULT_IDS.has(row.id) && row.staff_recommended_response_id !== null);
     row.modal_ready =
         row.requires_player_response &&
         row.has_title &&
         row.has_narrative &&
         row.has_source_note &&
-        row.has_historical_default_marker &&
-        row.historical_default_unavailable_reason === null &&
+        hasApprovedDefault &&
         row.has_option_descriptions &&
         row.has_numeric_option_previews &&
         row.sensitive_history_status === 'clear';
+    row.presidential_decision_valid = isPresidentialDecisionValid(row);
+    row.catalog_action = classifyCatalogAction(row);
     row.row_classification = classifyEventTaxonomy(row);
     return row;
 }
 
 export function loadCatalogRows(): EventTaxonomyRow[] {
     const rows = CATALOG_FILES.flatMap((file, fileIndex) =>
-        readJsonArray(file).map((event, catalogIndex) => buildRow(event, file, fileIndex, catalogIndex)),
+        readJsonArray(file).map((event, catalogIndex) => buildEventTaxonomyRow(event, file, fileIndex, catalogIndex)),
     );
 
     return rows.sort((a, b) => {
@@ -470,6 +643,7 @@ function finding(row: EventTaxonomyRow, code: string, severity: EventTaxonomyFin
 export function collectCatalogFindings(rows: EventTaxonomyRow[]): EventTaxonomyFinding[] {
     const findings: EventTaxonomyFinding[] = [];
     const byId = new Map<string, EventTaxonomyRow[]>();
+    const allEventIds = new Set(rows.map((row) => row.id).filter((id) => id.length > 0));
 
     for (const row of rows) {
         const existing = byId.get(row.id) ?? [];
@@ -478,7 +652,7 @@ export function collectCatalogFindings(rows: EventTaxonomyRow[]): EventTaxonomyF
 
         if (row.requires_player_response && row.responding_faction === null) {
             findings.push(finding(row, 'missing_responding_faction', 'error', 'Required-response event has no responding_faction.'));
-        } else if (row.requires_player_response && !VALID_FACTIONS.has(row.responding_faction ?? '')) {
+        } else if (row.requires_player_response && !VALID_EVENT_FACTION_SET.has(row.responding_faction ?? '')) {
             findings.push(finding(row, 'invalid_responding_faction', 'error', `Invalid responding_faction ${row.responding_faction}.`));
         }
 
@@ -503,23 +677,33 @@ export function collectCatalogFindings(rows: EventTaxonomyRow[]): EventTaxonomyF
         }
 
         for (const kind of row.effect_kinds) {
-            if (!KNOWN_EFFECT_KINDS.has(kind)) {
+            if (!KNOWN_EVENT_EFFECT_KIND_SET.has(kind)) {
                 findings.push(finding(row, 'unknown_effect_kind', 'warning', `Unknown effect kind ${kind}.`));
             }
         }
         for (const type of row.condition_types) {
-            if (!KNOWN_CONDITION_TYPES.has(type)) {
+            if (!KNOWN_EVENT_CONDITION_TYPE_SET.has(type)) {
                 findings.push(finding(row, 'unknown_condition_type', 'warning', `Unknown condition type ${type}.`));
             }
         }
         if (row.historical_source_status === 'missing') {
             findings.push(finding(row, 'missing_source', 'warning', 'Event has no historical_source or source field.'));
         }
+        if (row.is_historically_specific && row.historical_source_status === 'missing') {
+            findings.push(finding(row, 'missing_historical_source', 'warning', 'Historically specific event has no historical_source or source field.'));
+        }
         if (row.sensitive_history_status !== 'clear') {
             findings.push(finding(row, 'sensitive_history_review', 'warning', `Sensitive-history keyword review required: ${row.sensitive_history_keywords.join(', ')}.`));
         }
-        if (row.requires_player_response && !row.has_historical_default_marker) {
+        if (row.requires_player_response && !row.has_historical_default_marker && !STAFF_RECOMMENDATION_DEFAULT_IDS.has(row.id)) {
             findings.push(finding(row, 'missing_historical_default_marker', 'warning', 'Required-response event has no explicit historical default option marker.'));
+        }
+        if (
+            row.requires_player_response &&
+            STAFF_RECOMMENDATION_DEFAULT_IDS.has(row.id) &&
+            row.staff_recommended_response_id === null
+        ) {
+            findings.push(finding(row, 'missing_staff_recommendation', 'warning', 'Abstract required-response event has no explicit staff recommendation.'));
         }
         if (row.historical_default_unavailable_reason !== null) {
             findings.push(finding(row, 'historical_default_unavailable', 'warning', `Historical default unavailable: ${row.historical_default_unavailable_reason}.`));
@@ -542,6 +726,39 @@ export function collectCatalogFindings(rows: EventTaxonomyRow[]): EventTaxonomyF
             row.bot_response_logic !== 'historical'
         ) {
             findings.push(finding(row, 'historical_default_bot_logic_mismatch', 'warning', 'Explicit historical-default calibration rows must use bot_response_logic historical.'));
+        }
+        if (hasLegacyCalendarDebt(row) && (row.modal_ready || row.row_classification === 'finished_modal_ready')) {
+            findings.push(finding(row, 'finished_row_has_legacy_calendar_pending_conversion', 'error', 'Finished event rows must not keep legacy_calendar_pending_conversion trigger debt.'));
+        }
+        for (const shapeError of row.future_consequence_shape_errors) {
+            findings.push(finding(row, 'malformed_future_consequence', 'error', shapeError));
+        }
+        for (const id of row.future_consequence_opens_events) {
+            if (!allEventIds.has(id)) {
+                findings.push(finding(row, 'dangling_future_consequence_event', 'error', `future_consequences opens_events ${id} does not match a catalog event id.`));
+            }
+        }
+        for (const id of row.future_consequence_closes_events) {
+            if (!allEventIds.has(id)) {
+                findings.push(finding(row, 'dangling_future_consequence_event', 'error', `future_consequences closes_events ${id} does not match a catalog event id.`));
+            }
+        }
+        // Phase B Sub-slice B3 — presentation-vs-runtime alignment finding
+        // (packet §3.3). Every id in `enables_events_runtime` must appear in
+        // some `future_consequences[*].opens_events`; same for closes_runtime
+        // and `future_consequences[*].closes_events`. Player-visible record
+        // must never silently diverge from runtime causality.
+        const presentationOpens = new Set(row.future_consequence_opens_events);
+        for (const id of row.enables_events_runtime) {
+            if (!presentationOpens.has(id)) {
+                findings.push(finding(row, 'runtime_presentation_mismatch', 'error', `enables_events_runtime target ${id} is not declared in any future_consequences[*].opens_events on the same event.`));
+            }
+        }
+        const presentationCloses = new Set(row.future_consequence_closes_events);
+        for (const id of row.closes_events_runtime) {
+            if (!presentationCloses.has(id)) {
+                findings.push(finding(row, 'runtime_presentation_mismatch', 'error', `closes_events_runtime target ${id} is not declared in any future_consequences[*].closes_events on the same event.`));
+            }
         }
     }
 
@@ -569,9 +786,30 @@ export function buildEventTaxonomyReport(rows: EventTaxonomyRow[] = loadCatalogR
         const rowFindings = findingsByRow.get(`${row.file}:${row.id}`) ?? [];
         const modalReady =
             row.modal_ready &&
-            !rowFindings.some((entry) => ['missing_source', 'sensitive_history_review', 'missing_historical_default_marker', 'historical_default_unavailable', 'historical_default_bot_logic_mismatch'].includes(entry.code));
-        const nextRow = { ...row, modal_ready: modalReady, findings: rowFindings };
-        return { ...nextRow, row_classification: classifyEventTaxonomy(nextRow) };
+            !rowFindings.some((entry) => [
+                'missing_source',
+                'missing_historical_source',
+                'sensitive_history_review',
+                'missing_historical_default_marker',
+                'missing_staff_recommendation',
+                'historical_default_unavailable',
+                'historical_default_bot_logic_mismatch',
+                'finished_row_has_legacy_calendar_pending_conversion',
+                'malformed_future_consequence',
+                'dangling_future_consequence_event',
+            ].includes(entry.code));
+        const nextRow = {
+            ...row,
+            modal_ready: modalReady,
+            findings: rowFindings,
+        };
+        const presidentialDecisionValid = isPresidentialDecisionValid(nextRow);
+        const withDecisionFields = {
+            ...nextRow,
+            presidential_decision_valid: presidentialDecisionValid,
+            catalog_action: classifyCatalogAction({ ...nextRow, modal_ready: modalReady }),
+        };
+        return { ...withDecisionFields, row_classification: classifyEventTaxonomy(withDecisionFields) };
     });
 
     const duplicateEventIds = uniqueSorted(
@@ -592,6 +830,10 @@ export function buildEventTaxonomyReport(rows: EventTaxonomyRow[] = loadCatalogR
             historical_default_unavailable_events: reportRows.filter((row) => row.historical_default_unavailable_reason !== null).length,
             modal_ready_events: reportRows.filter((row) => row.modal_ready).length,
             duplicate_event_ids: duplicateEventIds,
+            events_with_runtime_causality_wiring: reportRows.filter((row) =>
+                row.response_options_with_enables_runtime > 0 ||
+                row.response_options_with_closes_runtime > 0,
+            ).length,
             findings: findings.length,
             errors: findings.filter((entry) => entry.severity === 'error').length,
             warnings: findings.filter((entry) => entry.severity === 'warning').length,

@@ -63,7 +63,8 @@ import {
 } from './ethnic_defense.js';
 import { isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import { getPostWashingtonJointPressureMultiplier } from '../early_war/washington_agreement.js';
-import { findBrigadeOperation } from './corps_operation_helpers.js';
+import { findBrigadeOperation, findBrigadeOperationAnywhere, countAxisConcentrationSupport } from './corps_operation_helpers.js';
+import { getBrigadeAxis } from './bot_brigade_ai_osid.js';
 
 // ── Shared combat math ──────────────────────────────────────────────────
 import {
@@ -712,7 +713,26 @@ export function resolveAttackOrdersOsid(
         const targetSlope = slopeByOsid[targetOsid] ?? 0;
         const seasonal = getSeasonalModifiers(currentTurn, startDate, targetSlope);
         const targetTerrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
-        const concentrationBonus = getConcentrationBonus(attackerFormations.length);
+        // R13b op-level concentration mirror: amplify the concentration bonus
+        // when same-axis op-mates are within 2 hops of the target (theater
+        // coordination). Capped at 4 effective via Math.min to stay within
+        // the existing CONCENTRATION_BONUS_CAP=0.30. Same-axis (not whole op)
+        // scope prevents cross-axis amplification on Sarajevo ring / Drina.
+        let effectiveAttackerCount = attackerFormations.length;
+        const opMatch = findBrigadeOperationAnywhere(state, firstAttacker.id);
+        if (opMatch) {
+            const axis = getBrigadeAxis(opMatch.op, firstAttacker.id);
+            const sameAxisBrigades = axis?.assigned_brigades ?? opMatch.op.participating_brigades ?? [];
+            const attackerIds = new Set<FormationId>(attackerFormations.map(a => a.id));
+            effectiveAttackerCount += countAxisConcentrationSupport(
+                state,
+                sameAxisBrigades,
+                attackerIds,
+                adjacency,
+                targetOsid,
+            );
+        }
+        const concentrationBonus = getConcentrationBonus(Math.min(4, effectiveAttackerCount));
         // Formations with attack orders attack at their posture — but postures with
         // zero attack mult (defend, hold, dig_in) use 'attack' as minimum, since the
         // attack order itself implies attack intent. Preserves 'assault' (1.2×) bonus.

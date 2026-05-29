@@ -54,7 +54,7 @@ const EXPECTED_FIRST_PACKET_DEFAULTS = new Map([
     ['rbih_state_identity', 'civic'],
     ['hrhb_political_goal', 'croat_republic'],
     ['rs_assembly_rejects_voplan_1993', 'accept_rejection'],
-    ['belgrade_embargo_rs_1994', 'defiant'],
+    ['belgrade_embargo_rs_1994', 'negotiate'],
 ]);
 
 const EXPECTED_PACKET_2A_DEFAULTS = new Map([
@@ -67,12 +67,12 @@ const EXPECTED_PACKET_2B_DEFAULTS = new Map([
 
 const EXPECTED_PACKET_3_DEFAULTS = new Map([
     ['operation_lukavac_93', 'comply'],
-    ['os_rbih_tactical_acceptance_1993', 'accept_for_optics'],
+    ['os_rbih_tactical_acceptance_1993', 'reject_via_assembly'],
     ['csq_patron_recovery_offer', 'accept_recovery'],
 ]);
 
 const EXPECTED_PACKET_4_DEFAULTS = new Map([
-    ['washington_agreement_1994', 'accept'],
+    ['hrhb_washington_agreement_1994', 'accept'],
     ['contact_group_plan_1994', 'accept'],
     ['dayton_talks_begin_1995', 'accept'],
 ]);
@@ -109,15 +109,16 @@ describe('event acceptance diagnostic report', () => {
         const second = buildEventAcceptanceReport();
 
         expect(JSON.stringify(first)).toBe(JSON.stringify(second));
-        expect(first.summary.total_events).toBe(247);
-        expect(first.summary.required_response_events).toBe(36);
-        expect(first.summary.production_modal_authoring_ready_events).toBe(17);
+        expect(first.summary.total_events).toBe(274);
+        expect(first.summary.required_response_events).toBe(65);
+        expect(first.summary.production_modal_authoring_ready_events).toBe(45);
         expect(first.summary.acceptance_status).toBe('NOT_READY');
         expect(first.summary.full_catalog_accepted).toBe(false);
-        expect(first.summary.missing_historical_default_response_id_events).toBe(19);
-        expect(first.summary.missing_historical_marker_events).toBe(19);
+        expect(first.summary.missing_approved_default_events).toBe(10);
+        expect(first.summary.missing_historical_default_response_id_events).toBe(13);
+        expect(first.summary.missing_historical_marker_events).toBe(13);
         expect(first.summary.source_blocked_events).toBeGreaterThan(0);
-        expect(first.summary.missing_source_note_events).toBe(19);
+        expect(first.summary.missing_source_note_events).toBe(11);
     });
 
     it('lists the approved first production authoring packet candidates without changing JSON content', () => {
@@ -270,20 +271,48 @@ describe('event acceptance diagnostic report', () => {
         expect(report.production_modal_authoring_ready_rows.map((row) => row.id)).toEqual([
             'rbih_state_identity',
             'hrhb_political_goal',
+            'rbih_paramilitary_policy_1992',
+            'hrhb_1992_graz_cooperation_collapse',
+            'rbih_minority_retention_1992',
             'gornji_vakuf_clashes_1993',
             'ic_pressure_vopp_engagement',
             'vance_owen_plan_1993',
+            'hrhb_vance_owen_acceptance_1993',
+            'hrhb_central_bosnia_defense_1993',
             'rs_assembly_rejects_voplan_1993',
+            'hrhb_territorial_scope_1993',
             'operation_lukavac_93',
             'os_rbih_tactical_acceptance_1993',
+            'rbih_arms_embargo_lift_advocacy_1993',
+            'hrhb_owen_stoltenberg_response_1993',
+            'rs_owen_stoltenberg_response_1993',
+            'rs_belgrade_pressure_response_1993',
+            'abdic_apwb_declared_1993',
+            'rbih_reintegration_offers_1993',
             'strategic_posture_review_hrhb',
-            'washington_agreement_1994',
+            'visit_to_front_rbih',
+            'hrhb_federation_overture_1993',
+            'rs_autonomy_path_decision_1993',
+            'rbih_nato_ultimatum_compliance_1994',
+            'rs_washington_rejection_1994',
+            'hrhb_washington_agreement_1994',
+            'rbih_washington_agreement_1994',
             'ic_rbih_restraint_post_washington',
             'contact_group_plan_1994',
+            'hrhb_contact_group_response_1994',
+            'rbih_contact_group_response_1994',
+            'rs_contact_group_response_1994',
+            'rbih_federation_army_integration_1994',
             'belgrade_embargo_rs_1994',
+            'hrhb_federation_army_integration_1994',
+            'bihac_5th_corps_offensive_1994',
             'carter_ceasefire_1994',
+            'hv_hvo_cooperation_1995',
+            'rbih_late_war_offensive_1995',
             'holbrooke_ceasefire_demand_oct95',
             'dayton_talks_begin_1995',
+            'hrhb_dayton_acceptance_1995',
+            'rs_dayton_acceptance_1995',
             'csq_patron_recovery_offer',
         ]);
         expect(report.summary.acceptance_status).toBe('NOT_READY');

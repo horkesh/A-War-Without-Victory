@@ -1,0 +1,109 @@
+name: Event System CI
+
+# Phase G Packet 4 — automate the canon-compliance defense established by the
+# Phase G3 strict gate test. This workflow gives PR reviewers a named,
+# discoverable CI surface for event-system validation, complementing the
+# broader Baseline Regression workflow (which runs the same tests implicitly
+# via the test:vitest:fast slice).
+#
+# Phase H Packet 10 (2026-05-29) — extended the test gate with the seven
+# Phase H suites (causality query + six UI integration files, 74 tests) so
+# PR-time enforcement covers the Phase H consequence-visualization layer
+# alongside the Phase B/D/E/F regression substrate.
+#
+# Three layered gates run sequentially:
+#   1. TypeScript typecheck — catches loader / vocabulary / shape errors.
+#   2. Event-system + Phase E/F/H suite — 25 test files covering loader,
+#      decisions, evaluation, taxonomy, presidential acceptance, families,
+#      causality, political-dimension propagation, F2 audit, F3 graph,
+#      F5 runtime substrate integration, and the Phase H causality-query
+#      API + UI consequence-visualization layer (decision-context modal,
+#      faction-branch badges, codex unlock state, chronicle causality
+#      slides, catalog wire-up, decision-history overlay).
+#   3. Phase F2 strict gate (Phase G3) — asserts CRITICAL + WARNING = 0
+#      on the real catalog. This is the canon-compliance hard rail.
+#   4. Baseline regression — byte-identical run-artifact hash check via
+#      tools/scenario_runner/run_baseline_regression.ts.
+#
+# Determinism + convention notes:
+#   - Node 22 (matches repo's other workflows; see baseline-regression.yml).
+#   - npm install --legacy-peer-deps (matches repo convention; npm ci would
+#     fail under the same peer-dep skew that motivated the legacy flag).
+#   - The map workspace also installs because the root tsc references map UI
+#     types (mirrors baseline-regression.yml).
+#   - actions/checkout@v5 + actions/setup-node@v5 (matches repo convention).
+#
+# Cross-references:
+#   - docs/40_reports/implemented/20260528_PHASE_F_CLOSEOUT.md (G3 strict gate origin)
+#   - docs/20_engineering/EVENT_SYSTEM_AUTHORING_GUIDE.md (authoring patterns)
+#   - .github/workflows/README.md (workflow catalog)
+
+on:
+  push:
+    branches:
+      - main
+      - 'codex/**'
+      - 'feature/**'
+  pull_request:
+    branches: [main]
+
+jobs:
+  event-system-validation:
+    name: Event system validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies (root)
+        run: npm install --legacy-peer-deps
+
+      - name: Install dependencies (map workspace)
+        run: npm install --legacy-peer-deps --prefix src/ui/map
+
+      - name: TypeScript typecheck
+        run: npx tsc --noEmit
+
+      - name: Event-system + Phase E/F/H suite
+        run: |
+          node node_modules/vitest/vitest.mjs run \
+            tests/event_loader.test.ts \
+            tests/event_loader_runtime_substrate.test.ts \
+            tests/event_decisions.test.ts \
+            tests/events_evaluate.test.ts \
+            tests/events_evaluate_b3.test.ts \
+            tests/event_families.test.ts \
+            tests/event_state_shape_b2.test.ts \
+            tests/event_causality_chain.test.ts \
+            tests/event_family_graph.test.ts \
+            tests/sim/events/event_acceptance_report.test.ts \
+            tests/sim/events/event_taxonomy_report.test.ts \
+            tests/sim/events/event_presidential_acceptance.test.ts \
+            tests/political_dimension_propagation_gate.test.ts \
+            tests/political_dimensions_snapshot.test.ts \
+            tests/phase_e2_cohesion_caution_bias.test.ts \
+            tests/phase_e3_combined_activation.test.ts \
+            tests/sensitive_history_canon_gate_audit.test.ts \
+            tests/phase_d_causality_runtime_integration.test.ts \
+            tests/causality_query.test.ts \
+            tests/ui/event_decision_modal_decision_context.test.ts \
+            tests/ui/faction_branch_tags_badge.test.ts \
+            tests/ui/codex_panel_unlock_state.test.ts \
+            tests/ui/chronicle_causality_slides.test.ts \
+            tests/ui/catalog_wireup_integration.test.ts \
+            tests/ui/decision_history_overlay.test.ts \
+            --reporter=dot
+
+      - name: Phase F2 strict gate (canon-compliance hard rail)
+        run: |
+          node node_modules/vitest/vitest.mjs run \
+            tests/sensitive_history_canon_gate_audit_strict_gate.test.ts \
+            --reporter=dot
+
+      - name: Baseline regression
+        run: node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_baseline_regression.ts

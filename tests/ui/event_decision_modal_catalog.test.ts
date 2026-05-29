@@ -90,20 +90,27 @@ describe('production modal-ready event catalog rendering', () => {
   it('renders every accepted ready row as a complete player-facing decision modal', () => {
     const report = buildEventAcceptanceReport();
 
-    expect(report.summary.production_modal_authoring_ready_events).toBe(17);
-    expect(report.summary.required_response_events).toBe(36);
+    expect(report.summary.production_modal_authoring_ready_events).toBe(45);
+    expect(report.summary.required_response_events).toBe(65);
 
     for (const row of report.production_modal_authoring_ready_rows) {
       const event = loadEvent(row.file, row.id);
       const sourceNote = event.source_note ?? event.historical_source ?? event.source;
       const historicalOption = event.response_options?.find((option) => option.id === event.historical_default_response_id);
+      const staffOption = event.response_options?.find((option) => option.id === event.staff_recommended_response_id);
       const respondingFaction = event.responding_faction;
+      const usesStaffRecommendation = Boolean(event.staff_recommended_response_id);
 
       expect(event.narrative || event.situation, row.id).toEqual(expect.any(String));
       expect(sourceNote, row.id).toEqual(expect.any(String));
       expect(event.staff_assessment, row.id).toEqual(expect.any(String));
       expect(event.trigger_evidence, row.id).toEqual(expect.arrayContaining([expect.any(String)]));
-      expect(historicalOption?.historical_marker, row.id).toBe('historical_default');
+      if (usesStaffRecommendation) {
+        expect(staffOption, row.id).toBeTruthy();
+        expect(historicalOption, row.id).toBeUndefined();
+      } else {
+        expect(historicalOption?.historical_marker, row.id).toBe('historical_default');
+      }
       expect(event.response_options?.every((option) => expectedPreviewRows(option).length > 0), row.id).toBe(true);
       expect(respondingFaction, row.id).toEqual(expect.any(String));
 
@@ -123,6 +130,7 @@ describe('production modal-ready event catalog rendering', () => {
           faction: respondingFaction!,
           requires_player_response: event.requires_player_response,
           historical_default_response_id: event.historical_default_response_id,
+          staff_recommended_response_id: event.staff_recommended_response_id,
           response_options: event.response_options ?? [],
         },
         onRespond: () => undefined,
@@ -136,8 +144,15 @@ describe('production modal-ready event catalog rendering', () => {
       for (const evidence of event.trigger_evidence ?? []) {
         expect(screen.getByText(evidence), row.id).toBeTruthy();
       }
-      expect(screen.getAllByText('Historical default'), row.id).toHaveLength(1);
-      expect(screen.getByText(/AI historical path for calibration/), row.id).toBeTruthy();
+      if (usesStaffRecommendation) {
+        expect(screen.getAllByText('Staff recommendation'), row.id).toHaveLength(1);
+        expect(screen.getByText(/not a historical default and does not control bot calibration/), row.id).toBeTruthy();
+        expect(screen.queryByText('Historical default'), row.id).toBeNull();
+        expect(screen.queryByText(/AI historical path for calibration/), row.id).toBeNull();
+      } else {
+        expect(screen.getAllByText('Historical default'), row.id).toHaveLength(1);
+        expect(screen.getByText(/AI historical path for calibration/), row.id).toBeTruthy();
+      }
       expect(screen.queryByText('Historical default source review required'), row.id).toBeNull();
       expect(screen.queryByText('No immediate mechanical effects.'), row.id).toBeNull();
 

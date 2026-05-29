@@ -10,13 +10,10 @@
  * Deterministic: sorted iteration via strictCompare. No timestamps or RNG.
  */
 
-import type { EdgeRecord, SettlementRecord } from '../../map/settlements.js';
+import type { EdgeRecord } from '../../map/settlements.js';
 import type {
-    FactionId,
     FormationId,
-    FormationState,
     GameState,
-    MunicipalityId,
     SettlementId
 } from '../../state/game_state.js';
 import { getLegacyAoR } from '../../state/game_state.js';
@@ -54,97 +51,6 @@ export function identifyFrontActiveSettlements(
     }
 
     return frontActive;
-}
-
-/**
- * Expand front-active set to include limited rear depth.
- * Includes settlements 1 hop behind the front line (controlled by same faction as the front settlement).
- * This provides operational depth for brigades.
- */
-export function expandFrontActiveWithDepth(
-    frontActive: Set<SettlementId>,
-    edges: EdgeRecord[],
-    pc: Record<SettlementId, FactionId | null>,
-    depth: number = 1
-): Set<SettlementId> {
-    const expanded = new Set(frontActive);
-    // Build adjacency
-    const adj = new Map<SettlementId, SettlementId[]>();
-    for (const edge of edges) {
-        let listA = adj.get(edge.a);
-        if (!listA) { listA = []; adj.set(edge.a, listA); }
-        listA.push(edge.b);
-        let listB = adj.get(edge.b);
-        if (!listB) { listB = []; adj.set(edge.b, listB); }
-        listB.push(edge.a);
-    }
-
-    let current = new Set(frontActive);
-    for (let d = 0; d < depth; d++) {
-        const next = new Set<SettlementId>();
-        const sorted = Array.from(current).sort(strictCompare);
-        for (const sid of sorted) {
-            const neighbors = adj.get(sid) ?? [];
-            const faction = pc[sid];
-            for (const n of neighbors) {
-                if (!expanded.has(n) && pc[n] === faction) {
-                    expanded.add(n);
-                    next.add(n);
-                }
-            }
-        }
-        current = next;
-    }
-
-    return expanded;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Municipality helpers (used by corps_directed_aor.ts)
-// ═══════════════════════════════════════════════════════════════════════════
-
-export function resolveMunicipalityForSid(
-    sid: SettlementId,
-    sidToMun: Record<SettlementId, MunicipalityId>
-): MunicipalityId {
-    return sidToMun[sid] ?? sid;
-}
-
-/** Build a settlement→municipality lookup from settlement records + fallback to SID. */
-export function buildSidToMunMap(
-    settlementIds: Iterable<SettlementId>,
-    settlements?: Map<SettlementId, SettlementRecord>
-): Record<SettlementId, MunicipalityId> {
-    const sidToMun: Record<SettlementId, MunicipalityId> = {};
-    if (settlements) {
-        for (const [sid, s] of settlements.entries()) {
-            sidToMun[sid] = (s.mun1990_id ?? s.mun_code ?? sid) as MunicipalityId;
-        }
-    }
-    for (const sid of settlementIds) {
-        if (!(sid in sidToMun)) sidToMun[sid] = sid as MunicipalityId;
-    }
-    return sidToMun;
-}
-
-/** Build municipality adjacency graph from settlement edges and SID→municipality lookup. */
-export function buildMunicipalityAdjacency(
-    edges: EdgeRecord[],
-    sidToMun: Record<SettlementId, MunicipalityId>
-): Map<MunicipalityId, Set<MunicipalityId>> {
-    const adj = new Map<MunicipalityId, Set<MunicipalityId>>();
-    for (const edge of edges) {
-        const a = resolveMunicipalityForSid(edge.a, sidToMun);
-        const b = resolveMunicipalityForSid(edge.b, sidToMun);
-        if (a === b) continue;
-        const aSet = adj.get(a) ?? new Set<MunicipalityId>();
-        aSet.add(b);
-        adj.set(a, aSet);
-        const bSet = adj.get(b) ?? new Set<MunicipalityId>();
-        bSet.add(a);
-        adj.set(b, bSet);
-    }
-    return adj;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

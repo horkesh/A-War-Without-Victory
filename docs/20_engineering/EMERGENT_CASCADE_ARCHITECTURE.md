@@ -285,6 +285,63 @@ Pipeline hardening ── before next pipeline change
 
 ---
 
+## Strategic Dimension Clamp Semantics (added 2026-05-29, Phase J Packet 4)
+
+The six `DimensionId` scores (`military_credibility`, `territorial_legitimacy`, `international_standing`, `patron_confidence`, `internal_cohesion`, `negotiating_leverage`) are **hard-clamped to `[0,100]`** at every write site. This section captures the canonical clamp behavior so future cohesion / dimension investigations do not re-derive it from scratch.
+
+### Where the clamp lives
+
+Canonical owner: `src/sim/events/strategic_dimensions.ts` (verbatim, verified 2026-05-29).
+
+- **Event-shift write site** — `applyDimensionShift`, line 39:
+  ```ts
+  dim.effective_value = clamp(dim.base_value + dim.event_modifier, 0, 100);
+  ```
+- **Base-recompute write site** — `updateBaseValue`, lines 49-50:
+  ```ts
+  dim.base_value = clamp(newBase, 0, 100);
+  dim.effective_value = clamp(dim.base_value + dim.event_modifier, 0, 100);
+  ```
+- **Composite-formula write site** — `computeDimensionBaseValues`, internal_cohesion branch at lines 102-111, ends with the same `clamp(..., 0, 100)` call through `updateBaseValue`.
+
+The two `effective_value` writes are unconditional: every recomputation and every event shift re-applies both bounds.
+
+### Pre-clamp vs post-clamp value
+
+The composite scalar that drives a dimension can drift below 0 or above 100 transiently:
+
+- **Pre-clamp value** = `base_value + event_modifier` (or the raw composite from the per-dimension formula), computed in the engine but never stored.
+- **Post-clamp value** = `effective_value`, the field actually serialized to `DimensionStore`, read by `computeNegotiatingCapital`, and consumed by Phase E gates.
+
+When the underlying composite goes negative or super-100, the clamp silently absorbs the excess. Two factions with very different pre-clamp values can both read `0.00` (or both `100.00`) post-clamp, masking their qualitative separation.
+
+### Investigation pattern: `0.00` or `100.00` is a floor/ceiling signal, not a measurement
+
+When triaging a dimension reading of exactly `0.00` or exactly `100.00`, **do not treat the value as a discriminator** until the pre-clamp composite has been mathematically reconstructed.
+
+Reconstruction recipe (worked example: Phase J Packet 3, RBiH `internal_cohesion = 0.00` at turn 40):
+
+1. Read `base_value` and `event_modifier` from `state.military.negotiation.strategic_dimensions[faction][dimension]`.
+2. For per-dimension base formulas, replay the formula at `strategic_dimensions.ts:73-118` using raw GameState inputs (alliance, avg brigade cohesion, war_exhaustion, etc.).
+3. Compute `pre_clamp = base_value + event_modifier`. If `pre_clamp < 0`, the `0.00` is a floor artifact. If `pre_clamp > 100`, the `100.00` is a ceiling artifact.
+4. Compare the pre-clamp magnitudes across factions before concluding one faction is "uniquely collapsed" / "uniquely dominant."
+
+J3 reconstruction: RBiH pre-clamp `= 18.288 + (-22) = -3.71`; HRHB pre-clamp `= 7.828 + (-5) = 2.83`. Both factions are in the same low-cohesion regime; the clamp made them appear qualitatively different by floor-flooring only one.
+
+### Implication for Phase E gate analysis
+
+Phase E gates (`internal_cohesion < 40`, `international_standing < 30`) read `effective_value` directly. When a gate trips on a clamp-floored reading, the trip is real (the gate fired) but the **degree** of trip is not informative — any threshold value above the pre-clamp magnitude would also trip. Threshold-recalibration analyses must reconstruct pre-clamp composites for floored factions before drawing discriminator conclusions.
+
+### Cross-references
+
+- J1 simulator (turn-40 multiplier projection): `tools/diagnostics/phase_e_activation_simulator.ts`
+- J2 readiness report (Phase E threshold discussion): `docs/40_reports/proposals/20260529_PHASE_E_ACTIVATION_READINESS.md` §5.4, §9.4
+- J3 cohesion investigation (full math reconstruction, hypothesis ranking): `docs/40_reports/proposals/20260529_RBIH_COHESION_INVESTIGATION.md`
+- Vocabulary index (the six canonical DimensionIds + EffectKind dispatch): `memory/engine_dimension_vocabulary.md` — "Bounded ranges" section
+- Original dimension design plan: `docs/plans/2026-03-22-dayton-dimension-merge-design.md:125-188`
+
+---
+
 ## The v1.0 Test: Does Every Player Choice Cascade?
 
 For v1.0 to ship, EVERY player-facing choice must produce a cascade through at least 3 of these 5 layers:

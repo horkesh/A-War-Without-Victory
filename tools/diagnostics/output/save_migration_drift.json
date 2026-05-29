@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 18,
-  "registered_migration_count": 18,
-  "strict_required_field_count": 51,
+  "latest_schema_version": 33,
+  "registered_migration_count": 33,
+  "strict_required_field_count": 76,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -77,6 +77,66 @@
     {
       "version": 18,
       "description": "Displacement lazy-map persisted defaults. Sensitive: no."
+    },
+    {
+      "version": 19,
+      "description": "Displacement civilian casualty persisted default. Sensitive: no."
+    },
+    {
+      "version": 20,
+      "description": "JNA phantom spawned marker persisted default. Sensitive: no."
+    },
+    {
+      "version": 21,
+      "description": "Top-level paramilitary decision history persisted default. Sensitive: no."
+    },
+    {
+      "version": 22,
+      "description": "Persisted military event overflow queue defaults. Sensitive: no."
+    },
+    {
+      "version": 23,
+      "description": "Persisted event notification queue defaults. Sensitive: no."
+    },
+    {
+      "version": 24,
+      "description": "Persisted pending event decision queue defaults. Sensitive: no."
+    },
+    {
+      "version": 25,
+      "description": "Persisted event modifier queue defaults. Sensitive: no."
+    },
+    {
+      "version": 26,
+      "description": "Persisted cost ledger annotation defaults. Sensitive: no."
+    },
+    {
+      "version": 27,
+      "description": "Persisted humanitarian convoy decision queue defaults. Sensitive: no."
+    },
+    {
+      "version": 28,
+      "description": "Persisted army reserve request queue and decision history defaults. Sensitive: no."
+    },
+    {
+      "version": 29,
+      "description": "Persisted triggered-operation bookkeeping record defaults. Sensitive: no."
+    },
+    {
+      "version": 30,
+      "description": "Persisted officer decision queue and history defaults. Sensitive: no."
+    },
+    {
+      "version": 31,
+      "description": "Persisted consequence runtime effect queue defaults. Sensitive: no."
+    },
+    {
+      "version": 32,
+      "description": "Persisted closed_event_ids array default (event soft foreclosure substrate). Sensitive: no."
+    },
+    {
+      "version": 33,
+      "description": "Persisted event_causality_log array default (audit trail substrate). Sensitive: no."
     }
   ],
   "required_fields": [
@@ -283,6 +343,106 @@
     {
       "version": 18,
       "path": "displacement.sustainability_state"
+    },
+    {
+      "version": 19,
+      "path": "displacement.civilian_casualties"
+    },
+    {
+      "version": 20,
+      "path": "military.phantoms_spawned"
+    },
+    {
+      "version": 21,
+      "path": "paramilitary_decision_history"
+    },
+    {
+      "version": 22,
+      "path": "military.event_overflow_queue"
+    },
+    {
+      "version": 23,
+      "path": "military.pending_event_notifications"
+    },
+    {
+      "version": 24,
+      "path": "military.pending_event_decisions"
+    },
+    {
+      "version": 25,
+      "path": "military.equipment_quality_modifiers"
+    },
+    {
+      "version": 25,
+      "path": "military.event_aggression_modifiers"
+    },
+    {
+      "version": 25,
+      "path": "military.recruitment_modifiers"
+    },
+    {
+      "version": 26,
+      "path": "military.cost_ledger_annotations"
+    },
+    {
+      "version": 27,
+      "path": "military.convoy_decision_history"
+    },
+    {
+      "version": 27,
+      "path": "military.pending_convoy_decisions"
+    },
+    {
+      "version": 28,
+      "path": "military.pending_reserve_requests"
+    },
+    {
+      "version": 28,
+      "path": "military.reserve_request_history"
+    },
+    {
+      "version": 29,
+      "path": "military.declined_operations"
+    },
+    {
+      "version": 29,
+      "path": "military.triggered_operations_accepted"
+    },
+    {
+      "version": 29,
+      "path": "military.used_operation_names"
+    },
+    {
+      "version": 30,
+      "path": "military.officer_decision_history"
+    },
+    {
+      "version": 30,
+      "path": "military.pending_officer_events"
+    },
+    {
+      "version": 31,
+      "path": "military.alliance_locks"
+    },
+    {
+      "version": 31,
+      "path": "military.bot_priority_shifts"
+    },
+    {
+      "version": 31,
+      "path": "military.cascade_penalties"
+    },
+    {
+      "version": 31,
+      "path": "military.offensive_ops_suppressions"
+    },
+    {
+      "version": 32,
+      "path": "military.closed_event_ids"
+    },
+    {
+      "version": 33,
+      "path": "military.event_causality_log"
     }
   ]
 }

@@ -1056,7 +1056,7 @@ describe('v0.9.1 vocab - late intervention and final offensive breadth wave', ()
                 'operation_sana_1995',
                 'operation_summer_95',
                 'us_halts_federation_advance_1995',
-                'washington_agreement_1994',
+                'hrhb_washington_agreement_1994',
             ]),
             gameOver: true,
             costLedger,

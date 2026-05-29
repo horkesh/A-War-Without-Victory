@@ -209,6 +209,8 @@
 
 ### C.1 — State Schema
 
+**Status update 2026-05-27:** The persisted save/load schema contract for `military.pending_event_notifications` is closed as schema v23 with `[]` legacy migration, current-save required-field validation, fixture coverage, and serialization tests. Runtime emission, phase surfacing, inbox projection, and authored notification content remain planned below.
+
 **Files:**
 - `src/state/game_state.ts` (add `pending_event_notifications: EventNotification[]` under `state.military` or new `state.intelligence` branch)
 - `src/state/serialize.ts` (round-trip)

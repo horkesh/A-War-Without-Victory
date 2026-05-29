@@ -2747,9 +2747,9 @@
     "faction": "RS",
     "name": "1st Romanija Infantry",
     "corps": "vrs_sarajevo_romanija",
-    "home_mun": "pale",
-    "home_settlement": "Pale",
-    "home_osid": "op:pale:pale",
+    "home_mun": "trnovo",
+    "home_settlement": "Gornja Presjenica",
+    "home_osid": "op:trnovo:gornja_presjenica",
     "kind": "brigade",
     "default_equipment_class": "motorized",
     "available_from": 0,
@@ -3584,7 +3584,9 @@
     "mandatory": true,
     "initial_personnel": 700,
     "initial_cohesion": 55,
-    "tags": ["enclave"]
+    "tags": [
+      "enclave"
+    ]
   },
   {
     "id": "hvo_rama_brigade",

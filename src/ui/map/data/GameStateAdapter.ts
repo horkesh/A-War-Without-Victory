@@ -2072,6 +2072,13 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         replaySaveManifest: options?.replaySaveManifest && options.replaySaveManifest.frame_count > 0
             ? options.replaySaveManifest
             : undefined,
+        // Phase H Packet 7 — preserve the raw `GameState` so UI bridges (H3
+        // EventDecisionModal, H4 BranchTagBadgeRow, H5 CodexPanel, H6
+        // generateWrappedSlides) can read the causality substrate
+        // (military.fired_event_ids / event_decision_log / event_causality_log
+        // / enabled_event_ids / closed_event_ids) without a parallel adapter
+        // pass. Runtime-only handle; not persisted, no save-schema impact.
+        rawGameState: gameState,
     };
 }
 

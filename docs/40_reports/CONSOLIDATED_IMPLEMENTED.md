@@ -2,6 +2,48 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest event staff recommendation defaults:** [implemented/20260527_EVENT_STAFF_RECOMMENDATION_DEFAULTS.md](implemented/20260527_EVENT_STAFF_RECOMMENDATION_DEFAULTS.md) - Abstract command-presence events now carry visible `Staff recommendation` metadata separate from historical defaults. `visit_to_front_rbih` becomes the 18th production modal-ready required-response row, while RS/HRHB visit rows remain gated and historical bot calibration is unchanged.
+
+**Latest event expansion roadmap contract:** [implemented/20260527_EVENT_EXPANSION_ROADMAP_CONTRACT.md](implemented/20260527_EVENT_EXPANSION_ROADMAP_CONTRACT.md) - Event expansion is now scoped as a gated full historical/counterfactual database with branch-visibility diagnostics first, a foundational decisions packet second, explicit historical labels, historical bot calibration, causal branch opens/closes, detailed modal explanations, and no broad authoring until source/default/sensitive gates are satisfied.
+
+**Latest force-quality diagnostic artifact ownership:** [implemented/20260527_FORCE_QUALITY_DIAGNOSTIC_ARTIFACT_OWNERSHIP.md](implemented/20260527_FORCE_QUALITY_DIAGNOSTIC_ARTIFACT_OWNERSHIP.md) - A static guard now locks the four committed `tools/diagnostics/_force_quality_*.md` diagnostics as retained force-quality evidence rather than transient run output or current calibration truth.
+
+**Latest painted-compare artifact ownership:** [implemented/20260527_PAINTED_COMPARE_ARTIFACT_OWNERSHIP.md](implemented/20260527_PAINTED_COMPARE_ARTIFACT_OWNERSHIP.md) - A static guard now locks the five committed `tools/diagnostics/_phase5a_painted_compares/*.txt` diagnostics as intentional Phase 5a painted-vs-sim evidence rather than transient run output.
+
+**Latest consequence runtime queue schema contract:** [implemented/20260527_CONSEQUENCE_RUNTIME_QUEUE_SCHEMA_CONTRACT.md](implemented/20260527_CONSEQUENCE_RUNTIME_QUEUE_SCHEMA_CONTRACT.md) - Consequence runtime queues are now required persisted v31 save/load contracts with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no event or operation behavior change.
+
+**Latest officer decision queue schema contract:** [implemented/20260527_OFFICER_DECISION_QUEUE_SCHEMA_CONTRACT.md](implemented/20260527_OFFICER_DECISION_QUEUE_SCHEMA_CONTRACT.md) - Officer pending/history queues are now required persisted v30 save/load contracts with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no officer behavior change.
+
+**Latest triggered-operation bookkeeping schema contract:** [implemented/20260527_TRIGGERED_OPERATION_BOOKKEEPING_SCHEMA_CONTRACT.md](implemented/20260527_TRIGGERED_OPERATION_BOOKKEEPING_SCHEMA_CONTRACT.md) - Triggered-operation accepted/declined/used-name records are now required persisted v29 save/load contracts with `{}` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no operation behavior change.
+
+**Latest reserve request schema contract:** [implemented/20260527_RESERVE_REQUEST_SCHEMA_CONTRACT.md](implemented/20260527_RESERVE_REQUEST_SCHEMA_CONTRACT.md) - Reserve pending/history queues are now required persisted v28 save/load contracts with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no reserve behavior change.
+
+**Latest convoy decision schema contract:** [implemented/20260527_CONVOY_DECISION_SCHEMA_CONTRACT.md](implemented/20260527_CONVOY_DECISION_SCHEMA_CONTRACT.md) - Convoy pending/history queues are now required persisted v27 save/load contracts with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no convoy behavior change.
+
+**Latest cost ledger annotation schema contract:** [implemented/20260527_COST_LEDGER_ANNOTATION_SCHEMA_CONTRACT.md](implemented/20260527_COST_LEDGER_ANNOTATION_SCHEMA_CONTRACT.md) - `military.cost_ledger_annotations` is now a required persisted v26 save/load contract with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no cost-ledger behavior change.
+
+**Latest event modifier schema contract:** [implemented/20260527_EVENT_MODIFIER_SCHEMA_CONTRACT.md](implemented/20260527_EVENT_MODIFIER_SCHEMA_CONTRACT.md) - Active event modifier queues are now required persisted v25 save/load contracts with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no event behavior change.
+
+**Latest pending event decisions schema contract:** [implemented/20260527_PENDING_EVENT_DECISIONS_SCHEMA_CONTRACT.md](implemented/20260527_PENDING_EVENT_DECISIONS_SCHEMA_CONTRACT.md) - `military.pending_event_decisions` is now a required persisted v24 save/load contract with `[]` legacy migration, current-version missing/malformed rejection coverage, drift/startup snapshot proof, and no event behavior change.
+
+**Latest pending event notifications schema contract:** [implemented/20260527_PENDING_EVENT_NOTIFICATIONS_SCHEMA_CONTRACT.md](implemented/20260527_PENDING_EVENT_NOTIFICATIONS_SCHEMA_CONTRACT.md) - `military.pending_event_notifications` is now a required persisted v23 save/load contract with `[]` legacy migration, current-version missing/malformed rejection coverage, drift report proof, and no runtime notification-emission change.
+
+**Latest event presidential acceptance diagnostic:** [implemented/20260527_EVENT_PRESIDENTIAL_ACCEPTANCE_DIAGNOSTIC.md](implemented/20260527_EVENT_PRESIDENTIAL_ACCEPTANCE_DIAGNOSTIC.md) - A deterministic diagnostic now proves all 17 production modal-ready required-response rows surface for the responding player, resolve to exactly one player decision-log entry, and auto-resolve headlessly on historical defaults with no stuck pending decisions.
+
+**Latest event loader semantic validation:** [implemented/20260527_EVENT_LOADER_SEMANTIC_VALIDATION.md](implemented/20260527_EVENT_LOADER_SEMANTIC_VALIDATION.md) - Runtime event loading now shares vocabulary with taxonomy diagnostics and fails closed for unknown effect/condition semantics, duplicate IDs, unresolved event references, invalid response defaults, and declared enum/range violations while preserving the current 247-row catalog.
+
+**Latest generated artifact ownership matrix meta-guard:** [implemented/20260527_GENERATED_ARTIFACT_OWNERSHIP_MATRIX_META_GUARD.md](implemented/20260527_GENERATED_ARTIFACT_OWNERSHIP_MATRIX_META_GUARD.md) - A static meta-contract now keeps the generated artifact ownership matrix shape, POSIX artifact keys, cited tests, ownership-test row references, and transient catch-all policy language aligned.
+
+**Latest replay sidecar artifact ownership:** [implemented/20260526_REPLAY_SIDECAR_ARTIFACT_OWNERSHIP.md](implemented/20260526_REPLAY_SIDECAR_ARTIFACT_OWNERSHIP.md) - A static guard now locks `runs/<scenario_run>/replay_sequence.jsonl` and `runs/<scenario_run>/replay_timeline.json` as transient scenario runner/video replay sidecars, including `emitWeeklySavesForVideo` gating and `runs/` no-commit proof.
+
+**Latest data-derived debug artifact ownership:** [implemented/20260526_DATA_DERIVED_DEBUG_ARTIFACT_OWNERSHIP.md](implemented/20260526_DATA_DERIVED_DEBUG_ARTIFACT_OWNERSHIP.md) - A static guard now locks `data/derived/_debug/**` as ignored, default-transient diagnostic scratch with no committed files and owner varying by diagnostic script.
+
+**Latest phantom-spawn marker schema contract:** [implemented/20260526_PHANTOMS_SPAWNED_SCHEMA_CONTRACT.md](implemented/20260526_PHANTOMS_SPAWNED_SCHEMA_CONTRACT.md) - `military.phantoms_spawned` is now a required persisted v20 `string[]` with `[]` migration proof, current-version string-array validation, order/content preservation coverage, and strict-null floor 464.
+
+**Latest diagnostics output artifact ownership:** [implemented/20260526_DIAGNOSTICS_OUTPUT_ARTIFACT_OWNERSHIP.md](implemented/20260526_DIAGNOSTICS_OUTPUT_ARTIFACT_OWNERSHIP.md) - A static guard now locks `tools/diagnostics/output/save_migration_drift.json` as the only committed diagnostics output artifact and keeps unlisted `tools/diagnostics/output/*.json` files default-transient until a matrix row exists.
+
+**Latest displacement civilian-casualties schema contract:** [implemented/20260526_DISPLACEMENT_CIVILIAN_CASUALTIES_SCHEMA_CONTRACT.md](implemented/20260526_DISPLACEMENT_CIVILIAN_CASUALTIES_SCHEMA_CONTRACT.md) - `displacement.civilian_casualties` is now a required persisted v19 record with `{}` migration proof, current-version nested casualty validation, empty-map first-write regression coverage, run-summary non-empty gating, and strict-null floor 465.
+
 **Latest displacement lazy-map schema contract:** [implemented/20260526_DISPLACEMENT_LAZY_MAP_SCHEMA_CONTRACT.md](implemented/20260526_DISPLACEMENT_LAZY_MAP_SCHEMA_CONTRACT.md) - `displacement_state`, `minority_flight_state`, and `sustainability_state` are now required persisted v18 records with current-version rejection coverage, v17 `{}` migration proof, pre-v18 top-level rescue, current v18 residue guarding, and strict-null floor 466.
 
 **Latest displacement operational schema contract:** [implemented/20260526_DISPLACEMENT_OPERATIONAL_SCHEMA_CONTRACT.md](implemented/20260526_DISPLACEMENT_OPERATIONAL_SCHEMA_CONTRACT.md) - Three displacement operational substrate records are now required persisted v17 contract fields with current-version rejection coverage, v16 `{}` migration proof, pre-v17 top-level rescue, malformed v17 top-level residue guarding, and strict-null floor 469.
@@ -421,3 +463,89 @@
 - Promoted `military.fired_event_ids`, `military.event_readiness`, `military.event_fire_counts`, `military.event_last_fired_turn`, `military.event_flags`, and `military.enabled_event_ids` to required persisted v15 contracts.
 - Added v15 migration/default, current-version rejection, strict-null inventory, and direct-fixture alignment proof without changing event eligibility or response behavior.
 - Report: `docs/40_reports/implemented/20260526_EVENT_BOOKKEEPING_SCHEMA_CONTRACT.md`
+
+# 2026-05-26 - Terrain PMTiles artifact ownership
+
+- Added a static generated-artifact ownership guard for `hillshade.pmtiles`, `osm.pmtiles`, and `terrain.pmtiles`.
+- Documented the committed PMTiles as terrain/tile pipeline-owned Git LFS binary artifacts with desktop PMTiles route/range consumer coverage.
+- Report: `docs/40_reports/implemented/20260526_TERRAIN_TILES_ARTIFACT_OWNERSHIP.md`
+
+# 2026-05-27 - Event loader row validation
+
+- Added structural row validation to the event loader before parsed JSON is cast to `EventDefinition[]`.
+- Invalid ids, triggers, turn bounds, `requires_events`, primary effects, effect arrays, and response options now fail closed while preserving the 247-row catalog baseline.
+- Report: `docs/40_reports/implemented/20260527_EVENT_LOADER_ROW_VALIDATION.md`
+
+# 2026-05-27 - Migration nested ownership v21 fixture alignment
+
+- Added the required empty `paramilitary_decision_history` field to the nested migration ownership current-schema fixture.
+- Closed the Baseline Regression fast-test failure without changing production migration or validation logic.
+- Report: `docs/40_reports/implemented/20260527_MIGRATION_NESTED_OWNERSHIP_V21_FIXTURE.md`
+
+# 2026-05-27 - Event state shape validation
+
+- Added validation for pending event decisions, event decision logs, and active event modifier arrays when present in GameState.
+- Preserved schema version, migration behavior, event firing, event prose, GUI behavior, and scenario output.
+- Report: `docs/40_reports/implemented/20260527_EVENT_STATE_SHAPE_VALIDATION.md`
+
+# 2026-05-27 - Event mutex filtering
+
+- Added same-turn `mutex_group` filtering after canonical event candidate sorting and before the unchanged four-event cap.
+- Added additive `mutex_suppressed_ids` diagnostics; persisted overflow queueing remains deferred.
+- Report: `docs/40_reports/implemented/20260527_EVENT_MUTEX_FILTERING.md`
+
+# 2026-05-27 - Event overflow queue implementation
+
+- Added persisted save-schema v22 `military.event_overflow_queue` for events delayed only by the four-event cap.
+- Queued ids are re-resolved, re-gated, canonically sorted with new candidates, mutex-filtered, capped, and replaced by the next post-cap overflow ids.
+- Refreshed startup/baseline generated artifacts for schema-byte drift; event JSON, prose, GUI, bot historical-default policy, and calibration logic are unchanged.
+- Report: `docs/40_reports/implemented/20260527_EVENT_OVERFLOW_QUEUE_IMPLEMENTATION.md`
+
+# 2026-05-27 - Pending event notifications schema contract
+
+- Added save schema v23 `military.pending_event_notifications` with an inert `[]` legacy migration default and current-version missing/malformed rejection coverage.
+- Retained the TypeScript optional marker for runtime/legacy compatibility; event notification emission, event JSON/prose, event ordering, GUI behavior, bot choices, scenario data, and calibration logic are unchanged.
+- Refreshed the save-migration drift report to v23 / 23 migrations / 56 strict required fields.
+- Report: `docs/40_reports/implemented/20260527_PENDING_EVENT_NOTIFICATIONS_SCHEMA_CONTRACT.md`
+
+# 2026-05-27 - Codex sensitive-claim inventory Phase 0
+
+- Added a deterministic read-only diagnostic for Codex, chronicle, notification, event, and consequence prose surfaces.
+- Current live baseline scans 176 files and reports 297 claims, including 245 stop-gated review items.
+- No prose, citations, event behavior, UI rendering, scenario data, or sensitive-history mechanics changed.
+- Report: `docs/40_reports/audits/20260527_CODEX_SENSITIVE_CLAIM_INVENTORY_PHASE0.md`
+
+# 2026-05-27 - Codex safe factual corrections Phase 1
+
+- Replaced cinematic/over-causal Deliberate Force and Mistral 2 wording in `war_1995.json` with bounded operational phrasing.
+- Added a content regression test to keep the removed phrases from returning.
+- No triggers, effects, bot policy, save schema, calibration data, or sensitive-history mechanics changed.
+- Report: `docs/40_reports/implemented/20260527_CODEX_SAFE_FACTUAL_CORRECTIONS_PHASE1.md`
+
+# 2026-05-27 - Codex sensitive-history source notes Phase 1
+
+- Added provenance-only source notes to seven Srebrenica/Zepa event rows without changing narrative text or mechanics.
+- Added a content regression test to keep the notes bounded away from casualty, causality, prohibited-choice, and alternate-outcome prevention framing.
+- Current inventory remains 176 files / 296 claims / 245 stop-gated; cited source status improved to 196 and uncited dropped to 72.
+- Report: `docs/40_reports/implemented/20260527_CODEX_SENSITIVE_HISTORY_SOURCE_NOTES_PHASE1.md`
+
+# 2026-05-27 - Codex event source notes Phase 2
+
+- Added provenance-only source notes to 15 additional cleared event rows without changing narrative text or mechanics.
+- Extended the content regression test to cover barracks, Corridor, London Conference, Prozor/Jajce, central Bosnia, Ahmici, Markale, and anti-sniping rows.
+- Current inventory remains 176 files / 296 claims / 245 stop-gated; cited source status improved to 224 and uncited dropped to 44.
+- Report: `docs/40_reports/implemented/20260527_CODEX_EVENT_SOURCE_NOTES_PHASE2.md`
+
+# 2026-05-27 - Event expansion roadmap contract
+
+- Reframed event expansion as a gated full historical/counterfactual database program.
+- Implemented branch-visibility metadata/diagnostics as the immediate safe slice, followed by a foundational decisions packet before broad authoring.
+- Preserved the sensitive-history, source, and historical-default gates; no event JSON, runtime behavior, save schema, GUI, scenario output, or calibration behavior changed.
+- Report: `docs/40_reports/implemented/20260527_EVENT_EXPANSION_ROADMAP_CONTRACT.md`
+
+# 2026-05-27 - Event future consequence modal slice
+
+- Added behavior-neutral `future_consequences` metadata to `rbih_state_identity`, `hrhb_political_goal`, `rs_assembly_rejects_voplan_1993`, and `belgrade_embargo_rs_1994`.
+- Rendered future-consequence cards in the existing event decision modal using branch-visibility wording, not runtime open/close claims.
+- Preserved evaluator behavior, response effects, bot choices, save schema, scenario setup, generated artifacts, and calibration behavior.
+- Report: `docs/40_reports/implemented/20260527_EVENT_FUTURE_CONSEQUENCE_MODAL_SLICE.md`

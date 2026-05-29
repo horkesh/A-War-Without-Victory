@@ -125,7 +125,8 @@ describe('event notification content backfill', () => {
         const events = loadWar1994Events();
         const cases = [
             {
-                eventId: 'washington_agreement_1994',
+                eventId: 'hrhb_washington_agreement_1994',
+                source: 'HRHB',
                 responses: {
                     accept: ['HRHB', 'RS'],
                     reluctant: ['HRHB', 'RS'],
@@ -133,6 +134,7 @@ describe('event notification content backfill', () => {
             },
             {
                 eventId: 'ic_rbih_restraint_post_washington',
+                source: 'RBiH',
                 responses: {
                     acknowledge_pressure: ['HRHB', 'RS'],
                     resist_patron: ['HRHB', 'RS'],
@@ -140,9 +142,9 @@ describe('event notification content backfill', () => {
             },
         ];
 
-        for (const { eventId, responses } of cases) {
+        for (const { eventId, source, responses } of cases) {
             const event = events.find((entry) => entry.id === eventId);
-            expect(event?.responding_faction).toBe('RBiH');
+            expect(event?.responding_faction).toBe(source);
             expect(event?.notifications_to_other_factions).toBeDefined();
 
             for (const [responseId, recipients] of Object.entries(responses)) {
@@ -314,7 +316,7 @@ describe('event notification content backfill', () => {
 
         expect(event?.responding_faction).toBe('RBiH');
         expect(event?.notifications_to_other_factions).toEqual({
-            accept: {
+            accept_principles: {
                 HRHB: {
                     headline: expect.any(String),
                     body: expect.any(String),

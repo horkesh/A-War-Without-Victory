@@ -696,6 +696,23 @@ export function tickPreparation(
 
     op.preparation_turns_elapsed = (op.preparation_turns_elapsed ?? 0) + 1;
 
+    // Pre-planned ops bypass the preparation state machine — objectives, staging,
+    // and timing are author-validated. Skip straight to 'ready' so the outer
+    // planning_duration gate in sector_offensive.ts is the sole launch gate.
+    if (op.is_pre_planned === true) {
+        op.preparation_sub_phase = 'ready';
+        op.commander_assessment = 'launch';
+        return {
+            sub_phase: 'ready',
+            ready: true,
+            probe_ordered: false,
+            intel_confidence: getOperationIntelConfidence(state, op),
+            supply_readiness: supplyReadiness,
+            force_ratio_estimate: 1.0,
+            aborted: false,
+        };
+    }
+
     const confidence = getOperationIntelConfidence(state, op);
     // LANE-2026-05-02: pass supplyByOsid + terrainMultByOsid for honest defender modifiers
     const forceRatio = estimateForceRatio(state, op, competence, confidence, supplyByOsid, terrainMultByOsid);

@@ -46,6 +46,10 @@ import { pickOperationName } from '../operation_names.js';
 import { buildTerrainCache, predictCombatOutcome, type CombatPrediction } from '../combat_predictor.js';
 import { buildOfficerCombatLookup } from '../combat_math.js';
 import { isOutcomeSufficientForAttack } from '../bot_brigade_targeting.js';
+import {
+    getCohesionCautionBiasMultiplier,
+    getIntlStandingOpsHesitationMultiplier,
+} from '../sector_offensive.js';
 import { getPoliticalControllerOSID } from '../../../state/settlement_control.js';
 import { shouldGrazBlockAttack } from '../../local_truces.js';
 import type {
@@ -838,8 +842,35 @@ function buildOperations(
         // anchor provides strategic coherence the old broad-pool lacked. The predictor
         // (force_ratio_estimate) will determine how quickly a thin op fails at execution.
         // Without an anchor (fallback: no sector matched) keep the corps-wide floor.
-        const minForOp = primarySector ? 2 : MIN_BRIGADES_FOR_PLAN;
-        if (participatingBrigades.length < minForOp) {
+        const baseMinForOp = primarySector ? 2 : MIN_BRIGADES_FOR_PLAN;
+
+        // Phase E MVS: international_standing → op-launch hesitation.
+        // The multiplier reads the briefing-surfaced intl_standing (which is
+        // populated only when the two-tier propagation gate is ON; see
+        // briefing.ts §11). When the gate is OFF, `political_dimensions` is
+        // undefined → `getIntlStandingOpsHesitationMultiplier(undefined)` ===
+        // 1.0 → `effectiveMinForOp === baseMinForOp` → byte-identical to
+        // pre-Phase-E launch behavior. Gated `!== 1.0` mirrors the canonical
+        // equipment-quality-modifier consumer pattern in combat_math.ts:1305-1310.
+        const hesitationMult = getIntlStandingOpsHesitationMultiplier(
+            briefing.political_dimensions?.international_standing,
+        );
+        // Phase E Packet 2: internal_cohesion → op-launch caution bias.
+        // Chained alongside the MVS hesitation multiplier; same byte-stability
+        // contract. When the cohesion sub-flag is OFF, briefing has no
+        // `internal_cohesion` field → `getCohesionCautionBiasMultiplier(undefined)`
+        // === 1.0 → multiplicative composition is a no-op. The combined `!== 1.0`
+        // guard below keeps the `effectiveMinForOp === baseMinForOp` byte-stable
+        // fast-path when EITHER sub-flag is OFF (both multipliers 1.0 → product
+        // 1.0 → branch not taken).
+        const cohesionMult = getCohesionCautionBiasMultiplier(
+            briefing.political_dimensions?.internal_cohesion,
+        );
+        const combinedMult = hesitationMult * cohesionMult;
+        const effectiveMinForOp = combinedMult !== 1.0
+            ? Math.ceil(baseMinForOp / combinedMult)
+            : baseMinForOp;
+        if (participatingBrigades.length < effectiveMinForOp) {
             return ops;
         }
 

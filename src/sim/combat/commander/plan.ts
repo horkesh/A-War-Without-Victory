@@ -183,8 +183,6 @@ export interface PlanDecision {
     action: 'created' | 'advanced' | 'suspended' | 'abandoned' | 'launched' | 'none';
     /** Reason for the action. */
     reason: string;
-    /** Brigades that should be concentrating toward staging zone. */
-    concentration_orders: Array<{ brigade_id: FormationId; destination_zone: ZoneId }>;
     /** v0.8.1: Candidate intent competition trace. Only present when a new plan decision was made. */
     decision_trace?: CommanderDecisionTrace;
 }
@@ -812,7 +810,6 @@ export function managePlan(
             plan: null,
             action: 'none',
             reason: `corps in ${briefing.corps_stance} stance — no new plans`,
-            concentration_orders: [],
             decision_trace: {
                 turn,
                 winning_intent_id: null,
@@ -829,7 +826,6 @@ export function managePlan(
             plan: null,
             action: 'none',
             reason: `corps exhaustion ${briefing.corps_exhaustion} above operation threshold ${MAX_EXHAUSTION_FOR_OPERATION}`,
-            concentration_orders: [],
             decision_trace: {
                 turn,
                 winning_intent_id: null,
@@ -847,7 +843,6 @@ export function managePlan(
             plan: null,
             action: 'none',
             reason: fatigueBlockReason,
-            concentration_orders: [],
             decision_trace: {
                 turn,
                 winning_intent_id: null,
@@ -865,7 +860,6 @@ export function managePlan(
             plan: null,
             action: 'none',
             reason: campaignRoleBlockReason,
-            concentration_orders: [],
             decision_trace: {
                 turn,
                 winning_intent_id: null,
@@ -883,7 +877,6 @@ export function managePlan(
             plan: null,
             action: 'none',
             reason: syncRoleBlockReason,
-            concentration_orders: [],
             decision_trace: {
                 turn,
                 winning_intent_id: null,
@@ -907,7 +900,6 @@ export function managePlan(
             plan: null,
             action: 'none',
             reason: 'major operation already active for this corps',
-            concentration_orders: [],
             decision_trace: {
                 turn,
                 winning_intent_id: null,
@@ -950,7 +942,7 @@ export function managePlan(
         }
 
         // Offensive winner but underlying plan functions returned null (e.g. no reachable targets).
-        return { plan: null, action: 'none', reason: 'no viable plan available', concentration_orders: [], decision_trace: trace };
+        return { plan: null, action: 'none', reason: 'no viable plan available', decision_trace: trace };
     }
 
     // Non-offensive intent won (hold_line, reinforce_zone, thin_quiet_sector,
@@ -961,7 +953,6 @@ export function managePlan(
         reason: winner
             ? `intent competition selected ${winner.type}`
             : 'all candidates blocked',
-        concentration_orders: [],
         decision_trace: trace,
     };
 }
@@ -982,7 +973,7 @@ function advanceExistingPlan(
     // Abandoned plans are stored in state for one turn to allow EMIT to see the reason,
     // but on the NEXT advance they must be cleared rather than re-evaluated.
     if (plan.status === 'abandoned') {
-        return { plan: null, action: 'none', reason: 'clearing abandoned plan', concentration_orders: [] };
+        return { plan: null, action: 'none', reason: 'clearing abandoned plan' };
     }
 
     // Check for abandon conditions first
@@ -992,7 +983,6 @@ function advanceExistingPlan(
             plan: { ...plan, status: 'abandoned' },
             action: 'abandoned',
             reason: abandonReason,
-            concentration_orders: [],
         };
     }
 
@@ -1008,7 +998,6 @@ function advanceExistingPlan(
                     plan: { ...plan, status: 'abandoned' },
                     action: 'abandoned',
                     reason: `suspended for ${suspendedTurns} turns: ${suspendReason}`,
-                    concentration_orders: [],
                     decision_trace: {
                         turn,
                         winning_intent_id: null,
@@ -1026,7 +1015,6 @@ function advanceExistingPlan(
             plan: { ...plan, status: 'suspended', suspension_reason: suspendReason, suspended_since_turn: suspendedSince },
             action: 'suspended',
             reason: suspendReason,
-            concentration_orders: [],
             decision_trace: {
                 turn,
                 winning_intent_id: null,
@@ -1045,7 +1033,6 @@ function advanceExistingPlan(
             plan: null,
             action: 'none',
             reason: 'plan handed to execution pipeline',
-            concentration_orders: [],
         };
     }
 
@@ -1068,7 +1055,6 @@ function advanceExistingPlan(
             plan: { ...plan, status: 'abandoned', viability_score: viability },
             action: 'abandoned',
             reason: `viability dropped to ${viability.toFixed(2)}`,
-            concentration_orders: [],
             decision_trace: {
                 turn,
                 winning_intent_id: null,
@@ -1093,7 +1079,6 @@ function advanceExistingPlan(
             plan: readyPlan,
             action: 'advanced',
             reason: `concentration complete (${(concentrationProgress * 100).toFixed(0)}%), ready to launch`,
-            concentration_orders: [],
         };
     }
 
@@ -1110,7 +1095,6 @@ function advanceExistingPlan(
             plan: launchPlan,
             action: 'launched',
             reason: 'plan ready, launching operation',
-            concentration_orders: [],
             decision_trace: {
                 turn,
                 winning_intent_id: plan.plan_id,
@@ -1122,13 +1106,9 @@ function advanceExistingPlan(
         };
     }
 
-    // Still concentrating — issue movement orders
-    const concentrationOrders = buildConcentrationOrders(
-        plan.assigned_brigades,
-        surplusPool,
-        plan.staging_zone,
-    );
-
+    // Still concentrating — time-based advancement only. No movement orders
+    // are emitted because no downstream system consumes them; concentration
+    // is measured by elapsed turns vs target_ready_turn.
     const advancedPlan: CommanderPlan = {
         ...plan,
         status: effectiveStatus,
@@ -1140,7 +1120,6 @@ function advanceExistingPlan(
         plan: advancedPlan,
         action: 'advanced',
         reason: `concentrating: ${(concentrationProgress * 100).toFixed(0)}% (turn ${turn} / target ${plan.target_ready_turn})`,
-        concentration_orders: concentrationOrders,
     };
 }
 
@@ -1217,13 +1196,10 @@ function tryCreateFromPrePlanned(
         source: 'pre_planned',
     };
 
-    const concentrationOrders = buildConcentrationOrders(assignedBrigades, surplusPool, stagingZone.zone_id);
-
     return {
         plan,
         action: 'created',
         reason: `adopted pre-planned op: ${opName}`,
-        concentration_orders: concentrationOrders,
     };
 }
 
@@ -1370,15 +1346,12 @@ function createOpportunityPlan(
         source: 'opportunity',
     };
 
-    const concentrationOrders = buildConcentrationOrders(assignedBrigades, surplusPool, stagingZone.zone_id);
-
     return {
         plan,
         action: 'created',
         reason: isLocal
             ? `local opportunity: ${requiredBrigades} brigades at ${stagingZone.zone_id}`
             : `offensive opportunity: ${requiredBrigades} brigades at ${stagingZone.zone_id}`,
-        concentration_orders: concentrationOrders,
     };
 }
 
@@ -1701,34 +1674,6 @@ function countBrigadesInZone(
         }
     }
     return count;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Helper: build concentration orders for brigades not yet at staging
-// ═══════════════════════════════════════════════════════════════════════════
-
-function buildConcentrationOrders(
-    assignedBrigades: readonly FormationId[],
-    evaluations: readonly BrigadeEvaluation[],
-    stagingZone: ZoneId,
-): Array<{ brigade_id: FormationId; destination_zone: ZoneId }> {
-    const orders: Array<{ brigade_id: FormationId; destination_zone: ZoneId }> = [];
-    const idSet = new Set(assignedBrigades);
-
-    // Collect brigades not at staging zone, sort deterministically
-    const needsMovement: BrigadeEvaluation[] = [];
-    for (const ev of evaluations) {
-        if (idSet.has(ev.brigade_id) && ev.current_zone !== stagingZone) {
-            needsMovement.push(ev);
-        }
-    }
-    needsMovement.sort((a, b) => strictCompare(a.brigade_id, b.brigade_id));
-
-    for (const ev of needsMovement) {
-        orders.push({ brigade_id: ev.brigade_id, destination_zone: stagingZone });
-    }
-
-    return orders;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

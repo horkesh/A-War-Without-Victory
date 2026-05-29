@@ -55,6 +55,7 @@ import { PeaceWarTransition } from './components/PeaceWarTransition';
 import { ChronicleOverlay } from './components/chronicle/ChronicleOverlay';
 import { WrappedOverlay } from './components/chronicle/WrappedOverlay';
 import { CodexPanel } from './components/CodexPanel';
+import { DecisionHistoryOverlay } from './components/DecisionHistoryOverlay';
 import { CoachmarkLayer } from './components/CoachmarkLayer';
 import { OnboardingOverlay, shouldShowOnboarding } from './components/onboarding';
 import { LoadingSkeleton } from './components/LoadingSkeleton';
@@ -70,7 +71,8 @@ import { PresidentDeskShell } from './components/presidential_desk/PresidentDesk
 import { RootErrorBoundary } from './components/RootErrorBoundary';
 import { derivePanelRailState, shouldRenderInboxPanel, shouldRenderTacticalDetailRails } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
-import { loadLatestRunSaveAsText, loadEventDefinitions } from './data/DataLoader';
+import { loadLatestRunSaveAsText, loadEventDefinitions, loadEventDefinitionsFull } from './data/DataLoader';
+import type { EventDefinition } from '../../sim/events/event_types';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
 import { getPlayerSafeMilitaryFactionName } from './utils/playerSafeText';
@@ -190,10 +192,26 @@ function OperationBriefingModalWrapper() {
   );
 }
 
-function CodexPanelWrapper() {
+function CodexPanelWrapper({
+  eventCatalog,
+}: {
+  eventCatalog?: ReadonlyMap<string, EventDefinition>;
+}) {
   const codexOpen = useGameStore((s) => s.codexOpen);
   const setCodexOpen = useGameStore((s) => s.setCodexOpen);
-  return <CodexPanel isOpen={codexOpen} onClose={() => setCodexOpen(false)} />;
+  // Phase H Packet 7 — supply the catalog + raw GameState to activate the
+  // H5 Unlock State section. Both inputs are required; when either is
+  // absent the section gracefully degrades and the panel renders exactly
+  // as before.
+  const rawGameState = useGameStore((s) => s.loadedGameState?.rawGameState);
+  return (
+    <CodexPanel
+      isOpen={codexOpen}
+      onClose={() => setCodexOpen(false)}
+      eventCatalog={eventCatalog}
+      state={rawGameState}
+    />
+  );
 }
 
 function StrategicDashboardWrapper() {
@@ -317,6 +335,13 @@ function App() {
   const [acknowledgedEventIds, setAcknowledgedEventIds] = useState<Set<string>>(new Set());
   const [dismissedPeacePlanKey, setDismissedPeacePlanKey] = useState<string | null>(null);
   const [paramilitaryReviewOpen, setParamilitaryReviewOpen] = useState(false);
+  /**
+   * Phase H Packet 8 — Decision History overlay open state. Owned at App
+   * root because the overlay is full-screen and may be triggered from
+   * multiple places (currently: 'D' hotkey + future inbox / records
+   * actions). Default closed. See `DecisionHistoryOverlay.tsx`.
+   */
+  const [isDecisionHistoryOpen, setIsDecisionHistoryOpen] = useState(false);
   /** Active blocking event decision id surfaced as a modal. `null` = no modal.
    *  Set by (a) inbox click on `event_modal` action, or (b) the auto-launch effect
    *  below when a new turn surfaces pending decisions for the player faction. */
@@ -332,6 +357,32 @@ function App() {
   const [recruitmentCatalog, setRecruitmentCatalog] = useState<RecruitmentCatalogBrigade[]>([]);
   const recruitmentCatalogRequestId = useRef(0);
   const initialShellHandoffApplied = useRef(false);
+
+  /**
+   * Phase H Packet 7 — runtime catalog of full canonical `EventDefinition`
+   * records, loaded once at app boot from
+   * `/data/scenarios/events/{war_1992..war_1995,consequences}.json`.
+   * Used by the four Phase H bridges:
+   *   - EventDecisionModal (H3 Decision Context family/source/dossier)
+   *   - CodexPanel (H5 Unlock State family/source-tier per row)
+   *   - BranchTagBadgeRow (H4 sets_flags walk; mounted in BottomStatusStrip)
+   *   - generateWrappedSlides (H6 causality slides — F1/F2/F3)
+   * `undefined` until the fetch resolves; bridges degrade gracefully.
+   */
+  const [eventCatalogFull, setEventCatalogFull] = useState<ReadonlyMap<string, EventDefinition> | undefined>(undefined);
+  useEffect(() => {
+    let cancelled = false;
+    loadEventDefinitionsFull()
+      .then((catalog) => {
+        if (cancelled) return;
+        setEventCatalogFull(catalog);
+      })
+      .catch((err) => {
+        // Non-fatal: bridges already degrade gracefully when catalog is absent.
+        console.warn('[PhaseH] Failed to load event catalog:', err);
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   // Reset dismissal/acknowledgement state when a new save is loaded.
   // Without this, stale flags from a previous save hide real pending items.
@@ -686,6 +737,13 @@ function App() {
         e.preventDefault();
         const gs = useGameStore.getState();
         gs.setCodexOpen(!gs.codexOpen);
+      } else if (e.key === 'd' || e.key === 'D') {
+        // Phase H Packet 8 — Decision History overlay hotkey. Toggle behaviour
+        // mirrors Codex (X) / Chronicle (C) for consistency. The overlay's
+        // ESC handler is the canonical close path; this is the second-open
+        // path so the player can dismiss via the same key they opened with.
+        e.preventDefault();
+        setIsDecisionHistoryOpen((prev) => !prev);
       }
     };
     window.addEventListener('keydown', handler);
@@ -1020,8 +1078,19 @@ function App() {
         <ArmyHQModal />
       </RootErrorBoundary>
       <ChronicleOverlay />
-      <WrappedOverlay />
-      <CodexPanelWrapper />
+      <WrappedOverlay eventCatalog={eventCatalogFull} />
+      <CodexPanelWrapper eventCatalog={eventCatalogFull} />
+      {/* Phase H Packet 8 — Decision History overlay (Component B per H1 §4.2B).
+          Consumes H2 wave 1 helpers (getPlayerDecisionHistory +
+          getCausalDescendants); same catalog + raw state as CodexPanelWrapper.
+          Trigger: 'D' hotkey (see keyboard shortcut handler). The overlay
+          gracefully degrades when catalog or state is absent. */}
+      <DecisionHistoryOverlay
+        isOpen={isDecisionHistoryOpen}
+        onClose={() => setIsDecisionHistoryOpen(false)}
+        eventCatalog={eventCatalogFull}
+        state={loadedGameState?.rawGameState}
+      />
       <StrategicDashboardWrapper />
       <RootErrorBoundary zone="ops planning">
         <OpsPlanningModal />
@@ -1102,6 +1171,8 @@ function App() {
         return (
           <EventDecisionModal
             decision={decision}
+            eventCatalog={eventCatalogFull}
+            state={loadedGameState?.rawGameState}
             onRespond={async (eventId, responseId) => {
               if (ipc.isAvailable) {
                 const result = await ipc.respondToEventDecision(eventId, responseId);
@@ -1174,7 +1245,7 @@ function App() {
           aria-label="Map controls and status"
           style={{ display: 'contents' }}
         >
-          <BottomStatusStrip />
+          <BottomStatusStrip eventCatalog={eventCatalogFull} />
         </nav>
       )}
 

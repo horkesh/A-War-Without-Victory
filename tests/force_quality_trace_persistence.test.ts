@@ -136,7 +136,6 @@ describe('force_quality_traits persistence in decision_trace', () => {
             plan: null,
             action: 'none' as const,
             reason: 'major operation already active for this corps',
-            concentration_orders: [],
             decision_trace: {
                 turn: 12,
                 winning_intent_id: null,
@@ -173,7 +172,6 @@ describe('force_quality_traits persistence in decision_trace', () => {
             plan: null, // null is fine for this test — we only care about decision_trace plumbing
             action: 'none' as const,
             reason: 'no viable plan available',
-            concentration_orders: [],
             decision_trace: {
                 turn: 12,
                 winning_intent_id: 'launch_opportunity',
@@ -204,7 +202,6 @@ describe('force_quality_traits persistence in decision_trace', () => {
                 plan: null,
                 action: 'none' as const,
                 reason: 'major operation already active for this corps',
-                concentration_orders: [],
                 decision_trace: {
                     turn: 12,
                     winning_intent_id: null,

@@ -742,8 +742,7 @@ function detectOperationZeroEligibleExecution(state: GameState): AnomalyReport[]
         if (aar.outcome === 'orphaned') continue;
         const enteredExecution = (aar.weekly_log ?? []).some((entry) => entry.phase === 'execution');
         if (!enteredExecution) continue;
-        // Consolidation-only successes: ops that captured objectives via rear_pocket_consolidation
-        // without combat are intentional — not a staging failure.
+        // Objectives captured with 0 attacks (e.g. via paramilitary sweep) are intentional — not a staging failure.
         if (aar.outcome === 'success' && aar.objectives_captured.length > 0 && aar.total_attacks === 0) continue;
         if (aar.total_attacks > 0) continue;
 

@@ -29,6 +29,7 @@ export type EventAcceptanceRow = {
     has_source_note: boolean;
     has_historical_default_response_id: boolean;
     has_historical_marker: boolean;
+    has_staff_recommendation: boolean;
     bot_response_logic: string | null;
     historical_default_option0: boolean | null;
     sensitive_gate: 'clear' | 'sensitive_or_ring_review' | 'ring3_refused';
@@ -40,6 +41,7 @@ export type EventAcceptanceReport = {
         total_events: number;
         required_response_events: number;
         production_modal_authoring_ready_events: number;
+        missing_approved_default_events: number;
         missing_historical_default_response_id_events: number;
         missing_historical_marker_events: number;
         source_blocked_events: number;
@@ -54,6 +56,13 @@ export type EventAcceptanceReport = {
         full_catalog_accepted: boolean;
         acceptance_status: AcceptanceStatus;
         not_ready_reason: string;
+        /** Phase B Sub-slice B3 — count of production-ready rows whose any
+         *  response option has runtime causality wiring (packet §3.3).
+         *  Tracks Phase D-F authoring progress on runtime gates. */
+        production_ready_events_with_runtime_causality: number;
+        /** Phase B Sub-slice B3 — count of ALL rows (not just production-ready)
+         *  with any runtime causality wiring. Tracks broader authoring fan-out. */
+        total_events_with_runtime_causality: number;
     };
     required_response_rows: EventAcceptanceRow[];
     production_modal_authoring_ready_rows: EventAcceptanceRow[];
@@ -102,6 +111,12 @@ export const SOURCE_OR_DESIGN_DEFAULT_BLOCKED_IDS = [
 const COUNTERFACTUAL_BLOCKED_IDS = new Set([
     'srebrenica_demilitarization_1993',
     'karadzic_mladic_split_1995',
+]);
+
+const STAFF_RECOMMENDATION_DEFAULT_IDS = new Set([
+    'visit_to_front_rbih',
+    'visit_to_front_rs',
+    'visit_to_front_hrhb',
 ]);
 
 const FIRST_PACKET_SENSITIVE_EXCLUSION_KEYWORDS = [
@@ -163,6 +178,17 @@ function historicalDefaultOption0(row: EventTaxonomyRow): boolean | null {
     return row.historical_default_response_id === firstOptionId;
 }
 
+function hasApprovedDefault(row: Pick<EventTaxonomyRow, 'id' | 'historical_default_response_id' | 'has_historical_default_marker' | 'staff_recommended_response_id'> | Pick<EventAcceptanceRow, 'id' | 'has_historical_default_response_id' | 'has_historical_marker' | 'has_staff_recommendation'>): boolean {
+    if (STAFF_RECOMMENDATION_DEFAULT_IDS.has(row.id)) {
+        if ('staff_recommended_response_id' in row) return row.staff_recommended_response_id !== null;
+        return row.has_staff_recommendation;
+    }
+    if ('historical_default_response_id' in row) {
+        return row.historical_default_response_id !== null && row.has_historical_default_marker;
+    }
+    return row.has_historical_default_response_id && row.has_historical_marker;
+}
+
 function sensitiveGateFor(row: EventTaxonomyRow): EventAcceptanceRow['sensitive_gate'] {
     if (idSet(SENSITIVE_RING3_REFUSED_IDS).has(row.id)) return 'ring3_refused';
     if (row.sensitive_history_status !== 'clear') return 'sensitive_or_ring_review';
@@ -180,8 +206,9 @@ function blockingReasonsFor(row: EventTaxonomyRow): string[] {
     const triggerGate = triggerGateFor(row);
     const defaultOption0 = historicalDefaultOption0(row);
 
-    if (row.historical_default_response_id === null) reasons.push('missing_historical_default_response_id');
-    if (!row.has_historical_default_marker) reasons.push('missing_historical_marker');
+    if (!STAFF_RECOMMENDATION_DEFAULT_IDS.has(row.id) && row.historical_default_response_id === null) reasons.push('missing_historical_default_response_id');
+    if (!STAFF_RECOMMENDATION_DEFAULT_IDS.has(row.id) && !row.has_historical_default_marker) reasons.push('missing_historical_marker');
+    if (STAFF_RECOMMENDATION_DEFAULT_IDS.has(row.id) && row.staff_recommended_response_id === null) reasons.push('missing_staff_recommendation');
     if (row.historical_default_response_id !== null && row.has_historical_default_marker && row.bot_response_logic !== 'historical') {
         reasons.push('historical_default_requires_historical_bot_logic');
     }
@@ -217,6 +244,7 @@ function toAcceptanceRow(row: EventTaxonomyRow): EventAcceptanceRow {
         has_source_note: sourceNoteIsAuthored(row),
         has_historical_default_response_id: row.historical_default_response_id !== null,
         has_historical_marker: row.has_historical_default_marker,
+        has_staff_recommendation: row.staff_recommended_response_id !== null,
         bot_response_logic: row.bot_response_logic,
         historical_default_option0: historicalDefaultOption0(row),
         sensitive_gate: sensitiveGateFor(row),
@@ -262,11 +290,25 @@ export function buildEventAcceptanceReport(taxonomyRows: EventTaxonomyRow[] = lo
         defaultBlockedRows.length === 0 &&
         scheduledOnlyRows.length === 0;
 
+    // Phase B Sub-slice B3 — runtime causality wiring counts (packet §3.3).
+    // Diagnostic-only: tracks Phase D-F authoring progress as families gain
+    // `enables_events_runtime` / `closes_events_runtime` wiring.
+    const rowHasRuntimeCausality = (taxonomyRow: EventTaxonomyRow): boolean =>
+        taxonomyRow.response_options_with_enables_runtime > 0 ||
+        taxonomyRow.response_options_with_closes_runtime > 0;
+    const totalEventsWithRuntimeCausality = taxonomyReport.rows.filter(rowHasRuntimeCausality).length;
+    const readyIds = new Set(readyRows.map((row) => row.id));
+    const productionReadyEventsWithRuntimeCausality = taxonomyReport.rows
+        .filter((row) => readyIds.has(row.id))
+        .filter(rowHasRuntimeCausality)
+        .length;
+
     return {
         summary: {
             total_events: taxonomyReport.summary.total_events,
             required_response_events: requiredRows.length,
             production_modal_authoring_ready_events: readyRows.length,
+            missing_approved_default_events: requiredRows.filter((row) => !hasApprovedDefault(row)).length,
             missing_historical_default_response_id_events: requiredRows.filter((row) => !row.has_historical_default_response_id).length,
             missing_historical_marker_events: requiredRows.filter((row) => !row.has_historical_marker).length,
             source_blocked_events: sourceBlockedRows.length,
@@ -283,10 +325,12 @@ export function buildEventAcceptanceReport(taxonomyRows: EventTaxonomyRow[] = lo
             not_ready_reason: fullCatalogAccepted
                 ? ''
                 : 'Full catalog remains NOT_READY until production JSON authoring adds explicit historical defaults/source notes, resolves source/design debt, gates or rewrites sensitive rows, and cleans scheduled-only required-response triggers unless exogenous.',
+            production_ready_events_with_runtime_causality: productionReadyEventsWithRuntimeCausality,
+            total_events_with_runtime_causality: totalEventsWithRuntimeCausality,
         },
         required_response_rows: requiredRows,
         production_modal_authoring_ready_rows: readyRows,
-        missing_historical_default_rows: requiredRows.filter((row) => !row.has_historical_default_response_id || !row.has_historical_marker),
+        missing_historical_default_rows: requiredRows.filter((row) => !hasApprovedDefault(row)),
         source_blocked_rows: sourceBlockedRows,
         missing_source_note_rows: missingSourceNoteRows,
         sensitive_gated_rows: sensitiveGatedRows,
@@ -306,7 +350,7 @@ export function buildEventAcceptanceReport(taxonomyRows: EventTaxonomyRow[] = lo
 function printTextReport(report: EventAcceptanceReport): void {
     process.stdout.write(`Event acceptance diagnostic: ${report.summary.acceptance_status}\n`);
     process.stdout.write(`Required-response events: ${report.summary.required_response_events}; production modal-ready: ${report.summary.production_modal_authoring_ready_events}\n`);
-    process.stdout.write(`Missing defaults: ${report.summary.missing_historical_default_response_id_events}; missing source notes: ${report.summary.missing_source_note_events}; sensitive-gated: ${report.summary.sensitive_gated_events}\n`);
+    process.stdout.write(`Missing approved defaults: ${report.summary.missing_approved_default_events}; missing source notes: ${report.summary.missing_source_note_events}; sensitive-gated: ${report.summary.sensitive_gated_events}\n`);
     process.stdout.write(`Approved first packet: ${report.approved_first_authoring_packet_candidates.map((row) => row.id).join(', ')}\n`);
 }
 

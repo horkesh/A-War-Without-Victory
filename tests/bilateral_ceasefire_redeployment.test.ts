@@ -61,6 +61,7 @@ function makeCeasefireState(progress: number): GameState {
             settlement_displacement: {},
             settlement_displacement_started_turn: {},
             municipality_displacement: {},
+            civilian_casualties: {},
         },
     } as GameState;
 }

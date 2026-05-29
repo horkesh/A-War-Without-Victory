@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import type { FactionState, GameState, PendingConvoyDecision } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
+import { deserializeState, serializeState } from '../src/state/serialize.js';
 import {
     applyHumanitarianConvoyDecisions,
     evaluateHumanitarianConvoys,
@@ -369,6 +370,33 @@ describe('applyHumanitarianConvoyDecisions', () => {
                 decided_by: 'bot',
             },
         ]);
+    });
+
+    it('round-trips pending and filed convoy decisions through save serialization', () => {
+        const state = makeState({
+            military: {
+                pending_convoy_decisions: [
+                    makeConvoy({ id: 'convoy:64:ENCL_alpha:RS', route_faction: 'RS', decision: 'allow', supply_amount: 0.5 }),
+                ],
+                convoy_decision_history: [
+                    {
+                        id: 'convoy:63:ENCL_beta:HRHB',
+                        turn: 63,
+                        target_enclave: 'ENCL_beta',
+                        route_faction: 'HRHB',
+                        target_faction: 'RBiH',
+                        supply_amount: 0.4,
+                        decision: 'divert',
+                        decided_by: 'bot',
+                    },
+                ],
+            } as Partial<GameState['military']> as GameState['military'],
+        });
+
+        const hydrated = deserializeState(serializeState(state));
+
+        expect(hydrated.military.pending_convoy_decisions).toEqual(state.military.pending_convoy_decisions);
+        expect(hydrated.military.convoy_decision_history).toEqual(state.military.convoy_decision_history);
     });
 
     it('early-returns without mutating IVP when the pending queue is empty', () => {
