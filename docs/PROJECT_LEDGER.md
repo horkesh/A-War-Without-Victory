@@ -1,4 +1,25 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] codex: Phase I Packet 5 (defunct exclusion-claims triage; 1 cleaned, 3 deferred-calibration, 1 skipped-consumer)
+
+- **Type.** Defunct comment-claims-of-exclusion triage per I1 audit Section 3. ONE entry cleaned (dead field declaration removed + misleading comment corrected). Zero behavior change; baseline regression byte-identical.
+- **Scope.** Surgical, per-entry. 5 audit entries triaged:
+  - **#1 `avoid_municipalities` (CLEANED).** `src/sim/combat/bot_strategy.ts:434` — dead `avoid_municipalities?: string[];` field on `ArmyOperationPriority` removed (zero writers in `src/**`, all grep matches were docs/comments). `src/sim/combat/bot_brigade_targeting.ts:140` — misleading comment "(legacy — avoid_municipalities removed, but keep for future use)" corrected to reflect the branch's actual data source (`directive.avoid_osids`, currently always-empty in production per `bot_corps_ai.ts:188`, `bot_brigade_eval_attack.ts:484`, `commander/emit.ts:339`). Branch itself preserved (still consumes the live `avoid_osids` field).
+  - **#2 `avoided_osids_by_faction` (DEFERRED).** `src/state/game_state.ts:1426-1430` — audit explicitly marks calibration-overlap and "do not edit now". Deferred per overlap rule.
+  - **#3 `tryCreateFromPrePlanned` (SKIPPED — consumer found).** Audit located function in `bot_corps_operations.ts` but actual implementation is `src/sim/combat/commander/plan.ts:1130`. Live consumer at `plan.ts:929` invokes it on every offensive-winner turn, with downstream `applyForceQualitySoftGates` + trace augmentation logic that depends on the return value (even when null). Napkin lesson ("queue already consumed → empty at runtime") describes data-driven dead-execution, not a dead branch the type system can prove. Removal would alter commander control flow in calibration-adjacent code. STOP-and-report per safeguard.
+  - **#4 `// Legacy flat: check completion and failures` (DEFERRED).** `src/sim/combat/sector_offensive.ts:1213` — calibration overlap confirmed via `git diff main...claude/calibration-historical-army-arc-2026-05-24`. Deferred.
+  - **#5 `// Legacy fallback` (DEFERRED).** `src/sim/combat/combat_math.ts:738,1200` — calibration overlap confirmed. Deferred.
+- **Counts.** Cleaned: 1. Calibration-deferred: 3 (#2, #4, #5). Consumer-skipped (STOP safeguard): 1 (#3). Total: 5.
+- **Data-not-comment principle.** Entry #1 was the clearest application: the comment claimed the system was "removed" but the type-level declaration was still live. Cleanup brought data + comment into alignment without changing behavior (the branch was already reading from `avoid_osids`, not `avoid_municipalities`).
+- **Verification matrix.**
+  - `npx tsc --noEmit` PASS (clean).
+  - `vitest run tests/event_loader.test.ts` PASS (32/32).
+  - `vitest run tests/bot_strategy_adaptation_a1.test.ts` PASS (2/2).
+  - `git diff --check` clean (only CRLF/LF informational warnings on touched files; no whitespace errors).
+  - `tools/scenario_runner/run_baseline_regression.ts` PASS — "Baseline regression: all scenarios match." (byte-identical).
+- **Net LOC delta.** −3 lines source (−2 in `bot_strategy.ts` removing dead field + its doc-comment, −1 net in `bot_brigade_targeting.ts` after comment swap).
+- **Hard constraints honored.** No `FORAWWV.md` edits. No `.claude/scheduled_tasks.lock` staging. No worktree usage. No baseline refresh. Surgical scope per entry. Per-entry STOP safeguard used for #3.
+- **Cross-references.** I1 audit `docs/40_reports/proposals/20260529_ENGINE_SIMPLIFICATION_AUDIT.md` Section 3 (entries #1–#5), Section 6 Packet 3 #6 (`avoid_municipalities` cleanup queued). CLAUDE.md Sacred Rules ("NEVER use `avoided_osids_by_faction`" — entry #2 reinforced via DEFER). Napkin lesson "Bot/AI generators must exclude canonical names by DATA, not by comments" (Stupčanica precedent — same shape as entry #1).
+
 ## [2026-05-29] codex: Phase I Packet 4 (remove 4 vienna_* deprecated aliases from local_truces.ts)
 
 - **Type.** Targeted dead-export removal per I1 audit Section 1 #2. ZERO behavior change (zero importers across src/ + tests/ + tools/ — verified per I3/I3a lesson that audit's "0 importers in src/**" scope must be widened before deletion).
