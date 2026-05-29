@@ -25,7 +25,9 @@ import { estimateConcentratedOutcome, isOutcomeSufficientForAttack } from './bot
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { getAllAxisObjectives, getCurrentLaunchObjectives, isMultiAxis } from './sector_offensive_axis_helpers.js';
-import { ENABLE_TACTICAL_GROUPS, getAnchorBrigade } from './tactical_group_config.js';
+import { ENABLE_TACTICAL_GROUPS, ENABLE_TG_FORMATION, DONATION_READINESS_FRACTION, getAnchorBrigade } from './tactical_group_config.js';
+// ADR-0005 v2.2c #3: donation-readiness gate recomputes the donor pool here.
+import { selectDonors } from './tactical_group_selection.js';
 
 // BATCH C: launch-readiness probes call `predictAllAdjacentTargets(...)` only
 // to query whether the brigade has a direct-objective adjacency entry; they do
@@ -647,6 +649,7 @@ export type OpeningAttackBlocker =
     | 'participants_below_attack_floor'
     | 'no_approach_osid'
     | 'zero_eligible_axis'
+    | 'insufficient_donation'
     | 'no_launch_readiness';
 
 export interface OpeningAttackReadinessResult {
@@ -802,6 +805,26 @@ function classifyAxisOpeningAttack(
     )) {
         axis.launch_blocker = 'zero_eligible_axis';
         return { executable: false, blocker: 'zero_eligible_axis' };
+    }
+
+    // ADR-0005 v2.2c #3: donation-readiness gate. With TG formation on, the anchor must be
+    // backed by donors pledging ≥ DONATION_READINESS_FRACTION (60%) of its personnel; otherwise
+    // it is a lone-anchor suicide attack and the axis is blocked. selectDonors is recomputed here
+    // (deterministic; a donor lost since planning naturally drops out) rather than reading a cached
+    // op.donor_pool — functionally the same gate, no persisted schema field. Flag-off: skipped, so
+    // byte-identical. The flag-on magnitude (how many ops this blocks) is validated at the 188w smoke.
+    if (ENABLE_TG_FORMATION) {
+        const anchorId = getAnchorBrigade(axis);
+        const stagingOsid = axis.staging_osid;
+        if (anchorId && stagingOsid) {
+            const anchorPersonnel = state.military.formations?.[anchorId]?.personnel ?? 0;
+            const donors = selectDonors(state, { anchor_brigade_id: anchorId, staging_osid: stagingOsid });
+            const donated = donors.reduce((sum, d) => sum + d.personnel_lent, 0);
+            if (donated < DONATION_READINESS_FRACTION * anchorPersonnel) {
+                axis.launch_blocker = 'insufficient_donation';
+                return { executable: false, blocker: 'insufficient_donation' };
+            }
+        }
     }
 
     delete axis.launch_blocker;

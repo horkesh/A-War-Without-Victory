@@ -620,8 +620,11 @@ function getOpsCommander(
  * Flag-on (v2.2b+): writes TG records under state.military.tactical_groups[id]
  * and sets donor.personnel_lent_by_tg[id] per Hard Invariant #1.
  *
- * v2.2c will split selectDonors to intel_gathering (caching to op.donor_pool)
- * once the 60% donation gate at assessment wires up. v2.2b skips that gate.
+ * v2.2c #3 added the 60% donation-readiness gate at the opening-attack readiness
+ * check (sector_offensive_launch_helpers.ts `classifyAxisOpeningAttack`) via a
+ * recomputed selectDonors — no cached `op.donor_pool` field. This helper still
+ * selects + forms at ready; selectDonors is deterministic, so the readiness-gate
+ * pool and this formation pool agree for a given turn's state.
  */
 function formTgsAtReadyTransition(
     state: GameState,

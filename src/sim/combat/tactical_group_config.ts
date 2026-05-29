@@ -38,6 +38,15 @@ export const ENABLE_TG_COMBAT_SYNTHESIS = false;
 export const ENABLE_TG_COHESION_BLEED = false;
 
 /**
+ * v2.2c #3 donation-readiness gate (ADR-0005 §Op lifecycle integration). The
+ * anchor's pledged donors must contribute at least this fraction of the anchor's
+ * personnel for the op to clear the opening-attack readiness gate; otherwise it is
+ * a lone-anchor suicide attack and the axis is blocked (`insufficient_donation`).
+ * Only enforced when ENABLE_TG_FORMATION is on (donors only exist then).
+ */
+export const DONATION_READINESS_FRACTION = 0.6;
+
+/**
  * Resolve the anchor brigade for an axis under TG semantics.
  *
  * Honors the canonical `main_brigade` if already assigned by
