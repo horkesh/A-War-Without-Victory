@@ -147,6 +147,48 @@ describe('Presidential Inbox officer event dedupe', () => {
         expect(screen.queryByText('Presidential Inbox')).toBeNull();
     });
 
+    it('localizes quiet-inbox capsule chrome in BCS mode', () => {
+        const onAction = vi.fn();
+        setLocale('bcs');
+        useGameStore.setState({
+            loadedGameState: makeLoadedState({ turn: 12 }),
+            openingBriefDismissed: true,
+            osidDisplayNames: null,
+        });
+
+        render(createElement(PresidentialInbox, { onAction }));
+
+        expect(screen.getByText('Komandno dezurstvo')).toBeTruthy();
+        expect(screen.getByText('Na stolu nema naredbi koje cekaju vasu odluku.')).toBeTruthy();
+        expect(screen.getByText('Predsjednicki sto')).toBeTruthy();
+        expect(screen.getByText('Hronika')).toBeTruthy();
+        expect(screen.queryByText('Command Watch')).toBeNull();
+        expect(screen.queryByText('No orders are waiting on your desk.')).toBeNull();
+
+        fireEvent.click(screen.getByRole('button', { name: /otvori sto/i }));
+        expect(onAction).toHaveBeenCalledWith('army_hq_briefing', 'empty:desk');
+    });
+
+    it('localizes opening brief chrome and RBiH scan bullets in BCS mode', () => {
+        const onAction = vi.fn();
+        setLocale('bcs');
+        useGameStore.setState({
+            loadedGameState: makeLoadedState({ player_faction: 'RBiH', turn: 0 }),
+            openingBriefDismissed: false,
+            osidDisplayNames: null,
+        });
+
+        render(createElement(PresidentialInbox, { onAction }));
+
+        expect(screen.getByText('Predsjednicki brifing')).toBeTruthy();
+        expect(screen.getByText('Republika Bosna i Hercegovina')).toBeTruthy();
+        expect(screen.getByText('Drzite Sarajevo, Tuzlu, Zenicu, Bihac i druga urbana uporista dok se armija formira pod vatrom.')).toBeTruthy();
+        expect(screen.getByRole('button', { name: /otvori sto/i })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /procitaj kasnije/i })).toBeTruthy();
+        expect(screen.queryByText('Presidential Brief')).toBeNull();
+        expect(screen.queryByText('Read later')).toBeNull();
+    });
+
     it('renders intelligence notifications with an explicit dismiss command', () => {
         const onAction = vi.fn();
         useGameStore.setState({
