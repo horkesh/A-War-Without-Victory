@@ -60,6 +60,8 @@ const baseState: GameState = {
         event_last_fired_turn: {},
         event_flags: {},
         enabled_event_ids: [],
+        closed_event_ids: [],
+        event_causality_log: [],
         event_overflow_queue: [],
         event_aggression_modifiers: [],
         recruitment_modifiers: [],

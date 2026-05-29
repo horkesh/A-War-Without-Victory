@@ -10,11 +10,12 @@ describe('event notification residual diagnostic', () => {
         );
         const payload = JSON.parse(output);
 
-        expect(payload.rows).toBe(2);
-        expect(payload.missing_blocks).toBe(4);
+        expect(payload.rows).toBe(3);
+        expect(payload.missing_blocks).toBe(6);
         expect(payload.classified_blocks).toBe(4);
-        expect(payload.unclassified_blocks).toBe(0);
+        expect(payload.unclassified_blocks).toBe(2);
         expect(payload.residuals.map((row: { event: string }) => row.event).sort()).toEqual([
+            'hrhb_washington_agreement_1994',
             'visit_to_front_hrhb',
             'visit_to_front_rs',
         ]);
@@ -23,6 +24,8 @@ describe('event notification residual diagnostic', () => {
             'blocked-sensitive',
             'blocked-sensitive',
             'blocked-sensitive',
+            'unclassified',
+            'unclassified',
         ]);
     });
 });
