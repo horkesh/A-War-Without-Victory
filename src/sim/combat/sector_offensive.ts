@@ -72,6 +72,9 @@ import { isEastHerzegovinaPair, isGrazAccordsActive, shouldGrazBlockAttack } fro
 import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
 import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { tickPreparation, hasUnresolvedProbe, autoResolveProbe } from './operation_preparation.js';
+// ADR-0005 v2.2b #45: TG dissolution at execution→recovery. Flag-gated.
+import { ENABLE_TG_FORMATION } from './tactical_group_config.js';
+import { dissolveTacticalGroup } from './tactical_group_lifecycle.js';
 import {
     BRIGADE_LOSS_THRESHOLD,
     COHESION_HEALTHY_THRESHOLD,
@@ -528,6 +531,35 @@ function recordFailedObjectives(cmd: CorpsCommandState, op: CorpsOperation, turn
     }
 }
 
+/**
+ * ADR-0005 v2.2b #45: dissolve every TG anchored to an operation.
+ *
+ * Called from beginRecovery — the single chokepoint for all execution→recovery
+ * transitions (~30 callers). Iterates `tactical_groups` in strictCompare order
+ * (determinism), collects matching ids in a first pass, dissolves in a second
+ * pass (avoids mutating during iteration). Clears donor lent fields and sets
+ * cooldowns per `dissolveTacticalGroup` (lifecycle.ts).
+ *
+ * Only called when ENABLE_TG_FORMATION is on; otherwise dormant. Anchor-
+ * destroyed-mid-op immediate dissolution (Hard Invariant #6) is deferred to
+ * v2.2c — anchor death currently flows through here on the next op tick when
+ * the op aborts to recovery (slight delay; functionally correct).
+ */
+function dissolveTgsForOp(state: GameState, opName: string, currentTurn: number): void {
+    const tgs = state.military?.tactical_groups;
+    if (!tgs) return;
+    const targetIds: string[] = [];
+    for (const id of Object.keys(tgs).sort(strictCompare)) {
+        const tg = tgs[id];
+        if (tg && tg.op_id === opName && tg.status !== 'dissolved') {
+            targetIds.push(id);
+        }
+    }
+    for (const id of targetIds) {
+        dissolveTacticalGroup(state, id, currentTurn);
+    }
+}
+
 function beginRecovery(op: CorpsOperation, turn: number, reason: CorpsOperation['recovery_reason'], state?: GameState): void {
     op.phase = 'recovery';
     op.phase_started_turn = turn;
@@ -536,6 +568,11 @@ function beginRecovery(op: CorpsOperation, turn: number, reason: CorpsOperation[
     // Clean up OPSEC marking when operation leaves active phase
     if (op.sector_id && state && Array.isArray(state.military.opsec_sectors)) {
         state.military.opsec_sectors = state.military.opsec_sectors.filter(s => s !== op.sector_id);
+    }
+    // ADR-0005 v2.2b #45: dissolve TGs anchored to this op. Flag-gated; state-optional
+    // (some callers don't pass state — those callers also can't have created TGs).
+    if (state && ENABLE_TG_FORMATION) {
+        dissolveTgsForOp(state, op.name, turn);
     }
 }
 
