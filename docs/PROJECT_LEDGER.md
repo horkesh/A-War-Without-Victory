@@ -1,4 +1,8 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] codex: fix codex_sensitive_history_source_notes — restore provenance-only convention on srebrenica_demilitarization_1993
+
+Removed forbidden tokens (`prevent genocide` / `reward`) introduced by Packet 41 gameplay-mechanic editorializing in the `srebrenica_demilitarization_1993` source_note (`data/scenarios/events/war_1993.json`). Reworded to provenance-only sentence (UN A/54/549 + ICTY Krstic IT-98-33-T paragraph citations) plus the fixed boundary sentence, matching passing siblings `srebrenica_falls_1995` + `zepa_falls_1995`. The `enclave_resilience`-direction rationale is preserved in ledger Packet 41 + `docs/20_engineering/EMERGENT_CASCADE_ARCHITECTURE.md` clamp-semantics section, so nothing is lost. Hash-neutral (baseline regression byte-identical; source_note is not a hashed gameplay field). Closes 1 of 3 decision-gated post-merge test failures.
+
 ## [2026-05-29] test-debt + CI-gating remediation (issue #39) — main full-suite red trunk 16 → 6
 
 **Type:** Test/data-only debt burndown + CI-gating fix. No sim behavior, scenario, or save-schema

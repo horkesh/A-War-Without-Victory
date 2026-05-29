@@ -1793,7 +1793,7 @@
     "id": "srebrenica_demilitarization_1993",
     "title": "Srebrenica Demilitarization Agreement",
     "narrative": "Under intense international pressure following the VRS assault on Srebrenica, Generals Mladic and Halilovic sign a demilitarization agreement on April 17-18: the ARBiH is to surrender weapons under UNPROFOR supervision in exchange for a ceasefire and UN troop deployment. Implementation is flawed on both sides — the ARBiH hides weapons while the VRS continues to restrict humanitarian convoys.",
-    "source_note": "ICTY Krstic and the Halilovic-Mladic agreement ground the row's demilitarization context. Per UN A/54/549 (Secretary-General's report on the fall of Srebrenica, 15 November 1999), paragraphs 57-98, and ICTY Krstic IT-98-33-T paragraphs 16-28, fuller compliance under hollow UN protection historically INCREASED enclave vulnerability. The enclave_resilience effect direction on comply_fully reflects this: comply_fully is not a 'prevent genocide' reward (per SENSITIVE_HISTORY_DESIGN_GATE Section 1.3 item 10, 'no gamified prevent-genocide mechanic'). This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "source_note": "ICTY Krstic and the Halilovic-Mladic agreement ground the row's demilitarization context, with UN A/54/549 (Secretary-General's report on the fall of Srebrenica, 15 November 1999), paragraphs 57-98, and ICTY Krstic IT-98-33-T paragraphs 16-28. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "diplomatic",
     "family": "rbih_srebrenica_response",
     "source_tier": "icty_icj_un",
