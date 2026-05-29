@@ -10,6 +10,17 @@ function readFile(absPath: string): string {
   return readFileSync(absPath, 'utf-8');
 }
 
+/**
+ * Strip block comments and line comments so boundary scans match only real
+ * runtime code, not prose in JSDoc/inline comments that legitimately reference
+ * engine field paths (e.g. documenting that the ADAPTER reads state.military.*).
+ */
+function stripComments(src: string): string {
+  return src
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/.*$/gm, '$1');
+}
+
 /** Recursively collect all .ts/.tsx files under a directory. */
 function getAllTsFiles(dir: string): string[] {
   const results: string[] = [];
@@ -29,7 +40,9 @@ describe('UI Adapter Boundary Discipline', () => {
     const files = getAllTsFiles(UI_COMPONENTS_ROOT);
     const violations: string[] = [];
     for (const file of files) {
-      const src = readFile(file);
+      // Scan only real runtime code — JSDoc/inline comments may reference
+      // state.military.* when documenting what the ADAPTER consumes.
+      const src = stripComments(readFile(file));
       if (/state\.military\./.test(src)) {
         violations.push(file.replace(UI_COMPONENTS_ROOT, ''));
       }

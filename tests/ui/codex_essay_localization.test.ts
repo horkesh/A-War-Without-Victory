@@ -112,9 +112,13 @@ describe('Codex essay localization coverage', () => {
         const sanaEvent = war1995Events.find((event) => event.id === 'operation_sana_1995');
 
         expect(bihacEssay?.sources).toContain('Balkan Battlegrounds II, pp. 536-538');
-        expect(bihacEvent?.historical_source).toContain('BB Vol. II pp. 536-538');
-        expect(bihacEvent?.narrative).toContain('Operation Grmec from the Bihac pocket toward VRS positions south and east of Bihac');
-        expect(bihacEvent?.narrative).toContain('later VRS, RSK, and APWB counteroffensive');
+        expect(bihacEvent?.historical_source).toContain('BB Vol. II pp. 406-417');
+        // Narrative re-authored into the Phase B+D decision-modal framing
+        // (commit 67eee60a). It still binds the same sourced operational facts:
+        // the 5th Corps push from the pocket toward Grabez/Bosanska Krupa against
+        // the VRS, and the Abdic/APWB split. Assert against the current canonized text.
+        expect(bihacEvent?.narrative).toContain('push from the pocket into Grabez and toward Bosanska Krupa against the VRS');
+        expect(bihacEvent?.narrative).toContain('Fikret Abdic / APWB split declared at Velika Kladusa on 27 September 1993');
         expect(sanaEvent?.narrative).toContain('Bosanski Petrovac fell on 15 September, Kljuc two days later');
         expect(sanaEssay?.content).toContain('Bosanski Petrovac fell on 15 September, Ključ two days later');
 
