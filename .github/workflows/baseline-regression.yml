@@ -1,8 +1,18 @@
 name: Baseline Regression
 
+# Issue #39: the full vitest suite (the `test` job) previously only ran on
+# pushes to `main` and PRs targeting `main`. Feature branches (claude/*, codex/*)
+# never triggered this workflow, so they shipped red without anyone noticing —
+# that is how both the OG and calibration branches reached main with 16
+# pre-existing failures. Extend the push trigger to feature branches so they
+# get full-suite coverage before they reach a PR. (Event System CI already
+# follows this precedent for codex/** + feature/**.)
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - 'claude/**'
+      - 'codex/**'
   pull_request:
     branches: [main]
 
