@@ -354,8 +354,21 @@ const MAX_MOVEMENT_ONLY_EXECUTION_TURNS = 4;
  *  operation is terminated early. This fires BEFORE the per-axis cap
  *  (MAX_TOTAL_FAILURES=5) for single-axis operations, cutting suicidal
  *  attack runs from 5 turns to 3. Multi-axis operations making any progress
- *  (≥1 capture) are exempt and run to their full per-axis budget. */
-const MAX_OPERATION_ZERO_PROGRESS_FAILURES = 3;
+ *  (≥1 capture) are exempt and run to their full per-axis budget.
+ *
+ *  R14a (2026-05-25): raised from 3 → 5. With R8 strategic_depth +
+ *  R11 Krajina-collapse + R13b op-axis 2-hop concentration stacking
+ *  for post-Storm RS-Krajina defenders, the asymptotic per-attempt
+ *  capture probability at hardened staging OSIDs (e.g. Mistral 1 at
+ *  crni_lug) is non-trivial — but n20 telemetry showed Mistral 1 hits
+ *  the 3-failure axis stall after 4 attempts (axisFailures=4, captures=0)
+ *  before that probability gets enough rolls. 5 gives multi-axis ops
+ *  two more chances to break a hard defender, while staying well below
+ *  the absolute MAX_TOTAL_FAILURES = 8 ceiling that backstops pathological
+ *  Operacija-Izlaz-style marathons (per Issue #29 / REAL_WAR_MASTER).
+ *  Faction-symmetric: applies to any multi-axis op of any faction.
+ */
+const MAX_OPERATION_ZERO_PROGRESS_FAILURES = 5;
 
 /** Consecutive catastrophic outcomes on the same objective before axis stalls.
  *  A desperate attack at bad odds can happen once — commanders sometimes gamble.
@@ -539,6 +552,18 @@ function issuePostOperationReturnMarches(state: GameState, op: CorpsOperation): 
                 && s.territory_osids?.includes(loc) === true);
         if (isInCorpsSectorTerritory) continue;
 
+        // Post-operation capture retention: if the brigade is sitting on an OSID
+        // that is now politically controlled by its own faction — meaning it was
+        // captured during this operation — do not march it home. territory_osids is
+        // derived at the start of the turn (partition-corps-front-sectors runs before
+        // advance-sector-offensives), so freshly-captured OSIDs are not yet reflected
+        // there. The next turn's sector recompute will incorporate the captured OSID
+        // into the corps' territory naturally via the political_controllers BFS.
+        // Without this guard, every participating brigade is marched home from
+        // captured ground, leaving it militarily undefended for one full turn.
+        const controller = getPoliticalControllerOSID(state, loc, undefined);
+        if (controller === f.faction) continue;
+
         // Already home — no march needed
         const homeMun = homeOsid.split(':')[1] ?? '';
         const currentMun = loc.split(':')[1] ?? '';
@@ -650,6 +675,7 @@ function reconcilePlanningObjectives(
     corpsId: FormationId,
     op: CorpsOperation,
     faction: FactionId,
+    staticAdjacency?: Map<string, string[]>,
 ): 'completed' | 'valid' | 'invalidated' {
     if (isMultiAxis(op) && op.axes) {
         const retainedAxes: OperationAxis[] = [];
@@ -679,7 +705,7 @@ function reconcilePlanningObjectives(
         op.current_objective_index = Math.min(op.current_objective_index ?? 0, filteredObjectives.length - 1);
     }
 
-    const approachOsids = collectObjectiveApproachOsids(state, corpsId, faction, getAllAxisObjectives(op));
+    const approachOsids = collectObjectiveApproachOsids(state, corpsId, faction, getAllAxisObjectives(op), staticAdjacency);
     return approachOsids.size > 0 ? 'valid' : 'invalidated';
 }
 
@@ -852,6 +878,7 @@ export function advanceSectorOffensives(
     state: GameState,
     supplyByOsid?: SupplyStateByOsidReport | null,
     terrainMultByOsid?: Record<string, number>, // LANE-2026-05-02
+    staticAdjacency?: Map<string, string[]>,
 ): PreparationEvent[] {
     const prepEvents: PreparationEvent[] = [];
     const corpsCommand = state.military.corps_command;
@@ -962,7 +989,7 @@ export function advanceSectorOffensives(
                 op.force_launch !== true &&
                 earlyElapsed > earlyPlanDuration + PLANNING_INVALIDATION_GRACE_TURNS
             ) {
-                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op);
+                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op, staticAdjacency);
                 if (!openingReadiness.executable) {
                     beginRecovery(op, turn, openingReadiness.blocker ?? 'no_launch_readiness', state);
                     continue;
@@ -1074,7 +1101,7 @@ export function advanceSectorOffensives(
                 beginRecovery(op, turn, 'defender_power_too_high', state);
                 continue;
             }
-            const planningObjectiveState = reconcilePlanningObjectives(state, corpsId, op, faction);
+            const planningObjectiveState = reconcilePlanningObjectives(state, corpsId, op, faction, staticAdjacency);
             if (planningObjectiveState === 'completed') {
                 beginRecovery(op, turn, 'completed', state);
                 continue;
@@ -1126,6 +1153,7 @@ export function advanceSectorOffensives(
                     corpsId,
                     faction,
                     op,
+                    // staticAdjacency intentionally omitted — physical adjacency required here
                 )) {
                     if (elapsed <= planDuration + PLANNING_INVALIDATION_GRACE_TURNS) {
                         continue;
@@ -1133,8 +1161,15 @@ export function advanceSectorOffensives(
                     beginRecovery(op, turn, 'no_launch_readiness', state);
                     continue;
                 }
-                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op);
+                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op, staticAdjacency);
                 if (!forcedLaunch && !openingReadiness.executable) {
+                    // stagedEarly fires via isCommittedInTransitTo when a brigade is en-route
+                    // to its approach OSID but not yet settled. Its CURRENT location may not be
+                    // adjacent to the objective, so evaluateOpeningAttackReadiness fails even though
+                    // the brigade will be in position next turn. Give one turn for march completion.
+                    if (stagedEarly && elapsed <= planDuration + PLANNING_INVALIDATION_GRACE_TURNS) {
+                        continue;
+                    }
                     beginRecovery(op, turn, openingReadiness.blocker ?? 'no_launch_readiness', state);
                     continue;
                 }
@@ -2134,9 +2169,12 @@ export function reevaluateWeakenedOperations(state: GameState): void {
         // Recovery-phase operations are already winding down.
         if (op.phase === 'recovery') continue;
 
-        // Count active participating brigades and total personnel
+        // Count active participating brigades and total personnel.
+        // Always use participating_brigades (consistent with how initial_strength is set in
+        // operation_aar.ts). getAllAxisBrigades would under-count when reconcilePlanningObjectives
+        // prunes a stale axis but leaves its brigades in participating_brigades.
         const multiAxis = isMultiAxis(op);
-        const allBrigadeIds = multiAxis ? getAllAxisBrigades(op) : op.participating_brigades;
+        const allBrigadeIds = op.participating_brigades;
         let activeBrigadeCount = 0;
         let totalPersonnel = 0;
         for (const bid of allBrigadeIds) {

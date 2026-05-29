@@ -33,7 +33,10 @@ const VRS_KRAJINA_DEFENDER_CORPS = 'vrs_2nd_krajina' as FormationId;
 // — VRS w188 morale 12.6/cohesion 26.5 vs RBiH 89.5/73.6). Forensics:
 // docs/40_reports/audits/20260522_FORENSICS_5_BLOCKED_ARBIH_OPS.md §3
 // mistral_2_95. Re-tune empirically against painted Oct 1995 once 188w
-// deltas land.
+// deltas land. NOTE 2026-05-25: floor is bypassed when vrs_2nd_krajina has
+// no active subordinates (evaluateDefenderTrajectoryWeakness returns
+// available=false → always green). Floor 0.20 and 0.28 produced identical
+// hashes — the cascade is combat-math driven, not floor-gated.
 const MISTRAL_DEFENDER_WEAKNESS_FLOOR = 0.20;
 
 const STAGING_LIVNO_MISI = 'op:livno:misi_2';
@@ -108,6 +111,9 @@ const MISTRAL_AXES: readonly OpportunityAxisDef[] = [
             'hvo_1st_guard_abb' as FormationId,
             'hv_4th_guards_split' as FormationId,
             'hvo_2nd_guard_mechanized' as FormationId,
+            // HV OG West 1995 phantom — corps=hvo_tomislavgrad matches axis host;
+            // pulls Drvar exploitation mass per BB v2 ch. 28 + HVO catalog synthesis §2.2.
+            'hv_112th_infantry_1995' as FormationId,
         ],
         objectives: MISTRAL_DRVAR_GRAHOVO_OBJECTIVES,
         staging_osid: STAGING_LIVNO_MISI,
@@ -143,6 +149,9 @@ const MISTRAL_DRVAR_GRAHOVO_AXIS: readonly OpportunityAxisDef[] = [
             'hvo_1st_guard_abb' as FormationId,
             'hv_4th_guards_split' as FormationId,
             'hvo_2nd_guard_mechanized' as FormationId,
+            // HV OG West 1995 phantom — corps=hvo_tomislavgrad matches axis host;
+            // pulls Drvar exploitation mass per BB v2 ch. 28 + HVO catalog synthesis §2.2.
+            'hv_112th_infantry_1995' as FormationId,
         ],
         objectives: MISTRAL_DRVAR_GRAHOVO_OBJECTIVES,
         staging_osid: STAGING_LIVNO_MISI,
@@ -379,6 +388,8 @@ const SOUTHERN_MOVE_AXES: readonly OpportunityAxisDef[] = [
             'hvo_3rd_guard_jastrebovi' as FormationId,
             'hv_4th_guards_brigade_1995' as FormationId,
             'hv_7th_guards_brigade_1995' as FormationId,
+            // HV OG West 1995 phantom — corps=hvo_tomislavgrad matches axis host.
+            'hv_134th_hgr_1995' as FormationId,
         ],
         objectives: SOUTHERN_MOVE_MRKONJIC_OBJECTIVES,
         staging_osid: 'op:sipovo:sipovo_2',
@@ -598,6 +609,11 @@ const MISTRAL_1_AXES: readonly OpportunityAxisDef[] = [
         brigades: [
             'hrhb_kralj_petar_kreimir_iv_brigade' as FormationId,
             'hrhb_kralj_tomislav_brigade' as FormationId,
+            // HV OG West 1995 phantom — corps=hvo_tomislavgrad matches axis host.
+            // Wired to the Glamoč axis (not Grahovo) to avoid extending the
+            // shared-brigade grahovo axis past Mistral 2's t175 launch window —
+            // preserves Mistral 2 AAR archive cleanup (recovery → operation_history).
+            'hv_7th_hgr_1995' as FormationId,
         ],
         objectives: MISTRAL_1_GLAMOC_OBJECTIVES,
         staging_osid: STAGING_TOMISLAVGRAD,
@@ -916,8 +932,6 @@ const JAJCE_STAGING_ANCHORS: readonly string[] = [
 //   any Jajce-municipality OSID. Belongs to the Mistral 2 Šipovo/Mrkonjić
 //   axis footprint, never reachable from a 3rd-corps approach.
 const JAJCE_NEAR_OBJECTIVES: readonly string[] = [
-    'op:donji_vakuf:oborci_2',
-    'op:donji_vakuf:torlakovac_2',
     'op:jajce:grdovo',
 ];
 

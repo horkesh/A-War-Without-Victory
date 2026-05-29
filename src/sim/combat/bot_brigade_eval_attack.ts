@@ -69,6 +69,7 @@ import {
     getBrigadeAxis
 } from './bot_brigade_ai_osid.js'; // Will need to export these from bot_brigade_ai_osid.ts
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
+import { countAxisConcentrationSupport } from './corps_operation_helpers.js';
 
 export function evaluateHomeDefense(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, loc, adjacency, result, isActiveSectorOperationParticipant, graphAnalysis, adjEnemy } = ctx;
@@ -289,14 +290,21 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 const predictedOutcome = directObjectiveAttack.prediction.predicted_outcome;
                 const axisBrigades = getBrigadeAxis(activeOp, brigade.id)?.assigned_brigades
                     ?? activeOp.participating_brigades ?? [];
+                // R13b op-level concentration: count same-axis op-mates within 2 hops
+                // of the objective with distance weighting (1-hop=1.0, 2-hop=0.5,
+                // floored). Replaces prior tactical-adjacency check which excluded
+                // op-mates staged 2+ hops away (e.g. HV phantoms at livno/duvno
+                // staging for drvar/glamoc objectives, where Mistral 1/2/SM ops
+                // never accumulated >1 supporter and concentratedOutcome stayed null).
                 const adjacentOperationParticipants = sectorAttackProfileTime(
                     '.sectorAttack.executionAdjacentParticipants',
-                    () => axisBrigades.filter((brigadeId) => {
-                        const participant = state.military.formations?.[brigadeId];
-                        if (!participant?.location_osid || participant.status !== 'active') return false;
-                        return getTacticalAdjacentOsids(state, participant.location_osid as Osid, adjacency)
-                            .includes(currentObjective);
-                    }).length
+                    () => countAxisConcentrationSupport(
+                        state,
+                        axisBrigades,
+                        new Set([brigade.id]),
+                        adjacency,
+                        currentObjective as Osid,
+                    )
                 );
                 const concentratedOutcome = adjacentOperationParticipants > 1
                     ? estimateConcentratedOutcome(

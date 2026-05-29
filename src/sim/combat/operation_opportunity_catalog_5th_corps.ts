@@ -67,6 +67,11 @@ const SANA_DEFENDER_WEAKNESS_FLOOR = 0.20;
 // ─── Staging anchors (5th Corps holds these throughout the pocket arc) ──────
 const STAGING_BIHAC = 'op:bihac:bihac_2';
 const STAGING_KRUPA_OTOKA = 'op:bosanska_krupa:otoka_2';
+// jasenica_2 is adjacent to lusci_palanka_2 (15 shared segments) — the first
+// SANSKI_KLJUC follow-on objective. otoka_2 has zero adjacency to lusci_palanka_2,
+// so staging there produces no_approach_osid. jasenica_2 is captured by
+// sana_krupa before the follow-on fires (it's in KRUPA_VALLEY_OBJECTIVES).
+const STAGING_JASENICA = 'op:bosanska_krupa:jasenica_2';
 
 // ─── Sana objectives (BB1 pp.417, 419-420; identical roster to legacy
 //     scripted Sana in triggered_operations.ts so painted-truth comparison
@@ -80,26 +85,29 @@ const KRUPA_VALLEY_OBJECTIVES = [
     'op:bosanska_krupa:gornja_suvaja',
 ];
 
-// Wave 24B (2026-05-23): reordered for OSID-adjacency reachability per the
-// catalog-sweep audit (docs/40_reports/audits/20260523_CATALOG_ADJACENCY_SWEEP.md
-// §b-sana). Prior order had two mid-sequence gaps: trubar (step 3) had no
-// captured neighbor at that point, and bosanski_petrovac_2 (step 6) was
-// approached from the wrong shoulder. New chain: ripac → racic → orasac_2 →
-// trubar (now adjacent to orasac_2) → vrtoce → kolonic_2 → vodjenica → prkosi
-// → bosanski_petrovac_2 (now adjacent to multiple captured) → dobro_selo_2 →
-// krnjeusa → jasenovac_2.
+// R15 (2026-05-25): removed trubar from the sequence — trubar is NOT adjacent
+// to vrtoce (confirmed from operational_contact_graph.json), so the prior chain
+// orasac_2 → trubar → vrtoce was geometrically broken. When trubar took 3
+// consecutive failed attacks MAX_CONSECUTIVE_FAILURES_ON_CURRENT skip fired,
+// jumping the objective to vrtoce while trubar was still RS; brigades at
+// orasac_2 then attacked trubar as an intermediate, accumulating spurious vrtoce
+// failure counts and stalling the axis before the Petrovac cluster could be
+// reached. Fix: vrtoce placed directly after orasac_2 (orasac_2→vrtoce IS
+// adjacent). trubar and krnjeusa are removed; both captured by consolidation
+// (trubar adjacent to captured orasac_2; krnjeusa adjacent to captured vrtoce +
+// gornja_suvaja on the sana_krupa axis). Verified adjacency chain (all ✓):
+//   orasac_2 → vrtoce → prkosi → vodjenica → kolonic_2 →
+//   bosanski_petrovac_2 → dobro_selo_2 → jasenovac_2
 const BIHAC_PETROVAC_OBJECTIVES = [
     'op:bihac:ripac',
     'op:bihac:racic',
     'op:bihac:orasac_2',
-    'op:bihac:trubar',
     'op:bosanski_petrovac:vrtoce',
-    'op:bosanski_petrovac:kolonic_2',
-    'op:bosanski_petrovac:vodjenica',
     'op:bosanski_petrovac:prkosi',
+    'op:bosanski_petrovac:vodjenica',
+    'op:bosanski_petrovac:kolonic_2',
     'op:bosanski_petrovac:bosanski_petrovac_2',
     'op:bosanski_petrovac:dobro_selo_2',
-    'op:bosanski_petrovac:krnjeusa',
     'op:bosanski_petrovac:jasenovac_2',
 ];
 
@@ -203,7 +211,7 @@ const SANA_FOLLOW_ON_AXES: readonly OpportunityAxisDef[] = [
             'arbih_517th_light' as FormationId,
         ],
         objectives: SANSKI_KLJUC_OBJECTIVES,
-        staging_osid: STAGING_KRUPA_OTOKA,
+        staging_osid: STAGING_JASENICA,
     },
 ];
 
@@ -394,7 +402,7 @@ export const SANA_95_FOLLOW_ON_OPPORTUNITY: OperationOpportunityDef = {
     primary_corps: PRIMARY_CORPS,
     family: 'fifth_corps',
     axes: SANA_FOLLOW_ON_AXES,
-    staging_osid: STAGING_KRUPA_OTOKA,
+    staging_osid: STAGING_JASENICA,
     planning_duration: 3,
     min_attack_outcome: 'repulsed',
     citations: [

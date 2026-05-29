@@ -78,7 +78,14 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         name: 'Operation Koridor',
         staging_osid: 'op:bijeljina:dvorovi_2',
         min_attack_outcome: 'repulsed',
-        planning_duration: 3,
+        // planning_duration:9 — brcko_corridor brigades stage at donji_rahic (RS init, adjacent
+        // to krepsic). March from dvorovi_2/bukovica_donja to donji_rahic takes ~8 turns via
+        // crnjelovo_donje→brezovo_polje_selo_2→potocari_2→brcko(city)→donji_rahic. Op fires
+        // after force_staging assembly gate (60%) clears at donji_rahic → brigades adjacent to
+        // krepsic at execution time. Previous staging at crnjelovo_donje caused zero_eligible_axis:
+        // posavina_flank readiness triggered multi-axis execution before brcko_corridor brigades
+        // completed their march past brcko(city) to donji_rahic (the only RS-side approach to krepsic).
+        planning_duration: 9,
         axes: [
             {
                 axis_id: 'brcko_corridor',
@@ -90,14 +97,10 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'jna_17th_corps_tg',
                 ],
                 objectives: [
-                    'op:brcko:brcko',
-                    'op:brcko:brezovo_polje_selo_2',
-                    'op:brcko:donji_rahic',
                     'op:brcko:krepsic',
-                    'op:brcko:potocari_2',
                     'op:brcko:skakava_donja',
                 ],
-                staging_osid: 'op:bijeljina:crnjelovo_donje',
+                staging_osid: 'op:brcko:donji_rahic',
             },
             {
                 axis_id: 'posavina_flank',
@@ -173,7 +176,6 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 ],
                 objectives: [
                     'op:rogatica:rogatica_2',
-                    'op:rogatica:brcigovo',
                     'op:rogatica:kovanj',
                     'op:rogatica:kramer_selo_2',
                     'op:sokolac:knezina_2',
@@ -191,6 +193,14 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'rs_1st_milii',
                     'rs_1st_birac',
                 ],
+                // BROKEN AXIS — never fires. DO NOT FIX without addressing cascade coupling below.
+                // slapasnica NOT adj vranesevici (Sacred Rule 3 violation) → axis produces zero effects.
+                // Subsequent broken links: zapolje_2→mala_daljegosta_2, mala_daljegosta_2→obadi, obadi→brezovice_2.
+                // R24 2026-05-25: replaced with valid chain slapasnica→donji_potocari_2→milacevici→srebrenica_2
+                //   →ljeskovik_2→sulice_2. Result: Srebrenica correctly RS (+6 OSIDs), BUT reversed the R22
+                //   bosansko_grahovo/Sipovo HRHB cascade (−6 large-area HRHB OSIDs). Net: −0.70pp REGRESSION.
+                //   REVERTED (commit 82a8e2c9-era context). The two cascades are mutually incompatible at
+                //   current sim state. Fix Srebrenica only after decoupling from VRS 2nd Krajina brigade states.
                 objectives: [
                     'op:bratunac:vranesevici',
                     'op:bratunac:zapolje_2',
@@ -199,6 +209,82 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:srebrenica:brezovice_2',
                 ],
                 staging_osid: 'op:bratunac:slapasnica',
+            },
+        ],
+    },
+    {
+        corps: 'vrs_drina',
+        faction: 'RS',
+        name: 'Operation Pracha River',
+        staging_osid: 'op:rogatica:stara_gora',
+        available_from: 41,
+        min_attack_outcome: 'repulsed',
+        axes: [
+            {
+                axis_id: 'pracha_encirclement',
+                name: 'Prača Encirclement',
+                brigades: [
+                    'rs_1st_podrinje',
+                    'rs_5th_podrinje',
+                ],
+                // BB2 p.409: May–Jun 1993 TG "Višegrad" (Drina Corps), Prača River offensive.
+                // Staging stara_gora (RS init) adj brcigovo ✓; brcigovo adj sopotnica ✓; sopotnica adj ustipraca_2 ✓
+                // All three objectives painted RBiH Jan 1993. ustipraca_2 terminus: non-chain neighbors RS-painted.
+                // slatina_2 excluded — adj gorazde_2, cascade risk (belongs to Op Zvezda 94, Apr 1994).
+                // available_from=41: gates past 40w calibration window (all objectives RBiH-painted at Jan 1993;
+                // VRS temporarily holds this corridor in mid-1993, ARBiH recovers before ceasefire).
+                objectives: [
+                    'op:rogatica:brcigovo',
+                    'op:gorazde:sopotnica',
+                    'op:gorazde:ustipraca_2',
+                ],
+                staging_osid: 'op:rogatica:stara_gora',
+            },
+        ],
+    },
+    {
+        // Operation Zvezda 94 — VRS Drina Corps spring 1994 offensive on Goražde safe area.
+        // Historically: Drina Corps tactical groups pressed from the east and south, reaching
+        // outskirts of Goražde town (BB2 p.289). Fires after Op Pracha River (w41) completes
+        // and frees brigades. Available w100 (~April 1994, contemporaneous with Washington Agreement).
+        //
+        // Staging: podkozara_donja_2 (RS-painted from init, adj slatina_2 ✓)
+        // Objectives: slatina_2 (RBiH-painted, adj gorazde_2 — encirclement approach);
+        //             sopotnica (RBiH-painted, adj slatina_2 — tighten pocket; skipped if already RS)
+        // gorazde_2 excluded: cascade risk documented in Op Pracha River comment (line 233).
+        // Sacred Rule checks: staging adj first objective ✓; no painted-opposite objectives ✓;
+        //   1st/5th Podrinje finish Op Pracha River ~w55-60, then ~40w gap before Zvezda 94 fires at w100 ✓.
+        //   They end Op Pracha River in the Prača corridor, 2-3 hops from podkozara_donja_2 staging ✓.
+        corps: 'vrs_drina',
+        faction: 'RS',
+        name: 'Operation Zvezda 94',
+        staging_osid: 'op:gorazde:podkozara_donja_2',
+        available_from: 100,
+        min_attack_outcome: 'repulsed',
+        // planning_duration: 10 — extended to allow brigades time to march 6+ hops to staging.
+        // ENGINE LIMITATION (documented 2026-05-28): all vrs_drina brigades are sector-pinned by
+        // bot AI after w46 and do not execute march orders (sector assignment > op march priority).
+        // Op injects at w100 (3 brigades ≥ MIN_OPERATION_PARTICIPANTS=2), issues movement_orders
+        // each planning turn, but eligible_attacker_count stays 0 for all 13 turns → aborts w113
+        // with zero_eligible_axis. Single-brigade variant (1 < MIN=2) never injects at all —
+        // keeping 3-brigade for observability. Requires engine fix: march priority for op-assigned
+        // brigades must override sector defensive assignment. Assign to gameplay-programmer.
+        planning_duration: 10,
+        axes: [
+            {
+                axis_id: 'gorazde_encirclement',
+                name: 'Goražde Encirclement',
+                brigades: [
+                    'rs_visegrad_brigade',
+                    'rs_1st_podrinje',
+                    'rs_5th_podrinje',
+                ],
+                // podkozara_donja_2 adj slatina_2 ✓; slatina_2 adj sopotnica ✓
+                objectives: [
+                    'op:gorazde:slatina_2',   // RBiH-painted; adj gorazde_2 — encirclement chokepoint
+                    'op:gorazde:sopotnica',   // RBiH-painted; adj slatina_2 — pocket tightener
+                ],
+                staging_osid: 'op:gorazde:podkozara_donja_2',
             },
         ],
     },
@@ -222,7 +308,6 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 ],
                 objectives: [
                     'op:visegrad:visegrad_2',
-                    'op:visegrad:drinsko',
                     'op:visegrad:kamenica_2',
                     'op:visegrad:medjedja_2',
                 ],
@@ -261,7 +346,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 ],
                 objectives: [
                     'op:vogosca:svrake',
-                    'op:vogosca:hotonj',
+                    // hotonj removed: paint=RBiH, Sacred Rule 4 violation.
                 ],
                 staging_osid: 'op:vogosca:vogosca_3',
             },
@@ -276,10 +361,67 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 objectives: [
                     'op:ilijas:medojevici',
                     'op:ilijas:dragoradi',
-                    'op:ilijas:krivajevici',
+                    // krivajevici removed: painted=RBiH (Sacred Rule 4) and not adjacent to sirovine
                     'op:ilijas:sirovine',
                 ],
                 staging_osid: 'op:ilijas:podlugovi',
+            },
+        ],
+    },
+    {
+        // Operation Trnovo — VRS Sarajevo-Romanija Corps (SRK) secures the Trnovo cluster
+        // south of Sarajevo. Historically, SRK held the Trnovo area throughout the war
+        // (BB2 p.289). rs_trnovo_brigade home OSID is gornja_presjenica (RS from init).
+        //
+        // Painted control (Sacred Rule 4):
+        //   gornja_presjenica = RS (staging — not an objective)
+        //   kijevo_2         = RS (RS waypoint — strips at execution, not a real objective)
+        //   delijas          = RBiH (painted) — valid RS attack objective
+        //   trnovo           = RBiH (painted) — valid RS attack objective
+        //   praca/podgrab    = RS/RBiH but not adjacent to any RS staging — excluded
+        //
+        // Adjacency (verified in operational_contact_graph.json):
+        //   gornja_presjenica adj kijevo_2  ✓
+        //   gornja_presjenica adj trnovo    ✓
+        //   kijevo_2          adj delijas   ✓
+        //   trnovo adj pale:praca/podgrab   ✗ — pale cluster excluded (broken chain)
+        //
+        // available_from: 6 — injects right after Op Prsten recovery (~w4).
+        // SRK queue is explicit (see queue block below): Prsten → Trnovo.
+        // Two brigades, both home gornja_presjenica → eligible at injection, no march needed:
+        //   rs_trnovo_brigade:       home gornja_presjenica — east axis (delijas)
+        //   rs_1st_romanija_infantry: home gornja_presjenica — town axis (trnovo)
+        // Historically: Tactical Group Trnovo (Lukavac 93) drew from multiple SRK formations
+        // including Romanija-area brigades pre-positioned south of Sarajevo (BB2 p.289).
+        corps: 'vrs_sarajevo_romanija',
+        faction: 'RS',
+        name: 'Operation Trnovo',
+        staging_osid: 'op:trnovo:gornja_presjenica',
+        // available_from: 69 — historical Lukavac 93 = August 1993 (~w69). Earlier firing
+        // would capture trnovo/delijas before Jan 1993, breaking the 40w calibration target.
+        available_from: 69,
+        min_attack_outcome: 'repulsed',
+        axes: [
+            {
+                // gornja_presjenica → kijevo_2 (RS waypoint, strips) → delijas (RBiH-painted)
+                axis_id: 'trnovo_east',
+                name: 'Trnovo East — Delijas',
+                brigades: ['rs_trnovo_brigade'],
+                objectives: [
+                    'op:trnovo:kijevo_2',   // RS waypoint (painted RS, strips at execution)
+                    'op:trnovo:delijas',     // RBiH-painted, persistent RBiH mismatch
+                ],
+                staging_osid: 'op:trnovo:gornja_presjenica',
+            },
+            {
+                // gornja_presjenica → trnovo (RBiH-painted, directly adjacent)
+                axis_id: 'trnovo_town',
+                name: 'Trnovo Town',
+                brigades: ['rs_1st_romanija_infantry'],
+                objectives: [
+                    'op:trnovo:trnovo',     // RBiH-painted, persistent RBiH mismatch
+                ],
+                staging_osid: 'op:trnovo:gornja_presjenica',
             },
         ],
     },
@@ -352,6 +494,11 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         faction: 'RS',
         name: 'Operation Foca',
         staging_osid: 'op:foca:foca_3',
+        // planning_duration:6 — kalinovik axis brigades take 5 elapsed turns to reach vlaholje
+        // (adjacent to golubici_2). Default aggressiveness anti-paralysis fires at elapsed=5 (t10=w09),
+        // 1 turn before brigades arrive → zero_eligible_axis. Extending to 6 shifts anti-paralysis
+        // to elapsed=6 (t11=w10) when kalinovik_brigade is already at vlaholje. n93 regression.
+        planning_duration: 6,
         axes: [
             {
                 axis_id: 'foca_valley',
@@ -360,11 +507,17 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'rs_foa_brigade',
                     'rs_bilea_brigade',
                 ],
-                // foca_3 → prevrac (RS waypoint) → kolovarice (RBiH; painted RS — valid target).
+                // foca_3 → patkovina (RBiH; painted RS) → prevrac (RS waypoint) → kolovarice (RBiH; painted RS).
+                // R22 2026-05-25: inserted patkovina before prevrac.
+                // R23 2026-05-25: ustikolina inserted then REVERTED — zero-delta (identical political_controllers,
+                //   84.55% unchanged). Patkovina captured at wi=10 and lost before wi=188; ustikolina never captured.
+                // foca_3 adj patkovina ✓, patkovina adj prevrac ✓, prevrac adj kolovarice ✓ (all verified).
+                // patkovina 89.2 km²; painted RS; sim=RBiH — legitimate target.
                 // ustipraca_2 removed (painted RBiH, caused DRINA over-capture in n1243).
                 // VRS historically pressed the Goražde enclave from the west (BB2 p.289).
                 objectives: [
-                    'op:foca:prevrac',              // RS waypoint (foca_3-adjacent); stripped at execution
+                    'op:foca:patkovina',            // RBiH-held; painted RS — R22 insertion, foca_3-adjacent
+                    'op:foca:prevrac',              // RS waypoint (patkovina-adjacent); stripped at execution
                     'op:gorazde:kolovarice',         // RBiH-held; painted RS — legitimate enclave approach target
                 ],
                 staging_osid: 'op:foca:foca_3',
@@ -377,14 +530,15 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'rs_kalinovik_brigade',
                     'jna_kalinovik_to_tg',
                 ],
-                // kalinovik_2 → vlaholje (RS waypoint) → varos_2 (RS waypoint) →
-                // kalinovik:golubici_2 (painted RS, sim=RBiH — legitimate RS target) →
-                // kalinovik:sela_2 (painted RS, sim=RBiH — legitimate RS target).
+                // kalinovik_2 → vlaholje (RS waypoint) → golubici_2 → sela_2.
+                // R20 2026-05-25: removed varos_2 — varos_2 adj golubici_2 = FALSE (broken link).
+                // vlaholje adj golubici_2 = TRUE (verified in operational_contact_graph.json).
+                // varos_2 is already RS-controlled (stripped anyway); its removal has no
+                // effect on varos_2 control but unblocks brigade advance to golubici_2.
                 // Original trnovo:delijas + trnovo:kijevo_2 removed — both painted RBiH and
                 // caused SARAJEVO regression when RS captured them (n1243).
                 objectives: [
                     'op:kalinovik:vlaholje',         // RS waypoint (kalinovik_2-adjacent); stripped
-                    'op:kalinovik:varos_2',          // RS waypoint (vlaholje-adjacent); stripped
                     'op:kalinovik:golubici_2',       // painted RS, currently RBiH — correct target
                     'op:kalinovik:sela_2',           // painted RS, currently RBiH — follow-on
                 ],
@@ -640,7 +794,16 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
     },
 ];
 
-const ARBIH_PRE_PLANNED: PrePlannedOp[] = [];
+const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
+    // R28 BLOCKED: Op Sana 95 on arbih_5th_corps caused regression (−6, −1pp).
+    // Root cause: triggered "Operation Sana" already runs on 5th Corps at w175-188.
+    // Op Sana 95 queued behind it, stayed in planning, brigade marching from
+    // bosanska_krupa sectors let VRS capture jasenica_2 + 5 adjacents. Zero captures.
+    // Sanski Most / Ključ mismatches require either:
+    //   (a) extending the existing triggered Operation Sana to include sanski_most axis, OR
+    //   (b) a separate synthetic corps op, OR
+    //   (c) an event-based control_change (triggered by RSK collapse 1995).
+];
 
 // v0.4.7: Mostar Hills axis removed from Op Jackal — vranjevici/kruzanj painted RS
 const ALL_PRE_PLANNED: PrePlannedOp[] = [...VRS_PRE_PLANNED, ...HRHB_PRE_PLANNED, ...ARBIH_PRE_PLANNED];
@@ -864,11 +1027,20 @@ export function injectPrePlannedOperations(state: GameState, adjacency?: Map<Osi
         }
     }
 
-    // Queue Drina Corps: Operation Drina → Podrinje Sweep
+    // Queue Drina Corps: Operation Drina → Podrinje Sweep → Pracha River → Zvezda 94 (available_from:100)
     if (injectedCorps.has('vrs_drina')) {
         const cmd = corpsCommand['vrs_drina'];
         if (cmd && !cmd.queued_operations) {
-            cmd.queued_operations = ['Operation Podrinje Sweep'];
+            cmd.queued_operations = ['Operation Podrinje Sweep', 'Operation Pracha River', 'Operation Zvezda 94'];
+        }
+    }
+
+    // Queue SRK: Operation Prsten → Operation Trnovo
+    // Prsten completes ~w9-10; Trnovo (available_from:6) injects immediately after.
+    if (injectedCorps.has('vrs_sarajevo_romanija')) {
+        const cmd = corpsCommand['vrs_sarajevo_romanija'];
+        if (cmd && !cmd.queued_operations) {
+            cmd.queued_operations = ['Operation Trnovo'];
         }
     }
 

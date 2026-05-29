@@ -137,6 +137,7 @@ import { correctMarchOrders, correctTransitStates } from '../combat/commander_ma
 import { evaluateHomeReturn } from '../combat/brigade_home_return.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
 import { advanceSectorOffensives, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
+import { buildStaticOsidAdjacency } from '../combat/sector_offensive_launch_helpers.js';
 // LANE-2026-05-02: estimateForceRatio defender-modifier integration — terrain cache for advance-sector-offensives
 import { buildTerrainCache } from '../combat/combat_predictor.js';
 import { processJnaWithdrawals, spawnJnaPhantomBrigades } from '../combat/jna_phantom_brigades.js';
@@ -165,7 +166,6 @@ import { generateArmyReserveRequests, evaluateArmyReserveAssignments, tickEliteL
 import { buildHomeDistanceCache } from '../combat/home_distance.js';
 import { computeSectorCombatRatings } from '../combat/sector_combat_rating.js';
 import { detectParamilitaryTargets, advanceParamilitaries, detectOffensiveParamilitaryTargets } from '../combat/paramilitary_sweep.js';
-import { consolidateRearPockets } from '../combat/rear_pocket_consolidation.js';
 import { updateStrandedBrigadeLifecycle } from '../combat/stranded_brigade_lifecycle.js';
 import {
     PARAMILITARY_FADE_WEEK,
@@ -817,20 +817,6 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'consolidate-rear-pockets',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const od = getOperationalData(context);
-            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
-            const report = consolidateRearPockets(
-                context.state, od.edges, od.opData.operationalToCanonical
-            );
-            if (report.total_flipped > 0) {
-                context.report.rear_pocket_consolidation = report;
-            }
-        }
-    },
-    {
         name: 'paramilitary-advance',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -929,7 +915,8 @@ export const warPhases: NamedPhase[] = [
                 }
                 terrainMultByOsid = buildTerrainCache(od.opData.operationalToCanonical, terrainData);
             }
-            const prepEvents = advanceSectorOffensives(context.state, supplyByOsid, terrainMultByOsid);
+            const staticAdjacency = od?.edges ? buildStaticOsidAdjacency(od.edges) : undefined;
+            const prepEvents = advanceSectorOffensives(context.state, supplyByOsid, terrainMultByOsid, staticAdjacency);
             if (prepEvents.length > 0) {
                 context.report.preparation_events = prepEvents;
             }

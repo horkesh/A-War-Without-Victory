@@ -52,13 +52,65 @@ const ADJACENT_FRIENDLY_SATURATION = 8;
 const SVK_PARTNER_DEPTH_BONUS = 1.4;
 
 /**
- * VRS 2nd Krajina Corps id (where applicable in current OOB). Only applied
- * for SVK partner buffer because historically 2KK was the formation whose
- * depth collapsed when SVK dissolved. Faction symmetry: the gate is the
- * `svk_corps_active` flag, not corps name — but only this corps has the
- * geography that benefits in practice.
+ * VRS 2nd Krajina Corps id (per current OOB at data/source/oob_corps.json:19).
+ * Only applied for SVK partner buffer because historically 2KK was the
+ * formation whose depth collapsed when SVK dissolved (ICTY Gotovina IT-06-90-T;
+ * Mladić MICT-13-56 §3437–3450). Faction symmetry: the gate is the
+ * `svk_corps_active` flag + this corps id, not faction identity — but only
+ * this corps has the geography that benefits in practice.
  */
-const VRS_2KK_CORPS_ID: FormationId = '2nd_krajina_corps';
+const VRS_2KK_CORPS_ID: FormationId = 'vrs_2nd_krajina';
+
+/**
+ * VRS Krajina corps subject to post-Storm coordination-collapse penalty.
+ * Historical mechanism per ICTY Mladić MICT-13-56 §3437–3450 + BB v2 ch 28:
+ * after SVK destruction in Operation Storm (4–7 Aug 1995), VRS 1st + 2nd
+ * Krajina lost their rear-area cushion AND absorbed ~165k Krajina Serb
+ * refugees through Bosanski Petrovac / Drvar / Glamoč, paralyzing supply,
+ * billet, and command-control. Frontage stretched from ~30 km/bde to
+ * 50–60 km/bde with no operational reserve. The corps did not lose battles —
+ * they lost coordination.
+ *
+ * Engine consumer: `getKrajinaCollapseMult` in this module. Gated by
+ * `state.meta.operation_storm_triggered === true`. Faction-symmetric in
+ * shape (corps-id list, not faction predicate); only RS corps with the
+ * historical Krajina geography are listed.
+ */
+export const KRAJINA_COLLAPSE_CORPS: ReadonlySet<FormationId> = new Set<FormationId>([
+    'vrs_1st_krajina' as FormationId,
+    'vrs_2nd_krajina' as FormationId,
+]);
+
+/**
+ * Defender combat-power multiplier applied to KRAJINA_COLLAPSE_CORPS while
+ * `operation_storm_triggered === true`. Magnitude 0.65 reflects the combined
+ * historical effect of lost SVK partner buffer + refugee paralysis + frontage
+ * overstretch — distinct from and stacking with NATO Deliberate Force's ×0.70
+ * equipment-quality suppression (which models air-campaign C2/ammo damage).
+ * Combined post-Storm RS Krajina defender power: ~0.455× baseline (×0.70 ×0.65).
+ * Sources: BB v2 ch 28 (4-day collapse pattern); ICTY Mladić MICT-13-56 §3437–3450.
+ */
+export const KRAJINA_COLLAPSE_DEFENDER_MULT = 0.65;
+
+/**
+ * Returns the post-Storm Krajina-collapse defender multiplier for a formation.
+ * Returns 1.0 (no effect, byte-stable historical path) unless:
+ *   - operation_storm_triggered is true in state.meta, AND
+ *   - the formation belongs to KRAJINA_COLLAPSE_CORPS.
+ *
+ * Faction-symmetric: gated by corps id, not faction. Sacred-rule clean:
+ * deterministic pure function; no Math.random; no init OSID override.
+ */
+export function getKrajinaCollapseMult(
+    state: GameState,
+    formation: FormationState | undefined | null
+): number {
+    if (!formation) return 1.0;
+    if (state.meta?.operation_storm_triggered !== true) return 1.0;
+    if (!formation.corps_id) return 1.0;
+    if (!KRAJINA_COLLAPSE_CORPS.has(formation.corps_id)) return 1.0;
+    return KRAJINA_COLLAPSE_DEFENDER_MULT;
+}
 
 export interface CorpsAdjacency {
     /** Friendly-controlled OSIDs adjacent to (or inside) the corps' AOR. */

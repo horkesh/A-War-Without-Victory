@@ -1,5 +1,15 @@
 # AWWV Calibration Master Reference
 
+## R15 baseline — 82.0% area-weighted (2026-05-25)
+
+- **NEW 188w baseline: R15 hash `59560840d2b4d976`; area-weighted match 82.0% (42072/51337 km²); count match 83.8% (597/712).** +2.8pp area over R14a (79.2%).
+- Per-faction sim vs painted: HRHB 90 (painted 80, Δ +10), RBiH 301 (painted 247, Δ +54), RS 321 (painted 385, Δ −64).
+- Benchmarks: 6/6. Op Sana: 16/16 objectives captured (full Una-Sana basin).
+- **Change:** `BIHAC_PETROVAC_OBJECTIVES` adjacency gap repaired — removed `op:bihac:trubar` (NOT adjacent to vrtoce) and `op:bosanski_petrovac:krnjeusa`. New sequence: ripac → racic → orasac_2 → vrtoce → prkosi → vodjenica → kolonic_2 → bosanski_petrovac_2 → dobro_pelo_2 → jasenovac_2. All adjacencies verified from `operational_contact_graph.json`.
+- **Regression resolved:** Bosanski Petrovac cluster (vrtoce/prkosi/vodjenica/kolonic_2/bosanski_petrovac_2) all RBiH at w188. bosanski_petrovac_2 no longer regresses to RS.
+- Commit: `f8080ca4`. Run dir: `runs/apr1992_definitive_188w__b9af2327fe0c3c10__w188_n19`.
+- **Note on KRAJINA mismatches:** orasac_2/racic/ripac/krupa objectives now showing painted=RS, sim=RBiH — these are correct Oct 1995 territorial outcomes from Op Sana, not present in jan1993 painted target.
+
 ## Historical-default baseline — n2003 79.21% (2026-05-23)
 
 - **NEW 188w baseline: n2003 hash `47438d249146d1af`; spatial match_ratio 79.21%** (564/712 OSIDs). +0.70pp over n2002 (78.51%).

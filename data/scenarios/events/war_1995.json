@@ -440,6 +440,22 @@
         "delta": 20
       },
       {
+        "kind": "control_change",
+        "faction": "RS",
+        "osids": [
+          "op:srebrenica:srebrenica_2",
+          "op:srebrenica:donji_potocari_2",
+          "op:srebrenica:milacevici",
+          "op:srebrenica:ljeskovik_2",
+          "op:srebrenica:sulice_2",
+          "op:srebrenica:bostahovine_2",
+          "op:srebrenica:luka_2",
+          "op:srebrenica:suceska",
+          "op:srebrenica:radovcici",
+          "op:srebrenica:brezovice_2"
+        ]
+      },
+      {
         "kind": "narrative",
         "text": "Srebrenica falls. Over 8,000 Bosniak men and boys are executed in the worst atrocity in Europe since World War II."
       }
@@ -486,6 +502,13 @@
         "faction": "RS",
         "dimension": "international_credibility",
         "delta": -10
+      },
+      {
+        "kind": "control_change",
+        "faction": "RS",
+        "osids": [
+          "op:rogatica:zepa_2"
+        ]
       },
       {
         "kind": "narrative",
@@ -605,7 +628,7 @@
         "kind": "equipment_quality_modifier",
         "faction": "RS",
         "multiplier": 0.7,
-        "duration_turns": 4
+        "duration_turns": 10
       },
       {
         "kind": "narrative",

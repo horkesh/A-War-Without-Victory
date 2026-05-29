@@ -209,13 +209,14 @@ export function shouldGrazBlockAttack(
         return true;
     }
 
-    // HRHB → RS faction-level block (bilateral ceasefire)
-    // Op Jackal exemption is handled at the brigade-level (bot_brigade_ai_osid.ts)
-    // where we can check if the target is an actual operation objective.
-    // shouldGrazBlockAttack blocks ALL HRHB→RS attacks; callers exempt op objectives.
+    // HRHB → RS faction-level block (bilateral ceasefire).
+    // East-pair corps (hvo_southeast_herzegovina) are excluded here — their time-gated
+    // truce (not blocked before Op Jackal ends; blocked after) is handled in the
+    // corps-pair block below. All other non-exempt HRHB corps are blocked.
     if (faction === 'HRHB' && (targetController === 'RS')
         && isHerzegovinaTruceActive(state)
-        && !GRAZ_EXEMPT_HRHB_CORPS.has(corpsId)) {
+        && !GRAZ_EXEMPT_HRHB_CORPS.has(corpsId)
+        && !isEastHerzegovinaPair(corpsId)) {
         return true;
     }
 

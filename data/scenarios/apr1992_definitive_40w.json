@@ -802,9 +802,15 @@
       "op:brcko:potocari_2",
       "op:doboj:boljanic_2"
     ],
-    "vrs_1st_krajina": ["op:gracanica:petrovo_2", "op:lukavac:brijesnica_donja_2"]
+    "vrs_1st_krajina": [
+      "op:gracanica:petrovo_2",
+      "op:lukavac:brijesnica_donja_2"
+    ]
   },
   "comms_override_by_corps": {
-    "arbih_1st_corps": { "before_turn": 18, "mode": "radio" }
+    "arbih_1st_corps": {
+      "before_turn": 18,
+      "mode": "radio"
+    }
   }
 }
