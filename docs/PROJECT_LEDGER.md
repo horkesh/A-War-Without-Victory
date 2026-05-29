@@ -1,4 +1,15 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] codex: Phase J Packet 4 (clamp semantics documentation per J3 follow-up B)
+
+- **Type.** Pure documentation packet. Zero code, zero state mutations, zero event-JSON, zero baselines. No FORAWWV edits. Closes J3 §6.3 Follow-Up B (LOW scope ~½ day).
+- **Scope.** Two files edited (additive only):
+  - `docs/20_engineering/EMERGENT_CASCADE_ARCHITECTURE.md` — appended new section "Strategic Dimension Clamp Semantics" (~60 lines) covering clamp write sites (quoted from `strategic_dimensions.ts:39,49-50`), pre-clamp vs post-clamp semantics, the `0.00`/`100.00` investigation pattern, J3 worked example, Phase E gate implication, cross-references to J1/J2/J3 + plan history + memory vocab.
+  - `memory/engine_dimension_vocabulary.md` — inserted "Bounded ranges" section (~35 lines) covering the [0,100] clamp at every write site, pre/post-clamp distinction, three-step investigation pattern, J3 worked example, singular-ownership pointer to EMERGENT_CASCADE_ARCHITECTURE.md.
+- **Trigger.** J3 (`docs/40_reports/proposals/20260529_RBIH_COHESION_INVESTIGATION.md` §6.3 Follow-Up B) recommended durable knowledge capture in canon + memory so future cohesion-debug sessions do not repeat the pre-clamp reconstruction work.
+- **Singular ownership.** EMERGENT_CASCADE_ARCHITECTURE.md is the canonical home for clamp semantics; memory file cross-references it rather than duplicating the full derivation. No FORAWWV edits per CLAUDE.md. No new memory file created → MEMORY.md index not modified.
+- **Verification.** Quoted lines verified against `src/sim/events/strategic_dimensions.ts` at commit head (lines 39, 49-50 match verbatim). `git diff --check` clean (no whitespace errors). Typecheck unaffected (no code changes).
+- **Hard constraints honored.** Read-only against code. No code changes. No staging of `.claude/scheduled_tasks.lock`. No worktree enter. No baseline refresh. No FORAWWV. No untracked debug dirs touched. No emojis.
+
 ## [2026-05-29] codex: Phase J Packet 3 (RBiH cohesion=0.00 investigation)
 
 - **Type.** Read-only investigation packet per J2 finding #4. Pure documentation; zero code, zero state mutations, zero event-JSON, zero baselines. No FORAWWV edits.
