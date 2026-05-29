@@ -303,6 +303,74 @@ Hash diverges (wiring is alive — TG records, donor lent ledgers, casualty redi
 
 **Next:** v2.0 — donor pool selection + TG formation + v33→v34 schema migration. Sub-stage order v2.0 (formation) → v2.1 (distribution math, dormant) → v2.2 (combat synthesis, calibration shift) → v2.3 (Pyrrhic dampener).
 
+## [2026-05-29] codex: 7 Pyrrhic-standard plans for the open/deferred event-system + calibration lanes
+
+**Type:** Docs/planning only. No engine, event-JSON, scenario, or save-schema change; no behavioral or
+output change; no test impact. Seven new plan files under `docs/plans/2026-05-29-*.md` (1470 lines), one per
+open/deferred lane triaged from COMMAND_BOARD:
+
+1. `patron-confidence-military-credibility-wirings-plan.md` — wire the 2 unwired DimensionId ops-consumers
+   behind new `AWWV_PDP_*` sub-flags, default-OFF byte-identical (mirrors the 2 shipped dimensions).
+2. `ring3-sensitive-event-authoring-plan.md` — §6-gated authoring process + 12 enumerated candidates
+   (8 author / 2 Ring-2 / 2 carry a Ring-3-refusal component); refusals flagged (Foča sexual-violence
+   dimension; Srebrenica column "save" lever — §1.3 #10); ICTY-anchored.
+3. `event-alternate-timeline-semantics-packet-plan.md` — reframed as RATIFICATION not build: the runtime
+   branch substrate (`closed_event_ids`/`enabled_event_ids`/`event_causality_log`) is ALREADY wired at
+   save v32/v33; load-bearing risk = the 42 `requires_enabled:true` rows may already have moved baselines,
+   so a byte-identity gate is a hard STOP before any `csq_*` authoring.
+4. `political-dimension-propagation-activation-plan.md` — staged flip (intl_only first; cohesion_only
+   BLOCKED on the divisor fix); answers the 5 readiness questions; measures via J1 ON-vs-OFF flip-set.
+5. `b7-sarajevo-siege-continuous-condition-plan.md` — consolidate the 4 existing siege fragments + add a
+   `SiegeLifelineState` (airlift/tunnel); monotonic cost the player ENDURES, never a relieve-the-siege lever.
+6. `cohesion-divisor-fix-plan.md` — calibration handoff; `/3→/300` + `/6→/600` (missed the 100× rescale at
+   `59511672`); ONE logical run; authorized baseline re-canonicalization.
+7. `fall-1995-deferrals-ea5-ea6-eb1-plan.md` — combat handoff; sequence E-A5→E-A6→E-B1; three one-change runs.
+
+**Review.** Drafted by 7 matched Pyrrhic specialists; independently cleared by two reviewers who did not
+draft them: Canon Compliance + Determinism Auditor (no sacred-rule violations; sensitive-history refusals
+correct; PASS / PASS-WITH-CONDITIONS) and Process QA + Reports Custodian (all COMPLETE; load-bearing
+file:line claims verified real — `game_state.ts:782` unconsumed `coordination_coherence`, v32/v33 substrate
+at `save_migration.ts:740-756`; cross-plan dependencies coherent; no closure-log conflicts; no overclaims).
+
+## [2026-05-29] codex: pin Fall-1995 deferred combat-math follow-ups (E-A5/E-A6/E-B1) lane
+
+**Type:** Docs/tracking only. No engine, event-JSON, scenario, or save-schema change; no behavioral or
+output change; no test impact.
+
+**COMMAND_BOARD.** Pinned the 3 Fall-1995 deferred combat-math follow-ups (E-A5/E-A6/E-B1) as a P3
+DEFERRED lane on `docs/plans/COMMAND_BOARD.md`, owned by the calibration/combat-engine lane (NOT
+event-system), so they aren't orphaned (previously only in `.claude/napkin.md` + the proposal doc
+`docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md`). E-A5 = 51:49 launch-gate consumer
+(would cap the RBiH +29 territorial overshoot); E-A6 = Sloboda 95 / Velika Kladuša rear-clearing op;
+E-B1 = corps coherence decay logic. Stop gate: calibration-owned, do NOT close from the docs/tracking lane.
+
+## [2026-05-29] codex: track deferred event-system lanes + disambiguate Phase E name-collision
+
+**Type:** Docs/tracking only. No engine, event-JSON, scenario, or save-schema change; no behavioral or
+output change; no test impact.
+
+**COMMAND_BOARD.** Added 5 deferred/open event-system lanes to `docs/plans/COMMAND_BOARD.md` (Active
+Command Board table, after the P2 telemetry row): (1) **Cohesion divisor fix** — OPEN, calibration-owned;
+`strategic_dimensions.ts:111` `/3` and `political_personality.ts:308-309` `/6` missed the 100×
+`war_exhaustion` rescale (commit `59511672`) and should be `/300` and `/600`, currently flooring cohesion
+bases at 0 (handoff `docs/40_reports/20260529_CALIBRATION_HANDOFF_COHESION_DIVISOR.md`); highest priority of
+the five, blocks Phase E cohesion activation. (2) **Political-Dimension Propagation activation** — DEFERRED
+per user; both PDP flags default OFF, baseline byte-identical; verdict
+`docs/40_reports/proposals/20260529_PHASE_E_VERDICT_CONSOLIDATED.md`. (3) **patron_confidence +
+military_credibility dimension wirings** — OPEN/unbuilt; no bot-ops consumers yet. (4) **Ring-3
+sensitive-event authoring backlog** — OPEN/§6-gated. (5) **B7 Sarajevo siege continuous-condition
+modeling** — DEFERRED.
+
+**MASTER_ROADMAP.** Disambiguation note (already present, after the v0.8.4 "Phase E — Turn-Advance Block"
+CLOSED entry) clarifying the closed v0.8.4 "Phase E" is distinct from the event-system
+political-dimension-propagation "Phase E".
+
+**Merge.** Landed on `main` via squash PR #54 (merge commit `008f0a76`), CI green on all required gates
+(`test` / `typecheck` / `scenario-anchors`) plus event-system/desktop checks; branch deleted. Independently
+reviewed (Reports Custodian + Process QA): APPROVE — all 5 lanes survive the closure-log cross-check, no
+overclaim vs the consolidated verdict, lane-2 code citations confirmed real. Review nit closed in follow-up
+commit `d930f037` (added `OPEN`/`DEFERRED` to the COMMAND_BOARD Status Legend).
+
 ## [2026-05-29] codex: J1 activation simulator — Tier 2 ON-vs-OFF territorial flip-set diff (fixes within-run misread)
 
 **Type:** Diagnostic tool + test only. No engine, event-JSON, scenario, or save-schema change.
