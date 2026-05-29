@@ -1,4 +1,40 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] feat(combat): ADR-0005 v2.1 — TG casualty distribution math (dormant)
+
+**Type:** Pure math helper + comprehensive unit tests. Phased rollout v2.1 of ADR-0005. Per Ops Expert sub-stage reorder: ship casualty distribution before combat synthesis so the math is unit-tested in isolation; v2.2 wires it into `attack_resolution_osid.ts` alongside combat-power synthesis.
+
+**Change:**
+- **New file `src/sim/combat/tactical_group_casualties.ts`** — pure function `distributeCasualtiesAcrossTg(totalCasualties, anchorBrigadeId, donors)` returning `{ anchor_casualties, donor_casualties }`. Implements ADR-0005 §Battle resolution algorithm: anchor floor at ≥50% (non-negotiable), donor share pro-rata by `personnel_lent`, **largest-remainder method** for integer split with **deterministic tiebreak by donor `brigade_id` strictCompare**. Hard Invariant #5 enforced: per-donor casualties capped at `personnel_lent`, overflow reassigned to anchor. Export `ANCHOR_CASUALTY_FLOOR_FRACTION = 0.5` constant for re-use.
+- **New test file `tests/tg_casualty_distribution.test.ts`** — 11 test cases covering all 7 scenarios from the v2.1 task list plus three additional edge cases:
+  - (a) zero donors → anchor 100%
+  - (b) single donor → 50/50
+  - (c) 3 donors varied → pro-rata + anchor 50%
+  - (d) integer remainder → largest-remainder + brigade_id tiebreak (intentional fractional case asserting d100/d200/d300 split)
+  - (e) equal donors edge case
+  - (e2) constant export assertion
+  - (g) zero casualties → no decrement
+  - (g2) negative casualties → defensive zero
+  - (h) Hard Invariant #5 cap + overflow
+  - (i) sum(personnel_lent)=0 defensive
+  - (j) conservation across many synthetic shapes
+- **Singular ownership preserved**: `strictCompare` imported from canonical `src/state/validateGameState.ts` (caught + fixed during self-check; rejected initial inline copy).
+
+**Determinism:** Pure function, no side effects, no `Math.random`/`Date.now`, no Record iteration over unsorted keys. Largest-remainder tiebreak uses `strictCompare` on `brigade_id`. Helper not imported by any runtime path yet — wires in at v2.2 alongside combat synthesis.
+
+**Verification:**
+- `node_modules/.bin/tsc --noEmit`: clean for v2.1 files (`tactical_group_casualties.ts`, `tg_casualty_distribution.test.ts`).
+- `vitest run tests/tg_casualty_distribution.test.ts tests/tg_invariants.test.ts --reporter=dot`: **18/18 PASS** (7 invariants + 11 casualty distribution).
+- 40w v2.1 (n3) hash: `3649b3861a87e6ea` — byte-identical to v1 baseline (n0), v1-on smoke (n1), v2.0 schema bump (n2). Pure-math addition with no runtime call site → zero behavioral surface.
+
+**Artifacts:**
+- `src/sim/combat/tactical_group_casualties.ts` (new)
+- `tests/tg_casualty_distribution.test.ts` (new)
+- `data/derived/latest_run_final_save.json` (n3 validation artifact)
+
+**Next:** v2.2 — combat synthesis. Wire `selectDonors` (v2.0 stub) into `intel_gathering` phase, populate TG in `tactical_groups` Record under `ENABLE_TG_FORMATION`. Wire `distributeCasualtiesAcrossTg` into `attack_resolution_osid.ts` battle resolution under `ENABLE_TG_COMBAT_SYNTHESIS`. **First calibration-shift stage** per ADR-0005 §Phased Rollout — expect +3-8% capture before v2.3 Pyrrhic dampener lands.
+
+---
+
 ## [2026-05-29] feat(state): ADR-0005 v2.0 — TG schema scaffold (v18→v19), behavior-flagged
 
 **Type:** Schema migration v18→v19 + sub-flag scaffolding + donor selection stub + invariants test. Phased rollout v2.0 of ADR-0005.
