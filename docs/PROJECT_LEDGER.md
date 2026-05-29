@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-29] codex: Phase I Packet 4 (remove 4 vienna_* deprecated aliases from local_truces.ts)
+
+- **Type.** Targeted dead-export removal per I1 audit Section 1 #2. ZERO behavior change (zero importers across src/ + tests/ + tools/ — verified per I3/I3a lesson that audit's "0 importers in src/**" scope must be widened before deletion).
+- **Scope.** `src/sim/local_truces.ts` only — removed 4 deprecated alias exports (all `@deprecated` and pointing at active canonical owners): `VIENNA_DECLARATION_TURN` (alias of `GRAZ_ACCORDS_TURN`), `isViennaDeclarationActive` (alias of `isGrazAccordsActive`), `shouldViennaBlockAttack` (alias of `shouldGrazBlockAttack`), `checkAndFireViennaDeclaration` (alias of `checkAndFireGrazAccords`). Canonical Graz-named exports retained as sole owners. No orphan imports created.
+- **Calibration-overlap safety.** Pre-flight `git diff origin/main...claude/calibration-historical-army-arc-2026-05-24` confirmed `src/sim/local_truces.ts` is NOT modified on calibration branch (audit's overlap warning at Section 6 Packet 2 #2 was conservative). Safe to land on `main` lane.
+- **Verification matrix.**
+  - `npx tsc --noEmit` PASS (clean).
+  - `vitest run tests/event_loader.test.ts tests/events_evaluate.test.ts` PASS (62/62).
+  - `vitest run tests/local_truces.test.ts tests/graz_faction_block.test.ts` PASS (86/86).
+  - `git diff --check` exit 0.
+  - `tools/scenario_runner/run_baseline_regression.ts` PASS — "all scenarios match" (byte-identical).
+- **Delta.** −12 LOC in `src/sim/local_truces.ts`. Zero other files touched.
+- **Authoring.** Pyrrhic Gameplay Programmer + Code Simplifier joint.
+
 ## [2026-05-29] codex: Phase I Packet 3a-narrow (remove 4 zero-importer exports from brigade_aor_legacy)
 
 - **Type.** Targeted dead-export removal. Surgical narrowing of `brigade_aor_legacy.ts` surface area after the aborted I3 (whole-module) and aborted I3a-original (which mis-classified two still-test-imported exports as zero-importer) attempts. ZERO behavior change (zero readers in src/ + tests/ + tools/).
