@@ -267,14 +267,15 @@ describe('dissolveTacticalGroup', () => {
         expect(state.military.formations.d2.tg_cooldown_until_turn).toBe(20 + TG_DONOR_COOLDOWN_TURNS);
     });
 
-    it('records a recent-composition hash on dissolution gated path is flag-off-inert', () => {
-        // ENABLE_TG_COHESION_BLEED is a compile-time const false, so dissolution must NOT
-        // write tg_recent_compositions (byte-identity contract). Asserts the gate holds.
+    it('records a recent-composition hash on dissolution (ENABLE_TG_COHESION_BLEED default-ON)', () => {
+        // Flags now default-ON (TG activation, commit 0b681ffe): ENABLE_TG_COHESION_BLEED is true,
+        // so dissolution records the composition hash → cooldown turn (Hard Invariant #9 reform gate).
         const state = stateWith([brigade('anchor'), brigade('d1')]);
         const donors = selectDonors(state, { anchor_brigade_id: 'anchor', staging_osid: 'op:x:y' });
         const formed = formTacticalGroup(state, { op_id: 'op1', anchor_brigade_id: 'anchor', donors, current_turn: 5 });
         dissolveTacticalGroup(state, formed.tg_id!, 5);
-        expect(state.military.tg_recent_compositions).toBeUndefined();
+        const hash = compositionHash('anchor', donors.map(d => d.brigade_id));
+        expect(state.military.tg_recent_compositions).toEqual({ [hash]: 5 + TG_DONOR_COOLDOWN_TURNS });
     });
 
     it('returns dissolved=false for unknown TG id', () => {

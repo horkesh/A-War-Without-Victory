@@ -111,6 +111,7 @@ describe('home-sector defensive strength reflects lent personnel (the bug fix)',
     it('(c) defensive strength drops by the lent fraction during the lend window', () => {
         const state = stateWith([brigade('anchor'), brigade('d1', { personnel: 1600 })]);
 
+        const cohesionBefore = state.military.formations.d1.cohesion;
         const before = homeDefPower(state, 'd1');
         expect(before).toBeGreaterThan(0);
 
@@ -122,6 +123,13 @@ describe('home-sector defensive strength reflects lent personnel (the bug fix)',
             op_id: 'op42', anchor_brigade_id: 'anchor', donors, current_turn: 5,
         });
         expect(formed.tg_id).not.toBeNull();
+
+        // Flags now default-ON (TG activation, commit 0b681ffe): ENABLE_TG_COHESION_BLEED is true,
+        // so formation also bleeds the donor's cohesion (the Pyrrhic dampener). This test isolates
+        // the PERSONNEL → defensive-power relationship (the lent-personnel bug fix), so restore the
+        // donor's cohesion to its pre-formation value before measuring; otherwise the cohesion drop
+        // would confound the linear-personnel assertion.
+        state.military.formations.d1.cohesion = cohesionBefore;
 
         const during = homeDefPower(state, 'd1');
         const raw = state.military.formations.d1.personnel!;
@@ -135,6 +143,7 @@ describe('home-sector defensive strength reflects lent personnel (the bug fix)',
 
     it('(d) after dissolution the donor returns to full home defensive strength', () => {
         const state = stateWith([brigade('anchor'), brigade('d1', { personnel: 1600 })]);
+        const cohesionBefore = state.military.formations.d1.cohesion;
         const before = homeDefPower(state, 'd1');
 
         const donors = selectDonors(state, { anchor_brigade_id: 'anchor', staging_osid: 'op:x:y' });
@@ -144,8 +153,12 @@ describe('home-sector defensive strength reflects lent personnel (the bug fix)',
         expect(homeDefPower(state, 'd1')).toBeLessThan(before);
 
         dissolveTacticalGroup(state, formed.tg_id!, 20);
-        // Lent ledger cleared → effectivePersonnel === personnel → full strength restored.
+        // Lent ledger cleared → effectivePersonnel === personnel → full PERSONNEL restored.
         expect(lentPersonnel(state.military.formations.d1)).toBe(0);
+        // Flags now default-ON (TG activation, commit 0b681ffe): formation bled the donor's
+        // cohesion (the Pyrrhic dampener) and dissolution does NOT restore it. This test asserts
+        // the PERSONNEL ledger round-trip, so restore the pre-formation cohesion before measuring.
+        state.military.formations.d1.cohesion = cohesionBefore;
         expect(homeDefPower(state, 'd1')).toBeCloseTo(before, 6);
     });
 });

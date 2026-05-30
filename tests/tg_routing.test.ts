@@ -182,10 +182,15 @@ describe('formTgsAtReadyTransition routing (flag-on)', () => {
     });
 
     it('flag-off: no TG formed (byte-identity guard)', async () => {
-        // Default import — ENABLE_TG_FORMATION is false in the unmocked module.
-        // doUnmock clears any flag-on doMock left registered by prior cases before reset.
-        vi.doUnmock('../src/sim/combat/tactical_group_config.js');
+        // Flags now default-ON (TG activation, commit 0b681ffe). To verify the flag-OFF
+        // byte-identity guard, explicitly force ENABLE_TG_FORMATION false.
         vi.resetModules();
+        vi.doMock('../src/sim/combat/tactical_group_config.js', async () => {
+            const actual = await vi.importActual<typeof import('../src/sim/combat/tactical_group_config.js')>(
+                '../src/sim/combat/tactical_group_config.js',
+            );
+            return { ...actual, ENABLE_TG_FORMATION: false };
+        });
         const { formTgsAtReadyTransition } = await import('../src/sim/combat/operation_preparation.js');
         const state = stateWith([
             brigade('anchor', { location_osid: 'op:m:s0' }),

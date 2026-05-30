@@ -29,6 +29,7 @@ import {
     projectPromotionDisplayNames,
 } from '../src/sim/combat/tactical_group_promotion.js';
 import { PROMOTION_TG_FORMATION_THRESHOLD } from '../src/sim/combat/tactical_group_config.js';
+import { TG_DONOR_COOLDOWN_TURNS } from '../src/sim/combat/tactical_group_lifecycle.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Fixtures
@@ -238,7 +239,15 @@ describe('OG→Division promotion — NO force inflation (flag-on)', () => {
         const personnelBefore = brigadeIdsBefore.reduce((s, id) => s + (state.military.formations[id].personnel ?? 0), 0);
 
         // Form TGs up to threshold (each formation increments the per-corps counter).
+        // Flags now default-ON (TG activation, commit 0b681ffe): ENABLE_TG_COHESION_BLEED is true,
+        // so Hard Invariant #9 (same-composition reform gate) blocks re-forming the SAME anchor
+        // composition within TG_DONOR_COOLDOWN_TURNS of a dissolve. Space each iteration past the
+        // cooldown window so each re-form is legitimate (mirrors a standing OG launching repeated
+        // ops over time rather than abusing dissolve+reform).
+        const step = TG_DONOR_COOLDOWN_TURNS + 1;
         for (let i = 0; i < PROMOTION_TG_FORMATION_THRESHOLD; i++) {
+            const turn = 30 + i * step;
+            state.meta.turn = turn;
             const tgId = `tg:arbih_2nd_corps:op${i}:anchor`;
             // Manually drive the counter as formTacticalGroup does, then dissolve so the anchor
             // is free to re-form (mirrors a standing OG launching repeated ops over time).
@@ -246,10 +255,10 @@ describe('OG→Division promotion — NO force inflation (flag-on)', () => {
                 op_id: `op${i}`,
                 anchor_brigade_id: 'anchor',
                 donors: [],
-                current_turn: 30 + i,
+                current_turn: turn,
             });
             expect(res.tg_id).not.toBeNull();
-            lifecycle.dissolveTacticalGroup(state, res.tg_id!, 30 + i);
+            lifecycle.dissolveTacticalGroup(state, res.tg_id!, turn);
             void tgId;
         }
 

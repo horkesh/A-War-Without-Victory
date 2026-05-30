@@ -139,6 +139,18 @@ describe('Army HQ AAR telemetry (flag ON)', () => {
 });
 
 describe('Army HQ AAR telemetry (flag OFF — byte-identity contract)', () => {
+    beforeEach(() => {
+        vi.resetModules();
+        // Flags now default-ON (TG activation, commit 0b681ffe). This block verifies the
+        // flag-OFF byte-identity contract, so it must explicitly force the flag false.
+        vi.doMock('../src/sim/combat/tactical_group_config.js', async () => {
+            const actual = await vi.importActual<typeof import('../src/sim/combat/tactical_group_config.js')>(
+                '../src/sim/combat/tactical_group_config.js',
+            );
+            return { ...actual, ENABLE_TG_ARMY_HQ_OPS: false };
+        });
+    });
+
     it('never populates army_hq_telemetry even when an Army-HQ TG matches', async () => {
         const { finalizeOperationAAR } = await import('../src/sim/combat/operation_aar.js');
         const { state, op } = fixture();
