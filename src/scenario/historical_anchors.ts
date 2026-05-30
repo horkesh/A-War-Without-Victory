@@ -256,3 +256,55 @@ export const HISTORICAL_OSID_ANCHORS_OCT1995: readonly HistoricalEpochOsidAnchor
     { at_week: 188, osid: 'op:foca:foca_3',             expected_controller: 'RS',   citation: 'unchanged' },
     { at_week: 188, osid: 'op:visegrad:visegrad_2',     expected_controller: 'RS',   citation: 'unchanged' },
 ];
+
+// ===== Epoch-appropriate OSID anchor resolver (2026-05-30) =====
+//
+// The early-war OSID list (HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992) encodes
+// 1992 expectations. Grading a late-war (Oct-1995, w188) scenario against it is
+// wrong for OSIDs that changed hands after Dec 1992 (Srebrenica/Žepa fell to RS;
+// Velika Kladuša retaken by RBiH; etc). The epoch supplement lists above already
+// carry the correct per-week controller for each endpoint.
+//
+// resolveEpochOsidAnchors merges the stable early-war anchors with the
+// epoch-specific overrides keyed by OSID: an epoch entry REPLACES the early-war
+// value for a changed OSID, and ADDS coverage for OSIDs absent from the base
+// list. The merge is deterministic (sorted by OSID) and introduces no new
+// controllers — every controller comes from a hand-authored list above.
+//
+// This affects ONLY the anchor_checks report/validation field, never sim state.
+
+const EPOCH_OSID_SUPPLEMENTS: Record<'jan1993' | 'apr1994' | 'apr1995' | 'oct1995', readonly HistoricalEpochOsidAnchor[]> = {
+    jan1993: HISTORICAL_OSID_ANCHORS_JAN1993_SUPPLEMENT,
+    apr1994: HISTORICAL_OSID_ANCHORS_APR1994,
+    apr1995: HISTORICAL_OSID_ANCHORS_APR1995,
+    oct1995: HISTORICAL_OSID_ANCHORS_OCT1995,
+};
+
+/**
+ * Resolve the effective OSID anchor set for a scenario epoch.
+ *
+ * `'apr1992'` returns the early-war base list unchanged (byte-identical with the
+ * pre-fix behavior). Every other epoch returns the base list merged with that
+ * epoch's supplement, where the supplement wins per OSID.
+ *
+ * Output is sorted by OSID for deterministic, stable report ordering.
+ */
+export function resolveEpochOsidAnchors(
+    epoch: 'apr1992' | 'jan1993' | 'apr1994' | 'apr1995' | 'oct1995'
+): readonly HistoricalOsidAnchor[] {
+    if (epoch === 'apr1992') {
+        // Early/short scenarios keep the raw early-war list (insertion order).
+        return HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992;
+    }
+    const byOsid = new Map<string, string>();
+    for (const a of HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992) {
+        byOsid.set(a.osid, a.expected_controller);
+    }
+    // Epoch supplement overrides the early-war value for changed OSIDs and adds new ones.
+    for (const a of EPOCH_OSID_SUPPLEMENTS[epoch]) {
+        byOsid.set(a.osid, a.expected_controller);
+    }
+    return Array.from(byOsid.keys())
+        .sort((x, y) => (x < y ? -1 : x > y ? 1 : 0))
+        .map((osid) => ({ osid, expected_controller: byOsid.get(osid)! }));
+}

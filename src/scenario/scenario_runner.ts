@@ -129,8 +129,8 @@ import {
     type ActiveOperationSummary
 } from './scenario_end_report.js';
 import {
-    HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992 as CANONICAL_HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992,
     HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992 as CANONICAL_HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992,
+    resolveEpochOsidAnchors,
 } from './historical_anchors.js';
 import { runAnomalyDetection } from './anomaly_detector.js';
 import type { AnomalyReport } from './anomaly_types.js';
@@ -774,7 +774,22 @@ function computeHistoricalControlAlignmentDiagnostics(
     };
 }
 
-function computeHistoricalAnchorChecks(final: ControlKey[]): HistoricalAnchorCheck[] {
+/**
+ * Grade OSID anchors against the EPOCH-APPROPRIATE expectation set.
+ *
+ * The early-war (apr1992-dec1992) OSID list encodes 1992 controllers. Grading a
+ * late-war scenario (e.g. 188w → Oct 1995) against it is wrong for OSIDs that
+ * changed hands after Dec 1992. `resolveEpochOsidAnchors(epoch)` merges the
+ * stable early-war anchors with the epoch-specific overrides (Srebrenica/Žepa →
+ * RS, Velika Kladuša → RBiH, etc.), so the count reflects the right history at
+ * the scenario's endpoint. The epoch is derived from the same reference key the
+ * painted-control diagnostics use (`pickHistoricalReferenceKey`). This touches
+ * ONLY the report/validation field — never sim state or the final hash.
+ */
+function computeHistoricalAnchorChecks(
+    final: ControlKey[],
+    epoch: 'jan1993' | 'apr1994' | 'apr1995' | 'oct1995'
+): HistoricalAnchorCheck[] {
     const bySid = new Map(final.map((row) => [row.settlement_id, row.controller ?? null]));
     const settlementChecks = CANONICAL_HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992.map((anchor) => {
         const actual = bySid.get(anchor.settlement_id) ?? null;
@@ -786,7 +801,7 @@ function computeHistoricalAnchorChecks(final: ControlKey[]): HistoricalAnchorChe
             passed: actual === anchor.expected_controller
         };
     });
-    const osidChecks = CANONICAL_HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992.map((anchor) => {
+    const osidChecks = resolveEpochOsidAnchors(epoch).map((anchor) => {
         const actual = bySid.get(anchor.osid) ?? null;
         return {
             anchor_type: 'osid' as const,
@@ -2810,7 +2825,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 historicalReferenceSnapshot,
                 referenceKey
             );
-            historicalAnchorChecks = computeHistoricalAnchorChecks(finalControlSnapshot);
+            // Grade OSID anchors against the epoch matching scenario duration
+            // (same key the painted-control diagnostics use), so late-war runs
+            // are not measured against 1992 expectations.
+            historicalAnchorChecks = computeHistoricalAnchorChecks(finalControlSnapshot, referenceKey);
         }
         const runHasAnyBattles = (combatCausalitySummary?.total_battles ?? 0) > 0;
         if (combatCausalitySummary && !runHasAnyBattles) {
