@@ -2118,14 +2118,22 @@ function shareFrontEdgeEndpoint(a: CorpsFrontSector, b: CorpsFrontSector): boole
 
 function buildFriendlyOsidsFromState(
     state: GameState,
-    adjacency: Map<Osid, Osid[]>,
+    _adjacency: Map<Osid, Osid[]>,
     faction: FactionId,
 ): Set<string> {
+    // The friendly set is every OSID politically controlled by `faction`. The
+    // previous implementation pre-scanned `adjacency.keys()` for faction-owned
+    // OSIDs and then scanned `political_controllers` again, but every OSID added
+    // by the adjacency pre-scan satisfies `pc[osid] === faction` and is therefore
+    // already produced by the `political_controllers` scan below (which enumerates
+    // every key of `pc`). The pre-scan was pure redundant work over the large
+    // adjacency map. Dropping it yields the byte-identical membership set (the
+    // result is consumed only via `.has(...)`, never iterated for order) while
+    // eliminating a full `adjacency.keys()` walk per call across the ~10 call
+    // sites in the sector reconstruction pipeline. `_adjacency` is retained in the
+    // signature so callers and instrumentation contracts are unchanged.
     const friendly = new Set<string>();
     const pc = state.political.political_controllers ?? {};
-    for (const osid of adjacency.keys()) {
-        if (pc[osid] === faction) friendly.add(osid);
-    }
     for (const [osid, controller] of Object.entries(pc)) {
         if (controller === faction) friendly.add(osid);
     }

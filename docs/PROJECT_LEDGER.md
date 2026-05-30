@@ -1,4 +1,62 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-30] feat(tg): finish v2.3 recovery-lock + Inv#6 test + Army-HQ AAR telemetry (PR #60)
+
+**Type:** Phased-rollout follow-up to ADR-0005 v2.3. Three flag-gated items, all flag-off byte-identical at both gold gates. Ring 1, faction-agnostic. PR #60 (2026-05-30, squash `12e822f3`).
+
+**Change:**
+- **(a) Finished the dead v2.3 8-turn cohesion-recovery LOCK** behind a new flag `ENABLE_TG_RECOVERY_SUPPRESSION` (`TG_RECOVERY_SUPPRESSION_TURNS=8`). `formTacticalGroup` now sets `donor.tg_recovery_suppressed_until_turn = formation_turn + 8` — the consumer existed but the field was never set (dead code). The `cohesion_drift.ts` suppression guard was widened to `(ENABLE_TG_ARMY_HQ_OPS || ENABLE_TG_RECOVERY_SUPPRESSION)` so regular corps-scope TGs — not just Army-HQ ops — receive the recovery lock.
+- **(b) Hard-Invariant-#6 zombie-hold confirmation test** added.
+- **(c) Army-HQ AAR telemetry sidecar** (donor corps lineage / cross-corps donor count / total cohesion bled), gated by `ENABLE_TG_ARMY_HQ_OPS`.
+
+**Verification:**
+- **Flag-off byte-identical at BOTH gold gates: 40w `78e231e35b08cf53` + 188w `940251e4acaff3d4`.** tsc clean. The changed code is reached flag-on only.
+
+**Files:**
+- `src/sim/combat/tactical_group_config.ts` (`ENABLE_TG_RECOVERY_SUPPRESSION`, `TG_RECOVERY_SUPPRESSION_TURNS`)
+- `src/sim/combat/tactical_group_lifecycle.ts` (`formTacticalGroup` sets `tg_recovery_suppressed_until_turn`)
+- `src/sim/combat/cohesion_drift.ts` (suppression guard widened)
+- Army-HQ AAR telemetry sidecar + Hard-Inv-#6 test
+- `docs/PROJECT_LEDGER.md` + `docs/20_engineering/ADR/ADR-0005-tactical-groups-as-primary-ops-path.md` (r3.6)
+
+---
+
+## [2026-05-30] chore(merge): integrate roadmap-noncalibration (i18n + strict-null/perf/GUI cleanup) into main (PR #59)
+
+**Type:** Branch integration merge. PR #59 (2026-05-30, squash `26cbf618`). 135-commit branch (`roadmap-noncalibration`: i18n + strict-null / perf / GUI cleanup) integrated into main.
+
+**Why:** Long-divergent cleanup branch brought current.
+
+**Change:** Merging current main into the branch surfaced **111 conflicts, all resolved keeping both sides' work** — engine/state took main's current form (incl. v34 / `save_migration`); i18n unioned both key sets; `src/ui` took main's evolved superset; ledger/roadmap keep-both.
+
+**Verification:**
+- **Calibration FLAT:** anchors 27/27, benchmarks 6/6, **656/712**.
+
+**Files:**
+- i18n key sets, `src/ui/*`, strict-null / perf / GUI cleanup across the branch
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
+
+## [2026-05-30] chore: intel/ambush friction flag-gate + provenance-gap report + derived-scratch gitignore (PRs #58 / #55 / #56)
+
+**Type:** Three small merges, combined. All Ring 1 / byte-identical or zero scenario-hash impact.
+
+**Change:**
+- **PR #58** — retro-gates the live intel/ambush casualty friction behind a default-ON flag `AWWV_INTEL_AMBUSH_FRICTION`. Byte-identical: 40w `a969d44719aaa40e` / 188w `dbccc61712566da7` unchanged with the flag unset.
+- **PR #55** — provenance-gap investigation report + `tests/essay_index_integrity.test.ts` (read-only, zero scenario-hash impact).
+- **PR #56** — `.gitignore` classification of `data/derived/scenario/_*/` transient scratch artifacts + ownership-matrix row + test (byte-identical by construction).
+
+**Verification:**
+- #58 byte-identical with flag unset (40w `a969d44719aaa40e` / 188w `dbccc61712566da7`); #55/#56 zero scenario-hash impact / byte-identical by construction.
+
+**Files:**
+- intel/ambush friction path + `AWWV_INTEL_AMBUSH_FRICTION` flag (#58)
+- `tests/essay_index_integrity.test.ts` + provenance-gap report (#55)
+- `.gitignore`, ownership-matrix row, gitignore test (#56)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
+
 ## [2026-05-29] feat(combat): ADR-0005 v3.0 — Army HQ Operations, flag-gated dormant
 
 **Type:** Phased rollout v3.0 of ADR-0005 — the Army HQ Operations sub-stage. All behavior gated behind new sub-flag `ENABLE_TG_ARMY_HQ_OPS` (default false). Ring 1, faction-agnostic. Flag-off byte-identity required and obtained at BOTH gold gates.
