@@ -301,12 +301,12 @@ export function computePoliticalAssessment(
     const patron_pressure = clamp(rawOverrideAuthority, 0, 100);
 
     // ── Exhaustion ──────────────────────────────────────────────────────────
-    // war_exhaustion is unbounded monotonic (Engine Invariants §8), typically 0-600+
-    // at 40w. Normalize to 0-100 scale for situation_score: divide by 6 so that
-    // exhaustion 600 maps to 100. Previous 0-100 clamp made ALL factions read 100
-    // after ~w5, contributing zero differential to political decisions.
+    // war_exhaustion is unbounded monotonic (Engine Invariants §8). After the 2026-05-22 100× rescale
+    // (commit 59511672) it runs ~0-10000+ (turn-40 ~4750-7940). Normalize to a 0-100 scale for
+    // situation_score: divide by 600 (was /6 in the 0-100 era) so the term tracks the rescaled ceiling.
+    // A plain 0-100 clamp pinned ALL factions to 100 after ~w5, contributing zero political differential.
     const exhaustion_level = clamp(
-        (state.political?.war_exhaustion?.[faction] ?? 0) / 6,
+        (state.political?.war_exhaustion?.[faction] ?? 0) / 600,
         0,
         100,
     );
