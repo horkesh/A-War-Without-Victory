@@ -826,8 +826,7 @@ function classifyAxisOpeningAttack(
         if (anchorId && stagingOsid) {
             const anchorPersonnel = state.military.formations?.[anchorId]?.personnel ?? 0;
             const donors = selectDonors(state, { anchor_brigade_id: anchorId, staging_osid: stagingOsid, army_hq_op_id: armyHqOpId });
-            const donated = donors.reduce((sum, d) => sum + d.personnel_lent, 0);
-            if (donated < DONATION_READINESS_FRACTION * anchorPersonnel) {
+            if (donationReadinessBlocksAxis(donors, anchorPersonnel)) {
                 axis.launch_blocker = 'insufficient_donation';
                 return { executable: false, blocker: 'insufficient_donation' };
             }
@@ -836,6 +835,39 @@ function classifyAxisOpeningAttack(
 
     delete axis.launch_blocker;
     return { executable: true };
+}
+
+/**
+ * PHASE 1.5 DONOR-READINESS FALLBACK (operations-expert + sector-expert, 2026-05-30).
+ *
+ * Pure decision for the ADR-0005 v2.2c #3 donation-readiness gate. Returns true iff
+ * the gate should BLOCK the axis with `insufficient_donation`.
+ *
+ * The 60% gate's real intent is to refuse an under-committed *multi-donor* TG (a lone
+ * anchor masquerading as a tactical group). It must NEVER cancel an otherwise-valid
+ * offensive when the corps simply has NO eligible donors to muster: an isolated /
+ * encircled, donor-poor corps (e.g. the ARBiH 5th Corps in the Bihać pocket — no
+ * adjacent donor corps; candidates blocked by distance / cohesion / residual-floor)
+ * had its anchor-only relief / defensive ops gated out, which dropped the Bihać enclave
+ * RBiH→RS wholesale (measured 188w 615→569). With zero donors no TG would form anyway
+ * (`formTgsAtReadyTransition` is a no-op with an empty donor pool → legacy lone-anchor
+ * combat), so blocking degrades a valid lone-anchor op into a cancellation.
+ *
+ * Rule:
+ *   - donors.length === 0 → DO NOT block (degrade to lone-anchor, exactly as flag-off).
+ *   - donors exist but pledge < DONATION_READINESS_FRACTION × anchorPersonnel → BLOCK.
+ *
+ * Deterministic: `selectDonors` is deterministic, so `donors.length === 0` is a stable
+ * function of the turn's state. Caller only invokes this under ENABLE_TG_FORMATION, so
+ * flag-off never reaches it → byte-identical.
+ */
+export function donationReadinessBlocksAxis(
+    donors: ReadonlyArray<{ personnel_lent: number }>,
+    anchorPersonnel: number,
+): boolean {
+    if (donors.length === 0) return false; // donor-poor corps: lone-anchor fallback, never block
+    const donated = donors.reduce((sum, d) => sum + d.personnel_lent, 0);
+    return donated < DONATION_READINESS_FRACTION * anchorPersonnel;
 }
 
 export function evaluateOpeningAttackReadiness(
