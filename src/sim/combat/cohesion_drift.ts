@@ -12,7 +12,8 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { getEnclaveCohesionRecovery } from './enclave_resilience.js';
 import { getFactionCohesionCeiling, getFactionCohesionFloor } from './faction_progression.js';
 // ADR-0005 v3.0 Phase D: Army HQ donor recovery-suppression (zero positive drift only).
-import { ENABLE_TG_ARMY_HQ_OPS } from './tactical_group_config.js';
+// v2.3 (ENABLE_TG_RECOVERY_SUPPRESSION): the same lock for regular (non-Army-HQ) TG donors.
+import { ENABLE_TG_ARMY_HQ_OPS, ENABLE_TG_RECOVERY_SUPPRESSION } from './tactical_group_config.js';
 
 /** Faction-specific exhaustion thresholds. RS had JNA logistics infrastructure —
  *  organizational strain sets in later (higher threshold). RBiH and HRHB are ad-hoc
@@ -151,13 +152,14 @@ export function runCohesionDrift(
         if (drift > 0 && isFormationInOpsecSector(state, f)) {
             drift *= 0.5;
         }
-        // ADR-0005 v3.0 Phase D: Army HQ donors recover no cohesion while suppressed.
+        // ADR-0005 v3.0 Phase D + v2.3: TG donors recover no cohesion while suppressed.
         // Zero ONLY positive drift (mirror the OPSEC drift>0 pattern above); the unconditional
         // faction-floor clamp below still protects these brigades — we never push below floor.
-        // Gated by ENABLE_TG_ARMY_HQ_OPS so the suppression field is never set flag-off and this
-        // branch can never fire (byte-identical flag-off).
+        // Reachable via EITHER the Army-HQ path (ENABLE_TG_ARMY_HQ_OPS) OR the regular-TG 8-turn
+        // lock (ENABLE_TG_RECOVERY_SUPPRESSION). With both flags off, the suppression field is
+        // never set, so this branch can never fire (byte-identical flag-off).
         if (
-            ENABLE_TG_ARMY_HQ_OPS &&
+            (ENABLE_TG_ARMY_HQ_OPS || ENABLE_TG_RECOVERY_SUPPRESSION) &&
             drift > 0 &&
             f.tg_recovery_suppressed_until_turn != null &&
             turn < f.tg_recovery_suppressed_until_turn

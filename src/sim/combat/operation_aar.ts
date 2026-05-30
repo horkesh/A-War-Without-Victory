@@ -7,10 +7,11 @@
  * compiled into a full OperationAAR and stored in GameState.operation_history.
  */
 
-import type { GameState, CorpsOperation, FormationId, CommanderAssessment } from '../../state/game_state.js';
+import type { GameState, CorpsOperation, FormationId, CommanderAssessment, TacticalGroup } from '../../state/game_state.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { ENABLE_TG_ARMY_HQ_OPS } from './tactical_group_config.js';
 
 // ─── Sub-ledgers ────────────────────────────────────────────────────────────
 
@@ -95,6 +96,28 @@ export interface OperationGrade {
     };
 }
 
+// ─── Army HQ telemetry sidecar ──────────────────────────────────────────────
+
+/**
+ * ADR-0005 v3.0 Army-HQ-op telemetry sidecar (gated by ENABLE_TG_ARMY_HQ_OPS).
+ * Populated only when the finalized operation was carried by a TG that belongs to an
+ * Army HQ op (faction-wide cross-corps offensive — Krivaja-95 / Farz 95 pattern).
+ * Pure diagnostic readout of state already present on the live TG; never recomputed
+ * after the fact. Flag-off: emit branch never fires → field omitted → byte-identical.
+ */
+export interface ArmyHqOpAarTelemetry {
+    /** The ArmyHqOpId this TG was carrying out. */
+    army_hq_op_id: string;
+    /** Anchor brigade's parent corps (TG owner). */
+    anchor_corps_id: string;
+    /** Distinct donor parent corps that contributed brigades (sorted, strictCompare). */
+    donor_corps_lineage: string[];
+    /** Count of donor corps OTHER than the anchor corps — measures cross-corps reach. */
+    cross_corps_donor_count: number;
+    /** Sum of cohesion_bleed_applied across all donor contributions (total Pyrrhic cost). */
+    total_cohesion_bled: number;
+}
+
 // ─── Complete AAR ───────────────────────────────────────────────────────────
 
 /** The complete After-Action Report. */
@@ -160,6 +183,10 @@ export interface OperationAAR {
      *  Grmeč/Sana fantasy-ratio bug-proof) from disk artifacts without source
      *  spelunking. */
     force_ratio_estimate?: number;
+    /** ADR-0005 v3.0 (ENABLE_TG_ARMY_HQ_OPS): Army-HQ-op telemetry sidecar.
+     *  Present only when this op was carried by a TG belonging to an Army HQ op.
+     *  Flag-off: never populated. */
+    army_hq_telemetry?: ArmyHqOpAarTelemetry;
 }
 
 // ─── Pending accumulator (lives on CorpsOperation during lifecycle) ─────────
@@ -518,6 +545,49 @@ export function recordOperationWeeklyEntries(
     }
 }
 
+// ─── Army HQ telemetry (ENABLE_TG_ARMY_HQ_OPS) ─────────────────────────────
+
+/**
+ * Find the TG carrying out this CorpsOperation, if any. Matches on TG.op_id === op.name
+ * (operation_preparation.ts sets TG.op_id = op.name at formation).
+ * Deterministic: scans tactical_groups in sorted id order, returns first match.
+ */
+function findTgForOp(state: GameState, opId: string): TacticalGroup | undefined {
+    const tgs = state.military?.tactical_groups;
+    if (!tgs) return undefined;
+    for (const tgId of Object.keys(tgs).sort(strictCompare)) {
+        const tg = tgs[tgId];
+        if (tg?.op_id === opId) return tg;
+    }
+    return undefined;
+}
+
+/**
+ * Build the Army-HQ telemetry sidecar for an op, or undefined if the op was not carried
+ * by an Army-HQ TG. Pure read of live TG donor_contributions — no recomputation.
+ * Caller gates on ENABLE_TG_ARMY_HQ_OPS.
+ */
+function buildArmyHqTelemetry(state: GameState, op: CorpsOperation): ArmyHqOpAarTelemetry | undefined {
+    // TG.op_id is set to op.name at formation (operation_preparation.ts), so match on name.
+    const tg = findTgForOp(state, op.name);
+    if (!tg || tg.army_hq_op_id == null) return undefined;
+    const donorCorpsSet = new Set<string>();
+    let totalCohesionBled = 0;
+    for (const d of tg.donor_contributions) {
+        if (d.source_corps_id) donorCorpsSet.add(d.source_corps_id);
+        totalCohesionBled += d.cohesion_bleed_applied ?? 0;
+    }
+    const donorCorpsLineage = [...donorCorpsSet].sort(strictCompare);
+    const crossCorpsDonorCount = donorCorpsLineage.filter(c => c !== tg.corps_id).length;
+    return {
+        army_hq_op_id: tg.army_hq_op_id,
+        anchor_corps_id: tg.corps_id,
+        donor_corps_lineage: donorCorpsLineage,
+        cross_corps_donor_count: crossCorpsDonorCount,
+        total_cohesion_bled: totalCohesionBled,
+    };
+}
+
 // ─── Finalize Operation AAR ────────────────────────────────────────────────
 
 /**
@@ -816,6 +886,16 @@ export function finalizeOperationAAR(
     // op state. Mirrors recovery_reason carryover above.
     if (typeof op.force_ratio_estimate === 'number') {
         aar.force_ratio_estimate = op.force_ratio_estimate;
+    }
+
+    // ADR-0005 v3.0 (ENABLE_TG_ARMY_HQ_OPS): Army-HQ-op telemetry sidecar. Only emitted when
+    // the op was carried by a TG belonging to an Army HQ op. Flag-off: branch never runs →
+    // field omitted → byte-identical.
+    if (ENABLE_TG_ARMY_HQ_OPS) {
+        const armyHqTelemetry = buildArmyHqTelemetry(state, op);
+        if (armyHqTelemetry) {
+            aar.army_hq_telemetry = armyHqTelemetry;
+        }
     }
 
     if (!state.operation_history) state.operation_history = [];

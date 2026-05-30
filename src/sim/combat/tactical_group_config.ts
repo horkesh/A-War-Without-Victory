@@ -53,6 +53,25 @@ export const ENABLE_TG_COHESION_BLEED = false;
 export const ENABLE_TG_ARMY_HQ_OPS = false;
 
 /**
+ * v2.3 sub-flag: 8-turn cohesion-recovery LOCK for TG donors (ADR-0005 §Pyrrhic cost
+ * "locked 8 turns"). When on, `formTacticalGroup` sets
+ * `donor.tg_recovery_suppressed_until_turn = formed_on_turn + TG_RECOVERY_SUPPRESSION_TURNS`
+ * on each donor, and `cohesion_drift.ts` zeroes positive ambient drift for that donor
+ * while the lock is active (never clamps below the faction floor). This is the regular-TG
+ * counterpart to the Army-HQ recovery suppression — the consumer branch in cohesion_drift
+ * is widened to fire under either flag.
+ *
+ * Flag-off (default): the field is never written, so the cohesion_drift suppression branch
+ * can never fire and `tg_recovery_suppressed_until_turn` stays omitted (omitEmpty-safe
+ * optional scalar on FormationState). Goal: both gold hashes hold byte-identical
+ * (40w 78e231e35b08cf53, 188w 940251e4acaff3d4).
+ */
+export const ENABLE_TG_RECOVERY_SUPPRESSION = false;
+
+/** v2.3 cohesion-recovery LOCK duration (ADR-0005 §Pyrrhic cost: donors "locked 8 turns"). */
+export const TG_RECOVERY_SUPPRESSION_TURNS = 8;
+
+/**
  * v3.0 Army HQ frequency gate (ADR-0005 §Constants reference + §Army HQ Operations).
  * Both gated by ENABLE_TG_ARMY_HQ_OPS; inert when the flag is off.
  */
