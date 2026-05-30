@@ -1,4 +1,62 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-30] feat(tg): finish v2.3 recovery-lock + Inv#6 test + Army-HQ AAR telemetry (PR #60)
+
+**Type:** Phased-rollout follow-up to ADR-0005 v2.3. Three flag-gated items, all flag-off byte-identical at both gold gates. Ring 1, faction-agnostic. PR #60 (2026-05-30, squash `12e822f3`).
+
+**Change:**
+- **(a) Finished the dead v2.3 8-turn cohesion-recovery LOCK** behind a new flag `ENABLE_TG_RECOVERY_SUPPRESSION` (`TG_RECOVERY_SUPPRESSION_TURNS=8`). `formTacticalGroup` now sets `donor.tg_recovery_suppressed_until_turn = formation_turn + 8` — the consumer existed but the field was never set (dead code). The `cohesion_drift.ts` suppression guard was widened to `(ENABLE_TG_ARMY_HQ_OPS || ENABLE_TG_RECOVERY_SUPPRESSION)` so regular corps-scope TGs — not just Army-HQ ops — receive the recovery lock.
+- **(b) Hard-Invariant-#6 zombie-hold confirmation test** added.
+- **(c) Army-HQ AAR telemetry sidecar** (donor corps lineage / cross-corps donor count / total cohesion bled), gated by `ENABLE_TG_ARMY_HQ_OPS`.
+
+**Verification:**
+- **Flag-off byte-identical at BOTH gold gates: 40w `78e231e35b08cf53` + 188w `940251e4acaff3d4`.** tsc clean. The changed code is reached flag-on only.
+
+**Files:**
+- `src/sim/combat/tactical_group_config.ts` (`ENABLE_TG_RECOVERY_SUPPRESSION`, `TG_RECOVERY_SUPPRESSION_TURNS`)
+- `src/sim/combat/tactical_group_lifecycle.ts` (`formTacticalGroup` sets `tg_recovery_suppressed_until_turn`)
+- `src/sim/combat/cohesion_drift.ts` (suppression guard widened)
+- Army-HQ AAR telemetry sidecar + Hard-Inv-#6 test
+- `docs/PROJECT_LEDGER.md` + `docs/20_engineering/ADR/ADR-0005-tactical-groups-as-primary-ops-path.md` (r3.6)
+
+---
+
+## [2026-05-30] chore(merge): integrate roadmap-noncalibration (i18n + strict-null/perf/GUI cleanup) into main (PR #59)
+
+**Type:** Branch integration merge. PR #59 (2026-05-30, squash `26cbf618`). 135-commit branch (`roadmap-noncalibration`: i18n + strict-null / perf / GUI cleanup) integrated into main.
+
+**Why:** Long-divergent cleanup branch brought current.
+
+**Change:** Merging current main into the branch surfaced **111 conflicts, all resolved keeping both sides' work** — engine/state took main's current form (incl. v34 / `save_migration`); i18n unioned both key sets; `src/ui` took main's evolved superset; ledger/roadmap keep-both.
+
+**Verification:**
+- **Calibration FLAT:** anchors 27/27, benchmarks 6/6, **656/712**.
+
+**Files:**
+- i18n key sets, `src/ui/*`, strict-null / perf / GUI cleanup across the branch
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
+
+## [2026-05-30] chore: intel/ambush friction flag-gate + provenance-gap report + derived-scratch gitignore (PRs #58 / #55 / #56)
+
+**Type:** Three small merges, combined. All Ring 1 / byte-identical or zero scenario-hash impact.
+
+**Change:**
+- **PR #58** — retro-gates the live intel/ambush casualty friction behind a default-ON flag `AWWV_INTEL_AMBUSH_FRICTION`. Byte-identical: 40w `a969d44719aaa40e` / 188w `dbccc61712566da7` unchanged with the flag unset.
+- **PR #55** — provenance-gap investigation report + `tests/essay_index_integrity.test.ts` (read-only, zero scenario-hash impact).
+- **PR #56** — `.gitignore` classification of `data/derived/scenario/_*/` transient scratch artifacts + ownership-matrix row + test (byte-identical by construction).
+
+**Verification:**
+- #58 byte-identical with flag unset (40w `a969d44719aaa40e` / 188w `dbccc61712566da7`); #55/#56 zero scenario-hash impact / byte-identical by construction.
+
+**Files:**
+- intel/ambush friction path + `AWWV_INTEL_AMBUSH_FRICTION` flag (#58)
+- `tests/essay_index_integrity.test.ts` + provenance-gap report (#55)
+- `.gitignore`, ownership-matrix row, gitignore test (#56)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
+
 ## [2026-05-29] feat(combat): ADR-0005 v3.0 — Army HQ Operations, flag-gated dormant
 
 **Type:** Phased rollout v3.0 of ADR-0005 — the Army HQ Operations sub-stage. All behavior gated behind new sub-flag `ENABLE_TG_ARMY_HQ_OPS` (default false). Ring 1, faction-agnostic. Flag-off byte-identity required and obtained at BOTH gold gates.
@@ -4989,6 +5047,1022 @@ Reverting these is not viable — they are shipped v0.9.x event/officer/conseque
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize operations planning parameters
+
+**Type:** Operations-planning chrome localization slice. No operation plan state, phase-gate logic, commander selection, objective discovery, brigade assignment, artillery-preparation behavior, operation submission, scenario data, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `opsPlanning.*` message keys and routed phase-gate prerequisite messages plus `PlanParameters` operation name label, type/tempo/tolerance/support group labels/descriptions, pill labels/subtitles/title tooltips, artillery-preparation toggle, and support detail copy through the localization substrate.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; phase gate conditions, plan mutations, objective/brigade lists, artillery-preparation values, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\ops_planning_target_discovery.test.ts --reporter=dot` failed while BCS mode still returned English phase-gate messages and rendered English PlanParameters chrome. Green rerun passed 10/10. Related `npx.cmd vitest run tests\ui\ops_planning_target_discovery.test.ts tests\ui\accessibility_form_labels.test.ts tests\ui\gui_polish_typography_floor.test.ts tests\ui\ops_planning_draft_guard.test.ts --reporter=dot` passed 16/16. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/ops_modal/phaseGate.ts`, `src/ui/map/components/ops_modal/PlanParameters.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/ops_planning_target_discovery.test.ts`, `tests/ui/gui_polish_typography_floor.test.ts`, `docs/40_reports/implemented/20260523_BCS_OPS_PLANNING_PARAMETER_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize convoy decision chrome
+
+**Type:** Humanitarian convoy decision localization slice. No convoy lifecycle evaluation, decision staging IPC, player-decision gating, pending convoy queues, supply effects, IVP effects, scenario data, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `convoyDecision.*` message keys and routed the standalone convoy decision modal title, close action, route/supply/staged fields, decision-state labels, summary prose, action labels/details, staging fallback, and fallback error copy through the localization substrate. War Summary inline convoy decision buttons now use the same message family.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; staged decisions, convoy IDs, convoy queue ownership, IPC callbacks, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\convoy_decision_modal_i18n.test.ts tests\ui\war_summary_empty_states.test.ts --reporter=dot` failed while BCS mode still rendered English modal chrome and inline convoy buttons. Green rerun passed 10/10. Related `npx.cmd vitest run tests\ui\convoy_decision_modal_i18n.test.ts tests\ui\war_summary_empty_states.test.ts tests\ui\war_summary_opsec_reconciliation.test.ts tests\ui\war_summary_campaign_cost_i18n.test.ts --reporter=dot` passed 13/13. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/ConvoyDecisionModal.tsx`, `src/ui/map/components/SituationTab.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/convoy_decision_modal_i18n.test.ts`, `tests/ui/war_summary_empty_states.test.ts`, `docs/40_reports/implemented/20260523_BCS_CONVOY_DECISION_CHROME_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize War Summary situation chrome
+
+**Type:** Army HQ War Summary situation-tab localization slice. No War Summary model math, convoy staging IPC, municipality-support data, OPSEC sector derivation, operation state, diplomacy capital data, scenario data, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `warSummary.situation.*` message keys and routed component-owned convoy, local-support, OPSEC, and diplomacy section headings/empty states through the localization substrate. OPSEC flagged-operation-health count and per-operation supply/failure summaries now localize while preserving existing operation filtering and player-safe disclosure.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; convoy decisions, support orders, OPSEC sector lists, operation filtering, counts, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\war_summary_empty_states.test.ts tests\ui\war_summary_opsec_reconciliation.test.ts --reporter=dot` failed while BCS mode still rendered English empty states and OPSEC labels. Green rerun passed 10/10. Related `npx.cmd vitest run tests\ui\war_summary_empty_states.test.ts tests\ui\war_summary_opsec_reconciliation.test.ts tests\ui\war_summary_campaign_cost_i18n.test.ts tests\ui\war_summary_personnel_label.test.ts tests\ui\gui_audit_label_discipline.test.ts --reporter=dot` passed 16/16. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/SituationTab.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/war_summary_empty_states.test.ts`, `tests/ui/war_summary_opsec_reconciliation.test.ts`, `docs/40_reports/implemented/20260523_BCS_WAR_SUMMARY_SITUATION_CHROME_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Presidential Toolbar chrome
+
+**Type:** Tactical-map toolbar chrome localization slice. No advance gating, IPC behavior, inbox routing, Decision Room routing, Army HQ routing, dev tools, command authority values, scenario data, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS toolbar message keys and routed `PresidentialToolbar` primary labels, titles, no-state text, normal advance copy, pre-advance severity tooltip text, Army HQ visit affordance text, and Command Authority accessibility text through the localization substrate. `formatTurnLabel(...)` now localizes the `Turn {n}` suffix while preserving date arithmetic and English output.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; action callbacks, routing targets, turn math, command authority values, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\advance_turn_button_gated_feedback.test.ts --reporter=dot` failed while BCS mode still rendered English toolbar labels. Green rerun passed 6/6. Related `npx.cmd vitest run tests\ui\advance_turn_button_gated_feedback.test.ts tests\ui\bottom_status_strip_labels.test.ts tests\ui\presidential_toolbar_severity_pip.test.ts tests\ui\warroom_date_i18n.test.ts tests\ui\turn_aftermath.test.ts --reporter=dot` passed 30/30. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/PresidentialToolbar.tsx`, `src/ui/map/utils/formatters.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/advance_turn_button_gated_feedback.test.ts`, `docs/40_reports/implemented/20260523_BCS_PRESIDENTIAL_TOOLBAR_CHROME_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Settlement Timeline chrome
+
+**Type:** Settlement Timeline localization slice. No event collection, event ordering, settlement control, battle data, casualty values, scenario data, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Replaced the Settlement Timeline hardwired English short-month array with deterministic English/BCS short month tables keyed by the active UI locale. The no-events empty state and component-owned casualty row label now render through the English/BCS message substrate. Event titles/details remain source-authored.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; timeline grouping, event arrays, casualty values, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\settlement_timeline_i18n.test.ts --reporter=dot` failed first because `formatSettlementTimelineTurnDate` was not exposed; the casualty-row addition then failed while BCS mode still emitted English casualty labels. Green rerun passed 3/3. Related `npx.cmd vitest run tests\ui\settlement_timeline_i18n.test.ts tests\ui\war_planning_map_date_i18n.test.ts tests\ui\warroom_date_i18n.test.ts tests\ui\turn_aftermath.test.ts --reporter=dot` passed 20/20. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/SettlementTimeline.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/settlement_timeline_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_SETTLEMENT_TIMELINE_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize War Planning map date labels
+
+**Type:** War Planning map date-format localization slice. No map layer behavior, settlement control, turn arithmetic, scenario data, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Replaced the War Planning map hardwired English short-month array with deterministic English/BCS short month tables keyed by the active UI locale. The map's visible turn-date label now localizes its date portion while preserving the existing turn number and date math.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; map data, click behavior, draw order, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\war_planning_map_date_i18n.test.ts --reporter=dot` failed because `formatWarPlanningTurnDate` was not exposed yet. Green rerun passed 2/2. Related `npx.cmd vitest run tests\ui\war_planning_map_date_i18n.test.ts tests\ui\warroom_date_i18n.test.ts tests\ui\turn_aftermath.test.ts --reporter=dot` passed 17/17. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/warroom/components/WarPlanningMap.ts`, `tests/ui/war_planning_map_date_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_WAR_PLANNING_MAP_DATE_FORMATTING.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Warroom date labels
+
+**Type:** Warroom shared date-format localization slice. No ticker-turn conversion, scenario start-date state, turn arithmetic, faction colors, player-faction resolution, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Replaced Warroom hardwired month arrays with deterministic English/BCS full and short month tables keyed by the active UI locale. `turnToDateString`, `turnToMonthYear`, `turnToWeekString`, and `turnToShortLabel` now localize Warroom date labels while preserving existing date math.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; turn/date arithmetic and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\warroom_date_i18n.test.ts --reporter=dot` failed while BCS mode still emitted `1 September 1991`. Green rerun passed 2/2. Related `npx.cmd vitest run tests\ui\warroom_date_i18n.test.ts tests\faction_palette_canonical.test.ts tests\ui\warroom_player_faction.test.ts --reporter=dot` passed 10/10. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/warroom/components/warroom_utils.ts`, `tests/ui/warroom_date_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_WARROOM_DATE_FORMATTING.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize tactical-map shared date labels
+
+**Type:** Tactical-map shared date-format localization slice. No turn arithmetic, date baseline, scenario start date, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Replaced `turnToDateString(...)`'s hardwired English short month formatting with deterministic English/BCS short month tables keyed by the active UI locale. Tactical-map consumers such as Turn Aftermath, Chronicle, Formation Detail history moments, and Decision Room hard-turn card titles inherit localized month labels.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference changes strings only; turn-to-date arithmetic and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\turn_aftermath.test.ts --reporter=dot` failed while BCS mode still emitted `24 Jun 1992`. Green rerun passed 13/13. Related `npx.cmd vitest run tests\ui\turn_aftermath.test.ts tests\ui\turn_aftermath_modal_i18n.test.ts tests\ui\presidential_decision_room.test.ts --reporter=dot` passed 27/27. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/utils/formatters.ts`, `tests/ui/turn_aftermath.test.ts`, `docs/40_reports/implemented/20260523_BCS_MAP_SHARED_DATE_FORMATTING.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Decision Room owned card prose
+
+**Type:** Presidential Decision Room generated-card prose localization slice. No card synthesis, card ordering, severity ranking, source grouping, navigation target, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `decisionRoom.card.*` message keys and routed Decision Room-owned card titles, explanations, evidence rows, source owners, source labels, and action labels through the localization substrate. Source-provided external prose such as command briefing item text, live SITREP alert text, opportunity recommendations/descriptions, campaign-cost generated briefing lines, and Turn Aftermath cost reasons remains unchanged and separately scoped.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference changes strings only; card IDs, card arrays, sort keys, grouping order, navigation targets, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\presidential_decision_room.test.ts --reporter=dot` failed while BCS mode still emitted English Decision Room card titles. Green rerun passed 13/13. Related `npx.cmd vitest run tests\ui\presidential_decision_room.test.ts tests\ui\presidential_decision_room_panel_i18n.test.ts tests\ui\pre_advance_command_review.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts --reporter=dot` passed 30/30. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/data/presidentialDecisionRoom.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/presidential_decision_room.test.ts`, `docs/40_reports/implemented/20260523_BCS_DECISION_ROOM_CARD_PROSE_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Decision Room read-model chrome
+
+**Type:** Presidential Decision Room read-model chrome localization slice. No card synthesis, card ordering, severity ranking, source-handoff grouping, navigation target, advance-readiness selection, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `decisionRoom.category.*`, `decisionRoom.source.*`, `decisionRoom.action.*`, `decisionRoom.command.*`, `decisionRoom.loop.*`, `decisionRoom.noun.*`, and summary message keys. `presidentialDecisionRoom.ts` now localizes category lenses, command lanes, product-loop labels/fallbacks, count summaries, source-handoff labels, and handoff action labels.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference changes strings only; card IDs, card arrays, grouping order, sort keys, navigation targets, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\presidential_decision_room.test.ts --reporter=dot` failed while BCS mode still emitted English lens labels. Green rerun passed 12/12. Related `npx.cmd vitest run tests\ui\presidential_decision_room.test.ts tests\ui\presidential_decision_room_panel_i18n.test.ts tests\ui\pre_advance_command_review.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts --reporter=dot` passed 29/29. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/data/presidentialDecisionRoom.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/presidential_decision_room.test.ts`, `tests/ui/presidential_decision_room_panel_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_DECISION_ROOM_READ_MODEL_CHROME_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Presidential Inbox chrome
+
+**Type:** Presidential Inbox UI chrome localization slice. No Inbox item derivation, decision routing, opening-brief dismissal state, actionable-item counting, notification semantics, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `inbox.*` message keys. `PresidentialInbox` now localizes its panel title, situation divider, severity/type badges, notification dismiss affordance, update chip, three-faction opening briefs, quiet-inbox capsule, and toolbar badge titles.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; derived item arrays, button actions, dismissal state, source IDs, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\inbox_dedup.test.ts --reporter=dot` failed while BCS mode still rendered English Inbox opening/quiet chrome. Green rerun passed 6/6. Related `npx.cmd vitest run tests\ui\inbox_dedup.test.ts tests\ui\onboarding_track_d_consolidation.test.ts tests\ui\inbox_items.test.ts --reporter=dot` passed 46/46. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/PresidentialInbox.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/inbox_dedup.test.ts`, `tests/ui/onboarding_track_d_consolidation.test.ts`, `docs/40_reports/implemented/20260523_BCS_PRESIDENTIAL_INBOX_CHROME_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Decision Room panel chrome
+
+**Type:** Army HQ Decision Room UI chrome localization slice. No Decision Room card synthesis, command-loop lane selection, product-loop ordering, advance-readiness selection, navigation target, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `decisionRoom.panel.*` and `decisionRoom.category.counterOffer` message keys. `PresidentialDecisionRoomPanel` now localizes its title/header, advanced toggle, advanced desk metrics, command/product loop headings, lens/count chrome, dossier labels, source/advance/evidence labels, source handoff headings, inspection/review empty states, and category badge labels where the panel owns the label.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; Decision Room read-model arrays, sort order, navigation callbacks, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\presidential_decision_room_panel_i18n.test.ts --reporter=dot` failed while BCS mode still rendered English Decision Room panel chrome. Green rerun passed 1/1. Related `npx.cmd vitest run tests\ui\presidential_decision_room_panel_i18n.test.ts tests\ui\presidential_decision_room.test.ts tests\ui\pre_advance_command_review.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts --reporter=dot` passed 28/28. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/presidential_decision_room_panel_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_DECISION_ROOM_PANEL_CHROME_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Decision Room advance readiness
+
+**Type:** Decision Room/pre-advance read-model localization slice. No Decision Room card selection, advance-gate blocking logic, source-handoff grouping, navigation target, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `decisionRoom.advance.*`, `decisionRoom.empty.*`, and `preAdvance.gate.*` message keys. The Decision Room advance-readiness headline, active-dossier advance badge, no-state/no-player readiness labels, and pre-advance pending-decision gate title now localize through the shared substrate.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference changes strings only; card archives, readiness item order, blocker counts, source handoffs, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\pre_advance_command_review.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts --reporter=dot` failed while BCS mode still emitted English readiness headlines and gate titles. Green `npx.cmd vitest run tests\ui\pre_advance_command_review.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui\presidential_decision_room.test.ts --reporter=dot` passed 27/27. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/data/presidentialDecisionRoom.ts`, `src/ui/map/data/preAdvanceCommandReview.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/pre_advance_command_review.test.ts`, `tests/ui/advance_turn_button_gated_feedback.test.ts`, `docs/40_reports/implemented/20260523_BCS_DECISION_ROOM_ADVANCE_READINESS_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Warroom status bar chrome
+
+**Type:** Warroom status bar UI chrome localization slice. No Warroom navigation, advance gating, pre-advance review selection, docket ordering, source-handoff grouping, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `warroom.status.*` message keys. `WarroomStatusBar` now localizes phase badges, priority pulse label/title, urgent badge, advance action/title, docket panel headings, empty-state copy, source-handoff heading, and docket category badges.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; docket metrics, item/source order, navigation callbacks, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\advance_turn_button_gated_feedback.test.ts --reporter=dot` failed while BCS mode still rendered English Warroom status-bar chrome. Green rerun passed 4/4. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/warroom/WarroomStatusBar.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/advance_turn_button_gated_feedback.test.ts`, `docs/40_reports/implemented/20260523_BCS_WARROOM_STATUS_BAR_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Warroom priority docket summary
+
+**Type:** Warroom priority docket read-model localization slice. No pre-advance review selection, docket ordering, source-handoff grouping, blocking decision logic, navigation target, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `warroom.docket.*` message keys. `buildWarroomPriorityDocketView(...)` now localizes its compact summary, source-handoff summary, and open-Decision-Room label while preserving the underlying metrics and item/source arrays.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference changes strings only; docket metrics, item order, source handoff order, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\warroom_priority_docket.test.ts --reporter=dot` failed while BCS mode still emitted English docket summary chrome. Green rerun passed 4/4. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/data/warroomPriorityDocket.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/warroom_priority_docket.test.ts`, `docs/40_reports/implemented/20260523_BCS_WARROOM_PRIORITY_DOCKET_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] content(i18n): localize Letter Home templates
+
+**Type:** Chief of Staff Letter Home authored-template localization slice. No casualty selection, template selection, deterministic hashing, battle casualty split, formation lookup, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added optional `LetterHomeInput.locale` and optional `text_template_bcs` support in `generateLetterHome(...)`. `ChiefOfStaffBriefing` now passes the active UI locale into the generator, and all 25 shipped `data/templates/letter_home_templates.json` casualty vignette templates include BCS prose.
+
+**Determinism:** Deterministic template selection, name selection, age selection, rank index selection, and placeholder substitution order are unchanged. Locale changes only which authored template string is substituted after the same deterministic template ID is selected.
+
+**Verification:** Red `npx.cmd vitest run tests\letter_home_i18n.test.ts --reporter=dot` failed while BCS requests still used English template prose. Green `npx.cmd vitest run tests\letter_home_i18n.test.ts tests\ui\chief_of_staff_briefing_i18n.test.ts --reporter=dot` passed 9/9. Catalog check confirmed all 25 Letter Home templates include `text_template_bcs`. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/sim/letter_home.ts`, `src/ui/map/components/army_hq/ChiefOfStaffBriefing.tsx`, `data/templates/letter_home_templates.json`, `tests/letter_home_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_LETTER_HOME_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Chief of Staff header chrome
+
+**Type:** Army HQ Chief of Staff UI chrome localization slice. No Chief of Staff identity, faction profile selection, briefing generation, date calculation, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `chiefOfStaff.header.*` and `chiefOfStaff.title.*` message keys. `ChiefOfStaffBriefing` now localizes the paper stamp, daily-briefing label, visible staff title, and footer staff title while preserving rank/name rendering and existing date formatting.
+
+**Determinism:** Renderer presentation only. Locale preference remains UI state; profile selection, generated briefing paragraphs, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\chief_of_staff_briefing_i18n.test.ts --reporter=dot` failed while BCS mode still rendered English header chrome. Green rerun passed 8/8. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/ChiefOfStaffBriefing.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/chief_of_staff_briefing_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_HEADER_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Chief of Staff combat tone prose
+
+**Type:** Army HQ Chief of Staff generated-prose localization slice. No battle outcome classification, territory-net derivation, command briefing generation, turn-summary schema, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `chiefOfStaff.battle.*`, `chiefOfStaff.territory.*`, and small count-label message keys for precise/aggressive staff tones. `generateCoSBriefing(...)` now localizes generated last-turn combat and territory prose across all current staff tone branches while preserving existing win/loss/inconclusive counting and net-territory derivation.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference remains UI state; battle summaries, turn summaries, territory net, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\chief_of_staff_briefing_i18n.test.ts --reporter=dot` failed while BCS mode still emitted English precise/aggressive combat and territory prose. Green rerun passed 7/7. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/ChiefOfStaffBriefing.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/chief_of_staff_briefing_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_COMBAT_TONE_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Chief of Staff command-strain prose
+
+**Type:** Army HQ Chief of Staff generated-prose localization slice. No command-strain calculation, command relationship state, intervention cost, corps sorting, briefing item generation, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `chiefOfStaff.strain.*` message keys. The cautious, precise, and aggressive command-strain branches of `generateCoSBriefing(...)` now localize institutional warning prose while preserving existing corps-name interpolation and deterministic corps ordering.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference remains UI state; command-strain labels, corps data, intervention mechanics, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\chief_of_staff_briefing_i18n.test.ts --reporter=dot` failed while BCS mode still emitted English command-strain prose. Green rerun passed 6/6. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/ChiefOfStaffBriefing.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/chief_of_staff_briefing_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_COMMAND_STRAIN_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Chief of Staff precise/aggressive alert prose
+
+**Type:** Army HQ Chief of Staff generated-prose localization slice. No briefing item generation, alert severity, routing target, corps link, operation readiness, defense warning derivation, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `chiefOfStaff.alert.*.precise.*` and `chiefOfStaff.alert.*.aggressive.*` message keys. The precise/aggressive cohesion, operation readiness, and thin-front warning branches of `generateCoSBriefing(...)` now localize generated alert prose while preserving linked corps/operation/sector labels.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference remains UI state; briefing items, routing targets, command state, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\chief_of_staff_briefing_i18n.test.ts --reporter=dot` failed while BCS mode still emitted English precise/aggressive alert prose. Green rerun passed 5/5. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/ChiefOfStaffBriefing.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/chief_of_staff_briefing_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_ALERT_TONE_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Chief of Staff cautious alert prose
+
+**Type:** Army HQ Chief of Staff generated-prose localization slice. No briefing item generation, alert severity, routing target, corps link, operation readiness, defense warning derivation, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `chiefOfStaff.alert.*.cautious.*` message keys. The cautious-tone cohesion, operation authorization, and thin-front warning branches of `generateCoSBriefing(...)` now localize generated alert prose while preserving linked corps/operation/sector labels.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference remains UI state; briefing items, routing targets, command state, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\chief_of_staff_briefing_i18n.test.ts --reporter=dot` failed while BCS mode still emitted English cautious alert prose. Green rerun passed 4/4. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/ChiefOfStaffBriefing.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/chief_of_staff_briefing_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_ALERT_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Chief of Staff exhaustion prose
+
+**Type:** Army HQ Chief of Staff generated-prose localization slice. No war-exhaustion calculation, command relationship readout, command-briefing item generation, alert severity, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `chiefOfStaff.exhaustion.*` message keys. The exhaustion warning branch of `generateCoSBriefing(...)` now localizes army-wide staff interpretation prose for cautious, precise, and aggressive tones.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference remains UI state; exhaustion values, command relationship detail, briefing items, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\chief_of_staff_briefing_i18n.test.ts --reporter=dot` failed while BCS mode still emitted English exhaustion prose. Green rerun passed 3/3. Expanded localization/endgame pack passed 126/126. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/ChiefOfStaffBriefing.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/chief_of_staff_briefing_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_EXHAUSTION_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Chief of Staff combat and territory prose
+
+**Type:** Army HQ Chief of Staff generated-prose localization slice. No battle outcome classification, territory-net math, turn-summary schema, command-briefing item generation, command-strain behavior, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `chiefOfStaff.battle.cautious.*` and `chiefOfStaff.territory.cautious.*` message keys. The cautious-tone combat and territory summary branch of `generateCoSBriefing(...)` now localizes generated last-turn prose while preserving battle win/loss counting and territory gain/loss derivation.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference remains UI state; combat summaries, turn summaries, territory net, command briefing, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\chief_of_staff_briefing_i18n.test.ts --reporter=dot` failed while BCS mode still emitted English combat/territory prose. Green rerun passed 2/2. Expanded localization/endgame pack passed 125/125. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/ChiefOfStaffBriefing.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/chief_of_staff_briefing_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_COMBAT_TERRITORY_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Chief of Staff stable briefing
+
+**Type:** Army HQ Chief of Staff generated-prose localization slice. No command-briefing item generation, alert severity, corps routing link, command-strain behavior, battle/territory summary, letter-home generation, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `chiefOfStaff.greeting.*` and `chiefOfStaff.stable.*` message keys. The stable/no-alert branch of `generateCoSBriefing(...)` now localizes its deterministic greeting and baseline situation prose while preserving turn-modulo phrase selection.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference remains UI state; briefing item derivation, command-strain derivation, combat summaries, turn summaries, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\chief_of_staff_briefing_i18n.test.ts --reporter=dot` failed while BCS mode still emitted English stable briefing prose. Green rerun passed 1/1. Expanded localization/endgame pack passed 124/124. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/ChiefOfStaffBriefing.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/chief_of_staff_briefing_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_STABLE_BRIEFING_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize War Summary overview
+
+**Type:** Army HQ War Summary overview localization slice. No summary model math, player-safe disclosure policy, turn-summary schema, save shape, scenario data, combat math, operation behavior, campaign-cost classification, SITREP derivation, war-exhaustion behavior, calibration/army-arc tuning, source-authored event text, settlement labels, formation names, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `warSummary.overview.*` message keys. `WarSummaryContent` now localizes overview section titles, row labels, full-faction table labels, staff-assessment prose, SITREP count formatters, and civilian-impact labels while preserving source-authored SITREP headline/alert text.
+
+**Determinism:** Renderer presentation only. Locale preference remains UI state; War Summary overview model derivation, SITREP derivation, turn summaries, combat results, event firing, operation outcomes, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\war_summary_campaign_cost_i18n.test.ts --reporter=dot` failed while BCS mode still rendered English War Summary overview labels/prose. Green rerun passed 1/1. Expanded localization/endgame pack passed 123/123. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/WarSummaryContent.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/war_summary_campaign_cost_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_WAR_SUMMARY_OVERVIEW_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize War Summary campaign cost
+
+**Type:** Army HQ War Summary localization slice. No summary model math, turn-summary schema, save shape, scenario data, combat math, operation behavior, campaign-cost classification, war-exhaustion behavior, calibration/army-arc tuning, source-authored event text, settlement labels, formation names, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `warSummary.*` message keys. `WarSummaryContent` now localizes its title, no-state fallback, subsection tabs, Campaign Cost labels, localized campaign-cost severity value, and Campaign Drag labels/detail copy.
+
+**Determinism:** Renderer presentation only. Locale preference remains UI state; War Summary overview model derivation, campaign-cost classification, turn summaries, war-exhaustion values, combat results, event firing, operation outcomes, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\war_summary_campaign_cost_i18n.test.ts --reporter=dot` failed while BCS mode still rendered English campaign-cost chrome. Green rerun passed 1/1. Expanded localization/endgame pack passed 123/123. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/WarSummaryContent.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/war_summary_campaign_cost_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_WAR_SUMMARY_CAMPAIGN_COST_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Turn Aftermath archive
+
+**Type:** Turn Aftermath campaign archive localization slice. No turn-summary schema, save shape, scenario data, combat math, operation behavior, campaign-cost classification, momentum classification, calibration/army-arc tuning, source-authored event text, settlement labels, formation names, inbox item titles, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `turnAftermath.records.*`, `turnAftermath.campaign.*`, `turnAftermath.campaignCost.*`, and `turnAftermath.momentum.*` message keys. `buildTurnAftermathCampaignPulse(...)` and `buildTurnAftermathCampaignCost(...)` now localize generated campaign archive prose and top cost-driver labels. `TurnAftermathRecordsPanel` now localizes filters, archive chrome, metric labels/details, badges, and empty states.
+
+**Determinism:** Renderer/read-model presentation only. Archive ordering, cost/momentum classification, turn summaries, combat results, event firing, operation outcomes, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\turn_aftermath.test.ts tests\ui\turn_aftermath_records_panel_i18n.test.ts --reporter=dot` failed while BCS mode still rendered English archive prose and Records-panel chrome. Green rerun passed 14/14. Expanded localization/endgame pack passed 122/122. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/data/turnAftermath.ts`, `src/ui/map/components/army_hq/TurnAftermathRecordsPanel.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/turn_aftermath.test.ts`, `tests/ui/turn_aftermath_records_panel_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_TURN_AFTERMATH_ARCHIVE_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Turn Aftermath
+
+**Type:** Turn Aftermath generated-prose and modal-chrome localization slice. No turn-summary schema, save shape, scenario data, combat math, operation behavior, calibration/army-arc tuning, source-authored event text, settlement labels, formation names, inbox item titles, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added `turnAftermath.*` English/BCS message keys. `TurnAftermathModal` now localizes static chrome, metrics, empty states, enum badges, signal-kind badges, and footer actions. `buildTurnAftermathView(...)` now localizes generated headlines, deterministic narrative lines, cost reasons, strategic-signal wrapper labels, and judgment prose while preserving source-authored content unchanged.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference remains UI state; turn summaries, combat results, event firing, operation outcomes, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\turn_aftermath.test.ts tests\ui\turn_aftermath_modal_i18n.test.ts --reporter=dot` failed while BCS mode still rendered English Turn Aftermath strings. Green rerun passed 13/13. Expanded localization/endgame pack passed 120/120. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/data/turnAftermath.ts`, `src/ui/map/components/TurnAftermathModal.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/turn_aftermath.test.ts`, `tests/ui/turn_aftermath_modal_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_TURN_AFTERMATH_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Codex chrome
+
+**Type:** `CodexPanel` static chrome localization slice. No Codex essay catalog data, essay titles, authored essay prose, dynamic section conditions, unlock logic, Cost Ledger data, historical comparison data, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added `codex.*` English/BCS message keys and replaced hardcoded Codex shell labels/instructions with `t(...)`: title, essay-count line, empty-selection copy, locked-essay copy, ghost badges, context labels, dynamic-section labels, pending-content text, and source heading. Essay titles, essay bodies, source names, and category IDs remain source-authored.
+
+**Determinism:** Renderer presentation only. Locale preference remains UI state; Codex unlock/visibility logic and dynamic content selection are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\codex_panel_dynamic_mount.test.ts --reporter=dot` failed while BCS mode still rendered English Codex chrome. Green rerun passed 6/6. Expanded localization/endgame pack passed 107/107. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/CodexPanel.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/codex_panel_dynamic_mount.test.ts`, `docs/40_reports/implemented/20260523_BCS_CODEX_CHROME_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Codex and Chronicle comparison notes
+
+**Type:** Codex/Chronicle generated historical-comparison localization slice. No simulation behavior, combat math, operation behavior, `compareToHistorical(...)`, divergence-note generation, Cost Ledger data, Codex essay unlock logic, Chronicle entry selection, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Expanded `formatHistoricalDivergenceNote(...)` to cover current generated duration, territory-control, military-casualty, and Srebrenica comparison-note shapes. Codex `{comparison_notes}`, Chronicle card details, and Chronicle Wrapped bullets now reuse the formatter. `getActiveLocale()` now preserves in-memory locale in non-browser/server-render contexts instead of resetting to English when no `window.localStorage` exists.
+
+**Determinism:** Renderer/data presentation only. Locale preference remains browser-local UI state in browser contexts; non-browser render paths now honor explicit in-memory locale selection. No save/state schema, Cost Ledger output, historical comparison output, verdict output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\war_cost_summary.test.ts tests\ui\codex_panel_dynamic_mount.test.ts tests\ui\chronicle_endgame_mount.test.ts --reporter=dot` failed while BCS mode still rendered raw generated English comparison notes and non-browser locale lookup reset to English. Green rerun passed 22/22. Expanded localization/endgame pack passed 106/106. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/data/historicalDivergenceNotes.ts`, `src/ui/map/i18n/index.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `src/ui/map/components/CodexPanel.tsx`, `src/ui/map/components/codex/codexEssayResolver.ts`, `src/ui/map/components/chronicle/ChronicleCard.tsx`, `src/ui/map/components/chronicle/WrappedSlide.tsx`, `tests/ui/war_cost_summary.test.ts`, `tests/ui/codex_panel_dynamic_mount.test.ts`, `tests/ui/chronicle_endgame_mount.test.ts`, `docs/40_reports/implemented/20260523_BCS_CODEX_CHRONICLE_COMPARISON_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Cinematic Verdict comparison notes
+
+**Type:** `CinematicVerdict` / verdict share-summary historical comparison localization slice. No simulation behavior, combat math, operation behavior, `compareToHistorical(...)`, divergence-note generation, Cost Ledger data, verdict scoring, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Moved `formatHistoricalDivergenceNote(...)` into a shared UI data utility, preserved the existing `WarCostSummary` export, and reused the formatter for `CinematicVerdict` visible comparison callouts plus `buildVerdictShareSummary(...)` comparison lines. Unknown authored notes remain raw fallback.
+
+**Determinism:** Renderer/data presentation only. Locale preference remains browser-local UI state; no save/state schema, Cost Ledger output, historical comparison output, verdict output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\cinematic_verdict.test.ts --reporter=dot` failed while BCS mode still rendered `War lasted 12 weeks shorter than the historical 188 weeks` in the Cinematic Verdict comparison/share-summary path. Green `npx.cmd vitest run tests\ui\cinematic_verdict.test.ts --reporter=dot` passed 2/2. Focused pack `npx.cmd vitest run tests\ui\cinematic_verdict.test.ts tests\ui\verdict_share_summary.test.ts tests\ui\war_cost_summary.test.ts --reporter=dot` passed 18/18. Expanded localization/endgame pack passed 60/60. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/data/historicalDivergenceNotes.ts`, `src/ui/map/components/WarCostSummary.tsx`, `src/ui/map/components/verdict/CinematicVerdict.tsx`, `src/ui/map/data/verdictShareSummary.ts`, `tests/ui/cinematic_verdict.test.ts`, `tests/ui/verdict_share_summary.test.ts`, `docs/40_reports/implemented/20260523_BCS_CINEMATIC_VERDICT_COMPARISON_LOCALIZATION.md`, `docs/40_reports/implemented/20260523_BCS_WAR_COST_DIVERGENCE_NOTES_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize War Cost divergence notes
+
+**Type:** `WarCostSummary` historical-divergence note localization slice. No simulation behavior, combat math, operation behavior, `compareToHistorical(...)`, divergence-note generation, Cost Ledger data, verdict scoring, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `warCost.divergence.*` message keys. `formatHistoricalDivergenceNote(...)` now localizes known generated duration-note shapes and known Srebrenica comparison notes in the War Cost section, while preserving unknown authored notes unchanged.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema, Cost Ledger output, historical comparison output, verdict output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode still rendered `War lasted 6 weeks longer` in the War Cost section. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 19/19 after implementation. Helper contract `npx.cmd vitest run tests\ui\war_cost_summary.test.ts --reporter=dot` passed 13/13.
+
+**Artifacts:** `src/ui/map/components/WarCostSummary.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/endgame_interaction_proof.test.ts`, `tests/ui/war_cost_summary.test.ts`, `docs/40_reports/implemented/20260523_BCS_WAR_COST_DIVERGENCE_NOTES_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Verdict Dayton values
+
+**Type:** Rich `VerdictScreen` Dayton-value localization slice. No simulation behavior, combat math, operation behavior, Dayton negotiation data, verdict scoring, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `verdict.dayton.package.*`, `verdict.dayton.institution.*`, `verdict.dayton.institutionValue.*`, and `verdict.dayton.patronOverride.*` message keys. Known Dayton package IDs, institution keys/values, and patron override IDs now render localized labels, while unknown values retain raw source fallback.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema, Dayton output, verdict output, scoring output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode still rendered raw `package_a`. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 19/19 after implementation. Compatibility contract `npx.cmd vitest run tests\ui\endgame_presentation_proof.test.ts --reporter=dot` passed 29/29.
+
+**Artifacts:** `src/ui/map/components/VerdictScreen.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/endgame_interaction_proof.test.ts`, `docs/40_reports/implemented/20260523_BCS_VERDICT_DAYTON_VALUES_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Verdict dimension labels
+
+**Type:** Rich `VerdictScreen` dimension-label localization slice. No simulation behavior, combat math, operation behavior, verdict scoring, dimension scores, faction grades, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `verdict.dimension.*` message keys. Known `DimensionGrade.dimension` IDs now render localized negotiating-capital labels in the verdict report, while unknown/source-expanded dimension IDs keep the existing `dg.label` fallback.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema, verdict output, scoring output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode still rendered `Military Credibility`. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 19/19 after implementation. Compatibility contract `npx.cmd vitest run tests\ui\endgame_presentation_proof.test.ts --reporter=dot` passed 29/29.
+
+**Artifacts:** `src/ui/map/components/VerdictScreen.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/endgame_interaction_proof.test.ts`, `docs/40_reports/implemented/20260523_BCS_VERDICT_DIMENSION_LABELS_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Verdict condemnation notices
+
+**Type:** Rich `VerdictScreen` condemnation-notice localization slice. No simulation behavior, combat math, operation behavior, verdict scoring, condemnation category logic, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `verdict.condemnation.*` message keys. `formatCondemnationFlag(...)` now localizes known condemnation notice body text through `t(...)` while preserving the unknown-flag fallback. This localizes existing notice categories only and adds no new sensitive-history facts.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema, verdict output, scoring output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode still rendered `Condemned for genocide`. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 19/19 after implementation. Compatibility contract `npx.cmd vitest run tests\ui\endgame_presentation_proof.test.ts --reporter=dot` passed 29/29.
+
+**Artifacts:** `src/ui/map/components/VerdictScreen.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/endgame_interaction_proof.test.ts`, `docs/40_reports/implemented/20260523_BCS_VERDICT_CONDEMNATION_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Verdict outcome-class badges
+
+**Type:** Rich `VerdictScreen` outcome-class localization slice. No simulation behavior, combat math, operation behavior, verdict scoring, outcome classification data, faction grades, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Reused existing English/BCS `verdict.outcome.*` message keys. `VerdictScreen.formatOutcomeClass(...)` now renders localized outcome-class labels for faction-tab badges and the selected-faction report badge instead of using a component-local English label map.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema, verdict output, scoring output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode still rendered two `Survival` badges. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 19/19 after implementation. Compatibility pack `npx.cmd vitest run tests\ui\endgame_presentation_proof.test.ts tests\ui\verdict_share_summary.test.ts --reporter=dot` passed 32/32.
+
+**Artifacts:** `src/ui/map/components/VerdictScreen.tsx`, `tests/ui/endgame_interaction_proof.test.ts`, `docs/40_reports/implemented/20260523_BCS_VERDICT_OUTCOME_CLASS_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Verdict milestone comparison
+
+**Type:** Rich `VerdictScreen` milestone-comparison localization slice. No simulation behavior, combat math, operation behavior, milestone comparison truth, Cost Ledger generation, historical comparison math, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `verdict.milestone.*` message keys. Milestone comparison section chrome, week labels, delta labels, status labels, fallback duration-row label, and fallback duration summary now render through `t(...)`. Explicit source-authored milestone labels and summaries remain authoritative content.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema, milestone truth, Cost Ledger output, historical comparison output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode could not find `Poredjenje prekretnica`. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 19/19 after implementation. `npx.cmd vitest run tests\ui\endgame_presentation_proof.test.ts --reporter=dot` passed 29/29. Expanded localization/endgame pack `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts tests\ui\endgame_presentation_proof.test.ts tests\ui\verdict_share_summary.test.ts tests\ui\war_cost_summary.test.ts tests\ui\settings_localization.test.ts --reporter=dot` passed 62/62 across the discovered files in that invocation.
+
+**Artifacts:** `src/ui/map/components/VerdictScreen.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/endgame_interaction_proof.test.ts`, `docs/40_reports/implemented/20260523_BCS_VERDICT_MILESTONE_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Verdict scene prose
+
+**Type:** Deterministic verdict scene-prose localization slice. No simulation behavior, combat math, operation behavior, verdict scene tone/focus selection, Cost Ledger generation, historical comparison math, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `verdict.scene.*` message keys. `buildVerdictScene(...)` now localizes deterministic tone headlines, tone subheadlines, missing Cost Ledger fallback text, default war-cost-total title, and default war-cost-total sentence. Cost Ledger finding titles/text and historical divergence notes remain source-authored content.
+
+**Determinism:** Renderer/data presentation only. Locale preference remains browser-local UI state; no save/state schema, tone selection, focus selection, Cost Ledger output, historical comparison output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\cinematic_verdict.test.ts --reporter=dot` failed while BCS mode still rendered `Pyrrhic success, measured against the bill`. Green `npx.cmd vitest run tests\ui\cinematic_verdict.test.ts tests\ui\verdict_scene.test.ts tests\ui\verdict_share_summary.test.ts --reporter=dot` passed 8/8 after implementation. Expanded localization/endgame pack `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts tests\ui\game_over_i18n.test.ts tests\ui\side_picker_i18n.test.ts tests\ui\credits_screen_i18n.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts tests\ui\verdict_share_summary.test.ts tests\ui\verdict_scene.test.ts tests\ui\cinematic_verdict.test.ts --reporter=dot` passed 47/47. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/data/verdictScene.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/cinematic_verdict.test.ts`, `docs/40_reports/implemented/20260523_BCS_VERDICT_SCENE_PROSE_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Verdict share summary
+
+**Type:** Verdict share-summary wrapper/outcome-label localization slice. No simulation behavior, combat math, operation behavior, verdict scene selection, Cost Ledger generation, historical comparison math, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `verdict.share.*` and `verdict.outcome.*` message keys. `buildVerdictShareSummary(...)` now localizes deterministic wrapper lines, missing-packet fallbacks, grade/score labels, and faction-outcomes labels; `formatVerdictOutcomeClass(...)` now uses localized outcome-class labels. Cost Ledger finding prose, historical divergence notes, source verdict outcome labels, faction IDs, and source-provided prose remain unchanged.
+
+**Determinism:** Renderer/data presentation only. Locale preference remains browser-local UI state; no save/state schema, verdict scene selection, Cost Ledger output, historical comparison output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\verdict_share_summary.test.ts --reporter=dot` failed while BCS mode still rendered `A War Without Victory - Verdict`. Green `npx.cmd vitest run tests\ui\verdict_share_summary.test.ts tests\ui\verdict_scene.test.ts tests\ui\cinematic_verdict.test.ts --reporter=dot` passed 7/7 after implementation. Expanded localization/endgame pack `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts tests\ui\game_over_i18n.test.ts tests\ui\side_picker_i18n.test.ts tests\ui\credits_screen_i18n.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts tests\ui\verdict_share_summary.test.ts tests\ui\verdict_scene.test.ts tests\ui\cinematic_verdict.test.ts --reporter=dot` passed 46/46. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/data/verdictShareSummary.ts`, `src/ui/map/data/verdictScene.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/verdict_share_summary.test.ts`, `docs/40_reports/implemented/20260523_BCS_VERDICT_SHARE_SUMMARY_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Verdict Dayton labels
+
+**Type:** Rich `VerdictScreen` FactionReport Dayton-label localization slice. No simulation behavior, combat math, operation behavior, Dayton negotiation result data, patron override logic, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `verdict.dayton.*` message keys and routed the FactionReport Dayton section title, mobile toggle hint, package labels, institution label, final split label, and patron-override label through `t(...)`. Package IDs/names, institution keys/values, faction labels, and patron override identifiers remain source-provided content.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema, Dayton output, verdict output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode still rendered `Dayton Agreement` in English. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 19/19 after implementation. Expanded localization/endgame pack `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts tests\ui\game_over_i18n.test.ts tests\ui\side_picker_i18n.test.ts tests\ui\credits_screen_i18n.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts --reporter=dot` passed 39/39. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/VerdictScreen.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/endgame_interaction_proof.test.ts`, `docs/40_reports/implemented/20260523_BCS_VERDICT_DAYTON_LABELS_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Cinematic Verdict chrome
+
+**Type:** `CinematicVerdict` static-chrome localization slice. No simulation behavior, combat math, operation behavior, Cost Ledger generation, historical comparison math, verdict scene selection, share-summary body generation, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `verdict.cinematic.*` message keys and routed CinematicVerdict static metric labels, campaign/not-recorded fallback text, share-summary heading, and copy button through `t(...)`. `CinematicVerdict` now subscribes to the existing locale store. Generated scene headline/subheadline/cost emphasis text, comparison callouts, and share-summary body remain source-generated authored content.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema, verdict scene output, Cost Ledger output, historical comparison output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode still rendered `Focus` in English. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 19/19 after implementation. Expanded localization/endgame pack `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts tests\ui\game_over_i18n.test.ts tests\ui\side_picker_i18n.test.ts tests\ui\credits_screen_i18n.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts --reporter=dot` passed 39/39. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/verdict/CinematicVerdict.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/endgame_interaction_proof.test.ts`, `docs/40_reports/implemented/20260523_BCS_CINEMATIC_VERDICT_CHROME_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize War Cost Summary
+
+**Type:** `WarCostSummary` localization slice. No simulation behavior, combat math, operation behavior, Cost Ledger generation, historical comparison math, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `warCost.*` message keys and routed WarCostSummary static headings, cost metric labels, opportunity-decision labels, exit-class labels, source prefix, duration/casualty/territory formatter strings, and attack-count copy through `t(...)`. `WarCostSummary` now subscribes to the existing locale store. Authored finding titles/text, divergence notes, operation names, response IDs, faction IDs, and source lists remain source-provided content.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema, Cost Ledger output, historical comparison output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode still rendered WarCostSummary labels in English. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 19/19 after implementation. Expanded localization/endgame pack `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts tests\ui\game_over_i18n.test.ts tests\ui\side_picker_i18n.test.ts tests\ui\credits_screen_i18n.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts --reporter=dot` passed 39/39. WarCost helper pack `npx.cmd vitest run tests\ui\war_cost_summary.test.ts tests\ui\endgame_presentation_proof.test.ts tests\ui\render_proof_real_fixtures.test.ts --reporter=dot` passed 55/55. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/WarCostSummary.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/endgame_interaction_proof.test.ts`, `docs/40_reports/implemented/20260523_BCS_WAR_COST_SUMMARY_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Verdict report labels
+
+**Type:** Rich `VerdictScreen` FactionReport static-label localization slice. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `verdict.report.*` message keys and routed FactionReport static headings, mobile report toggles, and final-statistic row labels through `t(...)`. FactionReport now subscribes to the existing locale store. Faction IDs, authored grade descriptions, source-provided dimension labels, Cost Ledger text, cinematic verdict prose, and WarCostSummary body content remain unchanged.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode still rendered rich report labels in English. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 19/19 after implementation. Expanded localization/endgame pack `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts tests\ui\game_over_i18n.test.ts tests\ui\side_picker_i18n.test.ts tests\ui\credits_screen_i18n.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts --reporter=dot` passed 39/39. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/VerdictScreen.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/endgame_interaction_proof.test.ts`, `docs/40_reports/implemented/20260523_BCS_VERDICT_REPORT_LABELS_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Verdict chrome
+
+**Type:** Rich `VerdictScreen` chrome localization slice. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS message keys for rich VerdictScreen lower-section tabs (`Report`, `Reckoning`, `Codex`, `Replay`) and the footer tagline. The rich verdict path now subscribes to the existing locale store and renders mobile lower-section tabs plus footer tagline/actions through `t(...)`; View Your War/New Game/Load Save reuse the existing Game Over action keys. Faction IDs, report body labels, War Cost content, and authored verdict prose remain unchanged.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode still rendered rich VerdictScreen chrome in English. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 19/19 after implementation. Expanded localization/endgame pack `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts tests\ui\game_over_i18n.test.ts tests\ui\side_picker_i18n.test.ts tests\ui\credits_screen_i18n.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts --reporter=dot` passed 39/39. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/VerdictScreen.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/endgame_interaction_proof.test.ts`, `docs/40_reports/implemented/20260523_BCS_VERDICT_CHROME_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Verdict fallback Game Over
+
+**Type:** No-verdict `VerdictScreen` fallback localization slice. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Reused the existing `gameOver.*` outcome/standings/metric/duration/action dictionary family for the `VerdictScreen` fallback path and added `gameOver.viewYourWar` for its fallback-specific action. The fallback now subscribes to the existing locale store and renders known outcome labels, final standings, OSID-control counts, active-brigade counts, campaign duration, View Your War, New Game, and Load Save through `t(...)`. Canonical faction IDs and the `A War Without Victory` product title remain untranslated.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode still rendered the fallback `VerdictScreen` in English. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 18/18 after implementation. Expanded localization/endgame pack `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts tests\ui\game_over_i18n.test.ts tests\ui\side_picker_i18n.test.ts tests\ui\credits_screen_i18n.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts --reporter=dot` passed 38/38. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/VerdictScreen.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/endgame_interaction_proof.test.ts`, `docs/40_reports/implemented/20260523_BCS_VERDICT_FALLBACK_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Game Over modal
+
+**Type:** Terminal fallback Game Over UI localization slice. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS message keys for known game-over outcomes, final standings, OSID-control counts, active-brigade counts, campaign duration, New Game, and Load Save. `GameOverModal` now subscribes to the existing locale store and renders these strings through `t(...)`; canonical faction IDs and the `A War Without Victory` product title remain untranslated. The modal date separator is normalized to ASCII ` - `.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\game_over_i18n.test.ts --reporter=dot` failed while the modal still rendered hard-coded English and one-count metric labels. Green `npx.cmd vitest run tests\ui\game_over_i18n.test.ts --reporter=dot` passed 2/2 after implementation. Focused localization pack `npx.cmd vitest run tests\ui\game_over_i18n.test.ts tests\ui\side_picker_i18n.test.ts tests\ui\credits_screen_i18n.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts --reporter=dot` passed 20/20. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/GameOverModal.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/game_over_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_GAME_OVER_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize side picker shell
+
+**Type:** New-campaign side-picker UI localization slice. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS message keys for the side-picker title, force suffix, load-save file aria label, Load Save from Disk action, Continue Last Run action, and Close action. `SidePickerOverlay` now subscribes to the existing locale store and renders these strings through `t(...)`; faction IDs and army names remain canonical/proper labels.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\side_picker_i18n.test.ts --reporter=dot` failed while BCS mode still rendered English side-picker copy. Green `npx.cmd vitest run tests\ui\side_picker_i18n.test.ts --reporter=dot` passed 2/2 after implementation. Focused localization pack `npx.cmd vitest run tests\ui\side_picker_i18n.test.ts tests\ui\credits_screen_i18n.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts --reporter=dot` passed 18/18. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/SidePickerOverlay.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/side_picker_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_SIDE_PICKER_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Credits screen
+
+**Type:** Credits-screen UI localization slice. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS message keys for Credits title, close affordances, section headings, strategic-simulation subtitle, source framing line, additional-sources line, technology heading, and dedication text. `CreditsScreen` now subscribes to the existing locale store and renders these strings through `t(...)`; product/source proper nouns remain untranslated.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\credits_screen_i18n.test.ts --reporter=dot` failed while BCS mode still rendered English credits copy. Green `npx.cmd vitest run tests\ui\credits_screen_i18n.test.ts --reporter=dot` passed 2/2 after implementation. Focused localization pack `npx.cmd vitest run tests\ui\credits_screen_i18n.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts --reporter=dot` passed 16/16. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/CreditsScreen.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/credits_screen_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_CREDITS_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Main Menu shell
+
+**Type:** Main-menu UI localization slice. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS message keys for the Main Menu publisher line, theater/date line, New Game, Continue, Load Game, Settings, Credits, and Quit. `MainMenu` now subscribes to the existing locale store and renders these strings through `t(...)`. The product title remains untranslated. The theater/date line is normalized to ASCII `1992-1995`, removing prior source mojibake while preserving intended display.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\main_menu_i18n.test.ts --reporter=dot` failed while BCS mode still rendered English Main Menu copy. Green `npx.cmd vitest run tests\ui\main_menu_i18n.test.ts --reporter=dot` passed 3/3 after implementation. Focused localization pack `npx.cmd vitest run tests\ui\main_menu_i18n.test.ts tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts --reporter=dot` passed 14/14. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/MainMenu.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/main_menu_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_MAIN_MENU_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize Settings Audio copy
+
+**Type:** Settings UI localization slice. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, browser audio playback, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS message keys for the Settings Audio tab, Soundscape row, Master Volume row, soundscape toggle aria label, and master-volume slider aria label. `SettingsScreen` now renders the default Audio page through the existing localization substrate instead of hard-coded English.
+
+**Determinism:** Renderer presentation only. Audio preferences remain browser-local UI state; no playback path, save/state schema, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\settings_screen_i18n.test.ts --reporter=dot` failed while the Audio tab and rows still rendered English after selecting BCS. Green `npx.cmd vitest run tests\ui\settings_screen_i18n.test.ts --reporter=dot` passed 3/3 after implementation. Focused localization pack `npx.cmd vitest run tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts --reporter=dot` passed 11/11. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/SettingsScreen.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/settings_screen_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_SETTINGS_AUDIO_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize pause menu actions
+
+**Type:** Tactical-map UI localization slice. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, browser audio, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS message keys for the in-game Pause Menu and wired `PauseMenu` through the existing `useLocale()` / `t(...)` localization substrate. The pause title, resume shortcut, resume overlay aria label, menu actions, and preserved-planning notice now render from the active locale with English fallback.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\pause_menu_i18n.test.ts --reporter=dot` failed while the menu still rendered hard-coded English after selecting BCS. Green `npx.cmd vitest run tests\ui\pause_menu_i18n.test.ts --reporter=dot` passed 2/2 after implementation. Focused localization pack `npx.cmd vitest run tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts tests\ui\settings_screen_i18n.test.ts --reporter=dot` passed 10/10. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/PauseMenu.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/pause_menu_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_PAUSE_MENU_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(audio): wire soundscape cue observer
+
+**Type:** Tactical-map UI observer wiring over the silent audio bus. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, browser audio playback, network IO, or random source changed.
+
+**Change:** Added `AudioCueObserver` and mounted it once at the tactical-map root. The observer suppresses initial save hydration, compares previous and next loaded game state via `buildAudioCueEventsForState(...)`, and sends later-turn cue requests to `playCue(...)` with an explicit UI-local timestamp for cooldown gating.
+
+**Determinism:** UI-local observer only. It consumes already-loaded UI state and does not create simulation events or mutate saves. The silent bus remains disabled by default and performs no playback/fetch/Web Audio work.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\audio_cue_observer.test.ts --reporter=dot` failed because the observer component did not exist. Green focused audio pack `npx.cmd vitest run tests\ui\audio_cue_observer.test.ts tests\ui\audio_event_adapter.test.ts tests\ui\audio_manifest.test.ts tests\ui\audio_bus.test.ts tests\ui\audio_hook_points.test.ts tests\ui\audio_preferences.test.ts tests\ui\settings_audio_preferences.test.ts --reporter=dot` passed 17/17. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed.
+
+**Artifacts:** `src/ui/map/components/AudioCueObserver.tsx`, `src/ui/map/App.tsx`, `tests/ui/audio_cue_observer.test.ts`, `docs/40_reports/implemented/20260523_SOUNDSCAPE_OBSERVER_WIRING.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(audio): add deterministic cue cooldown suppression
+
+**Type:** Tactical-map silent audio bus behavior. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, browser audio IO, network IO, wall-clock read, timestamp source, or random source changed.
+
+**Change:** Extended `playCue(id, nowMs?)` to enforce per-cue cooldown metadata when callers provide explicit millisecond timestamps. The silent bus now tracks accepted cue count and per-cue accepted timestamps for deterministic tests and future observer wiring. Existing no-timestamp call sites remain compatible.
+
+**Determinism:** Cooldown acceptance depends only on the supplied `nowMs` argument and cue metadata. The bus still performs no playback, fetch, Web Audio initialization, wall-clock read, or randomness.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\audio_bus.test.ts --reporter=dot` failed on missing accepted-cue count/cooldown memory. Green focused audio pack `npx.cmd vitest run tests\ui\audio_event_adapter.test.ts tests\ui\audio_manifest.test.ts tests\ui\audio_bus.test.ts tests\ui\audio_hook_points.test.ts tests\ui\audio_preferences.test.ts tests\ui\settings_audio_preferences.test.ts --reporter=dot` passed 16/16. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed.
+
+**Artifacts:** `src/ui/map/audio/audio_engine.ts`, `tests/ui/audio_bus.test.ts`, `docs/40_reports/implemented/20260523_SOUNDSCAPE_COOLDOWN_SUPPRESSION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(audio): add pure soundscape event adapter
+
+**Type:** Tactical-map UI/audio read-model adapter. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, browser audio IO, network IO, timestamp, or random source changed.
+
+**Change:** Added `src/ui/map/audio/audio_event_adapter.ts` with `buildAudioCueEventsForState(previous, next)`. The adapter emits stable cue requests for newly observed completed turns, battles, territory-flipping battles, fired historical events, and completed operation AARs. It sorts event/operation requests by stable ids, filters through the cue manifest, and suppresses duplicate cue requests when the same turn is observed again.
+
+**Determinism:** Pure function over already-loaded UI state. It returns cue request data only and never calls `playCue(...)`.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\audio_event_adapter.test.ts --reporter=dot` failed because the adapter module did not exist. Green focused audio pack `npx.cmd vitest run tests\ui\audio_event_adapter.test.ts tests\ui\audio_manifest.test.ts tests\ui\audio_bus.test.ts tests\ui\audio_hook_points.test.ts tests\ui\audio_preferences.test.ts tests\ui\settings_audio_preferences.test.ts --reporter=dot` passed 15/15. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed.
+
+**Artifacts:** `src/ui/map/audio/audio_event_adapter.ts`, `tests/ui/audio_event_adapter.test.ts`, `docs/40_reports/implemented/20260523_SOUNDSCAPE_EVENT_ADAPTER.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] ui(audio): add soundscape cue readiness metadata
+
+**Type:** Tactical-map audio manifest/readiness metadata. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, browser audio IO, network IO, timestamp, or random source changed.
+
+**Change:** Added normalized cue readiness metadata to `src/ui/map/audio/sound_manifest.ts`: `cooldownMs`, `assetStatus`, and `reducedMotionPolicy`. Existing cue registrations remain concise, while `getAllAudioCues()` / `getCueConfig()` now expose a complete readiness contract for every silent placeholder cue. Current file paths are explicitly classified as `missing_placeholder`; no cue claims shipped assets.
+
+**Determinism:** UI/audio substrate only. The existing bus remains disabled and silent by default and still performs no fetch, Web Audio initialization, timestamps, or randomness.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\audio_manifest.test.ts --reporter=dot` failed on missing cue metadata. Green `npx.cmd vitest run tests\ui\audio_manifest.test.ts tests\ui\audio_bus.test.ts tests\ui\audio_hook_points.test.ts tests\ui\audio_preferences.test.ts tests\ui\settings_audio_preferences.test.ts --reporter=dot` passed 13/13. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed.
+
+**Artifacts:** `src/ui/map/audio/sound_manifest.ts`, `tests/ui/audio_manifest.test.ts`, `docs/40_reports/implemented/20260523_SOUNDSCAPE_CUE_METADATA_READINESS.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
+## [2026-05-23] docs(launch): add traceable high concept one-pager
+
+**Type:** Documentation/launch collateral only. No runtime behavior, sim behavior, scenario data, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or generated scenario output changed.
+
+**Why:** Rating #38 still carried the High Concept one-pager as the remaining architecture-documentation promotion gap. Existing marketing drafts had store/press/claims material, but no single one-page product framing that separated playable-now truth from pending operator evidence and future/gated claims.
+
+**Change:** Added `docs/50_launch/marketing/high_concept.md` with a one-sentence premise, player fantasy, core loop, playable-now scope, repo-supported pending evidence, future/gated claims, historical framing, and evidence pointers. Refreshed the launch marketing README commit baseline, linked the one-pager from the press kit, updated claims inventory for current telemetry/localization truth, and promoted Rating #38 from A to A+.
+
+**Verification:** `git rev-parse HEAD` recorded baseline `7842189c8b8127c3f6f170ff18e7fd39af876027`; path/evidence references were checked with `rg`; docs-only `git diff --check` passed.
+
+**Roadmap delta:** Closes the High Concept one-pager gap for Rating #38. Remaining launch collateral work is operator-facing screenshot validation, final art/trailer/press assets, and keeping claims synchronized before publication.
+
+---
+
+## [2026-05-23] ui(diplomacy): add actor stance prose
+
+**Type:** UI read-model/presentation enhancement. No diplomacy mechanics, negotiation resolution, sim behavior, scenario data, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or generated scenario output changed.
+
+**Why:** The Diplomacy panel had active proposals, external actors, timeline, pressure, and needle hints, but actor rows still read like a compact metrics table. Rating #11's remaining practical lift was to make per-power stance readable without exposing raw thresholds or inventing new diplomatic state.
+
+**Change:** `DiplomacyActorView` now includes `stanceSummary`. `buildDiplomacyView(...)` derives deterministic public-safe summaries from existing support, constraint, commitment, isolation, sanctions, and patron labels. `DiplomacyPanel` renders that prose under each actor's qualitative bands.
+
+**Determinism / output impact:** Renderer read-model only. No saved state, scenario artifact, or baseline output changed.
+
+**Verification:** Red/green `npx.cmd vitest run tests\ui\diplomacy_view.test.ts tests\ui\diplomacy_panel.test.ts --reporter=dot` failed on missing `stanceSummary` / rendered text before implementation; focused pack `npx.cmd vitest run tests\ui\diplomacy_view.test.ts tests\ui\diplomacy_panel.test.ts tests\ui\diplomacy_player_truth.test.ts tests\ui\warroom_shell_ownership.test.ts --reporter=dot` PASS 10/10 after implementation.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_DIPLOMACY_ACTOR_STANCE_PROSE.md`.
+
+**Roadmap delta:** Rating #11 moves from B- to B. Remaining diplomacy lift is richer per-power/treaty history and map context, not absence of a panel, route, timeline, or actor stance readout.
+
+---
+
+## [2026-05-23] telemetry(ui): record localized boundary crashes
+
+**Type:** UI observability enhancement. No sim behavior, scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or generated scenario output changed.
+
+**Why:** The existing crash diagnostics queue covered global browser/window crashes and Settings export/consent, but localized React error boundaries only wrote console errors. That meant the UI could survive a panel crash without leaving an opt-in player-exportable diagnostic record tied to the failed surface.
+
+**Change:** Added a shared `recordCrashDiagnostic(...)` helper in `src/ui/map/services/telemetry/crashCapture.ts`, reused it from the global installer, and called it from `RootErrorBoundary.componentDidCatch(...)` with the boundary `zone` as `uiSurface`. The map entrypoint now uses the shared crash-diagnostics app-version constant.
+
+**Determinism / output impact:** UI/localStorage diagnostics only and default-off behind the existing consent key. No scenario artifacts, saves, or baseline outputs changed.
+
+**Verification:** Red/green `npx.cmd vitest run tests\ui\error_boundary_isolation.test.ts --reporter=dot` failed on an empty queue before implementation; focused pack `npx.cmd vitest run tests\ui\error_boundary_isolation.test.ts tests\telemetry_queue.test.ts tests\ui_settings_telemetry_controls.test.ts --reporter=dot` PASS 9/9 after implementation.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_LOCALIZED_CRASH_DIAGNOSTICS.md`.
+
+**Roadmap delta:** Rating #39 moves from C+ to B-. Crash reporting is no longer absent, but post-launch observability still needs opt-in upload/aggregation and anonymized playtest telemetry.
+
+---
+
+## [2026-05-23] ui(chronicle): write prose chapter summaries
+
+**Type:** UI read-model/presentation enhancement. No sim behavior, scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or output contract changed.
+
+**Why:** Chronicle chapter mode already existed, but its chapter summaries were generic entry counts. Rating #31 still correctly described the Chronicle as too ledger-like.
+
+**Change:** `buildChronicleChapters(...)` now derives deterministic prose summaries from source entry count, dominant entry type, headline count, and month range. Sensitive-history signal flags still come only from source entries; the prose summary does not invent atrocity/rupture labels.
+
+**Determinism / output impact:** UI read-model only from existing Chronicle entries. No saved state or generated run artifacts changed.
+
+**Verification:** Red/green `npx.cmd vitest run tests\ui\chronicle_chapters.test.ts --reporter=dot` failed on generic summaries; focused pack `npx.cmd vitest run tests\ui\chronicle_chapters.test.ts tests\ui\chronicle_chapter_guardrails.test.ts --reporter=dot` PASS 9/9 after implementation.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_CHRONICLE_CHAPTER_PROSE_SUMMARY.md`.
+
+**Roadmap delta:** Advances Rating #31 by making existing Chronicle chapters read less like raw entry counts. Larger session-end chapter recap remains a future synthesis layer.
+
+---
+
+## [2026-05-23] ui(aftermath): add tone-authored narrative line
+
+**Type:** UI read-model/presentation enhancement. No sim behavior, turn-summary schema, scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or output contract changed.
+
+**Why:** Rating #23 called out that Turn Aftermath was visually solid but still read like a report. The next bounded lift was one authored line per aftermath tone.
+
+**Change:** `TurnAftermathView` now includes a deterministic `narrativeLine` derived from the existing tone classification. The immediate Turn Aftermath modal and Army HQ Records aftermath cards both render the line.
+
+**Determinism / output impact:** UI/read-model presentation only from existing turn-summary data. No saved state or generated run artifacts changed.
+
+**Verification:** Red/green `npx.cmd vitest run tests\ui\turn_aftermath.test.ts --reporter=dot` failed on missing `narrativeLine`; focused pack `npx.cmd vitest run tests\ui\turn_aftermath.test.ts tests\ui\records_button_behavior.test.ts --reporter=dot` PASS 13/13 after implementation.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_TURN_AFTERMATH_NARRATIVE_LINE.md`.
+
+**Roadmap delta:** Closes the one-line authored aftermath prose slice in Rating #23. Remaining narrative lift is Chronicle chapter recap / endgame prose depth, not the immediate aftermath tone line.
+
+---
+
+## [2026-05-23] fix(settings): own Escape above pause shortcuts
+
+**Type:** UI shell keyboard/interaction fix. No sim behavior, scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or output contract changed.
+
+**Why:** Escape-to-pause was already implemented in the global shortcut hook, but Settings did not own Escape while open. When Settings was opened from Pause, Escape could be consumed by the global pause shortcut underneath instead of closing Settings cleanly.
+
+**Change:** `SettingsScreen` now registers a capture-phase Escape listener that calls its existing `onClose` callback and stops propagation before global shortcut owners run.
+
+**Determinism / output impact:** UI interaction only. No saved state or generated run artifacts changed.
+
+**Verification:** Red/green `npx.cmd vitest run tests\ui\settings_screen_shell_cleanup.test.ts --reporter=dot` failed because `onClose` was not called, then PASS 3/3 after implementation.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_SETTINGS_ESCAPE_OWNERSHIP.md`.
+
+**Roadmap delta:** Closes the core Escape-tree gap in Rating #26. Remaining settings work is richer display/key-remap polish rather than missing pause/settings ownership.
+
+---
+
+## [2026-05-23] ui(personnel): surface mobilization pool health
+
+**Type:** UI read-model/presentation enhancement. No mobilization mechanics, JNA transfer behavior, scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or sim output contract changed.
+
+**Why:** Rating #9 listed early-war/militia/formation emergence as deep but player-invisible. The selected faction's `mobilizationSummary` already exists in the loaded-state adapter, but Army HQ Personnel did not show pool health.
+
+**Change:** Army HQ Personnel now renders a selected-faction Mobilization section with available, committed, exhausted, strategic reserve, exhaustion percentage, and largest available pools. The new section uses deterministic `en-US` whole-number formatting so host locale does not alter test/UI punctuation.
+
+**Determinism / output impact:** UI presentation only from existing loaded-state data. No saved state, scenario outputs, or baseline artifacts changed.
+
+**Verification:** Red/green `npx.cmd vitest run tests\ui\officer_mini_bio.test.ts --reporter=dot` failed on missing `MOBILIZATION` before implementation, then PASS 6/6 after implementation.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_PERSONNEL_MOBILIZATION_VISIBILITY.md`.
+
+**Roadmap delta:** Advances Rating #9 by moving core mobilization pool health into the Army HQ Personnel owner. Remaining early-war visibility work is recent-emergence/JNA equipment-transfer explanation, not the basic pool-health readout.
+
+---
+
+## [2026-05-23] feat(briefing): surface supply corridor risk
+
+**Type:** Sim-side command briefing visibility enhancement. No supply mechanics, combat math, operation behavior, scenario data, calibration/army-arc tuning, painted targets, event content, turn ordering, save schema, or baseline contract changed.
+
+**Why:** Rating #8 still listed `BRIEF-GAP-1`: supply truth existed in `supply_state_by_osid`, `supply_corridors_osid`, map overlays, and Decision Room cards, but the sim-side command briefing did not summarize player-faction supply/corridor exposure.
+
+**Change:** Added a built-in `logistics` briefing collector. It reads `supply_state_by_osid.factions[]` and `supply_corridors_osid.corridors[]`, scopes both to the requested faction, and emits one `log-supply` item with adequate/strained/critical OSID counts plus cut/brittle corridor counts. Severity is critical for any critical OSID or cut corridor, warning for strained/brittle exposure, and info for adequate-only evidence.
+
+**Determinism / output impact:** Deterministic read-model/briefing output only. Current baseline regression remains byte-matching, so no manifest refresh was required.
+
+**Verification:** Red/green `npx.cmd vitest run tests\command_briefing.test.ts --reporter=dot` failed on missing `log-supply` before implementation, then PASS 9/9 after implementation; `npx.cmd vitest run tests\command_briefing.test.ts tests\ui_player_supply_visibility.test.ts tests\ui_decision_room_supply_visibility.test.ts tests\supply_panel_contract.test.ts --reporter=dot` PASS 22/22; `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS; `git diff --check` PASS.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_COMMAND_BRIEFING_SUPPLY_VISIBILITY.md`.
+
+**Roadmap delta:** Closes the command-briefing supply visibility portion of Rating #8. The supply map reach overlay is already implemented; remaining supply/logistics work is polish/affordance depth rather than missing read-model wiring.
+
+---
+
+## [2026-05-23] ui(personnel): surface officer trait chips
+
+**Type:** UI read-model/presentation enhancement. No combat math, commander behavior, scenario data, calibration/army-arc tuning, painted targets, event content, turn ordering, save schema, or sim output contract changed.
+
+**Why:** The officer-character lane had authored `command_style` and `known_for` fields, but Army HQ Personnel still presented officers as compact stat rows. The remaining safe trait-surfacing work was to expose those existing fields without authoring new claims or changing commander behavior.
+
+**Change:** Army HQ Personnel active-officer rows now render `command_style` as a doctrinal trait chip and `known_for` as a narrative trait chip when those fields are present. The chips sit under the officer rank/corps line and keep the roster scan-friendly.
+
+**Determinism / output impact:** UI presentation only from existing `NamedOfficerView` fields. No save, sim, scenario, baseline, or generated artifact impact.
+
+**Verification:** Red/green `npx.cmd vitest run tests\ui\officer_mini_bio.test.ts --reporter=dot` failed on missing Personnel trait text before implementation, then PASS 5/5 after implementation.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_PERSONNEL_TRAIT_CHIPS.md`.
+
+**Roadmap delta:** Closes the current safe trait-surfacing sub-slice for Rating #10. Remaining officer-character work is content breadth and historian-reviewed expansion beyond the first-pass authored commanders, not UI wiring.
+
+---
+
+## [2026-05-23] feat(chronicle): spotlight completed-operation commanders
+
+**Type:** UI read-model/presentation enhancement. No combat math, operation behavior, scenario data, calibration/army-arc tuning, painted targets, event content, turn ordering, save schema, or sim output contract changed.
+
+**Why:** The officer/personnel AAA+++ lane already had mini-bios and compact operation AAR Chronicle cards, but the explicit "Officer of the Week" Chronicle beat was still missing from the player-facing campaign record.
+
+**Change:** `generateChronicleEntries(...)` now emits a `personnel` Chronicle card for each player-faction completed operation AAR with a named commander. The card title uses the existing commander rank/name, details the operation name/outcome/objective count/attacks/star grade, and preserves `metadata.operationAarId` so the existing Chronicle dossier action opens the owning Army HQ Operation History row. Chronicle card styling, timeline dot colors, and filters now recognize the `personnel` category.
+
+**Determinism / output impact:** Deterministic UI projection only from existing `operationHistory` fields. No new runtime state, save migration, or baseline artifact refresh is required.
+
+**Verification:** Red/green `npx.cmd vitest run tests\chronicle_entries.test.ts --reporter=dot` failed on the missing personnel spotlight before implementation, then PASS 16/16 after implementation; `npx.cmd vitest run tests\chronicle_entries.test.ts tests\ui_chronicle_review_tools.test.ts tests\ui\chronicle_chapters.test.ts tests\ui\chronicle_chapter_ui.test.ts tests\ui\chronicle_chapter_guardrails.test.ts tests\ui_chronicle_operation_aar_link.test.ts --reporter=dot` PASS 32/32; `npm.cmd run typecheck` PASS; `npm.cmd run desktop:map:build` PASS with existing Vite warnings; `git diff --check` PASS.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_CHRONICLE_OFFICER_OF_WEEK.md`.
+
+**Roadmap delta:** Advances Rating #10 officer/personnel character layer by closing the Chronicle "Officer of the Week" card sub-item. Remaining officer-character lift is authored trait surfacing, not operation-history spotlight wiring.
+
+---
+
+## [2026-05-23] fix(briefing): read canonical command signals
+
+**Type:** Sim-side command briefing truth fix. No combat math, operation behavior, scenario data, calibration/army-arc tuning, painted targets, event content, turn ordering, UI ownership, or save schema changed.
+
+**Why:** Strict-null Batch C deliberately preserved three broken-tolerant command briefing reads for byte identity: active operations looked for a non-existent `CorpsCommandState.faction`, disrupted brigade warnings looked under `FormationOpsState`, and enclave alerts looked under `state.military.enclave_resilience`. Those paths hid canonical player-facing staff signals from `state.military.last_briefing`.
+
+**Change:** `assembleCommandBriefing(...)` now counts active operations by joining each `corps_command` row to the owning corps/army-HQ formation faction, reads disrupted brigade warnings from `FormationState.disrupted_turns`, and reads prolonged enclave isolation from `state.political.enclave_resilience`. Added regression coverage for all three canonical paths.
+
+**Determinism / output impact:** Deterministic read-model/output change only. `apr1992_52w` baseline drift is intentionally limited to `final_save.json` and `run_summary.json` because serialized `last_briefing` now contains enclave warnings; activity/control/end-report/formation/watched-operation/weekly-report hashes remain unchanged.
+
+**Verification:** Red/green `npx.cmd vitest run tests\command_briefing.test.ts --reporter=dot`; `npx.cmd vitest run tests\command_briefing.test.ts tests\sim\command\phase4_ui_data_layer.test.ts tests\ui_map_game_state_adapter.test.ts tests\warroom_player_visibility.test.ts --reporter=dot` PASS 60/60; `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS after surgical manifest refresh for the two intentional 52-week briefing hashes.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_COMMAND_BRIEFING_CANONICAL_PATHS.md`.
+
+**Roadmap delta:** Closes the three `collect_briefing.ts` latent path bugs documented during strict-null Batch C.
+
+---
+
+## [2026-05-23] ui(diplomacy): add timeline and needle signals
+
+**Type:** UI read-model/presentation enhancement. No scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, event content, turn ordering, painted targets, or sim output contract changed.
+
+**Why:** AAA Track E calls for the diplomacy surface to show not only patron stance and proposals, but also a negotiation timeline and a player-safe explanation of which visible signals are moving the diplomatic room.
+
+**Change:** Added `DiplomacyTimelineEntryView` and `DiplomacyNeedleHintView` to the diplomacy UI contract. `buildDiplomacyView(...)` now derives timeline rows from active proposals, patron relationship events, and active IVP consequences, and derives qualitative needle hints from elevated patron constraint, high/medium IVP reasons, and unresolved active proposals. `DiplomacyPanel` renders both sections without exposing raw thresholds or formulas.
+
+**Determinism / output impact:** UI read-model projection only. No sim path, save shape, scenario data, or generated run artifact changed.
+
+**Verification:** `npx.cmd vitest run tests\ui\diplomacy_panel.test.ts tests\ui\diplomacy_view.test.ts tests\ui\diplomacy_player_truth.test.ts tests\ui\warroom_shell_ownership.test.ts --reporter=dot` PASS 10/10.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_DIPLOMACY_PANEL_TIMELINE_NEEDLE.md`.
+
+**Roadmap delta:** Advances AAA Track E diplomacy-panel enrichment. Remaining Track E work is richer per-power stance detail and deeper treaty/actor history when canonical state carries those signals.
+
+---
+
+## [2026-05-23] ui(warroom): route diplomacy telephone to panel
+
+**Type:** UI navigation/routing fix. No scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, event content, turn ordering, painted targets, or sim output contract changed.
+
+**Why:** The dedicated read-only Diplomacy panel exists and is already backed by canonical diplomacy/patron/IVP read models, but the Warroom `diplomatic_telephone` hotspot still routed to Army HQ Summary with a stale placeholder comment.
+
+**Change:** Added `diplomacy` as a Warroom-local command, routed `diplomatic_telephone` to that command, and had `App.tsx` open `DiplomacyPanel` while staying in the Warroom shell. Added a Warroom shell regression asserting the hotspot maps to `{ kind: 'diplomacy' }`.
+
+**Determinism / output impact:** UI navigation only. No sim path, save shape, scenario data, or generated run artifact changed.
+
+**Verification:** `npx.cmd vitest run tests\ui\warroom_shell_ownership.test.ts tests\ui\diplomacy_panel.test.ts tests\ui\diplomacy_view.test.ts tests\ui\diplomacy_player_truth.test.ts --reporter=dot` PASS 10/10.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_WARROOM_DIPLOMACY_TELEPHONE_ROUTE.md`.
+
+**Roadmap delta:** Closes the stale Warroom diplomacy-placeholder routing slice. The broader AAA Track E diplomacy-panel enrichment remains open.
+
+---
+
+## [2026-05-23] docs(roadmap): close stale GUI visual audit row
+
+**Type:** Roadmap/status reconciliation. No code, scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
+
+**Why:** `docs/40_reports/CONSOLIDATED_BACKLOG.md`, `docs/40_reports/README.md`, and the top-of-roadmap addenda already record the 2026-05-22 GUI visual audit queue as implemented through Batch H9, but the older master roadmap report table still described `docs/40_reports/GUI_VISUAL_AUDIT_2026-05-22.md` as a new active corrective queue.
+
+**Change:** Updated the master roadmap report table to mark the GUI visual audit implementation-closed and point readers at the implemented 20260522 GUI audit reports plus the audit-focused UI guard suite.
+
+**Determinism / output impact:** Documentation/process only. No runtime code or serialized state shape changed.
+
+**Verification:** `npx.cmd vitest run tests\ui\gui_audit_label_discipline.test.ts tests\ui\gui_audit_dead_controls.test.ts tests\ui\warroom_shell_ownership.test.ts tests\ui\modal_palette_unification.test.ts tests\ui\stale_state_resets.test.ts tests\ui\gui_audit_polish_cleanup.test.ts tests\ui\command_briefing_banner_contract.test.ts tests\ui\supply_legend_overlap_contract.test.ts tests\ui\retired_chrome_removed.test.ts tests\ui_map_maplibre_dasharray_contract.test.ts --reporter=dot` PASS 30/30; `git diff --check`.
+
+**Roadmap delta:** Removes the stale active label for the closed GUI visual audit queue so future roadmap work can move to still-open non-calibration lanes.
+
+---
+
 
 ## [2026-05-23] build(desktop): refresh apr-1992 startup snapshot
 
@@ -5201,6 +6275,26 @@ Reverting these is not viable — they are shipped v0.9.x event/officer/conseque
 
 **Roadmap delta:** Closes the reviewed true-FIFO CLI harness queue-shift tail. Remaining `.shift()` sites are semantic queues, priority queues, UI buffers, test examples, painter undo history, or archived/report code unless separately proven otherwise.
 
+---
+
+## [2026-05-23] build(desktop): refresh apr-1992 startup snapshot
+
+**Type:** Desktop packaging artifact refresh. No code, scenario source data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** The prior map/scenario cursor slice exposed a pre-existing desktop release blocker: `tests\startup_snapshot_contract.test.ts` and `tests\desktop_sim_bundle_smoke.test.ts` failed because `data\derived\startup\apr_1992_initial_save.json` had drifted from the canonical builder. Desktop packaging requires this baked startup artifact to match builder truth before bundling.
+
+**Change:** Refreshed `data/derived/startup/apr_1992_initial_save.json` using the canonical writer `npm.cmd run desktop:startup-snapshot:build`.
+
+**Determinism / output impact:** Generated artifact refresh only. The artifact is rebuilt by `tools/scenario_runner/build_startup_snapshot.ts --write` and checked by the matching `--check` path. No timestamps, random fields, pipeline entrypoint changes, or runtime code changes were introduced.
+
+**Verification:** `npm.cmd run desktop:startup-snapshot:build` passed and wrote the artifact. `npm.cmd run desktop:startup-snapshot:check` passed. `npx.cmd vitest run tests\startup_snapshot_contract.test.ts tests\desktop_sim_bundle_smoke.test.ts tests\desktop_startup_snapshot_guardrails.test.ts --reporter=dot` passed 9/9. `git diff --check` passed.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_DESKTOP_STARTUP_SNAPSHOT_REFRESH.md`.
+
+**Roadmap delta:** Closes the stale baked-startup artifact blocker discovered while proving the desktop movement-order cursor slice. Desktop startup/bundle checks are available again for future desktop lanes.
+
+---
+
 ## [2026-05-23] perf(map/scenario): use cursors in FIFO BFS queues
 
 **Type:** Deterministic map/scenario/desktop/event graph traversal performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
@@ -5404,6 +6498,7 @@ Reverting these is not viable — they are shipped v0.9.x event/officer/conseque
 
 **Type:** Strict-null diagnostic/test/docs tooling. No simulation behavior, save schema, migration, scenario data, UI behavior, calibration/army-arc tuning, combat math, operation behavior, event content, turn ordering, painted target, or serialized output contract changed.
 
+**Why:** The optional `GameState` contract lane needed an interface-level summary so future work can choose bounded owner slices from evidence instead of scanning the full 477-field domain list.
 **Why:** The optional `GameState` contract lane needed an interface-level summary so future work can choose bounded owner slices from evidence instead of scanning the full 486-field domain list.
 
 **Change:** Added `--field-interfaces` to `tools/diagnostics/strict_null_inventory.cjs`, grouping optional `GameState` fields by interface and domain. Added CLI coverage in `tests/strict_null_inventory.test.ts` and report `docs/40_reports/implemented/20260522_STRICT_NULL_OPTIONAL_INTERFACE_SUMMARY.md`.
@@ -5414,6 +6509,7 @@ Reverting these is not viable — they are shipped v0.9.x event/officer/conseque
 
 **Artifacts:** `tools/diagnostics/strict_null_inventory.cjs`; `tests/strict_null_inventory.test.ts`; `docs/40_reports/implemented/20260522_STRICT_NULL_OPTIONAL_INTERFACE_SUMMARY.md`.
 
+**Roadmap delta:** Future optional-field work now has executable interface grouping. Current largest groups are `MilitaryState` (105), `FormationState` (63), and `CorpsOperation` (58).
 **Roadmap delta:** Future optional-field work now has executable interface grouping. Current largest groups are `MilitaryState` (111), `FormationState` (65), and `CorpsOperation` (58).
 
 ---
@@ -5433,6 +6529,9 @@ Reverting these is not viable — they are shipped v0.9.x event/officer/conseque
 **Artifacts:** `tools/diagnostics/event_notification_residuals.cjs`; `tests/sim/events/event_notification_residuals_diagnostic.test.ts`; `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_BLOCKED_RESIDUAL_CLASSIFICATION.md`.
 
 **Roadmap delta:** Phase D notification backfill is now in policy-residual state: 2 rows / 4 missing blocks remain, all blocked-sensitive, with 0 unclassified residual blocks.
+
+---
+
 ## [2026-05-22] docs(strict-null): classify derived optional fields
 
 **Type:** Strict-null optional `GameState` contract classification. No simulation behavior, save schema, migration, scenario data, UI behavior, calibration/army-arc tuning, combat math, operation behavior, event content, turn ordering, painted target, or serialized output contract changed.
@@ -5443,6 +6542,7 @@ Reverting these is not viable — they are shipped v0.9.x event/officer/conseque
 
 **Determinism / output impact:** Documentation/classification only. No source, schema, serialization, generated output, or runtime behavior changed.
 
+**Verification:** `node tools\diagnostics\strict_null_inventory.cjs --field-domains` reports `derived: 8`, `unknown: 0`, and total optional fields `477`.
 **Verification:** `node tools\diagnostics\strict_null_inventory.cjs --field-domains` reports `derived: 8`, `unknown: 0`, and total optional fields `486`.
 
 **Artifacts:** `docs/40_reports/audits/20260522_STRICT_NULL_DERIVED_OPTIONAL_FIELDS_CLASSIFICATION.md`; `docs/40_reports/implemented/20260522_STRICT_NULL_OPTIONAL_GAMESTATE_CONTRACT_GUARD.md`; `docs/plans/MASTER_ROADMAP.md`.
@@ -5484,10 +6584,18 @@ Reverting these is not viable — they are shipped v0.9.x event/officer/conseque
 **Artifacts:** `data/scenarios/events/war_1992.json`; `tests/sim/events/event_notification_content_backfill.test.ts`; `tests/sim/events/event_notification_residuals_diagnostic.test.ts`; `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_1992_HISTORIAN_ROWS.md`.
 
 **Roadmap delta:** Phase D notification residual drops from 5 rows / 20 blocks to 3 rows / 10 blocks. The remaining rows are `srebrenica_demilitarization_1993` and the two blocked-sensitive front-visit press options.
+
+---
+
 ## [2026-05-22] diagnostic(strict-null): pin optional GameState contract floor
 
 **Type:** Strict-null diagnostic/test/docs guard. No simulation behavior, save schema, migration, scenario data, UI behavior, calibration/army-arc tuning, combat math, operation behavior, event content, turn ordering, painted target, or serialized output contract changed.
 
+**Why:** After the GameStateAdapter tail closed the last visible counted strict-null escape lanes, the remaining `optional_fields_game_state` count needed an executable contract rather than a vague "still optional" backlog note.
+
+**Change:** Added a strict-null progress assertion that pins the zero counted escape floor and the optional `GameState` domain split: 477 total optional fields, with `sim` 296, `state` 173, `derived` 8, and `unknown` 0. Added CLI test coverage for `tools/diagnostics/strict_null_inventory.cjs --field-domains`. Added report `docs/40_reports/implemented/20260522_STRICT_NULL_OPTIONAL_GAMESTATE_CONTRACT_GUARD.md` and propagated the new floor through roadmap/backlog/phase-ledger indexes.
+
+**Verification:** `npx.cmd vitest run tests\strict_null_inventory.test.ts tests\strict_null_inventory_progress.test.ts --reporter=dot` passed 94/94.
 **Why:** The live strict-null inventory had drifted past the older 477-field floor. The remaining optional `GameState` count needed an executable current contract rather than a vague "still optional" backlog note.
 
 **Change:** Added a strict-null progress assertion that pins the current counted escape floor and the optional `GameState` domain split: 486 total optional fields, with `sim` 304, `state` 174, `derived` 8, and `unknown` 0. Current counted escapes are `as_factionid_casts 0`, `as_unknown_casts 3`, `as_any_casts 0`, `non_null_assertions_dot 0`, and `non_null_assertions_index 0`. Added CLI test coverage for `tools/diagnostics/strict_null_inventory.cjs --field-domains`. Added report `docs/40_reports/implemented/20260522_STRICT_NULL_OPTIONAL_GAMESTATE_CONTRACT_GUARD.md` and propagated the new floor through roadmap/backlog/phase-ledger indexes.
@@ -5874,6 +6982,11 @@ Reverting these is not viable — they are shipped v0.9.x event/officer/conseque
 
 **Why:** The 2026-05-22 GUI visual audit Batch H found that OpsPlanningModal discarded assigned objectives/brigades on Escape or close without confirmation, and that axis IDs used a module-global counter that climbed across modal opens.
 
+**Change:** Added `src/ui/map/components/ops_modal/opsPlanningDraft.ts` for dirty-draft detection and plan-local axis ID derivation; wired OpsPlanningModal close/Escape through an in-app discard confirmation when the plan has assigned objectives or brigades; removed the module-global `nextAxisCounter`; and added `tests/ui/ops_planning_draft_guard.test.ts`.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\ops_planning_draft_guard.test.ts --reporter=dot` failed before the patch because the draft helper module did not exist. After the patch, `npx.cmd vitest run tests\ui\ops_planning_draft_guard.test.ts --reporter=dot` passed 3/3. Focused surrounding suite `npx.cmd vitest run tests\ui\ops_planning_draft_guard.test.ts tests\ui\ops_planning_target_discovery.test.ts tests\ui\stale_state_resets.test.ts tests\ui\error_boundary_isolation.test.ts tests\z_index_canonical.test.ts --reporter=dot` passed 25/25. `npm.cmd run typecheck` and `npm.cmd run desktop:map:build` passed. The desktop build kept the repository's existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/ops_modal/OpsPlanningModal.tsx`; `src/ui/map/components/ops_modal/opsPlanningDraft.ts`; `tests/ui/ops_planning_draft_guard.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_OPS_PLANNING_DRAFT_GUARD_H2.md`.
 **Change:** Added `src/ui/map/components/ops_modal/opsPlanningDraft.ts` for dirty-draft detection and plan-local axis ID derivation; wired OpsPlanningModal close/Escape through an in-app discard confirmation when the plan has assigned objectives or brigades; removed the module-global `nextAxisCounter`; routed the discard confirmation title, body, actions, and close title through the English/BCS dictionary; and added `tests/ui/ops_planning_draft_guard.test.ts`.
 
 **Verification:** Red run `npx.cmd vitest run tests\ui\ops_planning_draft_guard.test.ts --reporter=dot` failed before the patch because the draft helper module did not exist. After the patch, `npx.cmd vitest run tests\ui\ops_planning_draft_guard.test.ts --reporter=dot` passed 3/3. Focused surrounding suite `npx.cmd vitest run tests\ui\ops_planning_draft_guard.test.ts tests\ui\ops_planning_target_discovery.test.ts tests\ui\stale_state_resets.test.ts tests\ui\error_boundary_isolation.test.ts tests\z_index_canonical.test.ts --reporter=dot` passed 34/34 after localization reconciliation. `npm.cmd run typecheck` and `npm.cmd run desktop:map:build` passed. The desktop build kept the repository's existing Vite warnings.
@@ -5892,6 +7005,7 @@ Reverting these is not viable — they are shipped v0.9.x event/officer/conseque
 
 **Change:** Removed the unused `target` field from coachmark definitions; updated the onboarding consolidation test to assert the live `data-coachmark-id` contract; replaced the order-interpretation header separator; removed raw warning glyphs from OperationBriefingModal Direct Intervention labels; added shared `src/ui/map/utils/commandAuthority.ts` constants for force-launch cost and recovery; imported those constants from both operation decision surfaces; and routed OpsMap diagnostics through disabled `debugOpsMap(...)` instead of unconditional `console.log`. Added `tests/ui/gui_audit_polish_cleanup.test.ts`.
 
+**Verification:** Red run `npx.cmd vitest run tests\ui\gui_audit_polish_cleanup.test.ts --reporter=dot` failed before the patch because the shared command-authority module did not exist. After the patch, `npx.cmd vitest run tests\ui\gui_audit_polish_cleanup.test.ts --reporter=dot` passed 5/5. Focused surrounding suite `npx.cmd vitest run tests\ui\gui_audit_polish_cleanup.test.ts tests\ui\coachmark_layer.test.ts tests\ui\onboarding_track_d_consolidation.test.ts tests\command_authority_lifecycle.test.ts tests\command_authority_interpretation_review.test.ts tests\modal_migration_2.test.ts tests\ui\modal_palette_unification.test.ts tests\ui\ops_planning_target_discovery.test.ts --reporter=dot` passed 136/136. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed. The desktop build kept the repository's existing Vite warnings.
 **Verification:** Red run `npx.cmd vitest run tests\ui\gui_audit_polish_cleanup.test.ts --reporter=dot` failed before the patch because the shared command-authority module did not exist. After the patch, `npx.cmd vitest run tests\ui\gui_audit_polish_cleanup.test.ts --reporter=dot` passed 5/5. Focused surrounding suite `npx.cmd vitest run tests\ui\gui_audit_polish_cleanup.test.ts tests\ui\coachmark_layer.test.ts tests\ui\onboarding_track_d_consolidation.test.ts tests\command_authority_lifecycle.test.ts tests\command_authority_interpretation_review.test.ts tests\modal_migration_2.test.ts tests\ui\modal_palette_unification.test.ts tests\ui\ops_planning_target_discovery.test.ts --reporter=dot` passed 145/145. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed. The desktop build kept the repository's existing Vite warnings.
 
 **Artifacts:** `src/ui/map/components/CoachmarkLayer.tsx`; `src/ui/map/components/OperationBriefingModal.tsx`; `src/ui/map/components/army_hq/OperationsSection.tsx`; `src/ui/map/components/army_hq/OrderInterpretationPanel.tsx`; `src/ui/map/components/plan_ui/OpsMapRenderer.ts`; `src/ui/map/utils/commandAuthority.ts`; `tests/ui/gui_audit_polish_cleanup.test.ts`; `tests/ui/onboarding_track_d_consolidation.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_POLISH_CLEANUP_H1.md`.
@@ -5906,6 +7020,11 @@ Reverting these is not viable — they are shipped v0.9.x event/officer/conseque
 
 **Why:** The 2026-05-22 GUI visual audit Batch G identified three dead-control failures: onboarding step targets had no visual spotlight, `OVERRIDE` on order interpretation acknowledged through the same path as `ACCEPT`, and presidential decision / emergency-posture controls silently no-op'd without the desktop command bridge.
 
+**Change:** `OnboardingOverlay` now resolves `data-tutorial-step` target geometry and renders a spotlight ring plus arrow for targeted steps; `OrderInterpretationPanel` hides active override controls unless a distinct supported override bridge exists and shows an unavailable note for current unsupported override events; `PresidentialAttentionPanel` disables browser/no-IPC decision/personnel buttons and shows bridge-unavailable feedback; `ArmyHQModal` keeps emergency posture visible but disabled without IPC and reports bridge absence through `setLoadError`. Added `tests/ui/gui_audit_dead_controls.test.ts`.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\gui_audit_dead_controls.test.ts --reporter=dot` failed before the patch on missing spotlight/override helpers and missing bridge feedback. After the patch, `npx.cmd vitest run tests\ui\gui_audit_dead_controls.test.ts --reporter=dot` passed 5/5. Focused surrounding suite `npx.cmd vitest run tests\ui\gui_audit_dead_controls.test.ts tests\v092_tutorial_anchor_coverage.test.ts tests\v092_tutorial_lane_e_overlay_a11y.test.ts tests\ui\emergency_posture_confirm.test.ts tests\ui_presidential_decision_room_wiring.test.ts tests\sim\command\phase4_ui_data_layer.test.ts --reporter=dot` passed 44/44.
+
+**Artifacts:** `src/ui/map/components/onboarding/OnboardingOverlay.tsx`; `src/ui/map/components/army_hq/OrderInterpretationPanel.tsx`; `src/ui/map/components/army_hq/PresidentialAttentionPanel.tsx`; `src/ui/map/components/army_hq/ArmyHQModal.tsx`; `tests/ui/gui_audit_dead_controls.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_DEAD_CONTROL_FEEDBACK.md`.
 **Change:** `OnboardingOverlay` now resolves `data-tutorial-step` target geometry and renders a spotlight ring plus arrow for targeted steps; `OrderInterpretationPanel` hides active override controls unless a distinct supported override bridge exists and shows an unavailable note for current unsupported override events; `PresidentialAttentionPanel` disables browser/no-IPC decision/personnel buttons and shows bridge-unavailable feedback; `ArmyHQModal` keeps emergency posture visible but disabled without IPC and reports bridge absence through `setLoadError`. New bridge/override feedback routes through the English/BCS dictionary. Added `tests/ui/gui_audit_dead_controls.test.ts`.
 
 **Verification:** Red run `npx.cmd vitest run tests\ui\gui_audit_dead_controls.test.ts --reporter=dot` failed before the patch on missing spotlight/override helpers and missing bridge feedback. After the patch, `npx.cmd vitest run tests\ui\gui_audit_dead_controls.test.ts --reporter=dot` passed 5/5. Focused surrounding suite `npx.cmd vitest run tests\ui\gui_audit_dead_controls.test.ts tests\v092_tutorial_anchor_coverage.test.ts tests\v092_tutorial_lane_e_overlay_a11y.test.ts tests\ui\emergency_posture_confirm.test.ts tests\ui_presidential_decision_room_wiring.test.ts tests\sim\command\phase4_ui_data_layer.test.ts --reporter=dot` passed 45/45 after localization reconciliation. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed.
@@ -5937,6 +7056,11 @@ Reverting these is not viable — they are shipped v0.9.x event/officer/conseque
 
 **Why:** The 2026-05-22 GUI visual audit Batch F identified shell ownership bleed: tactical map chrome could render in the Warroom, browser Warroom launches did not always show an explicit Warroom return path, Army HQ exposed duplicate close labels, and Decision Room command-loop lanes could repeat identical visible headlines.
 
+**Change:** `App.tsx` now renders `MapModeLegend`, `Minimap`, and `BottomStatusStrip` only on `appScreen === 'game'`; `shouldShowWarroomReturn(...)` recognizes `?view=warroom` alongside embedded and IPC contexts; `ArmyHQModal` leaves the explicit close label on the header control instead of duplicating it on the backdrop; and `buildCommandQuestions(...)` de-duplicates repeated Decision Room lane headlines by prefixing later duplicates with the lane label. Added `tests/ui/warroom_shell_ownership.test.ts` covering all four Batch F contracts.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\warroom_shell_ownership.test.ts --reporter=dot` failed before the patch across all four expected Batch F contracts. After the patch, `npx.cmd vitest run tests\ui\warroom_shell_ownership.test.ts --reporter=dot` passed 4/4. Focused shell suite `npx.cmd vitest run tests\ui\warroom_shell_ownership.test.ts tests\warroom_shell_layer.test.ts tests\ui_shell_navigation.test.ts tests\ui_presidential_decision_room_wiring.test.ts tests\v093_a11y_lane_c_warroom_decision_room.test.ts --reporter=dot` passed 77/77. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed.
+
+**Artifacts:** `src/ui/map/App.tsx`; `src/ui/map/utils/warroomReturn.ts`; `src/ui/map/components/army_hq/ArmyHQModal.tsx`; `src/ui/map/data/presidentialDecisionRoom.ts`; `tests/ui/warroom_shell_ownership.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md`.
 **Change:** `App.tsx` now renders `MapModeLegend`, `Minimap`, and `BottomStatusStrip` only on `appScreen === 'game'`; `shouldShowWarroomReturn(...)` recognizes `?view=warroom` alongside embedded and IPC contexts; `ArmyHQModal` leaves the explicit close label on the header control while the backdrop uses a distinct localized dismissal label; and `buildCommandQuestions(...)` de-duplicates repeated Decision Room lane headlines by prefixing later duplicates with the lane label. Added `tests/ui/warroom_shell_ownership.test.ts` covering all four Batch F contracts.
 
 **Verification:** Red run `npx.cmd vitest run tests\ui\warroom_shell_ownership.test.ts --reporter=dot` failed before the patch across all four expected Batch F contracts. After the patch, focused shell tests passed; broader verification is recorded in the current commit.
@@ -5955,6 +7079,11 @@ Reverting these is not viable — they are shipped v0.9.x event/officer/conseque
 
 **Change:** `CorpsFrontPanel` clears `sectorActionMessage` on `selectedSectorId` changes; `SelectionPanel` clears `supportMessage` on `selectedOsid` changes; `setArmyHQOpen(false)` resets `armyHQTab` to `briefing`; `PresidentialDecisionRoomPanel` clears `activeLens` to `all` when Advanced is hidden; and the `PresidentialToolbar` Inbox badge closes Army HQ, Codex, Chronicle, Operations, and Ops Planning modal before clearing selection ids. Added `tests/ui/stale_state_resets.test.ts` covering all four Batch E reset families.
 
+**Verification:** Red run `npx.cmd vitest run tests\ui\stale_state_resets.test.ts --reporter=dot` failed before the patch across all four expected stale-state cases. After the patch, `npx.cmd vitest run tests\ui\stale_state_resets.test.ts --reporter=dot` passed 4/4. Focused surrounding suite `npx.cmd vitest run tests\ui\stale_state_resets.test.ts tests\ui_presidential_decision_room_wiring.test.ts tests\ui_shell_navigation.test.ts tests\ui\records_button_behavior.test.ts tests\ui\emergency_posture_confirm.test.ts --reporter=dot` passed 33/33. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed.
+
+**Artifacts:** `src/ui/map/components/CorpsFrontPanel.tsx`; `src/ui/map/components/SelectionPanel.tsx`; `src/ui/map/components/PresidentialToolbar.tsx`; `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx`; `src/ui/map/store/gameStore.ts`; `tests/ui/stale_state_resets.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md`.
+
+**Roadmap delta:** Closes GUI visual audit Batch E. Remaining GUI audit queue: Warroom chrome/shell ownership, no-op control feedback, onboarding spotlight/bridge-unavailable feedback, and polish cleanup.
 **Verification:** Red run `npx.cmd vitest run tests\ui\stale_state_resets.test.ts --reporter=dot` failed before the patch across all four expected stale-state cases. After the patch, focused stale-state tests passed; broader verification is recorded in the current commit.
 
 **Artifacts:** `src/ui/map/components/CorpsFrontPanel.tsx`; `src/ui/map/components/SelectionPanel.tsx`; `src/ui/map/components/PresidentialToolbar.tsx`; `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx`; `src/ui/map/store/gameStore.ts`; `tests/ui/stale_state_resets.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md`.
@@ -5969,6 +7098,29 @@ Reverting these is not viable — they are shipped v0.9.x event/officer/conseque
 
 **Why:** The 2026-05-22 GUI visual audit Batch D identified `OperationBriefingModal` and `CommanderSelectionModal` as light-theme leaks on consequential operation-command surfaces.
 
+**Change:** Re-skinned `OperationBriefingModal` and `CommanderSelectionModal` to use dark panel tokens (`bg-panel-bg`, `bg-panel-card`, `border-panel-border`, `text-text-primary`) across shells, headers, roster/record cards, direct-intervention cards, and action bars. Added `tests/ui/modal_palette_unification.test.ts` to require the panel token palette and forbid the old light palette tokens in both Batch D target files.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\modal_palette_unification.test.ts --reporter=dot` failed before the patch because both target files lacked `bg-panel-bg` and still carried the old light palette. After the patch, `npx.cmd vitest run tests\ui\modal_palette_unification.test.ts --reporter=dot` passed 2/2. Focused modal contracts `npx.cmd vitest run tests\ui\modal_palette_unification.test.ts tests\modal_migration_2.test.ts tests\v093_a11y_lane_a_modal_stack.test.ts --reporter=dot` passed 35/35. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed.
+
+**Artifacts:** `src/ui/map/components/OperationBriefingModal.tsx`; `src/ui/map/components/CommanderSelectionModal.tsx`; `tests/ui/modal_palette_unification.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md`.
+
+**Roadmap delta:** Closes GUI visual audit Batch D. Remaining GUI audit queue: stale-state resets, Warroom chrome/shell ownership, no-op control feedback, onboarding spotlight/bridge-unavailable feedback, and polish cleanup.
+
+---
+
+## [2026-05-22] fix(gui): scope peace plan dismissal by offer
+
+**Type:** Tactical-map UI modal-state fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit identified stale peace-plan modal behavior. `App.tsx` used one global dismissal boolean, so dismissing one pending peace proposal could suppress a later or changed plan while the save remained loaded.
+
+**Change:** Added `src/ui/map/utils/peacePlanDismissal.ts` with `getPeacePlanDismissalKey(...)` and `shouldShowPeacePlanModal(...)`. `App.tsx` now stores `dismissedPeacePlanKey` scoped as `planId@turnOffered`, resets that key on save-load fingerprint changes and explicit Inbox/Dayton review routes, and dismisses only the currently offered plan. Added `tests/ui/peace_plan_dismissal_scope.test.ts` covering same-plan suppression, different-plan resurfacing, and a static guard against reintroducing the global boolean.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\peace_plan_dismissal_scope.test.ts --reporter=dot` failed before the patch because the scoped-dismissal helper did not exist and `App.tsx` still used the global boolean; after the patch, `npx.cmd vitest run tests\ui\peace_plan_dismissal_scope.test.ts --reporter=dot` passed 2/2. Focused UI/adapter suite `npx.cmd vitest run tests\ui\peace_plan_dismissal_scope.test.ts tests\ui\peace_plan_modal.test.ts tests\ui_adapter_boundary.test.ts tests\ui\diplomacy_view.test.ts tests\ui\diplomacy_panel.test.ts --reporter=dot` passed 25/25. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed.
+
+**Artifacts:** `src/ui/map/App.tsx`; `src/ui/map/utils/peacePlanDismissal.ts`; `tests/ui/peace_plan_dismissal_scope.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md`.
+
+**Roadmap delta:** Closes the stacked stale peace-modal slice of GUI visual audit Batch C. Remaining GUI audit queue: modal palette unification, stale-state resets, Warroom chrome/shell ownership, no-op control feedback, onboarding spotlight/bridge-unavailable feedback, and polish cleanup.
 **Change:** Re-skinned `OperationBriefingModal` and `CommanderSelectionModal` to use dark panel tokens (`bg-panel-bg`, `bg-panel-card`, `border-panel-border`, `text-text-primary`) across shells, headers, roster/record cards, direct-intervention cards, and action bars while preserving existing localized copy. Added `tests/ui/modal_palette_unification.test.ts` to require the panel token palette and forbid the old light palette tokens in both Batch D target files.
 
 **Verification:** Red run `npx.cmd vitest run tests\ui\modal_palette_unification.test.ts --reporter=dot` failed before the patch because both target files lacked `bg-panel-bg` and still carried the old light palette. After the patch, focused modal contracts passed; broader verification is recorded in the current commit.
@@ -5991,6 +7143,7 @@ Reverting these is not viable — they are shipped v0.9.x event/officer/conseque
 
 **Artifacts:** `src/ui/map/data/GameStateAdapter.ts`; `tests/ui_adapter_boundary.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md`.
 
+**Roadmap delta:** Closes the Vance-Owen zero-meter slice of GUI visual audit Batch C. Stacked stale peace modals, modal palette unification, stale-state resets, Warroom chrome scoping, no-op controls, and onboarding/bridge feedback remain active.
 **Roadmap delta:** Closes the Vance-Owen zero-meter slice of GUI visual audit Batch C. No-op controls and onboarding/bridge feedback remain active.
 
 ---
@@ -6023,6 +7176,7 @@ Reverting these is not viable — they are shipped v0.9.x event/officer/conseque
 
 **Artifacts:** `src/ui/map/components/EventModal.tsx`; `tests/ui/event_modal_dismissal.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_EVENT_MODAL_DISMISSAL.md`.
 
+**Roadmap delta:** Closes the event-notification dismissal/focus-semantics slice of GUI visual audit Batch C. Peace-meter semantics, stacked stale peace modals, modal palette unification, stale-state resets, Warroom chrome scoping, no-op controls, and onboarding/bridge feedback remain active.
 **Roadmap delta:** Closes the event-notification dismissal/focus-semantics slice of GUI visual audit Batch C. No-op controls and onboarding/bridge feedback remain active.
 
 ---
@@ -6039,6 +7193,7 @@ Reverting these is not viable — they are shipped v0.9.x event/officer/conseque
 
 **Artifacts:** `src/ui/map/map/MapContainer.tsx`; `tests/ui_map_maplibre_dasharray_contract.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_MAPLIBRE_DASHARRAY.md`.
 
+**Roadmap delta:** Closes the MapLibre dasharray render-correctness slice from GUI visual audit Batch A. Remaining GUI audit work stays active for peace/event modal hygiene, palette unification, stale-state resets, Warroom chrome scoping, no-op control feedback, and polish cleanup.
 **Roadmap delta:** Closes the MapLibre dasharray render-correctness slice from GUI visual audit Batch A. Remaining GUI audit work stays active for no-op control feedback and polish cleanup.
 
 ---
@@ -6055,6 +7210,7 @@ Reverting these is not viable — they are shipped v0.9.x event/officer/conseque
 
 **Artifacts:** `src/ui/map/components/SituationTab.tsx`; `src/ui/map/components/SelectionPanel.tsx`; `src/ui/map/components/army_hq/OpportunityLedgerPanel.tsx`; `tests/ui/gui_audit_label_discipline.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_LABEL_DISCIPLINE.md`.
 
+**Roadmap delta:** Closes the first player-truth slice of GUI visual audit Batch B. The broader 2026-05-22 GUI corrective queue remains active for MapLibre render correctness, peace/event modal hygiene, palette unification, stale-state resets, Warroom chrome scoping, no-op control feedback, and polish cleanup.
 **Roadmap delta:** Closes the first player-truth slice of GUI visual audit Batch B. The broader 2026-05-22 GUI corrective queue remains active for no-op control feedback and polish cleanup.
 
 ---
@@ -16662,5 +17818,31 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 - Preserved (were untracked; now committed as audit trail): `docs/40_reports/proposals/20260529_PHASE_E_ACTIVATION_RECOMMENDATION_POSTMERGE.md`, `docs/40_reports/proposals/20260529_WAR_EXHAUSTION_RATE_INVESTIGATION.md`, `docs/40_reports/proposals/20260529_INTL_ONLY_COUPLING_INVESTIGATION.md`.
 
 **Verification.** Documentation-only; no build/test impact. `git diff --check` clean. FORAWWV.md not touched.
+
+---
+
+## [2026-05-30] codex: complete 100× war_exhaustion rescale in cohesion divisors (CALIBRATION-OWNED — baseline refresh PENDING owner sign-off)
+
+**Summary.** Single sim-code change completing the 2026-05-22 100× `war_exhaustion` rescale (commit `59511672`) that had missed two linear-term consumers, leaving the cohesion dimension base floored at 0. Branch `codex/cohesion-divisor-rescale-fix` (off `origin/main` `12e822f3`), commit `16df9eeb`. **Baseline NOT refreshed — UPDATE_BASELINES not run; owner gates the recanonicalization + merge.**
+
+**The change (one logical change, two divisors).**
+- `src/sim/events/strategic_dimensions.ts` internal_cohesion base: `exhaustion / 3` → `exhaustion / 300`.
+- `src/sim/political/political_personality.ts` situation-score exhaustion term: `exhaustion / 6` → `exhaustion / 600` (+ comment updated to the post-rescale 0–10000 scale).
+- Rationale verified: the 100× rescale moved the exhaustion saturation ceiling 100→10000; both divisors were calibrated against that ceiling, so completing the sweep means ×100. `/6` was introduced 2026-04-14 (`948c6fdf`), BEFORE the rescale → genuinely stale. `commander/plan.ts:263` already used `/600` (that consumer was handled). Engine Invariants §8 accumulator untouched.
+
+**Mechanism confirmed.** Post-rescale turn-40 exhaustion ~4750–7940: old `/3` (~1583) dwarfed the cohesion formula's max positive term (allianceVal ≤40 + avgCohesion/2 ≤50 = 90) → `clamp(.,0,100)` floored all three factions' internal_cohesion base at 0; old `/6` pinned every faction's `exhaustion_level` at 100. New divisors leave cohesion base ~19–49 (RBiH/HRHB allianceVal 40 vs RS 20 → faction-differentiated) and `exhaustion_level` ~8–13.
+
+**Measured calibration impact (BEFORE = clean `origin/main`, AFTER = with fix).**
+- **40w** (`apr1992_definitive_40w`): anchors **27/27 → 27/27**, benchmarks **6/6 → 6/6**, OSID **656/712 (0.921348) → 656/712 (0.921348)** — per-faction breakdown byte-identical (HRHB 76/80, RBiH 223/247, RS 357/385). `final_state_hash` **`78e231e35b08cf53` → `e6b5187eaf320c57`** (moved). Net: count/anchor/benchmark FLAT; only state hash moves (cohesion base no longer 0).
+- **188w** (`apr1992_definitive_188w`): anchors **26/27 → 27/27** (`op:brcko:brcko` RECOVERED — Posavina corridor correctly VRS-held), benchmarks **6/6 → 6/6**, OSID **606/712 (0.851124) → 615/712 (0.863764)** (+9, +1.26pp). per-faction RBiH 246→250, RS 271→278, HRHB 89→87. `final_state_hash` **`940251e4acaff3d4` → `f27a22cc39b8b710`**. Net IMPROVEMENT.
+- **Baseline regression** (`run_baseline_regression.ts`): `apr1992_52w` `final_save.json` hash drift **`3e76057e0150e3e3…` → `1dcd59a183b53ceb…`** (expected; runner aborts at first mismatch). 4w scenarios not individually evaluated (gated behind the 52w abort) but expected to drift similarly since the cohesion base value changes every turn.
+
+**Anomaly delta (188w, per scenario-tester).** 24→29 (+5): 0 critical; +4 info, +1 warning = a new `morale_collapse_cluster` (VRS/HVO in exhausted NW/E-Bosnia + Central Bosnia) — the INTENDED exhaustion→cohesion/morale signal, not a regression. The +9 OSID gains are historically-correct flips: 5th Corps NW pocket (Op Sana/Storm) RS→RBiH + Brčko corridor RBiH→RS. **Watch-item (non-blocking):** late-war VRS morale-0 thinning could compound beyond 188w — monitor.
+
+**Tests.** New `tests/cohesion_divisor_rescale.test.ts` (4 tests) proves cohesion base is non-zero + faction-differentiated and `situation_score` stays exhaustion-sensitive post-rescale. Updated exactly one stale `/3`-era expectation in `tests/consequence_substrate_ownership.test.ts` (`exhaustion 150 → 15` → `64.5`). `tsc --noEmit` clean. `test:vitest:fast`: my change caused exactly 1 stale-test failure (the one fixed) — verified by before/after diff; the other 8 failures in 4 files (`audit_state_of_game_determinism`, `data_extract1990_h1_2_2` [Excel], `political_control_audit_cli`, `sector_foca_kalinovik_*_real_save`) are PRE-EXISTING on `origin/main` (fail identically with/without the change; environmental).
+
+**Recommendation.** Scenario-tester verdict: **GO** — accept the new baseline (40w `e6b5187e` + 188w `f27a22cc`). 40w fully count-flat; 188w strictly improves on the two factions whose late-war fronts this signal governs. **Owner gates the `UPDATE_BASELINES` refresh + merge.** Unblocks Phase E cohesion-gate activation evaluation (was BLOCKED solely on this divisor omission).
+
+**Artifacts.** `src/sim/events/strategic_dimensions.ts`, `src/sim/political/political_personality.ts`, `tests/consequence_substrate_ownership.test.ts`, `tests/cohesion_divisor_rescale.test.ts`. Handoff source: `docs/40_reports/20260529_CALIBRATION_HANDOFF_COHESION_DIVISOR.md`.
 
 ---

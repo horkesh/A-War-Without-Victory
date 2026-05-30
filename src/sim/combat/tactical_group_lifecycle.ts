@@ -34,8 +34,10 @@ import {
     ENABLE_TG_COHESION_BLEED,
     ENABLE_TG_ARMY_HQ_OPS,
     ENABLE_TG_OG_PROMOTION,
+    ENABLE_TG_RECOVERY_SUPPRESSION,
     TG_COHESION_BLEED_BASE,
     TG_BLEED_HOPS_FACTOR,
+    TG_RECOVERY_SUPPRESSION_TURNS,
     ARMY_HQ_COHESION_BLEED_MULT,
     MAX_CONCURRENT_TGS_PER_FACTION,
     MAX_TGS_PER_CORPS,
@@ -194,6 +196,16 @@ export function formTacticalGroup(
                 d.cohesion_bleed_applied = loss;
             }
             donor.tg_donations_this_scenario = (donor.tg_donations_this_scenario ?? 0) + 1;
+        }
+
+        // v2.3 (ENABLE_TG_RECOVERY_SUPPRESSION) — ADR-0005 §Pyrrhic cost "locked 8 turns":
+        // donors recover NO positive ambient cohesion drift for the next 8 turns after donating.
+        // cohesion_drift.ts reads tg_recovery_suppressed_until_turn and zeroes upward drift while
+        // turn < it (never below the faction floor). Set at formation off the formed-on turn
+        // (params.current_turn === tg.formed_on_turn). Flag-off: field never written → cohesion_drift
+        // suppression branch never fires → both gold hashes hold byte-identical.
+        if (ENABLE_TG_RECOVERY_SUPPRESSION) {
+            donor.tg_recovery_suppressed_until_turn = params.current_turn + TG_RECOVERY_SUPPRESSION_TURNS;
         }
 
         // Phase 3A telemetry: record this brigade's donor participation in its history

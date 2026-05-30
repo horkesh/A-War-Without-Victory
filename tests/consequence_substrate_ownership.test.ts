@@ -233,10 +233,11 @@ describe('internal_cohesion dimension uses canonical political war_exhaustion', 
         computeDimensionBaseValues(store, state, 'RBiH');
         const cohesion = getDimensionEffective(store, 'RBiH', 'internal_cohesion');
 
-        // With exhaustion 150, the formula subtracts exhaustion/3 = 50 from the base
+        // Post the 2026-05-22 100× war_exhaustion rescale the divisor is /300, so
+        // exhaustion 150 subtracts 150/300 = 0.5 from the base.
         // Alliance val for RBiH = 1 * 40 = 40, avgCohesion = 50 (default), avgCohesion/2 = 25
-        // Total = 40 + 25 - 50 = 15
-        expect(cohesion).toBe(15);
+        // Total = 40 + 25 - 0.5 = 64.5
+        expect(cohesion).toBe(64.5);
     });
 
     it('ignores stale military.war_exhaustion shadow data', () => {

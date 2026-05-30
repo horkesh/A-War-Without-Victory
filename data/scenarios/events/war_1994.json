@@ -2742,6 +2742,16 @@
       }
     ],
     "notifications_to_other_factions": {
+      "defiant": {
+        "RBiH": {
+          "headline": "Pale defies Belgrade embargo",
+          "body": "RS rejects Belgrade's pressure and accepts deeper isolation over the Contact Group map. Sarajevo sees a harder Pale line, but also a widening split between RS leadership and its Serbian patron."
+        },
+        "HRHB": {
+          "headline": "RS stands against Belgrade",
+          "body": "Pale chooses defiance despite the border closure and military-supply shock. Mostar sees RS cohesion harden internally while patron confidence and international standing deteriorate."
+        }
+      },
       "negotiate": {
         "RBiH": {
           "headline": "Pale seeks accommodation with Belgrade",

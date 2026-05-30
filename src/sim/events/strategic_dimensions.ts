@@ -108,7 +108,10 @@ export function computeDimensionBaseValues(store: DimensionStore, state: any, fa
         ? factionBrigades.reduce((s: number, b: any) => s + (b.cohesion ?? 50), 0) / factionBrigades.length
         : 50;
     const exhaustion = state.political?.war_exhaustion?.[faction] ?? 0;
-    updateBaseValue(store, faction, 'internal_cohesion', clamp(allianceVal + (avgCohesion / 2) - (exhaustion / 3), 0, 100));
+    // war_exhaustion is unbounded monotonic (Engine Invariants §8); the 2026-05-22 100× rescale
+    // (commit 59511672) moved its saturation ceiling 100→10000, so the divisor was rescaled in lockstep
+    // (was /3 in the 0-100 era) to keep the exhaustion term proportional to the formula's positive bound.
+    updateBaseValue(store, faction, 'internal_cohesion', clamp(allianceVal + (avgCohesion / 2) - (exhaustion / 300), 0, 100));
 
     // negotiating_leverage: derived meta-dimension (average of 3 key dimensions)
     const milEff = store[faction].military_credibility.effective_value;

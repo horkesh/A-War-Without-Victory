@@ -213,7 +213,11 @@ export function buildOneHopReserveBand(
 ): Set<string> {
     const oneHopBehind = new Set<string>();
     for (const frontOsid of frontSet) {
-        for (const neighbor of (adjacency.get(frontOsid as Osid) ?? [])) {
+        // Skip the `?? []` empty-array allocation when an OSID has no adjacency
+        // entry; iterating the same neighbor list produces an identical result set.
+        const neighbors = adjacency.get(frontOsid as Osid);
+        if (!neighbors) continue;
+        for (const neighbor of neighbors) {
             if (frontSet.has(neighbor)) continue;
             if (!friendlyOsids.has(neighbor)) continue;
             oneHopBehind.add(neighbor);
