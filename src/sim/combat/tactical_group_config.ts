@@ -256,26 +256,10 @@ export type OpKindDonorPolicy = 'full' | 'limited' | 'none';
 
 /**
  * Donor cap for the `limited` policy (ADR §"Bot AI ops": emergency ops use
- * `limited` with max 2 donors). The `full` policy is bounded by
- * MAX_DONORS_PER_TG_FULL_POLICY; `none` forms no TG at all.
+ * `limited` with max 2 donors). The `full` policy is bounded by the selection
+ * module's own MAX_DONORS_PER_TG; `none` forms no TG at all.
  */
 export const TG_LIMITED_POLICY_MAX_DONORS = 2;
-
-/**
- * Phase 1.7 POWER-FLOOR donor cap for OFFENSIVE ('full'-policy) ops.
- *
- * RATIONALE: the legacy (flag-off) engine committed the ENTIRE tactically-adjacent
- * assigned-brigade stack to a mass offensive — historical ops like Mistral-2 fielded
- * 5–6 brigades on one axis. The original MAX_DONORS_PER_TG=3 dropped the surplus
- * committed brigades from the synthesized force, starving the very mass offensives the
- * power floor is meant to keep power-neutral. We raise the cap for 'full'-policy ops so
- * the committed brigades are NOT dropped from the donor pool. This does NOT inflate force
- * (each donor still fights at its real strength); it stops the cap from amputating the
- * committed mass. 'limited'/'none' policies keep their tighter caps (TG_LIMITED_POLICY_
- * MAX_DONORS / 0). Gated by ENABLE_TG_FORMATION at the selection site → flag-off
- * byte-identical. Tunable per calibration.
- */
-export const MAX_DONORS_PER_TG_FULL_POLICY = 6;
 
 /**
  * Pure classifier: map an operation's KIND to its donor policy. Keys off the

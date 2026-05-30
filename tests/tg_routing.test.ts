@@ -138,9 +138,8 @@ describe('formTgsAtReadyTransition routing (flag-on)', () => {
         const tgs = Object.values(state.military!.tactical_groups!);
         expect(tgs).toHaveLength(1);
         expect(tgs[0].anchor_brigade_id).toBe('anchor');
-        // Phase 1.7 POWER FLOOR: full policy → offensive cap (MAX_DONORS_PER_TG_FULL_POLICY=6),
-        // so all 4 eligible donors are kept (was capped at 3 pre-Phase-1.7).
-        expect(tgs[0].donor_contributions.length).toBe(4);
+        // Full policy → module default cap (3 donors), not the limited cap.
+        expect(tgs[0].donor_contributions.length).toBe(3);
     });
 
     it('probe op (none) forms NO TG', async () => {

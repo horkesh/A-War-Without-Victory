@@ -133,25 +133,13 @@ describe('selectDonors v2.2-simplified', () => {
         expect(donors.map(d => d.brigade_id)).toEqual(['d_ok']);
     });
 
-    it('caps full-policy donors at MAX_DONORS_PER_TG_FULL_POLICY = 6 (Phase 1.7 power floor)', () => {
-        // Phase 1.7 raised the offensive ('full'-policy, max_donors omitted) cap from 3 to 6
-        // so a mass historical offensive's committed brigades are not amputated from the pool.
+    it('caps at MAX_DONORS_PER_TG_V2_2 = 3', () => {
         const state = stateWith([
             brigade('anchor'),
             brigade('d1'), brigade('d2'), brigade('d3'), brigade('d4'), brigade('d5'),
         ]);
         const donors = selectDonors(state, { anchor_brigade_id: 'anchor', staging_osid: 'op:x:y' });
-        expect(donors).toHaveLength(5); // 5 candidates, all kept (below the cap of 6)
-    });
-
-    it('caps full-policy donors at 6 even with more candidates available', () => {
-        const state = stateWith([
-            brigade('anchor'),
-            brigade('d1'), brigade('d2'), brigade('d3'), brigade('d4'),
-            brigade('d5'), brigade('d6'), brigade('d7'), brigade('d8'),
-        ]);
-        const donors = selectDonors(state, { anchor_brigade_id: 'anchor', staging_osid: 'op:x:y' });
-        expect(donors).toHaveLength(6); // 8 candidates, capped at MAX_DONORS_PER_TG_FULL_POLICY
+        expect(donors).toHaveLength(3);
     });
 
     it('returns donations sorted deterministically by brigade_id', () => {

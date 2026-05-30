@@ -55,7 +55,6 @@ import {
     TG_EQUIPMENT_FALLOFF_MULT,
     MIN_BRIGADE_PERSONNEL_AFTER_DONATION_BY_KIND,
     MIN_BRIGADE_PERSONNEL_AFTER_DONATION_DEFAULT,
-    MAX_DONORS_PER_TG_FULL_POLICY,
 } from './tactical_group_config.js';
 
 export interface DonorSelectionContext {
@@ -73,8 +72,8 @@ export interface DonorSelectionContext {
     /**
      * ADR-0005 Phase 2: per-op donor cap. When set, the returned pool is sliced
      * to at most this many donors (e.g. the `limited` policy caps at 2; `none`
-     * passes 0 → empty pool). When omitted (full policy), the offensive default
-     * (MAX_DONORS_PER_TG_FULL_POLICY) applies. Never widens above that ceiling.
+     * passes 0 → empty pool). When omitted, the module default (MAX_DONORS_PER_TG)
+     * applies. Never widens the cap above the module default.
      */
     max_donors?: number;
 }
@@ -82,9 +81,8 @@ export interface DonorSelectionContext {
 // === Eligibility thresholds (ADR-0005 §Tier 1 constraints) ===
 const COHESION_HEALTHY_THRESHOLD = 50;
 const DONATION_CAP_FRACTION = 0.30;
-// Phase 1.7: the donor cap now lives in tactical_group_config as
-// MAX_DONORS_PER_TG_FULL_POLICY (offensive 'full'-policy cap). 'limited'/'none'
-// caps arrive via context.max_donors.
+/** Max donors per TG. Caps cascade/C2 risk; the deterministic sort takes the closest few. */
+const MAX_DONORS_PER_TG = 3;
 
 /**
  * Select donor contributions for a prospective TG (ADR-0005 full donor model).
@@ -154,17 +152,12 @@ export function selectDonors(
         return strictCompare(a.donor.id, b.donor.id);
     });
 
-    // ADR-0005 Phase 2 + Phase 1.7 POWER FLOOR: per-op donor cap.
-    //  - `limited`/`none` pass an explicit `max_donors` (2 / 0) → tighten, never widen
-    //    (clamped to MAX_DONORS_PER_TG_FULL_POLICY so the explicit value still wins).
-    //  - `full` (offensive) omits `max_donors` → use the wider MAX_DONORS_PER_TG_FULL_POLICY
-    //    so a mass historical offensive's committed brigades aren't amputated from the pool
-    //    (legacy engine committed the whole adjacent stack). No force inflation: each donor
-    //    still fights at its real strength; this only stops the cap from dropping committed
-    //    brigades. Flag-off: this function is only reached inside ENABLE_TG_FORMATION.
+    // ADR-0005 Phase 2: a per-op donor cap (limited/none policies) may tighten — never widen —
+    // the module default. Math.min keeps `full` (max_donors omitted) at MAX_DONORS_PER_TG and
+    // a `limited` cap of 2 at 2; a `none` cap of 0 yields an empty pool.
     const cap = context.max_donors != null
-        ? Math.max(0, Math.min(MAX_DONORS_PER_TG_FULL_POLICY, context.max_donors))
-        : MAX_DONORS_PER_TG_FULL_POLICY;
+        ? Math.max(0, Math.min(MAX_DONORS_PER_TG, context.max_donors))
+        : MAX_DONORS_PER_TG;
 
     return scored
         .slice(0, cap)

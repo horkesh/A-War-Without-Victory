@@ -111,7 +111,7 @@ import {
 import { isSupportBrigadeOnActiveOp } from './sector_offensive_axis_helpers.js';
 import { SUPPORT_POWER_MULT } from './bot_constants.js';
 // ADR-0005 v2.2b: TG combat-power synthesis + casualty distribution. Flag-gated.
-import { ENABLE_TG_COMBAT_SYNTHESIS, classifyOpDonorPolicy } from './tactical_group_config.js';
+import { ENABLE_TG_COMBAT_SYNTHESIS } from './tactical_group_config.js';
 import { distributeCasualtiesAcrossTg } from './tactical_group_casualties.js';
 // ADR-0005 v2.2c #2: Hard Invariant #6 — immediate dissolution on anchor destruction.
 import { dissolveTacticalGroup, TG_ANCHOR_DISSOLVE_COHESION_FLOOR } from './tactical_group_lifecycle.js';
@@ -264,80 +264,38 @@ export function hasFriendlyNonTgHolder(
 }
 
 /**
- * Phase 1.7 power-floor helper: is the operation backing this TG an OFFENSIVE
- * ('full'-policy) op? Resolves the op by `tg.op_id` (== CorpsOperation.name, set
- * at TG formation in operation_preparation.ts) across every corps's
- * active_operations, then classifies via the same `classifyOpDonorPolicy` used
- * at formation time. When the op cannot be located (e.g. it already recovered),
- * we default to TRUE — matching `classifyOpDonorPolicy`'s "unknown → full"
- * default, and because the only TGs that reach battle are the offensives we want
- * power-neutral vs the legacy stack.
+ * ADR-0005 v2.2c: aggregate donor combat power for all TG anchors in an attack,
+ * using each donor's OWN stats (true per-donor power).
  *
- * Deterministic: corps keys iterated via strictCompare; pure read.
- * Only called inside ENABLE_TG_COMBAT_SYNTHESIS, so flag-off is byte-identical.
+ * For each donor of a TG anchored on an attacker, the contribution is the donor's
+ * full-force power — `computeAttackerPower(donor, ...)`, which bakes in the donor's
+ * equipment ratio (basePower), supply, disruption, fatigue, officer quality,
+ * heavy-weapons-vs-target-terrain, home-distance (≈1.0 since donors stay home),
+ * and morale — scaled by the donated fraction `personnel_lent / donor.personnel`.
+ * The donated element fights at the ANCHOR's effective posture against the target's
+ * terrain (it reinforces the anchor's assault), but is NOT a physical brigade, so it
+ * does not receive the concentration multiplier (applied by the caller to physical
+ * brigades only, per ADR-0005 §Battle resolution).
+ *
+ * This replaces the v2.2b proxy (which scaled the ANCHOR's per-personnel power by the
+ * total donated fraction); v2.2c reflects donor-specific equipment/supply/cohesion so a
+ * well-equipped donor lends more punch than a militia donor of equal headcount.
+ *
+ * Returned value is the SUM of donor contributions across all TG anchors in
+ * `attackerFormations`. Caller multiplies by coordPenalty × seasonal × tempo.
  */
-function isFullPolicyTg(state: GameState, tg: TacticalGroup): boolean {
-    const corpsCommand = state.military?.corps_command;
-    if (!corpsCommand) return true;
-    for (const cid of Object.keys(corpsCommand).sort(strictCompare)) {
-        const cmd = corpsCommand[cid];
-        if (!cmd) continue;
-        for (const op of cmd.active_operations) {
-            if (op.name === tg.op_id) return classifyOpDonorPolicy(op) === 'full';
-        }
-    }
-    return true; // op not locatable → treat as offensive (full)
-}
-
-/**
- * ADR-0005 v2.2c + Phase 1.7 POWER FLOOR: aggregate donor combat power for all TG
- * anchors in an attack, using each donor's OWN stats (true per-donor power).
- *
- * For each donor of a TG anchored on an attacker, the base contribution is the
- * donor's full-force power — `computeAttackerPower(donor, ...)`, which bakes in the
- * donor's equipment ratio (basePower), supply, disruption, fatigue, officer quality,
- * heavy-weapons-vs-target-terrain, home-distance (≈1.0 since donors stay home), and
- * morale. The donated element fights at the ANCHOR's effective posture against the
- * target's terrain (it reinforces the anchor's assault).
- *
- * Phase 1.7 (user-ratified POWER FLOOR — synthesized TG power must be ≥ the legacy
- * committed-stack power it replaces; the Pyrrhic cost is paid in COHESION via v2.3,
- * NOT in a combat-power haircut):
- *   - For an OFFENSIVE ('full'-policy) op, a committed donor lends its FULL combat
- *     power (donation fraction → 1.0). The legacy (flag-off) engine attacked with the
- *     whole tactically-adjacent stack at full `computeAttackerPower`; the TG layer must
- *     match that. The frozen `personnel_lent` cap (≤30%, BFS-falloff) still governs the
- *     casualty pro-rata + cohesion-bleed (the Pyrrhic price) — see distributeCasualties
- *     and the v2.3 bleed formula — but it no longer haircuts the punch. The BFS-hop
- *     distance effect is therefore a COHESION cost only (v2.3 `distance_hops` term),
- *     not a power cut; MAX_OG_DONOR_DISTANCE remains the hard reachability ceiling in
- *     selectDonors.
- *   - For a 'limited' op (emergency reaction), the old `personnel_lent`-scaled
- *     contribution is preserved: a defensive reaction is not meant to match a full
- *     offensive stack.
- *
- * Returns BOTH the summed donor power AND the count of full-policy donors that
- * contributed (`fullPolicyDonorCount`), so the caller can fold those donors into the
- * concentration-bonus count and apply the same concentration multiplier to the
- * synthesized force — restoring the +30% concentration the legacy stack received.
- *
- * Caller multiplies the returned power by coordPenalty × seasonal × tempo (× the
- * concentration bonus over the augmented effective count, applied caller-side).
- */
-export function computeTgDonorPower(
+function computeTgDonorPower(
     state: GameState,
     attackerFormations: FormationState[],
     supplyStateByOsid: SupplyStateByOsidReport | null | undefined,
     targetTerrainMult: number,
     targetOsid: string,
-): { power: number; fullPolicyDonorCount: number } {
+): number {
     const formations = state.military?.formations ?? {};
     let total = 0;
-    let fullPolicyDonorCount = 0;
     for (const a of attackerFormations) {
         const tg = findTgForAnchor(state, a.id);
         if (!tg) continue;
-        const isFull = isFullPolicyTg(state, tg);
         const anchorPosture = a.posture ?? 'defend';
         const atkMult = POSTURE_ATTACK[anchorPosture] ?? 0;
         const effectivePosture = atkMult > 0 ? anchorPosture : 'attack';
@@ -349,22 +307,13 @@ export function computeTgDonorPower(
             const donorPersonnel = donor.personnel ?? 0;
             if (donorPersonnel <= 0) continue;
             const donorRaw = computeAttackerPower(state, donor, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid);
-            if (isFull) {
-                // POWER FLOOR: committed donor to an offensive op fights at full power.
-                // No personnel_lent haircut, no per-hop power falloff — the distance/
-                // commitment cost is paid in cohesion (v2.3), not power.
-                total += donorRaw;
-                fullPolicyDonorCount += 1;
-            } else {
-                // 'limited' (emergency) op: keep the donated-fraction haircut. Cap the
-                // lent fraction at 1.0 — donor.personnel can drop below personnel_lent
-                // mid-op via attrition; a donor never lends more than its current force.
-                const lentFraction = Math.min(1, lent / donorPersonnel);
-                total += donorRaw * lentFraction;
-            }
+            // Cap the lent fraction at 1.0: donor.personnel can drop below personnel_lent
+            // mid-op via the donor's own attrition; a donor never lends more than its current force.
+            const lentFraction = Math.min(1, lent / donorPersonnel);
+            total += donorRaw * lentFraction;
         }
     }
-    return { power: total, fullPolicyDonorCount };
+    return total;
 }
 
 function findFriendlySectorIdForOsid(state: GameState, osid: string): string | null {
@@ -847,17 +796,6 @@ export function resolveAttackOrdersOsid(
                 targetOsid,
             );
         }
-        // Phase 1.7 POWER FLOOR: compute TG donor power BEFORE the concentration bonus so
-        // committed 'full'-policy donors can be folded into the effective concentration
-        // count and receive the SAME concentration multiplier the legacy adjacent stack
-        // got. Flag-off: ENABLE_TG_COMBAT_SYNTHESIS false → donorPower 0, donorCount 0,
-        // effectiveAttackerCount/concentrationBonus unchanged → byte-identical.
-        let tgDonorPower = 0;
-        if (ENABLE_TG_COMBAT_SYNTHESIS) {
-            const donorSynth = computeTgDonorPower(state, attackerFormations, supplyStateByOsid, targetTerrainMult, targetOsid);
-            tgDonorPower = donorSynth.power;
-            effectiveAttackerCount += donorSynth.fullPolicyDonorCount;
-        }
         const concentrationBonus = getConcentrationBonus(Math.min(4, effectiveAttackerCount));
         // Formations with attack orders attack at their posture — but postures with
         // zero attack mult (defend, hold, dig_in) use 'attack' as minimum, since the
@@ -873,14 +811,12 @@ export function resolveAttackOrdersOsid(
         }, 0);
         const tempoMult = getWarExhaustionTempoMult(state, attackerFaction); // P7: war exhaustion → attack tempo penalty
         let attackerPower = physicalPower * coordPenalty * seasonal.attack_mult * concentrationBonus * tempoMult;
-        // ADR-0005 v2.2b → Phase 1.7 POWER FLOOR: a committed 'full'-policy donor reinforces
-        // the assault as part of the concentrated mass, so it now receives the SAME
-        // concentration bonus as a physical brigade (it was already folded into
-        // effectiveAttackerCount above). The synthesized force therefore floors at the legacy
-        // full adjacent-stack power; the Pyrrhic cost is paid in cohesion (v2.3), not power.
-        // Flag-off: tgDonorPower is 0, so attackerPower equals the original expression.
+        // ADR-0005 v2.2b: TG donor personnel scales anchor combat output. Donors are
+        // NOT physical brigades sharing frontage; they do NOT get concentrationBonus.
+        // Flag-off: donor branch dead; attackerPower equals the original expression.
         if (ENABLE_TG_COMBAT_SYNTHESIS) {
-            attackerPower += tgDonorPower * coordPenalty * seasonal.attack_mult * concentrationBonus * tempoMult;
+            const donorPower = computeTgDonorPower(state, attackerFormations, supplyStateByOsid, targetTerrainMult, targetOsid);
+            attackerPower += donorPower * coordPenalty * seasonal.attack_mult * tempoMult;
         }
         defenderPower *= seasonal.defense_mult;
         const attackerIntelConfidence = getAttackIntelConfidence(
