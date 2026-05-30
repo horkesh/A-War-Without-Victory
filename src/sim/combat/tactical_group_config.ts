@@ -29,16 +29,16 @@
  * off the hash holds steady AT the v34 baseline (78e231e35b08cf53). Sub-flag activation
  * is the calibration-shift gate.
  */
-export const ENABLE_TACTICAL_GROUPS = false;
+export const ENABLE_TACTICAL_GROUPS = true;
 
 /** v2.0/v2.2 sub-flag: TG entity formation + combat power synthesis. */
-export const ENABLE_TG_FORMATION = false;
+export const ENABLE_TG_FORMATION = true;
 
 /** v2.2 sub-flag: donor contribution to combat power + casualty distribution. */
-export const ENABLE_TG_COMBAT_SYNTHESIS = false;
+export const ENABLE_TG_COMBAT_SYNTHESIS = true;
 
 /** v2.3 sub-flag: Pyrrhic dampener (donor cohesion bleed + cooldown enforcement). */
-export const ENABLE_TG_COHESION_BLEED = false;
+export const ENABLE_TG_COHESION_BLEED = true;
 
 /**
  * v2.3 sub-flag: 8-turn cohesion-recovery LOCK for TG donors (ADR-0005 §Pyrrhic cost
@@ -54,7 +54,7 @@ export const ENABLE_TG_COHESION_BLEED = false;
  * optional scalar on FormationState). Goal: both gold hashes hold byte-identical
  * (40w 78e231e35b08cf53, 188w 940251e4acaff3d4).
  */
-export const ENABLE_TG_RECOVERY_SUPPRESSION = false;
+export const ENABLE_TG_RECOVERY_SUPPRESSION = true;
 
 /** v2.3 cohesion-recovery LOCK duration (ADR-0005 §Pyrrhic cost: donors "locked 8 turns"). */
 export const TG_RECOVERY_SUPPRESSION_TURNS = 8;
@@ -78,7 +78,7 @@ export const TG_RECOVERY_SUPPRESSION_TURNS = 8;
  * record is written. Schema stays v34 (both fields are optional + omitEmpty-safe). Goal:
  * 40w final_state_hash `78e231e35b08cf53` byte-identical with this flag off.
  */
-export const ENABLE_TG_OG_PROMOTION = false;
+export const ENABLE_TG_OG_PROMOTION = true;
 
 /**
  * Promotion criterion (deterministic, RBiH-only): a corps's standing OG is promoted once it
@@ -113,7 +113,7 @@ export const OG_TO_DIVISION_DEFAULT_OFFSET = 20;
  * (all Army HQ fields already present + omitEmpty-safe). Goal: 40w final_state_hash
  * `78e231e35b08cf53` byte-identical with this flag off.
  */
-export const ENABLE_TG_ARMY_HQ_OPS = false;
+export const ENABLE_TG_ARMY_HQ_OPS = true;
 
 /**
  * v3.0 Army HQ frequency gate (ADR-0005 §Constants reference + §Army HQ Operations).
