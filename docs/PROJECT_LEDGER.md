@@ -17762,3 +17762,29 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Verification.** Documentation-only; no build/test impact. `git diff --check` clean. FORAWWV.md not touched.
 
 ---
+
+## [2026-05-30] codex: complete 100× war_exhaustion rescale in cohesion divisors (CALIBRATION-OWNED — baseline refresh PENDING owner sign-off)
+
+**Summary.** Single sim-code change completing the 2026-05-22 100× `war_exhaustion` rescale (commit `59511672`) that had missed two linear-term consumers, leaving the cohesion dimension base floored at 0. Branch `codex/cohesion-divisor-rescale-fix` (off `origin/main` `12e822f3`), commit `16df9eeb`. **Baseline NOT refreshed — UPDATE_BASELINES not run; owner gates the recanonicalization + merge.**
+
+**The change (one logical change, two divisors).**
+- `src/sim/events/strategic_dimensions.ts` internal_cohesion base: `exhaustion / 3` → `exhaustion / 300`.
+- `src/sim/political/political_personality.ts` situation-score exhaustion term: `exhaustion / 6` → `exhaustion / 600` (+ comment updated to the post-rescale 0–10000 scale).
+- Rationale verified: the 100× rescale moved the exhaustion saturation ceiling 100→10000; both divisors were calibrated against that ceiling, so completing the sweep means ×100. `/6` was introduced 2026-04-14 (`948c6fdf`), BEFORE the rescale → genuinely stale. `commander/plan.ts:263` already used `/600` (that consumer was handled). Engine Invariants §8 accumulator untouched.
+
+**Mechanism confirmed.** Post-rescale turn-40 exhaustion ~4750–7940: old `/3` (~1583) dwarfed the cohesion formula's max positive term (allianceVal ≤40 + avgCohesion/2 ≤50 = 90) → `clamp(.,0,100)` floored all three factions' internal_cohesion base at 0; old `/6` pinned every faction's `exhaustion_level` at 100. New divisors leave cohesion base ~19–49 (RBiH/HRHB allianceVal 40 vs RS 20 → faction-differentiated) and `exhaustion_level` ~8–13.
+
+**Measured calibration impact (BEFORE = clean `origin/main`, AFTER = with fix).**
+- **40w** (`apr1992_definitive_40w`): anchors **27/27 → 27/27**, benchmarks **6/6 → 6/6**, OSID **656/712 (0.921348) → 656/712 (0.921348)** — per-faction breakdown byte-identical (HRHB 76/80, RBiH 223/247, RS 357/385). `final_state_hash` **`78e231e35b08cf53` → `e6b5187eaf320c57`** (moved). Net: count/anchor/benchmark FLAT; only state hash moves (cohesion base no longer 0).
+- **188w** (`apr1992_definitive_188w`): anchors **26/27 → 27/27** (`op:brcko:brcko` RECOVERED — Posavina corridor correctly VRS-held), benchmarks **6/6 → 6/6**, OSID **606/712 (0.851124) → 615/712 (0.863764)** (+9, +1.26pp). per-faction RBiH 246→250, RS 271→278, HRHB 89→87. `final_state_hash` **`940251e4acaff3d4` → `f27a22cc39b8b710`**. Net IMPROVEMENT.
+- **Baseline regression** (`run_baseline_regression.ts`): `apr1992_52w` `final_save.json` hash drift **`3e76057e0150e3e3…` → `1dcd59a183b53ceb…`** (expected; runner aborts at first mismatch). 4w scenarios not individually evaluated (gated behind the 52w abort) but expected to drift similarly since the cohesion base value changes every turn.
+
+**Anomaly delta (188w, per scenario-tester).** 24→29 (+5): 0 critical; +4 info, +1 warning = a new `morale_collapse_cluster` (VRS/HVO in exhausted NW/E-Bosnia + Central Bosnia) — the INTENDED exhaustion→cohesion/morale signal, not a regression. The +9 OSID gains are historically-correct flips: 5th Corps NW pocket (Op Sana/Storm) RS→RBiH + Brčko corridor RBiH→RS. **Watch-item (non-blocking):** late-war VRS morale-0 thinning could compound beyond 188w — monitor.
+
+**Tests.** New `tests/cohesion_divisor_rescale.test.ts` (4 tests) proves cohesion base is non-zero + faction-differentiated and `situation_score` stays exhaustion-sensitive post-rescale. Updated exactly one stale `/3`-era expectation in `tests/consequence_substrate_ownership.test.ts` (`exhaustion 150 → 15` → `64.5`). `tsc --noEmit` clean. `test:vitest:fast`: my change caused exactly 1 stale-test failure (the one fixed) — verified by before/after diff; the other 8 failures in 4 files (`audit_state_of_game_determinism`, `data_extract1990_h1_2_2` [Excel], `political_control_audit_cli`, `sector_foca_kalinovik_*_real_save`) are PRE-EXISTING on `origin/main` (fail identically with/without the change; environmental).
+
+**Recommendation.** Scenario-tester verdict: **GO** — accept the new baseline (40w `e6b5187e` + 188w `f27a22cc`). 40w fully count-flat; 188w strictly improves on the two factions whose late-war fronts this signal governs. **Owner gates the `UPDATE_BASELINES` refresh + merge.** Unblocks Phase E cohesion-gate activation evaluation (was BLOCKED solely on this divisor omission).
+
+**Artifacts.** `src/sim/events/strategic_dimensions.ts`, `src/sim/political/political_personality.ts`, `tests/consequence_substrate_ownership.test.ts`, `tests/cohesion_divisor_rescale.test.ts`. Handoff source: `docs/40_reports/20260529_CALIBRATION_HANDOFF_COHESION_DIVISOR.md`.
+
+---
