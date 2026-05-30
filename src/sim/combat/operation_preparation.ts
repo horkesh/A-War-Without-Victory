@@ -80,6 +80,9 @@ import {
 } from './tactical_group_config.js';
 import { selectDonors } from './tactical_group_selection.js';
 import { formTacticalGroup } from './tactical_group_lifecycle.js';
+// ADR-0005 Phase 4: phantom-aware anchor resolution + dual-anchor de-confliction. Flag-gated.
+import { resolveTgAnchor, collectActiveAnchorIds } from './tactical_group_anchor.js';
+import { getReservedPrePlannedBrigadeIds } from './pre_planned_operations.js';
 // ADR-0006 Phase 3A: named TG commander + faction-asymmetric naming. Flag-gated (ENABLE_TG_FORMATION).
 import { assignTacticalCommander } from './officer_system.js';
 import { generateTacticalGroupName } from './tactical_group_naming.js';
@@ -650,10 +653,20 @@ export function formTgsAtReadyTransition(
     if (policy === 'none') return;
     const maxDonors = donorCapForPolicy(policy); // undefined for 'full' → module default
 
+    // ADR-0005 Phase 4 — dual-anchor de-confliction (Fix 2). Seed the reservation set
+    // with brigades already anchoring an active TG plus issue-#40 pre-planned reserves,
+    // then add each anchor we pick this pass so sibling axes / later ops can't re-claim it.
+    // resolveTgAnchor also drops phantom anchors (Fix 1): when a phantom outranks the
+    // resident brigade it is skipped; an all-phantom axis (Op Prsten ilijas_ring) yields
+    // null → no TG forms (legacy anchor-only path until a real VRS anchor is authored).
+    const reservedAnchors = collectActiveAnchorIds(state);
+    for (const id of getReservedPrePlannedBrigadeIds(currentTurn)) reservedAnchors.add(id);
+
     if (op.axes && op.axes.length > 0) {
         for (const axis of op.axes) {
-            const anchorId = getAnchorBrigade(axis);
+            const anchorId = resolveTgAnchor(state, axis, reservedAnchors);
             if (!anchorId) continue;
+            reservedAnchors.add(anchorId); // claim it: a sibling axis must pick its next-best
             const stagingOsid = axis.staging_osid ?? op.staging_osid;
             if (!stagingOsid) continue;
             // Idempotent: skip if a TG for this op+anchor already exists (the
@@ -678,7 +691,14 @@ export function formTgsAtReadyTransition(
         return;
     }
     if (op.participating_brigades.length === 0 || !op.staging_osid) return;
-    const anchorId = op.participating_brigades[0];
+    // Phase 4 (Fix 1/2): resolve a persistent, non-phantom, non-reserved anchor for the
+    // legacy single-axis path too (treat participating_brigades as the candidate pool).
+    const anchorId = resolveTgAnchor(
+        state,
+        { assigned_brigades: op.participating_brigades },
+        reservedAnchors,
+    );
+    if (!anchorId) return;
     if (tgAlreadyExistsFor(state, op.name, anchorId)) return;
     const donors = selectDonors(state, {
         anchor_brigade_id: anchorId,

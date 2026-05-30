@@ -28,6 +28,9 @@ import { getAllAxisObjectives, getCurrentLaunchObjectives, isMultiAxis } from '.
 import { ENABLE_TACTICAL_GROUPS, ENABLE_TG_FORMATION, DONATION_READINESS_FRACTION, getAnchorBrigade } from './tactical_group_config.js';
 // ADR-0005 v2.2c #3: donation-readiness gate recomputes the donor pool here.
 import { selectDonors } from './tactical_group_selection.js';
+// ADR-0005 Phase 4: phantom-aware anchor (gate must score donors against the SAME
+// persistent anchor that formTgsAtReadyTransition will actually use, not a phantom).
+import { resolveTgAnchor } from './tactical_group_anchor.js';
 
 // BATCH C: launch-readiness probes call `predictAllAdjacentTargets(...)` only
 // to query whether the brigade has a direct-objective adjacency entry; they do
@@ -815,7 +818,10 @@ function classifyAxisOpeningAttack(
     // op.donor_pool — functionally the same gate, no persisted schema field. Flag-off: skipped, so
     // byte-identical. The flag-on magnitude (how many ops this blocks) is validated at the 188w smoke.
     if (ENABLE_TG_FORMATION) {
-        const anchorId = getAnchorBrigade(axis);
+        // Phase 4: score donors against the persistent anchor (phantom-filtered). An
+        // all-phantom axis resolves to null → no TG forms there, so the donation gate is
+        // moot; skip it (the legacy anchor-only path handles the phantom axis).
+        const anchorId = resolveTgAnchor(state, axis, new Set());
         const stagingOsid = axis.staging_osid;
         if (anchorId && stagingOsid) {
             const anchorPersonnel = state.military.formations?.[anchorId]?.personnel ?? 0;

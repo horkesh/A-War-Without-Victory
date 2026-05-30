@@ -218,6 +218,52 @@ function findTgForAnchor(state: GameState, brigadeId: string): TacticalGroup | n
 }
 
 /**
+ * ADR-0005 Phase 4 (Fix 4) — territory-revert support. True if a friendly NON-TG
+ * brigade can hold `targetOsid` after a dissolved TG vacated it: i.e. an active
+ * same-faction brigade sits on a 1-hop neighbor of `targetOsid` and is NOT currently
+ * committed to any active TG (neither anchor nor donor). Such a brigade can occupy the
+ * captured OSID, so the capture stands; otherwise the OSID reverts to contested.
+ *
+ * Deterministic: 1-hop neighbors are sorted (getTacticalAdjacentOsids), formations
+ * iterated in sorted-key order, TG membership is a pure set lookup.
+ * Only called when ENABLE_TG_COMBAT_SYNTHESIS is true (caller-gated).
+ */
+export function hasFriendlyNonTgHolder(
+    state: GameState,
+    targetOsid: string,
+    friendlyFaction: FactionId,
+    adjacency: Map<string, string[]>,
+): boolean {
+    const formations = state.military?.formations;
+    if (!formations) return false;
+
+    const neighbors = new Set(getTacticalAdjacentOsids(state, targetOsid, adjacency));
+    if (neighbors.size === 0) return false;
+
+    // Brigades currently committed to an active TG (anchors + donors) cannot hold —
+    // they are the dissolving/dissolved force or pledged elsewhere.
+    const tgCommitted = new Set<string>();
+    const tgs = state.military?.tactical_groups ?? {};
+    for (const id of Object.keys(tgs).sort(strictCompare)) {
+        const tg = tgs[id];
+        if (!tg || tg.status === 'dissolved') continue;
+        tgCommitted.add(tg.anchor_brigade_id);
+        for (const d of tg.donor_contributions) tgCommitted.add(d.brigade_id);
+    }
+
+    for (const id of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[id];
+        if (!f || f.status !== 'active') continue;
+        if (f.faction !== friendlyFaction) continue;
+        if (!f.location_osid || !neighbors.has(f.location_osid)) continue;
+        if (tgCommitted.has(f.id)) continue;          // committed to a TG → can't occupy
+        if ((f.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue; // too weak to occupy
+        return true;
+    }
+    return false;
+}
+
+/**
  * ADR-0005 v2.2c: aggregate donor combat power for all TG anchors in an attack,
  * using each donor's OWN stats (true per-donor power).
  *
@@ -892,6 +938,10 @@ export function resolveAttackOrdersOsid(
         let totalDArtLost = 0;
 
         // Pre-classify support roles for weight computation
+        // ADR-0005 Phase 4 (Fix 4): track whether a TG anchor died and its TG dissolved
+        // THIS battle. Used after the territory-flip block to revert a just-captured OSID to
+        // contested when no friendly non-TG brigade can hold it (no dissolved-TG ghost hold).
+        let tgAnchorDissolvedThisBattle = false;
         const anySupport = attackerFormations.some(a => isSupportBrigadeOnActiveOp(state, a.id, a.corps_id));
         const casShares = computeAttackerCasualtyShares(
             attackerFormations.map(a => ({
@@ -932,14 +982,16 @@ export function resolveAttackOrdersOsid(
             // immediately (don't wait for the next-tick beginRecovery in sector_offensive.ts).
             // dissolveTacticalGroup clears donor personnel_lent_by_tg/equipment fields and sets
             // tg_cooldown_until_turn on anchor + donors; surviving donors keep their already-debited
-            // casualties and return. The territory-revert sub-clause (held OSID → contested unless a
-            // 1-hop friendly non-TG brigade is present) is deferred: a destroyed anchor is a normal
-            // dead physical brigade, so existing brigade-death/control mechanics already vacate its
-            // OSID — TODO-v2.2c-followup to confirm no TG-specific zombie hold remains. Flag-gated.
+            // casualties and return. ADR-0005 Phase 4 (Fix 4): the territory-revert sub-clause is
+            // now implemented after the flip block below — a dissolved TG must not leave a "ghost"
+            // hold on a just-captured OSID with no friendly brigade able to occupy it. Flag-gated.
             if (ENABLE_TG_COMBAT_SYNTHESIS
                 && ((a.personnel ?? 0) < MIN_ATTACK_PERSONNEL || (a.cohesion ?? 60) < TG_ANCHOR_DISSOLVE_COHESION_FLOOR)) {
                 const anchorTg = findTgForAnchor(state, a.id);
-                if (anchorTg) dissolveTacticalGroup(state, anchorTg.id, state.meta?.turn ?? 0);
+                if (anchorTg) {
+                    dissolveTacticalGroup(state, anchorTg.id, state.meta?.turn ?? 0);
+                    tgAnchorDissolvedThisBattle = true;
+                }
             }
 
             // Sweeping undefended territory is less exhausting than real combat but not free —
@@ -1147,6 +1199,35 @@ export function resolveAttackOrdersOsid(
 
             // Fall-1995 mechanic E-A4: cascade trigger (writer extracted for testability).
             emitCascadePenaltiesOnFlip(state, targetOsid, prevController, adjacency);
+
+            // ADR-0005 Phase 4 (Fix 4) / Hard Invariant #6 territory-revert sub-clause:
+            // when the capturing TG's anchor died and the TG dissolved THIS battle, the
+            // just-captured OSID has no committed force left to hold it. Revert it to
+            // CONTESTED (prevController) UNLESS a friendly NON-TG brigade sits on a 1-hop
+            // neighbor and can occupy it — otherwise a dissolved TG would leave a "ghost"
+            // hold. Flag-gated (ENABLE_TG_COMBAT_SYNTHESIS); flag-off never sets the flag.
+            if (ENABLE_TG_COMBAT_SYNTHESIS && tgAnchorDissolvedThisBattle
+                && !hasFriendlyNonTgHolder(state, targetOsid, attackerFaction, adjacency)) {
+                // Revert to the prior controller (CONTESTED). When there was no prior
+                // controller, remove the entry entirely so the OSID is unowned/contested.
+                if (prevController == null) {
+                    delete state.political.political_controllers[targetOsid];
+                } else {
+                    state.political.political_controllers[targetOsid] = prevController;
+                }
+                report.flips_applied -= 1;
+                (state.political.control_events ??= []).push({
+                    turn: state.meta?.turn ?? 0,
+                    settlement_id: targetOsid,
+                    mechanism: 'combat',
+                    from: attackerFaction,
+                    to: prevController,
+                    mun_id: targetOsid.split(':')[1] ?? undefined,
+                    battle_id: battleId,
+                    attacker_brigade: firstAttacker.id as string,
+                } satisfies ControlEvent);
+                flip = false; // downstream op feedback must not credit territory for a reverted flip
+            }
         }
 
         // ── Increment operation combat feedback counters ──────────────

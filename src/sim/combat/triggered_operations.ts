@@ -482,11 +482,20 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         // donja_bocinja_2 confirmed reachable (single contiguous Zavidovići/Maglaj
         // salient). Anchor arbih_351st_liberation (resident at staging). Seed brigades
         // are all arbih_3rd_corps: 351st + 328th (pocket) + 327th Vitezka Mountain
-        // (Maglaj-home, near the Bočinja objectives) + 7th Vitezka Muslim Liberation
-        // (3rd Corps shock bde; historical stand-in for the El Mujahid Detachment,
-        // which has no OOB id). Donor candidates beyond these are pulled faction-wide
-        // by the Army HQ Phase-A selection; the brigades list only seeds the
-        // participant set for injection — the cross-corps donor pool is NOT pinned.
+        // (Maglaj-home, near the Bočinja objectives) + 7th Vitezka Muslim Liberation.
+        //
+        // ADR-0005 Phase 4 (Fix 3) OOB resolution: the 7th Vitezka Muslim Liberation
+        // (`arbih_7th_vitezka_muslim_liberation`) is a REAL OOB brigade — present in
+        // data/source/oob_brigades.json (corps arbih_3rd_corps, available_from 0,
+        // mandatory, motorized). It serves as the 3rd Corps shock-brigade stand-in for the
+        // El Mujahid Detachment (the *Detachment itself* has no OOB id, but this seed does
+        // NOT inject a phantom — it references an existing brigade). The triggered-op
+        // injection (`buildAxesFromDef`) filters every brigade id through `formations[fid]`,
+        // so any unresolved seed id is silently dropped, never injected as a phantom — the
+        // seed list is therefore robust by construction. No OOB authoring action required.
+        // Donor candidates beyond these are pulled faction-wide by the Army HQ Phase-A
+        // selection; the brigades list only seeds the participant set for injection — the
+        // cross-corps donor pool is NOT pinned.
         name: 'Operation Farz 95',
         faction: 'RBiH',
         army_hq_op_id: 'farz_95',
