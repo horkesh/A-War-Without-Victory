@@ -59,13 +59,16 @@ export function mapOsidsToCorps(
     // Otherwise a canonical municipality claim can flood whole operational
     // interiors, fuse unrelated front arcs, and serialize giant non-contiguous
     // sectors that the frontline geometry never actually owns.
+    // Every OSID politically controlled by `faction` is friendly. The previous
+    // implementation pre-scanned `adjacency.keys()` for faction-owned OSIDs and
+    // then scanned `political_controllers` again, but any OSID added by the
+    // adjacency pre-scan satisfies `pc[osid] === faction` and is therefore already
+    // produced by the `political_controllers` scan below (which enumerates every
+    // key of `pc`). The pre-scan was pure redundant work over the large adjacency
+    // map. `friendlyOsids` is consumed only via `.has(...)` here and in
+    // `findSubordinateOsid`, never iterated for order, so dropping the pre-scan is
+    // byte-identical. (Mirrors the #62 elision in `buildFriendlyOsidsFromState`.)
     const friendlyOsids = new Set<Osid>();
-    for (const osid of adjacency.keys()) {
-        if (pc[osid] === faction) friendlyOsids.add(osid);
-    }
-    // Also add all OSIDs from political_controllers that belong to this faction.
-    // These may not appear in the adjacency graph (interior OSIDs with no edges)
-    // but are needed for BFS seeding from corps HQ / subordinate locations.
     for (const [osid, ctrl] of Object.entries(pc)) {
         if (ctrl === faction) friendlyOsids.add(osid);
     }
@@ -963,14 +966,20 @@ export function consolidateIsolatedCorpsPockets(
                 const meta = edgeMeta.get(eid);
                 if (!meta) continue;
                 const friendlyOsid = meta.side_a === faction ? meta.a : meta.b;
-                // Check OSID neighbors for edges belonging to other corps
-                const osidsToCheck = [friendlyOsid, ...(adjacency.get(friendlyOsid) ?? [])];
-                for (const checkOsid of osidsToCheck) {
+                // Check the friendly OSID itself, then its neighbors, for edges
+                // belonging to other corps. Iterating in place (self first, then
+                // adjacency in stored order) preserves the prior visitation order
+                // while avoiding a fresh array allocation per isolated edge.
+                const countCandidates = (checkOsid: string): void => {
                     for (const candidateEid of osidToFrontEdgeIds.get(checkOsid) ?? []) {
                         const candidateCorps = edgeToCorps.get(candidateEid);
                         if (!candidateCorps || candidateCorps === corpsId) continue;
                         neighborCorpsCounts.set(candidateCorps, (neighborCorpsCounts.get(candidateCorps) ?? 0) + 1);
                     }
+                };
+                countCandidates(friendlyOsid);
+                for (const checkOsid of adjacency.get(friendlyOsid) ?? []) {
+                    countCandidates(checkOsid);
                 }
             }
 
