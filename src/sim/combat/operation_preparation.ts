@@ -71,7 +71,13 @@ import { computeAttackerPower, rankDefendersByPower, getArtillerySuppression } f
 import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 // ADR-0005 v2.2b: TG formation wiring at sub_phase='ready' transition. Flag-gated.
-import { ENABLE_TG_FORMATION, getAnchorBrigade } from './tactical_group_config.js';
+// ADR-0005 Phase 2: per-op donor policy classifier + cap.
+import {
+    ENABLE_TG_FORMATION,
+    getAnchorBrigade,
+    classifyOpDonorPolicy,
+    donorCapForPolicy,
+} from './tactical_group_config.js';
 import { selectDonors } from './tactical_group_selection.js';
 import { formTacticalGroup } from './tactical_group_lifecycle.js';
 
@@ -626,22 +632,36 @@ function getOpsCommander(
  * selects + forms at ready; selectDonors is deterministic, so the readiness-gate
  * pool and this formation pool agree for a given turn's state.
  */
-function formTgsAtReadyTransition(
+export function formTgsAtReadyTransition(
     state: GameState,
     op: CorpsOperation,
     currentTurn: number,
 ): void {
     if (!ENABLE_TG_FORMATION) return;
+
+    // ADR-0005 Phase 2: classify the op by KIND → donor policy. `none` (probes /
+    // feints / reorganization) forms NO TG (legacy anchor-only). `limited`
+    // (emergency reactions) forms a TG with a capped donor pull. `full`
+    // (offensives) uses the module default donor cap.
+    const policy = classifyOpDonorPolicy(op);
+    if (policy === 'none') return;
+    const maxDonors = donorCapForPolicy(policy); // undefined for 'full' → module default
+
     if (op.axes && op.axes.length > 0) {
         for (const axis of op.axes) {
             const anchorId = getAnchorBrigade(axis);
             if (!anchorId) continue;
             const stagingOsid = axis.staging_osid ?? op.staging_osid;
             if (!stagingOsid) continue;
+            // Idempotent: skip if a TG for this op+anchor already exists (the
+            // sector_attack ready-path may form first; the canonical launch-site
+            // call must not double-form).
+            if (tgAlreadyExistsFor(state, op.name, anchorId)) continue;
             const donors = selectDonors(state, {
                 anchor_brigade_id: anchorId,
                 staging_osid: stagingOsid,
                 army_hq_op_id: op.army_hq_op_id,
+                max_donors: maxDonors,
             });
             formTacticalGroup(state, {
                 op_id: op.name,
@@ -655,10 +675,12 @@ function formTgsAtReadyTransition(
     }
     if (op.participating_brigades.length === 0 || !op.staging_osid) return;
     const anchorId = op.participating_brigades[0];
+    if (tgAlreadyExistsFor(state, op.name, anchorId)) return;
     const donors = selectDonors(state, {
         anchor_brigade_id: anchorId,
         staging_osid: op.staging_osid,
         army_hq_op_id: op.army_hq_op_id,
+        max_donors: maxDonors,
     });
     formTacticalGroup(state, {
         op_id: op.name,
@@ -667,6 +689,22 @@ function formTgsAtReadyTransition(
         current_turn: currentTurn,
         army_hq_op_id: op.army_hq_op_id,
     });
+}
+
+/**
+ * Idempotency guard for TG formation: true if a TG already exists for this
+ * operation + anchor. The TG id is `tg:<corps_id>:<op_id>:<anchor_brigade_id>`,
+ * so we match by op_id + anchor (corps is derived from the anchor). Keeps the
+ * canonical launch-site call from double-forming a TG the ready-path already made.
+ */
+function tgAlreadyExistsFor(state: GameState, opId: string, anchorId: string): boolean {
+    const tgs = state.military?.tactical_groups;
+    if (!tgs) return false;
+    for (const id of Object.keys(tgs)) {
+        const tg = tgs[id];
+        if (tg.op_id === opId && tg.anchor_brigade_id === anchorId) return true;
+    }
+    return false;
 }
 
 /**

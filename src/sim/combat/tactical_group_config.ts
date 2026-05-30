@@ -149,6 +149,71 @@ export const MAX_DONATIONS_PER_SCENARIO = 3;
 export const DONATION_READINESS_FRACTION = 0.6;
 
 /**
+ * ADR-0005 Phase 2 (§"Migration of existing pre-planned ops" / §"Bot AI ops"):
+ * per-operation donor policy. Classifies an operation by KIND into how it forms
+ * its Tactical Group:
+ *
+ *   - `full`    — offensive operations. Form a TG and pull donors per the full
+ *                 Phase-1 model (up to MAX_DONORS_PER_TG, distance falloff, etc.).
+ *                 Covers pre-planned / triggered / sector-offensive / Army-HQ ops.
+ *   - `limited` — emergency defensive-reaction ops. Form a TG but cap the donor
+ *                 pull (anchor + at most TG_LIMITED_POLICY_MAX_DONORS donors).
+ *   - `none`    — probes / feints / reorganization. Low-commitment by design;
+ *                 no TG is formed (legacy anchor-only behaviour).
+ */
+export type OpKindDonorPolicy = 'full' | 'limited' | 'none';
+
+/**
+ * Donor cap for the `limited` policy (ADR §"Bot AI ops": emergency ops use
+ * `limited` with max 2 donors). The `full` policy is bounded by the selection
+ * module's own MAX_DONORS_PER_TG; `none` forms no TG at all.
+ */
+export const TG_LIMITED_POLICY_MAX_DONORS = 2;
+
+/**
+ * Pure classifier: map an operation's KIND to its donor policy. Keys off the
+ * EXISTING `CorpsOperation.type` discriminant (+ the `is_emergency` flag); does
+ * NOT invent new op kinds. Deterministic and side-effect-free.
+ *
+ *   sector_attack / general_offensive          → 'full'   (offensive)
+ *   strategic_defense OR is_emergency === true  → 'limited' (emergency reaction)
+ *   probe / feint / reorganization              → 'none'   (low-commitment)
+ *
+ * An explicit `op.op_kind_donor_policy` on the operation overrides the derived
+ * value (lets scenario authors / future callers pin a policy); when absent the
+ * kind-derived default is returned.
+ */
+export function classifyOpDonorPolicy(op: {
+    type?: 'general_offensive' | 'sector_attack' | 'strategic_defense' | 'reorganization' | 'feint' | 'probe';
+    is_emergency?: boolean;
+    op_kind_donor_policy?: OpKindDonorPolicy;
+}): OpKindDonorPolicy {
+    if (op.op_kind_donor_policy != null) return op.op_kind_donor_policy;
+    if (op.is_emergency === true) return 'limited';
+    switch (op.type) {
+        case 'sector_attack':
+        case 'general_offensive':
+            return 'full';
+        case 'strategic_defense':
+            return 'limited';
+        case 'probe':
+        case 'feint':
+        case 'reorganization':
+            return 'none';
+        default:
+            // Unknown / unset kind: treat as offensive (the primary ops path).
+            return 'full';
+    }
+}
+
+/** Donor cap implied by a policy. `none` → 0 (no TG); `limited` → capped; `full` → undefined (module default). */
+export function donorCapForPolicy(policy: OpKindDonorPolicy): number | undefined {
+    if (policy === 'none') return 0;
+    if (policy === 'limited') return TG_LIMITED_POLICY_MAX_DONORS;
+    return undefined;
+}
+
+/**
  * Resolve the anchor brigade for an axis under TG semantics.
  *
  * Honors the canonical `main_brigade` if already assigned by

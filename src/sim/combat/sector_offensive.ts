@@ -71,7 +71,7 @@ import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 import { isEastHerzegovinaPair, isGrazAccordsActive, shouldGrazBlockAttack } from '../local_truces.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
 import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
-import { tickPreparation, hasUnresolvedProbe, autoResolveProbe } from './operation_preparation.js';
+import { tickPreparation, hasUnresolvedProbe, autoResolveProbe, formTgsAtReadyTransition } from './operation_preparation.js';
 // ADR-0005 v2.2b #45: TG dissolution at execution→recovery. Flag-gated.
 import { ENABLE_TG_FORMATION } from './tactical_group_config.js';
 import { dissolveTacticalGroup } from './tactical_group_lifecycle.js';
@@ -1227,6 +1227,15 @@ export function advanceSectorOffensives(
                 op.phase_started_turn = turn;
                 op.recovery_reason = undefined;
 
+                // ADR-0005 Phase 2: canonical TG-formation gate. EVERY offensive forms a
+                // TG here at the single planning→execution transition, regardless of which
+                // sub-path released it (preparation-ready, force_launch, stagedEarly, probe,
+                // feint). For standard sector_attack ops the preparation 'ready' path may have
+                // already formed the TG — formTgsAtReadyTransition is idempotent (skips when a
+                // TG for this op+anchor exists) and policy-gated (probes/feints classify as
+                // 'none' → no TG). Flag-off (ENABLE_TG_FORMATION false): early-return, byte-identical.
+                formTgsAtReadyTransition(state, op, turn);
+
                 if (multiAxis) {
                     for (const axis of op.axes!) resetAxisForExecution(axis);
                 } else {
@@ -2342,6 +2351,12 @@ export function evaluateOperationProgress(
                 if (turnsInPhase >= PLANNING_DURATION) {
                     op.phase = 'execution';
                     op.phase_started_turn = turn;
+                    // ADR-0005 Phase 2: general_offensive + strategic_defense (emergency)
+                    // ops transition planning→execution HERE (not in advanceSectorOffensives).
+                    // Route them through TG formation so emergency reactions ('limited' policy
+                    // → ≤2 donors) and any general_offensive ('full') form a TG. Idempotent +
+                    // policy-gated. Flag-off: early-return, byte-identical.
+                    formTgsAtReadyTransition(state, op, turn);
                 }
             } else if (op.phase === 'execution') {
                 // Check progress

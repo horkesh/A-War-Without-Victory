@@ -69,6 +69,13 @@ export interface DonorSelectionContext {
      * derivation. When omitted, a state-derived front-edge adjacency is used.
      */
     adjacency?: Map<string, string[]>;
+    /**
+     * ADR-0005 Phase 2: per-op donor cap. When set, the returned pool is sliced
+     * to at most this many donors (e.g. the `limited` policy caps at 2; `none`
+     * passes 0 → empty pool). When omitted, the module default (MAX_DONORS_PER_TG)
+     * applies. Never widens the cap above the module default.
+     */
+    max_donors?: number;
 }
 
 // === Eligibility thresholds (ADR-0005 §Tier 1 constraints) ===
@@ -145,8 +152,15 @@ export function selectDonors(
         return strictCompare(a.donor.id, b.donor.id);
     });
 
+    // ADR-0005 Phase 2: a per-op donor cap (limited/none policies) may tighten — never widen —
+    // the module default. Math.min keeps `full` (max_donors omitted) at MAX_DONORS_PER_TG and
+    // a `limited` cap of 2 at 2; a `none` cap of 0 yields an empty pool.
+    const cap = context.max_donors != null
+        ? Math.max(0, Math.min(MAX_DONORS_PER_TG, context.max_donors))
+        : MAX_DONORS_PER_TG;
+
     return scored
-        .slice(0, MAX_DONORS_PER_TG)
+        .slice(0, cap)
         .map(s => buildContribution(s.donor, anchorCorps, s.hops));
 }
 

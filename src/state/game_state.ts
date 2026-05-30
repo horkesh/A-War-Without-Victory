@@ -459,6 +459,15 @@ export interface CorpsOperation {
      *  scalar — omitEmpty-safe, undefined when ENABLE_TG_ARMY_HQ_OPS is off; no schema
      *  migration (mirrors the v2.3 tg_recent_compositions additive pattern, schema stays v34). */
     army_hq_op_id?: ArmyHqOpId;
+
+    // --- Tactical Group donor policy (ADR-0005 Phase 2 routing) ---
+    /** Per-operation donor policy classifying how this op forms its Tactical Group:
+     *  'full' (offensive — full donor pull), 'limited' (emergency — capped donors),
+     *  'none' (probe/feint — anchor-only, no TG). When unset, the kind-derived default
+     *  from `classifyOpDonorPolicy` applies (keyed off `type` + `is_emergency`). Optional
+     *  scalar — omitEmpty-safe, undefined when ENABLE_TG_FORMATION is off; no schema
+     *  migration (mirrors the army_hq_op_id additive pattern, schema stays v34). */
+    op_kind_donor_policy?: 'full' | 'limited' | 'none';
 }
 
 // === Tactical Group / Operational Group entity (ADR-0005 v2.0) ===
