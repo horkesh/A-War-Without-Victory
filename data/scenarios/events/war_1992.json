@@ -3052,6 +3052,7 @@
     "title": "UN Arms Embargo Strangles Bosnia",
     "narrative": "The UN arms embargo, originally imposed on all of Yugoslavia, disproportionately impacts the fledgling Bosnian government. While the VRS inherits vast JNA stockpiles and the HVO receives supplies from Croatia, the ARBiH faces severe weapons shortages across all fronts.",
     "category": "military",
+    "priority": 1,
     "trigger": {
       "turn_min": 3,
       "turn_max": 6,
@@ -3612,6 +3613,7 @@
     "title": "JNA Forces Begin Withdrawal from Bosnia",
     "narrative": "The Yugoslav People's Army formally announces its withdrawal from Bosnia-Herzegovina. In practice, Bosnian Serb personnel simply change insignia, and massive quantities of heavy weapons, ammunition depots, and military infrastructure are transferred directly to the newly formed VRS.",
     "category": "military",
+    "priority": 1,
     "trigger": {
       "turn_min": 5,
       "turn_max": 5,

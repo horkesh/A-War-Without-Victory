@@ -22,12 +22,33 @@ import { pickPoliticalResponse } from '../political/political_event_decision.js'
 import { compareCausalityEntries, strictCompare } from '../../state/validateGameState.js';
 
 /**
- * Maximum events that can fire in a single turn.
- * Raised from 3→4: at w5, jna_withdrawal_1992 was crowded out by 4+ eligible
- * events (barracks + others), preventing the jna_withdrawn flag from firing
- * and breaking the Drina → Srebrenica → Corridor cascade chain.
+ * Maximum PLAYER-FACING DECISION events that can fire in a single turn.
+ *
+ * The cap exists ONLY for decision-modal pacing: it bounds how many
+ * player-decision events (events with non-empty `response_options`) can be
+ * queued / auto-resolved in one turn so the player is not flooded with modals.
+ *
+ * Auto-resolving and pure flag-setter events (no `response_options`) are NEVER
+ * capped — they fire unconditionally when eligible and are never sent to the
+ * overflow queue. A flag-setter crowded out on the last turn of its window
+ * (e.g. jna_withdrawal_1992, turn 5-5) would otherwise be permanently dropped
+ * because the next turn `triggerMatches` rejects it (currentTurn > turn_max),
+ * silently killing downstream causal chains (Srebrenica/Žepa enclave + falls).
+ * See fix(events): cap only player-facing decisions (silent-drop bug).
  */
 const MAX_EVENTS_PER_TURN = 4;
+
+/**
+ * A "player-decision" event is one that presents response options to a faction.
+ * Only these are subject to MAX_EVENTS_PER_TURN + the overflow queue; auto /
+ * flag-setter events bypass both. Decision-event status is a property of the
+ * authored definition (presence of non-empty `response_options`), independent
+ * of which faction is the player this run — keeping the partition deterministic
+ * and run-invariant.
+ */
+export function isPlayerDecisionEvent(def: EventDefinition): boolean {
+    return Array.isArray(def.response_options) && def.response_options.length > 0;
+}
 
 export interface EventsEvaluationReport {
     fired: FiredEvent[];
@@ -470,7 +491,25 @@ export function evaluateEvents(
             kind: 'mutex_suppressed',
         });
     }
-    const overflowedIds = mutexFiltered.candidates.slice(MAX_EVENTS_PER_TURN).map((def) => def.id);
+
+    // Partition the (mutex-filtered, canonically-sorted) eligible set into
+    // player-decision events (subject to the cap + overflow queue) and auto /
+    // flag-setter events (fire unconditionally — never capped, never overflowed).
+    // Order is preserved within each partition because we walk the already-sorted
+    // list once; this keeps firing order deterministic. The cap's only legitimate
+    // purpose is decision-modal pacing, so it applies ONLY to the decision set.
+    const autoCandidates: EventDefinition[] = [];
+    const decisionCandidates: EventDefinition[] = [];
+    for (const def of mutexFiltered.candidates) {
+        if (isPlayerDecisionEvent(def)) {
+            decisionCandidates.push(def);
+        } else {
+            autoCandidates.push(def);
+        }
+    }
+
+    // Only player-decision events overflow. Auto/flag-setter events never do.
+    const overflowedIds = decisionCandidates.slice(MAX_EVENTS_PER_TURN).map((def) => def.id);
     state.military.event_overflow_queue = overflowedIds;
     // Phase B Sub-slice B3: record overflow causality entries (packet §3.4).
     for (const overflowedId of overflowedIds) {
@@ -482,7 +521,12 @@ export function evaluateEvents(
             kind: 'overflowed',
         });
     }
-    const toFire = mutexFiltered.candidates.slice(0, MAX_EVENTS_PER_TURN);
+
+    // Fire all auto/flag-setter events, plus the capped player-decision set.
+    // Re-sort the union so firing order stays in canonical (priority/turn/id)
+    // order regardless of the partition split.
+    const cappedDecisions = decisionCandidates.slice(0, MAX_EVENTS_PER_TURN);
+    const toFire = [...autoCandidates, ...cappedDecisions].sort(compareEventCandidates);
 
     // Phase 3: Fire selected events
     for (const def of toFire) {

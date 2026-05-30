@@ -92,7 +92,7 @@ const TEST_REGISTRY: EventDefinition[] = [...TEST_HISTORICAL, ...TEST_RANDOM];
 
 function makeEligibleEvent(
     id: string,
-    options: { priority?: number; turnMin?: number; cooldownTurns?: number; mutexGroup?: string } = {},
+    options: { priority?: number; turnMin?: number; cooldownTurns?: number; mutexGroup?: string; asDecision?: boolean } = {},
 ): EventDefinition {
     return {
         id,
@@ -106,7 +106,28 @@ function makeEligibleEvent(
         ...(options.cooldownTurns != null
             ? { recurrence: { max_fires: 10, cooldown_turns: options.cooldownTurns, escalation: 'static' as const } }
             : {}),
+        // The MAX_EVENTS_PER_TURN cap + overflow queue now apply ONLY to
+        // player-decision events (events with non-empty response_options).
+        // Auto/flag-setter events fire unconditionally. Cap/overflow tests opt
+        // in via asDecision so the cap mechanics are exercised. See
+        // fix(events): cap only player-facing decisions (silent-drop bug).
+        ...(options.asDecision
+            ? {
+                  response_options: [
+                      { id: `${id}_resp`, label: `${id} response`, effects: [] },
+                  ],
+              }
+            : {}),
     };
+}
+
+/** Cap/overflow-test variant: every event is a player-decision event so the
+ *  per-turn cap and overflow queue apply (auto/flag-setter events bypass both). */
+function makeDecisionEvent(
+    id: string,
+    options: { priority?: number; turnMin?: number; cooldownTurns?: number; mutexGroup?: string } = {},
+): EventDefinition {
+    return makeEligibleEvent(id, { ...options, asDecision: true });
 }
 
 test('compareEventCandidates: sorts by priority, trigger turn_min, missing turn_min last, then event id', () => {
@@ -153,11 +174,11 @@ test('filterMutexCandidates: keeps first canonical event per mutex group and rep
 test('evaluateEvents: five eligible same-priority same-turn events fire four and report overflow exactly', () => {
     const state = minimalState('war', 12);
     const registry = [
-        makeEligibleEvent('overflow_a', { priority: 1, turnMin: 12 }),
-        makeEligibleEvent('overflow_b', { priority: 1, turnMin: 12 }),
-        makeEligibleEvent('overflow_c', { priority: 1, turnMin: 12 }),
-        makeEligibleEvent('overflow_d', { priority: 1, turnMin: 12 }),
-        makeEligibleEvent('overflow_e', { priority: 1, turnMin: 12 }),
+        makeDecisionEvent('overflow_a', { priority: 1, turnMin: 12 }),
+        makeDecisionEvent('overflow_b', { priority: 1, turnMin: 12 }),
+        makeDecisionEvent('overflow_c', { priority: 1, turnMin: 12 }),
+        makeDecisionEvent('overflow_d', { priority: 1, turnMin: 12 }),
+        makeDecisionEvent('overflow_e', { priority: 1, turnMin: 12 }),
     ];
 
     const result = evaluateEvents(state, createRng('overflow'), 12, registry);
@@ -174,15 +195,51 @@ test('evaluateEvents: five eligible same-priority same-turn events fire four and
     assert.ok(!state.military.fired_event_ids?.includes('overflow_e'), 'overflowed event must not be tracked as fired');
 });
 
+test('evaluateEvents: auto/flag-setter events bypass the cap; only player-decision events overflow', () => {
+    // Silent-drop regression guard: five auto events (no response_options) plus
+    // five player-decision events all eligible on the same turn. ALL five autos
+    // must fire (cap does not apply to them); only the decision events are capped
+    // at MAX_EVENTS_PER_TURN (4) with the fifth overflowed. An auto flag-setter on
+    // the last turn of its window must never be silently dropped.
+    const state = minimalState('war', 12);
+    const registry = [
+        makeEligibleEvent('auto_a', { priority: 1, turnMin: 12 }),
+        makeEligibleEvent('auto_b', { priority: 1, turnMin: 12 }),
+        makeEligibleEvent('auto_c', { priority: 1, turnMin: 12 }),
+        makeEligibleEvent('auto_d', { priority: 1, turnMin: 12 }),
+        makeEligibleEvent('auto_e', { priority: 1, turnMin: 12 }),
+        makeDecisionEvent('dec_a', { priority: 1, turnMin: 12 }),
+        makeDecisionEvent('dec_b', { priority: 1, turnMin: 12 }),
+        makeDecisionEvent('dec_c', { priority: 1, turnMin: 12 }),
+        makeDecisionEvent('dec_d', { priority: 1, turnMin: 12 }),
+        makeDecisionEvent('dec_e', { priority: 1, turnMin: 12 }),
+    ];
+
+    const result = evaluateEvents(state, createRng('auto-bypass'), 12, registry);
+
+    const firedIds = result.fired.map((event) => event.id);
+    // All five autos fire (never capped).
+    for (const id of ['auto_a', 'auto_b', 'auto_c', 'auto_d', 'auto_e']) {
+        assert.ok(firedIds.includes(id), `auto event ${id} must fire (cap must not apply)`);
+    }
+    // Exactly four of the five decision events fire; the fifth overflows.
+    const firedDecisions = firedIds.filter((id) => id.startsWith('dec_'));
+    assert.strictEqual(firedDecisions.length, 4, 'decision events are still capped at 4');
+    assert.deepStrictEqual(result.overflowed_ids, ['dec_e']);
+    assert.deepStrictEqual(state.military.event_overflow_queue, ['dec_e']);
+    // Total fired = 5 autos + 4 capped decisions = 9 (cap is decision-only).
+    assert.strictEqual(result.fired.length, 9);
+});
+
 test('evaluateEvents: stores overflowed ids in the persisted overflow queue', () => {
     const state = minimalState('war', 13);
     const registry = [
-        makeEligibleEvent('queue_a', { priority: 1, turnMin: 13 }),
-        makeEligibleEvent('queue_b', { priority: 1, turnMin: 13 }),
-        makeEligibleEvent('queue_c', { priority: 1, turnMin: 13 }),
-        makeEligibleEvent('queue_d', { priority: 1, turnMin: 13 }),
-        makeEligibleEvent('queue_e', { priority: 1, turnMin: 13 }),
-        makeEligibleEvent('queue_f', { priority: 1, turnMin: 13 }),
+        makeDecisionEvent('queue_a', { priority: 1, turnMin: 13 }),
+        makeDecisionEvent('queue_b', { priority: 1, turnMin: 13 }),
+        makeDecisionEvent('queue_c', { priority: 1, turnMin: 13 }),
+        makeDecisionEvent('queue_d', { priority: 1, turnMin: 13 }),
+        makeDecisionEvent('queue_e', { priority: 1, turnMin: 13 }),
+        makeDecisionEvent('queue_f', { priority: 1, turnMin: 13 }),
     ];
 
     const result = evaluateEvents(state, createRng('overflow-queue-store'), 13, registry);
@@ -208,11 +265,11 @@ test('evaluateEvents: re-enters queued ids but canonical order controls firing a
     const state = minimalState('war', 14);
     state.military.event_overflow_queue = ['queued_z', 'queued_z', 'missing_old'];
     const registry = [
-        makeEligibleEvent('new_a', { priority: 1, turnMin: 14 }),
-        makeEligibleEvent('new_b', { priority: 1, turnMin: 14 }),
-        makeEligibleEvent('new_c', { priority: 1, turnMin: 14 }),
-        makeEligibleEvent('new_d', { priority: 1, turnMin: 14 }),
-        makeEligibleEvent('queued_z', { priority: 100, turnMin: 14 }),
+        makeDecisionEvent('new_a', { priority: 1, turnMin: 14 }),
+        makeDecisionEvent('new_b', { priority: 1, turnMin: 14 }),
+        makeDecisionEvent('new_c', { priority: 1, turnMin: 14 }),
+        makeDecisionEvent('new_d', { priority: 1, turnMin: 14 }),
+        makeDecisionEvent('queued_z', { priority: 100, turnMin: 14 }),
     ];
 
     const result = evaluateEvents(state, createRng('overflow-queue-priority'), 14, registry);
@@ -246,12 +303,12 @@ test('evaluateEvents: drops queued ids that no longer pass normal gates', () => 
 test('evaluateEvents: does not queue mutex-suppressed ids', () => {
     const state = minimalState('war', 16);
     const registry = [
-        makeEligibleEvent('mutex_queue_a', { priority: 1, turnMin: 16, mutexGroup: 'shared' }),
-        makeEligibleEvent('mutex_queue_b', { priority: 1, turnMin: 16, mutexGroup: 'shared' }),
-        makeEligibleEvent('plain_queue_a', { priority: 1, turnMin: 16 }),
-        makeEligibleEvent('plain_queue_b', { priority: 1, turnMin: 16 }),
-        makeEligibleEvent('plain_queue_c', { priority: 1, turnMin: 16 }),
-        makeEligibleEvent('plain_queue_d', { priority: 1, turnMin: 16 }),
+        makeDecisionEvent('mutex_queue_a', { priority: 1, turnMin: 16, mutexGroup: 'shared' }),
+        makeDecisionEvent('mutex_queue_b', { priority: 1, turnMin: 16, mutexGroup: 'shared' }),
+        makeDecisionEvent('plain_queue_a', { priority: 1, turnMin: 16 }),
+        makeDecisionEvent('plain_queue_b', { priority: 1, turnMin: 16 }),
+        makeDecisionEvent('plain_queue_c', { priority: 1, turnMin: 16 }),
+        makeDecisionEvent('plain_queue_d', { priority: 1, turnMin: 16 }),
     ];
 
     const result = evaluateEvents(state, createRng('overflow-queue-mutex'), 16, registry);
@@ -265,11 +322,11 @@ test('evaluateEvents: does not queue mutex-suppressed ids', () => {
 test('evaluateEvents: shuffled five-event registry fires canonical first four deterministically', () => {
     const state = minimalState('war', 20);
     const registry = [
-        makeEligibleEvent('canonical_e', { priority: 1, turnMin: 20 }),
-        makeEligibleEvent('canonical_c', { priority: 1, turnMin: 20 }),
-        makeEligibleEvent('canonical_a', { priority: 1, turnMin: 20 }),
-        makeEligibleEvent('canonical_d', { priority: 1, turnMin: 20 }),
-        makeEligibleEvent('canonical_b', { priority: 1, turnMin: 20 }),
+        makeDecisionEvent('canonical_e', { priority: 1, turnMin: 20 }),
+        makeDecisionEvent('canonical_c', { priority: 1, turnMin: 20 }),
+        makeDecisionEvent('canonical_a', { priority: 1, turnMin: 20 }),
+        makeDecisionEvent('canonical_d', { priority: 1, turnMin: 20 }),
+        makeDecisionEvent('canonical_b', { priority: 1, turnMin: 20 }),
     ];
 
     const result = evaluateEvents(state, createRng('canonical-shuffle'), 20, registry);
@@ -297,12 +354,12 @@ test('evaluateEvents: recurrence cooldown-blocked event is excluded before overf
     const state = minimalState('war', 30);
     state.military.event_last_fired_turn = { blocked_by_cooldown: 29 };
     const registry = [
-        makeEligibleEvent('included_a', { priority: 1, turnMin: 30 }),
-        makeEligibleEvent('included_b', { priority: 1, turnMin: 30 }),
-        makeEligibleEvent('included_c', { priority: 1, turnMin: 30 }),
-        makeEligibleEvent('included_d', { priority: 1, turnMin: 30 }),
-        makeEligibleEvent('overflow_after_gates', { priority: 1, turnMin: 30 }),
-        makeEligibleEvent('blocked_by_cooldown', { priority: 1, turnMin: 30, cooldownTurns: 3 }),
+        makeDecisionEvent('included_a', { priority: 1, turnMin: 30 }),
+        makeDecisionEvent('included_b', { priority: 1, turnMin: 30 }),
+        makeDecisionEvent('included_c', { priority: 1, turnMin: 30 }),
+        makeDecisionEvent('included_d', { priority: 1, turnMin: 30 }),
+        makeDecisionEvent('overflow_after_gates', { priority: 1, turnMin: 30 }),
+        makeDecisionEvent('blocked_by_cooldown', { priority: 1, turnMin: 30, cooldownTurns: 3 }),
     ];
 
     const result = evaluateEvents(state, createRng('cooldown-overflow'), 30, registry);
@@ -321,12 +378,12 @@ test('evaluateEvents: recurrence cooldown-blocked event is excluded before overf
 test('evaluateEvents: mutex suppression happens after canonical sort and before the per-turn cap', () => {
     const state = minimalState('war', 40);
     const registry = [
-        makeEligibleEvent('cap_d', { priority: 1, turnMin: 40 }),
-        makeEligibleEvent('mutex_b', { priority: 1, turnMin: 40, mutexGroup: 'shared' }),
-        makeEligibleEvent('cap_c', { priority: 1, turnMin: 40 }),
-        makeEligibleEvent('overflow_e', { priority: 1, turnMin: 40 }),
-        makeEligibleEvent('mutex_a', { priority: 1, turnMin: 40, mutexGroup: 'shared' }),
-        makeEligibleEvent('cap_f', { priority: 1, turnMin: 40 }),
+        makeDecisionEvent('cap_d', { priority: 1, turnMin: 40 }),
+        makeDecisionEvent('mutex_b', { priority: 1, turnMin: 40, mutexGroup: 'shared' }),
+        makeDecisionEvent('cap_c', { priority: 1, turnMin: 40 }),
+        makeDecisionEvent('overflow_e', { priority: 1, turnMin: 40 }),
+        makeDecisionEvent('mutex_a', { priority: 1, turnMin: 40, mutexGroup: 'shared' }),
+        makeDecisionEvent('cap_f', { priority: 1, turnMin: 40 }),
     ];
 
     const result = evaluateEvents(state, createRng('mutex-before-cap'), 40, registry);
@@ -344,13 +401,13 @@ test('evaluateEvents: mutex suppression happens after canonical sort and before 
 
 test('evaluateEvents: shuffled mutex registry yields deterministic suppression and overflow ids', () => {
     const makeRegistry = () => [
-        makeEligibleEvent('z_overflow', { priority: 1, turnMin: 41 }),
-        makeEligibleEvent('b_group_second', { priority: 1, turnMin: 41, mutexGroup: 'group_b' }),
-        makeEligibleEvent('a_group_second', { priority: 1, turnMin: 41, mutexGroup: 'group_a' }),
-        makeEligibleEvent('a_group_first', { priority: 1, turnMin: 41, mutexGroup: 'group_a' }),
-        makeEligibleEvent('b_group_first', { priority: 1, turnMin: 41, mutexGroup: 'group_b' }),
-        makeEligibleEvent('c_plain', { priority: 1, turnMin: 41 }),
-        makeEligibleEvent('d_plain', { priority: 1, turnMin: 41 }),
+        makeDecisionEvent('z_overflow', { priority: 1, turnMin: 41 }),
+        makeDecisionEvent('b_group_second', { priority: 1, turnMin: 41, mutexGroup: 'group_b' }),
+        makeDecisionEvent('a_group_second', { priority: 1, turnMin: 41, mutexGroup: 'group_a' }),
+        makeDecisionEvent('a_group_first', { priority: 1, turnMin: 41, mutexGroup: 'group_a' }),
+        makeDecisionEvent('b_group_first', { priority: 1, turnMin: 41, mutexGroup: 'group_b' }),
+        makeDecisionEvent('c_plain', { priority: 1, turnMin: 41 }),
+        makeDecisionEvent('d_plain', { priority: 1, turnMin: 41 }),
     ];
     const stateA = minimalState('war', 41);
     const stateB = minimalState('war', 41);
