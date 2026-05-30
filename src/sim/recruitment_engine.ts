@@ -44,6 +44,7 @@ import {
 import { getRsJnaHeavyComposition, getRsMountainComposition } from './combat/equipment_effects.js';
 import { ENCLAVE_DEFINITIONS, isEnclaveBrigade, osidBelongsToEnclave } from './combat/enclave_resilience.js';
 import { getFactionDefaultOfficerQuality } from './combat/combat_math.js';
+import { effectivePersonnel } from './combat/tactical_group_personnel.js';
 import { isFriendlyFaction } from './early_war/alliance_update.js';
 import { initializeDoctrineStateForFormation } from '../state/doctrine.js';
 import { initializeEquipmentStateForFormation } from '../state/heavy_equipment.js';
@@ -478,7 +479,11 @@ export function getMunBrigadesForFaction(
                 if (typeof t === 'string' && t.startsWith('mun:') && t.slice(4) === munId) {
                     const rawMax = f.max_personnel;
                     const effectiveMax = isEnclave ? Math.min(rawMax ?? 3000, ENCLAVE_MAX_PERSONNEL) : rawMax;
-                    result.push({ personnel: f.personnel ?? 0, max_personnel: effectiveMax });
+                    // Phase 0 (ADR-0005): recruitment capacity is a home-availability read — a
+                    // brigade with personnel lent to a TG is below effective capacity and should
+                    // be backfill-eligible. Feeds the at-capacity checks (recruitment + surplus
+                    // routing). Flag-off: effectivePersonnel === personnel.
+                    result.push({ personnel: effectivePersonnel(f), max_personnel: effectiveMax });
                     break;
                 }
             }
