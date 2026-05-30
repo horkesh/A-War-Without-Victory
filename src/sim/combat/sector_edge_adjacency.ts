@@ -44,7 +44,11 @@ export function isCaseBBridge(
 
 /** Check if two OSIDs are adjacent in the OSID adjacency map. */
 export function isOsidAdjacent(a: Osid, b: Osid, adj: Map<Osid, Osid[]>): boolean {
-    return (adj.get(a) ?? []).includes(b);
+    // Avoid the `?? []` empty-array allocation on a miss: this is called in the
+    // hot O(n²) Case A / Case B edge-adjacency loops. Membership test only — the
+    // boolean result is identical to `(adj.get(a) ?? []).includes(b)`.
+    const list = adj.get(a);
+    return list !== undefined && list.includes(b);
 }
 
 /**
