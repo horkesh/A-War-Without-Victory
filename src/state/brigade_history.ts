@@ -8,7 +8,7 @@
  * Turn numbers and OSID strings only.
  */
 
-import type { FactionId } from './game_state.js';
+import type { ArmyHqOpId, FactionId, FormationId, TgId } from './game_state.js';
 
 /** Combat outcome type alias (mirrors attack resolution outcomes). */
 export type CombatOutcome =
@@ -47,6 +47,34 @@ export interface BrigadeEngagement {
     equipment_captured?: { tanks: number; artillery: number };
 }
 
+/**
+ * Per-brigade TG participation record (ADR-0005 §Schema, lines 166-179).
+ *
+ * Telemetry the "back the officer" AAR/Chronicle UI (Phase 3B) renders: a record
+ * that this brigade anchored or donated to a Tactical Group. Written at TG
+ * formation (Phase 3A). Fields known only at dissolution (`dissolved_turn`,
+ * `personnel_returned`, `casualties`) are optional + omitEmpty — populated later
+ * if/when dissolution telemetry lands. Deterministic: no randomness, turn numbers
+ * + ids only.
+ */
+export interface TgParticipationRecord {
+    tg_id: TgId;
+    /** CorpsOperation.id (or ArmyHqOpId) this TG carried out. */
+    op_id: string;
+    role: 'anchor' | 'donor';
+    /** Turn the TG formed (= when this record was written). */
+    formed_turn: number;
+    /** Personnel this brigade lent at formation (donors only; 0/omitted for anchor). */
+    personnel_lent?: number;
+    /** Donor brigade's source corps (donors only; anchor uses its own corps). */
+    donor_corps_id?: FormationId;
+    /** Set when the TG is part of an Army HQ (faction-scope) op. */
+    army_hq_op_id?: ArmyHqOpId;
+}
+
+/** Rolling window (turns) for live `tg_participations`; older flushed to archive (ADR-0005 §421). */
+export const TG_PARTICIPATION_WINDOW_TURNS = 26;
+
 /** Cumulative brigade service record. */
 export interface BrigadeHistory {
     // --- Engagement log (FIFO cap at MAX_HISTORY_ENTRIES) ---
@@ -81,6 +109,17 @@ export interface BrigadeHistory {
     worst_single_battle_turn: number | null;
     peak_personnel: number;
     nadir_personnel: number;
+
+    // --- TG participation telemetry (ADR-0005 Phase 3A; optional/omitEmpty) ---
+    /**
+     * Rolling-window log of TG anchor/donor participations (ADR-0005 §178). Written
+     * at TG formation (FLAG-ON only). Absent when the brigade has never joined a TG,
+     * keeping flag-off serialized state byte-identical. Bounded to the most recent
+     * TG_PARTICIPATION_WINDOW_TURNS by formed_turn; older entries flushed to archive.
+     */
+    tg_participations?: TgParticipationRecord[];
+    /** Participations older than the rolling window (ADR-0005 §179); lazy-loaded. */
+    archived_tg_participations?: TgParticipationRecord[];
 }
 
 /** Maximum engagement entries per brigade history. FIFO eviction beyond this. */

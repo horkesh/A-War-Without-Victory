@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { describe, it } from 'vitest';
+import { describe, it, vi } from 'vitest';
 
 import { checkTriggeredOperations, _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
@@ -305,7 +305,22 @@ describe('checkTriggeredOperations', () => {
         );
     });
 
-    it('persists non-blocking validation warnings in watched-operation traces', () => {
+    it('persists non-blocking validation warnings in watched-operation traces', async () => {
+        // TG activation (commit 0b681ffe, flags default-ON): with ENABLE_TG_ARMY_HQ_OPS on,
+        // Krivaja-95 (army_hq_op_id set) is OWNED by the inject-army-hq-operations war-phase step
+        // and SKIPPED by the legacy checkTriggeredOperations path, so it emits no Krivaja-95
+        // watched-operation warning row here. This test verifies the LEGACY triggered path's
+        // non-blocking-warning persistence, so force the AHQ flag OFF to exercise that path.
+        vi.resetModules();
+        vi.doMock('../src/sim/combat/tactical_group_config.js', async () => {
+            const actual = await vi.importActual<typeof import('../src/sim/combat/tactical_group_config.js')>(
+                '../src/sim/combat/tactical_group_config.js',
+            );
+            return { ...actual, ENABLE_TG_ARMY_HQ_OPS: false };
+        });
+        const { checkTriggeredOperations: checkTriggeredOperationsLegacy } =
+            await import('../src/sim/combat/triggered_operations.js');
+
         const state = makeState(170);
         state.military.triggered_operations_accepted = {
             'Operation Cerska-Kamenica': 40,
@@ -313,7 +328,10 @@ describe('checkTriggeredOperations', () => {
         state.military.formations!['rs_skelani_battalion']!.status = 'inactive';
         state.military.formations!['rs_skelani_battalion']!.personnel = 0;
 
-        checkTriggeredOperations(state);
+        checkTriggeredOperationsLegacy(state);
+
+        vi.resetModules();
+        vi.doUnmock('../src/sim/combat/tactical_group_config.js');
 
         const warningRow = state.military.watched_operations?.find((row: any) =>
             row.operation_name === 'Operation Krivaja-95'

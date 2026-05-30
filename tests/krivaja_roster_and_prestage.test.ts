@@ -45,7 +45,7 @@
 
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { describe, it } from 'vitest';
+import { afterEach, describe, it, vi } from 'vitest';
 
 import {
     _TRIGGERED_OPS,
@@ -317,9 +317,31 @@ describe('LANE-2026-05-02-KRIVAJA T5: prestage helper is deterministic', () => {
 // T6 — Pre-stage helper invoked from checkTriggeredOperations BEFORE op push
 // ---------------------------------------------------------------------------
 describe('LANE-2026-05-02-KRIVAJA T6: checkTriggeredOperations invokes prestage', () => {
-    it('emits movement orders for non-staged participants when Krivaja-95 fires', () => {
+    afterEach(() => {
+        vi.resetModules();
+        vi.doUnmock('../src/sim/combat/tactical_group_config.js');
+    });
+
+    it('emits movement orders for non-staged participants when Krivaja-95 fires', async () => {
         // LANE-NIGHTSHIFT-KRIVAJA-95-T168-FLOOR-FIX (d622b762, 2026-05-06):
         // Krivaja-95 trigger floor bumped 168→170 to enforce §6 canonical floor.
+        //
+        // TG activation (commit 0b681ffe, flags default-ON): with ENABLE_TG_ARMY_HQ_OPS on,
+        // Krivaja-95 (army_hq_op_id set) is OWNED by the inject-army-hq-operations war-phase
+        // step and is SKIPPED by the legacy checkTriggeredOperations path (triggered_operations.ts
+        // line `if (ENABLE_TG_ARMY_HQ_OPS && def.army_hq_op_id != null) continue;`). This test
+        // verifies the LEGACY triggered path's prestage wiring, so force the AHQ flag OFF to
+        // exercise that path (flag-off byte-identity behavior, 188w 940251e4acaff3d4).
+        vi.resetModules();
+        vi.doMock('../src/sim/combat/tactical_group_config.js', async () => {
+            const actual = await vi.importActual<typeof import('../src/sim/combat/tactical_group_config.js')>(
+                '../src/sim/combat/tactical_group_config.js',
+            );
+            return { ...actual, ENABLE_TG_ARMY_HQ_OPS: false };
+        });
+        const { checkTriggeredOperations: checkTriggeredOperationsLegacy } =
+            await import('../src/sim/combat/triggered_operations.js');
+
         const state = buildSyntheticState(170);
 
         // Ensure all five Krivaja-95 objectives are RBiH-controlled so the
@@ -337,7 +359,7 @@ describe('LANE-2026-05-02-KRIVAJA T6: checkTriggeredOperations invokes prestage'
             controllers[osid] = 'RBiH';
         }
 
-        const injected = checkTriggeredOperations(state);
+        const injected = checkTriggeredOperationsLegacy(state);
 
         assert.ok(
             injected.includes('Operation Krivaja-95'),

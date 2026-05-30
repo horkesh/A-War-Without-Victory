@@ -11,6 +11,7 @@ import type {
     GameState,
 } from '../../state/game_state.js';
 import { computeLocalFrontDefensivePower } from './local_front_defense.js';
+import { effectivePersonnel } from './tactical_group_personnel.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { munFromOsid, type Osid } from './osid_adjacency.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -264,9 +265,12 @@ function countActiveEnemyPersonnelByOsid(
         if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
         const locationOsid = formation.location_osid;
         if (!locationOsid) continue;
+        // Phase 0 (ADR-0005): enemy strength-at-OSID is a home-availability read — a brigade
+        // that has lent personnel to a TG is correspondingly weaker at this location. Flag-off:
+        // effectivePersonnel === personnel.
         personnelByOsid.set(
             locationOsid,
-            (personnelByOsid.get(locationOsid) ?? 0) + (formation.personnel ?? 0),
+            (personnelByOsid.get(locationOsid) ?? 0) + effectivePersonnel(formation),
         );
     }
     return personnelByOsid;
@@ -1139,7 +1143,9 @@ export function reclassifyRearBrigades(
             if (position === 'front') {
                 keepAssigned.push(bid);
             } else if (position === 'reserve') {
-                reserveCandidates.push({ bid, personnel: f.personnel ?? 0 });
+                // Phase 0 (ADR-0005): reserve ranking is home-availability — prefer the brigade
+                // with the most personnel actually present at home (lent slice excluded).
+                reserveCandidates.push({ bid, personnel: effectivePersonnel(f) });
             } else {
                 keepRear.push(bid);
             }
@@ -2116,7 +2122,8 @@ export function ensureMinimumSectorCoverage(
                         ...entry,
                         target: bestTarget.target,
                         dist: bestTarget.dist,
-                        personnel: formation.personnel ?? 0,
+                        // Phase 0 (ADR-0005): redistribution ranking is home-availability.
+                        personnel: effectivePersonnel(formation),
                     };
                 })
                 .filter((entry): entry is {
@@ -2237,7 +2244,8 @@ export function ensureMinimumSectorCoverage(
                                 ...entry,
                                 target: bestTarget.target,
                                 dist: bestTarget.dist,
-                                personnel: formation.personnel ?? 0,
+                                // Phase 0 (ADR-0005): redistribution ranking is home-availability.
+                                personnel: effectivePersonnel(formation),
                             };
                         })
                         .filter((entry): entry is {

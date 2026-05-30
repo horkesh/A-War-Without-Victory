@@ -20,20 +20,28 @@
 import type {
     ArmyHqOpId,
     FormationId,
+    FormationState,
     GameState,
     TacticalGroup,
     TgDonorContribution,
     TgId,
     TgStatus,
 } from '../../state/game_state.js';
+import type { TgParticipationRecord } from '../../state/brigade_history.js';
+import { createEmptyBrigadeHistory, TG_PARTICIPATION_WINDOW_TURNS } from '../../state/brigade_history.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import {
     ENABLE_TG_COHESION_BLEED,
+    ENABLE_TG_ARMY_HQ_OPS,
+    ENABLE_TG_OG_PROMOTION,
     ENABLE_TG_RECOVERY_SUPPRESSION,
     TG_COHESION_BLEED_BASE,
     TG_BLEED_HOPS_FACTOR,
     TG_RECOVERY_SUPPRESSION_TURNS,
     ARMY_HQ_COHESION_BLEED_MULT,
+    MAX_CONCURRENT_TGS_PER_FACTION,
+    MAX_TGS_PER_CORPS,
+    ARMY_HQ_TG_CAP_REDUCTION,
 } from './tactical_group_config.js';
 
 export interface FormTgParams {
@@ -115,6 +123,16 @@ export function formTacticalGroup(
         }
     }
 
+    // Concurrency caps (ADR-0005 §Constants reference + §Army HQ Operations). Enforced at
+    // formation: a candidate TG that would push the faction or corps past its cap is rejected.
+    // Callers form TGs in a deterministic (sorted) op order, so the TGs that win the cap are the
+    // earliest in that stable order — the deterministic tie-break. Army HQ ops bypass nothing;
+    // instead they REDUCE the faction cap while running (Pyrrhic cost), forcing other ops quiet.
+    {
+        const capCheck = checkConcurrencyCaps(mil, anchor.faction, anchor.corps_id);
+        if (capCheck != null) return { tg_id: null, rejection_reason: capCheck };
+    }
+
     const tgId = makeTgId(anchor.corps_id, params.op_id, params.anchor_brigade_id);
 
     // Build the TG entity. donor_contributions stored pre-sorted by brigade_id
@@ -138,6 +156,16 @@ export function formTacticalGroup(
     // Mutate state: insert TG.
     if (!mil.tactical_groups) mil.tactical_groups = {};
     mil.tactical_groups[tgId] = tg;
+
+    // ADR-0006 OG→Division promotion signal (ENABLE_TG_OG_PROMOTION): increment the per-corps
+    // formation counter — the deterministic longevity/sustained-success proxy the promotion
+    // criterion reads. Counts ALL factions' formations (cheap, faction-agnostic write); the
+    // promotion EVALUATION is RBiH-only. Flag-off: never written, so state is byte-identical.
+    if (ENABLE_TG_OG_PROMOTION) {
+        if (!mil.tg_formations_by_corps) mil.tg_formations_by_corps = {};
+        mil.tg_formations_by_corps[anchor.corps_id] =
+            (mil.tg_formations_by_corps[anchor.corps_id] ?? 0) + 1;
+    }
 
     // Mutate state: write per-donor lent fields (Hard Invariant #1) + v2.3 Pyrrhic dampener.
     const hqMult = params.army_hq_op_id != null ? ARMY_HQ_COHESION_BLEED_MULT : 1.0;
@@ -178,6 +206,43 @@ export function formTacticalGroup(
         // suppression branch never fires → both gold hashes hold byte-identical.
         if (ENABLE_TG_RECOVERY_SUPPRESSION) {
             donor.tg_recovery_suppressed_until_turn = params.current_turn + TG_RECOVERY_SUPPRESSION_TURNS;
+        }
+
+        // Phase 3A telemetry: record this brigade's donor participation in its history
+        // (ADR-0005 §Schema). Donors iterate in sorted order, so writes are deterministic.
+        appendTgParticipation(donor, {
+            tg_id: tgId,
+            op_id: params.op_id,
+            role: 'donor',
+            formed_turn: params.current_turn,
+            personnel_lent: d.personnel_lent,
+            donor_corps_id: d.source_corps_id,
+            ...(params.army_hq_op_id != null && { army_hq_op_id: params.army_hq_op_id }),
+        }, params.current_turn);
+    }
+
+    // Phase 3A telemetry: anchor participation record (own corps; no personnel lent).
+    appendTgParticipation(anchor, {
+        tg_id: tgId,
+        op_id: params.op_id,
+        role: 'anchor',
+        formed_turn: params.current_turn,
+        ...(params.army_hq_op_id != null && { army_hq_op_id: params.army_hq_op_id }),
+    }, params.current_turn);
+
+    // Phase 3A telemetry: back-fill donor_corps_ids on the Army HQ op record from the
+    // actually-selected donors' source corps (the injection site writes it EMPTY because
+    // donors aren't known until TG formation). Sorted + deduped via strictCompare.
+    if (params.army_hq_op_id != null) {
+        const ahqOp = mil.army_hq_operations?.[params.army_hq_op_id];
+        if (ahqOp) {
+            const corpsSet = new Set<FormationId>();
+            for (const d of sortedDonors) corpsSet.add(d.source_corps_id);
+            // Anchor's own corps is the op's anchor_corps, not a donor — exclude it.
+            corpsSet.delete(anchor.corps_id);
+            ahqOp.donor_corps_ids = [...corpsSet].sort(strictCompare);
+            // Link the active TG carrying out the op (set at TG formation per schema).
+            ahqOp.tg_id = tgId;
         }
     }
 
@@ -269,6 +334,59 @@ export function dissolveTacticalGroup(
     return { dissolved: true, tg_id: tgId };
 }
 
+/**
+ * Concurrency-cap gate (ADR-0005 §Constants reference + §Army HQ Operations Pyrrhic cost #1).
+ * Returns a rejection_reason string if forming a TG for `faction`/`corpsId` would exceed a cap,
+ * else null. Deterministic: pure counting over the existing tactical_groups Record (sorted keys).
+ *
+ *   - Per-corps cap:    active TGs anchored by `corpsId`           < MAX_TGS_PER_CORPS
+ *   - Per-faction cap:  active TGs for `faction`                   < effective faction cap
+ *   - Effective faction cap = MAX_CONCURRENT_TGS_PER_FACTION
+ *       − (ENABLE_TG_ARMY_HQ_OPS && faction has an Army HQ op planning/executing
+ *          ? ARMY_HQ_TG_CAP_REDUCTION : 0)
+ */
+function checkConcurrencyCaps(
+    mil: NonNullable<GameState['military']>,
+    faction: string,
+    corpsId: FormationId,
+): string | null {
+    const tgs = mil.tactical_groups ?? {};
+    const formations = mil.formations ?? {};
+
+    let factionCount = 0;
+    let corpsCount = 0;
+    for (const id of Object.keys(tgs).sort(strictCompare)) {
+        const tg = tgs[id];
+        if (tg.corps_id === corpsId) corpsCount += 1;
+        const tgFaction = formations[tg.anchor_brigade_id]?.faction;
+        if (tgFaction === faction) factionCount += 1;
+    }
+
+    if (corpsCount >= MAX_TGS_PER_CORPS) return 'corps_tg_cap_reached';
+
+    let factionCap = MAX_CONCURRENT_TGS_PER_FACTION;
+    if (ENABLE_TG_ARMY_HQ_OPS && factionHasActiveArmyHqOp(mil, faction)) {
+        factionCap = Math.max(0, factionCap - ARMY_HQ_TG_CAP_REDUCTION);
+    }
+    if (factionCount >= factionCap) return 'faction_tg_cap_reached';
+
+    return null;
+}
+
+/** True if the faction has an Army HQ op in a planning or executing state (cap-reduction trigger). */
+function factionHasActiveArmyHqOp(
+    mil: NonNullable<GameState['military']>,
+    faction: string,
+): boolean {
+    const ops = mil.army_hq_operations ?? {};
+    for (const id of Object.keys(ops).sort(strictCompare)) {
+        const op = ops[id];
+        if (op.faction_id !== faction) continue;
+        if (op.status === 'planning' || op.status === 'executing') return true;
+    }
+    return false;
+}
+
 /** Canonical TG id format. Frozen by ADR-0005 §Schema. */
 function makeTgId(corpsId: FormationId, opId: string, anchorBrigadeId: FormationId): TgId {
     return `tg:${corpsId}:${opId}:${anchorBrigadeId}`;
@@ -282,4 +400,43 @@ function makeTgId(corpsId: FormationId, opId: string, anchorBrigadeId: Formation
 export function compositionHash(anchorBrigadeId: FormationId, donorIds: readonly FormationId[]): string {
     const sortedDonors = [...donorIds].sort(strictCompare);
     return `${anchorBrigadeId}|${sortedDonors.join(',')}`;
+}
+
+/**
+ * Append a TG participation record to a brigade's history (ADR-0005 §Schema, Phase 3A
+ * telemetry). FLAG-ON only — reached exclusively from `formTacticalGroup`, which the
+ * engine calls only inside the `ENABLE_TG_FORMATION` gate. Lazily initializes
+ * `brigade_history` + `tg_participations` so flag-off state stays untouched / byte-identical.
+ *
+ * Maintains the ADR-0005 §421 rolling 26-turn window: records whose `formed_turn` falls
+ * outside the window (older than `currentTurn - TG_PARTICIPATION_WINDOW_TURNS`) are flushed
+ * to `archived_tg_participations`. Deterministic: the live list is append-order (callers
+ * append in sorted donor order then the anchor); the flush preserves that order.
+ */
+function appendTgParticipation(
+    brigade: FormationState,
+    record: TgParticipationRecord,
+    currentTurn: number,
+): void {
+    if (!brigade.brigade_history) {
+        brigade.brigade_history = createEmptyBrigadeHistory(brigade.personnel ?? 0);
+    }
+    const hist = brigade.brigade_history;
+    if (!hist.tg_participations) hist.tg_participations = [];
+    hist.tg_participations.push(record);
+
+    // Flush entries older than the rolling window to the lazy-loaded archive.
+    const cutoff = currentTurn - TG_PARTICIPATION_WINDOW_TURNS;
+    if (hist.tg_participations.some((r) => r.formed_turn < cutoff)) {
+        const live: TgParticipationRecord[] = [];
+        const aged: TgParticipationRecord[] = [];
+        for (const r of hist.tg_participations) {
+            (r.formed_turn < cutoff ? aged : live).push(r);
+        }
+        hist.tg_participations = live;
+        if (aged.length > 0) {
+            if (!hist.archived_tg_participations) hist.archived_tg_participations = [];
+            hist.archived_tg_participations.push(...aged);
+        }
+    }
 }

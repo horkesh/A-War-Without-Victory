@@ -71,9 +71,21 @@ import { computeAttackerPower, rankDefendersByPower, getArtillerySuppression } f
 import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 // ADR-0005 v2.2b: TG formation wiring at sub_phase='ready' transition. Flag-gated.
-import { ENABLE_TG_FORMATION, getAnchorBrigade } from './tactical_group_config.js';
+// ADR-0005 Phase 2: per-op donor policy classifier + cap.
+import {
+    ENABLE_TG_FORMATION,
+    getAnchorBrigade,
+    classifyOpDonorPolicy,
+    donorCapForPolicy,
+} from './tactical_group_config.js';
 import { selectDonors } from './tactical_group_selection.js';
 import { formTacticalGroup } from './tactical_group_lifecycle.js';
+// ADR-0005 Phase 4: phantom-aware anchor resolution + dual-anchor de-confliction. Flag-gated.
+import { resolveTgAnchor, collectActiveAnchorIds } from './tactical_group_anchor.js';
+import { getReservedPrePlannedBrigadeIds } from './pre_planned_operations.js';
+// ADR-0006 Phase 3A: named TG commander + faction-asymmetric naming. Flag-gated (ENABLE_TG_FORMATION).
+import { assignTacticalCommander } from './officer_system.js';
+import { generateTacticalGroupName } from './tactical_group_naming.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -626,47 +638,144 @@ function getOpsCommander(
  * selects + forms at ready; selectDonors is deterministic, so the readiness-gate
  * pool and this formation pool agree for a given turn's state.
  */
-function formTgsAtReadyTransition(
+export function formTgsAtReadyTransition(
     state: GameState,
     op: CorpsOperation,
     currentTurn: number,
 ): void {
     if (!ENABLE_TG_FORMATION) return;
+
+    // ADR-0005 Phase 2: classify the op by KIND → donor policy. `none` (probes /
+    // feints / reorganization) forms NO TG (legacy anchor-only). `limited`
+    // (emergency reactions) forms a TG with a capped donor pull. `full`
+    // (offensives) uses the module default donor cap.
+    const policy = classifyOpDonorPolicy(op);
+    if (policy === 'none') return;
+    const maxDonors = donorCapForPolicy(policy); // undefined for 'full' → module default
+
+    // ADR-0005 Phase 4 — dual-anchor de-confliction (Fix 2). Seed the reservation set
+    // with brigades already anchoring an active TG plus issue-#40 pre-planned reserves,
+    // then add each anchor we pick this pass so sibling axes / later ops can't re-claim it.
+    // resolveTgAnchor also drops phantom anchors (Fix 1): when a phantom outranks the
+    // resident brigade it is skipped; an all-phantom axis (Op Prsten ilijas_ring) yields
+    // null → no TG forms (legacy anchor-only path until a real VRS anchor is authored).
+    const reservedAnchors = collectActiveAnchorIds(state);
+    for (const id of getReservedPrePlannedBrigadeIds(currentTurn)) reservedAnchors.add(id);
+
     if (op.axes && op.axes.length > 0) {
         for (const axis of op.axes) {
-            const anchorId = getAnchorBrigade(axis);
+            const anchorId = resolveTgAnchor(state, axis, reservedAnchors);
             if (!anchorId) continue;
+            reservedAnchors.add(anchorId); // claim it: a sibling axis must pick its next-best
             const stagingOsid = axis.staging_osid ?? op.staging_osid;
             if (!stagingOsid) continue;
+            // Idempotent: skip if a TG for this op+anchor already exists (the
+            // sector_attack ready-path may form first; the canonical launch-site
+            // call must not double-form).
+            if (tgAlreadyExistsFor(state, op.name, anchorId)) continue;
             const donors = selectDonors(state, {
                 anchor_brigade_id: anchorId,
                 staging_osid: stagingOsid,
                 army_hq_op_id: op.army_hq_op_id,
+                max_donors: maxDonors,
             });
-            formTacticalGroup(state, {
+            const formed = formTacticalGroup(state, {
                 op_id: op.name,
                 anchor_brigade_id: anchorId,
                 donors,
                 current_turn: currentTurn,
                 army_hq_op_id: op.army_hq_op_id,
             });
+            if (formed.tg_id) applyTgIdentity(state, op, anchorId);
         }
         return;
     }
     if (op.participating_brigades.length === 0 || !op.staging_osid) return;
-    const anchorId = op.participating_brigades[0];
+    // Phase 4 (Fix 1/2): resolve a persistent, non-phantom, non-reserved anchor for the
+    // legacy single-axis path too (treat participating_brigades as the candidate pool).
+    const anchorId = resolveTgAnchor(
+        state,
+        { assigned_brigades: op.participating_brigades },
+        reservedAnchors,
+    );
+    if (!anchorId) return;
+    if (tgAlreadyExistsFor(state, op.name, anchorId)) return;
     const donors = selectDonors(state, {
         anchor_brigade_id: anchorId,
         staging_osid: op.staging_osid,
         army_hq_op_id: op.army_hq_op_id,
+        max_donors: maxDonors,
     });
-    formTacticalGroup(state, {
+    const formed = formTacticalGroup(state, {
         op_id: op.name,
         anchor_brigade_id: anchorId,
         donors,
         current_turn: currentTurn,
         army_hq_op_id: op.army_hq_op_id,
     });
+    if (formed.tg_id) applyTgIdentity(state, op, anchorId);
+}
+
+/**
+ * ADR-0006 Phase 3A — apply TG identity once a TG forms (FLAG-ON ONLY; caller is
+ * already inside the ENABLE_TG_FORMATION gate of formTgsAtReadyTransition):
+ *   1. Assign a named `tactical_commander` (anchor brigade's corps grade) to the op
+ *      via `op.tg_commander_officer_id`. Its combat mod applies to the ANCHOR only
+ *      (getThreeTierOfficerMod TG-anchor branch); donors keep their own corps mod.
+ *   2. Populate the anchor sector's faction-asymmetric `display_name` (VRS geographic,
+ *      ARBiH numbered, HVO operational zone) for the identity read-model.
+ *
+ * Deterministic: sorted iteration, pure name generation, no randomness/clock. Idempotent.
+ */
+function applyTgIdentity(state: GameState, op: CorpsOperation, anchorId: string): void {
+    const anchor = state.military?.formations?.[anchorId];
+    if (!anchor || !anchor.corps_id) return;
+    const faction = anchor.faction;
+    const corpsId = anchor.corps_id;
+
+    // 1. Named tactical_commander for the anchor assault.
+    assignTacticalCommander(state, op, corpsId, faction);
+
+    // 2. Faction-asymmetric display name for the anchor's standing sector.
+    const sectors = state.military?.corps_front_sectors;
+    if (sectors) {
+        // Deterministic ordinal: count this corps's active TGs (sorted) anchored elsewhere.
+        const tgs = state.military?.tactical_groups ?? {};
+        let ordinal = 0;
+        for (const id of Object.keys(tgs).sort(strictCompare)) {
+            if (tgs[id]?.corps_id === corpsId) ordinal += 1;
+        }
+        const name = generateTacticalGroupName({
+            faction,
+            corps_id: corpsId,
+            anchor_osid: anchor.location_osid ?? op.staging_osid ?? corpsId,
+            ordinal,
+        });
+        const sectorIds = Object.keys(sectors).sort(strictCompare);
+        for (const sid of sectorIds) {
+            const sector = sectors[sid];
+            if (sector?.corps_id === corpsId && !sector.display_name) {
+                sector.display_name = name;
+                break;
+            }
+        }
+    }
+}
+
+/**
+ * Idempotency guard for TG formation: true if a TG already exists for this
+ * operation + anchor. The TG id is `tg:<corps_id>:<op_id>:<anchor_brigade_id>`,
+ * so we match by op_id + anchor (corps is derived from the anchor). Keeps the
+ * canonical launch-site call from double-forming a TG the ready-path already made.
+ */
+function tgAlreadyExistsFor(state: GameState, opId: string, anchorId: string): boolean {
+    const tgs = state.military?.tactical_groups;
+    if (!tgs) return false;
+    for (const id of Object.keys(tgs)) {
+        const tg = tgs[id];
+        if (tg.op_id === opId && tg.anchor_brigade_id === anchorId) return true;
+    }
+    return false;
 }
 
 /**

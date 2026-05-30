@@ -289,9 +289,11 @@ export function selectOperationCommander(
         // a designated operational-group commander. The current model uses the
         // `corps_commander` pool as a proxy for "senior officer capable of
         // commanding an operation", which works for the 1992-1993 chaotic period
-        // but becomes inaccurate as the war professionalises. Future work: add a
-        // `tactical_commander` rank tier (brigade COs who actually lead assaults)
-        // and reserve `corps_commander` pool for the planning/modifier role only.
+        // but becomes inaccurate as the war professionalises. ADR-0006 Phase 3A
+        // added the `tactical_commander` rank tier (brigade COs who lead TG anchor
+        // assaults — see selectTacticalCommander); this `corps_commander` pool now
+        // serves the planning/modifier role, and a TG's anchor gets a dedicated
+        // tactical_commander layered on top (flag-gated by ENABLE_TG_FORMATION).
         if (data.rank !== 'corps_commander') continue;
 
         const os = officers[data.id];
@@ -341,6 +343,121 @@ export function assignOperationCommander(
     if (os) {
         os.status = 'active';
         os.assigned_operation = op.name;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Tactical Group commander (ADR-0006 Phase 3A)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Tactical-commander attack modifier (ADR-0006 Phase 3A).
+ *
+ * Mirrors `getCorpsCommanderAttackMod` but for the named `tactical_commander` who
+ * actually LEADS a TG's anchor assault (brigade CO grade), not the corps planner.
+ *   attack_mod = 0.90 + comp×0.03 + agg×0.01
+ * Acting commanders get the flat ACTING_COMMANDER_MOD.
+ */
+export function getTacticalCommanderAttackMod(data: NamedOfficer, os: NamedOfficerState): number {
+    if (os.acting_commander) return ACTING_COMMANDER_MOD;
+    const comp = getEffectiveCompetence(os, data);
+    return 0.90 + comp * 0.03 + data.aggressiveness * 0.01;
+}
+
+/**
+ * Select an available `tactical_commander` to lead a TG's anchor assault.
+ *
+ * Selection mirrors `selectOperationCommander` but draws from the
+ * `tactical_commander` rank pool (brigade COs who lead assaults), reserving the
+ * `corps_commander` pool for the planning/modifier role (per the officer_system
+ * DESIGN NOTE). Priority: home corps match > compatible > other, then competence
+ * (desc), aggressiveness (desc), then id. Enclave-locked officers are filtered to
+ * reachable corps. Returns null if no tactical_commander is available.
+ *
+ * Deterministic: sorted candidate ordering, strictCompare tie-break.
+ */
+export function selectTacticalCommander(
+    state: GameState,
+    corpsId: string,
+    faction: FactionId,
+): string | null {
+    const officers = state.military.named_officers;
+    const officerData = state.military.named_officer_data;
+    if (!officers || !officerData) return null;
+
+    const currentTurn = state.meta?.turn ?? 0;
+    const candidates: NamedOfficer[] = [];
+
+    for (const data of officerData) {
+        if (data.faction !== faction) continue;
+        if (data.rank !== 'tactical_commander') continue;
+
+        const os = officers[data.id];
+        if (!os || os.status !== 'reserve') continue;
+        if (os.assigned_operation) continue;
+        if (!isEnclaveCompatible(data, corpsId, currentTurn)) continue;
+
+        candidates.push(data);
+    }
+
+    if (candidates.length === 0) return null;
+
+    candidates.sort((a, b) => {
+        const aHome = a.home_corps_id === corpsId ? 0 : 1;
+        const bHome = b.home_corps_id === corpsId ? 0 : 1;
+        if (aHome !== bHome) return aHome - bHome;
+
+        const aCompat = a.compatible_corps_ids?.includes(corpsId) ? 0 : 1;
+        const bCompat = b.compatible_corps_ids?.includes(corpsId) ? 0 : 1;
+        if (aCompat !== bCompat) return aCompat - bCompat;
+
+        if (a.competence !== b.competence) return b.competence - a.competence;
+        if (a.aggressiveness !== b.aggressiveness) return b.aggressiveness - a.aggressiveness;
+        return strictCompare(a.id, b.id);
+    });
+
+    return candidates[0]!.id;
+}
+
+/**
+ * Assign a tactical_commander to a TG's operation and update officer state.
+ * Sets `op.tg_commander_officer_id` (distinct from `commander_officer_id`).
+ * No-op when no tactical_commander is available — the op proceeds without one and
+ * combat falls back to the existing corps/op commander mod.
+ */
+export function assignTacticalCommander(
+    state: GameState,
+    op: import('../../state/game_state.js').CorpsOperation,
+    corpsId: string,
+    faction: FactionId,
+): void {
+    if (op.tg_commander_officer_id) return; // already assigned (idempotent)
+    const commanderId = selectTacticalCommander(state, corpsId, faction);
+    if (!commanderId) return;
+
+    op.tg_commander_officer_id = commanderId;
+    const os = state.military.named_officers?.[commanderId];
+    if (os) {
+        os.status = 'active';
+        os.assigned_operation = op.name;
+    }
+}
+
+/**
+ * Release a tactical_commander back to reserve when the operation ends.
+ */
+export function releaseTacticalCommander(
+    state: GameState,
+    op: import('../../state/game_state.js').CorpsOperation,
+): void {
+    if (!op.tg_commander_officer_id) return;
+    const officers = state.military.named_officers;
+    if (!officers) return;
+
+    const os = officers[op.tg_commander_officer_id];
+    if (os && os.assigned_operation) {
+        os.status = 'reserve';
+        os.assigned_operation = undefined;
     }
 }
 

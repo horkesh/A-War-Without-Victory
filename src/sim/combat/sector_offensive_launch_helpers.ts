@@ -25,9 +25,12 @@ import { estimateConcentratedOutcome, isOutcomeSufficientForAttack } from './bot
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { getAllAxisObjectives, getCurrentLaunchObjectives, isMultiAxis } from './sector_offensive_axis_helpers.js';
-import { ENABLE_TACTICAL_GROUPS, ENABLE_TG_FORMATION, DONATION_READINESS_FRACTION, getAnchorBrigade } from './tactical_group_config.js';
+import { ENABLE_TACTICAL_GROUPS, ENABLE_TG_FORMATION, DONATION_READINESS_FRACTION, DONATION_READINESS_FRACTION_HRHB, getAnchorBrigade } from './tactical_group_config.js';
 // ADR-0005 v2.2c #3: donation-readiness gate recomputes the donor pool here.
 import { selectDonors } from './tactical_group_selection.js';
+// ADR-0005 Phase 4: phantom-aware anchor (gate must score donors against the SAME
+// persistent anchor that formTgsAtReadyTransition will actually use, not a phantom).
+import { resolveTgAnchor } from './tactical_group_anchor.js';
 
 // BATCH C: launch-readiness probes call `predictAllAdjacentTargets(...)` only
 // to query whether the brigade has a direct-objective adjacency entry; they do
@@ -796,11 +799,30 @@ function classifyAxisOpeningAttack(
         return { executable: false, blocker: 'participants_below_attack_floor' };
     }
 
+    // TG-CAUSED launch regression fix (operations-expert, 2026-05-30): the anchor-only
+    // narrowing above was authored so a non-anchor brigade that fails to march cannot
+    // BLOCK the transition. But applying that same narrowing to the EXECUTABILITY check
+    // inverts the intent: a single anchor that is not yet at/marching to an
+    // objective-adjacent OSID then BLOCKS an axis whose support brigades CAN open the
+    // attack — exactly the Cincar/Kupres-94 regression (opportunity ops never set
+    // `main_brigade`, so the anchor defaults to authoring-order assigned_brigades[0]
+    // = hrhb_kralj_petar_kreimir_iv_brigade, which alone cannot reach op:kupres:bucovaca;
+    // n51 188w showed launch_blocker=zero_eligible_axis + unreachable_at_launch with a
+    // healthy force_ratio 1.23 and 4 active brigades, vs flag-off SUCCESS capturing all
+    // four objectives). The executability check must consider the whole assigned pool —
+    // `axisHasExecutableOpeningAttack` already filters each brigade for active/personnel/
+    // adjacency internally, so this only RESTORES legacy reachability semantics; it does
+    // NOT let a non-anchor brigade gate the floor check (that stays anchor-aware above).
+    // Flag-off: `gateBrigades` already equals `assigned_brigades`, so byte-identical.
+    const executabilityBrigades = ENABLE_TACTICAL_GROUPS
+        ? axis.assigned_brigades
+        : gateBrigades;
+
     if (!axisHasExecutableOpeningAttack(
         state,
         faction,
         objective,
-        gateBrigades,
+        executabilityBrigades,
         adjacency,
         threshold,
     )) {
@@ -815,13 +837,15 @@ function classifyAxisOpeningAttack(
     // op.donor_pool — functionally the same gate, no persisted schema field. Flag-off: skipped, so
     // byte-identical. The flag-on magnitude (how many ops this blocks) is validated at the 188w smoke.
     if (ENABLE_TG_FORMATION) {
-        const anchorId = getAnchorBrigade(axis);
+        // Phase 4: score donors against the persistent anchor (phantom-filtered). An
+        // all-phantom axis resolves to null → no TG forms there, so the donation gate is
+        // moot; skip it (the legacy anchor-only path handles the phantom axis).
+        const anchorId = resolveTgAnchor(state, axis, new Set());
         const stagingOsid = axis.staging_osid;
         if (anchorId && stagingOsid) {
             const anchorPersonnel = state.military.formations?.[anchorId]?.personnel ?? 0;
             const donors = selectDonors(state, { anchor_brigade_id: anchorId, staging_osid: stagingOsid, army_hq_op_id: armyHqOpId });
-            const donated = donors.reduce((sum, d) => sum + d.personnel_lent, 0);
-            if (donated < DONATION_READINESS_FRACTION * anchorPersonnel) {
+            if (donationReadinessBlocksAxis(donors, anchorPersonnel, faction)) {
                 axis.launch_blocker = 'insufficient_donation';
                 return { executable: false, blocker: 'insufficient_donation' };
             }
@@ -830,6 +854,54 @@ function classifyAxisOpeningAttack(
 
     delete axis.launch_blocker;
     return { executable: true };
+}
+
+/**
+ * PHASE 1.5 DONOR-READINESS FALLBACK (operations-expert + sector-expert, 2026-05-30).
+ *
+ * Pure decision for the ADR-0005 v2.2c #3 donation-readiness gate. Returns true iff
+ * the gate should BLOCK the axis with `insufficient_donation`.
+ *
+ * The 60% gate's real intent is to refuse an under-committed *multi-donor* TG (a lone
+ * anchor masquerading as a tactical group). It must NEVER cancel an otherwise-valid
+ * offensive when the corps simply has NO eligible donors to muster: an isolated /
+ * encircled, donor-poor corps (e.g. the ARBiH 5th Corps in the Bihać pocket — no
+ * adjacent donor corps; candidates blocked by distance / cohesion / residual-floor)
+ * had its anchor-only relief / defensive ops gated out, which dropped the Bihać enclave
+ * RBiH→RS wholesale (measured 188w 615→569). With zero donors no TG would form anyway
+ * (`formTgsAtReadyTransition` is a no-op with an empty donor pool → legacy lone-anchor
+ * combat), so blocking degrades a valid lone-anchor op into a cancellation.
+ *
+ * Rule:
+ *   - donors.length === 0 → DO NOT block (degrade to lone-anchor, exactly as flag-off).
+ *   - donors exist but pledge < readinessFraction × anchorPersonnel → BLOCK.
+ *
+ * Phase 1.6 HVO Mistral-2 westward-reach lever (operations-expert, 2026-05-30): the
+ * readiness fraction is faction-specific. HRHB (HVO) axes use the relaxed
+ * DONATION_READINESS_FRACTION_HRHB; all other factions use the standard
+ * DONATION_READINESS_FRACTION. RATIONALE: the HVO Mistral-2 westward axes (Livno →
+ * Drvar/Grahovo/Šipovo) stage for a long reach where BFS distance-falloff trims the few
+ * eligible local donors below the 60% floor, so the gate cancelled an axis the flag-off
+ * engine prosecuted. Historically the HV (Croatian Army) spearhead — absorbed into the HVO
+ * anchor, no separate HV corps in OOB — supplied the westward mass, so a lower local-donor
+ * floor is doctrinally correct. This is NOT force inflation (the anchor + qualifying donors
+ * still fight at real strength) and NOT a new global gate or distance cap.
+ *
+ * Deterministic: `selectDonors` is deterministic, so `donors.length === 0` is a stable
+ * function of the turn's state. Caller only invokes this under ENABLE_TG_FORMATION, so
+ * flag-off never reaches it → byte-identical.
+ */
+export function donationReadinessBlocksAxis(
+    donors: ReadonlyArray<{ personnel_lent: number }>,
+    anchorPersonnel: number,
+    faction?: FactionId,
+): boolean {
+    if (donors.length === 0) return false; // donor-poor corps: lone-anchor fallback, never block
+    const donated = donors.reduce((sum, d) => sum + d.personnel_lent, 0);
+    const readinessFraction = faction === 'HRHB'
+        ? DONATION_READINESS_FRACTION_HRHB
+        : DONATION_READINESS_FRACTION;
+    return donated < readinessFraction * anchorPersonnel;
 }
 
 export function evaluateOpeningAttackReadiness(
