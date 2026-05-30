@@ -1119,7 +1119,9 @@ export function checkTriggeredOperations(state: GameState): string[] {
         // For single-corps ops: inject directly
         // For joint ops: inject into primary corps (all axes), set participating brigades
         primaryCmd.active_operations.push(result.op);
-        assignOperationCommander(state, result.op, def.primary_corps, 'RS');
+        // ADR-0006 Phase 3A: use the op def's own faction (was hardcoded 'RS' — broke
+        // commander assignment for RBiH/HRHB triggered ops in the regular path).
+        assignOperationCommander(state, result.op, def.primary_corps, def.faction);
         primaryCmd.stance = 'offensive';
 
         // Track acceptance

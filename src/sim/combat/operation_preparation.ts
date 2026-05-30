@@ -80,6 +80,9 @@ import {
 } from './tactical_group_config.js';
 import { selectDonors } from './tactical_group_selection.js';
 import { formTacticalGroup } from './tactical_group_lifecycle.js';
+// ADR-0006 Phase 3A: named TG commander + faction-asymmetric naming. Flag-gated (ENABLE_TG_FORMATION).
+import { assignTacticalCommander } from './officer_system.js';
+import { generateTacticalGroupName } from './tactical_group_naming.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -663,13 +666,14 @@ export function formTgsAtReadyTransition(
                 army_hq_op_id: op.army_hq_op_id,
                 max_donors: maxDonors,
             });
-            formTacticalGroup(state, {
+            const formed = formTacticalGroup(state, {
                 op_id: op.name,
                 anchor_brigade_id: anchorId,
                 donors,
                 current_turn: currentTurn,
                 army_hq_op_id: op.army_hq_op_id,
             });
+            if (formed.tg_id) applyTgIdentity(state, op, anchorId);
         }
         return;
     }
@@ -682,13 +686,60 @@ export function formTgsAtReadyTransition(
         army_hq_op_id: op.army_hq_op_id,
         max_donors: maxDonors,
     });
-    formTacticalGroup(state, {
+    const formed = formTacticalGroup(state, {
         op_id: op.name,
         anchor_brigade_id: anchorId,
         donors,
         current_turn: currentTurn,
         army_hq_op_id: op.army_hq_op_id,
     });
+    if (formed.tg_id) applyTgIdentity(state, op, anchorId);
+}
+
+/**
+ * ADR-0006 Phase 3A — apply TG identity once a TG forms (FLAG-ON ONLY; caller is
+ * already inside the ENABLE_TG_FORMATION gate of formTgsAtReadyTransition):
+ *   1. Assign a named `tactical_commander` (anchor brigade's corps grade) to the op
+ *      via `op.tg_commander_officer_id`. Its combat mod applies to the ANCHOR only
+ *      (getThreeTierOfficerMod TG-anchor branch); donors keep their own corps mod.
+ *   2. Populate the anchor sector's faction-asymmetric `display_name` (VRS geographic,
+ *      ARBiH numbered, HVO operational zone) for the identity read-model.
+ *
+ * Deterministic: sorted iteration, pure name generation, no randomness/clock. Idempotent.
+ */
+function applyTgIdentity(state: GameState, op: CorpsOperation, anchorId: string): void {
+    const anchor = state.military?.formations?.[anchorId];
+    if (!anchor || !anchor.corps_id) return;
+    const faction = anchor.faction;
+    const corpsId = anchor.corps_id;
+
+    // 1. Named tactical_commander for the anchor assault.
+    assignTacticalCommander(state, op, corpsId, faction);
+
+    // 2. Faction-asymmetric display name for the anchor's standing sector.
+    const sectors = state.military?.corps_front_sectors;
+    if (sectors) {
+        // Deterministic ordinal: count this corps's active TGs (sorted) anchored elsewhere.
+        const tgs = state.military?.tactical_groups ?? {};
+        let ordinal = 0;
+        for (const id of Object.keys(tgs).sort(strictCompare)) {
+            if (tgs[id]?.corps_id === corpsId) ordinal += 1;
+        }
+        const name = generateTacticalGroupName({
+            faction,
+            corps_id: corpsId,
+            anchor_osid: anchor.location_osid ?? op.staging_osid ?? corpsId,
+            ordinal,
+        });
+        const sectorIds = Object.keys(sectors).sort(strictCompare);
+        for (const sid of sectorIds) {
+            const sector = sectors[sid];
+            if (sector?.corps_id === corpsId && !sector.display_name) {
+                sector.display_name = name;
+                break;
+            }
+        }
+    }
 }
 
 /**

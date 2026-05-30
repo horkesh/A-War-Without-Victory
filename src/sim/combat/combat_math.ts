@@ -27,6 +27,8 @@ import {
 } from '../../state/supply_reserve_constants.js';
 import { findBrigadeOperation } from './corps_operation_helpers.js';
 import { getEnclaveDefenseBonus } from './enclave_resilience.js';
+// ADR-0006 Phase 3A: named TG commander anchor mod (flag-gated; flag-off branch never taken).
+import { ENABLE_TG_FORMATION } from './tactical_group_config.js';
 import {
     getLocalFrontDensityModifier,
     type LocalFrontDensityModifierLookup,
@@ -690,6 +692,42 @@ export function getThreeTierOfficerMod(
         // Operation commander: brigades in named ops answer to ops commander
         const corpsCmd = state.military.corps_command?.[corpsId];
         const activeOp = corpsCmd ? findBrigadeOperation(corpsCmd, formation.id) : null;
+
+        // ADR-0006 Phase 3A — named TG tactical_commander (FLAG-ON ONLY). When this
+        // brigade is the ANCHOR of a TG whose op has a tg_commander_officer_id, that
+        // tactical commander's competence/aggression drives the attack mod for the
+        // ANCHOR only (donors keep their corps/op mod via the paths below). Flag-off:
+        // ENABLE_TG_FORMATION is false → branch never taken → byte-identical.
+        if (ENABLE_TG_FORMATION && role === 'attack' && activeOp?.tg_commander_officer_id
+            && activeOp.phase === 'execution') {
+            const tgs = state.military.tactical_groups;
+            let isAnchor = false;
+            if (tgs) {
+                for (const id of Object.keys(tgs).sort(strictCompare)) {
+                    const tg = tgs[id];
+                    if (tg.op_id === activeOp.name && tg.anchor_brigade_id === formation.id) {
+                        isAnchor = true;
+                        break;
+                    }
+                }
+            }
+            if (isAnchor) {
+                const tcEntry = officerLookup
+                    ? getOfficerCombatEntryById(officerLookup, activeOp.tg_commander_officer_id)
+                    : undefined;
+                const tcOs = tcEntry?.state ?? state.military.named_officers[activeOp.tg_commander_officer_id];
+                const tcData = tcEntry?.data ?? (tcOs ? state.military.named_officer_data.find(o => o.id === activeOp.tg_commander_officer_id) : null);
+                if (tcOs && tcData && tcOs.status === 'active') {
+                    const penalty = tcOs.penalty_turns_remaining > 0 ? tcOs.effective_competence_penalty : 0;
+                    const comp = Math.max(1, Math.min(5, tcData.competence - penalty));
+                    const tcMod = tcOs.acting_commander
+                        ? 0.92
+                        : 0.90 + comp * 0.03 + tcData.aggressiveness * 0.01;
+                    return brigMod * tcMod;
+                }
+            }
+        }
+
         if (activeOp?.commander_officer_id && activeOp.phase === 'execution') {
             const opsEntry = officerLookup
                 ? getOfficerCombatEntryById(officerLookup, activeOp.commander_officer_id)
