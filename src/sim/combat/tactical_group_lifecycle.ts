@@ -20,12 +20,15 @@
 import type {
     ArmyHqOpId,
     FormationId,
+    FormationState,
     GameState,
     TacticalGroup,
     TgDonorContribution,
     TgId,
     TgStatus,
 } from '../../state/game_state.js';
+import type { TgParticipationRecord } from '../../state/brigade_history.js';
+import { createEmptyBrigadeHistory, TG_PARTICIPATION_WINDOW_TURNS } from '../../state/brigade_history.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import {
     ENABLE_TG_COHESION_BLEED,
@@ -180,6 +183,43 @@ export function formTacticalGroup(
                 d.cohesion_bleed_applied = loss;
             }
             donor.tg_donations_this_scenario = (donor.tg_donations_this_scenario ?? 0) + 1;
+        }
+
+        // Phase 3A telemetry: record this brigade's donor participation in its history
+        // (ADR-0005 §Schema). Donors iterate in sorted order, so writes are deterministic.
+        appendTgParticipation(donor, {
+            tg_id: tgId,
+            op_id: params.op_id,
+            role: 'donor',
+            formed_turn: params.current_turn,
+            personnel_lent: d.personnel_lent,
+            donor_corps_id: d.source_corps_id,
+            ...(params.army_hq_op_id != null && { army_hq_op_id: params.army_hq_op_id }),
+        }, params.current_turn);
+    }
+
+    // Phase 3A telemetry: anchor participation record (own corps; no personnel lent).
+    appendTgParticipation(anchor, {
+        tg_id: tgId,
+        op_id: params.op_id,
+        role: 'anchor',
+        formed_turn: params.current_turn,
+        ...(params.army_hq_op_id != null && { army_hq_op_id: params.army_hq_op_id }),
+    }, params.current_turn);
+
+    // Phase 3A telemetry: back-fill donor_corps_ids on the Army HQ op record from the
+    // actually-selected donors' source corps (the injection site writes it EMPTY because
+    // donors aren't known until TG formation). Sorted + deduped via strictCompare.
+    if (params.army_hq_op_id != null) {
+        const ahqOp = mil.army_hq_operations?.[params.army_hq_op_id];
+        if (ahqOp) {
+            const corpsSet = new Set<FormationId>();
+            for (const d of sortedDonors) corpsSet.add(d.source_corps_id);
+            // Anchor's own corps is the op's anchor_corps, not a donor — exclude it.
+            corpsSet.delete(anchor.corps_id);
+            ahqOp.donor_corps_ids = [...corpsSet].sort(strictCompare);
+            // Link the active TG carrying out the op (set at TG formation per schema).
+            ahqOp.tg_id = tgId;
         }
     }
 
@@ -337,4 +377,43 @@ function makeTgId(corpsId: FormationId, opId: string, anchorBrigadeId: Formation
 export function compositionHash(anchorBrigadeId: FormationId, donorIds: readonly FormationId[]): string {
     const sortedDonors = [...donorIds].sort(strictCompare);
     return `${anchorBrigadeId}|${sortedDonors.join(',')}`;
+}
+
+/**
+ * Append a TG participation record to a brigade's history (ADR-0005 §Schema, Phase 3A
+ * telemetry). FLAG-ON only — reached exclusively from `formTacticalGroup`, which the
+ * engine calls only inside the `ENABLE_TG_FORMATION` gate. Lazily initializes
+ * `brigade_history` + `tg_participations` so flag-off state stays untouched / byte-identical.
+ *
+ * Maintains the ADR-0005 §421 rolling 26-turn window: records whose `formed_turn` falls
+ * outside the window (older than `currentTurn - TG_PARTICIPATION_WINDOW_TURNS`) are flushed
+ * to `archived_tg_participations`. Deterministic: the live list is append-order (callers
+ * append in sorted donor order then the anchor); the flush preserves that order.
+ */
+function appendTgParticipation(
+    brigade: FormationState,
+    record: TgParticipationRecord,
+    currentTurn: number,
+): void {
+    if (!brigade.brigade_history) {
+        brigade.brigade_history = createEmptyBrigadeHistory(brigade.personnel ?? 0);
+    }
+    const hist = brigade.brigade_history;
+    if (!hist.tg_participations) hist.tg_participations = [];
+    hist.tg_participations.push(record);
+
+    // Flush entries older than the rolling window to the lazy-loaded archive.
+    const cutoff = currentTurn - TG_PARTICIPATION_WINDOW_TURNS;
+    if (hist.tg_participations.some((r) => r.formed_turn < cutoff)) {
+        const live: TgParticipationRecord[] = [];
+        const aged: TgParticipationRecord[] = [];
+        for (const r of hist.tg_participations) {
+            (r.formed_turn < cutoff ? aged : live).push(r);
+        }
+        hist.tg_participations = live;
+        if (aged.length > 0) {
+            if (!hist.archived_tg_participations) hist.archived_tg_participations = [];
+            hist.archived_tg_participations.push(...aged);
+        }
+    }
 }
