@@ -17870,3 +17870,24 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **REMAINING (owner-gated).** (1) B-lite anchor seed-priority (one calibration run). (2) ACTIVATION: flip TG flags stage-by-stage (v2.2 FORMATION+COMBAT_SYNTHESIS → v3.0 ARMY_HQ → COHESION_BLEED/RECOVERY/OG_PROMOTION), 40w→188w→scenario-tester GO→owner `UPDATE_BASELINES` + default-ON; war-or-game pass on the 188w flag-on HRHB −24 swing. (3) PR/merge-to-main. `UPDATE_BASELINES` NOT run; flags still default-OFF.
 
 ---
+
+## [2026-05-30] codex: Tactical Groups (ADR-0005) ACTIVATED — all 7 flags default-ON; primary ops path live (owner-authorized)
+
+**Summary.** Owner-authorized full activation of Tactical Groups. All 7 TG flags flipped **default-ON** (commit `0b681ffe`); golden baselines re-floored to TG-on; stale tests updated. TGs are now the live primary ops path. Validated as OSID-baseline-neutral with a +1 historically-correct anchor gain.
+
+**Activation outcome (epoch-correct anchors).**
+- **40w:** OSID **656/712** (= flag-off baseline), anchors **30/30**, benchmarks 6/6, 0 critical anomalies. Hash `1a921ccaa4b9304e`.
+- **188w:** OSID **615/712** (= flag-off baseline), anchors **27/30** vs flag-off **26/30** → **TG +1 anchor** (`vozuca_2` recovered via the Army-HQ Op-Farz capture of Vozuća, which the legacy engine cannot take). Benchmarks 6/6, 0 critical anomalies. Hash `0a36b1090f5f902e`.
+- Net: TG activation is territorially baseline-neutral AND historically *better* (Vozuća). The Pyrrhic cost (cohesion bleed + recovery lock) never dissolves a donor's home brigade (verified — dissolution guard + ≥0 clamp).
+
+**The activation arc (root-causes found, not papered over).** Naive v2.2-core activation regressed (−14/−46, Bihać collapse, 2 critical anomalies). Two real bugs were root-caused and fixed: (1) `1.5` donor-readiness gate stranded isolated/donor-poor corps (5th Corps Bihać) → degrade to lone-anchor when no donors (`8023e2d2`); (2) `1.8` the TG anchor-only readiness narrowing was wrongly applied to `axisHasExecutableOpeningAttack`, so a non-reaching anchor blocked the whole axis — a GENERAL op-launch suppression (`57010afc`). `1.6` HRHB readiness kept (load-bearing with 1.8). `1.7` power-floor was a dead-end → reverted (`a1a6d098`). Forensics traced the SW-Dinaric residual to the Cincar→Kupres→Mistral-2 op-chain (not combat power).
+
+**Calibration-anchor honesty fix (`aa99518c` + `015eba84`).** `scenario_runner` was grading every scenario's OSID anchors against the 1992 list; now grades against epoch-appropriate merged sets (Jan1993/Apr1994/Apr1995/Oct1995). Hash-neutral (eval only). Surfaced two **pre-existing, TG-independent** defects previously masked: **Srebrenica + Žepa never fall to RS in-sim** (separate calibration lane). Added cited OCT1995 anchors `vozuca_2`/`brijesnica_donja_2 = RBiH` (BB1 p.459, Op Farz Sep 1995).
+
+**Baselines re-floored.** `UPDATE_BASELINES` re-canonicalized the manifest scenarios (apr1992_52w + 4w pair) to TG-on; baseline regression "all scenarios match". 40w/188w TG-on hashes above are the new calibration of record.
+
+**Stale tests updated (`9084d691` + `fbc3f0d8`).** 13 tests across 11 files updated for the TG-on default (war-phase step 179→180 for `promote-og-to-division`; strict-null +5 TG optional fields; Krivaja now owned by the Army-HQ inject step; donor-cohesion-bleed isolation; 40w integrity invariant allows 2 exhausted-but-not-destroyed non-donor brigades from higher op-tempo). All STALE — zero real regressions.
+
+**Schema** stays v34. **KNOWN OPEN LANES (separate, TG-independent):** Srebrenica/Žepa enclave-fall mechanics; Brijesnica-Donja Spreča-valley gain; B-lite anchor seed-priority (never built); player-facing TG command UI depth (intent-altitude surfacing shipped, deeper command optional).
+
+---
