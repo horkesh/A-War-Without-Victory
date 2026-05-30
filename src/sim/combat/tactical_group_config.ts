@@ -41,6 +41,50 @@ export const ENABLE_TG_COMBAT_SYNTHESIS = false;
 export const ENABLE_TG_COHESION_BLEED = false;
 
 /**
+ * ARBiH OG→Division promotion (ADR-0006 historical reorganization). When true, a RBiH
+ * (ARBiH) standing OG that has anchored a sustained number of Tactical Group formations
+ * is PROMOTED into a permanent Division — an IDENTITY / COMMAND-ECHELON re-badge of the
+ * SAME brigades that already exist. Historian basis: 2nd Corps Tuzla promoted 1st OG→21st
+ * Division and 5th OG→25th Division. This is faction-specific to ARBiH; VRS geographic OGs
+ * and HVO operational zones never promote.
+ *
+ * CRITICAL INVARIANT (Engine Invariants — NO permanent force inflation): promotion spawns
+ * NO new brigades and adds NO personnel/equipment. It updates the standing OG's display
+ * identity ("N. OG (Place)" → "{N+20}. Division" / historically-mapped number) and records
+ * a one-way promotion entry. Brigade counts, personnel, equipment, and sector geometry are
+ * untouched.
+ *
+ * When false (default): the promotion war-phase step early-returns before any read/write,
+ * formTacticalGroup never increments the per-corps formation counter, and no og_promotions
+ * record is written. Schema stays v34 (both fields are optional + omitEmpty-safe). Goal:
+ * 40w final_state_hash `78e231e35b08cf53` byte-identical with this flag off.
+ */
+export const ENABLE_TG_OG_PROMOTION = false;
+
+/**
+ * Promotion criterion (deterministic, RBiH-only): a corps's standing OG is promoted once it
+ * has anchored at least this many Tactical Group formations (the per-corps `tg_formations_by_corps`
+ * counter). Each TG formation is a launched offensive anchored by that OG, so the counter is a
+ * pure-state proxy for sustained longevity + operational success. Promotion is one-way (no demotion).
+ * Tunable per calibration; gated by ENABLE_TG_OG_PROMOTION.
+ */
+export const PROMOTION_TG_FORMATION_THRESHOLD = 3;
+
+/**
+ * Historian-confirmed ARBiH OG→Division number map (2nd Corps Tuzla). Keys are
+ * "<corps_id>:<og_ordinal>"; values are the canonical promoted Division number.
+ * 2nd Corps: 1st OG → 21st Division, 5th OG → 25th Division. When a (corps, ordinal)
+ * pair is absent, the default rule applies: promoted Division number = og_ordinal + 20.
+ */
+export const ARBIH_OG_TO_DIVISION_NUMBER: Readonly<Record<string, number>> = {
+    'arbih_2nd_corps:1': 21,
+    'arbih_2nd_corps:5': 25,
+};
+
+/** Default OG→Division number offset when no historical mapping exists (N. OG → {N+20}. Division). */
+export const OG_TO_DIVISION_DEFAULT_OFFSET = 20;
+
+/**
  * v3.0 flag: Army HQ Operations (faction-wide cross-corps offensives — Krivaja-95,
  * Farz 95 pattern). ADR-0005 §Army HQ Operations + §Phased Rollout v3.0.
  *

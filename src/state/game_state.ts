@@ -529,6 +529,33 @@ export interface TacticalGroup {
     cohesion: number;
 }
 
+/**
+ * ARBiH OG→Division promotion record (ADR-0006 historical reorganization).
+ *
+ * A one-way IDENTITY / COMMAND-ECHELON re-badge of a standing OG into a permanent Division.
+ * Records the upgrade so it is queryable and persistent across the per-turn sector rebuild
+ * (corps_front_sectors is derived/recomputed each turn; this record lives on MilitaryState
+ * and drives the projected display_name). NO force inflation: no brigades/personnel/equipment
+ * are added — the SAME brigades are re-badged under the Division identity.
+ *
+ * Determinism: written only inside the ENABLE_TG_OG_PROMOTION gate; one-way (never demoted).
+ * Optional/omitEmpty-safe — schema stays v34.
+ */
+export interface OgPromotionRecord {
+    /** Corps whose standing OG was promoted. */
+    corps_id: FormationId;
+    /** Faction (always 'RBiH' — promotion is ARBiH-specific). */
+    faction: FactionId;
+    /** OG ordinal that was promoted (1-based). */
+    og_ordinal: number;
+    /** Promoted Division number (historical map where known, else og_ordinal + offset). */
+    division_number: number;
+    /** New display identity, e.g. "21. Division". */
+    division_display_name: string;
+    /** Turn the promotion took effect (frozen; one-way). */
+    promoted_on_turn: number;
+}
+
 /** Faction-wide cross-corps offensive entity (Krivaja-95, Farz 95
  *  pattern). Capped at most once per year per faction per ADR-0005 §Army HQ
  *  Operations. v2.0 scaffold; v3.0 wires triggers + pipeline step. */
@@ -2566,6 +2593,19 @@ army_hq_op_count_by_year?: Record<FactionId, Record<number, number>>;
  * (byte-identical) when the flag is off.
  */
 tg_recent_compositions?: Record<string, number>;
+/**
+ * ARBiH OG→Division promotion (ADR-0006). Per-corps count of Tactical Group formations the
+ * corps has anchored over the scenario — the deterministic longevity/sustained-success signal
+ * the promotion criterion reads. Incremented at TG formation ONLY while ENABLE_TG_OG_PROMOTION
+ * is on; stays empty/omitted (byte-identical) when the flag is off. Schema stays v34.
+ */
+tg_formations_by_corps?: Record<FormationId, number>;
+/**
+ * ARBiH OG→Division promotions (ADR-0006), keyed by corps_id. One-way identity/command-echelon
+ * re-badge records (no force inflation). Written only inside ENABLE_TG_OG_PROMOTION; empty/omitted
+ * (byte-identical) when the flag is off. Schema stays v34 (optional + omitEmpty-safe).
+ */
+og_promotions?: Record<FormationId, OgPromotionRecord>;
 }
 
 /** Presidential command authority — the player's resource for overriding the command chain.

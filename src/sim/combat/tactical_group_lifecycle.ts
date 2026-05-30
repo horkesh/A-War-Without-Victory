@@ -33,6 +33,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import {
     ENABLE_TG_COHESION_BLEED,
     ENABLE_TG_ARMY_HQ_OPS,
+    ENABLE_TG_OG_PROMOTION,
     TG_COHESION_BLEED_BASE,
     TG_BLEED_HOPS_FACTOR,
     ARMY_HQ_COHESION_BLEED_MULT,
@@ -153,6 +154,16 @@ export function formTacticalGroup(
     // Mutate state: insert TG.
     if (!mil.tactical_groups) mil.tactical_groups = {};
     mil.tactical_groups[tgId] = tg;
+
+    // ADR-0006 OG→Division promotion signal (ENABLE_TG_OG_PROMOTION): increment the per-corps
+    // formation counter — the deterministic longevity/sustained-success proxy the promotion
+    // criterion reads. Counts ALL factions' formations (cheap, faction-agnostic write); the
+    // promotion EVALUATION is RBiH-only. Flag-off: never written, so state is byte-identical.
+    if (ENABLE_TG_OG_PROMOTION) {
+        if (!mil.tg_formations_by_corps) mil.tg_formations_by_corps = {};
+        mil.tg_formations_by_corps[anchor.corps_id] =
+            (mil.tg_formations_by_corps[anchor.corps_id] ?? 0) + 1;
+    }
 
     // Mutate state: write per-donor lent fields (Hard Invariant #1) + v2.3 Pyrrhic dampener.
     const hqMult = params.army_hq_op_id != null ? ARMY_HQ_COHESION_BLEED_MULT : 1.0;

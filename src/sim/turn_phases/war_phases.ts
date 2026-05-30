@@ -132,6 +132,8 @@ import { updateEnclaveResilience } from '../combat/enclave_resilience.js';
 import { updateExhaustion } from '../combat/exhaustion.js';
 import { detectFronts } from '../combat/front_emergence.js';
 import { buildCorpsFrontSectors, assignBrigadesToSubSegments, REASSIGNMENT_ENTRENCHMENT_RETAIN } from '../combat/corps_front_sectors.js';
+import { ENABLE_TG_OG_PROMOTION } from '../combat/tactical_group_config.js';
+import { applyOgPromotions, projectPromotionDisplayNames } from '../combat/tactical_group_promotion.js';
 import { distributeBrigadesToFront } from '../combat/brigade_front_distribution.js';
 import { correctMarchOrders, correctTransitStates } from '../combat/commander_march_correction.js';
 import { evaluateHomeReturn } from '../combat/brigade_home_return.js';
@@ -738,6 +740,20 @@ export const warPhases: NamedPhase[] = [
                     }
                 }
             }
+        }
+    },
+
+    {
+        // ADR-0006 ARBiH OG→Division promotion (identity/command-echelon re-badge; NO force
+        // inflation). Flag-off: early-return before any read/write → byte-identical state.
+        // Runs after sectors are (re)built + brigades assigned so the projected Division
+        // display_name lands on the current turn's derived sectors. Deterministic + idempotent.
+        name: 'promote-og-to-division',
+        run: (context) => {
+            if (!ENABLE_TG_OG_PROMOTION) return;
+            if (context.state.meta.phase !== 'war') return;
+            applyOgPromotions(context.state, context.state.meta.turn);
+            projectPromotionDisplayNames(context.state);
         }
     },
 
