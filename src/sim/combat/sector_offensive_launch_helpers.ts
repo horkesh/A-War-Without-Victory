@@ -799,11 +799,30 @@ function classifyAxisOpeningAttack(
         return { executable: false, blocker: 'participants_below_attack_floor' };
     }
 
+    // TG-CAUSED launch regression fix (operations-expert, 2026-05-30): the anchor-only
+    // narrowing above was authored so a non-anchor brigade that fails to march cannot
+    // BLOCK the transition. But applying that same narrowing to the EXECUTABILITY check
+    // inverts the intent: a single anchor that is not yet at/marching to an
+    // objective-adjacent OSID then BLOCKS an axis whose support brigades CAN open the
+    // attack — exactly the Cincar/Kupres-94 regression (opportunity ops never set
+    // `main_brigade`, so the anchor defaults to authoring-order assigned_brigades[0]
+    // = hrhb_kralj_petar_kreimir_iv_brigade, which alone cannot reach op:kupres:bucovaca;
+    // n51 188w showed launch_blocker=zero_eligible_axis + unreachable_at_launch with a
+    // healthy force_ratio 1.23 and 4 active brigades, vs flag-off SUCCESS capturing all
+    // four objectives). The executability check must consider the whole assigned pool —
+    // `axisHasExecutableOpeningAttack` already filters each brigade for active/personnel/
+    // adjacency internally, so this only RESTORES legacy reachability semantics; it does
+    // NOT let a non-anchor brigade gate the floor check (that stays anchor-aware above).
+    // Flag-off: `gateBrigades` already equals `assigned_brigades`, so byte-identical.
+    const executabilityBrigades = ENABLE_TACTICAL_GROUPS
+        ? axis.assigned_brigades
+        : gateBrigades;
+
     if (!axisHasExecutableOpeningAttack(
         state,
         faction,
         objective,
-        gateBrigades,
+        executabilityBrigades,
         adjacency,
         threshold,
     )) {
