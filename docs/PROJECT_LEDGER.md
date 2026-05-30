@@ -17846,3 +17846,27 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Artifacts.** `src/sim/events/strategic_dimensions.ts`, `src/sim/political/political_personality.ts`, `tests/consequence_substrate_ownership.test.ts`, `tests/cohesion_divisor_rescale.test.ts`. Handoff source: `docs/40_reports/20260529_CALIBRATION_HANDOFF_COHESION_DIVISOR.md`.
 
 ---
+
+## [2026-05-30] codex: Tactical Groups (ADR-0005) FULL IMPLEMENTATION — flag-off-safe, integrated on main baseline, ACTIVATION PENDING (owner-gated)
+
+**Summary.** Completed the full ADR-0005 Tactical Groups system on branch `claude/tactical-groups-2026-05-28` per a 4-specialist design panel + user-ratified scope (default-ON primary path, player-commandable at intent altitude, every offensive forms a TG, full ratified donor model, faction-asymmetric identity). All work is **flag-gated default-OFF and flag-off byte-identical** to main; schema frozen at **v34**. **Flags NOT yet flipped on — activation (calibration re-floor) is owner-gated and pending.** Plan: `docs/plans/2026-05-30-tg-full-implementation-plan.md`.
+
+**Phase commits (flag-off 40w byte-identity held throughout; pre-merge `78e231e35b08cf53`):**
+- Phase 0 `9b9614c7` — SAFETY: `effectivePersonnel` helper + home-availability read-site migration (fixes confirmed lent-personnel double-count; TG-internal denominators left raw) + invariant test.
+- Phase 1 `5f143291` — FIDELITY: BFS distance-falloff (replaces hardcoded hops=0 → cohesion cost now distance-scaled), equipment donation, adjacent-corps donors, concurrency caps.
+- Phase 2 `76d65f29` — ROUTING: every offensive forms a TG; `op_kind_donor_policy`; fixed offensive paths (general_offensive/strategic_defense) that bypassed TG formation.
+- Phase 3A `d12654a5` — IDENTITY+COMMAND: sector `display_name` standing identity (ADR-0006); `tactical_commander` rank + `op.tg_commander_officer_id` + anchor combat-mod (flag-on only); faction naming (VRS geo / ARBiH numbered / HVO zones); fixed hardcoded `'RS'` commander assignment.
+- Phase 3A-telemetry `18443bee` — `donor_corps_ids` back-fill + `tg_participations` (26-turn window).
+- Phase 3B `9fede550` — UI (src/ui only): "back the officer" surfacing — CO + TG identity + donor lineage on existing op-decision dossier; AAR aftermath read-model. No new panel, donor micro stays smart-default (intent altitude).
+- Phase 3A-promotion `26ac5ada` — ARBiH OG→Division (RBiH-only, flag-gated, one-way) — identity/command reorg, **no force inflation** (test-confirmed).
+- Phase 4 `5cdd56d5` — MIGRATION RECON: phantom anchors (Prsten→no-TG, Višegrad→real anchor), dual-anchor de-confliction, Farz-95 (real OOB; stale comment fixed), territory-revert-on-anchor-death.
+- Phase 5 `b7c1cdfd` — DETERMINISM: `tg_determinism.test.ts`, schema-v34 freeze guard, one-way migration contract doc.
+- Integration `8e7ded1c` — merged `origin/main` (15bf78d3, incl. cohesion-divisor fix + sector-perf): 15-file divergent-TG merge resolved branch-TG-authoritative; single v34 migration. **Flag-off 40w now = `e6b5187eaf320c57`** (post-cohesion main baseline) — TG flag-off adds nothing.
+
+**Verification.** tsc clean; TG suite 138 + schema/migration 194 tests pass. Flag-off byte-identity proven each phase.
+
+**Design (4-specialist panel + user).** Persistence = HYBRID (no new standing-TG entity; sector display_name = standing identity + named TG CO). Player command = intent + "back the officer" (donor micro hidden). Faction texture modeled. Sectors = A (name layer, done) + B-lite (anchor seed-priority, PENDING — calibration-forcing).
+
+**REMAINING (owner-gated).** (1) B-lite anchor seed-priority (one calibration run). (2) ACTIVATION: flip TG flags stage-by-stage (v2.2 FORMATION+COMBAT_SYNTHESIS → v3.0 ARMY_HQ → COHESION_BLEED/RECOVERY/OG_PROMOTION), 40w→188w→scenario-tester GO→owner `UPDATE_BASELINES` + default-ON; war-or-game pass on the 188w flag-on HRHB −24 swing. (3) PR/merge-to-main. `UPDATE_BASELINES` NOT run; flags still default-OFF.
+
+---
