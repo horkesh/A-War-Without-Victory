@@ -61,6 +61,7 @@ import { toCommandBriefingView } from '../../shared/command_briefing_views.js';
 import { getOperationalSitrepView } from '../../shared/operational_sitrep_views.js';
 import { deriveOperationOpportunityRecords, deriveOperationOpportunitySummary } from './operationOpportunityLedger.js';
 import { deriveOperationOpportunityProposals } from './operationOpportunityDossiers.js';
+import { buildBackTheOfficerViews, buildTgAftermathViews } from './backTheOfficer.js';
 import { buildDiplomacyView } from './diplomacyView.js';
 import { playerFactionMatch } from './playerFactionMatch.js';
 import {
@@ -1764,9 +1765,17 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
                 .slice(0, 2)
                 .map(([m]) => humanizeMunicipalitySlug(m));
-            const displayName = topMuns.length > 0
-                ? `${corpsName} \u2013 ${topMuns.join(', ')}`
-                : corpsName;
+            // ADR-0006 Phase 3B: prefer the standing TG/OG identity (CorpsFrontSector.display_name,
+            // e.g. "TG Drina", "1. OG (Tuzla)", "OZ Mostar") when present in state; otherwise fall
+            // back to the computed "{corps} \u2013 {top muns}" label. Mirrors displaySectorLabel() in
+            // game_state.ts. Absent on flag-off / pre-3A saves, so the fallback is the default path.
+            const standingIdentity = typeof s.display_name === 'string' && s.display_name.length > 0
+                ? s.display_name
+                : undefined;
+            const displayName = standingIdentity
+                ?? (topMuns.length > 0
+                    ? `${corpsName} \u2013 ${topMuns.join(', ')}`
+                    : corpsName);
 
             out.push({
                 sector_id: typeof s.sector_id === 'string' ? s.sector_id : sectorId,
@@ -1907,6 +1916,22 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     const pendingEventNotifications = derivePendingEventNotifications(state);
     const pendingProposalReviews = derivePendingProposalReviews(state, playerFaction);
     const operationOpportunityProposals = deriveOperationOpportunityProposals(state, playerFaction);
+    // Phase 3B "Back the Officer" read-model projections (ADR-0005/0006). Pure, defensive:
+    // empty on flag-off / pre-3A saves. Roster supplies player-safe CO names + lost status.
+    const backTheOfficerRoster = (namedOfficerData ?? []).map((o) => ({
+        id: o.id,
+        name: o.name,
+        rank: o.rank,
+        status: o.status,
+    }));
+    const backTheOfficerAll = buildBackTheOfficerViews(state, backTheOfficerRoster);
+    const backTheOfficerOps = playerFaction
+        ? backTheOfficerAll.filter((view) => {
+            const corps = formationsRecord[view.anchor_corps_id] as { faction?: string } | undefined;
+            return !corps?.faction || corps.faction === playerFaction;
+        })
+        : backTheOfficerAll;
+    const tgAftermathAll = buildTgAftermathViews(state, backTheOfficerRoster);
     const presidentialReviewQueue = derivePresidentialReviewQueue({
         pendingOfficerEvents,
         pendingEventDecisions,
@@ -1988,6 +2013,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             return filtered.length > 0 ? filtered : undefined;
         })(),
         operations: filterPlayerFacingEntriesByFaction(operations, playerFaction),
+        backTheOfficerOps: backTheOfficerOps.length > 0 ? backTheOfficerOps : undefined,
+        tgAftermath: tgAftermathAll.length > 0 ? tgAftermathAll : undefined,
         namedOfficerData,
         namedOfficerStateById,
         factionReserves: scopeToPlayerFaction(factionReserves, playerFaction),

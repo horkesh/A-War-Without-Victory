@@ -1671,6 +1671,7 @@ export const enMessages = {
     'opportunity.resolveFailed': 'Failed to {decision} opportunity.',
     'opportunity.authorizeVerb': 'authorize',
     'opportunity.operationalOpportunities': 'Operational Opportunities',
+    'opportunity.backTheOfficer': 'Back the Officer',
     'corpsSituation.title': 'Situation Assessment',
     'corpsSituation.constraint.siege': 'SIEGE',
     'corpsSituation.constraint.threat': 'THREAT',
