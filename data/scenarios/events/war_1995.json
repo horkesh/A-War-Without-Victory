@@ -683,6 +683,7 @@
     "title": "UN Rapid Reaction Force Deploys to Mount Igman",
     "narrative": "A new force arrives on the battlefield. Four thousand British, French, and Dutch troops -- equipped with heavy artillery, armored vehicles, and orders to shoot back -- take up positions on Mount Igman above Sarajevo. The Rapid Reaction Force is not UNPROFOR. Its rules of engagement permit offensive fire against any force that threatens UN operations or the humanitarian supply route. For the first time, the international presence in Bosnia has teeth. The VRS now faces a second army overlooking its siege positions around the capital.",
     "category": "military",
+    "priority": 1,
     "trigger": {
       "turn_min": 168,
       "turn_max": 170,

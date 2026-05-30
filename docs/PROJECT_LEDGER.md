@@ -17891,3 +17891,24 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Schema** stays v34. **KNOWN OPEN LANES (separate, TG-independent):** Srebrenica/Žepa enclave-fall mechanics; Brijesnica-Donja Spreča-valley gain; B-lite anchor seed-priority (never built); player-facing TG command UI depth (intent-altitude surfacing shipped, deeper command optional).
 
 ---
+
+## [2026-05-31] codex: Event-system fix — silent-drop cap + backwards JNA-withdrawal modeling (Srebrenica/Žepa now fall, RS rear intact)
+
+**Summary.** Owner-flagged investigation ("our events system does not work as intended") root-caused and fixed **two stacked bugs**. Net 188w result is strictly better than both prior states. Branch `codex/event-cap-silent-drop-fix`.
+
+**Bug 1 — silent event drop (`83757a43`).** `MAX_EVENTS_PER_TURN=4` was applied to ALL candidates including non-player auto/flag-setter events. An eligible narrow-window event crowded out on its last window-turn was re-checked next turn, failed `triggerMatches` (turn > turn_max), and was **dropped permanently**. This killed `jna_withdrawal_1992` (window 5-5) → which silently killed the `srebrenica_enclave_formed → Srebrenica/Žepa fall` chain. Fix: `isPlayerDecisionEvent` partition — cap ONLY player-facing decision events (those with `response_options`); auto/flag-setters fire unconditionally. Added `priority:1` to chain-head flag-setters (`jna_withdrawal_1992`, `arms_embargo_impact_1992`, `rapid_reaction_force_1995`). Result: Srebrenica + Žepa now fall to RS in-sim (the owner's original ask).
+
+**Bug 2 — backwards JNA-withdrawal modeling (`d382a092`).** Fixing Bug 1 exposed a −37 OSID / −43 RS deep-rear collapse (Posavina/Brčko/Doboj). A confident first hypothesis (unbounded patron-override accumulation) was **disproven** — `patron_pressure.override_authority` is recomputed-from-scratch each turn, not accumulated. A clean ablation (events fire + set all flags, but numeric effects stripped) proved the driver was the events' **uncalibrated numeric effects**, not the flags or any consumer. Root cause: `jna_withdrawal_1992` was authored **historically backwards** — it *debuffed* RS (equipment ×0.96, recruitment ×0.92) and *boosted* ARBiH/HVO supply (+8/+5), when the May-1992 JNA withdrawal in fact handed equipment + Bosnian-Serb personnel to the VRS. These were never caught because the event never fired (Bug 1). Fix: removed the backwards RBiH/HVO supply boosts + RS debuffs; kept `supply_delta RS +20` + `morale RBiH −5` + flags + dimension_shifts. `arms_embargo_impact_1992` (RBiH −10, correct) + enclave chain unchanged.
+
+**Also (`5d3eaae1`).** Bounded the Drina-cleansing RS patron-override (front-loaded decay PEAK 8 → FLOOR 2 over 52t) — a legitimate no-regression design improvement (replaces a flat constant), independent of the collapse.
+
+**Outcome (epoch-correct anchors), scenario-tester GO.**
+- **188w:** OSID **618/712** (vs pre-fix 615 where enclaves did NOT fall, and broken-post-fix 578 collapse) — strictly better than both. Anchors **29/30** (lone fail `brijesnica_donja_2` = known separate stale-anchor lane); `brčko`/`boljanic_2`/`petrovo_2` RESTORED to RS; `srebrenica_2`/`zepa_2` PASS (fall). Benchmarks 6/6, 0 critical. Hash `b6c9507e7c045a6c`.
+- **40w:** OSID **655/712** (−1, benign early-war supply consequence), anchors **30/30**, 6/6, 0 critical. Hash `85ae31578378c707`.
+- RS sim 338 vs Oct1995 ref 315 (+23 over) is the **pre-existing HRHB Mistral-2 SW-belt + Sana-pocket lanes** (HRHB −16, RBiH −7), NOT event-caused — tracked separately.
+
+**Tests/baselines.** `jna_withdrawal_consequences.test.ts` T1/T3 updated to the historically-correct direction (RS supply gain present, RS debuffs absent, RBiH/HVO boosts absent). tsc clean; vitest fast (8436) + scenario (98) slices green; desktop:map:build green. `UPDATE_BASELINES` re-floored `apr1992_52w` manifest (6 artifacts; 4w pair unchanged — stop before turn 5) — commit `508976f3`.
+
+**KNOWN OPEN LANES (separate):** `brijesnica_donja_2` Spreča-valley gain (not a Farz objective + absent from Oct1995 anchors); HRHB Mistral-2 SW-belt OOB ceiling; Sana-pocket frontier.
+
+---

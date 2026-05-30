@@ -12,6 +12,10 @@ import {
     MAX_PATRON_EXHAUSTION_OVERRIDE,
     MAX_MILITARY_STRENGTH_REDUCTION,
     MAX_RECENT_DEFEATS_OVERRIDE,
+    computeDrinaCleansingOverride,
+    DRINA_CLEANSING_OVERRIDE_PEAK,
+    DRINA_CLEANSING_OVERRIDE_FLOOR,
+    DRINA_CLEANSING_DECAY_WINDOW,
 } from '../src/sim/negotiation/patron_pressure.js';
 import {
     evaluatePatronEvents,
@@ -156,6 +160,52 @@ describe('Patron Pressure — Override Authority', () => {
 
         // 3 * 5 = 15, capped at MAX_WAR_CRIMES_OVERRIDE=15
         expect(withCrimes - base).toBe(MAX_WAR_CRIMES_OVERRIDE);
+    });
+
+    it('Drina cleansing override is bounded + decays from PEAK to FLOOR (not a permanent flat per-turn add)', () => {
+        // Flag unset → no contribution
+        const clean = makeState({ turn: 8 });
+        expect(computeDrinaCleansingOverride(clean)).toBe(0);
+
+        // Flag set at turn 8: first observation stamps the set-turn, contribution = PEAK
+        const s = makeState({ turn: 8 });
+        s.military.event_flags = { drina_cleansing_occurred: true };
+        expect(computeDrinaCleansingOverride(s)).toBeCloseTo(DRINA_CLEANSING_OVERRIDE_PEAK, 5);
+
+        // Midway through the decay window → between FLOOR and PEAK, strictly decreasing
+        const mid = makeState({ turn: 8 + DRINA_CLEANSING_DECAY_WINDOW / 2 });
+        mid.military.event_flags = { drina_cleansing_occurred: true, drina_cleansing_first_turn: 8 };
+        const midVal = computeDrinaCleansingOverride(mid);
+        expect(midVal).toBeLessThan(DRINA_CLEANSING_OVERRIDE_PEAK);
+        expect(midVal).toBeGreaterThan(DRINA_CLEANSING_OVERRIDE_FLOOR);
+
+        // Late war (well past the window) → holds at FLOOR, NOT an escalating value
+        const late = makeState({ turn: 188 });
+        late.military.event_flags = { drina_cleansing_occurred: true, drina_cleansing_first_turn: 8 };
+        expect(computeDrinaCleansingOverride(late)).toBeCloseTo(DRINA_CLEANSING_OVERRIDE_FLOOR, 5);
+
+        // Bound: never exceeds PEAK regardless of elapsed turns
+        for (const turn of [8, 20, 60, 120, 188]) {
+            const st = makeState({ turn });
+            st.military.event_flags = { drina_cleansing_occurred: true, drina_cleansing_first_turn: 8 };
+            const v = computeDrinaCleansingOverride(st);
+            expect(v).toBeLessThanOrEqual(DRINA_CLEANSING_OVERRIDE_PEAK);
+            expect(v).toBeGreaterThanOrEqual(DRINA_CLEANSING_OVERRIDE_FLOOR);
+        }
+    });
+
+    it('Drina override only applies to RS', () => {
+        const s = makeState({ turn: 100 });
+        s.military.event_flags = { drina_cleansing_occurred: true, drina_cleansing_first_turn: 8 };
+        const rsPr = s.military.negotiation!.patron_relationships.RS;
+        const rsCap = s.military.negotiation!.capital.RS;
+        const rbihPr = s.military.negotiation!.patron_relationships.RBiH;
+        const rbihCap = s.military.negotiation!.capital.RBiH;
+
+        const rsAuth = computeOverrideAuthority(s, 'RS', rsPr, rsCap);
+        const rbihAuth = computeOverrideAuthority(s, 'RBiH', rbihPr, rbihCap);
+        // RS picks up the (now floored) Drina contribution; RBiH does not.
+        expect(rsAuth).toBeGreaterThan(rbihAuth);
     });
 
     it('override authority is clamped 0-100', () => {
