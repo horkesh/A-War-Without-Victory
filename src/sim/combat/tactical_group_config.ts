@@ -212,6 +212,34 @@ export const MAX_DONATIONS_PER_SCENARIO = 3;
 export const DONATION_READINESS_FRACTION = 0.6;
 
 /**
+ * Phase 1.6 HVO Mistral-2 westward-reach lever (operations-expert, 2026-05-30).
+ *
+ * MEASURED PROBLEM (TG v2.2-core flag-ON, after the Phase 1.5 donor-gate fix): the 188w
+ * residual regression vs the flag-OFF engine concentrates in the 1995 Mistral-2 / Maestral
+ * SW Dinaric belt — HVO (HRHB) cedes Šipovo / Kupres / Bosansko Grahovo / Glamoč / Drvar to
+ * RS that the flag-OFF engine captured. ROOT CAUSE (diagnosis cause a + b): the HVO Mistral
+ * axes are hosted on the Livno-area corps (`hvo_tomislavgrad`) and stage at op:livno:* for a
+ * long WESTWARD reach into Drvar/Grahovo. A handful of HVO donors ARE eligible (so the
+ * Phase-1.5 zero-donor fallback does NOT apply), but BFS distance-falloff over that long
+ * westward axis (TG_DISTANCE_FALLOFF_PER_HOP) cuts their `personnel_lent` below the 60%
+ * DONATION_READINESS_FRACTION → the gate blocks the axis with `insufficient_donation`. The
+ * flag-OFF engine has no such gate, so the op launches and the historical capture lands.
+ *
+ * DOCTRINE: the historical Mistral 2 spearhead was the Croatian Army (HV) 4th Guards + OG West
+ * crossing the border as the main effort — territorially absorbed into the HVO anchor brigades
+ * (the OOB carries no separate HV corps). The HVO westward thrust was therefore NOT contingent
+ * on mustering full LOCAL donor mass; the readiness floor that fits a self-supplied ARBiH corps
+ * over-constrains the HV-backed HVO axis. We relax the readiness fraction for HRHB-faction axes
+ * only — a corps/faction-specific reach lever, NOT a new global gate or distance cap. It does
+ * NOT inflate force (the anchor + whatever donors qualify still fight at their real strength);
+ * it only stops the gate from CANCELLING an axis the flag-off engine would have prosecuted.
+ *
+ * Flag-on-only: only consulted inside the ENABLE_TG_FORMATION donation-readiness branch, so
+ * flag-off stays byte-identical (40w e6b5187eaf320c57). Tunable per calibration.
+ */
+export const DONATION_READINESS_FRACTION_HRHB = 0.25;
+
+/**
  * ADR-0005 Phase 2 (§"Migration of existing pre-planned ops" / §"Bot AI ops"):
  * per-operation donor policy. Classifies an operation by KIND into how it forms
  * its Tactical Group:

@@ -25,7 +25,7 @@ import { estimateConcentratedOutcome, isOutcomeSufficientForAttack } from './bot
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { getAllAxisObjectives, getCurrentLaunchObjectives, isMultiAxis } from './sector_offensive_axis_helpers.js';
-import { ENABLE_TACTICAL_GROUPS, ENABLE_TG_FORMATION, DONATION_READINESS_FRACTION, getAnchorBrigade } from './tactical_group_config.js';
+import { ENABLE_TACTICAL_GROUPS, ENABLE_TG_FORMATION, DONATION_READINESS_FRACTION, DONATION_READINESS_FRACTION_HRHB, getAnchorBrigade } from './tactical_group_config.js';
 // ADR-0005 v2.2c #3: donation-readiness gate recomputes the donor pool here.
 import { selectDonors } from './tactical_group_selection.js';
 // ADR-0005 Phase 4: phantom-aware anchor (gate must score donors against the SAME
@@ -826,7 +826,7 @@ function classifyAxisOpeningAttack(
         if (anchorId && stagingOsid) {
             const anchorPersonnel = state.military.formations?.[anchorId]?.personnel ?? 0;
             const donors = selectDonors(state, { anchor_brigade_id: anchorId, staging_osid: stagingOsid, army_hq_op_id: armyHqOpId });
-            if (donationReadinessBlocksAxis(donors, anchorPersonnel)) {
+            if (donationReadinessBlocksAxis(donors, anchorPersonnel, faction)) {
                 axis.launch_blocker = 'insufficient_donation';
                 return { executable: false, blocker: 'insufficient_donation' };
             }
@@ -855,7 +855,18 @@ function classifyAxisOpeningAttack(
  *
  * Rule:
  *   - donors.length === 0 → DO NOT block (degrade to lone-anchor, exactly as flag-off).
- *   - donors exist but pledge < DONATION_READINESS_FRACTION × anchorPersonnel → BLOCK.
+ *   - donors exist but pledge < readinessFraction × anchorPersonnel → BLOCK.
+ *
+ * Phase 1.6 HVO Mistral-2 westward-reach lever (operations-expert, 2026-05-30): the
+ * readiness fraction is faction-specific. HRHB (HVO) axes use the relaxed
+ * DONATION_READINESS_FRACTION_HRHB; all other factions use the standard
+ * DONATION_READINESS_FRACTION. RATIONALE: the HVO Mistral-2 westward axes (Livno →
+ * Drvar/Grahovo/Šipovo) stage for a long reach where BFS distance-falloff trims the few
+ * eligible local donors below the 60% floor, so the gate cancelled an axis the flag-off
+ * engine prosecuted. Historically the HV (Croatian Army) spearhead — absorbed into the HVO
+ * anchor, no separate HV corps in OOB — supplied the westward mass, so a lower local-donor
+ * floor is doctrinally correct. This is NOT force inflation (the anchor + qualifying donors
+ * still fight at real strength) and NOT a new global gate or distance cap.
  *
  * Deterministic: `selectDonors` is deterministic, so `donors.length === 0` is a stable
  * function of the turn's state. Caller only invokes this under ENABLE_TG_FORMATION, so
@@ -864,10 +875,14 @@ function classifyAxisOpeningAttack(
 export function donationReadinessBlocksAxis(
     donors: ReadonlyArray<{ personnel_lent: number }>,
     anchorPersonnel: number,
+    faction?: FactionId,
 ): boolean {
     if (donors.length === 0) return false; // donor-poor corps: lone-anchor fallback, never block
     const donated = donors.reduce((sum, d) => sum + d.personnel_lent, 0);
-    return donated < DONATION_READINESS_FRACTION * anchorPersonnel;
+    const readinessFraction = faction === 'HRHB'
+        ? DONATION_READINESS_FRACTION_HRHB
+        : DONATION_READINESS_FRACTION;
+    return donated < readinessFraction * anchorPersonnel;
 }
 
 export function evaluateOpeningAttackReadiness(
