@@ -57,8 +57,69 @@ export const SANCTIONS_SUPPORT_DECAY_PER_TURN = 0.5;
 /** Support level loss when client rejects a peace plan. */
 export const PEACE_PLAN_REJECTION_SUPPORT_COST = 5;
 
-/** RS override authority bonus per turn when Drina valley cleansing occurred (v0.7.0 Phase 4). */
-export const DRINA_CLEANSING_OVERRIDE_PER_TURN = 2;
+/**
+ * RS override-authority contribution from the 1992 Drina valley cleansing.
+ *
+ * Historically the atrocity drew a sharp, front-loaded international reaction
+ * (Belgrade leaned on Pale over the fallout) that then settled into a lower,
+ * lasting baseline of elevated patron pressure. This is modelled as a BOUNDED,
+ * DECAYING contribution — NOT a flat permanent per-turn add. The old flat
+ * `+2 every turn for the whole war` (applied ~turn 8 → 188) pinned RS override
+ * authority high for the entire conflict, pushing RS bots into sustained
+ * concession and an ahistorical rear collapse. See `computeDrinaCleansingOverride`.
+ *
+ * Contribution = lerp(PEAK → FLOOR) over DECAY_WINDOW turns from the atrocity,
+ * then holds at FLOOR for the remainder of the war.
+ */
+/** Peak Drina override contribution at the moment of the atrocity (v0.7.0 Phase 4). */
+export const DRINA_CLEANSING_OVERRIDE_PEAK = 8;
+
+/** Sustained Drina override floor once the initial political moment has faded. */
+export const DRINA_CLEANSING_OVERRIDE_FLOOR = 2;
+
+/** Turns over which the Drina contribution decays from PEAK down to FLOOR. */
+export const DRINA_CLEANSING_DECAY_WINDOW = 52;
+
+/**
+ * Legacy alias retained for back-compat: equals the sustained floor (the value
+ * the old flat-per-turn model used). Prefer the PEAK/FLOOR constants.
+ * @deprecated use DRINA_CLEANSING_OVERRIDE_FLOOR / DRINA_CLEANSING_OVERRIDE_PEAK
+ */
+export const DRINA_CLEANSING_OVERRIDE_PER_TURN = DRINA_CLEANSING_OVERRIDE_FLOOR;
+
+/** event_flags key recording the turn the Drina cleansing was first observed. */
+const DRINA_CLEANSING_FIRST_TURN_FLAG = 'drina_cleansing_first_turn';
+
+/**
+ * Compute the bounded, decaying Drina-cleansing override contribution for RS.
+ *
+ * The first turn the `drina_cleansing_occurred` flag is observed, the current
+ * turn is stamped lazily into `event_flags` (deterministic — driven only by
+ * `state.meta.turn`; no migration needed since `event_flags` is a free-form
+ * record). The contribution then decays linearly from PEAK to FLOOR over
+ * DECAY_WINDOW turns and holds at FLOOR thereafter.
+ *
+ * Returns 0 when the flag is unset.
+ */
+export function computeDrinaCleansingOverride(state: GameState): number {
+    if (state.military.event_flags?.drina_cleansing_occurred !== true) return 0;
+
+    if (!state.military.event_flags) state.military.event_flags = {};
+    const flags = state.military.event_flags;
+
+    let firstTurn = flags[DRINA_CLEANSING_FIRST_TURN_FLAG];
+    if (typeof firstTurn !== 'number') {
+        firstTurn = state.meta.turn;
+        flags[DRINA_CLEANSING_FIRST_TURN_FLAG] = firstTurn;
+    }
+
+    const elapsed = Math.max(0, state.meta.turn - firstTurn);
+    const t = clamp(elapsed / DRINA_CLEANSING_DECAY_WINDOW, 0, 1);
+    const contribution =
+        DRINA_CLEANSING_OVERRIDE_PEAK -
+        t * (DRINA_CLEANSING_OVERRIDE_PEAK - DRINA_CLEANSING_OVERRIDE_FLOOR);
+    return Math.round(contribution * 100) / 100;
+}
 
 /** RS override authority bonus per turn when concentration camps revealed (v0.7.0 Phase 4). */
 export const CAMPS_REVEALED_OVERRIDE_PER_TURN = 3;
@@ -136,9 +197,11 @@ export function computeOverrideAuthority(
         cap.war_crimes_events * WAR_CRIMES_OVERRIDE_PER_EVENT
     );
 
-    // 3b. Drina valley cleansing increases RS international pressure (v0.7.0 Phase 4)
-    if (faction === 'RS' && state.military.event_flags?.drina_cleansing_occurred === true) {
-        authority += DRINA_CLEANSING_OVERRIDE_PER_TURN;
+    // 3b. Drina valley cleansing increases RS international pressure (v0.7.0 Phase 4).
+    //     Bounded + decaying (PEAK→FLOOR over DECAY_WINDOW), NOT a flat permanent
+    //     per-turn add — the old model pinned RS override authority high all war.
+    if (faction === 'RS') {
+        authority += computeDrinaCleansingOverride(state);
     }
 
     // 3c. Camp revelations permanently increase RS pressure (v0.7.0 Phase 4)
