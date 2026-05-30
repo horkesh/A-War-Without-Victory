@@ -255,6 +255,9 @@ export const HISTORICAL_OSID_ANCHORS_OCT1995: readonly HistoricalEpochOsidAnchor
     { at_week: 188, osid: 'op:bijeljina:bijeljina_2',   expected_controller: 'RS',   citation: 'unchanged since April 1992' },
     { at_week: 188, osid: 'op:foca:foca_3',             expected_controller: 'RS',   citation: 'unchanged' },
     { at_week: 188, osid: 'op:visegrad:visegrad_2',     expected_controller: 'RS',   citation: 'unchanged' },
+    // ARBiH late-1995 Ozren/Vozuća + Spreča-valley gains (Op Farz, Sept 1995) — held through Dayton (Zavidovići/Lukavac muni = FBiH).
+    { at_week: 188, osid: 'op:zavidovici:vozuca_2',     expected_controller: 'RBiH', citation: 'BB1 p.459 (Op Farz, ARBiH 3rd Corps capture of Vozuća pocket, Sep 1995; post-Dayton Zavidovići=FBiH); audit 20260522_4_PERSISTENT_ANCHORS.md' },
+    { at_week: 188, osid: 'op:lukavac:brijesnica_donja_2', expected_controller: 'RBiH', citation: 'late-1995 Spreča-valley/Ozren ARBiH gains; post-Dayton Lukavac=FBiH; audit 20260522_4_PERSISTENT_ANCHORS.md' },
 ];
 
 // ===== Epoch-appropriate OSID anchor resolver (2026-05-30) =====
