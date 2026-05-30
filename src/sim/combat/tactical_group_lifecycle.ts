@@ -29,9 +29,13 @@ import type {
 import { strictCompare } from '../../state/validateGameState.js';
 import {
     ENABLE_TG_COHESION_BLEED,
+    ENABLE_TG_ARMY_HQ_OPS,
     TG_COHESION_BLEED_BASE,
     TG_BLEED_HOPS_FACTOR,
     ARMY_HQ_COHESION_BLEED_MULT,
+    MAX_CONCURRENT_TGS_PER_FACTION,
+    MAX_TGS_PER_CORPS,
+    ARMY_HQ_TG_CAP_REDUCTION,
 } from './tactical_group_config.js';
 
 export interface FormTgParams {
@@ -111,6 +115,16 @@ export function formTacticalGroup(
                 return { tg_id: null, rejection_reason: 'same_composition_cooldown' };
             }
         }
+    }
+
+    // Concurrency caps (ADR-0005 §Constants reference + §Army HQ Operations). Enforced at
+    // formation: a candidate TG that would push the faction or corps past its cap is rejected.
+    // Callers form TGs in a deterministic (sorted) op order, so the TGs that win the cap are the
+    // earliest in that stable order — the deterministic tie-break. Army HQ ops bypass nothing;
+    // instead they REDUCE the faction cap while running (Pyrrhic cost), forcing other ops quiet.
+    {
+        const capCheck = checkConcurrencyCaps(mil, anchor.faction, anchor.corps_id);
+        if (capCheck != null) return { tg_id: null, rejection_reason: capCheck };
     }
 
     const tgId = makeTgId(anchor.corps_id, params.op_id, params.anchor_brigade_id);
@@ -255,6 +269,59 @@ export function dissolveTacticalGroup(
     delete mil.tactical_groups[tgId];
 
     return { dissolved: true, tg_id: tgId };
+}
+
+/**
+ * Concurrency-cap gate (ADR-0005 §Constants reference + §Army HQ Operations Pyrrhic cost #1).
+ * Returns a rejection_reason string if forming a TG for `faction`/`corpsId` would exceed a cap,
+ * else null. Deterministic: pure counting over the existing tactical_groups Record (sorted keys).
+ *
+ *   - Per-corps cap:    active TGs anchored by `corpsId`           < MAX_TGS_PER_CORPS
+ *   - Per-faction cap:  active TGs for `faction`                   < effective faction cap
+ *   - Effective faction cap = MAX_CONCURRENT_TGS_PER_FACTION
+ *       − (ENABLE_TG_ARMY_HQ_OPS && faction has an Army HQ op planning/executing
+ *          ? ARMY_HQ_TG_CAP_REDUCTION : 0)
+ */
+function checkConcurrencyCaps(
+    mil: NonNullable<GameState['military']>,
+    faction: string,
+    corpsId: FormationId,
+): string | null {
+    const tgs = mil.tactical_groups ?? {};
+    const formations = mil.formations ?? {};
+
+    let factionCount = 0;
+    let corpsCount = 0;
+    for (const id of Object.keys(tgs).sort(strictCompare)) {
+        const tg = tgs[id];
+        if (tg.corps_id === corpsId) corpsCount += 1;
+        const tgFaction = formations[tg.anchor_brigade_id]?.faction;
+        if (tgFaction === faction) factionCount += 1;
+    }
+
+    if (corpsCount >= MAX_TGS_PER_CORPS) return 'corps_tg_cap_reached';
+
+    let factionCap = MAX_CONCURRENT_TGS_PER_FACTION;
+    if (ENABLE_TG_ARMY_HQ_OPS && factionHasActiveArmyHqOp(mil, faction)) {
+        factionCap = Math.max(0, factionCap - ARMY_HQ_TG_CAP_REDUCTION);
+    }
+    if (factionCount >= factionCap) return 'faction_tg_cap_reached';
+
+    return null;
+}
+
+/** True if the faction has an Army HQ op in a planning or executing state (cap-reduction trigger). */
+function factionHasActiveArmyHqOp(
+    mil: NonNullable<GameState['military']>,
+    faction: string,
+): boolean {
+    const ops = mil.army_hq_operations ?? {};
+    for (const id of Object.keys(ops).sort(strictCompare)) {
+        const op = ops[id];
+        if (op.faction_id !== faction) continue;
+        if (op.status === 'planning' || op.status === 'executing') return true;
+    }
+    return false;
 }
 
 /** Canonical TG id format. Frozen by ADR-0005 §Schema. */

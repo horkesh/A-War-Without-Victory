@@ -64,6 +64,55 @@ export const MAX_ARMY_HQ_OPS_PER_FACTION_PER_YEAR = 2;
 export const ARMY_HQ_OP_COOLDOWN_TURNS = 52;
 
 /**
+ * While a faction's Army HQ op is planning/executing (and for 4 turns after it enters recovering),
+ * that faction's MAX_CONCURRENT_TGS_PER_FACTION is reduced by this amount (ADR §Army HQ Operations
+ * Pyrrhic cost #1). Forces other ops to go quiet during the major effort. Gated by
+ * ENABLE_TG_ARMY_HQ_OPS at the enforcement site.
+ */
+export const ARMY_HQ_TG_CAP_REDUCTION = 2;
+
+/**
+ * Phase 1 donor-model fidelity constants (ADR-0005 §Distance falloff, §Constants
+ * reference, §Cross-corps donor permission, §Army HQ Operations). These bound the
+ * full donor model; they only take effect inside the flag-gated TG formation path
+ * (ENABLE_TG_FORMATION / ENABLE_TG_ARMY_HQ_OPS), so flag-off remains byte-identical.
+ */
+
+/** Hard BFS-hop ceiling: donors farther than this from the staging OSID are skipped. */
+export const MAX_OG_DONOR_DISTANCE = 6;
+
+/** Per-hop distance falloff applied to a donor's contribution (ADR §Distance falloff). */
+export const TG_DISTANCE_FALLOFF_PER_HOP = 0.15;
+
+/** Floor on the distance-falloff factor — even a far donor lends at least this fraction-scale. */
+export const TG_DISTANCE_FALLOFF_FLOOR = 0.10;
+
+/** Equipment falloff is intentionally harsher than personnel (ADR §Distance falloff): heavy
+ *  weapons rarely travel piecemeal. donation_equip = floor(donor.equipment × factor × 0.5). */
+export const TG_EQUIPMENT_FALLOFF_MULT = 0.5;
+
+/**
+ * Max simultaneously-active TGs a single faction may field (ADR §Constants reference). Enforced
+ * at TG formation; candidate TGs beyond the cap are rejected with a deterministic tie-break.
+ */
+export const MAX_CONCURRENT_TGS_PER_FACTION = 4;
+
+/** Max simultaneously-active TGs a single corps may anchor (ADR §Constants reference). */
+export const MAX_TGS_PER_CORPS = 2;
+
+/**
+ * Per-kind minimum residual personnel after a donation (ADR §Constants reference / §Distance
+ * falloff). A donor whose post-donation strength would fall below its kind floor is ineligible.
+ * Motorized 1000, light infantry 600, militia 400; default 800 for unclassified brigades.
+ */
+export const MIN_BRIGADE_PERSONNEL_AFTER_DONATION_BY_KIND: Readonly<Record<string, number>> = {
+    motorized: 1000,
+    light_infantry: 600,
+    militia: 400,
+};
+export const MIN_BRIGADE_PERSONNEL_AFTER_DONATION_DEFAULT = 800;
+
+/**
  * v2.3 Pyrrhic dampener constants (ADR-0005 §Pyrrhic cost + §Phased Rollout v2.3).
  * All gated by ENABLE_TG_COHESION_BLEED; inert when the flag is off.
  */
