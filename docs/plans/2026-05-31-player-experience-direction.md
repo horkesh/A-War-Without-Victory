@@ -1,7 +1,7 @@
 # Player-Experience Direction — "Authorship of the Tragedy"
 
 **Date:** 2026-05-31
-**Status:** DIRECTION (panel-ratified) + phased plan. Phase 1 SHIPPED; Phase 2 IN PROGRESS; Phase 3 TO SCOPE.
+**Status:** DIRECTION (panel-ratified) + phased plan. Phase 1 SHIPPED (PR #68); Phase 2 slice 1 SHIPPED (PR #70); game-start intro SHIPPED (PR #71); AI-as-player president prototype + determinism harness SHIPPED (PR #72, `tools/ai_play/`); Phase 3 TO SCOPE (RESPONSE: atom + keystone tags — see §4).
 **Author:** Pyrrhic specialist panel (Game Designer + UX/Event-Decision + Tech Architect + Historian), convened 2026-05-31.
 **Scope:** Records the player-experience vision, binding guardrails, and the three-phase delivery plan so future sessions inherit the intent — not just the code.
 
@@ -50,7 +50,7 @@ These are hard constraints on every phase below. Violating them breaks either th
 
 ---
 
-## 3. Phase 2 — "Back the officer" (IN PROGRESS)
+## 3. Phase 2 — "Back the officer" (SHIPPED — PR #70, slice 1)
 
 **Goal.** Make the weekly signature decision a **commit / withhold / override** of a *named* commander's proposed operation, decided at **intent altitude** (back this officer's plan, hold them back, or override their judgement) — not at the altitude of brigade micromanagement.
 
@@ -59,6 +59,12 @@ These are hard constraints on every phase below. Violating them breaks either th
 **Smallest viable slice.** Re-skin the proposal card with the **named-officer voice** (`src/ui/map/data/backTheOfficer.ts`) + a **force-ratio** read + an **Override** button that spends `command_authority`, shown to the player as an explicit *cost*. This is **zero hash risk**: it is a read-model over existing staged state, and headless scenarios never set the proposal/response flags.
 
 ---
+
+## 3b. Also shipped this session (onboarding + AI-play foundation)
+
+**Game-start intro (PR #71).** A two-step dramatic open at the live peace→war handoff (once-only via the existing `peaceWarTransitionSeen` gate): a fading "WAR HAS STARTED / APRIL 1992" splash (`WarHasBegunSplash.tsx`) → the `PeaceWarTransition` briefing extended with a per-faction "who you are" identity block (Identity / Situation / What-you-cannot-escape; RBiH = "President of the Presidency of the Republic of Bosnia and Herzegovina"). Orients the player in the dread from turn one — the framing front-end of "authorship of the tragedy." EN shipped; BCS deferred to the owner Bosnian pass (render path confirmed UTF-8/diacritic-clean — the stripped `messages.bcs.ts` is a fixable artifact).
+
+**AI-as-player president prototype (PR #72, `tools/ai_play/`).** Proves the external-decision boundary: an agent plays the President via `desktop_sim` (`resolveEventDecision` injection), and the playthrough replays **byte-identically** from a recorded decision log (determinism boundary confirmed; LLM-safe). Dual value — it doubles as the sharpest playtest of the decision surfaces; its findings (empty `situation`, no `staff_recommended_response_id`, briefing buried under logs, no quantified stakes) are the to-do list in §5 for making decisions legible. Next: wire a real model; extend to Army-CO (plan-approval gate on `generateCampaignPlan`) / Corps-CO.
 
 ## 4. Phase 3 — Living codex + dilemma spine (TO SCOPE)
 
