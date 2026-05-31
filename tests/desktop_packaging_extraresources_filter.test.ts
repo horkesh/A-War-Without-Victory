@@ -197,6 +197,26 @@ test('T6: required runtime resources remain included (not blanket-excluded)', ()
     assert.ok(!isExcluded(assetsFilter, '**/*.webp'), 'WebP runtime crest/flag images must NOT be blanket-excluded.');
 });
 
+test('T6b: data/scenarios/events ships so events load on Advance Turn in a packaged build', () => {
+    // Regression pin for the packaged-runtime ENOENT: desktop_sim.ts loads the
+    // event catalog from join(baseDir, 'data/scenarios/events'); without this
+    // extraResources entry the packaged build omitted the dir and advanceTurn
+    // threw ENOENT in loadEventDefinitionsFromDir. The dir holds the campaign
+    // event JSONs (consequences.json, war_1992.json..war_1995.json).
+    const pkg = readPackageJson();
+    const extras = pkg.build?.extraResources ?? [];
+    const eventsEntry = findEntry(extras, 'data/scenarios/events');
+    assert.strictEqual(
+        eventsEntry.to,
+        'data/scenarios/events',
+        `events entry must copy to the same relative path desktop_sim resolves under baseDir. Got: ${JSON.stringify(eventsEntry)}`,
+    );
+    assert.ok(
+        (eventsEntry.filter ?? []).includes('**/*'),
+        `events entry filter must include '**/*' so all campaign event JSONs ship. Got: ${JSON.stringify(eventsEntry.filter)}`,
+    );
+});
+
 test('T7: predecessor desktop_packaging_contract.test.ts invariants remain green', () => {
     // This test mirrors the load-bearing pinned shape in
     // desktop_packaging_contract.test.ts. If this passes, the predecessor's
@@ -220,6 +240,7 @@ test('T7: predecessor desktop_packaging_contract.test.ts invariants remain green
             ['data/derived', 'data/derived'],
             ['data/source', 'data/source'],
             ['data/ui', 'data/ui'],
+            ['data/scenarios/events', 'data/scenarios/events'],
             ['assets', 'assets'],
         ],
         'extraResources [from,to] pair list must remain identical to the predecessor contract pin.',
