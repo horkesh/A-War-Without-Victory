@@ -1026,6 +1026,18 @@ export interface LoadedGameState {
     operationOpportunitySummary?: OperationOpportunitySummaryView;
     /** Live Army HQ opportunity dossiers awaiting presidential review. */
     operationOpportunityProposals?: OperationOpportunityProposalView[];
+    /**
+     * Phase 3B "Back the Officer": per-active-operation Tactical Group identity, named
+     * commander, and donor lineage (battalions from X, Y corps; cohesion bled). Absent
+     * on flag-off / pre-3A saves. Surfaced on existing op/decision surfaces at INTENT
+     * altitude — never a donor-management screen.
+     */
+    backTheOfficerOps?: import('./backTheOfficer.js').BackTheOfficerView[];
+    /**
+     * Phase 3B aftermath stories for TGs (how each TG fared: CO, donor casualties,
+     * cohesion bled, anchor-death dissolution). For AAR / Chronicle. Absent pre-3A.
+     */
+    tgAftermath?: import('./backTheOfficer.js').TgAftermathView[];
     /** Most recent turn after-action report (null before first turn is advanced). */
     latestTurnSummary: import('../../../state/turn_summary.js').TurnSummary | null;
     /** All turn summaries (for Chronicle timeline). */

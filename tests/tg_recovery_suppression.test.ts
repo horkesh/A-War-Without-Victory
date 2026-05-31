@@ -116,6 +116,20 @@ describe('ENABLE_TG_RECOVERY_SUPPRESSION (flag ON)', () => {
 });
 
 describe('ENABLE_TG_RECOVERY_SUPPRESSION (flag OFF — byte-identity contract)', () => {
+    beforeEach(() => {
+        vi.resetModules();
+        // Flags now default-ON (TG activation, commit 0b681ffe). This block verifies the
+        // flag-OFF byte-identity contract, so it must explicitly force the flag false.
+        vi.doMock('../src/sim/combat/tactical_group_config.js', async () => {
+            const actual = await vi.importActual<typeof import('../src/sim/combat/tactical_group_config.js')>(
+                '../src/sim/combat/tactical_group_config.js',
+            );
+            // cohesion_drift fires its suppression branch under EITHER ENABLE_TG_ARMY_HQ_OPS
+            // OR ENABLE_TG_RECOVERY_SUPPRESSION, so the flag-OFF contract requires both off.
+            return { ...actual, ENABLE_TG_RECOVERY_SUPPRESSION: false, ENABLE_TG_ARMY_HQ_OPS: false };
+        });
+    });
+
     it('formTacticalGroup never writes tg_recovery_suppressed_until_turn', async () => {
         const { formTacticalGroup } = await import('../src/sim/combat/tactical_group_lifecycle.js');
         const turn = 5;

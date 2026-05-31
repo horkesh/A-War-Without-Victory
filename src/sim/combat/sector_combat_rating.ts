@@ -25,6 +25,7 @@ import {
     getConcentrationBonus,
 } from './combat_math.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
+import { effectivePersonnel } from './tactical_group_personnel.js';
 
 // ── Strength classification thresholds ──────────────────────────────────────
 // Based on average brigade attack power (~800-1200 for a healthy VRS brigade).
@@ -114,11 +115,19 @@ export function computeSectorCombatRatings(
             const offPow = computeAttackerPower(state, b, supplyStateByOsid, 'attack', repTerrainMult, repOsid);
             totalOffPower += offPow;
 
-            // Defensive: use actual posture and representative terrain
-            const defPow = computeDefenderPower(state, b, repOsid, tMult, 0, supplyStateByOsid);
+            // Defensive: use actual posture and representative terrain.
+            // Phase 0 (ADR-0005): a donor's lent slice fights inside its TG, so it must NOT
+            // also count toward home-sector defensive strength. computeDefenderPower reads
+            // raw personnel deep inside basePower (a primitive shared with the TG-internal
+            // attacker path), so we scale the defender result by the effective fraction
+            // rather than mutating the shared primitive. Flag-off: effFraction === 1.
+            const rawPers = b.personnel ?? 0;
+            const effPers = effectivePersonnel(b);
+            const effFraction = rawPers > 0 ? effPers / rawPers : 0;
+            const defPow = computeDefenderPower(state, b, repOsid, tMult, 0, supplyStateByOsid) * effFraction;
             totalDefPower += defPow;
 
-            totalPersonnel += b.personnel ?? 0;
+            totalPersonnel += effPers;
             totalMorale += b.morale ?? 50;
             totalCohesion += b.cohesion ?? 60;
             totalFatigue += b.ops?.fatigue ?? 0;

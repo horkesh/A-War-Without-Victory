@@ -1672,6 +1672,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'opportunity.resolveFailed': 'Nije uspjelo {decision} priliku.',
     'opportunity.authorizeVerb': 'odobriti',
     'opportunity.operationalOpportunities': 'Operativne prilike',
+    'opportunity.backTheOfficer': 'Podrži oficira',
     'corpsSituation.title': 'Procjena situacije',
     'corpsSituation.constraint.siege': 'OPSADA',
     'corpsSituation.constraint.threat': 'PRIJETNJA',

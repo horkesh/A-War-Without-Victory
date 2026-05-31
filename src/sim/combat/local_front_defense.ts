@@ -11,6 +11,7 @@
 
 import type { CorpsFrontSector, FormationId, FormationState, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { effectivePersonnel } from './tactical_group_personnel.js';
 
 /** Coverage density: below this ratio, defense power is penalized. */
 const THIN_FRONT_THRESHOLD = 0.5;
@@ -31,7 +32,12 @@ export type LocalFrontDensityModifierLookup = ReadonlyMap<FormationId, number>;
  * Uses simplified basePower (personnel × equipment × experience × cohesion × honor).
  */
 function brigadePower(formation: FormationState): number {
-    const personnel = formation.personnel ?? 0;
+    // Phase 0 (ADR-0005): local front defensive power is a pure home-availability read.
+    // A donor's lent slice fights inside its TG and must not also defend the home front.
+    // This helper is defense-only (used solely by computeLocalFrontDefensivePower), so
+    // effectivePersonnel is correct here — unlike the shared basePower primitive, which the
+    // TG-internal attacker path also uses. Flag-off: effectivePersonnel === personnel.
+    const personnel = effectivePersonnel(formation);
     if (personnel <= 0) return 0;
     const cohesion = Math.max(0, Math.min(100, formation.cohesion ?? 60)) / 100;
     const experience = Math.max(0, Math.min(1, formation.experience ?? 0));

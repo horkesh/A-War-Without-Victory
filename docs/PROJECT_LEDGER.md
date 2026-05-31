@@ -17846,3 +17846,69 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Artifacts.** `src/sim/events/strategic_dimensions.ts`, `src/sim/political/political_personality.ts`, `tests/consequence_substrate_ownership.test.ts`, `tests/cohesion_divisor_rescale.test.ts`. Handoff source: `docs/40_reports/20260529_CALIBRATION_HANDOFF_COHESION_DIVISOR.md`.
 
 ---
+
+## [2026-05-30] codex: Tactical Groups (ADR-0005) FULL IMPLEMENTATION — flag-off-safe, integrated on main baseline, ACTIVATION PENDING (owner-gated)
+
+**Summary.** Completed the full ADR-0005 Tactical Groups system on branch `claude/tactical-groups-2026-05-28` per a 4-specialist design panel + user-ratified scope (default-ON primary path, player-commandable at intent altitude, every offensive forms a TG, full ratified donor model, faction-asymmetric identity). All work is **flag-gated default-OFF and flag-off byte-identical** to main; schema frozen at **v34**. **Flags NOT yet flipped on — activation (calibration re-floor) is owner-gated and pending.** Plan: `docs/plans/2026-05-30-tg-full-implementation-plan.md`.
+
+**Phase commits (flag-off 40w byte-identity held throughout; pre-merge `78e231e35b08cf53`):**
+- Phase 0 `9b9614c7` — SAFETY: `effectivePersonnel` helper + home-availability read-site migration (fixes confirmed lent-personnel double-count; TG-internal denominators left raw) + invariant test.
+- Phase 1 `5f143291` — FIDELITY: BFS distance-falloff (replaces hardcoded hops=0 → cohesion cost now distance-scaled), equipment donation, adjacent-corps donors, concurrency caps.
+- Phase 2 `76d65f29` — ROUTING: every offensive forms a TG; `op_kind_donor_policy`; fixed offensive paths (general_offensive/strategic_defense) that bypassed TG formation.
+- Phase 3A `d12654a5` — IDENTITY+COMMAND: sector `display_name` standing identity (ADR-0006); `tactical_commander` rank + `op.tg_commander_officer_id` + anchor combat-mod (flag-on only); faction naming (VRS geo / ARBiH numbered / HVO zones); fixed hardcoded `'RS'` commander assignment.
+- Phase 3A-telemetry `18443bee` — `donor_corps_ids` back-fill + `tg_participations` (26-turn window).
+- Phase 3B `9fede550` — UI (src/ui only): "back the officer" surfacing — CO + TG identity + donor lineage on existing op-decision dossier; AAR aftermath read-model. No new panel, donor micro stays smart-default (intent altitude).
+- Phase 3A-promotion `26ac5ada` — ARBiH OG→Division (RBiH-only, flag-gated, one-way) — identity/command reorg, **no force inflation** (test-confirmed).
+- Phase 4 `5cdd56d5` — MIGRATION RECON: phantom anchors (Prsten→no-TG, Višegrad→real anchor), dual-anchor de-confliction, Farz-95 (real OOB; stale comment fixed), territory-revert-on-anchor-death.
+- Phase 5 `b7c1cdfd` — DETERMINISM: `tg_determinism.test.ts`, schema-v34 freeze guard, one-way migration contract doc.
+- Integration `8e7ded1c` — merged `origin/main` (15bf78d3, incl. cohesion-divisor fix + sector-perf): 15-file divergent-TG merge resolved branch-TG-authoritative; single v34 migration. **Flag-off 40w now = `e6b5187eaf320c57`** (post-cohesion main baseline) — TG flag-off adds nothing.
+
+**Verification.** tsc clean; TG suite 138 + schema/migration 194 tests pass. Flag-off byte-identity proven each phase.
+
+**Design (4-specialist panel + user).** Persistence = HYBRID (no new standing-TG entity; sector display_name = standing identity + named TG CO). Player command = intent + "back the officer" (donor micro hidden). Faction texture modeled. Sectors = A (name layer, done) + B-lite (anchor seed-priority, PENDING — calibration-forcing).
+
+**REMAINING (owner-gated).** (1) B-lite anchor seed-priority (one calibration run). (2) ACTIVATION: flip TG flags stage-by-stage (v2.2 FORMATION+COMBAT_SYNTHESIS → v3.0 ARMY_HQ → COHESION_BLEED/RECOVERY/OG_PROMOTION), 40w→188w→scenario-tester GO→owner `UPDATE_BASELINES` + default-ON; war-or-game pass on the 188w flag-on HRHB −24 swing. (3) PR/merge-to-main. `UPDATE_BASELINES` NOT run; flags still default-OFF.
+
+---
+
+## [2026-05-30] codex: Tactical Groups (ADR-0005) ACTIVATED — all 7 flags default-ON; primary ops path live (owner-authorized)
+
+**Summary.** Owner-authorized full activation of Tactical Groups. All 7 TG flags flipped **default-ON** (commit `0b681ffe`); golden baselines re-floored to TG-on; stale tests updated. TGs are now the live primary ops path. Validated as OSID-baseline-neutral with a +1 historically-correct anchor gain.
+
+**Activation outcome (epoch-correct anchors).**
+- **40w:** OSID **656/712** (= flag-off baseline), anchors **30/30**, benchmarks 6/6, 0 critical anomalies. Hash `1a921ccaa4b9304e`.
+- **188w:** OSID **615/712** (= flag-off baseline), anchors **27/30** vs flag-off **26/30** → **TG +1 anchor** (`vozuca_2` recovered via the Army-HQ Op-Farz capture of Vozuća, which the legacy engine cannot take). Benchmarks 6/6, 0 critical anomalies. Hash `0a36b1090f5f902e`.
+- Net: TG activation is territorially baseline-neutral AND historically *better* (Vozuća). The Pyrrhic cost (cohesion bleed + recovery lock) never dissolves a donor's home brigade (verified — dissolution guard + ≥0 clamp).
+
+**The activation arc (root-causes found, not papered over).** Naive v2.2-core activation regressed (−14/−46, Bihać collapse, 2 critical anomalies). Two real bugs were root-caused and fixed: (1) `1.5` donor-readiness gate stranded isolated/donor-poor corps (5th Corps Bihać) → degrade to lone-anchor when no donors (`8023e2d2`); (2) `1.8` the TG anchor-only readiness narrowing was wrongly applied to `axisHasExecutableOpeningAttack`, so a non-reaching anchor blocked the whole axis — a GENERAL op-launch suppression (`57010afc`). `1.6` HRHB readiness kept (load-bearing with 1.8). `1.7` power-floor was a dead-end → reverted (`a1a6d098`). Forensics traced the SW-Dinaric residual to the Cincar→Kupres→Mistral-2 op-chain (not combat power).
+
+**Calibration-anchor honesty fix (`aa99518c` + `015eba84`).** `scenario_runner` was grading every scenario's OSID anchors against the 1992 list; now grades against epoch-appropriate merged sets (Jan1993/Apr1994/Apr1995/Oct1995). Hash-neutral (eval only). Surfaced two **pre-existing, TG-independent** defects previously masked: **Srebrenica + Žepa never fall to RS in-sim** (separate calibration lane). Added cited OCT1995 anchors `vozuca_2`/`brijesnica_donja_2 = RBiH` (BB1 p.459, Op Farz Sep 1995).
+
+**Baselines re-floored.** `UPDATE_BASELINES` re-canonicalized the manifest scenarios (apr1992_52w + 4w pair) to TG-on; baseline regression "all scenarios match". 40w/188w TG-on hashes above are the new calibration of record.
+
+**Stale tests updated (`9084d691` + `fbc3f0d8`).** 13 tests across 11 files updated for the TG-on default (war-phase step 179→180 for `promote-og-to-division`; strict-null +5 TG optional fields; Krivaja now owned by the Army-HQ inject step; donor-cohesion-bleed isolation; 40w integrity invariant allows 2 exhausted-but-not-destroyed non-donor brigades from higher op-tempo). All STALE — zero real regressions.
+
+**Schema** stays v34. **KNOWN OPEN LANES (separate, TG-independent):** Srebrenica/Žepa enclave-fall mechanics; Brijesnica-Donja Spreča-valley gain; B-lite anchor seed-priority (never built); player-facing TG command UI depth (intent-altitude surfacing shipped, deeper command optional).
+
+---
+
+## [2026-05-31] codex: Event-system fix — silent-drop cap + backwards JNA-withdrawal modeling (Srebrenica/Žepa now fall, RS rear intact)
+
+**Summary.** Owner-flagged investigation ("our events system does not work as intended") root-caused and fixed **two stacked bugs**. Net 188w result is strictly better than both prior states. Branch `codex/event-cap-silent-drop-fix`.
+
+**Bug 1 — silent event drop (`83757a43`).** `MAX_EVENTS_PER_TURN=4` was applied to ALL candidates including non-player auto/flag-setter events. An eligible narrow-window event crowded out on its last window-turn was re-checked next turn, failed `triggerMatches` (turn > turn_max), and was **dropped permanently**. This killed `jna_withdrawal_1992` (window 5-5) → which silently killed the `srebrenica_enclave_formed → Srebrenica/Žepa fall` chain. Fix: `isPlayerDecisionEvent` partition — cap ONLY player-facing decision events (those with `response_options`); auto/flag-setters fire unconditionally. Added `priority:1` to chain-head flag-setters (`jna_withdrawal_1992`, `arms_embargo_impact_1992`, `rapid_reaction_force_1995`). Result: Srebrenica + Žepa now fall to RS in-sim (the owner's original ask).
+
+**Bug 2 — backwards JNA-withdrawal modeling (`d382a092`).** Fixing Bug 1 exposed a −37 OSID / −43 RS deep-rear collapse (Posavina/Brčko/Doboj). A confident first hypothesis (unbounded patron-override accumulation) was **disproven** — `patron_pressure.override_authority` is recomputed-from-scratch each turn, not accumulated. A clean ablation (events fire + set all flags, but numeric effects stripped) proved the driver was the events' **uncalibrated numeric effects**, not the flags or any consumer. Root cause: `jna_withdrawal_1992` was authored **historically backwards** — it *debuffed* RS (equipment ×0.96, recruitment ×0.92) and *boosted* ARBiH/HVO supply (+8/+5), when the May-1992 JNA withdrawal in fact handed equipment + Bosnian-Serb personnel to the VRS. These were never caught because the event never fired (Bug 1). Fix: removed the backwards RBiH/HVO supply boosts + RS debuffs; kept `supply_delta RS +20` + `morale RBiH −5` + flags + dimension_shifts. `arms_embargo_impact_1992` (RBiH −10, correct) + enclave chain unchanged.
+
+**Also (`5d3eaae1`).** Bounded the Drina-cleansing RS patron-override (front-loaded decay PEAK 8 → FLOOR 2 over 52t) — a legitimate no-regression design improvement (replaces a flat constant), independent of the collapse.
+
+**Outcome (epoch-correct anchors), scenario-tester GO.**
+- **188w:** OSID **618/712** (vs pre-fix 615 where enclaves did NOT fall, and broken-post-fix 578 collapse) — strictly better than both. Anchors **29/30** (lone fail `brijesnica_donja_2` = known separate stale-anchor lane); `brčko`/`boljanic_2`/`petrovo_2` RESTORED to RS; `srebrenica_2`/`zepa_2` PASS (fall). Benchmarks 6/6, 0 critical. Hash `b6c9507e7c045a6c`.
+- **40w:** OSID **655/712** (−1, benign early-war supply consequence), anchors **30/30**, 6/6, 0 critical. Hash `85ae31578378c707`.
+- RS sim 338 vs Oct1995 ref 315 (+23 over) is the **pre-existing HRHB Mistral-2 SW-belt + Sana-pocket lanes** (HRHB −16, RBiH −7), NOT event-caused — tracked separately.
+
+**Tests/baselines.** `jna_withdrawal_consequences.test.ts` T1/T3 updated to the historically-correct direction (RS supply gain present, RS debuffs absent, RBiH/HVO boosts absent). tsc clean; vitest fast (8436) + scenario (98) slices green; desktop:map:build green. `UPDATE_BASELINES` re-floored `apr1992_52w` manifest (6 artifacts; 4w pair unchanged — stop before turn 5) — commit `508976f3`.
+
+**KNOWN OPEN LANES (separate):** `brijesnica_donja_2` Spreča-valley gain (not a Farz objective + absent from Oct1995 anchors); HRHB Mistral-2 SW-belt OOB ceiling; Sana-pocket frontier.
+
+---

@@ -14,7 +14,7 @@ import type { StepCurveEntry } from './war_timeline.js';
 // Static officer data (loaded from JSON, immutable during simulation)
 // ═══════════════════════════════════════════════════════════════════════════
 
-export type OfficerRank = 'army_commander' | 'corps_commander' | 'deputy';
+export type OfficerRank = 'army_commander' | 'corps_commander' | 'deputy' | 'tactical_commander';
 export type OfficerOrigin = 'jna' | 'hv' | 'to' | 'militia' | 'foreign' | 'political' | 'military';
 export type OfficerPoolTier = 'starter' | 'tier_a' | 'tier_b' | 'tier_c';
 

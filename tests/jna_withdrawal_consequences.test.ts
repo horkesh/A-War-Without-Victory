@@ -66,12 +66,15 @@ describe('jna_withdrawal_1992 — consequence-block audit (LANE-NIGHTSHIFT-JNA-W
     it('T1: jna_withdrawal_1992 has a non-empty consequences (effect+effects) block', () => {
         const ev = findJna(loadEvents());
         const all = allEffects(ev);
-        // Must have at least the historical 3 (RS supply, RBiH morale, narrative)
-        // plus the four new ones (RS recruitment, RS equipment quality, RBiH supply, HRHB supply).
-        expect(all.length).toBeGreaterThanOrEqual(7);
+        // Historically-correct payload (corrected 2026-05-31): RS supply gain
+        // (depot inheritance), RBiH morale hit, narrative. The JNA withdrawal
+        // STRENGTHENED the VRS (it inherited JNA equipment + Bosnian-Serb
+        // personnel) and gave ARBiH/HVO nothing — so the prior RS recruitment/
+        // equipment debuffs and the RBiH/HRHB supply boosts were removed.
+        expect(all.length).toBeGreaterThanOrEqual(3);
         // Must contain at least one *mechanical* effect (not just narrative).
         const mechanical = all.filter(e => e.kind !== 'narrative');
-        expect(mechanical.length).toBeGreaterThanOrEqual(6);
+        expect(mechanical.length).toBeGreaterThanOrEqual(2);
     });
 
     it('T2: every effect kind on jna_withdrawal_1992 is dispatched by applyEventEffects', () => {
@@ -85,38 +88,33 @@ describe('jna_withdrawal_1992 — consequence-block audit (LANE-NIGHTSHIFT-JNA-W
         }
     });
 
-    it('T3: per-faction inheritance pattern — RS pays the personnel/equipment cost; RBiH+HRHB get supply boosts', () => {
+    it('T3: per-faction direction — RS inherits JNA materiel (supply gain); ARBiH demoralized; no RS debuffs, no ARBiH/HVO supply boosts', () => {
         const ev = findJna(loadEvents());
         const all = allEffects(ev);
 
-        // RS recruitment hit (officer shortage from JNA withdrawal)
-        const rsRecruit = all.find(e => e.kind === 'recruitment_modifier' && e.faction === 'RS');
-        expect(rsRecruit, 'expected RS recruitment_modifier (officer shortage)').toBeDefined();
-        expect(rsRecruit!.pool_multiplier).toBeLessThan(1.0);
-        expect(rsRecruit!.pool_multiplier).toBeGreaterThan(0.7); // bounded — no cliff
-        expect(rsRecruit!.duration_turns).toBeGreaterThan(0);
-
-        // RS equipment-quality hit (mixed depot inheritance, maintenance/spares disrupted)
-        const rsQual = all.find(e => e.kind === 'equipment_quality_modifier' && e.faction === 'RS');
-        expect(rsQual, 'expected RS equipment_quality_modifier (depot maintenance disruption)').toBeDefined();
-        expect(rsQual!.multiplier).toBeLessThan(1.0);
-        expect(rsQual!.multiplier).toBeGreaterThan(0.85); // bounded
-        expect(rsQual!.duration_turns).toBeGreaterThan(0);
-
-        // RS still gets the historical depot-transfer supply gain (the original primary effect)
+        // RS gets the historical depot-transfer supply gain (the primary effect).
         const rsSupply = ev.effect && ev.effect.kind === 'supply_delta' && ev.effect.faction === 'RS' ? ev.effect : undefined;
         expect(rsSupply, 'expected RS supply_delta (depot inheritance) preserved as primary effect').toBeDefined();
         expect(rsSupply!.delta).toBeGreaterThan(0);
 
-        // RBiH supply boost (Tuzla/Visoko/partial Sarajevo barracks)
-        const rbihSupplies = all.filter(e => e.kind === 'supply_delta' && e.faction === 'RBiH');
-        expect(rbihSupplies.length, 'expected RBiH supply_delta (barracks transfers)').toBeGreaterThanOrEqual(1);
-        expect(rbihSupplies[0].delta).toBeGreaterThan(0);
+        // ARBiH demoralized losing JNA-heavy ground.
+        const rbihMorale = all.find(e => e.kind === 'morale_change' && e.faction === 'RBiH');
+        expect(rbihMorale, 'expected RBiH morale_change (demoralization)').toBeDefined();
+        expect(rbihMorale!.delta).toBeLessThan(0);
 
-        // HRHB supply boost (western/Herzegovina barracks chain via Croatia)
+        // The JNA withdrawal STRENGTHENED the VRS — it must NOT carry RS recruitment
+        // or equipment-quality debuffs (those were historically backwards; removed 2026-05-31).
+        const rsRecruit = all.find(e => e.kind === 'recruitment_modifier' && e.faction === 'RS');
+        expect(rsRecruit, 'RS recruitment_modifier debuff must NOT be present (JNA withdrawal strengthened RS)').toBeUndefined();
+        const rsQual = all.find(e => e.kind === 'equipment_quality_modifier' && e.faction === 'RS');
+        expect(rsQual, 'RS equipment_quality_modifier debuff must NOT be present (JNA withdrawal strengthened RS)').toBeUndefined();
+
+        // ARBiH and HVO gained nothing from the JNA withdrawal (stayed starved under the
+        // arms embargo) — no supply boosts for either.
+        const rbihSupplies = all.filter(e => e.kind === 'supply_delta' && e.faction === 'RBiH');
+        expect(rbihSupplies.length, 'RBiH must NOT receive a supply_delta from JNA withdrawal').toBe(0);
         const hrhbSupplies = all.filter(e => e.kind === 'supply_delta' && e.faction === 'HRHB');
-        expect(hrhbSupplies.length, 'expected HRHB supply_delta (Herzegovina depot transfers)').toBeGreaterThanOrEqual(1);
-        expect(hrhbSupplies[0].delta).toBeGreaterThan(0);
+        expect(hrhbSupplies.length, 'HRHB must NOT receive a supply_delta from JNA withdrawal').toBe(0);
     });
 
     it('T4: deterministic — re-loading the JSON yields a structurally identical event', () => {

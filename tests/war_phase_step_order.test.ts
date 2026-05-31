@@ -156,6 +156,8 @@ describe('war-phase step ordering', () => {
         // +1 from resolve-counter-offers (B3 negotiation counter-offer docket, 2026-05-17)
         // -1 from consolidate-rear-pockets removed (2026-05-28; paramilitaries handle isolated pockets)
         // +1 from inject-army-hq-operations (ADR-0005 v3.0 Army HQ ops, flag-gated ENABLE_TG_ARMY_HQ_OPS, 2026-05-29)
-        expect(stepNames.length).toBe(179);
+        // +1 from promote-og-to-division (ADR-0006 ARBiH OG→Division promotion, flag-gated ENABLE_TG_OG_PROMOTION, 26ac5ada, 2026-05-29).
+        //        Step is unconditionally present in the pipeline; the handler early-returns when the flag is off.
+        expect(stepNames.length).toBe(180);
     });
 });

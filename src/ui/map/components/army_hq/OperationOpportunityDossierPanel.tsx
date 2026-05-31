@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { LoadedGameState, OperationOpportunityAxisState, OperationOpportunityProposalView } from '../../data/types';
+import type { BackTheOfficerView } from '../../data/backTheOfficer';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 import { t } from '../../i18n';
@@ -89,12 +90,14 @@ function FootprintPill({ label, muted = false }: { label: string; muted?: boolea
 
 function DossierCard({
     proposal,
+    backTheOfficer,
     busy,
     onResolve,
     onHighlightFootprint,
     onClearFootprint,
 }: {
     proposal: OperationOpportunityProposalView;
+    backTheOfficer?: BackTheOfficerView | null;
     busy: boolean;
     onResolve: (
         proposal: OperationOpportunityProposalView,
@@ -142,6 +145,38 @@ function DossierCard({
 
             {proposal.description && (
                 <div className="text-[10px] leading-relaxed text-text-secondary">{proposal.description}</div>
+            )}
+
+            {backTheOfficer && (backTheOfficer.commander || backTheOfficer.donors.length > 0) && (
+                <div className="rounded border border-sky-500/25 bg-sky-500/10 p-2 space-y-1">
+                    <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-sky-300/80">
+                        {t('opportunity.backTheOfficer')}
+                    </div>
+                    {backTheOfficer.commander && (
+                        <div className="text-[10px] font-bold text-text-primary">
+                            {backTheOfficer.commander.rank
+                                ? `${backTheOfficer.commander.rank.replace(/[_\s]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} `
+                                : ''}
+                            {backTheOfficer.commander.name}
+                            {backTheOfficer.tg_name ? ` — ${backTheOfficer.tg_name}` : ''}
+                        </div>
+                    )}
+                    <div className="text-[10px] leading-relaxed text-text-secondary">{backTheOfficer.framing}</div>
+                    {backTheOfficer.donors.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                            {backTheOfficer.donors.map((donor) => (
+                                <span
+                                    key={`${proposal.proposal_id}:donor:${donor.corps_id}`}
+                                    className="rounded border border-panel-border bg-panel-card px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-text-tertiary"
+                                    title={donor.personnel_lent > 0 ? `${donor.personnel_lent.toLocaleString('en-US')} men lent` : undefined}
+                                >
+                                    {donor.corps_name}
+                                    {donor.personnel_lent > 0 ? ` (${donor.personnel_lent.toLocaleString('en-US')})` : ''}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                </div>
             )}
 
             {(proposal.objectives.length > 0 || proposal.staging.length > 0) && (
@@ -277,6 +312,26 @@ export function OperationOpportunityDossierPanel({ gameState, playerFaction }: O
         [gameState.operationOpportunityProposals, playerFaction],
     );
 
+    // Phase 3B: match a proposal to its live Tactical Group (post-launch) so the decision
+    // surface frames "back the officer". Defensive: empty when no TG has formed yet.
+    const backTheOfficerByKey = useMemo(() => {
+        const byKey = new Map<string, BackTheOfficerView>();
+        const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, '');
+        for (const view of gameState.backTheOfficerOps ?? []) {
+            byKey.set(normalize(view.op_id), view);
+            byKey.set(normalize(view.op_name), view);
+        }
+        return byKey;
+    }, [gameState.backTheOfficerOps]);
+    const matchBackTheOfficer = (proposal: OperationOpportunityProposalView): BackTheOfficerView | null => {
+        const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, '');
+        return (
+            backTheOfficerByKey.get(normalize(proposal.opportunity_id)) ??
+            backTheOfficerByKey.get(normalize(proposal.display_name)) ??
+            null
+        );
+    };
+
     if (proposals.length === 0) return null;
 
     const resolveProposal = async (
@@ -319,6 +374,7 @@ export function OperationOpportunityDossierPanel({ gameState, playerFaction }: O
                     <DossierCard
                         key={proposal.proposal_id}
                         proposal={proposal}
+                        backTheOfficer={matchBackTheOfficer(proposal)}
                         busy={busyProposalId === proposal.proposal_id}
                         onResolve={(p, decision, options) => { void resolveProposal(p, decision, options); }}
                         onHighlightFootprint={(p) => {

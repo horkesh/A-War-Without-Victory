@@ -20,6 +20,7 @@ import { findAdjacentFrontGap } from './bot_brigade_movement_ai.js';
 import { countFactionBrigadesAtOsid, getCorpsBrigadeCountAtOsid, hasActiveFormationAtOsid } from './bot_brigade_context.js';
 import type { Osid } from './osid_adjacency.js';
 import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
+import { effectivePersonnel } from './tactical_group_personnel.js';
 import type { BrigadePosture, FactionId, FormationState, GameState } from '../../state/game_state.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import type { CorpsFrontSector, CorpsFrontSubSegment } from '../../state/game_state.js';
@@ -919,12 +920,14 @@ export function findWeakestSubSegment(
         // Already found a gap — skip non-gap sub-segments
         if (weakest?.gap) continue;
 
-        // Estimate defense strength as sum of primary brigade personnel
+        // Estimate defense strength as sum of primary brigade personnel.
+        // Phase 0 (ADR-0005): home-availability read — a defender that lent personnel to a TG
+        // is weaker on its own sub-segment. Flag-off: effectivePersonnel === personnel.
         let strength = 0;
         for (const bid of ss.primary_brigade_ids) {
             const f = formations[bid];
             if (f && f.status === 'active') {
-                strength += f.personnel ?? 0;
+                strength += effectivePersonnel(f);
             }
         }
 

@@ -766,10 +766,18 @@ registerMigration({
         + 'a969d44719aaa40e → v34 78e231e35b08cf53). This is a schema scaffold only: '
         + 'behaviorally and calibration-neutral (identical territory/anchors/benchmarks with '
         + 'flags off), as expected for a schema-version migration — NOT byte-identical. '
-        + 'Sensitive: no. One-way migration '
-        + '(no v34→v33 downgrade; personnel-lent ledger has no v33 representation). '
-        + 'FormationState.personnel_lent_by_tg / equipment_lent_by_tg / tg_cooldown_until_turn / '
-        + 'tg_donations_this_scenario stay optional (undefined for unaffected brigades). '
+        + 'Sensitive: no. '
+        + 'ONE-WAY MIGRATION CONTRACT (release-notes citable; pinned by tests/tg_schema_freeze.test.ts): '
+        + 'v34→v33 DOWNGRADE IS UNSUPPORTED. The v34 personnel-lent ledger '
+        + '(FormationState.personnel_lent_by_tg / equipment_lent_by_tg / tg_cooldown_until_turn / '
+        + 'tg_donations_this_scenario / tg_recovery_suppressed_until_turn) and the TG/Army-HQ records '
+        + '(MilitaryState.tactical_groups / army_hq_operations / tg_recent_compositions / '
+        + 'tg_formations_by_corps / og_promotions) have NO v33 representation, so there is no '
+        + 'lossless reverse migration. A v34 save loaded by v33 code would silently lose every '
+        + 'in-flight Tactical Group and its lent personnel/equipment, corrupting force totals. '
+        + 'Forward-only by design; do NOT add a downgrade path. '
+        + 'These FormationState fields stay optional (undefined for unaffected brigades). '
+        + 'V34 IS FROZEN: do not collide-renumber it from future event/displacement/TG work. '
         + 'Renumbered from v19 during the event-system merge (v19 slot taken by displacement civilian casualty).',
     migrate: (state) => {
         const mil = asRecord(state.military);
