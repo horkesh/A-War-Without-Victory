@@ -3155,7 +3155,28 @@ app.whenReady().then(() => {
       return { ok: false, error: 'not_op_proposal' };
     }
 
-    // Command-authority guard FIRST — do not stage anything if unaffordable.
+    // Resolve the named plan's active op BEFORE any mutation. Force-launch
+    // overrides a SPECIFIC operation's go/no-go, so the named planId MUST match
+    // an entry in this corps' active_operations. If it does not, reject as a
+    // no-op — do NOT fall back to ops[0] (which would debit command_authority
+    // and set force_launch on an UNRELATED op) and do NOT mark the proposal
+    // accepted. Mirrors accept-proposal's not-found semantics (no side effects).
+    const parts = proposal.proposed_action.split(':');
+    const corpsId = parts[1];
+    const planId = parts.slice(2).join(':');
+    const cc = state.military?.corps_command?.[corpsId];
+    if (!cc) {
+      return { ok: false, error: 'corps_not_found' };
+    }
+    const ops = Array.isArray(cc.active_operations)
+      ? cc.active_operations
+      : (cc.active_operation ? [cc.active_operation] : []);
+    const op = ops.find((o) => o && (o.plan_id === planId || o.id === planId));
+    if (!op) {
+      return { ok: false, error: 'plan_not_active' };
+    }
+
+    // Command-authority guard — do not stage anything if unaffordable.
     const auth = state.military?.command_authority;
     if (auth) {
       if (auth.current < FORCE_LAUNCH_COST) {
@@ -3166,24 +3187,12 @@ app.whenReady().then(() => {
       auth.lifetime_spent += FORCE_LAUNCH_COST;
     }
 
-    const parts = proposal.proposed_action.split(':');
-    const corpsId = parts[1];
-    const planId = parts.slice(2).join(':');
-    const cc = state.military?.corps_command?.[corpsId];
-    if (cc) {
-      // Approve the plan (same channel as accept-proposal) so applyCommanderOutput launches it.
-      cc.player_op_response = { plan_id: planId, approved: true, turn: state.meta.turn };
-      // Override the commander's go/no-go on the matching active op (best-effort).
-      const ops = Array.isArray(cc.active_operations)
-        ? cc.active_operations
-        : (cc.active_operation ? [cc.active_operation] : []);
-      const op = ops.find((o) => o && (o.plan_id === planId || o.id === planId)) || ops[0];
-      if (op) {
-        op.force_launch = true;
-        op.was_force_launched = true;
-        op.commander_assessment_at_launch = op.commander_assessment;
-      }
-    }
+    // Approve the plan (same channel as accept-proposal) so applyCommanderOutput launches it.
+    cc.player_op_response = { plan_id: planId, approved: true, turn: state.meta.turn };
+    // Override the commander's go/no-go on the matching active op.
+    op.force_launch = true;
+    op.was_force_launched = true;
+    op.commander_assessment_at_launch = op.commander_assessment;
 
     proposal.accepted = true;
     proposal.resolved_turn = state.meta.turn;

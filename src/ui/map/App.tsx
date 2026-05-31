@@ -131,6 +131,34 @@ function selectNextPendingEventDecision(
   return playerDecisions[0] ?? null;
 }
 
+/**
+ * Phase 2 slice 1 "Back the Officer": resolve the named advisor whose voice
+ * frames an operation/corps-scoped event decision ('command' / 'military'
+ * category). Pending event decisions carry no corps/op linkage, so the advisor
+ * is the player faction's senior acting commander from the same officer roster
+ * the back-the-officer card reads (`namedOfficerData`). Deterministic: officers
+ * are sorted by id and the acting commander is preferred; the first match wins.
+ * Returns undefined when no officer resolves OR the event is not officer-scoped,
+ * so the modal keeps its generic "Staff assessment" fallback (see
+ * `deriveAssessmentLabel`).
+ */
+function resolveEventDecisionAdvisor(
+  decision: PendingEventDecisionView,
+  officers: LoadedGameState['namedOfficerData'],
+  playerFaction: string | null,
+): { name: string | null | undefined; rank?: string } | undefined {
+  const category = (decision as { category?: string }).category;
+  if (category !== 'command' && category !== 'military') return undefined;
+  if (!playerFaction || !officers || officers.length === 0) return undefined;
+  const factionOfficers = officers
+    .filter((o) => o.faction === playerFaction)
+    .slice()
+    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  if (factionOfficers.length === 0) return undefined;
+  const advisor = factionOfficers.find((o) => o.acting_commander) ?? factionOfficers[0];
+  return { name: advisor.name, rank: advisor.rank };
+}
+
 function CommanderSelectionModalWrapper() {
   const ctx = useGameStore((s) => s.commanderSelectionContext);
   const setCtx = useGameStore((s) => s.setCommanderSelectionContext);
@@ -257,7 +285,18 @@ function PeaceWarTransitionOverlay() {
   //   'briefing' → step 2: the PeaceWarTransition faction briefing + identity
   const [step, setStep] = useState<'splash' | 'briefing'>('splash');
 
-  if (!state || !shouldShowPeaceWarTransition(state, seen)) return null;
+  const shouldShow = state != null && shouldShowPeaceWarTransition(state, seen);
+
+  // Reset to the splash step whenever the gate stops showing the overlay. The
+  // component stays mounted for the whole session, so without this a second
+  // in-session peace→war handoff (player dismisses, starts another peace-phase
+  // game) would re-open at 'briefing' and skip the splash. The once-per-handoff
+  // gate (`peaceWarTransitionSeen`) is unchanged.
+  useEffect(() => {
+    if (!shouldShow) setStep('splash');
+  }, [shouldShow]);
+
+  if (!shouldShow) return null;
 
   if (step === 'splash') {
     return <WarHasBegunSplash onDismiss={() => setStep('briefing')} />;
@@ -1199,6 +1238,7 @@ function App() {
             decision={decision}
             eventCatalog={eventCatalogFull}
             state={loadedGameState?.rawGameState}
+            advisor={resolveEventDecisionAdvisor(decision, loadedGameState?.namedOfficerData, playerFaction)}
             onRespond={async (eventId, responseId) => {
               if (ipc.isAvailable) {
                 const result = await ipc.respondToEventDecision(eventId, responseId);
