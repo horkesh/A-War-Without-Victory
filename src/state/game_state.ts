@@ -465,6 +465,13 @@ export interface CorpsOperation {
      *  scalar — omitEmpty-safe, undefined when ENABLE_TG_ARMY_HQ_OPS is off; no schema
      *  migration (mirrors the v2.3 tg_recent_compositions additive pattern, schema stays v34). */
     army_hq_op_id?: ArmyHqOpId;
+    /** Army-HQ telemetry snapshot captured at TG-dissolution time (beginRecovery). The op's TG is
+     *  dissolved when the op enters recovery, but finalizeOperationAAR runs only after the recovery
+     *  window elapses — by then the live TG is gone, so the telemetry must be snapshotted up front
+     *  (P2 #48). finalizeOperationAAR prefers the live TG, falling back to this snapshot. Only set
+     *  when ENABLE_TG_ARMY_HQ_OPS is on AND the op was carried by an Army-HQ TG; otherwise undefined
+     *  (omitEmpty-safe, no schema migration — mirrors the army_hq_op_id additive pattern). */
+    army_hq_telemetry_snapshot?: import('../sim/combat/operation_aar.js').ArmyHqOpAarTelemetry;
 
     // --- Tactical Group donor policy (ADR-0005 Phase 2 routing) ---
     /** Per-operation donor policy classifying how this op forms its Tactical Group:

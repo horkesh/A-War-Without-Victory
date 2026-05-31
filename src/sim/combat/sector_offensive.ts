@@ -64,7 +64,7 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { ControlSide } from '../../state/political_control_types.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { releaseOperationCommander } from './officer_system.js';
-import { finalizeOperationAAR } from './operation_aar.js';
+import { finalizeOperationAAR, buildArmyHqTelemetryFromTg } from './operation_aar.js';
 import { linkOpportunityResolutionToAAR } from './operation_opportunities.js';
 import { applyOperationExperience, gradeStarsToOutcome, checkDefeatism } from './officer_experience.js';
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
@@ -73,7 +73,7 @@ import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/allianc
 import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { tickPreparation, hasUnresolvedProbe, autoResolveProbe, formTgsAtReadyTransition } from './operation_preparation.js';
 // ADR-0005 v2.2b #45: TG dissolution at execution→recovery. Flag-gated.
-import { ENABLE_TG_FORMATION } from './tactical_group_config.js';
+import { ENABLE_TG_FORMATION, ENABLE_TG_ARMY_HQ_OPS } from './tactical_group_config.js';
 import { dissolveTacticalGroup } from './tactical_group_lifecycle.js';
 import {
     BRIGADE_LOSS_THRESHOLD,
@@ -689,10 +689,39 @@ function beginRecovery(op: CorpsOperation, turn: number, reason: CorpsOperation[
     if (op.sector_id && state && Array.isArray(state.military.opsec_sectors)) {
         state.military.opsec_sectors = state.military.opsec_sectors.filter(s => s !== op.sector_id);
     }
+    // P2 #48: snapshot Army-HQ telemetry BEFORE dissolving the TG. finalizeOperationAAR runs
+    // only after the recovery window elapses (sector_offensive ~:1338), by which point the live
+    // TG is gone — so the AAR sidecar would be silently omitted for real Army-HQ ops. Capture it
+    // here, on the op record, so finalize can read the snapshot. Flag-gated + only set when an
+    // Army-HQ TG matches → baseline (no Army-HQ ops) leaves the field undefined → no hash impact.
+    if (state && ENABLE_TG_ARMY_HQ_OPS) {
+        snapshotArmyHqTelemetryForOp(state, op);
+    }
     // ADR-0005 v2.2b #45: dissolve TGs anchored to this op. Flag-gated; state-optional
     // (some callers don't pass state — those callers also can't have created TGs).
     if (state && ENABLE_TG_FORMATION) {
         dissolveTgsForOp(state, op.name, turn);
+    }
+}
+
+/**
+ * P2 #48: capture the Army-HQ telemetry from this op's live TG onto the op record, so it survives
+ * TG dissolution and can be read by finalizeOperationAAR turns later. Deterministic: scans
+ * tactical_groups in strictCompare order, matches on TG.op_id === op.name, snapshots the first
+ * Army-HQ TG found. No-op when no Army-HQ TG matches (snapshot stays undefined). Caller gates on
+ * ENABLE_TG_ARMY_HQ_OPS.
+ */
+function snapshotArmyHqTelemetryForOp(state: GameState, op: CorpsOperation): void {
+    const tgs = state.military?.tactical_groups;
+    if (!tgs) return;
+    for (const id of Object.keys(tgs).sort(strictCompare)) {
+        const tg = tgs[id];
+        if (!tg || tg.op_id !== op.name) continue;
+        const telemetry = buildArmyHqTelemetryFromTg(tg);
+        if (telemetry) {
+            op.army_hq_telemetry_snapshot = telemetry;
+            return;
+        }
     }
 }
 

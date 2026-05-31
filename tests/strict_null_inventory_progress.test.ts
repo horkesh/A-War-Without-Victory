@@ -526,7 +526,10 @@ describe('strict null inventory progress', () => {
         // CorpsOperation.{army_hq_op_id,tg_commander_officer_id,op_kind_donor_policy},
         // MilitaryState.{tg_recent_compositions,tg_formations_by_corps,og_promotions,army_hq_*},
         // FormationState.{tg_recovery_suppressed_until_turn,tg_donations_this_scenario}), so
-        // 482 → 487 / sim 312 → 317. The as_unknown_casts (3) and non_null_assertions_dot (7)
+        // 482 → 487 / sim 312 → 317; then +1 → 488 / sim 318 for the new optional
+        // CorpsOperation.army_hq_telemetry_snapshot (AAR Army-HQ telemetry sidecar snapshotted
+        // at beginRecovery so finalizeOperationAAR can emit it after TG dissolution — #48,
+        // telemetry-only, behaviorally hash-neutral on territory/anchors). The as_unknown_casts (3) and non_null_assertions_dot (7)
         // escape hatches live in src/ui/map/data/backTheOfficer.ts (TG-UI surfacing, commit
         // 9fede550 — predates this activation); they are existing accepted UI-layer hatches.
         expect(current.counts).toMatchObject({
@@ -535,14 +538,14 @@ describe('strict null inventory progress', () => {
             as_any_casts: 0,
             non_null_assertions_dot: 7,
             non_null_assertions_index: 0,
-            optional_fields_game_state: 487,
+            optional_fields_game_state: 488,
         });
-        expect(current.optional_field_domains.total).toBe(487);
+        expect(current.optional_field_domains.total).toBe(488);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 8,
             ipc: 0,
             scenario: 0,
-            sim: 317,
+            sim: 318,
             state: 162,
             ui_adapter: 0,
             unknown: 0,
