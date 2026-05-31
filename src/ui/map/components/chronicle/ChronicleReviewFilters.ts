@@ -14,6 +14,7 @@ export const CHRONICLE_FILTERS: Array<{ id: ChronicleFilterId; labelKey: Message
     { id: 'personnel', labelKey: 'chronicle.filter.personnel' },
     { id: 'diplomatic', labelKey: 'chronicle.filter.diplomatic' },
     { id: 'narrative', labelKey: 'chronicle.filter.narrative' },
+    { id: 'consequence', labelKey: 'chronicle.filter.consequence' },
 ];
 
 export function chronicleFilterLabel(filter: { labelKey: MessageKey }): string {
@@ -32,6 +33,7 @@ function emptyEntryCounts(): Record<ChronicleFilterId, number> {
         diplomatic: 0,
         narrative: 0,
         cost: 0,
+        consequence: 0,
     };
 }
 

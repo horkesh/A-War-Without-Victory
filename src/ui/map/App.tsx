@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { MapContainer } from './map/MapContainer';
 import { PresidentialToolbar } from './components/PresidentialToolbar';
 import { SelectionPanel } from './components/SelectionPanel';
@@ -73,6 +73,7 @@ import { derivePanelRailState, shouldRenderInboxPanel, shouldRenderTacticalDetai
 import { useGameStore, isDevMode } from './store/gameStore';
 import { loadLatestRunSaveAsText, loadEventDefinitions, loadEventDefinitionsFull } from './data/DataLoader';
 import type { EventDefinition } from '../../sim/events/event_types';
+import { buildConsequenceReceipts, receiptsRealizedOnTurn } from './data/consequenceReceipts';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
 import { getPlayerSafeMilitaryFactionName } from './utils/playerSafeText';
@@ -383,6 +384,19 @@ function App() {
       });
     return () => { cancelled = true; };
   }, []);
+
+  // Promise→receipt loop (consequence-receipt read-model). All realized
+  // receipts derived from the persisted causality substrate + full catalog;
+  // the aftermath modal surfaces only those whose CONFIRMED firing landed on
+  // the just-advanced turn. Read-only; collapses to [] pre-substrate.
+  const consequenceReceipts = useMemo(
+    () => buildConsequenceReceipts(loadedGameState?.rawGameState, eventCatalogFull),
+    [loadedGameState?.rawGameState, eventCatalogFull],
+  );
+  const aftermathConsequences = useMemo(
+    () => (turnAftermath ? receiptsRealizedOnTurn(consequenceReceipts, turnAftermath.turn) : []),
+    [consequenceReceipts, turnAftermath],
+  );
 
   // Reset dismissal/acknowledgement state when a new save is loaded.
   // Without this, stale flags from a previous save hide real pending items.
@@ -1055,6 +1069,7 @@ function App() {
       <TurnAftermathModal
         isOpen={turnAftermathOpen}
         view={turnAftermath}
+        consequences={aftermathConsequences}
         onClose={() => setTurnAftermathOpen(false)}
         onOpenInbox={openInboxHome}
         onOpenSummary={() => {

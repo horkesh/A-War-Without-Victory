@@ -6,6 +6,7 @@
  * anchors inside this modal.
  */
 import type { TurnAftermathTopAction, TurnAftermathView } from '../data/turnAftermath';
+import type { ConsequenceReceipt } from '../data/consequenceReceipts';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { t, type MessageKey } from '../i18n';
@@ -19,6 +20,13 @@ interface TurnAftermathModalProps {
   onOpenRecords: () => void;
   onOpenChronicle: () => void;
   onOpenCodex: () => void;
+  /**
+   * Realized consequence receipts whose CONFIRMED firing landed on this turn.
+   * Closes the promise→receipt loop: each entry pairs the player's originating
+   * decision with the downstream consequence the dossier predicted, now
+   * actually delivered by the engine. Empty/absent → section not rendered.
+   */
+  consequences?: readonly ConsequenceReceipt[];
 }
 
 function formatSigned(value: number): string {
@@ -73,11 +81,13 @@ export function TurnAftermathModal({
   onOpenRecords,
   onOpenChronicle,
   onOpenCodex,
+  consequences,
 }: TurnAftermathModalProps) {
   if (!view) return null;
 
   const hasTopActions = view.nextActions.topItems.length > 0;
   const signalPreview = view.signals.slice(0, 4);
+  const realizedConsequences = consequences ?? [];
 
   return (
     <Modal
@@ -145,6 +155,38 @@ export function TurnAftermathModal({
           </section>
 
           <section className="min-w-0 space-y-4">
+            {realizedConsequences.length > 0 && (
+              <div
+                data-testid="turn-aftermath-consequences"
+                className="border border-amber-400/30 bg-amber-950/15"
+              >
+                <div className="border-b border-amber-400/20 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-amber-300/80">
+                  {t('turnAftermath.consequencesRealized')}
+                </div>
+                <div className="divide-y divide-white/10">
+                  {realizedConsequences.map((receipt) => (
+                    <div
+                      key={receipt.id}
+                      data-testid="turn-aftermath-consequence-row"
+                      data-receipt-id={receipt.id}
+                      className="px-3 py-2.5 text-[12px] leading-5 text-text-primary/85"
+                    >
+                      {t('turnAftermath.consequenceWarned', {
+                        decision: receipt.decisionOptionLabel,
+                        turn: receipt.decisionTurn,
+                        consequence: receipt.predictedLabel,
+                      })}
+                      {receipt.predictedExplanation && (
+                        <div className="mt-1 text-[10px] leading-4 text-text-secondary/80 italic">
+                          {receipt.predictedExplanation}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="border border-white/10 bg-black/20">
               <div className="border-b border-white/10 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary">
                 {t('turnAftermath.strategicSignals')}

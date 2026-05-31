@@ -1,6 +1,8 @@
 import React, { useMemo, useEffect, useCallback, useRef, useState } from 'react';
 import { useGameStore } from '../../store/gameStore.js';
 import { generateChronicleEntries } from './generateChronicleEntries.js';
+import { loadEventDefinitionsFull } from '../../data/DataLoader.js';
+import type { EventDefinition } from '../../../../sim/events/event_types.js';
 import { ChronicleCard } from './ChronicleCard.js';
 import { ChronicleRibbon, ChronicleRibbonScrubber } from './ChronicleSpine.js';
 import { CHRONICLE_FILTERS, chronicleFilterLabel, countChronicleEntriesByFilter, filterChronicleEntries } from './ChronicleReviewFilters.js';
@@ -49,6 +51,7 @@ const DOT_COLORS: Record<ChronicleCardType, string> = {
     narrative: '#d5c9bc',
     cost: '#d28a3a',
     personnel: '#75a9b8',
+    consequence: '#b8924a',
 };
 
 export type ChronicleViewMode = 'entries' | 'chapters';
@@ -231,9 +234,22 @@ export function ChronicleOverlay() {
 
     const turnSummaries = state?.turnSummaries ?? [];
 
+    // Full event catalog for the consequence-receipt chronicle cards
+    // (promise→receipt loop). Cached by the loader; absent → receipt cards
+    // simply do not appear. Only loaded while the overlay is open.
+    const [eventCatalogFull, setEventCatalogFull] = useState<ReadonlyMap<string, EventDefinition> | undefined>(undefined);
+    useEffect(() => {
+        if (!open) return;
+        let cancelled = false;
+        loadEventDefinitionsFull()
+            .then((catalog) => { if (!cancelled) setEventCatalogFull(catalog); })
+            .catch(() => { /* non-fatal: receipt cards degrade to absent */ });
+        return () => { cancelled = true; };
+    }, [open]);
+
     const allEntries = useMemo(() =>
-        turnSummaries.length > 0 ? generateChronicleEntries(state) : [],
-        [state, turnSummaries.length]
+        turnSummaries.length > 0 ? generateChronicleEntries(state, eventCatalogFull) : [],
+        [state, turnSummaries.length, eventCatalogFull]
     );
 
     const entryCounts = useMemo(() => countChronicleEntriesByFilter(allEntries), [allEntries]);

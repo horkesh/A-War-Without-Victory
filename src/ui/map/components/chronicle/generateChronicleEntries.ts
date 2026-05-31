@@ -1,4 +1,4 @@
-export type ChronicleCardType = 'combat' | 'political' | 'humanitarian' | 'military' | 'diplomatic' | 'narrative' | 'cost' | 'personnel';
+export type ChronicleCardType = 'combat' | 'political' | 'humanitarian' | 'military' | 'diplomatic' | 'narrative' | 'cost' | 'personnel' | 'consequence';
 
 export interface ChronicleEntry {
     id?: string;
@@ -33,6 +33,9 @@ export interface ChronicleEntry {
 
 import { buildDecisionConsequenceLedger, type DecisionConsequenceRecord } from '../../data/decisionConsequenceLedger.js';
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets.js';
+import { buildConsequenceReceipts } from '../../data/consequenceReceipts.js';
+import type { EventDefinition } from '../../../../sim/events/event_types.js';
+import type { GameState } from '../../../../state/game_state.js';
 
 import {
     getPlayerSafeDisplayLabel,
@@ -329,6 +332,42 @@ function buildDecisionLedgerEntries(state: any): ChronicleEntry[] {
     }));
 }
 
+/** Chronicle cards for CONFIRMED consequence receipts — the promise→receipt
+ *  loop. Each card names the originating decision and the downstream
+ *  consequence the dossier predicted, now delivered by the engine. CONFIRMED
+ *  only (pending/contradicted are surfaced in the Decision History overlay,
+ *  not the chronicle). Requires the full event catalog for prediction lookup;
+ *  collapses to [] when absent. Tone stays somber: these are recorded costs
+ *  and outcomes, never gamified achievements. */
+function buildConsequenceReceiptEntries(
+    state: any,
+    eventCatalog: ReadonlyMap<string, EventDefinition> | undefined,
+): ChronicleEntry[] {
+    if (!eventCatalog || eventCatalog.size === 0) return [];
+    // The persisted causality substrate lives on the runtime raw GameState
+    // handle (Phase H Packet 7), not the parsed view.
+    const rawState: GameState | undefined = state?.rawGameState;
+    if (!rawState) return [];
+    const receipts = buildConsequenceReceipts(rawState, eventCatalog);
+    const entries: ChronicleEntry[] = [];
+    for (const receipt of receipts) {
+        if (receipt.status !== 'confirmed') continue;
+        if (receipt.firedTurn === null) continue;
+        entries.push({
+            id: `consequence-receipt-${receipt.id}`,
+            turn: receipt.firedTurn,
+            type: 'consequence',
+            headline: false,
+            title: `Consequence realized: ${receipt.predictedLabel}`,
+            detail: `Your decision "${receipt.decisionOptionLabel}" at week ${receipt.decisionTurn} brought this about, as the dossier warned.`,
+            metadata: {
+                decisionRecordId: `event:${receipt.decisionEventId}`,
+            },
+        });
+    }
+    return entries;
+}
+
 function collectDecisionEventIds(state: any): Set<string> {
     const ids = new Set<string>();
     for (const event of Array.isArray(state?.firedEvents) ? state.firedEvents : []) {
@@ -339,7 +378,10 @@ function collectDecisionEventIds(state: any): Set<string> {
     return ids;
 }
 
-export function generateChronicleEntries(state: any): ChronicleEntry[] {
+export function generateChronicleEntries(
+    state: any,
+    eventCatalog?: ReadonlyMap<string, EventDefinition>,
+): ChronicleEntry[] {
     if (!state || !state.turnSummaries || !Array.isArray(state.turnSummaries)) {
         return [];
     }
@@ -460,6 +502,7 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
     entries.push(...buildOperationHistoryEntries(state, playerFaction));
     entries.push(...buildOfficerSpotlightEntries(state, playerFaction));
     entries.push(...buildDecisionLedgerEntries(state));
+    entries.push(...buildConsequenceReceiptEntries(state, eventCatalog));
     entries.sort((a, b) => a.turn - b.turn);
     return entries;
 }

@@ -242,9 +242,9 @@ describe('DecisionHistoryOverlay (Phase H Packet 8)', () => {
         expect(order).toEqual(['evt_early', 'evt_mid', 'evt_late']);
     });
 
-    it('row content surfaces event_id, family, chosen option, and turn', () => {
+    it('row content surfaces resolved title, option prose, family, and turn', () => {
         const catalog = new Map<string, EventDefinition>([
-            ['evt_z', buildEventDef('evt_z', { family: 'rbih_civic' })],
+            ['evt_z', buildEventDef('evt_z', { family: 'rbih_civic', title: 'The Sarajevo siege tightens' })],
         ]);
         const state = buildState({
             decisions: [{ event_id: 'evt_z', response_id: 'opt_b', turn: 17 }],
@@ -255,9 +255,13 @@ describe('DecisionHistoryOverlay (Phase H Packet 8)', () => {
         expect(row.getAttribute('data-event-id')).toBe('evt_z');
         expect(row.getAttribute('data-response-id')).toBe('opt_b');
         expect(row.getAttribute('data-turn')).toBe('17');
-        expect(screen.getByTestId('decision-history-event-id').textContent).toBe('evt_z');
+        // Raw ids upgraded to resolved player-facing prose (title + option label).
+        expect(screen.getByTestId('decision-history-event-id').textContent).toBe('The Sarajevo siege tightens');
+        expect(screen.getByTestId('decision-history-event-id').getAttribute('data-event-id')).toBe('evt_z');
         expect(screen.getByTestId('decision-history-family').textContent).toBe('[family=rbih_civic]');
-        expect(screen.getByTestId('decision-history-chosen-option').textContent).toBe('[chose=opt_b]');
+        // Option prose resolved from catalog (label 'Option B'), not raw 'opt_b'.
+        expect(screen.getByTestId('decision-history-chosen-option').textContent).toBe('Option B');
+        expect(screen.getByTestId('decision-history-chosen-option').getAttribute('data-response-id')).toBe('opt_b');
         expect(screen.getByTestId('decision-history-turn').textContent).toBe('T17');
     });
 
