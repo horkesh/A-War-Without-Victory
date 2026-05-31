@@ -24,7 +24,11 @@ import { resolveEventDecision } from '../../src/sim/events/resolve_decision.js';
 import { assembleCommandBriefing, type CommandBriefing } from '../../src/sim/briefing/collect_briefing.js';
 import { serializeState } from '../../src/state/serialize.js';
 import type { FactionId, GameState } from '../../src/state/game_state.js';
-import type { PendingEventDecision } from '../../src/sim/events/event_types.js';
+import type {
+    PendingEventDecision,
+    DimensionShift,
+    EventFutureConsequence,
+} from '../../src/sim/events/event_types.js';
 
 // ── Repo base dir ────────────────────────────────────────────────────────────
 // This file lives at <repo>/tools/ai_play/. baseDir is the repo root.
@@ -43,6 +47,9 @@ export interface DecisionOptionView {
     historical_marker?: 'historical_default' | 'counterfactual';
     is_historical_default: boolean;
     is_staff_recommended: boolean;
+    /** Quantified per-option stakes the human modal shows; omitted when the option carries none. */
+    dimension_shifts?: DimensionShift[];
+    future_consequences?: EventFutureConsequence[];
 }
 
 /** One pending event decision, flattened for the player. */
@@ -135,6 +142,8 @@ function viewDecision(d: PendingEventDecision): DecisionView {
             historical_marker: o.historical_marker,
             is_historical_default: o.id === d.historical_default_response_id,
             is_staff_recommended: o.id === d.staff_recommended_response_id,
+            dimension_shifts: o.dimension_shifts,
+            future_consequences: o.future_consequences,
         })),
     };
 }
