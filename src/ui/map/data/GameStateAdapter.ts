@@ -230,6 +230,9 @@ const ATTESTED_OG_NAMES: readonly AttestedOgName[] = [
 
 /**
  * Resolve the attested OG/TG/OZ display name for a sector, or undefined if none is attested.
+ * Region-discriminated anchors only match when the anchor municipality DOMINATES the sector's
+ * coverage; a minority anchor mun present alongside a different dominant mun falls through to the
+ * computed label.
  * @param corpsId engine corps formation id
  * @param munCounts mun1990-slug → edge-count for the sector's friendly coverage
  */
@@ -238,17 +241,26 @@ function resolveAttestedOgName(corpsId: string, munCounts: Map<string, number>):
     for (const entry of ATTESTED_OG_NAMES) {
         if (entry.corps_id === corpsId && entry.anchor_mun === null) return entry.name;
     }
-    // Region-discriminated match: pick the attested anchor with the highest coverage in this sector.
-    let best: { name: string; count: number } | undefined;
-    for (const entry of ATTESTED_OG_NAMES) {
-        if (entry.corps_id !== corpsId || entry.anchor_mun === null) continue;
-        const count = munCounts.get(entry.anchor_mun) ?? 0;
-        if (count <= 0) continue;
-        if (!best || count > best.count || (count === best.count && entry.name < best.name)) {
-            best = { name: entry.name, count };
+    // Region-discriminated match: only return an attested label when its anchor municipality is the
+    // DOMINANT entry in this sector's coverage. A sector whose dominant mun matches none of the corps'
+    // attested anchors (e.g. a vrs_drina sector mostly over Goražde with a lone Foča-frontline OSID)
+    // must fall through to the computed regional label rather than borrow a minority anchor's name.
+    // Dominant mun is the max-count entry with deterministic tie-break (highest count, then lexical
+    // mun slug) — matching how the computed "{corps} – {top muns}" label picks its top mun.
+    let dominantMun: string | undefined;
+    let dominantCount = 0;
+    for (const [mun, count] of munCounts) {
+        if (count > dominantCount || (count === dominantCount && (dominantMun === undefined || mun < dominantMun))) {
+            dominantMun = mun;
+            dominantCount = count;
         }
     }
-    return best?.name;
+    if (dominantMun === undefined || dominantCount <= 0) return undefined;
+    for (const entry of ATTESTED_OG_NAMES) {
+        if (entry.corps_id !== corpsId || entry.anchor_mun === null) continue;
+        if (entry.anchor_mun === dominantMun) return entry.name;
+    }
+    return undefined;
 }
 
 function getAirdropAllocationValue(state: GameState, enclaveId: string): number {

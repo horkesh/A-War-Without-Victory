@@ -1304,6 +1304,21 @@ test('ADR-0006: unattested corps/region falls back to computed label (no fabrica
     assert.ok(!['OG North', 'OG South'].includes(fifthLabel), 'arbih_5th_corps OG North/South left unset');
 });
 
+test('ADR-0006: attested name only when its anchor mun DOMINATES the sector (Codex P2, #58)', () => {
+    // vrs_drina sector mostly over Goražde with a single Foča-frontline OSID: foca is present in
+    // munCounts (count 1) but gorazde dominates (count 3). The attested "TG Foča" anchor must NOT
+    // win — the sector falls through to the computed regional label.
+    const mixed = parseGameState(sectorState('vrs_drina', ['gorazde', 'gorazde', 'gorazde', 'foca']));
+    const label = mixed.corpsFrontSectors?.[0]?.display_name ?? '';
+    assert.ok(!['TG Foča', 'TG Višegrad'].includes(label),
+        'minority anchor mun must not borrow the attested TG name when another mun dominates');
+    assert.ok(label.length > 0, 'computed fallback label present');
+
+    // Sanity: when the anchor mun IS the dominant entry, the attested name still resolves.
+    const dominant = parseGameState(sectorState('vrs_drina', ['foca', 'foca', 'foca', 'gorazde']));
+    assert.strictEqual(dominant.corpsFrontSectors?.[0]?.display_name, 'TG Foča');
+});
+
 test('ADR-0006: explicit state display_name takes precedence over attested resolver', () => {
     const s = sectorState('vrs_drina', ['foca', 'foca']);
     s.military.corps_front_sectors.s0.display_name = 'Authored Name';
