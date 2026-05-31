@@ -15,7 +15,7 @@ import { effectivePersonnel } from './tactical_group_personnel.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { munFromOsid, type Osid } from './osid_adjacency.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { emitRoutineConsoleWarn } from '../../utils/routine_console_diagnostics.js';
+import { emitRoutineConsoleDebug, emitRoutineConsoleWarn } from '../../utils/routine_console_diagnostics.js';
 import {
     GARRISON_BUDGET_EDGES_PER_BRIGADE,
     isSectorAssignmentExemptCorpsId,
@@ -986,7 +986,7 @@ export function classifyBrigadesByTerritory(
                     const idx = sector.assigned_brigade_ids.indexOf(bid);
                     if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
                     territoryMatches[0]!.assigned_brigade_ids.push(bid);
-                    emitRoutineConsoleWarn(`[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to territory-owning ${territoryMatches[0]!.sector_id}`);
+                    emitRoutineConsoleDebug(`[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to territory-owning ${territoryMatches[0]!.sector_id}`);
                     continue;
                 }
                 const sameCorps = sectors
@@ -1011,7 +1011,7 @@ export function classifyBrigadesByTerritory(
                     const idx = sector.assigned_brigade_ids.indexOf(bid);
                     if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
                     sameCorps[0]!.sector.assigned_brigade_ids.push(bid);
-                    emitRoutineConsoleWarn(`[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to ${sameCorps[0]!.sector.sector_id}`);
+                    emitRoutineConsoleDebug(`[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to ${sameCorps[0]!.sector.sector_id}`);
                     continue;
                 }
                 if (Array.isArray(f.tags) && f.tags.includes('pocket_destroyable')) {
@@ -1075,7 +1075,7 @@ export function classifyBrigadesByTerritory(
                 const idx = sector.assigned_brigade_ids.indexOf(bid);
                 if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
                 best.sector.assigned_brigade_ids.push(bid);
-                emitRoutineConsoleWarn(
+                emitRoutineConsoleDebug(
                     `[brigade_assignment] rear-guard rebalance ${bid}: ${sector.sector_id} (dist ${ownDist}) -> ${best.sector.sector_id} (dist ${best.dist})`
                 );
             }
@@ -1305,7 +1305,7 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
             const ownCorpsSectors = sectorClaims.filter(c => c.sector.corps_id === corpsId);
             const homeStillOwnCorps = ownCorpsSectors.some(c => c.territorySet.has(formation.home_osid!));
             if (homeStillOwnCorps) {
-                emitRoutineConsoleWarn(`[brigade_assignment] Skipping cross-corps rehome for drifted ${fid} — home_osid ${formation.home_osid} still in own-corps territory`);
+                emitRoutineConsoleDebug(`[brigade_assignment] Skipping cross-corps rehome for drifted ${fid} — home_osid ${formation.home_osid} still in own-corps territory`);
                 continue;
             }
         }
@@ -1368,7 +1368,7 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
                 locationOsid,
             ])].sort(strictCompare);
             assigned.add(fid);
-            emitRoutineConsoleWarn(`[brigade_assignment] Rehomed ${fid} into truthful sector owner ${rearBest.sector.sector_id} (deep-rear)`);
+            emitRoutineConsoleDebug(`[brigade_assignment] Rehomed ${fid} into truthful sector owner ${rearBest.sector.sector_id} (deep-rear)`);
             continue;
         }
         if (candidates.length === 0) continue;
@@ -1382,7 +1382,7 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
             best.sector.reserve_brigade_ids.push(fid);
         }
         assigned.add(fid);
-        emitRoutineConsoleWarn(`[brigade_assignment] Rehomed ${fid} into truthful sector owner ${best.sector.sector_id} (${best.claim})`);
+        emitRoutineConsoleDebug(`[brigade_assignment] Rehomed ${fid} into truthful sector owner ${best.sector.sector_id} (${best.claim})`);
     }
 }
 
