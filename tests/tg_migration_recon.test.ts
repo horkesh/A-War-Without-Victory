@@ -277,19 +277,29 @@ describe('Phase 4 flag-on integration — formTgsAtReadyTransition', () => {
         });
         const { formTgsAtReadyTransition } = await import('../src/sim/combat/operation_preparation.js');
 
-        // Single-brigade axes (no donor pull) in distinct corps, both listing rs_shared first.
-        // Axis A claims rs_shared; axis B must de-conflict to its own resident.
+        // Two axes in distinct corps that both list rs_shared as their highest-power
+        // candidate; each carries a same-corps donor so a real (multi-brigade) TG can
+        // form. Axis A claims rs_shared as anchor + rs_donor_a as donor; axis B must
+        // de-conflict to its own resident rs_nextbest (rs_shared already reserved) and
+        // pull rs_donor_b. Codex P2 #46: a TG only forms when selectDonors yields ≥1
+        // donor, so each axis needs its own donor to exercise the de-confliction path.
         const state = stateWith([
+            // Donor personnel must clear the residual floor: at 0 hops a donor gives 30%
+            // (DONATION_CAP_FRACTION), so it must keep ≥ MIN_BRIGADE_PERSONNEL_AFTER_DONATION
+            // (800) → ≥ ~1143 personnel. 1200 passes while staying below each anchor's power
+            // so resolveTgAnchor still prefers rs_shared (axis A) / rs_nextbest (axis B).
             brigade('rs_shared', { corps_id: 'vrs_a', location_osid: 'op:a:s0', personnel: 2200 }),
-            brigade('rs_nextbest', { corps_id: 'vrs_b', location_osid: 'op:b:s0', personnel: 1300 }),
+            brigade('rs_donor_a', { corps_id: 'vrs_a', location_osid: 'op:a:s0', personnel: 1200 }),
+            brigade('rs_nextbest', { corps_id: 'vrs_b', location_osid: 'op:b:s0', personnel: 1500 }),
+            brigade('rs_donor_b', { corps_id: 'vrs_b', location_osid: 'op:b:s0', personnel: 1200 }),
         ]);
         const op: any = {
             name: 'OpDual', type: 'sector_attack', staging_osid: 'op:a:s0',
-            participating_brigades: ['rs_shared', 'rs_nextbest'],
+            participating_brigades: ['rs_shared', 'rs_donor_a', 'rs_nextbest', 'rs_donor_b'],
             phase: 'execution',
             axes: [
-                { axis_id: 'a', name: 'A', assigned_brigades: ['rs_shared'], objectives: ['op:a:obj'], staging_osid: 'op:a:s0', current_objective_index: 0, status: 'executing' },
-                { axis_id: 'b', name: 'B', assigned_brigades: ['rs_shared', 'rs_nextbest'], objectives: ['op:b:obj'], staging_osid: 'op:b:s0', current_objective_index: 0, status: 'executing' },
+                { axis_id: 'a', name: 'A', assigned_brigades: ['rs_shared', 'rs_donor_a'], objectives: ['op:a:obj'], staging_osid: 'op:a:s0', current_objective_index: 0, status: 'executing' },
+                { axis_id: 'b', name: 'B', assigned_brigades: ['rs_shared', 'rs_nextbest', 'rs_donor_b'], objectives: ['op:b:obj'], staging_osid: 'op:b:s0', current_objective_index: 0, status: 'executing' },
             ],
         };
 
