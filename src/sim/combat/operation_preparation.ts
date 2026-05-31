@@ -679,6 +679,12 @@ export function formTgsAtReadyTransition(
                 army_hq_op_id: op.army_hq_op_id,
                 max_donors: maxDonors,
             });
+            // Codex P2 #46: a zero-donor anchor must NOT form a phantom TG (consuming TG
+            // caps + identity/commander + TG-only dissolution/revert). With no donors the
+            // intended behavior is the legacy lone-anchor (no-TG) attack, exactly as
+            // flag-off: the op still launches via the sector/operation path with just the
+            // anchor brigade. Skip TG formation for this axis.
+            if (donors.length === 0) continue;
             const formed = formTacticalGroup(state, {
                 op_id: op.name,
                 anchor_brigade_id: anchorId,
@@ -706,6 +712,11 @@ export function formTgsAtReadyTransition(
         army_hq_op_id: op.army_hq_op_id,
         max_donors: maxDonors,
     });
+    // Codex P2 #46: a zero-donor anchor must NOT form a phantom TG (consuming TG caps +
+    // identity/commander + TG-only dissolution/revert). With no donors the intended
+    // behavior is the legacy lone-anchor (no-TG) attack, exactly as flag-off: the op still
+    // launches via the sector/operation path with just the anchor brigade. Skip TG formation.
+    if (donors.length === 0) return;
     const formed = formTacticalGroup(state, {
         op_id: op.name,
         anchor_brigade_id: anchorId,
