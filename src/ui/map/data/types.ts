@@ -1309,6 +1309,13 @@ export interface LoadedGameState {
     /** Phase 3 Thread 1: set of `${event_id}:${response_id}` for player/bot decisions,
      *  consumed by codex RESPONSE: condition atoms. UI read-model only (not hashed state). */
     decisionResponses?: ReadonlySet<string>;
+    /**
+     * Phase 3 Thread 2 "the dilemma spine" — the seven keystone "impossible
+     * choice" decisions projected as a read-only backbone: title, faced /
+     * not-yet-faced, chosen branch, decision turn, linked codex essay. Pure
+     * function of already-projected state (see dilemmaSpine.ts). Always present
+     * (full not-yet-faced spine on flag-off / empty saves); never hashed state. */
+    dilemmaSpine?: import('./dilemmaSpine.js').DilemmaSpineView[];
     /** True when any event has readiness >= 50 (approaching threshold). */
     pressureWarning: boolean;
 

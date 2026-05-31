@@ -18,6 +18,7 @@
       "decay_rate": 0
     },
     "once": true,
+    "tags": ["keystone_dilemma"],
     "effect": {
       "kind": "narrative",
       "text": "The strategic goals are presented to the Assembly."
@@ -2217,6 +2218,7 @@
       "decay_rate": 0
     },
     "once": true,
+    "tags": ["keystone_dilemma"],
     "effect": {
       "kind": "narrative",
       "text": "The political direction of Herceg-Bosna is debated."
