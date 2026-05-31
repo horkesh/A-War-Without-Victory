@@ -2077,7 +2077,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         firedEvents: firedEventsView,
         decisionResponses: decisionResponsesSet,
         rawGameState: gameState,
-    } as unknown as LoadedGameState);
+    });
 
     return {
         label, turn, phase,

@@ -244,7 +244,9 @@ function resolveDecisionForEvent(
  * Returns a fully not-yet-faced spine for empty / flag-off states (never []),
  * so the UI can always render the full backbone.
  */
-export function buildDilemmaSpine(loaded: LoadedGameState | null | undefined): DilemmaSpineView[] {
+export function buildDilemmaSpine(
+    loaded: Pick<LoadedGameState, 'firedEvents' | 'decisionResponses' | 'rawGameState'> | null | undefined,
+): DilemmaSpineView[] {
     const firedIds = new Set<string>();
     for (const entry of loaded?.firedEvents ?? []) {
         if (entry?.id) firedIds.add(entry.id);
