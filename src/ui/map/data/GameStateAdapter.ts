@@ -2152,6 +2152,14 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         strategicDimensions: deriveStrategicDimensions(state),
         negotiatingCapital: deriveNegotiatingCapital(state),
         eventFlags: state.military?.event_flags ?? undefined,
+        // Phase 3 Thread 1: project player/bot decisions as `${event_id}:${response_id}`
+        // for codex RESPONSE: condition atoms. Set membership (.has) is order-independent,
+        // so iteration order of the source array does not affect resolver output.
+        decisionResponses: new Set<string>(
+            (state.military?.event_decision_log ?? []).map(
+                (d: { event_id: string; response_id: string }) => `${d.event_id}:${d.response_id}`,
+            ),
+        ),
         pressureWarning: derivePressureWarning(state),
         patronOverrideAuthority: derivePatronOverrideAuthority(state),
         diplomacyView: buildDiplomacyView(state, playerFaction),
