@@ -12,7 +12,7 @@
 // No state mutation; deterministic (sorted iteration via strictCompare).
 
 import { getPlayerSafeOfficerName } from '../utils/playerSafeText.js';
-import { FORCE_LAUNCH_COST } from '../utils/commandAuthority.js';
+import { FORCE_LAUNCH_COST, PROACTIVE_FORCE_LAUNCH_COST } from '../utils/commandAuthority.js';
 
 type RawRecord = Record<string, unknown>;
 
@@ -715,4 +715,131 @@ export function buildOpProposalFraming(
     ? ` It pulls ${totalPersonnelLent.toLocaleString('en-US')} men from ${joinList(donors.map((d) => d.corps_name))} — cohesion bled.`
     : ` It pulls battalions from ${joinList(donors.map((d) => d.corps_name))} — cohesion bled.`;
   return `${lead}${pulling}`;
+}
+
+// --- Proactive force-launch projection ("override without proposal") ---
+//
+// At autonomy level 1 the corps commander may hold a plan at 'ready' WITHOUT
+// surfacing it as an APPROVE_OP proposal (he prepared it but did not recommend
+// launching this turn). This projection lists those held-ready plans so the
+// president can PROACTIVELY force the launch (paying PROACTIVE_FORCE_LAUNCH_COST
+// command authority) — distinct from overriding a surfaced no-go.
+//
+// A plan is "forceable" iff:
+//   1. corps.commander_state.current_plan.status === 'ready', AND
+//   2. NO pending proposal carries APPROVE_OP:<corpsId>:<plan_id> for it.
+// Pure / defensive / deterministic (sorted by corps id then plan id).
+
+/** One corps plan the officer holds at 'ready' with no surfaced proposal. */
+export interface ForceableReadyPlanView {
+  /** Anchor corps id that owns the held plan. */
+  corps_id: string;
+  /** Player-facing corps name (falls back to the corps id). */
+  corps_name: string;
+  /** The held plan's id (the IPC force-launch key, with corps_id). */
+  plan_id: string;
+  /** Operation display name (plan objective_description, falls back to plan id). */
+  op_name: string;
+  /** The corps commander leading it (null when unresolved). */
+  commander: TgCommanderView | null;
+  /**
+   * The officer's own readiness note for this held plan, if any (last_plan_reason
+   * on the commander_state). Player-safe; null when absent.
+   */
+  commander_assessment: string | null;
+  /** Command-authority cost of proactively forcing this plan. */
+  force_ca_cost: number;
+}
+
+/** Minimal pending-proposal shape this projection reads. */
+export interface ForceableReadyProposalRow {
+  proposed_action?: string;
+}
+
+/**
+ * Build the list of corps plans currently held at 'ready' with NO surfaced
+ * proposal — the candidates for a proactive presidential force-launch.
+ *
+ * Reads raw GameState (military.corps_command[*].commander_state.current_plan)
+ * and the pending proposals so a plan that already has an APPROVE_OP proposal is
+ * excluded (that one goes through the existing commit / override path instead).
+ * Returns [] when no corps holds a ready plan. Sorted by corps id then plan id.
+ */
+export function buildForceableReadyPlans(
+  rawState: unknown,
+  roster: BackTheOfficerRosterRow[] | undefined,
+  proposals: ForceableReadyProposalRow[] | undefined,
+): ForceableReadyPlanView[] {
+  const state = asRecord(rawState);
+  const military = asRecord(state?.military);
+  if (!military) return [];
+
+  const corpsCommand = asRecord(military.corps_command);
+  if (!corpsCommand) return [];
+
+  const rosterById = new Map<string, BackTheOfficerRosterRow>();
+  for (const row of roster ?? []) {
+    if (row && typeof row.id === 'string') rosterById.set(row.id, row);
+  }
+
+  const corpsNameById = new Map<string, string>();
+  const formations = asRecord(military.formations);
+  if (formations) {
+    for (const key of Object.keys(formations)) {
+      const name = str(asRecord(formations[key])?.name);
+      if (name) corpsNameById.set(key, name);
+    }
+  }
+
+  // Resolve the active corps commander per corps from named_officers
+  // (status active + assigned to the corps). Sorted pick for determinism.
+  const namedOfficers = asRecord(military.named_officers);
+  const commanderIdByCorps = new Map<string, string>();
+  if (namedOfficers) {
+    for (const oid of Object.keys(namedOfficers).sort(strictCompare)) {
+      const os = asRecord(namedOfficers[oid]);
+      if (!os) continue;
+      if (str(os.status) !== 'active') continue;
+      const corpsId = str(os.assigned_corps_id);
+      if (corpsId && !commanderIdByCorps.has(corpsId)) commanderIdByCorps.set(corpsId, oid);
+    }
+  }
+
+  // Index the plan ids that already carry a surfaced proposal so we exclude them.
+  const proposedPlanKeys = new Set<string>();
+  for (const p of proposals ?? []) {
+    const action = str(p?.proposed_action);
+    if (!action) continue;
+    const parts = action.split(':');
+    if (parts[0] !== 'APPROVE_OP' || !parts[1] || !parts[2]) continue;
+    proposedPlanKeys.add(`${parts[1]}:${parts.slice(2).join(':')}`);
+  }
+
+  const views: ForceableReadyPlanView[] = [];
+  for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+    const cc = asRecord(corpsCommand[corpsId]);
+    if (!cc) continue;
+    const cmdState = asRecord(cc.commander_state);
+    const plan = asRecord(cmdState?.current_plan);
+    if (!plan) continue;
+    if (str(plan.status) !== 'ready') continue;
+    const planId = str(plan.plan_id);
+    if (!planId) continue;
+    // Skip plans the officer already surfaced as a proposal (existing path owns those).
+    if (proposedPlanKeys.has(`${corpsId}:${planId}`)) continue;
+
+    const commander = resolveCommander(commanderIdByCorps.get(corpsId), rosterById);
+    views.push({
+      corps_id: corpsId,
+      corps_name: corpsName(corpsId, corpsNameById),
+      plan_id: planId,
+      op_name: str(plan.objective_description) ?? planId,
+      commander,
+      commander_assessment: str(cmdState?.last_plan_reason) ?? null,
+      force_ca_cost: PROACTIVE_FORCE_LAUNCH_COST,
+    });
+  }
+
+  views.sort((a, b) => strictCompare(a.corps_id, b.corps_id) || strictCompare(a.plan_id, b.plan_id));
+  return views;
 }

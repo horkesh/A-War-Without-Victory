@@ -117,6 +117,9 @@ contextBridge.exposeInMainWorld('awwv', {
   rejectProposal: (proposalId) => ipcRenderer.invoke('reject-proposal', proposalId),
   // Phase 2 slice 1 "Back the Officer": Level 3 Direct Intervention on an op proposal.
   forceLaunchProposal: (proposalId) => ipcRenderer.invoke('force-launch-proposal', proposalId),
+  // "Override without proposal": proactively force-launch a corps plan the officer
+  // holds at 'ready' but never surfaced as a proposal.
+  proactiveForceLaunchOp: (corpsId, planId) => ipcRenderer.invoke('proactive-force-launch-op', { corpsId, planId }),
   resolveOperationOpportunityDecision: (payload) => ipcRenderer.invoke('resolve-operation-opportunity-decision', payload),
   // v0.9.2 tutorial onboarding (LANE-NIGHTSHIFT-ROUND2 + LANE-NIGHTSHIFT-TUTORIAL-CONTENT-V1)
   dismissTutorial: () => ipcRenderer.invoke('tutorial:dismiss'),
