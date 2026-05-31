@@ -238,6 +238,14 @@ function buildForceableReadyPlanData(state, proposals) {
   if (!corpsCommand) return [];
   const formations = military && typeof military.formations === 'object' ? military.formations : {};
 
+  // Player-ownership: only surface plans for the player faction's own corps.
+  // Corps→faction is the corps formation's faction (corps_command key is a
+  // FormationId in military.formations). When player_faction is unknown (null),
+  // keep all (defensive — mirrors getPendingProposalReviewsForPlayer).
+  const playerFaction = state && state.meta && typeof state.meta.player_faction === 'string'
+    ? state.meta.player_faction
+    : null;
+
   // Player-safe officer roster (name + rank + status).
   const rosterById = new Map();
   const officerData = Array.isArray(military.named_officer_data) ? military.named_officer_data : [];
@@ -274,6 +282,11 @@ function buildForceableReadyPlanData(state, proposals) {
   for (const corpsId of Object.keys(corpsCommand).sort()) {
     const cc = corpsCommand[corpsId];
     if (!cc || typeof cc !== 'object') continue;
+    // Skip corps that don't belong to the player faction.
+    const corpsFaction = formations[corpsId] && typeof formations[corpsId].faction === 'string'
+      ? formations[corpsId].faction
+      : null;
+    if (playerFaction && corpsFaction && corpsFaction !== playerFaction) continue;
     const cmdState = cc.commander_state && typeof cc.commander_state === 'object' ? cc.commander_state : null;
     const plan = cmdState && cmdState.current_plan && typeof cmdState.current_plan === 'object' ? cmdState.current_plan : null;
     if (!plan) continue;

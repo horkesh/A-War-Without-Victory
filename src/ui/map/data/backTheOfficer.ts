@@ -777,17 +777,28 @@ export function buildForceableReadyPlans(
   const corpsCommand = asRecord(military.corps_command);
   if (!corpsCommand) return [];
 
+  // Player-ownership: only surface plans for the player faction's own corps.
+  // Corps→faction is the corps formation's faction (corps_command key is a
+  // FormationId in military.formations). When player_faction is unknown (null),
+  // keep all (defensive — mirrors getPendingProposalReviewsForPlayer).
+  const meta = asRecord(state?.meta);
+  const playerFaction = str(meta?.player_faction) ?? null;
+
   const rosterById = new Map<string, BackTheOfficerRosterRow>();
   for (const row of roster ?? []) {
     if (row && typeof row.id === 'string') rosterById.set(row.id, row);
   }
 
   const corpsNameById = new Map<string, string>();
+  const corpsFactionById = new Map<string, string>();
   const formations = asRecord(military.formations);
   if (formations) {
     for (const key of Object.keys(formations)) {
-      const name = str(asRecord(formations[key])?.name);
+      const f = asRecord(formations[key]);
+      const name = str(f?.name);
       if (name) corpsNameById.set(key, name);
+      const faction = str(f?.faction);
+      if (faction) corpsFactionById.set(key, faction);
     }
   }
 
@@ -819,6 +830,9 @@ export function buildForceableReadyPlans(
   for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
     const cc = asRecord(corpsCommand[corpsId]);
     if (!cc) continue;
+    // Skip corps that don't belong to the player faction.
+    const corpsFaction = corpsFactionById.get(corpsId) ?? null;
+    if (playerFaction && corpsFaction && corpsFaction !== playerFaction) continue;
     const cmdState = asRecord(cc.commander_state);
     const plan = asRecord(cmdState?.current_plan);
     if (!plan) continue;

@@ -109,6 +109,34 @@ describe('buildForceableReadyPlans — proactive force-launch read-model', () =>
         expect(buildForceableReadyPlans(state, ROSTER, [])).toEqual([]);
     });
 
+    it('EXCLUDES an enemy-faction ready plan (only player-faction corps are forceable)', () => {
+        // Corps→faction is the corps formation's faction (corps_command key is a
+        // FormationId in military.formations). With player_faction set, an enemy
+        // corps's held-ready plan must never be surfaced as forceable.
+        const state = {
+            meta: { player_faction: 'RBiH' },
+            military: {
+                formations: {
+                    arbih_1st_corps: { name: '1st Corps', faction: 'RBiH' },
+                    vrs_drina_corps: { name: 'Drina Corps', faction: 'RS' },
+                },
+                named_officers: {},
+                corps_command: {
+                    arbih_1st_corps: {
+                        commander_state: { current_plan: { plan_id: 'p_own', status: 'ready' } },
+                    },
+                    vrs_drina_corps: {
+                        commander_state: { current_plan: { plan_id: 'p_enemy', status: 'ready' } },
+                    },
+                },
+            },
+        };
+        const views = buildForceableReadyPlans(state, ROSTER, []);
+        // Only the player's own corps plan is forceable; the enemy corps is filtered out.
+        expect(views.map((v) => v.corps_id)).toEqual(['arbih_1st_corps']);
+        expect(views.some((v) => v.corps_id === 'vrs_drina_corps')).toBe(false);
+    });
+
     it('is deterministic — sorted by corps id then plan id', () => {
         const state = {
             military: {
