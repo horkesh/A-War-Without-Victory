@@ -1183,6 +1183,7 @@ function App() {
         <AutonomyPanel
           onClose={() => setAutonomyPanelOpen(false)}
           playerFaction={playerFaction}
+          namedOfficerData={loadedGameState?.namedOfficerData}
         />
       )}
       {diplomacyOpen && loadedGameState?.diplomacyView && (

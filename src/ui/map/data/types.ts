@@ -90,6 +90,40 @@ export interface NamedOfficerView {
     cowed_until_turn?: number;
     /** Pre-computed effective compliance modifier (base reliability ± warlord modifier). */
     effective_compliance_modifier?: number;
+    /**
+     * Per-officer combat ledger aggregated from `state.operation_history` (read-only,
+     * deterministic). Present only when this officer commanded ≥1 operation in history.
+     * Pure read-model — no engine state; never persisted.
+     */
+    combat_record?: OfficerCombatRecordView;
+}
+
+/**
+ * Deterministic per-officer combat ledger, aggregated from `OperationAAR` rows in
+ * `state.operation_history` filtered by `commander_officer_id`. Counts and sums only;
+ * authored verbatim from already-present state. Used by the Officer Dossier surface.
+ */
+export interface OfficerCombatRecordView {
+    /** Number of operations this officer commanded (rows in history). */
+    operations_commanded: number;
+    /** Operations graded `success`. */
+    wins: number;
+    /** Operations graded `partial`. */
+    partials: number;
+    /** Operations graded `failure` or `orphaned`. */
+    failures: number;
+    /** Total casualties suffered across all commanded ops (killed + wounded). */
+    casualties_suffered: number;
+    /** Total casualties inflicted across all commanded ops (killed + wounded). */
+    casualties_inflicted: number;
+    /** Total objectives captured across all commanded ops. */
+    objectives_captured: number;
+    /** Most-recent commanded operation (highest ended_turn; ties broken by op id). */
+    last_operation?: {
+        name: string;
+        outcome: string;
+        ended_turn: number;
+    };
 }
 
 export interface FormationView {
