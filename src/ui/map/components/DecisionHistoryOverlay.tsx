@@ -34,6 +34,10 @@ import {
     getCausalDescendants,
     type EventDecision,
 } from '../../../sim/events/causality_query.js';
+import {
+    buildConsequenceReceipts,
+    type ConsequenceReceipt,
+} from '../data/consequenceReceipts.js';
 import { Z } from '../../shared/zIndex.js';
 
 export interface DecisionHistoryOverlayProps {
@@ -63,6 +67,46 @@ function truncateSourceNote(text: string): string {
     return text.slice(0, SOURCE_NOTE_EXCERPT_MAX_CHARS) + '...';
 }
 
+/** Resolve the player-facing event title from the catalog, defensively. Falls
+ *  back to the raw event id when absent. */
+function resolveDecisionTitle(
+    decision: EventDecision,
+    eventCatalog: ReadonlyMap<string, EventDefinition> | undefined,
+): string {
+    const def = eventCatalog?.get(decision.event_id);
+    const title = def?.title;
+    return typeof title === 'string' && title.trim().length > 0 ? title : decision.event_id;
+}
+
+/** Resolve the player-facing chosen-option label (prose) from the catalog,
+ *  defensively. Falls back to the raw response id. */
+function resolveOptionLabel(
+    decision: EventDecision,
+    eventCatalog: ReadonlyMap<string, EventDefinition> | undefined,
+): string {
+    const def = eventCatalog?.get(decision.event_id);
+    const option = (def?.response_options ?? []).find((o) => o.id === decision.response_id);
+    const label = option?.label;
+    return typeof label === 'string' && label.trim().length > 0 ? label : decision.response_id;
+}
+
+interface ReceiptStatusCounts {
+    confirmed: number;
+    pending: number;
+    contradicted: number;
+}
+
+/** Tally a decision's receipt statuses for the status-badge row. */
+function tallyReceipts(receipts: readonly ConsequenceReceipt[]): ReceiptStatusCounts {
+    const counts: ReceiptStatusCounts = { confirmed: 0, pending: 0, contradicted: 0 };
+    for (const r of receipts) {
+        if (r.status === 'confirmed') counts.confirmed += 1;
+        else if (r.status === 'pending') counts.pending += 1;
+        else counts.contradicted += 1;
+    }
+    return counts;
+}
+
 /** Compute whether a player decision diverged from the event's historical
  *  default. Returns false when the catalog has no entry or no
  *  `historical_default_response_id`. Deterministic. */
@@ -82,12 +126,14 @@ function DecisionRow({
     decision,
     eventCatalog,
     state,
+    receipts,
     isExpanded,
     onToggle,
 }: {
     decision: EventDecision;
     eventCatalog: ReadonlyMap<string, EventDefinition> | undefined;
     state: GameState;
+    receipts: readonly ConsequenceReceipt[];
     isExpanded: boolean;
     onToggle: () => void;
 }) {
@@ -96,6 +142,10 @@ function DecisionRow({
     const diverged = isDivergenceFromHistorical(decision, eventCatalog);
     const rawSourceNote = def?.source_note ?? def?.historical_source ?? null;
     const sourceNoteExcerpt = rawSourceNote ? truncateSourceNote(rawSourceNote) : null;
+    const decisionTitle = resolveDecisionTitle(decision, eventCatalog);
+    const optionLabel = resolveOptionLabel(decision, eventCatalog);
+    const counts = tallyReceipts(receipts);
+    const hasReceipts = receipts.length > 0;
 
     // Descendants are only computed when row is expanded — keeps the
     // un-expanded list render-cheap.
@@ -126,14 +176,41 @@ function DecisionRow({
                 <span className="flex-1 min-w-0">
                     <span
                         data-testid="decision-history-event-id"
+                        data-event-id={decision.event_id}
                         className="block text-[10px] text-neutral-200 font-semibold leading-snug truncate"
+                        title={decisionTitle}
                     >
-                        {decision.event_id}
+                        {decisionTitle}
+                    </span>
+                    <span
+                        data-testid="decision-history-chosen-option"
+                        data-response-id={decision.response_id}
+                        className="block text-[9px] text-neutral-400 leading-snug truncate mt-0.5"
+                        title={optionLabel}
+                    >
+                        {optionLabel}
                     </span>
                     <span className="block text-[8px] uppercase tracking-[0.1em] text-neutral-500 mt-0.5">
                         <span data-testid="decision-history-family">[family={family}]</span>
-                        {' '}
-                        <span data-testid="decision-history-chosen-option">[chose={decision.response_id}]</span>
+                        {hasReceipts && (
+                            <span data-testid="decision-history-receipt-counts" className="ml-1.5">
+                                {counts.confirmed > 0 && (
+                                    <span data-testid="decision-history-receipt-confirmed" className="text-emerald-400/80">
+                                        {' '}{counts.confirmed} confirmed
+                                    </span>
+                                )}
+                                {counts.pending > 0 && (
+                                    <span data-testid="decision-history-receipt-pending" className="text-neutral-400">
+                                        {' '}{counts.pending} pending
+                                    </span>
+                                )}
+                                {counts.contradicted > 0 && (
+                                    <span data-testid="decision-history-receipt-contradicted" className="text-amber-400/80">
+                                        {' '}{counts.contradicted} foreclosed
+                                    </span>
+                                )}
+                            </span>
+                        )}
                     </span>
                 </span>
                 {diverged ? (
@@ -231,6 +308,20 @@ export function DecisionHistoryOverlay({
         [state],
     );
 
+    // Realized consequence receipts indexed by originating event id, so each
+    // row can show its confirmed/pending/foreclosed status counts. Read-only;
+    // collapses to an empty map pre-substrate.
+    const receiptsByEvent = useMemo(() => {
+        const map = new Map<string, ConsequenceReceipt[]>();
+        if (!state || !eventCatalog) return map;
+        for (const receipt of buildConsequenceReceipts(state, eventCatalog)) {
+            const arr = map.get(receipt.decisionEventId) ?? [];
+            arr.push(receipt);
+            map.set(receipt.decisionEventId, arr);
+        }
+        return map;
+    }, [state, eventCatalog]);
+
     if (!isOpen) return null;
 
     const hasInputs = Boolean(state && eventCatalog);
@@ -301,6 +392,7 @@ export function DecisionHistoryOverlay({
                                     decision={decision}
                                     eventCatalog={eventCatalog}
                                     state={state!}
+                                    receipts={receiptsByEvent.get(decision.event_id) ?? []}
                                     isExpanded={expandedEventId === decision.event_id}
                                     onToggle={() => setExpandedEventId(
                                         expandedEventId === decision.event_id

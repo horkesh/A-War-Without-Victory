@@ -27,6 +27,7 @@ describe('Chronicle review tools wiring', () => {
             'personnel',
             'diplomatic',
             'narrative',
+            'consequence',
         ]);
     });
 
