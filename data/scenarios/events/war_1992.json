@@ -939,7 +939,7 @@
           {
             "kind": "recruitment_modifier",
             "faction": "RS",
-            "delta": -0.05,
+            "pool_multiplier": 0.95,
             "duration_turns": 52
           }
         ],
@@ -994,7 +994,7 @@
           {
             "kind": "recruitment_modifier",
             "faction": "RS",
-            "delta": -0.05,
+            "pool_multiplier": 0.95,
             "duration_turns": 52
           }
         ],
@@ -2059,7 +2059,7 @@
           {
             "kind": "recruitment_modifier",
             "faction": "RBiH",
-            "delta": -0.03,
+            "pool_multiplier": 0.97,
             "duration_turns": 52
           }
         ],
@@ -2114,7 +2114,7 @@
           {
             "kind": "recruitment_modifier",
             "faction": "RBiH",
-            "delta": -0.05,
+            "pool_multiplier": 0.95,
             "duration_turns": 52
           }
         ],

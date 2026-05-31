@@ -351,9 +351,13 @@ function applyRecruitmentModifier(
         state.military.recruitment_modifiers = [];
     }
     const currentTurn = state.meta.turn ?? 0;
+    // Defensive: malformed event data (e.g. a missing/non-numeric pool_multiplier)
+    // must never push a non-finite value, which validateGameState rejects and which
+    // would break serialization. Coerce to the identity multiplier (1.0). Deterministic.
+    const safeMultiplier = Number.isFinite(poolMultiplier) ? poolMultiplier : 1.0;
     state.military.recruitment_modifiers.push({
         faction,
-        pool_multiplier: poolMultiplier,
+        pool_multiplier: safeMultiplier,
         expires_turn: currentTurn + durationTurns,
     });
 }

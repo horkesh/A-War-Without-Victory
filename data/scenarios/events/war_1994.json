@@ -1541,7 +1541,7 @@
           {
             "kind": "recruitment_modifier",
             "faction": "RS",
-            "delta": -0.15,
+            "pool_multiplier": 0.85,
             "duration_turns": 8
           }
         ],
