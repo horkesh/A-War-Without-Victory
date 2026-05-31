@@ -19,6 +19,8 @@ import { estimateAttackCost, type AttackEstimate } from '../sim/combat/combat_es
 import { computeFrontWidthMetrics } from '../sim/combat/front_width_metrics.js';
 import { applyRecruitment, initializeRecruitmentResources, recruitBrigade } from '../sim/recruitment_engine.js';
 import { runTurn } from '../sim/turn_pipeline.js';
+import { loadEventDefinitionsFromDir } from '../sim/events/event_loader.js';
+import type { EventDefinition } from '../sim/events/event_types.js';
 import {
     queryMovementPath as computeMovementPathQuery,
     queryMovementRange as computeMovementRangeQuery,
@@ -41,6 +43,23 @@ import { asArray, asRecord } from '../state/schema_validators.js';
 import type { Osid } from '../sim/combat/osid_adjacency.js';
 import { canEliteLoanReachCorpsTerritory, deployEliteLoan, recallEliteLoan } from '../sim/combat/army_reserve_system.js';
 import { resolvePlayerParamilitaryDecisions } from '../sim/combat/paramilitary_sweep.js';
+
+// Event definitions are static per build. Load + validate once per events dir and
+// reuse across turns — the scenario runner likewise loads them once before its loop.
+// Without this, the desktop turn ran evaluateEvents with no registry, so registry-driven
+// decision events (rs_strategic_goals, war_199x, consequence chains) never fired.
+let _eventDefinitionsCache: { dir: string; defs: EventDefinition[] } | null = null;
+function loadDesktopEventDefinitions(baseDir: string): EventDefinition[] {
+    const dir = join(baseDir, 'data/scenarios/events');
+    if (_eventDefinitionsCache && _eventDefinitionsCache.dir === dir) {
+        return _eventDefinitionsCache.defs;
+    }
+    // Start week 0: load the full April-1992 campaign event set. Each event still fires
+    // only at its own trigger.turn_min inside evaluateEvents, not at load time.
+    const defs = loadEventDefinitionsFromDir(0, dir);
+    _eventDefinitionsCache = { dir, defs };
+    return defs;
+}
 
 function settlementGraphOptions(baseDir: string): { settlementsPath: string; edgesPath: string } {
     return {
@@ -145,6 +164,7 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
                 seed,
                 settlementGraph: graphForBrowser,
                 settlementEdges: graph.edges,
+                eventDefinitions: loadDesktopEventDefinitions(baseDir),
             });
             return {
                 state: nextState,
