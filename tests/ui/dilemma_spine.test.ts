@@ -17,6 +17,7 @@ import war1995 from '../../data/scenarios/events/war_1995.json';
  *  reads (firedEvents, decisionResponses, rawGameState.military.event_decision_log). */
 function fixtureLoaded(opts: {
     firedIds?: string[];
+    rawFiredIds?: string[];
     decisions?: Array<{ event_id: string; response_id: string; turn: number }>;
 }): LoadedGameState {
     const firedEvents = (opts.firedIds ?? []).map((id) => ({
@@ -36,6 +37,9 @@ function fixtureLoaded(opts: {
         decisionResponses,
         rawGameState: {
             military: {
+                // Authoritative uncapped fired set. Defaults to the view ids so existing
+                // cases stay realistic (the capped view is always a subset of this).
+                fired_event_ids: opts.rawFiredIds ?? opts.firedIds ?? [],
                 event_decision_log: (opts.decisions ?? []).map((d) => ({
                     event_id: d.event_id,
                     response_id: d.response_id,
@@ -138,6 +142,24 @@ describe('buildDilemmaSpine', () => {
         const vopp = byId(views, 'vance_owen_plan');
         assert.strictEqual(vopp.faced, true);
         assert.strictEqual(vopp.chosenBranchLabel, 'not_a_real_option');
+    });
+
+    test('faced uses the uncapped raw fired_event_ids when the capped view dropped the event (Codex P2 #82)', () => {
+        // Long-running/older save: the dilemma fired >20 events ago so deriveFiredEvents
+        // (the capped timeline view) no longer contains it, and a pre-Thread-1 save has
+        // no decision-log entry — but military.fired_event_ids still records it.
+        const views = buildDilemmaSpine(
+            fixtureLoaded({
+                firedIds: [],
+                rawFiredIds: ['vance_owen_plan_1993'],
+                decisions: [],
+            }),
+        );
+        const vopp = byId(views, 'vance_owen_plan');
+        assert.strictEqual(vopp.faced, true);
+        // Faced but no decision recorded → branch fields stay null.
+        assert.strictEqual(vopp.chosenResponseId, null);
+        assert.strictEqual(vopp.decisionTurn, null);
     });
 
     test('karadzic split dilemma has no essay (essayId null) and surfaces event only', () => {

@@ -247,7 +247,14 @@ function resolveDecisionForEvent(
 export function buildDilemmaSpine(
     loaded: Pick<LoadedGameState, 'firedEvents' | 'decisionResponses' | 'rawGameState'> | null | undefined,
 ): DilemmaSpineView[] {
-    const firedIds = new Set<string>();
+    // `faced` must use the UNCAPPED raw fired-event ids. `firedEvents`
+    // (deriveFiredEvents) is capped to the 20 most-recent for the timeline view,
+    // so a dilemma that fired >20 events ago would wrongly read "Not yet faced"
+    // on older/long-running saves (Codex P2, PR #82). Union both: the raw set is
+    // authoritative; the view is a robustness fallback if rawGameState is absent.
+    const firedIds = new Set<string>(
+        (loaded?.rawGameState?.military?.fired_event_ids ?? []) as ReadonlyArray<string>,
+    );
     for (const entry of loaded?.firedEvents ?? []) {
         if (entry?.id) firedIds.add(entry.id);
     }
