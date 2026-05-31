@@ -70,6 +70,23 @@ describe('back-the-officer is human-only (determinism guard)', () => {
     expect(offenders).toEqual([]);
   });
 
+  it('no sim/scenario code references the proactive force-launch IPC channel', () => {
+    // "Override without proposal" is human-only: the proactive force-launch IPC
+    // (proactive-force-launch-op) lives entirely in src/desktop. The sim must
+    // never reference it, so it cannot shift bot/scenario output or run hashes.
+    const roots = [resolve(process.cwd(), 'src', 'sim'), resolve(process.cwd(), 'src', 'scenario')];
+    const offenders: string[] = [];
+    for (const root of roots) {
+      for (const file of walk(root)) {
+        const src = readFileSync(file, 'utf8');
+        if (src.includes('proactive-force-launch-op') || src.includes('proactiveForceLaunchOp')) {
+          offenders.push(file.replace(/\\/g, '/'));
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
   it('the desktop card builder is a pure read-model — it does not mutate the state it reads', () => {
     const state = {
       military: {

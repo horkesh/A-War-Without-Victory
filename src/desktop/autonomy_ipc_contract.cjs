@@ -103,6 +103,10 @@ function resolveOpportunityDecisionPayload(proposals, payload, playerFaction) {
 // command-authority cost. MUST match src/ui/map/utils/commandAuthority.ts
 // (FORCE_LAUNCH_COST = 15) and the stage-operation-force-launch handler.
 const FORCE_LAUNCH_COST = 15;
+// Proactive presidential force-launch (override-without-proposal) command-authority
+// cost. MUST match src/ui/map/utils/commandAuthority.ts (PROACTIVE_FORCE_LAUNCH_COST
+// = 25) and the proactive-force-launch-op handler.
+const PROACTIVE_FORCE_LAUNCH_COST = 25;
 const APPROVE_OP_PREFIX = 'APPROVE_OP:';
 
 function parseApproveOpAction(action) {
@@ -217,10 +221,102 @@ function buildOpProposalCardData(state, proposals) {
   return cards;
 }
 
+/**
+ * Build the list of corps plans held at 'ready' with NO surfaced proposal —
+ * the candidates for a PROACTIVE presidential force-launch (override without
+ * proposal). Mirrors src/ui/map/data/backTheOfficer.ts buildForceableReadyPlans
+ * for the LIVE get-autonomy-state IPC (AutonomyPanel does not see LoadedGameState).
+ *
+ * A plan is forceable iff corps.commander_state.current_plan.status === 'ready'
+ * AND no pending proposal carries APPROVE_OP:<corps>:<plan_id> for it.
+ * Pure / defensive / deterministic — sorted by corps id then plan id. Never mutates.
+ */
+function buildForceableReadyPlanData(state, proposals) {
+  const military = state && typeof state.military === 'object' ? state.military : null;
+  if (!military) return [];
+  const corpsCommand = military && typeof military.corps_command === 'object' ? military.corps_command : null;
+  if (!corpsCommand) return [];
+  const formations = military && typeof military.formations === 'object' ? military.formations : {};
+
+  // Player-safe officer roster (name + rank + status).
+  const rosterById = new Map();
+  const officerData = Array.isArray(military.named_officer_data) ? military.named_officer_data : [];
+  const officerState = military && typeof military.named_officers === 'object' ? military.named_officers : {};
+  for (const d of officerData) {
+    const id = d && typeof d.id === 'string' ? d.id : '';
+    if (!id) continue;
+    const os = officerState[id];
+    rosterById.set(id, {
+      name: typeof d.name === 'string' ? d.name : 'the field commander',
+      rank: typeof d.rank === 'string' ? d.rank : undefined,
+      status: os && typeof os.status === 'string' ? os.status : 'active',
+    });
+  }
+
+  // Active corps commander per corps (status active + assigned to the corps).
+  const commanderIdByCorps = new Map();
+  for (const oid of Object.keys(officerState).sort()) {
+    const os = officerState[oid];
+    if (!os || typeof os !== 'object') continue;
+    if (os.status !== 'active') continue;
+    const corpsId = typeof os.assigned_corps_id === 'string' ? os.assigned_corps_id : '';
+    if (corpsId && !commanderIdByCorps.has(corpsId)) commanderIdByCorps.set(corpsId, oid);
+  }
+
+  // Plan ids already surfaced as a proposal — excluded (existing path owns those).
+  const proposedPlanKeys = new Set();
+  for (const p of Array.isArray(proposals) ? proposals : []) {
+    const parsed = parseApproveOpAction(p && p.proposed_action);
+    if (parsed) proposedPlanKeys.add(`${parsed.corpsId}:${parsed.planId}`);
+  }
+
+  const views = [];
+  for (const corpsId of Object.keys(corpsCommand).sort()) {
+    const cc = corpsCommand[corpsId];
+    if (!cc || typeof cc !== 'object') continue;
+    const cmdState = cc.commander_state && typeof cc.commander_state === 'object' ? cc.commander_state : null;
+    const plan = cmdState && cmdState.current_plan && typeof cmdState.current_plan === 'object' ? cmdState.current_plan : null;
+    if (!plan) continue;
+    if (plan.status !== 'ready') continue;
+    const planId = safeStr(plan.plan_id);
+    if (!planId) continue;
+    if (proposedPlanKeys.has(`${corpsId}:${planId}`)) continue;
+
+    const commanderId = commanderIdByCorps.get(corpsId);
+    const rosterRow = commanderId ? rosterById.get(commanderId) : undefined;
+    const corpsName = (formations[corpsId] && typeof formations[corpsId].name === 'string')
+      ? formations[corpsId].name
+      : corpsId;
+    views.push({
+      corps_id: corpsId,
+      corps_name: corpsName,
+      plan_id: planId,
+      op_name: safeStr(plan.objective_description) || planId,
+      commander: commanderId
+        ? {
+            officer_id: commanderId,
+            name: rosterRow ? rosterRow.name : 'the field commander',
+            rank: rosterRow ? rosterRow.rank : undefined,
+            display: rosterRow && rosterRow.rank
+              ? `${humanizeRank(rosterRow.rank)} ${rosterRow.name}`
+              : (rosterRow ? rosterRow.name : 'the field commander'),
+          }
+        : null,
+      commander_assessment: safeStr(cmdState.last_plan_reason) || null,
+      force_ca_cost: PROACTIVE_FORCE_LAUNCH_COST,
+    });
+  }
+
+  views.sort((a, b) => (a.corps_id < b.corps_id ? -1 : a.corps_id > b.corps_id ? 1 : (a.plan_id < b.plan_id ? -1 : a.plan_id > b.plan_id ? 1 : 0)));
+  return views;
+}
+
 module.exports = {
   getPendingProposalReviewsForPlayer,
   resolvePendingProposalAccess,
   resolveOpportunityDecisionPayload,
   buildOpProposalCardData,
+  buildForceableReadyPlanData,
   FORCE_LAUNCH_COST,
+  PROACTIVE_FORCE_LAUNCH_COST,
 };

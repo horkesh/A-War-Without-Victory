@@ -19,7 +19,9 @@ const {
   resolvePendingProposalAccess,
   resolveOpportunityDecisionPayload,
   buildOpProposalCardData,
+  buildForceableReadyPlanData,
   FORCE_LAUNCH_COST,
+  PROACTIVE_FORCE_LAUNCH_COST,
 } = require('./autonomy_ipc_contract.cjs');
 const { computeCorpsCommandStrain } = require('./command_strain.cjs');
 const { stageConvoyDecisionOnState } = require('./convoy_ipc_contract.cjs');
@@ -2992,6 +2994,9 @@ app.whenReady().then(() => {
       // Phase 2 slice 1 "Back the Officer": named-officer decision cards joined
       // to active ops (officer + rank, force ratio, go/no-go, override CA cost).
       op_proposal_cards: buildOpProposalCardData(state, playerProposals),
+      // "Override without proposal": corps plans the officer holds at 'ready' but
+      // never surfaced as a proposal — candidates for a proactive force-launch.
+      forceable_ready_plans: buildForceableReadyPlanData(state, playerProposals),
       command_authority: state.military?.command_authority ?? null,
     };
   });
@@ -3196,6 +3201,91 @@ app.whenReady().then(() => {
 
     proposal.accepted = true;
     proposal.resolved_turn = state.meta.turn;
+
+    writeCanonicalCurrentState(sim, state, event.sender);
+    return { ok: true };
+  });
+
+  // "Override without proposal" — PROACTIVE presidential force-launch.
+  //
+  // At autonomy level 1 the corps commander may hold a plan at 'ready' WITHOUT
+  // ever surfacing it as an APPROVE_OP proposal. This handler lets the president
+  // force that held plan to launch by STAGING player_op_response.approved=true for
+  // it — exactly the channel the commander_loop Level-1 guard consumes next turn
+  // to let the plan reach 'executing'. Mirrors force-launch-proposal but resolves
+  // the plan from commander_state.current_plan (no proposal lookup), and REQUIRES
+  // status 'ready' with NO pending proposal for that plan (rejects otherwise — no
+  // fallback). Debits PROACTIVE_FORCE_LAUNCH_COST (25) command authority.
+  //
+  // Determinism preserved: no clock, no RNG; human-only (the sim never sets
+  // player_op_response, and Level-1 proposals/launch only exist for the human
+  // player — headless stays at autonomy_level 0).
+  ipcMain.handle('proactive-force-launch-op', async (event, payload) => {
+    if (!currentGameStateJson) return { ok: false, error: 'no_state' };
+    const corpsId = payload && typeof payload.corpsId === 'string' ? payload.corpsId : '';
+    const planId = payload && typeof payload.planId === 'string' ? payload.planId : '';
+    if (!corpsId || !planId) return { ok: false, error: 'invalid_payload' };
+
+    const sim = getDesktopSim();
+    const state = readCanonicalCurrentState(sim);
+
+    // Player-ownership: only the player faction may force its own corps.
+    const playerFaction = state.meta?.player_faction ?? null;
+
+    const cc = state.military?.corps_command?.[corpsId];
+    if (!cc) return { ok: false, error: 'corps_not_found' };
+
+    // Resolve the HELD plan from commander_state.current_plan (NOT active_operations).
+    const plan = cc.commander_state && typeof cc.commander_state === 'object'
+      ? cc.commander_state.current_plan
+      : null;
+    if (!plan || typeof plan !== 'object') return { ok: false, error: 'plan_not_found' };
+    if (plan.plan_id !== planId) return { ok: false, error: 'plan_not_found' };
+    if (plan.status !== 'ready') return { ok: false, error: 'plan_not_ready' };
+
+    // REQUIRE no surfaced proposal for this plan — proactive force-launch is for
+    // plans the officer never recommended. A surfaced proposal goes through the
+    // existing commit / override (force-launch-proposal) path instead.
+    const proposals = Array.isArray(state.meta?.pending_proposal_reviews)
+      ? state.meta.pending_proposal_reviews
+      : [];
+    const approveAction = `APPROVE_OP:${corpsId}:${planId}`;
+    const hasProposal = proposals.some((p) =>
+      p && p.proposed_action === approveAction
+      && (!playerFaction || p.faction === playerFaction)
+      && p.accepted === undefined && p.opportunity_decision === undefined,
+    );
+    if (hasProposal) return { ok: false, error: 'plan_has_pending_proposal' };
+
+    // Command-authority guard — stage nothing if unaffordable.
+    const auth = state.military?.command_authority;
+    if (auth) {
+      if (auth.current < PROACTIVE_FORCE_LAUNCH_COST) {
+        return { ok: false, error: `insufficient_command_authority (${auth.current}/${PROACTIVE_FORCE_LAUNCH_COST})` };
+      }
+      auth.current -= PROACTIVE_FORCE_LAUNCH_COST;
+      auth.spent_this_turn += PROACTIVE_FORCE_LAUNCH_COST;
+      auth.lifetime_spent += PROACTIVE_FORCE_LAUNCH_COST;
+    }
+
+    // Stage approval — the SAME channel as commit / force-launch-proposal. The
+    // commander_loop Level-1 guard reads this next turn and lets the held plan
+    // reach 'executing' and emit its operation.
+    cc.player_op_response = { plan_id: planId, approved: true, turn: state.meta.turn };
+
+    // Defensive parity with force-launch-proposal: if an active op already exists
+    // for this plan (e.g. re-issued same turn), carry the force-launch flags so it
+    // bypasses planning like the proposal-override path. Held-ready plans normally
+    // have no active op yet — the flags then ride the emitted op via normal staging.
+    const ops = Array.isArray(cc.active_operations)
+      ? cc.active_operations
+      : (cc.active_operation ? [cc.active_operation] : []);
+    const op = ops.find((o) => o && (o.plan_id === planId || o.id === planId));
+    if (op) {
+      op.force_launch = true;
+      op.was_force_launched = true;
+      op.commander_assessment_at_launch = op.commander_assessment;
+    }
 
     writeCanonicalCurrentState(sim, state, event.sender);
     return { ok: true };
