@@ -18,6 +18,8 @@ const {
   getPendingProposalReviewsForPlayer,
   resolvePendingProposalAccess,
   resolveOpportunityDecisionPayload,
+  buildOpProposalCardData,
+  FORCE_LAUNCH_COST,
 } = require('./autonomy_ipc_contract.cjs');
 const { computeCorpsCommandStrain } = require('./command_strain.cjs');
 const { stageConvoyDecisionOnState } = require('./convoy_ipc_contract.cjs');
@@ -2981,11 +2983,16 @@ app.whenReady().then(() => {
     if (!currentGameStateJson) return null;
     const sim = getDesktopSim();
     const state = readCanonicalCurrentState(sim);
+    const playerProposals = getPendingProposalReviewsForPlayer(state);
     return {
       autonomy_level: state.meta?.autonomy_level ?? 0,
       autonomy_level_pending: state.meta?.autonomy_level_pending ?? null,
       autonomy_overrides: state.meta?.autonomy_overrides ?? [],
-      pending_proposal_reviews: getPendingProposalReviewsForPlayer(state),
+      pending_proposal_reviews: playerProposals,
+      // Phase 2 slice 1 "Back the Officer": named-officer decision cards joined
+      // to active ops (officer + rank, force ratio, go/no-go, override CA cost).
+      op_proposal_cards: buildOpProposalCardData(state, playerProposals),
+      command_authority: state.military?.command_authority ?? null,
     };
   });
 
@@ -3119,6 +3126,67 @@ app.whenReady().then(() => {
       // accepted=false above; the war-pipeline step on the next turn routes
       // it through applyOpportunityDecision('decline'). No state mutation here.
     }
+
+    writeCanonicalCurrentState(sim, state, event.sender);
+    return { ok: true };
+  });
+
+  // Phase 2 slice 1 "Back the Officer": Level 3 Direct Intervention on a pending
+  // op proposal. Mirrors accept-proposal but ALSO debits command authority and
+  // sets the op's force_launch flag so the corps commander's go/no-go is
+  // overridden in-pipeline (consumed at apply-autonomy-transition). The handler
+  // STAGES intent only — player_op_response + force_launch are consumed and
+  // cleared by the canonical war pipeline each turn. Determinism preserved:
+  // no clock, no RNG; this path is human-only (proposals never carry
+  // force_launch for bot/headless factions).
+  ipcMain.handle('force-launch-proposal', async (event, proposalId) => {
+    if (!currentGameStateJson) return { ok: false, error: 'no_state' };
+    const sim = getDesktopSim();
+    const state = readCanonicalCurrentState(sim);
+    const proposals = state.meta?.pending_proposal_reviews ?? [];
+    const playerFaction = state.meta?.player_faction ?? null;
+    const proposalAccess = resolvePendingProposalAccess(proposals, proposalId, playerFaction);
+    if (proposalAccess.index === -1) return { ok: false, error: proposalAccess.error };
+    const proposal = proposals[proposalAccess.index];
+    if (proposal.accepted !== undefined || proposal.opportunity_decision !== undefined) {
+      return { ok: false, error: 'already_resolved' };
+    }
+    if (typeof proposal.proposed_action !== 'string' || !proposal.proposed_action.startsWith('APPROVE_OP:')) {
+      return { ok: false, error: 'not_op_proposal' };
+    }
+
+    // Command-authority guard FIRST — do not stage anything if unaffordable.
+    const auth = state.military?.command_authority;
+    if (auth) {
+      if (auth.current < FORCE_LAUNCH_COST) {
+        return { ok: false, error: `insufficient_command_authority (${auth.current}/${FORCE_LAUNCH_COST})` };
+      }
+      auth.current -= FORCE_LAUNCH_COST;
+      auth.spent_this_turn += FORCE_LAUNCH_COST;
+      auth.lifetime_spent += FORCE_LAUNCH_COST;
+    }
+
+    const parts = proposal.proposed_action.split(':');
+    const corpsId = parts[1];
+    const planId = parts.slice(2).join(':');
+    const cc = state.military?.corps_command?.[corpsId];
+    if (cc) {
+      // Approve the plan (same channel as accept-proposal) so applyCommanderOutput launches it.
+      cc.player_op_response = { plan_id: planId, approved: true, turn: state.meta.turn };
+      // Override the commander's go/no-go on the matching active op (best-effort).
+      const ops = Array.isArray(cc.active_operations)
+        ? cc.active_operations
+        : (cc.active_operation ? [cc.active_operation] : []);
+      const op = ops.find((o) => o && (o.plan_id === planId || o.id === planId)) || ops[0];
+      if (op) {
+        op.force_launch = true;
+        op.was_force_launched = true;
+        op.commander_assessment_at_launch = op.commander_assessment;
+      }
+    }
+
+    proposal.accepted = true;
+    proposal.resolved_turn = state.meta.turn;
 
     writeCanonicalCurrentState(sim, state, event.sender);
     return { ok: true };

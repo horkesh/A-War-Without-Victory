@@ -1038,6 +1038,13 @@ export interface LoadedGameState {
      * cohesion bled, anchor-death dissolution). For AAR / Chronicle. Absent pre-3A.
      */
     tgAftermath?: import('./backTheOfficer.js').TgAftermathView[];
+    /**
+     * Phase 2 slice 1 "Back the Officer": per pending 'ops' proposal, the named-officer
+     * decision card — proposing officer + rank, force-ratio estimate, donor pull /
+     * cohesion cost, go/no-go call, and the Override (force-launch) CA cost. Absent
+     * when there are no pending op proposals. Decision-only read-model; never staged.
+     */
+    opProposalCards?: import('./backTheOfficer.js').OpProposalCardView[];
     /** Most recent turn after-action report (null before first turn is advanced). */
     latestTurnSummary: import('../../../state/turn_summary.js').TurnSummary | null;
     /** All turn summaries (for Chronicle timeline). */
