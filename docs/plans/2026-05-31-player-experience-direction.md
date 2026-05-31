@@ -1,7 +1,7 @@
 # Player-Experience Direction — "Authorship of the Tragedy"
 
 **Date:** 2026-05-31
-**Status:** DIRECTION (panel-ratified) + phased plan. Phase 1 SHIPPED (PR #68); Phase 2 slice 1 SHIPPED (PR #70); game-start intro SHIPPED (PR #71); AI-as-player president prototype + determinism harness SHIPPED (PR #72, `tools/ai_play/`); Phase 3 TO SCOPE (RESPONSE: atom + keystone tags — see §4).
+**Status:** DIRECTION (panel-ratified) + phased plan. Phase 1 SHIPPED (PR #68); Phase 2 slice 1 SHIPPED (PR #70); game-start intro SHIPPED (PR #71); AI-as-player president prototype + determinism harness SHIPPED (PR #72, `tools/ai_play/`); Phase 3 Thread 1 (RESPONSE: atom) SHIPPED (PR #80); **Phase 3 Thread 2 (dilemma spine — "The Choices That Made This War" Codex section, 7 keystone-tagged events, `dilemmaSpine` read-model) SHIPPED (PR #82 + faced-fix PR #83).** Remaining: Phase 2 deepening (override-without-proposal, officer dossiers — scoped); sensitive-essay branch annotations (owner/historian-gated); patron-dependence dilemma DEFERRED (dimension, not a keystone event).
 **Author:** Pyrrhic specialist panel (Game Designer + UX/Event-Decision + Tech Architect + Historian), convened 2026-05-31.
 **Scope:** Records the player-experience vision, binding guardrails, and the three-phase delivery plan so future sessions inherit the intent — not just the code.
 
