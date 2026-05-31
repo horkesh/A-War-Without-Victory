@@ -122,12 +122,13 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
         const context = {
             firedEventIds,
             eventFlags: loadedGameState?.eventFlags,
+            decisionResponses: loadedGameState?.decisionResponses,
             historicalComparison: loadedGameState?.historicalComparison,
             costLedger: loadedGameState?.costLedger,
             gameOver: loadedGameState?.gameOver,
         };
         return new Map(essays.map((essay) => [essay.id, resolveCodexEssay(essay, context, locale)]));
-    }, [essays, firedEventIds, locale, loadedGameState?.eventFlags, loadedGameState?.historicalComparison, loadedGameState?.costLedger, loadedGameState?.gameOver]);
+    }, [essays, firedEventIds, locale, loadedGameState?.eventFlags, loadedGameState?.decisionResponses, loadedGameState?.historicalComparison, loadedGameState?.costLedger, loadedGameState?.gameOver]);
 
     const visibleEssaysByYear = useMemo(() => {
         const grouped = new Map<number, EssayEntry[]>();

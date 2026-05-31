@@ -1306,6 +1306,9 @@ export interface LoadedGameState {
 
     /** Per-faction event flags set by player decisions. */
     eventFlags?: Record<string, string | number | boolean>;
+    /** Phase 3 Thread 1: set of `${event_id}:${response_id}` for player/bot decisions,
+     *  consumed by codex RESPONSE: condition atoms. UI read-model only (not hashed state). */
+    decisionResponses?: ReadonlySet<string>;
     /** True when any event has readiness >= 50 (approaching threshold). */
     pressureWarning: boolean;
 

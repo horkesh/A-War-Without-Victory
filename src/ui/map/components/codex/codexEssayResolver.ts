@@ -44,6 +44,8 @@ export interface EssayEntry {
 export interface CodexRenderContext {
     firedEventIds: Set<string>;
     eventFlags?: Record<string, string | number | boolean>;
+    /** Phase 3 Thread 1: `${event_id}:${response_id}` for player/bot decisions. */
+    decisionResponses?: ReadonlySet<string>;
     historicalComparison?: ComparisonResult;
     costLedger?: CostLedger;
     gameOver?: boolean;
@@ -276,6 +278,12 @@ function evaluateAtom(token: string, context: CodexRenderContext): boolean {
 
     if (token.startsWith('FLAG:')) {
         return isTruthyValue(context.eventFlags?.[token.slice('FLAG:'.length)]);
+    }
+
+    // Phase 3 Thread 1: RESPONSE:<event_id>:<response_id> — true iff the player/bot
+    // chose that response (persisted in state.military.event_decision_log).
+    if (token.startsWith('RESPONSE:')) {
+        return context.decisionResponses?.has(token.slice('RESPONSE:'.length)) ?? false;
     }
 
     return isTruthyValue(context.eventFlags?.[token]);
