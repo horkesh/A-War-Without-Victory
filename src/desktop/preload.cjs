@@ -115,6 +115,8 @@ contextBridge.exposeInMainWorld('awwv', {
   // v0.8.4 Phase C: Proposal review
   acceptProposal: (proposalId) => ipcRenderer.invoke('accept-proposal', proposalId),
   rejectProposal: (proposalId) => ipcRenderer.invoke('reject-proposal', proposalId),
+  // Phase 2 slice 1 "Back the Officer": Level 3 Direct Intervention on an op proposal.
+  forceLaunchProposal: (proposalId) => ipcRenderer.invoke('force-launch-proposal', proposalId),
   resolveOperationOpportunityDecision: (payload) => ipcRenderer.invoke('resolve-operation-opportunity-decision', payload),
   // v0.9.2 tutorial onboarding (LANE-NIGHTSHIFT-ROUND2 + LANE-NIGHTSHIFT-TUTORIAL-CONTENT-V1)
   dismissTutorial: () => ipcRenderer.invoke('tutorial:dismiss'),

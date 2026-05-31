@@ -6,6 +6,8 @@ const {
   getPendingProposalReviewsForPlayer,
   resolvePendingProposalAccess,
   resolveOpportunityDecisionPayload,
+  buildOpProposalCardData,
+  FORCE_LAUNCH_COST,
 } = require('../src/desktop/autonomy_ipc_contract.cjs') as {
   getPendingProposalReviewsForPlayer: (state: any) => any[];
   resolvePendingProposalAccess: (
@@ -23,6 +25,8 @@ const {
     decision?: string;
     options?: Record<string, unknown>;
   };
+  buildOpProposalCardData: (state: any, proposals: any[]) => any[];
+  FORCE_LAUNCH_COST: number;
 };
 
 describe('desktop autonomy IPC boundary truth', () => {
@@ -129,5 +133,46 @@ describe('desktop autonomy IPC boundary truth', () => {
       { reviewId: 'PROP_176_opportunity_0', proposalId: 'OPP_999_other', decision: 'delay' },
       'RBiH',
     )).toEqual({ index: -1, error: 'proposal_id_mismatch' });
+  });
+});
+
+describe('op-proposal decision card builder (desktop boundary)', () => {
+  function state(opOverrides: Record<string, unknown>) {
+    return {
+      military: {
+        formations: { '1st_corps': { name: '1st Corps' } },
+        named_officer_data: [{ id: 'off_x', name: 'Atif Dudaković', rank: 'corps_commander' }],
+        named_officers: { off_x: { status: 'active' } },
+        corps_command: {
+          '1st_corps': {
+            active_operations: [
+              { id: 'op_a', name: 'Operation A', plan_id: 'plan_a', tg_commander_officer_id: 'off_x', ...opOverrides },
+            ],
+          },
+        },
+      },
+    };
+  }
+  const proposal = { id: 'PROP_30_ops_0', faction: 'RBiH', domain: 'ops', proposed_action: 'APPROVE_OP:1st_corps:plan_a' };
+
+  it('matches the TS read-model shape: officer display, force ratio, override gate, CA cost', () => {
+    const cards = buildOpProposalCardData(state({ force_ratio_estimate: 0.7, commander_assessment: 'abort' }), [proposal]);
+    expect(cards).toHaveLength(1);
+    const c = cards[0];
+    expect(c.proposal_id).toBe('PROP_30_ops_0');
+    expect(c.corps_name).toBe('1st Corps');
+    expect(c.op_id).toBe('op_a');
+    expect(c.commander.display).toBe('Corps Commander Atif Dudaković');
+    expect(c.force_ratio_estimate).toBe(0.7);
+    expect(c.commander_assessment).toBe('abort');
+    expect(c.override_available).toBe(true);
+    expect(c.override_ca_cost).toBe(FORCE_LAUNCH_COST);
+  });
+
+  it('drops non-ops + malformed proposals and is defensive on missing state', () => {
+    expect(buildOpProposalCardData(state({}), [{ id: 'x', domain: 'military', proposed_action: 'SET_STANCE:1st_corps:offensive' }])).toEqual([]);
+    expect(buildOpProposalCardData(state({}), [{ id: 'x', domain: 'ops', proposed_action: 'APPROVE_OP:' }])).toEqual([]);
+    expect(buildOpProposalCardData(null, [proposal])).toHaveLength(1);
+    expect(buildOpProposalCardData({}, [])).toEqual([]);
   });
 });

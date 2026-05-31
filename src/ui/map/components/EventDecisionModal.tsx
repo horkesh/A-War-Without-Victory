@@ -21,7 +21,7 @@ import type {
 } from '../../../sim/events/event_types';
 import type { GameState } from '../../../state/game_state';
 import { getCausalAncestors } from '../../../sim/events/causality_query';
-import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
+import { getPlayerSafePoliticalFactionName, getPlayerSafeOfficerName } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 
@@ -59,6 +59,15 @@ export interface EventDecisionModalProps {
      * skipped. Backward compatible.
      */
     state?: GameState;
+    /**
+     * Phase 2 slice 1 "Back the Officer": named advisor whose voice frames the
+     * assessment block for operation/corps-scoped events ('command' / 'military'
+     * category). When a commander resolves, the block is labelled "{rank} {name}"
+     * instead of the generic "Staff assessment". Backward compatible — omit to
+     * keep the generic label. Names are already player-safe via the roster, but
+     * sanitised defensively here too.
+     */
+    advisor?: { name: string | null | undefined; rank?: string };
 }
 
 /** Phase H Packet 3 — Maximum chars of source dossier excerpt rendered in
@@ -82,6 +91,34 @@ function sentenceToken(value: string | undefined): string {
     const text = humanizeToken(value).trim();
     if (!text) return '';
     return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+}
+
+/** Phase 2 slice 1: "corps_commander" → "Corps Commander" for advisor labels. */
+function humanizeRank(rank: string): string {
+    return rank
+        .split(/[_\s]+/)
+        .filter(Boolean)
+        .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+        .join(' ');
+}
+
+/**
+ * Phase 2 slice 1 "Back the Officer": label for the assessment block.
+ *
+ * Operation/corps-scoped events ('command' / 'military') speak in a named
+ * officer's voice ("{rank} {name}") when a commander resolves; everything else
+ * (and the no-officer fallback) keeps the generic "Staff assessment". Pure +
+ * exported for unit testing without a DOM render.
+ */
+export function deriveAssessmentLabel(
+    category: string | undefined,
+    advisor: { name: string | null | undefined; rank?: string } | undefined,
+): string {
+    const isOfficerScoped = category === 'command' || category === 'military';
+    const hasOfficer = isOfficerScoped && advisor != null && (advisor.name ?? '').trim().length > 0;
+    if (!hasOfficer) return 'Staff assessment';
+    const rankPrefix = advisor!.rank ? `${humanizeRank(advisor!.rank)} ` : '';
+    return `${rankPrefix}${getPlayerSafeOfficerName(advisor!.name)}`;
 }
 
 /** Render a human-readable summary of an effect. */
@@ -356,11 +393,16 @@ function DecisionContextSection({
     );
 }
 
-export function EventDecisionModal({ decision, onRespond, eventCatalog, state }: EventDecisionModalProps) {
+export function EventDecisionModal({ decision, onRespond, eventCatalog, state, advisor }: EventDecisionModalProps) {
     const factionColor = FACTION_TEXT_CLASS[decision.faction ?? ''] ?? 'text-accent-gold';
     const category = sentenceToken(decision.category) || 'Presidential decision';
     const sourceNote = decision.source_note ?? decision.historical_source ?? decision.source ?? null;
     const hasHistoricalDefault = decision.response_options.some((option) => isHistoricalOption(option, decision));
+
+    // Phase 2 slice 1 "Back the Officer": for operation/corps-scoped events
+    // the assessment block speaks in a named officer's voice; otherwise it falls
+    // back to the generic "Staff assessment". (See deriveAssessmentLabel.)
+    const assessmentLabel = deriveAssessmentLabel(decision.category, advisor);
 
     return (
         <Modal
@@ -399,7 +441,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state }:
                         {decision.staff_assessment && (
                             <div className="mt-3 rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2">
                                 <div className="mb-1 text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
-                                    Staff assessment
+                                    {assessmentLabel}
                                 </div>
                                 <p className="text-[12px] leading-relaxed text-text-secondary">
                                     {decision.staff_assessment}

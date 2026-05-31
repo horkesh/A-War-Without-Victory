@@ -33,11 +33,39 @@ export interface PendingProposalReview {
     resolved_turn?: number;
 }
 
+/**
+ * Phase 2 slice 1 "Back the Officer": named-officer decision card joined to a
+ * pending 'ops' proposal. Built main-side by buildOpProposalCardData and keyed
+ * to a proposal by proposal_id. Decision-only; never staged.
+ */
+export interface OpProposalCard {
+    proposal_id: string;
+    corps_id: string;
+    corps_name: string;
+    plan_id: string;
+    op_id: string | null;
+    op_name: string;
+    commander: { officer_id: string; name: string; rank?: string; display: string } | null;
+    force_ratio_estimate: number | null;
+    commander_assessment: 'launch' | 'postpone' | 'abort' | null;
+    override_available: boolean;
+    override_ca_cost: number;
+}
+
+interface CommandAuthorityState {
+    current: number;
+    max: number;
+    spent_this_turn: number;
+    lifetime_spent: number;
+}
+
 interface AutonomyState {
     autonomy_level: number;
     autonomy_level_pending?: number;
     autonomy_overrides?: Record<string, unknown>;
     pending_proposal_reviews?: PendingProposalReview[];
+    op_proposal_cards?: OpProposalCard[];
+    command_authority?: CommandAuthorityState | null;
 }
 
 export function filterPendingProposalsForPlayer(
@@ -55,6 +83,7 @@ interface AutonomyBridge {
     setAutonomyLevel: (level: number) => Promise<{ ok: boolean; error?: string }>;
     acceptProposal?: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
     rejectProposal?: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
+    forceLaunchProposal?: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
 }
 
 function getAutonomyBridge(): AutonomyBridge | undefined {
@@ -83,12 +112,24 @@ const LEVEL_DESC_KEYS: Record<number, MessageKey> = {
 
 interface ProposalCardProps {
     proposal: PendingProposalReview;
+    /** Phase 2 slice 1: named-officer decision card for an 'ops' proposal (joined main-side). */
+    opCard?: OpProposalCard;
+    /** Current command authority, for the Override (force-launch) affordability gate. */
+    commandAuthorityCurrent?: number;
     onAccept: (id: string) => void;
     onReject: (id: string) => void;
+    onForceLaunch: (id: string) => void;
     busy: boolean;
 }
 
-function ProposalCard({ proposal, onAccept, onReject, busy }: ProposalCardProps) {
+/** Force ratio → label colour. <1 is unfavourable (defender stronger). */
+function ratioClass(ratio: number): string {
+    if (ratio >= 2) return 'text-green-300';
+    if (ratio >= 1) return 'text-[#d4d0c8]';
+    return 'text-red-300';
+}
+
+function ProposalCard({ proposal, opCard, commandAuthorityCurrent, onAccept, onReject, onForceLaunch, busy }: ProposalCardProps) {
     const resolved = proposal.accepted !== undefined;
 
     // Parse a readable corps label from proposed_action.
@@ -106,12 +147,20 @@ function ProposalCard({ proposal, onAccept, onReject, busy }: ProposalCardProps)
     } else {
         corpsLabel = proposal.description.split('.')[0] ?? proposal.domain;
     }
+    // Prefer the joined card's player-facing corps name when present.
+    if (opCard?.corps_name) corpsLabel = opCard.corps_name;
 
     const statusIndicator = resolved
         ? proposal.accepted
             ? { label: t('autonomy.proposal.accepted'), cls: 'text-green-400 border-green-500/30 bg-green-900/10' }
             : { label: t('autonomy.proposal.rejected'), cls: 'text-red-400 border-red-500/30 bg-red-900/10' }
         : null;
+
+    // Phase 2 slice 1: Override (force-launch) only when the commander recommends
+    // NOT launching (postpone | abort). Disabled when CA can't cover the cost.
+    const overrideOffered = isOp && !!opCard?.override_available;
+    const overrideCost = opCard?.override_ca_cost ?? 0;
+    const canAffordOverride = (commandAuthorityCurrent ?? 0) >= overrideCost;
 
     return (
         <div
@@ -131,8 +180,31 @@ function ProposalCard({ proposal, onAccept, onReject, busy }: ProposalCardProps)
                 </span>
             </div>
 
-            {/* Stance change arrow */}
-            {(proposal.current_value || proposal.proposed_value) && (
+            {/* Phase 2 slice 1: named-officer voice for an op proposal. */}
+            {isOp && opCard && (
+                <div className="space-y-1">
+                    <div className="flex items-center justify-between gap-2 text-[10px] font-mono">
+                        <span className="text-[#d4d0c8] truncate">
+                            {opCard.commander
+                                ? opCard.commander.display
+                                : t('autonomy.proposal.fieldCommander')}
+                        </span>
+                        {opCard.force_ratio_estimate != null && (
+                            <span className={`shrink-0 ${ratioClass(opCard.force_ratio_estimate)}`}>
+                                {t('autonomy.proposal.forceRatio', { ratio: opCard.force_ratio_estimate.toFixed(1) })}
+                            </span>
+                        )}
+                    </div>
+                    {opCard.commander_assessment && (
+                        <div className="text-[9px] font-mono uppercase tracking-[0.12em] text-[#8a8578]">
+                            {t(`autonomy.proposal.assessment.${opCard.commander_assessment}` as MessageKey)}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Stance change arrow (non-op proposals) */}
+            {!isOp && (proposal.current_value || proposal.proposed_value) && (
                 <div className="flex items-center gap-1.5 text-[10px] font-mono">
                     <span className="text-[#8a8578]">{proposal.current_value ?? '—'}</span>
                     <span className="text-[#c4a04a]/60">→</span>
@@ -151,21 +223,39 @@ function ProposalCard({ proposal, onAccept, onReject, busy }: ProposalCardProps)
                     {statusIndicator.label}
                 </div>
             ) : (
-                <div className="flex gap-2 pt-0.5">
-                    <button
-                        onClick={() => onAccept(proposal.id)}
-                        disabled={busy}
-                        className="flex-1 py-1 text-[9px] font-mono uppercase tracking-[0.15em] rounded border border-green-500/25 bg-green-900/15 text-green-300 hover:bg-green-900/30 hover:border-green-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                    >
-                        {isOp ? t('autonomy.proposal.authorize') : t('autonomy.proposal.accept')}
-                    </button>
-                    <button
-                        onClick={() => onReject(proposal.id)}
-                        disabled={busy}
-                        className="flex-1 py-1 text-[9px] font-mono uppercase tracking-[0.15em] rounded border border-red-500/25 bg-red-900/10 text-red-400 hover:bg-red-900/25 hover:border-red-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                    >
-                        {isOp ? t('autonomy.proposal.abort') : t('autonomy.proposal.reject')}
-                    </button>
+                <div className="space-y-2 pt-0.5">
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => onAccept(proposal.id)}
+                            disabled={busy}
+                            className="flex-1 py-1 text-[9px] font-mono uppercase tracking-[0.15em] rounded border border-green-500/25 bg-green-900/15 text-green-300 hover:bg-green-900/30 hover:border-green-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                        >
+                            {isOp ? t('autonomy.proposal.commit') : t('autonomy.proposal.accept')}
+                        </button>
+                        <button
+                            onClick={() => onReject(proposal.id)}
+                            disabled={busy}
+                            className="flex-1 py-1 text-[9px] font-mono uppercase tracking-[0.15em] rounded border border-red-500/25 bg-red-900/10 text-red-400 hover:bg-red-900/25 hover:border-red-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                        >
+                            {isOp ? t('autonomy.proposal.withhold') : t('autonomy.proposal.reject')}
+                        </button>
+                    </div>
+                    {/* Override (Level 3 Direct Intervention) — only when the commander
+                        recommends NOT launching. Disabled when CA can't cover the cost. */}
+                    {overrideOffered && (
+                        <button
+                            onClick={() => onForceLaunch(proposal.id)}
+                            disabled={busy || !canAffordOverride}
+                            title={canAffordOverride
+                                ? t('autonomy.proposal.overrideCost', { cost: overrideCost })
+                                : t('autonomy.proposal.overrideInsufficient', { current: commandAuthorityCurrent ?? 0, cost: overrideCost })}
+                            className="w-full py-1 text-[9px] font-mono uppercase tracking-[0.15em] rounded border border-amber-500/30 bg-amber-900/15 text-amber-300 hover:bg-amber-900/30 hover:border-amber-500/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                        >
+                            {canAffordOverride
+                                ? t('autonomy.proposal.override', { cost: overrideCost })
+                                : t('autonomy.proposal.overrideInsufficient', { current: commandAuthorityCurrent ?? 0, cost: overrideCost })}
+                        </button>
+                    )}
                 </div>
             )}
         </div>
@@ -254,10 +344,28 @@ export function AutonomyPanel({ onClose, playerFaction }: AutonomyPanelProps) {
         }
     };
 
+    // Phase 2 slice 1: Override (Level 3 Direct Intervention) on an op proposal.
+    const handleForceLaunch = async (proposalId: string) => {
+        if (!bridge?.forceLaunchProposal) return;
+        setBusy(true);
+        try {
+            await bridge.forceLaunchProposal(proposalId);
+            await refresh();
+        } catch (err) {
+            console.warn('[AutonomyPanel] forceLaunchProposal failed:', err);
+        } finally {
+            setBusy(false);
+        }
+    };
+
     const currentLevel = autonomyState?.autonomy_level ?? 0;
     const pendingLevel = autonomyState?.autonomy_level_pending;
     const proposals = filterPendingProposalsForPlayer(autonomyState?.pending_proposal_reviews, playerFaction);
     const unresolvedCount = proposals.filter((p) => p.accepted === undefined).length;
+    // Index op decision cards by proposal id (Phase 2 slice 1).
+    const opCardsById = new Map<string, OpProposalCard>();
+    for (const card of autonomyState?.op_proposal_cards ?? []) opCardsById.set(card.proposal_id, card);
+    const commandAuthorityCurrent = autonomyState?.command_authority?.current;
 
     return (
         <GlassPanel position="right" title={t('autonomy.title')} width="288px" onClose={onClose}>
@@ -361,8 +469,11 @@ export function AutonomyPanel({ onClose, playerFaction }: AutonomyPanelProps) {
                                     <ProposalCard
                                         key={proposal.id}
                                         proposal={proposal}
+                                        opCard={opCardsById.get(proposal.id)}
+                                        commandAuthorityCurrent={commandAuthorityCurrent}
                                         onAccept={handleAccept}
                                         onReject={handleReject}
+                                        onForceLaunch={handleForceLaunch}
                                         busy={busy}
                                     />
                                 ))}
