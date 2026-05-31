@@ -79,7 +79,7 @@ function fixture(turn = 30): { state: GameState; op: CorpsOperation } {
             donor('d_same', 'corp_a', 3),
         ],
         location_osid: 'op:obj:x',
-        status: 'active',
+        status: 'engaged',
         formed_on_turn: turn - 5,
         cohesion: 60,
     };
