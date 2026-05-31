@@ -15,8 +15,10 @@
  */
 import { useEffect, useState, useCallback } from 'react';
 import { GlassPanel } from './GlassPanel';
+import { OfficerDossierPanel } from './OfficerDossierPanel';
 import { playerFactionMatch } from '../data/playerFactionMatch';
 import { t, type MessageKey } from '../i18n';
+import type { NamedOfficerView } from '../data/types';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -126,6 +128,14 @@ interface ProposalCardProps {
     onAccept: (id: string) => void;
     onReject: (id: string) => void;
     onForceLaunch: (id: string) => void;
+    /**
+     * Phase 2 "Officer Dossier": open the dossier for the proposing officer by id.
+     * Only wired when the officer can be resolved in namedOfficerData; otherwise the
+     * commander name renders as plain text.
+     */
+    onInspectOfficer?: (officerId: string) => void;
+    /** True when the proposing officer has a dossier available (clickable name). */
+    inspectable?: boolean;
     busy: boolean;
 }
 
@@ -136,7 +146,7 @@ function ratioClass(ratio: number): string {
     return 'text-red-300';
 }
 
-function ProposalCard({ proposal, opCard, commandAuthorityCurrent, onAccept, onReject, onForceLaunch, busy }: ProposalCardProps) {
+function ProposalCard({ proposal, opCard, commandAuthorityCurrent, onAccept, onReject, onForceLaunch, onInspectOfficer, inspectable, busy }: ProposalCardProps) {
     const resolved = proposal.accepted !== undefined;
 
     // Parse a readable corps label from proposed_action.
@@ -191,11 +201,25 @@ function ProposalCard({ proposal, opCard, commandAuthorityCurrent, onAccept, onR
             {isOp && opCard && (
                 <div className="space-y-1">
                     <div className="flex items-center justify-between gap-2 text-[10px] font-mono">
-                        <span className="text-[#d4d0c8] truncate">
-                            {opCard.commander
-                                ? opCard.commander.display
-                                : t('autonomy.proposal.fieldCommander')}
-                        </span>
+                        {opCard.commander && inspectable && onInspectOfficer ? (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const id = opCard.commander?.officer_id;
+                                    if (id) onInspectOfficer(id);
+                                }}
+                                title={t('officerDossier.title')}
+                                className="text-[#c4a04a] truncate text-left underline decoration-dotted underline-offset-2 hover:text-[#e0c068] focus:outline-none focus:text-[#e0c068] transition-colors"
+                            >
+                                {opCard.commander.display}
+                            </button>
+                        ) : (
+                            <span className="text-[#d4d0c8] truncate">
+                                {opCard.commander
+                                    ? opCard.commander.display
+                                    : t('autonomy.proposal.fieldCommander')}
+                            </span>
+                        )}
                         {opCard.force_ratio_estimate != null && (
                             <span className={`shrink-0 ${ratioClass(opCard.force_ratio_estimate)}`}>
                                 {t('autonomy.proposal.forceRatio', { ratio: opCard.force_ratio_estimate.toFixed(1) })}
@@ -274,9 +298,18 @@ function ProposalCard({ proposal, opCard, commandAuthorityCurrent, onAccept, onR
 export interface AutonomyPanelProps {
     onClose: () => void;
     playerFaction: string | null;
+    /**
+     * Officer Dossier source (Phase 2 "back the officer"): the merged officer
+     * projection from LoadedGameState. Used to resolve a proposing officer by id
+     * and open their dossier. Optional — when absent, commander names render as
+     * plain text (no dossier link).
+     */
+    namedOfficerData?: NamedOfficerView[];
 }
 
-export function AutonomyPanel({ onClose, playerFaction }: AutonomyPanelProps) {
+export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: AutonomyPanelProps) {
+    // Officer Dossier: which officer (if any) is currently being inspected.
+    const [dossierOfficerId, setDossierOfficerId] = useState<string | null>(null);
     const [autonomyState, setAutonomyState] = useState<AutonomyState | null>(null);
     const [loading, setLoading] = useState(true);
     const [levelError, setLevelError] = useState<string | null>(null);
@@ -374,7 +407,16 @@ export function AutonomyPanel({ onClose, playerFaction }: AutonomyPanelProps) {
     for (const card of autonomyState?.op_proposal_cards ?? []) opCardsById.set(card.proposal_id, card);
     const commandAuthorityCurrent = autonomyState?.command_authority?.current;
 
+    // Officer Dossier: index officers by id so a proposing officer can be resolved.
+    const officerById = new Map<string, NamedOfficerView>();
+    for (const officer of namedOfficerData ?? []) officerById.set(officer.id, officer);
+    const dossierOfficer = dossierOfficerId ? officerById.get(dossierOfficerId) ?? null : null;
+    const inspectOfficer = (officerId: string) => {
+        if (officerById.has(officerId)) setDossierOfficerId(officerId);
+    };
+
     return (
+        <>
         <GlassPanel position="right" title={t('autonomy.title')} width="288px" onClose={onClose}>
             {loading ? (
                 <div className="flex items-center justify-center py-8">
@@ -472,18 +514,25 @@ export function AutonomyPanel({ onClose, playerFaction }: AutonomyPanelProps) {
                             </div>
 
                             <div className="space-y-2">
-                                {proposals.map((proposal) => (
-                                    <ProposalCard
-                                        key={proposal.id}
-                                        proposal={proposal}
-                                        opCard={opCardsById.get(proposal.id)}
-                                        commandAuthorityCurrent={commandAuthorityCurrent}
-                                        onAccept={handleAccept}
-                                        onReject={handleReject}
-                                        onForceLaunch={handleForceLaunch}
-                                        busy={busy}
-                                    />
-                                ))}
+                                {proposals.map((proposal) => {
+                                    const card = opCardsById.get(proposal.id);
+                                    const commanderId = card?.commander?.officer_id;
+                                    const inspectable = Boolean(commanderId && officerById.has(commanderId));
+                                    return (
+                                        <ProposalCard
+                                            key={proposal.id}
+                                            proposal={proposal}
+                                            opCard={card}
+                                            commandAuthorityCurrent={commandAuthorityCurrent}
+                                            onAccept={handleAccept}
+                                            onReject={handleReject}
+                                            onForceLaunch={handleForceLaunch}
+                                            onInspectOfficer={inspectOfficer}
+                                            inspectable={inspectable}
+                                            busy={busy}
+                                        />
+                                    );
+                                })}
                             </div>
 
                             {unresolvedCount === 0 && (
@@ -507,6 +556,15 @@ export function AutonomyPanel({ onClose, playerFaction }: AutonomyPanelProps) {
                 </div>
             )}
         </GlassPanel>
+        {/* Officer Dossier overlay (Phase 2 "back the officer"): read-only inspection
+            of the proposing officer. Keyboard-dismissible via GlassPanel (Escape). */}
+        {dossierOfficer && (
+            <OfficerDossierPanel
+                officer={dossierOfficer}
+                onClose={() => setDossierOfficerId(null)}
+            />
+        )}
+        </>
     );
 }
 

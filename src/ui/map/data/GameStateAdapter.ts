@@ -126,6 +126,83 @@ function asLooseRecord(value: unknown): LooseRecord | undefined {
         : undefined;
 }
 
+/**
+ * Read a {killed, wounded} sub-ledger off an AAR record and return killed+wounded.
+ * Defensive: missing/non-numeric fields contribute 0. No casts counted by the
+ * strict-null ratchet (only typed narrowing + finiteNumber).
+ */
+function casualtyTotal(value: unknown): number {
+    const rec = asLooseRecord(value);
+    if (!rec) return 0;
+    return finiteNumber(rec.killed, 0) + finiteNumber(rec.wounded, 0);
+}
+
+/**
+ * Aggregate a per-officer combat ledger from `state.operation_history`
+ * (Array<OperationAAR>) keyed by `commander_officer_id`. Pure, deterministic
+ * read-model: counts/sums only, no mutation, no nondeterministic calls. The
+ * most-recent op is the highest `ended_turn`, ties broken by `operation_id`
+ * (strictCompare) so the result is stable. Returns an empty Map when there is
+ * no history.
+ */
+function buildOfficerCombatRecords(
+    history: unknown,
+): Map<string, NonNullable<NamedOfficerView['combat_record']>> {
+    const out = new Map<string, NonNullable<NamedOfficerView['combat_record']>>();
+    if (!Array.isArray(history)) return out;
+
+    // Track the winning "last op" candidate per officer for deterministic tie-break.
+    const lastOpKey = new Map<string, { endedTurn: number; opId: string }>();
+
+    for (const raw of history) {
+        const aar = asLooseRecord(raw);
+        if (!aar) continue;
+        const officerId = typeof aar.commander_officer_id === 'string' ? aar.commander_officer_id : '';
+        if (!officerId) continue;
+
+        const existing = out.get(officerId) ?? {
+            operations_commanded: 0,
+            wins: 0,
+            partials: 0,
+            failures: 0,
+            casualties_suffered: 0,
+            casualties_inflicted: 0,
+            objectives_captured: 0,
+        };
+
+        existing.operations_commanded += 1;
+        const outcome = typeof aar.outcome === 'string' ? aar.outcome : '';
+        if (outcome === 'success') existing.wins += 1;
+        else if (outcome === 'partial') existing.partials += 1;
+        else existing.failures += 1; // 'failure' | 'orphaned' | unknown
+
+        existing.casualties_suffered += casualtyTotal(aar.casualties_suffered);
+        existing.casualties_inflicted += casualtyTotal(aar.casualties_inflicted);
+        const captured = aar.objectives_captured;
+        if (Array.isArray(captured)) existing.objectives_captured += captured.length;
+
+        // Deterministic most-recent op: highest ended_turn, tie-break by operation_id.
+        const endedTurn = finiteNumber(aar.ended_turn, 0);
+        const opId = typeof aar.operation_id === 'string' ? aar.operation_id : '';
+        const prev = lastOpKey.get(officerId);
+        const isNewer = !prev
+            || endedTurn > prev.endedTurn
+            || (endedTurn === prev.endedTurn && strictCompare(opId, prev.opId) > 0);
+        if (isNewer) {
+            lastOpKey.set(officerId, { endedTurn, opId });
+            existing.last_operation = {
+                name: typeof aar.operation_name === 'string' ? aar.operation_name : opId,
+                outcome,
+                ended_turn: endedTurn,
+            };
+        }
+
+        out.set(officerId, existing);
+    }
+
+    return out;
+}
+
 function readActiveOperationRows(command: LooseRecord | undefined): LooseRecord[] {
     if (!command) return [];
     if (Array.isArray(command.active_operations)) {
@@ -1524,6 +1601,9 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     const rawOfficers = state.military.named_officers as Record<string, Record<string, unknown>> | undefined;
     if (Array.isArray(rawOfficerData) && rawOfficers && typeof rawOfficers === 'object' && !Array.isArray(rawOfficers)) {
         const officerList: NamedOfficerView[] = [];
+        // Officer Dossier: aggregate per-officer combat ledger from operation_history
+        // once, then attach to each officer below. Pure read-model (counts/sums only).
+        const combatRecordsByOfficer = buildOfficerCombatRecords(state.operation_history);
         const sortedData = [...rawOfficerData].sort((a, b) => strictCompare(String(a?.id ?? ''), String(b?.id ?? '')));
         for (const data of sortedData) {
             const id = typeof data?.id === 'string' ? data.id : '';
@@ -1587,6 +1667,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                         Number(state.meta?.turn ?? 0) < Number(warlordEndWeek);
                     return isWarlordActive ? baseMod - 0.15 : baseMod;
                 })(),
+                combat_record: combatRecordsByOfficer.get(id),
             });
         }
         if (officerList.length > 0) namedOfficerData = officerList;

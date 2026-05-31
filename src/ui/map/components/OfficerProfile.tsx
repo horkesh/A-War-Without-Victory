@@ -120,6 +120,51 @@ export function OfficerProfile({ officer, label, compact = false, emphasis = 'ag
                 </div>
             )}
 
+            {/* Combat record (aggregated from operation_history; read-only). */}
+            {!compact && officer.combat_record && officer.combat_record.operations_commanded > 0 && (
+                <div className="space-y-0.5 pt-0.5 border-t border-panel-border/20">
+                    <div className="text-[9px] uppercase text-text-secondary tracking-wider font-semibold">{t('officerProfile.combatRecord')}</div>
+                    <div className="flex items-center gap-2 text-[9px]">
+                        <span className="text-text-secondary w-[62px] shrink-0">{t('officerProfile.opsCommanded')}</span>
+                        <span className="font-mono text-text-primary">{officer.combat_record.operations_commanded}</span>
+                        <span className="text-text-secondary">
+                            {t('officerProfile.wlpRecord', {
+                                wins: officer.combat_record.wins,
+                                partials: officer.combat_record.partials,
+                                failures: officer.combat_record.failures,
+                            })}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[9px]">
+                        <span className="text-text-secondary w-[62px] shrink-0">{t('officerProfile.casualtiesSuffered')}</span>
+                        <span className="font-mono text-red-400">{officer.combat_record.casualties_suffered.toLocaleString('en-US')}</span>
+                        <span className="text-text-secondary">{t('officerProfile.casualtiesInflicted')}</span>
+                        <span className="font-mono text-green-400">{officer.combat_record.casualties_inflicted.toLocaleString('en-US')}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[9px]">
+                        <span className="text-text-secondary w-[62px] shrink-0">{t('officerProfile.objectivesTaken')}</span>
+                        <span className="font-mono text-accent-gold">{officer.combat_record.objectives_captured}</span>
+                    </div>
+                    {officer.combat_record.last_operation && (
+                        <div className="flex items-center gap-2 text-[9px]">
+                            <span className="text-text-secondary w-[62px] shrink-0">{t('officerProfile.lastOperation')}</span>
+                            <span className="text-text-primary truncate" title={officer.combat_record.last_operation.name}>
+                                {officer.combat_record.last_operation.name}
+                            </span>
+                            <span className={`shrink-0 ${
+                                officer.combat_record.last_operation.outcome === 'success'
+                                    ? 'text-green-400'
+                                    : officer.combat_record.last_operation.outcome === 'partial'
+                                        ? 'text-amber-400'
+                                        : 'text-red-400'
+                            }`}>
+                                {officer.combat_record.last_operation.outcome || '—'}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Casualty vulnerability indicator */}
             {officer.casualty_vulnerability != null && officer.casualty_vulnerability >= 0.10 && (
                 <div className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${
