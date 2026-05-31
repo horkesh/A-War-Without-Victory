@@ -52,6 +52,7 @@ import { CreditsScreen } from './components/CreditsScreen';
 import { MapModeLegend } from './components/MapModeLegend';
 import { PeaceStatusPanel } from './components/PeaceStatusPanel';
 import { PeaceWarTransition } from './components/PeaceWarTransition';
+import { WarHasBegunSplash } from './components/WarHasBegunSplash';
 import { ChronicleOverlay } from './components/chronicle/ChronicleOverlay';
 import { WrappedOverlay } from './components/chronicle/WrappedOverlay';
 import { CodexPanel } from './components/CodexPanel';
@@ -250,7 +251,17 @@ function PeaceWarTransitionOverlay() {
   const seen = useGameStore((s) => s.peaceWarTransitionSeen);
   const setSeen = useGameStore((s) => s.setPeaceWarTransitionSeen);
 
+  // Two-step game-start intro, driven by local component state and gated by the
+  // single shared `peaceWarTransitionSeen` flag (no new save flag / migration):
+  //   'splash'   → step 1: the "WAR HAS STARTED" blood-red splash
+  //   'briefing' → step 2: the PeaceWarTransition faction briefing + identity
+  const [step, setStep] = useState<'splash' | 'briefing'>('splash');
+
   if (!state || !shouldShowPeaceWarTransition(state, seen)) return null;
+
+  if (step === 'splash') {
+    return <WarHasBegunSplash onDismiss={() => setStep('briefing')} />;
+  }
 
   return <PeaceWarTransition state={state} onDismiss={() => setSeen(true)} />;
 }

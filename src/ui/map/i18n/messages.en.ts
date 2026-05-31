@@ -1035,6 +1035,17 @@ export const enMessages = {
     'autonomy.proposal.accept': 'Accept',
     'autonomy.proposal.abort': 'Abort',
     'autonomy.proposal.reject': 'Reject',
+    // Phase 2 slice 1 "Back the Officer": named-officer decision card.
+    'autonomy.proposal.commit': 'Commit',
+    'autonomy.proposal.withhold': 'Withhold',
+    'autonomy.proposal.override': 'Override · {cost} CA',
+    'autonomy.proposal.overrideCost': 'Force-launch over your commander\'s objection. Costs {cost} command authority.',
+    'autonomy.proposal.overrideInsufficient': 'Need {cost} CA (have {current})',
+    'autonomy.proposal.fieldCommander': 'Your field commander',
+    'autonomy.proposal.forceRatio': '{ratio}:1',
+    'autonomy.proposal.assessment.launch': 'Recommends: launch',
+    'autonomy.proposal.assessment.postpone': 'Recommends: postpone',
+    'autonomy.proposal.assessment.abort': 'Recommends: abort',
     'common.cancel': 'Cancel',
     'common.confirm': 'Confirm',
     'common.close': 'Close',
@@ -1475,6 +1486,34 @@ export const enMessages = {
     'peace.tankCount': '{count} tanks',
     'peace.artyCount': '{count} arty',
     'peace.begin': 'Begin',
+    // Game-start intro: "WAR HAS STARTED" splash (step 1)
+    'intro.warHasStarted': 'WAR HAS STARTED',
+    'intro.warHasStartedDate': 'APRIL 1992',
+    'intro.warHasStartedSkip': 'Click or press any key to continue',
+    'intro.warHasStartedAcknowledge': 'Acknowledge',
+    // Game-start intro: "who you are" identity block (step 2 — extends PeaceWarTransition)
+    'intro.identity.heading': 'WHO YOU ARE',
+    'intro.identity.identityLabel': 'Identity',
+    'intro.identity.situationLabel': 'Situation',
+    'intro.identity.escapeLabel': 'What you cannot escape',
+    'intro.identity.RBiH.identity':
+        'You are the President of the Presidency of the Republic of Bosnia and Herzegovina, recognized by the world on 6 April and besieged the same day. You preside over a multi-ethnic state that half its own citizens have taken up arms to dismantle.',
+    'intro.identity.RBiH.situation':
+        'Recognition arrived; weapons did not. An international arms embargo binds your hands while the heights above Sarajevo, Tuzla, and the Drina belong to a former federal army that kept its tanks and its officers. Your defenders are territorial units, police, and volunteers — Bosniak, Serb, Croat — outnumbered in guns by an order of magnitude. You hold the cities and little of the ground between them. The killing in Zvornik and Bijeljina has already begun.',
+    'intro.identity.RBiH.escape':
+        'You must defend a civic republic with a citizen army that the fighting is already turning into a single-nation force — and you have no guns to spare for the gap between what you believe and what you can hold.',
+    'intro.identity.RS.identity':
+        'You are the President of Republika Srpska. The National Assembly is in session, and six strategic goals for the Serb people of Bosnia lie before you. To adopt them is to set the army in motion. The signature is yours.',
+    'intro.identity.RS.situation':
+        'You begin the war that everyone else is still scrambling to answer. The JNA leaves you its artillery, its corps, its logistics, and the high ground over every Muslim and Croat town that matters. The corridor through Posavina, the Drina border, a divided Sarajevo — each goal is a map, and each map crosses settlements where your enemy lives. The advantage is yours today, and it is total.',
+    'intro.identity.RS.escape':
+        'Your own army commander has risen in this Assembly and warned, plainly, that the Drina corridor and the division of Sarajevo cannot be reached without acts that constitute genocide. The decision is on the table now, and it is yours alone: to set the army in motion is to own what it does.',
+    'intro.identity.HRHB.identity':
+        'You are the President of Herceg-Bosna, the Croat para-state proclaimed at Grude — a leader who answers, in truth, to two capitals: the one in Sarajevo you are allied with, and the one in Zagreb that made you.',
+    'intro.identity.HRHB.situation':
+        'Your strength sits in western Herzegovina; your most exposed people sit scattered through central Bosnia, in valleys where Bosniaks are the majority and the VRS is the nearer threat. The HVO is capable but split across ground it cannot connect. Today your guns face the same enemy as Sarajevo’s — at Mostar, in the Posavina. Behind you, Zagreb’s patronage carries a price, and a map of its own.',
+    'intro.identity.HRHB.escape':
+        'The alliance that keeps your scattered enclaves alive serves a capital whose design for Bosnia is not Sarajevo’s — and every brigade, every town, every order pulls you between the two. You cannot fully satisfy either.',
     'tooltip.attackerLosses': 'Attacker losses',
     'tooltip.defenderLosses': 'Defender losses',
     'tooltip.territoryCaptured': 'Territory captured',

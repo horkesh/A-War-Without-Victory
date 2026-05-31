@@ -236,6 +236,8 @@ interface WindowAwwv {
     overrideAiDecision: (level: number, targetId: string, faction: string) => Promise<{ ok: boolean; error?: string }>;
     acceptProposal: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
     rejectProposal: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
+    // Phase 2 slice 1 "Back the Officer": Level 3 Direct Intervention on an op proposal.
+    forceLaunchProposal: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
     resolveOperationOpportunityDecision: (payload: OperationOpportunityDecisionPayload) => Promise<{ ok: boolean; error?: string }>;
     // v0.9.2 tutorial onboarding (LANE-NIGHTSHIFT-ROUND2-TUTORIAL-ONBOARDING-SKELETON
     // + LANE-NIGHTSHIFT-TUTORIAL-CONTENT-V1)
@@ -553,6 +555,10 @@ export function useIPC() {
 
             rejectProposal: awwv
                 ? (proposalId: string) => awwv.rejectProposal(proposalId)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            forceLaunchProposal: awwv
+                ? (proposalId: string) => awwv.forceLaunchProposal(proposalId)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
             resolveOperationOpportunityDecision: awwv

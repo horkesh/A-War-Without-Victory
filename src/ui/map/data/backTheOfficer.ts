@@ -12,6 +12,7 @@
 // No state mutation; deterministic (sorted iteration via strictCompare).
 
 import { getPlayerSafeOfficerName } from '../utils/playerSafeText.js';
+import { FORCE_LAUNCH_COST } from '../utils/commandAuthority.js';
 
 type RawRecord = Record<string, unknown>;
 
@@ -516,4 +517,202 @@ function casualtyClause(donors: TgAftermathDonorView[], totalCasualties: number)
   return totalCasualties > 0
     ? `${prefix} — ${totalCasualties.toLocaleString('en-US')} men spent in all.`
     : `${prefix}.`;
+}
+
+// --- Op-proposal decision-card projection (Phase 2 slice 1 "Back the Officer") ---
+
+/** Minimal pending-proposal shape the card builder reads (subset of PendingProposalReview). */
+export interface OpProposalReviewRow {
+  id: string;
+  faction?: string;
+  domain?: string;
+  description?: string;
+  proposed_action?: string;
+}
+
+/**
+ * A decision card for one pending 'ops' proposal (APPROVE_OP:<corps>:<plan>),
+ * joined to the matching active operation so the player decides in the
+ * NAMED-OFFICER voice — who proposes, the force ratio he estimates, what is
+ * being pulled (donors / cohesion), his go/no-go call, and the override cost.
+ *
+ * Pure + defensive: every join is best-effort. When the op or officer cannot be
+ * resolved the card still renders (officer = null, ratio = null, donors = []).
+ */
+export interface OpProposalCardView {
+  /** Proposal id (the IPC accept/reject/force-launch key). */
+  proposal_id: string;
+  /** Anchor corps id parsed from the proposed_action. */
+  corps_id: string;
+  /** Player-facing corps name (falls back to the corps id). */
+  corps_name: string;
+  /** Plan id parsed from the proposed_action. */
+  plan_id: string;
+  /** Resolved active operation id (null when no active op matches the corps). */
+  op_id: string | null;
+  /** Operation display name (falls back to the plan id). */
+  op_name: string;
+  /** Named officer proposing the operation (null when unresolved). */
+  commander: TgCommanderView | null;
+  /** Commander's estimated force ratio (null when the op carries no estimate). */
+  force_ratio_estimate: number | null;
+  /** Commander's go/no-go recommendation (null when the op carries none). */
+  commander_assessment: 'launch' | 'postpone' | 'abort' | null;
+  /** Donor corps lineage for the op's TG (sorted; empty when none / unresolved). */
+  donors: TgDonorLineageView[];
+  /** Total personnel pulled from donor corps into this op's TG. */
+  total_personnel_lent: number;
+  /**
+   * True when the commander recommends NOT launching (postpone | abort) — the
+   * only states where presidential Override (force-launch) is offered.
+   */
+  override_available: boolean;
+  /** Command-authority cost of force-launching (Level 3 Direct Intervention). */
+  override_ca_cost: number;
+  /** One-line officer-voice framing of the proposal + its cost. */
+  framing: string;
+}
+
+/** Parse `APPROVE_OP:<corps>:<plan>` → { corpsId, planId }; null when malformed. */
+function parseApproveOpAction(action: string | undefined): { corpsId: string; planId: string } | null {
+  if (typeof action !== 'string') return null;
+  const parts = action.split(':');
+  if (parts[0] !== 'APPROVE_OP' || !parts[1] || !parts[2]) return null;
+  return { corpsId: parts[1], planId: parts.slice(2).join(':') };
+}
+
+/** Find an active operation on a corps by plan id (best-effort), else first active op. */
+function findOpForPlan(cc: RawRecord | null, planId: string): RawRecord | null {
+  if (!cc) return null;
+  const activeOps: unknown[] = Array.isArray(cc.active_operations)
+    ? cc.active_operations
+    : asRecord(cc.active_operation)
+      ? [cc.active_operation]
+      : [];
+  const ops = activeOps.map(asRecord).filter((o): o is RawRecord => o != null);
+  if (ops.length === 0) return null;
+  const byPlan = ops.find((o) => str(o.plan_id) === planId || str(o.id) === planId);
+  return byPlan ?? ops[0];
+}
+
+function assessmentOrNull(value: unknown): 'launch' | 'postpone' | 'abort' | null {
+  return value === 'launch' || value === 'postpone' || value === 'abort' ? value : null;
+}
+
+/** Read a finite number from a free-form record value, else null. */
+function finiteNumOrNull(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+/**
+ * Build a decision card for every pending 'ops' proposal owned by the player.
+ *
+ * Joins each `APPROVE_OP:<corps>:<plan>` proposal to the matching active op for
+ * the named officer, force ratio, donor pull, and go/no-go call. Sorted by
+ * proposal id. Returns [] when there are no ops proposals.
+ */
+export function buildOpProposalCards(
+  rawState: unknown,
+  roster: BackTheOfficerRosterRow[] | undefined,
+  proposals: OpProposalReviewRow[] | undefined,
+): OpProposalCardView[] {
+  if (!Array.isArray(proposals) || proposals.length === 0) return [];
+  const state = asRecord(rawState);
+  const military = asRecord(state?.military);
+
+  const rosterById = new Map<string, BackTheOfficerRosterRow>();
+  for (const row of roster ?? []) {
+    if (row && typeof row.id === 'string') rosterById.set(row.id, row);
+  }
+
+  const corpsNameById = new Map<string, string>();
+  const formations = asRecord(military?.formations);
+  if (formations) {
+    for (const key of Object.keys(formations)) {
+      const name = str(asRecord(formations[key])?.name);
+      if (name) corpsNameById.set(key, name);
+    }
+  }
+
+  const corpsCommand = asRecord(military?.corps_command);
+
+  // Reuse the TG donor projection so the "what's pulled / cohesion" line matches
+  // the rest of the Back-the-Officer surfaces. Keyed by op_id.
+  const tgViews = buildBackTheOfficerViews(rawState, roster);
+  const tgByOpId = new Map<string, BackTheOfficerView>();
+  for (const v of tgViews) tgByOpId.set(v.op_id, v);
+
+  const cards: OpProposalCardView[] = [];
+  for (const proposal of proposals) {
+    if (!proposal || proposal.domain !== 'ops') continue;
+    const parsed = parseApproveOpAction(proposal.proposed_action);
+    if (!parsed) continue;
+    const { corpsId, planId } = parsed;
+
+    const cc = asRecord(corpsCommand?.[corpsId]);
+    const op = findOpForPlan(cc, planId);
+
+    const opId = str(op?.id) ?? null;
+    const opName = str(op?.name) ?? str(op?.objective_description) ?? planId;
+    const commanderId = str(op?.tg_commander_officer_id) ?? str(op?.commander_officer_id);
+    const commander = resolveCommander(commanderId, rosterById);
+    const forceRatio = finiteNumOrNull(op?.force_ratio_estimate);
+    const assessment = assessmentOrNull(op?.commander_assessment);
+
+    const tg = opId ? tgByOpId.get(opId) : undefined;
+    const donors = tg?.donors ?? [];
+    const totalPersonnelLent = tg?.total_personnel_lent ?? 0;
+
+    const overrideAvailable = assessment === 'postpone' || assessment === 'abort';
+
+    cards.push({
+      proposal_id: proposal.id,
+      corps_id: corpsId,
+      corps_name: corpsName(corpsId, corpsNameById),
+      plan_id: planId,
+      op_id: opId,
+      op_name: opName,
+      commander,
+      force_ratio_estimate: forceRatio,
+      commander_assessment: assessment,
+      donors,
+      total_personnel_lent: totalPersonnelLent,
+      override_available: overrideAvailable,
+      override_ca_cost: FORCE_LAUNCH_COST,
+      framing: buildOpProposalFraming(opName, commander, forceRatio, assessment, donors, totalPersonnelLent),
+    });
+  }
+
+  cards.sort((a, b) => strictCompare(a.proposal_id, b.proposal_id));
+  return cards;
+}
+
+/** One-line officer-voice framing for an op proposal decision card. */
+export function buildOpProposalFraming(
+  opName: string,
+  commander: TgCommanderView | null,
+  forceRatio: number | null,
+  assessment: 'launch' | 'postpone' | 'abort' | null,
+  donors: TgDonorLineageView[],
+  totalPersonnelLent: number,
+): string {
+  const who = commander
+    ? `${commander.rank ? `${humanizeRank(commander.rank)} ` : ''}${commander.name}`
+    : 'Your field commander';
+  const ratioClause = forceRatio != null ? ` at an estimated ${forceRatio.toFixed(1)}:1` : '';
+  const recommendation =
+    assessment === 'launch'
+      ? 'recommends you authorize the assault'
+      : assessment === 'postpone'
+        ? 'recommends you hold — the moment is not ripe'
+        : assessment === 'abort'
+          ? 'recommends against it'
+          : 'awaits your decision on';
+  const lead = `${who} ${recommendation} ${opName}${ratioClause}.`;
+
+  if (donors.length === 0) return lead;
+  const pulling = totalPersonnelLent > 0
+    ? ` It pulls ${totalPersonnelLent.toLocaleString('en-US')} men from ${joinList(donors.map((d) => d.corps_name))} — cohesion bled.`
+    : ` It pulls battalions from ${joinList(donors.map((d) => d.corps_name))} — cohesion bled.`;
+  return `${lead}${pulling}`;
 }

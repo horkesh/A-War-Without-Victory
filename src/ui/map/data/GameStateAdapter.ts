@@ -61,7 +61,7 @@ import { toCommandBriefingView } from '../../shared/command_briefing_views.js';
 import { getOperationalSitrepView } from '../../shared/operational_sitrep_views.js';
 import { deriveOperationOpportunityRecords, deriveOperationOpportunitySummary } from './operationOpportunityLedger.js';
 import { deriveOperationOpportunityProposals } from './operationOpportunityDossiers.js';
-import { buildBackTheOfficerViews, buildTgAftermathViews } from './backTheOfficer.js';
+import { buildBackTheOfficerViews, buildTgAftermathViews, buildOpProposalCards } from './backTheOfficer.js';
 import { buildDiplomacyView } from './diplomacyView.js';
 import { playerFactionMatch } from './playerFactionMatch.js';
 import {
@@ -1932,6 +1932,9 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         })
         : backTheOfficerAll;
     const tgAftermathAll = buildTgAftermathViews(state, backTheOfficerRoster);
+    // Phase 2 slice 1: decision cards joining player ops proposals → active op
+    // (named officer, force ratio, donor pull, go/no-go, override CA cost).
+    const opProposalCards = buildOpProposalCards(state, backTheOfficerRoster, pendingProposalReviews);
     const presidentialReviewQueue = derivePresidentialReviewQueue({
         pendingOfficerEvents,
         pendingEventDecisions,
@@ -2015,6 +2018,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         operations: filterPlayerFacingEntriesByFaction(operations, playerFaction),
         backTheOfficerOps: backTheOfficerOps.length > 0 ? backTheOfficerOps : undefined,
         tgAftermath: tgAftermathAll.length > 0 ? tgAftermathAll : undefined,
+        opProposalCards: opProposalCards.length > 0 ? opProposalCards : undefined,
         namedOfficerData,
         namedOfficerStateById,
         factionReserves: scopeToPlayerFaction(factionReserves, playerFaction),
