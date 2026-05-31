@@ -1,8 +1,15 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { applyEventEffects } from '../src/sim/events/apply_effects.js';
 import { evaluateEvents } from '../src/sim/events/evaluate_events.js';
+import { validateGameStateShape } from '../src/state/validateGameState.js';
 import type { EventEffect } from '../src/sim/events/event_types.js';
 import type { GameState } from '../src/state/game_state.js';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const WAR_1992_PATH = join(HERE, '..', 'data', 'scenarios', 'events', 'war_1992.json');
 
 /** Minimal GameState stub for event effect tests. */
 function makeState(overrides?: Partial<GameState>): GameState {
@@ -112,6 +119,59 @@ describe('applyEventEffects', () => {
         expect(state.political.war_alliance_rbih_hrhb).toBeCloseTo(0.6);
         expect(state.military.formations['brig_1'].morale).toBe(63);
         expect(state.military.general_supply_reserve!['RBiH']).toBe(55);
+    });
+});
+
+describe('recruitment_modifier effect (Codex/#54)', () => {
+    /** Read a response option's effects directly from the canonical event data. */
+    function responseEffects(eventId: string, responseId: string): EventEffect[] {
+        const raw = JSON.parse(readFileSync(WAR_1992_PATH, 'utf8'));
+        const events = Array.isArray(raw) ? raw : raw.events;
+        const ev = events.find((e: { id: string }) => e.id === eventId);
+        if (!ev) throw new Error(`event ${eventId} not found`);
+        const opt = (ev.response_options ?? []).find((o: { id: string }) => o.id === responseId);
+        if (!opt) throw new Error(`response ${responseId} not found on ${eventId}`);
+        return (opt.effects ?? []) as EventEffect[];
+    }
+
+    for (const responseId of ['ask', 'always_allow']) {
+        it(`rbih_paramilitary_policy_1992 "${responseId}" yields a finite pool_multiplier and passes validation`, () => {
+            const effects = responseEffects('rbih_paramilitary_policy_1992', responseId);
+            const rm = effects.find((e) => e.kind === 'recruitment_modifier');
+            expect(rm, 'response must carry a recruitment_modifier effect').toBeDefined();
+            // Canonical field is pool_multiplier, NOT delta (the #54 bug).
+            expect((rm as { pool_multiplier?: unknown }).pool_multiplier).toBeTypeOf('number');
+
+            const state = makeState();
+            applyEventEffects(state, effects);
+
+            const mods = state.military.recruitment_modifiers ?? [];
+            expect(mods.length).toBe(1);
+            expect(Number.isFinite(mods[0].pool_multiplier)).toBe(true);
+
+            // Resulting state must serialize/validate cleanly (the bug produced a
+            // non-finite pool_multiplier that validateGameState rejected).
+            const result = validateGameStateShape(state);
+            const recruitErrors = result.ok ? [] : result.errors.filter((e) => e.includes('recruitment_modifiers'));
+            expect(recruitErrors).toEqual([]);
+        });
+    }
+
+    it('clamps a non-finite pool_multiplier to identity (1.0) so malformed data cannot break serialization', () => {
+        const state = makeState();
+        // Simulate malformed data: applier reads `effect.pool_multiplier` which is
+        // undefined when the JSON wrongly used `delta`, yielding NaN/undefined.
+        const malformed = { kind: 'recruitment_modifier', faction: 'RBiH', pool_multiplier: undefined, duration_turns: 10 } as unknown as EventEffect;
+        applyEventEffects(state, [malformed]);
+
+        const mods = state.military.recruitment_modifiers ?? [];
+        expect(mods.length).toBe(1);
+        expect(mods[0].pool_multiplier).toBe(1.0);
+        expect(Number.isFinite(mods[0].pool_multiplier)).toBe(true);
+
+        const result = validateGameStateShape(state);
+        const recruitErrors = result.ok ? [] : result.errors.filter((e) => e.includes('recruitment_modifiers'));
+        expect(recruitErrors).toEqual([]);
     });
 });
 
