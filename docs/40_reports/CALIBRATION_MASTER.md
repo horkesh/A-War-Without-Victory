@@ -1,9 +1,9 @@
 # AWWV Calibration Master Reference
 
-## CURRENT BASELINE OF RECORD — 188w 618/712, hash `b6c9507e7c045a6c` (2026-05-31)
+## CURRENT BASELINE OF RECORD — 188w 618/712, hash `a1a7c167f0b05411` (2026-05-31)
 
-- **188w: OSID 618/712 (86.8%), anchors 29/30, benchmarks 6/6, 0 critical anomalies. Hash `b6c9507e7c045a6c`.** Source: event-system fix (PR #66) — silent-drop cap + historically-correct JNA-withdrawal retune; Srebrenica + Žepa fall to RS; RS rear intact. Scenario-tester GO; baselines re-floored.
-- **40w: OSID 655/712, anchors 30/30, 6/6, 0 critical. Hash `85ae31578378c707`.**
+- **188w: OSID 618/712 (86.8%), anchors 29/30, benchmarks 6/6, 0 critical anomalies. Hash `a1a7c167f0b05411`.** Combined hash after the TG-correctness batch (PRs #73 #48 AAR-telemetry-snapshot, #74 #47 cascade-after-revert, #75 #46 zero-donor-no-phantom-TG) on top of the event-system fix (PR #66). **All three were calibration-FLAT** — OSID/anchors/benchmarks/per-faction identical; only the final-state hash composes (telemetry + phantom-TG-removal change combat/operation_history state without moving any tracked outcome). Prior single-point hash was `b6c9507e7c045a6c` (event-fix #66, pre-batch).
+- **40w: OSID 655/712, anchors 30/30, 6/6, 0 critical. Hash `e086afbefcef01e6`** (shifted by #46; #47 byte-identical, #48 40w-byte-identical). Prior `85ae31578378c707`.
 - Lineage: TG (ADR-0005) activation baseline was 188w 615/712 (hash `0a36b1090f5f902e`, PR #65); the event-fix added +3 OSID (618) and made the enclaves fall. The lone failing 188w anchor is `brijesnica_donja_2` (Spreča gain — separate lane). RS sim ~338 vs Oct1995 ref 315 (+23) = the pre-existing HRHB Mistral-2 SW-belt + Sana-pocket lanes, NOT event-caused.
 - Golden-baseline manifest (`data/derived/scenario/baselines/manifest.json`) re-floored for `apr1992_52w` accordingly (`npm run test:baselines` green on main).
 - NOTE: the dated sections below (R15 → n2003 → R-series) are HISTORICAL — superseded by the above. Full R-series ↔ TG ↔ event-fix reconciliation is a separate cleanup lane; this header is the current pointer.
