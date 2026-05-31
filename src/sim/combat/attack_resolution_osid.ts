@@ -1197,9 +1197,6 @@ export function resolveAttackOrdersOsid(
                 attacker_brigade: firstAttacker.id as string,
             } satisfies ControlEvent);
 
-            // Fall-1995 mechanic E-A4: cascade trigger (writer extracted for testability).
-            emitCascadePenaltiesOnFlip(state, targetOsid, prevController, adjacency);
-
             // ADR-0005 Phase 4 (Fix 4) / Hard Invariant #6 territory-revert sub-clause:
             // when the capturing TG's anchor died and the TG dissolved THIS battle, the
             // just-captured OSID has no committed force left to hold it. Revert it to
@@ -1227,6 +1224,15 @@ export function resolveAttackOrdersOsid(
                     attacker_brigade: firstAttacker.id as string,
                 } satisfies ControlEvent);
                 flip = false; // downstream op feedback must not credit territory for a reverted flip
+            }
+
+            // Fall-1995 mechanic E-A4: cascade trigger (writer extracted for testability).
+            // Codex P2 #47: emit cascade penalties only AFTER the TG-anchor-died revert
+            // check above, and only when the capture STILL STANDS (post-revert flip === true).
+            // Otherwise adjacent prevController defenders would be weakened for a territory
+            // loss that was immediately rolled back and never actually occurred.
+            if (flip) {
+                emitCascadePenaltiesOnFlip(state, targetOsid, prevController, adjacency);
             }
         }
 
