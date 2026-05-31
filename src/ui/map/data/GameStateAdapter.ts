@@ -62,6 +62,7 @@ import { getOperationalSitrepView } from '../../shared/operational_sitrep_views.
 import { deriveOperationOpportunityRecords, deriveOperationOpportunitySummary } from './operationOpportunityLedger.js';
 import { deriveOperationOpportunityProposals } from './operationOpportunityDossiers.js';
 import { buildBackTheOfficerViews, buildTgAftermathViews, buildOpProposalCards } from './backTheOfficer.js';
+import { buildDilemmaSpine } from './dilemmaSpine.js';
 import { buildDiplomacyView } from './diplomacyView.js';
 import { playerFactionMatch } from './playerFactionMatch.js';
 import {
@@ -2058,6 +2059,26 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             : deriveHistoricalComparison(state);
     }
 
+    // Phase 3 Thread 1: project player/bot decisions as `${event_id}:${response_id}`
+    // for codex RESPONSE: condition atoms. Set membership (.has) is order-independent,
+    // so iteration order of the source array does not affect resolver output.
+    const decisionResponsesSet = new Set<string>(
+        (state.military?.event_decision_log ?? []).map(
+            (d: { event_id: string; response_id: string }) => `${d.event_id}:${d.response_id}`,
+        ),
+    );
+    const firedEventsView = deriveFiredEvents(state);
+    // Phase 3 Thread 2 "the dilemma spine": pure projection of the seven keystone
+    // dilemmas from already-derived UI fields (firedEvents, decisionResponses,
+    // raw causality substrate). Always present (full not-yet-faced backbone on
+    // empty/flag-off saves). Faction-agnostic — the spine is the player's whole
+    // war, not a per-faction slice.
+    const dilemmaSpine = buildDilemmaSpine({
+        firedEvents: firedEventsView,
+        decisionResponses: decisionResponsesSet,
+        rawGameState: gameState,
+    } as unknown as LoadedGameState);
+
     return {
         label, turn, phase,
         metadata: {
@@ -2153,7 +2174,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         eliteBrigadeTracker: deriveEliteBrigadeTracker(state),
         pendingOfficerEvents,
         // Event system (v0.4.1 Phase 5)
-        firedEvents: deriveFiredEvents(state),
+        firedEvents: firedEventsView,
         pendingEventDecisions,
         pendingEventNotifications,
         presidentialReviewQueue,
@@ -2167,11 +2188,9 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         // Phase 3 Thread 1: project player/bot decisions as `${event_id}:${response_id}`
         // for codex RESPONSE: condition atoms. Set membership (.has) is order-independent,
         // so iteration order of the source array does not affect resolver output.
-        decisionResponses: new Set<string>(
-            (state.military?.event_decision_log ?? []).map(
-                (d: { event_id: string; response_id: string }) => `${d.event_id}:${d.response_id}`,
-            ),
-        ),
+        decisionResponses: decisionResponsesSet,
+        // Phase 3 Thread 2 "the dilemma spine" (see local above).
+        dilemmaSpine,
         pressureWarning: derivePressureWarning(state),
         patronOverrideAuthority: derivePatronOverrideAuthority(state),
         diplomacyView: buildDiplomacyView(state, playerFaction),

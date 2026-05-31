@@ -274,6 +274,7 @@
     },
     "requires_enabled": true,
     "once": true,
+    "tags": ["keystone_dilemma"],
     "requires_player_response": true,
     "responding_faction": "RBiH",
     "bot_response_logic": "historical",
@@ -1837,6 +1838,7 @@
       }
     },
     "once": true,
+    "tags": ["keystone_dilemma"],
     "requires_enabled": true,
     "requires_player_response": true,
     "responding_faction": "RBiH",
@@ -3383,6 +3385,7 @@
       "phase": "war"
     },
     "once": true,
+    "tags": ["keystone_dilemma"],
     "requires_player_response": true,
     "responding_faction": "RBiH",
     "bot_response_logic": "capital_based",

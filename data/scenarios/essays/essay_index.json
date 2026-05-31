@@ -691,6 +691,30 @@
               "content": "Odstupanje u vasem ratu mijenja nacin na koji se ovaj historijski zapis cita. Uporedite kanonski dogadjaj s kampanjskim dokazima prije nego sto iz toga izvedete politicki ili vojni zakljucak.\n\nPodaci iz zavrsnog zapisa: {cost_duration_findings}"
             }
           }
+        },
+        {
+          "id": "thread2_vance_owen_branch_accepted",
+          "insert_after_paragraph": 5,
+          "condition": "RESPONSE:vance_owen_plan_1993:accept",
+          "variant": "note",
+          "content": "In this campaign, Sarajevo recorded acceptance of the Vance-Owen framework — the procedural posture the historical record attributes to the Bosnian government's pressured signature at Athens on 25 March 1993 (UN S/25479, 8 April 1993).",
+          "localizations": {
+            "bcs": {
+              "content": "U ovoj kampanji Sarajevo je zabiljezilo prihvatanje Vance-Owenovog okvira — proceduralni stav koji historijski zapis vezuje uz potpis bosanske vlade pod pritiskom u Atini 25. marta 1993. (UN S/25479, 8. april 1993)."
+            }
+          }
+        },
+        {
+          "id": "thread2_vance_owen_branch_rejected",
+          "insert_after_paragraph": 5,
+          "condition": "RESPONSE:vance_owen_plan_1993:reject",
+          "variant": "note",
+          "content": "In this campaign, Sarajevo recorded rejection of the Vance-Owen framework — a procedural divergence from the historical record, in which the Bosnian government signed under pressure and the plan instead foundered on the Bosnian Serb assembly's vote at Pale on 5-6 May 1993 (UN S/25479, 8 April 1993).",
+          "localizations": {
+            "bcs": {
+              "content": "U ovoj kampanji Sarajevo je zabiljezilo odbijanje Vance-Owenovog okvira — proceduralno odstupanje od historijskog zapisa, u kojem je bosanska vlada potpisala pod pritiskom, a plan je propao na glasanju skupstine bosanskih Srba u Palama 5-6. maja 1993. (UN S/25479, 8. april 1993)."
+            }
+          }
         }
       ],
       "localizations": {
@@ -1492,6 +1516,30 @@
               "content": "Dodatna napomena povezuje ovaj zapis s vidljivim ishodima vase kampanje. Uporedite kanonski dogadjaj s kampanjskim dokazima prije nego sto iz toga izvedete politicki ili vojni zakljucak.\n\nPodaci iz zavrsnog zapisa: {cost_duration_findings}"
             }
           }
+        },
+        {
+          "id": "thread2_owen_stoltenberg_branch_accepted",
+          "insert_after_paragraph": 4,
+          "condition": "RESPONSE:owen_stoltenberg_plan_1993:accept",
+          "variant": "note",
+          "content": "In this campaign, Sarajevo recorded acceptance of the Owen-Stoltenberg framework — a procedural divergence from the historical record, in which the Bosnian parliament declined the three-republic partition in late August and early September 1993 (UN Document S/26260, 1993).",
+          "localizations": {
+            "bcs": {
+              "content": "U ovoj kampanji Sarajevo je zabiljezilo prihvatanje Owen-Stoltenbergovog okvira — proceduralno odstupanje od historijskog zapisa, u kojem je bosanski parlament odbio trorepublicku podjelu krajem augusta i pocetkom septembra 1993. (UN Document S/26260, 1993)."
+            }
+          }
+        },
+        {
+          "id": "thread2_owen_stoltenberg_branch_rejected",
+          "insert_after_paragraph": 4,
+          "condition": "RESPONSE:owen_stoltenberg_plan_1993:reject",
+          "variant": "note",
+          "content": "In this campaign, Sarajevo recorded rejection of the Owen-Stoltenberg framework — the procedural posture the historical record attributes to the Bosnian parliament's refusal of the three-republic partition in late August and early September 1993 (UN Document S/26260, 1993).",
+          "localizations": {
+            "bcs": {
+              "content": "U ovoj kampanji Sarajevo je zabiljezilo odbijanje Owen-Stoltenbergovog okvira — proceduralni stav koji historijski zapis vezuje uz odbijanje trorepublicke podjele u bosanskom parlamentu krajem augusta i pocetkom septembra 1993. (UN Document S/26260, 1993)."
+            }
+          }
         }
       ],
       "localizations": {
@@ -1688,6 +1736,30 @@
           "localizations": {
             "bcs": {
               "content": "Dodatna napomena povezuje ovaj zapis s vidljivim ishodima vase kampanje. Uporedite kanonski dogadjaj s kampanjskim dokazima prije nego sto iz toga izvedete politicki ili vojni zakljucak.\n\nPodaci iz zavrsnog zapisa: {milestone_dayton_accords_summary} {milestone_dayton_accords_delta_weeks}"
+            }
+          }
+        },
+        {
+          "id": "thread2_contact_group_branch_accepted",
+          "insert_after_paragraph": 5,
+          "condition": "RESPONSE:contact_group_plan_1994:accept",
+          "variant": "note",
+          "content": "In this campaign, Sarajevo recorded acceptance of the Contact Group's 51/49 framework — the procedural posture the historical record attributes to the Bosnian government, which accepted the take-it-or-leave-it map in July 1994 while the Bosnian Serb assembly at Pale rejected it (Contact Group proposal, July 1994).",
+          "localizations": {
+            "bcs": {
+              "content": "U ovoj kampanji Sarajevo je zabiljezilo prihvatanje okvira Kontakt grupe 51/49 — proceduralni stav koji historijski zapis vezuje uz bosansku vladu, koja je prihvatila kartu po principu uzmi-ili-ostavi u julu 1994, dok ju je skupstina bosanskih Srba u Palama odbila (Contact Group proposal, July 1994)."
+            }
+          }
+        },
+        {
+          "id": "thread2_contact_group_branch_rejected",
+          "insert_after_paragraph": 5,
+          "condition": "RESPONSE:contact_group_plan_1994:reject",
+          "variant": "note",
+          "content": "In this campaign, Sarajevo recorded rejection of the Contact Group's 51/49 framework — a procedural divergence from the historical record, in which the Bosnian government accepted the take-it-or-leave-it map in July 1994 and the rejection that isolated Pale came instead from the Bosnian Serb assembly (Contact Group proposal, July 1994).",
+          "localizations": {
+            "bcs": {
+              "content": "U ovoj kampanji Sarajevo je zabiljezilo odbijanje okvira Kontakt grupe 51/49 — proceduralno odstupanje od historijskog zapisa, u kojem je bosanska vlada prihvatila kartu po principu uzmi-ili-ostavi u julu 1994, a odbijanje koje je izolovalo Pale doslo je od skupstine bosanskih Srba (Contact Group proposal, July 1994)."
             }
           }
         }

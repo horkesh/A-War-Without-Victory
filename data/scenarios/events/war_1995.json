@@ -866,6 +866,7 @@
     },
     "requires_enabled": true,
     "once": true,
+    "tags": ["keystone_dilemma"],
     "requires_player_response": true,
     "responding_faction": "RS",
     "bot_response_logic": "historical",

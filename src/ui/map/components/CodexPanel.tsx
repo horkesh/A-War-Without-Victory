@@ -117,6 +117,11 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
         return ids;
     }, [loadedGameState?.firedEvents]);
 
+    // Phase 3 Thread 2 "the dilemma spine": already-projected read-model from the
+    // adapter. Empty array when absent (flag-off / pre-Thread-2 saves) so the
+    // section degrades gracefully.
+    const dilemmaSpine = loadedGameState?.dilemmaSpine ?? [];
+
     const essays = (Array.isArray(essayIndex) ? essayIndex : (essayIndex as { essays: EssayEntry[] }).essays ?? []) as EssayEntry[];
     const resolvedEssays = useMemo(() => {
         const context = {
@@ -197,6 +202,91 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                         ESC
                     </button>
                 </div>
+
+                {/* Phase 3 Thread 2 "the dilemma spine" — "The Choices That Made
+                    This War". Read-only backbone of the seven keystone
+                    "impossible choice" decisions: title, faced / not-yet-faced
+                    badge, chosen branch (when faced), and a control that opens
+                    the linked codex essay. Rows with a null essayId surface the
+                    dilemma without an essay link. Renders nothing when the spine
+                    is empty/absent (flag-off / pre-Thread-2 saves). */}
+                {dilemmaSpine.length > 0 && (
+                    <div
+                        data-testid="codex-dilemma-spine-section"
+                        className="border-b border-neutral-700/40 bg-[#0d0f16] px-3 py-2"
+                    >
+                        <div className="text-amber-400 text-[10px] font-bold tracking-[0.12em] uppercase mb-1.5">
+                            The Choices That Made This War
+                        </div>
+                        <ul className="space-y-1">
+                            {dilemmaSpine.map((dilemma) => {
+                                const essayUnlocked = dilemma.essayId
+                                    ? Boolean(resolvedEssays.get(dilemma.essayId)?.isUnlocked)
+                                    : false;
+                                return (
+                                    <li
+                                        key={dilemma.dilemmaId}
+                                        data-testid="codex-dilemma-row"
+                                        data-dilemma-id={dilemma.dilemmaId}
+                                        data-faced={dilemma.faced ? 'true' : 'false'}
+                                        className="flex items-start gap-2 text-[9px] leading-snug"
+                                    >
+                                        <span
+                                            data-testid="codex-dilemma-faced-badge"
+                                            className={`mt-[1px] shrink-0 px-1 py-0.5 rounded text-[7px] font-bold uppercase tracking-[0.1em] ${
+                                                dilemma.faced
+                                                    ? 'bg-amber-400/15 text-amber-400'
+                                                    : 'bg-neutral-500/15 text-neutral-500'
+                                            }`}
+                                        >
+                                            {dilemma.faced ? 'Faced' : 'Not yet'}
+                                        </span>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="text-neutral-200">{dilemma.title}</div>
+                                            {dilemma.faced && dilemma.chosenBranchLabel && (
+                                                <div
+                                                    data-testid="codex-dilemma-branch"
+                                                    className="text-neutral-400 text-[8px] mt-0.5"
+                                                >
+                                                    Chose: {dilemma.chosenBranchLabel}
+                                                    {dilemma.decisionTurn !== null && (
+                                                        <span className="text-neutral-600"> (W{dilemma.decisionTurn})</span>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                        {dilemma.essayId ? (
+                                            <button
+                                                type="button"
+                                                data-testid="codex-dilemma-essay-link"
+                                                disabled={!essayUnlocked}
+                                                onClick={() => {
+                                                    const essay = essays.find((e) => e.id === dilemma.essayId);
+                                                    if (essay) setExpandedYear(essay.year);
+                                                    setSelectedEssayId(dilemma.essayId);
+                                                }}
+                                                className={`shrink-0 text-[8px] uppercase tracking-[0.1em] px-1.5 py-0.5 rounded transition-colors ${
+                                                    essayUnlocked
+                                                        ? 'text-amber-400 hover:bg-amber-400/10'
+                                                        : 'text-neutral-600 cursor-default'
+                                                }`}
+                                            >
+                                                {essayUnlocked ? 'Read essay' : 'Locked'}
+                                            </button>
+                                        ) : (
+                                            <span
+                                                data-testid="codex-dilemma-no-essay"
+                                                className="shrink-0 text-[8px] uppercase tracking-[0.1em] text-neutral-700 px-1.5 py-0.5"
+                                            >
+                                                No essay
+                                            </span>
+                                        )}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                )}
 
                 {/* Phase H Packet 5 (Component C) — Unlock State section.
                     Renders only when BOTH `state` and `eventCatalog` props
