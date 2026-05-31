@@ -563,14 +563,14 @@ function findTgForOp(state: GameState, opId: string): TacticalGroup | undefined 
 }
 
 /**
- * Build the Army-HQ telemetry sidecar for an op, or undefined if the op was not carried
- * by an Army-HQ TG. Pure read of live TG donor_contributions — no recomputation.
- * Caller gates on ENABLE_TG_ARMY_HQ_OPS.
+ * Build the Army-HQ telemetry from a live TacticalGroup, or undefined if the TG does not
+ * belong to an Army-HQ op. Pure read of donor_contributions — no recomputation. Exported so
+ * the TG-dissolution path (beginRecovery → dissolveTgsForOp) can snapshot the telemetry onto
+ * the op record BEFORE the TG is deleted; finalizeOperationAAR runs only after the recovery
+ * window elapses, by which point the live TG is gone (P2 timing bug #48).
  */
-function buildArmyHqTelemetry(state: GameState, op: CorpsOperation): ArmyHqOpAarTelemetry | undefined {
-    // TG.op_id is set to op.name at formation (operation_preparation.ts), so match on name.
-    const tg = findTgForOp(state, op.name);
-    if (!tg || tg.army_hq_op_id == null) return undefined;
+export function buildArmyHqTelemetryFromTg(tg: TacticalGroup): ArmyHqOpAarTelemetry | undefined {
+    if (tg.army_hq_op_id == null) return undefined;
     const donorCorpsSet = new Set<string>();
     let totalCohesionBled = 0;
     for (const d of tg.donor_contributions) {
@@ -586,6 +586,24 @@ function buildArmyHqTelemetry(state: GameState, op: CorpsOperation): ArmyHqOpAar
         cross_corps_donor_count: crossCorpsDonorCount,
         total_cohesion_bled: totalCohesionBled,
     };
+}
+
+/**
+ * Build the Army-HQ telemetry sidecar for an op, or undefined if the op was not carried
+ * by an Army-HQ TG. Prefers the live TG (still present for synchronous finalize paths and
+ * the unit-test fixture); falls back to the snapshot stashed on the op at TG-dissolution
+ * time (the real lifecycle: beginRecovery dissolves the TG, finalize runs turns later).
+ * Caller gates on ENABLE_TG_ARMY_HQ_OPS.
+ */
+function buildArmyHqTelemetry(state: GameState, op: CorpsOperation): ArmyHqOpAarTelemetry | undefined {
+    // TG.op_id is set to op.name at formation (operation_preparation.ts), so match on name.
+    const tg = findTgForOp(state, op.name);
+    if (tg) {
+        const live = buildArmyHqTelemetryFromTg(tg);
+        if (live) return live;
+    }
+    // Live TG absent (dissolved during beginRecovery) → use the snapshot captured then.
+    return op.army_hq_telemetry_snapshot;
 }
 
 // ─── Finalize Operation AAR ────────────────────────────────────────────────
