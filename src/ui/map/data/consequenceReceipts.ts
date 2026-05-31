@@ -102,19 +102,15 @@ function findOption(
     return (def.response_options ?? []).find((o) => o.id === responseId);
 }
 
-/** Resolve a player-facing event title from the catalog, defensively. */
+/** Resolve a player-facing event title from the catalog, defensively. `title`
+ *  is the canonical (typed) display field on EventDefinition; fall back to the
+ *  raw id when it is absent/blank. */
 function resolveEventTitle(
     def: EventDefinition | undefined,
     fallbackId: string,
 ): string {
-    if (!def) return fallbackId;
-    // EventDefinition carries `title`; some defs lean on `headline`/`name`.
-    const anyDef = def as unknown as Record<string, unknown>;
-    for (const key of ['title', 'headline', 'name']) {
-        const value = anyDef[key];
-        if (typeof value === 'string' && value.trim().length > 0) return value;
-    }
-    return fallbackId;
+    const title = def?.title;
+    return typeof title === 'string' && title.trim().length > 0 ? title : fallbackId;
 }
 
 /**
