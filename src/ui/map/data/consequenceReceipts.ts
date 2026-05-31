@@ -168,14 +168,22 @@ export function buildConsequenceReceipts(
                 let firedTurn: number | null = null;
                 let turnsElapsed: number | null = null;
 
+                // CONFIRMED requires the predicted event to have fired, a
+                // response-tagged enables edge, AND a fired turn AT OR AFTER the
+                // decision turn. The engine still records an enables edge when a
+                // response "enables" an already-fired event (audit), so the edge
+                // alone does not prove causation — confirming a P that fired
+                // BEFORE the decision would be a false causal claim. When P fired
+                // earlier (or has no recorded fired turn), it is not a receipt of
+                // THIS decision: fall through to closed → contradicted, else
+                // pending.
                 const edgeKey = `${dec.event_id}::${predictedId}::${dec.response_id}`;
-                if (firedIds.has(predictedId) && edges.has(edgeKey)) {
+                const ft = lastFiredTurn[predictedId];
+                const firedAtOrAfterDecision = typeof ft === 'number' && ft >= dec.turn;
+                if (firedIds.has(predictedId) && edges.has(edgeKey) && firedAtOrAfterDecision) {
                     status = 'confirmed';
-                    const ft = lastFiredTurn[predictedId];
-                    if (typeof ft === 'number') {
-                        firedTurn = ft;
-                        turnsElapsed = Math.max(0, ft - dec.turn);
-                    }
+                    firedTurn = ft;
+                    turnsElapsed = ft - dec.turn;
                 } else if (closedIds.has(predictedId)) {
                     status = 'contradicted';
                 } else {

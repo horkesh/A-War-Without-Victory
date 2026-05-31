@@ -172,6 +172,53 @@ describe('buildConsequenceReceipts', () => {
         expect(receipts[0].status).toBe('pending');
     });
 
+    it('does NOT confirm when P fired BEFORE the decision turn (no false causality)', () => {
+        // The engine records an enables edge even when a response "enables" an
+        // already-fired event. P fired at week 8, the decision is at week 14 —
+        // confirming would falsely claim the week-14 choice caused the week-8
+        // event. Must classify as pending, not confirmed.
+        const catalog = new Map<string, EventDefinition>([
+            ['E', buildEventDef('E', ['p_early'])],
+            ['p_early', buildTargetDef('p_early')],
+        ]);
+        const state = buildState({
+            decisions: [{ event_id: 'E', response_id: 'opt_a', turn: 14 }],
+            firedEventIds: ['E', 'p_early'],
+            lastFiredTurn: { p_early: 8 }, // fired BEFORE the decision turn
+            causalityLog: [
+                { turn: 14, from_event: 'E', to_event: 'p_early', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+            ],
+        });
+        const receipts = buildConsequenceReceipts(state, catalog);
+        expect(receipts).toHaveLength(1);
+        expect(receipts[0].status).toBe('pending');
+        expect(receipts[0].firedTurn).toBeNull();
+        expect(receipts[0].turnsElapsed).toBeNull();
+    });
+
+    it('confirms (with correct non-negative elapsed) when P fired AT/AFTER the decision turn', () => {
+        const catalog = new Map<string, EventDefinition>([
+            ['E', buildEventDef('E', ['p_same', 'p_after'])],
+            ['p_same', buildTargetDef('p_same')],
+            ['p_after', buildTargetDef('p_after')],
+        ]);
+        const state = buildState({
+            decisions: [{ event_id: 'E', response_id: 'opt_a', turn: 6 }],
+            firedEventIds: ['E', 'p_same', 'p_after'],
+            lastFiredTurn: { p_same: 6, p_after: 11 }, // at-turn and after-turn
+            causalityLog: [
+                { turn: 6, from_event: 'E', to_event: 'p_same', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+                { turn: 11, from_event: 'E', to_event: 'p_after', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+            ],
+        });
+        const receipts = buildConsequenceReceipts(state, catalog);
+        const byId = new Map(receipts.map((r) => [r.predictedEventId, r]));
+        expect(byId.get('p_same')!.status).toBe('confirmed');
+        expect(byId.get('p_same')!.turnsElapsed).toBe(0);
+        expect(byId.get('p_after')!.status).toBe('confirmed');
+        expect(byId.get('p_after')!.turnsElapsed).toBe(5);
+    });
+
     it('excludes bot decisions — only the player promise→receipt loop earns a receipt', () => {
         const catalog = new Map<string, EventDefinition>([
             ['E', buildEventDef('E', ['p'])],
