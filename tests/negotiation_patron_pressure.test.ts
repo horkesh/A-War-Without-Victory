@@ -194,6 +194,34 @@ describe('Patron Pressure — Override Authority', () => {
         }
     });
 
+    it('upgraded LATE-WAR save (no first_turn stamp) backfills from event fire-turn → FLOOR, not a fresh PEAK', () => {
+        // PRE-CHANGE save: drina_cleansing_occurred is already true but the
+        // drina_cleansing_first_turn stamp was never written. Loading a late-war
+        // save must NOT re-stamp the current (late) turn (which would re-apply the
+        // PEAK and decay for another 52 turns). It must derive the first-turn from
+        // the recorded event fire-turn so the contribution sits at the FLOOR.
+        const late = makeState({ turn: 180 });
+        late.military.event_flags = { drina_cleansing_occurred: true };
+        late.military.event_last_fired_turn = { drina_valley_ethnic_cleansing_1992: 8 };
+
+        // Far past the decay window (180 - 8 = 172 >= 52) → FLOOR, NOT the peak.
+        expect(computeDrinaCleansingOverride(late)).toBeCloseTo(DRINA_CLEANSING_OVERRIDE_FLOOR, 5);
+        expect(computeDrinaCleansingOverride(late)).not.toBeCloseTo(DRINA_CLEANSING_OVERRIDE_PEAK, 5);
+        // The derived first-turn is stamped back for stable subsequent lookups.
+        expect(late.military.event_flags.drina_cleansing_first_turn).toBe(8);
+    });
+
+    it('truly old save (no stamp, no fire-turn) falls back to early-war default → FLOOR, never current turn', () => {
+        const late = makeState({ turn: 180 });
+        late.military.event_flags = { drina_cleansing_occurred: true };
+        late.military.event_last_fired_turn = {};
+
+        // Deterministic early-war default (turn_min=8) keeps elapsed >= window → FLOOR.
+        expect(computeDrinaCleansingOverride(late)).toBeCloseTo(DRINA_CLEANSING_OVERRIDE_FLOOR, 5);
+        // Must NOT stamp the current late turn.
+        expect(late.military.event_flags.drina_cleansing_first_turn).not.toBe(180);
+    });
+
     it('Drina override only applies to RS', () => {
         const s = makeState({ turn: 100 });
         s.military.event_flags = { drina_cleansing_occurred: true, drina_cleansing_first_turn: 8 };

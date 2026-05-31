@@ -90,14 +90,58 @@ export const DRINA_CLEANSING_OVERRIDE_PER_TURN = DRINA_CLEANSING_OVERRIDE_FLOOR;
 /** event_flags key recording the turn the Drina cleansing was first observed. */
 const DRINA_CLEANSING_FIRST_TURN_FLAG = 'drina_cleansing_first_turn';
 
+/** Event id that sets `drina_cleansing_occurred` (see data/scenarios/events/war_1992.json). */
+const DRINA_CLEANSING_EVENT_ID = 'drina_valley_ethnic_cleansing_1992';
+
+/**
+ * Historical early-war fall-back first-turn for a truly old save that carries
+ * `drina_cleansing_occurred` but neither the stamp nor the event fire-turn.
+ * Equal to the Drina event's `trigger.turn_min` (the earliest the atrocity could
+ * historically fire). Chosen deterministically — NOT from `state.meta.turn` — so
+ * an upgraded LATE-WAR save never re-triggers a fresh PEAK and instead settles at
+ * the FLOOR once `state.meta.turn - this >= DECAY_WINDOW`.
+ */
+const DRINA_CLEANSING_HISTORICAL_FIRST_TURN = 8;
+
+/**
+ * Resolve the turn the Drina cleansing first occurred for the decay calculation.
+ *
+ * Resolution order (all deterministic):
+ *   1. Existing `event_flags.drina_cleansing_first_turn` stamp (live games).
+ *   2. The fire turn recorded in `event_last_fired_turn[drina_valley_ethnic_cleansing_1992]`
+ *      — the stable historical signal for an upgraded save that observed the event
+ *      but predates the stamp.
+ *   3. A fixed early-war historical default (the event's turn_min) — never the
+ *      current turn — so an old LATE-WAR save lands at the FLOOR rather than
+ *      re-applying a fresh PEAK.
+ *
+ * The resolved turn is stamped back into `event_flags` so the lookup is stable
+ * across subsequent turns. `event_flags` is a free-form record, so no migration
+ * or schema change is needed.
+ */
+function resolveDrinaCleansingFirstTurn(state: GameState): number {
+    const flags = state.military.event_flags;
+    const stamped = flags[DRINA_CLEANSING_FIRST_TURN_FLAG];
+    if (typeof stamped === 'number') return stamped;
+
+    const firedTurn = state.military.event_last_fired_turn?.[DRINA_CLEANSING_EVENT_ID];
+    const firstTurn =
+        typeof firedTurn === 'number' && firedTurn >= 0
+            ? firedTurn
+            : DRINA_CLEANSING_HISTORICAL_FIRST_TURN;
+
+    flags[DRINA_CLEANSING_FIRST_TURN_FLAG] = firstTurn;
+    return firstTurn;
+}
+
 /**
  * Compute the bounded, decaying Drina-cleansing override contribution for RS.
  *
- * The first turn the `drina_cleansing_occurred` flag is observed, the current
- * turn is stamped lazily into `event_flags` (deterministic — driven only by
- * `state.meta.turn`; no migration needed since `event_flags` is a free-form
- * record). The contribution then decays linearly from PEAK to FLOOR over
- * DECAY_WINDOW turns and holds at FLOOR thereafter.
+ * The first turn the `drina_cleansing_occurred` flag is observed, the
+ * first-occurrence turn is resolved deterministically (see
+ * `resolveDrinaCleansingFirstTurn`) and stamped lazily into `event_flags`. The
+ * contribution then decays linearly from PEAK to FLOOR over DECAY_WINDOW turns
+ * and holds at FLOOR thereafter.
  *
  * Returns 0 when the flag is unset.
  */
@@ -105,13 +149,8 @@ export function computeDrinaCleansingOverride(state: GameState): number {
     if (state.military.event_flags?.drina_cleansing_occurred !== true) return 0;
 
     if (!state.military.event_flags) state.military.event_flags = {};
-    const flags = state.military.event_flags;
 
-    let firstTurn = flags[DRINA_CLEANSING_FIRST_TURN_FLAG];
-    if (typeof firstTurn !== 'number') {
-        firstTurn = state.meta.turn;
-        flags[DRINA_CLEANSING_FIRST_TURN_FLAG] = firstTurn;
-    }
+    const firstTurn = resolveDrinaCleansingFirstTurn(state);
 
     const elapsed = Math.max(0, state.meta.turn - firstTurn);
     const t = clamp(elapsed / DRINA_CLEANSING_DECAY_WINDOW, 0, 1);

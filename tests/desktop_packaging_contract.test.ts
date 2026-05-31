@@ -83,9 +83,10 @@ test('electron-builder config matches the packaged runtime resource contract', a
             ['data/derived', 'data/derived'],
             ['data/source', 'data/source'],
             ['data/ui', 'data/ui'],
+            ['data/scenarios/events', 'data/scenarios/events'],
             ['assets', 'assets'],
         ],
-        'extraResources should mirror the packaged resources layout assumed by electron-main.cjs',
+        'extraResources should mirror the packaged resources layout assumed by electron-main.cjs (data/scenarios/events ships so loadEventDefinitionsFromDir resolves on Advance Turn in a packaged build)',
     );
 
     const startupSnapshotEntry = extraResources.find((entry) => entry.from === 'data/derived');

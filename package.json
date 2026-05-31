@@ -373,6 +373,13 @@
         ]
       },
       {
+        "from": "data/scenarios/events",
+        "to": "data/scenarios/events",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
         "from": "assets",
         "to": "assets",
         "filter": [
