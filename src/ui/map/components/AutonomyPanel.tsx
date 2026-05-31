@@ -108,6 +108,13 @@ const LEVEL_DESC_KEYS: Record<number, MessageKey> = {
     3: 'autonomy.level.observer.desc',
 };
 
+// Phase 2 slice 1: commander go/no-go → assessment label key (typed, no cast).
+const ASSESSMENT_LABEL_KEYS: Record<'launch' | 'postpone' | 'abort', MessageKey> = {
+    launch: 'autonomy.proposal.assessment.launch',
+    postpone: 'autonomy.proposal.assessment.postpone',
+    abort: 'autonomy.proposal.assessment.abort',
+};
+
 // ── ProposalCard ───────────────────────────────────────────────────────────
 
 interface ProposalCardProps {
@@ -197,7 +204,7 @@ function ProposalCard({ proposal, opCard, commandAuthorityCurrent, onAccept, onR
                     </div>
                     {opCard.commander_assessment && (
                         <div className="text-[9px] font-mono uppercase tracking-[0.12em] text-[#8a8578]">
-                            {t(`autonomy.proposal.assessment.${opCard.commander_assessment}` as MessageKey)}
+                            {t(ASSESSMENT_LABEL_KEYS[opCard.commander_assessment])}
                         </div>
                     )}
                 </div>

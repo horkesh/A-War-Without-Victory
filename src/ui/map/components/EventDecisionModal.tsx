@@ -115,10 +115,11 @@ export function deriveAssessmentLabel(
     advisor: { name: string | null | undefined; rank?: string } | undefined,
 ): string {
     const isOfficerScoped = category === 'command' || category === 'military';
-    const hasOfficer = isOfficerScoped && advisor != null && (advisor.name ?? '').trim().length > 0;
-    if (!hasOfficer) return 'Staff assessment';
-    const rankPrefix = advisor!.rank ? `${humanizeRank(advisor!.rank)} ` : '';
-    return `${rankPrefix}${getPlayerSafeOfficerName(advisor!.name)}`;
+    if (!isOfficerScoped || !advisor) return 'Staff assessment';
+    // `advisor` is now narrowed; access its fields without non-null assertions.
+    if ((advisor.name ?? '').trim().length === 0) return 'Staff assessment';
+    const rankPrefix = advisor.rank ? `${humanizeRank(advisor.rank)} ` : '';
+    return `${rankPrefix}${getPlayerSafeOfficerName(advisor.name)}`;
 }
 
 /** Render a human-readable summary of an effect. */

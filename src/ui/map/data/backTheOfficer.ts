@@ -584,8 +584,8 @@ function parseApproveOpAction(action: string | undefined): { corpsId: string; pl
 /** Find an active operation on a corps by plan id (best-effort), else first active op. */
 function findOpForPlan(cc: RawRecord | null, planId: string): RawRecord | null {
   if (!cc) return null;
-  const activeOps = Array.isArray(cc.active_operations)
-    ? (cc.active_operations as unknown[])
+  const activeOps: unknown[] = Array.isArray(cc.active_operations)
+    ? cc.active_operations
     : asRecord(cc.active_operation)
       ? [cc.active_operation]
       : [];
@@ -597,6 +597,11 @@ function findOpForPlan(cc: RawRecord | null, planId: string): RawRecord | null {
 
 function assessmentOrNull(value: unknown): 'launch' | 'postpone' | 'abort' | null {
   return value === 'launch' || value === 'postpone' || value === 'abort' ? value : null;
+}
+
+/** Read a finite number from a free-form record value, else null. */
+function finiteNumOrNull(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
 /**
@@ -651,9 +656,7 @@ export function buildOpProposalCards(
     const opName = str(op?.name) ?? str(op?.objective_description) ?? planId;
     const commanderId = str(op?.tg_commander_officer_id) ?? str(op?.commander_officer_id);
     const commander = resolveCommander(commanderId, rosterById);
-    const forceRatio = typeof op?.force_ratio_estimate === 'number' && Number.isFinite(op.force_ratio_estimate)
-      ? (op.force_ratio_estimate as number)
-      : null;
+    const forceRatio = finiteNumOrNull(op?.force_ratio_estimate);
     const assessment = assessmentOrNull(op?.commander_assessment);
 
     const tg = opId ? tgByOpId.get(opId) : undefined;
