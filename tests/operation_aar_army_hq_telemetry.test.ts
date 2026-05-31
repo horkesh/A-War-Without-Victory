@@ -8,13 +8,21 @@
  *   - cross_corps_donor_count (donor corps OTHER than the anchor corps)
  *   - total_cohesion_bled (sum of donor cohesion_bleed_applied)
  *
+ * P2 #48 — REAL LIFECYCLE: beginRecovery (inside advanceSectorOffensives) dissolves the op's TG
+ * immediately, but finalizeOperationAAR runs only after the recovery window elapses. So a LIVE-TG
+ * lookup at finalize time finds nothing for real Army-HQ ops → the sidecar was silently omitted.
+ * The fix snapshots the telemetry onto the op record AT dissolution. These tests drive the real
+ * recovery path (TG actually dissolved) before finalizing, so they exercise the snapshot — not a
+ * pre-injected live-TG artifact.
+ *
  * Two scopes:
- *   - FLAG-ON  (vi.mock overrides the const to true): sidecar populated.
+ *   - FLAG-ON  (vi.mock overrides the const to true): sidecar populated FROM THE SNAPSHOT.
  *   - FLAG-OFF (real const false): sidecar absent — byte-identity contract.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
+    CorpsCommandState,
     CorpsOperation,
     FormationState,
     GameState,
@@ -45,9 +53,16 @@ function donor(brigade_id: string, source_corps_id: string, bled: number): TgDon
     };
 }
 
-/** State with a finished sector_attack op carried by an Army-HQ TG (anchor corp_a; donors corp_a + corp_b). */
+/**
+ * State with a live sector_attack op carried by an Army-HQ TG (anchor corp_a; donors corp_a +
+ * corp_b). The op sits in `corps_command.active_operations` in EXECUTION phase and points at a
+ * sector that does not exist in corps_front_sectors — so the first advanceSectorOffensives tick
+ * sends it to recovery (orphaned_sector), which dissolves the TG. The corps brigade `corp_a`
+ * provides the faction lookup advanceSectorOffensives needs.
+ */
 function fixture(turn = 30): { state: GameState; op: CorpsOperation } {
     const formations: Record<string, FormationState> = {
+        corp_a: { ...brigade('corp_a', 'corp_a'), kind: 'corps' } as FormationState,
         anchor: brigade('anchor', 'corp_a'),
         d_same: brigade('d_same', 'corp_a'),
         d_cross: brigade('d_cross', 'corp_b'),
@@ -64,10 +79,35 @@ function fixture(turn = 30): { state: GameState; op: CorpsOperation } {
             donor('d_same', 'corp_a', 3),
         ],
         location_osid: 'op:obj:x',
-        status: 'recovering',
+        status: 'active',
         formed_on_turn: turn - 5,
         cohesion: 60,
     };
+
+    const op: CorpsOperation = {
+        name: 'KRIVAJA_95',
+        type: 'sector_attack',
+        phase: 'execution',
+        started_turn: turn - 5,
+        phase_started_turn: turn - 1,
+        sector_id: 'sector:does_not_exist', // missing sector → orphaned recovery on next tick
+        participating_brigades: ['anchor', 'd_same', 'd_cross'],
+        objectives: ['op:obj:x'],
+        weekly_log: [],
+    } as unknown as CorpsOperation;
+
+    const corpsCommand: Record<string, CorpsCommandState> = {
+        corp_a: {
+            command_span: 3,
+            subordinate_count: 3,
+            og_slots: 1,
+            active_ogs: [],
+            corps_exhaustion: 0,
+            stance: 'offensive' as any,
+            active_operations: [op],
+        },
+    };
+
     const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn, seed: 'aar-ahq-fixture', phase: 'war', player_faction: 'RBiH' } as any,
@@ -75,6 +115,8 @@ function fixture(turn = 30): { state: GameState; op: CorpsOperation } {
         military: {
             formations,
             tactical_groups: { [tgId]: tg },
+            corps_command: corpsCommand,
+            corps_front_sectors: {}, // sector:does_not_exist absent → orphaned
             army_hq_operations: {},
             army_hq_last_op_turn: {},
             army_hq_op_count_by_year: {},
@@ -83,16 +125,6 @@ function fixture(turn = 30): { state: GameState; op: CorpsOperation } {
         operation_history: [],
     } as unknown as GameState;
 
-    const op: CorpsOperation = {
-        name: 'KRIVAJA_95',
-        type: 'sector_attack',
-        phase: 'recovery',
-        started_turn: turn - 5,
-        phase_started_turn: turn - 1,
-        participating_brigades: ['anchor', 'd_same', 'd_cross'],
-        objectives: ['op:obj:x'],
-        weekly_log: [],
-    } as unknown as CorpsOperation;
     return { state, op };
 }
 
@@ -108,13 +140,25 @@ describe('Army HQ AAR telemetry (flag ON)', () => {
             const actual = await vi.importActual<typeof import('../src/sim/combat/tactical_group_config.js')>(
                 '../src/sim/combat/tactical_group_config.js',
             );
-            return { ...actual, ENABLE_TG_ARMY_HQ_OPS: true };
+            return { ...actual, ENABLE_TG_FORMATION: true, ENABLE_TG_ARMY_HQ_OPS: true };
         });
     });
 
-    it('populates army_hq_telemetry with donor lineage, cross-corps count, and total bled', async () => {
+    it('snapshots telemetry at TG dissolution and finalize emits it AFTER the live TG is gone', async () => {
+        const { advanceSectorOffensives } = await import('../src/sim/combat/sector_offensive.js');
         const { finalizeOperationAAR } = await import('../src/sim/combat/operation_aar.js');
         const { state, op } = fixture();
+
+        // 1. Drive the real recovery path. The op's sector is missing → beginRecovery fires,
+        //    which dissolves the op's TG (the timing bug source).
+        advanceSectorOffensives(state);
+
+        // 2. Prove the live TG is GONE — a live lookup at finalize would now find nothing.
+        expect(state.military.tactical_groups?.['tg:corp_a:KRIVAJA_95:anchor']).toBeUndefined();
+        // ...but the snapshot was captured onto the op record at dissolution time.
+        expect(op.army_hq_telemetry_snapshot).toBeDefined();
+
+        // 3. Finalize turns later (no live TG). The sidecar must survive via the snapshot.
         const aar = finalizeOperationAAR(state, 'corp_a', op);
         expect(aar.army_hq_telemetry).toBeDefined();
         const t = aar.army_hq_telemetry!;
@@ -128,11 +172,23 @@ describe('Army HQ AAR telemetry (flag ON)', () => {
         expect(t.total_cohesion_bled).toBe(8);
     });
 
-    it('omits army_hq_telemetry for an op NOT carried by an Army-HQ TG', async () => {
+    it('still emits telemetry from a LIVE TG when finalize runs synchronously (no recovery yet)', async () => {
+        // Belt-and-suspenders: the live-TG path must remain intact for any synchronous finalize.
+        const { finalizeOperationAAR } = await import('../src/sim/combat/operation_aar.js');
+        const { state, op } = fixture();
+        const aar = finalizeOperationAAR(state, 'corp_a', op);
+        expect(aar.army_hq_telemetry).toBeDefined();
+        expect(aar.army_hq_telemetry!.total_cohesion_bled).toBe(8);
+    });
+
+    it('omits army_hq_telemetry for an op NOT carried by an Army-HQ TG (even after dissolution)', async () => {
+        const { advanceSectorOffensives } = await import('../src/sim/combat/sector_offensive.js');
         const { finalizeOperationAAR } = await import('../src/sim/combat/operation_aar.js');
         const { state, op } = fixture();
         // Strip the army_hq_op_id → TG exists but is a regular (non-Army-HQ) TG.
         delete state.military.tactical_groups!['tg:corp_a:KRIVAJA_95:anchor'].army_hq_op_id;
+        advanceSectorOffensives(state); // dissolves the (non-Army-HQ) TG; nothing to snapshot
+        expect(op.army_hq_telemetry_snapshot).toBeUndefined();
         const aar = finalizeOperationAAR(state, 'corp_a', op);
         expect(aar.army_hq_telemetry).toBeUndefined();
     });
@@ -156,5 +212,12 @@ describe('Army HQ AAR telemetry (flag OFF — byte-identity contract)', () => {
         const { state, op } = fixture();
         const aar = finalizeOperationAAR(state, 'corp_a', op);
         expect(aar.army_hq_telemetry).toBeUndefined();
+    });
+
+    it('never snapshots telemetry at dissolution when the flag is off', async () => {
+        const { advanceSectorOffensives } = await import('../src/sim/combat/sector_offensive.js');
+        const { state, op } = fixture();
+        advanceSectorOffensives(state);
+        expect(op.army_hq_telemetry_snapshot).toBeUndefined();
     });
 });
