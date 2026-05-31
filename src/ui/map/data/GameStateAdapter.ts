@@ -185,6 +185,72 @@ function humanizeMunicipalitySlug(slug: string): string {
         ?? slug.split(/[-_]/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
+/**
+ * ADR-0006 — attested historical Operational-Group / Tactical-Group / Operational-Zone
+ * labels for standing corps front sectors. DISPLAY-ONLY (read-model layer): resolved here
+ * in parseGameState, never written to the hashed `corps_front_sectors` state, so simulation
+ * hashes are unaffected (zero calibration risk per ADR-0006 §"Determinism Impact").
+ *
+ * Names are sourced verbatim from ADR-0006's "Recommended initial set" table
+ * (docs/20_engineering/ADR/ADR-0006-sectors-as-standing-operational-groups.md, lines 70-83),
+ * which cites Balkan Battlegrounds Vol I pp.150/389/446/494 + Vol II pp.419/475/479/482/490/505
+ * and ICTY Krstić IT-98-33-T. No names are invented here.
+ *
+ * Resolution is by corps_id + the sector's dominant municipality coverage (region discriminator),
+ * not by the geometry-derived sector index (which is not stable across turns). A `null` muns entry
+ * means "any sector of this corps" (whole-corps OZ). Sectors whose corps has multiple attested OGs
+ * but whose dominant municipality matches none of the attested anchors are left UNSET (fall back to
+ * the computed "{corps} – {top muns}" label) — better unset than fabricated.
+ *
+ * Sectors deliberately left WITHOUT an attested name (ADR gives no region anchor):
+ *   - arbih_5th_corps "OG North" / "OG South" — ADR specifies only "north flank" / "south flank"
+ *     with no municipality anchor; resolving a specific mun to a flank would be invention.
+ */
+interface AttestedOgName {
+    /** Engine corps formation id (oob_corps.json). */
+    corps_id: string;
+    /** Dominant-municipality discriminator (mun1990 slug). null = any sector of this corps. */
+    anchor_mun: string | null;
+    /** Historically-attested label, verbatim from ADR-0006. */
+    name: string;
+}
+
+const ATTESTED_OG_NAMES: readonly AttestedOgName[] = [
+    // VRS 1st Krajina Corps — two attested OGs discriminated by region (ADR-0006 lines 74-75).
+    { corps_id: 'vrs_1st_krajina', anchor_mun: 'doboj', name: 'Doboj OG 9' },
+    { corps_id: 'vrs_1st_krajina', anchor_mun: 'prijedor', name: 'Prijedor OG 10' },
+    // VRS Drina Corps — two attested TGs (ADR-0006 lines 76-77).
+    { corps_id: 'vrs_drina', anchor_mun: 'foca', name: 'TG Foča' },
+    { corps_id: 'vrs_drina', anchor_mun: 'visegrad', name: 'TG Višegrad' },
+    // VRS Sarajevo-Romanija Corps — Vogošća OG (ADR-0006 line 78).
+    { corps_id: 'vrs_sarajevo_romanija', anchor_mun: 'vogosca', name: '"Vogošća" OG' },
+    // HVO Central Bosnia — whole corps is the OZ (ADR-0006 line 81).
+    { corps_id: 'hvo_central_bosnia', anchor_mun: null, name: 'OZ Central Bosnia' },
+];
+
+/**
+ * Resolve the attested OG/TG/OZ display name for a sector, or undefined if none is attested.
+ * @param corpsId engine corps formation id
+ * @param munCounts mun1990-slug → edge-count for the sector's friendly coverage
+ */
+function resolveAttestedOgName(corpsId: string, munCounts: Map<string, number>): string | undefined {
+    // Whole-corps OZ match first (anchor_mun === null).
+    for (const entry of ATTESTED_OG_NAMES) {
+        if (entry.corps_id === corpsId && entry.anchor_mun === null) return entry.name;
+    }
+    // Region-discriminated match: pick the attested anchor with the highest coverage in this sector.
+    let best: { name: string; count: number } | undefined;
+    for (const entry of ATTESTED_OG_NAMES) {
+        if (entry.corps_id !== corpsId || entry.anchor_mun === null) continue;
+        const count = munCounts.get(entry.anchor_mun) ?? 0;
+        if (count <= 0) continue;
+        if (!best || count > best.count || (count === best.count && entry.name < best.name)) {
+            best = { name: entry.name, count };
+        }
+    }
+    return best?.name;
+}
+
 function getAirdropAllocationValue(state: GameState, enclaveId: string): number {
     return finiteNumber((state.military.airdrop_allocation as Record<string, number> | undefined)?.[enclaveId]);
 }
@@ -1769,9 +1835,13 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             // e.g. "TG Drina", "1. OG (Tuzla)", "OZ Mostar") when present in state; otherwise fall
             // back to the computed "{corps} \u2013 {top muns}" label. Mirrors displaySectorLabel() in
             // game_state.ts. Absent on flag-off / pre-3A saves, so the fallback is the default path.
-            const standingIdentity = typeof s.display_name === 'string' && s.display_name.length > 0
+            // ADR-0006 attested-name wiring: if state carries no explicit display_name, resolve the
+            // historically-attested OG/TG/OZ label from the corps + dominant-municipality coverage
+            // (display-only; never written back to hashed state). Falls through to computed label
+            // when this sector's corps/region has no attested name.
+            const standingIdentity = (typeof s.display_name === 'string' && s.display_name.length > 0)
                 ? s.display_name
-                : undefined;
+                : resolveAttestedOgName(corpsId, munCounts);
             const displayName = standingIdentity
                 ?? (topMuns.length > 0
                     ? `${corpsName} \u2013 ${topMuns.join(', ')}`

@@ -1222,3 +1222,91 @@ test('parseGameState maps the canonical operational SITREP packet from extractWa
     assert.deepStrictEqual(parsed.operationalSitrep?.alerts, expected.alerts);
     assert.strictEqual(parsed.operationalSitrep?.headline, expected.headline);
 });
+
+// ADR-0006 — attested historical OG/TG/OZ display_names wired into the read-model.
+// Verifies that parseGameState resolves the corps + dominant-municipality coverage to the
+// historically-attested label (display-only; never touches hashed state).
+function sectorState(corpsId: string, munSlugs: string[]): any {
+    const friendlyOsids = munSlugs.map((m, i) => `op:${m}:${m}_${i + 1}`);
+    return {
+        meta: { turn: 5, phase: 'war' },
+        military: {
+            formations: {
+                [corpsId]: { faction: 'RS', name: corpsId, kind: 'corps', status: 'active', created_turn: 0, tags: [] },
+            },
+            corps_front_sectors: {
+                's0': {
+                    sector_id: 'sector:' + corpsId + ':0',
+                    corps_id: corpsId,
+                    faction: 'RS',
+                    opposing_factions: ['RBiH'],
+                    edge_ids: friendlyOsids.map((_, i) => 'e' + i),
+                    territory_osids: friendlyOsids,
+                    sub_segments: [{ sub_segment_id: 'subseg:0', edge_ids: friendlyOsids.map((_, i) => 'e' + i), friendly_osids: friendlyOsids, enemy_osids: [] }],
+                    length_edges: friendlyOsids.length,
+                    assigned_brigade_ids: [],
+                    reserve_brigade_ids: [],
+                    density: 0, threat_ratio: 0, defensive_power: 0,
+                    sector_stance: 'defend', stance_source: 'bot',
+                },
+            },
+        } as any,
+        political: { political_controllers: {} } as any,
+    };
+}
+
+test('ADR-0006: attested OG/TG/OZ names resolve from corps + region (display-only)', () => {
+    const drinaFoca = parseGameState(sectorState('vrs_drina', ['foca', 'foca', 'kalinovik']));
+    assert.strictEqual(drinaFoca.corpsFrontSectors?.[0]?.display_name, 'TG Foča');
+
+    const drinaVisegrad = parseGameState(sectorState('vrs_drina', ['visegrad', 'visegrad', 'rudo']));
+    assert.strictEqual(drinaVisegrad.corpsFrontSectors?.[0]?.display_name, 'TG Višegrad');
+
+    const krajinaDoboj = parseGameState(sectorState('vrs_1st_krajina', ['doboj', 'doboj', 'teslic']));
+    assert.strictEqual(krajinaDoboj.corpsFrontSectors?.[0]?.display_name, 'Doboj OG 9');
+
+    const krajinaPrijedor = parseGameState(sectorState('vrs_1st_krajina', ['prijedor', 'prijedor']));
+    assert.strictEqual(krajinaPrijedor.corpsFrontSectors?.[0]?.display_name, 'Prijedor OG 10');
+
+    const srk = parseGameState(sectorState('vrs_sarajevo_romanija', ['vogosca', 'vogosca']));
+    assert.strictEqual(srk.corpsFrontSectors?.[0]?.display_name, '"Vogošća" OG');
+
+    // Whole-corps OZ: any sector of hvo_central_bosnia regardless of region.
+    const oz = parseGameState(sectorState('hvo_central_bosnia', ['vitez', 'busovaca']));
+    assert.strictEqual(oz.corpsFrontSectors?.[0]?.display_name, 'OZ Central Bosnia');
+});
+
+test('ADR-0006: unattested corps/region falls back to computed label (no fabrication)', () => {
+    // vrs_drina sector with no attested anchor (e.g. only Goražde-area muns) → computed fallback.
+    const fallback = parseGameState(sectorState('vrs_drina', ['gorazde', 'gorazde']));
+    const label = fallback.corpsFrontSectors?.[0]?.display_name ?? '';
+    assert.ok(!['TG Foča', 'TG Višegrad'].includes(label), 'must not fabricate a TG name');
+    assert.ok(label.length > 0, 'fallback label present');
+
+    // arbih_5th_corps is deliberately left unset (ADR gives no region anchor for OG North/South).
+    const fifth = parseGameState({
+        meta: { turn: 5, phase: 'war' },
+        military: {
+            formations: { arbih_5th_corps: { faction: 'RBiH', name: '5th Corps', kind: 'corps', status: 'active', created_turn: 0, tags: [] } },
+            corps_front_sectors: {
+                's0': {
+                    sector_id: 'sector:arbih_5th_corps:0', corps_id: 'arbih_5th_corps', faction: 'RBiH',
+                    opposing_factions: ['RS'], edge_ids: ['e0'], territory_osids: ['op:bihac:bihac_2'],
+                    sub_segments: [{ sub_segment_id: 'subseg:0', edge_ids: ['e0'], friendly_osids: ['op:bihac:bihac_2'], enemy_osids: [] }],
+                    length_edges: 1, assigned_brigade_ids: [], reserve_brigade_ids: [],
+                    density: 0, threat_ratio: 0, defensive_power: 0, sector_stance: 'defend', stance_source: 'bot',
+                },
+            },
+        } as any,
+        political: { political_controllers: {} } as any,
+    });
+    const fifthLabel = fifth.corpsFrontSectors?.[0]?.display_name ?? '';
+    assert.ok(!['OG North', 'OG South'].includes(fifthLabel), 'arbih_5th_corps OG North/South left unset');
+});
+
+test('ADR-0006: explicit state display_name takes precedence over attested resolver', () => {
+    const s = sectorState('vrs_drina', ['foca', 'foca']);
+    s.military.corps_front_sectors.s0.display_name = 'Authored Name';
+    const parsed = parseGameState(s);
+    assert.strictEqual(parsed.corpsFrontSectors?.[0]?.display_name, 'Authored Name');
+});
