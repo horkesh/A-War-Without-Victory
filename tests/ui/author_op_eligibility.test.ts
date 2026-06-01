@@ -223,6 +223,20 @@ describe('buildAuthorableOpEligibility — operation-slot availability (silent i
     expect(result.ok).toBe(false);
   });
 
+  it('recovery-phase op does not occupy a slot (still has_available_slot)', () => {
+    const state = makeState({ controllers: { enemy_1: 'RS' }, formations: corpsWith12Brigades() });
+    // 1 slot max, but the only active op is in the recovery phase → not counted →
+    // a slot remains free for the authored op (mirrors emit.ts `phase !== 'recovery'`).
+    const cmd = {
+      active_operations: [{ name: 'Recovering Op', objectives: ['other_osid'], axes: [], phase: 'recovery' }],
+    } as unknown as Parameters<typeof buildAuthorableOpEligibility>[3];
+    const result = buildAuthorableOpEligibility(state, opDef(), undefined, cmd, 'corps_A');
+    expect(result.slots_max).toBe(1);
+    expect(result.slots_used).toBe(0);
+    expect(result.has_available_slot).toBe(true);
+    expect(result.ok).toBe(true);
+  });
+
   it('defaults to has_available_slot=true when corps context is unavailable', () => {
     const state = makeState({ controllers: { enemy_1: 'RS' }, formations: { bde_1: ELIGIBLE_BRIGADE } });
     const result = buildAuthorableOpEligibility(state, opDef());

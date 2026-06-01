@@ -1006,16 +1006,22 @@ function countActiveCorpsBrigades(state: GameState, corpsId: string | undefined)
 
 /**
  * Compute operation-slot availability. slots_max = floor(active brigade count
- * / 12), min 1 (getMaxOperationSlots). slots_used = cmd.active_operations.length.
- * Defaults to "available" (slots_used 0, max 1) when corps/command context is
- * unavailable so the read-model never falsely blocks.
+ * / 12), min 1 (getMaxOperationSlots). slots_used counts active_operations that
+ * are NOT in the recovery phase — recovery ops do not occupy a slot. This
+ * mirrors the commander emission slot-cap filter `op.phase !== 'recovery'` in
+ * src/sim/combat/commander/emit.ts (buildOperations). Defaults to "available"
+ * (slots_used 0, max 1) when corps/command context is unavailable so the
+ * read-model never falsely blocks.
  */
 function computeSlotAvailability(
   activeBrigadeCount: number,
   cmd: AuthorableOpCmd | undefined,
 ): { has_available_slot: boolean; slots_used: number; slots_max: number } {
   const activeOps = cmd?.active_operations;
-  const slots_used = Array.isArray(activeOps) ? activeOps.length : 0;
+  // Recovery-phase ops do not occupy an active slot (mirrors emit.ts).
+  const slots_used = Array.isArray(activeOps)
+    ? activeOps.filter((op) => asRecord(op)?.phase !== 'recovery').length
+    : 0;
   // When no corps context (0 brigades), fall back to the engine minimum of 1
   // slot so a lone authored op is not falsely blocked.
   const slots_max = activeBrigadeCount > 0 ? getMaxOperationSlots(activeBrigadeCount) : 1;
