@@ -24,6 +24,16 @@ export const AUTHOR_OP_COST = 25;
  */
 export const STOP_OP_COST = 25;
 /**
+ * Cost of the REQUEST-OP presidential lever (Presidential Command Model slice 2/N):
+ * the president names a strategic OBJECTIVE (target OSID) for a corps and the engine
+ * builds the operation a commander would (auto-selecting brigades + axis). Priced
+ * equal to AUTHOR_OP_COST / STOP_OP_COST (25) because the president is directing the
+ * officer's effort toward a chosen target rather than approving or declining a
+ * proposal. MUST match autonomy_ipc_contract.cjs (REQUEST_OP_COST = 25) and the
+ * stage-op-directive-order IPC handler (op_directive_staging.cjs).
+ */
+export const REQUEST_OP_COST = 25;
+/**
  * Cost of the ELITE-DEPLOY presidential lever (Presidential Command Model):
  * the president authorizes RELEASING an elite/special formation from the
  * strategic reserve to a corps that requested it. Priced equal to a STOP-OP /

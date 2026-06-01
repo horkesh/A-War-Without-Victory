@@ -184,6 +184,9 @@ interface WindowAwwv {
     stageCorpsOperationOrder: (payload: CorpsOperationOrderPayload) => Promise<{ ok: boolean; error?: string }>;
     queryOperationPrediction: (payload: Record<string, unknown>) => Promise<{ ok: boolean; data?: Record<string, unknown>; error?: string }>;
     stageOpHaltOrder: (payload: { corpsId: string; opName: string }) => Promise<{ ok: boolean; error?: string }>;
+    /** REQUEST-OP presidential lever: name a strategic objective (target OSID) for a corps;
+     *  the engine auto-selects the force + axis and builds the op (requested_by_president). */
+    stageOpDirectiveOrder: (payload: { corpsId: string; targetOsid: string }) => Promise<{ ok: boolean; error?: string }>;
     stageAssignOperationCommander: (payload: { corpsId: string; operationName: string; officerId: string }) => Promise<{ ok: boolean; error?: string }>;
     assignCommander: (officerId: string, corpsId: string) => Promise<{ ok: boolean; error?: string }>;
     dismissOfficer: (officerId: string) => Promise<{ ok: boolean; error?: string }>;
@@ -370,6 +373,13 @@ export function useIPC() {
             stageOpHaltOrder: awwv
                 ? (payload: { corpsId: string; opName: string }) => awwv.stageOpHaltOrder(payload)
                 : (_payload: { corpsId: string; opName: string }) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
+
+            // REQUEST-OP presidential lever — CA-costed objective directive. Routes the
+            // "Request operation" affordance to stage-op-directive-order; the engine
+            // auto-selects brigades + axis toward the named target OSID.
+            stageOpDirectiveOrder: awwv
+                ? (payload: { corpsId: string; targetOsid: string }) => awwv.stageOpDirectiveOrder(payload)
+                : (_payload: { corpsId: string; targetOsid: string }) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
 
             stageAssignOperationCommander: awwv
                 ? (payload: { corpsId: string; operationName: string; officerId: string }) => awwv.stageAssignOperationCommander(payload)

@@ -81,6 +81,10 @@ contextBridge.exposeInMainWorld('awwv', {
   // Supersedes the legacy stage-operation-halt (officer-compliance, no CA cost), which
   // was removed — the player Stand Down button now routes through this path.
   stageOpHaltOrder: (payload) => ipcRenderer.invoke('stage-op-halt-order', payload),
+  // REQUEST-OP presidential lever: CA-costed staged objective directive
+  // (op_directive_staging.cjs → inject-op-directive). The president names a target OSID;
+  // the engine auto-selects the force + axis and builds the op (requested_by_president).
+  stageOpDirectiveOrder: (payload) => ipcRenderer.invoke('stage-op-directive-order', payload),
   stageOperationForceLaunch: (payload) => ipcRenderer.invoke('stage-operation-force-launch', payload),
   stageOperationDecision: (payload) => ipcRenderer.invoke('stage-operation-decision', payload),
   stageAirdropAllocation: (allocations) => ipcRenderer.invoke('stage-airdrop-allocation', { allocations }),

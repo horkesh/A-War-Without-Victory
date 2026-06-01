@@ -376,6 +376,12 @@ export interface CorpsOperation {
      *  #67). Provenance tag only — does not change execution. Optional/omitEmpty so
      *  bot and pre-planned ops stay byte-identical. */
     authored_by_player?: boolean;
+    /** True when this operation was built by the engine from a presidential REQUEST-OP
+     *  directive (Presidential Command Model slice 2/N): the president named the target
+     *  OSID, the engine auto-selected the force + axis/staging and injected it via the
+     *  `inject-op-directive` war-phase step. Provenance tag only — does not change
+     *  execution. Optional/omitEmpty so bot and pre-planned ops stay byte-identical. */
+    requested_by_president?: boolean;
 
     // --- Operation preparation sub-phases (within planning) ---
     /** Current sub-phase of preparation (only meaningful when phase === 'planning'). */
@@ -755,6 +761,25 @@ export interface CorpsCommandState {
      * per applied halt). Surfaced to the UI and consumed by the (follow-up) political
      * consequence wiring. Optional — absent in headless scenarios. */
     halted_op_record?: { op_name: string; turn: number }[];
+    /**
+     * REQUEST-OP presidential lever (Presidential Command Model slice 2/N). The
+     * president names a strategic OBJECTIVE (target_osid) for this corps; the engine
+     * then builds the operation the way a commander would — auto-selecting the force
+     * and an axis/staging toward the target. The president does NOT pick brigades or
+     * axes. Staged by the desktop IPC handler (stage-op-directive-order →
+     * op_directive_staging.cjs) and consumed ONCE by the `inject-op-directive`
+     * war-phase step, which auto-selects available eligible brigades, builds a
+     * reachable axis (friendly staging adjacent to the target), validates, injects a
+     * CorpsOperation tagged requested_by_president, and ALWAYS clears this field.
+     * OPTIONAL — absent in old saves and all headless scenarios, so the inject step
+     * early-outs and stays byte-identical when no corps has one. */
+    pending_op_directive?: { target_osid: string; turn: number; ca_cost: number };
+    /**
+     * Lightweight rejection record set by `inject-op-directive` when a staged
+     * pending_op_directive cannot be built into a viable op (objective already owned,
+     * no reachable friendly staging, too few available brigades). Surfaced to the UI;
+     * overwritten each attempt; never blocks. Optional — absent in headless scenarios. */
+    op_directive_rejection?: { target_osid: string; reason: string; turn: number };
 }
 
 /** Operational group activation order. */
