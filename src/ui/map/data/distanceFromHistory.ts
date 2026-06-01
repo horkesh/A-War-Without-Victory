@@ -35,6 +35,10 @@ import war1992 from '../../../../data/scenarios/events/war_1992.json';
 import war1993 from '../../../../data/scenarios/events/war_1993.json';
 import war1994 from '../../../../data/scenarios/events/war_1994.json';
 import war1995 from '../../../../data/scenarios/events/war_1995.json';
+// Codex P2 (#95): consequences.json is part of the runtime EVENT_FILES catalog and its
+// rows are recorded in event_decision_log by id (e.g. csq_patron_recovery_offer carries a
+// historical_default_response_id). Without it, those decisions were skipped → undercount.
+import consequences from '../../../../data/scenarios/events/consequences.json';
 
 /** One resolved decision that differs from the historical default. */
 export interface DistanceFromHistoryDivergence {
@@ -99,7 +103,7 @@ interface EventHistoryMeta {
  */
 function buildEventHistoryMap(): ReadonlyMap<string, EventHistoryMeta> {
     const out = new Map<string, EventHistoryMeta>();
-    const files: unknown[] = [war1992, war1993, war1994, war1995];
+    const files: unknown[] = [war1992, war1993, war1994, war1995, consequences];
     for (const file of files) {
         if (!Array.isArray(file)) continue;
         for (const rawRow of file as RawEventRowForHistory[]) {
