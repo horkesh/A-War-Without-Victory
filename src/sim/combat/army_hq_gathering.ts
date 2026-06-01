@@ -373,7 +373,7 @@ const RECENT_TERRITORY_CHANGE_WINDOW = 6;
  * Positive = recent gains near this corps's front.
  * Negative = recent losses near this corps's front.
  */
-function computeRecentTerritoryChange(
+export function computeRecentTerritoryChange(
     state: GameState,
     faction: FactionId,
     corpsId: string,
