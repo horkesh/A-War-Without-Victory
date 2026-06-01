@@ -608,10 +608,16 @@ export function evaluateEvents(
                 let decisionSource: 'bot_political' | 'bot_v1' | 'bot_ai_default';
                 // Free War Phase 0 de-railroad: in 'emergent' mode, bypass the
                 // historical-default railroad and fall through to the live
-                // political/v1 scorers. Unset/'historical' preserves today's
+                // political/v1 scorers. Unset preserves today's flag-dependent
                 // behavior byte-identical (the calibration health check).
+                // Codex P2 (#88): EXPLICIT 'historical' is the source of truth for
+                // the calibration contract — it must replay historical defaults
+                // regardless of the AWWV_TWO_LEVEL_NOTIFICATIONS flag, so a future
+                // calibration scenario that sets historical mode without exporting
+                // the flag does not silently take emergent choices.
                 const emergent = state.meta.decision_mode === 'emergent';
-                if (isTwoLevelNotificationsEnabled() && !emergent) {
+                const forceHistorical = state.meta.decision_mode === 'historical';
+                if (forceHistorical || (isTwoLevelNotificationsEnabled() && !emergent)) {
                     chosen = applyAIDefaultResponse(state, def);
                     decisionSource = 'bot_ai_default';
                 } else if (POLITICAL_LOGICS.has(def.bot_response_logic ?? '') && respondingFaction !== null) {
