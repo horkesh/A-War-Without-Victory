@@ -772,8 +772,15 @@ export interface CorpsCommandState {
      * reachable axis (friendly staging adjacent to the target), validates, injects a
      * CorpsOperation tagged requested_by_president, and ALWAYS clears this field.
      * OPTIONAL — absent in old saves and all headless scenarios, so the inject step
-     * early-outs and stays byte-identical when no corps has one. */
-    pending_op_directive?: { target_osid: string; turn: number; ca_cost: number };
+     * early-outs and stays byte-identical when no corps has one.
+     *
+     * `forced_over_objection` (Presidential Command Model slice "force-op pushback"):
+     * set true by the desktop UI ONLY when the player confirmed past a SHOWN commander
+     * objection (queryDirectiveObjection returned recommendedAction !== 'launch'). When
+     * true and the op injects, `inject-op-directive` tags the op was_force_launched +
+     * commander_assessment_at_launch and records a presidential override on the CO
+     * (override_count / cowed bump). OPTIONAL — absent in headless → no consequence path. */
+    pending_op_directive?: { target_osid: string; turn: number; ca_cost: number; forced_over_objection?: boolean };
     /**
      * Lightweight rejection record set by `inject-op-directive` when a staged
      * pending_op_directive cannot be built into a viable op (objective already owned,

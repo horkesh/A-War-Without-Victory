@@ -461,6 +461,7 @@ import {
     type OperationPredictionRequest,
     type OperationPredictionResponse,
 } from '../sim/combat/operation_prediction.js';
+import { planDirectiveOperation } from '../sim/turn_phases/war_phases.js';
 
 /**
  * Read-only query: predict operation outcomes using the full combat predictor.
@@ -496,6 +497,92 @@ export async function queryOperationPrediction(
 }
 
 export type { OperationPredictionRequest, OperationPredictionResponse };
+
+/**
+ * Result of a force-op pushback OBJECTION query (Presidential Command Model
+ * "force-op pushback"). Read-only: a candidate plan + the commander's predicted
+ * judgment, computed on a deserialized-fresh state with ZERO mutation.
+ *
+ * `recommendedAction` is the commander's go/no-go from the predictor
+ * ('launch' | 'delay' | 'abort'). The UI shows the disposition-tinted objection card
+ * only when it is NOT 'launch'. When the candidate op cannot even be built
+ * (no force / unreachable / already owned …) `rejectionReason` carries the plan
+ * reason code and the prediction fields are 0 — the directive would no-op, so the UI
+ * surfaces the rejection rather than a pushback.
+ */
+export interface DirectiveObjectionResult {
+    /** Candidate plan reason code when the op could NOT be built (else undefined). */
+    rejectionReason?: string;
+    /** Predicted attacker:defender force ratio (0 when no candidate plan). */
+    forceRatio: number;
+    /** Predicted attacker casualties (0 when no candidate plan). */
+    estimatedCasualties: number;
+    /** Commander go/no-go recommendation; defaults to 'abort' when no candidate plan
+     *  (an un-buildable directive is the strongest possible objection). */
+    recommendedAction: 'launch' | 'delay' | 'abort';
+}
+
+/**
+ * Read-only OBJECTION query for the REQUEST/force-op pushback card. Runs the SAME
+ * auto-selection the consume step (`inject-op-directive`) would run — via the shared
+ * pure `planDirectiveOperation` helper — to obtain a candidate plan WITHOUT mutating
+ * state, then asks the existing combat predictor for the commander's force ratio,
+ * casualty estimate, and go/no-go. The caller (electron-main IPC) deserializes a fresh
+ * state, so this never touches the live GameState.
+ *
+ * Determinism: pure read; no Math.random / Date.now. Mirrors queryOperationPrediction's
+ * data-loading and adjacency/terrain caches.
+ */
+export async function queryDirectiveObjection(
+    state: GameState,
+    payload: { corpsId: string; targetOsid: string },
+    baseDir: string,
+): Promise<DirectiveObjectionResult> {
+    if (!cachedOpData) cachedOpData = await loadOperationalData(baseDir);
+    if (!cachedEdges) cachedEdges = await loadOperationalEdges(baseDir);
+    const adjacency = buildOsidAdjacency(cachedEdges);
+
+    const cmd = state.military?.corps_command?.[payload.corpsId];
+    if (!cmd) {
+        return { rejectionReason: 'corps_not_found', forceRatio: 0, estimatedCasualties: 0, recommendedAction: 'abort' };
+    }
+
+    const plan = planDirectiveOperation(state, cmd, payload.corpsId, payload.targetOsid, adjacency as Map<string, string[]>);
+    if (!plan.ok) {
+        // An un-buildable directive would no-op (op_directive_rejection). Surface the
+        // reason; recommend 'abort' (the strongest objection) so the UI does not stage it.
+        return { rejectionReason: plan.reason, forceRatio: 0, estimatedCasualties: 0, recommendedAction: 'abort' };
+    }
+
+    const terrain = await loadTerrainScalars(terrainScalarsPath(baseDir));
+    const terrainCache = buildTerrainCache(cachedOpData.operationalToCanonical, terrain);
+
+    const request: OperationPredictionRequest = {
+        corpsId: payload.corpsId,
+        axes: plan.axes.map((a) => ({
+            axisId: a.axis_id,
+            brigadeIds: a.assigned_brigades,
+            objectiveOsids: a.objectives,
+            stagingOsid: a.staging_osid,
+        })),
+        tempo: 'standard',
+        artilleryPreparation: false,
+    };
+
+    const prediction = computeOperationPrediction(
+        state,
+        request,
+        adjacency,
+        cachedOpData.operationalToCanonical,
+        terrainCache,
+    );
+
+    return {
+        forceRatio: prediction.overall.forceRatio,
+        estimatedCasualties: prediction.overall.totalEstimatedCasualties,
+        recommendedAction: prediction.commanderAssessment.recommendation,
+    };
+}
 
 /** Phase K: Validate settlement-level movement order (1-4 contiguous, same-faction). */
 export async function validateBrigadeMovementOrder(

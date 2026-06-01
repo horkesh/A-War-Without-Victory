@@ -188,3 +188,88 @@ describe('REQUEST-OP inject step (inject-op-directive)', () => {
     expect(JSON.stringify(state)).toBe(before);
   });
 });
+
+// ───────────────────────────────────────────────────────────────────────────
+// Force-op PUSHBACK consequence (forced_over_objection → was_force_launched +
+// presidential override on the CO).
+// ───────────────────────────────────────────────────────────────────────────
+
+/** State with an active named CO assigned to the corps (so the override path has a target). */
+function makeStateWithCO(opts: { forced?: boolean; coState?: any } = {}): any {
+  const state = makeState({
+    pendingDirective: {
+      target_osid: 'bihac_1', turn: 14, ca_cost: 25,
+      ...(opts.forced ? { forced_over_objection: true } : {}),
+    },
+  });
+  state.military.named_officers = {
+    off_co: {
+      officer_id: 'off_co', status: 'active', assigned_corps_id: 'rbih_1st_corps',
+      acting_commander: false, turns_in_command: 5, battles: 0, victories: 0,
+      effective_competence_penalty: 0, penalty_turns_remaining: 0,
+      ...(opts.coState ?? {}),
+    },
+  };
+  state.military.named_officer_data = [
+    { id: 'off_co', name: 'Dudaković', faction: 'RBiH', rank: 'corps_commander', competence: 4, aggressiveness: 3, defensive_skill: 4, political_reliability: 3 },
+  ];
+  return state;
+}
+
+describe('REQUEST-OP inject step — forced_over_objection consequence', () => {
+  it('forced directive → op tagged was_force_launched + commander_assessment_at_launch, and bumps the CO override count + appends recent_overrides', () => {
+    const state = makeStateWithCO({ forced: true });
+    const cc = state.military.corps_command.rbih_1st_corps;
+
+    runStep(state, ADJ);
+
+    // Op injected and force-tagged for the badge/strain/receipt surfaces.
+    expect(cc.active_operations).toHaveLength(1);
+    const op = cc.active_operations[0];
+    expect(op.requested_by_president).toBe(true);
+    expect(op.was_force_launched).toBe(true);
+    expect(op.commander_assessment_at_launch).toBe('abort');
+
+    // The CO was warned + overridden → override tracking bumped, history appended.
+    const co = state.military.named_officers.off_co;
+    expect(co.override_count).toBe(1);
+    expect(co.last_override_turn).toBe(14);
+    expect(co.recent_overrides).toEqual([{ turn: 14, resolution: 'override' }]);
+
+    // Staged field consumed.
+    expect(cc.pending_op_directive).toBeUndefined();
+  });
+
+  it('NON-forced directive → no was_force_launched and NO override recorded on the CO', () => {
+    const state = makeStateWithCO({ forced: false });
+    const cc = state.military.corps_command.rbih_1st_corps;
+
+    runStep(state, ADJ);
+
+    expect(cc.active_operations).toHaveLength(1);
+    const op = cc.active_operations[0];
+    expect(op.requested_by_president).toBe(true);
+    expect(op.was_force_launched).toBeUndefined();
+    expect(op.commander_assessment_at_launch).toBeUndefined();
+
+    const co = state.military.named_officers.off_co;
+    expect(co.override_count).toBeUndefined();
+    expect(co.recent_overrides).toBeUndefined();
+  });
+
+  it('forced override cows the CO when the threshold is reached within the window', () => {
+    // A prior override on record at turn 8 (within COWED_OVERRIDE_WINDOW=8 of turn 14):
+    // this second override (count 1 → 2 = threshold) cows the officer.
+    const state = makeStateWithCO({
+      forced: true,
+      coState: { override_count: 1, last_override_turn: 8 },
+    });
+
+    runStep(state, ADJ);
+
+    const co = state.military.named_officers.off_co;
+    // cowed_until_turn = 14 + COWED_DURATION(8) = 22; override_count reset to 0.
+    expect(co.cowed_until_turn).toBe(22);
+    expect(co.override_count).toBe(0);
+  });
+});
