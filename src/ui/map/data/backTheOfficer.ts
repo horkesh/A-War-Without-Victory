@@ -12,7 +12,14 @@
 // No state mutation; deterministic (sorted iteration via strictCompare).
 
 import { getPlayerSafeOfficerName } from '../utils/playerSafeText.js';
-import { FORCE_LAUNCH_COST, PROACTIVE_FORCE_LAUNCH_COST } from '../utils/commandAuthority.js';
+import { FORCE_LAUNCH_COST, PROACTIVE_FORCE_LAUNCH_COST, AUTHOR_OP_COST } from '../utils/commandAuthority.js';
+import {
+  validateOpAtInjection,
+  type ValidatableOpDef,
+  type OpInjectionCheck,
+} from '../../../sim/combat/operation_validation.js';
+import { getMaxOperationSlots } from '../../../sim/combat/corps_operation_helpers.js';
+import type { GameState } from '../../../state/game_state.js';
 
 type RawRecord = Record<string, unknown>;
 
@@ -856,4 +863,162 @@ export function buildForceableReadyPlans(
 
   views.sort((a, b) => strictCompare(a.corps_id, b.corps_id) || strictCompare(a.plan_id, b.plan_id));
   return views;
+}
+
+// --- Author-new-op eligibility projection (Free War Phase 4, #67, Slice 1) ---
+//
+// Surfaces ELIGIBILITY/validation feedback + the command-authority cost for a
+// player-AUTHORED corps operation, BEFORE any staging or engine execution
+// (Slices 2-4). It is a read-only wrapper over the canonical injection validator
+// `validateOpAtInjection` (the same gate that runs when a pre-planned/triggered
+// op is injected), so the authoring UI shows the EXACT findings the op would hit
+// if executed: all_objectives_owned / axis_empty / staging_adjacency /
+// objective_overlap / etc.
+//
+// Pure / defensive / deterministic: no mutation, no Math.random/Date.now. The
+// validator itself sorts iteration via strictCompare.
+
+/** One validation finding for an authored op, ready for UI display. */
+export interface AuthorableOpWarningView {
+  /** Canonical injection-check code (e.g. 'all_objectives_owned'). */
+  code: OpInjectionCheck;
+  /** Player-facing message (validator detail, with axis context when present). */
+  message: string;
+  /** Whether this finding blocks (error) or merely warns. */
+  severity: 'error' | 'warning';
+}
+
+/** Eligibility + cost projection for an authored corps operation. */
+export interface AuthorableOpEligibilityView {
+  /**
+   * True when the authored op carries NO blocking (error-severity) findings AND
+   * the corps has a free operation slot. Operation-slot exhaustion is SILENT at
+   * injection (nothing rejects an over-capacity op), so "no available slot" is
+   * surfaced here as a BLOCKING condition the same as a validation error.
+   */
+  ok: boolean;
+  /** All findings (errors + warnings), sorted by code then message. */
+  warnings: AuthorableOpWarningView[];
+  /** Command-authority cost of authoring this op (AUTHOR_OP_COST). */
+  ca_cost: number;
+  /**
+   * True when the player can currently afford the authoring cost
+   * (military.command_authority.current >= ca_cost). When command_authority is
+   * absent (pre-Phase-2 saves / flag-off), affordability defaults to true so the
+   * read-model never falsely blocks; the IPC handler (Slice 2) is the real gate.
+   */
+  affordable: boolean;
+  /**
+   * True when the corps has a free operation slot for a new op
+   * (active_operations.length < getMaxOperationSlots(active brigade count)).
+   * Engine slot exhaustion is silent, so the authoring UI must show this up
+   * front. Defaults to true when corps/command context is unavailable (the
+   * read-model never falsely blocks; the IPC handler is the real gate).
+   */
+  has_available_slot: boolean;
+  /** Operation slots currently in use by the corps (active_operations.length). */
+  slots_used: number;
+  /** Maximum concurrent operation slots for the corps (floor(active brigades/12), min 1). */
+  slots_max: number;
+}
+
+/** Minimal state shape this projection reads (command authority only). */
+type AuthorableOpStateView = Pick<GameState, 'military'> & {
+  military?: { command_authority?: { current?: number } };
+};
+
+/** Minimal corps-command shape this projection reads for slot accounting. */
+type AuthorableOpCmd = { active_operations?: ReadonlyArray<unknown> };
+
+/**
+ * Build the eligibility + cost projection for a candidate authored operation.
+ *
+ * Wraps `validateOpAtInjection` and joins the player's current command authority
+ * (affordability) + the corps's free operation-slot accounting (slot exhaustion
+ * is silent in-engine, so it is surfaced here as a blocking condition). PURE —
+ * never mutates `state`, `def`, or `cmd`.
+ *
+ * @param state Current GameState (the raw handle on loadedGameState.rawGameState).
+ * @param def   The candidate authored operation definition.
+ * @param adjacency Optional OSID adjacency map — enables staging/chain checks.
+ * @param cmd   Optional CorpsCommandState for cross-op objective-overlap checks
+ *              AND operation-slot accounting (active_operations.length).
+ * @param corpsId Optional anchor corps id — enables active-brigade-count-based
+ *               slot-max computation (counts formations whose corps_id matches).
+ */
+export function buildAuthorableOpEligibility(
+  state: GameState,
+  def: ValidatableOpDef,
+  adjacency?: Parameters<typeof validateOpAtInjection>[2],
+  cmd?: Parameters<typeof validateOpAtInjection>[3],
+  corpsId?: string,
+): AuthorableOpEligibilityView {
+  const rawWarnings = validateOpAtInjection(def, state, adjacency, cmd);
+  const warnings: AuthorableOpWarningView[] = rawWarnings
+    .map((w) => ({
+      code: w.check,
+      message: w.axis_id ? `[${w.axis_id}] ${w.detail}` : w.detail,
+      severity: w.severity,
+    }))
+    .sort((a, b) => strictCompare(a.code, b.code) || strictCompare(a.message, b.message));
+
+  const ca_cost = AUTHOR_OP_COST;
+  const current = readCommandAuthorityCurrent(state as AuthorableOpStateView);
+  const affordable = current === null ? true : current >= ca_cost;
+
+  const { has_available_slot, slots_used, slots_max } = computeSlotAvailability(
+    countActiveCorpsBrigades(state, corpsId),
+    cmd as AuthorableOpCmd | undefined,
+  );
+
+  // Slot exhaustion blocks the same as a validation error (engine is silent).
+  const ok = has_available_slot && !warnings.some((w) => w.severity === 'error');
+
+  return { ok, warnings, ca_cost, affordable, has_available_slot, slots_used, slots_max };
+}
+
+/** Read military.command_authority.current defensively; null when absent. */
+function readCommandAuthorityCurrent(state: AuthorableOpStateView): number | null {
+  const current = state.military?.command_authority?.current;
+  return typeof current === 'number' && Number.isFinite(current) ? current : null;
+}
+
+/**
+ * Count active brigades belonging to a corps (kind brigade, status active),
+ * for operation-slot-max accounting. Reads the typed GameState formations map
+ * directly (cast-free). Returns 0 when corpsId is absent.
+ */
+function countActiveCorpsBrigades(state: GameState, corpsId: string | undefined): number {
+  if (!corpsId) return 0;
+  const formations = state.military?.formations;
+  if (!formations) return 0;
+  let count = 0;
+  for (const fid of Object.keys(formations).sort(strictCompare)) {
+    const f = formations[fid];
+    if (!f) continue;
+    if (f.corps_id !== corpsId) continue;
+    if ((f.kind ?? 'brigade') !== 'brigade') continue;
+    if (f.status !== 'active') continue;
+    count++;
+  }
+  return count;
+}
+
+/**
+ * Compute operation-slot availability. slots_max = floor(active brigade count
+ * / 12), min 1 (getMaxOperationSlots). slots_used = cmd.active_operations.length.
+ * Defaults to "available" (slots_used 0, max 1) when corps/command context is
+ * unavailable so the read-model never falsely blocks.
+ */
+function computeSlotAvailability(
+  activeBrigadeCount: number,
+  cmd: AuthorableOpCmd | undefined,
+): { has_available_slot: boolean; slots_used: number; slots_max: number } {
+  const activeOps = cmd?.active_operations;
+  const slots_used = Array.isArray(activeOps) ? activeOps.length : 0;
+  // When no corps context (0 brigades), fall back to the engine minimum of 1
+  // slot so a lone authored op is not falsely blocked.
+  const slots_max = activeBrigadeCount > 0 ? getMaxOperationSlots(activeBrigadeCount) : 1;
+  const has_available_slot = slots_used < slots_max;
+  return { has_available_slot, slots_used, slots_max };
 }

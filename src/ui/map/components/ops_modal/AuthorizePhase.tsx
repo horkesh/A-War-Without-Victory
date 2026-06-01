@@ -11,6 +11,9 @@ import type { PredictionResult } from './usePrediction';
 import { OpordDocument } from './OpordDocument';
 import { formatCorpsDisplayName, turnToISODate } from '../../utils/formatters';
 import { findPlayerFacingOperationByKey } from '../../../shared/playerVisibility';
+import { buildAuthorableOpEligibility } from '../../data/backTheOfficer';
+import type { ValidatableOpDef } from '../../../../sim/combat/operation_validation';
+import type { FactionId } from '../../../../state/game_state';
 import { t } from '../../i18n';
 
 interface AuthorizePhaseProps {
@@ -58,6 +61,35 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
 
         return { corpsName: name, faction: fac, commanderName: officer?.name ?? t('opsPlanning.g2.notAvailable'), date: turnToISODate(loadedGameState.turn ?? 0) };
     }, [loadedGameState, corpsId, officerId]);
+
+    // Free War Phase 4, #67 (Slice 1): author-new-op eligibility/validation +
+    // command-authority cost, surfaced READ-ONLY over the canonical injection
+    // validator. Staging/IPC execution (Slices 2-4) is unchanged — this only
+    // shows the player which findings the authored op carries and what it costs.
+    const eligibility = useMemo(() => {
+        const rawState = loadedGameState?.rawGameState;
+        if (!rawState || !corpsId) return null;
+        // Faction from the typed GameState (corps formation, else player faction,
+        // else RBiH) — cast-free so the strict-null ratchet stays pinned.
+        const opFaction: FactionId =
+            rawState.military?.formations?.[corpsId]?.faction ?? rawState.meta?.player_faction ?? 'RBiH';
+        const def: ValidatableOpDef = {
+            name: plan.opName,
+            faction: opFaction,
+            staging_osid: plan.axes[0]?.stagingOsid ?? plan.defaultStagingOsid,
+            axes: plan.axes.map((a) => ({
+                axis_id: a.id,
+                brigades: a.brigadeIds,
+                objectives: a.objectives,
+                staging_osid: a.stagingOsid ?? plan.defaultStagingOsid,
+            })),
+        };
+        const corpsCmd = rawState.military?.corps_command?.[corpsId];
+        return buildAuthorableOpEligibility(rawState, def, undefined, corpsCmd, corpsId);
+    }, [loadedGameState, corpsId, plan]);
+
+    const eligibilityErrors = eligibility?.warnings.filter((w) => w.severity === 'error') ?? [];
+    const eligibilityWarnings = eligibility?.warnings.filter((w) => w.severity === 'warning') ?? [];
 
     const isLowIntel = prediction && prediction.overall.intelConfidence < 0.4;
 
@@ -186,6 +218,73 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                         {t('opsPlanning.authorize.transmittedStamp')}
                     </div>
                     <div className="text-text-secondary text-[10px] mt-1">{t('opsPlanning.authorize.directiveTransmitted')}</div>
+                </div>
+            )}
+
+            {/* Free War Phase 4, #67 (Slice 1): author-new-op eligibility + CA cost.
+                Read-only surfacing — does NOT gate the Authorize button (Slice 2). */}
+            {!isStamped && eligibility && (
+                <div className="relative z-10 mt-5 w-[min(90vw,42rem)] rounded-lg border border-[rgba(180,160,130,0.15)]
+                                bg-[rgba(20,18,15,0.6)] px-4 py-3 text-left">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] uppercase tracking-[0.2em] text-text-secondary/80">
+                            {t('opsPlanning.authorize.eligibility.title')}
+                        </span>
+                        <span
+                            className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded
+                                ${eligibility.affordable
+                                    ? 'bg-[#2d6a4f]/20 text-[#4a9a55] border border-[#2d6a4f]/30'
+                                    : 'bg-red-500/15 text-red-400 border border-red-500/30'}`}
+                            title={eligibility.affordable
+                                ? t('opsPlanning.authorize.eligibility.affordableTitle')
+                                : t('opsPlanning.authorize.eligibility.unaffordableTitle')}
+                        >
+                            {t('opsPlanning.authorize.eligibility.caCost')}: {eligibility.ca_cost}
+                        </span>
+                    </div>
+                    {/* Operation-slot accounting — slot exhaustion is silent in-engine. */}
+                    <div className="flex items-center justify-between mb-2 text-[10px]">
+                        <span className="text-text-secondary/70">
+                            {t('opsPlanning.authorize.eligibility.slots')}: {eligibility.slots_used}/{eligibility.slots_max}
+                        </span>
+                        {!eligibility.has_available_slot && (
+                            <span className="font-bold uppercase tracking-wider text-red-400">
+                                {t('opsPlanning.authorize.eligibility.slotExhausted')}
+                            </span>
+                        )}
+                    </div>
+                    {eligibility.has_available_slot && eligibilityErrors.length === 0 && eligibilityWarnings.length === 0 ? (
+                        <div className="text-[11px] text-[#4a9a55]">
+                            {t('opsPlanning.authorize.eligibility.clean')}
+                        </div>
+                    ) : (
+                        <ul className="space-y-1">
+                            {!eligibility.has_available_slot && (
+                                <li className="flex items-start gap-2 text-[11px] text-red-400">
+                                    <span className="font-bold uppercase text-[9px] mt-[1px]">
+                                        {t('opsPlanning.authorize.eligibility.block')}
+                                    </span>
+                                    <span>{t('opsPlanning.authorize.eligibility.slotExhaustedDetail')}</span>
+                                </li>
+                            )}
+                            {eligibilityErrors.map((w, i) => (
+                                <li key={`e${i}`} className="flex items-start gap-2 text-[11px] text-red-400">
+                                    <span className="font-bold uppercase text-[9px] mt-[1px]">
+                                        {t('opsPlanning.authorize.eligibility.block')}
+                                    </span>
+                                    <span>{w.message}</span>
+                                </li>
+                            ))}
+                            {eligibilityWarnings.map((w, i) => (
+                                <li key={`w${i}`} className="flex items-start gap-2 text-[11px] text-amber-400/90">
+                                    <span className="font-bold uppercase text-[9px] mt-[1px]">
+                                        {t('opsPlanning.authorize.eligibility.warn')}
+                                    </span>
+                                    <span>{w.message}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
             )}
 
