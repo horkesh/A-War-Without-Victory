@@ -170,6 +170,51 @@ describe('inject-authored-operations war-phase step', () => {
     expect(cc(valid).pending_authored_op).toBeUndefined();
   });
 
+  it('cross-corps double-commit prevented (brigade busy in ANOTHER corps op is excluded)', () => {
+    // 24 brigades → 2 op slots so slot exhaustion does not mask the guard.
+    const many = Array.from({ length: 24 }, (_, i) => `rbih_b${i + 1}`);
+    const state = makeState({
+      brigades: many,
+      participating: ['rbih_b1', 'rbih_b2', 'rbih_b3'],
+    });
+    // A SECOND corps hosts an active op whose participating_brigades include
+    // rbih_b1 (a 1st-corps brigade joined as a secondary axis). The local
+    // getAvailableBrigades guard on the 1st corps would NOT see this — only the
+    // state-wide findBrigadeOperationAnywhere lookup catches it.
+    (state.military.corps_command as any).rbih_2nd_corps = {
+      stance: 'offensive',
+      active_operations: [
+        { name: 'joint_op', type: 'sector_attack', phase: 'execution', participating_brigades: ['rbih_b1'] },
+      ],
+    };
+    runStep(state);
+    const authored = cc(state).active_operations.find((o: any) => o.authored_by_player);
+    // b2,b3 still free → 2 survivors → op injects, but rbih_b1 is excluded.
+    expect(authored).toBeDefined();
+    expect(authored.participating_brigades).not.toContain('rbih_b1');
+    expect(authored.participating_brigades).toContain('rbih_b2');
+    expect(authored.participating_brigades).toContain('rbih_b3');
+  });
+
+  it('cross-corps double-commit can drop the op below the attack floor → reject', () => {
+    const many = Array.from({ length: 24 }, (_, i) => `rbih_b${i + 1}`);
+    const state = makeState({
+      brigades: many,
+      participating: ['rbih_b1', 'rbih_b2'],
+    });
+    // Both requested brigades committed in another corps's op → 0 survivors → reject.
+    (state.military.corps_command as any).rbih_2nd_corps = {
+      stance: 'offensive',
+      active_operations: [
+        { name: 'joint_op', type: 'sector_attack', phase: 'execution', participating_brigades: ['rbih_b1', 'rbih_b2'] },
+      ],
+    };
+    runStep(state);
+    expect(cc(state).active_operations.some((o: any) => o.authored_by_player)).toBe(false);
+    expect(cc(state).pending_authored_op).toBeUndefined();
+    expect(cc(state).authored_op_rejection?.reason).toBe('participants_below_attack_floor');
+  });
+
   it('brigade-corps membership enforced (foreign-corps brigade filtered out)', () => {
     const state = makeState({ participating: ['rbih_b1', 'foreign_b'] });
     // foreign_b belongs to a different corps.

@@ -120,6 +120,27 @@ describe('author-op staging contract', () => {
     expect(state.military.corps_command.rbih_1st_corps.active_operations).toHaveLength(0);
   });
 
+  it('rejects a second stage while pending_authored_op is already set (no double debit, first preserved)', () => {
+    const state = makeState({ ca: 100 });
+    const first = stageAuthoredOperation(state, makePayload({ name: 'First Order' }));
+    expect(first.ok).toBe(true);
+    const afterFirst = state.military.command_authority.current;
+    expect(afterFirst).toBe(100 - AUTHOR_OP_COST);
+    const firstPending = state.military.corps_command.rbih_1st_corps.pending_authored_op;
+    expect(firstPending.def.name).toBe('First Order');
+
+    // Second stage before the engine consumes the first must reject and debit nothing.
+    const second = stageAuthoredOperation(state, makePayload({ name: 'Second Order' }));
+    expect(second.ok).toBe(false);
+    expect(second.error).toBe('pending_authored_op_exists');
+    // No further CA debit.
+    expect(state.military.command_authority.current).toBe(afterFirst);
+    expect(state.military.command_authority.spent_this_turn).toBe(AUTHOR_OP_COST);
+    expect(state.military.command_authority.lifetime_spent).toBe(AUTHOR_OP_COST);
+    // First (paid-for) order is preserved, NOT overwritten.
+    expect(state.military.corps_command.rbih_1st_corps.pending_authored_op.def.name).toBe('First Order');
+  });
+
   it('observer mode (no player_faction) does not block authoring', () => {
     const state = makeState();
     state.meta.player_faction = undefined as any;

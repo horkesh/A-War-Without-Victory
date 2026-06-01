@@ -91,6 +91,14 @@ function stageAuthoredOperation(state, payload) {
     return { ok: false, error: 'corps_not_owned_by_player' };
   }
 
+  // Single-slot staging field: pending_authored_op holds ONE order, consumed
+  // once by inject-authored-operations. A second stage call before the engine
+  // consumes the first would overwrite it and silently lose the already-paid
+  // order. Reject (debit nothing) before the CA guard so no double-charge.
+  if (cc.pending_authored_op) {
+    return { ok: false, error: 'pending_authored_op_exists' };
+  }
+
   // Command-authority guard + debit — stage nothing if unaffordable.
   const auth = state.military.command_authority;
   if (auth) {

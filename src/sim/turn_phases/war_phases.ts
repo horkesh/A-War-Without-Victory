@@ -144,7 +144,7 @@ import { buildStaticOsidAdjacency } from '../combat/sector_offensive_launch_help
 import { buildTerrainCache } from '../combat/combat_predictor.js';
 import { processJnaWithdrawals, spawnJnaPhantomBrigades } from '../combat/jna_phantom_brigades.js';
 import { injectQueuedOperation } from '../combat/pre_planned_operations.js';
-import { isSlot0AvailableForQueue, hasAvailableSlot, getAvailableBrigades, buildCorpsOperation } from '../combat/corps_operation_helpers.js';
+import { isSlot0AvailableForQueue, hasAvailableSlot, getAvailableBrigades, buildCorpsOperation, findBrigadeOperationAnywhere } from '../combat/corps_operation_helpers.js';
 import { validateOpAtInjection, hasBlockingOpInjectionWarnings } from '../combat/operation_validation.js';
 import { createSingleAxis } from '../combat/sector_offensive_axis_helpers.js';
 import { getCorpsSubordinates } from '../combat/bot_corps_helpers.js';
@@ -272,6 +272,13 @@ function injectAuthoredOperations(state: GameState): void {
         const corpsBrigadeIds = new Set(
             getCorpsSubordinates(state, corpsId).map((f) => f.id),
         );
+        // getAvailableBrigades only inspects THIS corps's active_operations. Joint/
+        // triggered ops store their full brigade list under the PRIMARY corps even
+        // when they draw brigades from another corps, so a brigade committed as a
+        // secondary-axis participant in another corps's op would pass this local
+        // check. Pair it with the state-wide findBrigadeOperationAnywhere lookup so
+        // the guard searches ALL corps' active operations (prevents cross-corps
+        // double-commit).
         const available = new Set(
             getAvailableBrigades(cmd, [...corpsBrigadeIds]),
         );
@@ -279,7 +286,8 @@ function injectAuthoredOperations(state: GameState): void {
         const survivors = [...new Set(requested)]
             .filter((bid) => {
                 if (!corpsBrigadeIds.has(bid)) return false;           // must belong to this corps
-                if (!available.has(bid)) return false;                  // not committed elsewhere
+                if (!available.has(bid)) return false;                  // not committed in own corps
+                if (findBrigadeOperationAnywhere(state, bid)) return false; // not committed in ANY corps
                 const f = formations[bid];
                 return !!f && isEligibleOperationFormation(f);           // brigade-only, active
             })
