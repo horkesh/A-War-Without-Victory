@@ -23,6 +23,7 @@ const {
   FORCE_LAUNCH_COST,
   PROACTIVE_FORCE_LAUNCH_COST,
 } = require('./autonomy_ipc_contract.cjs');
+const { stageAuthoredOperation } = require('./author_op_staging.cjs');
 const { computeCorpsCommandStrain } = require('./command_strain.cjs');
 const { stageConvoyDecisionOnState } = require('./convoy_ipc_contract.cjs');
 const { fileOfficerDecisionRecord } = require('./officer_decision_history.cjs');
@@ -1883,63 +1884,24 @@ app.whenReady().then(() => {
     }
   });
 
+  // Free War Phase 4 (#67): canon-safe author-new-op staging. The previous
+  // PHASE 5 TRANSITIONAL path built a raw op object and directly pushed it onto
+  // active_operations — bypassing validation, command-authority cost, and the
+  // player-faction restriction. It is replaced by stageAuthoredOperation (mirrors
+  // proactive-force-launch-op): ownership check → CA guard+debit → STAGE
+  // cc.pending_authored_op. The engine `inject-authored-operations` war-phase step
+  // consumes the staged def once (validate → filter participants → build canon
+  // CorpsOperation via buildCorpsOperation, or reject + clear). No active_operations.push.
   ipcMain.handle('stage-corps-operation-order', async (_event, payload) => {
-    const {
-      corpsId,
-      name,
-      type,
-      targetSettlements,
-      participatingBrigades,
-      sectorId,
-      objectives,
-      planningDuration,
-      stagingOsid,
-      minAttackOutcome,
-      tempo,
-      schwerpunktOsid,
-      artilleryPreparation,
-      axes,
-    } = payload || {};
-    if (!currentGameStateJson || typeof corpsId !== 'string' || typeof name !== 'string' || typeof type !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    const validTypes = ['general_offensive', 'sector_attack', 'strategic_defense', 'reorganization', 'feint', 'probe'];
-    if (!validTypes.includes(type)) {
-      return { ok: false, error: `Invalid operation type: ${type}` };
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
     }
     try {
       const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const corpsCommand = ensureCorpsCommandEntry(state, corpsId);
-      const turn = state.meta?.turn ?? 0;
-      if (!corpsCommand.active_operations) corpsCommand.active_operations = [];
-      // PHASE 5 TRANSITIONAL: PLAYER-AUTHORED op creation (ops modal IPC path).
-      // sector_id flows in from the payload (line below). Brigade categorization fields
-      // (primary_sector_brigades, attached_brigades, supporting_sector_ids) are absent —
-      // player explicitly selects brigades, so no automatic categorization is needed.
-      // Cannot use TypeScript factories here (CJS/ESM boundary). Not broad-pool.
-      corpsCommand.active_operations.push({
-        name,
-        type,
-        phase: 'planning',
-        started_turn: turn,
-        phase_started_turn: turn,
-        target_settlements: Array.isArray(targetSettlements) ? targetSettlements : [],
-        participating_brigades: Array.isArray(participatingBrigades) ? participatingBrigades : [],
-        sector_id: typeof sectorId === 'string' ? sectorId : undefined,
-        objectives: Array.isArray(objectives) ? objectives : [],
-        planning_duration: typeof planningDuration === 'number' ? planningDuration : 2,
-        staging_osid: typeof stagingOsid === 'string' ? stagingOsid : undefined,
-        momentum: 0,
-        current_objective_index: 0,
-        min_attack_outcome: typeof minAttackOutcome === 'string' ? minAttackOutcome : undefined,
-        tempo: typeof tempo === 'string' ? tempo : undefined,
-        schwerpunkt_osid: typeof schwerpunktOsid === 'string' ? schwerpunktOsid : undefined,
-        artillery_preparation: artilleryPreparation === true,
-        axes: Array.isArray(axes) ? axes : undefined,
-      });
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      const state = readCanonicalCurrentState(sim);
+      const result = stageAuthoredOperation(state, payload);
+      if (!result.ok) return result;
+      writeCanonicalCurrentState(sim, state, _event && _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };

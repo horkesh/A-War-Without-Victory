@@ -537,21 +537,32 @@ describe('strict null inventory progress', () => {
         // 'historical' | 'emergent' in src/state/game_state.ts), so 488 → 489 /
         // state 162 → 163. Unset = historical = byte-identical baseline; the field
         // gates the bot event-decision scorer (emergent) vs the historical railroad.
+        // Free War Phase 4 (author-new-op, #67) added +12 optional GameState fields:
+        //   - AuthoredOpDef (new interface, classifyDomain → `state` via game_state.ts
+        //     path): axes, sector_id, staging_osid, target_settlements, tempo,
+        //     min_attack_outcome, schwerpunkt_osid, artillery_preparation,
+        //     planning_duration = +9 state.
+        //   - CorpsCommandState (classifyDomain → `sim` via /Corps/): pending_authored_op,
+        //     authored_op_rejection = +2 sim.
+        //   - CorpsOperation (classifyDomain → `sim` via /Corps|Operation/):
+        //     authored_by_player = +1 sim.
+        // So 489 → 501 / state 163 → 172 / sim 318 → 321. All OPTIONAL → absent in
+        // old saves and all headless scenarios → byte-identical baseline by construction.
         expect(current.counts).toMatchObject({
             as_factionid_casts: 1,
             as_unknown_casts: 3,
             as_any_casts: 0,
             non_null_assertions_dot: 7,
             non_null_assertions_index: 0,
-            optional_fields_game_state: 489,
+            optional_fields_game_state: 501,
         });
-        expect(current.optional_field_domains.total).toBe(489);
+        expect(current.optional_field_domains.total).toBe(501);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 8,
             ipc: 0,
             scenario: 0,
-            sim: 318,
-            state: 163,
+            sim: 321,
+            state: 172,
             ui_adapter: 0,
             unknown: 0,
         });

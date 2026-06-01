@@ -50,7 +50,7 @@ import { applyFormationCommitment } from '../../state/front_posture_commitment.j
 import { expandRegionPostureToEdges } from '../../state/front_posture_regions.js';
 import { accumulateFrontPressure } from '../../state/front_pressure.js';
 import { syncFrontSegments } from '../../state/front_segments.js';
-import { GameState, type FactionId, type FormationState, type LegacyBrigadeAoRState, type EffectivePostureExposureState } from '../../state/game_state.js';
+import { GameState, type FactionId, type FormationId, type FormationState, type LegacyBrigadeAoRState, type EffectivePostureExposureState, type AuthoredOpDef, type OperationAxis, type CorpsOperation } from '../../state/game_state.js';
 import { updateHeavyEquipmentState } from '../../state/heavy_equipment.js';
 import { updateLegitimacyState } from '../../state/legitimacy.js';
 import { ensureMaintenanceCapacity } from '../../state/maintenance.js';
@@ -144,7 +144,12 @@ import { buildStaticOsidAdjacency } from '../combat/sector_offensive_launch_help
 import { buildTerrainCache } from '../combat/combat_predictor.js';
 import { processJnaWithdrawals, spawnJnaPhantomBrigades } from '../combat/jna_phantom_brigades.js';
 import { injectQueuedOperation } from '../combat/pre_planned_operations.js';
-import { isSlot0AvailableForQueue } from '../combat/corps_operation_helpers.js';
+import { isSlot0AvailableForQueue, hasAvailableSlot, getAvailableBrigades, buildCorpsOperation } from '../combat/corps_operation_helpers.js';
+import { validateOpAtInjection, hasBlockingOpInjectionWarnings } from '../combat/operation_validation.js';
+import { createSingleAxis } from '../combat/sector_offensive_axis_helpers.js';
+import { getCorpsSubordinates } from '../combat/bot_corps_helpers.js';
+import { assignOperationCommander } from '../combat/officer_system.js';
+import { isEligibleOperationFormation } from '../../state/formation_constants.js';
 import { checkTriggeredOperations, injectArmyHqOperations } from '../combat/triggered_operations.js';
 import { computeMilitiaGarrisons } from '../combat/militia_garrison.js';
 import { activateOGs, updateOGLifecycle } from '../combat/operational_groups.js';
@@ -207,6 +212,166 @@ import type { EffectivePressureEdge } from '../pressure/phase3a_pressure_eligibi
 interface WarPhaseContextExtensions {
     effectivePosture?: Record<FactionId, EffectivePostureState>;
     phase3aEffectiveEdges?: EffectivePressureEdge[];
+}
+
+/** Attack floor for player-authored ops — mirrors MIN_OPERATION_PARTICIPANTS in
+ *  pre_planned_operations.ts / triggered_operations.ts (kept as a local const because
+ *  the engine constant is not exported). */
+const AUTHORED_OP_MIN_PARTICIPANTS = 2;
+
+/**
+ * Consume player-authored operations staged on cc.pending_authored_op (Free War
+ * Phase 4, #67). Single owner of the inject-authored-operations step.
+ *
+ * DETERMINISM EARLY-OUT: returns with ZERO mutation when no corps has a
+ * pending_authored_op. pending_authored_op is OPTIONAL and never set in
+ * headless/historical runs → byte-identical baselines.
+ *
+ * Per corps (sorted strictCompare):
+ *  1. Pre-filter def.participating_brigades: keep only brigades that belong to this
+ *     corps (getCorpsSubordinates), are eligible (isEligibleOperationFormation), and
+ *     are not already committed to another active op (getAvailableBrigades) — injection
+ *     has no native double-commit guard, so this is the guard.
+ *  2. Build axes: prefer def.axes (re-filtered to surviving brigades); else a single
+ *     axis from def.objectives + surviving brigades.
+ *  3. Validate via validateOpAtInjection (blocking errors reject) + attack floor
+ *     (AUTHORED_OP_MIN_PARTICIPANTS) + free slot (hasAvailableSlot).
+ *  4. If valid: buildCorpsOperation(isPrePlanned=false) → push → assignOperationCommander
+ *     → tag authored_by_player. If invalid: record authored_op_rejection, inject nothing.
+ *  5. ALWAYS clear cc.pending_authored_op (consumed-once).
+ */
+function injectAuthoredOperations(state: GameState): void {
+    const corpsCommand = state.military.corps_command;
+    if (!corpsCommand) return;
+
+    // DETERMINISM GATE — early-out with zero mutation if nothing is staged.
+    const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
+    if (!corpsIds.some((id) => corpsCommand[id]?.pending_authored_op)) return;
+
+    const formations = state.military.formations ?? {};
+    const turn = state.meta?.turn ?? 0;
+
+    for (const corpsId of corpsIds) {
+        const cmd = corpsCommand[corpsId];
+        const staged = cmd?.pending_authored_op;
+        if (!cmd || !staged) continue;
+
+        // Consumed-once: clear the staged field regardless of outcome.
+        cmd.pending_authored_op = undefined;
+
+        const def: AuthoredOpDef = staged.def;
+        const opName = typeof def.name === 'string' ? def.name : 'Authored Operation';
+        const reject = (reason: string): void => {
+            cmd.authored_op_rejection = { op_name: opName, reason, turn };
+        };
+
+        const corpsFaction = formations[corpsId]?.faction;
+        if (!corpsFaction) { reject('corps_not_found'); continue; }
+
+        // 1. Pre-filter participants — membership + eligibility + double-commit guard.
+        const corpsBrigadeIds = new Set(
+            getCorpsSubordinates(state, corpsId).map((f) => f.id),
+        );
+        const available = new Set(
+            getAvailableBrigades(cmd, [...corpsBrigadeIds]),
+        );
+        const requested = Array.isArray(def.participating_brigades) ? def.participating_brigades : [];
+        const survivors = [...new Set(requested)]
+            .filter((bid) => {
+                if (!corpsBrigadeIds.has(bid)) return false;           // must belong to this corps
+                if (!available.has(bid)) return false;                  // not committed elsewhere
+                const f = formations[bid];
+                return !!f && isEligibleOperationFormation(f);           // brigade-only, active
+            })
+            .sort(strictCompare);
+
+        if (survivors.length < AUTHORED_OP_MIN_PARTICIPANTS) {
+            reject('participants_below_attack_floor');
+            continue;
+        }
+
+        // 2. Build axes from surviving brigades.
+        const survivorSet = new Set(survivors);
+        let axes: OperationAxis[];
+        if (Array.isArray(def.axes) && def.axes.length > 0) {
+            axes = [];
+            for (const axisDef of def.axes) {
+                const axisBrigades = (axisDef.assigned_brigades ?? [])
+                    .filter((bid) => survivorSet.has(bid))
+                    .sort(strictCompare);
+                const axisObjectives = Array.isArray(axisDef.objectives) ? [...axisDef.objectives] : [];
+                if (axisBrigades.length === 0 || axisObjectives.length === 0) continue;
+                axes.push(createSingleAxis(axisBrigades, axisObjectives, axisDef.staging_osid ?? def.staging_osid, formations));
+            }
+        } else {
+            const objectives = Array.isArray(def.objectives) ? [...def.objectives] : [];
+            axes = objectives.length > 0
+                ? [createSingleAxis(survivors, objectives, def.staging_osid, formations)]
+                : [];
+        }
+
+        if (axes.length === 0) { reject('op_empty'); continue; }
+
+        // 3a. Validate at injection (objective ownership, axis-empty, op-empty, overlap).
+        const warnings = validateOpAtInjection(
+            {
+                name: opName,
+                faction: corpsFaction,
+                axes: axes.map((a) => ({ axis_id: a.axis_id, brigades: a.assigned_brigades, objectives: a.objectives, staging_osid: a.staging_osid })),
+                staging_osid: def.staging_osid ?? '',
+            },
+            state,
+            undefined,
+            cmd,
+        );
+        if (hasBlockingOpInjectionWarnings(warnings)) {
+            const blocker = warnings.find((w) => w.severity === 'error');
+            reject(blocker?.check ?? 'validation_failed');
+            continue;
+        }
+
+        // 3b. Attack floor on surviving axis participants.
+        const axisParticipants = [...new Set(axes.flatMap((a) => a.assigned_brigades))];
+        if (axisParticipants.length < AUTHORED_OP_MIN_PARTICIPANTS) {
+            reject('participants_below_attack_floor');
+            continue;
+        }
+
+        // 3c. Free operation slot required (slots scale with active brigade count).
+        if (!hasAvailableSlot(cmd, corpsBrigadeIds.size)) {
+            reject('no_available_slot');
+            continue;
+        }
+
+        // 4. Build the canon CorpsOperation (isPrePlanned=false — does NOT occupy slot 0).
+        const op: CorpsOperation = buildCorpsOperation(
+            {
+                name: opName,
+                planning_duration: def.planning_duration,
+                staging_osid: def.staging_osid ?? '',
+                ...(def.min_attack_outcome ? { min_attack_outcome: def.min_attack_outcome } : {}),
+            },
+            axes,
+            axisParticipants,
+            turn,
+            false,
+            typeof def.sector_id === 'string' ? def.sector_id : undefined,
+        );
+        op.type = def.type ?? 'sector_attack';
+        op.authored_by_player = true;
+        if (typeof def.tempo === 'string') op.tempo = def.tempo;
+        if (typeof def.schwerpunkt_osid === 'string') op.schwerpunkt_osid = def.schwerpunkt_osid;
+        if (def.artillery_preparation === true) op.artillery_preparation = true;
+        if (Array.isArray(def.target_settlements) && def.target_settlements.length > 0) {
+            op.target_settlements = [...def.target_settlements];
+        }
+
+        cmd.active_operations.push(op);
+        assignOperationCommander(state, op, corpsId, corpsFaction);
+        cmd.stance = 'offensive';
+        // Clear any prior rejection on successful injection.
+        cmd.authored_op_rejection = undefined;
+    }
 }
 
 function getRoutineEquipmentOperationalFloor(state: GameState, formation: FormationState, turn: number): number {
@@ -1002,6 +1167,27 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        // Free War Phase 4 (#67): consume player-authored operations staged by the
+        // desktop IPC handler (electron-main.cjs stage-corps-operation-order) on
+        // cc.pending_authored_op. Placed adjacent to inject-queued-operations so all
+        // operation injection shares one ordering neighbourhood.
+        //
+        // DETERMINISM GATE: if no corps has a pending_authored_op, this step performs
+        // ZERO state mutation (early-out below). pending_authored_op is OPTIONAL and is
+        // never set in headless/historical scenarios → byte-identical by construction.
+        //
+        // Flow per corps (sorted strictCompare): validate def → pre-filter participants
+        // (drop already-committed brigades via getAvailableBrigades; enforce brigade↔corps
+        // membership + isEligibleOperationFormation) → require free slot → build canon
+        // CorpsOperation via buildCorpsOperation (isPrePlanned=false) → assignOperationCommander
+        // → tag authored_by_player. ALWAYS clear pending_authored_op (consumed-once).
+        name: 'inject-authored-operations',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            injectAuthoredOperations(context.state);
+        }
+    },
+    {
         // ADR-0005 v3.0: inject faction-wide Army HQ operations (Krivaja-95, Farz 95).
         // Runs AFTER inject-queued-operations and BEFORE check-triggered-
         // operations so the Army HQ path owns its promoted defs exclusively. Fully gated by
@@ -1072,6 +1258,12 @@ export const warPhases: NamedPhase[] = [
                 for (const corpsId of Object.keys(corpsCmd)) {
                     if (corpsCmd[corpsId].player_op_response !== undefined) {
                         corpsCmd[corpsId].player_op_response = undefined;
+                    }
+                    // Free War Phase 4 (#67): belt-and-suspenders GC of any stale
+                    // pending_authored_op (normally consumed by inject-authored-operations
+                    // earlier the same turn; clear here if it survived for any reason).
+                    if (corpsCmd[corpsId].pending_authored_op !== undefined) {
+                        corpsCmd[corpsId].pending_authored_op = undefined;
                     }
                 }
             }
