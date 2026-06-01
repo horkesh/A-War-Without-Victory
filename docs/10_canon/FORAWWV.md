@@ -343,6 +343,8 @@ The Claude-API QA mode supports persona-grounded roleplay across three layers:
 - **Army CO layer** — `tools/claude_plays_vrs/api_commander.ts` (Mladić / Halilović → Delić / Petković → Praljak → Roso personas).
 - **Corps CO layer** — `tools/claude_plays_vrs/api_corps_commander.ts` (named officers per OOB; archetype fallback via `default_corps_co.json`).
 
+**Player command model (canonical, 2026-06-01).** These three layers mirror the player's canonical role: the player IS the **president** (the President layer) and commands the war THROUGH the army/corps COs — by strategic directive, approval, and the five command levers (authorize / request / stop op, authorize elite deployment, replace a corps CO at cost) — **never as a general** and **never by direct unit orders or direct posture-setting** (commanders propose posture/stance; the president approves or declines). Brigade/axis operation-PLANNING is post-1.0/DLC. Refusing a patron demand is the event layer, not a sixth lever. Authoritative design: `docs/plans/2026-06-01-presidential-command-model-design.md`. (NOTE: the §XII.4 suppressor "no political directive issued = player-driven design" is now **stale** — the president DOES issue directives via the command levers; revise when next touching that clause.)
+
 ### XII.2 Opt-in env-flag schema
 Default-off; opt-in granular per layer × per faction × per corps:
 - `CLAUDE_AS_PRESIDENT_<faction>=true`
