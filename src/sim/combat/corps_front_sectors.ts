@@ -2921,9 +2921,12 @@ function buildFactionSectors(
                     }
                 }
             }
+            // Free War Slice B: thread emergent mode down so applyMissionCompliance
+            // can grant a capped emergent-only garrison-budget bonus to boosted areas.
+            const emergent = state.meta?.decision_mode === 'emergent';
             commanderReviewAssignment(
                 cid, sectors, formations, priorities, profile,
-                componentOf, adjacency, friendlyOsids, opParticipants,
+                componentOf, adjacency, friendlyOsids, opParticipants, emergent,
             );
         }
     });

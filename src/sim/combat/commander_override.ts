@@ -42,6 +42,24 @@ const MAX_VIABILITY_WITHDRAWALS_PER_CORPS = 2;
 const REAR_GUARD_CORPS = new Set(['vrs_1st_krajina', 'vrs_2nd_krajina']);
 const REAR_GUARD_LINE_MAX_HOPS = 6;
 
+// ── Free War Slice B: emergent mission-budget bonus ──────────────────────────
+// In emergent mode the army priority weights are modulated by the territory-trend
+// multiplier (getCorpsArmyPriorities). A genuinely collapsing area carries an
+// EFFECTIVE weight well above its static value. These constants let that boosted
+// weight pull 1–2 EXTRA brigades into the facing sector's garrison budget — a lever
+// that does NOT exist on the historical path (gated by `emergent`).
+//
+// Sizing rationale (static army-priority weights span ~20–100; emergent boost takes
+// a collapsing static-20 area to ~56 via Slice A.3, clamp HI 4.0 → up to ~120):
+//   BASE = 40  → above the static ceiling (~30) of quiet/non-boosted priorities, so
+//                quiet areas always yield wBonus = 0 even when the gate is reached.
+//   STEP = 12  → mw≈56 ⇒ floor((56-40)/12)=1 (+1 brigade); a near-clamped ~120 ⇒
+//                floor((120-40)/12)=6 → capped to 2.
+//   CAP  = 2   → never more than +2 (uncapped values cause transfer-loop cascade thrash).
+const WEIGHT_BUDGET_BASE = 40;
+const WEIGHT_BUDGET_STEP = 12;
+const WEIGHT_BUDGET_BONUS_CAP = 2;
+
 function friendlyDistanceToAny(
     startOsid: string,
     targets: Set<string>,
@@ -227,6 +245,7 @@ export function commanderReviewAssignment(
     adjacency: Map<string, string[]>,
     friendlyOsids: Set<string>,
     opParticipants?: Set<string>,
+    emergent = false,
 ): CommanderOverride[] {
     if (commanderProfile.competence < COMMANDER_COMPETENCE_OVERRIDE_THRESHOLD) {
         return [];
@@ -247,7 +266,7 @@ export function commanderReviewAssignment(
         for (const bid of opParticipants) overriddenBrigadeIds.add(bid);
     }
 
-    applyMissionCompliance(corpsSectors, formations, armyPriorities, commanderProfile, overrides, overriddenBrigadeIds, componentOf, adjacency, friendlyOsids);
+    applyMissionCompliance(corpsSectors, formations, armyPriorities, commanderProfile, overrides, overriddenBrigadeIds, componentOf, adjacency, friendlyOsids, emergent);
     applyNonPriorityExcess(corpsSectors, formations, armyPriorities, commanderProfile, overrides, overriddenBrigadeIds, componentOf, adjacency, friendlyOsids);
     applyOffensiveStaging(corpsSectors, formations, commanderProfile, overrides, overriddenBrigadeIds, componentOf, adjacency, friendlyOsids);
     applyDefensiveCoherence(corpsSectors, formations, commanderProfile, overrides, overriddenBrigadeIds, componentOf, adjacency, friendlyOsids);
@@ -283,6 +302,7 @@ function applyMissionCompliance(
     componentOf: Map<string, number>,
     adjacency: Map<string, string[]>,
     friendlyOsids: Set<string>,
+    emergent = false,
 ): void {
     if (armyPriorities.length === 0) return;
 
@@ -318,7 +338,13 @@ function applyMissionCompliance(
 
     for (const s of corpsSectors) {
         const mw = getMissionWeight(s);
-        const budget = Math.ceil(s.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE) + (mw > 0 ? aggressiveBonus : 0);
+        // Free War Slice B: emergent-only. A facing municipality whose EFFECTIVE
+        // weight (territory-trend boosted) exceeds the static baseline pulls 1–2
+        // EXTRA brigades. Historical path: emergent=false ⇒ wBonus=0 ⇒ byte-identical.
+        const wBonus = (emergent && mw > 0)
+            ? Math.max(0, Math.min(WEIGHT_BUDGET_BONUS_CAP, Math.floor((mw - WEIGHT_BUDGET_BASE) / WEIGHT_BUDGET_STEP)))
+            : 0;
+        const budget = Math.ceil(s.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE) + (mw > 0 ? aggressiveBonus : 0) + wBonus;
         if (mw > 0 && s.assigned_brigade_ids.length < budget) {
             missionDeficits.push({ sector: s, need: budget - s.assigned_brigade_ids.length, weight: mw });
         } else if (mw === 0) {

@@ -230,6 +230,92 @@ describe('commanderReviewAssignment', () => {
             expect(sectors[0].assigned_brigade_ids.length).toBeGreaterThan(1);
         });
 
+        // ── Free War Slice B: emergent garrison-budget bonus ──────────────────
+        // Shared setup: mission sector s1 has length_edges=6 → base budget ceil(6/6)=1
+        // with aggressiveness 0.5 (no aggressiveBonus). With exactly 1 brigade already
+        // assigned, the historical path sees NO deficit (1 < 1 is false) → no transfer.
+        // In emergent mode a boosted effective weight (56) yields wBonus =
+        // floor((56-40)/12)=1 → budget 2 → deficit 1 → pulls 1 EXTRA brigade.
+        function makeBudgetBonusFixture() {
+            const sectors: any[] = [
+                { ...makeSector('s1', 'vrs_2kk', ['b1'], 6, 1.0),
+                  sub_segments: [{ friendly_osids: ['op:bihac:f1'], enemy_osids: ['op:bihac:h1'] }] },
+                { ...makeSector('s2', 'vrs_2kk', ['b2', 'b3', 'b4'], 4, 0.3),
+                  sub_segments: [{ friendly_osids: ['op:livno:f1'], enemy_osids: ['op:livno:h1'] }] },
+            ];
+            const formations: Record<string, any> = {
+                b1: makeFormation('b1', 'op:bihac:f1', 'vrs_2kk', 800),
+                b2: makeFormation('b2', 'op:livno:rear', 'vrs_2kk', 700),
+                b3: makeFormation('b3', 'op:livno:rear', 'vrs_2kk', 600),
+                b4: makeFormation('b4', 'op:livno:rear', 'vrs_2kk', 500),
+            };
+            // aggressiveness 0.5 ⇒ NO aggressiveBonus, isolating the weight-budget bonus.
+            const profile = { competence: 0.6, aggressiveness: 0.5, preStagingSectorWeights: new Map() };
+            return { sectors, formations, profile };
+        }
+
+        // Effective weight 56 (a collapsing area in emergent mode).
+        const boostedPriorities = [{
+            name: 'Bihac Pocket', corps_id: 'vrs_2kk',
+            target_municipalities: ['bihac'],
+            start_week: 0, end_week: 52, weight: 56,
+            min_outcome: 'stalemate' as const,
+        }];
+
+        it('(Slice B) emergent: boosted weight grants +1 deficit budget → pulls an extra brigade', () => {
+            const { sectors, formations, profile } = makeBudgetBonusFixture();
+            const result = commanderReviewAssignment(
+                'vrs_2kk', sectors, formations, boostedPriorities, profile,
+                new Map(), new Map(), new Set(),
+                undefined, /* emergent */ true,
+            );
+            expect(result.some(o => o.to_sector_id === 's1' && o.reason === 'mission_priority')).toBe(true);
+            // s1 started at 1 brigade; the +1 budget bonus pulls it to 2.
+            expect(sectors[0].assigned_brigade_ids.length).toBe(2);
+        });
+
+        it('(Slice B) historical: identical setup grants NO budget bonus → no transfer', () => {
+            const { sectors, formations, profile } = makeBudgetBonusFixture();
+            const result = commanderReviewAssignment(
+                'vrs_2kk', sectors, formations, boostedPriorities, profile,
+                new Map(), new Map(), new Set(),
+                undefined, /* emergent */ false,
+            );
+            // Historical path: budget = ceil(6/6) = 1, s1 already has 1 ⇒ no deficit.
+            expect(result.filter(o => o.reason === 'mission_priority').length).toBe(0);
+            expect(sectors[0].assigned_brigade_ids.length).toBe(1);
+        });
+
+        it('(Slice B) emergent default (omitted arg) behaves as historical', () => {
+            const { sectors, formations, profile } = makeBudgetBonusFixture();
+            const result = commanderReviewAssignment(
+                'vrs_2kk', sectors, formations, boostedPriorities, profile,
+                new Map(), new Map(), new Set(),
+            );
+            // emergent defaults to false ⇒ no budget bonus ⇒ no transfer.
+            expect(result.filter(o => o.reason === 'mission_priority').length).toBe(0);
+            expect(sectors[0].assigned_brigade_ids.length).toBe(1);
+        });
+
+        it('(Slice B) emergent: a quiet (low static) weight area gets NO bonus', () => {
+            const { sectors, formations, profile } = makeBudgetBonusFixture();
+            // Static weight 30 (a quiet area) → mw=30 < BASE(40) → wBonus=0.
+            const quietPriorities = [{
+                name: 'Bihac Pocket', corps_id: 'vrs_2kk',
+                target_municipalities: ['bihac'],
+                start_week: 0, end_week: 52, weight: 30,
+                min_outcome: 'stalemate' as const,
+            }];
+            const result = commanderReviewAssignment(
+                'vrs_2kk', sectors, formations, quietPriorities, profile,
+                new Map(), new Map(), new Set(),
+                undefined, /* emergent */ true,
+            );
+            // No bonus despite emergent: budget stays 1, no deficit.
+            expect(result.filter(o => o.reason === 'mission_priority').length).toBe(0);
+            expect(sectors[0].assigned_brigade_ids.length).toBe(1);
+        });
+
         it('does not move when no army priorities exist', () => {
             const sectors = [
                 makeSector('s1', 'vrs_2kk', ['b1'], 8, 1.0),
