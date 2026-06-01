@@ -474,8 +474,59 @@ export function previewInterpretation(
 }
 
 /**
+ * Record a presidential override against a corps's current commanding officer — the
+ * BARE officer-state mutation, factored out of `overrideInterpretation` so it can be
+ * invoked WITHOUT a synthesized PendingOfficerEvent (e.g. by the force-op pushback
+ * consequence path in war_phases.ts `inject-op-directive`, where the president forced a
+ * requested op past a shown commander objection).
+ *
+ * Effects (deterministic; no Math.random/Date.now):
+ *  - bump override_count + set last_override_turn to `turn`;
+ *  - on the cowed threshold (override_count ≥ COWED_OVERRIDE_THRESHOLD within
+ *    COWED_OVERRIDE_WINDOW of the prior override) set cowed_until_turn and reset the count;
+ *  - append a sorted `recent_overrides` entry (resolution 'override') for the
+ *    political-bot auto-relief window (A2/A4 substrate).
+ *
+ * No-op when the corps has no active named commander. Does NOT acknowledge any event
+ * (that stays the caller's concern).
+ */
+export function recordPresidentialOverride(
+    state: GameState,
+    corpsId: string,
+    turn: number,
+): void {
+    const commander = getCorpsCommander(corpsId, state);
+    if (!commander) return;
+
+    const officerState = commander.state;
+    const prevLastOverrideTurn = officerState.last_override_turn;
+
+    // Increment override count.
+    officerState.override_count = (officerState.override_count ?? 0) + 1;
+    officerState.last_override_turn = turn;
+
+    // Cowed condition: if the previous override was within COWED_OVERRIDE_WINDOW AND
+    // override_count has reached COWED_OVERRIDE_THRESHOLD → cow the officer.
+    const withinWindow =
+        prevLastOverrideTurn !== undefined &&
+        turn - prevLastOverrideTurn <= COWED_OVERRIDE_WINDOW;
+
+    if (withinWindow && officerState.override_count >= COWED_OVERRIDE_THRESHOLD) {
+        officerState.cowed_until_turn = turn + COWED_DURATION;
+        officerState.override_count = 0;
+    }
+
+    // Append the rolling override-history entry (A2/A4 auto-relief window). Sorted by
+    // turn ascending for determinism.
+    const history = officerState.recent_overrides ?? [];
+    history.push({ turn, resolution: 'override' });
+    history.sort((a, b) => a.turn - b.turn);
+    officerState.recent_overrides = history;
+}
+
+/**
  * Handle player override of an officer interpretation event.
- * Increments override_count, checks for cowed condition.
+ * Increments override_count, checks for cowed condition (via recordPresidentialOverride).
  * NOTE: Applying original_order.stance back to CorpsCommandState is an IPC concern (Phase 2).
  * This function only handles officer state mutation and event acknowledgment.
  */
@@ -496,26 +547,8 @@ export function overrideInterpretation(
     const commander = getCorpsCommander(corpsId, state);
     if (!commander) return;
 
-    const officerState = commander.state;
-    const currentTurn = state.meta.turn;
-
-    const prevLastOverrideTurn = officerState.last_override_turn;
-
-    // Increment override count
-    officerState.override_count = (officerState.override_count ?? 0) + 1;
-    officerState.last_override_turn = currentTurn;
-
-    // Check cowed condition:
-    // If previous last_override_turn was within COWED_OVERRIDE_WINDOW AND
-    // override_count has reached COWED_OVERRIDE_THRESHOLD → cow the officer
-    const withinWindow =
-        prevLastOverrideTurn !== undefined &&
-        currentTurn - prevLastOverrideTurn <= COWED_OVERRIDE_WINDOW;
-
-    if (withinWindow && officerState.override_count >= COWED_OVERRIDE_THRESHOLD) {
-        officerState.cowed_until_turn = currentTurn + COWED_DURATION;
-        officerState.override_count = 0;
-    }
+    // Officer-state mutation (override_count / last_override_turn / cowed / history).
+    recordPresidentialOverride(state, corpsId, state.meta.turn);
 
     // Mark event acknowledged
     event.acknowledged = true;

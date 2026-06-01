@@ -89,10 +89,15 @@ function stageOpDirective(state, payload) {
   }
 
   // Stage — the engine step consumes this once. NEVER mutate active_operations here.
+  // `forced_over_objection` is set ONLY when the UI confirmed past a shown commander
+  // objection (queryDirectiveObjection recommendedAction !== 'launch'); the engine
+  // consume step then tags the op was_force_launched + records a presidential override
+  // on the CO. Default false (a plain request, no objection shown).
   cc.pending_op_directive = {
     target_osid: targetOsid,
     turn,
     ca_cost: REQUEST_OP_COST,
+    ...(payload.forced_over_objection === true ? { forced_over_objection: true } : {}),
   };
   return { ok: true };
 }

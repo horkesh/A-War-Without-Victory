@@ -2013,6 +2013,30 @@ app.whenReady().then(() => {
     }
   });
 
+  // Read-only OBJECTION query for the force-op pushback card (Presidential Command
+  // Model "force-op pushback"). Mirrors query-operation-prediction: deserializes a
+  // FRESH state (no mutation), runs the shared planDirectiveOperation auto-selection +
+  // the combat predictor, and returns { forceRatio, estimatedCasualties,
+  // recommendedAction, rejectionReason? }. The UI shows the disposition-tinted objection
+  // only when recommendedAction !== 'launch'.
+  ipcMain.handle('query-directive-objection', async (_event, payload) => {
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
+    }
+    if (!payload || typeof payload.corpsId !== 'string' || typeof payload.targetOsid !== 'string') {
+      return { ok: false, error: 'Invalid directive objection request' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const result = await sim.queryDirectiveObjection(state, payload, getBaseDir());
+      return { ok: true, data: result };
+    } catch (e) {
+      console.error('[IPC] query-directive-objection error:', e);
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   ipcMain.handle('stage-sector-stance-order', async (_event, payload) => {
     const { sectorId, stance } = payload || {};
     if (!currentGameStateJson || typeof sectorId !== 'string' || typeof stance !== 'string') {

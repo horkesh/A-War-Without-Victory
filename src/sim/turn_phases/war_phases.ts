@@ -37,7 +37,7 @@ import { loadSettlementEthnicityData } from '../../data/settlement_ethnicity.js'
 import { buildSidToMunFromSettlements, buildOsidToMunFromReverseMap } from '../../scenario/oob_early_war_entry.js';
 import { updateCapabilityProfiles } from '../../state/capability_progression.js';
 import { computeDimensionBaseValues, applyDimensionShift } from '../events/strategic_dimensions.js';
-import { relieveOfficer } from '../combat/order_interpretation.js';
+import { relieveOfficer, recordPresidentialOverride } from '../combat/order_interpretation.js';
 import { clamp } from '../../utils/math.js';
 import { updateDisplacement } from '../../state/displacement.js';
 import { processDisplacementTakeover } from '../../state/displacement_takeover.js';
@@ -52,7 +52,7 @@ import { applyFormationCommitment } from '../../state/front_posture_commitment.j
 import { expandRegionPostureToEdges } from '../../state/front_posture_regions.js';
 import { accumulateFrontPressure } from '../../state/front_pressure.js';
 import { syncFrontSegments } from '../../state/front_segments.js';
-import { GameState, type FactionId, type FormationId, type FormationState, type LegacyBrigadeAoRState, type EffectivePostureExposureState, type AuthoredOpDef, type OperationAxis, type CorpsOperation } from '../../state/game_state.js';
+import { GameState, type FactionId, type FormationId, type FormationState, type LegacyBrigadeAoRState, type EffectivePostureExposureState, type AuthoredOpDef, type OperationAxis, type CorpsOperation, type CorpsCommandState } from '../../state/game_state.js';
 import { updateHeavyEquipmentState } from '../../state/heavy_equipment.js';
 import { updateLegitimacyState } from '../../state/legitimacy.js';
 import { ensureMaintenanceCapacity } from '../../state/maintenance.js';
@@ -555,32 +555,147 @@ function applyCoReplacements(state: GameState): void {
 }
 
 /**
+ * Result of planning a presidential REQUEST-OP directive into a candidate operation.
+ * A `rejected` plan carries the reason code (mirrors op_directive_rejection.reason);
+ * an `ok` plan carries everything needed to BUILD the op — but produces NO mutation.
+ *
+ * Shared by:
+ *  - `injectOpDirectives` (the consume step — mutates state from an `ok` plan), and
+ *  - `queryDirectiveObjection` (the read-only objection query — runs the same
+ *    auto-selection on a deserialized-fresh state, never mutating).
+ */
+export type DirectivePlanResult =
+    | { ok: false; reason: string }
+    | {
+          ok: true;
+          corpsFaction: FactionId;
+          participants: FormationId[];
+          stagingOsid: string;
+          axes: OperationAxis[];
+          opName: string;
+          /** Count of corps subordinate brigades — used for slot-availability accounting. */
+          corpsBrigadeCount: number;
+      };
+
+/**
+ * PURE auto-selection + axis-build for a presidential REQUEST-OP directive — the
+ * commander's force-selection logic factored out of `injectOpDirectives` so it can be
+ * run WITHOUT mutating state (the pre-commit objection predictor needs a candidate
+ * plan; the staged directive only carries a target OSID).
+ *
+ * Identical selection to the consume path (`injectOpDirectives`):
+ *  1. AUTO-SELECT participant brigades: this corps's subordinates (getCorpsSubordinates)
+ *     that are available in their own corps (getAvailableBrigades), not committed in ANY
+ *     corps (findBrigadeOperationAnywhere), and eligible (isEligibleOperationFormation).
+ *     Require ≥ AUTHORED_OP_MIN_PARTICIPANTS.
+ *  2. BUILD a reachable axis toward target_osid: the smallest FRIENDLY OSID adjacent to
+ *     the target (controller === corps faction) as staging (deterministic).
+ *  3. Validate via validateOpAtInjection (blocking errors reject).
+ *
+ * Returns a discriminated plan; NEVER mutates `state` or `cmd`. The mutation (push op,
+ * assign commander, set stance, clear staged field) lives ONLY in the consume step so
+ * `injectOpDirectives`' behavior is unchanged.
+ */
+export function planDirectiveOperation(
+    state: GameState,
+    cmd: CorpsCommandState,
+    corpsId: string,
+    targetOsid: string,
+    adjacency: Map<string, string[]> | undefined,
+): DirectivePlanResult {
+    const formations = state.military.formations ?? {};
+
+    const corpsFaction = formations[corpsId]?.faction;
+    if (!corpsFaction) return { ok: false, reason: 'corps_not_found' };
+
+    // Objective must be enemy-held — directing at a friendly/own OSID is a no-op.
+    const targetController = getPoliticalControllerOSID(state, targetOsid, undefined);
+    if (targetController === null) return { ok: false, reason: 'objective_uncontrolled' };
+    if (targetController === corpsFaction) return { ok: false, reason: 'objective_already_owned' };
+
+    // 1. AUTO-SELECT the force — the commander picks brigades, not the president.
+    //    Eligible + available in own corps + not committed anywhere.
+    const corpsBrigadeIds = new Set(
+        getCorpsSubordinates(state, corpsId).map((f) => f.id),
+    );
+    const available = new Set(getAvailableBrigades(cmd, [...corpsBrigadeIds]));
+    const participants = [...corpsBrigadeIds]
+        .filter((bid) => {
+            if (!available.has(bid)) return false;                       // free in own corps
+            if (findBrigadeOperationAnywhere(state, bid)) return false;   // not committed in ANY corps
+            const f = formations[bid];
+            return !!f && isEligibleOperationFormation(f);                // brigade-only, active
+        })
+        .sort(strictCompare);
+
+    if (participants.length < AUTHORED_OP_MIN_PARTICIPANTS) {
+        return { ok: false, reason: 'no_available_force' };
+    }
+
+    // 2. BUILD the axis — find a FRIENDLY OSID adjacent to the target through the
+    //    static adjacency graph. That neighbor is the staging zone; the target is the
+    //    single objective. Smallest friendly neighbor (deterministic). With no
+    //    adjacency graph available we cannot prove reachability → reject.
+    if (!adjacency) return { ok: false, reason: 'no_adjacency' };
+    const neighbors = adjacency.get(targetOsid) ?? [];
+    const stagingOsid = [...neighbors]
+        .filter((n) => getPoliticalControllerOSID(state, n, undefined) === corpsFaction)
+        .sort(strictCompare)[0];
+    if (!stagingOsid) return { ok: false, reason: 'objective_unreachable' };
+
+    const axes: OperationAxis[] = [createSingleAxis(participants, [targetOsid], stagingOsid, formations)];
+
+    // 3. Validate WITH adjacency so staging_adjacency / all_objectives_owned are enforced.
+    const opName = `Presidential Directive — ${targetOsid}`;
+    const warnings = validateOpAtInjection(
+        {
+            name: opName,
+            faction: corpsFaction,
+            axes: axes.map((a) => ({ axis_id: a.axis_id, brigades: a.assigned_brigades, objectives: a.objectives, staging_osid: a.staging_osid })),
+            staging_osid: stagingOsid,
+        },
+        state,
+        adjacency,
+        cmd,
+    );
+    if (hasBlockingOpInjectionWarnings(warnings)) {
+        const blocker = warnings.find((w) => w.severity === 'error');
+        return { ok: false, reason: blocker?.check ?? 'validation_failed' };
+    }
+
+    return {
+        ok: true,
+        corpsFaction,
+        participants,
+        stagingOsid,
+        axes,
+        opName,
+        corpsBrigadeCount: corpsBrigadeIds.size,
+    };
+}
+
+/**
  * Consume player REQUEST-OP directives staged on cc.pending_op_directive (Presidential
  * Command Model slice 2/N). Single owner of the inject-op-directive step.
  *
  * The president names ONLY a target OSID. This step builds the operation the way a
- * commander would — auto-selecting the force and an axis/staging toward the target.
- * The president does NOT pick brigades or axes.
+ * commander would — auto-selecting the force and an axis/staging toward the target via
+ * the shared pure `planDirectiveOperation` helper. The president does NOT pick brigades
+ * or axes.
  *
  * DETERMINISM EARLY-OUT: returns with ZERO mutation when no corps has a
  * pending_op_directive. pending_op_directive is OPTIONAL and never set in
  * headless/historical runs → byte-identical baselines by construction.
  *
  * Per corps (sorted strictCompare):
- *  1. AUTO-SELECT participant brigades: this corps's subordinates (getCorpsSubordinates)
- *     that are eligible (isEligibleOperationFormation), available in their own corps
- *     (getAvailableBrigades), and not committed in ANY corps (findBrigadeOperationAnywhere).
- *     Require ≥ AUTHORED_OP_MIN_PARTICIPANTS. (This is "the commander picks the force.")
- *  2. BUILD a reachable axis toward target_osid: pick a FRIENDLY OSID adjacent to the
- *     target (controller === corps faction) as the staging zone — the smallest such
- *     neighbor (deterministic). The axis is [target_osid] staged from that friendly
- *     neighbor, so it advances through friendly territory and passes staging_adjacency.
- *     If the objective is already owned, or no friendly staging is adjacent (unreachable),
- *     or there is no available force → record op_directive_rejection, inject nothing.
- *  3. Validate via validateOpAtInjection (WITH adjacency → staging_adjacency enforced) →
- *     buildCorpsOperation(isPrePlanned=false) → assignOperationCommander →
- *     tag requested_by_president. Free slot required (hasAvailableSlot).
- *  4. ALWAYS clear cc.pending_op_directive (consumed-once).
+ *  1-3. Plan the candidate op via planDirectiveOperation (auto-select force +
+ *     reachable axis + injection-validate). On a rejected plan, record
+ *     op_directive_rejection and inject nothing.
+ *  3b. Free operation slot required (hasAvailableSlot).
+ *  4. buildCorpsOperation(isPrePlanned=false) → push → assignOperationCommander →
+ *     tag requested_by_president (+ was_force_launched / commander_assessment_at_launch
+ *     when forced_over_objection) → record the presidential override on the CO.
+ *  5. ALWAYS clear cc.pending_op_directive (consumed-once).
  */
 function injectOpDirectives(state: GameState, adjacency?: Map<string, string[]>): void {
     const corpsCommand = state.military.corps_command;
@@ -590,7 +705,6 @@ function injectOpDirectives(state: GameState, adjacency?: Map<string, string[]>)
     const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
     if (!corpsIds.some((id) => corpsCommand[id]?.pending_op_directive)) return;
 
-    const formations = state.military.formations ?? {};
     const turn = state.meta?.turn ?? 0;
 
     for (const corpsId of corpsIds) {
@@ -599,6 +713,7 @@ function injectOpDirectives(state: GameState, adjacency?: Map<string, string[]>)
         if (!cmd || !staged) continue;
 
         // Consumed-once: clear the staged field regardless of outcome.
+        const forcedOverObjection = staged.forced_over_objection === true;
         cmd.pending_op_directive = undefined;
 
         const targetOsid = staged.target_osid;
@@ -606,77 +721,20 @@ function injectOpDirectives(state: GameState, adjacency?: Map<string, string[]>)
             cmd.op_directive_rejection = { target_osid: targetOsid, reason, turn };
         };
 
-        const corpsFaction = formations[corpsId]?.faction;
-        if (!corpsFaction) { reject('corps_not_found'); continue; }
-
-        // Objective must be enemy-held — directing at a friendly/own OSID is a no-op.
-        const targetController = getPoliticalControllerOSID(state, targetOsid, undefined);
-        if (targetController === null) { reject('objective_uncontrolled'); continue; }
-        if (targetController === corpsFaction) { reject('objective_already_owned'); continue; }
-
-        // 1. AUTO-SELECT the force — the commander picks brigades, not the president.
-        //    Eligible + available in own corps + not committed anywhere.
-        const corpsBrigadeIds = new Set(
-            getCorpsSubordinates(state, corpsId).map((f) => f.id),
-        );
-        const available = new Set(getAvailableBrigades(cmd, [...corpsBrigadeIds]));
-        const participants = [...corpsBrigadeIds]
-            .filter((bid) => {
-                if (!available.has(bid)) return false;                       // free in own corps
-                if (findBrigadeOperationAnywhere(state, bid)) return false;   // not committed in ANY corps
-                const f = formations[bid];
-                return !!f && isEligibleOperationFormation(f);                // brigade-only, active
-            })
-            .sort(strictCompare);
-
-        if (participants.length < AUTHORED_OP_MIN_PARTICIPANTS) {
-            reject('no_available_force');
-            continue;
-        }
-
-        // 2. BUILD the axis — find a FRIENDLY OSID adjacent to the target through the
-        //    static adjacency graph. That neighbor is the staging zone; the target is the
-        //    single objective. Smallest friendly neighbor (deterministic). With no
-        //    adjacency graph available we cannot prove reachability → reject.
-        if (!adjacency) { reject('no_adjacency'); continue; }
-        const neighbors = adjacency.get(targetOsid) ?? [];
-        const stagingOsid = [...neighbors]
-            .filter((n) => getPoliticalControllerOSID(state, n, undefined) === corpsFaction)
-            .sort(strictCompare)[0];
-        if (!stagingOsid) { reject('objective_unreachable'); continue; }
-
-        const axes: OperationAxis[] = [createSingleAxis(participants, [targetOsid], stagingOsid, formations)];
-
-        // 3a. Validate WITH adjacency so staging_adjacency / all_objectives_owned are enforced.
-        const opName = `Presidential Directive — ${targetOsid}`;
-        const warnings = validateOpAtInjection(
-            {
-                name: opName,
-                faction: corpsFaction,
-                axes: axes.map((a) => ({ axis_id: a.axis_id, brigades: a.assigned_brigades, objectives: a.objectives, staging_osid: a.staging_osid })),
-                staging_osid: stagingOsid,
-            },
-            state,
-            adjacency,
-            cmd,
-        );
-        if (hasBlockingOpInjectionWarnings(warnings)) {
-            const blocker = warnings.find((w) => w.severity === 'error');
-            reject(blocker?.check ?? 'validation_failed');
-            continue;
-        }
+        const plan = planDirectiveOperation(state, cmd, corpsId, targetOsid, adjacency);
+        if (!plan.ok) { reject(plan.reason); continue; }
 
         // 3b. Free operation slot required (slots scale with active brigade count).
-        if (!hasAvailableSlot(cmd, corpsBrigadeIds.size)) {
+        if (!hasAvailableSlot(cmd, plan.corpsBrigadeCount)) {
             reject('no_available_slot');
             continue;
         }
 
         // 4. Build the canon CorpsOperation (isPrePlanned=false — does NOT occupy slot 0).
         const op: CorpsOperation = buildCorpsOperation(
-            { name: opName, staging_osid: stagingOsid },
-            axes,
-            participants,
+            { name: plan.opName, staging_osid: plan.stagingOsid },
+            plan.axes,
+            plan.participants,
             turn,
             false,
             undefined,
@@ -684,11 +742,26 @@ function injectOpDirectives(state: GameState, adjacency?: Map<string, string[]>)
         op.type = 'sector_attack';
         op.requested_by_president = true;
 
+        // When the president FORCED this op past a shown commander objection, tag it for
+        // the existing badge/strain/receipt surfaces (command_strain.ts deriveOperationOutcomeCategory
+        // reads was_force_launched; consequenceReceipts.ts reads commander_assessment_at_launch).
+        // The objection that was overridden was a no-go ('postpone'/'abort'), so snapshot
+        // a no-go assessment — abort is the strongest framing the predictor produces.
+        if (forcedOverObjection) {
+            op.was_force_launched = true;
+            op.commander_assessment_at_launch = 'abort';
+        }
+
         cmd.active_operations.push(op);
-        assignOperationCommander(state, op, corpsId, corpsFaction);
+        assignOperationCommander(state, op, corpsId, plan.corpsFaction);
         cmd.stance = 'offensive';
         // Clear any prior rejection on successful injection.
         cmd.op_directive_rejection = undefined;
+
+        // The CO was warned and overridden — bump override tracking + cow on threshold.
+        if (forcedOverObjection) {
+            recordPresidentialOverride(state, corpsId, turn);
+        }
     }
 }
 

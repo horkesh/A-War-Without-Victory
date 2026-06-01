@@ -16,6 +16,7 @@ import { deriveOperationOutcomeCategory } from '../../data/command_strain';
 import { EmptyState } from '../EmptyState';
 import { t, type MessageKey } from '../../i18n';
 import { FORCE_LAUNCH_COST, REQUEST_OP_COST } from '../../utils/commandAuthority';
+import { buildDirectiveObjection, type DirectiveObjectionView } from '../../data/opDirectiveObjection';
 
 type CompletedOp = NonNullable<LoadedGameState['operationHistory']>[number];
 
@@ -505,6 +506,13 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
     // OSID; the engine auto-selects the force + axis and builds the op. Full map-target
     // selection UX is an explicit FOLLOW-UP (see PR notes) — this is the minimal entry.
     const [requestTargetOsid, setRequestTargetOsid] = useState('');
+    // Force-op PUSHBACK: when the commander objects to a requested op, hold his
+    // disposition-tinted objection here so the player can Force anyway / Stand down.
+    // NOTE: this minimal card lives on the Request-op affordance for now; the read-model
+    // (buildDirectiveObjection) + consequence wiring are surface-agnostic and will later
+    // migrate to the Decision Room directive card.
+    const [pendingObjection, setPendingObjection] = useState<{ view: DirectiveObjectionView; targetOsid: string } | null>(null);
+    const [objectionLoading, setObjectionLoading] = useState(false);
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
     const setOperationBriefingContext = useGameStore((s) => s.setOperationBriefingContext);
@@ -529,6 +537,30 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
     };
 
     const canRequestOp = authCurrent >= REQUEST_OP_COST;
+
+    // Resolve this corps's active commanding officer (for the disposition-tinted objection).
+    const corpsCommander = useMemo(
+        () => (gameState.namedOfficerData ?? []).find(
+            (o) => o.assigned_corps_id === corpsId && o.status === 'active',
+        ),
+        [gameState.namedOfficerData, corpsId],
+    );
+
+    /** Stage the directive (optionally forced past a shown objection). Shared by the
+     *  no-objection path and the "Force anyway" button. */
+    const stageDirective = async (target: string, forced: boolean) => {
+        const result = await ipc.stageOpDirectiveOrder({
+            corpsId,
+            targetOsid: target,
+            ...(forced ? { forced_over_objection: true } : {}),
+        });
+        if (!result.ok) setLoadError(result.error ?? 'Failed to request operation.');
+        else {
+            setRequestTargetOsid('');
+            setPendingObjection(null);
+        }
+    };
+
     const handleRequestOp = async () => {
         if (!ipc.isAvailable) return;
         const target = requestTargetOsid.trim();
@@ -537,9 +569,42 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
             setLoadError(t('operationsSection.insufficientAuthority', { current: authCurrent, cost: REQUEST_OP_COST }));
             return;
         }
-        const result = await ipc.stageOpDirectiveOrder({ corpsId, targetOsid: target });
-        if (!result.ok) setLoadError(result.error ?? 'Failed to request operation.');
-        else setRequestTargetOsid('');
+        // Ask the commander first. If he objects (recommendedAction !== 'launch'), surface
+        // his disposition-tinted pushback BEFORE committing — the president decides whether
+        // to force it. If he agrees (or the query is unavailable), stage directly.
+        setObjectionLoading(true);
+        try {
+            const objection = await ipc.queryDirectiveObjection({ corpsId, targetOsid: target });
+            if (objection.ok && objection.data && objection.data.recommendedAction !== 'launch' && corpsCommander) {
+                const view = buildDirectiveObjection(
+                    {
+                        name: corpsCommander.name,
+                        rank: corpsCommander.rank,
+                        competence: corpsCommander.competence,
+                        political_reliability: corpsCommander.political_reliability,
+                        is_cowed: corpsCommander.is_cowed,
+                    },
+                    objection.data,
+                );
+                if (view.shows_objection) {
+                    setPendingObjection({ view, targetOsid: target });
+                    return;
+                }
+            }
+        } finally {
+            setObjectionLoading(false);
+        }
+        // No objection (commander agrees, is cowed, or no CO/query) → stage directly.
+        await stageDirective(target, false);
+    };
+
+    const handleForceAnyway = async () => {
+        if (!pendingObjection) return;
+        await stageDirective(pendingObjection.targetOsid, true);
+    };
+
+    const handleStandDownObjection = () => {
+        setPendingObjection(null);
     };
 
     return (
@@ -561,13 +626,49 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                     <button
                         type="button"
                         onClick={handleRequestOp}
-                        disabled={!canRequestOp || requestTargetOsid.trim().length === 0}
+                        disabled={!canRequestOp || requestTargetOsid.trim().length === 0 || objectionLoading || pendingObjection !== null}
                         title={canRequestOp
                             ? `Direct this corps to take the objective (cost ${REQUEST_OP_COST} command authority; current ${authCurrent}). The engine selects the force + axis.`
                             : `Insufficient command authority (need ${REQUEST_OP_COST}, have ${authCurrent}).`}
                         className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-panel-border/50 text-text-primary disabled:opacity-40 hover:bg-panel-bg">
-                        {`Request op (${REQUEST_OP_COST})`}
+                        {objectionLoading ? 'Consulting…' : `Request op (${REQUEST_OP_COST})`}
                     </button>
+                </div>
+            )}
+            {/* Force-op PUSHBACK card: the commander objected. Show his disposition-tinted
+                judgment (the SOURCE, not a clean %) and let the president Force anyway
+                (pays CA + cows/relieves the CO over time) or Stand down. */}
+            {pendingObjection && (
+                <div
+                    role="alertdialog"
+                    aria-label="Commander objection"
+                    className={`mb-3 mx-1 p-3 rounded border ${
+                        pendingObjection.view.severity === 'abort'
+                            ? 'border-red-500/50 bg-red-500/5'
+                            : 'border-amber-500/50 bg-amber-500/5'
+                    }`}>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-amber-400 mb-1">
+                        {pendingObjection.view.severity === 'abort' ? 'Commander recommends against' : 'Commander urges delay'}
+                    </p>
+                    <p className="text-[11px] italic text-text-primary mb-2">{pendingObjection.view.prose}</p>
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={handleForceAnyway}
+                            disabled={pendingObjection.view.rejection_reason !== undefined}
+                            title={pendingObjection.view.rejection_reason !== undefined
+                                ? 'The operation cannot be formed as ordered — there is nothing to force.'
+                                : `Override the commander's judgment and order the operation anyway. He will be cowed by repeated overrides.`}
+                            className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-red-500/50 text-red-400 disabled:opacity-40 hover:bg-red-500/10">
+                            Force anyway
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleStandDownObjection}
+                            className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-panel-border/50 text-text-primary hover:bg-panel-bg">
+                            Stand down
+                        </button>
+                    </div>
                 </div>
             )}
             {operations.length === 0 ? (

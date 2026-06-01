@@ -183,10 +183,20 @@ interface WindowAwwv {
     stageLogisticsPriority: (faction: string, sectorId: string, priority: number) => Promise<{ ok: boolean; error?: string }>;
     stageCorpsOperationOrder: (payload: CorpsOperationOrderPayload) => Promise<{ ok: boolean; error?: string }>;
     queryOperationPrediction: (payload: Record<string, unknown>) => Promise<{ ok: boolean; data?: Record<string, unknown>; error?: string }>;
+    /** Force-op pushback OBJECTION query: read-only candidate plan + commander go/no-go
+     *  for a REQUEST-OP target. data carries { forceRatio, estimatedCasualties,
+     *  recommendedAction: 'launch'|'delay'|'abort', rejectionReason? }. */
+    queryDirectiveObjection: (payload: { corpsId: string; targetOsid: string }) => Promise<{
+        ok: boolean;
+        data?: { forceRatio: number; estimatedCasualties: number; recommendedAction: 'launch' | 'delay' | 'abort'; rejectionReason?: string };
+        error?: string;
+    }>;
     stageOpHaltOrder: (payload: { corpsId: string; opName: string }) => Promise<{ ok: boolean; error?: string }>;
     /** REQUEST-OP presidential lever: name a strategic objective (target OSID) for a corps;
-     *  the engine auto-selects the force + axis and builds the op (requested_by_president). */
-    stageOpDirectiveOrder: (payload: { corpsId: string; targetOsid: string }) => Promise<{ ok: boolean; error?: string }>;
+     *  the engine auto-selects the force + axis and builds the op (requested_by_president).
+     *  `forced_over_objection` is set ONLY when the player confirmed past a shown commander
+     *  objection — the engine then tags was_force_launched + records a presidential override. */
+    stageOpDirectiveOrder: (payload: { corpsId: string; targetOsid: string; forced_over_objection?: boolean }) => Promise<{ ok: boolean; error?: string }>;
     stageAssignOperationCommander: (payload: { corpsId: string; operationName: string; officerId: string }) => Promise<{ ok: boolean; error?: string }>;
     /** REPLACE-CO presidential lever: sack a corps's current CO and install a replacement
      *  (explicit reserve officer or auto-pick) at REPLACE_CO_COST command authority +
@@ -380,8 +390,8 @@ export function useIPC() {
             // "Request operation" affordance to stage-op-directive-order; the engine
             // auto-selects brigades + axis toward the named target OSID.
             stageOpDirectiveOrder: awwv
-                ? (payload: { corpsId: string; targetOsid: string }) => awwv.stageOpDirectiveOrder(payload)
-                : (_payload: { corpsId: string; targetOsid: string }) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
+                ? (payload: { corpsId: string; targetOsid: string; forced_over_objection?: boolean }) => awwv.stageOpDirectiveOrder(payload)
+                : (_payload: { corpsId: string; targetOsid: string; forced_over_objection?: boolean }) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
 
             stageAssignOperationCommander: awwv
                 ? (payload: { corpsId: string; operationName: string; officerId: string }) => awwv.stageAssignOperationCommander(payload)
@@ -493,6 +503,11 @@ export function useIPC() {
             queryOperationPrediction: awwv
                 ? (payload: Record<string, unknown>) => awwv.queryOperationPrediction(payload)
                 : makeNoop<{ ok: boolean; data?: Record<string, unknown>; error?: string }>(),
+
+            // Force-op pushback OBJECTION query — read-only candidate plan + commander go/no-go.
+            queryDirectiveObjection: awwv
+                ? (payload: { corpsId: string; targetOsid: string }) => awwv.queryDirectiveObjection(payload)
+                : makeNoop<{ ok: boolean; data?: { forceRatio: number; estimatedCasualties: number; recommendedAction: 'launch' | 'delay' | 'abort'; rejectionReason?: string }; error?: string }>(),
 
             approveReserveRequest: awwv
                 ? (requestId: string, brigadeId: string, reason?: string) => awwv.approveReserveRequest(requestId, brigadeId, reason)
