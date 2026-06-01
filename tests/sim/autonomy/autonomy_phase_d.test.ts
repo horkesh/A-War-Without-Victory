@@ -564,6 +564,17 @@ describe('CorpsCommandState.player_op_response schema', () => {
         });
         expect(cmd.player_op_response?.approved).toBe(false);
     });
+
+    it('player_op_response carries optional force_launched marker (force-launch vs ordinary commit)', () => {
+        const commit = makeCorpsCommand({
+            player_op_response: { plan_id: 'p', approved: true, turn: 5 },
+        });
+        expect(commit.player_op_response?.force_launched).toBeUndefined();
+        const forced = makeCorpsCommand({
+            player_op_response: { plan_id: 'p', approved: true, turn: 5, force_launched: true },
+        });
+        expect(forced.player_op_response?.force_launched).toBe(true);
+    });
 });
 
 // ---------------------------------------------------------------------------

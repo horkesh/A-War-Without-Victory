@@ -3193,7 +3193,9 @@ app.whenReady().then(() => {
     }
 
     // Approve the plan (same channel as accept-proposal) so applyCommanderOutput launches it.
-    cc.player_op_response = { plan_id: planId, approved: true, turn: state.meta.turn };
+    // force_launched marks this as a force-launch (Direct Intervention) so commander_loop tags
+    // a newly-emitted op too; an ordinary Commit omits the marker and is not tagged.
+    cc.player_op_response = { plan_id: planId, approved: true, turn: state.meta.turn, force_launched: true };
     // Override the commander's go/no-go on the matching active op.
     op.force_launch = true;
     op.was_force_launched = true;
@@ -3276,10 +3278,10 @@ app.whenReady().then(() => {
       auth.lifetime_spent += PROACTIVE_FORCE_LAUNCH_COST;
     }
 
-    // Stage approval — the SAME channel as commit / force-launch-proposal. The
-    // commander_loop Level-1 guard reads this next turn and lets the held plan
-    // reach 'executing' and emit its operation.
-    cc.player_op_response = { plan_id: planId, approved: true, turn: state.meta.turn };
+    // Stage approval — the SAME channel as commit / force-launch-proposal, but with
+    // force_launched:true so commander_loop tags the emitted op as a force-launch
+    // (Direct Intervention). An ordinary Commit omits the marker and is not tagged.
+    cc.player_op_response = { plan_id: planId, approved: true, turn: state.meta.turn, force_launched: true };
 
     // Defensive parity with force-launch-proposal: if an active op already exists
     // for this plan (e.g. re-issued same turn), carry the force-launch flags so it
