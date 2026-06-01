@@ -250,6 +250,65 @@ describe('Free War — ethics bright line: atrocity never yields a better end-st
         expect(terminal.outcome_class).not.toBe('strategic_success');
     });
 
+    it('terminal-turn DISPLAY: the breakdown shows the FRESH atrocity facts, not the stale capital snapshot (Codex P2 on #96)', () => {
+        // The grade reads max(capital, fresh); the DISPLAYED breakdown must read
+        // the same source, or the verdict shows a fresh-derived grade next to
+        // stale (pre-refresh) numbers — internally inconsistent. Build the stale
+        // capital + fresh displacement aggregates and assert the breakdown is
+        // raised to the fresh totals (30000+20000 refugees, 3000+2000 civilian).
+        const state = makeVerdictState(
+            {
+                RS: {
+                    territory_controlled_pct: 58,
+                    war_crimes_events: 3,          // fresh on capital (in-place increment)
+                    refugees_created: 0,           // STALE — capital frozen pre-refresh
+                    civilian_casualties_caused: 0, // STALE — capital frozen pre-refresh
+                },
+            },
+            SHARED_COST,
+        );
+        (state as unknown as { displacement: { displacement_humanitarian_aggregates: Record<string, Record<string, { refugees_created: number; refugees_received: number; civilian_casualties_caused: number }>> } }).displacement.displacement_humanitarian_aggregates = {
+            RS: {
+                RBiH: { refugees_created: 30000, refugees_received: 0, civilian_casualties_caused: 3000 },
+                HRHB: { refugees_created: 20000, refugees_received: 0, civilian_casualties_caused: 2000 },
+            },
+        };
+
+        const verdict = computeFactionVerdict(state, 'RS');
+        // Displayed facts now match the fresh source the grade was capped with.
+        expect(verdict.capital_breakdown?.refugees_created).toBe(50000);
+        expect(verdict.capital_breakdown?.civilian_casualties_caused).toBe(5000);
+        // war_crimes_events is already fresh on capital — left untouched.
+        expect(verdict.capital_breakdown?.war_crimes_events).toBe(3);
+    });
+
+    it('display freshness is EMERGENT-GATED: in historical mode the breakdown keeps the raw capital snapshot', () => {
+        // The atrocity term (and its display correction) is emergent-only. In
+        // historical mode the displayed breakdown must be the UNCHANGED capital
+        // snapshot, so the byte-identical 52w baseline is preserved by construction.
+        const state = makeVerdictState(
+            {
+                RS: {
+                    territory_controlled_pct: 58,
+                    war_crimes_events: 3,
+                    refugees_created: 0,
+                    civilian_casualties_caused: 0,
+                },
+            },
+            { ...SHARED_COST, decision_mode: 'historical' },
+        );
+        (state as unknown as { displacement: { displacement_humanitarian_aggregates: Record<string, Record<string, { refugees_created: number; refugees_received: number; civilian_casualties_caused: number }>> } }).displacement.displacement_humanitarian_aggregates = {
+            RS: {
+                RBiH: { refugees_created: 30000, refugees_received: 0, civilian_casualties_caused: 3000 },
+            },
+        };
+
+        const verdict = computeFactionVerdict(state, 'RS');
+        // Historical mode: displayed breakdown stays the raw (stale=0) snapshot.
+        expect(verdict.capital_breakdown?.refugees_created).toBe(0);
+        expect(verdict.capital_breakdown?.civilian_casualties_caused).toBe(0);
+    });
+
     it('emergent gating: the SAME cleansing end-state in HISTORICAL mode is NOT atrocity-capped', () => {
         // Proves the term is emergent-gated. In historical mode the atrocity
         // fields do not raise the cost index, so the cleansing state keeps its

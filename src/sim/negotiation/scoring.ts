@@ -249,6 +249,46 @@ function computeAtrocitySubScore(state: GameState, faction: string): number {
 }
 
 /**
+ * Return the breakdown to DISPLAY for a faction, with its atrocity/humanitarian
+ * facts raised to the SAME fresh source the grade used (Free War Phase 5, Codex
+ * P2 on #96). The verdict grade is capped using max(capital, FRESH displacement
+ * aggregate) for refugees_created / civilian_casualties_caused (see
+ * computeAtrocitySubScore). On a TERMINAL turn the capital snapshot can be frozen
+ * one step before compute-negotiation-capital refreshes its displacement copy, so
+ * the raw capital values can be STALE. Displaying the raw snapshot would put a
+ * fresh-derived grade next to stale numbers — internally inconsistent.
+ *
+ * EMERGENT-GATED: the atrocity term (and thus this display correction) is OFF in
+ * historical/unset mode, where the raw capital snapshot is returned UNCHANGED so
+ * the byte-identical 52w baseline is preserved by construction. war_crimes_events
+ * is already fresh on capital (recordWarCrime increments it in place), so it is
+ * left as-is. Pure & deterministic; never lowers a displayed value (max only).
+ */
+function freshenBreakdownForDisplay(
+    state: GameState,
+    faction: string,
+    capital: NegotiationBreakdown,
+): NegotiationBreakdown {
+    // Historical/unset mode: the atrocity term is OFF, so display is untouched.
+    if (state.meta?.decision_mode !== 'emergent') return capital;
+
+    const fresh = freshDisplacementHarm(state, faction);
+    const freshRefugees = Math.max(capital.refugees_created ?? 0, fresh.refugees);
+    const freshCivilian = Math.max(capital.civilian_casualties_caused ?? 0, fresh.civilianCasualties);
+
+    // No drift between capital and fresh — return the original object unchanged.
+    if (freshRefugees === capital.refugees_created && freshCivilian === capital.civilian_casualties_caused) {
+        return capital;
+    }
+
+    return {
+        ...capital,
+        refugees_created: freshRefugees,
+        civilian_casualties_caused: freshCivilian,
+    };
+}
+
+/**
  * Compute the monotonic war-cost index in [0, 1] for a faction.
  *
  * Reads only already-accrued, monotonic state:
@@ -604,16 +644,29 @@ export function computeFactionVerdict(
 
     const dimensionGrades = computeDimensionGrades(capital, faction, dimStore);
 
+    // DISPLAY FRESHNESS (Free War Phase 5, Codex P2 on #96): the grade above is
+    // capped using the FRESH atrocity source (max of the capital snapshot and the
+    // always-current displacement aggregates — see computeAtrocitySubScore). On a
+    // TERMINAL turn the capital snapshot can be frozen one step before
+    // compute-negotiation-capital refreshes its displacement copy, so the raw
+    // capital's refugees_created / civilian_casualties_caused can be STALE. If we
+    // displayed the raw snapshot, the verdict would show a grade derived from
+    // fresh terminal-turn atrocities next to stale pre-refresh numbers — an
+    // internally inconsistent display. So the displayed breakdown takes the SAME
+    // max(capital, fresh) the grade used. EMERGENT-GATED to keep historical mode
+    // byte-identical (the term is emergent-only by construction).
+    const displayBreakdown = freshenBreakdownForDisplay(state, faction, capital);
+
     // Collect condemnation flags from rupture consequences (Ring 2)
     const condemnationFlags = collectCondemnationFlags(state, faction);
-    const outcomeClass = classifyOutcome(faction, capital, dimStore, grade, pyrrhicScore, condemnationFlags);
+    const outcomeClass = classifyOutcome(faction, displayBreakdown, dimStore, grade, pyrrhicScore, condemnationFlags);
 
     return {
         faction,
         pyrrhic_score: pyrrhicScore,
         grade,
         grade_description: description,
-        capital_breakdown: capital,
+        capital_breakdown: displayBreakdown,
         dimension_grades: dimensionGrades,
         outcome_class: outcomeClass,
         condemnation_flags: condemnationFlags,
