@@ -318,7 +318,8 @@
       "src/desktop/officer_decision_history.cjs",
       "src/desktop/settings_store.cjs",
       "src/desktop/author_op_staging.cjs",
-      "src/desktop/op_halt.cjs"
+      "src/desktop/op_halt.cjs",
+      "src/desktop/op_directive_staging.cjs"
     ],
     "extraResources": [
       {

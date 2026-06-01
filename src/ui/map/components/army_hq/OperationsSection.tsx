@@ -15,7 +15,7 @@ import { CollapsibleSection } from './CollapsibleSection';
 import { deriveOperationOutcomeCategory } from '../../data/command_strain';
 import { EmptyState } from '../EmptyState';
 import { t, type MessageKey } from '../../i18n';
-import { FORCE_LAUNCH_COST } from '../../utils/commandAuthority';
+import { FORCE_LAUNCH_COST, REQUEST_OP_COST } from '../../utils/commandAuthority';
 
 type CompletedOp = NonNullable<LoadedGameState['operationHistory']>[number];
 
@@ -501,6 +501,10 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
 
 export function OperationsSection({ corpsId, operations, gameState, commandStrain = 0, commandStrainLabel = 'healthy' }: OperationsSectionProps) {
     const [expandedOp, setExpandedOp] = useState<string | null>(null);
+    // REQUEST-OP presidential lever (minimal affordance). The president types a target
+    // OSID; the engine auto-selects the force + axis and builds the op. Full map-target
+    // selection UX is an explicit FOLLOW-UP (see PR notes) — this is the minimal entry.
+    const [requestTargetOsid, setRequestTargetOsid] = useState('');
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
     const setOperationBriefingContext = useGameStore((s) => s.setOperationBriefingContext);
@@ -524,8 +528,48 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
         if (!result.ok) setLoadError(result.error ?? t('operationsSection.error.standDown'));
     };
 
+    const canRequestOp = authCurrent >= REQUEST_OP_COST;
+    const handleRequestOp = async () => {
+        if (!ipc.isAvailable) return;
+        const target = requestTargetOsid.trim();
+        if (!target) return;
+        if (!canRequestOp) {
+            setLoadError(t('operationsSection.insufficientAuthority', { current: authCurrent, cost: REQUEST_OP_COST }));
+            return;
+        }
+        const result = await ipc.stageOpDirectiveOrder({ corpsId, targetOsid: target });
+        if (!result.ok) setLoadError(result.error ?? 'Failed to request operation.');
+        else setRequestTargetOsid('');
+    };
+
     return (
         <CollapsibleSection sectionKey={`ops-${corpsId}`} title={t('operationsSection.title')} count={operations.length}>
+            {/* REQUEST-OP presidential lever (minimal affordance). Name a strategic objective
+                (target OSID); the engine builds the op a commander would — auto-selecting the
+                force + axis. The president does NOT pick brigades/axes. Full map-target picker
+                is a FOLLOW-UP. */}
+            {ipc.isAvailable && (
+                <div className="flex items-center gap-2 mb-3 px-1">
+                    <input
+                        type="text"
+                        value={requestTargetOsid}
+                        onChange={(e) => setRequestTargetOsid(e.target.value)}
+                        placeholder="Objective OSID (e.g. bihac_1)"
+                        aria-label="Request operation objective OSID"
+                        className="flex-1 text-[11px] font-mono bg-panel-bg border border-panel-border/50 rounded px-2 py-1 text-text-primary"
+                    />
+                    <button
+                        type="button"
+                        onClick={handleRequestOp}
+                        disabled={!canRequestOp || requestTargetOsid.trim().length === 0}
+                        title={canRequestOp
+                            ? `Direct this corps to take the objective (cost ${REQUEST_OP_COST} command authority; current ${authCurrent}). The engine selects the force + axis.`
+                            : `Insufficient command authority (need ${REQUEST_OP_COST}, have ${authCurrent}).`}
+                        className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-panel-border/50 text-text-primary disabled:opacity-40 hover:bg-panel-bg">
+                        {`Request op (${REQUEST_OP_COST})`}
+                    </button>
+                </div>
+            )}
             {operations.length === 0 ? (
                 <EmptyState
                     message={t('operationsSection.empty')}

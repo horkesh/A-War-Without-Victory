@@ -116,6 +116,12 @@ const AUTHOR_OP_COST = 25;
 // officer's in-progress effort. MUST match src/ui/map/utils/commandAuthority.ts
 // (STOP_OP_COST = 25) and the stage-op-halt-order handler (op_halt.cjs).
 const STOP_OP_COST = 25;
+// REQUEST-OP presidential lever (Presidential Command Model slice 2/N) command-authority
+// cost: the president names a strategic OBJECTIVE (target OSID) for a corps and the engine
+// builds the operation a commander would (auto-selecting brigades + axis). Priced equal to
+// AUTHOR_OP_COST / STOP_OP_COST (25). MUST match src/ui/map/utils/commandAuthority.ts
+// (REQUEST_OP_COST = 25) and the stage-op-directive-order handler (op_directive_staging.cjs).
+const REQUEST_OP_COST = 25;
 const APPROVE_OP_PREFIX = 'APPROVE_OP:';
 
 function parseApproveOpAction(action) {
@@ -343,4 +349,5 @@ module.exports = {
   PROACTIVE_FORCE_LAUNCH_COST,
   AUTHOR_OP_COST,
   STOP_OP_COST,
+  REQUEST_OP_COST,
 };

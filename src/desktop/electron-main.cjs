@@ -25,6 +25,7 @@ const {
 } = require('./autonomy_ipc_contract.cjs');
 const { stageAuthoredOperation } = require('./author_op_staging.cjs');
 const { stageOpHalt } = require('./op_halt.cjs');
+const { stageOpDirective } = require('./op_directive_staging.cjs');
 const { computeCorpsCommandStrain } = require('./command_strain.cjs');
 const { stageConvoyDecisionOnState } = require('./convoy_ipc_contract.cjs');
 const { fileOfficerDecisionRecord } = require('./officer_decision_history.cjs');
@@ -1925,7 +1926,38 @@ app.whenReady().then(() => {
       const state = readCanonicalCurrentState(sim);
       const result = stageOpHalt(state, payload);
       if (!result.ok) return result;
-      writeCanonicalCurrentState(sim, state, _event && _event.sender);
+      // Codex P2 (#104): refresh the CLICKING renderer too. Excluding _event.sender
+      // left the renderer that issued the halt showing stale command-authority — the
+      // CA debit + pending_op_halt never reached it, so it would let the player click
+      // STOP-OP again (→ pending_op_halt_exists). Broadcast to ALL windows (no exclude)
+      // so the sender re-renders the debited CA and the now-staged halt immediately.
+      writeCanonicalCurrentState(sim, state);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  // REQUEST-OP presidential lever (Presidential Command Model slice 2/N): canon-safe
+  // directive staging. Mirrors stage-op-halt-order: ownership check → confirm the corps
+  // exists → reject duplicate directive → CA guard+debit (REQUEST_OP_COST) → STAGE
+  // cc.pending_op_directive { target_osid }. The engine `inject-op-directive` war-phase
+  // step consumes it once: auto-selects the force + builds a reachable axis/staging
+  // toward the target → injects a CorpsOperation tagged requested_by_president (or records
+  // op_directive_rejection if unbuildable). The president names ONLY the objective — the
+  // engine (commander) picks brigades + axis. No active_operations mutation here.
+  ipcMain.handle('stage-op-directive-order', async (_event, payload) => {
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = readCanonicalCurrentState(sim);
+      const result = stageOpDirective(state, payload);
+      if (!result.ok) return result;
+      // Refresh ALL windows incl. the clicking renderer (see Codex P2 above) so the
+      // sender re-renders the debited CA and the now-staged directive immediately.
+      writeCanonicalCurrentState(sim, state);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
