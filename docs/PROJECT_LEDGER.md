@@ -18058,3 +18058,19 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `docs/plans/2026-06-01-presidential-command-surface-design.md` (new), `docs/plans/MASTER_ROADMAP.md` + `docs/plans/COMMAND_BOARD.md` (lane), `docs/PROJECT_LEDGER.md` (this entry).
 
 ---
+
+## [2026-06-01] feat(command): player-initiated FRONT VISIT — gated by enclave reachability
+
+**Type:** New player-IPC-only presidential action (Presidential Command Surface design §10). **Byte-identical by construction** — desktop-only, never runs headless; touches NO sim/event/scenario/calibration code. tsc 64 (baseline, ZERO new); new `tests/front_visit_action.test.ts` 12/12 + packaging-contract 2/2 green.
+
+**The mechanic (zero new sim/event code):** a new IPC `initiate-front-visit` FORCE-QUEUES the already-authored `visit_to_front_<faction>` event (`war_1993.json`; morale +5 / cohesion +3 / patron_pressure −3 / standing shifts) into `state.military.pending_event_decisions` (mirror of `evaluate_events.ts:577`) so the existing `EventDecisionModal` surfaces it. The authored effects ARE the consequence-receipt — unchanged. Guards: player-faction → event resolution; **CA debit `FRONT_VISIT_COST=10`** (new const in `commandAuthority.ts` + mirrored in `autonomy_ipc_contract.cjs`); **cooldown/cap reuse the event's OWN recurrence** (`max_fires 5` / `cooldown 10t`) read from `state.military.event_fire_counts`/`event_last_fired_turn`. Because the modal-resolve path (`resolveEventDecision`) does NOT increment those counters, the handler records the fire at queue time (mirror of `evaluate_events.ts:194-202`) so the cap/cooldown actually engage.
+
+**⚠ ENCLAVE REACHABILITY GATE (owner constraint):** the president CANNOT visit a CUT-OFF enclave. Reuses the SUPPLY-CONNECTIVITY signal already persisted in state — `state.political.last_supply_state_by_osid` (per-OSID `adequate`/`strained`/`critical`, derived from the supply-reachability BFS-from-sources; `critical` === isolated/cut-off — `supply_reachability_osid.ts` + `supply_state_derivation.ts`). **No new BFS.** A front branch is reachable iff the player controls ≥1 in-area OSID NOT `critical`. Validated on a real save (RBiH): Srebrenica/Žepa/Goražde = `critical` → excluded; Sarajevo (Butmir corridor)/Tuzla/Bihać = `strained` → offered. Branches filtered before queuing; all-cut-off → action unavailable (`all_cut_off`). Sensitive-history `visit_press_*` sub-options untouched.
+
+**Branch→area map** (gated front branches only; `stay_*`/`press_*` ungated): RBiH `visit_sarajevo`→stari/centar/novi/novo-sarajevo, `visit_eastern_front`→tuzla, `visit_bihac`→bihac; RS `visit_posavina`→brcko/bos.samac/modrica, `visit_sarajevo_lines`→novo-sarajevo/ilidza/ilijas, `visit_drina_front`→vlasenica/bratunac/zvornik; HRHB `visit_mostar_front`→mostar/citluk, `visit_central_bosnia`→vitez/novi-travnik/busovaca, `visit_posavina_hrhb`→orasje/odzak.
+
+**UI:** `FrontVisitSection` in the Army-HQ Command & Personnel tab (`PersonnelContent`) — "Visit the Front" button showing morale stake + availability (fires-left / cooldown-remaining / cut-off fronts), disabled when exhausted/cut-off, fed by a read-only `get-front-visit-availability` IPC.
+
+**Files:** `src/desktop/front_visit_contract.cjs` (new — pure gate/build logic, in `build.files` + packaging-contract test), `electron-main.cjs` / `preload.cjs` / `autonomy_ipc_contract.cjs` (2 IPC handlers + cost mirror + event-def loader), `src/ui/map/utils/commandAuthority.ts` (`FRONT_VISIT_COST`), `useIPC.ts` (bindings), `FrontVisitSection.tsx` (new) + `PersonnelContent.tsx` (mount), `messages.en.ts` (i18n), `tests/front_visit_action.test.ts` (new), `docs/PROJECT_LEDGER.md` (this entry).
+
+---

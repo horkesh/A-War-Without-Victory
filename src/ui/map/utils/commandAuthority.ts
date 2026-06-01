@@ -56,4 +56,15 @@ export const ELITE_DEPLOY_COST = 25;
  * through proposeAutonomousArmyLaunch post-sacking, NOT from a faction-keyed cost.
  */
 export const REPLACE_CO_COST = 25;
+/**
+ * Cost of the FRONT-VISIT presidential leadership action (Presidential Command
+ * Surface design §10): the president visits the front as a morale/leadership
+ * gesture, force-queuing the authored `visit_to_front_<faction>` event. Priced
+ * LOWER than the override levers (10, matching the stabilize-command-relationship
+ * action) because it is a leadership gesture, not an officer override. MUST match
+ * autonomy_ipc_contract.cjs (FRONT_VISIT_COST = 10) and the initiate-front-visit
+ * IPC handler (electron-main.cjs). Cooldown/cap reuse the event's OWN recurrence
+ * (max_fires 5 / cooldown 10t), not a CA-side timer.
+ */
+export const FRONT_VISIT_COST = 10;
 export const COMMAND_AUTHORITY_RECOVERY_PER_TURN = 2;

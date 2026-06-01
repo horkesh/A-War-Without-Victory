@@ -8,6 +8,7 @@ import { formatPersonnel } from '../../utils/formatters';
 import { getRatingColor } from '../../utils/officerCharacter';
 import { t, useLocale } from '../../i18n';
 import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
+import { FrontVisitSection } from './FrontVisitSection';
 
 function OfficerQualityChip({ label, value }: { label: string; value: number }) {
     return (
@@ -67,6 +68,10 @@ export function PersonnelContent() {
 
     return (
         <div className="space-y-4">
+            {/* Presidential FRONT VISIT — leadership/morale action (Command Surface §10).
+                Self-gates to desktop (IPC) and to availability; renders null otherwise. */}
+            <FrontVisitSection />
+
             <div className="bg-panel-card border border-panel-border rounded-lg p-3">
                 <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
                     {t('personnel.forceOverview')}

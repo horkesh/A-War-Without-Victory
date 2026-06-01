@@ -245,6 +245,41 @@ interface WindowAwwv {
     acknowledgeFrictionEvent: (payload: { corpsId: string; officerId: string; eventTurn: number; eventType: string }) => Promise<{ ok: boolean; error?: string }>;
     /** Level 2: Resolve ALL unresolved friction events for a corps at once. Costs CA (10 if strained, 15 if compromised). 3-turn cooldown. */
     stabilizeCommandRelationship: (payload: { corpsId: string }) => Promise<{ ok: boolean; resolvedCount?: number; caCost?: number; error?: string }>;
+    /**
+     * Presidential FRONT VISIT (Command Surface §10) — read-only availability.
+     * Returns whether the player can initiate a front visit this turn, the
+     * reachability-filtered branch lists (enclave gate), cooldown/cap, and CA cost.
+     */
+    getFrontVisitAvailability: () => Promise<{
+        ok: boolean;
+        costCA?: number;
+        available?: boolean;
+        reason?: string | null;
+        eventId?: string | null;
+        currentTurn?: number;
+        firesLeft?: number;
+        maxFires?: number;
+        cooldownUntil?: number | null;
+        onCooldown?: boolean;
+        reachableBranchIds?: string[];
+        unreachableBranchIds?: string[];
+        error?: string;
+    }>;
+    /**
+     * Presidential FRONT VISIT (Command Surface §10) — initiate. Force-queues the
+     * authored visit_to_front_<faction> event (reachability-filtered branches) into
+     * pending_event_decisions so EventDecisionModal surfaces it. Costs CA (10).
+     * Refuses on cooldown/exhausted/all-cut-off/insufficient-CA via `reason`.
+     */
+    initiateFrontVisit: () => Promise<{
+        ok: boolean;
+        reason?: string;
+        eventId?: string;
+        caCost?: number;
+        offeredBranchIds?: string[];
+        unreachableBranchIds?: string[];
+        error?: string;
+    }>;
     // v0.8.4 Phase B+C: Autonomy bridge
     getAutonomyState: () => Promise<{ autonomy_level: number; autonomy_level_pending?: number; autonomy_overrides?: Record<string, unknown>; pending_proposal_reviews?: unknown[] }>;
     setAutonomyLevel: (level: number) => Promise<{ ok: boolean; error?: string }>;
@@ -562,6 +597,28 @@ export function useIPC() {
             stabilizeCommandRelationship: awwv
                 ? (payload: { corpsId: string }) => awwv.stabilizeCommandRelationship(payload)
                 : makeNoop<{ ok: boolean; resolvedCount?: number; caCost?: number; error?: string }>(),
+
+            getFrontVisitAvailability: awwv
+                ? () => awwv.getFrontVisitAvailability()
+                : makeNoop<{
+                    ok: boolean;
+                    costCA?: number;
+                    available?: boolean;
+                    reason?: string | null;
+                    eventId?: string | null;
+                    currentTurn?: number;
+                    firesLeft?: number;
+                    maxFires?: number;
+                    cooldownUntil?: number | null;
+                    onCooldown?: boolean;
+                    reachableBranchIds?: string[];
+                    unreachableBranchIds?: string[];
+                    error?: string;
+                }>(),
+
+            initiateFrontVisit: awwv
+                ? () => awwv.initiateFrontVisit()
+                : makeNoop<{ ok: boolean; reason?: string; eventId?: string; caCost?: number; offeredBranchIds?: string[]; unreachableBranchIds?: string[]; error?: string }>(),
 
             // v0.8.4 Phase B+C: Autonomy bridge
             getAutonomyState: awwv
