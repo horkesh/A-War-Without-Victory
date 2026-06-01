@@ -8,6 +8,13 @@
 - Golden-baseline manifest (`data/derived/scenario/baselines/manifest.json`) re-floored for `apr1992_52w` accordingly (`npm run test:baselines` green on main).
 - NOTE: the dated sections below (R15 → n2003 → R-series) are HISTORICAL — superseded by the above. Full R-series ↔ TG ↔ event-fix reconciliation is a separate cleanup lane; this header is the current pointer.
 
+## Free War Model — calibration is now the SIM-HEALTH check (2026-06-01)
+
+- The **Free War Model** shipped to `main` (HEAD `2b2a7218`). New field `state.meta.decision_mode: 'historical' | 'emergent'`. **The game is the emergent war; `decision_mode='historical'` is now the internal calibration health-check** — the objective "can the engine still reproduce the real 1992–95 war?" indicator. Calibration scenarios stay `historical`.
+- **All free-war work is emergent-gated**, so the baseline-of-record above is UNCHANGED and **40w/52w/188w stayed byte-identical throughout** the Free War Model phases (Phase 0 / 0.5 / 1 / 3 / 5 + distance-from-history read-model). No calibration numbers, hashes, anchors, or benchmarks moved. The 188w `a1a7c167f0b05411` / 40w `e086afbefcef01e6` baseline-of-record still stands.
+- Calibration discipline is unchanged: one change per run, historical-default path, byte-identity proof. The one OWNER-gated free-war follow-up that *would* touch calibration (systematic-Drina reward neutralization) is held precisely because it moves the baseline — do not pick it up under the autonomous calibration lane without owner sign-off.
+- Design doc: `docs/plans/2026-06-01-free-war-model-design.md`. Active lane: `docs/plans/COMMAND_BOARD.md` (P0 Free War Model).
+
 ## R15 baseline — 82.0% area-weighted (2026-05-25) [HISTORICAL — superseded]
 
 - **NEW 188w baseline: R15 hash `59560840d2b4d976`; area-weighted match 82.0% (42072/51337 km²); count match 83.8% (597/712).** +2.8pp area over R14a (79.2%).

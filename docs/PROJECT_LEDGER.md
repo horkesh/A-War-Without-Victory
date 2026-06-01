@@ -17960,3 +17960,27 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 - **Phase 0.5 (#92 `75decda6`):** Phase 0's freedom was *nominal* — 55/73 events carry `bot_response_logic:'historical'` → `pickBotResponseV1` hard-returns the default (no scoring); an emergent playtest changed ZERO decisions. Fix: in emergent mode route EVERY faction-attributed event through `pickPoliticalResponse` (`respondingFaction !== null && (emergent || POLITICAL_LOGICS.has(logic))`).
 - **Phase 3 (#90 `e5c31b59`):** the negative-sum SOUL lock. The game was a conquest scoreboard (verdict ~90% territory). New monotonic `war_cost_index` (exhaustion + casualties + duration) **caps** the verdict grade independent of territory — a long bloody war can never read as `strategic_success`. Conquest victory condition disarmed in emergent mode (`war_termination.ts`). Owner decision: **no conquest win** — the free war ends only via settlement/timeout/collapse. **Codex P1 (#91 `8682b476`):** `exhaustion_full` reference corrected 80→8000 (post-2026-05-22 0..10000 rescale was over-capping).
 - **Determinism:** all emergent scorers are `argmax` + `strictCompare` (no RNG, no LLM); historical mode byte-identical across all 5 PRs. **EMERGENT PLAYTEST VALIDATION (40w):** 6/13 bot decisions diverge from historical (Phase 0 alone: 0), all `bot_political`, stable, deterministic (hash `b9cfbef5` ×2), plausible + causal (RS picking `aggressive` over `all_six` strategic goals → `drina_cleansing_decision` never fires; RBiH resists patron pressure → patron_confidence 53→35). **Remaining phases (scoped, unbuilt):** Phase 1 emergent military priorities, Phase 4 author-new-op, Phase 5 ethics machinery, distance-from-history read-model.
+
+---
+
+## [2026-06-01] feat: Free War Model — phases 1/5 + distance-from-history (PR #93/#94/#95/#96)
+
+**Type:** Continuation of the Free War Model arc (follows #88–#92). All four PRs emergent-gated → **historical mode byte-identical; baseline-of-record unchanged.** main HEAD `2b2a7218`.
+
+**Change:**
+- **Phase 1 — emergent military priorities (#93 `379dd743`):** a territory-trend weight multiplier on `getCorpsArmyPriorities` (`bot_strategy.ts TERRITORY_TREND_MODULATOR`), emergent-gated; in emergent the effective (modulated) weight is propagated, historical returns the static weights. Slice A coefficients (K_LOSS=0.15/K_QUIET=0.20/clamp 0.80–1.60).
+- **Phase 5 — atrocity bright line as a TESTED invariant (#94 `5f98da42`):** emergent-gated war-crimes/refugees/civilian-casualty term added to `war_cost_index` (`negotiation/scoring.ts`) so cleansing is net-negative at the verdict — atrocity can never read as success. Enforced by test, not convention. **Codex P2 (#96 `2b2a7218`):** the atrocity term read the capital snapshot, which freezes pre-refresh on the terminal turn → last-turn atrocities evaded the penalty. Fixed to read `max(capital, fresh)` from `displacement.displacement_humanitarian_aggregates`.
+- **Distance-from-history read-model v1 (#95 `758f03b5`):** pure/display-only "Your War vs History" view (`ui/map/data/distanceFromHistory.ts`) — counts event decisions whose chosen `response_id` differs from the catalog `historical_default_response_id` (the hand-computed "6/13 diverge" made legible). Zero hash/calibration impact.
+
+**Verification:**
+- All four emergent-gated; historical 40w/52w/188w byte-identical (no baseline movement). tsc clean. #94 invariant covered by test; #96 fixes terminal-turn evasion.
+
+**Open / pending (not yet merged):**
+- **PR #98 — Phase 1 Slice A.2** (`free-war-phase1a2`, commit `97101060`): strengthens the modulator coefficients (K_LOSS=0.25/K_QUIET=0.25/clamp 0.70–2.50). Byte-identical historical; CI green. **52w emergent playtest verdict: STILL cosmetically inert** (1 op differs, 0 territorial delta, deterministic hash `027c76f03cd3acd6`). Root cause: the modulator only re-orders *within* a corps, and static weight gaps (e.g. Drina Sweep 130 vs Hold 30 = 4.3×) exceed the max boost/decay ratio (2.50/0.70 ≈ 3.5×). **Recommendation: roll forward to Slice A.3 (K_LOSS→0.45, HI→4.00, ratio ≈ 5.7×) before merge** — enough for a genuinely collapsing area to out-rank a quiet dominant objective, still gated on a real multi-OSID crisis (no single-loss noise-chasing).
+- **PR #97 — distance-from-history consequences.json fix** (`dist-history-consequences-fix`, Codex P2 on #95): `consequences.json` rows carry `historical_default_response_id` and are logged by id but were excluded from the catalog → undercount. Adds it to the bundled `files[]`. Display-only; CI green.
+
+**Files:**
+- `src/sim/combat/bot_strategy.ts` (#93/#98), `src/sim/negotiation/scoring.ts` (#94/#96), `src/ui/map/data/distanceFromHistory.ts` (#95/#97)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
