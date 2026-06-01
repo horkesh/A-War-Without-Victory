@@ -18074,3 +18074,21 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `src/desktop/front_visit_contract.cjs` (new — pure gate/build logic, in `build.files` + packaging-contract test), `electron-main.cjs` / `preload.cjs` / `autonomy_ipc_contract.cjs` (2 IPC handlers + cost mirror + event-def loader), `src/ui/map/utils/commandAuthority.ts` (`FRONT_VISIT_COST`), `useIPC.ts` (bindings), `FrontVisitSection.tsx` (new) + `PersonnelContent.tsx` (mount), `messages.en.ts` (i18n), `tests/front_visit_action.test.ts` (new), `docs/PROJECT_LEDGER.md` (this entry).
 
 ---
+
+## [2026-06-01] feat: presidential command-surface depth batch — force-op pushback (#108/#109), card strip (#111), patron dead-channel fix (#112)
+
+**Type:** Feature batch closing the two REMAINING-DEPTH pieces of the Presidential Command Model (force-op pushback + patron dead-channel) plus the warroom command-surface card strip. The front-visit action (#110) has its own entry above; this records the rest of the 2026-06-01 surface batch. **All player-only/UI-only or emergent-gated → historical 40w/52w/188w byte-identical** (the #112 patron block is wholly gated `decision_mode === 'emergent'`; baseline regression independently re-verified "all scenarios match"). main HEAD `1cd7eb74`.
+
+**Force-op pushback (#108 `553c9e04` + #109 `528aedf9`):** when the president forces an op OVER military objection, the commander's **disposition-tinted professional-judgment objection is shown BEFORE commit** (NOT a clean win-%), with an authored consequence shown AFTER — the Q2 mechanic from the LOCKED design. Reuses existing substrate (`usePrediction`, `army_directive_pushback`, officer disposition, override-tracking). #109 folded in two Codex P2 fixes: surface impossible directives BEFORE staging (slot-check), and `cowed`-vs-`rejectionReason` ordering + `issuable` gating so a blocked directive is presented as such rather than half-staged.
+
+**Command-surface card strip (#111 `3278444c`):** 6 image-category `CommandCard`s in the warroom (placeholder fallback until owner art lands at `src/ui/map/assets/command_cards/`). Combo warroom nav — desk objects deep-link the card strip: folio→War Direction, telephone→Diplomacy, coat-rack→Command, newspaper→Record; the **map object always opens the main tactical map**; the calendar advances the turn. Decision-Room category deep-link wired. UI-only.
+
+**Patron dead-channel fix (#112 `1cd7eb74`):** refusing a patron now ACTUALLY cuts material supply — the long-documented dead-channel (resist-patron previously only moved `patron_confidence`, never reaching the real supply meter) is closed. The penalty is folded into `updatePatronState` (reads effective `patron_confidence`; defiance severity HRHB 0.6 > RS 0.5 > RBiH 0), and the **whole block is gated `state.meta.decision_mode === 'emergent'`** → historical/calibration byte-identical by construction. RS's signature tragic lever (defy Belgrade → blockade) is now consequential in the free, emergent war.
+
+**Still open (UI integration, not levers):** the Decision-Room "cards ISSUE directives" integration (the card strip currently navigates; the directive-issuing host work is the command-surface build order); owner-generated card art; patron consequence-RECEIPT + the Patron Relations surface (DiplomacyPanel repurpose); deferred StrategicDashboard retirement. **#113 (remove dead direct-set stance/movement controls) is IN FLIGHT / OPEN** at this writing — the corps/sector-stance + brigade-movement handlers wrote top-level state keys the engine never read (no-ops); the live path is commander-proposes → president-approves (`AutonomyPanel` → `accept-proposal`). Byte-identical (player-only dead code); record as merged once it lands.
+
+**Verification:** #108/#109/#111 UI-only; #112 emergent-gated → all historical 40w/52w/188w byte-identical; #112 baseline regression independently re-verified "all scenarios match".
+
+**Files:** `docs/PROJECT_LEDGER.md` (this entry); see PRs #108/#109/#111/#112 for the per-PR source touch (player/UI/desktop + emergent-gated `updatePatronState`).
+
+---
