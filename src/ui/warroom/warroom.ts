@@ -24,7 +24,6 @@ interface DesktopBridge {
     getCurrentGameState?: () => Promise<string | null>;
     loadStateDialog?: () => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
     openTacticalMapWindow?: (payload?: { mode?: 'operational' | 'sandbox' }) => Promise<unknown>;
-    assignCommander?: (officerId: string, corpsId: string) => Promise<{ ok: boolean; error?: string }>;
     [key: string]: unknown;
 }
 

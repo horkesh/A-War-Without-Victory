@@ -26,6 +26,7 @@ const {
 const { stageAuthoredOperation } = require('./author_op_staging.cjs');
 const { stageOpHalt } = require('./op_halt.cjs');
 const { stageOpDirective } = require('./op_directive_staging.cjs');
+const { stageCoReplacement } = require('./co_replacement.cjs');
 const { computeCorpsCommandStrain } = require('./command_strain.cjs');
 const { stageConvoyDecisionOnState } = require('./convoy_ipc_contract.cjs');
 const { fileOfficerDecisionRecord } = require('./officer_decision_history.cjs');
@@ -1964,6 +1965,35 @@ app.whenReady().then(() => {
     }
   });
 
+  // REPLACE-CO presidential lever (Presidential Command Model slice 3/N): canon-safe
+  // CO-replacement staging. Mirrors stage-op-halt-order: ownership check → confirm the
+  // corps HAS a current named CO → pick/validate a reserve replacement (explicit
+  // replacementOfficerId or auto-pick) → reject duplicate → CA guard+debit
+  // (REPLACE_CO_COST) → STAGE cc.pending_co_replacement. The engine
+  // `apply-co-replacements` war-phase step consumes it once: reuses relieveOfficer
+  // (retire CO → install replacement → emit officer_relieved), applies the morale hit +
+  // an internal_cohesion cost, records the replacement, clears the field. No officer
+  // mutation here. RS officer-revolt asymmetry emerges downstream from the successor's
+  // roster stubbornness — not hardcoded.
+  ipcMain.handle('stage-co-replacement-order', async (_event, payload) => {
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = readCanonicalCurrentState(sim);
+      const result = stageCoReplacement(state, payload);
+      if (!result.ok) return result;
+      // Refresh ALL windows incl. the clicking renderer (see Codex P2 note on
+      // stage-op-halt-order) so the sender re-renders the debited CA + staged
+      // replacement immediately. NO excludeSender.
+      writeCanonicalCurrentState(sim, state);
+      return { ok: true, replacementOfficerId: result.replacementOfficerId };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   // Read-only prediction query for ops planning G-2 panel
   ipcMain.handle('query-operation-prediction', async (_event, payload) => {
     if (!currentGameStateJson) {
@@ -2403,71 +2433,15 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('assign-commander', async (_event, payload) => {
-    const { officerId, corpsId } = payload || {};
-    if (!currentGameStateJson || typeof officerId !== 'string' || typeof corpsId !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-
-      // 1. Validate officer exists
-      const officer = state.named_officers?.[officerId];
-      if (!officer) return { ok: false, error: `Officer ${officerId} not found` };
-
-      // 2. Clear previous assignments for this corps (if any)
-      for (const oid in state.named_officers) {
-        if (state.named_officers[oid].assigned_corps_id === corpsId) {
-          state.named_officers[oid].assigned_corps_id = null;
-          // If they were active only because they were leading this corps, maybe set back to reserve?
-          // For now, let's just clear the assignment.
-        }
-      }
-
-      // 3. Assign new officer to this corps
-      officer.assigned_corps_id = corpsId;
-      officer.status = 'active';
-      officer.acting_commander = false; // Manual assignment makes them the official commander
-      officer.penalty_turns_remaining = 2; // Standard "settling in" penalty for manual re-assignment
-
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
-  ipcMain.handle('dismiss-officer', async (_event, payload) => {
-    const { officerId } = payload || {};
-    if (!currentGameStateJson || typeof officerId !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-
-      const officer = state.named_officers?.[officerId];
-      if (!officer) return { ok: false, error: `Officer ${officerId} not found` };
-
-      // Cannot dismiss an officer currently commanding an operation
-      if (officer.assigned_operation) {
-        return { ok: false, error: `Officer is commanding an active operation — stand down the operation first` };
-      }
-
-      // Unassign from corps and move to reserve
-      officer.assigned_corps_id = null;
-      officer.status = 'reserve';
-      officer.acting_commander = false;
-
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
+  // NOTE: the legacy `assign-commander` and `dismiss-officer` IPC handlers were REMOVED
+  // (Presidential Command Model slice 3/N, 2026-06-01). Both read the stale
+  // `state.named_officers` path (canonical is `state.military.named_officers`) so they
+  // operated on `undefined` and silently no-op'd ("Officer not found"), and neither
+  // applied a command-authority cost. The player CO sack/install path is now the single
+  // costed `stage-co-replacement-order` handler above (→ co_replacement.cjs →
+  // apply-co-replacements). The engine-event-driven `accept-officer-replacement` handler
+  // (responding to a commander-initiated relief event) is a DISTINCT, still-live mechanism
+  // and is retained.
 
   ipcMain.handle('respond-to-event-decision', async (_event, payload) => {
     const { eventId, responseId } = payload || {};

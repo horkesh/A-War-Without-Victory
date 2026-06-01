@@ -45,4 +45,15 @@ export const REQUEST_OP_COST = 25;
  * in calibration/headless where command_authority is absent.
  */
 export const ELITE_DEPLOY_COST = 25;
+/**
+ * Cost of the REPLACE-CO presidential lever (Presidential Command Model slice 3/N):
+ * the president sacks a corps's commanding officer and installs a replacement,
+ * trading command authority for a cohesion/morale cost. Priced equal to the other
+ * override levers (25) — sacking a serving commander mid-war is a costly political
+ * act. MUST match autonomy_ipc_contract.cjs (REPLACE_CO_COST = 25) and the
+ * stage-co-replacement-order handler (co_replacement.cjs). The faction asymmetry
+ * (RS officer-corps revolt risk) emerges from officer-disposition DATA flowing
+ * through proposeAutonomousArmyLaunch post-sacking, NOT from a faction-keyed cost.
+ */
+export const REPLACE_CO_COST = 25;
 export const COMMAND_AUTHORITY_RECOVERY_PER_TURN = 2;

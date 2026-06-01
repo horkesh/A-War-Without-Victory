@@ -188,8 +188,10 @@ interface WindowAwwv {
      *  the engine auto-selects the force + axis and builds the op (requested_by_president). */
     stageOpDirectiveOrder: (payload: { corpsId: string; targetOsid: string }) => Promise<{ ok: boolean; error?: string }>;
     stageAssignOperationCommander: (payload: { corpsId: string; operationName: string; officerId: string }) => Promise<{ ok: boolean; error?: string }>;
-    assignCommander: (officerId: string, corpsId: string) => Promise<{ ok: boolean; error?: string }>;
-    dismissOfficer: (officerId: string) => Promise<{ ok: boolean; error?: string }>;
+    /** REPLACE-CO presidential lever: sack a corps's current CO and install a replacement
+     *  (explicit reserve officer or auto-pick) at REPLACE_CO_COST command authority +
+     *  a cohesion/morale cost. Supersedes the removed broken assignCommander/dismissOfficer. */
+    stageCoReplacementOrder: (payload: { corpsId: string; replacementOfficerId?: string }) => Promise<{ ok: boolean; error?: string; replacementOfficerId?: string }>;
     dismissEventNotification: (notificationId: string) => Promise<{ ok: boolean; error?: string }>;
     stageOperationForceLaunch: (payload: { corpsId: string; operationName: string }) => Promise<{ ok: boolean; error?: string }>;
     stageOperationDecision: (payload: { corpsId: string; operationName: string; decision: 'launch' | 'postpone' | 'abort' | 'probe' }) => Promise<{ ok: boolean; error?: string }>;
@@ -385,13 +387,11 @@ export function useIPC() {
                 ? (payload: { corpsId: string; operationName: string; officerId: string }) => awwv.stageAssignOperationCommander(payload)
                 : (_payload: { corpsId: string; operationName: string; officerId: string }) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
 
-            assignCommander: awwv
-                ? (officerId: string, corpsId: string) => awwv.assignCommander(officerId, corpsId)
-                : (_officerId: string, _corpsId: string) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
-
-            dismissOfficer: awwv
-                ? (officerId: string) => awwv.dismissOfficer(officerId)
-                : (_officerId: string) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
+            // REPLACE-CO presidential lever (Presidential Command Model slice 3/N) — routes
+            // the CO sack/install UX to the single costed stage-co-replacement-order path.
+            stageCoReplacementOrder: awwv
+                ? (payload: { corpsId: string; replacementOfficerId?: string }) => awwv.stageCoReplacementOrder(payload)
+                : (_payload: { corpsId: string; replacementOfficerId?: string }) => NOOP_RESULT as Promise<{ ok: boolean; error?: string; replacementOfficerId?: string }>,
 
             dismissEventNotification: awwv
                 ? (notificationId: string) => awwv.dismissEventNotification(notificationId)

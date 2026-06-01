@@ -94,8 +94,10 @@ contextBridge.exposeInMainWorld('awwv', {
   focusWarroom: () => ipcRenderer.invoke('focus-warroom'),
   getMapServerUrl: () => ipcRenderer.invoke('get-map-server-url'),
   stageAssignOperationCommander: (payload) => ipcRenderer.invoke('stage-assign-operation-commander', payload),
-  assignCommander: (officerId, corpsId) => ipcRenderer.invoke('assign-commander', { officerId, corpsId }),
-  dismissOfficer: (officerId) => ipcRenderer.invoke('dismiss-officer', { officerId }),
+  // REPLACE-CO presidential lever (Presidential Command Model slice 3/N): costed sack +
+  // install. Supersedes the removed broken assign-commander / dismiss-officer handlers
+  // (which read the stale state.named_officers path and applied no cost).
+  stageCoReplacementOrder: (payload) => ipcRenderer.invoke('stage-co-replacement-order', payload),
   dismissEventNotification: (notificationId) => ipcRenderer.invoke('dismiss-event-notification', { notificationId }),
   respondToEventDecision: (eventId, responseId) => ipcRenderer.invoke('respond-to-event-decision', { eventId, responseId }),
   approveReserveRequest: (requestId, brigadeId, reason) => ipcRenderer.invoke('approve-reserve-request', { requestId, brigadeId, reason }),

@@ -45,9 +45,15 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
         });
     }, [showPicker, corps.id, corps.faction, gameState.namedOfficerData]);
 
+    // REPLACE-CO presidential lever (Presidential Command Model slice 3/N): both the
+    // explicit picker and the dismiss button route to the single costed
+    // stage-co-replacement-order path (sack the serving CO + install a replacement at
+    // REPLACE_CO_COST + cohesion/morale cost). Supersedes the removed broken
+    // assignCommander/dismissOfficer handlers. Requires a current CO (the lever REPLACES
+    // a serving commander); a true vacancy-fill is a separate flow (noted FOLLOW-UP).
     const handleAssign = async (officerId: string) => {
-        if (!ipc.isAvailable) return;
-        const result = await ipc.assignCommander(officerId, corps.id);
+        if (!ipc.isAvailable || !commander) return;
+        const result = await ipc.stageCoReplacementOrder({ corpsId: corps.id, replacementOfficerId: officerId });
         if (!result.ok) {
             setLoadError(result.error ?? t('commanderSection.error.assign'));
         }
@@ -56,7 +62,8 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
 
     const handleDismiss = async () => {
         if (!ipc.isAvailable || !commander) return;
-        const result = await ipc.dismissOfficer(commander.id);
+        // Auto-pick the replacement (engine installs the best reserve officer).
+        const result = await ipc.stageCoReplacementOrder({ corpsId: corps.id });
         if (!result.ok) {
             setLoadError(result.error ?? t('commanderSection.error.dismiss'));
         }
