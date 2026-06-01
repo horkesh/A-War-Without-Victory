@@ -55,6 +55,123 @@ function gradeDimension(score: number): string {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// War-cost floor — the negative-sum keystone (Free War Phase 3, Part A)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// The verdict grade is, by its anchors, territory-dominated: a faction that
+// holds enough ground reads as A+/A no matter how long or bloody the war was.
+// That is a conquest scoreboard, and it betrays the negative-sum soul — the
+// Bosnian War was a tragedy *nobody won*. This floor makes a long, bloody war
+// structurally unable to read as `strategic_success` regardless of territory.
+//
+// It is POST-TERMINATION reflection: it READS already-accrued, monotonic cost
+// values (war exhaustion, cumulative casualties, war duration) and applies a
+// grade CAP. It never writes state, never touches accrual, and can only LOWER
+// a grade — never raise one. Determinism: pure arithmetic over persisted state.
+//
+// ── OWNER-TUNABLE GAME-DESIGN KNOBS ─────────────────────────────────────────
+// These thresholds are deliberate balance dials. Tune them; do not over-tune.
+// `war_cost_index` is a 0..1 scale built from three monotonic sub-scores that
+// each saturate at the reference ceiling below, then blended by COST_WEIGHTS.
+
+/** Reference ceilings: the value at which each sub-score saturates to 1.0. */
+const COST_REFERENCE = Object.freeze({
+    /** War exhaustion (0..100, monotonic per Engine Invariants §8) hitting this reads as max cost. */
+    exhaustion_full: 80,
+    /** Cumulative faction casualties (killed + wounded + missing/captured) at max cost. */
+    casualties_full: 40000,
+    /** War duration in weeks/turns at max cost (~3 years of grinding war). */
+    duration_full_weeks: 156,
+});
+
+/** Blend weights for the three monotonic sub-scores. Must sum to 1.0. */
+const COST_WEIGHTS = Object.freeze({
+    exhaustion: 0.4,
+    casualties: 0.4,
+    duration: 0.2,
+});
+
+/**
+ * Grade ceilings keyed by ascending war_cost_index threshold.
+ * Evaluated high-to-low; the first threshold the cost index meets or exceeds
+ * sets the BEST achievable grade. A higher-cost war can never read as a clean
+ * triumph. `max_grade` is the highest grade still permitted at that cost tier.
+ *
+ *   cost < 0.45  → no cap (clean, short, cheap wars keep their earned grade)
+ *   cost ≥ 0.45  → cannot exceed A   (a real war is never a flawless A+)
+ *   cost ≥ 0.60  → cannot exceed B   (costly_victory band — pyrrhic at best)
+ *   cost ≥ 0.78  → cannot exceed C   (hollow — won something at ruinous cost)
+ */
+const COST_GRADE_CAPS: Array<{ min_cost_index: number; max_grade: string }> = [
+    { min_cost_index: 0.78, max_grade: 'C' },
+    { min_cost_index: 0.60, max_grade: 'B' },
+    { min_cost_index: 0.45, max_grade: 'A' },
+];
+
+/** Letter grades ranked best→worst; index = severity (0 = best). */
+const GRADE_RANK: readonly string[] = ['A+', 'A', 'B', 'C', 'D', 'F'];
+
+function gradeRank(grade: string): number {
+    const idx = GRADE_RANK.indexOf(grade);
+    return idx === -1 ? GRADE_RANK.length - 1 : idx; // unknown grade treated as worst
+}
+
+function clamp01(value: number): number {
+    if (!Number.isFinite(value) || value <= 0) return 0;
+    return value >= 1 ? 1 : value;
+}
+
+/**
+ * Compute the monotonic war-cost index in [0, 1] for a faction.
+ *
+ * Reads only already-accrued, monotonic state:
+ *   - war exhaustion         (state.political.war_exhaustion[faction], §8 monotonic)
+ *   - cumulative casualties  (state.military.casualty_ledger[faction], monotonic)
+ *   - war duration in weeks  (state.meta.turn, monotonic)
+ *
+ * Each sub-score saturates at its COST_REFERENCE ceiling, then blends by
+ * COST_WEIGHTS. Higher = more catastrophic war. Pure & deterministic.
+ */
+export function computeWarCostIndex(state: GameState, faction: string): number {
+    const exhaustion = state.political?.war_exhaustion?.[faction] ?? 0;
+    const exhaustionScore = clamp01(exhaustion / COST_REFERENCE.exhaustion_full);
+
+    const ledger = state.military?.casualty_ledger?.[faction];
+    const casualties = ledger
+        ? (ledger.killed ?? 0) + (ledger.wounded ?? 0) + (ledger.missing_captured ?? 0)
+        : 0;
+    const casualtyScore = clamp01(casualties / COST_REFERENCE.casualties_full);
+
+    const weeks = state.meta?.turn ?? 0;
+    const durationScore = clamp01(weeks / COST_REFERENCE.duration_full_weeks);
+
+    const index =
+        exhaustionScore * COST_WEIGHTS.exhaustion +
+        casualtyScore * COST_WEIGHTS.casualties +
+        durationScore * COST_WEIGHTS.duration;
+
+    return clamp01(index);
+}
+
+/**
+ * Cap a faction's earned grade by its war-cost index. Can only LOWER the grade
+ * (toward F), never raise it. Returns the input grade unchanged when the cost
+ * index is below all cap thresholds.
+ */
+export function capGradeByCost(grade: string, costIndex: number): string {
+    let maxGrade: string | null = null;
+    for (const cap of COST_GRADE_CAPS) {
+        if (costIndex >= cap.min_cost_index) {
+            maxGrade = cap.max_grade;
+            break; // COST_GRADE_CAPS is ordered high→low; first hit is the tightest cap
+        }
+    }
+    if (maxGrade === null) return grade;
+    // Only lower: keep the worse (higher-rank-index) of earned vs cap.
+    return gradeRank(grade) >= gradeRank(maxGrade) ? grade : maxGrade;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Faction Grade Anchors — historical outcome-based grading
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -332,7 +449,17 @@ export function computeFactionVerdict(
     }
 
     const pyrrhicScore = computePyrrhicScore(capital, faction, dimStore);
-    const { grade, description } = computeFactionGrade(capital, faction, state);
+    const earned = computeFactionGrade(capital, faction, state);
+
+    // War-cost floor (Free War Phase 3, Part A): a long, bloody war can never
+    // read as a clean triumph. Post-termination reflection — reads accrued cost,
+    // caps the grade downward only. Territory alone can no longer buy A+.
+    const costIndex = computeWarCostIndex(state, faction);
+    const grade = capGradeByCost(earned.grade, costIndex);
+    const description = grade === earned.grade
+        ? earned.description
+        : `${earned.description} — capped by war cost (index ${costIndex.toFixed(2)})`;
+
     const dimensionGrades = computeDimensionGrades(capital, faction, dimStore);
 
     // Collect condemnation flags from rupture consequences (Ring 2)

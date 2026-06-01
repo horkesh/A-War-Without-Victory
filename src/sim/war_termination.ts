@@ -43,8 +43,20 @@ export function checkWarTermination(state: GameState): WarTerminationResult {
         };
     }
 
-    // 1. Scenario victory conditions
-    const victoryEval = evaluateVictoryConditions(state, state.meta.victory_conditions);
+    // 1. Scenario victory conditions.
+    //
+    // Free War Phase 3, Part B — DISARM THE CONQUEST WIN IN EMERGENT MODE.
+    // Owner decision (locked 2026-06-01): there is no winning the Bosnian War.
+    // The free, emergent war ends only via negotiated settlement / timeout /
+    // collapse — never "hold N settlements + stay fresh ⇒ victory." So in
+    // emergent mode we skip the min_controlled_settlements/max_exhaustion
+    // victory-condition check entirely (the "competence escape hatch" off).
+    // Historical/unset mode is unchanged; calibration baselines never set
+    // victory_conditions, so this is byte-identical for them either way.
+    const conquestWinDisarmed = state.meta.decision_mode === 'emergent';
+    const victoryEval = conquestWinDisarmed
+        ? null
+        : evaluateVictoryConditions(state, state.meta.victory_conditions);
     if (victoryEval && (victoryEval.result === 'winner' || victoryEval.result === 'co_winners')) {
         const winner = victoryEval.winner ?? victoryEval.co_winners[0] ?? null;
         const outcome = victoryEval.result === 'co_winners'
