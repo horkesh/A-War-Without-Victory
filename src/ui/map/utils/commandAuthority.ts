@@ -23,4 +23,16 @@ export const AUTHOR_OP_COST = 25;
  * and the stage-op-halt-order IPC handler (op_halt.cjs).
  */
 export const STOP_OP_COST = 25;
+/**
+ * Cost of the ELITE-DEPLOY presidential lever (Presidential Command Model):
+ * the president authorizes RELEASING an elite/special formation from the
+ * strategic reserve to a corps that requested it. Priced equal to a STOP-OP /
+ * proactive force-launch (25) because committing the strategic reserve is a
+ * high-stakes command-authority decision the president owns. MUST match
+ * autonomy_ipc_contract.cjs (ELITE_DEPLOY_COST = 25). The CA debit lives ONLY
+ * in the player IPC path (approveReserveRequest in desktop_sim.ts) — NEVER in
+ * deployEliteLoan / evaluateArmyReserveAssignments / tickEliteLoans, which run
+ * in calibration/headless where command_authority is absent.
+ */
+export const ELITE_DEPLOY_COST = 25;
 export const COMMAND_AUTHORITY_RECOVERY_PER_TURN = 2;

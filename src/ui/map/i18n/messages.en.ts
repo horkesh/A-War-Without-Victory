@@ -1723,6 +1723,8 @@ export const enMessages = {
     'armyReserve.corpsHow': 'Corps CO (HOW)',
     'armyReserve.approve': 'APPROVE',
     'armyReserve.decline': 'DECLINE',
+    'armyReserve.commandAuthorityCost': 'Command authority cost: {cost}',
+    'armyReserve.insufficientAuthority': 'Insufficient command authority',
     'armyReserve.campaignHistory': 'Campaign History',
     'armyReserve.loans': 'Loans',
     'armyReserve.weeks': 'Weeks',
