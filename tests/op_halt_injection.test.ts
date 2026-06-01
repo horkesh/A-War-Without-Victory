@@ -29,8 +29,10 @@ function makeState(opts: {
   ops?: any[];
   pendingHalt?: any;
   withCommander?: boolean;
+  withTgCommander?: boolean;
 } = {}): any {
   const commanderId = 'rbih_officer_1';
+  const tgCommanderId = 'rbih_officer_tg_1';
   const op = {
     id: 'op_live_1',
     name: 'Operation Live',
@@ -38,6 +40,7 @@ function makeState(opts: {
     phase: 'execution',
     participating_brigades: ['rbih_b1', 'rbih_b2'],
     ...(opts.withCommander !== false ? { commander_officer_id: commanderId } : {}),
+    ...(opts.withTgCommander === true ? { tg_commander_officer_id: tgCommanderId } : {}),
   };
   const ops = opts.ops ?? [op];
 
@@ -46,6 +49,9 @@ function makeState(opts: {
     military: {
       named_officers: {
         [commanderId]: { officer_id: commanderId, status: 'active', assigned_operation: 'op_live_1' },
+        ...(opts.withTgCommander === true
+          ? { [tgCommanderId]: { officer_id: tgCommanderId, status: 'active', assigned_operation: 'Operation Live' } }
+          : {}),
       },
       formations: {
         rbih_1st_corps: { id: 'rbih_1st_corps', faction: 'RBiH', kind: 'corps', status: 'active' },
@@ -86,6 +92,31 @@ describe('STOP-OP apply step (apply-op-halts)', () => {
     // Halt recorded.
     expect(cc.halted_op_record).toEqual([{ op_name: 'Operation Live', turn: 12 }]);
     // Staged field consumed.
+    expect(cc.pending_op_halt).toBeUndefined();
+  });
+
+  it('releases the TG tactical_commander too when halting a TG op (no dangling ref)', () => {
+    const state = makeState({
+      withTgCommander: true,
+      pendingHalt: { op_id: 'op_live_1', op_name: 'Operation Live', turn: 12, ca_cost: 25 },
+    });
+    const cc = state.military.corps_command.rbih_1st_corps;
+
+    runStep(state);
+
+    // Op removed.
+    expect(cc.active_operations).toHaveLength(0);
+    // Op commander released.
+    const officer = state.military.named_officers.rbih_officer_1;
+    expect(officer.status).toBe('reserve');
+    expect(officer.assigned_operation).toBeUndefined();
+    // TG tactical_commander ALSO released back to reserve — not left active/assigned to a
+    // removed op (the Codex P2 fix). Otherwise it is unavailable for future TG assignments.
+    const tgOfficer = state.military.named_officers.rbih_officer_tg_1;
+    expect(tgOfficer.status).toBe('reserve');
+    expect(tgOfficer.assigned_operation).toBeUndefined();
+    // Halt recorded, staged field consumed.
+    expect(cc.halted_op_record).toEqual([{ op_name: 'Operation Live', turn: 12 }]);
     expect(cc.pending_op_halt).toBeUndefined();
   });
 
