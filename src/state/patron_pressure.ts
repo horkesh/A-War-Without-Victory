@@ -1,6 +1,24 @@
 import type { FactionId, GameState, InternationalVisibilityPressure, PatronState, SarajevoState } from './game_state.js';
 import { clamp01 } from '../utils/math.js';
 import { getYearForTurn } from '../utils/time.js';
+import { getDimensionEffective } from '../sim/events/strategic_dimensions.js';
+
+/**
+ * Emergent-only severity of the patron-defiance supply penalty by faction.
+ * RS and HRHB have coercive patrons (Belgrade / Zagreb) that can throttle materiel;
+ * RBiH is under arms embargo with no single coercive state patron, so refusal cannot
+ * cost what was never supplied → severity 0 (RBiH path is also pinned-historical).
+ */
+function patronDefianceSeverity(factionId: FactionId): number {
+    switch (factionId) {
+        case 'HRHB':
+            return 0.6;
+        case 'RS':
+            return 0.5;
+        default:
+            return 0.0;
+    }
+}
 
 export const EXHAUSTION_DIPLOMATIC_MULTIPLIER = 0.1;
 export const NEGOTIATION_MOMENTUM_MULTIPLIER = 0.05;
@@ -271,6 +289,24 @@ export function updatePatronState(
         if (faction.id === 'RS' && hasConsequence(state.political.ivp_consequences_active, 'international_sanctions')) {
             materialSupport = clamp01(materialSupport * 0.8);
         }
+
+        // ── Patron-defiance supply penalty (emergent-only) ──────────────────────
+        // Refusing a patron demand (resist_patron) collapses patron_confidence (the
+        // strategic dimension). Historically this also throttled materiel: Belgrade's
+        // 1994 Drina embargo on the VRS, Zagreb's leverage over the HVO. We read the
+        // *effective* patron_confidence (0..100, 50=neutral) directly from the dimension
+        // store — no new persisted field, no save-migration. The penalty is HARD-GATED on
+        // decision_mode === 'emergent': in historical/unset (calibration) mode it never
+        // applies, so material_support_level stays byte-identical by construction (the 3
+        // live RS strategic-weighted patron events reach the scorer only outside emergent).
+        if (state.meta?.decision_mode === 'emergent') {
+            const store = state.military?.negotiation?.strategic_dimensions;
+            const conf = store ? getDimensionEffective(store, faction.id, 'patron_confidence') : 50;
+            const defiance = clamp01((50 - conf) / 50); // 0 at neutral → 1 as confidence collapses
+            const severity = patronDefianceSeverity(faction.id); // RBiH no coercive patron → 0
+            materialSupport = clamp01(materialSupport * (1 - defiance * severity));
+        }
+
         const constraintSeverity = clamp01(
             0.3 +
             momentum * 0.2 +
