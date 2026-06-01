@@ -13,6 +13,8 @@ export interface PresidentDeskShellProps {
   onOpenArmyHQ: () => void;
   onOpenMap: () => void;
   onOpenRecords: () => void;
+  /** Open the presidential command-surface card strip directly (accessibility). */
+  onOpenCommandSurface?: () => void;
 }
 
 function factionTitle(state: LoadedGameState | null): string {
@@ -30,6 +32,7 @@ export function PresidentDeskShell({
   onOpenArmyHQ,
   onOpenMap,
   onOpenRecords,
+  onOpenCommandSurface,
 }: PresidentDeskShellProps) {
   const items = deriveInboxItems(state, osidNameMap);
   const actionableCount = countActionableItems(items);
@@ -97,6 +100,17 @@ export function PresidentDeskShell({
             Records
           </button>
         </div>
+
+        {onOpenCommandSurface && (
+          <button
+            type="button"
+            onClick={onOpenCommandSurface}
+            data-testid="desk-open-command-surface"
+            className="mt-3 w-full border border-accent-gold/45 bg-accent-gold/12 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-accent-gold transition-colors hover:bg-accent-gold/20"
+          >
+            Command Surface
+          </button>
+        )}
 
         <div className="mt-4">
           <ConsequenceStrip state={state} onOpenRecords={onOpenRecords} />

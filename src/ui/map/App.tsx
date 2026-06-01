@@ -68,6 +68,8 @@ import { AudioCueObserver } from './components/AudioCueObserver';
 import { WarroomShellLayer } from './components/warroom/WarroomShellLayer';
 import { AdvanceTurnModal } from './components/warroom/AdvanceTurnModal';
 import { WarroomStatusBar } from './components/warroom/WarroomStatusBar';
+import { CommandCardStrip } from './components/warroom/CommandCardStrip';
+import { categoryForWarroomHotspot, type PresidentialCommandCategoryId } from './data/presidentialCategories';
 import { PresidentDeskShell } from './components/presidential_desk/PresidentDeskShell';
 import { RootErrorBoundary } from './components/RootErrorBoundary';
 import { derivePanelRailState, shouldRenderInboxPanel, shouldRenderTacticalDetailRails } from './components/panelRail';
@@ -363,6 +365,10 @@ function App() {
   });
 
   const [appScreen, setAppScreen] = useState<'game' | 'mainMenu' | 'warroom'>('game');
+  // Command-surface card strip: open state + the category to pre-highlight when
+  // opened from a warroom hotspot object. null highlight = direct Desk open.
+  const [commandStripOpen, setCommandStripOpen] = useState(false);
+  const [commandStripCategoryId, setCommandStripCategoryId] = useState<PresidentialCommandCategoryId | null>(null);
   const pauseOpen = useGameStore((s) => s.pauseMenuOpen);
   const setPauseOpen = (v: boolean) => useGameStore.setState({ pauseMenuOpen: v });
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -865,6 +871,26 @@ function App() {
     setEventLogOpen(false);
   };
 
+  // Command-surface card strip handlers. Opening a category requests the
+  // Decision Room lens (done inside the strip) then routes into the Army HQ
+  // briefing where the Decision Room renders, pre-filtered to that lens.
+  const openCommandStrip = (categoryId: PresidentialCommandCategoryId | null) => {
+    setCommandStripCategoryId(categoryId);
+    setCommandStripOpen(true);
+  };
+  const closeCommandStrip = () => {
+    setCommandStripOpen(false);
+    setCommandStripCategoryId(null);
+  };
+  const openCommandCategory = () => {
+    setCommandStripOpen(false);
+    setCommandStripCategoryId(null);
+    openArmyHQTab(useGameStore.getState(), 'briefing');
+    setAppScreen('game');
+    setSummaryOpen(false);
+    setEventLogOpen(false);
+  };
+
   const openReservePanelFromDesk = () => {
     const hqId = playerFaction === 'RS'
       ? 'vrs_main_staff'
@@ -1325,6 +1351,7 @@ function App() {
               setSidePickerOpen(true);
               setSidePickerDismissed(false);
             }}
+            onOpenCommandCategory={(categoryId) => openCommandStrip(categoryId)}
             onNavigate={(command) => {
               if (isWarroomLocalCommand(command)) {
                 if (command.kind === 'strategic-overview') {
@@ -1361,7 +1388,15 @@ function App() {
               openArmyHQRecordsSubTab(useGameStore.getState(), 'aftermath');
               setAppScreen('game');
             }}
+            onOpenCommandSurface={() => openCommandStrip(null)}
           />
+          {commandStripOpen && (
+            <CommandCardStrip
+              initialCategoryId={commandStripCategoryId}
+              onOpenCategory={openCommandCategory}
+              onClose={closeCommandStrip}
+            />
+          )}
           <WarroomStatusBar
             onReviewPriorities={reviewPreAdvancePriorities}
             onReviewItem={reviewPreAdvanceItem}

@@ -1,4 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import {
+  consumeRequestedDecisionRoomLens,
+  getDecisionRoomLensRequestSnapshot,
+  subscribeDecisionRoomLensRequest,
+} from '../../utils/decisionRoomLensRequest';
 import {
   buildPresidentialDecisionRoomView,
   type PresidentialDecisionRoomCard,
@@ -359,6 +364,23 @@ export function PresidentialDecisionRoomPanel() {
   const [activeLens, setActiveLens] = useState<ActiveDecisionRoomLens>('all');
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Command-surface deep-link: the card strip pushes a requested lens here; we
+  // consume it (one-shot) and pre-filter the Decision Room to that category.
+  // The lens bar lives in the advanced desk, so we reveal it for non-`all` lenses.
+  const lensRequest = useSyncExternalStore(
+    subscribeDecisionRoomLensRequest,
+    getDecisionRoomLensRequestSnapshot,
+    getDecisionRoomLensRequestSnapshot,
+  );
+  useEffect(() => {
+    if (lensRequest === null) return;
+    const requested = consumeRequestedDecisionRoomLens();
+    if (requested === null) return;
+    setActiveLens(requested);
+    setActiveCardId(null);
+    if (requested !== 'all') setShowAdvanced(true);
+  }, [lensRequest]);
 
   const view = useMemo(
     () => buildPresidentialDecisionRoomView({ state, osidNameMap, selectedCardId: activeCardId }),
