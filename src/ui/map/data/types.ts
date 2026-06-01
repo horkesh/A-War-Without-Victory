@@ -1350,6 +1350,13 @@ export interface LoadedGameState {
      * function of already-projected state (see dilemmaSpine.ts). Always present
      * (full not-yet-faced spine on flag-off / empty saves); never hashed state. */
     dilemmaSpine?: import('./dilemmaSpine.js').DilemmaSpineView[];
+    /**
+     * Distance-from-history read-model v1 — how far the player's emergent war
+     * has drifted from the historical 1992-95, measured as event-decision
+     * divergence (chosen response vs each event's historical_default_response_id).
+     * Pure function of already-projected state (see distanceFromHistory.ts).
+     * Display-only / zero-hash; absent on flag-off / pre-substrate saves. */
+    distanceFromHistory?: import('./distanceFromHistory.js').DistanceFromHistoryView;
     /** True when any event has readiness >= 50 (approaching threshold). */
     pressureWarning: boolean;
 
