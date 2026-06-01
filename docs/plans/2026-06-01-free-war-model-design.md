@@ -8,6 +8,16 @@
 
 ---
 
+## Owner decisions (locked 2026-06-01)
+
+1. **There is ONE game — the free, emergent war.** No player-facing mode toggle. The player always fights a free war where both sides make real choices.
+2. **"Historical" is NOT a player mode — it is an internal calibration test.** `decision_mode` survives only as dev/test plumbing: the calibration *scenarios* pin a historical-lock so CI can keep verifying "fed the real 1992–95 choices, does the engine still reproduce the real 1992–95 outcome?"
+3. **Keep calibration — it is the health indicator of the simulation.** The historical-reproduction regression (40w/52w/188w byte-identical under historical-lock) stays as the objective check that the engine remains realistic as we make it free. It does not constrain the free game (the lock forces the historical default and bypasses scoring) and players never see it.
+4. **Start with Phase 0 (the keystone):** add the `decision_mode` plumbing, activate the emergent scorer for the game, and prove the historical-locked path still reproduces the baselines byte-identical — i.e. prove we made the AI free without breaking the engine's grip on reality.
+5. **Mode exposure (global vs per-faction) is moot** — there is no player-facing mode. `decision_mode` defaults to `historical` for migration safety (existing saves/baselines unchanged); new campaigns explicitly set `emergent`; calibration scenarios explicitly declare `historical`.
+
+---
+
 ## 0. The reframe — determinism is not the railroad
 
 Two things had been conflated:
