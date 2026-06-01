@@ -10,6 +10,30 @@ import { buildPlayerSupplyVisibility } from './playerSupplyVisibility';
 import { buildPlayerArmyCoPushbackVisibility } from './playerArmyCoPushbackVisibility';
 import { t, type MessageKey } from '../i18n';
 import { getDecisionSurface } from './decisionSurfaceRegistry';
+import { STOP_OP_COST } from '../utils/commandAuthority';
+
+/**
+ * War-Direction directive the president can ISSUE from a Decision Room card
+ * (Presidential Command Surface design §2 / LOCKED decision #1). ADDITIVE,
+ * optional — flag-off / old saves leave `directive` undefined and the card
+ * simply navigates as before. Populated ONLY where the source card already
+ * carries the needed corps/op/proposal context (request-op → target OSID +
+ * corpsId; authorize-op → proposalId; stop-op → opName + corpsId; force-launch
+ * → opName + corpsId). The DirectiveCard component lifts the proven
+ * OperationsSection act-flow (objection → force-anyway) for request/force, and
+ * calls the no-objection IPC directly for stop/authorize. `cost` is read from
+ * the canonical commandAuthority constants (authorize-op = 0: agreeing with the
+ * officer is free).
+ */
+export interface PresidentialDecisionRoomDirective {
+  lever: 'request_op' | 'stop_op' | 'force_launch' | 'authorize_op';
+  /** Corps the directive acts on (request/stop/force). Absent for authorize-op. */
+  corpsId?: string;
+  /** Command Authority cost (authorize-op = 0). */
+  cost: number;
+  /** Lever-specific payload forwarded verbatim to the IPC. */
+  payload: Record<string, unknown>;
+}
 
 export type PresidentialDecisionRoomCategory =
   | 'decision'
@@ -44,6 +68,8 @@ export interface PresidentialDecisionRoomCard {
   actionLabel: string;
   evidence: string[];
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
+  /** Optional War-Direction directive this card can ISSUE inline (additive). */
+  directive?: PresidentialDecisionRoomDirective;
   sortKey: number;
 }
 
@@ -137,6 +163,8 @@ export interface PresidentialDecisionRoomDossier {
   actionLabel: string;
   evidence: string[];
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
+  /** Optional War-Direction directive the dossier can ISSUE inline (additive). */
+  directive?: PresidentialDecisionRoomDirective;
   sourceHandoff: PresidentialDecisionRoomSourceHandoff | null;
   relatedCardIds: string[];
   advanceSensitive: boolean;
@@ -163,9 +191,10 @@ export interface PresidentialDecisionRoomInput {
   selectedCardId?: string | null;
 }
 
-type CandidateCard = Omit<PresidentialDecisionRoomCard, 'sortKey'> & {
+type CandidateCard = Omit<PresidentialDecisionRoomCard, 'sortKey' | 'directive'> & {
   urgencySort: number;
   sourceSort: string;
+  directive?: PresidentialDecisionRoomDirective;
 };
 
 type ManifestModalFamilyId = 'peace_plan' | 'dayton_negotiation' | 'convoy_decision';
@@ -460,6 +489,16 @@ function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): vo
       optional,
     ].filter((entry): entry is string => Boolean(entry));
 
+    // AUTHORIZE-OP directive: when the officer's proposal carries an enabled
+    // `approve` action, the card can ISSUE acceptance inline (acceptProposal).
+    // Cost 0 — agreeing with the officer's own recommendation is free.
+    const canApprove = opportunity.available_actions.some(
+      (action) => action.id === 'approve' && action.enabled,
+    );
+    const directive: PresidentialDecisionRoomDirective | undefined = canApprove
+      ? { lever: 'authorize_op', cost: 0, payload: { proposalId: opportunity.proposal_id } }
+      : undefined;
+
     cards.push({
       id: `opportunity:${opportunity.proposal_id}`,
       category: 'opportunity',
@@ -473,6 +512,7 @@ function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): vo
       actionLabel: t('decisionRoom.action.reviewDossier'),
       evidence,
       navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+      ...(directive ? { directive } : {}),
       urgencySort: expires,
       sourceSort: opportunity.proposal_id,
     });
@@ -574,6 +614,25 @@ function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void 
 
   for (const item of items.slice(0, 4)) {
     const action = actionForBriefingItem(item);
+    // STOP-OP directive: a briefing item targeting a live operation carries the
+    // (corpsId, opName) pair as `operationKey` ("corpsId|opName"). The president
+    // can HALT it inline (stageOpHaltOrder). Only populate when BOTH parts parse.
+    const directive: PresidentialDecisionRoomDirective | undefined = (() => {
+      if (item.target.type !== 'operation') return undefined;
+      const key = item.target.operationKey;
+      if (!key) return undefined;
+      const sep = key.indexOf('|');
+      if (sep <= 0 || sep >= key.length - 1) return undefined;
+      const corpsId = key.slice(0, sep);
+      const opName = key.slice(sep + 1);
+      return {
+        lever: 'stop_op',
+        corpsId,
+        cost: STOP_OP_COST,
+        payload: { corpsId, opName },
+      };
+    })();
+
     cards.push({
       id: `briefing:${item.id}`,
       category: 'briefing',
@@ -585,6 +644,7 @@ function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void 
       actionLabel: action.actionLabel,
       evidence: [item.category ? humanize(item.category) : humanize(item.kind)],
       navigationTarget: action.navigationTarget,
+      ...(directive ? { directive } : {}),
       urgencySort: 0,
       sourceSort: `${item.title}:${item.id}`,
     });
@@ -704,6 +764,7 @@ function finalizeCards(cards: CandidateCard[]): PresidentialDecisionRoomCard[] {
       actionLabel: card.actionLabel,
       evidence: card.evidence,
       navigationTarget: card.navigationTarget,
+      ...(card.directive ? { directive: card.directive } : {}),
       sortKey: index,
     }));
 }
@@ -1211,6 +1272,7 @@ function buildActiveDossier(
     actionLabel: card.actionLabel,
     evidence: card.evidence,
     navigationTarget: card.navigationTarget,
+    ...(card.directive ? { directive: card.directive } : {}),
     sourceHandoff,
     relatedCardIds,
     advanceSensitive,

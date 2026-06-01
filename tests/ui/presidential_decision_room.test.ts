@@ -820,6 +820,118 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(fallbackView.activeDossier?.cardId).toBe(defaultView.cards[0]?.id);
   });
 
+  it('populates an authorize-op directive (cost 0) on an opportunity card with an enabled approve action', () => {
+    const state = makeState({
+      operationOpportunityProposals: [
+        makeOpportunity({
+          proposal_id: 'opp_authorize',
+          display_name: 'Authorize Window',
+          expires_turn: 30,
+          available_actions: [{ id: 'approve', label: 'Authorize', enabled: true }],
+        }),
+        makeOpportunity({
+          proposal_id: 'opp_no_action',
+          display_name: 'No Action Window',
+          expires_turn: 30,
+          available_actions: [{ id: 'approve', label: 'Authorize', enabled: false }],
+        }),
+      ],
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const authorizeCard = view.cards.find((card) => card.id === 'opportunity:opp_authorize');
+    const noActionCard = view.cards.find((card) => card.id === 'opportunity:opp_no_action');
+
+    expect(authorizeCard?.directive).toEqual({
+      lever: 'authorize_op',
+      cost: 0,
+      payload: { proposalId: 'opp_authorize' },
+    });
+    // A disabled approve action carries no directive (additive — undefined).
+    expect(noActionCard?.directive).toBeUndefined();
+  });
+
+  it('populates a stop-op directive (cost 25) on a briefing card targeting a live operation', () => {
+    const state = makeState({
+      commandBriefing: {
+        headline: 'Operation friction.',
+        criticalCount: 1,
+        pendingCount: 1,
+        items: [
+          {
+            id: 'op_halt',
+            kind: 'military',
+            severity: 'warning',
+            title: 'Operation stalling at the line',
+            detail: 'The push has lost momentum.',
+            target: { type: 'operation', operationKey: 'arbih_3rd_corps|operation_breakthrough' },
+          },
+          {
+            id: 'plain_summary',
+            kind: 'military',
+            severity: 'info',
+            title: 'Theater overview',
+            detail: 'General situation report.',
+            target: { type: 'summary' },
+          },
+        ],
+      },
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const opCard = view.cards.find((card) => card.id === 'briefing:op_halt');
+    const summaryCard = view.cards.find((card) => card.id === 'briefing:plain_summary');
+
+    expect(opCard?.directive).toEqual({
+      lever: 'stop_op',
+      corpsId: 'arbih_3rd_corps',
+      cost: 25,
+      payload: { corpsId: 'arbih_3rd_corps', opName: 'operation_breakthrough' },
+    });
+    // A non-operation briefing card carries no directive.
+    expect(summaryCard?.directive).toBeUndefined();
+  });
+
+  it('propagates a directive through buildActiveDossier for the selected card', () => {
+    const state = makeState({
+      operationOpportunityProposals: [
+        makeOpportunity({
+          proposal_id: 'opp_authorize',
+          display_name: 'Authorize Window',
+          expires_turn: 30,
+          available_actions: [{ id: 'approve', label: 'Authorize', enabled: true }],
+        }),
+      ],
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state, selectedCardId: 'opportunity:opp_authorize' });
+
+    expect(view.activeDossier?.cardId).toBe('opportunity:opp_authorize');
+    expect(view.activeDossier?.directive).toEqual({
+      lever: 'authorize_op',
+      cost: 0,
+      payload: { proposalId: 'opp_authorize' },
+    });
+  });
+
+  it('leaves directive undefined on cards without lever context (additive / flag-off safe)', () => {
+    const state = makeState({
+      presidentialReviewQueue: {
+        pendingCount: 1,
+        criticalCount: 0,
+        eventDecisionCount: 0,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 0,
+      },
+      operationalSitrep: makeSitrep(),
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    expect(view.cards.find((card) => card.id === 'review:pending')?.directive).toBeUndefined();
+    expect(view.cards.find((card) => card.id === 'sitrep:front-exposed')?.directive).toBeUndefined();
+  });
+
   it('returns a safe empty state when no player faction is loaded', () => {
     const view = buildPresidentialDecisionRoomView({
       state: makeState({
