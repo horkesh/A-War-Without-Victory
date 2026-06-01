@@ -76,8 +76,10 @@ function gradeDimension(score: number): string {
 
 /** Reference ceilings: the value at which each sub-score saturates to 1.0. */
 const COST_REFERENCE = Object.freeze({
-    /** War exhaustion (0..100, monotonic per Engine Invariants §8) hitting this reads as max cost. */
-    exhaustion_full: 80,
+    /** War exhaustion at max cost. Post-2026-05-22 rescale, war_exhaustion runs on a 0..10000
+     *  scale (100x; saturation cap 10000, combat tempo thresholds 3000/8000) — see
+     *  src/sim/combat/exhaustion.ts. 8000 = the "high exhaustion" tempo threshold (formerly 80). */
+    exhaustion_full: 8000,
     /** Cumulative faction casualties (killed + wounded + missing/captured) at max cost. */
     casualties_full: 40000,
     /** War duration in weeks/turns at max cost (~3 years of grinding war). */

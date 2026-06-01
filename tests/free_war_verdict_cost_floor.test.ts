@@ -86,21 +86,21 @@ describe('computeWarCostIndex', () => {
     it('is high for a long, bloody, exhausted war', () => {
         const state = makeVerdictState(
             { RS: { territory_controlled_pct: 58 } },
-            { turn: 156, exhaustion: { RS: 80 }, casualties: { RS: { killed: 30000, wounded: 15000 } } },
+            { turn: 156, exhaustion: { RS: 8000 }, casualties: { RS: { killed: 30000, wounded: 15000 } } },
         );
         expect(computeWarCostIndex(state, 'RS')).toBeCloseTo(1, 5);
     });
 
     it('is monotonic — more cost never lowers the index', () => {
-        const low = makeVerdictState({ RS: {} }, { turn: 20, exhaustion: { RS: 10 } });
-        const high = makeVerdictState({ RS: {} }, { turn: 80, exhaustion: { RS: 50 }, casualties: { RS: { killed: 5000 } } });
+        const low = makeVerdictState({ RS: {} }, { turn: 20, exhaustion: { RS: 1000 } });
+        const high = makeVerdictState({ RS: {} }, { turn: 80, exhaustion: { RS: 5000 }, casualties: { RS: { killed: 5000 } } });
         expect(computeWarCostIndex(high, 'RS')).toBeGreaterThan(computeWarCostIndex(low, 'RS'));
     });
 
     it('is deterministic', () => {
         const state = makeVerdictState(
             { RS: {} },
-            { turn: 100, exhaustion: { RS: 40 }, casualties: { RS: { killed: 8000, wounded: 4000 } } },
+            { turn: 100, exhaustion: { RS: 4000 }, casualties: { RS: { killed: 8000, wounded: 4000 } } },
         );
         expect(computeWarCostIndex(state, 'RS')).toBe(computeWarCostIndex(state, 'RS'));
     });
@@ -144,7 +144,7 @@ describe('verdict cost-floor — high territory + HIGH cost is capped', () => {
     it('RS holding A+ territory but in a long bloody war is NOT strategic_success', () => {
         const state = makeVerdictState(
             { RS: { territory_controlled_pct: 58, war_crimes_events: 1 } },
-            { turn: 156, exhaustion: { RS: 80 }, casualties: { RS: { killed: 30000, wounded: 15000 } } },
+            { turn: 156, exhaustion: { RS: 8000 }, casualties: { RS: { killed: 30000, wounded: 15000 } } },
         );
         const verdict = computeFactionVerdict(state, 'RS');
         expect(verdict.grade).not.toBe('A+');
@@ -154,7 +154,7 @@ describe('verdict cost-floor — high territory + HIGH cost is capped', () => {
     it('the cap is reflected in the grade description', () => {
         const state = makeVerdictState(
             { RS: { territory_controlled_pct: 58, war_crimes_events: 1 } },
-            { turn: 156, exhaustion: { RS: 80 }, casualties: { RS: { killed: 30000, wounded: 15000 } } },
+            { turn: 156, exhaustion: { RS: 8000 }, casualties: { RS: { killed: 30000, wounded: 15000 } } },
         );
         const verdict = computeFactionVerdict(state, 'RS');
         expect(verdict.grade_description).toContain('war cost');
@@ -167,7 +167,7 @@ describe('verdict cost-floor — high territory + LOW cost keeps the high grade'
     it('RS holding A+ territory in a short, cheap war stays A+ / strategic_success', () => {
         const state = makeVerdictState(
             { RS: { territory_controlled_pct: 58, war_crimes_events: 1 } },
-            { turn: 8, exhaustion: { RS: 5 }, casualties: { RS: { killed: 200 } } },
+            { turn: 8, exhaustion: { RS: 500 }, casualties: { RS: { killed: 200 } } },
         );
         const verdict = computeFactionVerdict(state, 'RS');
         expect(verdict.grade).toBe('A+');
