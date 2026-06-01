@@ -207,6 +207,49 @@ describe('Free War — ethics bright line: atrocity never yields a better end-st
         expect(verdict.outcome_class).not.toBe('strategic_success');
     });
 
+    it('terminal-turn: atrocity harm in the FRESH displacement source is counted even when capital is STALE', () => {
+        // Codex P2: on a run that TERMINATES inside warPhaseNegotiationSteps, the
+        // verdict snapshot is frozen in check-victory-conditions BEFORE the later
+        // compute-negotiation-capital step copies displacement aggregates onto
+        // negotiation.capital. So a faction can append displacement/civilian harm
+        // EARLIER in the terminal turn that the stale capital snapshot omits.
+        //
+        // Build exactly that: capital shows refugees_created=0 / civilian=0 (stale
+        // freeze), but the FRESH displacement aggregates record the cleansing.
+        // war_crimes_events stays on capital (recordWarCrime increments it in place,
+        // so it is already fresh). The atrocity penalty MUST still apply.
+        const state = makeVerdictState(
+            {
+                RS: {
+                    territory_controlled_pct: 58, // the territory cleansing bought
+                    war_crimes_events: 3,         // fresh on capital (in-place increment)
+                    refugees_created: 0,          // STALE — capital frozen pre-refresh
+                    civilian_casualties_caused: 0, // STALE — capital frozen pre-refresh
+                },
+            },
+            SHARED_COST,
+        );
+        // Inject the FRESH displacement aggregates the terminal-turn freeze missed.
+        (state as unknown as { displacement: { displacement_humanitarian_aggregates: Record<string, Record<string, { refugees_created: number; refugees_received: number; civilian_casualties_caused: number }>> } }).displacement.displacement_humanitarian_aggregates = {
+            RS: {
+                // split across two ethnicity buckets to exercise the summation
+                RBiH: { refugees_created: 30000, refugees_received: 0, civilian_casualties_caused: 3000 },
+                HRHB: { refugees_created: 20000, refugees_received: 0, civilian_casualties_caused: 2000 },
+            },
+        };
+
+        const terminal = computeFactionVerdict(state, 'RS');
+        // Same cleansing magnitude as cleansingState() but sourced from displacement.
+        const cleansing = computeFactionVerdict(cleansingState(), 'RS');
+        const restrained = computeFactionVerdict(restrainedState(), 'RS');
+
+        // The bright line holds despite the stale capital: terminal grade is capped
+        // strictly worse than restraint, and matches the capital-fresh cleansing grade.
+        expect(gradeRank(terminal.grade)).toBeGreaterThan(gradeRank(restrained.grade));
+        expect(terminal.grade).toBe(cleansing.grade);
+        expect(terminal.outcome_class).not.toBe('strategic_success');
+    });
+
     it('emergent gating: the SAME cleansing end-state in HISTORICAL mode is NOT atrocity-capped', () => {
         // Proves the term is emergent-gated. In historical mode the atrocity
         // fields do not raise the cost index, so the cleansing state keeps its
