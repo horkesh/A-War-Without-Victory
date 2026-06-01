@@ -548,20 +548,25 @@ describe('strict null inventory progress', () => {
         //     authored_by_player = +1 sim.
         // So 489 → 501 / state 163 → 172 / sim 318 → 321. All OPTIONAL → absent in
         // old saves and all headless scenarios → byte-identical baseline by construction.
+        // STOP-OP presidential lever (Presidential Command Model slice 1/N) added +2
+        // optional GameState fields on CorpsCommandState (classifyDomain → `sim` via
+        // /Corps/): pending_op_halt, halted_op_record. So 501 → 503 / sim 321 → 323.
+        // Both OPTIONAL → absent in old saves and all headless scenarios → byte-identical
+        // baseline by construction (apply-op-halts early-outs when none staged).
         expect(current.counts).toMatchObject({
             as_factionid_casts: 1,
             as_unknown_casts: 3,
             as_any_casts: 0,
             non_null_assertions_dot: 7,
             non_null_assertions_index: 0,
-            optional_fields_game_state: 501,
+            optional_fields_game_state: 503,
         });
-        expect(current.optional_field_domains.total).toBe(501);
+        expect(current.optional_field_domains.total).toBe(503);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 8,
             ipc: 0,
             scenario: 0,
-            sim: 321,
+            sim: 323,
             state: 172,
             ui_adapter: 0,
             unknown: 0,

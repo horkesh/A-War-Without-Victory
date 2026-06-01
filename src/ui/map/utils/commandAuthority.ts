@@ -14,4 +14,13 @@ export const PROACTIVE_FORCE_LAUNCH_COST = 25;
  * because both override the officer's silence rather than a surfaced no-go.
  */
 export const AUTHOR_OP_COST = 25;
+/**
+ * Cost of the STOP-OP presidential lever (Presidential Command Model slice 1/N):
+ * the president HALTS a live operation, trading the military opportunity for
+ * command authority. Priced equal to a proactive force-launch (25) because the
+ * president is overriding the officer's in-progress effort rather than approving
+ * or declining a proposal. MUST match autonomy_ipc_contract.cjs (STOP_OP_COST = 25)
+ * and the stage-op-halt-order IPC handler (op_halt.cjs).
+ */
+export const STOP_OP_COST = 25;
 export const COMMAND_AUTHORITY_RECOVERY_PER_TURN = 2;

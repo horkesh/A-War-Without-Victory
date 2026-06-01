@@ -110,6 +110,12 @@ const PROACTIVE_FORCE_LAUNCH_COST = 25;
 // Author-new-op (Free War Phase 4, #67) command-authority cost. MUST match
 // src/ui/map/utils/commandAuthority.ts (AUTHOR_OP_COST = 25).
 const AUTHOR_OP_COST = 25;
+// STOP-OP presidential lever (Presidential Command Model slice 1/N) command-authority
+// cost: halting a LIVE operation trades the military opportunity for command authority.
+// Priced equal to a proactive force-launch (25) — the president is overriding the
+// officer's in-progress effort. MUST match src/ui/map/utils/commandAuthority.ts
+// (STOP_OP_COST = 25) and the stage-op-halt-order handler (op_halt.cjs).
+const STOP_OP_COST = 25;
 const APPROVE_OP_PREFIX = 'APPROVE_OP:';
 
 function parseApproveOpAction(action) {
@@ -336,4 +342,5 @@ module.exports = {
   FORCE_LAUNCH_COST,
   PROACTIVE_FORCE_LAUNCH_COST,
   AUTHOR_OP_COST,
+  STOP_OP_COST,
 };

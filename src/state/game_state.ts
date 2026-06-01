@@ -738,6 +738,23 @@ export interface CorpsCommandState {
      * launch). Overwritten each injection attempt; never blocks. Optional — absent in
      * headless scenarios. */
     authored_op_rejection?: { op_name: string; reason: string; turn: number };
+    /**
+     * STOP-OP presidential lever (Presidential Command Model slice 1/N). The
+     * president halts a LIVE operation, trading the military opportunity for
+     * command authority. Staged by the desktop IPC handler (stage-op-halt-order →
+     * op_halt.cjs) and consumed ONCE by the `apply-op-halts` war-phase step, which
+     * finds the matching live op in active_operations, releases its commander,
+     * removes it via the canonical clean-removal path, appends halted_op_record, and
+     * ALWAYS clears this field. OPTIONAL — absent in old saves and all headless
+     * scenarios, so the apply step early-outs and stays byte-identical when no corps
+     * has one. The political-consequence dimension (patron_confidence gain etc.) is a
+     * deliberate FOLLOW-UP, not this slice. */
+    pending_op_halt?: { op_id?: string; op_name?: string; turn: number; ca_cost: number };
+    /**
+     * Append-only log of operations the president has halted via STOP-OP (one entry
+     * per applied halt). Surfaced to the UI and consumed by the (follow-up) political
+     * consequence wiring. Optional — absent in headless scenarios. */
+    halted_op_record?: { op_name: string; turn: number }[];
 }
 
 /** Operational group activation order. */
