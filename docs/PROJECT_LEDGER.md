@@ -17984,3 +17984,24 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 - `docs/PROJECT_LEDGER.md` (this entry)
 
 ---
+
+## [2026-06-01] decision: emergent BOT military divergence parked — lean on politics + player ops (PR #97/#99 merged, #98 closed)
+
+**Type:** Direction decision + closeout of the Free War Phase 1 (emergent military) lane. No engine change merged from this investigation; documents WHY and the chosen path.
+
+**Outcome:**
+- **#97 (dist-history `consequences.json` fix) MERGED** + **#99 (verdict displays FRESH atrocity facts, Codex P2 on #96) MERGED** — both emergent-gated, historical byte-identical. #99 fixed `scoring.ts` `computeFactionVerdict` to display `freshenBreakdownForDisplay(max(capital,fresh))` so the shown breakdown matches the fresh-derived grade.
+- **#98 (Phase 1 emergent military) CLOSED, not merged.**
+
+**The Phase 1 finding (3 validated 52w attempts, all macro-inert).** Goal: make the emergent AI fight a *different* war from history. Three attempts, each validated via a resume-controlled 52w harness (turn-0 save → inject `decision_mode` → `resumeFromSavePath`; compare emergent-resume vs historical-resume):
+- **Slice A.2** (K_LOSS 0.25/HI 2.50) and **A.3** (0.45/4.00): coefficient escalation. Both produced the **identical** emergent hash `027c76f03cd3acd6`, 0 territorial delta. The `TERRITORY_TREND_MODULATOR` only re-orders priorities *within* a corps.
+- **Slice B** (`79111bf3`): wired the effective `p.weight` into `applyMissionCompliance`'s garrison budget (emergent-only +1/+2 brigade bonus). **Historical byte-identical `54365af1a19f1eb7`; emergent STILL `027c76f0`, 0 delta.** Root cause: `applyMissionCompliance` redistributes *defensive garrison among already-held sectors* — it cannot flip OSIDs.
+- **Lesson:** the macro war is decided by the **offensive op-launch path** (`army_hq_overrides`), gated/starved by `MIN_IDLE_TURNS_FOR_OVERRIDE=6` + skip-if-active-op — not by priority/garrison plumbing.
+
+**Direction decision (owner, 2026-06-01): lean on politics + player ops.** Bot military stays **historical-faithful** (it is deeply calibrated to reproduce the real war; making bots diverge militarily risks calibration + thrash for uncertain payoff). The free war's divergence comes from (a) the **political/event layer** (already 6/13 emergent decisions diverge) and (b) the **player's own operations**. Next: resume the greenlit **Phase 4 author-new-op** (#67). The offensive-op-launch lever is documented and available if pursued later; the Slice A.3+B branch is retained as a correct-but-dormant foundation.
+
+**Verification:** historical 40w/52w byte-identical throughout (`54365af1a19f1eb7` 52w-resume); emergent determinism stable (`027c76f0` ×n). No calibration movement.
+
+**Files:** `src/sim/combat/commander_override.ts` + `corps_front_sectors.ts` (Slice B, on closed branch only — NOT on main); `docs/PROJECT_LEDGER.md` (this entry).
+
+---
