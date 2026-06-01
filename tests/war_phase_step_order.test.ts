@@ -158,6 +158,10 @@ describe('war-phase step ordering', () => {
         // +1 from inject-army-hq-operations (ADR-0005 v3.0 Army HQ ops, flag-gated ENABLE_TG_ARMY_HQ_OPS, 2026-05-29)
         // +1 from promote-og-to-division (ADR-0006 ARBiH OG→Division promotion, flag-gated ENABLE_TG_OG_PROMOTION, 26ac5ada, 2026-05-29).
         //        Step is unconditionally present in the pipeline; the handler early-returns when the flag is off.
-        expect(stepNames.length).toBe(180);
+        // +1 from inject-authored-operations (Free War Phase 4 author-new-op, #67, 2026-06-01).
+        //        Adjacent to inject-queued-operations; DETERMINISM EARLY-OUT — performs ZERO
+        //        state mutation when no corps has a pending_authored_op (never set in headless
+        //        scenarios), so the step is byte-identical-inert on all baselines.
+        expect(stepNames.length).toBe(181);
     });
 });

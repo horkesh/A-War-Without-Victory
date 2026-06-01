@@ -93,6 +93,15 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
 
     const isLowIntel = prediction && prediction.overall.intelConfidence < 0.4;
 
+    // Free War Phase 4, #67 (Slice 2): gate the Authorize button on the canonical
+    // eligibility read-model. Disabled unless the op is valid (no blocking errors),
+    // affordable (CA >= AUTHOR_OP_COST), and a free operation slot exists. When the
+    // eligibility read-model is unavailable (no rawState), do not block — the engine
+    // remains the final validator (it rejects + clears on injection).
+    const authorizeBlocked = eligibility
+        ? !(eligibility.ok && eligibility.affordable && eligibility.has_available_slot)
+        : false;
+
     const submitOperation = async (overrides?: Partial<CorpsOperationOrderPayload>) => {
         setIsStamped(true);
         await new Promise((r) => setTimeout(r, 1500));
@@ -307,7 +316,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                             <button
                                 type="button"
                                 onClick={handleAuthorize}
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || authorizeBlocked}
                                 className="px-4 py-3 rounded-lg bg-[rgba(40,36,30,0.6)] text-text-secondary font-bold text-xs
                                            uppercase tracking-wider hover:bg-[rgba(60,54,44,0.7)] transition-colors
                                            border border-[rgba(180,160,130,0.1)] disabled:opacity-50"
@@ -319,7 +328,8 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                         <button
                             type="button"
                             onClick={handleAuthorize}
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || authorizeBlocked}
+                            title={authorizeBlocked ? t('opsPlanning.authorize.eligibility.unaffordableTitle') : undefined}
                             className="px-8 py-3 rounded-lg bg-[#2d6a4f]/20 text-[#4a9a55] font-bold text-sm
                                        uppercase tracking-wider hover:bg-[#2d6a4f]/30 transition-colors
                                        border border-[#2d6a4f]/30 disabled:opacity-50"
