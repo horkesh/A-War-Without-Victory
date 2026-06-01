@@ -2910,7 +2910,7 @@ function buildFactionSectors(
         for (const cid of uniqueCorps) {
             const profile = commanderProfiles.get(cid);
             if (!profile) continue;
-            const priorities = getCorpsArmyPriorities(faction, cid, state.meta.turn);
+            const priorities = getCorpsArmyPriorities(faction, cid, state.meta.turn, state);
             // Build op participants set — never reassign brigades mid-operation
             const opParticipants = new Set<string>();
             const cmd = state.military.corps_command?.[cid];
