@@ -560,20 +560,25 @@ describe('strict null inventory progress', () => {
         // So 503 → 506 / sim 323 → 326. All OPTIONAL → absent in old saves and all headless
         // scenarios → byte-identical baseline by construction (inject-op-directive early-outs
         // when none staged).
+        // REPLACE-CO presidential lever (Presidential Command Model slice 3/N) added +2
+        // optional GameState fields on CorpsCommandState (classifyDomain → `sim` via
+        // /Corps/): pending_co_replacement, co_replacement_record. So 506 → 508 / sim 326 → 328.
+        // Both OPTIONAL → absent in old saves and all headless scenarios → byte-identical
+        // baseline by construction (apply-co-replacements early-outs when none staged).
         expect(current.counts).toMatchObject({
             as_factionid_casts: 1,
             as_unknown_casts: 3,
             as_any_casts: 0,
             non_null_assertions_dot: 7,
             non_null_assertions_index: 0,
-            optional_fields_game_state: 506,
+            optional_fields_game_state: 508,
         });
-        expect(current.optional_field_domains.total).toBe(506);
+        expect(current.optional_field_domains.total).toBe(508);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 8,
             ipc: 0,
             scenario: 0,
-            sim: 326,
+            sim: 328,
             state: 172,
             ui_adapter: 0,
             unknown: 0,

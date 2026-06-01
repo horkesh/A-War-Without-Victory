@@ -42,16 +42,24 @@ describe('war-phase step ordering', () => {
         assertBefore('inject-queued-operations', 'inject-army-hq-operations');
         assertBefore('inject-army-hq-operations', 'check-triggered-operations');
 
-        // REQUEST-OP presidential lever: player directives inject right after author-op
-        // injection (one ordering neighbourhood) and BEFORE the commander loop so the
-        // engine-built directed op is live the same turn.
-        assertBefore('inject-authored-operations', 'inject-op-directive');
+        // STOP-OP presidential lever: player halts apply right after author-op injection
+        // (one ordering neighbourhood). #106 step-order fix: apply-op-halts runs BEFORE
+        // inject-op-directive so a same-turn STOP-OP frees brigades/slot the REQUEST-OP
+        // directive can then reuse. Halts also apply before attacks resolve.
+        assertBefore('inject-authored-operations', 'apply-op-halts');
+        assertBefore('apply-op-halts', 'inject-op-directive');
+        assertBefore('apply-op-halts', 'resolve-attack-orders');
+
+        // REQUEST-OP presidential lever: player directives inject AFTER apply-op-halts
+        // (#106) and BEFORE the commander loop so the engine-built directed op is live the
+        // same turn.
         assertBefore('inject-op-directive', 'ai-corps-decisions');
 
-        // STOP-OP presidential lever: player halts apply right after directive injection
-        // and before attacks resolve, so the halted op's brigades free up the same turn.
-        assertBefore('inject-op-directive', 'apply-op-halts');
-        assertBefore('apply-op-halts', 'resolve-attack-orders');
+        // REPLACE-CO presidential lever: CO replacements apply in the same player-lever
+        // neighbourhood, after the op-injection steps and BEFORE the commander loop so the
+        // new CO is in command the same turn.
+        assertBefore('inject-op-directive', 'apply-co-replacements');
+        assertBefore('apply-co-replacements', 'ai-corps-decisions');
 
         // Live operation rosters must be reconciled before sector offensives advance
         assertBefore('jna-phantom-withdrawals', 'reconcile-live-operation-truth');
@@ -178,9 +186,14 @@ describe('war-phase step ordering', () => {
         //        state mutation when no corps has a pending_op_halt (never set in headless
         //        scenarios), so the step is byte-identical-inert on all baselines.
         // +1 from inject-op-directive (REQUEST-OP presidential lever, Presidential Command Model 2/N, 2026-06-01).
-        //        Between inject-authored-operations and apply-op-halts; DETERMINISM EARLY-OUT —
+        //        After apply-op-halts (#106 step-order fix); DETERMINISM EARLY-OUT —
         //        performs ZERO state mutation when no corps has a pending_op_directive (never set
         //        in headless scenarios), so the step is byte-identical-inert on all baselines.
-        expect(stepNames.length).toBe(183);
+        // +1 from apply-co-replacements (REPLACE-CO presidential lever, Presidential Command Model 3/N, 2026-06-01).
+        //        In the player-lever neighbourhood, after inject-op-directive and before the
+        //        commander loop; DETERMINISM EARLY-OUT — performs ZERO state mutation when no
+        //        corps has a pending_co_replacement (never set in headless scenarios), so the
+        //        step is byte-identical-inert on all baselines.
+        expect(stepNames.length).toBe(184);
     });
 });

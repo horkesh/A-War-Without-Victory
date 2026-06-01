@@ -780,6 +780,24 @@ export interface CorpsCommandState {
      * no reachable friendly staging, too few available brigades). Surfaced to the UI;
      * overwritten each attempt; never blocks. Optional — absent in headless scenarios. */
     op_directive_rejection?: { target_osid: string; reason: string; turn: number };
+    /**
+     * REPLACE-CO presidential lever (Presidential Command Model slice 3/N). The
+     * president sacks this corps's current commanding officer and installs a
+     * replacement (an explicit reserve officer or an auto-picked successor), trading
+     * command authority for a cohesion/morale cost. Staged by the desktop IPC handler
+     * (stage-co-replacement-order → co_replacement.cjs) and consumed ONCE by the
+     * `apply-co-replacements` war-phase step, which reuses relieveOfficer (retires the
+     * current CO, installs the reserve/acting replacement for RELIEF_ACTING_DURATION,
+     * emits officer_relieved), applies the returned morale hit, writes a
+     * co_replacement_record, and ALWAYS clears this field. OPTIONAL — absent in old
+     * saves and all headless scenarios, so the apply step early-outs and stays
+     * byte-identical when no corps has one. */
+    pending_co_replacement?: { replacement_officer_id?: string; turn: number; ca_cost: number };
+    /**
+     * Append-only log of corps-CO replacements the president has ordered via REPLACE-CO
+     * (one entry per applied replacement). Surfaced to the UI and consumed by any
+     * follow-up consequence wiring. Optional — absent in headless scenarios. */
+    co_replacement_record?: { relieved_officer_id: string; replacement_officer_id: string | null; turn: number }[];
 }
 
 /** Operational group activation order. */

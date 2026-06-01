@@ -129,6 +129,13 @@ const REQUEST_OP_COST = 25;
 // ONLY in approveReserveRequest (player IPC path) — NEVER in deployEliteLoan or the
 // headless/calibration reserve auto-deploy path.
 const ELITE_DEPLOY_COST = 25;
+// REPLACE-CO presidential lever (Presidential Command Model slice 3/N) command-authority
+// cost: sacking a corps's commanding officer and installing a replacement trades command
+// authority for a cohesion/morale cost. Priced equal to the other override levers (25).
+// MUST match src/ui/map/utils/commandAuthority.ts (REPLACE_CO_COST = 25) and the
+// stage-co-replacement-order handler (co_replacement.cjs). RS officer-revolt asymmetry
+// emerges from officer-disposition DATA, NOT from a faction-keyed cost.
+const REPLACE_CO_COST = 25;
 const APPROVE_OP_PREFIX = 'APPROVE_OP:';
 
 function parseApproveOpAction(action) {
@@ -358,4 +365,5 @@ module.exports = {
   STOP_OP_COST,
   REQUEST_OP_COST,
   ELITE_DEPLOY_COST,
+  REPLACE_CO_COST,
 };

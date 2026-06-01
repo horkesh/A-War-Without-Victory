@@ -36,7 +36,9 @@ import { backfillFormationLocationOsid, computeOsidPopulation, loadOperationalCe
 import { loadSettlementEthnicityData } from '../../data/settlement_ethnicity.js';
 import { buildSidToMunFromSettlements, buildOsidToMunFromReverseMap } from '../../scenario/oob_early_war_entry.js';
 import { updateCapabilityProfiles } from '../../state/capability_progression.js';
-import { computeDimensionBaseValues } from '../events/strategic_dimensions.js';
+import { computeDimensionBaseValues, applyDimensionShift } from '../events/strategic_dimensions.js';
+import { relieveOfficer } from '../combat/order_interpretation.js';
+import { clamp } from '../../utils/math.js';
 import { updateDisplacement } from '../../state/displacement.js';
 import { processDisplacementTakeover } from '../../state/displacement_takeover.js';
 import { getDoctrineTempoMultiplier, updateDoctrineState } from '../../state/doctrine.js';
@@ -446,6 +448,109 @@ function applyOpHalts(state: GameState): void {
             if (Array.isArray(cmd.halted_op_record)) cmd.halted_op_record.push(record);
             else cmd.halted_op_record = [record];
         }
+    }
+}
+
+/**
+ * Cohesion cost of a presidential CO sacking, applied to the faction's
+ * internal_cohesion dimension via applyDimensionShift (a persistent event_modifier
+ * delta that SURVIVES the per-turn compute-dimension-bases recompute — that step only
+ * rewrites base_value, never event_modifier). Sacking a serving commander mid-war
+ * rattles the chain of command; the cost is observable across turns. */
+const CO_REPLACEMENT_COHESION_COST = -4;
+
+/**
+ * Apply player REPLACE-CO orders staged on cc.pending_co_replacement (Presidential
+ * Command Model slice 3/N). Single owner of the apply-co-replacements step.
+ *
+ * DETERMINISM EARLY-OUT: returns with ZERO mutation when no corps has a
+ * pending_co_replacement. pending_co_replacement is OPTIONAL and never set in
+ * headless/historical runs → byte-identical baselines by construction.
+ *
+ * Per corps (sorted strictCompare), for each staged replacement:
+ *  1. Find the corps's CURRENT named CO (active + assigned). If none, clear and skip
+ *     (the staging guard already required one, but the engine is defensive).
+ *  2. REUSE relieveOfficer(state, currentCoId, corpsId): retires the CO, installs the
+ *     reserve/acting replacement for RELIEF_ACTING_DURATION, emits officer_relieved,
+ *     returns { morale_hit, replacement_officer_id }.
+ *  3. Apply the returned morale hit to the corps's active brigades (relieveOfficer
+ *     documents this as the caller's job — TODO in order_interpretation.ts).
+ *  4. Apply the internal_cohesion cost via applyDimensionShift (persistent, observable).
+ *  5. Append a co_replacement_record (relieved + replacement + turn).
+ *  6. ALWAYS clear cc.pending_co_replacement (consumed-once).
+ *
+ * Faction asymmetry (RS officer-corps revolt risk) is NOT hardcoded here: it emerges
+ * downstream from the successor's roster `stubbornness` flowing through
+ * proposeAutonomousArmyLaunch — this step only installs the successor.
+ */
+function applyCoReplacements(state: GameState): void {
+    const corpsCommand = state.military.corps_command;
+    if (!corpsCommand) return;
+
+    // DETERMINISM GATE — early-out with zero mutation if nothing is staged.
+    const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
+    if (!corpsIds.some((id) => corpsCommand[id]?.pending_co_replacement)) return;
+
+    const turn = state.meta?.turn ?? 0;
+    const officers = state.military.named_officers;
+    const dims = state.military.negotiation?.strategic_dimensions;
+    const formations = state.military.formations ?? {};
+
+    for (const corpsId of corpsIds) {
+        const cmd = corpsCommand[corpsId];
+        const staged = cmd?.pending_co_replacement;
+        if (!cmd || !staged) continue;
+
+        // Consumed-once: clear the staged field regardless of outcome.
+        cmd.pending_co_replacement = undefined;
+
+        // Resolve the CURRENT CO (active + assigned to this corps). Defensive: skip if
+        // none (e.g. the CO was relieved by another path between staging and apply).
+        let currentCoId: string | null = null;
+        let coFaction: FactionId | null = null;
+        if (officers) {
+            for (const id of Object.keys(officers).sort(strictCompare)) {
+                const os = officers[id];
+                if (os && os.status === 'active' && os.assigned_corps_id === corpsId) {
+                    currentCoId = id;
+                    break;
+                }
+            }
+        }
+        if (!currentCoId) continue;
+
+        const coData = state.military.named_officer_data?.find((o) => o.id === currentCoId);
+        coFaction = coData ? coData.faction : (formations[corpsId]?.faction ?? null);
+
+        // REUSE the orphan relief helper: retires the CO, installs the staged/auto
+        // replacement, emits officer_relieved, returns the morale hit.
+        const relief = relieveOfficer(state, currentCoId, corpsId);
+
+        // Apply the returned morale hit to this corps's active brigades (relieveOfficer
+        // documents this as the caller's responsibility). getCorpsSubordinates returns the
+        // active brigades whose corps_id is this corps (sorted, deterministic).
+        if (relief.morale_hit !== 0) {
+            for (const brigade of getCorpsSubordinates(state, corpsId)) {
+                if (typeof brigade.morale === 'number') {
+                    brigade.morale = clamp(brigade.morale + relief.morale_hit, 0, 100);
+                }
+            }
+        }
+
+        // Cohesion cost — persistent internal_cohesion event_modifier (observable across
+        // turns; the compute-dimension-bases recompute preserves event_modifier).
+        if (dims && coFaction) {
+            applyDimensionShift(dims, coFaction, 'internal_cohesion', CO_REPLACEMENT_COHESION_COST);
+        }
+
+        // Append the replacement record for the UI / follow-up consequence.
+        const record = {
+            relieved_officer_id: relief.relieved_officer_id,
+            replacement_officer_id: relief.replacement_officer_id,
+            turn,
+        };
+        if (Array.isArray(cmd.co_replacement_record)) cmd.co_replacement_record.push(record);
+        else cmd.co_replacement_record = [record];
     }
 }
 
@@ -1401,14 +1506,44 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        // STOP-OP presidential lever (Presidential Command Model slice 1/N): apply any
+        // player halts staged by the desktop IPC handler (electron-main.cjs
+        // stage-op-halt-order → op_halt.cjs) on cc.pending_op_halt. Placed immediately
+        // after inject-authored-operations so all player operation-management lives in
+        // one ordering neighbourhood, and BEFORE the AAR/combat steps so the halted op
+        // takes effect cleanly this turn (its brigades free up before execution).
+        //
+        // ORDERING (#106 step-order fix): apply-op-halts runs BEFORE inject-op-directive
+        // so a STOP-OP + REQUEST-OP staged on the SAME corps in one turn works — the halt
+        // frees the live op's brigades/slot FIRST, then the directive can reuse them.
+        // Previously inject-op-directive ran first and rejected the directive because the
+        // still-live halted op's brigades/slot read as occupied. Both steps are player-only
+        // early-out steps (pending_op_halt / pending_op_directive never set in headless),
+        // so this reorder is byte-identical by construction.
+        //
+        // DETERMINISM GATE: if no corps has a pending_op_halt, this step performs ZERO
+        // state mutation (early-out below). pending_op_halt is OPTIONAL and is never set
+        // in headless/historical scenarios → byte-identical by construction.
+        //
+        // MECHANICAL ONLY: release commander → remove op via the canonical clean-removal
+        // path → append halted_op_record → clear. No dimension/consequence effects
+        // (patron_confidence etc.) — that is a deliberate FOLLOW-UP, not this slice.
+        name: 'apply-op-halts',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            applyOpHalts(context.state);
+        }
+    },
+    {
         // REQUEST-OP presidential lever (Presidential Command Model slice 2/N): consume
         // player directives staged by the desktop IPC handler (electron-main.cjs
         // stage-op-directive-order → op_directive_staging.cjs) on cc.pending_op_directive.
         // The president names ONLY a target OSID; this step builds the op a commander
         // would — auto-selecting the force + a reachable axis/staging toward the target.
-        // Placed immediately after inject-authored-operations so all player operation
-        // injection lives in one ordering neighbourhood, and BEFORE the commander loop
-        // (ai-corps-decisions) so the directed op is live this same turn.
+        // Placed immediately after apply-op-halts so all player operation injection lives
+        // in one ordering neighbourhood, and BEFORE the commander loop (ai-corps-decisions)
+        // so the directed op is live this same turn. Runs AFTER apply-op-halts (#106) so a
+        // same-turn STOP-OP frees brigades/slot the directive can reuse.
         //
         // DETERMINISM GATE: if no corps has a pending_op_directive, this step performs
         // ZERO state mutation (early-out below). pending_op_directive is OPTIONAL and is
@@ -1425,24 +1560,25 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        // STOP-OP presidential lever (Presidential Command Model slice 1/N): apply any
-        // player halts staged by the desktop IPC handler (electron-main.cjs
-        // stage-op-halt-order → op_halt.cjs) on cc.pending_op_halt. Placed immediately
-        // after inject-authored-operations so all player operation-management lives in
-        // one ordering neighbourhood, and BEFORE the AAR/combat steps so the halted op
-        // takes effect cleanly this turn (its brigades free up before execution).
+        // REPLACE-CO presidential lever (Presidential Command Model slice 3/N): apply any
+        // player CO-replacement orders staged by the desktop IPC handler (electron-main.cjs
+        // stage-co-replacement-order → co_replacement.cjs) on cc.pending_co_replacement.
+        // Placed in the same player-lever ordering neighbourhood, and BEFORE the commander
+        // loop (ai-corps-decisions) so the new CO is in command this same turn.
         //
-        // DETERMINISM GATE: if no corps has a pending_op_halt, this step performs ZERO
-        // state mutation (early-out below). pending_op_halt is OPTIONAL and is never set
-        // in headless/historical scenarios → byte-identical by construction.
+        // DETERMINISM GATE: if no corps has a pending_co_replacement, this step performs
+        // ZERO state mutation (early-out below). pending_co_replacement is OPTIONAL and is
+        // never set in headless/historical scenarios → byte-identical by construction.
         //
-        // MECHANICAL ONLY: release commander → remove op via the canonical clean-removal
-        // path → append halted_op_record → clear. No dimension/consequence effects
-        // (patron_confidence etc.) — that is a deliberate FOLLOW-UP, not this slice.
-        name: 'apply-op-halts',
+        // REUSES relieveOfficer (retire CO → install reserve/acting replacement → emit
+        // officer_relieved). Applies the returned morale hit to the corps's brigades and an
+        // internal_cohesion event_modifier cost (observable across turns), records the
+        // replacement, clears the staged field. RS officer-revolt asymmetry emerges
+        // downstream from the successor's roster stubbornness — not hardcoded here.
+        name: 'apply-co-replacements',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            applyOpHalts(context.state);
+            applyCoReplacements(context.state);
         }
     },
     {
@@ -1534,6 +1670,12 @@ export const warPhases: NamedPhase[] = [
                     // inject-op-directive earlier the same turn; clear here if it survived).
                     if (corpsCmd[corpsId].pending_op_directive !== undefined) {
                         corpsCmd[corpsId].pending_op_directive = undefined;
+                    }
+                    // REPLACE-CO (Presidential Command Model slice 3/N): belt-and-suspenders
+                    // GC of any stale pending_co_replacement (normally consumed by
+                    // apply-co-replacements earlier the same turn; clear here if it survived).
+                    if (corpsCmd[corpsId].pending_co_replacement !== undefined) {
+                        corpsCmd[corpsId].pending_co_replacement = undefined;
                     }
                 }
             }
