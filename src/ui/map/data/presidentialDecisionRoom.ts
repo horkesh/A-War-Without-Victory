@@ -690,7 +690,8 @@ function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void 
  *      to scan; never crashes when unreachable.
  *
  * Deterministic: corps + reserve requests are iterated in a stable strictCompare
- * order; the front-visit card is a fixed singleton. No Math.random / Date.now.
+ * order; the front-visit card is a fixed singleton. No nondeterministic or
+ * time-based sources.
  */
 function addCommandPersonnelCards(state: LoadedGameState, cards: CandidateCard[]): void {
   const playerFaction = state.player_faction ?? null;
