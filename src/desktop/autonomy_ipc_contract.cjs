@@ -107,6 +107,9 @@ const FORCE_LAUNCH_COST = 15;
 // cost. MUST match src/ui/map/utils/commandAuthority.ts (PROACTIVE_FORCE_LAUNCH_COST
 // = 25) and the proactive-force-launch-op handler.
 const PROACTIVE_FORCE_LAUNCH_COST = 25;
+// Author-new-op (Free War Phase 4, #67) command-authority cost. MUST match
+// src/ui/map/utils/commandAuthority.ts (AUTHOR_OP_COST = 25).
+const AUTHOR_OP_COST = 25;
 const APPROVE_OP_PREFIX = 'APPROVE_OP:';
 
 function parseApproveOpAction(action) {
@@ -332,4 +335,5 @@ module.exports = {
   buildForceableReadyPlanData,
   FORCE_LAUNCH_COST,
   PROACTIVE_FORCE_LAUNCH_COST,
+  AUTHOR_OP_COST,
 };
