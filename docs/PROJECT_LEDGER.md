@@ -18042,3 +18042,19 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `src/state/game_state.ts`, `src/sim/turn_phases/war_phases.ts`, `src/desktop/{op_halt,op_directive_staging,co_replacement}.cjs` (new) + `electron-main.cjs`/`preload.cjs`/`autonomy_ipc_contract.cjs`, `src/ui/map/utils/commandAuthority.ts`, `desktop_sim.ts`, `ArmyReservePanel.tsx`/`OperationsSection.tsx`/`CommanderSection.tsx`, `src/sim/combat/{officer_system,order_interpretation,corps_operation_helpers}.ts` (reuse); `docs/PROJECT_LEDGER.md` (this entry).
 
 ---
+
+## [2026-06-01] design: Presidential Command Surface (warroom) — ACCEPTED (no code yet)
+
+**Type:** Accepted design direction (docs only; build forthcoming). Two-specialist convening (warroom UI audit + presidential-UX design). Design doc `docs/plans/2026-06-01-presidential-command-surface-design.md`.
+
+**Diagnosis:** the desktop warroom desk is a *launcher* (hotspots route through `applyShellHandoffCommand` into the Army-HQ briefing room, then drop to the tactical map; only advance-turn stays in the room). The legacy `src/ui/warroom/*.ts` modals are dormant (only Settings is instantiated); the live UI is the React `src/ui/map` app. The five shipped command levers are SCATTERED/buried — Request-op/Stop-op/Replace-CO are 2–3 clicks deep inside an Army-HQ *corps card*; Authorize-elite is on a map rail. **No coherent presidential command surface.**
+
+**Accepted design — converge, don't add screens.** The existing `PresidentialDecisionRoom` view-model already aggregates every decision into cards but only *navigates*. Make it the **single host that ISSUES the levers** (add a `directive` action to the card model; Command Authority — the shared 25-cost currency — becomes the connective tissue on a Desk header). Spine = **Desk (scan) → Decision Room (act) → Directive Card (confirm + the force-op pushback card + promise→receipt seed)**. Repurpose the dead-end modals: `DiplomacyPanel`→Patron Relations + `EventLogPanel`→Authored-Choices ledger (quick wins, pure re-route/filter, no engine touch); retire `StrategicDashboard`; merge `DecisionHistory`+`EventLog`.
+
+**LOCKED owner decisions (2026-06-01):** (1) Decision Room *issues* directives; (2) retire StrategicDashboard + merge DecisionHistory/EventLog; (3) Desk=scan, Decision Room=act.
+
+**Build order:** 0 quick wins → 1 Decision-Room directive integration + CA Desk header → 2 directive card + migrate the force-op pushback card → 3 retire/merge → 4 deepen partial repurposes. **All UI-layer → no calibration/determinism impact** (lever engine paths already shipped byte-identical).
+
+**Files:** `docs/plans/2026-06-01-presidential-command-surface-design.md` (new), `docs/plans/MASTER_ROADMAP.md` + `docs/plans/COMMAND_BOARD.md` (lane), `docs/PROJECT_LEDGER.md` (this entry).
+
+---
