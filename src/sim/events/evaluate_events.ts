@@ -620,7 +620,17 @@ export function evaluateEvents(
                 if (forceHistorical || (isTwoLevelNotificationsEnabled() && !emergent)) {
                     chosen = applyAIDefaultResponse(state, def);
                     decisionSource = 'bot_ai_default';
-                } else if (POLITICAL_LOGICS.has(def.bot_response_logic ?? '') && respondingFaction !== null) {
+                // Free War Phase 0.5: in EMERGENT mode, route EVERY faction-attributed
+                // event through the signal-driven political scorer — not just the
+                // POLITICAL_LOGICS subset. Most events carry bot_response_logic
+                // 'historical' (→ pickBotResponseV1, which hard-returns the historical
+                // default with no scoring); without this, emergent freedom is nominal.
+                // Historical/unset keeps the POLITICAL_LOGICS gate, byte-identical.
+                } else if (
+                    emergent
+                        ? respondingFaction !== null
+                        : POLITICAL_LOGICS.has(def.bot_response_logic ?? '') && respondingFaction !== null
+                ) {
                     const personality = getPoliticalPersonality(respondingFaction);
                     const assessment = computePoliticalAssessment(state, respondingFaction, personality);
                     chosen = pickPoliticalResponse(def.response_options, respondingFaction, assessment, personality);

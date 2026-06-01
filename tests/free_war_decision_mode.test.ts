@@ -71,6 +71,14 @@ function rsDecisionEvent(): EventDefinition {
     } as EventDefinition;
 }
 
+/** Same RS corridor decision but with bot_response_logic 'historical' — the most
+ *  common authored logic (55/73 events). Pre-Phase-0.5 this routed to
+ *  pickBotResponseV1, which hard-returns the historical default with no scoring;
+ *  Phase 0.5 routes ALL faction events through the political scorer in emergent. */
+function rsHistoricalLogicEvent(): EventDefinition {
+    return { ...rsDecisionEvent(), bot_response_logic: 'historical' } as EventDefinition;
+}
+
 /**
  * Minimal war-phase state. player_faction is RBiH so the RS event is NOT a
  * player-respondent → it flows through the bot auto-respond branch (the
@@ -175,4 +183,22 @@ test('emergent decisions are deterministic: same state → same choice twice', (
     evaluateEvents(b, rng, 10, [rsDecisionEvent()]);
     assert.strictEqual(chosenResponseId(a), chosenResponseId(b), 'emergent argmax must be deterministic');
     assert.strictEqual(chosenResponseId(a), SIGNAL_DRIVEN_ID);
+});
+
+test('Phase 0.5: a `historical`-logic event DIVERGES in emergent (routed to the political scorer, not the v1 railroad)', () => {
+    const state = rsBotState('emergent');
+    evaluateEvents(state, rng, 10, [rsHistoricalLogicEvent()]);
+    assert.strictEqual(decisionSource(state), 'bot_political', 'emergent routes ALL faction events to the political scorer');
+    assert.strictEqual(
+        chosenResponseId(state),
+        SIGNAL_DRIVEN_ID,
+        'the scorer picks the signal-driven option — a `historical`-logic event is no longer hard-railroaded',
+    );
+});
+
+test('Phase 0.5: a `historical`-logic event still replays the default in historical mode (byte-identical)', () => {
+    const state = rsBotState('historical');
+    evaluateEvents(state, rng, 10, [rsHistoricalLogicEvent()]);
+    assert.strictEqual(decisionSource(state), 'bot_ai_default', 'historical keeps the railroad — unchanged');
+    assert.strictEqual(chosenResponseId(state), HISTORICAL_DEFAULT_ID);
 });
