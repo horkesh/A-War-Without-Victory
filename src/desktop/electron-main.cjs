@@ -22,12 +22,18 @@ const {
   buildForceableReadyPlanData,
   FORCE_LAUNCH_COST,
   PROACTIVE_FORCE_LAUNCH_COST,
+  FRONT_VISIT_COST,
 } = require('./autonomy_ipc_contract.cjs');
 const { stageAuthoredOperation } = require('./author_op_staging.cjs');
 const { stageOpHalt } = require('./op_halt.cjs');
 const { stageOpDirective } = require('./op_directive_staging.cjs');
 const { stageCoReplacement } = require('./co_replacement.cjs');
 const { computeCorpsCommandStrain } = require('./command_strain.cjs');
+const {
+  frontVisitEventIdForFaction,
+  computeFrontVisitAvailability,
+  buildFrontVisitPendingDecision,
+} = require('./front_visit_contract.cjs');
 const { stageConvoyDecisionOnState } = require('./convoy_ipc_contract.cjs');
 const { fileOfficerDecisionRecord } = require('./officer_decision_history.cjs');
 const RUNTIME_PROBE_MODE = process.env.AWWV_DESKTOP_RUNTIME_PROBE === '1';
@@ -60,6 +66,35 @@ function getAppIconPath() {
 let currentGameStateJson = null;
 let mainWindow = null;
 let tacticalMapWindow = null;
+
+/**
+ * Lazy-load + cache the authored `visit_to_front_<faction>` event definition
+ * from data/scenarios/events/war_1993.json. Read-only; the file ships as
+ * extraResources (data/scenarios/events) so it resolves in the packaged build
+ * via getBaseDir(). Returns null when the event is not found / file unreadable.
+ *
+ * Determinism: pure file read; no Date / no Math.random. The cache is keyed by
+ * event id and never mutated.
+ */
+let _frontVisitEventCache = null;
+function loadFrontVisitEventDef(eventId) {
+  if (!eventId) return null;
+  if (_frontVisitEventCache === null) {
+    try {
+      const eventsPath = path.join(getBaseDir(), 'data', 'scenarios', 'events', 'war_1993.json');
+      const raw = fs.readFileSync(eventsPath, 'utf-8');
+      const parsed = JSON.parse(raw);
+      const arr = Array.isArray(parsed) ? parsed : (parsed.events || []);
+      _frontVisitEventCache = {};
+      for (const def of arr) {
+        if (def && typeof def.id === 'string') _frontVisitEventCache[def.id] = def;
+      }
+    } catch (_e) {
+      _frontVisitEventCache = {};
+    }
+  }
+  return _frontVisitEventCache[eventId] ?? null;
+}
 
 /** Lazy-load desktop sim bundle (built by desktop:sim:build). Resolve from project root so path matches build output (dist/desktop/), not src/dist/desktop/. */
 function getDesktopSim() {
@@ -2275,6 +2310,107 @@ app.whenReady().then(() => {
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true, resolvedCount: resolved, caCost: auth ? STABILIZE_COST : 0 };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  // ── Presidential FRONT VISIT (read-only availability) ───────────────────────
+  // Returns whether the player faction can initiate a front visit this turn,
+  // plus the reachability-filtered branch lists, cooldown/cap, and CA cost. The
+  // gate reuses the SUPPLY-CONNECTIVITY signal (state.political.last_supply_state_by_osid):
+  // a front branch is reachable iff the player controls ≥1 in-area OSID that is
+  // NOT 'critical' (cut off). No mutation.
+  ipcMain.handle('get-front-visit-availability', async () => {
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const playerFaction = state.meta?.player_faction ?? null;
+      const eventId = frontVisitEventIdForFaction(playerFaction);
+      const eventDef = loadFrontVisitEventDef(eventId);
+      const availability = computeFrontVisitAvailability(state, playerFaction, eventDef);
+      return { ok: true, costCA: FRONT_VISIT_COST, ...availability };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  // ── Presidential FRONT VISIT (initiate) ─────────────────────────────────────
+  // Force-queues the authored visit_to_front_<faction> event into
+  // state.military.pending_event_decisions (mirror evaluate_events.ts:577) so
+  // EventDecisionModal surfaces it. ZERO new sim/event code — the event's authored
+  // effects/recurrence/branches are reused. Guards (in order):
+  //   1. player faction must resolve to a visit_to_front_<faction> event
+  //   2. cooldown/cap reuse the event's OWN recurrence (max_fires 5 / cooldown 10t)
+  //   3. ENCLAVE REACHABILITY GATE: front branches filtered to corridored targets;
+  //      all-cut-off → 'all_cut_off' refusal
+  //   4. CA guard + debit FRONT_VISIT_COST (10)
+  // Player-IPC-only (desktop) → never headless → byte-identical by construction.
+  ipcMain.handle('initiate-front-visit', async () => {
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const playerFaction = state.meta?.player_faction ?? null;
+      const eventId = frontVisitEventIdForFaction(playerFaction);
+      const eventDef = loadFrontVisitEventDef(eventId);
+
+      // Guards 1–3: faction / event / cooldown / cap / reachability.
+      const availability = computeFrontVisitAvailability(state, playerFaction, eventDef);
+      if (!availability.available) {
+        return { ok: false, error: availability.reason || 'unavailable', reason: availability.reason };
+      }
+
+      // Guard 4: CA debit.
+      const auth = state.military.command_authority;
+      if (auth) {
+        if (auth.current < FRONT_VISIT_COST) {
+          return {
+            ok: false,
+            reason: 'insufficient_ca',
+            error: `Insufficient command authority (${auth.current}/${FRONT_VISIT_COST} needed)`,
+          };
+        }
+        auth.current -= FRONT_VISIT_COST;
+        auth.spent_this_turn = (auth.spent_this_turn ?? 0) + FRONT_VISIT_COST;
+        auth.lifetime_spent = (auth.lifetime_spent ?? 0) + FRONT_VISIT_COST;
+      }
+
+      // Force-queue the (reachability-filtered) decision so EventDecisionModal surfaces it.
+      const decision = buildFrontVisitPendingDecision(state, playerFaction, eventDef, availability);
+      if (!decision) {
+        return { ok: false, error: 'Failed to build front-visit decision' };
+      }
+      if (!state.military.pending_event_decisions) {
+        state.military.pending_event_decisions = [];
+      }
+      state.military.pending_event_decisions.push(decision);
+
+      // Record the fire so the event's OWN recurrence (max_fires 5 / cooldown 10t)
+      // gates subsequent visits. resolveEventDecision (the modal-resolve path)
+      // does NOT increment these — so we record at queue time here, mirroring the
+      // calendar-fire bookkeeping in evaluate_events.ts:194-202. The act of
+      // initiating the visit IS the fire; the morale/standing effects commit when
+      // the player picks a branch in EventDecisionModal.
+      if (!state.military.event_fire_counts) state.military.event_fire_counts = {};
+      state.military.event_fire_counts[eventId] = (state.military.event_fire_counts[eventId] ?? 0) + 1;
+      if (!state.military.event_last_fired_turn) state.military.event_last_fired_turn = {};
+      state.military.event_last_fired_turn[eventId] = state.meta?.turn ?? 0;
+
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return {
+        ok: true,
+        eventId,
+        caCost: auth ? FRONT_VISIT_COST : 0,
+        offeredBranchIds: decision.response_options.map((o) => o.id),
+        unreachableBranchIds: availability.unreachableBranchIds,
+      };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }

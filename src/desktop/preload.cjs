@@ -120,6 +120,9 @@ contextBridge.exposeInMainWorld('awwv', {
   resolveDayton: (proposal) => ipcRenderer.invoke('resolve-dayton', proposal),
   acknowledgeFrictionEvent: (payload) => ipcRenderer.invoke('acknowledge-friction-event', payload),
   stabilizeCommandRelationship: (payload) => ipcRenderer.invoke('stabilize-command-relationship', payload),
+  // Presidential FRONT VISIT (Command Surface §10): read-only availability + initiate.
+  getFrontVisitAvailability: () => ipcRenderer.invoke('get-front-visit-availability'),
+  initiateFrontVisit: () => ipcRenderer.invoke('initiate-front-visit'),
   // v0.8.4 Phase B: Autonomy bridge
   getAutonomyState: () => ipcRenderer.invoke('get-autonomy-state'),
   setAutonomyLevel: (level) => ipcRenderer.invoke('set-autonomy-level', { level }),

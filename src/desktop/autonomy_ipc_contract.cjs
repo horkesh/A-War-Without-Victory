@@ -136,6 +136,14 @@ const ELITE_DEPLOY_COST = 25;
 // stage-co-replacement-order handler (co_replacement.cjs). RS officer-revolt asymmetry
 // emerges from officer-disposition DATA, NOT from a faction-keyed cost.
 const REPLACE_CO_COST = 25;
+// FRONT-VISIT presidential leadership action cost (Presidential Command Surface §10):
+// the president visits the front as a morale/leadership gesture, force-queuing the
+// authored visit_to_front_<faction> event. Priced LOWER than the override levers (10,
+// matching the stabilize-command-relationship action) because it is a leadership
+// gesture, not an officer override. MUST match src/ui/map/utils/commandAuthority.ts
+// (FRONT_VISIT_COST = 10) and the initiate-front-visit IPC handler. Cooldown/cap reuse
+// the event's OWN recurrence (max_fires 5 / cooldown 10t), not a CA-side timer.
+const FRONT_VISIT_COST = 10;
 const APPROVE_OP_PREFIX = 'APPROVE_OP:';
 
 function parseApproveOpAction(action) {
@@ -366,4 +374,5 @@ module.exports = {
   REQUEST_OP_COST,
   ELITE_DEPLOY_COST,
   REPLACE_CO_COST,
+  FRONT_VISIT_COST,
 };
