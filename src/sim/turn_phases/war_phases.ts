@@ -148,7 +148,7 @@ import { isSlot0AvailableForQueue, hasAvailableSlot, getAvailableBrigades, build
 import { validateOpAtInjection, hasBlockingOpInjectionWarnings } from '../combat/operation_validation.js';
 import { createSingleAxis } from '../combat/sector_offensive_axis_helpers.js';
 import { getCorpsSubordinates } from '../combat/bot_corps_helpers.js';
-import { assignOperationCommander, releaseOperationCommander } from '../combat/officer_system.js';
+import { assignOperationCommander, releaseOperationCommander, releaseTacticalCommander } from '../combat/officer_system.js';
 import { isEligibleOperationFormation } from '../../state/formation_constants.js';
 import { checkTriggeredOperations, injectArmyHqOperations } from '../combat/triggered_operations.js';
 import { computeMilitiaGarrisons } from '../combat/militia_garrison.js';
@@ -392,9 +392,12 @@ function injectAuthoredOperations(state: GameState): void {
  *
  * Per corps (sorted strictCompare), for each staged halt:
  *  1. Find the matching LIVE op in active_operations (by op_id first, then op_name).
- *  2. If found: release its commander (releaseOperationCommander) then remove it via
- *     the canonical clean-removal path (removeOperation) — the SAME path completion
- *     and attrition-abort use (corps_command.ts:268-269, sector_offensive.ts).
+ *  2. If found: release its commander (releaseOperationCommander), release the TG
+ *     tactical_commander too when the op carries tg_commander_officer_id
+ *     (releaseTacticalCommander) — otherwise that officer is left active/assigned to a
+ *     removed op — then remove it via the canonical clean-removal path (removeOperation)
+ *     — the SAME path completion and attrition-abort use (corps_command.ts:268-269,
+ *     sector_offensive.ts).
  *     Brigades are released implicitly by op-membership recompute (getAvailableBrigades);
  *     the op object is dropped wholesale, so no dangling axis/op-id refs remain.
  *  3. Append a halted_op_record (op_name + turn) for the UI / follow-up consequence.
@@ -431,6 +434,10 @@ function applyOpHalts(state: GameState): void {
             // Canonical clean-removal path (mirrors op completion / attrition abort):
             // release the officer back to reserve, then drop the op from active_operations.
             releaseOperationCommander(state, op);
+            // TG ops also carry a tactical_commander (tg_commander_officer_id); release it
+            // too or the TG officer is left active/assigned to a removed op and unavailable
+            // for future TG assignments. releaseTacticalCommander is a no-op when unset.
+            if (op.tg_commander_officer_id) releaseTacticalCommander(state, op);
             removeOperation(cmd, op);
 
             // Append the halt record (op_name + turn) for the UI / follow-up consequence.

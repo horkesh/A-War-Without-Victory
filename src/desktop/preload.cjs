@@ -77,7 +77,10 @@ contextBridge.exposeInMainWorld('awwv', {
   stageLogisticsPriority: (faction, sectorId, priority) => ipcRenderer.invoke('stage-logistics-priority', { faction, sectorId, priority }),
   stageCorpsOperationOrder: (payload) => ipcRenderer.invoke('stage-corps-operation-order', payload),
   queryOperationPrediction: (payload) => ipcRenderer.invoke('query-operation-prediction', payload),
-  stageOperationHalt: (payload) => ipcRenderer.invoke('stage-operation-halt', payload),
+  // STOP-OP presidential lever: CA-costed staged halt (op_halt.cjs → apply-op-halts).
+  // Supersedes the legacy stage-operation-halt (officer-compliance, no CA cost), which
+  // was removed — the player Stand Down button now routes through this path.
+  stageOpHaltOrder: (payload) => ipcRenderer.invoke('stage-op-halt-order', payload),
   stageOperationForceLaunch: (payload) => ipcRenderer.invoke('stage-operation-force-launch', payload),
   stageOperationDecision: (payload) => ipcRenderer.invoke('stage-operation-decision', payload),
   stageAirdropAllocation: (allocations) => ipcRenderer.invoke('stage-airdrop-allocation', { allocations }),

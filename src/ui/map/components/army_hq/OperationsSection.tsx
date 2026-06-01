@@ -520,7 +520,7 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
 
     const handleStandDown = async (opName: string) => {
         if (!ipc.isAvailable) return;
-        const result = await ipc.stageOperationHalt({ corpsId, operationName: opName, digInOnHalt: true });
+        const result = await ipc.stageOpHaltOrder({ corpsId, opName });
         if (!result.ok) setLoadError(result.error ?? t('operationsSection.error.standDown'));
     };
 

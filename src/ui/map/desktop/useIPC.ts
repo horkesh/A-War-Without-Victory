@@ -183,7 +183,7 @@ interface WindowAwwv {
     stageLogisticsPriority: (faction: string, sectorId: string, priority: number) => Promise<{ ok: boolean; error?: string }>;
     stageCorpsOperationOrder: (payload: CorpsOperationOrderPayload) => Promise<{ ok: boolean; error?: string }>;
     queryOperationPrediction: (payload: Record<string, unknown>) => Promise<{ ok: boolean; data?: Record<string, unknown>; error?: string }>;
-    stageOperationHalt: (payload: { corpsId: string; operationName: string; digInOnHalt: boolean }) => Promise<{ ok: boolean; error?: string }>;
+    stageOpHaltOrder: (payload: { corpsId: string; opName: string }) => Promise<{ ok: boolean; error?: string }>;
     stageAssignOperationCommander: (payload: { corpsId: string; operationName: string; officerId: string }) => Promise<{ ok: boolean; error?: string }>;
     assignCommander: (officerId: string, corpsId: string) => Promise<{ ok: boolean; error?: string }>;
     dismissOfficer: (officerId: string) => Promise<{ ok: boolean; error?: string }>;
@@ -365,9 +365,11 @@ export function useIPC() {
                 ? (faction: string, sectorId: string, priority: number) => awwv.stageLogisticsPriority(faction, sectorId, priority)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
-            stageOperationHalt: awwv
-                ? (payload: { corpsId: string; operationName: string; digInOnHalt: boolean }) => awwv.stageOperationHalt(payload)
-                : (_payload: { corpsId: string; operationName: string; digInOnHalt: boolean }) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
+            // STOP-OP presidential lever — CA-costed staged halt (supersedes the removed
+            // legacy stageOperationHalt). Routes the Stand Down button to stage-op-halt-order.
+            stageOpHaltOrder: awwv
+                ? (payload: { corpsId: string; opName: string }) => awwv.stageOpHaltOrder(payload)
+                : (_payload: { corpsId: string; opName: string }) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
 
             stageAssignOperationCommander: awwv
                 ? (payload: { corpsId: string; operationName: string; officerId: string }) => awwv.stageAssignOperationCommander(payload)

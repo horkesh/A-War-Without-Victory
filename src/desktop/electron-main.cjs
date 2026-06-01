@@ -2025,39 +2025,11 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('stage-operation-halt', async (_event, payload) => {
-    const { corpsId, operationName, digInOnHalt } = payload || {};
-    if (!currentGameStateJson || typeof corpsId !== 'string' || typeof operationName !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const op = (state.corps_command?.[corpsId]?.active_operations ?? []).find(o => o.name === operationName);
-      if (!op) {
-        return { ok: false, error: 'Operation not found' };
-      }
-      op.dig_in_on_halt = digInOnHalt === true;
-      const { interpretOperationHalt } = await import('../sim/combat/order_interpretation.js');
-      const haltResult = interpretOperationHalt(state, corpsId, operationName);
-      // Event (if any) is already pushed to state.military.pending_officer_events by interpretOperationHalt
-      if (haltResult.compliance === 'full') {
-        // Immediate halt
-        op.recovery_reason = 'manual_termination';
-      } else if (haltResult.compliance === 'modified' || haltResult.compliance === 'partial') {
-        // Delayed halt — op continues until countdown expires
-        op.halt_delay_turns_remaining = haltResult.halt_delay_turns;
-      } else {
-        // Refused — op continues; delay still applied so the order has some effect
-        op.halt_delay_turns_remaining = haltResult.halt_delay_turns;
-      }
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
+  // NOTE: the legacy `stage-operation-halt` handler (officer-compliance halt via
+  // interpretOperationHalt — dig-in, halt delays, NO command-authority cost, and it
+  // never removed the op) was REMOVED. Its sole caller was the player Stand Down button
+  // in OperationsSection, which now routes through the CA-costed STOP-OP staged path
+  // (`stage-op-halt-order` → op_halt.cjs → apply-op-halts). One canonical halt path only.
 
   ipcMain.handle('stage-operation-force-launch', async (_event, payload) => {
     const { corpsId, operationName } = payload || {};
