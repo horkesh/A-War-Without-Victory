@@ -22,6 +22,7 @@ import { buildFrontLinesGeoJSON } from '../../map/builders/buildFrontLinesGeoJSO
 import { useGameStore } from '../../store/gameStore';
 import { formatTurnLabel, turnToDateString } from '../../utils/formatters';
 import type { WarroomNavigationCommand } from '../../utils/warroomNavigation';
+import { categoryForWarroomHotspot, type PresidentialCommandCategoryId } from '../../data/presidentialCategories';
 import { t } from '../../i18n';
 import { WARROOM_SCENE_URLS } from './warroom-asset-urls';
 import fallbackRbihRegions from '../../../warroom/assets/hq_rbih_regions.json';
@@ -579,9 +580,17 @@ export interface WarroomShellLayerProps {
   onNavigate: (command?: WarroomNavigationCommand) => void;
   /** Opens the existing campaign side picker when the Warroom has no loaded side. */
   onOpenSidePicker?: () => void;
+  /**
+   * COMBO nav (design §9): a warroom hotspot OBJECT that maps to a presidential
+   * category opens the command-surface card strip pre-filtered to that category,
+   * instead of routing into the Army HQ briefing. Receives the category id.
+   * When provided and a hotspot maps to a category, this takes priority over
+   * the legacy `onNavigate` shell handoff for that hotspot.
+   */
+  onOpenCommandCategory?: (categoryId: PresidentialCommandCategoryId) => void;
 }
 
-export function WarroomShellLayer({ onNavigate, onOpenSidePicker }: WarroomShellLayerProps) {
+export function WarroomShellLayer({ onNavigate, onOpenSidePicker, onOpenCommandCategory }: WarroomShellLayerProps) {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const playerFaction = getPlayerFacingFaction(loadedGameState);
 
@@ -708,6 +717,16 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker }: WarroomShell
   }
 
   const handleRegionClick = (region: WarroomRegion) => {
+    // COMBO nav: if this hotspot object maps to a presidential category and a
+    // handler is wired, open the command-surface card strip pre-filtered to that
+    // category instead of the legacy Army-HQ shell handoff. Diegetic objects
+    // (desk_map → map, wall_calendar → advance) are intentionally NOT in the
+    // category map and fall through to their existing handoff below.
+    const categoryId = categoryForWarroomHotspot(region.id);
+    if (categoryId && onOpenCommandCategory) {
+      onOpenCommandCategory(categoryId);
+      return;
+    }
     const command = regionToShellHandoff(region.id);
     onNavigate(command);
   };
