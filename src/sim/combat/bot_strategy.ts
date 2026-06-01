@@ -603,19 +603,23 @@ export const FACTION_ARMY_PRIORITIES: Record<FactionId, ArmyOperationPriority[]>
  * the original static-weight ordering (the calibration regression contract).
  */
 const TERRITORY_TREND_MODULATOR = {
-    /** Per-unit-of-recent-loss boost. trend=-2 (lost 2 OSIDs in area) → +0.50 multiplier.
-     *  Slice A.2 (2026-06-01): raised 0.15→0.25 — the gentle 40w setting was operationally
-     *  inert (0/13 ops changed), unable to overcome the 2-4× static priority gaps. */
-    K_LOSS: 0.25,
+    /** Per-unit-of-recent-loss boost. trend=-2 (lost 2 OSIDs in area) → +0.90 multiplier.
+     *  Slice A.3 (2026-06-01): raised 0.25→0.45. Slice A.2 (0.25/HI 2.50) was STILL
+     *  cosmetically inert at 52w (1 op differed, 0 territorial delta) — the modulator only
+     *  re-orders WITHIN a corps and the static gaps (e.g. Drina Sweep 130 vs Hold 30 = 4.3×)
+     *  exceeded the 3.5× clamp ratio, so no genuinely collapsing area could out-rank a quiet
+     *  dominant objective. */
+    K_LOSS: 0.45,
     /** Decay applied to a quiet area (no recent territory change in its target set). */
     K_QUIET: 0.25,
     /** Lower clamp on the multiplier (a quiet objective decays to 0.70×). */
     LO: 0.70,
-    /** Upper clamp on the multiplier (a collapsing area boosts to at most 2.50×). With LO 0.70
-     *  this gives a max boost/decay ratio of ~3.5×, enough for a real crisis to out-rank a
-     *  mid-priority quiet objective — but the dominant strategic priority (e.g. Drina Sweep
-     *  130 vs Hold 30 = 4.3×) still holds unless that area itself is collapsing. */
-    HI: 2.50,
+    /** Upper clamp on the multiplier (a collapsing area boosts to at most 4.00×). With LO 0.70
+     *  this gives a max boost/decay ratio of ~5.7× — enough for a 2-3 OSID/6-turn collapse
+     *  (trend ≤ −2) to lift a mid-priority over a quiet dominant objective (e.g. Krajina Sweep
+     *  45 over a quiet Drina Sweep 130), but still requiring a REAL multi-OSID crisis to do so,
+     *  which guards against single-loss noise-chasing / strategy thrashing. */
+    HI: 4.00,
     /** Look-back window (turns) for recent control changes. Matches army_hq_gathering. */
     WINDOW: 6,
 } as const;
