@@ -93,12 +93,6 @@ export function createDesktopBridgeClient(bridge: AwwvBridge | null): DesktopBri
         { ok: false, error: BRIDGE_UNAVAILABLE }
       );
     },
-    stageBrigadeMovementOrder(brigadeId: string, targetSettlementIds: string[]): Promise<DesktopOkError> {
-      return invokeOrUnavailable(
-        bridge?.stageBrigadeMovementOrder ? () => bridge.stageBrigadeMovementOrder!(brigadeId, targetSettlementIds) : undefined,
-        { ok: false, error: BRIDGE_UNAVAILABLE }
-      );
-    },
     getRecruitmentCatalog(): Promise<RecruitmentCatalogResult | null> {
       if (!bridge?.getRecruitmentCatalog) return Promise.resolve(null);
       return bridge.getRecruitmentCatalog();

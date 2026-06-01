@@ -8,10 +8,9 @@
  *
  * See: docs/20_engineering/PRESIDENTIAL_COMMAND_DOCTRINE.md
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { useIPC } from '../../desktop/useIPC';
-import { Modal } from '../../../shared/Modal';
 import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../../utils/warroomReturn';
 import { getFactionArmyCommander } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
@@ -25,7 +24,7 @@ import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getArmyCrest, getArmyName } from '../../utils/factionAssets';
 import { turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
-import { t, type MessageKey } from '../../i18n';
+import { t } from '../../i18n';
 import { WarSummaryContent } from './WarSummaryContent';
 import { RecordsContent } from './RecordsContent';
 import { RootErrorBoundary } from '../RootErrorBoundary';
@@ -48,18 +47,6 @@ const FACTION_DISPLAY: Record<string, string> = {
     RBiH: 'Armija Republike Bosne i Hercegovine',
     HRHB: 'Hrvatsko Vijeće Obrane',
 };
-
-const EMERGENCY_POSTURE_LABEL_KEYS: Record<string, MessageKey> = {
-    defensive: 'armyHq.emergency.defensive',
-    balanced: 'armyHq.emergency.balanced',
-    offensive: 'armyHq.emergency.offensive',
-    reorganize: 'armyHq.emergency.reorganize',
-};
-
-function emergencyPostureLabel(posture: string | null): string {
-    if (!posture) return t('armyHq.emergency.title');
-    return t(EMERGENCY_POSTURE_LABEL_KEYS[posture] ?? 'armyHq.emergency.title');
-}
 
 function OfficerMiniBio({ officer }: { officer: NamedOfficerView }) {
     return (
@@ -95,8 +82,6 @@ export function ArmyHQModal() {
     const setActiveTab = useGameStore((s) => s.setArmyHQTab);
     const expandedCorpsId = useGameStore((s) => s.armyHQExpandedCorpsId);
     const setExpandedCorpsId = useGameStore((s) => s.setArmyHQExpandedCorpsId);
-    const setLoadError = useGameStore((s) => s.setLoadError);
-    const [pendingEmergencyPosture, setPendingEmergencyPosture] = useState<string | null>(null);
     // These remain available for future use but briefing navigation now stays inside HQ
 
     useEffect(() => {
@@ -165,18 +150,6 @@ export function ArmyHQModal() {
     }, [open, state, faction]);
 
     const ipc = useIPC();
-
-    const handleEmergencyPosture = useCallback(async (stance: string) => {
-        if (!ipc.isAvailable) {
-            setLoadError(t('armyHq.emergency.bridgeUnavailableError'));
-            return;
-        }
-        if (!data) return;
-        const corpsIds = data.corpsFormations.map(c => c.id);
-        for (const corpsId of corpsIds) {
-            await ipc.stageCorpsStanceOrder(corpsId, stance);
-        }
-    }, [ipc, data, setLoadError]);
 
     const navigateToCorps = useCallback((corpsId: string) => {
         setActiveTab('briefing');
@@ -308,36 +281,8 @@ export function ArmyHQModal() {
                         </div>
                     </div>
 
-                    {/* Right: emergency posture + situation + close */}
+                    {/* Right: situation + close */}
                     <div className="flex items-center gap-2">
-                        {!expandedCorpsId && (
-                            <div className="flex flex-col items-end gap-1">
-                                <select
-                                    defaultValue=""
-                                    aria-label={t('armyHq.emergency.aria')}
-                                    disabled={!ipc.isAvailable}
-                                    title={!ipc.isAvailable ? t('armyHq.emergency.bridgeUnavailableTitle') : undefined}
-                                    onChange={(e) => {
-                                        if (e.target.value) {
-                                            setPendingEmergencyPosture(e.target.value);
-                                            e.target.value = '';
-                                        }
-                                    }}
-                                    className="text-[9px] font-bold uppercase bg-panel-bg text-amber-400 border border-amber-400/50 rounded-md px-2 py-0.5 cursor-pointer focus:outline-none focus:border-amber-400 hover:bg-amber-400/10 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                    <option value="" disabled>{t('armyHq.emergency.placeholder')}</option>
-                                    <option value="defensive">{t('armyHq.emergency.defensiveOption')}</option>
-                                    <option value="balanced">{t('armyHq.emergency.balancedOption')}</option>
-                                    <option value="offensive">{t('armyHq.emergency.offensiveOption')}</option>
-                                    <option value="reorganize">{t('armyHq.emergency.reorganizeOption')}</option>
-                                </select>
-                                {!ipc.isAvailable && (
-                                    <div className="text-[8px] uppercase tracking-[0.16em] text-amber-300/70">
-                                        {t('armyHq.emergency.bridgeUnavailableShort')}
-                                    </div>
-                                )}
-                            </div>
-                        )}
                         <div className="text-right">
                             <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold">
                                 {t('armyHq.strategicSituation')}
@@ -356,45 +301,6 @@ export function ArmyHQModal() {
                         </button>
                     </div>
                 </div>
-
-                <Modal
-                    isOpen={pendingEmergencyPosture != null}
-                    onClose={() => setPendingEmergencyPosture(null)}
-                    ariaLabel={t('armyHq.confirmAria')}
-                    panelClassName="w-[min(92vw,28rem)] rounded-lg border border-amber-400/35 bg-panel-card p-4 text-text-primary shadow-2xl"
-                    backdropClassName="bg-black/55"
-                >
-                    <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300">
-                        {t('armyHq.confirmBulk')}
-                    </div>
-                    <div className="mt-2 text-[16px] font-bold uppercase tracking-[0.04em] text-text-primary">
-                        {emergencyPostureLabel(pendingEmergencyPosture)}
-                    </div>
-                    <p className="mt-2 text-[12px] leading-relaxed text-text-secondary">
-                        {t('armyHq.confirmBody', { count: data.corpsFormations.length })}
-                    </p>
-                    <div className="mt-4 flex justify-end gap-2">
-                        <button
-                            type="button"
-                            onClick={() => setPendingEmergencyPosture(null)}
-                            className="rounded border border-panel-border bg-panel-bg px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary hover:bg-panel-hover hover:text-text-primary"
-                        >
-                            {t('armyHq.cancel')}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                if (pendingEmergencyPosture) {
-                                    void handleEmergencyPosture(pendingEmergencyPosture);
-                                }
-                                setPendingEmergencyPosture(null);
-                            }}
-                            className="rounded border border-amber-400/45 bg-amber-400/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-200 hover:bg-amber-400/25"
-                        >
-                            {t('armyHq.stageOrders')}
-                        </button>
-                    </div>
-                </Modal>
 
                 {/* A11y LANE-NIGHTSHIFT-V093-A11Y-LANE-C: tablist semantics + arrow-key navigation. */}
                 <div

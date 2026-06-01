@@ -52,7 +52,6 @@ export interface AwwvBridge {
     startNewCampaign?(payload: StartNewCampaignPayload): Promise<StartNewCampaignResult>;
     stagePostureOrder?(brigadeId: string, posture: string): Promise<DesktopOkError>;
     stageMoveOrder?(brigadeId: string, targetMunicipalityId: string): Promise<DesktopOkError>;
-    stageBrigadeMovementOrder?(brigadeId: string, targetSettlementIds: string[]): Promise<DesktopOkError>;
     getRecruitmentCatalog?(): Promise<RecruitmentCatalogResult | null>;
     applyRecruitment?(brigadeId: string, equipmentClass: string): Promise<ApplyRecruitmentResult>;
 }
@@ -68,7 +67,6 @@ export interface DesktopBridgeClient {
     startNewCampaign(payload: StartNewCampaignPayload): Promise<StartNewCampaignResult>;
     stagePostureOrder(brigadeId: string, posture: string): Promise<DesktopOkError>;
     stageMoveOrder(brigadeId: string, targetMunicipalityId: string): Promise<DesktopOkError>;
-    stageBrigadeMovementOrder(brigadeId: string, targetSettlementIds: string[]): Promise<DesktopOkError>;
     getRecruitmentCatalog(): Promise<RecruitmentCatalogResult | null>;
     applyRecruitment(brigadeId: string, equipmentClass: string): Promise<ApplyRecruitmentResult>;
 }

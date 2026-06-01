@@ -1,12 +1,18 @@
 // @vitest-environment jsdom
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { ArmyHQModal } from '../../src/ui/map/components/army_hq/ArmyHQModal.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import { setLocale } from '../../src/ui/map/i18n';
+
+// NOTE: the dead direct-set "emergency posture" bulk corps-stance control was
+// removed (the president now approves CO-proposed stance changes via the
+// AutonomyPanel propose→approve surface). The bulk posture select + confirm
+// dialog no longer exist. This file retains only the Army HQ shell chrome
+// localization coverage that was incidentally exercised here.
 
 function makeLoadedState(): LoadedGameState {
     return {
@@ -41,14 +47,8 @@ function makeLoadedState(): LoadedGameState {
     } as LoadedGameState;
 }
 
-describe('Army HQ emergency posture confirmation', () => {
-    const stageCorpsStanceOrder = vi.fn(() => Promise.resolve({ ok: true }));
-
+describe('Army HQ shell chrome', () => {
     beforeEach(() => {
-        stageCorpsStanceOrder.mockClear();
-        (window as unknown as { awwv?: Record<string, unknown> }).awwv = {
-            stageCorpsStanceOrder,
-        };
         useGameStore.setState({
             ...useGameStore.getInitialState(),
             loadedGameState: makeLoadedState(),
@@ -61,31 +61,15 @@ describe('Army HQ emergency posture confirmation', () => {
     afterEach(() => {
         cleanup();
         setLocale('en');
-        delete (window as unknown as { awwv?: Record<string, unknown> }).awwv;
         useGameStore.setState(useGameStore.getInitialState());
     });
 
-    it('requires confirmation before staging a bulk corps posture order', async () => {
+    it('no longer renders a bulk emergency posture control', () => {
         render(createElement(ArmyHQModal));
-
-        fireEvent.change(screen.getByRole('combobox'), { target: { value: 'defensive' } });
-
-        expect(stageCorpsStanceOrder).not.toHaveBeenCalled();
-        expect(screen.getByRole('dialog', { name: /confirm emergency posture order/i }).textContent)
-            .toContain('This will stage the same posture order for all 2 corps');
-
-        fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
-        expect(stageCorpsStanceOrder).not.toHaveBeenCalled();
-
-        fireEvent.change(screen.getByRole('combobox'), { target: { value: 'defensive' } });
-        fireEvent.click(screen.getByRole('button', { name: 'Stage Orders' }));
-
-        await waitFor(() => expect(stageCorpsStanceOrder).toHaveBeenCalledTimes(2));
-        expect(stageCorpsStanceOrder).toHaveBeenNthCalledWith(1, 'vrs_1st_krajina', 'defensive');
-        expect(stageCorpsStanceOrder).toHaveBeenNthCalledWith(2, 'vrs_drina', 'defensive');
+        expect(screen.queryByRole('combobox')).toBeNull();
     });
 
-    it('localizes Army HQ shell chrome and emergency posture dialog in BCS mode', () => {
+    it('localizes Army HQ shell chrome in BCS mode', () => {
         setLocale('bcs');
         render(createElement(ArmyHQModal));
 
@@ -94,14 +78,5 @@ describe('Army HQ emergency posture confirmation', () => {
         expect(screen.getByRole('tab', { name: 'SAZETAK' })).toBeTruthy();
         expect(screen.getByRole('tab', { name: 'ZAPISI' })).toBeTruthy();
         expect(screen.getByRole('tab', { name: 'LJUDSTVO' })).toBeTruthy();
-
-        fireEvent.change(screen.getByRole('combobox'), { target: { value: 'defensive' } });
-
-        const confirmDialog = screen.getByRole('dialog', { name: 'Potvrdi hitnu naredbu polozaja' });
-        expect(confirmDialog).toBeTruthy();
-        expect(screen.getByText('Potvrdi masovnu naredbu')).toBeTruthy();
-        expect(confirmDialog.textContent).toContain('SVE U ODBRANU');
-        expect(screen.getByText(/pripremiti istu naredbu polozaja za sva 2 korpusa/)).toBeTruthy();
-        expect(screen.queryByText('Confirm Bulk Order')).toBeNull();
     });
 });

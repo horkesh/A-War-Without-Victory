@@ -3,14 +3,12 @@
  * Uses FlipCard for front (summary) / back (detail) with 3D flip animation.
  * Compressed mode stays as a single-line mini card when another card is flipped.
  */
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { FormationView, CorpsFrontSectorView, OperationView, LoadedGameState } from '../../data/types';
 import type { TurnBattle } from '../../../../state/turn_summary';
 import { formatCorpsDisplayName } from '../../utils/formatters';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getFormationCommander } from '../../utils/officerUtils';
-import { useIPC } from '../../desktop/useIPC';
-import { useGameStore } from '../../store/gameStore';
 import { Icon } from '../icons/Icon';
 import { CommanderSection } from './CommanderSection';
 import { CommandRelationshipSection } from './CommandRelationshipSection';
@@ -20,7 +18,7 @@ import { OperationsSection } from './OperationsSection';
 import { OrbatSection } from './OrbatSection';
 import { CombatRecordSection } from './CombatRecordSection';
 import { FlipCard } from './FlipCard';
-import { deriveStanceInterpretation, deriveCorpsDelegationSummary } from '../../data/command_strain';
+import { deriveCorpsDelegationSummary } from '../../data/command_strain';
 import { t } from '../../i18n';
 
 import type { ReadinessGrade } from './ForceReadiness';
@@ -71,10 +69,6 @@ export function ArmyHQCorpsCard({
     isExpanded, isCompressed, onToggleExpand,
     readinessGrade, hasThreat,
 }: ArmyHQCorpsCardProps) {
-    const ipc = useIPC();
-    const setLoadError = useGameStore((s) => s.setLoadError);
-    const [pendingStance, setPendingStance] = useState<string | null>(null);
-
     const data = useMemo(() => {
         const totalPersonnel = brigades.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
         const avgCohesion = brigades.length > 0
@@ -160,31 +154,6 @@ export function ArmyHQCorpsCard({
             </button>
         );
     }
-
-    const handleStanceChange = (newStance: string) => {
-        const { severity } = deriveStanceInterpretation(data.strain, data.strainLabel, newStance);
-        if (severity === 'normal') {
-            // Immediate commit — silence = healthy
-            if (!ipc.isAvailable) return;
-            void ipc.stageCorpsStanceOrder(corps.id, newStance).then((result) => {
-                if (!result.ok) setLoadError(result.error ?? t('armyHqCorps.error.stageStance'));
-            });
-        } else {
-            // Show preview panel — player must confirm (or cancel for constrained)
-            setPendingStance(newStance);
-        }
-    };
-
-    const handleConfirmStance = async () => {
-        if (!pendingStance || !ipc.isAvailable) return;
-        const result = await ipc.stageCorpsStanceOrder(corps.id, pendingStance);
-        if (!result.ok) setLoadError(result.error ?? t('armyHqCorps.error.stageStance'));
-        setPendingStance(null);
-    };
-
-    const handleCancelStance = () => {
-        setPendingStance(null);
-    };
 
     // Front face: summary card (clickable to flip)
     const cardFront = (
@@ -359,71 +328,8 @@ export function ArmyHQCorpsCard({
                         <span><b className="text-text-primary">{brigades.length}</b> {t('armyHqCorps.brigadeShort')}</span>
                         <span><b className="text-text-primary">{sectors.length}</b> {t('armyHqCorps.sectorShort')}</span>
                     </div>
-                    {/* Stance dropdown — offensive disabled when command is compromised (strain >= 6) */}
-                    <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-text-secondary/60 uppercase tracking-widest">{t('armyHqCorps.stance')}</span>
-                        <select
-                            value={pendingStance ?? data.stance}
-                            onChange={(e) => { handleStanceChange(e.target.value); }}
-                            onClick={(e) => e.stopPropagation()}
-                            aria-label={t('armyHqCorps.stanceAria', { corps: displayName })}
-                            className="text-[11px] font-bold uppercase bg-panel-bg text-text-primary border border-panel-border rounded px-2 py-1 cursor-pointer focus:outline-none focus:border-amber-400"
-                        >
-                            <option
-                                value="offensive"
-                                disabled={data.strainLabel === 'compromised'}
-                                title={data.strainLabel === 'compromised' ? t('armyHqCorps.stanceLockedTitle') : undefined}
-                            >
-                                {t('armyHqCorps.stance.offensive')}{data.strainLabel === 'compromised' ? ` [${t('armyHqCorps.locked')}]` : ''}
-                            </option>
-                            <option value="balanced">{t('armyHqCorps.stance.balanced')}</option>
-                            <option value="defensive">{t('armyHqCorps.stance.defensive')}</option>
-                            <option value="reorganize">{t('armyHqCorps.stance.reorganize')}</option>
-                        </select>
-                    </div>
                 </div>
             </div>
-            {/* Stance interpretation preview — Wave 6. Shown when pendingStance requires confirmation. */}
-            {pendingStance !== null && pendingStance !== data.stance && (() => {
-                const { severity, notice, isBlocked } = deriveStanceInterpretation(data.strain, data.strainLabel, pendingStance);
-                if (severity === 'normal') return null;
-                const isConstrained = severity === 'constrained';
-                return (
-                    <div className={`px-4 py-2 border-b ${isConstrained ? 'border-red-500/20 bg-red-900/10' : 'border-amber-500/20 bg-amber-900/10'}`}>
-                        <div className="flex items-center gap-2">
-                            <span className={`text-[9px] uppercase font-bold tracking-wider opacity-80 shrink-0 ${isConstrained ? 'text-red-400' : 'text-amber-400'}`}>
-                                {t('armyHqCorps.interpretation')}
-                            </span>
-                        </div>
-                        <p className={`text-[10px] leading-snug mt-1 mb-1.5 ${isConstrained ? 'text-red-300' : 'text-amber-300'}`}>
-                            {notice}
-                        </p>
-                        {!isBlocked && (
-                            <div className="flex gap-2">
-                                <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); void handleConfirmStance(); }}
-                                    className="text-[9px] font-bold uppercase tracking-wider px-2 py-1 border border-amber-600/50 text-amber-400 bg-amber-900/20 hover:bg-amber-900/40 transition-colors"
-                                >
-                                    {t('armyHqCorps.confirmStance')}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); handleCancelStance(); }}
-                                    className="text-[9px] font-bold uppercase tracking-wider px-2 py-1 border border-panel-border text-text-secondary hover:border-panel-border/80 transition-colors"
-                                >
-                                    {t('common.cancel')}
-                                </button>
-                            </div>
-                        )}
-                        {isBlocked && (
-                            <p className="text-[9px] text-text-secondary/60 italic">
-                                {t('armyHqCorps.restoreRelationship')}
-                            </p>
-                        )}
-                    </div>
-                );
-            })()}
 
             {/* Sections wrapper */}
             <div className="flex flex-col gap-[1px] bg-panel-bg">

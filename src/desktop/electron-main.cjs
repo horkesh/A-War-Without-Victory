@@ -1828,31 +1828,6 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('stage-brigade-movement-order', async (_event, payload) => {
-    const { brigadeId, targetSettlementIds } = payload || {};
-    if (!currentGameStateJson || typeof brigadeId !== 'string' || !Array.isArray(targetSettlementIds)) {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    const sids = targetSettlementIds.filter(s => typeof s === 'string');
-    if (sids.length === 0) return { ok: false, error: 'At least one destination settlement required' };
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const result = await sim.validateBrigadeMovementOrder(state, brigadeId, sids, getBaseDir());
-      if (!result.valid) {
-        return { ok: false, error: result.error || 'Invalid movement order' };
-      }
-      if (!state.brigade_movement_orders) state.brigade_movement_orders = {};
-      state.brigade_movement_orders[brigadeId] = { destination_sids: [...sids].sort() };
-      if (state.brigade_mun_orders) delete state.brigade_mun_orders[brigadeId];
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
   ipcMain.handle('clear-orders', async (_event, payload) => {
     const { brigadeId } = payload || {};
     if (!currentGameStateJson || typeof brigadeId !== 'string') {
@@ -1863,7 +1838,6 @@ app.whenReady().then(() => {
       const state = sim.deserializeState(currentGameStateJson);
       if (state.brigade_attack_orders) delete state.brigade_attack_orders[brigadeId];
       if (state.brigade_mun_orders) delete state.brigade_mun_orders[brigadeId];
-      if (state.brigade_movement_orders) delete state.brigade_movement_orders[brigadeId];
       if (state.brigade_reposition_orders) delete state.brigade_reposition_orders[brigadeId];
       if (state.brigade_deploy_orders) delete state.brigade_deploy_orders[brigadeId];
       if (state.brigade_posture_orders) {
@@ -1874,46 +1848,6 @@ app.whenReady().then(() => {
           o => o.from_brigade !== brigadeId && o.to_brigade !== brigadeId
         );
       }
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
-  ipcMain.handle('stage-corps-stance-order', async (_event, payload) => {
-    const { corpsId, stance } = payload || {};
-    if (!currentGameStateJson || typeof corpsId !== 'string' || typeof stance !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    const validStances = ['defensive', 'balanced', 'offensive', 'reorganize'];
-    if (!validStances.includes(stance)) {
-      return { ok: false, error: `Invalid stance: ${stance}` };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-
-      // Wave 4 stance gate: reject offensive stance when command is compromised (strain >= 6).
-      // Strain computation owner: src/desktop/command_strain.cjs.
-      if (stance === 'offensive') {
-        const currentTurn = state.meta?.turn ?? 0;
-        const { isCompromised } = computeCorpsCommandStrain(state, corpsId, currentTurn);
-        if (isCompromised) {
-          return { ok: false, reason: 'compromised', error: 'Cannot set aggressive stance — command is compromised. Stabilize the command relationship first.' };
-        }
-      }
-
-      const corpsCommand = ensureCorpsCommandEntry(state, corpsId, stance);
-      // Record the raw player-ordered stance before interpretation
-      corpsCommand.player_ordered_stance = stance;
-      // Run order interpretation through the corps commander's personality
-      const { interpretStanceOrder } = await import('../sim/combat/order_interpretation.js');
-      const result = interpretStanceOrder(state, corpsId, stance);
-      // Apply effective stance (may differ from ordered if officer deviates)
-      // Event (if any) is already pushed to state.military.pending_officer_events by interpretStanceOrder
-      corpsCommand.stance = result.effective_stance ?? stance;
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true };
@@ -2068,55 +2002,6 @@ app.whenReady().then(() => {
       return { ok: true, data: result };
     } catch (e) {
       console.error('[IPC] query-directive-objection error:', e);
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
-  ipcMain.handle('stage-sector-stance-order', async (_event, payload) => {
-    const { sectorId, stance } = payload || {};
-    if (!currentGameStateJson || typeof sectorId !== 'string' || typeof stance !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    const validStances = ['fortify', 'defend', 'elastic', 'active_defense', 'screening'];
-    if (!validStances.includes(stance)) {
-      return { ok: false, error: `Invalid sector stance: ${stance}` };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const nextOrders = Array.isArray(state.sector_stance_orders) ? [...state.sector_stance_orders] : [];
-      const filtered = nextOrders.filter((order) => order?.sector_id !== sectorId);
-      filtered.push({ sector_id: sectorId, stance });
-      state.sector_stance_orders = filtered;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
-  ipcMain.handle('reset-sector-stance-to-bot', async (_event, payload) => {
-    const { sectorId } = payload || {};
-    if (!currentGameStateJson || typeof sectorId !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const sector = state.corps_front_sectors?.[sectorId];
-      if (!sector) {
-        return { ok: false, error: `Unknown sector: ${sectorId}` };
-      }
-      sector.stance_source = 'bot';
-      // Remove any pending stance order for this sector
-      if (Array.isArray(state.sector_stance_orders)) {
-        state.sector_stance_orders = state.sector_stance_orders.filter((order) => order?.sector_id !== sectorId);
-      }
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }
   });

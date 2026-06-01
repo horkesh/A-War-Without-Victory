@@ -176,10 +176,6 @@ interface WindowAwwv {
     stageMoveOrder: (brigadeId: string, targetMunicipalityId: string) => Promise<{ ok: boolean; error?: string }>;
     stageDeployOrder: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     stageUndeployOrder: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
-    stageBrigadeMovementOrder: (brigadeId: string, targetSettlementIds: string[]) => Promise<{ ok: boolean; error?: string }>;
-    stageCorpsStanceOrder: (corpsId: string, stance: string) => Promise<{ ok: boolean; error?: string }>;
-    stageSectorStanceOrder: (sectorId: string, stance: string) => Promise<{ ok: boolean; error?: string }>;
-    resetSectorStanceToBot: (sectorId: string) => Promise<{ ok: boolean; error?: string }>;
     stageLogisticsPriority: (faction: string, sectorId: string, priority: number) => Promise<{ ok: boolean; error?: string }>;
     stageCorpsOperationOrder: (payload: CorpsOperationOrderPayload) => Promise<{ ok: boolean; error?: string }>;
     queryOperationPrediction: (payload: Record<string, unknown>) => Promise<{ ok: boolean; data?: Record<string, unknown>; error?: string }>;
@@ -393,22 +389,6 @@ export function useIPC() {
 
             stageUndeployOrder: awwv
                 ? (brigadeId: string) => awwv.stageUndeployOrder(brigadeId)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            stageBrigadeMovementOrder: awwv
-                ? (brigadeId: string, targetSettlementIds: string[]) => awwv.stageBrigadeMovementOrder(brigadeId, targetSettlementIds)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            stageCorpsStanceOrder: awwv
-                ? (corpsId: string, stance: string) => awwv.stageCorpsStanceOrder(corpsId, stance)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            stageSectorStanceOrder: awwv
-                ? (sectorId: string, stance: string) => awwv.stageSectorStanceOrder(sectorId, stance)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            resetSectorStanceToBot: awwv
-                ? (sectorId: string) => awwv.resetSectorStanceToBot(sectorId)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
             stageLogisticsPriority: awwv

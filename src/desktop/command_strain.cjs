@@ -3,9 +3,12 @@
 /**
  * Command Strain — CJS helper for Electron main process.
  *
- * Mirrors the numeric strain formula used at two IPC handler sites in
- * electron-main.cjs (stage-corps-stance-order gate + stabilize-command-relationship).
- * Extracted verbatim to a single owner so both sites cannot drift.
+ * Mirrors the numeric strain formula used by the stabilize-command-relationship
+ * IPC handler in electron-main.cjs. Extracted to a single owner so call sites
+ * cannot drift. (The former stage-corps-stance-order gate that also consumed
+ * this helper was removed when the dead direct-set stance control was retired —
+ * the president now approves CO-proposed stance changes via the autonomy
+ * propose→approve surface.)
  *
  * Source of truth (semantics): src/ui/map/data/command_strain.ts
  * NOTE: The UI TS canonical adds a third strain source (corps exhaustion) which
