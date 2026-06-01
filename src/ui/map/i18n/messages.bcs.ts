@@ -1669,6 +1669,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'armyReserve.corpsHow': 'KO korpusa (KAKO)',
     'armyReserve.approve': 'ODOBRI',
     'armyReserve.decline': 'ODBIJ',
+    'armyReserve.commandAuthorityCost': 'Trošak komandnog autoriteta: {cost}',
+    'armyReserve.insufficientAuthority': 'Nedovoljan komandni autoritet',
     'armyReserve.campaignHistory': 'Historija kampanje',
     'armyReserve.loans': 'Posudbe',
     'armyReserve.weeks': 'Sedmice',

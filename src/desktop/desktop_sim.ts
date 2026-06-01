@@ -42,6 +42,7 @@ import { strictCompare } from '../state/validateGameState.js';
 import { asArray, asRecord } from '../state/schema_validators.js';
 import type { Osid } from '../sim/combat/osid_adjacency.js';
 import { canEliteLoanReachCorpsTerritory, deployEliteLoan, recallEliteLoan } from '../sim/combat/army_reserve_system.js';
+import { ELITE_DEPLOY_COST } from '../ui/map/utils/commandAuthority.js';
 import { resolvePlayerParamilitaryDecisions } from '../sim/combat/paramilitary_sweep.js';
 
 // Event definitions are static per build. Load + validate once per events dir and
@@ -648,6 +649,24 @@ export async function approveReserveRequest(
     }
     if (!canEliteLoanReachCorpsTerritory(state, brigadeId, corpsId, await getCachedOsidAdjacency(baseDir))) {
         return { ok: false, error: `No friendly route from ${brigadeId} to ${corpsId} sector territory` };
+    }
+    // ── ELITE-DEPLOY command-authority guard + debit (Presidential Command Model) ──
+    // PLAYER IPC path ONLY. All deployability checks above (elite brigade exists, not
+    // on loan / degraded, base dir present, request found, corps owner valid, friendly
+    // route reachable) have passed — so reaching here means deployEliteLoan WILL succeed.
+    // Ordering is therefore: validate deployability → CA guard → debit → deploy, which
+    // guarantees the president is NEVER charged for a rejected approval.
+    // `command_authority` is player-only and absent in headless/calibration, so the
+    // entire guard is a no-op there (the bot/headless auto-deploy path is unaffected —
+    // it never calls approveReserveRequest).
+    const auth = state.military.command_authority;
+    if (auth) {
+        if (auth.current < ELITE_DEPLOY_COST) {
+            return { ok: false, error: `insufficient_command_authority (${auth.current}/${ELITE_DEPLOY_COST})` };
+        }
+        auth.current -= ELITE_DEPLOY_COST;
+        auth.spent_this_turn += ELITE_DEPLOY_COST;
+        auth.lifetime_spent += ELITE_DEPLOY_COST;
     }
     const reason = req?.reason ?? 'offensive_support';
     const hops = req?.travel_hops ?? 0;
