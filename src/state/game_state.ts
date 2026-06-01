@@ -691,8 +691,10 @@ export interface CorpsCommandState {
     player_ordered_stance?: string | null;
     /** Formula bot's recommended stance computed this turn. Set by generateCorpsStanceOrders; read by Level 1 proposal generation. */
     ai_recommended_stance?: CorpsStance;
-    /** v0.8.4 Phase D: Player response to op proposal at Level 1. Cleared each turn by apply-autonomy-transition. */
-    player_op_response?: { plan_id: string; approved: boolean; turn: number };
+    /** v0.8.4 Phase D: Player response to op proposal at Level 1. Cleared each turn by apply-autonomy-transition.
+     *  `force_launched` distinguishes a proactive/override force-launch (Direct Intervention — tags the emitted op
+     *  as force-launched and costs CA) from an ordinary Commit/accept-proposal. Only the force-launch IPC handlers set it. */
+    player_op_response?: { plan_id: string; approved: boolean; turn: number; force_launched?: boolean };
 }
 
 /** Operational group activation order. */

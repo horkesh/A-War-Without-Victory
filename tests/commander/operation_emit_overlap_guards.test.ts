@@ -340,4 +340,75 @@ describe('commander emission overlap guards', () => {
         expect(state.military.corps_command?.[CORPS_ID]?.active_operations).toHaveLength(1);
         expect(state.military.corps_command?.[CORPS_ID]?.active_operations?.[0]?.name).toBe('cmd_old');
     });
+
+    // Codex P1 regression (#86): at autonomy level 1 the emitted op is tagged
+    // force-launched ONLY for a force-launch (player_op_response.force_launched),
+    // NOT for an ordinary Commit (which also stages approved:true).
+    function runLevel1Launch(forceLaunched: boolean) {
+        const state = {
+            schema_version: CURRENT_SCHEMA_VERSION,
+            meta: { turn: 10, phase: 'war', seed: 'l1-launch', autonomy_level: 1 } as any,
+            factions: [{ id: FACTION }] as any,
+            military: {
+                corps_command: {
+                    [CORPS_ID]: {
+                        command_span: 5,
+                        subordinate_count: 2,
+                        og_slots: 0,
+                        active_ogs: [],
+                        corps_exhaustion: 0,
+                        faction_war_exhaustion: 0,
+                        stance: 'offensive',
+                        active_operations: [],
+                        player_op_response: {
+                            plan_id: 'p1', approved: true, turn: 10,
+                            ...(forceLaunched ? { force_launched: true } : {}),
+                        },
+                    },
+                },
+                brigade_movement_orders: {},
+            },
+        } as unknown as GameState;
+
+        applyCommanderOutput(state, CORPS_ID, {
+            directive: { type: 'hold', target_zone: null } as any,
+            operations: [{
+                name: 'l1_op', type: 'sector_attack', phase: 'planning',
+                sector_id: `sector:${CORPS_ID}:0`, objectives: ['op:test:objective'],
+                participating_brigades: ['b1', 'b2'],
+            } as any],
+            sector_stances: [],
+            updated_state: {
+                current_plan: { plan_id: 'p1', status: 'executing' } as any,
+                zone_assessments: [],
+                threat_assessment: { threatened_zones: [], enemy_concentration_zones: [], recent_losses: [], overall_pressure: 'low' },
+                force_assessment: makeForces(),
+                sector_activity_log: [],
+                operation_history: [],
+                intel_picture: undefined,
+                garrison_budget: {},
+                last_assessment_turn: 10,
+                last_plan_action: 'none',
+                last_plan_reason: 'test',
+            } as any,
+            reinforcement_requests: [],
+            prepositioning_orders: [],
+            plan_updates: [],
+            garrison_locks: [],
+        });
+        return state.military.corps_command?.[CORPS_ID]?.active_operations?.[0] as any;
+    }
+
+    it('Level-1 ordinary Commit does NOT tag the emitted op as force-launched', () => {
+        const op = runLevel1Launch(false);
+        expect(op?.name).toBe('l1_op');
+        expect(op?.was_force_launched).not.toBe(true);
+    });
+
+    it('Level-1 force-launch (player_op_response.force_launched) tags the emitted op', () => {
+        const op = runLevel1Launch(true);
+        expect(op?.name).toBe('l1_op');
+        expect(op?.force_launch).toBe(true);
+        expect(op?.was_force_launched).toBe(true);
+    });
 });

@@ -271,20 +271,23 @@ export function applyCommanderOutput(
             }
             // planApproved === true → fall through, apply output normally.
             //
-            // Mark the operation(s) emitted from this just-approved plan as
-            // force-launched. This branch is reached ONLY when the human staged
-            // player_op_response.approved === true at autonomy level 1 — the same
-            // intent the IPC proactive-force-launch handler records on an already
-            // active op. The newly emitted ops were pushed by reference from
-            // output.operations in step 3, so tagging those objects tags the ops
-            // now on corps.active_operations.
+            // Mark the emitted operation(s) as force-launched ONLY for a proactive/
+            // override force-launch (Direct Intervention), signalled by
+            // player_op_response.force_launched. An ordinary Commit (accept-proposal)
+            // also stages player_op_response.approved === true but is NOT a force-launch
+            // and must not be tagged (downstream command-strain/history treats
+            // was_force_launched as Direct Intervention). The emitted ops were pushed
+            // by reference from output.operations in step 3, so tagging those objects
+            // tags the ops now on corps.active_operations.
             //
             // Headless/bot runs never set player_op_response and stay at autonomy
             // level 0, so this branch is never taken outside human play — baseline
             // stays byte-identical. No clock / RNG used.
-            for (const emittedOp of output.operations) {
-                emittedOp.force_launch = true;
-                emittedOp.was_force_launched = true;
+            if (playerOpResp?.force_launched === true) {
+                for (const emittedOp of output.operations) {
+                    emittedOp.force_launch = true;
+                    emittedOp.was_force_launched = true;
+                }
             }
         }
     }
