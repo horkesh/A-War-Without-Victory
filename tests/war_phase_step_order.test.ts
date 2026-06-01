@@ -42,6 +42,11 @@ describe('war-phase step ordering', () => {
         assertBefore('inject-queued-operations', 'inject-army-hq-operations');
         assertBefore('inject-army-hq-operations', 'check-triggered-operations');
 
+        // STOP-OP presidential lever: player halts apply right after author-op injection
+        // and before attacks resolve, so the halted op's brigades free up the same turn.
+        assertBefore('inject-authored-operations', 'apply-op-halts');
+        assertBefore('apply-op-halts', 'resolve-attack-orders');
+
         // Live operation rosters must be reconciled before sector offensives advance
         assertBefore('jna-phantom-withdrawals', 'reconcile-live-operation-truth');
         assertBefore('reconcile-live-operation-truth', 'advance-sector-offensives');
@@ -162,6 +167,10 @@ describe('war-phase step ordering', () => {
         //        Adjacent to inject-queued-operations; DETERMINISM EARLY-OUT — performs ZERO
         //        state mutation when no corps has a pending_authored_op (never set in headless
         //        scenarios), so the step is byte-identical-inert on all baselines.
-        expect(stepNames.length).toBe(181);
+        // +1 from apply-op-halts (STOP-OP presidential lever, Presidential Command Model 1/N, 2026-06-01).
+        //        Adjacent to inject-authored-operations; DETERMINISM EARLY-OUT — performs ZERO
+        //        state mutation when no corps has a pending_op_halt (never set in headless
+        //        scenarios), so the step is byte-identical-inert on all baselines.
+        expect(stepNames.length).toBe(182);
     });
 });

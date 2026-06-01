@@ -24,6 +24,7 @@ const {
   PROACTIVE_FORCE_LAUNCH_COST,
 } = require('./autonomy_ipc_contract.cjs');
 const { stageAuthoredOperation } = require('./author_op_staging.cjs');
+const { stageOpHalt } = require('./op_halt.cjs');
 const { computeCorpsCommandStrain } = require('./command_strain.cjs');
 const { stageConvoyDecisionOnState } = require('./convoy_ipc_contract.cjs');
 const { fileOfficerDecisionRecord } = require('./officer_decision_history.cjs');
@@ -1900,6 +1901,29 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       const state = readCanonicalCurrentState(sim);
       const result = stageAuthoredOperation(state, payload);
+      if (!result.ok) return result;
+      writeCanonicalCurrentState(sim, state, _event && _event.sender);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  // STOP-OP presidential lever (Presidential Command Model slice 1/N): canon-safe
+  // halt staging. Mirrors stage-corps-operation-order: ownership check → confirm a
+  // matching LIVE op → reject duplicate halt → CA guard+debit (STOP_OP_COST) → STAGE
+  // cc.pending_op_halt. The engine `apply-op-halts` war-phase step consumes the staged
+  // halt once (release commander → remove op via the canonical clean-removal path →
+  // append halted_op_record → clear). No active_operations mutation here. The political
+  // consequence (patron_confidence gain etc.) is a deliberate FOLLOW-UP, not this slice.
+  ipcMain.handle('stage-op-halt-order', async (_event, payload) => {
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = readCanonicalCurrentState(sim);
+      const result = stageOpHalt(state, payload);
       if (!result.ok) return result;
       writeCanonicalCurrentState(sim, state, _event && _event.sender);
       return { ok: true };

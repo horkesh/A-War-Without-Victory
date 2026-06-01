@@ -144,11 +144,11 @@ import { buildStaticOsidAdjacency } from '../combat/sector_offensive_launch_help
 import { buildTerrainCache } from '../combat/combat_predictor.js';
 import { processJnaWithdrawals, spawnJnaPhantomBrigades } from '../combat/jna_phantom_brigades.js';
 import { injectQueuedOperation } from '../combat/pre_planned_operations.js';
-import { isSlot0AvailableForQueue, hasAvailableSlot, getAvailableBrigades, buildCorpsOperation, findBrigadeOperationAnywhere } from '../combat/corps_operation_helpers.js';
+import { isSlot0AvailableForQueue, hasAvailableSlot, getAvailableBrigades, buildCorpsOperation, findBrigadeOperationAnywhere, removeOperation } from '../combat/corps_operation_helpers.js';
 import { validateOpAtInjection, hasBlockingOpInjectionWarnings } from '../combat/operation_validation.js';
 import { createSingleAxis } from '../combat/sector_offensive_axis_helpers.js';
 import { getCorpsSubordinates } from '../combat/bot_corps_helpers.js';
-import { assignOperationCommander } from '../combat/officer_system.js';
+import { assignOperationCommander, releaseOperationCommander } from '../combat/officer_system.js';
 import { isEligibleOperationFormation } from '../../state/formation_constants.js';
 import { checkTriggeredOperations, injectArmyHqOperations } from '../combat/triggered_operations.js';
 import { computeMilitiaGarrisons } from '../combat/militia_garrison.js';
@@ -379,6 +379,65 @@ function injectAuthoredOperations(state: GameState): void {
         cmd.stance = 'offensive';
         // Clear any prior rejection on successful injection.
         cmd.authored_op_rejection = undefined;
+    }
+}
+
+/**
+ * Apply player STOP-OP halts staged on cc.pending_op_halt (Presidential Command
+ * Model slice 1/N). Single owner of the apply-op-halts step.
+ *
+ * DETERMINISM EARLY-OUT: returns with ZERO mutation when no corps has a
+ * pending_op_halt. pending_op_halt is OPTIONAL and never set in headless/historical
+ * runs → byte-identical baselines by construction.
+ *
+ * Per corps (sorted strictCompare), for each staged halt:
+ *  1. Find the matching LIVE op in active_operations (by op_id first, then op_name).
+ *  2. If found: release its commander (releaseOperationCommander) then remove it via
+ *     the canonical clean-removal path (removeOperation) — the SAME path completion
+ *     and attrition-abort use (corps_command.ts:268-269, sector_offensive.ts).
+ *     Brigades are released implicitly by op-membership recompute (getAvailableBrigades);
+ *     the op object is dropped wholesale, so no dangling axis/op-id refs remain.
+ *  3. Append a halted_op_record (op_name + turn) for the UI / follow-up consequence.
+ *  4. ALWAYS clear cc.pending_op_halt (consumed-once), even if no live op matched.
+ *
+ * MECHANICAL ONLY: no dimension/consequence effects (patron_confidence etc.) are
+ * wired here — that is a deliberate FOLLOW-UP, not this slice.
+ */
+function applyOpHalts(state: GameState): void {
+    const corpsCommand = state.military.corps_command;
+    if (!corpsCommand) return;
+
+    // DETERMINISM GATE — early-out with zero mutation if nothing is staged.
+    const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
+    if (!corpsIds.some((id) => corpsCommand[id]?.pending_op_halt)) return;
+
+    const turn = state.meta?.turn ?? 0;
+
+    for (const corpsId of corpsIds) {
+        const cmd = corpsCommand[corpsId];
+        const staged = cmd?.pending_op_halt;
+        if (!cmd || !staged) continue;
+
+        // Consumed-once: clear the staged field regardless of outcome.
+        cmd.pending_op_halt = undefined;
+
+        // Match the LIVE op by name — `name` is the canonical CorpsOperation identifier
+        // (CorpsOperation has no `id` field; op_halt.cjs records op_name from it). The
+        // staged op_id is informational only.
+        const ops = Array.isArray(cmd.active_operations) ? cmd.active_operations : [];
+        const op = staged.op_name ? ops.find((o) => o.name === staged.op_name) : undefined;
+
+        if (op) {
+            // Canonical clean-removal path (mirrors op completion / attrition abort):
+            // release the officer back to reserve, then drop the op from active_operations.
+            releaseOperationCommander(state, op);
+            removeOperation(cmd, op);
+
+            // Append the halt record (op_name + turn) for the UI / follow-up consequence.
+            const record = { op_name: op.name ?? staged.op_name ?? 'Operation', turn };
+            if (Array.isArray(cmd.halted_op_record)) cmd.halted_op_record.push(record);
+            else cmd.halted_op_record = [record];
+        }
     }
 }
 
@@ -1196,6 +1255,27 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        // STOP-OP presidential lever (Presidential Command Model slice 1/N): apply any
+        // player halts staged by the desktop IPC handler (electron-main.cjs
+        // stage-op-halt-order → op_halt.cjs) on cc.pending_op_halt. Placed immediately
+        // after inject-authored-operations so all player operation-management lives in
+        // one ordering neighbourhood, and BEFORE the AAR/combat steps so the halted op
+        // takes effect cleanly this turn (its brigades free up before execution).
+        //
+        // DETERMINISM GATE: if no corps has a pending_op_halt, this step performs ZERO
+        // state mutation (early-out below). pending_op_halt is OPTIONAL and is never set
+        // in headless/historical scenarios → byte-identical by construction.
+        //
+        // MECHANICAL ONLY: release commander → remove op via the canonical clean-removal
+        // path → append halted_op_record → clear. No dimension/consequence effects
+        // (patron_confidence etc.) — that is a deliberate FOLLOW-UP, not this slice.
+        name: 'apply-op-halts',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            applyOpHalts(context.state);
+        }
+    },
+    {
         // ADR-0005 v3.0: inject faction-wide Army HQ operations (Krivaja-95, Farz 95).
         // Runs AFTER inject-queued-operations and BEFORE check-triggered-
         // operations so the Army HQ path owns its promoted defs exclusively. Fully gated by
@@ -1272,6 +1352,12 @@ export const warPhases: NamedPhase[] = [
                     // earlier the same turn; clear here if it survived for any reason).
                     if (corpsCmd[corpsId].pending_authored_op !== undefined) {
                         corpsCmd[corpsId].pending_authored_op = undefined;
+                    }
+                    // STOP-OP (Presidential Command Model slice 1/N): belt-and-suspenders GC
+                    // of any stale pending_op_halt (normally consumed by apply-op-halts earlier
+                    // the same turn; clear here if it survived for any reason).
+                    if (corpsCmd[corpsId].pending_op_halt !== undefined) {
+                        corpsCmd[corpsId].pending_op_halt = undefined;
                     }
                 }
             }
