@@ -89,7 +89,7 @@ Formations progress through readiness states: Forming, Active, Overextended, and
 
 **Implementation-note (formation activation grace period):** Brigades that remain in Forming for at least BRIGADE_FORMATION_MAX_WAIT turns (e.g. 6) auto-activate regardless of supply or authority gates, so supply-gate cannot permanently block activation. Implementation: `docs/40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md` §6.
 
-Players command brigades through **location_osid**, sector-oriented orders, and command-shell review flows. Compatibility-era front-segment assignment may still survive under the hood for fallback logic, but it is no longer the primary player-facing command model.
+The engine resolves brigade **location_osid** and orders from corps-CO directives; the president commands through the army/corps chain (command-shell review/approval flows), not direct brigade orders. Compatibility-era front-segment assignment may still survive under the hood for fallback logic, but it is no longer the primary player-facing command model.
 
 Operational Groups may be formed temporarily and dissolve automatically under cohesion loss or command degradation. This models ad-hoc wartime organization without allowing permanent force inflation.
 
@@ -118,7 +118,7 @@ RBiH aligns with Bosniak + Other; RS with Serb; HRHB with Croat. This data is al
 
 ### 6.1 Brigade posture (OSID model)
 
-Each brigade maintains a posture state chosen by the player. Posture modifies **attacker and defender combat power** in the attack-resolution formula (see §7.4). Posture does not override supply state, cohesion, or command coherence.
+Each brigade maintains a posture state proposed by its commander and approved/declined by the president. Posture modifies **attacker and defender combat power** in the attack-resolution formula (see §7.4). Posture does not override supply state, cohesion, or command coherence.
 
 **8 postures (attack mult / defense mult / cohesion cost per turn):**
 
@@ -212,7 +212,7 @@ Alliance drift is computed per turn in `alliance_update.ts`: alliance deteriorat
 | Active Defense | 0.85× | 0.6× | Local counterattacks, reduced digging |
 | Screening | 0.50× | 0.0× | Minimal presence, no entrenchment |
 
-Bot AI evaluates stance per sector based on threat and corps directive. Corps stance provides a ceiling (e.g., offensive corps cannot Fortify). Player overrides persist across turns. Applied via `sector_stance_orders` → `applySectorStanceOrders()` in pipeline.
+Bot AI evaluates stance per sector based on threat and corps directive. Corps stance provides a ceiling (e.g., offensive corps cannot Fortify). Approved CO-proposed sector stances persist across turns. Applied via `sector_stance_orders` → `applySectorStanceOrders()` in pipeline.
 
 **Unified sector defense model (n500):** Defense at any OSID = totalSectorPower × (1/sector_edges) × densityMod. The front is a continuous locked line — no brigade-at-OSID vs sector-coverage distinction.
 

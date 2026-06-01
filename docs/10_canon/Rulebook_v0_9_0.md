@@ -129,7 +129,7 @@ Formations differ in manpower, cohesion, supply, and experience.
 
 **OSID location:** Each brigade occupies one OSID (`location_osid`). Stacking is allowed. Only **deployed** brigades (not in column: packing / in_transit / unpacking) participate in combat.
 
-**Movement orders:** Brigade movement uses `brigade_movement_orders.ts` (apply-brigade-movement pipeline step). Column movement allows multi-hop redeployment through friendly rear (terrain-weighted path, composition-dependent rate); brigades in column are in_transit and do not fight until they arrive.
+**Movement orders:** Brigade redeployment is engine-resolved from corps-CO march directives via `brigade_movement_orders.ts` (apply-brigade-movement pipeline step) — the president does not issue brigade movement orders. Column movement allows multi-hop redeployment through friendly rear (terrain-weighted path, composition-dependent rate); brigades in column are in_transit and do not fight until they arrive.
 
 **Retreat (prefer rear):** When retreating, valid destinations are friendly-controlled OSIDs. Tie-break among valid destinations: **enemy adjacency count ascending** (prefer rear), then **OSID string sort** (determinism). No ZoC blocking of retreat destinations.
 
@@ -472,7 +472,7 @@ Some actions are possible but carry severe long-term consequences.
 War-phase player control is real but bounded. The player does not micromanage battles; the player shapes intent, commitment, and risk.
 
 In practice, this means the player can:
-- set brigade postures and attack orders on the line
+- review/approve CO-proposed brigade postures; attacks flow through corps operations (ops-only)
 - set sector-level defensive stances (Fortify / Defend / Elastic / Active Defense / Screening) for individual corps sectors, shaping how reserves respond to attacks and how quickly entrenchments grow
 - shape corps operations with tempo, artillery preparation, launch discipline, and target focus
 - review operation readiness during preparation: intelligence confidence, supply status, force ratio estimates, and commander assessment (launch/postpone/abort recommendation)
@@ -496,21 +496,21 @@ A phase-by-phase summary of player actions each turn. For system details, see th
 
 Each turn the player:
 1. **Reviews** the situation: control map, militia emergence, authority states, alliance status
-2. **Sets brigade postures** (when formations exist): hold, defend, defend_at_all_costs, elastic_defense, counterattack, dig_in, attack, assault
-3. **Issues attack orders** against adjacent enemy-controlled settlements
+2. **Reviews/approves CO-proposed brigade postures** (when formations exist): hold, defend, defend_at_all_costs, elastic_defense, counterattack, dig_in, attack, assault
+3. **Authorizes/requests corps operations**; brigades never attack independently
 4. **Monitors** JNA withdrawal, alliance strain, and early-war transition conditions
 5. **Responds** to the Graz Accords event (week 4): accept or decline the RS-HRHB non-aggression pact
 6. **Ends turn** — postures apply; battles resolve; control may flip; displacement triggers
 
-The player commands through posture and targeting, not direct unit movement. Command friction may degrade order execution.
+The player commands through approving/declining CO proposals and authorizing operations, not direct posture-setting or unit movement. Command friction may degrade order execution.
 
 ### 17.3 War phase (Mid-War to Late-War)
 
 Each turn the player:
 1. **Reviews** reports: front status, exhaustion, supply pressure, corps operations, recent battles, officer status
-2. **Sets brigade postures** and **sector defensive stances**. Note: brigades do not attack independently — all attacks flow through corps operations (see §6.4). The player sets posture as a readiness directive; the sector and operation machinery decides when and where to attack.
+2. **Reviews and approves/declines CO-proposed brigade postures** and **sector defensive stances**. Note: brigades do not attack independently — all attacks flow through corps operations (see §6.4). The president approves a CO-proposed posture as a readiness directive; the sector and operation machinery decides when and where to attack.
 3. **Manages corps operations**: front assignments, operational groups, attack axes, tempo, launch timing, and deception tools such as feints or probes. Operations now include a **preparation phase** before execution (see §7.2) — the player reviews readiness briefings, selects commanders, may order probes, and makes go/no-go decisions. Commander personality (competence x aggressiveness) shapes preparation tempo and launch recommendations
-3a. **Brigade sector override** (n717): player may permanently assign a brigade to a specific same-corps sector via the brigade's Orders tab. The sector commander then orders the brigade to march to its frontline position. Useful for concentrating a veteran unit on a key sector or pulling a brigade back from a threatened flank. Override persists until cleared. Effectiveness cost shown in the panel: brigades operating far from their home municipality perform at reduced effectiveness (up to 30% penalty; elite mechanized/motorized brigades have a gentler decay curve).
+3a. **Brigade sector override** (n717): the president directs the corps CO to concentrate a brigade on a specific same-corps sector (the CO executes the march) via the brigade's Orders tab. The sector commander then orders the brigade to march to its frontline position. Useful for concentrating a veteran unit on a key sector or pulling a brigade back from a threatened flank. Override persists until cleared. Effectiveness cost shown in the panel: brigades operating far from their home municipality perform at reduced effectiveness (up to 30% penalty; elite mechanized/motorized brigades have a gentler decay curve).
 4. **Manages the officer corps**: responds to succession events, assigns replacement commanders, reviews officer combat records. Selects operation commanders for upcoming operations.
 5. **Manages army reserves**: reviews elite brigade loan requests from corps commanders, approves or denies deployments, recalls loaned brigades when the need has passed.
 6. **Allocates constrained supply agency**: enclave airdrops, convoy decisions, smuggling focus, municipality support, and related relief choices where available
