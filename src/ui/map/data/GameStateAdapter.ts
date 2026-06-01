@@ -63,6 +63,7 @@ import { deriveOperationOpportunityRecords, deriveOperationOpportunitySummary } 
 import { deriveOperationOpportunityProposals } from './operationOpportunityDossiers.js';
 import { buildBackTheOfficerViews, buildTgAftermathViews, buildOpProposalCards } from './backTheOfficer.js';
 import { buildDilemmaSpine } from './dilemmaSpine.js';
+import { buildDistanceFromHistory } from './distanceFromHistory.js';
 import { buildDiplomacyView } from './diplomacyView.js';
 import { playerFactionMatch } from './playerFactionMatch.js';
 import {
@@ -2160,6 +2161,12 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         rawGameState: gameState,
     });
 
+    // Distance-from-history read-model v1: how far the player's emergent war has
+    // drifted from the historical 1992-95, measured as event-decision divergence
+    // (chosen response vs each event's historical_default_response_id). Pure /
+    // display-only / zero-hash; reads only the raw event_decision_log substrate.
+    const distanceFromHistory = buildDistanceFromHistory({ rawGameState: gameState });
+
     return {
         label, turn, phase,
         metadata: {
@@ -2272,6 +2279,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         decisionResponses: decisionResponsesSet,
         // Phase 3 Thread 2 "the dilemma spine" (see local above).
         dilemmaSpine,
+        // Distance-from-history read-model v1 (see local above).
+        distanceFromHistory,
         pressureWarning: derivePressureWarning(state),
         patronOverrideAuthority: derivePatronOverrideAuthority(state),
         diplomacyView: buildDiplomacyView(state, playerFaction),

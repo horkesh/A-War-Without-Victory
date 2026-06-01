@@ -122,6 +122,11 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
     // section degrades gracefully.
     const dilemmaSpine = loadedGameState?.dilemmaSpine ?? [];
 
+    // Distance-from-history read-model v1: how far the player's emergent war has
+    // drifted from the historical 1992-95 (event-decision divergence). Absent on
+    // flag-off / pre-substrate saves; the section degrades to nothing.
+    const distanceFromHistory = loadedGameState?.distanceFromHistory ?? null;
+
     const essays = (Array.isArray(essayIndex) ? essayIndex : (essayIndex as { essays: EssayEntry[] }).essays ?? []) as EssayEntry[];
     const resolvedEssays = useMemo(() => {
         const context = {
@@ -285,6 +290,68 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                                 );
                             })}
                         </ul>
+                    </div>
+                )}
+
+                {/* Distance-from-history v1 — "Your War vs History". Read-only
+                    summary of how far the player's emergent war has drifted from
+                    the historical 1992-95, measured as event-decision divergence.
+                    The player-authored divergence count is led. Renders nothing
+                    when the read-model is absent OR no decisions have a historical
+                    default to compare against (totalDecided === 0). */}
+                {distanceFromHistory && distanceFromHistory.totalDecided > 0 && (
+                    <div
+                        data-testid="codex-distance-from-history-section"
+                        className="border-b border-neutral-700/40 bg-[#0d0f16] px-3 py-2"
+                    >
+                        <div className="text-amber-400 text-[10px] font-bold tracking-[0.12em] uppercase mb-1">
+                            Your War vs History
+                        </div>
+                        <div
+                            data-testid="codex-distance-from-history-summary"
+                            className="text-[9px] text-neutral-300 mb-1.5"
+                        >
+                            <span className="text-amber-400 font-bold">
+                                You authored {distanceFromHistory.playerDiverged} departure
+                                {distanceFromHistory.playerDiverged === 1 ? '' : 's'} from history.
+                            </span>
+                            {' '}
+                            <span className="text-neutral-400">
+                                {distanceFromHistory.diverged} of {distanceFromHistory.totalDecided} decision
+                                {distanceFromHistory.totalDecided === 1 ? '' : 's'} diverged from the historical
+                                record ({distanceFromHistory.divergencePct}%).
+                            </span>
+                        </div>
+                        {distanceFromHistory.divergences.length > 0 && (
+                            <ul className="space-y-0.5">
+                                {distanceFromHistory.divergences.map((d) => (
+                                    <li
+                                        key={d.eventId}
+                                        data-testid="codex-distance-from-history-row"
+                                        data-event-id={d.eventId}
+                                        data-source={d.source}
+                                        className="flex items-start gap-2 text-[9px] leading-snug"
+                                    >
+                                        <span className="text-neutral-600 shrink-0">W{d.turn}</span>
+                                        <div className="flex-1 min-w-0">
+                                            <span className="text-neutral-200">{d.title}</span>
+                                            <span className="text-neutral-500">
+                                                {' '}— chose <span className="text-neutral-300">{d.chosen}</span>
+                                                {' '}(history: {d.historical})
+                                            </span>
+                                        </div>
+                                        {d.source === 'player' && (
+                                            <span
+                                                data-testid="codex-distance-from-history-player-badge"
+                                                className="shrink-0 text-[7px] font-bold uppercase tracking-[0.1em] px-1 py-0.5 rounded bg-amber-400/15 text-amber-400"
+                                            >
+                                                Yours
+                                            </span>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                 )}
 
