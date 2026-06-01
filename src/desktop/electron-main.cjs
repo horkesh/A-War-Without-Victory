@@ -3235,6 +3235,14 @@ app.whenReady().then(() => {
     const cc = state.military?.corps_command?.[corpsId];
     if (!cc) return { ok: false, error: 'corps_not_found' };
 
+    // Corps→faction is the corps formation's faction (corps_command key is a
+    // FormationId in military.formations). Reject force-launching another
+    // faction's corps — stage nothing, debit no command authority.
+    const corpsFaction = state.military?.formations?.[corpsId]?.faction ?? null;
+    if (playerFaction && corpsFaction && corpsFaction !== playerFaction) {
+      return { ok: false, error: 'corps_not_owned_by_player' };
+    }
+
     // Resolve the HELD plan from commander_state.current_plan (NOT active_operations).
     const plan = cc.commander_state && typeof cc.commander_state === 'object'
       ? cc.commander_state.current_plan

@@ -270,6 +270,22 @@ export function applyCommanderOutput(
                 return;
             }
             // planApproved === true → fall through, apply output normally.
+            //
+            // Mark the operation(s) emitted from this just-approved plan as
+            // force-launched. This branch is reached ONLY when the human staged
+            // player_op_response.approved === true at autonomy level 1 — the same
+            // intent the IPC proactive-force-launch handler records on an already
+            // active op. The newly emitted ops were pushed by reference from
+            // output.operations in step 3, so tagging those objects tags the ops
+            // now on corps.active_operations.
+            //
+            // Headless/bot runs never set player_op_response and stay at autonomy
+            // level 0, so this branch is never taken outside human play — baseline
+            // stays byte-identical. No clock / RNG used.
+            for (const emittedOp of output.operations) {
+                emittedOp.force_launch = true;
+                emittedOp.was_force_launched = true;
+            }
         }
     }
     corps.commander_state = output.updated_state;
