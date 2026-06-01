@@ -106,9 +106,10 @@ describe('Free War Slice A — territory-trend priority multiplier', () => {
             loss('RS', 'op:laktasi:laktasi_2', 6),
         ];
         const emergent = getCorpsArmyPriorities(FACTION, CORPS, TURN, makeState({ turn: TURN, mode: 'emergent', controlEvents }));
-        // 1KK Rear (static 20) loses 4 OSIDs → ×2.00 → effective weight 40 carried on the returned object,
-        // so generateArmyHQOverrides' thresholds + commanderReviewAssignment's mission weights see the boost.
-        expect(emergent.find(p => p.name === '1KK Rear Security')!.weight).toBeCloseTo(40, 5);
+        // 1KK Rear (static 20) loses 4 OSIDs → Slice A.3 (K_LOSS 0.45): 1 + 0.45×4 = 2.80 (clamp HI 4.00)
+        // → effective weight 56 carried on the returned object, so generateArmyHQOverrides' thresholds +
+        // commanderReviewAssignment's mission weights see the boost.
+        expect(emergent.find(p => p.name === '1KK Rear Security')!.weight).toBeCloseTo(56, 5);
         // A quiet area decays: Central Corridor static 30 → ×0.75 → 22.5.
         expect(emergent.find(p => p.name === 'Central Corridor')!.weight).toBeCloseTo(22.5, 5);
         // Historical returns the STATIC weights unchanged (byte-identical contract).
