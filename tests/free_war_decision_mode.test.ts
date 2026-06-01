@@ -146,6 +146,28 @@ test('unset decision_mode behaves as historical (byte-identical-to-today default
     assert.strictEqual(decisionSource(state), 'bot_ai_default', 'unset → AI default railroad');
 });
 
+test('Codex P2 #88: EXPLICIT historical honors the default even WITHOUT the two-level flag', () => {
+    delete process.env.AWWV_TWO_LEVEL_NOTIFICATIONS; // flag off — decision_mode must still decide
+    const state = rsBotState('historical');
+    evaluateEvents(state, rng, 10, [rsDecisionEvent()]);
+    assert.strictEqual(
+        chosenResponseId(state),
+        HISTORICAL_DEFAULT_ID,
+        'explicit historical must replay the historical default regardless of the notification flag',
+    );
+    assert.strictEqual(decisionSource(state), 'bot_ai_default');
+});
+
+test('the fix is surgical: UNSET mode without the flag still takes the legacy political/v1 path (unchanged)', () => {
+    delete process.env.AWWV_TWO_LEVEL_NOTIFICATIONS; // flag off
+    const state = rsBotState(undefined); // unset — NOT explicit historical
+    evaluateEvents(state, rng, 10, [rsDecisionEvent()]);
+    // Legacy behavior (no flag + unset) routes to the political scorer, NOT applyAIDefaultResponse.
+    // The Codex fix only forces the default for EXPLICIT historical, leaving this untouched.
+    assert.strictEqual(decisionSource(state), 'bot_political', 'unset + no flag = legacy political path, unchanged');
+    assert.strictEqual(chosenResponseId(state), SIGNAL_DRIVEN_ID);
+});
+
 test('emergent decisions are deterministic: same state → same choice twice', () => {
     const a = rsBotState('emergent');
     const b = rsBotState('emergent');
