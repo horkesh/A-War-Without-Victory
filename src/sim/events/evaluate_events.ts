@@ -606,7 +606,12 @@ export function evaluateEvents(
                 // Political personality path for dimension-weighted logic types.
                 let chosen: EventResponseOption;
                 let decisionSource: 'bot_political' | 'bot_v1' | 'bot_ai_default';
-                if (isTwoLevelNotificationsEnabled()) {
+                // Free War Phase 0 de-railroad: in 'emergent' mode, bypass the
+                // historical-default railroad and fall through to the live
+                // political/v1 scorers. Unset/'historical' preserves today's
+                // behavior byte-identical (the calibration health check).
+                const emergent = state.meta.decision_mode === 'emergent';
+                if (isTwoLevelNotificationsEnabled() && !emergent) {
                     chosen = applyAIDefaultResponse(state, def);
                     decisionSource = 'bot_ai_default';
                 } else if (POLITICAL_LOGICS.has(def.bot_response_logic ?? '') && respondingFaction !== null) {

@@ -1587,6 +1587,8 @@ export interface StateMeta {
     ai_commander_config?: import('../sim/ai_commander/ai_config.js').AiCommanderConfig;
     /** Calendar date string for current turn (set at runtime in saves, not always present). */
     date?: string;
+    /** Free War Phase 0: bot event-decision resolution mode. Unset/'historical' = bots replay historical defaults (calibration byte-identical); 'emergent' = bots choose from battlefield/political signals. Set by the entry point (game = emergent, calibration = historical). */
+    decision_mode?: 'historical' | 'emergent';
     /** v0.8.4: Current autonomy level. 0 = Full Control (default). 1 = Strategic. 2 = Political. 3 = Observer. */
     autonomy_level?: 0 | 1 | 2 | 3;
     /** v0.8.4: Queued autonomy change; takes effect at the start of the next turn via apply-autonomy-transition. */

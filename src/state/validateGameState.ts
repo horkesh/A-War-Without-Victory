@@ -1110,6 +1110,15 @@ export function validateGameStateShape(
             ) {
                 errors.push('meta.rbih_hrhb_war_earliest_turn must be null or a non-negative integer when present');
             }
+            // Free War Phase 0: bot event-decision mode (optional; 'historical'|'emergent' when present, unset = historical)
+            if (
+                'decision_mode' in m &&
+                m.decision_mode !== undefined &&
+                m.decision_mode !== 'historical' &&
+                m.decision_mode !== 'emergent'
+            ) {
+                errors.push("meta.decision_mode must be 'historical' or 'emergent' when present");
+            }
         }
     }
 
