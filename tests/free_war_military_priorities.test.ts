@@ -98,6 +98,25 @@ describe('Free War Slice A — territory-trend priority multiplier', () => {
         expect(names).not.toEqual(staticNames);
     });
 
+    it('(e) Codex P2 #93: emergent returns the EFFECTIVE weight on each priority (consumers read p.weight)', () => {
+        const controlEvents: ControlEvent[] = [
+            loss('RS', 'op:prijedor:prijedor_2', 5),
+            loss('RS', 'op:banja_luka:banja_luka_2', 5),
+            loss('RS', 'op:celinac:celinac_2', 4),
+            loss('RS', 'op:laktasi:laktasi_2', 6),
+        ];
+        const emergent = getCorpsArmyPriorities(FACTION, CORPS, TURN, makeState({ turn: TURN, mode: 'emergent', controlEvents }));
+        // 1KK Rear (static 20) loses 4 OSIDs → ×1.60 → effective weight 32 carried on the returned object,
+        // so generateArmyHQOverrides' thresholds + commanderReviewAssignment's mission weights see the boost.
+        expect(emergent.find(p => p.name === '1KK Rear Security')!.weight).toBeCloseTo(32, 5);
+        // A quiet area decays: Central Corridor static 30 → ×0.80 → 24.
+        expect(emergent.find(p => p.name === 'Central Corridor')!.weight).toBeCloseTo(24, 5);
+        // Historical returns the STATIC weights unchanged (byte-identical contract).
+        const hist = getCorpsArmyPriorities(FACTION, CORPS, TURN, makeState({ turn: TURN, mode: 'historical', controlEvents }));
+        expect(hist.find(p => p.name === '1KK Rear Security')!.weight).toBe(20);
+        expect(hist.find(p => p.name === 'Central Corridor')!.weight).toBe(30);
+    });
+
     it('(c) determinism: identical state yields identical ordering on repeat calls', () => {
         const controlEvents: ControlEvent[] = [
             loss('RS', 'op:prijedor:prijedor_2', 5),

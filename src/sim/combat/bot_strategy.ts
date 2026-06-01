@@ -711,12 +711,17 @@ export function getCorpsArmyPriorities(
         p,
         eff: round2(p.weight * priorityTrendMultiplier(state, faction, p)),
     }));
+    // Codex P2 (#93): return priorities carrying the EFFECTIVE weight, not just the
+    // sort order — downstream consumers read `p.weight` directly (generateArmyHQOverrides'
+    // probe/full-override thresholds, commanderReviewAssignment's mission weights), so a
+    // boosted losing area must also carry the higher weight or it gets reordered up yet
+    // skipped/under-allocated. Quantized; historical path above is untouched (byte-identical).
     return scored
         .sort((a, b) => {
             if (b.eff !== a.eff) return b.eff - a.eff;
             return a.p.name < b.p.name ? -1 : a.p.name > b.p.name ? 1 : 0;
         })
-        .map(s => s.p);
+        .map(s => ({ ...s.p, weight: s.eff }));
 }
 
 /**
