@@ -84,14 +84,58 @@ const COST_REFERENCE = Object.freeze({
     casualties_full: 40000,
     /** War duration in weeks/turns at max cost (~3 years of grinding war). */
     duration_full_weeks: 156,
+    // ── Atrocity sub-score references (Free War Phase 5, Slice 1) ──────────────
+    // The atrocity term saturates at these reference ceilings. They are
+    // deliberately LOW so that even a modest cleansing campaign pushes the
+    // atrocity sub-score toward 1.0 — the bright line requires atrocity to
+    // dominate any territory-driven grade gain, never merely shade it.
+    /** War-crimes event count at which the war-crimes component saturates. */
+    war_crimes_full: 3,
+    /** Refugees created at which the displacement component saturates. */
+    refugees_full: 50000,
+    /** Civilian casualties caused at which the civilian-harm component saturates. */
+    civilian_casualties_full: 5000,
 });
 
-/** Blend weights for the three monotonic sub-scores. Must sum to 1.0. */
+/** Blend weights for the three monotonic base sub-scores. Must sum to 1.0. */
 const COST_WEIGHTS = Object.freeze({
     exhaustion: 0.4,
     casualties: 0.4,
     duration: 0.2,
 });
+
+// ── ATROCITY TERM — the ethics bright line (Free War Phase 5, Slice 1) ────────
+//
+// OWNER-TUNABLE. The atrocity sub-score (0..1) is built from war-crimes events,
+// refugees created, and civilian casualties caused — each saturating at its
+// COST_REFERENCE ceiling above, then blended by ATROCITY_WEIGHTS (sum 1.0).
+//
+// It is added to the base war-cost index (the result is clamped to 1.0), scaled
+// by ATROCITY_COST_GAIN. The gain is sized so a meaningful cleansing campaign
+// alone can lift the cost index across the 0.78 "hollow" cap — i.e. push an
+// otherwise-A+ territory grade down to C. That is the whole point: the extra
+// territory cleansing buys is NET-NEGATIVE at the verdict.
+//
+// CRITICAL — EMERGENT-GATED: the atrocity term applies ONLY when
+// state.meta.decision_mode === 'emergent'. The historical 52w baseline contains
+// the real Drina cleansing (war_crimes_events > 0); applying the term there
+// would raise its cost index, lower its grade, and break the byte-identical
+// baseline. Historical/unset mode is therefore left exactly as before.
+
+/** Blend weights for the three atrocity components. Must sum to 1.0. */
+const ATROCITY_WEIGHTS = Object.freeze({
+    war_crimes: 0.5,
+    refugees: 0.3,
+    civilian_casualties: 0.2,
+});
+
+/**
+ * Additive gain applied to the (0..1) atrocity sub-score before it is added to
+ * the base cost index. At full saturation (atrocity sub-score 1.0) this adds
+ * +0.85 to the index — enough that even a low-cost short war crosses the 0.78
+ * hollow cap on cleansing alone, so atrocity DOMINATES territory at the verdict.
+ */
+const ATROCITY_COST_GAIN = 0.85;
 
 /**
  * Grade ceilings keyed by ascending war_cost_index threshold.
@@ -124,6 +168,38 @@ function clamp01(value: number): number {
 }
 
 /**
+ * Compute the monotonic atrocity sub-score in [0, 1] for a faction.
+ *
+ * Reads only already-accrued, monotonic per-faction war-data from the
+ * negotiation capital breakdown:
+ *   - war_crimes_events         (count of war-crime events)
+ *   - refugees_created          (forced displacement caused)
+ *   - civilian_casualties_caused
+ *
+ * Each component saturates at its COST_REFERENCE ceiling, then blends by
+ * ATROCITY_WEIGHTS. Higher = more atrocity. Pure & deterministic. This is the
+ * raw signal; the emergent gate and additive gain are applied by the caller.
+ */
+function computeAtrocitySubScore(state: GameState, faction: string): number {
+    const cap = state.military?.negotiation?.capital?.[faction];
+    if (!cap) return 0;
+
+    const warCrimes = cap.war_crimes_events ?? 0;
+    const refugees = cap.refugees_created ?? 0;
+    const civilianCasualties = cap.civilian_casualties_caused ?? 0;
+
+    const warCrimesScore = clamp01(warCrimes / COST_REFERENCE.war_crimes_full);
+    const refugeesScore = clamp01(refugees / COST_REFERENCE.refugees_full);
+    const civilianScore = clamp01(civilianCasualties / COST_REFERENCE.civilian_casualties_full);
+
+    return clamp01(
+        warCrimesScore * ATROCITY_WEIGHTS.war_crimes +
+        refugeesScore * ATROCITY_WEIGHTS.refugees +
+        civilianScore * ATROCITY_WEIGHTS.civilian_casualties,
+    );
+}
+
+/**
  * Compute the monotonic war-cost index in [0, 1] for a faction.
  *
  * Reads only already-accrued, monotonic state:
@@ -133,6 +209,14 @@ function clamp01(value: number): number {
  *
  * Each sub-score saturates at its COST_REFERENCE ceiling, then blends by
  * COST_WEIGHTS. Higher = more catastrophic war. Pure & deterministic.
+ *
+ * EMERGENT-ONLY atrocity term (Free War Phase 5, Slice 1 — the ethics bright
+ * line): when meta.decision_mode === 'emergent', an additive atrocity penalty
+ * (war_crimes_events + refugees + civilian casualties, scaled by
+ * ATROCITY_COST_GAIN) is folded in so cleansing RAISES the cost index — pushing
+ * the grade cap down enough that the territory cleansing buys is net-negative at
+ * the verdict. In historical/unset mode the term is OFF, so the index (and thus
+ * the 52w baseline grade) is byte-identical to before this slice.
  */
 export function computeWarCostIndex(state: GameState, faction: string): number {
     const exhaustion = state.political?.war_exhaustion?.[faction] ?? 0;
@@ -147,12 +231,19 @@ export function computeWarCostIndex(state: GameState, faction: string): number {
     const weeks = state.meta?.turn ?? 0;
     const durationScore = clamp01(weeks / COST_REFERENCE.duration_full_weeks);
 
-    const index =
+    const baseIndex =
         exhaustionScore * COST_WEIGHTS.exhaustion +
         casualtyScore * COST_WEIGHTS.casualties +
         durationScore * COST_WEIGHTS.duration;
 
-    return clamp01(index);
+    // EMERGENT-GATED: the atrocity term is OFF in historical/unset mode, keeping
+    // the historical 52w war_cost_index (and verdict) byte-identical.
+    if (state.meta?.decision_mode !== 'emergent') {
+        return clamp01(baseIndex);
+    }
+
+    const atrocityPenalty = computeAtrocitySubScore(state, faction) * ATROCITY_COST_GAIN;
+    return clamp01(baseIndex + atrocityPenalty);
 }
 
 /**
