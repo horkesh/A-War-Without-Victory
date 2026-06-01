@@ -168,13 +168,56 @@ function clamp01(value: number): number {
 }
 
 /**
+ * Sum the FRESH humanitarian aggregates for a faction directly from
+ * displacement state — `state.displacement.displacement_humanitarian_aggregates`
+ * keyed by causer faction × ethnicity. These are written at append-time by
+ * appendDisplacementEvent (src/state/displacement_event_log.ts), BEFORE the
+ * later compute-negotiation-capital step copies them onto negotiation.capital.
+ *
+ * Reading them here makes the atrocity score independent of capital-refresh
+ * timing: on a TERMINAL turn the verdict snapshot is frozen in
+ * check-victory-conditions BEFORE compute-negotiation-capital runs, so the
+ * capital copy of refugees_created / civilian_casualties_caused can be stale
+ * (omitting harm appended earlier the same turn). The displacement aggregates
+ * are always current. Pure, deterministic, sorted iteration.
+ */
+function freshDisplacementHarm(
+    state: GameState,
+    faction: string,
+): { refugees: number; civilianCasualties: number } {
+    const humAgg = state.displacement?.displacement_humanitarian_aggregates;
+    const byEth = humAgg?.[faction];
+    if (!byEth) return { refugees: 0, civilianCasualties: 0 };
+
+    let refugees = 0;
+    let civilianCasualties = 0;
+    for (const eth of Object.keys(byEth).sort(strictCompare)) {
+        const slot = byEth[eth];
+        if (!slot) continue;
+        refugees += slot.refugees_created ?? 0;
+        civilianCasualties += slot.civilian_casualties_caused ?? 0;
+    }
+    return { refugees, civilianCasualties };
+}
+
+/**
  * Compute the monotonic atrocity sub-score in [0, 1] for a faction.
  *
- * Reads only already-accrued, monotonic per-faction war-data from the
- * negotiation capital breakdown:
- *   - war_crimes_events         (count of war-crime events)
- *   - refugees_created          (forced displacement caused)
- *   - civilian_casualties_caused
+ * Reads already-accrued, monotonic per-faction war-data, sourced so the score
+ * holds on TERMINAL turns (when the negotiation.capital snapshot may be frozen
+ * one step before compute-negotiation-capital refreshes its displacement copy):
+ *   - war_crimes_events         — read from negotiation.capital. recordWarCrime
+ *                                 (paramilitary_sweep.ts) and apply_effects.ts
+ *                                 increment this IN PLACE during the turn, so
+ *                                 capital is already the freshest store.
+ *   - refugees_created          — max(capital, FRESH displacement aggregate).
+ *   - civilian_casualties_caused — max(capital, FRESH displacement aggregate).
+ *
+ * For the two displacement-derived inputs we take the MAX of the (possibly
+ * stale) capital value and the always-current displacement aggregate, so the
+ * score can never UNDER-count terminal-turn harm — a faction cannot commit
+ * atrocities on the final turn and evade the bright-line penalty exactly at the
+ * end-state being scored.
  *
  * Each component saturates at its COST_REFERENCE ceiling, then blends by
  * ATROCITY_WEIGHTS. Higher = more atrocity. Pure & deterministic. This is the
@@ -182,11 +225,17 @@ function clamp01(value: number): number {
  */
 function computeAtrocitySubScore(state: GameState, faction: string): number {
     const cap = state.military?.negotiation?.capital?.[faction];
-    if (!cap) return 0;
 
-    const warCrimes = cap.war_crimes_events ?? 0;
-    const refugees = cap.refugees_created ?? 0;
-    const civilianCasualties = cap.civilian_casualties_caused ?? 0;
+    const warCrimes = cap?.war_crimes_events ?? 0;
+    const capRefugees = cap?.refugees_created ?? 0;
+    const capCivilian = cap?.civilian_casualties_caused ?? 0;
+
+    // FRESH source — never under-count terminal-turn harm (see freshDisplacementHarm).
+    const fresh = freshDisplacementHarm(state, faction);
+    const refugees = Math.max(capRefugees, fresh.refugees);
+    const civilianCasualties = Math.max(capCivilian, fresh.civilianCasualties);
+
+    if (warCrimes === 0 && refugees === 0 && civilianCasualties === 0) return 0;
 
     const warCrimesScore = clamp01(warCrimes / COST_REFERENCE.war_crimes_full);
     const refugeesScore = clamp01(refugees / COST_REFERENCE.refugees_full);
