@@ -82,20 +82,6 @@ const STANCE_LABEL_KEYS: Record<SectorStanceType, MessageKey> = {
   fortify: 'corpsFront.stance.fortify', defend: 'corpsFront.stance.defend', elastic: 'corpsFront.stance.elastic',
   active_defense: 'corpsFront.stance.activeDefense', screening: 'corpsFront.stance.screening',
 };
-const STANCE_DESCRIPTION_KEYS: Record<SectorStanceType, MessageKey> = {
-  fortify: 'corpsFront.stance.fortify.desc',
-  defend: 'corpsFront.stance.defend.desc',
-  elastic: 'corpsFront.stance.elastic.desc',
-  active_defense: 'corpsFront.stance.activeDefense.desc',
-  screening: 'corpsFront.stance.screening.desc',
-};
-const CORPS_STANCE_ALLOWED: Record<string, readonly SectorStanceType[]> = {
-  offensive: ['active_defense', 'elastic', 'defend'],
-  balanced: SECTOR_STANCES,
-  defensive: ['fortify', 'defend', 'elastic'],
-  reorganize: ['fortify', 'defend', 'screening'],
-};
-
 const PREP_SUB_PHASES = ['intel_gathering', 'force_staging', 'supply_check', 'assessment', 'ready'] as const;
 const PREP_LABELS: Record<string, string> = {
   intel_gathering: 'INTEL', force_staging: 'STAGING', supply_check: 'SUPPLY', assessment: 'ASSESS', ready: 'READY',
@@ -235,22 +221,11 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
     ? relatedOperations.reduce((sum, op) => sum + (op.supply_readiness ?? 0), 0) / relatedOperations.length
     : null;
   const entrenchmentSummary = loadedGameState.sectorEntrenchmentSummary?.[sector.sector_id];
-  const allowedStances = new Set(CORPS_STANCE_ALLOWED[corpsStance] ?? SECTOR_STANCES);
   const currentSectorStance = (sector.sector_stance ?? 'defend') as SectorStanceType;
   const currentStanceSource = sector.stance_source ?? 'bot';
   const sectorStanceLabel = stanceLabel(currentSectorStance);
   const effectiveLogisticsPriority = Math.max(0.5, Math.min(1.5, sector.logistics_priority ?? 1));
   const logisticsPriorityTitle = t('corpsFront.logisticsPriorityTitle');
-
-  const issueSectorStance = async (stance: SectorStanceType) => {
-    const result = await ipc.stageSectorStanceOrder(sector.sector_id, stance);
-    setSectorActionMessage(result.ok ? t('corpsFront.sectorStanceStaged', { stance: stanceLabel(stance) }) : (result.error ?? t('corpsFront.stageStanceFailed')));
-  };
-
-  const resetToAI = async () => {
-    const result = await ipc.resetSectorStanceToBot(sector.sector_id);
-    setSectorActionMessage(result.ok ? t('corpsFront.stanceReturnedAi') : (result.error ?? t('corpsFront.resetStanceFailed')));
-  };
 
   const issueLogisticsPriority = async (priority: number) => {
     const result = await ipc.stageLogisticsPriority(sector.faction, sector.sector_id, priority);
@@ -487,41 +462,6 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                 </div>
 
                 <div className="pt-2 border-t border-dashed border-neutral-300 space-y-2">
-                  <div>
-                    <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">{t('corpsFront.sectorStanceOrders')}</span>
-                    <div className="grid grid-cols-3 gap-1">
-                      {SECTOR_STANCES.map((stance) => {
-                        const isAllowed = allowedStances.has(stance);
-                        const isActive = currentSectorStance === stance;
-                        return (
-                          <button
-                            key={stance}
-                            type="button"
-                            disabled={!isAllowed}
-                            onClick={() => void issueSectorStance(stance)}
-                            title={isAllowed ? t(STANCE_DESCRIPTION_KEYS[stance]) : t('corpsFront.stanceNotAllowed', { stance: corpsStance })}
-                            className={`kbd-focus px-1.5 py-1 rounded border text-[9px] font-bold uppercase transition-colors ${!isAllowed
-                                ? 'border-neutral-200 bg-neutral-100 text-neutral-300 cursor-not-allowed'
-                                : isActive
-                                  ? 'border-accent-gold bg-amber-50 text-amber-800 ring-1 ring-accent-gold'
-                                  : 'border-neutral-400 bg-neutral-200/50 hover:bg-neutral-300/60 text-neutral-700'
-                              }`}
-                          >
-                            {stanceLabel(stance)}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {currentStanceSource === 'player' && (
-                      <button
-                        type="button"
-                        onClick={() => void resetToAI()}
-                        className="kbd-focus mt-1 w-full px-2 py-0.5 rounded border border-neutral-300 bg-neutral-50 hover:bg-neutral-300/50 text-[9px] text-neutral-600 font-semibold uppercase"
-                      >
-                        {t('corpsFront.returnAiControl')}
-                      </button>
-                    )}
-                  </div>
                   <div>
                     <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1" title={logisticsPriorityTitle}>{t('corpsFront.reinforcementPriority')}</span>
                     <div className="flex gap-1">

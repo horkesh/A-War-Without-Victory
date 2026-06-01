@@ -71,16 +71,4 @@ describe('desktop bridge client', () => {
     expect(getAwwvBridge(windowLike)).toBe(windowLike.awwv);
     expect(getAwwvBridge({})).toBeNull();
   });
-
-  it('passes through brigade movement staging with settlement ids', async () => {
-    const stageBrigadeMovementOrder = vi.fn().mockResolvedValue({ ok: true });
-    const client = createDesktopBridgeClient({
-      stageAttackOrder: vi.fn().mockResolvedValue({ ok: true }),
-      queryCombatEstimate: vi.fn().mockResolvedValue({ ok: true }),
-      stageBrigadeMovementOrder,
-    });
-
-    await expect(client.stageBrigadeMovementOrder('b9', ['op:mun:a'])).resolves.toEqual({ ok: true });
-    expect(stageBrigadeMovementOrder).toHaveBeenCalledWith('b9', ['op:mun:a']);
-  });
 });

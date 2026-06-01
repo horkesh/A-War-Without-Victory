@@ -5,7 +5,6 @@
 import { useMemo, useState } from 'react';
 import type { CorpsFrontSectorView, FormationView } from '../../data/types';
 import type { TurnBattle } from '../../../../state/turn_summary';
-import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { OUTCOME_COLORS } from '../../utils/theme';
@@ -176,8 +175,6 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
 
 export function SectorsSection({ corpsId, sectors, factionBattles }: SectorsSectionProps) {
     const [expandedId, setExpandedId] = useState<string | null>(null);
-    const ipc = useIPC();
-    const setLoadError = useGameStore((s) => s.setLoadError);
     const formations = useGameStore((s) => s.loadedGameState?.formations ?? []);
     const formationMap = useMemo(() => {
         const m = new Map<string, FormationView>();
@@ -196,12 +193,6 @@ export function SectorsSection({ corpsId, sectors, factionBattles }: SectorsSect
         }
         return map;
     }, [sectors]);
-
-    const handleSectorStance = async (sectorId: string, stance: string) => {
-        if (!ipc.isAvailable) return;
-        const result = await ipc.stageSectorStanceOrder(sectorId, stance);
-        if (!result.ok) setLoadError(result.error ?? t('sectorsSection.stageFailed'));
-    };
 
     return (
         <CollapsibleSection sectionKey={`sec-${corpsId}`} title={t('sectorsSection.title')} count={sectors.length}>
@@ -250,21 +241,6 @@ export function SectorsSection({ corpsId, sectors, factionBattles }: SectorsSect
                                             })}
                                         </div>
                                     </button>
-                                    <div className="text-right shrink-0 ml-4">
-                                        <select
-                                            value={sector.sector_stance ?? 'defend'}
-                                            onChange={(e) => { void handleSectorStance(sector.sector_id, e.target.value); }}
-                                            onClick={(e) => e.stopPropagation()}
-                                            aria-label={t('sectorsSection.stanceAria', { sector: sector.display_name })}
-                                            className="text-[10px] font-bold uppercase bg-panel-bg text-text-primary border border-panel-border rounded px-2 py-1 cursor-pointer focus:outline-none focus:border-amber-400"
-                                        >
-                                            <option value="fortify">{t('sectorsSection.stance.fortify')}</option>
-                                            <option value="defend">{t('sectorsSection.stance.defend')}</option>
-                                            <option value="elastic">{t('sectorsSection.stance.elastic')}</option>
-                                            <option value="active_defense">{t('sectorsSection.stance.activeDefense')}</option>
-                                            <option value="screening">{t('sectorsSection.stance.screening')}</option>
-                                        </select>
-                                    </div>
                                 </div>
                                 {isExpanded && <SectorExpandedDetail
                                     sector={sector}

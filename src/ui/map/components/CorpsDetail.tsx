@@ -7,7 +7,6 @@ import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
 import { getOperationId } from '../utils/operations';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
-import { useIPC } from '../desktop/useIPC';
 import { getPanelRailStyle } from './panelRail';
 import { CombatSummaryPanel } from './CombatSummaryPanel';
 import { getFormationCommander } from '../utils/officerUtils';
@@ -29,7 +28,6 @@ interface CorpsDetailProps {
 }
 
 export function CorpsDetail({ railSlot }: CorpsDetailProps) {
-  const ipc = useIPC();
   const [activeTab, setActiveTab] = useState<CorpsTab>('overview');
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
   const selectedArmyId = useGameStore((s) => s.selectedArmyId);
@@ -138,15 +136,6 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
     } else {
       setLoadError(t('corpsDetail.opsPlanningRequiresSector'));
     }
-  };
-
-  const stageCorpsStance = async (stance: string) => {
-    if (!ipc.isAvailable) {
-      setLoadError(t('corpsDetail.desktopOnly'));
-      return;
-    }
-    const result = await ipc.stageCorpsStanceOrder(selectedCorpsId, stance);
-    if (!result.ok) setLoadError(result.error ?? t('corpsDetail.stageStanceFailed'));
   };
 
   return (
@@ -494,31 +483,6 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
         {activeTab === 'orders' && (
           <div className="p-3 space-y-3">
             <div>
-              <div className="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-2">
-                {t('corpsDetail.corpsStance')}
-              </div>
-              <div className="grid grid-cols-2 gap-1.5">
-                {(['defensive', 'balanced', 'offensive', 'reorganize'] as const).map((stance) => {
-                  const isActive = (corpsFormation.corpsStance ?? 'balanced') === stance;
-                  return (
-                    <button
-                      key={stance}
-                      type="button"
-                      onClick={() => void stageCorpsStance(stance)}
-                      className={`px-2 py-2 rounded border text-[11px] font-semibold capitalize transition-colors ${
-                        isActive
-                          ? 'border-accent-gold bg-accent-gold/10 text-accent-gold'
-                          : 'border-panel-border text-interactive hover:bg-panel-hover'
-                      }`}
-                    >
-                      {stance}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="border-t border-panel-border pt-3">
               <div className="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-2">
                 {t('operationHistory.title')}
               </div>
