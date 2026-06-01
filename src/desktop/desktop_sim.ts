@@ -462,6 +462,7 @@ import {
     type OperationPredictionResponse,
 } from '../sim/combat/operation_prediction.js';
 import { planDirectiveOperation } from '../sim/turn_phases/war_phases.js';
+import { hasAvailableSlot } from '../sim/combat/corps_operation_helpers.js';
 
 /**
  * Read-only query: predict operation outcomes using the full combat predictor.
@@ -552,6 +553,16 @@ export async function queryDirectiveObjection(
         // An un-buildable directive would no-op (op_directive_rejection). Surface the
         // reason; recommend 'abort' (the strongest objection) so the UI does not stage it.
         return { rejectionReason: plan.reason, forceRatio: 0, estimatedCasualties: 0, recommendedAction: 'abort' };
+    }
+
+    // Mirror injectOpDirectives' SAME slot gate: a plan can be buildable yet still be
+    // rejected at injection when the corps is at its operation-slot limit
+    // (hasAvailableSlot). Without this, the predictor would report a launchable plan, the
+    // UI would stage + debit command authority, and the directive would then fail with
+    // 'no_available_slot' in the next war phase. Surface the rejection here so the
+    // pre-commit query and the consume step agree.
+    if (!hasAvailableSlot(cmd, plan.corpsBrigadeCount)) {
+        return { rejectionReason: 'no_available_slot', forceRatio: 0, estimatedCasualties: 0, recommendedAction: 'abort' };
     }
 
     const terrain = await loadTerrainScalars(terrainScalarsPath(baseDir));

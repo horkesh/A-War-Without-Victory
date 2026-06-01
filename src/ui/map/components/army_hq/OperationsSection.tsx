@@ -16,7 +16,7 @@ import { deriveOperationOutcomeCategory } from '../../data/command_strain';
 import { EmptyState } from '../EmptyState';
 import { t, type MessageKey } from '../../i18n';
 import { FORCE_LAUNCH_COST, REQUEST_OP_COST } from '../../utils/commandAuthority';
-import { buildDirectiveObjection, type DirectiveObjectionView } from '../../data/opDirectiveObjection';
+import { buildDirectiveObjection, plainReason, type DirectiveObjectionView } from '../../data/opDirectiveObjection';
 
 type CompletedOp = NonNullable<LoadedGameState['operationHistory']>[number];
 
@@ -512,6 +512,10 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
     // (buildDirectiveObjection) + consequence wiring are surface-agnostic and will later
     // migrate to the Decision Room directive card.
     const [pendingObjection, setPendingObjection] = useState<{ view: DirectiveObjectionView; targetOsid: string } | null>(null);
+    // IMPOSSIBLE directive: the candidate op cannot be built (no force / unreachable /
+    // already owned) or the corps has no free operation slot. Such a directive is NOT
+    // issuable — we surface "cannot issue: <reason>" and never stage / debit CA.
+    const [impossibleReason, setImpossibleReason] = useState<string | null>(null);
     const [objectionLoading, setObjectionLoading] = useState(false);
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
@@ -558,6 +562,7 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
         else {
             setRequestTargetOsid('');
             setPendingObjection(null);
+            setImpossibleReason(null);
         }
     };
 
@@ -569,26 +574,38 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
             setLoadError(t('operationsSection.insufficientAuthority', { current: authCurrent, cost: REQUEST_OP_COST }));
             return;
         }
+        setImpossibleReason(null);
         // Ask the commander first. If he objects (recommendedAction !== 'launch'), surface
         // his disposition-tinted pushback BEFORE committing — the president decides whether
         // to force it. If he agrees (or the query is unavailable), stage directly.
         setObjectionLoading(true);
         try {
             const objection = await ipc.queryDirectiveObjection({ corpsId, targetOsid: target });
-            if (objection.ok && objection.data && objection.data.recommendedAction !== 'launch' && corpsCommander) {
-                const view = buildDirectiveObjection(
-                    {
-                        name: corpsCommander.name,
-                        rank: corpsCommander.rank,
-                        competence: corpsCommander.competence,
-                        political_reliability: corpsCommander.political_reliability,
-                        is_cowed: corpsCommander.is_cowed,
-                    },
-                    objection.data,
-                );
-                if (view.shows_objection) {
-                    setPendingObjection({ view, targetOsid: target });
+            if (objection.ok && objection.data) {
+                // IMPOSSIBLE (checked FIRST, independent of cowed state / CO presence): the
+                // candidate op could not be built or the corps has no free slot. This is NOT
+                // forceable — injectOpDirectives would reject it with the same reason. Surface
+                // "cannot issue" and do NOT stage / debit command authority.
+                if (objection.data.rejectionReason) {
+                    setImpossibleReason(objection.data.rejectionReason);
                     return;
+                }
+                if (objection.data.recommendedAction !== 'launch' && corpsCommander) {
+                    const view = buildDirectiveObjection(
+                        {
+                            name: corpsCommander.name,
+                            rank: corpsCommander.rank,
+                            competence: corpsCommander.competence,
+                            political_reliability: corpsCommander.political_reliability,
+                            is_cowed: corpsCommander.is_cowed,
+                        },
+                        objection.data,
+                    );
+                    // Only a genuine, forceable objection (issuable) shows the Force-anyway card.
+                    if (view.shows_objection && view.issuable) {
+                        setPendingObjection({ view, targetOsid: target });
+                        return;
+                    }
                 }
             }
         } finally {
@@ -618,7 +635,7 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                     <input
                         type="text"
                         value={requestTargetOsid}
-                        onChange={(e) => setRequestTargetOsid(e.target.value)}
+                        onChange={(e) => { setRequestTargetOsid(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
                         placeholder="Objective OSID (e.g. bihac_1)"
                         aria-label="Request operation objective OSID"
                         className="flex-1 text-[11px] font-mono bg-panel-bg border border-panel-border/50 rounded px-2 py-1 text-text-primary"
@@ -633,6 +650,23 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                         className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-panel-border/50 text-text-primary disabled:opacity-40 hover:bg-panel-bg">
                         {objectionLoading ? 'Consulting…' : `Request op (${REQUEST_OP_COST})`}
                     </button>
+                </div>
+            )}
+            {/* CANNOT ISSUE banner: the directive is IMPOSSIBLE (unbuildable target / no
+                force / no free slot). It is not forceable — there is no objection to
+                override and no order to stage. Nothing was committed; no command authority
+                was spent. */}
+            {impossibleReason && (
+                <div
+                    role="alert"
+                    aria-label="Directive cannot be issued"
+                    className="mb-3 mx-1 p-3 rounded border border-panel-border/60 bg-panel-bg/60">
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-text-secondary mb-1">
+                        Cannot issue
+                    </p>
+                    <p className="text-[11px] text-text-primary">
+                        This corps cannot mount that operation — {plainReason(impossibleReason)}. No command authority was spent.
+                    </p>
                 </div>
             )}
             {/* Force-op PUSHBACK card: the commander objected. Show his disposition-tinted

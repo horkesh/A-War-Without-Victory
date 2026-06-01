@@ -60,6 +60,15 @@ export type ObjectionTone =
 export interface DirectiveObjectionView {
   /** True when an objection card should be shown (recommendedAction !== 'launch' and not cowed). */
   shows_objection: boolean;
+  /**
+   * False when the directive is IMPOSSIBLE — the candidate op could not be built or the
+   * corps has no free slot (rejection_reason present). Such a directive is not forceable:
+   * the UI must NOT stage it / debit command authority, regardless of cowed state. A cowed
+   * CO may not OBJECT to risk, but an unbuildable target / no force / no slot is simply not
+   * forceable. True for both the "no objection, stage it" path AND the "objection,
+   * Force-anyway available" path.
+   */
+  issuable: boolean;
   /** The disposition tone driving the prose. */
   tone: ObjectionTone;
   /** Disposition-tinted objection prose (the SOURCE, not the number). Always populated. */
@@ -96,11 +105,32 @@ export function buildDirectiveObjection(
 ): DirectiveObjectionView {
   const name = who(officer);
 
+  // IMPOSSIBLE (checked FIRST, before cowed/launch): the candidate op could not be built
+  // or the corps has no free slot. This is NOT issuable regardless of cowed state — a
+  // cowed CO complies with risk, but he cannot mount an operation with no force / no
+  // reachable ground / no free slot. Surface it as not-issuable so the UI shows
+  // "cannot issue" and does NOT stage the order / debit command authority. This must
+  // precede the cowed short-circuit, which would otherwise mask it as the
+  // no-objection "stage it" path.
+  if (query.rejectionReason) {
+    return {
+      shows_objection: true,
+      issuable: false,
+      tone: 'professional',
+      prose: `${name} reports he cannot mount this operation as ordered — ${plainReason(query.rejectionReason)}.`,
+      rejection_reason: query.rejectionReason,
+      // An un-buildable directive is the strongest possible objection; the predictor
+      // returns 'abort' for these, so report the hard severity.
+      severity: query.recommendedAction === 'launch' ? 'abort' : query.recommendedAction,
+    };
+  }
+
   // COWED: the officer complies fully (order_interpretation early-out). Show compliance,
-  // never an objection — even if the predictor's raw call is a no-go.
+  // never an objection — the directive is buildable (rejectionReason handled above).
   if (officer.is_cowed) {
     return {
       shows_objection: false,
+      issuable: true,
       tone: 'compliant',
       prose: `${name} acknowledges the order without comment and begins moving his brigades.`,
       severity: null,
@@ -111,6 +141,7 @@ export function buildDirectiveObjection(
   if (query.recommendedAction === 'launch') {
     return {
       shows_objection: false,
+      issuable: true,
       tone: 'compliant',
       prose: `${name} judges the operation sound and is ready to move on your word.`,
       severity: null,
@@ -118,18 +149,6 @@ export function buildDirectiveObjection(
   }
 
   const severity: 'delay' | 'abort' = query.recommendedAction;
-
-  // An un-buildable directive (no force / unreachable / already owned) is surfaced as a
-  // hard, plain objection — there is no operation to weigh, just the impossibility.
-  if (query.rejectionReason) {
-    return {
-      shows_objection: true,
-      tone: 'professional',
-      prose: `${name} reports he cannot mount this operation as ordered — ${plainReason(query.rejectionReason)}.`,
-      rejection_reason: query.rejectionReason,
-      severity,
-    };
-  }
 
   const lowCompetence = officer.competence <= 2;
   const highReliability = officer.political_reliability >= 4;
@@ -145,6 +164,7 @@ export function buildDirectiveObjection(
       : `I will not move until the ground is ready. Order me if you must.`;
     return {
       shows_objection: true,
+      issuable: true,
       tone: 'blunt',
       prose: `${name}: "${tail}"`,
       severity,
@@ -161,6 +181,7 @@ export function buildDirectiveObjection(
       : ` It is your decision; I will carry it out, whatever it costs.`;
     return {
       shows_objection: true,
+      issuable: true,
       tone: 'deferential',
       prose: `${name} advises against it — ${body}.${tail}`,
       severity,
@@ -171,6 +192,7 @@ export function buildDirectiveObjection(
   if (lowCompetence) {
     return {
       shows_objection: true,
+      issuable: true,
       tone: 'hedged',
       prose: `${name} is uneasy — "I cannot guarantee this. The enemy may be stronger than we think." He recommends ${severity === 'abort' ? 'we not attempt it' : 'we wait'}.`,
       severity,
@@ -183,6 +205,7 @@ export function buildDirectiveObjection(
     : `conditions are not yet favorable; pressing now risks an avoidable repulse`;
   return {
     shows_objection: true,
+    issuable: true,
     tone: 'professional',
     prose: `${name} recommends against the operation as ordered — ${body}.`,
     severity,
@@ -190,7 +213,7 @@ export function buildDirectiveObjection(
 }
 
 /** Map a plan rejection reason code to plain player-facing prose. */
-function plainReason(reason: string): string {
+export function plainReason(reason: string): string {
   switch (reason) {
     case 'no_available_force': return 'he has too few free brigades to attack';
     case 'objective_unreachable': return 'there is no friendly ground adjacent to stage from';
