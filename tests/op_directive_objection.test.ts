@@ -95,14 +95,60 @@ describe('buildDirectiveObjection — disposition tinting', () => {
     expect(view.tone).toBe('blunt');
   });
 
-  it('un-buildable directive (rejectionReason) → objection that names the impossibility', () => {
+  it('un-buildable directive (rejectionReason) → objection that names the impossibility, NOT issuable', () => {
     const view = buildDirectiveObjection(
       { name: 'a corps commander', competence: 4, political_reliability: 3 },
       { forceRatio: 0, estimatedCasualties: 0, recommendedAction: 'abort', rejectionReason: 'no_available_force' },
     );
     expect(view.shows_objection).toBe(true);
+    // IMPOSSIBLE directives are NOT forceable — the UI must not stage / debit CA.
+    expect(view.issuable).toBe(false);
     expect(view.rejection_reason).toBe('no_available_force');
     expect(view.prose).toMatch(/too few free brigades/i);
+  });
+
+  it('IMPOSSIBLE directive is NOT issuable even when the CO is COWED (rejection checked before cowed)', () => {
+    // A cowed CO complies with risk, but cannot mount an op with no force / no slot. The
+    // rejectionReason must win over the cowed compliance short-circuit.
+    const view = buildDirectiveObjection(
+      { name: 'Talić', rank: 'corps_commander', competence: 4, political_reliability: 3, is_cowed: true },
+      { forceRatio: 0, estimatedCasualties: 0, recommendedAction: 'abort', rejectionReason: 'no_available_force' },
+    );
+    expect(view.issuable).toBe(false);
+    expect(view.rejection_reason).toBe('no_available_force');
+    // NOT the cowed "complies without comment" path.
+    expect(view.prose).not.toMatch(/without comment/i);
+    expect(view.prose).toMatch(/cannot mount/i);
+  });
+
+  it('full operation-slot (no_available_slot rejectionReason) → NOT issuable, names no free operation', () => {
+    const view = buildDirectiveObjection(
+      { name: 'a corps commander', competence: 4, political_reliability: 3 },
+      { forceRatio: 0, estimatedCasualties: 0, recommendedAction: 'abort', rejectionReason: 'no_available_slot' },
+    );
+    expect(view.issuable).toBe(false);
+    expect(view.rejection_reason).toBe('no_available_slot');
+    expect(view.prose).toMatch(/no free operation/i);
+  });
+
+  it('a genuine (buildable) objection IS issuable — the Force-anyway path stays available', () => {
+    const view = buildDirectiveObjection(
+      { name: 'Delić', competence: 4, political_reliability: 5 },
+      NO_GO,
+    );
+    expect(view.shows_objection).toBe(true);
+    expect(view.issuable).toBe(true);
+    expect(view.rejection_reason).toBeUndefined();
+  });
+
+  it('cowed CO on a BUILDABLE no-go still complies (no rejectionReason) — issuable, no objection', () => {
+    const view = buildDirectiveObjection(
+      { name: 'Talić', rank: 'corps_commander', competence: 4, political_reliability: 3, is_cowed: true },
+      NO_GO,
+    );
+    expect(view.shows_objection).toBe(false);
+    expect(view.issuable).toBe(true);
+    expect(view.rejection_reason).toBeUndefined();
   });
 });
 

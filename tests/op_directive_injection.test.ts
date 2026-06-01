@@ -181,6 +181,31 @@ describe('REQUEST-OP inject step (inject-op-directive)', () => {
     expect(cc.pending_op_directive).toBeUndefined();
   });
 
+  it('rejects with no_available_slot when the corps is at its operation-slot limit even though force is available', () => {
+    // 4 corps brigades → getMaxOperationSlots(4)=1. b3+b4 already committed to a live op
+    // (filling the single slot); b1+b2 are free → plan IS buildable (force ok), but the
+    // slot gate rejects. This is the exact gap queryDirectiveObjection now mirrors: a
+    // buildable plan that injection still rejects with no_available_slot.
+    const state = makeState({
+      brigades: {
+        rbih_b1: { id: 'rbih_b1', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'rbih_1st_corps', personnel: 2000, location_osid: 'bihac_2' },
+        rbih_b2: { id: 'rbih_b2', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'rbih_1st_corps', personnel: 2000, location_osid: 'bihac_2' },
+        rbih_b3: { id: 'rbih_b3', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'rbih_1st_corps', personnel: 2000, location_osid: 'bihac_2' },
+        rbih_b4: { id: 'rbih_b4', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'rbih_1st_corps', personnel: 2000, location_osid: 'bihac_2' },
+      },
+      ops: [{ name: 'Existing Op', participating_brigades: ['rbih_b3', 'rbih_b4'], objectives: ['kljuc_1'], axes: [{ objectives: ['kljuc_1'], assigned_brigades: ['rbih_b3', 'rbih_b4'] }] }],
+      pendingDirective: { target_osid: 'bihac_1', turn: 14, ca_cost: 25 },
+    });
+    const cc = state.military.corps_command.rbih_1st_corps;
+
+    runStep(state, ADJ);
+
+    // Existing op preserved; no new op; rejection is the slot gate (NOT no_available_force).
+    expect(cc.active_operations).toHaveLength(1);
+    expect(cc.op_directive_rejection).toEqual({ target_osid: 'bihac_1', reason: 'no_available_slot', turn: 14 });
+    expect(cc.pending_op_directive).toBeUndefined();
+  });
+
   it('DETERMINISM EARLY-OUT: makes ZERO mutation when no corps has a pending_op_directive', () => {
     const state = makeState(); // no pendingDirective
     const before = JSON.stringify(state);
