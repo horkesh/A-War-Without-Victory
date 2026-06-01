@@ -18023,3 +18023,22 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `src/desktop/author_op_staging.cjs` (new), `electron-main.cjs`, `src/sim/turn_phases/war_phases.ts`, `src/state/game_state.ts`, `src/ui/map/data/backTheOfficer.ts`, `ops_modal/AuthorizePhase.tsx`, `commandAuthority.ts`; `docs/plans/2026-06-01-presidential-command-model-design.md` (new); `docs/PROJECT_LEDGER.md` (this entry).
 
 ---
+
+## [2026-06-01] feat: Presidential Command Model — all 5 command levers SHIPPED (PR #103–#107)
+
+**Type:** Feature — the five presidential command levers (LOCKED design `docs/plans/2026-06-01-presidential-command-model-design.md`). Player = the unnamed **president**, commands the war THROUGH generals (strategic directives), not as one. **Every lever is player-only → historical/headless byte-identical BY CONSTRUCTION** (optional staging field absent in headless + war-step early-out). Verified: my own `test:baselines` "all scenarios match" on each branch + CI scenario-anchors. main HEAD `f315ad1e`. Shared build pattern: optional `CorpsCommandState` staging field + `<verb>.cjs` desktop helper (player-faction + CA guard+debit) + IPC handler + war step with determinism early-out.
+
+**The five levers:**
+- **1 Authorize op** — pre-existing (back-the-officer / proposal approval).
+- **2 Request op (#106 `0b24ae6e`)** — president names a strategic OBJECTIVE (target OSID) for a corps; the engine builds the op a commander would (`pending_op_directive` → `inject-op-directive`: auto-selects brigades `getCorpsSubordinates∩getAvailableBrigades∩!findBrigadeOperationAnywhere∩isEligibleOperationFormation`, builds a single-hop axis toward the target, `buildCorpsOperation(isPrePlanned=false)`, tags `requested_by_president`). v1 = single-hop staging (multi-hop deferred); text-OSID UX (map picker deferred). REQUEST_OP_COST=25.
+- **3 Stop op (#103 `f026ea74` + #104 `305fef85`)** — halt a live op (`pending_op_halt` → `apply-op-halts`: `releaseOperationCommander`+`releaseTacticalCommander`+`removeOperation`). STOP_OP_COST=25. Replaced the canon-unsafe legacy `stage-operation-halt` (no cost / no ownership / never removed).
+- **4 Authorize elite deployment (#105 `6c104492`)** — CA cost (`ELITE_DEPLOY_COST=25`) on the player's reserve-release approval (`approveReserveRequest`), debit in the player IPC path ONLY (bot/headless `evaluateArmyReserveAssignments` auto-deploy untouched → byte-identical).
+- **5 Replace corps CO (#107 `f315ad1e`)** — sack/install a corps CO (`pending_co_replacement` → `apply-co-replacements`, reusing the previously-orphan `relieveOfficer`), REPLACE_CO_COST=25 + an `internal_cohesion` −4 cost (VERIFIED observable, not a dead-channel — the per-turn recompute preserves `event_modifier`). RS revolt is reachable + data-driven (roster `stubbornness` → `proposeAutonomousArmyLaunch`). Removed the broken legacy `dismiss-officer`/`assign-commander` handlers (stale `state.named_officers` path, no cost).
+
+**Codex P2 fixes folded in:** #100 recovery-slot + #101 dup-stage/cross-corps double-commit (author-op substrate); #103→#104 (UI-unreachable IPC + TG-commander dangling); #104→#106 (stage-handler renderer-refresh — dropped `excludeSender`); #106→#107 (war-step order: `apply-op-halts` now BEFORE `inject-op-directive` so "stand down + replace" frees brigades first).
+
+**Remaining (depth, not levers):** (a) the force-op **disposition-tinted pushback card** (show the commander's objection BEFORE the president forces a request-op, + an authored consequence-receipt AFTER — the Q2 mechanic; substrate exists: `usePrediction`, `army_directive_pushback`, officer disposition, override tracking); (b) **patron-demand-event consolidation + the supply dead-channel fix** (refusing a patron currently only moves `patron_confidence`, never reaching `material_support_level` — `supply_reserves.ts:350`; fix = fold a defiance term into `updatePatronState`; calibration-adjacent → scope byte-identical safety first).
+
+**Files:** `src/state/game_state.ts`, `src/sim/turn_phases/war_phases.ts`, `src/desktop/{op_halt,op_directive_staging,co_replacement}.cjs` (new) + `electron-main.cjs`/`preload.cjs`/`autonomy_ipc_contract.cjs`, `src/ui/map/utils/commandAuthority.ts`, `desktop_sim.ts`, `ArmyReservePanel.tsx`/`OperationsSection.tsx`/`CommanderSection.tsx`, `src/sim/combat/{officer_system,order_interpretation,corps_operation_helpers}.ts` (reuse); `docs/PROJECT_LEDGER.md` (this entry).
+
+---
