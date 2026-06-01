@@ -71,9 +71,9 @@ describe('Free War Slice A — territory-trend priority multiplier', () => {
         //   Corridor 92 (1KK)  = 100  (area: brcko/odzak/derventa/... quiet)
         //   Central Corridor   = 30   (area: kotor_varos/teslic/doboj  quiet)
         //   1KK Rear Security  = 20   (area: prijedor/banja_luka/...  LOSING 4 OSIDs)
-        // 1KK Rear: mult = round2(1 + 0.15*4) = 1.60 -> eff = 20*1.60 = 32
-        // Central Corridor (quiet): mult 0.80 -> eff = 30*0.80 = 24
-        // => 1KK Rear (32) out-ranks Central Corridor (24): LOWER static beats HIGHER.
+        // 1KK Rear: mult = round2(1 + 0.25*4) = 2.00 -> eff = 20*2.00 = 40
+        // Central Corridor (quiet): mult 0.75 -> eff = 30*0.75 = 22.5
+        // => 1KK Rear (40) out-ranks Central Corridor (22.5): LOWER static beats HIGHER.
         // All four losses fall in 1KK Rear Security's area (prijedor/banja_luka/laktasi/
         // celinac) — none touch Central Corridor (kotor_varos/teslic/doboj), which stays
         // quiet. NOTE: kotor_varos belongs to BOTH areas, so it is deliberately avoided.
@@ -106,11 +106,11 @@ describe('Free War Slice A — territory-trend priority multiplier', () => {
             loss('RS', 'op:laktasi:laktasi_2', 6),
         ];
         const emergent = getCorpsArmyPriorities(FACTION, CORPS, TURN, makeState({ turn: TURN, mode: 'emergent', controlEvents }));
-        // 1KK Rear (static 20) loses 4 OSIDs → ×1.60 → effective weight 32 carried on the returned object,
+        // 1KK Rear (static 20) loses 4 OSIDs → ×2.00 → effective weight 40 carried on the returned object,
         // so generateArmyHQOverrides' thresholds + commanderReviewAssignment's mission weights see the boost.
-        expect(emergent.find(p => p.name === '1KK Rear Security')!.weight).toBeCloseTo(32, 5);
-        // A quiet area decays: Central Corridor static 30 → ×0.80 → 24.
-        expect(emergent.find(p => p.name === 'Central Corridor')!.weight).toBeCloseTo(24, 5);
+        expect(emergent.find(p => p.name === '1KK Rear Security')!.weight).toBeCloseTo(40, 5);
+        // A quiet area decays: Central Corridor static 30 → ×0.75 → 22.5.
+        expect(emergent.find(p => p.name === 'Central Corridor')!.weight).toBeCloseTo(22.5, 5);
         // Historical returns the STATIC weights unchanged (byte-identical contract).
         const hist = getCorpsArmyPriorities(FACTION, CORPS, TURN, makeState({ turn: TURN, mode: 'historical', controlEvents }));
         expect(hist.find(p => p.name === '1KK Rear Security')!.weight).toBe(20);

@@ -603,14 +603,19 @@ export const FACTION_ARMY_PRIORITIES: Record<FactionId, ArmyOperationPriority[]>
  * the original static-weight ordering (the calibration regression contract).
  */
 const TERRITORY_TREND_MODULATOR = {
-    /** Per-unit-of-recent-loss boost. trend=-2 (lost 2 OSIDs in area) → +0.30 multiplier. */
-    K_LOSS: 0.15,
+    /** Per-unit-of-recent-loss boost. trend=-2 (lost 2 OSIDs in area) → +0.50 multiplier.
+     *  Slice A.2 (2026-06-01): raised 0.15→0.25 — the gentle 40w setting was operationally
+     *  inert (0/13 ops changed), unable to overcome the 2-4× static priority gaps. */
+    K_LOSS: 0.25,
     /** Decay applied to a quiet area (no recent territory change in its target set). */
-    K_QUIET: 0.20,
-    /** Lower clamp on the multiplier (a quiet objective decays to 0.80×). */
-    LO: 0.80,
-    /** Upper clamp on the multiplier (a collapsing area boosts to at most 1.60×). */
-    HI: 1.60,
+    K_QUIET: 0.25,
+    /** Lower clamp on the multiplier (a quiet objective decays to 0.70×). */
+    LO: 0.70,
+    /** Upper clamp on the multiplier (a collapsing area boosts to at most 2.50×). With LO 0.70
+     *  this gives a max boost/decay ratio of ~3.5×, enough for a real crisis to out-rank a
+     *  mid-priority quiet objective — but the dominant strategic priority (e.g. Drina Sweep
+     *  130 vs Hold 30 = 4.3×) still holds unless that area itself is collapsing. */
+    HI: 2.50,
     /** Look-back window (turns) for recent control changes. Matches army_hq_gathering. */
     WINDOW: 6,
 } as const;
