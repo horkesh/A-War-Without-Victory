@@ -137,6 +137,20 @@ Concrete free choices (Game Designer): **triage geography** (hold/abandon pocket
 
 ---
 
+## 10b. Post-Phase-0 synthesis (panel scoping + emergent playtest, 2026-06-01)
+
+Phase 0 shipped (PR #88 + Codex fix #89). Three parallel agents + an emergent-mode playtest reshaped the plan:
+
+- **Phase 0 is a correct foundation but freedom is NOMINAL so far.** The emergent playtest (40w, stable + deterministic) changed **zero** event decisions: most events fall through to `pickBotResponseV1`, which still honors `historical_default_response_id`, and the genuinely-emergent `pickPoliticalResponse` only covers the narrow `POLITICAL_LOGICS` set (1 event in 40w). → **Phase 0.5** = de-railroad `pickBotResponseV1` in emergent mode + widen `POLITICAL_LOGICS` so the AI *actually* diverges.
+- **Phase 1 is smaller than scoped.** The "3 missing signals" (`recent_territory_change`, supply, `CampaignPlan`) already exist in `army_hq_gathering`; they just don't modulate the **static `weight`** in `FACTION_ARMY_PRIORITIES`. Phase 1 = convert that constant into a live multiplier `weight × f(threat, force-ratio, supply, territory-trend)`, emergent-gated. Smallest slice: territory-trend → weight. Determinism: quantize the multiplier so FP near-ties don't flip the argmax (keep the existing name tie-break).
+- **Phase 3 is MORE URGENT and moves first.** The game is **currently a conquest scoreboard**: the Verdict grade is ~90% `territory_controlled_pct` (`scoring.ts`), military success *eases* patron coercion (backwards), and a literal `max_exhaustion`/`max_settlements` victory condition (`war_termination.ts` / `victory_conditions.ts`) rewards staying fresh. The exhaustion accumulator is sound (monotonic), but the *outcome-deciding* dimensions are reversible + reward-positive — the "competence escape hatch" is wired in. Keystone fix (1 file, byte-identical post-termination): a monotonic `war_cost_index` (exhaustion + cumulative casualties + duration) **caps** the achievable grade independent of territory.
+
+**OWNER DECISION (locked):** **No conquest win in emergent mode.** The free war ends only via negotiated settlement / timeout / political collapse (`war_termination.ts`) — never "hold N settlements + stay fresh ⇒ victory." There is no winning the Bosnian War. (Phase 3 disarms `victory_conditions` evaluation when `decision_mode === 'emergent'`.)
+
+**Revised sequencing:** ✅ Phase 0 (#88) + Codex fix (#89) → **Phase 3** (verdict cost-floor + disarm conquest win — lock the soul before freedom makes winning possible) → **Phase 0.5** (make the AI actually diverge) → **Phase 1** (military priorities) → **Phase 4** author-new-op → **Phase 5** ethics machinery. Cross-cut: distance-from-history read-model.
+
+---
+
 ## 11. Open decisions for the owner
 
 1. **Default mode** — ship `'emergent'` as the default *game* experience, with `'historical'` an explicit calibration/documentary mode? *(Panel lean: yes.)*
