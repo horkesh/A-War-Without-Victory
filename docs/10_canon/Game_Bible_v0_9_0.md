@@ -284,12 +284,12 @@ Player decisions set named flags on game state (e.g., `rs_strategic_goals: 'sele
 Canonical clarification of the player's command role, consistent with §3 and §21: **the player is the president and commands the war THROUGH their generals (strategic-political directives), not as a general.** Brigade-level operation planning is **post-1.0 / DLC** — it remains the general's domain in 1.0. The president's military agency in 1.0 is expressed through five command levers, with explicit build status:
 
 1. **Authorize op** — approve an operation a commander proposes. **SHIPPED** (back-the-officer / proposal approval).
-2. **Request op** — direct a commander toward a strategic objective, even against his military judgment. **Locked design, forthcoming (not yet built).**
-3. **Stop op** — halt a live operation to bank political capital. **Locked design, forthcoming.**
-4. **Authorize elite deployment** — release elite/special units to a front or operation. **Locked design, forthcoming.**
-5. **Replace a corps CO** — sack/install a commander, at a cost. **Locked design, forthcoming.**
+2. **Request op** — direct a commander toward a strategic objective, even against his military judgment. **SHIPPED 2026-06-01 (#106)** — president names a target OSID; engine auto-builds the op (single-hop staging v1).
+3. **Stop op** — halt a live operation to bank political capital. **SHIPPED 2026-06-01 (#103/#104).**
+4. **Authorize elite deployment** — release elite/special units to a front or operation. **SHIPPED 2026-06-01 (#105).**
+5. **Replace a corps CO** — sack/install a commander, at a cost. **SHIPPED 2026-06-01 (#107)** — observable internal_cohesion −4 cost + RS-revolt via roster stubbornness.
 
-Refusing a patron demand is **not a sixth lever** — it is a response option within the event system (§21.1) resolving through `patron_confidence` (§21.2). Faction asymmetry (RS officer-revolt/blockade risk, RBiH firmest civilian control, HRHB patron-gated) emerges from data, not faction branches. Authoritative design: `docs/plans/2026-06-01-presidential-command-model-design.md`. *(Additive note; does not supersede §3 or §21. Levers 2–5 are design-locked but unbuilt — do not treat as implemented.)*
+Refusing a patron demand is **not a sixth lever** — it is a response option within the event system (§21.1) resolving through `patron_confidence` (§21.2). Faction asymmetry (RS officer-revolt/blockade risk, RBiH firmest civilian control, HRHB patron-gated) emerges from data, not faction branches. Authoritative design: `docs/plans/2026-06-01-presidential-command-model-design.md`. *(Additive note; does not supersede §3 or §21. All five levers SHIPPED 2026-06-01, player-only → historical/headless byte-identical. Still forthcoming as depth (not levers): the force-op disposition-tinted pushback card, and patron-event consolidation + supply dead-channel fix.)*
 
 ## 22. Sensitive History Design Gate (canon, v0.9.0)
 
