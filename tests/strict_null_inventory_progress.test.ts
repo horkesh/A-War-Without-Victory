@@ -532,21 +532,26 @@ describe('strict null inventory progress', () => {
         // telemetry-only, behaviorally hash-neutral on territory/anchors). The as_unknown_casts (3) and non_null_assertions_dot (7)
         // escape hatches live in src/ui/map/data/backTheOfficer.ts (TG-UI surfacing, commit
         // 9fede550 — predates this activation); they are existing accepted UI-layer hatches.
+        // Free War Phase 0 (decision_mode de-railroad) added +1 optional GameState
+        // field in the `state` domain (GameStateMeta.decision_mode, an optional
+        // 'historical' | 'emergent' in src/state/game_state.ts), so 488 → 489 /
+        // state 162 → 163. Unset = historical = byte-identical baseline; the field
+        // gates the bot event-decision scorer (emergent) vs the historical railroad.
         expect(current.counts).toMatchObject({
             as_factionid_casts: 1,
             as_unknown_casts: 3,
             as_any_casts: 0,
             non_null_assertions_dot: 7,
             non_null_assertions_index: 0,
-            optional_fields_game_state: 488,
+            optional_fields_game_state: 489,
         });
-        expect(current.optional_field_domains.total).toBe(488);
+        expect(current.optional_field_domains.total).toBe(489);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 8,
             ipc: 0,
             scenario: 0,
             sim: 318,
-            state: 162,
+            state: 163,
             ui_adapter: 0,
             unknown: 0,
         });

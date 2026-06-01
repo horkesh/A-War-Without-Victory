@@ -136,7 +136,14 @@ export async function startNewCampaign(
         );
     }
 
-    if (state.meta) state.meta.player_faction = playerFaction;
+    if (state.meta) {
+        state.meta.player_faction = playerFaction;
+        // Free War Phase 0: the live player campaign is the FREE, emergent war —
+        // AI factions choose event responses from battlefield/political signals,
+        // not historical replay. Calibration (scenario_runner) never routes
+        // through this entry, so it stays unset = historical = byte-identical.
+        state.meta.decision_mode = 'emergent';
+    }
     return { state: canonicalizeStartupState(state).state };
 }
 
