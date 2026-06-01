@@ -18,6 +18,8 @@ import {
 import { useGameStore } from '../../store/gameStore';
 import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presidentialDecisionRoomNavigation';
 import { t } from '../../i18n';
+import { DirectiveCard } from './DirectiveCard';
+import type { LoadedGameState } from '../../data/types';
 
 function severityClass(severity: PresidentialDecisionRoomSeverity): string {
   if (severity === 'blocking') return 'border-red-400/45 bg-red-500/10 text-red-300';
@@ -218,10 +220,12 @@ function PriorityDossier({
   dossier,
   cardsById,
   onSelectCard,
+  gameState,
 }: {
   dossier: PresidentialDecisionRoomDossier | null;
   cardsById: Map<string, PresidentialDecisionRoomCard>;
   onSelectCard: (cardId: string) => void;
+  gameState: LoadedGameState | null;
 }) {
   if (!dossier) {
     return (
@@ -299,6 +303,13 @@ function PriorityDossier({
             ))}
           </div>
         </div>
+      )}
+
+      {/* War-Direction directive: ISSUE the lever inline (Presidential Command
+          Surface §2). Rendered ABOVE the navigate button — the navigate button
+          remains the commander's deep-drill path. */}
+      {dossier.directive && gameState && (
+        <DirectiveCard directive={dossier.directive} gameState={gameState} />
       )}
 
       <button
@@ -519,6 +530,7 @@ export function PresidentialDecisionRoomPanel() {
               dossier={view.activeDossier}
               cardsById={cardsById}
               onSelectCard={setActiveCardId}
+              gameState={state}
             />
           </div>
 
