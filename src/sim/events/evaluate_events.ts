@@ -627,9 +627,8 @@ export function evaluateEvents(
                 // default with no scoring); without this, emergent freedom is nominal.
                 // Historical/unset keeps the POLITICAL_LOGICS gate, byte-identical.
                 } else if (
-                    emergent
-                        ? respondingFaction !== null
-                        : POLITICAL_LOGICS.has(def.bot_response_logic ?? '') && respondingFaction !== null
+                    respondingFaction !== null &&
+                    (emergent || POLITICAL_LOGICS.has(def.bot_response_logic ?? ''))
                 ) {
                     const personality = getPoliticalPersonality(respondingFaction);
                     const assessment = computePoliticalAssessment(state, respondingFaction, personality);
