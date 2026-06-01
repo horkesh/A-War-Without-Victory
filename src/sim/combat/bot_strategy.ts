@@ -39,6 +39,8 @@
 import type { BrigadePosture, FactionId, GameState } from '../../state/game_state.js';
 import type { DoctrinePhase, StandingOrder, WarTimeline } from '../../state/war_timeline.js';
 import { getActiveBotObjectiveShifts } from '../events/active_modifiers.js';
+import { computeRecentTerritoryChange } from './army_hq_gathering.js';
+import { munFromOsid } from './osid_adjacency.js';
 import {
     RS_EARLY_WAR_END_WEEK,
 } from './bot_constants.js';
@@ -575,22 +577,146 @@ export const FACTION_ARMY_PRIORITIES: Record<FactionId, ArmyOperationPriority[]>
 };
 
 /**
+ * Free War Phase 1 (Slice A) — emergent territory-trend priority multiplier.
+ *
+ * OWNER-TUNABLE coefficients. In emergent mode (state.meta.decision_mode === 'emergent')
+ * each priority's static weight is scaled by a deterministic modulator derived from the
+ * RECENT TERRITORY TREND OF THAT PRIORITY'S OWN TARGET AREA (its target_municipalities +
+ * target_osids), using the same control_events mechanism and sign convention as
+ * army_hq_gathering.computeRecentTerritoryChange (positive = recent gains, negative =
+ * recent losses):
+ *
+ *   effectiveWeight = round2(staticWeight * clamp(
+ *       1 + K_LOSS * max(0, -trend) - K_QUIET * quietness, LO, HI))
+ *
+ * Because the trend is scoped PER PRIORITY AREA (not uniformly per corps), the argmax can
+ * re-order WITHIN a corps:
+ * - A lower-static priority whose area is LOSING ground recently (trend < 0) → BOOST, and
+ *   can rise above a quiet higher-static objective.
+ * - A QUIET high-static objective (no recent change in its area) → DECAY.
+ *
+ * Determinism: reads only persisted state (control_events); no Math.random / Date.now.
+ * The multiplier is QUANTIZED to 2 decimals so FP near-ties cannot flip the argmax vs the
+ * integer-weight ordering; the existing secondary NAME tie-break is preserved.
+ *
+ * Historical / unset / no-state → modulator skipped entirely; output is byte-identical to
+ * the original static-weight ordering (the calibration regression contract).
+ */
+const TERRITORY_TREND_MODULATOR = {
+    /** Per-unit-of-recent-loss boost. trend=-2 (lost 2 OSIDs in area) → +0.30 multiplier. */
+    K_LOSS: 0.15,
+    /** Decay applied to a quiet area (no recent territory change in its target set). */
+    K_QUIET: 0.20,
+    /** Lower clamp on the multiplier (a quiet objective decays to 0.80×). */
+    LO: 0.80,
+    /** Upper clamp on the multiplier (a collapsing area boosts to at most 1.60×). */
+    HI: 1.60,
+    /** Look-back window (turns) for recent control changes. Matches army_hq_gathering. */
+    WINDOW: 6,
+} as const;
+
+/** Deterministic 2-decimal quantizer. Keeps near-ties from flipping the argmax. */
+function round2(x: number): number {
+    return Math.round(x * 100) / 100;
+}
+
+function clamp(x: number, lo: number, hi: number): number {
+    return x < lo ? lo : x > hi ? hi : x;
+}
+
+/**
+ * Net recent territory change scoped to a single priority's target AREA
+ * (target_municipalities + target_osids), from political.control_events.
+ * Positive = recent gains in the area; negative = recent losses. Same sign convention
+ * as army_hq_gathering.computeRecentTerritoryChange. Deterministic: persisted state only.
+ */
+function priorityAreaTrend(
+    state: GameState,
+    faction: FactionId,
+    priority: ArmyOperationPriority,
+): number {
+    const currentTurn = state.meta?.turn ?? 0;
+    const recentCutoff = currentTurn - TERRITORY_TREND_MODULATOR.WINDOW;
+    const muns = new Set(priority.target_municipalities ?? []);
+    const osids = new Set(priority.target_osids ?? []);
+    if (muns.size === 0 && osids.size === 0) return 0;
+
+    const controlEvents = state.political?.control_events ?? [];
+    let delta = 0;
+    for (const event of controlEvents) {
+        if (event.turn <= recentCutoff) continue;
+        const inArea =
+            osids.has(event.settlement_id) ||
+            muns.has(event.mun_id ?? munFromOsid(event.settlement_id) ?? '');
+        if (!inArea) continue;
+
+        const gained = event.to === faction && event.from !== faction;
+        const lost = event.from === faction && event.to !== faction;
+        if (gained) delta += 1;
+        else if (lost) delta -= 1;
+    }
+    return delta;
+}
+
+/**
+ * Emergent territory-trend multiplier for one priority's target area.
+ * Quantized to 2 decimals so near-ties cannot flip the argmax order.
+ */
+function priorityTrendMultiplier(
+    state: GameState,
+    faction: FactionId,
+    priority: ArmyOperationPriority,
+): number {
+    const trend = priorityAreaTrend(state, faction, priority);
+    // Losing ground in the area → positive boost; gaining or quiet → no boost.
+    const lossTerm = TERRITORY_TREND_MODULATOR.K_LOSS * Math.max(0, -trend);
+    // Quietness: 1 when no recent change in the priority's area, 0 otherwise.
+    const quietness = trend === 0 ? 1 : 0;
+    const quietTerm = TERRITORY_TREND_MODULATOR.K_QUIET * quietness;
+    const raw = 1 + lossTerm - quietTerm;
+    return round2(clamp(raw, TERRITORY_TREND_MODULATOR.LO, TERRITORY_TREND_MODULATOR.HI));
+}
+
+/**
  * Get active army-level priorities for a corps at a given turn.
  * Returns priorities sorted by weight descending (highest first).
  * Deterministic: weight sort, then name sort for tie-break.
+ *
+ * `state` is OPTIONAL. Without it (or in historical/unset mode) the result is the
+ * static-weight ordering — byte-identical to the original. Only when
+ * `state.meta.decision_mode === 'emergent'` is the per-area territory-trend modulator
+ * applied, so the argmax responds to the battlefield instead of the 1992 calendar.
  */
 export function getCorpsArmyPriorities(
     faction: FactionId,
     corpsId: string,
-    turn: number
+    turn: number,
+    state?: GameState,
 ): ArmyOperationPriority[] {
     const all = FACTION_ARMY_PRIORITIES[faction] ?? [];
-    return all
-        .filter(p => p.corps_id === corpsId && turn >= p.start_week && turn < p.end_week)
-        .sort((a, b) => {
+    const active = all.filter(p => p.corps_id === corpsId && turn >= p.start_week && turn < p.end_week);
+
+    // Historical / unset / no-state → static weights verbatim (byte-identical contract).
+    if (state?.meta?.decision_mode !== 'emergent') {
+        return active.sort((a, b) => {
             if (b.weight !== a.weight) return b.weight - a.weight;
             return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
         });
+    }
+
+    // Emergent mode: scale each static weight by the deterministic per-area
+    // territory-trend modulator, then sort by the quantized effective weight with the
+    // existing NAME tie-break. A losing area can out-rank a quiet higher-static objective.
+    const scored = active.map(p => ({
+        p,
+        eff: round2(p.weight * priorityTrendMultiplier(state, faction, p)),
+    }));
+    return scored
+        .sort((a, b) => {
+            if (b.eff !== a.eff) return b.eff - a.eff;
+            return a.p.name < b.p.name ? -1 : a.p.name > b.p.name ? 1 : 0;
+        })
+        .map(s => s.p);
 }
 
 /**
