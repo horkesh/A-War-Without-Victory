@@ -254,6 +254,8 @@ Brigades never attack independently. All attacks flow through CorpsOperation. In
 
 No seventh tactical lever is canonized here. Do not use avoided_osids_by_faction or any banned override as player guidance.
 
+**Presidential Command Model (additive note — LOCKED design 2026-06-01):** Canonically the player is the **president and commands through generals (strategic directives), not as a general; brigade-level operation planning is post-1.0 / DLC.** Distinct from the six tactical levers above (the shipped corps/sector/ops/logistics/OPSEC command surface), the presidential command model defines five president-level levers: (1) **Authorize op — SHIPPED** (the existing back-the-officer / proposal-approval path that "Ops planning" surfaces); (2) Request op; (3) Stop op; (4) Authorize elite deployment; (5) Replace a corps CO at cost. **Levers 2–5 are locked-design/forthcoming, not yet built — do not treat them as available player guidance.** Refusing a patron demand is the event layer, not a lever. Authoritative design: `docs/plans/2026-06-01-presidential-command-model-design.md`. *(Additive note; does not add a tactical lever and does not supersede §4. As each lever ships it must be reconciled with this table under Rulebook/Systems Manual authority.)*
+
 ## 5. Playing RBiH
 
 RBiH reads the same phase table through scarcity and continuity: supply strain, mobilization, enclave officer locks, and international standing are usually the first scan. Start with Decision Room Urgent, Fronts, and Inspect; then check Army HQ BRIEFING for corps readiness, enclave officer constraints such as Oric and Dudakovic, and ongoing-mobilization / recruitment consequences. This is framing only, not a new RBiH mechanic.

@@ -18005,3 +18005,21 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `src/sim/combat/commander_override.ts` + `corps_front_sectors.ts` (Slice B, on closed branch only — NOT on main); `docs/PROJECT_LEDGER.md` (this entry).
 
 ---
+
+## [2026-06-01] feat: Phase 4 author-op substrate (PR #100/#101/#102) + Presidential Command Model v1.0 LOCKED
+
+**Type:** Feature substrate (merged) + locked design direction. All merged code is player/emergent-only → **historical 40w/52w/188w byte-identical by construction** (verified: my own baseline regression "all scenarios match" + CI scenario-anchors green). main HEAD `5b25ee88`.
+
+**Merged — canon-safe op staging + injection substrate (1.0):**
+- **#100 (`1056f326`):** eligibility read-model — `AUTHOR_OP_COST=25` (`commandAuthority.ts` + CJS mirror), `buildAuthorableOpEligibility` over `validateOpAtInjection` returning `{ok,warnings,ca_cost,affordable,has_available_slot,slots_used,slots_max}`, surfaced in `ops_modal/AuthorizePhase.tsx`. UI-only.
+- **#101 (`483669a7`):** the canon-safe core — replaced the canon-UNSAFE `stage-corps-operation-order` handler (which raw-`push`ed an unvalidated op into `active_operations`) with `author_op_staging.cjs` (player-faction check + CA debit + stage `pending_authored_op`), plus a new `inject-authored-operations` war-phase step (`getAvailableBrigades` double-commit filter → `validateOpAtInjection` → attack-floor → `hasAvailableSlot` → `buildCorpsOperation(isPrePlanned=false)` → `assignOperationCommander`; clears the stage; **determinism early-out when no corps has a staged op**).
+- **#102 (`cbf3f5ce`):** 3 Codex P2 fixes — recovery-phase ops no longer counted as used slots; duplicate stage now rejected (`pending_authored_op_exists`) before a second CA debit; brigade double-commit guard made state-wide via `findBrigadeOperationAnywhere`.
+
+**LOCKED design — Presidential Command Model v1.0** (`docs/plans/2026-06-01-presidential-command-model-design.md`; memory `player_command_model.md`). The player is the **president** — commands the war THROUGH generals, not as one. **Supersedes the parked Free-War Phase-1 emergent-military lane** (the entry above): divergence comes from the president's strategic-political choices through a living command chain, not from the bot fighting differently. Five 1.0 levers: **1 Authorize op (SHIPPED), 2 Request op, 3 Stop op, 4 Authorize elite deployment, 5 Replace a corps CO at cost** (2–5 are locked-design, in implementation). Brigade/axis op-PLANNING → **post-1.0/DLC** (the merged substrate above is 1.0; the brigade-picker UX is DLC). "Refuse a patron demand" is the EVENT layer, NOT a 6th lever. Force-op-over-objection = disposition-tinted pushback shown BEFORE + authored consequence AFTER. Faction-asymmetric (RS=insubordination+Milošević blockade; RBiH=firmest control; HRHB=patron-gated/Zagreb). ICTY-grounded (Karadžić IT-95-5/18-T, Mladić IT-09-92, Prlić IT-04-74-T, Halilović IT-01-48; the "Karadžić stop-order at Bihać" is NOT verifiable — it was the Carter Dec-1994 ceasefire + strangle-restraint).
+- **Build (0) DONE — patron-meter dead-channel CONFIRMED:** `resist_patron` writes only the `patron_confidence` dimension (a one-way sink, `strategic_dimensions.ts:99`), which never reaches `material_support_level` (the real supply meter, consumed at `supply_reserves.ts:350`). So refusing a patron currently has ZERO supply consequence — RS's signature tragic lever is presently cosmetic. Fix specified (fold a defiance term into `updatePatronState` before :283), queued for build-step 5.
+
+**Verification:** #100/#101/#102 all byte-identical historical; tsc 0-new; author-op tests + ratchet green. Codex swept clean after fixes.
+
+**Files:** `src/desktop/author_op_staging.cjs` (new), `electron-main.cjs`, `src/sim/turn_phases/war_phases.ts`, `src/state/game_state.ts`, `src/ui/map/data/backTheOfficer.ts`, `ops_modal/AuthorizePhase.tsx`, `commandAuthority.ts`; `docs/plans/2026-06-01-presidential-command-model-design.md` (new); `docs/PROJECT_LEDGER.md` (this entry).
+
+---

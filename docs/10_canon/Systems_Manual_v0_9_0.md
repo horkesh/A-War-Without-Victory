@@ -844,6 +844,8 @@ Certain actions are forbidden but attemptable, generating penalties rather than 
 
 Institutional inertia and command degradation delay or distort execution.
 
+**Presidential Command Model (additive note — LOCKED design 2026-06-01):** Canonically the player is the **president and commands through generals (strategic directives), not as a general; brigade-level operation planning is post-1.0 / DLC.** The president's military agency is five command levers: (1) **Authorize op — SHIPPED**; (2) Request op; (3) Stop op; (4) Authorize elite deployment; (5) Replace a corps CO at cost — **levers 2–5 are locked-design/forthcoming, not yet built.** Forcing an op over a commander's objection surfaces disposition-tinted pushback before commit and an authored consequence after — i.e. command friction (institutional inertia / command degradation above) is the mechanism, not a hard block. Refusing a patron demand is the event layer, not a sixth lever. Authoritative design: `docs/plans/2026-06-01-presidential-command-model-design.md`. *(Additive note; does not supersede §6.4, §7.5, or §8.)*
+
 ## 22. Persistence and determinism
 
 All state variables are serializable.

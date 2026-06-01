@@ -279,6 +279,18 @@ These are ahistorical branching points. The bot always picks the historical opti
 
 Player decisions set named flags on game state (e.g., `rs_strategic_goals: 'selective'`). Downstream events read these flags to modify their conditions, options, and consequences. Flags create explicit causal chains across the entire game.
 
+### 21.5 Presidential Command Model (additive note — LOCKED design 2026-06-01)
+
+Canonical clarification of the player's command role, consistent with §3 and §21: **the player is the president and commands the war THROUGH their generals (strategic-political directives), not as a general.** Brigade-level operation planning is **post-1.0 / DLC** — it remains the general's domain in 1.0. The president's military agency in 1.0 is expressed through five command levers, with explicit build status:
+
+1. **Authorize op** — approve an operation a commander proposes. **SHIPPED** (back-the-officer / proposal approval).
+2. **Request op** — direct a commander toward a strategic objective, even against his military judgment. **Locked design, forthcoming (not yet built).**
+3. **Stop op** — halt a live operation to bank political capital. **Locked design, forthcoming.**
+4. **Authorize elite deployment** — release elite/special units to a front or operation. **Locked design, forthcoming.**
+5. **Replace a corps CO** — sack/install a commander, at a cost. **Locked design, forthcoming.**
+
+Refusing a patron demand is **not a sixth lever** — it is a response option within the event system (§21.1) resolving through `patron_confidence` (§21.2). Faction asymmetry (RS officer-revolt/blockade risk, RBiH firmest civilian control, HRHB patron-gated) emerges from data, not faction branches. Authoritative design: `docs/plans/2026-06-01-presidential-command-model-design.md`. *(Additive note; does not supersede §3 or §21. Levers 2–5 are design-locked but unbuilt — do not treat as implemented.)*
+
 ## 22. Sensitive History Design Gate (canon, v0.9.0)
 
 AWWV depicts the 1992-1995 Bosnian War — a war that included genocide, systematic ethnic cleansing, siege-starvation, and mass atrocity convicted by the International Criminal Tribunal for the former Yugoslavia. A negative-sum wargame that takes its subject seriously must settle the moral question before implementation continues, not after.

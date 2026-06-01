@@ -10,6 +10,8 @@ Municipalities cannot flip control through violence until the war-start escalati
 
 A War Without Victory is a strategic war game simulating the conflict in Bosnia and Herzegovina from late 1991 to 1995. Players assume the role of political and military leadership of one faction. The goal is not conquest, but survival, leverage, and shaping the conditions under which the war ends.
 
+**Presidential Command Model (additive note — LOCKED design 2026-06-01):** Canonically, **the player is the president and commands the war through their generals (strategic directives), not as a general; brigade-level operation planning is post-1.0 / DLC.** In 1.0 the president's military agency is five command levers: (1) **Authorize op — SHIPPED**; (2) Request op; (3) Stop op; (4) Authorize elite deployment; (5) Replace a corps CO at cost — **levers 2–5 are locked-design/forthcoming, not yet built.** Refusing a patron demand is the event layer, not a sixth lever. Authoritative design: `docs/plans/2026-06-01-presidential-command-model-design.md`. *(Additive note; does not supersede existing Rulebook sections. **Owner-review flag:** §5.1/§5.5 state brigades are "directly commanded by the player" and brigade posture is "selected by the player." This describes the shipped tactical command surface and is not in itself contradicted — the brigade op-PLANNING UX deferred to DLC is the operation-authoring surface, not posture/movement — but the precise reconciliation of brigade-direct-command vs president-through-generals framing is left for owner resolution.)*
+
 ## 2. Core Concepts
 
 ### 2.1 What this game is
