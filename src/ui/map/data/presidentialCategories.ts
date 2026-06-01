@@ -103,7 +103,7 @@ export const PRESIDENTIAL_COMMAND_CATEGORIES: readonly PresidentialCommandCatego
     id: 'cat_command',
     title: 'Command & Personnel',
     blurb: 'Commanders, elite units, and officer matters.',
-    sources: [],
+    sources: ['command'],
   },
   {
     id: 'cat_conscience',

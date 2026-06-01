@@ -78,11 +78,12 @@ describe('presidential command categories — taxonomy', () => {
     expect(byId.get('cat_war_direction')).toEqual(['opportunity', 'operational', 'briefing']);
     expect(byId.get('cat_diplomacy')).toEqual(['decision', 'counter_offer']);
     expect(byId.get('cat_record')).toEqual(['turn', 'cost', 'memory']);
-    // Home Front / Command / Conscience have no broad source category (Conscience
-    // is fed by the paramilitary card predicate; the others are reachable via the
-    // strip directly until their decision sources are wired).
+    // Command & Personnel is wired (Slice 2): replace-CO / elite-deploy / front-visit
+    // cards carry the `command` category.
+    expect(byId.get('cat_command')).toEqual(['command']);
+    // Home Front / Conscience have no broad source category (Conscience is fed by the
+    // paramilitary card predicate; Home Front stays scan-only this slice).
     expect(byId.get('cat_home_front')).toEqual([]);
-    expect(byId.get('cat_command')).toEqual([]);
     expect(byId.get('cat_conscience')).toEqual([]);
   });
 

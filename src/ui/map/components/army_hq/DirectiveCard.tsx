@@ -20,7 +20,7 @@
  * IPCs — no determinism touch.
  */
 
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { LoadedGameState } from '../../data/types';
 import type { PresidentialDecisionRoomDirective } from '../../data/presidentialDecisionRoom';
 import { useIPC } from '../../desktop/useIPC';
@@ -43,6 +43,9 @@ function leverLabel(lever: PresidentialDecisionRoomDirective['lever']): string {
     case 'force_launch': return 'Force operation launch';
     case 'stop_op': return 'Halt operation';
     case 'authorize_op': return 'Authorize operation';
+    case 'replace_co': return 'Replace commander';
+    case 'elite_deploy': return 'Release reserve brigade';
+    case 'front_visit': return 'Visit the front';
     default: return 'Issue directive';
   }
 }
@@ -53,6 +56,8 @@ function targetLabel(directive: PresidentialDecisionRoomDirective): string | nul
   if (typeof p.opName === 'string' && p.opName) return p.opName;
   if (typeof p.targetOsid === 'string' && p.targetOsid) return p.targetOsid;
   if (typeof p.proposalId === 'string' && p.proposalId) return p.proposalId;
+  if (typeof p.brigadeId === 'string' && p.brigadeId) return p.brigadeId;
+  if (directive.corpsId) return directive.corpsId;
   return null;
 }
 
@@ -69,10 +74,17 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   const [impossibleReason, setImpossibleReason] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  // FRONT-VISIT reachability (async server-side — the president cannot reach a
+  // cut-off enclave). Fetched once on mount / on state change, mirroring
+  // FrontVisitSection. Only used for the front_visit lever.
+  const [frontVisitUnavailableReason, setFrontVisitUnavailableReason] = useState<string | null>(null);
+  const [frontVisitReady, setFrontVisitReady] = useState(false);
+
   const cost = directive.cost;
   const authCurrent = gameState.commandAuthority?.current ?? 100;
   const canAfford = authCurrent >= cost;
   const needsObjection = directive.lever === 'request_op' || directive.lever === 'force_launch';
+  const isFrontVisit = directive.lever === 'front_visit';
 
   // Commander disposition for the request/force objection (same lookup as
   // OperationsSection): the active CO of the target corps.
@@ -82,6 +94,29 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       (o) => o.assigned_corps_id === directive.corpsId && o.status === 'active',
     );
   }, [gameState.namedOfficerData, directive.corpsId]);
+
+  const refreshFrontVisit = useCallback(async () => {
+    if (!ipc.isAvailable || !isFrontVisit) return;
+    const r = await ipc.getFrontVisitAvailability();
+    setFrontVisitReady(true);
+    if (!r.ok) { setFrontVisitUnavailableReason('Front-visit availability is unknown.'); return; }
+    const reachable = (r.reachableBranchIds ?? []).length > 0;
+    if (r.available && reachable) {
+      setFrontVisitUnavailableReason(null);
+    } else {
+      // Cut-off / exhausted / on-cooldown — surface a concise reason.
+      setFrontVisitUnavailableReason(
+        r.reason
+          ?? (r.onCooldown ? 'The front visit is on cooldown.'
+            : !reachable ? 'No front is reachable — every offered front is cut off.'
+            : 'A front visit cannot be made right now.'),
+      );
+    }
+  }, [ipc, isFrontVisit]);
+
+  useEffect(() => {
+    void refreshFrontVisit();
+  }, [refreshFrontVisit, gameState]);
 
   // Browser/headless: render inert (mirror FrontVisitSection).
   if (!ipc.isAvailable) return null;
@@ -144,6 +179,39 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         const result = await ipc.stageOpHaltOrder({ corpsId: directive.corpsId, opName });
         if (!result.ok) setLoadError(result.error ?? 'Failed to halt operation.');
         else resetTransient();
+        return;
+      }
+
+      // REPLACE-CO (single CA-cost confirm — the spend IS the friction). The engine
+      // auto-picks the best reserve replacement (same path as the dismiss button);
+      // the heavy candidate picker stays in CommanderSection.
+      if (directive.lever === 'replace_co') {
+        if (!directive.corpsId) { setLoadError('Directive is missing its corps context.'); return; }
+        const result = await ipc.stageCoReplacementOrder({ corpsId: directive.corpsId });
+        if (!result.ok) setLoadError(result.error ?? 'Failed to replace commander.');
+        else resetTransient();
+        return;
+      }
+
+      // ELITE-DEPLOY (single CA-cost confirm): release the suggested reserve brigade
+      // to the requesting corps.
+      if (directive.lever === 'elite_deploy') {
+        const requestId = typeof directive.payload.requestId === 'string' ? directive.payload.requestId : '';
+        const brigadeId = typeof directive.payload.brigadeId === 'string' ? directive.payload.brigadeId : '';
+        if (!requestId || !brigadeId) { setLoadError('Directive is missing its reserve-request context.'); return; }
+        const result = await ipc.approveReserveRequest(requestId, brigadeId);
+        if (!result.ok) setLoadError(result.error ?? 'Failed to release reserve brigade.');
+        else resetTransient();
+        return;
+      }
+
+      // FRONT-VISIT (single CA-cost confirm): respect server-side reachability — the
+      // president cannot reach a cut-off enclave.
+      if (directive.lever === 'front_visit') {
+        if (frontVisitUnavailableReason) { setLoadError(frontVisitUnavailableReason); return; }
+        const result = await ipc.initiateFrontVisit();
+        if (!result.ok) setLoadError(result.error ?? 'Failed to initiate front visit.');
+        else { resetTransient(); await refreshFrontVisit(); }
         return;
       }
 
@@ -270,24 +338,41 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         </div>
       )}
 
-      {/* Confirm / ISSUE — disabled when CA short (still renders for scan-without-spend). */}
-      {!pendingObjection && !impossibleReason && (
-        <button
-          type="button"
-          onClick={handleConfirm}
-          disabled={!canAfford || busy}
-          title={canAfford
+      {/* FRONT-VISIT reachability notice — the president cannot reach a cut-off
+          enclave. Surface the server-side reason; the ISSUE button is disabled. */}
+      {isFrontVisit && frontVisitReady && frontVisitUnavailableReason && (
+        <div role="status" aria-label="Front visit unavailable" className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2">
+          <p className="text-[8px] font-bold uppercase tracking-wider text-text-secondary">Cannot visit</p>
+          <p className="mt-0.5 text-[10px] text-text-primary">{frontVisitUnavailableReason}</p>
+        </div>
+      )}
+
+      {/* Confirm / ISSUE — disabled when CA short (still renders for scan-without-spend),
+          or, for front-visit, when no front is reachable. */}
+      {!pendingObjection && !impossibleReason && (() => {
+        const blockedFrontVisit = isFrontVisit && frontVisitReady && frontVisitUnavailableReason !== null;
+        const issueDisabled = !canAfford || busy || blockedFrontVisit;
+        const issueTitle = blockedFrontVisit
+          ? (frontVisitUnavailableReason ?? 'A front visit cannot be made right now.')
+          : canAfford
             ? (cost === 0
               ? 'Issue this directive (no command authority cost).'
               : `Issue this directive (cost ${cost} command authority; current ${authCurrent}).`)
-            : `Insufficient command authority (need ${cost}, have ${authCurrent}).`}
-          className="mt-2 h-7 w-full truncate rounded border border-amber-400/35 bg-amber-400/12 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
-        >
-          {busy
-            ? (needsObjection ? 'Consulting…' : 'Issuing…')
-            : (cost === 0 ? 'Authorize' : `Issue (${cost})`)}
-        </button>
-      )}
+            : `Insufficient command authority (need ${cost}, have ${authCurrent}).`;
+        return (
+          <button
+            type="button"
+            onClick={handleConfirm}
+            disabled={issueDisabled}
+            title={issueTitle}
+            className="mt-2 h-7 w-full truncate rounded border border-amber-400/35 bg-amber-400/12 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
+          >
+            {busy
+              ? (needsObjection ? 'Consulting…' : 'Issuing…')
+              : (cost === 0 ? 'Authorize' : `Issue (${cost})`)}
+          </button>
+        );
+      })()}
     </section>
   );
 }
