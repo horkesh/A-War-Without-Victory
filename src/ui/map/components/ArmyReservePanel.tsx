@@ -23,6 +23,7 @@ import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
 import { EmptyState } from './EmptyState';
 import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
+import { ELITE_DEPLOY_COST } from '../utils/commandAuthority';
 
 const REASON_LABEL_KEYS: Record<string, MessageKey> = {
     offensive_support: 'armyReserve.reason.offensiveSupport',
@@ -95,6 +96,14 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
     function getCorpsName(corpsId: string): string {
         return getPlayerFacingCorpsName(corpsId, corpsNameById, 'Assigned command');
     }
+
+    // ELITE-DEPLOY presidential command-authority cost. Approving a reserve request
+    // releases an elite formation from the strategic reserve and debits ELITE_DEPLOY_COST
+    // (charged server-side in approveReserveRequest). When command_authority is absent
+    // (pre-Phase-2 saves), default to affordable so the affordance is not falsely disabled.
+    const commandAuthorityCurrent = loadedGameState.commandAuthority?.current;
+    const canAffordEliteDeploy =
+        commandAuthorityCurrent === undefined || commandAuthorityCurrent >= ELITE_DEPLOY_COST;
 
     async function handleApprove(requestId: string, brigadeId: string | null) {
         if (!brigadeId) return;
@@ -382,14 +391,21 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                         />
                                     </div>
 
+                                    {/* Presidential command-authority cost of releasing the strategic reserve. */}
+                                    <div className={`text-[10px] ${canAffordEliteDeploy ? 'text-text-secondary' : 'text-[#d45555]'}`}>
+                                        {t('armyReserve.commandAuthorityCost', { cost: ELITE_DEPLOY_COST })}
+                                        {!canAffordEliteDeploy && ` — ${t('armyReserve.insufficientAuthority')}`}
+                                    </div>
+
                                     <div className="flex gap-1.5">
                                         <button
                                             type="button"
-                                            disabled={!req.suggested_brigade_id}
+                                            disabled={!req.suggested_brigade_id || !canAffordEliteDeploy}
+                                            title={!canAffordEliteDeploy ? t('armyReserve.insufficientAuthority') : undefined}
                                             onClick={() => void handleApprove(req.request_id, req.suggested_brigade_id)}
                                             className="flex-1 px-2 py-1 bg-[#55d48a]/20 border border-[#55d48a]/40 rounded text-[10px] text-[#55d48a] font-bold hover:bg-[#55d48a]/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                                         >
-                                            {t('armyReserve.approve')}
+                                            {t('armyReserve.approve')} ({ELITE_DEPLOY_COST})
                                         </button>
                                         <button
                                             type="button"

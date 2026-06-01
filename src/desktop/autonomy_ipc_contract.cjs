@@ -122,6 +122,13 @@ const STOP_OP_COST = 25;
 // AUTHOR_OP_COST / STOP_OP_COST (25). MUST match src/ui/map/utils/commandAuthority.ts
 // (REQUEST_OP_COST = 25) and the stage-op-directive-order handler (op_directive_staging.cjs).
 const REQUEST_OP_COST = 25;
+// ELITE-DEPLOY presidential lever (Presidential Command Model) command-authority
+// cost: releasing an elite/special formation from the strategic reserve to a corps.
+// Priced equal to a STOP-OP / proactive force-launch (25). MUST match
+// src/ui/map/utils/commandAuthority.ts (ELITE_DEPLOY_COST = 25). The debit lives
+// ONLY in approveReserveRequest (player IPC path) — NEVER in deployEliteLoan or the
+// headless/calibration reserve auto-deploy path.
+const ELITE_DEPLOY_COST = 25;
 const APPROVE_OP_PREFIX = 'APPROVE_OP:';
 
 function parseApproveOpAction(action) {
@@ -350,4 +357,5 @@ module.exports = {
   AUTHOR_OP_COST,
   STOP_OP_COST,
   REQUEST_OP_COST,
+  ELITE_DEPLOY_COST,
 };
