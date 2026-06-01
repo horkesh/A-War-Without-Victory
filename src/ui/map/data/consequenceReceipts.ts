@@ -113,10 +113,64 @@ function resolveEventTitle(
     return typeof title === 'string' && title.trim().length > 0 ? title : fallbackId;
 }
 
+/** Player-facing label for a faction's coercive patron — sober, factual. */
+function patronLabelForFaction(factionId: string): string {
+    switch (factionId) {
+        case 'RS': return "Belgrade's";
+        case 'HRHB': return "Zagreb's";
+        default: return "the patron's";
+    }
+}
+
+/**
+ * Slice 4a — project the engine's realized patron-defiance supply cuts into
+ * one-shot ConsequenceReceipts. Each entry of
+ * `state.military.patron_defiance_supply_cuts` records a turn on which refusing /
+ * distancing from the patron actually STARVED a faction's materiel (emergent-only;
+ * the engine never writes these in historical/calibration mode, so this projection
+ * collapses to [] there). Unlike the event-causality receipts, these have no
+ * promise→receipt edge (the cut is an engine-state mechanic, not an event decision):
+ * we emit a one-shot RECEIPT marked `confirmed` with `firedTurn` = the cut turn,
+ * so the existing Turn-Aftermath "Consequences Realized This Turn" section surfaces
+ * it via `receiptsRealizedOnTurn`. Wording is factual and never framed as a reward.
+ */
+function buildPatronDefianceReceipts(state: GameState): ConsequenceReceipt[] {
+    const cuts = state.military?.patron_defiance_supply_cuts ?? [];
+    if (cuts.length === 0) return [];
+    const out: ConsequenceReceipt[] = [];
+    for (const cut of cuts) {
+        const pct = Math.round(cut.cut_fraction * 100);
+        const supportPct = Math.round(cut.support_after * 100);
+        const patron = patronLabelForFaction(cut.faction);
+        out.push({
+            id: `patron_defiance::${cut.faction}::${cut.turn}`,
+            decisionEventId: `patron_defiance_${cut.faction}`,
+            decisionTitle: 'Patron defiance',
+            decisionOptionLabel: `Refused ${patron} demand`,
+            decisionTurn: cut.turn,
+            predictedEventId: `patron_supply_cut_${cut.faction}`,
+            predictedLabel: `${patron} materiel cut by ${pct}%`,
+            predictedExplanation:
+                `Defiance collapsed patron confidence; ${patron} support to the front fell to ${supportPct}%. ` +
+                `The refusal stands on the record — the cost is borne at the front.`,
+            status: 'confirmed',
+            firedTurn: cut.turn,
+            turnsElapsed: 0,
+        });
+    }
+    return out;
+}
+
 /**
  * Build the realized consequence-receipt list from the persisted causality
- * substrate. Returns `[]` when state or catalog is absent/empty, or when no
- * player decision has any `opens_events` prediction.
+ * substrate. Returns `[]` when state is absent, or when neither an event-decision
+ * prediction nor an emergent patron-defiance cut has been realized.
+ *
+ * Two receipt sources merge here:
+ *   1. Event-causality receipts (promise→receipt; requires a player decision whose
+ *      chosen option has `opens_events` and a realized causal edge). Needs `catalog`.
+ *   2. Emergent patron-defiance supply-cut receipts (one-shot; engine-state mechanic,
+ *      no catalog needed). Emitted only when the engine wrote a non-zero cut.
  *
  * Output is sorted deterministically: CONFIRMED-fired turn ascending (with
  * null fired turns — pending/contradicted — sorted last), then by receipt id
@@ -126,9 +180,17 @@ export function buildConsequenceReceipts(
     state: GameState | null | undefined,
     catalog: ReadonlyMap<string, EventDefinition> | null | undefined,
 ): ConsequenceReceipt[] {
-    if (!state || !catalog || catalog.size === 0) return [];
+    if (!state) return [];
+
+    // Patron-defiance receipts need no catalog and no event-decision log — they
+    // project directly from the engine's realized-cut substrate. Gather them first
+    // so they survive the event-causality early-returns below.
+    const patronReceipts = buildPatronDefianceReceipts(state);
+
     const decisionLog = state.military?.event_decision_log ?? [];
-    if (decisionLog.length === 0) return [];
+    if (!catalog || catalog.size === 0 || decisionLog.length === 0) {
+        return sortReceipts(patronReceipts);
+    }
 
     const firedIds = new Set(state.military?.fired_event_ids ?? []);
     const closedIds = new Set(state.military?.closed_event_ids ?? []);
@@ -136,7 +198,7 @@ export function buildConsequenceReceipts(
     const edges = enablesEdgeKeySet(state);
     const chosenByEvent = chosenResponseByEvent(state);
 
-    const receipts: ConsequenceReceipt[] = [];
+    const receipts: ConsequenceReceipt[] = [...patronReceipts];
 
     for (const dec of decisionLog) {
         // Only player decisions earn a receipt — bot choices are not the
@@ -211,9 +273,14 @@ export function buildConsequenceReceipts(
         }
     }
 
-    receipts.sort((a, b) => {
-        // CONFIRMED rows (firedTurn != null) sort by fired turn ascending;
-        // pending/contradicted (firedTurn == null) sort last. Tiebreak by id.
+    return sortReceipts(receipts);
+}
+
+/** Deterministic receipt ordering: CONFIRMED rows (firedTurn != null) by fired
+ *  turn ascending; pending/contradicted (firedTurn == null) sort last; tiebreak
+ *  by id via `strictCompare`. Pure; returns a new sorted array. */
+function sortReceipts(receipts: ConsequenceReceipt[]): ConsequenceReceipt[] {
+    return [...receipts].sort((a, b) => {
         const aFired = a.firedTurn;
         const bFired = b.firedTurn;
         if (aFired !== null && bFired !== null && aFired !== bFired) {
@@ -223,8 +290,6 @@ export function buildConsequenceReceipts(
         if (aFired !== null && bFired === null) return -1;
         return strictCompare(a.id, b.id);
     });
-
-    return receipts;
 }
 
 /** Convenience filter: receipts whose CONFIRMED firing landed on `turn`.
