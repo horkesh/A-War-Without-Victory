@@ -168,7 +168,12 @@ describe('GUI audit Batch G dead/no-op controls', () => {
         expect(screen.queryByRole('button', { name: 'Accept' })).toBeNull();
     });
 
-    it('keeps emergency posture visible but disabled when the desktop bridge is unavailable', () => {
+    // Removal regression-guard: the bulk "emergency posture" control was a dead
+    // direct-set surface (wrote top-level state.corps_command, which the engine
+    // never reads). It was removed — the president now approves CO-proposed stance
+    // changes via the propose→approve AutonomyPanel surface. This case guards that
+    // the dead control does not silently return to ArmyHQModal.
+    it('no longer renders the removed bulk emergency-posture control', () => {
         useGameStore.setState({
             ...useGameStore.getInitialState(),
             loadedGameState: makeState({
@@ -185,7 +190,8 @@ describe('GUI audit Batch G dead/no-op controls', () => {
 
         render(createElement(ArmyHQModal));
 
-        expect(screen.getByText(/desktop bridge unavailable/i)).toBeTruthy();
-        expect((screen.getByRole('combobox', { name: /emergency posture order/i }) as HTMLSelectElement).disabled).toBe(true);
+        expect(screen.queryByRole('combobox', { name: /emergency posture order/i })).toBeNull();
+        // No bulk emergency-posture combobox at all (it was the only combobox here).
+        expect(screen.queryByRole('combobox')).toBeNull();
     });
 });
