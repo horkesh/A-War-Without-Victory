@@ -686,7 +686,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         </div>
 
                         <div className="font-bold text-[12px] uppercase tracking-wide mb-1 flex items-center gap-2">
-                          <span>{sector.intel_confidence < 0.2 ? <span className="bg-black text-black select-none">{t('corpsFront.opRedacted')}</span> : op.name}</span>
+                          <span>{sector.intel_confidence < 0.2 ? <span className="bg-black text-black select-none">{t('corpsFront.opRedacted')}</span> : op.display_name}</span>
                           <span className={`px-1 rounded text-[8px] text-white ${phaseBg}`}>{op.phase}</span>
                         </div>
 

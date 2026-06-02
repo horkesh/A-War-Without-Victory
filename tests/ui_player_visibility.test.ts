@@ -46,8 +46,8 @@ describe('player visibility helpers', () => {
         { sector_id: 's_2', corps_id: 'vrs_1st_krajina', faction: 'RS', display_name: 'Doboj Front', edge_ids: [], length_edges: 2, density: 1, threat_ratio: 1, territory_osids: [], assigned_brigade_ids: [], reserve_brigade_ids: [], offensive_signs: false, intel_confidence: 0.5, combat_strength_class: 'adequate' },
       ],
       operations: [
-        { corps_id: 'arbih_3rd_corps', corps_name: '3rd Corps', faction: 'RBiH', name: 'Op Tuzla', type: 'sector_attack', phase: 'planning', started_turn: 1, current_objective_index: 0, objectives: ['osid_a'], participating_brigade_count: 1 },
-        { corps_id: 'vrs_1st_krajina', corps_name: '1st Krajina Corps', faction: 'RS', name: 'Op Doboj', type: 'sector_attack', phase: 'execution', started_turn: 1, current_objective_index: 0, objectives: ['osid_b'], participating_brigade_count: 1 },
+        { corps_id: 'arbih_3rd_corps', corps_name: '3rd Corps', faction: 'RBiH', name: 'Op Tuzla', display_name: 'Op Tuzla', type: 'sector_attack', phase: 'planning', started_turn: 1, current_objective_index: 0, objectives: ['osid_a'], participating_brigade_count: 1 },
+        { corps_id: 'vrs_1st_krajina', corps_name: '1st Krajina Corps', faction: 'RS', name: 'Op Doboj', display_name: 'Op Doboj', type: 'sector_attack', phase: 'execution', started_turn: 1, current_objective_index: 0, objectives: ['osid_b'], participating_brigade_count: 1 },
       ] satisfies OperationView[],
     } as unknown as LoadedGameState;
 
@@ -154,8 +154,8 @@ describe('player visibility helpers', () => {
     const state = {
       player_faction: 'RBiH',
       operations: [
-        { corps_id: 'arbih_3rd_corps', corps_name: '3rd Corps', faction: 'RBiH', name: 'Op Tuzla', type: 'sector_attack', phase: 'planning', started_turn: 1, staging_osid: 'osid_a', current_objective_index: 0, objectives: ['osid_b'], participating_brigade_count: 1 },
-        { corps_id: 'vrs_1st_krajina', corps_name: '1st Krajina Corps', faction: 'RS', name: 'Op Doboj', type: 'sector_attack', phase: 'execution', started_turn: 1, staging_osid: 'osid_c', current_objective_index: 0, objectives: ['osid_d'], participating_brigade_count: 1 },
+        { corps_id: 'arbih_3rd_corps', corps_name: '3rd Corps', faction: 'RBiH', name: 'Op Tuzla', display_name: 'Op Tuzla', type: 'sector_attack', phase: 'planning', started_turn: 1, staging_osid: 'osid_a', current_objective_index: 0, objectives: ['osid_b'], participating_brigade_count: 1 },
+        { corps_id: 'vrs_1st_krajina', corps_name: '1st Krajina Corps', faction: 'RS', name: 'Op Doboj', display_name: 'Op Doboj', type: 'sector_attack', phase: 'execution', started_turn: 1, staging_osid: 'osid_c', current_objective_index: 0, objectives: ['osid_d'], participating_brigade_count: 1 },
       ] satisfies OperationView[],
     } as unknown as LoadedGameState;
 
@@ -240,8 +240,8 @@ describe('player visibility helpers', () => {
       player_faction: 'RBiH',
       formations: [],
       operations: [
-        { corps_id: 'arbih_3rd_corps', corps_name: '3rd Corps', faction: 'RBiH', name: 'Own Op', type: 'sector_attack', phase: 'planning', started_turn: 1, current_objective_index: 0, objectives: ['osid_a'], participating_brigade_count: 1 },
-        { corps_id: 'vrs_1st_krajina', corps_name: '1st Krajina Corps', faction: 'RS', name: 'Enemy Op', type: 'sector_attack', phase: 'execution', started_turn: 1, current_objective_index: 0, objectives: ['osid_b'], participating_brigade_count: 1 },
+        { corps_id: 'arbih_3rd_corps', corps_name: '3rd Corps', faction: 'RBiH', name: 'Own Op', display_name: 'Own Op', type: 'sector_attack', phase: 'planning', started_turn: 1, current_objective_index: 0, objectives: ['osid_a'], participating_brigade_count: 1 },
+        { corps_id: 'vrs_1st_krajina', corps_name: '1st Krajina Corps', faction: 'RS', name: 'Enemy Op', display_name: 'Enemy Op', type: 'sector_attack', phase: 'execution', started_turn: 1, current_objective_index: 0, objectives: ['osid_b'], participating_brigade_count: 1 },
       ] satisfies OperationView[],
       corpsFrontSectors: [],
     } as unknown as LoadedGameState;

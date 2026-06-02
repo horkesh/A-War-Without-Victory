@@ -858,7 +858,15 @@ export interface OperationView {
     corps_id: string;
     corps_name: string;
     faction: string;
+    /**
+     * RAW engine operation name. Used as the join key against
+     * operationHistory[].operation_name and as the IPC payload for
+     * force-launch / stand-down / staging decisions. Do NOT render to the
+     * player — use `display_name`, which humanizes engine slug/id names.
+     */
     name: string;
+    /** Player-safe display name (humanized). Render this, not `name`. */
+    display_name: string;
     type: string;
     phase: 'planning' | 'execution' | 'recovery';
     sector_id?: string;

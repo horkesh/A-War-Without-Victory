@@ -42,6 +42,7 @@ import {
     getPlayerSafeDecisionTitle,
     getPlayerSafeDisplayLabel,
     getPlayerSafeOfficerName,
+    getPlayerSafeOperationName,
 } from '../utils/playerSafeText.js';
 import { classifyArmyReserveSeverity } from '../utils/armyReserveSeverity.js';
 import { deriveWarFrontVisibleEnemyOsids } from '../utils/deriveWarFrontVisibleEnemyOsids.js';
@@ -192,7 +193,11 @@ function buildOfficerCombatRecords(
         if (isNewer) {
             lastOpKey.set(officerId, { endedTurn, opId });
             existing.last_operation = {
-                name: typeof aar.operation_name === 'string' ? aar.operation_name : opId,
+                // Display-only field (officer profile). Humanize slug/id op names;
+                // this is not used as a join key (lastOpKey joins on opId).
+                name: getPlayerSafeOperationName(
+                    typeof aar.operation_name === 'string' ? aar.operation_name : opId,
+                ),
                 outcome,
                 ended_turn: endedTurn,
             };
@@ -1143,7 +1148,15 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     corps_id: fv.id,
                     corps_name: fv.name,
                     faction: fv.faction,
+                    // `name` stays RAW: it is the join key against
+                    // operationHistory[].operation_name and the IPC payload for
+                    // force-launch / stand-down / staging decisions (engine truth).
                     name: op.name as string,
+                    // `display_name` is the UI projection only — humanizes engine
+                    // slug/id op names for the player (e.g.
+                    // probe_arbih_1st_corps_t12 → "Probe — 1st Corps"). Does NOT
+                    // mutate the engine op.name (determinism preserved).
+                    display_name: getPlayerSafeOperationName(op.name as string, fv.id),
                     type: (op.type as string) ?? 'sector_attack',
                     phase: (op.phase as 'planning' | 'execution' | 'recovery') ?? 'execution',
                     sector_id: typeof op.sector_id === 'string' ? op.sector_id : undefined,

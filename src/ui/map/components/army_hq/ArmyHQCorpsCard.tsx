@@ -232,7 +232,7 @@ export function ArmyHQCorpsCard({
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                             <span className="text-[11px] text-red-400 font-bold truncate uppercase font-mono">
-                                {data.activeOp.name}
+                                {data.activeOp.display_name}
                             </span>
                         </div>
                     </div>

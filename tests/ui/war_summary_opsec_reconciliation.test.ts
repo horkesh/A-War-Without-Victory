@@ -23,6 +23,7 @@ function makeOperation(name: string, overrides: Partial<OperationView> = {}): Op
         corps_name: '1st Krajina Corps',
         faction: 'RS',
         name,
+        display_name: name,
         type: 'sector_attack',
         phase: 'execution',
         participating_brigade_count: 1,
