@@ -1115,3 +1115,123 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.emptyState).toBe('No player faction loaded.');
   });
 });
+
+describe('buildPresidentialDecisionRoomView — proactive force-launch (override silence)', () => {
+  afterEach(() => {
+    setLocale('en');
+  });
+
+  const PROACTIVE_FORCE_LAUNCH_COST = 25;
+
+  function makeRawWithHeldPlan(params: {
+    playerFaction: string | null;
+    planStatus?: string;
+    proposedAction?: string;
+  }): LoadedGameState {
+    const officer = {
+      id: 'off_1',
+      name: 'General Delic',
+      faction: 'RBiH',
+      rank: 'general',
+      status: 'active',
+      assigned_corps_id: 'arbih_1st_corps',
+    };
+    const rawGameState = {
+      meta: { player_faction: params.playerFaction },
+      military: {
+        formations: {
+          arbih_1st_corps: { id: 'arbih_1st_corps', name: '1st Corps', faction: 'RBiH', kind: 'corps' },
+        },
+        named_officers: {
+          off_1: officer,
+        },
+        corps_command: {
+          arbih_1st_corps: {
+            commander_state: {
+              last_plan_reason: 'Holding for reserves.',
+              current_plan: {
+                plan_id: 'plan_alpha',
+                status: params.planStatus ?? 'ready',
+                objective_description: 'Operation Held Alpha',
+              },
+            },
+          },
+        },
+      },
+    };
+    const pendingProposalReviews = params.proposedAction
+      ? [
+          {
+            id: 'rev_1',
+            turn: 24,
+            faction: 'RBiH',
+            domain: 'ops',
+            description: 'Approve held plan',
+            proposed_action: params.proposedAction,
+          },
+        ]
+      : [];
+    return makeState({
+      player_faction: params.playerFaction,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      rawGameState: rawGameState as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      namedOfficerData: [officer as any],
+      pendingProposalReviews,
+    });
+  }
+
+  it('emits a proactive force_launch directive for a held-ready plan with PROACTIVE_FORCE_LAUNCH_COST', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeRawWithHeldPlan({ playerFaction: 'RBiH' }),
+    });
+
+    const card = view.cards.find(
+      (c) => c.id === 'command:proactive-force-launch:arbih_1st_corps:plan_alpha',
+    );
+    expect(card).toBeDefined();
+    expect(card?.directive).toMatchObject({
+      lever: 'force_launch',
+      corpsId: 'arbih_1st_corps',
+      cost: PROACTIVE_FORCE_LAUNCH_COST,
+      payload: { opName: 'Operation Held Alpha' },
+    });
+    // Distinct title from the proposal-override card.
+    expect(card?.title).toContain('unrequested');
+  });
+
+  it('does NOT emit a proactive card for a plan that already has a proposal-override card', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeRawWithHeldPlan({
+        playerFaction: 'RBiH',
+        proposedAction: 'APPROVE_OP:arbih_1st_corps:plan_alpha',
+      }),
+    });
+
+    expect(
+      view.cards.find(
+        (c) => c.id === 'command:proactive-force-launch:arbih_1st_corps:plan_alpha',
+      ),
+    ).toBeUndefined();
+  });
+
+  it('emits no proactive cards when there is no player faction', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeRawWithHeldPlan({ playerFaction: null }),
+    });
+
+    expect(
+      view.cards.filter((c) => c.id.startsWith('command:proactive-force-launch:')),
+    ).toEqual([]);
+  });
+
+  it('emits no proactive card when the plan is not held at ready', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeRawWithHeldPlan({ playerFaction: 'RBiH', planStatus: 'drafting' }),
+    });
+
+    expect(
+      view.cards.filter((c) => c.id.startsWith('command:proactive-force-launch:')),
+    ).toEqual([]);
+  });
+});

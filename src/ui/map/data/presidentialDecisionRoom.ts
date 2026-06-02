@@ -17,7 +17,9 @@ import {
   FRONT_VISIT_COST,
   REQUEST_OP_COST,
   FORCE_LAUNCH_COST,
+  PROACTIVE_FORCE_LAUNCH_COST,
 } from '../utils/commandAuthority';
+import { buildForceableReadyPlans } from './backTheOfficer';
 
 /**
  * War-Direction directive the president can ISSUE from a Decision Room card
@@ -902,6 +904,70 @@ function addForceLaunchDirectiveCards(state: LoadedGameState, cards: CandidateCa
   }
 }
 
+/**
+ * PROACTIVE force-launch directives (override officer SILENCE): one
+ * `command`-category card per corps plan the commander holds at 'ready' WITHOUT
+ * ever surfacing it as a proposal. Unlike addForceLaunchDirectiveCards (which
+ * overrides a surfaced no-go), this lets the president order an operation the
+ * officer never asked for. Reuses the existing projection
+ * `buildForceableReadyPlans` (held-but-unproposed ready plans) and the SAME
+ * `force_launch` lever / `{ corpsId, opName }` payload — only the cost differs
+ * (PROACTIVE_FORCE_LAUNCH_COST). The IPC + DirectiveCard already consume this.
+ *
+ * De-dup: buildForceableReadyPlans already excludes any plan that carries an
+ * APPROVE_OP proposal, so a plan with a proposal-override card never produces a
+ * proactive card here. Player-faction gating is enforced inside the projection.
+ *
+ * Deterministic: the projection returns plans in a stable order (corps id then
+ * plan id). No nondeterministic or time-based sources.
+ */
+function addProactiveForceLaunchDirectiveCards(
+  state: LoadedGameState,
+  cards: CandidateCard[],
+): void {
+  if (!state.player_faction) return;
+  const roster = (state.namedOfficerData ?? []).map((o) => ({
+    id: o.id,
+    name: o.name,
+    rank: o.rank,
+    status: o.status,
+  }));
+  const plans = buildForceableReadyPlans(
+    state.rawGameState,
+    roster,
+    state.pendingProposalReviews,
+  );
+
+  for (const plan of plans) {
+    cards.push({
+      id: `command:proactive-force-launch:${plan.corps_id}:${plan.plan_id}`,
+      category: 'command',
+      severity: 'warning',
+      title: t('decisionRoom.card.proactiveForceLaunch.title', { opName: plan.op_name }),
+      explanation: t('decisionRoom.card.proactiveForceLaunch.explanation', {
+        opName: plan.op_name,
+        corps: plan.corps_name,
+      }),
+      sourceOwner: t('decisionRoom.card.command.sourceOwner'),
+      sourceLabel: t('decisionRoom.card.proactiveForceLaunch.sourceLabel'),
+      actionLabel: t('decisionRoom.action.inspectCorps'),
+      evidence: [
+        t('decisionRoom.card.proactiveForceLaunch.evidence.corps', { corps: plan.corps_name }),
+        t('decisionRoom.card.proactiveForceLaunch.evidence.held'),
+      ],
+      navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: plan.corps_id },
+      directive: {
+        lever: 'force_launch',
+        corpsId: plan.corps_id,
+        cost: PROACTIVE_FORCE_LAUNCH_COST,
+        payload: { opName: plan.op_name },
+      },
+      urgencySort: 6,
+      sourceSort: `command:proactive-force-launch:${plan.corps_id}:${plan.plan_id}`,
+    });
+  }
+}
+
 function turnCostPriority(record: TurnAftermathView): number {
   const severity = record.cost.severity === 'critical' ? 0 : 1;
   return severity * 1000 - record.turn;
@@ -1603,6 +1669,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   addCommandPersonnelCards(state, candidates);
   addRequestOpDirectiveCards(state, candidates);
   addForceLaunchDirectiveCards(state, candidates);
+  addProactiveForceLaunchDirectiveCards(state, candidates);
   addHardTurnCards(state, osidNameMap, candidates);
   addCampaignCostCard(state, osidNameMap, candidates);
   addChronicleCard(state, candidates);
