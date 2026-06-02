@@ -23,7 +23,12 @@ import { setLocale } from '../../src/ui/map/i18n';
 import type { EventDefinition } from '../../src/sim/events/event_types.js';
 import type { GameState, CausalityLogEntry } from '../../src/state/game_state.js';
 
-let storeState: Record<string, any> = { loadedGameState: null };
+// `devMode: true` by default so the Unlock State section (a developer-only
+// diagnostic, gated behind the `devMode` store flag) renders and the
+// present/null-condition cases exercise the REAL data conditions rather than
+// the dev-gate. The dev-gate itself is covered by the dedicated
+// `devMode === false` case below.
+let storeState: Record<string, any> = { loadedGameState: null, devMode: true };
 
 vi.mock('../../src/ui/map/store/gameStore', () => ({
     useGameStore: Object.assign(
@@ -93,7 +98,7 @@ function renderPanel(props: {
 
 describe('CodexPanel Unlock State (Phase H Packet 5)', () => {
     beforeEach(() => {
-        storeState = { loadedGameState: null };
+        storeState = { loadedGameState: null, devMode: true };
         setLocale('en');
     });
 
@@ -119,6 +124,23 @@ describe('CodexPanel Unlock State (Phase H Packet 5)', () => {
         expect(firedList.textContent).toContain('foundational_event_1');
         expect(firedList.textContent).toContain('[family=rbih_identity]');
         expect(firedList.textContent).toContain('[source=icty_icj_un]');
+    });
+
+    it('omits the Unlock State section when devMode is false (player default — no raw event-code leak)', () => {
+        // Even with both eventCatalog + state present, the developer-only
+        // diagnostic must stay hidden for players (devMode === false).
+        storeState = { loadedGameState: null, devMode: false };
+        const def = buildEventDef('foundational_event_1', { family: 'rbih_identity' });
+        const catalog = new Map<string, EventDefinition>([[def.id, def]]);
+        const state = buildState({
+            fired: [def.id],
+            enabled: [],
+            closed: [],
+        });
+
+        renderPanel({ eventCatalog: catalog, state });
+
+        expect(screen.queryByTestId('codex-unlock-state-section')).toBeNull();
     });
 
     it('omits the Unlock State section when eventCatalog is absent (graceful degradation)', () => {
