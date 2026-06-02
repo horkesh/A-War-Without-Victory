@@ -18308,3 +18308,15 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `src/ui/map/components/warroom/CommandCardStrip.tsx`, `tests/ui/command_card_strip_accessibility.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-06-02] feat(ui): route supply visibility to Home Front command card
+
+**Type:** Player-facing command-surface regrouping. The existing `supply:player-visibility` Decision Room card now counts under the `Home Front` command card by explicit card-id predicate and is excluded from `War Direction`, so supply/economy pressure appears in the correct presidential family without changing the underlying Decision Room card archive.
+
+**Determinism / scope:** UI/read-model regrouping only. No sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, command-authority, or directive mechanics changed.
+
+**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui/presidential_categories.test.ts --reporter=dot` failed because Home Front count was still 0 for `supply:player-visibility`. Green focused proof: `node node_modules/vitest/vitest.mjs run tests/ui/presidential_categories.test.ts --reporter=dot` passed 13/13.
+
+**Files:** `src/ui/map/data/presidentialCategories.ts`, `tests/ui/presidential_categories.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---

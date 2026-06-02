@@ -85,8 +85,8 @@ describe('presidential command categories — taxonomy', () => {
     // Command & Personnel is wired (Slice 2): replace-CO / elite-deploy / front-visit
     // cards carry the `command` category.
     expect(byId.get('cat_command')).toEqual(['command']);
-    // Home Front / Conscience have no broad source category (Conscience is fed by the
-    // paramilitary card predicate; Home Front stays scan-only this slice).
+    // Home Front / Conscience have no broad source category (both are fed by
+    // dedicated card predicates to avoid double-counting broad categories).
     expect(byId.get('cat_home_front')).toEqual([]);
     expect(byId.get('cat_conscience')).toEqual([]);
   });
@@ -147,6 +147,24 @@ describe('presidential command categories — count derivation', () => {
     // The paramilitary decision card must NOT be double-counted under Diplomacy.
     const diplomacy = byId.get('cat_diplomacy')!;
     expect(diplomacy.count).toBe(1); // only the dayton manifest, not paramilitary
+  });
+
+  it('routes supply visibility to Home Front, not War Direction', () => {
+    const view = makeView([
+      makeCard({ id: 'supply:player-visibility', category: 'operational', severity: 'critical' }),
+      makeCard({ id: 'sitrep:front-exposed', category: 'operational', severity: 'warning' }),
+    ]);
+    const byId = new Map(derivePresidentialCommandCategoryCounts(view).map((c) => [c.id, c]));
+
+    const homeFront = byId.get('cat_home_front')!;
+    expect(homeFront.count).toBe(1);
+    expect(homeFront.urgentCount).toBe(1);
+    expect(homeFront.isUrgent).toBe(true);
+
+    // Supply/economy pressure should not inflate the War Direction count.
+    const war = byId.get('cat_war_direction')!;
+    expect(war.count).toBe(1);
+    expect(war.urgentCount).toBe(0);
   });
 
   it('returns zero counts for an empty view', () => {

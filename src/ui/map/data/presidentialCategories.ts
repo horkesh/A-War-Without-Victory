@@ -72,7 +72,9 @@ export interface PresidentialCommandCategoryCount {
  *                       category itself is broad. We route the bulk of
  *                       `decision` into Diplomacy & Patrons (peace/Dayton/convoy
  *                       manifests + counter-offers live there), while the
- *                       paramilitary bright-line stays isolated in Conscience.
+ *                       paramilitary bright-line stays isolated in Conscience,
+ *                       and supply/economy pressure is pulled into Home Front
+ *                       by card id.
  *
  * NOTE: `decision` is a broad bucket. To keep the bright line intact and avoid
  * double-counting, the paramilitary card source is handled by a dedicated
@@ -122,13 +124,20 @@ export const PRESIDENTIAL_COMMAND_CATEGORIES: readonly PresidentialCommandCatego
 /**
  * Card ids (from presidentialDecisionRoom.ts) that belong to a category by an
  * explicit predicate rather than by their `category` field. These let us keep
- * the Conscience bright line isolated from the broad `decision` bucket.
+ * the Conscience bright line isolated from the broad `decision` bucket and keep
+ * supply/economy pressure on the Home Front card instead of War Direction.
  */
 const PARAMILITARY_CARD_ID = 'paramilitary:pending';
+const SUPPLY_VISIBILITY_CARD_ID = 'supply:player-visibility';
 
 /** True when a card belongs to the Conscience & Atrocity bright-line card. */
 function isConscienceCard(cardId: string): boolean {
   return cardId === PARAMILITARY_CARD_ID;
+}
+
+/** True when a card belongs to the Home Front supply/economy card. */
+function isHomeFrontCard(cardId: string): boolean {
+  return cardId === SUPPLY_VISIBILITY_CARD_ID;
 }
 
 /** The lens a category deep-links to: its single source, else `all`. */
@@ -151,6 +160,9 @@ export function derivePresidentialCommandCategoryCounts(
   return PRESIDENTIAL_COMMAND_CATEGORIES.map((category) => {
     const sourceSet = new Set<PresidentialDecisionRoomCategory>(category.sources);
     const matched = cards.filter((card) => {
+      // Home Front owns supply/economy pressure exclusively.
+      if (category.id === 'cat_home_front') return isHomeFrontCard(card.id);
+      if (isHomeFrontCard(card.id)) return false;
       // Conscience owns the paramilitary card exclusively.
       if (category.id === 'cat_conscience') return isConscienceCard(card.id);
       // Every other category excludes the paramilitary card from its source set.
