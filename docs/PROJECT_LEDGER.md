@@ -18260,3 +18260,15 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-06-02] feat(ui): make Strategic Priorities state the next presidential work
+
+**Type:** Player-facing UI/read-model comprehension pass for the Presidential Decision Room. `buildPresidentialDecisionRoomView` now derives a deterministic `nextOrders` agenda from the same priority-card archive, and `PresidentialDecisionRoomPanel` renders it above the dense priority lanes as `What is expected of me?` with `Act`, `Inspect`, and `Monitor` cards. The panel subtitle now explains that the surface contains required decisions and safest next inspections instead of repeating `Strategic Priorities`.
+
+**Determinism / scope:** UI/read-model only. No sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, or command-authority mechanics changed.
+
+**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui/presidential_decision_room.test.ts --reporter=dot` failed because `nextOrders` did not exist. Green focused proof: `node node_modules/vitest/vitest.mjs run tests/ui/presidential_decision_room.test.ts tests/ui/presidential_decision_room_panel_i18n.test.ts tests/ui_presidential_decision_room_wiring.test.ts tests/ui/presidential_categories.test.ts --reporter=dot` passed 52/52. `npm.cmd run typecheck` passed. Browser visible-text proof on `http://127.0.0.1:3002/?view=warroom` after starting ARBiH and opening Army HQ showed `STRATEGIC PRIORITIES`, `Your required decisions and safest next inspections`, `WHAT IS EXPECTED OF ME?`, `ACT`, `INSPECT`, `MONITOR`, and `PRIORITY LANES`. Screenshot capture timed out, so the browser evidence is text/DOM-based.
+
+**Files:** `src/ui/map/data/presidentialDecisionRoom.ts`, `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/presidential_decision_room.test.ts`, `tests/ui/presidential_decision_room_panel_i18n.test.ts`, `tests/ui/presidential_categories.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---

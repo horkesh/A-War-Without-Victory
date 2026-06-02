@@ -12,6 +12,7 @@ import {
   type PresidentialDecisionRoomDossier,
   type PresidentialDecisionRoomLens,
   type PresidentialDecisionRoomLoopStep,
+  type PresidentialDecisionRoomNextOrder,
   type PresidentialDecisionRoomSeverity,
   type PresidentialDecisionRoomSourceHandoff,
 } from '../../data/presidentialDecisionRoom';
@@ -119,6 +120,41 @@ function CommandQuestionLane({ question }: { question: PresidentialDecisionRoomC
         className="mt-2 h-7 w-full truncate rounded border border-amber-400/25 bg-amber-400/10 px-2 text-[8px] font-bold uppercase tracking-[0.1em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
       >
         {question.actionLabel}
+      </button>
+    </article>
+  );
+}
+
+function NextOrderCard({ order }: { order: PresidentialDecisionRoomNextOrder }) {
+  const disabled = order.navigationTarget.kind === 'none';
+  return (
+    <article className={`min-w-0 rounded border px-3 py-2 ${order.role === 'act'
+      ? 'border-amber-400/40 bg-amber-400/10'
+      : 'border-panel-border/55 bg-panel-card/55'}`}
+    >
+      <div className="flex min-w-0 items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className={`text-[8px] font-bold uppercase tracking-[0.14em] ${order.urgent ? 'text-amber-300' : 'text-text-muted'}`}>
+            {order.label}
+          </div>
+          <div className="mt-1 truncate text-[12px] font-bold text-text-primary">
+            {order.headline}
+          </div>
+        </div>
+        {order.urgent && (
+          <span className="shrink-0 rounded border border-amber-400/35 bg-amber-400/10 px-1.5 py-0.5 text-[8px] font-bold uppercase text-amber-300">
+            {t('decisionRoom.nextOrders.urgent')}
+          </span>
+        )}
+      </div>
+      <div className="mt-1 text-[10px] leading-snug text-text-secondary">{order.instruction}</div>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => openPresidentialDecisionRoomNavigationTarget(order.navigationTarget)}
+        className="mt-2 h-7 w-full truncate rounded border border-amber-400/25 bg-amber-400/10 px-2 text-[8px] font-bold uppercase tracking-[0.1em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
+      >
+        {order.actionLabel}
       </button>
     </article>
   );
@@ -439,7 +475,7 @@ export function PresidentialDecisionRoomPanel() {
       <div className="mb-2 flex flex-wrap items-end justify-between gap-2 border-b border-panel-border pb-1">
         <div>
           <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-text-secondary">{t('decisionRoom.title')}</div>
-          <div className="text-[13px] font-bold uppercase tracking-[0.05em] text-text-primary">{t('decisionRoom.subtitle')}</div>
+          <div className="text-[13px] font-bold tracking-[0.02em] text-text-primary">{t('decisionRoom.subtitle')}</div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -482,6 +518,17 @@ export function PresidentialDecisionRoomPanel() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {view.nextOrders.length > 0 && (
+        <div className="mb-2">
+          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionRoom.nextOrders.title')}</div>
+          <div className="grid gap-1.5 md:grid-cols-3">
+            {view.nextOrders.map((order) => (
+              <NextOrderCard key={order.id} order={order} />
+            ))}
+          </div>
         </div>
       )}
 

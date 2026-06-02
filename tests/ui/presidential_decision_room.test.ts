@@ -463,6 +463,51 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
   });
 
+  it('builds an ordered next-orders agenda that separates act, inspect, and monitor work', () => {
+    const state = makeState({
+      presidentialReviewQueue: {
+        pendingCount: 2,
+        criticalCount: 1,
+        eventDecisionCount: 1,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 1,
+      },
+      operationOpportunityProposals: [
+        makeOpportunity({ proposal_id: 'opp_alpha', display_name: 'Alpha Window', expires_turn: 24 }),
+      ],
+      operationalSitrep: makeSitrep(),
+      latestTurnSummary: makeSummary({
+        turn: 24,
+        displacement_total: 1400,
+      }),
+    });
+
+    const first = buildPresidentialDecisionRoomView({ state });
+    const second = buildPresidentialDecisionRoomView({ state });
+
+    expect(first.nextOrders.map((order) => order.role)).toEqual(['act', 'inspect', 'monitor']);
+    expect(first.nextOrders[0]).toMatchObject({
+      id: 'act:review:pending',
+      label: 'Act',
+      headline: 'Presidential reviews pending',
+      instruction: 'Resolve this before advancing the turn.',
+      cardId: 'review:pending',
+      navigationTarget: { kind: 'inbox' },
+    });
+    expect(first.nextOrders[1]).toMatchObject({
+      label: 'Inspect',
+      instruction: 'Open the named surface to understand the staff evidence.',
+    });
+    expect(first.nextOrders[2]).toMatchObject({
+      role: 'monitor',
+      label: 'Monitor',
+      headline: 'Review before advance',
+      instruction: 'Watch this before ending the turn.',
+    });
+    expect(second.nextOrders).toEqual(first.nextOrders);
+  });
+
   it('localizes Decision Room lane, loop, lens, and source-handoff chrome in BCS mode', () => {
     setLocale('bcs');
     const state = makeState({

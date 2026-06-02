@@ -54,6 +54,7 @@ function makeView(cards: PresidentialDecisionRoomCard[]): PresidentialDecisionRo
     emptyState: null,
     cards,
     lenses: [],
+    nextOrders: [],
     commandQuestions: [],
     loopSteps: [],
     sourceHandoffs: [],

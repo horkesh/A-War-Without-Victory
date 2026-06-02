@@ -119,6 +119,20 @@ export interface PresidentialDecisionRoomLens {
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
 }
 
+export type PresidentialDecisionRoomNextOrderRole = 'act' | 'inspect' | 'monitor';
+
+export interface PresidentialDecisionRoomNextOrder {
+  id: string;
+  role: PresidentialDecisionRoomNextOrderRole;
+  label: string;
+  headline: string;
+  instruction: string;
+  cardId: string | null;
+  urgent: boolean;
+  actionLabel: string;
+  navigationTarget: PresidentialDecisionRoomNavigationTarget;
+}
+
 export type PresidentialDecisionRoomCommandQuestionId =
   | 'urgent'
   | 'pending'
@@ -196,6 +210,7 @@ export interface PresidentialDecisionRoomView {
   emptyState: string | null;
   cards: PresidentialDecisionRoomCard[];
   lenses: PresidentialDecisionRoomLens[];
+  nextOrders: PresidentialDecisionRoomNextOrder[];
   commandQuestions: PresidentialDecisionRoomCommandQuestion[];
   loopSteps: PresidentialDecisionRoomLoopStep[];
   sourceHandoffs: PresidentialDecisionRoomSourceHandoff[];
@@ -1409,6 +1424,87 @@ function buildCommandQuestions(
   ]);
 }
 
+function firstNavigableCard(
+  cards: PresidentialDecisionRoomCard[],
+  excludedCardIds: Set<string>,
+): PresidentialDecisionRoomCard | null {
+  return cards.find((card) => card.navigationTarget.kind !== 'none' && !excludedCardIds.has(card.id)) ?? null;
+}
+
+function buildNextOrders(
+  cards: PresidentialDecisionRoomCard[],
+  inspectNext: PresidentialDecisionRoomCard[],
+  advanceReadiness: PresidentialDecisionRoomAdvanceReadiness,
+): PresidentialDecisionRoomNextOrder[] {
+  const selectedIds = new Set<string>();
+  const decisionCards = cards.filter((card) =>
+    card.category === 'decision'
+    || card.category === 'counter_offer'
+    || card.category === 'opportunity'
+    || card.directive != null
+    || isUrgentCard(card),
+  );
+  const actCard = firstNavigableCard(decisionCards, selectedIds) ?? firstNavigableCard(cards, selectedIds);
+  if (actCard) selectedIds.add(actCard.id);
+
+  const inspectCards = [
+    ...inspectNext,
+    ...cards.filter((card) =>
+      card.category === 'operational'
+      || card.category === 'briefing'
+      || card.category === 'command'
+      || card.category === 'cost'
+      || card.category === 'turn',
+    ),
+  ];
+  const inspectCard = firstNavigableCard(inspectCards, selectedIds);
+  if (inspectCard) selectedIds.add(inspectCard.id);
+
+  const monitorCard = firstNavigableCard(advanceReadiness.items, selectedIds)
+    ?? firstNavigableCard(cards.filter((card) => card.category === 'turn' || card.category === 'cost' || card.category === 'memory'), selectedIds);
+
+  const orders: PresidentialDecisionRoomNextOrder[] = [];
+  if (actCard) {
+    orders.push({
+      id: `act:${actCard.id}`,
+      role: 'act',
+      label: t('decisionRoom.nextOrders.act'),
+      headline: actCard.title,
+      instruction: t('decisionRoom.nextOrders.actInstruction'),
+      cardId: actCard.id,
+      urgent: isUrgentCard(actCard),
+      actionLabel: actCard.actionLabel,
+      navigationTarget: actCard.navigationTarget,
+    });
+  }
+  if (inspectCard) {
+    orders.push({
+      id: `inspect:${inspectCard.id}`,
+      role: 'inspect',
+      label: t('decisionRoom.nextOrders.inspect'),
+      headline: inspectCard.title,
+      instruction: t('decisionRoom.nextOrders.inspectInstruction'),
+      cardId: inspectCard.id,
+      urgent: isUrgentCard(inspectCard),
+      actionLabel: inspectCard.actionLabel,
+      navigationTarget: inspectCard.navigationTarget,
+    });
+  }
+  orders.push({
+    id: monitorCard ? `monitor:${monitorCard.id}` : 'monitor:advance-readiness',
+    role: 'monitor',
+    label: t('decisionRoom.nextOrders.monitor'),
+    headline: advanceReadiness.headline,
+    instruction: t('decisionRoom.nextOrders.monitorInstruction'),
+    cardId: monitorCard?.id ?? null,
+    urgent: advanceReadiness.blockedByExistingSystems || (monitorCard ? isUrgentCard(monitorCard) : false),
+    actionLabel: monitorCard?.actionLabel ?? t('decisionRoom.action.reviewAdvance'),
+    navigationTarget: monitorCard?.navigationTarget ?? { kind: 'none' },
+  });
+
+  return orders;
+}
+
 function loopStepSummary(count: number, urgentCount: number, nounKey: MessageKey): string {
   return summaryCount(count, urgentCount, nounKey);
 }
@@ -1616,6 +1712,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
       emptyState: t('decisionRoom.empty.noGameState'),
       cards: [],
       lenses: [],
+      nextOrders: [],
       commandQuestions: [],
       loopSteps: [],
       sourceHandoffs: [],
@@ -1641,6 +1738,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
       emptyState: t('decisionRoom.empty.noPlayerFaction'),
       cards: [],
       lenses: [],
+      nextOrders: [],
       commandQuestions: [],
       loopSteps: [],
       sourceHandoffs: [],
@@ -1684,6 +1782,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   const advanceReadiness = buildAdvanceReadiness(state, cards);
   const lenses = buildLenses(cards);
   const inspectNext = cards.filter((card) => card.navigationTarget.kind !== 'none').slice(0, 5);
+  const nextOrders = buildNextOrders(cards, inspectNext, advanceReadiness);
   const sourceHandoffs = buildPresidentialDecisionRoomSourceHandoffs(cards);
   const commandQuestions = buildCommandQuestions(cards, inspectNext, advanceReadiness);
   const loopSteps = buildLoopSteps(state, cards, inspectNext, advanceReadiness);
@@ -1694,6 +1793,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
     emptyState: cards.length === 0 ? 'No urgent command priorities.' : null,
     cards,
     lenses,
+    nextOrders,
     commandQuestions,
     loopSteps,
     sourceHandoffs,
