@@ -3,7 +3,7 @@
 
 **Type:** Engine behavior scaffold, flag-gated default-off. Adds ADR-0007 Phase C shared-sector-defense plumbing behind `ENABLE_SHARED_SECTOR_DEFENSE = false`: assigned-only defender roster is preserved when the flag is off; flag-on widens sector defense to assigned + reserve + rear brigade ids, deduped/sorted; defender fatigue can distribute across contributing sector defenders by normalized reactive weights; reactive cap/min-floor use contributing defender power only when the flag is enabled. No save schema, scenario data, OOB, calibration, or default baseline flip.
 
-**Verification:** Red/green TDD on `tests/standing_og_defense.test.ts` and `tests/attack_resource_aftermath.test.ts`; focused combat smoke `tests/combat_pipeline.test.ts`; `git diff --check`. Full `npm.cmd run typecheck` is blocked in this isolated worktree by missing frontend map packages (`maplibre-gl`, `pmtiles`, `@deck.gl/*`, `@vitejs/plugin-react`) before reaching combat files.
+**Verification:** Red/green TDD on `tests/standing_og_defense.test.ts` and `tests/attack_resource_aftermath.test.ts`; focused combat smoke `tests/combat_pipeline.test.ts`; `git diff --check`; baseline regression `Baseline regression: all scenarios match.` Full `npm.cmd run typecheck` is blocked in this isolated worktree by missing frontend map packages (`maplibre-gl`, `pmtiles`, `@deck.gl/*`, `@vitejs/plugin-react`) before reaching combat files.
 
 **Files:** `src/sim/combat/standing_og_defense.ts`, `src/sim/combat/attack_resource_aftermath.ts`, `src/sim/combat/attack_resolution_osid.ts`, `tests/standing_og_defense.test.ts`, `tests/attack_resource_aftermath.test.ts`.
 
