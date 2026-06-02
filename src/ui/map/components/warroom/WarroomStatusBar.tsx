@@ -43,6 +43,13 @@ function docketBadgeClass(tone: WarroomPriorityDocketTone): string {
   return 'border-neutral-700/70 bg-neutral-950/55 text-neutral-300';
 }
 
+function severityLabel(severity: WarroomPriorityDocketItem['severity']): string {
+  if (severity === 'blocking') return 'Blocking';
+  if (severity === 'critical') return 'Critical';
+  if (severity === 'warning') return 'Warning';
+  return 'Info';
+}
+
 function categoryLabel(category: WarroomPriorityDocketItem['category']): string {
   if (category === 'decision') return t('decisionRoom.category.decision');
   if (category === 'opportunity') return t('decisionRoom.category.opportunity');
@@ -98,7 +105,7 @@ function PriorityDocketPanel({
                   {categoryLabel(item.category)}
                 </span>
                 <span className="rounded border border-neutral-700/60 bg-neutral-950/50 px-1 py-0.5 text-[7px] font-bold uppercase tracking-[0.1em] text-neutral-300">
-                  {item.severity}
+                  {severityLabel(item.severity)}
                 </span>
               </span>
               <span className="mt-1 block truncate text-[10px] font-bold text-amber-50">{item.title}</span>

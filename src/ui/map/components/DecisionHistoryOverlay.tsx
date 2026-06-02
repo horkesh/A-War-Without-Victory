@@ -228,7 +228,7 @@ function DecisionRow({
                                 )}
                                 {counts.contradicted > 0 && (
                                     <span data-testid="decision-history-receipt-contradicted" className="text-amber-400/80">
-                                        {' '}{counts.contradicted} foreclosed
+                                        {' '}{counts.contradicted} ruled out
                                     </span>
                                 )}
                             </span>

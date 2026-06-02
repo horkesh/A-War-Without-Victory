@@ -150,7 +150,7 @@ describe('generateChronicleEntries', () => {
         expect(cost?.detail).toContain('35 opposing casualties');
         expect(cost?.detail).toContain('1250 displaced');
         expect(cost?.detail).toContain('1 own formation destroyed');
-        expect(cost?.detail).toContain('-2 net OSIDs');
+        expect(cost?.detail).toContain('-2 net settlements');
         expect(cost?.metadata).toMatchObject({
             casualties: 120,
             displaced: 1250,
