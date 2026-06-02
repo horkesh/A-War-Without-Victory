@@ -5,7 +5,7 @@
  * with live pending-counts + urgent pips derived from the Presidential Decision
  * Room view. Clicking a card deep-links the Decision Room to that category's
  * lens (via decisionRoomLensRequest) and invokes `onOpenCategory` so the host
- * can route into the Army HQ briefing where the Decision Room lives.
+ * can open the Warroom-native Decision Room surface.
  *
  * Reachable two ways (design §9 COMBO nav):
  *   1. A warroom hotspot OBJECT opens the strip pre-filtered to its category
@@ -34,7 +34,7 @@ export interface CommandCardStripProps {
   initialCategoryId?: PresidentialCommandCategoryId | null;
   /**
    * Invoked after the lens is requested — the host routes into the Army HQ
-   * briefing (where the Decision Room renders). Receives the chosen category.
+   * Decision Room surface. Receives the chosen category.
    */
   onOpenCategory: (category: PresidentialCommandCategoryCount) => void;
   /** Dismiss the strip without opening a category. */

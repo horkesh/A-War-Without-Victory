@@ -94,7 +94,7 @@
 - **React shell hotspot contract (2026-05-16):** React Warroom loads canonical `/data/ui/hq_<faction>_clickable_regions.json` by faction, falls back to bundled JSON only if needed, fits hotspots to the centered 2752x1536 plate, and honors polygon geometry. The cork-board/map anchor is canonical `desk_map` and returns to the tactical map; `wall_cork_board` is legacy alias only.
 - **React dynamic board overlays (2026-05-16):** React Warroom now renders dynamic board visuals beneath the hotspot layer. The corkboard/desk-map surface projects operational settlement geometry into a paper BiH map with current front lines and fill only for the player faction's current territory; the wall calendar/whiteboard renders the current date in blue marker styling.
 
-- **Priority docket (2026-05-02):** The React Warroom status bar shows `PRIORITIES` counts and can open a compact docket tray derived from the Decision Room pre-advance packet. The tray is a shell summary only: `Open Decision Room` routes to Army HQ BRIEFING, and row actions route to the preserved Decision Room source targets through the App shell.
+- **Priority docket (2026-05-02; route updated 2026-06-02):** The React Warroom status bar shows `PRIORITIES` counts and can open a compact docket tray derived from the Decision Room pre-advance packet. The tray is a shell summary only: `Open Decision Room` now routes to the Warroom-native Decision Room host, and row actions route to the preserved Decision Room source targets through the App shell.
 
 ---
 

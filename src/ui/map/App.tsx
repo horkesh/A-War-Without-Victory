@@ -66,6 +66,7 @@ import { WarroomStatusBar } from './components/warroom/WarroomStatusBar';
 import { CommandCardStrip } from './components/warroom/CommandCardStrip';
 import type { PresidentialCommandCategoryId } from './data/presidentialCategories';
 import { PresidentDeskShell } from './components/presidential_desk/PresidentDeskShell';
+import { PresidentialDecisionRoomPanel } from './components/army_hq/PresidentialDecisionRoomPanel';
 import { RootErrorBoundary } from './components/RootErrorBoundary';
 import { derivePanelRailState, shouldRenderInboxPanel, shouldRenderTacticalDetailRails } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
@@ -438,6 +439,7 @@ function App() {
   const [commandStripOpen, setCommandStripOpen] = useState(false);
   const [commandStripCategoryId, setCommandStripCategoryId] = useState<PresidentialCommandCategoryId | null>(null);
   const [warroomDeskOpen, setWarroomDeskOpen] = useState(false);
+  const [warroomDecisionRoomOpen, setWarroomDecisionRoomOpen] = useState(false);
   const [warroomOverlaySurface, setWarroomOverlaySurface] = useState<Exclude<WarroomOverlaySurface, 'president-desk' | 'command-surface'> | null>(null);
   const warroomFocusReturnRef = useRef<HTMLElement | null>(null);
   const pauseOpen = useGameStore((s) => s.pauseMenuOpen);
@@ -1000,15 +1002,18 @@ function App() {
   const closeWarroomDesk = () => {
     setWarroomDeskOpen(false);
     closeCommandStrip(false);
+    setWarroomDecisionRoomOpen(false);
     restoreWarroomFocus();
   };
   const closeWarroomNativeOverlay = () => {
     setWarroomOverlaySurface(null);
+    setWarroomDecisionRoomOpen(false);
     restoreWarroomFocus();
   };
   const openCommandStrip = (categoryId: PresidentialCommandCategoryId | null, preserveFocusTarget = true) => {
     if (preserveFocusTarget) rememberWarroomFocus();
     setWarroomOverlaySurface(null);
+    setWarroomDecisionRoomOpen(false);
     setCommandStripCategoryId(categoryId);
     setCommandStripOpen(true);
   };
@@ -1020,25 +1025,28 @@ function App() {
   const openCommandCategory = () => {
     setCommandStripOpen(false);
     setCommandStripCategoryId(null);
-    openArmyHQTab(useGameStore.getState(), 'briefing');
-    setAppScreen('game');
-    setSummaryOpen(false);
+    setWarroomDeskOpen(false);
+    setWarroomOverlaySurface(null);
+    setWarroomDecisionRoomOpen(true);
   };
   const openWarroomOverlay = (surface: WarroomOverlaySurface) => {
     rememberWarroomFocus();
     if (surface === 'president-desk') {
       setWarroomDeskOpen(true);
+      setWarroomDecisionRoomOpen(false);
       setWarroomOverlaySurface(null);
       closeCommandStrip(false);
       return;
     }
     if (surface === 'command-surface') {
       setWarroomDeskOpen(false);
+      setWarroomDecisionRoomOpen(false);
       setWarroomOverlaySurface(null);
       openCommandStrip(null, false);
       return;
     }
     setWarroomDeskOpen(false);
+    setWarroomDecisionRoomOpen(false);
     closeCommandStrip(false);
     setWarroomOverlaySurface(surface);
   };
@@ -1050,6 +1058,12 @@ function App() {
       if (commandStripOpen) {
         event.preventDefault();
         closeCommandStrip();
+        return;
+      }
+      if (warroomDecisionRoomOpen) {
+        event.preventDefault();
+        setWarroomDecisionRoomOpen(false);
+        restoreWarroomFocus();
         return;
       }
       if (warroomDeskOpen) {
@@ -1064,7 +1078,7 @@ function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [appScreen, commandStripOpen, warroomDeskOpen, warroomOverlaySurface]);
+  }, [appScreen, commandStripOpen, warroomDecisionRoomOpen, warroomDeskOpen, warroomOverlaySurface]);
 
   const openReservePanelFromDesk = () => {
     const hqId = playerFaction === 'RS'
@@ -1563,6 +1577,7 @@ function App() {
             onNavigate={(command) => {
               if (isWarroomLocalCommand(command)) {
                 if (command.kind === 'warroom-overlay') {
+                  setWarroomDecisionRoomOpen(false);
                   openWarroomOverlay(command.surface);
                   return;
                 }
@@ -1581,6 +1596,7 @@ function App() {
                 } else if (command.kind === 'war-map') {
                   setWarroomOverlaySurface(null);
                   setWarroomDeskOpen(false);
+                  setWarroomDecisionRoomOpen(false);
                   closeCommandStrip(false);
                   setAppScreen('game');
                 }
@@ -1590,6 +1606,7 @@ function App() {
               if (command.kind === 'advance-turn') {
                 setWarroomOverlaySurface(null);
                 setWarroomDeskOpen(false);
+                setWarroomDecisionRoomOpen(false);
                 closeCommandStrip(false);
               }
               if (command) {
@@ -1627,6 +1644,34 @@ function App() {
               onOpenCategory={openCommandCategory}
               onClose={() => closeCommandStrip()}
             />
+          )}
+          {warroomDecisionRoomOpen && (
+            <div
+              role="dialog"
+              aria-label="Warroom Decision Room"
+              aria-modal="false"
+              data-testid="warroom-decision-room-host"
+              className="pointer-events-auto absolute inset-x-3 bottom-20 z-[6] mx-auto max-h-[76%] max-w-6xl overflow-y-auto rounded-md border border-accent-gold/35 bg-panel-bg/96 p-4 shadow-[0_28px_90px_rgba(0,0,0,0.6)] backdrop-blur-md xl:left-10 xl:right-10"
+            >
+              <div className="mb-3 flex items-end justify-between gap-2 border-b border-panel-border/70 pb-2">
+                <div>
+                  <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-accent-gold">Command Surface</div>
+                  <h2 className="mt-0.5 text-[15px] font-bold leading-tight text-text-primary">Decision Room</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setWarroomDecisionRoomOpen(false);
+                    restoreWarroomFocus();
+                  }}
+                  aria-label="Close Decision Room"
+                  className="shrink-0 rounded border border-panel-border bg-black/30 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
+                >
+                  Close
+                </button>
+              </div>
+              <PresidentialDecisionRoomPanel />
+            </div>
           )}
           {warroomOverlaySurface && (
             <WarroomNativeOverlay

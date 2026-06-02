@@ -18272,3 +18272,15 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `src/ui/map/data/presidentialDecisionRoom.ts`, `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/presidential_decision_room.test.ts`, `tests/ui/presidential_decision_room_panel_i18n.test.ts`, `tests/ui/presidential_categories.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-06-02] feat(ui): keep command cards in a Warroom-native Decision Room
+
+**Type:** Player-facing Warroom route-cohesion fix. Selecting a Command Surface category now closes the card strip and opens a Warroom-native `Decision Room` host containing the existing `PresidentialDecisionRoomPanel`, instead of switching the player into generic Army HQ briefing. This preserves the existing Decision Room/DirectiveCard execution substrate while making the command-card route feel like a presidential surface in the Warroom.
+
+**Determinism / scope:** UI route/presentation only. No sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, command-authority, or directive execution mechanics changed.
+
+**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui/warroom_shell_accessibility.test.ts --reporter=dot` failed because `openCommandCategory` still called `openArmyHQTab(..., 'briefing')` and switched to `game`. Green focused proof: `node node_modules/vitest/vitest.mjs run tests/ui/warroom_shell_accessibility.test.ts tests/warroom_shell_layer.test.ts tests/ui/command_card_strip_accessibility.test.ts --reporter=dot` passed 52/52. `npm.cmd run typecheck` passed. Browser proof on `http://127.0.0.1:3002/?view=warroom`: Command Surface -> War Direction kept the URL at `?view=warroom` and visible text showed `COMMAND SURFACE`, `Decision Room`, `STRATEGIC PRIORITIES`, `WHAT IS EXPECTED OF ME?`, and `PRIORITY LANES`.
+
+**Files:** `src/ui/map/App.tsx`, `src/ui/map/components/warroom/CommandCardStrip.tsx`, `tests/ui/warroom_shell_accessibility.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/40_reports/WARROOM_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---

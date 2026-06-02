@@ -219,4 +219,19 @@ describe('WarroomShellLayer accessibility proof', () => {
         expect(source).toContain('<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"');
         expect(source).not.toContain('preserveAspectRatio="xMidYMid slice"');
     });
+
+    it('opens command-surface cards into a Warroom-native Decision Room host, not generic Army HQ briefing', () => {
+        const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
+        const openCommandCategoryStart = appSource.indexOf('const openCommandCategory =');
+        const openWarroomOverlayStart = appSource.indexOf('const openWarroomOverlay =', openCommandCategoryStart);
+        const openCommandCategoryBody = appSource.slice(openCommandCategoryStart, openWarroomOverlayStart);
+
+        expect(openCommandCategoryStart).toBeGreaterThan(-1);
+        expect(openWarroomOverlayStart).toBeGreaterThan(openCommandCategoryStart);
+        expect(openCommandCategoryBody).toContain('setWarroomDecisionRoomOpen(true)');
+        expect(openCommandCategoryBody).not.toContain("openArmyHQTab(useGameStore.getState(), 'briefing')");
+        expect(openCommandCategoryBody).not.toContain("setAppScreen('game')");
+        expect(appSource).toContain('data-testid="warroom-decision-room-host"');
+        expect(appSource).toContain('<PresidentialDecisionRoomPanel />');
+    });
 });
