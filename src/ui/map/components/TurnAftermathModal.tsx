@@ -7,6 +7,7 @@
  */
 import type { TurnAftermathTopAction, TurnAftermathView } from '../data/turnAftermath';
 import type { ConsequenceReceipt } from '../data/consequenceReceipts';
+import type { ForcedOpReceipt } from '../data/forcedOpReceipts';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { t, type MessageKey } from '../i18n';
@@ -27,6 +28,14 @@ interface TurnAftermathModalProps {
    * actually delivered by the engine. Empty/absent → section not rendered.
    */
   consequences?: readonly ConsequenceReceipt[];
+  /**
+   * Forced-operation receipts whose operation resolved on this turn. Closes the
+   * force-op AFTER-loop: each entry pairs an operation the president
+   * force-launched over the corps commander's objection with the outcome it
+   * actually produced. Sober/negative-sum tone, never celebratory.
+   * Empty/absent → section not rendered.
+   */
+  forcedOps?: readonly ForcedOpReceipt[];
 }
 
 function formatSigned(value: number): string {
@@ -82,12 +91,14 @@ export function TurnAftermathModal({
   onOpenChronicle,
   onOpenCodex,
   consequences,
+  forcedOps,
 }: TurnAftermathModalProps) {
   if (!view) return null;
 
   const hasTopActions = view.nextActions.topItems.length > 0;
   const signalPreview = view.signals.slice(0, 4);
   const realizedConsequences = consequences ?? [];
+  const realizedForcedOps = forcedOps ?? [];
 
   return (
     <Modal
@@ -181,6 +192,41 @@ export function TurnAftermathModal({
                           {receipt.predictedExplanation}
                         </div>
                       )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {realizedForcedOps.length > 0 && (
+              <div
+                data-testid="turn-aftermath-forced-op-consequences"
+                className="border border-red-400/30 bg-red-950/15"
+              >
+                <div className="border-b border-red-400/20 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-red-300/80">
+                  {t('turnAftermath.forcedOpRealized')}
+                </div>
+                <div className="divide-y divide-white/10">
+                  {realizedForcedOps.map((receipt) => (
+                    <div
+                      key={receipt.id}
+                      data-testid="turn-aftermath-forced-op-row"
+                      data-receipt-id={receipt.id}
+                      className="px-3 py-2.5 text-[12px] leading-5 text-text-primary/85"
+                    >
+                      {t('turnAftermath.forcedOpForced', {
+                        op: receipt.opName,
+                        commander: receipt.commanderName,
+                      })}
+                      <div className="mt-1 text-[10px] leading-4 text-text-secondary/80 italic">
+                        {t('turnAftermath.forcedOpOutcome', {
+                          grade: t(`turnAftermath.opOutcome.${receipt.outcome}` as MessageKey),
+                          casualties: receipt.casualtiesSuffered,
+                          objectives: receipt.objectivesCaptured > 0
+                            ? t('turnAftermath.forcedOpObjectives', { count: receipt.objectivesCaptured })
+                            : t('turnAftermath.forcedOpNoObjectives'),
+                        })}
+                      </div>
                     </div>
                   ))}
                 </div>

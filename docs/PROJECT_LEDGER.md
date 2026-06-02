@@ -1,4 +1,22 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-02] feat(ui): consequence-receipt when a forced op resolves (force-op after-loop)
+
+**Type:** UI read-model only (Ring 1, no §6, faction-agnostic). Closes the force-op "authorship of the tragedy" AFTER half — the BEFORE half shipped in #108/#109.
+
+**Change:**
+- New pure read-model `src/ui/map/data/forcedOpReceipts.ts` (`buildForcedOpReceipts` + `forcedOpReceiptsRealizedOnTurn`): iterates `state.operation_history`, keeps `force_launched===true` AARs, maps outcome/grade/casualties/objectives + `commander_assessment_at_launch`. Deterministic (ended_turn then id via `strictCompare`), defensive ([] when absent).
+- Wired into TurnAftermath: `App.tsx` adds `forcedOpReceipts` + per-turn memos; `TurnAftermathModal.tsx` renders a sibling block (`data-testid="turn-aftermath-forced-op-consequences"`), sober/negative-sum wording.
+- i18n EN-only (`messages.en.ts`); BCS falls back to EN (parallel agent owns `messages.bcs.ts`).
+- Stale comment fix in `war_phases.ts` (~:746): `consequenceReceipts` does NOT read these op tags; `forcedOpReceipts` does (via the AAR snapshot).
+
+**Verification:**
+- Baseline regression byte-identical: `Baseline regression: all scenarios match.` (forced ops are player-origin only — both force-launch sites gate out of headless/historical, so the projection is [] for bot/historical).
+- tsc 0 errors (double node_modules junction); new test `tests/ui/forced_op_receipts.test.ts` 6/6; existing `consequence_receipts.test.ts` 8/8.
+
+**Files:** `src/ui/map/data/forcedOpReceipts.ts` (new), `src/ui/map/App.tsx`, `src/ui/map/components/TurnAftermathModal.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/sim/turn_phases/war_phases.ts`, `tests/ui/forced_op_receipts.test.ts` (new).
+
+---
+
 ## [2026-05-30] feat(tg): finish v2.3 recovery-lock + Inv#6 test + Army-HQ AAR telemetry (PR #60)
 
 **Type:** Phased-rollout follow-up to ADR-0005 v2.3. Three flag-gated items, all flag-off byte-identical at both gold gates. Ring 1, faction-agnostic. PR #60 (2026-05-30, squash `12e822f3`).

@@ -77,6 +77,7 @@ import { useGameStore, isDevMode } from './store/gameStore';
 import { loadLatestRunSaveAsText, loadEventDefinitions, loadEventDefinitionsFull } from './data/DataLoader';
 import type { EventDefinition } from '../../sim/events/event_types';
 import { buildConsequenceReceipts, receiptsRealizedOnTurn } from './data/consequenceReceipts';
+import { buildForcedOpReceipts, forcedOpReceiptsRealizedOnTurn } from './data/forcedOpReceipts';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
 import { getPlayerSafeMilitaryFactionName } from './utils/playerSafeText';
@@ -452,6 +453,19 @@ function App() {
   const aftermathConsequences = useMemo(
     () => (turnAftermath ? receiptsRealizedOnTurn(consequenceReceipts, turnAftermath.turn) : []),
     [consequenceReceipts, turnAftermath],
+  );
+
+  // Force-op AFTER-loop: when an operation the president force-launched over the
+  // corps commander's objection RESOLVES, surface the outcome the president
+  // authored. Player-origin by construction (the force_launched flag can only
+  // come from a player force-launch); bot/historical → []. Read-only.
+  const forcedOpReceipts = useMemo(
+    () => buildForcedOpReceipts(loadedGameState?.rawGameState),
+    [loadedGameState?.rawGameState],
+  );
+  const aftermathForcedOps = useMemo(
+    () => (turnAftermath ? forcedOpReceiptsRealizedOnTurn(forcedOpReceipts, turnAftermath.turn) : []),
+    [forcedOpReceipts, turnAftermath],
   );
 
   // Reset dismissal/acknowledgement state when a new save is loaded.
@@ -1146,6 +1160,7 @@ function App() {
         isOpen={turnAftermathOpen}
         view={turnAftermath}
         consequences={aftermathConsequences}
+        forcedOps={aftermathForcedOps}
         onClose={() => setTurnAftermathOpen(false)}
         onOpenInbox={openInboxHome}
         onOpenSummary={() => {

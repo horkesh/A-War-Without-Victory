@@ -743,8 +743,12 @@ function injectOpDirectives(state: GameState, adjacency?: Map<string, string[]>)
         op.requested_by_president = true;
 
         // When the president FORCED this op past a shown commander objection, tag it for
-        // the existing badge/strain/receipt surfaces (command_strain.ts deriveOperationOutcomeCategory
-        // reads was_force_launched; consequenceReceipts.ts reads commander_assessment_at_launch).
+        // the existing badge/strain/receipt surfaces. command_strain.ts
+        // deriveOperationOutcomeCategory reads was_force_launched; finalizeOperationAAR
+        // snapshots was_force_launched + commander_assessment_at_launch onto the AAR at
+        // resolution, where forcedOpReceipts.ts (the force-op AFTER-loop read-model) reads
+        // them to emit a Turn-Aftermath consequence-receipt. (consequenceReceipts.ts reads
+        // only event-causality + patron-defiance substrate — NOT these op tags.)
         // The objection that was overridden was a no-go ('postpone'/'abort'), so snapshot
         // a no-go assessment — abort is the strongest framing the predictor produces.
         if (forcedOverObjection) {
