@@ -360,7 +360,11 @@ function App() {
     chronicleOpen,
   });
 
-  const [appScreen, setAppScreen] = useState<'game' | 'mainMenu' | 'warroom'>('game');
+  // Task #80 — boot to the Main Menu first. Faction choice is offered ONLY via
+  // the menu (New Game / Load → SidePicker), never an auto-popping modal. The
+  // `?view=warroom` / `?view=game` URL-param overrides below (~:1022) still let
+  // dev/automation deep-link past the menu.
+  const [appScreen, setAppScreen] = useState<'game' | 'mainMenu' | 'warroom'>('mainMenu');
   // Command-surface card strip: open state + the category to pre-highlight when
   // opened from a warroom hotspot object. null highlight = direct Desk open.
   const [commandStripOpen, setCommandStripOpen] = useState(false);
@@ -518,14 +522,13 @@ function App() {
   }, [pendingAttackConfirmation, setConfirmPrimaryAction]);
 
   useEffect(() => {
+    // Task #80 — when a save/state loads, close the SidePicker. We deliberately
+    // do NOT auto-open it when no state is loaded: faction choice is offered
+    // only via explicit user actions (MainMenu New Game / Load, warroom
+    // handoff), never an auto-popping modal on boot.
     if (loadedGameState) {
       setSidePickerOpen(false);
       setSidePickerDismissed(false);
-      return;
-    }
-    // Show side picker automatically if no state is loaded and not already dismissed
-    if (!sidePickerDismissed) {
-      setSidePickerOpen(true);
     }
   }, [ipc.isAvailable, loadedGameState, sidePickerDismissed]);
 
@@ -588,6 +591,11 @@ function App() {
   useEffect(() => {
     if (!ipc.isAvailable) return;
     if (!loadedGameState) return;
+    // Task #80 — do not queue acknowledgement flashes while booted to the Main
+    // Menu; they would pop the EventModal over it (and the auto-dismiss timer
+    // would clear them unseen). Defer until past the menu — the effect re-runs
+    // when `appScreen` leaves 'mainMenu' (it is in the dep list below).
+    if (appScreen === 'mainMenu') return;
     const fired = loadedGameState.firedEvents;
     if (!fired || fired.length === 0) return;
 
@@ -621,7 +629,7 @@ function App() {
       }
     });
     return () => { stale = true; };
-  }, [loadedGameState?.turn, loadedGameState?.firedEvents?.length]);
+  }, [loadedGameState?.turn, loadedGameState?.firedEvents?.length, appScreen]);
 
   const pendingPeacePlan = loadedGameState?.pendingPeacePlan;
   const showPeacePlanModal = shouldShowPeacePlanModal(pendingPeacePlan, dismissedPeacePlanKey);
@@ -634,13 +642,18 @@ function App() {
   useEffect(() => {
     if (activeEventDecisionId !== null) return;
     if (showPeacePlanModal) return;
+    // Task #80 — the boot-to-menu default means an auto-loaded save with a
+    // pending decision must NOT auto-pop the (non-dismissible) EventDecisionModal
+    // over the Main Menu. Defer until the player is past the menu (Continue /
+    // warroom desk); the effect re-runs when `appScreen` leaves 'mainMenu'.
+    if (appScreen === 'mainMenu') return;
     const nextDecision = selectNextPendingEventDecision(
       loadedGameState?.pendingEventDecisions,
       playerFaction,
       recentlyAcceptedEventDecisionId,
     );
     if (nextDecision) setActiveEventDecisionId(nextDecision.event_id);
-  }, [loadedGameState?.pendingEventDecisions, playerFaction, activeEventDecisionId, showPeacePlanModal, recentlyAcceptedEventDecisionId]);
+  }, [loadedGameState?.pendingEventDecisions, playerFaction, activeEventDecisionId, showPeacePlanModal, recentlyAcceptedEventDecisionId, appScreen]);
 
   useEffect(() => {
     if (activeEventDecisionId === null) return;
@@ -1008,6 +1021,11 @@ function App() {
     const command = decodeShellHandoffCommand(params.get('shellHandoff'));
     if (!command) return;
     applyShellHandoffCommand(useGameStore.getState(), command);
+    // Task #80 — a `?shellHandoff=...` deep-link (warroom.ts `showTacticalMapScene`)
+    // opens the tactical map with no `view=game`. With the boot-to-menu default
+    // the screen would stay on the Main Menu and hide the requested panel behind
+    // it, so route to the in-game shell once the handoff command is applied.
+    setAppScreen('game');
 
     params.delete('shellHandoff');
     const nextQuery = params.toString();
@@ -1019,10 +1037,23 @@ function App() {
   // Activate Warroom React shell when ?view=warroom is present in the URL.
   // warroom.ts canvas rendering remains the active runtime path; this is
   // the foundation component for progressive React shell ownership.
+  // Task #80 — boot now defaults to the Main Menu; `?view=game` lets
+  // dev/automation deep-link straight into the in-game shell, bypassing the
+  // menu (mirrors the existing `?view=warroom` override).
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('view') === 'warroom') {
+    const view = params.get('view');
+    if (view === 'warroom') {
       setAppScreen('warroom');
+    } else if (view === 'game') {
+      setAppScreen('game');
+    } else if (params.has('desktop_window')) {
+      // Task #80 — the packaged desktop app opens its tactical map windows with
+      // `?desktop_window=operational` / `?desktop_window=sandbox`
+      // (electron-main.cjs `getTacticalMapWindowUrl`). These windows attach to
+      // an already-running session, so deep-link straight to the in-game shell
+      // — but do NOT force the SidePicker (no new-game flow here).
+      setAppScreen('game');
     }
   }, []);
 
@@ -1124,12 +1155,24 @@ function App() {
         />
       )}
       <SidePickerOverlay
-        isOpen={sidePickerOpen && !loadedGameState}
+        // Task #80 — gate on `sidePickerOpen` alone. After the boot-to-menu
+        // fix, `sidePickerOpen` is set true ONLY by explicit user actions
+        // (MainMenu New Game / Load, warroom handoff) — the auto-open branch is
+        // gone — so this never spuriously overlays an active game.
+        isOpen={sidePickerOpen}
         starting={campaignStarting}
         errorMessage={loadError}
         onClose={() => {
+          // Task #80 — cancel cleanly without dropping into the loading
+          // skeleton. If no campaign is loaded (cancelled a true New Game),
+          // return to the Main Menu. If a save is loaded (the player opened the
+          // picker over an existing campaign and backed out), just close and
+          // resume that campaign — `loadedGameState` is untouched.
           setSidePickerOpen(false);
           setSidePickerDismissed(true);
+          if (!loadedGameState) {
+            setAppScreen('mainMenu');
+          }
         }}
         onSelectFaction={handleSelectFaction}
       />
@@ -1245,8 +1288,11 @@ function App() {
           onAcknowledge={handleEventAcknowledge}
         />
       )}
-      {/* v0.5.0: Peace Plan Modal — blocks turn progression until player responds */}
-      {showPeacePlanModal && pendingPeacePlan && (
+      {/* v0.5.0: Peace Plan Modal — blocks turn progression until player responds.
+          Task #80 — gated on `appScreen !== 'mainMenu'` so an auto-loaded save with
+          a pending plan does not auto-pop it over the boot Main Menu (same contract
+          as the EventDecisionModal auto-launch above). Shows once past the menu. */}
+      {appScreen !== 'mainMenu' && showPeacePlanModal && pendingPeacePlan && (
         <PeacePlanModal
           plan={pendingPeacePlan}
           onDismiss={() => setDismissedPeacePlanKey(getPeacePlanDismissalKey(pendingPeacePlan))}
@@ -1320,8 +1366,12 @@ function App() {
         state={loadedGameState}
         onClose={() => setSelectedCounterOfferId(null)}
       />
-      {/* v0.5.0: Dayton Negotiation Modal — blocks when Dayton trigger fires */}
-      {loadedGameState?.pendingDayton && !loadedGameState?.gameOver && (
+      {/* v0.5.0: Dayton Negotiation Modal — blocks when Dayton trigger fires.
+          Task #80 — gated on `appScreen !== 'mainMenu'` (same contract as the
+          EventDecision / PeacePlan / EventModal auto-pop guards): an auto-loaded
+          save sitting at the Dayton step must not cover the boot Main Menu with
+          this non-dismissible modal. Shows once the player is past the menu. */}
+      {appScreen !== 'mainMenu' && loadedGameState?.pendingDayton && !loadedGameState?.gameOver && (
         <DaytonNegotiationModal dayton={loadedGameState.pendingDayton} />
       )}
       <PeaceWarTransitionOverlay />
@@ -1415,6 +1465,13 @@ function App() {
       {appScreen === 'mainMenu' && (
         <MainMenu
           hasSave={!!loadedGameState}
+          // Task #80 — New Game / Load Game open the SidePicker. The picker is
+          // gated on `sidePickerOpen` alone (~:1136), so an EXPLICIT open shows
+          // it even when a save is already auto-loaded (desktop live-session /
+          // auto-load path). State is preserved until the user COMMITS: picking
+          // a faction starts a fresh campaign (replaces `loadedGameState` via
+          // `handleSelectFaction` → `loadSave`); cancelling the picker leaves
+          // the existing campaign intact (see the overlay `onClose` below).
           onNewGame={() => { setAppScreen('game'); setSidePickerOpen(true); }}
           onContinue={() => setAppScreen('game')}
           onLoadGame={() => { setAppScreen('game'); setSidePickerOpen(true); }}
