@@ -32,6 +32,7 @@ import {
     COUNTER_ATTACK_MIN_PERSONNEL,
     COUNTER_ATTACK_MIN_COHESION,
     COUNTER_ATTACK_MAX_HOPS,
+    COUNTER_ATTACK_RETREAT_WINDOW,
 } from './bot_constants.js';
 
 export const UNCONTESTED_OCCUPATION_SCORE = 600;
@@ -41,6 +42,7 @@ const SECTOR_ATTACK_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
 const SECTOR_ATTACK_DIRECT_OBJECTIVE_PREDICT_PROFILE_PREFIX =
     'bot_orders.executeFactionDirectives.eval.sectorAttack.executionDirectObjective.predictCombatOutcome';
 const UNCONTESTED_OCCUPATION_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
+const UNCONTESTED_REPULSE_COOLDOWN_TURNS = 4;
 
 function homeDefenseProfileTime<T>(labelSuffix: string, fn: () => T): T {
     return botOrdersPerfTime(`${HOME_DEFENSE_PROFILE_PREFIX}${labelSuffix}`, fn);
@@ -149,6 +151,17 @@ function buildObjectivePathDistances(
         }
     }
     return distances;
+}
+
+function wasRecentlyRepulsedFromTarget(
+    brigade: FormationState,
+    targetOsid: string,
+    currentTurn: number,
+    cooldownTurns = COUNTER_ATTACK_RETREAT_WINDOW,
+): boolean {
+    const repulseInfo = (brigade as { last_repulsed_from?: { osid: string; turn: number } }).last_repulsed_from;
+    return repulseInfo?.osid === targetOsid
+        && repulseInfo.turn >= currentTurn - cooldownTurns;
 }
 
 export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
@@ -633,7 +646,9 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
                         // Find best target among candidates with sufficient predicted outcome
                         let bestTarget: typeof targets[number] | null = null;
                         let bestRatio = -Infinity;
+                        const currentTurn = state.meta?.turn ?? 0;
                         for (const candidate of candidateTargets) {
+                            if (wasRecentlyRepulsedFromTarget(brigade, candidate, currentTurn)) continue;
                             const t = targets.find(p => p.osid === candidate);
                             if (!t) continue;
                             if ((chosenTargets.get(t.osid) ?? 0) >= maxAtt) continue;
@@ -784,6 +799,9 @@ export function evaluateUncontestedOccupation(
                 return controller;
             });
             if (!controller) continue;
+            if (wasRecentlyRepulsedFromTarget(brigade, n, state.meta?.turn ?? 0, UNCONTESTED_REPULSE_COOLDOWN_TURNS)) {
+                continue;
+            }
 
             // Salient aversion: don't walk into undefended territory if it creates
             // an indefensible salient (>75% of neighbors are enemy after capture).

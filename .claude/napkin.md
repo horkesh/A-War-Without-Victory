@@ -982,6 +982,8 @@ After EVERY scenario run, the orchestrator:
 - **Explicitly rejected:** LOS cones, full 3D main map, 3D battle replay, threat heat layer, pulsing markers.
 
 ## Simulation Engine
+1. **[2026-06-03] Repulsed walkover targets are not uncontested ground**
+   Do instead: when an attacker is catastrophically repulsed from a physically empty OSID, check `last_repulsed_from` before treating the target as an uncontested occupation. Sector defense can be real without a brigade physically parked on the OSID.
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**
    Do instead: Keep IVP consequence hysteresis in `patron_pressure.ts`; keep convoy/smuggling/tunnel hooks in `supply_reserves.ts`.
 2. **[2026-03-07] Composite IVP extends the existing patron-pressure system**
