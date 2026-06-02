@@ -39,6 +39,8 @@ import {
     type ConsequenceReceipt,
 } from '../data/consequenceReceipts.js';
 import { Z } from '../../shared/zIndex.js';
+import { useGameStore } from '../store/gameStore.js';
+import { getPlayerSafeDisplayLabel } from '../utils/playerSafeText.js';
 
 export interface DecisionHistoryOverlayProps {
     isOpen: boolean;
@@ -76,6 +78,18 @@ function resolveDecisionTitle(
     const def = eventCatalog?.get(decision.event_id);
     const title = def?.title;
     return typeof title === 'string' && title.trim().length > 0 ? title : decision.event_id;
+}
+
+/** Resolve a downstream descendant event id to its player-facing title via the
+ *  catalog. Falls back to a humanized label so a raw event id never reaches the
+ *  player. Deterministic. */
+function resolveDescendantLabel(
+    eventId: string,
+    eventCatalog: ReadonlyMap<string, EventDefinition> | undefined,
+): string {
+    const title = eventCatalog?.get(eventId)?.title;
+    if (typeof title === 'string' && title.trim().length > 0) return title;
+    return getPlayerSafeDisplayLabel(eventId, 'Recorded event');
 }
 
 /** Resolve the player-facing chosen-option label (prose) from the catalog,
@@ -129,6 +143,7 @@ function DecisionRow({
     receipts,
     isExpanded,
     onToggle,
+    devMode,
 }: {
     decision: EventDecision;
     eventCatalog: ReadonlyMap<string, EventDefinition> | undefined;
@@ -136,6 +151,7 @@ function DecisionRow({
     receipts: readonly ConsequenceReceipt[];
     isExpanded: boolean;
     onToggle: () => void;
+    devMode: boolean;
 }) {
     const def = eventCatalog?.get(decision.event_id);
     const family = def?.family ?? 'unknown';
@@ -191,7 +207,13 @@ function DecisionRow({
                         {optionLabel}
                     </span>
                     <span className="block text-[8px] uppercase tracking-[0.1em] text-neutral-500 mt-0.5">
-                        <span data-testid="decision-history-family">[family={family}]</span>
+                        {/* Developer diagnostic ONLY: the raw internal `family`
+                            taxonomy is gated behind the `devMode` store flag so it
+                            never leaks into the player-facing Authored Choices list
+                            (mirrors the PR #130 Codex unlock-state dev-gate). */}
+                        {devMode && (
+                            <span data-testid="decision-history-family">[family={family}]</span>
+                        )}
                         {hasReceipts && (
                             <span data-testid="decision-history-receipt-counts" className="ml-1.5">
                                 {counts.confirmed > 0 && (
@@ -249,7 +271,7 @@ function DecisionRow({
                                     data-event-id={id}
                                     className="text-[9px] text-neutral-300 leading-snug"
                                 >
-                                    {id}
+                                    {resolveDescendantLabel(id, eventCatalog)}
                                 </li>
                             ))}
                         </ul>
@@ -282,6 +304,7 @@ export function DecisionHistoryOverlay({
     eventCatalog,
     state,
 }: DecisionHistoryOverlayProps) {
+    const devMode = useGameStore((s) => s.devMode);
     const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
 
     // ESC closes the overlay — matches WrappedOverlay / CodexPanel pattern.
@@ -393,6 +416,7 @@ export function DecisionHistoryOverlay({
                                     eventCatalog={eventCatalog}
                                     state={state!}
                                     receipts={receiptsByEvent.get(decision.event_id) ?? []}
+                                    devMode={devMode}
                                     isExpanded={expandedEventId === decision.event_id}
                                     onToggle={() => setExpandedEventId(
                                         expandedEventId === decision.event_id

@@ -123,7 +123,7 @@ describe('decision consequence trail', () => {
         turn: 12,
         title: 'Reserve request accepted',
         outcome: 'Accepted',
-        detail: expect.stringContaining('Elite Guard Brigade assigned to Vrs Drina Corps'),
+        detail: expect.stringContaining('Elite Guard Brigade assigned to Drina Corps'),
       }),
       expect.objectContaining({
         id: 'reserve:reserve:turn_11:vrs_herzegovina_corps',
@@ -131,7 +131,7 @@ describe('decision consequence trail', () => {
         turn: 11,
         title: 'Reserve request declined',
         outcome: 'Declined',
-        detail: expect.stringContaining('Vrs Herzegovina Corps request declined'),
+        detail: expect.stringContaining('Herzegovina Corps request declined'),
       }),
     ]);
     expect(ledger.map((record) => `${record.family} ${record.title} ${record.outcome} ${record.detail}`).join(' ')).not.toMatch(/_/);
@@ -162,7 +162,7 @@ describe('decision consequence trail', () => {
       turn: 40,
       title: 'Vance-Owen Peace Plan',
       outcome: 'Rejected',
-      detail: 'Your government rejected the proposal; RBiH accepted, RS rejected, HRHB accepted.',
+      detail: 'Your government rejected the proposal; ARBiH accepted, VRS rejected, HVO accepted.',
     });
     expect(`${ledger[0]?.family} ${ledger[0]?.title} ${ledger[0]?.outcome} ${ledger[0]?.detail}`).not.toMatch(/_/);
   });
@@ -198,7 +198,7 @@ describe('decision consequence trail', () => {
       turn: 188,
       title: 'Dayton Peace Agreement',
       outcome: 'Agreement signed',
-      detail: 'Accepted 2 territorial packages; 1 left with default holders. Final territory split: RBiH 51%, RS 49%, HRHB 0%. Patron overrides applied: 1.',
+      detail: 'Accepted 2 territorial packages; 1 left with default holders. Final territory split: ARBiH 51%, VRS 49%, HVO 0%. Patron overrides applied: 1.',
     });
     expect(`${ledger[0]?.family} ${ledger[0]?.title} ${ledger[0]?.outcome} ${ledger[0]?.detail}`).not.toMatch(/_/);
   });
@@ -225,7 +225,7 @@ describe('decision consequence trail', () => {
       turn: 64,
       title: 'Convoy allowed',
       outcome: 'Allowed',
-      detail: 'Convoy to Srebrenica enclave allowed through RS lines; aid delivered to RBiH.',
+      detail: 'Convoy to Srebrenica enclave allowed through VRS lines; aid delivered to ARBiH.',
     });
     expect(`${ledger[0]?.family} ${ledger[0]?.title} ${ledger[0]?.outcome} ${ledger[0]?.detail}`).not.toMatch(/_/);
   });
@@ -251,7 +251,7 @@ describe('decision consequence trail', () => {
       turn: 5,
       title: 'Paramilitary deployment authorized',
       outcome: 'Authorized',
-      detail: 'Paramilitary deployment authorized for RS rear-pocket cleanup. Estimated civilian risk: 12.',
+      detail: 'Paramilitary deployment authorized for VRS rear-pocket cleanup. Estimated civilian risk: 12.',
     });
     expect(`${ledger[0]?.family} ${ledger[0]?.title} ${ledger[0]?.outcome} ${ledger[0]?.detail}`).not.toMatch(/_/);
   });
