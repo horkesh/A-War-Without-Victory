@@ -7,7 +7,7 @@ import type { FormationView } from '../../data/types';
 import { useGameStore } from '../../store/gameStore';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { getCohesionColor, OUTCOME_COLORS } from '../../utils/theme';
-import { formatPersonnel } from '../../utils/formatters';
+import { formatPersonnel, toTitleCase } from '../../utils/formatters';
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
 import { t, useLocale } from '../../i18n';
@@ -193,7 +193,7 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
                                 </span>
                                 <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border leading-none`}
                                     style={{ color: OUTCOME_COLORS[e.outcome] ?? '#d4c5a0', borderColor: (OUTCOME_COLORS[e.outcome] ?? '#d4c5a0') + '40' }}>
-                                    {e.outcome.replace(/_/g, ' ')}
+                                    {toTitleCase(e.outcome)}
                                 </span>
                                 <span className="text-text-secondary/60 w-6 shrink-0">{e.role === 'attacker' ? t('orbat.attackerShort') : t('orbat.defenderShort')}</span>
                                 <span className="text-red-500 font-bold">-{e.casualties_taken}</span>

@@ -424,7 +424,7 @@ export function OperationsPanel() {
                   {selectedOperation.min_attack_outcome && (
                     <div>
                       <span className="text-text-secondary">{t('operationsPanel.minimum')} </span>
-                      <span className="text-text-primary">{selectedOperation.min_attack_outcome.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</span>
+                      <span className="text-text-primary">{toTitleCase(selectedOperation.min_attack_outcome)}</span>
                     </div>
                   )}
                   {(selectedOperation.postponement_count ?? 0) > 0 && (

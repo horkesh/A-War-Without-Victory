@@ -8,7 +8,7 @@ import type { TurnBattle } from '../../../../state/turn_summary';
 import { useGameStore } from '../../store/gameStore';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { OUTCOME_COLORS } from '../../utils/theme';
-import { formatPersonnel } from '../../utils/formatters';
+import { formatPersonnel, toTitleCase } from '../../utils/formatters';
 import { getPlayerSafeThreatPresentation } from '../../utils/playerSafeThreat';
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
@@ -151,7 +151,7 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
                             <div key={i} className="flex items-center gap-3">
                                 <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded border leading-none shrink-0"
                                     style={{ color: OUTCOME_COLORS[battle.outcome] ?? '#d4c5a0', borderColor: (OUTCOME_COLORS[battle.outcome] ?? '#d4c5a0') + '40' }}>
-                                    {battle.outcome.replace(/_/g, ' ')}
+                                    {toTitleCase(battle.outcome)}
                                 </span>
                                 <span className="text-text-secondary truncate flex-1">
                                     {getOsidDisplayName(battle.osid, osidDisplayNames)}

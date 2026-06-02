@@ -7,7 +7,7 @@ import { useMemo, useState } from 'react';
 import type { OperationView, FormationView, LoadedGameState, NamedOfficerView } from '../../data/types';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
-import { turnToDateString } from '../../utils/formatters';
+import { turnToDateString, toTitleCase } from '../../utils/formatters';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { getPlayerSafeBrigadeName } from '../../utils/playerSafeText';
 import { getPlayerSafeOperationBalancePresentation } from '../../../../shared/playerSafeOperationBalance';
@@ -93,6 +93,33 @@ const OUTCOME_LABEL_KEY: Record<string, MessageKey> = {
     orphaned_sector: 'operationsSection.outcome.orphanedSector',
     no_logged_attempt: 'operationsSection.outcome.noLoggedAttempt',
     manual_termination: 'operationsSection.outcome.manualTermination',
+};
+
+/** Player-facing phrasing for a commander's launch recommendation (raw enum). */
+const COMMANDER_ASSESSMENT_LABELS: Record<string, string> = {
+    launch: 'Recommends launch', postpone: 'Urges delay', abort: 'Advises abort',
+};
+
+/** Player-facing phrasing for a recovery-mode reason (raw enum). */
+const RECOVERY_REASON_LABELS: Record<string, string> = {
+    max_failures: 'Halted after repeated failures',
+    orphaned_sector: 'Objective sector lost',
+    manual_termination: 'Stood down by order',
+    no_logged_attempt: 'No assault attempted',
+};
+
+/** Player-facing title-case labels for axis status (raw enum). */
+const AXIS_STATUS_LABELS: Record<string, string> = {
+    executing: 'Executing', stalled: 'Stalled', complete: 'Complete',
+};
+
+/** Player-facing labels for AAR grade-factor keys (raw enum). */
+const GRADE_FACTOR_LABELS: Record<string, string> = {
+    objective_capture_rate: 'Objective capture',
+    force_ratio: 'Force ratio',
+    casualty_ratio: 'Casualty ratio',
+    duration_efficiency: 'Duration efficiency',
+    momentum: 'Momentum',
 };
 
 function ReadinessBar({ label, value }: { label: string; value: number }) {
@@ -320,7 +347,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                             <span className="text-text-secondary/60 uppercase">{t('operationsSection.assessment')}</span>
                             <span className={`font-bold px-2 py-0.5 border ${op.commander_assessment === 'launch' ? 'text-emerald-400 border-panel-border' :
                                     op.commander_assessment === 'abort' ? 'text-red-500 border-red-500/30' : 'text-amber-500 border-amber-500/30'
-                                }`}>{op.commander_assessment.toUpperCase()}</span>
+                                }`}>{COMMANDER_ASSESSMENT_LABELS[op.commander_assessment] ?? toTitleCase(op.commander_assessment)}</span>
                             {op.postponement_count != null && op.postponement_count > 0 && (
                                 <span className="text-red-500/60 ml-2 animate-pulse">(! {op.postponement_count} DELAYS)</span>
                             )}
@@ -382,7 +409,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="font-bold text-text-primary uppercase tracking-wider">{axis.name}</span>
                                     <span className={`text-[10px] font-bold uppercase px-2 py-0.5 border border-current bg-current/5 ${AXIS_STATUS_COLOR[axis.status] ?? 'text-text-secondary/60'}`}>
-                                        {axis.status}
+                                        {AXIS_STATUS_LABELS[axis.status] ?? toTitleCase(axis.status)}
                                     </span>
                                 </div>
                                 <div className="flex flex-wrap gap-x-6 gap-y-1 text-text-secondary text-[10px] uppercase">
@@ -436,7 +463,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
             {/* Recovery info */}
             {op.phase === 'recovery' && op.recovery_reason && (
                 <div className="text-blue-400 font-bold italic tracking-widest uppercase border border-blue-400/20 bg-blue-400/5 p-3">
-                    {t('operationsSection.recoveryModeReason', { reason: op.recovery_reason.toUpperCase().replace(/_/g, ' ') })}
+                    {t('operationsSection.recoveryModeReason', { reason: RECOVERY_REASON_LABELS[op.recovery_reason] ?? toTitleCase(op.recovery_reason) })}
                 </div>
             )}
 
@@ -466,7 +493,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                         <div className="flex flex-wrap gap-2 px-1">
                             {Object.entries(completedAAR.grade.factors).map(([key, val]) => (
                                 <span key={key} className="text-[8px] text-text-secondary/40 font-mono uppercase border border-panel-border/30 px-1.5 py-0.5 rounded">
-                                    {key.replace(/_/g, ' ')}: <span className="text-text-secondary tabular-nums">{typeof val === 'number' ? val.toFixed(0) : String(val)}</span>
+                                    {GRADE_FACTOR_LABELS[key] ?? toTitleCase(key)}: <span className="text-text-secondary tabular-nums">{typeof val === 'number' ? val.toFixed(0) : String(val)}</span>
                                 </span>
                             ))}
                         </div>
@@ -636,8 +663,8 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                         type="text"
                         value={requestTargetOsid}
                         onChange={(e) => { setRequestTargetOsid(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
-                        placeholder="Objective OSID (e.g. bihac_1)"
-                        aria-label="Request operation objective OSID"
+                        placeholder="Objective settlement (e.g. Bihać)"
+                        aria-label="Request operation objective settlement"
                         className="flex-1 text-[11px] font-mono bg-panel-bg border border-panel-border/50 rounded px-2 py-1 text-text-primary"
                     />
                     <button

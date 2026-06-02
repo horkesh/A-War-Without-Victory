@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildOpordDisplayModel } from '../src/ui/map/components/ops_modal/opordDisplay';
 import { readFileSync } from 'node:fs';
 import type { OpsPlanState } from '../src/ui/map/components/ops_modal/types';
+import { formatPosture, toTitleCase } from '../src/ui/map/utils/formatters';
 
 describe('buildOpordDisplayModel', () => {
     it('uses display names instead of raw OSIDs in OPORD-facing labels', () => {
@@ -107,5 +108,61 @@ describe('buildOpordDisplayModel', () => {
         expect(authorizeSource).not.toContain('loadedGameState.operations ?? []).find');
         expect(commanderSelectionSource).toContain('findPlayerFacingOperationByKey');
         expect(commanderSelectionSource).not.toContain('operations?.find((o) => o.corps_id === context.corpsId && o.name === context.operationName)');
+    });
+});
+
+describe('Army-HQ raw enum + faction-slug resolution (QA Batch F)', () => {
+    it('resolves corps/sector stance enums to player-facing labels, not raw tokens', () => {
+        // Single-word and multi-word stance enums humanize cleanly.
+        expect(formatPosture('offensive')).toBe('Offensive');
+        expect(toTitleCase('active_defense')).toBe('Active Defense');
+        // Never leaks the raw snake_case token.
+        expect(formatPosture('active_defense')).not.toContain('_');
+        expect(toTitleCase('decisive_victory')).toBe('Decisive Victory');
+    });
+
+    it('renders opposing factions through the player-safe military name resolver', () => {
+        const sectorPanelSource = readFileSync(
+            new URL('../src/ui/map/components/CorpsFrontPanel.tsx', import.meta.url),
+            'utf8',
+        );
+        // Identified-hostiles chips resolve RS/RBiH/HRHB → VRS/ARBiH/HVO.
+        expect(sectorPanelSource).toContain('getPlayerSafeMilitaryFactionName(f)');
+        // Corps stance no longer renders the bare enum.
+        expect(sectorPanelSource).toContain('formatPosture(corpsStance)');
+        // Commander recommendation no longer renders the raw launch/postpone/abort enum.
+        expect(sectorPanelSource).toContain('commanderAssessmentLabel(op.commander_assessment)');
+        expect(sectorPanelSource).toContain("launch: 'Recommends launch'");
+    });
+
+    it('resolves commander assessment, recovery reason, axis status, and grade factors in OperationsSection', () => {
+        const opsSource = readFileSync(
+            new URL('../src/ui/map/components/army_hq/OperationsSection.tsx', import.meta.url),
+            'utf8',
+        );
+        expect(opsSource).toContain('COMMANDER_ASSESSMENT_LABELS[op.commander_assessment]');
+        expect(opsSource).not.toContain('op.commander_assessment.toUpperCase()');
+        expect(opsSource).toContain('RECOVERY_REASON_LABELS[op.recovery_reason]');
+        expect(opsSource).not.toContain("op.recovery_reason.toUpperCase().replace(/_/g, ' ')");
+        expect(opsSource).toContain('AXIS_STATUS_LABELS[axis.status]');
+        expect(opsSource).toContain('GRADE_FACTOR_LABELS[key]');
+        // Request-op input no longer surfaces the "OSID" slug to the player.
+        expect(opsSource).not.toContain('Objective OSID (e.g. bihac_1)');
+        expect(opsSource).toContain('Objective settlement (e.g. Bihać)');
+    });
+
+    it('humanizes battle/engagement outcome chips in Sectors/Orbat sections', () => {
+        const sectorsSource = readFileSync(
+            new URL('../src/ui/map/components/army_hq/SectorsSection.tsx', import.meta.url),
+            'utf8',
+        );
+        const orbatSource = readFileSync(
+            new URL('../src/ui/map/components/army_hq/OrbatSection.tsx', import.meta.url),
+            'utf8',
+        );
+        expect(sectorsSource).toContain('toTitleCase(battle.outcome)');
+        expect(sectorsSource).not.toContain("battle.outcome.replace(/_/g, ' ')");
+        expect(orbatSource).toContain('toTitleCase(e.outcome)');
+        expect(orbatSource).not.toContain("e.outcome.replace(/_/g, ' ')");
     });
 });
