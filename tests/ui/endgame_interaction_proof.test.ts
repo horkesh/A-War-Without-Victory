@@ -250,7 +250,7 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(warCostSection).toBeDefined();
         const warCost = within(warCostSection as HTMLElement);
 
-        expect(screen.getByRole('button', { name: 'Izvjestaj' })).toBeDefined();
+        expect(screen.getByRole('button', { name: 'Izvještaj' })).toBeDefined();
         expect(screen.getByRole('button', { name: 'Obracun' })).toBeDefined();
         expect(screen.getByText('Najmanje losa verzija tragedije')).toBeDefined();
         expect(screen.getByRole('button', { name: 'Pogledaj svoj rat' })).toBeDefined();
@@ -276,7 +276,7 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('Fokus')).toBeDefined();
         expect(screen.getByText('Ishod')).toBeDefined();
         expect(screen.getByText('Signal cijene')).toBeDefined();
-        expect(screen.getByText('Podijeli sazetak')).toBeDefined();
+        expect(screen.getByText('Podijeli sažetak')).toBeDefined();
         expect(screen.getByRole('button', { name: 'Kopiraj' })).toBeDefined();
         expect(screen.queryByText('Survival')).toBeNull();
         expect(screen.getAllByText('Opstanak').length).toBeGreaterThanOrEqual(2);

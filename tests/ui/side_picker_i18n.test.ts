@@ -45,8 +45,8 @@ describe('SidePickerOverlay localization', () => {
         renderSidePicker();
 
         expect(screen.getByRole('heading', { name: 'Izaberite frakciju' })).toBeTruthy();
-        expect(screen.getByLabelText('Ucitaj sacuvanu igru')).toBeTruthy();
-        expect(screen.getByRole('button', { name: /Ucitaj save s diska/ })).toBeTruthy();
+        expect(screen.getByLabelText('Učitaj sacuvanu igru')).toBeTruthy();
+        expect(screen.getByRole('button', { name: /Učitaj save s diska/ })).toBeTruthy();
         expect(screen.getByRole('button', { name: /Nastavi zadnje pokretanje/ })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Zatvori' })).toBeTruthy();
         expect(screen.getAllByText(/^Snage /).length).toBeGreaterThan(0);

@@ -39,7 +39,7 @@ describe('SettingsScreen localization control', () => {
         render(createElement(SettingsScreen, { onClose: () => {} }));
 
         expect(screen.getByRole('button', { name: 'Zvuk' })).toBeTruthy();
-        expect(screen.getByText('Zvucna slika')).toBeTruthy();
+        expect(screen.getByText('Zvučna slika')).toBeTruthy();
         expect(screen.getByText('Dozvoli audio signale takticke karte')).toBeTruthy();
         expect(screen.getByRole('slider', { name: 'Glavna jacina zvuka' })).toBeTruthy();
     });

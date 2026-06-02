@@ -13,7 +13,7 @@ function makeView(): TurnAftermathView {
         dateLabel: '24 Jun 1992',
         playerFaction: 'RBiH',
         headline: 'Neto teritorijalni dobitak: +1 OSID-a.',
-        narrativeLine: 'Sedmica zavrsava osvojenim prostorom, ali knjiga troska jos odreduje cijenu napredovanja.',
+        narrativeLine: 'Sedmica zavrsava osvojenim prostorom, ali knjiga troška jos odreduje cijenu napredovanja.',
         tone: 'gain',
         territory: {
             friendlyNet: 1,
@@ -50,7 +50,7 @@ function makeView(): TurnAftermathView {
         },
         signals: [],
         judgment: {
-            headline: 'Teritorija je promijenila pamcenje kampanje.',
+            headline: 'Teritorija je promijenila pamćenje kampanje.',
             detail: 'Linija fronta je zabiljezila +1 neto OSID za igracevu frakciju.',
             memoryTone: 'territory',
             primarySurface: 'chronicle',
@@ -95,7 +95,7 @@ describe('TurnAftermathModal localization', () => {
         expect(screen.getByText('Teritorija')).toBeTruthy();
         expect(screen.getByText('1 osvojeno / 0 izgubljeno')).toBeTruthy();
         expect(screen.getByText('Cijena poteza')).toBeTruthy();
-        expect(screen.getByText('Sud / sjecanje')).toBeTruthy();
+        expect(screen.getByText('Sud / sjećanje')).toBeTruthy();
         expect(screen.getByText('Komandni sto')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Pregled rata' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Zapisi poteza' })).toBeTruthy();

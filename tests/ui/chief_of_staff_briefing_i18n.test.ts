@@ -31,7 +31,7 @@ describe('Chief of Staff briefing localization', () => {
 
         const text = flatten(generateCoSBriefing([], state, 'RBiH'));
 
-        expect(text).toContain('Komandante, imam pitanja koja zahtijevaju vasu paznju.');
+        expect(text).toContain('Komandante, imam pitanja koja zahtijevaju vasu pažnju.');
         expect(text).toContain('Situacija je zasad stabilna, ali moramo ostati oprezni.');
         expect(text).not.toContain('Commander,');
         expect(text).not.toContain('The situation is stable for now');
@@ -237,7 +237,7 @@ describe('Chief of Staff briefing localization', () => {
 
         expect(text).toContain('Zabrinut sam zbog 1st Corps - kohezija je opasno niska. Trebamo razmotriti reorganizaciju.');
         expect(text).toContain('Operacija River Line ceka vase odobrenje. Preporucujem prvo pregledati odnos snaga.');
-        expect(text).toContain('Nasa linija kod Tuzla corridor je opasno tanka. Ako neprijatelj ispita taj pravac, mozda necemo izdrzati.');
+        expect(text).toContain('Nasa linija kod Tuzla corridor je opasno tanka. Ako neprijatelj ispita taj pravac, možda nećemo izdrzati.');
         expect(text).not.toContain('I am concerned about');
         expect(text).not.toContain('awaits your authorization');
         expect(text).not.toContain('Our line at');
@@ -356,7 +356,7 @@ describe('Chief of Staff briefing localization', () => {
         const aggressiveText = flatten(generateCoSBriefing([], state, 'HRHB'));
 
         expect(cautiousText).toContain('Moram napomenuti da su komandni odnosi sa 1st Corps i dalje pod pritiskom nakon nedavnih predsjednickih intervencija.');
-        expect(preciseText).toContain('Status komandnog autoriteta: komandni odnos sa Drina Corps je narusen.');
+        expect(preciseText).toContain('Status komandnog autoriteta: komandni odnos sa Drina Corps je narušen.');
         expect(aggressiveText).toContain('Stab HVO Main Corps je jos uz nas, ali su intervencije ostavile trag.');
         expect(cautiousText + preciseText + aggressiveText).not.toContain('command relations with');
         expect(cautiousText + preciseText + aggressiveText).not.toContain('Command Authority Status');

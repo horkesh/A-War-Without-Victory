@@ -173,7 +173,7 @@ describe('ADVANCE_TURN gated feedback', () => {
     fireEvent.click(screen.getByText('PRIORITETI'));
 
     expect(screen.getByText('Pregled prije nastavka')).toBeTruthy();
-    expect(screen.getByText('Nijedna ziva stavka stola nece biti zakopana sljedecim potezom.')).toBeTruthy();
+    expect(screen.getByText('Nijedna ziva stavka stola nece biti zakopana sljedećim potezom.')).toBeTruthy();
     expect(screen.getByText('Predaje izvora')).toBeTruthy();
   });
 
@@ -219,7 +219,7 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(screen.getByText('HRONIKA')).toBeTruthy();
     expect(screen.getByText('KODEKS')).toBeTruthy();
     expect(screen.getByText(/Potez 40/)).toBeTruthy();
-    expect(screen.getByText(/SLJEDECI POTEZ/)).toBeTruthy();
+    expect(screen.getByText(/SLJEDEĆI POTEZ/)).toBeTruthy();
     expect(screen.getByRole('group', { name: 'Komandni autoritet: 4/8' })).toBeTruthy();
     expect(screen.getByTitle('Kampanjska hronika')).toBeTruthy();
     expect(screen.getAllByTitle('Posjeti Armijski HQ [H]').length).toBeGreaterThan(0);

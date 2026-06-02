@@ -372,6 +372,6 @@ describe('buildPreAdvanceCommandReviewView', () => {
 
     expect(clearView.headline).toBe('Spremno za napredovanje');
     expect(reviewView.headline).toBe('Pregled prije napredovanja');
-    expect(unavailableView.headline).toBe('Nema ucitanog stanja');
+    expect(unavailableView.headline).toBe('Nema učitanog stanja');
   });
 });

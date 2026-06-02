@@ -246,9 +246,9 @@ describe('ops planning target discovery', () => {
         }));
 
         expect(screen.getByText('Status plana')).toBeTruthy();
-        expect(screen.getByRole('button', { name: /predlozi plan/i })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /predloži plan/i })).toBeTruthy();
         expect(screen.getAllByText('Osa').length).toBeGreaterThan(0);
-        expect(screen.getAllByText('Polaziste').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Polazište').length).toBeGreaterThan(0);
         expect(screen.getAllByText('Ciljevi').length).toBeGreaterThan(0);
         expect(screen.getAllByText('Brigade').length).toBeGreaterThan(0);
         expect(screen.getByRole('button', { name: /procjena G-2/i })).toBeTruthy();
@@ -269,7 +269,7 @@ describe('ops planning target discovery', () => {
         expect(screen.getByText('Planiranje')).toBeTruthy();
         expect(screen.getByText('Dostupno')).toBeTruthy();
         expect(screen.getByText('Kliknite neprijateljsku teritoriju na karti za dodavanje ciljeva')).toBeTruthy();
-        expect(screen.getByText('Polaziste')).toBeTruthy();
+        expect(screen.getByText('Polazište')).toBeTruthy();
         expect(screen.queryByText('Available')).toBeNull();
     });
 
@@ -312,8 +312,8 @@ describe('ops planning target discovery', () => {
             originSectorId: 'sector_1',
         }));
 
-        expect(screen.getByRole('button', { name: /narediti izvidjanje/i })).toBeTruthy();
-        expect(screen.getByText('Naredi izvidjanje')).toBeTruthy();
+        expect(screen.getByRole('button', { name: /narediti izviđanje/i })).toBeTruthy();
+        expect(screen.getByText('Naredi izviđanje')).toBeTruthy();
         expect(screen.getByRole('button', { name: /odobri svejedno/i })).toBeTruthy();
         unmount();
 

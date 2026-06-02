@@ -32,7 +32,7 @@ describe('SettlementTimeline localization', () => {
 
     render(createElement(SettlementTimeline, { events: [] }));
 
-    expect(screen.getByText('Nema zabiljezenih dogadjaja za ovo naselje.')).toBeTruthy();
+    expect(screen.getByText('Nema zabiljezenih događaja za ovo naselje.')).toBeTruthy();
     expect(screen.queryByText('No recorded events at this settlement.')).toBeNull();
   });
 
