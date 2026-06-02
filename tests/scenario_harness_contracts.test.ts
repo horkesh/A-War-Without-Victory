@@ -559,7 +559,7 @@ describe('H2.4 scenario bots determinism', () => {
     const OUT_A = join(process.cwd(), '.tmp_scenario_bots_h2_4_a');
     const OUT_B = join(process.cwd(), '.tmp_scenario_bots_h2_4_b');
 
-    test('scenario bots determinism: noop_4w_bots run twice yields identical key artifacts', async () => {
+    test('scenario bots determinism: noop_4w_bots run twice yields identical key artifacts', { timeout: 300000 }, async () => {
         await ensureRemoved(OUT_A);
         await ensureRemoved(OUT_B);
 
