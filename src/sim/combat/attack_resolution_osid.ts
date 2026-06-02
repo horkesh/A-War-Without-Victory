@@ -187,6 +187,32 @@ import {
     COMMANDER_EXP_LOSS,
 } from './attack_post_battle_effects.js';
 
+function recordDefenderCombatFatigue(params: {
+    defenderFormation: FormationState;
+    sectorDefenseBrigades: FormationState[] | null;
+    sectorBrigadeWeights: Map<FormationId, number> | null;
+}): void {
+    const {
+        defenderFormation,
+        sectorDefenseBrigades,
+        sectorBrigadeWeights,
+    } = params;
+    if (ENABLE_SHARED_SECTOR_DEFENSE && sectorDefenseBrigades && sectorDefenseBrigades.length > 1 && sectorBrigadeWeights) {
+        const weightedDefenders = sectorDefenseBrigades
+            .map((formation) => ({ formation, weight: Math.max(0, sectorBrigadeWeights.get(formation.id) ?? 0) }))
+            .filter(({ weight }) => weight > 0)
+            .sort((a, b) => strictCompare(a.formation.id, b.formation.id));
+        const totalWeight = weightedDefenders.reduce((sum, { weight }) => sum + weight, 0);
+        if (totalWeight > 0) {
+            for (const { formation, weight } of weightedDefenders) {
+                recordFormationFatigue(formation, weight / totalWeight);
+            }
+            return;
+        }
+    }
+    recordFormationFatigue(defenderFormation, 1);
+}
+
 // Backward-compat re-exports (types)
 export type AttackOutcome = CombatOutcome;
 export { getEquipmentRatio, getToTerrainDefenseMult };
@@ -1029,7 +1055,7 @@ export function resolveAttackOrdersOsid(
 
             // Apply cohesion/fatigue/morale to primary defender
             defenderFormation.cohesion = Math.max(0, Math.min(100, (defenderFormation.cohesion ?? 60) + (COHESION_DEFENDER[outcome] ?? 0)));
-            recordFormationFatigue(defenderFormation, 1);
+            recordDefenderCombatFatigue({ defenderFormation, sectorDefenseBrigades, sectorBrigadeWeights });
 
             // Record battle outcome for morale drift — defender's perspective is inverted
             (defenderFormation as { recent_battle_outcome?: string }).recent_battle_outcome = getDefenderOutcomePerspective(outcome);

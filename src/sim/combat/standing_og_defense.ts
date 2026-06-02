@@ -47,7 +47,7 @@ function defenderTurnsByOsid(formation: FormationState): Map<string, Set<number>
 function isFullStrengthIdleBrigade(formation: FormationState, fullStrengthRatio: number): boolean {
     const peakPersonnel = formation.brigade_history?.peak_personnel ?? formation.personnel ?? 0;
     if ((formation.personnel ?? 0) < peakPersonnel * fullStrengthRatio) return false;
-    return (formation.brigade_history?.battles_fought ?? 0) === 0;
+    return (formation.brigade_history?.battles_fought ?? 0) === 0 && (formation.ops?.fatigue ?? 0) <= 0;
 }
 
 export function detectStandingOgSoloDefenderHotspots(
@@ -62,32 +62,37 @@ export function detectStandingOgSoloDefenderHotspots(
 
     for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
         const sector = sectors[sectorId];
-        if (!sector || sector.edge_ids.length === 0 || sector.assigned_brigade_ids.length !== 1) continue;
-        const holderId = sector.assigned_brigade_ids[0];
-        const holder = formations[holderId];
-        if (!holder || holder.status !== 'active') continue;
-        const holderTurnsByOsid = defenderTurnsByOsid(holder);
+        if (!sector || sector.edge_ids.length === 0) continue;
 
-        const sameOgIds = getStandingOgDefenseBrigadeIds(sector, true)
-            .filter((id) => id !== holderId);
-        const idleSameOgIds = sameOgIds
-            .filter((id) => {
-                const formation = formations[id];
-                return formation != null && formation.status === 'active' && isFullStrengthIdleBrigade(formation, fullStrengthRatio);
-            })
-            .sort(strictCompare);
-        if (idleSameOgIds.length === 0) continue;
+        for (const holderId of [...sector.assigned_brigade_ids].sort(strictCompare)) {
+            const holder = formations[holderId];
+            if (!holder || holder.status !== 'active') continue;
+            const holderTurnsByOsid = defenderTurnsByOsid(holder);
 
-        for (const osid of [...holderTurnsByOsid.keys()].sort(strictCompare)) {
-            const defenderTurns = holderTurnsByOsid.get(osid)?.size ?? 0;
-            if (defenderTurns < minDefenderTurns) continue;
-            reports.push({
-                sector_id: sector.sector_id,
-                holder_brigade_id: holderId,
-                contested_osid: osid,
-                defender_turns: defenderTurns,
-                idle_same_og_brigade_ids: idleSameOgIds,
-            });
+            const idleSameOgIds = getStandingOgDefenseBrigadeIds(sector, true)
+                .filter((id) => id !== holderId)
+                .filter((id) => {
+                    const formation = formations[id];
+                    return formation != null
+                        && formation.status === 'active'
+                        && formation.faction === holder.faction
+                        && isFullStrengthIdleBrigade(formation, fullStrengthRatio);
+                })
+                .sort(strictCompare);
+            if (idleSameOgIds.length === 0) continue;
+
+            for (const osid of [...holderTurnsByOsid.keys()].sort(strictCompare)) {
+                if (!sector.territory_osids.includes(osid)) continue;
+                const defenderTurns = holderTurnsByOsid.get(osid)?.size ?? 0;
+                if (defenderTurns < minDefenderTurns) continue;
+                reports.push({
+                    sector_id: sector.sector_id,
+                    holder_brigade_id: holderId,
+                    contested_osid: osid,
+                    defender_turns: defenderTurns,
+                    idle_same_og_brigade_ids: idleSameOgIds,
+                });
+            }
         }
     }
 

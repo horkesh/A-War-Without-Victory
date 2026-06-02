@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-02] feat(engine): Standing OG Phase C detector hardening + direct fatigue sharing residual
+
+**Type:** Engine behavior scaffold, flag-gated default-off. Tightens the ADR-0007 Phase C health detector so it no longer depends on final sectors having exactly one assigned brigade: it now scans all current sector holders' defender history on sector territory, filters idle same-faction sector mates, and treats a brigade as not idle once it has paid `ops.fatigue`. Adds a flag-on weighted path for the resolver's direct `recordFormationFatigue(defenderFormation, 1)` call, so both combat-fatigue side effects use sector weights when `ENABLE_SHARED_SECTOR_DEFENSE` is enabled. Flag-off behavior remains default and byte-identical.
+
+**Evidence:** Focused tests pass (`standing_og_defense`, `attack_resource_aftermath`, `combat_pipeline`: 28/28). Baseline regression with `ENABLE_SHARED_SECTOR_DEFENSE=false` passes: `Baseline regression: all scenarios match.` Fresh 40w flag-on probe (`apr1992_definitive_40w__3649b3861a87e6ea__w40_n1`, hash `704903cf963ea777`) is behaviorally live but **not acceptance-green**: flag-off -> flag-on v2 control flips 121 -> 120, defender casualties 27,643 -> 24,411, destroyed brigades 7 -> 5, morale-zero brigades 5 -> 4, but formation fatigue total falls 241 -> 165 and solo-defender hotspot counts remain 5 at `minDefenderTurns=8` / 11->12 at `minDefenderTurns=4`. Residual: battle-time sector contribution/commitment is not yet charging the final idle reserves implicated by the detector; Phase B reserve-commitment/proof remains required before any default flip, calibration re-floor, or parked 712th retry.
+
+**Files:** `src/sim/combat/standing_og_defense.ts`, `src/sim/combat/attack_resolution_osid.ts`, `tests/standing_og_defense.test.ts`.
+
+---
+
 ## [2026-06-02] feat(engine): Standing OG Defensive Model Phase C MVS scaffold (default-off)
 
 **Type:** Engine behavior scaffold, flag-gated default-off. Adds ADR-0007 Phase C shared-sector-defense plumbing behind `ENABLE_SHARED_SECTOR_DEFENSE = false`: assigned-only defender roster is preserved when the flag is off; flag-on widens sector defense to assigned + reserve + rear brigade ids, deduped/sorted; defender fatigue can distribute across contributing sector defenders by normalized reactive weights; reactive cap/min-floor use contributing defender power only when the flag is enabled. Adds a pure health-invariant detector for the solo-front-holder + idle-full-strength-same-OG pattern. No save schema, scenario data, OOB, calibration, or default baseline flip.

@@ -157,4 +157,109 @@ describe('detectStandingOgSoloDefenderHotspots', () => {
 
         expect(detectStandingOgSoloDefenderHotspots(state, { minDefenderTurns: 4 })).toEqual([]);
     });
+
+    it('does not flag when the same-OG reserve paid shared defensive fatigue', () => {
+        const holder = makeBrigade({ id: 'arbih_7th_viteska', personnel: 450 });
+        recordDefenses(holder, 'op:kakanj:brnjic_2', [1, 2, 3, 4]);
+        const reserve = makeBrigade({
+            id: 'arbih_329th_mountain',
+            personnel: 1800,
+            ops: { fatigue: 0.5, last_supplied_turn: null },
+            location_osid: 'op:kakanj:rear_1',
+            brigade_history: createEmptyBrigadeHistory(1800),
+        });
+        const sector = makeSector({
+            assigned_brigade_ids: [holder.id],
+            reserve_brigade_ids: [reserve.id],
+            edge_ids: ['edge:kakanj'],
+            territory_osids: ['op:kakanj:brnjic_2', 'op:kakanj:rear_1'],
+        });
+        const state = {
+            meta: { turn: 40 },
+            military: {
+                formations: {
+                    [holder.id]: holder,
+                    [reserve.id]: reserve,
+                },
+                corps_front_sectors: {
+                    [sector.sector_id]: sector,
+                },
+            },
+        } as unknown as GameState;
+
+        expect(detectStandingOgSoloDefenderHotspots(state, { minDefenderTurns: 4 })).toEqual([]);
+    });
+
+    it('flags repeated sector defense even when the final sector has multiple assigned brigades', () => {
+        const holder = makeBrigade({ id: 'arbih_7th_viteska', personnel: 450 });
+        recordDefenses(holder, 'op:kakanj:brnjic_2', [1, 2, 3, 4]);
+        const assignedPeer = makeBrigade({
+            id: 'arbih_309th_mountain',
+            personnel: 1200,
+            brigade_history: createEmptyBrigadeHistory(1200),
+        });
+        const reserve = makeBrigade({
+            id: 'arbih_329th_mountain',
+            personnel: 1800,
+            location_osid: 'op:kakanj:rear_1',
+            brigade_history: createEmptyBrigadeHistory(1800),
+        });
+        const sector = makeSector({
+            assigned_brigade_ids: [holder.id, assignedPeer.id],
+            reserve_brigade_ids: [reserve.id],
+            edge_ids: ['edge:kakanj'],
+            territory_osids: ['op:kakanj:brnjic_2', 'op:kakanj:rear_1'],
+        });
+        const state = {
+            meta: { turn: 40 },
+            military: {
+                formations: {
+                    [holder.id]: holder,
+                    [assignedPeer.id]: assignedPeer,
+                    [reserve.id]: reserve,
+                },
+                corps_front_sectors: {
+                    [sector.sector_id]: sector,
+                },
+            },
+        } as unknown as GameState;
+
+        expect(detectStandingOgSoloDefenderHotspots(state, { minDefenderTurns: 4 })).toEqual([{
+            sector_id: sector.sector_id,
+            holder_brigade_id: holder.id,
+            contested_osid: 'op:kakanj:brnjic_2',
+            defender_turns: 4,
+            idle_same_og_brigade_ids: [assignedPeer.id, reserve.id],
+        }]);
+    });
+
+    it('ignores defender history outside the current sector territory', () => {
+        const holder = makeBrigade({ id: 'arbih_7th_viteska', personnel: 450 });
+        recordDefenses(holder, 'op:zenica:outside_2', [1, 2, 3, 4]);
+        const reserve = makeBrigade({
+            id: 'arbih_329th_mountain',
+            personnel: 1800,
+            brigade_history: createEmptyBrigadeHistory(1800),
+        });
+        const sector = makeSector({
+            assigned_brigade_ids: [holder.id],
+            reserve_brigade_ids: [reserve.id],
+            edge_ids: ['edge:kakanj'],
+            territory_osids: ['op:kakanj:brnjic_2'],
+        });
+        const state = {
+            meta: { turn: 40 },
+            military: {
+                formations: {
+                    [holder.id]: holder,
+                    [reserve.id]: reserve,
+                },
+                corps_front_sectors: {
+                    [sector.sector_id]: sector,
+                },
+            },
+        } as unknown as GameState;
+
+        expect(detectStandingOgSoloDefenderHotspots(state, { minDefenderTurns: 4 })).toEqual([]);
+    });
 });
