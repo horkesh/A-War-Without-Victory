@@ -91,6 +91,7 @@ function formatUnlockRow(
 
 export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
+    const devMode = useGameStore((s) => s.devMode);
     const [locale] = useLocale();
     const [selectedEssayId, setSelectedEssayId] = useState<string | null>(null);
     const [expandedYear, setExpandedYear] = useState<number | null>(1992);
@@ -361,8 +362,12 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                     three sub-lists (fired / enabled-but-not-fired /
                     closed). Sub-list rows capped at
                     UNLOCK_STATE_MAX_ROWS_PER_LIST; the section heading
-                    always shows the full count. */}
-                {unlockState && (
+                    always shows the full count. Developer diagnostic ONLY:
+                    gated behind the `devMode` store flag so the raw internal
+                    event IDs never leak into the player-facing Codex (hidden
+                    by default for players AND dev:map playtesters; shown only
+                    when a developer explicitly enables DEV mode). */}
+                {unlockState && devMode && (
                     <div
                         data-testid="codex-unlock-state-section"
                         className="border-b border-neutral-700/40 bg-[#0d0f16] px-3 py-2"
