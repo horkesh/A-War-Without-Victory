@@ -2922,6 +2922,23 @@ export const enMessages = {
     'warroom.status.priorities': 'PRIORITIES',
     'warroom.status.urgentShort': 'URG',
     'warroom.status.advance': 'ADVANCE',
+    'deskAuthority.title': 'Authority & Directives',
+    'deskAuthority.subtitle': 'The currency of command — and what it buys',
+    'deskAuthority.caLabel': 'Command Authority',
+    'deskAuthority.caValue': '{current} / {max}',
+    'deskAuthority.spentThisTurn': 'Spent this turn: {spent}',
+    'deskAuthority.lowHint': 'Authority is low — some levers are out of reach.',
+    'deskAuthority.recovers': 'Recovers +{rate} each turn.',
+    'deskAuthority.legendHeading': 'Lever costs',
+    'deskAuthority.lever.authorOp': 'Author operation',
+    'deskAuthority.lever.requestOp': 'Request operation',
+    'deskAuthority.lever.stopOp': 'Halt operation',
+    'deskAuthority.lever.forceLaunch': 'Force-launch (held plan)',
+    'deskAuthority.lever.proactiveForceLaunch': 'Force-launch (no proposal)',
+    'deskAuthority.lever.eliteDeploy': 'Release elite reserve',
+    'deskAuthority.lever.replaceCo': 'Replace commander',
+    'deskAuthority.lever.frontVisit': 'Visit the front',
+    'deskAuthority.costSuffix': '{cost} CA',
 } as const;
 
 export type MessageKey = keyof typeof enMessages;

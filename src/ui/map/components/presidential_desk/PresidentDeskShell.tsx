@@ -3,6 +3,7 @@ import { countActionableItems, deriveInboxItems, hasBlockingItems } from '../../
 import type { LoadedGameState } from '../../data/types';
 import { turnToDateString } from '../../utils/formatters';
 import { ConsequenceStrip } from './ConsequenceStrip';
+import { DeskAuthorityHeader } from './DeskAuthorityHeader';
 import { DeskPacket } from './DeskPacket';
 
 export interface PresidentDeskShellProps {
@@ -44,6 +45,10 @@ export function PresidentDeskShell({
       aria-label="President desk"
       className="pointer-events-none absolute inset-x-3 top-16 bottom-16 z-[3] grid content-start gap-4 overflow-y-auto lg:grid-cols-[minmax(22rem,34rem)_minmax(18rem,26rem)] xl:left-10 xl:right-10"
     >
+      <div className="lg:col-span-2">
+        <DeskAuthorityHeader state={state} />
+      </div>
+
       <div className="pointer-events-auto self-start border border-panel-border/80 bg-panel-bg/92 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.52)] backdrop-blur-md">
         <DeskPacket items={items} onAction={onAction} />
       </div>
