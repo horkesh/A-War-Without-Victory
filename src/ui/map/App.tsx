@@ -1032,6 +1032,13 @@ function App() {
       setAppScreen('warroom');
     } else if (view === 'game') {
       setAppScreen('game');
+    } else if (params.has('desktop_window')) {
+      // Task #80 — the packaged desktop app opens its tactical map windows with
+      // `?desktop_window=operational` / `?desktop_window=sandbox`
+      // (electron-main.cjs `getTacticalMapWindowUrl`). These windows attach to
+      // an already-running session, so deep-link straight to the in-game shell
+      // — but do NOT force the SidePicker (no new-game flow here).
+      setAppScreen('game');
     }
   }, []);
 

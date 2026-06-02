@@ -93,6 +93,15 @@ describe('App boot — Main Menu first, faction choice menu-only (#80)', () => {
         expect(app).toContain("if (view === 'warroom') {");
         expect(app).toContain("} else if (view === 'game') {");
     });
+
+    it('treats ?desktop_window=... as a game deep-link for packaged tactical windows (#138 follow-up)', () => {
+        // The desktop Electron app opens tactical map windows with
+        // `?desktop_window=operational` / `?desktop_window=sandbox`
+        // (electron-main.cjs getTacticalMapWindowUrl). With the boot-to-menu
+        // default these must deep-link into the game, not the Main Menu — they
+        // attach to an already-running session (no SidePicker).
+        expect(app).toContain("} else if (params.has('desktop_window')) {");
+    });
 });
 
 describe('gameStore — no eager loaded-state clear (#138 follow-up)', () => {
