@@ -8,12 +8,18 @@
  *
  * Art resolution precedence (first hit wins):
  *   1. a per-card override at `assets/command_cards/<id>.webp` (drop one in and it
- *      wins with no code edit — eager `import.meta.glob`, hashed into dist);
+ *      wins with no code edit);
  *   2. the existing, already-generated presidential-desk art this card SHARES
  *      (category cards reuse the 4:3 `packet_thumbnails/`, action cards reuse the
- *      16:9 `consequence_stills/`) via `COMMAND_CARD_DESK_ART`;
+ *      16:9 `consequence_stills/`) via `COMMAND_CARD_DESK_ASSET`;
  *   3. otherwise the card falls back to a faction-tinted CSS gradient placeholder
  *      with a gold border so the feature works fully even for unmapped ids.
+ *
+ * The glob-backed resolution itself lives in the shared `presidentialCommandArt`
+ * util (steps 1+2) so the `import.meta.glob` patterns are never duplicated across
+ * the warroom strip and the Decision Room DirectiveCard act layer. This module
+ * keeps only the command-strip id→asset map (`COMMAND_CARD_DESK_ASSET`) and the
+ * thin `resolveCommandCardArt` wrapper.
  *
  * No new art is added — step 2 reuses the desk assets that already ship for the
  * decision modals. The id→asset map (`COMMAND_CARD_DESK_ASSET`) is an explicit,
@@ -25,23 +31,7 @@
  */
 
 import type { PresidentialCommandCategoryCount } from '../../data/presidentialCategories';
-
-// Drop-in per-card override: place `<id>.webp` in assets/command_cards/ and it
-// wins with no code edit. Eager + ?url so the bundler hashes the asset into dist
-// and we get a plain URL string keyed by the glob path.
-const COMMAND_CARD_ART = import.meta.glob('../../assets/command_cards/*.webp', {
-  eager: true,
-  query: '?url',
-  import: 'default',
-}) as Record<string, string>;
-
-// Shared desk art: the already-generated presidential-desk decision-family
-// thumbnails/stills. ES-import (same packaging-safe pattern as the override glob)
-// so these existing assets hash into dist and ship automatically.
-const COMMAND_CARD_DESK_ART = import.meta.glob(
-  '../../assets/presidential_desk/{packet_thumbnails,consequence_stills}/*.webp',
-  { eager: true, query: '?url', import: 'default' },
-) as Record<string, string>;
+import { resolvePresidentialCommandArt } from '../../data/presidentialCommandArt';
 
 /**
  * Explicit, editable command-strip card id → existing desk asset basename map.
@@ -50,9 +40,10 @@ const COMMAND_CARD_DESK_ART = import.meta.glob(
  * `consequence_stills/`. Re-map any card by editing the basename here — no other
  * code change needed. Ids absent from this table fall through to the placeholder.
  *
- * Action (`act_*`) entries are READY but currently UNRENDERED: the action /
- * Directive-Card act layer is not yet built, so no surface renders these images
- * today. They are kept here so the act layer resolves art the moment it lands.
+ * Action (`act_*`) entries feed the Decision Room DirectiveCard act-layer header
+ * (§9): `directiveActArt.ts` maps each lever → one of these `act_*` ids and the
+ * shared resolver turns that into a 16:9 consequence-still URL. Re-map a card by
+ * editing the basename here — no other code change needed.
  */
 export const COMMAND_CARD_DESK_ASSET: Readonly<Record<string, string>> = {
   // Category cards (4:3 → packet_thumbnails)
@@ -70,32 +61,15 @@ export const COMMAND_CARD_DESK_ASSET: Readonly<Record<string, string>> = {
   act_front_visit: 'consequence_public_pressure.webp',
 };
 
-/** Resolve a glob record entry whose path ends with the given suffix. */
-function resolveGlobBySuffix(glob: Record<string, string>, suffix: string): string | null {
-  for (const [path, url] of Object.entries(glob)) {
-    if (path.endsWith(suffix)) return url;
-  }
-  return null;
-}
-
 /**
  * Resolve the art URL for a command-strip card id.
  *
- * Precedence: per-card override (`command_cards/<id>.webp`) → mapped shared desk
- * asset → null (caller renders the faction-tinted placeholder).
+ * Precedence (via the shared `presidentialCommandArt` resolver): per-card override
+ * (`command_cards/<id>.webp`) → mapped shared desk asset → null (caller renders
+ * the faction-tinted placeholder).
  */
 export function resolveCommandCardArt(categoryId: string): string | null {
-  // 1. Per-card override always wins.
-  const override = resolveGlobBySuffix(COMMAND_CARD_ART, `/${categoryId}.webp`);
-  if (override) return override;
-  // 2. Shared desk asset for this id, if mapped.
-  const deskBasename = COMMAND_CARD_DESK_ASSET[categoryId];
-  if (deskBasename) {
-    const shared = resolveGlobBySuffix(COMMAND_CARD_DESK_ART, `/${deskBasename}`);
-    if (shared) return shared;
-  }
-  // 3. No art — caller falls back to the placeholder.
-  return null;
+  return resolvePresidentialCommandArt(categoryId, COMMAND_CARD_DESK_ASSET);
 }
 
 /** Faction ink tint for the CSS fallback placeholder (RBiH green / RS red / HRHB blue). */
