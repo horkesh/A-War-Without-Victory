@@ -9,6 +9,7 @@ import {
 import { getPeacePlanById } from '../../../sim/negotiation/peace_plan_data.js';
 import { getDimensionEffective, type DimensionStore } from '../../../sim/events/strategic_dimensions.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { getPlayerSafeMilitaryFactionName, getPlayerSafeDisplayLabel } from '../utils/playerSafeText';
 import type {
     DiplomacyActorView,
     DiplomacyNeedleHintView,
@@ -94,8 +95,9 @@ function getFactionPatronState(state: any, factionId: string): Record<string, an
 }
 
 function actorStanceSummary(actor: Pick<DiplomacyActorView, 'faction' | 'patronLabel' | 'supportBand' | 'constraintBand' | 'commitmentBand' | 'isolationBand' | 'sanctionsActive'>): string {
+    const forceLabel = getPlayerSafeMilitaryFactionName(actor.faction);
     if (actor.sanctionsActive) {
-        return `${actor.patronLabel} is constrained by sanctions and keeps the ${actor.faction} channel under pressure.`;
+        return `${actor.patronLabel} is constrained by sanctions and keeps the ${forceLabel} channel under pressure.`;
     }
     if (actor.constraintBand === 'high' || actor.constraintBand === 'elevated') {
         return `${actor.patronLabel} support is ${actor.supportBand}, but constraint is ${actor.constraintBand}; expect limited room for independent bargaining.`;
@@ -236,8 +238,8 @@ function buildNegotiationTimeline(
     }));
     const relationshipEntries: DiplomacyTimelineEntryView[] = externalActors.flatMap((actor) => actor.events.map((event) => ({
         id: `patron:${actor.faction}:${event}`,
-        label: `${actor.patronLabel}: ${event.replace(/_/g, ' ')}`,
-        detail: `${actor.faction} channel relationship signal.`,
+        label: `${actor.patronLabel}: ${getPlayerSafeDisplayLabel(event)}`,
+        detail: `${getPlayerSafeMilitaryFactionName(actor.faction)} channel relationship signal.`,
         turn: undefined,
         confidence: 'likely' as const,
     })));

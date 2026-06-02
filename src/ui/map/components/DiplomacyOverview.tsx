@@ -6,7 +6,7 @@
  * Legacy negotiationCapital with duplicate field mappings is no longer used here.
  */
 import type { LoadedGameState } from '../data/types';
-import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
+import { getPlayerSafePoliticalFactionName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 
 const PATRON_LABELS: Record<string, string> = {
     RBiH: 'International Community',
@@ -33,7 +33,7 @@ function PatronGauge({ faction, authority }: { faction: string; authority: numbe
         <div className="flex items-center gap-3">
             <div className="w-24 text-[10px] text-[#6a5a40] font-bold uppercase shrink-0"
                  style={{ fontFamily: 'Courier New, monospace' }}>
-                {PATRON_LABELS[faction] ?? faction}
+                {PATRON_LABELS[faction] ?? getPlayerSafeMilitaryFactionName(faction)}
             </div>
             <div className="flex-1 h-3 bg-[#d8d0c4] rounded overflow-hidden border border-[#c8b898]/50">
                 <div className="h-full rounded transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: color }} />

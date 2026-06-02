@@ -85,7 +85,10 @@ describe('buildDiplomacyView', () => {
         expect(view.playerFaction).toBe('RS');
         expect(view.patronStance?.patronLabel).toBe('Serbia');
         expect(view.patronStance?.constraintBand).toBe('high');
-        expect(view.patronStance?.stanceSummary).toBe('Serbia is constrained by sanctions and keeps the RS channel under pressure.');
+        // Player-safe: raw faction slug RS must resolve to the military name VRS in prose.
+        expect(view.patronStance?.stanceSummary).toBe('Serbia is constrained by sanctions and keeps the VRS channel under pressure.');
+        // The bare slug "RS" must never appear as a standalone word (VRS is fine).
+        expect(view.patronStance?.stanceSummary).not.toMatch(/\bRS\b/);
         expect(view.activeProposals.map((proposal) => proposal.name)).toEqual([
             'Dayton negotiation menu',
             'Vance-Owen Peace Plan',
@@ -106,6 +109,17 @@ describe('buildDiplomacyView', () => {
         expect(view.negotiationTimeline.map((entry) => entry.label)).toContain('International sanctions');
         expect(view.needleHints.map((hint) => hint.label)).toContain('Ease Serbia constraint');
         expect(view.needleHints.map((hint) => hint.label)).toContain('Reduce Sarajevo siege visibility');
+    });
+
+    it('routes raw faction slugs and snake_case event ids through player-safe resolvers in the timeline', () => {
+        const view = buildDiplomacyView(makeDiplomacyState(), 'RS');
+        // RS relationship_events: ['belgrade_border_pressure'] → "Serbia: Belgrade Border Pressure".
+        const entry = view.negotiationTimeline.find((e) => e.id.startsWith('patron:RS:'));
+        expect(entry).toBeDefined();
+        expect(entry?.label).toBe('Serbia: Belgrade Border Pressure');
+        // Detail must say "VRS channel", never the raw RS slug as a standalone word.
+        expect(entry?.detail).toBe('VRS channel relationship signal.');
+        expect(entry?.detail).not.toMatch(/\bRS\b/);
     });
 
     it('projects patron-confidence standing for the player faction', () => {

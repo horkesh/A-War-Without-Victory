@@ -10,6 +10,7 @@ import type {
     PlayerKnowledgeConfidence,
 } from '../data/types';
 import { t, type MessageKey } from '../i18n';
+import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 
 const CONFIDENCE_BAND_KEY: Record<PatronConfidenceView['band'], MessageKey> = {
     high: 'patronRelations.confidenceBand.high',
@@ -88,7 +89,7 @@ function ActorRow({ actor, primary = false }: { actor: DiplomacyActorView; prima
                         {actor.patronLabel}
                     </div>
                     <div className="mt-1 text-[10px] font-mono uppercase tracking-[0.12em] text-text-secondary">
-                        {t('diplomacy.factionChannel', { faction: actor.faction })}
+                        {t('diplomacy.factionChannel', { faction: getPlayerSafeMilitaryFactionName(actor.faction) })}
                     </div>
                 </div>
                 {actor.sanctionsActive ? (
