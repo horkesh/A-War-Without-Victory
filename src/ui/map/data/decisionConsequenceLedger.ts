@@ -7,6 +7,10 @@ import type {
   PeacePlanDecisionRecordView,
   ReserveRequestDecisionRecordView,
 } from './types';
+import {
+  getPlayerSafeCorpsName,
+  getPlayerSafeMilitaryFactionName,
+} from '../utils/playerSafeText.js';
 
 export interface DecisionConsequenceRecord {
   id: string;
@@ -60,7 +64,10 @@ function reserveTitle(record: ReserveRequestDecisionRecordView): string {
 }
 
 function reserveDetail(record: ReserveRequestDecisionRecordView): string {
-  const corps = humanizeToken(record.corps_id) || 'corps';
+  // Resolve via the corps display helper so a faction-slug-prefixed id
+  // (e.g. `arbih_1st_corps`) renders as "1st Corps" instead of leaking the
+  // faction slug as a word ("Arbih 1st Corps").
+  const corps = getPlayerSafeCorpsName(record.corps_id, record.corps_id, 'corps');
   const brigade = record.brigade_id ? humanizeToken(record.brigade_id) : null;
   if (record.outcome === 'accepted' && brigade) {
     return `${brigade} assigned to ${corps}. ${record.why_needed || record.reason}`.trim();
@@ -94,7 +101,7 @@ function peaceDetail(record: PeacePlanDecisionRecordView): string {
       : 'left pending';
   const responses = ['RBiH', 'RS', 'HRHB']
     .filter((faction) => record.responses[faction])
-    .map((faction) => `${faction} ${peaceResponseLabel(record.responses[faction]!)}`)
+    .map((faction) => `${getPlayerSafeMilitaryFactionName(faction, faction)} ${peaceResponseLabel(record.responses[faction]!)}`)
     .join(', ');
   return responses
     ? `Your government ${playerVerb} the proposal; ${responses}.`
@@ -112,7 +119,7 @@ function daytonDetail(verdict: NonNullable<LoadedGameState['gameVerdict']>): str
   const rejected = result.territorial_packages_rejected?.length ?? 0;
   const split = ['RBiH', 'RS', 'HRHB']
     .filter((faction) => typeof result.final_territory_split?.[faction] === 'number')
-    .map((faction) => `${faction} ${result.final_territory_split[faction]}%`)
+    .map((faction) => `${getPlayerSafeMilitaryFactionName(faction, faction)} ${result.final_territory_split[faction]}%`)
     .join(', ');
   const overrideCount = result.patron_overrides_applied?.length ?? 0;
   const pieces = [`Accepted ${pluralize(accepted, 'territorial package')}; ${rejected} left with default holders.`];
@@ -137,8 +144,12 @@ function convoyDetail(record: ConvoyDecisionRecordView): string {
       ? record.target_enclave
       : humanizeToken(record.target_enclave)
     : 'the enclave';
-  const route = record.route_faction || 'route faction';
-  const target = record.target_faction || 'the enclave garrison';
+  const route = record.route_faction
+    ? getPlayerSafeMilitaryFactionName(record.route_faction, record.route_faction)
+    : 'route faction';
+  const target = record.target_faction
+    ? getPlayerSafeMilitaryFactionName(record.target_faction, record.target_faction)
+    : 'the enclave garrison';
   if (record.decision === 'allow') {
     return `Convoy to ${enclave} allowed through ${route} lines; aid delivered to ${target}.`;
   }
@@ -164,13 +175,14 @@ function paramilitaryDetail(record: ParamilitaryDecisionRecordView): string {
   const risk = typeof record.estimated_civilian_risk === 'number'
     ? ` Estimated civilian risk: ${record.estimated_civilian_risk}.`
     : '';
+  const faction = getPlayerSafeMilitaryFactionName(record.faction, record.faction);
   if (record.decision === 'allow') {
-    return `Paramilitary deployment authorized for ${record.faction} rear-pocket cleanup.${risk}`;
+    return `Paramilitary deployment authorized for ${faction} rear-pocket cleanup.${risk}`;
   }
   if (record.decision === 'deny') {
-    return `Paramilitary deployment refused for ${record.faction}; request removed from the authorization queue.${risk}`;
+    return `Paramilitary deployment refused for ${faction}; request removed from the authorization queue.${risk}`;
   }
-  return `Regular forces directed to handle the ${record.faction} rear-pocket request.${risk}`;
+  return `Regular forces directed to handle the ${faction} rear-pocket request.${risk}`;
 }
 
 function officerOutcome(record: OfficerDecisionRecordView): string {

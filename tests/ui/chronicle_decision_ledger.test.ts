@@ -31,7 +31,7 @@ describe('Chronicle decision ledger integration', () => {
       type: 'military',
       headline: false,
       title: 'Reserve request accepted',
-      detail: expect.stringContaining('Elite Guard Brigade assigned to Vrs Drina Corps'),
+      detail: expect.stringContaining('Elite Guard Brigade assigned to Drina Corps'),
       metadata: expect.objectContaining({
         decisionRecordId: 'reserve:reserve:turn_12:vrs_drina_corps',
       }),

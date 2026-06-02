@@ -31,6 +31,10 @@ import { ReplayScrubber } from './replay/index.js';
 import { Z } from '../../shared/zIndex.js';
 import { CinematicVerdict } from './verdict/CinematicVerdict.js';
 import { t, useLocale, type MessageKey } from '../i18n';
+import {
+    getPlayerSafeDisplayLabel,
+    getPlayerSafeMilitaryFactionName,
+} from '../utils/playerSafeText.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Outcome Class & Condemnation Helpers (exported for testing)
@@ -507,7 +511,7 @@ export function VerdictScreen() {
                                     data-awwv-ghost-id={g.ghost_id}
                                     data-awwv-ghost-variant={g.variant}
                                     data-awwv-ghost-ring={g.ring_classification}>
-                                    <span className="text-text-primary font-mono">{g.ghost_id}</span>
+                                    <span className="text-text-primary">{getPlayerSafeDisplayLabel(g.ghost_id, 'Path not taken')}</span>
                                     <span className="text-text-secondary/70"> &mdash; {g.path}</span>
                                 </li>
                             ))}
@@ -783,13 +787,13 @@ export function FactionReport({
                         {daytonResult.territorial_packages_accepted.length > 0 && (
                             <div>
                                 <span className="text-text-primary font-semibold">{t('verdict.packagesAccepted')} </span>
-                                {daytonResult.territorial_packages_accepted.join(', ')}
+                                {daytonResult.territorial_packages_accepted.map(formatDaytonPackageLabel).join(', ')}
                             </div>
                         )}
                         {daytonResult.territorial_packages_rejected.length > 0 && (
                             <div>
                                 <span className="text-text-primary font-semibold">{t('verdict.packagesRejected')} </span>
-                                {daytonResult.territorial_packages_rejected.join(', ')}
+                                {daytonResult.territorial_packages_rejected.map(formatDaytonPackageLabel).join(', ')}
                             </div>
                         )}
                         {Object.keys(daytonResult.institutional_choices).length > 0 && (
@@ -804,14 +808,14 @@ export function FactionReport({
                             <div>
                                 <span className="text-text-primary font-semibold">{t('verdict.finalSplit')} </span>
                                 {Object.entries(daytonResult.final_territory_split)
-                                    .map(([k, v]) => `${k} ${(v as number).toFixed(1)}%`)
+                                    .map(([k, v]) => `${getPlayerSafeMilitaryFactionName(k, k)} ${(v as number).toFixed(1)}%`)
                                     .join(', ')}
                             </div>
                         )}
                         {daytonResult.patron_overrides_applied.length > 0 && (
                             <div className="text-faction-rs-subtle">
                                 <span className="font-semibold">{t('verdict.patronOverrides')} </span>
-                                {daytonResult.patron_overrides_applied.join(', ')}
+                                {daytonResult.patron_overrides_applied.map(formatDaytonPatronOverride).join(', ')}
                             </div>
                         )}
                     </div>
@@ -991,7 +995,7 @@ function FallbackGameOver({
                                 <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center gap-2">
                                         <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: color }} />
-                                        <span className="text-[12px] font-bold text-text-primary uppercase tracking-wide">{fid}</span>
+                                        <span className="text-[12px] font-bold text-text-primary uppercase tracking-wide">{getPlayerSafeMilitaryFactionName(fid, fid)}</span>
                                     </div>
                                     <span className="text-[11px] text-text-primary tabular-nums font-bold">{pct}%</span>
                                 </div>

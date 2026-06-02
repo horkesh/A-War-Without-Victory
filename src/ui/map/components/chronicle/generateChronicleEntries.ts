@@ -417,7 +417,7 @@ export function generateChronicleEntries(
             for (const event of summary.events_fired) {
                 const id = event.id || '';
                 if (decisionEventIds.has(id)) continue;
-                const title = event.text || event.id || 'Unknown event';
+                const title = getPlayerSafeDisplayLabel(event.text, 'Recorded event');
 
                 if (isDiplomaticEvent(id)) {
                     entries.push({
