@@ -1052,6 +1052,34 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.cards.find((c) => c.id === 'command:elite-deploy:reserve_enemy')).toBeUndefined();
   });
 
+  it('resolves the elite-deploy card title to the corps display name, not the raw corps id', () => {
+    const state = makeState({
+      formations: [
+        { id: 'arbih_1st_corps', faction: 'RBiH', name: '1st Corps', kind: 'corps' },
+      ] as LoadedGameState['formations'],
+      pendingReserveRequests: [
+        {
+          request_id: 'reserve_alpha',
+          corps_id: 'arbih_1st_corps',
+          faction: 'RBiH',
+          reason: 'sector_threat',
+          priority: 80,
+          severityBand: 'critical',
+          travel_hops: 3,
+          description: 'A sector is buckling.',
+          suggested_brigade_id: 'elite_guards',
+          turn_requested: 24,
+        },
+      ] as LoadedGameState['pendingReserveRequests'],
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const card = view.cards.find((c) => c.id === 'command:elite-deploy:reserve_alpha');
+
+    expect(card?.title).toContain('1st Corps');
+    expect(card?.title).not.toContain('arbih_1st_corps');
+  });
+
   it('always emits a single front-visit directive card (cost 10, availability gated in the component)', () => {
     const view = buildPresidentialDecisionRoomView({ state: makeState() });
     const card = view.cards.find((c) => c.id === 'command:front-visit');

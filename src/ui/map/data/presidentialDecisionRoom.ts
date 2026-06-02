@@ -764,7 +764,13 @@ function addCommandPersonnelCards(state: LoadedGameState, cards: CandidateCard[]
       id: `command:elite-deploy:${request.request_id}`,
       category: 'command',
       severity: request.severityBand === 'critical' ? 'critical' : 'warning',
-      title: t('decisionRoom.card.eliteDeploy.title', { corps: request.corps_id }),
+      // pendingReserveRequests carry only corps_id (no corps_name); resolve the
+      // display name from state.formations as the sibling replace_co / request_op
+      // cards do, so the title never leaks a raw corps id (e.g. arbih_1st_corps).
+      title: t('decisionRoom.card.eliteDeploy.title', {
+        corps:
+          state.formations?.find((f) => f.id === request.corps_id)?.name ?? request.corps_id,
+      }),
       explanation: request.why_needed ?? request.description,
       sourceOwner: t('decisionRoom.card.command.sourceOwner'),
       sourceLabel: t('decisionRoom.card.eliteDeploy.sourceLabel'),
