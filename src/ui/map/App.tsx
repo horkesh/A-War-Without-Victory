@@ -966,6 +966,12 @@ function App() {
       setSummaryOpen(false);
       return;
     }
+    if (item.navigationTarget.kind === 'enclave-dashboard') {
+      setEnclaveDashboardOpen(true);
+      setAppScreen('game');
+      setSummaryOpen(false);
+      return;
+    }
     openPresidentialDecisionRoomNavigationTarget(item.navigationTarget, useGameStore.getState());
     setAppScreen('game');
     setSummaryOpen(false);
@@ -978,6 +984,12 @@ function App() {
       setSummaryOpen(false);
       return;
     }
+    if (target.kind === 'enclave-dashboard') {
+      setEnclaveDashboardOpen(true);
+      setAppScreen('game');
+      setSummaryOpen(false);
+      return;
+    }
     openPresidentialDecisionRoomNavigationTarget(target, useGameStore.getState());
     setAppScreen('game');
     setSummaryOpen(false);
@@ -986,6 +998,11 @@ function App() {
   const openDecisionRoomTarget = (target: PresidentialDecisionRoomNavigationTarget) => {
     if (target.kind === 'counter-offer') {
       setSelectedCounterOfferId(target.counterOfferId);
+      setSummaryOpen(false);
+      return true;
+    }
+    if (target.kind === 'enclave-dashboard') {
+      setEnclaveDashboardOpen(true);
       setSummaryOpen(false);
       return true;
     }
@@ -1390,7 +1407,7 @@ function App() {
         }}
       />
       <RootErrorBoundary zone="army hq">
-        <ArmyHQModal />
+        <ArmyHQModal onDecisionRoomNavigateTarget={openDecisionRoomTarget} />
       </RootErrorBoundary>
       <ChronicleOverlay />
       <WrappedOverlay eventCatalog={eventCatalogFull} />

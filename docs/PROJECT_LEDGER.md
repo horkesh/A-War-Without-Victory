@@ -18320,3 +18320,15 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `src/ui/map/data/presidentialCategories.ts`, `tests/ui/presidential_categories.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-06-02] feat(ui): route enclave briefing cards to Enclave Dashboard
+
+**Type:** Player-facing Decision Room route correction. Command briefing items whose target is `enclaves` now produce Decision Room cards with an `enclave-dashboard` navigation target. App owns that target and opens the existing `EnclaveDashboard`; the same App-owned handler is passed into the Army HQ embedded Decision Room and the Warroom-native Decision Room host so enclave cards do not fall back to generic Army HQ briefing.
+
+**Determinism / scope:** UI route/presentation only. No sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, enclave mechanics, command-authority, or directive mechanics changed.
+
+**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui/presidential_decision_room.test.ts --reporter=dot` failed because an enclave briefing card still targeted `army-hq-tab`. Green focused proof: `node node_modules/vitest/vitest.mjs run tests/ui/presidential_decision_room.test.ts tests/ui_presidential_decision_room_wiring.test.ts --reporter=dot` passed 41/41. `npm.cmd run typecheck` passed.
+
+**Files:** `src/ui/map/App.tsx`, `src/ui/map/components/army_hq/ArmyHQModal.tsx`, `src/ui/map/data/presidentialDecisionRoom.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/presidential_decision_room.test.ts`, `tests/ui_presidential_decision_room_wiring.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---

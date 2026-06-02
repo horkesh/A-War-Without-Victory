@@ -390,6 +390,36 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
   });
 
+  it('routes enclave briefing cards to the dedicated enclave dashboard target', () => {
+    const state = makeState({
+      commandBriefing: {
+        headline: 'Enclave pressure rising.',
+        criticalCount: 1,
+        pendingCount: 1,
+        items: [
+          {
+            id: 'enclave-crisis',
+            kind: 'humanitarian',
+            severity: 'critical',
+            title: 'Enclave crisis',
+            detail: 'Staff reports a cut-off enclave under humanitarian pressure.',
+            actionLabel: 'Review enclaves',
+            target: { type: 'enclaves' },
+          },
+        ],
+      },
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const card = view.cards.find((entry) => entry.id === 'briefing:enclave-crisis');
+
+    expect(card).toMatchObject({
+      category: 'briefing',
+      actionLabel: 'Review enclaves',
+      navigationTarget: { kind: 'enclave-dashboard' },
+    });
+  });
+
   it('builds command-loop question lanes from the same priority card archive', () => {
     const state = makeState({
       presidentialReviewQueue: {

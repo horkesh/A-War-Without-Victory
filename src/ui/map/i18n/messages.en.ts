@@ -2724,6 +2724,7 @@ export const enMessages = {
     'decisionRoom.action.reviewQueue': 'Review Queue',
     'decisionRoom.action.personnel': 'Personnel',
     'decisionRoom.action.reviewBriefing': 'Review Briefing',
+    'decisionRoom.action.reviewEnclaves': 'Review Enclaves',
     'decisionRoom.action.openInbox': 'Open Inbox',
     'decisionRoom.action.reviewDossier': 'Review Dossier',
     'decisionRoom.action.reviewPushback': 'Review Pushback',

@@ -73,6 +73,7 @@ export type PresidentialDecisionRoomNavigationTarget =
   | { kind: 'army-hq-aftermath-record'; turn: number }
   | { kind: 'counter-offer'; counterOfferId: string }
   | { kind: 'army-hq-corps-briefing'; corpsId: string | null }
+  | { kind: 'enclave-dashboard' }
   | { kind: 'inbox' }
   | { kind: 'chronicle' }
   | { kind: 'none' };
@@ -351,6 +352,12 @@ function actionForBriefingItem(item: CommandBriefingItemView): Pick<CandidateCar
     return {
       actionLabel: t('decisionRoom.action.personnel'),
       navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
+    };
+  }
+  if (item.target.type === 'enclaves') {
+    return {
+      actionLabel: item.actionLabel ?? t('decisionRoom.action.reviewEnclaves'),
+      navigationTarget: { kind: 'enclave-dashboard' },
     };
   }
   return {
