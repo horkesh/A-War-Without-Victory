@@ -33,7 +33,7 @@ export interface CommandCardStripProps {
   /** Category to highlight when opened from a hotspot (null = direct Desk open). */
   initialCategoryId?: PresidentialCommandCategoryId | null;
   /**
-   * Invoked after the lens is requested — the host routes into the Army HQ
+   * Invoked after the lens is requested; the host opens the Warroom-native
    * Decision Room surface. Receives the chosen category.
    */
   onOpenCategory: (category: PresidentialCommandCategoryCount) => void;

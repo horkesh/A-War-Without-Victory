@@ -18296,3 +18296,15 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `src/ui/map/App.tsx`, `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx`, `tests/ui_presidential_decision_room_wiring.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-06-02] test(ui): prove all command cards route through Warroom host
+
+**Type:** Player-facing regression proof and route documentation cleanup for the Presidential Command Surface. `tests/ui/command_card_strip_accessibility.test.ts` now clicks all six command-category cards and verifies that each card calls the Warroom host callback while requesting the expected Decision Room lens. The stale `CommandCardStrip` source comment that still described Army HQ routing was corrected to the Warroom-native Decision Room host.
+
+**Determinism / scope:** UI test/source-comment/docs-only slice over existing behavior. No sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, command-authority, or directive mechanics changed.
+
+**Verification:** `node node_modules/vitest/vitest.mjs run tests/ui/command_card_strip_accessibility.test.ts --reporter=dot` passed 2/2; the new all-six route test passed immediately, confirming the route contract already existed before this documentation cleanup.
+
+**Files:** `src/ui/map/components/warroom/CommandCardStrip.tsx`, `tests/ui/command_card_strip_accessibility.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
