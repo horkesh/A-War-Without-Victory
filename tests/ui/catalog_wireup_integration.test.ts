@@ -84,7 +84,7 @@ beforeEach(() => {
 afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
-    useGameStore.setState({ loadedGameState: null });
+    useGameStore.setState({ loadedGameState: null, devMode: false });
 });
 
 // ---------------------------------------------------------------------------
@@ -129,6 +129,11 @@ describe('Phase H Packet 7 — Catalog Wire-Up Integration', () => {
     });
 
     it('EventDecisionModal renders Decision Context when supplied catalog + state', () => {
+        // The family/source taxonomy row is a developer-only diagnostic gated
+        // behind the `devMode` store flag (QA Batch E), so enable DEV mode
+        // before asserting it renders (player default hides it — covered in the
+        // dedicated decision-context unit suite).
+        useGameStore.setState({ devMode: true });
         const catalog = new Map<string, EventDefinition>([
             [FAKE_FOUNDATIONAL_EVENT.id, FAKE_FOUNDATIONAL_EVENT],
         ]);

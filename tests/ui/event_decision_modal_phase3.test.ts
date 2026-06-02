@@ -55,7 +55,7 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(screen.getByText('Political')).toBeTruthy();
     expect(screen.getByText('BB1 source packet')).toBeTruthy();
     expect(screen.getByText('Historical default')).toBeTruthy();
-    expect(screen.getByText(/AI historical path for calibration/)).toBeTruthy();
+    expect(screen.getByText(/historically attested choice/)).toBeTruthy();
     expect(screen.getByText('Keep the institutions aligned with the existing wartime project.')).toBeTruthy();
     expect(screen.getByText('Croatian Republic of Herzeg-Bosnia morale +4')).toBeTruthy();
     expect(screen.getByText('Croatian Republic of Herzeg-Bosnia patron pressure -2')).toBeTruthy();
@@ -106,7 +106,7 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(screen.getByText('Staff recommendation')).toBeTruthy();
     expect(screen.getByText(/not a historical default and does not control bot calibration/i)).toBeTruthy();
     expect(screen.queryByText('Historical default')).toBeNull();
-    expect(screen.queryByText(/AI historical path for calibration/)).toBeNull();
+    expect(screen.queryByText(/historically attested choice/)).toBeNull();
   });
 
   it('renders future-consequence cards only for response options that include branch metadata', () => {

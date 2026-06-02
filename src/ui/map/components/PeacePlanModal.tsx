@@ -35,6 +35,11 @@ const INSTITUTIONAL_LABELS: Record<string, string> = {
     '10_provinces': '10 Decentralized Provinces',
 };
 
+const PEACE_RESPONSE_LABELS: Record<string, string> = {
+    accepted: 'Accepted',
+    rejected: 'Rejected',
+};
+
 const FACTION_ORDER = ['RBiH', 'RS', 'HRHB'] as const;
 type PeacePlanFaction = typeof FACTION_ORDER[number];
 
@@ -192,12 +197,12 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                         {otherFactionResponses.map(([faction, response]) => (
                             <div key={faction} className="flex items-center justify-between text-[12px]">
                                 <span className="text-[#2a2016]">{getPlayerSafePoliticalFactionName(faction)}</span>
-                                <span className={`font-bold uppercase text-[11px] px-2 py-0.5 rounded border ${
+                                <span className={`font-bold text-[11px] px-2 py-0.5 rounded border ${
                                     response === 'accepted'
                                         ? 'text-[#2a6a2a] bg-[#d0e8d0] border-[#2a6a2a]/30'
                                         : 'text-[#8a2a2a] bg-[#e8d0d0] border-[#8a2a2a]/30'
                                 }`}>
-                                    {response}
+                                    {PEACE_RESPONSE_LABELS[response] ?? response}
                                 </span>
                             </div>
                         ))}

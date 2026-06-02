@@ -12,11 +12,31 @@
 
 import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
-import { EventDecisionModal } from '../../src/ui/map/components/EventDecisionModal.js';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { EventDefinition } from '../../src/sim/events/event_types.js';
 import type { GameState, CausalityLogEntry } from '../../src/state/game_state.js';
 
+// The Decision Context family/source + ancestry rows are engine-internal
+// designer/debug diagnostics, gated behind the `devMode` store flag (mirrors
+// PR #130/#133, QA Batch E). Default `devMode: true` so the diagnostics render;
+// the player-default hidden case flips this to false explicitly.
+let storeState: Record<string, unknown> = { devMode: true };
+
+vi.mock('../../src/ui/map/store/gameStore', () => ({
+    useGameStore: Object.assign(
+        (selector: (state: Record<string, unknown>) => unknown) => selector(storeState),
+        {
+            getState: () => storeState,
+            setState: (partial: Record<string, unknown>) => { Object.assign(storeState, partial); },
+            subscribe: () => () => {},
+        },
+    ),
+}));
+
+// @ts-expect-error TS1378: top-level await is supported by the vitest runtime.
+const { EventDecisionModal } = await import('../../src/ui/map/components/EventDecisionModal');
+
+beforeEach(() => { storeState = { devMode: true }; });
 afterEach(() => cleanup());
 
 const BASE_DECISION = {
@@ -111,10 +131,55 @@ describe('EventDecisionModal Decision Context (Phase H Packet 3)', () => {
             state,
         }));
 
-        // Sorted via strictCompare; both ancestor ids should appear comma-separated.
+        // Ancestor ids absent from the catalog are humanized (raw slugs never
+        // surface). Both ancestors appear comma-separated.
         const ancestryRow = screen.getByText(/Ancestry:/);
-        expect(ancestryRow.textContent).toContain('foundational_event_a');
-        expect(ancestryRow.textContent).toContain('foundational_event_b');
+        expect(ancestryRow.textContent).toContain('Foundational Event A');
+        expect(ancestryRow.textContent).toContain('Foundational Event B');
+        // Raw slug form must not leak.
+        expect(ancestryRow.textContent).not.toContain('foundational_event_a');
+    });
+
+    it('resolves ancestry ids to catalog titles when the ancestor is in the catalog', () => {
+        const eventDef = buildEventDef();
+        const ancestorDef = buildEventDef({ id: 'foundational_event_a', title: 'The Founding Crisis' });
+        const catalog = new Map<string, EventDefinition>([
+            [eventDef.id, eventDef],
+            [ancestorDef.id, ancestorDef],
+        ]);
+        const state = buildStateWithAncestry(eventDef.id, ['foundational_event_a']);
+
+        render(React.createElement(EventDecisionModal, {
+            decision: BASE_DECISION,
+            onRespond: () => undefined,
+            eventCatalog: catalog,
+            state,
+        }));
+
+        const ancestryRow = screen.getByText(/Ancestry:/);
+        expect(ancestryRow.textContent).toContain('The Founding Crisis');
+        expect(ancestryRow.textContent).not.toContain('foundational_event_a');
+    });
+
+    it('hides the family/source + ancestry diagnostics when devMode is false (player default — no engine-internal leak)', () => {
+        storeState = { devMode: false };
+        const eventDef = buildEventDef();
+        const catalog = new Map<string, EventDefinition>([[eventDef.id, eventDef]]);
+        const state = buildStateWithAncestry(eventDef.id, ['foundational_event_a', 'foundational_event_b']);
+
+        render(React.createElement(EventDecisionModal, {
+            decision: BASE_DECISION,
+            onRespond: () => undefined,
+            eventCatalog: catalog,
+            state,
+        }));
+
+        // Diagnostics are gated; the player must not see the family taxonomy,
+        // source tier, or causal ancestry chain.
+        expect(screen.queryByText(/Family:/)).toBeNull();
+        expect(screen.queryByText(/Ancestry:/)).toBeNull();
+        // But the player-facing source dossier excerpt stays visible.
+        expect(screen.getByText(/Source dossier:/)).toBeTruthy();
     });
 
     it('omits the Decision Context section entirely when neither eventCatalog nor state is provided (graceful degradation)', () => {
