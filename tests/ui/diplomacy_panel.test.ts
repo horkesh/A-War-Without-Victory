@@ -97,6 +97,26 @@ describe('DiplomacyPanel', () => {
         expect(screen.getByText('Reduce Sarajevo siege visibility')).toBeTruthy();
     });
 
+    it('renders the patron-confidence gauge and a defiance-cut line under Your Patron', () => {
+        render(createElement(DiplomacyPanel, {
+            view: makeView({
+                patronConfidence: { value: 38, band: 'low' },
+                patronDefianceCuts: { count: 1, latestCutFraction: 0.3, latestTurn: 44, latestSupportAfter: 0.5 },
+            }),
+            onClose: vi.fn(),
+        }));
+
+        expect(screen.getByText('Patron confidence')).toBeTruthy();
+        expect(screen.getByText(/38 \/ 100 \(Low\)/)).toBeTruthy();
+        // Sober, factual defiance line — never celebratory.
+        expect(screen.getByText(/Your defiance has cost 30% of materiel \(turn 44\); support fell to 50%\./)).toBeTruthy();
+    });
+
+    it('omits the gauge when no patron-confidence or defiance data is present', () => {
+        render(createElement(DiplomacyPanel, { view: makeView(), onClose: vi.fn() }));
+        expect(screen.queryByText('Patron confidence')).toBeNull();
+    });
+
     it('renders the patron-absent empty state without a patron stance', () => {
         render(createElement(DiplomacyPanel, {
             view: makeView({

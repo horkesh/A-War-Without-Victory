@@ -431,10 +431,43 @@ export interface DiplomacyNeedleHintView {
     confidence: PlayerKnowledgeConfidence;
 }
 
+/**
+ * Patron-confidence standing for the player faction. Pure read of the
+ * `patron_confidence` strategic dimension (0..100, 50 = neutral). Display-only;
+ * absent when the player has no faction or the dimension store is unpopulated.
+ */
+export interface PatronConfidenceView {
+    /** Effective patron-confidence value, 0..100 (50 = neutral). */
+    value: number;
+    /** Qualitative band derived from `value`. */
+    band: 'high' | 'steady' | 'neutral' | 'low' | 'collapsed';
+}
+
+/**
+ * Compact summary of realized patron-defiance supply cuts for the PLAYER faction,
+ * read from `state.military.patron_defiance_supply_cuts` (#117). Emergent-only;
+ * absent (undefined) when there are no player-faction cuts (historical/calibration
+ * mode never writes these). Display-only — never a reward framing.
+ */
+export interface PatronDefianceCutsView {
+    /** Number of realized cuts recorded for the player faction. */
+    count: number;
+    /** Most-recent cut fraction (0..1) by turn. */
+    latestCutFraction: number;
+    /** Turn of the most-recent cut. */
+    latestTurn: number;
+    /** material_support_level after the most-recent cut (0..1). */
+    latestSupportAfter: number;
+}
+
 export interface DiplomacyView {
     playerFaction: string | null;
     hasSignals: boolean;
     patronStance?: DiplomacyActorView;
+    /** Player-faction patron-confidence standing (#112/#117 feedback loop). */
+    patronConfidence?: PatronConfidenceView;
+    /** Player-faction realized defiance supply cuts (#117). Absent when none. */
+    patronDefianceCuts?: PatronDefianceCutsView;
     activeProposals: DiplomacyProposalView[];
     externalActors: DiplomacyActorView[];
     pressureReasons: DiplomacyPressureReasonView[];

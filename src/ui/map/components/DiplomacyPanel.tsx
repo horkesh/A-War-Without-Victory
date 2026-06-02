@@ -5,9 +5,66 @@ import type {
     DiplomacyProposalView,
     DiplomacyTimelineEntryView,
     DiplomacyView,
+    PatronConfidenceView,
+    PatronDefianceCutsView,
     PlayerKnowledgeConfidence,
 } from '../data/types';
-import { t } from '../i18n';
+import { t, type MessageKey } from '../i18n';
+
+const CONFIDENCE_BAND_KEY: Record<PatronConfidenceView['band'], MessageKey> = {
+    high: 'patronRelations.confidenceBand.high',
+    steady: 'patronRelations.confidenceBand.steady',
+    neutral: 'patronRelations.confidenceBand.neutral',
+    low: 'patronRelations.confidenceBand.low',
+    collapsed: 'patronRelations.confidenceBand.collapsed',
+};
+
+function PatronConfidenceGauge({ confidence, cuts }: { confidence?: PatronConfidenceView; cuts?: PatronDefianceCutsView }) {
+    if (!confidence && !cuts) return null;
+    // Gauge tone: above neutral (50) is steadier (amber); below is strained (red).
+    const value = confidence?.value ?? 50;
+    const fillPct = Math.max(0, Math.min(100, value));
+    const tone = value >= 55 ? 'bg-amber-400/70' : value >= 45 ? 'bg-amber-400/45' : 'bg-red-400/60';
+    const bandLabel = confidence ? t(CONFIDENCE_BAND_KEY[confidence.band]) : '';
+    return (
+        <div className="mt-2 rounded border border-white/10 bg-black/20 p-3">
+            {confidence ? (
+                <>
+                    <div className="flex items-center justify-between gap-3">
+                        <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-text-secondary">
+                            {t('patronRelations.confidenceLabel')}
+                        </span>
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-[0.12em] text-text-primary">
+                            {t('patronRelations.confidenceReadout', { value: Math.round(confidence.value), band: bandLabel })}
+                        </span>
+                    </div>
+                    <div className="mt-2 h-1.5 w-full overflow-hidden rounded bg-white/10" role="presentation">
+                        <div className={`h-full ${tone}`} style={{ width: `${fillPct}%` }} />
+                    </div>
+                    <p className="mt-2 text-[10px] leading-4 text-text-secondary">
+                        {t('patronRelations.confidenceHelp')}
+                    </p>
+                </>
+            ) : null}
+            {cuts ? (
+                <p className={`text-[11px] leading-5 text-red-300 ${confidence ? 'mt-2 border-t border-white/8 pt-2' : ''}`}>
+                    {cuts.count > 1
+                        ? t('patronRelations.defianceCutMulti', {
+                            count: cuts.count,
+                            pct: Math.round(cuts.latestCutFraction * 100),
+                            turn: cuts.latestTurn,
+                            support: Math.round(cuts.latestSupportAfter * 100),
+                        })
+                        : t('patronRelations.defianceCutSingle', {
+                            pct: Math.round(cuts.latestCutFraction * 100),
+                            turn: cuts.latestTurn,
+                            support: Math.round(cuts.latestSupportAfter * 100),
+                        })}
+                </p>
+            ) : null}
+        </div>
+    );
+}
 
 interface DiplomacyPanelProps {
     view: DiplomacyView;
@@ -170,6 +227,7 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
                                 {t('patronRelations.headline')}
                             </div>
                             <ActorRow actor={view.patronStance} primary />
+                            <PatronConfidenceGauge confidence={view.patronConfidence} cuts={view.patronDefianceCuts} />
                         </section>
                     ) : (
                         <div className="rounded border border-white/10 bg-black/20 p-4">
