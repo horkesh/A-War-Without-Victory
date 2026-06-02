@@ -8,6 +8,7 @@ import { useGameStore } from '../../store/gameStore';
 import { OpportunityLedgerPanel } from './OpportunityLedgerPanel';
 import { TurnAftermathRecordsPanel } from './TurnAftermathRecordsPanel';
 import { DecisionConsequenceRecordsPanel } from './DecisionConsequenceRecordsPanel';
+import { TerritoryOverTimeChart } from '../TerritoryOverTimeChart';
 import { t, type MessageKey } from '../../i18n';
 
 const SUB_TABS = [
@@ -25,6 +26,13 @@ export function RecordsContent() {
 
     return (
         <div>
+            {/* Territory-over-time trend chart — re-hosted from the retired
+                StrategicDashboard. The War's Record surface owns the campaign
+                trend; this is the player-reachable home for the chart. */}
+            <div className="mb-4 rounded-md border border-panel-border bg-panel-card px-3 py-3">
+                <TerritoryOverTimeChart />
+            </div>
+
             {/* Sub-tab selector */}
             <div className="flex gap-1.5 mb-4">
                 {SUB_TABS.map(({ id, labelKey }) => (

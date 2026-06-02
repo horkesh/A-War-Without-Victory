@@ -314,9 +314,6 @@ export interface GameStore {
   flashOsid: string | null;
   setFlashOsid: (osid: string | null) => void;
 
-  /** Whether the Strategic Dashboard overlay is open. */
-  strategicDashboardOpen: boolean;
-  setStrategicDashboardOpen: (open: boolean) => void;
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -799,7 +796,4 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   flashOsid: null,
   setFlashOsid: (osid) => set({ flashOsid: osid }),
-
-  strategicDashboardOpen: false,
-  setStrategicDashboardOpen: (open) => set({ strategicDashboardOpen: open }),
 }));

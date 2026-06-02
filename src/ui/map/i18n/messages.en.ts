@@ -1719,7 +1719,12 @@ export const enMessages = {
     'attackConfirm.odds': 'Odds',
     'statusStrip.less': 'LESS',
     'statusStrip.more': '+MORE',
+    // statusStrip.openStrategicDashboard retained as an orphan key: the
+    // StrategicDashboard component was retired, but messages.bcs.ts still keys
+    // off MessageKey (keyof enMessages); removing it would break the BCS type
+    // contract. The live status-strip bar now uses statusStrip.openWarRecord.
     'statusStrip.openStrategicDashboard': 'Open Strategic Dashboard',
+    'statusStrip.openWarRecord': "Open The War's Record",
     'statusStrip.territoryControlTitle': 'Territory control (area-weighted)',
     'statusStrip.friendlyPct': 'Friendly {pct}%',
     'statusStrip.hostileHeldPct': 'Hostile-held {pct}%',
