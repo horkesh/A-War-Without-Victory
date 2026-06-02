@@ -5,6 +5,7 @@ import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
 import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
+import { t } from '../i18n';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
 
 interface CounterOfferModalProps {
@@ -18,15 +19,15 @@ function stripCounterOfferPrefix(offerId: string): string {
 }
 
 function responseLabel(response: string): string {
-  if (response === 'conditional_accept') return 'Conditional accept';
-  if (response === 'counter') return 'Counter proposal';
-  if (response === 'accept') return 'Accept';
-  if (response === 'reject') return 'Reject';
+  if (response === 'conditional_accept') return t('decisionModal.counterOffer.responseConditional');
+  if (response === 'counter') return t('decisionModal.counterOffer.responseCounter');
+  if (response === 'accept') return t('decisionModal.counterOffer.responseAccept');
+  if (response === 'reject') return t('decisionModal.counterOffer.responseReject');
   return response.replace(/[_-]+/g, ' ');
 }
 
 function formatInstitution(value: string | undefined): string {
-  if (!value) return 'Not specified';
+  if (!value) return t('decisionModal.counterOffer.notSpecified');
   return value.replace(/[_-]+/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
@@ -37,10 +38,10 @@ export function CounterOfferModal({ offerId, state, onClose }: CounterOfferModal
   const offer = state?.pendingCounterOffers?.find((entry) => entry.id === rawId) ?? null;
   const authorLabel = offer
     ? offer.author === 'PLAYER'
-      ? 'your delegation'
+      ? t('decisionModal.counterOffer.yourDelegation')
       : getPlayerSafePoliticalFactionName(offer.author)
     : '';
-  const title = offer ? `Counter-offer from ${authorLabel}` : 'Counter-offer';
+  const title = offer ? t('decisionModal.counterOffer.titleFrom', { author: authorLabel }) : t('decisionModal.counterOffer.titleFallback');
   const headerImage = getDecisionHeaderForFamily('counter_offer');
 
   const submitAsCounter = async () => {
@@ -71,13 +72,13 @@ export function CounterOfferModal({ offerId, state, onClose }: CounterOfferModal
       {headerImage && (
         <DecisionModalImageHeader
           imageUrl={headerImage}
-          imageAlt="Negotiation channel"
-          eyebrow="Negotiation channel"
+          imageAlt={t('decisionModal.counterOffer.imageAlt')}
+          eyebrow={t('decisionModal.counterOffer.eyebrow')}
           title={title}
           titleId="counter-offer-modal-title"
           description={offer
-            ? 'A cited counter-proposal is on your desk. Review the territorial split, institutional model, and rider before deciding whether to answer through your own counter-proposal.'
-            : 'This counter-offer is no longer pending.'}
+            ? t('decisionModal.counterOffer.descriptionPending')
+            : t('decisionModal.counterOffer.descriptionResolved')}
         />
       )}
 
@@ -85,21 +86,21 @@ export function CounterOfferModal({ offerId, state, onClose }: CounterOfferModal
         <div className="space-y-4 px-5 py-4 text-[12px]">
           <div className="grid gap-2 sm:grid-cols-3">
             <div className="border border-panel-border bg-panel-card px-3 py-2">
-              <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Plan</div>
+              <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionModal.counterOffer.plan')}</div>
               <div className="mt-1 text-[12px] font-bold text-text-primary">{offer.planName}</div>
             </div>
             <div className="border border-panel-border bg-panel-card px-3 py-2">
-              <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Response</div>
+              <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionModal.counterOffer.response')}</div>
               <div className="mt-1 text-[12px] font-bold text-text-primary">{responseLabel(offer.response)}</div>
             </div>
             <div className="border border-panel-border bg-panel-card px-3 py-2">
-              <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Chain</div>
-              <div className="mt-1 text-[12px] font-bold text-text-primary">Depth {offer.chainDepth}</div>
+              <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionModal.counterOffer.chain')}</div>
+              <div className="mt-1 text-[12px] font-bold text-text-primary">{t('decisionModal.counterOffer.chainDepth', { depth: offer.chainDepth })}</div>
             </div>
           </div>
 
           <div className="border border-panel-border bg-panel-card px-3 py-3">
-            <div className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Territorial split</div>
+            <div className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionModal.counterOffer.territorialSplit')}</div>
             <div className="grid gap-2 sm:grid-cols-3">
               {(['RBiH', 'RS', 'HRHB'] as const).map((faction) => (
                 <div key={faction} className="rounded border border-white/10 bg-black/20 px-2 py-2">
@@ -114,18 +115,18 @@ export function CounterOfferModal({ offerId, state, onClose }: CounterOfferModal
 
           <div className="grid gap-2 sm:grid-cols-2">
             <div className="border border-panel-border bg-panel-card px-3 py-3">
-              <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Institutional model</div>
+              <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionModal.counterOffer.institutionalModel')}</div>
               <div className="mt-1 text-[12px] text-text-secondary">{formatInstitution(offer.institutionalModel)}</div>
             </div>
             <div className="border border-panel-border bg-panel-card px-3 py-3">
-              <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Source</div>
-              <div className="mt-1 text-[12px] text-text-secondary">{offer.sourceCitation || 'No citation provided'}</div>
+              <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionModal.counterOffer.source')}</div>
+              <div className="mt-1 text-[12px] text-text-secondary">{offer.sourceCitation || t('decisionModal.counterOffer.noCitation')}</div>
             </div>
           </div>
 
           {offer.rider && (
             <div className="border border-accent-gold/25 bg-accent-gold/8 px-3 py-3">
-              <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-accent-gold">Rider</div>
+              <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-accent-gold">{t('decisionModal.counterOffer.rider')}</div>
               <div className="mt-1 text-[12px] text-text-secondary">{offer.rider}</div>
             </div>
           )}
@@ -138,7 +139,7 @@ export function CounterOfferModal({ offerId, state, onClose }: CounterOfferModal
           onClick={onClose}
           className="border border-panel-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary"
         >
-          Review later
+          {t('decisionModal.counterOffer.reviewLater')}
         </button>
         <button
           type="button"
@@ -146,7 +147,7 @@ export function CounterOfferModal({ offerId, state, onClose }: CounterOfferModal
           disabled={!offer}
           className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-accent-gold disabled:opacity-40"
         >
-          Submit as counter-proposal
+          {t('decisionModal.counterOffer.submit')}
         </button>
       </div>
     </Modal>

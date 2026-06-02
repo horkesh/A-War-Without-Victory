@@ -4,6 +4,7 @@ import type { LoadedGameState } from '../data/types';
 import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
+import { t } from '../i18n';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
 
 interface IntelligenceBriefModalProps {
@@ -45,19 +46,19 @@ export function IntelligenceBriefModal({ notificationId, state, onClose }: Intel
       {headerImage && (
         <DecisionModalImageHeader
           imageUrl={headerImage}
-          imageAlt="Intelligence Channel"
-          eyebrow="Intelligence Channel"
-          title={notification?.headline ?? 'Intelligence brief'}
+          imageAlt={t('decisionModal.intel.imageAlt')}
+          eyebrow={t('decisionModal.intel.eyebrow')}
+          title={notification?.headline ?? t('decisionModal.intel.titleFallback')}
           titleId="intelligence-brief-modal-title"
           accentClassName="text-sky-300"
         />
       )}
       <div className="px-5 py-4 text-[12px] leading-relaxed text-text-secondary">
-        {notification?.body ?? 'This intelligence brief is no longer pending.'}
+        {notification?.body ?? t('decisionModal.intel.bodyFallback')}
       </div>
       <div className="flex justify-end gap-2 border-t border-panel-border bg-black/20 px-5 py-3">
-        <button type="button" onClick={onClose} className="border border-panel-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary">Close</button>
-        <button type="button" onClick={acknowledge} disabled={!notification} className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-accent-gold disabled:opacity-40">Acknowledge</button>
+        <button type="button" onClick={onClose} className="border border-panel-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary">{t('decisionModal.intel.close')}</button>
+        <button type="button" onClick={acknowledge} disabled={!notification} className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-accent-gold disabled:opacity-40">{t('decisionModal.intel.acknowledge')}</button>
       </div>
     </Modal>
   );
