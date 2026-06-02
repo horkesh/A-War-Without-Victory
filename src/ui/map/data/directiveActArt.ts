@@ -1,0 +1,74 @@
+/**
+ * directiveActArt — lever → 16:9 dossier-header art for the Decision Room
+ * DirectiveCard act surface (Presidential Command Surface design §9 act layer).
+ *
+ * The art already ships: the `act_*` ids map to existing
+ * `presidential_desk/consequence_stills/*.webp` stills (wired in
+ * CommandCard's `COMMAND_CARD_DESK_ASSET`). This module is the small, explicit,
+ * owner-editable table that says WHICH still each War-Direction lever shows as its
+ * directive-card header. Resolution goes through the SHARED
+ * `presidentialCommandArt` resolver (act_* id → consequence_stills basename), so
+ * the glob pattern is never duplicated.
+ *
+ * Graceful fallback: a lever absent from the table (or whose mapped still fails to
+ * resolve) returns null and the DirectiveCard renders its existing text-only
+ * header — the card always works with zero art.
+ *
+ * Pure presentation: no engine/state touch, no Math.random/Date.now.
+ *
+ * Canonical owner: src/ui/map/data/directiveActArt.ts
+ */
+
+import type { PresidentialDecisionRoomDirective } from './presidentialDecisionRoom';
+import {
+  resolveCommandCardOverride,
+  resolveDeskAssetByBasename,
+} from './presidentialCommandArt';
+import { COMMAND_CARD_DESK_ASSET } from '../components/warroom/CommandCard';
+
+type DirectiveLever = PresidentialDecisionRoomDirective['lever'];
+
+/**
+ * Explicit, owner-editable lever → command-card `act_*` id map.
+ *
+ * Each id resolves (via the shared resolver) to its mapped 16:9 consequence-still:
+ *   - act_authorize_op    → consequence_reserve_deployment (reserve / op art)
+ *   - act_replace_commander → consequence_personnel_change (officer art)
+ *   - act_front_visit     → consequence_public_pressure (public-pressure art)
+ *
+ * Operation levers (request/force/authorize/stop/elite-deploy) all read as
+ * "commit forces" → the reserve-deployment still. replace_co → personnel change.
+ * front_visit → public pressure. Re-map by editing this table; ids absent here
+ * fall back to the text-only header.
+ */
+export const DIRECTIVE_LEVER_TO_ACT_ID: Readonly<Record<DirectiveLever, string>> = {
+  request_op: 'act_authorize_op',
+  force_launch: 'act_authorize_op',
+  authorize_op: 'act_authorize_op',
+  stop_op: 'act_authorize_op',
+  elite_deploy: 'act_authorize_op',
+  replace_co: 'act_replace_commander',
+  front_visit: 'act_front_visit',
+};
+
+/**
+ * Resolve the 16:9 dossier-header art URL for a directive lever.
+ *
+ * Precedence: per-id override (`command_cards/<act_id>.webp`) → mapped
+ * consequence-still → null (caller renders its text-only header).
+ */
+export function resolveDirectiveActArt(lever: DirectiveLever): string | null {
+  const actId = DIRECTIVE_LEVER_TO_ACT_ID[lever];
+  if (!actId) return null;
+  // 1. Per-id override wins (drop a command_cards/<act_id>.webp in).
+  const override = resolveCommandCardOverride(actId);
+  if (override) return override;
+  // 2. Mapped consequence-still basename for this act id.
+  const basename = COMMAND_CARD_DESK_ASSET[actId];
+  if (basename) {
+    const shared = resolveDeskAssetByBasename(basename);
+    if (shared) return shared;
+  }
+  // 3. No art — caller falls back to the text-only header.
+  return null;
+}

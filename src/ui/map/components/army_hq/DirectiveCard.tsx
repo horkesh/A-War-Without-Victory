@@ -30,6 +30,7 @@ import {
   plainReason,
   type DirectiveObjectionView,
 } from '../../data/opDirectiveObjection';
+import { resolveDirectiveActArt } from '../../data/directiveActArt';
 
 interface DirectiveCardProps {
   directive: PresidentialDecisionRoomDirective;
@@ -282,20 +283,67 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
 
   const tgt = targetLabel(directive);
 
+  // §9 act-layer dossier header: a 16:9 period still chosen by the directive's
+  // lever (reusing the existing consequence_stills art via the shared resolver).
+  // When nothing resolves the card renders its text-only header below — the act
+  // surface always works with zero art.
+  const headerArt = resolveDirectiveActArt(directive.lever);
+
   return (
     <section
-      className="mt-2 rounded border border-amber-400/30 bg-amber-400/[0.06] px-3 py-2"
+      className="mt-2 overflow-hidden rounded border border-amber-400/30 bg-amber-400/[0.06]"
       aria-label="Issue War-Direction directive"
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-amber-300">
-            Issue directive
-          </div>
-          <div className="mt-0.5 truncate text-[11px] font-bold text-text-primary">
-            {leverLabel(directive.lever)}{tgt ? ` · ${tgt}` : ''}
+      {/* 16:9 dossier-header band — period still + bottom-gradient title-safe area
+          (mirrors the DecisionCard/CommandCard object-cover + gradient idiom so the
+          lever/target caption stays legible over any photo). Omitted entirely when
+          no art resolves; the text header below carries the same information. */}
+      {headerArt && (
+        <div
+          data-testid="directive-card-header-art"
+          className="relative aspect-video w-full overflow-hidden border-b border-amber-400/25 bg-black/40"
+        >
+          <img
+            src={headerArt}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 h-2/3"
+            style={{
+              background:
+                'linear-gradient(to top, rgba(8,7,5,0.92), rgba(8,7,5,0.5) 45%, rgba(8,7,5,0))',
+            }}
+          />
+          <div className="absolute inset-x-0 bottom-0 p-2">
+            <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
+              Issue directive
+            </div>
+            <div className="mt-0.5 truncate text-[11px] font-bold text-text-primary drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
+              {leverLabel(directive.lever)}{tgt ? ` · ${tgt}` : ''}
+            </div>
           </div>
         </div>
+      )}
+
+      <div className="px-3 py-2">
+      {/* Header row. When the dossier image renders above, its overlay already
+          carries the "Issue directive" / lever title, so here we keep only the
+          cost badge (right-aligned). With no art the original text header carries
+          the full title — graceful fallback, identical information. */}
+      <div className={`flex items-start gap-2 ${headerArt ? 'justify-end' : 'justify-between'}`}>
+        {!headerArt && (
+          <div className="min-w-0">
+            <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-amber-300">
+              Issue directive
+            </div>
+            <div className="mt-0.5 truncate text-[11px] font-bold text-text-primary">
+              {leverLabel(directive.lever)}{tgt ? ` · ${tgt}` : ''}
+            </div>
+          </div>
+        )}
         <span className="shrink-0 rounded border border-amber-400/35 bg-amber-400/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.08em] text-amber-300">
           {cost === 0 ? 'Free' : `${cost} authority`}
         </span>
@@ -406,6 +454,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
           </button>
         );
       })()}
+      </div>
     </section>
   );
 }
