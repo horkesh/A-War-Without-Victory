@@ -1366,8 +1366,12 @@ function App() {
         state={loadedGameState}
         onClose={() => setSelectedCounterOfferId(null)}
       />
-      {/* v0.5.0: Dayton Negotiation Modal — blocks when Dayton trigger fires */}
-      {loadedGameState?.pendingDayton && !loadedGameState?.gameOver && (
+      {/* v0.5.0: Dayton Negotiation Modal — blocks when Dayton trigger fires.
+          Task #80 — gated on `appScreen !== 'mainMenu'` (same contract as the
+          EventDecision / PeacePlan / EventModal auto-pop guards): an auto-loaded
+          save sitting at the Dayton step must not cover the boot Main Menu with
+          this non-dismissible modal. Shows once the player is past the menu. */}
+      {appScreen !== 'mainMenu' && loadedGameState?.pendingDayton && !loadedGameState?.gameOver && (
         <DaytonNegotiationModal dayton={loadedGameState.pendingDayton} />
       )}
       <PeaceWarTransitionOverlay />

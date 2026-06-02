@@ -132,6 +132,9 @@ describe('App boot — Main Menu first, faction choice menu-only (#80)', () => {
         // The PeacePlanModal render is gated so a pending plan does not pop over
         // the boot menu either.
         expect(app).toContain("{appScreen !== 'mainMenu' && showPeacePlanModal && pendingPeacePlan && (");
+        // The (non-dismissible) DaytonNegotiationModal is likewise gated so an
+        // auto-loaded save at the Dayton step does not cover the boot menu.
+        expect(app).toContain("{appScreen !== 'mainMenu' && loadedGameState?.pendingDayton && !loadedGameState?.gameOver && (");
     });
 });
 
