@@ -10,7 +10,12 @@ import { buildPlayerSupplyVisibility } from './playerSupplyVisibility';
 import { buildPlayerArmyCoPushbackVisibility } from './playerArmyCoPushbackVisibility';
 import { t, type MessageKey } from '../i18n';
 import { getDecisionSurface } from './decisionSurfaceRegistry';
-import { STOP_OP_COST } from '../utils/commandAuthority';
+import {
+  STOP_OP_COST,
+  REPLACE_CO_COST,
+  ELITE_DEPLOY_COST,
+  FRONT_VISIT_COST,
+} from '../utils/commandAuthority';
 
 /**
  * War-Direction directive the president can ISSUE from a Decision Room card
@@ -26,8 +31,18 @@ import { STOP_OP_COST } from '../utils/commandAuthority';
  * officer is free).
  */
 export interface PresidentialDecisionRoomDirective {
-  lever: 'request_op' | 'stop_op' | 'force_launch' | 'authorize_op';
-  /** Corps the directive acts on (request/stop/force). Absent for authorize-op. */
+  lever:
+    | 'request_op'
+    | 'stop_op'
+    | 'force_launch'
+    | 'authorize_op'
+    | 'replace_co'
+    | 'elite_deploy'
+    | 'front_visit';
+  /**
+   * Corps the directive acts on (request/stop/force/replace_co/elite_deploy).
+   * Absent for authorize-op and front-visit (the latter targets a front, not a corps).
+   */
   corpsId?: string;
   /** Command Authority cost (authorize-op = 0). */
   cost: number;
@@ -41,6 +56,7 @@ export type PresidentialDecisionRoomCategory =
   | 'opportunity'
   | 'operational'
   | 'briefing'
+  | 'command'
   | 'turn'
   | 'cost'
   | 'memory';
@@ -218,9 +234,10 @@ const CATEGORY_RANK: Record<PresidentialDecisionRoomCategory, number> = {
   opportunity: 2,
   operational: 3,
   briefing: 4,
-  turn: 5,
-  cost: 6,
-  memory: 7,
+  command: 5,
+  turn: 6,
+  cost: 7,
+  memory: 8,
 };
 
 const CATEGORY_LABEL_KEY: Record<PresidentialDecisionRoomCategory, MessageKey> = {
@@ -229,6 +246,7 @@ const CATEGORY_LABEL_KEY: Record<PresidentialDecisionRoomCategory, MessageKey> =
   opportunity: 'decisionRoom.category.opportunity',
   operational: 'decisionRoom.category.operational',
   briefing: 'decisionRoom.category.briefing',
+  command: 'decisionRoom.category.command',
   turn: 'decisionRoom.category.turn',
   cost: 'decisionRoom.category.cost',
   memory: 'decisionRoom.category.memory',
@@ -649,6 +667,138 @@ function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void 
       sourceSort: `${item.title}:${item.id}`,
     });
   }
+}
+
+/**
+ * COMMAND & PERSONNEL directives (Slice 2 / owner-locked decision #1: these levers
+ * ISSUE INLINE as Decision-Room priority cards, not deep-link-only). Emits, in a
+ * fixed deterministic order:
+ *   1. replace-CO — one card per player-faction corps whose serving CO is eligible
+ *      to be sacked (active, assigned, NOT acting). cost=REPLACE_CO_COST. The
+ *      DirectiveCard issues stageCoReplacementOrder({ corpsId }) with the engine
+ *      auto-picking the best reserve replacement (hybrid note: the heavy candidate
+ *      picker stays in CommanderSection; inline confirm uses the proven auto-pick
+ *      path the dismiss button already uses — single CA-cost confirm, no picker lift).
+ *   2. elite-deploy — one card per pending army-reserve request. cost=ELITE_DEPLOY_COST.
+ *      Issues approveReserveRequest(request_id, suggested_brigade_id). Requests with
+ *      no suggested brigade carry no directive (the president must pick a brigade in
+ *      the ArmyReservePanel — card still scans + deep-links).
+ *   3. front-visit — a single leadership card. cost=FRONT_VISIT_COST. Reachability is
+ *      computed async server-side (getFrontVisitAvailability); the DirectiveCard
+ *      gates the ISSUE button on it and shows a disabled/reason state when the
+ *      president cannot reach any front. Emitted once so the option is always visible
+ *      to scan; never crashes when unreachable.
+ *
+ * Deterministic: corps + reserve requests are iterated in a stable strictCompare
+ * order; the front-visit card is a fixed singleton. No nondeterministic or
+ * time-based sources.
+ */
+function addCommandPersonnelCards(state: LoadedGameState, cards: CandidateCard[]): void {
+  const playerFaction = state.player_faction ?? null;
+  if (!playerFaction) return;
+
+  const officers = state.namedOfficerData ?? [];
+
+  // 1. REPLACE-CO — player-faction corps with an eligible serving CO.
+  const corps = [...(state.formations ?? [])]
+    .filter((formation) => formation.faction === playerFaction && formation.kind === 'corps')
+    .sort((a, b) => strictCompare(a.id, b.id));
+  for (const formation of corps) {
+    const commander = officers.find(
+      (o) => o.assigned_corps_id === formation.id && o.status === 'active',
+    );
+    // Eligible only when there IS a serving CO to replace and they are not merely an
+    // acting commander (mirrors CommanderSection's dismiss gate: `!isActing`).
+    if (!commander || commander.acting_commander) continue;
+    cards.push({
+      id: `command:replace-co:${formation.id}`,
+      category: 'command',
+      severity: commander.political_reliability <= 2 ? 'warning' : 'info',
+      title: t('decisionRoom.card.replaceCo.title', { corps: formation.name }),
+      explanation: t('decisionRoom.card.replaceCo.explanation', { officer: commander.name }),
+      sourceOwner: t('decisionRoom.card.command.sourceOwner'),
+      sourceLabel: t('decisionRoom.card.replaceCo.sourceLabel'),
+      actionLabel: t('decisionRoom.action.personnel'),
+      evidence: [
+        t('decisionRoom.card.replaceCo.evidence.serving', { officer: commander.name }),
+        t('decisionRoom.card.replaceCo.evidence.loyalty', { value: commander.political_reliability }),
+      ],
+      navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
+      directive: {
+        lever: 'replace_co',
+        corpsId: formation.id,
+        cost: REPLACE_CO_COST,
+        payload: { corpsId: formation.id },
+      },
+      urgencySort: commander.political_reliability <= 2 ? 5 : 20,
+      sourceSort: `command:replace-co:${formation.id}`,
+    });
+  }
+
+  // 2. ELITE-DEPLOY — pending army-reserve requests (the president releases an elite
+  // brigade from the strategic reserve to a corps that asked for one).
+  const reserveRequests = [...(state.pendingReserveRequests ?? [])]
+    .filter((request) => request.faction === playerFaction)
+    .sort((a, b) => {
+      if (a.priority !== b.priority) return b.priority - a.priority;
+      return strictCompare(a.request_id, b.request_id);
+    });
+  for (const request of reserveRequests) {
+    const suggestedBrigadeId = request.suggested_brigade_id;
+    // Only ISSUE inline when the request carries a concrete brigade to release; if
+    // the staff named none, the card still scans + deep-links to the ArmyReservePanel
+    // where the president selects one.
+    const directive: PresidentialDecisionRoomDirective | undefined = suggestedBrigadeId
+      ? {
+          lever: 'elite_deploy',
+          corpsId: request.corps_id,
+          cost: ELITE_DEPLOY_COST,
+          payload: { requestId: request.request_id, brigadeId: suggestedBrigadeId },
+        }
+      : undefined;
+    cards.push({
+      id: `command:elite-deploy:${request.request_id}`,
+      category: 'command',
+      severity: request.severityBand === 'critical' ? 'critical' : 'warning',
+      title: t('decisionRoom.card.eliteDeploy.title', { corps: request.corps_id }),
+      explanation: request.why_needed ?? request.description,
+      sourceOwner: t('decisionRoom.card.command.sourceOwner'),
+      sourceLabel: t('decisionRoom.card.eliteDeploy.sourceLabel'),
+      actionLabel: t('decisionRoom.action.personnel'),
+      evidence: [
+        t('decisionRoom.card.eliteDeploy.evidence.reason', { reason: humanize(request.reason) }),
+        t('decisionRoom.card.eliteDeploy.evidence.travel', { hops: request.travel_hops }),
+      ],
+      navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
+      ...(directive ? { directive } : {}),
+      urgencySort: request.severityBand === 'critical' ? 0 : 5,
+      sourceSort: `command:elite-deploy:${request.request_id}`,
+    });
+  }
+
+  // 3. FRONT-VISIT — a single leadership card. Reachability + cap/cooldown are an
+  // async server-side query (getFrontVisitAvailability) the DirectiveCard performs;
+  // the card is emitted unconditionally so the option is always scannable, and the
+  // ISSUE button disables (with a reason) when no front is reachable.
+  cards.push({
+    id: 'command:front-visit',
+    category: 'command',
+    severity: 'info',
+    title: t('decisionRoom.card.frontVisit.title'),
+    explanation: t('decisionRoom.card.frontVisit.explanation'),
+    sourceOwner: t('decisionRoom.card.command.sourceOwner'),
+    sourceLabel: t('decisionRoom.card.frontVisit.sourceLabel'),
+    actionLabel: t('decisionRoom.action.personnel'),
+    evidence: [t('decisionRoom.card.frontVisit.evidence.gesture')],
+    navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
+    directive: {
+      lever: 'front_visit',
+      cost: FRONT_VISIT_COST,
+      payload: {},
+    },
+    urgencySort: 50,
+    sourceSort: 'command:front-visit',
+  });
 }
 
 function turnCostPriority(record: TurnAftermathView): number {
@@ -1349,6 +1499,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   addSitrepCards(state, candidates);
   addSupplyVisibilityCard(state, candidates);
   addBriefingCards(state, candidates);
+  addCommandPersonnelCards(state, candidates);
   addHardTurnCards(state, osidNameMap, candidates);
   addCampaignCostCard(state, osidNameMap, candidates);
   addChronicleCard(state, candidates);

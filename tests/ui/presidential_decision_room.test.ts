@@ -310,6 +310,9 @@ describe('buildPresidentialDecisionRoomView', () => {
       'army-hq-corps-briefings',
       'turn-aftermath-records',
       'army-hq-records-aftermath',
+      // The always-present front-visit Command & Personnel card (info severity)
+      // handoffs after the warning/critical surfaces, before the chronicle.
+      'army-hq-personnel',
       'chronicle',
     ]);
     expect(byId['presidential-inbox']).toMatchObject({
@@ -930,6 +933,162 @@ describe('buildPresidentialDecisionRoomView', () => {
     const view = buildPresidentialDecisionRoomView({ state });
     expect(view.cards.find((card) => card.id === 'review:pending')?.directive).toBeUndefined();
     expect(view.cards.find((card) => card.id === 'sitrep:front-exposed')?.directive).toBeUndefined();
+  });
+
+  it('populates a replace-co directive (cost 25) for a player corps with an eligible serving CO', () => {
+    const state = makeState({
+      formations: [
+        { id: 'arbih_3rd_corps', faction: 'RBiH', name: '3rd Corps', kind: 'corps' },
+        { id: 'arbih_3rd_brigade', faction: 'RBiH', name: '3rd Brigade', kind: 'brigade' },
+        { id: 'vrs_1st_corps', faction: 'RS', name: '1st Krajina Corps', kind: 'corps' },
+      ] as LoadedGameState['formations'],
+      namedOfficerData: [
+        {
+          id: 'arbih_co', name: 'Serving CO', faction: 'RBiH', rank: 'corps_commander',
+          competence: 0.6, aggressiveness: 0.5, defensive_skill: 0.5, political_reliability: 4,
+          origin: 'authored', status: 'active', assigned_corps_id: 'arbih_3rd_corps',
+          acting_commander: false, turns_in_command: 8, battles: 2, victories: 1,
+        },
+        {
+          id: 'vrs_co', name: 'Enemy CO', faction: 'RS', rank: 'corps_commander',
+          competence: 0.6, aggressiveness: 0.5, defensive_skill: 0.5, political_reliability: 4,
+          origin: 'authored', status: 'active', assigned_corps_id: 'vrs_1st_corps',
+          acting_commander: false, turns_in_command: 8, battles: 2, victories: 1,
+        },
+      ] as LoadedGameState['namedOfficerData'],
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const card = view.cards.find((c) => c.id === 'command:replace-co:arbih_3rd_corps');
+
+    expect(card?.category).toBe('command');
+    expect(card?.directive).toEqual({
+      lever: 'replace_co',
+      corpsId: 'arbih_3rd_corps',
+      cost: 25,
+      payload: { corpsId: 'arbih_3rd_corps' },
+    });
+    // Enemy-faction corps and the player's brigade never get a replace-co card.
+    expect(view.cards.find((c) => c.id === 'command:replace-co:vrs_1st_corps')).toBeUndefined();
+    expect(view.cards.find((c) => c.id === 'command:replace-co:arbih_3rd_brigade')).toBeUndefined();
+  });
+
+  it('omits a replace-co card when the corps CO is only an acting commander', () => {
+    const state = makeState({
+      formations: [
+        { id: 'arbih_5th_corps', faction: 'RBiH', name: '5th Corps', kind: 'corps' },
+      ] as LoadedGameState['formations'],
+      namedOfficerData: [
+        {
+          id: 'arbih_acting', name: 'Acting CO', faction: 'RBiH', rank: 'corps_commander',
+          competence: 0.6, aggressiveness: 0.5, defensive_skill: 0.5, political_reliability: 4,
+          origin: 'authored', status: 'active', assigned_corps_id: 'arbih_5th_corps',
+          acting_commander: true, turns_in_command: 1, battles: 0, victories: 0,
+        },
+      ] as LoadedGameState['namedOfficerData'],
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    expect(view.cards.find((c) => c.id === 'command:replace-co:arbih_5th_corps')).toBeUndefined();
+  });
+
+  it('populates an elite-deploy directive (cost 25) carrying requestId + brigadeId for a player reserve request', () => {
+    const state = makeState({
+      pendingReserveRequests: [
+        {
+          request_id: 'reserve_alpha',
+          corps_id: 'arbih_3rd_corps',
+          faction: 'RBiH',
+          reason: 'sector_threat',
+          priority: 80,
+          severityBand: 'critical',
+          travel_hops: 3,
+          description: 'A sector is buckling.',
+          suggested_brigade_id: 'elite_guards',
+          turn_requested: 24,
+        },
+        {
+          request_id: 'reserve_beta',
+          corps_id: 'arbih_2nd_corps',
+          faction: 'RBiH',
+          reason: 'defensive_gap',
+          priority: 40,
+          severityBand: 'routine',
+          travel_hops: 1,
+          description: 'No brigade named.',
+          suggested_brigade_id: null,
+          turn_requested: 24,
+        },
+        {
+          request_id: 'reserve_enemy',
+          corps_id: 'vrs_1st_corps',
+          faction: 'RS',
+          reason: 'sector_threat',
+          priority: 90,
+          severityBand: 'critical',
+          travel_hops: 2,
+          description: 'Enemy request.',
+          suggested_brigade_id: 'vrs_guards',
+          turn_requested: 24,
+        },
+      ] as LoadedGameState['pendingReserveRequests'],
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const alpha = view.cards.find((c) => c.id === 'command:elite-deploy:reserve_alpha');
+    const beta = view.cards.find((c) => c.id === 'command:elite-deploy:reserve_beta');
+
+    expect(alpha?.category).toBe('command');
+    expect(alpha?.directive).toEqual({
+      lever: 'elite_deploy',
+      corpsId: 'arbih_3rd_corps',
+      cost: 25,
+      payload: { requestId: 'reserve_alpha', brigadeId: 'elite_guards' },
+    });
+    // A request with no suggested brigade still scans but carries no inline directive.
+    expect(beta).toBeDefined();
+    expect(beta?.directive).toBeUndefined();
+    // Enemy-faction reserve requests never surface to the player.
+    expect(view.cards.find((c) => c.id === 'command:elite-deploy:reserve_enemy')).toBeUndefined();
+  });
+
+  it('always emits a single front-visit directive card (cost 10, availability gated in the component)', () => {
+    const view = buildPresidentialDecisionRoomView({ state: makeState() });
+    const card = view.cards.find((c) => c.id === 'command:front-visit');
+
+    expect(card?.category).toBe('command');
+    expect(card?.directive).toEqual({
+      lever: 'front_visit',
+      cost: 10,
+      payload: {},
+    });
+    // The front-visit directive targets no corps (it targets a front).
+    expect(card?.directive?.corpsId).toBeUndefined();
+  });
+
+  it('routes Command & Personnel cards into the command lens deterministically', () => {
+    const state = makeState({
+      formations: [
+        { id: 'arbih_1st_corps', faction: 'RBiH', name: '1st Corps', kind: 'corps' },
+      ] as LoadedGameState['formations'],
+      namedOfficerData: [
+        {
+          id: 'arbih_co1', name: 'CO One', faction: 'RBiH', rank: 'corps_commander',
+          competence: 0.6, aggressiveness: 0.5, defensive_skill: 0.5, political_reliability: 4,
+          origin: 'authored', status: 'active', assigned_corps_id: 'arbih_1st_corps',
+          acting_commander: false, turns_in_command: 8, battles: 2, victories: 1,
+        },
+      ] as LoadedGameState['namedOfficerData'],
+    });
+
+    const first = buildPresidentialDecisionRoomView({ state });
+    const second = buildPresidentialDecisionRoomView({ state });
+    const commandLens = first.lenses.find((lens) => lens.id === 'command');
+
+    expect(commandLens).toBeDefined();
+    // replace-co + front-visit both land in the command lens.
+    expect(commandLens?.count).toBeGreaterThanOrEqual(2);
+    expect(second.cards.map((c) => c.id)).toEqual(first.cards.map((c) => c.id));
   });
 
   it('returns a safe empty state when no player faction is loaded', () => {

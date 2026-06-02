@@ -34,6 +34,7 @@ function categoryLabel(category: PresidentialDecisionRoomCard['category']): stri
   if (category === 'opportunity') return t('decisionRoom.category.opportunity');
   if (category === 'operational') return t('decisionRoom.category.operational');
   if (category === 'briefing') return t('decisionRoom.category.briefing');
+  if (category === 'command') return t('decisionRoom.category.command');
   if (category === 'turn') return t('decisionRoom.category.turn');
   if (category === 'cost') return t('decisionRoom.category.cost');
   return t('decisionRoom.category.memory');
