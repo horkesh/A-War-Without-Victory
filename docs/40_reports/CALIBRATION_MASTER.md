@@ -1,5 +1,10 @@
 # AWWV Calibration Master Reference
 
+## [2026-06-02] 40w/52w re-floor — 712th Mountain home fix (`op:travnik:turbe_2`)
+
+- **40w NEW of record: OSID 656/712 (+1, 92.13%), anchors 30/30, benchmarks 6/6, 0 critical. Hash `93bbc00450042585`** (was `e086afbefcef01e6`). Determinism confirmed ×2 (identical hash). The +1 match is the removal of a spurious Bratunac mismatch: the 712th Mtn Bde (3rd Corps, Travnik) had a dangling `home_osid` (`op:travnik:krusevo_brdo_i` — nonexistent OSID) → the recruitment placement fallback (`chooseRecruitmentPlacementOsid`) seated it on the RBiH-held Bratunac enclave pocket (`op:bratunac:bratunac_2`), and `mapOsidsToCorps` stamped a geographically impossible 3rd-Corps sector in Bratunac. Fixed to `op:travnik:turbe_2` (Turbe — RBiH-held Travnik/Vlašić front, historically where a Travnik 3rd-Corps mountain brigade belongs). 5 anomaly warnings are all pre-existing and unrelated (VRS Krajina density `vrs_1st_krajina:8`, Zavidovići inertia `cardak_2`, 3rd-Corps morale-attrition on 303rd/330th).
+- **52w golden manifest re-floored** (`data/derived/scenario/baselines/manifest.json` — `apr1992_52w` entry only; `noop_4w` + `baseline_ops_4w` byte-identical). Startup snapshot re-baked (drift check passes). Scenario-runner-tester verdict: GO. Branch `claude/prebake-placement-and-rehome-idempotency`.
+
 ## CURRENT BASELINE OF RECORD — 188w 618/712, hash `a1a7c167f0b05411` (2026-05-31)
 
 - **188w: OSID 618/712 (86.8%), anchors 29/30, benchmarks 6/6, 0 critical anomalies. Hash `a1a7c167f0b05411`.** Combined hash after the TG-correctness batch (PRs #73 #48 AAR-telemetry-snapshot, #74 #47 cascade-after-revert, #75 #46 zero-donor-no-phantom-TG) on top of the event-system fix (PR #66). **All three were calibration-FLAT** — OSID/anchors/benchmarks/per-faction identical; only the final-state hash composes (telemetry + phantom-TG-removal change combat/operation_history state without moving any tracked outcome). Prior single-point hash was `b6c9507e7c045a6c` (event-fix #66, pre-batch).
