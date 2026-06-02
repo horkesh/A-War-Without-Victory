@@ -120,6 +120,19 @@ describe('App boot — Main Menu first, faction choice menu-only (#80)', () => {
         expect(routeIdx).toBeGreaterThan(handoffIdx);
         expect(routeIdx).toBeLessThan(deleteIdx);
     });
+
+    it('defers auto-pop gameplay modals while booted to the Main Menu (#138 follow-up, Codex P2)', () => {
+        // An auto-loaded save with a pending event decision / peace plan / event
+        // flash must NOT cover the Main Menu — boot is menu-only ("no auto-pop
+        // modal"). The EventDecisionModal auto-launch effect and the EventModal
+        // queue-population effect both early-return on the menu (and list
+        // `appScreen` as a dep so they re-run after Continue / warroom desk).
+        const menuGuards = app.split("if (appScreen === 'mainMenu') return;").length - 1;
+        expect(menuGuards).toBeGreaterThanOrEqual(2);
+        // The PeacePlanModal render is gated so a pending plan does not pop over
+        // the boot menu either.
+        expect(app).toContain("{appScreen !== 'mainMenu' && showPeacePlanModal && pendingPeacePlan && (");
+    });
 });
 
 describe('gameStore — no eager loaded-state clear (#138 follow-up)', () => {

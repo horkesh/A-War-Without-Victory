@@ -591,6 +591,11 @@ function App() {
   useEffect(() => {
     if (!ipc.isAvailable) return;
     if (!loadedGameState) return;
+    // Task #80 — do not queue acknowledgement flashes while booted to the Main
+    // Menu; they would pop the EventModal over it (and the auto-dismiss timer
+    // would clear them unseen). Defer until past the menu — the effect re-runs
+    // when `appScreen` leaves 'mainMenu' (it is in the dep list below).
+    if (appScreen === 'mainMenu') return;
     const fired = loadedGameState.firedEvents;
     if (!fired || fired.length === 0) return;
 
@@ -624,7 +629,7 @@ function App() {
       }
     });
     return () => { stale = true; };
-  }, [loadedGameState?.turn, loadedGameState?.firedEvents?.length]);
+  }, [loadedGameState?.turn, loadedGameState?.firedEvents?.length, appScreen]);
 
   const pendingPeacePlan = loadedGameState?.pendingPeacePlan;
   const showPeacePlanModal = shouldShowPeacePlanModal(pendingPeacePlan, dismissedPeacePlanKey);
@@ -637,13 +642,18 @@ function App() {
   useEffect(() => {
     if (activeEventDecisionId !== null) return;
     if (showPeacePlanModal) return;
+    // Task #80 — the boot-to-menu default means an auto-loaded save with a
+    // pending decision must NOT auto-pop the (non-dismissible) EventDecisionModal
+    // over the Main Menu. Defer until the player is past the menu (Continue /
+    // warroom desk); the effect re-runs when `appScreen` leaves 'mainMenu'.
+    if (appScreen === 'mainMenu') return;
     const nextDecision = selectNextPendingEventDecision(
       loadedGameState?.pendingEventDecisions,
       playerFaction,
       recentlyAcceptedEventDecisionId,
     );
     if (nextDecision) setActiveEventDecisionId(nextDecision.event_id);
-  }, [loadedGameState?.pendingEventDecisions, playerFaction, activeEventDecisionId, showPeacePlanModal, recentlyAcceptedEventDecisionId]);
+  }, [loadedGameState?.pendingEventDecisions, playerFaction, activeEventDecisionId, showPeacePlanModal, recentlyAcceptedEventDecisionId, appScreen]);
 
   useEffect(() => {
     if (activeEventDecisionId === null) return;
@@ -1278,8 +1288,11 @@ function App() {
           onAcknowledge={handleEventAcknowledge}
         />
       )}
-      {/* v0.5.0: Peace Plan Modal — blocks turn progression until player responds */}
-      {showPeacePlanModal && pendingPeacePlan && (
+      {/* v0.5.0: Peace Plan Modal — blocks turn progression until player responds.
+          Task #80 — gated on `appScreen !== 'mainMenu'` so an auto-loaded save with
+          a pending plan does not auto-pop it over the boot Main Menu (same contract
+          as the EventDecisionModal auto-launch above). Shows once past the menu. */}
+      {appScreen !== 'mainMenu' && showPeacePlanModal && pendingPeacePlan && (
         <PeacePlanModal
           plan={pendingPeacePlan}
           onDismiss={() => setDismissedPeacePlanKey(getPeacePlanDismissalKey(pendingPeacePlan))}
