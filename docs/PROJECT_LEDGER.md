@@ -1,4 +1,26 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-02] feat: Presidential Command Surface — directive-issuing + warroom convergence COMPLETE (#115–#124)
+
+**Type:** UI/read-model batch closing the Presidential Command Surface. **All player-only/UI-only or emergent-gated → historical 40w/52w/188w byte-identical** (each PR independently verified `Baseline regression: all scenarios match`). main HEAD `d2193c50`. (The force-op after-receipt #118 has its own entry below.)
+
+**Decision Room ISSUES directives (#115/#116/#119):** per-item priority cards carry an optional `directive`; new surface-agnostic `DirectiveCard.tsx` lifts the OperationsSection objection flow. Wired: authorize-op + stop-op (#115); replace-CO + elite-deploy + front-visit as inline single-CA-cost cards (#116); request-op + force-launch with an in-card free-text OSID input (#119, the "Direct V Corps to take Bihać" headline lever). Locked owner calls: inline issue, single CA-cost confirm, Home Front scan-only.
+
+**Patron consequence-receipt (#117):** emergent-mode patron-defiance supply cut now emits a receipt (new optional append-only `state.military.patron_defiance_supply_cuts[]`, ratchet 508→509) surfaced in TurnAftermathModal. Emergent-gated → byte-identical.
+
+**Warroom convergence (#121/#122/#123/#124):** EventLog merged into the Authored-Choices ledger (`DecisionHistoryOverlay`; flat feed deleted) (#121); StrategicDashboard retired, its territory-over-time chart re-hosted into `TerritoryOverTimeChart` in the War's Record / Army-HQ RECORDS surface (#122); command-strip now reuses the existing presidential-desk decision-family art via a precedence resolver (command_cards override → mapped desk asset → placeholder; cat_*→packet_thumbnails, act_*→consequence_stills) (#123); DiplomacyPanel reframed as **Patron Relations** (patronStance promoted, IVP/timeline demoted into a collapsed block) (#124).
+
+**i18n (#120):** ~330 standard-vocabulary BCS diacritics restored in `messages.bcs.ts`; the culturally-sensitive subset (~25: `aar.notable.*`, Srebrenica divergence lines, opening-brief place names) **DEFERRED for owner review** (in #120's PR body). Display-only → byte-identical.
+
+**⚠ INCIDENT (recovered, zero loss):** the `.claude/scheduled_tasks.lock` cron ran `git reset` in an agent worktree; the recovery leaked a STAGED DELETION of `StrategicDashboard.tsx` into the primary worktree index, which docs commit `d1bf31e2` swept in → `App.tsx` imported a deleted file → main CI red. Fixed: restore (`eee538e0`) then #122 retired it properly (`4ae59e8d`). **Durable safeguard:** always `git diff --cached --stat` before committing — the `.git` index is shared with agent worktrees + a cron that can pre-stage tracked-file deletions.
+
+**Docs:** card-art handover `docs/40_reports/handovers/20260602_COMMAND_CARD_PROMPTS.md` (canonical prompts in `2026-05-24-gui-ai-asset-brief.md`; all 20 decision-family cards already generated; + 11 §9 strip prompts in the documentary style).
+
+**Open depth menu (owner to steer):** officer-resentment receipt + proactive force-launch population (both IN FLIGHT); deferred — Desk CA-gauge header, Patron Relations confidence gauge, request-op validated-target picker (engine-touching), §9 act-card 16:9 layer (redundant with DirectiveCard — drop candidate).
+
+**Files:** `docs/PROJECT_LEDGER.md` (this entry); see PRs #115–#124 for per-PR touch (all `src/ui/map/**` + emergent-gated `patron_pressure.ts`/`game_state.ts` for #117).
+
+---
+
 ## [2026-06-02] feat(ui): consequence-receipt when a forced op resolves (force-op after-loop)
 
 **Type:** UI read-model only (Ring 1, no §6, faction-agnostic). Closes the force-op "authorship of the tragedy" AFTER half — the BEFORE half shipped in #108/#109.
