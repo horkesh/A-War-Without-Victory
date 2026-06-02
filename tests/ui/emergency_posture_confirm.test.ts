@@ -75,7 +75,7 @@ describe('Army HQ shell chrome', () => {
 
         expect(screen.getByRole('dialog', { name: 'Stab armije' })).toBeTruthy();
         expect(screen.getByRole('tab', { name: 'BRIFING' })).toBeTruthy();
-        expect(screen.getByRole('tab', { name: 'SAZETAK' })).toBeTruthy();
+        expect(screen.getByRole('tab', { name: 'SAŽETAK' })).toBeTruthy();
         expect(screen.getByRole('tab', { name: 'ZAPISI' })).toBeTruthy();
         expect(screen.getByRole('tab', { name: 'LJUDSTVO' })).toBeTruthy();
     });

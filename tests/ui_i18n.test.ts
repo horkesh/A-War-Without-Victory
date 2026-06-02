@@ -29,7 +29,7 @@ describe('UI localization substrate', () => {
     });
 
     it('interpolates message parameters after locale fallback', () => {
-        expect(t('settings.language.savedNotice', { locale: 'BCS' }, 'bcs')).toBe('Jezik sacuvan: BCS');
+        expect(t('settings.language.savedNotice', { locale: 'BCS' }, 'bcs')).toBe('Jezik sačuvan: BCS');
     });
 
     it('resolves unsupported locales to English', () => {

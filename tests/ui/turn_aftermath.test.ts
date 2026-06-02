@@ -301,11 +301,11 @@ describe('buildTurnAftermathView', () => {
 
     expect(view?.dateLabel).toBe('24 jun 1992');
     expect(view?.headline).toBe('Neto teritorijalni dobitak: +2 OSID-a.');
-    expect(view?.narrativeLine).toBe('Sedmica zavrsava osvojenim prostorom, ali knjiga troska jos odreduje cijenu napredovanja.');
-    expect(view?.cost.reasons).toEqual(['12 prijateljskih gubitaka', '1 formacija unistena', '80 raseljenih']);
+    expect(view?.narrativeLine).toBe('Sedmica zavrsava osvojenim prostorom, ali knjiga troška jos odreduje cijenu napredovanja.');
+    expect(view?.cost.reasons).toEqual(['12 prijateljskih gubitaka', '1 formacija uništena', '80 raseljenih']);
     expect(view?.judgment).toEqual({
-      headline: 'Tezak potez je usao u zapis.',
-      detail: 'Registar troska poteza je kritican: 12 prijateljskih gubitaka / 1 formacija unistena / 80 raseljenih.',
+      headline: 'Težak potez je usao u zapis.',
+      detail: 'Registar troška poteza je kritičan: 12 prijateljskih gubitaka / 1 formacija uništena / 80 raseljenih.',
       memoryTone: 'cost',
       primarySurface: 'chronicle',
       secondarySurface: 'codex',
@@ -511,13 +511,13 @@ describe('buildTurnAftermathView', () => {
     const pulse = buildTurnAftermathCampaignPulse(records);
     const cost = buildTurnAftermathCampaignCost({ state });
 
-    expect(pulse.briefing).toBe('Arhivski prozor je miran: nema vecih pomjeranja ili troskova u vidljivim zapisima.');
-    expect(cost.headline).toBe('Cijena kampanje je kriticna.');
+    expect(pulse.briefing).toBe('Arhivski prozor je miran: nema vecih pomjeranja ili troškova u vidljivim zapisima.');
+    expect(cost.headline).toBe('Cijena kampanje je kritična.');
     expect(cost.briefing).toBe('3 zabiljezena poteza: 160 prijateljskih gubitaka, 5200 raseljenih, +2 neto OSID-a, 0.31 protivnickih gubitaka po prijateljskom gubitku.');
     expect(cost.topDrivers).toEqual([
       '5200 raseljenih',
-      '2 vlastite formacije unistene',
-      '2 teska poteza',
+      '2 vlastite formacije uništene',
+      '2 teška poteza',
       '160 prijateljskih gubitaka',
     ]);
   });

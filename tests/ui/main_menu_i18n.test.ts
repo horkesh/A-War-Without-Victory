@@ -51,7 +51,7 @@ describe('MainMenu localization', () => {
         expect(screen.getByText('Bosna i Hercegovina, 1992-1995')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Nova igra' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Nastavi' })).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Ucitaj igru' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Učitaj igru' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Zasluge' })).toBeTruthy();
     });
 

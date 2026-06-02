@@ -125,7 +125,7 @@ describe('CinematicVerdict', () => {
         expect(html).toContain('Fokus');
         expect(html).toContain('Ishod');
         expect(html).toContain('Signal cijene');
-        expect(html).toContain('Podijeli sazetak');
+        expect(html).toContain('Podijeli sažetak');
         expect(html).toContain('Kopiraj');
         expect(html).toContain('Nije zabiljezeno');
     });
