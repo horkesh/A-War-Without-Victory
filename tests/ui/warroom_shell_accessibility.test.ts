@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createElement } from 'react';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
 
 let storeState: Record<string, any> = { loadedGameState: null };
 
@@ -58,6 +58,33 @@ describe('WarroomShellLayer accessibility proof', () => {
         expect(screen.getByRole('button', { name: 'Calendar' })).toBeTruthy();
     });
 
+    it('renders the Warroom-only toolbar with the accepted IA entries', () => {
+        storeState = {
+            loadedGameState: {
+                player_faction: 'RBiH',
+                metadata: { date: 'April 1993' },
+            },
+        };
+
+        renderShell();
+
+        const toolbar = screen.getByRole('navigation', { name: 'Warroom navigation' });
+        expect(toolbar).toBeTruthy();
+        for (const label of [
+            "President's Desk",
+            'Command Surface',
+            'Diplomacy',
+            'Intelligence',
+            'Staff',
+            'Chronicle',
+            'Faction',
+            'War Map',
+            'Advance',
+        ]) {
+            expect(within(toolbar).getByRole('button', { name: label })).toBeTruthy();
+        }
+    });
+
     it('activates mapped hotspots with Enter and Space', () => {
         storeState = {
             loadedGameState: {
@@ -71,8 +98,8 @@ describe('WarroomShellLayer accessibility proof', () => {
         fireEvent.keyDown(screen.getByRole('button', { name: 'Faction Overview' }), { key: 'Enter' });
         fireEvent.keyDown(screen.getByRole('button', { name: 'News & Press' }), { key: ' ' });
 
-        expect(onNavigate).toHaveBeenNthCalledWith(1, { kind: 'army-hq', tab: 'summary' });
-        expect(onNavigate).toHaveBeenNthCalledWith(2, { kind: 'chronicle' });
+        expect(onNavigate).toHaveBeenNthCalledWith(1, { kind: 'warroom-overlay', surface: 'faction' });
+        expect(onNavigate).toHaveBeenNthCalledWith(2, { kind: 'warroom-overlay', surface: 'chronicle' });
     });
 
     it('announces the unavailable state through a live status region', () => {
@@ -147,7 +174,7 @@ describe('WarroomShellLayer accessibility proof', () => {
         fireEvent.click(mapButton);
 
         expect(fetch).toHaveBeenCalledWith('/data/ui/hq_rbih_clickable_regions.json');
-        expect(onNavigate).toHaveBeenCalledWith(undefined);
+        expect(onNavigate).toHaveBeenCalledWith({ kind: 'war-map' });
     });
 
     it('formats Warroom calendar labels as full dates when metadata is partial', () => {
@@ -166,8 +193,30 @@ describe('WarroomShellLayer accessibility proof', () => {
     it('renders the Warroom calendar without Comic Sans fallback or ellipsis truncation', () => {
         const source = readFileSync('src/ui/map/components/warroom/WarroomShellLayer.tsx', 'utf8');
         expect(source).not.toContain('Comic Sans MS');
+        expect(source).not.toContain('Segoe Print');
         expect(source).not.toContain("textOverflow: 'ellipsis'");
         expect(source).not.toMatch(/fontSize:\s*['"][^'"]*vw/i);
         expect(source).toContain('data-testid="warroom-date-board-label"');
+        expect(source).toContain('fontFamily: \'"IBM Plex Sans Condensed", "Segoe UI", Arial, sans-serif\'');
+    });
+
+    it('keeps the Warroom dock and projected map attached to the scene plate', () => {
+        const source = readFileSync('src/ui/map/components/warroom/WarroomShellLayer.tsx', 'utf8');
+        const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
+        const statusSource = readFileSync('src/ui/map/components/warroom/WarroomStatusBar.tsx', 'utf8');
+        const sceneFrameIndex = source.indexOf('aspectRatio: `${CANVAS_ASPECT}`');
+        const toolbarRenderIndex = source.indexOf('<WarroomToolbar onNavigate={onNavigate} />');
+        const statusDockRenderIndex = source.indexOf('{statusDock}');
+        const projectedMapIndex = source.indexOf('<WarroomProjectedMap');
+
+        expect(sceneFrameIndex).toBeGreaterThan(0);
+        expect(toolbarRenderIndex).toBeGreaterThan(sceneFrameIndex);
+        expect(statusDockRenderIndex).toBeGreaterThan(toolbarRenderIndex);
+        expect(projectedMapIndex).toBeGreaterThan(statusDockRenderIndex);
+        expect(appSource).toContain('statusDock={(');
+        expect(statusSource).not.toContain('className="fixed ');
+        expect(statusSource).not.toContain("t('warroom.advance')");
+        expect(source).toContain('<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"');
+        expect(source).not.toContain('preserveAspectRatio="xMidYMid slice"');
     });
 });

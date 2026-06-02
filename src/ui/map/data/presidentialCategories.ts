@@ -173,30 +173,15 @@ export function derivePresidentialCommandCategoryCounts(
 }
 
 /**
- * Warroom hotspot OBJECT → presidential category. Diegetic objects that keep
- * their literal meaning (the desk map opens the map; the wall calendar advances
- * the turn) are intentionally ABSENT from this map — they retain their existing
- * shell-handoff behavior. Only the objects below open the card strip
- * pre-filtered to the matched category.
- *
- * Owner correction (2026-06-01):
- *   - desk_map / wall_cork_board → MAIN MAP (unchanged; not in this map)
- *   - wall_calendar(_area)       → ADVANCE   (unchanged; not in this map)
- *   - command_briefing_folio     → War Direction
- *   - commander_coatrack         → Command & Personnel
- *   - diplomatic_telephone       → Diplomacy & Patrons
- *   - newspaper_stack            → The War's Record
- *   - intelligence_journal       → Home Front (ledger/intel object — clean fit)
+ * Owner correction (2026-06-02): warroom hotspots are literal room objects,
+ * not command-surface category shortcuts. The President's Desk overlay is the
+ * entry point for the command-surface card strip until a replacement warroom IA
+ * is accepted.
  */
 export const WARROOM_HOTSPOT_TO_CATEGORY: Readonly<Record<string, PresidentialCommandCategoryId>> = {
-  command_briefing_folio: 'cat_war_direction',
-  commander_coatrack: 'cat_command',
-  diplomatic_telephone: 'cat_diplomacy',
-  newspaper_stack: 'cat_record',
-  intelligence_journal: 'cat_home_front',
 };
 
-/** Resolve a warroom hotspot id to a category, or null if it isn't a strip object. */
+/** Resolve a warroom hotspot id to a category, or null under the current room contract. */
 export function categoryForWarroomHotspot(
   regionId: string,
 ): PresidentialCommandCategoryId | null {

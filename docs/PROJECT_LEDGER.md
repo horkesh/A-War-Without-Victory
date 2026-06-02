@@ -17,6 +17,22 @@
 
 ---
 
+## [2026-06-02] fix(ui/docs): Warroom toolbar/hotspot implementation + scene-bound status dock
+
+**Type:** Player-facing UI/product-shell correction plus documentation sync. UI-only; no simulation, scenario, save-schema, calibration, or determinism path touched.
+
+**Change:** Implemented the accepted Warroom toolbar/hotspot IA in the React map shell: the Warroom now exposes one Warroom-only command toolbar with President's Desk, Command Surface, Diplomacy, Intelligence, Staff, Chronicle, Faction, War Map, and Advance. Hotspots and toolbar entries share the route table. Only the map/cork-board route exits to the tactical War Map, and only the calendar route opens Advance. Other room objects open Warroom-native overlays first. `PresidentDeskShell` is a closable overlay over the Warroom scene, and the Command Surface is reachable from the toolbar and briefing folio instead of being hidden behind the Desk only. Tutorial/coachmark rendering is removed from the live app shell.
+
+**Status-dock correction:** The lower Warroom `WarroomStatusBar` is now rendered inside the Warroom scene plate as a compact priority/status dock. It is `absolute` inside the scene frame, not viewport-fixed, and it no longer duplicates the `Advance` command. The top Warroom toolbar owns navigation and Advance; the lower dock owns only phase/priority status and review handoff.
+
+**Docs sync:** Updated `docs/plans/2026-06-01-presidential-command-surface-design.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, `.claude/napkin.md`, and `docs/PROJECT_LEDGER_KNOWLEDGE.md` so the current contract is: one Warroom command toolbar, one scene-bound status dock, Command Surface from folio/toolbar, and the next P0 product lane remains Command Card -> Directive Card -> consequence receipt.
+
+**Verification:** In-app browser geometry on `http://127.0.0.1:3002/` after opening RBiH -> Desk/Warroom showed `toolbarCount: 1`, `statusDockCount: 1`, `statusPosition: absolute`, `fixedStatusCount: 0`, `statusInsideFrame: true`, `statusInsideImage: true`, `statusHasAdvance: false`, and `toolbarHasAdvance: true`. Focused product/UI suite passed: `node node_modules/vitest/vitest.mjs run tests/ui/app_boot_main_menu.test.ts tests/warroom_shell_layer.test.ts tests/ui/warroom_shell_accessibility.test.ts tests/ui/presidential_categories.test.ts tests/ui/president_desk_shell.test.ts tests/ui/command_card_strip_accessibility.test.ts tests/ui/warroom_shell_ownership.test.ts tests/ui/warroom_priority_docket.test.ts tests/ui/pre_advance_command_review.test.ts tests/ui/shell_navigation_ownership.test.ts tests/ui/accessibility_clickable_controls.test.ts tests/ui/tutorial_persistence.test.ts tests/ui/onboarding_persistence_replacement.test.ts tests/ui/onboarding_track_d_consolidation.test.ts tests/ui/advance_turn_button_gated_feedback.test.ts --reporter=dot` passed 129/129. `npm.cmd run typecheck` exited 0. `node node_modules\vite\bin\vite.js build --config src/ui/map/vite.config.ts` exited 0 with existing Vite browser-externalization/chunk warnings. `git diff --check` exited 0 with only existing CRLF warnings.
+
+**Files:** `src/ui/map/App.tsx`, `src/ui/map/components/warroom/WarroomShellLayer.tsx`, `src/ui/map/components/warroom/WarroomStatusBar.tsx`, `src/ui/map/utils/warroomNavigation.ts`, `src/ui/map/data/presidentialCategories.ts`, `src/ui/map/components/presidential_desk/PresidentDeskShell.tsx`, `src/ui/map/components/warroom/CommandCardStrip.tsx`, focused UI tests, `docs/plans/2026-06-01-presidential-command-surface-design.md`, `docs/plans/2026-06-02-warroom-toolbar-hotspot-ia-plan.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-02] feat: Presidential Command Surface — directive-issuing + warroom convergence COMPLETE (#115–#124)
 
 **Type:** UI/read-model batch closing the Presidential Command Surface. **All player-only/UI-only or emergent-gated → historical 40w/52w/188w byte-identical** (each PR independently verified `Baseline regression: all scenarios match`). main HEAD `d2193c50`. (The force-op after-receipt #118 has its own entry below.)
@@ -18148,5 +18164,39 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Verification:** #108/#109/#111 UI-only; #112 emergent-gated → all historical 40w/52w/188w byte-identical; #112 baseline regression independently re-verified "all scenarios match".
 
 **Files:** `docs/PROJECT_LEDGER.md` (this entry); see PRs #108/#109/#111/#112 for the per-PR source touch (player/UI/desktop + emergent-gated `updatePatronState`).
+
+---
+
+## [2026-06-02] fix(ui/docs): New Game side selection inline + product-facing master wired
+
+**Type:** Player-facing UI correction plus roadmap/board wiring. New Game side selection now lives inline on the Main Menu / splash surface instead of opening the old `SidePickerOverlay` modal. The modal remains available only for non-menu legacy paths; main-menu New Game commits directly from the side cards, and manual save load commits from the menu file picker.
+
+**Roadmap wiring:** `docs/40_reports/PRODUCT_FACING_MASTER.md` is promoted from loose audit to the live product-facing alpha source. `docs/plans/COMMAND_BOARD.md` now lists it as a controlling source and adds a P0 "Product-facing alpha hardening" lane. `docs/plans/MASTER_ROADMAP.md` now carries the accepted 2026-06-02 addendum prioritizing first-session comprehension, Strategic Priorities clarity, command-card directive loops, tutorial persistence, map legends/hotspots, info consistency, and TG/president-layer productization.
+
+**Verification:** focused source contract test `node node_modules/vitest/vitest.mjs run tests/ui/app_boot_main_menu.test.ts --reporter=dot` passed 14/14; `npm.cmd run typecheck` exited 0; `git diff --check` exited 0; browser smoke on `http://127.0.0.1:3002/?showPanel=1` showed inline faction cards, no pre-start dialog, and no `CHOOSE YOUR FACTION` side-picker modal after selecting RBiH.
+
+**Files:** `src/ui/map/App.tsx`, `src/ui/map/components/MainMenu.tsx`, `tests/ui/app_boot_main_menu.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-06-02] fix(ui/docs): Warroom remains room-first; Desk is a closable overlay
+
+**Type:** Player-facing IA correction. Reversed the June 1 combo-nav behavior where Warroom hotspots were treated as command-surface category launchers. Warroom objects now keep literal destinations; `PresidentDeskShell` is no longer always rendered over the room, and opens from a compact Warroom button as a closable overlay. Closing the Desk also clears the command card strip so the room returns cleanly. The command-surface card strip remains reachable from the Desk.
+
+**Docs:** Updated the presidential command-surface design doc, Command Board, and Product-Facing Master so the controlling product contract is: Warroom is a room first; Desk is an overlay; command-surface cards are Desk flow, not every room object.
+
+**Verification:** focused suite `node node_modules/vitest/vitest.mjs run tests/ui/app_boot_main_menu.test.ts tests/warroom_shell_layer.test.ts tests/ui/warroom_shell_accessibility.test.ts tests/ui/presidential_categories.test.ts tests/ui/president_desk_shell.test.ts --reporter=dot` passed 76/76; `npm.cmd run typecheck` exited 0; browser smoke on `http://127.0.0.1:3002/?showPanel=1` confirmed Warroom starts with no Desk region and no command strip, Desk opens/closes, Command Surface opens only from Desk, closing Desk clears the strip, and the Diplomacy hotspot opens Patron Relations without opening the command strip.
+
+**Files:** `src/ui/map/App.tsx`, `src/ui/map/components/presidential_desk/PresidentDeskShell.tsx`, `src/ui/map/components/warroom/WarroomShellLayer.tsx`, `src/ui/map/data/presidentialCategories.ts`, `tests/ui/president_desk_shell.test.ts`, `tests/ui/presidential_categories.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/2026-06-01-presidential-command-surface-design.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-06-02] docs(plan): Warroom toolbar/hotspot IA accepted
+
+**Type:** Docs-only product architecture decision. Added `docs/plans/2026-06-02-warroom-toolbar-hotspot-ia-plan.md` and wired it into the Master Roadmap and Command Board. The accepted Warroom rule is now: a visible Warroom-only toolbar mirrors hotspots; only map/cork board and calendar bypass dedicated Warroom surfaces; every other hotspot opens a Warroom-native item first; briefing folio opens Command Surface; tutorial/coachmark rendering should be removed from the live app shell during the implementation slice.
+
+**Verification:** `git diff --check` clean for the docs-only change.
+
+**Files:** `docs/plans/2026-06-02-warroom-toolbar-hotspot-ia-plan.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
 
 ---

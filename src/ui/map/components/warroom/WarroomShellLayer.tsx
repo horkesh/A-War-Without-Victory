@@ -12,7 +12,7 @@
  * Canonical owner: src/ui/map/components/warroom/WarroomShellLayer.tsx
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import type { Feature, FeatureCollection, Geometry, LineString, MultiPolygon, Polygon } from 'geojson';
 import { getPlayerFacingFaction } from '../../../shared/playerFacingLabels';
 import { loadOperationalSettlements } from '../../data/DataLoader';
@@ -21,8 +21,12 @@ import { buildControlGeoJSON } from '../../map/builders/buildControlGeoJSON';
 import { buildFrontLinesGeoJSON } from '../../map/builders/buildFrontLinesGeoJSON';
 import { useGameStore } from '../../store/gameStore';
 import { formatTurnLabel, turnToDateString } from '../../utils/formatters';
-import type { WarroomNavigationCommand } from '../../utils/warroomNavigation';
-import { categoryForWarroomHotspot, type PresidentialCommandCategoryId } from '../../data/presidentialCategories';
+import {
+  WARROOM_ROUTE_ENTRIES,
+  commandForWarroomRegion,
+  commandForWarroomRoute,
+  type WarroomNavigationCommand,
+} from '../../utils/warroomNavigation';
 import { t } from '../../i18n';
 import { WARROOM_SCENE_URLS } from './warroom-asset-urls';
 import fallbackRbihRegions from '../../../warroom/assets/hq_rbih_regions.json';
@@ -82,39 +86,13 @@ const CANVAS_ASPECT = CANVAS_W / CANVAS_H;
  * propagates to onNavigate, which calls warroomCommandStaysInRoom(undefined) → false
  * → setAppScreen('game'), showing the map.
  *
- * Unmapped regions (intentional — navigate to game/map view):
- *   desk_map — clicking the desk map shows the tactical map (game screen).
- *
- * All other known hotspots are explicitly mapped below.
+ * War Map regions use an explicit local command; unknown regions are a no-op.
+ * All other known hotspots are explicitly mapped by the shared route table.
  *
  * Exported for unit testing.
  */
 export function regionToShellHandoff(regionId: string): WarroomNavigationCommand | undefined {
-  switch (regionId) {
-    case 'wall_flag_area':
-    case 'commander_coatrack':
-      return { kind: 'army-hq', tab: 'summary' };
-    case 'command_briefing_folio':
-      return { kind: 'army-hq', tab: 'briefing' };
-    case 'newspaper_stack':
-      return { kind: 'chronicle' };
-    case 'intelligence_journal':
-      return { kind: 'army-hq', tab: 'records', recordsSubTab: 'aar' };
-    case 'wall_calendar_area':
-    case 'wall_calendar':
-      // Most-used Warroom hotspot: clicking the wall calendar advances the turn.
-      return { kind: 'advance-turn' };
-    case 'wall_cork_board':
-      // Legacy alias for the authored cork-board region. The Warroom contract
-      // treats this as primary map access, same as desk_map.
-      return undefined;
-    case 'desk_radio':
-      return { kind: 'event-log' };
-    case 'diplomatic_telephone':
-      return { kind: 'diplomacy' };
-    default:
-      return undefined;
-  }
+  return commandForWarroomRegion(regionId);
 }
 
 // ── Hotspot overlay ────────────────────────────────────────────────────────
@@ -358,11 +336,7 @@ function WarroomProjectedMap({ region, model, playerFaction }: {
         }}
       >
         {model ? (
-          // viewBox cropped to the projector's actual output region (makeProjector
-          // produces content in [4..96]x[20..80] of a 100x100 space). Cropping
-          // removes the large blank padding that made the map look small on the
-          // corkboard. A slight crop is preferable to large blank borders.
-          <svg viewBox="4 20 92 60" preserveAspectRatio="xMidYMid slice" style={{ display: 'block', width: '100%', height: '100%' }}>
+          <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" style={{ display: 'block', width: '100%', height: '100%' }}>
             <rect x="0" y="0" width="100" height="100" fill="rgba(233,222,190,0.9)" />
             <g fill="none" stroke="rgba(66,58,45,0.26)" strokeWidth="0.22">
               {model.outlinePaths.map((path, index) => <path key={`outline-${index}`} d={path} />)}
@@ -418,12 +392,13 @@ function WarroomDateBoard({ region, label }: { region: WarroomRegion; label: str
           // Darker, smaller, less aggressive — reads as a scribbled marker
           // note rather than a billboarded UI label. Less luminous blue
           // (was rgba(28,84,172,0.86)) → dark navy ink at higher opacity.
-          color: 'rgba(15, 32, 70, 0.92)',
-          fontFamily: '"Segoe Print", "Segoe UI", Arial, sans-serif',
-          fontSize: '14px',
+          color: 'rgba(21, 35, 58, 0.88)',
+          fontFamily: '"IBM Plex Sans Condensed", "Segoe UI", Arial, sans-serif',
+          fontSize: '13px',
           fontWeight: 600,
-          lineHeight: 1.05,
-          transform: 'rotate(-1.4deg)',
+          letterSpacing: '0.02em',
+          lineHeight: 1,
+          transform: 'rotate(-0.45deg)',
           textShadow: 'none',
           whiteSpace: 'normal',
           textAlign: 'center',
@@ -580,17 +555,62 @@ export interface WarroomShellLayerProps {
   onNavigate: (command?: WarroomNavigationCommand) => void;
   /** Opens the existing campaign side picker when the Warroom has no loaded side. */
   onOpenSidePicker?: () => void;
-  /**
-   * COMBO nav (design §9): a warroom hotspot OBJECT that maps to a presidential
-   * category opens the command-surface card strip pre-filtered to that category,
-   * instead of routing into the Army HQ briefing. Receives the category id.
-   * When provided and a hotspot maps to a category, this takes priority over
-   * the legacy `onNavigate` shell handoff for that hotspot.
-   */
-  onOpenCommandCategory?: (categoryId: PresidentialCommandCategoryId) => void;
+  /** Warroom-local status dock rendered inside the scene plate frame. */
+  statusDock?: ReactNode;
 }
 
-export function WarroomShellLayer({ onNavigate, onOpenSidePicker, onOpenCommandCategory }: WarroomShellLayerProps) {
+function WarroomToolbar({ onNavigate }: { onNavigate: (command?: WarroomNavigationCommand) => void }) {
+  return (
+    <nav
+      aria-label="Warroom navigation"
+      data-testid="warroom-toolbar"
+      style={{
+        position: 'absolute',
+        left: '50%',
+        top: '1.6%',
+        transform: 'translateX(-50%)',
+        zIndex: 6,
+        display: 'flex',
+        maxWidth: 'calc(100% - 32px)',
+        gap: '6px',
+        overflowX: 'auto',
+        border: '1px solid rgba(214,174,76,0.34)',
+        background: 'rgba(13,16,20,0.84)',
+        padding: '6px',
+        boxShadow: '0 16px 42px rgba(0,0,0,0.42)',
+        backdropFilter: 'blur(8px)',
+      }}
+    >
+      {WARROOM_ROUTE_ENTRIES.map((entry) => (
+        <button
+          key={entry.id}
+          type="button"
+          data-testid={`warroom-toolbar-${entry.id}`}
+          onClick={() => onNavigate(commandForWarroomRoute(entry.id))}
+          style={{
+            flex: '0 0 auto',
+            cursor: 'pointer',
+            border: '1px solid rgba(214,174,76,0.26)',
+            background: 'rgba(0,0,0,0.24)',
+            color: entry.id === 'advance' ? 'rgba(255,214,190,0.96)' : 'rgba(236,220,174,0.96)',
+            padding: '7px 9px',
+            fontFamily: '"IBM Plex Sans Condensed", "Segoe UI", Arial, sans-serif',
+            fontSize: '10px',
+            fontWeight: 700,
+            letterSpacing: '0.04em',
+            lineHeight: 1,
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {entry.label}
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+export function WarroomShellLayer({ onNavigate, onOpenSidePicker, statusDock }: WarroomShellLayerProps) {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const playerFaction = getPlayerFacingFaction(loadedGameState);
 
@@ -717,16 +737,6 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker, onOpenCommandC
   }
 
   const handleRegionClick = (region: WarroomRegion) => {
-    // COMBO nav: if this hotspot object maps to a presidential category and a
-    // handler is wired, open the command-surface card strip pre-filtered to that
-    // category instead of the legacy Army-HQ shell handoff. Diegetic objects
-    // (desk_map → map, wall_calendar → advance) are intentionally NOT in the
-    // category map and fall through to their existing handoff below.
-    const categoryId = categoryForWarroomHotspot(region.id);
-    if (categoryId && onOpenCommandCategory) {
-      onOpenCommandCategory(categoryId);
-      return;
-    }
     const command = regionToShellHandoff(region.id);
     onNavigate(command);
   };
@@ -769,6 +779,8 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker, onOpenCommandC
             userSelect: 'none',
           }}
         />
+        <WarroomToolbar onNavigate={onNavigate} />
+        {statusDock}
         {deskMapRegion ? (
           <WarroomProjectedMap
             region={deskMapRegion}

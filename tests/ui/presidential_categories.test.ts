@@ -7,8 +7,7 @@
  *   - the six categories map onto the right PresidentialDecisionRoomCategory sources
  *   - count/urgent derivation from a mock decision-room view (incl. the
  *     paramilitary → Conscience bright-line split)
- *   - the warroom hotspot → category map covers the rewired hotspots and leaves
- *     diegetic objects (desk_map, wall_calendar) unmapped
+ *   - warroom hotspots are not remapped into command-surface categories
  *   - CommandCard renders its faction-tinted fallback placeholder with NO art
  */
 
@@ -156,22 +155,17 @@ describe('presidential command categories — count derivation', () => {
   });
 });
 
-describe('warroom hotspot → category map', () => {
-  it('covers the rewired hotspot objects with their matched categories', () => {
-    const expected: Record<string, PresidentialCommandCategoryId> = {
-      command_briefing_folio: 'cat_war_direction',
-      commander_coatrack: 'cat_command',
-      diplomatic_telephone: 'cat_diplomacy',
-      newspaper_stack: 'cat_record',
-      intelligence_journal: 'cat_home_front',
-    };
-    for (const [hotspot, category] of Object.entries(expected)) {
-      expect(categoryForWarroomHotspot(hotspot)).toBe(category);
-      expect(WARROOM_HOTSPOT_TO_CATEGORY[hotspot]).toBe(category);
-    }
+describe('warroom hotspot category map', () => {
+  it('does not remap literal warroom hotspots into the command surface', () => {
+    expect(Object.keys(WARROOM_HOTSPOT_TO_CATEGORY)).toHaveLength(0);
+    expect(categoryForWarroomHotspot('command_briefing_folio')).toBeNull();
+    expect(categoryForWarroomHotspot('commander_coatrack')).toBeNull();
+    expect(categoryForWarroomHotspot('diplomatic_telephone')).toBeNull();
+    expect(categoryForWarroomHotspot('newspaper_stack')).toBeNull();
+    expect(categoryForWarroomHotspot('intelligence_journal')).toBeNull();
   });
 
-  it('leaves diegetic objects (map, calendar) unmapped so they keep literal meaning', () => {
+  it('leaves diegetic objects unmapped so they keep literal meaning', () => {
     expect(categoryForWarroomHotspot('desk_map')).toBeNull();
     expect(categoryForWarroomHotspot('wall_cork_board')).toBeNull();
     expect(categoryForWarroomHotspot('wall_calendar')).toBeNull();

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, it, expect, vi } from 'vitest';
 import {
   buildWarroomProjectedMapModel,
@@ -9,47 +10,49 @@ import {
 } from '../src/ui/map/components/warroom/WarroomShellLayer';
 import { isShellHandoffCommand, type ShellHandoffCommand } from '../src/ui/shared/shellHandoff';
 import { warroomCommandStaysInRoom } from '../src/ui/map/utils/shellNavigation';
-import { isWarroomLocalCommand, type WarroomLocalCommand } from '../src/ui/map/utils/warroomNavigation';
+import {
+  WARROOM_ROUTE_ENTRIES,
+  commandForWarroomRoute,
+  isWarroomLocalCommand,
+  routeForWarroomRegion,
+  type WarroomLocalCommand,
+} from '../src/ui/map/utils/warroomNavigation';
 
 describe('regionToShellHandoff', () => {
   it('wall_flag_area → army-hq summary', () => {
-    expect(regionToShellHandoff('wall_flag_area')).toEqual({ kind: 'army-hq', tab: 'summary' });
+    expect(regionToShellHandoff('wall_flag_area')).toEqual({ kind: 'warroom-overlay', surface: 'faction' });
   });
 
   it('commander_coatrack → army-hq summary', () => {
-    expect(regionToShellHandoff('commander_coatrack')).toEqual({ kind: 'army-hq', tab: 'summary' });
+    expect(regionToShellHandoff('commander_coatrack')).toEqual({ kind: 'warroom-overlay', surface: 'staff' });
   });
 
   it('command_briefing_folio → army-hq briefing', () => {
-    expect(regionToShellHandoff('command_briefing_folio')).toEqual({ kind: 'army-hq', tab: 'briefing' });
+    expect(regionToShellHandoff('command_briefing_folio')).toEqual({ kind: 'warroom-overlay', surface: 'command-surface' });
   });
 
   it('newspaper_stack → chronicle', () => {
-    expect(regionToShellHandoff('newspaper_stack')).toEqual({ kind: 'chronicle' });
+    expect(regionToShellHandoff('newspaper_stack')).toEqual({ kind: 'warroom-overlay', surface: 'chronicle' });
   });
 
   it('intelligence_journal → army-hq records aar', () => {
-    expect(regionToShellHandoff('intelligence_journal')).toEqual({
-      kind: 'army-hq',
-      tab: 'records',
-      recordsSubTab: 'aar',
-    });
+    expect(regionToShellHandoff('intelligence_journal')).toEqual({ kind: 'warroom-overlay', surface: 'intelligence' });
   });
 
   it('unknown region → undefined', () => {
     expect(regionToShellHandoff('unknown_region')).toBeUndefined();
   });
 
-  it('wall_cork_board legacy alias → undefined (same behavior as desk_map)', () => {
-    expect(regionToShellHandoff('wall_cork_board')).toBeUndefined();
+  it('wall_cork_board legacy alias routes through explicit war-map command', () => {
+    expect(regionToShellHandoff('wall_cork_board')).toEqual({ kind: 'war-map' });
   });
 
   it('desk_radio → event-log', () => {
-    expect(regionToShellHandoff('desk_radio')).toEqual({ kind: 'event-log' });
+    expect(regionToShellHandoff('desk_radio')).toEqual({ kind: 'warroom-overlay', surface: 'intelligence' });
   });
 
   it('diplomatic_telephone → diplomacy panel', () => {
-    expect(regionToShellHandoff('diplomatic_telephone')).toEqual({ kind: 'diplomacy' });
+    expect(regionToShellHandoff('diplomatic_telephone')).toEqual({ kind: 'warroom-overlay', surface: 'diplomacy' });
   });
 
   it('wall_calendar_area → advance-turn', () => {
@@ -60,32 +63,64 @@ describe('regionToShellHandoff', () => {
     expect(regionToShellHandoff('wall_calendar')).toEqual({ kind: 'advance-turn' });
   });
 
-  it('desk_map → undefined (intentional: clicking the map navigates to game/map view)', () => {
-    // desk_map is the primary map-access hotspot in the warroom.
-    // It intentionally returns undefined so the onNavigate callback reaches
-    // warroomCommandStaysInRoom(undefined) → false → setAppScreen('game'),
-    // showing the tactical map without pre-opening any specific panel.
-    // DATA BOUNDARY: no command = navigate to game view. This is not a missing case.
-    expect(regionToShellHandoff('desk_map')).toBeUndefined();
+  it('desk_map routes through explicit war-map command', () => {
+    expect(regionToShellHandoff('desk_map')).toEqual({ kind: 'war-map' });
   });
 
-  it('desk_map undefined return causes game-view transition without applying a command', () => {
-    // Prove the full onNavigate contract for desk_map:
-    // undefined command → no applyShellHandoffCommand call → setAppScreen('game').
+  it('desk_map war-map command causes game-view transition without applying a shell command', () => {
     const applySpy = vi.fn();
     const setAppScreen = vi.fn();
 
     const onNavigate = (command?: ReturnType<typeof regionToShellHandoff>) => {
-      if (isWarroomLocalCommand(command)) return;
+      if (isWarroomLocalCommand(command)) {
+        if (command.kind === 'war-map') setAppScreen('game');
+        return;
+      }
       if (command) applySpy(command);
       if (!warroomCommandStaysInRoom(command)) setAppScreen('game');
     };
 
-    const command = regionToShellHandoff('desk_map'); // → undefined
+    const command = regionToShellHandoff('desk_map');
     onNavigate(command);
 
     expect(applySpy).not.toHaveBeenCalled();
     expect(setAppScreen).toHaveBeenCalledWith('game');
+  });
+
+  it('uses one route source for toolbar entries and hotspot regions', () => {
+    expect(WARROOM_ROUTE_ENTRIES.map((entry) => entry.label)).toEqual([
+      "President's Desk",
+      'Command Surface',
+      'Diplomacy',
+      'Intelligence',
+      'Staff',
+      'Chronicle',
+      'Faction',
+      'War Map',
+      'Advance',
+    ]);
+    for (const entry of WARROOM_ROUTE_ENTRIES) {
+      expect(commandForWarroomRoute(entry.id)).toEqual(entry.command);
+      for (const regionId of entry.regionIds) {
+        expect(routeForWarroomRegion(regionId)).toBe(entry.id);
+        expect(regionToShellHandoff(regionId)).toEqual(entry.command);
+      }
+    }
+  });
+
+  it('only map/corkboard exits to tactical map and only calendar opens advance', () => {
+    for (const entry of WARROOM_ROUTE_ENTRIES) {
+      const command = commandForWarroomRoute(entry.id);
+      if (entry.id === 'war-map') {
+        expect(command).toEqual({ kind: 'war-map' });
+        expect(entry.regionIds).toEqual(expect.arrayContaining(['desk_map', 'wall_cork_board']));
+      } else if (entry.id === 'advance') {
+        expect(command).toEqual({ kind: 'advance-turn' });
+        expect(entry.regionIds).toEqual(expect.arrayContaining(['wall_calendar_area', 'wall_calendar']));
+      } else {
+        expect(command).toEqual(expect.objectContaining({ kind: 'warroom-overlay' }));
+      }
+    }
   });
 });
 
@@ -126,7 +161,7 @@ describe('warroom React shell entry path — message type contracts', () => {
 //   }}
 
 describe('WarroomShellLayer onNavigate contract', () => {
-  it('navigating command (army-hq) applies command and transitions to game', () => {
+  it('non-map Warroom overlay commands stay in the Warroom', () => {
     const applySpy = vi.fn().mockReturnValue(true);
     const setAppScreen = vi.fn();
 
@@ -140,16 +175,19 @@ describe('WarroomShellLayer onNavigate contract', () => {
     const command = regionToShellHandoff('wall_flag_area'); // → army-hq, navigates away
     onNavigate(command);
 
-    expect(applySpy).toHaveBeenCalledWith({ kind: 'army-hq', tab: 'summary' });
-    expect(setAppScreen).toHaveBeenCalledWith('game');
+    expect(applySpy).not.toHaveBeenCalled();
+    expect(setAppScreen).not.toHaveBeenCalled();
   });
 
-  it('legacy wall_cork_board hotspot transitions to game/map view', () => {
+  it('legacy wall_cork_board hotspot transitions to game/map view through explicit war-map command', () => {
     const applySpy = vi.fn().mockReturnValue(true);
     const setAppScreen = vi.fn();
 
     const onNavigate = (command?: ReturnType<typeof regionToShellHandoff>) => {
-      if (isWarroomLocalCommand(command)) return;
+      if (isWarroomLocalCommand(command)) {
+        if (command.kind === 'war-map') setAppScreen('game');
+        return;
+      }
       if (command) applySpy(command);
       if (!warroomCommandStaysInRoom(command)) setAppScreen('game');
     };
@@ -161,12 +199,16 @@ describe('WarroomShellLayer onNavigate contract', () => {
     expect(setAppScreen).toHaveBeenCalledWith('game');
   });
 
-  it('when called with undefined (unmapped region), transitions to game without applying a command', () => {
+  it('when called with undefined (unmapped region), stays in Warroom without applying a command', () => {
     const applySpy = vi.fn();
     const setAppScreen = vi.fn();
 
     const onNavigate = (command?: ReturnType<typeof regionToShellHandoff>) => {
-      if (isWarroomLocalCommand(command)) return;
+      if (isWarroomLocalCommand(command)) {
+        if (command.kind === 'war-map') setAppScreen('game');
+        return;
+      }
+      if (!command) return;
       if (command) applySpy(command);
       if (!warroomCommandStaysInRoom(command)) setAppScreen('game');
     };
@@ -174,7 +216,7 @@ describe('WarroomShellLayer onNavigate contract', () => {
     onNavigate(undefined);
 
     expect(applySpy).not.toHaveBeenCalled();
-    expect(setAppScreen).toHaveBeenCalledWith('game');
+    expect(setAppScreen).not.toHaveBeenCalled();
   });
 
   it('all mapped regions produce valid shell or local Warroom commands', () => {
@@ -364,5 +406,15 @@ describe('AdvanceTurnModal state contract', () => {
     const setAdvanceTurnPending = (v: boolean) => { state = { advanceTurnPending: v }; };
     setAdvanceTurnPending(false);
     expect(state.advanceTurnPending).toBe(false);
+  });
+});
+
+describe('live campaign tutorial render suppression', () => {
+  it('does not mount tutorial or coachmark overlays from App', () => {
+    const source = readFileSync('src/ui/map/App.tsx', 'utf8');
+    expect(source).not.toContain('CoachmarkLayer');
+    expect(source).not.toContain('OnboardingOverlayWrapper');
+    expect(source).not.toContain('OnboardingOverlay');
+    expect(source).not.toContain('shouldShowOnboarding');
   });
 });

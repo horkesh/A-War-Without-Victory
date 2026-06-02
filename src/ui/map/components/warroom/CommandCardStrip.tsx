@@ -18,7 +18,7 @@
  * Canonical owner: src/ui/map/components/warroom/CommandCardStrip.tsx
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { CommandCard } from './CommandCard';
 import { buildPresidentialDecisionRoomView } from '../../data/presidentialDecisionRoom';
 import {
@@ -42,6 +42,7 @@ export interface CommandCardStripProps {
 }
 
 export function CommandCardStrip({ initialCategoryId, onOpenCategory, onClose }: CommandCardStripProps) {
+  const dialogRef = useRef<HTMLDivElement | null>(null);
   const state = useGameStore((s) => s.loadedGameState);
   const osidNameMap = useGameStore((s) => s.osidDisplayNames);
   const playerFaction = state?.player_faction ?? null;
@@ -56,11 +57,25 @@ export function CommandCardStrip({ initialCategoryId, onOpenCategory, onClose }:
     onOpenCategory(category);
   };
 
+  useEffect(() => {
+    dialogRef.current?.focus();
+  }, []);
+
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-label="Presidential command surface"
+      aria-modal="false"
+      tabIndex={-1}
       data-testid="command-card-strip"
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          event.stopPropagation();
+          onClose();
+        }
+      }}
       className="pointer-events-auto absolute inset-x-3 bottom-20 z-[6] mx-auto max-w-6xl rounded-md border border-accent-gold/35 bg-panel-bg/94 p-4 shadow-[0_28px_90px_rgba(0,0,0,0.6)] backdrop-blur-md xl:left-10 xl:right-10"
     >
       <div className="mb-3 flex items-end justify-between gap-2 border-b border-panel-border/70 pb-2">

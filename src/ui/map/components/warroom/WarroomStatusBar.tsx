@@ -1,9 +1,9 @@
 /**
  * WarroomStatusBar - live campaign context strip inside the Warroom.
  *
- * Renders a thin fixed strip at the bottom-right of the Warroom overlay
- * showing current turn/date, phase badge, Decision Room priority docket,
- * and an advance-turn affordance.
+ * Renders a thin strip at the bottom-right of the Warroom scene plate
+ * showing phase and Decision Room priority docket. The Warroom command dock
+ * owns navigation and Advance.
  *
  * Reads directly from useGameStore for campaign context. Navigation out of
  * the Warroom stays App-owned through onReviewPriorities/onReviewItem/onReviewTarget.
@@ -12,13 +12,11 @@
 
 import { useMemo, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
-import { formatTurnLabel } from '../../utils/formatters';
 import {
   buildWarroomPriorityDocketView,
   type WarroomPriorityDocketItem,
   type WarroomPriorityDocketTone,
 } from '../../data/warroomPriorityDocket';
-import { formatPreAdvanceGateBlockTitle } from '../../data/preAdvanceCommandReview';
 import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presidentialDecisionRoom';
 import { Z } from '../../../shared/zIndex';
 import { t } from '../../i18n';
@@ -162,7 +160,6 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
   const [priorityDocketOpen, setPriorityDocketOpen] = useState(false);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
-  const setAdvanceTurnPending = useGameStore((s) => s.setAdvanceTurnPending);
 
   const docket = useMemo(
     () => buildWarroomPriorityDocketView({ state: loadedGameState, osidNameMap: osidDisplayNames }),
@@ -171,18 +168,12 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
 
   if (!loadedGameState) return null;
 
-  const rawLabel = loadedGameState.label ?? '';
-  const displayLabel = formatTurnLabel(rawLabel);
   const phase = loadedGameState.phase ?? '';
   const isWar = phase.toLowerCase().includes('war');
   const pendingReviewCount = docket.metrics.pendingReviews;
   const hasPendingReviews = pendingReviewCount > 0;
   const { advanceReviewCount, urgentCount } = docket.metrics;
   const canReviewPriorities = docket.canOpenBoard && Boolean(onReviewPriorities);
-  const advanceBlocked = docket.status === 'blocked';
-  const advanceGateTitle = advanceBlocked
-    ? formatPreAdvanceGateBlockTitle(docket)
-    : t('warroom.advanceTurn');
 
   const handleOpenBoard = () => {
     setPriorityDocketOpen(false);
@@ -199,15 +190,10 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
     onReviewTarget?.(target);
   };
 
-  const handleAdvance = () => {
-    if (advanceBlocked) setPriorityDocketOpen(false);
-    setAdvanceTurnPending(true);
-  };
-
   return (
     <div
       data-tutorial-step="warroom-status-bar"
-      className="fixed bottom-4 right-4 flex max-w-[calc(100vw-2rem)] flex-wrap items-center gap-2 rounded bg-black/70 px-3 py-1.5 font-mono text-[10px] text-amber-400 pointer-events-auto select-none"
+      className="absolute bottom-[2%] right-[2%] flex max-w-[calc(100%-2rem)] flex-wrap items-center gap-2 rounded bg-black/70 px-3 py-1.5 font-mono text-[10px] text-amber-400 pointer-events-auto select-none"
       style={{ backdropFilter: 'blur(4px)', zIndex: Z.PRIORITY_DOCKET }}
     >
       {priorityDocketOpen && (
@@ -219,9 +205,6 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
           onReviewTarget={handleReviewTarget}
         />
       )}
-
-      {/* Current date / turn */}
-      <span className="min-w-0 max-w-[10rem] truncate opacity-90">{displayLabel || rawLabel}</span>
 
       {/* Phase badge */}
       <span
@@ -247,21 +230,6 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
         <span className="tabular-nums">{advanceReviewCount}</span>
         {urgentCount > 0 && <span className="text-[8px]">{t('warroom.urgentShort', { count: urgentCount })}</span>}
         {hasPendingReviews && <span className="h-1.5 w-1.5 rounded-full bg-amber-300 animate-pulse" aria-hidden="true" />}
-      </button>
-
-      {/* Advance-turn affordance */}
-      <button
-        type="button"
-        className={`ml-1 rounded border px-3 py-1 text-[11px] font-bold uppercase tracking-widest shadow-sm transition-colors cursor-pointer ${
-          advanceBlocked
-            ? 'border-red-700/80 bg-red-950/55 text-red-200 shadow-red-950/30 hover:bg-red-900/55'
-            : 'border-amber-700/75 bg-amber-950/35 text-amber-300 shadow-amber-950/25 hover:bg-amber-900/40 hover:text-amber-100'
-        }`}
-        onClick={handleAdvance}
-        title={advanceGateTitle}
-        aria-label={advanceBlocked ? advanceGateTitle : undefined}
-      >
-        {t('warroom.advance')}
       </button>
     </div>
   );
