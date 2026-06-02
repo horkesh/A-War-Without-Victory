@@ -27,13 +27,11 @@ import { SupplyPanel } from './components/SupplyPanel';
 import { EconomyPanel } from './components/EconomyPanel';
 import { EnclaveDashboard } from './components/EnclaveDashboard';
 import { EventModal } from './components/EventModal';
-import { EventLogPanel } from './components/EventLogPanel';
 import { AiAdvisorPanel } from './components/AiAdvisorPanel';
 import { AiSettingsPanel } from './components/AiSettingsPanel';
 import { AutonomyPanel } from './components/AutonomyPanel';
 import { PresidentialInbox } from './components/PresidentialInbox';
 import type { EventDisplayData } from './components/EventModal';
-import type { EventLogEntry } from './components/EventLogPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
 import { PeacePlanModal } from './components/PeacePlanModal';
 import { ParamilitaryReviewModal } from './components/ParamilitaryReviewModal';
@@ -381,7 +379,6 @@ function App() {
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [summaryFocus, setSummaryFocus] = useState<SummaryFocusSection>('overview');
   const [enclaveDashboardOpen, setEnclaveDashboardOpen] = useState(false);
-  const [eventLogOpen, setEventLogOpen] = useState(false);
   const [economyOpen, setEconomyOpen] = useState(false);
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
   const [autonomyPanelOpen, setAutonomyPanelOpen] = useState(false);
@@ -680,14 +677,6 @@ function App() {
     }
   };
 
-  // Build event log entries from fired events
-  const eventLogEntries: EventLogEntry[] = (loadedGameState?.firedEvents ?? []).map(e => ({
-    turn: e.turn,
-    title: e.title,
-    category: e.category || 'military',
-    effectsSummary: e.effects.map(ef => ef.description).filter(Boolean).join('; '),
-  }));
-
   // Phase C4: Attack confirmation modal payload and render
   const attackerFormation = pendingAttackConfirmation && loadedGameState
     ? loadedGameState.formations.find((f) => f.id === pendingAttackConfirmation.attackerFormationId)
@@ -788,7 +777,6 @@ function App() {
   const openSummary = (focus: SummaryFocusSection = 'overview') => {
     setSummaryFocus(focus);
     setSummaryOpen(true);
-    setEventLogOpen(false);
   };
 
   // Keyboard shortcuts for Army HQ tabs + orphaned modals
@@ -811,8 +799,11 @@ function App() {
         // Map-first: open WarSummaryModal on the tactical map instead of Army HQ
         openSummary();
       } else if (e.key === 'e' || e.key === 'E') {
+        // Legacy event-log hotkey now opens the Authored Choices ledger
+        // (DecisionHistoryOverlay). The flat event feed was retired; the
+        // ledger is the single record surface. Mirrors the 'D' hotkey.
         e.preventDefault();
-        setEventLogOpen(prev => !prev);
+        setIsDecisionHistoryOpen(prev => !prev);
       } else if (e.key === 'c' || e.key === 'C') {
         e.preventDefault();
         const gs = useGameStore.getState();
@@ -846,7 +837,6 @@ function App() {
   const openArmyHQRecords = (subTab: ArmyHQRecordsSubTab) => {
     openArmyHQRecordsSubTab(useGameStore.getState(), subTab);
     setSummaryOpen(false);
-    setEventLogOpen(false);
   };
 
   const reviewPreAdvancePriorities = () => {
@@ -854,7 +844,6 @@ function App() {
     openArmyHQTab(gs, 'briefing');
     setAppScreen('game');
     setSummaryOpen(false);
-    setEventLogOpen(false);
   };
 
   const reviewPreAdvanceItem = (item: PreAdvanceCommandReviewItem) => {
@@ -862,13 +851,11 @@ function App() {
       setSelectedCounterOfferId(item.navigationTarget.counterOfferId);
       setAppScreen('game');
       setSummaryOpen(false);
-      setEventLogOpen(false);
       return;
     }
     openPresidentialDecisionRoomNavigationTarget(item.navigationTarget, useGameStore.getState());
     setAppScreen('game');
     setSummaryOpen(false);
-    setEventLogOpen(false);
   };
 
   const reviewPreAdvanceTarget = (target: PresidentialDecisionRoomNavigationTarget) => {
@@ -876,13 +863,11 @@ function App() {
       setSelectedCounterOfferId(target.counterOfferId);
       setAppScreen('game');
       setSummaryOpen(false);
-      setEventLogOpen(false);
       return;
     }
     openPresidentialDecisionRoomNavigationTarget(target, useGameStore.getState());
     setAppScreen('game');
     setSummaryOpen(false);
-    setEventLogOpen(false);
   };
 
   // Command-surface card strip handlers. Opening a category requests the
@@ -902,7 +887,6 @@ function App() {
     openArmyHQTab(useGameStore.getState(), 'briefing');
     setAppScreen('game');
     setSummaryOpen(false);
-    setEventLogOpen(false);
   };
 
   const openReservePanelFromDesk = () => {
@@ -915,7 +899,6 @@ function App() {
     setSelectedReserveRequestId(null);
     setAppScreen('game');
     setSummaryOpen(false);
-    setEventLogOpen(false);
   };
 
   const openPersonnelFromDesk = () => {
@@ -923,13 +906,11 @@ function App() {
     setSelectedOfficerMatterId(null);
     setAppScreen('game');
     setSummaryOpen(false);
-    setEventLogOpen(false);
   };
 
   const handlePresidentialInboxAction = (action: InboxItem['action'], itemId: string) => {
     const gs = useGameStore.getState();
     setSummaryOpen(false);
-    setEventLogOpen(false);
     if (action === 'army_reserve') {
       setSelectedReserveRequestId(itemId);
     }
@@ -973,7 +954,6 @@ function App() {
     const gs = useGameStore.getState();
     setTurnAftermathOpen(false);
     setSummaryOpen(false);
-    setEventLogOpen(false);
     gs.setSelectedOsid(null);
     gs.setSelectedFormationId(null);
     gs.setSelectedCorpsId(null);
@@ -1002,7 +982,6 @@ function App() {
       // Transition from warroom view to game view when a shell handoff arrives.
       setAppScreen('game');
       setSummaryOpen(false);
-      setEventLogOpen(false);
     };
 
     window.addEventListener('message', handleShellHandoff);
@@ -1080,7 +1059,6 @@ function App() {
             onOpenRecords={() => openArmyHQRecords('aar')}
             onOpenOpsHistory={() => useGameStore.getState().setIsOperationsPanelOpen(true)}
             onOpenCodex={() => openCodex(useGameStore.getState())}
-            onOpenEventLog={() => setEventLogOpen(true)}
           />
         </RootErrorBoundary>
       </header>
@@ -1328,10 +1306,6 @@ function App() {
         state={loadedGameState}
         onClose={() => setSelectedCounterOfferId(null)}
       />
-      {/* v0.4.1 Phase 5: Event log panel */}
-      {eventLogOpen && (
-        <EventLogPanel events={eventLogEntries} onClose={() => setEventLogOpen(false)} />
-      )}
       {/* v0.5.0: Dayton Negotiation Modal — blocks when Dayton trigger fires */}
       {loadedGameState?.pendingDayton && !loadedGameState?.gameOver && (
         <DaytonNegotiationModal dayton={loadedGameState.pendingDayton} />
@@ -1374,15 +1348,15 @@ function App() {
                 } else if (command.kind === 'diplomacy') {
                   setDiplomacyOpen(true);
                 } else if (command.kind === 'event-log') {
-                  setEventLogOpen(true);
+                  // Warroom record hotspot (desk_radio) now opens the Authored
+                  // Choices ledger. The flat event feed was retired; the ledger
+                  // is the single record surface.
+                  setIsDecisionHistoryOpen(true);
                 }
                 return;
               }
               if (command) {
-                applyShellHandoffCommand(
-                  { ...useGameStore.getState(), setEventLogOpen },
-                  command,
-                );
+                applyShellHandoffCommand(useGameStore.getState(), command);
               }
               if (!warroomCommandStaysInRoom(command)) {
                 setAppScreen('game');

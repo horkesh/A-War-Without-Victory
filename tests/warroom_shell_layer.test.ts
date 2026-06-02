@@ -121,7 +121,7 @@ describe('warroom React shell entry path — message type contracts', () => {
 // to game view ONLY for commands that do not stay in room.
 // App.tsx wires this as (Wave 3):
 //   onNavigate={(command) => {
-//     if (command) applyShellHandoffCommand({ ...store, setEventLogOpen }, command);
+//     if (command) applyShellHandoffCommand(store, command);
 //     if (!warroomCommandStaysInRoom(command)) setAppScreen('game');
 //   }}
 

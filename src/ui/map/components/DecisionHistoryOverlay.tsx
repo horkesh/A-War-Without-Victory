@@ -337,7 +337,7 @@ export function DecisionHistoryOverlay({
                 <div className="flex items-center justify-between px-3 py-1.5 border-b border-neutral-700/50 bg-[#10131a]">
                     <div className="flex items-center gap-2.5">
                         <div className="text-amber-400 text-[13px] font-bold tracking-[0.13em] uppercase">
-                            Decision History
+                            Authored Choices
                         </div>
                         {hasInputs && (
                             <div
