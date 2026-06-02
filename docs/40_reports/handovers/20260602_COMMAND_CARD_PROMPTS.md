@@ -38,6 +38,84 @@ All cards in the brief's recommended set are **already generated and committed**
 - **Tone:** sober, restrained, negative-sum. Consequence stills are **aftermath/memory** — quiet and resolved, never triumphant; show the empty table after the meeting, not the act.
 - **Counter-offer / map pitfall:** the territorial map must read as **Bosnia/Balkan partition**, never a US/modern national map (a documented past failure).
 
+## Standalone per-card prompts (one copy-paste block each)
+
+Transcribed from the brief's "Prompt Specs", with each card's negative prompt folded inline so every block is self-contained. The brief remains authoritative — if these drift, the brief wins. All 20 are **already generated**; use these to regenerate/iterate.
+
+### Desk background — `hq_presidential_desk_1992.webp` (2752×1536) → `src/ui/warroom/assets/`
+```
+Generate a 2752 x 1536 px image. Scene: early 1990s Balkan presidential office used as a wartime briefing room, large wooden desk with folders, paper maps of Bosnia and Herzegovina, radio set, ashtray, telephone, muted daylight through tall windows, documentary realism, subdued warm practical light, no people, no flags with legible symbols, no text, no modern computers, cinematic but not glossy. The left third of the image must be a clean, natural dark office wall or shadowed room area reserved for app-rendered UI overlays: no black rectangles, no translucent panels, no embedded UI shapes, no empty card placeholders, no fake interface elements. Keep the desk and key props concentrated in the center and lower-right. Keep the window side softly exposed but not blown out, with a gentle natural vignette so white/amber UI text remains legible if placed over the scene. No watermark or signature. NEGATIVE: fantasy, sci-fi, modern glass office, readable text, dramatic explosions, soldiers posing, propaganda poster, bright saturated colors, clean stock photo, black UI panels, transparent UI panels, overlay boxes, card placeholders, interface mockup, HUD, menu, dashboard, watermark, logo, signature, pasted border, fake text labels, overexposed window.
+```
+
+### Decision headers (1536×512) → `src/ui/map/assets/presidential_desk/decision_headers/`
+
+**`decision_header_diplomacy.webp`**
+```
+Generate a 1536 x 512 px modal header strip. Scene: close-up of a diplomatic peace proposal folder on an old wooden desk, typed pages, colored territorial map partly visible but no readable labels, fountain pen, 1990s archival documentary style, restrained beige paper, soft side light, no people, no readable text. Keep the center-left calm enough for title text under a dark overlay. NEGATIVE: people, hands, readable text, labels, flags, insignia, modern electronics, UI overlay, black panel, watermark, signature, bright saturated colors, glossy 3D render.
+```
+
+**`decision_header_military_staff.webp`**
+```
+Generate a 1536 x 512 px modal header strip. Scene: military staff desk with operational map, grease pencil marks, folded field reports, radio handset, subdued green and amber light, 1990s Yugoslav-era office atmosphere, documentary realism, no soldiers, no readable text, no national insignia. Keep contrast restrained so white/amber modal text remains legible. NEGATIVE: people, soldiers, hands, readable text, numbers, place names, flags, insignia, modern computers, screens, keyboards, UI overlay, black panel, watermark, signature, bright saturated colors, glossy 3D render.
+```
+
+**`decision_header_intelligence.webp`**
+```
+Generate a 1536 x 512 px modal header strip. Scene: intelligence briefing file with black-and-white reconnaissance photos, redacted strips, paper clips, magnifying glass, low-key office lighting, 1990s archival realism, no readable text, no gore, no people. Leave a dark quiet band across the lower third for modal copy. NEGATIVE: people, faces, hands, readable text, codes, labels, gore, agency logos, flags, modern electronics, UI overlay, black panel, watermark, signature, bright saturated colors.
+```
+
+**`decision_header_humanitarian_convoy.webp`**
+```
+Generate a 1536 x 512 px modal header strip. Scene: humanitarian convoy route packet on a worn wooden desk: an unlabeled route map with dashed route line and checkpoints, blank folded paperwork, pencil, paper clips, weathered paper, muted daylight, documentary realism, no people. Do not include an aid manifest table, checklist grid, form title, numbers, stamps with readable symbols, logos, readable handwriting, readable labels, calculators, keyboards, or modern electronics. The image should feel bureaucratic and urgent, not heroic or action-oriented. Leave the left third visually quiet for modal title overlay. NEGATIVE: Aid Manifest, manifest table, checklist grid, readable text, readable handwriting, numbers, form fields, stamped logos, warning icons, calculator, keyboard, modern laptop, modern tablet, people, soldiers, vehicles, gore, dramatic action scene, UI overlay, black panel, watermark, signature.
+```
+
+**`decision_header_personnel.webp`**
+```
+Generate a 1536 x 512 px modal header strip. Scene: officer personnel dossier folder on a worn wooden desk, blank tabbed folder with no readable label, passport-style photograph area fully obscured by a plain black rectangle or paper slip, service-record papers with blurred/unreadable pseudo-text, brass desk lamp, pencil, paper clips, muted 1990s office setting, documentary realism, no people. Avoid medals, insignia, real-person likenesses, readable labels, readable classification stamps, readable handwriting, typed form fields, modern computer monitors, keyboards, printers, or obvious modern office equipment. NEGATIVE: PERSONNEL, SECRET, TOP SECRET, classified stamp, readable folder tab, readable labels, readable handwriting, readable typed text, numbers, forms with legible fields, real portrait, face, medals, insignia, modern computer, CRT monitor, printer, keyboard, UI overlay, black panel, watermark, signature.
+```
+
+**`decision_header_paramilitary.webp`**
+```
+Generate a 1536 x 512 px modal header strip. Scene: internal security case folder on a dark wooden desk, blank incident-report papers with blurred/unreadable pseudo-text, unlabeled municipal street-map fragment, plain red-brown folder, desk lamp, subdued red-brown and charcoal palette, 1990s documentary realism, no weapons in foreground, no people, no readable text, no insignia. The tone should signal political risk and civilian danger without showing violence. Do not include large warning stamps, caution labels, classification labels, readable headlines, logos, watermarks, or symbolic icons. Leave the left third visually quiet for modal title overlay. NEGATIVE: WARNING, WAR, CAUTION, DANGER, SECRET, TOP SECRET, readable text, readable labels, readable stamps, readable handwriting, large block letters, logo, watermark, signature, warning triangle, icon, insignia, weapons, blood, gore, soldiers, masked men, dramatic action scene, UI overlay, black panel.
+```
+
+**`decision_header_counter_offer.webp`**
+```
+Generate a 1536 x 512 px modal header strip. Scene: negotiation table detail with two blank proposal folders, crossed-out but unreadable pencil markings, a Bosnia-like territorial map under translucent tracing paper, coffee cup, pencil, muted office light, 1990s diplomatic documentary realism, no people, no flags, no readable text. The map must suggest Bosnia/Balkan partition lines, not the United States or any modern national map. Leave the left third as plain wood or shadowed paper for modal title overlay. Do not include any embedded title, subtitle, poster text, typography, UI mockup, or watermark. NEGATIVE: readable text, embedded title, subtitle, poster layout, typography, negotiation text, United States map, U.S. state map, modern national map, flags, logos, watermark, signature, UI overlay, black panel, people, hands, dramatic courtroom scene, clean stock photo, colorful infographic map.
+```
+
+### Packet thumbnails (640×480) → `src/ui/map/assets/presidential_desk/packet_thumbnails/`
+
+> Shared negative folded into each: *readable text/numbers/labels, faction names, code names, insignia, flags, logos, watermarks, signatures, UI overlay, HUD, menu, black panel, title/subtitle text, poster layout, infographic, modern computer, keyboard, printer, calculator, smartphone, people, hands, faces, gore, weapons, soldiers, battlefield action, clean stock photo, bright modern office.*
+
+**`packet_thumb_event_decision.webp`** — `Generate a 640 x 480 px packet-card thumbnail. Scene: tight close-up of an urgent but unlabeled presidential decision folder on a worn wooden desk, paperclip, blank cover sheet, blurred pseudo-typed blocks that cannot be read, muted amber desk lamp spill, 1990s government-office documentary realism. Leave one quiet darker corner for app-rendered urgency badges. No people, no readable text, no warning stamps, no UI elements.` + shared negative.
+
+**`packet_thumb_peace_plan.webp`** — `Generate a 640 x 480 px packet-card thumbnail. Scene: diplomatic peace-plan packet with two blank proposal folders, a folded Bosnia-like territorial map under translucent tracing paper, fountain pen, restrained archival paper tones, soft office daylight. The map must suggest Balkan negotiation geography without readable place names or modern national borders. No flags, no readable labels, no embedded title, no people.` + shared negative.
+
+**`packet_thumb_reserve_request.webp`** — `Generate a 640 x 480 px packet-card thumbnail. Scene: military staff request paperwork beside a 1990s field radio handset, dull green office telephone, blank roster sheet with unreadable pseudo-lines, pencil marks on a map fragment, subdued staff-office lighting. No insignia, no unit names, no readable numbers, no soldiers, no weapons, no modern electronics.` + shared negative.
+
+**`packet_thumb_officer_matter.webp`** — `Generate a 640 x 480 px packet-card thumbnail. Scene: personnel matter file on a desk, blank tabbed folder, obscured black photo placeholder, service papers with unreadable pseudo-text, brass lamp edge, dusty 1990s office realism. No real faces, no readable classification stamps, no PERSONNEL text, no SECRET text, no computer monitor, no printer, no keyboard.` + shared negative.
+
+**`packet_thumb_paramilitary.webp`** — `Generate a 640 x 480 px packet-card thumbnail. Scene: internal security incident file, blank red-brown folder, municipal street-map fragment with no place names, clipped memo pages with blurred pseudo-text, desk lamp shadow, dark restrained palette. Avoid sensational imagery. No large warning stamps, no readable caution labels, no police logos, no weapons, no gore, no people, no action scene.` + shared negative.
+
+**`packet_thumb_intelligence.webp`** — `Generate a 640 x 480 px packet-card thumbnail. Scene: intelligence packet on a desk with blurred reconnaissance print shapes, black redaction strips, brass magnifying glass, manila folder, paperclips, low archival light. The images and text must remain unreadable at full size. No real locations, no target labels, no agency logos, no readable codes, no people.` + shared negative.
+
+**`packet_thumb_convoy.webp`** — `Generate a 640 x 480 px packet-card thumbnail. Scene: humanitarian access packet with blank route map, weathered paperwork, pencil, paperclips, and a worn wooden desktop, cool daylight from a window. Use unlabeled route lines and blank form shapes only. No manifest table, no checklist grid, no aid organization logos, no readable handwriting, no stamps, no calculators, no people.` + shared negative.
+
+### Consequence stills (1280×720) → `src/ui/map/assets/presidential_desk/consequence_stills/`
+
+> Shared negative folded into each: *readable text/numbers, headlines, captions, subtitles, labels, faction names, code names, insignia, flags, logos, watermarks, signatures, UI overlay, HUD, menu, black panel, poster layout, propaganda, modern computer, keyboard, printer, smartphone, people, faces, soldiers, weapons, gore, explosions, battlefield action, dramatic cinematic battle scene, clean stock photo, bright modern office.*
+
+**`consequence_negotiated_settlement.webp`** — `Generate a 1280 x 720 px Records/Chronicle consequence still. Scene: empty negotiation table after a late meeting, two blank proposal folders left open, Bosnia-like territorial map sheets turned partly face-down, ashtray, pencil, cold coffee cup, dim practical office lighting, 1990s archival documentary realism. Leave a calm negative-space area for app-rendered record text. No readable text, no flags, no people, no triumphant symbolism.` + shared negative.
+
+**`consequence_reserve_deployment.webp`** — `Generate a 1280 x 720 px Records/Chronicle consequence still. Scene: staff desk after reserve deployment approval, field radio handset resting idle, stacked blank movement papers, map with unreadable grease-pencil arrows, subdued green-brown military-office lighting, chair pushed back. It should imply the order has gone out without showing combat. No soldiers, no weapons, no insignia, no unit names, no readable numbers.` + shared negative.
+
+**`consequence_public_pressure.webp`** — `Generate a 1280 x 720 px Records/Chronicle consequence still. Scene: government office desk with muted press-clipping shapes, telephone, unopened envelopes, blurred newspaper columns that cannot be read, soft grey daylight, restrained 1990s archival realism. The mood should suggest political pressure and scrutiny without a literal headline. No legible headlines, no protest crowd, no flags, no TV screen, no people.` + shared negative.
+
+**`consequence_humanitarian_access.webp`** — `Generate a 1280 x 720 px Records/Chronicle consequence still. Scene: aid-access paperwork and an unlabeled route map on a worn desk, pencil laid across the map, blank form pages, paperclips, quiet daylight, desaturated documentary palette. It should feel administrative and sober, not heroic. No aid logos, no manifest table, no checklist grid, no readable handwriting, no convoy vehicles, no people.` + shared negative.
+
+**`consequence_personnel_change.webp`** — `Generate a 1280 x 720 px Records/Chronicle consequence still. Scene: closed personnel folder after a staff decision, blank tab, obscured photo placeholder, desk lamp pool of light, files slightly rearranged, restrained 1990s office realism. It should imply a personnel action has been recorded, not expose a face or identity. No real faces, no readable classification stamps, no PERSONNEL text, no SECRET text, no modern computer, no printer.` + shared negative.
+
 ## Surfaces note (for whoever reconciles the GUI)
 
 Two surfaces reference card art and have **diverged**:
