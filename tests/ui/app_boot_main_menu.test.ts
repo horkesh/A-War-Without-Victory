@@ -102,6 +102,24 @@ describe('App boot — Main Menu first, faction choice menu-only (#80)', () => {
         // attach to an already-running session (no SidePicker).
         expect(app).toContain("} else if (params.has('desktop_window')) {");
     });
+
+    it('routes a ?shellHandoff=... deep-link to the game shell after applying it (#138 follow-up)', () => {
+        // warroom.ts `showTacticalMapScene` opens the tactical map with only
+        // `?shellHandoff=...` (no `view=game`). With the boot-to-menu default the
+        // handoff command would be applied but the screen would stay on the Main
+        // Menu, hiding the requested Army HQ/Codex panel behind it. The consumer
+        // effect must switch to the game shell once the command is handled.
+        expect(app).toContain('applyShellHandoffCommand(useGameStore.getState(), command);');
+        // The setAppScreen('game') must live inside the shellHandoff effect,
+        // before the `shellHandoff` param is stripped from the URL.
+        const handoffIdx = app.indexOf('applyShellHandoffCommand(useGameStore.getState(), command);');
+        const deleteIdx = app.indexOf("params.delete('shellHandoff');");
+        const routeIdx = app.indexOf("setAppScreen('game');", handoffIdx);
+        expect(handoffIdx).toBeGreaterThan(-1);
+        expect(deleteIdx).toBeGreaterThan(handoffIdx);
+        expect(routeIdx).toBeGreaterThan(handoffIdx);
+        expect(routeIdx).toBeLessThan(deleteIdx);
+    });
 });
 
 describe('gameStore — no eager loaded-state clear (#138 follow-up)', () => {

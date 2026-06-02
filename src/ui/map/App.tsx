@@ -1011,6 +1011,11 @@ function App() {
     const command = decodeShellHandoffCommand(params.get('shellHandoff'));
     if (!command) return;
     applyShellHandoffCommand(useGameStore.getState(), command);
+    // Task #80 — a `?shellHandoff=...` deep-link (warroom.ts `showTacticalMapScene`)
+    // opens the tactical map with no `view=game`. With the boot-to-menu default
+    // the screen would stay on the Main Menu and hide the requested panel behind
+    // it, so route to the in-game shell once the handoff command is applied.
+    setAppScreen('game');
 
     params.delete('shellHandoff');
     const nextQuery = params.toString();
