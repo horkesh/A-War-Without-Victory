@@ -4,6 +4,7 @@ import type { LoadedGameState } from '../data/types';
 import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
+import { t } from '../i18n';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
 
 interface OfficerMatterModalProps {
@@ -46,25 +47,25 @@ export function OfficerMatterModal({ itemId, state, onClose, onOpenPersonnel }: 
       {headerImage && (
         <DecisionModalImageHeader
           imageUrl={headerImage}
-          imageAlt="Personnel Office"
-          eyebrow="Personnel Office"
-          title="Personnel matter"
+          imageAlt={t('decisionModal.officer.imageAlt')}
+          eyebrow={t('decisionModal.officer.eyebrow')}
+          title={t('decisionModal.officer.title')}
           titleId="officer-matter-modal-title"
-          description={event ? 'A commander or staff matter has been placed on your desk. Acknowledge it or open the personnel dossier for assignment details.' : 'The personnel matter is no longer pending.'}
+          description={event ? t('decisionModal.officer.descriptionPending') : t('decisionModal.officer.descriptionResolved')}
           accentClassName="text-amber-300"
         />
       )}
       {event && (
         <div className="space-y-2 px-5 py-4 text-[12px]">
-          <div className="font-bold text-text-primary">{event.officer_name ?? event.current_commander_name ?? 'Staff officer'}</div>
+          <div className="font-bold text-text-primary">{event.officer_name ?? event.current_commander_name ?? t('decisionModal.officer.staffFallback')}</div>
           <div className="text-[10px] uppercase tracking-[0.12em] text-text-muted">{event.type.replace(/_/g, ' ')}</div>
           {event.reason && <div className="border border-panel-border bg-panel-card px-3 py-3 text-text-secondary">{event.reason}</div>}
         </div>
       )}
       <div className="flex justify-end gap-2 border-t border-panel-border bg-black/20 px-5 py-3">
-        <button type="button" onClick={onClose} className="border border-panel-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary">Close</button>
-        <button type="button" onClick={acknowledge} disabled={!event} className="border border-panel-border bg-black/20 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-primary disabled:opacity-40">Acknowledge</button>
-        <button type="button" onClick={onOpenPersonnel} disabled={!event} className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-accent-gold disabled:opacity-40">Open personnel</button>
+        <button type="button" onClick={onClose} className="border border-panel-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary">{t('decisionModal.officer.close')}</button>
+        <button type="button" onClick={acknowledge} disabled={!event} className="border border-panel-border bg-black/20 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-primary disabled:opacity-40">{t('decisionModal.officer.acknowledge')}</button>
+        <button type="button" onClick={onOpenPersonnel} disabled={!event} className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-accent-gold disabled:opacity-40">{t('decisionModal.officer.openPersonnel')}</button>
       </div>
     </Modal>
   );

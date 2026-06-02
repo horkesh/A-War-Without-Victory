@@ -1,6 +1,7 @@
 import type { LoadedGameState } from '../../data/types';
 import { buildDecisionConsequenceLedger } from '../../data/decisionConsequenceLedger';
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets';
+import { t } from '../../i18n';
 import { turnToDateString } from '../../utils/formatters';
 
 export interface ConsequenceStripProps {
@@ -17,12 +18,12 @@ export function ConsequenceStrip({ state, onOpenRecords }: ConsequenceStripProps
   const decisionRecords = buildDecisionConsequenceLedger(state, 2);
 
   return (
-    <section className="border-t border-panel-border/70 pt-3" aria-label="Recent consequences">
+    <section className="border-t border-panel-border/70 pt-3" aria-label={t('desk.consequences.ariaLabel')}>
       <div className="flex items-center justify-between gap-3">
         <div>
-          <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-text-muted">Recent Consequences</div>
+          <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-text-muted">{t('desk.consequences.heading')}</div>
           <div className="mt-1 text-[11px] text-text-secondary">
-            {state ? `Last filed record: ${turnToDateString(turn)}` : 'No campaign record loaded.'}
+            {state ? t('desk.consequences.lastFiled', { date: turnToDateString(turn) }) : t('desk.consequences.noRecord')}
           </div>
         </div>
         <button
@@ -30,24 +31,24 @@ export function ConsequenceStrip({ state, onOpenRecords }: ConsequenceStripProps
           onClick={onOpenRecords}
           className="border border-panel-border bg-black/20 px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.13em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
         >
-          Records
+          {t('desk.consequences.records')}
         </button>
       </div>
       <div className="mt-3 grid grid-cols-4 gap-2">
         <div className="border border-panel-border/70 bg-black/20 px-2 py-2">
-          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Battles</div>
+          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.consequences.battles')}</div>
           <div className="mt-1 text-[16px] font-bold text-text-primary">{battleCount}</div>
         </div>
         <div className="border border-panel-border/70 bg-black/20 px-2 py-2">
-          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Displaced</div>
+          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.consequences.displaced')}</div>
           <div className="mt-1 text-[16px] font-bold text-text-primary">{displacement}</div>
         </div>
         <div className="border border-panel-border/70 bg-black/20 px-2 py-2">
-          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Events</div>
+          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.consequences.events')}</div>
           <div className="mt-1 text-[16px] font-bold text-text-primary">{notableEvents}</div>
         </div>
         <div className="border border-panel-border/70 bg-black/20 px-2 py-2">
-          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Decisions</div>
+          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.consequences.decisions')}</div>
           <div className="mt-1 text-[16px] font-bold text-text-primary">{decisionRecords.length}</div>
         </div>
       </div>
