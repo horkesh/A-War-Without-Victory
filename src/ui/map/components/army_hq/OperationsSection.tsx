@@ -663,8 +663,8 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                         type="text"
                         value={requestTargetOsid}
                         onChange={(e) => { setRequestTargetOsid(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
-                        placeholder="Objective settlement (e.g. Bihać)"
-                        aria-label="Request operation objective settlement"
+                        placeholder={t('operationsSection.requestOp.placeholder')}
+                        aria-label={t('operationsSection.requestOp.aria')}
                         className="flex-1 text-[11px] font-mono bg-panel-bg border border-panel-border/50 rounded px-2 py-1 text-text-primary"
                     />
                     <button
@@ -672,10 +672,10 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                         onClick={handleRequestOp}
                         disabled={!canRequestOp || requestTargetOsid.trim().length === 0 || objectionLoading || pendingObjection !== null}
                         title={canRequestOp
-                            ? `Direct this corps to take the objective (cost ${REQUEST_OP_COST} command authority; current ${authCurrent}). The engine selects the force + axis.`
-                            : `Insufficient command authority (need ${REQUEST_OP_COST}, have ${authCurrent}).`}
+                            ? t('operationsSection.requestOp.title', { cost: REQUEST_OP_COST, current: authCurrent })
+                            : t('operationsSection.requestOp.insufficientTitle', { cost: REQUEST_OP_COST, current: authCurrent })}
                         className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-panel-border/50 text-text-primary disabled:opacity-40 hover:bg-panel-bg">
-                        {objectionLoading ? 'Consulting…' : `Request op (${REQUEST_OP_COST})`}
+                        {objectionLoading ? t('operationsSection.requestOp.consulting') : t('operationsSection.requestOp.button', { cost: REQUEST_OP_COST })}
                     </button>
                 </div>
             )}
@@ -686,13 +686,13 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
             {impossibleReason && (
                 <div
                     role="alert"
-                    aria-label="Directive cannot be issued"
+                    aria-label={t('operationsSection.requestOp.cannotIssueAria')}
                     className="mb-3 mx-1 p-3 rounded border border-panel-border/60 bg-panel-bg/60">
                     <p className="text-[9px] font-bold uppercase tracking-wider text-text-secondary mb-1">
-                        Cannot issue
+                        {t('operationsSection.requestOp.cannotIssueHeading')}
                     </p>
                     <p className="text-[11px] text-text-primary">
-                        This corps cannot mount that operation — {plainReason(impossibleReason)}. No command authority was spent.
+                        {t('operationsSection.requestOp.cannotIssueBody', { reason: plainReason(impossibleReason) })}
                     </p>
                 </div>
             )}
@@ -702,14 +702,14 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
             {pendingObjection && (
                 <div
                     role="alertdialog"
-                    aria-label="Commander objection"
+                    aria-label={t('operationsSection.requestOp.objectionAria')}
                     className={`mb-3 mx-1 p-3 rounded border ${
                         pendingObjection.view.severity === 'abort'
                             ? 'border-red-500/50 bg-red-500/5'
                             : 'border-amber-500/50 bg-amber-500/5'
                     }`}>
                     <p className="text-[9px] font-bold uppercase tracking-wider text-amber-400 mb-1">
-                        {pendingObjection.view.severity === 'abort' ? 'Commander recommends against' : 'Commander urges delay'}
+                        {pendingObjection.view.severity === 'abort' ? t('operationsSection.requestOp.recommendsAgainst') : t('operationsSection.requestOp.urgesDelay')}
                     </p>
                     <p className="text-[11px] italic text-text-primary mb-2">{pendingObjection.view.prose}</p>
                     <div className="flex items-center gap-2">
@@ -718,16 +718,16 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                             onClick={handleForceAnyway}
                             disabled={pendingObjection.view.rejection_reason !== undefined}
                             title={pendingObjection.view.rejection_reason !== undefined
-                                ? 'The operation cannot be formed as ordered — there is nothing to force.'
-                                : `Override the commander's judgment and order the operation anyway. He will be cowed by repeated overrides.`}
+                                ? t('operationsSection.requestOp.forceAnywayDisabledTitle')
+                                : t('operationsSection.requestOp.forceAnywayTitle')}
                             className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-red-500/50 text-red-400 disabled:opacity-40 hover:bg-red-500/10">
-                            Force anyway
+                            {t('operationsSection.requestOp.forceAnyway')}
                         </button>
                         <button
                             type="button"
                             onClick={handleStandDownObjection}
                             className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-panel-border/50 text-text-primary hover:bg-panel-bg">
-                            Stand down
+                            {t('operationsSection.requestOp.standDown')}
                         </button>
                     </div>
                 </div>

@@ -7,6 +7,8 @@
  */
 import type { LoadedGameState } from '../data/types';
 import { getPlayerSafePoliticalFactionName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { t } from '../i18n';
+import type { MessageKey } from '../i18n';
 
 const PATRON_LABELS: Record<string, string> = {
     RBiH: 'International Community',
@@ -23,18 +25,18 @@ function negotiatingCapitalBand(composite: number): string {
 }
 
 /** Canonical dimension display — matches strategic_dimensions.ts DIMENSION_WEIGHTS keys. */
-const DIMENSION_LABELS: Record<string, { label: string; color: string }> = {
-    military_credibility: { label: 'Military Credibility', color: '#4a6a8a' },
-    territorial_legitimacy: { label: 'Territorial Legitimacy', color: '#6a8a4a' },
-    international_standing: { label: 'Int\'l Standing', color: '#c4a35a' },
-    patron_confidence: { label: 'Patron Confidence', color: '#d4a055' },
-    internal_cohesion: { label: 'Internal Cohesion', color: '#7a5a8a' },
-    negotiating_leverage: { label: 'Negotiating Leverage', color: '#3a6a4a' },
+const DIMENSION_LABELS: Record<string, { labelKey: MessageKey; color: string }> = {
+    military_credibility: { labelKey: 'diplomacyOverview.dimension.military_credibility', color: '#4a6a8a' },
+    territorial_legitimacy: { labelKey: 'diplomacyOverview.dimension.territorial_legitimacy', color: '#6a8a4a' },
+    international_standing: { labelKey: 'diplomacyOverview.dimension.international_standing', color: '#c4a35a' },
+    patron_confidence: { labelKey: 'diplomacyOverview.dimension.patron_confidence', color: '#d4a055' },
+    internal_cohesion: { labelKey: 'diplomacyOverview.dimension.internal_cohesion', color: '#7a5a8a' },
+    negotiating_leverage: { labelKey: 'diplomacyOverview.dimension.negotiating_leverage', color: '#3a6a4a' },
 };
 
 function PatronGauge({ faction, authority }: { faction: string; authority: number }) {
     const pct = Math.min(100, Math.max(0, authority));
-    const level = pct >= 75 ? 'FORCES' : pct >= 50 ? 'DEMANDS' : pct >= 25 ? 'URGES' : 'RECOMMENDS';
+    const level = pct >= 75 ? t('diplomacyOverview.patron.forces') : pct >= 50 ? t('diplomacyOverview.patron.demands') : pct >= 25 ? t('diplomacyOverview.patron.urges') : t('diplomacyOverview.patron.recommends');
     const color = pct >= 75 ? '#c24040' : pct >= 50 ? '#c48030' : pct >= 25 ? '#c4a030' : '#4a8a4a';
 
     return (
@@ -63,7 +65,7 @@ function DimensionBar({ dimKey, value }: { dimKey: string; value: number }) {
     return (
         <div className="flex items-center gap-2">
             <div className="w-28 text-[10px] text-[#6a5a40] shrink-0" style={{ fontFamily: 'Courier New, monospace' }}>
-                {dim.label}
+                {t(dim.labelKey)}
             </div>
             <div className="flex-1 h-2.5 bg-[#d8d0c4] rounded overflow-hidden border border-[#c8b898]/50">
                 <div className="h-full rounded transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: dim.color }} />
@@ -95,11 +97,11 @@ export function DiplomacyOverview({ strategicDimensions, negotiatingCapital, pat
             {patronOverride && Object.keys(patronOverride).length > 0 && (
                 <div>
                     <div className="text-[9px] uppercase tracking-widest text-[#8a7a60] font-bold mb-2"
-                         title="How hard your patron is pushing — from a quiet RECOMMENDS up to an outright FORCES.">
-                        Patron Override Authority
+                         title={t('diplomacyOverview.patronOverrideAuthority.title')}>
+                        {t('diplomacyOverview.patronOverrideAuthority')}
                     </div>
                     <div className="text-[9px] text-[#8a7a60] italic mb-2 -mt-1">
-                        How hard your patron is pushing on your decisions.
+                        {t('diplomacyOverview.patronOverrideAuthority.subtitle')}
                     </div>
                     <div className="space-y-1.5">
                         {Object.entries(patronOverride).sort((a, b) => a[0].localeCompare(b[0])).map(([faction, auth]) => (
@@ -113,11 +115,11 @@ export function DiplomacyOverview({ strategicDimensions, negotiatingCapital, pat
             {hasDims && factions.length > 0 && (
                 <div>
                     <div className="text-[9px] uppercase tracking-widest text-[#8a7a60] font-bold mb-2"
-                         title="The standing each side brings to the negotiating table, scored 0-100 from six strategic dimensions.">
-                        Negotiation Capital
+                         title={t('diplomacyOverview.negotiationCapital.title')}>
+                        {t('diplomacyOverview.negotiationCapital')}
                     </div>
                     <div className="text-[9px] text-[#8a7a60] italic mb-2 -mt-1">
-                        Bargaining strength at the table (0-100), built from the six dimensions below.
+                        {t('diplomacyOverview.negotiationCapital.subtitle')}
                     </div>
                     {factions.map(faction => {
                         const dims = dimensionsByFaction[faction];
@@ -147,7 +149,7 @@ export function DiplomacyOverview({ strategicDimensions, negotiatingCapital, pat
 
             {!hasDims && !patronOverride && (
                 <div className="text-[11px] text-[#8a7a60] italic">
-                    Diplomatic intelligence not yet available.
+                    {t('diplomacyOverview.notAvailable')}
                 </div>
             )}
         </div>

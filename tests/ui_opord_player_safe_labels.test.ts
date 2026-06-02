@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildOpordDisplayModel } from '../src/ui/map/components/ops_modal/opordDisplay';
+import { enMessages } from '../src/ui/map/i18n/messages.en';
 import { readFileSync } from 'node:fs';
 import type { OpsPlanState } from '../src/ui/map/components/ops_modal/types';
 import { formatPosture, toTitleCase } from '../src/ui/map/utils/formatters';
@@ -147,8 +148,12 @@ describe('Army-HQ raw enum + faction-slug resolution (QA Batch F)', () => {
         expect(opsSource).toContain('AXIS_STATUS_LABELS[axis.status]');
         expect(opsSource).toContain('GRADE_FACTOR_LABELS[key]');
         // Request-op input no longer surfaces the "OSID" slug to the player.
+        // The placeholder literal is now i18n-keyed (i18n Car 2); the player-safe
+        // wording is pinned on the EN message value below so it can't silently regress.
         expect(opsSource).not.toContain('Objective OSID (e.g. bihac_1)');
-        expect(opsSource).toContain('Objective settlement (e.g. Bihać)');
+        expect(opsSource).toContain("t('operationsSection.requestOp.placeholder')");
+        expect(enMessages['operationsSection.requestOp.placeholder']).toContain('settlement');
+        expect(enMessages['operationsSection.requestOp.placeholder']).not.toContain('OSID');
     });
 
     it('humanizes battle/engagement outcome chips in Sectors/Orbat sections', () => {
