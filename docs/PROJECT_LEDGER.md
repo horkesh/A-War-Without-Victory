@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-02] investigation+ADR: Standing OG defensive-attrition fault -> ADR-0007 (712th fix parked)
+
+**Type:** Engine-soundness finding + design ADR (no code shipped). Triggered by the 712th Mountain Bde appearing with a sector in Bratunac (phantom `home_osid` `op:travnik:krusevo_brdo_i` -> recruitment placement fallback seated it on the RBiH Bratunac enclave pocket; fix -> `op:travnik:turbe_2`). Fixing it surfaced a 2000+-run combat fault: defensive **fatigue** is dumped on the single front-edge brigade holding a contested OSID, never shared across the OG roster - reactive defense (`attack_resolution_osid.ts:626-691`) shares power+casualties by weight but fatigue lands only on the primary (`attack_resource_aftermath.ts:101`), and the reactive roster is `assigned_brigade_ids`-only (line 637). Brigades grind to morale0/cohesion0 over 30+ weeks (7th Viteska Muslim 38 wks at `op:kakanj:brnjic_2` -> 0/0) while full-strength sectormates fight 0 weeks (RBiH rear 0/8, HRHB 1/13). Undetected for 2000+ runs because calibration measures territory, not brigade health.
+
+**ADR-0007 "Standing OG Defensive Model"** (Proposed; Pyrrhic-panel revised, unanimous Endorse-with-changes) - defensive twin of ADR-0005's offensive TGs. Phases (re-sequenced): C shared-attrition combat (3-fn MVS `ENABLE_SHARED_SECTOR_DEFENSE`, byte-identical-off) -> B reserve-commitment (depletable depth; do NOT abolish the rear pool - Historian/BB) -> A persistent membership (last/optional). 6 guardrails (war-cost gate, cap the uncapped enclave path `692-708`, weight>0 attrition, unit-quality resilience, active-op precedence, legibility). Flag-gated default-off; deliberate re-floor at Phase D.
+
+**712th fix PARKED:** the OOB fix (`turbe_2`) + 52w re-floor are correct but tip a 3rd 3rd-Corps brigade (7th Viteska) over the `integration_formation_integrity` <=2 dissolution threshold (the fault's symptom). PR #143 merged-then-reverted; handoff recorded `main` clean at `8fbdcc0d`, while local `main` is now `b2a96d9a`. Rides in once Phase B/C land. Branch `claude/prebake-placement-and-rehome-idempotency` (`8dab69a9` oob, `8228b7e1` re-floor, `76eaa39f` ADR).
+
+**Files:** `docs/20_engineering/ADR/ADR-0007-standing-og-defensive-model.md`; evidence run `runs/_prebake_40w_run1`; no engine/data code shipped.
+
+---
+
 ## [2026-06-02] fix/i18n: boot-to-Main-Menu deep-link/auto-pop hardening (#138) + i18n Car 2 (#141) + Car 3 (#142)
 
 **Type:** UI-layer batch (boot routing + player-facing string i18n). **All `src/ui/map/**` + EN-catalog only → NO sim/scenario/calibration/determinism touch; historical 40w/52w/188w byte-identical by construction.** main HEAD `d0488874`. Three in-flight PRs driven to clean closure (green CI + clean Codex pass each) before the Codex-overseer handoff.
