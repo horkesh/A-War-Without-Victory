@@ -8,6 +8,7 @@ import { getPlayerFacingFaction } from '../../shared/playerFacingLabels';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 import { Z } from '../../shared/zIndex';
 import { t } from '../i18n';
+import { openArmyHQRecordsSubTab } from '../utils/shellNavigation';
 import { BranchTagBadgeRow } from './BranchTagBadgeRow';
 import type { EventDefinition } from '../../../sim/events/event_types';
 
@@ -77,7 +78,6 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
   const playerTerritoryTrend = playerFaction ? getTrendArrow(playerFaction) : '';
 
   // Map mode
-  const setStrategicDashboardOpen = useGameStore((s) => s.setStrategicDashboardOpen);
   const devMode = useGameStore((s) => s.devMode);
   const LAYER_TOGGLES = devMode ? DEV_LAYER_TOGGLES : LIVE_LAYER_TOGGLES;
   const mapMode = useGameStore((s) => s.mapMode);
@@ -214,13 +214,15 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
 
       <div className="w-[1px] h-4 bg-white/10 shrink-0" />
 
-      {/* R6: Territory — stacked horizontal progress bar. R14: Click opens Strategic Dashboard. */}
+      {/* R6: Territory — stacked horizontal progress bar. Click opens The War's
+          Record (Army HQ RECORDS tab), home of the territory-over-time trend
+          chart re-hosted from the retired Strategic Dashboard. */}
       <button
         type="button"
         className="hidden md:flex items-center gap-2 px-2 shrink-0 cursor-pointer hover:bg-white/5 rounded transition-colors"
-        onClick={() => setStrategicDashboardOpen(true)}
-        aria-label={t('statusStrip.openStrategicDashboard')}
-        title={t('statusStrip.openStrategicDashboard')}
+        onClick={() => openArmyHQRecordsSubTab(useGameStore.getState(), 'aftermath')}
+        aria-label={t('statusStrip.openWarRecord')}
+        title={t('statusStrip.openWarRecord')}
       >
         {/* Player-safe bar */}
         <div className="flex h-[14px] rounded-sm overflow-hidden w-[180px] border border-white/10" title={t('statusStrip.territoryControlTitle')}>

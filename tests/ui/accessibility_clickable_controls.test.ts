@@ -15,7 +15,6 @@ const FILES = [
   'SettlementDetailContent.tsx',
   'SettingsScreen.tsx',
   'StackExpansionOverlay.tsx',
-  'StrategicDashboard.tsx',
   'chronicle/ChronicleSpine.tsx',
   'chronicle/WrappedOverlay.tsx',
 ] as const;

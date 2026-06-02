@@ -79,7 +79,6 @@ const MIGRATED_FILES = [
   'src/ui/map/components/SettingsScreen.tsx',
   'src/ui/map/components/SidePickerOverlay.tsx',
   'src/ui/map/components/StackExpansionOverlay.tsx',
-  'src/ui/map/components/StrategicDashboard.tsx',
   'src/ui/map/components/Tooltip.tsx',
   'src/ui/map/components/TurnAftermathModal.tsx',
   'src/ui/map/components/VerdictScreen.tsx',
