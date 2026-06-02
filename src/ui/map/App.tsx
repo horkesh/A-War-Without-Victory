@@ -75,6 +75,10 @@ import { loadLatestRunSaveAsText, loadEventDefinitions, loadEventDefinitionsFull
 import type { EventDefinition } from '../../sim/events/event_types';
 import { buildConsequenceReceipts, receiptsRealizedOnTurn } from './data/consequenceReceipts';
 import { buildForcedOpReceipts, forcedOpReceiptsRealizedOnTurn } from './data/forcedOpReceipts';
+import {
+  buildOfficerResentmentReceipts,
+  officerResentmentReceiptsRealizedOnTurn,
+} from './data/officerResentmentReceipts';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
 import { getPlayerSafeMilitaryFactionName } from './utils/playerSafeText';
@@ -456,6 +460,23 @@ function App() {
   const aftermathForcedOps = useMemo(
     () => (turnAftermath ? forcedOpReceiptsRealizedOnTurn(forcedOpReceipts, turnAftermath.turn) : []),
     [forcedOpReceipts, turnAftermath],
+  );
+
+  // Force-op HUMAN-COST half: when the president forces an op past a corps
+  // commander's objection, the engine bumps that CO's override/cowed substrate.
+  // Surface the command-loyalty cost. Player-origin by construction (the override
+  // fields can only be written by a player force-launch over objection);
+  // bot/historical → []. Read-only.
+  const officerResentmentReceipts = useMemo(
+    () => buildOfficerResentmentReceipts(loadedGameState?.rawGameState),
+    [loadedGameState?.rawGameState],
+  );
+  const aftermathOfficerResentment = useMemo(
+    () =>
+      turnAftermath
+        ? officerResentmentReceiptsRealizedOnTurn(officerResentmentReceipts, turnAftermath.turn)
+        : [],
+    [officerResentmentReceipts, turnAftermath],
   );
 
   // Reset dismissal/acknowledgement state when a new save is loaded.
@@ -1132,6 +1153,7 @@ function App() {
         view={turnAftermath}
         consequences={aftermathConsequences}
         forcedOps={aftermathForcedOps}
+        officerResentment={aftermathOfficerResentment}
         onClose={() => setTurnAftermathOpen(false)}
         onOpenInbox={openInboxHome}
         onOpenSummary={() => {

@@ -8,6 +8,7 @@
 import type { TurnAftermathTopAction, TurnAftermathView } from '../data/turnAftermath';
 import type { ConsequenceReceipt } from '../data/consequenceReceipts';
 import type { ForcedOpReceipt } from '../data/forcedOpReceipts';
+import type { OfficerResentmentReceipt } from '../data/officerResentmentReceipts';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { t, type MessageKey } from '../i18n';
@@ -36,6 +37,14 @@ interface TurnAftermathModalProps {
    * Empty/absent → section not rendered.
    */
   forcedOps?: readonly ForcedOpReceipt[];
+  /**
+   * Officer-resentment receipts whose override landed on this turn. Closes the
+   * force-op HUMAN-COST loop: each entry names a corps commander the president
+   * overrode by force-launching past his objection, and the command-loyalty cost
+   * it incurred (running override count, and whether the CO is now cowed). Sober
+   * tone, never celebratory. Empty/absent → section not rendered.
+   */
+  officerResentment?: readonly OfficerResentmentReceipt[];
 }
 
 function formatSigned(value: number): string {
@@ -92,6 +101,7 @@ export function TurnAftermathModal({
   onOpenCodex,
   consequences,
   forcedOps,
+  officerResentment,
 }: TurnAftermathModalProps) {
   if (!view) return null;
 
@@ -99,6 +109,7 @@ export function TurnAftermathModal({
   const signalPreview = view.signals.slice(0, 4);
   const realizedConsequences = consequences ?? [];
   const realizedForcedOps = forcedOps ?? [];
+  const realizedOfficerResentment = officerResentment ?? [];
 
   return (
     <Modal
@@ -226,6 +237,42 @@ export function TurnAftermathModal({
                             ? t('turnAftermath.forcedOpObjectives', { count: receipt.objectivesCaptured })
                             : t('turnAftermath.forcedOpNoObjectives'),
                         })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {realizedOfficerResentment.length > 0 && (
+              <div
+                data-testid="turn-aftermath-officer-resentment"
+                className="border border-red-400/30 bg-red-950/15"
+              >
+                <div className="border-b border-red-400/20 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-red-300/80">
+                  {t('officerResentment.realized')}
+                </div>
+                <div className="divide-y divide-white/10">
+                  {realizedOfficerResentment.map((receipt) => (
+                    <div
+                      key={receipt.id}
+                      data-testid="turn-aftermath-officer-resentment-row"
+                      data-receipt-id={receipt.id}
+                      className="px-3 py-2.5 text-[12px] leading-5 text-text-primary/85"
+                    >
+                      {t('officerResentment.overrode', {
+                        officer: receipt.officerName,
+                      })}
+                      <div className="mt-1 text-[10px] leading-4 text-text-secondary/80 italic">
+                        {receipt.newlyCowed && receipt.cowedUntilTurn !== null
+                          ? t('officerResentment.cowed', {
+                              officer: receipt.officerName,
+                              turn: receipt.cowedUntilTurn,
+                            })
+                          : t('officerResentment.resents', {
+                              officer: receipt.officerName,
+                              count: receipt.overrideCount,
+                            })}
                       </div>
                     </div>
                   ))}

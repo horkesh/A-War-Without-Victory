@@ -497,6 +497,12 @@ export const enMessages = {
     'turnAftermath.forcedOpOutcome': 'Outcome: {grade} — {casualties} casualties, {objectives}.',
     'turnAftermath.forcedOpObjectives': '{count} objective(s) taken',
     'turnAftermath.forcedOpNoObjectives': 'no objectives taken',
+    // Officer-resentment receipt (force-op HUMAN-COST half). Sober, factual,
+    // never celebratory — overriding a general spends his loyalty.
+    'officerResentment.realized': 'Command Loyalty Spent This Week',
+    'officerResentment.overrode': 'You overrode {officer}, forcing the operation past his objection.',
+    'officerResentment.resents': '{officer} resents the override ({count} this war); he will be slower to act on his own initiative.',
+    'officerResentment.cowed': '{officer} will now comply without deviation until week {turn} — initiative broken, not earned.',
     'turnAftermath.opOutcome.success': 'success',
     'turnAftermath.opOutcome.partial': 'partial',
     'turnAftermath.opOutcome.failure': 'failure',
