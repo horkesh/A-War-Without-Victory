@@ -1,4 +1,22 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-02] fix/i18n: boot-to-Main-Menu deep-link/auto-pop hardening (#138) + i18n Car 2 (#141) + Car 3 (#142)
+
+**Type:** UI-layer batch (boot routing + player-facing string i18n). **All `src/ui/map/**` + EN-catalog only → NO sim/scenario/calibration/determinism touch; historical 40w/52w/188w byte-identical by construction.** main HEAD `d0488874`. Three in-flight PRs driven to clean closure (green CI + clean Codex pass each) before the Codex-overseer handoff.
+
+**#138 — boot to Main Menu; faction choice menu-only (no auto-pop modal):** the intrusive "CHOOSE YOUR FACTION" modal no longer auto-pops on launch — `appScreen` defaults to `'mainMenu'`, the auto-open SidePicker branch is gone, and the picker is gated on `sidePickerOpen` alone (explicit New Game / Load / warroom handoff) so it still opens over an auto-loaded save; cancel preserves the campaign (no eager state clear, no drop to the loading skeleton). **Four Codex review rounds** caught the consequences of flipping the global boot default to `'mainMenu'` (each a real entry-point that had assumed `'game'`): (1) `?desktop_window=...` packaged tactical windows → route to the game shell; (2) `?shellHandoff=...` warroom deep-links → route to the game shell after the handoff command applies; (3) auto-pop **blocking** modals deferred while on the boot menu — EventDecisionModal auto-launch, EventModal queue population, and PeacePlanModal render now gate on `appScreen !== 'mainMenu'` (allows game + warroom, defers only the menu; effects list `appScreen` as a dep so they re-run after Continue); (4) DaytonNegotiationModal render gated likewise (completing an exhaustive root-modal audit — the `selected*Id` modals are user-triggered/safe). Final Codex pass clean. `tests/ui/app_boot_main_menu.test.ts` (13 cases) pins the contract.
+
+**#141 — i18n Car 2 (directive / diplomacy / army-HQ residual, EN keys):** migrates those surfaces' player-facing strings to `t('...')` over `messages.en.ts` (OperationsSection / DirectiveCard / DiplomacyOverview / PersonnelContent / CommanderSection). The QA-Batch-F label test was reconciled to the new `operationsSection.requestOp.placeholder` key (player-safe EN value pinned: "settlement", not "OSID").
+
+**#142 — i18n Car 3 (Paramilitary Authorization modal, EN keys):** migrates `ParamilitaryReviewModal` fully to `t('paramilitaryReview.*')` (+21 EN keys) — header chrome, request count (singular/plural), estimated-strength/per-request meta, empty state, Allow/Deny/Allow-All/Deny-All/Close/Submit buttons, mode labels, two `setLoadError` messages. EN values byte-identical to the prior literals (incl. the war-crimes-risk framing), pinned by `tests/ui/paramilitary_review_modal_i18n.test.ts`. **EN keys only** (matches Car 1/2); BCS is the owner-gated native pass; parity test `tests/ui_i18n.test.ts` green.
+
+**i18n Car contract (for future batches):** each Car migrates one surface's player-facing strings to EN keys only; BCS deferred to the owner native pass; EN values stay byte-identical to the prior literals (pin with a source-assertion + EN-value test). **Next: Car 4 — `EventDecisionModal`** (its `describeEffect`/`describeDimensionShift` family ~20 grammar-templated effect strings is a coherent sub-domain; deferred from Car 3 to avoid a half-migrated file).
+
+**Boot deep-link contract (for future shell work):** the boot screen is `'mainMenu'`; non-menu deep-links (`?view=game|warroom`, `?desktop_window=...`, `?shellHandoff=...`) must explicitly route to the game/warroom shell; auto-pop **blocking** gameplay modals must gate on `appScreen !== 'mainMenu'`.
+
+**Files:** `docs/PROJECT_LEDGER.md` (this entry); see PRs #138/#141/#142 for per-PR touch (all `src/ui/map/**` + tests).
+
+---
+
 ## [2026-06-02] feat: Presidential Command Surface — directive-issuing + warroom convergence COMPLETE (#115–#124)
 
 **Type:** UI/read-model batch closing the Presidential Command Surface. **All player-only/UI-only or emergent-gated → historical 40w/52w/188w byte-identical** (each PR independently verified `Baseline regression: all scenarios match`). main HEAD `d2193c50`. (The force-op after-receipt #118 has its own entry below.)
