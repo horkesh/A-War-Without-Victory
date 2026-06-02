@@ -125,6 +125,16 @@ function NeedleHintRow({ hint }: { hint: DiplomacyNeedleHintView }) {
 }
 
 export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
+    // Patron Relations reframe: the player's own patron (view.patronStance) leads as the
+    // headline ("what the patron will tolerate / current material support"). Other patrons
+    // (externalActors) are kept as context. General-diplomacy signals (IVP pressureReasons,
+    // activeConsequences, needleHints) are de-emphasised into a "Related Diplomatic Tracks"
+    // section at the bottom — read-model unchanged, presentation reframe only.
+    const hasRelatedTracks =
+        view.pressureReasons.length > 0 ||
+        view.activeConsequences.length > 0 ||
+        view.negotiationTimeline.length > 0 ||
+        view.needleHints.length > 0;
     return (
         <div className="fixed inset-0 z-[70] bg-black/35 backdrop-blur-[1px]" role="presentation">
             <section
@@ -137,40 +147,49 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
                 <header className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
                     <div>
                         <h2 id="diplomacy-panel-title" className="text-[13px] font-mono font-bold uppercase tracking-[0.16em] text-amber-300">
-                            {t('diplomacy.title')}
+                            {t('patronRelations.title')}
                         </h2>
                         <div className="mt-1 text-[10px] font-mono uppercase tracking-[0.12em] text-text-secondary">
-                            {t('diplomacy.subtitle')}
+                            {t('patronRelations.subtitle')}
                         </div>
                     </div>
                     <button
                         type="button"
                         onClick={onClose}
                         className="rounded border border-white/10 px-2 py-1 text-[11px] font-mono font-bold text-text-secondary hover:border-amber-400/40 hover:text-amber-300"
-                        aria-label={t('diplomacy.closePanel')}
+                        aria-label={t('patronRelations.closePanel')}
                     >
                         X
                     </button>
                 </header>
 
                 <div className="space-y-4 overflow-y-auto px-4 py-4">
-                    {!view.hasSignals ? (
-                        <div className="rounded border border-white/10 bg-black/20 p-4">
-                            <div className="text-[12px] font-mono font-bold uppercase tracking-[0.14em] text-text-primary">
-                                {t('diplomacy.noPacket')}
-                            </div>
-                            <p className="mt-2 text-[11px] leading-5 text-text-secondary">
-                                {t('diplomacy.noPacketHelp')}
-                            </p>
-                        </div>
-                    ) : null}
-
                     {view.patronStance ? (
-                        <section aria-label={t('diplomacy.patronStance')}>
-                            <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
-                                {t('diplomacy.patronStance')}
+                        <section aria-label={t('patronRelations.headline')}>
+                            <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-amber-300">
+                                {t('patronRelations.headline')}
                             </div>
                             <ActorRow actor={view.patronStance} primary />
+                        </section>
+                    ) : (
+                        <div className="rounded border border-white/10 bg-black/20 p-4">
+                            <div className="text-[12px] font-mono font-bold uppercase tracking-[0.14em] text-text-primary">
+                                {t('patronRelations.noPatron')}
+                            </div>
+                            <p className="mt-2 text-[11px] leading-5 text-text-secondary">
+                                {t('patronRelations.noPatronHelp')}
+                            </p>
+                        </div>
+                    )}
+
+                    {view.externalActors.length > 0 ? (
+                        <section aria-label={t('patronRelations.otherPatrons')}>
+                            <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
+                                {t('patronRelations.otherPatrons')}
+                            </div>
+                            <div className="space-y-2">
+                                {view.externalActors.map((actor) => <ActorRow key={`${actor.faction}:${actor.patronId}`} actor={actor} />)}
+                            </div>
                         </section>
                     ) : null}
 
@@ -185,61 +204,59 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
                         </section>
                     ) : null}
 
-                    {view.pressureReasons.length > 0 || view.activeConsequences.length > 0 ? (
-                        <section aria-label={t('diplomacy.internationalPressure')}>
-                            <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
-                                {t('diplomacy.internationalPressure')}
-                            </div>
-                            <div className="rounded border border-white/10 bg-black/20 px-3">
-                                <ul>
-                                    {view.pressureReasons.map((reason) => <PressureRow key={reason.key} reason={reason} />)}
-                                </ul>
-                                {view.activeConsequences.length > 0 ? (
-                                    <div className="flex flex-wrap gap-2 border-t border-white/8 py-3">
-                                        {view.activeConsequences.map((item) => (
-                                            <span key={item.id} className="rounded border border-amber-400/25 bg-amber-400/10 px-2 py-1 text-[10px] font-mono uppercase tracking-[0.1em] text-amber-200">
-                                                {item.label}
-                                            </span>
-                                        ))}
-                                    </div>
+                    {hasRelatedTracks ? (
+                        <details className="rounded border border-white/8 bg-black/10 px-3 py-2 [&_summary]:list-none">
+                            <summary className="cursor-pointer text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary/80">
+                                {t('patronRelations.relatedTracks')}
+                            </summary>
+                            <div className="mt-3 space-y-4">
+                                {view.pressureReasons.length > 0 || view.activeConsequences.length > 0 ? (
+                                    <section aria-label={t('diplomacy.internationalPressure')}>
+                                        <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
+                                            {t('diplomacy.internationalPressure')}
+                                        </div>
+                                        <div className="rounded border border-white/10 bg-black/20 px-3">
+                                            <ul>
+                                                {view.pressureReasons.map((reason) => <PressureRow key={reason.key} reason={reason} />)}
+                                            </ul>
+                                            {view.activeConsequences.length > 0 ? (
+                                                <div className="flex flex-wrap gap-2 border-t border-white/8 py-3">
+                                                    {view.activeConsequences.map((item) => (
+                                                        <span key={item.id} className="rounded border border-amber-400/25 bg-amber-400/10 px-2 py-1 text-[10px] font-mono uppercase tracking-[0.1em] text-amber-200">
+                                                            {item.label}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            ) : null}
+                                        </div>
+                                    </section>
+                                ) : null}
+
+                                {view.negotiationTimeline.length > 0 ? (
+                                    <section aria-label="Negotiation timeline">
+                                        <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
+                                            Negotiation Timeline
+                                        </div>
+                                        <div className="rounded border border-white/10 bg-black/20 px-3">
+                                            <ul>
+                                                {view.negotiationTimeline.map((entry) => <TimelineRow key={entry.id} entry={entry} />)}
+                                            </ul>
+                                        </div>
+                                    </section>
+                                ) : null}
+
+                                {view.needleHints.length > 0 ? (
+                                    <section aria-label="What would move the needle">
+                                        <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
+                                            What Moves The Needle
+                                        </div>
+                                        <ul className="space-y-2">
+                                            {view.needleHints.map((hint) => <NeedleHintRow key={hint.id} hint={hint} />)}
+                                        </ul>
+                                    </section>
                                 ) : null}
                             </div>
-                        </section>
-                    ) : null}
-
-                    {view.negotiationTimeline.length > 0 ? (
-                        <section aria-label="Negotiation timeline">
-                            <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
-                                Negotiation Timeline
-                            </div>
-                            <div className="rounded border border-white/10 bg-black/20 px-3">
-                                <ul>
-                                    {view.negotiationTimeline.map((entry) => <TimelineRow key={entry.id} entry={entry} />)}
-                                </ul>
-                            </div>
-                        </section>
-                    ) : null}
-
-                    {view.needleHints.length > 0 ? (
-                        <section aria-label="What would move the needle">
-                            <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
-                                What Moves The Needle
-                            </div>
-                            <ul className="space-y-2">
-                                {view.needleHints.map((hint) => <NeedleHintRow key={hint.id} hint={hint} />)}
-                            </ul>
-                        </section>
-                    ) : null}
-
-                    {view.externalActors.length > 0 ? (
-                        <section aria-label={t('diplomacy.externalActors')}>
-                            <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
-                                {t('diplomacy.externalActors')}
-                            </div>
-                            <div className="space-y-2">
-                                {view.externalActors.map((actor) => <ActorRow key={`${actor.faction}:${actor.patronId}`} actor={actor} />)}
-                            </div>
-                        </section>
+                        </details>
                     ) : null}
                 </div>
             </section>
