@@ -18332,3 +18332,15 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `src/ui/map/App.tsx`, `src/ui/map/components/army_hq/ArmyHQModal.tsx`, `src/ui/map/data/presidentialDecisionRoom.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/presidential_decision_room.test.ts`, `tests/ui_presidential_decision_room_wiring.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-06-02] feat(ui): frame advisor panel as Chief-of-Staff counsel
+
+**Type:** Player-facing copy repurpose for the dormant advisor panel. The old `AI Advisor` title and generic assessment label now render as `Chief-of-Staff Counsel` and `Staff assessment`, preserving the existing panel and IPC substrate while removing generic AI terminology from the product-facing surface.
+
+**Determinism / scope:** UI copy/test/docs only. No external advisor call was added, and no sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, command-authority, or directive mechanics changed.
+
+**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui/ai_advisor_panel.test.ts --reporter=dot` failed because the rendered panel still contained `AI Advisor`. Green proof: `node node_modules/vitest/vitest.mjs run tests/ui/ai_advisor_panel.test.ts --reporter=dot` passed 1/1.
+
+**Files:** `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/ai_advisor_panel.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
