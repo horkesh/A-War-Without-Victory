@@ -112,11 +112,11 @@ Tested with Chromium/Playwright against the same local app after restarting Vite
 | Missing item | Current evidence | Needed player-facing result | Priority |
 | --- | --- | --- | --- |
 | Single act surface for all five presidential levers | Command Board says five 1.0 levers are shipped; browser shows Desk cost list and Command Surface cards. `DirectiveCard` now has fixture proof for direct issue, exact display-name target resolution, request-op commander pushback, force-anyway, stand-down, cannot-issue, front-visit availability, and shared receipts. | Every lever should be issuable from a clear Decision Room/Directive Card path, with confirmation, cost, staff pushback, and next-turn receipt; remaining work is broader route/records/patron/event consequence integration, not the core DirectiveCard action host. | P0 |
-| Consequence receipt loop | Recent consequences exists; officer resentment and patron defiance receipts exist in code history. | Each presidential intervention should produce a visible receipt: what changed, who resented it, what it cost, where to inspect the aftermath. | P0 |
+| Consequence receipt loop | Recent consequences exists; officer resentment and patron defiance receipts exist in code history. Verified 2026-06-02: event promise receipts and patron-defiance supply-cut receipts feed Decision History/Authored Choices, Turn Aftermath, Chronicle, Records, and Diplomacy read-model tests. | Keep extending new presidential interventions into the existing receipt/records substrate; the remaining product gap is route cohesion and how clearly the player finds these receipts, not absence of the receipt model. | P0/P1 |
 | Advance-gate clarity | Browser saw disabled advance with "No pre-advance alert" nearby. | One clear blocker sentence and one routing button when advance is blocked. | P1 |
 | Command Authority doctrine copy | Desk says "currency of command", toolbar says override resource. | Consistent language: presidential leverage, institutional strain, recovery, and why overuse is dangerous. | P1 |
 | Direct-control cleanup | Browser still showed direct corps stance comboboxes in left command panel. | Player should not feel like a corps commander. Direct controls must be removed, reframed as request/intent, or hidden behind active doctrine decisions. | P0/P1 |
-| Patron/army pushback integration | Force-op pushback and patron dead-channel are shipped substrate. DirectiveCard now proves the army side of the loop: objection before staging, force-anyway override, stand-down cancel receipt, and unbuildable no-spend block. | Player should see "promise -> resistance -> consequence -> receipt" in the same command family; next unresolved half is patron/event consequence receipt and archival routing. | P1 |
+| Patron/army pushback integration | Force-op pushback and patron dead-channel are shipped substrate. DirectiveCard now proves the army side of the loop; patron-defiance receipts are already emitted from `patron_defiance_supply_cuts` into the same consequence receipt model. | Player should see "promise -> resistance -> consequence -> receipt" in the same command family; next work is visible route cohesion and Patron Relations polish, not substrate creation. | P1 |
 
 ### 2. Tactical Groups Productization
 
@@ -173,7 +173,7 @@ Browser coverage note: Patron Relations was not fully inspected in the live UI b
 | Reliable Patron route | Supplemental browser pass could not complete the Diplomacy & Patrons route because tutorial focus returned. | Patron Relations must be reachable from Desk/Command Surface without modal/focus interference. | P0/P1 |
 | Per-actor relationship history | GAME_STATE_RATING_MASTER grades diplomacy as B. | Timeline of external actors: what they did, why they moved, what player decisions changed. | P2 |
 | Diplomatic action clarity | Current board treats refuse-patron-demand as event layer, not sixth lever. | Make the boundary clear: what is a command lever, what is an event decision, what is diplomacy context. | P1 |
-| Patron receipts | Patron dead-channel fix is shipped. | Refusing or satisfying a patron should produce a visible receipt and supply/material consequence. | P1 |
+| Patron receipts | Patron dead-channel fix and patron-defiance consequence receipts are shipped and tested. | Refusing or satisfying a patron should remain visible in Patron Relations, Turn Aftermath, Chronicle, Records, and Authored Choices; polish should focus on route clarity and actor-history context. | P1 |
 
 ### 7. Onboarding and First-Session Comprehension
 
@@ -231,7 +231,7 @@ Context note: `GAME_STATE_RATING_MASTER.md` says static P0 accessibility blocker
 | Command Surface | Six cards with counts/urgency. | Card-to-Directive-to-Receipt closure. | Partial |
 | Decision Room | Advanced Desk/product loop exists in Army HQ. | Clearer naming and primary act layer. | Partial |
 | Pushback | Shipped substrate. | Surface as normal consequence of overreach, not exceptional debug-feeling state. | Partial |
-| Patron consequences | Patron Relations/defiance substrate. | Full diplomatic/material receipt loop. | Partial |
+| Patron consequences | Patron Relations/defiance substrate plus tested patron-defiance consequence receipts. | Full diplomatic/material receipt loop is present at the read-model level; remaining gap is route/discoverability polish. | Partial/Mostly built |
 | Direct controls | Direct corps stance controls still visible in browser. | Remove/reframe under president-through-generals doctrine. | Open |
 
 ### Tactical Groups
@@ -426,7 +426,7 @@ Preconditions before running this queue:
 | Destructive route | What must be tested last | Expected player-facing proof |
 | --- | --- | --- |
 | Advance turn | Disabled reason, ready state, wall-calendar/toolbar confirmation, actual advance, aftermath modal, next-turn records. | Player sees why advance is blocked or safe, confirms once, then receives receipts in Records/Chronicle/AAR. |
-| Command Surface directive | Each presidential card family that can mutate state: war direction, diplomacy/patrons, home front, command/personnel, conscience/atrocity, record/turn. | Card -> directive -> cost/pushback -> confirm/cancel -> receipt loop closes. Direct military/personnel issue paths, exact typed settlement-name resolution for request-op targets, request-op commander pushback/force-anyway/stand-down/cannot-issue states, and front-visit availability/initiation now have the shared receipt/cancel standard; patron/event consequence receipt paths remain separate follow-ups. |
+| Command Surface directive | Each presidential card family that can mutate state: war direction, diplomacy/patrons, home front, command/personnel, conscience/atrocity, record/turn. | Card -> directive -> cost/pushback -> confirm/cancel -> receipt loop closes. Direct military/personnel issue paths, exact typed settlement-name resolution for request-op targets, request-op commander pushback/force-anyway/stand-down/cannot-issue states, front-visit availability/initiation, and patron/event consequence receipts now have the shared receipt/records standard; remaining work is route cohesion and surface polish. |
 | Operations | Request/suggest plan, commander selection, G2/assessment view, authorize, force/direct intervention, abort/delay objections. | Player understands commander recommendation, uncertainty, CA cost, and next-turn consequence. |
 | Corps stance/direct control | Any remaining direct stance change or equivalent map-side military order. | Either removed/reframed as presidential request, or clearly confirmed as a state-changing command with doctrine/cost. |
 | Personnel | Reassign commander, dismiss, assign from pool, reserve recall, elite brigade override/loan termination. | Confirmation names officer/formation, cost, institutional friction, and resulting record. |
@@ -522,7 +522,7 @@ Goal: make it feel finished outside the dev environment.
 | 6 | TG completion matrix | TG/product oversight | Prevents TGs from remaining engine-only. |
 | 7 | TG dossier and donor-cost preview | TG/UI/AAR | Makes new TG layer playable. |
 | 8 | Patron Relations reliable route | Diplomacy/UI | New patron layer needs a home. |
-| 9 | Patron receipts and actor history | Diplomacy/events | Converts patron mechanics into story and strategy. |
+| 9 | Patron actor history and receipt discoverability | Diplomacy/events | Receipt substrate exists; the player still needs an obvious route and actor-history context. |
 | 10 | Operation predictor confidence | Army HQ/ops | Helps player authorize through uncertainty. |
 | 11 | AAR causality standard | AAR/Records/Chronicle | Makes outcomes legible. |
 | 12 | Priority-front rationale | Map/warroom | Explains why the game wants attention. |
@@ -591,7 +591,7 @@ These are findings, not permission to start work before the active Claude lanes 
 | P0 | Resolve direct corps stance/control exposure against president-through-generals doctrine. | It contradicts the player role unless explicitly reframed. |
 | P0 | Create TG Product Completion Matrix after active lanes hand off. | TGs are strategically important but not yet player-complete. |
 | P1 | Reduce first-turn jargon/density with progressive disclosure and glossary/tooltips. | Current first turn is deep but intimidating and acronym-heavy. |
-| P1 | Complete Patron Relations and patron-defiance receipt loop. | Patron layers are new and need a clear player-facing cause/effect story. |
+| P1 | Polish Patron Relations route, actor history, and receipt discoverability. | Patron-defiance receipts exist; patron layers still need a clear player-facing cause/effect story. |
 | P1 | Complete operation request/approval/AAR readability. | Operations are strong substrate; player needs causality and confidence. |
 | P1 | Add map uncertainty/contestedness/supply brittleness explanation. | The map looks good but can imply too much certainty. |
 | P1 | Continue i18n EN-key extraction and BCS LQA plan. | Localization is still a credibility cap for this subject matter. |

@@ -18248,3 +18248,15 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `src/ui/map/components/army_hq/DirectiveCard.tsx`, `src/ui/map/i18n/messages.en.ts`, `tests/ui/directive_card_stop_op_action.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-06-02] docs(plan): reconcile command-surface receipt lanes
+
+**Type:** Docs-only roadmap and command-board reconciliation after verifying the current command-surface branch state. The plan now distinguishes already-built receipt/read-model substrate from the next player-facing work: `StrategicDashboard` and the old flat event-log surface are already retired/merged in the current branch; event promise receipts and patron-defiance supply-cut receipts already flow through the shared consequence receipt model; the next P0 product work is Strategic Priorities comprehension and command-card route cohesion.
+
+**Determinism / scope:** Documentation-only. No code, sim, save-schema, scenario, calibration, TG, brigade, formation, or command-authority behavior changed.
+
+**Verification:** `node node_modules/vitest/vitest.mjs run tests/patron_defiance_receipt.test.ts tests/ui/consequence_receipts.test.ts tests/ui/decision_history_overlay.test.ts tests/ui/decision_consequence_records_panel.test.ts tests/ui/chronicle_decision_ledger.test.ts tests/ui/diplomacy_view.test.ts --reporter=dot` passed 33/33 while reconciling the receipt lane; `git diff --check` is the docs-only formatting gate for this commit.
+
+**Files:** `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
