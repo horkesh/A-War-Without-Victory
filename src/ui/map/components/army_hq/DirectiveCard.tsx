@@ -32,6 +32,7 @@ import {
 } from '../../data/opDirectiveObjection';
 import { resolveDirectiveActArt } from '../../data/directiveActArt';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
+import { t } from '../../i18n';
 
 interface DirectiveCardProps {
   directive: PresidentialDecisionRoomDirective;
@@ -41,14 +42,14 @@ interface DirectiveCardProps {
 /** Player-facing lever label. */
 function leverLabel(lever: PresidentialDecisionRoomDirective['lever']): string {
   switch (lever) {
-    case 'request_op': return 'Direct corps to objective';
-    case 'force_launch': return 'Force operation launch';
-    case 'stop_op': return 'Halt operation';
-    case 'authorize_op': return 'Authorize operation';
-    case 'replace_co': return 'Replace commander';
-    case 'elite_deploy': return 'Release reserve brigade';
-    case 'front_visit': return 'Visit the front';
-    default: return 'Issue directive';
+    case 'request_op': return t('directive.lever.request_op');
+    case 'force_launch': return t('directive.lever.force_launch');
+    case 'stop_op': return t('directive.lever.stop_op');
+    case 'authorize_op': return t('directive.lever.authorize_op');
+    case 'replace_co': return t('directive.lever.replace_co');
+    case 'elite_deploy': return t('directive.lever.elite_deploy');
+    case 'front_visit': return t('directive.lever.front_visit');
+    default: return t('directive.lever.default');
   }
 }
 
@@ -306,7 +307,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   return (
     <section
       className="mt-2 overflow-hidden rounded border border-amber-400/30 bg-amber-400/[0.06]"
-      aria-label="Issue War-Direction directive"
+      aria-label={t('directive.sectionAria')}
     >
       {/* 16:9 dossier-header band — period still + bottom-gradient title-safe area
           (mirrors the DecisionCard/CommandCard object-cover + gradient idiom so the
@@ -333,7 +334,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
           />
           <div className="absolute inset-x-0 bottom-0 p-2">
             <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
-              Issue directive
+              {t('directive.issueDirective')}
             </div>
             <div className="mt-0.5 truncate text-[11px] font-bold text-text-primary drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
               {leverLabel(directive.lever)}{tgt ? ` · ${tgt}` : ''}
@@ -351,7 +352,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         {!headerArt && (
           <div className="min-w-0">
             <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-amber-300">
-              Issue directive
+              {t('directive.issueDirective')}
             </div>
             <div className="mt-0.5 truncate text-[11px] font-bold text-text-primary">
               {leverLabel(directive.lever)}{tgt ? ` · ${tgt}` : ''}
@@ -359,17 +360,17 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
           </div>
         )}
         <span className="shrink-0 rounded border border-amber-400/35 bg-amber-400/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.08em] text-amber-300">
-          {cost === 0 ? 'Free' : `${cost} authority`}
+          {cost === 0 ? t('directive.costFree') : t('directive.costAuthority', { cost })}
         </span>
       </div>
 
       {/* CANNOT ISSUE banner — the directive is IMPOSSIBLE (unbuildable / no slot).
           Nothing committed; no CA spent. */}
       {impossibleReason && (
-        <div role="alert" aria-label="Directive cannot be issued" className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2">
-          <p className="text-[8px] font-bold uppercase tracking-wider text-text-secondary">Cannot issue</p>
+        <div role="alert" aria-label={t('directive.cannotIssue.aria')} className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2">
+          <p className="text-[8px] font-bold uppercase tracking-wider text-text-secondary">{t('directive.cannotIssue.heading')}</p>
           <p className="mt-0.5 text-[10px] text-text-primary">
-            This corps cannot mount that operation — {plainReason(impossibleReason)}. No command authority was spent.
+            {t('directive.cannotIssue.body', { reason: plainReason(impossibleReason) })}
           </p>
         </div>
       )}
@@ -379,7 +380,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       {pendingObjection && (
         <div
           role="alertdialog"
-          aria-label="Commander objection"
+          aria-label={t('directive.objection.aria')}
           className={`mt-2 rounded border p-2 ${
             pendingObjection.severity === 'abort'
               ? 'border-red-500/50 bg-red-500/5'
@@ -387,7 +388,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
           }`}
         >
           <p className="text-[8px] font-bold uppercase tracking-wider text-amber-400">
-            {pendingObjection.severity === 'abort' ? 'Commander recommends against' : 'Commander urges delay'}
+            {pendingObjection.severity === 'abort' ? t('directive.objection.recommendsAgainst') : t('directive.objection.urgesDelay')}
           </p>
           <p className="mt-1 text-[10px] italic text-text-primary">{pendingObjection.prose}</p>
           <div className="mt-2 flex items-center gap-2">
@@ -396,11 +397,11 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
               onClick={handleForceAnyway}
               disabled={busy || pendingObjection.rejection_reason !== undefined}
               title={pendingObjection.rejection_reason !== undefined
-                ? 'The operation cannot be formed as ordered — there is nothing to force.'
-                : "Override the commander's judgment and order the operation anyway. He will be cowed by repeated overrides."}
+                ? t('directive.objection.forceAnywayDisabledTitle')
+                : t('directive.objection.forceAnywayTitle')}
               className="text-[9px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-red-500/50 text-red-400 disabled:opacity-40 hover:bg-red-500/10"
             >
-              Force anyway
+              {t('directive.objection.forceAnyway')}
             </button>
             <button
               type="button"
@@ -408,7 +409,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
               disabled={busy}
               className="text-[9px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-panel-border/50 text-text-primary disabled:opacity-40 hover:bg-panel-bg"
             >
-              Stand down
+              {t('directive.objection.standDown')}
             </button>
           </div>
         </div>
@@ -417,8 +418,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       {/* FRONT-VISIT reachability notice — the president cannot reach a cut-off
           enclave. Surface the server-side reason; the ISSUE button is disabled. */}
       {isFrontVisit && frontVisitReady && frontVisitUnavailableReason && (
-        <div role="status" aria-label="Front visit unavailable" className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2">
-          <p className="text-[8px] font-bold uppercase tracking-wider text-text-secondary">Cannot visit</p>
+        <div role="status" aria-label={t('directive.frontVisit.unavailableAria')} className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2">
+          <p className="text-[8px] font-bold uppercase tracking-wider text-text-secondary">{t('directive.frontVisit.cannotVisit')}</p>
           <p className="mt-0.5 text-[10px] text-text-primary">{frontVisitUnavailableReason}</p>
         </div>
       )}
@@ -432,8 +433,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
           type="text"
           value={targetOsidInput}
           onChange={(e) => { setTargetOsidInput(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
-          placeholder="Target settlement (e.g. Bihać)"
-          aria-label="Target settlement"
+          placeholder={t('directive.targetInput.placeholder')}
+          aria-label={t('directive.targetInput.aria')}
           className="mt-2 w-full rounded border border-panel-border/50 bg-panel-bg px-2 py-1 text-[11px] font-mono text-text-primary"
         />
       )}
@@ -446,14 +447,14 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         const blockedNoTarget = showTargetInput && targetOsidInput.trim().length === 0;
         const issueDisabled = !canAfford || busy || blockedFrontVisit || blockedNoTarget;
         const issueTitle = blockedFrontVisit
-          ? (frontVisitUnavailableReason ?? 'A front visit cannot be made right now.')
+          ? (frontVisitUnavailableReason ?? t('directive.issue.blockedFrontVisitTitle'))
           : blockedNoTarget
-          ? 'Name a target settlement (OSID) to direct the operation.'
+          ? t('directive.issue.blockedNoTargetTitle')
           : canAfford
             ? (cost === 0
-              ? 'Issue this directive (no command authority cost).'
-              : `Issue this directive (cost ${cost} command authority; current ${authCurrent}).`)
-            : `Insufficient command authority (need ${cost}, have ${authCurrent}).`;
+              ? t('directive.issue.freeTitle')
+              : t('directive.issue.costTitle', { cost, current: authCurrent }))
+            : t('directive.issue.insufficientTitle', { cost, current: authCurrent });
         return (
           <button
             type="button"
@@ -463,8 +464,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
             className="mt-2 h-7 w-full truncate rounded border border-amber-400/35 bg-amber-400/12 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
           >
             {busy
-              ? (needsObjection ? 'Consulting…' : 'Issuing…')
-              : (cost === 0 ? 'Authorize' : `Issue (${cost})`)}
+              ? (needsObjection ? t('directive.button.consulting') : t('directive.button.issuing'))
+              : (cost === 0 ? t('directive.button.authorize') : t('directive.button.issue', { cost }))}
           </button>
         );
       })()}

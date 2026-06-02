@@ -87,18 +87,18 @@ export function PersonnelContent() {
             {data.mobilization && (
                 <div className="bg-panel-card border border-panel-border rounded-lg p-3">
                     <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
-                        MOBILIZATION
+                        {t('personnel.mobilization')}
                     </div>
                     <div className="grid grid-cols-5 gap-3">
-                        <StatCard label="Available Pool" value={formatWholeNumber(data.mobilization.total_available)} />
-                        <StatCard label="Committed" value={formatWholeNumber(data.mobilization.total_committed)} />
-                        <StatCard label="Exhausted" value={formatWholeNumber(data.mobilization.total_exhausted)} />
-                        <StatCard label="Strategic Reserve" value={formatWholeNumber(data.mobilization.strategic_reserve)} />
-                        <StatCard label="Exhaustion" value={`${data.mobilization.exhaustion_pct.toFixed(1)}%`} />
+                        <StatCard label={t('personnel.mobilization.availablePool')} value={formatWholeNumber(data.mobilization.total_available)} />
+                        <StatCard label={t('personnel.mobilization.committed')} value={formatWholeNumber(data.mobilization.total_committed)} />
+                        <StatCard label={t('personnel.mobilization.exhausted')} value={formatWholeNumber(data.mobilization.total_exhausted)} />
+                        <StatCard label={t('personnel.mobilization.strategicReserve')} value={formatWholeNumber(data.mobilization.strategic_reserve)} />
+                        <StatCard label={t('personnel.mobilization.exhaustion')} value={`${data.mobilization.exhaustion_pct.toFixed(1)}%`} />
                     </div>
                     {data.mobilization.top_pools.length > 0 && (
                         <div className="mt-3 pt-2 border-t border-panel-border/50">
-                            <div className="text-[9px] uppercase tracking-wider text-text-secondary/60 mb-1">Largest Available Pools</div>
+                            <div className="text-[9px] uppercase tracking-wider text-text-secondary/60 mb-1">{t('personnel.largestAvailablePools')}</div>
                             <div className="grid grid-cols-2 gap-1.5">
                                 {data.mobilization.top_pools.map((pool) => (
                                     <div key={pool.mun_id} className="flex items-center justify-between gap-3 text-[10px] px-2 py-1 rounded-sm bg-panel-bg border border-panel-border/40">
@@ -156,19 +156,19 @@ export function PersonnelContent() {
                                 {(o.command_style || o.known_for) && (
                                     <div className="mt-1 flex flex-wrap gap-1">
                                         {o.command_style && (
-                                            <OfficerTraitPill label="Doctrinal trait" value={o.command_style} tone="doctrine" />
+                                            <OfficerTraitPill label={t('personnel.trait.doctrinal')} value={o.command_style} tone="doctrine" />
                                         )}
                                         {o.known_for && (
-                                            <OfficerTraitPill label="Narrative trait" value={o.known_for} tone="narrative" />
+                                            <OfficerTraitPill label={t('personnel.trait.narrative')} value={o.known_for} tone="narrative" />
                                         )}
                                     </div>
                                 )}
                             </div>
                             <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                                <OfficerQualityChip label="Command" value={o.competence} />
-                                <OfficerQualityChip label="Initiative" value={o.aggressiveness} />
+                                <OfficerQualityChip label={t('commander.quality.command')} value={o.competence} />
+                                <OfficerQualityChip label={t('commander.quality.initiative')} value={o.aggressiveness} />
                                 {typeof o.defensive_skill === 'number' && (
-                                    <OfficerQualityChip label="Defense" value={o.defensive_skill} />
+                                    <OfficerQualityChip label={t('commander.quality.defense')} value={o.defensive_skill} />
                                 )}
                             </div>
                         </div>
