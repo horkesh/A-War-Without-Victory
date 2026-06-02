@@ -3134,6 +3134,28 @@ export const enMessages = {
     'commander.quality.defense': 'Defense',
     'commander.quality.commandTitle': 'Command: {value}',
     'commander.quality.initiativeTitle': 'Initiative: {value}',
+
+    // i18n Car 3 — Paramilitary Authorization decision modal (ParamilitaryReviewModal).
+    'paramilitaryReview.mode.offensive': 'Offensive sweep',
+    'paramilitaryReview.mode.rearArea': 'Rear-area consolidation',
+    'paramilitaryReview.imageAlt': 'Internal security desk',
+    'paramilitaryReview.eyebrow': 'Presidential Decision Required',
+    'paramilitaryReview.title': 'Paramilitary Authorization',
+    'paramilitaryReview.description': 'Approving these deployments can capture territory quickly, but paramilitary operations carry a serious risk of war crimes, civilian casualties, and international consequences.',
+    'paramilitaryReview.requestCount': '{count} request',
+    'paramilitaryReview.requestCountPlural': '{count} requests',
+    'paramilitaryReview.estimatedStrength': 'estimated strength {strength}',
+    'paramilitaryReview.empty': 'No paramilitary requests are pending.',
+    'paramilitaryReview.requestMeta': '{faction} - {mode} - strength {strength}',
+    'paramilitaryReview.deny': 'Deny',
+    'paramilitaryReview.allow': 'Allow',
+    'paramilitaryReview.denyAll': 'Deny All',
+    'paramilitaryReview.allowAll': 'Allow All',
+    'paramilitaryReview.close': 'Close',
+    'paramilitaryReview.submit': 'Submit Decisions',
+    'paramilitaryReview.submitting': 'Submitting...',
+    'paramilitaryReview.error.ipcUnavailable': 'Desktop IPC not available for paramilitary review.',
+    'paramilitaryReview.error.resolveFailed': 'Failed to resolve paramilitary requests.',
 } as const;
 
 export type MessageKey = keyof typeof enMessages;

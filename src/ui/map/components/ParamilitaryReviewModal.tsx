@@ -7,6 +7,7 @@ import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
+import { t } from '../i18n';
 
 type ParamilitaryDecision = 'allow' | 'deny';
 
@@ -16,8 +17,8 @@ interface ParamilitaryReviewModalProps {
 }
 
 function modeLabel(mode: string | undefined): string {
-    if (mode === 'offensive') return 'Offensive sweep';
-    return 'Rear-area consolidation';
+    if (mode === 'offensive') return t('paramilitaryReview.mode.offensive');
+    return t('paramilitaryReview.mode.rearArea');
 }
 
 export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewModalProps) {
@@ -58,7 +59,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
     const submit = async () => {
         if (!allDecided || submitting) return;
         if (!ipc.isAvailable) {
-            setLoadError('Desktop IPC not available for paramilitary review.');
+            setLoadError(t('paramilitaryReview.error.ipcUnavailable'));
             return;
         }
         setSubmitting(true);
@@ -70,7 +71,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                 })),
             );
             if (!result.ok) {
-                setLoadError(result.error ?? 'Failed to resolve paramilitary requests.');
+                setLoadError(result.error ?? t('paramilitaryReview.error.resolveFailed'));
                 return;
             }
             if (result.stateJson) {
@@ -97,21 +98,23 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                 {headerImage && (
                     <DecisionModalImageHeader
                         imageUrl={headerImage}
-                        imageAlt="Internal security desk"
-                        eyebrow="Presidential Decision Required"
-                        title="Paramilitary Authorization"
+                        imageAlt={t('paramilitaryReview.imageAlt')}
+                        eyebrow={t('paramilitaryReview.eyebrow')}
+                        title={t('paramilitaryReview.title')}
                         titleId="paramilitary-review-title"
-                        description="Approving these deployments can capture territory quickly, but paramilitary operations carry a serious risk of war crimes, civilian casualties, and international consequences."
+                        description={t('paramilitaryReview.description')}
                         accentClassName="text-red-300"
                     />
                 )}
                 <div className="border-b border-panel-border bg-red-950/25 px-5 py-3">
                     <div className="mt-3 flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary">
                         <span className="rounded border border-panel-border bg-panel-card px-2 py-1">
-                            {requests.length} request{requests.length === 1 ? '' : 's'}
+                            {requests.length === 1
+                                ? t('paramilitaryReview.requestCount', { count: requests.length })
+                                : t('paramilitaryReview.requestCountPlural', { count: requests.length })}
                         </span>
                         <span className="rounded border border-panel-border bg-panel-card px-2 py-1">
-                            estimated strength {totalStrength}
+                            {t('paramilitaryReview.estimatedStrength', { strength: totalStrength })}
                         </span>
                     </div>
                 </div>
@@ -119,7 +122,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                 <div className="flex-1 space-y-2 overflow-y-auto px-5 py-4">
                     {requests.length === 0 ? (
                         <div className="rounded border border-panel-border bg-panel-card px-3 py-3 text-[12px] text-text-secondary">
-                            No paramilitary requests are pending.
+                            {t('paramilitaryReview.empty')}
                         </div>
                     ) : requests.map((request) => {
                         const selected = decisions[request.target_osid];
@@ -130,7 +133,11 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                                     <div className="min-w-0">
                                         <div className="text-[12px] font-bold text-text-primary">{place}</div>
                                         <div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-text-secondary">
-                                            {getPlayerSafeMilitaryFactionName(request.faction)} - {modeLabel(request.mode)} - strength {request.strength}
+                                            {t('paramilitaryReview.requestMeta', {
+                                                faction: getPlayerSafeMilitaryFactionName(request.faction),
+                                                mode: modeLabel(request.mode),
+                                                strength: request.strength,
+                                            })}
                                         </div>
                                     </div>
                                     <div className="flex shrink-0 gap-2">
@@ -143,7 +150,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                                                     : 'border-panel-border bg-panel-bg text-text-secondary hover:text-text-primary'
                                             }`}
                                         >
-                                            Deny
+                                            {t('paramilitaryReview.deny')}
                                         </button>
                                         <button
                                             type="button"
@@ -154,7 +161,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                                                     : 'border-panel-border bg-panel-bg text-text-secondary hover:text-text-primary'
                                             }`}
                                         >
-                                            Allow
+                                            {t('paramilitaryReview.allow')}
                                         </button>
                                     </div>
                                 </div>
@@ -171,7 +178,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                             disabled={requests.length === 0 || submitting}
                             className="rounded border border-panel-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary hover:text-text-primary disabled:opacity-40"
                         >
-                            Deny All
+                            {t('paramilitaryReview.denyAll')}
                         </button>
                         <button
                             type="button"
@@ -179,7 +186,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                             disabled={requests.length === 0 || submitting}
                             className="rounded border border-red-500/35 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-red-300 hover:bg-red-500/10 disabled:opacity-40"
                         >
-                            Allow All
+                            {t('paramilitaryReview.allowAll')}
                         </button>
                     </div>
                     <div className="flex gap-2">
@@ -189,7 +196,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                             disabled={submitting}
                             className="rounded border border-panel-border px-4 py-2 text-[11px] font-bold uppercase tracking-[0.12em] text-text-secondary hover:text-text-primary disabled:opacity-40"
                         >
-                            Close
+                            {t('paramilitaryReview.close')}
                         </button>
                         <button
                             type="button"
@@ -197,7 +204,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                             disabled={!allDecided || submitting}
                             className="rounded border border-accent-gold/55 bg-accent-gold/10 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.12em] text-accent-gold hover:bg-accent-gold/20 disabled:cursor-not-allowed disabled:opacity-40"
                         >
-                            {submitting ? 'Submitting...' : 'Submit Decisions'}
+                            {submitting ? t('paramilitaryReview.submitting') : t('paramilitaryReview.submit')}
                         </button>
                     </div>
                 </div>
