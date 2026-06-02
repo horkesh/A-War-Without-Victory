@@ -77,13 +77,19 @@ function makeView(overrides: Partial<DiplomacyView> = {}): DiplomacyView {
 describe('DiplomacyPanel', () => {
     afterEach(() => cleanup());
 
-    it('renders a compact non-empty diplomacy packet', () => {
+    it('renders the reframed Patron Relations packet with the patron promoted', () => {
         render(createElement(DiplomacyPanel, { view: makeView(), onClose: vi.fn() }));
 
-        expect(screen.getByRole('dialog', { name: /diplomacy/i })).toBeTruthy();
+        // Panel is now titled "Patron Relations" — the dialog's accessible name reflects it.
+        expect(screen.getByRole('dialog', { name: /patron relations/i })).toBeTruthy();
+        // The player's own patron is promoted to the "Your Patron" headline.
+        expect(screen.getByText('Your Patron')).toBeTruthy();
         expect(screen.getAllByText('Serbia').length).toBeGreaterThan(0);
         expect(screen.getAllByText('Serbia is constrained by sanctions and keeps the RS channel under pressure.').length).toBeGreaterThan(0);
         expect(screen.getAllByText('Vance-Owen Peace Plan').length).toBeGreaterThan(0);
+        // The general-diplomacy signals are demoted into the collapsed "Related Diplomatic
+        // Tracks" <details> block — they still render in the DOM (text queries find them).
+        expect(screen.getByText('Related Diplomatic Tracks')).toBeTruthy();
         expect(screen.getByText('Sarajevo siege visibility')).toBeTruthy();
         expect(screen.getByText('International sanctions')).toBeTruthy();
         expect(screen.getByText('Negotiation Timeline')).toBeTruthy();
@@ -91,7 +97,7 @@ describe('DiplomacyPanel', () => {
         expect(screen.getByText('Reduce Sarajevo siege visibility')).toBeTruthy();
     });
 
-    it('renders an empty state without active diplomacy signals', () => {
+    it('renders the patron-absent empty state without a patron stance', () => {
         render(createElement(DiplomacyPanel, {
             view: makeView({
                 hasSignals: false,
@@ -106,7 +112,11 @@ describe('DiplomacyPanel', () => {
             onClose: vi.fn(),
         }));
 
-        expect(screen.getByText('No active diplomatic packet')).toBeTruthy();
-        expect(screen.getByText(/Staff will surface proposals/i)).toBeTruthy();
+        // The old "No active diplomatic packet" empty-state is now the patron-absent fallback.
+        expect(screen.getByRole('dialog', { name: /patron relations/i })).toBeTruthy();
+        expect(screen.getByText('No patron channel')).toBeTruthy();
+        expect(screen.getByText(/Your patron stance will surface here/i)).toBeTruthy();
+        // No patron headline when there is no patron stance.
+        expect(screen.queryByText('Your Patron')).toBeNull();
     });
 });
