@@ -1424,9 +1424,17 @@ function App() {
       {appScreen === 'mainMenu' && (
         <MainMenu
           hasSave={!!loadedGameState}
-          onNewGame={() => { setAppScreen('game'); setSidePickerOpen(true); }}
+          // Task #80 (PR #138 follow-up) — discard any auto-loaded campaign
+          // BEFORE opening the SidePicker. The picker renders only while
+          // `!loadedGameState` (~:1136); without clearing, a desktop
+          // live-session / auto-load save would keep that gate closed and the
+          // user would be silently dropped back into the existing campaign
+          // instead of reaching the faction/load picker. New Game / Load both
+          // legitimately leave the current campaign, then re-populate
+          // `loadedGameState` via `onSelectFaction` / a disk load.
+          onNewGame={() => { useGameStore.getState().clearLoadedGameState(); setAppScreen('game'); setSidePickerOpen(true); }}
           onContinue={() => setAppScreen('game')}
-          onLoadGame={() => { setAppScreen('game'); setSidePickerOpen(true); }}
+          onLoadGame={() => { useGameStore.getState().clearLoadedGameState(); setAppScreen('game'); setSidePickerOpen(true); }}
           onSettings={() => setSettingsOpen(true)}
           onCredits={() => setCreditsOpen(true)}
           onQuit={() => { if (typeof window !== 'undefined') window.close(); }}

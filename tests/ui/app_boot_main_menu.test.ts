@@ -59,14 +59,40 @@ describe('App boot — Main Menu first, faction choice menu-only (#80)', () => {
     it('opens the SidePicker only from explicit New Game / Load actions', () => {
         // MainMenu New Game and Load both go to the game screen and open the
         // picker on purpose.
-        expect(app).toContain('onNewGame={() => { setAppScreen(\'game\'); setSidePickerOpen(true); }}');
-        expect(app).toContain('onLoadGame={() => { setAppScreen(\'game\'); setSidePickerOpen(true); }}');
+        expect(app).toContain("setAppScreen('game'); setSidePickerOpen(true);");
         // The picker render is still gated on no loaded state.
         expect(app).toContain('isOpen={sidePickerOpen && !loadedGameState}');
+    });
+
+    it('clears the auto-loaded campaign so New Game / Load reach the picker even with a save loaded (#138)', () => {
+        // PR #138 follow-up — the picker renders only while `!loadedGameState`.
+        // On the desktop live-session / auto-load path a save is already in the
+        // store while the menu shows, so New Game / Load must discard it first
+        // or the user is silently dropped back into the existing campaign.
+        expect(app).toContain(
+            "onNewGame={() => { useGameStore.getState().clearLoadedGameState(); setAppScreen('game'); setSidePickerOpen(true); }}",
+        );
+        expect(app).toContain(
+            "onLoadGame={() => { useGameStore.getState().clearLoadedGameState(); setAppScreen('game'); setSidePickerOpen(true); }}",
+        );
+    });
+
+    it('keeps Continue gated on a loaded save (does not clear it)', () => {
+        // Continue must NOT clear the loaded state — it resumes the campaign.
+        expect(app).toContain('onContinue={() => setAppScreen(\'game\')}');
     });
 
     it('honors ?view=game and ?view=warroom deep-link overrides for dev/automation', () => {
         expect(app).toContain("if (view === 'warroom') {");
         expect(app).toContain("} else if (view === 'game') {");
+    });
+});
+
+describe('gameStore — clearLoadedGameState action (#138)', () => {
+    const store = read('src/ui/map/store/gameStore.ts');
+
+    it('exposes a clearLoadedGameState action that nulls the loaded state', () => {
+        expect(store).toContain('clearLoadedGameState: () => void;');
+        expect(store).toContain('clearLoadedGameState: () => set({ loadedGameState: null }),');
     });
 });
