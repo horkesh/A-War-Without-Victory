@@ -89,6 +89,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   // forceable; we surface "cannot issue" and never stage / debit CA.
   const [impossibleReason, setImpossibleReason] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [receipt, setReceipt] = useState<{ kind: 'success' | 'error' | 'cancelled'; message: string } | null>(null);
 
   // REQUEST-OP in-card target OSID (Decision-Room request-op cards carry an EMPTY
   // payload — the president names the objective settlement here). Mirrors the proven
@@ -148,12 +149,22 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
     void refreshFrontVisit();
   }, [refreshFrontVisit, gameState]);
 
+  useEffect(() => {
+    setReceipt(null);
+  }, [directive]);
+
   // Browser/headless: render inert (mirror FrontVisitSection).
   if (!ipc.isAvailable) return null;
 
   const resetTransient = () => {
     setPendingObjection(null);
     setImpossibleReason(null);
+  };
+
+  const handleCancel = () => {
+    resetTransient();
+    setTargetOsidInput('');
+    setReceipt({ kind: 'cancelled', message: t('directive.receipt.cancelled') });
   };
 
   /** Stage a request-op directive (optionally forced past a shown objection). */
@@ -207,8 +218,14 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         const opName = typeof directive.payload.opName === 'string' ? directive.payload.opName : '';
         if (!directive.corpsId || !opName) { setLoadError('Directive is missing its corps/operation context.'); return; }
         const result = await ipc.stageOpHaltOrder({ corpsId: directive.corpsId, opName });
-        if (!result.ok) setLoadError(result.error ?? 'Failed to halt operation.');
-        else resetTransient();
+        if (!result.ok) {
+          const reason = result.error ?? 'Failed to halt operation.';
+          setLoadError(reason);
+          setReceipt({ kind: 'error', message: t('directive.receipt.failed', { reason }) });
+        } else {
+          resetTransient();
+          setReceipt({ kind: 'success', message: t('directive.receipt.stagedNextTurn') });
+        }
         return;
       }
 
@@ -456,19 +473,44 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
               : t('directive.issue.costTitle', { cost, current: authCurrent }))
             : t('directive.issue.insufficientTitle', { cost, current: authCurrent });
         return (
-          <button
-            type="button"
-            onClick={handleConfirm}
-            disabled={issueDisabled}
-            title={issueTitle}
-            className="mt-2 h-7 w-full truncate rounded border border-amber-400/35 bg-amber-400/12 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
-          >
-            {busy
-              ? (needsObjection ? t('directive.button.consulting') : t('directive.button.issuing'))
-              : (cost === 0 ? t('directive.button.authorize') : t('directive.button.issue', { cost }))}
-          </button>
+          <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
+            <button
+              type="button"
+              onClick={handleConfirm}
+              disabled={issueDisabled}
+              title={issueTitle}
+              className="h-7 min-w-0 truncate rounded border border-amber-400/35 bg-amber-400/12 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
+            >
+              {busy
+                ? (needsObjection ? t('directive.button.consulting') : t('directive.button.issuing'))
+                : (cost === 0 ? t('directive.button.authorize') : t('directive.button.issue', { cost }))}
+            </button>
+            <button
+              type="button"
+              onClick={handleCancel}
+              disabled={busy}
+              className="h-7 rounded border border-panel-border/60 bg-panel-bg/50 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-text-secondary transition hover:border-text-secondary/70 hover:text-text-primary disabled:opacity-40"
+            >
+              {t('directive.button.cancel')}
+            </button>
+          </div>
         );
       })()}
+      {receipt && (
+        <div
+          role="status"
+          aria-label={t('directive.receipt.aria')}
+          className={`mt-2 rounded border p-2 text-[10px] ${
+            receipt.kind === 'error'
+              ? 'border-red-500/45 bg-red-500/5 text-red-200'
+              : receipt.kind === 'cancelled'
+                ? 'border-panel-border/60 bg-panel-bg/60 text-text-secondary'
+                : 'border-emerald-400/35 bg-emerald-400/8 text-emerald-100'
+          }`}
+        >
+          {receipt.message}
+        </div>
+      )}
       </div>
     </section>
   );

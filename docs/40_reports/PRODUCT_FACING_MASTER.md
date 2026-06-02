@@ -324,7 +324,7 @@ Goal: every major player action becomes a closed loop.
 | Work packet | Concrete recommendation | Acceptance evidence |
 | --- | --- | --- |
 | Command Surface closure | Each command-category card opens the exact next directive, not a broad dashboard, unless the card is explicitly "inspect only." | Card-by-card browser walkthrough with before/after state. |
-| Directive Cards | Standardize directive cards: premise, available act, cost, signatures, staff/patron/commander resistance, expected receipt, confirm/cancel. | Component snapshot and fixture coverage for all five levers plus patron/event decisions. |
+| Directive Cards | Standardize directive cards: premise, available act, cost, signatures, staff/patron/commander resistance, expected receipt, confirm/cancel. Stop Operation now has the first proof: issue stages the halt, cancel is non-mutating, and the card shows a next-turn receipt. | Component snapshot and fixture coverage for all five levers plus patron/event decisions; Stop Operation covered by `tests/ui/directive_card_stop_op_action.test.ts`. |
 | Receipts | Standardize next-turn receipts: action taken, actual outcome, cost spent, who resisted, what changed, where to inspect details. | AAR/Records/Chronicle entries generated for each lever in test states. |
 | Command Authority copy | Replace mixed "override resource/currency" language with a consistent institutional-strain model. | String inventory and browser proof on toolbar, Desk, directives, and receipts. |
 | Desk as home | Make President's Desk the default command home after campaign start; map remains primary inspection, not the whole game shell. | First-session walkthrough starts and returns to Desk after action/advance. |
@@ -426,7 +426,7 @@ Preconditions before running this queue:
 | Destructive route | What must be tested last | Expected player-facing proof |
 | --- | --- | --- |
 | Advance turn | Disabled reason, ready state, wall-calendar/toolbar confirmation, actual advance, aftermath modal, next-turn records. | Player sees why advance is blocked or safe, confirms once, then receives receipts in Records/Chronicle/AAR. |
-| Command Surface directive | Each presidential card family that can mutate state: war direction, diplomacy/patrons, home front, command/personnel, conscience/atrocity, record/turn. | Card -> directive -> cost/pushback -> confirm/cancel -> receipt loop closes. |
+| Command Surface directive | Each presidential card family that can mutate state: war direction, diplomacy/patrons, home front, command/personnel, conscience/atrocity, record/turn. | Card -> directive -> cost/pushback -> confirm/cancel -> receipt loop closes. Stop Operation is the first closed proof; remaining levers need the same receipt/cancel standard. |
 | Operations | Request/suggest plan, commander selection, G2/assessment view, authorize, force/direct intervention, abort/delay objections. | Player understands commander recommendation, uncertainty, CA cost, and next-turn consequence. |
 | Corps stance/direct control | Any remaining direct stance change or equivalent map-side military order. | Either removed/reframed as presidential request, or clearly confirmed as a state-changing command with doctrine/cost. |
 | Personnel | Reassign commander, dismiss, assign from pool, reserve recall, elite brigade override/loan termination. | Confirmation names officer/formation, cost, institutional friction, and resulting record. |

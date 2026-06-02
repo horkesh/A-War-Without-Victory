@@ -3084,6 +3084,11 @@ export const enMessages = {
     'directive.button.issuing': 'Issuing…',
     'directive.button.authorize': 'Authorize',
     'directive.button.issue': 'Issue ({cost})',
+    'directive.button.cancel': 'Cancel directive',
+    'directive.receipt.aria': 'Directive receipt',
+    'directive.receipt.stagedNextTurn': 'Directive staged for next turn. Command authority is spent now; the order is consumed when you advance.',
+    'directive.receipt.failed': 'Directive was not staged: {reason}.',
+    'directive.receipt.cancelled': 'Directive cancelled. No command authority was spent.',
     // i18n Car 2 — Batch B4: OperationsSection request-op block
     'operationsSection.requestOp.placeholder': 'Objective settlement (e.g. Bihać)',
     'operationsSection.requestOp.aria': 'Request operation objective settlement',

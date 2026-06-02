@@ -18200,3 +18200,15 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `docs/plans/2026-06-02-warroom-toolbar-hotspot-ia-plan.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-06-02] feat(ui): Stop Operation directive card receipt proof
+
+**Type:** Player-facing UI/IPC-surface closure for the Presidential Command Surface. The first complete directive-host proof uses the existing Stop Operation lever only: `DirectiveCard` already called `stageOpHaltOrder({ corpsId, opName })`; this slice adds a non-mutating `Cancel directive` affordance plus an inline `Directive receipt` that tells the player whether the halt was staged for next turn, failed, or was cancelled.
+
+**Determinism / scope:** UI-only around an existing desktop IPC path. No sim, save-schema, scenario, calibration, TG, brigade, formation, or operation-injection code changed. The engine stop-op staging/consumption substrate remains the existing `op_halt.cjs` -> `pending_op_halt` -> `apply-op-halts` path.
+
+**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui/directive_card_stop_op_action.test.ts --reporter=dot` failed because `Cancel directive` and `Directive receipt` were absent. Green focused suite `node node_modules/vitest/vitest.mjs run tests/ui/directive_card_stop_op_action.test.ts tests/ui/presidential_decision_room.test.ts tests/ui/presidential_decision_room_request_force.test.ts tests/ui/directive_card_act_art.test.ts --reporter=dot` passed 41/41. `npm.cmd run typecheck` passed.
+
+**Files:** `src/ui/map/components/army_hq/DirectiveCard.tsx`, `src/ui/map/i18n/messages.en.ts`, `tests/ui/directive_card_stop_op_action.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
