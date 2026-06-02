@@ -19,6 +19,7 @@ import { aggregateEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 import { chooseOpsPlanningSector } from './ops_modal/stagingChoice';
+import { formatPosture, toTitleCase } from '../utils/formatters';
 import { t } from '../i18n';
 
 type CorpsTab = 'overview' | 'orbat' | 'sectors' | 'ops' | 'orders';
@@ -177,7 +178,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 {getPlayerSafeMilitaryFactionName(corpsFormation.faction)}
               </span>
               {' · '}
-              <span className="capitalize">{corpsFormation.corpsStance ?? 'unknown'}</span>
+              <span>{corpsFormation.corpsStance ? formatPosture(corpsFormation.corpsStance) : 'Unknown'}</span>
               {corpsFormation.corpsExhaustion != null && (
                 <span>
                   {' · Exhaustion: '}
@@ -374,7 +375,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                     </div>
                     {s.sector_stance && (
                       <div className="text-[9px] uppercase text-text-secondary opacity-70">
-                        {s.sector_stance.replace(/_/g, ' ')}
+                        {toTitleCase(s.sector_stance)}
                         {s.stance_source === 'player' && <span className="ml-1 text-accent-gold">●</span>}
                       </div>
                     )}

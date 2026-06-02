@@ -13,6 +13,7 @@ import { useIPC } from '../desktop/useIPC';
 import { filterPlayerFacingOperations, findPlayerFacingSectorById } from '../../shared/playerVisibility';
 import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
+import { formatPosture, toTitleCase } from '../utils/formatters';
 
 /** Strength class badge with color coding. */
 function StrengthBadge({ strengthClass }: { strengthClass?: 'fortress' | 'strong' | 'adequate' | 'thin' | 'critical' }) {
@@ -86,6 +87,14 @@ const PREP_SUB_PHASES = ['intel_gathering', 'force_staging', 'supply_check', 'as
 const PREP_LABELS: Record<string, string> = {
   intel_gathering: 'INTEL', force_staging: 'STAGING', supply_check: 'SUPPLY', assessment: 'ASSESS', ready: 'READY',
 };
+
+/** Player-facing phrasing for a commander's launch recommendation (raw enum: launch/postpone/abort). */
+const COMMANDER_ASSESSMENT_LABELS: Record<string, string> = {
+  launch: 'Recommends launch', postpone: 'Urges delay', abort: 'Advises abort',
+};
+function commanderAssessmentLabel(assessment: string): string {
+  return COMMANDER_ASSESSMENT_LABELS[assessment] ?? toTitleCase(assessment);
+}
 
 function stanceLabel(stance: SectorStanceType): string {
   return t(STANCE_LABEL_KEYS[stance]);
@@ -302,7 +311,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
           </div>
           <div className="text-neutral-600 mt-2 text-[10px] space-y-0.5 uppercase">
             <div><span className="font-bold text-neutral-800">{t('corpsFront.faction')}:</span> <span className={FACTION_COLORS[sector.faction] ?? 'text-neutral-800'}>{getPlayerSafeMilitaryFactionName(sector.faction)}</span></div>
-            <div><span className="font-bold text-neutral-800">{t('corpsFront.corpsStance')}:</span> {corpsStance}</div>
+            <div><span className="font-bold text-neutral-800">{t('corpsFront.corpsStance')}:</span> {corpsStance === 'unknown' ? t('corpsFront.unknown') : formatPosture(corpsStance)}</div>
             <div><span className="font-bold text-neutral-800">{t('corpsFront.sectorStance')}:</span> {sectorStanceLabel}{currentStanceSource === 'player' ? ` (${t('corpsFront.manual')})` : ''}</div>
             <div>
               <span className="font-bold text-neutral-800">{t('corpsFront.opsec')}:</span>{' '}
@@ -496,7 +505,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     <div className="flex flex-wrap gap-2">
                       {sector.opposing_factions.map((f) => (
                         <span key={f} className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${FACTION_COLORS[f]?.replace('text-', 'bg-').replace('-400', '-900') ?? 'bg-neutral-800'} text-white`}>
-                          {f}
+                          {getPlayerSafeMilitaryFactionName(f)}
                         </span>
                       ))}
                     </div>
@@ -706,7 +715,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                             <PreparationProgressBar subPhase={op.preparation_sub_phase} turnsElapsed={op.preparation_turns_elapsed ?? 0} maxTurns={op.preparation_max_turns ?? 8} />
                             {op.commander_assessment && (
                               <div className={`text-[9px] mt-1 font-bold uppercase ${op.commander_assessment === 'launch' ? 'text-green-700' : op.commander_assessment === 'abort' ? 'text-red-700' : 'text-amber-700'}`}>
-                                {t('corpsFront.cdrAssessment', { assessment: op.commander_assessment })}
+                                {t('corpsFront.cdrAssessment', { assessment: commanderAssessmentLabel(op.commander_assessment) })}
                               </div>
                             )}
                             {op.has_active_probe && (
