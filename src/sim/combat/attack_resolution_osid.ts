@@ -113,6 +113,7 @@ import { SUPPORT_POWER_MULT } from './bot_constants.js';
 // ADR-0005 v2.2b: TG combat-power synthesis + casualty distribution. Flag-gated.
 import { ENABLE_TG_COMBAT_SYNTHESIS } from './tactical_group_config.js';
 import { distributeCasualtiesAcrossTg } from './tactical_group_casualties.js';
+import { ENABLE_SHARED_SECTOR_DEFENSE, getStandingOgDefenseBrigadeIds } from './standing_og_defense.js';
 // ADR-0005 v2.2c #2: Hard Invariant #6 — immediate dissolution on anchor destruction.
 import { dissolveTacticalGroup, TG_ANCHOR_DISSOLVE_COHESION_FLOOR } from './tactical_group_lifecycle.js';
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
@@ -635,7 +636,7 @@ export function resolveAttackOrdersOsid(
             const defendingSubSeg = sector ? findSubSegmentForOsid(sector, targetOsid) : undefined;
             defendingSubSegmentId = defendingSubSeg?.sub_segment_id;
             const sectorBrigades = sector
-                ? sector.assigned_brigade_ids
+                ? getStandingOgDefenseBrigadeIds(sector, ENABLE_SHARED_SECTOR_DEFENSE)
                     .map(id => state.military.formations?.[id])
                     .filter((f): f is FormationState => f != null && f.status === 'active')
                 : [];
@@ -647,6 +648,7 @@ export function resolveAttackOrdersOsid(
                 // Single-pass: compute per-brigade power, distance weight, and accumulate
                 let physicalPower = 0;
                 let effectiveReserves = 0;
+                let contributingBrigadeCount = 0;
                 const brigadeWeights = new Map<FormationId, number>();
                 const brigadeMeta = new Map<FormationId, { hops: number; isHome: boolean }>();
                 for (const b of sectorBrigades) {
@@ -661,6 +663,7 @@ export function resolveAttackOrdersOsid(
                         physicalPower += bPower;
                         brigadeWeights.set(b.id, bPower * homeBonus);
                         brigadeMeta.set(b.id, { hops: 0, isHome });
+                        if (bPower * homeBonus > 0) contributingBrigadeCount += 1;
                     } else {
                         // Reserve: distance-weighted contribution
                         const hops = bfsDistanceFriendly(locOsid, targetOsid, adjacency, pc, controller!);
@@ -669,6 +672,7 @@ export function resolveAttackOrdersOsid(
                         effectiveReserves += contribution;
                         brigadeWeights.set(b.id, contribution);
                         brigadeMeta.set(b.id, { hops, isHome });
+                        if (contribution > 0) contributingBrigadeCount += 1;
                     }
                 }
 
@@ -677,12 +681,15 @@ export function resolveAttackOrdersOsid(
                 const boostedReserves = effectiveReserves * stanceReactiveBonus;
 
                 // Cap reactive response proportional to attack size
+                const avgReactivePower = ENABLE_SHARED_SECTOR_DEFENSE && contributingBrigadeCount > 0
+                    ? (physicalPower + effectiveReserves) / contributingBrigadeCount
+                    : avgBrigadePower;
                 const reactiveResponse = Math.min(
                     boostedReserves,
-                    attackerFormations.length * avgBrigadePower * REACTIVE_DEFENSE_RATIO
+                    attackerFormations.length * avgReactivePower * REACTIVE_DEFENSE_RATIO
                 );
                 defenderPower = physicalPower + reactiveResponse;
-                const minFloor = avgBrigadePower * MIN_DEFENSE_FLOOR_FRACTION;
+                const minFloor = avgReactivePower * MIN_DEFENSE_FLOOR_FRACTION;
                 defenderPower = Math.max(defenderPower, minFloor);
                 defenderFormation = primary;
                 isSectorCoverageDefense = true;
@@ -1366,7 +1373,13 @@ export function resolveAttackOrdersOsid(
         updateSectorIntelFromCombat(state, attackerFormations[0].location_osid ?? targetOsid, targetOsid, currentTurn);
 
         // === COMBAT FATIGUE ===
-        applyCombatFatigue({ attackerFormations, defenderFormation });
+        applyCombatFatigue({
+            attackerFormations,
+            defenderFormation,
+            sectorDefenseBrigades,
+            sectorBrigadeWeights,
+            enableSharedSectorDefense: ENABLE_SHARED_SECTOR_DEFENSE,
+        });
     }
 
     // Final pass: displace any formation still in enemy territory (e.g. moved to an OSID that flipped in a later battle this turn)

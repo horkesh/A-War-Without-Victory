@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-02] feat(engine): Standing OG Defensive Model Phase C MVS scaffold (default-off)
+
+**Type:** Engine behavior scaffold, flag-gated default-off. Adds ADR-0007 Phase C shared-sector-defense plumbing behind `ENABLE_SHARED_SECTOR_DEFENSE = false`: assigned-only defender roster is preserved when the flag is off; flag-on widens sector defense to assigned + reserve + rear brigade ids, deduped/sorted; defender fatigue can distribute across contributing sector defenders by normalized reactive weights; reactive cap/min-floor use contributing defender power only when the flag is enabled. No save schema, scenario data, OOB, calibration, or default baseline flip.
+
+**Verification:** Red/green TDD on `tests/standing_og_defense.test.ts` and `tests/attack_resource_aftermath.test.ts`; focused combat smoke `tests/combat_pipeline.test.ts`; `git diff --check`. Full `npm.cmd run typecheck` is blocked in this isolated worktree by missing frontend map packages (`maplibre-gl`, `pmtiles`, `@deck.gl/*`, `@vitejs/plugin-react`) before reaching combat files.
+
+**Files:** `src/sim/combat/standing_og_defense.ts`, `src/sim/combat/attack_resource_aftermath.ts`, `src/sim/combat/attack_resolution_osid.ts`, `tests/standing_og_defense.test.ts`, `tests/attack_resource_aftermath.test.ts`.
+
+---
+
 ## [2026-06-02] investigation+ADR: Standing OG defensive-attrition fault -> ADR-0007 (712th fix parked)
 
 **Type:** Engine-soundness finding + design ADR (no code shipped). Triggered by the 712th Mountain Bde appearing with a sector in Bratunac (phantom `home_osid` `op:travnik:krusevo_brdo_i` -> recruitment placement fallback seated it on the RBiH Bratunac enclave pocket; fix -> `op:travnik:turbe_2`). Fixing it surfaced a 2000+-run combat fault: defensive **fatigue** is dumped on the single front-edge brigade holding a contested OSID, never shared across the OG roster - reactive defense (`attack_resolution_osid.ts:626-691`) shares power+casualties by weight but fatigue lands only on the primary (`attack_resource_aftermath.ts:101`), and the reactive roster is `assigned_brigade_ids`-only (line 637). Brigades grind to morale0/cohesion0 over 30+ weeks (7th Viteska Muslim 38 wks at `op:kakanj:brnjic_2` -> 0/0) while full-strength sectormates fight 0 weeks (RBiH rear 0/8, HRHB 1/13). Undetected for 2000+ runs because calibration measures territory, not brigade health.

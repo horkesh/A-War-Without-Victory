@@ -13,7 +13,7 @@
  * ═══════════════════════════════════════════════════════════════
  */
 
-import type { FactionId, FormationState, GameState } from '../../state/game_state.js';
+import type { FactionId, FormationId, FormationState, GameState } from '../../state/game_state.js';
 import { deductCombatExpenditure } from '../../state/supply_reserves.js';
 import { FACILITY_COMBAT_DAMAGE_RATE } from '../../state/supply_reserve_constants.js';
 import { FATIGUE_MAX } from '../../state/formation_constants.js';
@@ -92,11 +92,33 @@ export function applyFacilityCombatDamage(params: {
 export function applyCombatFatigue(params: {
     attackerFormations: FormationState[];
     defenderFormation: FormationState | null;
+    sectorDefenseBrigades?: FormationState[] | null;
+    sectorBrigadeWeights?: Map<FormationId, number> | null;
+    enableSharedSectorDefense?: boolean;
 }): void {
-    const { attackerFormations, defenderFormation } = params;
+    const {
+        attackerFormations,
+        defenderFormation,
+        sectorDefenseBrigades = null,
+        sectorBrigadeWeights = null,
+        enableSharedSectorDefense = false,
+    } = params;
     for (const af of attackerFormations) {
         if (!af.ops) af.ops = { fatigue: 0, last_supplied_turn: null };
         af.ops.fatigue = Math.min(FATIGUE_MAX, (af.ops.fatigue ?? 0) + FATIGUE_ATTACKER);
+    }
+    if (enableSharedSectorDefense && sectorDefenseBrigades && sectorDefenseBrigades.length > 1 && sectorBrigadeWeights) {
+        const weightedDefenders = sectorDefenseBrigades
+            .map((formation) => ({ formation, weight: Math.max(0, sectorBrigadeWeights.get(formation.id) ?? 0) }))
+            .filter(({ weight }) => weight > 0);
+        const totalWeight = weightedDefenders.reduce((sum, { weight }) => sum + weight, 0);
+        if (totalWeight > 0) {
+            for (const { formation, weight } of weightedDefenders) {
+                if (!formation.ops) formation.ops = { fatigue: 0, last_supplied_turn: null };
+                formation.ops.fatigue = Math.min(FATIGUE_MAX, (formation.ops.fatigue ?? 0) + FATIGUE_DEFENDER * (weight / totalWeight));
+            }
+            return;
+        }
     }
     if (defenderFormation) {
         if (!defenderFormation.ops) defenderFormation.ops = { fatigue: 0, last_supplied_turn: null };
