@@ -61,7 +61,6 @@ import { LoadingSkeleton } from './components/LoadingSkeleton';
 import { LoadErrorToast } from './components/LoadErrorToast';
 import { VerdictScreen } from './components/VerdictScreen';
 import { ReplayInspectionBanner } from './components/replay/ReplayInspectionBanner';
-import { StrategicDashboard } from './components/StrategicDashboard';
 import { AudioCueObserver } from './components/AudioCueObserver';
 import { WarroomShellLayer } from './components/warroom/WarroomShellLayer';
 import { AdvanceTurnModal } from './components/warroom/AdvanceTurnModal';
@@ -243,12 +242,6 @@ function CodexPanelWrapper({
       state={rawGameState}
     />
   );
-}
-
-function StrategicDashboardWrapper() {
-  const open = useGameStore((s) => s.strategicDashboardOpen);
-  if (!open) return null;
-  return <StrategicDashboard />;
 }
 
 function OnboardingOverlayWrapper() {
@@ -1175,7 +1168,6 @@ function App() {
         eventCatalog={eventCatalogFull}
         state={loadedGameState?.rawGameState}
       />
-      <StrategicDashboardWrapper />
       <RootErrorBoundary zone="ops planning">
         <OpsPlanningModal />
       </RootErrorBoundary>
@@ -1344,7 +1336,10 @@ function App() {
             onNavigate={(command) => {
               if (isWarroomLocalCommand(command)) {
                 if (command.kind === 'strategic-overview') {
-                  useGameStore.getState().setStrategicDashboardOpen(true);
+                  // StrategicDashboard retired — the territory-over-time trend
+                  // chart now lives in The War's Record (Army HQ RECORDS tab).
+                  // Re-point the warroom strategic-overview hotspot there.
+                  openArmyHQRecordsSubTab(useGameStore.getState(), 'aftermath');
                 } else if (command.kind === 'diplomacy') {
                   setDiplomacyOpen(true);
                 } else if (command.kind === 'event-log') {
