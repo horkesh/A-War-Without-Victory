@@ -244,7 +244,7 @@ function FrontTooltipContent({
       )}
       {model.ownFormationLabels.length > 0 && (
         <div className="text-[11px] mb-1 border-t border-panel-border pt-1">
-          <span className={FACTION_COLORS[playerFaction ?? ''] ?? 'text-text-primary'}>{playerFaction ?? 'Own'}:</span>{' '}
+          <span className={FACTION_COLORS[playerFaction ?? ''] ?? 'text-text-primary'}>{playerFaction ? getPlayerSafeMilitaryFactionName(playerFaction) : 'Own'}:</span>{' '}
           {model.ownFormationLabels.join(', ')}
         </div>
       )}

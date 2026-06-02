@@ -671,7 +671,7 @@ export function SettlementDetailContent({
                     .sort(([a], [b]) => a.localeCompare(b))
                     .map(([faction, count]) => (
                       <span key={faction} className={FACTION_COLORS_SUBTLE[faction] ?? ''}>
-                        {faction} {count}{' '}
+                        {getPlayerSafeMilitaryFactionName(faction)} {count}{' '}
                       </span>
                     ))}
                 </span>

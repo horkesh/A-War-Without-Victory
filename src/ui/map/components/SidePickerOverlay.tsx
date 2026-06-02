@@ -1,5 +1,6 @@
 import type { StartNewCampaignPayload } from '../desktop/types';
 import { getFactionFlag, getArmyName } from '../utils/factionAssets';
+import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { AWWV_APP_VERSION } from '../utils/appVersion';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
@@ -58,7 +59,7 @@ export function SidePickerOverlay({
                 <img src={getFactionFlag(faction)} alt="" className="w-10 h-7 object-cover rounded border border-white/5 opacity-80 group-hover:opacity-100 transition-opacity shadow-sm" />
               )}
               <div className="flex flex-col">
-                <span className="text-sm font-semibold tracking-wide">{faction}</span>
+                <span className="text-sm font-semibold tracking-wide">{getPlayerSafePoliticalFactionName(faction)}</span>
                 {getArmyName(faction) && (
                   <span className="text-[10px] text-text-secondary uppercase">{t('sidePicker.forces', { army: getArmyName(faction) ?? faction })}</span>
                 )}

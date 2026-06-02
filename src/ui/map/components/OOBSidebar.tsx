@@ -596,7 +596,7 @@ export function OOBSidebar() {
                   return (
                     <div key={faction} className="space-y-1">
                       <div className={`font-mono text-[10px] font-medium px-1 ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
-                        {faction}
+                        {getPlayerSafeMilitaryFactionName(faction)}
                       </div>
                       {sectors.map((sector) => {
                         const color = corpsColorMap[sector.corps_id] ?? '#888';
