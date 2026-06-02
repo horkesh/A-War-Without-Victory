@@ -27,8 +27,6 @@ export interface ShellNavigationState {
   setAdvanceTurnPending?: (v: boolean) => void;
   /** Optional: opens StrategicDashboard overlay without leaving warroom. */
   setStrategicDashboardOpen?: (open: boolean) => void;
-  /** Optional: opens EventLogPanel without leaving warroom. */
-  setEventLogOpen?: (open: boolean) => void;
   /** Optional: clear tactical selections to return to Presidential Inbox. */
   setSelectedOsid?: (id: string | null) => void;
   setSelectedFormationId?: (id: string | null) => void;

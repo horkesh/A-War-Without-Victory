@@ -2,7 +2,7 @@
  * GlassPanel — shared glassmorphism floating panel component.
  *
  * Four position variants: left, right, overlay, bottom-tray.
- * Used by PeaceStatusPanel, EventLogPanel, EconomyPanel, CommandBriefing, etc.
+ * Used by PeaceStatusPanel, EconomyPanel, CommandBriefing, etc.
  *
  * Visual spec: dark NATO ops center aesthetic matching CommandTopBar.
  */

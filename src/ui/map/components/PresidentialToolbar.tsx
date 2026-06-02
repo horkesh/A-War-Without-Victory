@@ -116,7 +116,6 @@ interface PresidentialToolbarProps {
     onOpenRecords?: () => void;
     onOpenOpsHistory?: () => void;
     onOpenCodex?: () => void;
-    onOpenEventLog?: () => void;
 }
 
 export function PresidentialToolbar({
