@@ -85,7 +85,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   const operationsTargetingOsid =
     getPlayerVisibleOperations(loadedGameState?.operations ?? [], playerFaction)
       ?.filter((op) => op.objectives?.includes(selectedOsid))
-      .map((op) => ({ name: op.name, faction: op.faction, phase: op.phase, operationKey: getOperationId(op) }))
+      .map((op) => ({ name: op.display_name, faction: op.faction, phase: op.phase, operationKey: getOperationId(op) }))
     ?? [];
   const recentControlEventsForOsid =
     loadedGameState?.recentControlEvents

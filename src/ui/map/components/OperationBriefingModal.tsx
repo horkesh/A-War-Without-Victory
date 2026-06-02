@@ -473,7 +473,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                         {t('operationBriefing.stamp')}
                     </div>
                     <div id="operation-briefing-title" className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">{t('operationBriefing.title')}</div>
-                    <div className="text-sm font-bold mt-0.5">{operation.name}</div>
+                    <div className="text-sm font-bold mt-0.5">{operation.display_name}</div>
                     <div className="text-[10px] text-neutral-500">{corpsLabel} / {getPlayerSafeMilitaryFactionName(operation.faction)}</div>
                 </div>
 

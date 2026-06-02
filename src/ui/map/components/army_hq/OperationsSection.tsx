@@ -760,7 +760,7 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                                             )}
                                             <span className="text-[14px] font-bold text-text-primary uppercase font-mono tracking-wider"
                                                 style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
-                                                {op.name}
+                                                {op.display_name}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-2">

@@ -283,7 +283,7 @@ export function OperationsPanel() {
                     type="button"
                     role="option"
                     aria-selected={selected}
-                    aria-label={t('operationsPanel.operationCardAria', { name: op.name, phase: op.phase, brigades: op.participating_brigade_count })}
+                    aria-label={t('operationsPanel.operationCardAria', { name: op.display_name, phase: op.phase, brigades: op.participating_brigade_count })}
                     ref={(el) => {
                       operationCardRefs.current[index] = el;
                     }}
@@ -295,7 +295,7 @@ export function OperationsPanel() {
                       }`}
                   >
                     <div className={`text-[11px] font-semibold truncate ${FACTION_COLORS[op.faction] ?? 'text-text-primary'} transition-colors`}>
-                      {op.name}
+                      {op.display_name}
                     </div>
                     <div className="text-[10px] text-text-secondary truncate">
                       {getPlayerSafeCorpsName(op.corps_name ?? null, op.corps_id, 'This corps')}
@@ -332,7 +332,7 @@ export function OperationsPanel() {
             {selectedOperation ? (
               <>
                 <div className={`text-sm font-semibold ${FACTION_COLORS[selectedOperation.faction] ?? 'text-text-primary'}`}>
-                  {selectedOperation.name}
+                  {selectedOperation.display_name}
                 </div>
                 <div className="text-xs text-text-secondary">
                   {selectedOperationCorpsLabel} / {getPlayerSafeMilitaryFactionName(selectedOperation.faction)}

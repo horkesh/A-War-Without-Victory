@@ -544,7 +544,7 @@ export function OOBSidebar() {
                             className={`w-full text-left rounded border px-2 py-1.5 space-y-1 transition-colors ${isSelected ? 'border-accent-gold bg-panel-active' : 'border-panel-border bg-panel-card hover:bg-panel-hover'}`}
                           >
                             <div className={`font-sans text-[11px] font-semibold ${FACTION_COLORS[op.faction] ?? 'text-text-primary'}`}>
-                              {op.name}
+                              {op.display_name}
                             </div>
                             <div className="text-text-secondary text-[10px]">
                               {op.corps_name} / {getPlayerSafeMilitaryFactionName(op.faction)}

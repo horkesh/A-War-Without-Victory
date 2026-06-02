@@ -396,7 +396,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
             </div>
             {fragileOperations.map((operation) => (
               <div key={`${operation.corps_id}|${operation.name}`} className="flex items-center justify-between gap-2 text-text-secondary">
-                <span>{operation.name}</span>
+                <span>{operation.display_name}</span>
                 <span className="text-right">
                   {t('situation.operationHealthLine', { supply: Math.round((operation.supply_readiness ?? 0) * 100), failures: operation.failure_count ?? 0 })}
                 </span>

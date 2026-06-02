@@ -427,7 +427,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                     }`}
                   >
                     <div className="flex justify-between items-start mb-1">
-                      <div className="font-semibold text-text-primary text-[12px] uppercase tracking-wide">{op.name}</div>
+                      <div className="font-semibold text-text-primary text-[12px] uppercase tracking-wide">{op.display_name}</div>
                       <span className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider ${phaseBg}`}>
                         {op.phase}
                       </span>
