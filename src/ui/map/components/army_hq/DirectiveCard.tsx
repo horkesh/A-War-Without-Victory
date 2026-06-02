@@ -74,6 +74,13 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   const [impossibleReason, setImpossibleReason] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  // REQUEST-OP in-card target OSID (Decision-Room request-op cards carry an EMPTY
+  // payload — the president names the objective settlement here). Mirrors the proven
+  // free-text OSID surface in OperationsSection; the objection → force-anyway flow
+  // below handles invalid / unreachable targets. Only used when the directive is a
+  // request_op whose payload carries no fixed targetOsid.
+  const [targetOsidInput, setTargetOsidInput] = useState('');
+
   // FRONT-VISIT reachability (async server-side — the president cannot reach a
   // cut-off enclave). Fetched once on mount / on state change, mirroring
   // FrontVisitSection. Only used for the front_visit lever.
@@ -85,6 +92,13 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   const canAfford = authCurrent >= cost;
   const needsObjection = directive.lever === 'request_op' || directive.lever === 'force_launch';
   const isFrontVisit = directive.lever === 'front_visit';
+
+  // request_op target OSID: a fixed payload target wins; otherwise the president
+  // types one into the in-card input. The input is shown ONLY when this is a
+  // request_op directive whose payload carries no fixed target.
+  const payloadTargetOsid = typeof directive.payload.targetOsid === 'string' ? directive.payload.targetOsid : '';
+  const showTargetInput = directive.lever === 'request_op' && !payloadTargetOsid;
+  const effectiveTargetOsid = payloadTargetOsid || targetOsidInput.trim();
 
   // Commander disposition for the request/force objection (same lookup as
   // OperationsSection): the active CO of the target corps.
@@ -128,7 +142,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
 
   /** Stage a request-op directive (optionally forced past a shown objection). */
   const stageRequestDirective = async (forced: boolean) => {
-    const targetOsid = typeof directive.payload.targetOsid === 'string' ? directive.payload.targetOsid : '';
+    const targetOsid = effectiveTargetOsid;
     if (!directive.corpsId || !targetOsid) {
       setLoadError('Directive is missing its corps/target context.');
       return;
@@ -139,7 +153,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       ...(forced ? { forced_over_objection: true } : {}),
     });
     if (!result.ok) setLoadError(result.error ?? 'Failed to issue directive.');
-    else resetTransient();
+    else { resetTransient(); setTargetOsidInput(''); }
   };
 
   /** Force-launch an existing held/ready op (no objection query — the officer
@@ -221,7 +235,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       }
 
       // request_op: ask the commander first; surface his objection before committing.
-      const targetOsid = typeof directive.payload.targetOsid === 'string' ? directive.payload.targetOsid : '';
+      const targetOsid = effectiveTargetOsid;
       if (!directive.corpsId || !targetOsid) { setLoadError('Directive is missing its corps/target context.'); return; }
       const objection = await ipc.queryDirectiveObjection({ corpsId: directive.corpsId, targetOsid });
       if (objection.ok && objection.data) {
@@ -347,13 +361,32 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         </div>
       )}
 
+      {/* REQUEST-OP target input — the president names the objective settlement
+          (OSID). Mirrors the proven OperationsSection free-text surface; the
+          objection / "cannot issue" flow above handles invalid / unreachable
+          targets. Shown only when the directive carries no fixed target. */}
+      {!pendingObjection && !impossibleReason && showTargetInput && (
+        <input
+          type="text"
+          value={targetOsidInput}
+          onChange={(e) => { setTargetOsidInput(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
+          placeholder="Target settlement (OSID, e.g. bihac_1)"
+          aria-label="Target settlement for the directed operation"
+          className="mt-2 w-full rounded border border-panel-border/50 bg-panel-bg px-2 py-1 text-[11px] font-mono text-text-primary"
+        />
+      )}
+
       {/* Confirm / ISSUE — disabled when CA short (still renders for scan-without-spend),
-          or, for front-visit, when no front is reachable. */}
+          for front-visit when no front is reachable, or for a request-op with no
+          target named yet. */}
       {!pendingObjection && !impossibleReason && (() => {
         const blockedFrontVisit = isFrontVisit && frontVisitReady && frontVisitUnavailableReason !== null;
-        const issueDisabled = !canAfford || busy || blockedFrontVisit;
+        const blockedNoTarget = showTargetInput && targetOsidInput.trim().length === 0;
+        const issueDisabled = !canAfford || busy || blockedFrontVisit || blockedNoTarget;
         const issueTitle = blockedFrontVisit
           ? (frontVisitUnavailableReason ?? 'A front visit cannot be made right now.')
+          : blockedNoTarget
+          ? 'Name a target settlement (OSID) to direct the operation.'
           : canAfford
             ? (cost === 0
               ? 'Issue this directive (no command authority cost).'

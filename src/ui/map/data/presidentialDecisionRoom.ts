@@ -15,6 +15,8 @@ import {
   REPLACE_CO_COST,
   ELITE_DEPLOY_COST,
   FRONT_VISIT_COST,
+  REQUEST_OP_COST,
+  FORCE_LAUNCH_COST,
 } from '../utils/commandAuthority';
 
 /**
@@ -801,6 +803,105 @@ function addCommandPersonnelCards(state: LoadedGameState, cards: CandidateCard[]
   });
 }
 
+/**
+ * REQUEST-OP directives (headline War-Direction lever): one `command`-category
+ * card per PLAYER-faction corps that has an ACTIVE serving CO (the same active /
+ * assigned-CO gate `addCommandPersonnelCards`'s replace-CO path uses, so the
+ * DirectiveCard objection lookup resolves to a real commander). The directive
+ * payload is EMPTY — the president names the target OSID in the DirectiveCard's
+ * in-card input, and the proven objection → force-anyway flow there handles
+ * invalid / unreachable targets and commander pushback. No UI read-model of valid
+ * targets exists; the in-card free-text OSID surface mirrors OperationsSection.
+ *
+ * Deterministic: corps are iterated in a stable strictCompare order. No
+ * nondeterministic or time-based sources.
+ */
+function addRequestOpDirectiveCards(state: LoadedGameState, cards: CandidateCard[]): void {
+  const playerFaction = state.player_faction ?? null;
+  if (!playerFaction) return;
+
+  const officers = state.namedOfficerData ?? [];
+  const corps = [...(state.formations ?? [])]
+    .filter((formation) => formation.faction === playerFaction && formation.kind === 'corps')
+    .sort((a, b) => strictCompare(a.id, b.id));
+
+  for (const formation of corps) {
+    const commander = officers.find(
+      (o) => o.assigned_corps_id === formation.id && o.status === 'active',
+    );
+    // Need a real serving CO so the DirectiveCard objection lookup resolves.
+    if (!commander) continue;
+    cards.push({
+      id: `command:request-op:${formation.id}`,
+      category: 'command',
+      severity: 'info',
+      title: t('decisionRoom.card.requestOp.title', { corps: formation.name }),
+      explanation: t('decisionRoom.card.requestOp.explanation', { officer: commander.name }),
+      sourceOwner: t('decisionRoom.card.command.sourceOwner'),
+      sourceLabel: t('decisionRoom.card.requestOp.sourceLabel'),
+      actionLabel: t('decisionRoom.action.inspectCorps'),
+      evidence: [
+        t('decisionRoom.card.requestOp.evidence.serving', { officer: commander.name }),
+        t('decisionRoom.card.requestOp.evidence.input'),
+      ],
+      navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: formation.id },
+      directive: {
+        lever: 'request_op',
+        corpsId: formation.id,
+        cost: REQUEST_OP_COST,
+        payload: {},
+      },
+      urgencySort: 40,
+      sourceSort: `command:request-op:${formation.id}`,
+    });
+  }
+}
+
+/**
+ * FORCE-LAUNCH directives (headline War-Direction lever): one `command`-category
+ * card per pending op proposal whose commander withheld approval but offers a
+ * presidential override (`override_available === true`). The DirectiveCard's
+ * force_launch branch consumes `{ corpsId, opName }` end-to-end with NO objection
+ * re-query — the president overrides a known no-go directly (stageOperationForceLaunch).
+ *
+ * Deterministic: proposals are iterated in a stable strictCompare order by
+ * proposal id. No nondeterministic or time-based sources.
+ */
+function addForceLaunchDirectiveCards(state: LoadedGameState, cards: CandidateCard[]): void {
+  const proposals = [...(state.opProposalCards ?? [])]
+    .filter((proposal) => proposal.override_available === true)
+    .sort((a, b) => strictCompare(a.proposal_id, b.proposal_id));
+
+  for (const proposal of proposals) {
+    cards.push({
+      id: `command:force-launch:${proposal.proposal_id}`,
+      category: 'command',
+      severity: 'warning',
+      title: t('decisionRoom.card.forceLaunch.title', { opName: proposal.op_name }),
+      explanation: t('decisionRoom.card.forceLaunch.explanation', {
+        opName: proposal.op_name,
+        corps: proposal.corps_name,
+      }),
+      sourceOwner: t('decisionRoom.card.command.sourceOwner'),
+      sourceLabel: t('decisionRoom.card.forceLaunch.sourceLabel'),
+      actionLabel: t('decisionRoom.action.inspectCorps'),
+      evidence: [
+        t('decisionRoom.card.forceLaunch.evidence.corps', { corps: proposal.corps_name }),
+        t('decisionRoom.card.forceLaunch.evidence.override'),
+      ],
+      navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: proposal.corps_id },
+      directive: {
+        lever: 'force_launch',
+        corpsId: proposal.corps_id,
+        cost: FORCE_LAUNCH_COST,
+        payload: { opName: proposal.op_name },
+      },
+      urgencySort: 5,
+      sourceSort: `command:force-launch:${proposal.proposal_id}`,
+    });
+  }
+}
+
 function turnCostPriority(record: TurnAftermathView): number {
   const severity = record.cost.severity === 'critical' ? 0 : 1;
   return severity * 1000 - record.turn;
@@ -1500,6 +1601,8 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   addSupplyVisibilityCard(state, candidates);
   addBriefingCards(state, candidates);
   addCommandPersonnelCards(state, candidates);
+  addRequestOpDirectiveCards(state, candidates);
+  addForceLaunchDirectiveCards(state, candidates);
   addHardTurnCards(state, osidNameMap, candidates);
   addCampaignCostCard(state, osidNameMap, candidates);
   addChronicleCard(state, candidates);
