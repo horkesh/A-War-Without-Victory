@@ -27,7 +27,11 @@ import type {
   PresidentialDecisionRoomCard,
   PresidentialDecisionRoomView,
 } from '../../src/ui/map/data/presidentialDecisionRoom.js';
-import { CommandCard } from '../../src/ui/map/components/warroom/CommandCard.js';
+import {
+  CommandCard,
+  COMMAND_CARD_DESK_ASSET,
+  resolveCommandCardArt,
+} from '../../src/ui/map/components/warroom/CommandCard.js';
 
 function makeCard(
   partial: Partial<PresidentialDecisionRoomCard> & Pick<PresidentialDecisionRoomCard, 'id' | 'category' | 'severity'>,
@@ -176,14 +180,59 @@ describe('warroom hotspot → category map', () => {
   });
 });
 
+describe('CommandCard shared desk-art resolution', () => {
+  it('resolves each of the six category ids to its mapped presidential_desk asset', () => {
+    const expected: Record<PresidentialCommandCategoryId, string> = {
+      cat_war_direction: 'packet_thumb_reserve_request.webp',
+      cat_diplomacy: 'packet_thumb_peace_plan.webp',
+      cat_home_front: 'packet_thumb_event_decision.webp',
+      cat_command: 'packet_thumb_officer_matter.webp',
+      cat_conscience: 'packet_thumb_paramilitary.webp',
+      cat_record: 'packet_thumb_intelligence.webp',
+    };
+    for (const id of PRESIDENTIAL_COMMAND_CATEGORIES.map((c) => c.id)) {
+      // The id→asset map carries the mapped basename...
+      expect(COMMAND_CARD_DESK_ASSET[id]).toBe(expected[id]);
+      // ...and the resolver returns a URL ending in that basename (the existing
+      // packet_thumbnails desk art is shared — no new command_cards art needed).
+      const url = resolveCommandCardArt(id);
+      expect(url).not.toBeNull();
+      expect(url!.endsWith(expected[id])).toBe(true);
+      expect(url).toContain('packet_thumbnails');
+    }
+  });
+
+  it('keeps the five action (act_*) ids mapped to consequence_stills (ready but unrendered)', () => {
+    const expected: Record<string, string> = {
+      act_authorize_op: 'consequence_reserve_deployment.webp',
+      act_replace_commander: 'consequence_personnel_change.webp',
+      act_patron_relations: 'consequence_negotiated_settlement.webp',
+      act_convoy: 'consequence_humanitarian_access.webp',
+      act_front_visit: 'consequence_public_pressure.webp',
+    };
+    for (const [id, basename] of Object.entries(expected)) {
+      expect(COMMAND_CARD_DESK_ASSET[id]).toBe(basename);
+      const url = resolveCommandCardArt(id);
+      expect(url).not.toBeNull();
+      expect(url!.endsWith(basename)).toBe(true);
+      expect(url).toContain('consequence_stills');
+    }
+  });
+});
+
 describe('CommandCard fallback placeholder', () => {
-  it('renders the faction-tinted fallback (no art) with title, count, and urgent pip', () => {
+  it('falls back to the faction-tinted placeholder for an UNMAPPED id', () => {
+    // An id with no command_cards override AND no desk-asset mapping must return
+    // null from the resolver and render the placeholder.
+    expect(resolveCommandCardArt('cat_unmapped_does_not_exist')).toBeNull();
     const html = renderToStaticMarkup(
       React.createElement(CommandCard, {
+        // The render path keys the fallback testid off the live category id; we
+        // assert the placeholder branch via an id the desk map does not carry.
         category: {
-          id: 'cat_war_direction',
-          title: 'War Direction',
-          blurb: 'Operations and the front.',
+          id: 'cat_unmapped_does_not_exist' as PresidentialCommandCategoryId,
+          title: 'Unmapped',
+          blurb: 'No art mapped.',
           count: 3,
           urgentCount: 1,
           isUrgent: true,
@@ -193,17 +242,17 @@ describe('CommandCard fallback placeholder', () => {
         onSelect: () => {},
       }),
     );
-    // No art resolves in the test bundle → the fallback placeholder must render.
-    expect(html).toContain('command-card-fallback-cat_war_direction');
-    expect(html).toContain('command-card-cat_war_direction');
-    expect(html).toContain('War Direction');
-    expect(html).toContain('command-card-urgent-cat_war_direction'); // urgent pip
+    // No art resolves → the fallback placeholder must render.
+    expect(html).toContain('command-card-fallback-cat_unmapped_does_not_exist');
+    expect(html).toContain('command-card-cat_unmapped_does_not_exist');
+    expect(html).toContain('Unmapped');
+    expect(html).toContain('command-card-urgent-cat_unmapped_does_not_exist'); // urgent pip
     expect(html).toContain('>3<'); // the count badge value
     // RS faction tint (red) present in the placeholder gradient.
     expect(html).toContain('165, 45, 45');
   });
 
-  it('omits the urgent pip when the category is not urgent', () => {
+  it('renders shared desk art (not the placeholder) for a mapped category id', () => {
     const html = renderToStaticMarkup(
       React.createElement(CommandCard, {
         category: {
@@ -219,9 +268,9 @@ describe('CommandCard fallback placeholder', () => {
         onSelect: () => {},
       }),
     );
-    expect(html).toContain('command-card-fallback-cat_home_front');
+    // cat_home_front is mapped → the <img> renders, not the CSS placeholder.
+    expect(html).not.toContain('command-card-fallback-cat_home_front');
     expect(html).not.toContain('command-card-urgent-cat_home_front');
-    // Default (RBiH) green tint when faction is null.
-    expect(html).toContain('35, 112, 63');
+    expect(html).toContain('packet_thumb_event_decision');
   });
 });
