@@ -77,9 +77,34 @@ function targetLabel(
   return null;
 }
 
+function normalizeTargetLabel(value: string): string {
+  return value.trim().toLocaleLowerCase('bs');
+}
+
+function resolveTargetOsidInput(
+  input: string,
+  controlBySettlement: Record<string, string | null> | undefined,
+  osidDisplayNames: Record<string, string> | null,
+): string {
+  const trimmed = input.trim();
+  if (!trimmed) return '';
+  if (controlBySettlement && Object.prototype.hasOwnProperty.call(controlBySettlement, trimmed)) return trimmed;
+  if (osidDisplayNames && Object.prototype.hasOwnProperty.call(osidDisplayNames, trimmed)) return trimmed;
+  if (!osidDisplayNames) return trimmed;
+
+  const normalized = normalizeTargetLabel(trimmed);
+  const matches = Object.entries(osidDisplayNames)
+    .filter(([, label]) => normalizeTargetLabel(label) === normalized)
+    .map(([osid]) => osid)
+    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+
+  return matches.length === 1 ? matches[0] : trimmed;
+}
+
 export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   const ipc = useIPC();
   const setLoadError = useGameStore((s) => s.setLoadError);
+  const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
 
   // Force-op PUSHBACK state (request_op / force_launch only). Mirrors
   // OperationsSection: hold the commander's disposition-tinted objection until the
@@ -107,7 +132,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   const cost = directive.cost;
   const authCurrent = gameState.commandAuthority?.current ?? 100;
   const canAfford = authCurrent >= cost;
-  const needsObjection = directive.lever === 'request_op' || directive.lever === 'force_launch';
+  const needsObjection = directive.lever === 'request_op';
   const isFrontVisit = directive.lever === 'front_visit';
 
   // request_op target OSID: a fixed payload target wins; otherwise the president
@@ -115,7 +140,11 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   // request_op directive whose payload carries no fixed target.
   const payloadTargetOsid = typeof directive.payload.targetOsid === 'string' ? directive.payload.targetOsid : '';
   const showTargetInput = directive.lever === 'request_op' && !payloadTargetOsid;
-  const effectiveTargetOsid = payloadTargetOsid || targetOsidInput.trim();
+  const effectiveTargetOsid = payloadTargetOsid || resolveTargetOsidInput(
+    targetOsidInput,
+    gameState.controlBySettlement,
+    osidDisplayNames,
+  );
 
   // Commander disposition for the request/force objection (same lookup as
   // OperationsSection): the active CO of the target corps.
@@ -164,6 +193,11 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   const handleCancel = () => {
     resetTransient();
     setTargetOsidInput('');
+    setReceipt({ kind: 'cancelled', message: t('directive.receipt.cancelled') });
+  };
+
+  const handleStandDown = () => {
+    setPendingObjection(null);
     setReceipt({ kind: 'cancelled', message: t('directive.receipt.cancelled') });
   };
 
@@ -266,6 +300,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       }
 
       if (directive.lever === 'force_launch') {
+        // The objection already exists in the proposal card; force-launch overrides
+        // that known held/no-go operation directly and does not re-query here.
         await stageForceLaunch();
         return;
       }
@@ -425,7 +461,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
             </button>
             <button
               type="button"
-              onClick={() => setPendingObjection(null)}
+              onClick={handleStandDown}
               disabled={busy}
               className="text-[9px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-panel-border/50 text-text-primary disabled:opacity-40 hover:bg-panel-bg"
             >

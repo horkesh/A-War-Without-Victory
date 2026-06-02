@@ -3076,7 +3076,7 @@ export const enMessages = {
     'directive.targetInput.placeholder': 'Target settlement (e.g. Bihać)',
     'directive.targetInput.aria': 'Target settlement',
     'directive.issue.blockedFrontVisitTitle': 'A front visit cannot be made right now.',
-    'directive.issue.blockedNoTargetTitle': 'Name a target settlement (OSID) to direct the operation.',
+    'directive.issue.blockedNoTargetTitle': 'Name a target settlement to direct the operation.',
     'directive.issue.freeTitle': 'Issue this directive (no command authority cost).',
     'directive.issue.costTitle': 'Issue this directive (cost {cost} command authority; current {current}).',
     'directive.issue.insufficientTitle': 'Insufficient command authority (need {cost}, have {current}).',

@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DirectiveCard } from '../../src/ui/map/components/army_hq/DirectiveCard';
 import type { LoadedGameState } from '../../src/ui/map/data/types';
 import type { PresidentialDecisionRoomDirective } from '../../src/ui/map/data/presidentialDecisionRoom';
+import { useGameStore } from '../../src/ui/map/store/gameStore';
 
 const baseGameState = {
   turn: 12,
@@ -15,6 +16,23 @@ const baseGameState = {
   ],
   commandAuthority: { current: 60, max: 100, spentThisTurn: 0, recoveryPerTurn: 2 },
   namedOfficerData: [],
+} as unknown as LoadedGameState;
+
+const gameStateWithCommander = {
+  ...baseGameState,
+  namedOfficerData: [
+    {
+      id: 'officer_mujic',
+      name: 'Adem Mujic',
+      rank: 'colonel',
+      assigned_corps_id: 'arbih_3rd_corps',
+      status: 'active',
+      competence: 4,
+      political_reliability: 4,
+      stubbornness: 2,
+      override_tolerance: 3,
+    },
+  ],
 } as unknown as LoadedGameState;
 
 const stopOpDirective: PresidentialDecisionRoomDirective = {
@@ -95,6 +113,7 @@ function installIpc(overrides: Record<string, unknown> = {}) {
 afterEach(() => {
   cleanup();
   Reflect.deleteProperty(window, 'awwv');
+  useGameStore.setState(useGameStore.getInitialState());
   vi.restoreAllMocks();
 });
 
@@ -176,6 +195,126 @@ describe('DirectiveCard stop-op action host', () => {
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
       'Directive staged for next turn',
     );
+  });
+
+  it('resolves a typed settlement display name before request-op objection review', async () => {
+    useGameStore.setState({
+      osidDisplayNames: {
+        'op:bihac:bihac_1': 'Bihać',
+        'op:zenica:zenica_1': 'Zenica',
+      },
+    });
+    const { queryDirectiveObjection, stageOpDirectiveOrder } = installIpc();
+
+    render(React.createElement(DirectiveCard, { directive: requestOpDirective, gameState: baseGameState }));
+
+    fireEvent.change(screen.getByLabelText('Target settlement'), { target: { value: 'Bihać' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Issue (25)' }));
+
+    await waitFor(() => {
+      expect(queryDirectiveObjection).toHaveBeenCalledWith({
+        corpsId: 'arbih_3rd_corps',
+        targetOsid: 'op:bihac:bihac_1',
+      });
+      expect(stageOpDirectiveOrder).toHaveBeenCalledWith({
+        corpsId: 'arbih_3rd_corps',
+        targetOsid: 'op:bihac:bihac_1',
+      });
+    });
+  });
+
+  it('surfaces commander pushback before staging a request-op directive', async () => {
+    const { queryDirectiveObjection, stageOpDirectiveOrder } = installIpc({
+      queryDirectiveObjection: vi.fn(async () => ({
+        ok: true,
+        data: { forceRatio: 0.7, estimatedCasualties: 380, recommendedAction: 'delay' },
+      })),
+    });
+
+    render(React.createElement(DirectiveCard, { directive: requestOpDirective, gameState: gameStateWithCommander }));
+
+    fireEvent.change(screen.getByLabelText('Target settlement'), { target: { value: 'zenica' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Issue (25)' }));
+
+    expect(await screen.findByRole('alertdialog', { name: 'Commander objection' })).toBeTruthy();
+    expect(screen.getByText(/Colonel Adem Mujic advises against it/i)).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Force anyway' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Stand down' })).toBeTruthy();
+    expect(screen.queryByRole('status', { name: 'Directive receipt' })).toBeNull();
+    expect(queryDirectiveObjection).toHaveBeenCalledWith({ corpsId: 'arbih_3rd_corps', targetOsid: 'zenica' });
+    expect(stageOpDirectiveOrder).not.toHaveBeenCalled();
+  });
+
+  it('forces a request-op directive over commander pushback and shows a receipt', async () => {
+    const { stageOpDirectiveOrder } = installIpc({
+      queryDirectiveObjection: vi.fn(async () => ({
+        ok: true,
+        data: { forceRatio: 0.7, estimatedCasualties: 380, recommendedAction: 'abort' },
+      })),
+    });
+
+    render(React.createElement(DirectiveCard, { directive: requestOpDirective, gameState: gameStateWithCommander }));
+
+    fireEvent.change(screen.getByLabelText('Target settlement'), { target: { value: 'zenica' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Issue (25)' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Force anyway' }));
+
+    await waitFor(() => {
+      expect(stageOpDirectiveOrder).toHaveBeenCalledWith({
+        corpsId: 'arbih_3rd_corps',
+        targetOsid: 'zenica',
+        forced_over_objection: true,
+      });
+    });
+    expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
+      'Directive staged for next turn',
+    );
+  });
+
+  it('records a stand-down receipt after dismissing commander pushback without staging', async () => {
+    const { stageOpDirectiveOrder } = installIpc({
+      queryDirectiveObjection: vi.fn(async () => ({
+        ok: true,
+        data: { forceRatio: 0.7, estimatedCasualties: 380, recommendedAction: 'delay' },
+      })),
+    });
+
+    render(React.createElement(DirectiveCard, { directive: requestOpDirective, gameState: gameStateWithCommander }));
+
+    fireEvent.change(screen.getByLabelText('Target settlement'), { target: { value: 'zenica' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Issue (25)' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Stand down' }));
+
+    expect(screen.queryByRole('alertdialog', { name: 'Commander objection' })).toBeNull();
+    expect(stageOpDirectiveOrder).not.toHaveBeenCalled();
+    expect(screen.getByRole('status', { name: 'Directive receipt' }).textContent).toContain(
+      'Directive cancelled',
+    );
+  });
+
+  it('blocks unbuildable request-op directives without offering force-anyway', async () => {
+    const { stageOpDirectiveOrder } = installIpc({
+      queryDirectiveObjection: vi.fn(async () => ({
+        ok: true,
+        data: {
+          forceRatio: 0,
+          estimatedCasualties: 0,
+          recommendedAction: 'abort',
+          rejectionReason: 'objective_unreachable',
+        },
+      })),
+    });
+
+    render(React.createElement(DirectiveCard, { directive: requestOpDirective, gameState: gameStateWithCommander }));
+
+    fireEvent.change(screen.getByLabelText('Target settlement'), { target: { value: 'zenica' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Issue (25)' }));
+
+    expect(await screen.findByRole('alert', { name: 'Directive cannot be issued' })).toBeTruthy();
+    expect(screen.getByText(/no friendly ground adjacent/i)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Force anyway' })).toBeNull();
+    expect(screen.queryByRole('status', { name: 'Directive receipt' })).toBeNull();
+    expect(stageOpDirectiveOrder).not.toHaveBeenCalled();
   });
 
   it.each([

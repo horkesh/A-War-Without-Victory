@@ -111,12 +111,12 @@ Tested with Chromium/Playwright against the same local app after restarting Vite
 
 | Missing item | Current evidence | Needed player-facing result | Priority |
 | --- | --- | --- | --- |
-| Single act surface for all five presidential levers | Command Board says five 1.0 levers are shipped; browser shows Desk cost list and Command Surface cards. | Every lever should be issuable from a clear Decision Room/Directive Card path, with confirmation, cost, staff pushback, and next-turn receipt. | P0 |
+| Single act surface for all five presidential levers | Command Board says five 1.0 levers are shipped; browser shows Desk cost list and Command Surface cards. `DirectiveCard` now has fixture proof for direct issue, exact display-name target resolution, request-op commander pushback, force-anyway, stand-down, cannot-issue, front-visit availability, and shared receipts. | Every lever should be issuable from a clear Decision Room/Directive Card path, with confirmation, cost, staff pushback, and next-turn receipt; remaining work is broader route/records/patron/event consequence integration, not the core DirectiveCard action host. | P0 |
 | Consequence receipt loop | Recent consequences exists; officer resentment and patron defiance receipts exist in code history. | Each presidential intervention should produce a visible receipt: what changed, who resented it, what it cost, where to inspect the aftermath. | P0 |
 | Advance-gate clarity | Browser saw disabled advance with "No pre-advance alert" nearby. | One clear blocker sentence and one routing button when advance is blocked. | P1 |
 | Command Authority doctrine copy | Desk says "currency of command", toolbar says override resource. | Consistent language: presidential leverage, institutional strain, recovery, and why overuse is dangerous. | P1 |
 | Direct-control cleanup | Browser still showed direct corps stance comboboxes in left command panel. | Player should not feel like a corps commander. Direct controls must be removed, reframed as request/intent, or hidden behind active doctrine decisions. | P0/P1 |
-| Patron/army pushback integration | Force-op pushback and patron dead-channel are shipped substrate. | Player should see "promise -> resistance -> consequence -> receipt" in the same command family. | P1 |
+| Patron/army pushback integration | Force-op pushback and patron dead-channel are shipped substrate. DirectiveCard now proves the army side of the loop: objection before staging, force-anyway override, stand-down cancel receipt, and unbuildable no-spend block. | Player should see "promise -> resistance -> consequence -> receipt" in the same command family; next unresolved half is patron/event consequence receipt and archival routing. | P1 |
 
 ### 2. Tactical Groups Productization
 
@@ -158,7 +158,7 @@ Tactical Groups are engine-meaningful, but not yet product-complete as a player-
 | --- | --- | --- | --- |
 | Operation request picker | June 2 audit found raw OSID objective boxes; later commits fixed some wording. | Request operation should use a settlement/front picker, not typed internal identifiers. | P1 |
 | Inherited operation briefing | RS starts with six active operations and flagged health for Drina/Koridor. | Factions with active inherited ops need a first-turn "what is already underway" briefing with allowed presidential actions. | P1 |
-| Commander rationale | Browser shows officer stats and loyalty, but not always "why this commander will resist/accept this order" near actions. | Every risky directive should show command interpretation and expected pushback. | P1 |
+| Commander rationale | Browser shows officer stats and loyalty; DirectiveCard now has request-op fixture coverage for commander objection prose near the actual action. | Every risky directive should show command interpretation and expected pushback; next expansion is consistency across non-request risky surfaces and records. | P1 |
 | Operation predictor confidence | GAME_STATE_RATING_MASTER flags predictor confidence as thin. | Before approval: estimated odds, uncertainty band, major reasons, and "what would improve this". | P1 |
 | AAR causality | Records tab has AAR and operation history owners but no turn-0 content. | After action: why launched, what happened, why it succeeded/failed, cost, affected TGs/officers/patrons. | P1 |
 | OOB source/provenance | Personnel/OOB is rich but source-light to the player. | High-value units and officers should carry provenance/source notes where practical. | P2 |
@@ -426,7 +426,7 @@ Preconditions before running this queue:
 | Destructive route | What must be tested last | Expected player-facing proof |
 | --- | --- | --- |
 | Advance turn | Disabled reason, ready state, wall-calendar/toolbar confirmation, actual advance, aftermath modal, next-turn records. | Player sees why advance is blocked or safe, confirms once, then receives receipts in Records/Chronicle/AAR. |
-| Command Surface directive | Each presidential card family that can mutate state: war direction, diplomacy/patrons, home front, command/personnel, conscience/atrocity, record/turn. | Card -> directive -> cost/pushback -> confirm/cancel -> receipt loop closes. Direct military/personnel issue paths and front-visit availability/initiation now have the shared receipt/cancel standard; patron/event consequence receipt paths remain separate follow-ups. |
+| Command Surface directive | Each presidential card family that can mutate state: war direction, diplomacy/patrons, home front, command/personnel, conscience/atrocity, record/turn. | Card -> directive -> cost/pushback -> confirm/cancel -> receipt loop closes. Direct military/personnel issue paths, exact typed settlement-name resolution for request-op targets, request-op commander pushback/force-anyway/stand-down/cannot-issue states, and front-visit availability/initiation now have the shared receipt/cancel standard; patron/event consequence receipt paths remain separate follow-ups. |
 | Operations | Request/suggest plan, commander selection, G2/assessment view, authorize, force/direct intervention, abort/delay objections. | Player understands commander recommendation, uncertainty, CA cost, and next-turn consequence. |
 | Corps stance/direct control | Any remaining direct stance change or equivalent map-side military order. | Either removed/reframed as presidential request, or clearly confirmed as a state-changing command with doctrine/cost. |
 | Personnel | Reassign commander, dismiss, assign from pool, reserve recall, elite brigade override/loan termination. | Confirmation names officer/formation, cost, institutional friction, and resulting record. |
@@ -587,7 +587,7 @@ These are findings, not permission to start work before the active Claude lanes 
 | Priority | Missing player-facing work | Why it matters |
 | --- | --- | --- |
 | P0 | Fix tutorial skip/persistence and modal interruption behavior. | It broke in live browser testing and disrupts first-session comprehension. |
-| P0 | Finish presidential act loop: command card -> directive -> confirmation -> pushback/cost -> next-turn receipt. | This is the central product promise. |
+| P0 | Finish presidential act loop beyond DirectiveCard: route command cards into the proven directive host, then archive receipts into Records/Chronicle and add patron/event consequence receipts. | The core DirectiveCard action host is now covered; the remaining product promise is route cohesion and aftermath memory. |
 | P0 | Resolve direct corps stance/control exposure against president-through-generals doctrine. | It contradicts the player role unless explicitly reframed. |
 | P0 | Create TG Product Completion Matrix after active lanes hand off. | TGs are strategically important but not yet player-complete. |
 | P1 | Reduce first-turn jargon/density with progressive disclosure and glossary/tooltips. | Current first turn is deep but intimidating and acronym-heavy. |

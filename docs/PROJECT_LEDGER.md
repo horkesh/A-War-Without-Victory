@@ -18236,3 +18236,15 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `tests/ui/directive_card_stop_op_action.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-06-02] feat(ui): cover request-op commander pushback in DirectiveCard
+
+**Type:** Player-facing UI/IPC-surface hardening for the Presidential Command Surface directive host. `DirectiveCard` now has fixture proof for the request-op objection loop: typed settlement display names resolve to canonical OSIDs through the map display-name store before objection review, commander pushback appears before staging, `Force anyway` stages the existing request-op IPC with `forced_over_objection: true`, `Stand down` dismisses the objection with the shared cancelled/no-spend receipt, and unbuildable request-op directives show `Cannot issue` without offering force-anyway or staging anything. The force-launch branch is documented at the live branch as intentionally direct: it overrides an already-known held/no-go proposal and does not re-query objection.
+
+**Determinism / scope:** UI-only around existing desktop IPC calls and the existing objection read-model. No sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, or command-authority mechanics changed.
+
+**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui/directive_card_stop_op_action.test.ts --reporter=dot` failed because stand-down had no `Directive receipt`; a second red pass failed because typed `Bihać` was sent directly instead of resolving to `op:bihac:bihac_1`. Green focused file `node node_modules/vitest/vitest.mjs run tests/ui/directive_card_stop_op_action.test.ts --reporter=dot` passed 15/15.
+
+**Files:** `src/ui/map/components/army_hq/DirectiveCard.tsx`, `src/ui/map/i18n/messages.en.ts`, `tests/ui/directive_card_stop_op_action.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
