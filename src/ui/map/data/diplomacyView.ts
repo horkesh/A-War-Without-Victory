@@ -7,7 +7,7 @@ import {
     type IvpComponentKey,
 } from '../../../state/patron_pressure.js';
 import { getPeacePlanById } from '../../../sim/negotiation/peace_plan_data.js';
-import { getDimensionEffective } from '../../../sim/events/strategic_dimensions.js';
+import { getDimensionEffective, type DimensionStore } from '../../../sim/events/strategic_dimensions.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import type {
     DiplomacyActorView,
@@ -301,9 +301,9 @@ function patronConfidenceBand(value: number): PatronConfidenceView['band'] {
  */
 function buildPatronConfidence(state: any, factionId: string | null): PatronConfidenceView | undefined {
     if (!factionId) return undefined;
-    const store = asRecord(state?.military?.negotiation?.strategic_dimensions);
+    const store: DimensionStore | undefined = asRecord(state?.military?.negotiation?.strategic_dimensions);
     if (!store || !store[factionId]?.patron_confidence) return undefined;
-    const value = getDimensionEffective(store as any, factionId, 'patron_confidence');
+    const value = getDimensionEffective(store, factionId, 'patron_confidence');
     return { value, band: patronConfidenceBand(value) };
 }
 
