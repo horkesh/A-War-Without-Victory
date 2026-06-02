@@ -35,7 +35,12 @@ export function CounterOfferModal({ offerId, state, onClose }: CounterOfferModal
   const setLoadError = useGameStore((s) => s.setLoadError);
   const rawId = offerId ? stripCounterOfferPrefix(offerId) : null;
   const offer = state?.pendingCounterOffers?.find((entry) => entry.id === rawId) ?? null;
-  const title = offer ? `Counter-offer from ${offer.author}` : 'Counter-offer';
+  const authorLabel = offer
+    ? offer.author === 'PLAYER'
+      ? 'your delegation'
+      : getPlayerSafePoliticalFactionName(offer.author)
+    : '';
+  const title = offer ? `Counter-offer from ${authorLabel}` : 'Counter-offer';
   const headerImage = getDecisionHeaderForFamily('counter_offer');
 
   const submitAsCounter = async () => {
@@ -99,10 +104,9 @@ export function CounterOfferModal({ offerId, state, onClose }: CounterOfferModal
               {(['RBiH', 'RS', 'HRHB'] as const).map((faction) => (
                 <div key={faction} className="rounded border border-white/10 bg-black/20 px-2 py-2">
                   <div className="text-[9px] uppercase tracking-[0.12em] text-text-muted">
-                    {faction}
+                    {getPlayerSafePoliticalFactionName(faction)}
                   </div>
                   <div className="mt-1 text-[16px] font-bold text-text-primary">{offer.proposedSplit[faction]}%</div>
-                  <div className="mt-0.5 text-[9px] text-text-muted">{getPlayerSafePoliticalFactionName(faction)}</div>
                 </div>
               ))}
             </div>

@@ -4,6 +4,7 @@ import { Z } from '../../shared/zIndex';
 import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
+import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
 
@@ -129,7 +130,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                                     <div className="min-w-0">
                                         <div className="text-[12px] font-bold text-text-primary">{place}</div>
                                         <div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-text-secondary">
-                                            {request.faction} - {modeLabel(request.mode)} - strength {request.strength}
+                                            {getPlayerSafeMilitaryFactionName(request.faction)} - {modeLabel(request.mode)} - strength {request.strength}
                                         </div>
                                     </div>
                                     <div className="flex shrink-0 gap-2">

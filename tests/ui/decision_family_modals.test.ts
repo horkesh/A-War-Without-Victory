@@ -153,10 +153,13 @@ describe('decision family modals', () => {
       onClose,
     }));
 
-    expect(screen.getByRole('dialog', { name: 'Counter-offer from HRHB' })).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: 'Counter-offer from Croatian Republic of Herzeg-Bosnia' })).toBeTruthy();
     expect(screen.getByRole('img', { name: 'Negotiation channel' }).getAttribute('src')).toContain('decision_header_counter_offer');
     expect(screen.getByText('Owen-Stoltenberg Plan')).toBeTruthy();
-    expect(screen.getByText('RBiH')).toBeTruthy();
+    // Split columns label the share by the resolved political faction name
+    // (no raw faction slug headline).
+    expect(screen.getByText('Republic of Bosnia and Herzegovina')).toBeTruthy();
+    expect(screen.queryByText('RBiH')).toBeNull();
     expect(screen.getByText('33%')).toBeTruthy();
     expect(screen.getByText('BB1 p.49')).toBeTruthy();
 

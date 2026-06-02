@@ -37,7 +37,7 @@ function describeEffect(effect: EventEffect): string | null {
     case 'humanitarian_impact': return `${getPlayerSafePoliticalFactionName(effect.faction)} humanitarian impact${effect.war_crimes_delta ? ` (${effect.war_crimes_delta > 0 ? '+' : ''}${effect.war_crimes_delta})` : ''}`;
     case 'patron_pressure': return `${getPlayerSafePoliticalFactionName(effect.faction)} patron pressure ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
     case 'alliance_change': return `${getPlayerSafePoliticalFactionName('RBiH')} / ${getPlayerSafePoliticalFactionName('HRHB')} alliance ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-    case 'negotiation_capital': return `${getPlayerSafePoliticalFactionName(effect.faction)} ${effect.dimension} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+    case 'negotiation_capital': return `${getPlayerSafePoliticalFactionName(effect.faction)} ${humanizeToken(effect.dimension)} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
     case 'equipment_grant': {
       const granted = [
         effect.tanks ? `${effect.tanks} tanks` : '',
@@ -148,10 +148,10 @@ describe('production modal-ready event catalog rendering', () => {
         expect(screen.getAllByText('Staff recommendation'), row.id).toHaveLength(1);
         expect(screen.getByText(/not a historical default and does not control bot calibration/), row.id).toBeTruthy();
         expect(screen.queryByText('Historical default'), row.id).toBeNull();
-        expect(screen.queryByText(/AI historical path for calibration/), row.id).toBeNull();
+        expect(screen.queryByText(/historically attested choice/), row.id).toBeNull();
       } else {
         expect(screen.getAllByText('Historical default'), row.id).toHaveLength(1);
-        expect(screen.getByText(/AI historical path for calibration/), row.id).toBeTruthy();
+        expect(screen.getByText(/historically attested choice/), row.id).toBeTruthy();
       }
       expect(screen.queryByText('Historical default source review required'), row.id).toBeNull();
       expect(screen.queryByText('No immediate mechanical effects.'), row.id).toBeNull();

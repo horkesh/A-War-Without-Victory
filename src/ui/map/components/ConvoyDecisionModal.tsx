@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { PendingConvoyDecisionView } from '../data/types';
-import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
+import { getPlayerSafeEnclaveName, getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { Modal } from '../../shared/Modal';
 import { Z } from '../../shared/zIndex';
 import { t, type MessageKey } from '../i18n';
@@ -32,11 +32,6 @@ const DECISION_COPY: Record<ConvoyDecision, { labelKey: MessageKey; detailKey: M
         className: 'border-amber-300/45 bg-amber-400/12 text-amber-100 hover:bg-amber-400/22',
     },
 };
-
-function formatConvoyDecision(decision: ConvoyDecision | undefined): string {
-    if (!decision) return t('convoyDecision.state.none');
-    return t(`convoyDecision.state.${decision}` as MessageKey);
-}
 
 export function ConvoyDecisionModal({ convoy, onClose, onDecide }: ConvoyDecisionModalProps) {
     const [pendingDecision, setPendingDecision] = useState<ConvoyDecision | null>(null);
@@ -73,7 +68,7 @@ export function ConvoyDecisionModal({ convoy, onClose, onDecide }: ConvoyDecisio
                         imageUrl={headerImage}
                         imageAlt="Humanitarian convoy"
                         eyebrow={t('convoyDecision.title')}
-                        title={convoy.target_enclave}
+                        title={getPlayerSafeEnclaveName(convoy.target_enclave)}
                         titleId="convoy-decision-title"
                     />
                 )}

@@ -198,7 +198,7 @@ export function deriveInboxItems(
             subtitle:
                 `${paramilitaryRequests.length} deployment request${paramilitaryRequests.length === 1 ? '' : 's'} near ${samplePlace}; ` +
                 `${projectedCivilianRisk} projected civilian casualties; +${paramilitaryRequests.length} war crimes event${paramilitaryRequests.length === 1 ? '' : 's'}; ` +
-                `${standingImpact} international standing; historical context: Sensitive History Design Gate. Estimated strength ${totalStrength}.`,
+                `${standingImpact} international standing. Estimated strength ${totalStrength}.`,
             action: paramilitarySurface.inboxAction,
             priority: 25,
         });

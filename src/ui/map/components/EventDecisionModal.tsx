@@ -22,6 +22,7 @@ import type {
 import type { GameState } from '../../../state/game_state';
 import { getCausalAncestors } from '../../../sim/events/causality_query';
 import { getPlayerSafePoliticalFactionName, getPlayerSafeOfficerName } from '../utils/playerSafeText';
+import { useGameStore } from '../store/gameStore';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 
@@ -132,7 +133,7 @@ function describeEffect(effect: EventEffect): string {
         case 'humanitarian_impact': return `${getPlayerSafePoliticalFactionName(effect.faction)} humanitarian impact${effect.war_crimes_delta ? ` (${effect.war_crimes_delta > 0 ? '+' : ''}${effect.war_crimes_delta})` : ''}`;
         case 'patron_pressure': return `${getPlayerSafePoliticalFactionName(effect.faction)} patron pressure ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
         case 'alliance_change': return `${getPlayerSafePoliticalFactionName('RBiH')} / ${getPlayerSafePoliticalFactionName('HRHB')} alliance ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'negotiation_capital': return `${getPlayerSafePoliticalFactionName(effect.faction)} ${effect.dimension} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+        case 'negotiation_capital': return `${getPlayerSafePoliticalFactionName(effect.faction)} ${humanizeToken(effect.dimension)} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
         case 'equipment_grant': {
             const granted = [
                 effect.tanks ? `${effect.tanks} tanks` : '',
@@ -290,7 +291,7 @@ function ResponseButton({
                     {historical && (
                         <span
                             className="rounded-sm border border-accent-gold/60 bg-accent-gold/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-accent-gold"
-                            title={`AI historical path for calibration. Bot-controlled factions choose this option in historical mode. The player may choose any option.${sourceNote ? ` Source: ${sourceNote}.` : ''}`}
+                            title={`The historically attested choice. You are free to choose any option.${sourceNote ? ` Source: ${sourceNote}.` : ''}`}
                         >
                             Historical default
                         </span>
@@ -307,8 +308,7 @@ function ResponseButton({
             </button>
             {historical && (
                 <p className="mt-2 text-[11px] leading-relaxed text-text-secondary">
-                    AI historical path for calibration. Bot-controlled factions choose this option in historical mode.
-                    The player may choose any option.{sourceNote ? ` Source: ${sourceNote}.` : ''}
+                    This is the historically attested choice. You are free to choose any option.{sourceNote ? ` Source: ${sourceNote}.` : ''}
                 </p>
             )}
             {staffRecommended && (
@@ -338,10 +338,12 @@ function DecisionContextSection({
     decision,
     eventCatalog,
     state,
+    devMode,
 }: {
     decision: EventDecisionDossier;
     eventCatalog?: ReadonlyMap<string, EventDefinition>;
     state?: GameState;
+    devMode: boolean;
 }) {
     // Graceful degradation: if neither catalog nor state is available, omit
     // the entire section. The existing modal sidebar already shows the
@@ -353,10 +355,25 @@ function DecisionContextSection({
     const ancestors = state ? getCausalAncestors(decision.event_id, state) : [];
     const rawDossier = eventDef?.source_note ?? eventDef?.historical_source ?? null;
     const dossierExcerpt = rawDossier ? truncateSourceDossier(rawDossier) : null;
+    // Resolve ancestry event_ids to catalog titles (humanized id as fallback)
+    // so the dev diagnostic shows readable names rather than raw slugs.
+    const ancestorLabels = ancestors.map(
+        (id) => eventCatalog?.get(id)?.title ?? humanizeToken(id),
+    );
 
     // If catalog provided but the event_id is not in it AND we have no
     // ancestors to render, omit the section (nothing to show).
     if (!eventDef && ancestors.length === 0) return null;
+
+    // Family/Source taxonomy and the causal ancestry chain are engine-internal
+    // designer/debug diagnostics — gate them behind the devMode store flag
+    // (mirrors PR #130/#133). The source dossier excerpt below is player-facing
+    // historical provenance and stays visible.
+    const showDiagnostics = devMode && (Boolean(eventDef && (family || sourceTier)) || ancestors.length > 0);
+
+    // If the only content this section could render is the (now-gated)
+    // diagnostics and the player-facing dossier is absent, omit it entirely.
+    if (!showDiagnostics && !dossierExcerpt) return null;
 
     return (
         <section
@@ -366,7 +383,7 @@ function DecisionContextSection({
             <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold">
                 Decision Context
             </div>
-            {eventDef && (family || sourceTier) && (
+            {showDiagnostics && eventDef && (family || sourceTier) && (
                 <div
                     className="mb-2 text-[11px] leading-relaxed text-text-secondary"
                     data-testid="decision-context-family-source"
@@ -374,12 +391,12 @@ function DecisionContextSection({
                     Family: {family ?? 'unknown'} | Source: {sourceTier ?? 'unknown'}
                 </div>
             )}
-            {ancestors.length > 0 && (
+            {showDiagnostics && ancestors.length > 0 && (
                 <div
                     className="mb-2 text-[11px] leading-relaxed text-text-secondary"
                     data-testid="decision-context-ancestry"
                 >
-                    Ancestry: {ancestors.join(', ')}
+                    Ancestry: {ancestorLabels.join(', ')}
                 </div>
             )}
             {dossierExcerpt && (
@@ -404,6 +421,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
     // the assessment block speaks in a named officer's voice; otherwise it falls
     // back to the generic "Staff assessment". (See deriveAssessmentLabel.)
     const assessmentLabel = deriveAssessmentLabel(decision.category, advisor);
+    const devMode = useGameStore((s) => s.devMode);
 
     return (
         <Modal
@@ -437,7 +455,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                             Situation
                         </div>
                         <p className="text-[13px] leading-relaxed text-text-primary">
-                            {decision.narrative || decision.situation || 'A player-facing presidential event decision requires your response.'}
+                            {decision.narrative || decision.situation || 'This decision requires your response.'}
                         </p>
                         {decision.staff_assessment && (
                             <div className="mt-3 rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2">
@@ -494,6 +512,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                     decision={decision}
                     eventCatalog={eventCatalog}
                     state={state}
+                    devMode={devMode}
                 />
 
                 {!hasHistoricalDefault && (

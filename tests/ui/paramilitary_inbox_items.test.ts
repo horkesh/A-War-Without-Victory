@@ -82,9 +82,12 @@ describe('paramilitary Presidential Inbox items', () => {
         expect(paramilitary?.action).toBe('paramilitary_review');
         expect(`${paramilitary?.title} ${paramilitary?.subtitle}`.toLowerCase()).toContain('paramilitary');
         expect(`${paramilitary?.title} ${paramilitary?.subtitle}`.toLowerCase()).toContain('war crimes');
+        expect(paramilitary?.subtitle).toContain('1 deployment request near Bijeljina');
         expect(paramilitary?.subtitle).toContain('100 projected civilian casualties');
         expect(paramilitary?.subtitle).toContain('-2 international standing');
-        expect(paramilitary?.subtitle).toContain('Sensitive History Design Gate');
+        expect(paramilitary?.subtitle).toContain('Estimated strength 150');
+        // Internal engineering content-gate term must not leak to players.
+        expect(paramilitary?.subtitle).not.toContain('Sensitive History Design Gate');
     });
 
     it('surfaces existing pending paramilitary requests even when policy is not ask', () => {

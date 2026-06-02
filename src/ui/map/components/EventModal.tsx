@@ -14,7 +14,7 @@ import { Icon, type IconName } from './icons/Icon';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import type { EventEffect } from '../../../sim/events/event_types';
-import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
+import { getPlayerSafeDisplayLabel, getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { t, type MessageKey } from '../i18n';
 
 /** Display-ready event data for the modal. */
@@ -89,7 +89,7 @@ export function describeEventEffect(effect: EventEffect): string {
         case 'humanitarian_impact': return `${getPlayerSafePoliticalFactionName(effect.faction)} humanitarian impact${effect.war_crimes_delta ? ` (${effect.war_crimes_delta > 0 ? '+' : ''}${effect.war_crimes_delta})` : ''}`;
         case 'patron_pressure': return `${getPlayerSafePoliticalFactionName(effect.faction)} patron pressure ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
         case 'alliance_change': return `${formatAllianceLabel()} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'negotiation_capital': return `${getPlayerSafePoliticalFactionName(effect.faction)} ${effect.dimension} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+        case 'negotiation_capital': return `${getPlayerSafePoliticalFactionName(effect.faction)} ${getPlayerSafeDisplayLabel(effect.dimension, effect.dimension)} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
     }
     return effect.kind;
 }
