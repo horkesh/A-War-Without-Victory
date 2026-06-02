@@ -983,9 +983,18 @@ function App() {
     setSummaryOpen(false);
   };
 
+  const openDecisionRoomTarget = (target: PresidentialDecisionRoomNavigationTarget) => {
+    if (target.kind === 'counter-offer') {
+      setSelectedCounterOfferId(target.counterOfferId);
+      setSummaryOpen(false);
+      return true;
+    }
+    return openPresidentialDecisionRoomNavigationTarget(target, useGameStore.getState());
+  };
+
   // Command-surface card strip handlers. Opening a category requests the
-  // Decision Room lens (done inside the strip) then routes into the Army HQ
-  // briefing where the Decision Room renders, pre-filtered to that lens.
+  // Decision Room lens (done inside the strip) then opens the Warroom-native
+  // Decision Room host, pre-filtered to that lens.
   const rememberWarroomFocus = () => {
     if (typeof document === 'undefined') return;
     const active = document.activeElement;
@@ -1670,7 +1679,7 @@ function App() {
                   Close
                 </button>
               </div>
-              <PresidentialDecisionRoomPanel />
+              <PresidentialDecisionRoomPanel onNavigateTarget={openDecisionRoomTarget} />
             </div>
           )}
           {warroomOverlaySurface && (

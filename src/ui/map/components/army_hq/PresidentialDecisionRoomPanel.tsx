@@ -13,6 +13,7 @@ import {
   type PresidentialDecisionRoomLens,
   type PresidentialDecisionRoomLoopStep,
   type PresidentialDecisionRoomNextOrder,
+  type PresidentialDecisionRoomNavigationTarget,
   type PresidentialDecisionRoomSeverity,
   type PresidentialDecisionRoomSourceHandoff,
 } from '../../data/presidentialDecisionRoom';
@@ -53,6 +54,7 @@ function MetricCell({ label, value, tone = 'neutral' }: { label: string; value: 
 }
 
 type ActiveDecisionRoomLens = 'all' | PresidentialDecisionRoomCategory;
+type DecisionRoomNavigateTarget = (target: PresidentialDecisionRoomNavigationTarget) => boolean | void;
 
 function LensButton({
   lens,
@@ -90,7 +92,13 @@ function LensButton({
   );
 }
 
-function CommandQuestionLane({ question }: { question: PresidentialDecisionRoomCommandQuestion }) {
+function CommandQuestionLane({
+  question,
+  navigateTarget,
+}: {
+  question: PresidentialDecisionRoomCommandQuestion;
+  navigateTarget: DecisionRoomNavigateTarget;
+}) {
   const disabled = question.navigationTarget.kind === 'none';
   return (
     <article className="min-w-0 rounded border border-panel-border/55 bg-panel-card/55 px-2 py-2">
@@ -116,7 +124,7 @@ function CommandQuestionLane({ question }: { question: PresidentialDecisionRoomC
       <button
         type="button"
         disabled={disabled}
-        onClick={() => openPresidentialDecisionRoomNavigationTarget(question.navigationTarget)}
+        onClick={() => navigateTarget(question.navigationTarget)}
         className="mt-2 h-7 w-full truncate rounded border border-amber-400/25 bg-amber-400/10 px-2 text-[8px] font-bold uppercase tracking-[0.1em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
       >
         {question.actionLabel}
@@ -125,7 +133,13 @@ function CommandQuestionLane({ question }: { question: PresidentialDecisionRoomC
   );
 }
 
-function NextOrderCard({ order }: { order: PresidentialDecisionRoomNextOrder }) {
+function NextOrderCard({
+  order,
+  navigateTarget,
+}: {
+  order: PresidentialDecisionRoomNextOrder;
+  navigateTarget: DecisionRoomNavigateTarget;
+}) {
   const disabled = order.navigationTarget.kind === 'none';
   return (
     <article className={`min-w-0 rounded border px-3 py-2 ${order.role === 'act'
@@ -151,7 +165,7 @@ function NextOrderCard({ order }: { order: PresidentialDecisionRoomNextOrder }) 
       <button
         type="button"
         disabled={disabled}
-        onClick={() => openPresidentialDecisionRoomNavigationTarget(order.navigationTarget)}
+        onClick={() => navigateTarget(order.navigationTarget)}
         className="mt-2 h-7 w-full truncate rounded border border-amber-400/25 bg-amber-400/10 px-2 text-[8px] font-bold uppercase tracking-[0.1em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
       >
         {order.actionLabel}
@@ -160,13 +174,19 @@ function NextOrderCard({ order }: { order: PresidentialDecisionRoomNextOrder }) 
   );
 }
 
-function ProductLoopStep({ step }: { step: PresidentialDecisionRoomLoopStep }) {
+function ProductLoopStep({
+  step,
+  navigateTarget,
+}: {
+  step: PresidentialDecisionRoomLoopStep;
+  navigateTarget: DecisionRoomNavigateTarget;
+}) {
   const disabled = step.navigationTarget.kind === 'none';
   return (
     <button
       type="button"
       disabled={disabled}
-      onClick={() => openPresidentialDecisionRoomNavigationTarget(step.navigationTarget)}
+      onClick={() => navigateTarget(step.navigationTarget)}
       className="flex min-h-[4.75rem] min-w-0 flex-col justify-between rounded border border-panel-border/55 bg-panel-card/50 px-2 py-2 text-left transition hover:border-amber-400/25 hover:bg-white/[0.04] disabled:cursor-default disabled:opacity-55"
     >
       <span className="min-w-0">
@@ -194,10 +214,12 @@ function PriorityCard({
   card,
   active,
   onSelectCard,
+  navigateTarget,
 }: {
   card: PresidentialDecisionRoomCard;
   active: boolean;
   onSelectCard: (cardId: string) => void;
+  navigateTarget: DecisionRoomNavigateTarget;
 }) {
   const disabled = card.navigationTarget.kind === 'none';
 
@@ -231,7 +253,7 @@ function PriorityCard({
         <button
           type="button"
           disabled={disabled}
-          onClick={() => openPresidentialDecisionRoomNavigationTarget(card.navigationTarget)}
+          onClick={() => navigateTarget(card.navigationTarget)}
           className="shrink-0 rounded border border-amber-400/30 bg-amber-400/10 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.11em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border disabled:bg-panel-bg/60 disabled:text-text-muted"
         >
           {card.actionLabel}
@@ -258,11 +280,13 @@ function PriorityDossier({
   cardsById,
   onSelectCard,
   gameState,
+  navigateTarget,
 }: {
   dossier: PresidentialDecisionRoomDossier | null;
   cardsById: Map<string, PresidentialDecisionRoomCard>;
   onSelectCard: (cardId: string) => void;
   gameState: LoadedGameState | null;
+  navigateTarget: DecisionRoomNavigateTarget;
 }) {
   if (!dossier) {
     return (
@@ -352,7 +376,7 @@ function PriorityDossier({
       <button
         type="button"
         disabled={disabled}
-        onClick={() => openPresidentialDecisionRoomNavigationTarget(dossier.navigationTarget)}
+        onClick={() => navigateTarget(dossier.navigationTarget)}
         className="mt-2 h-8 w-full truncate rounded border border-amber-400/35 bg-amber-400/12 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
       >
         {dossier.actionLabel}
@@ -361,11 +385,17 @@ function PriorityDossier({
   );
 }
 
-function CompactLink({ card }: { card: PresidentialDecisionRoomCard }) {
+function CompactLink({
+  card,
+  navigateTarget,
+}: {
+  card: PresidentialDecisionRoomCard;
+  navigateTarget: DecisionRoomNavigateTarget;
+}) {
   return (
     <button
       type="button"
-      onClick={() => openPresidentialDecisionRoomNavigationTarget(card.navigationTarget)}
+      onClick={() => navigateTarget(card.navigationTarget)}
       className="flex min-w-0 items-center justify-between gap-2 rounded border border-panel-border/55 bg-panel-card/55 px-2 py-1.5 text-left transition hover:border-amber-400/25 hover:bg-white/[0.04]"
     >
       <span className="min-w-0">
@@ -379,13 +409,19 @@ function CompactLink({ card }: { card: PresidentialDecisionRoomCard }) {
   );
 }
 
-function SourceHandoffLink({ handoff }: { handoff: PresidentialDecisionRoomSourceHandoff }) {
+function SourceHandoffLink({
+  handoff,
+  navigateTarget,
+}: {
+  handoff: PresidentialDecisionRoomSourceHandoff;
+  navigateTarget: DecisionRoomNavigateTarget;
+}) {
   const disabled = handoff.navigationTarget.kind === 'none';
   return (
     <button
       type="button"
       disabled={disabled}
-      onClick={() => openPresidentialDecisionRoomNavigationTarget(handoff.navigationTarget)}
+      onClick={() => navigateTarget(handoff.navigationTarget)}
       className="flex min-w-0 items-center justify-between gap-2 rounded border border-panel-border/55 bg-panel-card/55 px-2 py-1.5 text-left transition hover:border-amber-400/25 hover:bg-white/[0.04] disabled:cursor-default disabled:opacity-55"
     >
       <span className="min-w-0">
@@ -406,7 +442,11 @@ function SourceHandoffLink({ handoff }: { handoff: PresidentialDecisionRoomSourc
   );
 }
 
-export function PresidentialDecisionRoomPanel() {
+export interface PresidentialDecisionRoomPanelProps {
+  onNavigateTarget?: DecisionRoomNavigateTarget;
+}
+
+export function PresidentialDecisionRoomPanel({ onNavigateTarget }: PresidentialDecisionRoomPanelProps = {}) {
   const state = useGameStore((s) => s.loadedGameState);
   const osidNameMap = useGameStore((s) => s.osidDisplayNames);
   const [activeLens, setActiveLens] = useState<ActiveDecisionRoomLens>('all');
@@ -459,6 +499,7 @@ export function PresidentialDecisionRoomPanel() {
     ? view.inspectNext
     : filteredCards.filter((card) => card.navigationTarget.kind !== 'none')).slice(0, 5);
   const selectedDossierCardId = view.activeDossier?.cardId ?? null;
+  const navigateTarget = onNavigateTarget ?? openPresidentialDecisionRoomNavigationTarget;
   const handleSelectLens = (id: ActiveDecisionRoomLens) => {
     setActiveLens(id);
     const lens = view.lenses.find((entry) => entry.id === id);
@@ -513,7 +554,7 @@ export function PresidentialDecisionRoomPanel() {
               <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionRoom.productLoop')}</div>
               <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-8">
                 {view.loopSteps.map((step) => (
-                  <ProductLoopStep key={step.id} step={step} />
+                  <ProductLoopStep key={step.id} step={step} navigateTarget={navigateTarget} />
                 ))}
               </div>
             </div>
@@ -526,7 +567,7 @@ export function PresidentialDecisionRoomPanel() {
           <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionRoom.nextOrders.title')}</div>
           <div className="grid gap-1.5 md:grid-cols-3">
             {view.nextOrders.map((order) => (
-              <NextOrderCard key={order.id} order={order} />
+              <NextOrderCard key={order.id} order={order} navigateTarget={navigateTarget} />
             ))}
           </div>
         </div>
@@ -537,7 +578,7 @@ export function PresidentialDecisionRoomPanel() {
           <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionRoom.commandLoop')}</div>
           <div className="grid gap-1.5 sm:grid-cols-2 xl:grid-cols-5">
             {view.commandQuestions.map((question) => (
-              <CommandQuestionLane key={question.id} question={question} />
+              <CommandQuestionLane key={question.id} question={question} navigateTarget={navigateTarget} />
             ))}
           </div>
         </div>
@@ -568,6 +609,7 @@ export function PresidentialDecisionRoomPanel() {
               card={card}
               active={selectedDossierCardId === card.id}
               onSelectCard={setActiveCardId}
+              navigateTarget={navigateTarget}
             />
           ))}
         </div>
@@ -579,6 +621,7 @@ export function PresidentialDecisionRoomPanel() {
               cardsById={cardsById}
               onSelectCard={setActiveCardId}
               gameState={state}
+              navigateTarget={navigateTarget}
             />
           </div>
 
@@ -591,7 +634,7 @@ export function PresidentialDecisionRoomPanel() {
                   {t('decisionRoom.noInspectionHandoffs')}
                 </div>
               ) : inspectNext.map((card) => (
-                <CompactLink key={card.id} card={card} />
+                <CompactLink key={card.id} card={card} navigateTarget={navigateTarget} />
               ))}
             </div>
           </div>
@@ -606,7 +649,7 @@ export function PresidentialDecisionRoomPanel() {
                   {t('decisionRoom.noSourceHandoffs')}
                 </div>
               ) : view.sourceHandoffs.map((handoff) => (
-                <SourceHandoffLink key={handoff.id} handoff={handoff} />
+                <SourceHandoffLink key={handoff.id} handoff={handoff} navigateTarget={navigateTarget} />
               ))}
             </div>
           </div>
@@ -620,7 +663,7 @@ export function PresidentialDecisionRoomPanel() {
                   {t('decisionRoom.noBuriedItems')}
                 </div>
               ) : view.advanceReadiness.items.map((card) => (
-                <CompactLink key={`advance:${card.id}`} card={card} />
+                <CompactLink key={`advance:${card.id}`} card={card} navigateTarget={navigateTarget} />
               ))}
             </div>
           </div>

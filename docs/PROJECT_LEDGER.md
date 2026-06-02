@@ -18284,3 +18284,15 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `src/ui/map/App.tsx`, `src/ui/map/components/warroom/CommandCardStrip.tsx`, `tests/ui/warroom_shell_accessibility.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/40_reports/WARROOM_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-06-02] fix(ui): let App own Decision Room counter-offer navigation
+
+**Type:** Player-facing route correctness for Decision Room actions. `PresidentialDecisionRoomPanel` now accepts an optional `onNavigateTarget` callback and threads it through its action buttons; the Warroom host passes an App-owned handler so `counter-offer` targets set `selectedCounterOfferId` and open the existing `CounterOfferModal` path instead of relying on the shared router's no-op `true` return. Default panel behavior still uses `openPresidentialDecisionRoomNavigationTarget`.
+
+**Determinism / scope:** UI route/presentation only. No sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, command-authority, or counter-offer mechanics changed.
+
+**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui_presidential_decision_room_wiring.test.ts --reporter=dot` failed because the panel had no `onNavigateTarget` contract. Green focused proof: `node node_modules/vitest/vitest.mjs run tests/ui_presidential_decision_room_wiring.test.ts tests/ui/presidential_decision_room_panel_i18n.test.ts --reporter=dot` passed 13/13. `npm.cmd run typecheck` passed. `git diff --check` passed.
+
+**Files:** `src/ui/map/App.tsx`, `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx`, `tests/ui_presidential_decision_room_wiring.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---

@@ -152,6 +152,19 @@ describe('Presidential Decision Room wiring', () => {
     expect(panel).not.toContain('setChronicleOpen(true)');
   });
 
+  it('lets App-owned Decision Room navigation open counter-offer modals', () => {
+    const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+    const app = read('../src/ui/map/App.tsx');
+
+    expect(panel).toContain('onNavigateTarget?:');
+    expect(panel).toContain('navigateTarget(dossier.navigationTarget)');
+    expect(panel).toContain('navigateTarget(handoff.navigationTarget)');
+    expect(app).toContain('const openDecisionRoomTarget =');
+    expect(app).toContain("if (target.kind === 'counter-offer')");
+    expect(app).toContain('setSelectedCounterOfferId(target.counterOfferId)');
+    expect(app).toContain('<PresidentialDecisionRoomPanel onNavigateTarget={openDecisionRoomTarget} />');
+  });
+
   it('renders priority lenses as local filters over the Decision Room card list', () => {
     const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
 
@@ -184,7 +197,7 @@ describe('Presidential Decision Room wiring', () => {
     expect(panel).toContain('CommandQuestionLane');
     expect(panel).toContain('view.commandQuestions.map');
     expect(panel).toContain("t('decisionRoom.commandLoop')");
-    expect(panel).toContain('openPresidentialDecisionRoomNavigationTarget(question.navigationTarget)');
+    expect(panel).toContain('navigateTarget(question.navigationTarget)');
     expect(panel).not.toContain('commandLoopQueue');
   });
 
@@ -200,7 +213,7 @@ describe('Presidential Decision Room wiring', () => {
     expect(panel).toContain('ProductLoopStep');
     expect(panel).toContain('view.loopSteps.map');
     expect(panel).toContain("t('decisionRoom.productLoop')");
-    expect(panel).toContain('openPresidentialDecisionRoomNavigationTarget(step.navigationTarget)');
+    expect(panel).toContain('navigateTarget(step.navigationTarget)');
     expect(panel).not.toContain('productLoopQueue');
     expect(panel).not.toContain('historyOwner');
     expect(model).not.toContain('productLoopLedger');
@@ -215,7 +228,7 @@ describe('Presidential Decision Room wiring', () => {
     expect(panel).toContain('SourceHandoffLink');
     expect(panel).toContain('view.sourceHandoffs.map');
     expect(panel).toContain("t('decisionRoom.sourceHandoffs')");
-    expect(panel).toContain('openPresidentialDecisionRoomNavigationTarget(handoff.navigationTarget)');
+    expect(panel).toContain('navigateTarget(handoff.navigationTarget)');
     expect(panel).not.toContain('sourceHandoffQueue');
     expect(panel).not.toContain('sourceHandoffLedger');
   });
