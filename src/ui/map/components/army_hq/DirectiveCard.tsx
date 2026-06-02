@@ -167,6 +167,15 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
     setReceipt({ kind: 'cancelled', message: t('directive.receipt.cancelled') });
   };
 
+  const markIssued = () => {
+    setReceipt({ kind: 'success', message: t('directive.receipt.stagedNextTurn') });
+  };
+
+  const markFailed = (reason: string) => {
+    setLoadError(reason);
+    setReceipt({ kind: 'error', message: t('directive.receipt.failed', { reason }) });
+  };
+
   /** Stage a request-op directive (optionally forced past a shown objection). */
   const stageRequestDirective = async (forced: boolean) => {
     const targetOsid = effectiveTargetOsid;
@@ -179,8 +188,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       targetOsid,
       ...(forced ? { forced_over_objection: true } : {}),
     });
-    if (!result.ok) setLoadError(result.error ?? 'Failed to issue directive.');
-    else { resetTransient(); setTargetOsidInput(''); }
+    if (!result.ok) markFailed(result.error ?? 'Failed to issue directive.');
+    else { resetTransient(); setTargetOsidInput(''); markIssued(); }
   };
 
   /** Force-launch an existing held/ready op (no objection query — the officer
@@ -192,8 +201,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       return;
     }
     const result = await ipc.stageOperationForceLaunch({ corpsId: directive.corpsId, operationName: opName });
-    if (!result.ok) setLoadError(result.error ?? 'Failed to force-launch operation.');
-    else resetTransient();
+    if (!result.ok) markFailed(result.error ?? 'Failed to force-launch operation.');
+    else { resetTransient(); markIssued(); }
   };
 
   const handleConfirm = async () => {
@@ -209,8 +218,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         const proposalId = typeof directive.payload.proposalId === 'string' ? directive.payload.proposalId : '';
         if (!proposalId) { setLoadError('Directive is missing its proposal context.'); return; }
         const result = await ipc.acceptProposal(proposalId);
-        if (!result.ok) setLoadError(result.error ?? 'Failed to authorize operation.');
-        else resetTransient();
+        if (!result.ok) markFailed(result.error ?? 'Failed to authorize operation.');
+        else { resetTransient(); markIssued(); }
         return;
       }
 
@@ -218,14 +227,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         const opName = typeof directive.payload.opName === 'string' ? directive.payload.opName : '';
         if (!directive.corpsId || !opName) { setLoadError('Directive is missing its corps/operation context.'); return; }
         const result = await ipc.stageOpHaltOrder({ corpsId: directive.corpsId, opName });
-        if (!result.ok) {
-          const reason = result.error ?? 'Failed to halt operation.';
-          setLoadError(reason);
-          setReceipt({ kind: 'error', message: t('directive.receipt.failed', { reason }) });
-        } else {
-          resetTransient();
-          setReceipt({ kind: 'success', message: t('directive.receipt.stagedNextTurn') });
-        }
+        if (!result.ok) markFailed(result.error ?? 'Failed to halt operation.');
+        else { resetTransient(); markIssued(); }
         return;
       }
 
@@ -235,8 +238,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       if (directive.lever === 'replace_co') {
         if (!directive.corpsId) { setLoadError('Directive is missing its corps context.'); return; }
         const result = await ipc.stageCoReplacementOrder({ corpsId: directive.corpsId });
-        if (!result.ok) setLoadError(result.error ?? 'Failed to replace commander.');
-        else resetTransient();
+        if (!result.ok) markFailed(result.error ?? 'Failed to replace commander.');
+        else { resetTransient(); markIssued(); }
         return;
       }
 
@@ -247,8 +250,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         const brigadeId = typeof directive.payload.brigadeId === 'string' ? directive.payload.brigadeId : '';
         if (!requestId || !brigadeId) { setLoadError('Directive is missing its reserve-request context.'); return; }
         const result = await ipc.approveReserveRequest(requestId, brigadeId);
-        if (!result.ok) setLoadError(result.error ?? 'Failed to release reserve brigade.');
-        else resetTransient();
+        if (!result.ok) markFailed(result.error ?? 'Failed to release reserve brigade.');
+        else { resetTransient(); markIssued(); }
         return;
       }
 
@@ -257,8 +260,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       if (directive.lever === 'front_visit') {
         if (frontVisitUnavailableReason) { setLoadError(frontVisitUnavailableReason); return; }
         const result = await ipc.initiateFrontVisit();
-        if (!result.ok) setLoadError(result.error ?? 'Failed to initiate front visit.');
-        else { resetTransient(); await refreshFrontVisit(); }
+        if (!result.ok) markFailed(result.error ?? 'Failed to initiate front visit.');
+        else { resetTransient(); markIssued(); await refreshFrontVisit(); }
         return;
       }
 

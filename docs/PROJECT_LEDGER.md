@@ -18212,3 +18212,15 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `src/ui/map/components/army_hq/DirectiveCard.tsx`, `src/ui/map/i18n/messages.en.ts`, `tests/ui/directive_card_stop_op_action.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-06-02] feat(ui): share directive receipts across direct issue paths
+
+**Type:** Player-facing UI hardening for the Presidential Command Surface directive host. The Stop Operation receipt proof is generalized inside `DirectiveCard` so successful/failing direct issue paths now use the same `Directive receipt` contract: authorize-op, no-objection request-op after actual staging, force-launch, replace-CO, and elite-deploy. The request-op impossible/commander-objection review states remain pre-stage states and still do not show a receipt until the player actually issues or forces a directive.
+
+**Determinism / scope:** UI-only around existing desktop IPC calls. No sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, or command-authority mechanics changed.
+
+**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui/directive_card_stop_op_action.test.ts --reporter=dot` failed because authorize-op had no receipt after `acceptProposal`. Green expanded suite `node node_modules/vitest/vitest.mjs run tests/ui/directive_card_stop_op_action.test.ts tests/ui/presidential_decision_room.test.ts tests/ui/presidential_decision_room_request_force.test.ts tests/ui/directive_card_act_art.test.ts --reporter=dot` passed 47/47. `npm.cmd run typecheck` passed.
+
+**Files:** `src/ui/map/components/army_hq/DirectiveCard.tsx`, `tests/ui/directive_card_stop_op_action.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
