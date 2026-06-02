@@ -17,6 +17,7 @@ import {
 } from '../../utils/officerCharacter';
 import { getPreparationMaxTurns } from '../../../../sim/combat/operation_preparation';
 import { formatCorpsDisplayName } from '../../utils/formatters';
+import { getPlayerSafeMilitaryFactionName } from '../../utils/playerSafeText';
 import { t } from '../../i18n';
 
 interface CommanderPhaseProps {
@@ -148,7 +149,7 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                 <div className="flex items-center gap-3">
                     <div className="w-3 h-10 rounded-sm" style={{ backgroundColor: factionColor }} />
                     <div>
-                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-text-secondary">{faction}</div>
+                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-text-secondary">{getPlayerSafeMilitaryFactionName(faction)}</div>
                         <div className="text-sm font-bold text-white">{corpsName}</div>
                     </div>
                 </div>

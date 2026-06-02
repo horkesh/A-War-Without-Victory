@@ -7,6 +7,8 @@
 import type { CostLedger } from '../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult } from '../../../sim/endgame/endgame_comparison.js';
 import { formatHistoricalDivergenceNote } from '../data/historicalDivergenceNotes.js';
+import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { toTitleCase } from '../utils/formatters';
 import { t, useLocale } from '../i18n';
 export { formatHistoricalDivergenceNote } from '../data/historicalDivergenceNotes.js';
 
@@ -128,7 +130,7 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
                                         {entry.display_name}
                                     </span>
                                     <span className="ml-2 uppercase text-[8px] tracking-wider text-text-secondary/80">
-                                        {entry.faction} / {entry.response.replace(/_/g, ' ')}
+                                        {getPlayerSafeMilitaryFactionName(entry.faction)} / {toTitleCase(entry.response)}
                                     </span>
                                 </div>
                                 <div className="shrink-0 text-right tabular-nums">

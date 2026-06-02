@@ -17,6 +17,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { GlassPanel } from './GlassPanel';
 import { OfficerDossierPanel } from './OfficerDossierPanel';
 import { playerFactionMatch } from '../data/playerFactionMatch';
+import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 import { t, type MessageKey } from '../i18n';
 import type { NamedOfficerView } from '../data/types';
 
@@ -174,10 +175,13 @@ function ProposalCard({ proposal, opCard, commandAuthorityCurrent, onAccept, onR
     const parts = proposal.proposed_action.split(':');
     const isOp = parts[0] === 'APPROVE_OP';
     if ((parts[0] === 'SET_STANCE' || isOp) && parts[1]) {
-        // e.g. "2nd_corps" → "2nd Corps"
-        corpsLabel = parts[1]
-            .replace(/_/g, ' ')
-            .replace(/\b\w/g, (c) => c.toUpperCase());
+        // e.g. "arbih_1st_corps" → "1st Corps" (strips leaked faction prefix).
+        // Falls back to the humanized slug only when no corps resolves.
+        corpsLabel = getPlayerSafeCorpsName(
+            parts[1],
+            parts[1],
+            parts[1].replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+        );
     } else {
         corpsLabel = proposal.description.split('.')[0] ?? proposal.domain;
     }
