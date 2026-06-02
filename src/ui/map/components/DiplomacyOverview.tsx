@@ -14,6 +14,14 @@ const PATRON_LABELS: Record<string, string> = {
     HRHB: 'Croatia (Zagreb)',
 };
 
+/** Band label for the weighted negotiating-capital composite (0-100 scale). */
+function negotiatingCapitalBand(composite: number): string {
+    if (composite >= 75) return 'Strong hand';
+    if (composite >= 50) return 'Workable';
+    if (composite >= 25) return 'Weak';
+    return 'Marginal';
+}
+
 /** Canonical dimension display — matches strategic_dimensions.ts DIMENSION_WEIGHTS keys. */
 const DIMENSION_LABELS: Record<string, { label: string; color: string }> = {
     military_credibility: { label: 'Military Credibility', color: '#4a6a8a' },
@@ -86,8 +94,12 @@ export function DiplomacyOverview({ strategicDimensions, negotiatingCapital, pat
             {/* Patron Pressure */}
             {patronOverride && Object.keys(patronOverride).length > 0 && (
                 <div>
-                    <div className="text-[9px] uppercase tracking-widest text-[#8a7a60] font-bold mb-2">
+                    <div className="text-[9px] uppercase tracking-widest text-[#8a7a60] font-bold mb-2"
+                         title="How hard your patron is pushing — from a quiet RECOMMENDS up to an outright FORCES.">
                         Patron Override Authority
+                    </div>
+                    <div className="text-[9px] text-[#8a7a60] italic mb-2 -mt-1">
+                        How hard your patron is pushing on your decisions.
                     </div>
                     <div className="space-y-1.5">
                         {Object.entries(patronOverride).sort((a, b) => a[0].localeCompare(b[0])).map(([faction, auth]) => (
@@ -100,8 +112,12 @@ export function DiplomacyOverview({ strategicDimensions, negotiatingCapital, pat
             {/* Strategic Dimensions */}
             {hasDims && factions.length > 0 && (
                 <div>
-                    <div className="text-[9px] uppercase tracking-widest text-[#8a7a60] font-bold mb-2">
+                    <div className="text-[9px] uppercase tracking-widest text-[#8a7a60] font-bold mb-2"
+                         title="The standing each side brings to the negotiating table, scored 0-100 from six strategic dimensions.">
                         Negotiation Capital
+                    </div>
+                    <div className="text-[9px] text-[#8a7a60] italic mb-2 -mt-1">
+                        Bargaining strength at the table (0-100), built from the six dimensions below.
                     </div>
                     {factions.map(faction => {
                         const dims = dimensionsByFaction[faction];
@@ -112,8 +128,9 @@ export function DiplomacyOverview({ strategicDimensions, negotiatingCapital, pat
                                 <div className="text-[11px] font-bold text-[#2a2016] mb-1.5">
                                     {getPlayerSafePoliticalFactionName(faction)}
                                     {composite != null && (
-                                        <span className="ml-2 text-[10px] font-normal text-[#6a5a40]">
-                                            (Composite: {Math.round(composite)})
+                                        <span className="ml-2 text-[10px] font-normal text-[#6a5a40]"
+                                              title="Weighted negotiating-capital score (0-100) across the six strategic dimensions.">
+                                            {negotiatingCapitalBand(composite)} ({Math.round(composite)}/100)
                                         </span>
                                     )}
                                 </div>

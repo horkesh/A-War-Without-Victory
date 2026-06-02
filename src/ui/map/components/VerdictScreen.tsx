@@ -732,7 +732,7 @@ export function FactionReport({
                     {t('verdict.report.finalStatistics')}
                 </div>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
-                    <StatRow label={t('verdict.report.stat.territory')} value={`${((factionOsids / totalOsids) * 100).toFixed(1)}% (${factionOsids} OSIDs)`} />
+                    <StatRow label={t('verdict.report.stat.territory')} value={`${((factionOsids / totalOsids) * 100).toFixed(1)}% (${factionOsids} settlements)`} />
                     {cap && (
                         <>
                             <StatRow label={t('verdict.report.stat.territoryKm2')} value={`${Math.round(cap.territory_controlled_km2).toLocaleString()} km\u00b2`} />

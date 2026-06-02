@@ -136,7 +136,7 @@ function buildTurnCostEntry(summary: any, playerFaction: string | null): Chronic
         reasons.push(`${ownFormationsDestroyed} own ${ownFormationsDestroyed === 1 ? 'formation' : 'formations'} destroyed`);
     }
     if (playerFaction && netFriendlyTerritory !== 0) {
-        reasons.push(`${netFriendlyTerritory >= 0 ? '+' : ''}${netFriendlyTerritory} net OSIDs`);
+        reasons.push(`${netFriendlyTerritory >= 0 ? '+' : ''}${netFriendlyTerritory} net settlements`);
     }
 
     return {
