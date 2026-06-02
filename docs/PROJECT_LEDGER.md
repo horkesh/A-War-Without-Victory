@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-02] feat(engine): Standing OG Phase B reserve-commit scaffold + detector front-commit correction
+
+**Type:** Engine behavior scaffold, flag-gated default-off. Adds `ENABLE_STANDING_OG_RESERVE_COMMIT = false` and a narrow standing-OG reserve-commit path in `distributeBrigadesToFront(...)`: in threatened sectors (`threat_ratio >= 1.5`), one viable reserve/rear brigade can be committed toward the hottest occupied front subsegment before ordinary empty-front filling. Default-off preserves current behavior. Also tightens the ADR-0007 detector so full-strength same-OG formations already physically committed to a contested friendly front edge are not counted as idle rear depth.
+
+**Evidence:** Focused tests pass (`standing_og_defense`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`: 54/54). Baseline regression with both ADR-0007 flags default-off passes: `Baseline regression: all scenarios match.` Combined Phase C+B flag-on probe (`apr1992_definitive_40w__3649b3861a87e6ea__w40_n3`, hash `ad21be9e57e4bbf4`) is live but **not activation-green**: control flips 121 -> 118, RBiH control 250 -> 254, defender casualties 27,643 -> 33,974, destroyed brigades stay 7, morale-zero stays 5, cohesion-zero improves 2 -> 0, and corrected detector hotspots improve min4/min1 from 3/3 -> 1/1 with min8 at 0/0. Residuals: the parked 712th still dies, formation fatigue total falls 241 -> 206, and war-cost/health acceptance is mixed. A rejected local experiment that charged +1 fatigue on reserve commitment worsened the proof (hash `1e9a9f84c3ab2f3a`, destroyed 8, hotspots min4/min1 1/2), so it was not kept. No default flip, no re-floor, and no 712th retry yet.
+
+**Files:** `src/sim/combat/brigade_front_distribution.ts`, `src/sim/combat/standing_og_defense.ts`, `tests/brigade_front_distribution.test.ts`, `tests/standing_og_defense.test.ts`.
+
+---
+
 ## [2026-06-02] feat(engine): Standing OG Phase C detector hardening + direct fatigue sharing residual
 
 **Type:** Engine behavior scaffold, flag-gated default-off. Tightens the ADR-0007 Phase C health detector so it no longer depends on final sectors having exactly one assigned brigade: it now scans all current sector holders' defender history on sector territory, filters idle same-faction sector mates, and treats a brigade as not idle once it has paid `ops.fatigue`. Adds a flag-on weighted path for the resolver's direct `recordFormationFatigue(defenderFormation, 1)` call, so both combat-fatigue side effects use sector weights when `ENABLE_SHARED_SECTOR_DEFENSE` is enabled. Flag-off behavior remains default and byte-identical.

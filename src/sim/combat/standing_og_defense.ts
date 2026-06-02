@@ -6,6 +6,7 @@ import { strictCompare } from '../../state/validateGameState.js';
  * defensive fatigue and reactive-defense behavior byte-for-byte.
  */
 export const ENABLE_SHARED_SECTOR_DEFENSE = false;
+export const ENABLE_STANDING_OG_RESERVE_COMMIT = false;
 
 export function getStandingOgDefenseBrigadeIds(
     sector: Pick<CorpsFrontSector, 'assigned_brigade_ids' | 'reserve_brigade_ids' | 'rear_brigade_ids'>,
@@ -50,6 +51,16 @@ function isFullStrengthIdleBrigade(formation: FormationState, fullStrengthRatio:
     return (formation.brigade_history?.battles_fought ?? 0) === 0 && (formation.ops?.fatigue ?? 0) <= 0;
 }
 
+function isCommittedToContestedSectorFront(formation: FormationState, sector: CorpsFrontSector): boolean {
+    const location = formation.location_osid;
+    if (!location) return false;
+    for (const subSegment of sector.sub_segments ?? []) {
+        if ((subSegment.enemy_osids?.length ?? 0) === 0) continue;
+        if ((subSegment.friendly_osids ?? []).includes(location)) return true;
+    }
+    return false;
+}
+
 export function detectStandingOgSoloDefenderHotspots(
     state: GameState,
     options: StandingOgSoloDefenderOptions = {},
@@ -76,6 +87,7 @@ export function detectStandingOgSoloDefenderHotspots(
                     return formation != null
                         && formation.status === 'active'
                         && formation.faction === holder.faction
+                        && !isCommittedToContestedSectorFront(formation, sector)
                         && isFullStrengthIdleBrigade(formation, fullStrengthRatio);
                 })
                 .sort(strictCompare);

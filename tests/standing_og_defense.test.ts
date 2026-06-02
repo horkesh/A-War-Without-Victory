@@ -190,6 +190,45 @@ describe('detectStandingOgSoloDefenderHotspots', () => {
         expect(detectStandingOgSoloDefenderHotspots(state, { minDefenderTurns: 4 })).toEqual([]);
     });
 
+    it('does not count a full-strength reserve as idle once it is committed to a contested front edge', () => {
+        const holder = makeBrigade({ id: 'arbih_7th_viteska', personnel: 450 });
+        recordDefenses(holder, 'op:kakanj:brnjic_2', [1, 2, 3, 4]);
+        const reserve = makeBrigade({
+            id: 'arbih_329th_mountain',
+            personnel: 1800,
+            location_osid: 'op:kakanj:brnjic_2',
+            brigade_history: createEmptyBrigadeHistory(1800),
+        });
+        const sector = makeSector({
+            assigned_brigade_ids: [holder.id],
+            reserve_brigade_ids: [reserve.id],
+            edge_ids: ['edge:kakanj'],
+            territory_osids: ['op:kakanj:brnjic_2', 'op:kakanj:rear_1'],
+            sub_segments: [{
+                sub_segment_id: 'subseg:kakanj:front',
+                friendly_osids: ['op:kakanj:brnjic_2'],
+                enemy_osids: ['op:kakanj:enemy_1'],
+                primary_brigade_ids: [holder.id],
+                edge_ids: ['edge:kakanj'],
+                length_edges: 1,
+            }],
+        });
+        const state = {
+            meta: { turn: 40 },
+            military: {
+                formations: {
+                    [holder.id]: holder,
+                    [reserve.id]: reserve,
+                },
+                corps_front_sectors: {
+                    [sector.sector_id]: sector,
+                },
+            },
+        } as unknown as GameState;
+
+        expect(detectStandingOgSoloDefenderHotspots(state, { minDefenderTurns: 4 })).toEqual([]);
+    });
+
     it('flags repeated sector defense even when the final sector has multiple assigned brigades', () => {
         const holder = makeBrigade({ id: 'arbih_7th_viteska', personnel: 450 });
         recordDefenses(holder, 'op:kakanj:brnjic_2', [1, 2, 3, 4]);
