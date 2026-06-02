@@ -237,16 +237,6 @@ export interface GameStore {
   setOperationTargetOsids: (osids: string[]) => void;
 
   loadedGameState: LoadedGameState | null;
-  /**
-   * Discard the currently loaded campaign (sets `loadedGameState` back to
-   * null). Used by the Main Menu "New Game" / "Load Game" actions so the
-   * faction/load SidePicker — gated on `!loadedGameState` — can actually
-   * appear even when a save was already auto-loaded (desktop live-session /
-   * auto-load path). A fresh game then re-populates `loadedGameState` via
-   * `loadSave`. Does NOT touch the on-disk save; purely clears the UI read
-   * model. See App.tsx MainMenu handlers + task #80 PR #138 follow-up.
-   */
-  clearLoadedGameState: () => void;
   /** Active replay map-inspection overlay. Null means the map is showing the live/final loaded save. */
   replayInspection: {
     frameIndex: number;
@@ -535,7 +525,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setOperationTargetOsids: (osids) => set({ operationTargetOsids: [...new Set(osids)] }),
 
   loadedGameState: null,
-  clearLoadedGameState: () => set({ loadedGameState: null }),
   replayInspection: null,
   replayInspectionReturnState: null,
   startReplayInspection: (frame, frameIndex) => {

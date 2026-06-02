@@ -1133,12 +1133,24 @@ function App() {
         />
       )}
       <SidePickerOverlay
-        isOpen={sidePickerOpen && !loadedGameState}
+        // Task #80 — gate on `sidePickerOpen` alone. After the boot-to-menu
+        // fix, `sidePickerOpen` is set true ONLY by explicit user actions
+        // (MainMenu New Game / Load, warroom handoff) — the auto-open branch is
+        // gone — so this never spuriously overlays an active game.
+        isOpen={sidePickerOpen}
         starting={campaignStarting}
         errorMessage={loadError}
         onClose={() => {
+          // Task #80 — cancel cleanly without dropping into the loading
+          // skeleton. If no campaign is loaded (cancelled a true New Game),
+          // return to the Main Menu. If a save is loaded (the player opened the
+          // picker over an existing campaign and backed out), just close and
+          // resume that campaign — `loadedGameState` is untouched.
           setSidePickerOpen(false);
           setSidePickerDismissed(true);
+          if (!loadedGameState) {
+            setAppScreen('mainMenu');
+          }
         }}
         onSelectFaction={handleSelectFaction}
       />
@@ -1424,17 +1436,16 @@ function App() {
       {appScreen === 'mainMenu' && (
         <MainMenu
           hasSave={!!loadedGameState}
-          // Task #80 (PR #138 follow-up) — discard any auto-loaded campaign
-          // BEFORE opening the SidePicker. The picker renders only while
-          // `!loadedGameState` (~:1136); without clearing, a desktop
-          // live-session / auto-load save would keep that gate closed and the
-          // user would be silently dropped back into the existing campaign
-          // instead of reaching the faction/load picker. New Game / Load both
-          // legitimately leave the current campaign, then re-populate
-          // `loadedGameState` via `onSelectFaction` / a disk load.
-          onNewGame={() => { useGameStore.getState().clearLoadedGameState(); setAppScreen('game'); setSidePickerOpen(true); }}
+          // Task #80 — New Game / Load Game open the SidePicker. The picker is
+          // gated on `sidePickerOpen` alone (~:1136), so an EXPLICIT open shows
+          // it even when a save is already auto-loaded (desktop live-session /
+          // auto-load path). State is preserved until the user COMMITS: picking
+          // a faction starts a fresh campaign (replaces `loadedGameState` via
+          // `handleSelectFaction` → `loadSave`); cancelling the picker leaves
+          // the existing campaign intact (see the overlay `onClose` below).
+          onNewGame={() => { setAppScreen('game'); setSidePickerOpen(true); }}
           onContinue={() => setAppScreen('game')}
-          onLoadGame={() => { useGameStore.getState().clearLoadedGameState(); setAppScreen('game'); setSidePickerOpen(true); }}
+          onLoadGame={() => { setAppScreen('game'); setSidePickerOpen(true); }}
           onSettings={() => setSettingsOpen(true)}
           onCredits={() => setCreditsOpen(true)}
           onQuit={() => { if (typeof window !== 'undefined') window.close(); }}

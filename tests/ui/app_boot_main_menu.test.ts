@@ -56,25 +56,32 @@ describe('App boot — Main Menu first, faction choice menu-only (#80)', () => {
         expect(app).toContain('setSidePickerOpen(false);');
     });
 
-    it('opens the SidePicker only from explicit New Game / Load actions', () => {
-        // MainMenu New Game and Load both go to the game screen and open the
-        // picker on purpose.
-        expect(app).toContain("setAppScreen('game'); setSidePickerOpen(true);");
-        // The picker render is still gated on no loaded state.
-        expect(app).toContain('isOpen={sidePickerOpen && !loadedGameState}');
+    it('gates the SidePicker on sidePickerOpen alone (#138 follow-up)', () => {
+        // The render gate must be `sidePickerOpen` alone, NOT
+        // `sidePickerOpen && !loadedGameState`. An explicit open (New Game /
+        // Load / warroom handoff) must show the picker even when a save is
+        // already auto-loaded. Safe because the auto-open branch is gone, so
+        // `sidePickerOpen` is only ever set true by explicit user actions.
+        expect(app).toContain('isOpen={sidePickerOpen}');
+        expect(app).not.toContain('isOpen={sidePickerOpen && !loadedGameState}');
     });
 
-    it('clears the auto-loaded campaign so New Game / Load reach the picker even with a save loaded (#138)', () => {
-        // PR #138 follow-up — the picker renders only while `!loadedGameState`.
-        // On the desktop live-session / auto-load path a save is already in the
-        // store while the menu shows, so New Game / Load must discard it first
-        // or the user is silently dropped back into the existing campaign.
-        expect(app).toContain(
-            "onNewGame={() => { useGameStore.getState().clearLoadedGameState(); setAppScreen('game'); setSidePickerOpen(true); }}",
-        );
-        expect(app).toContain(
-            "onLoadGame={() => { useGameStore.getState().clearLoadedGameState(); setAppScreen('game'); setSidePickerOpen(true); }}",
-        );
+    it('opens the picker from explicit New Game / Load without eager-clearing state (#138 follow-up)', () => {
+        // MainMenu New Game and Load go to the game screen and open the picker.
+        expect(app).toContain("onNewGame={() => { setAppScreen('game'); setSidePickerOpen(true); }}");
+        expect(app).toContain("onLoadGame={() => { setAppScreen('game'); setSidePickerOpen(true); }}");
+        // The eager-clear (which threw away the in-memory campaign on the
+        // cancel path) must be gone — state is preserved until commit.
+        expect(app).not.toContain('clearLoadedGameState');
+    });
+
+    it('cancelling the picker never drops to the loading skeleton (#138 follow-up)', () => {
+        // onClose: close + mark dismissed, and when NO game is loaded (cancelled
+        // a true New Game) return to the Main Menu rather than leaving an empty
+        // 'game' screen that falls through to the loading skeleton. With a save
+        // loaded, the existing campaign is preserved and resumes.
+        expect(app).toContain('if (!loadedGameState) {');
+        expect(app).toContain("setAppScreen('mainMenu');");
     });
 
     it('keeps Continue gated on a loaded save (does not clear it)', () => {
@@ -88,11 +95,13 @@ describe('App boot — Main Menu first, faction choice menu-only (#80)', () => {
     });
 });
 
-describe('gameStore — clearLoadedGameState action (#138)', () => {
+describe('gameStore — no eager loaded-state clear (#138 follow-up)', () => {
     const store = read('src/ui/map/store/gameStore.ts');
 
-    it('exposes a clearLoadedGameState action that nulls the loaded state', () => {
-        expect(store).toContain('clearLoadedGameState: () => void;');
-        expect(store).toContain('clearLoadedGameState: () => set({ loadedGameState: null }),');
+    it('does not retain the now-unused clearLoadedGameState action', () => {
+        // State is preserved until commit (a faction pick replaces it via
+        // loadSave; cancel keeps it). The eager-clear action is no longer used
+        // and was removed to keep the store surface minimal.
+        expect(store).not.toContain('clearLoadedGameState');
     });
 });
