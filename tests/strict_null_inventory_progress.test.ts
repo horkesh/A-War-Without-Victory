@@ -565,20 +565,25 @@ describe('strict null inventory progress', () => {
         // /Corps/): pending_co_replacement, co_replacement_record. So 506 → 508 / sim 326 → 328.
         // Both OPTIONAL → absent in old saves and all headless scenarios → byte-identical
         // baseline by construction (apply-co-replacements early-outs when none staged).
+        // Patron-defiance consequence-receipt (Slice 4a) added +1 optional GameState field
+        // on MilitaryState (classifyDomain → `sim` via /Military/): patron_defiance_supply_cuts.
+        // So 508 → 509 / sim 328 → 329. OPTIONAL append-only → absent in old saves and all
+        // headless/historical scenarios (written only inside decision_mode === 'emergent' on a
+        // non-zero cut) → byte-identical baseline by construction.
         expect(current.counts).toMatchObject({
             as_factionid_casts: 1,
             as_unknown_casts: 3,
             as_any_casts: 0,
             non_null_assertions_dot: 7,
             non_null_assertions_index: 0,
-            optional_fields_game_state: 508,
+            optional_fields_game_state: 509,
         });
-        expect(current.optional_field_domains.total).toBe(508);
+        expect(current.optional_field_domains.total).toBe(509);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 8,
             ipc: 0,
             scenario: 0,
-            sim: 328,
+            sim: 329,
             state: 172,
             ui_adapter: 0,
             unknown: 0,

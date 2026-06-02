@@ -2605,6 +2605,29 @@ equipment_quality_modifiers?: Array<{
     multiplier: number;
     expires_turn: number;
 }>;
+/**
+ * Slice 4a — patron-defiance consequence-receipt substrate (emergent-only).
+ * Append-only log of turns on which the emergent patron-defiance penalty in
+ * `updatePatronState` actually CUT a faction's material support (refusing /
+ * distancing from the patron collapsed patron_confidence → Belgrade/Zagreb
+ * throttled materiel). Written ONLY when `state.meta.decision_mode === 'emergent'`
+ * AND the realized cut fraction is > 0 (RBiH severity 0 → never written). In
+ * historical/unset (calibration) mode this stays absent → material_support_level
+ * and serialized state remain byte-identical. Optional → no save migration; legacy
+ * saves carry none. Reader: `buildConsequenceReceipts` (consequenceReceipts.ts)
+ * projects each entry into a one-shot ConsequenceReceipt surfaced by the existing
+ * Turn-Aftermath "Consequences Realized" section. Deterministic: append order
+ * follows the faction iteration in `updatePatronState`; no sort/timestamp. */
+patron_defiance_supply_cuts?: Array<{
+    /** Faction whose patron throttled materiel (RS | HRHB; never RBiH). */
+    faction: FactionId;
+    /** Turn the cut was realized. */
+    turn: number;
+    /** Realized cut fraction defiance*severity, 0..1 (> 0 by construction). */
+    cut_fraction: number;
+    /** material_support_level after the cut (0..1). */
+    support_after: number;
+}>;
 /** Fall-1995 mechanic E-A4: cascade-pressure penalties on OSIDs adjacent to a
  *  just-lost OSID. Applied one turn after a control flip; defender power on these
  *  OSIDs is multiplied by `multiplier` (typically 0.85) until `expires_turn`.

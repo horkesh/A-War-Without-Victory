@@ -304,7 +304,26 @@ export function updatePatronState(
             const conf = store ? getDimensionEffective(store, faction.id, 'patron_confidence') : 50;
             const defiance = clamp01((50 - conf) / 50); // 0 at neutral → 1 as confidence collapses
             const severity = patronDefianceSeverity(faction.id); // RBiH no coercive patron → 0
-            materialSupport = clamp01(materialSupport * (1 - defiance * severity));
+            const cutFraction = defiance * severity; // 0..1 realized cut
+            if (cutFraction > 0) {
+                materialSupport = clamp01(materialSupport * (1 - cutFraction));
+                // ── Consequence-receipt (Slice 4a) ──────────────────────────────
+                // The defiance cut just STARVED supply because the player refused /
+                // distanced from the patron. Record the realized cut so the existing
+                // Turn-Aftermath "Consequences Realized" section surfaces a sober,
+                // factual receipt (never a reward — this is the negative-sum cost of
+                // defiance). Append-only; written ONLY here, inside the emergent gate,
+                // and ONLY when the cut is non-zero (RBiH severity 0 is excluded by
+                // construction) → historical/calibration state stays byte-identical.
+                if (state.military) {
+                    (state.military.patron_defiance_supply_cuts ??= []).push({
+                        faction: faction.id,
+                        turn,
+                        cut_fraction: cutFraction,
+                        support_after: materialSupport,
+                    });
+                }
+            }
         }
 
         const constraintSeverity = clamp01(
