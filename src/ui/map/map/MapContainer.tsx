@@ -21,7 +21,7 @@ import {
 import { useGameStore } from '../store/gameStore';
 import { collectSectorFriendlyOsids, buildOsidToSectorMap, getSectorIdForFormation } from '../utils/sectorUtils';
 import { buildCorpsColorMap } from './builders/buildCorpsFrontLinesGeoJSON';
-import { buildOsidDisplayNameMap } from '../utils/osidDisplayName';
+import { buildOsidDisplayNameMap, getOsidDisplayName } from '../utils/osidDisplayName';
 import { loadOperationalPoliticalControl, loadOperationalSettlements, loadOsidAdjacency, loadSidToOsidMapping, loadTerrainScalars, loadCensusSettlements } from '../data/DataLoader';
 import { buildControlGeoJSON } from './builders/buildControlGeoJSON';
 import { buildMoraleGeoJSON } from './builders/buildMoraleGeoJSON';
@@ -447,6 +447,7 @@ export function MapContainer() {
   const ipc = useIPC();
   const setLoadError = useGameStore((s) => s.setLoadError);
   const setOsidDisplayNames = useGameStore((s) => s.setOsidDisplayNames);
+  const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const setOsidPropertiesMap = useGameStore((s) => s.setOsidPropertiesMap);
   const selectedOsid = useGameStore((s) => s.selectedOsid);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
@@ -3490,7 +3491,7 @@ export function MapContainer() {
           position={contextMenu.position}
           targetLabel={
             contextMenu.type === 'formation' ? (contextMenu.properties?.name as string)?.split(' ').pop() :
-              contextMenu.type === 'osid' ? (contextMenu.properties?.osid as string)?.split(':').pop()?.replace(/_/g, ' ') :
+              contextMenu.type === 'osid' ? getOsidDisplayName(contextMenu.properties?.osid as string, osidDisplayNames) :
                 contextMenu.type === 'front' ? 'Front' : ''
           }
           onClose={() => setContextMenu(null)}
