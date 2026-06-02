@@ -58,6 +58,12 @@ const eliteDeployDirective: PresidentialDecisionRoomDirective = {
   payload: { requestId: 'reserve_request_alpha', brigadeId: 'elite_brigade_alpha' },
 };
 
+const frontVisitDirective: PresidentialDecisionRoomDirective = {
+  lever: 'front_visit',
+  cost: 10,
+  payload: {},
+};
+
 function installIpc(overrides: Record<string, unknown> = {}) {
   const bridge = {
     stageOpHaltOrder: vi.fn(async () => ({ ok: true })),
@@ -70,6 +76,13 @@ function installIpc(overrides: Record<string, unknown> = {}) {
     stageOperationForceLaunch: vi.fn(async () => ({ ok: true })),
     stageCoReplacementOrder: vi.fn(async () => ({ ok: true })),
     approveReserveRequest: vi.fn(async () => ({ ok: true })),
+    getFrontVisitAvailability: vi.fn(async () => ({
+      ok: true,
+      available: true,
+      reachableBranchIds: ['visit_sarajevo'],
+      unreachableBranchIds: [],
+    })),
+    initiateFrontVisit: vi.fn(async () => ({ ok: true })),
     ...overrides,
   };
   Object.defineProperty(window, 'awwv', {
@@ -204,5 +217,47 @@ describe('DirectiveCard stop-op action host', () => {
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
       'Directive staged for next turn',
     );
+  });
+
+  it('shows a receipt after front visit initiation succeeds', async () => {
+    const { getFrontVisitAvailability, initiateFrontVisit } = installIpc();
+
+    render(React.createElement(DirectiveCard, { directive: frontVisitDirective, gameState: baseGameState }));
+
+    await waitFor(() => {
+      expect(getFrontVisitAvailability).toHaveBeenCalled();
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Issue (10)' }));
+
+    await waitFor(() => {
+      expect(initiateFrontVisit).toHaveBeenCalled();
+    });
+    expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
+      'Directive staged for next turn',
+    );
+  });
+
+  it('blocks front visit issue when availability says no front is reachable', async () => {
+    const initiateFrontVisit = vi.fn(async () => ({ ok: true }));
+    installIpc({
+      initiateFrontVisit,
+      getFrontVisitAvailability: vi.fn(async () => ({
+        ok: true,
+        available: false,
+        reason: 'No front is reachable.',
+        reachableBranchIds: [],
+        unreachableBranchIds: ['visit_sarajevo'],
+      })),
+    });
+
+    render(React.createElement(DirectiveCard, { directive: frontVisitDirective, gameState: baseGameState }));
+
+    expect((await screen.findByRole('status', { name: 'Front visit unavailable' })).textContent).toContain(
+      'No front is reachable.',
+    );
+    const issue = screen.getByRole('button', { name: 'Issue (10)' });
+    expect(issue.hasAttribute('disabled')).toBe(true);
+    fireEvent.click(issue);
+    expect(initiateFrontVisit).not.toHaveBeenCalled();
   });
 });

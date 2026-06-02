@@ -18224,3 +18224,15 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `src/ui/map/components/army_hq/DirectiveCard.tsx`, `tests/ui/directive_card_stop_op_action.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-06-02] test(ui): cover front-visit directive receipt and availability block
+
+**Type:** Player-facing UI fixture coverage for the Presidential Command Surface directive host. `tests/ui/directive_card_stop_op_action.test.ts` now covers `front_visit` as the remaining DirectiveCard receipt exception: a reachable front visit calls `initiateFrontVisit` and shows the shared next-turn `Directive receipt`; an unavailable/no-reachable-front response renders the front-visit unavailable status, disables issue, and does not call IPC.
+
+**Determinism / scope:** Test/docs-only over existing UI behavior and existing front-visit IPC contract. No production code, sim, save-schema, scenario, calibration, TG, brigade, formation, or command-authority mechanics changed in this slice.
+
+**Verification:** `node node_modules/vitest/vitest.mjs run tests/ui/directive_card_stop_op_action.test.ts tests/ui/presidential_decision_room.test.ts tests/ui/presidential_decision_room_request_force.test.ts tests/ui/directive_card_act_art.test.ts tests/front_visit_action.test.ts --reporter=dot` passed 61/61. `npm.cmd run typecheck` passed.
+
+**Files:** `tests/ui/directive_card_stop_op_action.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
