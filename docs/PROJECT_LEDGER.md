@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-02] docs: Standing OG 712th placement probe narrows remaining acceptance blocker
+
+**Type:** Diagnostic evidence + roadmap/board clarification (no code/data shipped). Follow-up probes prove the parked 712th fix is an upstream placement/OOB problem, not a combat-fatigue death: with current OOB the `arbih_712th_mountain` is destroyed on turn 1 with 0 battles and 0 casualties after fallback placement from phantom `home_osid` `op:travnik:krusevo_brdo_i`; with temporary `home_osid: op:travnik:turbe_2`, the 712th survives and fights normally.
+
+**Evidence:** Temporary OOB-only probe (`apr1992_definitive_40w__3649b3861a87e6ea__w40_n5`, hash `93bbc00450042585`) keeps the 712th active at `op:travnik:turbe_2` with 1,800 personnel, morale 78, cohesion 56.46, and 6 defender battles, but pushes `integration_formation_integrity` residuals to 3 (`arbih_303rd_vitezka_mountain`, `arbih_330th_liberation`, `arbih_7th_vitezka_muslim_liberation`). Temporary OOB + Phase C+B flag-on probe (`...__w40_n6`, hash `53596ef05f31a4d5`) keeps the 712th active with 8 defender battles and improves corrected idle-depth hotspots to min8/min4/min1 = 0/1/1, but still leaves 3 integrity residuals and lowers total formation fatigue to 195. Conclusion: the 712th `turbe_2` fix is correct but remains parked; next acceptance work is the 3rd-Corps residual/integrity sink under ADR-0007, not another blind 712th retry. Temporary probe edits were restored; no default flip, OOB change, baseline re-floor, or generated artifact shipped.
+
+**Files:** `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
 ## [2026-06-02] feat(engine): Standing OG Phase B reserve-commit scaffold + detector front-commit correction
 
 **Type:** Engine behavior scaffold, flag-gated default-off. Adds `ENABLE_STANDING_OG_RESERVE_COMMIT = false` and a narrow standing-OG reserve-commit path in `distributeBrigadesToFront(...)`: in threatened sectors (`threat_ratio >= 1.5`), one viable reserve/rear brigade can be committed toward the hottest occupied front subsegment before ordinary empty-front filling. Default-off preserves current behavior. Also tightens the ADR-0007 detector so full-strength same-OG formations already physically committed to a contested friendly front edge are not counted as idle rear depth.
