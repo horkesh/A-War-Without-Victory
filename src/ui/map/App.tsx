@@ -360,7 +360,11 @@ function App() {
     chronicleOpen,
   });
 
-  const [appScreen, setAppScreen] = useState<'game' | 'mainMenu' | 'warroom'>('game');
+  // Task #80 — boot to the Main Menu first. Faction choice is offered ONLY via
+  // the menu (New Game / Load → SidePicker), never an auto-popping modal. The
+  // `?view=warroom` / `?view=game` URL-param overrides below (~:1022) still let
+  // dev/automation deep-link past the menu.
+  const [appScreen, setAppScreen] = useState<'game' | 'mainMenu' | 'warroom'>('mainMenu');
   // Command-surface card strip: open state + the category to pre-highlight when
   // opened from a warroom hotspot object. null highlight = direct Desk open.
   const [commandStripOpen, setCommandStripOpen] = useState(false);
@@ -518,14 +522,13 @@ function App() {
   }, [pendingAttackConfirmation, setConfirmPrimaryAction]);
 
   useEffect(() => {
+    // Task #80 — when a save/state loads, close the SidePicker. We deliberately
+    // do NOT auto-open it when no state is loaded: faction choice is offered
+    // only via explicit user actions (MainMenu New Game / Load, warroom
+    // handoff), never an auto-popping modal on boot.
     if (loadedGameState) {
       setSidePickerOpen(false);
       setSidePickerDismissed(false);
-      return;
-    }
-    // Show side picker automatically if no state is loaded and not already dismissed
-    if (!sidePickerDismissed) {
-      setSidePickerOpen(true);
     }
   }, [ipc.isAvailable, loadedGameState, sidePickerDismissed]);
 
@@ -1019,10 +1022,16 @@ function App() {
   // Activate Warroom React shell when ?view=warroom is present in the URL.
   // warroom.ts canvas rendering remains the active runtime path; this is
   // the foundation component for progressive React shell ownership.
+  // Task #80 — boot now defaults to the Main Menu; `?view=game` lets
+  // dev/automation deep-link straight into the in-game shell, bypassing the
+  // menu (mirrors the existing `?view=warroom` override).
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('view') === 'warroom') {
+    const view = params.get('view');
+    if (view === 'warroom') {
       setAppScreen('warroom');
+    } else if (view === 'game') {
+      setAppScreen('game');
     }
   }, []);
 
