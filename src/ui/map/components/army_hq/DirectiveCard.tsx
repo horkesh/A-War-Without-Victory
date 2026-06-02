@@ -31,6 +31,7 @@ import {
   type DirectiveObjectionView,
 } from '../../data/opDirectiveObjection';
 import { resolveDirectiveActArt } from '../../data/directiveActArt';
+import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 
 interface DirectiveCardProps {
   directive: PresidentialDecisionRoomDirective;
@@ -51,14 +52,27 @@ function leverLabel(lever: PresidentialDecisionRoomDirective['lever']): string {
   }
 }
 
-/** Target descriptor from the directive payload (best-effort, presentational). */
-function targetLabel(directive: PresidentialDecisionRoomDirective): string | null {
+/** Target descriptor from the directive payload (best-effort, presentational).
+ *  Resolves player-safe display names — never leaks a raw corps/proposal/brigade
+ *  id into the caption. `opName` and `targetOsid` are already display-facing
+ *  values; the `corpsId` fallback is resolved to the formation's display name;
+ *  raw proposal / brigade ids are suppressed (caption degrades to the lever
+ *  label alone). */
+function targetLabel(
+  directive: PresidentialDecisionRoomDirective,
+  gameState: LoadedGameState,
+): string | null {
   const p = directive.payload;
   if (typeof p.opName === 'string' && p.opName) return p.opName;
   if (typeof p.targetOsid === 'string' && p.targetOsid) return p.targetOsid;
-  if (typeof p.proposalId === 'string' && p.proposalId) return p.proposalId;
-  if (typeof p.brigadeId === 'string' && p.brigadeId) return p.brigadeId;
-  if (directive.corpsId) return directive.corpsId;
+  // proposalId (authorize_op) / brigadeId (elite_deploy) are raw internal ids —
+  // suppress rather than leak; the lever label alone is sufficient.
+  if (directive.corpsId) {
+    return getPlayerSafeCorpsName(
+      gameState.formations.find((f) => f.id === directive.corpsId)?.name,
+      directive.corpsId,
+    );
+  }
   return null;
 }
 
@@ -281,7 +295,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
     }
   };
 
-  const tgt = targetLabel(directive);
+  const tgt = targetLabel(directive, gameState);
 
   // §9 act-layer dossier header: a 16:9 period still chosen by the directive's
   // lever (reusing the existing consequence_stills art via the shared resolver).
@@ -418,8 +432,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
           type="text"
           value={targetOsidInput}
           onChange={(e) => { setTargetOsidInput(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
-          placeholder="Target settlement (OSID, e.g. bihac_1)"
-          aria-label="Target settlement for the directed operation"
+          placeholder="Target settlement (e.g. Bihać)"
+          aria-label="Target settlement"
           className="mt-2 w-full rounded border border-panel-border/50 bg-panel-bg px-2 py-1 text-[11px] font-mono text-text-primary"
         />
       )}
