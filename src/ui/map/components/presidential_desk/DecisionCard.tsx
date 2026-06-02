@@ -1,6 +1,7 @@
 import type { InboxItem } from '../../data/inboxItems';
 import { getDecisionSurfaceForInboxType } from '../../data/decisionSurfaceRegistry';
 import { getPacketThumbnailForInboxType } from '../../data/presidentialDeskAssets';
+import { t } from '../../i18n';
 
 const SEVERITY_CLASS: Record<InboxItem['severity'], string> = {
   blocking: 'border-red-400/55 bg-red-950/35',
@@ -26,7 +27,7 @@ function familyLabel(item: InboxItem): string {
 }
 
 function actionLabel(item: InboxItem): string {
-  return getDecisionSurfaceForInboxType(item.type)?.actionLabel ?? 'Open';
+  return getDecisionSurfaceForInboxType(item.type)?.actionLabel ?? t('desk.card.openFallback');
 }
 
 export function DecisionCard({ item, onAction }: DecisionCardProps) {
@@ -48,7 +49,7 @@ export function DecisionCard({ item, onAction }: DecisionCardProps) {
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className={`border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.16em] ${BADGE_CLASS[item.severity]}`}>
-              {item.severity === 'blocking' ? 'Required' : item.severity}
+              {item.severity === 'blocking' ? t('desk.card.required') : item.severity}
             </span>
             <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">
               {familyLabel(item)}
