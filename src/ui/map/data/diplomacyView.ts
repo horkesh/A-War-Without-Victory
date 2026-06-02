@@ -7,6 +7,7 @@ import {
     type IvpComponentKey,
 } from '../../../state/patron_pressure.js';
 import { getPeacePlanById } from '../../../sim/negotiation/peace_plan_data.js';
+import { getDimensionEffective, type DimensionStore } from '../../../sim/events/strategic_dimensions.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import type {
     DiplomacyActorView,
@@ -15,6 +16,8 @@ import type {
     DiplomacyProposalView,
     DiplomacyTimelineEntryView,
     DiplomacyView,
+    PatronConfidenceView,
+    PatronDefianceCutsView,
     PlayerKnowledgeConfidence,
 } from './types';
 
@@ -283,6 +286,57 @@ function buildNeedleHints(
     return hints.sort((a, b) => strictCompare(a.label, b.label) || strictCompare(a.id, b.id));
 }
 
+function patronConfidenceBand(value: number): PatronConfidenceView['band'] {
+    if (value >= 67) return 'high';
+    if (value >= 55) return 'steady';
+    if (value >= 45) return 'neutral';
+    if (value >= 25) return 'low';
+    return 'collapsed';
+}
+
+/**
+ * Player-faction patron-confidence standing. Pure read of the
+ * `patron_confidence` strategic dimension (0..100, 50 = neutral). Returns
+ * undefined when the player has no faction or the dimension store is absent.
+ */
+function buildPatronConfidence(state: any, factionId: string | null): PatronConfidenceView | undefined {
+    if (!factionId) return undefined;
+    const store: DimensionStore | undefined = asRecord(state?.military?.negotiation?.strategic_dimensions);
+    if (!store || !store[factionId]?.patron_confidence) return undefined;
+    const value = getDimensionEffective(store, factionId, 'patron_confidence');
+    return { value, band: patronConfidenceBand(value) };
+}
+
+/**
+ * Compact player-faction defiance-cut summary from
+ * `state.military.patron_defiance_supply_cuts` (#117). Filters to the player
+ * faction; returns undefined when there are no player entries (emergent-only —
+ * historical/calibration mode never writes these). Picks the most-recent cut by
+ * turn (ties broken by max cut_fraction) for the headline line.
+ */
+function buildPatronDefianceCuts(state: any, factionId: string | null): PatronDefianceCutsView | undefined {
+    if (!factionId) return undefined;
+    const cuts = Array.isArray(state?.military?.patron_defiance_supply_cuts)
+        ? state.military.patron_defiance_supply_cuts
+        : [];
+    const mine = cuts.filter((cut: any) => asRecord(cut)?.faction === factionId);
+    if (mine.length === 0) return undefined;
+    let latest = mine[0];
+    for (const cut of mine) {
+        const turn = finiteNumber(cut?.turn);
+        const latestTurn = finiteNumber(latest?.turn);
+        if (turn > latestTurn || (turn === latestTurn && finiteNumber(cut?.cut_fraction) > finiteNumber(latest?.cut_fraction))) {
+            latest = cut;
+        }
+    }
+    return {
+        count: mine.length,
+        latestCutFraction: finiteNumber(latest?.cut_fraction),
+        latestTurn: finiteNumber(latest?.turn),
+        latestSupportAfter: finiteNumber(latest?.support_after),
+    };
+}
+
 export function buildDiplomacyView(state: unknown, playerFaction?: string | null): DiplomacyView {
     const s = asRecord(state) ?? {};
     const externalActors = buildExternalActors(s);
@@ -295,6 +349,8 @@ export function buildDiplomacyView(state: unknown, playerFaction?: string | null
     const activeConsequences = buildConsequences(s);
     const negotiationTimeline = buildNegotiationTimeline(activeProposals, externalActors, activeConsequences);
     const needleHints = buildNeedleHints(patronStance, pressureReasons, activeProposals);
+    const patronConfidence = buildPatronConfidence(s, actorFaction);
+    const patronDefianceCuts = buildPatronDefianceCuts(s, actorFaction);
 
     return {
         playerFaction: actorFaction ?? null,
@@ -304,6 +360,8 @@ export function buildDiplomacyView(state: unknown, playerFaction?: string | null
             || pressureReasons.length > 0
             || activeConsequences.length > 0,
         patronStance,
+        patronConfidence,
+        patronDefianceCuts,
         activeProposals,
         externalActors,
         pressureReasons,

@@ -108,6 +108,40 @@ describe('buildDiplomacyView', () => {
         expect(view.needleHints.map((hint) => hint.label)).toContain('Reduce Sarajevo siege visibility');
     });
 
+    it('projects patron-confidence standing for the player faction', () => {
+        const view = buildDiplomacyView(makeDiplomacyState(), 'RS');
+        // strategic_dimensions.RS.patron_confidence.effective_value === 45 in the fixture.
+        expect(view.patronConfidence).toEqual({ value: 45, band: 'neutral' });
+    });
+
+    it('omits patron-confidence when the dimension store is unpopulated', () => {
+        const view = buildDiplomacyView(makeDiplomacyState(), 'HRHB');
+        expect(view.patronConfidence).toBeUndefined();
+    });
+
+    it('summarizes player-faction defiance supply cuts when present, absent otherwise', () => {
+        const withCuts = buildDiplomacyView(makeDiplomacyState({
+            military: {
+                ...(makeDiplomacyState().military as Record<string, unknown>),
+                patron_defiance_supply_cuts: [
+                    { faction: 'RS', turn: 30, cut_fraction: 0.2, support_after: 0.6 },
+                    { faction: 'RS', turn: 44, cut_fraction: 0.35, support_after: 0.45 },
+                    { faction: 'HRHB', turn: 40, cut_fraction: 0.5, support_after: 0.3 },
+                ],
+            },
+        }), 'RS');
+        expect(withCuts.patronDefianceCuts).toEqual({
+            count: 2,
+            latestCutFraction: 0.35,
+            latestTurn: 44,
+            latestSupportAfter: 0.45,
+        });
+
+        // No player-faction entries → summary absent (historical/calibration mode never writes these).
+        const noCuts = buildDiplomacyView(makeDiplomacyState(), 'RS');
+        expect(noCuts.patronDefianceCuts).toBeUndefined();
+    });
+
     it('returns a stable empty view when diplomacy state has not been populated', () => {
         const view = buildDiplomacyView({
             meta: { turn: 2, phase: 'peace' },
