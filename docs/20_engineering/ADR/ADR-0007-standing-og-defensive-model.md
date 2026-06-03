@@ -39,6 +39,8 @@ A standing OG defends as a **formation**: a durable roster, a thin **depletable*
 
 **Pillar A — Persistent membership & stable identity (last, optional).** Durable OG id (minted once; deterministic split/merge lineage) + persisted membership, so "who holds which segment" is durable and the reconciliation churn ends. Required only for the health invariant and to kill the rehome thrash — **not** for the correctness of C or B.
 
+**Morale doctrine hardening (2026-06-03).** A fixed-home brigade assigned as a same-corps standing-OG front holder may be outside its literal origin municipality while still defending its corps' home/AOR band. The engine therefore applies the existing faction home morale floor to that brigade for morale drift only when its `home_osid` remains in same-corps/same-faction sector territory. This is not a posture rule: `home_defense_active` remains municipality-literal, so attack/assault blocking and operation eligibility are unchanged.
+
 ## Phasing (re-sequenced per panel; each flag-gated, default-off, flag-off byte-identical)
 
 - **Phase C (FIRST — the MVS): `ENABLE_SHARED_SECTOR_DEFENSE`.** Three surgical changes, ~3 functions in 2 files, reusing the existing weight/casualty machinery, no new serialized state, no migration:
@@ -65,6 +67,8 @@ A standing OG defends as a **formation**: a durable roster, a thin **depletable*
 
 ## Worked-example acceptance criteria
 With the model on (40w): the 7th Viteška no longer holds `brnjic_2` alone for 38 weeks — its OG's reserve commits forward and shares the fatigue/casualties (weight>0); no brigade grinds to 0/0 while full-strength reachable sectormates idle; depth is depletable (a line *can* still break once the reserve is spent); territory anchors/benchmarks hold within the re-floored baseline; **aggregate casualties + exhaustion ≥ the flag-off run** (Guardrail 1).
+
+**Current implementation evidence (2026-06-03):** Phase C+B remains default-off. After shared defender aftermath and fixed-home standing-OG morale-floor hardening, temporary combined C+B 40w probe `n33` (`6dbe77fcb4315566`) has no active zero-morale brigades and no unresolved sector brigades; Ozren finishes morale 20, Kljuc 21, Drvar 68. The health blocker is cleared, but the flag-on path still trails default-path throughput/war-cost proof (149 orders / 113 battles / 72 defender-present versus default `n32` 165 / 133 / 102), so Phase D default flip remains blocked pending throughput/cost calibration and Guardrail 1.
 
 ## Roadmap slot & command-board lane
 - **Roadmap:** v0.10 combat-soundness band, alongside ADR-0005 v3.0 (Army HQ ops) and the force-trajectory wiring plan (`docs/plans/2026-05-22-force-trajectory-wiring-plan.md`) — Pillar C is the same "wire the combat cost to all participants" family as that plan's `casualty_ledger` reader gap.

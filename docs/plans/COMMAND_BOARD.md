@@ -6,6 +6,8 @@
 
 **Last reconciled:** 2026-06-03.
 
+**Standing OG latest reconciliation (2026-06-03):** fixed-home Standing OG morale-floor hardening cleared the C+B morale-health blocker without broadening `home_defense_active`. Default `n32` (`88036914bd630321`) is healthy at 165 orders / 133 battles / 102 defender-present / active zero-morale `[]`; temporary combined C+B `n33` (`6dbe77fcb4315566`) has active zero-morale `[]`, unresolved `[]`, Ozren morale 20, Kljuc 21, Drvar 68. ADR-0007 flags remain default-off; next action is throughput/war-cost calibration toward Guardrail 1, not more Ozren/Kljuc assignment-guard experiments.
+
 **Controlling sources:** `docs/plans/MASTER_ROADMAP.md`, `docs/plans/2026-05-18-autonomous-remaining-work-coverage-matrix.md`, `docs/40_reports/CONSOLIDATED_BACKLOG.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, and `docs/PROJECT_LEDGER.md`.
 
 **Plan standard:** active, gated, operator, and owned-elsewhere plan packets should comply with `docs/plans/PLAN_EXECUTION_STANDARD.md`; the current hardening queue lives at `docs/plans/2026-05-24-active-plan-hardening-pass.md`.

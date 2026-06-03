@@ -158,6 +158,150 @@ describe('Faction home morale floors', () => {
         expect(state.military.formations!['b1']!.morale).toBeGreaterThanOrEqual(20);
     });
 
+    it('RS fixed-home sector front holder gets morale floor when home remains in same-corps standing OG territory', () => {
+        const state = makeState({
+            b1: {
+                faction: 'RS',
+                morale: 18,
+                home_defense_active: false,
+                location_osid: 'op:maglaj:jablanica',
+                home_osid: 'op:gracanica:petrovo_2',
+                corps_id: 'vrs_1st_krajina',
+                assignment: { kind: 'sector', role: 'front', sector_id: 'sector:vrs_1st_krajina:2' },
+                tags: ['placement:fixed_home_osid'],
+            } as any,
+        });
+        state.military.corps_front_sectors = {
+            'sector:vrs_1st_krajina:0': {
+                sector_id: 'sector:vrs_1st_krajina:0',
+                corps_id: 'vrs_1st_krajina',
+                faction: 'RS',
+                territory_osids: ['op:gracanica:petrovo_2'],
+                assigned_brigade_ids: [],
+                reserve_brigade_ids: [],
+            } as any,
+            'sector:vrs_1st_krajina:2': {
+                sector_id: 'sector:vrs_1st_krajina:2',
+                corps_id: 'vrs_1st_krajina',
+                faction: 'RS',
+                territory_osids: ['op:maglaj:jablanica'],
+                assigned_brigade_ids: ['b1'],
+                reserve_brigade_ids: [],
+            } as any,
+        };
+
+        const munPop = { maglaj: { total: 100, bosniak: 70, serb: 20, croat: 5, other: 5 } };
+        runMoraleDrift(state, [], munPop);
+
+        expect(state.military.formations!['b1']!.morale).toBeGreaterThanOrEqual(20);
+    });
+
+    it('does not give standing-OG morale floor without fixed-home placement tag', () => {
+        const state = makeState({
+            b1: {
+                faction: 'RS',
+                morale: 18,
+                home_defense_active: false,
+                location_osid: 'op:maglaj:jablanica',
+                home_osid: 'op:gracanica:petrovo_2',
+                corps_id: 'vrs_1st_krajina',
+                assignment: { kind: 'sector', role: 'front', sector_id: 'sector:vrs_1st_krajina:2' },
+                tags: [],
+            } as any,
+        });
+        state.military.corps_front_sectors = {
+            'sector:vrs_1st_krajina:0': {
+                sector_id: 'sector:vrs_1st_krajina:0',
+                corps_id: 'vrs_1st_krajina',
+                faction: 'RS',
+                territory_osids: ['op:gracanica:petrovo_2'],
+                assigned_brigade_ids: [],
+                reserve_brigade_ids: [],
+            } as any,
+            'sector:vrs_1st_krajina:2': {
+                sector_id: 'sector:vrs_1st_krajina:2',
+                corps_id: 'vrs_1st_krajina',
+                faction: 'RS',
+                territory_osids: ['op:maglaj:jablanica'],
+                assigned_brigade_ids: ['b1'],
+                reserve_brigade_ids: [],
+            } as any,
+        };
+
+        const munPop = { maglaj: { total: 100, bosniak: 70, serb: 20, croat: 5, other: 5 } };
+        runMoraleDrift(state, [], munPop);
+
+        expect(state.military.formations!['b1']!.morale).toBe(16);
+    });
+
+    it('does not give standing-OG morale floor to reserve or rear sector members', () => {
+        const state = makeState({
+            b1: {
+                faction: 'RS',
+                morale: 18,
+                home_defense_active: false,
+                location_osid: 'op:maglaj:jablanica',
+                home_osid: 'op:gracanica:petrovo_2',
+                corps_id: 'vrs_1st_krajina',
+                assignment: { kind: 'sector', role: 'reserve', sector_id: 'sector:vrs_1st_krajina:2' },
+                tags: ['placement:fixed_home_osid'],
+            } as any,
+        });
+        state.military.corps_front_sectors = {
+            'sector:vrs_1st_krajina:0': {
+                sector_id: 'sector:vrs_1st_krajina:0',
+                corps_id: 'vrs_1st_krajina',
+                faction: 'RS',
+                territory_osids: ['op:gracanica:petrovo_2'],
+                assigned_brigade_ids: [],
+                reserve_brigade_ids: [],
+            } as any,
+            'sector:vrs_1st_krajina:2': {
+                sector_id: 'sector:vrs_1st_krajina:2',
+                corps_id: 'vrs_1st_krajina',
+                faction: 'RS',
+                territory_osids: ['op:maglaj:jablanica'],
+                assigned_brigade_ids: [],
+                reserve_brigade_ids: ['b1'],
+            } as any,
+        };
+
+        const munPop = { maglaj: { total: 100, bosniak: 70, serb: 20, croat: 5, other: 5 } };
+        runMoraleDrift(state, [], munPop);
+
+        expect(state.military.formations!['b1']!.morale).toBe(16);
+    });
+
+    it('does not give standing-OG morale floor when home is no longer in same-corps territory', () => {
+        const state = makeState({
+            b1: {
+                faction: 'RS',
+                morale: 18,
+                home_defense_active: false,
+                location_osid: 'op:maglaj:jablanica',
+                home_osid: 'op:gracanica:petrovo_2',
+                corps_id: 'vrs_1st_krajina',
+                assignment: { kind: 'sector', role: 'front', sector_id: 'sector:vrs_1st_krajina:2' },
+                tags: ['placement:fixed_home_osid'],
+            } as any,
+        });
+        state.military.corps_front_sectors = {
+            'sector:vrs_1st_krajina:2': {
+                sector_id: 'sector:vrs_1st_krajina:2',
+                corps_id: 'vrs_1st_krajina',
+                faction: 'RS',
+                territory_osids: ['op:maglaj:jablanica'],
+                assigned_brigade_ids: ['b1'],
+                reserve_brigade_ids: [],
+            } as any,
+        };
+
+        const munPop = { maglaj: { total: 100, bosniak: 70, serb: 20, croat: 5, other: 5 } };
+        runMoraleDrift(state, [], munPop);
+
+        expect(state.military.formations!['b1']!.morale).toBe(16);
+    });
+
     it('HRHB home defender: floor 25', () => {
         const state = makeState({
             b1: { faction: 'HRHB', morale: 20, home_defense_active: true,

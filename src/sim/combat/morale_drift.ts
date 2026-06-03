@@ -5,7 +5,7 @@
  * Deterministic: formations in sorted order, no randomness.
  */
 
-import type { FactionId, FormationId, FormationState, GameState } from '../../state/game_state.js';
+import type { CorpsFrontSector, FactionId, FormationId, FormationState, GameState } from '../../state/game_state.js';
 import type { MunicipalityPopulation1991Map } from '../../state/population_share.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getFactionAlignedPopulationShare } from '../../state/population_share.js';
@@ -111,10 +111,49 @@ const FACTION_HOME_MORALE_FLOOR: Record<string, number> = {
  * Models the "cornered rat" — no surrender option for Bosniaks. */
 const RBIH_EXISTENTIAL_FLOOR = 25;
 const EXISTENTIAL_AFFINITY_THRESHOLD = 0.50;
+const FIXED_HOME_OSID_TAG = 'placement:fixed_home_osid';
 
 export interface MoraleDriftReport {
     formations_updated: number;
     by_faction: Record<string, number>;
+}
+
+function assignedStandingOgFrontSector(
+    state: GameState,
+    formation: FormationState,
+    formationId: FormationId
+): CorpsFrontSector | null {
+    const assignment = formation.assignment;
+    if (assignment?.kind !== 'sector' || assignment.role !== 'front') return null;
+    if (!assignment.sector_id) return null;
+    if (!formation.corps_id) return null;
+    const sector = state.military.corps_front_sectors?.[assignment.sector_id];
+    if (!sector) return null;
+    if (sector.corps_id !== formation.corps_id || sector.faction !== formation.faction) return null;
+    if (!sector.assigned_brigade_ids.includes(formationId)) return null;
+    return sector;
+}
+
+function hasSameCorpsStandingOgHomeTerritory(state: GameState, formation: FormationState): boolean {
+    if (!formation.home_osid || !formation.corps_id) return false;
+    for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
+        if (sector.corps_id !== formation.corps_id) continue;
+        if (sector.faction !== formation.faction) continue;
+        if (sector.territory_osids.includes(formation.home_osid)) return true;
+    }
+    return false;
+}
+
+function receivesStandingOgHomeMoraleFloor(
+    state: GameState,
+    formation: FormationState,
+    formationId: FormationId
+): boolean {
+    if (!formation.tags?.includes(FIXED_HOME_OSID_TAG)) return false;
+    const sector = assignedStandingOgFrontSector(state, formation, formationId);
+    if (!sector) return false;
+    if (formation.location_osid && !sector.territory_osids.includes(formation.location_osid)) return false;
+    return hasSameCorpsStandingOgHomeTerritory(state, formation);
 }
 
 /**
@@ -248,7 +287,7 @@ export function runMoraleDrift(
 
         // Home ground morale floor: faction-differentiated.
         // RBiH 30 (nowhere to go), HRHB 25 (Croatia fallback), RS 20 (Serbia fallback).
-        if (f.home_defense_active === true) {
+        if (f.home_defense_active === true || receivesStandingOgHomeMoraleFloor(state, f, fId)) {
             const factionFloor = FACTION_HOME_MORALE_FLOOR[f.faction] ?? 15;
             f.morale = Math.max(f.morale, factionFloor);
         }
