@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-03] docs: Standing OG flag isolation narrows Phase C and Phase B blockers
+
+**Type:** Diagnostic evidence + roadmap/board clarification (no code/data default change). Two temporary 40w probes isolated the ADR-0007 activation-red result: Phase C-only (`ENABLE_SHARED_SECTOR_DEFENSE=true`, reserve commit off) and Phase B-only (`ENABLE_STANDING_OG_RESERVE_COMMIT=true`, shared defense off). Defaults were restored and generated latest-run output was not kept.
+
+**Evidence:** Baseline/default post-hardening run `n9` hash `e586d024066012c4`: 657/712 match, 164 orders, 127 battles, attacker casualties 19,504, defender casualties 25,189, total formation fatigue 137, zero-morale active brigades 2. Phase C-only `n11` hash `baf321d37cefcae1`: 655/712 match, 149 orders, 110 battles, attacker casualties 16,868, defender casualties 29,776, fatigue 105, zero-morale 2, zero-cohesion 1. Phase B-only `n12` hash `9cae620f4054d67b`: 655/712 match, 143 orders, 118 battles, attacker casualties 18,403, defender casualties 25,690, fatigue 137, zero-morale 4. Combined `n10` remains activation-red at 653/712, 118 orders, 96 battles, fatigue 77, zero-morale 4. Interpretation: Phase C primarily undercharges/depresses aggregate fatigue and battle throughput; Phase B primarily spreads morale collapse and also reduces orders. Next implementation target is not a default flip, but fixing Phase C's fatigue conservation and Phase B's reserve-commit morale/throughput effects under narrower tests.
+
+**Files:** `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
 ## [2026-06-03] docs: Standing OG Phase C+B flag-on proof remains activation-red
 
 **Type:** Diagnostic evidence + roadmap/board clarification (no default flip). After the repulse-memory hardening and 712th OOB promotion, a fresh temporary Phase C+B flag-on 40w probe was run with `ENABLE_SHARED_SECTOR_DEFENSE=true` and `ENABLE_STANDING_OG_RESERVE_COMMIT=true`; defaults were restored after the probe.
