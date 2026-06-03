@@ -56,7 +56,7 @@ function makeSector(corpsId: string, faction: string, territoryOsids: string[]):
     } as CorpsFrontSector;
 }
 
-function makeCorpsCommand(activeOps: { participating_brigades: string[] }[] = []): CorpsCommandState {
+function makeCorpsCommand(activeOps: { participating_brigades?: string[]; axes?: { assigned_brigades: string[] }[] }[] = []): CorpsCommandState {
     return {
         command_span: 5,
         subordinate_count: 3,
@@ -70,7 +70,8 @@ function makeCorpsCommand(activeOps: { participating_brigades: string[] }[] = []
             phase: 'execution' as const,
             started_turn: 0,
             phase_started_turn: 0,
-            participating_brigades: op.participating_brigades,
+            participating_brigades: op.participating_brigades ?? [],
+            axes: op.axes,
         })),
     } as CorpsCommandState;
 }
@@ -360,6 +361,30 @@ describe('stranded_brigade_lifecycle', () => {
             };
             const corps_command = {
                 corps_5: makeCorpsCommand([{ participating_brigades: ['brig_op'] }]),
+            };
+            const adj = chainAdj(['op:mun:o1', 'op:mun:o2', 'op:mun:o3']);
+            const state = makeState({ formations, corps_front_sectors: sectors, political_controllers: controllers, corps_command });
+
+            const report = updateStrandedBrigadeLifecycle(state, adj);
+
+            expect(report.newly_stranded).toEqual([]);
+            expect(report.updated).toBe(0);
+        });
+
+        it('excludes axis-assigned brigades in active operations', () => {
+            const formations = {
+                brig_axis: makeBrigade('brig_axis', 'RBiH', 'corps_5', 'op:mun:o3'),
+            };
+            const sectors = {
+                'sector:corps_5': makeSector('corps_5', 'RBiH', ['op:mun:o1']),
+            };
+            const controllers: Record<string, string | null> = {
+                'op:mun:o1': 'RBiH',
+                'op:mun:o2': 'RS',
+                'op:mun:o3': 'RBiH',
+            };
+            const corps_command = {
+                corps_5: makeCorpsCommand([{ axes: [{ assigned_brigades: ['brig_axis'] }] }]),
             };
             const adj = chainAdj(['op:mun:o1', 'op:mun:o2', 'op:mun:o3']);
             const state = makeState({ formations, corps_front_sectors: sectors, political_controllers: controllers, corps_command });

@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-03] fix(engine): exempt operation-axis brigades from stranded lifecycle
+
+**Type:** Engine invariant fix on the default path. `updateStrandedBrigadeLifecycle(...)` already excluded brigades listed in flat `corps_command[*].active_operations[*].participating_brigades`, but ignored current operation `axes[*].assigned_brigades` and assumed the flat list was always present. Axis-only operation participants could therefore be treated as stranded/non-battle attrition candidates despite being actively committed. The lifecycle guard now treats both axis-assigned brigades and flat participants as active-operation members.
+
+**Evidence:** Red/green regression `tests/stranded_brigade_lifecycle.test.ts` first reproduced the axis-only active-operation case, then passed after the guard fix. Broader focused combat/lifecycle slice passes 121/121 (`standing_og_defense`, `bot_orders_perf_profile`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`, `sector_counter_attack`, `stranded_brigade_lifecycle`, `pipeline_step_execution_proof`), and `git diff --check` is clean. Fresh default-path 40w probe `n20` moved the prior default reference `n9` hash `e586d024066012c4` to `13c8f4cdff9caf1a`: orders 164 -> 173, battles 127 -> 135, defender-present battles 92 -> 103, defender-absent battles 35 -> 32, controller changes 125 -> 120, counts `HRHB:88,RBiH:249,RS:375` -> `HRHB:88,RBiH:254,RS:370`, anchors remain 30/30, benchmarks remain 6/6, and the two zero-morale active brigades are unchanged (`rs_17th_klju_light_infantry`, `rs_1st_ozren_light_infantry`). Fresh combined C+B probe `n21` is unchanged versus `n17`/`n19` (`dbe6cdb8d2c81d81`), so this is default-path lifecycle hardening, not the ADR-0007 activation fix. No baseline re-floor is claimed in this slice.
+
+**Files:** `src/sim/combat/stranded_brigade_lifecycle.ts`, `tests/stranded_brigade_lifecycle.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
 ## [2026-06-03] fix(engine): protect operation-axis brigades from shared Standing OG defense
 
 **Type:** Engine invariant fix, flag-gated by existing default-off ADR-0007 Phase C. The shared-defense availability helper excluded flat `participating_brigades` from `corps_command.active_operations`, but did not exclude brigades assigned through operation `axes[*].assigned_brigades`. Under `ENABLE_SHARED_SECTOR_DEFENSE=true`, that left an axis participant borrowable as a reactive sector defender in the same turn. The helper now treats axis-assigned brigades as unavailable for shared defense; flag-off behavior remains unchanged.
