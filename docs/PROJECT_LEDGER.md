@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-03] fix(engine): include shared Standing OG defenders in engagement report
+
+**Type:** Engine invariant fix, flag-gated by existing default-off ADR-0007 Phase C. When `ENABLE_SHARED_SECTOR_DEFENSE` is enabled, weighted sector defenders already contribute defensive power, casualties, and direct combat fatigue, but the battle report only listed the primary defender in `engaged_formation_ids`. Later war phases use that list for fatigue recovery, officer quality, cohesion drift, and morale drift, so shared defenders could be treated as non-engaged despite having fought. The resolver now records every positive-weight shared defender as engaged; flag-off behavior remains primary-defender-only.
+
+**Evidence:** Focused tests pass: `standing_og_defense.test.ts` 11/11, and the broader combat slice 84/84 (`standing_og_defense`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`, `sector_counter_attack`). Fresh temporary Phase C-only probe after the fix (`n13`, hash `37bd24426ec57318`) remains activation-red versus default `n9` (`e586d024066012c4`): orders 164 -> 143, battles 127 -> 109, flips 41 -> 37, attacker casualties 19,504 -> 16,559, defender casualties 25,189 -> 30,003, zero-morale active brigades remain 2, zero-cohesion active brigades remain 0, and final control counts remain `HRHB:89,RBiH:254,RS:369` for the C-only path. Interpretation: the engagement-list invariant is fixed, but Phase C still depresses combat throughput and must not be flipped on by default.
+
+**Files:** `src/sim/combat/standing_og_defense.ts`, `src/sim/combat/attack_resolution_osid.ts`, `tests/standing_og_defense.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
 ## [2026-06-03] docs: Standing OG flag isolation narrows Phase C and Phase B blockers
 
 **Type:** Diagnostic evidence + roadmap/board clarification (no code/data default change). Two temporary 40w probes isolated the ADR-0007 activation-red result: Phase C-only (`ENABLE_SHARED_SECTOR_DEFENSE=true`, reserve commit off) and Phase B-only (`ENABLE_STANDING_OG_RESERVE_COMMIT=true`, shared defense off). Defaults were restored and generated latest-run output was not kept.

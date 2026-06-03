@@ -113,7 +113,11 @@ import { SUPPORT_POWER_MULT } from './bot_constants.js';
 // ADR-0005 v2.2b: TG combat-power synthesis + casualty distribution. Flag-gated.
 import { ENABLE_TG_COMBAT_SYNTHESIS } from './tactical_group_config.js';
 import { distributeCasualtiesAcrossTg } from './tactical_group_casualties.js';
-import { ENABLE_SHARED_SECTOR_DEFENSE, getStandingOgDefenseBrigadeIds } from './standing_og_defense.js';
+import {
+    ENABLE_SHARED_SECTOR_DEFENSE,
+    getStandingOgDefenseBrigadeIds,
+    getStandingOgEngagedDefenseBrigadeIds,
+} from './standing_og_defense.js';
 // ADR-0005 v2.2c #2: Hard Invariant #6 — immediate dissolution on anchor destruction.
 import { dissolveTacticalGroup, TG_ANCHOR_DISSOLVE_COHESION_FLOOR } from './tactical_group_lifecycle.js';
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
@@ -901,7 +905,14 @@ export function resolveAttackOrdersOsid(
 
         report.orders_processed += attackerIds.length;
         for (const a of attackerFormations) report.engaged_formation_ids.push(a.id);
-        if (defenderFormation) report.engaged_formation_ids.push(defenderFormation.id);
+        for (const defenderId of getStandingOgEngagedDefenseBrigadeIds(
+            defenderFormation,
+            sectorDefenseBrigades,
+            sectorBrigadeWeights,
+            ENABLE_SHARED_SECTOR_DEFENSE,
+        )) {
+            report.engaged_formation_ids.push(defenderId);
+        }
 
         const personnelAttacker = attackerFormations.reduce((s, a) => s + (a.personnel ?? 0), 0);
         // Sector defense: all sector brigades contribute to the casualty base, matching

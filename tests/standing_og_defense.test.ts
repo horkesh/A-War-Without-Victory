@@ -5,6 +5,7 @@ import { createEmptyBrigadeHistory } from '../src/state/brigade_history.js';
 import {
     detectStandingOgSoloDefenderHotspots,
     getStandingOgDefenseBrigadeIds,
+    getStandingOgEngagedDefenseBrigadeIds,
 } from '../src/sim/combat/standing_og_defense.js';
 
 function makeSector(overrides: Partial<CorpsFrontSector>): CorpsFrontSector {
@@ -47,6 +48,47 @@ describe('getStandingOgDefenseBrigadeIds', () => {
         });
 
         expect(getStandingOgDefenseBrigadeIds(sector, true)).toEqual(['b1', 'b2', 'r1', 'z1']);
+    });
+});
+
+describe('getStandingOgEngagedDefenseBrigadeIds', () => {
+    it('preserves primary-only engagement when shared sector defense is disabled', () => {
+        const primary = { id: 'primary' };
+        const weights = new Map([
+            ['primary', 2],
+            ['reserve', 1],
+        ]);
+
+        expect(getStandingOgEngagedDefenseBrigadeIds(primary, [{ id: 'reserve' }, primary], weights, false)).toEqual([
+            'primary',
+        ]);
+    });
+
+    it('returns deterministic positive-weight defender engagements when shared sector defense is enabled', () => {
+        const primary = { id: 'primary' };
+        const weights = new Map([
+            ['reserve_b', 0.5],
+            ['primary', 1],
+            ['reserve_a', 0],
+        ]);
+
+        expect(getStandingOgEngagedDefenseBrigadeIds(primary, [
+            { id: 'reserve_b' },
+            { id: 'reserve_a' },
+            primary,
+        ], weights, true)).toEqual(['primary', 'reserve_b']);
+    });
+
+    it('falls back to the primary defender when no sector defender has positive weight', () => {
+        const primary = { id: 'primary' };
+        const weights = new Map([
+            ['reserve', 0],
+            ['primary', -1],
+        ]);
+
+        expect(getStandingOgEngagedDefenseBrigadeIds(primary, [{ id: 'reserve' }, primary], weights, true)).toEqual([
+            'primary',
+        ]);
     });
 });
 

@@ -21,6 +21,24 @@ export function getStandingOgDefenseBrigadeIds(
     return [...new Set(brigadeIds)].sort(strictCompare);
 }
 
+export function getStandingOgEngagedDefenseBrigadeIds(
+    defenderFormation: Pick<FormationState, 'id'> | null,
+    sectorDefenseBrigades: Array<Pick<FormationState, 'id'>> | null | undefined,
+    sectorBrigadeWeights: Map<FormationId, number> | null | undefined,
+    enableSharedSectorDefense: boolean = ENABLE_SHARED_SECTOR_DEFENSE,
+): FormationId[] {
+    if (!defenderFormation) return [];
+    if (!enableSharedSectorDefense || !sectorDefenseBrigades || !sectorBrigadeWeights) {
+        return [defenderFormation.id];
+    }
+
+    const engagedIds = sectorDefenseBrigades
+        .filter((formation) => Math.max(0, sectorBrigadeWeights.get(formation.id) ?? 0) > 0)
+        .map((formation) => formation.id)
+        .sort(strictCompare);
+    return engagedIds.length > 0 ? engagedIds : [defenderFormation.id];
+}
+
 export interface StandingOgSoloDefenderHotspot {
     sector_id: string;
     holder_brigade_id: FormationId;
