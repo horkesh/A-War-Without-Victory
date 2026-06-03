@@ -1110,7 +1110,12 @@ export function validateGameStateShape(
             ) {
                 errors.push('meta.rbih_hrhb_war_earliest_turn must be null or a non-negative integer when present');
             }
-            // Free War Phase 0: bot event-decision mode (optional; 'historical'|'emergent' when present, unset = historical)
+            // Free War Phase 0: bot event-decision mode. Legacy/unset saves migrate to
+            // explicit historical at v35; current loaded saves must carry the mode.
+            const requireDecisionMode = stateVersion >= 35 || (options.requireVersion !== undefined && options.requireVersion >= 35);
+            if (requireDecisionMode && m.decision_mode === undefined) {
+                errors.push("meta.decision_mode is required and must be 'historical' or 'emergent'");
+            }
             if (
                 'decision_mode' in m &&
                 m.decision_mode !== undefined &&

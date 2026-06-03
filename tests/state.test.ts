@@ -20,6 +20,7 @@ const baseState: GameState = {
         referendum_deadline_turn: null,
         game_over: false,
         player_faction: 'RBiH',
+        decision_mode: 'historical',
     } as any,
     factions: [
         {

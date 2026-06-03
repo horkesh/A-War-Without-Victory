@@ -1,4 +1,23 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-03] feat(state): v35 decision_mode loaded-state contract
+
+**Type:** Save-schema / engine-health contract slice. **No sim decision logic changed.** `state.meta.decision_mode` is now an explicit v35 loaded-state contract: current saves must carry `'historical'` or `'emergent'`, malformed values are rejected, and legacy/unset saves migrate deterministically to `'historical'` so calibration remains the internal health-check path. Desktop new-campaign emergent behavior and the no-player-facing-toggle rule are unchanged.
+
+**Change:**
+- `CURRENT_SCHEMA_VERSION` advanced 34 -> 35.
+- `save_migration.ts` appends v35, stamping missing `meta.decision_mode` to `'historical'`.
+- `validateGameStateShape(...)` requires `meta.decision_mode` for v35/current loaded gameplay state while preserving legacy migration compatibility.
+- Baseline regression scenario JSON now explicitly declares `decision_mode: "historical"` (`apr1992_definitive_52w`, `baseline_ops_4w`, `noop_4w`) so calibration baselines do not rely on migration fallback.
+- Versioned migration, round-trip fixture, state serialization, player-faction/decision-mode contract, and TG schema-freeze tests now pin the v35 contract.
+
+**Verification:** focused save/state suite green: `node node_modules\vitest\vitest.mjs run tests\save_migration_versioned_steps.test.ts tests\save_migration_round_trip_contract.test.ts tests\save_migration_validator_rejection.test.ts tests\state\player_faction_contract.test.ts tests\tg_schema_freeze.test.ts tests\free_war_decision_mode.test.ts tests\validate_game_state_shape.test.ts tests\state.test.ts tests\state\serialize.notifications.test.ts --reporter=dot` (211/211); `npm.cmd run typecheck`; `git diff --check`; `node tools\diagnostics\strict_null_inventory.cjs --field-domains`. Event CI reproduction after review catch: full 25-file Event-system + Phase E/F/H suite green (438 passed / 5 skipped), `tests/event_state_shape_b2.test.ts` green, and strict gate `tests\sensitive_history_canon_gate_audit_strict_gate.test.ts` green. Baseline proof: first run failed only on expected serialized-state hashes (`final_save.json` plus `run_summary.json` embedding `final_state_hash`); after `UPDATE_BASELINES=1 npm.cmd run test:baselines`, clean rerun passed `Baseline regression: all scenarios match`; after explicit scenario declarations, another clean rerun passed `Baseline regression: all scenarios match.` Control/activity/formation/watch/weekly artifacts stayed fixed. After rebasing onto merged Standing OG Phase C (#144), the baseline manifest was regenerated and rechecked against the new `main` + v35 state contract combination.
+
+**Review:** Franklin independent schema review found one low doc/source truth issue: docs claimed baseline scenarios explicitly declared `historical` while source JSON still relied on fallback. Fixed by adding explicit `decision_mode: "historical"` to all baseline regression scenarios. No other issues found.
+
+**Files:** `src/state/game_state.ts`, `src/state/save_migration.ts`, `src/state/validateGameState.ts`, `data/scenarios/*baseline*`/`apr1992_definitive_52w`, save/state/event tests, baseline and drift diagnostic outputs, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/2026-06-01-free-war-model-design.md`, `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`, `.claude/napkin.md`.
+
+---
+
 ## [2026-06-03] fix(ci): reconcile Standing OG Phase C baseline manifest and static guard
 
 **Type:** CI/baseline closeout for PR #144. The Standing OG Phase C branch had two stale proof surfaces after the final sector-seal commit: `tests/bot_orders_perf_profile.test.ts` still pinned the old literal `REACTIVE_DEFENSE_RATIO` expression even though the predictor now routes the cap through `getSectorReactiveDefensePredictionRatio(...)`, and `data/derived/scenario/baselines/manifest.json` still held an earlier apr1992_52w baseline hash set that the branch head no longer reproduced.

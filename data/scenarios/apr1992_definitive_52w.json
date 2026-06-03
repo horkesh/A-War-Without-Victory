@@ -1,5 +1,6 @@
 {
   "scenario_id": "apr1992_definitive_52w",
+  "decision_mode": "historical",
   "scenario_start_week": 0,
   "start_lifecycle_phase": "war",
   "weeks": 52,

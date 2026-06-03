@@ -1,5 +1,6 @@
 {
   "scenario_id": "noop_4w",
+  "decision_mode": "historical",
   "weeks": 4,
   "turns": []
 }
