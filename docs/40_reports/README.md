@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest root UI dependency declarations** | [implemented/20260603_ROOT_UI_DEPENDENCY_DECLARATIONS.md](implemented/20260603_ROOT_UI_DEPENDENCY_DECLARATIONS.md) - Root `package.json` now declares the MapLibre/PMTiles/Deck.gl/Vite React/PostCSS dependencies required by root typecheck and tactical map build. |
 | **Latest event database / alternate timelines scope** | [proposals/20260527_EVENT_DATABASE_ALTERNATE_TIMELINES_SCOPE.md](proposals/20260527_EVENT_DATABASE_ALTERNATE_TIMELINES_SCOPE.md) - The next event-system phase is scoped as a source-backed historical/counterfactual database with causal opens/closes, material consequences, faction alternate timelines, and strict sensitive-history gates. |
 | **Latest event staff recommendation defaults** | [implemented/20260527_EVENT_STAFF_RECOMMENDATION_DEFAULTS.md](implemented/20260527_EVENT_STAFF_RECOMMENDATION_DEFAULTS.md) - Abstract `visit_to_front_*` decisions now use visible `Staff recommendation` metadata instead of historical defaults; RBiH front-visit is modal-ready while RS/HRHB stay gated, and bot historical calibration is unchanged. |
 | **Latest event expansion roadmap contract** | [implemented/20260527_EVENT_EXPANSION_ROADMAP_CONTRACT.md](implemented/20260527_EVENT_EXPANSION_ROADMAP_CONTRACT.md) - Event expansion is now scoped as a gated full historical/counterfactual database: branch-visibility diagnostics first, foundational decisions packet second, and no broad authoring until source/default/sensitive gates are satisfied. |
