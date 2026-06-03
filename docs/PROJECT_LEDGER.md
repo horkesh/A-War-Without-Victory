@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-03] fix(ci): align replay branch UI proof expectations
+
+**Type:** Test-proof reconciliation for `codex/replay-manifest-only` (#145). No replay payload logic, scenario data, save schema, or simulation path touched.
+
+**Change:** Updated inherited UI/static proof tests to match the current product shell: the main menu now starts campaigns through inline faction cards rather than a generic "New Game" button; tutorial/coachmark onboarding remains removed from the live shell; Army HQ and Warroom Decision Room error-boundary/static assertions now account for navigation callback props on the current overlay wiring.
+
+**Verification:** `node node_modules\vitest\vitest.mjs run tests\ui_presidential_toolbar_summary_click.test.ts tests\ui\error_boundary_isolation.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\main_menu_language.test.ts tests\ui\warroom_shell_accessibility.test.ts --reporter=dot` passed 23/23.
+
+**Files:** `tests/ui_presidential_toolbar_summary_click.test.ts`, `tests/ui/error_boundary_isolation.test.ts`, `tests/ui/main_menu_i18n.test.ts`, `tests/ui/main_menu_language.test.ts`, `tests/ui/warroom_shell_accessibility.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-02] fix/i18n: boot-to-Main-Menu deep-link/auto-pop hardening (#138) + i18n Car 2 (#141) + Car 3 (#142)
 
 **Type:** UI-layer batch (boot routing + player-facing string i18n). **All `src/ui/map/**` + EN-catalog only → NO sim/scenario/calibration/determinism touch; historical 40w/52w/188w byte-identical by construction.** main HEAD `d0488874`. Three in-flight PRs driven to clean closure (green CI + clean Codex pass each) before the Codex-overseer handoff.

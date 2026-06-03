@@ -36,7 +36,9 @@ describe('MainMenu localization', () => {
         renderMainMenu();
 
         expect(screen.getByText('Pyrrhic Games presents')).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'New Game' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /Republic of Bosnia and Herzegovina/i })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /Republika Srpska/i })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /Croatian Republic of Herzeg-Bosnia/i })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Load Game' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Credits' })).toBeTruthy();
@@ -49,7 +51,7 @@ describe('MainMenu localization', () => {
 
         expect(screen.getByText('Pyrrhic Games predstavlja')).toBeTruthy();
         expect(screen.getByText('Bosna i Hercegovina, 1992-1995')).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Nova igra' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /Republika Srpska/i })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Nastavi' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Učitaj igru' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Zasluge' })).toBeTruthy();
