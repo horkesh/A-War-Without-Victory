@@ -3,7 +3,7 @@ import { assertFormationsInFriendlyTerritory } from '../combat/assert_formation_
 import { assertOperationLifecycle } from '../combat/assert_operation_lifecycle.js';
 import { distributeBrigadesToFront } from '../combat/brigade_front_distribution.js';
 import { reconcileFinalOperationTruth } from '../combat/final_operation_truth_reconciliation.js';
-import { reconcileFinalSectorTruth } from '../combat/final_sector_truth_reconciliation.js';
+import { reconcileFinalSectorTruth, sealFinalSectorTruthFromCurrentSectors } from '../combat/final_sector_truth_reconciliation.js';
 import { computeCombatEffectiveBrigades } from '../negotiation/compute_combat_effective.js';
 import { computeSpatialContext } from '../spatial_context.js';
 import type { NamedPhase } from '../turn_pipeline_types.js';
@@ -90,7 +90,6 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
                 od.centroids,
                 cachedSpatial,
                 context.report?.supply_resolution?.supply_state_by_osid ?? null,
-                true,
             );
         }
     },
@@ -106,6 +105,29 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
             distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency as Map<string, string[]>, {
                 population1991ByMun: context.input.municipalityPopulation1991,
             });
+            const finalEdges = context.state.military.war_front_edges_osid ?? [];
+            if (finalEdges.length === 0) return;
+            sealFinalSectorTruthFromCurrentSectors(
+                context.state,
+                finalEdges,
+                context.report?.supply_resolution?.supply_state_by_osid ?? null,
+                spatial?.postCombat,
+            );
+        }
+    },
+    {
+        name: 'seal-final-sector-truth-after-distribution',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const finalEdges = context.state.military.war_front_edges_osid ?? [];
+            if (finalEdges.length === 0) return;
+            const spatial = getSpatialContextCache(context);
+            sealFinalSectorTruthFromCurrentSectors(
+                context.state,
+                finalEdges,
+                context.report?.supply_resolution?.supply_state_by_osid ?? null,
+                spatial?.postCombat,
+            );
         }
     },
     {

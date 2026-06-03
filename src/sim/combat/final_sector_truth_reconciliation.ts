@@ -5,9 +5,16 @@ import type { SupplyStateByOsidReport } from '../../state/supply_state_derivatio
 import type { SpatialContext } from '../spatial_context.js';
 import type { Osid } from './osid_adjacency.js';
 import { buildOsidAdjacency } from './osid_adjacency.js';
-import { assignBrigadesToSubSegments, buildCorpsFrontSectors, emitFinalUnresolvedSectorWarnings } from './corps_front_sectors.js';
+import {
+    applyFinalSectorOwnerTruthPass,
+    assignBrigadesToSubSegments,
+    buildCorpsFrontSectors,
+    collectUnresolvedSectorBrigades,
+    emitFinalUnresolvedSectorWarnings,
+} from './corps_front_sectors.js';
 import { computeSectorCombatRatings } from './sector_combat_rating.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { syncSectorAssignmentsToFormations } from './brigade_assignment.js';
 
 export interface FinalSectorTruthReconciliationReport {
     sectors_rebuilt: number;
@@ -31,9 +38,11 @@ export interface FinalSectorTruthReconciliationReport {
  *     but length fingerprint lets us catch unexpected replacements too)
  *   - political_controllers entries (sorted)
  *   - active formations (id, location_osid, faction, status-active)
+ *   - supply_state_by_osid report entries used by sector combat ratings
  *
- * On hit: all state writes from the prior run are still present; re-emit
- * warnings only if `isFinalPass` flipped to true since the cached run.
+ * On hit: all state writes from the prior run are still present. A false ->
+ * true final-pass transition rebuilds once because final pass now enables
+ * final-only sector repairs before emitting unresolved warnings.
  */
 interface ReconcileCacheEntry {
     fingerprint: string;
@@ -42,7 +51,19 @@ interface ReconcileCacheEntry {
 }
 const reconcileCache = new WeakMap<GameState, ReconcileCacheEntry>();
 
-function computeReconcileFingerprint(state: GameState): string {
+function computeSupplyFingerprint(supplyStateByOsid?: SupplyStateByOsidReport | null): string {
+    if (!supplyStateByOsid) return 'none';
+    const parts = [`schema=${supplyStateByOsid.schema}`, `turn=${supplyStateByOsid.turn}`];
+    for (const faction of [...(supplyStateByOsid.factions ?? [])].sort((a, b) => strictCompare(a.faction_id, b.faction_id))) {
+        parts.push(`f=${faction.faction_id}`);
+        for (const entry of [...(faction.by_osid ?? [])].sort((a, b) => strictCompare(a.osid, b.osid))) {
+            parts.push(`${entry.osid}:${entry.state}`);
+        }
+    }
+    return parts.join('|');
+}
+
+function computeReconcileFingerprint(state: GameState, supplyStateByOsid?: SupplyStateByOsidReport | null): string {
     const turn = state.meta?.turn ?? 0;
     const frontEdgeCount = state.military.war_front_edges_osid?.length ?? 0;
 
@@ -66,7 +87,8 @@ function computeReconcileFingerprint(state: GameState): string {
     return 't' + turn
         + '|fe' + frontEdgeCount
         + '|pc' + pcParts.join('|')
-        + '|fm' + fmParts.join('|');
+        + '|fm' + fmParts.join('|')
+        + '|supply' + computeSupplyFingerprint(supplyStateByOsid);
 }
 
 export function reconcileFinalSectorTruth(
@@ -78,20 +100,13 @@ export function reconcileFinalSectorTruth(
     supplyStateByOsid?: SupplyStateByOsidReport | null,
     isFinalPass: boolean = false,
 ): FinalSectorTruthReconciliationReport {
-    const fingerprint = computeReconcileFingerprint(state);
+    const fingerprint = computeReconcileFingerprint(state, supplyStateByOsid);
     const cached = reconcileCache.get(state);
-    if (cached && cached.fingerprint === fingerprint) {
+    const finalPassNeedsRebuild = isFinalPass && !cached?.lastFinalPass;
+    if (cached && cached.fingerprint === fingerprint && !finalPassNeedsRebuild) {
         // State is byte-identical to the last reconcile run. All outputs
         // (corps_front_sectors, sector_combat_ratings, unresolved_sector_brigades,
         // formation.assigned_sub_segment_id) are still present in state.
-        // Emit final-unresolved warnings only when the flag flipped true since cache.
-        if (isFinalPass && !cached.lastFinalPass) {
-            emitFinalUnresolvedSectorWarnings(
-                state.military.unresolved_sector_brigades ?? [],
-                state.military.formations ?? {},
-            );
-            cached.lastFinalPass = true;
-        }
         return cached.report;
     }
 
@@ -140,4 +155,57 @@ export function reconcileFinalSectorTruth(
     };
     reconcileCache.set(state, { fingerprint, report, lastFinalPass: isFinalPass });
     return report;
+}
+
+export function sealFinalSectorTruthFromCurrentSectors(
+    state: GameState,
+    edges: EdgeRecord[],
+    supplyStateByOsid?: SupplyStateByOsidReport | null,
+    spatial?: SpatialContext,
+): FinalSectorTruthReconciliationReport {
+    const sectors = state.military.corps_front_sectors;
+    if (!sectors || Object.keys(sectors).length === 0) {
+        state.military.sector_combat_ratings = {};
+        state.military.unresolved_sector_brigades = [];
+        return {
+            sectors_rebuilt: 0,
+            sectors_rated: 0,
+            unresolved_brigades: 0,
+        };
+    }
+
+    const formations = state.military.formations ?? {};
+    const adjacency = (spatial?.adjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(edges);
+    applyFinalSectorOwnerTruthPass(sectors, state, formations, adjacency, {
+        allowCollapsedRearGuardAbsorption: true,
+    });
+    syncSectorAssignmentsToFormations(sectors, formations, adjacency);
+    state.military.unresolved_sector_brigades = collectUnresolvedSectorBrigades(
+        state,
+        sectors,
+        formations,
+        adjacency,
+    );
+
+    const sectorList = Object.values(sectors);
+    assignBrigadesToSubSegments(state, sectorList, adjacency);
+    const sectorOwnedBrigades = new Set<string>();
+    for (const sector of sectorList) {
+        for (const bid of sector.assigned_brigade_ids ?? []) sectorOwnedBrigades.add(bid);
+        for (const bid of sector.reserve_brigade_ids ?? []) sectorOwnedBrigades.add(bid);
+    }
+    for (const fid of Object.keys(formations)) {
+        const f = formations[fid];
+        if (f.assigned_sub_segment_id && !sectorOwnedBrigades.has(fid)) {
+            f.assigned_sub_segment_id = undefined;
+        }
+    }
+
+    const ratings = computeSectorCombatRatings(state, supplyStateByOsid ?? null);
+    emitFinalUnresolvedSectorWarnings(state.military.unresolved_sector_brigades ?? [], formations);
+    return {
+        sectors_rebuilt: 0,
+        sectors_rated: ratings.sectors_rated,
+        unresolved_brigades: state.military.unresolved_sector_brigades?.length ?? 0,
+    };
 }

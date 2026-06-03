@@ -983,6 +983,7 @@ export function advanceSectorOffensives(
         const corps = state.military.formations?.[corpsId];
         const faction: FactionId = corps?.faction ?? 'RS';
         const multiAxis = isMultiAxis(op);
+        const operationStaticAdjacency = op.is_pre_planned === true ? staticAdjacency : undefined;
 
         const allObjectives = multiAxis ? getAllAxisObjectives(op) : (op.objectives ?? []);
         const allBrigades = multiAxis ? getAllAxisBrigades(op) : op.participating_brigades;
@@ -1055,7 +1056,7 @@ export function advanceSectorOffensives(
                 op.force_launch !== true &&
                 earlyElapsed > earlyPlanDuration + PLANNING_INVALIDATION_GRACE_TURNS
             ) {
-                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op, staticAdjacency);
+                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op, operationStaticAdjacency);
                 if (!openingReadiness.executable) {
                     beginRecovery(op, turn, openingReadiness.blocker ?? 'no_launch_readiness', state);
                     continue;
@@ -1167,7 +1168,7 @@ export function advanceSectorOffensives(
                 beginRecovery(op, turn, 'defender_power_too_high', state);
                 continue;
             }
-            const planningObjectiveState = reconcilePlanningObjectives(state, corpsId, op, faction, staticAdjacency);
+            const planningObjectiveState = reconcilePlanningObjectives(state, corpsId, op, faction, operationStaticAdjacency);
             if (planningObjectiveState === 'completed') {
                 beginRecovery(op, turn, 'completed', state);
                 continue;
@@ -1184,6 +1185,7 @@ export function advanceSectorOffensives(
                 corpsId,
                 faction,
                 op,
+                operationStaticAdjacency,
             );
             const forcedLaunch = op.force_launch === true && elapsed >= 1;
 
@@ -1219,7 +1221,7 @@ export function advanceSectorOffensives(
                     corpsId,
                     faction,
                     op,
-                    // staticAdjacency intentionally omitted — physical adjacency required here
+                    operationStaticAdjacency,
                 )) {
                     if (elapsed <= planDuration + PLANNING_INVALIDATION_GRACE_TURNS) {
                         continue;
@@ -1227,7 +1229,7 @@ export function advanceSectorOffensives(
                     beginRecovery(op, turn, 'no_launch_readiness', state);
                     continue;
                 }
-                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op, staticAdjacency);
+                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op, operationStaticAdjacency);
                 if (!forcedLaunch && !openingReadiness.executable) {
                     // stagedEarly fires via isCommittedInTransitTo when a brigade is en-route
                     // to its approach OSID but not yet settled. Its CURRENT location may not be

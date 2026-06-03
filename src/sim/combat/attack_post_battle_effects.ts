@@ -12,6 +12,7 @@
  */
 
 import type {
+    CorpsFrontSector,
     FormationId,
     FormationState,
 } from '../../state/game_state.js';
@@ -109,19 +110,58 @@ export function applyDisruptionFromOutcome(
 export function applyDefenderBattleAftermath(params: {
     defenderFormations: FormationState[];
     outcome: CombatOutcome;
+    primaryDefenderId?: FormationId;
+    corpsFrontSectors?: Record<string, CorpsFrontSector>;
 }): void {
     const defenderOutcome = getDefenderOutcomePerspective(params.outcome);
+    const defenderCohesionDelta = COHESION_DEFENDER[params.outcome] ?? 0;
     for (const defender of params.defenderFormations) {
-        defender.cohesion = Math.max(0, Math.min(100, (defender.cohesion ?? 60) + (COHESION_DEFENDER[params.outcome] ?? 0)));
         (defender as { recent_battle_outcome?: string }).recent_battle_outcome = defenderOutcome;
-        (defender as { defense_streak?: number }).defense_streak =
-            (params.outcome === 'stalemate' || params.outcome === 'repulsed' || params.outcome === 'catastrophic')
-                ? Math.min(MAX_RESILIENCE_STREAK, ((defender as { defense_streak?: number }).defense_streak ?? 0) + 1)
-                : 0;
-        const prevEntrenchment = (defender as { entrenchment_turns?: number }).entrenchment_turns ?? 0;
-        (defender as { entrenchment_turns?: number }).entrenchment_turns =
-            Math.max(0, prevEntrenchment - ENTRENCHMENT_DEGRADATION_PER_BATTLE);
+        const isNonPrimaryFixedHomeDefender = isSameCorpsStandingOgHomeHolder(
+            defender,
+            params.primaryDefenderId,
+            params.corpsFrontSectors,
+        );
+        const appliesLineAftermath = !isNonPrimaryFixedHomeDefender;
+        if (appliesLineAftermath) {
+            defender.cohesion = Math.max(0, Math.min(100, (defender.cohesion ?? 60) + defenderCohesionDelta));
+            (defender as { defense_streak?: number }).defense_streak =
+                (params.outcome === 'stalemate' || params.outcome === 'repulsed' || params.outcome === 'catastrophic')
+                    ? Math.min(MAX_RESILIENCE_STREAK, ((defender as { defense_streak?: number }).defense_streak ?? 0) + 1)
+                    : 0;
+            const prevEntrenchment = (defender as { entrenchment_turns?: number }).entrenchment_turns ?? 0;
+            (defender as { entrenchment_turns?: number }).entrenchment_turns =
+                Math.max(0, prevEntrenchment - ENTRENCHMENT_DEGRADATION_PER_BATTLE);
+        }
     }
+}
+
+function isSameCorpsStandingOgHomeHolder(
+    defender: FormationState,
+    primaryDefenderId: FormationId | undefined,
+    sectors: Record<string, CorpsFrontSector> | undefined,
+): boolean {
+    if (!primaryDefenderId || defender.id === primaryDefenderId) return false;
+    if (!defender.id || !defender.corps_id || !defender.faction || !defender.home_osid || !defender.location_osid) return false;
+    if (!defender.tags?.includes('placement:fixed_home_osid')) return false;
+    const assignment = defender.assignment;
+    if (assignment?.kind !== 'sector' || !assignment.sector_id) return false;
+    const assignedSector = sectors?.[assignment.sector_id];
+    if (!assignedSector) return false;
+    if (assignedSector.corps_id !== defender.corps_id || assignedSector.faction !== defender.faction) return false;
+    const sectorMembers = [
+        ...assignedSector.assigned_brigade_ids,
+        ...assignedSector.reserve_brigade_ids,
+        ...(assignedSector.rear_brigade_ids ?? []),
+    ];
+    if (!sectorMembers.includes(defender.id)) return false;
+    if (!assignedSector.territory_osids.includes(defender.location_osid)) return false;
+
+    return Object.values(sectors ?? {}).some((sector) =>
+        sector.corps_id === defender.corps_id
+        && sector.faction === defender.faction
+        && sector.territory_osids.includes(defender.home_osid!),
+    );
 }
 
 /**

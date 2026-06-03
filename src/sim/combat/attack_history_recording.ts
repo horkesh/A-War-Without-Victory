@@ -46,6 +46,7 @@ export function recordBattleHistory(params: {
     flip: boolean;
     finalAttackerCas: number;
     finalDefenderCas: number;
+    defenderCasualtyShares?: Map<FormationId, number>;
     state: GameState;
     battleId: string;
     // Equipment loss accumulators
@@ -70,6 +71,7 @@ export function recordBattleHistory(params: {
         flip,
         finalAttackerCas,
         finalDefenderCas,
+        defenderCasualtyShares,
         state,
         battleId,
         battleEquipDefenderTanksLost,
@@ -118,7 +120,7 @@ export function recordBattleHistory(params: {
                 };
                 recordDefenderEngagement(
                     b, currentTurn, targetOsid, outcome,
-                    attackerFaction, flip, takenById.get(b.id) ?? 0, inflictedById.get(b.id) ?? 0, isConcentrated, state,
+                    attackerFaction, flip, defenderCasualtyShares?.get(b.id) ?? takenById.get(b.id) ?? 0, inflictedById.get(b.id) ?? 0, isConcentrated, state,
                     defenderEquipData, battleId,
                 );
             }

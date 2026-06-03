@@ -1041,6 +1041,80 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
         expect(sector.assigned_brigade_ids).toContain('brig_rehome_final');
     });
 
+    it('absorbs collapsed rear-guard corps survivors into the truthful local faction sector owner', () => {
+        const localSector = makeSector(
+            'sector:vrs_1st_krajina:11',
+            'vrs_1st_krajina',
+            [makeSubSeg('front', ['op:bosanski_novi:suhaca_4'], ['op:enemy:a'], 3)],
+            ['op:bosanski_novi:suhaca_4', 'op:sanski_most:jelasinovci'],
+        );
+        const disconnectedOwnCorpsSector = makeSector(
+            'sector:vrs_2nd_krajina:4',
+            'vrs_2nd_krajina',
+            [makeSubSeg('own_front', ['op:bihac:trubar'], ['op:enemy:b'], 3)],
+            ['op:bihac:trubar'],
+        );
+        const formations: Record<FormationId, FormationState> = {
+            rs_11th_krupa_light_infantry: makeFormation({
+                id: 'rs_11th_krupa_light_infantry',
+                corps_id: 'vrs_2nd_krajina',
+                location_osid: 'op:bosanski_novi:suhaca_4',
+                home_osid: 'op:bosanska_krupa:donji_dubovik_2',
+            }),
+        };
+        const adjacency = makeAdjacency([
+            ['op:bosanski_novi:suhaca_4', 'op:sanski_most:jelasinovci'],
+        ]);
+        const friendlyOsids = new Set<string>([
+            'op:bosanski_novi:suhaca_4',
+            'op:sanski_most:jelasinovci',
+        ]);
+
+        rehomeUnassignedBrigadesToPhysicalSectorOwners(
+            [localSector, disconnectedOwnCorpsSector],
+            formations,
+            'RS' as FactionId,
+            adjacency,
+            friendlyOsids,
+            { allowCollapsedRearGuardAbsorption: true },
+        );
+
+        expect(localSector.assigned_brigade_ids).toContain('rs_11th_krupa_light_infantry');
+    });
+
+    it('does not absorb collapsed rear-guard corps survivors outside the final repair pass', () => {
+        const localSector = makeSector(
+            'sector:vrs_1st_krajina:11',
+            'vrs_1st_krajina',
+            [makeSubSeg('front', ['op:bosanski_novi:suhaca_4'], ['op:enemy:a'], 3)],
+            ['op:bosanski_novi:suhaca_4'],
+        );
+        const disconnectedOwnCorpsSector = makeSector(
+            'sector:vrs_2nd_krajina:4',
+            'vrs_2nd_krajina',
+            [makeSubSeg('own_front', ['op:bihac:trubar'], ['op:enemy:b'], 3)],
+            ['op:bihac:trubar'],
+        );
+        const formations: Record<FormationId, FormationState> = {
+            rs_11th_krupa_light_infantry: makeFormation({
+                id: 'rs_11th_krupa_light_infantry',
+                corps_id: 'vrs_2nd_krajina',
+                location_osid: 'op:bosanski_novi:suhaca_4',
+            }),
+        };
+
+        rehomeUnassignedBrigadesToPhysicalSectorOwners(
+            [localSector, disconnectedOwnCorpsSector],
+            formations,
+            'RS' as FactionId,
+            makeAdjacency([]),
+            new Set<string>(['op:bosanski_novi:suhaca_4', 'op:bihac:trubar']),
+        );
+
+        expect(localSector.assigned_brigade_ids).not.toContain('rs_11th_krupa_light_infantry');
+        expect(localSector.reserve_brigade_ids).not.toContain('rs_11th_krupa_light_infantry');
+    });
+
     it('does emit a final unresolved warning for a loaned reserve brigade that still falls through', () => {
         const loanedReserve = makeFormation({
             id: 'brig_loaned_unresolved_final',

@@ -15,11 +15,11 @@ import type {
     CorpsOperation,
     FactionId,
     FormationId,
+    FormationState,
     GameState,
     OperationAxis,
 } from '../../state/game_state.js';
 import type { Osid } from './osid_adjacency.js';
-import { createSingleAxis } from './sector_offensive_axis_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { assignOperationCommander } from './officer_system.js';
@@ -70,6 +70,34 @@ interface PrePlannedOp {
 }
 
 const MIN_OPERATION_PARTICIPANTS = 2;
+
+function createPrePlannedAxis(
+    brigades: FormationId[],
+    objectives: string[],
+    stagingOsid?: string,
+): OperationAxis {
+    const assignedBrigades = [...brigades];
+    const mainBrigade = assignedBrigades[0];
+    const supportBrigades = assignedBrigades.slice(1).sort(strictCompare);
+    return {
+        axis_id: 'main',
+        name: 'Main Advance',
+        assigned_brigades: assignedBrigades,
+        ...(mainBrigade && { main_brigade: mainBrigade }),
+        ...(supportBrigades.length > 0 && { support_brigades: supportBrigades }),
+        objectives,
+        current_objective_index: 0,
+        status: 'executing',
+        failure_count: 0,
+        consecutive_failures_on_current: 0,
+        momentum: 0,
+        attack_attempt_count: 0,
+        objective_capture_count: 0,
+        movement_only_execution_turns: 0,
+        idle_execution_turn_streak: 0,
+        ...(stagingOsid && { staging_osid: stagingOsid }),
+    };
+}
 
 const VRS_PRE_PLANNED: PrePlannedOp[] = [
     {
@@ -825,6 +853,36 @@ function hasInjectableBrigadeRoster(state: GameState): boolean {
 
 // Use shared isEligibleOperationFormation from formation_constants
 
+function canReachAxisStaging(
+    state: GameState,
+    formation: FormationState,
+    faction: FactionId,
+    stagingOsid: Osid | undefined,
+    adjacency: Map<Osid, Osid[]> | undefined,
+    maxHops?: number,
+): boolean {
+    if (!adjacency || !stagingOsid) return true;
+    const start = formation.location_osid as Osid | undefined;
+    if (!start) return false;
+    if (start === stagingOsid) return true;
+
+    const seen = new Set<Osid>([start]);
+    const queue: Array<{ osid: Osid; hops: number }> = [{ osid: start, hops: 0 }];
+    while (queue.length > 0) {
+        const current = queue.shift()!;
+        if (maxHops != null && current.hops >= maxHops) continue;
+        for (const next of adjacency.get(current.osid) ?? []) {
+            if (seen.has(next)) continue;
+            const controller = getPoliticalControllerOSID(state, next, undefined);
+            if (next !== stagingOsid && controller !== faction) continue;
+            if (next === stagingOsid) return controller === faction;
+            seen.add(next);
+            queue.push({ osid: next, hops: current.hops + 1 });
+        }
+    }
+    return false;
+}
+
 function activeOperationObjectiveOsids(cmd: CorpsCommandState | undefined): Set<Osid> {
     const objectives = new Set<Osid>();
     for (const op of cmd?.active_operations ?? []) {
@@ -876,6 +934,14 @@ function buildAxesFromDef(
             // Exclude brigades currently in column-march transit — they are already
             // marching somewhere else and contribute zero eligible attackers until they arrive.
             if (movementState[fid]?.status === 'in_transit') return false;
+            if (!canReachAxisStaging(
+                state,
+                formation,
+                def.faction,
+                (axisDef.staging_osid ?? def.staging_osid) as Osid | undefined,
+                adjacency,
+                def.planning_duration != null ? Math.max(0, def.planning_duration - 1) : undefined,
+            )) return false;
             // Exempt-corps brigades (e.g. General Staff elites) are allowed
             // if explicitly named in a pre-planned op — they get an elite loan
             // to the operation's corps at injection time.
@@ -891,7 +957,7 @@ function buildAxesFromDef(
                 }
             }
             return true;
-        }).sort(strictCompare);
+        });
 
         if (axisBrigades.length === 0) continue;
 
@@ -902,11 +968,10 @@ function buildAxesFromDef(
 
         if (axisObjectives.length === 0) continue;
 
-        builtAxes.push(createSingleAxis(
+        builtAxes.push(createPrePlannedAxis(
             axisBrigades,
             axisObjectives,
             axisDef.staging_osid ?? def.staging_osid,
-            formations,
         ));
         const lastAxis = builtAxes[builtAxes.length - 1]!;
         lastAxis.axis_id = axisDef.axis_id;

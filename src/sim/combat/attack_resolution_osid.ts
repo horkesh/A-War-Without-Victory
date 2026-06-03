@@ -174,6 +174,7 @@ import {
     splitKiaWiaMia,
     computeFinalCasualties,
     computeAttackerCasualtyShares,
+    computeDefenderCasualtyShares,
     distributeDefenderCasualties,
     buildDefenderContributions,
 } from './attack_casualty_distribution.js';
@@ -228,15 +229,29 @@ function getDefenderAftermathEntries(params: {
         finalDefenderCas,
     } = params;
     if (ENABLE_SHARED_SECTOR_DEFENSE && sectorDefenseBrigades && sectorDefenseBrigades.length > 1 && sectorBrigadeWeights) {
+        const shares = computeDefenderCasualtyShares({
+            defenderFormation,
+            sectorDefenseBrigades,
+            sectorBrigadeWeights,
+            finalDefenderCas,
+            capNonPrimaryDefenders: ENABLE_SHARED_SECTOR_DEFENSE,
+        });
         const weightedDefenders = sectorDefenseBrigades
             .map((formation) => ({ formation, weight: Math.max(0, sectorBrigadeWeights.get(formation.id) ?? 0) }))
-            .filter(({ weight }) => weight > 0)
             .sort((a, b) => strictCompare(a.formation.id, b.formation.id));
         const totalWeight = weightedDefenders.reduce((sum, { weight }) => sum + weight, 0);
         if (totalWeight > 0) {
-            return weightedDefenders.map(({ formation, weight }) => ({
+            return weightedDefenders
+                .filter(({ weight }) => weight > 0)
+                .map(({ formation }) => ({
+                    formation,
+                    casualties: shares.get(formation.id) ?? 0,
+                }));
+        }
+        if (shares.size > 0) {
+            return weightedDefenders.map(({ formation }) => ({
                 formation,
-                casualties: Math.round(finalDefenderCas * (weight / totalWeight)),
+                casualties: shares.get(formation.id) ?? 0,
             }));
         }
     }
@@ -647,6 +662,7 @@ export function resolveAttackOrdersOsid(
         if (attackerFormations.length === 0) continue;
 
         const firstAttacker = attackerFormations[0]!;
+        const firstAttackerPreBattleOsid = firstAttacker.location_osid;
         const attackerFaction = firstAttacker.faction;
 
         // Safety gate: suppress HRHB↔RBiH combat when mobilizing, ceasefire-active, or
@@ -984,6 +1000,18 @@ export function resolveAttackOrdersOsid(
             attackerCount: attackerFormations.length,
             powerRatio,
         });
+        const defenderCasualtyShares = defenderFormation
+            ? computeDefenderCasualtyShares({
+                defenderFormation,
+                sectorDefenseBrigades,
+                sectorBrigadeWeights,
+                finalDefenderCas,
+                capNonPrimaryDefenders: ENABLE_SHARED_SECTOR_DEFENSE,
+            })
+            : undefined;
+        const appliedDefenderCas = defenderCasualtyShares
+            ? [...defenderCasualtyShares.values()].reduce((sum, cas) => sum + cas, 0)
+            : finalDefenderCas;
 
         // Build defender contribution records for Layer C battle reports
         const defenderContributions = (sectorBrigadeWeights && sectorBrigadeMeta && sectorDefenseBrigades && sectorDefenseBrigades.length > 1)
@@ -992,6 +1020,8 @@ export function resolveAttackOrdersOsid(
                 sectorBrigadeWeights,
                 sectorBrigadeMeta,
                 finalDefenderCas,
+                primaryDefenderId: defenderFormation?.id,
+                capNonPrimaryDefenders: ENABLE_SHARED_SECTOR_DEFENSE,
             })
             : undefined;
 
@@ -1005,7 +1035,7 @@ export function resolveAttackOrdersOsid(
         let battleEquipCapturedBy = '' as string;
 
         report.casualty_attacker += finalAttackerCas;
-        report.casualty_defender += finalDefenderCas;
+        report.casualty_defender += appliedDefenderCas;
 
         // Equipment loss accumulators for battlefield scavenging (summed across attacker formations)
         let totalATanksLost = 0;
@@ -1094,6 +1124,7 @@ export function resolveAttackOrdersOsid(
                 sectorBrigadeWeights,
                 finalDefenderCas,
                 casualtyLedger: state.military.casualty_ledger!,
+                capNonPrimaryDefenders: ENABLE_SHARED_SECTOR_DEFENSE,
             });
 
             defenderAftermathEntries = getDefenderAftermathEntries({
@@ -1103,7 +1134,12 @@ export function resolveAttackOrdersOsid(
                 finalDefenderCas,
             });
             defenderAftermathFormations = defenderAftermathEntries.map((entry) => entry.formation);
-            applyDefenderBattleAftermath({ defenderFormations: defenderAftermathFormations, outcome });
+            applyDefenderBattleAftermath({
+                defenderFormations: defenderAftermathFormations,
+                outcome,
+                primaryDefenderId: defenderFormation.id,
+                corpsFrontSectors: state.military.corps_front_sectors,
+            });
             recordDefenderCombatFatigue({ defenderFormation, sectorDefenseBrigades, sectorBrigadeWeights });
 
             // Record battle outcome for morale drift — defender's perspective is inverted
@@ -1115,8 +1151,9 @@ export function resolveAttackOrdersOsid(
                 battleEquipDefenderTanksLost += dTanksLost;
                 battleEquipDefenderArtLost += dArtLost;
                 // Snap: Commander Casualty
-                if (defender.cohesion < 20) {
-                    defender.cohesion = Math.max(0, defender.cohesion - 8);
+                const defenderCohesion = defender.cohesion ?? 0;
+                if (defenderCohesion < 20) {
+                    defender.cohesion = Math.max(0, defenderCohesion - 8);
                     (defender as { defense_streak?: number }).defense_streak = 0;
                     const prevExp = defender.experience ?? 0;
                     if (prevExp > 0.3) {
@@ -1180,7 +1217,7 @@ export function resolveAttackOrdersOsid(
             defender_brigade: defenderFormation?.id ?? null,
             snap_events: battleSnapEvents,
             attacker_casualties: finalAttackerCas,
-            defender_casualties: finalDefenderCas,
+            defender_casualties: appliedDefenderCas,
             defender_contributions: defenderContributions,
             ...(executionFriction ? { execution_friction: executionFriction } : {}),
             defending_sub_segment_id: defendingSubSegmentId,
@@ -1254,7 +1291,7 @@ export function resolveAttackOrdersOsid(
             ethnicComposition,
             personnelAttacker,
             finalAttackerCas,
-            finalDefenderCas,
+            finalDefenderCas: appliedDefenderCas,
             casualtyLedger: state.military.casualty_ledger!,
             report,
             firstAttackerId: firstAttacker.id,
@@ -1340,7 +1377,7 @@ export function resolveAttackOrdersOsid(
         // Significance: decisive/catastrophic outcome, OR territory flip, OR ≥200 total casualties.
         // Guard: skip in cadet mode (no AI client).
         if (state.meta.ai_commander_config?.mode !== 'cadet') {
-            const aarTotalCas = finalAttackerCas + finalDefenderCas;
+            const aarTotalCas = finalAttackerCas + appliedDefenderCas;
             const aarSignificant =
                 outcome === 'decisive_victory' ||
                 outcome === 'catastrophic' ||
@@ -1357,7 +1394,7 @@ export function resolveAttackOrdersOsid(
                         targetOsid,
                         outcome,
                         attackerCasualties: finalAttackerCas,
-                        defenderCasualties: finalDefenderCas,
+                        defenderCasualties: appliedDefenderCas,
                         attackerBrigades: attackerFormations.map(a => a.id),
                         defenderBrigades: defenderFormation ? [defenderFormation.id] : [],
                         territoryChanged: flip,
@@ -1432,7 +1469,8 @@ export function resolveAttackOrdersOsid(
             controller,
             flip,
             finalAttackerCas,
-            finalDefenderCas,
+            finalDefenderCas: appliedDefenderCas,
+            defenderCasualtyShares,
             state,
             battleId,
             battleEquipDefenderTanksLost,
@@ -1445,7 +1483,8 @@ export function resolveAttackOrdersOsid(
         });
 
         // === SECTOR INTEL: RECON BY FORCE ===
-        updateSectorIntelFromCombat(state, attackerFormations[0].location_osid ?? targetOsid, targetOsid, currentTurn);
+        updateSectorIntelFromCombat(state, firstAttackerPreBattleOsid ?? targetOsid, targetOsid, currentTurn);
+        updateSectorIntelFromCombat(state, targetOsid, firstAttackerPreBattleOsid ?? targetOsid, currentTurn);
 
         // === COMBAT FATIGUE ===
         applyCombatFatigue({

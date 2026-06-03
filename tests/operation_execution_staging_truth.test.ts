@@ -256,4 +256,151 @@ describe('operation execution staging truth', () => {
         expect(ctx.result.column_march_orders.b1).toBeUndefined();
         expect(ctx.result.posture_orders).toContainEqual({ brigade_id: 'b1', posture: 'defend' });
     });
+
+    it('plans column march to the approach destination instead of the first route step', () => {
+        const state = {
+            schema_version: CURRENT_SCHEMA_VERSION,
+            meta: { turn: 35, phase: 'war', seed: 'planning-approach-destination' } as any,
+            factions: [
+                { id: 'RS', areasOfResponsibility: [] },
+                { id: 'RBiH', areasOfResponsibility: [] },
+            ] as any,
+            military: {
+                formations: {
+                    rs_corps: makeCorps({ id: 'rs_corps', faction: 'RS', hq_sid: 'S1' }),
+                    b1: makeFormation({
+                        id: 'b1',
+                        faction: 'RS',
+                        corps_id: 'rs_corps',
+                        hq_sid: 'S1',
+                        location_osid: 'op:rear:start',
+                        posture: 'defend',
+                        personnel: 900,
+                        cohesion: 65,
+                    }),
+                    enemy_main: makeFormation({
+                        id: 'enemy_main',
+                        faction: 'RBiH',
+                        corps_id: 'rbih_corps',
+                        hq_sid: 'S2',
+                        location_osid: 'op:target:objective',
+                        personnel: 6000,
+                        cohesion: 85,
+                    }),
+                },
+                corps_front_sectors: {
+                    'sector:rs_corps:0': {
+                        sector_id: 'sector:rs_corps:0',
+                        corps_id: 'rs_corps',
+                        assigned_brigade_ids: ['b1'],
+                        reserve_brigade_ids: [],
+                        length_edges: 1,
+                        territory_osids: ['op:rear:start', 'op:rear:mid', 'op:front:approach'],
+                        sub_segments: [{
+                            sub_segment_id: 'ss:0',
+                            friendly_osids: ['op:front:approach'],
+                            enemy_osids: ['op:target:objective'],
+                        }],
+                    },
+                },
+                corps_command: {},
+                war_front_edges_osid: [{
+                    edge_id: 'front:approach-objective',
+                    a: 'op:front:approach',
+                    b: 'op:target:objective',
+                    side_a: 'RS',
+                    side_b: 'RBiH',
+                }],
+            } as any,
+            political: {
+                political_controllers: {
+                    'op:rear:start': 'RS',
+                    'op:rear:mid': 'RS',
+                    'op:front:approach': 'RS',
+                    'op:target:objective': 'RBiH',
+                },
+            } as any,
+        } as GameState;
+
+        const activeOp: CorpsOperation = {
+            name: 'Planning Approach Test',
+            type: 'sector_attack',
+            phase: 'planning',
+            started_turn: 30,
+            phase_started_turn: 34,
+            participating_brigades: ['b1'],
+            objectives: ['op:target:objective'],
+            current_objective_index: 0,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            sector_id: 'sector:rs_corps:0',
+            axes: [{
+                axis_id: 'main',
+                name: 'Main Axis',
+                assigned_brigades: ['b1'],
+                objectives: ['op:target:objective'],
+                current_objective_index: 0,
+                status: 'executing',
+                failure_count: 0,
+                consecutive_failures_on_current: 0,
+                momentum: 0,
+                attack_attempt_count: 0,
+                objective_capture_count: 0,
+                movement_only_execution_turns: 0,
+                idle_execution_turn_streak: 0,
+            }],
+        };
+
+        const ctx: BrigadeEvaluationContext = {
+            state,
+            faction: 'RS',
+            brigade: state.military.formations!.b1!,
+            loc: 'op:rear:start',
+            corpsId: 'rs_corps',
+            cmd: null,
+            directive: null,
+            corpsStance: 'offensive',
+            activeOp,
+            isActiveSectorOperationParticipant: true,
+            adjEnemy: [],
+            isAlliedWithRBiH: false,
+            targetAdjacentCount: new Map(),
+            corpsReserve: new Map(),
+            chosenTargets: new Map(),
+            columnAssignments: new Map(),
+            counterAttackTarget: null,
+            brigadeSupplyState: 'adequate',
+            isHoldBrigade: false,
+            sectorRecentRetreats: new Map(),
+            sectorCounterAttackCount: new Map(),
+            adjacency: new Map([
+                ['op:rear:start', ['op:rear:mid']],
+                ['op:rear:mid', ['op:rear:start', 'op:front:approach']],
+                ['op:front:approach', ['op:rear:mid', 'op:target:objective']],
+                ['op:target:objective', ['op:front:approach']],
+            ]),
+            reverseMap: new Map(),
+            terrainCache: {},
+            graphAnalysis: {} as any,
+            result: {
+                posture_orders: [],
+                attack_orders: {},
+                attack_scores: {},
+                movement_orders: {},
+                column_march_orders: {},
+                eligible_attackers_by_corps: {},
+            },
+        };
+
+        const handled = evaluateSectorAttack(ctx);
+
+        expect(handled).toBe(true);
+        expect(ctx.result.column_march_orders.b1).toBe('op:front:approach');
+        expect(ctx.result.column_march_orders.b1).not.toBe('op:rear:mid');
+        expect(ctx.result.posture_orders).toContainEqual({ brigade_id: 'b1', posture: 'defend' });
+    });
 });

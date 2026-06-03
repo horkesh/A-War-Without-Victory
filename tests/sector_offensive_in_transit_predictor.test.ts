@@ -28,10 +28,14 @@ import { describe, it } from 'vitest';
 import {
     areParticipantsReadyForExecution,
     axisHasExecutableOpeningAttack,
+    buildOpeningAttackAdjacency,
     buildOsidAdjacencyFromFrontEdges,
+    collectObjectiveApproachOsids,
     countAdjacentGateParticipants,
     countAdjacentStagedParticipants,
+    evaluateOpeningAttackReadiness,
     getPlanningAttackThreshold,
+    resolveOpeningAttackGateBrigades,
 } from '../src/sim/combat/sector_offensive_launch_helpers.js';
 import type { CorpsOperation, FormationId, GameState } from '../src/state/game_state.js';
 
@@ -412,6 +416,247 @@ describe('LANE-2026-05-02-IN-TRANSIT-PREDICTOR T6: axisHasExecutableOpeningAttac
         const ids = ['synth_staged', 'synth_intransit'] as FormationId[];
         assert.equal(countAdjacentGateParticipants(state, ids, adjacency, 'op:test:objective_a'), 2);
         assert.equal(countAdjacentStagedParticipants(state, ids, adjacency, 'op:test:objective_a'), 1);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// T7 — stale TG anchor must not hide viable assigned brigades from the floor gate
+// ---------------------------------------------------------------------------
+describe('LANE-2026-06-03-STANDING-OG-Foca T7: stale TG anchor fallback', () => {
+    it('falls back to viable assigned brigades when main_brigade is missing', () => {
+        const state = buildState({
+            synth_viable: {
+                location_osid: 'op:test:staging_a',
+                personnel: 1200,
+            },
+            synth_support: {
+                location_osid: 'op:test:home_a',
+                personnel: 1100,
+            },
+        });
+        const axis = {
+            axis_id: 'synthetic_axis',
+            name: 'Synthetic Axis',
+            main_brigade: 'synth_missing_anchor',
+            assigned_brigades: ['synth_viable', 'synth_support'],
+            objectives: ['op:test:objective_a'],
+            current_objective_index: 0,
+            status: 'planning',
+        };
+
+        assert.deepEqual(
+            resolveOpeningAttackGateBrigades(state, axis),
+            ['synth_support', 'synth_viable'],
+        );
+    });
+});
+
+describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launch gate', () => {
+    it('prefers static objective neighbors over spurious live approach edges', () => {
+        const state = buildState({});
+        state.military.war_front_edges_osid = [
+            {
+                a: 'op:test:objective_a',
+                b: 'op:test:spurious_approach',
+                controller_a: 'RIVAL_FACTION',
+                controller_b: 'TEST_FACTION',
+            } as never,
+        ];
+        state.military.corps_front_sectors = {};
+        state.political!.political_controllers!['op:test:objective_a'] = 'RIVAL_FACTION';
+        state.political!.political_controllers!['op:test:spurious_approach'] = 'TEST_FACTION';
+        state.political!.political_controllers!['op:test:static_approach'] = 'TEST_FACTION';
+        const staticAdjacency = new Map<string, string[]>([
+            ['op:test:objective_a', ['op:test:static_approach']],
+            ['op:test:static_approach', ['op:test:objective_a']],
+        ]);
+
+        assert.deepEqual(
+            [...collectObjectiveApproachOsids(
+                state,
+                'synth_corps' as FormationId,
+                'TEST_FACTION' as never,
+                ['op:test:objective_a'],
+                staticAdjacency,
+            )].sort(),
+            ['op:test:static_approach'],
+        );
+    });
+
+    it('adds accepted static approach edges when live front edges omit the objective contact', () => {
+        const state = buildState({
+            synth_alpha: {
+                location_osid: 'op:test:static_approach',
+                personnel: 1200,
+            },
+        });
+        state.military.war_front_edges_osid = [
+            {
+                edge_id: 'op:test:other_front__op:test:other_enemy',
+                a: 'op:test:other_front',
+                b: 'op:test:other_enemy',
+                side_a: 'TEST_FACTION' as never,
+                side_b: 'RIVAL_FACTION' as never,
+            },
+        ];
+        state.military.corps_front_sectors = {};
+        state.political!.political_controllers!['op:test:static_approach'] = 'TEST_FACTION';
+        state.political!.political_controllers!['op:test:other_front'] = 'TEST_FACTION';
+        state.political!.political_controllers!['op:test:other_enemy'] = 'RIVAL_FACTION';
+        const liveAdjacency = buildOsidAdjacencyFromFrontEdges(state);
+        const staticAdjacency = new Map<string, string[]>([
+            ['op:test:objective_a', ['op:test:static_approach']],
+            ['op:test:static_approach', ['op:test:objective_a']],
+        ]);
+
+        const openingAdjacency = buildOpeningAttackAdjacency(
+            state,
+            'synth_corps' as FormationId,
+            'TEST_FACTION' as never,
+            'op:test:objective_a',
+            liveAdjacency,
+            staticAdjacency,
+        );
+
+        assert.equal(
+            countAdjacentGateParticipants(
+                state,
+                ['synth_alpha' as FormationId],
+                openingAdjacency,
+                'op:test:objective_a',
+            ),
+            1,
+        );
+    });
+
+    it('does not make ordinary operations ready from static-only approach edges', () => {
+        const state = buildState({
+            synth_alpha: {
+                location_osid: 'op:test:static_approach',
+                personnel: 1200,
+            },
+        });
+        state.military.war_front_edges_osid = [
+            {
+                edge_id: 'op:test:other_front__op:test:other_enemy',
+                a: 'op:test:other_front',
+                b: 'op:test:other_enemy',
+                side_a: 'TEST_FACTION' as never,
+                side_b: 'RIVAL_FACTION' as never,
+            },
+        ];
+        state.military.corps_front_sectors = {};
+        state.political!.political_controllers!['op:test:static_approach'] = 'TEST_FACTION';
+        state.political!.political_controllers!['op:test:other_front'] = 'TEST_FACTION';
+        state.political!.political_controllers!['op:test:other_enemy'] = 'RIVAL_FACTION';
+        const staticAdjacency = new Map<string, string[]>([
+            ['op:test:objective_a', ['op:test:static_approach']],
+            ['op:test:static_approach', ['op:test:objective_a']],
+        ]);
+        const op = makeOp(['synth_alpha' as FormationId], { multiAxis: false });
+
+        assert.equal(
+            areParticipantsReadyForExecution(
+                state,
+                'synth_corps' as FormationId,
+                'TEST_FACTION' as never,
+                op,
+                staticAdjacency,
+            ),
+            false,
+        );
+        assert.deepEqual(
+            evaluateOpeningAttackReadiness(
+                state,
+                'synth_corps' as FormationId,
+                'TEST_FACTION' as never,
+                op,
+                staticAdjacency,
+            ),
+            { executable: false, blocker: 'no_approach_osid' },
+        );
+    });
+
+    it('allows pre-planned operations to use static-only opening approach edges', () => {
+        const state = buildState({
+            synth_alpha: {
+                location_osid: 'op:test:static_approach',
+                personnel: 1200,
+            },
+        });
+        state.military.war_front_edges_osid = [];
+        state.military.corps_front_sectors = {};
+        state.political!.political_controllers!['op:test:static_approach'] = 'TEST_FACTION';
+        const staticAdjacency = new Map<string, string[]>([
+            ['op:test:objective_a', ['op:test:static_approach']],
+            ['op:test:static_approach', ['op:test:objective_a']],
+        ]);
+        const op = {
+            ...makeOp(['synth_alpha' as FormationId], { multiAxis: false }),
+            is_pre_planned: true,
+        } as CorpsOperation;
+
+        assert.equal(
+            areParticipantsReadyForExecution(
+                state,
+                'synth_corps' as FormationId,
+                'TEST_FACTION' as never,
+                op,
+                staticAdjacency,
+            ),
+            true,
+        );
+        assert.deepEqual(
+            evaluateOpeningAttackReadiness(
+                state,
+                'synth_corps' as FormationId,
+                'TEST_FACTION' as never,
+                op,
+                staticAdjacency,
+            ),
+            { executable: true },
+        );
+    });
+
+    it('does not make pre-planned static openings executable when participants are not at the static approach', () => {
+        const state = buildState({
+            synth_alpha: {
+                location_osid: 'op:test:home_a',
+                personnel: 1200,
+            },
+        });
+        state.military.war_front_edges_osid = [];
+        state.military.corps_front_sectors = {};
+        state.political!.political_controllers!['op:test:static_approach'] = 'TEST_FACTION';
+        const staticAdjacency = new Map<string, string[]>([
+            ['op:test:objective_a', ['op:test:static_approach']],
+            ['op:test:static_approach', ['op:test:objective_a']],
+        ]);
+        const op = {
+            ...makeOp(['synth_alpha' as FormationId], { multiAxis: false }),
+            is_pre_planned: true,
+        } as CorpsOperation;
+
+        assert.equal(
+            areParticipantsReadyForExecution(
+                state,
+                'synth_corps' as FormationId,
+                'TEST_FACTION' as never,
+                op,
+                staticAdjacency,
+            ),
+            false,
+        );
+        assert.deepEqual(
+            evaluateOpeningAttackReadiness(
+                state,
+                'synth_corps' as FormationId,
+                'TEST_FACTION' as never,
+                op,
+                staticAdjacency,
+            ),
+            { executable: false, blocker: 'zero_eligible_axis' },
+        );
     });
 });
 

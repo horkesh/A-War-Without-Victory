@@ -4,7 +4,7 @@ import type { OperationalToCanonicalReverseMap } from '../../data/operational_da
 import { getAdjacentEnemyOsids } from './bot_brigade_context.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { findNearestFriendlyOsidInSet, findNearestFriendlyOsidDestination } from './bot_brigade_context.js';
+import { findNearestFriendlyOsidDestination } from './bot_brigade_context.js';
 import { predictAllAdjacentTargets, predictCombatOutcome } from './combat_predictor.js';
 import {
     scoreTargetFromDirective,
@@ -200,7 +200,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 // Not at an approach OSID — march toward one
                 const nearestApproach = sectorAttackProfileTime(
                     '.sectorAttack.planningApproachPath',
-                    () => findNearestFriendlyOsidInSet(
+                    () => findNearestFriendlyOsidDestination(
                         state,
                         faction,
                         loc,
@@ -217,7 +217,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 sectorAttackProfileTime('.sectorAttack.planningApproachPath', () => {
                     const axisStaging = getBrigadeAxis(activeOp, brigade.id)?.staging_osid ?? activeOp.staging_osid;
                     if (axisStaging && loc !== axisStaging) {
-                        const nearestStaging = findNearestFriendlyOsidInSet(
+                        const nearestStaging = findNearestFriendlyOsidDestination(
                             state,
                             faction,
                             loc,

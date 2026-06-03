@@ -1213,13 +1213,11 @@ export const warPhases: NamedPhase[] = [
             } catch {
                 terrainData = { by_sid: {} };
             }
-            const colSpatial = getSpatialContextCache(context);
             const report = processOsidColumnMovement(
                 context.state,
                 od.edges,
                 od.opData.operationalToCanonical,
                 terrainData,
-                colSpatial?.preCombat.adjacency,
             );
             (context.report as TurnReport & { column_movement?: OsidColumnMovementReport }).column_movement = report;
         }
