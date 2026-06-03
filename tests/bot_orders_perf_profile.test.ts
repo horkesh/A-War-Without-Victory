@@ -275,6 +275,9 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(combatPredictor).toContain('rankDefendersByPowerWithEntries');
         expect(combatPredictor).toContain('powerByFormationId');
         expect(combatPredictor).toContain('powerByFormationId.get(b.id)');
+        expect(combatPredictor).toContain('getStandingOgDefenseBrigadeIds(sector, ENABLE_SHARED_SECTOR_DEFENSE)');
+        expect(combatPredictor).toContain('const avgReactivePower = ENABLE_SHARED_SECTOR_DEFENSE && contributingBrigadeCount > 0');
+        expect(combatPredictor).toContain('attackerCount * avgReactivePower * REACTIVE_DEFENSE_RATIO');
         expect(combatPredictor).toContain('collectDefenderFormationsAtTarget');
         expect(combatPredictor).toContain('let defenderFormations: FormationState[] | null = null');
         expect(combatPredictor).toContain('getDefenderFormations()');

@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-03] fix(engine): align combat predictor with shared Standing OG defense
+
+**Type:** Engine predictor/resolver parity fix, flag-gated by existing default-off ADR-0007 Phase C. The real resolver used the Phase C shared-defense roster and contributing-power cap basis, but `combat_predictor.ts` still estimated sector defense from assigned brigades only and capped reactive defense on the old average-brigade basis. Under `ENABLE_SHARED_SECTOR_DEFENSE=true`, bot planning therefore evaluated a different defense model than combat resolution applied. The predictor now uses `getStandingOgDefenseBrigadeIds(sector, ENABLE_SHARED_SECTOR_DEFENSE)` and mirrors the resolver's `avgReactivePower` cap/floor basis.
+
+**Evidence:** Source guard passes (`bot_orders_perf_profile.test.ts` 5/5), and the focused combat slice remains green at 84/84 (`standing_og_defense`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`, `sector_counter_attack`). Fresh temporary Phase C-only probe after predictor parity (`n14`, hash `9ea9fe120835ac12`) improves over the engagement-list-only C probe (`n13`, hash `37bd24426ec57318`) but remains activation-red versus default `n9`: orders 143 -> 148 (default 164), battles 109 -> 114 (default 127), defender-present battles 77 -> 82 (default 92), attacker casualties 16,559 -> 17,735 (default 19,504), defender casualties 30,003 -> 29,531 (default 25,189), flips stay 37 (default 41), zero-morale stays 2, zero-cohesion stays 0, and final control counts stay `HRHB:89,RBiH:254,RS:369`. Interpretation: predictor/resolver parity is improved, but Phase C still needs another bounded throughput fix before any default flip.
+
+**Files:** `src/sim/combat/combat_predictor.ts`, `tests/bot_orders_perf_profile.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
 ## [2026-06-03] fix(engine): include shared Standing OG defenders in engagement report
 
 **Type:** Engine invariant fix, flag-gated by existing default-off ADR-0007 Phase C. When `ENABLE_SHARED_SECTOR_DEFENSE` is enabled, weighted sector defenders already contribute defensive power, casualties, and direct combat fatigue, but the battle report only listed the primary defender in `engaged_formation_ids`. Later war phases use that list for fatigue recovery, officer quality, cohesion drift, and morale drift, so shared defenders could be treated as non-engaged despite having fought. The resolver now records every positive-weight shared defender as engaged; flag-off behavior remains primary-defender-only.
