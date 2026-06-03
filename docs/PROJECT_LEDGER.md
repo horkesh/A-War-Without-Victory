@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-03] docs: Standing OG Phase C+B flag-on proof remains activation-red
+
+**Type:** Diagnostic evidence + roadmap/board clarification (no default flip). After the repulse-memory hardening and 712th OOB promotion, a fresh temporary Phase C+B flag-on 40w probe was run with `ENABLE_SHARED_SECTOR_DEFENSE=true` and `ENABLE_STANDING_OG_RESERVE_COMMIT=true`; defaults were restored after the probe.
+
+**Evidence:** Default post-hardening/OOB run `n9` hash `e586d024066012c4` versus flag-on probe `n10` hash `9108f7baccafe9ac`: OSID match falls 657/712 -> 653/712, anchors and benchmarks remain 30/30 and 6/6, attack orders fall 164 -> 118, total battles fall 127 -> 96, total formation fatigue falls 137 -> 77, and active zero-morale brigades rise 2 -> 4 (`hrhb_111th_brigade` and `rs_1st_drvar_light_infantry` join the existing RS Ključ/Ozren cases). The 712th remains healthy at `op:travnik:turbe_2`, and the watched 3rd-Corps brigades remain active, but the activation gate is not green because the flag-on path reduces combat throughput/attrition and worsens health in other formations.
+
+**Files:** `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
 ## [2026-06-03] fix(data): rehome 712th Mountain to Turbe after post-hardening probe
 
 **Type:** Scenario/OOB data correction plus deliberate baseline re-floor. The parked 712th Mountain Brigade placement fix is now promoted after the default-path repulse-memory hardening removed the unrelated 3rd-Corps integrity blocker. `arbih_712th_mountain` no longer uses phantom `home_osid` `op:travnik:krusevo_brdo_i`, which forced recruitment fallback placement into the wrong operational context; it now starts at `op:travnik:turbe_2`.
