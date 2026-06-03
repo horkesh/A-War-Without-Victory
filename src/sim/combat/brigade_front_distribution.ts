@@ -38,7 +38,10 @@
  */
 
 import type { CorpsFrontSector, CorpsCommandState, FactionId, FormationState, GameState, OperationAxis } from '../../state/game_state.js';
+import type { MunicipalityPopulation1991Map } from '../../state/population_share.js';
+import { getFactionAlignedPopulationShare } from '../../state/population_share.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { munFromOsid } from './osid_adjacency.js';
 import { bfsDistance } from './sector_utils.js';
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 import { ENABLE_STANDING_OG_RESERVE_COMMIT } from './standing_og_defense.js';
@@ -51,6 +54,7 @@ interface FrontDistributionOptions {
     rearDirectRepairMaxHops?: number;
     frontGapRepairMaxHops?: number;
     enableStandingOgReserveCommit?: boolean;
+    population1991ByMun?: MunicipalityPopulation1991Map;
 }
 
 // ── Corps boundary helpers ─────────────────────────────────────────────────────
@@ -88,6 +92,7 @@ const MAX_REDISTRIBUTION_DISTANCE = 20;
  * Higher values (tested: 1.0) produce wrong-direction battles and net calibration regression.
  */
 const PHASE_B_DISTANCE_WEIGHT = 0.3;
+const RESERVE_COMMIT_MIN_AFFINITY = 0.30;
 
 /** Brigades with this many entrenchment turns or more are NOT redistributed in Phase A.
  *  Only freshly-arrived brigades get spread — entrenched positions are too valuable to abandon. */
@@ -141,6 +146,18 @@ function buildOperationParticipantSet(state: GameState): Set<string> {
         }
     }
     return participants;
+}
+
+function hasReserveCommitPopulationAffinity(
+    formation: FormationState,
+    targetOsid: string,
+    population1991ByMun: MunicipalityPopulation1991Map | undefined,
+): boolean {
+    if (!population1991ByMun) return true;
+    const munId = munFromOsid(targetOsid);
+    if (!munId) return true;
+    const affinity = getFactionAlignedPopulationShare(munId, formation.faction, population1991ByMun, 0.5);
+    return affinity >= RESERVE_COMMIT_MIN_AFFINITY;
 }
 
 /**
@@ -339,6 +356,11 @@ function commitReserveToThreatenedFront(
         .filter((entry) => !state.military.brigade_movement_orders?.[entry.bid])
         .map((entry) => {
             const reachableTargets = targetFrontOsids
+                .filter((target) => hasReserveCommitPopulationAffinity(
+                    entry.formation,
+                    target,
+                    options.population1991ByMun,
+                ))
                 .map((target) => ({
                     target,
                     dist: bfsDistance(entry.formation.location_osid as string, target, adjacency, friendlySet),

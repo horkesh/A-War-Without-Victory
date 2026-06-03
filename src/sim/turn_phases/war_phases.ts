@@ -1326,7 +1326,9 @@ export const warPhases: NamedPhase[] = [
             const spatial = getSpatialContextCache(context);
             if (!spatial) return;
             const adjacency = spatial.preCombat.adjacency as Map<Osid, Osid[]>;
-            distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency);
+            distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency, {
+                population1991ByMun: context.input.municipalityPopulation1991,
+            });
         }
     },
 

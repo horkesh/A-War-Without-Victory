@@ -103,7 +103,9 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
             const spatial = getSpatialContextCache(context);
             const adjacency = spatial?.postCombat?.adjacency ?? spatial?.preCombat.adjacency;
             if (!adjacency) return;
-            distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency as Map<string, string[]>);
+            distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency as Map<string, string[]>, {
+                population1991ByMun: context.input.municipalityPopulation1991,
+            });
         }
     },
     {
