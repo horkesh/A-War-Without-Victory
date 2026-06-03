@@ -156,8 +156,12 @@ function extractStateString(row: { state?: unknown }): string {
     return s;
 }
 
-async function writeReplayManifest(outDir: string, summaries: ReadonlyArray<ReturnType<typeof buildReplayFrameSummary>>): Promise<string> {
+export async function writeReplaySaveManifest(
+    outDir: string,
+    summaries: ReadonlyArray<ReturnType<typeof buildReplayFrameSummary>>,
+): Promise<string> {
     const manifestPath = join(outDir, 'replay_save_manifest.json');
+    await mkdir(outDir, { recursive: true });
     await writeFile(manifestPath, JSON.stringify(buildReplaySaveManifest(summaries)), 'utf8');
     return manifestPath;
 }
@@ -244,7 +248,7 @@ export async function streamFinalizeReplaySaveSequenceFromJsonl(
     }
     await writeChunk(']');
     await closeStream();
-    await writeReplayManifest(outDir, summaries);
+    await writeReplaySaveManifest(outDir, summaries);
     return sequencePath;
 }
 
@@ -297,6 +301,6 @@ export async function finalizeReplaySaveSequence(
     }
     await writeChunk(']');
     await closeStream();
-    await writeReplayManifest(outDir, summaries);
+    await writeReplaySaveManifest(outDir, summaries);
     return sequencePath;
 }

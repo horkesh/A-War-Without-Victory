@@ -49,18 +49,18 @@ test('replay save finalizer sidecars keep explicit static ownership', async () =
     );
     assert.match(
         finalizerSource,
-        /await writeReplayManifest\(outDir, summaries\);/,
+        /await writeReplaySaveManifest\(outDir, summaries\);/,
         'streaming finalizer should emit the sparse manifest next to the sequence',
     );
     assert.match(
         scenarioRunnerSource,
-        /const replaySaveSequencePath = await timedAsync\([^]*streamFinalizeReplaySaveSequenceFromJsonl\(\s*outDir,\s*replaySequencePath,\s*\)/,
-        'scenario runner should finalize replay_save_sequence.json from replay_sequence.jsonl',
+        /const replaySaveSequencePath = emitFullReplayPayload[^]*streamFinalizeReplaySaveSequenceFromJsonl\(\s*outDir,\s*replaySequencePath,\s*\)[^]*: '';/,
+        'scenario runner should finalize replay_save_sequence.json from replay_sequence.jsonl only in full replay mode',
     );
     assert.match(
         scenarioRunnerSource,
-        /const replaySaveManifestPath = join\(outDir, 'replay_save_manifest\.json'\);/,
-        'scenario runner should report the manifest path beside the finalized sequence',
+        /writeReplaySaveManifest\(outDir, replayManifestSummaries\)/,
+        'scenario runner should write the sparse manifest directly in default manifest-only mode',
     );
 
     const { stdout } = await execFileAsync('git', ['ls-files', 'runs'], {

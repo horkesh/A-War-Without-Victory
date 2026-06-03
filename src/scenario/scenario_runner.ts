@@ -162,7 +162,10 @@ import { buildBrigadeTemporalRows } from './brigade_temporal_emit.js';
 import {
     buildReplayFrameRow,
     streamFinalizeReplaySaveSequenceFromJsonl,
+    writeReplaySaveManifest,
 } from './replay_save_emit.js';
+import { buildReplayFrameSummary } from '../sim/replay/replay_frame_summary.js';
+import type { ReplayFrameSummary } from '../sim/replay/replay_frame_summary.js';
 import type { TurnReport } from '../sim/turn_pipeline_types.js';
 import type { Scenario, ScenarioAction } from './scenario_types.js';
 import { evaluateVictoryConditions } from './victory_conditions.js';
@@ -318,6 +321,7 @@ export function hasCivilianCasualtyRecords(casualties: unknown): boolean {
 
 /** H1.11: Scope for baseline_ops displacement (derived-only; no new mechanics). */
 export type BaselineOpsScopeMode = 'all_front_active' | 'static_front_only' | 'fluid_front_only';
+export type ReplayPayloadMode = 'manifest_only' | 'full';
 
 export interface RunScenarioOptions {
     scenarioPath: string;
@@ -355,6 +359,8 @@ export interface RunScenarioOptions {
     consoleDiagnostics?: boolean;
     /** Optional wall-clock bucket report for benchmark instrumentation. Not part of deterministic scenario artifacts. */
     emitTimingJson?: boolean;
+    /** Replay payload policy. Default manifest_only avoids full-state replay bloat; full preserves legacy sidecars. */
+    replayPayloadMode?: ReplayPayloadMode;
 }
 
 export interface RunScenarioResult {
@@ -1859,7 +1865,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         resumeFromWeekIndex,
         consoleDiagnostics = process.env.VITEST !== 'true',
         emitTimingJson = false,
+        replayPayloadMode = 'manifest_only',
     } = options;
+    if (replayPayloadMode !== 'manifest_only' && replayPayloadMode !== 'full') {
+        throw new Error(`Unsupported replayPayloadMode: ${String(replayPayloadMode)}`);
+    }
+    const emitFullReplayPayload = replayPayloadMode === 'full';
     const timingTotals = createScenarioTimingTotals();
     const totalTimingStart = timingStart(emitTimingJson);
     if (!consoleDiagnostics) {
@@ -2036,11 +2047,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         const weeklyReportPath = join(outDir, 'weekly_report.jsonl');
         const brigadeTemporalLogPath = join(outDir, 'brigade_temporal_log.jsonl');
         const replayPath = emitWeeklySavesForVideo ? join(outDir, 'replay.jsonl') : null;
-        // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: per-turn full-state snapshot
-        // stream. Always emitted (not gated on emitWeeklySavesForVideo) so the
-        // VerdictScreen Replay tab works for every run. Consolidated end-of-run
-        // artifact (replay_save_sequence.json) is what the UI loader picks up.
-        const replaySequencePath = join(outDir, 'replay_sequence.jsonl');
+        // Replay payload policy: manifest_only (default) keeps the VerdictScreen
+        // summary contract without writing full-state replay payloads. full keeps
+        // the legacy JSONL + consolidated GameState[] sidecars for opt-in replay
+        // inspection workflows.
+        const replaySequencePath = emitFullReplayPayload ? join(outDir, 'replay_sequence.jsonl') : '';
         // LANE D-CONTENT (Path A): per-turn displacement event stream. The
         // engine's clear-displacement-event-log step calls
         // displacementEventStreamSink (provided via TurnInput) right before
@@ -2061,9 +2072,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                   createWriteStream(replayPath, { flags: 'w' })
               )
             : null;
-        const replaySequenceStream = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
-            createWriteStream(replaySequencePath, { flags: 'w' })
-        );
+        const replaySequenceStream = emitFullReplayPayload
+            ? timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+                  createWriteStream(replaySequencePath, { flags: 'w' })
+              )
+            : null;
         const displacementEventStream = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
             createWriteStream(displacementEventLogPath, { flags: 'w' })
         );
@@ -2077,6 +2090,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         let firstReportRow: WeeklyReportRow | null = null;
         let lastReportRow: WeeklyReportRow | null = null;
         const activityCountsPerWeek: WeeklyActivityCounts[] = [];
+        const replayManifestSummaries: ReplayFrameSummary[] = [];
         const weeklySavePaths: string[] = [];
         let replayTimelinePath: string | undefined;
         let replayTimelineStream: ReturnType<typeof createWriteStream> | null = null;
@@ -2637,10 +2651,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             // stream-finalized from this JSONL at end-of-run. Pure read-only —
             // `serializeState(state)` is the canonical writer (also produces
             // final_save.json). State is NOT mutated.
-            const replayFrameRow = buildReplayFrameRow(state, week_index);
-            _serTimeSync(emitTimingJson, timingTotals, 'replay-sequence-write', () => {
-                replaySequenceStream.write(JSON.stringify(replayFrameRow) + '\n');
-            });
+            // Current policy: every run records only sparse replay summaries by
+            // default; full serialized frames are opt-in.
+            replayManifestSummaries.push(buildReplayFrameSummary(state));
+            if (replaySequenceStream) {
+                const replayFrameRow = buildReplayFrameRow(state, week_index);
+                _serTimeSync(emitTimingJson, timingTotals, 'replay-sequence-write', () => {
+                    replaySequenceStream.write(JSON.stringify(replayFrameRow) + '\n');
+                });
+            }
 
             // Batch 38: the previous in-loop week-39 `serializeState(state)` +
             // hash and the post-loop `if (!final_state_hash)` fallback were both
@@ -2695,7 +2714,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             reportStream.end();
             brigadeTemporalStream.end();
             if (replayStream) replayStream.end();
-            replaySequenceStream.end();
+            if (replaySequenceStream) replaySequenceStream.end();
             displacementEventStream.end();
         });
         await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', () => new Promise<void>((resolve, reject) => {
@@ -2710,9 +2729,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // stream-reads `replay_sequence.jsonl` from disk, so we MUST wait for the
         // JSONL `finish` event before invoking the finalizer. Without this, the
         // finalizer can race against still-buffered writes on slow disks.
-        await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', () => new Promise<void>((resolve, reject) => {
-            replaySequenceStream.on('finish', resolve).on('error', reject);
-        }));
+        if (replaySequenceStream) {
+            await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', () => new Promise<void>((resolve, reject) => {
+                replaySequenceStream.on('finish', resolve).on('error', reject);
+            }));
+        }
 
         const finalSavePath = join(outDir, 'final_save.json');
         if (state.meta.phase === 'war' && operationalData) {
@@ -2751,13 +2772,21 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // stream-reading `replay_sequence.jsonl` line-by-line — peak heap is
         // bounded by one frame's serialized state, never the whole sequence.
         // This unblocks 188w hash-identity gates that previously OOM'd here.
-        const replaySaveSequencePath = await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
-            streamFinalizeReplaySaveSequenceFromJsonl(
-                outDir,
-                replaySequencePath,
-            )
-        );
-        const replaySaveManifestPath = join(outDir, 'replay_save_manifest.json');
+        // Current policy: manifest_only writes no full replay payload; full mode
+        // preserves the separate replay_save_sequence.json sidecar.
+        const replaySaveSequencePath = emitFullReplayPayload
+            ? await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+                  streamFinalizeReplaySaveSequenceFromJsonl(
+                      outDir,
+                      replaySequencePath,
+                  )
+              )
+            : '';
+        const replaySaveManifestPath = emitFullReplayPayload
+            ? join(outDir, 'replay_save_manifest.json')
+            : await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+                  writeReplaySaveManifest(outDir, replayManifestSummaries)
+              );
 
         let endDiagnosticsStart = timingStart(emitTimingJson);
         const anomalyReports: AnomalyReport[] = runAnomalyDetection(state);

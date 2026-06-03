@@ -34,7 +34,7 @@ test('replay sidecar generated artifact ownership stays documented and untracked
     const sequenceRow = findOwnershipRow(ownershipDoc, REPLAY_SEQUENCE_JSONL);
     assert.ok(sequenceRow, 'ownership matrix should include replay_sequence.jsonl');
     assert.ok(sequenceRow.includes('scenario runner'), 'replay_sequence.jsonl row should name the scenario runner owner');
-    assert.ok(sequenceRow.includes('video replay'), 'replay_sequence.jsonl row should name the video replay path');
+    assert.ok(sequenceRow.includes('full replay payload mode'), 'replay_sequence.jsonl row should name the opt-in full replay path');
     assert.ok(sequenceRow.includes('Do not commit'), 'replay_sequence.jsonl should not be committed');
     assert.ok(sequenceRow.includes('Transient'), 'replay_sequence.jsonl should be a transient run-output sidecar');
 
@@ -48,23 +48,23 @@ test('replay sidecar generated artifact ownership stays documented and untracked
 
     assert.match(
         scenarioRunner,
-        /const replaySequencePath = join\(outDir, 'replay_sequence\.jsonl'\);/,
-        'scenario runner should declare the replay_sequence.jsonl sidecar path',
+        /const replaySequencePath = emitFullReplayPayload \? join\(outDir, 'replay_sequence\.jsonl'\) : '';/,
+        'scenario runner should gate the replay_sequence.jsonl sidecar path on full replay mode',
     );
     assert.match(
         scenarioRunner,
-        /replaySequenceStream\.write\(JSON\.stringify\(replayFrameRow\) \+ '\\n'\);/,
-        'scenario runner should stream replay_sequence.jsonl rows',
+        /if \(replaySequenceStream\) \{[^]*replaySequenceStream\.write\(JSON\.stringify\(replayFrameRow\) \+ '\\n'\);[^]*\}/,
+        'scenario runner should stream replay_sequence.jsonl rows only when full replay mode opens the stream',
     );
     assert.match(
         scenarioRunner,
-        /replaySequenceStream\.on\('finish', resolve\)\.on\('error', reject\);/,
-        'scenario runner should wait for replay_sequence.jsonl finalization before consuming it',
+        /if \(replaySequenceStream\) \{[^]*replaySequenceStream\.on\('finish', resolve\)\.on\('error', reject\);[^]*\}/,
+        'scenario runner should wait for replay_sequence.jsonl finalization only before consuming an opt-in stream',
     );
     assert.match(
         scenarioRunner,
-        /streamFinalizeReplaySaveSequenceFromJsonl\(\s*outDir,\s*replaySequencePath,\s*\)/,
-        'replay save finalizer should consume replay_sequence.jsonl by path',
+        /emitFullReplayPayload[^]*streamFinalizeReplaySaveSequenceFromJsonl\(\s*outDir,\s*replaySequencePath,\s*\)/,
+        'replay save finalizer should consume replay_sequence.jsonl by path only in full replay mode',
     );
     assert.match(
         scenarioRunner,

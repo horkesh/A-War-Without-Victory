@@ -18344,3 +18344,15 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/ai_advisor_panel.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-06-03] feat(replay): default scenario runs to manifest-only replay payloads
+
+**Type:** Scenario harness artifact policy / replay-bloat reduction. Normal `runScenario(...)` and harness CLI runs now default to `replayPayloadMode: 'manifest_only'`, writing `replay_save_manifest.json` without writing `replay_sequence.jsonl` or `replay_save_sequence.json`. Full replay payloads remain available by explicit opt-in through `runScenario({ replayPayloadMode: 'full' })` or `--full-replay-save-sequence`.
+
+**Determinism / scope:** Harness-side artifact policy only. No engine pipeline, scenario data, calibration data, TG/Standing OG files, UI warroom/PR143 files, save schema, or `final_save.json` embedding changed. The focused contract proves manifest-only and full modes produce byte-identical `final_save.json` and identical final hashes for the same tiny scenario input.
+
+**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/replay_payload_mode_contract.test.ts --reporter=dot` failed because default runs still returned/wrote `replay_sequence.jsonl`. Green proof: `node node_modules/vitest/vitest.mjs run tests/replay_payload_mode_contract.test.ts tests/replay_save_emit.test.ts tests/replay_artifact_ownership.test.ts tests/replay_save_finalizer_artifact_ownership.test.ts --reporter=dot` passed 11/11; `node node_modules/vitest/vitest.mjs run tests/scenario_continue_from_save_equivalence.test.ts --reporter=dot` passed 2/2; `node node_modules/vitest/vitest.mjs run tests/generated_artifact_ownership_matrix_contract.test.ts tests/scenario_transient_scratch_artifact_ownership.test.ts --reporter=dot` passed 2/2; `npm.cmd run typecheck` passed; `git diff --check` passed.
+
+**Files:** `src/scenario/scenario_runner.ts`, `src/scenario/replay_save_emit.ts`, `tools/scenario_runner/run_scenario.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `tests/replay_payload_mode_contract.test.ts`, `tests/replay_artifact_ownership.test.ts`, `tests/replay_save_finalizer_artifact_ownership.test.ts`, `tests/scenario_continue_from_save_equivalence.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
