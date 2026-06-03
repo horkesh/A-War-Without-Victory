@@ -16,6 +16,11 @@ import type {
     FormationState,
 } from '../../state/game_state.js';
 import type { CombatOutcome } from './combat_math.js';
+import {
+    COHESION_DEFENDER,
+    ENTRENCHMENT_DEGRADATION_PER_BATTLE,
+    MAX_RESILIENCE_STREAK,
+} from './combat_math.js';
 import { OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR } from './officer_quality_update.js';
 import type { AttackResolutionOsidSnapEvent } from './attack_resolution_types.js';
 
@@ -101,6 +106,24 @@ export function applyDisruptionFromOutcome(
     }
 }
 
+export function applyDefenderBattleAftermath(params: {
+    defenderFormations: FormationState[];
+    outcome: CombatOutcome;
+}): void {
+    const defenderOutcome = getDefenderOutcomePerspective(params.outcome);
+    for (const defender of params.defenderFormations) {
+        defender.cohesion = Math.max(0, Math.min(100, (defender.cohesion ?? 60) + (COHESION_DEFENDER[params.outcome] ?? 0)));
+        (defender as { recent_battle_outcome?: string }).recent_battle_outcome = defenderOutcome;
+        (defender as { defense_streak?: number }).defense_streak =
+            (params.outcome === 'stalemate' || params.outcome === 'repulsed' || params.outcome === 'catastrophic')
+                ? Math.min(MAX_RESILIENCE_STREAK, ((defender as { defense_streak?: number }).defense_streak ?? 0) + 1)
+                : 0;
+        const prevEntrenchment = (defender as { entrenchment_turns?: number }).entrenchment_turns ?? 0;
+        (defender as { entrenchment_turns?: number }).entrenchment_turns =
+            Math.max(0, prevEntrenchment - ENTRENCHMENT_DEGRADATION_PER_BATTLE);
+    }
+}
+
 /**
  * Apply ammo crisis or pyrrhic victory effects.
  * Returns a snap event if conditions are met, null otherwise.
@@ -148,6 +171,7 @@ export function applyAmmoCrisisPyrrhicEffects(params: {
 export function applyPostBattleMorale(params: {
     attackerFormations: FormationState[];
     defenderFormation: FormationState | null;
+    defenderFormations?: FormationState[];
     outcome: CombatOutcome;
     flip: boolean;
     moraleAbsorbed: boolean;
@@ -164,11 +188,17 @@ export function applyPostBattleMorale(params: {
             case 'catastrophic': a.morale = Math.max(0, a.morale - 10); break;
         }
     }
-    if (defenderFormation?.morale !== undefined) {
+    const defenders = params.defenderFormations && params.defenderFormations.length > 0
+        ? params.defenderFormations
+        : defenderFormation
+            ? [defenderFormation]
+            : [];
+    for (const defender of defenders) {
+        if (defender.morale === undefined) continue;
         if (flip) {
-            defenderFormation.morale = Math.max(0, defenderFormation.morale - 5);
+            defender.morale = Math.max(0, defender.morale - 5);
         } else if (!moraleAbsorbed) {
-            defenderFormation.morale = Math.min(100, defenderFormation.morale + 1);
+            defender.morale = Math.min(100, defender.morale + 1);
         }
     }
 }

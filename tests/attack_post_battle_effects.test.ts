@@ -12,6 +12,7 @@ import {
     applyOfficerCasualtyLoss,
     getDefenderOutcomePerspective,
     applyDisruptionFromOutcome,
+    applyDefenderBattleAftermath,
     applyAmmoCrisisPyrrhicEffects,
     applyPostBattleMorale,
     BASE_EXPERIENCE_GAIN,
@@ -183,6 +184,43 @@ describe('getDefenderOutcomePerspective', () => {
     it('unknown → pass-through', () => {
         expect(getDefenderOutcomePerspective('some_other' as CombatOutcome)).toBe('some_other');
     });
+});
+
+describe('applyDefenderBattleAftermath', () => {
+    it('applies defender outcome, cohesion, streak, and entrenchment to every shared defender', () => {
+        const primary = makeFormation({ cohesion: 50, entrenchment_turns: 3, defense_streak: 1 });
+        const reserve = makeFormation({ cohesion: 60, entrenchment_turns: 2, defense_streak: 0 });
+
+        applyDefenderBattleAftermath({
+            defenderFormations: [primary, reserve],
+            outcome: 'repulsed',
+        });
+
+        expect(primary.recent_battle_outcome).toBe('victory');
+        expect(reserve.recent_battle_outcome).toBe('victory');
+        expect(primary.defense_streak).toBe(2);
+        expect(reserve.defense_streak).toBe(1);
+        expect(primary.entrenchment_turns).toBe(2.5);
+        expect(reserve.entrenchment_turns).toBe(1.5);
+        expect(primary.cohesion).toBeGreaterThan(50);
+        expect(reserve.cohesion).toBeGreaterThan(60);
+    });
+
+    it('resets all shared defender streaks when attackers win', () => {
+        const primary = makeFormation({ defense_streak: 3 });
+        const reserve = makeFormation({ defense_streak: 2 });
+
+        applyDefenderBattleAftermath({
+            defenderFormations: [primary, reserve],
+            outcome: 'victory',
+        });
+
+        expect(primary.recent_battle_outcome).toBe('repulsed');
+        expect(reserve.recent_battle_outcome).toBe('repulsed');
+        expect(primary.defense_streak).toBe(0);
+        expect(reserve.defense_streak).toBe(0);
+    });
+
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -481,6 +519,23 @@ describe('applyPostBattleMorale', () => {
             moraleAbsorbed: true,
         });
         expect(d.morale).toBe(60);
+    });
+
+    it('applies defender morale effects to every shared defender when provided', () => {
+        const primary = makeFormation({ id: 'primary_defender', morale: 60 });
+        const reserve = makeFormation({ id: 'reserve_defender', morale: 70 });
+
+        applyPostBattleMorale({
+            attackerFormations: [],
+            defenderFormation: primary,
+            defenderFormations: [primary, reserve],
+            outcome: 'decisive_victory',
+            flip: true,
+            moraleAbsorbed: false,
+        });
+
+        expect(primary.morale).toBe(55);
+        expect(reserve.morale).toBe(65);
     });
 
     it('defender null: no crash', () => {
