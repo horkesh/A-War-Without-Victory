@@ -896,4 +896,87 @@ describe('ensureMinimumSectorCoverage severe undercoverage rebalance', () => {
         expect(donor.reserve_brigade_ids).toEqual(['brig_far_reserve']);
         expect(formations.brig_far_reserve.location_osid).toBe('op:donor:rear_4');
     });
+
+    it('does not borrow from a surplus donor in another friendly component', () => {
+        const recipient = makeSector({
+            sectorId: 'sector:corps_a:recipient',
+            frontOsids: [
+                'op:recipient:f1',
+                'op:recipient:f2',
+                'op:recipient:f3',
+                'op:recipient:f4',
+                'op:recipient:f5',
+                'op:recipient:f6',
+                'op:recipient:f7',
+                'op:recipient:f8',
+                'op:recipient:f9',
+                'op:recipient:f10',
+                'op:recipient:f11',
+                'op:recipient:f12',
+                'op:recipient:f13',
+                'op:recipient:f14',
+                'op:recipient:f15',
+                'op:recipient:f16',
+                'op:recipient:f17',
+            ],
+            assigned: ['brig_recipient'],
+            threatRatio: 4800,
+        });
+        const donor = makeSector({
+            sectorId: 'sector:corps_a:donor',
+            frontOsids: [
+                'op:donor:f1',
+                'op:donor:f2',
+                'op:donor:f3',
+                'op:donor:f4',
+                'op:donor:f5',
+                'op:donor:f6',
+                'op:donor:f7',
+                'op:donor:f8',
+            ],
+            assigned: ['brig_donor_a', 'brig_donor_b', 'brig_donor_c'],
+            threatRatio: 20,
+        });
+        donor.reserve_brigade_ids = ['brig_donor_reserve'];
+
+        const formations: Record<FormationId, FormationState> = {
+            brig_recipient: makeFormation('brig_recipient', 'op:recipient:f1'),
+            brig_donor_a: makeFormation('brig_donor_a', 'op:donor:f1', 1500),
+            brig_donor_b: makeFormation('brig_donor_b', 'op:donor:f2', 1200),
+            brig_donor_c: makeFormation('brig_donor_c', 'op:donor:f3', 1100),
+            brig_donor_reserve: makeFormation('brig_donor_reserve', 'op:donor:rear_1', 1800),
+        };
+
+        const adjacency = makeAdjacency([
+            ['op:donor:f1', 'op:recipient:f2'],
+            ['op:donor:rear_1', 'op:recipient:f3'],
+            ['op:donor:f1', 'op:donor:f2'],
+            ['op:donor:f2', 'op:donor:f3'],
+            ['op:donor:f3', 'op:donor:rear_1'],
+        ]);
+        const friendlyOsids = new Set<string>([
+            ...recipient.territory_osids,
+            ...donor.territory_osids,
+            'op:donor:rear_1',
+        ]);
+        const componentOf = new Map<string, number>([
+            ...recipient.territory_osids.map((osid) => [osid, 1] as const),
+            ...donor.territory_osids.map((osid) => [osid, 0] as const),
+            ['op:donor:rear_1', 0],
+        ]);
+
+        ensureMinimumSectorCoverage(
+            [recipient, donor],
+            formations,
+            adjacency,
+            friendlyOsids,
+            componentOf,
+        );
+
+        expect(recipient.assigned_brigade_ids).toEqual(['brig_recipient']);
+        expect(donor.assigned_brigade_ids).toEqual(['brig_donor_a', 'brig_donor_b', 'brig_donor_c']);
+        expect(donor.reserve_brigade_ids).toEqual(['brig_donor_reserve']);
+        expect(formations.brig_donor_a.location_osid).toBe('op:donor:f1');
+        expect(formations.brig_donor_reserve.location_osid).toBe('op:donor:rear_1');
+    });
 });
