@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-03] fix(engine): protect corps-command operation brigades from Standing OG reserve commit
+
+**Type:** Engine invariant fix, flag-gated by existing default-off ADR-0007 Phase B. The Standing OG reserve-commit scaffold already skipped operation participants, but its participant scanner only read legacy `formations[*].active_operations` on `corps_asset` formations. Current operations live primarily in `state.military.corps_command[*].active_operations`, so a flag-on Phase B pass could pull an already committed operation brigade out of the rear/reserve pool and move it to a threatened defensive front. The scanner now includes current corps-command operations and axis-assigned brigades as well as flat `participating_brigades`; default-off behavior remains unchanged.
+
+**Evidence:** Red/green regression `tests/brigade_front_distribution.test.ts` first reproduced the bad grab (`brig_reserve` moved from rear to front despite `corps_command.active_operations`), then passed after the scanner fix. Focused combat slice passes 93/93 (`standing_og_defense`, `bot_orders_perf_profile`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`, `sector_counter_attack`), and `git diff --check` is clean. Fresh temporary combined C+B probe after the fix (`n17`, hash `dbe6cdb8d2c81d81`) improves over prior fixed combined `n16`: orders 125 -> 137, battles 103 -> 108, zero-morale active brigades 4 -> 3 (`hrhb_111th_brigade` removed), counts recover from `HRHB:90,RBiH:255,RS:367` to `HRHB:89,RBiH:254,RS:369`. Fresh B-only probe after the fix (`n18`, hash `8ab60f2ba2afd325`) is high-throughput at 171 orders / 136 battles / 96 defender-present battles, counts `HRHB:88,RBiH:252,RS:372`, but still carries 3 zero-morale active brigades (`rs_17th_klju_light_infantry`, `rs_1st_drvar_light_infantry`, `rs_1st_ozren_light_infantry`). Interpretation: the operation-steal bug is fixed and Phase B alone is no longer the throughput sink; ADR-0007 remains default-off because the C+B interaction still suppresses defender-present battles and leaves a morale residual that needs a separate diagnostic/fix.
+
+**Files:** `src/sim/combat/brigade_front_distribution.ts`, `tests/brigade_front_distribution.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
 ## [2026-06-03] docs: fresh Standing OG C+B probe confirms Phase B remains activation blocker
 
 **Type:** Diagnostic evidence + roadmap/board clarification (no default flip). After the Phase C engagement-list, predictor-parity, and active-op precedence fixes, a fresh temporary combined Phase C+B 40w probe was run with both ADR-0007 flags on; defaults and generated latest-run output were restored after the probe.

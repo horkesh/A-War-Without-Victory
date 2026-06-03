@@ -37,7 +37,7 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random(), no timestamps.
  */
 
-import type { CorpsFrontSector, CorpsCommandState, FactionId, FormationState, GameState } from '../../state/game_state.js';
+import type { CorpsFrontSector, CorpsCommandState, FactionId, FormationState, GameState, OperationAxis } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { bfsDistance } from './sector_utils.js';
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
@@ -120,7 +120,24 @@ function buildOperationParticipantSet(state: GameState): Set<string> {
         const ops = f.active_operations;
         if (!ops) continue;
         for (const op of ops) {
+            if (op.axes) {
+                for (const axis of op.axes as OperationAxis[]) {
+                    for (const bid of axis.assigned_brigades ?? []) participants.add(bid);
+                }
+            }
             if (op.participating_brigades) for (const bid of op.participating_brigades) participants.add(bid);
+        }
+    }
+    const corpsCommand = state.military.corps_command ?? {};
+    for (const cid of Object.keys(corpsCommand).sort(strictCompare)) {
+        const command = corpsCommand[cid];
+        for (const op of command?.active_operations ?? []) {
+            if (op.axes) {
+                for (const axis of op.axes as OperationAxis[]) {
+                    for (const bid of axis.assigned_brigades ?? []) participants.add(bid);
+                }
+            }
+            for (const bid of op.participating_brigades ?? []) participants.add(bid);
         }
     }
     return participants;
