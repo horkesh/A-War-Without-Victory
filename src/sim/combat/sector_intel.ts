@@ -265,11 +265,10 @@ function computePosture(sector: CorpsFrontSector, state: GameState, confidence: 
 }
 
 function computeOffensiveSigns(sector: CorpsFrontSector, state: GameState, confidence: number, _reconRange: number): boolean {
-    // n1194: lowered from CONFIDENCE_DEEP_INTEL (0.8) to CONFIDENCE_FULL_STRENGTH (0.5)
-    // and removed reconRange >= 2 gate. All factions should detect enemy staging when
-    // they have accurate strength intel. Previous thresholds made offensive_signs always
-    // false (0/109 records), leaving the defensive reaction (2× threat boost) dead.
-    if (confidence < CONFIDENCE_FULL_STRENGTH) return false;
+    // Offensive signs are rough contact intelligence, not full strength/posture truth.
+    // Late-war attack sectors can remain below CONFIDENCE_FULL_STRENGTH because intel
+    // decays even in contact, but defenders should still notice staging pressure.
+    if (confidence < CONFIDENCE_ROUGH_STRENGTH) return false;
     const corpsCommand = state.military.corps_command?.[sector.corps_id];
     return corpsCommand?.active_operations?.some(op => op.type === 'sector_attack' || op.type === 'feint' || op.type === 'probe') ?? false;
 }

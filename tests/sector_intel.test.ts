@@ -366,6 +366,47 @@ describe('T9: posture_observed below full-strength threshold', () => {
         const rec = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
         expect(rec.posture_observed).toBe('unknown');
     });
+
+    it('can detect offensive signs from rough contact without exposing full posture truth', () => {
+        const sectorA = makeSector('sector:corps-A:0', 'corps-A', 'RBiH', ['e1'], ['oA'], ['oB']);
+        const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RS', ['e1'], ['oB'], ['oA'], 1.0);
+        const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
+        state.military.corps_command = {
+            'corps-B': {
+                active_operations: [{
+                    name: 'Enemy staging',
+                    type: 'sector_attack',
+                    phase: 'planning',
+                    participating_brigades: [],
+                    objectives: ['oA'],
+                    current_objective_index: 0,
+                }],
+            },
+        } as any;
+        state.military.sector_intel = {
+            'sector:corps-A:0': [{
+                enemy_sector_id: 'sector:corps-B:0',
+                enemy_faction: 'RS',
+                enemy_corps_id: 'corps-B' as any,
+                front_edge_count: 1,
+                strength_category: 'unknown',
+                posture_observed: 'unknown',
+                offensive_signs: false,
+                confidence: 0.23,
+                turns_in_contact: 3,
+                visible_brigade_ids: [],
+                last_updated_turn: 4,
+            }],
+        };
+
+        deriveSectorIntel(state, 5);
+
+        const rec = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
+        expect(rec.confidence).toBeGreaterThanOrEqual(CONFIDENCE_ROUGH_STRENGTH);
+        expect(rec.confidence).toBeLessThan(CONFIDENCE_FULL_STRENGTH);
+        expect(rec.posture_observed).toBe('unknown');
+        expect(rec.offensive_signs).toBe(true);
+    });
 });
 
 // ---------------------------------------------------------------------------

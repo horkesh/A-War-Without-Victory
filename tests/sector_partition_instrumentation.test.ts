@@ -542,6 +542,36 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(region).not.toMatch(/\bperformance\.now\s*\(/);
     });
 
+    it('static contract: final distributor seals current sector truth only after distribution', () => {
+        const raw = readFileSync(resolve('src/sim/turn_phases/war_phase_reconciliation_steps.ts'), 'utf8');
+        const phaseIdx = raw.indexOf("name: 'final-distribute-brigades-to-front'");
+        const phaseEnd = raw.indexOf("\n    {\n        name: 'assert-final-operation-lifecycle'", phaseIdx);
+        expect(phaseIdx).toBeGreaterThanOrEqual(0);
+        expect(phaseEnd).toBeGreaterThan(phaseIdx);
+
+        const region = raw.slice(phaseIdx, phaseEnd);
+        const distributeIdx = region.indexOf('distributeBrigadesToFront(');
+        const sealIdx = region.indexOf('sealFinalSectorTruthFromCurrentSectors(');
+        expect(distributeIdx).toBeGreaterThanOrEqual(0);
+        expect(sealIdx).toBeGreaterThan(distributeIdx);
+        expect(region).toContain('context.state.military.war_front_edges_osid ?? []');
+    });
+
+    it('static contract: scenario final-save reconciliation seals current sector truth before serialization', () => {
+        const raw = readFileSync(resolve('src/scenario/scenario_runner.ts'), 'utf8');
+        const finalSaveIdx = raw.indexOf("const finalSavePath = join(outDir, 'final_save.json');");
+        const serializeIdx = raw.indexOf('const finalSerialized = _serTimeSync', finalSaveIdx);
+        expect(finalSaveIdx).toBeGreaterThanOrEqual(0);
+        expect(serializeIdx).toBeGreaterThan(finalSaveIdx);
+
+        const region = raw.slice(finalSaveIdx, serializeIdx);
+        const reconcileIdx = region.indexOf('reconcileFinalSectorTruth(');
+        const sealIdx = region.indexOf('sealFinalSectorTruthFromCurrentSectors(');
+        expect(reconcileIdx).toBeGreaterThanOrEqual(0);
+        expect(sealIdx).toBeGreaterThan(reconcileIdx);
+        expect(region).toContain('state.military.war_front_edges_osid ?? []');
+    });
+
     it('static contract: sealMergedSectorTruth has deterministic child attribution labels', () => {
         const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
         const startIdx = raw.indexOf('function sealMergedSectorTruth(');

@@ -68,7 +68,7 @@ import {
     getPowerRatioCasualtyMult,
     MIN_DEFENSE_FLOOR_FRACTION,
     MAX_EDGES_PER_BRIGADE,
-    REACTIVE_DEFENSE_RATIO,
+    getSectorReactiveDefensePredictionRatio,
     DEFENDER_CASUALTY_ENGAGEMENT_CAP,
     bfsDistanceFriendly,
     getReactiveDistanceWeight,
@@ -79,6 +79,11 @@ import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sec
 import { getEnclaveGarrisonPower } from './enclave_resilience.js';
 import { getSectorPairIntelConfidence } from './sector_intel.js';
 import { buildLocalFrontDensityModifierByFormationIdForSector } from './local_front_defense.js';
+import {
+    ENABLE_SHARED_SECTOR_DEFENSE,
+    getStandingOgDefenseBrigadeIds,
+    isStandingOgDefenseBrigadeAvailable,
+} from './standing_og_defense.js';
 
 // Backward-compat re-export
 export type PredictedOutcome = CombatOutcome;
@@ -333,9 +338,13 @@ export function predictCombatOutcome(
             profilePrefix,
             '.sectorBrigades',
             () => sector
-                ? sector.assigned_brigade_ids
+                ? getStandingOgDefenseBrigadeIds(sector, ENABLE_SHARED_SECTOR_DEFENSE)
                     .map(id => state.military.formations?.[id])
-                    .filter((f): f is FormationState => f != null && f.status === 'active')
+                    .filter((f): f is FormationState =>
+                        f != null
+                        && f.status === 'active'
+                        && isStandingOgDefenseBrigadeAvailable(state, f.id, ENABLE_SHARED_SECTOR_DEFENSE)
+                    )
                 : [],
         );
         if (sectorBrigades.length > 0) {
@@ -351,12 +360,13 @@ export function predictCombatOutcome(
             const pc = state.political?.political_controllers ?? {};
 
             // Per-brigade distance-weighted contribution
-            const { physicalPower, effectiveReserves } = predictorPerfTime(
+            const { physicalPower, effectiveReserves, contributingBrigadeCount } = predictorPerfTime(
                 profilePrefix,
                 '.sectorDefensePower',
                 () => {
                     let physicalPower = 0;
                     let effectiveReserves = 0;
+                    let contributingBrigadeCount = 0;
                     for (const b of sectorBrigades) {
                         const locOsid = (b as { location_osid?: string }).location_osid ?? '';
                         const bPower = powerByFormationId.get(b.id) ?? computeDefenderPower(
@@ -368,17 +378,20 @@ export function predictCombatOutcome(
                             supplyStateByOsid,
                             ethBonus(b),
                         );
+                        const homeMun = munFromOsid((b as { home_osid?: string }).home_osid ?? '');
+                        const homeBonus = (homeMun && homeMun === targetMun) ? HOME_DEFENSE_REACTIVE_BONUS : 1.0;
                         if (locOsid === targetOsid) {
                             physicalPower += bPower;
+                            if (bPower * homeBonus > 0) contributingBrigadeCount += 1;
                         } else {
                             const hops = bfsDistanceFriendly(locOsid, targetOsid, adjacency, pc, controller!);
                             const distWeight = getReactiveDistanceWeight(hops);
-                            const homeMun = munFromOsid((b as { home_osid?: string }).home_osid ?? '');
-                            const homeBonus = (homeMun && homeMun === targetMun) ? HOME_DEFENSE_REACTIVE_BONUS : 1.0;
-                            effectiveReserves += bPower * distWeight * homeBonus;
+                            const contribution = bPower * distWeight * homeBonus;
+                            effectiveReserves += contribution;
+                            if (contribution > 0) contributingBrigadeCount += 1;
                         }
                     }
-                    return { physicalPower, effectiveReserves };
+                    return { physicalPower, effectiveReserves, contributingBrigadeCount };
                 }
             );
 
@@ -386,12 +399,15 @@ export function predictCombatOutcome(
             const stanceReactiveBonus = SECTOR_STANCE_REACTIVE_BONUS[sector?.sector_stance ?? 'defend'];
             const boostedReserves = effectiveReserves * stanceReactiveBonus;
 
+            const avgReactivePower = ENABLE_SHARED_SECTOR_DEFENSE && contributingBrigadeCount > 0
+                ? (physicalPower + effectiveReserves) / contributingBrigadeCount
+                : avgBrigadePower;
             const reactiveResponse = Math.min(
                 boostedReserves,
-                attackerCount * avgBrigadePower * REACTIVE_DEFENSE_RATIO
+                attackerCount * avgReactivePower * getSectorReactiveDefensePredictionRatio(ENABLE_SHARED_SECTOR_DEFENSE)
             );
             const baseDef = physicalPower + reactiveResponse;
-            const minFloor = avgBrigadePower * MIN_DEFENSE_FLOOR_FRACTION;
+            const minFloor = avgReactivePower * MIN_DEFENSE_FLOOR_FRACTION;
             // Intel-scaled fog: look up sector-pair confidence for this attacker vs defender sector
             const sectorConf = sector ? getSectorPairIntelConfidence(state, attackerLoc, sector.sector_id) : 0;
             const intelFog = FOG_BASE + FOG_INTEL_SCALE * sectorConf;

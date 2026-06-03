@@ -37,10 +37,14 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random(), no timestamps.
  */
 
-import type { CorpsFrontSector, CorpsCommandState, FactionId, FormationState, GameState } from '../../state/game_state.js';
+import type { CorpsFrontSector, CorpsCommandState, FactionId, FormationState, GameState, OperationAxis } from '../../state/game_state.js';
+import type { MunicipalityPopulation1991Map } from '../../state/population_share.js';
+import { getFactionAlignedPopulationShare } from '../../state/population_share.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { munFromOsid } from './osid_adjacency.js';
 import { bfsDistance } from './sector_utils.js';
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
+import { ENABLE_STANDING_OG_RESERVE_COMMIT } from './standing_og_defense.js';
 
 type CorpsAssetFormationState = FormationState & {
     active_operations?: CorpsCommandState['active_operations'];
@@ -49,6 +53,8 @@ type CorpsAssetFormationState = FormationState & {
 interface FrontDistributionOptions {
     rearDirectRepairMaxHops?: number;
     frontGapRepairMaxHops?: number;
+    enableStandingOgReserveCommit?: boolean;
+    population1991ByMun?: MunicipalityPopulation1991Map;
 }
 
 // ── Corps boundary helpers ─────────────────────────────────────────────────────
@@ -86,6 +92,7 @@ const MAX_REDISTRIBUTION_DISTANCE = 20;
  * Higher values (tested: 1.0) produce wrong-direction battles and net calibration regression.
  */
 const PHASE_B_DISTANCE_WEIGHT = 0.3;
+const RESERVE_COMMIT_MIN_AFFINITY = 0.30;
 
 /** Brigades with this many entrenchment turns or more are NOT redistributed in Phase A.
  *  Only freshly-arrived brigades get spread — entrenched positions are too valuable to abandon. */
@@ -118,10 +125,39 @@ function buildOperationParticipantSet(state: GameState): Set<string> {
         const ops = f.active_operations;
         if (!ops) continue;
         for (const op of ops) {
+            if (op.axes) {
+                for (const axis of op.axes as OperationAxis[]) {
+                    for (const bid of axis.assigned_brigades ?? []) participants.add(bid);
+                }
+            }
             if (op.participating_brigades) for (const bid of op.participating_brigades) participants.add(bid);
         }
     }
+    const corpsCommand = state.military.corps_command ?? {};
+    for (const cid of Object.keys(corpsCommand).sort(strictCompare)) {
+        const command = corpsCommand[cid];
+        for (const op of command?.active_operations ?? []) {
+            if (op.axes) {
+                for (const axis of op.axes as OperationAxis[]) {
+                    for (const bid of axis.assigned_brigades ?? []) participants.add(bid);
+                }
+            }
+            for (const bid of op.participating_brigades ?? []) participants.add(bid);
+        }
+    }
     return participants;
+}
+
+function hasReserveCommitPopulationAffinity(
+    formation: FormationState,
+    targetOsid: string,
+    population1991ByMun: MunicipalityPopulation1991Map | undefined,
+): boolean {
+    if (!population1991ByMun) return true;
+    const munId = munFromOsid(targetOsid);
+    if (!munId) return true;
+    const affinity = getFactionAlignedPopulationShare(munId, formation.faction, population1991ByMun, 0.5);
+    return affinity >= RESERVE_COMMIT_MIN_AFFINITY;
 }
 
 /**
@@ -274,6 +310,102 @@ function disperseStackedRearBrigadesForSector(
  * Mutates state.military.formations (location_osid, entrenchment_turns) and
  * state.military.brigade_movement_orders.
  */
+function commitReserveToThreatenedFront(
+    state: GameState,
+    sector: CorpsFrontSector,
+    adjacency: Map<string, string[]>,
+    friendlySet: Set<string> | undefined,
+    opParticipants: Set<string>,
+    options: FrontDistributionOptions = {},
+): void {
+    if (!(options.enableStandingOgReserveCommit ?? ENABLE_STANDING_OG_RESERVE_COMMIT)) return;
+    if ((sector.threat_ratio ?? 0) < 1.5) return;
+
+    const formations = state.military.formations ?? {};
+    const activeCounts = countActiveBrigadesByOsid(formations);
+    const reserveCandidates = [
+        ...(sector.reserve_brigade_ids ?? []),
+        ...(sector.rear_brigade_ids ?? []),
+    ].sort(strictCompare);
+    if (reserveCandidates.length === 0) return;
+
+    const targetSubSegment = [...(sector.sub_segments ?? [])]
+        .filter((subSegment) => (subSegment.enemy_osids?.length ?? 0) > 0)
+        .filter((subSegment) => (subSegment.friendly_osids?.length ?? 0) > 0)
+        .sort((a, b) =>
+            (b.enemy_osids?.length ?? 0) - (a.enemy_osids?.length ?? 0)
+            || (b.length_edges ?? 0) - (a.length_edges ?? 0)
+            || strictCompare(a.sub_segment_id, b.sub_segment_id)
+        )[0];
+    if (!targetSubSegment) return;
+
+    const targetFrontOsids = [...new Set(targetSubSegment.friendly_osids ?? [])]
+        .filter((target) => !friendlySet || friendlySet.has(target))
+        .sort(strictCompare);
+    if (targetFrontOsids.length === 0) return;
+
+    const viable = reserveCandidates
+        .map((bid) => ({ bid, formation: formations[bid] }))
+        .filter((entry): entry is { bid: string; formation: FormationState } => !!entry.formation)
+        .filter((entry) => entry.formation.status === 'active')
+        .filter((entry) => entry.formation.kind === 'brigade' || entry.formation.kind === 'og' || entry.formation.kind === 'operational_group')
+        .filter((entry) => !!entry.formation.location_osid)
+        .filter((entry) => !opParticipants.has(entry.bid))
+        .filter((entry) => (entry.formation.disrupted_turns ?? 0) === 0)
+        .filter((entry) => !(state.military.brigade_movement_state?.[entry.bid]?.status === 'in_transit'))
+        .filter((entry) => !state.military.brigade_movement_orders?.[entry.bid])
+        .map((entry) => {
+            const reachableTargets = targetFrontOsids
+                .filter((target) => hasReserveCommitPopulationAffinity(
+                    entry.formation,
+                    target,
+                    options.population1991ByMun,
+                ))
+                .map((target) => ({
+                    target,
+                    dist: bfsDistance(entry.formation.location_osid as string, target, adjacency, friendlySet),
+                    count: activeCounts.get(target) ?? 0,
+                }))
+                .filter((target) => Number.isFinite(target.dist) && target.dist <= MAX_REDISTRIBUTION_DISTANCE)
+                .sort((a, b) =>
+                    a.count - b.count
+                    || a.dist - b.dist
+                    || strictCompare(a.target, b.target)
+                );
+            const bestTarget = reachableTargets[0];
+            return bestTarget ? {
+                bid: entry.bid,
+                formation: entry.formation,
+                target: bestTarget.target,
+                dist: bestTarget.dist,
+                targetCount: bestTarget.count,
+            } : null;
+        })
+        .filter((entry): entry is { bid: string; formation: FormationState; target: string; dist: number; targetCount: number } => entry != null)
+        .sort((a, b) =>
+            a.targetCount - b.targetCount
+            || a.dist - b.dist
+            || (b.formation.personnel ?? 0) - (a.formation.personnel ?? 0)
+            || strictCompare(a.bid, b.bid)
+        );
+
+    const best = viable[0];
+    if (!best) return;
+
+    if (best.dist <= 1) {
+        best.formation.location_osid = best.target;
+        best.formation.entrenchment_turns = 0;
+        activeCounts.set(best.target, (activeCounts.get(best.target) ?? 0) + 1);
+        return;
+    }
+
+    if (!state.military.brigade_movement_orders) {
+        state.military.brigade_movement_orders = {};
+    }
+    state.military.brigade_movement_orders[best.bid] = createColumnMovementOrder(best.target);
+    activeCounts.set(best.target, (activeCounts.get(best.target) ?? 0) + 1);
+}
+
 function fillEmptyFrontSubsegmentsFromSectorReserve(
     state: GameState,
     sector: CorpsFrontSector,
@@ -671,6 +803,15 @@ export function distributeBrigadesToFront(
                 // If dist > MAX_REDISTRIBUTION_DISTANCE or Infinity: skip
             }
         }
+
+        commitReserveToThreatenedFront(
+            state,
+            sector,
+            adjacency,
+            friendlyByFaction.get(sector.faction),
+            opParticipants,
+            options,
+        );
 
         fillEmptyFrontSubsegmentsFromSectorReserve(
             state,

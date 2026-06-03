@@ -114,6 +114,11 @@ export function resolveTgAnchor(
     }
     if (eligible.length === 0) return null;
 
+    if (axis.main_brigade) {
+        const main = eligible.find((f) => f.id === axis.main_brigade);
+        if (main) return main.id;
+    }
+
     // Rank by (basePower desc, id asc). Mirrors assignBrigadeRoles but over the
     // phantom-filtered, reservation-filtered survivors only.
     eligible.sort((a, b) => {

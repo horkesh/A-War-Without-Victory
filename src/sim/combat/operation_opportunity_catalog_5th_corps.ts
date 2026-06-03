@@ -83,6 +83,7 @@ const KRUPA_VALLEY_OBJECTIVES = [
     'op:bosanska_krupa:vranjska_2',
     'op:bosanska_krupa:jasenica_2',
     'op:bosanska_krupa:gornja_suvaja',
+    'op:bosanski_petrovac:krnjeusa',
 ];
 
 // R15 (2026-05-25): removed trubar from the sequence — trubar is NOT adjacent
@@ -93,9 +94,10 @@ const KRUPA_VALLEY_OBJECTIVES = [
 // orasac_2 then attacked trubar as an intermediate, accumulating spurious vrtoce
 // failure counts and stalling the axis before the Petrovac cluster could be
 // reached. Fix: vrtoce placed directly after orasac_2 (orasac_2→vrtoce IS
-// adjacent). trubar and krnjeusa are removed; both captured by consolidation
-// (trubar adjacent to captured orasac_2; krnjeusa adjacent to captured vrtoce +
-// gornja_suvaja on the sana_krupa axis). Verified adjacency chain (all ✓):
+// adjacent). trubar remains consolidation-only. Krnjeusa is explicit on the
+// sana_krupa flank because the 188w closeout proved consolidation can leave it
+// as an undefended RS island after gornja_suvaja/jasenica_2 fall. Verified
+// Petrovac corridor adjacency chain (all ✓):
 //   orasac_2 → vrtoce → prkosi → vodjenica → kolonic_2 →
 //   bosanski_petrovac_2 → dobro_selo_2 → jasenovac_2
 const BIHAC_PETROVAC_OBJECTIVES = [

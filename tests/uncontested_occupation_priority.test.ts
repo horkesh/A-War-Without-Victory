@@ -62,6 +62,65 @@ describe('uncontested occupation priority', () => {
         expect(state.military.brigade_attack_orders?.rs_test_brigade).toBe('op:test:empty_enemy');
     });
 
+    it('does not retry a recently repulsed walkover target as uncontested territory', () => {
+        const state = {
+            meta: { turn: 10, phase: 'war', seed: 'uncontested-occupation-repulse-memory' },
+            corps_front_directives: {},
+            political: {
+                political_controllers: {
+                    'op:test:front': 'RS',
+                    'op:test:empty_enemy': 'RBiH',
+                    'op:test:friendly_escape': 'RS',
+                    'op:test:friendly_escape_2': 'RS',
+                },
+            },
+            military: {
+                formations: {
+                    rs_test_brigade: {
+                        id: 'rs_test_brigade',
+                        kind: 'brigade',
+                        faction: 'RS',
+                        status: 'active',
+                        corps_id: 'vrs_test',
+                        posture: 'defend',
+                        cohesion: 70,
+                        morale: 70,
+                        personnel: 1000,
+                        location_osid: 'op:test:front',
+                        last_repulsed_from: { osid: 'op:test:empty_enemy', turn: 8 },
+                    },
+                },
+                corps_command: {
+                    vrs_test: {
+                        stance: 'balanced',
+                        active_operations: [],
+                    },
+                },
+                brigade_posture_orders: [],
+            },
+        } as unknown as GameState;
+
+        generateAllBotOrdersOsid(state, ['RS'], {
+            edges: [
+                { a: 'op:test:front', b: 'op:test:empty_enemy' },
+                { a: 'op:test:front', b: 'op:test:friendly_escape' },
+                { a: 'op:test:empty_enemy', b: 'op:test:friendly_escape' },
+                { a: 'op:test:empty_enemy', b: 'op:test:friendly_escape_2' },
+            ] as any,
+            adjacency: new Map([
+                ['op:test:front' as any, ['op:test:empty_enemy' as any, 'op:test:friendly_escape' as any]],
+                ['op:test:empty_enemy' as any, ['op:test:front' as any, 'op:test:friendly_escape' as any, 'op:test:friendly_escape_2' as any]],
+                ['op:test:friendly_escape' as any, ['op:test:front' as any, 'op:test:empty_enemy' as any]],
+                ['op:test:friendly_escape_2' as any, ['op:test:empty_enemy' as any]],
+            ]),
+            reverseMap: new Map(),
+            supplyStateByOsid: {} as any,
+            osidPopulationMap: new Map(),
+        });
+
+        expect(state.military.brigade_attack_orders?.rs_test_brigade).toBeUndefined();
+    });
+
     it('lets a defensive corps brigade walk into adjacent undefended enemy territory instead of passively digging in', () => {
         const state = {
             meta: { turn: 3, phase: 'war', seed: 'defensive-uncontested-occupation-priority' },

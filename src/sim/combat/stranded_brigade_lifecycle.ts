@@ -57,7 +57,10 @@ function isInActiveOperation(state: GameState, brigadeId: FormationId, corpsId: 
     const cmd = state.military.corps_command?.[corpsId];
     if (!cmd) return false;
     for (const op of cmd.active_operations) {
-        if (op.participating_brigades.includes(brigadeId)) return true;
+        for (const axis of op.axes ?? []) {
+            if ((axis.assigned_brigades ?? []).includes(brigadeId)) return true;
+        }
+        if ((op.participating_brigades ?? []).includes(brigadeId)) return true;
     }
     return false;
 }

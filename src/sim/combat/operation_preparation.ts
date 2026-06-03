@@ -83,6 +83,11 @@ import { formTacticalGroup } from './tactical_group_lifecycle.js';
 // ADR-0005 Phase 4: phantom-aware anchor resolution + dual-anchor de-confliction. Flag-gated.
 import { resolveTgAnchor, collectActiveAnchorIds } from './tactical_group_anchor.js';
 import { getReservedPrePlannedBrigadeIds } from './pre_planned_operations.js';
+import {
+    ENABLE_SHARED_SECTOR_DEFENSE,
+    getStandingOgDefenseBrigadeIds,
+    isStandingOgDefenseBrigadeAvailable,
+} from './standing_og_defense.js';
 // ADR-0006 Phase 3A: named TG commander + faction-asymmetric naming. Flag-gated (ENABLE_TG_FORMATION).
 import { assignTacticalCommander } from './officer_system.js';
 import { generateTacticalGroupName } from './tactical_group_naming.js';
@@ -399,7 +404,11 @@ export function estimateForceRatio(
                     if (objectiveEnemySectors.size > 0 && !objectiveEnemySectors.has(rec.enemy_sector_id)) continue;
                     const enemySector = state.military.corps_front_sectors?.[rec.enemy_sector_id];
                     if (!enemySector) continue;
-                    for (const bid of enemySector.assigned_brigade_ids ?? []) {
+                    const defenderIds = getStandingOgDefenseBrigadeIds(enemySector, ENABLE_SHARED_SECTOR_DEFENSE);
+                    for (const bid of defenderIds) {
+                        if (ENABLE_SHARED_SECTOR_DEFENSE
+                            && !isStandingOgDefenseBrigadeAvailable(state, bid, ENABLE_SHARED_SECTOR_DEFENSE)
+                        ) continue;
                         const b = state.military.formations?.[bid];
                         if (!b || b.status !== 'active') continue;
                         defenderFormations.push(b);

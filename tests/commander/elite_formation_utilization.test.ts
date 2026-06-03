@@ -646,6 +646,70 @@ describe('prepositioning pipeline priority', () => {
         expect(state.military.brigade_movement_orders?.['bde_1' as FormationId]).toBeUndefined();
     });
 
+    it('correctMarchOrders preserves active operation order from assigned front to axis approach', () => {
+        const state = makeMinimalState({
+            locationOsid: 'op:foca:patkovina',
+            orderDest: 'op:foca:prevrac',
+            orderStance: 'column',
+        });
+        const brigade = state.military.formations!['bde_1' as FormationId]!;
+        brigade.id = 'bde_1' as FormationId;
+        brigade.corps_id = 'vrs_herzegovina' as FormationId;
+        brigade.assigned_sub_segment_id = 'subseg:foca:0';
+        state.political!.political_controllers = {
+            'op:foca:patkovina': 'RS',
+            'op:foca:prevrac': 'RS',
+            'op:gorazde:kolovarice': 'RBiH',
+        } as any;
+        state.military.corps_front_sectors = {
+            'sector:foca:0': {
+                sub_segments: [{
+                    sub_segment_id: 'subseg:foca:0',
+                    friendly_osids: ['op:foca:patkovina'],
+                    enemy_osids: ['op:gorazde:kolovarice'],
+                    edge_ids: ['edge:foca'],
+                    length_edges: 1,
+                    primary_brigade_ids: ['bde_1'],
+                }],
+            },
+        } as any;
+        state.military.corps_command = {
+            vrs_herzegovina: {
+                active_operations: [{
+                    name: 'Operation Foca',
+                    type: 'sector_attack',
+                    phase: 'planning',
+                    started_turn: 5,
+                    phase_started_turn: 5,
+                    participating_brigades: ['bde_1'],
+                    objectives: ['op:gorazde:kolovarice'],
+                    current_objective_index: 0,
+                    axes: [{
+                        axis_id: 'foca_valley',
+                        name: 'Foca Valley',
+                        assigned_brigades: ['bde_1'],
+                        objectives: ['op:gorazde:kolovarice'],
+                        current_objective_index: 0,
+                        staging_osid: 'op:foca:foca_3',
+                        status: 'executing',
+                    }],
+                }],
+            },
+        } as any;
+        const adjacency = new Map<string, string[]>([
+            ['op:foca:patkovina', ['op:foca:prevrac']],
+            ['op:foca:prevrac', ['op:foca:patkovina', 'op:gorazde:kolovarice']],
+            ['op:gorazde:kolovarice', ['op:foca:prevrac']],
+        ]);
+
+        correctMarchOrders(state, adjacency);
+
+        expect(state.military.brigade_movement_orders?.['bde_1' as FormationId]).toEqual({
+            destination_sids: ['op:foca:prevrac'],
+            stance: 'column',
+        });
+    });
+
     it('correctTransitStates preserves stance column on corrected orders', () => {
         const state = makeMinimalState({
             inTransit: true,
@@ -680,6 +744,68 @@ describe('prepositioning pipeline priority', () => {
 
         expect(state.military.brigade_movement_state?.['bde_1' as FormationId]).toBeUndefined();
         expect(state.military.brigade_movement_orders?.['bde_1' as FormationId]).toBeUndefined();
+    });
+
+    it('correctTransitStates preserves active operation transit from assigned front to axis approach', () => {
+        const state = makeMinimalState({
+            locationOsid: 'op:foca:patkovina',
+            inTransit: true,
+            transitDest: 'op:foca:prevrac',
+        });
+        const brigade = state.military.formations!['bde_1' as FormationId]!;
+        brigade.id = 'bde_1' as FormationId;
+        brigade.corps_id = 'vrs_herzegovina' as FormationId;
+        brigade.assigned_sub_segment_id = 'subseg:foca:0';
+        state.political!.political_controllers = {
+            'op:foca:patkovina': 'RS',
+            'op:foca:prevrac': 'RS',
+            'op:gorazde:kolovarice': 'RBiH',
+        } as any;
+        state.military.corps_front_sectors = {
+            'sector:foca:0': {
+                sub_segments: [{
+                    sub_segment_id: 'subseg:foca:0',
+                    friendly_osids: ['op:foca:patkovina'],
+                    enemy_osids: ['op:gorazde:kolovarice'],
+                    edge_ids: ['edge:foca'],
+                    length_edges: 1,
+                    primary_brigade_ids: ['bde_1'],
+                }],
+            },
+        } as any;
+        state.military.corps_command = {
+            vrs_herzegovina: {
+                active_operations: [{
+                    name: 'Operation Foca',
+                    type: 'sector_attack',
+                    phase: 'planning',
+                    started_turn: 5,
+                    phase_started_turn: 5,
+                    participating_brigades: ['bde_1'],
+                    objectives: ['op:gorazde:kolovarice'],
+                    current_objective_index: 0,
+                    axes: [{
+                        axis_id: 'foca_valley',
+                        name: 'Foca Valley',
+                        assigned_brigades: ['bde_1'],
+                        objectives: ['op:gorazde:kolovarice'],
+                        current_objective_index: 0,
+                        staging_osid: 'op:foca:foca_3',
+                        status: 'executing',
+                    }],
+                }],
+            },
+        } as any;
+        const adjacency = new Map<string, string[]>([
+            ['op:foca:patkovina', ['op:foca:prevrac']],
+            ['op:foca:prevrac', ['op:foca:patkovina', 'op:gorazde:kolovarice']],
+            ['op:gorazde:kolovarice', ['op:foca:prevrac']],
+        ]);
+
+        correctTransitStates(state, adjacency);
+
+        expect(state.military.brigade_movement_state?.['bde_1' as FormationId]).toBeDefined();
+        expect(state.military.brigade_movement_state?.['bde_1' as FormationId]?.destination_sids?.[0]).toBe('op:foca:prevrac');
     });
 
     it('prepositioning overrides existing distribution order', () => {

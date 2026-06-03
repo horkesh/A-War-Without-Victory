@@ -72,7 +72,7 @@ import { backfillFormationLocationOsid, loadOperationalCentroids, loadOperationa
 import { setUrbanOsidSet, setForestOsidSet } from '../sim/combat/combat_math.js';
 import { loadUrbanOsidSet, loadForestOsidSet } from '../sim/combat/combat_terrain_sets_node.js';
 import { displaceFormationsInEnemyTerritory } from '../sim/combat/attack_resolution_osid.js';
-import { reconcileFinalSectorTruth } from '../sim/combat/final_sector_truth_reconciliation.js';
+import { reconcileFinalSectorTruth, sealFinalSectorTruthFromCurrentSectors } from '../sim/combat/final_sector_truth_reconciliation.js';
 import {
     applyBotOpportunityDecisions,
     autoResolveOpportunityProposalReviews,
@@ -2729,6 +2729,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 finalOperationalEdges,
                 operationalData.operationalToCanonical,
                 operationalCentroids,
+            );
+            sealFinalSectorTruthFromCurrentSectors(
+                state,
+                state.military.war_front_edges_osid ?? [],
+                null,
             );
         }
         const finalSerialized = _serTimeSync(emitTimingJson, timingTotals, 'final-save-serialize', () =>

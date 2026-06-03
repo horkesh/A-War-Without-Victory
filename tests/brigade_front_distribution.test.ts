@@ -947,4 +947,157 @@ describe('distributeBrigadesToFront', () => {
         ).toBe(true);
     });
 
+    it('keeps a hot but already occupied front unchanged when standing-OG reserve commit is disabled', () => {
+        const state = makeState({
+            brig_front: makeFormation({ location_osid: 'op:test:front', entrenchment_turns: 12 }),
+            brig_reserve: makeFormation({ location_osid: 'op:test:rear', entrenchment_turns: 12 }),
+        });
+
+        const sectors = [
+            makeSector({
+                assigned_brigade_ids: ['brig_front'],
+                reserve_brigade_ids: ['brig_reserve'],
+                rear_brigade_ids: [],
+                threat_ratio: 2.2,
+                territory_osids: ['op:test:front', 'op:test:rear'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:hot',
+                    friendly_osids: ['op:test:front'],
+                    enemy_osids: ['op:enemy:x', 'op:enemy:y'],
+                    primary_brigade_ids: ['brig_front'],
+                    edge_ids: ['edge:1'],
+                    length_edges: 1,
+                }],
+            }),
+        ];
+
+        const adjacency = makeAdjacency([
+            ['op:test:front', 'op:test:rear'],
+        ]);
+
+        distributeBrigadesToFront(state, sectors, adjacency);
+
+        expect(state.military.formations.brig_reserve.location_osid).toBe('op:test:rear');
+        expect(state.military.brigade_movement_orders?.brig_reserve).toBeUndefined();
+    });
+
+    it('commits one reserve to a threatened occupied front when standing-OG reserve commit is enabled', () => {
+        const state = makeState({
+            brig_front: makeFormation({ location_osid: 'op:test:front', entrenchment_turns: 12 }),
+            brig_reserve: makeFormation({ location_osid: 'op:test:rear', entrenchment_turns: 12 }),
+        });
+
+        const sectors = [
+            makeSector({
+                assigned_brigade_ids: ['brig_front'],
+                reserve_brigade_ids: ['brig_reserve'],
+                rear_brigade_ids: [],
+                threat_ratio: 2.2,
+                territory_osids: ['op:test:front', 'op:test:rear'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:hot',
+                    friendly_osids: ['op:test:front'],
+                    enemy_osids: ['op:enemy:x', 'op:enemy:y'],
+                    primary_brigade_ids: ['brig_front'],
+                    edge_ids: ['edge:1'],
+                    length_edges: 1,
+                }],
+            }),
+        ];
+
+        const adjacency = makeAdjacency([
+            ['op:test:front', 'op:test:rear'],
+        ]);
+
+        distributeBrigadesToFront(state, sectors, adjacency, { enableStandingOgReserveCommit: true });
+
+        expect(state.military.formations.brig_reserve.location_osid).toBe('op:test:front');
+        expect(state.military.brigade_movement_orders?.brig_reserve).toBeUndefined();
+        expect(state.military.formations.brig_reserve.entrenchment_turns).toBe(0);
+    });
+
+    it('avoids committing a standing-OG reserve to a low-affinity front target', () => {
+        const state = makeState({
+            brig_hostile_front: makeFormation({ location_osid: 'op:aaa_hostile:front', entrenchment_turns: 12 }),
+            brig_viable_front: makeFormation({ location_osid: 'op:zzz_viable:front', entrenchment_turns: 12 }),
+            brig_reserve: makeFormation({ location_osid: 'op:zzz_viable:rear', entrenchment_turns: 12 }),
+        });
+
+        const sectors = [
+            makeSector({
+                assigned_brigade_ids: ['brig_hostile_front', 'brig_viable_front'],
+                reserve_brigade_ids: ['brig_reserve'],
+                rear_brigade_ids: [],
+                threat_ratio: 2.2,
+                territory_osids: ['op:aaa_hostile:front', 'op:zzz_viable:front', 'op:zzz_viable:rear'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:hot',
+                    friendly_osids: ['op:aaa_hostile:front', 'op:zzz_viable:front'],
+                    enemy_osids: ['op:enemy:x', 'op:enemy:y'],
+                    primary_brigade_ids: ['brig_hostile_front', 'brig_viable_front'],
+                    edge_ids: ['edge:1'],
+                    length_edges: 2,
+                }],
+            }),
+        ];
+
+        const adjacency = makeAdjacency([
+            ['op:zzz_viable:rear', 'op:aaa_hostile:front'],
+            ['op:zzz_viable:rear', 'op:zzz_viable:front'],
+        ]);
+
+        distributeBrigadesToFront(state, sectors, adjacency, {
+            enableStandingOgReserveCommit: true,
+            population1991ByMun: {
+                aaa_hostile: { total: 1000, bosniak: 800, serb: 100, croat: 50, other: 50 },
+                zzz_viable: { total: 1000, bosniak: 100, serb: 800, croat: 50, other: 50 },
+            },
+        });
+
+        expect(state.military.formations.brig_reserve.location_osid).toBe('op:zzz_viable:front');
+        expect(state.military.brigade_movement_orders?.brig_reserve).toBeUndefined();
+    });
+
+    it('does not commit a corps-command operation participant as a standing-OG reserve', () => {
+        const state = makeState({
+            brig_front: makeFormation({ location_osid: 'op:test:front', entrenchment_turns: 12 }),
+            brig_reserve: makeFormation({ location_osid: 'op:test:rear', entrenchment_turns: 12 }),
+        });
+        state.military.corps_command = {
+            test_corps: {
+                active_operations: [{
+                    phase: 'execution',
+                    participating_brigades: ['brig_reserve'],
+                }],
+            },
+        };
+
+        const sectors = [
+            makeSector({
+                assigned_brigade_ids: ['brig_front'],
+                reserve_brigade_ids: ['brig_reserve'],
+                rear_brigade_ids: [],
+                threat_ratio: 2.2,
+                territory_osids: ['op:test:front', 'op:test:rear'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:hot',
+                    friendly_osids: ['op:test:front'],
+                    enemy_osids: ['op:enemy:x', 'op:enemy:y'],
+                    primary_brigade_ids: ['brig_front'],
+                    edge_ids: ['edge:1'],
+                    length_edges: 1,
+                }],
+            }),
+        ];
+
+        const adjacency = makeAdjacency([
+            ['op:test:front', 'op:test:rear'],
+        ]);
+
+        distributeBrigadesToFront(state, sectors, adjacency, { enableStandingOgReserveCommit: true });
+
+        expect(state.military.formations.brig_reserve.location_osid).toBe('op:test:rear');
+        expect(state.military.brigade_movement_orders?.brig_reserve).toBeUndefined();
+    });
+
 });

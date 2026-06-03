@@ -139,6 +139,38 @@ describe('Phase 4 Fix 2 — dual-anchor de-confliction', () => {
         expect(anchor).toBe('rs_a');
     });
 
+    it('honors an explicit authored main brigade before fallback power ranking', () => {
+        const state = stateWith([
+            brigade('rs_foa_brigade', { personnel: 1000 }),
+            brigade('rs_bilea_brigade', { personnel: 2000 }),
+        ]);
+        const anchor = resolveTgAnchor(
+            state,
+            {
+                main_brigade: 'rs_foa_brigade',
+                assigned_brigades: ['rs_foa_brigade', 'rs_bilea_brigade'],
+            },
+            new Set(),
+        );
+        expect(anchor).toBe('rs_foa_brigade');
+    });
+
+    it('falls back when the explicit main brigade is reserved', () => {
+        const state = stateWith([
+            brigade('rs_foa_brigade', { personnel: 1000 }),
+            brigade('rs_bilea_brigade', { personnel: 2000 }),
+        ]);
+        const anchor = resolveTgAnchor(
+            state,
+            {
+                main_brigade: 'rs_foa_brigade',
+                assigned_brigades: ['rs_foa_brigade', 'rs_bilea_brigade'],
+            },
+            new Set(['rs_foa_brigade']),
+        );
+        expect(anchor).toBe('rs_bilea_brigade');
+    });
+
     it('collectActiveAnchorIds seeds the reservation set from live TGs (excludes dissolved)', () => {
         const tgs: Record<string, TacticalGroup> = {
             'tg:vrs_corp:OpA:rs_1st_bratunac': {

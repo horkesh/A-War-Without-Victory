@@ -35,10 +35,49 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random(), no timestamps.
  */
 
-import type { FactionId, GameState } from '../../state/game_state.js';
+import type { CorpsOperation, FactionId, FormationId, GameState, OperationAxis } from '../../state/game_state.js';
 import { bfsDistance } from './sector_utils.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
+
+function axisForBrigade(op: CorpsOperation, brigadeId: FormationId): OperationAxis | undefined {
+    return op.axes?.find((axis) => axis.assigned_brigades.includes(brigadeId));
+}
+
+function activeOperationRelevantDestination(
+    state: GameState,
+    brigadeId: FormationId,
+    destinationOsid: string,
+    adjacency: Map<string, string[]>,
+): boolean {
+    const formation = state.military.formations?.[brigadeId];
+    const corpsId = formation?.corps_id;
+    if (!corpsId) return false;
+    const cmd = state.military.corps_command?.[corpsId];
+    if (!cmd) return false;
+
+    const pc = state.political?.political_controllers ?? {};
+    for (const op of cmd.active_operations ?? []) {
+        if (op.phase !== 'planning' && op.phase !== 'execution') continue;
+        const axis = axisForBrigade(op, brigadeId);
+        const participates = axis
+            ? true
+            : op.participating_brigades.includes(brigadeId);
+        if (!participates) continue;
+
+        const stagingOsid = axis?.staging_osid ?? op.staging_osid;
+        if (stagingOsid === destinationOsid) return true;
+
+        const objectives = axis?.objectives ?? op.objectives ?? [];
+        const currentIndex = axis?.current_objective_index ?? op.current_objective_index ?? 0;
+        for (const objective of objectives.slice(currentIndex)) {
+            if (!adjacency.get(objective)?.includes(destinationOsid)) continue;
+            const controller = pc[destinationOsid];
+            if (controller === formation.faction) return true;
+        }
+    }
+    return false;
+}
 
 export function correctMarchOrders(state: GameState, adjacency: Map<string, string[]>): void {
     const formations = state.military.formations ?? {};
@@ -87,6 +126,7 @@ export function correctMarchOrders(state: GameState, adjacency: Map<string, stri
         const dest = order.destination_sids?.[0];
         if (!dest) continue;
         if (frontOsids.includes(dest)) continue; // Destination already correct
+        if (activeOperationRelevantDestination(state, bid as FormationId, dest, adjacency)) continue;
         if (atAssignedFront) {
             delete state.military.brigade_movement_orders?.[bid];
             continue;
@@ -178,6 +218,14 @@ export function correctTransitStates(state: GameState, adjacency: Map<string, st
         }
 
         // Wrong transit destination — cancel transit state first, then issue corrected order
+        if (
+            brigadeAlreadyAtValidFront
+            && !frontOsids.includes(transitDest)
+            && activeOperationRelevantDestination(state, bid as FormationId, transitDest, adjacency)
+        ) {
+            continue;
+        }
+
         if (brigadeAlreadyAtValidFront && !frontOsids.includes(transitDest)) {
             delete moveStates[bid];
             delete state.military.brigade_movement_orders?.[bid];
