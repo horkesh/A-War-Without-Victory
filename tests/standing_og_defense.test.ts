@@ -131,6 +131,27 @@ describe('isStandingOgDefenseBrigadeAvailable', () => {
         expect(isStandingOgDefenseBrigadeAvailable(state, 'brigade_b', true)).toBe(true);
     });
 
+    it('excludes axis-assigned operation brigades when shared sector defense is enabled', () => {
+        const state = {
+            military: {
+                corps_command: {
+                    corps_a: {
+                        active_operations: [
+                            {
+                                axes: [
+                                    { assigned_brigades: ['axis_brigade'] },
+                                ],
+                            },
+                        ],
+                    },
+                },
+            },
+        } as unknown as GameState;
+
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'axis_brigade', true)).toBe(false);
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'other_brigade', true)).toBe(true);
+    });
+
     it('excludes active tactical-group anchors and donors when shared sector defense is enabled', () => {
         const state = {
             military: {

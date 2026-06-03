@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-03] fix(engine): protect operation-axis brigades from shared Standing OG defense
+
+**Type:** Engine invariant fix, flag-gated by existing default-off ADR-0007 Phase C. The shared-defense availability helper excluded flat `participating_brigades` from `corps_command.active_operations`, but did not exclude brigades assigned through operation `axes[*].assigned_brigades`. Under `ENABLE_SHARED_SECTOR_DEFENSE=true`, that left an axis participant borrowable as a reactive sector defender in the same turn. The helper now treats axis-assigned brigades as unavailable for shared defense; flag-off behavior remains unchanged.
+
+**Evidence:** Red/green regression `tests/standing_og_defense.test.ts` first failed for an axis-assigned operation brigade, then passed after the helper fix. Focused combat slice passes 94/94 (`standing_og_defense`, `bot_orders_perf_profile`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`, `sector_counter_attack`), and `git diff --check` is clean. Fresh temporary combined C+B probe `n19` produced the same final hash as `n17` (`dbe6cdb8d2c81d81`), so this is a correctness hardening rather than a scenario-moving activation fix. ADR-0007 remains default-off; the next blocker is still the C+B interaction / residual zero-morale cases.
+
+**Files:** `src/sim/combat/standing_og_defense.ts`, `tests/standing_og_defense.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
 ## [2026-06-03] fix(engine): protect corps-command operation brigades from Standing OG reserve commit
 
 **Type:** Engine invariant fix, flag-gated by existing default-off ADR-0007 Phase B. The Standing OG reserve-commit scaffold already skipped operation participants, but its participant scanner only read legacy `formations[*].active_operations` on `corps_asset` formations. Current operations live primarily in `state.military.corps_command[*].active_operations`, so a flag-on Phase B pass could pull an already committed operation brigade out of the rear/reserve pool and move it to a threatened defensive front. The scanner now includes current corps-command operations and axis-assigned brigades as well as flat `participating_brigades`; default-off behavior remains unchanged.

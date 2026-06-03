@@ -50,6 +50,9 @@ export function isStandingOgDefenseBrigadeAvailable(
     for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
         const command = corpsCommand[corpsId];
         for (const op of command?.active_operations ?? []) {
+            for (const axis of op.axes ?? []) {
+                if ((axis.assigned_brigades ?? []).includes(brigadeId)) return false;
+            }
             if ((op.participating_brigades ?? []).includes(brigadeId)) return false;
         }
     }
