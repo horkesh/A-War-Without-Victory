@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-03] fix(engine): enforce active-op precedence for shared Standing OG defense
+
+**Type:** Engine invariant fix, flag-gated by existing default-off ADR-0007 Phase C. ADR-0007 guardrail 5 says a brigade committed to an active operation or active TG/offensive donor must not also be borrowed as a reactive Standing OG defender that turn. Phase C's widened defensive roster now filters out active-operation participants plus active tactical-group anchors/donors when `ENABLE_SHARED_SECTOR_DEFENSE=true`; flag-off behavior remains unchanged.
+
+**Evidence:** Focused tests pass: `standing_og_defense.test.ts` + `bot_orders_perf_profile.test.ts` 19/19, and the broader combat slice remains green at 92/92 (`standing_og_defense`, `bot_orders_perf_profile`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`, `sector_counter_attack`). Fresh temporary Phase C-only probe after active-op precedence (`n15`, hash `2009e7c810bd796e`) improves over predictor-parity C-only `n14` (`9ea9fe120835ac12`): orders 148 -> 156 (default `n9` 164), battles 114 -> 122 (default 127), defender-absent battles 32 -> 43, defender-present battles 82 -> 79, attacker casualties 17,735 -> 17,503, defender casualties 29,531 -> 29,785, zero-morale active brigades stay 2, zero-cohesion active brigades stay 0. It remains below default on flips/control: flips stay 37 vs default 41 and final control counts stay `HRHB:89,RBiH:254,RS:369` vs default `HRHB:88,RBiH:249,RS:375`. Interpretation: active-op precedence substantially recovers Phase C throughput, but Phase C is still not activation-green.
+
+**Files:** `src/sim/combat/standing_og_defense.ts`, `src/sim/combat/attack_resolution_osid.ts`, `src/sim/combat/combat_predictor.ts`, `tests/standing_og_defense.test.ts`, `tests/bot_orders_perf_profile.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
 ## [2026-06-03] fix(engine): align combat predictor with shared Standing OG defense
 
 **Type:** Engine predictor/resolver parity fix, flag-gated by existing default-off ADR-0007 Phase C. The real resolver used the Phase C shared-defense roster and contributing-power cap basis, but `combat_predictor.ts` still estimated sector defense from assigned brigades only and capped reactive defense on the old average-brigade basis. Under `ENABLE_SHARED_SECTOR_DEFENSE=true`, bot planning therefore evaluated a different defense model than combat resolution applied. The predictor now uses `getStandingOgDefenseBrigadeIds(sector, ENABLE_SHARED_SECTOR_DEFENSE)` and mirrors the resolver's `avgReactivePower` cap/floor basis.

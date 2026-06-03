@@ -117,6 +117,7 @@ import {
     ENABLE_SHARED_SECTOR_DEFENSE,
     getStandingOgDefenseBrigadeIds,
     getStandingOgEngagedDefenseBrigadeIds,
+    isStandingOgDefenseBrigadeAvailable,
 } from './standing_og_defense.js';
 // ADR-0005 v2.2c #2: Hard Invariant #6 — immediate dissolution on anchor destruction.
 import { dissolveTacticalGroup, TG_ANCHOR_DISSOLVE_COHESION_FLOOR } from './tactical_group_lifecycle.js';
@@ -668,7 +669,11 @@ export function resolveAttackOrdersOsid(
             const sectorBrigades = sector
                 ? getStandingOgDefenseBrigadeIds(sector, ENABLE_SHARED_SECTOR_DEFENSE)
                     .map(id => state.military.formations?.[id])
-                    .filter((f): f is FormationState => f != null && f.status === 'active')
+                    .filter((f): f is FormationState =>
+                        f != null
+                        && f.status === 'active'
+                        && isStandingOgDefenseBrigadeAvailable(state, f.id, ENABLE_SHARED_SECTOR_DEFENSE)
+                    )
                 : [];
             if (sectorBrigades.length > 0) {
                 const { primary, totalPower } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);

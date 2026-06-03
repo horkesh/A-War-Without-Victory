@@ -79,7 +79,11 @@ import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sec
 import { getEnclaveGarrisonPower } from './enclave_resilience.js';
 import { getSectorPairIntelConfidence } from './sector_intel.js';
 import { buildLocalFrontDensityModifierByFormationIdForSector } from './local_front_defense.js';
-import { ENABLE_SHARED_SECTOR_DEFENSE, getStandingOgDefenseBrigadeIds } from './standing_og_defense.js';
+import {
+    ENABLE_SHARED_SECTOR_DEFENSE,
+    getStandingOgDefenseBrigadeIds,
+    isStandingOgDefenseBrigadeAvailable,
+} from './standing_og_defense.js';
 
 // Backward-compat re-export
 export type PredictedOutcome = CombatOutcome;
@@ -336,7 +340,11 @@ export function predictCombatOutcome(
             () => sector
                 ? getStandingOgDefenseBrigadeIds(sector, ENABLE_SHARED_SECTOR_DEFENSE)
                     .map(id => state.military.formations?.[id])
-                    .filter((f): f is FormationState => f != null && f.status === 'active')
+                    .filter((f): f is FormationState =>
+                        f != null
+                        && f.status === 'active'
+                        && isStandingOgDefenseBrigadeAvailable(state, f.id, ENABLE_SHARED_SECTOR_DEFENSE)
+                    )
                 : [],
         );
         if (sectorBrigades.length > 0) {

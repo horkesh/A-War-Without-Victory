@@ -6,6 +6,7 @@ import {
     detectStandingOgSoloDefenderHotspots,
     getStandingOgDefenseBrigadeIds,
     getStandingOgEngagedDefenseBrigadeIds,
+    isStandingOgDefenseBrigadeAvailable,
 } from '../src/sim/combat/standing_og_defense.js';
 
 function makeSector(overrides: Partial<CorpsFrontSector>): CorpsFrontSector {
@@ -89,6 +90,69 @@ describe('getStandingOgEngagedDefenseBrigadeIds', () => {
         expect(getStandingOgEngagedDefenseBrigadeIds(primary, [{ id: 'reserve' }, primary], weights, true)).toEqual([
             'primary',
         ]);
+    });
+});
+
+describe('isStandingOgDefenseBrigadeAvailable', () => {
+    it('preserves availability when shared sector defense is disabled', () => {
+        const state = {
+            military: {
+                corps_command: {
+                    corps_a: {
+                        active_operations: [
+                            {
+                                participating_brigades: ['brigade_a'],
+                            },
+                        ],
+                    },
+                },
+            },
+        } as unknown as GameState;
+
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'brigade_a', false)).toBe(true);
+    });
+
+    it('excludes brigades committed to active operations when shared sector defense is enabled', () => {
+        const state = {
+            military: {
+                corps_command: {
+                    corps_a: {
+                        active_operations: [
+                            {
+                                participating_brigades: ['brigade_a'],
+                            },
+                        ],
+                    },
+                },
+            },
+        } as unknown as GameState;
+
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'brigade_a', true)).toBe(false);
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'brigade_b', true)).toBe(true);
+    });
+
+    it('excludes active tactical-group anchors and donors when shared sector defense is enabled', () => {
+        const state = {
+            military: {
+                tactical_groups: {
+                    'tg:a': {
+                        status: 'active',
+                        anchor_brigade_id: 'anchor',
+                        donor_contributions: [{ brigade_id: 'donor' }],
+                    },
+                    'tg:b': {
+                        status: 'dissolved',
+                        anchor_brigade_id: 'released_anchor',
+                        donor_contributions: [{ brigade_id: 'released_donor' }],
+                    },
+                },
+            },
+        } as unknown as GameState;
+
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'anchor', true)).toBe(false);
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'donor', true)).toBe(false);
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'released_anchor', true)).toBe(true);
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'released_donor', true)).toBe(true);
     });
 });
 

@@ -39,6 +39,32 @@ export function getStandingOgEngagedDefenseBrigadeIds(
     return engagedIds.length > 0 ? engagedIds : [defenderFormation.id];
 }
 
+export function isStandingOgDefenseBrigadeAvailable(
+    state: Pick<GameState, 'military'>,
+    brigadeId: FormationId,
+    enableSharedSectorDefense: boolean = ENABLE_SHARED_SECTOR_DEFENSE,
+): boolean {
+    if (!enableSharedSectorDefense) return true;
+
+    const corpsCommand = state.military?.corps_command ?? {};
+    for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+        const command = corpsCommand[corpsId];
+        for (const op of command?.active_operations ?? []) {
+            if ((op.participating_brigades ?? []).includes(brigadeId)) return false;
+        }
+    }
+
+    const tacticalGroups = state.military?.tactical_groups ?? {};
+    for (const tgId of Object.keys(tacticalGroups).sort(strictCompare)) {
+        const tg = tacticalGroups[tgId];
+        if (!tg || tg.status === 'dissolved') continue;
+        if (tg.anchor_brigade_id === brigadeId) return false;
+        if (tg.donor_contributions.some((donor) => donor.brigade_id === brigadeId)) return false;
+    }
+
+    return true;
+}
+
 export interface StandingOgSoloDefenderHotspot {
     sector_id: string;
     holder_brigade_id: FormationId;
