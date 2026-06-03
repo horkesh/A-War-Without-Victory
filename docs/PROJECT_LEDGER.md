@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-03] fix(data): rehome 712th Mountain to Turbe after post-hardening probe
+
+**Type:** Scenario/OOB data correction plus deliberate baseline re-floor. The parked 712th Mountain Brigade placement fix is now promoted after the default-path repulse-memory hardening removed the unrelated 3rd-Corps integrity blocker. `arbih_712th_mountain` no longer uses phantom `home_osid` `op:travnik:krusevo_brdo_i`, which forced recruitment fallback placement into the wrong operational context; it now starts at `op:travnik:turbe_2`.
+
+**Evidence:** Fresh post-hardening 40w probe with the promoted OOB edit (`apr1992_definitive_40w__3649b3861a87e6ea__w40_n9`, final hash `e586d024066012c4`) keeps `arbih_712th_mountain` active at `op:travnik:turbe_2` with 1,800 personnel, morale 78, cohesion 56.46, fatigue 0, and front-sector assignment `sector:arbih_3rd_corps:2`. The prior residual 3rd-Corps brigades remain healthy: 303rd active at 1,800/m46/c56.46/f0, 319th active at 1,081/m90/c56.46/f0, 330th active at 1,800/m84/c56.46/f0, and 7th Viteska Muslim active at 2,200/m47/c58.55/f0. Cardak repeat battles stay at 5, and the run emits no 3rd-Corps integrity/morale residual report. Baselines are re-floored in this batch because both the repulse-memory fix and OOB correction are intentional default-path output changes; only `apr1992_52w` manifest hashes move, and the post-update verifier reports `Baseline regression: all scenarios match.` Focused suites also pass after the OOB promotion: 53/53 (`uncontested_occupation_priority`, `sector_counter_attack`, `catastrophic_stall`, `bot_operation_objective_focus`, `defensive_front_gap_count_cache`) and 81/81 (`standing_og_defense`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`, `sector_counter_attack`).
+
+**Files:** `data/source/oob_brigades.json`, `data/derived/scenario/baselines/manifest.json`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
 ## [2026-06-03] fix(engine): repulse memory blocks repeated uncontested walkover attacks
 
 **Type:** Engine behavior hardening (default path, deterministic). The 3rd-Corps residual behind the Standing OG acceptance blocker was traced to non-operation bot attacks into `op:zavidovici:cardak_2`, not to ADR-0007 shared-defense fatigue. Root cause: `evaluateUncontestedOccupation(...)` treated an adjacent enemy OSID with no physical brigade as a free walkover even after the same attacker had just been catastrophically repulsed by abstract sector defense there. The combat predictor already learns from `last_repulsed_from`, but the walkover path bypassed prediction entirely. The fix adds a narrow 4-turn repulse cooldown for uncontested occupation targets and also prevents broadened sector counterattacks from choosing a target the same brigade was recently repulsed from.
