@@ -68,7 +68,7 @@ import {
     getPowerRatioCasualtyMult,
     MIN_DEFENSE_FLOOR_FRACTION,
     MAX_EDGES_PER_BRIGADE,
-    REACTIVE_DEFENSE_RATIO,
+    getSectorReactiveDefensePredictionRatio,
     DEFENDER_CASUALTY_ENGAGEMENT_CAP,
     bfsDistanceFriendly,
     getReactiveDistanceWeight,
@@ -404,7 +404,7 @@ export function predictCombatOutcome(
                 : avgBrigadePower;
             const reactiveResponse = Math.min(
                 boostedReserves,
-                attackerCount * avgReactivePower * REACTIVE_DEFENSE_RATIO
+                attackerCount * avgReactivePower * getSectorReactiveDefensePredictionRatio(ENABLE_SHARED_SECTOR_DEFENSE)
             );
             const baseDef = physicalPower + reactiveResponse;
             const minFloor = avgReactivePower * MIN_DEFENSE_FLOOR_FRACTION;

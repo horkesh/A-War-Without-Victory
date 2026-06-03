@@ -93,7 +93,7 @@ import {
     rankDefendersByPower,
     MIN_DEFENSE_FLOOR_FRACTION,
     MAX_EDGES_PER_BRIGADE,
-    REACTIVE_DEFENSE_RATIO,
+    getSectorReactiveDefenseResolutionRatio,
     DEFENDER_CASUALTY_ENGAGEMENT_CAP,
     bfsDistanceFriendly,
     getReactiveDistanceWeight,
@@ -746,7 +746,7 @@ export function resolveAttackOrdersOsid(
                     : avgBrigadePower;
                 const reactiveResponse = Math.min(
                     boostedReserves,
-                    attackerFormations.length * avgReactivePower * REACTIVE_DEFENSE_RATIO
+                    attackerFormations.length * avgReactivePower * getSectorReactiveDefenseResolutionRatio(ENABLE_SHARED_SECTOR_DEFENSE)
                 );
                 defenderPower = physicalPower + reactiveResponse;
                 const minFloor = avgReactivePower * MIN_DEFENSE_FLOOR_FRACTION;
