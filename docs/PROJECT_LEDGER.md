@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-03] fix(ci): reconcile Standing OG Phase C baseline manifest and static guard
+
+**Type:** CI/baseline closeout for PR #144. The Standing OG Phase C branch had two stale proof surfaces after the final sector-seal commit: `tests/bot_orders_perf_profile.test.ts` still pinned the old literal `REACTIVE_DEFENSE_RATIO` expression even though the predictor now routes the cap through `getSectorReactiveDefensePredictionRatio(...)`, and `data/derived/scenario/baselines/manifest.json` still held an earlier apr1992_52w baseline hash set that the branch head no longer reproduced.
+
+**What changed:** updated the static perf-profile guard to pin the new helper call, then regenerated the scenario baseline manifest with the canonical `UPDATE_BASELINES=1` runner. The apr1992_52w hash set now matches the reproducible branch-head output; the 4w scenario hashes remain unchanged.
+
+**Evidence:** focused fast-test repro initially failed on `tests/bot_orders_perf_profile.test.ts` and now passes with `node node_modules\vitest\vitest.mjs run tests\bot_operation_objective_focus.test.ts tests\bot_orders_perf_profile.test.ts --reporter=dot` (17/17). Two direct apr1992_52w branch-head probes produced the same `activity_summary.json` SHA256 `9b11b1e75daac9ef71c5239d85892258a8ff947fa8a7a4baa6a96787320bf923`, matching the CI-observed actual hash. `UPDATE_BASELINES=1 node node_modules\tsx\dist\cli.mjs tools\scenario_runner\run_baseline_regression.ts` refreshed the manifest, and clean check-mode `node node_modules\tsx\dist\cli.mjs tools\scenario_runner\run_baseline_regression.ts` then reported `Baseline regression: all scenarios match.` Transient `_baseline_tmp` replay sequence sidecars were removed after verification.
+
+**Files:** `data/derived/scenario/baselines/manifest.json`, `tests/bot_operation_objective_focus.test.ts`, `tests/bot_orders_perf_profile.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-03] fix(engine): close Standing OG 188w final-sector seal
 
 **Type:** Engine final-save/sector-truth hardening plus ADR-0007 closeout support. This is a default-path correctness batch for final serialized sector truth, combat intel refresh, and Operation Sana opportunity coverage; ADR-0007 shared-defense flags remain default-off.
