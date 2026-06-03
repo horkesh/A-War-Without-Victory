@@ -2,9 +2,9 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-> **Status:** First implementation slice closed 2026-05-21. The measured target was `buildFactionSectors:*` / corps-sector construction, and the accepted optimization is an invocation-local per-corps formation scan index in `src/sim/combat/sector_building.ts`. See `docs/40_reports/implemented/20260521_SECTOR_FORMATION_SCAN_INDEX_CACHE.md`. This plan remains the active template for the next sector-performance pass: re-profile first, pick one remaining owner, and keep byte-identity gates.
+> **Status:** Current closeout 2026-06-03: `ensureMinimumSectorCoverage(...)` now reuses invocation-local sector-component lookups. See `docs/40_reports/implemented/20260603_SECTOR_COVERAGE_COMPONENT_CACHE.md`. This plan remains the active template for the next sector-performance pass: re-profile first, pick one remaining owner, and keep byte-identity gates.
 
-> **Current clean pre-change baseline:** `5d94adbfdb09bbda`. The prior comparison hash `f219401f4a17f311` is now superseded for this lane; read-only comparison found the old-to-current drift was save-shape/schema drift only, not sector/frontline behavior drift.
+> **Current clean pre-change baseline:** `e086afbefcef01e6` as of 2026-06-03. The older `5d94adbfdb09bbda` and `f219401f4a17f311` comparison hashes are superseded for this lane; use fresh profiling from current main before the next slice.
 
 **Goal:** Turn the sector reconstruction performance lane into one measured next-target implementation plan with byte-identity proof gates.
 

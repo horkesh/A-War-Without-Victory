@@ -481,6 +481,30 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(region).not.toMatch(/\bperformance\.now\s*\(/);
     });
 
+    it('static contract: ensureMinimumSectorCoverage reuses invocation-local sector components', () => {
+        const raw = readFileSync(resolve('src/sim/combat/brigade_assignment.ts'), 'utf8');
+        const startIdx = raw.indexOf('export function ensureMinimumSectorCoverage(');
+        const endIdx = raw.indexOf('\nexport function deduplicateBrigadesAcrossSectors', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        expect(region).toContain('const sectorComponentCache = new Map<CorpsFrontSector, number>();');
+        expect(region).toContain('const componentForSector = (sector: CorpsFrontSector): number => {');
+        expect(region).toContain('const computed = getSectorComponent(sector, componentOf);');
+        expect(region).toContain('sectorComponentCache.set(sector, computed);');
+
+        const helperIdx = region.indexOf('const componentForSector = (sector: CorpsFrontSector): number => {');
+        const afterHelper = region.slice(region.indexOf("perfTime('ensureMinimumSectorCoverage:territory-claim-rescue'", helperIdx));
+        expect(afterHelper).not.toContain('getSectorComponent(s, componentOf)');
+        expect(afterHelper).not.toContain('getSectorComponent(sector, componentOf)');
+        expect(afterHelper).not.toContain('getSectorComponent(recipient, componentOf)');
+        expect(afterHelper).not.toContain('getSectorComponent(donor, componentOf)');
+        expect(region).not.toMatch(/\bDate\.now\s*\(/);
+        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
+    });
+
     it('static contract: pickVacantLocalFrontTarget keeps deterministic loop and final sort', () => {
         const raw = readFileSync(resolve('src/sim/combat/brigade_assignment.ts'), 'utf8');
         const startIdx = raw.indexOf('const pickVacantLocalFrontTarget = (');

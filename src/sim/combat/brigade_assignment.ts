@@ -1618,6 +1618,14 @@ export function ensureMinimumSectorCoverage(
     const DENSITY_FLOOR_THREAT_GATE = 300;
     const needed = (s: CorpsFrontSector): number =>
         Math.max(1, Math.ceil(s.length_edges / DENSITY_FLOOR_EDGES_PER_BRIGADE));
+    const sectorComponentCache = new Map<CorpsFrontSector, number>();
+    const componentForSector = (sector: CorpsFrontSector): number => {
+        const cached = sectorComponentCache.get(sector);
+        if (cached !== undefined) return cached;
+        const computed = getSectorComponent(sector, componentOf);
+        sectorComponentCache.set(sector, computed);
+        return computed;
+    };
 
     perfTime('ensureMinimumSectorCoverage:territory-claim-rescue', () => {
     // ── Pre-pass: territory-claim rescue for zero-brigade split children ──────────
@@ -1659,7 +1667,7 @@ export function ensureMinimumSectorCoverage(
                     if (!zeroTerritory.has(f.location_osid)) continue;  // not in zero-child territory
                     if (donorFrontOsids.has(f.location_osid)) {
                         const sharedFrontOverlap = zeroFrontOsids.has(f.location_osid);
-                        const sameComponent = getSectorComponent(s, componentOf) === getSectorComponent(zero, componentOf);
+                        const sameComponent = componentForSector(s) === componentForSector(zero);
                         if (!sharedFrontOverlap) continue;
                         if (!sameComponent) continue;
                         candidates.push({ donor: s, bid, rescueKind: 'shared_front_overlap' });
@@ -1694,7 +1702,7 @@ export function ensureMinimumSectorCoverage(
         for (const sector of corpsSectors) {
             if (sector.assigned_brigade_ids.length > 0) continue;
 
-            const sectorComp = getSectorComponent(sector, componentOf);
+            const sectorComp = componentForSector(sector);
 
             // Step 1: promote first connected reserve to assigned
             const promotedReserve = perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:promote-reserve', () => {
@@ -1725,7 +1733,7 @@ export function ensureMinimumSectorCoverage(
                 const rearCandidates = corpsSectors
                     .filter(s =>
                         s.sector_id !== sector.sector_id
-                        && getSectorComponent(s, componentOf) === sectorComp)
+                        && componentForSector(s) === sectorComp)
                     .flatMap((donor) => {
                         return [...(donor.rear_brigade_ids ?? [])]
                             .sort(strictCompare)
@@ -1759,7 +1767,7 @@ export function ensureMinimumSectorCoverage(
                 const reserveCandidates = corpsSectors
                     .filter(s =>
                         s.sector_id !== sector.sector_id
-                        && getSectorComponent(s, componentOf) === sectorComp)
+                        && componentForSector(s) === sectorComp)
                     .flatMap((donor) => {
                         return [...donor.reserve_brigade_ids]
                             .sort(strictCompare)
@@ -1801,7 +1809,7 @@ export function ensureMinimumSectorCoverage(
                 const sameCompSectors = corpsSectors
                     .filter(s => s.assigned_brigade_ids.length > 1
                         && s.sector_id !== sector.sector_id
-                        && getSectorComponent(s, componentOf) === sectorComp)
+                        && componentForSector(s) === sectorComp)
                     .sort((a, b) => b.assigned_brigade_ids.length - a.assigned_brigade_ids.length || strictCompare(a.sector_id, b.sector_id));
 
                 for (const donor of sameCompSectors) {
@@ -1860,11 +1868,11 @@ export function ensureMinimumSectorCoverage(
 
         for (const recipient of underStaffed) {
             const deficit = needed(recipient) - recipient.assigned_brigade_ids.length;
-            const recipComp = getSectorComponent(recipient, componentOf);
+            const recipComp = componentForSector(recipient);
             const donors = corpsSectors
                 .filter(s =>
                     s.sector_id !== recipient.sector_id
-                    && getSectorComponent(s, componentOf) === recipComp
+                    && componentForSector(s) === recipComp
                     && s.assigned_brigade_ids.length > needed(s))
                 .sort((a, b) =>
                     (b.assigned_brigade_ids.length - needed(b)) - (a.assigned_brigade_ids.length - needed(a))
@@ -1933,13 +1941,13 @@ export function ensureMinimumSectorCoverage(
                 || strictCompare(a.sector_id, b.sector_id));
 
         for (const recipient of thin) {
-            const recipComp = getSectorComponent(recipient, componentOf);
+            const recipComp = componentForSector(recipient);
             let transferred = 0;
 
             for (const donor of overDense) {
                 if (transferred >= EQUALIZATION_MAX_TRANSFERS) break;
                 if (donor.sector_id === recipient.sector_id) continue;
-                if (getSectorComponent(donor, componentOf) !== recipComp) continue;
+                if (componentForSector(donor) !== recipComp) continue;
                 if (donor.assigned_brigade_ids.length / donor.length_edges < EQUALIZATION_MIN_DONOR_DENSITY) continue;
 
                 const donorFront = getSectorFrontOsids(donor);
@@ -1987,7 +1995,7 @@ export function ensureMinimumSectorCoverage(
                 || strictCompare(a.sector_id, b.sector_id));
 
         for (const recipient of recipients) {
-            const recipComp = getSectorComponent(recipient, componentOf);
+            const recipComp = componentForSector(recipient);
             let transferred = 0;
 
             const donors = corpsSectors
@@ -1996,7 +2004,7 @@ export function ensureMinimumSectorCoverage(
                     && s.assigned_brigade_ids.length > 1
                     && s.length_edges > 0
                     && s.assigned_brigade_ids.length / s.length_edges >= PASS_7D_DONOR_MIN_DENSITY
-                    && getSectorComponent(s, componentOf) === recipComp)
+                    && componentForSector(s) === recipComp)
                 .sort((a, b) =>
                     (b.assigned_brigade_ids.length / b.length_edges)
                     - (a.assigned_brigade_ids.length / a.length_edges)
@@ -2123,7 +2131,7 @@ export function ensureMinimumSectorCoverage(
         // with that footprint, while the per-recipient fresh build produces a
         // tighter Map. Revert documented in BATCH27_FLOOR_COMPLETION_HOIST_REVERT.
         for (const recipient of recipients) {
-            const recipComp = getSectorComponent(recipient, componentOf);
+            const recipComp = componentForSector(recipient);
             const recipientDensity = recipient.assigned_brigade_ids.length / Math.max(1, recipient.length_edges);
             const activeCounts = countActiveBrigadesByOsid(formations);
             const deficit = Math.max(0, needed(recipient) - recipient.assigned_brigade_ids.length);
@@ -2137,7 +2145,7 @@ export function ensureMinimumSectorCoverage(
                     && (donor.threat_ratio ?? 0) <= FLOOR_COMPLETION_DONOR_MAX_THREAT
                     && donor.assigned_brigade_ids.length / donor.length_edges
                         >= recipientDensity + FLOOR_COMPLETION_MIN_DENSITY_ADVANTAGE
-                    && getSectorComponent(donor, componentOf) === recipComp)
+                    && componentForSector(donor) === recipComp)
                 .flatMap((donor) => donor.assigned_brigade_ids.map((bid) => ({ donor, bid })))
                 .map((entry) => {
                     const formation = formations[entry.bid];
@@ -2231,7 +2239,7 @@ export function ensureMinimumSectorCoverage(
                 || strictCompare(a.sector_id, b.sector_id));
 
         for (const recipient of recipients) {
-            const recipComp = getSectorComponent(recipient, componentOf);
+            const recipComp = componentForSector(recipient);
             const deficit = Math.max(0, needed(recipient) - recipient.assigned_brigade_ids.length);
             const activeCounts = countActiveBrigadesByOsid(formations);
             const recipientDensity = recipient.assigned_brigade_ids.length / Math.max(1, recipient.length_edges);
@@ -2241,7 +2249,7 @@ export function ensureMinimumSectorCoverage(
             const candidates = corpsSectors
                 .filter((sector) =>
                     sector.sector_id !== recipient.sector_id
-                    && getSectorComponent(sector, componentOf) === recipComp)
+                    && componentForSector(sector) === recipComp)
                 .flatMap((donor) => {
                     const donorDensity = donor.assigned_brigade_ids.length / Math.max(1, donor.length_edges);
                     const donorThreat = donor.threat_ratio ?? 0;

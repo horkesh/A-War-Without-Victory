@@ -1,8 +1,20 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-26 (front-edge metadata lookup reuse)
+**Updated:** 2026-06-03 (coverage component cache)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
+
+---
+
+## 2026-06-03: Coverage component cache (byte-identical)
+
+**Change:** `src/sim/combat/brigade_assignment.ts` `ensureMinimumSectorCoverage(...)` now caches `getSectorComponent(...)` results inside one coverage invocation and reuses them for donor/recipient filtering.
+
+**Determinism:** The cache is keyed by the live `CorpsFrontSector` object and is discarded before the next invocation. It reads only sector geometry fields that are stable during the coverage pass; brigade assignment mutations continue to use the existing deterministic ordering. No cross-turn cache, save field, scenario data, combat math, sector id ordering, or serialized output changed.
+
+**Verification:** Focused instrumentation passed 26/26, the focused sector regression pack passed, profiled and timed 40w runs preserved hash `e086afbefcef01e6`, and baseline regression reported all scenarios matching. Typecheck in the isolated worktree is blocked by pre-existing UI optional-package declaration gaps.
+
+**Report:** [implemented/20260603_SECTOR_COVERAGE_COMPONENT_CACHE.md](implemented/20260603_SECTOR_COVERAGE_COMPONENT_CACHE.md)
 
 ---
 
