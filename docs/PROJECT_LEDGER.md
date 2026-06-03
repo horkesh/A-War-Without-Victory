@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-03] docs: fresh Standing OG C+B probe confirms Phase B remains activation blocker
+
+**Type:** Diagnostic evidence + roadmap/board clarification (no default flip). After the Phase C engagement-list, predictor-parity, and active-op precedence fixes, a fresh temporary combined Phase C+B 40w probe was run with both ADR-0007 flags on; defaults and generated latest-run output were restored after the probe.
+
+**Evidence:** Default `n9` remains 164 orders, 127 battles, 41 flips, attacker casualties 19,504, defender casualties 25,189, zero-morale active brigades 2, counts `HRHB:88,RBiH:249,RS:375`. Old combined `n10` was 118 orders, 96 battles, 36 flips, zero-morale active brigades 4, counts `HRHB:90,RBiH:255,RS:367`. Fixed Phase C-only `n15` is near-throughput-green at 156 orders, 122 battles, 37 flips, zero-morale active brigades 2, counts `HRHB:89,RBiH:254,RS:369`. Fresh fixed combined C+B `n16` hash `aa11517ac3f818d3` improves old combined only modestly: 125 orders, 103 battles, 36 flips, attacker casualties 15,615, defender casualties 27,090, zero-morale active brigades 4 (`hrhb_111th_brigade`, `rs_17th_klju_light_infantry`, `rs_1st_drvar_light_infantry`, `rs_1st_ozren_light_infantry`), counts `HRHB:90,RBiH:255,RS:367`. Interpretation: Phase C is no longer the main throughput sink; Phase B reserve-commit still spreads zero-morale and suppresses orders/battles in the combined path. Next code target is Phase B reserve-commit side effects.
+
+**Files:** `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
 ## [2026-06-03] fix(engine): enforce active-op precedence for shared Standing OG defense
 
 **Type:** Engine invariant fix, flag-gated by existing default-off ADR-0007 Phase C. ADR-0007 guardrail 5 says a brigade committed to an active operation or active TG/offensive donor must not also be borrowed as a reactive Standing OG defender that turn. Phase C's widened defensive roster now filters out active-operation participants plus active tactical-group anchors/donors when `ENABLE_SHARED_SECTOR_DEFENSE=true`; flag-off behavior remains unchanged.
