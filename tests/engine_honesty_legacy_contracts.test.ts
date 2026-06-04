@@ -382,8 +382,8 @@ describe('engine honesty legacy contracts', () => {
 
     expect(gameState).toContain('Legacy compatibility snapshot for old saves/tests only');
     expect(gameState).toContain('Legacy compatibility fallback only. Null = reserve; sectors/front edges are the live frontline truth.');
-    expect(gameState).toContain('Legacy theatre compatibility state. Not a live player-shell or turn-pipeline authority.');
-    expect(gameState).toContain('Legacy theatre compatibility assignment. Preserved only for old saves/tools.');
+    expect(gameState).toContain('Legacy theatre compatibility state. Required current-save record; not a live player-shell or turn-pipeline authority.');
+    expect(gameState).toContain('Legacy theatre compatibility assignment. Required current-save record; preserved only for old saves/tools.');
     expect(gameState).toContain('Legacy AoR tuning compatibility field. Do not expose in the live player shell and do not write new values.');
   });
 
