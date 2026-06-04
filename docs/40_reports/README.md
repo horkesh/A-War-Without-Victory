@@ -10,6 +10,8 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest scenario run-output artifact ownership** | [implemented/20260604_SCENARIO_RUN_OUTPUT_ARTIFACT_OWNERSHIP.md](implemented/20260604_SCENARIO_RUN_OUTPUT_ARTIFACT_OWNERSHIP.md) - The broad `runs/<scenario_run>/...` catch-all now has a focused static guard proving run directories stay ignored, transient, and uncommitted. |
+| **Latest military credibility no-data consumer fix** | [implemented/20260604_MILITARY_CREDIBILITY_NO_DATA_CONSUMER.md](implemented/20260604_MILITARY_CREDIBILITY_NO_DATA_CONSUMER.md) - The flag-gated `military_credibility` op-launch consumer now requires operation/casualty evidence before treating low credibility as caution evidence. |
 | **Latest Chain 3 source-flag alignment** | [implemented/20260604_CHAIN3_SOURCE_FLAGS.md](implemented/20260604_CHAIN3_SOURCE_FLAGS.md) - The historical Srebrenica Falls and NATO Deliberate Force events now write the flags consumed by Chain 3 consequence predicates. |
 | **Latest Ahmici hostile-threshold alignment** | [implemented/20260604_AHMICI_HOSTILE_THRESHOLD.md](implemented/20260604_AHMICI_HOSTILE_THRESHOLD.md) - The authored Ahmici rupture event now drives RBiH-HRHB alliance to same-turn hostile/combat-enabled status and locks recovery at the hostile ceiling. |
 | **Latest bilateral flip municipality fallback** | [implemented/20260604_BILATERAL_FLIP_MUN_FALLBACK.md](implemented/20260604_BILATERAL_FLIP_MUN_FALLBACK.md) - War-phase RBiH-HRHB bilateral flip counting now derives `mun_id` from canonical OSID control events when producers omit the duplicate municipality field. |
