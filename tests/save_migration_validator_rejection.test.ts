@@ -1474,4 +1474,46 @@ describe('save migration validator hardening', () => {
             /Save schema validation failed after migration[\s\S]*military\.patron_defiance_supply_cuts must be an array when present/
         );
     });
+
+    it('accepts current-version saves with absent or well-formed airdrop allocations', () => {
+        const absent = currentVersionState();
+        delete absent.military.airdrop_allocation;
+        const withAllocation = currentVersionState();
+        withAllocation.military.airdrop_allocation = {
+            gorazde: 0.75,
+            srebrenica: 0.25,
+        };
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWithAllocation = deserializeState(JSON.stringify(withAllocation));
+
+        expect(migratedAbsent.military.airdrop_allocation).toBeUndefined();
+        expect(migratedWithAllocation.military.airdrop_allocation).toEqual({
+            gorazde: 0.75,
+            srebrenica: 0.25,
+        });
+    });
+
+    it('rejects current-version saves with malformed airdrop allocations', () => {
+        const state = currentVersionState();
+        state.military.airdrop_allocation = {
+            ok: 0,
+            negative: -1,
+            infinite: Number.POSITIVE_INFINITY,
+            text: '1',
+        };
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.airdrop_allocation\.negative must be a finite non-negative number[\s\S]*military\.airdrop_allocation\.infinite must be a finite non-negative number[\s\S]*military\.airdrop_allocation\.text must be a finite non-negative number/
+        );
+    });
+
+    it('rejects current-version saves with non-record airdrop allocations', () => {
+        const state = currentVersionState();
+        state.military.airdrop_allocation = [];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.airdrop_allocation must be an object when present/
+        );
+    });
 });

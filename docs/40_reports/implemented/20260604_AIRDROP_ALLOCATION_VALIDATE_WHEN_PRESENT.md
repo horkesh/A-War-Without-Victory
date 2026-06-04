@@ -1,0 +1,33 @@
+# Airdrop Allocation Validate-When-Present Contract
+
+**Date:** 2026-06-04
+
+**Lane:** Optional `GameState` schema contract / engine health.
+
+## Summary
+
+`state.military.airdrop_allocation` is now validated when present. This closes the humanitarian airdrop allocation slice without promoting the field to required current-save state.
+
+The field remains optional because it is a player-entered/runtime-normalized allocation record and absence is legitimate before any humanitarian airdrop allocation is staged or normalized. No save-schema version bump, migration, fixture, simulation logic, UI routing, scenario data, or TypeScript optionality changed.
+
+## Contract
+
+When present, `military.airdrop_allocation` must be an object mapping enclave ids to finite non-negative numbers.
+
+Zero remains valid because the existing allocation normalizer can preserve an explicitly empty share while runtime distribution ignores non-positive allocation weight for delivery.
+
+## Evidence
+
+Red proof: `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` failed because malformed and non-record `airdrop_allocation` payloads were accepted before the validator existed.
+
+Green proof:
+
+- `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` passed 117/117.
+- `node node_modules\vitest\vitest.mjs run tests\supply_airdrop.test.ts --reporter=dot` passed 9/9.
+- `node node_modules\vitest\vitest.mjs run tests\save_migration_versioned_steps.test.ts tests\save_migration_round_trip_contract.test.ts tests\save_migration_validator_rejection.test.ts tests\state\player_faction_contract.test.ts tests\validate_game_state_shape.test.ts tests\state.test.ts --reporter=dot` passed 208/208.
+- `npm.cmd run typecheck` passed.
+- `node tools\diagnostics\strict_null_inventory.cjs --field-domains` remained count-neutral at total 507, with `state: 172` and `sim: 327`.
+
+## Follow-Up
+
+Continue the Optional `GameState` schema lane by classifying one optional family at a time. Player-entered or lazily normalized records should receive validate-when-present coverage; already-materialized records can be promoted only when migration and current validation already prove required presence.
