@@ -744,6 +744,18 @@ function validatePatronDefianceSupplyCuts(value: unknown, errors: string[]): voi
     });
 }
 
+function validateFiniteNonNegativeNumberRecord(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+    for (const [key, entry] of Object.entries(value)) {
+        if (!isFiniteNonNegativeNumber(entry)) {
+            errors.push(`${path}.${key} must be a finite non-negative number`);
+        }
+    }
+}
+
 function validateCostLedgerAnnotations(value: unknown, errors: string[]): void {
     if (!Array.isArray(value)) {
         errors.push('military.cost_ledger_annotations must be an array when present');
@@ -1321,6 +1333,9 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'patron_defiance_supply_cuts' in military && military.patron_defiance_supply_cuts !== undefined) {
         validatePatronDefianceSupplyCuts(military.patron_defiance_supply_cuts, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'airdrop_allocation' in military && military.airdrop_allocation !== undefined) {
+        validateFiniteNonNegativeNumberRecord(military.airdrop_allocation, 'military.airdrop_allocation', errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'closed_event_ids' in military && military.closed_event_ids !== undefined) {
         validateClosedEventIds(military.closed_event_ids, errors);
