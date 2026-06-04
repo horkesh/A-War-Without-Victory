@@ -14,6 +14,7 @@ const CANONICAL_PLAYER_FACTIONS = ['RBiH', 'RS', 'HRHB'] as const;
 const DOCTRINE_OVERRIDE_FORCED_STANCES = ['defensive', 'balanced', 'offensive', 'reorganize'] as const;
 const SECTOR_STANCES = ['fortify', 'defend', 'elastic', 'active_defense', 'screening'] as const;
 const MUNICIPALITY_SUPPORT_TYPES = ['weapons_shipment', 'staff_priority', 'croatian_support_package'] as const;
+const ARMY_HQ_OVERRIDE_TYPES = ['offensive', 'probe', 'feint'] as const;
 const AI_DECISION_LEVELS = ['army', 'corps', 'advisor', 'political', 'event'] as const;
 const AI_CORPS_STANCES = ['offensive', 'balanced', 'defensive'] as const;
 const AI_PEACE_PLAN_RESPONSES = ['accept', 'reject'] as const;
@@ -139,6 +140,10 @@ function isSectorStanceValue(value: unknown): boolean {
 
 function isMunicipalitySupportType(value: unknown): boolean {
     return typeof value === 'string' && MUNICIPALITY_SUPPORT_TYPES.includes(value as typeof MUNICIPALITY_SUPPORT_TYPES[number]);
+}
+
+function isArmyHqOverrideType(value: unknown): boolean {
+    return typeof value === 'string' && ARMY_HQ_OVERRIDE_TYPES.includes(value as typeof ARMY_HQ_OVERRIDE_TYPES[number]);
 }
 
 function isAiDecisionLevel(value: unknown): boolean {
@@ -905,6 +910,49 @@ function validateMunicipalitySupportOrders(value: unknown, errors: string[]): vo
             errors.push(`${path}.staged_turn must be a non-negative integer`);
         }
     }
+}
+
+function isPositiveInteger(value: unknown): value is number {
+    return typeof value === 'number' && Number.isInteger(value) && value > 0;
+}
+
+function validateArmyHqOverrides(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.army_hq_overrides must be an array when present');
+        return;
+    }
+
+    value.forEach((entry, i) => {
+        const path = `military.army_hq_overrides[${i}]`;
+        if (!isRecord(entry)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        if (!isNonEmptyString(entry.corps_id)) {
+            errors.push(`${path}.corps_id must be a non-empty string`);
+        }
+        if (!isNonEmptyString(entry.operation_name)) {
+            errors.push(`${path}.operation_name must be a non-empty string`);
+        }
+        if (!isPositiveInteger(entry.min_brigades)) {
+            errors.push(`${path}.min_brigades must be a positive integer`);
+        }
+        if (!isStringArray(entry.target_osids)) {
+            errors.push(`${path}.target_osids must be a string array`);
+        }
+        if (!isNonEmptyString(entry.reason)) {
+            errors.push(`${path}.reason must be a non-empty string`);
+        }
+        if (!isNonNegativeInteger(entry.issued_turn)) {
+            errors.push(`${path}.issued_turn must be a non-negative integer`);
+        }
+        if (!isArmyHqOverrideType(entry.type)) {
+            errors.push(`${path}.type must be offensive, probe, or feint`);
+        }
+        if ('max_brigades' in entry && entry.max_brigades !== undefined && !isPositiveInteger(entry.max_brigades)) {
+            errors.push(`${path}.max_brigades must be a positive integer when present`);
+        }
+    });
 }
 
 function validateAiStringArray(value: unknown, path: string, errors: string[]): void {
@@ -1846,6 +1894,9 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'municipality_support_orders' in military && military.municipality_support_orders !== undefined) {
         validateMunicipalitySupportOrders(military.municipality_support_orders, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'army_hq_overrides' in military && military.army_hq_overrides !== undefined) {
+        validateArmyHqOverrides(military.army_hq_overrides, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'opsec_sectors' in military && military.opsec_sectors !== undefined && !isStringArray(military.opsec_sectors)) {
         errors.push('military.opsec_sectors must be a string array when present');
