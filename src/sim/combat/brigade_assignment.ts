@@ -21,7 +21,7 @@ import {
     isSectorAssignmentExemptCorpsId,
     PHASE_2C_MAX_HOPS,
 } from './corps_front_sectors_constants.js';
-import { getSectorComponent, getSectorFrontOsids, bfsDistance, bfsToNearestSector } from './sector_utils.js';
+import { getSectorComponent, getSectorFrontOsids, bfsDistance } from './sector_utils.js';
 import type { CorpsCommanderProfile } from './commander_override.js';
 import {
     removeFromActiveOperation,
@@ -1537,19 +1537,30 @@ export function ensureMinimumSectorCoverage(
     const brigadeMovementOrders = state?.military.brigade_movement_orders;
     const LOCAL_FRONT_RELIEF_MAX_HOPS = 3;
 
-    const distanceToSectorFront = (bid: string, sector: CorpsFrontSector): number | null => {
-        const f = formations[bid];
-        if (!f?.location_osid) return null;
-        const sectorFriendly = getSectorFrontOsids(sector);
-        return bfsToNearestSector(
-            f.location_osid,
-            new Map([...sectorFriendly].map(o => [o, 0])),
-            adjacency, friendlyOsids
-        );
-    };
-
     const canReachSectorFront = (bid: string, sector: CorpsFrontSector): boolean => {
-        return distanceToSectorFront(bid, sector) !== null;
+        const f = formations[bid];
+        const startOsid = f?.location_osid;
+        if (!startOsid) return false;
+        const sectorFriendly = getSectorFrontOsids(sector);
+        if (sectorFriendly.size === 0) return false;
+        if (sectorFriendly.has(startOsid)) return true;
+
+        const visited = new Set<string>([startOsid]);
+        const queue: string[] = [startOsid];
+        let head = 0;
+        while (head < queue.length) {
+            const osid = queue[head++]!;
+            const neighbors = adjacency.get(osid as Osid);
+            if (!neighbors) continue;
+            for (const neighbor of neighbors) {
+                if (visited.has(neighbor)) continue;
+                if (!friendlyOsids.has(neighbor)) continue;
+                if (sectorFriendly.has(neighbor)) return true;
+                visited.add(neighbor);
+                queue.push(neighbor);
+            }
+        }
+        return false;
     };
 
     const claimTypeForSector = (

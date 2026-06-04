@@ -1115,6 +1115,11 @@ function App() {
         closeWarroomDesk();
         return;
       }
+      if (diplomacyOpen) {
+        event.preventDefault();
+        setDiplomacyOpen(false);
+        return;
+      }
       if (warroomOverlaySurface) {
         event.preventDefault();
         closeWarroomNativeOverlay();
@@ -1122,7 +1127,7 @@ function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [appScreen, commandStripOpen, warroomDecisionRoomOpen, warroomDeskOpen, warroomOverlaySurface]);
+  }, [appScreen, commandStripOpen, warroomDecisionRoomOpen, warroomDeskOpen, diplomacyOpen, warroomOverlaySurface]);
 
   const openReservePanelFromDesk = () => {
     const hqId = playerFaction === 'RS'

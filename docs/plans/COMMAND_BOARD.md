@@ -20,6 +20,10 @@
 
 **2026-06-04 sector hash reconciliation:** the active sector/frontline performance floor is now `41c72b13ad2e91b9` from `runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n2019`. The prior `e086afbefcef01e6` floor is superseded for future optimization by the accepted final-sector seal correction in PR #159 / commit `1a823d5e`. Current `n2019` passes 30/30 anchors, 0 critical anomalies, and `validate_run_consistency`; old `n2017` with `e086...` now fails current consistency validation with empty-contested, undefended-front, and adjacent-uncontested-territory failures. Next sector slice must re-profile from current `main` against `41c72...` before implementation.
 
+**2026-06-04 sector coverage reachability elision:** current-main re-profile selected a narrow allocation-removal slice inside `ensureMinimumSectorCoverage(...)`: boolean sector-front reachability no longer builds a temporary `Map(front_osid -> 0)` for every candidate before calling `bfsToNearestSector(...)`. The direct BFS is scoped to the existing helper and preserves the same friendly-territory reachability semantics while avoiding the broad sector-front cache class that regressed on 2026-05-27. Proof: focused sector coverage pack 90/90, UI thread cleanup pack 10/10, typecheck, profiled 40w hash `41c72b13ad2e91b9`, `validate_run_consistency` PASS, baseline regression PASS, and `git diff --check`.
+
+**2026-06-04 Warroom Diplomacy Escape cleanup:** GitHub sweep found one unresolved Codex thread on merged PR #166 (`PRRT_kwDORNoPiM6HGaCG`): Warroom Diplomacy / Patron Relations bypassed `WarroomNativeOverlay` and therefore lost Escape-to-close. `App.tsx` now closes `diplomacyOpen` in the Warroom Escape stack and `tests/ui/warroom_shell_ownership.test.ts` pins the contract. This is UI-only and shares the verification pack above.
+
 **Controlling sources:** `docs/plans/MASTER_ROADMAP.md`, `docs/plans/2026-05-18-autonomous-remaining-work-coverage-matrix.md`, `docs/40_reports/CONSOLIDATED_BACKLOG.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/2026-06-02-warroom-toolbar-hotspot-ia-plan.md`, and `docs/PROJECT_LEDGER.md`.
 
 **Plan standard:** active, gated, operator, and owned-elsewhere plan packets should comply with `docs/plans/PLAN_EXECUTION_STANDARD.md`; the current hardening queue lives at `docs/plans/2026-05-24-active-plan-hardening-pass.md`.
@@ -38,6 +42,8 @@
 | `DEFERRED` | Intentionally postponed by decision (user/design); reopen only on the stated reopen criteria. |
 
 ## Active Command Board
+
+**Current row overrides (2026-06-04):** For the P0 Presidential Command Surface row, treat Warroom `Diplomacy` / telephone as Patron Relations plus Escape-dismissible shell behavior; proof is `tests/ui/warroom_shell_ownership.test.ts` + `tests/ui/diplomacy_panel.test.ts`, typecheck, baseline regression, and `git diff --check`. For the P1 Sector/frontline performance row, treat `ensureMinimumSectorCoverage(...)` boolean reachability map-elision as the latest closed slice; proof is focused sector pack 90/90, profiled 40w hash `41c72b13ad2e91b9`, `validate_run_consistency`, baseline regression, and `git diff --check`.
 
 | Priority | Lane | Status | Owner Lane | Next Action | Verification / Proof | Stop Gate |
 | --- | --- | --- | --- | --- | --- | --- |
