@@ -1,4 +1,20 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(oob): seat ARBiH 4th Corps HQ in East Mostar (was Jablanica)
+
+**Type:** OOB historical-fidelity correction (calibration-moving; golden baselines re-floored). Owner-confirmed.
+
+**Change:** `arbih_4th_corps` HQ moved Jablanica → East Mostar in `data/source/oob_corps.json` (`hq_mun` jablanica→mostar; `hq_osid` `op:jablanica:jablanica_2` → `op:mostar:mostar_istok_2`). The 4th Corps (Arif Pašalić, formed 17 Nov 1992) was headquartered in eastern Mostar; the Jablanica seat was a Neretva-valley artifact traceable to the short-lived **6th Corps** (HQ Konjic, 44th/45th "Neretvica" brigades at Jablanica, Jun 1993–Feb 1994) that AWWV folds into the 4th. Source resolution: BB Appendix-H ("4th Corps, HQ Jablanica", `BB1_p0511`) is the outlier; Wikipedia + the operational record place the 4th in East Mostar (owner directive: BB is not ultimate — cross-check Wikipedia/web on any doubt). `op:mostar:mostar_istok_2` is RBiH/east-bank (HVO west bank is `mostar_zapad_2`); runtime HQ resolves to `op:mostar:blagaj_2` (RBiH east-bank).
+
+**Calibration (scenario-creator-runner-tester GO verdict):** floor held — anchors **30/30**, bot benchmarks **6/6**, OSID pair-match **0.9171 (653/712)** flat, **0** critical anomalies, no 4th-Corps-area regression (the 2 Neretva mismatches are pre-existing contested cells). 40w final hash advances `41c72b13ad2e91b9` → `41ba34ddfaa02a85` — the expected fingerprint of a corps-HQ relocation (deterministic; not a determinism break). Golden baselines re-floored: `manifest.json` regenerated + startup snapshot rebuilt (`desktop:startup-snapshot:check` OK); `test:baselines` → "all scenarios match".
+
+**Sacred rules:** one change; no initial-OSID-control edits; no `avoided_osids`.
+
+**Follow-up (Codex board upkeep):** the sector-performance floor `41c72b13ad2e91b9` (COMMAND_BOARD Sector/frontline lane, refs ~L31/33/35/58/73) is advanced to `41ba34ddfaa02a85` by this change — Codex to reconcile those board references against the new floor.
+
+**Files:** `data/source/oob_corps.json`, `data/derived/startup/apr_1992_initial_save.json`, `data/derived/scenario/baselines/manifest.json`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(events): write Chain 3 historical source flags
 
 **Type:** Event-state correctness fix for GitHub issue #170 P1. Sensitive-history scope: no new prose, response options, player choices, scoring, civilian-targeting mechanics, save schema, replay writers, baseline manifests, or combat behavior changed.

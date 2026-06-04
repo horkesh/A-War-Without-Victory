@@ -11,7 +11,7 @@
     { "id": "arbih_1st_corps", "faction": "RBiH", "name": "1st Corps", "hq_mun": "centar_sarajevo", "hq_osid": "op:centar_sarajevo:sarajevo_dio_centar_sajarevo", "available_from": 24 },
     { "id": "arbih_2nd_corps", "faction": "RBiH", "name": "2nd Corps", "hq_mun": "tuzla", "hq_osid": "op:tuzla:tuzla_2", "available_from": 24 },
     { "id": "arbih_3rd_corps", "faction": "RBiH", "name": "3rd Corps", "hq_mun": "zenica", "hq_osid": "op:zenica:zenica_2", "available_from": 24 },
-    { "id": "arbih_4th_corps", "faction": "RBiH", "name": "4th Corps", "hq_mun": "jablanica", "hq_osid": "op:jablanica:jablanica_2", "available_from": 24 },
+    { "id": "arbih_4th_corps", "faction": "RBiH", "name": "4th Corps", "hq_mun": "mostar", "hq_osid": "op:mostar:mostar_istok_2", "available_from": 24 },
     { "id": "arbih_5th_corps", "faction": "RBiH", "name": "5th Corps", "hq_mun": "bihac", "hq_osid": "op:bihac:bihac_2", "available_from": 24 },
     { "id": "vrs_main_staff", "faction": "RS", "name": "Main Staff VRS", "hq_mun": "han_pijesak", "hq_osid": "op:hanpijesak:han_pijesak_2", "kind": "army_hq", "available_from": 0, "initial_officer_quality": 0.75, "initial_cohesion": 72 },
     { "id": "jna_herzegovina_command", "faction": "RS", "name": "JNA Herzegovina Command", "hq_mun": "nevesinje", "hq_osid": "op:nevesinje:sopilja", "available_from": 0 },
