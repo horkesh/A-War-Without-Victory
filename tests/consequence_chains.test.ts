@@ -16,6 +16,7 @@ import { describe, it, expect } from 'vitest';
 import { loadEventDefinitions } from '../src/sim/events/event_loader.js';
 import { evaluateEvents } from '../src/sim/events/evaluate_events.js';
 import { applyEventEffects } from '../src/sim/events/apply_effects.js';
+import { HOSTILE_THRESHOLD, isRbihHrhbAtWar, isRbihHrhbCombatEnabled } from '../src/sim/early_war/alliance_update.js';
 import type { EventDefinition, Rng } from '../src/sim/events/event_types.js';
 import type { GameState } from '../src/state/game_state.js';
 
@@ -815,7 +816,7 @@ describe('hrhb_political_goal historical ordering fix', () => {
 //
 // Per the corps-army-commander + war-or-game design consult (2026-04-23),
 // the HVO Croat-Bosniak war requires:
-//   1. alliance_change -0.60 + alliance_lock ceiling 0.10 (flips hostility)
+//   1. alliance_change -1.0 + alliance_lock ceiling 0.0 (flips hostility)
 //   2. morale/cohesion bump (un-sticks HVO brigades idle at morale 0)
 //   3. aggression_modifier +0.25 + bot_priority_shift on central-Bosnia munis
 // Phase 2 (ARBiH counter-offensive) emerges organically once alliance breaks.
@@ -835,15 +836,20 @@ describe('Issue #9 — csq_hvo_central_bosnia_offensive_1993', () => {
 
     it('fires w48-w56 under croat_republic and lands all five effect kinds', () => {
         const state = makeChain1State(52, { flags: { hrhb_political_goal: 'croat_republic' } });
+        state.political.war_alliance_rbih_hrhb = 1.0;
         evaluateEvents(state, rng, 52, CSQ_EVENTS);
         expect(state.military.fired_event_ids).toContain('csq_hvo_central_bosnia_offensive_1993');
         expect(state.military.event_flags?.hvo_arbih_war_active).toBe(true);
         expect(state.military.event_flags?.ahmici_1993).toBe(true);
+        expect(state.political.war_alliance_rbih_hrhb).toBeLessThanOrEqual(HOSTILE_THRESHOLD);
+        expect(isRbihHrhbAtWar(state)).toBe(true);
+        expect(isRbihHrhbCombatEnabled(state)).toBe(true);
 
-        // alliance_lock ceiling 0.10 at duration 60
+        // alliance_lock ceiling 0.0 at duration 60
         const locks = state.military.alliance_locks ?? [];
-        const ceilingLock = locks.find(l => l.mode === 'ceiling' && l.value === 0.10);
+        const ceilingLock = locks.find(l => l.mode === 'ceiling' && l.value === 0.0);
         expect(ceilingLock).toBeDefined();
+        expect(ceilingLock?.expires_turn).toBe(112);
 
         // aggression_modifier HRHB +0.25 duration 14
         const aggMods = state.military.event_aggression_modifiers ?? [];

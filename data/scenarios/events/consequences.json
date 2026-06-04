@@ -1356,12 +1356,12 @@
     "effects": [
       {
         "kind": "alliance_change",
-        "delta": -0.60
+        "delta": -1.0
       },
       {
         "kind": "alliance_lock",
         "mode": "ceiling",
-        "value": 0.10,
+        "value": 0.0,
         "duration_turns": 60
       },
       {
