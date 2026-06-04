@@ -198,6 +198,13 @@ export function normalizeScenario(raw: unknown): Scenario {
         }
         player_faction = o.player_faction;
     }
+    let decision_mode: Scenario['decision_mode'];
+    if (o.decision_mode !== undefined && o.decision_mode !== null) {
+        if (o.decision_mode !== 'historical' && o.decision_mode !== 'emergent') {
+            throw new Error(`decision_mode must be "historical" or "emergent", got: ${String(o.decision_mode)}`);
+        }
+        decision_mode = o.decision_mode;
+    }
     const weeks = typeof o.weeks === 'number' ? Math.floor(o.weeks) : undefined;
     const scenario_start_week =
         typeof o.scenario_start_week === 'number' && Number.isInteger(o.scenario_start_week)
@@ -448,6 +455,7 @@ export function normalizeScenario(raw: unknown): Scenario {
         return {
             scenario_id,
             ...(player_faction !== undefined ? { player_faction } : {}),
+            ...(decision_mode !== undefined ? { decision_mode } : {}),
             scenario_start_week,
             start_lifecycle_phase,
             peace_referendum_held_at_start,
@@ -498,6 +506,7 @@ export function normalizeScenario(raw: unknown): Scenario {
     return {
         scenario_id,
         ...(player_faction !== undefined ? { player_faction } : {}),
+        ...(decision_mode !== undefined ? { decision_mode } : {}),
         scenario_start_week,
         start_lifecycle_phase,
         peace_referendum_held_at_start,
@@ -561,4 +570,3 @@ export function computeRunId(scenario: Scenario): string {
     const hash = createHash('sha256').update(stableStringify(scenario), 'utf8').digest('hex').slice(0, 16);
     return `${scenario.scenario_id}__${hash}__w${scenario.weeks}`;
 }
-

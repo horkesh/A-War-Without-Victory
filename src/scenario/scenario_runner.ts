@@ -41,7 +41,7 @@ import {
 } from '../state/control_flip_proposals.js';
 import { computeFrontBreaches } from '../state/front_breaches.js';
 import type { FactionId, GameState, MunicipalityId } from '../state/game_state.js';
-import { CURRENT_SCHEMA_VERSION } from '../state/game_state.js';
+import { CANONICAL_FACTIONS, CURRENT_SCHEMA_VERSION } from '../state/game_state.js';
 import { prepareNewGameState } from '../state/initialize_new_game_state.js';
 import {
     applyMunicipalityControllersFromMun1990Only,
@@ -56,6 +56,7 @@ import {
 import { applyJnaInheritanceBonus, ensureSupplyReserves } from '../state/supply_reserves.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
 import { runOneTurn } from '../state/turn_pipeline.js';
+import { computeSpatialContext } from '../sim/spatial_context.js';
 import { strictCompare } from '../state/validateGameState.js';
 import { stableStringify } from '../utils/stable_json.js';
 import {
@@ -1470,6 +1471,9 @@ export async function buildScenarioStartupState(
     if (authoredPlayerFaction !== undefined && authoredPlayerFaction !== null) {
         state.meta.player_faction = authoredPlayerFaction;
     }
+    if (scenario.decision_mode !== undefined) {
+        state.meta.decision_mode = scenario.decision_mode;
+    }
     // else: leave undefined — event evaluator's `playerFaction != null` gate then
     // routes every event with `requires_player_response: true` through the bot
     // auto-respond path, as a headless harness run requires.
@@ -2745,16 +2749,26 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 finalOperationalEdges,
                 operationalData.operationalToCanonical,
             );
+            const finalSpatial = computeSpatialContext(
+                finalOperationalEdges,
+                state.political.political_controllers ?? {},
+                CANONICAL_FACTIONS,
+                state.meta.turn,
+                'post-combat',
+                state.military.war_front_edges_osid,
+            );
             reconcileFinalSectorTruth(
                 state,
                 finalOperationalEdges,
                 operationalData.operationalToCanonical,
                 operationalCentroids,
+                finalSpatial,
             );
             sealFinalSectorTruthFromCurrentSectors(
                 state,
-                state.military.war_front_edges_osid ?? [],
+                finalOperationalEdges,
                 null,
+                finalSpatial,
             );
         }
         const finalSerialized = _serTimeSync(emitTimingJson, timingTotals, 'final-save-serialize', () =>

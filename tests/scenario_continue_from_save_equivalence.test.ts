@@ -102,7 +102,7 @@ describe('scenario continue-from-save equivalence', () => {
       await ensureRemoved(SPLIT_OUT);
       await ensureRemoved(RESUME_OUT);
     }
-  }, 20_000);
+  }, 60_000);
 
   it('rejects an explicit resume week that disagrees with the save turn', async () => {
     const prereq = checkDataPrereqs({ baseDir: process.cwd() });

@@ -1360,6 +1360,7 @@ describe('save migration validator hardening', () => {
             ],
             doctrine_overrides: [
                 { faction: 'RBiH', forced_stance: 'defensive', expires_turn: 21, reason: 'UN pressure' },
+                { faction: 'RS', forced_stance: 'reorganize', expires_turn: 24, reason: 'rebuild' },
             ],
             scope_restrictions: [
                 {
@@ -1408,7 +1409,21 @@ describe('save migration validator hardening', () => {
         };
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.event_constraints\.operation_blocks\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.event_constraints\.operation_blocks\[0\]\.expires_turn must be a non-negative integer[\s\S]*military\.event_constraints\.operation_blocks\[0\]\.reason must be a non-empty string[\s\S]*military\.event_constraints\.operation_blocks\[1\] must be an object[\s\S]*military\.event_constraints\.doctrine_overrides\[0\]\.expires_turn must be a non-negative integer[\s\S]*military\.event_constraints\.doctrine_overrides\[0\]\.reason must be a non-empty string[\s\S]*military\.event_constraints\.doctrine_overrides\[0\]\.forced_stance must be a non-empty string[\s\S]*military\.event_constraints\.doctrine_overrides\[1\] must be an object[\s\S]*military\.event_constraints\.scope_restrictions\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.event_constraints\.scope_restrictions\[0\]\.allowed_municipalities must be a string array when present[\s\S]*military\.event_constraints\.scope_restrictions\[0\]\.blocked_municipalities must be a string array when present[\s\S]*military\.event_constraints\.scope_restrictions\[0\]\.expires_turn must be a non-negative integer when present[\s\S]*military\.event_constraints\.scope_restrictions\[0\]\.reason must be a non-empty string[\s\S]*military\.event_constraints\.scope_restrictions\[1\] must be an object/
+            /Save schema validation failed after migration[\s\S]*military\.event_constraints\.operation_blocks\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.event_constraints\.operation_blocks\[0\]\.expires_turn must be a non-negative integer[\s\S]*military\.event_constraints\.operation_blocks\[0\]\.reason must be a non-empty string[\s\S]*military\.event_constraints\.operation_blocks\[1\] must be an object[\s\S]*military\.event_constraints\.doctrine_overrides\[0\]\.expires_turn must be a non-negative integer[\s\S]*military\.event_constraints\.doctrine_overrides\[0\]\.reason must be a non-empty string[\s\S]*military\.event_constraints\.doctrine_overrides\[0\]\.forced_stance must be one of: defensive, balanced, offensive, reorganize[\s\S]*military\.event_constraints\.doctrine_overrides\[1\] must be an object[\s\S]*military\.event_constraints\.scope_restrictions\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.event_constraints\.scope_restrictions\[0\]\.allowed_municipalities must be a string array when present[\s\S]*military\.event_constraints\.scope_restrictions\[0\]\.blocked_municipalities must be a string array when present[\s\S]*military\.event_constraints\.scope_restrictions\[0\]\.expires_turn must be a non-negative integer when present[\s\S]*military\.event_constraints\.scope_restrictions\[0\]\.reason must be a non-empty string[\s\S]*military\.event_constraints\.scope_restrictions\[1\] must be an object/
+        );
+    });
+
+    it('rejects current-version saves with unknown doctrine override stances', () => {
+        const state = currentVersionState();
+        state.military.event_constraints = {
+            doctrine_overrides: [
+                { faction: 'RS', forced_stance: 'general_offensive', expires_turn: 10, reason: 'bad stance family' },
+                { faction: 'HRHB', forced_stance: 'hold', expires_turn: 12, reason: 'unknown stance' },
+            ],
+        };
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.event_constraints\.doctrine_overrides\[0\]\.forced_stance must be one of: defensive, balanced, offensive, reorganize[\s\S]*military\.event_constraints\.doctrine_overrides\[1\]\.forced_stance must be one of: defensive, balanced, offensive, reorganize/
         );
     });
 
@@ -1427,6 +1442,17 @@ describe('save migration validator hardening', () => {
         );
         expect(() => deserializeState(JSON.stringify(nonArrayMember))).toThrow(
             /Save schema validation failed after migration[\s\S]*military\.event_constraints\.operation_blocks must be an array when present[\s\S]*military\.event_constraints\.doctrine_overrides must be an array when present[\s\S]*military\.event_constraints\.scope_restrictions must be an array when present/
+        );
+    });
+
+    it('rejects current-version saves with RBiH patron defiance supply cuts', () => {
+        const state = currentVersionState();
+        state.military.patron_defiance_supply_cuts = [
+            { faction: 'RBiH', turn: 30, cut_fraction: 0.2, support_after: 0.6 },
+        ];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.patron_defiance_supply_cuts\[0\]\.faction must be RS or HRHB/
         );
     });
 
@@ -1462,7 +1488,7 @@ describe('save migration validator hardening', () => {
         ];
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.patron_defiance_supply_cuts\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.patron_defiance_supply_cuts\[0\]\.turn must be a non-negative integer[\s\S]*military\.patron_defiance_supply_cuts\[0\]\.cut_fraction must be > 0 and <= 1[\s\S]*military\.patron_defiance_supply_cuts\[0\]\.support_after must be a finite number in \[0,1\][\s\S]*military\.patron_defiance_supply_cuts\[1\]\.turn must be a non-negative integer[\s\S]*military\.patron_defiance_supply_cuts\[1\]\.cut_fraction must be > 0 and <= 1[\s\S]*military\.patron_defiance_supply_cuts\[1\]\.support_after must be a finite number in \[0,1\][\s\S]*military\.patron_defiance_supply_cuts\[2\] must be an object/
+            /Save schema validation failed after migration[\s\S]*military\.patron_defiance_supply_cuts\[0\]\.faction must be RS or HRHB[\s\S]*military\.patron_defiance_supply_cuts\[0\]\.turn must be a non-negative integer[\s\S]*military\.patron_defiance_supply_cuts\[0\]\.cut_fraction must be > 0 and <= 1[\s\S]*military\.patron_defiance_supply_cuts\[0\]\.support_after must be a finite number in \[0,1\][\s\S]*military\.patron_defiance_supply_cuts\[1\]\.turn must be a non-negative integer[\s\S]*military\.patron_defiance_supply_cuts\[1\]\.cut_fraction must be > 0 and <= 1[\s\S]*military\.patron_defiance_supply_cuts\[1\]\.support_after must be a finite number in \[0,1\][\s\S]*military\.patron_defiance_supply_cuts\[2\] must be an object/
         );
     });
 

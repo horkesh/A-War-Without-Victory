@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(github): close unresolved Codex review threads
+
+**Type:** GitHub review-debt cleanup for merged PRs. No operation catalog, OOB, event prose, UI routing, or player-facing command behavior changed.
+
+**Change:** Swept deployments and Codex review comments. Deployments API returned `[]`. GraphQL review-thread status showed four unresolved non-outdated Codex threads on merged PRs #144, #148, #150, and #151. Fixed them by passing full operational edges plus final spatial context into the scenario final-save sector seal, preserving scenario-authored `decision_mode` through loader/startup, validating event-constraint `forced_stance` against the live corps-stance vocabulary, and rejecting invalid RBiH patron-defiance supply-cut receipts. Refreshed the scenario baseline manifest because the final-save seal correction changes terminal serialization hashes: the 52-week final snapshot moves four formations from rear to reserve, while weekly/control/activity/formation/watched-operation artifacts remain stable; shorter scenario report hashes move due run identity/source-hash churn only.
+
+**Verification:** `node node_modules\vitest\vitest.mjs run tests\scenario_player_faction_contract.test.ts tests\scenario_runner_final_seal_contract.test.ts tests\scenario_runner_artifact_repair.test.ts tests\save_migration_validator_rejection.test.ts tests\events_evaluate.test.ts tests\ai_commander_validation.test.ts --reporter=dot` passed 186/186; `node node_modules\vitest\vitest.mjs run tests\sector_partition_instrumentation.test.ts --reporter=dot` passed 28/28; `node node_modules\vitest\vitest.mjs run tests\scenario_continue_from_save_equivalence.test.ts --reporter=dot` passed 2/2; `npm.cmd run typecheck -- --pretty false`; `node node_modules\tsx\dist\cli.mjs tools\scenario_runner\run_baseline_regression.ts`; `git diff --check`.
+
+**Files:** `src/scenario/scenario_loader.ts`, `src/scenario/scenario_runner.ts`, `src/scenario/scenario_types.ts`, `src/state/validateGameState.ts`, `tests/scenario_player_faction_contract.test.ts`, `tests/scenario_runner_final_seal_contract.test.ts`, `tests/scenario_continue_from_save_equivalence.test.ts`, `tests/sector_partition_instrumentation.test.ts`, `tests/save_migration_validator_rejection.test.ts`, `data/derived/scenario/baselines/manifest.json`, `docs/40_reports/implemented/20260604_CODEX_REVIEW_THREAD_CLEANUP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/README.md`, `.claude/napkin.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(state): validate command_authority when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation logic, scenario data, UI routing, or player-facing behavior changed.

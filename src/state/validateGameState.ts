@@ -11,6 +11,7 @@ import type { PhaseName } from './game_state.js';
 /** Known phase names (must match PhaseName in game_state.ts). */
 const KNOWN_PHASES: readonly PhaseName[] = ['peace', 'war'];
 const CANONICAL_PLAYER_FACTIONS = ['RBiH', 'RS', 'HRHB'] as const;
+const DOCTRINE_OVERRIDE_FORCED_STANCES = ['defensive', 'balanced', 'offensive', 'reorganize'] as const;
 
 /**
  * Strict comparator for deterministic ordering (Engine Invariants §11.3).
@@ -112,6 +113,10 @@ function isDeclinedOperationRecord(value: unknown): boolean {
 
 function isCanonicalPlayerFaction(value: unknown): boolean {
     return typeof value === 'string' && CANONICAL_PLAYER_FACTIONS.includes(value as typeof CANONICAL_PLAYER_FACTIONS[number]);
+}
+
+function isDoctrineOverrideForcedStance(value: unknown): boolean {
+    return typeof value === 'string' && DOCTRINE_OVERRIDE_FORCED_STANCES.includes(value as typeof DOCTRINE_OVERRIDE_FORCED_STANCES[number]);
 }
 
 function isEventDecisionSource(value: unknown): boolean {
@@ -680,8 +685,8 @@ function validateEventConstraints(value: unknown, errors: string[]): void {
             value.doctrine_overrides.forEach((override, i) => {
                 const path = `military.event_constraints.doctrine_overrides[${i}]`;
                 if (!validateEventConstraintFactionExpiryReasonEntry(override, path, errors)) return;
-                if (!isNonEmptyString(override.forced_stance)) {
-                    errors.push(`${path}.forced_stance must be a non-empty string`);
+                if (!isDoctrineOverrideForcedStance(override.forced_stance)) {
+                    errors.push(`${path}.forced_stance must be one of: defensive, balanced, offensive, reorganize`);
                 }
             });
         }
@@ -729,8 +734,8 @@ function validatePatronDefianceSupplyCuts(value: unknown, errors: string[]): voi
             errors.push(`${path} must be an object`);
             return;
         }
-        if (!isCanonicalPlayerFaction(cut.faction)) {
-            errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+        if (cut.faction !== 'RS' && cut.faction !== 'HRHB') {
+            errors.push(`${path}.faction must be RS or HRHB`);
         }
         if (!isNonNegativeInteger(cut.turn)) {
             errors.push(`${path}.turn must be a non-negative integer`);

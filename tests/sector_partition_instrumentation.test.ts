@@ -581,7 +581,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(region).toContain('context.state.military.war_front_edges_osid ?? []');
     });
 
-    it('static contract: scenario final-save reconciliation seals current sector truth before serialization', () => {
+    it('static contract: scenario final-save reconciliation seals full operational sector truth before serialization', () => {
         const raw = readFileSync(resolve('src/scenario/scenario_runner.ts'), 'utf8');
         const finalSaveIdx = raw.indexOf("const finalSavePath = join(outDir, 'final_save.json');");
         const serializeIdx = raw.indexOf('const finalSerialized = _serTimeSync', finalSaveIdx);
@@ -593,7 +593,11 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         const sealIdx = region.indexOf('sealFinalSectorTruthFromCurrentSectors(');
         expect(reconcileIdx).toBeGreaterThanOrEqual(0);
         expect(sealIdx).toBeGreaterThan(reconcileIdx);
-        expect(region).toContain('state.military.war_front_edges_osid ?? []');
+        expect(region).toContain('const finalOperationalEdges');
+        expect(region).toContain('const finalSpatial');
+        expect(region).toMatch(/sealFinalSectorTruthFromCurrentSectors\(\s*state,\s*finalOperationalEdges,/);
+        expect(region).toMatch(/sealFinalSectorTruthFromCurrentSectors\([\s\S]*finalSpatial,[\s\S]*\)/);
+        expect(region).not.toMatch(/sealFinalSectorTruthFromCurrentSectors\(\s*state,\s*state\.military\.war_front_edges_osid/);
     });
 
     it('static contract: sealMergedSectorTruth has deterministic child attribution labels', () => {
