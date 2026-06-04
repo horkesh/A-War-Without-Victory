@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(state): validate cosmetic AI buffers when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation behavior, AI prompt/prose generation, baseline manifest, replay writer, scenario output, or player-facing command behavior changed.
+
+**Change:** Classified `military.corps_dialogues`, `military.war_dispatches`, and `military.battle_narratives` as optional cosmetic AI/read-model buffers. Absence remains valid. Present buffers now validate array shape, non-negative turns, canonical factions where applicable, non-empty identity/prose fields, and exported enum vocabularies for dialogue confidence and dispatch perspective. `military.narrative_queue` stays out of scope because it is pending combat-work input rather than a finished cosmetic read model.
+
+**Verification:** Red proof: focused validator file failed because malformed present cosmetic AI buffers were accepted. Green proof: `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` passed 156/156; `npm.cmd run typecheck -- --pretty false` passed; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 with `state: 172` and `sim: 327`; `git diff --check` passed.
+
+**Files:** `src/state/validateGameState.ts`, `tests/save_migration_validator_rejection.test.ts`, `docs/40_reports/implemented/20260604_COSMETIC_AI_BUFFERS_VALIDATE_WHEN_PRESENT.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(state): validate command briefing when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation behavior, Tactical Group, `army_hq_operations`, telemetry, Ahmici consequence files, no-data credibility files, OOB/brigade/Standing OG files, operation-launch behavior, baseline manifests, replay writer, scenario output, or player-facing command behavior changed.
