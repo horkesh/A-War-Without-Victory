@@ -800,6 +800,29 @@ function validateArmyStanceRecord(value: unknown, errors: string[]): void {
     }
 }
 
+function validateLogisticsPriority(value: unknown, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push('military.logistics_priority must be an object when present');
+        return;
+    }
+
+    for (const [faction, priorities] of Object.entries(value)) {
+        const path = `military.logistics_priority.${faction}`;
+        if (!isCanonicalPlayerFaction(faction)) {
+            errors.push(`${path} must use a canonical faction id key`);
+        }
+        if (!isRecord(priorities)) {
+            errors.push(`${path} must be an object`);
+            continue;
+        }
+        for (const [targetId, priority] of Object.entries(priorities)) {
+            if (!isFiniteNonNegativeNumber(priority)) {
+                errors.push(`${path}.${targetId} must be a finite non-negative number`);
+            }
+        }
+    }
+}
+
 function validateCostLedgerAnnotations(value: unknown, errors: string[]): void {
     if (!Array.isArray(value)) {
         errors.push('military.cost_ledger_annotations must be an array when present');
@@ -1389,6 +1412,9 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'opsec_sectors' in military && military.opsec_sectors !== undefined && !isStringArray(military.opsec_sectors)) {
         errors.push('military.opsec_sectors must be a string array when present');
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'logistics_priority' in military && military.logistics_priority !== undefined) {
+        validateLogisticsPriority(military.logistics_priority, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'closed_event_ids' in military && military.closed_event_ids !== undefined) {
         validateClosedEventIds(military.closed_event_ids, errors);

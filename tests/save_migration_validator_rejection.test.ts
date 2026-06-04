@@ -1636,4 +1636,58 @@ describe('save migration validator hardening', () => {
             /Save schema validation failed after migration[\s\S]*military\.opsec_sectors must be a string array when present/
         );
     });
+
+    it('accepts current-version saves with absent or well-formed logistics priority records', () => {
+        const absent = currentVersionState();
+        delete absent.military.logistics_priority;
+        const withPriorities = currentVersionState();
+        withPriorities.military.logistics_priority = {
+            RBiH: {
+                edge_alpha: 0.5,
+                edge_bravo: 5,
+            },
+            RS: {},
+        };
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWithPriorities = deserializeState(JSON.stringify(withPriorities));
+
+        expect(migratedAbsent.military.logistics_priority).toBeUndefined();
+        expect(migratedWithPriorities.military.logistics_priority).toEqual({
+            RBiH: {
+                edge_alpha: 0.5,
+                edge_bravo: 5,
+            },
+            RS: {},
+        });
+    });
+
+    it('rejects current-version saves with malformed logistics priority records', () => {
+        const state = currentVersionState();
+        state.military.logistics_priority = {
+            RBiH: {
+                ok: 1,
+                negative: -1,
+                infinite: Number.POSITIVE_INFINITY,
+                text: '1',
+            },
+            RS: 1,
+            unknown: {
+                edge: 1,
+            },
+        } as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.logistics_priority\.RBiH\.negative must be a finite non-negative number[\s\S]*military\.logistics_priority\.RBiH\.infinite must be a finite non-negative number[\s\S]*military\.logistics_priority\.RBiH\.text must be a finite non-negative number[\s\S]*military\.logistics_priority\.RS must be an object[\s\S]*military\.logistics_priority\.unknown must use a canonical faction id key/
+        );
+    });
+
+    it('rejects current-version saves with non-record logistics priority payloads', () => {
+        const state = currentVersionState();
+        state.military.logistics_priority = [] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.logistics_priority must be an object when present/
+        );
+    });
 });
