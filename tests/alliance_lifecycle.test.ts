@@ -41,6 +41,7 @@ import {
     WASH_ALLIANCE_LOCK_VALUE,
     WASH_CEASEFIRE_DURATION
 } from '../src/sim/early_war/washington_agreement.js';
+import { warPhases } from '../src/sim/turn_phases/war_phases.js';
 import type { DisplacementState, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
@@ -194,6 +195,30 @@ describe('alliance update', () => {
         ensureRbihHrhbState(state);
         state.political.rbih_hrhb_state!.stalemate_turns = 5;
         countBilateralFlips(state, [{ mun_id: 'travnik', from_faction: 'RBiH', to_faction: 'HRHB' }]);
+        expect(state.political.rbih_hrhb_state!.stalemate_turns).toBe(0);
+    });
+
+    test('war bilateral flip count derives municipality from OSID when mun_id is absent', () => {
+        const state = makeState();
+        ensureRbihHrhbState(state);
+        state.meta.turn = 12;
+        state.political.rbih_hrhb_state!.stalemate_turns = 5;
+        state.political.control_events = [{
+            turn: 12,
+            settlement_id: 'op:travnik:lasva_1',
+            from: 'RBiH',
+            to: 'HRHB',
+            mechanism: 'consolidation',
+        }];
+        const report: Record<string, unknown> = {};
+        const phase = warPhases.find((p) => p.name === 'bilateral-flip-count-war');
+        expect(phase).toBeDefined();
+
+        phase!.run({ state, report } as any);
+
+        expect(report.bilateral_flip_count).toBe(1);
+        expect(state.political.rbih_hrhb_state!.bilateral_flips_this_turn).toBe(1);
+        expect(state.political.rbih_hrhb_state!.total_bilateral_flips).toBe(1);
         expect(state.political.rbih_hrhb_state!.stalemate_turns).toBe(0);
     });
 });

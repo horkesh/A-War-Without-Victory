@@ -101,6 +101,7 @@ import { checkAndApplyWashington } from '../early_war/washington_agreement.js';
 import { updateMixedMunicipalitiesList } from '../early_war/mixed_municipality.js';
 import { checkAndApplyOperationStorm } from '../combat/operation_storm.js';
 import { tickHvIntegration } from '../combat/hv_integration.js';
+import { munFromOsid } from '../combat/osid_adjacency.js';
 import { runCohesionDrift } from '../combat/cohesion_drift.js';
 import { runMoraleDrift } from '../combat/morale_drift.js';
 import { runOngoingMobilization } from '../combat/ongoing_mobilization.js';
@@ -2789,10 +2790,11 @@ export const warPhases: NamedPhase[] = [
             const flips: Array<{ mun_id: string; from_faction: FactionId | null; to_faction: FactionId }> = [];
             for (const e of events) {
                 if (e.turn !== turn) continue;
-                if (!e.mun_id) continue;
+                const munId = e.mun_id ?? munFromOsid(e.settlement_id);
+                if (!munId) continue;
                 if (e.to !== 'RBiH' && e.to !== 'HRHB' && e.to !== 'RS') continue;
                 if (e.from !== null && e.from !== 'RBiH' && e.from !== 'HRHB' && e.from !== 'RS') continue;
-                flips.push({ mun_id: e.mun_id, from_faction: e.from, to_faction: e.to });
+                flips.push({ mun_id: munId, from_faction: e.from, to_faction: e.to });
             }
             context.report.bilateral_flip_count = countBilateralFlips(context.state, flips);
             context.report.territorial_incident_count = countTerritorialIncidents(context.state, flips);

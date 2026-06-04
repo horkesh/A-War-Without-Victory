@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(engine): derive bilateral flip municipality from OSID
+
+**Type:** Engine correctness fix for GitHub issue #170 P1. No save schema, scenario data, event content, calibration constants, UI, or replay writer changed. The baseline manifest is refreshed for the expected `apr1992_52w` final-state drift.
+
+**Change:** War-phase `bilateral-flip-count-war` now derives a municipality id with `munFromOsid(control_event.settlement_id)` when a current-turn control event lacks `mun_id`. Valid RBiH-HRHB control flips emitted with canonical `op:<municipality>:<slug>` settlement ids are now counted instead of being dropped. Non-OSID/no-municipality events remain skipped.
+
+**Baseline impact:** Parent comparison at `c7d35df6` ended `apr1992_52w` with `total_bilateral_flips: 6`; this branch ends with `total_bilateral_flips: 13`. `UPDATE_BASELINES=1 npm.cmd run test:baselines` updated only the `apr1992_52w` `final_save.json` hash and dependent `run_summary.json` final-state hash.
+
+**Verification:** `node node_modules\vitest\vitest.mjs run tests\alliance_lifecycle.test.ts --reporter=dot` passed 40/40; `npm.cmd run typecheck -- --pretty false`; `UPDATE_BASELINES=1 npm.cmd run test:baselines`; `npm.cmd run test:baselines`; `git diff --check`.
+
+**Files:** `src/sim/turn_phases/war_phases.ts`, `tests/alliance_lifecycle.test.ts`, `data/derived/scenario/baselines/manifest.json`, `docs/40_reports/implemented/20260604_BILATERAL_FLIP_MUN_FALLBACK.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(diagnostics): skip global_off-only Phase E Tier 2 runs
 
 **Type:** Diagnostic-tool fix for GitHub issue #170 P2. No simulation mechanics, scenario data, sector files, event JSON, cache/fingerprint behavior, command model, save schema, calibration tuning, replay writer, or baseline manifest changed.
