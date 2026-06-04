@@ -94,6 +94,58 @@ export function setCohesionCautionBiasOverride(value: boolean | null): void {
 }
 
 // ---------------------------------------------------------------------------
+// Tier 2: patron_confidence → op-launch patron-hesitation sub-flag
+// ---------------------------------------------------------------------------
+
+let _patronConfidenceOpsHesitationOverride: boolean | null = null;
+
+/** Returns true when the patron_confidence → ops-hesitation sub-flag is
+ *  enabled. Reads `process.env.AWWV_PDP_PATRON_CONFIDENCE_OPS_HESITATION`
+ *  ('true' or '1') unless an override has been set via the setter. Mirrors the
+ *  intl_standing sub-flag pattern; default off until the flag is flipped.
+ *  Semantic: low patron confidence (sponsor withholding) → op-launch
+ *  hesitation, same DIRECTION as intl_standing. */
+export function isPatronConfidenceOpsHesitationEnabled(): boolean {
+    if (_patronConfidenceOpsHesitationOverride !== null) {
+        return _patronConfidenceOpsHesitationOverride;
+    }
+    const raw = process.env.AWWV_PDP_PATRON_CONFIDENCE_OPS_HESITATION;
+    return raw === 'true' || raw === '1';
+}
+
+/** Set the patron_confidence → ops-hesitation sub-flag override.
+ *  Pass `null` to clear and fall back to env. Tests-only. */
+export function setPatronConfidenceOpsHesitationOverride(value: boolean | null): void {
+    _patronConfidenceOpsHesitationOverride = value;
+}
+
+// ---------------------------------------------------------------------------
+// Tier 2: military_credibility → op-launch caution-bias sub-flag
+// ---------------------------------------------------------------------------
+
+let _militaryCredibilityCautionBiasOverride: boolean | null = null;
+
+/** Returns true when the military_credibility → caution-bias sub-flag is
+ *  enabled. Reads `process.env.AWWV_PDP_MILITARY_CREDIBILITY_CAUTION_BIAS`
+ *  ('true' or '1') unless an override has been set via the setter. Mirrors the
+ *  internal_cohesion sub-flag pattern; default off until the flag is flipped.
+ *  Semantic: low military credibility (failing ops + bleeding exchange ratio)
+ *  → op-launch caution, same DIRECTION as internal_cohesion. */
+export function isMilitaryCredibilityCautionBiasEnabled(): boolean {
+    if (_militaryCredibilityCautionBiasOverride !== null) {
+        return _militaryCredibilityCautionBiasOverride;
+    }
+    const raw = process.env.AWWV_PDP_MILITARY_CREDIBILITY_CAUTION_BIAS;
+    return raw === 'true' || raw === '1';
+}
+
+/** Set the military_credibility → caution-bias sub-flag override.
+ *  Pass `null` to clear and fall back to env. Tests-only. */
+export function setMilitaryCredibilityCautionBiasOverride(value: boolean | null): void {
+    _militaryCredibilityCautionBiasOverride = value;
+}
+
+// ---------------------------------------------------------------------------
 // Combined helpers — both tiers required
 // ---------------------------------------------------------------------------
 
@@ -115,6 +167,24 @@ export function isCohesionCautionBiasActive(): boolean {
     return isPoliticalDimensionPropagationEnabled() && isCohesionCautionBiasEnabled();
 }
 
+/** Combined gate: BOTH the global propagation switch AND the
+ *  patron_confidence → ops-hesitation sub-flag must be ON. Mirrors the
+ *  intl_standing combined predicate. Consumers (briefing assembly,
+ *  sector_offensive launch-gate patron multiplier) MUST gate on this and take a
+ *  byte-stable no-op path when false. */
+export function isPatronConfidenceOpsHesitationActive(): boolean {
+    return isPoliticalDimensionPropagationEnabled() && isPatronConfidenceOpsHesitationEnabled();
+}
+
+/** Combined gate: BOTH the global propagation switch AND the
+ *  military_credibility → caution-bias sub-flag must be ON. Mirrors the
+ *  internal_cohesion combined predicate. Consumers (briefing assembly,
+ *  sector_offensive launch-gate credibility multiplier) MUST gate on this and
+ *  take a byte-stable no-op path when false. */
+export function isMilitaryCredibilityCautionBiasActive(): boolean {
+    return isPoliticalDimensionPropagationEnabled() && isMilitaryCredibilityCautionBiasEnabled();
+}
+
 // ---------------------------------------------------------------------------
 // Test isolation helper
 // ---------------------------------------------------------------------------
@@ -125,4 +195,6 @@ export function resetPoliticalDimensionGates(): void {
     _politicalDimensionPropagationOverride = null;
     _intlStandingOpsHesitationOverride = null;
     _cohesionCautionBiasOverride = null;
+    _patronConfidenceOpsHesitationOverride = null;
+    _militaryCredibilityCautionBiasOverride = null;
 }

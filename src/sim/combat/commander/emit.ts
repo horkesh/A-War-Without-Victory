@@ -49,6 +49,8 @@ import { isOutcomeSufficientForAttack } from '../bot_brigade_targeting.js';
 import {
     getCohesionCautionBiasMultiplier,
     getIntlStandingOpsHesitationMultiplier,
+    getMilitaryCredibilityCautionBiasMultiplier,
+    getPatronConfidenceOpsHesitationMultiplier,
 } from '../sector_offensive.js';
 import { getPoliticalControllerOSID } from '../../../state/settlement_control.js';
 import { shouldGrazBlockAttack } from '../../local_truces.js';
@@ -866,7 +868,19 @@ function buildOperations(
         const cohesionMult = getCohesionCautionBiasMultiplier(
             briefing.political_dimensions?.internal_cohesion,
         );
-        const combinedMult = hesitationMult * cohesionMult;
+        // Phase E extension: patron_confidence → op-launch patron-hesitation and
+        // military_credibility → op-launch caution-bias. Chained alongside the two
+        // MVS multipliers; same byte-stability contract. When a sub-flag is OFF, the
+        // briefing has no corresponding field → the helper receives undefined →
+        // returns 1.0 → multiplicative composition is a no-op. With all four OFF the
+        // product is exactly 1.0 → the `!== 1.0` guard keeps the byte-stable fast-path.
+        const patronMult = getPatronConfidenceOpsHesitationMultiplier(
+            briefing.political_dimensions?.patron_confidence,
+        );
+        const credibilityMult = getMilitaryCredibilityCautionBiasMultiplier(
+            briefing.political_dimensions?.military_credibility,
+        );
+        const combinedMult = hesitationMult * cohesionMult * patronMult * credibilityMult;
         const effectiveMinForOp = combinedMult !== 1.0
             ? Math.ceil(baseMinForOp / combinedMult)
             : baseMinForOp;

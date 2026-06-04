@@ -555,6 +555,20 @@ export interface CommanderBriefing {
          *  sector_offensive `getCohesionCautionBiasMultiplier` scales op-launch
          *  threshold when value `< 40`. */
         readonly internal_cohesion?: number;
+        /** Phase E extension: effective patron_confidence value (0..100) for this
+         *  corps's faction, sourced from `state.military.negotiation.strategic_dimensions
+         *  [faction].patron_confidence.effective_value`. Populated only when the
+         *  two-tier `isPatronConfidenceOpsHesitationActive` gate is ON. Soft consumer
+         *  contract: sector_offensive `getPatronConfidenceOpsHesitationMultiplier`
+         *  scales op-launch threshold when value `< 30`. */
+        readonly patron_confidence?: number;
+        /** Phase E extension: effective military_credibility value (0..100) for this
+         *  corps's faction, sourced from `state.military.negotiation.strategic_dimensions
+         *  [faction].military_credibility.effective_value`. Populated only when the
+         *  two-tier `isMilitaryCredibilityCautionBiasActive` gate is ON. Soft consumer
+         *  contract: sector_offensive `getMilitaryCredibilityCautionBiasMultiplier`
+         *  scales op-launch threshold when value `< 40`. */
+        readonly military_credibility?: number;
     };
 }
 
