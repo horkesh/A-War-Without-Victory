@@ -2040,6 +2040,106 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('accepts current-version saves with canonical cosmetic AI read-model buffers', () => {
+        const state = currentVersionState();
+        state.military.corps_dialogues = [
+            {
+                turn: 12,
+                corps_id: 'rbih_1st_corps',
+                faction: 'RBiH',
+                officer_name: 'Mustafa Hajrulahovic',
+                acknowledgment: 'We will hold the line.',
+                concern: '',
+                confidence: 'medium',
+            },
+        ];
+        state.military.war_dispatches = [
+            {
+                turn: 16,
+                source: 'UNHCR field desk',
+                headline: 'Convoys delayed outside the city',
+                body: 'Access remains difficult, but negotiations continue.',
+                perspective: 'humanitarian',
+            },
+        ];
+        state.military.battle_narratives = [
+            {
+                turn: 18,
+                target_osid: 'op:sarajevo:dobrinja',
+                corps_id: 'rbih_1st_corps',
+                faction: 'RBiH',
+                officer_name: 'Mustafa Hajrulahovic',
+                narrative: 'We took casualties but held the block.',
+                tone: 'grim',
+                outcome: 'stalemate',
+            },
+        ];
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.military.corps_dialogues).toEqual(state.military.corps_dialogues);
+        expect(migrated.military.war_dispatches).toEqual(state.military.war_dispatches);
+        expect(migrated.military.battle_narratives).toEqual(state.military.battle_narratives);
+    });
+
+    it('accepts current-version saves with parser-aligned whitespace war dispatch strings', () => {
+        const state = currentVersionState();
+        state.military.war_dispatches = [
+            {
+                turn: 16,
+                source: '   ',
+                headline: '',
+                body: '\n\t',
+                perspective: 'humanitarian',
+            },
+        ];
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.military.war_dispatches).toEqual(state.military.war_dispatches);
+    });
+
+    it('rejects current-version saves with malformed cosmetic AI read-model buffers', () => {
+        const state = currentVersionState();
+        state.military.corps_dialogues = [
+            {
+                turn: -1,
+                corps_id: '',
+                faction: 'JNA',
+                officer_name: 4,
+                acknowledgment: '',
+                concern: 5,
+                confidence: 'certain',
+            },
+        ] as any;
+        state.military.war_dispatches = [
+            {
+                turn: -2,
+                source: '',
+                headline: 7,
+                body: '',
+                perspective: 'rumor',
+            },
+        ] as any;
+        state.military.battle_narratives = [
+            {
+                turn: -3,
+                target_osid: '',
+                corps_id: 8,
+                faction: 'JNA',
+                officer_name: '',
+                narrative: 9,
+                tone: '',
+                outcome: '',
+            },
+            42,
+        ] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.corps_dialogues\[0\]\.turn must be a non-negative integer[\s\S]*military\.corps_dialogues\[0\]\.corps_id must be a non-empty string[\s\S]*military\.corps_dialogues\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.corps_dialogues\[0\]\.officer_name must be a non-empty string[\s\S]*military\.corps_dialogues\[0\]\.acknowledgment must be a non-empty string[\s\S]*military\.corps_dialogues\[0\]\.concern must be a string[\s\S]*military\.corps_dialogues\[0\]\.confidence must be one of: high, medium, low[\s\S]*military\.war_dispatches\[0\]\.turn must be a non-negative integer[\s\S]*military\.war_dispatches\[0\]\.headline must be a string[\s\S]*military\.war_dispatches\[0\]\.perspective must be one of: humanitarian, military, civilian, diplomatic[\s\S]*military\.battle_narratives\[0\]\.turn must be a non-negative integer[\s\S]*military\.battle_narratives\[0\]\.target_osid must be a non-empty string[\s\S]*military\.battle_narratives\[0\]\.corps_id must be a non-empty string[\s\S]*military\.battle_narratives\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.battle_narratives\[0\]\.officer_name must be a non-empty string[\s\S]*military\.battle_narratives\[0\]\.narrative must be a non-empty string[\s\S]*military\.battle_narratives\[0\]\.tone must be a non-empty string[\s\S]*military\.battle_narratives\[0\]\.outcome must be a non-empty string[\s\S]*military\.battle_narratives\[1\] must be an object/
+        );
+    });
+
     it('accepts current-version saves with absent or well-formed AI army decisions', () => {
         const absent = currentVersionState();
         delete absent.military.ai_army_decisions;
