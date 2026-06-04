@@ -363,6 +363,21 @@ describe('Phase E activation simulator — Tier 2 (real-scenario shape)', () => 
         expect(withTier2.tier2!.runs.length).toBe(4);
     });
 
+    it('skips the OFF scenario pass when global_off is the only requested combo', async () => {
+        const observed: SimCombo[] = [];
+        const tier2 = await buildTier2Projection({
+            manifestOverride: manifestStub(),
+            combo: 'global_off',
+            tier2RunnerOverride: async (entry, combo) => {
+                observed.push(combo);
+                return { ...entry.hashes };
+            },
+        });
+
+        expect(observed).toEqual([]);
+        expect(tier2.runs).toEqual([]);
+    });
+
     it('resets gates even when the runner throws', async () => {
         const runner = async () => {
             throw new Error('synthetic runner failure');
