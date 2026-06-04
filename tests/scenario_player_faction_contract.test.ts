@@ -54,4 +54,33 @@ describe('scenario player_faction contract', () => {
 
         expect(rsHarnessFixture.player_faction).toBe('RS');
     });
+
+    it('preserves authored scenario decision_mode and rejects invalid values', () => {
+        const emergent = normalizeScenario({
+            scenario_id: 'decision_mode_emergent',
+            weeks: 1,
+            decision_mode: 'emergent',
+            turns: [],
+        });
+        const historical = normalizeScenario({
+            scenario_id: 'decision_mode_historical',
+            weeks: 1,
+            decision_mode: 'historical',
+            turns: [],
+        });
+
+        expect(emergent.decision_mode).toBe('emergent');
+        expect(historical.decision_mode).toBe('historical');
+        expect(normalizeScenario({
+            scenario_id: 'decision_mode_missing',
+            weeks: 1,
+            turns: [],
+        }).decision_mode).toBeUndefined();
+        expect(() => normalizeScenario({
+            scenario_id: 'decision_mode_invalid',
+            weeks: 1,
+            decision_mode: 'railroad',
+            turns: [],
+        })).toThrow(/decision_mode/);
+    });
 });

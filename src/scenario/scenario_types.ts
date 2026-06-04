@@ -45,6 +45,12 @@ export interface Scenario {
      * supply the active player faction instead.
      */
     player_faction?: FactionId;
+    /**
+     * Optional scenario-authored decision mode. Historical scenarios normally omit
+     * this and let the harness/default state keep calibration mode; explicit test
+     * or gameplay fixtures may request emergent behavior.
+     */
+    decision_mode?: 'historical' | 'emergent';
     /** Optional absolute week index anchor (weeks since Jan 1992). Enables time-adaptive bot doctrine profiles. */
     scenario_start_week?: number;
     /** Scenario lifecycle start phase. */
