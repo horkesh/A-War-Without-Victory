@@ -260,7 +260,7 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.queryByText('Military Credibility')).toBeNull();
         expect(screen.getByText('Vojni kredibilitet')).toBeDefined();
         expect(screen.getByText('Teritorijalni legitimitet')).toBeDefined();
-        expect(screen.getByText('Medjunarodni polozaj')).toBeDefined();
+        expect(screen.getByText('Međunarodni položaj')).toBeDefined();
         expect(screen.getByText('Povjerenje patrona')).toBeDefined();
         expect(screen.getByText('Unutrasnja kohezija')).toBeDefined();
         expect(screen.getByText('Pregovaracka poluga')).toBeDefined();
@@ -271,7 +271,7 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('Historijsko odstupanje')).toBeDefined();
         expect(warCost.queryByText('War lasted 6 weeks longer')).toBeNull();
         expect(warCost.queryByText('Srebrenica genocide occurred')).toBeNull();
-        expect(warCost.getByText('Rat je trajao 6 sedmica duze.')).toBeDefined();
+        expect(warCost.getByText('Rat je trajao 6 sedmica duže.')).toBeDefined();
         expect(warCost.getByText('Genocid u Srebrenici se dogodio.')).toBeDefined();
         expect(screen.getByText('Fokus')).toBeDefined();
         expect(screen.getByText('Ishod')).toBeDefined();
@@ -294,9 +294,9 @@ describe('VerdictScreen interaction — faction tab switching', () => {
 
         fireEvent.click(screen.getByText('VRS'));
 
-        expect(screen.getByText('Medjunarodna osuda')).toBeDefined();
+        expect(screen.getByText('Međunarodna osuda')).toBeDefined();
         expect(screen.queryByText(/Condemned for genocide/i)).toBeNull();
-        expect(screen.getByText('Osudjeno zbog genocida - medjunarodni sudski postupci su neizbjezni')).toBeDefined();
+        expect(screen.getByText('Osuđeno zbog genocida - međunarodni sudski postupci su neizbjezni')).toBeDefined();
     });
 });
 

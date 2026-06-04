@@ -197,9 +197,9 @@ describe('ADVANCE_TURN gated feedback', () => {
       pressureWarning: false,
     }));
 
-    const button = screen.getByRole('button', { name: /rijesite 2 odluke na cekanju za nastavak/i });
+    const button = screen.getByRole('button', { name: /rijesite 2 odluke na čekanju za nastavak/i });
 
-    expect(button.getAttribute('title')).toBe('Rijesite 2 odluke na cekanju za nastavak. Otvara pregled sobe odluka.');
+    expect(button.getAttribute('title')).toBe('Rijesite 2 odluke na čekanju za nastavak. Otvara pregled sobe odluka.');
     expect(screen.queryByText(/Resolve 2 pending decisions to continue/i)).toBeNull();
   });
 

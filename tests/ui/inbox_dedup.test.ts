@@ -142,7 +142,7 @@ describe('Presidential Inbox officer event dedupe', () => {
 
         expect(screen.getByText('Predsjednicki inbox')).toBeTruthy();
         expect(screen.getByText('Komandno dezurstvo')).toBeTruthy();
-        expect(screen.getByText('Na stolu nema naredbi koje cekaju vasu odluku.')).toBeTruthy();
+        expect(screen.getByText('Na stolu nema naredbi koje čekaju vašu odluku.')).toBeTruthy();
         expect(screen.getByText('Otvori sto')).toBeTruthy();
         expect(screen.queryByText('Presidential Inbox')).toBeNull();
     });
@@ -159,7 +159,7 @@ describe('Presidential Inbox officer event dedupe', () => {
         render(createElement(PresidentialInbox, { onAction }));
 
         expect(screen.getByText('Komandno dezurstvo')).toBeTruthy();
-        expect(screen.getByText('Na stolu nema naredbi koje cekaju vasu odluku.')).toBeTruthy();
+        expect(screen.getByText('Na stolu nema naredbi koje čekaju vašu odluku.')).toBeTruthy();
         expect(screen.getByText('Predsjednicki sto')).toBeTruthy();
         expect(screen.getByText('Hronika')).toBeTruthy();
         expect(screen.queryByText('Command Watch')).toBeNull();
@@ -182,7 +182,7 @@ describe('Presidential Inbox officer event dedupe', () => {
 
         expect(screen.getByText('Predsjednicki brifing')).toBeTruthy();
         expect(screen.getByText('Republika Bosna i Hercegovina')).toBeTruthy();
-        expect(screen.getByText('Drzite Sarajevo, Tuzlu, Zenicu, Bihac i druga urbana uporista dok se armija formira pod vatrom.')).toBeTruthy();
+        expect(screen.getByText('Držite Sarajevo, Tuzlu, Zenicu, Bihac i druga urbana uporista dok se armija formira pod vatrom.')).toBeTruthy();
         expect(screen.getByRole('button', { name: /otvori sto/i })).toBeTruthy();
         expect(screen.getByRole('button', { name: /procitaj kasnije/i })).toBeTruthy();
         expect(screen.queryByText('Presidential Brief')).toBeNull();
