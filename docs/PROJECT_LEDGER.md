@@ -11,6 +11,18 @@
 
 ---
 
+## [2026-06-04] test(artifacts): guard scenario run-output ownership
+
+**Type:** Generated-artifact ownership guard. No scenario outputs, replay sidecars, baselines, PMTiles, painted diagnostics, force-quality diagnostics, replay writers, save schema, simulation mechanics, calibration constants, UI, or event data changed.
+
+**Change:** The broad `runs/<scenario_run>/...` ownership row now cites `tests/scenario_run_output_artifact_ownership.test.ts`. The guard proves `.gitignore` ignores `runs/`, the matrix classifies scenario run outputs as default transient / always transient, the row forbids committing them, and `git ls-files runs` is empty.
+
+**Verification:** Red focused guard failed before the matrix cited the new test. Green proof: `F:\A-War-Without-Victory\vitest.cmd run tests\scenario_run_output_artifact_ownership.test.ts --reporter=dot` passed 1/1; `F:\A-War-Without-Victory\vitest.cmd run tests\generated_artifact_ownership_matrix_contract.test.ts --reporter=dot` passed 1/1; `git diff --check` passed.
+
+**Files:** `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `tests/scenario_run_output_artifact_ownership.test.ts`, `docs/40_reports/implemented/20260604_SCENARIO_RUN_OUTPUT_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(events): align Ahmici rupture with hostile threshold
 
 **Type:** Authored consequence data fix for GitHub issue #170 P1. Sensitive-history scope: no player choices, reward surface, victory scoring, civilian-targeting mechanics, engine phase logic, save schema, or scenario structure changed.
@@ -18795,5 +18807,21 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Verification:** focused sector pack PASS (90/90): `tests/sector_partition_instrumentation.test.ts`, `tests/sector_coverage_truth_preservation.test.ts`, `tests/sector_split_brigade_assignment.test.ts`, `tests/sector_severe_undercoverage_rebalance.test.ts`, `tests/rear_sector_bucket_truth.test.ts`, `tests/brigade_territory_reconciliation.test.ts`. Focused UI pack PASS (10/10): `tests/ui/warroom_shell_ownership.test.ts`, `tests/ui/diplomacy_panel.test.ts`. `npm.cmd run typecheck` PASS. Profiled 40w PASS: final hash `41c72b13ad2e91b9`, `totalWallS=87.89`. `node tools\validate_run_consistency.cjs runs_perf\sector_coverage_hotspot_20260604\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` PASS. `npm.cmd run test:baselines` PASS ("Baseline regression: all scenarios match"). `git diff --check` PASS.
 
 **Report:** `docs/40_reports/implemented/20260604_SECTOR_COVERAGE_REACHABILITY_ELISION.md`; `docs/40_reports/implemented/20260604_WARROOM_DIPLOMACY_ESCAPE.md`
+
+---
+
+## [2026-06-04] fix(combat): ignore no-data military credibility at op-launch floor
+
+**Type:** Default-off combat dimension consumer fix. No scenario data, OOB, brigade lifecycle, TG mechanics, Standing OG, telemetry, Ahmici consequence files, baseline manifests, save schema, replay writer, or player-facing UI changed.
+
+**Change:** `src/sim/combat/commander/briefing.ts` now forwards `political_dimensions.military_credibility` only when the faction has operation or military casualty evidence in negotiation capital. This keeps no-data `military_credibility = 25` from being consumed as low-credibility caution and raising anchored-sector operation floors from 2 to 3. Evidenced low credibility still reaches `getMilitaryCredibilityCautionBiasMultiplier(...)` under the default-off flags.
+
+**Docs:** Closed the stale `docs/plans/COMMAND_BOARD.md` row that still described `patron_confidence + military_credibility` consumers as unbuilt, and added `docs/40_reports/implemented/20260604_MILITARY_CREDIBILITY_NO_DATA_CONSUMER.md` with index/roadmap references.
+
+**Determinism:** Deterministic pure guard over existing numeric capital fields; no randomness, timestamps, ordering changes, serialization changes, or baseline artifact refresh.
+
+**Verification:** Red regression first failed with `expected 25 to be undefined`; green branch pack `node F:\A-War-Without-Victory\node_modules\vitest\vitest.mjs run tests\phase_e_military_credibility_caution_bias.test.ts tests\phase_e_patron_confidence_ops_hesitation.test.ts tests\sector_offensive.test.ts tests\scenario_run_output_artifact_ownership.test.ts tests\generated_artifact_ownership_matrix_contract.test.ts --reporter=dot` passed 40/40; `npm.cmd run typecheck -- --pretty false` passed; `npm.cmd run test:baselines` passed with all scenarios matching; `git diff --check` passed.
+
+**Artifacts:** `src/sim/combat/commander/briefing.ts`, `tests/phase_e_military_credibility_caution_bias.test.ts`, `docs/40_reports/implemented/20260604_MILITARY_CREDIBILITY_NO_DATA_CONSUMER.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
 
 ---

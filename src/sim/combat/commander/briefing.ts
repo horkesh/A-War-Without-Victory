@@ -616,6 +616,15 @@ function collectCampaignIntent(
     };
 }
 
+function hasMilitaryCredibilityEvidence(state: GameState, faction: FactionId): boolean {
+    const cap = state.military?.negotiation?.capital?.[faction];
+    if (!cap) return false;
+    return (cap.operations_launched ?? 0) > 0
+        || (cap.operations_successful ?? 0) > 0
+        || (cap.military_casualties_inflicted ?? 0) > 0
+        || (cap.military_casualties_taken ?? 0) > 0;
+}
+
 // ---------------------------------------------------------------------------
 // Main entry point
 // ---------------------------------------------------------------------------
@@ -773,7 +782,7 @@ export function buildBriefing(
     // is added.
     if (isMilitaryCredibilityCautionBiasActive()) {
         const militaryCredibility = state.military?.negotiation?.strategic_dimensions?.[faction]?.military_credibility?.effective_value;
-        if (typeof militaryCredibility === 'number') {
+        if (typeof militaryCredibility === 'number' && hasMilitaryCredibilityEvidence(state, faction)) {
             politicalDimensions = { ...politicalDimensions, military_credibility: militaryCredibility };
         }
     }

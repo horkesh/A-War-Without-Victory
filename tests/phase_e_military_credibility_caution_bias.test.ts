@@ -8,9 +8,10 @@
  *   7    Byte-stability: with the gate OFF, briefing OMITS the field.
  *   8    Compositional: credibility sub-flag ON + other sub-flags OFF →
  *        briefing has political_dimensions with military_credibility ONLY.
- *   9-12 Multiplier byte-stable fast-paths (undefined, NaN, >= threshold) and
+ *   9    No-data low military_credibility is omitted from op-launch briefing.
+ *   10-13 Multiplier byte-stable fast-paths (undefined, NaN, >= threshold) and
  *        0.85 for military_credibility < 40.
- *   13   Four-flag-OFF product sentinel = 1.0 exactly.
+ *   14   Four-flag-OFF product sentinel = 1.0 exactly.
  *
  * Determinism: each test resets gate overrides via `resetPoliticalDimensionGates`
  * and snapshots/restores process.env entries.
@@ -124,6 +125,14 @@ function buildMinimalState(
     };
     if (militaryCredibility !== undefined) {
         military.negotiation = {
+            capital: {
+                [faction]: {
+                    operations_launched: 1,
+                    operations_successful: 0,
+                    military_casualties_inflicted: 0,
+                    military_casualties_taken: 100,
+                },
+            },
             strategic_dimensions: {
                 [faction]: {
                     military_credibility: {
@@ -293,6 +302,40 @@ describe('Phase E extension — military_credibility → bot caution-bias gate',
         expect(briefing.political_dimensions?.international_standing).toBeUndefined();
         expect(briefing.political_dimensions?.internal_cohesion).toBeUndefined();
         expect(briefing.political_dimensions?.patron_confidence).toBeUndefined();
+    });
+
+    it('test 9: no ops or casualty evidence omits no-data military_credibility from op-launch briefing', () => {
+        setPoliticalDimensionPropagationOverride(true);
+        setMilitaryCredibilityCautionBiasOverride(true);
+
+        const corpsId = 'test_corps' as FormationId;
+        const faction = 'RS' as FactionId;
+        const state = buildMinimalState(corpsId, faction, 25);
+        state.military.negotiation = {
+            ...state.military.negotiation,
+            capital: {
+                [faction]: {
+                    operations_launched: 0,
+                    operations_successful: 0,
+                    military_casualties_inflicted: 0,
+                    military_casualties_taken: 0,
+                },
+            },
+        } as any;
+
+        const briefing = buildBriefing(
+            state,
+            corpsId,
+            faction,
+            buildSpatial(faction),
+            [],
+            null,
+            null,
+            null,
+            null,
+        );
+
+        expect(briefing.political_dimensions?.military_credibility).toBeUndefined();
     });
 
     // ----- Multiplier byte-stable fast-paths -----
