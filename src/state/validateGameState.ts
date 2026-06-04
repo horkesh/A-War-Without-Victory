@@ -717,6 +717,33 @@ function validateEventConstraints(value: unknown, errors: string[]): void {
     }
 }
 
+function validatePatronDefianceSupplyCuts(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.patron_defiance_supply_cuts must be an array when present');
+        return;
+    }
+
+    value.forEach((cut, i) => {
+        const path = `military.patron_defiance_supply_cuts[${i}]`;
+        if (!isRecord(cut)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        if (!isCanonicalPlayerFaction(cut.faction)) {
+            errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+        }
+        if (!isNonNegativeInteger(cut.turn)) {
+            errors.push(`${path}.turn must be a non-negative integer`);
+        }
+        if (!isFiniteNumber(cut.cut_fraction) || cut.cut_fraction <= 0 || cut.cut_fraction > 1) {
+            errors.push(`${path}.cut_fraction must be > 0 and <= 1`);
+        }
+        if (!isFiniteNumber(cut.support_after) || cut.support_after < 0 || cut.support_after > 1) {
+            errors.push(`${path}.support_after must be a finite number in [0,1]`);
+        }
+    });
+}
+
 function validateCostLedgerAnnotations(value: unknown, errors: string[]): void {
     if (!Array.isArray(value)) {
         errors.push('military.cost_ledger_annotations must be an array when present');
@@ -1291,6 +1318,9 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'event_constraints' in military && military.event_constraints !== undefined) {
         validateEventConstraints(military.event_constraints, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'patron_defiance_supply_cuts' in military && military.patron_defiance_supply_cuts !== undefined) {
+        validatePatronDefianceSupplyCuts(military.patron_defiance_supply_cuts, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'closed_event_ids' in military && military.closed_event_ids !== undefined) {
         validateClosedEventIds(military.closed_event_ids, errors);

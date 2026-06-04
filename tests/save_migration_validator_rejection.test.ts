@@ -1429,4 +1429,49 @@ describe('save migration validator hardening', () => {
             /Save schema validation failed after migration[\s\S]*military\.event_constraints\.operation_blocks must be an array when present[\s\S]*military\.event_constraints\.doctrine_overrides must be an array when present[\s\S]*military\.event_constraints\.scope_restrictions must be an array when present/
         );
     });
+
+    it('accepts current-version saves with absent patron defiance supply cuts', () => {
+        const state = currentVersionState();
+        delete state.military.patron_defiance_supply_cuts;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.patron_defiance_supply_cuts).toBeUndefined();
+    });
+
+    it('accepts current-version saves with well-formed patron defiance supply cuts', () => {
+        const state = currentVersionState();
+        state.military.patron_defiance_supply_cuts = [
+            { faction: 'RS', turn: 30, cut_fraction: 0.2, support_after: 0.6 },
+            { faction: 'HRHB', turn: 44, cut_fraction: 1, support_after: 0 },
+        ];
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.patron_defiance_supply_cuts?.map((cut: any) => cut.faction)).toEqual(['RS', 'HRHB']);
+    });
+
+    it('rejects current-version saves with malformed patron defiance supply cuts', () => {
+        const state = currentVersionState();
+        state.military.patron_defiance_supply_cuts = [
+            { faction: 'JNA', turn: -1, cut_fraction: 0, support_after: 1.5 },
+            { faction: 'RS', turn: 1.5, cut_fraction: Number.POSITIVE_INFINITY, support_after: Number.NaN },
+            42,
+        ];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.patron_defiance_supply_cuts\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.patron_defiance_supply_cuts\[0\]\.turn must be a non-negative integer[\s\S]*military\.patron_defiance_supply_cuts\[0\]\.cut_fraction must be > 0 and <= 1[\s\S]*military\.patron_defiance_supply_cuts\[0\]\.support_after must be a finite number in \[0,1\][\s\S]*military\.patron_defiance_supply_cuts\[1\]\.turn must be a non-negative integer[\s\S]*military\.patron_defiance_supply_cuts\[1\]\.cut_fraction must be > 0 and <= 1[\s\S]*military\.patron_defiance_supply_cuts\[1\]\.support_after must be a finite number in \[0,1\][\s\S]*military\.patron_defiance_supply_cuts\[2\] must be an object/
+        );
+    });
+
+    it('rejects current-version saves with non-array patron defiance supply cuts', () => {
+        const state = currentVersionState();
+        state.military.patron_defiance_supply_cuts = {};
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.patron_defiance_supply_cuts must be an array when present/
+        );
+    });
 });
