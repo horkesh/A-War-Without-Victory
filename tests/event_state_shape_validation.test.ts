@@ -19,6 +19,7 @@ function baseState(overrides: Record<string, unknown> = {}): Record<string, unkn
             referendum_deadline_turn: null,
             game_over: false,
             player_faction: 'RBiH',
+            decision_mode: 'historical',
         },
         factions: [],
         military: {

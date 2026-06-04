@@ -11,7 +11,7 @@ describe('GameState turn/week invariant', () => {
     it('meta.turn must be non-negative integer (weeks)', () => {
         const state = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 5, seed: 'x', player_faction: 'RBiH' },
+            meta: { turn: 5, seed: 'x', player_faction: 'RBiH', decision_mode: 'historical' },
             factions: [],
             military: {
                 formations: {},

@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**StateMeta decision_mode contract (2026-06-03, v35).** Current loaded gameplay saves must carry explicit `meta.decision_mode: 'historical' | 'emergent'`; malformed values fail validation. Legacy/unset saves migrate to `'historical'` for calibration safety. TypeScript may still keep the field optional where legacy/migration compatibility requires it. Do instead: baseline scenarios explicitly declare `historical`, desktop new campaigns explicitly set `emergent`, and no UI exposes a mode toggle.
+
 **Location:** `.claude/napkin.md` - single runbook for this repo. Read and curate at session start. Update during work.
 
 **Rules:** Max 10 items per category. Re-prioritize on every read (highest first). Merge duplicates, remove stale. Each entry: date + short title + "Do instead".

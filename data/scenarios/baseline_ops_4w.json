@@ -1,5 +1,6 @@
 {
   "scenario_id": "baseline_ops_4w",
+  "decision_mode": "historical",
   "weeks": 4,
   "turns": [
     {

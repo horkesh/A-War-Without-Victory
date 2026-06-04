@@ -1,7 +1,7 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 34,
-  "registered_migration_count": 34,
+  "latest_schema_version": 35,
+  "registered_migration_count": 35,
   "strict_required_field_count": 76,
   "anonymous_default_count": 0,
   "fields": [],
@@ -141,6 +141,10 @@
     {
       "version": 34,
       "description": "ADR-0005 v2.0: Tactical Group + Army HQ Operation state scaffold. "
+    },
+    {
+      "version": 35,
+      "description": "Persist explicit StateMeta decision_mode default. Sensitive: yes; legacy/unset saves default to historical calibration mode."
     }
   ],
   "required_fields": [

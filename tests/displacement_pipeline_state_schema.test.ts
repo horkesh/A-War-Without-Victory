@@ -28,6 +28,7 @@ function phaseFGameStateFixture(): GameState {
             game_over: false,
             outcome: undefined,
             player_faction: 'RBiH',
+            decision_mode: 'historical',
         } as any,
   factions: [
             {

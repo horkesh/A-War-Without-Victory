@@ -788,3 +788,15 @@ registerMigration({
         ensureRecord(mil, 'army_hq_op_count_by_year');
     },
 });
+
+registerMigration({
+    version: 35,
+    description: 'Persist explicit StateMeta decision_mode default. Sensitive: yes; legacy/unset saves default to historical calibration mode.',
+    migrate: (state) => {
+        const meta = asRecord(state.meta);
+        if (!meta) return;
+        if (meta.decision_mode === undefined) {
+            meta.decision_mode = 'historical';
+        }
+    },
+});
