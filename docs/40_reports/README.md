@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Ahmici same-turn lock follow-up** | [implemented/20260604_AHMICI_SAME_TURN_LOCK_FOLLOWUP.md](implemented/20260604_AHMICI_SAME_TURN_LOCK_FOLLOWUP.md) - The Ahmici rupture and alliance-held alt-path are now same-turn mutex alternatives, and per-turn alliance update honors active alliance locks. |
 | **Latest scenario run-output artifact ownership** | [implemented/20260604_SCENARIO_RUN_OUTPUT_ARTIFACT_OWNERSHIP.md](implemented/20260604_SCENARIO_RUN_OUTPUT_ARTIFACT_OWNERSHIP.md) - The broad `runs/<scenario_run>/...` catch-all now has a focused static guard proving run directories stay ignored, transient, and uncommitted. |
 | **Latest military credibility no-data consumer fix** | [implemented/20260604_MILITARY_CREDIBILITY_NO_DATA_CONSUMER.md](implemented/20260604_MILITARY_CREDIBILITY_NO_DATA_CONSUMER.md) - The flag-gated `military_credibility` op-launch consumer now requires operation/casualty evidence before treating low credibility as caution evidence. |
 | **Latest Chain 3 source-flag alignment** | [implemented/20260604_CHAIN3_SOURCE_FLAGS.md](implemented/20260604_CHAIN3_SOURCE_FLAGS.md) - The historical Srebrenica Falls and NATO Deliberate Force events now write the flags consumed by Chain 3 consequence predicates. |

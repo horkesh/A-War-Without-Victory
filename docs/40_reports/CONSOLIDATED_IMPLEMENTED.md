@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Ahmici same-turn lock follow-up:** [implemented/20260604_AHMICI_SAME_TURN_LOCK_FOLLOWUP.md](implemented/20260604_AHMICI_SAME_TURN_LOCK_FOLLOWUP.md) - The Ahmici rupture and alliance-held alt-path are now same-turn mutex alternatives, and per-turn alliance update honors active alliance locks.
+
 **Latest military credibility no-data consumer fix:** [implemented/20260604_MILITARY_CREDIBILITY_NO_DATA_CONSUMER.md](implemented/20260604_MILITARY_CREDIBILITY_NO_DATA_CONSUMER.md) - The PR #173 `military_credibility` op-launch consumer now ignores no-evidence low values while preserving evidenced low-credibility caution under the default-off flags.
 
 **Latest event staff recommendation defaults:** [implemented/20260527_EVENT_STAFF_RECOMMENDATION_DEFAULTS.md](implemented/20260527_EVENT_STAFF_RECOMMENDATION_DEFAULTS.md) - Abstract command-presence events now carry visible `Staff recommendation` metadata separate from historical defaults. `visit_to_front_rbih` becomes the 18th production modal-ready required-response row, while RS/HRHB visit rows remain gated and historical bot calibration is unchanged.
