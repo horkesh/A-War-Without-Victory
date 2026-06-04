@@ -4,7 +4,7 @@
 
 > **Status:** Current closeout 2026-06-03: `ensureMinimumSectorCoverage(...)` now reuses invocation-local sector-component lookups. See `docs/40_reports/implemented/20260603_SECTOR_COVERAGE_COMPONENT_CACHE.md`. This plan remains the active template for the next sector-performance pass: re-profile first, pick one remaining owner, and keep byte-identity gates.
 
-> **Current clean pre-change baseline:** `e086afbefcef01e6` as of 2026-06-03. The older `5d94adbfdb09bbda` and `f219401f4a17f311` comparison hashes are superseded for this lane; use fresh profiling from current main before the next slice.
+> **Current clean pre-change baseline:** `41c72b13ad2e91b9` as of 2026-06-04. The prior `e086afbefcef01e6` sector-performance floor is superseded by the accepted final-sector seal correction from PR #159 / commit `1a823d5e`; current validation passes on `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n2019`, while the old `e086...` run now fails current consistency checks. The older `5d94adbfdb09bbda` and `f219401f4a17f311` comparison hashes remain superseded for this lane; use fresh profiling from current main before the next slice.
 
 **Goal:** Turn the sector reconstruction performance lane into one measured next-target implementation plan with byte-identity proof gates.
 
@@ -57,7 +57,7 @@ $env:PERF_PROFILE_SECTOR_PARTITION='true'; npx.cmd tsx tools/perf/profile_scenar
 3. Record top 10 sector child labels.
 4. Compare to the prior accepted 40w hash in `docs/plans/MASTER_ROADMAP.md`.
 
-**Gate:** Stop if the final hash differs before any code change, or if sector reconstruction is no longer a top hotspot.
+**Gate:** Stop if the final hash differs from current floor `41c72b13ad2e91b9` before any code change, or if sector reconstruction is no longer a top hotspot. If a later accepted engine-health fix deliberately changes final-sector truth, reconcile the hash and consistency evidence in roadmap/command-board/sector master before optimizing.
 
 ## Task 2: Select The Next Target
 

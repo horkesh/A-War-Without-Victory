@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] docs(sector): reconcile current 40w sector hash floor
+
+**Type:** Docs-only engine-health/sector-lane reconciliation. No code, scenario source, generated artifact, save schema, calibration, UI, or player-facing behavior changed.
+
+**Change:** Reconciled the sector/frontline performance lane from historical hash floor `e086afbefcef01e6` to current floor `41c72b13ad2e91b9` after the accepted final-sector seal correction in PR #159 / commit `1a823d5e`. The old `e086...` run remains historical evidence for the 2026-06-03 coverage-component-cache slice, but future sector optimization must re-profile from current `main` against `41c72...`.
+
+**Verification:** `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n2019` passed; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n2017` failed with empty-contested, undefended-front, and adjacent-uncontested-territory failures, proving the old floor is no longer current validator truth. `git diff --check`.
+
+**Files:** `docs/40_reports/implemented/20260604_SECTOR_HASH_RECONCILIATION.md`, `docs/40_reports/README.md`, `docs/40_reports/SECTOR_MASTER.md`, `docs/plans/2026-05-20-sector-performance-next-target-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(ui): route Warroom Diplomacy and Chronicle to mature panels
 
 **Type:** UI/product Warroom routing hardening. No simulation behavior, save schema, scenario data, calibration, Tactical Group, event content, diplomacy mechanics, or presidential authority changed.
