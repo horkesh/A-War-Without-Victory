@@ -13,6 +13,7 @@
 
 import type { FactionId, GameState, RbihHrhbState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { getActiveAllianceBounds } from '../events/active_modifiers.js';
 
 // ── Tunable constants (all canon-referenced, version-controlled) ──
 
@@ -298,6 +299,10 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
     if (state.meta.turn < earliestTurn) {
         newValue = Math.max(newValue, ALLIANCE_FLOOR_BEFORE_WAR);
     }
+    const currentTurn = state.meta.turn ?? 0;
+    const bounds = getActiveAllianceBounds(state, currentTurn);
+    if (bounds.ceiling != null && newValue > bounds.ceiling) newValue = bounds.ceiling;
+    if (bounds.floor != null && newValue < bounds.floor) newValue = bounds.floor;
     state.political.war_alliance_rbih_hrhb = newValue;
 
     // Track mobilization start: first time alliance drops to ≤ ALLIED_THRESHOLD after earliest turn

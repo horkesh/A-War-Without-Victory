@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(events): close Ahmici same-turn lock residual
+
+**Type:** Event-state / alliance-lock correctness follow-up to PR #176 Codex review. No sensitive-history prose, player choices, reward surface, victory scoring, save schema, UI, or scenario structure changed.
+
+**Change:** `csq_hvo_central_bosnia_offensive_1993` and `csq_alliance_holds_past_w35` now share `mutex_group: "rbih_hrhb_rupture_window"`, so the historical rupture cannot fire in the same evaluation as the counterfactual "alliance held" floor. `updateAllianceValue(...)` now applies active `alliance_locks` after the generic early-war floor, preventing normal appeasement or stale floors from lifting a locked hostile rupture above `HOSTILE_THRESHOLD` in the same turn.
+
+**Verification:** Focused consequence-chain regression passed 51/51. Broader event/alliance pack passed 153/153: `tests\consequence_chains.test.ts`, `tests\consequence_consumers.test.ts`, `tests\consequence_effects.test.ts`, `tests\event_effects.test.ts`, `tests\alliance_lifecycle.test.ts`, and `tests\alliance_mobilization.test.ts`. `npm.cmd run typecheck -- --pretty false` passed.
+
+**Files:** `data/scenarios/events/consequences.json`, `src/sim/early_war/alliance_update.ts`, `tests/consequence_chains.test.ts`, `docs/40_reports/implemented/20260604_AHMICI_SAME_TURN_LOCK_FOLLOWUP.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(oob): seat ARBiH 4th Corps HQ in East Mostar (was Jablanica)
 
 **Type:** OOB historical-fidelity correction (calibration-moving; golden baselines re-floored). Owner-confirmed.

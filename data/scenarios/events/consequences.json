@@ -1347,6 +1347,7 @@
       }
     },
     "once": true,
+    "mutex_group": "rbih_hrhb_rupture_window",
     "priority": 50,
     "responding_faction": "HRHB",
     "effect": {
@@ -1438,6 +1439,7 @@
       }
     },
     "once": true,
+    "mutex_group": "rbih_hrhb_rupture_window",
     "priority": 80,
     "effect": { "kind": "narrative", "text": "RBiH-HRHB alliance survives past w35; Washington alt-path opens." },
     "effects": [
