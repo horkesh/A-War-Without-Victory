@@ -1632,6 +1632,118 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('accepts current-version saves with absent or well-formed sector stance orders', () => {
+        const absent = currentVersionState();
+        delete absent.military.sector_stance_orders;
+        const withOrders = currentVersionState();
+        withOrders.military.sector_stance_orders = [
+            { sector_id: 'sector:rbih_defense:0', stance: 'fortify' },
+            { sector_id: 'sector:rs_main:2', stance: 'active_defense' },
+        ];
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWithOrders = deserializeState(JSON.stringify(withOrders));
+
+        expect(migratedAbsent.military.sector_stance_orders).toBeUndefined();
+        expect(migratedWithOrders.military.sector_stance_orders).toEqual([
+            { sector_id: 'sector:rbih_defense:0', stance: 'fortify' },
+            { sector_id: 'sector:rs_main:2', stance: 'active_defense' },
+        ]);
+    });
+
+    it('rejects current-version saves with malformed sector stance orders', () => {
+        const state = currentVersionState();
+        state.military.sector_stance_orders = [
+            { sector_id: '', stance: 'fortify' },
+            { sector_id: 'sector:rs_main:2', stance: 'advance' },
+            42,
+        ] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.sector_stance_orders\[0\]\.sector_id must be a non-empty string[\s\S]*military\.sector_stance_orders\[1\]\.stance must be a valid sector stance[\s\S]*military\.sector_stance_orders\[2\] must be an object/
+        );
+    });
+
+    it('rejects current-version saves with non-array sector stance orders', () => {
+        const state = currentVersionState();
+        state.military.sector_stance_orders = {} as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.sector_stance_orders must be an array when present/
+        );
+    });
+
+    it('accepts current-version saves with absent or well-formed municipality support orders', () => {
+        const absent = currentVersionState();
+        delete absent.military.municipality_support_orders;
+        const withOrders = currentVersionState();
+        withOrders.military.municipality_support_orders = {
+            RBiH: {
+                faction: 'RBiH',
+                mun_id: 'MUN_SARAJEVO',
+                type: 'weapons_shipment',
+                staged_turn: 12,
+            },
+            RS: {
+                faction: 'RS',
+                mun_id: 'MUN_BANJA_LUKA',
+                type: 'staff_priority',
+                staged_turn: 12,
+            },
+        };
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWithOrders = deserializeState(JSON.stringify(withOrders));
+
+        expect(migratedAbsent.military.municipality_support_orders).toBeUndefined();
+        expect(migratedWithOrders.military.municipality_support_orders).toEqual({
+            RBiH: {
+                faction: 'RBiH',
+                mun_id: 'MUN_SARAJEVO',
+                type: 'weapons_shipment',
+                staged_turn: 12,
+            },
+            RS: {
+                faction: 'RS',
+                mun_id: 'MUN_BANJA_LUKA',
+                type: 'staff_priority',
+                staged_turn: 12,
+            },
+        });
+    });
+
+    it('rejects current-version saves with malformed municipality support orders', () => {
+        const state = currentVersionState();
+        state.military.municipality_support_orders = {
+            RBiH: {
+                faction: 'RS',
+                mun_id: '',
+                type: 'staff_priority',
+                staged_turn: 0.5,
+            },
+            HRHB: 42,
+            unknown: {
+                faction: 'unknown',
+                mun_id: 'MUN_X',
+                type: 'airlift',
+                staged_turn: -1,
+            },
+        } as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.municipality_support_orders\.RBiH\.faction must match its faction key[\s\S]*military\.municipality_support_orders\.RBiH\.mun_id must be a non-empty string[\s\S]*military\.municipality_support_orders\.RBiH\.type must match its faction support type[\s\S]*military\.municipality_support_orders\.RBiH\.staged_turn must be a non-negative integer[\s\S]*military\.municipality_support_orders\.HRHB must be an object[\s\S]*military\.municipality_support_orders\.unknown must use a canonical faction id key[\s\S]*military\.municipality_support_orders\.unknown\.type must be a valid municipality support type[\s\S]*military\.municipality_support_orders\.unknown\.staged_turn must be a non-negative integer/
+        );
+    });
+
+    it('rejects current-version saves with non-record municipality support payloads', () => {
+        const state = currentVersionState();
+        state.military.municipality_support_orders = [] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.municipality_support_orders must be an object when present/
+        );
+    });
+
     it('accepts current-version saves with absent or well-formed OPSEC sectors', () => {
         const absent = currentVersionState();
         delete absent.military.opsec_sectors;
