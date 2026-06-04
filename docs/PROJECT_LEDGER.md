@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(state): validate campaign plans when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation behavior, scenario data, Tactical Group, `army_hq_operations`, UI routing, or player-facing command behavior changed.
+
+**Change:** Classified `military.campaign_plans` and `military.last_gathering_turn` as optional Army HQ gathering records rather than required current-save state. Deepened validate-when-present coverage so present campaign plans must use canonical faction keys, valid turn windows, non-empty trigger reasons, valid front priorities, optional doctrine overrides, synchronized operation rows, participant rows, force-transfer rows, and string-array excluded corps. Present `last_gathering_turn` records must use canonical faction keys and non-negative integer turns. Empty sync participant `target_osids` arrays remain valid because Army HQ gathering can generate synchronized operations from front priorities with no current offensive targets.
+
+**Verification:** Red proof: `node F:\A-War-Without-Victory\node_modules\vitest\vitest.mjs run tests\army_hq_gathering.test.ts --reporter=dot` failed because malformed nested `campaign_plans` payloads were accepted. Green proof: `node F:\A-War-Without-Victory\node_modules\vitest\vitest.mjs run tests\army_hq_gathering.test.ts --reporter=dot` passed 68/68; `node F:\A-War-Without-Victory\node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts tests\army_hq_gathering.test.ts tests\commander\briefing_campaign_intent.test.ts --reporter=dot` passed 234/234; `npm.cmd run typecheck -- --pretty false`; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 with `state: 172` and `sim: 327`; `git diff --check`.
+
+**Files:** `src/state/validateGameState.ts`, `tests/army_hq_gathering.test.ts`, `docs/40_reports/implemented/20260604_CAMPAIGN_PLANS_VALIDATE_WHEN_PRESENT.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/README.md`, `.claude/napkin.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(state): validate Army HQ overrides when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation behavior, scenario data, Tactical Group, `army_hq_operations`, UI routing, or player-facing command behavior changed.
