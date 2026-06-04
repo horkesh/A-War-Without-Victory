@@ -10,9 +10,11 @@ import {
     splitKiaWiaMia,
     computeFinalCasualties,
     computeAttackerCasualtyShares,
+    computeDefenderCasualtyShares,
     distributeDefenderCasualties,
     buildDefenderContributions,
     KIA_FRACTION,
+    SHARED_NON_PRIMARY_DEFENDER_CASUALTY_CAP_FRACTION,
     WIA_FRACTION,
 } from '../src/sim/combat/attack_casualty_distribution.js';
 import type { AttackerCasualtyInput } from '../src/sim/combat/attack_casualty_distribution.js';
@@ -354,6 +356,113 @@ describe('distributeDefenderCasualties', () => {
         expect(def2.personnel).toBe(800);
     });
 
+    it('caps non-primary shared defender losses and shifts excess to the primary defender', () => {
+        const primary = makeFormation({ id: 'rs_1st_doboj_light_infantry', faction: 'RS', personnel: 1000 });
+        const ozren2 = makeFormation({ id: 'rs_2nd_ozren_light_infantry', faction: 'RS', personnel: 677 });
+        const ozren3 = makeFormation({ id: 'rs_3rd_ozren_light_infantry', faction: 'RS', personnel: 765 });
+        const ozren4 = makeFormation({ id: 'rs_4th_ozren_light_infantry', faction: 'RS', personnel: 679 });
+        const weights = new Map<string, number>([
+            [primary.id, 0.25],
+            [ozren2.id, 0.25],
+            [ozren3.id, 0.25],
+            [ozren4.id, 0.25],
+        ]);
+        const ledger = makeLedger();
+
+        const shares = computeDefenderCasualtyShares({
+            defenderFormation: primary,
+            sectorDefenseBrigades: [primary, ozren2, ozren3, ozren4],
+            sectorBrigadeWeights: weights,
+            finalDefenderCas: 819,
+            capNonPrimaryDefenders: true,
+        });
+
+        expect(shares.get(ozren2.id)).toBeLessThanOrEqual(Math.round(677 * SHARED_NON_PRIMARY_DEFENDER_CASUALTY_CAP_FRACTION));
+        expect(shares.get(ozren3.id)).toBeLessThanOrEqual(Math.round(765 * SHARED_NON_PRIMARY_DEFENDER_CASUALTY_CAP_FRACTION));
+        expect(shares.get(ozren4.id)).toBeLessThanOrEqual(Math.round(679 * SHARED_NON_PRIMARY_DEFENDER_CASUALTY_CAP_FRACTION));
+        expect([...shares.values()].reduce((sum, cas) => sum + cas, 0)).toBe(819);
+
+        distributeDefenderCasualties({
+            defenderFormation: primary,
+            sectorDefenseBrigades: [primary, ozren2, ozren3, ozren4],
+            sectorBrigadeWeights: weights,
+            finalDefenderCas: 819,
+            casualtyLedger: ledger,
+            capNonPrimaryDefenders: true,
+        });
+
+        expect(ozren2.personnel).toBeGreaterThanOrEqual(677 - Math.round(677 * SHARED_NON_PRIMARY_DEFENDER_CASUALTY_CAP_FRACTION));
+        expect(ozren3.personnel).toBeGreaterThanOrEqual(765 - Math.round(765 * SHARED_NON_PRIMARY_DEFENDER_CASUALTY_CAP_FRACTION));
+        expect(ozren4.personnel).toBeGreaterThanOrEqual(679 - Math.round(679 * SHARED_NON_PRIMARY_DEFENDER_CASUALTY_CAP_FRACTION));
+        expect(primary.personnel).toBeLessThan(1000 - Math.round(819 * 0.25));
+        for (const [formationId, expectedCasualties] of shares) {
+            const entry = ledger.RS!.per_formation[formationId];
+            expect(entry.killed + entry.wounded + entry.missing_captured).toBe(expectedCasualties);
+        }
+    });
+
+    it('does not attribute casualties beyond removable personnel', () => {
+        const primary = makeFormation({ id: 'primary', faction: 'RS', personnel: 180 });
+        const reserve = makeFormation({ id: 'reserve', faction: 'RS', personnel: 120 });
+        const weights = new Map<string, number>([
+            [primary.id, 0.5],
+            [reserve.id, 0.5],
+        ]);
+
+        const shares = computeDefenderCasualtyShares({
+            defenderFormation: primary,
+            sectorDefenseBrigades: [primary, reserve],
+            sectorBrigadeWeights: weights,
+            finalDefenderCas: 300,
+            capNonPrimaryDefenders: true,
+        });
+
+        expect(shares.get(primary.id)).toBeLessThanOrEqual(80);
+        expect(shares.get(reserve.id)).toBeLessThanOrEqual(20);
+        expect([...shares.values()].reduce((sum, cas) => sum + cas, 0)).toBe(98);
+        expect([...shares.values()].reduce((sum, cas) => sum + cas, 0)).toBeLessThan(300);
+    });
+
+    it('does not apply the shared non-primary cap unless explicitly requested', () => {
+        const primary = makeFormation({ id: 'primary', faction: 'RS', personnel: 1000 });
+        const reserve = makeFormation({ id: 'reserve', faction: 'RS', personnel: 1000 });
+        const weights = new Map<string, number>([
+            [primary.id, 0.5],
+            [reserve.id, 0.5],
+        ]);
+
+        const shares = computeDefenderCasualtyShares({
+            defenderFormation: primary,
+            sectorDefenseBrigades: [primary, reserve],
+            sectorBrigadeWeights: weights,
+            finalDefenderCas: 400,
+        });
+
+        expect(shares.get(primary.id)).toBe(200);
+        expect(shares.get(reserve.id)).toBe(200);
+    });
+
+    it('uses deterministic equal fallback shares when shared defender weights sum to zero', () => {
+        const primary = makeFormation({ id: 'primary', faction: 'RS', personnel: 1000 });
+        const reserve = makeFormation({ id: 'reserve', faction: 'RS', personnel: 1000 });
+        const weights = new Map<string, number>([
+            [primary.id, 0],
+            [reserve.id, 0],
+        ]);
+
+        const shares = computeDefenderCasualtyShares({
+            defenderFormation: primary,
+            sectorDefenseBrigades: [primary, reserve],
+            sectorBrigadeWeights: weights,
+            finalDefenderCas: 100,
+        });
+
+        expect([...shares.entries()].sort(([a], [b]) => a.localeCompare(b))).toEqual([
+            [primary.id, 50],
+            [reserve.id, 50],
+        ]);
+    });
+
     it('applyPersonnelLoss mutates personnel', () => {
         const defender = makeFormation({ id: 'def_1', personnel: 500 });
         const ledger = makeLedger();
@@ -492,5 +601,59 @@ describe('buildDefenderContributions', () => {
         expect(contributions).toHaveLength(1);
         expect(contributions[0].brigade_id).toBe('bde_1');
         expect(contributions[0].casualties_taken).toBe(42);
+    });
+
+    it('uses capped defender shares when a primary defender id is provided', () => {
+        const primary = makeFormation({ id: 'primary_defender', personnel: 1000 });
+        const reserve = makeFormation({ id: 'reserve_defender', personnel: 600 });
+        const weights = new Map<string, number>([
+            [primary.id, 0.5],
+            [reserve.id, 0.5],
+        ]);
+        const meta = new Map<string, { hops: number; isHome: boolean }>([
+            [primary.id, { hops: 0, isHome: false }],
+            [reserve.id, { hops: 1, isHome: true }],
+        ]);
+
+        const contributions = buildDefenderContributions({
+            sectorDefenseBrigades: [primary, reserve],
+            sectorBrigadeWeights: weights,
+            sectorBrigadeMeta: meta,
+            finalDefenderCas: 400,
+            primaryDefenderId: primary.id,
+            capNonPrimaryDefenders: true,
+        });
+
+        expect(contributions.find((c) => c.brigade_id === reserve.id)?.casualties_taken)
+            .toBeLessThanOrEqual(Math.round(600 * SHARED_NON_PRIMARY_DEFENDER_CASUALTY_CAP_FRACTION));
+        expect(contributions.reduce((sum, c) => sum + c.casualties_taken, 0)).toBe(400);
+    });
+
+    it('reports applied capped casualties when removable personnel caps bind', () => {
+        const primary = makeFormation({ id: 'primary_defender', personnel: 180 });
+        const reserve = makeFormation({ id: 'reserve_defender', personnel: 120 });
+        const weights = new Map<string, number>([
+            [primary.id, 0.5],
+            [reserve.id, 0.5],
+        ]);
+        const meta = new Map<string, { hops: number; isHome: boolean }>([
+            [primary.id, { hops: 0, isHome: false }],
+            [reserve.id, { hops: 1, isHome: true }],
+        ]);
+
+        const contributions = buildDefenderContributions({
+            sectorDefenseBrigades: [primary, reserve],
+            sectorBrigadeWeights: weights,
+            sectorBrigadeMeta: meta,
+            finalDefenderCas: 300,
+            primaryDefenderId: primary.id,
+            capNonPrimaryDefenders: true,
+        });
+
+        expect(contributions.map((c) => [c.brigade_id, c.casualties_taken]).sort()).toEqual([
+            [primary.id, 80],
+            [reserve.id, 18],
+        ]);
+        expect(contributions.reduce((sum, c) => sum + c.casualties_taken, 0)).toBe(98);
     });
 });

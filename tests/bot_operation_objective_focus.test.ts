@@ -695,7 +695,7 @@ test('execution-phase operation does not attack unrelated intermediates off the 
     );
 });
 
-test('planning-phase operation emits the first hop toward a distant staging OSID', () => {
+test('planning-phase operation emits a column march destination toward a distant staging OSID', () => {
     const state = {
   meta: { turn: 11, phase: 'war', seed: 'test-seed' },
   corps_front_directives: {},
@@ -761,7 +761,11 @@ test('planning-phase operation emits the first hop toward a distant staging OSID
 
     assert.equal(
         state.military.brigade_movement_orders?.rs_1st_doboj_light_infantry?.destination_sids?.[0],
-        'op:test:mid'
+        'op:test:staging'
+    );
+    assert.equal(
+        state.military.brigade_movement_orders?.rs_1st_doboj_light_infantry?.stance,
+        'column'
     );
 });
 

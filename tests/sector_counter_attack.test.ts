@@ -14,9 +14,10 @@ import {
     COUNTER_ATTACK_RETREAT_WINDOW,
     COUNTER_ATTACK_MAX_HOPS,
 } from '../src/sim/combat/bot_constants.js';
-import { getEnemyOsidsWithinHops } from '../src/sim/combat/bot_brigade_eval_attack.js';
+import { getEnemyOsidsWithinHops, evaluateDefensive } from '../src/sim/combat/bot_brigade_eval_attack.js';
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
-import type { FactionId, GameState } from '../src/state/game_state.js';
+import type { BrigadeEvaluationContext } from '../src/sim/combat/bot_brigade_eval_types.js';
+import type { FactionId, FormationState, GameState } from '../src/state/game_state.js';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -235,6 +236,131 @@ describe('Sector counter-attack eligibility', () => {
 });
 
 // ── Retreat window filtering ───────────────────────────────────────────────
+
+describe('Sector counter-attack repulse memory', () => {
+    it('does not send a recently repulsed brigade back into the same sector counter-attack target', () => {
+        const loc = 'op:zavidovici:zavidovici_2' as Osid;
+        const target = 'op:zavidovici:cardak_2' as Osid;
+        const source = 'op:zavidovici:gostovic' as Osid;
+        const brigade = {
+            id: 'arbih_330th_liberation',
+            faction: 'RBiH',
+            status: 'active',
+            kind: 'brigade',
+            corps_id: 'arbih_3rd_corps',
+            location_osid: loc,
+            personnel: 850,
+            cohesion: 50,
+            morale: 30,
+            disrupted_turns: 0,
+            last_repulsed_from: { osid: target, turn: 31 },
+        } as unknown as FormationState;
+        const state = {
+            meta: { turn: 32 },
+            military: {
+                formations: {
+                    [brigade.id]: brigade,
+                    rs_defender: {
+                        id: 'rs_defender',
+                        faction: 'RS',
+                        status: 'active',
+                        kind: 'brigade',
+                        location_osid: target,
+                        personnel: 400,
+                        cohesion: 20,
+                        morale: 25,
+                    },
+                },
+                corps_front_sectors: {
+                    'sector:arbih_3rd_corps:1': {
+                        sector_id: 'sector:arbih_3rd_corps:1',
+                        corps_id: 'arbih_3rd_corps',
+                        faction: 'RBiH',
+                        assigned_brigade_ids: [brigade.id],
+                        reserve_brigade_ids: [],
+                        rear_brigade_ids: [],
+                        sub_segments: [{
+                            sub_segment_id: 'subseg:sector:arbih_3rd_corps:1:0',
+                            friendly_osids: [loc],
+                            enemy_osids: [target],
+                            primary_brigade_ids: [brigade.id],
+                            edge_ids: ['edge:zavidovici'],
+                            length_edges: 1,
+                        }],
+                        territory_osids: [loc],
+                        edge_ids: ['edge:zavidovici'],
+                        length_edges: 1,
+                    },
+                },
+            },
+            political: {
+                political_controllers: {
+                    [loc]: 'RBiH',
+                    [source]: 'RBiH',
+                    [target]: 'RS',
+                },
+            },
+        } as unknown as GameState;
+        const result = {
+            posture_orders: [],
+            attack_orders: {},
+            attack_scores: {},
+            movement_orders: {},
+            column_march_orders: {},
+            eligible_attackers_by_corps: {},
+        };
+        const ctx = {
+            state,
+            faction: 'RBiH',
+            brigade,
+            loc,
+            corpsId: 'arbih_3rd_corps',
+            cmd: null,
+            directive: null,
+            corpsStance: 'defensive',
+            activeOp: null,
+            isActiveSectorOperationParticipant: false,
+            adjEnemy: [target],
+            isAlliedWithRBiH: false,
+            targetAdjacentCount: new Map(),
+            corpsReserve: new Map(),
+            chosenTargets: new Map(),
+            columnAssignments: new Map(),
+            counterAttackTarget: null,
+            brigadeSupplyState: 'adequate',
+            isHoldBrigade: false,
+            sectorRecentRetreats: new Map([
+                ['sector:arbih_3rd_corps:1', [{ osid: source, turn: 31 }]],
+            ]),
+            sectorCounterAttackCount: new Map(),
+            sectorAssignment: {
+                sector: state.military.corps_front_sectors!['sector:arbih_3rd_corps:1']!,
+                isReserve: false,
+                frontOsids: new Set([loc]),
+            },
+            assignedSectorFrontOsids: new Set([loc]),
+            adjacency: new Map<Osid, Osid[]>([
+                [loc, [target]],
+                [target, [loc, source]],
+                [source, [target]],
+            ]),
+            reverseMap: new Map(),
+            terrainCache: {},
+            graphAnalysis: {
+                osid_analysis: new Map([
+                    [loc, { enemy_neighbors: [target], friendly_neighbors: [], classification: 'contested' }],
+                ]),
+            },
+            result,
+        } as unknown as BrigadeEvaluationContext;
+
+        const handled = evaluateDefensive(ctx);
+
+        expect(handled).toBe(true);
+        expect(result.attack_orders).not.toHaveProperty(brigade.id);
+        expect(result.posture_orders).toContainEqual({ brigade_id: brigade.id, posture: 'dig_in' });
+    });
+});
 
 describe('Retreat window filtering', () => {
     function isRecentRetreat(retreatTurn: number, currentTurn: number): boolean {

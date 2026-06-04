@@ -177,6 +177,8 @@ Battle outcomes now feed into morale drift with diminishing returns and faction-
 - HRHB: 25 (Herceg-Bosna identity)
 - RS: 20 (Krajina identity, but can retreat to Serbia)
 
+**Standing OG fixed-home floor** (2026-06-03): fixed-home brigades assigned as same-corps sector front holders receive the same faction morale floor for morale drift only when their home OSID remains inside same-corps Standing OG territory. This does not set `home_defense_active`, so it does not change posture blocking, operation eligibility, movement, or assignment behavior.
+
 **RBiH existential floor**: Morale floor 25 for ARBiH formations at OSIDs with >50% Bosniak population, even without `home_defense_active`.
 
 **Shock path** (`attack_resolution_osid.ts:1124-1142`): Unchanged in n618. Stage 2 candidate if drift-only proves insufficient.

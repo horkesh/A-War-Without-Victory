@@ -84,7 +84,7 @@ export const CONFIDENCE_FRONT_BRIGADES = 0.3;
 /** At or above this confidence: accurate strength category + posture (defensive/entrenched) + all sector brigades visible. */
 export const CONFIDENCE_FULL_STRENGTH = 0.5;
 
-/** At or above this confidence (and recon_range >= 2): offensive_signs detectable + second-echelon sectors + deeper brigades visible. */
+/** At or above this confidence (and recon_range >= 2): second-echelon sectors + deeper brigades visible. */
 export const CONFIDENCE_DEEP_INTEL = 0.8;
 
 export const SECTOR_INTEL_SOURCE_CONFIDENCE_BONUS = {

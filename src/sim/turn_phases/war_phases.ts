@@ -1213,13 +1213,11 @@ export const warPhases: NamedPhase[] = [
             } catch {
                 terrainData = { by_sid: {} };
             }
-            const colSpatial = getSpatialContextCache(context);
             const report = processOsidColumnMovement(
                 context.state,
                 od.edges,
                 od.opData.operationalToCanonical,
                 terrainData,
-                colSpatial?.preCombat.adjacency,
             );
             (context.report as TurnReport & { column_movement?: OsidColumnMovementReport }).column_movement = report;
         }
@@ -1326,7 +1324,9 @@ export const warPhases: NamedPhase[] = [
             const spatial = getSpatialContextCache(context);
             if (!spatial) return;
             const adjacency = spatial.preCombat.adjacency as Map<Osid, Osid[]>;
-            distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency);
+            distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency, {
+                population1991ByMun: context.input.municipalityPopulation1991,
+            });
         }
     },
 

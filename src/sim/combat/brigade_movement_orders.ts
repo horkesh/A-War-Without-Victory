@@ -32,7 +32,7 @@
  */
 
 import type { EdgeRecord } from '../../map/settlements.js';
-import type { FormationId, GameState, SectorStance } from '../../state/game_state.js';
+import type { BrigadeMovementOrder, FormationId, GameState, SectorStance } from '../../state/game_state.js';
 import { SECTOR_STANCE_ENTRENCHMENT_RATE } from './combat_math.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -60,6 +60,7 @@ export function applyBrigadeMovementOrders(
     const formations = state.military.formations ?? {};
     const adjacency = (preComputedAdjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(edges);
     const movementOrders = state.military.brigade_movement_orders ?? {};
+    const retainedColumnOrders: Record<FormationId, BrigadeMovementOrder> = {};
 
     // Build brigade→sector_stance lookup for entrenchment rate modifier (Layer B)
     const brigadeStance = new Map<FormationId, SectorStance>();
@@ -85,7 +86,11 @@ export function applyBrigadeMovementOrders(
             report.disrupted_decremented += 1;
         }
 
-        const order = movementOrders[formationId] as { destination_sids?: string[] } | undefined;
+        const order = movementOrders[formationId];
+        if (order?.stance === 'column') {
+            retainedColumnOrders[formationId] = order;
+            continue;
+        }
         const destOsid = order?.destination_sids?.[0] as Osid | undefined;
         const neighbors = adjacency.get(loc) ?? [];
 
@@ -114,6 +119,8 @@ export function applyBrigadeMovementOrders(
         }
     }
 
-    state.military.brigade_movement_orders = undefined;
+    state.military.brigade_movement_orders = Object.keys(retainedColumnOrders).length > 0
+        ? retainedColumnOrders
+        : undefined;
     return report;
 }

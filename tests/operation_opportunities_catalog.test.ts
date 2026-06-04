@@ -1025,10 +1025,11 @@ describe('entry-specific: sana_95 family', () => {
             .toBe(true);
     });
 
-    it('axis shape: parent has Krupa 3/6 + Bihac-Petrovac 5/10 (no Sanski-Most/Kljuc); follow-on owns Sanski-Most/Kljuc 4/13', () => {
+    it('axis shape: parent has Krupa 3/7 + Bihac-Petrovac 5/10 (no Sanski-Most/Kljuc); follow-on owns Sanski-Most/Kljuc 4/13', () => {
         const krupa = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_krupa')!;
         expect(krupa.brigades).toHaveLength(3);
-        expect(krupa.objectives).toHaveLength(6);
+        expect(krupa.objectives).toHaveLength(7);
+        expect(krupa.objectives).toContain('op:bosanski_petrovac:krnjeusa');
         const bp = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_bihac_petrovac')!;
         expect(bp.brigades).toHaveLength(5);
         expect(bp.objectives).toHaveLength(10);

@@ -82,7 +82,8 @@ describe('war-phase step ordering', () => {
         assertBefore('rederive-osid-front-segments', 'reconcile-final-sector-truth');
         assertBefore('reconcile-final-operation-truth', 'reconcile-final-sector-truth-after-ops');
         assertBefore('reconcile-final-sector-truth-after-ops', 'final-distribute-brigades-to-front');
-        assertBefore('final-distribute-brigades-to-front', 'assert-final-operation-lifecycle');
+        assertBefore('final-distribute-brigades-to-front', 'seal-final-sector-truth-after-distribution');
+        assertBefore('seal-final-sector-truth-after-distribution', 'assert-final-operation-lifecycle');
         assertBefore('reconcile-final-sector-truth-after-ops', 'assert-final-operation-lifecycle');
         assertBefore('reconcile-final-sector-truth', 'assert-formations-in-friendly-territory');
     });
@@ -154,7 +155,8 @@ describe('war-phase step ordering', () => {
         // +1 from reconcile-live-operation-truth (live operation roster cleanup before sector offensives advance)
         // +1 from reconcile-final-operation-truth (final end-of-turn operation authority rebuild)
         // +1 from reconcile-final-sector-truth-after-ops (final sector authority refresh after op truth)
-        // +1 from final-distribute-brigades-to-front (late physical dispersion after final sector truth)
+        // +1 from final-distribute-brigades-to-front (late physical dispersion plus serialization-only final sector seal)
+        // +1 from seal-final-sector-truth-after-distribution (serialization-only sector seal even when distributor skips)
         // +1 from assert-final-operation-lifecycle (late lifecycle seal after final reconciliation)
         // +1 from evaluate-dayton-trigger (DG1: Dayton trigger ownership moved to pipeline, 2026-04-14)
         // +1 from update-stranded-brigade-lifecycle (DG2: stranded brigade lifecycle owner, 2026-04-14)
@@ -194,6 +196,6 @@ describe('war-phase step ordering', () => {
         //        commander loop; DETERMINISM EARLY-OUT — performs ZERO state mutation when no
         //        corps has a pending_co_replacement (never set in headless scenarios), so the
         //        step is byte-identical-inert on all baselines.
-        expect(stepNames.length).toBe(184);
+        expect(stepNames.length).toBe(185);
     });
 });

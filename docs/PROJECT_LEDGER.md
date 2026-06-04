@@ -11,6 +11,264 @@
 
 ---
 
+## [2026-06-03] fix(ci): reconcile Standing OG Phase C baseline manifest and static guard
+
+**Type:** CI/baseline closeout for PR #144. The Standing OG Phase C branch had two stale proof surfaces after the final sector-seal commit: `tests/bot_orders_perf_profile.test.ts` still pinned the old literal `REACTIVE_DEFENSE_RATIO` expression even though the predictor now routes the cap through `getSectorReactiveDefensePredictionRatio(...)`, and `data/derived/scenario/baselines/manifest.json` still held an earlier apr1992_52w baseline hash set that the branch head no longer reproduced.
+
+**What changed:** updated the static perf-profile guard to pin the new helper call, then regenerated the scenario baseline manifest with the canonical `UPDATE_BASELINES=1` runner. The apr1992_52w hash set now matches the reproducible branch-head output; the 4w scenario hashes remain unchanged.
+
+**Evidence:** focused fast-test repro initially failed on `tests/bot_orders_perf_profile.test.ts` and now passes with `node node_modules\vitest\vitest.mjs run tests\bot_operation_objective_focus.test.ts tests\bot_orders_perf_profile.test.ts --reporter=dot` (17/17). Two direct apr1992_52w branch-head probes produced the same `activity_summary.json` SHA256 `9b11b1e75daac9ef71c5239d85892258a8ff947fa8a7a4baa6a96787320bf923`, matching the CI-observed actual hash. `UPDATE_BASELINES=1 node node_modules\tsx\dist\cli.mjs tools\scenario_runner\run_baseline_regression.ts` refreshed the manifest, and clean check-mode `node node_modules\tsx\dist\cli.mjs tools\scenario_runner\run_baseline_regression.ts` then reported `Baseline regression: all scenarios match.` Transient `_baseline_tmp` replay sequence sidecars were removed after verification.
+
+**Files:** `data/derived/scenario/baselines/manifest.json`, `tests/bot_operation_objective_focus.test.ts`, `tests/bot_orders_perf_profile.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-06-03] fix(engine): close Standing OG 188w final-sector seal
+
+**Type:** Engine final-save/sector-truth hardening plus ADR-0007 closeout support. This is a default-path correctness batch for final serialized sector truth, combat intel refresh, and Operation Sana opportunity coverage; ADR-0007 shared-defense flags remain default-off.
+
+**What changed:** final sector reconciliation now fingerprints supply input, preventing stale sector ratings when the same state receives different supply context; the final turn distributor and the scenario final-save writer both run a current-sector truth seal after all movement-producing consumers; collapsed VRS 2nd Krajina rear-guard survivors can be serialized into a truthful same-faction rear-guard sector owner only under an explicit final collapsed-rear-guard absorption option; sector intel offensive signs can surface at rough-contact confidence and combat refreshes attacker/defender intel reciprocally; Operation Sana's Krupa Valley objective set now includes the Krnjeusa flank.
+
+**Why:** default-off 188w probes `n80`/`n81` failed only three unresolved active VRS 2nd Krajina brigades in a VRS 1st Krajina-controlled final sector. A full post-distribution sector rebuild cleared the unresolved rows but changed topology and created disconnected/empty-sector failures (`n83`). The accepted fix is the narrower current-sector final seal, applied after distribution and again at the scenario final-save writer, so serialized truth is cleaned without re-partitioning the front.
+
+**Verification:** default-off 188w `runs\apr1992_definitive_188w__3a26ccdf831ca525__w188_n87` passed `node tools\validate_run_consistency.cjs runs\apr1992_definitive_188w__3a26ccdf831ca525__w188_n87` with final hash `82af4ca1d89dd3c4`: 0 unresolved brigade assignments, 0 ghost paramilitaries, intel functional, 18/104 offensive signs, assignment sync OK, sector role buckets OK, reserve cap OK, physical sector ownership OK, war-front faction-side coverage OK, sector geometry OK, empty contested sectors OK, adjacent uncontested territory OK, and only documented no-legal-donor floor notes. Focused regression slice passed 18 files / 376 tests: `elite_formation_utilization`, `sector_offensive_in_transit_predictor`, `final_sector_war_front_faction_side_coverage`, `operation_execution_staging_truth`, `pre_planned_operations`, `osid_column_movement`, `attack_casualty_distribution`, `attack_post_battle_effects`, `tg_migration_recon`, `sector_intel`, `attack_resolution_osid_intel_friction`, `operation_opportunities_catalog`, `brigade_territory_reconciliation`, `validate_run_consistency`, `final_sector_reserve_band_truth`, `final_sector_truth_reconciliation_cache`, `sector_partition_instrumentation`, and `war_phase_step_order`. Replay payload cleanup preserved the latest baseline `apr1992_definitive_188w__3a26ccdf831ca525__w188_n2018` replay files and removed non-baseline replay sequence bulk.
+
+**Review caveat:** the collapsed rear-guard absorption path is intentionally final-serialization-only and must not become a general movement/rehome rule. It is allowed only when there is no same-corps candidate, the recipient is a same-faction rear-guard corps that physically owns the brigade's current OSID, and the caller explicitly opts into collapsed rear-guard absorption. Canon/Guardrail-1 still must review the non-primary defender casualty cap and any ADR-0007 default flip.
+
+**Files:** `src/scenario/scenario_runner.ts`, `src/sim/combat/final_sector_truth_reconciliation.ts`, `src/sim/turn_phases/war_phase_reconciliation_steps.ts`, `src/sim/combat/brigade_assignment.ts`, `src/sim/combat/corps_front_sectors.ts`, `src/sim/combat/attack_resolution_osid.ts`, `src/sim/combat/sector_intel.ts`, `src/sim/combat/sector_intel_constants.ts`, `src/sim/combat/operation_opportunity_catalog_5th_corps.ts`, `tests/brigade_territory_reconciliation.test.ts`, `tests/final_sector_truth_reconciliation_cache.test.ts`, `tests/sector_partition_instrumentation.test.ts`, `tests/war_phase_step_order.test.ts`, `tests/sector_intel.test.ts`, `tests/attack_resolution_osid_intel_friction.test.ts`, `tests/operation_opportunities_catalog.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/20_engineering/ADR/ADR-0007-standing-og-defensive-model.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-03] fix(engine): align shared-defense readiness gates
+
+**Type:** Engine invariant fix, flag-gated by existing default-off ADR-0007 Phase C. The resolver and combat predictor could use the widened Standing OG defense roster under `ENABLE_SHARED_SECTOR_DEFENSE=true`, but operation readiness still used assigned-only defenders in two launch/preparation gates: `evaluateLaunchFeasibility(...)` and `estimateForceRatio(...)`. That let a weak assigned screen appear executable even when reserve/rear sector depth would participate in shared sector defense. Both readiness paths now use `getStandingOgDefenseBrigadeIds(...)` when Phase C is enabled and preserve the active-operation/TG availability exclusion before counting those defenders. Default-off behavior remains assigned-only.
+
+**Evidence:** New flag-on regression coverage in `tests/operation_launch_feasibility_shared_defense_flag.test.ts` pins that launch feasibility and operation force-ratio preparation count reserve/rear sector defenders before declaring an attack executable. Focused readiness/Standing OG slice passes 35/35 (`operation_launch_feasibility_defender_aware`, `operation_launch_feasibility_shared_defense_flag`, `operation_preparation_force_ratio`, `standing_og_defense`), and the broader readiness/combat slice passes 78/78. Fresh temporary combined C+B probe `n39` (`0d5c6e519d800275`) is macro-identical to n38 on the relevant activation blockers: 165 orders, 125 battles, 84 defender-present, 41 defender-absent, casualties 23,607 attacker / 25,187 defender, final counts `RS:374,RBiH:249,HRHB:89`, active zero-morale `[]`, active min cohesion 11 on `rs_1st_ozren_light_infantry`. The readiness mismatch is fixed but was not the scenario-moving residual. Follow-up undercoverage investigation shows `sector:vrs_1st_krajina:1` is component-isolated: apparent donor sectors in the same corps are in another friendly component and unreachable through RS-held OSIDs. New regression coverage in `tests/sector_severe_undercoverage_rebalance.test.ts` pins that severe undercoverage does **not** borrow from surplus donors in another component. The remaining root-cause target is local Ozren defender supply/commitment: 2nd and 4th Ozren dissolve on turn 35 after repeated shared-defense fights, while 3rd Ozren is healthy but committed/positioned away from the pocket. Follow-up OOB review split the causes: Operation Corridor assignment is intentional, but `rs_3rd_ozren_light_infantry` had an inconsistent home identity (`home_settlement` Gornja Paklenica / SID `S208329` mapped to `op:doboj:boljanic_2`, while OOB claimed `op:doboj:cerovica_2`). The row is corrected to `op:doboj:boljanic_2` and pinned by `tests/ozren_oob_home_osid.test.ts`. ADR-0007 flags remain default-off.
+
+**Scenario follow-up:** Default-off 40w proof after the OOB correction (`n41`, hash `b280b1053ebfd11b`) is acceptable for the data fix: 180 orders, 129 battles, 93 defender-present, final counts `RS:374,RBiH:249,HRHB:89`, active zero-morale `[]`, active zero-cohesion `[]`, and all four Ozren brigades remain active. Temporary combined C+B proof after the same OOB correction (`n40`, hash `5f613dd0303f0d17`) is **not** activation proof: 152 orders, 114 battles, 80 defender-present, final counts `RS:374,RBiH:248,HRHB:90`, active zero-morale `[]`, active zero-cohesion `[]`, but 2nd/3rd/4th Ozren are destroyed while 1st Ozren survives at morale 20 / cohesion 35. The next blocker is C+B reserve/depletion policy around local Ozren defense, not OOB geography, readiness gates, or cross-component donor relaxation.
+
+**Files:** `src/sim/combat/sector_offensive_launch_helpers.ts`, `src/sim/combat/operation_preparation.ts`, `data/source/oob_brigades.json`, `tests/operation_launch_feasibility_shared_defense_flag.test.ts`, `tests/sector_severe_undercoverage_rebalance.test.ts`, `tests/ozren_oob_home_osid.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/20_engineering/ADR/ADR-0007-standing-og-defensive-model.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-03] fix(engine): Standing OG Phase C handoff closeout - Foča delivery, static opening scope, and final sector side coverage
+
+**Type:** Engine hardening + ADR-0007 default-off activation support. This is a default-path behavior change where movement/preplanned-operation delivery was wrong, not a flag-off byte-identity batch.
+
+**What changed:** preplanned operation staging now preserves authored/viable brigade order and full destination intent; column movement keeps column orders long enough to consume them; commander march/transit correction preserves active-operation staging or objective-approach destinations even when the brigade is already on its assigned front; static objective-adjacency overlays are scoped to `is_pre_planned` opening attacks only and no longer make ordinary operations executable; final sector truth now seals missing war-front faction-side coverage for thin salients without attaching unrelated sectors. Standing OG shared-defense flags remain default-off.
+
+**Why:** Foča was failing to launch because the engine treated Patkovina as "already assigned front" and deleted the valid movement toward Prevrac/Kolovarice; a flags-on 40w run also exposed a real Vareš/Ravne faction-side sector-coverage gap. Both were product/engine truth faults, not reasons to relax same-component donor gates.
+
+**Verification:** focused lane slice green: `npm.cmd run test:vitest:fast -- -- tests\commander\elite_formation_utilization.test.ts tests\sector_offensive_in_transit_predictor.test.ts tests\final_sector_war_front_faction_side_coverage.test.ts tests\operation_execution_staging_truth.test.ts tests\pre_planned_operations.test.ts tests\osid_column_movement.test.ts tests\attack_casualty_distribution.test.ts tests\attack_post_battle_effects.test.ts tests\tg_migration_recon.test.ts` = 217/217. `git diff --check` clean. Lane-local TypeScript filter reports no lane-local errors; full typecheck still exits nonzero on known unrelated frontend dependency/type gaps in this isolated worktree. Earlier current-source flags-on 40w `n62` hash `d7cade7d65dc8d65` and default-off 40w `n63` hash `62595bbb648e689b` passed consistency. After review hardening made fixed-home tag a necessary-but-not-sufficient predicate, added live sector truth for assigned/reserve/rear fixed-home members, and kept post-side-coverage absorption behind the one-contiguous-sector invariant, current default-off 40w `n74` hash `108075cb5ec85bfa` passes consistency with exact war-front faction-side coverage, zero empty contested sectors, zero undefended front/adjacent-territory failures, Operation Foca partial 1/2, and final counts HRHB 89 / RBiH 254 / RS 369. Current flags-on 40w `029c3da215963418` passes consistency with no sector/coverage/geometry/undefended failures, Operation Foca partial 2/3, and final counts HRHB 90 / RBiH 249 / RS 373. Current default-off 60w proof `b8ce1eaae4296120` also passes consistency with no sector/coverage/geometry/undefended failures, final counts HRHB 91 / RBiH 263 / RS 358, and Operation Foca success 2/2.
+
+**Review follow-up:** final read-only review found no blockers after the final-sector and static-opening fixes. It did flag that the fixed-home shared-defender aftermath exemption must not rely on descriptive `placement:fixed_home_osid` tag authority; this branch replaced that predicate with live same-corps Standing OG sector/front assignment plus `home_osid`-inside-same-corps-territory truth, and added a negative tag-only regression. The remaining activation doctrine item is the non-primary defender casualty cap, which softens strict proportional casualty language; it is acceptable while `ENABLE_SHARED_SECTOR_DEFENSE=false`, but needs canon/Guardrail-1 approval before any default flip.
+
+**Docs:** `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/20_engineering/ADR/ADR-0007-standing-og-defensive-model.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-03] fix(engine): split shared-sector defense prediction cap
+
+**Type:** Engine calibration hardening, flag-gated by existing default-off ADR-0007 Phase C. The shared-sector defense roster was correctly widened for Phase C, but planning and resolution both used the legacy `REACTIVE_DEFENSE_RATIO` cap. Isolation probes showed Phase C, not Phase B, was the main throughput/cost problem. The predictor now uses a lower shared-sector reactive cap only when `ENABLE_SHARED_SECTOR_DEFENSE=true`; battle resolution keeps the legacy cap so widened rosters do not cheaply suppress attacker cost or burn defenders through an underpowered resolution path. Flag-off behavior remains unchanged and both ADR-0007 flags remain default-off.
+
+**Evidence:** Red/green coverage in `tests/distance_weighted_defense.test.ts` pins the legacy prediction cap when shared-sector defense is disabled, the lower prediction cap when enabled, and the legacy resolution cap in both modes. Focused combat slice passes 78/78 (`distance_weighted_defense`, `sector_stances`, `standing_og_defense`, `sector_coverage_defense`, `attack_resolution_osid_intel_friction`); broader focused slice passes 135/135 (`distance_weighted_defense`, `standing_og_defense`, `sector_coverage_defense`, `attack_resolution_osid_intel_friction`, `attack_resource_aftermath`, `morale_victory_feedback`, `brigade_posture`); reviewer determinism static scan passes 1/1; `git diff --check` reports only CRLF warnings. Diagnostic probes: old C-only `n34` (`cafdcb7ce469eb8e`) showed 145 orders / 105 battles / 71 defender-present / 17,213 attacker casualties / 25,568 defender casualties / 3 invalid ops; B-only `n35` (`6cb3d2d552de5e07`) stayed healthy at 163 orders / 135 battles / 96 defender-present / 0 invalid ops; low-prediction plus legacy-resolution C-only `n37` (`7a74030586a26a86`) improved C-only to 149 orders / 111 battles / 77 defender-present while restoring attacker casualty pressure to 22,643; combined C+B `n38` (`60e05cc7a917fb15`) improved over old combined `n33` from 149 / 113 / 72 to 165 orders / 125 battles / 84 defender-present, with 23,607 attacker casualties, 25,187 defender casualties, 0 invalid ops, active zero-morale `[]`, counts `RS:374,RBiH:249,HRHB:89`. This is not activation proof: default `n32` still has 133 battles / 102 defender-present and higher active cohesion floor, so the next blocker is the defender-present gap plus low-cohesion residual, not another default flip attempt. Typecheck remains red on known missing frontend map/deck packages plus pre-existing `attack_resolution_osid.ts` strict-null and `attack_post_battle_effects.test.ts` typing errors. `test:baselines` / `canon:check` currently fail at `apr1992_52w/activity_summary.json` (`expected 8f53fa96...`, `actual 9b15f574...`); because the changed code is default-off and returns the legacy ratio when `ENABLE_SHARED_SECTOR_DEFENSE=false`, this is recorded as a branch-baseline reconciliation blocker, not Phase C activation proof.
+
+**Files:** `src/sim/combat/combat_math.ts`, `src/sim/combat/combat_predictor.ts`, `src/sim/combat/attack_resolution_osid.ts`, `tests/distance_weighted_defense.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/20_engineering/ADR/ADR-0007-standing-og-defensive-model.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-03] fix(engine): floor fixed-home Standing OG front-holder morale
+
+**Type:** Engine behavior hardening (default path, deterministic). The remaining ADR-0007 C+B morale residual was traced to fixed-home territorial brigades that hold same-corps Standing OG frontage outside their exact origin municipality. `home_defense_active` correctly stays false there because broadening it would also block attack/assault posture and change command behavior, but morale drift treated those brigades as ordinary foreign-duty formations and let hostile population affinity push them into zero-morale collapse even while their home OSID remained inside same-corps Standing OG territory. `runMoraleDrift(...)` now applies the existing faction home morale floor, for morale only, to a narrowly-scoped fixed-home brigade that is assigned as a sector front holder, is listed in that sector's `assigned_brigade_ids`, is physically in that sector's territory, and whose `home_osid` remains in same-corps/same-faction sector territory. The rule does not set `home_defense_active`, posture, movement, operations, assignments, or attack eligibility.
+
+**Evidence:** Red/green coverage in `tests/morale_victory_feedback.test.ts` pins the Ozren-like positive case and exclusion cases for missing `placement:fixed_home_osid`, reserve/rear role, and home no longer in same-corps territory. Focused slice passes 114/114 (`morale_victory_feedback`, `brigade_posture`, `standing_og_defense`, `sector_coverage_defense`, `brigade_territory_reconciliation`). Typecheck no longer reports `morale_drift.ts`; the isolated worktree still has pre-existing typecheck blockers in `attack_resolution_osid.ts`, `attack_post_battle_effects.test.ts`, and missing frontend map/deck packages. Fresh default-path 40w probe `n32` hash `88036914bd630321`: 165 orders, 133 battles, 102 defender-present, 31 defender-absent, 35 flips, casualties 23,897 attacker / 25,918 defender, counts `RS:369,RBiH:254,HRHB:89`, active zero-morale `[]`, unresolved `[]`; Ozren finishes morale 20, Kljuc 20, Drvar 65. Fresh temporary combined C+B probe `n33` hash `6dbe77fcb4315566`: 149 orders, 113 battles, 72 defender-present, 41 defender-absent, 45 flips, casualties 15,443 attacker / 22,880 defender, counts `RS:375,RBiH:248,HRHB:89`, active zero-morale `[]`, unresolved `[]`; Ozren finishes morale 20, Kljuc 21, Drvar 68. ADR-0007 flags remain default-off; the health blocker is cleared, but combined C+B still needs throughput/war-cost calibration before any default flip.
+
+**Files:** `src/sim/combat/morale_drift.ts`, `tests/morale_victory_feedback.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/10_canon/Systems_Manual_v0_9_0.md`, `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md`, `docs/20_engineering/ADR/ADR-0007-standing-og-defensive-model.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-03] fix(engine): apply shared defender aftermath
+
+**Type:** Engine invariant fix, flag-gated by existing default-off ADR-0007 Phase C. Shared Standing OG defenders already contributed defensive power, casualties, direct combat fatigue, and engagement reporting, but non-casualty defender aftermath still applied to only the primary defender: defender-side cohesion drift, recent-battle outcome, defense streak, entrenchment degradation, equipment loss accounting, commander-casualty snap checks, experience gain, officer attrition, and post-battle morale. The resolver now derives the positive-weight shared defender set once after casualty distribution and applies those defender-side aftermath effects to every contributor; flag-off remains the old single-defender path.
+
+**Evidence:** Red/green unit coverage in `tests/attack_post_battle_effects.test.ts` pins shared defender battle-aftermath fan-out and shared post-battle morale fan-out. Focused combat/Standing OG slice passes 178/178 (`attack_post_battle_effects`, `standing_og_defense`, `bot_orders_perf_profile`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`, `sector_counter_attack`, `stranded_brigade_lifecycle`, `pipeline_step_execution_proof`). Fresh temporary combined C+B 40w probe `n24` hash `dd327409d8538fdb`: 156 orders, 115 battles, 73 defender-present battles, 42 defender-absent battles, 46 flips, attacker casualties 16,282, defender casualties 23,452, counts `HRHB:88,RBiH:248,RS:376`; Drvar remains fixed at morale 68 / cohesion 50.4 / 919 personnel, and active zero-morale drops to one residual (`rs_1st_ozren_light_infantry`) versus the prior combined `n23` 137 orders / 108 battles / 64 defender-present / default zero-morale pair. Diagnostic C-only probe after the same change (`n25`) remained worse than prior C-only and is not activation proof; a weighted-aftermath alternative (`n26`/`n27`) was also probed and rejected because combined throughput regressed to 134 orders / 105 battles / 61 defender-present. ADR-0007 remains default-off; next target is the residual C+B throughput gap and Ozren/Kljuc morale health before any default flip.
+
+**Files:** `src/sim/combat/attack_post_battle_effects.ts`, `src/sim/combat/attack_resolution_osid.ts`, `tests/attack_post_battle_effects.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-03] fix(engine): keep Standing OG reserve commits off low-affinity fronts
+
+**Type:** Engine invariant fix, flag-gated by existing default-off ADR-0007 Phase B. The Standing OG reserve-commit selector could move a reserve/rear brigade onto an equally reachable threatened frontage where that brigade's faction has sub-30% 1991 population affinity. The normal morale-drift model then applied a steady hostile-territory morale drain even when the brigade was not fighting, which caused `rs_1st_drvar_light_infantry` to collapse in B-only and combined C+B probes. Reserve commit now receives the existing municipality population map from the turn pipeline and refuses low-affinity target OSIDs for the committing formation; when no population map is present, behavior remains unchanged.
+
+**Evidence:** Red/green regression `tests/brigade_front_distribution.test.ts` now pins that a Standing OG reserve chooses the viable high-affinity front target over an equally reachable low-affinity target. Focused front-distribution suite passes 27/27; broader combat/Standing OG slice passes 122/122 (`standing_og_defense`, `bot_orders_perf_profile`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`, `sector_counter_attack`, `stranded_brigade_lifecycle`, `pipeline_step_execution_proof`). Fresh B-only 40w probe `n22` hash `7527bd491eca1ec5`: 171 orders, 136 battles, 96 defender-present battles, active zero-morale list returns to the default pair (`rs_17th_klju_light_infantry`, `rs_1st_ozren_light_infantry`), and Drvar finishes active at morale 68 / cohesion 48.8 / 919 personnel. Fresh combined C+B probe `n23` hash `3a7cbbaa867d718d`: Drvar also finishes active at morale 68 / cohesion 50.8 / 919 personnel and active zero-morale again stays at the default pair, but combined throughput remains activation-red at 137 orders / 108 battles / 64 defender-present battles. ADR-0007 remains default-off; next target is the C-side shared-defense throughput/aftermath suppression, not Phase B morale spread.
+
+**Files:** `src/sim/combat/brigade_front_distribution.ts`, `src/sim/turn_phases/war_phases.ts`, `src/sim/turn_phases/war_phase_reconciliation_steps.ts`, `tests/brigade_front_distribution.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-03] fix(engine): exempt operation-axis brigades from stranded lifecycle
+
+**Type:** Engine invariant fix on the default path. `updateStrandedBrigadeLifecycle(...)` already excluded brigades listed in flat `corps_command[*].active_operations[*].participating_brigades`, but ignored current operation `axes[*].assigned_brigades` and assumed the flat list was always present. Axis-only operation participants could therefore be treated as stranded/non-battle attrition candidates despite being actively committed. The lifecycle guard now treats both axis-assigned brigades and flat participants as active-operation members.
+
+**Evidence:** Red/green regression `tests/stranded_brigade_lifecycle.test.ts` first reproduced the axis-only active-operation case, then passed after the guard fix. Broader focused combat/lifecycle slice passes 121/121 (`standing_og_defense`, `bot_orders_perf_profile`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`, `sector_counter_attack`, `stranded_brigade_lifecycle`, `pipeline_step_execution_proof`), and `git diff --check` is clean. Fresh default-path 40w probe `n20` moved the prior default reference `n9` hash `e586d024066012c4` to `13c8f4cdff9caf1a`: orders 164 -> 173, battles 127 -> 135, defender-present battles 92 -> 103, defender-absent battles 35 -> 32, controller changes 125 -> 120, counts `HRHB:88,RBiH:249,RS:375` -> `HRHB:88,RBiH:254,RS:370`, anchors remain 30/30, benchmarks remain 6/6, and the two zero-morale active brigades are unchanged (`rs_17th_klju_light_infantry`, `rs_1st_ozren_light_infantry`). Fresh combined C+B probe `n21` is unchanged versus `n17`/`n19` (`dbe6cdb8d2c81d81`), so this is default-path lifecycle hardening, not the ADR-0007 activation fix. No baseline re-floor is claimed in this slice.
+
+**Files:** `src/sim/combat/stranded_brigade_lifecycle.ts`, `tests/stranded_brigade_lifecycle.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-03] fix(engine): protect operation-axis brigades from shared Standing OG defense
+
+**Type:** Engine invariant fix, flag-gated by existing default-off ADR-0007 Phase C. The shared-defense availability helper excluded flat `participating_brigades` from `corps_command.active_operations`, but did not exclude brigades assigned through operation `axes[*].assigned_brigades`. Under `ENABLE_SHARED_SECTOR_DEFENSE=true`, that left an axis participant borrowable as a reactive sector defender in the same turn. The helper now treats axis-assigned brigades as unavailable for shared defense; flag-off behavior remains unchanged.
+
+**Evidence:** Red/green regression `tests/standing_og_defense.test.ts` first failed for an axis-assigned operation brigade, then passed after the helper fix. Focused combat slice passes 94/94 (`standing_og_defense`, `bot_orders_perf_profile`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`, `sector_counter_attack`), and `git diff --check` is clean. Fresh temporary combined C+B probe `n19` produced the same final hash as `n17` (`dbe6cdb8d2c81d81`), so this is a correctness hardening rather than a scenario-moving activation fix. ADR-0007 remains default-off; the next blocker is still the C+B interaction / residual zero-morale cases.
+
+**Files:** `src/sim/combat/standing_og_defense.ts`, `tests/standing_og_defense.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-03] fix(engine): protect corps-command operation brigades from Standing OG reserve commit
+
+**Type:** Engine invariant fix, flag-gated by existing default-off ADR-0007 Phase B. The Standing OG reserve-commit scaffold already skipped operation participants, but its participant scanner only read legacy `formations[*].active_operations` on `corps_asset` formations. Current operations live primarily in `state.military.corps_command[*].active_operations`, so a flag-on Phase B pass could pull an already committed operation brigade out of the rear/reserve pool and move it to a threatened defensive front. The scanner now includes current corps-command operations and axis-assigned brigades as well as flat `participating_brigades`; default-off behavior remains unchanged.
+
+**Evidence:** Red/green regression `tests/brigade_front_distribution.test.ts` first reproduced the bad grab (`brig_reserve` moved from rear to front despite `corps_command.active_operations`), then passed after the scanner fix. Focused combat slice passes 93/93 (`standing_og_defense`, `bot_orders_perf_profile`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`, `sector_counter_attack`), and `git diff --check` is clean. Fresh temporary combined C+B probe after the fix (`n17`, hash `dbe6cdb8d2c81d81`) improves over prior fixed combined `n16`: orders 125 -> 137, battles 103 -> 108, zero-morale active brigades 4 -> 3 (`hrhb_111th_brigade` removed), counts recover from `HRHB:90,RBiH:255,RS:367` to `HRHB:89,RBiH:254,RS:369`. Fresh B-only probe after the fix (`n18`, hash `8ab60f2ba2afd325`) is high-throughput at 171 orders / 136 battles / 96 defender-present battles, counts `HRHB:88,RBiH:252,RS:372`, but still carries 3 zero-morale active brigades (`rs_17th_klju_light_infantry`, `rs_1st_drvar_light_infantry`, `rs_1st_ozren_light_infantry`). Interpretation: the operation-steal bug is fixed and Phase B alone is no longer the throughput sink; ADR-0007 remains default-off because the C+B interaction still suppresses defender-present battles and leaves a morale residual that needs a separate diagnostic/fix.
+
+**Files:** `src/sim/combat/brigade_front_distribution.ts`, `tests/brigade_front_distribution.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-03] docs: fresh Standing OG C+B probe confirms Phase B remains activation blocker
+
+**Type:** Diagnostic evidence + roadmap/board clarification (no default flip). After the Phase C engagement-list, predictor-parity, and active-op precedence fixes, a fresh temporary combined Phase C+B 40w probe was run with both ADR-0007 flags on; defaults and generated latest-run output were restored after the probe.
+
+**Evidence:** Default `n9` remains 164 orders, 127 battles, 41 flips, attacker casualties 19,504, defender casualties 25,189, zero-morale active brigades 2, counts `HRHB:88,RBiH:249,RS:375`. Old combined `n10` was 118 orders, 96 battles, 36 flips, zero-morale active brigades 4, counts `HRHB:90,RBiH:255,RS:367`. Fixed Phase C-only `n15` is near-throughput-green at 156 orders, 122 battles, 37 flips, zero-morale active brigades 2, counts `HRHB:89,RBiH:254,RS:369`. Fresh fixed combined C+B `n16` hash `aa11517ac3f818d3` improves old combined only modestly: 125 orders, 103 battles, 36 flips, attacker casualties 15,615, defender casualties 27,090, zero-morale active brigades 4 (`hrhb_111th_brigade`, `rs_17th_klju_light_infantry`, `rs_1st_drvar_light_infantry`, `rs_1st_ozren_light_infantry`), counts `HRHB:90,RBiH:255,RS:367`. Interpretation: Phase C is no longer the main throughput sink; Phase B reserve-commit still spreads zero-morale and suppresses orders/battles in the combined path. Next code target is Phase B reserve-commit side effects.
+
+**Files:** `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-03] fix(engine): enforce active-op precedence for shared Standing OG defense
+
+**Type:** Engine invariant fix, flag-gated by existing default-off ADR-0007 Phase C. ADR-0007 guardrail 5 says a brigade committed to an active operation or active TG/offensive donor must not also be borrowed as a reactive Standing OG defender that turn. Phase C's widened defensive roster now filters out active-operation participants plus active tactical-group anchors/donors when `ENABLE_SHARED_SECTOR_DEFENSE=true`; flag-off behavior remains unchanged.
+
+**Evidence:** Focused tests pass: `standing_og_defense.test.ts` + `bot_orders_perf_profile.test.ts` 19/19, and the broader combat slice remains green at 92/92 (`standing_og_defense`, `bot_orders_perf_profile`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`, `sector_counter_attack`). Fresh temporary Phase C-only probe after active-op precedence (`n15`, hash `2009e7c810bd796e`) improves over predictor-parity C-only `n14` (`9ea9fe120835ac12`): orders 148 -> 156 (default `n9` 164), battles 114 -> 122 (default 127), defender-absent battles 32 -> 43, defender-present battles 82 -> 79, attacker casualties 17,735 -> 17,503, defender casualties 29,531 -> 29,785, zero-morale active brigades stay 2, zero-cohesion active brigades stay 0. It remains below default on flips/control: flips stay 37 vs default 41 and final control counts stay `HRHB:89,RBiH:254,RS:369` vs default `HRHB:88,RBiH:249,RS:375`. Interpretation: active-op precedence substantially recovers Phase C throughput, but Phase C is still not activation-green.
+
+**Files:** `src/sim/combat/standing_og_defense.ts`, `src/sim/combat/attack_resolution_osid.ts`, `src/sim/combat/combat_predictor.ts`, `tests/standing_og_defense.test.ts`, `tests/bot_orders_perf_profile.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-03] fix(engine): align combat predictor with shared Standing OG defense
+
+**Type:** Engine predictor/resolver parity fix, flag-gated by existing default-off ADR-0007 Phase C. The real resolver used the Phase C shared-defense roster and contributing-power cap basis, but `combat_predictor.ts` still estimated sector defense from assigned brigades only and capped reactive defense on the old average-brigade basis. Under `ENABLE_SHARED_SECTOR_DEFENSE=true`, bot planning therefore evaluated a different defense model than combat resolution applied. The predictor now uses `getStandingOgDefenseBrigadeIds(sector, ENABLE_SHARED_SECTOR_DEFENSE)` and mirrors the resolver's `avgReactivePower` cap/floor basis.
+
+**Evidence:** Source guard passes (`bot_orders_perf_profile.test.ts` 5/5), and the focused combat slice remains green at 84/84 (`standing_og_defense`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`, `sector_counter_attack`). Fresh temporary Phase C-only probe after predictor parity (`n14`, hash `9ea9fe120835ac12`) improves over the engagement-list-only C probe (`n13`, hash `37bd24426ec57318`) but remains activation-red versus default `n9`: orders 143 -> 148 (default 164), battles 109 -> 114 (default 127), defender-present battles 77 -> 82 (default 92), attacker casualties 16,559 -> 17,735 (default 19,504), defender casualties 30,003 -> 29,531 (default 25,189), flips stay 37 (default 41), zero-morale stays 2, zero-cohesion stays 0, and final control counts stay `HRHB:89,RBiH:254,RS:369`. Interpretation: predictor/resolver parity is improved, but Phase C still needs another bounded throughput fix before any default flip.
+
+**Files:** `src/sim/combat/combat_predictor.ts`, `tests/bot_orders_perf_profile.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-03] fix(engine): include shared Standing OG defenders in engagement report
+
+**Type:** Engine invariant fix, flag-gated by existing default-off ADR-0007 Phase C. When `ENABLE_SHARED_SECTOR_DEFENSE` is enabled, weighted sector defenders already contribute defensive power, casualties, and direct combat fatigue, but the battle report only listed the primary defender in `engaged_formation_ids`. Later war phases use that list for fatigue recovery, officer quality, cohesion drift, and morale drift, so shared defenders could be treated as non-engaged despite having fought. The resolver now records every positive-weight shared defender as engaged; flag-off behavior remains primary-defender-only.
+
+**Evidence:** Focused tests pass: `standing_og_defense.test.ts` 11/11, and the broader combat slice 84/84 (`standing_og_defense`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`, `sector_counter_attack`). Fresh temporary Phase C-only probe after the fix (`n13`, hash `37bd24426ec57318`) remains activation-red versus default `n9` (`e586d024066012c4`): orders 164 -> 143, battles 127 -> 109, flips 41 -> 37, attacker casualties 19,504 -> 16,559, defender casualties 25,189 -> 30,003, zero-morale active brigades remain 2, zero-cohesion active brigades remain 0, and final control counts remain `HRHB:89,RBiH:254,RS:369` for the C-only path. Interpretation: the engagement-list invariant is fixed, but Phase C still depresses combat throughput and must not be flipped on by default.
+
+**Files:** `src/sim/combat/standing_og_defense.ts`, `src/sim/combat/attack_resolution_osid.ts`, `tests/standing_og_defense.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-03] docs: Standing OG flag isolation narrows Phase C and Phase B blockers
+
+**Type:** Diagnostic evidence + roadmap/board clarification (no code/data default change). Two temporary 40w probes isolated the ADR-0007 activation-red result: Phase C-only (`ENABLE_SHARED_SECTOR_DEFENSE=true`, reserve commit off) and Phase B-only (`ENABLE_STANDING_OG_RESERVE_COMMIT=true`, shared defense off). Defaults were restored and generated latest-run output was not kept.
+
+**Evidence:** Baseline/default post-hardening run `n9` hash `e586d024066012c4`: 657/712 match, 164 orders, 127 battles, attacker casualties 19,504, defender casualties 25,189, total formation fatigue 137, zero-morale active brigades 2. Phase C-only `n11` hash `baf321d37cefcae1`: 655/712 match, 149 orders, 110 battles, attacker casualties 16,868, defender casualties 29,776, fatigue 105, zero-morale 2, zero-cohesion 1. Phase B-only `n12` hash `9cae620f4054d67b`: 655/712 match, 143 orders, 118 battles, attacker casualties 18,403, defender casualties 25,690, fatigue 137, zero-morale 4. Combined `n10` remains activation-red at 653/712, 118 orders, 96 battles, fatigue 77, zero-morale 4. Interpretation: Phase C primarily undercharges/depresses aggregate fatigue and battle throughput; Phase B primarily spreads morale collapse and also reduces orders. Next implementation target is not a default flip, but fixing Phase C's fatigue conservation and Phase B's reserve-commit morale/throughput effects under narrower tests.
+
+**Files:** `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-03] docs: Standing OG Phase C+B flag-on proof remains activation-red
+
+**Type:** Diagnostic evidence + roadmap/board clarification (no default flip). After the repulse-memory hardening and 712th OOB promotion, a fresh temporary Phase C+B flag-on 40w probe was run with `ENABLE_SHARED_SECTOR_DEFENSE=true` and `ENABLE_STANDING_OG_RESERVE_COMMIT=true`; defaults were restored after the probe.
+
+**Evidence:** Default post-hardening/OOB run `n9` hash `e586d024066012c4` versus flag-on probe `n10` hash `9108f7baccafe9ac`: OSID match falls 657/712 -> 653/712, anchors and benchmarks remain 30/30 and 6/6, attack orders fall 164 -> 118, total battles fall 127 -> 96, total formation fatigue falls 137 -> 77, and active zero-morale brigades rise 2 -> 4 (`hrhb_111th_brigade` and `rs_1st_drvar_light_infantry` join the existing RS Ključ/Ozren cases). The 712th remains healthy at `op:travnik:turbe_2`, and the watched 3rd-Corps brigades remain active, but the activation gate is not green because the flag-on path reduces combat throughput/attrition and worsens health in other formations.
+
+**Files:** `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-03] fix(data): rehome 712th Mountain to Turbe after post-hardening probe
+
+**Type:** Scenario/OOB data correction plus deliberate baseline re-floor. The parked 712th Mountain Brigade placement fix is now promoted after the default-path repulse-memory hardening removed the unrelated 3rd-Corps integrity blocker. `arbih_712th_mountain` no longer uses phantom `home_osid` `op:travnik:krusevo_brdo_i`, which forced recruitment fallback placement into the wrong operational context; it now starts at `op:travnik:turbe_2`.
+
+**Evidence:** Fresh post-hardening 40w probe with the promoted OOB edit (`apr1992_definitive_40w__3649b3861a87e6ea__w40_n9`, final hash `e586d024066012c4`) keeps `arbih_712th_mountain` active at `op:travnik:turbe_2` with 1,800 personnel, morale 78, cohesion 56.46, fatigue 0, and front-sector assignment `sector:arbih_3rd_corps:2`. The prior residual 3rd-Corps brigades remain healthy: 303rd active at 1,800/m46/c56.46/f0, 319th active at 1,081/m90/c56.46/f0, 330th active at 1,800/m84/c56.46/f0, and 7th Viteska Muslim active at 2,200/m47/c58.55/f0. Cardak repeat battles stay at 5, and the run emits no 3rd-Corps integrity/morale residual report. Baselines are re-floored in this batch because both the repulse-memory fix and OOB correction are intentional default-path output changes; only `apr1992_52w` manifest hashes move, and the post-update verifier reports `Baseline regression: all scenarios match.` Focused suites also pass after the OOB promotion: 53/53 (`uncontested_occupation_priority`, `sector_counter_attack`, `catastrophic_stall`, `bot_operation_objective_focus`, `defensive_front_gap_count_cache`) and 81/81 (`standing_og_defense`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`, `sector_counter_attack`).
+
+**Files:** `data/source/oob_brigades.json`, `data/derived/scenario/baselines/manifest.json`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-03] fix(engine): repulse memory blocks repeated uncontested walkover attacks
+
+**Type:** Engine behavior hardening (default path, deterministic). The 3rd-Corps residual behind the Standing OG acceptance blocker was traced to non-operation bot attacks into `op:zavidovici:cardak_2`, not to ADR-0007 shared-defense fatigue. Root cause: `evaluateUncontestedOccupation(...)` treated an adjacent enemy OSID with no physical brigade as a free walkover even after the same attacker had just been catastrophically repulsed by abstract sector defense there. The combat predictor already learns from `last_repulsed_from`, but the walkover path bypassed prediction entirely. The fix adds a narrow 4-turn repulse cooldown for uncontested occupation targets and also prevents broadened sector counterattacks from choosing a target the same brigade was recently repulsed from.
+
+**Evidence:** Focused red/green tests now pin both failure modes: `tests/uncontested_occupation_priority.test.ts` blocks retrying a recently repulsed walkover target, and `tests/sector_counter_attack.test.ts` blocks a recently repulsed sector-counterattack target. Focused suites passed: 53/53 (`uncontested_occupation_priority`, `sector_counter_attack`, `catastrophic_stall`, `bot_operation_objective_focus`, `defensive_front_gap_count_cache`) and 81/81 (`standing_og_defense`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`, `sector_counter_attack`). Fresh 40w proof moved from failing current-OOB sample `n7` hash `e086afbefcef01e6` to `n8` hash `b74f1af54ab64b0f`: Cardak repeat battles fell 35 -> 5; `arbih_303rd_vitezka_mountain` ended active at 1,800 personnel / morale 46 / cohesion 56.46 / fatigue 0, `arbih_330th_liberation` at 1,800 / 84 / 56.46 / fatigue 0, and `arbih_7th_vitezka_muslim_liberation` at 2,200 / 70 / 56.85 / fatigue 6. The 52w baseline-temp actual also leaves those brigades healthy (303rd 1,800/m69/c63.65; 330th 1,800/m100/c63.65; 7th 2,200/m86/c62). `test:baselines` now fails on the expected `apr1992_52w` artifact drift because this is a default-path behavior change; baseline re-floor is not performed in this commit. Full `typecheck` remains blocked in this isolated worktree by missing frontend map packages (`maplibre-gl`, `pmtiles`, `@deck.gl/*`, `@vitejs/plugin-react`), before reaching combat files.
+
+**Files:** `src/sim/combat/bot_brigade_eval_attack.ts`, `tests/uncontested_occupation_priority.test.ts`, `tests/sector_counter_attack.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-02] docs: Standing OG 712th placement probe narrows remaining acceptance blocker
+
+**Type:** Diagnostic evidence + roadmap/board clarification (no code/data shipped). Follow-up probes prove the parked 712th fix is an upstream placement/OOB problem, not a combat-fatigue death: with current OOB the `arbih_712th_mountain` is destroyed on turn 1 with 0 battles and 0 casualties after fallback placement from phantom `home_osid` `op:travnik:krusevo_brdo_i`; with temporary `home_osid: op:travnik:turbe_2`, the 712th survives and fights normally.
+
+**Evidence:** Temporary OOB-only probe (`apr1992_definitive_40w__3649b3861a87e6ea__w40_n5`, hash `93bbc00450042585`) keeps the 712th active at `op:travnik:turbe_2` with 1,800 personnel, morale 78, cohesion 56.46, and 6 defender battles, but pushes `integration_formation_integrity` residuals to 3 (`arbih_303rd_vitezka_mountain`, `arbih_330th_liberation`, `arbih_7th_vitezka_muslim_liberation`). Temporary OOB + Phase C+B flag-on probe (`...__w40_n6`, hash `53596ef05f31a4d5`) keeps the 712th active with 8 defender battles and improves corrected idle-depth hotspots to min8/min4/min1 = 0/1/1, but still leaves 3 integrity residuals and lowers total formation fatigue to 195. Conclusion: the 712th `turbe_2` fix is correct but remains parked; next acceptance work is the 3rd-Corps residual/integrity sink under ADR-0007, not another blind 712th retry. Temporary probe edits were restored; no default flip, OOB change, baseline re-floor, or generated artifact shipped.
+
+**Files:** `docs/PROJECT_LEDGER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/napkin.md`.
+
+---
+
+## [2026-06-02] feat(engine): Standing OG Phase B reserve-commit scaffold + detector front-commit correction
+
+**Type:** Engine behavior scaffold, flag-gated default-off. Adds `ENABLE_STANDING_OG_RESERVE_COMMIT = false` and a narrow standing-OG reserve-commit path in `distributeBrigadesToFront(...)`: in threatened sectors (`threat_ratio >= 1.5`), one viable reserve/rear brigade can be committed toward the hottest occupied front subsegment before ordinary empty-front filling. Default-off preserves current behavior. Also tightens the ADR-0007 detector so full-strength same-OG formations already physically committed to a contested friendly front edge are not counted as idle rear depth.
+
+**Evidence:** Focused tests pass (`standing_og_defense`, `attack_resource_aftermath`, `combat_pipeline`, `brigade_front_distribution`: 54/54). Baseline regression with both ADR-0007 flags default-off passes: `Baseline regression: all scenarios match.` Combined Phase C+B flag-on probe (`apr1992_definitive_40w__3649b3861a87e6ea__w40_n3`, hash `ad21be9e57e4bbf4`) is live but **not activation-green**: control flips 121 -> 118, RBiH control 250 -> 254, defender casualties 27,643 -> 33,974, destroyed brigades stay 7, morale-zero stays 5, cohesion-zero improves 2 -> 0, and corrected detector hotspots improve min4/min1 from 3/3 -> 1/1 with min8 at 0/0. Residuals: the parked 712th still dies, formation fatigue total falls 241 -> 206, and war-cost/health acceptance is mixed. A rejected local experiment that charged +1 fatigue on reserve commitment worsened the proof (hash `1e9a9f84c3ab2f3a`, destroyed 8, hotspots min4/min1 1/2), so it was not kept. No default flip, no re-floor, and no 712th retry yet.
+
+**Files:** `src/sim/combat/brigade_front_distribution.ts`, `src/sim/combat/standing_og_defense.ts`, `tests/brigade_front_distribution.test.ts`, `tests/standing_og_defense.test.ts`.
+
+---
+
+## [2026-06-02] feat(engine): Standing OG Phase C detector hardening + direct fatigue sharing residual
+
+**Type:** Engine behavior scaffold, flag-gated default-off. Tightens the ADR-0007 Phase C health detector so it no longer depends on final sectors having exactly one assigned brigade: it now scans all current sector holders' defender history on sector territory, filters idle same-faction sector mates, and treats a brigade as not idle once it has paid `ops.fatigue`. Adds a flag-on weighted path for the resolver's direct `recordFormationFatigue(defenderFormation, 1)` call, so both combat-fatigue side effects use sector weights when `ENABLE_SHARED_SECTOR_DEFENSE` is enabled. Flag-off behavior remains default and byte-identical.
+
+**Evidence:** Focused tests pass (`standing_og_defense`, `attack_resource_aftermath`, `combat_pipeline`: 28/28). Baseline regression with `ENABLE_SHARED_SECTOR_DEFENSE=false` passes: `Baseline regression: all scenarios match.` Fresh 40w flag-on probe (`apr1992_definitive_40w__3649b3861a87e6ea__w40_n1`, hash `704903cf963ea777`) is behaviorally live but **not acceptance-green**: flag-off -> flag-on v2 control flips 121 -> 120, defender casualties 27,643 -> 24,411, destroyed brigades 7 -> 5, morale-zero brigades 5 -> 4, but formation fatigue total falls 241 -> 165 and solo-defender hotspot counts remain 5 at `minDefenderTurns=8` / 11->12 at `minDefenderTurns=4`. Residual: battle-time sector contribution/commitment is not yet charging the final idle reserves implicated by the detector; Phase B reserve-commitment/proof remains required before any default flip, calibration re-floor, or parked 712th retry.
+
+**Files:** `src/sim/combat/standing_og_defense.ts`, `src/sim/combat/attack_resolution_osid.ts`, `tests/standing_og_defense.test.ts`.
+
+---
+
+## [2026-06-02] feat(engine): Standing OG Defensive Model Phase C MVS scaffold (default-off)
+
+**Type:** Engine behavior scaffold, flag-gated default-off. Adds ADR-0007 Phase C shared-sector-defense plumbing behind `ENABLE_SHARED_SECTOR_DEFENSE = false`: assigned-only defender roster is preserved when the flag is off; flag-on widens sector defense to assigned + reserve + rear brigade ids, deduped/sorted; defender fatigue can distribute across contributing sector defenders by normalized reactive weights; reactive cap/min-floor use contributing defender power only when the flag is enabled. Adds a pure health-invariant detector for the solo-front-holder + idle-full-strength-same-OG pattern. No save schema, scenario data, OOB, calibration, or default baseline flip.
+
+**Verification:** Red/green TDD on `tests/standing_og_defense.test.ts` and `tests/attack_resource_aftermath.test.ts`; focused combat smoke `tests/combat_pipeline.test.ts`; `git diff --check`; baseline regression `Baseline regression: all scenarios match.` Full `npm.cmd run typecheck` is blocked in this isolated worktree by missing frontend map packages (`maplibre-gl`, `pmtiles`, `@deck.gl/*`, `@vitejs/plugin-react`) before reaching combat files.
+
+**Files:** `src/sim/combat/standing_og_defense.ts`, `src/sim/combat/attack_resource_aftermath.ts`, `src/sim/combat/attack_resolution_osid.ts`, `tests/standing_og_defense.test.ts`, `tests/attack_resource_aftermath.test.ts`.
+
+---
+
+## [2026-06-02] investigation+ADR: Standing OG defensive-attrition fault -> ADR-0007 (712th fix parked)
+
+**Type:** Engine-soundness finding + design ADR (no code shipped). Triggered by the 712th Mountain Bde appearing with a sector in Bratunac (phantom `home_osid` `op:travnik:krusevo_brdo_i` -> recruitment placement fallback seated it on the RBiH Bratunac enclave pocket; fix -> `op:travnik:turbe_2`). Fixing it surfaced a 2000+-run combat fault: defensive **fatigue** is dumped on the single front-edge brigade holding a contested OSID, never shared across the OG roster - reactive defense (`attack_resolution_osid.ts:626-691`) shares power+casualties by weight but fatigue lands only on the primary (`attack_resource_aftermath.ts:101`), and the reactive roster is `assigned_brigade_ids`-only (line 637). Brigades grind to morale0/cohesion0 over 30+ weeks (7th Viteska Muslim 38 wks at `op:kakanj:brnjic_2` -> 0/0) while full-strength sectormates fight 0 weeks (RBiH rear 0/8, HRHB 1/13). Undetected for 2000+ runs because calibration measures territory, not brigade health.
+
+**ADR-0007 "Standing OG Defensive Model"** (Proposed; Pyrrhic-panel revised, unanimous Endorse-with-changes) - defensive twin of ADR-0005's offensive TGs. Phases (re-sequenced): C shared-attrition combat (3-fn MVS `ENABLE_SHARED_SECTOR_DEFENSE`, byte-identical-off) -> B reserve-commitment (depletable depth; do NOT abolish the rear pool - Historian/BB) -> A persistent membership (last/optional). 6 guardrails (war-cost gate, cap the uncapped enclave path `692-708`, weight>0 attrition, unit-quality resilience, active-op precedence, legibility). Flag-gated default-off; deliberate re-floor at Phase D.
+
+**712th fix PARKED:** the OOB fix (`turbe_2`) + 52w re-floor are correct but tip a 3rd 3rd-Corps brigade (7th Viteska) over the `integration_formation_integrity` <=2 dissolution threshold (the fault's symptom). PR #143 merged-then-reverted; handoff recorded `main` clean at `8fbdcc0d`, while local `main` is now `b2a96d9a`. Rides in once Phase B/C land. Branch `claude/prebake-placement-and-rehome-idempotency` (`8dab69a9` oob, `8228b7e1` re-floor, `76eaa39f` ADR).
+
+**Files:** `docs/20_engineering/ADR/ADR-0007-standing-og-defensive-model.md`; evidence run `runs/_prebake_40w_run1`; no engine/data code shipped.
+
+---
+
 ## [2026-06-02] fix/i18n: boot-to-Main-Menu deep-link/auto-pop hardening (#138) + i18n Car 2 (#141) + Car 3 (#142)
 
 **Type:** UI-layer batch (boot routing + player-facing string i18n). **All `src/ui/map/**` + EN-catalog only → NO sim/scenario/calibration/determinism touch; historical 40w/52w/188w byte-identical by construction.** main HEAD `d0488874`. Three in-flight PRs driven to clean closure (green CI + clean Codex pass each) before the Codex-overseer handoff.
@@ -26,22 +284,6 @@
 **Boot deep-link contract (for future shell work):** the boot screen is `'mainMenu'`; non-menu deep-links (`?view=game|warroom`, `?desktop_window=...`, `?shellHandoff=...`) must explicitly route to the game/warroom shell; auto-pop **blocking** gameplay modals must gate on `appScreen !== 'mainMenu'`.
 
 **Files:** `docs/PROJECT_LEDGER.md` (this entry); see PRs #138/#141/#142 for per-PR touch (all `src/ui/map/**` + tests).
-
----
-
-## [2026-06-02] fix(ui/docs): Warroom toolbar/hotspot implementation + scene-bound status dock
-
-**Type:** Player-facing UI/product-shell correction plus documentation sync. UI-only; no simulation, scenario, save-schema, calibration, or determinism path touched.
-
-**Change:** Implemented the accepted Warroom toolbar/hotspot IA in the React map shell: the Warroom now exposes one Warroom-only command toolbar with President's Desk, Command Surface, Diplomacy, Intelligence, Staff, Chronicle, Faction, War Map, and Advance. Hotspots and toolbar entries share the route table. Only the map/cork-board route exits to the tactical War Map, and only the calendar route opens Advance. Other room objects open Warroom-native overlays first. `PresidentDeskShell` is a closable overlay over the Warroom scene, and the Command Surface is reachable from the toolbar and briefing folio instead of being hidden behind the Desk only. Tutorial/coachmark rendering is removed from the live app shell.
-
-**Status-dock correction:** The lower Warroom `WarroomStatusBar` is now rendered inside the Warroom scene plate as a compact priority/status dock. It is `absolute` inside the scene frame, not viewport-fixed, and it no longer duplicates the `Advance` command. The top Warroom toolbar owns navigation and Advance; the lower dock owns only phase/priority status and review handoff.
-
-**Docs sync:** Updated `docs/plans/2026-06-01-presidential-command-surface-design.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, `.claude/napkin.md`, and `docs/PROJECT_LEDGER_KNOWLEDGE.md` so the current contract is: one Warroom command toolbar, one scene-bound status dock, Command Surface from folio/toolbar, and the next P0 product lane remains Command Card -> Directive Card -> consequence receipt.
-
-**Verification:** In-app browser geometry on `http://127.0.0.1:3002/` after opening RBiH -> Desk/Warroom showed `toolbarCount: 1`, `statusDockCount: 1`, `statusPosition: absolute`, `fixedStatusCount: 0`, `statusInsideFrame: true`, `statusInsideImage: true`, `statusHasAdvance: false`, and `toolbarHasAdvance: true`. Focused product/UI suite passed: `node node_modules/vitest/vitest.mjs run tests/ui/app_boot_main_menu.test.ts tests/warroom_shell_layer.test.ts tests/ui/warroom_shell_accessibility.test.ts tests/ui/presidential_categories.test.ts tests/ui/president_desk_shell.test.ts tests/ui/command_card_strip_accessibility.test.ts tests/ui/warroom_shell_ownership.test.ts tests/ui/warroom_priority_docket.test.ts tests/ui/pre_advance_command_review.test.ts tests/ui/shell_navigation_ownership.test.ts tests/ui/accessibility_clickable_controls.test.ts tests/ui/tutorial_persistence.test.ts tests/ui/onboarding_persistence_replacement.test.ts tests/ui/onboarding_track_d_consolidation.test.ts tests/ui/advance_turn_button_gated_feedback.test.ts --reporter=dot` passed 129/129. `npm.cmd run typecheck` exited 0. `node node_modules\vite\bin\vite.js build --config src/ui/map/vite.config.ts` exited 0 with existing Vite browser-externalization/chunk warnings. `git diff --check` exited 0 with only existing CRLF warnings.
-
-**Files:** `src/ui/map/App.tsx`, `src/ui/map/components/warroom/WarroomShellLayer.tsx`, `src/ui/map/components/warroom/WarroomStatusBar.tsx`, `src/ui/map/utils/warroomNavigation.ts`, `src/ui/map/data/presidentialCategories.ts`, `src/ui/map/components/presidential_desk/PresidentDeskShell.tsx`, `src/ui/map/components/warroom/CommandCardStrip.tsx`, focused UI tests, `docs/plans/2026-06-01-presidential-command-surface-design.md`, `docs/plans/2026-06-02-warroom-toolbar-hotspot-ia-plan.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
 
@@ -18176,195 +18418,5 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Verification:** #108/#109/#111 UI-only; #112 emergent-gated → all historical 40w/52w/188w byte-identical; #112 baseline regression independently re-verified "all scenarios match".
 
 **Files:** `docs/PROJECT_LEDGER.md` (this entry); see PRs #108/#109/#111/#112 for the per-PR source touch (player/UI/desktop + emergent-gated `updatePatronState`).
-
----
-
-## [2026-06-02] fix(ui/docs): New Game side selection inline + product-facing master wired
-
-**Type:** Player-facing UI correction plus roadmap/board wiring. New Game side selection now lives inline on the Main Menu / splash surface instead of opening the old `SidePickerOverlay` modal. The modal remains available only for non-menu legacy paths; main-menu New Game commits directly from the side cards, and manual save load commits from the menu file picker.
-
-**Roadmap wiring:** `docs/40_reports/PRODUCT_FACING_MASTER.md` is promoted from loose audit to the live product-facing alpha source. `docs/plans/COMMAND_BOARD.md` now lists it as a controlling source and adds a P0 "Product-facing alpha hardening" lane. `docs/plans/MASTER_ROADMAP.md` now carries the accepted 2026-06-02 addendum prioritizing first-session comprehension, Strategic Priorities clarity, command-card directive loops, tutorial persistence, map legends/hotspots, info consistency, and TG/president-layer productization.
-
-**Verification:** focused source contract test `node node_modules/vitest/vitest.mjs run tests/ui/app_boot_main_menu.test.ts --reporter=dot` passed 14/14; `npm.cmd run typecheck` exited 0; `git diff --check` exited 0; browser smoke on `http://127.0.0.1:3002/?showPanel=1` showed inline faction cards, no pre-start dialog, and no `CHOOSE YOUR FACTION` side-picker modal after selecting RBiH.
-
-**Files:** `src/ui/map/App.tsx`, `src/ui/map/components/MainMenu.tsx`, `tests/ui/app_boot_main_menu.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
-
----
-
-## [2026-06-02] fix(ui/docs): Warroom remains room-first; Desk is a closable overlay
-
-**Type:** Player-facing IA correction. Reversed the June 1 combo-nav behavior where Warroom hotspots were treated as command-surface category launchers. Warroom objects now keep literal destinations; `PresidentDeskShell` is no longer always rendered over the room, and opens from a compact Warroom button as a closable overlay. Closing the Desk also clears the command card strip so the room returns cleanly. The command-surface card strip remains reachable from the Desk.
-
-**Docs:** Updated the presidential command-surface design doc, Command Board, and Product-Facing Master so the controlling product contract is: Warroom is a room first; Desk is an overlay; command-surface cards are Desk flow, not every room object.
-
-**Verification:** focused suite `node node_modules/vitest/vitest.mjs run tests/ui/app_boot_main_menu.test.ts tests/warroom_shell_layer.test.ts tests/ui/warroom_shell_accessibility.test.ts tests/ui/presidential_categories.test.ts tests/ui/president_desk_shell.test.ts --reporter=dot` passed 76/76; `npm.cmd run typecheck` exited 0; browser smoke on `http://127.0.0.1:3002/?showPanel=1` confirmed Warroom starts with no Desk region and no command strip, Desk opens/closes, Command Surface opens only from Desk, closing Desk clears the strip, and the Diplomacy hotspot opens Patron Relations without opening the command strip.
-
-**Files:** `src/ui/map/App.tsx`, `src/ui/map/components/presidential_desk/PresidentDeskShell.tsx`, `src/ui/map/components/warroom/WarroomShellLayer.tsx`, `src/ui/map/data/presidentialCategories.ts`, `tests/ui/president_desk_shell.test.ts`, `tests/ui/presidential_categories.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/2026-06-01-presidential-command-surface-design.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
-
----
-
-## [2026-06-02] docs(plan): Warroom toolbar/hotspot IA accepted
-
-**Type:** Docs-only product architecture decision. Added `docs/plans/2026-06-02-warroom-toolbar-hotspot-ia-plan.md` and wired it into the Master Roadmap and Command Board. The accepted Warroom rule is now: a visible Warroom-only toolbar mirrors hotspots; only map/cork board and calendar bypass dedicated Warroom surfaces; every other hotspot opens a Warroom-native item first; briefing folio opens Command Surface; tutorial/coachmark rendering should be removed from the live app shell during the implementation slice.
-
-**Verification:** `git diff --check` clean for the docs-only change.
-
-**Files:** `docs/plans/2026-06-02-warroom-toolbar-hotspot-ia-plan.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
-
----
-
-## [2026-06-02] feat(ui): Stop Operation directive card receipt proof
-
-**Type:** Player-facing UI/IPC-surface closure for the Presidential Command Surface. The first complete directive-host proof uses the existing Stop Operation lever only: `DirectiveCard` already called `stageOpHaltOrder({ corpsId, opName })`; this slice adds a non-mutating `Cancel directive` affordance plus an inline `Directive receipt` that tells the player whether the halt was staged for next turn, failed, or was cancelled.
-
-**Determinism / scope:** UI-only around an existing desktop IPC path. No sim, save-schema, scenario, calibration, TG, brigade, formation, or operation-injection code changed. The engine stop-op staging/consumption substrate remains the existing `op_halt.cjs` -> `pending_op_halt` -> `apply-op-halts` path.
-
-**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui/directive_card_stop_op_action.test.ts --reporter=dot` failed because `Cancel directive` and `Directive receipt` were absent. Green focused suite `node node_modules/vitest/vitest.mjs run tests/ui/directive_card_stop_op_action.test.ts tests/ui/presidential_decision_room.test.ts tests/ui/presidential_decision_room_request_force.test.ts tests/ui/directive_card_act_art.test.ts --reporter=dot` passed 41/41. `npm.cmd run typecheck` passed.
-
-**Files:** `src/ui/map/components/army_hq/DirectiveCard.tsx`, `src/ui/map/i18n/messages.en.ts`, `tests/ui/directive_card_stop_op_action.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
-
----
-
-## [2026-06-02] feat(ui): share directive receipts across direct issue paths
-
-**Type:** Player-facing UI hardening for the Presidential Command Surface directive host. The Stop Operation receipt proof is generalized inside `DirectiveCard` so successful/failing direct issue paths now use the same `Directive receipt` contract: authorize-op, no-objection request-op after actual staging, force-launch, replace-CO, and elite-deploy. The request-op impossible/commander-objection review states remain pre-stage states and still do not show a receipt until the player actually issues or forces a directive.
-
-**Determinism / scope:** UI-only around existing desktop IPC calls. No sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, or command-authority mechanics changed.
-
-**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui/directive_card_stop_op_action.test.ts --reporter=dot` failed because authorize-op had no receipt after `acceptProposal`. Green expanded suite `node node_modules/vitest/vitest.mjs run tests/ui/directive_card_stop_op_action.test.ts tests/ui/presidential_decision_room.test.ts tests/ui/presidential_decision_room_request_force.test.ts tests/ui/directive_card_act_art.test.ts --reporter=dot` passed 47/47. `npm.cmd run typecheck` passed.
-
-**Files:** `src/ui/map/components/army_hq/DirectiveCard.tsx`, `tests/ui/directive_card_stop_op_action.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
-
----
-
-## [2026-06-02] test(ui): cover front-visit directive receipt and availability block
-
-**Type:** Player-facing UI fixture coverage for the Presidential Command Surface directive host. `tests/ui/directive_card_stop_op_action.test.ts` now covers `front_visit` as the remaining DirectiveCard receipt exception: a reachable front visit calls `initiateFrontVisit` and shows the shared next-turn `Directive receipt`; an unavailable/no-reachable-front response renders the front-visit unavailable status, disables issue, and does not call IPC.
-
-**Determinism / scope:** Test/docs-only over existing UI behavior and existing front-visit IPC contract. No production code, sim, save-schema, scenario, calibration, TG, brigade, formation, or command-authority mechanics changed in this slice.
-
-**Verification:** `node node_modules/vitest/vitest.mjs run tests/ui/directive_card_stop_op_action.test.ts tests/ui/presidential_decision_room.test.ts tests/ui/presidential_decision_room_request_force.test.ts tests/ui/directive_card_act_art.test.ts tests/front_visit_action.test.ts --reporter=dot` passed 61/61. `npm.cmd run typecheck` passed.
-
-**Files:** `tests/ui/directive_card_stop_op_action.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
-
----
-
-## [2026-06-02] feat(ui): cover request-op commander pushback in DirectiveCard
-
-**Type:** Player-facing UI/IPC-surface hardening for the Presidential Command Surface directive host. `DirectiveCard` now has fixture proof for the request-op objection loop: typed settlement display names resolve to canonical OSIDs through the map display-name store before objection review, commander pushback appears before staging, `Force anyway` stages the existing request-op IPC with `forced_over_objection: true`, `Stand down` dismisses the objection with the shared cancelled/no-spend receipt, and unbuildable request-op directives show `Cannot issue` without offering force-anyway or staging anything. The force-launch branch is documented at the live branch as intentionally direct: it overrides an already-known held/no-go proposal and does not re-query objection.
-
-**Determinism / scope:** UI-only around existing desktop IPC calls and the existing objection read-model. No sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, or command-authority mechanics changed.
-
-**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui/directive_card_stop_op_action.test.ts --reporter=dot` failed because stand-down had no `Directive receipt`; a second red pass failed because typed `Bihać` was sent directly instead of resolving to `op:bihac:bihac_1`. Green focused file `node node_modules/vitest/vitest.mjs run tests/ui/directive_card_stop_op_action.test.ts --reporter=dot` passed 15/15.
-
-**Files:** `src/ui/map/components/army_hq/DirectiveCard.tsx`, `src/ui/map/i18n/messages.en.ts`, `tests/ui/directive_card_stop_op_action.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
-
----
-
-## [2026-06-02] docs(plan): reconcile command-surface receipt lanes
-
-**Type:** Docs-only roadmap and command-board reconciliation after verifying the current command-surface branch state. The plan now distinguishes already-built receipt/read-model substrate from the next player-facing work: `StrategicDashboard` and the old flat event-log surface are already retired/merged in the current branch; event promise receipts and patron-defiance supply-cut receipts already flow through the shared consequence receipt model; the next P0 product work is Strategic Priorities comprehension and command-card route cohesion.
-
-**Determinism / scope:** Documentation-only. No code, sim, save-schema, scenario, calibration, TG, brigade, formation, or command-authority behavior changed.
-
-**Verification:** `node node_modules/vitest/vitest.mjs run tests/patron_defiance_receipt.test.ts tests/ui/consequence_receipts.test.ts tests/ui/decision_history_overlay.test.ts tests/ui/decision_consequence_records_panel.test.ts tests/ui/chronicle_decision_ledger.test.ts tests/ui/diplomacy_view.test.ts --reporter=dot` passed 33/33 while reconciling the receipt lane; `git diff --check` is the docs-only formatting gate for this commit.
-
-**Files:** `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
-
----
-
-## [2026-06-02] feat(ui): make Strategic Priorities state the next presidential work
-
-**Type:** Player-facing UI/read-model comprehension pass for the Presidential Decision Room. `buildPresidentialDecisionRoomView` now derives a deterministic `nextOrders` agenda from the same priority-card archive, and `PresidentialDecisionRoomPanel` renders it above the dense priority lanes as `What is expected of me?` with `Act`, `Inspect`, and `Monitor` cards. The panel subtitle now explains that the surface contains required decisions and safest next inspections instead of repeating `Strategic Priorities`.
-
-**Determinism / scope:** UI/read-model only. No sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, or command-authority mechanics changed.
-
-**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui/presidential_decision_room.test.ts --reporter=dot` failed because `nextOrders` did not exist. Green focused proof: `node node_modules/vitest/vitest.mjs run tests/ui/presidential_decision_room.test.ts tests/ui/presidential_decision_room_panel_i18n.test.ts tests/ui_presidential_decision_room_wiring.test.ts tests/ui/presidential_categories.test.ts --reporter=dot` passed 52/52. `npm.cmd run typecheck` passed. Browser visible-text proof on `http://127.0.0.1:3002/?view=warroom` after starting ARBiH and opening Army HQ showed `STRATEGIC PRIORITIES`, `Your required decisions and safest next inspections`, `WHAT IS EXPECTED OF ME?`, `ACT`, `INSPECT`, `MONITOR`, and `PRIORITY LANES`. Screenshot capture timed out, so the browser evidence is text/DOM-based.
-
-**Files:** `src/ui/map/data/presidentialDecisionRoom.ts`, `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/presidential_decision_room.test.ts`, `tests/ui/presidential_decision_room_panel_i18n.test.ts`, `tests/ui/presidential_categories.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
-
----
-
-## [2026-06-02] feat(ui): keep command cards in a Warroom-native Decision Room
-
-**Type:** Player-facing Warroom route-cohesion fix. Selecting a Command Surface category now closes the card strip and opens a Warroom-native `Decision Room` host containing the existing `PresidentialDecisionRoomPanel`, instead of switching the player into generic Army HQ briefing. This preserves the existing Decision Room/DirectiveCard execution substrate while making the command-card route feel like a presidential surface in the Warroom.
-
-**Determinism / scope:** UI route/presentation only. No sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, command-authority, or directive execution mechanics changed.
-
-**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui/warroom_shell_accessibility.test.ts --reporter=dot` failed because `openCommandCategory` still called `openArmyHQTab(..., 'briefing')` and switched to `game`. Green focused proof: `node node_modules/vitest/vitest.mjs run tests/ui/warroom_shell_accessibility.test.ts tests/warroom_shell_layer.test.ts tests/ui/command_card_strip_accessibility.test.ts --reporter=dot` passed 52/52. `npm.cmd run typecheck` passed. Browser proof on `http://127.0.0.1:3002/?view=warroom`: Command Surface -> War Direction kept the URL at `?view=warroom` and visible text showed `COMMAND SURFACE`, `Decision Room`, `STRATEGIC PRIORITIES`, `WHAT IS EXPECTED OF ME?`, and `PRIORITY LANES`.
-
-**Files:** `src/ui/map/App.tsx`, `src/ui/map/components/warroom/CommandCardStrip.tsx`, `tests/ui/warroom_shell_accessibility.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/40_reports/WARROOM_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
-
----
-
-## [2026-06-02] fix(ui): let App own Decision Room counter-offer navigation
-
-**Type:** Player-facing route correctness for Decision Room actions. `PresidentialDecisionRoomPanel` now accepts an optional `onNavigateTarget` callback and threads it through its action buttons; the Warroom host passes an App-owned handler so `counter-offer` targets set `selectedCounterOfferId` and open the existing `CounterOfferModal` path instead of relying on the shared router's no-op `true` return. Default panel behavior still uses `openPresidentialDecisionRoomNavigationTarget`.
-
-**Determinism / scope:** UI route/presentation only. No sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, command-authority, or counter-offer mechanics changed.
-
-**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui_presidential_decision_room_wiring.test.ts --reporter=dot` failed because the panel had no `onNavigateTarget` contract. Green focused proof: `node node_modules/vitest/vitest.mjs run tests/ui_presidential_decision_room_wiring.test.ts tests/ui/presidential_decision_room_panel_i18n.test.ts --reporter=dot` passed 13/13. `npm.cmd run typecheck` passed. `git diff --check` passed.
-
-**Files:** `src/ui/map/App.tsx`, `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx`, `tests/ui_presidential_decision_room_wiring.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
-
----
-
-## [2026-06-02] test(ui): prove all command cards route through Warroom host
-
-**Type:** Player-facing regression proof and route documentation cleanup for the Presidential Command Surface. `tests/ui/command_card_strip_accessibility.test.ts` now clicks all six command-category cards and verifies that each card calls the Warroom host callback while requesting the expected Decision Room lens. The stale `CommandCardStrip` source comment that still described Army HQ routing was corrected to the Warroom-native Decision Room host.
-
-**Determinism / scope:** UI test/source-comment/docs-only slice over existing behavior. No sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, command-authority, or directive mechanics changed.
-
-**Verification:** `node node_modules/vitest/vitest.mjs run tests/ui/command_card_strip_accessibility.test.ts --reporter=dot` passed 2/2; the new all-six route test passed immediately, confirming the route contract already existed before this documentation cleanup.
-
-**Files:** `src/ui/map/components/warroom/CommandCardStrip.tsx`, `tests/ui/command_card_strip_accessibility.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
-
----
-
-## [2026-06-02] feat(ui): route supply visibility to Home Front command card
-
-**Type:** Player-facing command-surface regrouping. The existing `supply:player-visibility` Decision Room card now counts under the `Home Front` command card by explicit card-id predicate and is excluded from `War Direction`, so supply/economy pressure appears in the correct presidential family without changing the underlying Decision Room card archive.
-
-**Determinism / scope:** UI/read-model regrouping only. No sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, command-authority, or directive mechanics changed.
-
-**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui/presidential_categories.test.ts --reporter=dot` failed because Home Front count was still 0 for `supply:player-visibility`. Green focused proof: `node node_modules/vitest/vitest.mjs run tests/ui/presidential_categories.test.ts --reporter=dot` passed 13/13.
-
-**Files:** `src/ui/map/data/presidentialCategories.ts`, `tests/ui/presidential_categories.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
-
----
-
-## [2026-06-02] feat(ui): route enclave briefing cards to Enclave Dashboard
-
-**Type:** Player-facing Decision Room route correction. Command briefing items whose target is `enclaves` now produce Decision Room cards with an `enclave-dashboard` navigation target. App owns that target and opens the existing `EnclaveDashboard`; the same App-owned handler is passed into the Army HQ embedded Decision Room and the Warroom-native Decision Room host so enclave cards do not fall back to generic Army HQ briefing.
-
-**Determinism / scope:** UI route/presentation only. No sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, enclave mechanics, command-authority, or directive mechanics changed.
-
-**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui/presidential_decision_room.test.ts --reporter=dot` failed because an enclave briefing card still targeted `army-hq-tab`. Green focused proof: `node node_modules/vitest/vitest.mjs run tests/ui/presidential_decision_room.test.ts tests/ui_presidential_decision_room_wiring.test.ts --reporter=dot` passed 41/41. `npm.cmd run typecheck` passed.
-
-**Files:** `src/ui/map/App.tsx`, `src/ui/map/components/army_hq/ArmyHQModal.tsx`, `src/ui/map/data/presidentialDecisionRoom.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/presidential_decision_room.test.ts`, `tests/ui_presidential_decision_room_wiring.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
-
----
-
-## [2026-06-02] feat(ui): frame advisor panel as Chief-of-Staff counsel
-
-**Type:** Player-facing copy repurpose for the dormant advisor panel. The old `AI Advisor` title and generic assessment label now render as `Chief-of-Staff Counsel` and `Staff assessment`, preserving the existing panel and IPC substrate while removing generic AI terminology from the product-facing surface.
-
-**Determinism / scope:** UI copy/test/docs only. No external advisor call was added, and no sim, save-schema, scenario, calibration, TG, brigade, formation, operation-injection, command-authority, or directive mechanics changed.
-
-**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/ui/ai_advisor_panel.test.ts --reporter=dot` failed because the rendered panel still contained `AI Advisor`. Green proof: `node node_modules/vitest/vitest.mjs run tests/ui/ai_advisor_panel.test.ts --reporter=dot` passed 1/1.
-
-**Files:** `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/ai_advisor_panel.test.ts`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
-
----
-
-## [2026-06-03] feat(replay): default scenario runs to manifest-only replay payloads
-
-**Type:** Scenario harness artifact policy / replay-bloat reduction. Normal `runScenario(...)` and harness CLI runs now default to `replayPayloadMode: 'manifest_only'`, writing `replay_save_manifest.json` without writing `replay_sequence.jsonl` or `replay_save_sequence.json`. Full replay payloads remain available by explicit opt-in through `runScenario({ replayPayloadMode: 'full' })` or `--full-replay-save-sequence`.
-
-**Determinism / scope:** Harness-side artifact policy only. No engine pipeline, scenario data, calibration data, TG/Standing OG files, UI warroom/PR143 files, save schema, or `final_save.json` embedding changed. The focused contract proves manifest-only and full modes produce byte-identical `final_save.json` and identical final hashes for the same tiny scenario input.
-
-**Verification:** Red first: `node node_modules/vitest/vitest.mjs run tests/replay_payload_mode_contract.test.ts --reporter=dot` failed because default runs still returned/wrote `replay_sequence.jsonl`. Green proof: `node node_modules/vitest/vitest.mjs run tests/replay_payload_mode_contract.test.ts tests/replay_save_emit.test.ts tests/replay_artifact_ownership.test.ts tests/replay_save_finalizer_artifact_ownership.test.ts --reporter=dot` passed 11/11; `node node_modules/vitest/vitest.mjs run tests/scenario_continue_from_save_equivalence.test.ts --reporter=dot` passed 2/2; `node node_modules/vitest/vitest.mjs run tests/generated_artifact_ownership_matrix_contract.test.ts tests/scenario_transient_scratch_artifact_ownership.test.ts --reporter=dot` passed 2/2; `npm.cmd run typecheck` passed; `git diff --check` passed.
-
-**Files:** `src/scenario/scenario_runner.ts`, `src/scenario/replay_save_emit.ts`, `tools/scenario_runner/run_scenario.ts`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `tests/replay_payload_mode_contract.test.ts`, `tests/replay_artifact_ownership.test.ts`, `tests/replay_save_finalizer_artifact_ownership.test.ts`, `tests/scenario_continue_from_save_equivalence.test.ts`, `docs/PROJECT_LEDGER.md`.
 
 ---

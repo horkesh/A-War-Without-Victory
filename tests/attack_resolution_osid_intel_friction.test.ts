@@ -300,7 +300,59 @@ describe('attack resolution intel execution friction', () => {
         const staleReport = resolveAttackOrdersOsid(stale.state, stale.edges, new Map<string, string[]>());
 
         expect(staleReport.battles[0]!.power_ratio).toBeLessThan(freshReport.battles[0]!.power_ratio);
-        expect(stale.state.military.sector_intel!['sector:vrs_1st:0']![0]!.visible_brigade_ids).toEqual([]);
+        const refreshedRecord = stale.state.military.sector_intel!['sector:vrs_1st:0']![0]!;
+        expect(refreshedRecord.confidence).toBe(1);
+        expect(refreshedRecord.visible_brigade_ids).toEqual(['brig_rbih_1']);
+    });
+
+    it('refreshes reciprocal defender intel so combat reveals attacker offensive signs', () => {
+        const { state, edges } = makeScenario();
+        state.military.sector_intel = {
+            'sector:vrs_1st:0': [{
+                enemy_sector_id: 'sector:rbih_defense:0',
+                enemy_faction: 'RBiH',
+                enemy_corps_id: 'rbih_corps' as any,
+                front_edge_count: 1,
+                strength_category: 'unknown',
+                posture_observed: 'unknown',
+                offensive_signs: false,
+                confidence: 0.1,
+                turns_in_contact: 1,
+                visible_brigade_ids: [],
+                osid_confidence: [{
+                    osid: 'op:rbih:target',
+                    confidence: 0.1,
+                    sources: ['passive_contact'],
+                }],
+                last_updated_turn: 4,
+            }],
+            'sector:rbih_defense:0': [{
+                enemy_sector_id: 'sector:vrs_1st:0',
+                enemy_faction: 'RS',
+                enemy_corps_id: 'vrs_1st' as any,
+                front_edge_count: 1,
+                strength_category: 'unknown',
+                posture_observed: 'unknown',
+                offensive_signs: false,
+                confidence: 0.1,
+                turns_in_contact: 1,
+                visible_brigade_ids: [],
+                osid_confidence: [{
+                    osid: 'op:rs:staging',
+                    confidence: 0.1,
+                    sources: ['passive_contact'],
+                }],
+                last_updated_turn: 4,
+            }],
+        };
+
+        resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+
+        const defenderRecord = state.military.sector_intel!['sector:rbih_defense:0']![0]!;
+        expect(defenderRecord.confidence).toBe(1);
+        expect(defenderRecord.posture_observed).toBe('offensive_prep');
+        expect(defenderRecord.offensive_signs).toBe(true);
+        expect(defenderRecord.visible_brigade_ids).toContain('brig_rs_1');
     });
 
     it('annotates stale intel and defender OPSEC only when execution multipliers changed', () => {

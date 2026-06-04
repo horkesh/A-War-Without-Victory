@@ -34,6 +34,7 @@ const POCKET_BRIGADE_FORCE_DISSOLUTION_IDS = new Set<string>([
     'hvo_hrvoje_vukcic_brigade',
 ]);
 const REAR_GUARD_CORPS = new Set<string>(['vrs_1st_krajina', 'vrs_2nd_krajina']);
+const COLLAPSED_REAR_GUARD_ABSORPTION_CORPS = new Set<string>(['vrs_2nd_krajina']);
 const VRS_1K_LINE_DISTANCE_MAX_HOPS = 6;
 
 /**
@@ -1257,7 +1258,7 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
     faction: FactionId,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
-    options?: { allowDeepRearOwnership?: boolean },
+    options?: { allowDeepRearOwnership?: boolean; allowCollapsedRearGuardAbsorption?: boolean },
 ): void {
     const sectorClaims = sectors.map((sector) => {
         const frontSet = getSectorFrontOsids(sector);
@@ -1328,6 +1329,45 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
                 || a.load - b.load
                 || strictCompare(a.sector.sector_id, b.sector.sector_id)
             );
+
+        if (candidates.length === 0
+            && options?.allowCollapsedRearGuardAbsorption === true
+            && corpsId != null
+            && COLLAPSED_REAR_GUARD_ABSORPTION_CORPS.has(corpsId)) {
+            const collapsedRearGuardCandidates = sectorClaims
+                .map(({ sector, frontSet, territorySet, oneHopBehind }) => {
+                    if (sector.faction !== faction) return null;
+                    if (!REAR_GUARD_CORPS.has(sector.corps_id)) return null;
+                    let claim: 'front' | 'territory' | 'reserve' | null = null;
+                    if (frontSet.has(locationOsid)) claim = 'front';
+                    else if (oneHopBehind.has(locationOsid)) claim = 'reserve';
+                    else if (territorySet.has(locationOsid)) claim = 'territory';
+                    if (!claim) return null;
+                    const claimRank = claim === 'front' ? 0 : claim === 'reserve' ? 1 : 2;
+                    const load = sector.assigned_brigade_ids.length + sector.reserve_brigade_ids.length + (sector.rear_brigade_ids?.length ?? 0);
+                    return { sector, claim, claimRank, load };
+                })
+                .filter((x): x is { sector: CorpsFrontSector; claim: 'front' | 'territory' | 'reserve'; claimRank: number; load: number } => x != null)
+                .sort((a, b) =>
+                    a.claimRank - b.claimRank
+                    || a.load - b.load
+                    || strictCompare(a.sector.sector_id, b.sector.sector_id)
+                );
+            const collapsedBest = collapsedRearGuardCandidates[0];
+            if (collapsedBest) {
+                if (collapsedBest.claim === 'front') {
+                    collapsedBest.sector.assigned_brigade_ids.push(fid);
+                } else if (collapsedBest.claim === 'territory') {
+                    collapsedBest.sector.rear_brigade_ids ??= [];
+                    collapsedBest.sector.rear_brigade_ids.push(fid);
+                } else {
+                    collapsedBest.sector.reserve_brigade_ids.push(fid);
+                }
+                assigned.add(fid);
+                emitRoutineConsoleDebug(`[brigade_assignment] Rehomed collapsed rear-guard ${fid} into truthful sector owner ${collapsedBest.sector.sector_id} (${collapsedBest.claim})`);
+                continue;
+            }
+        }
 
         if (candidates.length === 0 && options?.allowDeepRearOwnership === true) {
             const rearCandidates = sectorClaims

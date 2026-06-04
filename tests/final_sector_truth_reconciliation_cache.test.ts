@@ -169,6 +169,31 @@ describe('reconcileFinalSectorTruth cache (C5)', () => {
         expect(second).not.toBe(first);
     });
 
+    it('invalidates when supply state input changes', () => {
+        const { state, edges } = makeState();
+        const firstSupply = {
+            schema: 1 as const,
+            turn: 10,
+            factions: [{
+                faction_id: 'RS',
+                by_osid: [{ osid: 'op:test:front', state: 'adequate' as const }],
+            }],
+        };
+        const secondSupply = {
+            schema: 1 as const,
+            turn: 10,
+            factions: [{
+                faction_id: 'RS',
+                by_osid: [{ osid: 'op:test:front', state: 'critical' as const }],
+            }],
+        };
+
+        const first = reconcileFinalSectorTruth(state, edges, null, undefined, undefined, firstSupply);
+        const second = reconcileFinalSectorTruth(state, edges, null, undefined, undefined, secondSupply);
+
+        expect(second).not.toBe(first);
+    });
+
     it('distinct GameState instances keep independent caches', () => {
         const a = makeState();
         const b = makeState();
@@ -178,54 +203,18 @@ describe('reconcileFinalSectorTruth cache (C5)', () => {
         expect(rb).toEqual(ra); // content still identical
     });
 
-    it('re-emits final-unresolved warnings on cache hit when isFinalPass flips true', () => {
-        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    it('rebuilds once when isFinalPass flips true so final-only repairs can run', () => {
         const { state, edges } = makeState();
-
-        // First call with isFinalPass=false — no warnings expected regardless of
-        // whether any brigade is unresolved.
-        reconcileFinalSectorTruth(state, edges, null, undefined, undefined, null, false);
-        warnSpy.mockClear();
-
-        // Seed an unresolved brigade before the cache-hit call so the warning
-        // emission has something to output. The cache hit path reads from
-        // `state.military.unresolved_sector_brigades`. This seeding does NOT
-        // affect the cache fingerprint (which only tracks political_controllers
-        // and active-formation locations), so the second call cache-hits.
-        state.military.unresolved_sector_brigades = ['brig_seed'];
-
-        // Pin cache-hit on second call by spying on buildCorpsFrontSectors —
-        // if the cache misses (e.g. because first-call mutations changed the
-        // fingerprint), this spy is the fallback-proof that the warning
-        // re-emission path needs a cache hit to fire. When the spy records a
-        // rebuild, skip the assertion to avoid a false positive in fixtures
-        // that trigger fingerprint-invalidating internal mutations.
         const spy = vi.spyOn(corpsFrontSectorsModule, 'buildCorpsFrontSectors');
 
-        // Second call with isFinalPass=true — cache hit (fingerprint unchanged;
-        // seeding above touched a non-input derived field).
-        reconcileFinalSectorTruth(state, edges, null, undefined, undefined, null, true);
-        if (spy.mock.calls.length > 0) {
-            // Fixture triggered a cache miss on the second call. Skip the
-            // warning-emission assertion: when the cache misses, warnings are
-            // emitted via buildCorpsFrontSectors' own isFinalPass path rather
-            // than the cache-hit re-emission, so our test invariant doesn't
-            // apply. The cache-hit re-emission is still covered in production
-            // (verified via the measured cache-hit rate in the profile).
-            return;
-        }
-        const unresolvedCalls = warnSpy.mock.calls.filter(
-            args => typeof args[0] === 'string' && args[0].includes('UNRESOLVED brig_seed'),
-        );
-        expect(unresolvedCalls.length).toBe(1);
+        const first = reconcileFinalSectorTruth(state, edges, null, undefined, undefined, null, false);
+        const second = reconcileFinalSectorTruth(state, edges, null, undefined, undefined, null, true);
+        const rebuildsAfterFlip = spy.mock.calls.length;
+        const third = reconcileFinalSectorTruth(state, edges, null, undefined, undefined, null, true);
 
-        // Third call with isFinalPass=true again on same cached state should NOT
-        // re-emit (lastFinalPass already true).
-        warnSpy.mockClear();
-        reconcileFinalSectorTruth(state, edges, null, undefined, undefined, null, true);
-        const secondUnresolvedCalls = warnSpy.mock.calls.filter(
-            args => typeof args[0] === 'string' && args[0].includes('UNRESOLVED brig_seed'),
-        );
-        expect(secondUnresolvedCalls.length).toBe(0);
+        expect(second).not.toBe(first);
+        expect(rebuildsAfterFlip).toBeGreaterThanOrEqual(2);
+        expect(third).toBe(second);
+        expect(spy.mock.calls.length).toBe(rebuildsAfterFlip);
     });
 });

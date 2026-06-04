@@ -12,6 +12,7 @@ import {
     applyOfficerCasualtyLoss,
     getDefenderOutcomePerspective,
     applyDisruptionFromOutcome,
+    applyDefenderBattleAftermath,
     applyAmmoCrisisPyrrhicEffects,
     applyPostBattleMorale,
     BASE_EXPERIENCE_GAIN,
@@ -30,6 +31,10 @@ import {
 } from './_helpers/combat.js';
 
 // Cluster 8 — attack_history_recording.test.ts (9 it) absorbed below.
+
+function recentBattleOutcome(formation: FormationState): CombatOutcome | undefined {
+    return (formation as FormationState & { recent_battle_outcome?: CombatOutcome }).recent_battle_outcome;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers (extracted to tests/_helpers/combat.ts; aliased for local readability)
@@ -183,6 +188,285 @@ describe('getDefenderOutcomePerspective', () => {
     it('unknown → pass-through', () => {
         expect(getDefenderOutcomePerspective('some_other' as CombatOutcome)).toBe('some_other');
     });
+});
+
+describe('applyDefenderBattleAftermath', () => {
+    const standingOgSectors = {
+        'sector:test:front': {
+            sector_id: 'sector:test:front',
+            corps_id: 'test_corps',
+            faction: 'RS',
+            territory_osids: ['op:test:home'],
+            assigned_brigade_ids: ['reserve_defender'],
+            reserve_brigade_ids: [],
+            edge_ids: [],
+            sub_segments: [],
+            length_edges: 0,
+            opposing_factions: [],
+            density: 1,
+            threat_ratio: 1,
+            defensive_power: 1,
+            sector_stance: 'defend',
+            stance_source: 'bot',
+        },
+    } as NonNullable<GameState['military']['corps_front_sectors']>;
+
+    it('applies defender outcome, cohesion, streak, and entrenchment to every shared defender', () => {
+        const primary = makeFormation({ cohesion: 50, entrenchment_turns: 3, defense_streak: 1 });
+        const reserve = makeFormation({ cohesion: 60, entrenchment_turns: 2, defense_streak: 0 });
+
+        applyDefenderBattleAftermath({
+            defenderFormations: [primary, reserve],
+            outcome: 'repulsed',
+        });
+
+        expect(recentBattleOutcome(primary)).toBe('victory');
+        expect(recentBattleOutcome(reserve)).toBe('victory');
+        expect(primary.defense_streak).toBe(2);
+        expect(reserve.defense_streak).toBe(1);
+        expect(primary.entrenchment_turns).toBe(2.5);
+        expect(reserve.entrenchment_turns).toBe(1.5);
+        expect(primary.cohesion).toBeGreaterThan(50);
+        expect(reserve.cohesion).toBeGreaterThan(60);
+    });
+
+    it('resets all shared defender streaks when attackers win', () => {
+        const primary = makeFormation({ defense_streak: 3 });
+        const reserve = makeFormation({ defense_streak: 2 });
+
+        applyDefenderBattleAftermath({
+            defenderFormations: [primary, reserve],
+            outcome: 'victory',
+        });
+
+        expect(recentBattleOutcome(primary)).toBe('repulsed');
+        expect(recentBattleOutcome(reserve)).toBe('repulsed');
+        expect(primary.defense_streak).toBe(0);
+        expect(reserve.defense_streak).toBe(0);
+    });
+
+    it('keeps non-primary same-corps Standing OG home holders off line-position aftermath', () => {
+        const primary = makeFormation({ id: 'primary_defender', cohesion: 50, entrenchment_turns: 3, defense_streak: 1 });
+        const reserve = makeFormation({
+            id: 'reserve_defender',
+            faction: 'RS',
+            corps_id: 'test_corps',
+            cohesion: 60,
+            entrenchment_turns: 2,
+            defense_streak: 2,
+            home_osid: 'op:test:home',
+            location_osid: 'op:test:home',
+            tags: ['placement:fixed_home_osid'],
+            assignment: { kind: 'sector', role: 'front', sector_id: 'sector:test:front' },
+        });
+
+        applyDefenderBattleAftermath({
+            defenderFormations: [primary, reserve],
+            outcome: 'victory',
+            primaryDefenderId: primary.id,
+            corpsFrontSectors: standingOgSectors,
+        });
+
+        expect(recentBattleOutcome(primary)).toBe('repulsed');
+        expect(recentBattleOutcome(reserve)).toBe('repulsed');
+        expect(primary.cohesion).toBe(42);
+        expect(primary.defense_streak).toBe(0);
+        expect(primary.entrenchment_turns).toBe(2.5);
+        expect(reserve.cohesion).toBe(60);
+        expect(reserve.defense_streak).toBe(2);
+        expect(reserve.entrenchment_turns).toBe(2);
+    });
+
+    it('does not let placement tag alone suppress line-position aftermath', () => {
+        const primary = makeFormation({ id: 'primary_defender', cohesion: 50, entrenchment_turns: 3, defense_streak: 1 });
+        const reserve = makeFormation({
+            id: 'reserve_defender',
+            cohesion: 60,
+            entrenchment_turns: 2,
+            defense_streak: 2,
+            home_osid: 'op:test:home',
+            location_osid: 'op:test:home',
+            tags: ['placement:fixed_home_osid'],
+        });
+
+        applyDefenderBattleAftermath({
+            defenderFormations: [primary, reserve],
+            outcome: 'victory',
+            primaryDefenderId: primary.id,
+        });
+
+        expect(recentBattleOutcome(reserve)).toBe('repulsed');
+        expect(reserve.cohesion).toBe(52);
+        expect(reserve.defense_streak).toBe(0);
+        expect(reserve.entrenchment_turns).toBe(1.5);
+    });
+
+    it('keeps fixed-home defenders away from home on the legacy line aftermath path', () => {
+        const primary = makeFormation({ id: 'primary_defender', cohesion: 50, entrenchment_turns: 3, defense_streak: 1 });
+        const reserve = makeFormation({
+            id: 'reserve_defender',
+            cohesion: 60,
+            entrenchment_turns: 2,
+            defense_streak: 2,
+            home_osid: 'op:test:home',
+            location_osid: 'op:test:front',
+            tags: ['placement:fixed_home_osid'],
+        });
+
+        applyDefenderBattleAftermath({
+            defenderFormations: [primary, reserve],
+            outcome: 'victory',
+            primaryDefenderId: primary.id,
+        });
+
+        expect(recentBattleOutcome(reserve)).toBe('repulsed');
+        expect(reserve.cohesion).toBe(52);
+        expect(reserve.defense_streak).toBe(0);
+        expect(reserve.entrenchment_turns).toBe(1.5);
+    });
+
+    it('keeps ordinary non-primary shared defenders on the legacy line aftermath path', () => {
+        const primary = makeFormation({ id: 'primary_defender', cohesion: 50, entrenchment_turns: 3, defense_streak: 1 });
+        const reserve = makeFormation({ id: 'reserve_defender', cohesion: 60, entrenchment_turns: 2, defense_streak: 2, tags: [] });
+
+        applyDefenderBattleAftermath({
+            defenderFormations: [primary, reserve],
+            outcome: 'victory',
+            primaryDefenderId: primary.id,
+        });
+
+        expect(reserve.cohesion).toBe(52);
+        expect(reserve.defense_streak).toBe(0);
+        expect(reserve.entrenchment_turns).toBe(1.5);
+    });
+
+    it('does not suppress line aftermath for ordinary same-corps home holders without fixed-home tag', () => {
+        const primary = makeFormation({ id: 'primary_defender', cohesion: 50, entrenchment_turns: 3, defense_streak: 1 });
+        const reserve = makeFormation({
+            id: 'reserve_defender',
+            faction: 'RS',
+            corps_id: 'test_corps',
+            cohesion: 60,
+            entrenchment_turns: 2,
+            defense_streak: 2,
+            home_osid: 'op:test:home',
+            location_osid: 'op:test:home',
+            tags: [],
+            assignment: { kind: 'sector', role: 'front', sector_id: 'sector:test:front' },
+        });
+
+        applyDefenderBattleAftermath({
+            defenderFormations: [primary, reserve],
+            outcome: 'victory',
+            primaryDefenderId: primary.id,
+            corpsFrontSectors: standingOgSectors,
+        });
+
+        expect(reserve.cohesion).toBe(52);
+        expect(reserve.defense_streak).toBe(0);
+        expect(reserve.entrenchment_turns).toBe(1.5);
+    });
+
+    it('keeps fixed-home reserve and rear sector members off line-position aftermath when live sector truth matches', () => {
+        const primary = makeFormation({ id: 'primary_defender', cohesion: 50, entrenchment_turns: 3, defense_streak: 1 });
+        const reserve = makeFormation({
+            id: 'reserve_defender',
+            faction: 'RS',
+            corps_id: 'test_corps',
+            cohesion: 60,
+            entrenchment_turns: 2,
+            defense_streak: 2,
+            home_osid: 'op:test:home',
+            location_osid: 'op:test:home',
+            tags: ['placement:fixed_home_osid'],
+            assignment: { kind: 'sector', role: 'reserve', sector_id: 'sector:test:front' },
+        });
+        const rear = makeFormation({
+            id: 'rear_defender',
+            faction: 'RS',
+            corps_id: 'test_corps',
+            cohesion: 62,
+            entrenchment_turns: 4,
+            defense_streak: 3,
+            home_osid: 'op:test:home',
+            location_osid: 'op:test:home',
+            tags: ['placement:fixed_home_osid'],
+            assignment: { kind: 'sector', role: 'rear', sector_id: 'sector:test:front' },
+        });
+
+        applyDefenderBattleAftermath({
+            defenderFormations: [primary, reserve, rear],
+            outcome: 'victory',
+            primaryDefenderId: primary.id,
+            corpsFrontSectors: {
+                'sector:test:front': {
+                    ...standingOgSectors['sector:test:front']!,
+                    reserve_brigade_ids: ['reserve_defender' as never],
+                    rear_brigade_ids: ['rear_defender' as never],
+                },
+            },
+        });
+
+        expect(reserve.cohesion).toBe(60);
+        expect(reserve.defense_streak).toBe(2);
+        expect(reserve.entrenchment_turns).toBe(2);
+        expect(rear.cohesion).toBe(62);
+        expect(rear.defense_streak).toBe(3);
+        expect(rear.entrenchment_turns).toBe(4);
+    });
+
+    it('still shares defender-favorable aftermath across positive-weight defenders', () => {
+        const primary = makeFormation({ id: 'primary_defender', cohesion: 50, entrenchment_turns: 3, defense_streak: 1 });
+        const reserve = makeFormation({ id: 'reserve_defender', cohesion: 60, entrenchment_turns: 2, defense_streak: 0 });
+
+        applyDefenderBattleAftermath({
+            defenderFormations: [primary, reserve],
+            outcome: 'repulsed',
+            primaryDefenderId: primary.id,
+        });
+
+        expect(recentBattleOutcome(primary)).toBe('victory');
+        expect(recentBattleOutcome(reserve)).toBe('victory');
+        expect(primary.defense_streak).toBe(2);
+        expect(reserve.defense_streak).toBe(1);
+        expect(primary.entrenchment_turns).toBe(2.5);
+        expect(reserve.entrenchment_turns).toBe(1.5);
+        expect(primary.cohesion).toBe(51);
+        expect(reserve.cohesion).toBe(61);
+    });
+
+    it('keeps same-corps Standing OG home holders off line aftermath even when the defense succeeds', () => {
+        const primary = makeFormation({ id: 'primary_defender', cohesion: 50, entrenchment_turns: 3, defense_streak: 1 });
+        const reserve = makeFormation({
+            id: 'reserve_defender',
+            faction: 'RS',
+            corps_id: 'test_corps',
+            cohesion: 60,
+            entrenchment_turns: 2,
+            defense_streak: 0,
+            home_osid: 'op:test:home',
+            location_osid: 'op:test:home',
+            tags: ['placement:fixed_home_osid'],
+            assignment: { kind: 'sector', role: 'front', sector_id: 'sector:test:front' },
+        });
+
+        applyDefenderBattleAftermath({
+            defenderFormations: [primary, reserve],
+            outcome: 'repulsed',
+            primaryDefenderId: primary.id,
+            corpsFrontSectors: standingOgSectors,
+        });
+
+        expect(recentBattleOutcome(primary)).toBe('victory');
+        expect(recentBattleOutcome(reserve)).toBe('victory');
+        expect(primary.defense_streak).toBe(2);
+        expect(primary.entrenchment_turns).toBe(2.5);
+        expect(primary.cohesion).toBe(51);
+        expect(reserve.defense_streak).toBe(0);
+        expect(reserve.entrenchment_turns).toBe(2);
+        expect(reserve.cohesion).toBe(60);
+    });
+
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -481,6 +765,23 @@ describe('applyPostBattleMorale', () => {
             moraleAbsorbed: true,
         });
         expect(d.morale).toBe(60);
+    });
+
+    it('applies defender morale effects to every shared defender when provided', () => {
+        const primary = makeFormation({ id: 'primary_defender', morale: 60 });
+        const reserve = makeFormation({ id: 'reserve_defender', morale: 70 });
+
+        applyPostBattleMorale({
+            attackerFormations: [],
+            defenderFormation: primary,
+            defenderFormations: [primary, reserve],
+            outcome: 'decisive_victory',
+            flip: true,
+            moraleAbsorbed: false,
+        });
+
+        expect(primary.morale).toBe(55);
+        expect(reserve.morale).toBe(65);
     });
 
     it('defender null: no crash', () => {

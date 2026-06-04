@@ -13,6 +13,7 @@ import {
     processOsidColumnMovement,
 } from '../src/sim/combat/osid_column_movement.js';
 import { buildOsidAdjacency } from '../src/sim/combat/osid_adjacency.js';
+import { applyBrigadeMovementOrders } from '../src/sim/combat/brigade_movement_orders.js';
 
 function makeEdge(a: string, b: string): EdgeRecord {
     return { a, b } as EdgeRecord;
@@ -274,6 +275,31 @@ describe('processOsidColumnMovement', () => {
         expect(state.military.brigade_movement_state?.brig1?.destination_sids).toEqual(['C']);
         expect(state.military.formations?.brig1?.location_osid).toBe('A');
         expect(state.military.brigade_movement_orders?.brig1).toBeUndefined();
+    });
+
+    it('single-hop movement pass ignores column orders owned by column movement', () => {
+        const state = makeState([
+            makeFormation('brig1', 'RS', 'A'),
+        ], {
+            military: {
+                brigade_movement_orders: {
+                    brig1: { destination_sids: ['C'], stance: 'column' },
+                },
+            } as any,
+        });
+
+        const report = applyBrigadeMovementOrders(
+            state,
+            makeLinearEdges(),
+            mockReverseMap(['A', 'B', 'C', 'D', 'E']),
+        );
+
+        expect(report.moves_applied).toBe(0);
+        expect(state.military.formations?.brig1?.location_osid).toBe('A');
+        expect(state.military.brigade_movement_orders?.brig1).toEqual({
+            destination_sids: ['C'],
+            stance: 'column',
+        });
     });
 
     it('arrives on a later turn and clears movement state', () => {

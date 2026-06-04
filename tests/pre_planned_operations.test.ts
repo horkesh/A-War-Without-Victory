@@ -372,6 +372,62 @@ describe('pre-planned operations', () => {
         assert.ok(!brigades.includes('jna_mostar_garrison_tg'));
     });
 
+    it('preserves authored main effort for queued Operation Foca when Bileca is also viable', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 8;
+        const command = state.military.corps_command!.vrs_herzegovina!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Foca'];
+
+        const injected = injectQueuedOperation(state, 'vrs_herzegovina');
+
+        assert.equal(injected, true);
+        const foca = command.active_operations.find((op) => op.name === 'Operation Foca');
+        assert.ok(foca);
+        const focaValley = foca!.axes?.find((axis) => axis.axis_id === 'foca_valley');
+        assert.ok(focaValley);
+        assert.deepEqual(focaValley!.assigned_brigades, ['rs_foa_brigade', 'rs_bilea_brigade']);
+        assert.equal(focaValley!.main_brigade, 'rs_foa_brigade');
+        assert.deepEqual(focaValley!.support_brigades, ['rs_bilea_brigade']);
+    });
+
+    it('excludes queued Operation Foca brigades that cannot reach the authored axis staging area', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 8;
+        const command = state.military.corps_command!.vrs_herzegovina!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Foca'];
+        state.military.formations['rs_foa_brigade']!.location_osid = 'op:foca:patkovina';
+        state.military.formations['rs_bilea_brigade']!.location_osid = 'op:nevesinje:zovi_do';
+        state.political.political_controllers!['op:foca:patkovina'] = 'RS';
+        state.political.political_controllers!['op:foca:foca_3'] = 'RS';
+        state.political.political_controllers!['op:nevesinje:zovi_do'] = 'RS';
+        for (let hop = 1; hop <= 5; hop++) {
+            state.political.political_controllers![`op:test:bileca_route_${hop}`] = 'RS';
+        }
+        const adjacency = new Map([
+            ['op:foca:patkovina', ['op:foca:foca_3']],
+            ['op:foca:foca_3', ['op:foca:patkovina']],
+            ['op:nevesinje:zovi_do', ['op:test:bileca_route_1']],
+            ['op:test:bileca_route_1', ['op:nevesinje:zovi_do', 'op:test:bileca_route_2']],
+            ['op:test:bileca_route_2', ['op:test:bileca_route_1', 'op:test:bileca_route_3']],
+            ['op:test:bileca_route_3', ['op:test:bileca_route_2', 'op:test:bileca_route_4']],
+            ['op:test:bileca_route_4', ['op:test:bileca_route_3', 'op:test:bileca_route_5']],
+            ['op:test:bileca_route_5', ['op:test:bileca_route_4', 'op:foca:foca_3']],
+        ]);
+
+        const injected = injectQueuedOperation(state, 'vrs_herzegovina', adjacency as any);
+
+        assert.equal(injected, true);
+        const foca = command.active_operations.find((op) => op.name === 'Operation Foca');
+        assert.ok(foca);
+        const focaValley = foca!.axes?.find((axis) => axis.axis_id === 'foca_valley');
+        assert.ok(focaValley);
+        assert.deepEqual(focaValley!.assigned_brigades, ['rs_foa_brigade']);
+        assert.equal(focaValley!.main_brigade, 'rs_foa_brigade');
+        assert.ok(!foca!.participating_brigades.includes('rs_bilea_brigade'));
+    });
+
     it('preserves brigade-level warning detail when collecting multiple missing brigades on one axis', () => {
         const state = makeMinimalState();
         const warnings: OpInjectionWarning[] = [
