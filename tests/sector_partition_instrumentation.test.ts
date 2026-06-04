@@ -505,6 +505,24 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(region).not.toMatch(/\bperformance\.now\s*\(/);
     });
 
+    it('static contract: ensureMinimumSectorCoverage reachability avoids per-check sector-index maps', () => {
+        const raw = readFileSync(resolve('src/sim/combat/brigade_assignment.ts'), 'utf8');
+        const startIdx = raw.indexOf('const canReachSectorFront = (');
+        const endIdx = raw.indexOf('\n\n    const claimTypeForSector', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        expect(region).toContain('const sectorFriendly = getSectorFrontOsids(sector);');
+        expect(region).toContain('if (sectorFriendly.has(startOsid)) return true;');
+        expect(region).toContain('if (sectorFriendly.has(neighbor)) return true;');
+        expect(region).not.toContain('bfsToNearestSector');
+        expect(region).not.toContain('new Map([...sectorFriendly].map');
+        expect(region).not.toMatch(/\bDate\.now\s*\(/);
+        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
+    });
+
     it('static contract: pickVacantLocalFrontTarget keeps deterministic loop and final sort', () => {
         const raw = readFileSync(resolve('src/sim/combat/brigade_assignment.ts'), 'utf8');
         const startIdx = raw.indexOf('const pickVacantLocalFrontTarget = (');

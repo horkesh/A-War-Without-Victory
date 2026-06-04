@@ -47,4 +47,18 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
     it('routes the Warroom diplomacy telephone to a Warroom-native diplomacy overlay first', () => {
         expect(regionToShellHandoff('diplomatic_telephone')).toEqual({ kind: 'warroom-overlay', surface: 'diplomacy' });
     });
+
+    it('keeps Warroom Diplomacy dismissible through the Warroom Escape stack', () => {
+        const app = read('src/ui/map/App.tsx');
+        const effectStart = app.indexOf("if (appScreen !== 'warroom') return undefined;");
+        const effectEnd = app.indexOf('\n\n  const openReservePanelFromDesk', effectStart);
+
+        expect(effectStart).toBeGreaterThanOrEqual(0);
+        expect(effectEnd).toBeGreaterThan(effectStart);
+
+        const effect = app.slice(effectStart, effectEnd);
+        expect(effect).toContain('if (diplomacyOpen) {');
+        expect(effect).toContain('setDiplomacyOpen(false);');
+        expect(effect).toContain('diplomacyOpen, warroomOverlaySurface');
+    });
 });

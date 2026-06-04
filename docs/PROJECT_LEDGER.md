@@ -18707,3 +18707,19 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Report:** `docs/40_reports/implemented/20260603_SECTOR_COVERAGE_COMPONENT_CACHE.md`
 
 ---
+
+## [2026-06-04] perf(sector/ui): coverage reachability elision + Warroom Diplomacy Escape cleanup
+
+**Type:** Deterministic sector/frontline performance optimization plus UI/product shell review-thread cleanup.
+
+**Sector change:** `src/sim/combat/brigade_assignment.ts` `ensureMinimumSectorCoverage(...)` no longer answers boolean sector-front reachability by allocating a temporary `Map(front_osid -> 0)` and calling `bfsToNearestSector(...)` for every candidate. The local `canReachSectorFront(...)` helper now performs direct friendly-territory BFS against the sector front OSID set and returns boolean reachability. This deliberately avoids the broad sector-front view cache class that regressed on 2026-05-27.
+
+**UI change:** GitHub sweep found one unresolved Codex thread on merged PR #166 (`PRRT_kwDORNoPiM6HGaCG`): Warroom Diplomacy / Patron Relations bypassed `WarroomNativeOverlay` and lost Escape-to-close. `src/ui/map/App.tsx` now closes `diplomacyOpen` in the Warroom Escape stack; `tests/ui/warroom_shell_ownership.test.ts` pins the contract.
+
+**Docs/roadmap:** Added `docs/40_reports/implemented/20260604_SECTOR_COVERAGE_REACHABILITY_ELISION.md` and `docs/40_reports/implemented/20260604_WARROOM_DIPLOMACY_ESCAPE.md`; updated `docs/40_reports/README.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, and `docs/plans/2026-05-20-sector-performance-next-target-plan.md`.
+
+**Verification:** focused sector pack PASS (90/90): `tests/sector_partition_instrumentation.test.ts`, `tests/sector_coverage_truth_preservation.test.ts`, `tests/sector_split_brigade_assignment.test.ts`, `tests/sector_severe_undercoverage_rebalance.test.ts`, `tests/rear_sector_bucket_truth.test.ts`, `tests/brigade_territory_reconciliation.test.ts`. Focused UI pack PASS (10/10): `tests/ui/warroom_shell_ownership.test.ts`, `tests/ui/diplomacy_panel.test.ts`. `npm.cmd run typecheck` PASS. Profiled 40w PASS: final hash `41c72b13ad2e91b9`, `totalWallS=87.89`. `node tools\validate_run_consistency.cjs runs_perf\sector_coverage_hotspot_20260604\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` PASS. `npm.cmd run test:baselines` PASS ("Baseline regression: all scenarios match"). `git diff --check` PASS.
+
+**Report:** `docs/40_reports/implemented/20260604_SECTOR_COVERAGE_REACHABILITY_ELISION.md`; `docs/40_reports/implemented/20260604_WARROOM_DIPLOMACY_ESCAPE.md`
+
+---
