@@ -1578,16 +1578,16 @@ export function ensureMinimumSectorCoverage(
         return null;
     };
 
-    const pickVacantLocalFrontTarget = (
+    const pickVacantLocalFrontTargetFromFrontSet = (
         bid: FormationId,
-        sector: CorpsFrontSector,
+        sectorFrontOsids: ReadonlySet<string>,
         activeCounts: Map<string, number>,
         maxHops = LOCAL_FRONT_RELIEF_MAX_HOPS,
     ): { target: string; dist: number } | null => {
         const formation = formations[bid];
         if (!formation?.location_osid) return null;
         const candidates: Array<{ target: string; dist: number }> = [];
-        for (const target of getSectorFrontOsids(sector)) {
+        for (const target of sectorFrontOsids) {
             if ((activeCounts.get(target) ?? 0) !== 0) continue;
             const dist = bfsDistance(formation.location_osid, target, adjacency, friendlyOsids);
             if (!Number.isFinite(dist) || dist > maxHops) continue;
@@ -1596,6 +1596,20 @@ export function ensureMinimumSectorCoverage(
         candidates.sort((a, b) => a.dist - b.dist || strictCompare(a.target, b.target));
         return candidates[0] ?? null;
     };
+
+    const pickVacantLocalFrontTarget = (
+        bid: FormationId,
+        sector: CorpsFrontSector,
+        activeCounts: Map<string, number>,
+        maxHops = LOCAL_FRONT_RELIEF_MAX_HOPS,
+    ): { target: string; dist: number } | null => (
+        pickVacantLocalFrontTargetFromFrontSet(
+            bid,
+            getSectorFrontOsids(sector),
+            activeCounts,
+            maxHops,
+        )
+    );
 
     const moveBrigadeToFrontTarget = (
         bid: FormationId,
@@ -1714,13 +1728,19 @@ export function ensureMinimumSectorCoverage(
             if (sector.assigned_brigade_ids.length > 0) continue;
 
             const sectorComp = componentForSector(sector);
+            const sectorFrontOsids = getSectorFrontOsids(sector);
+            const sameComponentDonors = corpsSectors
+                .filter(s =>
+                    s.sector_id !== sector.sector_id
+                    && componentForSector(s) === sectorComp);
 
             // Step 1: promote first connected reserve to assigned
             const promotedReserve = perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:promote-reserve', () => {
+                if (sector.reserve_brigade_ids.length === 0) return false;
                 const activeCounts = countActiveBrigadesByOsid(formations);
                 for (let ri = 0; ri < sector.reserve_brigade_ids.length; ri++) {
                     const bid = sector.reserve_brigade_ids[ri]!;
-                    const target = pickVacantLocalFrontTarget(bid, sector, activeCounts);
+                    const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts);
                     if (target) {
                         sector.reserve_brigade_ids.splice(ri, 1);
                         moveBrigadeToFrontTarget(bid, target.target, activeCounts);
@@ -1734,22 +1754,22 @@ export function ensureMinimumSectorCoverage(
 
             // Step 1b: pull the nearest reachable same-corps rear brigade.
             const pulledRear = perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:pull-rear', () => {
+                const rearDonors = sameComponentDonors
+                    .filter(s => (s.rear_brigade_ids?.length ?? 0) > 0);
+                if (rearDonors.length === 0) return false;
                 // Hoisted from inside the flatMap callback: formations is read-only
                 // across donor iterations within this step, so the per-donor rebuild
                 // produced identical activeCounts maps. Byte-identical because
-                // pickVacantLocalFrontTarget(...) consumes activeCounts read-only;
-                // the post-pick moveBrigadeToFrontTarget below uses its own fresh
-                // activeCounts at line ~1519.
+                // pickVacantLocalFrontTargetFromFrontSet(...) consumes activeCounts read-only;
+                // the post-pick moveBrigadeToFrontTarget below can reuse the same
+                // map because no formation location changes between pick and move.
                 const stepActiveCounts = countActiveBrigadesByOsid(formations);
-                const rearCandidates = corpsSectors
-                    .filter(s =>
-                        s.sector_id !== sector.sector_id
-                        && componentForSector(s) === sectorComp)
+                const rearCandidates = rearDonors
                     .flatMap((donor) => {
                         return [...(donor.rear_brigade_ids ?? [])]
                             .sort(strictCompare)
                             .map((bid) => {
-                                const target = pickVacantLocalFrontTarget(bid, sector, stepActiveCounts);
+                                const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, stepActiveCounts);
                                 return target ? { donor, bid, dist: target.dist, target: target.target } : null;
                             });
                     })
@@ -1760,10 +1780,9 @@ export function ensureMinimumSectorCoverage(
                         || strictCompare(a.bid, b.bid)
                     );
                 if (rearCandidates.length > 0) {
-                    const activeCounts = countActiveBrigadesByOsid(formations);
                     const { donor, bid, target } = rearCandidates[0]!;
                     donor.rear_brigade_ids = (donor.rear_brigade_ids ?? []).filter((candidate) => candidate !== bid);
-                    moveBrigadeToFrontTarget(bid, target, activeCounts);
+                    moveBrigadeToFrontTarget(bid, target, stepActiveCounts);
                     sector.assigned_brigade_ids.push(bid);
                     return true;
                 }
@@ -1773,17 +1792,17 @@ export function ensureMinimumSectorCoverage(
 
             // Step 1c: if no rear brigade exists, pull the nearest reachable same-corps reserve.
             const pulledReserve = perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:pull-reserve', () => {
+                const reserveDonors = sameComponentDonors
+                    .filter(s => s.reserve_brigade_ids.length > 0);
+                if (reserveDonors.length === 0) return false;
                 // Hoisted from inside the flatMap callback (same justification as Step 1b).
                 const stepActiveCounts = countActiveBrigadesByOsid(formations);
-                const reserveCandidates = corpsSectors
-                    .filter(s =>
-                        s.sector_id !== sector.sector_id
-                        && componentForSector(s) === sectorComp)
+                const reserveCandidates = reserveDonors
                     .flatMap((donor) => {
                         return [...donor.reserve_brigade_ids]
                             .sort(strictCompare)
                             .map((bid) => {
-                                const target = pickVacantLocalFrontTarget(bid, sector, stepActiveCounts);
+                                const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, stepActiveCounts);
                                 return target ? { donor, bid, dist: target.dist, target: target.target } : null;
                             });
                     })
@@ -1794,10 +1813,9 @@ export function ensureMinimumSectorCoverage(
                         || strictCompare(a.bid, b.bid)
                     );
                 if (reserveCandidates.length > 0) {
-                    const activeCounts = countActiveBrigadesByOsid(formations);
                     const { donor, bid, target } = reserveCandidates[0]!;
                     donor.reserve_brigade_ids = donor.reserve_brigade_ids.filter((candidate) => candidate !== bid);
-                    moveBrigadeToFrontTarget(bid, target, activeCounts);
+                    moveBrigadeToFrontTarget(bid, target, stepActiveCounts);
                     sector.assigned_brigade_ids.push(bid);
                     return true;
                 }
@@ -1817,10 +1835,9 @@ export function ensureMinimumSectorCoverage(
                 let transferred = false;
 
                 // Pass A: same connected component (original behavior)
-                const sameCompSectors = corpsSectors
+                const sameCompSectors = sameComponentDonors
                     .filter(s => s.assigned_brigade_ids.length > 1
-                        && s.sector_id !== sector.sector_id
-                        && componentForSector(s) === sectorComp)
+                        && s.sector_id !== sector.sector_id)
                     .sort((a, b) => b.assigned_brigade_ids.length - a.assigned_brigade_ids.length || strictCompare(a.sector_id, b.sector_id));
 
                 for (const donor of sameCompSectors) {

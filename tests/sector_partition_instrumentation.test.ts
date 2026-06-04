@@ -525,18 +525,38 @@ describe('sector-partition instrumentation — env-flag gating', () => {
 
     it('static contract: pickVacantLocalFrontTarget keeps deterministic loop and final sort', () => {
         const raw = readFileSync(resolve('src/sim/combat/brigade_assignment.ts'), 'utf8');
-        const startIdx = raw.indexOf('const pickVacantLocalFrontTarget = (');
-        const endIdx = raw.indexOf('\n\n    const moveBrigadeToFrontTarget', startIdx);
+        const startIdx = raw.indexOf('const pickVacantLocalFrontTargetFromFrontSet = (');
+        const endIdx = raw.indexOf('\n\n    const pickVacantLocalFrontTarget = (', startIdx);
         expect(startIdx).toBeGreaterThanOrEqual(0);
         expect(endIdx).toBeGreaterThan(startIdx);
 
         const region = raw.slice(startIdx, endIdx);
         expect(region).toContain('const candidates: Array<{ target: string; dist: number }> = [];');
-        expect(region).toContain('for (const target of getSectorFrontOsids(sector)) {');
+        expect(region).toContain('for (const target of sectorFrontOsids) {');
         expect(region).toContain('candidates.push({ target, dist });');
         expect(region).toContain('candidates.sort((a, b) => a.dist - b.dist || strictCompare(a.target, b.target));');
         expect(region).not.toContain('.filter((target)');
         expect(region).not.toContain('.map((target)');
+    });
+
+    it('static contract: zero-assigned coverage rescue reuses local front and active-count views', () => {
+        const raw = readFileSync(resolve('src/sim/combat/brigade_assignment.ts'), 'utf8');
+        const startIdx = raw.indexOf("perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned'");
+        const endIdx = raw.indexOf("perfTime('ensureMinimumSectorCoverage:density-floor'", startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        expect(raw).toContain('const pickVacantLocalFrontTargetFromFrontSet = (');
+        expect(region).toContain('const sectorFrontOsids = getSectorFrontOsids(sector);');
+        expect(region).toContain('const sameComponentDonors = corpsSectors');
+        expect(region).toContain('pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts)');
+        expect(region).toContain('pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, stepActiveCounts)');
+        expect(region).toContain('moveBrigadeToFrontTarget(bid, target, stepActiveCounts);');
+        expect(region).not.toContain('moveBrigadeToFrontTarget(bid, target, countActiveBrigadesByOsid');
+        expect(region).not.toMatch(/\bDate\.now\s*\(/);
+        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
     });
 
     it('static contract: sector brigade assignment reuses enemy personnel indexes', () => {

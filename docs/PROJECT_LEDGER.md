@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] perf(sector): reuse zero-assigned rescue views
+
+**Type:** Engine performance / sector-frontline byte-identical optimization. No save schema, scenario data, calibration, command model, UI, or player-facing behavior changed.
+
+**Change:** `ensureMinimumSectorCoverage(...)` now reuses local views inside the zero-assigned territory-claim rescue path: the target sector front OSID set is computed once per zero-assigned sector, same-component donors are filtered once, active-count maps are skipped when no rear/reserve donors exist, and the candidate-selection active-count map is reused for the immediate move because no formation location changes between selection and move. This keeps the existing deterministic candidate ordering and sector assignment semantics.
+
+**Verification:** Focused sector pack passed 49/49; `npm.cmd run typecheck -- --pretty false`; profiled 40w hash stayed `41c72b13ad2e91b9`; `node tools\validate_run_consistency.cjs runs_perf\sector_zero_assigned_profile_20260604\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` passed with exact war-front faction-side coverage and no critical anomalies; `npm.cmd run test:baselines` passed with all scenarios matching; `git diff --check`.
+
+**Files:** `src/sim/combat/brigade_assignment.ts`, `tests/sector_partition_instrumentation.test.ts`, `docs/40_reports/implemented/20260604_SECTOR_ZERO_ASSIGNED_RESCUE_REUSE.md`, `docs/40_reports/README.md`, `docs/plans/2026-05-20-sector-performance-next-target-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] docs(sector): reconcile current 40w sector hash floor
 
 **Type:** Docs-only engine-health/sector-lane reconciliation. No code, scenario source, generated artifact, save schema, calibration, UI, or player-facing behavior changed.
