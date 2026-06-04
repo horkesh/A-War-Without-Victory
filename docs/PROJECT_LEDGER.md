@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(events): align Ahmici rupture with hostile threshold
+
+**Type:** Authored consequence data fix for GitHub issue #170 P1. Sensitive-history scope: no player choices, reward surface, victory scoring, civilian-targeting mechanics, engine phase logic, save schema, or scenario structure changed.
+
+**Change:** `csq_hvo_central_bosnia_offensive_1993` now applies `alliance_change: -1.0` and an `alliance_lock` ceiling of `0.0`, aligning the event's numeric effects with its existing source note that Ahmici must break the RBiH-HRHB alliance below the hostile threshold. The regression starts from maximum legal alliance `1.0` and asserts same-turn `isRbihHrhbAtWar(...)` and `isRbihHrhbCombatEnabled(...)`.
+
+**Verification:** Focused consequence/alliance pack passed 124/124; `npm.cmd run typecheck -- --pretty false` passed; `UPDATE_BASELINES=1 npm.cmd run test:baselines` refreshed only `apr1992_52w` `final_save.json` and dependent `run_summary.json` hashes; no-update `npm.cmd run test:baselines` passed; `git diff --check` passed.
+
+**Files:** `data/scenarios/events/consequences.json`, `tests/consequence_chains.test.ts`, `data/derived/scenario/baselines/manifest.json`, `docs/40_reports/implemented/20260604_AHMICI_HOSTILE_THRESHOLD.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(engine): derive bilateral flip municipality from OSID
 
 **Type:** Engine correctness fix for GitHub issue #170 P1. No save schema, scenario data, event content, calibration constants, UI, or replay writer changed. The baseline manifest is refreshed for the expected `apr1992_52w` final-state drift.
