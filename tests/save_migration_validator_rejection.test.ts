@@ -1561,4 +1561,48 @@ describe('save migration validator hardening', () => {
             /Save schema validation failed after migration[\s\S]*military\.smuggling_allocation must be an object when present/
         );
     });
+
+    it('accepts current-version saves with absent or well-formed army stance records', () => {
+        const absent = currentVersionState();
+        delete absent.military.army_stance;
+        const withStances = currentVersionState();
+        withStances.military.army_stance = {
+            RBiH: 'general_defensive',
+            RS: 'general_offensive',
+            HRHB: 'total_mobilization',
+        };
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWithStances = deserializeState(JSON.stringify(withStances));
+
+        expect(migratedAbsent.military.army_stance).toBeUndefined();
+        expect(migratedWithStances.military.army_stance).toEqual({
+            RBiH: 'general_defensive',
+            RS: 'general_offensive',
+            HRHB: 'total_mobilization',
+        });
+    });
+
+    it('rejects current-version saves with malformed army stance records', () => {
+        const state = currentVersionState();
+        state.military.army_stance = {
+            RBiH: 'advance',
+            RS: 1,
+            HRHB: 'balanced',
+            unknown: 'balanced',
+        } as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.army_stance\.RBiH must be a valid army stance[\s\S]*military\.army_stance\.RS must be a valid army stance[\s\S]*military\.army_stance\.unknown must use a canonical faction id key/
+        );
+    });
+
+    it('rejects current-version saves with non-record army stance payloads', () => {
+        const state = currentVersionState();
+        state.military.army_stance = [] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.army_stance must be an object when present/
+        );
+    });
 });

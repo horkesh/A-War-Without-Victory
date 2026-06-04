@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(state): validate army_stance when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation logic, scenario data, UI routing, or player-facing behavior changed.
+
+**Change:** Classified `military.army_stance` as an optional runtime-written stance record rather than required current-save state. Added validate-when-present coverage so present payloads must be an object mapping canonical faction ids to valid `ArmyStance` values: `general_defensive`, `balanced`, `general_offensive`, or `total_mobilization`. Absent payloads remain valid before standing-order / corps-command phases populate the record.
+
+**Verification:** Red proof: `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` failed because malformed/non-record army stance payloads were accepted before the validator existed. Green proof passed: focused validator file 123/123; stance consumer proof 34/34; broader save/schema pack 214/214; `npm.cmd run typecheck`; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 with `state: 172` and `sim: 327`.
+
+**Files:** `src/state/validateGameState.ts`, `tests/save_migration_validator_rejection.test.ts`, `docs/40_reports/implemented/20260604_ARMY_STANCE_VALIDATE_WHEN_PRESENT.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/README.md`, `.claude/napkin.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(state): validate smuggling_allocation when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation logic, scenario data, UI routing, or player-facing behavior changed.
