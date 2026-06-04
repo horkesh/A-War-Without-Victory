@@ -11,6 +11,7 @@
 | Need | Go to |
 |------|--------|
 | **Latest root UI dependency declarations** | [implemented/20260603_ROOT_UI_DEPENDENCY_DECLARATIONS.md](implemented/20260603_ROOT_UI_DEPENDENCY_DECLARATIONS.md) - Root `package.json` now declares the MapLibre/PMTiles/Deck.gl/Vite React/PostCSS dependencies required by root typecheck and tactical map build. |
+| **Latest logistics priority validate-when-present contract** | [implemented/20260604_LOGISTICS_PRIORITY_VALIDATE_WHEN_PRESENT.md](implemented/20260604_LOGISTICS_PRIORITY_VALIDATE_WHEN_PRESENT.md) - `military.logistics_priority` remains optional but now rejects malformed present faction priority maps. |
 | **Latest OPSEC sectors validate-when-present contract** | [implemented/20260604_OPSEC_SECTORS_VALIDATE_WHEN_PRESENT.md](implemented/20260604_OPSEC_SECTORS_VALIDATE_WHEN_PRESENT.md) - `military.opsec_sectors` remains optional but now rejects malformed present OPSEC sector lists. |
 | **Latest army stance validate-when-present contract** | [implemented/20260604_ARMY_STANCE_VALIDATE_WHEN_PRESENT.md](implemented/20260604_ARMY_STANCE_VALIDATE_WHEN_PRESENT.md) - `military.army_stance` remains optional but now rejects malformed present faction stance records. |
 | **Latest smuggling allocation validate-when-present contract** | [implemented/20260604_SMUGGLING_ALLOCATION_VALIDATE_WHEN_PRESENT.md](implemented/20260604_SMUGGLING_ALLOCATION_VALIDATE_WHEN_PRESENT.md) - `military.smuggling_allocation` remains optional but now rejects malformed present smuggling allocation records. |
