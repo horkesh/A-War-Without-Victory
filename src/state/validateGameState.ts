@@ -79,6 +79,8 @@ const AI_OPERATION_TIMINGS = ['immediate', 'next_turn', 'after_preparation'] as 
 const AI_ADVISOR_CONTEXT_TYPES = ['situation_analysis', 'operation_planning', 'peace_plan'] as const;
 const AI_ALLIANCE_POSTURES = ['maintain', 'distance', 'break'] as const;
 const COMMAND_BRIEFING_SEVERITIES = ['critical', 'warning', 'info'] as const;
+const CORPS_DIALOGUE_CONFIDENCES = ['high', 'medium', 'low'] as const;
+const WAR_DISPATCH_PERSPECTIVES = ['humanitarian', 'military', 'civilian', 'diplomatic'] as const;
 const MUNICIPALITY_SUPPORT_TYPE_BY_FACTION: Record<string, string> = {
     RBiH: 'weapons_shipment',
     RS: 'staff_priority',
@@ -273,6 +275,14 @@ function isAiAlliancePosture(value: unknown): boolean {
 
 function isCommandBriefingSeverity(value: unknown): boolean {
     return typeof value === 'string' && COMMAND_BRIEFING_SEVERITIES.includes(value as typeof COMMAND_BRIEFING_SEVERITIES[number]);
+}
+
+function isCorpsDialogueConfidence(value: unknown): boolean {
+    return typeof value === 'string' && CORPS_DIALOGUE_CONFIDENCES.includes(value as typeof CORPS_DIALOGUE_CONFIDENCES[number]);
+}
+
+function isWarDispatchPerspective(value: unknown): boolean {
+    return typeof value === 'string' && WAR_DISPATCH_PERSPECTIVES.includes(value as typeof WAR_DISPATCH_PERSPECTIVES[number]);
 }
 
 function isEventDecisionSource(value: unknown): boolean {
@@ -1880,6 +1890,71 @@ function validateCommandBriefing(value: unknown, errors: string[]): void {
     });
 }
 
+function validateCorpsDialogues(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.corps_dialogues must be an array when present');
+        return;
+    }
+
+    value.forEach((entry, i) => {
+        const path = `military.corps_dialogues[${i}]`;
+        if (!isRecord(entry)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        if (!isNonNegativeInteger(entry.turn)) errors.push(`${path}.turn must be a non-negative integer`);
+        if (!isNonEmptyString(entry.corps_id)) errors.push(`${path}.corps_id must be a non-empty string`);
+        if (!isCanonicalPlayerFaction(entry.faction)) errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+        if (!isNonEmptyString(entry.officer_name)) errors.push(`${path}.officer_name must be a non-empty string`);
+        if (!isNonEmptyString(entry.acknowledgment)) errors.push(`${path}.acknowledgment must be a non-empty string`);
+        if (typeof entry.concern !== 'string') errors.push(`${path}.concern must be a string`);
+        if (!isCorpsDialogueConfidence(entry.confidence)) errors.push(`${path}.confidence must be one of: high, medium, low`);
+    });
+}
+
+function validateWarDispatches(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.war_dispatches must be an array when present');
+        return;
+    }
+
+    value.forEach((entry, i) => {
+        const path = `military.war_dispatches[${i}]`;
+        if (!isRecord(entry)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        if (!isNonNegativeInteger(entry.turn)) errors.push(`${path}.turn must be a non-negative integer`);
+        if (typeof entry.source !== 'string') errors.push(`${path}.source must be a string`);
+        if (typeof entry.headline !== 'string') errors.push(`${path}.headline must be a string`);
+        if (typeof entry.body !== 'string') errors.push(`${path}.body must be a string`);
+        if (!isWarDispatchPerspective(entry.perspective)) errors.push(`${path}.perspective must be one of: humanitarian, military, civilian, diplomatic`);
+    });
+}
+
+function validateBattleNarratives(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.battle_narratives must be an array when present');
+        return;
+    }
+
+    value.forEach((entry, i) => {
+        const path = `military.battle_narratives[${i}]`;
+        if (!isRecord(entry)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        if (!isNonNegativeInteger(entry.turn)) errors.push(`${path}.turn must be a non-negative integer`);
+        if (!isNonEmptyString(entry.target_osid)) errors.push(`${path}.target_osid must be a non-empty string`);
+        if (!isNonEmptyString(entry.corps_id)) errors.push(`${path}.corps_id must be a non-empty string`);
+        if (!isCanonicalPlayerFaction(entry.faction)) errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+        if (!isNonEmptyString(entry.officer_name)) errors.push(`${path}.officer_name must be a non-empty string`);
+        if (!isNonEmptyString(entry.narrative)) errors.push(`${path}.narrative must be a non-empty string`);
+        if (!isNonEmptyString(entry.tone)) errors.push(`${path}.tone must be a non-empty string`);
+        if (!isNonEmptyString(entry.outcome)) errors.push(`${path}.outcome must be a non-empty string`);
+    });
+}
+
 function validateCostLedgerAnnotations(value: unknown, errors: string[]): void {
     if (!Array.isArray(value)) {
         errors.push('military.cost_ledger_annotations must be an array when present');
@@ -2499,6 +2574,15 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'last_briefing' in military && military.last_briefing !== undefined) {
         validateCommandBriefing(military.last_briefing, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'corps_dialogues' in military && military.corps_dialogues !== undefined) {
+        validateCorpsDialogues(military.corps_dialogues, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'war_dispatches' in military && military.war_dispatches !== undefined) {
+        validateWarDispatches(military.war_dispatches, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'battle_narratives' in military && military.battle_narratives !== undefined) {
+        validateBattleNarratives(military.battle_narratives, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'ai_decision_log' in military && military.ai_decision_log !== undefined) {
         validateAiDecisionLog(military.ai_decision_log, errors);
