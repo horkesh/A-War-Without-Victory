@@ -1949,6 +1949,97 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('accepts current-version saves with absent military last briefing', () => {
+        const state = currentVersionState();
+        delete state.military.last_briefing;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.military.last_briefing).toBeUndefined();
+    });
+
+    it('accepts current-version saves with canonical military last briefing packets', () => {
+        const state = currentVersionState();
+        state.military.last_briefing = {
+            turn: 12,
+            faction: 'RBiH',
+            headline: '2 items for your review.',
+            criticalCount: 1,
+            warningCount: 1,
+            items: [
+                {
+                    id: 'cmd-1',
+                    section: 'command',
+                    severity: 'critical',
+                    title: 'Commander requests acknowledgement',
+                    detail: 'Pending officer decision remains unresolved.',
+                    actionLabel: 'Review command chain',
+                    target: { corpsId: 'rbih_1st_corps' },
+                },
+                {
+                    id: 'hum-1',
+                    section: 'humanitarian',
+                    severity: 'warning',
+                    title: 'Gorazde under prolonged siege',
+                    detail: 'Isolation is now affecting resilience.',
+                    target: { enclaveId: 'gorazde' },
+                },
+            ],
+        };
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.military.last_briefing).toEqual(state.military.last_briefing);
+    });
+
+    it('rejects current-version saves with malformed military last briefing packets', () => {
+        const state = currentVersionState();
+        state.military.last_briefing = {
+            turn: -1,
+            faction: 'JNA',
+            headline: 42,
+            criticalCount: 2,
+            warningCount: -1,
+            items: [
+                {
+                    id: '',
+                    section: 4,
+                    severity: 'urgent',
+                    title: '',
+                    detail: 5,
+                    actionLabel: 6,
+                    target: {
+                        kind: 'corps',
+                        osid: 12,
+                        corpsId: 'rbih_1st_corps',
+                        enclaveId: null,
+                    },
+                },
+                {
+                    id: 'warn-1',
+                    section: 'humanitarian',
+                    severity: 'warning',
+                    title: 'Warning',
+                    detail: 'Warning detail',
+                },
+                42,
+            ],
+        } as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.last_briefing\.turn must be a non-negative integer[\s\S]*military\.last_briefing\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.last_briefing\.headline must be a string[\s\S]*military\.last_briefing\.warningCount must be a non-negative integer[\s\S]*military\.last_briefing\.criticalCount must match critical item count[\s\S]*military\.last_briefing\.items\[0\]\.id must be a non-empty string[\s\S]*military\.last_briefing\.items\[0\]\.section must be a non-empty string[\s\S]*military\.last_briefing\.items\[0\]\.title must be a non-empty string[\s\S]*military\.last_briefing\.items\[0\]\.detail must be a non-empty string[\s\S]*military\.last_briefing\.items\[0\]\.severity must be one of: critical, warning, info[\s\S]*military\.last_briefing\.items\[0\]\.actionLabel must be a string when present[\s\S]*military\.last_briefing\.items\[0\]\.target\.osid must be a string when present[\s\S]*military\.last_briefing\.items\[0\]\.target\.enclaveId must be a string when present[\s\S]*military\.last_briefing\.items\[2\] must be an object/
+        );
+    });
+
+    it('rejects current-version saves with non-object military last briefing payloads', () => {
+        const state = currentVersionState();
+        state.military.last_briefing = [] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.last_briefing must be an object when present/
+        );
+    });
+
     it('accepts current-version saves with absent or well-formed AI army decisions', () => {
         const absent = currentVersionState();
         delete absent.military.ai_army_decisions;

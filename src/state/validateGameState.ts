@@ -78,6 +78,7 @@ const AI_OPERATION_APPROACHES = ['concentrated_assault', 'broad_front', 'probing
 const AI_OPERATION_TIMINGS = ['immediate', 'next_turn', 'after_preparation'] as const;
 const AI_ADVISOR_CONTEXT_TYPES = ['situation_analysis', 'operation_planning', 'peace_plan'] as const;
 const AI_ALLIANCE_POSTURES = ['maintain', 'distance', 'break'] as const;
+const COMMAND_BRIEFING_SEVERITIES = ['critical', 'warning', 'info'] as const;
 const MUNICIPALITY_SUPPORT_TYPE_BY_FACTION: Record<string, string> = {
     RBiH: 'weapons_shipment',
     RS: 'staff_priority',
@@ -268,6 +269,10 @@ function isAiAdvisorContextType(value: unknown): boolean {
 
 function isAiAlliancePosture(value: unknown): boolean {
     return typeof value === 'string' && AI_ALLIANCE_POSTURES.includes(value as typeof AI_ALLIANCE_POSTURES[number]);
+}
+
+function isCommandBriefingSeverity(value: unknown): boolean {
+    return typeof value === 'string' && COMMAND_BRIEFING_SEVERITIES.includes(value as typeof COMMAND_BRIEFING_SEVERITIES[number]);
 }
 
 function isEventDecisionSource(value: unknown): boolean {
@@ -1808,6 +1813,73 @@ function validateCommandAuthority(value: unknown, errors: string[]): void {
     }
 }
 
+function validateCommandBriefing(value: unknown, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push('military.last_briefing must be an object when present');
+        return;
+    }
+
+    if (!isNonNegativeInteger(value.turn)) {
+        errors.push('military.last_briefing.turn must be a non-negative integer');
+    }
+    if (!isCanonicalPlayerFaction(value.faction)) {
+        errors.push('military.last_briefing.faction must be one of: RBiH, RS, HRHB');
+    }
+    if (typeof value.headline !== 'string') {
+        errors.push('military.last_briefing.headline must be a string');
+    }
+    if (!isNonNegativeInteger(value.criticalCount)) {
+        errors.push('military.last_briefing.criticalCount must be a non-negative integer');
+    }
+    if (!isNonNegativeInteger(value.warningCount)) {
+        errors.push('military.last_briefing.warningCount must be a non-negative integer');
+    }
+
+    if (!Array.isArray(value.items)) {
+        errors.push('military.last_briefing.items must be an array');
+        return;
+    }
+
+    const criticalItemCount = value.items.filter((item) => isRecord(item) && item.severity === 'critical').length;
+    const warningItemCount = value.items.filter((item) => isRecord(item) && item.severity === 'warning').length;
+    if (isNonNegativeInteger(value.criticalCount) && value.criticalCount !== criticalItemCount) {
+        errors.push('military.last_briefing.criticalCount must match critical item count');
+    }
+    if (isNonNegativeInteger(value.warningCount) && value.warningCount !== warningItemCount) {
+        errors.push('military.last_briefing.warningCount must match warning item count');
+    }
+
+    value.items.forEach((item, i) => {
+        const path = `military.last_briefing.items[${i}]`;
+        if (!isRecord(item)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        for (const key of ['id', 'section', 'title', 'detail']) {
+            if (!isNonEmptyString(item[key])) {
+                errors.push(`${path}.${key} must be a non-empty string`);
+            }
+        }
+        if (!isCommandBriefingSeverity(item.severity)) {
+            errors.push(`${path}.severity must be one of: critical, warning, info`);
+        }
+        if ('actionLabel' in item && item.actionLabel !== undefined && typeof item.actionLabel !== 'string') {
+            errors.push(`${path}.actionLabel must be a string when present`);
+        }
+        if ('target' in item && item.target !== undefined) {
+            if (!isRecord(item.target)) {
+                errors.push(`${path}.target must be an object when present`);
+            } else {
+                for (const key of ['kind', 'osid', 'corpsId', 'enclaveId']) {
+                    if (key in item.target && item.target[key] !== undefined && typeof item.target[key] !== 'string') {
+                        errors.push(`${path}.target.${key} must be a string when present`);
+                    }
+                }
+            }
+        }
+    });
+}
+
 function validateCostLedgerAnnotations(value: unknown, errors: string[]): void {
     if (!Array.isArray(value)) {
         errors.push('military.cost_ledger_annotations must be an array when present');
@@ -2424,6 +2496,9 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'command_authority' in military && military.command_authority !== undefined) {
         validateCommandAuthority(military.command_authority, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'last_briefing' in military && military.last_briefing !== undefined) {
+        validateCommandBriefing(military.last_briefing, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'ai_decision_log' in military && military.ai_decision_log !== undefined) {
         validateAiDecisionLog(military.ai_decision_log, errors);

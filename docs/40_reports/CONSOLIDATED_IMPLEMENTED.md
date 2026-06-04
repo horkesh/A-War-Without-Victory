@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest command briefing validate-when-present contract:** [implemented/20260604_LAST_BRIEFING_VALIDATE_WHEN_PRESENT.md](implemented/20260604_LAST_BRIEFING_VALIDATE_WHEN_PRESENT.md) - `military.last_briefing` remains optional but now rejects malformed present command briefing packets without materializing the field.
+
 **Latest Ahmici same-turn lock follow-up:** [implemented/20260604_AHMICI_SAME_TURN_LOCK_FOLLOWUP.md](implemented/20260604_AHMICI_SAME_TURN_LOCK_FOLLOWUP.md) - The Ahmici rupture and alliance-held alt-path are now same-turn mutex alternatives, and per-turn alliance update honors active alliance locks.
 
 **Latest military credibility no-data consumer fix:** [implemented/20260604_MILITARY_CREDIBILITY_NO_DATA_CONSUMER.md](implemented/20260604_MILITARY_CREDIBILITY_NO_DATA_CONSUMER.md) - The PR #173 `military_credibility` op-launch consumer now ignores no-evidence low values while preserving evidenced low-credibility caution under the default-off flags.
