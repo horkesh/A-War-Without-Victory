@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(state): validate opsec_sectors when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation logic, scenario data, UI routing, or player-facing behavior changed.
+
+**Change:** Classified `military.opsec_sectors` as an optional runtime-written OPSEC sector list rather than required current-save state. Added validate-when-present coverage so present payloads must be a string array. Absent payloads remain valid when no sectors currently carry OPSEC.
+
+**Verification:** Red proof: `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` failed because malformed/non-array OPSEC sector payloads were accepted before the validator existed. Green proof passed: focused validator file 126/126; OPSEC combat/intel consumer proof 13/13; broader save/schema pack 217/217; `npm.cmd run typecheck`; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 with `state: 172` and `sim: 327`.
+
+**Files:** `src/state/validateGameState.ts`, `tests/save_migration_validator_rejection.test.ts`, `docs/40_reports/implemented/20260604_OPSEC_SECTORS_VALIDATE_WHEN_PRESENT.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/README.md`, `.claude/napkin.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(state): validate army_stance when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation logic, scenario data, UI routing, or player-facing behavior changed.
