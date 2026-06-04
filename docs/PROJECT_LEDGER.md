@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(diagnostics): skip global_off-only Phase E Tier 2 runs
+
+**Type:** Diagnostic-tool fix for GitHub issue #170 P2. No simulation mechanics, scenario data, sector files, event JSON, cache/fingerprint behavior, command model, save schema, calibration tuning, replay writer, or baseline manifest changed.
+
+**Change:** `tools/diagnostics/phase_e_activation_simulator.ts` now detects when the requested Tier 2 combo set has no ON combos after filtering out `global_off`. In that case it resets Phase E gate overrides and returns `tier2.runs: []` instead of running the OFF scenario pass.
+
+**Verification:** Red focused test failed before the fix with observed runner calls `['global_off']`. Green proof: `node node_modules\vitest\vitest.mjs run tests\phase_e_activation_simulator.test.ts --reporter=dot` passed 24/24; CLI smoke `node node_modules\tsx\dist\cli.mjs tools\diagnostics\phase_e_activation_simulator.ts --combo global_off --run-scenarios --json` returned `tier2.runs: []`; `npm.cmd run typecheck -- --pretty false`; `git diff --check`.
+
+**Files:** `tools/diagnostics/phase_e_activation_simulator.ts`, `tests/phase_e_activation_simulator.test.ts`, `docs/40_reports/implemented/20260604_PHASE_E_ACTIVATION_SIMULATOR_GLOBAL_OFF_SKIP.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(engine): harden review-flagged cache fingerprints
 
 **Type:** Engine correctness / cache invalidation hardening from GitHub issue #170. No save schema, scenario data, calibration constants, UI, event content, or player-facing behavior changed.

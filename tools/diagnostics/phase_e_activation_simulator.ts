@@ -696,17 +696,25 @@ function applyGateForCombo(combo: SimCombo): void {
 export async function buildTier2Projection(
     options: SimulatorOptions = {},
 ): Promise<Tier2Result> {
-    const manifest = options.manifestOverride ?? (await loadManifest());
-    const rawRunner = options.tier2RunnerOverride ?? defaultTier2Runner;
-    const runner = async (entry: ManifestScenarioEntry, combo: SimCombo): Promise<Tier2RunnerOutput> =>
-        normalizeRunnerOutput(await rawRunner(entry, combo));
     const comboFilter = options.combo ?? null;
 
     const onCombos: SimCombo[] = (comboFilter ? [comboFilter] : [...SIM_COMBOS])
         .filter((c) => c !== 'global_off');
 
-    const sortedScenarios = manifest.scenarios.slice().sort((a, b) => strictCompare(a.id, b.id));
     const runs: ComboScenarioRun[] = [];
+    if (onCombos.length === 0) {
+        resetPoliticalDimensionGates();
+        return {
+            manifest_path: MANIFEST_PATH,
+            runs,
+        };
+    }
+
+    const manifest = options.manifestOverride ?? (await loadManifest());
+    const rawRunner = options.tier2RunnerOverride ?? defaultTier2Runner;
+    const runner = async (entry: ManifestScenarioEntry, combo: SimCombo): Promise<Tier2RunnerOutput> =>
+        normalizeRunnerOutput(await rawRunner(entry, combo));
+    const sortedScenarios = manifest.scenarios.slice().sort((a, b) => strictCompare(a.id, b.id));
 
     try {
         // Pass 1 — run the OFF baseline (`global_off`) once per scenario to
