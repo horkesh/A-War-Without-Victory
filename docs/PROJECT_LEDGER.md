@@ -18420,3 +18420,17 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `docs/PROJECT_LEDGER.md` (this entry); see PRs #108/#109/#111/#112 for the per-PR source touch (player/UI/desktop + emergent-gated `updatePatronState`).
 
 ---
+
+## [2026-06-03] build: declare root tactical-map UI dependencies
+
+**Type:** Build/dependency hygiene. No source behavior, scenario data, save schema, event content, calibration tuning, replay writer, generated scenario artifact, or turn ordering changed.
+
+**Change:** Root `package.json` / `package-lock.json` now declare the packages already imported by the root TypeScript and tactical-map build paths: runtime `maplibre-gl`, `pmtiles`, `@deck.gl/core`, `@deck.gl/layers`, `@deck.gl/mapbox`, `@deck.gl/extensions`; dev `@vitejs/plugin-react`, `tailwindcss`, `autoprefixer`, and `postcss`. `@vitejs/plugin-react` stays on the Vite-5-compatible 4.x line.
+
+**Why:** Untouched `origin/main` reproduced the pre-commit/typecheck blocker seen in isolated worktrees: `npm.cmd run typecheck` failed because the imported UI packages were absent from the root dependency manifest. After declaring those packages, `desktop:map:build` exposed the map PostCSS config's missing root `tailwindcss` / `autoprefixer` declarations.
+
+**Verification:** Repro on untouched main: `npm.cmd run typecheck` failed with missing MapLibre/PMTiles/Deck.gl/Vite plugin declarations. After the dependency declaration fix, `npm.cmd run typecheck` PASS and `npm.cmd run desktop:map:build` PASS (existing bundle-size/static-dynamic import and Node externalization warnings only). `git diff --check` PASS.
+
+**Report:** `docs/40_reports/implemented/20260603_ROOT_UI_DEPENDENCY_DECLARATIONS.md`
+
+---
