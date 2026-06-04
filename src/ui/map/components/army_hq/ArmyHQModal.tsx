@@ -31,6 +31,7 @@ import { RootErrorBoundary } from '../RootErrorBoundary';
 import { PersonnelContent } from './PersonnelContent';
 import { Z } from '../../../shared/zIndex';
 import type { NamedOfficerView } from '../../data/types';
+import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presidentialDecisionRoom';
 import osidAreasData from '../../../../../data/derived/operational/osid_areas.json';
 
 const HQ_TABS = [
@@ -41,6 +42,10 @@ const HQ_TABS = [
 ];
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
+
+export interface ArmyHQModalProps {
+    onDecisionRoomNavigateTarget?: (target: PresidentialDecisionRoomNavigationTarget) => boolean | void;
+}
 
 const FACTION_DISPLAY: Record<string, string> = {
     RS: 'Vojska Republike Srpske',
@@ -72,7 +77,7 @@ function OfficerMiniBio({ officer }: { officer: NamedOfficerView }) {
     );
 }
 
-export function ArmyHQModal() {
+export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps = {}) {
     const open = useGameStore((s) => s.armyHQOpen);
     const setOpen = useGameStore((s) => s.setArmyHQOpen);
     const faction = useGameStore((s) => s.selectedArmyId);
@@ -369,7 +374,7 @@ export function ArmyHQModal() {
                                         />
 
                                         <RootErrorBoundary zone="decision room">
-                                            <PresidentialDecisionRoomPanel />
+                                            <PresidentialDecisionRoomPanel onNavigateTarget={onDecisionRoomNavigateTarget} />
                                         </RootErrorBoundary>
 
                                         <RootErrorBoundary zone="presidential decisions">

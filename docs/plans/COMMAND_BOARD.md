@@ -14,7 +14,7 @@
 
 **2026-06-03 engine-health sync:** Optional `GameState` schema contract advanced one StateMeta slice: `meta.decision_mode` is v35 current-save truth. Legacy/unset saves migrate to `'historical'`; current loaded state requires `'historical' | 'emergent'`; malformed values reject. The TypeScript field may remain optional for legacy/migration compatibility, but the loaded-state contract is now explicit. Next safe schema slice after this branch lands is the legacy theatre compatibility pair (`military.theatres`, `military.army_theatre_assignment`), already defaulted and validated since v5.
 
-**Controlling sources:** `docs/plans/MASTER_ROADMAP.md`, `docs/plans/2026-05-18-autonomous-remaining-work-coverage-matrix.md`, `docs/40_reports/CONSOLIDATED_BACKLOG.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, and `docs/PROJECT_LEDGER.md`.
+**Controlling sources:** `docs/plans/MASTER_ROADMAP.md`, `docs/plans/2026-05-18-autonomous-remaining-work-coverage-matrix.md`, `docs/40_reports/CONSOLIDATED_BACKLOG.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/2026-06-02-warroom-toolbar-hotspot-ia-plan.md`, and `docs/PROJECT_LEDGER.md`.
 
 **Plan standard:** active, gated, operator, and owned-elsewhere plan packets should comply with `docs/plans/PLAN_EXECUTION_STANDARD.md`; the current hardening queue lives at `docs/plans/2026-05-24-active-plan-hardening-pass.md`.
 

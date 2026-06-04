@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-03] fix(ci): align replay branch UI proof expectations
+
+**Type:** Test-proof reconciliation for `codex/replay-manifest-only` (#145). No replay payload logic, scenario data, save schema, or simulation path touched.
+
+**Change:** Updated inherited UI/static proof tests to match the current product shell: the main menu now starts campaigns through inline faction cards rather than a generic "New Game" button; tutorial/coachmark onboarding remains removed from the live shell; Army HQ and Warroom Decision Room error-boundary/static assertions now account for navigation callback props on the current overlay wiring.
+
+**Verification:** `node node_modules\vitest\vitest.mjs run tests\ui_presidential_toolbar_summary_click.test.ts tests\ui\error_boundary_isolation.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\main_menu_language.test.ts tests\ui\warroom_shell_accessibility.test.ts --reporter=dot` passed 23/23.
+
+**Files:** `tests/ui_presidential_toolbar_summary_click.test.ts`, `tests/ui/error_boundary_isolation.test.ts`, `tests/ui/main_menu_i18n.test.ts`, `tests/ui/main_menu_language.test.ts`, `tests/ui/warroom_shell_accessibility.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-03] fix(ci): align full-suite fixtures with v35 decision_mode
 
 **Type:** CI/test-contract reconciliation for `codex/state-meta-decision-mode-contract` (#148). No save migration behavior, simulation logic, scenario data, or player-facing behavior changed.

@@ -52,10 +52,12 @@ describe('Track D onboarding consolidation', () => {
     vi.restoreAllMocks();
   });
 
-  it('mounts onboarding through OnboardingOverlay only, without the legacy first-turn overlay', () => {
+  it('does not mount tutorial onboarding or the legacy first-turn overlay', () => {
     const source = readFileSync('src/ui/map/App.tsx', 'utf8');
 
-    expect(source).toContain('<OnboardingOverlayWrapper />');
+    expect(source).not.toContain('<OnboardingOverlayWrapper />');
+    expect(source).not.toContain('<OnboardingOverlay ');
+    expect(source).not.toContain('<CoachmarkLayer');
     expect(source).not.toContain('FirstTurnOrientationWrapper');
     expect(source).not.toContain('FirstTurnOrientationCard');
     expect(source).not.toContain('buildFirstTurnOrientation');

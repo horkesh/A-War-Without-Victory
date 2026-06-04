@@ -5,6 +5,7 @@
  * Phase H1.2: Fails early if data prerequisites are missing (same remediation as sim:data:check).
  * --map: copy final_save.json to data/derived/latest_run_final_save.json and print tactical map instructions.
  * --video: emit weekly save artifacts and replay_timeline.json for tactical map replay/export.
+ * --full-replay-save-sequence: emit replay_sequence.jsonl and replay_save_sequence.json full-state payloads.
  * --unique: append timestamp to run directory so each run creates a new folder (no overwrite).
  * --timing-json: emit timing.json with wall-clock benchmark buckets.
  */
@@ -37,6 +38,7 @@ function parseArgs(): {
   postureAllPushAndApplyBreaches: boolean;
   map: boolean;
   video: boolean;
+  fullReplaySaveSequence: boolean;
   unique: boolean;
   timingJson: boolean;
 } {
@@ -49,6 +51,7 @@ function parseArgs(): {
   let postureAllPushAndApplyBreaches = false;
   let map = false;
   let video = false;
+  let fullReplaySaveSequence = false;
   let unique = false;
   let timingJson = false;
   for (let i = 0; i < args.length; i++) {
@@ -68,6 +71,8 @@ function parseArgs(): {
       map = true;
     } else if (args[i] === '--video') {
       video = true;
+    } else if (args[i] === '--full-replay-save-sequence') {
+      fullReplaySaveSequence = true;
     } else if (args[i] === '--unique') {
       unique = true;
     } else if (args[i] === '--timing-json') {
@@ -77,7 +82,7 @@ function parseArgs(): {
   if (!scenario) {
     scenario = DEFAULT_SCENARIO;
   }
-  return { scenario, weeks, out, continueSave, continueWeek, postureAllPushAndApplyBreaches, map, video, unique, timingJson };
+  return { scenario, weeks, out, continueSave, continueWeek, postureAllPushAndApplyBreaches, map, video, fullReplaySaveSequence, unique, timingJson };
 }
 
 async function main(): Promise<void> {
@@ -90,6 +95,7 @@ async function main(): Promise<void> {
     postureAllPushAndApplyBreaches,
     map: enableMap,
     video,
+    fullReplaySaveSequence,
     unique,
     timingJson,
   } = parseArgs();
@@ -109,6 +115,7 @@ async function main(): Promise<void> {
     resumeFromWeekIndex: continueWeek,
     postureAllPushAndApplyBreaches,
     emitWeeklySavesForVideo: video,
+    replayPayloadMode: fullReplaySaveSequence ? 'full' : 'manifest_only',
     uniqueRunFolder: unique,
     emitTimingJson: timingJson
   });

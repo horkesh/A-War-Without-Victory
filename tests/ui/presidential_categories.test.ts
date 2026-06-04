@@ -7,8 +7,7 @@
  *   - the six categories map onto the right PresidentialDecisionRoomCategory sources
  *   - count/urgent derivation from a mock decision-room view (incl. the
  *     paramilitary → Conscience bright-line split)
- *   - the warroom hotspot → category map covers the rewired hotspots and leaves
- *     diegetic objects (desk_map, wall_calendar) unmapped
+ *   - warroom hotspots are not remapped into command-surface categories
  *   - CommandCard renders its faction-tinted fallback placeholder with NO art
  */
 
@@ -55,6 +54,7 @@ function makeView(cards: PresidentialDecisionRoomCard[]): PresidentialDecisionRo
     emptyState: null,
     cards,
     lenses: [],
+    nextOrders: [],
     commandQuestions: [],
     loopSteps: [],
     sourceHandoffs: [],
@@ -85,8 +85,8 @@ describe('presidential command categories — taxonomy', () => {
     // Command & Personnel is wired (Slice 2): replace-CO / elite-deploy / front-visit
     // cards carry the `command` category.
     expect(byId.get('cat_command')).toEqual(['command']);
-    // Home Front / Conscience have no broad source category (Conscience is fed by the
-    // paramilitary card predicate; Home Front stays scan-only this slice).
+    // Home Front / Conscience have no broad source category (both are fed by
+    // dedicated card predicates to avoid double-counting broad categories).
     expect(byId.get('cat_home_front')).toEqual([]);
     expect(byId.get('cat_conscience')).toEqual([]);
   });
@@ -149,6 +149,24 @@ describe('presidential command categories — count derivation', () => {
     expect(diplomacy.count).toBe(1); // only the dayton manifest, not paramilitary
   });
 
+  it('routes supply visibility to Home Front, not War Direction', () => {
+    const view = makeView([
+      makeCard({ id: 'supply:player-visibility', category: 'operational', severity: 'critical' }),
+      makeCard({ id: 'sitrep:front-exposed', category: 'operational', severity: 'warning' }),
+    ]);
+    const byId = new Map(derivePresidentialCommandCategoryCounts(view).map((c) => [c.id, c]));
+
+    const homeFront = byId.get('cat_home_front')!;
+    expect(homeFront.count).toBe(1);
+    expect(homeFront.urgentCount).toBe(1);
+    expect(homeFront.isUrgent).toBe(true);
+
+    // Supply/economy pressure should not inflate the War Direction count.
+    const war = byId.get('cat_war_direction')!;
+    expect(war.count).toBe(1);
+    expect(war.urgentCount).toBe(0);
+  });
+
   it('returns zero counts for an empty view', () => {
     const counts = derivePresidentialCommandCategoryCounts(makeView([]));
     expect(counts).toHaveLength(6);
@@ -156,22 +174,17 @@ describe('presidential command categories — count derivation', () => {
   });
 });
 
-describe('warroom hotspot → category map', () => {
-  it('covers the rewired hotspot objects with their matched categories', () => {
-    const expected: Record<string, PresidentialCommandCategoryId> = {
-      command_briefing_folio: 'cat_war_direction',
-      commander_coatrack: 'cat_command',
-      diplomatic_telephone: 'cat_diplomacy',
-      newspaper_stack: 'cat_record',
-      intelligence_journal: 'cat_home_front',
-    };
-    for (const [hotspot, category] of Object.entries(expected)) {
-      expect(categoryForWarroomHotspot(hotspot)).toBe(category);
-      expect(WARROOM_HOTSPOT_TO_CATEGORY[hotspot]).toBe(category);
-    }
+describe('warroom hotspot category map', () => {
+  it('does not remap literal warroom hotspots into the command surface', () => {
+    expect(Object.keys(WARROOM_HOTSPOT_TO_CATEGORY)).toHaveLength(0);
+    expect(categoryForWarroomHotspot('command_briefing_folio')).toBeNull();
+    expect(categoryForWarroomHotspot('commander_coatrack')).toBeNull();
+    expect(categoryForWarroomHotspot('diplomatic_telephone')).toBeNull();
+    expect(categoryForWarroomHotspot('newspaper_stack')).toBeNull();
+    expect(categoryForWarroomHotspot('intelligence_journal')).toBeNull();
   });
 
-  it('leaves diegetic objects (map, calendar) unmapped so they keep literal meaning', () => {
+  it('leaves diegetic objects unmapped so they keep literal meaning', () => {
     expect(categoryForWarroomHotspot('desk_map')).toBeNull();
     expect(categoryForWarroomHotspot('wall_cork_board')).toBeNull();
     expect(categoryForWarroomHotspot('wall_calendar')).toBeNull();

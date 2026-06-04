@@ -36,6 +36,7 @@ describe('scenario continue-from-save equivalence', () => {
         scenarioPath: SCENARIO_PATH,
         outDirBase: FULL_OUT,
         consoleDiagnostics: false,
+        replayPayloadMode: 'full',
       });
 
       const segmentedRun = await runScenario({
@@ -43,6 +44,7 @@ describe('scenario continue-from-save equivalence', () => {
         outDirBase: SPLIT_OUT,
         emitEvery: 4,
         consoleDiagnostics: false,
+        replayPayloadMode: 'full',
       });
 
       const resumeSave = segmentedRun.paths.weekly_saves?.[1];
@@ -53,6 +55,7 @@ describe('scenario continue-from-save equivalence', () => {
         outDirBase: RESUME_OUT,
         resumeFromSavePath: resumeSave!,
         consoleDiagnostics: false,
+        replayPayloadMode: 'full',
       });
 
       const [fullFinal, resumedFinal, checkpoint, resumedInitial] = await Promise.all([

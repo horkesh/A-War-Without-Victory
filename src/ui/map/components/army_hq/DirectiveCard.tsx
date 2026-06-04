@@ -77,9 +77,34 @@ function targetLabel(
   return null;
 }
 
+function normalizeTargetLabel(value: string): string {
+  return value.trim().toLocaleLowerCase('bs');
+}
+
+function resolveTargetOsidInput(
+  input: string,
+  controlBySettlement: Record<string, string | null> | undefined,
+  osidDisplayNames: Record<string, string> | null,
+): string {
+  const trimmed = input.trim();
+  if (!trimmed) return '';
+  if (controlBySettlement && Object.prototype.hasOwnProperty.call(controlBySettlement, trimmed)) return trimmed;
+  if (osidDisplayNames && Object.prototype.hasOwnProperty.call(osidDisplayNames, trimmed)) return trimmed;
+  if (!osidDisplayNames) return trimmed;
+
+  const normalized = normalizeTargetLabel(trimmed);
+  const matches = Object.entries(osidDisplayNames)
+    .filter(([, label]) => normalizeTargetLabel(label) === normalized)
+    .map(([osid]) => osid)
+    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+
+  return matches.length === 1 ? matches[0] : trimmed;
+}
+
 export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   const ipc = useIPC();
   const setLoadError = useGameStore((s) => s.setLoadError);
+  const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
 
   // Force-op PUSHBACK state (request_op / force_launch only). Mirrors
   // OperationsSection: hold the commander's disposition-tinted objection until the
@@ -89,6 +114,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   // forceable; we surface "cannot issue" and never stage / debit CA.
   const [impossibleReason, setImpossibleReason] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [receipt, setReceipt] = useState<{ kind: 'success' | 'error' | 'cancelled'; message: string } | null>(null);
 
   // REQUEST-OP in-card target OSID (Decision-Room request-op cards carry an EMPTY
   // payload — the president names the objective settlement here). Mirrors the proven
@@ -106,7 +132,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   const cost = directive.cost;
   const authCurrent = gameState.commandAuthority?.current ?? 100;
   const canAfford = authCurrent >= cost;
-  const needsObjection = directive.lever === 'request_op' || directive.lever === 'force_launch';
+  const needsObjection = directive.lever === 'request_op';
   const isFrontVisit = directive.lever === 'front_visit';
 
   // request_op target OSID: a fixed payload target wins; otherwise the president
@@ -114,7 +140,11 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   // request_op directive whose payload carries no fixed target.
   const payloadTargetOsid = typeof directive.payload.targetOsid === 'string' ? directive.payload.targetOsid : '';
   const showTargetInput = directive.lever === 'request_op' && !payloadTargetOsid;
-  const effectiveTargetOsid = payloadTargetOsid || targetOsidInput.trim();
+  const effectiveTargetOsid = payloadTargetOsid || resolveTargetOsidInput(
+    targetOsidInput,
+    gameState.controlBySettlement,
+    osidDisplayNames,
+  );
 
   // Commander disposition for the request/force objection (same lookup as
   // OperationsSection): the active CO of the target corps.
@@ -148,12 +178,36 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
     void refreshFrontVisit();
   }, [refreshFrontVisit, gameState]);
 
+  useEffect(() => {
+    setReceipt(null);
+  }, [directive]);
+
   // Browser/headless: render inert (mirror FrontVisitSection).
   if (!ipc.isAvailable) return null;
 
   const resetTransient = () => {
     setPendingObjection(null);
     setImpossibleReason(null);
+  };
+
+  const handleCancel = () => {
+    resetTransient();
+    setTargetOsidInput('');
+    setReceipt({ kind: 'cancelled', message: t('directive.receipt.cancelled') });
+  };
+
+  const handleStandDown = () => {
+    setPendingObjection(null);
+    setReceipt({ kind: 'cancelled', message: t('directive.receipt.cancelled') });
+  };
+
+  const markIssued = () => {
+    setReceipt({ kind: 'success', message: t('directive.receipt.stagedNextTurn') });
+  };
+
+  const markFailed = (reason: string) => {
+    setLoadError(reason);
+    setReceipt({ kind: 'error', message: t('directive.receipt.failed', { reason }) });
   };
 
   /** Stage a request-op directive (optionally forced past a shown objection). */
@@ -168,8 +222,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       targetOsid,
       ...(forced ? { forced_over_objection: true } : {}),
     });
-    if (!result.ok) setLoadError(result.error ?? 'Failed to issue directive.');
-    else { resetTransient(); setTargetOsidInput(''); }
+    if (!result.ok) markFailed(result.error ?? 'Failed to issue directive.');
+    else { resetTransient(); setTargetOsidInput(''); markIssued(); }
   };
 
   /** Force-launch an existing held/ready op (no objection query — the officer
@@ -181,8 +235,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       return;
     }
     const result = await ipc.stageOperationForceLaunch({ corpsId: directive.corpsId, operationName: opName });
-    if (!result.ok) setLoadError(result.error ?? 'Failed to force-launch operation.');
-    else resetTransient();
+    if (!result.ok) markFailed(result.error ?? 'Failed to force-launch operation.');
+    else { resetTransient(); markIssued(); }
   };
 
   const handleConfirm = async () => {
@@ -198,8 +252,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         const proposalId = typeof directive.payload.proposalId === 'string' ? directive.payload.proposalId : '';
         if (!proposalId) { setLoadError('Directive is missing its proposal context.'); return; }
         const result = await ipc.acceptProposal(proposalId);
-        if (!result.ok) setLoadError(result.error ?? 'Failed to authorize operation.');
-        else resetTransient();
+        if (!result.ok) markFailed(result.error ?? 'Failed to authorize operation.');
+        else { resetTransient(); markIssued(); }
         return;
       }
 
@@ -207,8 +261,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         const opName = typeof directive.payload.opName === 'string' ? directive.payload.opName : '';
         if (!directive.corpsId || !opName) { setLoadError('Directive is missing its corps/operation context.'); return; }
         const result = await ipc.stageOpHaltOrder({ corpsId: directive.corpsId, opName });
-        if (!result.ok) setLoadError(result.error ?? 'Failed to halt operation.');
-        else resetTransient();
+        if (!result.ok) markFailed(result.error ?? 'Failed to halt operation.');
+        else { resetTransient(); markIssued(); }
         return;
       }
 
@@ -218,8 +272,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       if (directive.lever === 'replace_co') {
         if (!directive.corpsId) { setLoadError('Directive is missing its corps context.'); return; }
         const result = await ipc.stageCoReplacementOrder({ corpsId: directive.corpsId });
-        if (!result.ok) setLoadError(result.error ?? 'Failed to replace commander.');
-        else resetTransient();
+        if (!result.ok) markFailed(result.error ?? 'Failed to replace commander.');
+        else { resetTransient(); markIssued(); }
         return;
       }
 
@@ -230,8 +284,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         const brigadeId = typeof directive.payload.brigadeId === 'string' ? directive.payload.brigadeId : '';
         if (!requestId || !brigadeId) { setLoadError('Directive is missing its reserve-request context.'); return; }
         const result = await ipc.approveReserveRequest(requestId, brigadeId);
-        if (!result.ok) setLoadError(result.error ?? 'Failed to release reserve brigade.');
-        else resetTransient();
+        if (!result.ok) markFailed(result.error ?? 'Failed to release reserve brigade.');
+        else { resetTransient(); markIssued(); }
         return;
       }
 
@@ -240,12 +294,14 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       if (directive.lever === 'front_visit') {
         if (frontVisitUnavailableReason) { setLoadError(frontVisitUnavailableReason); return; }
         const result = await ipc.initiateFrontVisit();
-        if (!result.ok) setLoadError(result.error ?? 'Failed to initiate front visit.');
-        else { resetTransient(); await refreshFrontVisit(); }
+        if (!result.ok) markFailed(result.error ?? 'Failed to initiate front visit.');
+        else { resetTransient(); markIssued(); await refreshFrontVisit(); }
         return;
       }
 
       if (directive.lever === 'force_launch') {
+        // The objection already exists in the proposal card; force-launch overrides
+        // that known held/no-go operation directly and does not re-query here.
         await stageForceLaunch();
         return;
       }
@@ -405,7 +461,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
             </button>
             <button
               type="button"
-              onClick={() => setPendingObjection(null)}
+              onClick={handleStandDown}
               disabled={busy}
               className="text-[9px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-panel-border/50 text-text-primary disabled:opacity-40 hover:bg-panel-bg"
             >
@@ -456,19 +512,44 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
               : t('directive.issue.costTitle', { cost, current: authCurrent }))
             : t('directive.issue.insufficientTitle', { cost, current: authCurrent });
         return (
-          <button
-            type="button"
-            onClick={handleConfirm}
-            disabled={issueDisabled}
-            title={issueTitle}
-            className="mt-2 h-7 w-full truncate rounded border border-amber-400/35 bg-amber-400/12 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
-          >
-            {busy
-              ? (needsObjection ? t('directive.button.consulting') : t('directive.button.issuing'))
-              : (cost === 0 ? t('directive.button.authorize') : t('directive.button.issue', { cost }))}
-          </button>
+          <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
+            <button
+              type="button"
+              onClick={handleConfirm}
+              disabled={issueDisabled}
+              title={issueTitle}
+              className="h-7 min-w-0 truncate rounded border border-amber-400/35 bg-amber-400/12 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
+            >
+              {busy
+                ? (needsObjection ? t('directive.button.consulting') : t('directive.button.issuing'))
+                : (cost === 0 ? t('directive.button.authorize') : t('directive.button.issue', { cost }))}
+            </button>
+            <button
+              type="button"
+              onClick={handleCancel}
+              disabled={busy}
+              className="h-7 rounded border border-panel-border/60 bg-panel-bg/50 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-text-secondary transition hover:border-text-secondary/70 hover:text-text-primary disabled:opacity-40"
+            >
+              {t('directive.button.cancel')}
+            </button>
+          </div>
         );
       })()}
+      {receipt && (
+        <div
+          role="status"
+          aria-label={t('directive.receipt.aria')}
+          className={`mt-2 rounded border p-2 text-[10px] ${
+            receipt.kind === 'error'
+              ? 'border-red-500/45 bg-red-500/5 text-red-200'
+              : receipt.kind === 'cancelled'
+                ? 'border-panel-border/60 bg-panel-bg/60 text-text-secondary'
+                : 'border-emerald-400/35 bg-emerald-400/8 text-emerald-100'
+          }`}
+        >
+          {receipt.message}
+        </div>
+      )}
       </div>
     </section>
   );

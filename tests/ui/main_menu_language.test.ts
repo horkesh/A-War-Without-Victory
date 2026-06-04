@@ -44,6 +44,6 @@ describe('MainMenu language control', () => {
         });
 
         expect(window.localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('bcs');
-        expect(screen.getByRole('button', { name: 'Nova igra' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /Republika Srpska/i })).toBeTruthy();
     });
 });

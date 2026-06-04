@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { InboxItem } from '../../data/inboxItems';
 import { countActionableItems, deriveInboxItems, hasBlockingItems } from '../../data/inboxItems';
 import type { LoadedGameState } from '../../data/types';
@@ -15,6 +16,7 @@ export interface PresidentDeskShellProps {
   onOpenArmyHQ: () => void;
   onOpenMap: () => void;
   onOpenRecords: () => void;
+  onClose?: () => void;
   /** Open the presidential command-surface card strip directly (accessibility). */
   onOpenCommandSurface?: () => void;
 }
@@ -34,19 +36,46 @@ export function PresidentDeskShell({
   onOpenArmyHQ,
   onOpenMap,
   onOpenRecords,
+  onClose,
   onOpenCommandSurface,
 }: PresidentDeskShellProps) {
+  const shellRef = useRef<HTMLElement | null>(null);
   const items = deriveInboxItems(state, osidNameMap);
   const actionableCount = countActionableItems(items);
   const blocked = hasBlockingItems(items);
 
+  useEffect(() => {
+    if (onClose) shellRef.current?.focus();
+  }, [onClose]);
+
   return (
     <section
-      role="region"
+      ref={shellRef}
+      role={onClose ? 'dialog' : 'region'}
       aria-label={t('desk.region.ariaLabel')}
-      className="pointer-events-none absolute inset-x-3 top-16 bottom-16 z-[3] grid content-start gap-4 overflow-y-auto lg:grid-cols-[minmax(22rem,34rem)_minmax(18rem,26rem)] xl:left-10 xl:right-10"
+      aria-modal={onClose ? 'false' : undefined}
+      tabIndex={onClose ? -1 : undefined}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape' && onClose) {
+          event.preventDefault();
+          event.stopPropagation();
+          onClose();
+        }
+      }}
+      className="pointer-events-none absolute right-3 top-4 bottom-16 z-[3] flex w-[min(32rem,calc(100vw-1.5rem))] flex-col gap-3 overflow-y-auto md:right-6 xl:right-10"
     >
-      <div className="lg:col-span-2">
+      {onClose && (
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={t('common.close')}
+          data-testid="desk-close-overlay"
+          className="pointer-events-auto self-end border border-panel-border/80 bg-panel-bg/92 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-secondary shadow-[0_16px_48px_rgba(0,0,0,0.42)] transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
+        >
+          {t('common.close')}
+        </button>
+      )}
+      <div>
         <DeskAuthorityHeader state={state} />
       </div>
 

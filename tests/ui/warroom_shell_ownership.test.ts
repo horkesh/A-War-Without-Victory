@@ -44,7 +44,7 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(source).toContain('seenHeadlines');
     });
 
-    it('routes the Warroom diplomacy telephone to the dedicated diplomacy panel', () => {
-        expect(regionToShellHandoff('diplomatic_telephone')).toEqual({ kind: 'diplomacy' });
+    it('routes the Warroom diplomacy telephone to a Warroom-native diplomacy overlay first', () => {
+        expect(regionToShellHandoff('diplomatic_telephone')).toEqual({ kind: 'warroom-overlay', surface: 'diplomacy' });
     });
 });

@@ -84,6 +84,26 @@ describe('PresidentDeskShell', () => {
     expect(onOpenMap).toHaveBeenCalledOnce();
   });
 
+  it('can close when rendered as a warroom overlay', () => {
+    const onClose = vi.fn();
+    renderDesk({ onClose });
+
+    expect(screen.getByRole('dialog', { name: 'President desk' })).toBe(document.activeElement);
+
+    fireEvent.click(screen.getByTestId('desk-close-overlay'));
+
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it('closes the Warroom overlay on Escape', () => {
+    const onClose = vi.fn();
+    renderDesk({ onClose });
+
+    fireEvent.keyDown(screen.getByRole('dialog', { name: 'President desk' }), { key: 'Escape' });
+
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
   it('does not render raw implementation labels in the desk packet', () => {
     const { container } = renderDesk({
       state: makeState({

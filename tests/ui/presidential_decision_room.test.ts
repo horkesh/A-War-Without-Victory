@@ -390,6 +390,36 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
   });
 
+  it('routes enclave briefing cards to the dedicated enclave dashboard target', () => {
+    const state = makeState({
+      commandBriefing: {
+        headline: 'Enclave pressure rising.',
+        criticalCount: 1,
+        pendingCount: 1,
+        items: [
+          {
+            id: 'enclave-crisis',
+            kind: 'humanitarian',
+            severity: 'critical',
+            title: 'Enclave crisis',
+            detail: 'Staff reports a cut-off enclave under humanitarian pressure.',
+            actionLabel: 'Review enclaves',
+            target: { type: 'enclaves' },
+          },
+        ],
+      },
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const card = view.cards.find((entry) => entry.id === 'briefing:enclave-crisis');
+
+    expect(card).toMatchObject({
+      category: 'briefing',
+      actionLabel: 'Review enclaves',
+      navigationTarget: { kind: 'enclave-dashboard' },
+    });
+  });
+
   it('builds command-loop question lanes from the same priority card archive', () => {
     const state = makeState({
       presidentialReviewQueue: {
@@ -461,6 +491,51 @@ describe('buildPresidentialDecisionRoomView', () => {
       headline: 'Review before advance',
       cardIds: ['review:pending', 'opportunity:opp_alpha', 'sitrep:front-exposed', 'turn:24:hard-turn'],
     });
+  });
+
+  it('builds an ordered next-orders agenda that separates act, inspect, and monitor work', () => {
+    const state = makeState({
+      presidentialReviewQueue: {
+        pendingCount: 2,
+        criticalCount: 1,
+        eventDecisionCount: 1,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 1,
+      },
+      operationOpportunityProposals: [
+        makeOpportunity({ proposal_id: 'opp_alpha', display_name: 'Alpha Window', expires_turn: 24 }),
+      ],
+      operationalSitrep: makeSitrep(),
+      latestTurnSummary: makeSummary({
+        turn: 24,
+        displacement_total: 1400,
+      }),
+    });
+
+    const first = buildPresidentialDecisionRoomView({ state });
+    const second = buildPresidentialDecisionRoomView({ state });
+
+    expect(first.nextOrders.map((order) => order.role)).toEqual(['act', 'inspect', 'monitor']);
+    expect(first.nextOrders[0]).toMatchObject({
+      id: 'act:review:pending',
+      label: 'Act',
+      headline: 'Presidential reviews pending',
+      instruction: 'Resolve this before advancing the turn.',
+      cardId: 'review:pending',
+      navigationTarget: { kind: 'inbox' },
+    });
+    expect(first.nextOrders[1]).toMatchObject({
+      label: 'Inspect',
+      instruction: 'Open the named surface to understand the staff evidence.',
+    });
+    expect(first.nextOrders[2]).toMatchObject({
+      role: 'monitor',
+      label: 'Monitor',
+      headline: 'Review before advance',
+      instruction: 'Watch this before ending the turn.',
+    });
+    expect(second.nextOrders).toEqual(first.nextOrders);
   });
 
   it('localizes Decision Room lane, loop, lens, and source-handoff chrome in BCS mode', () => {

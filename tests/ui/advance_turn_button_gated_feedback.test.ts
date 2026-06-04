@@ -118,7 +118,7 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(useGameStore.getState().advanceTurnPending).toBe(false);
   });
 
-  it('Warroom ADVANCE opens the advance review modal even when the turn is blocked', () => {
+  it('Warroom status dock does not duplicate the command-dock Advance control', () => {
     const onReviewPriorities = vi.fn();
     setLoadedState(makeState({
       presidentialReviewQueue: {
@@ -133,13 +133,15 @@ describe('ADVANCE_TURN gated feedback', () => {
 
     render(createElement(WarroomStatusBar, { onReviewPriorities }));
 
-    const button = screen.getByRole('button', { name: /resolve 2 pending decisions to continue/i });
-    expect(button.getAttribute('title')).toContain('Resolve 2 pending decisions');
+    expect(screen.queryByRole('button', { name: /resolve 2 pending decisions to continue/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /advance/i })).toBeNull();
 
-    fireEvent.click(button);
+    fireEvent.click(screen.getByRole('button', { name: /priorities/i }));
 
+    expect(screen.getByText('Review before advance')).toBeTruthy();
+    expect(screen.getByText('1 advance item / 1 urgent / 2 pending')).toBeTruthy();
     expect(onReviewPriorities).not.toHaveBeenCalled();
-    expect(useGameStore.getState().advanceTurnPending).toBe(true);
+    expect(useGameStore.getState().advanceTurnPending).toBe(false);
   });
 
   it('advance clearance opens a single hard blocker resolver directly', async () => {
@@ -157,7 +159,7 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(useGameStore.getState().advanceTurnPending).toBe(false);
   });
 
-  it('Warroom status bar localizes priority and advance chrome in BCS mode', () => {
+  it('Warroom status dock localizes priority chrome in BCS mode without duplicating Advance', () => {
     setLocale('bcs');
     setLoadedState(makeState());
 
@@ -165,7 +167,7 @@ describe('ADVANCE_TURN gated feedback', () => {
 
     expect(screen.getByText('RAT')).toBeTruthy();
     expect(screen.getByText('PRIORITETI')).toBeTruthy();
-    expect(screen.getByText('NASTAVI')).toBeTruthy();
+    expect(screen.queryByText('NASTAVI')).toBeNull();
     expect(screen.queryByText('WAR')).toBeNull();
     expect(screen.queryByText('PRIORITIES')).toBeNull();
     expect(screen.queryByText('ADVANCE')).toBeNull();

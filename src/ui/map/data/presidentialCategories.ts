@@ -72,7 +72,9 @@ export interface PresidentialCommandCategoryCount {
  *                       category itself is broad. We route the bulk of
  *                       `decision` into Diplomacy & Patrons (peace/Dayton/convoy
  *                       manifests + counter-offers live there), while the
- *                       paramilitary bright-line stays isolated in Conscience.
+ *                       paramilitary bright-line stays isolated in Conscience,
+ *                       and supply/economy pressure is pulled into Home Front
+ *                       by card id.
  *
  * NOTE: `decision` is a broad bucket. To keep the bright line intact and avoid
  * double-counting, the paramilitary card source is handled by a dedicated
@@ -122,13 +124,20 @@ export const PRESIDENTIAL_COMMAND_CATEGORIES: readonly PresidentialCommandCatego
 /**
  * Card ids (from presidentialDecisionRoom.ts) that belong to a category by an
  * explicit predicate rather than by their `category` field. These let us keep
- * the Conscience bright line isolated from the broad `decision` bucket.
+ * the Conscience bright line isolated from the broad `decision` bucket and keep
+ * supply/economy pressure on the Home Front card instead of War Direction.
  */
 const PARAMILITARY_CARD_ID = 'paramilitary:pending';
+const SUPPLY_VISIBILITY_CARD_ID = 'supply:player-visibility';
 
 /** True when a card belongs to the Conscience & Atrocity bright-line card. */
 function isConscienceCard(cardId: string): boolean {
   return cardId === PARAMILITARY_CARD_ID;
+}
+
+/** True when a card belongs to the Home Front supply/economy card. */
+function isHomeFrontCard(cardId: string): boolean {
+  return cardId === SUPPLY_VISIBILITY_CARD_ID;
 }
 
 /** The lens a category deep-links to: its single source, else `all`. */
@@ -151,6 +160,9 @@ export function derivePresidentialCommandCategoryCounts(
   return PRESIDENTIAL_COMMAND_CATEGORIES.map((category) => {
     const sourceSet = new Set<PresidentialDecisionRoomCategory>(category.sources);
     const matched = cards.filter((card) => {
+      // Home Front owns supply/economy pressure exclusively.
+      if (category.id === 'cat_home_front') return isHomeFrontCard(card.id);
+      if (isHomeFrontCard(card.id)) return false;
       // Conscience owns the paramilitary card exclusively.
       if (category.id === 'cat_conscience') return isConscienceCard(card.id);
       // Every other category excludes the paramilitary card from its source set.
@@ -173,30 +185,15 @@ export function derivePresidentialCommandCategoryCounts(
 }
 
 /**
- * Warroom hotspot OBJECT → presidential category. Diegetic objects that keep
- * their literal meaning (the desk map opens the map; the wall calendar advances
- * the turn) are intentionally ABSENT from this map — they retain their existing
- * shell-handoff behavior. Only the objects below open the card strip
- * pre-filtered to the matched category.
- *
- * Owner correction (2026-06-01):
- *   - desk_map / wall_cork_board → MAIN MAP (unchanged; not in this map)
- *   - wall_calendar(_area)       → ADVANCE   (unchanged; not in this map)
- *   - command_briefing_folio     → War Direction
- *   - commander_coatrack         → Command & Personnel
- *   - diplomatic_telephone       → Diplomacy & Patrons
- *   - newspaper_stack            → The War's Record
- *   - intelligence_journal       → Home Front (ledger/intel object — clean fit)
+ * Owner correction (2026-06-02): warroom hotspots are literal room objects,
+ * not command-surface category shortcuts. The President's Desk overlay is the
+ * entry point for the command-surface card strip until a replacement warroom IA
+ * is accepted.
  */
 export const WARROOM_HOTSPOT_TO_CATEGORY: Readonly<Record<string, PresidentialCommandCategoryId>> = {
-  command_briefing_folio: 'cat_war_direction',
-  commander_coatrack: 'cat_command',
-  diplomatic_telephone: 'cat_diplomacy',
-  newspaper_stack: 'cat_record',
-  intelligence_journal: 'cat_home_front',
 };
 
-/** Resolve a warroom hotspot id to a category, or null if it isn't a strip object. */
+/** Resolve a warroom hotspot id to a category, or null under the current room contract. */
 export function categoryForWarroomHotspot(
   regionId: string,
 ): PresidentialCommandCategoryId | null {

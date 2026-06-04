@@ -6,22 +6,29 @@
 import { type ReactNode } from 'react';
 import { Z } from '../../shared/zIndex';
 import { SUPPORTED_LOCALES, t, useLocale, type Locale } from '../i18n';
+import type { StartNewCampaignPayload } from '../desktop/types';
+import { getArmyName, getFactionFlag } from '../utils/factionAssets';
+import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 
 interface MainMenuProps {
     hasSave: boolean;
-    onNewGame: () => void;
+    starting?: boolean;
+    errorMessage?: string | null;
+    onNewGame: (faction: StartNewCampaignPayload['playerFaction']) => void;
     onContinue: () => void;
-    onLoadGame: () => void;
+    onLoadGame: (json: unknown) => void;
     onSettings: () => void;
     onCredits: () => void;
     onQuit: () => void;
 }
 
-export function MainMenu({ hasSave, onNewGame, onContinue, onLoadGame, onSettings, onCredits, onQuit }: MainMenuProps) {
+const FACTIONS: StartNewCampaignPayload['playerFaction'][] = ['RBiH', 'RS', 'HRHB'];
+
+export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, onContinue, onLoadGame, onSettings, onCredits, onQuit }: MainMenuProps) {
     const [locale, setLocale] = useLocale();
 
     return (
-        <div className="fixed inset-0 flex flex-col items-center justify-center"
+        <div className="fixed inset-0 flex flex-col items-center justify-center px-6"
              style={{
                  zIndex: Z.HARD_MODAL,
                  background: 'radial-gradient(ellipse at center, #1a1816 0%, #0d0c0a 100%)',
@@ -60,10 +67,47 @@ export function MainMenu({ hasSave, onNewGame, onContinue, onLoadGame, onSetting
                 </div>
             </div>
 
-            {/* Primary actions */}
-            <div className="flex flex-col gap-3 w-64 mb-6">
-                <MenuButton onClick={onNewGame} primary>{t('mainMenu.newGame')}</MenuButton>
-                {hasSave && <MenuButton onClick={onContinue} primary>{t('mainMenu.continue')}</MenuButton>}
+            {errorMessage && (
+                <div className="mb-4 w-full max-w-2xl rounded border border-red-500/40 bg-red-950/40 px-3 py-2 text-xs text-red-200">
+                    {errorMessage}
+                </div>
+            )}
+
+            <div className="mb-6 w-full max-w-2xl">
+                <div
+                    className="mb-3 text-center text-[10px] font-bold uppercase tracking-[0.24em] text-[#8a7a60]"
+                    style={{ fontFamily: 'Courier New, monospace' }}
+                >
+                    {t('sidePicker.chooseFaction')}
+                </div>
+                <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3">
+                    {FACTIONS.map((faction) => (
+                        <button
+                            key={faction}
+                            type="button"
+                            disabled={starting}
+                            onClick={() => onNewGame(faction)}
+                            className="min-h-[132px] rounded border border-[#c4a35a]/25 bg-[#15130f]/75 px-4 py-4 text-left transition-all hover:border-[#c4a35a]/55 hover:bg-[#201b13]/85 disabled:opacity-50"
+                            style={{ fontFamily: 'Courier New, monospace' }}
+                        >
+                            {getFactionFlag(faction) && (
+                                <img
+                                    src={getFactionFlag(faction)}
+                                    alt=""
+                                    className="mb-3 h-9 w-14 rounded border border-white/10 object-cover shadow-sm"
+                                />
+                            )}
+                            <div className="font-sans text-[15px] font-bold leading-tight text-[#d5c9bc]">
+                                {getPlayerSafePoliticalFactionName(faction)}
+                            </div>
+                            {getArmyName(faction) && (
+                                <div className="mt-2 text-[10px] uppercase tracking-[0.16em] text-[#8a7a60]">
+                                    {t('sidePicker.forces', { army: getArmyName(faction) ?? faction })}
+                                </div>
+                            )}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* Divider */}
@@ -71,7 +115,29 @@ export function MainMenu({ hasSave, onNewGame, onContinue, onLoadGame, onSetting
 
             {/* Secondary actions */}
             <div className="flex flex-col gap-2 w-48">
-                <MenuButton onClick={onLoadGame}>{t('mainMenu.loadGame')}</MenuButton>
+                {hasSave && <MenuButton onClick={onContinue} primary>{t('mainMenu.continue')}</MenuButton>}
+                <input
+                    type="file"
+                    id="main-menu-save-input"
+                    accept=".json"
+                    aria-label={t('sidePicker.loadSaveAria')}
+                    className="hidden"
+                    onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        event.currentTarget.value = '';
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = (readerEvent) => {
+                            try {
+                                onLoadGame(JSON.parse(String(readerEvent.target?.result ?? 'null')));
+                            } catch (err) {
+                                console.error('Failed to parse save file:', err);
+                            }
+                        };
+                        reader.readAsText(file);
+                    }}
+                />
+                <MenuButton onClick={() => document.getElementById('main-menu-save-input')?.click()}>{t('mainMenu.loadGame')}</MenuButton>
                 <MenuButton onClick={onSettings}>{t('mainMenu.settings')}</MenuButton>
                 <MenuButton onClick={onCredits}>{t('mainMenu.credits')}</MenuButton>
                 <MenuButton onClick={onQuit}>{t('mainMenu.quit')}</MenuButton>
