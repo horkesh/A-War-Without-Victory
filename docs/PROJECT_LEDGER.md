@@ -18465,3 +18465,17 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Report:** `docs/40_reports/implemented/20260603_ROOT_UI_DEPENDENCY_DECLARATIONS.md`
 
 ---
+
+## [2026-06-03] perf(sector): coverage component lookup cache
+
+**Type:** Deterministic sector/frontline performance optimization. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration tuning, event content, replay writer, turn ordering, or output contract changed.
+
+**Change:** `src/sim/combat/brigade_assignment.ts` `ensureMinimumSectorCoverage(...)` now uses an invocation-local `Map<CorpsFrontSector, number>` to reuse `getSectorComponent(...)` results while filtering coverage donors and recipients. The cache is discarded before the next coverage pass and reads only sector geometry fields that do not mutate inside the function. `tests/sector_partition_instrumentation.test.ts` adds a static guard against reintroducing repeated raw component scans after the helper.
+
+**Plan/roadmap:** `docs/plans/2026-05-20-sector-performance-next-target-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/SECTOR_MASTER.md`, and `docs/40_reports/README.md` now record the current lane baseline and closeout. Current sector-performance hash of record is `e086afbefcef01e6`; older `5d94adbfdb09bbda` / `f219401f4a17f311` comparisons are superseded for this lane.
+
+**Verification:** `node node_modules\vitest\vitest.mjs run tests\sector_partition_instrumentation.test.ts --reporter=dot` PASS (26/26). Focused sector pack PASS: `tests\final_sector_truth_reconciliation_cache.test.ts`, `tests\final_sector_truth_reconciliation.test.ts`, `tests\sector_partition_buildCorpsFrontSectors_integration.test.ts`, `tests\sector_partition_instrumentation.test.ts`, `tests\war_phase_step_order.test.ts`. Profiled 40w and timed 40w both preserved final hash `e086afbefcef01e6`; timed run moved from 122953.071ms total / 98527.204ms simulation to 116851.360ms total / 94138.556ms simulation. `npm.cmd run test:baselines` PASS ("Baseline regression: all scenarios match"). `npm.cmd run typecheck` is blocked in this isolated worktree by pre-existing UI optional-package declaration gaps (`maplibre-gl`, `pmtiles`, `@deck.gl/*`, `@vitejs/plugin-react`) and related UI implicit-any diagnostics, not by the sector edit. Generated replay sidecars were removed after verification and `data/derived/latest_run_final_save.json` was restored.
+
+**Report:** `docs/40_reports/implemented/20260603_SECTOR_COVERAGE_COMPONENT_CACHE.md`
+
+---
