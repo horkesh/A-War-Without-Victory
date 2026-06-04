@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] test(artifacts): guard save migration fixture ownership
+
+**Type:** Static generated-artifact ownership guard + docs closeout. No fixture bytes, save migration logic, validator behavior, replay writer, scenario output, baseline manifest, schema version, UI, or simulation behavior changed.
+
+**Change:** Added an explicit generated-artifact ownership row and focused static guard for committed legacy save migration fixtures at `tests/fixtures/save_migration/v*.json`. The fixtures are now classified as retained static schema-evolution evidence: add a new `vNN` fixture during schema bumps, do not refresh prior fixtures in place.
+
+**Verification:** Red proof: `node node_modules\vitest\vitest.mjs run tests\save_migration_fixture_artifact_ownership.test.ts --reporter=dot` failed because the matrix did not include the fixture row. Green proof: `node node_modules\vitest\vitest.mjs run tests\save_migration_fixture_artifact_ownership.test.ts tests\save_migration_round_trip_contract.test.ts tests\generated_artifact_ownership_matrix_contract.test.ts --reporter=dot`; `node node_modules\vitest\vitest.mjs run tests\save_migration_drift_audit.test.ts --reporter=dot`; `git diff --check`.
+
+**Files:** `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `tests/save_migration_fixture_artifact_ownership.test.ts`, `docs/40_reports/implemented/20260604_SAVE_MIGRATION_FIXTURE_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(state): validate cosmetic AI buffers when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation behavior, AI prompt/prose generation, baseline manifest, replay writer, scenario output, or player-facing command behavior changed.
