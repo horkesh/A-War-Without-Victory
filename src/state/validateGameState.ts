@@ -777,6 +777,29 @@ function validateSmugglingAllocation(value: unknown, errors: string[]): void {
     }
 }
 
+function isArmyStanceValue(value: unknown): boolean {
+    return value === 'general_defensive'
+        || value === 'balanced'
+        || value === 'general_offensive'
+        || value === 'total_mobilization';
+}
+
+function validateArmyStanceRecord(value: unknown, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push('military.army_stance must be an object when present');
+        return;
+    }
+
+    for (const [key, stance] of Object.entries(value)) {
+        if (!isCanonicalPlayerFaction(key)) {
+            errors.push(`military.army_stance.${key} must use a canonical faction id key`);
+        }
+        if (!isArmyStanceValue(stance)) {
+            errors.push(`military.army_stance.${key} must be a valid army stance`);
+        }
+    }
+}
+
 function validateCostLedgerAnnotations(value: unknown, errors: string[]): void {
     if (!Array.isArray(value)) {
         errors.push('military.cost_ledger_annotations must be an array when present');
@@ -1360,6 +1383,9 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'smuggling_allocation' in military && military.smuggling_allocation !== undefined) {
         validateSmugglingAllocation(military.smuggling_allocation, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'army_stance' in military && military.army_stance !== undefined) {
+        validateArmyStanceRecord(military.army_stance, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'closed_event_ids' in military && military.closed_event_ids !== undefined) {
         validateClosedEventIds(military.closed_event_ids, errors);
