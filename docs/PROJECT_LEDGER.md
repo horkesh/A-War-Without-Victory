@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-03] fix(ci): align full-suite fixtures with v35 decision_mode
+
+**Type:** CI/test-contract reconciliation for `codex/state-meta-decision-mode-contract` (#148). No save migration behavior, simulation logic, scenario data, or player-facing behavior changed.
+
+**Change:** Updated full-suite current-version minimal `GameState` fixtures to include explicit `meta.decision_mode: 'historical'`, matching the v35 loaded-state contract. Updated the save-migration drift diagnostic assertion to expect latest schema version 35 instead of the pre-branch v34 value.
+
+**Verification:** CI failure subset now passes locally: `node node_modules\vitest\vitest.mjs run tests\combat_state_schema.test.ts tests\displacement_pipeline_state_schema.test.ts tests\early_war_state_schema.test.ts tests\emergence_pressure_schema.test.ts tests\event_state_shape_validation.test.ts tests\game_state_shape.test.ts tests\game_state_turn_week_invariant.test.ts tests\integration_save_load.test.ts tests\migration_nested_ownership.test.ts tests\save_migration_drift_audit.test.ts tests\serialize_gamestate_stability.test.ts --reporter=dot` passed 56/56. Expanded v35 proof with the original focused save/state suite plus this CI subset passed 20 files / 267 tests; `npm.cmd run typecheck`, `node tools\diagnostics\strict_null_inventory.cjs --field-domains`, and `git diff --check` also passed.
+
+**Files:** `tests/combat_state_schema.test.ts`, `tests/displacement_pipeline_state_schema.test.ts`, `tests/early_war_state_schema.test.ts`, `tests/emergence_pressure_schema.test.ts`, `tests/event_state_shape_validation.test.ts`, `tests/game_state_shape.test.ts`, `tests/game_state_turn_week_invariant.test.ts`, `tests/integration_save_load.test.ts`, `tests/migration_nested_ownership.test.ts`, `tests/save_migration_drift_audit.test.ts`, `tests/serialize_gamestate_stability.test.ts`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-03] feat(state): v35 decision_mode loaded-state contract
 
 **Type:** Save-schema / engine-health contract slice. **No sim decision logic changed.** `state.meta.decision_mode` is now an explicit v35 loaded-state contract: current saves must carry `'historical'` or `'emergent'`, malformed values are rejected, and legacy/unset saves migrate deterministically to `'historical'` so calibration remains the internal health-check path. Desktop new-campaign emergent behavior and the no-player-facing-toggle rule are unchanged.
