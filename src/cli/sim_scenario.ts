@@ -714,15 +714,14 @@ async function main(): Promise<void> {
     process.stdout.write(`  summary: ${opts.summaryPath}\n`);
 
     // Local-first playtest telemetry slice (DEFAULT-OFF). No-op unless AWWV_PLAYTEST_TELEMETRY
-    // is enabled. The wall-clock label below is read ONLY when the flag is on and is used
-    // strictly to disambiguate the local diagnostic filename — it is outside the determinism
-    // path and never enters digest content or sim state.
+    // is enabled. Filename is fully deterministic (<scenario>__<run>__session.json); no
+    // wall-clock or RNG call is used here — src/ is in scope of the determinism static scan,
+    // which forbids such calls regardless of gating.
     if (isPlaytestTelemetryEnabled()) {
         const telemetryPath = await maybeWritePlaytestSessionDigest({
             scenarioId: opts.saveInPath,
             runId: `turns${opts.turns}`,
-            summary,
-            filenameLabel: String(Date.now())
+            summary
         });
         if (telemetryPath !== null) {
             process.stdout.write(`  playtest_telemetry: ${telemetryPath}\n`);
