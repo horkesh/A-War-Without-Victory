@@ -63,6 +63,22 @@ function computeSupplyFingerprint(supplyStateByOsid?: SupplyStateByOsidReport | 
     return parts.join('|');
 }
 
+function computeCorpsCommandFingerprint(state: GameState): string {
+    const corpsCommand = state.military.corps_command ?? {};
+    const parts: string[] = [];
+    for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+        const cmd = corpsCommand[corpsId];
+        const participants = new Set<string>();
+        for (const op of cmd?.active_operations ?? []) {
+            for (const bid of op.participating_brigades ?? []) {
+                participants.add(bid);
+            }
+        }
+        parts.push(`${corpsId}:${[...participants].sort(strictCompare).join(',')}`);
+    }
+    return parts.join('|');
+}
+
 function computeReconcileFingerprint(state: GameState, supplyStateByOsid?: SupplyStateByOsidReport | null): string {
     const turn = state.meta?.turn ?? 0;
     const frontEdgeCount = state.military.war_front_edges_osid?.length ?? 0;
@@ -88,7 +104,8 @@ function computeReconcileFingerprint(state: GameState, supplyStateByOsid?: Suppl
         + '|fe' + frontEdgeCount
         + '|pc' + pcParts.join('|')
         + '|fm' + fmParts.join('|')
-        + '|supply' + computeSupplyFingerprint(supplyStateByOsid);
+        + '|supply' + computeSupplyFingerprint(supplyStateByOsid)
+        + '|ops' + computeCorpsCommandFingerprint(state);
 }
 
 export function reconcileFinalSectorTruth(

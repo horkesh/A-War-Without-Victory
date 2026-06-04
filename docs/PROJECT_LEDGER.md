@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(engine): harden review-flagged cache fingerprints
+
+**Type:** Engine correctness / cache invalidation hardening from GitHub issue #170. No save schema, scenario data, calibration constants, UI, event content, or player-facing behavior changed.
+
+**Change:** Closed the P1 cache/fingerprint subset from the Codex review-thread backlog. OSID supply reachability cache keys now include deterministic edge topology. OSID corridor and supply-state derivation caches now include edge topology, and supply-state cache keys include the per-faction open-corridor set. Final-sector truth reconciliation fingerprints now include corps-command active-operation participant state, matching the operation participant set consumed by commander review inside `buildCorpsFrontSectors(...)`.
+
+**Verification:** Red focused tests failed before implementation for all three invalidation gaps. Green proof: `node node_modules\vitest\vitest.mjs run tests\supply_reachability_cache.test.ts tests\supply_state_derivation_cache.test.ts tests\final_sector_truth_reconciliation.test.ts --reporter=dot` passed 14/14; `npm.cmd run typecheck -- --pretty false`; `npm.cmd run test:baselines` passed with all scenarios matching; `git diff --check`.
+
+**Files:** `src/state/supply_reachability_osid.ts`, `src/state/supply_state_derivation.ts`, `src/sim/combat/final_sector_truth_reconciliation.ts`, `tests/supply_reachability_cache.test.ts`, `tests/supply_state_derivation_cache.test.ts`, `tests/final_sector_truth_reconciliation.test.ts`, `docs/40_reports/implemented/20260604_REVIEW_CACHE_FINGERPRINTS.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] perf(sector): reuse zero-assigned rescue views
 
 **Type:** Engine performance / sector-frontline byte-identical optimization. No save schema, scenario data, calibration, command model, UI, or player-facing behavior changed.

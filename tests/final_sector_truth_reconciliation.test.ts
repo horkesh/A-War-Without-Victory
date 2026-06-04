@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
 
 import { buildCorpsFrontSectors } from '../src/sim/combat/corps_front_sectors.js';
 import { reconcileFinalSectorTruth } from '../src/sim/combat/final_sector_truth_reconciliation.js';
@@ -222,6 +223,15 @@ describe('final sector truth reconciliation', () => {
         // In this case brig_seed resolves successfully so no warnings expected,
         // but the code path was exercised without error
         expect(state.military.unresolved_sector_brigades ?? []).toHaveLength(0);
+    });
+
+    it('static contract: reconciliation fingerprint includes operation roster state', () => {
+        const raw = readFileSync('src/sim/combat/final_sector_truth_reconciliation.ts', 'utf8');
+        expect(raw).toContain('function computeCorpsCommandFingerprint');
+        expect(raw).toContain('state.military.corps_command');
+        expect(raw).toContain('active_operations');
+        expect(raw).toContain('participating_brigades');
+        expect(raw).toContain('|ops');
     });
 
     it('rebuilds final sector truth after late brigade writers and clears stale unresolved state', () => {

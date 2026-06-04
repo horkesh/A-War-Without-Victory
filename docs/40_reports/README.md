@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest review cache fingerprint hardening** | [implemented/20260604_REVIEW_CACHE_FINGERPRINTS.md](implemented/20260604_REVIEW_CACHE_FINGERPRINTS.md) - Issue #170 P1 cache subset: OSID supply reachability, OSID supply-state, and final-sector reconciliation caches now include the topology/operation inputs they read; baseline regression remains byte-identical. |
 | **Latest sector zero-assigned rescue reuse** | [implemented/20260604_SECTOR_ZERO_ASSIGNED_RESCUE_REUSE.md](implemented/20260604_SECTOR_ZERO_ASSIGNED_RESCUE_REUSE.md) - `ensureMinimumSectorCoverage(...)` now reuses local front/donor/active-count views inside the zero-assigned territory-claim rescue path; 40w hash `41c72b13ad2e91b9`, consistency validation, and baseline regression are preserved. |
 | **Latest sector coverage reachability elision** | [implemented/20260604_SECTOR_COVERAGE_REACHABILITY_ELISION.md](implemented/20260604_SECTOR_COVERAGE_REACHABILITY_ELISION.md) - `ensureMinimumSectorCoverage(...)` now answers same-front reachability with direct boolean BFS instead of allocating a per-check sector-index map; 40w hash `41c72b13ad2e91b9`, consistency validation, and baseline regression are preserved. |
 | **Latest Warroom Diplomacy Escape cleanup** | [implemented/20260604_WARROOM_DIPLOMACY_ESCAPE.md](implemented/20260604_WARROOM_DIPLOMACY_ESCAPE.md) - Warroom Diplomacy / Patron Relations now closes through the Warroom Escape stack after PR #166's direct route bypassed the native overlay handler. |

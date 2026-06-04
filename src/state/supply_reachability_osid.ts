@@ -8,11 +8,10 @@
  *   1. Single-pass controlled-set bucketing: one `getPoliticalControllerOSID`
  *      call per OSID (was: one per OSID × faction = 3× waste).
  *   2. Per-GameState, per-faction BFS result cache keyed on
- *      `(sources, controlled)` string hash. When a faction's controlled set
- *      and sources are byte-identical to the previous turn (no flips affecting
- *      it), the cached BFS result is reused. Correctness follows from
- *      runSupplyBfs being pure over (sources, controlled, adjacency); adjacency
- *      stability is guaranteed by the C1 memoization in osid_adjacency.ts.
+ *      `(sources, controlled, edge topology)` string hash. When a faction's
+ *      controlled set, sources, and graph topology are byte-identical to the
+ *      previous turn, the cached BFS result is reused. Correctness follows
+ *      from runSupplyBfs being pure over (sources, controlled, adjacency).
  *   No caller mutates the returned per-faction objects — grep-audited; arrays
  *   are shared across turns on cache hit.
  */
@@ -48,8 +47,19 @@ const factionSupplyCache: WeakMap<
 
 /** Compose the deterministic cache key: sorted sources ∥ sorted controlled.
  *  OSID strings use `:` separators so `,` is safe as the join delimiter. */
-function factionCacheKey(sources: readonly string[], controlled: readonly string[]): string {
-    return sources.join(',') + '||' + controlled.join(',');
+function edgeTopologyFingerprint(edges: readonly EdgeRecord[]): string {
+    return edges
+        .map((edge) => edge.a < edge.b ? `${edge.a}__${edge.b}` : `${edge.b}__${edge.a}`)
+        .sort((a, b) => a.localeCompare(b))
+        .join(',');
+}
+
+function factionCacheKey(
+    sources: readonly string[],
+    controlled: readonly string[],
+    edgeTopology: string,
+): string {
+    return sources.join(',') + '||' + controlled.join(',') + '||edges=' + edgeTopology;
 }
 
 /**
@@ -66,6 +76,7 @@ export function computeSupplyReachabilityOsid(
     const turn = state.meta.turn;
     const factions = [...(state.factions ?? [])].sort((a, b) => a.id.localeCompare(b.id));
     const adjacency = buildOsidAdjacency(edges); // C1-memoized
+    const edgeTopology = edgeTopologyFingerprint(edges);
 
     // Build the set of all OSIDs from edges + hoist the sort out of the faction loop.
     const allOsids = new Set<string>();
@@ -109,7 +120,7 @@ export function computeSupplyReachabilityOsid(
         const sources = [...sourceOsids].sort((a, b) => a.localeCompare(b));
 
         // Cache check: if (sources, controlled) matches last turn, skip BFS.
-        const cacheKey = factionCacheKey(sources, controlled);
+        const cacheKey = factionCacheKey(sources, controlled, edgeTopology);
         const cached = perFactionCache.get(faction.id);
         if (cached && cached.key === cacheKey) {
             factionResults.push(cached.result);
