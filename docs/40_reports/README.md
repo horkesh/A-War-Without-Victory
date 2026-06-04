@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest player order-surface validate-when-present contract** | [implemented/20260604_ORDER_SURFACES_VALIDATE_WHEN_PRESENT.md](implemented/20260604_ORDER_SURFACES_VALIDATE_WHEN_PRESENT.md) - `military.sector_stance_orders` and `military.municipality_support_orders` remain optional but now reject malformed present player/order payloads. |
 | **Latest Codex review thread cleanup** | [implemented/20260604_CODEX_REVIEW_THREAD_CLEANUP.md](implemented/20260604_CODEX_REVIEW_THREAD_CLEANUP.md) - Closes unresolved Codex review threads from merged PRs #144/#148/#150/#151 and records the GitHub deployment/comment sweep. |
 | **Latest command authority validate-when-present contract** | [implemented/20260604_COMMAND_AUTHORITY_VALIDATE_WHEN_PRESENT.md](implemented/20260604_COMMAND_AUTHORITY_VALIDATE_WHEN_PRESENT.md) - `military.command_authority` remains optional but now rejects malformed present presidential resource records. |
 | **Latest Washington essay duplicate cleanup** | [implemented/20260604_WASHINGTON_ESSAY_DEDUPE.md](implemented/20260604_WASHINGTON_ESSAY_DEDUPE.md) - Removes the stale duplicate Washington essay deposit and guards unique on-disk Codex essay ids/event ids. |

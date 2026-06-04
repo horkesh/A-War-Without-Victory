@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(state): validate player order surfaces when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation logic, scenario data, UI routing, or player-facing command behavior changed.
+
+**Change:** Classified `military.sector_stance_orders` and `military.municipality_support_orders` as optional player/order surfaces rather than required current-save state. Added validate-when-present coverage so sector stance orders must be an array of `{ sector_id, stance }` entries with known sector stance values, and municipality support orders must be canonical faction-keyed records whose embedded faction, support type, municipality id, and staged turn are valid. Faction/type mismatches now reject because they would otherwise survive load as effect-dead player orders.
+
+**Verification:** `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` passed 140/140; `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts tests\phase_e_municipality_support.test.ts tests\ongoing_mobilization.test.ts tests\ui_map_game_state_adapter.test.ts --reporter=dot` passed 174/174; `node node_modules\vitest\vitest.mjs run tests\sector_stance_orders.test.ts --reporter=dot` passed 1/1; `npm.cmd run typecheck -- --pretty false`; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 with `state: 172` and `sim: 327`.
+
+**Files:** `src/state/validateGameState.ts`, `tests/save_migration_validator_rejection.test.ts`, `docs/40_reports/implemented/20260604_ORDER_SURFACES_VALIDATE_WHEN_PRESENT.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/README.md`, `.claude/napkin.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(github): close unresolved Codex review threads
 
 **Type:** GitHub review-debt cleanup for merged PRs. No operation catalog, OOB, event prose, UI routing, or player-facing command behavior changed.

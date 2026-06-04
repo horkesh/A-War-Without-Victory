@@ -12,6 +12,13 @@ import type { PhaseName } from './game_state.js';
 const KNOWN_PHASES: readonly PhaseName[] = ['peace', 'war'];
 const CANONICAL_PLAYER_FACTIONS = ['RBiH', 'RS', 'HRHB'] as const;
 const DOCTRINE_OVERRIDE_FORCED_STANCES = ['defensive', 'balanced', 'offensive', 'reorganize'] as const;
+const SECTOR_STANCES = ['fortify', 'defend', 'elastic', 'active_defense', 'screening'] as const;
+const MUNICIPALITY_SUPPORT_TYPES = ['weapons_shipment', 'staff_priority', 'croatian_support_package'] as const;
+const MUNICIPALITY_SUPPORT_TYPE_BY_FACTION: Record<string, string> = {
+    RBiH: 'weapons_shipment',
+    RS: 'staff_priority',
+    HRHB: 'croatian_support_package',
+};
 
 /**
  * Strict comparator for deterministic ordering (Engine Invariants §11.3).
@@ -117,6 +124,14 @@ function isCanonicalPlayerFaction(value: unknown): boolean {
 
 function isDoctrineOverrideForcedStance(value: unknown): boolean {
     return typeof value === 'string' && DOCTRINE_OVERRIDE_FORCED_STANCES.includes(value as typeof DOCTRINE_OVERRIDE_FORCED_STANCES[number]);
+}
+
+function isSectorStanceValue(value: unknown): boolean {
+    return typeof value === 'string' && SECTOR_STANCES.includes(value as typeof SECTOR_STANCES[number]);
+}
+
+function isMunicipalitySupportType(value: unknown): boolean {
+    return typeof value === 'string' && MUNICIPALITY_SUPPORT_TYPES.includes(value as typeof MUNICIPALITY_SUPPORT_TYPES[number]);
 }
 
 function isEventDecisionSource(value: unknown): boolean {
@@ -805,6 +820,58 @@ function validateArmyStanceRecord(value: unknown, errors: string[]): void {
     }
 }
 
+function validateSectorStanceOrders(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.sector_stance_orders must be an array when present');
+        return;
+    }
+
+    value.forEach((order, i) => {
+        if (!isRecord(order)) {
+            errors.push(`military.sector_stance_orders[${i}] must be an object`);
+            return;
+        }
+        if (!isNonEmptyString(order.sector_id)) {
+            errors.push(`military.sector_stance_orders[${i}].sector_id must be a non-empty string`);
+        }
+        if (!isSectorStanceValue(order.stance)) {
+            errors.push(`military.sector_stance_orders[${i}].stance must be a valid sector stance`);
+        }
+    });
+}
+
+function validateMunicipalitySupportOrders(value: unknown, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push('military.municipality_support_orders must be an object when present');
+        return;
+    }
+
+    for (const [faction, order] of Object.entries(value)) {
+        const path = `military.municipality_support_orders.${faction}`;
+        if (!isCanonicalPlayerFaction(faction)) {
+            errors.push(`${path} must use a canonical faction id key`);
+        }
+        if (!isRecord(order)) {
+            errors.push(`${path} must be an object`);
+            continue;
+        }
+        if (order.faction !== faction) {
+            errors.push(`${path}.faction must match its faction key`);
+        }
+        if (!isNonEmptyString(order.mun_id)) {
+            errors.push(`${path}.mun_id must be a non-empty string`);
+        }
+        if (!isMunicipalitySupportType(order.type)) {
+            errors.push(`${path}.type must be a valid municipality support type`);
+        } else if (isCanonicalPlayerFaction(faction) && order.type !== MUNICIPALITY_SUPPORT_TYPE_BY_FACTION[faction]) {
+            errors.push(`${path}.type must match its faction support type`);
+        }
+        if (!isNonNegativeInteger(order.staged_turn)) {
+            errors.push(`${path}.staged_turn must be a non-negative integer`);
+        }
+    }
+}
+
 function validateLogisticsPriority(value: unknown, errors: string[]): void {
     if (!isRecord(value)) {
         errors.push('military.logistics_priority must be an object when present');
@@ -1439,6 +1506,12 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'army_stance' in military && military.army_stance !== undefined) {
         validateArmyStanceRecord(military.army_stance, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'sector_stance_orders' in military && military.sector_stance_orders !== undefined) {
+        validateSectorStanceOrders(military.sector_stance_orders, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'municipality_support_orders' in military && military.municipality_support_orders !== undefined) {
+        validateMunicipalitySupportOrders(military.municipality_support_orders, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'opsec_sectors' in military && military.opsec_sectors !== undefined && !isStringArray(military.opsec_sectors)) {
         errors.push('military.opsec_sectors must be a string array when present');
