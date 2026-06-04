@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(state): validate event_constraints when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation logic, event catalog behavior, scenario data, UI routing, or player-facing behavior changed.
+
+**Change:** Classified `military.event_constraints` as a lazy nested semantics bus rather than a required current-save record. Added validate-when-present coverage for operation blocks, doctrine overrides, and scope restrictions. Absent `event_constraints` remains valid; malformed present payloads now fail current-save validation. Updated the current-version validator test fixture with required `meta.decision_mode: 'historical'`, matching the v35 save contract.
+
+**Verification:** Red proof: `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` failed only because malformed `event_constraints` was accepted before the validator existed. Green proof passed: focused validator file 110/110; event-constraint writer/consumer pack 114/114; broader save/schema pack 201/201; `npm.cmd run typecheck`; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 with `state: 172` and `sim: 327`.
+
+**Files:** `src/state/validateGameState.ts`, `tests/save_migration_validator_rejection.test.ts`, `docs/40_reports/implemented/20260604_EVENT_CONSTRAINTS_VALIDATE_WHEN_PRESENT.md`, `docs/20_engineering/SAVE_SCHEMA_EVOLUTION.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/README.md`, `.claude/napkin.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(state): promote theatre compatibility pair to required MilitaryState contract
 
 **Type:** Save/type contract closeout for the Optional `GameState` schema lane. No save-schema version bump, migration behavior, simulation logic, scenario data, UI routing, or player-facing behavior changed.

@@ -19,6 +19,7 @@ function currentVersionState(): any {
             referendum_deadline_turn: null,
             game_over: false,
             player_faction: 'RBiH',
+            decision_mode: 'historical',
         },
         factions: [
             {
@@ -1338,6 +1339,94 @@ describe('save migration validator hardening', () => {
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
             /Save schema validation failed after migration[\s\S]*military\.cascade_penalties\[0\]\.osid must be a non-empty string[\s\S]*military\.cascade_penalties\[0\]\.multiplier must be a finite number[\s\S]*military\.cascade_penalties\[0\]\.expires_turn must be a non-negative integer[\s\S]*military\.cascade_penalties\[1\] must be an object[\s\S]*military\.offensive_ops_suppressions\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.offensive_ops_suppressions\[0\]\.expires_turn must be a non-negative integer[\s\S]*military\.offensive_ops_suppressions\[0\]\.reason must be a string when present[\s\S]*military\.offensive_ops_suppressions\[1\] must be an object[\s\S]*military\.alliance_locks\[0\]\.mode must be one of: floor, ceiling[\s\S]*military\.alliance_locks\[0\]\.value must be a finite number[\s\S]*military\.alliance_locks\[0\]\.expires_turn must be a non-negative integer[\s\S]*military\.alliance_locks\[1\] must be an object[\s\S]*military\.bot_priority_shifts\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.bot_priority_shifts\[0\]\.add_objectives must be a string array when present[\s\S]*military\.bot_priority_shifts\[0\]\.remove_objectives must be a string array when present[\s\S]*military\.bot_priority_shifts\[0\]\.expires_turn must be a non-negative integer[\s\S]*military\.bot_priority_shifts\[1\] must be an object/
+        );
+    });
+
+    it('accepts current-version saves with absent event constraints', () => {
+        const state = currentVersionState();
+        delete state.military.event_constraints;
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.event_constraints).toBeUndefined();
+    });
+
+    it('accepts current-version saves with well-formed event constraints', () => {
+        const state = currentVersionState();
+        state.military.event_constraints = {
+            operation_blocks: [
+                { faction: 'RS', expires_turn: 20, reason: 'ceasefire' },
+            ],
+            doctrine_overrides: [
+                { faction: 'RBiH', forced_stance: 'defensive', expires_turn: 21, reason: 'UN pressure' },
+            ],
+            scope_restrictions: [
+                {
+                    faction: 'HRHB',
+                    allowed_municipalities: ['Mostar'],
+                    blocked_municipalities: ['Bugojno'],
+                    expires_turn: 22,
+                    reason: 'corridor limit',
+                },
+                {
+                    faction: 'RS',
+                    blocked_municipalities: ['Sarajevo'],
+                    reason: 'open-ended restriction',
+                },
+            ],
+        };
+
+        const migrated = deserializeState(JSON.stringify(state));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.military.event_constraints?.operation_blocks?.[0].reason).toBe('ceasefire');
+        expect(migrated.military.event_constraints?.scope_restrictions?.[1].expires_turn).toBeUndefined();
+    });
+
+    it('rejects current-version saves with malformed event constraints', () => {
+        const state = currentVersionState();
+        state.military.event_constraints = {
+            operation_blocks: [
+                { faction: 'JNA', expires_turn: -1, reason: 7 },
+                42,
+            ],
+            doctrine_overrides: [
+                { faction: 'RS', forced_stance: '', expires_turn: 1.5, reason: '' },
+                42,
+            ],
+            scope_restrictions: [
+                {
+                    faction: 'UN',
+                    allowed_municipalities: ['ok', 7],
+                    blocked_municipalities: 'bad',
+                    expires_turn: -1,
+                    reason: 42,
+                },
+                42,
+            ],
+        };
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.event_constraints\.operation_blocks\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.event_constraints\.operation_blocks\[0\]\.expires_turn must be a non-negative integer[\s\S]*military\.event_constraints\.operation_blocks\[0\]\.reason must be a non-empty string[\s\S]*military\.event_constraints\.operation_blocks\[1\] must be an object[\s\S]*military\.event_constraints\.doctrine_overrides\[0\]\.expires_turn must be a non-negative integer[\s\S]*military\.event_constraints\.doctrine_overrides\[0\]\.reason must be a non-empty string[\s\S]*military\.event_constraints\.doctrine_overrides\[0\]\.forced_stance must be a non-empty string[\s\S]*military\.event_constraints\.doctrine_overrides\[1\] must be an object[\s\S]*military\.event_constraints\.scope_restrictions\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.event_constraints\.scope_restrictions\[0\]\.allowed_municipalities must be a string array when present[\s\S]*military\.event_constraints\.scope_restrictions\[0\]\.blocked_municipalities must be a string array when present[\s\S]*military\.event_constraints\.scope_restrictions\[0\]\.expires_turn must be a non-negative integer when present[\s\S]*military\.event_constraints\.scope_restrictions\[0\]\.reason must be a non-empty string[\s\S]*military\.event_constraints\.scope_restrictions\[1\] must be an object/
+        );
+    });
+
+    it('rejects current-version saves with non-object or non-array event constraints members', () => {
+        const nonObject = currentVersionState();
+        nonObject.military.event_constraints = [];
+        const nonArrayMember = currentVersionState();
+        nonArrayMember.military.event_constraints = {
+            operation_blocks: {},
+            doctrine_overrides: {},
+            scope_restrictions: {},
+        };
+
+        expect(() => deserializeState(JSON.stringify(nonObject))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.event_constraints must be an object when present/
+        );
+        expect(() => deserializeState(JSON.stringify(nonArrayMember))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.event_constraints\.operation_blocks must be an array when present[\s\S]*military\.event_constraints\.doctrine_overrides must be an array when present[\s\S]*military\.event_constraints\.scope_restrictions must be an array when present/
         );
     });
 });
