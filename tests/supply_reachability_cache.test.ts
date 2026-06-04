@@ -104,6 +104,27 @@ describe('computeSupplyReachabilityOsid cache', () => {
         expect(secondRS.controlled).toEqual(['op:a:2', 'op:b:1', 'op:b:2']);
     });
 
+    it('edge topology change invalidates a faction cache entry even when sources and control are stable', () => {
+        const { state, edges, c2o, o2c } = makeFixture({
+            controllers: { 'op:a:1': 'RBiH', 'op:a:2': 'RBiH', 'op:b:1': 'RBiH', 'op:b:2': 'RBiH' },
+        });
+        const first = computeSupplyReachabilityOsid(state, edges, c2o, o2c);
+
+        const disconnectedEdges: EdgeRecord[] = [
+            { a: 'op:a:1', b: 'op:a:2' } as EdgeRecord,
+            { a: 'op:b:1', b: 'op:b:2' } as EdgeRecord,
+        ];
+        (state.meta as any).turn = 1;
+        const second = computeSupplyReachabilityOsid(state, disconnectedEdges, c2o, o2c);
+
+        const firstRBiH = first.factions.find(f => f.faction_id === 'RBiH')!;
+        const secondRBiH = second.factions.find(f => f.faction_id === 'RBiH')!;
+        expect(secondRBiH).not.toBe(firstRBiH);
+        expect(firstRBiH.reachable_osids).toEqual(['op:a:1', 'op:a:2', 'op:b:1', 'op:b:2']);
+        expect(secondRBiH.reachable_osids).toEqual(['op:a:1', 'op:a:2']);
+        expect(secondRBiH.isolated_osids).toEqual(['op:b:1', 'op:b:2']);
+    });
+
     it('distinct GameState instances keep independent caches', () => {
         const a = makeFixture({
             controllers: { 'op:a:1': 'RBiH', 'op:a:2': 'RBiH', 'op:b:1': 'RS', 'op:b:2': 'RS' },

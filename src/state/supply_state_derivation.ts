@@ -18,10 +18,11 @@ import { strictCompare } from './validateGameState.js';
 // v0.9.3 C2a — per-faction OSID-supply derivation caches.
 //
 // `deriveCorridorsOsid` and `deriveSupplyStateByOsid` are pure over the
-// per-faction `FactionSupplyReachabilityOsid` entry plus the (stable) edge
-// adjacency. The C2 supply-reachability cache returns the same per-faction
-// reference on cache hit, so we can use that reference as a WeakMap key for
-// both downstream derivations.
+// per-faction `FactionSupplyReachabilityOsid` entry plus edge topology and,
+// for supply states, the per-faction open-corridor set. The C2
+// supply-reachability cache returns the same per-faction reference on cache
+// hit, so we use that reference as the WeakMap owner and a deterministic
+// content key for the remaining inputs.
 //
 // Bridge detection in `deriveCorridorsOsid` is the dominant cost (O(E²) in
 // the worst case for the per-faction subgraph). Heartland-component + adequate
@@ -32,8 +33,19 @@ import { strictCompare } from './validateGameState.js';
 // deriveCorridorsOsid → deriveSupplyStateByOsid with the SAME supplyReport,
 // so the two caches stay coherent.
 // ═══════════════════════════════════════════════════════════════════════════
-const corridorCacheByFaction: WeakMap<FactionSupplyReachabilityOsid, DerivedCorridor[]> = new WeakMap();
-const supplyStateCacheByFaction: WeakMap<FactionSupplyReachabilityOsid, FactionSupplyStateByOsidEntry> = new WeakMap();
+const corridorCacheByFaction: WeakMap<FactionSupplyReachabilityOsid, { key: string; result: DerivedCorridor[] }> = new WeakMap();
+const supplyStateCacheByFaction: WeakMap<FactionSupplyReachabilityOsid, { key: string; result: FactionSupplyStateByOsidEntry }> = new WeakMap();
+
+function edgeTopologyFingerprint(edges: readonly EdgeRecord[]): string {
+    return edges
+        .map((edge) => edge.a < edge.b ? `${edge.a}__${edge.b}` : `${edge.b}__${edge.a}`)
+        .sort(strictCompare)
+        .join(',');
+}
+
+function setFingerprint(values: ReadonlySet<string>): string {
+    return [...values].sort(strictCompare).join(',');
+}
 
 /** Supply state levels per canon (Systems Manual §14). */
 export type SupplyStateLevel = 'adequate' | 'strained' | 'critical';
@@ -627,13 +639,15 @@ export function deriveCorridorsOsid(
 ): CorridorDerivationReport {
     const turn = state.meta.turn;
     const adjacency = buildOsidAdjacency(edges);
+    const topologyKey = edgeTopologyFingerprint(edges);
     const corridors: DerivedCorridor[] = [];
 
     for (const fac of supplyReport.factions) {
-        let perFaction = corridorCacheByFaction.get(fac);
+        const cached = corridorCacheByFaction.get(fac);
+        let perFaction = cached?.key === topologyKey ? cached.result : undefined;
         if (!perFaction) {
             perFaction = computeFactionCorridors(fac, adjacency);
-            corridorCacheByFaction.set(fac, perFaction);
+            corridorCacheByFaction.set(fac, { key: topologyKey, result: perFaction });
         }
         for (const c of perFaction) corridors.push(c);
     }
@@ -758,6 +772,7 @@ export function deriveSupplyStateByOsid(
 ): SupplyStateByOsidReport {
     const turn = state.meta.turn;
     const adjacency = buildOsidAdjacency(edges);
+    const topologyKey = edgeTopologyFingerprint(edges);
     // Group corridor states by faction so the per-faction cache key (the fac
     // reference) is the only deciding input alongside the stable adjacency.
     const openEdgesByFaction = new Map<string, Set<string>>();
@@ -771,11 +786,13 @@ export function deriveSupplyStateByOsid(
     const factionEntries: FactionSupplyStateByOsidEntry[] = [];
 
     for (const fac of supplyReport.factions) {
-        let perFaction = supplyStateCacheByFaction.get(fac);
+        const openEdges = openEdgesByFaction.get(fac.faction_id) ?? new Set<string>();
+        const cacheKey = topologyKey + '||open=' + setFingerprint(openEdges);
+        const cached = supplyStateCacheByFaction.get(fac);
+        let perFaction = cached?.key === cacheKey ? cached.result : undefined;
         if (!perFaction) {
-            const openEdges = openEdgesByFaction.get(fac.faction_id) ?? new Set<string>();
             perFaction = computeFactionSupplyState(fac, adjacency, openEdges);
-            supplyStateCacheByFaction.set(fac, perFaction);
+            supplyStateCacheByFaction.set(fac, { key: cacheKey, result: perFaction });
         }
         factionEntries.push(perFaction);
     }

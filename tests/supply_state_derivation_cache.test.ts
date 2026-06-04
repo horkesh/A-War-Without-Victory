@@ -117,6 +117,54 @@ describe('deriveSupplyStateByOsid per-faction cache (C2a)', () => {
         }
     });
 
+    it('open-corridor changes invalidate the per-faction supply-state cache', () => {
+        const { state, edges, c2o, o2c } = makeFixture({
+            controllers: { 'op:a:1': 'RBiH', 'op:a:2': 'RBiH', 'op:b:1': 'RBiH', 'op:b:2': 'RBiH' },
+        });
+        const supply = computeSupplyReachabilityOsid(state, edges, c2o, o2c);
+        const rbih = supply.factions.find(f => f.faction_id === 'RBiH')!;
+        expect(rbih.reachable_osids).toEqual(['op:a:1', 'op:a:2', 'op:b:1', 'op:b:2']);
+
+        const allOpen = {
+            schema: 1 as const,
+            turn: 0,
+            corridors: [
+                { faction_id: 'RBiH', edge_id: 'op:a:1__op:a:2', state: 'open' as const },
+                { faction_id: 'RBiH', edge_id: 'op:a:2__op:b:1', state: 'open' as const },
+                { faction_id: 'RBiH', edge_id: 'op:b:1__op:b:2', state: 'open' as const },
+            ],
+        };
+        const first = deriveSupplyStateByOsid(state, edges, supply, allOpen);
+
+        const bridgeCut = {
+            schema: 1 as const,
+            turn: 1,
+            corridors: [
+                { faction_id: 'RBiH', edge_id: 'op:a:1__op:a:2', state: 'open' as const },
+                { faction_id: 'RBiH', edge_id: 'op:a:2__op:b:1', state: 'brittle' as const },
+                { faction_id: 'RBiH', edge_id: 'op:b:1__op:b:2', state: 'open' as const },
+            ],
+        };
+        (state.meta as any).turn = 1;
+        const second = deriveSupplyStateByOsid(state, edges, supply, bridgeCut);
+
+        const firstRBiH = first.factions.find(f => f.faction_id === 'RBiH')!;
+        const secondRBiH = second.factions.find(f => f.faction_id === 'RBiH')!;
+        expect(secondRBiH).not.toBe(firstRBiH);
+        expect(firstRBiH.by_osid).toEqual([
+            { osid: 'op:a:1', state: 'adequate' },
+            { osid: 'op:a:2', state: 'adequate' },
+            { osid: 'op:b:1', state: 'adequate' },
+            { osid: 'op:b:2', state: 'adequate' },
+        ]);
+        expect(secondRBiH.by_osid).toEqual([
+            { osid: 'op:a:1', state: 'adequate' },
+            { osid: 'op:a:2', state: 'adequate' },
+            { osid: 'op:b:1', state: 'strained' },
+            { osid: 'op:b:2', state: 'strained' },
+        ]);
+    });
+
     it('cached per-faction supply state has content-identical by_osid to fresh compute', () => {
         const cached = makeFixture({
             controllers: { 'op:a:1': 'RBiH', 'op:a:2': 'RBiH', 'op:b:1': 'RS', 'op:b:2': 'RS' },
