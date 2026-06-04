@@ -1885,4 +1885,234 @@ describe('save migration validator hardening', () => {
             /Save schema validation failed after migration[\s\S]*military\.command_authority must be an object when present/
         );
     });
+
+    it('accepts current-version saves with absent or well-formed AI army decisions', () => {
+        const absent = currentVersionState();
+        delete absent.military.ai_army_decisions;
+        const withDecisions = currentVersionState();
+        withDecisions.military.ai_army_decisions = {
+            RS: {
+                faction: 'RS',
+                turn: 8,
+                corps_directives: {
+                    rs_1st_krajina: {
+                        stance: 'offensive',
+                        priority: 'corridor',
+                        hold_municipalities: ['banja_luka'],
+                        offensive_targets: ['op:doboj:doboj_2'],
+                    },
+                },
+                operation_decisions: {
+                    approve: ['operation_corridor'],
+                    postpone: [],
+                    abort: [],
+                },
+                peace_plan_response: null,
+                reserve_deployment: {
+                    deploy_to: 'sector:rs_1st_krajina:1',
+                    reason: 'Hold the corridor',
+                },
+                strategic_reasoning: 'Apply pressure',
+                briefing_text: 'Army briefing',
+            },
+        };
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWithDecisions = deserializeState(JSON.stringify(withDecisions));
+
+        expect(migratedAbsent.military.ai_army_decisions).toBeUndefined();
+        expect(migratedWithDecisions.military.ai_army_decisions).toEqual(withDecisions.military.ai_army_decisions);
+    });
+
+    it('rejects current-version saves with malformed AI army decisions', () => {
+        const state = currentVersionState();
+        state.military.ai_army_decisions = {
+            RS: {
+                faction: 'RBiH',
+                turn: -1,
+                corps_directives: {
+                    rs_1st_krajina: {
+                        stance: 'screening',
+                        hold_municipalities: ['banja_luka', 1],
+                    },
+                },
+                operation_decisions: {
+                    approve: ['operation_corridor'],
+                    postpone: 'later',
+                    abort: [],
+                },
+                peace_plan_response: 'maybe',
+                reserve_deployment: {
+                    deploy_to: '',
+                    reason: 42,
+                },
+                strategic_reasoning: 1,
+                briefing_text: null,
+            },
+            unknown: {
+                faction: 'unknown',
+                turn: 1,
+                corps_directives: {},
+                operation_decisions: { approve: [], postpone: [], abort: [] },
+                strategic_reasoning: '',
+                briefing_text: '',
+            },
+        } as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.ai_army_decisions\.RS\.faction must match its faction key[\s\S]*military\.ai_army_decisions\.RS\.turn must be a non-negative integer[\s\S]*military\.ai_army_decisions\.RS\.corps_directives\.rs_1st_krajina\.stance must be a valid AI corps stance[\s\S]*military\.ai_army_decisions\.RS\.corps_directives\.rs_1st_krajina\.hold_municipalities must be a string array[\s\S]*military\.ai_army_decisions\.RS\.operation_decisions\.postpone must be a string array[\s\S]*military\.ai_army_decisions\.RS\.peace_plan_response must be accept, reject, or null when present[\s\S]*military\.ai_army_decisions\.RS\.reserve_deployment\.deploy_to must be a non-empty string[\s\S]*military\.ai_army_decisions\.RS\.reserve_deployment\.reason must be a string[\s\S]*military\.ai_army_decisions\.RS\.strategic_reasoning must be a string[\s\S]*military\.ai_army_decisions\.RS\.briefing_text must be a string[\s\S]*military\.ai_army_decisions\.unknown must use a canonical faction id key[\s\S]*military\.ai_army_decisions\.unknown\.faction must be one of: RBiH, RS, HRHB/
+        );
+    });
+
+    it('rejects current-version saves with non-record AI army decision payloads', () => {
+        const state = currentVersionState();
+        state.military.ai_army_decisions = [] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.ai_army_decisions must be an object when present/
+        );
+    });
+
+    it('accepts current-version saves with absent or well-formed AI decision logs', () => {
+        const absent = currentVersionState();
+        delete absent.military.ai_decision_log;
+        const withLog = currentVersionState();
+        withLog.military.ai_decision_log = [
+            {
+                turn: 8,
+                level: 'army',
+                faction: 'RS',
+                decision: {
+                    faction: 'RS',
+                    turn: 8,
+                    corps_directives: {
+                        rs_1st_krajina: { stance: 'balanced' },
+                    },
+                    operation_decisions: { approve: [], postpone: [], abort: [] },
+                    peace_plan_response: 'reject',
+                    reserve_deployment: null,
+                    strategic_reasoning: 'Hold reserves',
+                    briefing_text: 'Brief',
+                },
+                model_used: 'formula',
+                prompt_tokens: 10,
+                completion_tokens: 20,
+                latency_ms: 30,
+            },
+            {
+                turn: 8,
+                level: 'corps',
+                faction: 'RS',
+                corps_id: 'rs_1st_krajina',
+                decision: {
+                    corps_id: 'rs_1st_krajina',
+                    faction: 'RS',
+                    turn: 8,
+                    sector_stances: {
+                        'sector:rs_1st_krajina:1': 'defend',
+                    },
+                    operation_plan: {
+                        target: 'op:doboj:doboj_2',
+                        force: ['rs_1st_krajina_light'],
+                        approach: 'probing',
+                        timing: 'next_turn',
+                    },
+                    brigade_movements: {
+                        rs_1st_krajina_light: {
+                            destination: 'op:doboj:doboj_2',
+                            reason: 'Probe',
+                        },
+                    },
+                    assessment: 'Feasible',
+                },
+                model_used: 'test-model',
+            },
+        ];
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWithLog = deserializeState(JSON.stringify(withLog));
+
+        expect(migratedAbsent.military.ai_decision_log).toBeUndefined();
+        expect(migratedWithLog.military.ai_decision_log).toEqual(withLog.military.ai_decision_log);
+    });
+
+    it('rejects current-version saves with malformed AI decision logs', () => {
+        const state = currentVersionState();
+        state.military.ai_decision_log = [
+            {
+                turn: 1.5,
+                level: 'fleet',
+                faction: 'JNA',
+                corps_id: '',
+                decision: {},
+                model_used: '',
+                prompt_tokens: -1,
+                completion_tokens: '20',
+                latency_ms: -5,
+            },
+            {
+                turn: 2,
+                level: 'corps',
+                faction: 'RS',
+                corps_id: 'rs_1st_krajina',
+                decision: {
+                    corps_id: 'wrong_corps',
+                    faction: 'RBiH',
+                    turn: 2,
+                    sector_stances: { sector_alpha: 'advance' },
+                    operation_plan: {
+                        target: '',
+                        force: ['b1', 4],
+                        approach: 'frontal',
+                        timing: 'later',
+                    },
+                    brigade_movements: {
+                        b1: { destination: '', reason: 4 },
+                    },
+                    assessment: 4,
+                },
+                model_used: 'test-model',
+            },
+            {
+                turn: 3,
+                level: 'advisor',
+                faction: 'HRHB',
+                decision: {
+                    commander_name: 1,
+                    faction: 'RS',
+                    assessment: 3,
+                    recommendations: [{ priority: -1, action: 2, reasoning: 3 }],
+                    context_type: 'weather',
+                },
+                model_used: 'test-model',
+            },
+            {
+                turn: 4,
+                level: 'political',
+                faction: 'RBiH',
+                decision: {
+                    faction: 'RBiH',
+                    turn: 4,
+                    event_responses: { event_a: { choice: '', reasoning: 4 } },
+                    peace_plan_response: 'maybe',
+                    alliance_posture: 'escalate',
+                    reasoning: 4,
+                },
+                model_used: 'test-model',
+            },
+        ] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.ai_decision_log\[0\]\.turn must be a non-negative integer[\s\S]*military\.ai_decision_log\[0\]\.level must be a valid AI decision level[\s\S]*military\.ai_decision_log\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.ai_decision_log\[0\]\.corps_id must be a non-empty string when present[\s\S]*military\.ai_decision_log\[0\]\.model_used must be a non-empty string[\s\S]*military\.ai_decision_log\[0\]\.prompt_tokens must be a finite non-negative number when present[\s\S]*military\.ai_decision_log\[0\]\.completion_tokens must be a finite non-negative number when present[\s\S]*military\.ai_decision_log\[0\]\.latency_ms must be a finite non-negative number when present[\s\S]*military\.ai_decision_log\[1\]\.decision\.corps_id must match its log corps_id[\s\S]*military\.ai_decision_log\[1\]\.decision\.faction must match its log faction[\s\S]*military\.ai_decision_log\[1\]\.decision\.sector_stances\.sector_alpha must be a valid sector stance[\s\S]*military\.ai_decision_log\[1\]\.decision\.operation_plan\.target must be a non-empty string[\s\S]*military\.ai_decision_log\[1\]\.decision\.operation_plan\.force must be a string array[\s\S]*military\.ai_decision_log\[1\]\.decision\.operation_plan\.approach must be a valid operation approach[\s\S]*military\.ai_decision_log\[1\]\.decision\.operation_plan\.timing must be a valid operation timing[\s\S]*military\.ai_decision_log\[1\]\.decision\.brigade_movements\.b1\.destination must be a non-empty string[\s\S]*military\.ai_decision_log\[1\]\.decision\.brigade_movements\.b1\.reason must be a string[\s\S]*military\.ai_decision_log\[1\]\.decision\.assessment must be a string[\s\S]*military\.ai_decision_log\[2\]\.decision\.commander_name must be a string[\s\S]*military\.ai_decision_log\[2\]\.decision\.faction must match its log faction[\s\S]*military\.ai_decision_log\[2\]\.decision\.assessment must be a string[\s\S]*military\.ai_decision_log\[2\]\.decision\.recommendations\[0\]\.priority must be a finite non-negative number[\s\S]*military\.ai_decision_log\[2\]\.decision\.recommendations\[0\]\.action must be a string[\s\S]*military\.ai_decision_log\[2\]\.decision\.recommendations\[0\]\.reasoning must be a string[\s\S]*military\.ai_decision_log\[2\]\.decision\.context_type must be a valid advisor context type[\s\S]*military\.ai_decision_log\[3\]\.decision\.event_responses\.event_a\.choice must be a non-empty string[\s\S]*military\.ai_decision_log\[3\]\.decision\.event_responses\.event_a\.reasoning must be a string[\s\S]*military\.ai_decision_log\[3\]\.decision\.peace_plan_response must be accept, reject, or null when present[\s\S]*military\.ai_decision_log\[3\]\.decision\.alliance_posture must be a valid alliance posture when present[\s\S]*military\.ai_decision_log\[3\]\.decision\.reasoning must be a string/
+        );
+    });
+
+    it('rejects current-version saves with non-array AI decision logs', () => {
+        const state = currentVersionState();
+        state.military.ai_decision_log = {} as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.ai_decision_log must be an array when present/
+        );
+    });
 });

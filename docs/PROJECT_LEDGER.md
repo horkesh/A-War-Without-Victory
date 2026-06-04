@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(state): validate AI decision surfaces when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation logic, scenario data, UI routing, or player-facing command behavior changed.
+
+**Change:** Classified `military.ai_decision_log` and `military.ai_army_decisions` as optional AI commander replay/current-turn command surfaces rather than required current-save state. Added validate-when-present coverage for faction-keyed `ArmyDecision` records, replay log entry metadata, level-specific replay payload shapes, token/latency counters, corps stance enums, sector stance enums, advisor response shape, and political/event decision shape. Cosmetic AI read-model buffers remain lower-priority retention fields and were not promoted.
+
+**Verification:** `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` passed 146/146; `node node_modules\vitest\vitest.mjs run tests\ai_commander_ipc.test.ts --reporter=dot` passed 16/16; `node node_modules\vitest\vitest.mjs run tests\events_evaluate.test.ts tests\event_state_shape_validation.test.ts tests\save_migration_validator_rejection.test.ts tests\ai_commander_validation.test.ts tests\ai_commander_ipc.test.ts --reporter=dot` passed 217/217; `npm.cmd run typecheck -- --pretty false`; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 with `state: 172` and `sim: 327`.
+
+**Files:** `src/state/validateGameState.ts`, `tests/save_migration_validator_rejection.test.ts`, `docs/40_reports/implemented/20260604_AI_DECISION_SURFACES_VALIDATE_WHEN_PRESENT.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/README.md`, `.claude/napkin.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(state): validate player order surfaces when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation logic, scenario data, UI routing, or player-facing command behavior changed.
