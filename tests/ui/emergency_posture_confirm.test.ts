@@ -73,7 +73,7 @@ describe('Army HQ shell chrome', () => {
         setLocale('bcs');
         render(createElement(ArmyHQModal));
 
-        expect(screen.getByRole('dialog', { name: 'Stab armije' })).toBeTruthy();
+        expect(screen.getByRole('dialog', { name: 'Štab armije' })).toBeTruthy();
         expect(screen.getByRole('tab', { name: 'BRIFING' })).toBeTruthy();
         expect(screen.getByRole('tab', { name: 'SAŽETAK' })).toBeTruthy();
         expect(screen.getByRole('tab', { name: 'ZAPISI' })).toBeTruthy();

@@ -588,7 +588,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(loopsById.execute.label).toBe('Izvrši');
     expect(loopsById.cost.summary).toContain('stavke cijene');
     expect(loopsById.report.summary).toContain('zapisana poteza');
-    expect(handoffsById['army-hq-briefing'].label).toBe('Brifing Staba armije');
+    expect(handoffsById['army-hq-briefing'].label).toBe('Brifing Štaba armije');
     expect(handoffsById['turn-aftermath-records'].label).toBe('Zapisi posljedica poteza');
     expect(handoffsById.chronicle.actionLabel).toBe('Otvori Hroniku');
     expect(view.commandQuestions.map((question) => question.label)).not.toContain('Urgent');
@@ -623,12 +623,12 @@ describe('buildPresidentialDecisionRoomView', () => {
 
     const cardsById = Object.fromEntries(view.cards.map((card) => [card.id, card]));
 
-    expect(cardsById['review:pending'].title).toBe('Predsjednicki pregledi na cekanju');
+    expect(cardsById['review:pending'].title).toBe('Predsjednicki pregledi na čekanju');
     expect(cardsById['review:pending'].sourceOwner).toBe('Predsjednicki red pregleda');
-    expect(cardsById['review:pending'].evidence).toContain('2 na cekanju');
-    expect(cardsById['paramilitary:pending'].title).toBe('Odobrenje paravojske na cekanju');
-    expect(cardsById['paramilitary:pending'].evidence).toContain('rizik ratnih zlocina');
-    expect(cardsById['manifest:peace_plan'].title).toBe('Odgovor na mirovni plan na cekanju');
+    expect(cardsById['review:pending'].evidence).toContain('2 na čekanju');
+    expect(cardsById['paramilitary:pending'].title).toBe('Odobrenje paravojske na čekanju');
+    expect(cardsById['paramilitary:pending'].evidence).toContain('rizik ratnih zločina');
+    expect(cardsById['manifest:peace_plan'].title).toBe('Odgovor na mirovni plan na čekanju');
     expect(cardsById['sitrep:front-exposed'].title).toBe('Operativni SITREP');
     expect(cardsById['chronicle:review-memory'].title).toBe('Pamćenje Hronike ažurirano');
     expect(cardsById['review:pending'].title).not.toBe('Presidential reviews pending');
