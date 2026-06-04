@@ -1516,4 +1516,49 @@ describe('save migration validator hardening', () => {
             /Save schema validation failed after migration[\s\S]*military\.airdrop_allocation must be an object when present/
         );
     });
+
+    it('accepts current-version saves with absent or well-formed smuggling allocations', () => {
+        const absent = currentVersionState();
+        delete absent.military.smuggling_allocation;
+        const withAllocation = currentVersionState();
+        withAllocation.military.smuggling_allocation = {
+            gorazde: { type: 'ammo', amount: 0.4 },
+            sarajevo: { type: 'food', amount: 0 },
+        };
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWithAllocation = deserializeState(JSON.stringify(withAllocation));
+
+        expect(migratedAbsent.military.smuggling_allocation).toBeUndefined();
+        expect(migratedWithAllocation.military.smuggling_allocation).toEqual({
+            gorazde: { type: 'ammo', amount: 0.4 },
+            sarajevo: { type: 'food', amount: 0 },
+        });
+    });
+
+    it('rejects current-version saves with malformed smuggling allocation entries', () => {
+        const state = currentVersionState();
+        state.military.smuggling_allocation = {
+            ok: { type: 'food', amount: 0 },
+            badType: { type: 'medicine', amount: 1 },
+            negative: { type: 'ammo', amount: -1 },
+            infinite: { type: 'food', amount: Number.POSITIVE_INFINITY },
+            textAmount: { type: 'ammo', amount: '1' },
+            missingAmount: { type: 'ammo' },
+            nonRecord: 1,
+        } as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.smuggling_allocation\.badType\.type must be ammo or food[\s\S]*military\.smuggling_allocation\.negative\.amount must be a finite non-negative number[\s\S]*military\.smuggling_allocation\.infinite\.amount must be a finite non-negative number[\s\S]*military\.smuggling_allocation\.textAmount\.amount must be a finite non-negative number[\s\S]*military\.smuggling_allocation\.missingAmount\.amount must be a finite non-negative number[\s\S]*military\.smuggling_allocation\.nonRecord must be an object/
+        );
+    });
+
+    it('rejects current-version saves with non-record smuggling allocations', () => {
+        const state = currentVersionState();
+        state.military.smuggling_allocation = [] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.smuggling_allocation must be an object when present/
+        );
+    });
 });

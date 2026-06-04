@@ -756,6 +756,27 @@ function validateFiniteNonNegativeNumberRecord(value: unknown, path: string, err
     }
 }
 
+function validateSmugglingAllocation(value: unknown, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push('military.smuggling_allocation must be an object when present');
+        return;
+    }
+
+    for (const [key, entry] of Object.entries(value)) {
+        const path = `military.smuggling_allocation.${key}`;
+        if (!isRecord(entry)) {
+            errors.push(`${path} must be an object`);
+            continue;
+        }
+        if (entry.type !== 'ammo' && entry.type !== 'food') {
+            errors.push(`${path}.type must be ammo or food`);
+        }
+        if (!isFiniteNonNegativeNumber(entry.amount)) {
+            errors.push(`${path}.amount must be a finite non-negative number`);
+        }
+    }
+}
+
 function validateCostLedgerAnnotations(value: unknown, errors: string[]): void {
     if (!Array.isArray(value)) {
         errors.push('military.cost_ledger_annotations must be an array when present');
@@ -1336,6 +1357,9 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'airdrop_allocation' in military && military.airdrop_allocation !== undefined) {
         validateFiniteNonNegativeNumberRecord(military.airdrop_allocation, 'military.airdrop_allocation', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'smuggling_allocation' in military && military.smuggling_allocation !== undefined) {
+        validateSmugglingAllocation(military.smuggling_allocation, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'closed_event_ids' in military && military.closed_event_ids !== undefined) {
         validateClosedEventIds(military.closed_event_ids, errors);

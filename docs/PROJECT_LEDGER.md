@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(state): validate smuggling_allocation when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation logic, scenario data, UI routing, or player-facing behavior changed.
+
+**Change:** Classified `military.smuggling_allocation` as an optional player-entered/runtime-normalized allocation record rather than required current-save state. Added validate-when-present coverage so present payloads must be an object mapping enclave ids to allocation entries with `type: 'ammo' | 'food'` and finite non-negative `amount`. Absent payloads remain valid before any smuggling allocation is staged or normalized.
+
+**Verification:** Red proof: `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` failed because malformed/non-record smuggling allocations were accepted before the validator existed. Green proof passed: focused validator file 120/120; smuggling/airdrop supply consumer proof 13/13; broader save/schema pack 211/211; `npm.cmd run typecheck`; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 with `state: 172` and `sim: 327`.
+
+**Files:** `src/state/validateGameState.ts`, `tests/save_migration_validator_rejection.test.ts`, `docs/40_reports/implemented/20260604_SMUGGLING_ALLOCATION_VALIDATE_WHEN_PRESENT.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/README.md`, `.claude/napkin.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(state): validate airdrop_allocation when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation logic, scenario data, UI routing, or player-facing behavior changed.
