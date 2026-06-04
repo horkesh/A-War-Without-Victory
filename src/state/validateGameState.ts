@@ -1170,7 +1170,9 @@ function validateAiDecisionLog(value: unknown, errors: string[]): void {
         if (!isCanonicalPlayerFaction(entry.faction)) {
             errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
         }
-        if ('corps_id' in entry && entry.corps_id !== undefined && !isNonEmptyString(entry.corps_id)) {
+        if (entry.level === 'corps' && !isNonEmptyString(entry.corps_id)) {
+            errors.push(`${path}.corps_id must be a non-empty string for corps-level decisions`);
+        } else if ('corps_id' in entry && entry.corps_id !== undefined && !isNonEmptyString(entry.corps_id)) {
             errors.push(`${path}.corps_id must be a non-empty string when present`);
         }
         validateAiDecisionLogDecision(entry, `${path}.decision`, errors);

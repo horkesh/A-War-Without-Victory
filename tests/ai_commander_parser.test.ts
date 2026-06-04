@@ -40,6 +40,34 @@ describe('response parser', () => {
         expect(result!.corps_directives.vrs_1st_krajina.stance).toBe('balanced');
     });
 
+    it('parseArmyResponse filters non-string array entries before persistence', () => {
+        const json = JSON.stringify({
+            corps_directives: {
+                vrs_1st_krajina: {
+                    stance: 'offensive',
+                    hold_municipalities: ['brcko', 42, null],
+                    offensive_targets: [{ osid: 'bad' }, 'op:brcko:brcko_1'],
+                },
+            },
+            operation_decisions: {
+                approve: ['corridor_92', 7],
+                postpone: [false, 'sana_95'],
+                abort: [{ id: 'bad' }, 'stale_op'],
+            },
+            peace_plan_response: null,
+            reserve_deployment: null,
+            strategic_reasoning: 'test',
+            briefing_text: 'test',
+        });
+        const result = parseArmyResponse(json, 'RS', 10);
+
+        expect(result!.operation_decisions.approve).toEqual(['corridor_92']);
+        expect(result!.operation_decisions.postpone).toEqual(['sana_95']);
+        expect(result!.operation_decisions.abort).toEqual(['stale_op']);
+        expect(result!.corps_directives.vrs_1st_krajina.hold_municipalities).toEqual(['brcko']);
+        expect(result!.corps_directives.vrs_1st_krajina.offensive_targets).toEqual(['op:brcko:brcko_1']);
+    });
+
     it('parseCorpsResponse extracts valid corps decision', () => {
         const json = JSON.stringify({
             sector_stances: { sector_1: 'fortify' },

@@ -2107,6 +2107,31 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('rejects corps AI decision log entries without a replay corps key', () => {
+        const state = currentVersionState();
+        state.military.ai_decision_log = [
+            {
+                turn: 8,
+                level: 'corps',
+                faction: 'RS',
+                decision: {
+                    corps_id: 'rs_1st_krajina',
+                    faction: 'RS',
+                    turn: 8,
+                    sector_stances: { 'sector:rs_1st_krajina:1': 'defend' },
+                    operation_plan: null,
+                    brigade_movements: {},
+                    assessment: 'Hold',
+                },
+                model_used: 'test-model',
+            },
+        ];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.ai_decision_log\[0\]\.corps_id must be a non-empty string for corps-level decisions/
+        );
+    });
+
     it('rejects current-version saves with non-array AI decision logs', () => {
         const state = currentVersionState();
         state.military.ai_decision_log = {} as any;
