@@ -1,8 +1,20 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-06-03 (coverage component cache)
+**Updated:** 2026-06-04 (current hash reconciliation)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
+
+---
+
+## 2026-06-04: Current hash reconciliation after final-sector seal
+
+**Change:** The active sector/frontline performance floor is reconciled to current `main` after the June 4 final-sector seal correction. The prior `e086afbefcef01e6` floor remains valid history for the 2026-06-03 coverage-component-cache slice, but it is no longer the pre-change floor for new sector optimization work.
+
+**Evidence:** Current 40w timed run `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n2019` produced final hash `41c72b13ad2e91b9`, passed 30/30 anchors, reported 0 critical anomalies, and passed `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n2019`. The old `e086afbefcef01e6` run `n2017` now fails current consistency validation with an empty contested sector, one wide undefended front subsegment, and adjacent uncontested `op:zavidovici:cardak_2` exposure. This points to accepted mainline final-sector-truth drift, not a sector-performance regression.
+
+**Next gate:** Before any new sector/frontline optimization, re-profile from current `main` against `41c72b13ad2e91b9`; stop on unexpected hash drift until the new floor is explicitly reconciled.
+
+**Report:** [implemented/20260604_SECTOR_HASH_RECONCILIATION.md](implemented/20260604_SECTOR_HASH_RECONCILIATION.md)
 
 ---
 
