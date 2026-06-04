@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] test(replay): lock fatigue distribution fixture ownership
+
+**Type:** Static generated-artifact ownership guard + docs closeout. No fixture bytes, scenario outputs, replay writers, fatigue logic, combat logic, save schema, calibration, UI, or player-facing behavior changed.
+
+**Change:** Added an explicit generated-artifact ownership row and static guard for the committed compact fatigue-distribution replay fixture at `tests/fixtures/fatigue_distribution/compact_run/`. The fixture is now classified as retained static diagnostic evidence for `tests/fatigue_distribution_audit_diagnostic.test.ts`, not as a refresh target and not as a transient `runs/<scenario_run>/replay_save_sequence.json` sidecar. The guard pins the two tracked fixture files, the ownership row wording, the diagnostic consumer, and the synthetic two-turn `run_summary.json` / `replay_save_sequence.json` shape.
+
+**Verification:** Red proof: `node F:\A-War-Without-Victory\node_modules\vitest\vitest.mjs run tests\fatigue_distribution_replay_fixture_artifact_ownership.test.ts --reporter=dot` failed before the matrix row because the fixture was unlisted. Green proof: `node F:\A-War-Without-Victory\node_modules\vitest\vitest.mjs run tests\fatigue_distribution_replay_fixture_artifact_ownership.test.ts tests\fatigue_distribution_audit_diagnostic.test.ts tests\generated_artifact_ownership_matrix_contract.test.ts --reporter=dot`; `git diff --check`.
+
+**Files:** `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `tests/fatigue_distribution_replay_fixture_artifact_ownership.test.ts`, `docs/40_reports/implemented/20260604_FATIGUE_DISTRIBUTION_FIXTURE_ARTIFACT_OWNERSHIP.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(state): validate operation opportunities when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation behavior, scenario data, UI routing, calibration movement, or player-facing command behavior changed.
