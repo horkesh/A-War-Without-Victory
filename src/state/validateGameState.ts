@@ -14,6 +14,13 @@ const CANONICAL_PLAYER_FACTIONS = ['RBiH', 'RS', 'HRHB'] as const;
 const DOCTRINE_OVERRIDE_FORCED_STANCES = ['defensive', 'balanced', 'offensive', 'reorganize'] as const;
 const SECTOR_STANCES = ['fortify', 'defend', 'elastic', 'active_defense', 'screening'] as const;
 const MUNICIPALITY_SUPPORT_TYPES = ['weapons_shipment', 'staff_priority', 'croatian_support_package'] as const;
+const AI_DECISION_LEVELS = ['army', 'corps', 'advisor', 'political', 'event'] as const;
+const AI_CORPS_STANCES = ['offensive', 'balanced', 'defensive'] as const;
+const AI_PEACE_PLAN_RESPONSES = ['accept', 'reject'] as const;
+const AI_OPERATION_APPROACHES = ['concentrated_assault', 'broad_front', 'probing', 'envelopment'] as const;
+const AI_OPERATION_TIMINGS = ['immediate', 'next_turn', 'after_preparation'] as const;
+const AI_ADVISOR_CONTEXT_TYPES = ['situation_analysis', 'operation_planning', 'peace_plan'] as const;
+const AI_ALLIANCE_POSTURES = ['maintain', 'distance', 'break'] as const;
 const MUNICIPALITY_SUPPORT_TYPE_BY_FACTION: Record<string, string> = {
     RBiH: 'weapons_shipment',
     RS: 'staff_priority',
@@ -132,6 +139,34 @@ function isSectorStanceValue(value: unknown): boolean {
 
 function isMunicipalitySupportType(value: unknown): boolean {
     return typeof value === 'string' && MUNICIPALITY_SUPPORT_TYPES.includes(value as typeof MUNICIPALITY_SUPPORT_TYPES[number]);
+}
+
+function isAiDecisionLevel(value: unknown): boolean {
+    return typeof value === 'string' && AI_DECISION_LEVELS.includes(value as typeof AI_DECISION_LEVELS[number]);
+}
+
+function isAiCorpsStance(value: unknown): boolean {
+    return typeof value === 'string' && AI_CORPS_STANCES.includes(value as typeof AI_CORPS_STANCES[number]);
+}
+
+function isAiPeacePlanResponse(value: unknown): boolean {
+    return value === null || (typeof value === 'string' && AI_PEACE_PLAN_RESPONSES.includes(value as typeof AI_PEACE_PLAN_RESPONSES[number]));
+}
+
+function isAiOperationApproach(value: unknown): boolean {
+    return typeof value === 'string' && AI_OPERATION_APPROACHES.includes(value as typeof AI_OPERATION_APPROACHES[number]);
+}
+
+function isAiOperationTiming(value: unknown): boolean {
+    return typeof value === 'string' && AI_OPERATION_TIMINGS.includes(value as typeof AI_OPERATION_TIMINGS[number]);
+}
+
+function isAiAdvisorContextType(value: unknown): boolean {
+    return typeof value === 'string' && AI_ADVISOR_CONTEXT_TYPES.includes(value as typeof AI_ADVISOR_CONTEXT_TYPES[number]);
+}
+
+function isAiAlliancePosture(value: unknown): boolean {
+    return typeof value === 'string' && AI_ALLIANCE_POSTURES.includes(value as typeof AI_ALLIANCE_POSTURES[number]);
 }
 
 function isEventDecisionSource(value: unknown): boolean {
@@ -872,6 +907,305 @@ function validateMunicipalitySupportOrders(value: unknown, errors: string[]): vo
     }
 }
 
+function validateAiStringArray(value: unknown, path: string, errors: string[]): void {
+    if (!Array.isArray(value) || value.some((entry) => typeof entry !== 'string')) {
+        errors.push(`${path} must be a string array`);
+    }
+}
+
+function validateAiCorpsDirective(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isAiCorpsStance(value.stance)) {
+        errors.push(`${path}.stance must be a valid AI corps stance`);
+    }
+    if ('priority' in value && value.priority !== undefined && typeof value.priority !== 'string') {
+        errors.push(`${path}.priority must be a string when present`);
+    }
+    if ('hold_municipalities' in value && value.hold_municipalities !== undefined) {
+        validateAiStringArray(value.hold_municipalities, `${path}.hold_municipalities`, errors);
+    }
+    if ('offensive_targets' in value && value.offensive_targets !== undefined) {
+        validateAiStringArray(value.offensive_targets, `${path}.offensive_targets`, errors);
+    }
+}
+
+function validateAiArmyDecision(value: unknown, path: string, errors: string[], expectedFaction?: string): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isCanonicalPlayerFaction(value.faction)) {
+        errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+    } else if (expectedFaction !== undefined && value.faction !== expectedFaction) {
+        errors.push(`${path}.faction must match its faction key`);
+    }
+    if (!isNonNegativeInteger(value.turn)) {
+        errors.push(`${path}.turn must be a non-negative integer`);
+    }
+    if (!isRecord(value.corps_directives)) {
+        errors.push(`${path}.corps_directives must be an object`);
+    } else {
+        for (const [corpsId, directive] of Object.entries(value.corps_directives)) {
+            validateAiCorpsDirective(directive, `${path}.corps_directives.${corpsId}`, errors);
+        }
+    }
+    if (!isRecord(value.operation_decisions)) {
+        errors.push(`${path}.operation_decisions must be an object`);
+    } else {
+        validateAiStringArray(value.operation_decisions.approve, `${path}.operation_decisions.approve`, errors);
+        validateAiStringArray(value.operation_decisions.postpone, `${path}.operation_decisions.postpone`, errors);
+        validateAiStringArray(value.operation_decisions.abort, `${path}.operation_decisions.abort`, errors);
+    }
+    if ('peace_plan_response' in value && value.peace_plan_response !== undefined && !isAiPeacePlanResponse(value.peace_plan_response)) {
+        errors.push(`${path}.peace_plan_response must be accept, reject, or null when present`);
+    }
+    if ('reserve_deployment' in value && value.reserve_deployment !== undefined && value.reserve_deployment !== null) {
+        const reserveDeployment = value.reserve_deployment;
+        if (!isRecord(reserveDeployment)) {
+            errors.push(`${path}.reserve_deployment must be an object or null when present`);
+        } else {
+            if (!isNonEmptyString(reserveDeployment.deploy_to)) {
+                errors.push(`${path}.reserve_deployment.deploy_to must be a non-empty string`);
+            }
+            if (typeof reserveDeployment.reason !== 'string') {
+                errors.push(`${path}.reserve_deployment.reason must be a string`);
+            }
+        }
+    }
+    if (typeof value.strategic_reasoning !== 'string') {
+        errors.push(`${path}.strategic_reasoning must be a string`);
+    }
+    if (typeof value.briefing_text !== 'string') {
+        errors.push(`${path}.briefing_text must be a string`);
+    }
+}
+
+function validateAiOperationPlan(value: unknown, path: string, errors: string[]): void {
+    if (value === null) return;
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object or null when present`);
+        return;
+    }
+    if (!isNonEmptyString(value.target)) {
+        errors.push(`${path}.target must be a non-empty string`);
+    }
+    validateAiStringArray(value.force, `${path}.force`, errors);
+    if (!isAiOperationApproach(value.approach)) {
+        errors.push(`${path}.approach must be a valid operation approach`);
+    }
+    if (!isAiOperationTiming(value.timing)) {
+        errors.push(`${path}.timing must be a valid operation timing`);
+    }
+}
+
+function validateAiCorpsDecision(value: unknown, path: string, errors: string[], expectedFaction?: string, expectedCorpsId?: string): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isNonEmptyString(value.corps_id)) {
+        errors.push(`${path}.corps_id must be a non-empty string`);
+    } else if (expectedCorpsId !== undefined && value.corps_id !== expectedCorpsId) {
+        errors.push(`${path}.corps_id must match its log corps_id`);
+    }
+    if (!isCanonicalPlayerFaction(value.faction)) {
+        errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+    } else if (expectedFaction !== undefined && value.faction !== expectedFaction) {
+        errors.push(`${path}.faction must match its log faction`);
+    }
+    if (!isNonNegativeInteger(value.turn)) {
+        errors.push(`${path}.turn must be a non-negative integer`);
+    }
+    if (!isRecord(value.sector_stances)) {
+        errors.push(`${path}.sector_stances must be an object`);
+    } else {
+        for (const [sectorId, stance] of Object.entries(value.sector_stances)) {
+            if (!isSectorStanceValue(stance)) {
+                errors.push(`${path}.sector_stances.${sectorId} must be a valid sector stance`);
+            }
+        }
+    }
+    if ('operation_plan' in value && value.operation_plan !== undefined) {
+        validateAiOperationPlan(value.operation_plan, `${path}.operation_plan`, errors);
+    }
+    if (!isRecord(value.brigade_movements)) {
+        errors.push(`${path}.brigade_movements must be an object`);
+    } else {
+        for (const [brigadeId, movement] of Object.entries(value.brigade_movements)) {
+            const movementPath = `${path}.brigade_movements.${brigadeId}`;
+            if (!isRecord(movement)) {
+                errors.push(`${movementPath} must be an object`);
+                continue;
+            }
+            if (!isNonEmptyString(movement.destination)) {
+                errors.push(`${movementPath}.destination must be a non-empty string`);
+            }
+            if (typeof movement.reason !== 'string') {
+                errors.push(`${movementPath}.reason must be a string`);
+            }
+        }
+    }
+    if (typeof value.assessment !== 'string') {
+        errors.push(`${path}.assessment must be a string`);
+    }
+}
+
+function validateAiAdvisorResponse(value: unknown, path: string, errors: string[], expectedFaction?: string): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (typeof value.commander_name !== 'string') {
+        errors.push(`${path}.commander_name must be a string`);
+    }
+    if (!isCanonicalPlayerFaction(value.faction)) {
+        errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+    } else if (expectedFaction !== undefined && value.faction !== expectedFaction) {
+        errors.push(`${path}.faction must match its log faction`);
+    }
+    if (typeof value.assessment !== 'string') {
+        errors.push(`${path}.assessment must be a string`);
+    }
+    if (!Array.isArray(value.recommendations)) {
+        errors.push(`${path}.recommendations must be an array`);
+    } else {
+        value.recommendations.forEach((recommendation, i) => {
+            const recommendationPath = `${path}.recommendations[${i}]`;
+            if (!isRecord(recommendation)) {
+                errors.push(`${recommendationPath} must be an object`);
+                return;
+            }
+            if (!isFiniteNonNegativeNumber(recommendation.priority)) {
+                errors.push(`${recommendationPath}.priority must be a finite non-negative number`);
+            }
+            if (typeof recommendation.action !== 'string') {
+                errors.push(`${recommendationPath}.action must be a string`);
+            }
+            if (typeof recommendation.reasoning !== 'string') {
+                errors.push(`${recommendationPath}.reasoning must be a string`);
+            }
+        });
+    }
+    if (!isAiAdvisorContextType(value.context_type)) {
+        errors.push(`${path}.context_type must be a valid advisor context type`);
+    }
+}
+
+function validateAiPoliticalDecision(value: unknown, path: string, errors: string[], expectedFaction?: string): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isCanonicalPlayerFaction(value.faction)) {
+        errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+    } else if (expectedFaction !== undefined && value.faction !== expectedFaction) {
+        errors.push(`${path}.faction must match its log faction`);
+    }
+    if (!isNonNegativeInteger(value.turn)) {
+        errors.push(`${path}.turn must be a non-negative integer`);
+    }
+    if (!isRecord(value.event_responses)) {
+        errors.push(`${path}.event_responses must be an object`);
+    } else {
+        for (const [eventId, response] of Object.entries(value.event_responses)) {
+            const responsePath = `${path}.event_responses.${eventId}`;
+            if (!isRecord(response)) {
+                errors.push(`${responsePath} must be an object`);
+                continue;
+            }
+            if (!isNonEmptyString(response.choice)) {
+                errors.push(`${responsePath}.choice must be a non-empty string`);
+            }
+            if (typeof response.reasoning !== 'string') {
+                errors.push(`${responsePath}.reasoning must be a string`);
+            }
+        }
+    }
+    if ('peace_plan_response' in value && value.peace_plan_response !== undefined && !isAiPeacePlanResponse(value.peace_plan_response)) {
+        errors.push(`${path}.peace_plan_response must be accept, reject, or null when present`);
+    }
+    if ('alliance_posture' in value && value.alliance_posture !== undefined && !isAiAlliancePosture(value.alliance_posture)) {
+        errors.push(`${path}.alliance_posture must be a valid alliance posture when present`);
+    }
+    if (typeof value.reasoning !== 'string') {
+        errors.push(`${path}.reasoning must be a string`);
+    }
+}
+
+function validateAiDecisionLogDecision(entry: Record<string, unknown>, path: string, errors: string[]): void {
+    if (entry.level === 'army') {
+        validateAiArmyDecision(entry.decision, path, errors, entry.faction as string);
+    } else if (entry.level === 'corps') {
+        validateAiCorpsDecision(entry.decision, path, errors, entry.faction as string, typeof entry.corps_id === 'string' ? entry.corps_id : undefined);
+    } else if (entry.level === 'advisor') {
+        validateAiAdvisorResponse(entry.decision, path, errors, entry.faction as string);
+    } else if (entry.level === 'political' || entry.level === 'event') {
+        validateAiPoliticalDecision(entry.decision, path, errors, entry.faction as string);
+    } else if (!isRecord(entry.decision)) {
+        errors.push(`${path} must be an object`);
+    }
+}
+
+function validateAiDecisionLog(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.ai_decision_log must be an array when present');
+        return;
+    }
+
+    value.forEach((entry, i) => {
+        const path = `military.ai_decision_log[${i}]`;
+        if (!isRecord(entry)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        if (!isNonNegativeInteger(entry.turn)) {
+            errors.push(`${path}.turn must be a non-negative integer`);
+        }
+        if (!isAiDecisionLevel(entry.level)) {
+            errors.push(`${path}.level must be a valid AI decision level`);
+        }
+        if (!isCanonicalPlayerFaction(entry.faction)) {
+            errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+        }
+        if (entry.level === 'corps' && !isNonEmptyString(entry.corps_id)) {
+            errors.push(`${path}.corps_id must be a non-empty string for corps-level decisions`);
+        } else if ('corps_id' in entry && entry.corps_id !== undefined && !isNonEmptyString(entry.corps_id)) {
+            errors.push(`${path}.corps_id must be a non-empty string when present`);
+        }
+        validateAiDecisionLogDecision(entry, `${path}.decision`, errors);
+        if (!isNonEmptyString(entry.model_used)) {
+            errors.push(`${path}.model_used must be a non-empty string`);
+        }
+        if ('prompt_tokens' in entry && entry.prompt_tokens !== undefined && !isFiniteNonNegativeNumber(entry.prompt_tokens)) {
+            errors.push(`${path}.prompt_tokens must be a finite non-negative number when present`);
+        }
+        if ('completion_tokens' in entry && entry.completion_tokens !== undefined && !isFiniteNonNegativeNumber(entry.completion_tokens)) {
+            errors.push(`${path}.completion_tokens must be a finite non-negative number when present`);
+        }
+        if ('latency_ms' in entry && entry.latency_ms !== undefined && !isFiniteNonNegativeNumber(entry.latency_ms)) {
+            errors.push(`${path}.latency_ms must be a finite non-negative number when present`);
+        }
+    });
+}
+
+function validateAiArmyDecisions(value: unknown, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push('military.ai_army_decisions must be an object when present');
+        return;
+    }
+
+    for (const [faction, decision] of Object.entries(value)) {
+        const path = `military.ai_army_decisions.${faction}`;
+        if (!isCanonicalPlayerFaction(faction)) {
+            errors.push(`${path} must use a canonical faction id key`);
+        }
+        validateAiArmyDecision(decision, path, errors, faction);
+    }
+}
+
 function validateLogisticsPriority(value: unknown, errors: string[]): void {
     if (!isRecord(value)) {
         errors.push('military.logistics_priority must be an object when present');
@@ -1521,6 +1855,12 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'command_authority' in military && military.command_authority !== undefined) {
         validateCommandAuthority(military.command_authority, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'ai_decision_log' in military && military.ai_decision_log !== undefined) {
+        validateAiDecisionLog(military.ai_decision_log, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'ai_army_decisions' in military && military.ai_army_decisions !== undefined) {
+        validateAiArmyDecisions(military.ai_army_decisions, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'closed_event_ids' in military && military.closed_event_ids !== undefined) {
         validateClosedEventIds(military.closed_event_ids, errors);

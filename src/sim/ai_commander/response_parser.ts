@@ -29,6 +29,10 @@ function parseAdvisorContextType(value: unknown): AdvisorResponse['context_type'
     return 'situation_analysis';
 }
 
+function parseStringArray(value: unknown): string[] {
+    return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === 'string') : [];
+}
+
 /** Strip markdown code block wrappers if present. */
 function stripCodeBlock(text: string): string {
     const match = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
@@ -65,8 +69,8 @@ export function parseArmyResponse(raw: string, faction: FactionId, turn: number)
             corps_directives[corpsId] = {
                 stance,
                 priority: typeof d?.priority === 'string' ? d.priority : undefined,
-                hold_municipalities: Array.isArray(d?.hold_municipalities) ? d.hold_municipalities as string[] : undefined,
-                offensive_targets: Array.isArray(d?.offensive_targets) ? d.offensive_targets as string[] : undefined,
+                hold_municipalities: Array.isArray(d?.hold_municipalities) ? parseStringArray(d.hold_municipalities) : undefined,
+                offensive_targets: Array.isArray(d?.offensive_targets) ? parseStringArray(d.offensive_targets) : undefined,
             };
         }
     }
@@ -77,9 +81,9 @@ export function parseArmyResponse(raw: string, faction: FactionId, turn: number)
         turn,
         corps_directives,
         operation_decisions: {
-            approve: Array.isArray(opDec.approve) ? opDec.approve as string[] : [],
-            postpone: Array.isArray(opDec.postpone) ? opDec.postpone as string[] : [],
-            abort: Array.isArray(opDec.abort) ? opDec.abort as string[] : [],
+            approve: parseStringArray(opDec.approve),
+            postpone: parseStringArray(opDec.postpone),
+            abort: parseStringArray(opDec.abort),
         },
         peace_plan_response: data.peace_plan_response === 'accept' || data.peace_plan_response === 'reject'
             ? data.peace_plan_response as 'accept' | 'reject' : null,

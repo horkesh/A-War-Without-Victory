@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest AI decision-surface validate-when-present contract** | [implemented/20260604_AI_DECISION_SURFACES_VALIDATE_WHEN_PRESENT.md](implemented/20260604_AI_DECISION_SURFACES_VALIDATE_WHEN_PRESENT.md) - `military.ai_decision_log` and `military.ai_army_decisions` remain optional but now reject malformed present AI command/replay payloads, require corps replay keys, and sanitize recoverable AI parser arrays before persistence. |
 | **Latest player order-surface validate-when-present contract** | [implemented/20260604_ORDER_SURFACES_VALIDATE_WHEN_PRESENT.md](implemented/20260604_ORDER_SURFACES_VALIDATE_WHEN_PRESENT.md) - `military.sector_stance_orders` and `military.municipality_support_orders` remain optional but now reject malformed present player/order payloads. |
 | **Latest Codex review thread cleanup** | [implemented/20260604_CODEX_REVIEW_THREAD_CLEANUP.md](implemented/20260604_CODEX_REVIEW_THREAD_CLEANUP.md) - Closes unresolved Codex review threads from merged PRs #144/#148/#150/#151 and records the GitHub deployment/comment sweep. |
 | **Latest command authority validate-when-present contract** | [implemented/20260604_COMMAND_AUTHORITY_VALIDATE_WHEN_PRESENT.md](implemented/20260604_COMMAND_AUTHORITY_VALIDATE_WHEN_PRESENT.md) - `military.command_authority` remains optional but now rejects malformed present presidential resource records. |
