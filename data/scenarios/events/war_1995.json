@@ -422,6 +422,9 @@
       "faction": "RS",
       "war_crimes_delta": 5
     },
+    "sets_flags": {
+      "srebrenica_fell": true
+    },
     "effects": [
       {
         "kind": "morale_change",
@@ -612,6 +615,9 @@
       "kind": "supply_delta",
       "faction": "RS",
       "delta": -30
+    },
+    "sets_flags": {
+      "nato_deliberate_force_occurred": true
     },
     "effects": [
       {

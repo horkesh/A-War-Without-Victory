@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Chain 3 source-flag alignment** | [implemented/20260604_CHAIN3_SOURCE_FLAGS.md](implemented/20260604_CHAIN3_SOURCE_FLAGS.md) - The historical Srebrenica Falls and NATO Deliberate Force events now write the flags consumed by Chain 3 consequence predicates. |
 | **Latest Ahmici hostile-threshold alignment** | [implemented/20260604_AHMICI_HOSTILE_THRESHOLD.md](implemented/20260604_AHMICI_HOSTILE_THRESHOLD.md) - The authored Ahmici rupture event now drives RBiH-HRHB alliance to same-turn hostile/combat-enabled status and locks recovery at the hostile ceiling. |
 | **Latest bilateral flip municipality fallback** | [implemented/20260604_BILATERAL_FLIP_MUN_FALLBACK.md](implemented/20260604_BILATERAL_FLIP_MUN_FALLBACK.md) - War-phase RBiH-HRHB bilateral flip counting now derives `mun_id` from canonical OSID control events when producers omit the duplicate municipality field. |
 | **Latest Phase E activation simulator issue #170 fix** | [implemented/20260604_PHASE_E_ACTIVATION_SIMULATOR_GLOBAL_OFF_SKIP.md](implemented/20260604_PHASE_E_ACTIVATION_SIMULATOR_GLOBAL_OFF_SKIP.md) - `global_off --run-scenarios` now skips Tier 2 scenario execution when no ON combos are requested, returning `tier2.runs: []` while still clearing gate overrides. |
