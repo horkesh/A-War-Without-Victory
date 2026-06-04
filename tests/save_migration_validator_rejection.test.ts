@@ -1744,6 +1744,69 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('accepts current-version saves with absent or well-formed Army HQ overrides', () => {
+        const absent = currentVersionState();
+        delete absent.military.army_hq_overrides;
+        const withOverrides = currentVersionState();
+        withOverrides.military.army_hq_overrides = [
+            {
+                corps_id: 'rs_1st_krajina',
+                operation_name: 'HQ: Corridor',
+                min_brigades: 3,
+                target_osids: ['op:brcko:brcko_1'],
+                reason: 'Army HQ directive: Corridor',
+                issued_turn: 12,
+                type: 'offensive',
+                max_brigades: 5,
+            },
+            {
+                corps_id: 'arbih_1st_corps',
+                operation_name: 'Probe: Sarajevo approaches',
+                min_brigades: 1,
+                target_osids: [],
+                reason: 'Intel probe',
+                issued_turn: 12,
+                type: 'probe',
+            },
+        ];
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWithOverrides = deserializeState(JSON.stringify(withOverrides));
+
+        expect(migratedAbsent.military.army_hq_overrides).toBeUndefined();
+        expect(migratedWithOverrides.military.army_hq_overrides).toEqual(withOverrides.military.army_hq_overrides);
+    });
+
+    it('rejects current-version saves with malformed Army HQ overrides', () => {
+        const state = currentVersionState();
+        state.military.army_hq_overrides = [
+            {
+                corps_id: '',
+                operation_name: 42,
+                min_brigades: 0,
+                target_osids: ['op:brcko:brcko_1', 42],
+                reason: '',
+                issued_turn: -1,
+                type: 'assault',
+                max_brigades: 0,
+            },
+            42,
+        ] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.army_hq_overrides\[0\]\.corps_id must be a non-empty string[\s\S]*military\.army_hq_overrides\[0\]\.operation_name must be a non-empty string[\s\S]*military\.army_hq_overrides\[0\]\.min_brigades must be a positive integer[\s\S]*military\.army_hq_overrides\[0\]\.target_osids must be a string array[\s\S]*military\.army_hq_overrides\[0\]\.reason must be a non-empty string[\s\S]*military\.army_hq_overrides\[0\]\.issued_turn must be a non-negative integer[\s\S]*military\.army_hq_overrides\[0\]\.type must be offensive, probe, or feint[\s\S]*military\.army_hq_overrides\[0\]\.max_brigades must be a positive integer when present[\s\S]*military\.army_hq_overrides\[1\] must be an object/
+        );
+    });
+
+    it('rejects current-version saves with non-array Army HQ overrides', () => {
+        const state = currentVersionState();
+        state.military.army_hq_overrides = {} as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.army_hq_overrides must be an array when present/
+        );
+    });
+
     it('accepts current-version saves with absent or well-formed OPSEC sectors', () => {
         const absent = currentVersionState();
         delete absent.military.opsec_sectors;

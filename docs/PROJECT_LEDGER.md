@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(state): validate Army HQ overrides when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation behavior, scenario data, Tactical Group, `army_hq_operations`, UI routing, or player-facing command behavior changed.
+
+**Change:** Classified `military.army_hq_overrides` as an optional per-turn Army HQ directive bus rather than required current-save state. Added validate-when-present coverage so present payloads must be an array of `ArmyHQOverride` rows with non-empty `corps_id`, `operation_name`, `reason`, string-array `target_osids` (empty arrays remain valid for synchronized-operation participants with no current offensive targets), positive `min_brigades`, optional positive `max_brigades`, non-negative `issued_turn`, and type `offensive | probe | feint`. The validator does not normalize, sort, migrate, clear, materialize, or touch the separate v34 Tactical Group / `army_hq_operations` records.
+
+**Verification:** Red proof: `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` failed because malformed/non-array `army_hq_overrides` payloads were accepted. Green proof: `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` passed 150/150; `node node_modules\vitest\vitest.mjs run tests\commander_override.test.ts tests\army_hq_gathering.test.ts --reporter=dot` passed 98/98; `npm.cmd run typecheck -- --pretty false`; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 with `state: 172` and `sim: 327`.
+
+**Files:** `src/state/validateGameState.ts`, `tests/save_migration_validator_rejection.test.ts`, `docs/40_reports/implemented/20260604_ARMY_HQ_OVERRIDES_VALIDATE_WHEN_PRESENT.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/README.md`, `.claude/napkin.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(state): validate AI decision surfaces when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, scenario data, UI routing, or player-facing command behavior changed.
