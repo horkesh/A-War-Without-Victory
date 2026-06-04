@@ -17,6 +17,8 @@ import { computeFrontBreaches } from '../state/front_breaches.js';
 import type { FormationState, GameState, MilitiaPoolState, MunicipalityId, PostureLevel } from '../state/game_state.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
 import { computeSupplyReachability } from '../state/supply_reachability.js';
+import { maybeWritePlaytestSessionDigest } from '../diagnostics/telemetry/playtest_telemetry.js';
+import { isPlaytestTelemetryEnabled } from '../diagnostics/telemetry/playtest_telemetry_flag.js';
 
 type ScenarioScriptEntry = {
     faction: string;
@@ -710,6 +712,22 @@ async function main(): Promise<void> {
     process.stdout.write(`sim:scenario complete: turns=${opts.turns} applyBreaches=${opts.applyBreaches ? 'yes' : 'no'}\n`);
     process.stdout.write(`  save_out: ${opts.outPath}\n`);
     process.stdout.write(`  summary: ${opts.summaryPath}\n`);
+
+    // Local-first playtest telemetry slice (DEFAULT-OFF). No-op unless AWWV_PLAYTEST_TELEMETRY
+    // is enabled. The wall-clock label below is read ONLY when the flag is on and is used
+    // strictly to disambiguate the local diagnostic filename — it is outside the determinism
+    // path and never enters digest content or sim state.
+    if (isPlaytestTelemetryEnabled()) {
+        const telemetryPath = await maybeWritePlaytestSessionDigest({
+            scenarioId: opts.saveInPath,
+            runId: `turns${opts.turns}`,
+            summary,
+            filenameLabel: String(Date.now())
+        });
+        if (telemetryPath !== null) {
+            process.stdout.write(`  playtest_telemetry: ${telemetryPath}\n`);
+        }
+    }
 }
 
 // Only run the CLI when invoked directly (tests import runScenarioDeterministic).
