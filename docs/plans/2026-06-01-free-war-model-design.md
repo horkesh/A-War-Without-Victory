@@ -31,12 +31,12 @@ Two things had been conflated:
 
 ## 1. Two modes
 
-`state.meta.decision_mode: 'historical' | 'emergent'` (default `'historical'`).
+`state.meta.decision_mode: 'historical' | 'emergent'`. As of save schema v35, current loaded gameplay state must carry the field explicitly. Legacy/unset saves migrate to `'historical'`; new desktop campaigns explicitly set `'emergent'`.
 
 - **historical** — bots resolve to historical defaults; 40w/52w/188w regression byte-identical. The documentary / calibration path.
 - **emergent** — bots choose from battlefield + political signals; play diverges into a *bounded counterfactual*.
 
-**Guardrail against silent drift (Tech Architect):** baseline scenarios must **explicitly declare** `decision_mode: 'historical'` — never rely on the default. Add a save-migration that stamps it, and a CI assertion that baseline scenarios declare it. Mode is always an explicit, audited field.
+**Guardrail against silent drift (Tech Architect):** baseline scenarios must **explicitly declare** `decision_mode: 'historical'` — never rely on migration fallback. Save migration v35 stamps legacy/unset saves to historical, and current loaded-state validation rejects missing or malformed mode. Mode is always an explicit, audited field after migration.
 
 ---
 

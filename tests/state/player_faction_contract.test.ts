@@ -18,6 +18,7 @@ function minimalState(overrides: Record<string, unknown> = {}): Record<string, u
         referendum_deadline_turn: null,
         game_over: false,
         player_faction: 'RBiH',
+        decision_mode: 'historical',
     };
 
     return {
@@ -115,5 +116,39 @@ describe('player_faction loaded-state contract', () => {
 
         expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
         expect(migrated.meta.player_faction).toBe('RBiH');
+    });
+});
+
+describe('decision_mode loaded-state contract', () => {
+    it('requires current loaded gameplay state to carry a canonical decision mode', () => {
+        const missing = minimalState({ meta: { ...minimalState().meta as Record<string, unknown>, decision_mode: undefined } });
+        const invalid = minimalState({ meta: { ...minimalState().meta as Record<string, unknown>, decision_mode: 'sandbox' } });
+
+        const missingResult = validateGameStateShape(missing, { requireVersion: CURRENT_SCHEMA_VERSION });
+        const invalidResult = validateGameStateShape(invalid, { requireVersion: CURRENT_SCHEMA_VERSION });
+
+        expect(missingResult.ok).toBe(false);
+        expect(invalidResult.ok).toBe(false);
+        if (!missingResult.ok) {
+            expect(missingResult.errors).toContain("meta.decision_mode is required and must be 'historical' or 'emergent'");
+        }
+        if (!invalidResult.ok) {
+            expect(invalidResult.errors).toContain("meta.decision_mode must be 'historical' or 'emergent' when present");
+        }
+    });
+
+    it('migrates legacy saves without decision_mode to the historical calibration default', () => {
+        const legacyMeta = { ...minimalState().meta as Record<string, unknown> };
+        delete legacyMeta.decision_mode;
+
+        const legacy = minimalState({
+            schema_version: 13,
+            meta: legacyMeta,
+        });
+
+        const migrated = deserializeState(JSON.stringify(legacy));
+
+        expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(migrated.meta.decision_mode).toBe('historical');
     });
 });

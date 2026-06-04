@@ -34,6 +34,7 @@ function currentVersionState(): any {
             referendum_deadline_turn: null,
             game_over: false,
             player_faction: 'RBiH',
+            decision_mode: 'historical',
         },
         factions: [
             {
@@ -475,7 +476,7 @@ describe('Phase B Sub-slice B2 — state shape + save migration', () => {
     });
 
     describe('Gate 38 — drift audit clean', () => {
-        it('save_migration_drift_audit.cjs reports no orphan anonymous defaults at v34', () => {
+        it('save_migration_drift_audit.cjs reports no orphan anonymous defaults at v35', () => {
             const cwd = process.cwd();
             const outputPath = resolve(cwd, 'tools', 'diagnostics', 'output', 'save_migration_drift.json');
 
@@ -487,7 +488,7 @@ describe('Phase B Sub-slice B2 — state shape + save migration', () => {
                 fields: Array<{ field: string }>;
             };
 
-            expect(report.latest_schema_version).toBe(34);
+            expect(report.latest_schema_version).toBe(35);
             expect(report.anonymous_default_count).toBe(0);
             expect(report.fields).toEqual([]);
         });

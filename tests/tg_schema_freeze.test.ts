@@ -19,20 +19,20 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { getLatestSchemaVersion } from '../src/state/save_migration.js';
 import { serializeState, deserializeState } from '../src/state/serialize.js';
 
-describe('schema v34 freeze guard (ADR-0005 TG schema)', () => {
-    it('CURRENT_SCHEMA_VERSION is pinned at 34', () => {
+describe('schema v34/v35 freeze guard', () => {
+    it('CURRENT_SCHEMA_VERSION is pinned at 35', () => {
         // If this fails, a renumber happened. Confirm the bump is intentional
         // (new migration step appended), then update this guard + the
         // save_migration v34 one-way contract comment together.
-        expect(CURRENT_SCHEMA_VERSION).toBe(34);
+        expect(CURRENT_SCHEMA_VERSION).toBe(35);
     });
 
-    it('the latest registered migration version equals CURRENT_SCHEMA_VERSION (34)', () => {
+    it('the latest registered migration version equals CURRENT_SCHEMA_VERSION (35)', () => {
         // Guards against a migration being appended at a number > 34 without
         // bumping CURRENT_SCHEMA_VERSION (or vice-versa) — the classic
         // collide-renumber footgun ADR-0005 §Determinism Impact warns about.
         expect(getLatestSchemaVersion()).toBe(CURRENT_SCHEMA_VERSION);
-        expect(getLatestSchemaVersion()).toBe(34);
+        expect(getLatestSchemaVersion()).toBe(35);
     });
 
     it('v34 ships the four TG/Army-HQ Records as the only non-undefined scaffold (omitEmpty shape)', () => {
@@ -70,7 +70,7 @@ describe('schema v34 freeze guard (ADR-0005 TG schema)', () => {
         expect(brig.tg_recovery_suppressed_until_turn).toBeUndefined();
     });
 
-    it('a v34 state round-trips with schema_version preserved at 34', () => {
+    it('a current state round-trips with schema_version preserved at 35', () => {
         const faction = (id: string): any => ({
             id, profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 5 },
             areasOfResponsibility: [], supply_sources: [], command_capacity: 0,
@@ -83,7 +83,7 @@ describe('schema v34 freeze guard (ADR-0005 TG schema)', () => {
                 turn: 1, seed: 's', phase: 'war',
                 referendum_held: true, referendum_turn: 6, war_start_turn: 0,
                 referendum_eligible_turn: null, referendum_deadline_turn: null,
-                game_over: false, outcome: undefined, player_faction: 'RBiH',
+                game_over: false, outcome: undefined, player_faction: 'RBiH', decision_mode: 'historical',
             } as any,
             factions: [faction('RBiH'), faction('RS'), faction('HRHB')],
             military: {
@@ -109,6 +109,6 @@ describe('schema v34 freeze guard (ADR-0005 TG schema)', () => {
             displacement: {} as any,
         } as GameState;
         const hydrated = deserializeState(serializeState(state));
-        expect(hydrated.schema_version).toBe(34);
+        expect(hydrated.schema_version).toBe(35);
     });
 });

@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 34 as const;
+export const CURRENT_SCHEMA_VERSION = 35 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;

@@ -11,7 +11,7 @@ import type { GameState } from '../src/state/game_state.js';
 function makeFullFixture(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 12, seed: 'integration-save-load', phase: 'war', player_faction: 'RBiH' } as any,
+        meta: { turn: 12, seed: 'integration-save-load', phase: 'war', player_faction: 'RBiH', decision_mode: 'historical' } as any,
         factions: [
             {
                 id: 'RBiH',

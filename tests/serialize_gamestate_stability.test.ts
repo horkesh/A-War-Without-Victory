@@ -11,7 +11,7 @@ import { serializeGameState } from '../src/state/serializeGameState.js';
 function fixtureWithOutOfOrderKeys(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 1, seed: 'stability-fixture', player_faction: 'RBiH' } as any,
+        meta: { turn: 1, seed: 'stability-fixture', player_faction: 'RBiH', decision_mode: 'historical' } as any,
         factions: [],
         military: {
             formations: {
