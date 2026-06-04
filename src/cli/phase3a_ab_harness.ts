@@ -61,6 +61,8 @@ function createProlongedSiegeState(): GameState {
   military: {
     formations: {},
     front_segments: {},
+    theatres: {},
+    army_theatre_assignment: {},
     front_posture: {},
     front_posture_regions: {},
     front_pressure: {},
@@ -145,6 +147,8 @@ function createTemporaryEncirclementState(): GameState {
   military: {
     formations: {},
     front_segments: {},
+    theatres: {},
+    army_theatre_assignment: {},
     front_posture: {},
     front_posture_regions: {},
     front_pressure: {},
@@ -222,6 +226,8 @@ function createCorridorLifelineState(): GameState {
   military: {
     formations: {},
     front_segments: {},
+    theatres: {},
+    army_theatre_assignment: {},
     front_posture: {},
     front_posture_regions: {},
     front_pressure: {},
@@ -313,6 +319,8 @@ function createMultiPocketStressState(): GameState {
   military: {
     formations: {},
     front_segments: {},
+    theatres: {},
+    army_theatre_assignment: {},
     front_posture: {},
     front_posture_regions: {},
     front_pressure: {},
@@ -387,6 +395,8 @@ function createAsymmetricCollapseState(): GameState {
   military: {
     formations: {},
     front_segments: {},
+    theatres: {},
+    army_theatre_assignment: {},
     front_posture: {},
     front_posture_regions: {},
     front_pressure: {},

@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, expectTypeOf, it } from 'vitest';
 
-import { CURRENT_SCHEMA_VERSION } from '../../src/state/game_state.js';
+import { CURRENT_SCHEMA_VERSION, type MilitaryState } from '../../src/state/game_state.js';
 import { deserializeState } from '../../src/state/serialize.js';
 import { validateGameStateShape } from '../../src/state/validateGameState.js';
 
@@ -150,5 +150,17 @@ describe('decision_mode loaded-state contract', () => {
 
         expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
         expect(migrated.meta.decision_mode).toBe('historical');
+    });
+});
+
+type OptionalKeys<T> = {
+    [K in keyof T]-?: Record<string, never> extends Pick<T, K> ? K : never;
+}[keyof T];
+
+describe('legacy theatre loaded-state contract', () => {
+    it('keeps the v5 theatre compatibility pair required on current MilitaryState', () => {
+        type OptionalMilitaryKeys = OptionalKeys<MilitaryState>;
+
+        expectTypeOf<Extract<OptionalMilitaryKeys, 'theatres' | 'army_theatre_assignment'>>().toEqualTypeOf<never>();
     });
 });
