@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Washington essay duplicate cleanup** | [implemented/20260604_WASHINGTON_ESSAY_DEDUPE.md](implemented/20260604_WASHINGTON_ESSAY_DEDUPE.md) - Removes the stale duplicate Washington essay deposit and guards unique on-disk Codex essay ids/event ids. |
 | **Latest root UI dependency declarations** | [implemented/20260603_ROOT_UI_DEPENDENCY_DECLARATIONS.md](implemented/20260603_ROOT_UI_DEPENDENCY_DECLARATIONS.md) - Root `package.json` now declares the MapLibre/PMTiles/Deck.gl/Vite React/PostCSS dependencies required by root typecheck and tactical map build. |
 | **Latest logistics priority validate-when-present contract** | [implemented/20260604_LOGISTICS_PRIORITY_VALIDATE_WHEN_PRESENT.md](implemented/20260604_LOGISTICS_PRIORITY_VALIDATE_WHEN_PRESENT.md) - `military.logistics_priority` remains optional but now rejects malformed present faction priority maps. |
 | **Latest OPSEC sectors validate-when-present contract** | [implemented/20260604_OPSEC_SECTORS_VALIDATE_WHEN_PRESENT.md](implemented/20260604_OPSEC_SECTORS_VALIDATE_WHEN_PRESENT.md) - `military.opsec_sectors` remains optional but now rejects malformed present OPSEC sector lists. |

@@ -52,13 +52,17 @@ interface IndexEssay {
     category: string;
 }
 
+interface DiskEssay extends IndexEssay {
+    filename: string;
+}
+
 /**
  * Documented exceptions to the `id === essay_<event_id>` rule. The Washington
- * Agreement essay file keeps the filename stem `washington_agreement_1994`
- * (hence `id = essay_washington_agreement_1994`) but its `event_id` was
- * deliberately repointed to the HRHB-scoped event `hrhb_washington_agreement_1994`
- * so the essay unlocks off the HRHB acceptance event. Recorded here so the
- * convention check stays strict for every other row.
+ * Agreement essay keeps its legacy `id = essay_washington_agreement_1994`
+ * while its canonical backing file and `event_id` are HRHB-scoped
+ * (`hrhb_washington_agreement_1994`), so the essay unlocks off the HRHB
+ * acceptance event. Recorded here so the convention check stays strict for
+ * every other row.
  */
 const ID_EVENT_ID_EXCEPTIONS: ReadonlyMap<string, string> = new Map([
     ['essay_washington_agreement_1994', 'hrhb_washington_agreement_1994'],
@@ -69,12 +73,8 @@ const ID_EVENT_ID_EXCEPTIONS: ReadonlyMap<string, string> = new Map([
  * `event_id`. Thirteen are the Wave-4 1992 content deposit: content-complete
  * and ICTY/BB-cited on disk but not indexed because indexing them requires
  * authoring BCS localization prose (gated content work owned by the
- * localization / sensitive-history lane). The fourteenth,
- * `washington_agreement_1994`, is already represented in the index under the
- * repointed `event_id` `hrhb_washington_agreement_1994`; its disk stem simply
- * does not equal that `event_id`, so it surfaces here too. Keeping this list
- * explicit means (a) the divergence is documented, and (b) any NEW unindexed
- * file fails this test immediately.
+ * localization / sensitive-history lane). Keeping this list explicit means
+ * any NEW unindexed file fails this test immediately.
  */
 const KNOWN_UNINDEXED_DEPOSIT: readonly string[] = [
     'cutileiro_plan_lisbon_1992',
@@ -89,9 +89,6 @@ const KNOWN_UNINDEXED_DEPOSIT: readonly string[] = [
     'trnopolje_camp_1992',
     'vase_miskina_breadline_1992',
     'visegrad_1992',
-    // Already in the index under event_id `hrhb_washington_agreement_1994`;
-    // present here only because the disk stem differs from that event_id.
-    'washington_agreement_1994',
     'zvornik_takeover_1992',
 ];
 
@@ -105,6 +102,16 @@ function diskEssayStems(): string[] {
         .filter((f) => f.endsWith('.json') && f !== 'essay_index.json')
         .map((f) => f.replace(/\.json$/, ''))
         .sort();
+}
+
+function loadDiskEssays(): DiskEssay[] {
+    return readdirSync(ESSAY_DIR)
+        .filter((f) => f.endsWith('.json') && f !== 'essay_index.json')
+        .sort()
+        .map((filename) => {
+            const parsed = JSON.parse(readFileSync(resolve(ESSAY_DIR, filename), 'utf8')) as IndexEssay;
+            return { ...parsed, filename };
+        });
 }
 
 describe('essay_index_integrity', () => {
@@ -142,6 +149,21 @@ describe('essay_index_integrity', () => {
         expect(unindexed).toEqual([...KNOWN_UNINDEXED_DEPOSIT].sort());
     });
 
+    it('on-disk essay ids and event ids are unique across authoring files', () => {
+        const essays = loadDiskEssays();
+        const duplicateIds = essays
+            .map((essay) => essay.id)
+            .filter((id, index, ids) => ids.indexOf(id) !== index)
+            .sort();
+        const duplicateEventIds = essays
+            .map((essay) => essay.event_id)
+            .filter((eventId, index, eventIds) => eventIds.indexOf(eventId) !== index)
+            .sort();
+
+        expect(duplicateIds).toEqual([]);
+        expect(duplicateEventIds).toEqual([]);
+    });
+
     it('every known-deposit file is content-complete on disk (so indexing is a metadata-only future move)', () => {
         for (const stem of KNOWN_UNINDEXED_DEPOSIT) {
             const path = resolve(ESSAY_DIR, `${stem}.json`);
@@ -152,9 +174,7 @@ describe('essay_index_integrity', () => {
                 content?: string;
                 sources?: string[];
             };
-            // `id` always follows the filename stem; `event_id` matches the
-            // stem for the Wave-4 deposit but is repointed for the already-
-            // indexed Washington Agreement essay.
+            // `id` always follows the filename stem for this Wave-4 deposit.
             expect(essay.id).toBe(`essay_${stem}`);
             expect(typeof essay.content).toBe('string');
             expect((essay.content ?? '').length).toBeGreaterThanOrEqual(2000);

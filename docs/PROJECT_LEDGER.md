@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(codex): remove duplicate Washington essay deposit
+
+**Type:** Data/test hygiene for Codex review residue. No runtime Codex loader, event behavior, simulation logic, save schema, UI route, scenario calibration, or player-facing command behavior changed.
+
+**Change:** Removed the stale unindexed `data/scenarios/essays/washington_agreement_1994.json` duplicate. The canonical indexed backing file remains `data/scenarios/essays/hrhb_washington_agreement_1994.json`, matching the `essay_index.json` row for `hrhb_washington_agreement_1994`. Added an essay-index integrity guard so duplicate on-disk essay `id` or `event_id` metadata cannot recur silently.
+
+**Verification:** Red proof: `node node_modules\vitest\vitest.mjs run tests\essay_index_integrity.test.ts --reporter=dot` failed after adding the guard because both Washington files used `essay_washington_agreement_1994`. Green proof: `node node_modules\vitest\vitest.mjs run tests\essay_index_integrity.test.ts --reporter=dot`; `git diff --check`.
+
+**Files:** `data/scenarios/essays/washington_agreement_1994.json`, `tests/essay_index_integrity.test.ts`, `docs/40_reports/implemented/20260604_WASHINGTON_ESSAY_DEDUPE.md`, `docs/PROJECT_LEDGER.md`, `docs/40_reports/README.md`.
+
+---
+
 ## [2026-06-04] fix(state): validate logistics_priority when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation logic, scenario data, UI routing, or player-facing behavior changed.
