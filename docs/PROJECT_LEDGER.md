@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(state): validate operation opportunities when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation behavior, scenario data, UI routing, calibration movement, or player-facing command behavior changed.
+
+**Change:** Classified `military.operation_opportunities`, `military.operation_opportunity_resolutions`, `military.operation_opportunity_diagnostics`, and `military.operation_opportunity_traces` as optional operation-opportunity lifecycle records rather than required current-save state. Added validate-when-present coverage for opportunity lifecycle IDs, turn windows, statuses, approver factions, axis evaluation rows, footprint snapshots, redirect variants, persisted force-quality trait snapshots, resolution responses, exit classes, diagnostic failed-axis rows, trace events, and trace counters. The validator does not normalize, sort, materialize absent buses, resolve catalog IDs, or validate OSID existence.
+
+**Verification:** Red proof: `node F:\A-War-Without-Victory\node_modules\vitest\vitest.mjs run tests\operation_opportunity_state_validation.test.ts --reporter=dot` failed because malformed present operation-opportunity lifecycle payloads were accepted. Green proof: focused validator test passed 2/2; `node F:\A-War-Without-Victory\node_modules\vitest\vitest.mjs run tests\operation_opportunity_state_validation.test.ts tests\operation_opportunities_substrate.test.ts tests\operation_opportunities_phase2_decisions.test.ts tests\operation_opportunities_catalog.test.ts --reporter=dot` passed 106/106; `npm.cmd run typecheck -- --pretty false`; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 with `state: 172` and `sim: 327`; `git diff --check`. GitHub sweep found no deployments, no open PRs, no failed recent Actions runs in the default run window, and no open-PR Codex rows.
+
+**Files:** `src/state/validateGameState.ts`, `tests/operation_opportunity_state_validation.test.ts`, `docs/40_reports/implemented/20260604_OPERATION_OPPORTUNITIES_VALIDATE_WHEN_PRESENT.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/README.md`, `.claude/napkin.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(state): validate campaign plans when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation behavior, scenario data, Tactical Group, `army_hq_operations`, UI routing, or player-facing command behavior changed.

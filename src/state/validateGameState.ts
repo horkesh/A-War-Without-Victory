@@ -19,6 +19,58 @@ const CAMPAIGN_PLAN_FRONT_ROLES = ['primary', 'secondary', 'economy', 'contain']
 const CAMPAIGN_PLAN_FRONT_STANCES = ['offensive', 'balanced', 'defensive', 'reorganize'] as const;
 const CAMPAIGN_PLAN_ARMY_STANCES = ['general_defensive', 'balanced', 'general_offensive', 'total_mobilization'] as const;
 const CAMPAIGN_PLAN_SYNC_PARTICIPANT_ROLES = ['main_effort', 'supporting', 'feint', 'fixing'] as const;
+const OPPORTUNITY_AXES = [
+    'date_window',
+    'political_authorization',
+    'corps_readiness',
+    'logistics',
+    'staging_access',
+    'weather_season',
+    'commander_confidence',
+    'enemy_weakness',
+    'alliance_context',
+    'force_quality',
+] as const;
+const OPPORTUNITY_AXIS_MODES = ['required', 'optional', 'n_a'] as const;
+const OPPORTUNITY_STATUSES = [
+    'eligible_pending_review',
+    'delayed',
+    'approved',
+    'declined',
+    'expired',
+    'redirected',
+    'under_resourced_approved',
+] as const;
+const OPPORTUNITY_RESPONSES = ['approve', 'delay', 'redirect', 'under_resource', 'decline', 'expire'] as const;
+const OPPORTUNITY_TRACE_EVENTS = [
+    'blocked',
+    'eligible',
+    'expired',
+    'declined',
+    'delayed',
+    'redirected',
+    'under_resourced_approved',
+    'approved',
+    'spawn_failed',
+    't3_authorized_no_offensive',
+] as const;
+const OPPORTUNITY_EXIT_CLASSES = [
+    'did_not_launch',
+    'decisive_success',
+    'partial_success',
+    'failed',
+    'aborted',
+    't3_authorized_no_offensive',
+] as const;
+const OPPORTUNITY_FORCE_QUALITY_TRAITS = [
+    'operation_readiness',
+    'staging_reliability',
+    'axis_coordination',
+    'support_delivery',
+    'failure_recovery',
+    'reserve_response',
+    'collapse_susceptibility',
+] as const;
 const AI_DECISION_LEVELS = ['army', 'corps', 'advisor', 'political', 'event'] as const;
 const AI_CORPS_STANCES = ['offensive', 'balanced', 'defensive'] as const;
 const AI_PEACE_PLAN_RESPONSES = ['accept', 'reject'] as const;
@@ -164,6 +216,30 @@ function isCampaignPlanArmyStance(value: unknown): boolean {
 
 function isCampaignPlanSyncParticipantRole(value: unknown): boolean {
     return typeof value === 'string' && CAMPAIGN_PLAN_SYNC_PARTICIPANT_ROLES.includes(value as typeof CAMPAIGN_PLAN_SYNC_PARTICIPANT_ROLES[number]);
+}
+
+function isOpportunityAxis(value: unknown): boolean {
+    return typeof value === 'string' && OPPORTUNITY_AXES.includes(value as typeof OPPORTUNITY_AXES[number]);
+}
+
+function isOpportunityAxisMode(value: unknown): boolean {
+    return typeof value === 'string' && OPPORTUNITY_AXIS_MODES.includes(value as typeof OPPORTUNITY_AXIS_MODES[number]);
+}
+
+function isOpportunityStatus(value: unknown): boolean {
+    return typeof value === 'string' && OPPORTUNITY_STATUSES.includes(value as typeof OPPORTUNITY_STATUSES[number]);
+}
+
+function isOpportunityResponse(value: unknown): boolean {
+    return typeof value === 'string' && OPPORTUNITY_RESPONSES.includes(value as typeof OPPORTUNITY_RESPONSES[number]);
+}
+
+function isOpportunityTraceEvent(value: unknown): boolean {
+    return typeof value === 'string' && OPPORTUNITY_TRACE_EVENTS.includes(value as typeof OPPORTUNITY_TRACE_EVENTS[number]);
+}
+
+function isOpportunityExitClass(value: unknown): boolean {
+    return typeof value === 'string' && OPPORTUNITY_EXIT_CLASSES.includes(value as typeof OPPORTUNITY_EXIT_CLASSES[number]);
 }
 
 function isAiDecisionLevel(value: unknown): boolean {
@@ -1141,6 +1217,250 @@ function validateCampaignPlan(value: unknown, path: string, errors: string[]): v
     }
 }
 
+function validateOpportunityAxisReason(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isOpportunityAxis(value.axis)) {
+        errors.push(`${path}.axis must be a valid opportunity axis`);
+    }
+    if (typeof value.reason !== 'string') {
+        errors.push(`${path}.reason must be a string`);
+    }
+}
+
+function validateOpportunityAxisReasonArray(value: unknown, path: string, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push(`${path} must be an array when present`);
+        return;
+    }
+    value.forEach((entry, i) => {
+        validateOpportunityAxisReason(entry, `${path}[${i}]`, errors);
+    });
+}
+
+function validateOpportunityAxisEvaluation(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isOpportunityAxis(value.axis)) {
+        errors.push(`${path}.axis must be a valid opportunity axis`);
+    }
+    if (!isOpportunityAxisMode(value.mode)) {
+        errors.push(`${path}.mode must be required, optional, or n_a`);
+    }
+    if (typeof value.green !== 'boolean') {
+        errors.push(`${path}.green must be a boolean`);
+    }
+    if (typeof value.reason !== 'string') {
+        errors.push(`${path}.reason must be a string`);
+    }
+}
+
+function validateOpportunityFootprint(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isStringArray(value.objectives)) {
+        errors.push(`${path}.objectives must be a string array`);
+    }
+    if (!isStringArray(value.staging_osids)) {
+        errors.push(`${path}.staging_osids must be a string array`);
+    }
+}
+
+function validateOpportunityRedirectVariant(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isNonEmptyString(value.variant_id)) {
+        errors.push(`${path}.variant_id must be a non-empty string`);
+    }
+    if (!isNonEmptyString(value.name)) {
+        errors.push(`${path}.name must be a non-empty string`);
+    }
+    validateOpportunityFootprint(value, path, errors);
+}
+
+function validateOpportunityForceQualityTraits(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+    for (const trait of OPPORTUNITY_FORCE_QUALITY_TRAITS) {
+        const traitValue = value[trait];
+        if (!isFiniteNumber(traitValue) || traitValue < 0 || traitValue > 1) {
+            errors.push(`${path}.${trait} must be a finite number between 0 and 1`);
+        }
+    }
+}
+
+function validateOperationOpportunityState(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isNonEmptyString(value.opportunity_id)) {
+        errors.push(`${path}.opportunity_id must be a non-empty string`);
+    }
+    if (!isNonEmptyString(value.proposal_id)) {
+        errors.push(`${path}.proposal_id must be a non-empty string`);
+    }
+    if (!isNonNegativeInteger(value.eligibility_turn)) {
+        errors.push(`${path}.eligibility_turn must be a non-negative integer`);
+    }
+    if (!isNonNegativeInteger(value.expires_turn)) {
+        errors.push(`${path}.expires_turn must be a non-negative integer`);
+    } else if (isNonNegativeInteger(value.eligibility_turn) && value.expires_turn < value.eligibility_turn) {
+        errors.push(`${path}.expires_turn must be greater than or equal to eligibility_turn`);
+    }
+    if (!isOpportunityStatus(value.status)) {
+        errors.push(`${path}.status must be a valid opportunity status`);
+    }
+    if (!isCanonicalPlayerFaction(value.approver_faction)) {
+        errors.push(`${path}.approver_faction must be one of: RBiH, RS, HRHB`);
+    }
+    if ('response_turn' in value && value.response_turn !== undefined && !isNonNegativeInteger(value.response_turn)) {
+        errors.push(`${path}.response_turn must be a non-negative integer when present`);
+    }
+    if ('redirect_variant_id' in value && value.redirect_variant_id !== undefined && !isNonEmptyString(value.redirect_variant_id)) {
+        errors.push(`${path}.redirect_variant_id must be a non-empty string when present`);
+    }
+    if ('executed_op_id' in value && value.executed_op_id !== undefined && !isNonEmptyString(value.executed_op_id)) {
+        errors.push(`${path}.executed_op_id must be a non-empty string when present`);
+    }
+    if ('reevaluate_at_turn' in value && value.reevaluate_at_turn !== undefined && !isNonNegativeInteger(value.reevaluate_at_turn)) {
+        errors.push(`${path}.reevaluate_at_turn must be a non-negative integer when present`);
+    }
+    if (!Array.isArray(value.last_axis_evaluation)) {
+        errors.push(`${path}.last_axis_evaluation must be an array`);
+    } else {
+        value.last_axis_evaluation.forEach((entry, i) => {
+            validateOpportunityAxisEvaluation(entry, `${path}.last_axis_evaluation[${i}]`, errors);
+        });
+    }
+    if ('last_footprint' in value && value.last_footprint !== undefined) {
+        validateOpportunityFootprint(value.last_footprint, `${path}.last_footprint`, errors);
+    }
+    if ('redirect_variants' in value && value.redirect_variants !== undefined) {
+        if (!Array.isArray(value.redirect_variants)) {
+            errors.push(`${path}.redirect_variants must be an array when present`);
+        } else {
+            value.redirect_variants.forEach((entry, i) => {
+                validateOpportunityRedirectVariant(entry, `${path}.redirect_variants[${i}]`, errors);
+            });
+        }
+    }
+    if ('last_force_quality_traits' in value && value.last_force_quality_traits !== undefined) {
+        validateOpportunityForceQualityTraits(value.last_force_quality_traits, `${path}.last_force_quality_traits`, errors);
+    }
+}
+
+function validateOperationOpportunityResolution(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isNonEmptyString(value.proposal_id)) {
+        errors.push(`${path}.proposal_id must be a non-empty string`);
+    }
+    if (!isNonEmptyString(value.opportunity_id)) {
+        errors.push(`${path}.opportunity_id must be a non-empty string`);
+    }
+    if (!isOpportunityResponse(value.response)) {
+        errors.push(`${path}.response must be a valid opportunity response`);
+    }
+    if (!isNonNegativeInteger(value.response_turn)) {
+        errors.push(`${path}.response_turn must be a non-negative integer`);
+    }
+    if ('executed_op_name' in value && value.executed_op_name !== undefined && !isNonEmptyString(value.executed_op_name)) {
+        errors.push(`${path}.executed_op_name must be a non-empty string when present`);
+    }
+    if ('executed_op_aar_id' in value && value.executed_op_aar_id !== undefined && !isNonEmptyString(value.executed_op_aar_id)) {
+        errors.push(`${path}.executed_op_aar_id must be a non-empty string when present`);
+    }
+    if ('exit_class' in value && value.exit_class !== undefined && !isOpportunityExitClass(value.exit_class)) {
+        errors.push(`${path}.exit_class must be a valid opportunity exit class when present`);
+    }
+}
+
+function validateOperationOpportunityDiagnostic(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isNonNegativeInteger(value.turn)) {
+        errors.push(`${path}.turn must be a non-negative integer`);
+    }
+    if (!isNonEmptyString(value.opportunity_id)) {
+        errors.push(`${path}.opportunity_id must be a non-empty string`);
+    }
+    validateOpportunityAxisReasonArray(value.failed_required_axes, `${path}.failed_required_axes`, errors);
+    validateOpportunityAxisReasonArray(value.failed_optional_axes, `${path}.failed_optional_axes`, errors);
+    if (!isNonNegativeInteger(value.optional_green_count)) {
+        errors.push(`${path}.optional_green_count must be a non-negative integer`);
+    }
+    if (!isNonNegativeInteger(value.min_optional_axes)) {
+        errors.push(`${path}.min_optional_axes must be a non-negative integer`);
+    }
+}
+
+function validateOperationOpportunityTrace(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isNonNegativeInteger(value.turn)) {
+        errors.push(`${path}.turn must be a non-negative integer`);
+    }
+    if (!isNonEmptyString(value.opportunity_id)) {
+        errors.push(`${path}.opportunity_id must be a non-empty string`);
+    }
+    if (!isOpportunityTraceEvent(value.event)) {
+        errors.push(`${path}.event must be a valid opportunity trace event`);
+    }
+    if ('proposal_id' in value && value.proposal_id !== undefined && !isNonEmptyString(value.proposal_id)) {
+        errors.push(`${path}.proposal_id must be a non-empty string when present`);
+    }
+    if ('failed_required_axes' in value && value.failed_required_axes !== undefined) {
+        validateOpportunityAxisReasonArray(value.failed_required_axes, `${path}.failed_required_axes`, errors);
+    }
+    if ('failed_optional_axes' in value && value.failed_optional_axes !== undefined) {
+        validateOpportunityAxisReasonArray(value.failed_optional_axes, `${path}.failed_optional_axes`, errors);
+    }
+    if ('optional_green_count' in value && value.optional_green_count !== undefined && !isNonNegativeInteger(value.optional_green_count)) {
+        errors.push(`${path}.optional_green_count must be a non-negative integer when present`);
+    }
+    if ('min_optional_axes' in value && value.min_optional_axes !== undefined && !isNonNegativeInteger(value.min_optional_axes)) {
+        errors.push(`${path}.min_optional_axes must be a non-negative integer when present`);
+    }
+    if ('executed_op_name' in value && value.executed_op_name !== undefined && !isNonEmptyString(value.executed_op_name)) {
+        errors.push(`${path}.executed_op_name must be a non-empty string when present`);
+    }
+    if ('redirect_variant_id' in value && value.redirect_variant_id !== undefined && !isNonEmptyString(value.redirect_variant_id)) {
+        errors.push(`${path}.redirect_variant_id must be a non-empty string when present`);
+    }
+}
+
+function validateOperationOpportunityArray(
+    value: unknown,
+    path: string,
+    errors: string[],
+    validateEntry: (entry: unknown, path: string, errors: string[]) => void,
+): void {
+    if (!Array.isArray(value)) {
+        errors.push(`${path} must be an array when present`);
+        return;
+    }
+    value.forEach((entry, i) => {
+        validateEntry(entry, `${path}[${i}]`, errors);
+    });
+}
+
 function validateAiStringArray(value: unknown, path: string, errors: string[]): void {
     if (!Array.isArray(value) || value.some((entry) => typeof entry !== 'string')) {
         errors.push(`${path} must be a string array`);
@@ -2041,6 +2361,18 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'used_operation_names' in military && military.used_operation_names !== undefined) {
         validateNonNegativeIntegerRecord(military.used_operation_names, 'military.used_operation_names', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'operation_opportunities' in military && military.operation_opportunities !== undefined) {
+        validateOperationOpportunityArray(military.operation_opportunities, 'military.operation_opportunities', errors, validateOperationOpportunityState);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'operation_opportunity_resolutions' in military && military.operation_opportunity_resolutions !== undefined) {
+        validateOperationOpportunityArray(military.operation_opportunity_resolutions, 'military.operation_opportunity_resolutions', errors, validateOperationOpportunityResolution);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'operation_opportunity_diagnostics' in military && military.operation_opportunity_diagnostics !== undefined) {
+        validateOperationOpportunityArray(military.operation_opportunity_diagnostics, 'military.operation_opportunity_diagnostics', errors, validateOperationOpportunityDiagnostic);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'operation_opportunity_traces' in military && military.operation_opportunity_traces !== undefined) {
+        validateOperationOpportunityArray(military.operation_opportunity_traces, 'military.operation_opportunity_traces', errors, validateOperationOpportunityTrace);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'pending_officer_events' in military && military.pending_officer_events !== undefined) {
         validatePendingOfficerEvents(military.pending_officer_events, errors);
