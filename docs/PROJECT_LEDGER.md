@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(ui): route Warroom Diplomacy and Chronicle to mature panels
+
+**Type:** UI/product Warroom routing hardening. No simulation behavior, save schema, scenario data, calibration, Tactical Group, event content, diplomacy mechanics, or presidential authority changed.
+
+**Change:** Warroom `Diplomacy` / telephone now opens the existing Patron Relations `DiplomacyPanel` directly while staying in the Warroom shell. Warroom `Chronicle` / newspaper now opens the existing Authored Choices `DecisionHistoryOverlay` directly while staying in the Warroom shell. The generic Warroom-native overlay remains for `Intelligence`, `Staff`, and `Faction` until those receive richer native surfaces.
+
+**Verification:** `node F:\A-War-Without-Victory\node_modules\vitest\vitest.mjs run tests\ui\warroom_shell_accessibility.test.ts tests\warroom_shell_layer.test.ts tests\ui\diplomacy_panel.test.ts tests\ui\decision_history_overlay.test.ts --reporter=dot` passed 67/67; `npm.cmd run typecheck -- --pretty false`; `npm.cmd run desktop:map:build`; `git diff --check`. Browser smoke on `http://127.0.0.1:3003/?view=warroom` confirmed the standalone dev URL reaches the no-state Warroom fallback; loaded-campaign route proof remains covered by focused React route tests until a deterministic Warroom browser fixture exists.
+
+**Files:** `src/ui/map/App.tsx`, `tests/ui/warroom_shell_accessibility.test.ts`, `docs/40_reports/implemented/20260604_WARROOM_PATRON_AUTHORED_CHOICES_ROUTES.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] test(replay): lock fatigue distribution fixture ownership
 
 **Type:** Static generated-artifact ownership guard + docs closeout. No fixture bytes, scenario outputs, replay writers, fatigue logic, combat logic, save schema, calibration, UI, or player-facing behavior changed.
