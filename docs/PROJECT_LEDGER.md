@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(events): write Chain 3 historical source flags
+
+**Type:** Event-state correctness fix for GitHub issue #170 P1. Sensitive-history scope: no new prose, response options, player choices, scoring, civilian-targeting mechanics, save schema, replay writers, baseline manifests, or combat behavior changed.
+
+**Change:** `srebrenica_falls_1995` now writes `srebrenica_fell: true`, and `nato_deliberate_force_1995` now writes `nato_deliberate_force_occurred: true`. The existing Chain 3 consequence predicates already consumed those flags; this aligns historical source-event producers with the consequence consumers so counterfactual Chain 3 rows stay suppressed on the historical path.
+
+**Verification:** Focused consequence pack passed 86/86: `node node_modules\vitest\vitest.mjs run tests\consequence_chains.test.ts tests\consequence_consumers.test.ts tests\event_effects.test.ts --reporter=dot`; `npm.cmd run typecheck -- --pretty false` passed; `npm.cmd run test:baselines` passed with all scenarios matching; `git diff --check` passed.
+
+**Files:** `data/scenarios/events/war_1995.json`, `tests/consequence_chains.test.ts`, `docs/40_reports/implemented/20260604_CHAIN3_SOURCE_FLAGS.md`, `docs/40_reports/README.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(events): align Ahmici rupture with hostile threshold
 
 **Type:** Authored consequence data fix for GitHub issue #170 P1. Sensitive-history scope: no player choices, reward surface, victory scoring, civilian-targeting mechanics, engine phase logic, save schema, or scenario structure changed.

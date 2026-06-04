@@ -65,6 +65,7 @@ function makeRBiHState(turn: number, flags: Record<string, string | number | boo
 // loader wiring works end to end.
 const ALL_EVENTS: EventDefinition[] = loadEventDefinitions(0);
 const CSQ_EVENTS = ALL_EVENTS.filter(e => e.id.startsWith('csq_'));
+const EVENT_BY_ID = new Map(ALL_EVENTS.map(e => [e.id, e]));
 
 describe('consequences.json loads via event_loader', () => {
     it('loader returns at least one csq_ event', () => {
@@ -620,6 +621,14 @@ describe('Chain 1 — No Drina Cleansing: ahistorical path fires chain', () => {
 // docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md §L60.
 
 describe('Chain 3 — Srebrenica Survives: historical path fires nothing', () => {
+    it('historical source events write the flags consumed by Chain 3 predicates', () => {
+        const srebrenicaFalls = EVENT_BY_ID.get('srebrenica_falls_1995');
+        const deliberateForce = EVENT_BY_ID.get('nato_deliberate_force_1995');
+
+        expect(srebrenicaFalls?.sets_flags?.srebrenica_fell).toBe(true);
+        expect(deliberateForce?.sets_flags?.nato_deliberate_force_occurred).toBe(true);
+    });
+
     it('no Chain 3 csq_ event fires when srebrenica_fell is set (historical)', () => {
         const state = makeChain1State(175, {
             flags: { srebrenica_enclave_formed: true, srebrenica_fell: true },
@@ -629,6 +638,14 @@ describe('Chain 3 — Srebrenica Survives: historical path fires nothing', () =>
         expect(fired).not.toContain('csq_srebrenica_stalemate_1995');
         expect(fired).not.toContain('csq_enclave_drain_continues_1995');
         expect(fired).not.toContain('csq_prolonged_war_exhaustion_1995');
+    });
+
+    it('csq_prolonged_war_exhaustion_1995 does not fire when Deliberate Force occurred', () => {
+        const state = makeChain1State(185, {
+            flags: { srebrenica_enclave_formed: true, nato_deliberate_force_occurred: true },
+        });
+        evaluateEvents(state, rng, 185, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain('csq_prolonged_war_exhaustion_1995');
     });
 });
 
