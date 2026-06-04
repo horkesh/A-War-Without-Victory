@@ -1071,6 +1071,24 @@ function App() {
       openCommandStrip(null, false);
       return;
     }
+    if (surface === 'diplomacy') {
+      setWarroomDeskOpen(false);
+      setWarroomDecisionRoomOpen(false);
+      setWarroomOverlaySurface(null);
+      closeCommandStrip(false);
+      setIsDecisionHistoryOpen(false);
+      setDiplomacyOpen(true);
+      return;
+    }
+    if (surface === 'chronicle') {
+      setWarroomDeskOpen(false);
+      setWarroomDecisionRoomOpen(false);
+      setWarroomOverlaySurface(null);
+      closeCommandStrip(false);
+      setDiplomacyOpen(false);
+      setIsDecisionHistoryOpen(true);
+      return;
+    }
     setWarroomDeskOpen(false);
     setWarroomDecisionRoomOpen(false);
     closeCommandStrip(false);

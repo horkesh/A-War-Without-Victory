@@ -234,4 +234,32 @@ describe('WarroomShellLayer accessibility proof', () => {
         expect(appSource).toContain('data-testid="warroom-decision-room-host"');
         expect(appSource).toContain('<PresidentialDecisionRoomPanel onNavigateTarget={openDecisionRoomTarget} />');
     });
+
+    it('routes Warroom Diplomacy and Chronicle directly to their mature player-facing panels', () => {
+        const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
+        const openWarroomOverlayStart = appSource.indexOf('const openWarroomOverlay =');
+        const escapeHandlerStart = appSource.indexOf('useEffect(() => {', openWarroomOverlayStart);
+        const openWarroomOverlayBody = appSource.slice(openWarroomOverlayStart, escapeHandlerStart);
+        const diplomacyBranch = openWarroomOverlayBody.slice(
+            openWarroomOverlayBody.indexOf("if (surface === 'diplomacy')"),
+            openWarroomOverlayBody.indexOf("if (surface === 'chronicle')"),
+        );
+        const fallbackOverlayStart = openWarroomOverlayBody.lastIndexOf([
+            '    setWarroomDeskOpen(false);',
+            '    setWarroomDecisionRoomOpen(false);',
+            '    closeCommandStrip(false);',
+            '    setWarroomOverlaySurface(surface);',
+        ].join('\n'));
+        const chronicleBranch = openWarroomOverlayBody.slice(
+            openWarroomOverlayBody.indexOf("if (surface === 'chronicle')"),
+            fallbackOverlayStart,
+        );
+
+        expect(openWarroomOverlayBody).toContain("if (surface === 'diplomacy')");
+        expect(diplomacyBranch).toContain('setDiplomacyOpen(true)');
+        expect(diplomacyBranch).not.toContain('setWarroomOverlaySurface(surface)');
+        expect(openWarroomOverlayBody).toContain("if (surface === 'chronicle')");
+        expect(chronicleBranch).toContain('setIsDecisionHistoryOpen(true)');
+        expect(chronicleBranch).not.toContain('setWarroomOverlaySurface(surface)');
+    });
 });
