@@ -65,10 +65,12 @@ Targeted the predecessor's §6 (NEEDS-CITATION) and §7 (UNCERTAIN-IDENTITY) gat
 
 - Confirmed by the predecessor packet as April-1992 vs later-war snapshots. No citation gate; included only so nobody "corrects" the Apr-1992 roster to the better-known later commander. No action.
 
-### 2.6 — 4th Corps HQ: live OOB `jablanica` vs master narrative "Mostar" — **RESOLVED (high confidence)**
+### 2.6 — 4th Corps HQ: **East Mostar** (this packet's original "Jablanica" call was WRONG — CORRECTED & SHIPPED)
 
-- `ARBIH_ORDER_OF_BATTLE_MASTER.md` L338 itself states: **"4th Corps | Jablanica | Herzegovina (BB: HQ Jablanica; narrative also 4th Mostar)."** I.e. **BB Appendix-H places 4th Corps HQ at Jablanica**; only BB *narrative* (and master L154/L156) uses Mostar (the corps' operational/area seat, contested/HVO-pressured early-war).
-- **Recommended resolution:** the live OOB's `jablanica` HQ **matches BB Appendix-H** and is the better-sourced choice. **No change needed**; the master's narrative "Mostar" is an area label, not a contradiction. Confidence **HIGH**. (Citable as `Balkan Battlegrounds Vol. I Appendix H (4th Corps HQ Jablanica)`.)
+- **⚠ Superseded.** This packet originally accepted BB Appendix-H (`BB1_p0511`: "4th Corps, HQ Jablanica") as authoritative and concluded "no change needed." That was **wrong**. The owner flagged it; a Wikipedia cross-check (`4th Corps (Army of the Republic of Bosnia and Herzegovina)`) is unambiguous: the 4th Corps (Arif Pašalić, formed 17 Nov 1992) was HQ'd in **eastern Mostar**.
+- **Why BB said Jablanica:** it's the **outlier**, traceable to the short-lived **6th Corps** (HQ Konjic; 44th/45th "Neretvica" brigades at Jablanica; formed 9 Jun 1993 from the 4th's Northern-Herzegovina OG; disbanded Feb 1994, folded back into the 4th). AWWV models only 5 ARBiH corps (6th→4th), so the in-game 4th already spans the Mostar+Neretva AOR — but its canonical HQ is Mostar, not the absorbed-6th seat.
+- **Outcome:** `arbih_4th_corps` HQ corrected Jablanica → East Mostar (`hq_mun` mostar, `hq_osid` `op:mostar:mostar_istok_2`; runtime resolves to RBiH east-bank `op:mostar:blagaj_2`). **SHIPPED on `main` in PR #180** (`d6b6533a`); calibration floor held (anchors 30/30, benchmarks 6/6), golden baselines re-floored.
+- **Lesson (owner directive):** BB is not the ultimate source — cross-check Wikipedia/web on the least doubt. BB Appendix-H snapshots can record a unit's siege-era/displaced or reorganized position, not its canonical HQ.
 
 ---
 
@@ -79,7 +81,7 @@ These need no historian; the cited source is primary (BB/App-G/App-H) and unambi
 | Item | Proposed citation (apply as provenance note, not a data-shape change) | Why ready |
 |---|---|---|
 | `rs_65th_protection_motorized_regiment` cdr **Milomir Savčić** | `Balkan Battlegrounds Vol. I p.442 n.224 & Vol. II p.406` | BB-confirmed twice; ICTY-Srebrenica cross-link. HIGH. |
-| `arbih_4th_corps` HQ **Jablanica** | `Balkan Battlegrounds Vol. I Appendix H` (per ARBIH master L338) | App-H matches live OOB. HIGH. No data change — confirms current value. |
+| `arbih_4th_corps` HQ **East Mostar** (was Jablanica) | Wikipedia `4th Corps (ARBiH)` — HQ eastern Mostar, Pašalić, 17 Nov 1992. BB App-H "Jablanica" = 6th-Corps/reorg artifact, **not** authoritative. | **CORRECTED & SHIPPED in PR #180** (`d6b6533a`). This packet's original "Jablanica HIGH, no change" was wrong — see §2.6. |
 | 2nd Krajina Corps long-tenure CO **Grujo Borić** (Apr-1992 seed) | `Balkan Battlegrounds Vol. I p.186 & Vol. II p.530 App-G; VRS master L130` | BB App-G + narrative + master agree. HIGH on history. *(Seed-change is owner call — see §2.2.)* |
 
 **Note on mechanism:** the predecessor established the OOB brigade file has **no per-formation `source` field** and adding one is a schema change gated on Codex. So "ready-to-apply" here means *the citation is sound and could back a provenance note or a roster/essay reference* — it does **not** authorize a schema edit to `oob_brigades.json`.
@@ -105,7 +107,7 @@ These need no historian; the cited source is primary (BB/App-G/App-H) and unambi
 - **4 HVO guard COs sit at MED** (Wikipedia-tier, no BB HVO appendix — the systemic HVO provenance gap the predecessor flagged).
 - **3 personal attributions remain UNSOURCED** (Rađo, Tirić, Zdravko Samardžić) — explicitly **not invented**; flagged needs-historian.
 - **1 identity collision RESOLVED** (Ilija vs Franjo Nakić → Ilija, MED).
-- **2 apparent conflicts RESOLVED as time-snapshots** (Borić/Tomanić; and the SRK/1st-Corps snapshots) — and **1 apparent HQ conflict RESOLVED** (4th Corps Jablanica = BB App-H).
+- **2 apparent conflicts RESOLVED as time-snapshots** (Borić/Tomanić; and the SRK/1st-Corps snapshots). The **4th-Corps HQ item was resolved the OTHER way** than this packet first claimed: not Jablanica-per-BB, but **East Mostar** (Wikipedia-corrected; BB App-H was the outlier) — corrected & shipped in PR #180. See §2.6.
 - **No data file was edited.** Determinism, OSIDs, and Codex-owned `data/source/*` untouched. This is a proposal only; nothing is applied without the §3 owner sign-off or §4 historian ruling.
 
 ---
