@@ -1690,4 +1690,61 @@ describe('save migration validator hardening', () => {
             /Save schema validation failed after migration[\s\S]*military\.logistics_priority must be an object when present/
         );
     });
+
+    it('accepts current-version saves with absent or well-formed command authority records', () => {
+        const absent = currentVersionState();
+        delete absent.military.command_authority;
+        const withAuthority = currentVersionState();
+        withAuthority.military.command_authority = {
+            current: 88,
+            max: 100,
+            spent_this_turn: 12,
+            lifetime_spent: 44,
+        };
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWithAuthority = deserializeState(JSON.stringify(withAuthority));
+
+        expect(migratedAbsent.military.command_authority).toBeUndefined();
+        expect(migratedWithAuthority.military.command_authority).toEqual({
+            current: 88,
+            max: 100,
+            spent_this_turn: 12,
+            lifetime_spent: 44,
+        });
+    });
+
+    it('rejects current-version saves with malformed command authority records', () => {
+        const overMax = currentVersionState();
+        overMax.military.command_authority = {
+            current: 101,
+            max: 100,
+            spent_this_turn: -1,
+            lifetime_spent: '44',
+        } as any;
+
+        expect(() => deserializeState(JSON.stringify(overMax))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.command_authority\.spent_this_turn must be a finite non-negative number[\s\S]*military\.command_authority\.lifetime_spent must be a finite non-negative number[\s\S]*military\.command_authority\.current must be less than or equal to military\.command_authority\.max/
+        );
+
+        const missingMax = currentVersionState();
+        missingMax.military.command_authority = {
+            current: 10,
+            spent_this_turn: 0,
+            lifetime_spent: 0,
+        } as any;
+
+        expect(() => deserializeState(JSON.stringify(missingMax))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.command_authority\.max must be a finite non-negative number/
+        );
+    });
+
+    it('rejects current-version saves with non-record command authority payloads', () => {
+        const state = currentVersionState();
+        state.military.command_authority = [] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.command_authority must be an object when present/
+        );
+    });
 });

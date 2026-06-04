@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(state): validate command_authority when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation logic, scenario data, UI routing, or player-facing behavior changed.
+
+**Change:** Classified `military.command_authority` as an optional player-only presidential resource rather than required current-save state. Added validate-when-present coverage so present payloads must be an object with finite non-negative `current`, `max`, `spent_this_turn`, and `lifetime_spent`, with `current <= max`. Absent payloads remain valid for headless/calibration saves, pre-Phase-2 saves, and states before the presidential command shell materializes the resource.
+
+**Verification:** Red proof: `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` failed because malformed/non-record command authority payloads were accepted before the validator existed. Green proof passed: focused validator file 132/132; command-authority consumer proof 74/74; broader save/schema pack 223/223; `npm.cmd run typecheck`; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 with `state: 172` and `sim: 327`.
+
+**Files:** `src/state/validateGameState.ts`, `tests/save_migration_validator_rejection.test.ts`, `docs/40_reports/implemented/20260604_COMMAND_AUTHORITY_VALIDATE_WHEN_PRESENT.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/README.md`, `.claude/napkin.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(codex): remove duplicate Washington essay deposit
 
 **Type:** Data/test hygiene for Codex review residue. No runtime Codex loader, event behavior, simulation logic, save schema, UI route, scenario calibration, or player-facing command behavior changed.
