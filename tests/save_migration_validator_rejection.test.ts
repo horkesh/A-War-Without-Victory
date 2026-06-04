@@ -1605,4 +1605,35 @@ describe('save migration validator hardening', () => {
             /Save schema validation failed after migration[\s\S]*military\.army_stance must be an object when present/
         );
     });
+
+    it('accepts current-version saves with absent or well-formed OPSEC sectors', () => {
+        const absent = currentVersionState();
+        delete absent.military.opsec_sectors;
+        const withOpsec = currentVersionState();
+        withOpsec.military.opsec_sectors = ['sector:rbih_defense:0', 'sector:rs_main:2'];
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWithOpsec = deserializeState(JSON.stringify(withOpsec));
+
+        expect(migratedAbsent.military.opsec_sectors).toBeUndefined();
+        expect(migratedWithOpsec.military.opsec_sectors).toEqual(['sector:rbih_defense:0', 'sector:rs_main:2']);
+    });
+
+    it('rejects current-version saves with malformed OPSEC sectors', () => {
+        const state = currentVersionState();
+        state.military.opsec_sectors = ['sector:rbih_defense:0', 42] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.opsec_sectors must be a string array when present/
+        );
+    });
+
+    it('rejects current-version saves with non-array OPSEC sectors', () => {
+        const state = currentVersionState();
+        state.military.opsec_sectors = {} as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.opsec_sectors must be a string array when present/
+        );
+    });
 });

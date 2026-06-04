@@ -1387,6 +1387,9 @@ export function validateGameStateShape(
     if (military && typeof military === 'object' && !Array.isArray(military) && 'army_stance' in military && military.army_stance !== undefined) {
         validateArmyStanceRecord(military.army_stance, errors);
     }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'opsec_sectors' in military && military.opsec_sectors !== undefined && !isStringArray(military.opsec_sectors)) {
+        errors.push('military.opsec_sectors must be a string array when present');
+    }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'closed_event_ids' in military && military.closed_event_ids !== undefined) {
         validateClosedEventIds(military.closed_event_ids, errors);
     }
