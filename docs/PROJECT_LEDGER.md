@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(state): validate patron_defiance_supply_cuts when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation logic, scenario data, UI routing, or player-facing behavior changed.
+
+**Change:** Classified `military.patron_defiance_supply_cuts` as a lazy persisted receipt bus rather than required current-save state. Added validate-when-present coverage for realized patron-defiance supply cut rows: canonical faction, non-negative turn, cut fraction in `(0,1]`, and support-after in `[0,1]`. Absent payloads remain valid for historical/unset calibration mode and no-cut emergent cases.
+
+**Verification:** Red proof: `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` failed because malformed/non-array patron-defiance cuts were accepted before the validator existed. Green proof passed: focused validator file 114/114; patron receipt + diplomacy view consumers 11/11; broader save/schema pack 205/205; `npm.cmd run typecheck`; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 with `state: 172` and `sim: 327`.
+
+**Files:** `src/state/validateGameState.ts`, `tests/save_migration_validator_rejection.test.ts`, `docs/40_reports/implemented/20260604_PATRON_DEFIANCE_SUPPLY_CUTS_VALIDATE_WHEN_PRESENT.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/README.md`, `.claude/napkin.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] fix(state): validate event_constraints when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation logic, event catalog behavior, scenario data, UI routing, or player-facing behavior changed.
