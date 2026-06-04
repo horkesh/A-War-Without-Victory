@@ -636,6 +636,87 @@ function validateBotPriorityShifts(value: unknown, errors: string[]): void {
     });
 }
 
+function validateEventConstraintFactionExpiryReasonEntry(
+    entry: unknown,
+    path: string,
+    errors: string[],
+): entry is Record<string, unknown> {
+    if (!isRecord(entry)) {
+        errors.push(`${path} must be an object`);
+        return false;
+    }
+    if (!isCanonicalPlayerFaction(entry.faction)) {
+        errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+    }
+    if (!isNonNegativeInteger(entry.expires_turn)) {
+        errors.push(`${path}.expires_turn must be a non-negative integer`);
+    }
+    if (!isNonEmptyString(entry.reason)) {
+        errors.push(`${path}.reason must be a non-empty string`);
+    }
+    return true;
+}
+
+function validateEventConstraints(value: unknown, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push('military.event_constraints must be an object when present');
+        return;
+    }
+
+    if ('operation_blocks' in value && value.operation_blocks !== undefined) {
+        if (!Array.isArray(value.operation_blocks)) {
+            errors.push('military.event_constraints.operation_blocks must be an array when present');
+        } else {
+            value.operation_blocks.forEach((block, i) => {
+                validateEventConstraintFactionExpiryReasonEntry(block, `military.event_constraints.operation_blocks[${i}]`, errors);
+            });
+        }
+    }
+
+    if ('doctrine_overrides' in value && value.doctrine_overrides !== undefined) {
+        if (!Array.isArray(value.doctrine_overrides)) {
+            errors.push('military.event_constraints.doctrine_overrides must be an array when present');
+        } else {
+            value.doctrine_overrides.forEach((override, i) => {
+                const path = `military.event_constraints.doctrine_overrides[${i}]`;
+                if (!validateEventConstraintFactionExpiryReasonEntry(override, path, errors)) return;
+                if (!isNonEmptyString(override.forced_stance)) {
+                    errors.push(`${path}.forced_stance must be a non-empty string`);
+                }
+            });
+        }
+    }
+
+    if ('scope_restrictions' in value && value.scope_restrictions !== undefined) {
+        if (!Array.isArray(value.scope_restrictions)) {
+            errors.push('military.event_constraints.scope_restrictions must be an array when present');
+        } else {
+            value.scope_restrictions.forEach((restriction, i) => {
+                const path = `military.event_constraints.scope_restrictions[${i}]`;
+                if (!isRecord(restriction)) {
+                    errors.push(`${path} must be an object`);
+                    return;
+                }
+                if (!isCanonicalPlayerFaction(restriction.faction)) {
+                    errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+                }
+                if ('allowed_municipalities' in restriction && restriction.allowed_municipalities !== undefined && !isStringArray(restriction.allowed_municipalities)) {
+                    errors.push(`${path}.allowed_municipalities must be a string array when present`);
+                }
+                if ('blocked_municipalities' in restriction && restriction.blocked_municipalities !== undefined && !isStringArray(restriction.blocked_municipalities)) {
+                    errors.push(`${path}.blocked_municipalities must be a string array when present`);
+                }
+                if ('expires_turn' in restriction && restriction.expires_turn !== undefined && !isNonNegativeInteger(restriction.expires_turn)) {
+                    errors.push(`${path}.expires_turn must be a non-negative integer when present`);
+                }
+                if (!isNonEmptyString(restriction.reason)) {
+                    errors.push(`${path}.reason must be a non-empty string`);
+                }
+            });
+        }
+    }
+}
+
 function validateCostLedgerAnnotations(value: unknown, errors: string[]): void {
     if (!Array.isArray(value)) {
         errors.push('military.cost_ledger_annotations must be an array when present');
@@ -1207,6 +1288,9 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'bot_priority_shifts' in military && military.bot_priority_shifts !== undefined) {
         validateBotPriorityShifts(military.bot_priority_shifts, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'event_constraints' in military && military.event_constraints !== undefined) {
+        validateEventConstraints(military.event_constraints, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'closed_event_ids' in military && military.closed_event_ids !== undefined) {
         validateClosedEventIds(military.closed_event_ids, errors);
