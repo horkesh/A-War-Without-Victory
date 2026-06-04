@@ -62,6 +62,8 @@ import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 import {
     isCohesionCautionBiasActive,
     isIntlStandingOpsHesitationActive,
+    isMilitaryCredibilityCautionBiasActive,
+    isPatronConfidenceOpsHesitationActive,
 } from '../../political/political_dimension_propagation_gate.js';
 
 // ---------------------------------------------------------------------------
@@ -749,6 +751,30 @@ export function buildBriefing(
         const cohesion = state.military?.negotiation?.strategic_dimensions?.[faction]?.internal_cohesion?.effective_value;
         if (typeof cohesion === 'number') {
             politicalDimensions = { ...politicalDimensions, internal_cohesion: cohesion };
+        }
+    }
+    // Phase E extension: optional patron_confidence propagation (independent sub-flag).
+    // When the global propagation switch + patron-confidence sub-flag are both ON,
+    // surface this faction's effective patron_confidence so the op-launch
+    // patron-hesitation gate downstream can consume it. Composes independently with
+    // the other sub-flags; byte-stability contract identical to MVS — when this
+    // sub-flag is OFF, no field is added.
+    if (isPatronConfidenceOpsHesitationActive()) {
+        const patronConfidence = state.military?.negotiation?.strategic_dimensions?.[faction]?.patron_confidence?.effective_value;
+        if (typeof patronConfidence === 'number') {
+            politicalDimensions = { ...politicalDimensions, patron_confidence: patronConfidence };
+        }
+    }
+    // Phase E extension: optional military_credibility propagation (independent sub-flag).
+    // When the global propagation switch + military-credibility sub-flag are both ON,
+    // surface this faction's effective military_credibility so the op-launch
+    // credibility-caution gate downstream can consume it. Composes independently;
+    // byte-stability contract identical to MVS — when this sub-flag is OFF, no field
+    // is added.
+    if (isMilitaryCredibilityCautionBiasActive()) {
+        const militaryCredibility = state.military?.negotiation?.strategic_dimensions?.[faction]?.military_credibility?.effective_value;
+        if (typeof militaryCredibility === 'number') {
+            politicalDimensions = { ...politicalDimensions, military_credibility: militaryCredibility };
         }
     }
 

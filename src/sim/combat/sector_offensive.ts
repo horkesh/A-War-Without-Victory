@@ -313,6 +313,111 @@ const COHESION_CAUTION_BIAS_THRESHOLD = 40;
  *  — cohesion is a slower-moving signal. */
 const COHESION_CAUTION_BIAS_MULTIPLIER = 0.85;
 
+/**
+ * Phase E extension — patron_confidence → op-launch patron-hesitation multiplier.
+ *
+ * Mirrors the canonical `getIntlStandingOpsHesitationMultiplier` `!== 1.0`
+ * byte-stable consumer pattern. When no hesitation applies, returns 1.0 and
+ * consumers MUST gate `if (mult !== 1.0)` so the historical (no-event,
+ * gate-off) path is byte-identical to baseline.
+ *
+ * Direction mirrors intl_standing: LOW patron confidence → MORE hesitant. The
+ * faction's external sponsor (Belgrade→RS, Zagreb→HRHB, US/Iran→RBiH) has lost
+ * confidence and will not underwrite a fresh offensive (ammunition/fuel/
+ * spare-part throttling + political pressure to stop pushing — cf. the VRS
+ * post-1994 Belgrade fuel embargo, the HVO Washington-Agreement cooldown).
+ *
+ * Magnitude (0.75×) sits between the 0.7× intl_standing hesitation and the
+ * 0.85× cohesion caution: patron relationship is a moderately fast-moving
+ * political signal (sponsors throttle within weeks). Threshold (< 30) mirrors
+ * the intl_standing "isolated" band — a sponsor below 30 is actively withholding.
+ *
+ * Soft consumer contract: the multiplier MAY be applied to any op-launch
+ * scoring variable. The canonical consumer is `buildOperations` in
+ * commander/emit.ts which chains it alongside the other PDP multipliers when
+ * scaling the `minForOp` threshold.
+ *
+ * Inputs:
+ * - `patronConfidence`: faction's effective patron_confidence (0..100), or
+ *   `undefined` when the propagation gate is off / the briefing field is
+ *   absent. Undefined or non-numeric/NaN → returns 1.0 (no-op).
+ *
+ * Determinism: pure function of one numeric input. No state, no randomness,
+ * no save-state field.
+ */
+export function getPatronConfidenceOpsHesitationMultiplier(
+    patronConfidence: number | undefined,
+): number {
+    if (typeof patronConfidence !== 'number') return 1.0;
+    if (Number.isNaN(patronConfidence)) return 1.0;
+    if (patronConfidence < PATRON_CONFIDENCE_OPS_HESITATION_THRESHOLD) {
+        return PATRON_CONFIDENCE_OPS_HESITATION_MULTIPLIER;
+    }
+    return 1.0;
+}
+
+/** Phase E extension: patron_confidence threshold below which a faction's corps
+ *  COs hesitate on op launch (sponsor withholding support). Orchestrator-
+ *  accepted Architect default; mirrors the intl_standing "isolated" band. */
+const PATRON_CONFIDENCE_OPS_HESITATION_THRESHOLD = 30;
+
+/** Phase E extension: hesitation multiplier applied to op-launch scoring when
+ *  patron_confidence < threshold. Soft pressure (0.75×) — between the 0.7×
+ *  intl_standing hesitation and 0.85× cohesion caution. Not a hard block. */
+const PATRON_CONFIDENCE_OPS_HESITATION_MULTIPLIER = 0.75;
+
+/**
+ * Phase E extension — military_credibility → op-launch caution-bias multiplier.
+ *
+ * Mirrors the `getCohesionCautionBiasMultiplier` `!== 1.0` byte-stable consumer
+ * pattern. When no caution-bias applies, returns 1.0 and consumers MUST gate
+ * `if (mult !== 1.0)` so the historical (no-event, gate-off) path is
+ * byte-identical to baseline.
+ *
+ * Direction mirrors internal_cohesion: LOW military credibility → MORE cautious.
+ * A corps whose recent operations have failed and whose casualty-exchange ratio
+ * is bleeding has lost confidence in its own offensive capability — it
+ * consolidates rather than attacks.
+ *
+ * Magnitude (0.85×) matches the cohesion caution: both are slow-moving,
+ * ops-history-derived morale-class signals, so the soft pressure is identical.
+ * Threshold (< 40) mirrors the cohesion "fraying" band.
+ *
+ * Soft consumer contract: the multiplier MAY be applied to any op-launch
+ * scoring variable. The canonical consumer is `buildOperations` in
+ * commander/emit.ts which chains it alongside the other PDP multipliers when
+ * scaling the `minForOp` threshold.
+ *
+ * Inputs:
+ * - `militaryCredibility`: faction's effective military_credibility (0..100),
+ *   or `undefined` when the propagation gate is off / the briefing field is
+ *   absent. Undefined or non-numeric/NaN → returns 1.0 (no-op).
+ *
+ * Determinism: pure function of one numeric input. No state, no randomness,
+ * no save-state field.
+ */
+export function getMilitaryCredibilityCautionBiasMultiplier(
+    militaryCredibility: number | undefined,
+): number {
+    if (typeof militaryCredibility !== 'number') return 1.0;
+    if (Number.isNaN(militaryCredibility)) return 1.0;
+    if (militaryCredibility < MILITARY_CREDIBILITY_CAUTION_BIAS_THRESHOLD) {
+        return MILITARY_CREDIBILITY_CAUTION_BIAS_MULTIPLIER;
+    }
+    return 1.0;
+}
+
+/** Phase E extension: military_credibility threshold below which a faction's
+ *  corps COs become more cautious on op launch (failing ops record + bleeding
+ *  exchange ratio). Orchestrator-accepted Architect default; mirrors the
+ *  cohesion "fraying" band. */
+const MILITARY_CREDIBILITY_CAUTION_BIAS_THRESHOLD = 40;
+
+/** Phase E extension: caution-bias multiplier applied to op-launch scoring when
+ *  military_credibility < threshold. Soft pressure (0.85×) — matches the
+ *  cohesion caution magnitude (both slow-moving morale-class signals). */
+const MILITARY_CREDIBILITY_CAUTION_BIAS_MULTIPLIER = 0.85;
+
 /** Corps exhaustion decay per turn when idle (no active operation). */
 const EXHAUSTION_DECAY_IDLE = 3;
 
