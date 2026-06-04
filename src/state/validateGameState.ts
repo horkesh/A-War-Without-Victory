@@ -15,6 +15,10 @@ const DOCTRINE_OVERRIDE_FORCED_STANCES = ['defensive', 'balanced', 'offensive', 
 const SECTOR_STANCES = ['fortify', 'defend', 'elastic', 'active_defense', 'screening'] as const;
 const MUNICIPALITY_SUPPORT_TYPES = ['weapons_shipment', 'staff_priority', 'croatian_support_package'] as const;
 const ARMY_HQ_OVERRIDE_TYPES = ['offensive', 'probe', 'feint'] as const;
+const CAMPAIGN_PLAN_FRONT_ROLES = ['primary', 'secondary', 'economy', 'contain'] as const;
+const CAMPAIGN_PLAN_FRONT_STANCES = ['offensive', 'balanced', 'defensive', 'reorganize'] as const;
+const CAMPAIGN_PLAN_ARMY_STANCES = ['general_defensive', 'balanced', 'general_offensive', 'total_mobilization'] as const;
+const CAMPAIGN_PLAN_SYNC_PARTICIPANT_ROLES = ['main_effort', 'supporting', 'feint', 'fixing'] as const;
 const AI_DECISION_LEVELS = ['army', 'corps', 'advisor', 'political', 'event'] as const;
 const AI_CORPS_STANCES = ['offensive', 'balanced', 'defensive'] as const;
 const AI_PEACE_PLAN_RESPONSES = ['accept', 'reject'] as const;
@@ -144,6 +148,22 @@ function isMunicipalitySupportType(value: unknown): boolean {
 
 function isArmyHqOverrideType(value: unknown): boolean {
     return typeof value === 'string' && ARMY_HQ_OVERRIDE_TYPES.includes(value as typeof ARMY_HQ_OVERRIDE_TYPES[number]);
+}
+
+function isCampaignPlanFrontRole(value: unknown): boolean {
+    return typeof value === 'string' && CAMPAIGN_PLAN_FRONT_ROLES.includes(value as typeof CAMPAIGN_PLAN_FRONT_ROLES[number]);
+}
+
+function isCampaignPlanFrontStance(value: unknown): boolean {
+    return typeof value === 'string' && CAMPAIGN_PLAN_FRONT_STANCES.includes(value as typeof CAMPAIGN_PLAN_FRONT_STANCES[number]);
+}
+
+function isCampaignPlanArmyStance(value: unknown): boolean {
+    return typeof value === 'string' && CAMPAIGN_PLAN_ARMY_STANCES.includes(value as typeof CAMPAIGN_PLAN_ARMY_STANCES[number]);
+}
+
+function isCampaignPlanSyncParticipantRole(value: unknown): boolean {
+    return typeof value === 'string' && CAMPAIGN_PLAN_SYNC_PARTICIPANT_ROLES.includes(value as typeof CAMPAIGN_PLAN_SYNC_PARTICIPANT_ROLES[number]);
 }
 
 function isAiDecisionLevel(value: unknown): boolean {
@@ -953,6 +973,172 @@ function validateArmyHqOverrides(value: unknown, errors: string[]): void {
             errors.push(`${path}.max_brigades must be a positive integer when present`);
         }
     });
+}
+
+function validateCampaignPlanFrontPriority(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isNonEmptyString(value.corps_id)) {
+        errors.push(`${path}.corps_id must be a non-empty string`);
+    }
+    if (!isCampaignPlanFrontRole(value.role)) {
+        errors.push(`${path}.role must be a valid front priority role`);
+    }
+    if (!isCampaignPlanFrontStance(value.suggested_stance)) {
+        errors.push(`${path}.suggested_stance must be a valid front priority stance`);
+    }
+    if ('offensive_targets' in value && value.offensive_targets !== undefined && !isStringArray(value.offensive_targets)) {
+        errors.push(`${path}.offensive_targets must be a string array`);
+    }
+    if ('hold_targets' in value && value.hold_targets !== undefined && !isStringArray(value.hold_targets)) {
+        errors.push(`${path}.hold_targets must be a string array`);
+    }
+}
+
+function validateCampaignPlanDoctrineOverride(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isCampaignPlanArmyStance(value.army_stance)) {
+        errors.push(`${path}.army_stance must be a valid army stance`);
+    }
+    if (!isFiniteNumber(value.aggression_modifier)) {
+        errors.push(`${path}.aggression_modifier must be a finite number`);
+    }
+    if ('corps_stance_ceilings' in value && value.corps_stance_ceilings !== undefined) {
+        if (!isRecord(value.corps_stance_ceilings)) {
+            errors.push(`${path}.corps_stance_ceilings must be an object when present`);
+        } else {
+            for (const [corpsId, stance] of Object.entries(value.corps_stance_ceilings)) {
+                if (!isCampaignPlanFrontStance(stance)) {
+                    errors.push(`${path}.corps_stance_ceilings.${corpsId} must be a valid front priority stance`);
+                }
+            }
+        }
+    }
+}
+
+function validateCampaignPlanSyncParticipant(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isNonEmptyString(value.corps_id)) {
+        errors.push(`${path}.corps_id must be a non-empty string`);
+    }
+    if (!isCampaignPlanSyncParticipantRole(value.role)) {
+        errors.push(`${path}.role must be a valid synchronized operation participant role`);
+    }
+    if (!isStringArray(value.target_osids)) {
+        errors.push(`${path}.target_osids must be a string array`);
+    }
+    if (!isPositiveInteger(value.min_brigades)) {
+        errors.push(`${path}.min_brigades must be a positive integer`);
+    }
+}
+
+function validateCampaignPlanSynchronizedOperation(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isNonEmptyString(value.name)) {
+        errors.push(`${path}.name must be a non-empty string`);
+    }
+    if (!isNonNegativeInteger(value.launch_window_start)) {
+        errors.push(`${path}.launch_window_start must be a non-negative integer`);
+    }
+    if (!isNonNegativeInteger(value.launch_window_end)) {
+        errors.push(`${path}.launch_window_end must be a non-negative integer`);
+    } else if (isNonNegativeInteger(value.launch_window_start) && value.launch_window_end < value.launch_window_start) {
+        errors.push(`${path}.launch_window_end must be greater than or equal to launch_window_start`);
+    }
+    if (!isStringArray(value.target_area)) {
+        errors.push(`${path}.target_area must be a string array`);
+    }
+    if (!Array.isArray(value.participants)) {
+        errors.push(`${path}.participants must be an array`);
+    } else {
+        value.participants.forEach((participant, i) => {
+            validateCampaignPlanSyncParticipant(participant, `${path}.participants[${i}]`, errors);
+        });
+    }
+}
+
+function validateCampaignPlanForceTransfer(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isNonEmptyString(value.brigade_id)) {
+        errors.push(`${path}.brigade_id must be a non-empty string`);
+    }
+    if (!isNonEmptyString(value.from_corps)) {
+        errors.push(`${path}.from_corps must be a non-empty string`);
+    }
+    if (!isNonEmptyString(value.to_corps)) {
+        errors.push(`${path}.to_corps must be a non-empty string`);
+    }
+    if (!isNonNegativeInteger(value.march_turns)) {
+        errors.push(`${path}.march_turns must be a non-negative integer`);
+    }
+    if (!isNonNegativeInteger(value.issued_turn)) {
+        errors.push(`${path}.issued_turn must be a non-negative integer`);
+    }
+    if (typeof value.completed !== 'boolean') {
+        errors.push(`${path}.completed must be a boolean`);
+    }
+}
+
+function validateCampaignPlan(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be null or a CampaignPlan object`);
+        return;
+    }
+    if (!isNonNegativeInteger(value.issued_turn)) {
+        errors.push(`${path}.issued_turn must be a non-negative integer`);
+    }
+    if (!isNonNegativeInteger(value.valid_until_turn)) {
+        errors.push(`${path}.valid_until_turn must be a non-negative integer`);
+    } else if (isNonNegativeInteger(value.issued_turn) && value.valid_until_turn < value.issued_turn) {
+        errors.push(`${path}.valid_until_turn must be greater than or equal to issued_turn`);
+    }
+    if (!Array.isArray(value.front_priorities)) {
+        errors.push(`${path}.front_priorities must be an array`);
+    } else {
+        value.front_priorities.forEach((entry, i) => {
+            validateCampaignPlanFrontPriority(entry, `${path}.front_priorities[${i}]`, errors);
+        });
+    }
+    if ('doctrine_override' in value && value.doctrine_override !== undefined) {
+        validateCampaignPlanDoctrineOverride(value.doctrine_override, `${path}.doctrine_override`, errors);
+    }
+    if (!Array.isArray(value.synchronized_operations)) {
+        errors.push(`${path}.synchronized_operations must be an array`);
+    } else {
+        value.synchronized_operations.forEach((entry, i) => {
+            validateCampaignPlanSynchronizedOperation(entry, `${path}.synchronized_operations[${i}]`, errors);
+        });
+    }
+    if (!Array.isArray(value.force_transfers)) {
+        errors.push(`${path}.force_transfers must be an array`);
+    } else {
+        value.force_transfers.forEach((entry, i) => {
+            validateCampaignPlanForceTransfer(entry, `${path}.force_transfers[${i}]`, errors);
+        });
+    }
+    if (!isStringArray(value.excluded_corps)) {
+        errors.push(`${path}.excluded_corps must be a string array`);
+    }
+    if (typeof value.emergency !== 'boolean') {
+        errors.push(`${path}.emergency must be a boolean`);
+    }
+    if (!isNonEmptyString(value.trigger_reason)) {
+        errors.push(`${path}.trigger_reason must be a non-empty string`);
+    }
 }
 
 function validateAiStringArray(value: unknown, path: string, errors: string[]): void {
@@ -2190,36 +2376,12 @@ export function validateGameStateShape(
                 errors.push('military.campaign_plans must be an object (Record<FactionId, CampaignPlan | null>) when present');
             } else {
                 for (const [fid, plan] of Object.entries(cp)) {
+                    const planPath = `military.campaign_plans.${fid}`;
+                    if (!isCanonicalPlayerFaction(fid)) {
+                        errors.push(`${planPath} must use a canonical faction id key`);
+                    }
                     if (plan === null) continue; // null is valid (cleared plan)
-                    if (typeof plan !== 'object' || Array.isArray(plan)) {
-                        errors.push(`military.campaign_plans.${fid} must be null or a CampaignPlan object`);
-                        continue;
-                    }
-                    const p = plan as Record<string, unknown>;
-                    if (typeof p.issued_turn !== 'number' || !Number.isInteger(p.issued_turn) || p.issued_turn < 0) {
-                        errors.push(`military.campaign_plans.${fid}.issued_turn must be a non-negative integer`);
-                    }
-                    if (typeof p.valid_until_turn !== 'number' || !Number.isInteger(p.valid_until_turn) || p.valid_until_turn < 0) {
-                        errors.push(`military.campaign_plans.${fid}.valid_until_turn must be a non-negative integer`);
-                    }
-                    if (!Array.isArray(p.front_priorities)) {
-                        errors.push(`military.campaign_plans.${fid}.front_priorities must be an array`);
-                    }
-                    if (!Array.isArray(p.synchronized_operations)) {
-                        errors.push(`military.campaign_plans.${fid}.synchronized_operations must be an array`);
-                    }
-                    if (!Array.isArray(p.force_transfers)) {
-                        errors.push(`military.campaign_plans.${fid}.force_transfers must be an array`);
-                    }
-                    if (!Array.isArray(p.excluded_corps)) {
-                        errors.push(`military.campaign_plans.${fid}.excluded_corps must be an array`);
-                    }
-                    if (typeof p.emergency !== 'boolean') {
-                        errors.push(`military.campaign_plans.${fid}.emergency must be a boolean`);
-                    }
-                    if (typeof p.trigger_reason !== 'string') {
-                        errors.push(`military.campaign_plans.${fid}.trigger_reason must be a string`);
-                    }
+                    validateCampaignPlan(plan, planPath, errors);
                 }
             }
         }
@@ -2230,7 +2392,11 @@ export function validateGameStateShape(
                 errors.push('military.last_gathering_turn must be an object (Record<FactionId, number>) when present');
             } else {
                 for (const [fid, val] of Object.entries(lgt)) {
-                    if (typeof val !== 'number' || !Number.isInteger(val) || (val as number) < 0) {
+                    const path = `military.last_gathering_turn.${fid}`;
+                    if (!isCanonicalPlayerFaction(fid)) {
+                        errors.push(`${path} must use a canonical faction id key`);
+                    }
+                    if (!isNonNegativeInteger(val)) {
                         errors.push(`military.last_gathering_turn.${fid} must be a non-negative integer`);
                     }
                 }

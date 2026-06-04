@@ -1148,6 +1148,168 @@ describe('serialization and validation', () => {
         }
     });
 
+    it('validateGameState accepts nested campaign plan details produced by Army HQ gathering', () => {
+        const state = makeMinimalState({ turn: 10 });
+        (state.military as unknown as Record<string, unknown>).campaign_plans = {
+            RS: {
+                issued_turn: 8,
+                valid_until_turn: 18,
+                emergency: false,
+                trigger_reason: 'regular_cadence',
+                front_priorities: [
+                    {
+                        corps_id: 'vrs_1st_krajina',
+                        role: 'primary',
+                        suggested_stance: 'offensive',
+                        offensive_targets: [],
+                        hold_targets: ['op:bihac:bihac_1'],
+                    },
+                ],
+                doctrine_override: {
+                    army_stance: 'balanced',
+                    aggression_modifier: -0.05,
+                    corps_stance_ceilings: { vrs_1st_krajina: 'balanced' },
+                },
+                synchronized_operations: [
+                    {
+                        name: 'sync_vrs_1st_krajina_vrs_drina',
+                        participants: [
+                            {
+                                corps_id: 'vrs_1st_krajina',
+                                role: 'main_effort',
+                                target_osids: [],
+                                min_brigades: 4,
+                            },
+                            {
+                                corps_id: 'vrs_drina',
+                                role: 'supporting',
+                                target_osids: ['op:zvornik:zvornik_1'],
+                                min_brigades: 3,
+                            },
+                        ],
+                        launch_window_start: 11,
+                        launch_window_end: 15,
+                        target_area: [],
+                    },
+                ],
+                force_transfers: [
+                    {
+                        brigade_id: 'bde_test',
+                        from_corps: 'vrs_drina',
+                        to_corps: 'vrs_1st_krajina',
+                        march_turns: 2,
+                        issued_turn: 8,
+                        completed: false,
+                    },
+                ],
+                excluded_corps: ['arbih_general_staff'],
+            },
+        };
+        (state.military as unknown as Record<string, unknown>).last_gathering_turn = { RS: 8 };
+
+        const result = validateGameStateShape(state);
+        const gatheringErrors = result.ok
+            ? []
+            : result.errors.filter(e => e.includes('campaign_plans') || e.includes('last_gathering_turn'));
+        expect(gatheringErrors).toEqual([]);
+    });
+
+    it('validateGameState rejects malformed nested campaign plan details', () => {
+        const state = makeMinimalState({ turn: 10 });
+        (state.military as unknown as Record<string, unknown>).campaign_plans = {
+            RS: {
+                issued_turn: 8,
+                valid_until_turn: 7,
+                emergency: false,
+                trigger_reason: '',
+                front_priorities: [
+                    {
+                        corps_id: '',
+                        role: 'breakthrough',
+                        suggested_stance: 'reckless',
+                        offensive_targets: ['op:brcko:brcko_1', 42],
+                        hold_targets: [false],
+                    },
+                    42,
+                ],
+                doctrine_override: {
+                    army_stance: 'reckless',
+                    aggression_modifier: 'high',
+                    corps_stance_ceilings: { vrs_1st_krajina: 'reckless' },
+                },
+                synchronized_operations: [
+                    {
+                        name: '',
+                        participants: [
+                            {
+                                corps_id: '',
+                                role: 'decoy',
+                                target_osids: ['op:zvornik:zvornik_1', 42],
+                                min_brigades: 0,
+                            },
+                        ],
+                        launch_window_start: 12,
+                        launch_window_end: 11,
+                        target_area: ['brcko', 42],
+                    },
+                    null,
+                ],
+                force_transfers: [
+                    {
+                        brigade_id: '',
+                        from_corps: '',
+                        to_corps: '',
+                        march_turns: -1,
+                        issued_turn: 1.5,
+                        completed: 'no',
+                    },
+                    42,
+                ],
+                excluded_corps: ['arbih_general_staff', 42],
+            },
+            JNA: null,
+        };
+        (state.military as unknown as Record<string, unknown>).last_gathering_turn = { RS: 8, JNA: 'never' };
+
+        const result = validateGameStateShape(state);
+
+        expect(result.ok).toBe(false);
+        if (!result.ok) {
+            expect(result.errors).toEqual(expect.arrayContaining([
+                'military.campaign_plans.RS.valid_until_turn must be greater than or equal to issued_turn',
+                'military.campaign_plans.RS.trigger_reason must be a non-empty string',
+                'military.campaign_plans.RS.front_priorities[0].corps_id must be a non-empty string',
+                'military.campaign_plans.RS.front_priorities[0].role must be a valid front priority role',
+                'military.campaign_plans.RS.front_priorities[0].suggested_stance must be a valid front priority stance',
+                'military.campaign_plans.RS.front_priorities[0].offensive_targets must be a string array',
+                'military.campaign_plans.RS.front_priorities[0].hold_targets must be a string array',
+                'military.campaign_plans.RS.front_priorities[1] must be an object',
+                'military.campaign_plans.RS.doctrine_override.army_stance must be a valid army stance',
+                'military.campaign_plans.RS.doctrine_override.aggression_modifier must be a finite number',
+                'military.campaign_plans.RS.doctrine_override.corps_stance_ceilings.vrs_1st_krajina must be a valid front priority stance',
+                'military.campaign_plans.RS.synchronized_operations[0].name must be a non-empty string',
+                'military.campaign_plans.RS.synchronized_operations[0].launch_window_end must be greater than or equal to launch_window_start',
+                'military.campaign_plans.RS.synchronized_operations[0].target_area must be a string array',
+                'military.campaign_plans.RS.synchronized_operations[0].participants[0].corps_id must be a non-empty string',
+                'military.campaign_plans.RS.synchronized_operations[0].participants[0].role must be a valid synchronized operation participant role',
+                'military.campaign_plans.RS.synchronized_operations[0].participants[0].target_osids must be a string array',
+                'military.campaign_plans.RS.synchronized_operations[0].participants[0].min_brigades must be a positive integer',
+                'military.campaign_plans.RS.synchronized_operations[1] must be an object',
+                'military.campaign_plans.RS.force_transfers[0].brigade_id must be a non-empty string',
+                'military.campaign_plans.RS.force_transfers[0].from_corps must be a non-empty string',
+                'military.campaign_plans.RS.force_transfers[0].to_corps must be a non-empty string',
+                'military.campaign_plans.RS.force_transfers[0].march_turns must be a non-negative integer',
+                'military.campaign_plans.RS.force_transfers[0].issued_turn must be a non-negative integer',
+                'military.campaign_plans.RS.force_transfers[0].completed must be a boolean',
+                'military.campaign_plans.RS.force_transfers[1] must be an object',
+                'military.campaign_plans.RS.excluded_corps must be a string array',
+                'military.campaign_plans.JNA must use a canonical faction id key',
+                'military.last_gathering_turn.JNA must use a canonical faction id key',
+                'military.last_gathering_turn.JNA must be a non-negative integer',
+            ]));
+        }
+    });
+
     it('last_gathering_turn round-trips through JSON', () => {
         const lastGathering: Record<string, number> = {
             RS: 8,
