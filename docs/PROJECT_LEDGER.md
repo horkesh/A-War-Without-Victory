@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(state): validate command briefing when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, simulation behavior, Tactical Group, `army_hq_operations`, telemetry, Ahmici consequence files, no-data credibility files, OOB/brigade/Standing OG files, operation-launch behavior, baseline manifests, replay writer, scenario output, or player-facing command behavior changed.
+
+**Change:** Classified `military.last_briefing` as an optional war-phase command briefing packet rather than required current-save state. Absence remains valid because the writer runs only in war phase when `meta.player_faction` exists. Added validate-when-present coverage so present packets must be objects with non-negative integer `turn`, canonical `faction`, string `headline`, array `items`, non-negative integer severity counts matching item severities, and item rows with non-empty string `id`, `section`, `title`, `detail`, canonical `severity`, optional string `actionLabel`, and optional target objects with existing string keys such as `kind`, `osid`, `corpsId`, and `enclaveId`. The validator does not materialize the field or resolve target semantics.
+
+**Verification:** Red proof: `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` failed because malformed and non-object `military.last_briefing` payloads were accepted. Green proof: focused validator file passed 154/154; requested command-briefing/UI visibility pack passed; `npm.cmd run typecheck -- --pretty false` passed; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 with `state: 172` and `sim: 327`; `git diff --check` passed.
+
+**Files:** `src/state/validateGameState.ts`, `tests/save_migration_validator_rejection.test.ts`, `docs/40_reports/implemented/20260604_LAST_BRIEFING_VALIDATE_WHEN_PRESENT.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
 ## [2026-06-04] fix(events): close Ahmici same-turn lock residual
 
 **Type:** Event-state / alliance-lock correctness follow-up to PR #176 Codex review. No sensitive-history prose, player choices, reward surface, victory scoring, save schema, UI, or scenario structure changed.
