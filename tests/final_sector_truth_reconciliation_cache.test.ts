@@ -80,6 +80,8 @@ function makeState(): { state: GameState; edges: EdgeRecord[] } {
                 { edge_id: 'op:test:front__op:test:enemy', a: 'op:test:front', b: 'op:test:enemy', side_a: 'RS', side_b: 'RBiH' },
             ],
             front_segments: {},
+            theatres: {},
+            army_theatre_assignment: {},
             front_posture: {},
             front_posture_regions: {},
             front_pressure: {},

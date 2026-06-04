@@ -116,6 +116,8 @@ function makeState(alliance: number): GameState {
                 { edge_id: 'op:busovaca:busovaca_rbih_1__op:kiseljak:kiseljak_1', a: 'op:busovaca:busovaca_rbih_1', b: 'op:kiseljak:kiseljak_1', side_a: 'RBiH', side_b: 'HRHB' },
             ],
             front_segments: {},
+            theatres: {},
+            army_theatre_assignment: {},
             front_posture: {},
             front_posture_regions: {},
             front_pressure: {},

@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**Military theatre compatibility contract (2026-06-04, v5 type closeout).** `state.military.theatres` and `state.military.army_theatre_assignment` are required current-save records in `MilitaryState`; v5 migration already defaults both to `{}` and current validation already rejects missing/malformed records. They remain legacy compatibility records, not live front authority. Do instead: include empty records in current-state test/CLI fixtures; do not bump schema version or route live player/turn-pipeline logic through these fields.
+
 **StateMeta decision_mode contract (2026-06-03, v35).** Current loaded gameplay saves must carry explicit `meta.decision_mode: 'historical' | 'emergent'`; malformed values fail validation. Legacy/unset saves migrate to `'historical'` for calibration safety. TypeScript may still keep the field optional where legacy/migration compatibility requires it. Do instead: baseline scenarios explicitly declare `historical`, desktop new campaigns explicitly set `emergent`, and no UI exposes a mode toggle.
 
 **Location:** `.claude/napkin.md` - single runbook for this repo. Read and curate at session start. Update during work.

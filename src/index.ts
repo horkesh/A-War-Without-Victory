@@ -21,6 +21,8 @@ const initial: GameState = {
   military: {
     formations: {},
     front_segments: {},
+    theatres: {},
+    army_theatre_assignment: {},
     front_posture: {},
     front_posture_regions: {},
     front_pressure: {},

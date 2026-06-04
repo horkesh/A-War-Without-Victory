@@ -981,6 +981,8 @@ describe('post-merge misassignment relocation', () => {
                     { edge_id: 'op:front:b__op:enemy:b', a: 'op:front:b', b: 'op:enemy:b', side_a: 'RS', side_b: 'RBiH' },
                 ],
                 front_segments: {},
+                theatres: {},
+                army_theatre_assignment: {},
                 front_posture: {},
                 front_posture_regions: {},
                 front_pressure: {},

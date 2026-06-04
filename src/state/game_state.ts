@@ -2352,10 +2352,10 @@ assignable_front_segments?: AssignableFrontSegmentState[];
 // See: docs/40_reports/implemented/20260403_FRONTLINE_AUTHORITY_AND_PLAYER_SHELL_INTEL_REDUCTION.md
 /** Legacy compatibility fallback only. Null = reserve; sectors/front edges are the live frontline truth. */
 brigade_front_assignment?: Record<FormationId, string | null>;
-/** Legacy theatre compatibility state. Not a live player-shell or turn-pipeline authority. */
-theatres?: Record<string, TheatreState>;
-/** Legacy theatre compatibility assignment. Preserved only for old saves/tools. */
-army_theatre_assignment?: Record<FormationId, string>;
+/** Legacy theatre compatibility state. Required current-save record; not a live player-shell or turn-pipeline authority. */
+theatres: Record<string, TheatreState>;
+/** Legacy theatre compatibility assignment. Required current-save record; preserved only for old saves/tools. */
+army_theatre_assignment: Record<FormationId, string>;
 /** Legacy AoR tuning compatibility field. Do not expose in the live player shell and do not write new values. */
 brigade_desired_aor_cap?: Record<FormationId, number>;
 /** Pending brigade posture orders (consumed once per turn). */

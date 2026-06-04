@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] fix(state): promote theatre compatibility pair to required MilitaryState contract
+
+**Type:** Save/type contract closeout for the Optional `GameState` schema lane. No save-schema version bump, migration behavior, simulation logic, scenario data, UI routing, or player-facing behavior changed.
+
+**Change:** Removed stale TypeScript optionality from the v5 theatre compatibility pair: `military.theatres` and `military.army_theatre_assignment` are now required current-state records on `MilitaryState`. This matches the existing v5 migration and current validator contract, both of which already materialize/require empty records. Updated current-state test/CLI builders to include explicit `{}` records, added a type-level contract assertion, documented the closeout, and moved the command-board next schema slice to `military.event_constraints` classification.
+
+**Verification:** Red proof: `npm.cmd run typecheck` failed on the new type-level assertion while the fields remained optional. Focused runtime proof passed: `node node_modules\vitest\vitest.mjs run tests\state\player_faction_contract.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts tests\state.test.ts tests\migration_nested_ownership.test.ts --reporter=dot` (155/155). After implementation, `npm.cmd run typecheck` passed. `node tools\diagnostics\strict_null_inventory.cjs --field-domains` reported state-domain optional fields at 172 and no longer listed `MilitaryState.theatres` or `MilitaryState.army_theatre_assignment`.
+
+**Files:** `src/state/game_state.ts`, CLI/test current-state builders, `tests/state/player_faction_contract.test.ts`, `docs/20_engineering/SAVE_SCHEMA_EVOLUTION.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/implemented/20260604_THEATRE_COMPATIBILITY_SCHEMA_CONTRACT.md`, `.claude/napkin.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-03] fix(ci): align replay branch UI proof expectations
 
 **Type:** Test-proof reconciliation for `codex/replay-manifest-only` (#145). No replay payload logic, scenario data, save schema, or simulation path touched.

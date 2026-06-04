@@ -76,6 +76,8 @@ function makeState(): GameState {
                 { edge_id: 'op:beta:front__op:enemy:b5', a: 'op:beta:front', b: 'op:enemy:b5', side_a: 'RS', side_b: 'RBiH' },
             ],
             front_segments: {},
+            theatres: {},
+            army_theatre_assignment: {},
             front_posture: {},
             front_posture_regions: {},
             front_pressure: {},
