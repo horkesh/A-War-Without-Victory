@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-04] docs(sector): reconcile active sector floor to PR #180 refloor
+
+**Type:** Docs-only sector/frontline planning-floor reconciliation. No runtime code, scenario data, baseline artifact, save schema, replay writer, generated artifact, UI, calibration, or simulation behavior changed.
+
+**Change:** Reconciled the command board, roadmap, sector performance plan, sector master, and sector hash reconciliation report so the active no-edit sector/frontline floor is `41ba34ddfaa02a85` after PR #180 / commit `d6b6533a`.
+
+The prior `41c72b13ad2e91b9` floor remains historical proof for the closed pre-#180 sector optimization slices, while the older `e086afbefcef01e6` floor remains superseded by PR #159 final-sector seal correction.
+
+**Verification:** full hash inventory grep across `docs`; targeted stale active-floor wording grep across plans/reports/ledger; `git diff --check`.
+
+**Files:** `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/2026-05-20-sector-performance-next-target-plan.md`, `docs/40_reports/SECTOR_MASTER.md`, `docs/40_reports/implemented/20260604_SECTOR_HASH_RECONCILIATION.md`, `docs/40_reports/README.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] test(artifacts): guard save migration fixture ownership
 
 **Type:** Static generated-artifact ownership guard + docs closeout. No fixture bytes, save migration logic, validator behavior, replay writer, scenario output, baseline manifest, schema version, UI, or simulation behavior changed.

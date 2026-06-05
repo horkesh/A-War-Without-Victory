@@ -52,6 +52,7 @@ byte-identical final hash plus consistency and baseline gates.
 
 ## Follow-Up
 
-Continue sector work from the same current floor, `41c72b13ad2e91b9`, and
-re-profile before selecting the next target. Do not revive broad sector-front
+Continue sector work from the active floor recorded in `docs/40_reports/SECTOR_MASTER.md`;
+`41c72b13ad2e91b9` is this report's historical pre-#180 proof hash. Re-profile
+before selecting the next target. Do not revive broad sector-front
 view caches without new evidence that reverses the 2026-05-27 regression finding.
