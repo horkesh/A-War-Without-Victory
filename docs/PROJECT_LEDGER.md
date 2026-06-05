@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] test(engine): close review-backlog Trnovo waypoint and HRHB Graz coverage
+
+**Type:** Focused regression coverage and review-backlog triage. No runtime code, scenario output, baseline manifest, save schema, migration, scenario data, OOB data, sensitive-history prose, UI surface, randomness, timestamps, or nondeterministic ordering changed.
+
+**Change:** Added Trnovo queued-operation coverage proving already-controlled `op:trnovo:kijevo_2` is stripped as a capture objective while remaining the friendly approach waypoint to `op:trnovo:delijas`. Added HRHB Graz coverage for the non-east, non-exempt faction-level branch blocking HRHB attacks into RS territory. Same-axis concentration support and final-sector disconnected-territory serialization were tested locally but deferred because each candidate behavior path reproduced a week-40 Boljanic anchor failure (`op:doboj:boljanic_2` expected RS, got RBiH).
+
+**Docs:** Added `docs/40_reports/implemented/20260605_REVIEW_BACKLOG_ENGINE_BATCH.md` and updated the command board, master roadmap, reports indices, and knowledge ledger. Issue #170 still retains same-axis concentration support, enclave-resilience denominator, and TG anchor-only readiness; final-sector disconnected-territory hardening is tracked as a separate engine/canon decision residual.
+
+**Verification:** `npx.cmd vitest run tests/pre_planned_operations.test.ts tests/graz_faction_block.test.ts --reporter=dot`; `npm.cmd run test:vitest:scenario:anchors`; `npm.cmd run typecheck -- --pretty false`; `npm.cmd run test:baselines`; `node tools/diagnostics/strict_null_inventory.cjs --field-domains`; `git diff --check`.
+
+---
+
 ## [2026-06-05] docs(process): reconcile sector floor after recent OOB refloors
 
 **Type:** Documentation/process correction. No runtime behavior, scenario data, save schema, generated artifact, baseline, replay writer, UI code, or canon text changed.

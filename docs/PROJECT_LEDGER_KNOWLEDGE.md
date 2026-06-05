@@ -1,3 +1,9 @@
+## 2026-06-05 - Review backlog anchor gate
+
+**Controlled pre-planned waypoints can remain pathing context without becoming capture objectives:** Operation Trnovo demonstrates the current contract: already-controlled `op:trnovo:kijevo_2` is stripped from the capture objective chain, while `getSectorOffensiveApproachOsids(...)` still resolves it as the friendly approach to `op:trnovo:delijas`. Durable rule: before adding a persisted waypoint field, first test whether the existing approach resolver already preserves the waypoint as pathing context; add schema only if execution cannot recover the path from adjacency/control state.
+
+**Do not refloor or merge over Boljanic anchor drift:** Same-axis concentration support and final-sector disconnected-territory splitting each reproduced `op:doboj:boljanic_2` flipping from expected RS to RBiH under `npm.cmd run test:vitest:scenario:anchors`. Durable rule: if a review-backlog behavior fix moves a critical anchor, reduce the PR to proven-safe coverage or substrate work and move the behavior path to a dedicated engine/canon lane with scenario proof.
+
 ## 2026-06-05 - Presidential command canon wording
 
 **Rulebook and FORAWWV command wording must match the shipped player role:** the player is the president and acts through generals, not as a brigade/axis commander. Durable rule: when command-surface UI or command-lever docs mention operational authority, use the president-through-generals idiom; reserve direct brigade/axis planning language for explicitly post-1.0/DLC design packets. Applied in PR #196 Rulebook §5 reconciliation and PR #201 FORAWWV §XII reconciliation.
