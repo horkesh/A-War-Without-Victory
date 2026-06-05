@@ -1,3 +1,7 @@
+## 2026-06-05 - Opening brief dismissal is renderer-session state, not save state
+
+**Opening brief dismissal should survive same-campaign refreshes without writing save schema:** The presidential opening brief is not the deprecated tutorial overlay and should not use `meta.tutorial_state` or localStorage for this fix. Durable rule: key renderer-session dismissal to the current player faction, preserve it across same-faction `loadSave` refreshes, and reset on first load/no faction/faction change. Applied in `[2026-06-05] fix(ui): persist opening brief dismissal across same-faction refreshes`.
+
 ## 2026-06-05 - Personnel surfaces need a presidential dossier before raw ORBAT
 
 **Personnel tabs should lead with command risk, not the full roster wall:** Army HQ Personnel already has rich ORBAT, mobilization, and officer data, but the president needs the actionable summary first. Durable rule: lead Personnel surfaces with stable, existing-data summaries for commander vacancies, low-loyalty serving commanders, reserve officers, and mobilization strain before listing raw formations/officers. Front-visit surfaces should show both reachable and cut-off fronts from the existing availability contract; do not recalculate reachability in React. Applied in `[2026-06-05] feat(ui): add front-visit reachability and personnel command dossier`.

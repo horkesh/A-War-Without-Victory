@@ -164,6 +164,7 @@ export interface GameStore {
 
   /** Presidential Inbox: opening brief dismissed flag */
   openingBriefDismissed: boolean;
+  openingBriefDismissedFaction: string | null;
   setOpeningBriefDismissed: (v: boolean) => void;
   /** Force inbox panel open (from toolbar badge click) */
   forceInboxOpen: boolean;
@@ -403,7 +404,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
   advanceTurnPending: false,
   setAdvanceTurnPending: (v) => set({ advanceTurnPending: v }),
   openingBriefDismissed: false,
-  setOpeningBriefDismissed: (v) => set({ openingBriefDismissed: v }),
+  openingBriefDismissedFaction: null,
+  setOpeningBriefDismissed: (v) => set((state) => ({
+    openingBriefDismissed: v,
+    openingBriefDismissedFaction: v ? state.loadedGameState?.player_faction ?? null : null,
+  })),
   forceInboxOpen: false,
   setForceInboxOpen: (v) => set({ forceInboxOpen: v }),
   setArmyHQOpen: (open) => set({
@@ -688,6 +693,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         // Apply state in next tick so we don't block after parse.
         queueMicrotask(() => {
           try {
+            const previousOpeningBriefFaction = get().openingBriefDismissedFaction;
+            const keepOpeningBriefDismissed =
+              get().openingBriefDismissed &&
+              previousOpeningBriefFaction != null &&
+              previousOpeningBriefFaction === (state.player_faction ?? null);
             set({
               loadedGameState: state,
               replayInspection: null,
@@ -698,7 +708,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
               // Selection state holds references to entities from the previous save.
               // A different save may not contain those IDs — stale references cause
               // ghost panels, broken detail views, and confusing player state.
-              openingBriefDismissed: false,
+              openingBriefDismissed: keepOpeningBriefDismissed,
+              openingBriefDismissedFaction: keepOpeningBriefDismissed ? previousOpeningBriefFaction : null,
               selectedOsid: null,
               selectedFormationId: null,
               selectedCorpsId: null,

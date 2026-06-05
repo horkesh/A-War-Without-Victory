@@ -14,10 +14,15 @@ import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 // ---------------------------------------------------------------------------
 // Minimal valid GameState JSON that parseGameState can consume
 // ---------------------------------------------------------------------------
-function makeMinimalSaveJson(turn = 5): string {
+function makeMinimalSaveJson(turn = 5, playerFaction?: string): string {
     return JSON.stringify({
         schema_version: 2,
-        meta: { turn, seed: 'test-reset', phase: 'war' },
+        meta: {
+            turn,
+            seed: 'test-reset',
+            phase: 'war',
+            ...(playerFaction ? { player_faction: playerFaction } : {}),
+        },
         factions: [
             {
                 id: 'RBiH',
@@ -185,10 +190,30 @@ describe('gameStore.loadSave — post-load UI state reset', () => {
         expect(s.turnAftermathOpen).toBe(false);
     });
 
-    it('resets openingBriefDismissed after loading a save', async () => {
+    it('resets openingBriefDismissed after first loading a save', async () => {
         useGameStore.setState({ openingBriefDismissed: true });
         await useGameStore.getState().loadSave(makeMinimalSaveJson());
         expect(useGameStore.getState().openingBriefDismissed).toBe(false);
+    });
+
+    it('preserves openingBriefDismissed across same-faction save refreshes', async () => {
+        await useGameStore.getState().loadSave(makeMinimalSaveJson(5, 'RBiH'));
+        useGameStore.getState().setOpeningBriefDismissed(true);
+
+        await useGameStore.getState().loadSave(makeMinimalSaveJson(6, 'RBiH'));
+
+        expect(useGameStore.getState().openingBriefDismissed).toBe(true);
+        expect(useGameStore.getState().openingBriefDismissedFaction).toBe('RBiH');
+    });
+
+    it('resets openingBriefDismissed when loading a different player faction', async () => {
+        await useGameStore.getState().loadSave(makeMinimalSaveJson(5, 'RBiH'));
+        useGameStore.getState().setOpeningBriefDismissed(true);
+
+        await useGameStore.getState().loadSave(makeMinimalSaveJson(6, 'HRHB'));
+
+        expect(useGameStore.getState().openingBriefDismissed).toBe(false);
+        expect(useGameStore.getState().openingBriefDismissedFaction).toBeNull();
     });
 
     it('sets loadedGameState and clears loadError on successful load', async () => {

@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest opening brief dismissal persistence** | [implemented/20260605_OPENING_BRIEF_DISMISSAL_PERSISTENCE.md](implemented/20260605_OPENING_BRIEF_DISMISSAL_PERSISTENCE.md) - Presidential opening brief dismissal now survives same-faction save refreshes while resetting on first load or faction change. |
 | **Latest Records route cohesion** | [implemented/20260605_RECORDS_ROUTE_COHESION.md](implemented/20260605_RECORDS_ROUTE_COHESION.md) - Army HQ Records now summarizes archive routes/counts and decision consequences show stable Records/Chronicle filing destinations. |
 | **Latest front visit and personnel dossier surface** | [implemented/20260605_FRONT_VISIT_PERSONNEL_DOSSIER.md](implemented/20260605_FRONT_VISIT_PERSONNEL_DOSSIER.md) - Front Visit now shows reachable fronts, and Personnel opens with a presidential dossier for vacancies, low-loyalty commanders, reserve officers, and mobilization strain. |
 | **Latest Patron Relations material receipts** | [implemented/20260605_PATRON_RELATIONS_MATERIAL_RECEIPTS.md](implemented/20260605_PATRON_RELATIONS_MATERIAL_RECEIPTS.md) - Patron Relations now shows existing patron-defiance supply cuts as stable material consequence records. |
