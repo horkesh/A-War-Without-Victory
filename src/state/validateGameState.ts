@@ -1111,6 +1111,23 @@ function validateArmyHqOverrides(value: unknown, errors: string[]): void {
     });
 }
 
+function validateFormationSpawnDirective(value: unknown, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push('military.formation_spawn_directive must be an object when present');
+        return;
+    }
+
+    if (value.kind !== undefined && value.kind !== 'militia' && value.kind !== 'brigade' && value.kind !== 'both') {
+        errors.push('military.formation_spawn_directive.kind must be one of: militia, brigade, both when present');
+    }
+    if (value.turn !== undefined && !isNonNegativeInteger(value.turn)) {
+        errors.push('military.formation_spawn_directive.turn must be a non-negative integer when present');
+    }
+    if (value.allow_displaced_origin !== undefined && typeof value.allow_displaced_origin !== 'boolean') {
+        errors.push('military.formation_spawn_directive.allow_displaced_origin must be a boolean when present');
+    }
+}
+
 function validateCampaignPlanFrontPriority(value: unknown, path: string, errors: string[]): void {
     if (!isRecord(value)) {
         errors.push(`${path} must be an object`);
@@ -2768,6 +2785,9 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'army_hq_overrides' in military && military.army_hq_overrides !== undefined) {
         validateArmyHqOverrides(military.army_hq_overrides, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'formation_spawn_directive' in military && military.formation_spawn_directive !== undefined) {
+        validateFormationSpawnDirective(military.formation_spawn_directive, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'opsec_sectors' in military && military.opsec_sectors !== undefined && !isStringArray(military.opsec_sectors)) {
         errors.push('military.opsec_sectors must be a string array when present');

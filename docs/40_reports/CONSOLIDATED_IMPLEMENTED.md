@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest formation spawn directive validate-when-present contract:** [implemented/20260605_FORMATION_SPAWN_DIRECTIVE_VALIDATE_WHEN_PRESENT.md](implemented/20260605_FORMATION_SPAWN_DIRECTIVE_VALIDATE_WHEN_PRESENT.md) - `military.formation_spawn_directive` remains optional but now rejects malformed present directive payloads without changing formation spawning.
+
 **Latest narrative queue validate-when-present contract:** [implemented/20260605_NARRATIVE_QUEUE_VALIDATE_WHEN_PRESENT.md](implemented/20260605_NARRATIVE_QUEUE_VALIDATE_WHEN_PRESENT.md) - `military.narrative_queue` remains optional but now rejects malformed present AAR work-queue rows without changing combat resolution or AAR generation.
 
 **Latest operation observability validate-when-present contract:** [implemented/20260605_OPERATION_OBSERVABILITY_VALIDATE_WHEN_PRESENT.md](implemented/20260605_OPERATION_OBSERVABILITY_VALIDATE_WHEN_PRESENT.md) - `military.op_injection_warnings` and `military.watched_operations` remain optional but now reject malformed present operation-observability rows without changing operation launch.

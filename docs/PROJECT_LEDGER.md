@@ -1,4 +1,20 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] fix(state): validate formation spawn directive when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, formation spawning behavior, militia pool behavior, OOB data, scenario data, baseline artifact, replay writer, AI behavior, or player-facing UI changed.
+
+**Change:** Classified `military.formation_spawn_directive` as an optional formation-spawn control surface. Absence remains valid because formation spawn is explicitly directive-gated; an empty present object remains valid and active under the existing runtime contract. Present directives now validate only optional local shape: `kind` in `militia | brigade | both`, non-negative integer `turn`, and boolean `allow_displaced_origin`.
+
+The validator deliberately does not validate spawn eligibility, displaced-origin semantics, formation IDs, sector/front ownership, or whether the directive is active for the current turn.
+
+**Verification:** `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` passed 169/169; `node node_modules\vitest\vitest.mjs run tests\formation_spawn_directive_narrowing.test.ts tests\militia_rework.test.ts --reporter=dot` passed 7/7; `npm.cmd run typecheck -- --pretty false` passed; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 (`state: 172`, `sim: 327`, `derived: 8`, `unknown: 0`); `git diff --check` passed.
+
+**GitHub sweep:** PR #188 merged green before this branch was rebased; #187 post-merge main CI is green; deployments API and environments API remain empty. The unresolved Codex review-thread backlog is classified separately: 48 current unresolved threads, 26 stale/already fixed, 18 still actionable UI/player-command defects, and 4 outdated/no-action.
+
+**Files:** `src/state/validateGameState.ts`, `tests/save_migration_validator_rejection.test.ts`, `docs/40_reports/implemented/20260605_FORMATION_SPAWN_DIRECTIVE_VALIDATE_WHEN_PRESENT.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-05] fix(state): validate narrative queue when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, combat resolution, AAR generation, scenario data, baseline artifact, replay writer, AI prose behavior, or player-facing UI changed.
