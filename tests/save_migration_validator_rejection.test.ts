@@ -2140,6 +2140,70 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('accepts current-version saves with absent or well-formed AAR narrative queue entries', () => {
+        const absent = currentVersionState();
+        delete absent.military.narrative_queue;
+        const withQueue = currentVersionState();
+        withQueue.military.narrative_queue = [
+            {
+                faction: 'RBiH',
+                corpsId: 'rbih_1st_corps',
+                input: {
+                    officerName: 'Corps Commander',
+                    faction: 'RBiH',
+                    corpsId: 'rbih_1st_corps',
+                    targetOsid: 'op:sarajevo:dobrinja',
+                    outcome: 'stalemate',
+                    attackerCasualties: 12,
+                    defenderCasualties: 8,
+                    attackerBrigades: ['arbih_1st_brigade'],
+                    defenderBrigades: [],
+                    territoryChanged: false,
+                },
+            },
+        ];
+
+        expect(deserializeState(JSON.stringify(absent)).military.narrative_queue).toBeUndefined();
+        expect(deserializeState(JSON.stringify(withQueue)).military.narrative_queue).toEqual(withQueue.military.narrative_queue);
+    });
+
+    it('rejects current-version saves with malformed AAR narrative queue entries', () => {
+        const state = currentVersionState();
+        state.military.narrative_queue = [
+            {
+                faction: 'JNA',
+                corpsId: '',
+                input: {
+                    officerName: '',
+                    faction: 'JNA',
+                    corpsId: '',
+                    targetOsid: '',
+                    outcome: '',
+                    attackerCasualties: -1,
+                    defenderCasualties: Number.NaN,
+                    attackerBrigades: ['attacker', 1],
+                    defenderBrigades: 'defender',
+                    territoryChanged: 'no',
+                },
+            },
+            { faction: 'RBiH', corpsId: 'rbih_1st_corps', input: 42 },
+            42,
+        ] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.narrative_queue\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.narrative_queue\[0\]\.corpsId must be a non-empty string[\s\S]*military\.narrative_queue\[0\]\.input\.officerName must be a non-empty string[\s\S]*military\.narrative_queue\[0\]\.input\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.narrative_queue\[0\]\.input\.attackerCasualties must be a finite non-negative number[\s\S]*military\.narrative_queue\[0\]\.input\.defenderCasualties must be a finite non-negative number[\s\S]*military\.narrative_queue\[0\]\.input\.attackerBrigades must be a string array[\s\S]*military\.narrative_queue\[0\]\.input\.defenderBrigades must be a string array[\s\S]*military\.narrative_queue\[0\]\.input\.territoryChanged must be a boolean[\s\S]*military\.narrative_queue\[1\]\.input must be an object[\s\S]*military\.narrative_queue\[2\] must be an object/
+        );
+    });
+
+    it('rejects current-version saves with non-array AAR narrative queue entries', () => {
+        const state = currentVersionState();
+        state.military.narrative_queue = {} as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.narrative_queue must be an array when present/
+        );
+    });
+
     it('accepts current-version saves with absent or well-formed command friction events', () => {
         const absent = currentVersionState();
         delete absent.military.friction_events;

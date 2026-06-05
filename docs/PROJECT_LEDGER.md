@@ -1,4 +1,20 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] fix(state): validate narrative queue when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, combat resolution, AAR generation, scenario data, baseline artifact, replay writer, AI prose behavior, or player-facing UI changed.
+
+**Change:** Classified `military.narrative_queue` as an optional AAR work queue. Absence remains valid because combat resolution materializes the queue only when pending AAR narrative generation exists. Present rows now validate queue entries, canonical factions, corps identifiers, and nested `AARPromptInput` shape, including target OSID strings, outcome strings, casualty counters, brigade arrays, and territory-change boolean.
+
+The validator deliberately does not resolve OSIDs, formations, officers, battle outcome semantics, or generated narrative prose.
+
+**Verification:** `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` passed 166/166; `npm.cmd run typecheck -- --pretty false` passed; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 (`state: 172`, `sim: 327`, `derived: 8`, `unknown: 0`); `git diff --check` passed.
+
+**GitHub sweep:** Deployments API returned `[]`; recent PR list showed no open PRs; #186 post-merge main checks are green; #187 post-merge main checks were still in progress during this slice with no failure observed at local closeout time. A fresh review-thread GraphQL sweep over the latest 120 PRs found 49 unresolved Codex threads, all authored by `chatgpt-codex-connector`; the visible cluster is mostly merged UI/player-command PRs #119-#136 plus one outdated #138 thread. Treat this as a separate review-backlog cleanup lane, not a blocker for this schema slice.
+
+**Files:** `src/state/validateGameState.ts`, `tests/save_migration_validator_rejection.test.ts`, `docs/40_reports/implemented/20260605_NARRATIVE_QUEUE_VALIDATE_WHEN_PRESENT.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-05] fix(state): validate operation observability when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, operation-launch behavior, scenario data, baseline artifact, replay writer, AI behavior, or player-facing UI changed.
