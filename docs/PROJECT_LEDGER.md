@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] fix(desktop): route municipality support IPC to military order surface
+
+**Type:** Desktop IPC/player-order routing fix. No simulation turn logic, scenario output, baseline manifest, save schema, migration, scenario data, randomness, timestamps, or nondeterministic ordering changed.
+
+**Change:** Extracted `stageMunicipalitySupportOrderOnState(...)` into `src/desktop/municipality_support_staging.cjs` and routed the `stage-municipality-support-order` Electron handler through it. The handler now validates against `state.military.militia_pools` and stages orders under `state.military.municipality_support_orders[faction]`, matching the simulator and save-validator contract instead of writing effect-dead top-level fields. Added focused tests for successful staging, non-player-faction rejection, invalid faction/type rejection, and missing-pool rejection. Added the helper to the Electron packaged-file contract.
+
+**Docs:** Added `docs/40_reports/implemented/20260605_MUNICIPALITY_SUPPORT_IPC_ROUTING.md`, updated `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`, reports indices, command board, master roadmap, and knowledge ledger.
+
+**Verification:** `npx.cmd vitest run tests/municipality_support_staging.test.ts tests/desktop_packaging_contract.test.ts tests/phase_e_municipality_support.test.ts tests/ui_map_game_state_adapter.test.ts --reporter=dot`; `npm.cmd run typecheck -- --pretty false`; `node tools/diagnostics/strict_null_inventory.cjs --field-domains`; `git diff --check`.
+
+---
+
 ## [2026-06-05] test(engine): close review-backlog Trnovo waypoint and HRHB Graz coverage
 
 **Type:** Focused regression coverage and review-backlog triage. No runtime code, scenario output, baseline manifest, save schema, migration, scenario data, OOB data, sensitive-history prose, UI surface, randomness, timestamps, or nondeterministic ordering changed.

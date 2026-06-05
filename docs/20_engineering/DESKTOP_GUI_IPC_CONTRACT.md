@@ -112,7 +112,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `stage-municipality-support-order` (invoke)
   - Payload: `{ faction: 'RS' | 'RBiH' | 'HRHB', munId: string, type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }`
   - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: validates the selected municipality against the faction's militia pools, stages or replaces `state.municipality_support_orders[faction]`, reserializes, and broadcasts the updated state. When `meta.player_faction` is present, only that faction may stage support.
+  - Behavior: validates the selected municipality against `state.military.militia_pools`, stages or replaces `state.military.municipality_support_orders[faction]`, reserializes, and broadcasts the updated state. When `meta.player_faction` is present, only that faction may stage support.
 
 - `stage-opsec-toggle` (invoke)
   - Payload: `{ sectorId: string, enabled: boolean }`

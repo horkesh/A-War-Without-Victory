@@ -28,6 +28,7 @@ const { stageAuthoredOperation } = require('./author_op_staging.cjs');
 const { stageOpHalt } = require('./op_halt.cjs');
 const { stageOpDirective } = require('./op_directive_staging.cjs');
 const { stageCoReplacement } = require('./co_replacement.cjs');
+const { stageMunicipalitySupportOrderOnState } = require('./municipality_support_staging.cjs');
 const { computeCorpsCommandStrain } = require('./command_strain.cjs');
 const {
   frontVisitEventIdForFaction,
@@ -2409,37 +2410,14 @@ app.whenReady().then(() => {
   });
 
   ipcMain.handle('stage-municipality-support-order', async (_event, payload) => {
-    const { faction, munId, type } = payload || {};
-    if (!currentGameStateJson || typeof faction !== 'string' || typeof munId !== 'string' || typeof type !== 'string') {
+    if (!currentGameStateJson) {
       return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    if (!['RS', 'RBiH', 'HRHB'].includes(faction)) {
-      return { ok: false, error: `Invalid faction: ${faction}` };
-    }
-    if (!['weapons_shipment', 'staff_priority', 'croatian_support_package'].includes(type)) {
-      return { ok: false, error: `Invalid municipality support type: ${type}` };
     }
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      const playerFaction = state?.meta?.player_faction;
-      if (playerFaction && playerFaction !== faction) {
-        return { ok: false, error: 'Can only stage municipality support for the current player faction' };
-      }
-      const pools = state?.militia_pools && typeof state.militia_pools === 'object' ? state.militia_pools : {};
-      const hasPool = Object.values(pools).some((pool) => pool && pool.mun_id === munId && pool.faction === faction);
-      if (!hasPool) {
-        return { ok: false, error: `No ${faction} militia pool found for municipality ${munId}` };
-      }
-      if (!state.municipality_support_orders || typeof state.municipality_support_orders !== 'object') {
-        state.municipality_support_orders = {};
-      }
-      state.municipality_support_orders[faction] = {
-        faction,
-        mun_id: munId,
-        type,
-        staged_turn: state?.meta?.turn ?? 0,
-      };
+      const result = stageMunicipalitySupportOrderOnState(state, payload);
+      if (!result.ok) return result;
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true };
