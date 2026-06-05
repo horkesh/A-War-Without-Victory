@@ -11,6 +11,18 @@
 
 ---
 
+## [2026-06-05] fix(state): validate brigade order surfaces when present
+
+**Type:** Save-validation/schema-contract hardening. No simulation turn behavior, order-consumption behavior, route/path reachability, brigade/OSID/sector id resolution, scenario data, save schema version, migration, fixture refresh, baseline manifest, generated artifact, UI code, randomness, timestamps, or persisted output ordering changed.
+
+**Change:** `validateGameStateShape(...)` now rejects malformed present brigade order surfaces: `military.brigade_movement_state`, `military.brigade_movement_orders`, retired `military.brigade_reposition_orders`, `military.brigade_deploy_orders`, `military.brigade_posture_orders`, `military.brigade_attack_orders`, and `military.brigade_sector_override`. Absence remains valid, and well-formed present payloads round-trip unchanged.
+
+**Classification:** These fields are optional order, movement, player-override, or retired compatibility surfaces. The validator checks only local shape and canonical vocabularies: movement statuses, movement/deploy stances, deploy actions, brigade postures, required non-empty destination arrays, attack-order string/null values, and string sector overrides. It deliberately does not materialize maps, enforce semantic reachability, or resolve ids.
+
+**Verification:** Red/green `npx.cmd vitest run tests\save_migration_validator_rejection.test.ts --reporter=dot` (new malformed-order tests failed before validation; green 175/175 after implementation); `npm.cmd run typecheck -- --pretty false`; `node tools/diagnostics/strict_null_inventory.cjs --field-domains` total 507 (`state 172`, `sim 327`, `derived 8`); `git diff --check`.
+
+---
+
 ## [2026-06-05] fix(ui): hard-block advance gate and remove fake corps stance control
 
 **Type:** Player-command UI clarity cleanup. No corps stance mechanics, Army HQ command relationship behavior, autonomy behavior, sector stance mechanics, simulation turn logic, save schema, migration, scenario output, baseline manifest, scenario data, generated artifact, randomness, timestamps, or persisted output changed.

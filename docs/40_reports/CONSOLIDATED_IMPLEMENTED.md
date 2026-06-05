@@ -6,6 +6,8 @@
 
 **Latest opening brief dismissal persistence:** [implemented/20260605_OPENING_BRIEF_DISMISSAL_PERSISTENCE.md](implemented/20260605_OPENING_BRIEF_DISMISSAL_PERSISTENCE.md) - Presidential opening brief dismissal now survives same-faction save refreshes while resetting on first load or faction change.
 
+**Latest brigade order-surface validate-when-present contract:** [implemented/20260605_BRIGADE_ORDER_SURFACES_VALIDATE_WHEN_PRESENT.md](implemented/20260605_BRIGADE_ORDER_SURFACES_VALIDATE_WHEN_PRESENT.md) - Brigade movement/order/deploy/posture/attack and sector-override surfaces remain optional but now reject malformed present payloads without materializing absent orders or changing order consumption.
+
 **Latest Records route cohesion:** [implemented/20260605_RECORDS_ROUTE_COHESION.md](implemented/20260605_RECORDS_ROUTE_COHESION.md) - Army HQ Records now summarizes archive counts/routes and decision consequences expose stable Records/Chronicle filing destinations without changing sim/save/scenario state.
 
 **Latest front visit and personnel dossier surface:** [implemented/20260605_FRONT_VISIT_PERSONNEL_DOSSIER.md](implemented/20260605_FRONT_VISIT_PERSONNEL_DOSSIER.md) - Front Visit now shows reachable fronts, and Personnel opens with a presidential dossier for vacancies, low-loyalty commanders, reserve officers, and mobilization strain.
