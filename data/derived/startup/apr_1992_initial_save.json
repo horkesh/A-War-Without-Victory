@@ -20553,7 +20553,7 @@
         "id": "hvo_northwest_bosnia",
         "kind": "corps_asset",
         "morale": 60,
-        "name": "Northwest Bosnia OZ",
+        "name": "Bosnian Posavina OZ",
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": null
@@ -20753,7 +20753,7 @@
         "id": "hvo_tomislavgrad",
         "kind": "corps_asset",
         "morale": 60,
-        "name": "Tomislavgrad OZ",
+        "name": "Northwest Herzegovina OZ",
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": null
