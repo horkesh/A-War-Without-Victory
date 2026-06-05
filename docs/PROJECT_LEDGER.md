@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] feat(ui): add front-visit reachability and personnel command dossier
+
+**Type:** Presidential command UI/read-model surface polish. No front-visit eligibility, command authority costs, officer assignment mechanics, mobilization math, simulation turn logic, scenario output, baseline manifest, save schema, migration, scenario data, generated artifact, randomness, timestamps, or nondeterministic ordering changed.
+
+**Change:** `FrontVisitSection` now renders deterministic reachable-front labels alongside cut-off labels. `PersonnelContent` now starts with a presidential command dossier summarizing commander vacancies, low-loyalty serving commanders, reserve officers, and mobilization strain before the raw force overview, mobilization pools, ORBAT, and officer roster.
+
+**Docs:** Added `docs/40_reports/implemented/20260605_FRONT_VISIT_PERSONNEL_DOSSIER.md` and updated report indices, command board, master roadmap, product-facing master, and knowledge ledger.
+
+**Verification:** `npx.cmd vitest run tests/ui/personnel_player_safe_display.test.ts tests/ui/officer_mini_bio.test.ts tests/front_visit_action.test.ts tests/ui/directive_card_stop_op_action.test.ts --reporter=dot`; `npm.cmd run typecheck -- --pretty false`; `node tools/diagnostics/strict_null_inventory.cjs --field-domains`; `git diff --check`.
+
+---
+
 ## [2026-06-05] feat(ui): surface patron material consequence records
 
 **Type:** Patron Relations UI/read-model receipt discoverability. No patron mechanics, event choices, material-support calculations, simulation turn logic, scenario output, baseline manifest, save schema, migration, scenario data, generated artifact, randomness, timestamps, or nondeterministic ordering changed.

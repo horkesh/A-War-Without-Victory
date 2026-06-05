@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest front visit and personnel dossier surface** | [implemented/20260605_FRONT_VISIT_PERSONNEL_DOSSIER.md](implemented/20260605_FRONT_VISIT_PERSONNEL_DOSSIER.md) - Front Visit now shows reachable fronts, and Personnel opens with a presidential dossier for vacancies, low-loyalty commanders, reserve officers, and mobilization strain. |
 | **Latest Patron Relations material receipts** | [implemented/20260605_PATRON_RELATIONS_MATERIAL_RECEIPTS.md](implemented/20260605_PATRON_RELATIONS_MATERIAL_RECEIPTS.md) - Patron Relations now shows existing patron-defiance supply cuts as stable material consequence records. |
 | **Latest command directive target affordances** | [implemented/20260605_COMMAND_DIRECTIVE_TARGET_AFFORDANCES.md](implemented/20260605_COMMAND_DIRECTIVE_TARGET_AFFORDANCES.md) - Request-op directives now use president-through-staff copy, resolve fixed OSID captions to display names, and block ambiguous typed settlement names before IPC. |
 | **Latest sector coverage BFS target cache** | [implemented/20260605_SECTOR_COVERAGE_BFS_TARGET_CACHE.md](implemented/20260605_SECTOR_COVERAGE_BFS_TARGET_CACHE.md) - `ensureMinimumSectorCoverage(...)` now finds the nearest vacant local front target with one bounded BFS instead of one BFS per candidate target while preserving the `aa8f7a07962cecaf` floor. |

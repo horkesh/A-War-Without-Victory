@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest front visit and personnel dossier surface:** [implemented/20260605_FRONT_VISIT_PERSONNEL_DOSSIER.md](implemented/20260605_FRONT_VISIT_PERSONNEL_DOSSIER.md) - Front Visit now shows reachable fronts, and Personnel opens with a presidential dossier for vacancies, low-loyalty commanders, reserve officers, and mobilization strain.
+
 **Latest Patron Relations material receipts:** [implemented/20260605_PATRON_RELATIONS_MATERIAL_RECEIPTS.md](implemented/20260605_PATRON_RELATIONS_MATERIAL_RECEIPTS.md) - Patron Relations now projects existing patron-defiance supply cuts into stable material consequence records without changing patron mechanics.
 
 **Latest command directive target affordances:** [implemented/20260605_COMMAND_DIRECTIVE_TARGET_AFFORDANCES.md](implemented/20260605_COMMAND_DIRECTIVE_TARGET_AFFORDANCES.md) - Request-op directives now frame objectives through corps staff review, resolve fixed OSID captions to display names, and block ambiguous typed settlement names before player-command IPC.

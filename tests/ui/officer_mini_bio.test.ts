@@ -186,7 +186,7 @@ describe('officer mini-bio UI', () => {
         expect(screen.getByText('Strategic Reserve')).toBeTruthy();
         expect(screen.getByText('88')).toBeTruthy();
         expect(screen.getByText('Exhaustion')).toBeTruthy();
-        expect(screen.getByText('25.1%')).toBeTruthy();
+        expect(screen.getAllByText('25.1%').length).toBeGreaterThan(0);
         expect(screen.getByText('Sarajevo')).toBeTruthy();
         expect(screen.getByText('Bijeljina')).toBeTruthy();
     });
@@ -221,7 +221,7 @@ describe('officer mini-bio UI', () => {
         expect(screen.getByText('Strategic Reserve')).toBeTruthy();
         expect(screen.getByText('88')).toBeTruthy();
         expect(screen.getByText('Exhaustion')).toBeTruthy();
-        expect(screen.getByText('25.1%')).toBeTruthy();
+        expect(screen.getAllByText('25.1%').length).toBeGreaterThan(0);
         expect(screen.getByText('Sarajevo')).toBeTruthy();
         expect(screen.getByText('Bijeljina')).toBeTruthy();
     });

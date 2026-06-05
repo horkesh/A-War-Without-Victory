@@ -53,6 +53,10 @@ function frontLabel(branchId: string): string {
     }
 }
 
+function strictCompare(a: string, b: string): number {
+    return a < b ? -1 : a > b ? 1 : 0;
+}
+
 export function FrontVisitSection() {
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
@@ -103,7 +107,8 @@ export function FrontVisitSection() {
     if (!ipc.isAvailable || !avail) return null;
 
     const canVisit = avail.available && !busy;
-    const unreachableLabels = avail.unreachableBranchIds.map(frontLabel).join(', ');
+    const reachableLabels = avail.reachableBranchIds.map(frontLabel).sort(strictCompare).join(', ');
+    const unreachableLabels = avail.unreachableBranchIds.map(frontLabel).sort(strictCompare).join(', ');
 
     return (
         <div className="bg-panel-card border border-panel-border rounded-lg overflow-hidden">
@@ -131,6 +136,11 @@ export function FrontVisitSection() {
                     )}
                     {avail.reachableBranchIds.length === 0 && avail.firesLeft > 0 && !avail.onCooldown && (
                         <span className="text-red-400/80">{t('frontVisit.allCutOff')}</span>
+                    )}
+                    {avail.reachableBranchIds.length > 0 && (
+                        <span className="text-emerald-300/75">
+                            {t('frontVisit.reachable', { fronts: reachableLabels })}
+                        </span>
                     )}
                     {avail.unreachableBranchIds.length > 0 && (
                         <span className="text-amber-400/70">
