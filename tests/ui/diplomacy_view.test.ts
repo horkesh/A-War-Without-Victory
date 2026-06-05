@@ -156,6 +156,14 @@ describe('buildDiplomacyView', () => {
         });
 
         // No player-faction entries → summary absent (historical/calibration mode never writes these).
+        expect(withCuts.negotiationTimeline).toContainEqual(expect.objectContaining({
+            id: 'patron-defiance:RS:44:0.35:0.45',
+            label: 'Serbia material support cut',
+            detail: 'VRS channel lost 35% of material support; support after cut 45%.',
+            turn: 44,
+            confidence: 'known',
+        }));
+
         const noCuts = buildDiplomacyView(makeDiplomacyState(), 'RS');
         expect(noCuts.patronDefianceCuts).toBeUndefined();
     });

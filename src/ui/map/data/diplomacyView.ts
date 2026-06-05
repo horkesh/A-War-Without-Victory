@@ -228,6 +228,8 @@ function buildNegotiationTimeline(
     activeProposals: DiplomacyProposalView[],
     externalActors: DiplomacyActorView[],
     activeConsequences: DiplomacyView['activeConsequences'],
+    patronDefianceCuts: PatronDefianceCutsView | undefined,
+    actorFaction: string | null,
 ): DiplomacyTimelineEntryView[] {
     const proposalEntries: DiplomacyTimelineEntryView[] = activeProposals.map((proposal) => ({
         id: `proposal:${proposal.id}`,
@@ -250,8 +252,17 @@ function buildNegotiationTimeline(
         turn: undefined,
         confidence: 'known' as const,
     }));
+    const patronCutEntries: DiplomacyTimelineEntryView[] = actorFaction && patronDefianceCuts?.entries
+        ? patronDefianceCuts.entries.map((entry) => ({
+            id: `patron-defiance:${actorFaction}:${entry.turn}:${entry.cutFraction}:${entry.supportAfter}`,
+            label: `${PATRON_LABELS[FACTION_PATRON[actorFaction]] ?? 'Patron'} material support cut`,
+            detail: `${getPlayerSafeMilitaryFactionName(actorFaction)} channel lost ${Math.round(entry.cutFraction * 100)}% of material support; support after cut ${Math.round(entry.supportAfter * 100)}%.`,
+            turn: entry.turn,
+            confidence: 'known' as const,
+        }))
+        : [];
 
-    return [...proposalEntries, ...relationshipEntries, ...consequenceEntries]
+    return [...proposalEntries, ...relationshipEntries, ...consequenceEntries, ...patronCutEntries]
         .sort((a, b) => (a.turn ?? 9999) - (b.turn ?? 9999) || strictCompare(a.label, b.label) || strictCompare(a.id, b.id));
 }
 
@@ -352,10 +363,10 @@ export function buildDiplomacyView(state: unknown, playerFaction?: string | null
     const activeProposals = buildActiveProposals(s);
     const pressureReasons = buildPressureReasons(s);
     const activeConsequences = buildConsequences(s);
-    const negotiationTimeline = buildNegotiationTimeline(activeProposals, externalActors, activeConsequences);
-    const needleHints = buildNeedleHints(patronStance, pressureReasons, activeProposals);
     const patronConfidence = buildPatronConfidence(s, actorFaction);
     const patronDefianceCuts = buildPatronDefianceCuts(s, actorFaction);
+    const negotiationTimeline = buildNegotiationTimeline(activeProposals, externalActors, activeConsequences, patronDefianceCuts, actorFaction);
+    const needleHints = buildNeedleHints(patronStance, pressureReasons, activeProposals);
 
     return {
         playerFaction: actorFaction ?? null,

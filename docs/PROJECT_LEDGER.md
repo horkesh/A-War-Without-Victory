@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] feat(ui): add patron actor-history route cohesion
+
+**Type:** Player-facing UI/read-model receipt routing. No patron mechanics, event decision behavior, material-support math, simulation turn logic, save schema, migration, scenario data, scenario output, baseline manifest, generated artifact, randomness, timestamps, or persisted output ordering changed.
+
+**Change:** `buildDecisionConsequenceLedger(...)` now projects player-faction `rawGameState.military.patron_defiance_supply_cuts` rows into Records-filed `Patron relations` consequences, and Chronicle receives those rows through its existing decision-ledger bridge. Patron Relations also includes the same realized player-faction material-support cuts in its negotiation timeline as known actor-history entries.
+
+**Docs:** Added `docs/40_reports/implemented/20260605_PATRON_ACTOR_HISTORY_ROUTE_COHESION.md` and updated report indices, GUI master, product-facing master, command board, master roadmap, and knowledge ledger.
+
+**Verification:** Red/green `npx.cmd vitest run tests\ui\decision_consequence_trail.test.ts --reporter=dot`; red/green `npx.cmd vitest run tests\ui\diplomacy_view.test.ts --reporter=dot`; `npx.cmd vitest run tests\ui\diplomacy_view.test.ts tests\ui\diplomacy_panel.test.ts tests\ui\decision_consequence_trail.test.ts tests\ui\decision_consequence_records_panel.test.ts tests\ui\chronicle_decision_ledger.test.ts --reporter=dot`; `npm.cmd run typecheck -- --pretty false`.
+
+---
+
 ## [2026-06-05] docs(sector): reconcile active floor after HVO Southeast-Herzegovina OZ refloor
 
 **Type:** Documentation/process correction. No runtime behavior, scenario data, save schema, generated artifact, baseline manifest, replay writer, UI code, or canon text changed.

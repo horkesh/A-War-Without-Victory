@@ -294,6 +294,57 @@ describe('decision consequence trail', () => {
     expect(`${ledger[0]?.family} ${ledger[0]?.title} ${ledger[0]?.outcome} ${ledger[0]?.detail}`).not.toMatch(/_/);
   });
 
+  it('includes player-faction patron defiance material receipts from raw state', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      player_faction: 'RS',
+      rawGameState: {
+        meta: { player_faction: 'RS' },
+        military: {
+          patron_defiance_supply_cuts: [
+            { faction: 'RS', turn: 44, cut_fraction: 0.35, support_after: 0.45 },
+            { faction: 'HRHB', turn: 45, cut_fraction: 0.5, support_after: 0.3 },
+            { faction: 'RS', turn: 30, cut_fraction: 0.2, support_after: 0.6 },
+          ],
+        },
+      } as any,
+    } as Partial<LoadedGameState>), 10);
+
+    expect(ledger.map((record) => record.id)).toEqual([
+      'patron-defiance:RS:44:0.35:0.45',
+      'patron-defiance:RS:30:0.2:0.6',
+    ]);
+    expect(ledger[0]).toMatchObject({
+      family: 'Patron relations',
+      turn: 44,
+      title: 'Patron defiance supply cut',
+      outcome: 'Material support reduced',
+      detail: 'Serbia cut 35% of material support for VRS; support after cut 45%.',
+      recordTarget: 'records',
+    });
+    expect(ledger.map((record) => record.detail).join(' ')).not.toMatch(/\bRS\b|_/);
+  });
+
+  it('orders patron defiance receipts newest first with stable same-turn tiebreaks', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      player_faction: 'RS',
+      rawGameState: {
+        military: {
+          patron_defiance_supply_cuts: [
+            { faction: 'RS', turn: 44, cut_fraction: 0.2, support_after: 0.6 },
+            { faction: 'RS', turn: 44, cut_fraction: 0.35, support_after: 0.45 },
+            { faction: 'RS', turn: 44, cut_fraction: 0.35, support_after: 0.5 },
+          ],
+        },
+      } as any,
+    } as Partial<LoadedGameState>), 10);
+
+    expect(ledger.map((record) => record.id)).toEqual([
+      'patron-defiance:RS:44:0.2:0.6',
+      'patron-defiance:RS:44:0.35:0.45',
+      'patron-defiance:RS:44:0.35:0.5',
+    ]);
+  });
+
   it('orders newest consequences first and respects the limit', () => {
     const ledger = buildDecisionConsequenceLedger(makeState({
       firedEvents: [

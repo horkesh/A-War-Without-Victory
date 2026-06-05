@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Patron actor-history route cohesion** | [implemented/20260605_PATRON_ACTOR_HISTORY_ROUTE_COHESION.md](implemented/20260605_PATRON_ACTOR_HISTORY_ROUTE_COHESION.md) - Patron-defiance material cuts now file through Records/Chronicle consequence routes and appear in the Patron Relations timeline. |
 | **Latest command clarity: advance gate and stance cleanup** | [implemented/20260605_COMMAND_CLARITY_ADVANCE_AND_STANCE.md](implemented/20260605_COMMAND_CLARITY_ADVANCE_AND_STANCE.md) - Advance confirmation now hard-blocks unresolved pre-advance review, and the left OOB corps card no longer exposes fake direct stance overrides. |
 | **Latest opening brief dismissal persistence** | [implemented/20260605_OPENING_BRIEF_DISMISSAL_PERSISTENCE.md](implemented/20260605_OPENING_BRIEF_DISMISSAL_PERSISTENCE.md) - Presidential opening brief dismissal now survives same-faction save refreshes while resetting on first load or faction change. |
 | **Latest brigade order-surface validate-when-present contract** | [implemented/20260605_BRIGADE_ORDER_SURFACES_VALIDATE_WHEN_PRESENT.md](implemented/20260605_BRIGADE_ORDER_SURFACES_VALIDATE_WHEN_PRESENT.md) - Brigade movement/order/deploy/posture/attack and sector-override surfaces remain optional but now reject malformed present payloads. |

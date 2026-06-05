@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Patron actor-history route cohesion** | [implemented/20260605_PATRON_ACTOR_HISTORY_ROUTE_COHESION.md](implemented/20260605_PATRON_ACTOR_HISTORY_ROUTE_COHESION.md) - Patron-defiance material cuts now appear in Patron Relations timeline history and file through the shared Records/Chronicle consequence ledger. |
 | **Records route cohesion** | [implemented/20260605_RECORDS_ROUTE_COHESION.md](implemented/20260605_RECORDS_ROUTE_COHESION.md) - Army HQ Records now shows archive route/count summaries and decision consequence rows expose stable Records/Chronicle filing destinations. |
 | **Warroom calendar/advance polish** | [GAME_STATE_RATING_MASTER.md](GAME_STATE_RATING_MASTER.md) row 18 - the Warroom shell no longer carries the stale no-state/hotspot/Comic-Sans blockers, the wall-calendar label avoids viewport-scaled type, and the Warroom advance affordance has stronger command weight. |
 | **Full presidential GUI restructure audit and plan** | [../plans/2026-05-24-gui-shell-reorganization-scope.md](../plans/2026-05-24-gui-shell-reorganization-scope.md) - current branch plan and implementation evidence for reorganizing President's Desk, Warroom, Army HQ, Tactical Map, Records/Chronicle, Codex, decision modals, advance clearance, player-safe copy, and AI asset use. The current loop smoke validates Desk -> Army HQ -> inspection -> Advance Clearance -> Records -> Desk. |

@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Patron actor-history route cohesion:** [implemented/20260605_PATRON_ACTOR_HISTORY_ROUTE_COHESION.md](implemented/20260605_PATRON_ACTOR_HISTORY_ROUTE_COHESION.md) - Patron-defiance material cuts now file through Records/Chronicle consequence routes and appear in the Patron Relations timeline without changing patron mechanics or save state.
+
 **Latest command clarity: advance gate and stance cleanup:** [implemented/20260605_COMMAND_CLARITY_ADVANCE_AND_STANCE.md](implemented/20260605_COMMAND_CLARITY_ADVANCE_AND_STANCE.md) - Advance confirmation now hard-blocks unresolved pre-advance review, and the left OOB corps card no longer exposes fake direct stance overrides.
 
 **Latest opening brief dismissal persistence:** [implemented/20260605_OPENING_BRIEF_DISMISSAL_PERSISTENCE.md](implemented/20260605_OPENING_BRIEF_DISMISSAL_PERSISTENCE.md) - Presidential opening brief dismissal now survives same-faction save refreshes while resetting on first load or faction change.

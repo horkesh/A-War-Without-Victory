@@ -89,4 +89,28 @@ describe('DecisionConsequenceRecordsPanel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Open Chronicle' }));
     expect(useGameStore.getState().chronicleOpen).toBe(true);
   });
+
+  it('renders patron defiance material receipts as Records-filed consequences', () => {
+    useGameStore.setState({
+      loadedGameState: makeState({
+        player_faction: 'RS',
+        rawGameState: {
+          military: {
+            patron_defiance_supply_cuts: [
+              { faction: 'RS', turn: 44, cut_fraction: 0.35, support_after: 0.45 },
+            ],
+          },
+        } as any,
+      } as Partial<LoadedGameState>),
+    });
+
+    render(React.createElement(DecisionConsequenceRecordsPanel));
+
+    expect(screen.getByText('Patron defiance supply cut')).toBeTruthy();
+    expect(screen.getByText('Material support reduced')).toBeTruthy();
+    expect(screen.getByText('Serbia cut 35% of material support for VRS; support after cut 45%.')).toBeTruthy();
+    expect(screen.getByText(/Patron relations \/ Turn 44/)).toBeTruthy();
+    expect(screen.getByText('Filed to Records')).toBeTruthy();
+    expect(screen.getByText('Review in Records')).toBeTruthy();
+  });
 });
