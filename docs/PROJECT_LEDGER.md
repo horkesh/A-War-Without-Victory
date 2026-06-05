@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] docs(process): reconcile sector floor after recent OOB refloors
+
+**Type:** Documentation/process correction. No runtime behavior, scenario data, save schema, generated artifact, baseline, replay writer, UI code, or canon text changed.
+
+**Change:** Reconciled the command board, master roadmap, sector next-target plan, sector master, sector hash report, and reports index so the active sector/frontline performance floor is `aa8f7a07962cecaf` after PR #200 / commit `b94b4c683`. The older PR #199 `2043a49789fa21be`, PR #180 `41ba34ddfaa02a85`, pre-#180 `41c72b13ad2e91b9`, and `e086afbefcef01e6` hashes are now explicitly historical lineage, not the next-profile floor.
+
+**Process note:** A raw conflict-resolved merge of the formation-spawn directive branch (`ec1945cc`) landed without its own associated GitHub Actions gate. Later mainline PRs ran on a tree containing that merge and stayed green, so the integrated state is transitively covered, but future code-bearing conflict merges should be routed through a PR/merge-queue gate or followed by an explicit post-merge main check before being treated as closed.
+
+**Verification:** Targeted hash-reference greps across governing docs; `git diff --check`.
+
+---
+
 ## [2026-06-05] docs(canon): reconcile FORAWWV §XII to Presidential Command Model
 
 **Type:** Canon documentation reconciliation. No runtime behavior, scenario data, save schema, generated artifact, baseline, replay writer, or UI code changed.

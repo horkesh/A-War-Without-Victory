@@ -6,7 +6,7 @@
 
 ## Summary
 
-**Supersession note:** This report's original floor, `41c72b13ad2e91b9`, is now historical pre-PR #180 evidence. The active sector/frontline performance floor is `41ba34ddfaa02a85` after PR #180 / commit `d6b6533a` moved ARBiH 4th Corps HQ from Jablanica to East Mostar and refloored golden baselines.
+**Supersession note:** This report's original floor, `41c72b13ad2e91b9`, is now historical pre-PR #180 evidence. The active sector/frontline performance floor is `aa8f7a07962cecaf` after PR #200 / commit `b94b4c683` corrected `rs_1st_zvornik` equipment class and refloored golden baselines. PR #199 `2043a49789fa21be` and PR #180 `41ba34ddfaa02a85` are intermediate OOB floor lineage.
 
 The older `e086afbefcef01e6` floor remains historical evidence for the 2026-06-03 coverage-component-cache slice, but it is no longer valid as the pre-change floor for new sector optimization work. PR #159 / commit `1a823d5e` intentionally changed final-sector serialization/sealing by passing full operational edges plus final spatial context into the final-save seal path.
 
@@ -34,7 +34,7 @@ This is accepted mainline drift from the final-sector seal correction, not a sec
 Before any new sector/frontline performance implementation:
 
 1. Re-profile from current `main`.
-2. Treat `41ba34ddfaa02a85` as the current no-edit floor; keep `41c72b13ad2e91b9` as historical pre-#180 proof.
+2. Treat `aa8f7a07962cecaf` as the current no-edit floor; keep `41ba34ddfaa02a85`, `2043a49789fa21be`, and `41c72b13ad2e91b9` as historical proof lineage.
 3. Stop on unexpected pre-edit hash drift.
 4. Pick one measured owner only, from current profile evidence.
 5. Keep generated run/profile artifacts unstaged unless a separate artifact-ownership lane explicitly retains them.
