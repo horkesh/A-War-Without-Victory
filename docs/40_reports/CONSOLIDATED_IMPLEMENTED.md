@@ -14,7 +14,7 @@
 
 **Latest command directive target affordances:** [implemented/20260605_COMMAND_DIRECTIVE_TARGET_AFFORDANCES.md](implemented/20260605_COMMAND_DIRECTIVE_TARGET_AFFORDANCES.md) - Request-op directives now frame objectives through corps staff review, resolve fixed OSID captions to display names, and block ambiguous typed settlement names before player-command IPC.
 
-**Latest sector coverage BFS target cache:** [implemented/20260605_SECTOR_COVERAGE_BFS_TARGET_CACHE.md](implemented/20260605_SECTOR_COVERAGE_BFS_TARGET_CACHE.md) - `ensureMinimumSectorCoverage(...)` now finds the nearest vacant local front target with one bounded BFS instead of one BFS per candidate target while preserving the `aa8f7a07962cecaf` 40w floor.
+**Latest sector coverage BFS target cache:** [implemented/20260605_SECTOR_COVERAGE_BFS_TARGET_CACHE.md](implemented/20260605_SECTOR_COVERAGE_BFS_TARGET_CACHE.md) - `ensureMinimumSectorCoverage(...)` now finds the nearest vacant local front target with one bounded BFS instead of one BFS per candidate target; the closed slice preserved `aa8f7a07962cecaf`, now historical after the PR #208 OOB refloor.
 
 **Latest municipality support IPC routing:** [implemented/20260605_MUNICIPALITY_SUPPORT_IPC_ROUTING.md](implemented/20260605_MUNICIPALITY_SUPPORT_IPC_ROUTING.md) - Desktop municipality-support staging now writes the validated military order surface instead of an effect-dead top-level field.
 

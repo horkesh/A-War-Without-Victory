@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] docs(sector): reconcile active floor after HVO Southeast-Herzegovina OZ refloor
+
+**Type:** Documentation/process correction. No runtime behavior, scenario data, save schema, generated artifact, baseline manifest, replay writer, UI code, or canon text changed.
+
+**Change:** Reconciled the command board, master roadmap, sector next-target plan, sector master, sector hash report, and reports index so the active sector/frontline performance floor is `d1ace172a29b2353` after PR #208 / commit `74881faf7` corrected HVO Southeast-Herzegovina OZ HQ from Čitluk to Mostar and re-floored golden baselines. PR #200 `aa8f7a07962cecaf`, PR #199 `2043a49789fa21be`, PR #180 `41ba34ddfaa02a85`, pre-#180 `41c72b13ad2e91b9`, and old `e086afbefcef01e6` are now explicitly historical lineage, not the next-profile floor.
+
+**Process note:** A pre-edit timed sector run on current `main` reproduced `d1ace172a29b2353`, exposing the stale `aa8...` floor reference. Sector optimization remains stopped until a fresh profile is gathered against `d1ace...`; this docs-only lane does not claim a performance implementation.
+
+**Verification:** `rg -n "aa8f7a07962cecaf|d1ace172a29b2353|sector.*floor|Sector coverage BFS|Sector hash floor" docs\plans docs\40_reports docs\PROJECT_LEDGER.md docs\PROJECT_LEDGER_KNOWLEDGE.md .claude\napkin.md`; `git diff --check`.
+
+---
+
 ## [2026-06-05] fix(ui): hard-block advance gate and remove fake corps stance control
 
 **Type:** Player-command UI clarity cleanup. No corps stance mechanics, Army HQ command relationship behavior, autonomy behavior, sector stance mechanics, simulation turn logic, save schema, migration, scenario output, baseline manifest, scenario data, generated artifact, randomness, timestamps, or persisted output changed.
