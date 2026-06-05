@@ -12,6 +12,8 @@
 
 **Roadmap wiring:** `docs/plans/COMMAND_BOARD.md` and `docs/plans/MASTER_ROADMAP.md` now treat this master as the live product-facing audit for the presidential command surface and AAA+++ product-shell work. Use it to derive focused implementation lanes; do not treat it as permission for broad UI rewrites or simulation changes.
 
+**Current route/receipt note (2026-06-05):** Patron-defiance material cuts now appear in Patron Relations actor history and file through the shared Records/Chronicle decision consequence ledger. This improves BF-20/BF-32 consequence-route cohesion without changing patron mechanics, save state, or scenario outputs. Browser loaded-campaign proof and broader first-session route polish remain open.
+
 **Current-lane note:** The earlier #138/#141 off-limits gate is closed on `main` as of `b2a96d9a` with #138, #141, #142, and the consolidated ledger/napkin sync landed. Stale worktrees still require separate cleanup proof before removal.
 
 ---

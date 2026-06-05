@@ -1,3 +1,7 @@
+## 2026-06-05 - Patron actor-history receipts use the shared consequence ledger
+
+**Patron-defiance material cuts should file through existing receipt routes, not new state:** `state.military.patron_defiance_supply_cuts` is the realized player-consequence substrate, and `loadedGameState.rawGameState` gives UI read-models access without a new save field. Durable rule: filter to the current player faction, project cuts into the shared decision consequence ledger for Records/Chronicle, and add them to Patron Relations actor history; do not recompute material support, create another filing state, or expose other-faction patron cuts. Applied in `[2026-06-05] feat(ui): add patron actor-history route cohesion`.
+
 ## 2026-06-05 - Left OOB is status and navigation, not fake direct corps command
 
 **Left OOB corps cards should not stage local-only stance intent:** The OOB sidebar is a navigation/status rail. Durable rule: show corps stance there as read-only status unless the card is wired to a real command handler; do not maintain renderer-only stance overrides that imply direct presidential corps control. Applied in `[2026-06-05] fix(ui): hard-block advance gate and remove fake corps stance control`.

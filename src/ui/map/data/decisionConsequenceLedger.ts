@@ -198,6 +198,22 @@ function paramilitaryDetail(record: ParamilitaryDecisionRecordView): string {
   return `Regular forces directed to handle the ${faction} rear-pocket request.${risk}`;
 }
 
+function patronLabelForFaction(faction: string): string {
+  if (faction === 'RS') return 'Serbia';
+  if (faction === 'HRHB') return 'Croatia';
+  return 'International Community';
+}
+
+function playerFactionFromState(state: LoadedGameState): string | null {
+  if (typeof state.player_faction === 'string') return state.player_faction;
+  const rawPlayerFaction = state.rawGameState?.meta?.player_faction;
+  return typeof rawPlayerFaction === 'string' ? rawPlayerFaction : null;
+}
+
+function finiteReceiptNumber(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
 function officerOutcome(record: OfficerDecisionRecordView): string {
   if (record.decision === 'replacement_accepted') return 'Accepted';
   if (record.decision === 'override_confirmed') return 'Override confirmed';
@@ -321,6 +337,28 @@ export function buildDecisionConsequenceLedger(
       title: paramilitaryTitle(paramilitary),
       outcome: paramilitaryOutcome(paramilitary),
       detail: paramilitaryDetail(paramilitary),
+      recordTarget: 'records',
+    });
+  }
+
+  const playerFaction = playerFactionFromState(state);
+  const patronCuts = Array.isArray(state.rawGameState?.military?.patron_defiance_supply_cuts)
+    ? state.rawGameState.military.patron_defiance_supply_cuts
+    : [];
+  for (const cut of patronCuts) {
+    if (!playerFaction || cut?.faction !== playerFaction) continue;
+    const turn = finiteReceiptNumber(cut.turn);
+    const cutFraction = finiteReceiptNumber(cut.cut_fraction);
+    const supportAfter = finiteReceiptNumber(cut.support_after);
+    if (turn == null || cutFraction == null || supportAfter == null) continue;
+    const forceLabel = getPlayerSafeMilitaryFactionName(playerFaction, playerFaction);
+    records.push({
+      id: `patron-defiance:${playerFaction}:${turn}:${cutFraction}:${supportAfter}`,
+      turn,
+      family: 'Patron relations',
+      title: 'Patron defiance supply cut',
+      outcome: 'Material support reduced',
+      detail: `${patronLabelForFaction(playerFaction)} cut ${Math.round(cutFraction * 100)}% of material support for ${forceLabel}; support after cut ${Math.round(supportAfter * 100)}%.`,
       recordTarget: 'records',
     });
   }
