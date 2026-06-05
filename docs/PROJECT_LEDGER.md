@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] fix(oob): rs_1st_zvornik mountain → motorized (Drina Corps offensive unlock)
+
+**Type:** OOB equipment-class correction (calibration-moving — releases the VRS Drina Corps stance gate; golden baselines re-floored). Pyrrhic-panel UNANIMOUS adopt-with-conditions; the conditions were verified and PASSED (see gate below). Owner-directed adoption.
+
+**Change:** `rs_1st_zvornik` (corps `vrs_drina`) `default_equipment_class` `mountain` → `motorized` in `data/source/oob_brigades.json`. The 1st Zvornik Infantry Brigade had an organic **Armour-Mechanised Company** (ICTY *Borovčanin* indictment, VRS structure Annex A — primary tier; Wikipedia + BB2 consistent). Engine effect: motorized raises offensive priority (1→2), so the brigade can become `main_effort`, **releasing the `vrs_drina` N1297 stance gate** — the Drina Corps was locked `defensive` because all 9 of its brigades were mountain/light. A permanently-passive Drina Corps was the *ahistorical* state (it historically ran the Drina-valley '92 and 1995 Krivaja/Stupčanica offensives). Surfaced by the 2026-06-05 OOB equipment-class proposal (issue #16).
+
+**Calibration (scenario-creator-runner-tester GO — HARD enclave gate PASSED):** anchors **30/30**, benchmarks **6/6**, OSID match **653/712**, final control map **BYTE-IDENTICAL to baseline** (RS=369/RBiH=254/HRHB=89), **0 critical anomalies**, **0 enclave/Drina-axis flips** (srebrenica_2 / zepa_2 / gorazde_2 all hold RBiH). The N1297 gate released as intended — Drina Corps now mounts "Operation Cerska-Kamenica" (planning at w40); combat shifted modestly (battles 132→136, att/def casualties +3.3k/+9.5k) — **added military pressure (exhaustion), zero territorial runaway** (total captures unchanged at 45). This is the design-acceptable outcome: the eastern front grinds harder; the enclaves still fall by scripted event, not organic conquest (negative-sum soul preserved; atrocity bright line unaffected). 40w hash → `aa8f7a07962cecaf`. Golden baselines re-floored.
+
+**Sacred rules:** one change; no initial-OSID-control edits; no `avoided_osids`. Design guardrail (panel): if a future change shows organic enclave over-capture, REJECT + route via Guards/Option-M attachment — not breached here.
+
+**Files:** `data/source/oob_brigades.json`, `data/derived/startup/apr_1992_initial_save.json`, `data/derived/scenario/baselines/manifest.json`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-05] fix(oob): VRS 1st Guards Motorized home Rogatica → Han Pijesak
 
 **Type:** OOB placement correction (calibration-FLAT but baseline-moving; golden baselines re-floored). Pyrrhic-panel-approved (Historian ADOPT-WITH-CHANGE, Calibration ADOPT-surgical, Game-Designer/Ops endorse). Owner-directed "adopt panel solutions."

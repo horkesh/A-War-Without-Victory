@@ -24320,8 +24320,8 @@
         },
         "cohesion": 67,
         "composition": {
-          "aa_systems": 2,
-          "artillery": 15,
+          "aa_systems": 5,
+          "artillery": 30,
           "artillery_condition": {
             "degraded": 0,
             "non_operational": 0,
@@ -24333,7 +24333,7 @@
             "non_operational": 0,
             "operational": 1
           },
-          "tanks": 0
+          "tanks": 40
         },
         "corps_id": "vrs_drina",
         "created_turn": 0,
@@ -24349,7 +24349,7 @@
             "STATIC_DEFENSE": false
           }
         },
-        "equipment_class": "mountain",
+        "equipment_class": "motorized",
         "equipment_state": {
           "degraded_heavy": 0,
           "last_maintenance": null,
@@ -24365,7 +24365,7 @@
         "id": "rs_1st_zvornik",
         "kind": "brigade",
         "location_osid": "op:zvornik:kozluk_2",
-        "max_personnel": 2000,
+        "max_personnel": 2200,
         "morale": 60,
         "name": "1st Zvornik",
         "officer_quality": 0.6,
@@ -24379,7 +24379,7 @@
         "status": "active",
         "tags": [
           "corps:vrs_drina",
-          "equip:mountain",
+          "equip:motorized",
           "mun:zvornik",
           "placement:fixed_home_osid"
         ]
