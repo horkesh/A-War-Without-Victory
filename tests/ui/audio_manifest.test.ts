@@ -7,6 +7,7 @@ import {
     type AudioCueAssetStatus,
     type AudioCueReducedMotionPolicy,
 } from '../../src/ui/map/audio/sound_manifest.js';
+import { hasResolvedCueAsset, resolveCueAssetUrl } from '../../src/ui/map/audio/audioAssets.js';
 
 const VALID_CATEGORIES = new Set<AudioCueCategory>(['ui', 'ambient', 'music', 'stinger']);
 const VALID_ASSET_STATUSES = new Set<AudioCueAssetStatus>(['missing_placeholder', 'provided']);
@@ -46,8 +47,21 @@ describe('audio sound manifest', () => {
             expect(cue.cooldownMs).toBeGreaterThanOrEqual(0);
             expect(VALID_ASSET_STATUSES.has(cue.assetStatus)).toBe(true);
             expect(VALID_REDUCED_MOTION_POLICIES.has(cue.reducedMotionPolicy)).toBe(true);
-            if (cue.filePath !== undefined) {
-                expect(cue.assetStatus).toBe('missing_placeholder');
+        }
+    });
+
+    it('keeps asset-status honest against the URL-import resolution map', () => {
+        // Source of truth for "is a real binary wired" is audioAssets.ts (the
+        // Rollup URL-import map), NOT the cosmetic `filePath` string. A cue may
+        // claim `provided` only when a binary actually resolves, and a
+        // `missing_placeholder` cue must NOT resolve to a binary.
+        for (const cue of getAllAudioCues()) {
+            if (cue.assetStatus === 'provided') {
+                expect(hasResolvedCueAsset(cue.id)).toBe(true);
+                expect(resolveCueAssetUrl(cue.id)).not.toBeNull();
+            } else {
+                expect(hasResolvedCueAsset(cue.id)).toBe(false);
+                expect(resolveCueAssetUrl(cue.id)).toBeNull();
             }
         }
     });

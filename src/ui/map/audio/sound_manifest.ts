@@ -31,6 +31,7 @@ export interface SfxConfig {
     src?: string;
     volume?: number;
     sprite?: Record<string, [number, number]>;
+    assetStatus?: AudioCueAssetStatus;
 }
 
 export interface MusicConfig {
@@ -73,6 +74,7 @@ export function registerSFX(config: SfxConfig): void {
         category: 'ui',
         defaultVolume: config.volume ?? 1,
         filePath: config.src,
+        assetStatus: config.assetStatus,
     });
 }
 
@@ -131,23 +133,27 @@ export function getAllMusicIds(): string[] {
     return [...musicRegistry.keys()].sort();
 }
 
-registerSFX({ id: 'ui_click', src: 'audio/ui_click.mp3', volume: 0.5 });
-registerSFX({ id: 'ui_hover', src: 'audio/ui_hover.mp3', volume: 0.3 });
-registerSFX({ id: 'ui_open_panel', src: 'audio/ui_open.mp3', volume: 0.4 });
-registerSFX({ id: 'ui_close_panel', src: 'audio/ui_close.mp3', volume: 0.4 });
-registerSFX({ id: 'turn_advance', src: 'audio/turn_advance.mp3', volume: 0.6 });
-registerSFX({ id: 'turn_complete', src: 'audio/turn_complete.mp3', volume: 0.6 });
-registerSFX({ id: 'turn_review_open', src: 'audio/turn_review_open.mp3', volume: 0.35 });
-registerSFX({ id: 'battle_notification', src: 'audio/battle.mp3', volume: 0.5 });
-registerSFX({ id: 'battle_decisive', src: 'audio/battle_decisive.mp3', volume: 0.7 });
-registerSFX({ id: 'battle_catastrophic', src: 'audio/battle_catastrophic.mp3', volume: 0.7 });
-registerSFX({ id: 'operation_launched', src: 'audio/op_launch.mp3', volume: 0.5 });
-registerSFX({ id: 'operation_complete', src: 'audio/op_complete.mp3', volume: 0.5 });
-registerSFX({ id: 'event_notification', src: 'audio/event.mp3', volume: 0.5 });
-registerSFX({ id: 'event_critical', src: 'audio/event_critical.mp3', volume: 0.7 });
-registerSFX({ id: 'peace_plan_offered', src: 'audio/peace_plan.mp3', volume: 0.6 });
-registerSFX({ id: 'game_over', src: 'audio/game_over.mp3', volume: 0.8 });
-registerSFX({ id: 'tutorial_objective_complete', src: 'audio/tutorial_complete.mp3', volume: 0.5 });
+// Priority-1 UI feedback set — binaries PROVIDED (CC0 Kenney Interface Sounds).
+// Real playback resolves via audioAssets.ts (Rollup URL-import map); the `src`
+// stems are cosmetic and now point at the committed `.ogg` files. Each cue's
+// CC0 provenance is logged in docs/audio/LICENSES/<cue_id>.md.
+registerSFX({ id: 'ui_click', src: 'audio/ui/ui_click.ogg', volume: 0.5, assetStatus: 'provided' });
+registerSFX({ id: 'ui_hover', src: 'audio/ui/ui_hover.ogg', volume: 0.3, assetStatus: 'provided' });
+registerSFX({ id: 'ui_open_panel', src: 'audio/ui/ui_open.ogg', volume: 0.4, assetStatus: 'provided' });
+registerSFX({ id: 'ui_close_panel', src: 'audio/ui/ui_close.ogg', volume: 0.4, assetStatus: 'provided' });
+registerSFX({ id: 'turn_advance', src: 'audio/ui/turn_advance.ogg', volume: 0.6, assetStatus: 'provided' });
+registerSFX({ id: 'turn_complete', src: 'audio/ui/turn_complete.ogg', volume: 0.6, assetStatus: 'provided' });
+registerSFX({ id: 'turn_review_open', src: 'audio/ui/turn_review_open.ogg', volume: 0.35, assetStatus: 'provided' });
+registerSFX({ id: 'battle_notification', src: 'audio/ui/battle.ogg', volume: 0.5, assetStatus: 'provided' });
+registerSFX({ id: 'battle_decisive', src: 'audio/ui/battle_decisive.ogg', volume: 0.7, assetStatus: 'provided' });
+registerSFX({ id: 'battle_catastrophic', src: 'audio/ui/battle_catastrophic.ogg', volume: 0.7, assetStatus: 'provided' });
+registerSFX({ id: 'operation_launched', src: 'audio/ui/op_launch.ogg', volume: 0.5, assetStatus: 'provided' });
+registerSFX({ id: 'operation_complete', src: 'audio/ui/op_complete.ogg', volume: 0.5, assetStatus: 'provided' });
+registerSFX({ id: 'event_notification', src: 'audio/ui/event.ogg', volume: 0.5, assetStatus: 'provided' });
+registerSFX({ id: 'event_critical', src: 'audio/ui/event_critical.ogg', volume: 0.7, assetStatus: 'provided' });
+registerSFX({ id: 'peace_plan_offered', src: 'audio/ui/peace_plan.ogg', volume: 0.6, assetStatus: 'provided' });
+registerSFX({ id: 'game_over', src: 'audio/ui/game_over.ogg', volume: 0.8, assetStatus: 'provided' });
+registerSFX({ id: 'tutorial_objective_complete', src: 'audio/ui/tutorial_complete.ogg', volume: 0.5, assetStatus: 'provided' });
 
 registerCue({ id: 'ambient_peace_spring', category: 'ambient', defaultVolume: 0.2, filePath: 'audio/ambient/peace_spring.mp3', loop: true });
 registerCue({ id: 'ambient_war_winter', category: 'ambient', defaultVolume: 0.18, filePath: 'audio/ambient/war_winter.mp3', loop: true });
