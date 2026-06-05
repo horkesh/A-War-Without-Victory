@@ -2769,7 +2769,7 @@
     "home_settlement": "Zvornik",
     "home_osid": "op:zvornik:kozluk_2",
     "kind": "brigade",
-    "default_equipment_class": "mountain",
+    "default_equipment_class": "motorized",
     "available_from": 0,
     "mandatory": true,
     "initial_personnel": 2000,
