@@ -13,6 +13,18 @@
 
 ---
 
+## [2026-06-05] workflow: preserve local branch/worktree cleanup archive
+
+**Type:** Repository workflow hygiene. No gameplay behavior, scenario data, save schema, validation semantics, generated baseline, replay contract, or output byte contract changed.
+
+**Change:** Remaining local branch tips were copied to `refs/archive/20260605-pre-unify/*` and `refs/archive/20260605-post-dirty/*`; loose dirty worktree edits were committed onto their owning branches before cleanup; `docs/20_engineering/BRANCH_ARCHIVE_20260605.md` records how to list and restore the archived refs.
+
+**Why:** Local cleanup needed a single usable active branch without losing older branch experiments, merged-PR residue, detached validation snapshots, or worktree-only edits. Whole stale branch trees were not merged into current `main` because they would revert later canonical work; archive refs preserve them for targeted restoration.
+
+**Verification:** Git archive refs exist for all visible local branch tips before cleanup and after dirty-state preservation. Main workspace was clean before the unified branch was created.
+
+---
+
 ## [2026-06-05] fix(oob): VRS 1st Guards Motorized home Rogatica → Han Pijesak
 
 **Type:** OOB placement correction (calibration-FLAT but baseline-moving; golden baselines re-floored). Pyrrhic-panel-approved (Historian ADOPT-WITH-CHANGE, Calibration ADOPT-surgical, Game-Designer/Ops endorse). Owner-directed "adopt panel solutions."
