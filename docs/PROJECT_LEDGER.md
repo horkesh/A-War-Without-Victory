@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] docs(process): record CI/PR batching policy
+
+**Type:** Docs-only process and CI workflow decision. No runtime code, save schema, migrations, tests, scenario data, generated artifacts, baseline manifests, UI, or simulation behavior changed.
+
+**Change:** Recorded the accepted operating policy for repetitive low-risk cleanup lanes: batch related validator/schema slices into one meaningful PR after local proof, keep branch protection, tune required checks by touched paths, use merge queue/batch queue where available, and use CI wait time for isolated non-overlapping prep/classification or review-backlog work rather than opening more tiny PRs.
+
+**Verification:** `git diff --check`.
+
+**Files:** `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-05] fix(state): validate narrative queue when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, combat resolution, AAR generation, scenario data, baseline artifact, replay writer, AI prose behavior, or player-facing UI changed.
