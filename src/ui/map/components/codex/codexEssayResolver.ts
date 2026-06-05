@@ -26,6 +26,9 @@ export interface EssayEntry {
     content?: string;
     sources?: string[];
     generated?: boolean;
+    /** Provenance-only sensitive-history note (Ring 2). Not rendered to the
+     *  player; pinned by tests/codex_sensitive_history_source_notes.test.ts. */
+    source_note?: string;
     tier?: number;
     ghost_when?: string;
     ghost_summary?: string;

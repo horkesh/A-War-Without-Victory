@@ -70,23 +70,24 @@ const ID_EVENT_ID_EXCEPTIONS: ReadonlyMap<string, string> = new Map([
 
 /**
  * On-disk essay files whose filename stem is NOT referenced by any index
- * `event_id`. Thirteen are the Wave-4 1992 content deposit: content-complete
- * and ICTY/BB-cited on disk but not indexed because indexing them requires
- * authoring BCS localization prose (gated content work owned by the
- * localization / sensitive-history lane). Keeping this list explicit means
- * any NEW unindexed file fails this test immediately.
+ * `event_id`. These are the remaining Wave-4 1992 content deposit:
+ * content-complete and ICTY/BB-cited on disk but not indexed because indexing
+ * them requires authoring BCS localization prose (gated content work owned by
+ * the localization / sensitive-history lane). The three Prijedor camp-system
+ * essays (omarska/keraterm/trnopolje) were indexed in the §6 camp-family pass
+ * (BCS authored, source_note added, Ring-2 trigger events wired) and so are no
+ * longer in this list. Foča/Višegrad/takeover essays remain deferred to a
+ * later, separately-reviewed sensitive-history pass. Keeping this list explicit
+ * means any NEW unindexed file fails this test immediately.
  */
 const KNOWN_UNINDEXED_DEPOSIT: readonly string[] = [
     'cutileiro_plan_lisbon_1992',
     'foca_1992',
     'gorazde_pocket_consolidation_1992',
-    'keraterm_camp_1992',
     'kupres_battle_1992',
     'milosevic_isolation_warning_aug92',
-    'omarska_camp_1992',
     'prijedor_takeover_1992',
     'sarajevo_jna_column_dobrovoljacka_1992',
-    'trnopolje_camp_1992',
     'vase_miskina_breadline_1992',
     'visegrad_1992',
     'zvornik_takeover_1992',
