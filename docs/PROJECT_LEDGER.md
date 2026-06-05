@@ -1,4 +1,21 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] fix(oob): correct HVO operational-zone display labels (Posavina / NW Herzegovina)
+
+**Type:** OOB display-label correction (calibration-NEUTRAL; serialized-output hashes move only because the labels are embedded in baked artifacts). Owner-confirmed historical fix.
+
+**Change:** two HVO OZ `name` fields in `data/source/oob_corps.json` (ids/osids/hq_mun untouched):
+- `hvo_northwest_bosnia.name`: "Northwest Bosnia OZ" → "Bosnian Posavina OZ" (the Orašje-seated zone was historically the **Bosanska Posavina** OZ).
+- `hvo_tomislavgrad.name`: "Tomislavgrad OZ" → "Northwest Herzegovina OZ" (the Tomislavgrad-seated zone was the **NW Herzegovina** OZ).
+Per Wikipedia (Croatian Defence Council): the four HVO Corps Districts are Mostar (SE Hzg), Tomislavgrad (NW Hzg), Vitez (Central Bosnia), Orašje (Bosanska Posavina). Surfaced by the 2026-06-05 OOB historical-fidelity audit.
+
+**Calibration:** byte-identical sim behavior — `name` is a display field, not consumed by the engine (no test/src reads it; sim keys on `id`). Anchors/benchmarks unchanged. Artifact hashes move only because the strings are serialized into the startup snapshot + scenario final-saves; golden baselines re-floored accordingly (`manifest.json` + startup snapshot rebuilt; `desktop:startup-snapshot:check` OK; `test:baselines` "all scenarios match").
+
+**Sacred rules:** display-only; no `id`/OSID change; no initial-OSID-control edits; no `avoided_osids`.
+
+**Files:** `data/source/oob_corps.json`, `data/derived/startup/apr_1992_initial_save.json`, `data/derived/scenario/baselines/manifest.json`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-05] fix(state): validate supply siege state when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, reserve-map upper-bound enforcement, supply-reserve behavior, Sarajevo tunnel activation behavior, scenario data, baseline artifact, replay writer, AI behavior, or player-facing UI changed.
