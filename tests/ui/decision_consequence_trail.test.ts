@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildDecisionConsequenceLedger } from '../../src/ui/map/data/decisionConsequenceLedger.js';
+import {
+  buildDecisionConsequenceLedger,
+  buildDecisionConsequenceLedgerSummary,
+} from '../../src/ui/map/data/decisionConsequenceLedger.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 
 function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
@@ -301,5 +304,49 @@ describe('decision consequence trail', () => {
 
     expect(ledger).toHaveLength(1);
     expect(ledger[0]?.id).toBe('event:newer');
+  });
+
+  it('summarizes archive routes and tiebreaks same-turn records with stable id ordering', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      firedEvents: [
+        { id: 'b-decision', turn: 9, title: 'B decision', narrative: '', category: 'political', effects: [], isDecision: true },
+        { id: 'a-decision', turn: 9, title: 'A decision', narrative: '', category: 'political', effects: [], isDecision: true },
+      ],
+      officerDecisionHistory: [
+        {
+          id: 'officer:9:replacement_accepted',
+          turn: 9,
+          faction: 'RS',
+          event_id: 'evt-a',
+          event_type: 'replacement_suggested',
+          officer_id: 'new_commander',
+          officer_name: 'Gen. New Commander',
+          current_commander_id: 'old_commander',
+          current_commander_name: 'Gen. Old Commander',
+          corps_id: 'vrs_drina_corps',
+          corps_name: 'Drina Corps',
+          decision: 'replacement_accepted',
+          new_officer_id: 'new_commander',
+          new_officer_name: 'Gen. New Commander',
+          outgoing_officer_id: 'old_commander',
+          outgoing_officer_name: 'Gen. Old Commander',
+        },
+      ],
+    } as Partial<LoadedGameState>), 10);
+
+    expect(ledger.map((record) => record.id)).toEqual([
+      'event:a-decision',
+      'event:b-decision',
+      'officer:officer:9:replacement_accepted',
+    ]);
+
+    expect(buildDecisionConsequenceLedgerSummary(ledger)).toEqual({
+      total: 3,
+      recordsRouteCount: 1,
+      chronicleRouteCount: 2,
+      latestTurn: 9,
+      latestTitle: 'A decision',
+      families: ['Event decision', 'Officer personnel'],
+    });
   });
 });

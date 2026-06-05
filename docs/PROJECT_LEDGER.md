@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] feat(ui): add Records route cohesion
+
+**Type:** Army HQ Records UI/read-model receipt discoverability. No simulation turn logic, event/patron mechanics, save schema, migration, scenario data, scenario output, baseline manifest, generated artifact, randomness, timestamps, or persisted output changed.
+
+**Change:** Army HQ Records now summarizes archive counts for turn aftermath records, completed-operation AARs, decision consequences, Chronicle-filed decision rows, and opportunity records before sub-tab drilldown. Decision consequence records now expose stable route/family counts and show whether each record is filed to Records or Chronicle; Chronicle-filed rows can open Chronicle directly. `buildDecisionConsequenceLedger(...)` now uses a stable ASCII record-id tiebreak instead of `localeCompare(...)`.
+
+**Docs:** Added `docs/40_reports/implemented/20260605_RECORDS_ROUTE_COHESION.md` and updated report indices, GUI master, command board, master roadmap, product-facing master, and knowledge ledger. This closes the basic Records/Chronicle filing-visibility slice; post-turn browser fixture proof, full localization of the new route chrome, patron actor-history depth, and per-family receipt quality remain open product work.
+
+**Verification:** `npx.cmd vitest run tests/ui/decision_consequence_trail.test.ts tests/ui/decision_consequence_records_panel.test.ts tests/ui/operation_aar_records_review.test.ts tests/ui/turn_aftermath_records_panel_i18n.test.ts --reporter=dot`; `npm.cmd run typecheck -- --pretty false`; `node tools/diagnostics/strict_null_inventory.cjs --field-domains` (total 507; `state: 172`, `sim: 327`, `derived: 8`); `git diff --check`.
+
+---
+
 ## [2026-06-05] feat(ui): add front-visit reachability and personnel command dossier
 
 **Type:** Presidential command UI/read-model surface polish. No front-visit eligibility, command authority costs, officer assignment mechanics, mobilization math, simulation turn logic, scenario output, baseline manifest, save schema, migration, scenario data, generated artifact, randomness, timestamps, or nondeterministic ordering changed.
