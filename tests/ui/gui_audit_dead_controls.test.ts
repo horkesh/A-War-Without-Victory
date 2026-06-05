@@ -3,6 +3,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
+import { readFileSync } from 'node:fs';
 
 import {
     OnboardingOverlay,
@@ -193,5 +194,13 @@ describe('GUI audit Batch G dead/no-op controls', () => {
         expect(screen.queryByRole('combobox', { name: /emergency posture order/i })).toBeNull();
         // No bulk emergency-posture combobox at all (it was the only combobox here).
         expect(screen.queryByRole('combobox')).toBeNull();
+    });
+
+    it('does not wire the left OOB corps card to a direct stance override', () => {
+        const sidebarSource = readFileSync('src/ui/map/components/OOBSidebar.tsx', 'utf8');
+
+        expect(sidebarSource).not.toContain('corpsStanceOverrides');
+        expect(sidebarSource).not.toContain('setCorpsStance(');
+        expect(sidebarSource).not.toContain('onStanceChange={(next) => setCorpsStance(corpsId, next)}');
     });
 });

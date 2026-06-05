@@ -85,7 +85,6 @@ export function OOBSidebar() {
     operations: false,
     sectors: false,
   });
-  const [corpsStanceOverrides, setCorpsStanceOverrides] = useState<Record<string, string>>({});
   const sidebarRef = useRef<HTMLDivElement>(null);
   const playerFaction = loadedGameState ? getPlayerFacingFaction(loadedGameState) : null;
 
@@ -196,12 +195,7 @@ export function OOBSidebar() {
     setCollapsed((prev) => ({ ...prev, [faction]: !prev[faction] }));
   };
 
-  const setCorpsStance = (corpsId: string, nextStance: string) => {
-    setCorpsStanceOverrides((prev) => ({ ...prev, [corpsId]: nextStance }));
-  };
-
   const getCorpsStance = (corpsId: string, faction: string) => {
-    if (corpsStanceOverrides[corpsId]) return corpsStanceOverrides[corpsId];
     const corpsFormation = corpsFormationById.get(corpsId);
     return corpsFormation?.corpsStance ?? loadedGameState?.armyStance?.[faction] ?? 'balanced';
   };
@@ -417,7 +411,6 @@ export function OOBSidebar() {
                                 brigades={brigades}
                                 faction={faction}
                                 stance={getCorpsStance(corpsId, faction)}
-                                onStanceChange={(next) => setCorpsStance(corpsId, next)}
                                 onHeaderClick={() => {
                                   if (corpsId !== '_ungrouped') {
                                     setSelectedCorpsId(corpsId);

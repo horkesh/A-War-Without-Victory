@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] fix(ui): hard-block advance gate and remove fake corps stance control
+
+**Type:** Player-command UI clarity cleanup. No corps stance mechanics, Army HQ command relationship behavior, autonomy behavior, sector stance mechanics, simulation turn logic, save schema, migration, scenario output, baseline manifest, scenario data, generated artifact, randomness, timestamps, or persisted output changed.
+
+**Change:** `AdvanceTurnModal` now shows an explicit blocked panel and disables final Advance while pre-advance review or direct presidential blockers remain. `OOBSidebar` no longer tracks local corps stance overrides, and left OOB `CorpsCard` renders stance as read-only status unless a real command handler is supplied.
+
+**Docs:** Added `docs/40_reports/implemented/20260605_COMMAND_CLARITY_ADVANCE_AND_STANCE.md` and updated report indices, product-facing master, command board, master roadmap, and knowledge ledger.
+
+**Verification:** `npx.cmd vitest run tests/ui/advance_turn_button_gated_feedback.test.ts tests/ui/gui_audit_dead_controls.test.ts tests/ui/accessibility_form_labels.test.ts tests/ui/accessibility_clickable_controls.test.ts --reporter=dot`.
+
+---
+
 ## [2026-06-05] fix(ui): persist opening brief dismissal across same-faction refreshes
 
 **Type:** Presidential onboarding/opening-brief renderer-store persistence fix. No save schema, migration, `meta.tutorial_state`, tutorial IPC, localStorage, simulation turn logic, scenario output, baseline manifest, scenario data, generated artifact, randomness, timestamps, or persisted output changed.

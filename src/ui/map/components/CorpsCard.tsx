@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import type { FormationView } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
 import { Icon, type IconName } from './icons/Icon';
@@ -110,36 +110,12 @@ export function CorpsCard({
   };
 
   // R5: Stance change confirmation — flash + toast
-  const [flashActive, setFlashActive] = useState(false);
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const [toastExiting, setToastExiting] = useState(false);
-  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const handleStanceChange = useCallback((nextStance: string) => {
-    onStanceChange?.(nextStance);
-    // Flash the card border
-    setFlashActive(true);
-    setTimeout(() => setFlashActive(false), 500);
-    // Show toast
-    const label = STANCE_LABEL_KEY[nextStance] ? t(STANCE_LABEL_KEY[nextStance]) : nextStance;
-    setToastMsg(t('corpsCard.stanceSet', { label }));
-    setToastExiting(false);
-    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    toastTimerRef.current = setTimeout(() => {
-      setToastExiting(true);
-      setTimeout(() => { setToastMsg(null); setToastExiting(false); }, 200);
-    }, 1800);
-  }, [onStanceChange]);
-
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); };
-  }, []);
+  const stanceLabel = STANCE_LABEL_KEY[stance ?? 'balanced'] ? t(STANCE_LABEL_KEY[stance ?? 'balanced']) : stance ?? 'balanced';
 
   const cardFront = (
     <div
-      className={`rounded-lg border border-panel-border bg-panel-card/90 overflow-visible border-l-3 ${stanceBorder} ${flashActive ? 'stance-flash' : ''}`}
-      style={{ position: 'relative' }}
+      className={`rounded-lg border border-panel-border bg-panel-card/90 overflow-visible border-l-3 ${stanceBorder}`}
+      style={{ position: 'relative', zIndex: Z.CORPS_CARD_LABEL }}
     >
       <button
         type="button"
@@ -204,16 +180,16 @@ export function CorpsCard({
         )}
       </div>
 
-      {onStanceChange && (
-        <div className="px-3 py-1.5 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase text-accent-gold font-sans tracking-wide font-semibold flex items-center gap-1" title={t('corpsCard.stanceTitle')}>
-              <Icon name={STANCE_ICON[stance ?? 'balanced'] ?? 'balanced'} size={11} />
-              {t('corpsCard.stance')}
-            </span>
+      <div className="px-3 py-1.5 flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="text-[10px] uppercase text-accent-gold font-sans tracking-wide font-semibold flex items-center gap-1" title={t('corpsCard.stanceTitle')}>
+            <Icon name={STANCE_ICON[stance ?? 'balanced'] ?? 'balanced'} size={11} />
+            {t('corpsCard.stance')}
+          </span>
+          {onStanceChange ? (
             <select
               value={stance ?? 'balanced'}
-              onChange={(event) => handleStanceChange(event.target.value)}
+              onChange={(event) => onStanceChange(event.target.value)}
               onClick={(e) => e.stopPropagation()}
               aria-label={t('corpsCard.stanceAria')}
               className="bg-panel-bg border border-panel-border rounded px-1.5 py-0.5 text-[10px] font-mono text-text-primary focus:outline-none"
@@ -223,29 +199,21 @@ export function CorpsCard({
               <option value="offensive" title={t('corpsCard.stance.offensiveTitle')}>{t('corpsCard.stance.offensive')}</option>
               <option value="reorganize" title={t('corpsCard.stance.reorganizeTitle')}>{t('corpsCard.stance.reorganize')}</option>
             </select>
-          </div>
-
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onOrbatClick?.(); }}
-            className="px-2 py-0.5 bg-accent-gold/10 hover:bg-accent-gold/20 border border-accent-gold/50 rounded text-[10px] text-accent-gold font-bold uppercase tracking-wider transition-colors"
-          >
-            {t('corpsCard.orbat')}
-          </button>
+          ) : (
+            <span className="rounded border border-panel-border bg-panel-bg px-1.5 py-0.5 text-[10px] font-mono uppercase text-text-primary">
+              {stanceLabel}
+            </span>
+          )}
         </div>
-      )}
 
-      {/* R5: Stance change toast */}
-      {toastMsg && (
-        <div
-          className={`absolute left-0 right-0 flex justify-center pointer-events-none ${toastExiting ? 'stance-toast-exit' : 'stance-toast-enter'}`}
-          style={{ bottom: '-24px', zIndex: Z.CORPS_CARD_LABEL }}
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onOrbatClick?.(); }}
+          className="px-2 py-0.5 bg-accent-gold/10 hover:bg-accent-gold/20 border border-accent-gold/50 rounded text-[10px] text-accent-gold font-bold uppercase tracking-wider transition-colors"
         >
-          <span className="px-2 py-0.5 bg-accent-gold/20 border border-accent-gold/40 rounded text-[9px] font-mono text-accent-gold tracking-wider uppercase shadow-lg">
-            {toastMsg}
-          </span>
-        </div>
-      )}
+          {t('corpsCard.orbat')}
+        </button>
+      </div>
     </div>
   );
 
