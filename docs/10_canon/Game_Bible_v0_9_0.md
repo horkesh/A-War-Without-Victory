@@ -132,6 +132,8 @@ Wars end through negotiation, collapse, imposed settlement, or unresolved stalem
 
 Negotiation emerges from exhaustion and pressure rather than moral or military clarity.
 
+**Scope (international intervention, ruling D2, 2026-06-05):** International intervention (NATO / Operation Deliberate Force) is event-only for 1.0; the player earns or forfeits it through conduct and never commands its timing, intensity, or targeting. Expansion to a player-influenceable surface is deferred to v1.6 behind the §22 sensitive-history gate. See `docs/40_reports/design/20260605_D2_INTERNATIONAL_INTERVENTION_DECISION.md`.
+
 ### 15.1 Peace treaty mechanics
 
 Treaties are terminal: any accepted peace-triggering territorial treaty ends the war immediately and produces a deterministic end-state. Territorial clauses (transfer_settlements or recognize_control_settlements) trigger peace if accepted.
@@ -205,6 +207,8 @@ The design is bounded by historical plausibility, mechanical integrity, and them
 **Thematic coherence:** This is a war without victory. The simulation models exhaustion, constraint, and negative-sum conflict. Military power matters but never resolves the war alone. Political collapse is as dangerous as military defeat.
 
 These boundaries are non-negotiable and define what this game is and what it is not.
+
+**Scope (modding surface, ruling D4, 2026-06-05):** Scenario/event JSON and Lua data formats are internal and unsupported for 1.0 — they may change without notice, and no formal editor or Steam Workshop ships with 1.0. Mods never bypass the §22 sensitive-history gate. A formal editor / Workshop is deferred post-1.0 (v1.7 candidate). See `docs/40_reports/design/20260605_D4_MODDING_SURFACE_DECISION.md`.
 
 ## 19. v0.4 Design Additions (Systems 1-11)
 
