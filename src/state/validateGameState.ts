@@ -82,6 +82,10 @@ const COMMAND_BRIEFING_SEVERITIES = ['critical', 'warning', 'info'] as const;
 const CORPS_DIALOGUE_CONFIDENCES = ['high', 'medium', 'low'] as const;
 const WAR_DISPATCH_PERSPECTIVES = ['humanitarian', 'military', 'civilian', 'diplomatic'] as const;
 const FRICTION_EVENT_TYPES = ['ignored_stance', 'unauthorized_op', 'refused_release'] as const;
+const BRIGADE_MOVEMENT_STATUSES = ['deployed', 'packing', 'in_transit', 'unpacking'] as const;
+const BRIGADE_MOVEMENT_STANCES = ['combat', 'column'] as const;
+const BRIGADE_DEPLOY_ACTIONS = ['deploy', 'undeploy'] as const;
+const BRIGADE_POSTURES = ['hold', 'defend', 'defend_at_all_costs', 'elastic_defense', 'counterattack', 'dig_in', 'attack', 'assault'] as const;
 const OP_INJECTION_CHECKS = [
     'staging_adjacency',
     'chain_gap',
@@ -185,6 +189,10 @@ function isCivilianCasualtiesRecord(value: unknown): boolean {
 
 function isStringArray(value: unknown): boolean {
     return Array.isArray(value) && value.every((entry) => typeof entry === 'string');
+}
+
+function isNonEmptyStringArray(value: unknown): boolean {
+    return Array.isArray(value) && value.length > 0 && value.every((entry) => typeof entry === 'string');
 }
 
 function isNonNegativeIntegerRecord(value: unknown): boolean {
@@ -304,6 +312,22 @@ function isWarDispatchPerspective(value: unknown): boolean {
 
 function isFrictionEventType(value: unknown): boolean {
     return typeof value === 'string' && FRICTION_EVENT_TYPES.includes(value as typeof FRICTION_EVENT_TYPES[number]);
+}
+
+function isBrigadeMovementStatus(value: unknown): boolean {
+    return typeof value === 'string' && BRIGADE_MOVEMENT_STATUSES.includes(value as typeof BRIGADE_MOVEMENT_STATUSES[number]);
+}
+
+function isBrigadeMovementStance(value: unknown): boolean {
+    return typeof value === 'string' && BRIGADE_MOVEMENT_STANCES.includes(value as typeof BRIGADE_MOVEMENT_STANCES[number]);
+}
+
+function isBrigadeDeployAction(value: unknown): boolean {
+    return typeof value === 'string' && BRIGADE_DEPLOY_ACTIONS.includes(value as typeof BRIGADE_DEPLOY_ACTIONS[number]);
+}
+
+function isBrigadePosture(value: unknown): boolean {
+    return typeof value === 'string' && BRIGADE_POSTURES.includes(value as typeof BRIGADE_POSTURES[number]);
 }
 
 function isOpInjectionCheck(value: unknown): boolean {
@@ -1125,6 +1149,135 @@ function validateFormationSpawnDirective(value: unknown, errors: string[]): void
     }
     if (value.allow_displaced_origin !== undefined && typeof value.allow_displaced_origin !== 'boolean') {
         errors.push('military.formation_spawn_directive.allow_displaced_origin must be a boolean when present');
+    }
+}
+
+function validateBrigadeMovementState(value: unknown, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push('military.brigade_movement_state must be an object when present');
+        return;
+    }
+
+    for (const [brigadeId, entry] of Object.entries(value)) {
+        const path = `military.brigade_movement_state.${brigadeId}`;
+        if (!isRecord(entry)) {
+            errors.push(`${path} must be an object`);
+            continue;
+        }
+        if (!isBrigadeMovementStatus(entry.status)) {
+            errors.push(`${path}.status must be one of: deployed, packing, in_transit, unpacking`);
+        }
+        if ('stance' in entry && entry.stance !== undefined && !isBrigadeMovementStance(entry.stance)) {
+            errors.push(`${path}.stance must be one of: combat, column when present`);
+        }
+        if ('destination_sids' in entry && entry.destination_sids !== undefined && !isNonEmptyStringArray(entry.destination_sids)) {
+            errors.push(`${path}.destination_sids must be a non-empty string array when present`);
+        }
+        if ('path' in entry && entry.path !== undefined && !isStringArray(entry.path)) {
+            errors.push(`${path}.path must be a string array when present`);
+        }
+        if ('turns_remaining' in entry && entry.turns_remaining !== undefined && !isNonNegativeInteger(entry.turns_remaining)) {
+            errors.push(`${path}.turns_remaining must be a non-negative integer when present`);
+        }
+    }
+}
+
+function validateBrigadeMovementOrders(value: unknown, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push('military.brigade_movement_orders must be an object when present');
+        return;
+    }
+
+    for (const [brigadeId, entry] of Object.entries(value)) {
+        const path = `military.brigade_movement_orders.${brigadeId}`;
+        if (!isRecord(entry)) {
+            errors.push(`${path} must be an object`);
+            continue;
+        }
+        if (!isNonEmptyStringArray(entry.destination_sids)) {
+            errors.push(`${path}.destination_sids must be a non-empty string array`);
+        }
+        if ('stance' in entry && entry.stance !== undefined && !isBrigadeMovementStance(entry.stance)) {
+            errors.push(`${path}.stance must be one of: combat, column when present`);
+        }
+    }
+}
+
+function validateBrigadeRepositionOrders(value: unknown, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push('military.brigade_reposition_orders must be an object when present');
+        return;
+    }
+
+    for (const [brigadeId, entry] of Object.entries(value)) {
+        const path = `military.brigade_reposition_orders.${brigadeId}`;
+        if (!isRecord(entry)) {
+            errors.push(`${path} must be an object`);
+            continue;
+        }
+        if (!isNonEmptyStringArray(entry.settlement_ids)) {
+            errors.push(`${path}.settlement_ids must be a non-empty string array`);
+        }
+    }
+}
+
+function validateBrigadeDeployOrders(value: unknown, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push('military.brigade_deploy_orders must be an object when present');
+        return;
+    }
+
+    for (const [brigadeId, action] of Object.entries(value)) {
+        if (!isBrigadeDeployAction(action)) {
+            errors.push(`military.brigade_deploy_orders.${brigadeId} must be one of: deploy, undeploy`);
+        }
+    }
+}
+
+function validateBrigadePostureOrders(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.brigade_posture_orders must be an array when present');
+        return;
+    }
+
+    value.forEach((entry, i) => {
+        const path = `military.brigade_posture_orders[${i}]`;
+        if (!isRecord(entry)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        if (!isNonEmptyString(entry.brigade_id)) {
+            errors.push(`${path}.brigade_id must be a non-empty string`);
+        }
+        if (!isBrigadePosture(entry.posture)) {
+            errors.push(`${path}.posture must be a valid brigade posture`);
+        }
+    });
+}
+
+function validateBrigadeAttackOrders(value: unknown, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push('military.brigade_attack_orders must be an object when present');
+        return;
+    }
+
+    for (const [brigadeId, target] of Object.entries(value)) {
+        if (target !== null && typeof target !== 'string') {
+            errors.push(`military.brigade_attack_orders.${brigadeId} must be a string or null`);
+        }
+    }
+}
+
+function validateStringRecord(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+
+    for (const [key, entry] of Object.entries(value)) {
+        if (typeof entry !== 'string') {
+            errors.push(`${path}.${key} must be a string`);
+        }
     }
 }
 
@@ -2785,6 +2938,27 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'army_hq_overrides' in military && military.army_hq_overrides !== undefined) {
         validateArmyHqOverrides(military.army_hq_overrides, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_movement_state' in military && military.brigade_movement_state !== undefined) {
+        validateBrigadeMovementState(military.brigade_movement_state, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_movement_orders' in military && military.brigade_movement_orders !== undefined) {
+        validateBrigadeMovementOrders(military.brigade_movement_orders, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_reposition_orders' in military && military.brigade_reposition_orders !== undefined) {
+        validateBrigadeRepositionOrders(military.brigade_reposition_orders, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_deploy_orders' in military && military.brigade_deploy_orders !== undefined) {
+        validateBrigadeDeployOrders(military.brigade_deploy_orders, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_posture_orders' in military && military.brigade_posture_orders !== undefined) {
+        validateBrigadePostureOrders(military.brigade_posture_orders, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_attack_orders' in military && military.brigade_attack_orders !== undefined) {
+        validateBrigadeAttackOrders(military.brigade_attack_orders, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_sector_override' in military && military.brigade_sector_override !== undefined) {
+        validateStringRecord(military.brigade_sector_override, 'military.brigade_sector_override', errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'formation_spawn_directive' in military && military.formation_spawn_directive !== undefined) {
         validateFormationSpawnDirective(military.formation_spawn_directive, errors);

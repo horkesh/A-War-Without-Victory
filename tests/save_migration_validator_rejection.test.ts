@@ -1892,6 +1892,159 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('accepts current-version saves with absent or well-formed brigade order surfaces', () => {
+        const absent = currentVersionState();
+        delete absent.military.brigade_movement_state;
+        delete absent.military.brigade_movement_orders;
+        delete absent.military.brigade_reposition_orders;
+        delete absent.military.brigade_deploy_orders;
+        delete absent.military.brigade_posture_orders;
+        delete absent.military.brigade_attack_orders;
+        delete absent.military.brigade_sector_override;
+
+        const withOrders = currentVersionState();
+        withOrders.military.brigade_movement_state = {
+            arbih_1st_brigade: {
+                status: 'in_transit',
+                stance: 'column',
+                destination_sids: ['op:sarajevo:dobrinja_1'],
+                path: ['op:sarajevo:skenderija_1', 'op:sarajevo:dobrinja_1'],
+                turns_remaining: 2,
+            },
+            arbih_2nd_brigade: {
+                status: 'deployed',
+            },
+        };
+        withOrders.military.brigade_movement_orders = {
+            arbih_3rd_brigade: {
+                destination_sids: ['op:sarajevo:dobrinja_2'],
+                stance: 'combat',
+            },
+        };
+        withOrders.military.brigade_reposition_orders = {
+            arbih_4th_brigade: {
+                settlement_ids: ['op:sarajevo:stup_1'],
+            },
+        };
+        withOrders.military.brigade_deploy_orders = {
+            arbih_5th_brigade: 'deploy',
+            arbih_6th_brigade: 'undeploy',
+        };
+        withOrders.military.brigade_posture_orders = [
+            { brigade_id: 'arbih_7th_brigade', posture: 'defend' },
+            { brigade_id: 'arbih_8th_brigade', posture: 'assault' },
+        ];
+        withOrders.military.brigade_attack_orders = {
+            arbih_9th_brigade: 'op:sarajevo:vraca_1',
+            arbih_10th_brigade: null,
+        };
+        withOrders.military.brigade_sector_override = {
+            arbih_11th_brigade: 'sector:arbih_1st_corps:1',
+        };
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWithOrders = deserializeState(JSON.stringify(withOrders));
+
+        expect(migratedAbsent.military.brigade_movement_state).toBeUndefined();
+        expect(migratedAbsent.military.brigade_movement_orders).toBeUndefined();
+        expect(migratedAbsent.military.brigade_reposition_orders).toBeUndefined();
+        expect(migratedAbsent.military.brigade_deploy_orders).toBeUndefined();
+        expect(migratedAbsent.military.brigade_posture_orders).toBeUndefined();
+        expect(migratedAbsent.military.brigade_attack_orders).toBeUndefined();
+        expect(migratedAbsent.military.brigade_sector_override).toBeUndefined();
+        expect(migratedWithOrders.military.brigade_movement_state).toEqual(withOrders.military.brigade_movement_state);
+        expect(migratedWithOrders.military.brigade_movement_orders).toEqual(withOrders.military.brigade_movement_orders);
+        expect(migratedWithOrders.military.brigade_reposition_orders).toEqual(withOrders.military.brigade_reposition_orders);
+        expect(migratedWithOrders.military.brigade_deploy_orders).toEqual(withOrders.military.brigade_deploy_orders);
+        expect(migratedWithOrders.military.brigade_posture_orders).toEqual(withOrders.military.brigade_posture_orders);
+        expect(migratedWithOrders.military.brigade_attack_orders).toEqual(withOrders.military.brigade_attack_orders);
+        expect(migratedWithOrders.military.brigade_sector_override).toEqual(withOrders.military.brigade_sector_override);
+    });
+
+    it('rejects current-version saves with malformed brigade order surfaces', () => {
+        const state = currentVersionState();
+        state.military.brigade_movement_state = {
+            arbih_1st_brigade: {
+                status: 'teleporting',
+                stance: 'fast',
+                destination_sids: ['op:sarajevo:dobrinja_1', 2],
+                path: 'op:sarajevo:skenderija_1',
+                turns_remaining: -1,
+            },
+            arbih_2nd_brigade: 42,
+        } as any;
+        state.military.brigade_movement_orders = {
+            arbih_3rd_brigade: {
+                destination_sids: [],
+                stance: 'fast',
+            },
+            arbih_4th_brigade: 43,
+        } as any;
+        state.military.brigade_reposition_orders = {
+            arbih_5th_brigade: {
+                settlement_ids: ['op:sarajevo:stup_1', 44],
+            },
+            arbih_6th_brigade: 45,
+        } as any;
+        state.military.brigade_deploy_orders = {
+            arbih_7th_brigade: 'hold',
+            arbih_8th_brigade: 46,
+        } as any;
+        state.military.brigade_posture_orders = [
+            { brigade_id: '', posture: 'charge' },
+            47,
+        ] as any;
+        state.military.brigade_attack_orders = {
+            arbih_9th_brigade: 48,
+        } as any;
+        state.military.brigade_sector_override = {
+            arbih_10th_brigade: 49,
+        } as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.brigade_movement_state\.arbih_1st_brigade\.status must be one of: deployed, packing, in_transit, unpacking[\s\S]*military\.brigade_movement_state\.arbih_1st_brigade\.stance must be one of: combat, column when present[\s\S]*military\.brigade_movement_state\.arbih_1st_brigade\.destination_sids must be a non-empty string array when present[\s\S]*military\.brigade_movement_state\.arbih_1st_brigade\.path must be a string array when present[\s\S]*military\.brigade_movement_state\.arbih_1st_brigade\.turns_remaining must be a non-negative integer when present[\s\S]*military\.brigade_movement_state\.arbih_2nd_brigade must be an object[\s\S]*military\.brigade_movement_orders\.arbih_3rd_brigade\.destination_sids must be a non-empty string array[\s\S]*military\.brigade_movement_orders\.arbih_3rd_brigade\.stance must be one of: combat, column when present[\s\S]*military\.brigade_movement_orders\.arbih_4th_brigade must be an object[\s\S]*military\.brigade_reposition_orders\.arbih_5th_brigade\.settlement_ids must be a non-empty string array[\s\S]*military\.brigade_reposition_orders\.arbih_6th_brigade must be an object[\s\S]*military\.brigade_deploy_orders\.arbih_7th_brigade must be one of: deploy, undeploy[\s\S]*military\.brigade_deploy_orders\.arbih_8th_brigade must be one of: deploy, undeploy[\s\S]*military\.brigade_posture_orders\[0\]\.brigade_id must be a non-empty string[\s\S]*military\.brigade_posture_orders\[0\]\.posture must be a valid brigade posture[\s\S]*military\.brigade_posture_orders\[1\] must be an object[\s\S]*military\.brigade_attack_orders\.arbih_9th_brigade must be a string or null[\s\S]*military\.brigade_sector_override\.arbih_10th_brigade must be a string/
+        );
+    });
+
+    it('rejects current-version saves with non-record brigade order surfaces', () => {
+        const movementState = currentVersionState();
+        movementState.military.brigade_movement_state = [] as any;
+        const movementOrders = currentVersionState();
+        movementOrders.military.brigade_movement_orders = [] as any;
+        const repositionOrders = currentVersionState();
+        repositionOrders.military.brigade_reposition_orders = [] as any;
+        const deployOrders = currentVersionState();
+        deployOrders.military.brigade_deploy_orders = [] as any;
+        const postureOrders = currentVersionState();
+        postureOrders.military.brigade_posture_orders = {} as any;
+        const attackOrders = currentVersionState();
+        attackOrders.military.brigade_attack_orders = [] as any;
+        const sectorOverride = currentVersionState();
+        sectorOverride.military.brigade_sector_override = [] as any;
+
+        expect(() => deserializeState(JSON.stringify(movementState))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.brigade_movement_state must be an object when present/
+        );
+        expect(() => deserializeState(JSON.stringify(movementOrders))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.brigade_movement_orders must be an object when present/
+        );
+        expect(() => deserializeState(JSON.stringify(repositionOrders))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.brigade_reposition_orders must be an object when present/
+        );
+        expect(() => deserializeState(JSON.stringify(deployOrders))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.brigade_deploy_orders must be an object when present/
+        );
+        expect(() => deserializeState(JSON.stringify(postureOrders))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.brigade_posture_orders must be an array when present/
+        );
+        expect(() => deserializeState(JSON.stringify(attackOrders))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.brigade_attack_orders must be an object when present/
+        );
+        expect(() => deserializeState(JSON.stringify(sectorOverride))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.brigade_sector_override must be an object when present/
+        );
+    });
+
     it('accepts current-version saves with absent or well-formed OPSEC sectors', () => {
         const absent = currentVersionState();
         delete absent.military.opsec_sectors;
