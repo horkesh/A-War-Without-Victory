@@ -85,7 +85,7 @@ describe('War Summary personnel labels', () => {
         expect(screen.getByText('Pregled rata')).toBeTruthy();
         expect(screen.getByText('Teritorija')).toBeTruthy();
         expect(screen.getByText('Vojna snaga')).toBeTruthy();
-        expect(screen.getByText('Ljudstvo pod oruzjem')).toBeTruthy();
+        expect(screen.getByText('Ljudstvo pod oružjem')).toBeTruthy();
         expect(screen.getByText('Mobilizacijski bazen')).toBeTruthy();
         expect(screen.getByText('Mobilizirano ukupno')).toBeTruthy();
         expect(screen.queryByText('Personnel at arms')).toBeNull();

@@ -224,7 +224,7 @@ describe('buildWarroomPriorityDocketView', () => {
     const view = buildWarroomPriorityDocketView({ state, limit: 3 });
     setLocale('en');
 
-    expect(view.summary).toBe('4 stavke za napredovanje / 4 hitno / 2 na cekanju');
+    expect(view.summary).toBe('4 stavke za napredovanje / 4 hitno / 2 na čekanju');
     expect(view.sourceHandoffSummary).toBe('4 izvorna prijenosa / 4 hitno');
     expect(view.openBoardLabel).toBe('Otvori sobu odluka');
     expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('advance items');

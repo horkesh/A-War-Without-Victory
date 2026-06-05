@@ -80,9 +80,9 @@ describe('War Summary campaign cost localization', () => {
         const campaignCost = screen.getByTestId('war-summary-campaign-cost');
         expect(screen.getByText('Teritorija')).toBeTruthy();
         expect(screen.getByText('Prijateljska kontrola')).toBeTruthy();
-        expect(screen.getByText('Neprijateljska kontrola se ovdje sazimlje kroz procjene staba i izvještaje fronta, ne kao tačni ukupni brojevi po frakciji.')).toBeTruthy();
+        expect(screen.getByText('Neprijateljska kontrola se ovdje sazimlje kroz procjene štaba i izvještaje fronta, ne kao tačni ukupni brojevi po frakciji.')).toBeTruthy();
         expect(screen.getByText('Vojna snaga')).toBeTruthy();
-        expect(screen.getByText('Ljudstvo pod oruzjem')).toBeTruthy();
+        expect(screen.getByText('Ljudstvo pod oružjem')).toBeTruthy();
         expect(screen.getByText('Raseljavanje')).toBeTruthy();
         expect(screen.getByText('Raseljeni u teatru')).toBeTruthy();
         expect(screen.getByText('Raseljeni na vlastitoj strani')).toBeTruthy();

@@ -144,7 +144,7 @@ describe('CodexPanel dynamic essay proof', () => {
         expect(screen.queryByText('Player War Divergence')).toBeNull();
         expect(screen.getByText('Historijski kontekst')).toBeTruthy();
         expect(screen.queryByText('War lasted 6 weeks longer than the historical 182 weeks')).toBeNull();
-        expect(screen.getByText('Podaci iz zavrsnog zapisa: Rat je trajao 6 sedmica duze od historijskih 182 sedmica.')).toBeTruthy();
+        expect(screen.getByText('Podaci iz zavrsnog zapisa: Rat je trajao 6 sedmica duže od historijskih 182 sedmica.')).toBeTruthy();
         expect(screen.getByText('Federacija je kontrolisala 54.0% teritorije naspram historijskih 51%.')).toBeTruthy();
     });
 
