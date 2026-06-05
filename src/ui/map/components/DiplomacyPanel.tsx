@@ -48,20 +48,40 @@ function PatronConfidenceGauge({ confidence, cuts }: { confidence?: PatronConfid
                 </>
             ) : null}
             {cuts ? (
-                <p className={`text-[11px] leading-5 text-red-300 ${confidence ? 'mt-2 border-t border-white/8 pt-2' : ''}`}>
-                    {cuts.count > 1
-                        ? t('patronRelations.defianceCutMulti', {
-                            count: cuts.count,
-                            pct: Math.round(cuts.latestCutFraction * 100),
-                            turn: cuts.latestTurn,
-                            support: Math.round(cuts.latestSupportAfter * 100),
-                        })
-                        : t('patronRelations.defianceCutSingle', {
-                            pct: Math.round(cuts.latestCutFraction * 100),
-                            turn: cuts.latestTurn,
-                            support: Math.round(cuts.latestSupportAfter * 100),
-                        })}
-                </p>
+                <div className={confidence ? 'mt-2 border-t border-white/8 pt-2' : ''}>
+                    <p className="text-[11px] leading-5 text-red-300">
+                        {cuts.count > 1
+                            ? t('patronRelations.defianceCutMulti', {
+                                count: cuts.count,
+                                pct: Math.round(cuts.latestCutFraction * 100),
+                                turn: cuts.latestTurn,
+                                support: Math.round(cuts.latestSupportAfter * 100),
+                            })
+                            : t('patronRelations.defianceCutSingle', {
+                                pct: Math.round(cuts.latestCutFraction * 100),
+                                turn: cuts.latestTurn,
+                                support: Math.round(cuts.latestSupportAfter * 100),
+                            })}
+                    </p>
+                    {cuts.entries && cuts.entries.length > 0 ? (
+                        <div className="mt-2 rounded border border-red-400/20 bg-red-500/5 px-2 py-1.5">
+                            <div className="text-[9px] font-mono font-bold uppercase tracking-[0.12em] text-red-200">
+                                {t('patronRelations.defianceReceipts')}
+                            </div>
+                            <ul className="mt-1 space-y-1">
+                                {cuts.entries.map((entry, index) => (
+                                    <li key={`${entry.turn}:${entry.cutFraction}:${entry.supportAfter}:${index}`} className="flex items-center justify-between gap-2 text-[10px] font-mono uppercase tracking-[0.08em] text-red-100/90">
+                                        <span>{t('patronRelations.defianceReceiptTurn', { turn: entry.turn })}</span>
+                                        <span>{t('patronRelations.defianceReceiptImpact', {
+                                            pct: Math.round(entry.cutFraction * 100),
+                                            support: Math.round(entry.supportAfter * 100),
+                                        })}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ) : null}
+                </div>
             ) : null}
         </div>
     );

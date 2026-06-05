@@ -185,7 +185,7 @@ describe('DirectiveCard stop-op action host', () => {
 
     render(React.createElement(DirectiveCard, { directive: requestOpDirective, gameState: baseGameState }));
 
-    fireEvent.change(screen.getByLabelText('Target settlement'), { target: { value: 'zenica' } });
+    fireEvent.change(screen.getByLabelText('Objective settlement'), { target: { value: 'zenica' } });
     fireEvent.click(screen.getByRole('button', { name: 'Issue (25)' }));
 
     await waitFor(() => {
@@ -208,7 +208,7 @@ describe('DirectiveCard stop-op action host', () => {
 
     render(React.createElement(DirectiveCard, { directive: requestOpDirective, gameState: baseGameState }));
 
-    fireEvent.change(screen.getByLabelText('Target settlement'), { target: { value: 'Bihać' } });
+    fireEvent.change(screen.getByLabelText('Objective settlement'), { target: { value: 'Bihać' } });
     fireEvent.click(screen.getByRole('button', { name: 'Issue (25)' }));
 
     await waitFor(() => {
@@ -223,6 +223,46 @@ describe('DirectiveCard stop-op action host', () => {
     });
   });
 
+  it('blocks ambiguous typed settlement display names before request-op objection review', () => {
+    useGameStore.setState({
+      osidDisplayNames: {
+        'op:alpha:kamenica_1': 'Kamenica',
+        'op:beta:kamenica_1': 'Kamenica',
+      },
+    });
+    const { queryDirectiveObjection, stageOpDirectiveOrder } = installIpc();
+
+    render(React.createElement(DirectiveCard, { directive: requestOpDirective, gameState: baseGameState }));
+
+    fireEvent.change(screen.getByLabelText('Objective settlement'), { target: { value: 'Kamenica' } });
+
+    const alert = screen.getByRole('alert', { name: 'Ambiguous objective settlement' });
+    expect(alert.textContent).toContain('op:alpha:kamenica_1, op:beta:kamenica_1');
+    const issue = screen.getByRole('button', { name: 'Issue (25)' });
+    expect(issue.hasAttribute('disabled')).toBe(true);
+    fireEvent.click(issue);
+    expect(queryDirectiveObjection).not.toHaveBeenCalled();
+    expect(stageOpDirectiveOrder).not.toHaveBeenCalled();
+  });
+
+  it('resolves fixed request-op target captions to display names', () => {
+    useGameStore.setState({
+      osidDisplayNames: {
+        'op:bihac:bihac_1': 'Bihac',
+      },
+    });
+    installIpc();
+    const fixedTargetDirective: PresidentialDecisionRoomDirective = {
+      ...requestOpDirective,
+      payload: { targetOsid: 'op:bihac:bihac_1' },
+    };
+
+    render(React.createElement(DirectiveCard, { directive: fixedTargetDirective, gameState: baseGameState }));
+
+    expect(screen.getByText(/Direct corps to objective .* Bihac/)).toBeTruthy();
+    expect(screen.queryByText(/op:bihac:bihac_1/)).toBeNull();
+  });
+
   it('surfaces commander pushback before staging a request-op directive', async () => {
     const { queryDirectiveObjection, stageOpDirectiveOrder } = installIpc({
       queryDirectiveObjection: vi.fn(async () => ({
@@ -233,7 +273,7 @@ describe('DirectiveCard stop-op action host', () => {
 
     render(React.createElement(DirectiveCard, { directive: requestOpDirective, gameState: gameStateWithCommander }));
 
-    fireEvent.change(screen.getByLabelText('Target settlement'), { target: { value: 'zenica' } });
+    fireEvent.change(screen.getByLabelText('Objective settlement'), { target: { value: 'zenica' } });
     fireEvent.click(screen.getByRole('button', { name: 'Issue (25)' }));
 
     expect(await screen.findByRole('alertdialog', { name: 'Commander objection' })).toBeTruthy();
@@ -255,7 +295,7 @@ describe('DirectiveCard stop-op action host', () => {
 
     render(React.createElement(DirectiveCard, { directive: requestOpDirective, gameState: gameStateWithCommander }));
 
-    fireEvent.change(screen.getByLabelText('Target settlement'), { target: { value: 'zenica' } });
+    fireEvent.change(screen.getByLabelText('Objective settlement'), { target: { value: 'zenica' } });
     fireEvent.click(screen.getByRole('button', { name: 'Issue (25)' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Force anyway' }));
 
@@ -281,7 +321,7 @@ describe('DirectiveCard stop-op action host', () => {
 
     render(React.createElement(DirectiveCard, { directive: requestOpDirective, gameState: gameStateWithCommander }));
 
-    fireEvent.change(screen.getByLabelText('Target settlement'), { target: { value: 'zenica' } });
+    fireEvent.change(screen.getByLabelText('Objective settlement'), { target: { value: 'zenica' } });
     fireEvent.click(screen.getByRole('button', { name: 'Issue (25)' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Stand down' }));
 
@@ -307,7 +347,7 @@ describe('DirectiveCard stop-op action host', () => {
 
     render(React.createElement(DirectiveCard, { directive: requestOpDirective, gameState: gameStateWithCommander }));
 
-    fireEvent.change(screen.getByLabelText('Target settlement'), { target: { value: 'zenica' } });
+    fireEvent.change(screen.getByLabelText('Objective settlement'), { target: { value: 'zenica' } });
     fireEvent.click(screen.getByRole('button', { name: 'Issue (25)' }));
 
     expect(await screen.findByRole('alert', { name: 'Directive cannot be issued' })).toBeTruthy();

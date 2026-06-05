@@ -458,6 +458,12 @@ export interface PatronDefianceCutsView {
     latestTurn: number;
     /** material_support_level after the most-recent cut (0..1). */
     latestSupportAfter: number;
+    /** Stable, newest-first material consequence receipt rows. */
+    entries?: Array<{
+        turn: number;
+        cutFraction: number;
+        supportAfter: number;
+    }>;
 }
 
 export interface DiplomacyView {

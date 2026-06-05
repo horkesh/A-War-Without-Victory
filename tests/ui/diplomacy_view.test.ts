@@ -149,6 +149,10 @@ describe('buildDiplomacyView', () => {
             latestCutFraction: 0.35,
             latestTurn: 44,
             latestSupportAfter: 0.45,
+            entries: [
+                { turn: 44, cutFraction: 0.35, supportAfter: 0.45 },
+                { turn: 30, cutFraction: 0.2, supportAfter: 0.6 },
+            ],
         });
 
         // No player-faction entries → summary absent (historical/calibration mode never writes these).

@@ -1,4 +1,28 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] feat(ui): surface patron material consequence records
+
+**Type:** Patron Relations UI/read-model receipt discoverability. No patron mechanics, event choices, material-support calculations, simulation turn logic, scenario output, baseline manifest, save schema, migration, scenario data, generated artifact, randomness, timestamps, or nondeterministic ordering changed.
+
+**Change:** `buildDiplomacyView(...)` now projects player-faction `patron_defiance_supply_cuts` into stable newest-first material consequence entries on `PatronDefianceCutsView`, ordered by turn descending, cut fraction descending, and support-after ascending. `DiplomacyPanel` renders those entries under the Patron Relations confidence/cut block while preserving the existing latest-cut summary.
+
+**Docs:** Added `docs/40_reports/implemented/20260605_PATRON_RELATIONS_MATERIAL_RECEIPTS.md` and updated report indices, command board, master roadmap, product-facing master, and knowledge ledger. This closes a focused patron material-receipt discoverability slice; broader Patron Relations route polish and Records/Chronicle cross-links remain open product work.
+
+**Verification:** `npx.cmd vitest run tests/ui/directive_card_stop_op_action.test.ts tests/ui/diplomacy_view.test.ts tests/ui/diplomacy_panel.test.ts tests/ui/consequence_receipts.test.ts --reporter=dot`; `npm.cmd run typecheck -- --pretty false`; `git diff --check`.
+
+---
+
+## [2026-06-05] fix(ui): harden request-op directive target affordances
+
+**Type:** Player-command UI affordance/copy hardening. No simulation turn logic, operation construction, scenario output, baseline manifest, save schema, migration, scenario data, generated artifact, randomness, timestamps, or nondeterministic ordering changed.
+
+**Change:** `DirectiveCard` now resolves fixed request-operation target captions through player-safe OSID display names instead of showing raw internal IDs, keeps unique typed settlement display-name resolution, and blocks ambiguous typed display names before `queryDirectiveObjection(...)` or `stageOpDirectiveOrder(...)` IPC. Ambiguous match lists are `strictCompare` sorted for stable diagnostics. Request-operation copy now frames the player as naming an objective for corps staff review rather than directly ordering an attack.
+
+**Docs:** Added `docs/40_reports/implemented/20260605_COMMAND_DIRECTIVE_TARGET_AFFORDANCES.md` and updated report indices, command board, master roadmap, product-facing master, and knowledge ledger. This closes the second review-backlog player-command batch; the next batch remains patron/diplomacy/receipt read models.
+
+**Verification:** `npx.cmd vitest run tests/ui/directive_card_stop_op_action.test.ts --reporter=dot`; `npm.cmd run typecheck -- --pretty false`; `git diff --check`.
+
+---
+
 ## [2026-06-05] perf(engine): cache sector coverage target search with one bounded BFS
 
 **Type:** Sector/frontline performance optimization. No simulation semantics, combat math, operation choice, scenario data, save schema, migration, baseline manifest, UI surface, randomness, timestamps, or nondeterministic ordering changed.

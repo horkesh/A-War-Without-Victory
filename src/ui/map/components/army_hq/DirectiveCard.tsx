@@ -32,11 +32,18 @@ import {
 } from '../../data/opDirectiveObjection';
 import { resolveDirectiveActArt } from '../../data/directiveActArt';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
+import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { t } from '../../i18n';
+import { strictCompare } from '../../../../state/validateGameState.js';
 
 interface DirectiveCardProps {
   directive: PresidentialDecisionRoomDirective;
   gameState: LoadedGameState;
+}
+
+interface TargetInputResolution {
+  targetOsid: string;
+  ambiguousMatches: string[];
 }
 
 /** Player-facing lever label. */
@@ -62,10 +69,11 @@ function leverLabel(lever: PresidentialDecisionRoomDirective['lever']): string {
 function targetLabel(
   directive: PresidentialDecisionRoomDirective,
   gameState: LoadedGameState,
+  osidDisplayNames: Record<string, string> | null,
 ): string | null {
   const p = directive.payload;
   if (typeof p.opName === 'string' && p.opName) return p.opName;
-  if (typeof p.targetOsid === 'string' && p.targetOsid) return p.targetOsid;
+  if (typeof p.targetOsid === 'string' && p.targetOsid) return getOsidDisplayName(p.targetOsid, osidDisplayNames);
   // proposalId (authorize_op) / brigadeId (elite_deploy) are raw internal ids —
   // suppress rather than leak; the lever label alone is sufficient.
   if (directive.corpsId) {
@@ -85,20 +93,26 @@ function resolveTargetOsidInput(
   input: string,
   controlBySettlement: Record<string, string | null> | undefined,
   osidDisplayNames: Record<string, string> | null,
-): string {
+): TargetInputResolution {
   const trimmed = input.trim();
-  if (!trimmed) return '';
-  if (controlBySettlement && Object.prototype.hasOwnProperty.call(controlBySettlement, trimmed)) return trimmed;
-  if (osidDisplayNames && Object.prototype.hasOwnProperty.call(osidDisplayNames, trimmed)) return trimmed;
-  if (!osidDisplayNames) return trimmed;
+  if (!trimmed) return { targetOsid: '', ambiguousMatches: [] };
+  if (controlBySettlement && Object.prototype.hasOwnProperty.call(controlBySettlement, trimmed)) {
+    return { targetOsid: trimmed, ambiguousMatches: [] };
+  }
+  if (osidDisplayNames && Object.prototype.hasOwnProperty.call(osidDisplayNames, trimmed)) {
+    return { targetOsid: trimmed, ambiguousMatches: [] };
+  }
+  if (!osidDisplayNames) return { targetOsid: trimmed, ambiguousMatches: [] };
 
   const normalized = normalizeTargetLabel(trimmed);
   const matches = Object.entries(osidDisplayNames)
     .filter(([, label]) => normalizeTargetLabel(label) === normalized)
     .map(([osid]) => osid)
-    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    .sort(strictCompare);
 
-  return matches.length === 1 ? matches[0] : trimmed;
+  if (matches.length === 1) return { targetOsid: matches[0]!, ambiguousMatches: [] };
+  if (matches.length > 1) return { targetOsid: '', ambiguousMatches: matches };
+  return { targetOsid: trimmed, ambiguousMatches: [] };
 }
 
 export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
@@ -140,11 +154,13 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   // request_op directive whose payload carries no fixed target.
   const payloadTargetOsid = typeof directive.payload.targetOsid === 'string' ? directive.payload.targetOsid : '';
   const showTargetInput = directive.lever === 'request_op' && !payloadTargetOsid;
-  const effectiveTargetOsid = payloadTargetOsid || resolveTargetOsidInput(
+  const targetInputResolution = resolveTargetOsidInput(
     targetOsidInput,
     gameState.controlBySettlement,
     osidDisplayNames,
   );
+  const effectiveTargetOsid = payloadTargetOsid || targetInputResolution.targetOsid;
+  const ambiguousTargetMatches = showTargetInput ? targetInputResolution.ambiguousMatches : [];
 
   // Commander disposition for the request/force objection (same lookup as
   // OperationsSection): the active CO of the target corps.
@@ -352,7 +368,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
     }
   };
 
-  const tgt = targetLabel(directive, gameState);
+  const tgt = targetLabel(directive, gameState, osidDisplayNames);
 
   // §9 act-layer dossier header: a 16:9 period still chosen by the directive's
   // lever (reusing the existing consequence_stills art via the shared resolver).
@@ -494,6 +510,16 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
           className="mt-2 w-full rounded border border-panel-border/50 bg-panel-bg px-2 py-1 text-[11px] font-mono text-text-primary"
         />
       )}
+      {!pendingObjection && !impossibleReason && ambiguousTargetMatches.length > 0 && (
+        <div role="alert" aria-label={t('directive.targetInput.ambiguousAria')} className="mt-2 rounded border border-amber-500/50 bg-amber-500/5 p-2">
+          <p className="text-[8px] font-bold uppercase tracking-wider text-amber-400">
+            {t('directive.targetInput.ambiguousHeading')}
+          </p>
+          <p className="mt-0.5 text-[10px] text-text-primary">
+            {t('directive.targetInput.ambiguousBody', { matches: ambiguousTargetMatches.join(', ') })}
+          </p>
+        </div>
+      )}
 
       {/* Confirm / ISSUE — disabled when CA short (still renders for scan-without-spend),
           for front-visit when no front is reachable, or for a request-op with no
@@ -501,11 +527,14 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       {!pendingObjection && !impossibleReason && (() => {
         const blockedFrontVisit = isFrontVisit && frontVisitReady && frontVisitUnavailableReason !== null;
         const blockedNoTarget = showTargetInput && targetOsidInput.trim().length === 0;
-        const issueDisabled = !canAfford || busy || blockedFrontVisit || blockedNoTarget;
+        const blockedAmbiguousTarget = ambiguousTargetMatches.length > 0;
+        const issueDisabled = !canAfford || busy || blockedFrontVisit || blockedNoTarget || blockedAmbiguousTarget;
         const issueTitle = blockedFrontVisit
           ? (frontVisitUnavailableReason ?? t('directive.issue.blockedFrontVisitTitle'))
           : blockedNoTarget
           ? t('directive.issue.blockedNoTargetTitle')
+          : blockedAmbiguousTarget
+          ? t('directive.issue.blockedAmbiguousTargetTitle')
           : canAfford
             ? (cost === 0
               ? t('directive.issue.freeTitle')

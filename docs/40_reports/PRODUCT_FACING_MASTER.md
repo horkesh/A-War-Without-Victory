@@ -116,7 +116,7 @@ Tested with Chromium/Playwright against the same local app after restarting Vite
 | Advance-gate clarity | Browser saw disabled advance with "No pre-advance alert" nearby. | One clear blocker sentence and one routing button when advance is blocked. | P1 |
 | Command Authority doctrine copy | Desk says "currency of command", toolbar says override resource. | Consistent language: presidential leverage, institutional strain, recovery, and why overuse is dangerous. | P1 |
 | Direct-control cleanup | Browser still showed direct corps stance comboboxes in left command panel. | Player should not feel like a corps commander. Direct controls must be removed, reframed as request/intent, or hidden behind active doctrine decisions. | P0/P1 |
-| Patron/army pushback integration | Force-op pushback and patron dead-channel are shipped substrate. DirectiveCard now proves the army side of the loop; patron-defiance receipts are already emitted from `patron_defiance_supply_cuts` into the same consequence receipt model. | Player should see "promise -> resistance -> consequence -> receipt" in the same command family; next work is visible route cohesion and Patron Relations polish, not substrate creation. | P1 |
+| Patron/army pushback integration | Force-op pushback and patron dead-channel are shipped substrate. DirectiveCard now proves the army side of the loop; patron-defiance receipts are emitted from `patron_defiance_supply_cuts`, and Patron Relations now shows the material cut rows as stable consequence records. | Player should see "promise -> resistance -> consequence -> receipt" in the same command family; next work is visible route cohesion and Records/Chronicle cross-links, not substrate creation. | P1 / Improved |
 
 ### 2. Tactical Groups Productization
 
@@ -156,9 +156,9 @@ Tactical Groups are engine-meaningful, but not yet product-complete as a player-
 
 | Missing item | Current evidence | Needed player-facing result | Priority |
 | --- | --- | --- | --- |
-| Operation request picker | June 2 audit found raw OSID objective boxes; later commits fixed some wording. | Request operation should use a settlement/front picker, not typed internal identifiers. | P1 |
+| Operation request picker | Request-op DirectiveCard now resolves fixed OSID captions to display names, resolves unique typed settlement display names, and blocks ambiguous typed names before IPC. | Full request operation should still use a settlement/front picker, but the typed fallback no longer silently leaks fixed raw OSIDs or stages ambiguous display names. | P1 / Improved |
 | Inherited operation briefing | RS starts with six active operations and flagged health for Drina/Koridor. | Factions with active inherited ops need a first-turn "what is already underway" briefing with allowed presidential actions. | P1 |
-| Commander rationale | Browser shows officer stats and loyalty; DirectiveCard now has request-op fixture coverage for commander objection prose near the actual action. | Every risky directive should show command interpretation and expected pushback; next expansion is consistency across non-request risky surfaces and records. | P1 |
+| Commander rationale | Browser shows officer stats and loyalty; DirectiveCard now has request-op fixture coverage for commander objection prose near the actual action, plus staff-review copy at the objective input. | Every risky directive should show command interpretation and expected pushback; next expansion is consistency across non-request risky surfaces and records. | P1 |
 | Operation predictor confidence | GAME_STATE_RATING_MASTER flags predictor confidence as thin. | Before approval: estimated odds, uncertainty band, major reasons, and "what would improve this". | P1 |
 | AAR causality | Records tab has AAR and operation history owners but no turn-0 content. | After action: why launched, what happened, why it succeeded/failed, cost, affected TGs/officers/patrons. | P1 |
 | OOB source/provenance | Personnel/OOB is rich but source-light to the player. | High-value units and officers should carry provenance/source notes where practical. | P2 |
@@ -231,7 +231,7 @@ Context note: `GAME_STATE_RATING_MASTER.md` says static P0 accessibility blocker
 | Command Surface | Six cards with counts/urgency; category selection now stays Warroom-native and opens the Decision Room host. | Card-to-Directive-to-Receipt closure for each family plus inspect-only labels. | Partial/Improved |
 | Decision Room | Advanced Desk/product loop exists in Army HQ. | Clearer naming and primary act layer. | Partial |
 | Pushback | Shipped substrate. | Surface as normal consequence of overreach, not exceptional debug-feeling state. | Partial |
-| Patron consequences | Patron Relations/defiance substrate plus tested patron-defiance consequence receipts. | Full diplomatic/material receipt loop is present at the read-model level; remaining gap is route/discoverability polish. | Partial/Mostly built |
+| Patron consequences | Patron Relations/defiance substrate plus tested patron-defiance consequence receipts; material cut rows now appear in Patron Relations. | Full diplomatic/material receipt loop is present at the read-model level; remaining gap is route polish and cross-linking receipts into Records/Chronicle. | Partial/Mostly built |
 | Direct controls | Direct corps stance controls still visible in browser. | Remove/reframe under president-through-generals doctrine. | Open |
 
 ### Tactical Groups
@@ -591,7 +591,7 @@ These are findings, not permission to start work before the active Claude lanes 
 | P0 | Resolve direct corps stance/control exposure against president-through-generals doctrine. | It contradicts the player role unless explicitly reframed. |
 | P0 | Create TG Product Completion Matrix after active lanes hand off. | TGs are strategically important but not yet player-complete. |
 | P1 | Reduce first-turn jargon/density with progressive disclosure and glossary/tooltips. | Current first turn is deep but intimidating and acronym-heavy. |
-| P1 | Polish Patron Relations route, actor history, and receipt discoverability. | Patron-defiance receipts exist; patron layers still need a clear player-facing cause/effect story. |
+| P1 | Polish Patron Relations route, actor history, and receipt discoverability. | Patron-defiance receipts and Patron Relations material consequence records exist; patron layers still need cross-links into Records/Chronicle and fuller actor history. |
 | P1 | Complete operation request/approval/AAR readability. | Operations are strong substrate; player needs causality and confidence. |
 | P1 | Add map uncertainty/contestedness/supply brittleness explanation. | The map looks good but can imply too much certainty. |
 | P1 | Continue i18n EN-key extraction and BCS LQA plan. | Localization is still a credibility cap for this subject matter. |
