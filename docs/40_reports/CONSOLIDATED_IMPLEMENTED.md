@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest review backlog coverage batch:** [implemented/20260605_REVIEW_BACKLOG_ENGINE_BATCH.md](implemented/20260605_REVIEW_BACKLOG_ENGINE_BATCH.md) - Issue #170 Trnovo controlled-waypoint preservation and HRHB Graz branch coverage are closed; same-axis concentration and final-sector disconnected-territory hardening are deferred after 40-week Boljanic anchor proof failed.
+
 **Latest supply siege state validate-when-present contract:** [implemented/20260605_SUPPLY_SIEGE_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260605_SUPPLY_SIEGE_STATE_VALIDATE_WHEN_PRESENT.md) - `military.siege_turn_counters` and `military.sarajevo_tunnel_operational` remain optional but now reject malformed present supply siege state without changing supply mechanics.
 
 **Latest formation spawn directive validate-when-present contract:** [implemented/20260605_FORMATION_SPAWN_DIRECTIVE_VALIDATE_WHEN_PRESENT.md](implemented/20260605_FORMATION_SPAWN_DIRECTIVE_VALIDATE_WHEN_PRESENT.md) - `military.formation_spawn_directive` remains optional but now rejects malformed present directive payloads without changing formation spawning.

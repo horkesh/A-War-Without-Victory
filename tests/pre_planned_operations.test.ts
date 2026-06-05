@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
 import { injectPrePlannedOperations, injectQueuedOperation, _ALL_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
+import { getSectorOffensiveApproachOsids } from '../src/sim/combat/bot_brigade_ai_osid.js';
 import { collectOpInjectionWarnings } from '../src/sim/combat/operation_validation.js';
 import type { OpInjectionWarning } from '../src/sim/combat/operation_validation.js';
 import type {
@@ -324,6 +325,42 @@ describe('pre-planned operations', () => {
         assert.equal(injected, true);
         assert.equal(command.active_operations[0]?.name, 'Operation Corridor');
         assert.deepEqual(command.queued_operations, ['Operation Jajce', 'Operation Donji Vakuf', 'Operation Bosanski Novi']);
+    });
+
+    it('keeps Trnovo kijevo_2 as a friendly approach waypoint after stripping it as a capture objective', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 69;
+        const command = state.military.corps_command!.vrs_sarajevo_romanija!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Trnovo'];
+        state.political.political_controllers!['op:trnovo:gornja_presjenica'] = 'RS';
+        state.political.political_controllers!['op:trnovo:kijevo_2'] = 'RS';
+        state.political.political_controllers!['op:trnovo:delijas'] = 'RBiH';
+        state.political.political_controllers!['op:trnovo:trnovo'] = 'RBiH';
+        const adjacency = new Map([
+            ['op:trnovo:gornja_presjenica', ['op:trnovo:kijevo_2', 'op:trnovo:trnovo']],
+            ['op:trnovo:kijevo_2', ['op:trnovo:gornja_presjenica', 'op:trnovo:delijas']],
+            ['op:trnovo:delijas', ['op:trnovo:kijevo_2']],
+            ['op:trnovo:trnovo', ['op:trnovo:gornja_presjenica']],
+        ]);
+
+        const injected = injectQueuedOperation(state, 'vrs_sarajevo_romanija', adjacency as any);
+
+        assert.equal(injected, true);
+        const trnovo = command.active_operations.find((op) => op.name === 'Operation Trnovo');
+        assert.ok(trnovo);
+        const eastAxis = trnovo!.axes?.find((axis) => axis.axis_id === 'trnovo_east');
+        assert.ok(eastAxis);
+        assert.deepEqual(eastAxis!.objectives, ['op:trnovo:delijas']);
+        const approaches = getSectorOffensiveApproachOsids(
+            state,
+            trnovo!,
+            'RS' as FactionId,
+            adjacency as any,
+            new Map(),
+            'rs_trnovo_brigade',
+        );
+        assert.deepEqual([...approaches], ['op:trnovo:kijevo_2']);
     });
 
     it('records a typed Corridor status when the queued operation is moot because all objectives are already held', () => {
