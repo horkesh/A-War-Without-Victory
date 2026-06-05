@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] perf(engine): cache sector coverage target search with one bounded BFS
+
+**Type:** Sector/frontline performance optimization. No simulation semantics, combat math, operation choice, scenario data, save schema, migration, baseline manifest, UI surface, randomness, timestamps, or nondeterministic ordering changed.
+
+**Change:** `ensureMinimumSectorCoverage(...)` now selects the nearest vacant local front target by running one bounded BFS from the brigade location instead of calling `bfsDistance(...)` once per vacant target. Distance ordering and `strictCompare(...)` same-distance tie-breaks are preserved, and expansion remains constrained to friendly OSIDs. Added a regression proving a reserve brigade promotes to the lexically stable nearest vacant front target when adjacency and sector-front order disagree.
+
+**Docs:** Added `docs/40_reports/implemented/20260605_SECTOR_COVERAGE_BFS_TARGET_CACHE.md` and updated the reports indices, sector master, sector next-target plan, command board, master roadmap, and knowledge ledger.
+
+**Verification:** `npx.cmd vitest run tests/sector_partition_instrumentation.test.ts tests/sector_coverage_truth_preservation.test.ts --reporter=dot`; broader sector pack covering partition, final-sector truth, severe undercoverage, rear bucket truth, and brigade territory reconciliation; `npm.cmd run typecheck -- --pretty false`; `node tools/diagnostics/strict_null_inventory.cjs --field-domains`; `npm.cmd run sim:scenario:run:40w:timed` preserving `aa8f7a07962cecaf`; partition profile; `node tools/validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n2021`; `npm.cmd run test:baselines`; `git diff --check`.
+
+---
+
 ## [2026-06-05] fix(desktop): route municipality support IPC to military order surface
 
 **Type:** Desktop IPC/player-order routing fix. No simulation turn logic, scenario output, baseline manifest, save schema, migration, scenario data, randomness, timestamps, or nondeterministic ordering changed.

@@ -1,3 +1,7 @@
+## 2026-06-05 - Sector nearest-target search
+
+**Replace per-target BFS with one bounded source BFS when nearest target plus stable tie-break is the contract:** `ensureMinimumSectorCoverage(...)` previously called `bfsDistance(...)` for every vacant front target, then sorted by distance and `strictCompare`. Durable rule: when a hot loop asks for the nearest member of a target set from one source, build the target set once and run a single bounded BFS outward from the source; collect all targets reached at the current distance, sort those targets with the existing comparator, and return the first. Preserve any old target-before-expansion behavior if the prior helper checked the destination before applying expansion filters. Applied in `[2026-06-05] perf(engine): cache sector coverage target search with one bounded BFS`.
+
 ## 2026-06-05 - Review backlog anchor gate
 
 **Controlled pre-planned waypoints can remain pathing context without becoming capture objectives:** Operation Trnovo demonstrates the current contract: already-controlled `op:trnovo:kijevo_2` is stripped from the capture objective chain, while `getSectorOffensiveApproachOsids(...)` still resolves it as the friendly approach to `op:trnovo:delijas`. Durable rule: before adding a persisted waypoint field, first test whether the existing approach resolver already preserves the waypoint as pathing context; add schema only if execution cannot recover the path from adjacency/control state.
