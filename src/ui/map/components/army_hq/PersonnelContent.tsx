@@ -42,6 +42,18 @@ export function PersonnelContent() {
         const reserveOfficers = officers.filter(o => o.status === 'reserve');
         const reserves = state.factionReserves?.[faction];
         const mobilization = state.mobilizationSummary?.[faction];
+        const commanderByCorpsId = new Map(
+            activeOfficers
+                .filter((officer) => officer.assigned_corps_id)
+                .sort((a, b) => strictCompare(a.id, b.id))
+                .map((officer) => [officer.assigned_corps_id!, officer]),
+        );
+        const commanderVacancies = corpsFormations
+            .filter((corps) => !commanderByCorpsId.has(corps.id))
+            .sort((a, b) => strictCompare(a.id, b.id));
+        const lowReliabilityCommanders = activeOfficers
+            .filter((officer) => officer.assigned_corps_id && typeof officer.political_reliability === 'number' && officer.political_reliability <= 2)
+            .sort((a, b) => strictCompare(a.assigned_corps_id ?? '', b.assigned_corps_id ?? '') || strictCompare(a.id, b.id));
 
         const brigadesByCorps = new Map<string, typeof brigades>();
         for (const b of brigades) {
@@ -60,6 +72,8 @@ export function PersonnelContent() {
             reserveOfficers,
             reserves,
             mobilization,
+            commanderVacancies,
+            lowReliabilityCommanders,
             brigadesByCorps,
         };
     }, [state, faction]);
@@ -71,6 +85,45 @@ export function PersonnelContent() {
             {/* Presidential FRONT VISIT — leadership/morale action (Command Surface §10).
                 Self-gates to desktop (IPC) and to availability; renders null otherwise. */}
             <FrontVisitSection />
+
+            <div className="bg-panel-card border border-panel-border rounded-lg p-3">
+                <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
+                    {t('personnel.commandDossier')}
+                </div>
+                <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+                    <DossierCard
+                        label={t('personnel.dossier.vacancies')}
+                        value={String(data.commanderVacancies.length)}
+                        detail={data.commanderVacancies.length > 0
+                            ? t('personnel.dossier.vacanciesDetail', { commands: data.commanderVacancies.map((corps) => corps.name).join(', ') })
+                            : t('personnel.dossier.vacanciesClear')}
+                        tone={data.commanderVacancies.length > 0 ? 'warning' : 'steady'}
+                    />
+                    <DossierCard
+                        label={t('personnel.dossier.lowLoyalty')}
+                        value={String(data.lowReliabilityCommanders.length)}
+                        detail={data.lowReliabilityCommanders.length > 0
+                            ? t('personnel.dossier.lowLoyaltyDetail', { officers: data.lowReliabilityCommanders.map((officer) => officer.name).join(', ') })
+                            : t('personnel.dossier.lowLoyaltyClear')}
+                        tone={data.lowReliabilityCommanders.length > 0 ? 'warning' : 'steady'}
+                    />
+                    <DossierCard
+                        label={t('personnel.dossier.reserveOfficers')}
+                        value={String(data.reserveOfficers.length)}
+                        detail={data.reserveOfficers.length > 0
+                            ? t('personnel.dossier.reserveOfficersDetail', { officers: data.reserveOfficers.map((officer) => officer.name).join(', ') })
+                            : t('personnel.dossier.reserveOfficersEmpty')}
+                    />
+                    <DossierCard
+                        label={t('personnel.dossier.mobilizationStrain')}
+                        value={data.mobilization ? `${data.mobilization.exhaustion_pct.toFixed(1)}%` : '-'}
+                        detail={data.mobilization
+                            ? t('personnel.dossier.mobilizationStrainDetail', { exhausted: formatWholeNumber(data.mobilization.total_exhausted) })
+                            : t('personnel.dossier.mobilizationStrainUnknown')}
+                        tone={data.mobilization && data.mobilization.exhaustion_pct >= 30 ? 'warning' : 'neutral'}
+                    />
+                </div>
+            </div>
 
             <div className="bg-panel-card border border-panel-border rounded-lg p-3">
                 <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
@@ -201,6 +254,35 @@ function formatPoolName(munId: string): string {
 
 function formatWholeNumber(value: number): string {
     return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value);
+}
+
+function strictCompare(a: string, b: string): number {
+    return a < b ? -1 : a > b ? 1 : 0;
+}
+
+function DossierCard({
+    label,
+    value,
+    detail,
+    tone = 'neutral',
+}: {
+    label: string;
+    value: string;
+    detail: string;
+    tone?: 'neutral' | 'steady' | 'warning';
+}) {
+    const valueClass = tone === 'warning'
+        ? 'text-amber-300'
+        : tone === 'steady'
+            ? 'text-emerald-300'
+            : 'text-text-primary';
+    return (
+        <div className="min-w-0 rounded border border-panel-border/55 bg-panel-bg/65 px-2.5 py-2">
+            <div className="text-[8px] font-bold uppercase tracking-[0.13em] text-text-secondary">{label}</div>
+            <div className={`mt-1 text-[17px] font-bold tabular-nums ${valueClass}`}>{value}</div>
+            <div className="mt-1 line-clamp-2 text-[10px] leading-snug text-text-secondary">{detail}</div>
+        </div>
+    );
 }
 
 function OfficerTraitPill({

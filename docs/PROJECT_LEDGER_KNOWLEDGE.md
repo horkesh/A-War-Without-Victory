@@ -1,3 +1,7 @@
+## 2026-06-05 - Personnel surfaces need a presidential dossier before raw ORBAT
+
+**Personnel tabs should lead with command risk, not the full roster wall:** Army HQ Personnel already has rich ORBAT, mobilization, and officer data, but the president needs the actionable summary first. Durable rule: lead Personnel surfaces with stable, existing-data summaries for commander vacancies, low-loyalty serving commanders, reserve officers, and mobilization strain before listing raw formations/officers. Front-visit surfaces should show both reachable and cut-off fronts from the existing availability contract; do not recalculate reachability in React. Applied in `[2026-06-05] feat(ui): add front-visit reachability and personnel command dossier`.
+
 ## 2026-06-05 - Patron receipt read-model visibility
 
 **Patron Relations should show material consequence rows from existing cut substrate, not recompute patron effects:** `state.military.patron_defiance_supply_cuts` is already the realized material-support receipt bus. Durable rule: Patron Relations may project those rows into stable player-facing records, but must not recalculate material support, invent new patron penalties, or reclassify event decisions. Sort newest first by turn descending, cut fraction descending, then support-after ascending for stable display. Applied in `[2026-06-05] feat(ui): surface patron material consequence records`.
