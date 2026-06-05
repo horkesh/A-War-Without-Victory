@@ -35,6 +35,20 @@
 
 ---
 
+## [2026-06-05] fix(oob): HVO Southeast-Herzegovina OZ HQ Čitluk → Mostar
+
+**Type:** OOB placement correction (calibration-moving; #180-class corps-HQ relocation; golden baselines re-floored). Pyrrhic Historian panel resolved the residual; owner-directed ungating of the OOB-attribution lane.
+
+**Change:** `hvo_southeast_herzegovina` HQ in `data/source/oob_corps.json`: `hq_mun` citluk→mostar, `hq_osid` `op:citluk:citluk_2`→`op:mostar:mostar_zapad_2`. The OZ is canonically the **"Zborno područje Mostar" / Operativna zona Jugoistočna Hercegovina** — its seat is **Mostar**; Čitluk was only a constituent municipality (an error). Source: Croatian Wikipedia HVO order-of-battle / zone documents (HIGH). The new HQ co-locates with the HVO Main Staff already at Mostar — historically accurate (Mostar was the HVO capital). `op:mostar:mostar_zapad_2` is HVO/west-bank.
+
+**Calibration (scenario-creator-runner-tester GO):** anchors **30/30** (incl. the new HQ OSID `op:mostar:mostar_zapad_2` = HRHB, anchor pass), benchmarks **6/6**, net control counts **byte-identical** to baseline (RS=369/RBiH=254/HRHB=89), **0 critical anomalies**. Corps remains fully operational — launched **Operation Jackal (w8–12, 2/2 objectives, SUCCESS)** with its full 14-brigade roster; not stranded/gutted by the HQ move. Control-delta is LOCAL to SE/central Herzegovina (Stolac/Mostar/Čapljina/Prozor) — the expected blast radius for a Mostar-seated HVO corps. 40w hash `aa8f7a07962cecaf` → `d1ace172a29b2353`. Golden baselines re-floored.
+
+**Sacred rules:** one change; no initial-OSID-control edits; no `avoided_osids`. Run dir: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0`.
+
+**Files:** `data/source/oob_corps.json`, `data/derived/startup/apr_1992_initial_save.json`, `data/derived/scenario/baselines/manifest.json`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-05] fix(desktop): route municipality support IPC to military order surface
 
 **Type:** Desktop IPC/player-order routing fix. No simulation turn logic, scenario output, baseline manifest, save schema, migration, scenario data, randomness, timestamps, or nondeterministic ordering changed.

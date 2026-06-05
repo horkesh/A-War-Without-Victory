@@ -20724,7 +20724,7 @@
         "created_turn": 0,
         "faction": "HRHB",
         "force_label": "HVO",
-        "hq_sid": "op:citluk:citluk_2",
+        "hq_sid": "op:mostar:jasenica",
         "id": "hvo_southeast_herzegovina",
         "kind": "corps_asset",
         "morale": 60,
@@ -20738,7 +20738,7 @@
         "status": "active",
         "strategic_depth": 0.6,
         "tags": [
-          "mun:citluk"
+          "mun:mostar"
         ]
       },
       "hvo_tomislavgrad": {
