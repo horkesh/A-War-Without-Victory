@@ -573,3 +573,10 @@
 - Rendered future-consequence cards in the existing event decision modal using branch-visibility wording, not runtime open/close claims.
 - Preserved evaluator behavior, response effects, bot choices, save schema, scenario setup, generated artifacts, and calibration behavior.
 - Report: `docs/40_reports/implemented/20260527_EVENT_FUTURE_CONSEQUENCE_MODAL_SLICE.md`
+# 2026-06-05 Audio Asset Resolution Path
+
+Report: `docs/40_reports/implemented/20260605_AUDIO_ASSET_RESOLUTION_PATH.md`
+
+The tactical-map audio bus now routes future playable binaries through a Rollup URL-import map instead of bare manifest path strings. No binary audio assets shipped; current cues remain deterministic silent placeholders until an asset is explicitly imported and marked `provided`.
+
+---

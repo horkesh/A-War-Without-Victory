@@ -1,3 +1,7 @@
+## 2026-06-05 - Presidential command canon wording
+
+**Rulebook and FORAWWV command wording must match the shipped player role:** the player is the president and acts through generals, not as a brigade/axis commander. Durable rule: when command-surface UI or command-lever docs mention operational authority, use the president-through-generals idiom; reserve direct brigade/axis planning language for explicitly post-1.0/DLC design packets. Applied in PR #196 Rulebook §5 reconciliation and PR #201 FORAWWV §XII reconciliation.
+
 ## 2026-06-05 - CI/PR batching and path-aware protection
 
 **Low-risk repetitive cleanup should batch slices, not multiply full-CI PRs:** Accepted operator direction is to stop using one-field or one-family PRs for repetitive, low-risk schema/validator cleanup when every PR pays the full CI/protection wait. Durable rule: keep branch protection, but tune required checks by touched paths and use merge queue/batch queue where available. For optional `GameState` validation cleanup, batch several independently classified validate-when-present fields into one PR when they share the same risk class, absence remains valid, and malformed-present rejection is the only behavior change. Run the expensive local proof once per batch before opening the PR. While CI runs, use isolated worktrees for non-overlapping classification, prep, or review-backlog work; do not create additional tiny PRs that compete for the same queue.

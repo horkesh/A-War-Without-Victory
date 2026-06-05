@@ -1,4 +1,38 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] docs(canon): reconcile FORAWWV §XII to Presidential Command Model
+
+**Type:** Canon documentation reconciliation. No runtime behavior, scenario data, save schema, generated artifact, baseline, replay writer, or UI code changed.
+
+**Change:** `docs/10_canon/FORAWWV.md` §XII now aligns with the locked Presidential Command Model: the player is the president and exercises authority through generals, not by issuing direct brigade/axis orders. This was owner-authorized manual canon reconciliation in PR #201.
+
+**Docs sync:** The command board and roadmap now treat the FORAWWV/Rulebook reconciliation as complete for the Presidential Command Model row; remaining work is UI surface integration and future owner-approved design packets, not the §5/§XII canon wording gap.
+
+**Verification:** Documentation-only; no scenario or baseline proof required.
+
+---
+
+## [2026-06-05] docs(canon): reconcile Rulebook §5 to president-through-generals idiom
+
+**Type:** Canon documentation reconciliation. No runtime behavior, scenario data, save schema, generated artifact, baseline, replay writer, or UI code changed.
+
+**Change:** `docs/10_canon/Rulebook_v0_9_0.md` §5 now uses the same president-through-generals command idiom as the shipped command levers and accepted Presidential Command Model. This closes the Rulebook side of the former brigade-command wording mismatch from PR #196.
+
+**Verification:** Documentation-only; no scenario or baseline proof required.
+
+---
+
+## [2026-06-05] feat(audio): wire tactical-map audio asset-resolution path
+
+**Type:** Tactical-map audio substrate wiring. No binary audio assets, simulation behavior, scenario data, save schema, generated baseline, replay output, or player command behavior changed.
+
+**Change:** Added `src/ui/map/audio/audioAssets.ts` as the Rollup URL-import map for future cue binaries, routed manifest playback URL lookup through that map, and exposed the last resolved asset URL in the audio bus state. Added five placeholder manifest cues for future diplomatic-table, late-war, Dayton-afterword, major-escalation, and humanitarian-warning audio coverage. Current cue assets remain `missing_placeholder`; no playback binaries shipped.
+
+**Docs:** Added `docs/40_reports/implemented/20260605_AUDIO_ASSET_RESOLUTION_PATH.md` and indexed it in the reports README / consolidated implemented list.
+
+**Verification:** PR #197 landed the substrate with no binaries. No scenario/baseline proof is required because the change is UI/audio substrate only and current cues remain silent placeholders.
+
+---
+
 ## [2026-06-05] fix(oob): rs_1st_zvornik mountain → motorized (Drina Corps offensive unlock)
 
 **Type:** OOB equipment-class correction (calibration-moving — releases the VRS Drina Corps stance gate; golden baselines re-floored). Pyrrhic-panel UNANIMOUS adopt-with-conditions; the conditions were verified and PASSED (see gate below). Owner-directed adoption.
