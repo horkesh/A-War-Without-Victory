@@ -695,6 +695,8 @@ Corridor states are **Open**, **Brittle**, or **Cut** (Engine Invariants §4). C
 
 **Note:** Treaty-level corridor rights are deprecated. Supply and sustainment are evaluated via reachability and territorial clauses rather than granting special corridor-rights clauses.
 
+**Scope (war economy, ruling D3, 2026-06-05):** The war economy is abstract (scarcity, supply state, corridors, smuggling, equipment lifecycle) and final for 1.0; there are no player-managed production queues or build orders. See `docs/40_reports/design/20260605_D3_WAR_ECONOMY_DEPTH_DECISION.md`.
+
 ### 14.1 Sources
 
 A **supply source** is a settlement (or operational node) from which supply may originate for a faction. Typical sources include faction capital(s), major depots, or scenario-defined supply nodes. Supply resolution (pipeline step **supply-resolution**) computes reachability from these sources; see §14.2. Sources are defined per faction (e.g. `supply_sources` or equivalent in state); when operational (OSID) data is used, supply state may be defined per OSID from constituent canonical SIDs or from “supply at OSID = state at controlling settlement(s)” per implementation. **Implementation-note:** Current pipeline uses canonical settlement graph and `computeSupplyReachability`; OSID-keyed supply state derivation may be added when operational layer is authoritative for supply.
