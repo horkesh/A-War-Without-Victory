@@ -101,7 +101,16 @@ describe('DiplomacyPanel', () => {
         render(createElement(DiplomacyPanel, {
             view: makeView({
                 patronConfidence: { value: 38, band: 'low' },
-                patronDefianceCuts: { count: 1, latestCutFraction: 0.3, latestTurn: 44, latestSupportAfter: 0.5 },
+                patronDefianceCuts: {
+                    count: 2,
+                    latestCutFraction: 0.3,
+                    latestTurn: 44,
+                    latestSupportAfter: 0.5,
+                    entries: [
+                        { turn: 44, cutFraction: 0.3, supportAfter: 0.5 },
+                        { turn: 31, cutFraction: 0.15, supportAfter: 0.7 },
+                    ],
+                },
             }),
             onClose: vi.fn(),
         }));
@@ -109,7 +118,12 @@ describe('DiplomacyPanel', () => {
         expect(screen.getByText('Patron confidence')).toBeTruthy();
         expect(screen.getByText(/38 \/ 100 \(Low\)/)).toBeTruthy();
         // Sober, factual defiance line — never celebratory.
-        expect(screen.getByText(/Your defiance has cost 30% of materiel \(turn 44\); support fell to 50%\./)).toBeTruthy();
+        expect(screen.getByText(/2 defiance cuts on record\. Most recent cost 30% of materiel \(turn 44\); support fell to 50%\./)).toBeTruthy();
+        expect(screen.getByText('Material consequence records')).toBeTruthy();
+        expect(screen.getByText('T44')).toBeTruthy();
+        expect(screen.getByText('-30% / support 50%')).toBeTruthy();
+        expect(screen.getByText('T31')).toBeTruthy();
+        expect(screen.getByText('-15% / support 70%')).toBeTruthy();
     });
 
     it('omits the gauge when no patron-confidence or defiance data is present', () => {

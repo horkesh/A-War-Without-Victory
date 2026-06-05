@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Patron Relations material receipts:** [implemented/20260605_PATRON_RELATIONS_MATERIAL_RECEIPTS.md](implemented/20260605_PATRON_RELATIONS_MATERIAL_RECEIPTS.md) - Patron Relations now projects existing patron-defiance supply cuts into stable material consequence records without changing patron mechanics.
+
 **Latest command directive target affordances:** [implemented/20260605_COMMAND_DIRECTIVE_TARGET_AFFORDANCES.md](implemented/20260605_COMMAND_DIRECTIVE_TARGET_AFFORDANCES.md) - Request-op directives now frame objectives through corps staff review, resolve fixed OSID captions to display names, and block ambiguous typed settlement names before player-command IPC.
 
 **Latest sector coverage BFS target cache:** [implemented/20260605_SECTOR_COVERAGE_BFS_TARGET_CACHE.md](implemented/20260605_SECTOR_COVERAGE_BFS_TARGET_CACHE.md) - `ensureMinimumSectorCoverage(...)` now finds the nearest vacant local front target with one bounded BFS instead of one BFS per candidate target while preserving the `aa8f7a07962cecaf` 40w floor.

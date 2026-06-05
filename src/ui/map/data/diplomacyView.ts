@@ -323,19 +323,22 @@ function buildPatronDefianceCuts(state: any, factionId: string | null): PatronDe
         : [];
     const mine = cuts.filter((cut: any) => asRecord(cut)?.faction === factionId);
     if (mine.length === 0) return undefined;
-    let latest = mine[0];
-    for (const cut of mine) {
-        const turn = finiteNumber(cut?.turn);
-        const latestTurn = finiteNumber(latest?.turn);
-        if (turn > latestTurn || (turn === latestTurn && finiteNumber(cut?.cut_fraction) > finiteNumber(latest?.cut_fraction))) {
-            latest = cut;
-        }
-    }
+    const entries: NonNullable<PatronDefianceCutsView['entries']> = mine.map((cut: any) => ({
+        turn: finiteNumber(cut?.turn),
+        cutFraction: finiteNumber(cut?.cut_fraction),
+        supportAfter: finiteNumber(cut?.support_after),
+    })).sort((a: NonNullable<PatronDefianceCutsView['entries']>[number], b: NonNullable<PatronDefianceCutsView['entries']>[number]) => (
+        b.turn - a.turn
+        || b.cutFraction - a.cutFraction
+        || a.supportAfter - b.supportAfter
+    ));
+    const latest = entries[0]!;
     return {
         count: mine.length,
-        latestCutFraction: finiteNumber(latest?.cut_fraction),
-        latestTurn: finiteNumber(latest?.turn),
-        latestSupportAfter: finiteNumber(latest?.support_after),
+        latestCutFraction: latest.cutFraction,
+        latestTurn: latest.turn,
+        latestSupportAfter: latest.supportAfter,
+        entries,
     };
 }
 

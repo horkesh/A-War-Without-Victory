@@ -1,3 +1,7 @@
+## 2026-06-05 - Patron receipt read-model visibility
+
+**Patron Relations should show material consequence rows from existing cut substrate, not recompute patron effects:** `state.military.patron_defiance_supply_cuts` is already the realized material-support receipt bus. Durable rule: Patron Relations may project those rows into stable player-facing records, but must not recalculate material support, invent new patron penalties, or reclassify event decisions. Sort newest first by turn descending, cut fraction descending, then support-after ascending for stable display. Applied in `[2026-06-05] feat(ui): surface patron material consequence records`.
+
 ## 2026-06-05 - Player-command target affordance rule
 
 **Free-text presidential objective inputs must disambiguate player-facing names before IPC:** Request-operation targets may be typed as settlement display names, but duplicate display labels can map to multiple OSIDs. Durable rule: resolve exact OSID keys first, resolve display names only when there is exactly one match, and block ambiguous display-name matches before `queryDirectiveObjection(...)` / staging IPC with a `strictCompare`-sorted list of exact OSIDs. Player-facing captions should resolve fixed `targetOsid` values through the display-name map or humanizer; raw OSIDs belong only in debug/exact disambiguation surfaces. Applied in `[2026-06-05] fix(ui): harden request-op directive target affordances`.
