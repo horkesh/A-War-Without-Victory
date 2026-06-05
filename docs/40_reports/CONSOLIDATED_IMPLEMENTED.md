@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest command friction events validate-when-present contract:** [implemented/20260605_FRICTION_EVENTS_VALIDATE_WHEN_PRESENT.md](implemented/20260605_FRICTION_EVENTS_VALIDATE_WHEN_PRESENT.md) - `military.friction_events` remains optional but now rejects malformed present command-friction rows without materializing the lazy event bus.
+
 **Latest cosmetic AI buffer validate-when-present contract:** [implemented/20260604_COSMETIC_AI_BUFFERS_VALIDATE_WHEN_PRESENT.md](implemented/20260604_COSMETIC_AI_BUFFERS_VALIDATE_WHEN_PRESENT.md) - Cosmetic corps dialogue, war dispatch, and battle narrative buffers remain optional but now reject malformed present payloads.
 
 **Latest save migration fixture artifact ownership:** [implemented/20260604_SAVE_MIGRATION_FIXTURE_ARTIFACT_OWNERSHIP.md](implemented/20260604_SAVE_MIGRATION_FIXTURE_ARTIFACT_OWNERSHIP.md) - The committed `tests/fixtures/save_migration/v*.json` legacy schema fixtures now have an explicit ownership row and static guard.

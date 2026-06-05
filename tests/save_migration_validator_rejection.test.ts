@@ -2140,6 +2140,61 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('accepts current-version saves with absent or well-formed command friction events', () => {
+        const absent = currentVersionState();
+        delete absent.military.friction_events;
+        const withEvents = currentVersionState();
+        withEvents.military.friction_events = [
+            {
+                officer_id: 'officer-1',
+                turn: 5,
+                type: 'ignored_stance',
+                resolved: false,
+            },
+            {
+                officer_id: 'officer-2',
+                turn: 6,
+                type: 'unauthorized_op',
+                resolved: true,
+            },
+            {
+                officer_id: 'officer-3',
+                turn: 7,
+                type: 'refused_release',
+                resolved: false,
+            },
+        ];
+
+        expect(deserializeState(JSON.stringify(absent)).military.friction_events).toBeUndefined();
+        expect(deserializeState(JSON.stringify(withEvents)).military.friction_events).toEqual(withEvents.military.friction_events);
+    });
+
+    it('rejects current-version saves with malformed command friction events', () => {
+        const state = currentVersionState();
+        state.military.friction_events = [
+            {
+                officer_id: '',
+                turn: -1,
+                type: 'delayed_order',
+                resolved: 'no',
+            },
+            42,
+        ] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.friction_events\[0\]\.officer_id must be a non-empty string[\s\S]*military\.friction_events\[0\]\.turn must be a non-negative integer[\s\S]*military\.friction_events\[0\]\.type must be one of: ignored_stance, unauthorized_op, refused_release[\s\S]*military\.friction_events\[0\]\.resolved must be a boolean[\s\S]*military\.friction_events\[1\] must be an object/
+        );
+    });
+
+    it('rejects current-version saves with non-array command friction events', () => {
+        const state = currentVersionState();
+        state.military.friction_events = {} as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.friction_events must be an array when present/
+        );
+    });
+
     it('accepts current-version saves with absent or well-formed AI army decisions', () => {
         const absent = currentVersionState();
         delete absent.military.ai_army_decisions;
