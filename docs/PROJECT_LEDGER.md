@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] fix(state): validate command friction events when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, command-friction behavior, command-authority behavior, scenario data, baseline artifact, replay writer, AI behavior, or player-facing UI changed.
+
+**Change:** Classified `military.friction_events` as an optional command-friction event bus. Absence remains valid because warlord-friction / command-strain paths materialize the bus only when a command-friction event exists. Present rows now validate non-empty `officer_id`, non-negative integer `turn`, `type` in `ignored_stance | unauthorized_op | refused_release`, and boolean `resolved`.
+
+**Verification:** `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` passed 160/160; `npm.cmd run typecheck -- --pretty false` passed; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 (`state: 172`, `sim: 327`, `derived: 8`, `unknown: 0`); `git diff --check`.
+
+**GitHub sweep:** No open PRs, no deployments, and no current failed main checks were found during the sweep. PR #185 Event System CI was green while Baseline Regression and Desktop Release Guard were still in progress; a broad historical review-thread scan found older unresolved Codex records that are not open-PR blockers and should be handled as a separate backlog sweep.
+
+**Files:** `src/state/validateGameState.ts`, `tests/save_migration_validator_rejection.test.ts`, `docs/40_reports/implemented/20260605_FRICTION_EVENTS_VALIDATE_WHEN_PRESENT.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-04] docs(sector): reconcile active sector floor to PR #180 refloor
 
 **Type:** Docs-only sector/frontline planning-floor reconciliation. No runtime code, scenario data, baseline artifact, save schema, replay writer, generated artifact, UI, calibration, or simulation behavior changed.

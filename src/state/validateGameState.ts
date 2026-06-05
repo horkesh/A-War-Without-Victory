@@ -81,6 +81,7 @@ const AI_ALLIANCE_POSTURES = ['maintain', 'distance', 'break'] as const;
 const COMMAND_BRIEFING_SEVERITIES = ['critical', 'warning', 'info'] as const;
 const CORPS_DIALOGUE_CONFIDENCES = ['high', 'medium', 'low'] as const;
 const WAR_DISPATCH_PERSPECTIVES = ['humanitarian', 'military', 'civilian', 'diplomatic'] as const;
+const FRICTION_EVENT_TYPES = ['ignored_stance', 'unauthorized_op', 'refused_release'] as const;
 const MUNICIPALITY_SUPPORT_TYPE_BY_FACTION: Record<string, string> = {
     RBiH: 'weapons_shipment',
     RS: 'staff_priority',
@@ -283,6 +284,10 @@ function isCorpsDialogueConfidence(value: unknown): boolean {
 
 function isWarDispatchPerspective(value: unknown): boolean {
     return typeof value === 'string' && WAR_DISPATCH_PERSPECTIVES.includes(value as typeof WAR_DISPATCH_PERSPECTIVES[number]);
+}
+
+function isFrictionEventType(value: unknown): boolean {
+    return typeof value === 'string' && FRICTION_EVENT_TYPES.includes(value as typeof FRICTION_EVENT_TYPES[number]);
 }
 
 function isEventDecisionSource(value: unknown): boolean {
@@ -1955,6 +1960,25 @@ function validateBattleNarratives(value: unknown, errors: string[]): void {
     });
 }
 
+function validateFrictionEvents(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.friction_events must be an array when present');
+        return;
+    }
+
+    value.forEach((entry, i) => {
+        const path = `military.friction_events[${i}]`;
+        if (!isRecord(entry)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        if (!isNonEmptyString(entry.officer_id)) errors.push(`${path}.officer_id must be a non-empty string`);
+        if (!isNonNegativeInteger(entry.turn)) errors.push(`${path}.turn must be a non-negative integer`);
+        if (!isFrictionEventType(entry.type)) errors.push(`${path}.type must be one of: ignored_stance, unauthorized_op, refused_release`);
+        if (typeof entry.resolved !== 'boolean') errors.push(`${path}.resolved must be a boolean`);
+    });
+}
+
 function validateCostLedgerAnnotations(value: unknown, errors: string[]): void {
     if (!Array.isArray(value)) {
         errors.push('military.cost_ledger_annotations must be an array when present');
@@ -2583,6 +2607,9 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'battle_narratives' in military && military.battle_narratives !== undefined) {
         validateBattleNarratives(military.battle_narratives, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'friction_events' in military && military.friction_events !== undefined) {
+        validateFrictionEvents(military.friction_events, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'ai_decision_log' in military && military.ai_decision_log !== undefined) {
         validateAiDecisionLog(military.ai_decision_log, errors);

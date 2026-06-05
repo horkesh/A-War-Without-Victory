@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest command friction events validate-when-present contract** | [implemented/20260605_FRICTION_EVENTS_VALIDATE_WHEN_PRESENT.md](implemented/20260605_FRICTION_EVENTS_VALIDATE_WHEN_PRESENT.md) - `military.friction_events` remains optional but now rejects malformed present command-friction rows. |
 | **Latest save migration fixture artifact ownership** | [implemented/20260604_SAVE_MIGRATION_FIXTURE_ARTIFACT_OWNERSHIP.md](implemented/20260604_SAVE_MIGRATION_FIXTURE_ARTIFACT_OWNERSHIP.md) - The committed `tests/fixtures/save_migration/v*.json` legacy schema fixtures now have an explicit ownership row and static guard. |
 | **Latest Ahmici same-turn lock follow-up** | [implemented/20260604_AHMICI_SAME_TURN_LOCK_FOLLOWUP.md](implemented/20260604_AHMICI_SAME_TURN_LOCK_FOLLOWUP.md) - The Ahmici rupture and alliance-held alt-path are now same-turn mutex alternatives, and per-turn alliance update honors active alliance locks. |
 | **Latest scenario run-output artifact ownership** | [implemented/20260604_SCENARIO_RUN_OUTPUT_ARTIFACT_OWNERSHIP.md](implemented/20260604_SCENARIO_RUN_OUTPUT_ARTIFACT_OWNERSHIP.md) - The broad `runs/<scenario_run>/...` catch-all now has a focused static guard proving run directories stay ignored, transient, and uncommitted. |
