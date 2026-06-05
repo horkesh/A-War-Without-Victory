@@ -1,4 +1,20 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] fix(state): validate operation observability when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, operation-launch behavior, scenario data, baseline artifact, replay writer, AI behavior, or player-facing UI changed.
+
+**Change:** Classified `military.op_injection_warnings` and `military.watched_operations` as optional operation-observability surfaces. Absence remains valid because preplanned/triggered-operation validation and watched-operation tracing materialize the buses only when observability evidence exists. Present rows now validate operation-injection warning enums and watched-operation trace shape, including optional launch evidence and defender-power breakdown numbers.
+
+The validator deliberately does not resolve OSIDs, formations, operation catalog membership, defender-power semantics, or launch feasibility correctness.
+
+**Verification:** `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` passed 163/163; `npm.cmd run typecheck -- --pretty false` passed; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 (`state: 172`, `sim: 327`, `derived: 8`, `unknown: 0`); `git diff --check`.
+
+**GitHub sweep:** No open PRs and no deployments were found after #186 merged. Post-merge main CI for #186 started and was still running during this slice. A broad historical review-thread inventory found 41 unresolved Codex threads across PR #185-#83: 2 outdated/stale, several likely fixed by later merged PRs, and a newer untracked UI/player-command cluster around PR #109-#136. Treat that as a separate review-backlog cleanup lane, not a blocker for this schema slice.
+
+**Files:** `src/state/validateGameState.ts`, `tests/save_migration_validator_rejection.test.ts`, `docs/40_reports/implemented/20260605_OPERATION_OBSERVABILITY_VALIDATE_WHEN_PRESENT.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-05] fix(state): validate command friction events when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, command-friction behavior, command-authority behavior, scenario data, baseline artifact, replay writer, AI behavior, or player-facing UI changed.

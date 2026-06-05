@@ -2195,6 +2195,146 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('accepts current-version saves with absent or well-formed operation observability rows', () => {
+        const absent = currentVersionState();
+        delete absent.military.op_injection_warnings;
+        delete absent.military.watched_operations;
+        const withRows = currentVersionState();
+        withRows.military.op_injection_warnings = [
+            {
+                op_name: 'Operation Kotor Varos',
+                axis_id: 'axis-1',
+                check: 'chain_gap',
+                detail: 'Objectives are not adjacent.',
+                severity: 'warning',
+                turn: 10,
+            },
+        ];
+        withRows.military.watched_operations = [
+            {
+                operation_id: '',
+                operation_name: 'Operation Kotor Varos',
+                canonical_window: '10',
+                catalog_status: 'present',
+                eligibility_status: 'eligible',
+                launch_status: 'blocked',
+                delivery_status: 'blocked',
+                blocker_code: 'build_defender_power_too_high',
+                typed_blocker: 'build_defender_power_too_high',
+                turn: 10,
+                launch_objective_osid: 'op:kotor_varos:kotor_varos_2',
+                launch_primary_defender_id: 'arbih_kotor_varos_defender',
+                launch_defender_count: 1,
+                launch_defender_ids: ['arbih_kotor_varos_defender'],
+                launch_defender_power_by_id: [
+                    {
+                        formation_id: 'arbih_kotor_varos_defender',
+                        power: 12.5,
+                        stacked_power: 12.5,
+                        breakdown: {
+                            base: 10,
+                            posture_mult: 1,
+                            entrenchment_mult: 1,
+                            supply_mult: 1,
+                            terrain_mult: 1,
+                            terrain_class_mult: 1,
+                            to_terrain_mult: 1,
+                            per_brigade_terrain_bonus: 0,
+                            corps_def_mult: 1,
+                            resilience_mult: 1,
+                            front_density_mult: 1,
+                            ethnic_mult: 1,
+                            final_env_mult: 1,
+                            disruption_mult: 1,
+                            officer_mult: 1,
+                            fatigue_mult: 1,
+                            home_mult: 1,
+                            morale_mult: 1,
+                            equipment_quality_mult: 1,
+                        },
+                    },
+                ],
+                launch_feasibility_ratio: 0.75,
+                launch_attacker_power: 9,
+                launch_defender_power: 12,
+            },
+        ];
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWithRows = deserializeState(JSON.stringify(withRows));
+
+        expect(migratedAbsent.military.op_injection_warnings).toBeUndefined();
+        expect(migratedAbsent.military.watched_operations).toBeUndefined();
+        expect(migratedWithRows.military.op_injection_warnings).toEqual(withRows.military.op_injection_warnings);
+        expect(migratedWithRows.military.watched_operations).toEqual(withRows.military.watched_operations);
+    });
+
+    it('rejects current-version saves with malformed operation observability rows', () => {
+        const state = currentVersionState();
+        state.military.op_injection_warnings = [
+            {
+                op_name: '',
+                axis_id: 3,
+                check: 'unknown_check',
+                detail: '',
+                severity: 'notice',
+                turn: -1,
+            },
+            42,
+        ] as any;
+        state.military.watched_operations = [
+            {
+                operation_id: 4,
+                operation_name: '',
+                canonical_window: 5,
+                catalog_status: 'gone',
+                eligibility_status: 'maybe',
+                launch_status: 'started',
+                delivery_status: 'delivered',
+                blocker_code: 6,
+                typed_blocker: 7,
+                turn: -2,
+                launch_objective_osid: 8,
+                launch_primary_defender_id: 9,
+                launch_defender_count: -1,
+                launch_defender_ids: ['defender', 10],
+                launch_defender_power_by_id: [
+                    {
+                        formation_id: '',
+                        power: -1,
+                        stacked_power: Number.NaN,
+                        breakdown: {
+                            base: -1,
+                        },
+                    },
+                    43,
+                ],
+                launch_feasibility_ratio: -0.1,
+                launch_attacker_power: Number.NaN,
+                launch_defender_power: -1,
+            },
+            44,
+        ] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.op_injection_warnings\[0\]\.op_name must be a non-empty string[\s\S]*military\.op_injection_warnings\[0\]\.axis_id must be a string when present[\s\S]*military\.op_injection_warnings\[0\]\.check must be one of: staging_adjacency, chain_gap, brigade_missing, brigade_ineligible, all_objectives_owned, axis_empty, op_empty, objective_overlap, participants_below_attack_floor[\s\S]*military\.op_injection_warnings\[0\]\.detail must be a non-empty string[\s\S]*military\.op_injection_warnings\[0\]\.severity must be one of: error, warning[\s\S]*military\.op_injection_warnings\[0\]\.turn must be a non-negative integer[\s\S]*military\.op_injection_warnings\[1\] must be an object[\s\S]*military\.watched_operations\[0\]\.operation_id must be a string[\s\S]*military\.watched_operations\[0\]\.operation_name must be a non-empty string[\s\S]*military\.watched_operations\[0\]\.catalog_status must be one of: present, missing, not_applicable[\s\S]*military\.watched_operations\[0\]\.launch_defender_power_by_id\[0\]\.formation_id must be a non-empty string[\s\S]*military\.watched_operations\[0\]\.launch_defender_power_by_id\[0\]\.breakdown\.base must be a finite non-negative number[\s\S]*military\.watched_operations\[0\]\.launch_defender_power_by_id\[1\] must be an object[\s\S]*military\.watched_operations\[1\] must be an object/
+        );
+    });
+
+    it('rejects current-version saves with non-array operation observability rows', () => {
+        const opWarnings = currentVersionState();
+        opWarnings.military.op_injection_warnings = {} as any;
+        const watched = currentVersionState();
+        watched.military.watched_operations = {} as any;
+
+        expect(() => deserializeState(JSON.stringify(opWarnings))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.op_injection_warnings must be an array when present/
+        );
+        expect(() => deserializeState(JSON.stringify(watched))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.watched_operations must be an array when present/
+        );
+    });
+
     it('accepts current-version saves with absent or well-formed AI army decisions', () => {
         const absent = currentVersionState();
         delete absent.military.ai_army_decisions;

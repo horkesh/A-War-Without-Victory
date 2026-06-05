@@ -82,6 +82,22 @@ const COMMAND_BRIEFING_SEVERITIES = ['critical', 'warning', 'info'] as const;
 const CORPS_DIALOGUE_CONFIDENCES = ['high', 'medium', 'low'] as const;
 const WAR_DISPATCH_PERSPECTIVES = ['humanitarian', 'military', 'civilian', 'diplomatic'] as const;
 const FRICTION_EVENT_TYPES = ['ignored_stance', 'unauthorized_op', 'refused_release'] as const;
+const OP_INJECTION_CHECKS = [
+    'staging_adjacency',
+    'chain_gap',
+    'brigade_missing',
+    'brigade_ineligible',
+    'all_objectives_owned',
+    'axis_empty',
+    'op_empty',
+    'objective_overlap',
+    'participants_below_attack_floor',
+] as const;
+const OP_INJECTION_SEVERITIES = ['error', 'warning'] as const;
+const WATCHED_OPERATION_CATALOG_STATUSES = ['present', 'missing', 'not_applicable'] as const;
+const WATCHED_OPERATION_ELIGIBILITY_STATUSES = ['eligible', 'not_eligible', 'unknown'] as const;
+const WATCHED_OPERATION_LAUNCH_STATUSES = ['launched', 'blocked', 'not_launched', 'unknown'] as const;
+const WATCHED_OPERATION_DELIVERY_STATUSES = ['blocked', 'unknown', 'missing'] as const;
 const MUNICIPALITY_SUPPORT_TYPE_BY_FACTION: Record<string, string> = {
     RBiH: 'weapons_shipment',
     RS: 'staff_priority',
@@ -288,6 +304,30 @@ function isWarDispatchPerspective(value: unknown): boolean {
 
 function isFrictionEventType(value: unknown): boolean {
     return typeof value === 'string' && FRICTION_EVENT_TYPES.includes(value as typeof FRICTION_EVENT_TYPES[number]);
+}
+
+function isOpInjectionCheck(value: unknown): boolean {
+    return typeof value === 'string' && OP_INJECTION_CHECKS.includes(value as typeof OP_INJECTION_CHECKS[number]);
+}
+
+function isOpInjectionSeverity(value: unknown): boolean {
+    return typeof value === 'string' && OP_INJECTION_SEVERITIES.includes(value as typeof OP_INJECTION_SEVERITIES[number]);
+}
+
+function isWatchedOperationCatalogStatus(value: unknown): boolean {
+    return typeof value === 'string' && WATCHED_OPERATION_CATALOG_STATUSES.includes(value as typeof WATCHED_OPERATION_CATALOG_STATUSES[number]);
+}
+
+function isWatchedOperationEligibilityStatus(value: unknown): boolean {
+    return typeof value === 'string' && WATCHED_OPERATION_ELIGIBILITY_STATUSES.includes(value as typeof WATCHED_OPERATION_ELIGIBILITY_STATUSES[number]);
+}
+
+function isWatchedOperationLaunchStatus(value: unknown): boolean {
+    return typeof value === 'string' && WATCHED_OPERATION_LAUNCH_STATUSES.includes(value as typeof WATCHED_OPERATION_LAUNCH_STATUSES[number]);
+}
+
+function isWatchedOperationDeliveryStatus(value: unknown): boolean {
+    return typeof value === 'string' && WATCHED_OPERATION_DELIVERY_STATUSES.includes(value as typeof WATCHED_OPERATION_DELIVERY_STATUSES[number]);
 }
 
 function isEventDecisionSource(value: unknown): boolean {
@@ -1979,6 +2019,113 @@ function validateFrictionEvents(value: unknown, errors: string[]): void {
     });
 }
 
+function validateOpInjectionWarnings(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.op_injection_warnings must be an array when present');
+        return;
+    }
+
+    value.forEach((entry, i) => {
+        const path = `military.op_injection_warnings[${i}]`;
+        if (!isRecord(entry)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        if (!isNonEmptyString(entry.op_name)) errors.push(`${path}.op_name must be a non-empty string`);
+        if ('axis_id' in entry && entry.axis_id !== undefined && typeof entry.axis_id !== 'string') errors.push(`${path}.axis_id must be a string when present`);
+        if (!isOpInjectionCheck(entry.check)) errors.push(`${path}.check must be one of: staging_adjacency, chain_gap, brigade_missing, brigade_ineligible, all_objectives_owned, axis_empty, op_empty, objective_overlap, participants_below_attack_floor`);
+        if (!isNonEmptyString(entry.detail)) errors.push(`${path}.detail must be a non-empty string`);
+        if (!isOpInjectionSeverity(entry.severity)) errors.push(`${path}.severity must be one of: error, warning`);
+        if (!isNonNegativeInteger(entry.turn)) errors.push(`${path}.turn must be a non-negative integer`);
+    });
+}
+
+const WATCHED_OPERATION_POWER_BREAKDOWN_KEYS = [
+    'base',
+    'posture_mult',
+    'entrenchment_mult',
+    'supply_mult',
+    'terrain_mult',
+    'terrain_class_mult',
+    'to_terrain_mult',
+    'per_brigade_terrain_bonus',
+    'corps_def_mult',
+    'resilience_mult',
+    'front_density_mult',
+    'ethnic_mult',
+    'final_env_mult',
+    'disruption_mult',
+    'officer_mult',
+    'fatigue_mult',
+    'home_mult',
+    'morale_mult',
+    'equipment_quality_mult',
+] as const;
+
+function validateWatchedOperationPowerBreakdown(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+    for (const key of WATCHED_OPERATION_POWER_BREAKDOWN_KEYS) {
+        if (!isFiniteNonNegativeNumber(value[key])) errors.push(`${path}.${key} must be a finite non-negative number`);
+    }
+}
+
+function validateWatchedOperations(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.watched_operations must be an array when present');
+        return;
+    }
+
+    value.forEach((entry, i) => {
+        const path = `military.watched_operations[${i}]`;
+        if (!isRecord(entry)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        if (typeof entry.operation_id !== 'string') errors.push(`${path}.operation_id must be a string`);
+        if (!isNonEmptyString(entry.operation_name)) errors.push(`${path}.operation_name must be a non-empty string`);
+        if (typeof entry.canonical_window !== 'string') errors.push(`${path}.canonical_window must be a string`);
+        if (!isWatchedOperationCatalogStatus(entry.catalog_status)) errors.push(`${path}.catalog_status must be one of: present, missing, not_applicable`);
+        if (!isWatchedOperationEligibilityStatus(entry.eligibility_status)) errors.push(`${path}.eligibility_status must be one of: eligible, not_eligible, unknown`);
+        if (!isWatchedOperationLaunchStatus(entry.launch_status)) errors.push(`${path}.launch_status must be one of: launched, blocked, not_launched, unknown`);
+        if (!isWatchedOperationDeliveryStatus(entry.delivery_status)) errors.push(`${path}.delivery_status must be one of: blocked, unknown, missing`);
+        if (typeof entry.blocker_code !== 'string') errors.push(`${path}.blocker_code must be a string`);
+        if (typeof entry.typed_blocker !== 'string') errors.push(`${path}.typed_blocker must be a string`);
+        if (!isNonNegativeInteger(entry.turn)) errors.push(`${path}.turn must be a non-negative integer`);
+        for (const key of ['launch_objective_osid', 'launch_primary_defender_id']) {
+            if (key in entry && entry[key] !== undefined && typeof entry[key] !== 'string') errors.push(`${path}.${key} must be a string when present`);
+        }
+        if ('launch_defender_count' in entry && entry.launch_defender_count !== undefined && !isNonNegativeInteger(entry.launch_defender_count)) {
+            errors.push(`${path}.launch_defender_count must be a non-negative integer when present`);
+        }
+        if ('launch_defender_ids' in entry && entry.launch_defender_ids !== undefined && !isStringArray(entry.launch_defender_ids)) {
+            errors.push(`${path}.launch_defender_ids must be a string array when present`);
+        }
+        if ('launch_defender_power_by_id' in entry && entry.launch_defender_power_by_id !== undefined) {
+            if (!Array.isArray(entry.launch_defender_power_by_id)) {
+                errors.push(`${path}.launch_defender_power_by_id must be an array when present`);
+            } else {
+                entry.launch_defender_power_by_id.forEach((powerEntry, j) => {
+                    const powerPath = `${path}.launch_defender_power_by_id[${j}]`;
+                    if (!isRecord(powerEntry)) {
+                        errors.push(`${powerPath} must be an object`);
+                        return;
+                    }
+                    if (!isNonEmptyString(powerEntry.formation_id)) errors.push(`${powerPath}.formation_id must be a non-empty string`);
+                    if (!isFiniteNonNegativeNumber(powerEntry.power)) errors.push(`${powerPath}.power must be a finite non-negative number`);
+                    if (!isFiniteNonNegativeNumber(powerEntry.stacked_power)) errors.push(`${powerPath}.stacked_power must be a finite non-negative number`);
+                    if ('breakdown' in powerEntry && powerEntry.breakdown !== undefined) validateWatchedOperationPowerBreakdown(powerEntry.breakdown, `${powerPath}.breakdown`, errors);
+                });
+            }
+        }
+        for (const key of ['launch_feasibility_ratio', 'launch_attacker_power', 'launch_defender_power']) {
+            if (key in entry && entry[key] !== undefined && !isFiniteNonNegativeNumber(entry[key])) errors.push(`${path}.${key} must be a finite non-negative number when present`);
+        }
+    });
+}
+
 function validateCostLedgerAnnotations(value: unknown, errors: string[]): void {
     if (!Array.isArray(value)) {
         errors.push('military.cost_ledger_annotations must be an array when present');
@@ -2610,6 +2757,12 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'friction_events' in military && military.friction_events !== undefined) {
         validateFrictionEvents(military.friction_events, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'op_injection_warnings' in military && military.op_injection_warnings !== undefined) {
+        validateOpInjectionWarnings(military.op_injection_warnings, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'watched_operations' in military && military.watched_operations !== undefined) {
+        validateWatchedOperations(military.watched_operations, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'ai_decision_log' in military && military.ai_decision_log !== undefined) {
         validateAiDecisionLog(military.ai_decision_log, errors);
