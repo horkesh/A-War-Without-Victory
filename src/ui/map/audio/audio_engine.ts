@@ -10,7 +10,7 @@
  * packaging scope before playback requirements are proven.
  */
 
-import { getCueConfig, getMusicConfig, getSfxConfig, type AudioCueCategory } from './sound_manifest.js';
+import { getCueConfig, getMusicConfig, getSfxConfig, resolveCuePlaybackUrl, type AudioCueCategory } from './sound_manifest.js';
 
 export type AudioVolumeKind = 'master' | AudioCueCategory;
 
@@ -18,6 +18,14 @@ interface AudioBusState {
     enabled: boolean;
     muted: boolean;
     lastCueId: string | null;
+    /**
+     * Resolved playback URL for the last accepted cue, via the `audioAssets.ts`
+     * Rollup URL-import map. `null` when the cue is a placeholder (no binary
+     * wired) — the bus then decodes nothing (silent no-op). This is the field
+     * that proves the asset-resolution path is wired without trusting bare
+     * manifest strings that do not resolve under `publicDir:false`.
+     */
+    lastResolvedAssetUrl: string | null;
     currentMusicId: string | null;
     acceptedCueCount: number;
     lastCueAcceptedAtMsById: Record<string, number>;
@@ -36,6 +44,7 @@ let state: AudioBusState = {
     enabled: false,
     muted: true,
     lastCueId: null,
+    lastResolvedAssetUrl: null,
     currentMusicId: null,
     acceptedCueCount: 0,
     lastCueAcceptedAtMsById: {},
@@ -89,9 +98,15 @@ export async function playCue(id: string, nowMs?: number): Promise<void> {
     ) {
         return;
     }
+    // Resolve via the audioAssets URL-import map (NOT the bare manifest string,
+    // which does not resolve under publicDir:false). `null` => placeholder =>
+    // nothing is decoded (silent no-op), preserving the muted-by-default and
+    // determinism contracts.
+    const resolvedAssetUrl = resolveCuePlaybackUrl(cue.id);
     state = {
         ...state,
         lastCueId: cue.id,
+        lastResolvedAssetUrl: resolvedAssetUrl,
         acceptedCueCount: state.acceptedCueCount + 1,
         lastCueAcceptedAtMsById: normalizedNowMs === null
             ? state.lastCueAcceptedAtMsById
@@ -156,6 +171,7 @@ export function resetAudioForTests(): void {
         enabled: false,
         muted: true,
         lastCueId: null,
+        lastResolvedAssetUrl: null,
         currentMusicId: null,
         acceptedCueCount: 0,
         lastCueAcceptedAtMsById: {},
