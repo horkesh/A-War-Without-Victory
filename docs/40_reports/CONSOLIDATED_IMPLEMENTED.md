@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest municipality support IPC routing:** [implemented/20260605_MUNICIPALITY_SUPPORT_IPC_ROUTING.md](implemented/20260605_MUNICIPALITY_SUPPORT_IPC_ROUTING.md) - Desktop municipality-support staging now writes the validated military order surface instead of an effect-dead top-level field.
+
 **Latest review backlog coverage batch:** [implemented/20260605_REVIEW_BACKLOG_ENGINE_BATCH.md](implemented/20260605_REVIEW_BACKLOG_ENGINE_BATCH.md) - Issue #170 Trnovo controlled-waypoint preservation and HRHB Graz branch coverage are closed; same-axis concentration and final-sector disconnected-territory hardening are deferred after 40-week Boljanic anchor proof failed.
 
 **Latest supply siege state validate-when-present contract:** [implemented/20260605_SUPPLY_SIEGE_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260605_SUPPLY_SIEGE_STATE_VALIDATE_WHEN_PRESENT.md) - `military.siege_turn_counters` and `military.sarajevo_tunnel_operational` remain optional but now reject malformed present supply siege state without changing supply mechanics.
