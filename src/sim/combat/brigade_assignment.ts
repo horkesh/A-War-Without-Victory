@@ -21,7 +21,7 @@ import {
     isSectorAssignmentExemptCorpsId,
     PHASE_2C_MAX_HOPS,
 } from './corps_front_sectors_constants.js';
-import { getSectorComponent, getSectorFrontOsids, bfsDistance } from './sector_utils.js';
+import { getSectorComponent, getSectorFrontOsids } from './sector_utils.js';
 import type { CorpsCommanderProfile } from './commander_override.js';
 import {
     removeFromActiveOperation,
@@ -1586,15 +1586,42 @@ export function ensureMinimumSectorCoverage(
     ): { target: string; dist: number } | null => {
         const formation = formations[bid];
         if (!formation?.location_osid) return null;
-        const candidates: Array<{ target: string; dist: number }> = [];
+        const vacantTargets = new Set<string>();
         for (const target of sectorFrontOsids) {
             if ((activeCounts.get(target) ?? 0) !== 0) continue;
-            const dist = bfsDistance(formation.location_osid, target, adjacency, friendlyOsids);
-            if (!Number.isFinite(dist) || dist > maxHops) continue;
-            candidates.push({ target, dist });
+            vacantTargets.add(target);
         }
-        candidates.sort((a, b) => a.dist - b.dist || strictCompare(a.target, b.target));
-        return candidates[0] ?? null;
+        if (vacantTargets.size === 0) return null;
+        if (vacantTargets.has(formation.location_osid)) {
+            return { target: formation.location_osid, dist: 0 };
+        }
+
+        const visited = new Set<string>([formation.location_osid]);
+        let frontier: string[] = [formation.location_osid];
+        for (let dist = 1; dist <= maxHops; dist++) {
+            const next: string[] = [];
+            const candidates: string[] = [];
+            for (const osid of frontier) {
+                const neighbors = adjacency.get(osid as Osid);
+                if (!neighbors) continue;
+                for (const neighbor of neighbors) {
+                    if (vacantTargets.has(neighbor)) {
+                        candidates.push(neighbor);
+                    }
+                    if (visited.has(neighbor)) continue;
+                    if (!friendlyOsids.has(neighbor)) continue;
+                    visited.add(neighbor);
+                    next.push(neighbor);
+                }
+            }
+            if (candidates.length > 0) {
+                candidates.sort(strictCompare);
+                return { target: candidates[0]!, dist };
+            }
+            if (next.length === 0) break;
+            frontier = next;
+        }
+        return null;
     };
 
     const pickVacantLocalFrontTarget = (

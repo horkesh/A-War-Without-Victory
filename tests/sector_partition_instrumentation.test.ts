@@ -531,12 +531,15 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(endIdx).toBeGreaterThan(startIdx);
 
         const region = raw.slice(startIdx, endIdx);
-        expect(region).toContain('const candidates: Array<{ target: string; dist: number }> = [];');
+        expect(region).toContain('const vacantTargets = new Set<string>();');
         expect(region).toContain('for (const target of sectorFrontOsids) {');
-        expect(region).toContain('candidates.push({ target, dist });');
-        expect(region).toContain('candidates.sort((a, b) => a.dist - b.dist || strictCompare(a.target, b.target));');
+        expect(region).toContain('if (vacantTargets.has(formation.location_osid)) {');
+        expect(region).toContain('for (let dist = 1; dist <= maxHops; dist++) {');
+        expect(region).toContain('if (vacantTargets.has(neighbor)) {');
+        expect(region).toContain('candidates.sort(strictCompare);');
         expect(region).not.toContain('.filter((target)');
         expect(region).not.toContain('.map((target)');
+        expect(region).not.toContain('bfsDistance(');
     });
 
     it('static contract: zero-assigned coverage rescue reuses local front and active-count views', () => {

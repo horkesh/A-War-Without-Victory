@@ -69,6 +69,46 @@ function makeAdjacency(): Map<Osid, Osid[]> {
 }
 
 describe('ensureMinimumSectorCoverage truth preservation', () => {
+    it('promotes a reserve brigade to the stable nearest vacant front target', () => {
+        const sector = makeSector(
+            'sector:corps_a:0',
+            ['op:recipient:front:b', 'op:recipient:front:a'],
+            ['op:recipient:front:a', 'op:recipient:front:b', 'op:reserve:start'],
+            [],
+        );
+        sector.reserve_brigade_ids = ['brig_reserve'];
+        const formations: Record<FormationId, FormationState> = {
+            brig_reserve: makeFormation('brig_reserve', 'op:reserve:start'),
+        };
+        const adjacency = new Map<Osid, Osid[]>([
+            ['op:reserve:start' as Osid, ['op:recipient:front:b' as Osid, 'op:recipient:front:a' as Osid]],
+            ['op:recipient:front:a' as Osid, ['op:reserve:start' as Osid]],
+            ['op:recipient:front:b' as Osid, ['op:reserve:start' as Osid]],
+        ]);
+        const friendlyOsids = new Set<string>([
+            'op:reserve:start',
+            'op:recipient:front:a',
+            'op:recipient:front:b',
+        ]);
+        const componentOf = new Map<string, number>([
+            ['op:reserve:start', 0],
+            ['op:recipient:front:a', 0],
+            ['op:recipient:front:b', 0],
+        ]);
+
+        ensureMinimumSectorCoverage(
+            [sector],
+            formations,
+            adjacency,
+            friendlyOsids,
+            componentOf,
+        );
+
+        expect(sector.assigned_brigade_ids).toEqual(['brig_reserve']);
+        expect(sector.reserve_brigade_ids).toEqual([]);
+        expect(formations.brig_reserve?.location_osid).toBe('op:recipient:front:a');
+    });
+
     it('does not steal a brigade that is already truthfully anchored in donor territory', () => {
         const donor = makeSector(
             'sector:corps_a:0',

@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest sector coverage BFS target cache** | [implemented/20260605_SECTOR_COVERAGE_BFS_TARGET_CACHE.md](implemented/20260605_SECTOR_COVERAGE_BFS_TARGET_CACHE.md) - `ensureMinimumSectorCoverage(...)` now finds the nearest vacant local front target with one bounded BFS instead of one BFS per candidate target while preserving the `aa8f7a07962cecaf` floor. |
 | **Latest municipality support IPC routing** | [implemented/20260605_MUNICIPALITY_SUPPORT_IPC_ROUTING.md](implemented/20260605_MUNICIPALITY_SUPPORT_IPC_ROUTING.md) - Desktop municipality-support staging now writes the validated military order surface instead of an effect-dead top-level field. |
 | **Latest review backlog coverage batch** | [implemented/20260605_REVIEW_BACKLOG_ENGINE_BATCH.md](implemented/20260605_REVIEW_BACKLOG_ENGINE_BATCH.md) - Issue #170 Trnovo controlled-waypoint preservation and HRHB Graz branch coverage are closed; same-axis concentration and final-sector disconnected-territory hardening are deferred after 40-week Boljanic anchor proof failed. |
 | **Latest audio asset-resolution path** | [implemented/20260605_AUDIO_ASSET_RESOLUTION_PATH.md](implemented/20260605_AUDIO_ASSET_RESOLUTION_PATH.md) - The tactical-map audio bus now resolves future binaries through a Rollup URL-import map while current cues remain silent placeholders. |

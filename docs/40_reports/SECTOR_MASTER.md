@@ -1,8 +1,20 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-06-05 (current hash reconciliation)
+**Updated:** 2026-06-05 (coverage BFS target cache)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
+
+---
+
+## 2026-06-05: Coverage BFS target cache (byte-identical)
+
+**Change:** `src/sim/combat/brigade_assignment.ts` `ensureMinimumSectorCoverage(...)` now selects the nearest vacant local front target with one bounded BFS from the brigade location instead of running `bfsDistance(...)` once per candidate target.
+
+**Determinism:** The vacant target set is invocation-local, BFS expands by existing adjacency order, and same-distance targets are sorted with `strictCompare(...)` before selection. No cross-turn cache, save field, sector ordering, scenario data, combat math, or serialized output changed.
+
+**Verification:** Focused sector instrumentation and truth-preservation tests passed 34/34, the broader sector regression pack passed, typecheck passed, strict-null inventory remained total 507, the 40w timed run preserved hash `aa8f7a07962cecaf`, consistency validation passed on `runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n2021`, and baseline regression reported all scenarios matching.
+
+**Report:** [implemented/20260605_SECTOR_COVERAGE_BFS_TARGET_CACHE.md](implemented/20260605_SECTOR_COVERAGE_BFS_TARGET_CACHE.md)
 
 ---
 
