@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest operation observability validate-when-present contract:** [implemented/20260605_OPERATION_OBSERVABILITY_VALIDATE_WHEN_PRESENT.md](implemented/20260605_OPERATION_OBSERVABILITY_VALIDATE_WHEN_PRESENT.md) - `military.op_injection_warnings` and `military.watched_operations` remain optional but now reject malformed present operation-observability rows without changing operation launch.
+
 **Latest command friction events validate-when-present contract:** [implemented/20260605_FRICTION_EVENTS_VALIDATE_WHEN_PRESENT.md](implemented/20260605_FRICTION_EVENTS_VALIDATE_WHEN_PRESENT.md) - `military.friction_events` remains optional but now rejects malformed present command-friction rows without materializing the lazy event bus.
 
 **Latest cosmetic AI buffer validate-when-present contract:** [implemented/20260604_COSMETIC_AI_BUFFERS_VALIDATE_WHEN_PRESENT.md](implemented/20260604_COSMETIC_AI_BUFFERS_VALIDATE_WHEN_PRESENT.md) - Cosmetic corps dialogue, war dispatch, and battle narrative buffers remain optional but now reject malformed present payloads.
