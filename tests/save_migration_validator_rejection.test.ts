@@ -1807,6 +1807,48 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('accepts current-version saves with absent or well-formed formation spawn directives', () => {
+        const absent = currentVersionState();
+        delete absent.military.formation_spawn_directive;
+        const empty = currentVersionState();
+        empty.military.formation_spawn_directive = {};
+        const brigadeOnly = currentVersionState();
+        brigadeOnly.military.formation_spawn_directive = { kind: 'brigade' };
+        const activeBoth = currentVersionState();
+        activeBoth.military.formation_spawn_directive = {
+            kind: 'both',
+            turn: 10,
+            allow_displaced_origin: true,
+        };
+
+        expect(deserializeState(JSON.stringify(absent)).military.formation_spawn_directive).toBeUndefined();
+        expect(deserializeState(JSON.stringify(empty)).military.formation_spawn_directive).toEqual({});
+        expect(deserializeState(JSON.stringify(brigadeOnly)).military.formation_spawn_directive).toEqual({ kind: 'brigade' });
+        expect(deserializeState(JSON.stringify(activeBoth)).military.formation_spawn_directive).toEqual(activeBoth.military.formation_spawn_directive);
+    });
+
+    it('rejects current-version saves with malformed formation spawn directives', () => {
+        const state = currentVersionState();
+        state.military.formation_spawn_directive = {
+            kind: 'division',
+            turn: -1,
+            allow_displaced_origin: 'yes',
+        } as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.formation_spawn_directive\.kind must be one of: militia, brigade, both when present[\s\S]*military\.formation_spawn_directive\.turn must be a non-negative integer when present[\s\S]*military\.formation_spawn_directive\.allow_displaced_origin must be a boolean when present/
+        );
+    });
+
+    it('rejects current-version saves with non-object formation spawn directives', () => {
+        const state = currentVersionState();
+        state.military.formation_spawn_directive = 42 as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.formation_spawn_directive must be an object when present/
+        );
+    });
+
     it('accepts current-version saves with absent or well-formed OPSEC sectors', () => {
         const absent = currentVersionState();
         delete absent.military.opsec_sectors;
