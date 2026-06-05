@@ -2000,6 +2000,41 @@ function validateBattleNarratives(value: unknown, errors: string[]): void {
     });
 }
 
+function validateAarPromptInput(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object`);
+        return;
+    }
+    if (!isNonEmptyString(value.officerName)) errors.push(`${path}.officerName must be a non-empty string`);
+    if (!isCanonicalPlayerFaction(value.faction)) errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+    if (!isNonEmptyString(value.corpsId)) errors.push(`${path}.corpsId must be a non-empty string`);
+    if (!isNonEmptyString(value.targetOsid)) errors.push(`${path}.targetOsid must be a non-empty string`);
+    if (!isNonEmptyString(value.outcome)) errors.push(`${path}.outcome must be a non-empty string`);
+    if (!isFiniteNonNegativeNumber(value.attackerCasualties)) errors.push(`${path}.attackerCasualties must be a finite non-negative number`);
+    if (!isFiniteNonNegativeNumber(value.defenderCasualties)) errors.push(`${path}.defenderCasualties must be a finite non-negative number`);
+    if (!isStringArray(value.attackerBrigades)) errors.push(`${path}.attackerBrigades must be a string array`);
+    if (!isStringArray(value.defenderBrigades)) errors.push(`${path}.defenderBrigades must be a string array`);
+    if (typeof value.territoryChanged !== 'boolean') errors.push(`${path}.territoryChanged must be a boolean`);
+}
+
+function validateNarrativeQueue(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.narrative_queue must be an array when present');
+        return;
+    }
+
+    value.forEach((entry, i) => {
+        const path = `military.narrative_queue[${i}]`;
+        if (!isRecord(entry)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        if (!isCanonicalPlayerFaction(entry.faction)) errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+        if (!isNonEmptyString(entry.corpsId)) errors.push(`${path}.corpsId must be a non-empty string`);
+        validateAarPromptInput(entry.input, `${path}.input`, errors);
+    });
+}
+
 function validateFrictionEvents(value: unknown, errors: string[]): void {
     if (!Array.isArray(value)) {
         errors.push('military.friction_events must be an array when present');
@@ -2754,6 +2789,9 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'battle_narratives' in military && military.battle_narratives !== undefined) {
         validateBattleNarratives(military.battle_narratives, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'narrative_queue' in military && military.narrative_queue !== undefined) {
+        validateNarrativeQueue(military.narrative_queue, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'friction_events' in military && military.friction_events !== undefined) {
         validateFrictionEvents(military.friction_events, errors);
