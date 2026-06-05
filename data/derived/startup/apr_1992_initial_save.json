@@ -22945,11 +22945,10 @@
         },
         "faction": "RS",
         "force_label": "VRS",
-        "home_osid": "op:rogatica:stara_gora",
-        "hq_sid": "op:rogatica:pljesevica",
+        "home_osid": "op:hanpijesak:han_pijesak_2",
         "id": "rs_1st_guards_motorized",
         "kind": "brigade",
-        "location_osid": "op:rogatica:stara_gora",
+        "location_osid": "op:hanpijesak:han_pijesak_2",
         "max_personnel": 2200,
         "morale": 60,
         "name": "1st Guards Motorized",
@@ -22958,14 +22957,14 @@
           "fatigue": 0,
           "last_supplied_turn": null
         },
-        "origin_mun": "rogatica",
+        "origin_mun": "han_pijesak",
         "personnel": 1200,
         "readiness": "active",
         "status": "active",
         "tags": [
           "corps:vrs_main_staff",
           "equip:motorized",
-          "mun:rogatica",
+          "mun:han_pijesak",
           "placement:fixed_home_osid"
         ]
       },

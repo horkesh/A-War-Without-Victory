@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] fix(oob): VRS 1st Guards Motorized home Rogatica → Han Pijesak
+
+**Type:** OOB placement correction (calibration-FLAT but baseline-moving; golden baselines re-floored). Pyrrhic-panel-approved (Historian ADOPT-WITH-CHANGE, Calibration ADOPT-surgical, Game-Designer/Ops endorse). Owner-directed "adopt panel solutions."
+
+**Change:** `rs_1st_guards_motorized` (corps `vrs_main_staff`, already motorized) home relocated in `data/source/oob_brigades.json`: `home_mun` rogatica→han_pijesak, `home_settlement` Rogatica→"Han Pijesak", `home_osid` `op:rogatica:stara_gora`→`op:hanpijesak:han_pijesak_2`. Rogatica was unsupported; Wikipedia (*1st Guards Brigade (ARS)*: "initially Han Pijesak, later Kalinovik") + the repo's own VRS OOB master agree the April-1992 initial home is Han Pijesak (co-locating with the Main Staff it's subordinated to + the 65th Protection Regiment). Surfaced by the 2026-06-05 OOB fidelity audit.
+
+**Calibration (scenario-creator-runner-tester GO):** **calibration-FLAT** — anchors **30/30**, benchmarks **6/6**, OSID match **653/712 (91.7%) BYTE-FLAT** vs the #180 baseline (per-faction totals RS=369/RBiH=254/HRHB=89, 59 mismatches, Drina 95/112 all identical), area-weighted 93.9%, **0 critical anomalies**. The brigade is in `vrs_main_staff` (not a regional fighting corps), so no `main_effort`/hold-municipality gate was touched — surgical placement re-anchor exactly as predicted. Both home OSIDs are deep RS interior (no flip, brigade not stranded; engaged 44K/62M/94W). 40w hash `41ba34ddfaa02a85` → `2043a49789fa21be` — drift is brigade-home serialization only, zero tracked-outcome movement. Golden baselines re-floored (`manifest.json` + startup snapshot; `test:baselines` "all scenarios match").
+
+**Sacred rules:** one change; no initial-OSID-control edits; no `avoided_osids`. Run dir: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0`.
+
+**Files:** `data/source/oob_brigades.json`, `data/derived/startup/apr_1992_initial_save.json`, `data/derived/scenario/baselines/manifest.json`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-06-05] fix(oob): correct HVO operational-zone display labels (Posavina / NW Herzegovina)
 
 **Type:** OOB display-label correction (calibration-NEUTRAL; serialized-output hashes move only because the labels are embedded in baked artifacts). Owner-confirmed historical fix.
