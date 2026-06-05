@@ -1849,6 +1849,49 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('accepts current-version saves with absent or well-formed supply siege state', () => {
+        const absent = currentVersionState();
+        delete absent.military.siege_turn_counters;
+        delete absent.military.sarajevo_tunnel_operational;
+        const withSiegeState = currentVersionState();
+        withSiegeState.military.siege_turn_counters = {
+            'RBiH:op:sarajevo:sarajevo_1': 3,
+            'HRHB:op:mostar:mostar_zapad_2': 0,
+        };
+        withSiegeState.military.sarajevo_tunnel_operational = true;
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWithSiegeState = deserializeState(JSON.stringify(withSiegeState));
+
+        expect(migratedAbsent.military.siege_turn_counters).toBeUndefined();
+        expect(migratedAbsent.military.sarajevo_tunnel_operational).toBeUndefined();
+        expect(migratedWithSiegeState.military.siege_turn_counters).toEqual(withSiegeState.military.siege_turn_counters);
+        expect(migratedWithSiegeState.military.sarajevo_tunnel_operational).toBe(true);
+    });
+
+    it('rejects current-version saves with malformed supply siege state', () => {
+        const state = currentVersionState();
+        state.military.siege_turn_counters = {
+            'RBiH:op:sarajevo:sarajevo_1': -1,
+            'RS:op:gorazde:gorazde_1': 1.5,
+            'HRHB:op:mostar:mostar_zapad_2': 'two',
+        } as any;
+        state.military.sarajevo_tunnel_operational = 'yes' as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.siege_turn_counters\.RBiH:op:sarajevo:sarajevo_1 must be a non-negative integer[\s\S]*military\.siege_turn_counters\.RS:op:gorazde:gorazde_1 must be a non-negative integer[\s\S]*military\.siege_turn_counters\.HRHB:op:mostar:mostar_zapad_2 must be a non-negative integer[\s\S]*military\.sarajevo_tunnel_operational must be a boolean when present/
+        );
+    });
+
+    it('rejects current-version saves with non-object siege turn counters', () => {
+        const state = currentVersionState();
+        state.military.siege_turn_counters = [] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.siege_turn_counters must be an object when present/
+        );
+    });
+
     it('accepts current-version saves with absent or well-formed OPSEC sectors', () => {
         const absent = currentVersionState();
         delete absent.military.opsec_sectors;

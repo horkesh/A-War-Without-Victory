@@ -2789,6 +2789,12 @@ export function validateGameStateShape(
     if (military && typeof military === 'object' && !Array.isArray(military) && 'formation_spawn_directive' in military && military.formation_spawn_directive !== undefined) {
         validateFormationSpawnDirective(military.formation_spawn_directive, errors);
     }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'siege_turn_counters' in military && military.siege_turn_counters !== undefined) {
+        validateNonNegativeIntegerRecord(military.siege_turn_counters, 'military.siege_turn_counters', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'sarajevo_tunnel_operational' in military && military.sarajevo_tunnel_operational !== undefined && typeof military.sarajevo_tunnel_operational !== 'boolean') {
+        errors.push('military.sarajevo_tunnel_operational must be a boolean when present');
+    }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'opsec_sectors' in military && military.opsec_sectors !== undefined && !isStringArray(military.opsec_sectors)) {
         errors.push('military.opsec_sectors must be a string array when present');
     }

@@ -1,4 +1,20 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] fix(state): validate supply siege state when present
+
+**Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, reserve-map upper-bound enforcement, supply-reserve behavior, Sarajevo tunnel activation behavior, scenario data, baseline artifact, replay writer, AI behavior, or player-facing UI changed.
+
+**Change:** Classified `military.siege_turn_counters` and `military.sarajevo_tunnel_operational` as optional supply siege state. Absence remains valid because siege counters materialize lazily from supply-state processing and the Sarajevo tunnel flag materializes only after the existing tunnel activation path fires. Present siege counters now validate as an object with non-negative integer values, and present tunnel flags must be boolean.
+
+The validator deliberately does not resolve OSIDs, validate siege semantics, materialize absent fields, enforce reserve-pool upper bounds, or change supply mechanics.
+
+**Determinism:** Validation-only change. Existing supply code sorts siege-counter keys before runtime consumption; this slice adds no timestamps, randomness, unordered persisted output, generated artifacts, scenario output, replay output, or baseline movement.
+
+**Verification:** Red proof: `node node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` failed before production changes because malformed present supply siege state was accepted. Green proof: focused validator file passed 172/172; `npm.cmd run typecheck -- --pretty false` passed; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed count-neutral at total 507 (`state: 172`, `sim: 327`, `derived: 8`, `unknown: 0`); `git diff --check` passed.
+
+**Files:** `src/state/validateGameState.ts`, `tests/save_migration_validator_rejection.test.ts`, `docs/40_reports/implemented/20260605_SUPPLY_SIEGE_STATE_VALIDATE_WHEN_PRESENT.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `.claude/napkin.md`.
+
+---
+
 ## [2026-06-05] fix(state): validate formation spawn directive when present
 
 **Type:** Save/schema validator closeout for the Optional `GameState` schema lane. No save-schema version bump, migration, fixture, TypeScript optionality change, formation spawning behavior, militia pool behavior, OOB data, scenario data, baseline artifact, replay writer, AI behavior, or player-facing UI changed.
