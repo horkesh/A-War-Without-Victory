@@ -2,6 +2,10 @@
 
 **Personnel tabs should lead with command risk, not the full roster wall:** Army HQ Personnel already has rich ORBAT, mobilization, and officer data, but the president needs the actionable summary first. Durable rule: lead Personnel surfaces with stable, existing-data summaries for commander vacancies, low-loyalty serving commanders, reserve officers, and mobilization strain before listing raw formations/officers. Front-visit surfaces should show both reachable and cut-off fronts from the existing availability contract; do not recalculate reachability in React. Applied in `[2026-06-05] feat(ui): add front-visit reachability and personnel command dossier`.
 
+## 2026-06-05 - Records route cohesion
+
+**Receipt routes should be projected from existing archive read-models, not persisted as new state:** Army HQ Records can answer "where did this receipt file?" from `DecisionConsequenceRecord.recordTarget`, turn-summary records, operation history, and opportunity records. Durable rule: add route summaries and cross-links by deriving counts from the same read-models the sub-tabs render; do not add save fields or a second Chronicle/Records ownership layer for filing visibility. Use stable ASCII/id comparators for read-model tiebreaks instead of locale-dependent ordering. Applied in `[2026-06-05] feat(ui): add Records route cohesion`.
+
 ## 2026-06-05 - Patron receipt read-model visibility
 
 **Patron Relations should show material consequence rows from existing cut substrate, not recompute patron effects:** `state.military.patron_defiance_supply_cuts` is already the realized material-support receipt bus. Durable rule: Patron Relations may project those rows into stable player-facing records, but must not recalculate material support, invent new patron penalties, or reclassify event decisions. Sort newest first by turn descending, cut fraction descending, then support-after ascending for stable display. Applied in `[2026-06-05] feat(ui): surface patron material consequence records`.

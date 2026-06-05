@@ -22,6 +22,19 @@ export interface DecisionConsequenceRecord {
   recordTarget: 'records' | 'chronicle';
 }
 
+export interface DecisionConsequenceLedgerSummary {
+  total: number;
+  recordsRouteCount: number;
+  chronicleRouteCount: number;
+  latestTurn: number | null;
+  latestTitle: string | null;
+  families: string[];
+}
+
+function strictCompare(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 function humanizeToken(value: string | undefined): string {
   if (!value) return '';
   return value.replace(/[_-]+/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
@@ -214,7 +227,7 @@ function officerDetail(record: OfficerDecisionRecordView): string {
 
 function compareRecords(a: DecisionConsequenceRecord, b: DecisionConsequenceRecord): number {
   if (a.turn !== b.turn) return b.turn - a.turn;
-  return a.id.localeCompare(b.id);
+  return strictCompare(a.id, b.id);
 }
 
 export function buildDecisionConsequenceLedger(
@@ -325,4 +338,31 @@ export function buildDecisionConsequenceLedger(
   }
 
   return records.sort(compareRecords).slice(0, Math.max(0, limit));
+}
+
+export function buildDecisionConsequenceLedgerSummary(
+  records: readonly DecisionConsequenceRecord[],
+): DecisionConsequenceLedgerSummary {
+  const familySet = new Set<string>();
+  let recordsRouteCount = 0;
+  let chronicleRouteCount = 0;
+
+  for (const record of records) {
+    familySet.add(record.family);
+    if (record.recordTarget === 'chronicle') {
+      chronicleRouteCount += 1;
+    } else {
+      recordsRouteCount += 1;
+    }
+  }
+
+  const latest = records[0] ?? null;
+  return {
+    total: records.length,
+    recordsRouteCount,
+    chronicleRouteCount,
+    latestTurn: latest?.turn ?? null,
+    latestTitle: latest?.title ?? null,
+    families: [...familySet].sort(strictCompare),
+  };
 }

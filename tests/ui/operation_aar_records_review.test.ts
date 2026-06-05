@@ -168,6 +168,52 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.getByText('No completed operations yet.')).toBeTruthy();
     });
 
+    it('summarizes archive routes and sub-tab counts before drilling into a tab', () => {
+        useGameStore.setState({
+            loadedGameState: {
+                ...makeLoadedState(),
+                firedEvents: [
+                    {
+                        id: 'cabinet-crisis',
+                        turn: 8,
+                        title: 'Cabinet crisis response',
+                        narrative: 'The cabinet accepted the policy line.',
+                        category: 'political',
+                        effects: [{ kind: 'authority', description: 'Authority held.' }],
+                        isDecision: true,
+                    },
+                ],
+                latestTurnSummary: {
+                    turn: 18,
+                    battles: [],
+                    territory_net: { RS: 1 },
+                    notable_flips: [],
+                    displacement_total: 0,
+                    displacement_by_ethnicity: {},
+                    decoration_awards: [],
+                    arc_transitions: [],
+                    formation_spawns: [],
+                    formation_destructions: [],
+                    supply_deltas: {},
+                    heavy_munitions_deltas: {},
+                    movements: [],
+                    supply_transitions: [],
+                    events_fired: [],
+                    notable_events: [],
+                },
+            },
+        });
+
+        render(createElement(RecordsContent));
+
+        expect(screen.getByRole('region', { name: 'Records archive summary' })).toBeTruthy();
+        expect(screen.getByText('Archive Routes')).toBeTruthy();
+        expect(screen.getByText('Cabinet crisis response')).toBeTruthy();
+        expect(screen.getByText('Chronicle Filed')).toBeTruthy();
+        expect(screen.getByRole('button', { name: /Turn Aftermath 1/i })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /Decision Log 1/i })).toBeTruthy();
+    });
+
     it('opens the focused completed operation row when routed from Chronicle', () => {
         useGameStore.setState({
             armyHQRecordsSubTab: 'ops',

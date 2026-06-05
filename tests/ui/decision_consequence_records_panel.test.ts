@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { DecisionConsequenceRecordsPanel } from '../../src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.js';
@@ -62,5 +62,31 @@ describe('DecisionConsequenceRecordsPanel', () => {
     expect(screen.getByText('Cabinet crisis response')).toBeTruthy();
     expect(screen.getByText('Decision recorded')).toBeTruthy();
     expect(screen.getByText(/Event decision \/ Turn 8/)).toBeTruthy();
+    expect(screen.getByText('Chronicle Route')).toBeTruthy();
+    expect(screen.getByText('Filed to Chronicle')).toBeTruthy();
+  });
+
+  it('opens Chronicle from Chronicle-filed decision records', () => {
+    useGameStore.setState({
+      loadedGameState: makeState({
+        firedEvents: [
+          {
+            id: 'cabinet-crisis',
+            turn: 8,
+            title: 'Cabinet crisis response',
+            narrative: 'The cabinet accepted the policy line.',
+            category: 'political',
+            effects: [{ kind: 'authority', description: 'Authority held.' }],
+            isDecision: true,
+          },
+        ],
+      }),
+    });
+
+    render(React.createElement(DecisionConsequenceRecordsPanel));
+
+    expect(useGameStore.getState().chronicleOpen).toBe(false);
+    fireEvent.click(screen.getByRole('button', { name: 'Open Chronicle' }));
+    expect(useGameStore.getState().chronicleOpen).toBe(true);
   });
 });
