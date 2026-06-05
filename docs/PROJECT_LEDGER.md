@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] fix(ui): persist opening brief dismissal across same-faction refreshes
+
+**Type:** Presidential onboarding/opening-brief renderer-store persistence fix. No save schema, migration, `meta.tutorial_state`, tutorial IPC, localStorage, simulation turn logic, scenario output, baseline manifest, scenario data, generated artifact, randomness, timestamps, or persisted output changed.
+
+**Change:** `gameStore` now stores the player faction associated with an opening-brief dismissal and preserves `openingBriefDismissed` only when the next loaded save has the same `LoadedGameState.player_faction`. First load, no-faction saves, and faction changes reset the brief. Existing tests still guard that the deprecated onboarding overlay is not mounted.
+
+**Docs:** Added `docs/40_reports/implemented/20260605_OPENING_BRIEF_DISMISSAL_PERSISTENCE.md` and updated report indices, product-facing master, command board, master roadmap, and knowledge ledger.
+
+**Verification:** `npx.cmd vitest run tests/ui/gamestore_load_reset.test.ts tests/ui/onboarding_track_d_consolidation.test.ts --reporter=dot`.
+
+---
+
 ## [2026-06-05] feat(ui): add Records route cohesion
 
 **Type:** Army HQ Records UI/read-model receipt discoverability. No simulation turn logic, event/patron mechanics, save schema, migration, scenario data, scenario output, baseline manifest, generated artifact, randomness, timestamps, or persisted output changed.
