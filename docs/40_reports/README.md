@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest command directive target affordances** | [implemented/20260605_COMMAND_DIRECTIVE_TARGET_AFFORDANCES.md](implemented/20260605_COMMAND_DIRECTIVE_TARGET_AFFORDANCES.md) - Request-op directives now use president-through-staff copy, resolve fixed OSID captions to display names, and block ambiguous typed settlement names before IPC. |
 | **Latest sector coverage BFS target cache** | [implemented/20260605_SECTOR_COVERAGE_BFS_TARGET_CACHE.md](implemented/20260605_SECTOR_COVERAGE_BFS_TARGET_CACHE.md) - `ensureMinimumSectorCoverage(...)` now finds the nearest vacant local front target with one bounded BFS instead of one BFS per candidate target while preserving the `aa8f7a07962cecaf` floor. |
 | **Latest municipality support IPC routing** | [implemented/20260605_MUNICIPALITY_SUPPORT_IPC_ROUTING.md](implemented/20260605_MUNICIPALITY_SUPPORT_IPC_ROUTING.md) - Desktop municipality-support staging now writes the validated military order surface instead of an effect-dead top-level field. |
 | **Latest review backlog coverage batch** | [implemented/20260605_REVIEW_BACKLOG_ENGINE_BATCH.md](implemented/20260605_REVIEW_BACKLOG_ENGINE_BATCH.md) - Issue #170 Trnovo controlled-waypoint preservation and HRHB Graz branch coverage are closed; same-axis concentration and final-sector disconnected-territory hardening are deferred after 40-week Boljanic anchor proof failed. |

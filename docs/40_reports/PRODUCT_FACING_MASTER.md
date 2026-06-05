@@ -156,9 +156,9 @@ Tactical Groups are engine-meaningful, but not yet product-complete as a player-
 
 | Missing item | Current evidence | Needed player-facing result | Priority |
 | --- | --- | --- | --- |
-| Operation request picker | June 2 audit found raw OSID objective boxes; later commits fixed some wording. | Request operation should use a settlement/front picker, not typed internal identifiers. | P1 |
+| Operation request picker | Request-op DirectiveCard now resolves fixed OSID captions to display names, resolves unique typed settlement display names, and blocks ambiguous typed names before IPC. | Full request operation should still use a settlement/front picker, but the typed fallback no longer silently leaks fixed raw OSIDs or stages ambiguous display names. | P1 / Improved |
 | Inherited operation briefing | RS starts with six active operations and flagged health for Drina/Koridor. | Factions with active inherited ops need a first-turn "what is already underway" briefing with allowed presidential actions. | P1 |
-| Commander rationale | Browser shows officer stats and loyalty; DirectiveCard now has request-op fixture coverage for commander objection prose near the actual action. | Every risky directive should show command interpretation and expected pushback; next expansion is consistency across non-request risky surfaces and records. | P1 |
+| Commander rationale | Browser shows officer stats and loyalty; DirectiveCard now has request-op fixture coverage for commander objection prose near the actual action, plus staff-review copy at the objective input. | Every risky directive should show command interpretation and expected pushback; next expansion is consistency across non-request risky surfaces and records. | P1 |
 | Operation predictor confidence | GAME_STATE_RATING_MASTER flags predictor confidence as thin. | Before approval: estimated odds, uncertainty band, major reasons, and "what would improve this". | P1 |
 | AAR causality | Records tab has AAR and operation history owners but no turn-0 content. | After action: why launched, what happened, why it succeeded/failed, cost, affected TGs/officers/patrons. | P1 |
 | OOB source/provenance | Personnel/OOB is rich but source-light to the player. | High-value units and officers should carry provenance/source notes where practical. | P2 |

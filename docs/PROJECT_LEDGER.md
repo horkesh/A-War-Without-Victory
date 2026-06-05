@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] fix(ui): harden request-op directive target affordances
+
+**Type:** Player-command UI affordance/copy hardening. No simulation turn logic, operation construction, scenario output, baseline manifest, save schema, migration, scenario data, generated artifact, randomness, timestamps, or nondeterministic ordering changed.
+
+**Change:** `DirectiveCard` now resolves fixed request-operation target captions through player-safe OSID display names instead of showing raw internal IDs, keeps unique typed settlement display-name resolution, and blocks ambiguous typed display names before `queryDirectiveObjection(...)` or `stageOpDirectiveOrder(...)` IPC. Ambiguous match lists are `strictCompare` sorted for stable diagnostics. Request-operation copy now frames the player as naming an objective for corps staff review rather than directly ordering an attack.
+
+**Docs:** Added `docs/40_reports/implemented/20260605_COMMAND_DIRECTIVE_TARGET_AFFORDANCES.md` and updated report indices, command board, master roadmap, product-facing master, and knowledge ledger. This closes the second review-backlog player-command batch; the next batch remains patron/diplomacy/receipt read models.
+
+**Verification:** `npx.cmd vitest run tests/ui/directive_card_stop_op_action.test.ts --reporter=dot`; `npm.cmd run typecheck -- --pretty false`; `git diff --check`.
+
+---
+
 ## [2026-06-05] perf(engine): cache sector coverage target search with one bounded BFS
 
 **Type:** Sector/frontline performance optimization. No simulation semantics, combat math, operation choice, scenario data, save schema, migration, baseline manifest, UI surface, randomness, timestamps, or nondeterministic ordering changed.
