@@ -118,6 +118,34 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(useGameStore.getState().advanceTurnPending).toBe(false);
   });
 
+  it('advance modal disables the final advance action while review blockers remain', () => {
+    const onReviewPriorities = vi.fn();
+    setLoadedState(makeState({
+      presidentialReviewQueue: {
+        pendingCount: 2,
+        criticalCount: 1,
+        eventDecisionCount: 2,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 0,
+      },
+    }));
+    useGameStore.setState({ advanceTurnPending: true });
+
+    render(createElement(AdvanceTurnModal, { onReviewPriorities }));
+
+    expect(screen.getByText('Advance blocked')).toBeTruthy();
+    expect(screen.getByText(/Resolve the pending presidential decisions/i)).toBeTruthy();
+    const advanceButton = screen.getByRole('button', { name: 'Advance Turn' });
+    expect(advanceButton.hasAttribute('disabled')).toBe(true);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open review' }));
+
+    expect(advanceTurnAndSync).not.toHaveBeenCalled();
+    expect(onReviewPriorities).toHaveBeenCalledTimes(1);
+    expect(useGameStore.getState().advanceTurnPending).toBe(false);
+  });
+
   it('Warroom status dock does not duplicate the command-dock Advance control', () => {
     const onReviewPriorities = vi.fn();
     setLoadedState(makeState({

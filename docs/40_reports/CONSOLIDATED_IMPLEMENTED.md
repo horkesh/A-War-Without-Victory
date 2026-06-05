@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest command clarity: advance gate and stance cleanup:** [implemented/20260605_COMMAND_CLARITY_ADVANCE_AND_STANCE.md](implemented/20260605_COMMAND_CLARITY_ADVANCE_AND_STANCE.md) - Advance confirmation now hard-blocks unresolved pre-advance review, and the left OOB corps card no longer exposes fake direct stance overrides.
+
 **Latest opening brief dismissal persistence:** [implemented/20260605_OPENING_BRIEF_DISMISSAL_PERSISTENCE.md](implemented/20260605_OPENING_BRIEF_DISMISSAL_PERSISTENCE.md) - Presidential opening brief dismissal now survives same-faction save refreshes while resetting on first load or faction change.
 
 **Latest Records route cohesion:** [implemented/20260605_RECORDS_ROUTE_COHESION.md](implemented/20260605_RECORDS_ROUTE_COHESION.md) - Army HQ Records now summarizes archive counts/routes and decision consequences expose stable Records/Chronicle filing destinations without changing sim/save/scenario state.

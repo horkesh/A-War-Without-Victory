@@ -1,3 +1,9 @@
+## 2026-06-05 - Left OOB is status and navigation, not fake direct corps command
+
+**Left OOB corps cards should not stage local-only stance intent:** The OOB sidebar is a navigation/status rail. Durable rule: show corps stance there as read-only status unless the card is wired to a real command handler; do not maintain renderer-only stance overrides that imply direct presidential corps control. Applied in `[2026-06-05] fix(ui): hard-block advance gate and remove fake corps stance control`.
+
+**Blocked advance confirmation must disable the final turn-advance action:** Pre-advance review can surface blockers before execution. Durable rule: when the review is blocked or direct presidential blockers remain, the confirmation modal must show one explicit blocked sentence, route to review/resolution, and disable the final Advance action. Applied in `[2026-06-05] fix(ui): hard-block advance gate and remove fake corps stance control`.
+
 ## 2026-06-05 - Opening brief dismissal is renderer-session state, not save state
 
 **Opening brief dismissal should survive same-campaign refreshes without writing save schema:** The presidential opening brief is not the deprecated tutorial overlay and should not use `meta.tutorial_state` or localStorage for this fix. Durable rule: key renderer-session dismissal to the current player faction, preserve it across same-faction `loadSave` refreshes, and reset on first load/no faction/faction change. Applied in `[2026-06-05] fix(ui): persist opening brief dismissal across same-faction refreshes`.

@@ -281,6 +281,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
 
   const handleConfirm = async () => {
     if (advancing) return;
+    if (review.status === 'blocked' || blockers.length > 0) return;
     setAdvancing(true);
     try {
       await advanceTurnAndSync({
@@ -362,6 +363,27 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
             {t('advanceTurn.warning')}
           </div>
 
+          {(review.status === 'blocked' || blockers.length > 0) && (
+            <section className="rounded border border-red-500/40 bg-red-950/30 px-3 py-2">
+              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-red-300">
+                {t('advanceTurn.blockedTitle')}
+              </div>
+              <div className="mt-1 text-[11px] leading-snug text-text-secondary">
+                {t('advanceTurn.blockedSummary')}
+              </div>
+              {review.canReviewPriorities && (
+                <button
+                  type="button"
+                  onClick={handleReviewPriorities}
+                  disabled={advancing}
+                  className="mt-2 border border-red-300/35 bg-red-400/10 px-2 py-1 text-[10px] font-bold uppercase text-red-200 transition-colors hover:bg-red-400/20 disabled:opacity-50"
+                >
+                  {t('advanceTurn.openReview')}
+                </button>
+              )}
+            </section>
+          )}
+
           <section>
             <div className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.16em] text-text-muted">
               {t('decisionRoom.reviewBeforeAdvance')}
@@ -421,8 +443,8 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
           <button
             type="button"
             onClick={() => void handleConfirm()}
-            disabled={advancing}
-            className="border border-accent-gold/70 bg-accent-gold px-3 py-1.5 text-[10px] font-bold uppercase text-black transition-colors hover:bg-amber-300 disabled:opacity-50"
+            disabled={advancing || review.status === 'blocked' || blockers.length > 0}
+            className="border border-accent-gold/70 bg-accent-gold px-3 py-1.5 text-[10px] font-bold uppercase text-black transition-colors hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {advancing ? t('advanceTurn.advancing') : t('advanceTurn.advance')}
           </button>
