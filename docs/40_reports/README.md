@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest supply siege state validate-when-present contract** | [implemented/20260605_SUPPLY_SIEGE_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260605_SUPPLY_SIEGE_STATE_VALIDATE_WHEN_PRESENT.md) - `military.siege_turn_counters` and `military.sarajevo_tunnel_operational` remain optional but now reject malformed present supply siege payloads. |
 | **Latest formation spawn directive validate-when-present contract** | [implemented/20260605_FORMATION_SPAWN_DIRECTIVE_VALIDATE_WHEN_PRESENT.md](implemented/20260605_FORMATION_SPAWN_DIRECTIVE_VALIDATE_WHEN_PRESENT.md) - `military.formation_spawn_directive` remains optional but now rejects malformed present directive payloads. |
 | **Latest narrative queue validate-when-present contract** | [implemented/20260605_NARRATIVE_QUEUE_VALIDATE_WHEN_PRESENT.md](implemented/20260605_NARRATIVE_QUEUE_VALIDATE_WHEN_PRESENT.md) - `military.narrative_queue` remains optional but now rejects malformed present AAR work-queue rows. |
 | **Latest operation observability validate-when-present contract** | [implemented/20260605_OPERATION_OBSERVABILITY_VALIDATE_WHEN_PRESENT.md](implemented/20260605_OPERATION_OBSERVABILITY_VALIDATE_WHEN_PRESENT.md) - `military.op_injection_warnings` and `military.watched_operations` remain optional but now reject malformed present operation-observability rows. |
