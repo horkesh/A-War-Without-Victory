@@ -2865,3 +2865,7 @@ In AWWV, a shell can look player-safe overall while one modal still reaches into
 ## 2026-06-05 - Municipality support IPC namespacing
 
 **Desktop order IPC must stage through the same namespaced military surfaces validated by saves:** municipality support orders are live only under `state.military.municipality_support_orders`, and militia pools live under `state.military.militia_pools`. Durable rule: when extracting desktop order handlers, test the helper directly and assert no top-level order field is written; update `DESKTOP_GUI_IPC_CONTRACT.md` whenever IPC behavior names a state path.
+
+## 2026-06-05 - Sector pass-boundary active-combat scan reuse
+
+**Reuse sorted active-combat formation scans at the sector pass boundary:** `buildFactionSectors(...)` and `buildMultiSectorsForCorps(...)` both need the same active brigade/OG/operational-group id universe. Durable rule: build the `strictCompare`-sorted active-combat id list once inside `buildCorpsFrontSectors(...)`, pass it read-only to per-faction/per-corps builders, and keep direct-call fallback scans for test and utility callers. Do not introduce cross-turn caches or mutable sector-packet caches for this class of reuse. Applied in `[2026-06-05] perf(sector): reuse active-combat scan during sector reconstruction`; report `docs/40_reports/implemented/20260605_SECTOR_ACTIVE_COMBAT_SCAN_REUSE.md`.

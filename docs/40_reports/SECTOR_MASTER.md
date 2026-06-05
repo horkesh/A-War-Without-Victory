@@ -1,8 +1,20 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-06-05 (post-#208 sector floor reconciliation)
+**Updated:** 2026-06-05 (active-combat scan reuse)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
+
+---
+
+## 2026-06-05: Active-combat scan reuse (byte-identical)
+
+**Change:** `buildCorpsFrontSectors(...)` now builds one `strictCompare`-sorted active-combat formation id list per sector-reconstruction invocation and passes it through `buildFactionSectors(...)` and `buildMultiSectorsForCorps(...)`.
+
+**Determinism:** The list is invocation-local, read-only, and derived from the same active brigade/OG/operational-group predicate used before. Direct `buildMultiSectorsForCorps(...)` callers keep the old fallback scan. No cross-turn cache, sector packet ordering, combat math, scenario data, save schema, UI, or serialized output changed.
+
+**Verification:** Focused sector instrumentation/cache tests passed 38/38, typecheck passed, `git diff --check` passed, and a changed 40w timed run preserved `d1ace172a29b2353`. Changed partition profile wall time was `81.7347955s`; the latest top residuals remain `buildFactionSectors:RS/RBiH`, `enforceFinalSectorGeometryInvariants:split-pieces`, `recoverDroppedFrontEdges:1`, and `sealMergedSectorTruth:ensure-coverage`.
+
+**Report:** [implemented/20260605_SECTOR_ACTIVE_COMBAT_SCAN_REUSE.md](implemented/20260605_SECTOR_ACTIVE_COMBAT_SCAN_REUSE.md)
 
 ---
 

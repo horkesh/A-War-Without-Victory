@@ -369,7 +369,9 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         const compact = region.replace(/\s+/g, ' ');
 
         expect(compact).toMatch(/sharedFrontEdgeMeta\?:\s*FrontEdgeMetaLookup/);
+        expect(compact).toMatch(/sharedActiveCombatFormationScanIds\?:\s*readonly FormationId\[\]/);
         expect(compact).toMatch(/let\s+frontEdgeLookup:\s*Map<string,\s*FrontEdgeMeta>\s*\|\s*null\s*=\s*null/);
+        expect(compact).toContain('sharedActiveCombatFormationScanIds ?? buildActiveCombatFormationScanIds(formations)');
         const frontEdgeStatement = compact.match(/const\s+frontEdge\s*=\s*(?<expr>[^;]+);/)?.groups?.expr;
         expect(frontEdgeStatement).toBeTruthy();
         expect(frontEdgeStatement).toMatch(/^sharedFrontEdgeMeta\?\.get\(eid\)\s*\?\?/);
@@ -378,6 +380,30 @@ describe('sector-partition instrumentation — env-flag gating', () => {
 
         expect(compact).not.toMatch(/const\s+frontEdgeLookup\s*=\s*new Map\(osidFrontEdges\.map\(/);
         expect(compact).not.toMatch(/for\s*\(const eid of edgeIds\)[^{]*{[^}]*const\s+frontEdgeLookup\s*=\s*new Map/);
+    });
+
+    it('static contract: buildCorpsFrontSectors reuses the active-combat formation scan', () => {
+        const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
+        const startIdx = raw.indexOf('export function buildCorpsFrontSectors(');
+        const endIdx = raw.indexOf('// Post-processing: merge small adjacent sectors', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        const compact = region.replace(/\s+/g, ' ');
+
+        expect(region).toContain("_perfTime('active-combat-formation-scan-ids'");
+        expect(compact).toContain('const activeCombatFormationScanIds = _perfTime');
+        expect(compact).toContain('buildActiveCombatFormationScanIds(formations)');
+        expect(compact).toContain('globalEdgeMeta, formations, activeCombatFormationScanIds, reverseMap');
+        expect(region).not.toMatch(/Object\.keys\(formations\)\.sort\(strictCompare\)/);
+
+        const factionStartIdx = raw.indexOf('function buildFactionSectors(');
+        const factionEndIdx = raw.indexOf('// NOTE: Cold-front sector suppression', factionStartIdx);
+        expect(factionStartIdx).toBeGreaterThanOrEqual(0);
+        expect(factionEndIdx).toBeGreaterThan(factionStartIdx);
+        const factionRegion = raw.slice(factionStartIdx, factionEndIdx).replace(/\s+/g, ' ');
+        expect(factionRegion).toContain('_perfTime, edgeMeta, activeCombatFormationScanIds');
     });
 
     it('static contract: buildSectorFromSubSegments has deterministic child attribution labels', () => {
