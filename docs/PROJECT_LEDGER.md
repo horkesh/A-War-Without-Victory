@@ -19543,3 +19543,22 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Report:** `docs/40_reports/implemented/20260606_RECEIPT_ROUTE_BROWSER_PROOF.md`
 
 ---
+
+## [2026-06-06] Parallel drive session — 8 lanes shipped (#245–#252)
+
+**Type:** Orchestrated parallel-lane push while Codex paused (#244-era break). Eight PRs merged to `main` (#253 in CI at entry time). Mix of byte-identical (no baseline move) and one calibration re-floor. No simulation regression; all merges passed full CI including baseline regression.
+
+**Shipped:**
+- **#245** `fix(state)` — GameState validate-when-present sweep: 9 validators (`war_militia_strength`, `front_edges`/`war_front_edges_osid`, `assignable_front_segments`, `guerrilla_threats`, `og_promotions`, `army_hq_last_op_turn`, `army_hq_op_count_by_year`, `elite_brigade_tracker`, `tg_recent_compositions`/`tg_formations_by_corps`). Dropped a `brigade_front_assignment` validator post-CI because the `sector_frontline_truth` dead-write-path guard greps live `src/` and the presence-check tripped it (legacy dead field). Byte-identical. **Coordination heads-up for Codex (board owner):** this validated `front_edges`/`war_front_edges_osid` and `war_militia_strength`, which board schema-sync entries deliberately classified OUT (front-snapshot contract / compatibility-materialized). Additive + byte-identical + CI-green, but reconcile against the deferred front-snapshot plan.
+- **#246** `test(artifacts)` — save/replay artifact-stability audit; decoupled the headless save/load roundtrip proof from a UI `GameStateAdapter` import (sibling test). Byte-identical.
+- **#247** `feat(intel)` — flag-gated bounded ambush-depth amplifier (`AWWV_INTEL_AMBUSH_DEPTH`, default OFF; implements #228). Flag-off empirically byte-identical (40w `a503bb9fe40fe713`).
+- **#248** `feat(events)` — Phase E/F foreclosure causality: `closes_events` on the 3 historical-default faction-root decisions (7 `csq_*` counterfactual rows). Re-floored; "all scenarios match"; 40w calibration `3649b3861a87e6ea`, anchors 30/30, benchmarks 6/6.
+- **#249** `perf(sector)` — memoize `getSectorFrontOsids` within `ensureMinimumSectorCoverage`. 40w `a503bb9fe40fe713` unchanged; baselines match.
+- **#250** `feat(codex)` — Dynamic Codex: 14 decision-bound essays, `RESPONSE:`-gated `dynamic_sections` (note vs divergence), EN+BCS, ≥2 sources each. Byte-identical.
+- **#251** `feat(telemetry)` — `decision_consequence_telemetry.ts` read-only promise→receipt coverage aggregator. Byte-identical.
+- **#252** `fix(i18n)` — localization QA: +349 BCS translations to EN↔BCS parity; +4 parity-contract tests. UI-only.
+- **#253** `refactor(state)` — retire dead `displaySectorLabel` helper (in CI at entry). Byte-identical.
+
+**Verify-stale (already shipped; NOT re-dispatched):** Standing-OG display-name (ADR-0006 #79/#81); BRIEF-GAP-6 `recent_territory_change` (army_hq_gathering.ts); BRIEF-GAP-1 supply in `force_eval` (V0.8.1 Phase 1); ARMY-GAP-1 CampaignPlan→briefing (A1-A3-C1 chain). The 2026-04-02 Engine Health Audit's commander-signal P0/P1 items are wholesale superseded — see memory `verified_open_worklist_20260606`.
+
+**Env note:** primary worktree `node_modules/.bin` is empty (packages intact); `npm run`/bare `tsx`/`vitest` shims don't resolve — agents worked around via `node node_modules/<pkg>/...cli.mjs`. Repopulate (`npm rebuild`) before the next preflight-wrapper 40w run.
