@@ -996,6 +996,102 @@ function validateFiniteNonNegativeNumberRecord(value: unknown, path: string, err
     }
 }
 
+function validateFactionNumberRecord(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+    for (const [fid, entry] of Object.entries(value)) {
+        const entryPath = `${path}.${fid}`;
+        if (!isCanonicalPlayerFaction(fid)) {
+            errors.push(`${entryPath} must use a canonical faction id key`);
+        }
+        if (!isFiniteNonNegativeNumber(entry)) {
+            errors.push(`${entryPath} must be a finite non-negative number`);
+        }
+    }
+}
+
+function validateRecruitmentPoolRecord(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when recruitment_state is present`);
+        return;
+    }
+
+    for (const [fid, entry] of Object.entries(value)) {
+        const entryPath = `${path}.${fid}`;
+        if (!isCanonicalPlayerFaction(fid)) {
+            errors.push(`${entryPath} must use a canonical faction id key`);
+        }
+        if (!isRecord(entry)) {
+            errors.push(`${entryPath} must be an object`);
+            continue;
+        }
+        if (!isCanonicalPlayerFaction(entry.faction)) {
+            errors.push(`${entryPath}.faction must be one of: ${CANONICAL_PLAYER_FACTIONS.join(', ')}`);
+        } else if (entry.faction !== fid) {
+            errors.push(`${entryPath}.faction must match its canonical faction key`);
+        }
+        if (!isFiniteNonNegativeNumber(entry.points)) {
+            errors.push(`${entryPath}.points must be a finite non-negative number`);
+        }
+        if (!isFiniteNonNegativeNumber(entry.points_initial)) {
+            errors.push(`${entryPath}.points_initial must be a finite non-negative number`);
+        }
+    }
+}
+
+function validateRecruitmentState(value: unknown, errors: string[]): void {
+    const path = 'military.recruitment_state';
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+
+    validateRecruitmentPoolRecord(value.recruitment_capital, `${path}.recruitment_capital`, errors);
+    validateRecruitmentPoolRecord(value.equipment_pools, `${path}.equipment_pools`, errors);
+
+    if (!isStringArray(value.recruited_brigade_ids)) {
+        errors.push(`${path}.recruited_brigade_ids must be string[]`);
+    }
+    if (value.recruitment_capital_trickle !== undefined) {
+        validateFactionNumberRecord(value.recruitment_capital_trickle, `${path}.recruitment_capital_trickle`, errors);
+    }
+    if (value.equipment_points_trickle !== undefined) {
+        validateFactionNumberRecord(value.equipment_points_trickle, `${path}.equipment_points_trickle`, errors);
+    }
+    if (value.max_recruits_per_faction_per_turn !== undefined && !isNonNegativeInteger(value.max_recruits_per_faction_per_turn)) {
+        errors.push(`${path}.max_recruits_per_faction_per_turn must be a non-negative integer when present`);
+    }
+}
+
+function validateSmugglingRoutes(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('military.smuggling_routes must be an array when present');
+        return;
+    }
+
+    value.forEach((entry, i) => {
+        const path = `military.smuggling_routes[${i}]`;
+        if (!isRecord(entry)) {
+            errors.push(`${path} must be an object`);
+            return;
+        }
+        if (!isNonEmptyString(entry.id)) {
+            errors.push(`${path}.id must be a non-empty string`);
+        }
+        if (!isFiniteNonNegativeNumber(entry.capacity)) {
+            errors.push(`${path}.capacity must be a finite non-negative number`);
+        }
+        if (typeof entry.disrupted !== 'boolean') {
+            errors.push(`${path}.disrupted must be a boolean`);
+        }
+        if (!isNonNegativeInteger(entry.active_turns)) {
+            errors.push(`${path}.active_turns must be a non-negative integer`);
+        }
+    });
+}
+
 function validateSmugglingAllocation(value: unknown, errors: string[]): void {
     if (!isRecord(value)) {
         errors.push('military.smuggling_allocation must be an object when present');
@@ -2927,6 +3023,9 @@ export function validateGameStateShape(
     if (military && typeof military === 'object' && !Array.isArray(military) && 'smuggling_allocation' in military && military.smuggling_allocation !== undefined) {
         validateSmugglingAllocation(military.smuggling_allocation, errors);
     }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'smuggling_routes' in military && military.smuggling_routes !== undefined) {
+        validateSmugglingRoutes(military.smuggling_routes, errors);
+    }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'army_stance' in military && military.army_stance !== undefined) {
         validateArmyStanceRecord(military.army_stance, errors);
     }
@@ -3240,45 +3339,13 @@ export function validateGameStateShape(
         }
     }
 
-    if ('recruitment_state' in s && s.recruitment_state !== undefined) {
-        const recruitment = s.recruitment_state;
-        if (recruitment !== null && typeof recruitment === 'object' && !Array.isArray(recruitment)) {
-            const r = recruitment as Record<string, unknown>;
-            const capital = r.recruitment_capital;
-            const equipment = r.equipment_pools;
-            const recruited = r.recruited_brigade_ids;
-            if (capital == null || typeof capital !== 'object' || Array.isArray(capital)) {
-                errors.push('recruitment_state.recruitment_capital must be an object when recruitment_state is present');
-            }
-            if (equipment == null || typeof equipment !== 'object' || Array.isArray(equipment)) {
-                errors.push('recruitment_state.equipment_pools must be an object when recruitment_state is present');
-            }
-            if (!Array.isArray(recruited)) {
-                errors.push('recruitment_state.recruited_brigade_ids must be string[] when recruitment_state is present');
-            }
-            const capTrickle = r.recruitment_capital_trickle;
-            if (capTrickle !== undefined && (capTrickle == null || typeof capTrickle !== 'object' || Array.isArray(capTrickle))) {
-                errors.push('recruitment_state.recruitment_capital_trickle must be an object when present');
-            }
-            const equipTrickle = r.equipment_points_trickle;
-            if (equipTrickle !== undefined && (equipTrickle == null || typeof equipTrickle !== 'object' || Array.isArray(equipTrickle))) {
-                errors.push('recruitment_state.equipment_points_trickle must be an object when present');
-            }
-            const maxPerTurn = r.max_recruits_per_faction_per_turn;
-            if (
-                maxPerTurn !== undefined &&
-                (typeof maxPerTurn !== 'number' || !Number.isInteger(maxPerTurn) || maxPerTurn < 0)
-            ) {
-                errors.push('recruitment_state.max_recruits_per_faction_per_turn must be a non-negative integer when present');
-            }
-        } else {
-            errors.push('recruitment_state must be an object when present');
-        }
-    }
-
     // Army HQ Gathering: campaign_plans and last_gathering_turn (nested under military)
     const mil = s.military as Record<string, unknown>;
     if (mil && typeof mil === 'object') {
+        if ('recruitment_state' in mil && mil.recruitment_state !== undefined) {
+            validateRecruitmentState(mil.recruitment_state, errors);
+        }
+
         if ('campaign_plans' in mil && mil.campaign_plans !== undefined) {
             const cp = mil.campaign_plans;
             if (cp === null || typeof cp !== 'object' || Array.isArray(cp)) {

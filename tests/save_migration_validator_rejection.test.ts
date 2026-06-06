@@ -1892,6 +1892,74 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('accepts current-version saves with absent or well-formed recruitment economy state', () => {
+        const absent = currentVersionState();
+        delete absent.military.recruitment_state;
+        delete absent.military.smuggling_routes;
+
+        const withEconomyState = currentVersionState();
+        withEconomyState.military.recruitment_state = {
+            recruitment_capital: {
+                RBiH: { faction: 'RBiH', points: 150, points_initial: 150 },
+                RS: { faction: 'RS', points: 250, points_initial: 250 },
+            },
+            equipment_pools: {
+                RBiH: { faction: 'RBiH', points: 60, points_initial: 60 },
+                RS: { faction: 'RS', points: 300, points_initial: 300 },
+            },
+            recruitment_capital_trickle: { RBiH: 2, RS: 1 },
+            equipment_points_trickle: { RBiH: 1, RS: 3 },
+            max_recruits_per_faction_per_turn: 1,
+            recruited_brigade_ids: ['arbih_1st_brigade', 'rs_1st_krajina_light_infantry'],
+        };
+        withEconomyState.military.smuggling_routes = [
+            { id: 'rbih_adriatic_coast', capacity: 20.5, disrupted: false, active_turns: 4 },
+            { id: 'rs_belgrade_pipeline', capacity: 0, disrupted: true, active_turns: 0 },
+        ];
+
+        expect(deserializeState(JSON.stringify(absent)).military.recruitment_state).toBeUndefined();
+        const migrated = deserializeState(JSON.stringify(withEconomyState));
+        expect(migrated.military.recruitment_state).toEqual(withEconomyState.military.recruitment_state);
+        expect(migrated.military.smuggling_routes).toEqual(withEconomyState.military.smuggling_routes);
+    });
+
+    it('rejects current-version saves with malformed recruitment economy state', () => {
+        const state = currentVersionState();
+        state.military.recruitment_state = {
+            recruitment_capital: {
+                RBiH: { faction: 'RS', points: -1, points_initial: Number.POSITIVE_INFINITY },
+                bad: { faction: 'bad', points: 'ten', points_initial: 0 },
+                empty: 4,
+            },
+            equipment_pools: {
+                HRHB: { faction: 'HRHB', points: 1.5, points_initial: -1 },
+                bad: { faction: 'bad', points: 0, points_initial: 0 },
+            },
+            recruitment_capital_trickle: { RBiH: -1, bad: 1 },
+            equipment_points_trickle: [],
+            max_recruits_per_faction_per_turn: -1,
+            recruited_brigade_ids: ['ok', 42],
+        } as any;
+        state.military.smuggling_routes = [
+            { id: '', capacity: -1, disrupted: 'no', active_turns: 1.5 },
+            7,
+        ] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.smuggling_routes\[0\]\.id must be a non-empty string[\s\S]*military\.smuggling_routes\[0\]\.capacity must be a finite non-negative number[\s\S]*military\.smuggling_routes\[0\]\.disrupted must be a boolean[\s\S]*military\.smuggling_routes\[0\]\.active_turns must be a non-negative integer[\s\S]*military\.smuggling_routes\[1\] must be an object[\s\S]*military\.recruitment_state\.recruitment_capital\.RBiH\.faction must match its canonical faction key[\s\S]*military\.recruitment_state\.recruitment_capital\.RBiH\.points must be a finite non-negative number[\s\S]*military\.recruitment_state\.recruitment_capital\.RBiH\.points_initial must be a finite non-negative number[\s\S]*military\.recruitment_state\.recruitment_capital\.bad must use a canonical faction id key[\s\S]*military\.recruitment_state\.recruitment_capital\.empty must use a canonical faction id key[\s\S]*military\.recruitment_state\.recruitment_capital\.empty must be an object[\s\S]*military\.recruitment_state\.equipment_pools\.HRHB\.points_initial must be a finite non-negative number[\s\S]*military\.recruitment_state\.recruited_brigade_ids must be string\[\][\s\S]*military\.recruitment_state\.recruitment_capital_trickle\.RBiH must be a finite non-negative number[\s\S]*military\.recruitment_state\.equipment_points_trickle must be an object when present[\s\S]*military\.recruitment_state\.max_recruits_per_faction_per_turn must be a non-negative integer when present/
+        );
+    });
+
+    it('rejects current-version saves with non-object recruitment state and non-array smuggling routes', () => {
+        const state = currentVersionState();
+        state.military.recruitment_state = [] as any;
+        state.military.smuggling_routes = {} as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.smuggling_routes must be an array when present[\s\S]*military\.recruitment_state must be an object when present/
+        );
+    });
+
     it('accepts current-version saves with absent or well-formed brigade order surfaces', () => {
         const absent = currentVersionState();
         delete absent.military.brigade_movement_state;

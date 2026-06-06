@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest recruitment/smuggling economy state validate-when-present contract** | [implemented/20260606_RECRUITMENT_SMUGGLING_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260606_RECRUITMENT_SMUGGLING_STATE_VALIDATE_WHEN_PRESENT.md) - `military.recruitment_state` and `military.smuggling_routes` remain optional but now reject malformed present economy-state payloads. |
 | **Latest launch artifact ownership** | [implemented/20260605_LAUNCH_ARTIFACT_OWNERSHIP.md](implemented/20260605_LAUNCH_ARTIFACT_OWNERSHIP.md) - `dist-packaged/...` package outputs are now explicit operator-owned transient artifacts in the generated-artifact ownership matrix. |
 | **Latest sector construction index/reachability reuse** | [implemented/20260606_SECTOR_CONSTRUCTION_INDEX_REACHABILITY_REUSE.md](implemented/20260606_SECTOR_CONSTRUCTION_INDEX_REACHABILITY_REUSE.md) - `buildFactionSectors(...)` now reuses invocation-local per-corps sector formation scan indexes and staffability reachable-OSID sets while preserving the current `d1ace172a29b2353` floor. |
 | **Latest sector active-combat scan reuse** | [implemented/20260605_SECTOR_ACTIVE_COMBAT_SCAN_REUSE.md](implemented/20260605_SECTOR_ACTIVE_COMBAT_SCAN_REUSE.md) - `buildCorpsFrontSectors(...)` now reuses one sorted active-combat formation scan across per-faction and per-corps sector construction while preserving the current `d1ace172a29b2353` floor. |
