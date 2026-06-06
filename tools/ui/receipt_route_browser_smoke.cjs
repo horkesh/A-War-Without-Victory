@@ -36,6 +36,53 @@ function buildReceiptRouteSave() {
     patron_defiance_supply_cuts: [
       { faction: 'RS', turn: 44, cut_fraction: 0.35, support_after: 0.45 },
     ],
+    reserve_request_history: [
+      {
+        request_id: 'receipt-route-reserve',
+        turn: 42,
+        faction: 'RS',
+        corps_id: 'vrs_drina_corps',
+        brigade_id: 'receipt_route_guard_brigade',
+        outcome: 'accepted',
+        reason: 'Army CO accepted: request is actionable.',
+        decided_by: 'player',
+        purpose: 'defensive',
+        why_needed: 'Drina Corps needs a reserve to stabilize the front.',
+        how_to_use: 'Anchor the weakest sector.',
+      },
+    ],
+    convoy_decision_history: [
+      {
+        id: 'receipt-route-convoy',
+        turn: 43,
+        target_enclave: 'Srebrenica enclave',
+        route_faction: 'RS',
+        target_faction: 'RBiH',
+        supply_amount: 0.5,
+        decision: 'allow',
+        decided_by: 'player',
+      },
+    ],
+    operation_opportunities: [
+      {
+        proposal_id: 'receipt-route-opportunity',
+        opportunity_id: 'corridor_push',
+        approver_faction: 'RS',
+        status: 'approved',
+        eligibility_turn: 40,
+      },
+    ],
+    operation_opportunity_resolutions: [
+      {
+        proposal_id: 'receipt-route-opportunity',
+        opportunity_id: 'corridor_push',
+        response: 'approve',
+        response_turn: 41,
+        executed_op_name: 'Operation Receipt Corridor',
+        executed_op_aar_id: 'receipt_route_hist_op',
+        exit_class: 'partial_success',
+      },
+    ],
   };
   save.turn_summaries = [];
   save.operation_history = [
@@ -335,15 +382,25 @@ async function run() {
       await waitForVisibleText(page, 'Decision Consequences');
       await waitForVisibleText(page, 'Filed to Records');
       await waitForVisibleText(page, 'Review in Records');
+      await waitForVisibleText(page, 'Reserve request accepted');
+      await waitForVisibleText(page, 'Operation Receipt Corridor');
+      await waitForVisibleText(page, 'Convoy allowed');
+      await waitForVisibleText(page, 'Humanitarian convoy');
+      await waitForVisibleText(page, 'Filed to Chronicle');
       await waitForButtonLabel(page, 'After-Action Report0');
       await waitForButtonLabel(page, 'Operation History1');
 
-      const evidence = await page.evaluate(() => {
+      const recordsEvidence = await page.evaluate(() => {
         const bodyText = document.body?.innerText ?? '';
         const lowerBodyText = bodyText.toLowerCase();
         return {
           hasDecisionRecords: lowerBodyText.includes('decision consequences'),
           hasRecordsFiled: lowerBodyText.includes('filed to records'),
+          hasChronicleFiled: lowerBodyText.includes('filed to chronicle'),
+          hasReserveReceipt: lowerBodyText.includes('reserve request accepted'),
+          hasOpportunityReceipt: lowerBodyText.includes('operation receipt corridor'),
+          hasConvoyReceipt: lowerBodyText.includes('convoy allowed'),
+          hasChronicleOpen: lowerBodyText.includes('war chronicle'),
           hasAarZero: Array.from(document.querySelectorAll('button')).some((button) =>
             (button.textContent ?? '').replace(/\s+/g, ' ').trim().toLowerCase().includes('after-action report0')
           ),
@@ -354,10 +411,27 @@ async function run() {
         };
       });
 
-      if (!evidence.hasDecisionRecords || !evidence.hasRecordsFiled) {
+      await clickByText(page, 'Open Chronicle');
+      await waitForVisibleText(page, 'War Chronicle');
+      const chronicleEvidence = await page.evaluate(() => {
+        const bodyText = document.body?.innerText ?? '';
+        return {
+          hasChronicleOpen: bodyText.toLowerCase().includes('war chronicle'),
+          bodyTextSample: bodyText.replace(/\s+/g, ' ').slice(0, 1200),
+        };
+      });
+      const evidence = { records: recordsEvidence, chronicle: chronicleEvidence };
+
+      if (!recordsEvidence.hasDecisionRecords || !recordsEvidence.hasRecordsFiled) {
         throw new Error(`Patron consequence did not route to Decision consequence records: ${JSON.stringify(evidence)}`);
       }
-      if (!evidence.hasAarZero || !evidence.hasOperationHistoryOne) {
+      if (!recordsEvidence.hasChronicleFiled || !recordsEvidence.hasReserveReceipt || !recordsEvidence.hasOpportunityReceipt || !recordsEvidence.hasConvoyReceipt) {
+        throw new Error(`Receipt family coverage was incomplete: ${JSON.stringify(evidence)}`);
+      }
+      if (!chronicleEvidence.hasChronicleOpen) {
+        throw new Error(`Chronicle-filed receipt did not open Chronicle: ${JSON.stringify(evidence)}`);
+      }
+      if (!recordsEvidence.hasAarZero || !recordsEvidence.hasOperationHistoryOne) {
         throw new Error(`AAR and Operation History counts did not remain split: ${JSON.stringify(evidence)}`);
       }
       const screenshotPath = path.join(OUT_DIR, 'receipt_route_browser_smoke.png');

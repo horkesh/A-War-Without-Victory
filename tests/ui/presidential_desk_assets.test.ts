@@ -6,12 +6,13 @@ import {
   getPacketThumbnailForInboxType,
   PRESIDENTIAL_DESK_BACKGROUND,
 } from '../../src/ui/map/data/presidentialDeskAssets.js';
-import type { DecisionConsequenceRecord } from '../../src/ui/map/data/decisionConsequenceLedger.js';
+import type { DecisionConsequenceFamilyId, DecisionConsequenceRecord } from '../../src/ui/map/data/decisionConsequenceLedger.js';
 
-function record(family: string): DecisionConsequenceRecord {
+function record(family: string, familyId: DecisionConsequenceFamilyId): DecisionConsequenceRecord {
   return {
     id: `record:${family}`,
     turn: 1,
+    familyId,
     family,
     title: family,
     outcome: 'Recorded',
@@ -36,11 +37,11 @@ describe('presidential desk assets', () => {
   });
 
   it('maps filed consequence records to consequence stills', () => {
-    expect(getConsequenceStillForRecord(record('Peace proposal'))).toContain('consequence_negotiated_settlement');
-    expect(getConsequenceStillForRecord(record('Army reserve'))).toContain('consequence_reserve_deployment');
-    expect(getConsequenceStillForRecord(record('Humanitarian convoy'))).toContain('consequence_humanitarian_access');
-    expect(getConsequenceStillForRecord(record('Officer personnel'))).toContain('consequence_personnel_change');
-    expect(getConsequenceStillForRecord(record('Event decision'))).toContain('consequence_public_pressure');
+    expect(getConsequenceStillForRecord(record('Peace proposal', 'peace-proposal'))).toContain('consequence_negotiated_settlement');
+    expect(getConsequenceStillForRecord(record('Army reserve', 'army-reserve'))).toContain('consequence_reserve_deployment');
+    expect(getConsequenceStillForRecord(record('Humanitarian convoy', 'humanitarian-convoy'))).toContain('consequence_humanitarian_access');
+    expect(getConsequenceStillForRecord(record('Officer personnel', 'officer-personnel'))).toContain('consequence_personnel_change');
+    expect(getConsequenceStillForRecord(record('Event decision', 'event-decision'))).toContain('consequence_public_pressure');
   });
 
   it('exposes the presidential desk background asset', () => {

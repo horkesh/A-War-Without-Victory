@@ -12,6 +12,8 @@
 |------|--------|
 | **Latest Warroom native overlay residue batch** | [implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md](implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md) - Intelligence, Staff, and Faction are the only native Warroom preview overlays, with explicit drill-ins; retired StrategicDashboard/EventLog local command variants are gone from live source. |
 
+| **Latest receipt family quality/localization** | [implemented/20260606_RECEIPT_FAMILY_QUALITY_LOCALIZATION.md](implemented/20260606_RECEIPT_FAMILY_QUALITY_LOCALIZATION.md) - Decision consequence family labels and Records archive-summary chrome are localized, and the loaded browser smoke now covers patron, reserve, operation-opportunity, and Chronicle-filed convoy receipts together. |
+
 | **Latest supply panel player-scoped read-model** | [implemented/20260606_SUPPLY_PANEL_PLAYER_SCOPED_READMODEL.md](implemented/20260606_SUPPLY_PANEL_PLAYER_SCOPED_READMODEL.md) - Supply map logistics counts are localized, deterministic, and scoped to the loaded player faction even under legacy fallback rows. |
 
 | **Latest local military state validate-when-present contract** | [implemented/20260606_LOCAL_MILITARY_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260606_LOCAL_MILITARY_STATE_VALIDATE_WHEN_PRESENT.md) - Legacy AoR caps, OG orders, settlement holdouts, and faction officer maturity remain optional but now reject malformed present local-state payloads. |

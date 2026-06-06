@@ -5,6 +5,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { RecordsContent } from '../../src/ui/map/components/army_hq/RecordsContent.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 
 function makeLoadedState(): LoadedGameState {
@@ -121,6 +122,7 @@ describe('Army HQ Records operation AAR review', () => {
 
     afterEach(() => {
         cleanup();
+        setLocale('en');
         useGameStore.setState(useGameStore.getInitialState());
     });
 
@@ -212,6 +214,34 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.getByText('Chronicle Filed')).toBeTruthy();
         expect(screen.getByRole('button', { name: /Turn Aftermath 1/i })).toBeTruthy();
         expect(screen.getByRole('button', { name: /Decision Log 1/i })).toBeTruthy();
+    });
+
+    it('localizes the Records archive summary chrome', () => {
+        setLocale('bcs');
+        useGameStore.setState({
+            loadedGameState: {
+                ...makeLoadedState(),
+                firedEvents: [
+                    {
+                        id: 'cabinet-crisis',
+                        turn: 8,
+                        title: 'Cabinet crisis response',
+                        narrative: 'The cabinet accepted the policy line.',
+                        category: 'political',
+                        effects: [{ kind: 'authority', description: 'Authority held.' }],
+                        isDecision: true,
+                    },
+                ],
+            },
+        });
+
+        render(createElement(RecordsContent));
+
+        expect(screen.getByRole('region', { name: 'Sažetak arhive zapisa' })).toBeTruthy();
+        expect(screen.getByText('Putevi arhive')).toBeTruthy();
+        expect(screen.getByText('Najnovija odluka')).toBeTruthy();
+        expect(screen.getByText('U Hronici')).toBeTruthy();
+        expect(screen.queryByText('Archive Routes')).toBeNull();
     });
 
     it('counts the AAR tab from turn reports instead of completed operations', () => {
