@@ -1,3 +1,7 @@
+## 2026-06-06 - Retained map-derived artifact roots need owner rows before cleanup
+
+**Committed map-derived roots are not generic scratch output:** `data/derived/georef/`, `data/derived/operational/`, and `data/derived/municipality_audit/` contain retained generated map/georef/operational/audit evidence. Durable rule: before deleting, refreshing, expanding, or reclassifying a committed `data/derived/` root, add or update a generated-artifact ownership row that names the owner command, validation guard, commit policy, and transient policy, then pin the tracked file list with a focused ownership test. Applied in `[2026-06-06] test(map): document derived map artifact ownership`.
+
 ## 2026-06-06 - Derived military scalar validation excludes front snapshots
 
 **Derived scalar maps can be locally shape-validated without becoming required state:** `military.brigade_encircled`, `military.battle_damage`, `military.home_distance_cache`, and `military.active_offensives_against_corps` are optional derived/runtime scalar maps. Durable rule: validate present local value shape only; do not materialize absent fields, resolve ids, enforce battle-damage upper bounds, or change encirclement/damage/cache producers in a schema cleanup lane. Applied in `[2026-06-06] fix(state): validate derived military scalar maps when present`.
