@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Warroom native overlay residue batch** | [implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md](implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md) - Intelligence, Staff, and Faction native Warroom previews now drill into existing owner surfaces, while retired StrategicDashboard/EventLog local command variants are removed from live source. |
 | **Receipt route browser proof** | [implemented/20260606_RECEIPT_ROUTE_BROWSER_PROOF.md](implemented/20260606_RECEIPT_ROUTE_BROWSER_PROOF.md) - Live loaded-save browser smoke proves Records-filed Desk receipts route to Decision Consequences and AAR counts remain split from Operation History. |
 | **Patron actor-history route cohesion** | [implemented/20260605_PATRON_ACTOR_HISTORY_ROUTE_COHESION.md](implemented/20260605_PATRON_ACTOR_HISTORY_ROUTE_COHESION.md) - Patron-defiance material cuts now appear in Patron Relations timeline history and file through the shared Records/Chronicle consequence ledger. |
 | **Records route cohesion** | [implemented/20260605_RECORDS_ROUTE_COHESION.md](implemented/20260605_RECORDS_ROUTE_COHESION.md) - Army HQ Records now shows archive route/count summaries and decision consequence rows expose stable Records/Chronicle filing destinations. |
@@ -121,6 +122,7 @@
 
 | Date | Change | Report / spec |
 |------|--------|----------------|
+| 2026-06-06 | **Warroom native overlay residue batch:** Intelligence, Staff, and Faction are now the only native Warroom preview overlays with explicit drill-ins to Army HQ Records/AAR, Personnel, and Summary; retired StrategicDashboard/EventLog local command variants and the orphan status-strip i18n key are removed from live source. | [implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md](implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md) |
 | 2026-05-22 | **GUI visual audit retired chrome removal H9** - Unused retired tactical chrome files were deleted after import review, with a guard keeping them off disk. | [implemented/20260522_GUI_AUDIT_RETIRED_CHROME_REMOVAL_H9.md](implemented/20260522_GUI_AUDIT_RETIRED_CHROME_REMOVAL_H9.md) |
 | 2026-05-22 | **GUI visual audit Army HQ commander empty-state H8** - Army HQ commander lookup now falls back to active flattened officer data when sidecar state rows are absent. | [implemented/20260522_GUI_AUDIT_ARMY_HQ_COMMANDER_EMPTY_STATE_H8.md](implemented/20260522_GUI_AUDIT_ARMY_HQ_COMMANDER_EMPTY_STATE_H8.md) |
 | 2026-05-22 | **GUI visual audit Warroom desk map H7** - Warroom desk-map projection now fills more of its hotspot and uses stronger paper/frame/ink contrast. | [implemented/20260522_GUI_AUDIT_WARROOM_DESK_MAP_H7.md](implemented/20260522_GUI_AUDIT_WARROOM_DESK_MAP_H7.md) |

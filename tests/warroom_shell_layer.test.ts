@@ -241,14 +241,9 @@ describe('WarroomShellLayer onNavigate contract', () => {
 // ── Wave 3: new ShellHandoffCommand kinds ────────────────────────────────────
 
 describe('shared-vs-local Warroom command split', () => {
-  it('{ kind: strategic-overview } is a local Warroom command only', () => {
-    const cmd: WarroomLocalCommand = { kind: 'strategic-overview' };
-    expect(isShellHandoffCommand(cmd)).toBe(false);
-  });
-
-  it('{ kind: event-log } is a local Warroom command only', () => {
-    const cmd: WarroomLocalCommand = { kind: 'event-log' };
-    expect(isShellHandoffCommand(cmd)).toBe(false);
+  it('retired strategic-overview and event-log commands are no longer local Warroom commands', () => {
+    expect(isWarroomLocalCommand({ kind: 'strategic-overview' })).toBe(false);
+    expect(isWarroomLocalCommand({ kind: 'event-log' })).toBe(false);
   });
 });
 
@@ -350,15 +345,15 @@ describe('warroomCommandStaysInRoom', () => {
 });
 
 describe('warroom local commands', () => {
-  it('strategic-overview is a local Warroom command, not a shared shell handoff', () => {
+  it('strategic-overview is retired from local Warroom commands', () => {
     const cmd = { kind: 'strategic-overview' } as const;
-    expect(isWarroomLocalCommand(cmd)).toBe(true);
+    expect(isWarroomLocalCommand(cmd)).toBe(false);
     expect(isShellHandoffCommand(cmd)).toBe(false);
   });
 
-  it('event-log is a local Warroom command, not a shared shell handoff', () => {
+  it('event-log is retired from local Warroom commands', () => {
     const cmd = { kind: 'event-log' } as const;
-    expect(isWarroomLocalCommand(cmd)).toBe(true);
+    expect(isWarroomLocalCommand(cmd)).toBe(false);
     expect(isShellHandoffCommand(cmd)).toBe(false);
   });
 });

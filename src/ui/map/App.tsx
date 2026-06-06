@@ -278,18 +278,14 @@ function PeaceWarTransitionOverlay() {
   return <PeaceWarTransition state={state} onDismiss={() => setSeen(true)} />;
 }
 
-const WARROOM_OVERLAY_COPY: Record<Exclude<WarroomOverlaySurface, 'president-desk' | 'command-surface'>, {
+type NativeWarroomOverlaySurface = Extract<WarroomOverlaySurface, 'intelligence' | 'staff' | 'faction'>;
+
+const WARROOM_OVERLAY_COPY: Record<NativeWarroomOverlaySurface, {
   title: string;
   eyebrow: string;
   body: string;
-  drillInLabel?: string;
+  drillInLabel: string;
 }> = {
-  diplomacy: {
-    title: 'Diplomacy',
-    eyebrow: 'Patron relations',
-    body: 'Patron pressure, external demands, and negotiation windows stay here before any detailed diplomatic drill-in.',
-    drillInLabel: 'Open patron details',
-  },
   intelligence: {
     title: 'Intelligence',
     eyebrow: 'Radio briefs',
@@ -302,16 +298,11 @@ const WARROOM_OVERLAY_COPY: Record<Exclude<WarroomOverlaySurface, 'president-des
     body: 'Commanders, vacancies, personnel friction, and replacement actions are reviewed here before entering Army HQ.',
     drillInLabel: 'Open Army HQ personnel',
   },
-  chronicle: {
-    title: 'Chronicle',
-    eyebrow: 'Public record',
-    body: 'News, public consequences, and the campaign chronicle are previewed here before opening the full archive.',
-    drillInLabel: 'Open Chronicle',
-  },
   faction: {
     title: 'Faction',
     eyebrow: 'Presidential constraints',
     body: 'Faction legitimacy, doctrine, institutional constraints, and strategic posture stay visible as Warroom context first.',
+    drillInLabel: 'Open faction summary',
   },
 };
 
@@ -320,9 +311,9 @@ function WarroomNativeOverlay({
   onClose,
   onDrillIn,
 }: {
-  surface: Exclude<WarroomOverlaySurface, 'president-desk' | 'command-surface'>;
+  surface: NativeWarroomOverlaySurface;
   onClose: () => void;
-  onDrillIn?: () => void;
+  onDrillIn: () => void;
 }) {
   const dialogRef = useRef<HTMLElement | null>(null);
   const copy = WARROOM_OVERLAY_COPY[surface];
@@ -364,16 +355,14 @@ function WarroomNativeOverlay({
         </button>
       </div>
       <p className="mt-3 text-[12px] leading-relaxed text-text-secondary">{copy.body}</p>
-      {copy.drillInLabel && onDrillIn ? (
-        <button
-          type="button"
-          onClick={onDrillIn}
-          data-testid={`warroom-overlay-${surface}-drill-in`}
-          className="mt-4 border border-accent-gold/45 bg-accent-gold/12 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-accent-gold transition-colors hover:bg-accent-gold/20"
-        >
-          {copy.drillInLabel}
-        </button>
-      ) : null}
+      <button
+        type="button"
+        onClick={onDrillIn}
+        data-testid={`warroom-overlay-${surface}-drill-in`}
+        className="mt-4 border border-accent-gold/45 bg-accent-gold/12 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-accent-gold transition-colors hover:bg-accent-gold/20"
+      >
+        {copy.drillInLabel}
+      </button>
     </section>
   );
 }
@@ -440,7 +429,7 @@ function App() {
   const [commandStripCategoryId, setCommandStripCategoryId] = useState<PresidentialCommandCategoryId | null>(null);
   const [warroomDeskOpen, setWarroomDeskOpen] = useState(false);
   const [warroomDecisionRoomOpen, setWarroomDecisionRoomOpen] = useState(false);
-  const [warroomOverlaySurface, setWarroomOverlaySurface] = useState<Exclude<WarroomOverlaySurface, 'president-desk' | 'command-surface'> | null>(null);
+  const [warroomOverlaySurface, setWarroomOverlaySurface] = useState<NativeWarroomOverlaySurface | null>(null);
   const warroomFocusReturnRef = useRef<HTMLElement | null>(null);
   const pauseOpen = useGameStore((s) => s.pauseMenuOpen);
   const setPauseOpen = (v: boolean) => useGameStore.setState({ pauseMenuOpen: v });
@@ -912,9 +901,7 @@ function App() {
         // Map-first: open WarSummaryModal on the tactical map instead of Army HQ
         openSummary();
       } else if (e.key === 'e' || e.key === 'E') {
-        // Legacy event-log hotkey now opens the Authored Choices ledger
-        // (DecisionHistoryOverlay). The flat event feed was retired; the
-        // ledger is the single record surface. Mirrors the 'D' hotkey.
+        // Authored Choices ledger shortcut. Mirrors the 'D' hotkey.
         e.preventDefault();
         setIsDecisionHistoryOpen(prev => !prev);
       } else if (e.key === 'c' || e.key === 'C') {
@@ -1035,6 +1022,23 @@ function App() {
     setWarroomOverlaySurface(null);
     setWarroomDecisionRoomOpen(false);
     restoreWarroomFocus();
+  };
+  const openNativeWarroomOverlayDrillIn = (surface: NativeWarroomOverlaySurface) => {
+    setWarroomOverlaySurface(null);
+    setWarroomDecisionRoomOpen(false);
+    closeCommandStrip(false);
+    if (surface === 'staff') {
+      openArmyHQTab(useGameStore.getState(), 'personnel');
+      setAppScreen('game');
+      return;
+    }
+    if (surface === 'intelligence') {
+      openArmyHQRecordsSubTab(useGameStore.getState(), 'aar');
+      setAppScreen('game');
+      return;
+    }
+    openArmyHQTab(useGameStore.getState(), 'summary');
+    setAppScreen('game');
   };
   const openCommandStrip = (categoryId: PresidentialCommandCategoryId | null, preserveFocusTarget = true) => {
     if (preserveFocusTarget) rememberWarroomFocus();
@@ -1630,19 +1634,7 @@ function App() {
                   openWarroomOverlay(command.surface);
                   return;
                 }
-                if (command.kind === 'strategic-overview') {
-                  // StrategicDashboard retired — the territory-over-time trend
-                  // chart now lives in The War's Record (Army HQ RECORDS tab).
-                  // Re-point the warroom strategic-overview hotspot there.
-                  openArmyHQRecordsSubTab(useGameStore.getState(), 'aftermath');
-                } else if (command.kind === 'diplomacy') {
-                  setDiplomacyOpen(true);
-                } else if (command.kind === 'event-log') {
-                  // Warroom record hotspot (desk_radio) now opens the Authored
-                  // Choices ledger. The flat event feed was retired; the ledger
-                  // is the single record surface.
-                  setIsDecisionHistoryOpen(true);
-                } else if (command.kind === 'war-map') {
+                if (command.kind === 'war-map') {
                   setWarroomOverlaySurface(null);
                   setWarroomDeskOpen(false);
                   setWarroomDecisionRoomOpen(false);
@@ -1734,20 +1726,7 @@ function App() {
             <WarroomNativeOverlay
               surface={warroomOverlaySurface}
               onClose={closeWarroomNativeOverlay}
-              onDrillIn={() => {
-                if (warroomOverlaySurface === 'staff') {
-                  openArmyHQTab(useGameStore.getState(), 'personnel');
-                  setAppScreen('game');
-                } else if (warroomOverlaySurface === 'diplomacy') {
-                  setDiplomacyOpen(true);
-                } else if (warroomOverlaySurface === 'intelligence') {
-                  openArmyHQRecordsSubTab(useGameStore.getState(), 'aar');
-                  setAppScreen('game');
-                } else if (warroomOverlaySurface === 'chronicle') {
-                  openChronicle(useGameStore.getState());
-                  setAppScreen('game');
-                }
-              }}
+              onDrillIn={() => openNativeWarroomOverlayDrillIn(warroomOverlaySurface)}
             />
           )}
         </div>

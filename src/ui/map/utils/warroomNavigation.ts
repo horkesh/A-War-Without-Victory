@@ -11,15 +11,6 @@ export type WarroomOverlaySurface =
 
 export type WarroomLocalCommand =
   | {
-      kind: 'strategic-overview';
-    }
-  | {
-      kind: 'diplomacy';
-    }
-  | {
-      kind: 'event-log';
-    }
-  | {
       kind: 'war-map';
     }
   | {
@@ -31,10 +22,7 @@ export function isWarroomLocalCommand(value: unknown): value is WarroomLocalComm
   if (!value || typeof value !== 'object') return false;
   const command = value as Partial<WarroomLocalCommand>;
   return (
-    command.kind === 'strategic-overview'
-    || command.kind === 'diplomacy'
-    || command.kind === 'event-log'
-    || command.kind === 'war-map'
+    command.kind === 'war-map'
     || command.kind === 'warroom-overlay'
   );
 }

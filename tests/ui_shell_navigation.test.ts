@@ -215,9 +215,9 @@ describe('shellNavigation', () => {
     expect(shouldShowWarroomReturn('', false)).toBe(false);
   });
 
-  it('keeps Warroom-local overlays out of the shared shell handoff boundary', () => {
-    expect(isWarroomLocalCommand({ kind: 'strategic-overview' })).toBe(true);
-    expect(isWarroomLocalCommand({ kind: 'event-log' })).toBe(true);
+  it('keeps retired Warroom local commands out of both command boundaries', () => {
+    expect(isWarroomLocalCommand({ kind: 'strategic-overview' })).toBe(false);
+    expect(isWarroomLocalCommand({ kind: 'event-log' })).toBe(false);
     expect(decodeShellHandoffCommand(encodeURIComponent(JSON.stringify({ kind: 'strategic-overview' })))).toBeNull();
     expect(decodeShellHandoffCommand(encodeURIComponent(JSON.stringify({ kind: 'event-log' })))).toBeNull();
   });

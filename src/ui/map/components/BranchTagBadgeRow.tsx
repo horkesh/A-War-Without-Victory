@@ -4,9 +4,8 @@
  * Renders the canonical branch tags currently active for a given faction,
  * surfaced as a chip row from the foundational state via the H2 wave 1
  * helper `getBranchTagsActive`. Per H1 scoping doc §4.2D, the proposed
- * host for this component is the player-faction header area
- * (`BottomStatusStrip.tsx` / `StrategicDashboard.tsx`); wiring is
- * deferred. This file ships the standalone component only.
+ * host for this component is the player-faction header or command-record
+ * area; wiring is deferred. This file ships the standalone component only.
  *
  * Conservative scope per H1 §6:
  *   - data display only (no behavior changes)

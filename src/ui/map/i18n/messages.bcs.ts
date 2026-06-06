@@ -1657,7 +1657,6 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'attackConfirm.odds': 'Izgledi',
     'statusStrip.less': 'MANJE',
     'statusStrip.more': '+JOŠ',
-    'statusStrip.openStrategicDashboard': 'Otvori strateski pregled',
     'statusStrip.territoryControlTitle': 'Kontrola teritorije (ponderisana površinom)',
     'statusStrip.friendlyPct': 'Prijateljsko {pct}%',
     'statusStrip.hostileHeldPct': 'Neprijatelj drži {pct}%',
