@@ -1,3 +1,9 @@
+## 2026-06-06 - Native Warroom overlays must not retain dead local command variants
+
+**Direct mature panels are dispatcher targets, not native-preview surfaces:** Diplomacy/Patron Relations and Chronicle/Authored Choices are mature full panels, so the Warroom dispatcher may route to them directly while the native preview overlay type stays limited to surfaces that genuinely preview before drilling in. Durable rule: when a surface no longer renders through `WarroomNativeOverlay`, remove it from the native overlay state/type and prove it through route/static tests instead of leaving it as an unreachable component branch. Applied in `[2026-06-06] fix(ui): harden Warroom native overlay ownership`.
+
+**Retired Warroom commands should leave the command union:** Once StrategicDashboard and flat EventLog are retired from live routing, do not keep `strategic-overview` or `event-log` as local command variants with redirect branches. Durable rule: remove retired variants from `WarroomLocalCommand`, keep shell-handoff decode rejecting them, and route current UI through explicit surviving surfaces such as The War's Record, Authored Choices, or native overlays.
+
 ## 2026-06-06 - Supply UI fallbacks must stay player-scoped
 
 **Legacy supply fallback rows are still player-visible UI data:** Even when adapter output normally scopes `warPhaseSupplyPressure` and `warPhaseSupplyCondition`, direct panel/render tests can pass mixed-faction fallback rows. Durable rule: when `player_faction` is loaded, supply UI fallback aggregation must read only that faction; use all-faction fallback only when there is no loaded player faction. Applied in `[2026-06-06] fix(ui): scope supply panel read-model counts`.

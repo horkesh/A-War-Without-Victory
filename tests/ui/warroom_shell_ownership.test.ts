@@ -44,8 +44,52 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(source).toContain('seenHeadlines');
     });
 
-    it('routes the Warroom diplomacy telephone to a Warroom-native diplomacy overlay first', () => {
+    it('routes the Warroom diplomacy telephone through the Warroom overlay dispatcher', () => {
         expect(regionToShellHandoff('diplomatic_telephone')).toEqual({ kind: 'warroom-overlay', surface: 'diplomacy' });
+    });
+
+    it('routes Intelligence, Staff, and Faction through native Warroom preview overlays', () => {
+        expect(regionToShellHandoff('intelligence_journal')).toEqual({ kind: 'warroom-overlay', surface: 'intelligence' });
+        expect(regionToShellHandoff('desk_radio')).toEqual({ kind: 'warroom-overlay', surface: 'intelligence' });
+        expect(regionToShellHandoff('commander_coatrack')).toEqual({ kind: 'warroom-overlay', surface: 'staff' });
+        expect(regionToShellHandoff('wall_flag_area')).toEqual({ kind: 'warroom-overlay', surface: 'faction' });
+    });
+
+    it('retires live StrategicDashboard and flat EventLog local command variants', () => {
+        const navigation = read('src/ui/map/utils/warroomNavigation.ts');
+        const app = read('src/ui/map/App.tsx');
+        const englishMessages = read('src/ui/map/i18n/messages.en.ts');
+        const bcsMessages = read('src/ui/map/i18n/messages.bcs.ts');
+
+        expect(navigation).not.toContain("kind: 'strategic-overview'");
+        expect(navigation).not.toContain("kind: 'event-log'");
+        expect(app).not.toContain("command.kind === 'strategic-overview'");
+        expect(app).not.toContain("command.kind === 'event-log'");
+        expect(englishMessages).not.toContain('openStrategicDashboard');
+        expect(bcsMessages).not.toContain('openStrategicDashboard');
+    });
+
+    it('keeps native Warroom overlay drill-ins on existing owner surfaces', () => {
+        const app = read('src/ui/map/App.tsx');
+        const drillInStart = app.indexOf('const openNativeWarroomOverlayDrillIn =');
+        const drillInEnd = app.indexOf('\n  const openCommandStrip =', drillInStart);
+        const overlayStateStart = app.indexOf('const [warroomOverlaySurface');
+
+        expect(drillInStart).toBeGreaterThanOrEqual(0);
+        expect(drillInEnd).toBeGreaterThan(drillInStart);
+        expect(overlayStateStart).toBeGreaterThanOrEqual(0);
+
+        const drillIn = app.slice(drillInStart, drillInEnd);
+        const overlayState = app.slice(overlayStateStart, app.indexOf('\n', overlayStateStart));
+
+        expect(overlayState).toContain('useState<NativeWarroomOverlaySurface | null>');
+        expect(drillIn).toContain("if (surface === 'staff')");
+        expect(drillIn).toContain("openArmyHQTab(useGameStore.getState(), 'personnel')");
+        expect(drillIn).toContain("if (surface === 'intelligence')");
+        expect(drillIn).toContain("openArmyHQRecordsSubTab(useGameStore.getState(), 'aar')");
+        expect(drillIn).toContain("openArmyHQTab(useGameStore.getState(), 'summary')");
+        expect(drillIn).not.toContain("surface === 'diplomacy'");
+        expect(drillIn).not.toContain("surface === 'chronicle'");
     });
 
     it('keeps Warroom Diplomacy dismissible through the Warroom Escape stack', () => {

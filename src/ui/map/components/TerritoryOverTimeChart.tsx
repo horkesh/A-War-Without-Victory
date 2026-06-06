@@ -1,9 +1,8 @@
 /**
  * TerritoryOverTimeChart — territory-control-over-time stacked-area SVG chart.
  *
- * Extracted verbatim (behavior-preserving) from the retired StrategicDashboard
- * overlay. Re-hosted into the player-reachable "The War's Record" surface
- * (Army HQ RECORDS tab) so the trend chart survives the dashboard retirement.
+ * Hosted by the player-reachable "The War's Record" surface
+ * (Army HQ RECORDS tab).
  *
  * Pure presentation: reads `loadedGameState.turnSummaries[].territory_snapshot`
  * from the game store and renders a stacked-area trend (or a single player-

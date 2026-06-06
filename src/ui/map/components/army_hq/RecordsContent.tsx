@@ -50,9 +50,8 @@ export function RecordsContent() {
 
     return (
         <div>
-            {/* Territory-over-time trend chart — re-hosted from the retired
-                StrategicDashboard. The War's Record surface owns the campaign
-                trend; this is the player-reachable home for the chart. */}
+            {/* Territory-over-time trend chart. The War's Record surface owns
+                the campaign trend; this is the player-reachable home. */}
             <div className="mb-4 rounded-md border border-panel-border bg-panel-card px-3 py-3">
                 <TerritoryOverTimeChart />
             </div>
