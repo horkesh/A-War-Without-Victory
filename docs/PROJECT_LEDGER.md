@@ -19386,3 +19386,15 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Report:** `docs/40_reports/implemented/20260606_SECTOR_ENEMY_PERSONNEL_INDEX_REUSE.md`
 
 ---
+
+## [2026-06-06] fix(state): validate scenario military guidance when present
+
+**Type:** Optional GameState save-validation cleanup. No save schema version, migration, fixture refresh, scenario data, simulation behavior, baseline manifest, replay writer, UI behavior, generated artifact, randomness, timestamps, or persisted output ordering changed.
+
+**Change:** `military.must_hold_osids_by_corps` and `military.comms_override_by_corps` are now validated when present. Absence remains valid. Present must-hold records validate only local corps-keyed string-array shape; present comms override records validate only local row shape (`before_turn` non-negative integer and `mode` `radio`/`full`). This deliberately does not resolve corps ids, resolve OSIDs, change scenario-loader filtering, materialize absent fields, or tighten reserve-map upper bounds.
+
+**Docs/roadmap:** Updated `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, and `docs/PROJECT_LEDGER_KNOWLEDGE.md` with the batched optional-schema closeout and the reusable scenario-guidance validation rule.
+
+**Verification:** Focused validator/save-migration suite passed 188/188: `npx.cmd vitest run tests\save_migration_validator_rejection.test.ts --reporter=dot`; `npm.cmd run typecheck -- --pretty false` passed; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed total 507 (`state: 172`, `sim: 327`, `derived: 8`); `git diff --check` passed. Scenario/baseline regression was not run because this is optional-present shape validation only and cannot affect sim/output/save bytes for valid payloads.
+
+---
