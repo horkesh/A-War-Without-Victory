@@ -7170,6 +7170,1130 @@
     }
   },
   {
+    "id": "address_to_nation_rbih",
+    "title": "Address the Nation",
+    "narrative": "Your chief of staff lays a draft speech on the desk. RTV BiH can carry your voice into every cellar and shelter still holding a working radio. An address can steady a frightened, exhausted population and signal resolve abroad — but every word is a promise the war may not let you keep. Defiance hardens the lines and raises expectations that later curdle into disillusion; a sober call for endurance spends political credit; an appeal to the world invites the patron's irritation at being lectured. What does the president say to a people in the fourth year of siege?",
+    "category": "command",
+    "trigger": {
+      "turn_min": 84,
+      "phase": "war"
+    },
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "RBiH",
+    "bot_response_logic": "strategic_weighted",
+    "staff_recommended_response_id": "address_endurance_rbih",
+    "historical_source": "Design provenance: fictionalized recurring command-presence abstraction approved by docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md. Wartime presidential radio/TV addresses over RTV BiH are well attested (e.g. Izetbegović broadcasts during the Sarajevo siege); no specific speech or its text is claimed here.",
+    "source_note": "Abstracted leadership-broadcast action; the staff recommendation is a command judgment, not a sourced historical default. No specific address is reproduced.",
+    "staff_assessment": "Staff recommends a measured call for endurance when morale is brittle; a defiant address can rally the front at the cost of harder lines and raised expectations, and an appeal to the world trades patron goodwill for international attention.",
+    "trigger_evidence": [
+      "Recurring leadership-presence pressure is active after prolonged siege and front-line strain.",
+      "The staff recommendation is an abstract command judgment, not a sourced historical default."
+    ],
+    "pressure": {
+      "base_rate": 1,
+      "threshold": 13,
+      "decay_rate": 0,
+      "modifiers": [
+        {
+          "condition": {
+            "type": "morale_average_below",
+            "faction": "RBiH",
+            "threshold": 40
+          },
+          "rate_bonus": 1.5
+        },
+        {
+          "condition": {
+            "type": "dimension_below",
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "threshold": 30
+          },
+          "rate_bonus": 1
+        }
+      ]
+    },
+    "recurrence": {
+      "max_fires": 5,
+      "cooldown_turns": 10,
+      "escalation": "static"
+    },
+    "effect": {
+      "kind": "narrative",
+      "text": "The president prepares to address the nation."
+    },
+    "tags": [
+      "presidential",
+      "recurring",
+      "address_to_nation"
+    ],
+    "response_options": [
+      {
+        "id": "address_defiance_rbih",
+        "label": "A defiant address — we will not yield",
+        "description": "You speak of survival and resistance. The shelters take heart and the lines stiffen. But defiance is a debt: the harder you set the posture, the more the eventual compromise will feel like betrayal, and the expectations you raise tonight will weigh on you when the front cannot meet them.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 6
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "RBiH",
+            "delta": 3
+          },
+          {
+            "kind": "aggression_modifier",
+            "faction": "RBiH",
+            "delta": 0.05,
+            "duration_turns": 6
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": -5
+          }
+        ],
+        "aggression_affinity": 0.5,
+        "risk_level": 0.4
+      },
+      {
+        "id": "address_endurance_rbih",
+        "label": "A call for endurance — bear the winter",
+        "description": "You ask the people to hold on, to share what little there is, to keep faith without false hope. It is honest, and it costs you: a population told to endure rather than to win hears the leadership admitting how little it can promise.",
+        "effects": [
+          {
+            "kind": "cohesion_change",
+            "faction": "RBiH",
+            "delta": 4
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 2
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": -2
+          }
+        ],
+        "aggression_affinity": -0.2,
+        "risk_level": 0.1
+      },
+      {
+        "id": "address_appeal_world_rbih",
+        "label": "An appeal to the world — name the siege",
+        "description": "You address the international community as much as your own people, naming the siege and pressing for relief. The cameras carry it everywhere — and your patron bristles at being lectured on a stage it did not choose.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 3
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": -6
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 8
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": 3
+          }
+        ],
+        "aggression_affinity": -0.3,
+        "risk_level": 0.2
+      },
+      {
+        "id": "address_stay_silent_rbih",
+        "label": "Say nothing — let the staff speak",
+        "description": "You decide the moment is wrong. A presidential address that promises nothing can do more harm than silence. The communique goes out under a spokesman's name, and the people note that their president did not speak.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": -2
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -3
+          }
+        ],
+        "aggression_affinity": -0.1,
+        "risk_level": 0.1
+      }
+    ],
+    "notifications_to_other_factions": {
+      "address_defiance_rbih": {
+        "HRHB": {
+          "headline": "Sarajevo broadcasts a defiant address",
+          "body": "The RBiH presidency rallies its population over RTV BiH and stiffens the line. Mostar reads a harder posture and narrower room for compromise."
+        },
+        "RS": {
+          "headline": "Sarajevo broadcasts a defiant address",
+          "body": "The RBiH presidency calls for resistance over the airwaves. Pale sees morale reinforced inside the pocket and a leadership committing itself publicly against any settlement."
+        }
+      },
+      "address_appeal_world_rbih": {
+        "HRHB": {
+          "headline": "Sarajevo appeals to the world",
+          "body": "The RBiH presidency turns its address outward, naming the siege for an international audience. Mostar sees a diplomatic-pressure move with a patron-goodwill cost attached."
+        },
+        "RS": {
+          "headline": "Sarajevo appeals to the world",
+          "body": "The RBiH presidency presses the international community over the siege. Pale sees Sarajevo trading patron patience for outside attention."
+        }
+      },
+      "address_endurance_rbih": {
+        "HRHB": {
+          "headline": "Sarajevo asks its people to endure",
+          "body": "The RBiH presidency calls for patience and shared sacrifice rather than victory. Mostar reads a leadership managing exhaustion more than promising gains."
+        },
+        "RS": {
+          "headline": "Sarajevo asks its people to endure",
+          "body": "The RBiH presidency appeals for endurance through the winter. Pale sees a population being prepared for a long, costly hold."
+        }
+      },
+      "address_stay_silent_rbih": {
+        "HRHB": {
+          "headline": "Sarajevo presidency stays off the air",
+          "body": "No presidential address comes; a spokesman handles the message. Mostar notes the silence."
+        },
+        "RS": {
+          "headline": "Sarajevo presidency stays off the air",
+          "body": "The RBiH presidency declines to broadcast, leaving the message to staff. Pale reads hesitation in the capital."
+        }
+      }
+    }
+  },
+  {
+    "id": "address_to_nation_rs",
+    "title": "Address the Nation",
+    "narrative": "Pale radio is ready to carry your words to every Serb household from Banja Luka to the Drina. An address can bind a tired people to the project and steady the assembly — but defiance commits Republika Srpska to a course its sponsors may not fund, and any line you draw tonight you will have to defend or disown. A measured speech spends credit you are short of; a hard one invites the patron's displeasure at being committed without consultation. What does the president tell his nation?",
+    "category": "command",
+    "trigger": {
+      "turn_min": 84,
+      "phase": "war"
+    },
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "RS",
+    "bot_response_logic": "strategic_weighted",
+    "staff_recommended_response_id": "address_endurance_rs",
+    "historical_source": "Design provenance: fictionalized recurring command-presence abstraction approved by docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md. Wartime RS leadership broadcasts from Pale are attested; no specific speech or its content is claimed here.",
+    "source_note": "Abstracted leadership-broadcast action; the staff recommendation is a command judgment, not a sourced historical default. No specific address is reproduced.",
+    "staff_assessment": "Staff recommends a measured address when assembly and sponsor relations are delicate; a defiant broadcast can harden the home front at the cost of patron goodwill and committed lines.",
+    "trigger_evidence": [
+      "Recurring leadership-presence pressure is active after prolonged front-line strain.",
+      "The staff recommendation is an abstract command judgment, not a sourced historical default."
+    ],
+    "pressure": {
+      "base_rate": 1,
+      "threshold": 13,
+      "decay_rate": 0,
+      "modifiers": [
+        {
+          "condition": {
+            "type": "morale_average_below",
+            "faction": "RS",
+            "threshold": 45
+          },
+          "rate_bonus": 1.5
+        },
+        {
+          "condition": {
+            "type": "dimension_below",
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "threshold": 30
+          },
+          "rate_bonus": 1
+        }
+      ]
+    },
+    "recurrence": {
+      "max_fires": 5,
+      "cooldown_turns": 10,
+      "escalation": "static"
+    },
+    "effect": {
+      "kind": "narrative",
+      "text": "The president prepares to address the nation."
+    },
+    "tags": [
+      "presidential",
+      "recurring",
+      "address_to_nation"
+    ],
+    "response_options": [
+      {
+        "id": "address_defiance_rs",
+        "label": "A defiant address — the project endures",
+        "description": "You speak of the nation's survival and its right to exist. The home front rallies and the assembly closes ranks. But you have committed Republika Srpska in public to a maximal line, and the sponsor in Belgrade did not approve the words before you spoke them.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 6
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "RS",
+            "delta": 3
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 4
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": -5
+          }
+        ],
+        "aggression_affinity": 0.5,
+        "risk_level": 0.4
+      },
+      {
+        "id": "address_endurance_rs",
+        "label": "A call for endurance — hold what we have",
+        "description": "You ask the people to consolidate, to hold, to wait out the pressure. It steadies the assembly, but a nation told to dig in rather than advance hears its leadership lowering its sights.",
+        "effects": [
+          {
+            "kind": "cohesion_change",
+            "faction": "RS",
+            "delta": 4
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 2
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -2
+          }
+        ],
+        "aggression_affinity": -0.2,
+        "risk_level": 0.1
+      },
+      {
+        "id": "address_reassure_patron_rs",
+        "label": "Signal restraint — reassure the sponsor",
+        "description": "You pitch the address toward Belgrade and the watching world: a sober, responsible Republika Srpska open to settlement. The sponsor is reassured and pressure eases — but the hardliners at home hear surrender in the careful phrasing.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": -2
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": -6
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -3
+          }
+        ],
+        "aggression_affinity": -0.4,
+        "risk_level": 0.2
+      },
+      {
+        "id": "address_stay_silent_rs",
+        "label": "Say nothing — let Pale's staff speak",
+        "description": "You judge the moment wrong and leave the broadcast to a spokesman. The home front notes that the president did not speak, and reads what it wishes into the silence.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": -2
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -3
+          }
+        ],
+        "aggression_affinity": -0.1,
+        "risk_level": 0.1
+      }
+    ],
+    "notifications_to_other_factions": {
+      "address_defiance_rs": {
+        "HRHB": {
+          "headline": "Pale broadcasts a defiant address",
+          "body": "The RS presidency rallies its home front over Pale radio and commits publicly to a maximal line. Mostar reads narrower room for any settlement in the east."
+        },
+        "RBiH": {
+          "headline": "Pale broadcasts a defiant address",
+          "body": "The RS presidency calls for the project to endure. Sarajevo sees Pale hardening its posture and binding itself against compromise, with sponsor friction implied."
+        }
+      },
+      "address_reassure_patron_rs": {
+        "HRHB": {
+          "headline": "Pale signals restraint",
+          "body": "The RS presidency pitches a responsible, settlement-open posture toward its sponsor and the world. Mostar reads eased external pressure and unsettled hardliners in Pale."
+        },
+        "RBiH": {
+          "headline": "Pale signals restraint",
+          "body": "The RS presidency strikes a measured public tone aimed at Belgrade and the West. Sarajevo sees Pale trading home-front confidence for patron goodwill."
+        }
+      },
+      "address_endurance_rs": {
+        "HRHB": {
+          "headline": "Pale asks its people to hold",
+          "body": "The RS presidency calls for consolidation rather than advance. Mostar reads a leadership managing strain more than promising gains."
+        },
+        "RBiH": {
+          "headline": "Pale asks its people to hold",
+          "body": "The RS presidency appeals for endurance and consolidation. Sarajevo sees Pale preparing its public for a long hold."
+        }
+      },
+      "address_stay_silent_rs": {
+        "HRHB": {
+          "headline": "RS presidency stays off the air",
+          "body": "No presidential address comes from Pale; staff handle the message. Mostar notes the silence."
+        },
+        "RBiH": {
+          "headline": "RS presidency stays off the air",
+          "body": "The RS presidency declines to broadcast. Sarajevo reads hesitation in Pale."
+        }
+      }
+    }
+  },
+  {
+    "id": "address_to_nation_hrhb",
+    "title": "Address the Nation",
+    "narrative": "Herceg-Bosna's airwaves wait for the president. An address can steady a Croat community stretched between Herzegovina and the central-Bosnia pockets, and reassure Zagreb that the project is in steady hands — but a defiant line commits the HVO publicly and tightens the noose around any reconciliation with Sarajevo, while a conciliatory one risks the hardliners and Zagreb's patrons reading weakness. What does the president of the Croatian Community tell his people?",
+    "category": "command",
+    "trigger": {
+      "turn_min": 84,
+      "phase": "war"
+    },
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "HRHB",
+    "bot_response_logic": "strategic_weighted",
+    "staff_recommended_response_id": "address_endurance_hrhb",
+    "historical_source": "Design provenance: fictionalized recurring command-presence abstraction approved by docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md. Wartime HZ HB / HVO leadership communiques are attested; no specific speech or its content is claimed here.",
+    "source_note": "Abstracted leadership-broadcast action; the staff recommendation is a command judgment, not a sourced historical default. No specific address is reproduced.",
+    "staff_assessment": "Staff recommends a measured address when central-Bosnia cohesion and Zagreb relations are delicate; a defiant broadcast hardens the line at the cost of reconciliation room, and a conciliatory one risks the hardliners.",
+    "trigger_evidence": [
+      "Recurring leadership-presence pressure is active after prolonged front-line strain.",
+      "The staff recommendation is an abstract command judgment, not a sourced historical default."
+    ],
+    "pressure": {
+      "base_rate": 1,
+      "threshold": 13,
+      "decay_rate": 0,
+      "modifiers": [
+        {
+          "condition": {
+            "type": "morale_average_below",
+            "faction": "HRHB",
+            "threshold": 45
+          },
+          "rate_bonus": 1.5
+        },
+        {
+          "condition": {
+            "type": "dimension_below",
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "threshold": 30
+          },
+          "rate_bonus": 1
+        }
+      ]
+    },
+    "recurrence": {
+      "max_fires": 5,
+      "cooldown_turns": 10,
+      "escalation": "static"
+    },
+    "effect": {
+      "kind": "narrative",
+      "text": "The president prepares to address the Croatian Community."
+    },
+    "tags": [
+      "presidential",
+      "recurring",
+      "address_to_nation"
+    ],
+    "response_options": [
+      {
+        "id": "address_defiance_hrhb",
+        "label": "A defiant address — Herceg-Bosna stands",
+        "description": "You speak of the Croat community's right to its own institutions and land. Herzegovina rallies and the HVO line stiffens — but you have committed Herceg-Bosna publicly to the separate course, and any path back to a settlement with Sarajevo just grew narrower.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 6
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "HRHB",
+            "delta": 3
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "negotiating_leverage",
+            "delta": -6
+          }
+        ],
+        "aggression_affinity": 0.4,
+        "risk_level": 0.4
+      },
+      {
+        "id": "address_endurance_hrhb",
+        "label": "A call for endurance — hold the pockets",
+        "description": "You ask the community to hold together across the divided geography and to keep faith with the central-Bosnia garrisons. It steadies cohesion, but a people told to endure hears how exposed their position has become.",
+        "effects": [
+          {
+            "kind": "cohesion_change",
+            "faction": "HRHB",
+            "delta": 4
+          },
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 2
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "military_credibility",
+            "delta": -2
+          }
+        ],
+        "aggression_affinity": -0.2,
+        "risk_level": 0.1
+      },
+      {
+        "id": "address_conciliation_hrhb",
+        "label": "Signal conciliation — open the door to Sarajevo",
+        "description": "You speak of coexistence and a shared framework, pitching toward Zagreb's federation pressure and the watching West. It opens negotiating room and eases patron friction — but the hardliners hear capitulation, and central-Bosnia commanders wonder what their dead were for.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": -2
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "HRHB",
+            "delta": -6
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "negotiating_leverage",
+            "delta": 6
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -3
+          }
+        ],
+        "aggression_affinity": -0.4,
+        "risk_level": 0.2
+      },
+      {
+        "id": "address_stay_silent_hrhb",
+        "label": "Say nothing — let the staff speak",
+        "description": "You leave the broadcast to a spokesman. The community notes that the president did not speak, and the silence is read as it pleases each listener.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": -2
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -3
+          }
+        ],
+        "aggression_affinity": -0.1,
+        "risk_level": 0.1
+      }
+    ],
+    "notifications_to_other_factions": {
+      "address_defiance_hrhb": {
+        "RBiH": {
+          "headline": "Mostar broadcasts a defiant address",
+          "body": "The Herceg-Bosna presidency rallies the Croat community to its separate course. Sarajevo reads a hardened HVO posture and narrower room for any federation path."
+        },
+        "RS": {
+          "headline": "Mostar broadcasts a defiant address",
+          "body": "The Herceg-Bosna presidency commits publicly to Croat institutions and territory. Pale sees the Bosniak-Croat rift reinforced."
+        }
+      },
+      "address_conciliation_hrhb": {
+        "RBiH": {
+          "headline": "Mostar signals conciliation",
+          "body": "The Herceg-Bosna presidency speaks of coexistence and a shared framework. Sarajevo reads an opening toward the federation path, with hardline resistance inside Herceg-Bosna."
+        },
+        "RS": {
+          "headline": "Mostar signals conciliation",
+          "body": "The Herceg-Bosna presidency pitches a settlement-open tone toward Zagreb and the West. Pale sees the risk of a firmer Bosniak-Croat alignment."
+        }
+      },
+      "address_endurance_hrhb": {
+        "RBiH": {
+          "headline": "Mostar asks its community to hold",
+          "body": "The Herceg-Bosna presidency calls for cohesion across the divided pockets. Sarajevo reads a leadership managing exposure more than promising gains."
+        },
+        "RS": {
+          "headline": "Mostar asks its community to hold",
+          "body": "The Herceg-Bosna presidency appeals for endurance. Pale sees the HVO preparing for a long hold."
+        }
+      },
+      "address_stay_silent_hrhb": {
+        "RBiH": {
+          "headline": "Herceg-Bosna presidency stays off the air",
+          "body": "No presidential address comes from Mostar; staff handle the message. Sarajevo notes the silence."
+        },
+        "RS": {
+          "headline": "Herceg-Bosna presidency stays off the air",
+          "body": "The Herceg-Bosna presidency declines to broadcast. Pale reads hesitation in Mostar."
+        }
+      }
+    }
+  },
+  {
+    "id": "decorate_a_unit_rbih",
+    "title": "Decorate a Unit",
+    "narrative": "Your staff brings forward citations for units that have held the line under impossible conditions. A decoration — a unit citation, a streamer for the colours — costs nothing in materiel and can lift a battered formation's spirit and the watching army's morale. But honours are political: the unit you single out is the unit you are seen to favour, and every formation passed over reads the omission. Decorate the wrong unit, or decorate at all amid heavy losses, and the gesture rings hollow or breeds resentment. Which formation will the president honour — and only a regular formation of the armed forces is eligible?",
+    "category": "command",
+    "trigger": {
+      "turn_min": 84,
+      "phase": "war"
+    },
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "RBiH",
+    "bot_response_logic": "strategic_weighted",
+    "staff_recommended_response_id": "decorate_decline_rbih",
+    "historical_source": "Design provenance: fictionalized recurring command-presence abstraction approved by docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md. Wartime ARBiH decorations (e.g. the 'Zlatni ljiljan' / Golden Lily) are attested; no specific award or recipient is claimed, and only regular armed-forces formations are eligible by design.",
+    "source_note": "Abstracted command-decoration action restricted by design to regular military formations; the staff recommendation is a command judgment, not a sourced historical default. No specific decoration or recipient is reproduced.",
+    "staff_assessment": "Staff notes that decorations honouring regular formations can lift morale but are double-edged: the favoured unit gains, the overlooked resent, and honours amid heavy loss can ring hollow. Declining is the conservative course.",
+    "trigger_evidence": [
+      "Recurring command-presence pressure is active after prolonged front-line strain.",
+      "Eligibility is restricted to regular armed-forces formations; no irregular or paramilitary unit is offered."
+    ],
+    "pressure": {
+      "base_rate": 1,
+      "threshold": 13,
+      "decay_rate": 0,
+      "modifiers": [
+        {
+          "condition": {
+            "type": "morale_average_below",
+            "faction": "RBiH",
+            "threshold": 40
+          },
+          "rate_bonus": 1.5
+        }
+      ]
+    },
+    "recurrence": {
+      "max_fires": 5,
+      "cooldown_turns": 10,
+      "escalation": "static"
+    },
+    "effect": {
+      "kind": "narrative",
+      "text": "The president considers which regular formation to decorate."
+    },
+    "tags": [
+      "presidential",
+      "recurring",
+      "decorate_a_unit"
+    ],
+    "response_options": [
+      {
+        "id": "decorate_steadfast_rbih",
+        "label": "Decorate the most steadfast regular formation",
+        "description": "You honour the regular formation that has held longest under the heaviest pressure. Its soldiers stand a little taller, and the army takes note — but the formations that bled just as hard and went unmentioned mark the slight.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 5
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "RBiH",
+            "delta": 2
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": 4
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -2
+          }
+        ],
+        "aggression_affinity": 0.2,
+        "risk_level": 0.2
+      },
+      {
+        "id": "decorate_broadly_rbih",
+        "label": "Issue a broad citation across the regular corps",
+        "description": "Rather than single one out, you issue a citation recognising the regular formations of the army together. It avoids the appearance of favouritism, but a medal shared by all is a medal felt by none — the lift is gentler and the gesture thinner.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 3
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "RBiH",
+            "delta": 3
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 3
+          }
+        ],
+        "aggression_affinity": 0.1,
+        "risk_level": 0.1
+      },
+      {
+        "id": "decorate_decline_rbih",
+        "label": "Decline — honours ring hollow amid these losses",
+        "description": "You judge that with casualties this heavy, a decoration would ring hollow or look like spin. You hold the citations back. The deserving go unhonoured, and some read the silence as the leadership looking away from their sacrifice.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": -1
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -1
+          }
+        ],
+        "aggression_affinity": 0,
+        "risk_level": 0.1
+      }
+    ],
+    "notifications_to_other_factions": {
+      "decorate_steadfast_rbih": {
+        "HRHB": {
+          "headline": "Sarajevo decorates a regular formation",
+          "body": "The RBiH presidency honours one of the army's regular formations for steadfast defence. Mostar reads a morale gesture and the politics of favour within the ARBiH."
+        },
+        "RS": {
+          "headline": "Sarajevo decorates a regular formation",
+          "body": "The RBiH presidency awards a unit citation to a regular formation. Pale sees a morale signal and the internal jockeying it implies."
+        }
+      },
+      "decorate_broadly_rbih": {
+        "HRHB": {
+          "headline": "Sarajevo issues a broad army citation",
+          "body": "The RBiH presidency recognises its regular formations collectively rather than singling one out. Mostar reads a cohesion-minded, lower-key gesture."
+        },
+        "RS": {
+          "headline": "Sarajevo issues a broad army citation",
+          "body": "The RBiH presidency honours the regular army as a whole. Pale sees a unifying but modest morale move."
+        }
+      }
+    }
+  },
+  {
+    "id": "decorate_a_unit_rs",
+    "title": "Decorate a Unit",
+    "narrative": "Your staff lays out citations for VRS formations that have held or advanced at heavy cost. A decoration costs no materiel and can steady a tired army — but in Republika Srpska honours are watched closely. Single out a corps and you are seen to favour it; honour the wrong formation and you reward the wrong faction in the officer corps; decorate amid loss and the gesture can curdle. Eligibility is restricted to regular VRS formations — no irregular or volunteer paramilitary unit is on the list. Which regular formation will the president honour?",
+    "category": "command",
+    "trigger": {
+      "turn_min": 84,
+      "phase": "war"
+    },
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "RS",
+    "bot_response_logic": "strategic_weighted",
+    "staff_recommended_response_id": "decorate_decline_rs",
+    "historical_source": "Design provenance: fictionalized recurring command-presence abstraction approved by docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md. Wartime VRS unit commendations are attested; no specific award or recipient is claimed, and by design only regular VRS formations are eligible — irregular and paramilitary units are excluded.",
+    "source_note": "Abstracted command-decoration action restricted by design to regular military formations; the staff recommendation is a command judgment, not a sourced historical default. No paramilitary unit is eligible and no specific decoration is reproduced.",
+    "staff_assessment": "Staff notes that decorating regular VRS formations can steady morale but is double-edged: it shifts favour within the officer corps and can ring hollow amid loss. Declining is the conservative course. No irregular unit is eligible.",
+    "trigger_evidence": [
+      "Recurring command-presence pressure is active after prolonged front-line strain.",
+      "Eligibility is restricted to regular VRS formations; no irregular or paramilitary unit is offered."
+    ],
+    "pressure": {
+      "base_rate": 1,
+      "threshold": 13,
+      "decay_rate": 0,
+      "modifiers": [
+        {
+          "condition": {
+            "type": "morale_average_below",
+            "faction": "RS",
+            "threshold": 45
+          },
+          "rate_bonus": 1.5
+        }
+      ]
+    },
+    "recurrence": {
+      "max_fires": 5,
+      "cooldown_turns": 10,
+      "escalation": "static"
+    },
+    "effect": {
+      "kind": "narrative",
+      "text": "The president considers which regular VRS formation to decorate."
+    },
+    "tags": [
+      "presidential",
+      "recurring",
+      "decorate_a_unit"
+    ],
+    "response_options": [
+      {
+        "id": "decorate_steadfast_rs",
+        "label": "Decorate the most steadfast regular formation",
+        "description": "You honour the regular VRS formation that has borne the heaviest burden. Its soldiers take pride, and the army notices — but the favour shifts the balance inside the officer corps, and the formations passed over remember it.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 5
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "RS",
+            "delta": 2
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": 4
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -2
+          }
+        ],
+        "aggression_affinity": 0.2,
+        "risk_level": 0.2
+      },
+      {
+        "id": "decorate_broadly_rs",
+        "label": "Issue a broad citation across the regular corps",
+        "description": "You honour the regular VRS formations together rather than singling one out. It avoids favouritism inside the officer corps, but a shared honour is a thinner one.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 3
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "RS",
+            "delta": 3
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 3
+          }
+        ],
+        "aggression_affinity": 0.1,
+        "risk_level": 0.1
+      },
+      {
+        "id": "decorate_decline_rs",
+        "label": "Decline — honours ring hollow amid these losses",
+        "description": "With casualties this heavy you judge a decoration would ring hollow. You hold the citations back. The deserving go unhonoured, and the omission is noticed.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": -1
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -1
+          }
+        ],
+        "aggression_affinity": 0,
+        "risk_level": 0.1
+      }
+    ],
+    "notifications_to_other_factions": {
+      "decorate_steadfast_rs": {
+        "HRHB": {
+          "headline": "Pale decorates a regular VRS formation",
+          "body": "The RS presidency honours one of the VRS's regular formations. Mostar reads a morale gesture and the politics of favour within the officer corps."
+        },
+        "RBiH": {
+          "headline": "Pale decorates a regular VRS formation",
+          "body": "The RS presidency awards a citation to a regular VRS formation. Sarajevo sees a morale signal and the internal jockeying it implies."
+        }
+      },
+      "decorate_broadly_rs": {
+        "HRHB": {
+          "headline": "Pale issues a broad VRS citation",
+          "body": "The RS presidency recognises its regular formations collectively. Mostar reads a cohesion-minded, lower-key gesture."
+        },
+        "RBiH": {
+          "headline": "Pale issues a broad VRS citation",
+          "body": "The RS presidency honours the regular VRS as a whole. Sarajevo sees a unifying but modest morale move."
+        }
+      }
+    }
+  },
+  {
+    "id": "decorate_a_unit_hrhb",
+    "title": "Decorate a Unit",
+    "narrative": "Your staff brings citations for HVO formations that have held the divided geography of Herceg-Bosna at heavy cost. A decoration costs no materiel and can lift a stretched force — but honours carry weight between Herzegovina and the central-Bosnia pockets, and singling out one formation tells the others where they stand. Honour amid loss, or honour the wrong unit, and the gesture sours. Eligibility is restricted to regular HVO formations — no irregular or paramilitary unit is on the list. Which regular formation will the president honour?",
+    "category": "command",
+    "trigger": {
+      "turn_min": 84,
+      "phase": "war"
+    },
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "HRHB",
+    "bot_response_logic": "strategic_weighted",
+    "staff_recommended_response_id": "decorate_decline_hrhb",
+    "historical_source": "Design provenance: fictionalized recurring command-presence abstraction approved by docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md. Wartime HVO unit commendations are attested; no specific award or recipient is claimed, and by design only regular HVO formations are eligible — irregular and paramilitary units are excluded.",
+    "source_note": "Abstracted command-decoration action restricted by design to regular military formations; the staff recommendation is a command judgment, not a sourced historical default. No paramilitary unit is eligible and no specific decoration is reproduced.",
+    "staff_assessment": "Staff notes that decorating regular HVO formations can lift a stretched force but is double-edged across the divided geography. Declining is the conservative course. No irregular unit is eligible.",
+    "trigger_evidence": [
+      "Recurring command-presence pressure is active after prolonged front-line strain.",
+      "Eligibility is restricted to regular HVO formations; no irregular or paramilitary unit is offered."
+    ],
+    "pressure": {
+      "base_rate": 1,
+      "threshold": 13,
+      "decay_rate": 0,
+      "modifiers": [
+        {
+          "condition": {
+            "type": "morale_average_below",
+            "faction": "HRHB",
+            "threshold": 45
+          },
+          "rate_bonus": 1.5
+        }
+      ]
+    },
+    "recurrence": {
+      "max_fires": 5,
+      "cooldown_turns": 10,
+      "escalation": "static"
+    },
+    "effect": {
+      "kind": "narrative",
+      "text": "The president considers which regular HVO formation to decorate."
+    },
+    "tags": [
+      "presidential",
+      "recurring",
+      "decorate_a_unit"
+    ],
+    "response_options": [
+      {
+        "id": "decorate_steadfast_hrhb",
+        "label": "Decorate the most steadfast regular formation",
+        "description": "You honour the regular HVO formation that has held the longest under the worst pressure. Its soldiers take heart — but in the divided geography of Herceg-Bosna the favour is read keenly, and the overlooked formations note it.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 5
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "HRHB",
+            "delta": 2
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "military_credibility",
+            "delta": 4
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -2
+          }
+        ],
+        "aggression_affinity": 0.2,
+        "risk_level": 0.2
+      },
+      {
+        "id": "decorate_broadly_hrhb",
+        "label": "Issue a broad citation across the regular HVO",
+        "description": "You honour the regular HVO formations together rather than one alone. It avoids favouring Herzegovina over the pockets or the reverse, but a shared honour lifts less.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 3
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "HRHB",
+            "delta": 3
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": 3
+          }
+        ],
+        "aggression_affinity": 0.1,
+        "risk_level": 0.1
+      },
+      {
+        "id": "decorate_decline_hrhb",
+        "label": "Decline — honours ring hollow amid these losses",
+        "description": "With losses this heavy you judge a decoration would ring hollow. You hold the citations back. The deserving go unhonoured, and the omission is felt.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": -1
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -1
+          }
+        ],
+        "aggression_affinity": 0,
+        "risk_level": 0.1
+      }
+    ],
+    "notifications_to_other_factions": {
+      "decorate_steadfast_hrhb": {
+        "RBiH": {
+          "headline": "Mostar decorates a regular HVO formation",
+          "body": "The Herceg-Bosna presidency honours one of the HVO's regular formations. Sarajevo reads a morale gesture and the politics of favour across the divided geography."
+        },
+        "RS": {
+          "headline": "Mostar decorates a regular HVO formation",
+          "body": "The Herceg-Bosna presidency awards a citation to a regular HVO formation. Pale sees a morale signal and the internal balance it shifts."
+        }
+      },
+      "decorate_broadly_hrhb": {
+        "RBiH": {
+          "headline": "Mostar issues a broad HVO citation",
+          "body": "The Herceg-Bosna presidency recognises its regular formations collectively. Sarajevo reads a cohesion-minded, lower-key gesture."
+        },
+        "RS": {
+          "headline": "Mostar issues a broad HVO citation",
+          "body": "The Herceg-Bosna presidency honours the regular HVO as a whole. Pale sees a unifying but modest morale move."
+        }
+      }
+    }
+  },
+  {
     "id": "hrhb_federation_overture_1993",
     "title": "Federation Backchannel: Boban Tests The Language",
     "narrative": "In late autumn 1993, the diplomatic ground beneath Herceg-Bosna shifts. Tudjman, recalculating after the failed Owen-Stoltenberg Union of Three Republics framework, the territorial setbacks in central Bosnia following the ARBiH September-October counter-offensive, and the tightening US sanctions pressure on Croatia, signals to Boban that a federation overture to Sarajevo would buy diplomatic room. The channel is back: through Peter Galbraith (the new US Ambassador to Zagreb, accredited 28 June 1993), through Hannes Swoboda's German Christian Democratic foreign-policy office, through the Holbrooke Bonn-Geneva shuttle. Boban convenes the HZ HB Presidency. The Washington Agreement is still months away. The decision is whether to extend the federation overture NOW (October-December 1993) — pre-empting US pressure, capturing diplomatic credit, and creating the negotiating space that will eventually produce the formal Washington signature in March 1994. Or maintain the separate-state line and let Zagreb-hawks dictate the pace. Or condition federation acceptance on canton-level Croat institutional protections. Or reject the federation path entirely and commit to a permanent separate Croat republic. The choice DOES NOT replace H4 (Zagreb-ordered ceasefire, February 1994) or H9 (Washington Agreement, March 1994) — it captures the BACKCHANNEL window BEFORE both, where the diplomatic ground was being prepared.",

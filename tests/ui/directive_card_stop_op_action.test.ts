@@ -498,7 +498,7 @@ describe('DirectiveCard stop-op action host', () => {
 
     render(React.createElement(DirectiveCard, { directive: frontVisitDirective, gameState: baseGameState }));
 
-    expect((await screen.findByRole('status', { name: 'Front visit unavailable' })).textContent).toContain(
+    expect((await screen.findByRole('status', { name: 'Leadership action unavailable' })).textContent).toContain(
       'No front is reachable.',
     );
     const issue = screen.getByRole('button', { name: 'Issue (10)' });

@@ -15,6 +15,8 @@ import {
   REPLACE_CO_COST,
   ELITE_DEPLOY_COST,
   FRONT_VISIT_COST,
+  ADDRESS_NATION_COST,
+  DECORATE_UNIT_COST,
   REQUEST_OP_COST,
   FORCE_LAUNCH_COST,
   PROACTIVE_FORCE_LAUNCH_COST,
@@ -42,10 +44,13 @@ export interface PresidentialDecisionRoomDirective {
     | 'authorize_op'
     | 'replace_co'
     | 'elite_deploy'
-    | 'front_visit';
+    | 'front_visit'
+    | 'address_nation'
+    | 'decorate_unit';
   /**
    * Corps the directive acts on (request/stop/force/replace_co/elite_deploy).
-   * Absent for authorize-op and front-visit (the latter targets a front, not a corps).
+   * Absent for authorize-op, front-visit, address-nation, and decorate-unit (the
+   * leadership gestures target a front/nation/formation, not a commanded corps).
    */
   corpsId?: string;
   /** Command Authority cost (authorize-op = 0). */
@@ -830,6 +835,54 @@ function addCommandPersonnelCards(state: LoadedGameState, cards: CandidateCard[]
     },
     urgencySort: 50,
     sourceSort: 'command:front-visit',
+  });
+
+  // 4. ADDRESS THE NATION — a single leadership card (design §10 deferred action).
+  // Faction-wide (no reachability gate); cap/cooldown are an async server-side
+  // query (getAddressNationAvailability) the DirectiveCard performs. Emitted
+  // unconditionally so the option is always scannable.
+  cards.push({
+    id: 'command:address-nation',
+    category: 'command',
+    severity: 'info',
+    title: t('decisionRoom.card.addressNation.title'),
+    explanation: t('decisionRoom.card.addressNation.explanation'),
+    sourceOwner: t('decisionRoom.card.command.sourceOwner'),
+    sourceLabel: t('decisionRoom.card.addressNation.sourceLabel'),
+    actionLabel: t('decisionRoom.action.personnel'),
+    evidence: [t('decisionRoom.card.addressNation.evidence.gesture')],
+    navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
+    directive: {
+      lever: 'address_nation',
+      cost: ADDRESS_NATION_COST,
+      payload: {},
+    },
+    urgencySort: 51,
+    sourceSort: 'command:address-nation',
+  });
+
+  // 5. DECORATE A UNIT — a single leadership card (design §10 deferred action).
+  // BRIGHT LINE: only REGULAR formations are eligible (enforced server-side in
+  // decorate_unit_contract; the DirectiveCard surfaces the eligible-unit picker
+  // when initiating). Cap/cooldown via getDecorateUnitAvailability.
+  cards.push({
+    id: 'command:decorate-unit',
+    category: 'command',
+    severity: 'info',
+    title: t('decisionRoom.card.decorateUnit.title'),
+    explanation: t('decisionRoom.card.decorateUnit.explanation'),
+    sourceOwner: t('decisionRoom.card.command.sourceOwner'),
+    sourceLabel: t('decisionRoom.card.decorateUnit.sourceLabel'),
+    actionLabel: t('decisionRoom.action.personnel'),
+    evidence: [t('decisionRoom.card.decorateUnit.evidence.gesture')],
+    navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
+    directive: {
+      lever: 'decorate_unit',
+      cost: DECORATE_UNIT_COST,
+      payload: {},
+    },
+    urgencySort: 52,
+    sourceSort: 'command:decorate-unit',
   });
 }
 

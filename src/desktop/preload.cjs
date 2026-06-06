@@ -119,6 +119,12 @@ contextBridge.exposeInMainWorld('awwv', {
   // Presidential FRONT VISIT (Command Surface §10): read-only availability + initiate.
   getFrontVisitAvailability: () => ipcRenderer.invoke('get-front-visit-availability'),
   initiateFrontVisit: () => ipcRenderer.invoke('initiate-front-visit'),
+  // Presidential ADDRESS THE NATION (Command Surface §10): availability + initiate.
+  getAddressNationAvailability: () => ipcRenderer.invoke('get-address-nation-availability'),
+  initiateAddressNation: () => ipcRenderer.invoke('initiate-address-nation'),
+  // Presidential DECORATE A UNIT (Command Surface §10): availability + initiate.
+  getDecorateUnitAvailability: () => ipcRenderer.invoke('get-decorate-unit-availability'),
+  initiateDecorateUnit: () => ipcRenderer.invoke('initiate-decorate-unit'),
   // v0.8.4 Phase B: Autonomy bridge
   getAutonomyState: () => ipcRenderer.invoke('get-autonomy-state'),
   setAutonomyLevel: (level) => ipcRenderer.invoke('set-autonomy-level', { level }),

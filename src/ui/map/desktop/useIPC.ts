@@ -276,6 +276,70 @@ interface WindowAwwv {
         unreachableBranchIds?: string[];
         error?: string;
     }>;
+    /**
+     * Presidential ADDRESS THE NATION (Command Surface §10) — read-only
+     * availability. Faction-wide (no reachability gate); returns cooldown/cap +
+     * CA cost.
+     */
+    getAddressNationAvailability: () => Promise<{
+        ok: boolean;
+        costCA?: number;
+        available?: boolean;
+        reason?: string | null;
+        eventId?: string | null;
+        currentTurn?: number;
+        firesLeft?: number;
+        maxFires?: number;
+        cooldownUntil?: number | null;
+        onCooldown?: boolean;
+        error?: string;
+    }>;
+    /**
+     * Presidential ADDRESS THE NATION (Command Surface §10) — initiate.
+     * Force-queues the authored address_to_nation_<faction> event into
+     * pending_event_decisions so EventDecisionModal surfaces it. Costs CA (10).
+     */
+    initiateAddressNation: () => Promise<{
+        ok: boolean;
+        reason?: string;
+        eventId?: string;
+        caCost?: number;
+        offeredBranchIds?: string[];
+        error?: string;
+    }>;
+    /**
+     * Presidential DECORATE A UNIT (Command Surface §10) — read-only availability.
+     * Returns cooldown/cap + CA cost + the BRIGHT-LINE-filtered eligible REGULAR
+     * formations the president may honour (never paramilitary/militia/phantom).
+     */
+    getDecorateUnitAvailability: () => Promise<{
+        ok: boolean;
+        costCA?: number;
+        available?: boolean;
+        reason?: string | null;
+        eventId?: string | null;
+        currentTurn?: number;
+        firesLeft?: number;
+        maxFires?: number;
+        cooldownUntil?: number | null;
+        onCooldown?: boolean;
+        eligibleFormations?: { id: string; name: string; kind: string }[];
+        error?: string;
+    }>;
+    /**
+     * Presidential DECORATE A UNIT (Command Surface §10) — initiate. Force-queues
+     * the authored decorate_a_unit_<faction> event with per-unit branches (the
+     * player picks WHICH regular unit) into pending_event_decisions. Costs CA (10).
+     */
+    initiateDecorateUnit: () => Promise<{
+        ok: boolean;
+        reason?: string;
+        eventId?: string;
+        caCost?: number;
+        offeredBranchIds?: string[];
+        eligibleFormationIds?: string[];
+        error?: string;
+    }>;
     // v0.8.4 Phase B+C: Autonomy bridge
     getAutonomyState: () => Promise<{ autonomy_level: number; autonomy_level_pending?: number; autonomy_overrides?: Record<string, unknown>; pending_proposal_reviews?: unknown[] }>;
     setAutonomyLevel: (level: number) => Promise<{ ok: boolean; error?: string }>;
@@ -599,6 +663,47 @@ export function useIPC() {
             initiateFrontVisit: awwv
                 ? () => awwv.initiateFrontVisit()
                 : makeNoop<{ ok: boolean; reason?: string; eventId?: string; caCost?: number; offeredBranchIds?: string[]; unreachableBranchIds?: string[]; error?: string }>(),
+
+            getAddressNationAvailability: awwv
+                ? () => awwv.getAddressNationAvailability()
+                : makeNoop<{
+                    ok: boolean;
+                    costCA?: number;
+                    available?: boolean;
+                    reason?: string | null;
+                    eventId?: string | null;
+                    currentTurn?: number;
+                    firesLeft?: number;
+                    maxFires?: number;
+                    cooldownUntil?: number | null;
+                    onCooldown?: boolean;
+                    error?: string;
+                }>(),
+
+            initiateAddressNation: awwv
+                ? () => awwv.initiateAddressNation()
+                : makeNoop<{ ok: boolean; reason?: string; eventId?: string; caCost?: number; offeredBranchIds?: string[]; error?: string }>(),
+
+            getDecorateUnitAvailability: awwv
+                ? () => awwv.getDecorateUnitAvailability()
+                : makeNoop<{
+                    ok: boolean;
+                    costCA?: number;
+                    available?: boolean;
+                    reason?: string | null;
+                    eventId?: string | null;
+                    currentTurn?: number;
+                    firesLeft?: number;
+                    maxFires?: number;
+                    cooldownUntil?: number | null;
+                    onCooldown?: boolean;
+                    eligibleFormations?: { id: string; name: string; kind: string }[];
+                    error?: string;
+                }>(),
+
+            initiateDecorateUnit: awwv
+                ? () => awwv.initiateDecorateUnit()
+                : makeNoop<{ ok: boolean; reason?: string; eventId?: string; caCost?: number; offeredBranchIds?: string[]; eligibleFormationIds?: string[]; error?: string }>(),
 
             // v0.8.4 Phase B+C: Autonomy bridge
             getAutonomyState: awwv

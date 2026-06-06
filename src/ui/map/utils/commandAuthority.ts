@@ -67,4 +67,25 @@ export const REPLACE_CO_COST = 25;
  * (max_fires 5 / cooldown 10t), not a CA-side timer.
  */
 export const FRONT_VISIT_COST = 10;
+/**
+ * Cost of the ADDRESS-THE-NATION presidential leadership action (Presidential
+ * Command Surface design §10, deferred companion to the shipped front visit):
+ * the president addresses the nation over the airwaves, force-queuing the authored
+ * `address_to_nation_<faction>` event. Priced like the front visit (10) — a
+ * leadership gesture, not an officer override. Unlike the front visit it is
+ * faction-wide (no reachability gate). MUST match autonomy_ipc_contract.cjs
+ * (ADDRESS_NATION_COST = 10) and the initiate-address-nation IPC handler.
+ */
+export const ADDRESS_NATION_COST = 10;
+/**
+ * Cost of the DECORATE-A-UNIT presidential leadership action (Presidential
+ * Command Surface design §10, deferred companion to the shipped front visit):
+ * the president decorates a REGULAR formation (bright line — never paramilitaries
+ * or atrocity-associated units), force-queuing the authored
+ * `decorate_a_unit_<faction>` event with one branch per eligible regular unit so
+ * the player picks WHICH to honour. Priced like the front visit (10). MUST match
+ * autonomy_ipc_contract.cjs (DECORATE_UNIT_COST = 10) and the
+ * initiate-decorate-unit IPC handler.
+ */
+export const DECORATE_UNIT_COST = 10;
 export const COMMAND_AUTHORITY_RECOVERY_PER_TURN = 2;

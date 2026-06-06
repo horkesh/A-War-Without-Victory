@@ -23,6 +23,8 @@ const {
   FORCE_LAUNCH_COST,
   PROACTIVE_FORCE_LAUNCH_COST,
   FRONT_VISIT_COST,
+  ADDRESS_NATION_COST,
+  DECORATE_UNIT_COST,
 } = require('./autonomy_ipc_contract.cjs');
 const { stageAuthoredOperation } = require('./author_op_staging.cjs');
 const { stageOpHalt } = require('./op_halt.cjs');
@@ -35,6 +37,16 @@ const {
   computeFrontVisitAvailability,
   buildFrontVisitPendingDecision,
 } = require('./front_visit_contract.cjs');
+const {
+  addressNationEventIdForFaction,
+  computeAddressNationAvailability,
+  buildAddressNationPendingDecision,
+} = require('./address_nation_contract.cjs');
+const {
+  decorateUnitEventIdForFaction,
+  computeDecorateUnitAvailability,
+  buildDecorateUnitPendingDecision,
+} = require('./decorate_unit_contract.cjs');
 const { stageConvoyDecisionOnState } = require('./convoy_ipc_contract.cjs');
 const { fileOfficerDecisionRecord } = require('./officer_decision_history.cjs');
 const RUNTIME_PROBE_MODE = process.env.AWWV_DESKTOP_RUNTIME_PROBE === '1';
@@ -2296,6 +2308,179 @@ app.whenReady().then(() => {
         caCost: auth ? FRONT_VISIT_COST : 0,
         offeredBranchIds: decision.response_options.map((o) => o.id),
         unreachableBranchIds: availability.unreachableBranchIds,
+      };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  // ── Presidential ADDRESS THE NATION (read-only availability) ────────────────
+  // Mirrors get-front-visit-availability. An address is FACTION-WIDE — no
+  // reachability gate (the president broadcasts from the capital); the only gates
+  // are player-faction resolution and the event's OWN recurrence (cap/cooldown).
+  ipcMain.handle('get-address-nation-availability', async () => {
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const playerFaction = state.meta?.player_faction ?? null;
+      const eventId = addressNationEventIdForFaction(playerFaction);
+      const eventDef = loadFrontVisitEventDef(eventId); // shared war_1993.json event cache
+      const availability = computeAddressNationAvailability(state, playerFaction, eventDef);
+      return { ok: true, costCA: ADDRESS_NATION_COST, ...availability };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  // ── Presidential ADDRESS THE NATION (initiate) ──────────────────────────────
+  // Force-queues the authored address_to_nation_<faction> event into
+  // state.military.pending_event_decisions (mirror evaluate_events.ts:577 /
+  // initiate-front-visit) so EventDecisionModal surfaces it. ZERO new sim/event
+  // code. Guards: 1. faction→event 2. cooldown/cap (event's OWN recurrence)
+  // 3. CA guard + debit ADDRESS_NATION_COST. Player-IPC-only → never headless →
+  // byte-identical by construction.
+  ipcMain.handle('initiate-address-nation', async () => {
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const playerFaction = state.meta?.player_faction ?? null;
+      const eventId = addressNationEventIdForFaction(playerFaction);
+      const eventDef = loadFrontVisitEventDef(eventId);
+
+      const availability = computeAddressNationAvailability(state, playerFaction, eventDef);
+      if (!availability.available) {
+        return { ok: false, error: availability.reason || 'unavailable', reason: availability.reason };
+      }
+
+      const auth = state.military.command_authority;
+      if (auth) {
+        if (auth.current < ADDRESS_NATION_COST) {
+          return {
+            ok: false,
+            reason: 'insufficient_ca',
+            error: `Insufficient command authority (${auth.current}/${ADDRESS_NATION_COST} needed)`,
+          };
+        }
+        auth.current -= ADDRESS_NATION_COST;
+        auth.spent_this_turn = (auth.spent_this_turn ?? 0) + ADDRESS_NATION_COST;
+        auth.lifetime_spent = (auth.lifetime_spent ?? 0) + ADDRESS_NATION_COST;
+      }
+
+      const decision = buildAddressNationPendingDecision(state, playerFaction, eventDef, availability);
+      if (!decision) {
+        return { ok: false, error: 'Failed to build address-to-nation decision' };
+      }
+      if (!state.military.pending_event_decisions) {
+        state.military.pending_event_decisions = [];
+      }
+      state.military.pending_event_decisions.push(decision);
+
+      // Record the fire so the event's OWN recurrence gates subsequent addresses
+      // (mirror initiate-front-visit: resolveEventDecision does NOT increment these).
+      if (!state.military.event_fire_counts) state.military.event_fire_counts = {};
+      state.military.event_fire_counts[eventId] = (state.military.event_fire_counts[eventId] ?? 0) + 1;
+      if (!state.military.event_last_fired_turn) state.military.event_last_fired_turn = {};
+      state.military.event_last_fired_turn[eventId] = state.meta?.turn ?? 0;
+
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return {
+        ok: true,
+        eventId,
+        caCost: auth ? ADDRESS_NATION_COST : 0,
+        offeredBranchIds: decision.response_options.map((o) => o.id),
+      };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  // ── Presidential DECORATE A UNIT (read-only availability) ───────────────────
+  // Mirrors get-front-visit-availability. No reachability gate (issued from the
+  // capital); gated by player-faction + the event's OWN recurrence. Returns the
+  // BRIGHT-LINE-filtered eligible REGULAR formations (never paramilitary/militia/
+  // phantom) so the renderer can show what the president may honour.
+  ipcMain.handle('get-decorate-unit-availability', async () => {
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const playerFaction = state.meta?.player_faction ?? null;
+      const eventId = decorateUnitEventIdForFaction(playerFaction);
+      const eventDef = loadFrontVisitEventDef(eventId);
+      const availability = computeDecorateUnitAvailability(state, playerFaction, eventDef);
+      return { ok: true, costCA: DECORATE_UNIT_COST, ...availability };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  // ── Presidential DECORATE A UNIT (initiate) ─────────────────────────────────
+  // Force-queues the authored decorate_a_unit_<faction> event, with the steadfast
+  // template branch EXPANDED into one branch per eligible REGULAR formation so the
+  // PLAYER picks which unit to honour (we never auto-pick). ZERO new sim/event
+  // code. BRIGHT LINE: only regular formations are eligible (enforced in the
+  // contract's eligible-kind allowlist). Guards mirror initiate-address-nation.
+  ipcMain.handle('initiate-decorate-unit', async () => {
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const playerFaction = state.meta?.player_faction ?? null;
+      const eventId = decorateUnitEventIdForFaction(playerFaction);
+      const eventDef = loadFrontVisitEventDef(eventId);
+
+      const availability = computeDecorateUnitAvailability(state, playerFaction, eventDef);
+      if (!availability.available) {
+        return { ok: false, error: availability.reason || 'unavailable', reason: availability.reason };
+      }
+
+      const auth = state.military.command_authority;
+      if (auth) {
+        if (auth.current < DECORATE_UNIT_COST) {
+          return {
+            ok: false,
+            reason: 'insufficient_ca',
+            error: `Insufficient command authority (${auth.current}/${DECORATE_UNIT_COST} needed)`,
+          };
+        }
+        auth.current -= DECORATE_UNIT_COST;
+        auth.spent_this_turn = (auth.spent_this_turn ?? 0) + DECORATE_UNIT_COST;
+        auth.lifetime_spent = (auth.lifetime_spent ?? 0) + DECORATE_UNIT_COST;
+      }
+
+      const decision = buildDecorateUnitPendingDecision(state, playerFaction, eventDef, availability);
+      if (!decision) {
+        return { ok: false, error: 'Failed to build decorate-a-unit decision' };
+      }
+      if (!state.military.pending_event_decisions) {
+        state.military.pending_event_decisions = [];
+      }
+      state.military.pending_event_decisions.push(decision);
+
+      if (!state.military.event_fire_counts) state.military.event_fire_counts = {};
+      state.military.event_fire_counts[eventId] = (state.military.event_fire_counts[eventId] ?? 0) + 1;
+      if (!state.military.event_last_fired_turn) state.military.event_last_fired_turn = {};
+      state.military.event_last_fired_turn[eventId] = state.meta?.turn ?? 0;
+
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return {
+        ok: true,
+        eventId,
+        caCost: auth ? DECORATE_UNIT_COST : 0,
+        offeredBranchIds: decision.response_options.map((o) => o.id),
+        eligibleFormationIds: availability.eligibleFormations.map((f) => f.id),
       };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };

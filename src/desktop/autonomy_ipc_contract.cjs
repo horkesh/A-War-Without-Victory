@@ -144,6 +144,23 @@ const REPLACE_CO_COST = 25;
 // (FRONT_VISIT_COST = 10) and the initiate-front-visit IPC handler. Cooldown/cap reuse
 // the event's OWN recurrence (max_fires 5 / cooldown 10t), not a CA-side timer.
 const FRONT_VISIT_COST = 10;
+// ADDRESS-THE-NATION presidential leadership action cost (Presidential Command
+// Surface §10, deferred companion to front visit): the president addresses the
+// nation as a morale/leadership gesture, force-queuing the authored
+// address_to_nation_<faction> event. Priced like the front visit (10) — a
+// leadership gesture, not an officer override. MUST match
+// src/ui/map/utils/commandAuthority.ts (ADDRESS_NATION_COST = 10) and the
+// initiate-address-nation IPC handler. Cooldown/cap reuse the event's OWN
+// recurrence (max_fires 5 / cooldown 10t), not a CA-side timer.
+const ADDRESS_NATION_COST = 10;
+// DECORATE-A-UNIT presidential leadership action cost (Presidential Command
+// Surface §10, deferred companion to front visit): the president decorates a
+// REGULAR formation (bright line — never paramilitaries), force-queuing the
+// authored decorate_a_unit_<faction> event with per-unit branches. Priced like
+// the front visit (10). MUST match src/ui/map/utils/commandAuthority.ts
+// (DECORATE_UNIT_COST = 10) and the initiate-decorate-unit IPC handler.
+// Cooldown/cap reuse the event's OWN recurrence (max_fires 5 / cooldown 10t).
+const DECORATE_UNIT_COST = 10;
 const APPROVE_OP_PREFIX = 'APPROVE_OP:';
 
 function parseApproveOpAction(action) {
@@ -375,4 +392,6 @@ module.exports = {
   ELITE_DEPLOY_COST,
   REPLACE_CO_COST,
   FRONT_VISIT_COST,
+  ADDRESS_NATION_COST,
+  DECORATE_UNIT_COST,
 };

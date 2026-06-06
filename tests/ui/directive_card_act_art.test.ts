@@ -37,6 +37,8 @@ const ALL_LEVERS: Lever[] = [
   'replace_co',
   'elite_deploy',
   'front_visit',
+  'address_nation',
+  'decorate_unit',
 ];
 
 describe('DirectiveCard act-layer lever → art map', () => {
@@ -49,6 +51,8 @@ describe('DirectiveCard act-layer lever → art map', () => {
       elite_deploy: 'act_authorize_op',
       replace_co: 'act_replace_commander',
       front_visit: 'act_front_visit',
+      address_nation: 'act_front_visit',
+      decorate_unit: 'act_front_visit',
     });
   });
 
@@ -61,6 +65,8 @@ describe('DirectiveCard act-layer lever → art map', () => {
       elite_deploy: 'consequence_reserve_deployment.webp',
       replace_co: 'consequence_personnel_change.webp',
       front_visit: 'consequence_public_pressure.webp',
+      address_nation: 'consequence_public_pressure.webp',
+      decorate_unit: 'consequence_public_pressure.webp',
     };
     for (const lever of ALL_LEVERS) {
       const url = resolveDirectiveActArt(lever);
