@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest optional local military state validate-when-present contract:** [implemented/20260606_OPTIONAL_LOCAL_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260606_OPTIONAL_LOCAL_STATE_VALIDATE_WHEN_PRESENT.md) - `military.casualty_ledger` and `military.enclave_state` remain optional but now reject malformed present local payloads without materializing absent fields or resolving ids.
+
 **Latest command objective picker:** [implemented/20260606_COMMAND_OBJECTIVE_PICKER.md](implemented/20260606_COMMAND_OBJECTIVE_PICKER.md) - Request-op directives now offer deterministic known-objective pickers in both Decision Room and Army HQ request rows while preserving existing commander objection, CA cost, staging, and receipt behavior.
 
 **Latest Warroom native overlay residue batch:** [implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md](implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md) - Intelligence, Staff, and Faction now have the only native Warroom preview overlays with explicit drill-ins to existing owner surfaces, while retired StrategicDashboard/EventLog local command variants are removed from live source.

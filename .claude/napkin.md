@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**Optional schema cleanup classification (2026-06-06).** Compatibility-materialized fields such as `war_militia_strength`, front snapshots, TG/Army-HQ operation scaffolds, and broad live command records must not ride along with lazy validate-when-present batches. Do instead: classify optional `GameState` candidates against command-board exclusions and save-migration materialization first; batch only same-risk lazy local records.
+
 **Command-surface read-model repurposes (2026-06-06).** Enclave/Economy/Advisor panels are now Humanitarian & Siege Ledger, War Footing, and Chief-of-Staff Counsel with small presidential readouts and stable ordering guards. Do instead: when repurposing thin UI panels, update product framing, summarize existing state, remove locale-dependent ordering, and prove the surface remains UI/read-model-only.
 
 **Receipt family IDs and localization (2026-06-06).** Decision consequence records now keep compatibility `family` text and add hyphenated display-safe `familyId` values for localized UI labels. Do instead: for future receipt families, add a stable `familyId`, map it to English/BCS labels at the UI edge, and prove at least one non-English label plus loaded browser coverage when the route surface changes.

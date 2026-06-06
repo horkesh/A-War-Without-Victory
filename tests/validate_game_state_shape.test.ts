@@ -130,3 +130,69 @@ describe('validateGameStateShape — partition root validation', () => {
         }
     });
 });
+
+describe('validateGameStateShape optional military local state records', () => {
+    it('absent optional local state records still pass', () => {
+        const state = minimalValid();
+        const result = validateGameStateShape(state);
+        expect(result.ok).toBe(true);
+    });
+
+    it('well-formed optional local state records pass', () => {
+        const state = minimalValid();
+        (state.military as any).casualty_ledger = {
+            RBiH: {
+                killed: 1,
+                wounded: 2,
+                missing_captured: 0,
+                equipment_lost: { tanks: 0, artillery: 1, aa_systems: 0 },
+                per_formation: {
+                    brigade_a: { killed: 1, wounded: 2, missing_captured: 0 }
+                }
+            }
+        };
+        (state.military as any).enclave_state = {
+            gorazde: { fallen: false, status: 'holding', resilience: 0.8 }
+        };
+
+        const result = validateGameStateShape(state);
+        expect(result.ok).toBe(true);
+    });
+
+    it('malformed casualty_ledger rejects when present', () => {
+        const state = minimalValid();
+        (state.military as any).casualty_ledger = {
+            RS: {
+                killed: 1,
+                wounded: Number.NaN,
+                missing_captured: 0,
+                equipment_lost: { tanks: 0, artillery: -1, aa_systems: 0 },
+                per_formation: {
+                    brigade_a: { killed: 0, wounded: 1, missing_captured: 'bad' }
+                }
+            }
+        };
+
+        const result = validateGameStateShape(state);
+        expect(result.ok).toBe(false);
+        if (!result.ok) {
+            expect(result.errors).toContain('military.casualty_ledger.RS.wounded must be a finite non-negative number');
+            expect(result.errors).toContain('military.casualty_ledger.RS.equipment_lost.artillery must be a finite non-negative number');
+            expect(result.errors).toContain('military.casualty_ledger.RS.per_formation.brigade_a.missing_captured must be a finite non-negative number');
+        }
+    });
+
+    it('malformed enclave_state rejects known leaves when present', () => {
+        const state = minimalValid();
+        (state.military as any).enclave_state = {
+            bihac: { fallen: 'no', status: 3 }
+        };
+
+        const result = validateGameStateShape(state);
+        expect(result.ok).toBe(false);
+        if (!result.ok) {
+            expect(result.errors).toContain('military.enclave_state.bihac.fallen must be a boolean when present');
+            expect(result.errors).toContain('military.enclave_state.bihac.status must be a string when present');
+        }
+    });
+});

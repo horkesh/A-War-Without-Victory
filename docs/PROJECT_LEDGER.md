@@ -12,6 +12,17 @@
 **Report:** `docs/40_reports/implemented/20260606_COMMAND_CARD_ROLE_FRAMING.md`
 
 ---
+## [2026-06-06] fix(state): validate casualty/enclave local state when present
+
+**Type:** Optional `GameState` save-validation cleanup. No save schema version, migration, fixture refresh, scenario data, simulation behavior, baseline manifest, replay writer, UI behavior, generated artifact, randomness, timestamps, or persisted output ordering changed.
+
+**Change:** `military.casualty_ledger` and `military.enclave_state` now validate when present. Absence remains valid. Present casualty ledgers validate canonical faction-keyed finite non-negative casualty/equipment/per-formation leaves; present enclave-state rows validate only known `fallen` and `status` leaves while preserving extension fields. This deliberately does not resolve formation ids or enclave ids, require all factions, materialize absent fields, or touch `war_militia_strength`, sector/front snapshots, `corps_command`, `war_timeline`, reserve upper bounds, or TG/Army-HQ operation scaffolds.
+
+**Docs:** Added `docs/40_reports/implemented/20260606_OPTIONAL_LOCAL_STATE_VALIDATE_WHEN_PRESENT.md`; updated report indices, command board, master roadmap, and knowledge ledger.
+
+**Verification:** Focused validator passed 15/15: `node F:\A-War-Without-Victory\node_modules\vitest\vitest.mjs run tests\validate_game_state_shape.test.ts --reporter=dot`; typecheck passed via `npm.cmd run typecheck -- --pretty false`; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` stayed total 507 (`state: 172`, `sim: 327`, `derived: 8`); `git diff --check` passed.
+
+---
 
 ## [2026-06-06] fix(ui): repurpose command-surface read models
 
