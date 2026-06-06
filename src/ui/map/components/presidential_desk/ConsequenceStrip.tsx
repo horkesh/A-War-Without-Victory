@@ -1,14 +1,31 @@
 import type { LoadedGameState } from '../../data/types';
 import { buildDecisionConsequenceLedger } from '../../data/decisionConsequenceLedger';
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets';
-import { t } from '../../i18n';
+import { t, type MessageKey } from '../../i18n';
 import { turnToDateString } from '../../utils/formatters';
+import type { DecisionConsequenceRecord } from '../../data/decisionConsequenceLedger';
 
 export interface ConsequenceStripProps {
   state: LoadedGameState | null;
   onOpenRecords: () => void;
   onOpenDecisionRecords?: () => void;
   onOpenChronicle: () => void;
+}
+
+const FAMILY_LABEL_KEYS: Record<DecisionConsequenceRecord['familyId'], MessageKey> = {
+  'event-decision': 'decisionConsequences.family.eventDecision',
+  'operation-opportunity': 'decisionConsequences.family.operationOpportunity',
+  'army-reserve': 'decisionConsequences.family.armyReserve',
+  'peace-proposal': 'decisionConsequences.family.peaceProposal',
+  'dayton-settlement': 'decisionConsequences.family.daytonSettlement',
+  'humanitarian-convoy': 'decisionConsequences.family.humanitarianConvoy',
+  'paramilitary-authorization': 'decisionConsequences.family.paramilitaryAuthorization',
+  'patron-relations': 'decisionConsequences.family.patronRelations',
+  'officer-personnel': 'decisionConsequences.family.officerPersonnel',
+};
+
+function familyLabel(record: DecisionConsequenceRecord): string {
+  return t(FAMILY_LABEL_KEYS[record.familyId]);
 }
 
 export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, onOpenChronicle }: ConsequenceStripProps) {
@@ -73,7 +90,9 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
                   <div className="truncate text-[11px] font-bold text-text-primary">{record.title}</div>
                   <div className="shrink-0 text-[8px] font-bold uppercase tracking-[0.14em] text-accent-gold">{record.outcome}</div>
                 </div>
-                <div className="mt-1 truncate text-[9px] text-text-secondary">{record.family} / Turn {record.turn} / {record.detail}</div>
+                <div className="mt-1 truncate text-[9px] text-text-secondary">
+                  {familyLabel(record)} / {t('decisionConsequences.turn', { turn: record.turn })} / {record.detail}
+                </div>
                 <div className="mt-1 text-[8px] font-bold uppercase tracking-[0.13em] text-text-muted">
                   {record.recordTarget === 'chronicle'
                     ? t('desk.consequences.openChronicle')

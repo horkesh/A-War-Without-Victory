@@ -4,13 +4,29 @@ import {
   type DecisionConsequenceRecord,
 } from '../../data/decisionConsequenceLedger';
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets';
-import { t } from '../../i18n';
+import { t, type MessageKey } from '../../i18n';
 import { useGameStore } from '../../store/gameStore';
+
+const FAMILY_LABEL_KEYS: Record<DecisionConsequenceRecord['familyId'], MessageKey> = {
+  'event-decision': 'decisionConsequences.family.eventDecision',
+  'operation-opportunity': 'decisionConsequences.family.operationOpportunity',
+  'army-reserve': 'decisionConsequences.family.armyReserve',
+  'peace-proposal': 'decisionConsequences.family.peaceProposal',
+  'dayton-settlement': 'decisionConsequences.family.daytonSettlement',
+  'humanitarian-convoy': 'decisionConsequences.family.humanitarianConvoy',
+  'paramilitary-authorization': 'decisionConsequences.family.paramilitaryAuthorization',
+  'patron-relations': 'decisionConsequences.family.patronRelations',
+  'officer-personnel': 'decisionConsequences.family.officerPersonnel',
+};
 
 function routeLabel(record: DecisionConsequenceRecord): string {
   return record.recordTarget === 'chronicle'
     ? t('decisionConsequences.route.chronicle')
     : t('decisionConsequences.route.records');
+}
+
+function familyLabel(record: DecisionConsequenceRecord): string {
+  return t(FAMILY_LABEL_KEYS[record.familyId]);
 }
 
 export function DecisionConsequenceRecordsPanel() {
@@ -50,7 +66,9 @@ export function DecisionConsequenceRecordsPanel() {
         <div className="min-w-0 rounded border border-panel-border/60 bg-black/20 px-2 py-2">
           <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('decisionConsequences.families')}</div>
           <div className="mt-1 truncate text-[11px] text-text-secondary">
-            {summary.families.length > 0 ? summary.families.join(' / ') : '-'}
+            {records.length > 0
+              ? Array.from(new Map(records.map((record) => [record.familyId, familyLabel(record)])).values()).join(' / ')
+              : '-'}
           </div>
         </div>
       </div>
@@ -73,7 +91,7 @@ export function DecisionConsequenceRecordsPanel() {
                   <div className="min-w-0">
                     <div className="truncate text-[13px] font-bold text-text-primary">{record.title}</div>
                     <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-text-muted">
-                      {record.family} / Turn {record.turn}
+                      {familyLabel(record)} / {t('decisionConsequences.turn', { turn: record.turn })}
                     </div>
                   </div>
                   <div className="shrink-0 rounded border border-accent-gold/35 bg-accent-gold/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-accent-gold">

@@ -15,12 +15,24 @@ import {
 export interface DecisionConsequenceRecord {
   id: string;
   turn: number;
+  familyId: DecisionConsequenceFamilyId;
   family: string;
   title: string;
   outcome: string;
   detail: string;
   recordTarget: 'records' | 'chronicle';
 }
+
+export type DecisionConsequenceFamilyId =
+  | 'event-decision'
+  | 'operation-opportunity'
+  | 'army-reserve'
+  | 'peace-proposal'
+  | 'dayton-settlement'
+  | 'humanitarian-convoy'
+  | 'paramilitary-authorization'
+  | 'patron-relations'
+  | 'officer-personnel';
 
 export interface DecisionConsequenceLedgerSummary {
   total: number;
@@ -259,6 +271,7 @@ export function buildDecisionConsequenceLedger(
     records.push({
       id: `event:${event.id}`,
       turn: event.turn,
+      familyId: 'event-decision',
       family: 'Event decision',
       title: event.title || 'Recorded decision',
       outcome: 'Decision recorded',
@@ -272,6 +285,7 @@ export function buildDecisionConsequenceLedger(
     records.push({
       id: `opportunity:${opportunity.proposal_id}`,
       turn: opportunity.response_turn ?? opportunity.eligibility_turn ?? state.turn,
+      familyId: 'operation-opportunity',
       family: 'Operation opportunity',
       title: opportunity.display_name,
       outcome: opportunityOutcome(opportunity),
@@ -284,6 +298,7 @@ export function buildDecisionConsequenceLedger(
     records.push({
       id: `reserve:${reserve.request_id}`,
       turn: reserve.turn,
+      familyId: 'army-reserve',
       family: 'Army reserve',
       title: reserveTitle(reserve),
       outcome: reserveOutcome(reserve),
@@ -297,6 +312,7 @@ export function buildDecisionConsequenceLedger(
     records.push({
       id: `peace:${peace.planId}:${peace.turnOffered}`,
       turn: peace.turnOffered,
+      familyId: 'peace-proposal',
       family: 'Peace proposal',
       title: peace.planName || 'Peace proposal',
       outcome: peaceOutcome(peace),
@@ -309,6 +325,7 @@ export function buildDecisionConsequenceLedger(
     records.push({
       id: `dayton:${state.gameVerdict.turn}`,
       turn: state.gameVerdict.turn,
+      familyId: 'dayton-settlement',
       family: 'Dayton settlement',
       title: state.gameVerdict.outcome_label || 'Dayton Peace Agreement',
       outcome: 'Agreement signed',
@@ -321,6 +338,7 @@ export function buildDecisionConsequenceLedger(
     records.push({
       id: `convoy:${convoy.id}`,
       turn: convoy.turn,
+      familyId: 'humanitarian-convoy',
       family: 'Humanitarian convoy',
       title: convoyTitle(convoy),
       outcome: convoyOutcome(convoy),
@@ -333,6 +351,7 @@ export function buildDecisionConsequenceLedger(
     records.push({
       id: `paramilitary:${paramilitary.id}`,
       turn: paramilitary.turn,
+      familyId: 'paramilitary-authorization',
       family: 'Paramilitary authorization',
       title: paramilitaryTitle(paramilitary),
       outcome: paramilitaryOutcome(paramilitary),
@@ -355,6 +374,7 @@ export function buildDecisionConsequenceLedger(
     records.push({
       id: `patron-defiance:${playerFaction}:${turn}:${cutFraction}:${supportAfter}`,
       turn,
+      familyId: 'patron-relations',
       family: 'Patron relations',
       title: 'Patron defiance supply cut',
       outcome: 'Material support reduced',
@@ -367,6 +387,7 @@ export function buildDecisionConsequenceLedger(
     records.push({
       id: `officer:${officer.id}`,
       turn: officer.turn,
+      familyId: 'officer-personnel',
       family: 'Officer personnel',
       title: officerTitle(officer),
       outcome: officerOutcome(officer),

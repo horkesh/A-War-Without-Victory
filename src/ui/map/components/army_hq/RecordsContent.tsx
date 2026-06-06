@@ -56,40 +56,40 @@ export function RecordsContent() {
                 <TerritoryOverTimeChart />
             </div>
 
-            <section className="mb-4 rounded-md border border-panel-border bg-panel-card px-3 py-3" aria-label="Records archive summary">
+            <section className="mb-4 rounded-md border border-panel-border bg-panel-card px-3 py-3" aria-label={t('recordsContent.archiveSummary.ariaLabel')}>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
-                        <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-secondary">Archive Routes</div>
+                        <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-secondary">{t('recordsContent.archiveSummary.title')}</div>
                         <div className="mt-1 text-[11px] text-text-secondary">
-                            Turn aftermath, completed operations, opportunity decisions, and presidential consequences are filed here; Chronicle-filed decisions remain one click away.
+                            {t('recordsContent.archiveSummary.help')}
                         </div>
                     </div>
                     <div className="text-right">
-                        <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">Latest Decision</div>
+                        <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.latestDecision')}</div>
                         <div className="max-w-[14rem] truncate text-[11px] text-text-primary">
-                            {archiveCounts.decisionSummary.latestTitle ?? 'No filed decision yet'}
+                            {archiveCounts.decisionSummary.latestTitle ?? t('recordsContent.archiveSummary.noDecision')}
                         </div>
                     </div>
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-5">
                     <div className="rounded border border-panel-border/60 bg-black/20 px-2 py-2">
-                        <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">Turn Records</div>
+                        <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.turnRecords')}</div>
                         <div className="mt-1 text-[14px] font-bold tabular-nums text-text-primary">{archiveCounts.aftermath}</div>
                     </div>
                     <div className="rounded border border-panel-border/60 bg-black/20 px-2 py-2">
-                        <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">Operation AARs</div>
+                        <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.operationAars')}</div>
                         <div className="mt-1 text-[14px] font-bold tabular-nums text-text-primary">{archiveCounts.ops}</div>
                     </div>
                     <div className="rounded border border-panel-border/60 bg-black/20 px-2 py-2">
-                        <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">Decisions</div>
+                        <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.decisions')}</div>
                         <div className="mt-1 text-[14px] font-bold tabular-nums text-text-primary">{archiveCounts.decisions}</div>
                     </div>
                     <div className="rounded border border-panel-border/60 bg-black/20 px-2 py-2">
-                        <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">Chronicle Filed</div>
+                        <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.chronicleFiled')}</div>
                         <div className="mt-1 text-[14px] font-bold tabular-nums text-text-primary">{archiveCounts.decisionSummary.chronicleRouteCount}</div>
                     </div>
                     <div className="rounded border border-panel-border/60 bg-black/20 px-2 py-2">
-                        <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">Opportunities</div>
+                        <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.opportunities')}</div>
                         <div className="mt-1 text-[14px] font-bold tabular-nums text-text-primary">{archiveCounts.opportunities}</div>
                     </div>
                 </div>
