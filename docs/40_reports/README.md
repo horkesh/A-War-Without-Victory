@@ -10,6 +10,8 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest supply panel player-scoped read-model** | [implemented/20260606_SUPPLY_PANEL_PLAYER_SCOPED_READMODEL.md](implemented/20260606_SUPPLY_PANEL_PLAYER_SCOPED_READMODEL.md) - Supply map logistics counts are localized, deterministic, and scoped to the loaded player faction even under legacy fallback rows. |
+
 | **Latest local military state validate-when-present contract** | [implemented/20260606_LOCAL_MILITARY_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260606_LOCAL_MILITARY_STATE_VALIDATE_WHEN_PRESENT.md) - Legacy AoR caps, OG orders, settlement holdouts, and faction officer maturity remain optional but now reject malformed present local-state payloads. |
 
 | **Latest map-derived artifact ownership** | [implemented/20260606_MAP_DERIVED_ARTIFACT_OWNERSHIP.md](implemented/20260606_MAP_DERIVED_ARTIFACT_OWNERSHIP.md) - `data/derived/georef/`, `data/derived/operational/`, and `data/derived/municipality_audit/` are retained generated map-data evidence with owner-command rows and static guards. |

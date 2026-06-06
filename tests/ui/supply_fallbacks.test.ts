@@ -59,7 +59,7 @@ describe('supply UI fallbacks', () => {
     expect(screen.getByText('0 cut')).toBeTruthy();
   });
 
-  it('SupplyPanel falls back per faction when live condition is partial', () => {
+  it('SupplyPanel scopes legacy fallback to the player faction when live condition is partial', () => {
     render(createElement(SupplyPanel, {
       state: {
         player_faction: 'RBiH',
@@ -70,7 +70,41 @@ describe('supply UI fallbacks', () => {
 
     expect(screen.getByText('1 open')).toBeTruthy();
     expect(screen.getByText('0 strained')).toBeTruthy();
-    expect(screen.getByText('1 cut')).toBeTruthy();
+    expect(screen.getByText('0 cut')).toBeTruthy();
+  });
+
+  it('SupplyPanel shows player-scoped state and corridor counts from summary rows', () => {
+    render(createElement(SupplyPanel, {
+      state: {
+        player_faction: 'RBiH',
+        supplySummaryByFaction: {
+          RBiH: {
+            adequate_count: 2,
+            strained_count: 1,
+            critical_count: 1,
+            corridor_open_count: 3,
+            corridor_brittle_count: 1,
+            corridor_cut_count: 0,
+          },
+          RS: {
+            adequate_count: 0,
+            strained_count: 0,
+            critical_count: 99,
+            corridor_open_count: 0,
+            corridor_brittle_count: 0,
+            corridor_cut_count: 99,
+          },
+        },
+      } as unknown as LoadedGameState,
+    }));
+
+    expect(screen.getByText('2 adequate')).toBeTruthy();
+    expect(screen.getAllByText('1 strained').length).toBeGreaterThan(0);
+    expect(screen.getByText('1 critical')).toBeTruthy();
+    expect(screen.getByText('3 open')).toBeTruthy();
+    expect(screen.getByText('0 cut')).toBeTruthy();
+    expect(screen.queryByText('99 critical')).toBeNull();
+    expect(screen.queryByText('99 cut')).toBeNull();
   });
 
   it('buildSupplyGeoJSON treats high legacy pressure as critical, not adequate', () => {

@@ -1,3 +1,9 @@
+## 2026-06-06 - Supply UI fallbacks must stay player-scoped
+
+**Legacy supply fallback rows are still player-visible UI data:** Even when adapter output normally scopes `warPhaseSupplyPressure` and `warPhaseSupplyCondition`, direct panel/render tests can pass mixed-faction fallback rows. Durable rule: when `player_faction` is loaded, supply UI fallback aggregation must read only that faction; use all-faction fallback only when there is no loaded player faction. Applied in `[2026-06-06] fix(ui): scope supply panel read-model counts`.
+
+**UI read-model ordering should not depend on browser locale:** Supply panel summary rows now use a simple ASCII comparator rather than `localeCompare(...)`. Durable rule: for deterministic UI/read-model aggregation, sort ids with stable byte/ASCII comparators unless a user-facing collation requirement is explicit.
+
 ## 2026-06-06 - Local military state validation stays shape-only
 
 **Legacy/local order-state validation is not id resolution:** `military.brigade_desired_aor_cap`, `military.og_orders`, `military.settlement_holdouts`, and `military.faction_officer_maturity` can reject malformed present payloads without becoming required persisted state. Durable rule: validate local row/record shape and known enums only; do not resolve formation/corps/settlement ids, validate OG feasibility, infer holdout ownership, materialize absent fields, bump schema, or add migrations in optional cleanup lanes. Applied in `[2026-06-06] fix(state): validate local military state when present`.

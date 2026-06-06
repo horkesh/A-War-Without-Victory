@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-06] fix(ui): scope supply panel read-model counts
+
+**Type:** UI/read-model hardening. No simulation behavior, combat supply math, save schema, migration, scenario data, baseline manifest, generated artifact, randomness, timestamps, or persisted output ordering changed.
+
+**Change:** The supply map logistics panel now scopes legacy `warPhaseSupplyPressure` / `warPhaseSupplyCondition` fallback counts to the loaded player faction, uses deterministic ASCII ordering for visible summary rows, localizes corridor/status count labels, and shows the existing player-visible supply-state count summary when adapter rows are present.
+
+**Why:** The broader player supply visibility projection was already player-scoped, but the map-panel fallback could count non-player legacy rows when rendered directly with mixed-faction fallback input. Supply/logistics comprehension should explain existing player-visible state without leaking enemy supply truth or inventing new supply authority.
+
+**Verification:** `node ..\..\node_modules\vitest\vitest.mjs run tests\ui\supply_fallbacks.test.ts tests\ui_player_supply_visibility.test.ts tests\ui_decision_room_supply_visibility.test.ts tests\ui\supply_legend_overlap_contract.test.ts --reporter=dot` PASS, 21/21. Scenario/baseline regression was not run because this is UI/read-model-only and does not change sim, save, scenario, generated artifact, or baseline bytes.
+
+**Artifacts:** `docs/40_reports/implemented/20260606_SUPPLY_PANEL_PLAYER_SCOPED_READMODEL.md`.
+
 ## [2026-06-06] fix(state): validate local military state when present
 
 **Type:** Save-validation/schema-contract hardening. No simulation behavior, scenario data, save schema version, migration, fixture refresh, baseline manifest, generated artifact, UI code, randomness, timestamps, or persisted output ordering changed.

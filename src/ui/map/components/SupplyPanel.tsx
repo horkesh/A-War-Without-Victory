@@ -9,6 +9,7 @@ import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { t } from '../i18n';
 
 const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
+type MilitaryFactionId = typeof FACTIONS[number];
 
 interface SupplyPanelProps {
   state: LoadedGameState;
@@ -35,26 +36,42 @@ function ReserveBar({ label, value, color }: { label: string; value: number; col
   );
 }
 
+function isMilitaryFactionId(value: unknown): value is MilitaryFactionId {
+  return value === 'RS' || value === 'RBiH' || value === 'HRHB';
+}
+
+function strictCompare(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 export function SupplyPanel({ state }: SupplyPanelProps) {
   const reserves = state.factionReserves;
   const supplySummary = state.supplySummaryByFaction ?? {};
   const pressure = state.warPhaseSupplyPressure ?? {};
   const condition = state.warPhaseSupplyCondition ?? {};
   const playerFaction = state.player_faction;
-  const isPlayerFaction = playerFaction === 'RS' || playerFaction === 'RBiH' || playerFaction === 'HRHB';
+  const isPlayerFaction = isMilitaryFactionId(playerFaction);
 
   const visibleSummaries = Object.entries(supplySummary)
     .filter(([factionId]) => !isPlayerFaction || factionId === playerFaction)
-    .sort(([a], [b]) => a.localeCompare(b));
-  let totals = visibleSummaries.reduce((acc, [, summary]) => ({
+    .sort(([a], [b]) => strictCompare(a, b));
+  const visibleStateTotals = visibleSummaries.reduce((acc, [, summary]) => ({
+    adequate: acc.adequate + summary.adequate_count,
+    strained: acc.strained + summary.strained_count,
+    critical: acc.critical + summary.critical_count,
+  }), { adequate: 0, strained: 0, critical: 0 });
+  let corridorTotals = visibleSummaries.reduce((acc, [, summary]) => ({
     open: acc.open + summary.corridor_open_count,
     brittle: acc.brittle + summary.corridor_brittle_count,
     cut: acc.cut + summary.corridor_cut_count,
   }), { open: 0, brittle: 0, cut: 0 });
   if (visibleSummaries.length === 0) {
-    const legacyFactionIds = Array.from(new Set([...Object.keys(pressure), ...Object.keys(condition)]))
-      .sort();
-    totals = legacyFactionIds.reduce((acc, factionId) => {
+    const legacyFactionIds = isPlayerFaction
+      ? [playerFaction].filter((factionId) => pressure[factionId] != null || condition[factionId] != null)
+      : Array.from(new Set([...Object.keys(pressure), ...Object.keys(condition)]))
+        .filter(isMilitaryFactionId)
+        .sort();
+    corridorTotals = legacyFactionIds.reduce((acc, factionId) => {
       const live = condition[factionId];
       const legacy = pressure[factionId];
       const score = typeof live === 'number' && Number.isFinite(live) ? live : 100 - (typeof legacy === 'number' && Number.isFinite(legacy) ? legacy : 0);
@@ -95,10 +112,19 @@ export function SupplyPanel({ state }: SupplyPanelProps) {
       )}
 
       {/* Corridor summary */}
-      <div className="border-t border-panel-border/50 pt-1.5 text-[10px] text-text-secondary space-x-2">
-        <span className="text-green-400">{totals.open} open</span>
-        <span className="text-yellow-400">{totals.brittle} strained</span>
-        <span className="text-red-400">{totals.cut} cut</span>
+      <div className="border-t border-panel-border/50 pt-1.5 text-[10px] text-text-secondary space-y-1">
+        {visibleSummaries.length > 0 && (
+          <div className="flex gap-2">
+            <span className="text-green-400">{t('supply.stateAdequateCount', { count: visibleStateTotals.adequate })}</span>
+            <span className="text-yellow-400">{t('supply.stateStrainedCount', { count: visibleStateTotals.strained })}</span>
+            <span className="text-red-400">{t('supply.stateCriticalCount', { count: visibleStateTotals.critical })}</span>
+          </div>
+        )}
+        <div className="flex gap-2">
+          <span className="text-green-400">{t('supply.corridorOpenCount', { count: corridorTotals.open })}</span>
+          <span className="text-yellow-400">{t('supply.corridorStrainedCount', { count: corridorTotals.brittle })}</span>
+          <span className="text-red-400">{t('supply.corridorCutCount', { count: corridorTotals.cut })}</span>
+        </div>
       </div>
     </div>
   );

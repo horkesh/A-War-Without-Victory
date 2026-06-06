@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest supply panel player-scoped read-model:** [implemented/20260606_SUPPLY_PANEL_PLAYER_SCOPED_READMODEL.md](implemented/20260606_SUPPLY_PANEL_PLAYER_SCOPED_READMODEL.md) - Supply map logistics panel counts are now localized, deterministic, and scoped to the loaded player faction even when the panel falls back to legacy supply pressure/condition rows.
+
 **Latest local military state validate-when-present contract:** [implemented/20260606_LOCAL_MILITARY_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260606_LOCAL_MILITARY_STATE_VALIDATE_WHEN_PRESENT.md) - `military.brigade_desired_aor_cap`, `military.og_orders`, `military.settlement_holdouts`, and `military.faction_officer_maturity` remain optional but now reject malformed present local-state payloads without materializing absent fields or resolving ids.
 
 **Latest map-derived artifact ownership:** [implemented/20260606_MAP_DERIVED_ARTIFACT_OWNERSHIP.md](implemented/20260606_MAP_DERIVED_ARTIFACT_OWNERSHIP.md) - `data/derived/georef/`, `data/derived/operational/`, and `data/derived/municipality_audit/` are now classified as committed retained generated map evidence with owner commands and static tracked-file guards.
