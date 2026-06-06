@@ -2954,6 +2954,250 @@ function validateDeclinedOperationRecord(value: unknown, errors: string[]): void
     }
 }
 
+// ─── Batch: remaining optional military surfaces (validate-when-present) ───────
+// Read-only shape proofs. Absence stays valid; a present-but-malformed payload is
+// rejected. No migration / TS optionality change / behavior change (byte-identical).
+
+/** `military.war_militia_strength`: Record<MunicipalityId, Record<FactionId, number>>; each value [0, 100]. */
+function validateWarMilitiaStrength(value: unknown, errors: string[]): void {
+    const path = 'military.war_militia_strength';
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+    for (const munId of Object.keys(value).sort(strictCompare)) {
+        const inner = value[munId];
+        const innerPath = `${path}.${munId}`;
+        if (!isRecord(inner)) {
+            errors.push(`${innerPath} must be an object`);
+            continue;
+        }
+        for (const fid of Object.keys(inner).sort(strictCompare)) {
+            const v = inner[fid];
+            if (!isCanonicalPlayerFaction(fid)) {
+                errors.push(`${innerPath}.${fid} must use a canonical faction id key`);
+            }
+            if (typeof v !== 'number' || !Number.isFinite(v) || v < 0 || v > 100) {
+                errors.push(`${innerPath}.${fid} must be a number in [0, 100]`);
+            }
+        }
+    }
+}
+
+/** Shared shape proof for FrontEdgeState[] surfaces (`front_edges`, `war_front_edges_osid`). */
+function validateFrontEdgeStateArray(value: unknown, path: string, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push(`${path} must be an array when present`);
+        return;
+    }
+    value.forEach((edge, i) => {
+        const entryPath = `${path}[${i}]`;
+        if (!isRecord(edge)) {
+            errors.push(`${entryPath} must be an object`);
+            return;
+        }
+        if (!isNonEmptyString(edge.edge_id)) {
+            errors.push(`${entryPath}.edge_id must be a non-empty string`);
+        }
+        if (!isNonEmptyString(edge.a)) {
+            errors.push(`${entryPath}.a must be a non-empty string`);
+        }
+        if (!isNonEmptyString(edge.b)) {
+            errors.push(`${entryPath}.b must be a non-empty string`);
+        }
+        if (edge.side_a !== null && !isCanonicalPlayerFaction(edge.side_a)) {
+            errors.push(`${entryPath}.side_a must be null or one of: RBiH, RS, HRHB`);
+        }
+        if (edge.side_b !== null && !isCanonicalPlayerFaction(edge.side_b)) {
+            errors.push(`${entryPath}.side_b must be null or one of: RBiH, RS, HRHB`);
+        }
+    });
+}
+
+/** `military.assignable_front_segments`: AssignableFrontSegmentState[] (legacy compat snapshot). */
+function validateAssignableFrontSegments(value: unknown, errors: string[]): void {
+    const path = 'military.assignable_front_segments';
+    if (!Array.isArray(value)) {
+        errors.push(`${path} must be an array when present`);
+        return;
+    }
+    value.forEach((seg, i) => {
+        const entryPath = `${path}[${i}]`;
+        if (!isRecord(seg)) {
+            errors.push(`${entryPath} must be an object`);
+            return;
+        }
+        if (!isNonEmptyString(seg.front_id)) {
+            errors.push(`${entryPath}.front_id must be a non-empty string`);
+        }
+        if (!isStringArray(seg.edge_ids)) {
+            errors.push(`${entryPath}.edge_ids must be a string array`);
+        }
+        if (seg.side_a !== null && !isCanonicalPlayerFaction(seg.side_a)) {
+            errors.push(`${entryPath}.side_a must be null or one of: RBiH, RS, HRHB`);
+        }
+        if (seg.side_b !== null && !isCanonicalPlayerFaction(seg.side_b)) {
+            errors.push(`${entryPath}.side_b must be null or one of: RBiH, RS, HRHB`);
+        }
+        if (!isNonNegativeInteger(seg.length_edges)) {
+            errors.push(`${entryPath}.length_edges must be a non-negative integer`);
+        }
+        if ('name' in seg && seg.name !== undefined && typeof seg.name !== 'string') {
+            errors.push(`${entryPath}.name must be a string when present`);
+        }
+        if ('theatre_id' in seg && seg.theatre_id !== undefined && typeof seg.theatre_id !== 'string') {
+            errors.push(`${entryPath}.theatre_id must be a string when present`);
+        }
+    });
+}
+
+/** `military.guerrilla_threats`: Array<{ faction; municipalities; intensity; expires_turn }>. */
+function validateGuerrillaThreats(value: unknown, errors: string[]): void {
+    const path = 'military.guerrilla_threats';
+    if (!Array.isArray(value)) {
+        errors.push(`${path} must be an array when present`);
+        return;
+    }
+    value.forEach((threat, i) => {
+        const entryPath = `${path}[${i}]`;
+        if (!isRecord(threat)) {
+            errors.push(`${entryPath} must be an object`);
+            return;
+        }
+        if (!isCanonicalPlayerFaction(threat.faction)) {
+            errors.push(`${entryPath}.faction must be one of: RBiH, RS, HRHB`);
+        }
+        if (!isStringArray(threat.municipalities)) {
+            errors.push(`${entryPath}.municipalities must be a string array`);
+        }
+        if (!isFiniteNumber(threat.intensity)) {
+            errors.push(`${entryPath}.intensity must be a finite number`);
+        }
+        if (!isNonNegativeInteger(threat.expires_turn)) {
+            errors.push(`${entryPath}.expires_turn must be a non-negative integer`);
+        }
+    });
+}
+
+/** `military.og_promotions`: Record<FormationId, OgPromotionRecord> (ADR-0006). */
+function validateOgPromotions(value: unknown, errors: string[]): void {
+    const path = 'military.og_promotions';
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+    for (const corpsId of Object.keys(value).sort(strictCompare)) {
+        const entry = value[corpsId];
+        const entryPath = `${path}.${corpsId}`;
+        if (!isRecord(entry)) {
+            errors.push(`${entryPath} must be an object`);
+            continue;
+        }
+        if (!isNonEmptyString(entry.corps_id)) {
+            errors.push(`${entryPath}.corps_id must be a non-empty string`);
+        }
+        if (!isCanonicalPlayerFaction(entry.faction)) {
+            errors.push(`${entryPath}.faction must be one of: RBiH, RS, HRHB`);
+        }
+        if (!isNonNegativeInteger(entry.og_ordinal)) {
+            errors.push(`${entryPath}.og_ordinal must be a non-negative integer`);
+        }
+        if (!isNonNegativeInteger(entry.division_number)) {
+            errors.push(`${entryPath}.division_number must be a non-negative integer`);
+        }
+        if (!isNonEmptyString(entry.division_display_name)) {
+            errors.push(`${entryPath}.division_display_name must be a non-empty string`);
+        }
+        if (!isNonNegativeInteger(entry.promoted_on_turn)) {
+            errors.push(`${entryPath}.promoted_on_turn must be a non-negative integer`);
+        }
+    }
+}
+
+/** `military.army_hq_last_op_turn`: Record<FactionId, number> (non-negative integer turn). */
+function validateArmyHqLastOpTurn(value: unknown, errors: string[]): void {
+    const path = 'military.army_hq_last_op_turn';
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+    for (const fid of Object.keys(value).sort(strictCompare)) {
+        if (!isCanonicalPlayerFaction(fid)) {
+            errors.push(`${path}.${fid} must use a canonical faction id key`);
+        }
+        if (!isNonNegativeInteger(value[fid])) {
+            errors.push(`${path}.${fid} must be a non-negative integer`);
+        }
+    }
+}
+
+/** `military.army_hq_op_count_by_year`: Record<FactionId, Record<year, count>>. */
+function validateArmyHqOpCountByYear(value: unknown, errors: string[]): void {
+    const path = 'military.army_hq_op_count_by_year';
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+    for (const fid of Object.keys(value).sort(strictCompare)) {
+        const inner = value[fid];
+        const innerPath = `${path}.${fid}`;
+        if (!isCanonicalPlayerFaction(fid)) {
+            errors.push(`${innerPath} must use a canonical faction id key`);
+        }
+        if (!isRecord(inner)) {
+            errors.push(`${innerPath} must be an object`);
+            continue;
+        }
+        for (const year of Object.keys(inner).sort(strictCompare)) {
+            if (!isNonNegativeInteger(inner[year])) {
+                errors.push(`${innerPath}.${year} must be a non-negative integer`);
+            }
+        }
+    }
+}
+
+/** `military.elite_brigade_tracker`: Record<brigadeId, EliteBrigadeTracker>. */
+function validateEliteBrigadeTracker(value: unknown, errors: string[]): void {
+    const path = 'military.elite_brigade_tracker';
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+    for (const brigadeId of Object.keys(value).sort(strictCompare)) {
+        const entry = value[brigadeId];
+        const entryPath = `${path}.${brigadeId}`;
+        if (!isRecord(entry)) {
+            errors.push(`${entryPath} must be an object`);
+            continue;
+        }
+        if (!isNonEmptyString(entry.brigade_id)) {
+            errors.push(`${entryPath}.brigade_id must be a non-empty string`);
+        }
+        for (const key of ['total_loans', 'total_turns_deployed', 'total_battles', 'total_casualties_taken', 'total_osids_captured']) {
+            if (!isFiniteNonNegativeNumber(entry[key])) {
+                errors.push(`${entryPath}.${key} must be a finite non-negative number`);
+            }
+        }
+        if (!Array.isArray(entry.episodes)) {
+            errors.push(`${entryPath}.episodes must be an array`);
+        }
+    }
+}
+
+/** `military.tg_recent_compositions` / `military.tg_formations_by_corps`: Record<string, number>
+ *  (non-negative-integer values). Deterministic key iteration for stable error order. */
+function validateNonNegativeIntegerRecordNamed(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+    for (const key of Object.keys(value).sort(strictCompare)) {
+        if (!isNonNegativeInteger(value[key])) {
+            errors.push(`${path}.${key} must be a non-negative integer`);
+        }
+    }
+}
+
 const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 3, path: 'meta.referendum_held', check: (v) => typeof v === 'boolean' },
     { version: 3, path: 'meta.referendum_turn', check: (v) => v === null || Number.isInteger(v) },
@@ -3493,6 +3737,41 @@ export function validateGameStateShape(
         } else {
             errors.push('military.war_jna must be an object when present');
         }
+    }
+
+    // Batch: remaining optional military surfaces (validate-when-present; byte-identical, read-only).
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'war_militia_strength' in military && military.war_militia_strength !== undefined) {
+        validateWarMilitiaStrength(military.war_militia_strength, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'front_edges' in military && military.front_edges !== undefined) {
+        validateFrontEdgeStateArray(military.front_edges, 'military.front_edges', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'war_front_edges_osid' in military && military.war_front_edges_osid !== undefined) {
+        validateFrontEdgeStateArray(military.war_front_edges_osid, 'military.war_front_edges_osid', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'assignable_front_segments' in military && military.assignable_front_segments !== undefined) {
+        validateAssignableFrontSegments(military.assignable_front_segments, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'guerrilla_threats' in military && military.guerrilla_threats !== undefined) {
+        validateGuerrillaThreats(military.guerrilla_threats, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'og_promotions' in military && military.og_promotions !== undefined) {
+        validateOgPromotions(military.og_promotions, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'army_hq_last_op_turn' in military && military.army_hq_last_op_turn !== undefined) {
+        validateArmyHqLastOpTurn(military.army_hq_last_op_turn, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'army_hq_op_count_by_year' in military && military.army_hq_op_count_by_year !== undefined) {
+        validateArmyHqOpCountByYear(military.army_hq_op_count_by_year, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'elite_brigade_tracker' in military && military.elite_brigade_tracker !== undefined) {
+        validateEliteBrigadeTracker(military.elite_brigade_tracker, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'tg_recent_compositions' in military && military.tg_recent_compositions !== undefined) {
+        validateNonNegativeIntegerRecordNamed(military.tg_recent_compositions, 'military.tg_recent_compositions', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'tg_formations_by_corps' in military && military.tg_formations_by_corps !== undefined) {
+        validateNonNegativeIntegerRecordNamed(military.tg_formations_by_corps, 'military.tg_formations_by_corps', errors);
     }
 
     // War phase: optional supply pressure and exhaustion live under state.political
