@@ -1059,6 +1059,80 @@ function validateFactionNumberRecord(value: unknown, path: string, errors: strin
     }
 }
 
+function validateCasualtyLedger(value: unknown, errors: string[]): void {
+    const path = 'military.casualty_ledger';
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+    for (const factionId of Object.keys(value).sort(strictCompare)) {
+        const factionPath = `${path}.${factionId}`;
+        const factionLedger = value[factionId];
+        if (!isCanonicalPlayerFaction(factionId)) {
+            errors.push(`${factionPath} must use a canonical faction id key`);
+        }
+        if (!isRecord(factionLedger)) {
+            errors.push(`${factionPath} must be an object`);
+            continue;
+        }
+        for (const key of ['killed', 'wounded', 'missing_captured']) {
+            if (!isFiniteNonNegativeNumber(factionLedger[key])) {
+                errors.push(`${factionPath}.${key} must be a finite non-negative number`);
+            }
+        }
+        const equipmentPath = `${factionPath}.equipment_lost`;
+        if (!isRecord(factionLedger.equipment_lost)) {
+            errors.push(`${equipmentPath} must be an object`);
+        } else {
+            for (const key of ['tanks', 'artillery', 'aa_systems']) {
+                if (!isFiniteNonNegativeNumber(factionLedger.equipment_lost[key])) {
+                    errors.push(`${equipmentPath}.${key} must be a finite non-negative number`);
+                }
+            }
+        }
+        const perFormationPath = `${factionPath}.per_formation`;
+        if (!isRecord(factionLedger.per_formation)) {
+            errors.push(`${perFormationPath} must be an object`);
+        } else {
+            for (const formationId of Object.keys(factionLedger.per_formation).sort(strictCompare)) {
+                const formationPath = `${perFormationPath}.${formationId}`;
+                const formationLedger = factionLedger.per_formation[formationId];
+                if (!isRecord(formationLedger)) {
+                    errors.push(`${formationPath} must be an object`);
+                    continue;
+                }
+                for (const key of ['killed', 'wounded', 'missing_captured']) {
+                    if (!isFiniteNonNegativeNumber(formationLedger[key])) {
+                        errors.push(`${formationPath}.${key} must be a finite non-negative number`);
+                    }
+                }
+            }
+        }
+    }
+}
+
+function validateEnclaveState(value: unknown, errors: string[]): void {
+    const path = 'military.enclave_state';
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+    for (const enclaveId of Object.keys(value).sort(strictCompare)) {
+        const entryPath = `${path}.${enclaveId}`;
+        const entry = value[enclaveId];
+        if (!isRecord(entry)) {
+            errors.push(`${entryPath} must be an object`);
+            continue;
+        }
+        if ('fallen' in entry && entry.fallen !== undefined && typeof entry.fallen !== 'boolean') {
+            errors.push(`${entryPath}.fallen must be a boolean when present`);
+        }
+        if ('status' in entry && entry.status !== undefined && typeof entry.status !== 'string') {
+            errors.push(`${entryPath}.status must be a string when present`);
+        }
+    }
+}
+
 function validateCorpsEquipmentReserve(value: unknown, errors: string[]): void {
     const path = 'military.corps_equipment_reserve';
     if (!isRecord(value)) {
@@ -3285,6 +3359,9 @@ export function validateGameStateShape(
     if (military && typeof military === 'object' && !Array.isArray(military) && 'active_offensives_against_corps' in military && military.active_offensives_against_corps !== undefined) {
         validateNonNegativeIntegerRecord(military.active_offensives_against_corps, 'military.active_offensives_against_corps', errors);
     }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'casualty_ledger' in military && military.casualty_ledger !== undefined) {
+        validateCasualtyLedger(military.casualty_ledger, errors);
+    }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'faction_officer_maturity' in military && military.faction_officer_maturity !== undefined) {
         validateFiniteNonNegativeNumberRecord(military.faction_officer_maturity, 'military.faction_officer_maturity', errors);
     }
@@ -3326,6 +3403,9 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'last_briefing' in military && military.last_briefing !== undefined) {
         validateCommandBriefing(military.last_briefing, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'enclave_state' in military && military.enclave_state !== undefined) {
+        validateEnclaveState(military.enclave_state, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'corps_dialogues' in military && military.corps_dialogues !== undefined) {
         validateCorpsDialogues(military.corps_dialogues, errors);
