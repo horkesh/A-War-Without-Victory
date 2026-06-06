@@ -38,7 +38,12 @@ import type { Osid } from './osid_adjacency.js';
 import { getHomeDistanceMult } from './home_distance.js';
 import { getActiveEquipmentQualityMultiplier, getCascadePenaltyForOsid } from '../events/active_modifiers.js';
 import { getStrategicDepth, getKrajinaCollapseMult } from './strategic_depth.js';
-import { isIntelAmbushFrictionEnabled } from './intel_ambush_depth_gate.js';
+import { isIntelAmbushFrictionEnabled, isIntelAmbushDepthEnabled } from './intel_ambush_depth_gate.js';
+import {
+    INTEL_EXECUTION_AMBUSH_DEPTH_GAIN,
+    INTEL_EXECUTION_AMBUSH_ATTACKER_CASUALTY_MAX,
+    INTEL_EXECUTION_AMBUSH_DEFENDER_CASUALTY_MIN,
+} from './intel_ambush_depth.js';
 
 type CombatMathProfileTimer = <T>(labelSuffix: string, fn: () => T) => T;
 
@@ -434,9 +439,23 @@ export function getIntelExecutionFrictionMultipliers(
     };
 }
 
+/**
+ * Depth amplifier (packet §2/§4): scale the per-confidence ambush severity by how far the
+ * attacker is over-reaching its recon (`depthFactor ∈ [0,1]`), gated by the nested
+ * default-OFF AWWV_INTEL_AMBUSH_DEPTH sub-flag. Returns the unmodified `gapRatio` when the
+ * sub-flag is off or `depthFactor` is 0/neutral — byte-identical to the shipped value.
+ */
+function ambushDepthScaledGapRatio(gapRatio: number, depthFactor: number): number {
+    if (!isIntelAmbushDepthEnabled()) return gapRatio;
+    const d = Number.isFinite(depthFactor) ? Math.max(0, Math.min(1, depthFactor)) : 0;
+    if (d === 0) return gapRatio;
+    return gapRatio * (1 + INTEL_EXECUTION_AMBUSH_DEPTH_GAIN * d);
+}
+
 export function getIntelAmbushAttackerCasualtyMult(
     confidence: number | null | undefined,
     defenderOpsecActive: boolean,
+    depthFactor = 0,
 ): number {
     // Retro-gate: umbrella defaults ON (mechanic live = current baseline). When the
     // operator disables AWWV_INTEL_AMBUSH_FRICTION the mechanic is inert (×1.0).
@@ -447,12 +466,17 @@ export function getIntelAmbushAttackerCasualtyMult(
     if (!defenderOpsecActive || clampedConfidence >= INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD) return 1;
     const confidenceGapRatio = (INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD - clampedConfidence)
         / INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD;
-    return 1 + (INTEL_EXECUTION_AMBUSH_ATTACKER_CASUALTY_MULT - 1) * confidenceGapRatio;
+    // Depth-neutral (sub-flag off or depthFactor 0) ⇒ exact shipped value.
+    const scaledGapRatio = ambushDepthScaledGapRatio(confidenceGapRatio, depthFactor);
+    const mult = 1 + (INTEL_EXECUTION_AMBUSH_ATTACKER_CASUALTY_MULT - 1) * scaledGapRatio;
+    // Hard ceiling: bounded friction, never a swing (packet §2).
+    return Math.min(mult, INTEL_EXECUTION_AMBUSH_ATTACKER_CASUALTY_MAX);
 }
 
 export function getIntelAmbushDefenderCasualtyMult(
     confidence: number | null | undefined,
     defenderOpsecActive: boolean,
+    depthFactor = 0,
 ): number {
     // Retro-gate: umbrella defaults ON (mechanic live = current baseline). When the
     // operator disables AWWV_INTEL_AMBUSH_FRICTION the mechanic is inert (×1.0).
@@ -463,7 +487,11 @@ export function getIntelAmbushDefenderCasualtyMult(
     if (!defenderOpsecActive || clampedConfidence >= INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD) return 1;
     const confidenceGapRatio = (INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD - clampedConfidence)
         / INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD;
-    return 1 - (1 - INTEL_EXECUTION_AMBUSH_DEFENDER_CASUALTY_MULT) * confidenceGapRatio;
+    // Depth-neutral (sub-flag off or depthFactor 0) ⇒ exact shipped value.
+    const scaledGapRatio = ambushDepthScaledGapRatio(confidenceGapRatio, depthFactor);
+    const mult = 1 - (1 - INTEL_EXECUTION_AMBUSH_DEFENDER_CASUALTY_MULT) * scaledGapRatio;
+    // Hard floor: bounded friction, never a swing (packet §2).
+    return Math.max(mult, INTEL_EXECUTION_AMBUSH_DEFENDER_CASUALTY_MIN);
 }
 
 // Cohesion deltas (§4.5)

@@ -105,6 +105,9 @@ import {
     getIntelExecutionFrictionMultipliers,
 } from './combat_math.js';
 // OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR moved to attack_post_battle_effects.ts
+// Nested default-OFF ambush-DEPTH amplifier (packet 20260605_INTEL_AMBUSH_FRICTION_DESIGN).
+import { isIntelAmbushDepthEnabled } from './intel_ambush_depth_gate.js';
+import { getAmbushDepthFactor } from './intel_ambush_depth.js';
 import { isSupportBrigadeOnActiveOp } from './sector_offensive_axis_helpers.js';
 import { SUPPORT_POWER_MULT } from './bot_constants.js';
 // ADR-0005 v2.2b: TG combat-power synthesis + casualty distribution. Flag-gated.
@@ -914,13 +917,20 @@ export function resolveAttackOrdersOsid(
             attackerIntelConfidence,
             defendingSectorId ? (state.military.opsec_sectors ?? []).includes(defendingSectorId) : false,
         );
+        // Ambush-DEPTH amplifier (default OFF): only compute a non-zero depth when the
+        // nested sub-flag is on. Flag-off ⇒ depthFactor 0 ⇒ byte-identical to baseline.
+        const ambushDepthFactor = isIntelAmbushDepthEnabled()
+            ? getAmbushDepthFactor(state, firstAttacker.location_osid ?? '', defendingSectorId, targetOsid)
+            : 0;
         const intelAmbushAttackerCasualtyMult = getIntelAmbushAttackerCasualtyMult(
             attackerIntelConfidence,
             defendingSectorId ? (state.military.opsec_sectors ?? []).includes(defendingSectorId) : false,
+            ambushDepthFactor,
         );
         const intelAmbushDefenderCasualtyMult = getIntelAmbushDefenderCasualtyMult(
             attackerIntelConfidence,
             defendingSectorId ? (state.military.opsec_sectors ?? []).includes(defendingSectorId) : false,
+            ambushDepthFactor,
         );
         const effectiveAttackerPower = attackerPower * intelFriction.attackerPowerMult;
         defenderPower *= intelFriction.defenderPowerMult;
