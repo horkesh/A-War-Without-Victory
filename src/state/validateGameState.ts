@@ -996,6 +996,18 @@ function validateFiniteNonNegativeNumberRecord(value: unknown, path: string, err
     }
 }
 
+function validateBooleanRecord(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+    for (const [key, entry] of Object.entries(value)) {
+        if (typeof entry !== 'boolean') {
+            errors.push(`${path}.${key} must be a boolean`);
+        }
+    }
+}
+
 function validateFactionNumberRecord(value: unknown, path: string, errors: string[]): void {
     if (!isRecord(value)) {
         errors.push(`${path} must be an object when present`);
@@ -3118,6 +3130,12 @@ export function validateGameStateShape(
     if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_deploy_orders' in military && military.brigade_deploy_orders !== undefined) {
         validateBrigadeDeployOrders(military.brigade_deploy_orders, errors);
     }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_encircled' in military && military.brigade_encircled !== undefined) {
+        validateBooleanRecord(military.brigade_encircled, 'military.brigade_encircled', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'battle_damage' in military && military.battle_damage !== undefined) {
+        validateFiniteNonNegativeNumberRecord(military.battle_damage, 'military.battle_damage', errors);
+    }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_posture_orders' in military && military.brigade_posture_orders !== undefined) {
         validateBrigadePostureOrders(military.brigade_posture_orders, errors);
     }
@@ -3135,6 +3153,12 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'unresolved_sector_brigades' in military && military.unresolved_sector_brigades !== undefined && !isStringArray(military.unresolved_sector_brigades)) {
         errors.push('military.unresolved_sector_brigades must be a string array when present');
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'home_distance_cache' in military && military.home_distance_cache !== undefined) {
+        validateFiniteNonNegativeNumberRecord(military.home_distance_cache, 'military.home_distance_cache', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'active_offensives_against_corps' in military && military.active_offensives_against_corps !== undefined) {
+        validateNonNegativeIntegerRecord(military.active_offensives_against_corps, 'military.active_offensives_against_corps', errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'formation_spawn_directive' in military && military.formation_spawn_directive !== undefined) {
         validateFormationSpawnDirective(military.formation_spawn_directive, errors);
