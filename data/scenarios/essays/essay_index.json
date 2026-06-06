@@ -3802,6 +3802,613 @@
                     "content": "Ovaj Codex zapis obradjuje temu \"Pad Zepe: druga izgubljena sigurna zona\" kao vojno pitanje rata u Bosni i Hercegovini 1995. Bosanska lokalizacija sazimava isti historijski okvir koji nosi izvorni esej: uzroke, glavne aktere, neposredni tok dogadjaja i posljedice za komandovanje, diplomatiju, civile i ratnu legitimnost. Fokus ostaje na razumijevanju historije i odgovornosti, ne na pretvaranju patnje u igracku nagradu.\n\nU igrinom toku ovaj zapis pomaze igracu da poveze otkljucani dogadjaj s vecim ratnim lukom. Ako se kampanja razvije drugacije od historijskog slijeda, Codex i dalje cuva razliku izmedju onoga sto se dogodilo u stvarnosti i onoga sto je nastalo u simulaciji. Izvorni aparat navodi: ICTY Karadzic Trial Judgment (IT-95-5/18-T), Zepa findings; ICTY Tolimir Trial Judgment (IT-05-88/2-T)."
                 }
             }
+        },
+        {
+            "id": "essay_hrhb_vance_owen_acceptance_1993",
+            "event_id": "hrhb_vance_owen_acceptance_1993",
+            "title": "Vance-Owen and Herceg-Bosna: The Province Map as a Claim",
+            "year": 1993,
+            "category": "diplomatic",
+            "sources": [
+                "David Owen, Balkan Odyssey (Harcourt, 1995)",
+                "ICTY Prlic et al. Trial Judgment (IT-04-74-T)",
+                "UN Document S/25403 (1993)"
+            ],
+            "generated": true,
+            "content": "The Vance-Owen Peace Plan, presented at Geneva on 2 January 1993, proposed to divide Bosnia-Herzegovina into ten semi-autonomous provinces while preserving the republic’s international borders. Three of those provinces — Mostar, the Travnik-centred district of central Bosnia, and western Herzegovina — were drawn as Croat-majority units under the plan’s constitutional architecture. For the leadership of the Croatian Community of Herceg-Bosna under Mate Boban, the provincial map was not merely a peace proposal: it was a cartographic statement of where a Croat political space in Bosnia might legitimately lie.\n\nThis is why the Herceg-Bosna posture toward the plan was recorded separately from Sarajevo’s. Boban signed the agreed text for HZ HB at Athens on 25 March 1993, and the directive that reached Mostar from Zagreb — transmitted through the Granic-Susak channel documented in the ICTY Prlic et al. proceedings — treated the provincial allocation as the operative territorial basis for Croat claims. Acceptance of the ten-province framework was, in the historical record, the path Mostar took.\n\nThat acceptance was double-edged. The plan offered international validation of a defined Croat space, but it required that the space be administered within a single Bosnian state rather than annexed outward. The Prlic et al. Trial Judgment later examined how the provincial map was read on the ground — as a licence to consolidate administrative control over municipalities designated Croat, including those with substantial Bosniak populations. The gap between the plan’s constitutional intent and its battlefield interpretation became one of the war’s most consequential fault lines, feeding directly into the Croat-Bosniak fighting that spread across central Bosnia through the spring of 1993.\n\nAlternatives existed on paper. Mostar could have conditioned its signature on amendments to the central Bosnia and western Herzegovina boundaries, preserving the patron channel to Zagreb at a smaller political cost. It could have tied its signature to a reciprocal ARBiH acceptance, converting the plan into a joint-front overture. It could have rejected the framework outright and broken with Zagreb’s directive. Each of these counterfactuals carried a different cost in patron confidence and in the relationship with Sarajevo, but none was the documented choice.\n\nWhat the Vance-Owen episode demonstrates is that for Herceg-Bosna the plan functioned less as a peace instrument than as a territorial reference point. The map outlived the plan: even after Vance-Owen collapsed on the Bosnian Serb assembly’s rejection in May 1993, the three Croat provinces it had sketched continued to shape how the Herceg-Bosna leadership defined the limits of the space it sought to hold.",
+            "dynamic_sections": [
+                {
+                    "id": "wave2_hrhb_vopp_accept",
+                    "insert_after_paragraph": 4,
+                    "condition": "RESPONSE:hrhb_vance_owen_acceptance_1993:accept_vance_owen_plan",
+                    "variant": "note",
+                    "content": "In this campaign, Mostar recorded acceptance of the Vance-Owen ten-province framework — the documented historical posture, in which Mate Boban signed the agreed text for HZ HB at Athens on 25 March 1993 and treated the provincial map as the operative basis for Croat territorial claims (UN Document S/25403, 1993).",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Mostar je zabiljezio prihvatanje Vance-Owenovog okvira od deset provincija — dokumentovani historijski stav, u kojem je Mate Boban potpisao usaglaseni tekst za HZ HB u Atini 25. marta 1993. i tretirao provincijsku kartu kao operativnu osnovu hrvatskih teritorijalnih zahtjeva (UN Document S/25403, 1993)."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_hrhb_vopp_amendments",
+                    "insert_after_paragraph": 4,
+                    "condition": "RESPONSE:hrhb_vance_owen_acceptance_1993:accept_with_modifications",
+                    "variant": "divergence",
+                    "content": "In this campaign, Mostar conditioned acceptance on amendments to the central Bosnia and western Herzegovina provincial boundaries — a procedural divergence from the historical record, which attributes to the HZ HB leadership a clean signature transmitting Zagreb’s directive rather than a conditional one.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Mostar je uslovio prihvatanje izmjenama provincijskih granica srednje Bosne i zapadne Hercegovine — proceduralno odstupanje od historijskog zapisa, koji vodstvu HZ HB pripisuje cist potpis koji prenosi direktivu iz Zagreba, a ne uslovni."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_hrhb_vopp_reciprocity",
+                    "insert_after_paragraph": 4,
+                    "condition": "RESPONSE:hrhb_vance_owen_acceptance_1993:condition_on_arbih_reciprocity",
+                    "variant": "divergence",
+                    "content": "In this campaign, Mostar conditioned its signature on a reciprocal ARBiH acceptance, converting the framework into a joint-front overture — a counterfactual posture the historical record does not show, in which the central Bosnia friction might have been contained rather than allowed to spread.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Mostar je uslovio svoj potpis recipročnim prihvatanjem ARBiH, pretvarajuci okvir u ponudu zajednickog fronta — protucinjenicni stav koji historijski zapis ne pokazuje, u kojem je trvenje u srednjoj Bosni moglo biti obuzdano umjesto da se prosiri."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_hrhb_vopp_reject",
+                    "insert_after_paragraph": 4,
+                    "condition": "RESPONSE:hrhb_vance_owen_acceptance_1993:reject_plan",
+                    "variant": "divergence",
+                    "content": "In this campaign, Mostar rejected the Vance-Owen framework and broke with Zagreb’s directive — a counterfactual divergence from the documented acceptance, carrying a collapse of patron confidence with Tudjman and a rupture in the relationship with Sarajevo.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Mostar je odbio Vance-Owenov okvir i prekinuo sa direktivom iz Zagreba — protucinjenicno odstupanje od dokumentovanog prihvatanja, koje nosi slom povjerenja patrona s Tudjmanom i raskid u odnosu sa Sarajevom."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Vance-Owen i Herceg-Bosna: provincijska karta kao zahtjev",
+                    "category": "diplomatsko",
+                    "content": "Ovaj Codex zapis obradjuje temu \"Vance-Owen i Herceg-Bosna: provincijska karta kao zahtjev\" kao diplomatsko pitanje rata u Bosni i Hercegovini 1993. Bosanska lokalizacija sazimava isti historijski okvir koji nosi izvorni esej: uzroke, glavne aktere, neposredni tok dogadjaja i posljedice za komandovanje, diplomatiju, civile i ratnu legitimnost. Fokus ostaje na razumijevanju historije i odgovornosti, ne na pretvaranju patnje u igracku nagradu.\n\nU igrinom toku ovaj zapis pomaze igracu da poveze otkljucani dogadjaj s vecim ratnim lukom. Ako se kampanja razvije drugacije od historijskog slijeda, Codex i dalje cuva razliku izmedju onoga sto se dogodilo u stvarnosti i onoga sto je nastalo u simulaciji. Izvorni aparat navodi: David Owen, Balkan Odyssey (Harcourt, 1995); ICTY Prlic et al. Trial Judgment (IT-04-74-T); UN Document S/25403 (1993)."
+                }
+            }
+        },
+        {
+            "id": "essay_hrhb_owen_stoltenberg_response_1993",
+            "event_id": "hrhb_owen_stoltenberg_response_1993",
+            "title": "The Union of Three Republics: Mostar’s Posture Aboard Invincible",
+            "year": 1993,
+            "category": "diplomatic",
+            "sources": [
+                "David Owen, Balkan Odyssey (Harcourt, 1995)",
+                "ICTY Prlic et al. Trial Judgment (IT-04-74-T)",
+                "UN Document S/26337 (1993)"
+            ],
+            "generated": true,
+            "content": "By the autumn of 1993, the canton-based logic of Vance-Owen had given way to something more frankly partitionist. The Owen-Stoltenberg plan, tabled aboard the British carrier HMS Invincible on 20 September 1993, proposed a Union of Three Republics: a confederal frame in which a Bosniak, a Serb, and a Croat republic would each hold defined territory with substantial sovereign powers. Where Vance-Owen had preserved a nominally unitary Bosnia divided into provinces, Owen-Stoltenberg accepted the principle of three ethnic republics outright.\n\nFor the Herceg-Bosna leadership, the Invincible package ratified Herceg-Bosna as one of the three constituent republics. The central Bosnia and western Herzegovina territorial allocation was drawn favourably to Croat claims, and Zagreb’s directive to Boban, documented in the ICTY Prlic et al. proceedings, was unambiguous: the HZ HB Presidency was to sign. Acceptance of the Union framework was the recorded posture — the diplomatic formalisation of a Croat republic with defined borders.\n\nThe stakes for Mostar were different from Sarajevo’s. Where the Bosnian government read the three-republic frame as the institutionalisation of ethnic partition and rejected it, the Herceg-Bosna leadership read it as international recognition of the very entity its military campaign had sought to establish. Acceptance cost little in patron confidence; it aligned Mostar with Zagreb’s preference and converted battlefield control into a negotiating claim.\n\nThe counterfactual postures available to Mostar were narrow. It could have conditioned acceptance on amendments to the central Bosnia allocation, seeking a more favourable boundary while keeping the patron channel intact. It could have rejected the Union framework and broken with Zagreb. Neither was the documented choice, and each would have carried a cost in the relationship with Tudjman’s government that the historical leadership was unwilling to incur.\n\nOwen-Stoltenberg ultimately foundered on the same rock as its predecessor: the Bosnian government would not ratify a partition that fragmented the territory it regarded as its minimum entitlement. But for Herceg-Bosna the plan’s significance lay less in its failure than in what acceptance signalled — that the Croat leadership was prepared to formalise, in a confederal document, the separation that the war had imposed on the ground.",
+            "dynamic_sections": [
+                {
+                    "id": "wave2_hrhb_os_accept",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:hrhb_owen_stoltenberg_response_1993:accept_union_three_republics",
+                    "variant": "note",
+                    "content": "In this campaign, Mostar recorded acceptance of the Union of Three Republics — the documented historical posture, in which the HZ HB Presidency signed the Invincible package as the diplomatic formalisation of a Croat republic with defined borders (David Owen, Balkan Odyssey, 1995).",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Mostar je zabiljezio prihvatanje Unije triju republika — dokumentovani historijski stav, u kojem je Predsjednistvo HZ HB potpisalo paket sa Invinciblea kao diplomatsku formalizaciju hrvatske republike sa definisanim granicama (David Owen, Balkan Odyssey, 1995)."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_hrhb_os_amendments",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:hrhb_owen_stoltenberg_response_1993:accept_with_modifications",
+                    "variant": "divergence",
+                    "content": "In this campaign, Mostar conditioned acceptance on central Bosnia amendments — a procedural divergence from the historical clean signature, seeking a more favourable boundary while keeping the Zagreb channel intact.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Mostar je uslovio prihvatanje izmjenama u srednjoj Bosni — proceduralno odstupanje od historijskog cistog potpisa, trazeci povoljniju granicu uz ocuvanje kanala prema Zagrebu."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_hrhb_os_reject",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:hrhb_owen_stoltenberg_response_1993:reject_plan",
+                    "variant": "divergence",
+                    "content": "In this campaign, Mostar rejected the Union of Three Republics — a counterfactual divergence from the documented acceptance, breaking with Zagreb’s directive and forgoing the international recognition the framework offered the Croat entity.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Mostar je odbio Uniju triju republika — protucinjenicno odstupanje od dokumentovanog prihvatanja, raskidajuci sa direktivom iz Zagreba i odricuci se medjunarodnog priznanja koje je okvir nudio hrvatskom entitetu."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Unija triju republika: stav Mostara na Invincibleu",
+                    "category": "diplomatsko",
+                    "content": "Ovaj Codex zapis obradjuje temu \"Unija triju republika: stav Mostara na Invincibleu\" kao diplomatsko pitanje rata u Bosni i Hercegovini 1993. Bosanska lokalizacija sazimava isti historijski okvir koji nosi izvorni esej: uzroke, glavne aktere, neposredni tok dogadjaja i posljedice za komandovanje, diplomatiju, civile i ratnu legitimnost. Fokus ostaje na razumijevanju historije i odgovornosti, ne na pretvaranju patnje u igracku nagradu.\n\nU igrinom toku ovaj zapis pomaze igracu da poveze otkljucani dogadjaj s vecim ratnim lukom. Ako se kampanja razvije drugacije od historijskog slijeda, Codex i dalje cuva razliku izmedju onoga sto se dogodilo u stvarnosti i onoga sto je nastalo u simulaciji. Izvorni aparat navodi: David Owen, Balkan Odyssey (Harcourt, 1995); ICTY Prlic et al. Trial Judgment (IT-04-74-T); UN Document S/26337 (1993)."
+                }
+            }
+        },
+        {
+            "id": "essay_rs_owen_stoltenberg_response_1993",
+            "event_id": "rs_owen_stoltenberg_response_1993",
+            "title": "The Union of Three Republics: Pale Reads the Invincible Map",
+            "year": 1993,
+            "category": "diplomatic",
+            "sources": [
+                "David Owen, Balkan Odyssey (Harcourt, 1995)",
+                "ICTY Karadzic Trial Judgment (IT-95-5/18-T)",
+                "UN Document S/26337 (1993)"
+            ],
+            "generated": true,
+            "content": "When the Owen-Stoltenberg Union of Three Republics plan was tabled aboard HMS Invincible on 20 September 1993, the Bosnian Serb leadership at Pale read it through the lens of the Six Strategic Goals its assembly had adopted in May 1992. The Invincible map ratified Republika Srpska as one of three constituent ethnic republics. It narrowed the Posavina corridor that connected the western and eastern halves of Serb-held Bosnia, but it preserved the Drina-valley axis and retained the division of Sarajevo inside the tripartite frame.\n\nFor Pale, this was the most favourable diplomatic instrument the war had yet produced. The framework offered international acceptance of a contiguous Serb entity holding the majority of Bosnia’s territory — the central objective of the strategic platform. Belgrade’s directive, transmitted through Milosevic, pressed Karadzic to sign. The recorded posture was acceptance: the diplomatic legitimisation of Republika Srpska as a republic in its own right.\n\nThe ICTY Karadzic Trial Judgment documents the autumn 1993 Owen-Stoltenberg outcomes and the Pale acceptance posture, situating them within the broader pattern of Bosnian Serb diplomacy — a willingness to ratify, in a confederal document, the territorial gains the VRS had achieved by force. Acceptance was not a concession; it was a claim dressed as a compromise.\n\nThe counterfactuals available to Pale were marginal. It could have accepted with territorial modifications, pressing for a wider corridor or a fuller Sarajevo allocation. It could have rejected the framework, as the assembly had rejected Vance-Owen in May 1993, gambling that the battlefield position would yield better terms later. The historical leadership chose acceptance, calculating that the Invincible map ratified enough of the strategic platform to be worth signing.\n\nThat the plan ultimately failed — foundering, like its predecessors, on the Bosnian government’s refusal to legitimise partition — did not diminish what Pale’s acceptance revealed. For the Bosnian Serb leadership, the diplomatic track and the military campaign were a single instrument. The Invincible package was attractive precisely because it converted what the VRS held into what a Serb republic could claim.",
+            "dynamic_sections": [
+                {
+                    "id": "wave2_rs_os_accept",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:rs_owen_stoltenberg_response_1993:accept_union_three_republics",
+                    "variant": "note",
+                    "content": "In this campaign, Pale recorded acceptance of the Union of Three Republics — the documented historical posture, in which the leadership read the Invincible map as the diplomatic legitimisation of Republika Srpska and signed under Belgrade-blessed pressure (ICTY Karadzic Trial Judgment, IT-95-5/18-T).",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Pale je zabiljezio prihvatanje Unije triju republika — dokumentovani historijski stav, u kojem je vodstvo citalo kartu sa Invinciblea kao diplomatsku legitimizaciju Republike Srpske i potpisalo pod pritiskom uz blagoslov Beograda (ICTY Karadzic Trial Judgment, IT-95-5/18-T)."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_rs_os_modifications",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:rs_owen_stoltenberg_response_1993:accept_with_modifications",
+                    "variant": "divergence",
+                    "content": "In this campaign, Pale accepted with territorial modifications — a procedural divergence from the documented clean acceptance, pressing for a wider corridor or fuller Sarajevo allocation rather than signing the Invincible map as drawn.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Pale je prihvatio uz teritorijalne izmjene — proceduralno odstupanje od dokumentovanog cistog prihvatanja, trazeci siri koridor ili potpuniju raspodjelu Sarajeva umjesto potpisivanja karte sa Invinciblea onako kako je nacrtana."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_rs_os_reject",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:rs_owen_stoltenberg_response_1993:reject_plan",
+                    "variant": "divergence",
+                    "content": "In this campaign, Pale rejected the Union of Three Republics — a counterfactual divergence from the documented acceptance, defying Belgrade’s pressure and gambling that the battlefield position would yield better terms later.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Pale je odbio Uniju triju republika — protucinjenicno odstupanje od dokumentovanog prihvatanja, prkoseci pritisku Beograda i kockajuci se da ce pozicija na bojistu kasnije donijeti bolje uslove."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Unija triju republika: Pale cita kartu sa Invinciblea",
+                    "category": "diplomatsko",
+                    "content": "Ovaj Codex zapis obradjuje temu \"Unija triju republika: Pale cita kartu sa Invinciblea\" kao diplomatsko pitanje rata u Bosni i Hercegovini 1993. Bosanska lokalizacija sazimava isti historijski okvir koji nosi izvorni esej: uzroke, glavne aktere, neposredni tok dogadjaja i posljedice za komandovanje, diplomatiju, civile i ratnu legitimnost. Fokus ostaje na razumijevanju historije i odgovornosti, ne na pretvaranju patnje u igracku nagradu.\n\nU igrinom toku ovaj zapis pomaze igracu da poveze otkljucani dogadjaj s vecim ratnim lukom. Ako se kampanja razvije drugacije od historijskog slijeda, Codex i dalje cuva razliku izmedju onoga sto se dogodilo u stvarnosti i onoga sto je nastalo u simulaciji. Izvorni aparat navodi: David Owen, Balkan Odyssey (Harcourt, 1995); ICTY Karadzic Trial Judgment (IT-95-5/18-T); UN Document S/26337 (1993)."
+                }
+            }
+        },
+        {
+            "id": "essay_hrhb_central_bosnia_defense_1993",
+            "event_id": "hrhb_central_bosnia_defense_1993",
+            "title": "The Central Bosnia Pockets: Holding the Indefensible",
+            "year": 1993,
+            "category": "military",
+            "sources": [
+                "Balkan Battlegrounds (CIA Office of Russian and European Analysis, 2002), Vol. II",
+                "ICTY Prlic et al. Trial Judgment (IT-04-74-T)"
+            ],
+            "generated": true,
+            "content": "By the spring and summer of 1993, the Croat-Bosniak war that had erupted from the Gornji Vakuf clashes in January had hardened into a contest over a handful of encircled enclaves. The HVO’s Operative Zone Central Bosnia held three pockets: the Vitez-Busovaca-Kiseljak triangle in the Lasva Valley, anchoring the historical Croat heartland of central Bosnia; the Zepce exclave further north; and the west bank of Mostar. Each was surrounded by ARBiH formations — chiefly the 3rd and 7th Corps — whose strength far exceeded the local HVO.\n\nIn pure force-correlation terms, the Lasva Valley triangle was indefensible over the long run. Only a tenuous airbridge routed through Croatia by way of the Susak-Tudjman channel sustained ammunition, fuel, and officer rotation into the pocket. Yet the HVO chose to defend it, and held it from the spring of 1993 through the March 1994 Washington Agreement that ended the fighting. The decision to hold rather than withdraw was the documented historical posture.\n\nThat posture had a logic beyond the military. The Lasva Valley towns were central to the territorial claim that Herceg-Bosna advanced in the Vance-Owen and Owen-Stoltenberg negotiations; abandoning them would have surrendered a cartographic argument as much as a piece of ground. The defence was therefore as much a political act as an operational one — a refusal to concede, on the battlefield, the central Bosnia space the diplomatic track was still contesting.\n\nThe alternatives carried their own costs. Evacuation to Herzegovina would have consolidated the HVO’s defensible core but abandoned the Croat population of the Lasva Valley and forfeited the central Bosnia claim. A breakout offensive would have gambled the pocket’s limited strength on an attempt to reconnect with the main Herceg-Bosna body, against a heavier ARBiH force. Federating early with the Bosnian government — the course the Washington Agreement eventually imposed — would have ended the two-front war months sooner but at the cost of the separatist project the Herceg-Bosna leadership was then pursuing.\n\nThe ICTY Prlic et al. proceedings examined the central Bosnia operations and the command relationships that sustained the pockets through the Susak channel. The historical choice — to hold the triangle at the limit of what the airbridge could supply — kept the central Bosnia claim alive on the ground until diplomacy, not the battlefield, resolved it. The pockets did not fall; the war around them was ended by agreement.",
+            "dynamic_sections": [
+                {
+                    "id": "wave2_hrhb_cb_defend",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:hrhb_central_bosnia_defense_1993:defend_pocket",
+                    "variant": "note",
+                    "content": "In this campaign, the HVO held the central Bosnia pockets — the documented historical posture, in which the Lasva Valley triangle was defended at the limit of the Croatia-routed airbridge from the spring of 1993 until the March 1994 Washington Agreement ended the fighting (Balkan Battlegrounds, Vol. II).",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji HVO je drzao srednjobosanske dzepove — dokumentovani historijski stav, u kojem je trougao u dolini Lasve branjen na granici zracnog mosta preko Hrvatske od proljeca 1993. do Washingtonskog sporazuma u martu 1994. koji je okoncao borbe (Balkan Battlegrounds, Vol. II)."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_hrhb_cb_evacuate",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:hrhb_central_bosnia_defense_1993:evacuate_to_herzegovina",
+                    "variant": "divergence",
+                    "content": "In this campaign, the HVO evacuated the central Bosnia pockets to Herzegovina — a counterfactual divergence from the documented hold, consolidating the defensible core but abandoning the Lasva Valley claim that anchored Herceg-Bosna’s territorial argument.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji HVO je evakuisao srednjobosanske dzepove u Hercegovinu — protucinjenicno odstupanje od dokumentovanog zadrzavanja, ucvrscujuci branjivu jezgru ali napustajuci zahtjev za dolinom Lasve koji je bio uporiste teritorijalnog argumenta Herceg-Bosne."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_hrhb_cb_breakout",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:hrhb_central_bosnia_defense_1993:breakout_offensive",
+                    "variant": "divergence",
+                    "content": "In this campaign, the HVO mounted a breakout offensive from the pockets — a counterfactual divergence from the documented static defence, gambling the enclave’s limited strength on reconnecting with the main Herceg-Bosna body against a heavier ARBiH force.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji HVO je pokrenuo proboj iz dzepova — protucinjenicno odstupanje od dokumentovane staticne odbrane, kockajuci ogranicenu snagu enklave na ponovno spajanje s glavninom Herceg-Bosne protiv brojnije snage ARBiH."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_hrhb_cb_federate",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:hrhb_central_bosnia_defense_1993:federate_early",
+                    "variant": "divergence",
+                    "content": "In this campaign, the HVO federated early with the Bosnian government — a counterfactual divergence from the documented defence, ending the two-front war months before the Washington Agreement but forgoing the separatist project Herceg-Bosna was then pursuing.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji HVO se rano federisao sa bosanskom vladom — protucinjenicno odstupanje od dokumentovane odbrane, okoncavajuci dvofrontni rat mjesecima prije Washingtonskog sporazuma ali odricuci se separatistickog projekta koji je Herceg-Bosna tada vodila."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Srednjobosanski dzepovi: drzanje neodbranjivog",
+                    "category": "vojno",
+                    "content": "Ovaj Codex zapis obradjuje temu \"Srednjobosanski dzepovi: drzanje neodbranjivog\" kao vojno pitanje rata u Bosni i Hercegovini 1993. Bosanska lokalizacija sazimava isti historijski okvir koji nosi izvorni esej: uzroke, glavne aktere, neposredni tok dogadjaja i posljedice za komandovanje, diplomatiju, civile i ratnu legitimnost. Fokus ostaje na razumijevanju historije i odgovornosti, ne na pretvaranju patnje u igracku nagradu.\n\nU igrinom toku ovaj zapis pomaze igracu da poveze otkljucani dogadjaj s vecim ratnim lukom. Ako se kampanja razvije drugacije od historijskog slijeda, Codex i dalje cuva razliku izmedju onoga sto se dogodilo u stvarnosti i onoga sto je nastalo u simulaciji. Izvorni aparat navodi: Balkan Battlegrounds (CIA Office of Russian and European Analysis, 2002), Vol. II; ICTY Prlic et al. Trial Judgment (IT-04-74-T)."
+                }
+            }
+        },
+        {
+            "id": "essay_rs_belgrade_pressure_response_1993",
+            "event_id": "rs_belgrade_pressure_response_1993",
+            "title": "Belgrade Calls Pale: The Limits of the Patron’s Leverage",
+            "year": 1993,
+            "category": "diplomatic",
+            "sources": [
+                "ICTY Krajisnik Trial Judgment (IT-00-39-T)",
+                "ICTY Karadzic Trial Judgment (IT-95-5/18-T)"
+            ],
+            "generated": true,
+            "content": "Throughout the war’s middle period, the relationship between Belgrade and Pale was a study in the limits of patronage. Slobodan Milosevic, exhausted by the international sanctions that the Bosnian war had brought down on the Federal Republic of Yugoslavia, applied recurring diplomatic pressure on the Bosnian Serb leadership to accept the successive peace plans — Vance-Owen, Owen-Stoltenberg, and later the Contact Group map. The pressure in the autumn of 1993 was diplomatic, not material: no embargo, no border closure, no rupture of the supply line. It was the pressure of a patron asking, not yet compelling.\n\nThe directive that reached Pale through the FRY-RS channel was specific: ease the tempo on the Drina corridor, signal flexibility on the division of Sarajevo, and accept the corridor-narrowing implied by the Owen-Stoltenberg track. Belgrade was brokering a diplomatic envelope and wanted Pale to fit inside it. But Karadzic, Krajisnik, and Mladic did not speak with one voice on the response, and the Bosnian Serb assembly guarded its autonomy jealously.\n\nThe documented historical posture was defiance. Pale repeatedly declined Belgrade’s overtures short of the formal August 1994 embargo that Milosevic eventually imposed when soft pressure failed. The ICTY Krajisnik and Karadzic proceedings record the friction this produced: a patron channel that mattered for ammunition reliability and political cover at the Security Council, set against a Pale leadership convinced that the battlefield position justified holding firm against Belgrade’s diplomatic preferences.\n\nThe alternatives were real but unchosen. Pale could have accepted Belgrade’s directive, aligning its operational tempo with the diplomatic envelope. It could have offered partial compliance, easing some pressure while holding the Drina axis. It could have brokered a compromise, trading a gesture of flexibility for continued patron support. Each would have preserved the Belgrade channel at a different cost to the strategic platform; the historical leadership judged the platform worth the friction.\n\nThe autumn 1993 episode is the densest documented phase of Belgrade-Pale soft pressure, and it illustrates a structural truth about the Bosnian Serb war effort: the patron’s leverage was real but not unlimited. Belgrade could supply, shield, and lean — but it could not, short of an embargo, dictate. Pale’s defiance in 1993 was a wager that the patron would keep supplying even while being defied. For nearly a year, that wager held.",
+            "dynamic_sections": [
+                {
+                    "id": "wave2_rs_belgrade_defy",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:rs_belgrade_pressure_response_1993:defy_belgrade_directive",
+                    "variant": "note",
+                    "content": "In this campaign, Pale defied Belgrade’s directive — the documented historical posture, in which the leadership held its operational tempo against Milosevic’s soft diplomatic pressure short of the formal August 1994 embargo (ICTY Krajisnik Trial Judgment, IT-00-39-T).",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Pale je prkosio direktivi iz Beograda — dokumentovani historijski stav, u kojem je vodstvo zadrzalo svoj operativni tempo nasuprot mekom diplomatskom pritisku Milosevica, sve do formalnog embarga iz augusta 1994. (ICTY Krajisnik Trial Judgment, IT-00-39-T)."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_rs_belgrade_accept",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:rs_belgrade_pressure_response_1993:accept_belgrade_directive",
+                    "variant": "divergence",
+                    "content": "In this campaign, Pale accepted Belgrade’s directive — a counterfactual divergence from the documented defiance, aligning its operational tempo on the Drina and Sarajevo axes with the diplomatic envelope Milosevic was brokering.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Pale je prihvatio direktivu iz Beograda — protucinjenicno odstupanje od dokumentovanog prkosa, uskladjujuci svoj operativni tempo na drinskoj i sarajevskoj osi sa diplomatskim okvirom koji je Milosevic posredovao."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_rs_belgrade_partial",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:rs_belgrade_pressure_response_1993:partial_compliance",
+                    "variant": "divergence",
+                    "content": "In this campaign, Pale offered Belgrade partial compliance — a counterfactual divergence from the documented defiance, easing some pressure while holding the Drina-valley axis the strategic platform prized.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Pale je ponudio Beogradu djelimicnu saradnju — protucinjenicno odstupanje od dokumentovanog prkosa, popustajuci dio pritiska uz zadrzavanje drinske osi koju je strateska platforma cijenila."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_rs_belgrade_compromise",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:rs_belgrade_pressure_response_1993:broker_compromise",
+                    "variant": "divergence",
+                    "content": "In this campaign, Pale brokered a compromise with Belgrade — a counterfactual divergence from the documented defiance, trading a gesture of diplomatic flexibility for continued patron support and Security Council cover.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Pale je ispregovarao kompromis sa Beogradom — protucinjenicno odstupanje od dokumentovanog prkosa, mijenjajuci gest diplomatske fleksibilnosti za nastavak podrske patrona i zastite u Vijecu sigurnosti."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Beograd zove Pale: granice poluge patrona",
+                    "category": "diplomatsko",
+                    "content": "Ovaj Codex zapis obradjuje temu \"Beograd zove Pale: granice poluge patrona\" kao diplomatsko pitanje rata u Bosni i Hercegovini 1993. Bosanska lokalizacija sazimava isti historijski okvir koji nosi izvorni esej: uzroke, glavne aktere, neposredni tok dogadjaja i posljedice za komandovanje, diplomatiju, civile i ratnu legitimnost. Fokus ostaje na razumijevanju historije i odgovornosti, ne na pretvaranju patnje u igracku nagradu.\n\nU igrinom toku ovaj zapis pomaze igracu da poveze otkljucani dogadjaj s vecim ratnim lukom. Ako se kampanja razvije drugacije od historijskog slijeda, Codex i dalje cuva razliku izmedju onoga sto se dogodilo u stvarnosti i onoga sto je nastalo u simulaciji. Izvorni aparat navodi: ICTY Krajisnik Trial Judgment (IT-00-39-T); ICTY Karadzic Trial Judgment (IT-95-5/18-T)."
+                }
+            }
+        },
+        {
+            "id": "essay_rbih_washington_agreement_1994",
+            "event_id": "rbih_washington_agreement_1994",
+            "title": "The Washington Agreement: Ending the Two-Front War",
+            "year": 1994,
+            "category": "diplomatic",
+            "sources": [
+                "Balkan Battlegrounds (CIA Office of Russian and European Analysis, 2002), Vol. II",
+                "Washington Agreement framework and constitutional texts (1 and 18 March 1994)"
+            ],
+            "generated": true,
+            "content": "In the early months of 1994, under cumulative American shuttle diplomacy and the pressure of the post-Markale NATO ultimatum over Sarajevo, the Bosnian government accepted a framework that ended one of its two wars. The Washington Agreement — a framework agreement signed on 1 March 1994 and a constitutional agreement on 18 March — established the Federation of Bosnia and Herzegovina, joining the Bosniak-held and Croat-held territories into a single entity, with a parallel preliminary agreement on confederation with Croatia witnessed by President Tudjman.\n\nFor Sarajevo, acceptance was instrumental rather than ideological. Balkan Battlegrounds frames the Bosnian government’s posture precisely: the treaty was essentially imposed from outside, and the Presidency had to seem agreeable to it in order to keep international support. More decisively, the agreement allowed the ARBiH to end its desperate two-front war against the HVO and concentrate on the conflict with the Bosnian Serb army. A war fought on two fronts at once became a war fought on one.\n\nThe operational consequences were immediate. Within days, UNPROFOR took on ceasefire monitoring across the former Croat-Bosniak front — Mostar, Vitez, Gornji Vakuf, Prozor, Konjic, and Jablanica. The Croatian supply lines that the central Bosnia fighting had choked began to reopen. The Federation existed on paper before it existed in fact, but the paper was enough to redirect the ARBiH’s strategic attention to the front that mattered most.\n\nAcceptance was not without internal cost. Hardliners in the Bosnian assembly and the skepticism associated with Prime Minister Silajdzic’s track viewed the Federation as a concession to a former enemy and a foreign-brokered constraint on Bosnian sovereignty. The historical Presidency under Izetbegovic judged that the strategic relief outweighed the political friction — accepting the framework with the understanding that its implementation would be contested for years.\n\nThe alternative was to accept under open reservations, signalling reluctance and conditioning cooperation. The documented posture was acceptance — reluctant in substance but clean in form, because the strategic logic was overwhelming. Ending the two-front war was the single most consequential diplomatic decision available to Sarajevo in 1994, and the Presidency took it.",
+            "dynamic_sections": [
+                {
+                    "id": "wave2_rbih_wash_accept",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:rbih_washington_agreement_1994:accept",
+                    "variant": "note",
+                    "content": "In this campaign, Sarajevo signed the Federation framework — the documented historical posture, in which the Presidency accepted a treaty essentially imposed from outside because it ended the two-front war and let the ARBiH concentrate on the Bosnian Serb army (Balkan Battlegrounds, Vol. II).",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Sarajevo je potpisalo federalni okvir — dokumentovani historijski stav, u kojem je Predsjednistvo prihvatilo sporazum u sustini nametnut izvana jer je okoncao dvofrontni rat i omogucio ARBiH da se usredsredi na vojsku bosanskih Srba (Balkan Battlegrounds, Vol. II)."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_rbih_wash_reluctant",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:rbih_washington_agreement_1994:reluctant",
+                    "variant": "divergence",
+                    "content": "In this campaign, Sarajevo accepted the Federation framework under open reservations — a procedural divergence from the documented clean signature, signalling reluctance and conditioning cooperation rather than transmitting acceptance directly.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Sarajevo je prihvatilo federalni okvir uz otvorene rezerve — proceduralno odstupanje od dokumentovanog cistog potpisa, signalizirajuci nevoljkost i uslovljavajuci saradnju umjesto da prenese prihvatanje neposredno."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Washingtonski sporazum: kraj dvofrontnog rata",
+                    "category": "diplomatsko",
+                    "content": "Ovaj Codex zapis obradjuje temu \"Washingtonski sporazum: kraj dvofrontnog rata\" kao diplomatsko pitanje rata u Bosni i Hercegovini 1994. Bosanska lokalizacija sazimava isti historijski okvir koji nosi izvorni esej: uzroke, glavne aktere, neposredni tok dogadjaja i posljedice za komandovanje, diplomatiju, civile i ratnu legitimnost. Fokus ostaje na razumijevanju historije i odgovornosti, ne na pretvaranju patnje u igracku nagradu.\n\nU igrinom toku ovaj zapis pomaze igracu da poveze otkljucani dogadjaj s vecim ratnim lukom. Ako se kampanja razvije drugacije od historijskog slijeda, Codex i dalje cuva razliku izmedju onoga sto se dogodilo u stvarnosti i onoga sto je nastalo u simulaciji. Izvorni aparat navodi: Balkan Battlegrounds (CIA Office of Russian and European Analysis, 2002), Vol. II; Washington Agreement framework and constitutional texts (1 and 18 March 1994)."
+                }
+            }
+        },
+        {
+            "id": "essay_rs_washington_rejection_1994",
+            "event_id": "rs_washington_rejection_1994",
+            "title": "The Washington Agreement: Pale’s Non-Engagement",
+            "year": 1994,
+            "category": "diplomatic",
+            "sources": [
+                "ICTY Karadzic Trial Judgment (IT-95-5/18-T)",
+                "Balkan Battlegrounds (CIA Office of Russian and European Analysis, 2002), Vol. II"
+            ],
+            "generated": true,
+            "content": "The Washington Agreement of March 1994 was a bipolar instrument: it joined the Bosniak and Croat sides into a Federation and reconciled the two parties that had been fighting each other across central Bosnia. The Bosnian Serb leadership was not a party to it. Pale was informed; it was not invited. The framework was, by design, a settlement between two of the war’s three combatants — and from Pale’s vantage, a hostile development.\n\nKaradzic and Krajisnik read the bipolar Federation through the Six Strategic Goals. A Federation entity occupying roughly half of Bosnia narrowed the Posavina corridor, contested the Drina-valley axis, and foreclosed the division of Sarajevo ahead of any negotiated map. Worse, it ended the Croat-Bosniak war that had divided Pale’s enemies and freed the ARBiH to turn its full weight against the VRS. The agreement was, in strategic terms, the consolidation of an adversary.\n\nThe documented historical posture was non-engagement. Pale treated the diplomatic track as instrumentally hostile rather than worth engaging — declining to propose a counter-framework, to seek conditional engagement, or to accept observer status. The ICTY Karadzic proceedings situate this rejection within the leadership’s broader reading of the war: the Federation was a constraint to be resisted, not a process to be joined.\n\nThe counterfactuals would each have represented a different theory of the Bosnian Serb interest. Proposing a trilateral framework would have sought to reopen the settlement on three-party terms. Engaging conditionally would have tested whether participation could blunt the Federation’s strategic effect. Accepting observer status would have kept a foot in the diplomatic door. The historical leadership judged all three beneath the strategic platform’s logic and chose the cleanest expression of opposition: to stand outside.\n\nNon-engagement had its own cost. By refusing to shape the Federation, Pale ceded the diplomatic initiative to Washington and accepted that the next framework — the Contact Group plan of July 1994 — would be presented to it as a fait accompli to accept or reject. The Washington Agreement marked the point at which American diplomacy displaced the European-led track, and Pale’s decision to stand apart ensured it would face that diplomacy from outside rather than within.",
+            "dynamic_sections": [
+                {
+                    "id": "wave2_rs_wash_reject",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:rs_washington_rejection_1994:reject_federation",
+                    "variant": "note",
+                    "content": "In this campaign, Pale rejected the bipolar Federation — the documented historical posture of non-engagement, in which the leadership read the Washington framework as a constraint on the Six Strategic Goals and declined to engage a diplomatic track it judged instrumentally hostile (ICTY Karadzic Trial Judgment, IT-95-5/18-T).",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Pale je odbio bipolarnu Federaciju — dokumentovani historijski stav neukljucivanja, u kojem je vodstvo citalo Washingtonski okvir kao ogranicenje Sest strateskih ciljeva i odbilo da se ukljuci u diplomatski tok koji je smatralo instrumentalno neprijateljskim (ICTY Karadzic Trial Judgment, IT-95-5/18-T)."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_rs_wash_trilateral",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:rs_washington_rejection_1994:propose_trilateral",
+                    "variant": "divergence",
+                    "content": "In this campaign, Pale proposed a trilateral framework — a counterfactual divergence from the documented non-engagement, seeking to reopen the bipolar settlement on three-party terms rather than standing outside it.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Pale je predlozio trilateralni okvir — protucinjenicno odstupanje od dokumentovanog neukljucivanja, trazeci da ponovo otvori bipolarni dogovor na troclanim uslovima umjesto da ostane izvan njega."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_rs_wash_conditional",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:rs_washington_rejection_1994:conditional_engagement",
+                    "variant": "divergence",
+                    "content": "In this campaign, Pale engaged the Federation conditionally — a counterfactual divergence from the documented non-engagement, testing whether limited participation could blunt the framework’s strategic effect.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Pale se uslovno ukljucio u Federaciju — protucinjenicno odstupanje od dokumentovanog neukljucivanja, ispitujuci da li bi ograniceno ucesce moglo otupiti strateski ucinak okvira."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_rs_wash_observer",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:rs_washington_rejection_1994:accept_observer_status",
+                    "variant": "divergence",
+                    "content": "In this campaign, Pale accepted observer status — a counterfactual divergence from the documented non-engagement, keeping a foot in the diplomatic door rather than ceding the initiative to Washington entirely.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Pale je prihvatio status posmatraca — protucinjenicno odstupanje od dokumentovanog neukljucivanja, zadrzavajuci nogu u diplomatskim vratima umjesto da inicijativu u potpunosti prepusti Washingtonu."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Washingtonski sporazum: neukljucivanje Pala",
+                    "category": "diplomatsko",
+                    "content": "Ovaj Codex zapis obradjuje temu \"Washingtonski sporazum: neukljucivanje Pala\" kao diplomatsko pitanje rata u Bosni i Hercegovini 1994. Bosanska lokalizacija sazimava isti historijski okvir koji nosi izvorni esej: uzroke, glavne aktere, neposredni tok dogadjaja i posljedice za komandovanje, diplomatiju, civile i ratnu legitimnost. Fokus ostaje na razumijevanju historije i odgovornosti, ne na pretvaranju patnje u igracku nagradu.\n\nU igrinom toku ovaj zapis pomaze igracu da poveze otkljucani dogadjaj s vecim ratnim lukom. Ako se kampanja razvije drugacije od historijskog slijeda, Codex i dalje cuva razliku izmedju onoga sto se dogodilo u stvarnosti i onoga sto je nastalo u simulaciji. Izvorni aparat navodi: ICTY Karadzic Trial Judgment (IT-95-5/18-T); Balkan Battlegrounds (CIA Office of Russian and European Analysis, 2002), Vol. II."
+                }
+            }
+        },
+        {
+            "id": "essay_hrhb_federation_army_integration_1994",
+            "event_id": "hrhb_federation_army_integration_1994",
+            "title": "The Federation Army on Paper: How Far Zagreb Would Let Go",
+            "year": 1994,
+            "category": "command",
+            "sources": [
+                "ICTY Prlic et al. Trial Judgment (IT-04-74-T)",
+                "Balkan Battlegrounds (CIA Office of Russian and European Analysis, 2002), Vol. II"
+            ],
+            "generated": true,
+            "content": "The Washington Agreement of March 1994 created, on paper, a Federation Army charged to absorb the HVO and the ARBiH into a single unified military structure. Six months on, the paper architecture had not bitten. HVO brigades in central Bosnia, Mostar, and western Herzegovina held Federation Army table-of-organization slots in name, but they answered in practice through the Mostar Defence Department and the Zagreb-Susak channel — not through the Federation general staff.\n\nThe question recorded on the Croat side was how far Zagreb would let go. Integration meant subordinating Croat formations to a joint command in which Bosniak officers would hold a share of authority proportionate to the larger ARBiH. For a leadership that had fought a year-long war to establish a separate Croat military space, full integration was a profound concession — and Tudjman’s government, as the patron that supplied and sustained the HVO, held an effective veto over how completely it occurred.\n\nThe documented historical posture was parallel commands: the status quo. ICRC and UNPROFOR field reports across the former front recorded persistent dual command structures through the Vienna framework of March 1994, the Contact Group process of July, and on through Dayton at the end of 1995. The Tudjman-Susak correspondence admitted in the ICTY Prlic et al. proceedings records Zagreb’s preference for the HVO retaining a parallel Croat command line inside the Federation’s paper architecture. Operational integration was nominal, not substantive.\n\nThe alternatives would each have meant a different degree of letting go. Full integration would have merged the HVO and ARBiH into a genuine Federation Army with a unified staff. Selective integration would have shared a joint staff while keeping troops under separate national chains. Refusing integration outright would have rejected even the paper structure. The historical leadership chose the option that satisfied the agreement’s form while preserving the substance of a separate Croat command — parallel commands behind a Federation facade.\n\nThe gap between the paper army and the real one was a deliberate construction. It allowed Herceg-Bosna to claim compliance with the Federation while retaining the military autonomy that the Susak channel underwrote. That gap persisted until Dayton, and its persistence is the clearest measure of how far Zagreb was, in the end, willing to let go: far enough to sign, not far enough to merge.",
+            "dynamic_sections": [
+                {
+                    "id": "wave2_hrhb_army_parallel",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:hrhb_federation_army_integration_1994:parallel_commands",
+                    "variant": "note",
+                    "content": "In this campaign, the HVO kept parallel commands behind the Federation facade — the documented historical posture, in which dual command structures persisted through Dayton and Zagreb retained a parallel Croat command line via the Susak channel (ICTY Prlic et al. Trial Judgment, IT-04-74-T).",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji HVO je zadrzao paralelne komande iza federalne fasade — dokumentovani historijski stav, u kojem su dvojne komandne strukture potrajale do Daytona, a Zagreb je preko kanala Susak zadrzao paralelnu hrvatsku komandnu liniju (ICTY Prlic et al. Trial Judgment, IT-04-74-T)."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_hrhb_army_full",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:hrhb_federation_army_integration_1994:full_integration",
+                    "variant": "divergence",
+                    "content": "In this campaign, the HVO merged into a unified Federation Army — a counterfactual divergence from the documented parallel commands, subordinating Croat formations to a joint staff in which ARBiH officers held proportionate authority.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji HVO se stopio u jedinstvenu Federalnu armiju — protucinjenicno odstupanje od dokumentovanih paralelnih komandi, podredjujuci hrvatske formacije zajednickom stabu u kojem su oficiri ARBiH imali srazmjeran autoritet."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_hrhb_army_selective",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:hrhb_federation_army_integration_1994:selective_integration",
+                    "variant": "divergence",
+                    "content": "In this campaign, the HVO integrated selectively — a counterfactual divergence from the documented parallel commands, sharing a joint staff while keeping troops under separate national chains of command.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji HVO se integrisao selektivno — protucinjenicno odstupanje od dokumentovanih paralelnih komandi, dijeleci zajednicki stab uz zadrzavanje vojnika pod odvojenim nacionalnim komandnim lancima."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_hrhb_army_refuse",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:hrhb_federation_army_integration_1994:refuse_integration",
+                    "variant": "divergence",
+                    "content": "In this campaign, the HVO refused Federation Army integration — a counterfactual divergence from the documented parallel-command compromise, rejecting even the paper structure the Washington Agreement created.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji HVO je odbio integraciju u Federalnu armiju — protucinjenicno odstupanje od dokumentovanog kompromisa paralelnih komandi, odbacujuci cak i papirnu strukturu koju je Washingtonski sporazum stvorio."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Federalna armija na papiru: dokle bi Zagreb popustio",
+                    "category": "komandno",
+                    "content": "Ovaj Codex zapis obradjuje temu \"Federalna armija na papiru: dokle bi Zagreb popustio\" kao komandno pitanje rata u Bosni i Hercegovini 1994. Bosanska lokalizacija sazimava isti historijski okvir koji nosi izvorni esej: uzroke, glavne aktere, neposredni tok dogadjaja i posljedice za komandovanje, diplomatiju, civile i ratnu legitimnost. Fokus ostaje na razumijevanju historije i odgovornosti, ne na pretvaranju patnje u igracku nagradu.\n\nU igrinom toku ovaj zapis pomaze igracu da poveze otkljucani dogadjaj s vecim ratnim lukom. Ako se kampanja razvije drugacije od historijskog slijeda, Codex i dalje cuva razliku izmedju onoga sto se dogodilo u stvarnosti i onoga sto je nastalo u simulaciji. Izvorni aparat navodi: ICTY Prlic et al. Trial Judgment (IT-04-74-T); Balkan Battlegrounds (CIA Office of Russian and European Analysis, 2002), Vol. II."
+                }
+            }
+        },
+        {
+            "id": "essay_rbih_nato_ultimatum_compliance_1994",
+            "event_id": "rbih_nato_ultimatum_compliance_1994",
+            "title": "The Sarajevo Exclusion Zone: Symmetry and the Defender",
+            "year": 1994,
+            "category": "diplomatic",
+            "sources": [
+                "North Atlantic Council decision of 9 February 1994",
+                "UN Security Council Resolution 824 (1993)"
+            ],
+            "generated": true,
+            "content": "On 9 February 1994, following a marketplace shelling that killed scores of civilians in Sarajevo, the North Atlantic Council issued an ultimatum: all heavy weapons were to be withdrawn from a twenty-kilometre exclusion zone around the city by one minute past midnight on 21 February, or face air strikes. The Heavy Weapons Exclusion Zone regime was symmetric by design. It applied to the besieging Bosnian Serb positions and, in equal terms, to any ARBiH heavy weapons inside the perimeter.\n\nThat symmetry placed the Bosnian government in an awkward position. For nearly two years the ARBiH had defended a besieged city against an army firing into it from the surrounding hills. A regime that treated the besieger’s artillery and the defender’s as equivalent risked a moral equivalence the Bosnian side rejected. Yet the ARBiH held relatively few heavy weapons inside the perimeter, so the material cost of compliance was asymmetric in Sarajevo’s favour even as the framing rankled.\n\nThe documented historical posture of the Presidency was compliance. Sarajevo cooperated with UNPROFOR collection-point inventories, withdrew or registered the heavy weapons it held inside the zone, and framed the NATO action publicly as overdue Western coercion of the besieging army. The political calculation was straightforward: the exclusion zone fell far more heavily on the VRS, whose encircling artillery was the instrument of the siege. Accepting the symmetric regime cost Sarajevo little and bound NATO to enforce withdrawal against the besieger.\n\nThe alternative was to refuse the symmetric application — to protest the moral equivalence of demanding withdrawal from the defenders of a city under siege. That posture would have asserted a principle at the cost of friction with the very Western powers whose air power the Bosnian government had long sought to engage. The historical Presidency judged the principle less valuable than the enforcement, and complied.\n\nThe exclusion zone marked a turning point in the siege. For the first time, the threat of NATO air power was attached to a concrete deadline, and the VRS pulled the bulk of its heavy weapons back from the perimeter or surrendered them to UNPROFOR control. The relative quiet that followed in Sarajevo through much of 1994 was the fruit of a regime the Bosnian government had accepted despite its symmetric framing — because the symmetry, in practice, fell on the army doing the besieging.",
+            "dynamic_sections": [
+                {
+                    "id": "wave2_rbih_hwez_comply",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:rbih_nato_ultimatum_compliance_1994:rbih_comply_hwez_regime",
+                    "variant": "note",
+                    "content": "In this campaign, Sarajevo withdrew its heavy weapons from the exclusion zone — the documented historical posture, in which the Presidency cooperated with UNPROFOR inventories and accepted the symmetric HWEZ regime because it fell far more heavily on the besieging VRS (North Atlantic Council decision, 9 February 1994).",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Sarajevo je povuklo svoje tesko naoruzanje iz zone iskljucenja — dokumentovani historijski stav, u kojem je Predsjednistvo saradjivalo sa popisima UNPROFOR-a i prihvatilo simetricni HWEZ rezim jer je daleko teze pao na VRS koji je opsjedao grad (odluka Sjevernoatlantskog vijeca, 9. februar 1994)."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_rbih_hwez_defy",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:rbih_nato_ultimatum_compliance_1994:rbih_defy_hwez_regime",
+                    "variant": "divergence",
+                    "content": "In this campaign, Sarajevo refused the symmetric application of the exclusion zone — a counterfactual divergence from the documented compliance, protesting the moral equivalence of demanding withdrawal from the defenders of a besieged city at the cost of friction with the Western powers.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Sarajevo je odbilo simetricnu primjenu zone iskljucenja — protucinjenicno odstupanje od dokumentovanog postupanja, protesteci protiv moralne jednacine zahtjeva za povlacenjem od branilaca opsjednutog grada, po cijenu trvenja sa zapadnim silama."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Sarajevska zona iskljucenja: simetrija i branilac",
+                    "category": "diplomatsko",
+                    "content": "Ovaj Codex zapis obradjuje temu \"Sarajevska zona iskljucenja: simetrija i branilac\" kao diplomatsko pitanje rata u Bosni i Hercegovini 1994. Bosanska lokalizacija sazimava isti historijski okvir koji nosi izvorni esej: uzroke, glavne aktere, neposredni tok dogadjaja i posljedice za komandovanje, diplomatiju, civile i ratnu legitimnost. Fokus ostaje na razumijevanju historije i odgovornosti, ne na pretvaranju patnje u igracku nagradu.\n\nU igrinom toku ovaj zapis pomaze igracu da poveze otkljucani dogadjaj s vecim ratnim lukom. Ako se kampanja razvije drugacije od historijskog slijeda, Codex i dalje cuva razliku izmedju onoga sto se dogodilo u stvarnosti i onoga sto je nastalo u simulaciji. Izvorni aparat navodi: North Atlantic Council decision of 9 February 1994; UN Security Council Resolution 824 (1993)."
+                }
+            }
+        },
+        {
+            "id": "essay_holbrooke_ceasefire_demand_oct95",
+            "event_id": "holbrooke_ceasefire_demand_oct95",
+            "title": "Holbrooke’s Ceasefire: Momentum Against the Map",
+            "year": 1995,
+            "category": "diplomatic",
+            "sources": [
+                "Richard Holbrooke, To End a War (Random House, 1998)",
+                "UN Security Council Resolution 1021 (1995)"
+            ],
+            "generated": true,
+            "content": "By October 1995, the war had turned. The Croatian and Bosnian offensives of late summer, fought under cover of the NATO air campaign that followed the second Markale massacre, had rolled back Bosnian Serb control across western Bosnia. The ARBiH and HVO were advancing in the northwest, and the territorial balance that had frozen for two years was suddenly fluid. It was at this moment that the American negotiator Richard Holbrooke pressed for a ceasefire to clear the ground for the peace conference at Dayton.\n\nThe demand placed the Bosnian government before a genuine dilemma, recorded in Holbrooke’s own account. Every week of continued advance brought more territory under Federation control, strengthening Sarajevo’s hand at the negotiating table where the final map would be drawn. But refusing Holbrooke’s ceasefire risked the American support that had made the advance possible — the air power, the diplomatic weight, the pressure on Belgrade that was bringing the Bosnian Serbs to the table at all. Military momentum and diplomatic dependence pulled in opposite directions.\n\nThe documented historical posture was acceptance. Sarajevo agreed to the ceasefire and went to Dayton, trading the prospect of further territorial gain for a seat at a conference where, with American backing, it could consolidate what it held. The sixty-day ceasefire that took hold in October 1995 froze the front lines that the autumn offensives had drawn — lines that, with adjustments, became the basis of the inter-entity boundary at Dayton.\n\nThe alternative was to continue the offensive, pressing for maximum territory before the map was fixed. That course would have gambled that the gains were worth more than the risk of straining the American relationship — and that the advance could continue without the air support and diplomatic cover Washington provided. The historical leadership judged the gamble too dangerous: the offensive’s momentum was a product of American engagement, and to defy Holbrooke was to risk the very thing that had created the opportunity.\n\nThe acceptance of the ceasefire was the last major strategic choice of the war for the Bosnian government. It marked the transition from a war fought for territory to a peace negotiated over a map — and it rested on a judgement that the surest path to consolidating Sarajevo’s position ran through Dayton, not through one more month of advance.",
+            "dynamic_sections": [
+                {
+                    "id": "wave2_holbrooke_accept",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:holbrooke_ceasefire_demand_oct95:accept_ceasefire",
+                    "variant": "note",
+                    "content": "In this campaign, Sarajevo accepted the ceasefire and went to Dayton — the documented historical posture, in which the Presidency traded further territorial gain for a seat at the conference and froze the front lines the autumn offensives had drawn (Richard Holbrooke, To End a War, 1998).",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Sarajevo je prihvatilo primirje i otislo u Dayton — dokumentovani historijski stav, u kojem je Predsjednistvo zamijenilo daljnji teritorijalni dobitak za mjesto na konferenciji i zamrznulo linije fronta koje su jesenje ofanzive iscrtale (Richard Holbrooke, To End a War, 1998)."
+                        }
+                    }
+                },
+                {
+                    "id": "wave2_holbrooke_continue",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:holbrooke_ceasefire_demand_oct95:continue_offensive",
+                    "variant": "divergence",
+                    "content": "In this campaign, Sarajevo continued the offensive for maximum territory before Dayton — a counterfactual divergence from the documented acceptance, gambling that the gains were worth more than the risk of straining the American support that had made the advance possible.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Sarajevo je nastavilo ofanzivu radi maksimalne teritorije prije Daytona — protucinjenicno odstupanje od dokumentovanog prihvatanja, kockajuci se da dobici vrijede vise od rizika narusavanja americke podrske koja je napredovanje i omogucila."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Holbrookeovo primirje: zamah protiv karte",
+                    "category": "diplomatsko",
+                    "content": "Ovaj Codex zapis obradjuje temu \"Holbrookeovo primirje: zamah protiv karte\" kao diplomatsko pitanje rata u Bosni i Hercegovini 1995. Bosanska lokalizacija sazimava isti historijski okvir koji nosi izvorni esej: uzroke, glavne aktere, neposredni tok dogadjaja i posljedice za komandovanje, diplomatiju, civile i ratnu legitimnost. Fokus ostaje na razumijevanju historije i odgovornosti, ne na pretvaranju patnje u igracku nagradu.\n\nU igrinom toku ovaj zapis pomaze igracu da poveze otkljucani dogadjaj s vecim ratnim lukom. Ako se kampanja razvije drugacije od historijskog slijeda, Codex i dalje cuva razliku izmedju onoga sto se dogodilo u stvarnosti i onoga sto je nastalo u simulaciji. Izvorni aparat navodi: Richard Holbrooke, To End a War (Random House, 1998); UN Security Council Resolution 1021 (1995)."
+                }
+            }
         }
     ]
 }
