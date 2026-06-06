@@ -3030,4 +3030,52 @@ describe('save migration validator hardening', () => {
             /Save schema validation failed after migration[\s\S]*military\.ai_decision_log must be an array when present/
         );
     });
+
+    it('accepts current-version saves with absent or well-formed optional runtime military state', () => {
+        const absent = currentVersionState();
+        delete absent.military.corps_equipment_reserve;
+        delete absent.military.militia_garrison;
+        delete absent.military.unresolved_sector_brigades;
+
+        const wellFormed = currentVersionState();
+        wellFormed.military.corps_equipment_reserve = {
+            rs_1st_krajina: { tanks: 2, artillery: 3, apcs: 4 },
+            rbih_1st_corps: { tanks: 0, artillery: 1, apcs: 0 },
+        };
+        wellFormed.military.militia_garrison = {
+            'op:sarajevo:centar_2': 12,
+            'op:banja_luka:banja_luka_2': 0,
+        };
+        wellFormed.military.unresolved_sector_brigades = [
+            'rbih_101st_mountain',
+            'rs_1st_krajina_light',
+        ];
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWellFormed = deserializeState(JSON.stringify(wellFormed));
+
+        expect(migratedAbsent.military.corps_equipment_reserve).toBeUndefined();
+        expect(migratedAbsent.military.militia_garrison).toBeUndefined();
+        expect(migratedAbsent.military.unresolved_sector_brigades).toBeUndefined();
+        expect(migratedWellFormed.military.corps_equipment_reserve).toEqual(wellFormed.military.corps_equipment_reserve);
+        expect(migratedWellFormed.military.militia_garrison).toEqual(wellFormed.military.militia_garrison);
+        expect(migratedWellFormed.military.unresolved_sector_brigades).toEqual(wellFormed.military.unresolved_sector_brigades);
+    });
+
+    it('rejects current-version saves with malformed optional runtime military state', () => {
+        const state = currentVersionState();
+        state.military.corps_equipment_reserve = {
+            rs_1st_krajina: { tanks: -1, artillery: Number.NaN, apcs: 1.5 },
+            bad_corps: 42,
+        };
+        state.military.militia_garrison = {
+            'op:sarajevo:centar_2': -1,
+            'op:banja_luka:banja_luka_2': Number.POSITIVE_INFINITY,
+        };
+        state.military.unresolved_sector_brigades = ['ok_brigade', 42];
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.corps_equipment_reserve\.rs_1st_krajina\.tanks must be a finite non-negative number[\s\S]*military\.corps_equipment_reserve\.rs_1st_krajina\.artillery must be a finite non-negative number[\s\S]*military\.corps_equipment_reserve\.bad_corps must be an object[\s\S]*military\.militia_garrison\.op:sarajevo:centar_2 must be a finite non-negative number[\s\S]*military\.militia_garrison\.op:banja_luka:banja_luka_2 must be a finite non-negative number[\s\S]*military\.unresolved_sector_brigades must be a string array when present/
+        );
+    });
 });

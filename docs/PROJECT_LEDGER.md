@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-06] fix(state): validate runtime military state when present
+
+**Type:** Save-validation/schema-contract hardening. No simulation turn behavior, militia-garrison computation, sector reconstruction behavior, equipment-reserve mechanics, scenario data, save schema version, migration, fixture refresh, baseline manifest, generated artifact, UI code, randomness, timestamps, or persisted output ordering changed.
+
+**Change:** `validateGameStateShape(...)` now rejects malformed present `military.corps_equipment_reserve`, `military.militia_garrison`, and `military.unresolved_sector_brigades` payloads. Absence remains valid, and well-formed present runtime military state round-trips unchanged.
+
+**Classification:** These fields are optional runtime/diagnostic military surfaces. The validator checks only local shape: per-corps finite non-negative equipment reserves for `tanks`, `artillery`, and `apcs`; settlement-keyed finite non-negative militia garrison values; and unresolved-sector brigade string-array shape. It deliberately does not materialize absent fields, resolve corps/formation/settlement ids, enforce equipment upper bounds, or change runtime producers/consumers. `war_jna` was excluded because save compatibility already materializes it to the legacy default, so it is not in the same optional-absent class.
+
+**Docs:** Added `docs/40_reports/implemented/20260606_RUNTIME_MILITARY_STATE_VALIDATE_WHEN_PRESENT.md` and updated report indices, command board, master roadmap, engine-quality residuals plan, and knowledge ledger.
+
+**Verification:** Red/green `node F:\A-War-Without-Victory\node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` (new malformed optional runtime military state test failed before validation; green 183/183 after implementation); `npm.cmd run typecheck -- --pretty false`; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` total 507 (`state: 172`, `sim: 327`, `derived: 8`); `git diff --check`.
+
+---
+
 ## [2026-06-06] fix(state): validate supply production state when present
 
 **Type:** Save-validation/schema-contract hardening. No simulation turn behavior, supply or production mechanics, scenario data, save schema version, migration, fixture refresh, baseline manifest, generated artifact, UI code, randomness, timestamps, or persisted output ordering changed.
