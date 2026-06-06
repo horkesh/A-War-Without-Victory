@@ -66,7 +66,7 @@ import {
 } from './sector_offensive_launch_helpers.js';
 import { SYNC_WAIT_MAX_TURNS } from './army_hq_gathering_constants.js';
 // LANE-2026-05-02: estimateForceRatio defender-modifier integration
-import { computeAttackerPower, rankDefendersByPower, getArtillerySuppression } from './combat_math.js';
+import { computeAttackerPower, rankDefendersByPower, getArtillerySuppression, applyDefensiveFireToRatio } from './combat_math.js';
 // LANE-2026-05-02-DRINA: enclave-scoped defender aggregation
 import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
@@ -472,7 +472,18 @@ export function estimateForceRatio(
         return confidence >= 0.5 ? 3.0 : 1.0;
     }
 
-    const trueRatio = ownStrength / enemyStrength;
+    // COMBAT-P14: fold defender RETURN-FIRE into the op-level force-ratio estimate
+    // (same getDefensiveFireMult the resolver applies to attacker casualties) so a
+    // high-return-fire (artillery-heavy / dug-in) facing defender raises the
+    // anticipated attacker cost and the corps does not green-light a zero-effect
+    // offensive. Bounded ÷[1.0,1.8]; soft targets unchanged. No double-counting:
+    // entrenchment/terrain/artillery-suppression already live in enemyStrength.
+    const trueRatio = applyDefensiveFireToRatio(
+        ownStrength / enemyStrength,
+        defenderFormations,
+        defenderFormations[0]!.faction,
+        state,
+    );
 
     // Apply estimation error based on confidence and competence
     // High confidence + high competence → accurate. Low → random-feeling but deterministic offset.
