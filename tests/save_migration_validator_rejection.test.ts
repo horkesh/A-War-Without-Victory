@@ -1892,6 +1892,57 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('accepts current-version saves with absent or well-formed scenario military guidance', () => {
+        const absent = currentVersionState();
+        delete absent.military.must_hold_osids_by_corps;
+        delete absent.military.comms_override_by_corps;
+
+        const withGuidance = currentVersionState();
+        withGuidance.military.must_hold_osids_by_corps = {
+            arbih_1st_corps: ['sarajevo_1', 'sarajevo_2'],
+            rs_drinja_corps: [],
+        };
+        withGuidance.military.comms_override_by_corps = {
+            arbih_1st_corps: { before_turn: 18, mode: 'radio' },
+            hvo_main_staff: { before_turn: 0, mode: 'full' },
+        };
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWithGuidance = deserializeState(JSON.stringify(withGuidance));
+
+        expect(migratedAbsent.military.must_hold_osids_by_corps).toBeUndefined();
+        expect(migratedAbsent.military.comms_override_by_corps).toBeUndefined();
+        expect(migratedWithGuidance.military.must_hold_osids_by_corps).toEqual(withGuidance.military.must_hold_osids_by_corps);
+        expect(migratedWithGuidance.military.comms_override_by_corps).toEqual(withGuidance.military.comms_override_by_corps);
+    });
+
+    it('rejects current-version saves with malformed scenario military guidance', () => {
+        const state = currentVersionState();
+        state.military.must_hold_osids_by_corps = {
+            arbih_1st_corps: ['sarajevo_1', 42],
+            hvo_main_staff: 'mostar_zapad_2',
+        } as any;
+        state.military.comms_override_by_corps = {
+            arbih_1st_corps: { before_turn: -1, mode: 'radio' },
+            hvo_main_staff: { before_turn: 1.5, mode: 'courier' },
+            rs_drinja_corps: 'radio',
+        } as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.must_hold_osids_by_corps\.arbih_1st_corps must be a string array[\s\S]*military\.must_hold_osids_by_corps\.hvo_main_staff must be a string array[\s\S]*military\.comms_override_by_corps\.arbih_1st_corps\.before_turn must be a non-negative integer[\s\S]*military\.comms_override_by_corps\.hvo_main_staff\.before_turn must be a non-negative integer[\s\S]*military\.comms_override_by_corps\.hvo_main_staff\.mode must be radio or full[\s\S]*military\.comms_override_by_corps\.rs_drinja_corps must be an object/
+        );
+    });
+
+    it('rejects current-version saves with non-object scenario military guidance records', () => {
+        const state = currentVersionState();
+        state.military.must_hold_osids_by_corps = [] as any;
+        state.military.comms_override_by_corps = 42 as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.must_hold_osids_by_corps must be an object when present[\s\S]*military\.comms_override_by_corps must be an object when present/
+        );
+    });
+
     it('accepts current-version saves with absent or well-formed recruitment economy state', () => {
         const absent = currentVersionState();
         delete absent.military.recruitment_state;

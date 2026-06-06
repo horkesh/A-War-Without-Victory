@@ -1008,6 +1008,41 @@ function validateBooleanRecord(value: unknown, path: string, errors: string[]): 
     }
 }
 
+function validateStringArrayRecord(value: unknown, path: string, errors: string[]): void {
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+    for (const key of Object.keys(value).sort(strictCompare)) {
+        const entry = value[key];
+        if (!isStringArray(entry)) {
+            errors.push(`${path}.${key} must be a string array`);
+        }
+    }
+}
+
+function validateCommsOverrideByCorps(value: unknown, errors: string[]): void {
+    const path = 'military.comms_override_by_corps';
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+    for (const corpsId of Object.keys(value).sort(strictCompare)) {
+        const entryPath = `${path}.${corpsId}`;
+        const entry = value[corpsId];
+        if (!isRecord(entry)) {
+            errors.push(`${entryPath} must be an object`);
+            continue;
+        }
+        if (!isNonNegativeInteger(entry.before_turn)) {
+            errors.push(`${entryPath}.before_turn must be a non-negative integer`);
+        }
+        if (entry.mode !== 'radio' && entry.mode !== 'full') {
+            errors.push(`${entryPath}.mode must be radio or full`);
+        }
+    }
+}
+
 function validateFactionNumberRecord(value: unknown, path: string, errors: string[]): void {
     if (!isRecord(value)) {
         errors.push(`${path} must be an object when present`);
@@ -3168,6 +3203,12 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'sarajevo_tunnel_operational' in military && military.sarajevo_tunnel_operational !== undefined && typeof military.sarajevo_tunnel_operational !== 'boolean') {
         errors.push('military.sarajevo_tunnel_operational must be a boolean when present');
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'must_hold_osids_by_corps' in military && military.must_hold_osids_by_corps !== undefined) {
+        validateStringArrayRecord(military.must_hold_osids_by_corps, 'military.must_hold_osids_by_corps', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'comms_override_by_corps' in military && military.comms_override_by_corps !== undefined) {
+        validateCommsOverrideByCorps(military.comms_override_by_corps, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'general_supply_reserve' in military && military.general_supply_reserve !== undefined) {
         validateFactionNumberRecord(military.general_supply_reserve, 'military.general_supply_reserve', errors);

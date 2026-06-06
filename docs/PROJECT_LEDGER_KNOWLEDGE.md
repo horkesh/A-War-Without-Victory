@@ -2913,3 +2913,7 @@ In AWWV, a shell can look player-safe overall while one modal still reaches into
 ## 2026-06-06 - Intel ambush-depth collision gate
 
 **Ambush-depth friction must wait for the attack-resolution casualty owner to clear:** the remaining intel surprise depth amplifier needs both depth derivation and casualty-multiplier consumption in `attack_resolution_osid.ts`, which overlaps ADR-0007 casualty-base work. Durable rule: packet bounded/default-off/clamped ambush-depth designs when the only runtime hook collides; do not implement through an alternate hidden-truth or unbounded path. Applied in `[2026-06-06] docs(intel): packet bounded ambush-depth friction`; packet `docs/40_reports/proposals/20260605_INTEL_AMBUSH_FRICTION_DESIGN.md`.
+
+## 2026-06-06 - Scenario military guidance optional validation
+
+**Validate scenario-authored military guidance locally when it becomes persisted state:** `must_hold_osids_by_corps` and `comms_override_by_corps` are loaded from scenario data and then live under `state.military` as optional guidance. Durable rule: save validation may reject malformed present local shape for these scenario-guidance records, but it must not resolve corps ids/OSIDs, change scenario-loader filtering, materialize absent fields, bump schema, or convert scenario contract checks into save-load behavior. Keep diagnostics sorted by `strictCompare` for stable error order. Applied in `[2026-06-06] fix(state): validate scenario military guidance when present`.
