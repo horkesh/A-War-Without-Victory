@@ -19360,3 +19360,17 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Report:** `docs/40_reports/implemented/20260606_DESK_CONSEQUENCE_ROUTE_LOCALIZATION.md`
 
 ---
+
+## [2026-06-06] perf(sector): reuse enemy personnel OSID index in brigade classification
+
+**Type:** Deterministic sector/frontline performance optimization. No sector truth, combat math, operation behavior, scenario data, save schema, UI behavior, baseline manifest, replay writer, or generated artifact changed.
+
+**Change:** `classifyBrigadesByTerritory(...)` now reuses the existing `countActiveEnemyPersonnelByOsid(...)` view when computing per-sector enemy personnel for garrison budgeting instead of scanning every formation once per sector. The reuse is invocation-local and keeps the existing active enemy brigade/OG/operational-group predicate.
+
+**Docs/roadmap:** Added `docs/40_reports/implemented/20260606_SECTOR_ENEMY_PERSONNEL_INDEX_REUSE.md` and updated `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/SECTOR_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/2026-05-20-sector-performance-next-target-plan.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, and `.claude/napkin.md`.
+
+**Proof:** Focused sector pack passed 96/96; `npm.cmd run typecheck -- --pretty false` passed; `git diff --check` passed. Pre-change and changed partition profiles both preserved final hash `d1ace172a29b2353`; changed profile moved `partition-corps-front-sectors` to `6964.4334ms` from `7146.0785ms`, with RS/RBiH brigade-classification per-invocation cost moving roughly `4.35ms -> 3.34ms` and `3.85ms -> 2.84ms`. Changed `npm.cmd run sim:scenario:run:40w:timed` preserved `d1ace172a29b2353`; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n2` passed; `npm.cmd run test:baselines` passed.
+
+**Report:** `docs/40_reports/implemented/20260606_SECTOR_ENEMY_PERSONNEL_INDEX_REUSE.md`
+
+---

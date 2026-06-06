@@ -653,6 +653,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(classifyEnd).toBeGreaterThan(classifyStart);
         const classifyRegion = raw.slice(classifyStart, classifyEnd);
         expect(classifyRegion).toContain('const enemyPersonnelByOsid = countActiveEnemyPersonnelByOsid(formations, faction);');
+        expect(classifyRegion).not.toContain('const allFormIds = Object.keys(formations).sort(strictCompare);');
         expect(classifyRegion).not.toContain('const allFids = Object.keys(formations).sort(strictCompare);');
 
         const recomputeStart = raw.indexOf('export function recomputeSectorPowerAndThreat(');

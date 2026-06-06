@@ -1,8 +1,20 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-06-05 (sector construction index/reachability reuse)
+**Updated:** 2026-06-06 (sector enemy personnel index reuse)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
+
+---
+
+## 2026-06-06: Enemy personnel index reuse (byte-identical)
+
+**Change:** `classifyBrigadesByTerritory(...)` now reuses `countActiveEnemyPersonnelByOsid(...)` for per-sector enemy personnel budgeting instead of scanning all formations once per sector.
+
+**Determinism:** The index is invocation-local and built with the existing `strictCompare`-sorted active enemy combat predicate. The result is summed across each sector's unique enemy OSIDs and does not change sector packet ordering, combat math, scenario data, save schema, UI, baseline manifest, or serialized output.
+
+**Verification:** Focused sector tests passed 96/96, typecheck passed, baseline regression passed, changed 40w timed run preserved `d1ace172a29b2353`, and consistency validation passed. Changed partition profile moved `partition-corps-front-sectors` to `6964.4334ms` from `7146.0785ms`.
+
+**Report:** [implemented/20260606_SECTOR_ENEMY_PERSONNEL_INDEX_REUSE.md](implemented/20260606_SECTOR_ENEMY_PERSONNEL_INDEX_REUSE.md)
 
 ---
 
