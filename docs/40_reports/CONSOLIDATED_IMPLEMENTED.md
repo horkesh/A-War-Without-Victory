@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest map-derived artifact ownership:** [implemented/20260606_MAP_DERIVED_ARTIFACT_OWNERSHIP.md](implemented/20260606_MAP_DERIVED_ARTIFACT_OWNERSHIP.md) - `data/derived/georef/`, `data/derived/operational/`, and `data/derived/municipality_audit/` are now classified as committed retained generated map evidence with owner commands and static tracked-file guards.
+
 **Latest sector component map reuse:** [implemented/20260606_SECTOR_COMPONENT_MAP_REUSE.md](implemented/20260606_SECTOR_COMPONENT_MAP_REUSE.md) - `buildFactionSectors(...)` now reuses the friendly territory component map from pre-component setup during brigade classification, preserving the current `d1ace172a29b2353` 40w floor.
 
 **Latest derived military scalar maps validate-when-present contract:** [implemented/20260606_DERIVED_MILITARY_SCALAR_MAPS_VALIDATE_WHEN_PRESENT.md](implemented/20260606_DERIVED_MILITARY_SCALAR_MAPS_VALIDATE_WHEN_PRESENT.md) - Derived/runtime military scalar maps remain optional but now reject malformed present boolean, finite non-negative number, and non-negative integer payloads without materializing absent fields or changing runtime producers.
