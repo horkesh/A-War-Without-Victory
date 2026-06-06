@@ -57,6 +57,8 @@ function leverLabel(lever: PresidentialDecisionRoomDirective['lever']): string {
     case 'replace_co': return t('directive.lever.replace_co');
     case 'elite_deploy': return t('directive.lever.elite_deploy');
     case 'front_visit': return t('directive.lever.front_visit');
+    case 'address_nation': return t('directive.lever.address_nation');
+    case 'decorate_unit': return t('directive.lever.decorate_unit');
     default: return t('directive.lever.default');
   }
 }
@@ -138,17 +140,24 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   // request_op whose payload carries no fixed targetOsid.
   const [targetOsidInput, setTargetOsidInput] = useState('');
 
-  // FRONT-VISIT reachability (async server-side — the president cannot reach a
-  // cut-off enclave). Fetched once on mount / on state change, mirroring
-  // FrontVisitSection. Only used for the front_visit lever.
-  const [frontVisitUnavailableReason, setFrontVisitUnavailableReason] = useState<string | null>(null);
-  const [frontVisitReady, setFrontVisitReady] = useState(false);
+  // LEADERSHIP-GESTURE availability (async server-side). Covers the three §10
+  // initiatable leadership actions — front_visit (reachability gate),
+  // address_nation (faction-wide), decorate_unit (regular-formation bright line).
+  // Fetched once on mount / on state change, mirroring FrontVisitSection. The
+  // ISSUE button gates on this reason when present.
+  const [gestureUnavailableReason, setGestureUnavailableReason] = useState<string | null>(null);
+  const [gestureReady, setGestureReady] = useState(false);
 
   const cost = directive.cost;
   const authCurrent = gameState.commandAuthority?.current ?? 100;
   const canAfford = authCurrent >= cost;
   const needsObjection = directive.lever === 'request_op';
   const isFrontVisit = directive.lever === 'front_visit';
+  const isAddressNation = directive.lever === 'address_nation';
+  const isDecorateUnit = directive.lever === 'decorate_unit';
+  // The three initiatable presidential leadership gestures share an async
+  // availability query + single CA-cost confirm.
+  const isLeadershipGesture = isFrontVisit || isAddressNation || isDecorateUnit;
 
   // request_op target OSID: a fixed payload target wins; otherwise the president
   // types one into the in-card input. The input is shown ONLY when this is a
@@ -179,28 +188,52 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
     );
   }, [gameState.namedOfficerData, directive.corpsId]);
 
-  const refreshFrontVisit = useCallback(async () => {
-    if (!ipc.isAvailable || !isFrontVisit) return;
-    const r = await ipc.getFrontVisitAvailability();
-    setFrontVisitReady(true);
-    if (!r.ok) { setFrontVisitUnavailableReason('Front-visit availability is unknown.'); return; }
-    const reachable = (r.reachableBranchIds ?? []).length > 0;
-    if (r.available && reachable) {
-      setFrontVisitUnavailableReason(null);
-    } else {
-      // Cut-off / exhausted / on-cooldown — surface a concise reason.
-      setFrontVisitUnavailableReason(
-        r.reason
-          ?? (r.onCooldown ? 'The front visit is on cooldown.'
-            : !reachable ? 'No front is reachable — every offered front is cut off.'
-            : 'A front visit cannot be made right now.'),
-      );
+  const refreshGesture = useCallback(async () => {
+    if (!ipc.isAvailable || !isLeadershipGesture) return;
+    if (isFrontVisit) {
+      const r = await ipc.getFrontVisitAvailability();
+      setGestureReady(true);
+      if (!r.ok) { setGestureUnavailableReason(t('directive.frontVisit.unknown')); return; }
+      const reachable = (r.reachableBranchIds ?? []).length > 0;
+      if (r.available && reachable) {
+        setGestureUnavailableReason(null);
+      } else {
+        setGestureUnavailableReason(
+          r.reason
+            ?? (r.onCooldown ? t('directive.frontVisit.onCooldown')
+              : !reachable ? t('directive.frontVisit.allCutOff')
+              : t('directive.frontVisit.unavailable')),
+        );
+      }
+      return;
     }
-  }, [ipc, isFrontVisit]);
+    if (isAddressNation) {
+      const r = await ipc.getAddressNationAvailability();
+      setGestureReady(true);
+      if (!r.ok) { setGestureUnavailableReason(t('directive.addressNation.unknown')); return; }
+      setGestureUnavailableReason(
+        r.available ? null
+          : (r.reason
+            ?? (r.onCooldown ? t('directive.addressNation.onCooldown')
+              : t('directive.addressNation.unavailable'))),
+      );
+      return;
+    }
+    // decorate_unit
+    const r = await ipc.getDecorateUnitAvailability();
+    setGestureReady(true);
+    if (!r.ok) { setGestureUnavailableReason(t('directive.decorateUnit.unknown')); return; }
+    setGestureUnavailableReason(
+      r.available ? null
+        : (r.reason
+          ?? (r.onCooldown ? t('directive.decorateUnit.onCooldown')
+            : t('directive.decorateUnit.unavailable'))),
+    );
+  }, [ipc, isLeadershipGesture, isFrontVisit, isAddressNation]);
 
   useEffect(() => {
-    void refreshFrontVisit();
-  }, [refreshFrontVisit, gameState]);
+    void refreshGesture();
+  }, [refreshGesture, gameState]);
 
   useEffect(() => {
     setReceipt(null);
@@ -313,13 +346,20 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         return;
       }
 
-      // FRONT-VISIT (single CA-cost confirm): respect server-side reachability — the
-      // president cannot reach a cut-off enclave.
-      if (directive.lever === 'front_visit') {
-        if (frontVisitUnavailableReason) { setLoadError(frontVisitUnavailableReason); return; }
-        const result = await ipc.initiateFrontVisit();
-        if (!result.ok) markFailed(result.error ?? 'Failed to initiate front visit.');
-        else { resetTransient(); markIssued(); await refreshFrontVisit(); }
+      // LEADERSHIP GESTURES (single CA-cost confirm): front_visit respects
+      // server-side reachability (cut-off enclaves); address_nation is
+      // faction-wide; decorate_unit force-queues the regular-formation picker
+      // (bright line enforced server-side). All force-queue an authored event the
+      // EventDecisionModal then surfaces.
+      if (isLeadershipGesture) {
+        if (gestureUnavailableReason) { setLoadError(gestureUnavailableReason); return; }
+        const result = isFrontVisit
+          ? await ipc.initiateFrontVisit()
+          : isAddressNation
+            ? await ipc.initiateAddressNation()
+            : await ipc.initiateDecorateUnit();
+        if (!result.ok) markFailed(result.error ?? t('directive.gesture.failed'));
+        else { resetTransient(); markIssued(); await refreshGesture(); }
         return;
       }
 
@@ -495,12 +535,13 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         </div>
       )}
 
-      {/* FRONT-VISIT reachability notice — the president cannot reach a cut-off
-          enclave. Surface the server-side reason; the ISSUE button is disabled. */}
-      {isFrontVisit && frontVisitReady && frontVisitUnavailableReason && (
-        <div role="status" aria-label={t('directive.frontVisit.unavailableAria')} className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2">
-          <p className="text-[8px] font-bold uppercase tracking-wider text-text-secondary">{t('directive.frontVisit.cannotVisit')}</p>
-          <p className="mt-0.5 text-[10px] text-text-primary">{frontVisitUnavailableReason}</p>
+      {/* LEADERSHIP-GESTURE unavailability notice — front_visit (cut-off enclave),
+          address_nation / decorate_unit (cap/cooldown). Surface the server-side
+          reason; the ISSUE button is disabled. */}
+      {isLeadershipGesture && gestureReady && gestureUnavailableReason && (
+        <div role="status" aria-label={t('directive.gesture.unavailableAria')} className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2">
+          <p className="text-[8px] font-bold uppercase tracking-wider text-text-secondary">{t('directive.gesture.cannotAct')}</p>
+          <p className="mt-0.5 text-[10px] text-text-primary">{gestureUnavailableReason}</p>
         </div>
       )}
 
@@ -545,15 +586,15 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       )}
 
       {/* Confirm / ISSUE — disabled when CA short (still renders for scan-without-spend),
-          for front-visit when no front is reachable, or for a request-op with no
-          target named yet. */}
+          for a leadership gesture that is unavailable (cut-off / cap / cooldown),
+          or for a request-op with no target named yet. */}
       {!pendingObjection && !impossibleReason && (() => {
-        const blockedFrontVisit = isFrontVisit && frontVisitReady && frontVisitUnavailableReason !== null;
+        const blockedGesture = isLeadershipGesture && gestureReady && gestureUnavailableReason !== null;
         const blockedNoTarget = showTargetInput && targetOsidInput.trim().length === 0;
         const blockedAmbiguousTarget = ambiguousTargetMatches.length > 0;
-        const issueDisabled = !canAfford || busy || blockedFrontVisit || blockedNoTarget || blockedAmbiguousTarget;
-        const issueTitle = blockedFrontVisit
-          ? (frontVisitUnavailableReason ?? t('directive.issue.blockedFrontVisitTitle'))
+        const issueDisabled = !canAfford || busy || blockedGesture || blockedNoTarget || blockedAmbiguousTarget;
+        const issueTitle = blockedGesture
+          ? (gestureUnavailableReason ?? t('directive.issue.blockedFrontVisitTitle'))
           : blockedNoTarget
           ? t('directive.issue.blockedNoTargetTitle')
           : blockedAmbiguousTarget

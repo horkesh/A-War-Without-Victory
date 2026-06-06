@@ -49,6 +49,10 @@ export const DIRECTIVE_LEVER_TO_ACT_ID: Readonly<Record<DirectiveLever, string>>
   elite_deploy: 'act_authorize_op',
   replace_co: 'act_replace_commander',
   front_visit: 'act_front_visit',
+  // Leadership gestures (design §10 deferred actions) reuse the public-pressure
+  // still — same "presidential leadership presence" register as the front visit.
+  address_nation: 'act_front_visit',
+  decorate_unit: 'act_front_visit',
 };
 
 /**
