@@ -38,6 +38,12 @@ const SOURCE_NOTE_EVENT_IDS = [
     'srebrenica_falls_1995',
     'zepa_falls_1995',
     'second_markale_massacre_1995',
+    // §6 camp-system family (Prijedor camp system + HVO detention camps).
+    // Documentary Ring-2 representation rows; provenance-only source notes.
+    'omarska_camp_1992',
+    'keraterm_camp_1992',
+    'trnopolje_camp_1992',
+    'hvo_detention_camps_1993',
 ] as const;
 
 const REQUIRED_BOUNDARY_PHRASES = [

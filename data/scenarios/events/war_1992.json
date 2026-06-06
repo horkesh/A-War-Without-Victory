@@ -18,7 +18,9 @@
       "decay_rate": 0
     },
     "once": true,
-    "tags": ["keystone_dilemma"],
+    "tags": [
+      "keystone_dilemma"
+    ],
     "effect": {
       "kind": "narrative",
       "text": "The strategic goals are presented to the Assembly."
@@ -2218,7 +2220,9 @@
       "decay_rate": 0
     },
     "once": true,
-    "tags": ["keystone_dilemma"],
+    "tags": [
+      "keystone_dilemma"
+    ],
     "effect": {
       "kind": "narrative",
       "text": "The political direction of Herceg-Bosna is debated."
@@ -3152,7 +3156,7 @@
         "effects": [
           {
             "kind": "alliance_change",
-            "delta": -0.10
+            "delta": -0.1
           },
           {
             "kind": "morale_change",
@@ -3234,7 +3238,7 @@
           {
             "kind": "equipment_quality_modifier",
             "faction": "HRHB",
-            "multiplier": 0.90,
+            "multiplier": 0.9,
             "duration_turns": 26
           }
         ],
@@ -4108,6 +4112,126 @@
     "historian_audit_row": "H4",
     "source": "BB1 p.167; docs/40_reports/audits/20260517_HISTORIAN_OPEN_QUESTIONS_RESEARCH.md H4",
     "historical_source": "BB1 p.167; 2026-05-17 Historian audit H4."
+  },
+  {
+    "id": "omarska_camp_1992",
+    "title": "The Omarska Camp",
+    "narrative": "Reports reach the outside world of a detention facility at the Omarska iron-ore complex south of Prijedor. The International Criminal Tribunal for the former Yugoslavia later established, across the Tadić, Stakić and Kvočka judgments, that the facility held some three thousand Bosniak and Croat detainees in conditions found to constitute crimes against humanity. The historical record of Omarska is documented here as part of the Prijedor camp system.",
+    "source_note": "ICTY findings in Prosecutor v. Tadic (IT-94-1-T), Prosecutor v. Stakic (IT-97-24-T), Prosecutor v. Kvocka et al. (IT-98-30/1-T), and Prosecutor v. Karadzic (IT-95-5/18-T) ground this row's provenance for the Omarska detention facility. Per Sensitive History Design Gate §1.3 Ring 3 #2 and §3.6: this is a representation-only historical-record row with no player response options; any descendant row MUST NOT re-author cleansing, forced-displacement, civilian-targeting, paramilitary deployment, detention-camp expansion, or detainee-population selection — the camp-system process is canon-refused. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "category": "humanitarian",
+    "family": "rs_camp_exposure_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 14,
+      "turn_max": 30,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "faction_controls_municipality",
+            "faction": "RS",
+            "municipality": "prijedor",
+            "threshold": 0.5
+          },
+          {
+            "type": "war_crimes_above",
+            "faction": "RS",
+            "threshold": 2
+          }
+        ]
+      }
+    },
+    "once": true,
+    "sets_flags": {
+      "omarska_camp_documented": true
+    },
+    "historical_source": "ICTY Tadic IT-94-1-T §§154-237; ICTY Stakic IT-97-24-T §§88-168; ICTY Kvocka et al. IT-98-30/1-T (Omarska command responsibility); ICTY Karadzic IT-95-5/18-T (scheduled detention facilities); ITN broadcast 6 August 1992; BB Vol. I pp. 198-229.",
+    "effect": {
+      "kind": "narrative",
+      "text": "The historical record of the Omarska detention facility is documented in the Codex."
+    }
+  },
+  {
+    "id": "keraterm_camp_1992",
+    "title": "The Keraterm Camp",
+    "narrative": "A second detention facility is documented at the Keraterm ceramics factory on the eastern edge of Prijedor. The ICTY Sikirica judgment reconstructed the camp's command structure and the mass killing in Room 3 on the night of 24-25 July 1992; the Tadić, Stakić and Karadžić findings situated Keraterm within the broader Prijedor camp system. The historical record is documented here.",
+    "source_note": "ICTY findings in Prosecutor v. Sikirica et al. (IT-95-8-S), Prosecutor v. Tadic (IT-94-1-T), Prosecutor v. Stakic (IT-97-24-T), and Prosecutor v. Karadzic (IT-95-5/18-T) ground this row's provenance for the Keraterm detention facility. Per Sensitive History Design Gate §1.3 Ring 3 #2 and §3.6: this is a representation-only historical-record row with no player response options; any descendant row MUST NOT re-author cleansing, forced-displacement, civilian-targeting, paramilitary deployment, detention-camp expansion, or detainee-population selection — the camp-system process is canon-refused. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "category": "humanitarian",
+    "family": "rs_camp_exposure_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 14,
+      "turn_max": 30,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "faction_controls_municipality",
+            "faction": "RS",
+            "municipality": "prijedor",
+            "threshold": 0.5
+          },
+          {
+            "type": "war_crimes_above",
+            "faction": "RS",
+            "threshold": 2
+          }
+        ]
+      }
+    },
+    "once": true,
+    "sets_flags": {
+      "keraterm_camp_documented": true
+    },
+    "historical_source": "ICTY Sikirica et al. IT-95-8-S (Keraterm command and Room 3); ICTY Tadic IT-94-1-T; ICTY Stakic IT-97-24-T §§88-168; ICTY Karadzic IT-95-5/18-T (scheduled detention facilities); BB Vol. I pp. 198-229.",
+    "effect": {
+      "kind": "narrative",
+      "text": "The historical record of the Keraterm detention facility is documented in the Codex."
+    }
+  },
+  {
+    "id": "trnopolje_camp_1992",
+    "title": "The Trnopolje Camp",
+    "narrative": "A third facility is documented at Trnopolje, north of Prijedor, operated at a school and community centre from late May 1992. The ICTY found it served both as a detention site and as an instrument of expulsion through which the demographic transformation of Prijedor municipality was carried out. It was the site of the 6 August 1992 ITN footage that first brought the camp system to global attention. The historical record is documented here.",
+    "source_note": "ICTY findings in Prosecutor v. Tadic (IT-94-1-T), Prosecutor v. Stakic (IT-97-24-T), Prosecutor v. Kvocka et al. (IT-98-30/1-T), and Prosecutor v. Karadzic (IT-95-5/18-T) ground this row's provenance for the Trnopolje detention facility. Per Sensitive History Design Gate §1.3 Ring 3 #2 and §3.6: this is a representation-only historical-record row with no player response options; any descendant row MUST NOT re-author cleansing, forced-displacement, civilian-targeting, paramilitary deployment, detention-camp expansion, or detainee-population selection — the camp-system process is canon-refused. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "category": "humanitarian",
+    "family": "rs_camp_exposure_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 14,
+      "turn_max": 30,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "faction_controls_municipality",
+            "faction": "RS",
+            "municipality": "prijedor",
+            "threshold": 0.5
+          },
+          {
+            "type": "war_crimes_above",
+            "faction": "RS",
+            "threshold": 2
+          }
+        ]
+      }
+    },
+    "once": true,
+    "sets_flags": {
+      "trnopolje_camp_documented": true
+    },
+    "historical_source": "ICTY Tadic IT-94-1-T (Trnopolje findings); ICTY Stakic IT-97-24-T §§88-168; ICTY Kvocka et al. IT-98-30/1-T; ICTY Karadzic IT-95-5/18-T (scheduled detention facilities); ITN broadcast 6 August 1992; BB Vol. I pp. 198-229.",
+    "effect": {
+      "kind": "narrative",
+      "text": "The historical record of the Trnopolje detention facility is documented in the Codex."
+    }
   },
   {
     "id": "concentration_camps_revealed_1992",
