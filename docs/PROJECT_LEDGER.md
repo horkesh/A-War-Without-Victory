@@ -19424,3 +19424,17 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Report:** `docs/40_reports/implemented/20260606_SECTOR_COMPONENT_MAP_REUSE.md`
 
 ---
+
+## [2026-06-06] test(ui): prove receipt route cohesion in browser
+
+**Type:** UI/read-model route and browser-proof cleanup. No simulation behavior, save schema, migration, scenario data, baseline manifest, generated artifact, replay writer, randomness, timestamps, or persisted output ordering changed.
+
+**Change:** President's Desk Records-filed consequence rows now route to Army HQ Records -> Decision Consequences through an explicit decision-records callback while generic Records routing remains Turn Aftermath. Army HQ AAR tab counts now derive from `latestTurnSummary`; completed-operation history remains under Operation History. Chronicle generation skips patron-defiance consequence-receipt bridge rows so the decision-ledger patron card does not duplicate when an event catalog is present. Added `tools/ui/receipt_route_browser_smoke.cjs` to load a deterministic modified startup save through the live map shell and prove the desk-to-Records route and AAR/Operation History count split.
+
+**Docs/roadmap:** Added `docs/40_reports/implemented/20260606_RECEIPT_ROUTE_BROWSER_PROOF.md` and updated `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/GUI_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, and `docs/PROJECT_LEDGER_KNOWLEDGE.md`.
+
+**Verification:** Focused UI/read-model pack passed 39/39: `node ..\..\node_modules\vitest\vitest.mjs run tests\ui\president_desk_shell.test.ts tests\ui\decision_consequence_trail.test.ts tests\ui\decision_consequence_records_panel.test.ts tests\ui\chronicle_decision_ledger.test.ts tests\ui\diplomacy_view.test.ts tests\ui\operation_aar_records_review.test.ts --reporter=dot`. Browser proof passed: `node tools\ui\receipt_route_browser_smoke.cjs`. Closeout validation also ran `npm.cmd run typecheck -- --pretty false` and `git diff --check`.
+
+**Report:** `docs/40_reports/implemented/20260606_RECEIPT_ROUTE_BROWSER_PROOF.md`
+
+---

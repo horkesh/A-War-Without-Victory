@@ -400,6 +400,7 @@ The main docs index is [docs/00_start_here/docs_index.md](../00_start_here/docs_
 
 Latest shell-ownership work:
 
+- [implemented/20260606_RECEIPT_ROUTE_BROWSER_PROOF.md](implemented/20260606_RECEIPT_ROUTE_BROWSER_PROOF.md) - Receipt route browser proof: live loaded-save smoke verifies Desk Records-filed patron consequences route to Decision Consequences, AAR counts split from Operation History, and patron Chronicle duplicates stay suppressed by focused generator tests.
 - [implemented/20260516_FIRST_RUN_INBOX_HQ_FLOW_POLISH.md](implemented/20260516_FIRST_RUN_INBOX_HQ_FLOW_POLISH.md) - First-run and inbox/HQ flow polish: sequenced onboarding, situation-card routing, CoS-first Army HQ briefing, and player-faction inbox filtering.
 - [implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md](implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md) - Tactical shell frame cohesion: shared rail clearances, corps-card flip layout fix, first-screen icon cleanup, side-panel alignment, dark advance-turn confirmation, and order-queue docking.
 - [implemented/20260516_TACTICAL_UI_AUDIT_AND_POLISH.md](implemented/20260516_TACTICAL_UI_AUDIT_AND_POLISH.md) - Tactical React shell audit: browser/dev startup fallback, floating-crest toolbar clearance, Summary modal fix, Corridor Heartbeat default-off, and layer popover z-order.

@@ -33,13 +33,14 @@ export function RecordsContent() {
         const aftermathCount = buildTurnAftermathRecordViews({ state, osidNameMap, limit: Number.MAX_SAFE_INTEGER }).length;
         const decisionRecords = buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER);
         const decisionSummary = buildDecisionConsequenceLedgerSummary(decisionRecords);
+        const aarCount = state?.latestTurnSummary ? 1 : 0;
         const operationCount = state?.operationHistory?.length ?? 0;
         const opportunityCount = (state?.operationOpportunityRecords ?? []).filter((record) =>
             record.status !== 'eligible_pending_review' || record.response_turn != null
         ).length;
         return {
             aftermath: aftermathCount,
-            aar: operationCount,
+            aar: aarCount,
             ops: operationCount,
             decisions: decisionSummary.total,
             opportunities: opportunityCount,

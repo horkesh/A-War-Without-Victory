@@ -214,6 +214,20 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.getByRole('button', { name: /Decision Log 1/i })).toBeTruthy();
     });
 
+    it('counts the AAR tab from turn reports instead of completed operations', () => {
+        useGameStore.setState({
+            loadedGameState: {
+                ...makeLoadedState(),
+                latestTurnSummary: null,
+            },
+        });
+
+        render(createElement(RecordsContent));
+
+        expect(screen.getByRole('button', { name: /After-Action Report 0/i })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /Operation History 1/i })).toBeTruthy();
+    });
+
     it('opens the focused completed operation row when routed from Chronicle', () => {
         useGameStore.setState({
             armyHQRecordsSubTab: 'ops',

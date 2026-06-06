@@ -94,4 +94,32 @@ describe('Chronicle decision ledger integration', () => {
     }));
     expect(entries.find((entry) => entry.id?.includes('HRHB'))).toBeUndefined();
   });
+
+  it('does not duplicate patron-defiance cuts when consequence receipts are available', () => {
+    const entries = generateChronicleEntries({
+      turn: 44,
+      player_faction: 'RS',
+      turnSummaries: [{ turn: 44, battles: [], events_fired: [], displacement_total: 0 }],
+      rawGameState: {
+        military: {
+          patron_defiance_supply_cuts: [
+            { faction: 'RS', turn: 44, cut_fraction: 0.35, support_after: 0.45 },
+          ],
+        },
+      },
+    }, new Map([['dummy-event', { id: 'dummy-event', title: 'Dummy event' } as any]]));
+
+    const patronEntries = entries.filter((entry) =>
+      entry.metadata?.decisionRecordId === 'patron-defiance:RS:44:0.35:0.45'
+      || entry.metadata?.decisionRecordId === 'event:patron_defiance_RS'
+      || entry.id === 'consequence-receipt-patron_defiance::RS::44'
+      || entry.id === 'decision-ledger-patron-defiance:RS:44:0.35:0.45'
+    );
+
+    expect(patronEntries).toHaveLength(1);
+    expect(patronEntries[0]).toMatchObject({
+      id: 'decision-ledger-patron-defiance:RS:44:0.35:0.45',
+      title: 'Patron defiance supply cut',
+    });
+  });
 });
