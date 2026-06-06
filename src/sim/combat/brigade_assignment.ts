@@ -692,7 +692,7 @@ export function classifyBrigadesByTerritory(
         const EDGES_PER_GARRISON_BRIGADE = GARRISON_BUDGET_EDGES_PER_BRIGADE;
         const THREAT_BASELINE = 2000;
 
-        const allFormIds = Object.keys(formations).sort(strictCompare);
+        const enemyPersonnelByOsid = countActiveEnemyPersonnelByOsid(formations, faction);
         const sectorEnemyPers = new Map<CorpsFrontSector, number>();
         for (const s of corpsSectors) {
             const enemyOsids = new Set<string>();
@@ -700,12 +700,8 @@ export function classifyBrigadesByTerritory(
                 for (const eo of ss.enemy_osids) enemyOsids.add(eo);
             }
             let enemyPers = 0;
-            for (const fid of allFormIds) {
-                const f = formations[fid];
-                if (!f || f.faction === faction || f.status !== 'active') continue;
-                if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-                if (!f.location_osid || !enemyOsids.has(f.location_osid)) continue;
-                enemyPers += f.personnel ?? 0;
+            for (const osid of enemyOsids) {
+                enemyPers += enemyPersonnelByOsid.get(osid) ?? 0;
             }
             sectorEnemyPers.set(s, enemyPers);
         }

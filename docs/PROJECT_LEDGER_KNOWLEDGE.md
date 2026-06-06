@@ -2905,3 +2905,7 @@ In AWWV, a shell can look player-safe overall while one modal still reaches into
 ## 2026-06-06 - Desk consequence receipt routing
 
 **Desk consequence receipts must route by their filed surface, not by the panel that happens to render them:** President's Desk consequence rows share `buildDecisionConsequenceLedger(...)` with Records and Chronicle. Durable rule: when rendering a receipt action, use `recordTarget` as the route source of truth: `chronicle` opens Chronicle, `records` opens Army HQ Records. Keep route chrome localized and do not create a second archive/receipt surface for the same decision consequence record. Applied in `[2026-06-06] fix(ui): route desk consequences by filed surface`; report `docs/40_reports/implemented/20260606_DESK_CONSEQUENCE_ROUTE_LOCALIZATION.md`.
+
+## 2026-06-06 - Sector enemy personnel index reuse
+
+**Reuse active enemy personnel by OSID inside sector brigade classification:** `classifyBrigadesByTerritory(...)` already has a deterministic helper that builds active enemy personnel totals by OSID. Durable rule: when sector-local budgeting needs enemy personnel totals for many sector enemy-OSID sets, build the sorted active enemy personnel map once per classification pass and sum by OSID membership; do not rescan all formations once per sector. Keep the helper invocation-local and preserve direct predicates/order. Applied in `[2026-06-06] perf(sector): reuse enemy personnel OSID index in brigade classification`; report `docs/40_reports/implemented/20260606_SECTOR_ENEMY_PERSONNEL_INDEX_REUSE.md`.

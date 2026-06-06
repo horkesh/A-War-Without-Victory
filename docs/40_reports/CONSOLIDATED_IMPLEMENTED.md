@@ -616,3 +616,11 @@ Report: `docs/40_reports/implemented/20260605_AUDIO_ASSET_RESOLUTION_PATH.md`
 The tactical-map audio bus now routes future playable binaries through a Rollup URL-import map instead of bare manifest path strings. No binary audio assets shipped; current cues remain deterministic silent placeholders until an asset is explicitly imported and marked `provided`.
 
 ---
+
+# 2026-06-06 Sector Enemy Personnel Index Reuse
+
+Report: `docs/40_reports/implemented/20260606_SECTOR_ENEMY_PERSONNEL_INDEX_REUSE.md`
+
+`classifyBrigadesByTerritory(...)` now reuses the existing active enemy personnel by OSID view for per-sector garrison budgeting instead of rescanning all formations once per sector. The changed profile and 40-week timed run preserved `d1ace172a29b2353`; focused sector tests, typecheck, consistency validation, baseline regression, and diff check passed.
+
+---
