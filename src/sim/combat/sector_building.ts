@@ -41,7 +41,7 @@ function isActiveCombatFormation(formation: FormationState | undefined): formati
         && (formation.kind === 'brigade' || formation.kind === 'og' || formation.kind === 'operational_group');
 }
 
-function buildActiveCombatFormationScanIds(
+export function buildActiveCombatFormationScanIds(
     formations: Record<FormationId, FormationState>,
 ): FormationId[] {
     return Object.keys(formations)
@@ -175,6 +175,7 @@ export function buildMultiSectorsForCorps(
     friendlyOsids?: Set<string>,
     perfTime: SectorPartitionPerfTimer = (_label, fn) => fn(),
     sharedFrontEdgeMeta?: FrontEdgeMetaLookup,
+    sharedActiveCombatFormationScanIds?: readonly FormationId[],
 ): CorpsFrontSector[] {
     if (edgeIds.length === 0) return [];
 
@@ -244,7 +245,7 @@ export function buildMultiSectorsForCorps(
 
     // Step 3: Build sectors with full brigade assignment (front + interior BFS)
     const activeCombatFormationScanIds = perfTime(`buildMultiSectorsForCorps:${corpsId}:active-combat-formation-scan-ids`, () => (
-        buildActiveCombatFormationScanIds(formations)
+        sharedActiveCombatFormationScanIds ?? buildActiveCombatFormationScanIds(formations)
     ));
     const sectorFormationScanIndex = perfTime(`buildMultiSectorsForCorps:${corpsId}:sector-formation-scan-index`, () => (
         buildSectorFormationScanIndex(formations, faction, corpsId, activeCombatFormationScanIds)

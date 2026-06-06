@@ -59,7 +59,7 @@ import {
     consolidateCrossCorpsFronts,
     consolidateIsolatedCorpsPockets,
 } from './sector_territory.js';
-import { buildMultiSectorsForCorps, buildSectorFromSubSegments, findSubSegments, splitOversizedSubSegments } from './sector_building.js';
+import { buildActiveCombatFormationScanIds, buildMultiSectorsForCorps, buildSectorFromSubSegments, findSubSegments, splitOversizedSubSegments } from './sector_building.js';
 import { areSectorsEdgeAdjacent, mergeSectors, splitNonContiguousSectors } from './sector_splitting.js';
 import {
     classifyBrigadesByTerritory,
@@ -368,6 +368,8 @@ export function buildCorpsFrontSectors(
 
     const formations = state.military.formations ?? {};
     const factions = getFactions(state);
+    const activeCombatFormationScanIds = _perfTime('active-combat-formation-scan-ids', () =>
+        buildActiveCombatFormationScanIds(formations));
     const result: Record<string, CorpsFrontSector> = {};
     // Recovered-front-claim setup MUST be computed once and shared across both
     // recoverDroppedFrontEdges passes. The setup's corps→edge partition is derived
@@ -385,7 +387,7 @@ export function buildCorpsFrontSectors(
 
     for (const faction of factions) {
         const factionSectors = _perfTime(`buildFactionSectors:${faction}`, () => buildFactionSectors(
-            state, faction, osidFrontEdges, adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial
+            state, faction, osidFrontEdges, adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, globalEdgeMeta, formations, activeCombatFormationScanIds, reverseMap, centroids, spatial
         ));
         for (const sector of factionSectors) {
             result[sector.sector_id] = sector;
@@ -2689,6 +2691,7 @@ function buildFactionSectors(
     caseBSplitAdj: Map<Osid, Osid[]>,
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
     formations: Record<FormationId, FormationState>,
+    activeCombatFormationScanIds: readonly FormationId[],
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,
     spatial?: SpatialContext,
@@ -2753,10 +2756,9 @@ function buildFactionSectors(
         const componentsByCorps = new Map<FormationId, Set<number>>();
         const allFactionLocations: string[] = [];
         const allFactionComponents = new Set<number>();
-        for (const fid of Object.keys(formations).sort(strictCompare)) {
+        for (const fid of activeCombatFormationScanIds) {
             const f = formations[fid];
-            if (!f || f.faction !== faction || f.status !== 'active') continue;
-            if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+            if (!f || f.faction !== faction) continue;
             const corpsId = getFormationCorpsId(f);
             if (corpsId) countByCorps.set(corpsId, (countByCorps.get(corpsId) ?? 0) + 1);
             if (!f.location_osid) continue;
@@ -2804,7 +2806,7 @@ function buildFactionSectors(
             _perfTime(`buildFactionSectors:${faction}:corps-sector-construction:${corpsId}:multi-sector-build`, () => buildMultiSectorsForCorps(
                 state, corpsId, faction, edgeIds, osidFrontEdges,
                 adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, formations, reverseMap, centroids, friendlyOsids,
-                _perfTime, edgeMeta,
+                _perfTime, edgeMeta, activeCombatFormationScanIds,
             )),
         );
 

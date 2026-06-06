@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest sector active-combat scan reuse:** [implemented/20260605_SECTOR_ACTIVE_COMBAT_SCAN_REUSE.md](implemented/20260605_SECTOR_ACTIVE_COMBAT_SCAN_REUSE.md) - `buildCorpsFrontSectors(...)` now reuses one sorted active-combat formation scan across per-faction and per-corps sector construction, preserving the current `d1ace172a29b2353` 40w floor.
+
 **Latest Patron actor-history route cohesion:** [implemented/20260605_PATRON_ACTOR_HISTORY_ROUTE_COHESION.md](implemented/20260605_PATRON_ACTOR_HISTORY_ROUTE_COHESION.md) - Patron-defiance material cuts now file through Records/Chronicle consequence routes and appear in the Patron Relations timeline without changing patron mechanics or save state.
 
 **Latest command clarity: advance gate and stance cleanup:** [implemented/20260605_COMMAND_CLARITY_ADVANCE_AND_STANCE.md](implemented/20260605_COMMAND_CLARITY_ADVANCE_AND_STANCE.md) - Advance confirmation now hard-blocks unresolved pre-advance review, and the left OOB corps card no longer exposes fake direct stance overrides.

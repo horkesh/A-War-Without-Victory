@@ -19252,3 +19252,15 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Artifacts:** `src/sim/combat/commander/briefing.ts`, `tests/phase_e_military_credibility_caution_bias.test.ts`, `docs/40_reports/implemented/20260604_MILITARY_CREDIBILITY_NO_DATA_CONSUMER.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-06-05] perf(sector): reuse active-combat scan during sector reconstruction
+
+**Type:** Deterministic sector/frontline performance optimization. No sector truth, combat math, operation behavior, scenario data, save schema, UI behavior, baseline manifest, replay writer, or generated artifact changed.
+
+**Change:** `buildCorpsFrontSectors(...)` now builds one `strictCompare`-sorted active-combat formation id list per sector-reconstruction invocation and passes it into `buildFactionSectors(...)` and `buildMultiSectorsForCorps(...)`. Direct `buildMultiSectorsForCorps(...)` callers keep the old fallback scan.
+
+**Proof:** Focused sector instrumentation/cache pack passed 38/38; `npm.cmd run typecheck -- --pretty false` passed; `git diff --check` passed; changed `npm.cmd run sim:scenario:run:40w:timed` preserved final hash `d1ace172a29b2353`. Changed partition profile wall time was `81.7347955s`; this is a narrow reuse slice, with remaining residuals still in `buildFactionSectors:RS/RBiH`, `enforceFinalSectorGeometryInvariants:split-pieces`, `recoverDroppedFrontEdges:1`, and `sealMergedSectorTruth:ensure-coverage`.
+
+**Report:** `docs/40_reports/implemented/20260605_SECTOR_ACTIVE_COMBAT_SCAN_REUSE.md`
+
+---
