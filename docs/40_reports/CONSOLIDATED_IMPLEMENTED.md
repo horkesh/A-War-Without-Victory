@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest supply/production economy state validate-when-present contract:** [implemented/20260606_SUPPLY_PRODUCTION_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260606_SUPPLY_PRODUCTION_STATE_VALIDATE_WHEN_PRESENT.md) - Supply reserve maps and `military.production_facilities` remain optional but now reject malformed present economy-state payloads without materializing absent fields or enforcing deferred upper bounds.
+
 **Latest recruitment/smuggling economy state validate-when-present contract:** [implemented/20260606_RECRUITMENT_SMUGGLING_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260606_RECRUITMENT_SMUGGLING_STATE_VALIDATE_WHEN_PRESENT.md) - `military.recruitment_state` and `military.smuggling_routes` remain optional but now reject malformed present economy-state payloads without materializing absent fields or changing recruitment/smuggling behavior.
 
 **Latest launch artifact ownership:** [implemented/20260605_LAUNCH_ARTIFACT_OWNERSHIP.md](implemented/20260605_LAUNCH_ARTIFACT_OWNERSHIP.md) - `dist-packaged/...` package outputs are now explicit operator-owned transient artifacts in the generated-artifact ownership matrix; release evidence records exact artifact identity, but packaged binaries stay out of git.

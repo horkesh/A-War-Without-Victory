@@ -1,3 +1,9 @@
+## 2026-06-06 - Supply/production validation excludes deferred upper-bound policy
+
+**Supply reserve shape validation is not reserve-cap enforcement:** `military.general_supply_reserve`, `military.heavy_munitions_reserve`, and `military.strategic_reserves` can reject malformed present maps while still accepting numeric values above 100. Durable rule: optional schema cleanup validates canonical faction keys and finite non-negative values only; reserve-map upper bounds remain a separate schema/design decision until oversized fixtures are audited. Applied in `[2026-06-06] fix(state): validate supply production state when present`.
+
+**Production facility validation is local row shape, not catalog membership:** `military.production_facilities` rows can validate id/key consistency, type enum, capacities, condition, and required-input booleans without resolving municipality ids or requiring a seed catalog row. Durable rule: do not make save validation depend on runtime production seed membership unless a materialization/schema decision owns that compatibility break.
+
 ## 2026-06-06 - Recruitment/smuggling economy validation is nested local-shape validation
 
 **Recruitment economy state lives under `military`, not top-level state:** `military.recruitment_state` is an optional lazy economy surface, so validate it only when present under `state.military`. Durable rule: for schema cleanup, check local faction-keyed pool/trickle shape, faction/key consistency, recruited brigade id arrays, and optional per-turn cap shape; do not materialize the field, add migrations, or resolve brigade ids in the validator. Applied in `[2026-06-06] fix(state): validate recruitment economy state when present`.
