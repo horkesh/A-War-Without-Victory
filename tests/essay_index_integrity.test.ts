@@ -82,15 +82,11 @@ const ID_EVENT_ID_EXCEPTIONS: ReadonlyMap<string, string> = new Map([
  */
 const KNOWN_UNINDEXED_DEPOSIT: readonly string[] = [
     'cutileiro_plan_lisbon_1992',
-    'foca_1992',
     'gorazde_pocket_consolidation_1992',
     'kupres_battle_1992',
     'milosevic_isolation_warning_aug92',
-    'prijedor_takeover_1992',
     'sarajevo_jna_column_dobrovoljacka_1992',
     'vase_miskina_breadline_1992',
-    'visegrad_1992',
-    'zvornik_takeover_1992',
 ];
 
 function loadIndex(): IndexEssay[] {

@@ -938,8 +938,8 @@ test.skip('TODO B2/B3: R11 remove_mladic forward-looking guard — needs evaluat
 
 // ─── Gate 1, 3 spirit: production catalog loads cleanly with B1 passes ──────
 
-test('existing 277-row production catalog loads cleanly through all B1 passes', async () => {
+test('existing 281-row production catalog loads cleanly through all B1 passes', async () => {
     const { loadEventDefinitions } = await import('../src/sim/events/event_loader.js');
     const loaded = loadEventDefinitions(0);
-    assert.strictEqual(loaded.length, 277);
+    assert.strictEqual(loaded.length, 281);
 });
