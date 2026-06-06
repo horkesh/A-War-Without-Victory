@@ -3078,4 +3078,65 @@ describe('save migration validator hardening', () => {
             /Save schema validation failed after migration[\s\S]*military\.corps_equipment_reserve\.rs_1st_krajina\.tanks must be a finite non-negative number[\s\S]*military\.corps_equipment_reserve\.rs_1st_krajina\.artillery must be a finite non-negative number[\s\S]*military\.corps_equipment_reserve\.bad_corps must be an object[\s\S]*military\.militia_garrison\.op:sarajevo:centar_2 must be a finite non-negative number[\s\S]*military\.militia_garrison\.op:banja_luka:banja_luka_2 must be a finite non-negative number[\s\S]*military\.unresolved_sector_brigades must be a string array when present/
         );
     });
+
+    it('accepts current-version saves with absent or well-formed derived military scalar maps', () => {
+        const absent = currentVersionState();
+        delete absent.military.brigade_encircled;
+        delete absent.military.battle_damage;
+        delete absent.military.home_distance_cache;
+        delete absent.military.active_offensives_against_corps;
+
+        const wellFormed = currentVersionState();
+        wellFormed.military.brigade_encircled = {
+            rbih_101st_mountain: true,
+            rs_1st_krajina_light: false,
+        };
+        wellFormed.military.battle_damage = {
+            'op:sarajevo:centar_2': 0,
+            'op:banja_luka:banja_luka_2': 0.75,
+        };
+        wellFormed.military.home_distance_cache = {
+            rbih_101st_mountain: 0,
+            rs_1st_krajina_light: 6,
+        };
+        wellFormed.military.active_offensives_against_corps = {
+            rbih_1st_corps: 0,
+            vrs_1st_krajina: 2,
+        };
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWellFormed = deserializeState(JSON.stringify(wellFormed));
+
+        expect(migratedAbsent.military.brigade_encircled).toBeUndefined();
+        expect(migratedAbsent.military.battle_damage).toBeUndefined();
+        expect(migratedAbsent.military.home_distance_cache).toBeUndefined();
+        expect(migratedAbsent.military.active_offensives_against_corps).toBeUndefined();
+        expect(migratedWellFormed.military.brigade_encircled).toEqual(wellFormed.military.brigade_encircled);
+        expect(migratedWellFormed.military.battle_damage).toEqual(wellFormed.military.battle_damage);
+        expect(migratedWellFormed.military.home_distance_cache).toEqual(wellFormed.military.home_distance_cache);
+        expect(migratedWellFormed.military.active_offensives_against_corps).toEqual(wellFormed.military.active_offensives_against_corps);
+    });
+
+    it('rejects current-version saves with malformed derived military scalar maps', () => {
+        const state = currentVersionState();
+        state.military.brigade_encircled = {
+            rbih_101st_mountain: 'yes',
+        } as any;
+        state.military.battle_damage = {
+            'op:sarajevo:centar_2': -1,
+            'op:banja_luka:banja_luka_2': Number.POSITIVE_INFINITY,
+        };
+        state.military.home_distance_cache = {
+            rbih_101st_mountain: -1,
+            rs_1st_krajina_light: Number.NaN,
+        };
+        state.military.active_offensives_against_corps = {
+            rbih_1st_corps: -1,
+            vrs_1st_krajina: 1.5,
+        };
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.brigade_encircled\.rbih_101st_mountain must be a boolean[\s\S]*military\.battle_damage\.op:sarajevo:centar_2 must be a finite non-negative number[\s\S]*military\.battle_damage\.op:banja_luka:banja_luka_2 must be a finite non-negative number[\s\S]*military\.home_distance_cache\.rbih_101st_mountain must be a finite non-negative number[\s\S]*military\.home_distance_cache\.rs_1st_krajina_light must be a finite non-negative number[\s\S]*military\.active_offensives_against_corps\.rbih_1st_corps must be a non-negative integer[\s\S]*military\.active_offensives_against_corps\.vrs_1st_krajina must be a non-negative integer/
+        );
+    });
 });

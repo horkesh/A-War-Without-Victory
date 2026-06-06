@@ -1,3 +1,9 @@
+## 2026-06-06 - Derived military scalar validation excludes front snapshots
+
+**Derived scalar maps can be locally shape-validated without becoming required state:** `military.brigade_encircled`, `military.battle_damage`, `military.home_distance_cache`, and `military.active_offensives_against_corps` are optional derived/runtime scalar maps. Durable rule: validate present local value shape only; do not materialize absent fields, resolve ids, enforce battle-damage upper bounds, or change encirclement/damage/cache producers in a schema cleanup lane. Applied in `[2026-06-06] fix(state): validate derived military scalar maps when present`.
+
+**Front snapshots are not the same cleanup class as scalar caches:** `front_edges` and `war_front_edges_osid` are derived front snapshots with simulation, output, and UI-facing semantics, while `assignable_front_segments` is compatibility-materialized by v5 migration. Durable rule: keep front snapshots out of low-risk scalar-map batches until a separate front-snapshot contract owns compatibility, ordering, and output implications.
+
 ## 2026-06-06 - Runtime military validation excludes compatibility-materialized JNA state
 
 **Runtime military diagnostics can be shape-validated without becoming persisted contracts:** `military.corps_equipment_reserve`, `military.militia_garrison`, and `military.unresolved_sector_brigades` are optional runtime/diagnostic surfaces. Durable rule: validate present local shape only; do not materialize absent fields, resolve ids, enforce equipment upper bounds, or change sector/militia/equipment producers in a schema cleanup lane. Applied in `[2026-06-06] fix(state): validate runtime military state when present`.

@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-06] fix(state): validate derived military scalar maps when present
+
+**Type:** Save-validation/schema-contract hardening. No simulation turn behavior, encirclement computation, battle-damage computation, home-distance computation, active-offensive cache production, scenario data, save schema version, migration, fixture refresh, baseline manifest, generated artifact, UI code, randomness, timestamps, or persisted output ordering changed.
+
+**Change:** `validateGameStateShape(...)` now rejects malformed present `military.brigade_encircled`, `military.battle_damage`, `military.home_distance_cache`, and `military.active_offensives_against_corps` payloads. Absence remains valid, and well-formed present derived military scalar maps round-trip unchanged.
+
+**Classification:** These fields are optional derived/runtime military scalar maps. The validator checks only local shape: brigade-keyed booleans for `brigade_encircled`; finite non-negative numeric values for `battle_damage` and `home_distance_cache`; and non-negative integer values for `active_offensives_against_corps`. It deliberately does not materialize absent fields, resolve brigade/corps/operation/settlement ids, enforce battle-damage upper bounds, or change runtime producers/consumers. `front_edges` and `war_front_edges_osid` were excluded because derived front snapshots are simulation/output/UI-facing and need a separate front-snapshot contract. `assignable_front_segments` was excluded because save compatibility already materializes it through the v5 migration.
+
+**Docs:** Added `docs/40_reports/implemented/20260606_DERIVED_MILITARY_SCALAR_MAPS_VALIDATE_WHEN_PRESENT.md` and updated report indices, command board, master roadmap, engine-quality residuals plan, and knowledge ledger.
+
+**Verification:** Red/green `node F:\A-War-Without-Victory\node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` (new malformed optional derived military scalar maps test failed before validation; green 185/185 after implementation); `npm.cmd run typecheck -- --pretty false`; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` total 507 (`state: 172`, `sim: 327`, `derived: 8`); `git diff --check`.
+
+---
+
 ## [2026-06-06] fix(state): validate runtime military state when present
 
 **Type:** Save-validation/schema-contract hardening. No simulation turn behavior, militia-garrison computation, sector reconstruction behavior, equipment-reserve mechanics, scenario data, save schema version, migration, fixture refresh, baseline manifest, generated artifact, UI code, randomness, timestamps, or persisted output ordering changed.
