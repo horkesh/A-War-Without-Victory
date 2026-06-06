@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-06] docs(intel): packet bounded ambush-depth friction
+
+**Type:** Documentation/design packet only. No runtime code, scenario data, save schema, tests, baseline manifests, generated artifacts, randomness, timestamps, or persisted outputs changed.
+
+**Change:** Promoted the loose intel/ambush side-branch design packet into `docs/40_reports/proposals/20260605_INTEL_AMBUSH_FRICTION_DESIGN.md` and indexed it through the command board, master roadmap, reports README, consolidated backlog, project ledger, and knowledge ledger. The packet records that existing low-confidence + OPSEC ambush casualty friction already ships, while the remaining depth amplifier should wait until the ADR-0007 collision in `attack_resolution_osid.ts` clears.
+
+**Proof:** `git diff --check` passed. No scenario/baseline run was needed because this is docs-only and does not change runtime behavior or artifacts.
+
+**Artifacts:** `docs/40_reports/proposals/20260605_INTEL_AMBUSH_FRICTION_DESIGN.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_BACKLOG.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`.
+
+---
+
 ## [2026-06-06] fix(state): validate derived military scalar maps when present
 
 **Type:** Save-validation/schema-contract hardening. No simulation turn behavior, encirclement computation, battle-damage computation, home-distance computation, active-offensive cache production, scenario data, save schema version, migration, fixture refresh, baseline manifest, generated artifact, UI code, randomness, timestamps, or persisted output ordering changed.
