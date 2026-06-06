@@ -3,9 +3,10 @@
  *
  * Renders the six command-surface category cards (presidentialCategories.ts)
  * with live pending-counts + urgent pips derived from the Presidential Decision
- * Room view. Clicking a card deep-links the Decision Room to that category's
- * lens (via decisionRoomLensRequest) and invokes `onOpenCategory` so the host
- * can open the Warroom-native Decision Room surface.
+ * Room view. Clicking a card deep-links the Decision Room to that exact
+ * six-card category focus (via decisionRoomLensRequest) and invokes
+ * `onOpenCategory` so the host can open the Warroom-native Decision Room
+ * surface.
  *
  * Reachable two ways (design §9 COMBO nav):
  *   1. A warroom hotspot OBJECT opens the strip pre-filtered to its category
@@ -53,7 +54,7 @@ export function CommandCardStrip({ initialCategoryId, onOpenCategory, onClose }:
   }, [state, osidNameMap]);
 
   const handleSelect = (category: PresidentialCommandCategoryCount) => {
-    requestDecisionRoomLens(category.lens);
+    requestDecisionRoomLens(category.lens, category.id);
     onOpenCategory(category);
   };
 

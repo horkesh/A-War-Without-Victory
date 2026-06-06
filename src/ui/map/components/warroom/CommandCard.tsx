@@ -124,6 +124,15 @@ export function CommandCard({ category, playerFaction, onSelect }: CommandCardPr
         }}
       />
 
+      <div className="absolute left-1.5 top-1.5">
+        <span
+          data-testid={`command-card-role-${category.id}`}
+          className="rounded border border-accent-gold/35 bg-black/65 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.13em] text-accent-gold"
+        >
+          {category.roleLabel}
+        </span>
+      </div>
+
       {/* Count badge + urgent pip (top-right) */}
       <div className="absolute right-1.5 top-1.5 flex items-center gap-1">
         {category.isUrgent && (

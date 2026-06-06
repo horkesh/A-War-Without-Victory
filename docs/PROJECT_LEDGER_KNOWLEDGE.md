@@ -1,3 +1,9 @@
+## 2026-06-06 - Command category role and filter framing
+
+**Command category cards should state their expected mode before routing:** count badges alone do not tell the player whether a card opens a directive, an inspection surface, or records/monitoring. Durable rule: keep category order/routing deterministic, but add stable role metadata at the category source and render a compact role chip rather than inferring role from card title or count. Applied in `[2026-06-06] fix(ui): frame command card roles and filters`; report `docs/40_reports/implemented/20260606_COMMAND_CARD_ROLE_FRAMING.md`.
+
+**Command-card filters must use the same predicate as command-card counts:** broad Decision Room lenses cannot represent predicate-owned six-card categories like Home Front or Conscience. Durable rule: when a command card aggregates by explicit card id or split predicate, share that predicate with the receiving surface and pass the exact category id through the one-shot route request; do not infer those categories from the mixed `all` lens. Applied in `[2026-06-06] fix(ui): frame command card roles and filters`; report `docs/40_reports/implemented/20260606_COMMAND_CARD_ROLE_FRAMING.md`.
+
 ## 2026-06-06 - Command-surface read models need deterministic repurpose guards
 
 **Repurposed UI panels should be renamed, summarized, and sorted in the same slice:** When a dead-end or thin panel is repurposed into the presidential command surface, update the visible product frame, add a small existing-state summary, and remove locale-dependent ordering together. Durable rule: use stable comparators for read-model row ordering, add a focused static guard when retiring `localeCompare(...)`, and keep the slice UI/read-model-only unless a separate canon/schema decision owns deeper behavior. Applied in `[2026-06-06] fix(ui): repurpose command-surface read models`; report `docs/40_reports/implemented/20260606_COMMAND_SURFACE_REPURPOSE_READMODELS.md`.

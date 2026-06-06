@@ -17,6 +17,10 @@ import {
   type PresidentialDecisionRoomSeverity,
   type PresidentialDecisionRoomSourceHandoff,
 } from '../../data/presidentialDecisionRoom';
+import {
+  cardBelongsToPresidentialCommandCategory,
+  type PresidentialCommandCategoryId,
+} from '../../data/presidentialCategories';
 import { useGameStore } from '../../store/gameStore';
 import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presidentialDecisionRoomNavigation';
 import { t } from '../../i18n';
@@ -224,7 +228,9 @@ function PriorityCard({
   const disabled = card.navigationTarget.kind === 'none';
 
   return (
-    <article className={`min-h-[7.25rem] rounded border px-3 py-2 transition ${active
+    <article
+      data-testid={`decision-room-priority-card-${card.id}`}
+      className={`min-h-[7.25rem] rounded border px-3 py-2 transition ${active
       ? 'border-amber-400/45 bg-amber-400/10 shadow-[inset_3px_0_0_rgba(251,191,36,0.55)]'
       : 'border-panel-border/55 bg-panel-card/55'}`}
     >
@@ -450,6 +456,7 @@ export function PresidentialDecisionRoomPanel({ onNavigateTarget }: Presidential
   const state = useGameStore((s) => s.loadedGameState);
   const osidNameMap = useGameStore((s) => s.osidDisplayNames);
   const [activeLens, setActiveLens] = useState<ActiveDecisionRoomLens>('all');
+  const [activeCommandCategoryId, setActiveCommandCategoryId] = useState<PresidentialCommandCategoryId | null>(null);
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -465,14 +472,21 @@ export function PresidentialDecisionRoomPanel({ onNavigateTarget }: Presidential
     if (lensRequest === null) return;
     const requested = consumeRequestedDecisionRoomLens();
     if (requested === null) return;
-    setActiveLens(requested);
+    setActiveLens(requested.lens);
+    setActiveCommandCategoryId(requested.commandCategoryId);
     setActiveCardId(null);
-    if (requested !== 'all') setShowAdvanced(true);
+    if (requested.lens !== 'all' || requested.commandCategoryId !== null) setShowAdvanced(true);
   }, [lensRequest]);
 
+  const categorySeedCardId = useMemo(() => {
+    if (activeCardId || !activeCommandCategoryId) return null;
+    const seedView = buildPresidentialDecisionRoomView({ state, osidNameMap });
+    return seedView.cards.find((card) => cardBelongsToPresidentialCommandCategory(card, activeCommandCategoryId))?.id ?? null;
+  }, [state, osidNameMap, activeCardId, activeCommandCategoryId]);
+  const selectedCardId = activeCardId ?? categorySeedCardId;
   const view = useMemo(
-    () => buildPresidentialDecisionRoomView({ state, osidNameMap, selectedCardId: activeCardId }),
-    [state, osidNameMap, activeCardId],
+    () => buildPresidentialDecisionRoomView({ state, osidNameMap, selectedCardId }),
+    [state, osidNameMap, selectedCardId],
   );
   const cardsById = useMemo(
     () => new Map(view.cards.map((card) => [card.id, card])),
@@ -491,17 +505,20 @@ export function PresidentialDecisionRoomPanel({ onNavigateTarget }: Presidential
 
   const availableLensIds = new Set(view.lenses.map((lens) => lens.id));
   const effectiveLens: ActiveDecisionRoomLens = activeLens === 'all' || availableLensIds.has(activeLens) ? activeLens : 'all';
-  const filteredCards = effectiveLens === 'all'
+  const filteredCards = activeCommandCategoryId
+    ? view.cards.filter((card) => cardBelongsToPresidentialCommandCategory(card, activeCommandCategoryId))
+    : effectiveLens === 'all'
     ? view.cards
     : view.cards.filter((card) => card.category === effectiveLens);
   const mainCards = filteredCards.slice(0, showAdvanced ? 7 : 4);
-  const inspectNext = (effectiveLens === 'all'
+  const inspectNext = (effectiveLens === 'all' && !activeCommandCategoryId
     ? view.inspectNext
     : filteredCards.filter((card) => card.navigationTarget.kind !== 'none')).slice(0, 5);
   const selectedDossierCardId = view.activeDossier?.cardId ?? null;
   const navigateTarget = onNavigateTarget ?? openPresidentialDecisionRoomNavigationTarget;
   const handleSelectLens = (id: ActiveDecisionRoomLens) => {
     setActiveLens(id);
+    setActiveCommandCategoryId(null);
     const lens = view.lenses.find((entry) => entry.id === id);
     setActiveCardId(lens?.topCardId ?? null);
   };
@@ -526,6 +543,7 @@ export function PresidentialDecisionRoomPanel({ onNavigateTarget }: Presidential
               setShowAdvanced(nextShowAdvanced);
               if (!nextShowAdvanced) {
                 setActiveLens('all');
+                setActiveCommandCategoryId(null);
               }
             }}
             className="rounded border border-panel-border/65 bg-panel-card/65 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-text-secondary transition hover:border-amber-400/30 hover:bg-white/[0.04] hover:text-amber-300"

@@ -66,7 +66,10 @@ describe('CommandCardStrip accessibility', () => {
         id: category.id,
         lens: expectedLens,
       }));
-      expect(peekRequestedDecisionRoomLens()).toBe(expectedLens);
+      expect(peekRequestedDecisionRoomLens()).toEqual({
+        lens: expectedLens,
+        commandCategoryId: category.id,
+      });
     }
 
     expect(onOpenCategory).toHaveBeenCalledTimes(PRESIDENTIAL_COMMAND_CATEGORIES.length);
