@@ -3290,10 +3290,9 @@ describe('save migration validator hardening', () => {
             name: 42,
             theatre_id: 42,
         }, 7];
-        state.military.brigade_front_assignment = { arbih_1st: 42 };
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.war_militia_strength\.op_mostar must be an object[\s\S]*military\.war_militia_strength\.op_sarajevo\.RBiH must be a number in \[0, 100\][\s\S]*military\.war_militia_strength\.op_sarajevo\.bad must use a canonical faction id key[\s\S]*military\.front_edges\[0\]\.edge_id must be a non-empty string[\s\S]*military\.front_edges\[0\]\.a must be a non-empty string[\s\S]*military\.front_edges\[0\]\.b must be a non-empty string[\s\S]*military\.front_edges\[0\]\.side_a must be null or one of: RBiH, RS, HRHB[\s\S]*military\.front_edges\[1\] must be an object[\s\S]*military\.war_front_edges_osid must be an array when present[\s\S]*military\.assignable_front_segments\[0\]\.front_id must be a non-empty string[\s\S]*military\.assignable_front_segments\[0\]\.edge_ids must be a string array[\s\S]*military\.assignable_front_segments\[0\]\.side_a must be null or one of: RBiH, RS, HRHB[\s\S]*military\.assignable_front_segments\[0\]\.length_edges must be a non-negative integer[\s\S]*military\.assignable_front_segments\[0\]\.name must be a string when present[\s\S]*military\.assignable_front_segments\[0\]\.theatre_id must be a string when present[\s\S]*military\.assignable_front_segments\[1\] must be an object[\s\S]*military\.brigade_front_assignment\.arbih_1st must be a string or null/
+            /Save schema validation failed after migration[\s\S]*military\.war_militia_strength\.op_mostar must be an object[\s\S]*military\.war_militia_strength\.op_sarajevo\.RBiH must be a number in \[0, 100\][\s\S]*military\.war_militia_strength\.op_sarajevo\.bad must use a canonical faction id key[\s\S]*military\.front_edges\[0\]\.edge_id must be a non-empty string[\s\S]*military\.front_edges\[0\]\.a must be a non-empty string[\s\S]*military\.front_edges\[0\]\.b must be a non-empty string[\s\S]*military\.front_edges\[0\]\.side_a must be null or one of: RBiH, RS, HRHB[\s\S]*military\.front_edges\[1\] must be an object[\s\S]*military\.war_front_edges_osid must be an array when present[\s\S]*military\.assignable_front_segments\[0\]\.front_id must be a non-empty string[\s\S]*military\.assignable_front_segments\[0\]\.edge_ids must be a string array[\s\S]*military\.assignable_front_segments\[0\]\.side_a must be null or one of: RBiH, RS, HRHB[\s\S]*military\.assignable_front_segments\[0\]\.length_edges must be a non-negative integer[\s\S]*military\.assignable_front_segments\[0\]\.name must be a string when present[\s\S]*military\.assignable_front_segments\[0\]\.theatre_id must be a string when present[\s\S]*military\.assignable_front_segments\[1\] must be an object/
         );
     });
 
@@ -3314,12 +3313,6 @@ describe('save migration validator hardening', () => {
         state3.military.assignable_front_segments = {};
         expect(() => deserializeState(JSON.stringify(state3))).toThrow(
             /Save schema validation failed after migration[\s\S]*military\.assignable_front_segments must be an array when present/
-        );
-
-        const state4 = currentVersionState();
-        state4.military.brigade_front_assignment = [];
-        expect(() => deserializeState(JSON.stringify(state4))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.brigade_front_assignment must be an object when present/
         );
     });
 

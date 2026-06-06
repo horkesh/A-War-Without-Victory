@@ -3051,21 +3051,6 @@ function validateAssignableFrontSegments(value: unknown, errors: string[]): void
     });
 }
 
-/** `military.brigade_front_assignment`: Record<FormationId, string | null> (legacy compat fallback). */
-function validateBrigadeFrontAssignment(value: unknown, errors: string[]): void {
-    const path = 'military.brigade_front_assignment';
-    if (!isRecord(value)) {
-        errors.push(`${path} must be an object when present`);
-        return;
-    }
-    for (const fid of Object.keys(value).sort(strictCompare)) {
-        const v = value[fid];
-        if (v !== null && typeof v !== 'string') {
-            errors.push(`${path}.${fid} must be a string or null`);
-        }
-    }
-}
-
 /** `military.guerrilla_threats`: Array<{ faction; municipalities; intensity; expires_turn }>. */
 function validateGuerrillaThreats(value: unknown, errors: string[]): void {
     const path = 'military.guerrilla_threats';
@@ -3766,9 +3751,6 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'assignable_front_segments' in military && military.assignable_front_segments !== undefined) {
         validateAssignableFrontSegments(military.assignable_front_segments, errors);
-    }
-    if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_front_assignment' in military && military.brigade_front_assignment !== undefined) {
-        validateBrigadeFrontAssignment(military.brigade_front_assignment, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'guerrilla_threats' in military && military.guerrilla_threats !== undefined) {
         validateGuerrillaThreats(military.guerrilla_threats, errors);
