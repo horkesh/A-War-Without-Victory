@@ -19425,6 +19425,20 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 
 ---
 
+## [2026-06-06] fix(ui): add command objective picker
+
+**Type:** UI/read-model command-surface affordance. No simulation behavior, operation construction, save schema, migration, scenario data, baseline manifest, generated artifact, randomness, timestamps, or persisted output ordering changed.
+
+**Change:** Request-op directives now offer a deterministic known-objective picker in both the Decision Room `DirectiveCard` and the older Army HQ `OperationsSection` request row. The picker derives options from loaded control/display-name state, sorts labels with `strictCompare`, localizes English/BCS chrome, and feeds the existing target input before the current commander objection, CA cost, staging, and receipt path.
+
+**Docs/roadmap:** Added `docs/40_reports/implemented/20260606_COMMAND_OBJECTIVE_PICKER.md`; updated `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/GUI_MASTER.md`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`, and `docs/plans/COMMAND_BOARD.md`.
+
+**Verification:** Focused directive card/operations request pack passed 19/19: `node node_modules\vitest\vitest.mjs run tests\ui\directive_card_stop_op_action.test.ts --reporter=dot`. Closeout validation also ran `npm.cmd run typecheck -- --pretty false` and `git diff --check`.
+
+**Report:** `docs/40_reports/implemented/20260606_COMMAND_OBJECTIVE_PICKER.md`
+
+---
+
 ## [2026-06-06] fix(ui): route desk consequences by filed surface
 
 **Type:** UI/read-model route and localization cleanup. No simulation behavior, save schema, migration, scenario data, baseline manifest, generated artifact, randomness, timestamps, or persisted output ordering changed.

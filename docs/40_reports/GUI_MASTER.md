@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Command objective picker** | [implemented/20260606_COMMAND_OBJECTIVE_PICKER.md](implemented/20260606_COMMAND_OBJECTIVE_PICKER.md) - Request-op directives now offer a deterministic known-objective picker in both Decision Room and Army HQ request rows while preserving the existing objection/staging path. |
 | **Warroom native overlay residue batch** | [implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md](implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md) - Intelligence, Staff, and Faction native Warroom previews now drill into existing owner surfaces, while retired StrategicDashboard/EventLog local command variants are removed from live source. |
 | **Command-surface repurpose read-models** | [implemented/20260606_COMMAND_SURFACE_REPURPOSE_READMODELS.md](implemented/20260606_COMMAND_SURFACE_REPURPOSE_READMODELS.md) - Humanitarian & Siege Ledger, War Footing, and Chief-of-Staff Counsel now use presidential readout framing and stable ordering guards. |
 | **Receipt family quality/localization** | [implemented/20260606_RECEIPT_FAMILY_QUALITY_LOCALIZATION.md](implemented/20260606_RECEIPT_FAMILY_QUALITY_LOCALIZATION.md) - Decision consequence family labels and Records archive-summary chrome are localized, and the loaded browser smoke covers patron, reserve, operation-opportunity, and Chronicle-filed convoy receipts together. |

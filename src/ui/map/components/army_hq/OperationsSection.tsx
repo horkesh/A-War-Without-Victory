@@ -9,6 +9,7 @@ import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 import { turnToDateString, toTitleCase } from '../../utils/formatters';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
+import { buildObjectiveTargetOptions } from '../../utils/objectiveTargetOptions';
 import { getPlayerSafeBrigadeName } from '../../utils/playerSafeText';
 import { getPlayerSafeOperationBalancePresentation } from '../../../../shared/playerSafeOperationBalance';
 import { CollapsibleSection } from './CollapsibleSection';
@@ -546,10 +547,18 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
     const [objectionLoading, setObjectionLoading] = useState(false);
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
+    const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
     const setOperationBriefingContext = useGameStore((s) => s.setOperationBriefingContext);
 
     const authCurrent = gameState.commandAuthority?.current ?? 100;
     const canForceLaunch = authCurrent >= FORCE_LAUNCH_COST;
+    const targetPickerOptions = useMemo(
+        () => buildObjectiveTargetOptions(gameState.controlBySettlement, osidDisplayNames),
+        [gameState.controlBySettlement, osidDisplayNames],
+    );
+    const targetPickerValue = targetPickerOptions.some((option) => option.osid === requestTargetOsid.trim())
+        ? requestTargetOsid.trim()
+        : '';
 
     const handleForceLaunch = async (opName: string) => {
         if (!ipc.isAvailable) return;
@@ -658,25 +667,40 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                 force + axis. The president does NOT pick brigades/axes. Full map-target picker
                 is a FOLLOW-UP. */}
             {ipc.isAvailable && (
-                <div className="flex items-center gap-2 mb-3 px-1">
-                    <input
-                        type="text"
-                        value={requestTargetOsid}
-                        onChange={(e) => { setRequestTargetOsid(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
-                        placeholder={t('operationsSection.requestOp.placeholder')}
-                        aria-label={t('operationsSection.requestOp.aria')}
-                        className="flex-1 text-[11px] font-mono bg-panel-bg border border-panel-border/50 rounded px-2 py-1 text-text-primary"
-                    />
-                    <button
-                        type="button"
-                        onClick={handleRequestOp}
-                        disabled={!canRequestOp || requestTargetOsid.trim().length === 0 || objectionLoading || pendingObjection !== null}
-                        title={canRequestOp
-                            ? t('operationsSection.requestOp.title', { cost: REQUEST_OP_COST, current: authCurrent })
-                            : t('operationsSection.requestOp.insufficientTitle', { cost: REQUEST_OP_COST, current: authCurrent })}
-                        className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-panel-border/50 text-text-primary disabled:opacity-40 hover:bg-panel-bg">
-                        {objectionLoading ? t('operationsSection.requestOp.consulting') : t('operationsSection.requestOp.button', { cost: REQUEST_OP_COST })}
-                    </button>
+                <div className="mb-3 space-y-2 px-1">
+                    {targetPickerOptions.length > 0 && (
+                        <select
+                            value={targetPickerValue}
+                            onChange={(e) => { setRequestTargetOsid(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
+                            aria-label={t('operationsSection.requestOp.pickerAria')}
+                            className="w-full rounded border border-panel-border/50 bg-panel-bg px-2 py-1 text-[11px] text-text-primary"
+                        >
+                            <option value="">{t('operationsSection.requestOp.pickerPlaceholder')}</option>
+                            {targetPickerOptions.map((option) => (
+                                <option key={option.osid} value={option.osid}>{option.display}</option>
+                            ))}
+                        </select>
+                    )}
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="text"
+                            value={requestTargetOsid}
+                            onChange={(e) => { setRequestTargetOsid(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
+                            placeholder={t('operationsSection.requestOp.placeholder')}
+                            aria-label={t('operationsSection.requestOp.aria')}
+                            className="flex-1 text-[11px] font-mono bg-panel-bg border border-panel-border/50 rounded px-2 py-1 text-text-primary"
+                        />
+                        <button
+                            type="button"
+                            onClick={handleRequestOp}
+                            disabled={!canRequestOp || requestTargetOsid.trim().length === 0 || objectionLoading || pendingObjection !== null}
+                            title={canRequestOp
+                                ? t('operationsSection.requestOp.title', { cost: REQUEST_OP_COST, current: authCurrent })
+                                : t('operationsSection.requestOp.insufficientTitle', { cost: REQUEST_OP_COST, current: authCurrent })}
+                            className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-panel-border/50 text-text-primary disabled:opacity-40 hover:bg-panel-bg">
+                            {objectionLoading ? t('operationsSection.requestOp.consulting') : t('operationsSection.requestOp.button', { cost: REQUEST_OP_COST })}
+                        </button>
+                    </div>
                 </div>
             )}
             {/* CANNOT ISSUE banner: the directive is IMPOSSIBLE (unbuildable target / no

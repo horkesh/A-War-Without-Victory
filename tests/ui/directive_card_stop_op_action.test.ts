@@ -4,6 +4,7 @@ import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DirectiveCard } from '../../src/ui/map/components/army_hq/DirectiveCard';
+import { OperationsSection } from '../../src/ui/map/components/army_hq/OperationsSection';
 import type { LoadedGameState } from '../../src/ui/map/data/types';
 import type { PresidentialDecisionRoomDirective } from '../../src/ui/map/data/presidentialDecisionRoom';
 import { useGameStore } from '../../src/ui/map/store/gameStore';
@@ -223,6 +224,40 @@ describe('DirectiveCard stop-op action host', () => {
     });
   });
 
+  it('offers a deterministic known-objective picker before request-op objection review', async () => {
+    useGameStore.setState({
+      osidDisplayNames: {
+        'op:zenica:zenica_1': 'Zenica',
+        'op:bihac:bihac_1': 'Bihać',
+      },
+    });
+    const { queryDirectiveObjection, stageOpDirectiveOrder } = installIpc();
+
+    render(React.createElement(DirectiveCard, { directive: requestOpDirective, gameState: baseGameState }));
+
+    const picker = screen.getByLabelText('Known objective settlement') as HTMLSelectElement;
+    const optionTexts = Array.from(picker.options).map((option) => option.textContent);
+    expect(optionTexts).toEqual([
+      'Choose a known objective...',
+      'Bihać',
+      'Zenica',
+    ]);
+
+    fireEvent.change(picker, { target: { value: 'op:bihac:bihac_1' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Issue (25)' }));
+
+    await waitFor(() => {
+      expect(queryDirectiveObjection).toHaveBeenCalledWith({
+        corpsId: 'arbih_3rd_corps',
+        targetOsid: 'op:bihac:bihac_1',
+      });
+      expect(stageOpDirectiveOrder).toHaveBeenCalledWith({
+        corpsId: 'arbih_3rd_corps',
+        targetOsid: 'op:bihac:bihac_1',
+      });
+    });
+  });
+
   it('blocks ambiguous typed settlement display names before request-op objection review', () => {
     useGameStore.setState({
       osidDisplayNames: {
@@ -243,6 +278,38 @@ describe('DirectiveCard stop-op action host', () => {
     fireEvent.click(issue);
     expect(queryDirectiveObjection).not.toHaveBeenCalled();
     expect(stageOpDirectiveOrder).not.toHaveBeenCalled();
+  });
+
+  it('offers the same known-objective picker in the Army HQ operations request row', async () => {
+    useGameStore.setState({
+      osidDisplayNames: {
+        'op:zenica:zenica_1': 'Zenica',
+        'op:bihac:bihac_1': 'Bihać',
+      },
+    });
+    const { queryDirectiveObjection, stageOpDirectiveOrder } = installIpc();
+
+    render(React.createElement(OperationsSection, {
+      corpsId: 'arbih_3rd_corps',
+      operations: [],
+      gameState: baseGameState,
+    }));
+
+    fireEvent.click(screen.getByRole('button', { name: /Operations/i }));
+    const picker = screen.getByLabelText('Known request-operation objective') as HTMLSelectElement;
+    fireEvent.change(picker, { target: { value: 'op:zenica:zenica_1' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Request op (25)' }));
+
+    await waitFor(() => {
+      expect(queryDirectiveObjection).toHaveBeenCalledWith({
+        corpsId: 'arbih_3rd_corps',
+        targetOsid: 'op:zenica:zenica_1',
+      });
+      expect(stageOpDirectiveOrder).toHaveBeenCalledWith({
+        corpsId: 'arbih_3rd_corps',
+        targetOsid: 'op:zenica:zenica_1',
+      });
+    });
   });
 
   it('resolves fixed request-op target captions to display names', () => {

@@ -3147,6 +3147,8 @@ export const enMessages = {
     'directive.objection.standDown': 'Stand down',
     'directive.frontVisit.unavailableAria': 'Front visit unavailable',
     'directive.frontVisit.cannotVisit': 'Cannot visit',
+    'directive.targetPicker.aria': 'Known objective settlement',
+    'directive.targetPicker.placeholder': 'Choose a known objective...',
     'directive.targetInput.placeholder': 'Objective settlement (e.g. Bihać)',
     'directive.targetInput.aria': 'Objective settlement',
     'directive.targetInput.ambiguousAria': 'Ambiguous objective settlement',
@@ -3168,6 +3170,8 @@ export const enMessages = {
     'directive.receipt.failed': 'Directive was not staged: {reason}.',
     'directive.receipt.cancelled': 'Directive cancelled. No command authority was spent.',
     // i18n Car 2 — Batch B4: OperationsSection request-op block
+    'operationsSection.requestOp.pickerAria': 'Known request-operation objective',
+    'operationsSection.requestOp.pickerPlaceholder': 'Choose a known objective...',
     'operationsSection.requestOp.placeholder': 'Objective settlement (e.g. Bihać)',
     'operationsSection.requestOp.aria': 'Request operation objective settlement',
     'operationsSection.requestOp.title': 'Direct this corps to take the objective (cost {cost} command authority; current {current}). The engine selects the force + axis.',
