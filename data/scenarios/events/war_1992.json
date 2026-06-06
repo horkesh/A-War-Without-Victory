@@ -4021,6 +4021,93 @@
     }
   },
   {
+    "id": "foca_1992",
+    "title": "Foca: The Takeover and Its Aftermath",
+    "narrative": "The historical record of the takeover of Foca, at the confluence of the Drina and Cehotina rivers, is documented here. Across the Krnojelac, Kunarac and Karadzic judgments, the International Criminal Tribunal for the former Yugoslavia established the conditions at the KP Dom detention facility and convicted, in the Kunarac case, for sexual enslavement and rape as crimes against humanity, establishing those legal categories in international criminal law. The pre-war Bosniak community of the municipality was reduced to a residual presence by the end of 1992.",
+    "source_note": "ICTY findings in Prosecutor v. Kunarac et al. (IT-96-23-T & IT-96-23/1-T), Prosecutor v. Krnojelac (IT-97-25-T), and Prosecutor v. Karadzic (IT-95-5/18-T) ground this row's provenance for the takeover of Foca and the KP Dom detention facility. This is a representation-only historical-record row with no player response options; per Sensitive History Design Gate §1.3 Ring 3 #1/#2/#8: cleansing, forced-displacement, civilian-targeting, paramilitary deployment, detention-camp operation, and detainee or victim selection are canon-refused and must not be re-authored as player decisions. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "category": "humanitarian",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 10,
+      "turn_max": 30,
+      "phase": "war",
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RS",
+        "municipality": "foca",
+        "threshold": 0.5
+      }
+    },
+    "once": true,
+    "sets_flags": {
+      "foca_takeover_documented": true
+    },
+    "historical_source": "ICTY Kunarac et al. IT-96-23-T & IT-96-23/1-T (sexual enslavement and rape as crimes against humanity); ICTY Krnojelac IT-97-25-T (KP Dom detention facility); ICTY Karadzic IT-95-5/18-T (Foca scheduled municipality); BB Vol. I, Drina valley April-June 1992.",
+    "effect": {
+      "kind": "narrative",
+      "text": "The historical record of the Foca takeover is documented in the Codex."
+    }
+  },
+  {
+    "id": "zvornik_takeover_1992",
+    "title": "The Takeover of Zvornik",
+    "narrative": "The historical record of the takeover of Zvornik, on the right bank of the Drina opposite the Serbian town of Mali Zvornik, is documented here. The International Criminal Tribunal for the former Yugoslavia, in the Karadzic and Stanisic & Zupljanin judgments, found that crimes against humanity were committed in the takeover and that the police, paramilitaries, and military operated within a coordinated structure. The pre-war Bosniak majority of the municipality was reduced to small pockets by midsummer 1992.",
+    "source_note": "ICTY findings in Prosecutor v. Karadzic (IT-95-5/18-T), Prosecutor v. Stanisic & Zupljanin (IT-08-91-T), and Prosecutor v. Tolimir (IT-05-88/2-T) ground this row's provenance for the takeover of Zvornik. This is a representation-only historical-record row with no player response options; per Sensitive History Design Gate §1.3 Ring 3 #1/#2/#8: cleansing, forced-displacement, civilian-targeting, paramilitary deployment, detention-camp operation, and victim selection are canon-refused and must not be re-authored as player decisions. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "category": "humanitarian",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 10,
+      "turn_max": 30,
+      "phase": "war",
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RS",
+        "municipality": "zvornik",
+        "threshold": 0.5
+      }
+    },
+    "once": true,
+    "sets_flags": {
+      "zvornik_takeover_documented": true
+    },
+    "historical_source": "ICTY Karadzic IT-95-5/18-T (Zvornik scheduled municipality); ICTY Stanisic & Zupljanin IT-08-91-T (Zvornik police and paramilitary operations); ICTY Tolimir IT-05-88/2-T (Drina Corps formation and Zvornik command); BB Vol. I, Drina valley April 1992.",
+    "effect": {
+      "kind": "narrative",
+      "text": "The historical record of the Zvornik takeover is documented in the Codex."
+    }
+  },
+  {
+    "id": "visegrad_1992",
+    "title": "Visegrad: The Bridge on the Drina, 1992",
+    "narrative": "The historical record of the takeover of Visegrad, beneath the Mehmed Pasa Sokolovic bridge, is documented here. In the Lukic & Lukic and Vasiljevic judgments, the International Criminal Tribunal for the former Yugoslavia established the legal findings on the mass killings in the town between June and October 1992, including the house-burnings on Pionirska street and at Bikavac, which the chamber found were the operational expression of a campaign to eliminate Bosniaks from the municipality. The pre-war Bosniak community was reduced to a few hundred survivors.",
+    "source_note": "ICTY findings in Prosecutor v. Lukic & Lukic (IT-98-32/1-T), Prosecutor v. Vasiljevic (IT-98-32-T), and Prosecutor v. Karadzic (IT-95-5/18-T) ground this row's provenance for the takeover of Visegrad. This is a representation-only historical-record row with no player response options; per Sensitive History Design Gate §1.3 Ring 3 #1/#8/#9: cleansing, forced-displacement, civilian-targeting, paramilitary deployment, and victim selection are canon-refused and must not be re-authored as player decisions. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "category": "humanitarian",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 12,
+      "turn_max": 30,
+      "phase": "war",
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RS",
+        "municipality": "visegrad",
+        "threshold": 0.5
+      }
+    },
+    "once": true,
+    "sets_flags": {
+      "visegrad_takeover_documented": true
+    },
+    "historical_source": "ICTY Lukic & Lukic IT-98-32/1-T (Pionirska street and Bikavac killings); ICTY Vasiljevic IT-98-32-T (Drina riverbank killing, joint criminal enterprise); ICTY Karadzic IT-95-5/18-T (Visegrad scheduled municipality); BB Vol. I, Drina valley April-June 1992.",
+    "effect": {
+      "kind": "narrative",
+      "text": "The historical record of the Visegrad takeover is documented in the Codex."
+    }
+  },
+  {
     "id": "operation_corridor_1992",
     "title": "Operation Corridor — VRS Breaks Through at Brcko",
     "narrative": "The VRS launches Operation Corridor to link the Krajina region with Serbia proper through the narrow Posavina corridor near Brcko. Fierce fighting against HVO and ARBiH forces gradually widens the corridor, establishing a critical supply and communication link that sustains the western Bosnian Serb entity.",
@@ -4231,6 +4318,46 @@
     "effect": {
       "kind": "narrative",
       "text": "The historical record of the Trnopolje detention facility is documented in the Codex."
+    }
+  },
+  {
+    "id": "prijedor_takeover_1992",
+    "title": "Prijedor: The Takeover and the Counterattack",
+    "narrative": "The historical record of the takeover of Prijedor municipality, in the Bosanska Krajina, is documented here. Across the Stakic, Tadic, Brdjanin and Karadzic judgments, the International Criminal Tribunal for the former Yugoslavia found that the takeover of 30 April 1992 and the operations that followed the failed Bosniak counterattack of 30 May were the implementation of a coordinated programme, and that approximately three thousand Bosniaks and Croats from the municipality were killed in 1992. The takeover established the camp system at Omarska, Keraterm and Trnopolje documented elsewhere in this Codex.",
+    "source_note": "ICTY findings in Prosecutor v. Stakic (IT-97-24-T), Prosecutor v. Tadic (IT-94-1-T), Prosecutor v. Brdjanin (IT-99-36-T), and Prosecutor v. Karadzic (IT-95-5/18-T) ground this row's provenance for the takeover of Prijedor municipality and the Autonomous Region of Krajina command. Per Sensitive History Design Gate §1.3 Ring 3 #1/#2 and §3.6: this is a representation-only historical-record row with no player response options; any descendant row MUST NOT re-author cleansing, forced-displacement, civilian-targeting, paramilitary deployment, detention-camp operation, or detainee-population selection — the takeover and camp-system process is canon-refused. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "category": "humanitarian",
+    "family": "rs_camp_exposure_response",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 14,
+      "turn_max": 30,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "faction_controls_municipality",
+            "faction": "RS",
+            "municipality": "prijedor",
+            "threshold": 0.5
+          },
+          {
+            "type": "war_crimes_above",
+            "faction": "RS",
+            "threshold": 1
+          }
+        ]
+      }
+    },
+    "once": true,
+    "sets_flags": {
+      "prijedor_takeover_documented": true
+    },
+    "historical_source": "ICTY Stakic IT-97-24-T §§88-168 (Prijedor takeover and ARK command); ICTY Tadic IT-94-1-T (Prijedor 1992 context); ICTY Brdjanin IT-99-36-T §§540-558 (Autonomous Region of Krajina); ICTY Karadzic IT-95-5/18-T (Prijedor scheduled municipality); BB Vol. I, Bosanska Krajina spring 1992.",
+    "effect": {
+      "kind": "narrative",
+      "text": "The historical record of the Prijedor takeover is documented in the Codex."
     }
   },
   {
