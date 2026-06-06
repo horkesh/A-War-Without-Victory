@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest runtime military state validate-when-present contract** | [implemented/20260606_RUNTIME_MILITARY_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260606_RUNTIME_MILITARY_STATE_VALIDATE_WHEN_PRESENT.md) - Equipment reserves, militia garrison values, and unresolved-sector brigade diagnostics remain optional but now reject malformed present runtime payloads. |
 | **Latest desk consequence route localization** | [implemented/20260606_DESK_CONSEQUENCE_ROUTE_LOCALIZATION.md](implemented/20260606_DESK_CONSEQUENCE_ROUTE_LOCALIZATION.md) - President's Desk consequence rows now route Chronicle-filed decisions to Chronicle and Records-filed receipts to Records, with localized route chrome. |
 | **Latest supply/production economy state validate-when-present contract** | [implemented/20260606_SUPPLY_PRODUCTION_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260606_SUPPLY_PRODUCTION_STATE_VALIDATE_WHEN_PRESENT.md) - Supply reserve maps and `military.production_facilities` remain optional but now reject malformed present economy-state payloads without enforcing deferred upper bounds. |
 | **Latest recruitment/smuggling economy state validate-when-present contract** | [implemented/20260606_RECRUITMENT_SMUGGLING_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260606_RECRUITMENT_SMUGGLING_STATE_VALIDATE_WHEN_PRESENT.md) - `military.recruitment_state` and `military.smuggling_routes` remain optional but now reject malformed present economy-state payloads. |

@@ -1012,6 +1012,27 @@ function validateFactionNumberRecord(value: unknown, path: string, errors: strin
     }
 }
 
+function validateCorpsEquipmentReserve(value: unknown, errors: string[]): void {
+    const path = 'military.corps_equipment_reserve';
+    if (!isRecord(value)) {
+        errors.push(`${path} must be an object when present`);
+        return;
+    }
+
+    for (const [corpsId, entry] of Object.entries(value)) {
+        const entryPath = `${path}.${corpsId}`;
+        if (!isRecord(entry)) {
+            errors.push(`${entryPath} must be an object`);
+            continue;
+        }
+        for (const key of ['tanks', 'artillery', 'apcs']) {
+            if (!isFiniteNonNegativeNumber(entry[key])) {
+                errors.push(`${entryPath}.${key} must be a finite non-negative number`);
+            }
+        }
+    }
+}
+
 function validateRecruitmentPoolRecord(value: unknown, path: string, errors: string[]): void {
     if (!isRecord(value)) {
         errors.push(`${path} must be an object when recruitment_state is present`);
@@ -3105,6 +3126,15 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_sector_override' in military && military.brigade_sector_override !== undefined) {
         validateStringRecord(military.brigade_sector_override, 'military.brigade_sector_override', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'corps_equipment_reserve' in military && military.corps_equipment_reserve !== undefined) {
+        validateCorpsEquipmentReserve(military.corps_equipment_reserve, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'militia_garrison' in military && military.militia_garrison !== undefined) {
+        validateFiniteNonNegativeNumberRecord(military.militia_garrison, 'military.militia_garrison', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'unresolved_sector_brigades' in military && military.unresolved_sector_brigades !== undefined && !isStringArray(military.unresolved_sector_brigades)) {
+        errors.push('military.unresolved_sector_brigades must be a string array when present');
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'formation_spawn_directive' in military && military.formation_spawn_directive !== undefined) {
         validateFormationSpawnDirective(military.formation_spawn_directive, errors);

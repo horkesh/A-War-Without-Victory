@@ -1,3 +1,9 @@
+## 2026-06-06 - Runtime military validation excludes compatibility-materialized JNA state
+
+**Runtime military diagnostics can be shape-validated without becoming persisted contracts:** `military.corps_equipment_reserve`, `military.militia_garrison`, and `military.unresolved_sector_brigades` are optional runtime/diagnostic surfaces. Durable rule: validate present local shape only; do not materialize absent fields, resolve ids, enforce equipment upper bounds, or change sector/militia/equipment producers in a schema cleanup lane. Applied in `[2026-06-06] fix(state): validate runtime military state when present`.
+
+**Compatibility-materialized fields are not optional-absent cleanup candidates:** `war_jna` looks optional in `MilitaryState`, but save compatibility materializes absent current saves to `{ transition_begun: false, withdrawal_progress: 0, asset_transfer_rs: 0 }`. Durable rule: classify serialization/migration materialization before grouping a field into validate-when-present cleanup; exclude compatibility-materialized fields from optional-absent batches unless a separate schema decision owns the contract.
+
 ## 2026-06-06 - Supply/production validation excludes deferred upper-bound policy
 
 **Supply reserve shape validation is not reserve-cap enforcement:** `military.general_supply_reserve`, `military.heavy_munitions_reserve`, and `military.strategic_reserves` can reject malformed present maps while still accepting numeric values above 100. Durable rule: optional schema cleanup validates canonical faction keys and finite non-negative values only; reserve-map upper bounds remain a separate schema/design decision until oversized fixtures are audited. Applied in `[2026-06-06] fix(state): validate supply production state when present`.
