@@ -1,3 +1,7 @@
+## 2026-06-05 - Launch package artifacts are transient; release evidence owns identity
+
+**Packaged binaries belong in release evidence, not git:** `dist-packaged/...` contains operator-built package outputs whose identity must be captured by exact path, size, SHA-256, and clean-VM/operator status. Durable rule: keep package outputs ignored and uncommitted; use `npm.cmd run launch:artifacts:dry-run -- --artifact dist-packaged/<artifact> --format markdown` to produce copy-ready evidence for the exact artifact, and commit only the evidence packet/templates when appropriate. Applied in `[2026-06-05] test(release): document launch artifact ownership`.
+
 ## 2026-06-05 - Patron actor-history receipts use the shared consequence ledger
 
 **Patron-defiance material cuts should file through existing receipt routes, not new state:** `state.military.patron_defiance_supply_cuts` is the realized player-consequence substrate, and `loadedGameState.rawGameState` gives UI read-models access without a new save field. Durable rule: filter to the current player faction, project cuts into the shared decision consequence ledger for Records/Chronicle, and add them to Patron Relations actor history; do not recompute material support, create another filing state, or expose other-faction patron cuts. Applied in `[2026-06-05] feat(ui): add patron actor-history route cohesion`.

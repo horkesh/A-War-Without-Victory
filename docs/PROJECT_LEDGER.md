@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-05] test(release): document launch artifact ownership
+
+**Type:** Generated-artifact ownership / release-evidence hardening. No package was built, no package artifact was committed, no release upload occurred, no clean-VM evidence was claimed, and no simulation output, save schema, scenario data, baseline manifest, generated run artifact, randomness, timestamps, or persisted output ordering changed.
+
+**Change:** Added `dist-packaged/...` to the generated-artifact ownership matrix as an operator-owned transient package-output family. Added a focused guard proving `dist-packaged/` stays ignored/uncommitted, the matrix cites the launch operator tests, and release docs route exact artifact identity through `npm.cmd run launch:artifacts:dry-run`.
+
+**Docs:** Added `docs/40_reports/implemented/20260605_LAUNCH_ARTIFACT_OWNERSHIP.md` and updated report indices, command board, engine-quality residuals plan, master roadmap, and knowledge ledger.
+
+**Verification:** `npx.cmd vitest run tests\launch_artifact_ownership.test.ts tests\launch_operator_artifacts.test.ts tests\generated_artifact_ownership_matrix_contract.test.ts --reporter=dot`; `npm.cmd run typecheck -- --pretty false`; `git diff --check`.
+
+---
+
 ## [2026-06-05] feat(ui): add patron actor-history route cohesion
 
 **Type:** Player-facing UI/read-model receipt routing. No patron mechanics, event decision behavior, material-support math, simulation turn logic, save schema, migration, scenario data, scenario output, baseline manifest, generated artifact, randomness, timestamps, or persisted output ordering changed.

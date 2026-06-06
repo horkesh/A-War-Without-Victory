@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest launch artifact ownership:** [implemented/20260605_LAUNCH_ARTIFACT_OWNERSHIP.md](implemented/20260605_LAUNCH_ARTIFACT_OWNERSHIP.md) - `dist-packaged/...` package outputs are now explicit operator-owned transient artifacts in the generated-artifact ownership matrix; release evidence records exact artifact identity, but packaged binaries stay out of git.
+
 **Latest sector active-combat scan reuse:** [implemented/20260605_SECTOR_ACTIVE_COMBAT_SCAN_REUSE.md](implemented/20260605_SECTOR_ACTIVE_COMBAT_SCAN_REUSE.md) - `buildCorpsFrontSectors(...)` now reuses one sorted active-combat formation scan across per-faction and per-corps sector construction, preserving the current `d1ace172a29b2353` 40w floor.
 
 **Latest Patron actor-history route cohesion:** [implemented/20260605_PATRON_ACTOR_HISTORY_ROUTE_COHESION.md](implemented/20260605_PATRON_ACTOR_HISTORY_ROUTE_COHESION.md) - Patron-defiance material cuts now file through Records/Chronicle consequence routes and appear in the Patron Relations timeline without changing patron mechanics or save state.
