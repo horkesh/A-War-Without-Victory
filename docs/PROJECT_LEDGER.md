@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-06] fix(state): validate supply production state when present
+
+**Type:** Save-validation/schema-contract hardening. No simulation turn behavior, supply or production mechanics, scenario data, save schema version, migration, fixture refresh, baseline manifest, generated artifact, UI code, randomness, timestamps, or persisted output ordering changed.
+
+**Change:** `validateGameStateShape(...)` now rejects malformed present `military.general_supply_reserve`, `military.heavy_munitions_reserve`, `military.strategic_reserves`, and `military.production_facilities` payloads. Absence remains valid, and well-formed present supply/production economy state round-trips unchanged.
+
+**Classification:** These fields are optional lazy supply/production economy surfaces. The validator checks only local shape: canonical faction-keyed finite non-negative reserve maps, production facility key/id consistency, non-empty names and municipality ids, production facility type enum, finite non-negative capacity/condition values, and required-input booleans. It deliberately does not materialize maps, enforce reserve-map upper bounds, enforce production capacity/condition upper bounds, resolve municipality ids, or require production facility catalog membership.
+
+**Docs:** Added `docs/40_reports/implemented/20260606_SUPPLY_PRODUCTION_STATE_VALIDATE_WHEN_PRESENT.md` and updated report indices, command board, master roadmap, engine-quality residuals plan, and knowledge ledger.
+
+**Verification:** Red/green `node F:\A-War-Without-Victory\node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` (new malformed supply/production tests failed before validation; green 181/181 after implementation); `npm.cmd run typecheck -- --pretty false`; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` total 507 (`state: 172`, `sim: 327`, `derived: 8`); `git diff --check`.
+
+---
+
 ## [2026-06-06] fix(state): validate recruitment economy state when present
 
 **Type:** Save-validation/schema-contract hardening. No simulation turn behavior, recruitment or smuggling mechanics, scenario data, save schema version, migration, fixture refresh, baseline manifest, generated artifact, UI code, randomness, timestamps, or persisted output ordering changed.

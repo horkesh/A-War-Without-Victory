@@ -1960,6 +1960,77 @@ describe('save migration validator hardening', () => {
         );
     });
 
+    it('accepts current-version saves with absent or well-formed supply production economy state', () => {
+        const absent = currentVersionState();
+        delete absent.military.general_supply_reserve;
+        delete absent.military.heavy_munitions_reserve;
+        delete absent.military.strategic_reserves;
+        delete absent.military.production_facilities;
+
+        const withSupplyProduction = currentVersionState();
+        withSupplyProduction.military.general_supply_reserve = { RBiH: 150, RS: 80, HRHB: 40 };
+        withSupplyProduction.military.heavy_munitions_reserve = { RBiH: 120, RS: 60, HRHB: 25 };
+        withSupplyProduction.military.strategic_reserves = { RBiH: 1000, RS: 500, HRHB: 0 };
+        withSupplyProduction.military.production_facilities = {
+            prod_breza_ammo: {
+                facility_id: 'prod_breza_ammo',
+                name: 'Breza Munitions',
+                municipality_id: 'breza',
+                type: 'ammunition',
+                base_capacity: 4,
+                current_condition: 1.25,
+                required_inputs: {
+                    electricity: true,
+                    raw_materials: false,
+                    skilled_labor: true,
+                },
+            },
+        };
+
+        expect(deserializeState(JSON.stringify(absent)).military.general_supply_reserve).toBeUndefined();
+        const migrated = deserializeState(JSON.stringify(withSupplyProduction));
+        expect(migrated.military.general_supply_reserve).toEqual(withSupplyProduction.military.general_supply_reserve);
+        expect(migrated.military.heavy_munitions_reserve).toEqual(withSupplyProduction.military.heavy_munitions_reserve);
+        expect(migrated.military.strategic_reserves).toEqual(withSupplyProduction.military.strategic_reserves);
+        expect(migrated.military.production_facilities).toEqual(withSupplyProduction.military.production_facilities);
+    });
+
+    it('rejects current-version saves with malformed supply production economy state', () => {
+        const state = currentVersionState();
+        state.military.general_supply_reserve = { RBiH: -1, bad: 4, RS: Number.POSITIVE_INFINITY } as any;
+        state.military.heavy_munitions_reserve = [] as any;
+        state.military.strategic_reserves = { HRHB: -1, bad: 'many' } as any;
+        state.military.production_facilities = {
+            prod_breza_ammo: {
+                facility_id: 'different',
+                name: '',
+                municipality_id: '',
+                type: 'food',
+                base_capacity: -1,
+                current_condition: Number.NaN,
+                required_inputs: {
+                    electricity: true,
+                    raw_materials: 'yes',
+                },
+            },
+            bad_facility: 7,
+        } as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.general_supply_reserve\.RBiH must be a finite non-negative number[\s\S]*military\.general_supply_reserve\.bad must use a canonical faction id key[\s\S]*military\.general_supply_reserve\.RS must be a finite non-negative number[\s\S]*military\.heavy_munitions_reserve must be an object when present[\s\S]*military\.strategic_reserves\.HRHB must be a finite non-negative number[\s\S]*military\.strategic_reserves\.bad must use a canonical faction id key[\s\S]*military\.strategic_reserves\.bad must be a finite non-negative number[\s\S]*military\.production_facilities\.prod_breza_ammo\.facility_id must match its facility key[\s\S]*military\.production_facilities\.prod_breza_ammo\.name must be a non-empty string[\s\S]*military\.production_facilities\.prod_breza_ammo\.municipality_id must be a non-empty string[\s\S]*military\.production_facilities\.prod_breza_ammo\.type must be one of: ammunition, heavy_equipment, small_arms[\s\S]*military\.production_facilities\.prod_breza_ammo\.base_capacity must be a finite non-negative number[\s\S]*military\.production_facilities\.prod_breza_ammo\.current_condition must be a finite non-negative number[\s\S]*military\.production_facilities\.prod_breza_ammo\.required_inputs\.raw_materials must be boolean[\s\S]*military\.production_facilities\.prod_breza_ammo\.required_inputs\.skilled_labor must be boolean[\s\S]*military\.production_facilities\.bad_facility must be an object/
+        );
+    });
+
+    it('rejects current-version saves with non-object supply production economy maps', () => {
+        const state = currentVersionState();
+        state.military.general_supply_reserve = null as any;
+        state.military.production_facilities = [] as any;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.general_supply_reserve must be an object when present[\s\S]*military\.production_facilities must be an object when present/
+        );
+    });
+
     it('accepts current-version saves with absent or well-formed brigade order surfaces', () => {
         const absent = currentVersionState();
         delete absent.military.brigade_movement_state;

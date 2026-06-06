@@ -1092,6 +1092,53 @@ function validateSmugglingRoutes(value: unknown, errors: string[]): void {
     });
 }
 
+const PRODUCTION_FACILITY_TYPES = ['ammunition', 'heavy_equipment', 'small_arms'] as const;
+
+function validateProductionFacilities(value: unknown, errors: string[]): void {
+    const rootPath = 'military.production_facilities';
+    if (!isRecord(value)) {
+        errors.push(`${rootPath} must be an object when present`);
+        return;
+    }
+
+    for (const [facilityId, entry] of Object.entries(value)) {
+        const path = `${rootPath}.${facilityId}`;
+        if (!isRecord(entry)) {
+            errors.push(`${path} must be an object`);
+            continue;
+        }
+        if (!isNonEmptyString(entry.facility_id)) {
+            errors.push(`${path}.facility_id must be a non-empty string`);
+        } else if (entry.facility_id !== facilityId) {
+            errors.push(`${path}.facility_id must match its facility key`);
+        }
+        if (!isNonEmptyString(entry.name)) {
+            errors.push(`${path}.name must be a non-empty string`);
+        }
+        if (!isNonEmptyString(entry.municipality_id)) {
+            errors.push(`${path}.municipality_id must be a non-empty string`);
+        }
+        if (!PRODUCTION_FACILITY_TYPES.includes(entry.type as typeof PRODUCTION_FACILITY_TYPES[number])) {
+            errors.push(`${path}.type must be one of: ${PRODUCTION_FACILITY_TYPES.join(', ')}`);
+        }
+        if (!isFiniteNonNegativeNumber(entry.base_capacity)) {
+            errors.push(`${path}.base_capacity must be a finite non-negative number`);
+        }
+        if (!isFiniteNonNegativeNumber(entry.current_condition)) {
+            errors.push(`${path}.current_condition must be a finite non-negative number`);
+        }
+        if (!isRecord(entry.required_inputs)) {
+            errors.push(`${path}.required_inputs must be an object`);
+            continue;
+        }
+        for (const input of ['electricity', 'raw_materials', 'skilled_labor'] as const) {
+            if (typeof entry.required_inputs[input] !== 'boolean') {
+                errors.push(`${path}.required_inputs.${input} must be boolean`);
+            }
+        }
+    }
+}
+
 function validateSmugglingAllocation(value: unknown, errors: string[]): void {
     if (!isRecord(value)) {
         errors.push('military.smuggling_allocation must be an object when present');
@@ -3067,6 +3114,18 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'sarajevo_tunnel_operational' in military && military.sarajevo_tunnel_operational !== undefined && typeof military.sarajevo_tunnel_operational !== 'boolean') {
         errors.push('military.sarajevo_tunnel_operational must be a boolean when present');
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'general_supply_reserve' in military && military.general_supply_reserve !== undefined) {
+        validateFactionNumberRecord(military.general_supply_reserve, 'military.general_supply_reserve', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'heavy_munitions_reserve' in military && military.heavy_munitions_reserve !== undefined) {
+        validateFactionNumberRecord(military.heavy_munitions_reserve, 'military.heavy_munitions_reserve', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'strategic_reserves' in military && military.strategic_reserves !== undefined) {
+        validateFactionNumberRecord(military.strategic_reserves, 'military.strategic_reserves', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'production_facilities' in military && military.production_facilities !== undefined) {
+        validateProductionFacilities(military.production_facilities, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'opsec_sectors' in military && military.opsec_sectors !== undefined && !isStringArray(military.opsec_sectors)) {
         errors.push('military.opsec_sectors must be a string array when present');
