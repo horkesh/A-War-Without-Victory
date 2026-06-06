@@ -19576,3 +19576,21 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Verify-stale (already shipped; NOT re-dispatched):** Standing-OG display-name (ADR-0006 #79/#81); BRIEF-GAP-6 `recent_territory_change` (army_hq_gathering.ts); BRIEF-GAP-1 supply in `force_eval` (V0.8.1 Phase 1); ARMY-GAP-1 CampaignPlan→briefing (A1-A3-C1 chain). The 2026-04-02 Engine Health Audit's commander-signal P0/P1 items are wholesale superseded — see memory `verified_open_worklist_20260606`.
 
 **Env note:** primary worktree `node_modules/.bin` is empty (packages intact); `npm run`/bare `tsx`/`vitest` shims don't resolve — agents worked around via `node node_modules/<pkg>/...cli.mjs`. Repopulate (`npm rebuild`) before the next preflight-wrapper 40w run.
+
+---
+
+## [2026-06-07] Autonomous drive cont. — #255–#258 + COMBAT-P14 round-trip
+
+**Type:** Continued autonomous parallel-drive (Codex paused; owner AFK). Four more PRs merged; one feature shipped-then-reverted on dual-horizon evidence. No net regression on main.
+
+**Shipped:**
+- **#255** `feat(command)` — the two deferred §10 initiatable presidential leadership actions: **address-the-nation** + **decorate-a-unit** (6 events `{address_to_nation,decorate_a_unit}_{rbih,rs,hrhb}`, turn_min 84, EN+BCS), mirroring the front-visit pattern (thin `*_contract.cjs` force-queues into `pending_event_decisions`; DirectiveCard levers; Command & Personnel cards). Double-edged negative-sum tone; bright-line held (decorate = regular formations only, no paramilitary/atrocity glorification). **Calibration-safe**: player-IPC-only, never auto-fires in 40w (0 occurrences); anchors 30/30, "all scenarios match", no re-floor. Count-pins bumped (event_timeline 150→156, loader 281→287, + the `tests/sim/events/` diagnostic family 281→287 / choice-inventory 73→79 / required-response debt 65→71 — caught by full CI after focused-test miss; one real completeness fix: added `decorate_decline_<faction>` notification recipient-blocks). Independent scenario-tester GO.
+- **#258** `feat(codex)` — Dynamic Codex **wave 2**: 10 more decision-bound essays (Vance-Owen/Owen-Stoltenberg/Washington/NATO-ultimatum/Holbrooke decisions, EN+BCS, ≥2 ICTY/UN/memoir sources), additive `essay_index.json`. Byte-identical (essays+index only). Brings Dynamic Codex to 24 essays (waves 1+2). Non-§6.
+
+**Shipped then REVERTED (net no-op on main):**
+- **#256** `feat(combat)` COMBAT-P14 — folded defender return-fire (`getDefensiveFireMult`) into the launch-feasibility predictor. Merged on **40w-only** evidence (anchors 30/30, flips byte-identical, 2 scenario-tester GO).
+- **#257** `revert(combat)` — post-merge **188w** validation found it net-negative: −4 OSID (613→609), a 40w-cosmetic gain (fewer futile assaults, −31% attacker casualties, but flips byte-identical) at the cost of real 188w territorial accuracy. A principled fix (scope the tax by attacker artillery-suppression) kept the 40w gain but recovered none of the 188w loss (the Zvornik/Drina-corridor loss is driven by ARBiH counter-offensives + Operation Drina `max_failures`, not the predictor). Reverted; main byte-identical to pre-P14 (40w 653/30/30, 188w 613/28/30). **Do NOT re-attempt P14 by magnitude/scope tuning alone** — it needs a fix for the Drina-corridor / Op-Drina-max_failures interaction.
+
+**Process lesson (banked to memory `feedback_188w_validate_combat_changes_before_merge`):** calibration-moving COMBAT/predictor/launch changes MUST validate at **188w before merge** — 40w + CI is a false-green; 188w is in no CI gate. Correction: the "618/29-30 188w baseline of record" is stale; ground-truth pre-P14 188w is **613/28** (`2669bd0eecce5013`); `op:zvornik:zvornik` + `brijesnica_donja_2` are pre-existing failures, not P14-introduced.
+
+**Also:** earlier #244 (Codex's command-route-cohesion UI) merged at owner direction to unblock warroom — which on inspection was already fully shipped (Presidential Command Surface design build-order 0–4 + §9 image cards + §10 front-visit + DeskAuthorityHeader; 95 command-surface tests green). 9 merged session worktrees pruned; 3 unrecognized worktrees + Codex's left untouched (zero-work-loss).
