@@ -179,7 +179,7 @@ describe('PresidentDeskShell', () => {
     fireEvent.click(screen.getByText('Patron defiance supply cut'));
 
     expect(onOpenChronicle).toHaveBeenCalledOnce();
-    expect(onOpenDecisionRecords).toHaveBeenCalledOnce();
+    expect(onOpenDecisionRecords).toHaveBeenCalledWith('patron-defiance:RS:9:0.25:0.5');
     expect(onOpenRecords).not.toHaveBeenCalled();
   });
 });

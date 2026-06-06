@@ -91,7 +91,7 @@ import type { InboxItem } from './data/inboxItems';
 import type { PreAdvanceCommandReviewItem } from './data/preAdvanceCommandReview';
 import type { PresidentialDecisionRoomNavigationTarget } from './data/presidentialDecisionRoom';
 import { shouldShowPeaceWarTransition } from './data/peaceWarTransitionGate';
-import { applyShellHandoffCommand, openArmyHQRecordsSubTab, openArmyHQTab, openChronicle, openCodex, warroomCommandStaysInRoom } from './utils/shellNavigation';
+import { applyShellHandoffCommand, openArmyHQDecisionConsequenceRecord, openArmyHQRecordsSubTab, openArmyHQTab, openChronicle, openCodex, warroomCommandStaysInRoom } from './utils/shellNavigation';
 import { openPresidentialDecisionRoomNavigationTarget } from './utils/presidentialDecisionRoomNavigation';
 import { isWarroomLocalCommand, type WarroomOverlaySurface } from './utils/warroomNavigation';
 import { getPeacePlanDismissalKey, shouldShowPeacePlanModal } from './utils/peacePlanDismissal';
@@ -1673,8 +1673,8 @@ function App() {
                 openArmyHQRecordsSubTab(useGameStore.getState(), 'aftermath');
                 setAppScreen('game');
               }}
-              onOpenDecisionRecords={() => {
-                openArmyHQRecordsSubTab(useGameStore.getState(), 'decisions');
+              onOpenDecisionRecords={(recordId) => {
+                openArmyHQDecisionConsequenceRecord(useGameStore.getState(), recordId);
                 setAppScreen('game');
               }}
               onOpenChronicle={() => {

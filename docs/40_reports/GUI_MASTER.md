@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Decision consequence record focus** | [implemented/20260606_DECISION_CONSEQUENCE_RECORD_FOCUS.md](implemented/20260606_DECISION_CONSEQUENCE_RECORD_FOCUS.md) - Records-filed Desk consequences now open Army HQ Records -> Decision Consequences with the selected row focused, and shell handoff validation accepts the existing decisions subtab. |
 | **Command objective picker** | [implemented/20260606_COMMAND_OBJECTIVE_PICKER.md](implemented/20260606_COMMAND_OBJECTIVE_PICKER.md) - Request-op directives now offer a deterministic known-objective picker in both Decision Room and Army HQ request rows while preserving the existing objection/staging path. |
 | **Warroom native overlay residue batch** | [implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md](implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md) - Intelligence, Staff, and Faction native Warroom previews now drill into existing owner surfaces, while retired StrategicDashboard/EventLog local command variants are removed from live source. |
 | **Command card role/filter framing** | [implemented/20260606_COMMAND_CARD_ROLE_FRAMING.md](implemented/20260606_COMMAND_CARD_ROLE_FRAMING.md) - Command Surface category cards now render Act/Inspect/Monitor chips and pass exact category filters into the Decision Room while preserving owner-surface behavior. |

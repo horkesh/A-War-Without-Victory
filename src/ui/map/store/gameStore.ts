@@ -154,6 +154,8 @@ export interface GameStore {
   armyHQRecordsSubTab: ArmyHQRecordsSubTab;
   /** Completed operation AAR id to expand in Army HQ Records -> Operation History. */
   focusedOperationHistoryId: string | null;
+  /** Decision consequence id to focus in Army HQ Records -> Decision Consequences. */
+  focusedDecisionConsequenceId: string | null;
   armyHQExpandedCorpsId: string | null;
   armyHQExpandedSections: Record<string, boolean>;
   armyHQOfficerSelectionCorpsId: string | null;
@@ -173,6 +175,7 @@ export interface GameStore {
   setArmyHQTab: (tab: 'briefing' | 'summary' | 'records' | 'personnel') => void;
   setArmyHQRecordsSubTab: (subTab: ArmyHQRecordsSubTab) => void;
   setFocusedOperationHistoryId: (id: string | null) => void;
+  setFocusedDecisionConsequenceId: (id: string | null) => void;
   setArmyHQExpandedCorpsId: (id: string | null) => void;
   toggleArmyHQSection: (key: string) => void;
   setArmyHQOfficerSelectionCorpsId: (id: string | null) => void;
@@ -397,6 +400,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   armyHQTab: 'briefing',
   armyHQRecordsSubTab: 'aar',
   focusedOperationHistoryId: null,
+  focusedDecisionConsequenceId: null,
   armyHQExpandedCorpsId: null,
   armyHQExpandedSections: {},
   armyHQOfficerSelectionCorpsId: null,
@@ -419,6 +423,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       armyHQExpandedSections: {},
       armyHQOfficerSelectionCorpsId: null,
       focusedOperationHistoryId: null,
+      focusedDecisionConsequenceId: null,
     }),
   }),
   setArmyHQTab: (tab) => set({
@@ -426,6 +431,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     ...(tab !== 'records' ? { armyHQRecordsSubTab: 'aar' } : {}),
     ...(tab !== 'records' ? { focusedAftermathTurn: null } : {}),
     ...(tab !== 'records' ? { focusedOperationHistoryId: null } : {}),
+    ...(tab !== 'records' ? { focusedDecisionConsequenceId: null } : {}),
     armyHQExpandedCorpsId: null,
     armyHQExpandedSections: {},
     armyHQOfficerSelectionCorpsId: null,
@@ -435,11 +441,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     armyHQRecordsSubTab: subTab,
     ...(subTab === 'aftermath' ? {} : { focusedAftermathTurn: null }),
     ...(subTab === 'ops' ? {} : { focusedOperationHistoryId: null }),
+    ...(subTab === 'decisions' ? {} : { focusedDecisionConsequenceId: null }),
     armyHQExpandedCorpsId: null,
     armyHQExpandedSections: {},
     armyHQOfficerSelectionCorpsId: null,
   }),
   setFocusedOperationHistoryId: (id) => set({ focusedOperationHistoryId: id }),
+  setFocusedDecisionConsequenceId: (id) => set({ focusedDecisionConsequenceId: id }),
   setArmyHQExpandedCorpsId: (id) => set({
     armyHQExpandedCorpsId: id,
     armyHQExpandedSections: {},

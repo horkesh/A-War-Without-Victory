@@ -1,3 +1,4 @@
+import { useEffect, useMemo } from 'react';
 import {
   buildDecisionConsequenceLedger,
   buildDecisionConsequenceLedgerSummary,
@@ -32,8 +33,22 @@ function familyLabel(record: DecisionConsequenceRecord): string {
 export function DecisionConsequenceRecordsPanel() {
   const state = useGameStore((s) => s.loadedGameState);
   const setChronicleOpen = useGameStore((s) => s.setChronicleOpen);
-  const records = buildDecisionConsequenceLedger(state, 50);
-  const summary = buildDecisionConsequenceLedgerSummary(records);
+  const focusedDecisionConsequenceId = useGameStore((s) => s.focusedDecisionConsequenceId);
+  const records = useMemo(() => buildDecisionConsequenceLedger(state, 50), [state]);
+  const visibleRecords = useMemo(() => {
+    if (!focusedDecisionConsequenceId || records.some((record) => record.id === focusedDecisionConsequenceId)) {
+      return records;
+    }
+    return buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER);
+  }, [focusedDecisionConsequenceId, records, state]);
+  const summary = buildDecisionConsequenceLedgerSummary(visibleRecords);
+
+  useEffect(() => {
+    if (!focusedDecisionConsequenceId || typeof document === 'undefined') return;
+    const el = document.querySelector<HTMLElement>(`[data-focused-decision-consequence-id="${focusedDecisionConsequenceId}"]`);
+    el?.scrollIntoView?.({ block: 'center' });
+    el?.focus();
+  }, [focusedDecisionConsequenceId, visibleRecords.length]);
 
   return (
     <section className="rounded-md border border-panel-border bg-panel-card p-4" aria-label={t('decisionConsequences.ariaLabel')}>
@@ -66,20 +81,27 @@ export function DecisionConsequenceRecordsPanel() {
         <div className="min-w-0 rounded border border-panel-border/60 bg-black/20 px-2 py-2">
           <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('decisionConsequences.families')}</div>
           <div className="mt-1 truncate text-[11px] text-text-secondary">
-            {records.length > 0
-              ? Array.from(new Map(records.map((record) => [record.familyId, familyLabel(record)])).values()).join(' / ')
+            {visibleRecords.length > 0
+              ? Array.from(new Map(visibleRecords.map((record) => [record.familyId, familyLabel(record)])).values()).join(' / ')
               : '-'}
           </div>
         </div>
       </div>
 
       <div className="mt-3 space-y-2">
-        {records.length === 0 ? (
+        {visibleRecords.length === 0 ? (
           <div className="rounded border border-panel-border/70 bg-black/20 px-3 py-4 text-[12px] text-text-secondary">
             {t('decisionConsequences.empty')}
           </div>
-        ) : records.map((record) => (
-          <article key={record.id} className="rounded border border-panel-border/70 bg-black/20 px-3 py-3">
+        ) : visibleRecords.map((record) => {
+          const isFocused = record.id === focusedDecisionConsequenceId;
+          return (
+          <article
+            key={record.id}
+            tabIndex={isFocused ? -1 : undefined}
+            data-focused-decision-consequence-id={record.id}
+            className={`rounded border px-3 py-3 ${isFocused ? 'border-accent-gold/70 bg-accent-gold/10 shadow-[0_0_0_1px_rgba(218,165,32,0.18)]' : 'border-panel-border/70 bg-black/20'}`}
+          >
             <div className="flex items-start gap-3">
               <img
                 src={getConsequenceStillForRecord(record)}
@@ -120,7 +142,8 @@ export function DecisionConsequenceRecordsPanel() {
               </div>
             </div>
           </article>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

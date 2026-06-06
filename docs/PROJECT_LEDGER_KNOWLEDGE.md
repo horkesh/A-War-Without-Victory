@@ -1,3 +1,9 @@
+## 2026-06-06 - Records route targets must validate and focus their concrete subtab rows
+
+**Shell handoff validators must mirror declared route unions:** `ArmyHQRecordsSubTab` already included `decisions`, but shell handoff validation rejected it. Durable rule: when adding or repurposing a route union member, update the runtime validator and add a route test for that exact value; type declarations alone are not enough for deep links or Warroom handoffs. Applied in `[2026-06-06] fix(ui): focus decision consequence records from desk routes`; report `docs/40_reports/implemented/20260606_DECISION_CONSEQUENCE_RECORD_FOCUS.md`.
+
+**Receipt routes should preserve row identity, not just destination surface:** Opening "Records" is too coarse when a shared Records surface contains multiple subtab ledgers. Durable rule: Records-filed consequence rows should carry their stable record id into the destination surface, and the receiving panel may expand its normal page/window only to reveal the focused row without changing sort order. Applied in `[2026-06-06] fix(ui): focus decision consequence records from desk routes`.
+
 ## 2026-06-06 - Command category role and filter framing
 
 **Command category cards should state their expected mode before routing:** count badges alone do not tell the player whether a card opens a directive, an inspection surface, or records/monitoring. Durable rule: keep category order/routing deterministic, but add stable role metadata at the category source and render a compact role chip rather than inferring role from card title or count. Applied in `[2026-06-06] fix(ui): frame command card roles and filters`; report `docs/40_reports/implemented/20260606_COMMAND_CARD_ROLE_FRAMING.md`.
