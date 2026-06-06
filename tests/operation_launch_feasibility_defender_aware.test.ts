@@ -129,14 +129,7 @@ describe('operation launch feasibility uses defender-aware combat power', () => 
         expect(result.blocker).toBe('defender_power_too_high');
         expect(result.attackerPower).toBeGreaterThan(0);
         expect(result.defenderPower).toBeGreaterThan(result.attackerPower);
-        // COMBAT-P14: the reported ratio is now the return-fire-adjusted ratio
-        // (rawRatio ÷ getDefensiveFireMult ∈ [1.0, 1.8]). It is therefore ≤ the raw
-        // attackerPower/defenderPower and remains positive. With this defender's
-        // (default-composition) light return-fire the reduction is small but real.
-        const rawRatio = result.attackerPower / result.defenderPower;
-        expect(result.ratio).toBeGreaterThan(0);
-        expect(result.ratio).toBeLessThanOrEqual(rawRatio + 1e-9);
-        expect(result.ratio).toBeGreaterThanOrEqual(rawRatio / 1.8 - 1e-9);
+        expect(result.ratio).toBeCloseTo(result.attackerPower / result.defenderPower, 10);
         expect(result.defenderPowerById?.[0]?.breakdown.power).toBeCloseTo(result.defenderPower, 10);
         expect(result.defenderPowerById?.[0]?.breakdown.base).toBeGreaterThan(0);
         expect(result.defenderPowerById?.[0]?.breakdown.entrenchmentMult).toBeGreaterThan(1);

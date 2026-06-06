@@ -945,39 +945,6 @@ export function getDefensiveFireMult(
 }
 
 /**
- * COMBAT-P14: fold defender RETURN-FIRE into a launch-feasibility / force-ratio estimate.
- *
- * The resolver (attack_resolution_osid.ts → computeFinalCasualties) applies
- * `getDefensiveFireMult` ONLY as a multiplier on attacker casualties AFTER the
- * outcome/powerRatio are fixed — a high-return-fire defender (artillery-heavy /
- * tank-backed) makes the attacker bleed extra but never lowered the predictor's
- * power ratio. So the feasibility / force-ratio surfaces stayed over-optimistic
- * against dug-in, artillery-heavy defenders and launched zero-effect attacks.
- *
- * This helper mirrors the resolver by REUSING `getDefensiveFireMult` (no parallel
- * formula): an attacker that must pay an extra return-fire blood-tax has its
- * EFFECTIVE offensive ratio degraded in proportion to that tax. The adjustment is
- * BOUNDED and deterministic: `getDefensiveFireMult ∈ [1.0, MAX_DEFENSIVE_FIRE_MULT]`
- * (1.0–1.8), so the returned ratio is at most divided by 1.8 (~-44%) and is NEVER
- * raised. A soft target (no artillery/armour → mult 1.0) is returned unchanged.
- *
- * No double-counting: entrenchment / terrain / artillery-suppression already live
- * in defenderPower via computeDefenderPower; this term is the orthogonal
- * return-fire cost the resolver applies separately to attacker casualties.
- */
-export function applyDefensiveFireToRatio(
-    ratio: number,
-    defenders: FormationState[],
-    defenderFactionId: string,
-    state: GameState,
-): number {
-    if (!Number.isFinite(ratio) || ratio <= 0) return ratio;
-    const mult = getDefensiveFireMult(defenders, defenderFactionId, state);
-    if (mult <= 1.0) return ratio;
-    return ratio / mult;
-}
-
-/**
  * Heavy weapons offensive firepower multiplier.
  * Cap 1.5 (2.5× max), divisor 200.
  *

@@ -13,7 +13,6 @@ import type { OperationalToCanonicalReverseMap } from '../../data/operational_da
 import type { EdgeRecord } from '../../map/settlements.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
 import {
-    applyDefensiveFireToRatio,
     computeAttackerPower,
     type DefenderPowerBreakdown,
     getArtillerySuppression,
@@ -202,17 +201,7 @@ export function evaluateLaunchFeasibility(
             };
         }
 
-        // COMBAT-P14: degrade the launch-feasibility ratio by the defender's
-        // bounded return-fire tax (same getDefensiveFireMult the resolver applies
-        // to attacker casualties), so a high-return-fire (artillery-heavy / dug-in)
-        // defender raises the predicted attacker cost. No double-counting:
-        // entrenchment/terrain/artillery-suppression are already in defenderPower.
-        const ratio = applyDefensiveFireToRatio(
-            attackerPower / defenderPower,
-            defenders,
-            defenderFaction,
-            state,
-        );
+        const ratio = attackerPower / defenderPower;
         const defenderContext = {
             objectiveOsid: obj,
             primaryDefenderId: primary.id,

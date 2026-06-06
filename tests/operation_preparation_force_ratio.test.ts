@@ -408,16 +408,10 @@ describe('Family 3 GREEN — neutral parity preserved', () => {
         // ratio≈1.0 in this codebase. The "parity" notion the test enforces is:
         // with no terrain/entrenchment/equipment/morale advantage either way,
         // the ratio sits in a stable band determined by codebase posture math.
-        //
-        // COMBAT-P14: estimateForceRatio now folds the defender's RETURN-FIRE tax
-        // (getDefensiveFireMult) into the ratio. These defenders carry EQUIPPED_COMP
-        // (artillery 18 + tanks 12 each) → return-fire mult ≈1.46, so the symmetric
-        // ratio is degraded from ≈1.76 to ≈1.21. That is the intended mechanic: an
-        // artillery-bearing defender legitimately makes a symmetric assault less
-        // attractive. Band floor lowered 1.4→1.15 to admit the return-fire-adjusted
-        // value. Critical guarantee unchanged: symmetric must NOT read as
-        // clear-superiority (< 3.0; Family 2 covers the ≥3.0 GREEN case).
-        expect(ratio).toBeGreaterThanOrEqual(1.15);
+        // Critical guarantee: "still recognizes superiority" stop-gate (per
+        // /war-or-game) — symmetric must NOT produce ratio >= 3.0 (clear-superiority
+        // territory). Family 2 already covers >=3.0 GREEN.
+        expect(ratio).toBeGreaterThanOrEqual(1.4);
         expect(ratio).toBeLessThanOrEqual(2.2);
     });
 });
