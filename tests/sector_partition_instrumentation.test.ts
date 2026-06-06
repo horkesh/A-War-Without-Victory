@@ -612,7 +612,10 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(endIdx).toBeGreaterThan(startIdx);
 
         const region = raw.slice(startIdx, endIdx);
-        expect(region).toContain('const sectorFriendly = getSectorFrontOsids(sector);');
+        // Single-call-frame memoization: front-OSID lookups route through the
+        // per-invocation `frontOsidsFor(...)` cache (byte-identical to a fresh
+        // getSectorFrontOsids rebuild because sub_segments are never mutated here).
+        expect(region).toContain('const sectorFriendly = frontOsidsFor(sector);');
         expect(region).toContain('if (sectorFriendly.has(startOsid)) return true;');
         expect(region).toContain('if (sectorFriendly.has(neighbor)) return true;');
         expect(region).not.toContain('bfsToNearestSector');
@@ -650,7 +653,10 @@ describe('sector-partition instrumentation — env-flag gating', () => {
 
         const region = raw.slice(startIdx, endIdx);
         expect(raw).toContain('const pickVacantLocalFrontTargetFromFrontSet = (');
-        expect(region).toContain('const sectorFrontOsids = getSectorFrontOsids(sector);');
+        // Front-OSID lookup routes through the per-invocation `frontOsidsFor(...)`
+        // memoization cache (byte-identical to getSectorFrontOsids; sub_segments
+        // are immutable across this function's passes).
+        expect(region).toContain('const sectorFrontOsids = frontOsidsFor(sector);');
         expect(region).toContain('const sameComponentDonors = corpsSectors');
         expect(region).toContain('pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts)');
         expect(region).toContain('pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, stepActiveCounts)');

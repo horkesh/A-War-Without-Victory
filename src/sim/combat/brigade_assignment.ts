@@ -1533,11 +1533,37 @@ export function ensureMinimumSectorCoverage(
     const brigadeMovementOrders = state?.military.brigade_movement_orders;
     const LOCAL_FRONT_RELIEF_MAX_HOPS = 3;
 
+    // ── Single-call-frame front-OSID memoization (perf) ──
+    // `getSectorFrontOsids(sector)` rebuilds a Set by iterating every sub_segment's
+    // friendly_osids. Across this function's many passes (territory-claim-rescue,
+    // density-floor, idle-equalization, moderate-reinforcement, severe-rescue) and
+    // the tight donor×brigade loops inside canReachSectorFront / claimTypeForSector /
+    // pickVacantLocalFrontTarget, the same sector objects are re-scanned thousands of
+    // times per invocation. This function never mutates sub_segments or friendly_osids
+    // (it only moves brigade ids between assigned/reserve/rear lists and updates
+    // formation.location_osid/entrenchment_turns), so the front-OSID set is invariant
+    // for the whole call — the cached set is byte-identical to a fresh rebuild.
+    //
+    // Determinism: scoped to this single invocation (local const Map, never module-
+    // level / cross-turn), keyed by sector object identity, no env/time/random input.
+    // The returned Set is treated read-only by every consumer in this function
+    // (.has / .size / iteration / spread-copy only); buildOneHopReserveBand likewise
+    // only reads it. Mirrors the existing sectorComponentCache / componentForSector
+    // pattern below.
+    const frontOsidCache = new Map<CorpsFrontSector, Set<string>>();
+    const frontOsidsFor = (sector: CorpsFrontSector): Set<string> => {
+        const cached = frontOsidCache.get(sector);
+        if (cached !== undefined) return cached;
+        const computed = getSectorFrontOsids(sector);
+        frontOsidCache.set(sector, computed);
+        return computed;
+    };
+
     const canReachSectorFront = (bid: string, sector: CorpsFrontSector): boolean => {
         const f = formations[bid];
         const startOsid = f?.location_osid;
         if (!startOsid) return false;
-        const sectorFriendly = getSectorFrontOsids(sector);
+        const sectorFriendly = frontOsidsFor(sector);
         if (sectorFriendly.size === 0) return false;
         if (sectorFriendly.has(startOsid)) return true;
 
@@ -1566,7 +1592,7 @@ export function ensureMinimumSectorCoverage(
         const formation = formations[brigadeId];
         const locationOsid = formation?.location_osid;
         if (!locationOsid) return null;
-        const frontSet = getSectorFrontOsids(sector);
+        const frontSet = frontOsidsFor(sector);
         if (frontSet.has(locationOsid)) return 'front';
         const oneHopBehind = buildOneHopReserveBand(frontSet, adjacency, friendlyOsids);
         if (oneHopBehind.has(locationOsid)) return 'reserve';
@@ -1628,7 +1654,7 @@ export function ensureMinimumSectorCoverage(
     ): { target: string; dist: number } | null => (
         pickVacantLocalFrontTargetFromFrontSet(
             bid,
-            getSectorFrontOsids(sector),
+            frontOsidsFor(sector),
             activeCounts,
             maxHops,
         )
@@ -1693,7 +1719,7 @@ export function ensureMinimumSectorCoverage(
 
         for (const zero of zeroFrontSectors) {
             const zeroTerritory = new Set(zero.territory_osids);
-            const zeroFrontOsids = getSectorFrontOsids(zero);
+            const zeroFrontOsids = frontOsidsFor(zero);
             if (zeroTerritory.size === 0) continue;
 
             // Collect (donor sector, brigade id) candidates: brigades physically in
@@ -1708,7 +1734,7 @@ export function ensureMinimumSectorCoverage(
                 if (s.corps_id !== zero.corps_id) continue;
                 if (s.assigned_brigade_ids.length <= 1) continue; // donor must retain ≥ 1
 
-                const donorFrontOsids = getSectorFrontOsids(s);
+                const donorFrontOsids = frontOsidsFor(s);
                 for (const bid of [...s.assigned_brigade_ids].sort(strictCompare)) {
                     const f = formations[bid];
                     if (!f?.location_osid) continue;
@@ -1751,7 +1777,7 @@ export function ensureMinimumSectorCoverage(
             if (sector.assigned_brigade_ids.length > 0) continue;
 
             const sectorComp = componentForSector(sector);
-            const sectorFrontOsids = getSectorFrontOsids(sector);
+            const sectorFrontOsids = frontOsidsFor(sector);
             const sameComponentDonors = corpsSectors
                 .filter(s =>
                     s.sector_id !== sector.sector_id
@@ -1864,7 +1890,7 @@ export function ensureMinimumSectorCoverage(
                     .sort((a, b) => b.assigned_brigade_ids.length - a.assigned_brigade_ids.length || strictCompare(a.sector_id, b.sector_id));
 
                 for (const donor of sameCompSectors) {
-                    const donorFront = getSectorFrontOsids(donor);
+                    const donorFront = frontOsidsFor(donor);
                     for (const bid of [...donor.assigned_brigade_ids].sort(strictCompare)) {
                         const f = formations[bid];
                         if (!f?.location_osid) continue;
@@ -1934,7 +1960,7 @@ export function ensureMinimumSectorCoverage(
                 if (transferred >= deficit) break;
                 if (donor.assigned_brigade_ids.length <= needed(donor)) continue;
 
-                const donorFront = getSectorFrontOsids(donor);
+                const donorFront = frontOsidsFor(donor);
                 let bid: string | undefined;
                 for (const b of [...donor.assigned_brigade_ids].sort(strictCompare)) {
                     const f = formations[b];
@@ -2001,7 +2027,7 @@ export function ensureMinimumSectorCoverage(
                 if (componentForSector(donor) !== recipComp) continue;
                 if (donor.assigned_brigade_ids.length / donor.length_edges < EQUALIZATION_MIN_DONOR_DENSITY) continue;
 
-                const donorFront = getSectorFrontOsids(donor);
+                const donorFront = frontOsidsFor(donor);
                 let bid: string | undefined;
                 for (const b of [...donor.assigned_brigade_ids].sort(strictCompare)) {
                     const f = formations[b];
@@ -2065,7 +2091,7 @@ export function ensureMinimumSectorCoverage(
                 if (transferred >= PASS_7D_MAX_TRANSFERS) break;
                 if (donor.assigned_brigade_ids.length / donor.length_edges < PASS_7D_DONOR_MIN_DENSITY) continue;
 
-                const donorFront = getSectorFrontOsids(donor);
+                const donorFront = frontOsidsFor(donor);
                 let bid: string | undefined;
                 for (const b of [...donor.assigned_brigade_ids].sort(strictCompare)) {
                     const f = formations[b];
