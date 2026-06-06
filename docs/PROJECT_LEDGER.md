@@ -19410,3 +19410,17 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Verification:** `npx.cmd vitest run tests\balkan_battlegrounds_knowledge_base_artifact_ownership.test.ts tests\terrain_snapshot_artifact_ownership.test.ts tests\generated_artifact_ownership_matrix_contract.test.ts --reporter=dot`; `npm.cmd run typecheck -- --pretty false`; `git diff --check`. No scenario/baseline regression was run because no sim, save, scenario, or artifact bytes changed.
 
 ---
+
+## [2026-06-06] perf(sector): reuse friendly component map during brigade classification
+
+**Type:** Deterministic sector/frontline performance optimization. No sector truth, combat math, operation behavior, scenario data, save schema, UI behavior, baseline manifest, replay writer, or generated artifact changed.
+
+**Change:** `buildFactionSectors(...)` now reuses the friendly territory component map created during pre-component setup when classifying brigades. The old path could rebuild `buildFriendlyComponents(adjacency, friendlyOsids)` later in the same invocation when no `SpatialContext` component map was available.
+
+**Docs/roadmap:** Added `docs/40_reports/implemented/20260606_SECTOR_COMPONENT_MAP_REUSE.md` and updated `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/SECTOR_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/2026-05-20-sector-performance-next-target-plan.md`, `docs/plans/2026-05-24-engine-quality-residuals-execution-plan.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, and `.claude/napkin.md`.
+
+**Proof:** Focused sector instrumentation/integration command passed; final-sector reconciliation/cache/phase-order pack passed 15/15; hotspot-report pack passed 2/2; `npm.cmd run typecheck -- --pretty false` passed. Changed `npm.cmd run sim:scenario:run:40w:timed` preserved final hash `d1ace172a29b2353`. Changed partition profile moved total wall time to `85.3635816s` from pre-change `85.5309106s`, `partition-corps-front-sectors` to `7022.637ms` from `7114.2066ms`, `generate-bot-corps-orders` to `7150.147ms` from `7253.1478ms`, and `reconcile-final-sector-truth` to `7196.952ms` from `7356.5169ms`. `npm.cmd run test:baselines` passed with all scenarios matching.
+
+**Report:** `docs/40_reports/implemented/20260606_SECTOR_COMPONENT_MAP_REUSE.md`
+
+---

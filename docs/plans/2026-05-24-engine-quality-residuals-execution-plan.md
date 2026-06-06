@@ -6,7 +6,7 @@
 **Related command-board rows:** P1 Sector/frontline performance residuals; P1 Optional `GameState` schema contract; P1 Save/load/replay and generated-artifact stability
 **Collision rules:** May touch engine, diagnostics, save/schema, tests, and artifacts only inside the selected phase. Must not mix performance, schema, and artifact fixes in one implementation commit.
 **Phase covered:** Profile-led sector optimization, optional-field contract hardening, and save/replay/generated-artifact stability.
-**Current next action:** Pick exactly one phase, write or identify focused tests first, and run the phase-specific proof. Latest sector closeout is `docs/40_reports/implemented/20260606_SECTOR_ENEMY_PERSONNEL_INDEX_REUSE.md`; re-profile again before another sector slice. Latest optional-schema closeout in flight is the derived military scalar-map validate-when-present batch; do not mix schema and sector performance in one commit.
+**Current next action:** Pick exactly one phase, write or identify focused tests first, and run the phase-specific proof. Latest sector closeout is `docs/40_reports/implemented/20260606_SECTOR_COMPONENT_MAP_REUSE.md`; re-profile again before another sector slice. Latest optional-schema closeout is the scenario military guidance validate-when-present batch; do not mix schema and sector performance in one commit.
 
 ## Purpose
 
