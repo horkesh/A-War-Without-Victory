@@ -1,13 +1,13 @@
 /**
  * decisionRoomLensRequest.ts — a tiny module-level pub/sub for deep-linking the
- * Presidential Decision Room to a specific lens (category).
+ * Presidential Decision Room to a specific lens and command-card category.
  *
- * The command-surface card strip needs to open the Decision Room PRE-FILTERED to
- * a category's lens. The Decision Room panel owns its own `activeLens` internal
- * state; rather than lift that state (which would churn the panel and the global
- * game store), the card strip pushes a one-shot "requested lens" here and the
- * panel consumes it on mount via `useSyncExternalStore`. This keeps the global
- * game store untouched and the panel change minimal (a single consume effect).
+ * The command-surface card strip needs to open the Decision Room pre-filtered to
+ * an exact six-card category, including categories represented by predicates
+ * rather than one broad Decision Room lens. The Decision Room panel owns its own
+ * internal focus state; rather than lift that state (which would churn the panel
+ * and the global game store), the card strip pushes a one-shot request here and
+ * the panel consumes it on mount via `useSyncExternalStore`.
  *
  * Pure presentation: no engine/state/scenario touch, no Math.random/Date.now.
  *
@@ -15,10 +15,16 @@
  */
 
 import type { PresidentialDecisionRoomLensId } from '../data/presidentialDecisionRoom';
+import type { PresidentialCommandCategoryId } from '../data/presidentialCategories';
 
 type Listener = () => void;
 
-let requestedLens: PresidentialDecisionRoomLensId | null = null;
+export interface DecisionRoomLensRequest {
+  lens: PresidentialDecisionRoomLensId;
+  commandCategoryId: PresidentialCommandCategoryId | null;
+}
+
+let requestedFocus: DecisionRoomLensRequest | null = null;
 const listeners = new Set<Listener>();
 
 function emit(): void {
@@ -26,27 +32,31 @@ function emit(): void {
 }
 
 /**
- * Request the Decision Room open pre-filtered to `lens`. The panel reads and
- * clears this on its next render (one-shot). Idempotent for identical lenses.
+ * Request the Decision Room open pre-filtered to `lens` and, when present, the
+ * exact command category. The panel reads and clears this on its next render
+ * (one-shot).
  */
-export function requestDecisionRoomLens(lens: PresidentialDecisionRoomLensId): void {
-  requestedLens = lens;
+export function requestDecisionRoomLens(
+  lens: PresidentialDecisionRoomLensId,
+  commandCategoryId: PresidentialCommandCategoryId | null = null,
+): void {
+  requestedFocus = { lens, commandCategoryId };
   emit();
 }
 
-/** Read the pending requested lens (null when none). Does not clear. */
-export function peekRequestedDecisionRoomLens(): PresidentialDecisionRoomLensId | null {
-  return requestedLens;
+/** Read the pending requested focus (null when none). Does not clear. */
+export function peekRequestedDecisionRoomLens(): DecisionRoomLensRequest | null {
+  return requestedFocus;
 }
 
-/** Read and clear the pending requested lens. Returns null when none. */
-export function consumeRequestedDecisionRoomLens(): PresidentialDecisionRoomLensId | null {
-  const lens = requestedLens;
-  if (lens !== null) {
-    requestedLens = null;
+/** Read and clear the pending requested focus. Returns null when none. */
+export function consumeRequestedDecisionRoomLens(): DecisionRoomLensRequest | null {
+  const focus = requestedFocus;
+  if (focus !== null) {
+    requestedFocus = null;
     emit();
   }
-  return lens;
+  return focus;
 }
 
 /** Subscribe to lens-request changes (for useSyncExternalStore). */
@@ -58,12 +68,12 @@ export function subscribeDecisionRoomLensRequest(listener: Listener): () => void
 }
 
 /** Snapshot accessor for useSyncExternalStore. */
-export function getDecisionRoomLensRequestSnapshot(): PresidentialDecisionRoomLensId | null {
-  return requestedLens;
+export function getDecisionRoomLensRequestSnapshot(): DecisionRoomLensRequest | null {
+  return requestedFocus;
 }
 
 /** Test-only: reset module state between cases. */
 export function __resetDecisionRoomLensRequestForTest(): void {
-  requestedLens = null;
+  requestedFocus = null;
   listeners.clear();
 }

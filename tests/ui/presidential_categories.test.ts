@@ -17,6 +17,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import {
   PRESIDENTIAL_COMMAND_CATEGORIES,
   WARROOM_HOTSPOT_TO_CATEGORY,
+  cardBelongsToPresidentialCommandCategory,
   categoryForWarroomHotspot,
   derivePresidentialCommandCategoryCounts,
   lensForCategory,
@@ -91,6 +92,16 @@ describe('presidential command categories — taxonomy', () => {
     expect(byId.get('cat_conscience')).toEqual([]);
   });
 
+  it('assigns stable player-facing roles to the six cards', () => {
+    const roles = new Map(PRESIDENTIAL_COMMAND_CATEGORIES.map((c) => [c.id, c.role]));
+    expect(roles.get('cat_war_direction')).toBe('act');
+    expect(roles.get('cat_diplomacy')).toBe('act');
+    expect(roles.get('cat_home_front')).toBe('inspect');
+    expect(roles.get('cat_command')).toBe('act');
+    expect(roles.get('cat_conscience')).toBe('act');
+    expect(roles.get('cat_record')).toBe('monitor');
+  });
+
   it('single-source categories deep-link to their lens; multi-source link to all', () => {
     const diplomacy = PRESIDENTIAL_COMMAND_CATEGORIES.find((c) => c.id === 'cat_diplomacy')!;
     const warDirection = PRESIDENTIAL_COMMAND_CATEGORIES.find((c) => c.id === 'cat_war_direction')!;
@@ -116,6 +127,8 @@ describe('presidential command categories — count derivation', () => {
 
     const war = byId.get('cat_war_direction')!;
     expect(war.count).toBe(3); // opportunity + operational + briefing
+    expect(war.role).toBe('act');
+    expect(war.roleLabel).toBe('Act');
     expect(war.urgentCount).toBe(1); // the critical opportunity
     expect(war.isUrgent).toBe(true);
 
@@ -165,6 +178,32 @@ describe('presidential command categories — count derivation', () => {
     const war = byId.get('cat_war_direction')!;
     expect(war.count).toBe(1);
     expect(war.urgentCount).toBe(0);
+  });
+
+  it('uses the same exact predicate for command-card filtering and counts', () => {
+    const cards = [
+      makeCard({ id: 'supply:player-visibility', category: 'operational', severity: 'critical' }),
+      makeCard({ id: 'paramilitary:pending', category: 'decision', severity: 'blocking' }),
+      makeCard({ id: 'manifest:peace_plan', category: 'decision', severity: 'warning' }),
+      makeCard({ id: 'command:front-visit', category: 'command', severity: 'info' }),
+    ];
+    const view = makeView(cards);
+    const countsById = new Map(derivePresidentialCommandCategoryCounts(view).map((count) => [count.id, count.count]));
+
+    for (const category of PRESIDENTIAL_COMMAND_CATEGORIES) {
+      const filtered = cards.filter((card) => cardBelongsToPresidentialCommandCategory(card, category.id));
+      expect(filtered).toHaveLength(countsById.get(category.id) ?? -1);
+    }
+
+    expect(
+      cards.filter((card) => cardBelongsToPresidentialCommandCategory(card, 'cat_home_front')).map((card) => card.id),
+    ).toEqual(['supply:player-visibility']);
+    expect(
+      cards.filter((card) => cardBelongsToPresidentialCommandCategory(card, 'cat_conscience')).map((card) => card.id),
+    ).toEqual(['paramilitary:pending']);
+    expect(
+      cards.filter((card) => cardBelongsToPresidentialCommandCategory(card, 'cat_diplomacy')).map((card) => card.id),
+    ).toEqual(['manifest:peace_plan']);
   });
 
   it('returns zero counts for an empty view', () => {
@@ -246,6 +285,8 @@ describe('CommandCard fallback placeholder', () => {
           id: 'cat_unmapped_does_not_exist' as PresidentialCommandCategoryId,
           title: 'Unmapped',
           blurb: 'No art mapped.',
+          role: 'inspect',
+          roleLabel: 'Inspect',
           count: 3,
           urgentCount: 1,
           isUrgent: true,
@@ -257,6 +298,8 @@ describe('CommandCard fallback placeholder', () => {
     );
     // No art resolves → the fallback placeholder must render.
     expect(html).toContain('command-card-fallback-cat_unmapped_does_not_exist');
+    expect(html).toContain('command-card-role-cat_unmapped_does_not_exist');
+    expect(html).toContain('Inspect');
     expect(html).toContain('command-card-cat_unmapped_does_not_exist');
     expect(html).toContain('Unmapped');
     expect(html).toContain('command-card-urgent-cat_unmapped_does_not_exist'); // urgent pip
@@ -272,6 +315,8 @@ describe('CommandCard fallback placeholder', () => {
           id: 'cat_home_front',
           title: 'Home Front',
           blurb: 'Mobilization.',
+          role: 'inspect',
+          roleLabel: 'Inspect',
           count: 0,
           urgentCount: 0,
           isUrgent: false,

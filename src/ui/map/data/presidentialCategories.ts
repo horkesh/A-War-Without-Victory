@@ -16,6 +16,7 @@
  */
 
 import type {
+  PresidentialDecisionRoomCard,
   PresidentialDecisionRoomCategory,
   PresidentialDecisionRoomLensId,
   PresidentialDecisionRoomView,
@@ -30,6 +31,8 @@ export type PresidentialCommandCategoryId =
   | 'cat_conscience'
   | 'cat_record';
 
+export type PresidentialCommandCategoryRole = 'act' | 'inspect' | 'monitor';
+
 export interface PresidentialCommandCategory {
   /** Stable id — also the asset key (`<id>.webp`) and the CommandCard test id. */
   id: PresidentialCommandCategoryId;
@@ -37,6 +40,10 @@ export interface PresidentialCommandCategory {
   title: string;
   /** One-line scan blurb. */
   blurb: string;
+  /** Player-facing expectation for the card's next step. */
+  role: PresidentialCommandCategoryRole;
+  /** Short rendered role chip. */
+  roleLabel: string;
   /**
    * The underlying decision-room categories this card aggregates. A card with
    * exactly one source category deep-links to that lens; a multi-source card
@@ -49,6 +56,8 @@ export interface PresidentialCommandCategoryCount {
   id: PresidentialCommandCategoryId;
   title: string;
   blurb: string;
+  role: PresidentialCommandCategoryRole;
+  roleLabel: string;
   /** Total pending items across this card's source categories. */
   count: number;
   /** Blocking + critical items across this card's source categories. */
@@ -87,36 +96,48 @@ export const PRESIDENTIAL_COMMAND_CATEGORIES: readonly PresidentialCommandCatego
     id: 'cat_war_direction',
     title: 'War Direction',
     blurb: 'Operations, opportunities, and the front sitrep.',
+    role: 'act',
+    roleLabel: 'Act',
     sources: ['opportunity', 'operational', 'briefing'],
   },
   {
     id: 'cat_diplomacy',
     title: 'Diplomacy & Patrons',
     blurb: 'Peace plans, counter-offers, and patron relations.',
+    role: 'act',
+    roleLabel: 'Act',
     sources: ['decision', 'counter_offer'],
   },
   {
     id: 'cat_home_front',
     title: 'Home Front',
     blurb: 'Mobilization, logistics, and municipal support.',
+    role: 'inspect',
+    roleLabel: 'Inspect',
     sources: [],
   },
   {
     id: 'cat_command',
     title: 'Command & Personnel',
     blurb: 'Commanders, elite units, and officer matters.',
+    role: 'act',
+    roleLabel: 'Act',
     sources: ['command'],
   },
   {
     id: 'cat_conscience',
     title: 'Conscience & Atrocity',
     blurb: 'Paramilitary requests — the bright line.',
+    role: 'act',
+    roleLabel: 'Act',
     sources: [],
   },
   {
     id: 'cat_record',
     title: "The War's Record",
     blurb: 'Costly turns, campaign cost, and the chronicle.',
+    role: 'monitor',
+    roleLabel: 'Monitor',
     sources: ['turn', 'cost', 'memory'],
   },
 ] as const;
@@ -140,6 +161,25 @@ function isHomeFrontCard(cardId: string): boolean {
   return cardId === SUPPLY_VISIBILITY_CARD_ID;
 }
 
+/**
+ * True when a Decision Room card belongs to a six-card presidential command
+ * category. This is the exact predicate used by category-card deep links, so
+ * predicate-owned cards (Home Front / Conscience) no longer fall back to the
+ * mixed `all` lens when selected from the command strip.
+ */
+export function cardBelongsToPresidentialCommandCategory(
+  card: PresidentialDecisionRoomCard,
+  categoryId: PresidentialCommandCategoryId,
+): boolean {
+  if (categoryId === 'cat_home_front') return isHomeFrontCard(card.id);
+  if (isHomeFrontCard(card.id)) return false;
+  if (categoryId === 'cat_conscience') return isConscienceCard(card.id);
+  if (isConscienceCard(card.id)) return false;
+  const category = getPresidentialCommandCategory(categoryId);
+  if (!category) return false;
+  return category.sources.includes(card.category);
+}
+
 /** The lens a category deep-links to: its single source, else `all`. */
 export function lensForCategory(category: PresidentialCommandCategory): PresidentialDecisionRoomLensId {
   if (category.sources.length === 1) return category.sources[0];
@@ -158,17 +198,7 @@ export function derivePresidentialCommandCategoryCounts(
 ): PresidentialCommandCategoryCount[] {
   const cards = view.cards;
   return PRESIDENTIAL_COMMAND_CATEGORIES.map((category) => {
-    const sourceSet = new Set<PresidentialDecisionRoomCategory>(category.sources);
-    const matched = cards.filter((card) => {
-      // Home Front owns supply/economy pressure exclusively.
-      if (category.id === 'cat_home_front') return isHomeFrontCard(card.id);
-      if (isHomeFrontCard(card.id)) return false;
-      // Conscience owns the paramilitary card exclusively.
-      if (category.id === 'cat_conscience') return isConscienceCard(card.id);
-      // Every other category excludes the paramilitary card from its source set.
-      if (isConscienceCard(card.id)) return false;
-      return sourceSet.has(card.category);
-    });
+    const matched = cards.filter((card) => cardBelongsToPresidentialCommandCategory(card, category.id));
     const urgentCount = matched.filter(
       (card) => card.severity === 'blocking' || card.severity === 'critical',
     ).length;
@@ -176,6 +206,8 @@ export function derivePresidentialCommandCategoryCounts(
       id: category.id,
       title: category.title,
       blurb: category.blurb,
+      role: category.role,
+      roleLabel: category.roleLabel,
       count: matched.length,
       urgentCount,
       isUrgent: urgentCount > 0,

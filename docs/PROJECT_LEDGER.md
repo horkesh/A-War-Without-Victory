@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-06] fix(ui): frame command card roles and filters
+
+**Type:** UI/read-model command-surface clarity and route cohesion. No category order, count semantics, command authority behavior, simulation behavior, save schema, migration, scenario data, baseline manifest, generated artifact, randomness, timestamps, or persisted output ordering changed.
+
+**Change:** Presidential command-surface category cards now carry stable `act` / `inspect` / `monitor` role metadata and render an `Act`, `Inspect`, or `Monitor` chip on each card. Command-card handoff now also carries the exact six-card category id alongside the existing Decision Room lens, so predicate-owned Home Front and Conscience categories filter to their real cards instead of the mixed `all` view. The roles clarify player expectation before opening a card while preserving existing command authority and owner-surface behavior.
+
+**Docs/roadmap:** Added `docs/40_reports/implemented/20260606_COMMAND_CARD_ROLE_FRAMING.md`; updated `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/GUI_MASTER.md`, `docs/40_reports/PRODUCT_FACING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, and `docs/PROJECT_LEDGER_KNOWLEDGE.md`.
+
+**Verification:** Focused command-card/Decision Room route pack passed 19/19: `node node_modules\vitest\vitest.mjs run tests\ui\presidential_categories.test.ts tests\ui\command_card_strip_accessibility.test.ts tests\ui\presidential_decision_room_panel_i18n.test.ts --reporter=dot`. Closeout validation also ran `npm.cmd run typecheck -- --pretty false` and `git diff --check`.
+
+**Report:** `docs/40_reports/implemented/20260606_COMMAND_CARD_ROLE_FRAMING.md`
+
+---
+
 ## [2026-06-06] fix(ui): repurpose command-surface read models
 
 **Type:** UI/read-model hardening. No simulation behavior, save schema, migration, scenario data, baseline manifest, generated artifact, replay writer, randomness, timestamps, or persisted output ordering changed.
