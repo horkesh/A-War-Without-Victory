@@ -30,7 +30,7 @@ type SectorPartitionPerfTimer = <T>(label: string, fn: () => T) => T;
 type FrontEdgeMeta = { a: string; b: string; side_a: string | null; side_b: string | null };
 type FrontEdgeMetaLookup = ReadonlyMap<string, FrontEdgeMeta>;
 
-interface SectorFormationScanIndex {
+export interface SectorFormationScanIndex {
     assignedCandidateIds: readonly FormationId[];
     enemyPersonnelByLocation: ReadonlyMap<string, number>;
 }
@@ -176,6 +176,7 @@ export function buildMultiSectorsForCorps(
     perfTime: SectorPartitionPerfTimer = (_label, fn) => fn(),
     sharedFrontEdgeMeta?: FrontEdgeMetaLookup,
     sharedActiveCombatFormationScanIds?: readonly FormationId[],
+    sharedSectorFormationScanIndex?: SectorFormationScanIndex,
 ): CorpsFrontSector[] {
     if (edgeIds.length === 0) return [];
 
@@ -248,7 +249,7 @@ export function buildMultiSectorsForCorps(
         sharedActiveCombatFormationScanIds ?? buildActiveCombatFormationScanIds(formations)
     ));
     const sectorFormationScanIndex = perfTime(`buildMultiSectorsForCorps:${corpsId}:sector-formation-scan-index`, () => (
-        buildSectorFormationScanIndex(formations, faction, corpsId, activeCombatFormationScanIds)
+        sharedSectorFormationScanIndex ?? buildSectorFormationScanIndex(formations, faction, corpsId, activeCombatFormationScanIds)
     ));
 
     const sectors = perfTime(`buildMultiSectorsForCorps:${corpsId}:sector-object-construction`, () => {

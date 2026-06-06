@@ -19276,3 +19276,17 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Report:** `docs/40_reports/implemented/20260605_SECTOR_ACTIVE_COMBAT_SCAN_REUSE.md`
 
 ---
+
+## [2026-06-06] perf(sector): reuse sector construction indexes and reachability sets
+
+**Type:** Deterministic sector/frontline performance optimization. No sector truth, combat math, operation behavior, scenario data, save schema, UI behavior, baseline manifest, replay writer, or generated artifact changed.
+
+**Change:** `buildFactionSectors(...)` now derives per-corps `SectorFormationScanIndex` packets from the existing sorted active-combat id universe and passes them into `buildMultiSectorsForCorps(...)`, keeping the old fallback for direct sector-builder callers. The staffability filter also precomputes faction/corps reachable-OSID sets once per invocation/corps and checks unique front OSIDs against those sets instead of repeating bounded BFS probes per candidate sector.
+
+**Docs/roadmap:** Added `docs/40_reports/implemented/20260606_SECTOR_CONSTRUCTION_INDEX_REACHABILITY_REUSE.md` and updated `docs/40_reports/README.md`, `docs/40_reports/SECTOR_MASTER.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/2026-05-20-sector-performance-next-target-plan.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, and `.claude/napkin.md`.
+
+**Proof:** Focused sector instrumentation/cache pack passed 40/40; `npm.cmd run typecheck -- --pretty false` passed; `git diff --check` passed. Worktree npm scenario wrapper was blocked by missing local `node_modules\tsx`; equivalent root-`tsx` invocation of `tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_40w.json --unique --map --timing-json --out runs` passed and preserved final hash `d1ace172a29b2353`. `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` passed. Changed partition profile sidecar total was `17,795.054ms` after prior `25,931.774ms`; `sector-formation-scan-index` dropped to `0.256ms`, and staffability filtering moved from `200.307ms` to `38.366ms` plus one-time reachability builds.
+
+**Report:** `docs/40_reports/implemented/20260606_SECTOR_CONSTRUCTION_INDEX_REACHABILITY_REUSE.md`
+
+---

@@ -60,6 +60,7 @@ import {
     consolidateIsolatedCorpsPockets,
 } from './sector_territory.js';
 import { buildActiveCombatFormationScanIds, buildMultiSectorsForCorps, buildSectorFromSubSegments, findSubSegments, splitOversizedSubSegments } from './sector_building.js';
+import type { SectorFormationScanIndex } from './sector_building.js';
 import { areSectorsEdgeAdjacent, mergeSectors, splitNonContiguousSectors } from './sector_splitting.js';
 import {
     classifyBrigadesByTerritory,
@@ -795,6 +796,53 @@ function recomputeMetricsByFaction(
     }
 }
 
+function buildReachableOsidsWithinHops(
+    brigadeLocations: readonly string[],
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>,
+    maxHops: number,
+): Set<string> {
+    const reachable = new Set<string>();
+    if (brigadeLocations.length === 0) return reachable;
+
+    const visited = new Set<string>();
+    let frontier: string[] = [];
+    for (const startOsid of brigadeLocations) {
+        if (!startOsid) continue;
+        if (visited.has(startOsid)) continue;
+        visited.add(startOsid);
+        reachable.add(startOsid);
+        frontier.push(startOsid);
+    }
+
+    for (let hop = 1; hop <= maxHops; hop++) {
+        const next: string[] = [];
+        for (const osid of frontier) {
+            for (const nb of adjacency.get(osid as Osid) ?? []) {
+                if (visited.has(nb)) continue;
+                visited.add(nb);
+                if (!friendlyOsids.has(nb)) continue;
+                reachable.add(nb);
+                next.push(nb);
+            }
+        }
+        if (next.length === 0) break;
+        frontier = next;
+    }
+
+    return reachable;
+}
+
+function reachableOsidsContainAny(
+    reachableOsids: ReadonlySet<string>,
+    targets: Set<string>,
+): boolean {
+    for (const target of targets) {
+        if (reachableOsids.has(target)) return true;
+    }
+    return false;
+}
+
 function canCorpsStaffSectorFront(
     sector: CorpsFrontSector,
     siblingSectors: CorpsFrontSector[],
@@ -806,6 +854,8 @@ function canCorpsStaffSectorFront(
     corpsBrigadeComponents: Set<number>,
     factionBrigadeComponents: Set<number>,
     uniqueFrontOsidsOverride?: Set<string>,
+    corpsReachableOsidsOverride?: ReadonlySet<string>,
+    factionReachableOsidsOverride?: ReadonlySet<string>,
 ): boolean {
     // The override path is invocation-local: the staffability filter rebuilds
     // the same set in O(total OSIDs) once per corps rather than O(siblings *
@@ -813,22 +863,28 @@ function canCorpsStaffSectorFront(
     // returned set's contents are identical to getSectorUniqueFrontOsids.
     const uniqueFrontOsids = uniqueFrontOsidsOverride ?? getSectorUniqueFrontOsids(sector, siblingSectors);
     if (uniqueFrontOsids.size > 0) {
-        if (canAnyBrigadeReachAny(
-            corpsBrigadeLocations,
-            uniqueFrontOsids,
-            adjacency,
-            friendlyOsids,
-            TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS,
-        )) {
+        const corpsCanReach = corpsReachableOsidsOverride
+            ? reachableOsidsContainAny(corpsReachableOsidsOverride, uniqueFrontOsids)
+            : canAnyBrigadeReachAny(
+                corpsBrigadeLocations,
+                uniqueFrontOsids,
+                adjacency,
+                friendlyOsids,
+                TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS,
+            );
+        if (corpsCanReach) {
             return true;
         }
-        return !canAnyBrigadeReachAny(
-            factionBrigadeLocations,
-            uniqueFrontOsids,
-            adjacency,
-            friendlyOsids,
-            TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS,
-        );
+        const factionCanReach = factionReachableOsidsOverride
+            ? reachableOsidsContainAny(factionReachableOsidsOverride, uniqueFrontOsids)
+            : canAnyBrigadeReachAny(
+                factionBrigadeLocations,
+                uniqueFrontOsids,
+                adjacency,
+                friendlyOsids,
+                TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS,
+            );
+        return !factionCanReach;
     }
 
     const sectorComp = getSectorComponent(sector, componentOf);
@@ -2746,21 +2802,39 @@ function buildFactionSectors(
 
     const {
         activeCombatCountByCorps,
+        activeCombatIdsByCorps,
         activeCombatLocationsByCorps,
         activeCombatComponentsByCorps,
+        enemyPersonnelByLocation,
         factionBrigadeLocations,
         factionBrigadeComponents,
     } = _perfTime(`buildFactionSectors:${faction}:active-combat-formation-index`, () => {
         const countByCorps = new Map<FormationId, number>();
+        const idsByCorps = new Map<FormationId, FormationId[]>();
         const locationsByCorps = new Map<FormationId, string[]>();
         const componentsByCorps = new Map<FormationId, Set<number>>();
+        const enemyPersonnel = new Map<string, number>();
         const allFactionLocations: string[] = [];
         const allFactionComponents = new Set<number>();
         for (const fid of activeCombatFormationScanIds) {
             const f = formations[fid];
-            if (!f || f.faction !== faction) continue;
+            if (!f) continue;
+            if (f.faction !== faction) {
+                if (f.location_osid) {
+                    enemyPersonnel.set(
+                        f.location_osid,
+                        (enemyPersonnel.get(f.location_osid) ?? 0) + (f.personnel ?? 0),
+                    );
+                }
+                continue;
+            }
             const corpsId = getFormationCorpsId(f);
-            if (corpsId) countByCorps.set(corpsId, (countByCorps.get(corpsId) ?? 0) + 1);
+            if (corpsId) {
+                countByCorps.set(corpsId, (countByCorps.get(corpsId) ?? 0) + 1);
+                const corpsIds = idsByCorps.get(corpsId) ?? [];
+                corpsIds.push(fid);
+                idsByCorps.set(corpsId, corpsIds);
+            }
             if (!f.location_osid) continue;
 
             allFactionLocations.push(f.location_osid);
@@ -2784,12 +2858,23 @@ function buildFactionSectors(
         }
         return {
             activeCombatCountByCorps: countByCorps,
+            activeCombatIdsByCorps: idsByCorps,
             activeCombatLocationsByCorps: locationsByCorps,
             activeCombatComponentsByCorps: componentsByCorps,
+            enemyPersonnelByLocation: enemyPersonnel,
             factionBrigadeLocations: allFactionLocations,
             factionBrigadeComponents: allFactionComponents,
         };
     });
+
+    const factionReachableOsids = _perfTime(`buildFactionSectors:${faction}:staffability-reachability:faction`, () => (
+        buildReachableOsidsWithinHops(
+            factionBrigadeLocations,
+            adjacency,
+            friendlyOsids,
+            TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS,
+        )
+    ));
 
     // Step 4: Build multi-sectors (sub-segments promoted to independent sectors)
     const sectors: CorpsFrontSector[] = [];
@@ -2801,17 +2886,29 @@ function buildFactionSectors(
 
         // Reuse the per-faction active-combat index built for this invocation.
         const corpsBrigadeComponents = activeCombatComponentsByCorps.get(corpsId) ?? new Set<number>();
+        const sectorFormationScanIndex: SectorFormationScanIndex = {
+            assignedCandidateIds: activeCombatIdsByCorps.get(corpsId) ?? [],
+            enemyPersonnelByLocation,
+        };
 
         const corpsMultiSectors = _perfTime(`buildFactionSectors:${faction}:corps-sector-construction:${corpsId}`, () =>
             _perfTime(`buildFactionSectors:${faction}:corps-sector-construction:${corpsId}:multi-sector-build`, () => buildMultiSectorsForCorps(
                 state, corpsId, faction, edgeIds, osidFrontEdges,
                 adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, formations, reverseMap, centroids, friendlyOsids,
-                _perfTime, edgeMeta, activeCombatFormationScanIds,
+                _perfTime, edgeMeta, activeCombatFormationScanIds, sectorFormationScanIndex,
             )),
         );
 
         // Locations remain sorted by formation ID because the index iterates sorted IDs.
         const corpsBrigadeLocations = activeCombatLocationsByCorps.get(corpsId) ?? [];
+        const corpsReachableOsids = _perfTime(`buildFactionSectors:${faction}:corps-sector-construction:${corpsId}:staffability-reachability`, () => (
+            buildReachableOsidsWithinHops(
+                corpsBrigadeLocations,
+                adjacency,
+                friendlyOsids,
+                TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS,
+            )
+        ));
 
         _perfTime(`buildFactionSectors:${faction}:corps-sector-construction:${corpsId}:staffability-filter`, () => {
             // Pre-compute per-OSID distinct-sector counts across all of this
@@ -2869,6 +2966,8 @@ function buildFactionSectors(
                     corpsBrigadeComponents,
                     factionBrigadeComponents,
                     uniqueFrontOsids,
+                    corpsReachableOsids,
+                    factionReachableOsids,
                 )) {
                     continue;
                 }

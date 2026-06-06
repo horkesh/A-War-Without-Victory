@@ -294,6 +294,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
             'buildFactionSectors:${faction}:post-classification-truth-normalization:recompute-power',
             'buildFactionSectors:${faction}:post-classification-truth-normalization:rehome-unassigned',
             'buildFactionSectors:${faction}:pre-component-setup',
+            'buildFactionSectors:${faction}:staffability-reachability:faction',
             'buildFactionSectors:${faction}:territory-voronoi',
             'buildFactionSectors:${faction}:territory-voronoi:assign',
             'buildFactionSectors:${faction}:territory-voronoi:repair-disconnected',
@@ -323,6 +324,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
             'buildMultiSectorsForCorps:${corpsId}:edge-meta-lookup',
             'buildMultiSectorsForCorps:${corpsId}:final-filter',
             'buildMultiSectorsForCorps:${corpsId}:post-split-merge',
+            'buildMultiSectorsForCorps:${corpsId}:sector-formation-scan-index',
             'buildMultiSectorsForCorps:${corpsId}:sector-object-construction',
             'buildMultiSectorsForCorps:${corpsId}:split-non-contiguous-sectors',
             'buildMultiSectorsForCorps:${corpsId}:subsegment-discovery',
@@ -370,8 +372,10 @@ describe('sector-partition instrumentation — env-flag gating', () => {
 
         expect(compact).toMatch(/sharedFrontEdgeMeta\?:\s*FrontEdgeMetaLookup/);
         expect(compact).toMatch(/sharedActiveCombatFormationScanIds\?:\s*readonly FormationId\[\]/);
+        expect(compact).toMatch(/sharedSectorFormationScanIndex\?:\s*SectorFormationScanIndex/);
         expect(compact).toMatch(/let\s+frontEdgeLookup:\s*Map<string,\s*FrontEdgeMeta>\s*\|\s*null\s*=\s*null/);
         expect(compact).toContain('sharedActiveCombatFormationScanIds ?? buildActiveCombatFormationScanIds(formations)');
+        expect(compact).toContain('sharedSectorFormationScanIndex ?? buildSectorFormationScanIndex(formations, faction, corpsId, activeCombatFormationScanIds)');
         const frontEdgeStatement = compact.match(/const\s+frontEdge\s*=\s*(?<expr>[^;]+);/)?.groups?.expr;
         expect(frontEdgeStatement).toBeTruthy();
         expect(frontEdgeStatement).toMatch(/^sharedFrontEdgeMeta\?\.get\(eid\)\s*\?\?/);
@@ -404,6 +408,57 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(factionEndIdx).toBeGreaterThan(factionStartIdx);
         const factionRegion = raw.slice(factionStartIdx, factionEndIdx).replace(/\s+/g, ' ');
         expect(factionRegion).toContain('_perfTime, edgeMeta, activeCombatFormationScanIds');
+    });
+
+    it('static contract: buildFactionSectors reuses invocation-local sector formation scan indexes', () => {
+        const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
+        const startIdx = raw.indexOf('function buildFactionSectors(');
+        const endIdx = raw.indexOf('// NOTE: Cold-front sector suppression', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        const compact = region.replace(/\s+/g, ' ');
+
+        expect(compact).toContain('activeCombatIdsByCorps: idsByCorps');
+        expect(compact).toContain('enemyPersonnelByLocation: enemyPersonnel');
+        expect(compact).toContain('const sectorFormationScanIndex: SectorFormationScanIndex =');
+        expect(compact).toContain('assignedCandidateIds: activeCombatIdsByCorps.get(corpsId) ?? []');
+        expect(compact).toContain('enemyPersonnelByLocation');
+        expect(compact).toContain('_perfTime, edgeMeta, activeCombatFormationScanIds, sectorFormationScanIndex');
+        expect(region).not.toMatch(/buildSectorFormationScanIndex\(formations,\s*faction,\s*corpsId/);
+        expect(region).not.toMatch(/\bDate\.now\s*\(/);
+        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
+    });
+
+    it('static contract: staffability reachability uses invocation-local reachable OSID sets', () => {
+        const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
+        const startIdx = raw.indexOf('function buildReachableOsidsWithinHops(');
+        const endIdx = raw.indexOf('function isSectorUnstaffableByFaction(', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        const compact = region.replace(/\s+/g, ' ');
+
+        expect(compact).toContain('function buildReachableOsidsWithinHops(');
+        expect(compact).toContain('function reachableOsidsContainAny(');
+        expect(compact).toContain('corpsReachableOsidsOverride?: ReadonlySet<string>');
+        expect(compact).toContain('factionReachableOsidsOverride?: ReadonlySet<string>');
+        expect(compact).toContain('reachableOsidsContainAny(corpsReachableOsidsOverride, uniqueFrontOsids)');
+        expect(compact).toContain('reachableOsidsContainAny(factionReachableOsidsOverride, uniqueFrontOsids)');
+        expect(compact).toContain('for (let hop = 1; hop <= maxHops; hop++)');
+        expect(region).not.toMatch(/\bDate\.now\s*\(/);
+        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
+
+        const buildFactionStart = raw.indexOf('function buildFactionSectors(');
+        const buildFactionEnd = raw.indexOf('// NOTE: Cold-front sector suppression', buildFactionStart);
+        const buildFactionRegion = raw.slice(buildFactionStart, buildFactionEnd).replace(/\s+/g, ' ');
+        expect(buildFactionRegion).toContain('buildFactionSectors:${faction}:staffability-reachability:faction');
+        expect(buildFactionRegion).toContain('buildFactionSectors:${faction}:corps-sector-construction:${corpsId}:staffability-reachability');
+        expect(buildFactionRegion).toContain('corpsReachableOsids, factionReachableOsids');
     });
 
     it('static contract: buildSectorFromSubSegments has deterministic child attribution labels', () => {
