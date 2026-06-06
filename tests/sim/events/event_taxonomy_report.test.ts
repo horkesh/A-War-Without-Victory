@@ -62,10 +62,10 @@ describe('event taxonomy diagnostic report', () => {
         expect(new Map(report.rows
             .filter((row) => row.future_consequence_count > 0)
             .map((row) => [row.id, row.future_consequence_count]))).toEqual(new Map([
-            ['rs_strategic_goals', 39],
-            ['rbih_state_identity', 42],
+            ['rs_strategic_goals', 40],
+            ['rbih_state_identity', 43],
             ['rs_paramilitary_policy_1992', 3],
-            ['hrhb_political_goal', 39],
+            ['hrhb_political_goal', 40],
             ['rbih_paramilitary_policy_1992', 3],
             ['hrhb_1992_graz_cooperation_collapse', 2],
             ['rs_assembly_rejects_voplan_1993', 2],
@@ -131,7 +131,19 @@ describe('event taxonomy diagnostic report', () => {
             'csq_paramilitary_authorization_refused',
             'gornji_vakuf_clashes_1993',
         ]);
-        expect(report.rows.flatMap((row) => row.future_consequence_closes_events)).toEqual([]);
+        // Phase E/F foreclosure authoring: the three faction-root historical-default
+        // options each foreclose the counterfactual-only consequence branches that
+        // their non-chosen siblings would have opened. Catalog order: RS root,
+        // then RBiH root, then HRHB root (war_1992.json row order).
+        expect(report.rows.flatMap((row) => row.future_consequence_closes_events)).toEqual([
+            'csq_drina_partisan_resistance_1992',
+            'csq_bosniak_unity_1993',
+            'csq_minority_defections_1992',
+            'csq_pragmatic_coalition_1993',
+            'csq_federation_early_1994',
+            'csq_joint_operations_agreement_1992',
+            'csq_zagreb_displeasure_1993',
+        ]);
     });
 
     it('requires required-response choice rows to declare a valid responding faction', () => {

@@ -66,7 +66,24 @@
           "rs_washington_rejection_1994",
           "un_hostage_crisis_1995"
         ],
+        "closes_events_runtime": [
+          "csq_drina_partisan_resistance_1992"
+        ],
         "future_consequences": [
+          {
+            "id": "all_six_forecloses_restrained_drina_branch",
+            "label": "The maximalist six-goals platform forecloses the restrained-Drina partisan-resistance branch",
+            "timing": "future",
+            "certainty": "guaranteed",
+            "closes_events": [
+              "csq_drina_partisan_resistance_1992"
+            ],
+            "closes_flags": [
+              "rs_strategic_goals"
+            ],
+            "material_effect_refs": [],
+            "explanation": "Recording rs_strategic_goals as all_six forecloses the consequence branch that only the restrained (selective) platform could have opened: csq_drina_partisan_resistance_1992, the organized partisan-resistance / pinned-corps cascade that follows a command-disciplined, restrained Drina-valley posture. Adopting the full six strategic goals (Karadžić IT-95-5/18-T; ICJ Bosnia v. Serbia 2007) is also a choice NOT to walk the restrained road, and that road's downstream partisan-resistance consequence is permanently closed. The target is gated on the counterfactual rs_strategic_goals=selective flag, so on the documented historical all_six path it would never have fired regardless; the foreclosure formalizes the authorship in the causality ledger without changing which events fire. §3.6 STRICT — the foreclosure target is an emergent operational-resistance consequence row, NOT an atrocity surface; the Drina-valley sensitive-history acts remain canon-gated through their existing Ring-3 event surfaces (rs_drina_campaign family slugs) and are neither opened nor closed here (sources: Karadžić IT-95-5/18-T; Stakić IT-97-24; Brđanin IT-99-36; ICJ Bosnia v. Serbia 26 Feb 2007; Balkan Battlegrounds Vol. I Drina-valley 1992 chronology)."
+          },
           {
             "id": "all_six_paramilitary_policy",
             "label": "Paramilitary policy decision opens",
@@ -1143,7 +1160,28 @@
           "os_rbih_tactical_acceptance_1993",
           "srebrenica_demilitarization_1993"
         ],
+        "closes_events_runtime": [
+          "csq_bosniak_unity_1993",
+          "csq_minority_defections_1992",
+          "csq_pragmatic_coalition_1993"
+        ],
         "future_consequences": [
+          {
+            "id": "civic_forecloses_ethnonational_and_pragmatic_consequences",
+            "label": "Civic platform forecloses the ethnonational and pragmatic-partition consequence branches",
+            "timing": "future",
+            "certainty": "guaranteed",
+            "closes_events": [
+              "csq_bosniak_unity_1993",
+              "csq_minority_defections_1992",
+              "csq_pragmatic_coalition_1993"
+            ],
+            "closes_flags": [
+              "rbih_state_identity"
+            ],
+            "material_effect_refs": [],
+            "explanation": "Recording rbih_state_identity as civic forecloses the consequence branches that only the non-chosen identity postures could have opened: the Bosniak-national unity consolidation (csq_bosniak_unity_1993) and the minority-officer/recruit defection cascade (csq_minority_defections_1992) that the bosniak_national platform would have triggered, and the pragmatic-coalition partition-accommodation branch (csq_pragmatic_coalition_1993) that the pragmatic platform would have triggered. The civic-republic commitment to a unitary multi-ethnic BiH is a single authored identity at the constitutional level — choosing it is also choosing NOT to walk the ethnonational or pragmatic roads, and those roads' downstream consequences are permanently closed (the player authors which tragedy the Republic does NOT have). These consequence rows are gated on the counterfactual identity flags (bosniak_national / pragmatic), so on the documented historical civic path they would never have fired regardless; the foreclosure formalizes the authorship in the causality ledger without changing which events fire. §3.6 STRICT — identity-coupled lane: foreclosure targets are political-consequence rows (unity / defection-cascade / coalition), NOT atrocity surfaces; no sensitive-history event is opened or closed by this entry (sources: BB Vol. II ARBiH composition + civic-republic posture; Marko Attila Hoare 'How Bosnia Armed' Saqi 2004; ICTY Galić IT-98-29-T + Karadžić IT-95-5/18-T Vol. III on ARBiH 1st Corps civic command structure)."
+          },
           {
             "id": "civic_identity_followthrough",
             "label": "Civic platform follow-through",
@@ -2273,7 +2311,28 @@
           "zagreb_orders_hrhb_ceasefire",
           "zagreb_restrains_boban_vopp"
         ],
+        "closes_events_runtime": [
+          "csq_federation_early_1994",
+          "csq_joint_operations_agreement_1992",
+          "csq_zagreb_displeasure_1993"
+        ],
         "future_consequences": [
+          {
+            "id": "croat_republic_forecloses_united_front_alliance_branch",
+            "label": "The Croat-republic goal forecloses the sustained-alliance (united-front) consequence branches",
+            "timing": "future",
+            "certainty": "guaranteed",
+            "closes_events": [
+              "csq_federation_early_1994",
+              "csq_joint_operations_agreement_1992",
+              "csq_zagreb_displeasure_1993"
+            ],
+            "closes_flags": [
+              "hrhb_political_goal"
+            ],
+            "material_effect_refs": [],
+            "explanation": "Recording hrhb_political_goal as croat_republic forecloses the consequence branches that only the sustained-alliance (united_front) posture could have opened: the 1992 RBiH-HVO joint-operations agreement (csq_joint_operations_agreement_1992), the Zagreb-displeasure friction that an early-alliance posture would have provoked (csq_zagreb_displeasure_1993), and the early-Federation consolidation (csq_federation_early_1994) that would have pre-empted the historical Croat-Bosniak war. The Herceg-Bosna Croat-republic project (Boban / Tudjman; ICTY Prlić IT-04-74) is the historical posture, and choosing it is also a choice NOT to walk the united-front road — those branches' downstream consequences are permanently closed. The targets are gated on the counterfactual hrhb_political_goal=united_front flag, so on the documented historical croat_republic path they would never have fired regardless; the foreclosure formalizes the authorship in the causality ledger without changing which events fire. §3.6 STRICT — foreclosure targets are alliance/cooperation consequence rows, NOT atrocity surfaces; the central-Bosnia war crimes (Ahmići, Stupni Do, Mostar) remain canon-gated through their existing Ring-3 event surfaces (h5_croat_bosniak_war_atrocities, h8_mostar_bridge family slugs) and are neither opened nor closed here (sources: Prlić IT-04-74 Vol. 1-3; BB Vol. II central-Bosnia 1992-93 chronology; Tudjman-Boban Graz/Zagreb channel records)."
+          },
           {
             "id": "croat_republic_followthrough",
             "label": "Croat republic pressure path",
