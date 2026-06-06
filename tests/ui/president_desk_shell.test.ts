@@ -147,9 +147,11 @@ describe('PresidentDeskShell', () => {
 
   it('routes desk consequence rows to their filed surface', () => {
     const onOpenRecords = vi.fn();
+    const onOpenDecisionRecords = vi.fn();
     const onOpenChronicle = vi.fn();
     renderDesk({
       onOpenRecords,
+      onOpenDecisionRecords,
       onOpenChronicle,
       state: makeState({
         firedEvents: [
@@ -177,6 +179,7 @@ describe('PresidentDeskShell', () => {
     fireEvent.click(screen.getByText('Patron defiance supply cut'));
 
     expect(onOpenChronicle).toHaveBeenCalledOnce();
-    expect(onOpenRecords).toHaveBeenCalledOnce();
+    expect(onOpenDecisionRecords).toHaveBeenCalledOnce();
+    expect(onOpenRecords).not.toHaveBeenCalled();
   });
 });

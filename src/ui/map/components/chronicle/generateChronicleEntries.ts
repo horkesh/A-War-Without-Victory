@@ -351,6 +351,7 @@ function buildConsequenceReceiptEntries(
     const receipts = buildConsequenceReceipts(rawState, eventCatalog);
     const entries: ChronicleEntry[] = [];
     for (const receipt of receipts) {
+        if (receipt.id.startsWith('patron_defiance::')) continue;
         if (receipt.status !== 'confirmed') continue;
         if (receipt.firedTurn === null) continue;
         entries.push({
