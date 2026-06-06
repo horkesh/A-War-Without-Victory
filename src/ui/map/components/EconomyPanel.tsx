@@ -15,6 +15,7 @@ import {
     getPlayerSafePoliticalFactionName,
 } from '../utils/playerSafeText';
 import { t } from '../i18n';
+import { strictCompare } from '../../../state/validateGameState';
 
 const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -63,14 +64,45 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
     const reserves = state.factionReserves;
     const playerFaction = state.player_faction;
     const isPlayerFaction = playerFaction === 'RS' || playerFaction === 'RBiH' || playerFaction === 'HRHB';
-    const facilities = (state.productionFacilities ?? []).filter((facility) => !isPlayerFaction || facility.controller === playerFaction);
-    const routes = (state.smugglingRoutes ?? []).filter((route) => !isPlayerFaction || route.faction === playerFaction);
+    const reserveFactions = isPlayerFaction ? [playerFaction] : [...FACTIONS];
+    const facilities = (state.productionFacilities ?? [])
+        .filter((facility) => !isPlayerFaction || facility.controller === playerFaction)
+        .sort((a, b) => strictCompare(a.id, b.id));
+    const routes = (state.smugglingRoutes ?? [])
+        .filter((route) => !isPlayerFaction || route.faction === playerFaction)
+        .sort((a, b) => strictCompare(a.id, b.id));
     const embargoEntries = state.embargoStatus
         ? Object.entries(state.embargoStatus).filter(([faction]) => !isPlayerFaction || faction === playerFaction)
         : [];
+    const strainedReserveCount = reserves
+        ? reserveFactions.filter((faction) => {
+            const reserve = reserves[faction];
+            return (reserve?.generalSupply ?? 0) < 20 || (reserve?.heavyMunitions ?? 0) < 20;
+        }).length
+        : 0;
+    const disruptedRouteCount = routes.filter((route) => route.disrupted).length;
 
     return (
         <GlassPanel position="right" title={t('economy.title')} onClose={onClose} width="340px">
+            <section className="space-y-2 mb-4 rounded border border-panel-border bg-panel-card/60 p-2">
+                <h3 className="text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
+                    {t('economy.summaryTitle')}
+                </h3>
+                <div className="grid grid-cols-3 gap-2 text-[10px]">
+                    <div>
+                        <div className="text-text-secondary">{t('economy.summaryStrainedReserves')}</div>
+                        <div className="font-mono text-amber-300">{strainedReserveCount}</div>
+                    </div>
+                    <div>
+                        <div className="text-text-secondary">{t('economy.summaryFacilities')}</div>
+                        <div className="font-mono text-text-primary">{facilities.length}</div>
+                    </div>
+                    <div>
+                        <div className="text-text-secondary">{t('economy.summaryDisruptedRoutes')}</div>
+                        <div className="font-mono text-red-400">{disruptedRouteCount}</div>
+                    </div>
+                </div>
+            </section>
             {/* Supply Reserves */}
             <section className="space-y-2 mb-4">
                 <h3 className="text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
@@ -78,7 +110,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                 </h3>
                 {reserves ? (
                     <div className="space-y-2">
-                        {(isPlayerFaction ? [playerFaction] : FACTIONS).map((faction) => {
+                        {reserveFactions.map((faction) => {
                             const r = reserves[faction];
                             const color = FACTION_COLORS[faction] ?? 'text-text-primary';
                             return (
@@ -175,7 +207,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                 </h3>
                 <div className="text-[10px] text-text-secondary space-y-0.5">
                     {embargoEntries.length > 0 ? (
-                        embargoEntries.sort(([a], [b]) => a.localeCompare(b)).map(([faction, status]) => (
+                        embargoEntries.sort(([a], [b]) => strictCompare(a, b)).map(([faction, status]) => (
                             <div key={faction} className="flex items-center gap-1">
                                 <span className={`w-[42px] ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>{getPlayerSafeMilitaryFactionName(faction)}</span>
                                 <span className="tabular-nums">
