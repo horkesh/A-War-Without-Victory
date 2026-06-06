@@ -461,6 +461,24 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(buildFactionRegion).toContain('corpsReachableOsids, factionReachableOsids');
     });
 
+    it('static contract: buildFactionSectors reuses the friendly component map for brigade classification', () => {
+        const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
+        const startIdx = raw.indexOf('function buildFactionSectors(');
+        const endIdx = raw.indexOf('// Step 6: Classify brigades', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        const compact = region.replace(/\s+/g, ' ');
+
+        expect(compact).toContain('const preComponentOf = _perfTime(`buildFactionSectors:${faction}:pre-component-setup`');
+        expect(compact).toContain('const componentOf = preComponentOf;');
+        expect(region.match(/buildFriendlyComponents\(adjacency,\s*friendlyOsids\)/g) ?? []).toHaveLength(1);
+        expect(region).not.toMatch(/\bDate\.now\s*\(/);
+        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
+    });
+
     it('static contract: buildSectorFromSubSegments has deterministic child attribution labels', () => {
         const raw = readFileSync(resolve('src/sim/combat/sector_building.ts'), 'utf8');
         const startIdx = raw.indexOf('export function buildSectorFromSubSegments(');

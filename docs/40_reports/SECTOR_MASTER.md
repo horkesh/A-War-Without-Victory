@@ -1,8 +1,20 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-06-06 (sector enemy personnel index reuse)
+**Updated:** 2026-06-06 (sector component map reuse)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
+
+---
+
+## 2026-06-06: Friendly component map reuse (byte-identical)
+
+**Change:** `buildFactionSectors(...)` now reuses the friendly territory component map created during pre-component setup when classifying brigades, instead of rebuilding the same `buildFriendlyComponents(adjacency, friendlyOsids)` map later in the same invocation when no spatial component map is available.
+
+**Determinism:** The map is invocation-local and read-only at the reuse site. It is derived from the exact same `SpatialContext` fallback decision and friendly OSID inputs as before. No sector packet ordering, combat math, scenario data, save schema, UI, baseline manifest, or serialized output changed.
+
+**Verification:** Focused sector tests, typecheck, 40-week timed scenario, changed partition profile, and baseline regression passed. The changed timed run preserved `d1ace172a29b2353`; changed partition profile moved `partition-corps-front-sectors` to `7022.637ms` from the pre-change `7114.2066ms` and total profile wall time to `85.3635816s` from `85.5309106s`.
+
+**Report:** [implemented/20260606_SECTOR_COMPONENT_MAP_REUSE.md](implemented/20260606_SECTOR_COMPONENT_MAP_REUSE.md)
 
 ---
 

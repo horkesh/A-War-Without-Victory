@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest sector component map reuse** | [implemented/20260606_SECTOR_COMPONENT_MAP_REUSE.md](implemented/20260606_SECTOR_COMPONENT_MAP_REUSE.md) - `buildFactionSectors(...)` now reuses its precomputed friendly component map during brigade classification while preserving the current `d1ace172a29b2353` floor. |
 | **Latest derived military scalar maps validate-when-present contract** | [implemented/20260606_DERIVED_MILITARY_SCALAR_MAPS_VALIDATE_WHEN_PRESENT.md](implemented/20260606_DERIVED_MILITARY_SCALAR_MAPS_VALIDATE_WHEN_PRESENT.md) - Derived military scalar maps remain optional but now reject malformed present boolean, finite non-negative number, and non-negative integer payloads. |
 | **Latest runtime military state validate-when-present contract** | [implemented/20260606_RUNTIME_MILITARY_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260606_RUNTIME_MILITARY_STATE_VALIDATE_WHEN_PRESENT.md) - Equipment reserves, militia garrison values, and unresolved-sector brigade diagnostics remain optional but now reject malformed present runtime payloads. |
 | **Latest sector enemy personnel index reuse** | [implemented/20260606_SECTOR_ENEMY_PERSONNEL_INDEX_REUSE.md](implemented/20260606_SECTOR_ENEMY_PERSONNEL_INDEX_REUSE.md) - `classifyBrigadesByTerritory(...)` now reuses an invocation-local active enemy personnel by OSID view instead of rescanning every formation once per sector. |

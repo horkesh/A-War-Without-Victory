@@ -3071,9 +3071,8 @@ function buildFactionSectors(
         });
     });
 
-    // Pre-compute friendly territory connected components (used by steps 6 and 7).
-    // Use SpatialContext if available; otherwise build from adjacency + friendlyOsids.
-    const componentOf = ((spatial?.componentsByFaction.get(faction)) ?? buildFriendlyComponents(adjacency, friendlyOsids)) as Map<string, number>;
+    // Reuse the same friendly territory component map for brigade classification.
+    const componentOf = preComponentOf;
 
     // Step 6: Classify brigades — corps-driven assignment.
     const commanderProfiles = _perfTime(`buildFactionSectors:${faction}:brigade-classification`, () => {
