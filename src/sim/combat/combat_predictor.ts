@@ -58,6 +58,7 @@ import {
     COHESION_ATTACKER,
     COHESION_DEFENDER,
     getArtillerySuppression,
+    applyDefensiveFireToRatio,
     classifyOutcome,
     computeAttackerPower,
     computeDefenderPower,
@@ -482,7 +483,29 @@ export function predictCombatOutcome(
     );
     defenderPower *= seasonal.defense_mult;
 
-    const powerRatio = defenderPower <= 0 ? 10 : attackerPower / defenderPower;
+    // COMBAT-P14: fold defender RETURN-FIRE into the predicted power ratio so the
+    // bot anticipates the extra attacker cost of assaulting a high-return-fire
+    // (artillery-heavy / tank-backed) defender. The resolver
+    // (attack_resolution_osid.ts) applies getDefensiveFireMult as an attacker-
+    // casualty multiplier AFTER outcome/powerRatio are fixed, so this predictor was
+    // blind to return-fire and stayed over-optimistic (zero-effect assaults on
+    // dug-in VRS artillery). applyDefensiveFireToRatio REUSES the resolver's
+    // getDefensiveFireMult (no parallel formula) on the SAME true defender set the
+    // resolver will see (sectorDefBrigades, else the primary defenderFormation),
+    // degrading the effective ratio by the bounded return-fire tax (÷[1.0,1.8]).
+    // Soft targets (no artillery/armour) are unchanged. No double-counting:
+    // entrenchment/terrain/artillery-suppression already live in defenderPower.
+    const returnFireDefenders = sectorDefBrigades && sectorDefBrigades.length > 0
+        ? sectorDefBrigades
+        : defenderFormation ? [defenderFormation] : [];
+    const returnFireFactionId = controller ?? defenderFormation?.faction ?? attackerFaction;
+    const rawPowerRatio = defenderPower <= 0 ? 10 : attackerPower / defenderPower;
+    const powerRatio = applyDefensiveFireToRatio(
+        rawPowerRatio,
+        returnFireDefenders,
+        returnFireFactionId,
+        state,
+    );
     let predicted = classifyOutcome(powerRatio);
 
     // Morale resistance: downgrade costly_victory to stalemate if defender morale is high
