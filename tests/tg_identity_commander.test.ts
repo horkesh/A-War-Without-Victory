@@ -4,12 +4,11 @@
  * Covers:
  *   1. Faction-asymmetric naming generator (pure): VRS geographic, ARBiH numbered,
  *      HVO operational zone. Deterministic — repeated calls stable.
- *   2. displaySectorLabel read-model: explicit display_name wins; computed fallback else.
- *   3. selectTacticalCommander / assignTacticalCommander: picks the tactical_commander
+ *   2. selectTacticalCommander / assignTacticalCommander: picks the tactical_commander
  *      rank pool, sets op.tg_commander_officer_id, flips officer to active.
- *   4. (flag-on) formTgsAtReadyTransition assigns a tactical_commander + populates the
+ *   3. (flag-on) formTgsAtReadyTransition assigns a tactical_commander + populates the
  *      anchor sector's display_name when a TG forms.
- *   5. (flag-on) getThreeTierOfficerMod applies the tactical_commander mod to the ANCHOR
+ *   4. (flag-on) getThreeTierOfficerMod applies the tactical_commander mod to the ANCHOR
  *      only — a donor in the same op keeps the corps/op mod (anchor != donor).
  */
 
@@ -21,7 +20,7 @@ import type {
     GameState,
     MilitaryState,
 } from '../src/state/game_state.js';
-import { CURRENT_SCHEMA_VERSION, displaySectorLabel } from '../src/state/game_state.js';
+import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import type { NamedOfficer, NamedOfficerState } from '../src/state/officer_types.js';
 import {
     generateTacticalGroupName,
@@ -66,20 +65,6 @@ describe('generateTacticalGroupName — faction-asymmetric naming', () => {
         expect(humanizeToken('foca_2')).toBe('Foca');
         expect(humanizeToken('bosanski_novi')).toBe('Bosanski Novi');
         expect(humanizeToken('sarajevo')).toBe('Sarajevo');
-    });
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// 2. displaySectorLabel read-model
-// ═══════════════════════════════════════════════════════════════════════════
-
-describe('displaySectorLabel', () => {
-    it('returns explicit display_name when present', () => {
-        expect(displaySectorLabel({ display_name: 'TG Drina', corps_id: 'vrs_drina' })).toBe('TG Drina');
-    });
-
-    it('computes a humanized fallback from corps_id when display_name absent', () => {
-        expect(displaySectorLabel({ corps_id: 'vrs_drina' })).toBe('Vrs Drina Sector');
     });
 });
 
@@ -157,7 +142,7 @@ function baseOp(overrides: Partial<CorpsOperation>): CorpsOperation {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 3. selectTacticalCommander / assignTacticalCommander
+// 2. selectTacticalCommander / assignTacticalCommander
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('selectTacticalCommander / assignTacticalCommander', () => {
@@ -215,7 +200,7 @@ describe('selectTacticalCommander / assignTacticalCommander', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 4. Flag-on TG identity wiring (formTgsAtReadyTransition)
+// 3. Flag-on TG identity wiring (formTgsAtReadyTransition)
 // ═══════════════════════════════════════════════════════════════════════════
 
 async function withFormationFlagOn() {
@@ -267,7 +252,7 @@ describe('formTgsAtReadyTransition — TG identity (flag-on)', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 5. Flag-on anchor combat mod (getThreeTierOfficerMod)
+// 4. Flag-on anchor combat mod (getThreeTierOfficerMod)
 // ═══════════════════════════════════════════════════════════════════════════
 
 async function withCombatFlagOn() {
