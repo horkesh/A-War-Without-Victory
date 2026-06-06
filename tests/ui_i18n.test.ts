@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
     bcsMessages,
 } from '../src/ui/map/i18n/messages.bcs';
+import { enMessages } from '../src/ui/map/i18n/messages.en';
 import {
     DEFAULT_LOCALE,
     LOCALE_STORAGE_KEY,
@@ -12,6 +13,10 @@ import {
     t,
     type Locale,
 } from '../src/ui/map/i18n';
+
+// Keys that are deliberately English-only so the locale fallback path stays
+// exercised. Any other EN key without a BCS translation is a parity gap.
+const INTENTIONAL_EN_ONLY = new Set<string>(['settings.experimentalFallbackProbe']);
 
 describe('UI localization substrate', () => {
     it('defaults to English when no locale is provided', () => {
@@ -53,6 +58,39 @@ describe('UI localization substrate', () => {
 
         memoryStorage.set(LOCALE_STORAGE_KEY, 'fr');
         expect(getLocale(storage)).toBe<Locale>('en');
+    });
+
+    it('translates every EN key into BCS (except documented fallback probes)', () => {
+        const enKeys = Object.keys(enMessages);
+        const bcsKeys = new Set(Object.keys(bcsMessages));
+        const missing = enKeys.filter(
+            (key) => !bcsKeys.has(key) && !INTENTIONAL_EN_ONLY.has(key),
+        );
+        expect(missing).toEqual([]);
+    });
+
+    it('has no orphan BCS keys without an English counterpart', () => {
+        const enKeys = new Set(Object.keys(enMessages));
+        const orphans = Object.keys(bcsMessages).filter((key) => !enKeys.has(key));
+        expect(orphans).toEqual([]);
+    });
+
+    it('has no empty BCS or EN message values', () => {
+        const emptyBcs = Object.entries(bcsMessages)
+            .filter(([, value]) => typeof value === 'string' && value.trim() === '')
+            .map(([key]) => key);
+        const emptyEn = Object.entries(enMessages)
+            .filter(([, value]) => typeof value === 'string' && value.trim() === '')
+            .map(([key]) => key);
+        expect(emptyBcs).toEqual([]);
+        expect(emptyEn).toEqual([]);
+    });
+
+    it('keeps every documented intentional EN-only key absent from BCS', () => {
+        for (const key of INTENTIONAL_EN_ONLY) {
+            expect(bcsMessages).not.toHaveProperty(key);
+            expect(enMessages).toHaveProperty(key);
+        }
     });
 
     it('keeps BCS copy free of common Serbian ekavian and Croatian lexical forms', () => {
