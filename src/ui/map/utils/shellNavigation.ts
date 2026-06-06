@@ -21,6 +21,8 @@ export interface ShellNavigationState {
   setFocusedAftermathTurn?: (turn: number | null) => void;
   /** Optional: focuses a specific completed operation row after routing to Army HQ Records. */
   setFocusedOperationHistoryId?: (id: string | null) => void;
+  /** Optional: focuses a specific decision consequence row after routing to Army HQ Records. */
+  setFocusedDecisionConsequenceId?: (id: string | null) => void;
   setCodexOpen: (open: boolean) => void;
   setChronicleOpen: (open: boolean) => void;
   /** Optional: set by gameStore when advance-turn handoff is received from the Warroom shell. */
@@ -75,6 +77,17 @@ export function openArmyHQOperationHistory(state: ShellNavigationState, operatio
   state.setArmyHQOpen(true);
   state.setArmyHQRecordsSubTab('ops');
   state.setFocusedOperationHistoryId?.(operationAarId ?? null);
+  state.setChronicleOpen(false);
+  return true;
+}
+
+export function openArmyHQDecisionConsequenceRecord(state: ShellNavigationState, recordId?: string | null): boolean {
+  const faction = getPlayerFaction(state);
+  if (!faction) return false;
+  state.setSelectedArmyId(faction);
+  state.setArmyHQOpen(true);
+  state.setArmyHQRecordsSubTab('decisions');
+  state.setFocusedDecisionConsequenceId?.(recordId ?? null);
   state.setChronicleOpen(false);
   return true;
 }

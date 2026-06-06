@@ -8,7 +8,7 @@ import type { DecisionConsequenceRecord } from '../../data/decisionConsequenceLe
 export interface ConsequenceStripProps {
   state: LoadedGameState | null;
   onOpenRecords: () => void;
-  onOpenDecisionRecords?: () => void;
+  onOpenDecisionRecords?: (recordId?: string) => void;
   onOpenChronicle: () => void;
 }
 
@@ -77,7 +77,13 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
             <button
               key={record.id}
               type="button"
-              onClick={record.recordTarget === 'chronicle' ? onOpenChronicle : (onOpenDecisionRecords ?? onOpenRecords)}
+              onClick={record.recordTarget === 'chronicle' ? onOpenChronicle : () => {
+                if (onOpenDecisionRecords) {
+                  onOpenDecisionRecords(record.id);
+                } else {
+                  onOpenRecords();
+                }
+              }}
               className="flex w-full gap-2 border border-panel-border/70 bg-black/20 px-2.5 py-2 text-left transition-colors hover:border-accent-gold/45"
             >
               <img

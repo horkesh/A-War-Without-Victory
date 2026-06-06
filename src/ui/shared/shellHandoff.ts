@@ -38,6 +38,7 @@ export function isShellHandoffCommand(value: unknown): value is ShellHandoffComm
     && command.recordsSubTab !== 'aftermath'
     && command.recordsSubTab !== 'aar'
     && command.recordsSubTab !== 'ops'
+    && command.recordsSubTab !== 'decisions'
     && command.recordsSubTab !== 'opportunities'
   ) {
     return false;

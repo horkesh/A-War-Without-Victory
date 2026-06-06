@@ -114,6 +114,32 @@ describe('DecisionConsequenceRecordsPanel', () => {
     expect(screen.getByText('Review in Records')).toBeTruthy();
   });
 
+  it('focuses an older decision consequence when routed from the desk', () => {
+    const reserveRequestHistory = Array.from({ length: 60 }, (_, index) => ({
+      request_id: `reserve_${index.toString().padStart(2, '0')}`,
+      turn: index + 1,
+      faction: 'RS',
+      corps_id: 'vrs_drina_corps',
+      brigade_id: `reserve_brigade_${index.toString().padStart(2, '0')}`,
+      outcome: 'accepted',
+      reason: 'Army CO accepted: request is actionable.',
+      decided_by: 'player',
+      purpose: 'defensive',
+      why_needed: 'Drina Corps needs a reserve to stabilize the front.',
+      how_to_use: 'Anchor the weakest sector.',
+    }));
+    useGameStore.setState({
+      loadedGameState: makeState({ reserveRequestHistory } as Partial<LoadedGameState>),
+      focusedDecisionConsequenceId: 'reserve:reserve_00',
+    });
+
+    render(React.createElement(DecisionConsequenceRecordsPanel));
+
+    const focused = screen.getByText('Reserve Brigade 00 assigned to Drina Corps. Drina Corps needs a reserve to stabilize the front.').closest('article');
+    expect(focused?.getAttribute('data-focused-decision-consequence-id')).toBe('reserve:reserve_00');
+    expect(document.activeElement).toBe(focused);
+  });
+
   it('keeps decision consequence panel copy localized', async () => {
     const { setLocale } = await import('../../src/ui/map/i18n/index.js');
     setLocale('bcs', undefined);

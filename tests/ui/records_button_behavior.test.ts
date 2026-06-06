@@ -6,7 +6,8 @@ import { createElement } from 'react';
 import { PresidentialToolbar } from '../../src/ui/map/components/PresidentialToolbar.js';
 import { TurnAftermathModal } from '../../src/ui/map/components/TurnAftermathModal.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
-import { openArmyHQRecordsSubTab } from '../../src/ui/map/utils/shellNavigation.js';
+import { openArmyHQDecisionConsequenceRecord, openArmyHQRecordsSubTab } from '../../src/ui/map/utils/shellNavigation.js';
+import { isShellHandoffCommand } from '../../src/ui/shared/shellHandoff.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import type { TurnAftermathView } from '../../src/ui/map/data/turnAftermath.js';
 
@@ -138,5 +139,30 @@ describe('PresidentialToolbar RECORDS button', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Chronicle' }));
 
         expect(calls).toEqual(['records', 'chronicle']);
+    });
+
+    it('accepts Decision Consequences as a Records handoff target', () => {
+        expect(isShellHandoffCommand({
+            kind: 'army-hq',
+            tab: 'records',
+            recordsSubTab: 'decisions',
+        })).toBe(true);
+    });
+
+    it('opens and focuses a decision consequence record from shell navigation', () => {
+        const opened = openArmyHQDecisionConsequenceRecord(
+            useGameStore.getState(),
+            'reserve:reserve:turn_12:vrs_drina_corps',
+        );
+
+        expect(opened).toBe(true);
+        expect(useGameStore.getState()).toMatchObject({
+            selectedArmyId: 'RS',
+            armyHQOpen: true,
+            armyHQTab: 'records',
+            armyHQRecordsSubTab: 'decisions',
+            focusedDecisionConsequenceId: 'reserve:reserve:turn_12:vrs_drina_corps',
+            chronicleOpen: false,
+        });
     });
 });
