@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-06] fix(state): validate recruitment economy state when present
+
+**Type:** Save-validation/schema-contract hardening. No simulation turn behavior, recruitment or smuggling mechanics, scenario data, save schema version, migration, fixture refresh, baseline manifest, generated artifact, UI code, randomness, timestamps, or persisted output ordering changed.
+
+**Change:** `validateGameStateShape(...)` now rejects malformed present `military.recruitment_state` and `military.smuggling_routes` payloads. Absence remains valid, and well-formed present economy state round-trips unchanged.
+
+**Classification:** Both fields are optional lazy recruitment/smuggling economy surfaces. The validator checks only local shape: canonical faction-keyed recruitment/equipment pools and trickle maps, faction/key consistency, finite non-negative pool values, string recruited brigade ids, optional non-negative per-turn cap, smuggling route row objects, route ids, capacities, disrupted flags, and active-turn counters. It deliberately does not materialize maps, resolve brigade ids, require route catalog membership, enforce route capacity upper bounds, or enforce reserve-map upper bounds.
+
+**Docs:** Added `docs/40_reports/implemented/20260606_RECRUITMENT_SMUGGLING_STATE_VALIDATE_WHEN_PRESENT.md` and updated report indices, command board, master roadmap, engine-quality residuals plan, and knowledge ledger.
+
+**Verification:** Red/green `node F:\A-War-Without-Victory\node_modules\vitest\vitest.mjs run tests\save_migration_validator_rejection.test.ts --reporter=dot` (new malformed economy-state tests failed before validation; green 178/178 after implementation); `npm.cmd run typecheck -- --pretty false`; `node tools\diagnostics\strict_null_inventory.cjs --field-domains` total 507 (`state: 172`, `sim: 327`, `derived: 8`); `git diff --check`.
+
+---
+
 ## [2026-06-05] test(release): document launch artifact ownership
 
 **Type:** Generated-artifact ownership / release-evidence hardening. No package was built, no package artifact was committed, no release upload occurred, no clean-VM evidence was claimed, and no simulation output, save schema, scenario data, baseline manifest, generated run artifact, randomness, timestamps, or persisted output ordering changed.

@@ -1,3 +1,9 @@
+## 2026-06-06 - Recruitment/smuggling economy validation is nested local-shape validation
+
+**Recruitment economy state lives under `military`, not top-level state:** `military.recruitment_state` is an optional lazy economy surface, so validate it only when present under `state.military`. Durable rule: for schema cleanup, check local faction-keyed pool/trickle shape, faction/key consistency, recruited brigade id arrays, and optional per-turn cap shape; do not materialize the field, add migrations, or resolve brigade ids in the validator. Applied in `[2026-06-06] fix(state): validate recruitment economy state when present`.
+
+**Smuggling routes shape validation is not route catalog enforcement:** `military.smuggling_routes` can reject malformed present rows without judging whether a route id belongs to a scenario/catalog or whether capacity exceeds a future design maximum. Durable rule: validate row object/id/capacity/disrupted/active-turn shape in optional cleanup lanes, and leave route catalog membership, capacity upper bounds, and reserve-map upper bounds to explicit schema/design decisions.
+
 ## 2026-06-05 - Launch package artifacts are transient; release evidence owns identity
 
 **Packaged binaries belong in release evidence, not git:** `dist-packaged/...` contains operator-built package outputs whose identity must be captured by exact path, size, SHA-256, and clean-VM/operator status. Durable rule: keep package outputs ignored and uncommitted; use `npm.cmd run launch:artifacts:dry-run -- --artifact dist-packaged/<artifact> --format markdown` to produce copy-ready evidence for the exact artifact, and commit only the evidence packet/templates when appropriate. Applied in `[2026-06-05] test(release): document launch artifact ownership`.
