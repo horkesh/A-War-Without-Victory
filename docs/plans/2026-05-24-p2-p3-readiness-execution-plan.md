@@ -72,6 +72,7 @@ Stop gates: hidden enemy truth exposed, broad AI/intel redesign, or unexplained 
 **Owner:** product-manager plus UI/UX developer
 **Reviewers:** gameplay-programmer, QA engineer
 **Source plan:** `docs/plans/2026-05-17-supply-design-completion-plan.md`
+**2026-06-06 progress:** Supply map logistics panel fallback aggregation is now player-faction-scoped when a player faction is loaded, localized, and deterministically ordered. Report: `docs/40_reports/implemented/20260606_SUPPLY_PANEL_PLAYER_SCOPED_READMODEL.md`. Proof: focused supply UI/read-model pack 21/21.
 
 Allowed work: read-model clarity, docs/tooltips/diagnostics, and existing-state explanation.
 
