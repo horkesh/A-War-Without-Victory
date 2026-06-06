@@ -4,6 +4,8 @@
 
 **Latest Warroom native overlay residue batch:** [implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md](implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md) - Intelligence, Staff, and Faction now have the only native Warroom preview overlays with explicit drill-ins to existing owner surfaces, while retired StrategicDashboard/EventLog local command variants are removed from live source.
 
+**Latest command-surface repurpose read-models:** [implemented/20260606_COMMAND_SURFACE_REPURPOSE_READMODELS.md](implemented/20260606_COMMAND_SURFACE_REPURPOSE_READMODELS.md) - Enclave, Economy, and Chief-of-Staff panels now carry presidential readout framing with locale-independent ordering guards.
+
 **Latest receipt family quality/localization:** [implemented/20260606_RECEIPT_FAMILY_QUALITY_LOCALIZATION.md](implemented/20260606_RECEIPT_FAMILY_QUALITY_LOCALIZATION.md) - Decision consequence family labels now render through stable localized family IDs, Records archive-summary chrome is localized, and the loaded browser smoke covers patron, reserve, operation-opportunity, and Chronicle-filed convoy receipts together.
 
 **Latest supply panel player-scoped read-model:** [implemented/20260606_SUPPLY_PANEL_PLAYER_SCOPED_READMODEL.md](implemented/20260606_SUPPLY_PANEL_PLAYER_SCOPED_READMODEL.md) - Supply map logistics panel counts are now localized, deterministic, and scoped to the loaded player faction even when the panel falls back to legacy supply pressure/condition rows.

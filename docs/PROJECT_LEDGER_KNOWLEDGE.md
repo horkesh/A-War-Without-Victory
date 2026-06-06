@@ -1,3 +1,7 @@
+## 2026-06-06 - Command-surface read models need deterministic repurpose guards
+
+**Repurposed UI panels should be renamed, summarized, and sorted in the same slice:** When a dead-end or thin panel is repurposed into the presidential command surface, update the visible product frame, add a small existing-state summary, and remove locale-dependent ordering together. Durable rule: use stable comparators for read-model row ordering, add a focused static guard when retiring `localeCompare(...)`, and keep the slice UI/read-model-only unless a separate canon/schema decision owns deeper behavior. Applied in `[2026-06-06] fix(ui): repurpose command-surface read models`; report `docs/40_reports/implemented/20260606_COMMAND_SURFACE_REPURPOSE_READMODELS.md`.
+
 ## 2026-06-06 - Native Warroom overlays must not retain dead local command variants
 
 **Direct mature panels are dispatcher targets, not native-preview surfaces:** Diplomacy/Patron Relations and Chronicle/Authored Choices are mature full panels, so the Warroom dispatcher may route to them directly while the native preview overlay type stays limited to surfaces that genuinely preview before drilling in. Durable rule: when a surface no longer renders through `WarroomNativeOverlay`, remove it from the native overlay state/type and prove it through route/static tests instead of leaving it as an unreachable component branch. Applied in `[2026-06-06] fix(ui): harden Warroom native overlay ownership`.

@@ -4,6 +4,13 @@
  */
 import { GlassPanel } from './GlassPanel';
 import { t } from '../i18n';
+import { strictCompare } from '../../../state/validateGameState';
+
+interface StaffRecommendation {
+    priority: number;
+    action: string;
+    reasoning: string;
+}
 
 export interface AiAdvisorPanelProps {
     response: any;
@@ -29,8 +36,11 @@ export function AiAdvisorPanel({ response, loading, onClose }: AiAdvisorPanelPro
 
     const commanderName = response.commander_name ?? t('advisor.unknownCommander');
     const assessment = response.assessment ?? t('advisor.noAssessment');
-    const recommendations: Array<{ priority: number; action: string; reasoning: string }> =
-        response.recommendations ?? [];
+    const recommendations: StaffRecommendation[] = [...(response.recommendations ?? [])].sort((a, b) => (
+        a.priority - b.priority
+        || strictCompare(a.action, b.action)
+        || strictCompare(a.reasoning, b.reasoning)
+    ));
 
     return (
         <GlassPanel position="overlay" title={t('advisor.title')} width="520px" onClose={onClose}>
@@ -59,9 +69,9 @@ export function AiAdvisorPanel({ response, loading, onClose }: AiAdvisorPanelPro
                         <div className="text-[9px] font-mono text-[#8a8578] uppercase tracking-[0.2em]">
                             {t('advisor.recommendations')}
                         </div>
-                        {recommendations.map((rec, i) => (
+                        {recommendations.map((rec) => (
                             <div
-                                key={i}
+                                key={`${rec.priority}:${rec.action}:${rec.reasoning}`}
                                 className="flex gap-3 bg-black/20 rounded px-3 py-2 border border-white/5"
                             >
                                 <span className="text-[14px] font-mono text-[#c4a04a] font-bold shrink-0 w-5 text-center">
