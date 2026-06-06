@@ -626,3 +626,11 @@ Report: `docs/40_reports/implemented/20260606_SECTOR_ENEMY_PERSONNEL_INDEX_REUSE
 `classifyBrigadesByTerritory(...)` now reuses the existing active enemy personnel by OSID view for per-sector garrison budgeting instead of rescanning all formations once per sector. The changed profile and 40-week timed run preserved `d1ace172a29b2353`; focused sector tests, typecheck, consistency validation, baseline regression, and diff check passed.
 
 ---
+
+# 2026-06-06 Receipt Route Browser Proof
+
+Report: `docs/40_reports/implemented/20260606_RECEIPT_ROUTE_BROWSER_PROOF.md`
+
+Records-filed President's Desk consequence rows now route to Army HQ Records -> Decision Consequences; AAR tab counts now come from `latestTurnSummary` instead of completed-operation history; patron-defiance Chronicle duplicate generation is suppressed in the generator path. The new live browser smoke loads a deterministic modified startup save through the app save loader and proves the desk-to-Records route and AAR/Operation History count split.
+
+---
