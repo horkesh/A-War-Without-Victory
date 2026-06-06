@@ -1681,6 +1681,10 @@ function App() {
                 openArmyHQRecordsSubTab(useGameStore.getState(), 'aftermath');
                 setAppScreen('game');
               }}
+              onOpenChronicle={() => {
+                openChronicle(useGameStore.getState());
+                setAppScreen('game');
+              }}
               onClose={() => {
                 closeWarroomDesk();
               }}

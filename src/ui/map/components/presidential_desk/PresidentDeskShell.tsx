@@ -16,6 +16,7 @@ export interface PresidentDeskShellProps {
   onOpenArmyHQ: () => void;
   onOpenMap: () => void;
   onOpenRecords: () => void;
+  onOpenChronicle?: () => void;
   onClose?: () => void;
   /** Open the presidential command-surface card strip directly (accessibility). */
   onOpenCommandSurface?: () => void;
@@ -36,6 +37,7 @@ export function PresidentDeskShell({
   onOpenArmyHQ,
   onOpenMap,
   onOpenRecords,
+  onOpenChronicle,
   onClose,
   onOpenCommandSurface,
 }: PresidentDeskShellProps) {
@@ -148,7 +150,11 @@ export function PresidentDeskShell({
         )}
 
         <div className="mt-4">
-          <ConsequenceStrip state={state} onOpenRecords={onOpenRecords} />
+          <ConsequenceStrip
+            state={state}
+            onOpenRecords={onOpenRecords}
+            onOpenChronicle={onOpenChronicle ?? onOpenRecords}
+          />
         </div>
       </aside>
     </section>

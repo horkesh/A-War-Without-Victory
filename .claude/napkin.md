@@ -1280,6 +1280,8 @@ After EVERY scenario run, the orchestrator:
     Do instead: `processDisplacementTakeover` uses `currentTurn === warStartTurn + 1`. `runTurn()` increments turn BEFORE phases.
 
 ## Player Shell Discipline
+1. **[2026-06-06] Desk consequence receipts route by filed surface**
+   Do instead: Use `recordTarget` from the shared decision consequence ledger for receipt actions: `chronicle` opens Chronicle, `records` opens Army HQ Records. Localize the route chrome; do not add another archive surface for the same receipt.
 1. **[2026-04-02] Player-facing operation documents must never print raw OSIDs**
    Do instead: OPORDs, objective lists, and HQ roster/history hover rows must resolve settlement labels through player-safe helpers. Exact internal identifiers belong only in debug-only surfaces.
 2. **[2026-04-02] Warroom faction overview stays strategic**

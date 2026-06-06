@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest desk consequence route localization:** [implemented/20260606_DESK_CONSEQUENCE_ROUTE_LOCALIZATION.md](implemented/20260606_DESK_CONSEQUENCE_ROUTE_LOCALIZATION.md) - President's Desk consequence rows now route by each receipt's filed surface, sending Chronicle-filed decisions to Chronicle and Records-filed receipts to Army HQ Records with localized route chrome.
+
 **Latest supply/production economy state validate-when-present contract:** [implemented/20260606_SUPPLY_PRODUCTION_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260606_SUPPLY_PRODUCTION_STATE_VALIDATE_WHEN_PRESENT.md) - Supply reserve maps and `military.production_facilities` remain optional but now reject malformed present economy-state payloads without materializing absent fields or enforcing deferred upper bounds.
 
 **Latest recruitment/smuggling economy state validate-when-present contract:** [implemented/20260606_RECRUITMENT_SMUGGLING_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260606_RECRUITMENT_SMUGGLING_STATE_VALIDATE_WHEN_PRESENT.md) - `military.recruitment_state` and `military.smuggling_routes` remain optional but now reject malformed present economy-state payloads without materializing absent fields or changing recruitment/smuggling behavior.

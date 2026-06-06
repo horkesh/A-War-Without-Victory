@@ -19318,3 +19318,17 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Report:** `docs/40_reports/implemented/20260606_SECTOR_CONSTRUCTION_INDEX_REACHABILITY_REUSE.md`
 
 ---
+
+## [2026-06-06] fix(ui): route desk consequences by filed surface
+
+**Type:** UI/read-model route and localization cleanup. No simulation behavior, save schema, migration, scenario data, baseline manifest, generated artifact, randomness, timestamps, or persisted output ordering changed.
+
+**Change:** President's Desk consequence rows now route by each decision consequence record's filed surface: Chronicle-filed records open Chronicle, and Records-filed records open Army HQ Records. The desk row action labels and Army HQ Decision Consequences route chrome now use English/BCS localization keys instead of hard-coded English copy.
+
+**Docs/roadmap:** Added `docs/40_reports/implemented/20260606_DESK_CONSEQUENCE_ROUTE_LOCALIZATION.md`; updated `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, and `.claude/napkin.md`.
+
+**Verification:** Focused UI/read-model pack passed 25/25; `npm.cmd run typecheck -- --pretty false` passed; `git diff --check` passed. Scenario/baseline regression was not run because this is UI/read-model routing/localization only.
+
+**Report:** `docs/40_reports/implemented/20260606_DESK_CONSEQUENCE_ROUTE_LOCALIZATION.md`
+
+---
