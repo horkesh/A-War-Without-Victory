@@ -2228,27 +2228,10 @@ export interface CorpsFrontSector {
      *  affect simulation. CRITICAL DETERMINISM: written ONLY when ENABLE_TG_FORMATION is on
      *  (faction naming generator populates it at TG formation). Flag-off it is never assigned and
      *  serializeGameState skips undefined, so the flag-off serialized/hashed state is byte-identical.
-     *  Optional scalar — omitEmpty-safe; no schema migration (schema stays v34). Read via
-     *  `displaySectorLabel(sector)`, which falls back to a computed default when absent. */
+     *  Optional scalar — omitEmpty-safe; no schema migration (schema stays v34). The UI read-path
+     *  (GameStateAdapter.resolveAttestedOgName) prefers this label and falls back to a computed
+     *  default when absent. */
     display_name?: string;
-}
-
-/**
- * Read-model projection for a sector's display label (ADR-0006 Phase 3A).
- *
- * Returns the explicit `display_name` when present (flag-on identity), otherwise a
- * deterministic computed default derived from the sector's corps_id. Pure, side-effect-free,
- * no state mutation — safe to call from UI/read-model layers without touching the hashed state.
- */
-export function displaySectorLabel(sector: Pick<CorpsFrontSector, 'display_name' | 'corps_id'>): string {
-    if (sector.display_name) return sector.display_name;
-    // Computed fallback: humanize the corps_id (e.g. "vrs_drina" → "Vrs Drina Sector").
-    const humanized = sector.corps_id
-        .split(/[_:]/)
-        .filter(Boolean)
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(' ');
-    return `${humanized} Sector`;
 }
 
 /**

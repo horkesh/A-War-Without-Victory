@@ -1941,8 +1941,9 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 .map(([m]) => humanizeMunicipalitySlug(m));
             // ADR-0006 Phase 3B: prefer the standing TG/OG identity (CorpsFrontSector.display_name,
             // e.g. "TG Drina", "1. OG (Tuzla)", "OZ Mostar") when present in state; otherwise fall
-            // back to the computed "{corps} \u2013 {top muns}" label. Mirrors displaySectorLabel() in
-            // game_state.ts. Absent on flag-off / pre-3A saves, so the fallback is the default path.
+            // back to the computed "{corps} \u2013 {top muns}" label. This is the canonical UI
+            // read-path for the sector label. Absent on flag-off / pre-3A saves, so the fallback is
+            // the default path.
             // ADR-0006 attested-name wiring: if state carries no explicit display_name, resolve the
             // historically-attested OG/TG/OZ label from the corps + dominant-municipality coverage
             // (display-only; never written back to hashed state). Falls through to computed label
