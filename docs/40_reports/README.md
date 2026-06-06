@@ -10,6 +10,8 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest local military state validate-when-present contract** | [implemented/20260606_LOCAL_MILITARY_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260606_LOCAL_MILITARY_STATE_VALIDATE_WHEN_PRESENT.md) - Legacy AoR caps, OG orders, settlement holdouts, and faction officer maturity remain optional but now reject malformed present local-state payloads. |
+
 | **Latest map-derived artifact ownership** | [implemented/20260606_MAP_DERIVED_ARTIFACT_OWNERSHIP.md](implemented/20260606_MAP_DERIVED_ARTIFACT_OWNERSHIP.md) - `data/derived/georef/`, `data/derived/operational/`, and `data/derived/municipality_audit/` are retained generated map-data evidence with owner-command rows and static guards. |
 | **Latest sector component map reuse** | [implemented/20260606_SECTOR_COMPONENT_MAP_REUSE.md](implemented/20260606_SECTOR_COMPONENT_MAP_REUSE.md) - `buildFactionSectors(...)` now reuses its precomputed friendly component map during brigade classification while preserving the current `d1ace172a29b2353` floor. |
 | **Latest derived military scalar maps validate-when-present contract** | [implemented/20260606_DERIVED_MILITARY_SCALAR_MAPS_VALIDATE_WHEN_PRESENT.md](implemented/20260606_DERIVED_MILITARY_SCALAR_MAPS_VALIDATE_WHEN_PRESENT.md) - Derived military scalar maps remain optional but now reject malformed present boolean, finite non-negative number, and non-negative integer payloads. |

@@ -1,3 +1,9 @@
+## 2026-06-06 - Local military state validation stays shape-only
+
+**Legacy/local order-state validation is not id resolution:** `military.brigade_desired_aor_cap`, `military.og_orders`, `military.settlement_holdouts`, and `military.faction_officer_maturity` can reject malformed present payloads without becoming required persisted state. Durable rule: validate local row/record shape and known enums only; do not resolve formation/corps/settlement ids, validate OG feasibility, infer holdout ownership, materialize absent fields, bump schema, or add migrations in optional cleanup lanes. Applied in `[2026-06-06] fix(state): validate local military state when present`.
+
+**Shared record validators should emit stable sorted diagnostics:** The shared non-negative-integer record validator now iterates keys by `strictCompare`, which changed malformed-save diagnostic order for existing triggered-operation and siege-counter tests. Durable rule: when a shared validator owns record diagnostics, prefer stable key order and update tests to assert that order instead of preserving insertion-order behavior from hostile payloads.
+
 ## 2026-06-06 - Retained map-derived artifact roots need owner rows before cleanup
 
 **Committed map-derived roots are not generic scratch output:** `data/derived/georef/`, `data/derived/operational/`, and `data/derived/municipality_audit/` contain retained generated map/georef/operational/audit evidence. Durable rule: before deleting, refreshing, expanding, or reclassifying a committed `data/derived/` root, add or update a generated-artifact ownership row that names the owner command, validation guard, commit policy, and transient policy, then pin the tracked file list with a focused ownership test. Applied in `[2026-06-06] test(map): document derived map artifact ownership`.

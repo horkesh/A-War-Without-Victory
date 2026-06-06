@@ -1160,7 +1160,7 @@ describe('save migration validator hardening', () => {
         };
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.triggered_operations_accepted\.negative must be a non-negative integer[\s\S]*military\.triggered_operations_accepted\.fractional must be a non-negative integer[\s\S]*military\.declined_operations\.negative\.declined_turn must be a non-negative integer[\s\S]*military\.declined_operations\.missing\.decline_count must be a non-negative integer[\s\S]*military\.declined_operations\.non_object must be an object[\s\S]*military\.used_operation_names\.bad must be a non-negative integer/
+            /Save schema validation failed after migration[\s\S]*military\.triggered_operations_accepted\.fractional must be a non-negative integer[\s\S]*military\.triggered_operations_accepted\.negative must be a non-negative integer[\s\S]*military\.declined_operations\.negative\.declined_turn must be a non-negative integer[\s\S]*military\.declined_operations\.missing\.decline_count must be a non-negative integer[\s\S]*military\.declined_operations\.non_object must be an object[\s\S]*military\.used_operation_names\.bad must be a non-negative integer/
         );
     });
 
@@ -1879,7 +1879,7 @@ describe('save migration validator hardening', () => {
         state.military.sarajevo_tunnel_operational = 'yes' as any;
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.siege_turn_counters\.RBiH:op:sarajevo:sarajevo_1 must be a non-negative integer[\s\S]*military\.siege_turn_counters\.RS:op:gorazde:gorazde_1 must be a non-negative integer[\s\S]*military\.siege_turn_counters\.HRHB:op:mostar:mostar_zapad_2 must be a non-negative integer[\s\S]*military\.sarajevo_tunnel_operational must be a boolean when present/
+            /Save schema validation failed after migration[\s\S]*military\.siege_turn_counters\.HRHB:op:mostar:mostar_zapad_2 must be a non-negative integer[\s\S]*military\.siege_turn_counters\.RBiH:op:sarajevo:sarajevo_1 must be a non-negative integer[\s\S]*military\.siege_turn_counters\.RS:op:gorazde:gorazde_1 must be a non-negative integer[\s\S]*military\.sarajevo_tunnel_operational must be a boolean when present/
         );
     });
 
@@ -3188,6 +3188,87 @@ describe('save migration validator hardening', () => {
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
             /Save schema validation failed after migration[\s\S]*military\.brigade_encircled\.rbih_101st_mountain must be a boolean[\s\S]*military\.battle_damage\.op:sarajevo:centar_2 must be a finite non-negative number[\s\S]*military\.battle_damage\.op:banja_luka:banja_luka_2 must be a finite non-negative number[\s\S]*military\.home_distance_cache\.rbih_101st_mountain must be a finite non-negative number[\s\S]*military\.home_distance_cache\.rs_1st_krajina_light must be a finite non-negative number[\s\S]*military\.active_offensives_against_corps\.rbih_1st_corps must be a non-negative integer[\s\S]*military\.active_offensives_against_corps\.vrs_1st_krajina must be a non-negative integer/
+        );
+    });
+
+    it('accepts current-version saves with absent or well-formed local military order and scalar state', () => {
+        const absent = currentVersionState();
+        delete absent.military.brigade_desired_aor_cap;
+        delete absent.military.og_orders;
+        delete absent.military.settlement_holdouts;
+        delete absent.military.faction_officer_maturity;
+
+        const wellFormed = currentVersionState();
+        wellFormed.military.brigade_desired_aor_cap = {
+            rbih_101st_mountain: 4,
+            rs_1st_krajina_light: 0,
+        };
+        wellFormed.military.og_orders = [{
+            corps_id: 'rbih_1st_corps',
+            donors: [{ brigade_id: 'rbih_101st_mountain', personnel_contribution: 200 }],
+            focus_settlements: ['op:sarajevo:centar_2'],
+            posture: 'attack',
+            max_duration: 6,
+        }];
+        wellFormed.military.settlement_holdouts = {
+            'op:sarajevo:centar_2': {
+                holdout: true,
+                holdout_faction: 'RBiH',
+                occupying_faction: 'RS',
+                holdout_resistance: 0.75,
+                holdout_since_turn: 3,
+                isolated_turns: 1,
+            },
+        };
+        wellFormed.military.faction_officer_maturity = {
+            RBiH: 3,
+            RS: 4.25,
+        };
+
+        const migratedAbsent = deserializeState(JSON.stringify(absent));
+        const migratedWellFormed = deserializeState(JSON.stringify(wellFormed));
+
+        expect(migratedAbsent.military.brigade_desired_aor_cap).toBeUndefined();
+        expect(migratedAbsent.military.og_orders).toBeUndefined();
+        expect(migratedAbsent.military.settlement_holdouts).toBeUndefined();
+        expect(migratedAbsent.military.faction_officer_maturity).toBeUndefined();
+        expect(migratedWellFormed.military.brigade_desired_aor_cap).toEqual(wellFormed.military.brigade_desired_aor_cap);
+        expect(migratedWellFormed.military.og_orders).toEqual(wellFormed.military.og_orders);
+        expect(migratedWellFormed.military.settlement_holdouts).toEqual(wellFormed.military.settlement_holdouts);
+        expect(migratedWellFormed.military.faction_officer_maturity).toEqual(wellFormed.military.faction_officer_maturity);
+    });
+
+    it('rejects current-version saves with malformed local military order and scalar state', () => {
+        const state = currentVersionState();
+        state.military.brigade_desired_aor_cap = {
+            rbih_101st_mountain: -1,
+            rs_1st_krajina_light: 1.5,
+        };
+        state.military.og_orders = [{
+            corps_id: '',
+            donors: [{ brigade_id: 42, personnel_contribution: -1 }, 7],
+            focus_settlements: ['op:sarajevo:centar_2', 42],
+            posture: 'rush',
+            max_duration: 0,
+        }, 42];
+        state.military.settlement_holdouts = {
+            'op:sarajevo:centar_2': {
+                holdout: 'yes',
+                holdout_faction: '',
+                occupying_faction: 42,
+                holdout_resistance: Number.POSITIVE_INFINITY,
+                holdout_since_turn: -1,
+                isolated_turns: 1.5,
+            },
+            bad: 42,
+        };
+        state.military.faction_officer_maturity = {
+            RBiH: -1,
+            RS: Number.NaN,
+        };
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.brigade_desired_aor_cap\.rbih_101st_mountain must be a non-negative integer[\s\S]*military\.brigade_desired_aor_cap\.rs_1st_krajina_light must be a non-negative integer[\s\S]*military\.og_orders\[0\]\.corps_id must be a non-empty string[\s\S]*military\.og_orders\[0\]\.donors\[0\]\.brigade_id must be a non-empty string[\s\S]*military\.og_orders\[0\]\.donors\[0\]\.personnel_contribution must be a finite non-negative number[\s\S]*military\.og_orders\[0\]\.donors\[1\] must be an object[\s\S]*military\.og_orders\[0\]\.focus_settlements must be a string array[\s\S]*military\.og_orders\[0\]\.posture must be a brigade posture[\s\S]*military\.og_orders\[0\]\.max_duration must be a positive integer[\s\S]*military\.og_orders\[1\] must be an object[\s\S]*military\.settlement_holdouts\.bad must be an object[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.holdout must be a boolean[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.holdout_faction must be a non-empty string[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.occupying_faction must be a string when present[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.holdout_resistance must be a finite non-negative number[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.holdout_since_turn must be a non-negative integer[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.isolated_turns must be a non-negative integer[\s\S]*military\.faction_officer_maturity\.RBiH must be a finite non-negative number[\s\S]*military\.faction_officer_maturity\.RS must be a finite non-negative number/
         );
     });
 });
