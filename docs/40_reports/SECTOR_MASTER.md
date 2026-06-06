@@ -1,8 +1,20 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-06-05 (active-combat scan reuse)
+**Updated:** 2026-06-05 (sector construction index/reachability reuse)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
+
+---
+
+## 2026-06-05: Sector construction index and reachability reuse (byte-identical)
+
+**Change:** `buildFactionSectors(...)` now builds per-corps `SectorFormationScanIndex` packets from the already sorted active-combat id universe and passes them into `buildMultiSectorsForCorps(...)`. The staffability filter also precomputes faction/corps reachable-OSID sets once per invocation/corps and checks unique front OSIDs against those sets instead of repeating bounded BFS probes per sector.
+
+**Determinism:** Both indexes are invocation-local and read-only at the consumer boundary. Direct `buildMultiSectorsForCorps(...)` callers keep the fallback scan path. Reachability expands existing sorted adjacency lists and only affects the same boolean staffability predicate; no sector packet ordering, combat math, scenario data, save schema, UI, baseline manifest, or serialized output changed.
+
+**Verification:** Focused sector instrumentation/cache tests passed 40/40, typecheck passed, `git diff --check` passed, and a changed 40w timed run preserved `d1ace172a29b2353` with consistency validation PASS. Changed partition profile sidecar total was `17,795.054ms` versus the prior `25,931.774ms`; `sector-formation-scan-index` dropped to `0.256ms`, and staffability filtering moved from `200.307ms` to `38.366ms` plus one-time reachability builds.
+
+**Report:** [implemented/20260606_SECTOR_CONSTRUCTION_INDEX_REACHABILITY_REUSE.md](implemented/20260606_SECTOR_CONSTRUCTION_INDEX_REACHABILITY_REUSE.md)
 
 ---
 
