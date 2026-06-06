@@ -43,6 +43,7 @@ function renderDesk(
     onOpenArmyHQ: vi.fn(),
     onOpenMap: vi.fn(),
     onOpenRecords: vi.fn(),
+    onOpenChronicle: vi.fn(),
     ...props,
   }));
 }
@@ -140,6 +141,42 @@ describe('PresidentDeskShell', () => {
     expect(screen.getByText('Decisions')).toBeTruthy();
     expect(screen.getByText('Cabinet crisis response')).toBeTruthy();
     expect(screen.getByText('Decision recorded')).toBeTruthy();
+    expect(screen.getByText('Open Chronicle')).toBeTruthy();
     expect(screen.getByRole('img', { name: 'Cabinet crisis response consequence' }).getAttribute('src')).toContain('consequence_public_pressure');
+  });
+
+  it('routes desk consequence rows to their filed surface', () => {
+    const onOpenRecords = vi.fn();
+    const onOpenChronicle = vi.fn();
+    renderDesk({
+      onOpenRecords,
+      onOpenChronicle,
+      state: makeState({
+        firedEvents: [
+          {
+            id: 'cabinet-crisis',
+            turn: 8,
+            title: 'Cabinet crisis response',
+            narrative: 'The cabinet accepted the policy line.',
+            category: 'political',
+            effects: [{ kind: 'authority', description: 'Authority held.' }],
+            isDecision: true,
+          },
+        ],
+        rawGameState: {
+          military: {
+            patron_defiance_supply_cuts: [
+              { faction: 'RS', turn: 9, cut_fraction: 0.25, support_after: 0.5 },
+            ],
+          },
+        } as any,
+      }),
+    });
+
+    fireEvent.click(screen.getByText('Cabinet crisis response'));
+    fireEvent.click(screen.getByText('Patron defiance supply cut'));
+
+    expect(onOpenChronicle).toHaveBeenCalledOnce();
+    expect(onOpenRecords).toHaveBeenCalledOnce();
   });
 });

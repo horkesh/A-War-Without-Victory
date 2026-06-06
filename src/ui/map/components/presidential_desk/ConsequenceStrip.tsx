@@ -7,9 +7,10 @@ import { turnToDateString } from '../../utils/formatters';
 export interface ConsequenceStripProps {
   state: LoadedGameState | null;
   onOpenRecords: () => void;
+  onOpenChronicle: () => void;
 }
 
-export function ConsequenceStrip({ state, onOpenRecords }: ConsequenceStripProps) {
+export function ConsequenceStrip({ state, onOpenRecords, onOpenChronicle }: ConsequenceStripProps) {
   const turn = state?.turn ?? 0;
   const latestSummary = state?.latestTurnSummary ?? null;
   const battleCount = latestSummary?.battles?.length ?? 0;
@@ -58,7 +59,7 @@ export function ConsequenceStrip({ state, onOpenRecords }: ConsequenceStripProps
             <button
               key={record.id}
               type="button"
-              onClick={onOpenRecords}
+              onClick={record.recordTarget === 'chronicle' ? onOpenChronicle : onOpenRecords}
               className="flex w-full gap-2 border border-panel-border/70 bg-black/20 px-2.5 py-2 text-left transition-colors hover:border-accent-gold/45"
             >
               <img
@@ -72,6 +73,11 @@ export function ConsequenceStrip({ state, onOpenRecords }: ConsequenceStripProps
                   <div className="shrink-0 text-[8px] font-bold uppercase tracking-[0.14em] text-accent-gold">{record.outcome}</div>
                 </div>
                 <div className="mt-1 truncate text-[9px] text-text-secondary">{record.family} / Turn {record.turn} / {record.detail}</div>
+                <div className="mt-1 text-[8px] font-bold uppercase tracking-[0.13em] text-text-muted">
+                  {record.recordTarget === 'chronicle'
+                    ? t('desk.consequences.openChronicle')
+                    : t('desk.consequences.openRecords')}
+                </div>
               </div>
             </button>
           ))}

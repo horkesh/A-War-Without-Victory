@@ -113,4 +113,36 @@ describe('DecisionConsequenceRecordsPanel', () => {
     expect(screen.getByText('Filed to Records')).toBeTruthy();
     expect(screen.getByText('Review in Records')).toBeTruthy();
   });
+
+  it('keeps decision consequence panel copy localized', async () => {
+    const { setLocale } = await import('../../src/ui/map/i18n/index.js');
+    setLocale('bcs', undefined);
+    useGameStore.setState({
+      loadedGameState: makeState({
+        firedEvents: [
+          {
+            id: 'cabinet-crisis',
+            turn: 8,
+            title: 'Cabinet crisis response',
+            narrative: 'The cabinet accepted the policy line.',
+            category: 'political',
+            effects: [{ kind: 'authority', description: 'Authority held.' }],
+            isDecision: true,
+          },
+        ],
+      }),
+    });
+
+    try {
+      render(React.createElement(DecisionConsequenceRecordsPanel));
+
+      expect(screen.getByRole('region', { name: 'Zapisi posljedica odluka' })).toBeTruthy();
+      expect(screen.getByText('Posljedice odluka')).toBeTruthy();
+      expect(screen.getByText('Put Hronike')).toBeTruthy();
+      expect(screen.getByText('Arhivirano u: Hronika')).toBeTruthy();
+      expect(screen.getByRole('button', { name: 'Otvori Hroniku' })).toBeTruthy();
+    } finally {
+      setLocale('en', undefined);
+    }
+  });
 });
