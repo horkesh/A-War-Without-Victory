@@ -33,6 +33,7 @@ import {
 import { resolveDirectiveActArt } from '../../data/directiveActArt';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
+import { buildObjectiveTargetOptions } from '../../utils/objectiveTargetOptions';
 import { t } from '../../i18n';
 import { strictCompare } from '../../../../state/validateGameState.js';
 
@@ -161,6 +162,13 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   );
   const effectiveTargetOsid = payloadTargetOsid || targetInputResolution.targetOsid;
   const ambiguousTargetMatches = showTargetInput ? targetInputResolution.ambiguousMatches : [];
+  const targetPickerOptions = useMemo(
+    () => buildObjectiveTargetOptions(gameState.controlBySettlement, osidDisplayNames),
+    [gameState.controlBySettlement, osidDisplayNames],
+  );
+  const targetPickerValue = showTargetInput && targetPickerOptions.some((option) => option.osid === effectiveTargetOsid)
+    ? effectiveTargetOsid
+    : '';
 
   // Commander disposition for the request/force objection (same lookup as
   // OperationsSection): the active CO of the target corps.
@@ -501,14 +509,29 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
           objection / "cannot issue" flow above handles invalid / unreachable
           targets. Shown only when the directive carries no fixed target. */}
       {!pendingObjection && !impossibleReason && showTargetInput && (
-        <input
-          type="text"
-          value={targetOsidInput}
-          onChange={(e) => { setTargetOsidInput(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
-          placeholder={t('directive.targetInput.placeholder')}
-          aria-label={t('directive.targetInput.aria')}
-          className="mt-2 w-full rounded border border-panel-border/50 bg-panel-bg px-2 py-1 text-[11px] font-mono text-text-primary"
-        />
+        <div className="mt-2 space-y-1.5">
+          {targetPickerOptions.length > 0 && (
+            <select
+              value={targetPickerValue}
+              onChange={(e) => { setTargetOsidInput(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
+              aria-label={t('directive.targetPicker.aria')}
+              className="w-full rounded border border-panel-border/50 bg-panel-bg px-2 py-1 text-[11px] text-text-primary"
+            >
+              <option value="">{t('directive.targetPicker.placeholder')}</option>
+              {targetPickerOptions.map((option) => (
+                <option key={option.osid} value={option.osid}>{option.display}</option>
+              ))}
+            </select>
+          )}
+          <input
+            type="text"
+            value={targetOsidInput}
+            onChange={(e) => { setTargetOsidInput(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
+            placeholder={t('directive.targetInput.placeholder')}
+            aria-label={t('directive.targetInput.aria')}
+            className="w-full rounded border border-panel-border/50 bg-panel-bg px-2 py-1 text-[11px] font-mono text-text-primary"
+          />
+        </div>
       )}
       {!pendingObjection && !impossibleReason && ambiguousTargetMatches.length > 0 && (
         <div role="alert" aria-label={t('directive.targetInput.ambiguousAria')} className="mt-2 rounded border border-amber-500/50 bg-amber-500/5 p-2">

@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest command objective picker:** [implemented/20260606_COMMAND_OBJECTIVE_PICKER.md](implemented/20260606_COMMAND_OBJECTIVE_PICKER.md) - Request-op directives now offer deterministic known-objective pickers in both Decision Room and Army HQ request rows while preserving existing commander objection, CA cost, staging, and receipt behavior.
+
 **Latest Warroom native overlay residue batch:** [implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md](implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md) - Intelligence, Staff, and Faction now have the only native Warroom preview overlays with explicit drill-ins to existing owner surfaces, while retired StrategicDashboard/EventLog local command variants are removed from live source.
 
 **Latest command-surface repurpose read-models:** [implemented/20260606_COMMAND_SURFACE_REPURPOSE_READMODELS.md](implemented/20260606_COMMAND_SURFACE_REPURPOSE_READMODELS.md) - Enclave, Economy, and Chief-of-Staff panels now carry presidential readout framing with locale-independent ordering guards.
