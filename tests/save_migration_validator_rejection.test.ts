@@ -3271,4 +3271,160 @@ describe('save migration validator hardening', () => {
             /Save schema validation failed after migration[\s\S]*military\.brigade_desired_aor_cap\.rbih_101st_mountain must be a non-negative integer[\s\S]*military\.brigade_desired_aor_cap\.rs_1st_krajina_light must be a non-negative integer[\s\S]*military\.og_orders\[0\]\.corps_id must be a non-empty string[\s\S]*military\.og_orders\[0\]\.donors\[0\]\.brigade_id must be a non-empty string[\s\S]*military\.og_orders\[0\]\.donors\[0\]\.personnel_contribution must be a finite non-negative number[\s\S]*military\.og_orders\[0\]\.donors\[1\] must be an object[\s\S]*military\.og_orders\[0\]\.focus_settlements must be a string array[\s\S]*military\.og_orders\[0\]\.posture must be a brigade posture[\s\S]*military\.og_orders\[0\]\.max_duration must be a positive integer[\s\S]*military\.og_orders\[1\] must be an object[\s\S]*military\.settlement_holdouts\.bad must be an object[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.holdout must be a boolean[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.holdout_faction must be a non-empty string[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.occupying_faction must be a string when present[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.holdout_resistance must be a finite non-negative number[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.holdout_since_turn must be a non-negative integer[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.isolated_turns must be a non-negative integer[\s\S]*military\.faction_officer_maturity\.RBiH must be a finite non-negative number[\s\S]*military\.faction_officer_maturity\.RS must be a finite non-negative number/
         );
     });
+
+    // ─── Batch: remaining optional military surfaces (validate-when-present) ───
+    it('rejects current-version saves with malformed front-edge and militia-strength surfaces', () => {
+        const state = currentVersionState();
+        state.military.war_militia_strength = {
+            op_sarajevo: { RBiH: 150, bad: 10 },
+            op_mostar: 42,
+        };
+        state.military.front_edges = [{ edge_id: '', a: '', b: '', side_a: 'XX', side_b: 'RS' }, 42];
+        state.military.war_front_edges_osid = 42;
+        state.military.assignable_front_segments = [{
+            front_id: '',
+            edge_ids: [42],
+            side_a: 'XX',
+            side_b: null,
+            length_edges: -1,
+            name: 42,
+            theatre_id: 42,
+        }, 7];
+        state.military.brigade_front_assignment = { arbih_1st: 42 };
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.war_militia_strength\.op_mostar must be an object[\s\S]*military\.war_militia_strength\.op_sarajevo\.RBiH must be a number in \[0, 100\][\s\S]*military\.war_militia_strength\.op_sarajevo\.bad must use a canonical faction id key[\s\S]*military\.front_edges\[0\]\.edge_id must be a non-empty string[\s\S]*military\.front_edges\[0\]\.a must be a non-empty string[\s\S]*military\.front_edges\[0\]\.b must be a non-empty string[\s\S]*military\.front_edges\[0\]\.side_a must be null or one of: RBiH, RS, HRHB[\s\S]*military\.front_edges\[1\] must be an object[\s\S]*military\.war_front_edges_osid must be an array when present[\s\S]*military\.assignable_front_segments\[0\]\.front_id must be a non-empty string[\s\S]*military\.assignable_front_segments\[0\]\.edge_ids must be a string array[\s\S]*military\.assignable_front_segments\[0\]\.side_a must be null or one of: RBiH, RS, HRHB[\s\S]*military\.assignable_front_segments\[0\]\.length_edges must be a non-negative integer[\s\S]*military\.assignable_front_segments\[0\]\.name must be a string when present[\s\S]*military\.assignable_front_segments\[0\]\.theatre_id must be a string when present[\s\S]*military\.assignable_front_segments\[1\] must be an object[\s\S]*military\.brigade_front_assignment\.arbih_1st must be a string or null/
+        );
+    });
+
+    it('rejects current-version saves when front-edge and militia-strength surfaces are wrong root types', () => {
+        const state = currentVersionState();
+        state.military.war_militia_strength = [];
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.war_militia_strength must be an object when present/
+        );
+
+        const state2 = currentVersionState();
+        state2.military.front_edges = {};
+        expect(() => deserializeState(JSON.stringify(state2))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.front_edges must be an array when present/
+        );
+
+        const state3 = currentVersionState();
+        state3.military.assignable_front_segments = {};
+        expect(() => deserializeState(JSON.stringify(state3))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.assignable_front_segments must be an array when present/
+        );
+
+        const state4 = currentVersionState();
+        state4.military.brigade_front_assignment = [];
+        expect(() => deserializeState(JSON.stringify(state4))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.brigade_front_assignment must be an object when present/
+        );
+    });
+
+    it('rejects current-version saves with malformed TG / Army-HQ-op / elite-tracker / guerrilla surfaces', () => {
+        const state = currentVersionState();
+        state.military.guerrilla_threats = [{
+            faction: 'XX',
+            municipalities: [42],
+            intensity: Number.POSITIVE_INFINITY,
+            expires_turn: -1,
+        }, 42];
+        state.military.og_promotions = {
+            arbih_1st_corps: {
+                corps_id: '',
+                faction: 'XX',
+                og_ordinal: -1,
+                division_number: 1.5,
+                division_display_name: '',
+                promoted_on_turn: -1,
+            },
+            bad: 42,
+        };
+        state.military.army_hq_last_op_turn = { RBiH: -1, bad: 3 };
+        state.military.army_hq_op_count_by_year = { RBiH: { 1992: -1 }, bad: 42 };
+        state.military.elite_brigade_tracker = {
+            arbih_elite: {
+                brigade_id: '',
+                total_loans: -1,
+                total_turns_deployed: Number.NaN,
+                total_battles: 0,
+                total_casualties_taken: 0,
+                total_osids_captured: 0,
+                episodes: 42,
+            },
+            bad: 42,
+        };
+        state.military.tg_recent_compositions = { hash_a: -1 };
+        state.military.tg_formations_by_corps = { rs_1st: 1.5 };
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*military\.guerrilla_threats\[0\]\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.guerrilla_threats\[0\]\.municipalities must be a string array[\s\S]*military\.guerrilla_threats\[0\]\.intensity must be a finite number[\s\S]*military\.guerrilla_threats\[0\]\.expires_turn must be a non-negative integer[\s\S]*military\.guerrilla_threats\[1\] must be an object[\s\S]*military\.og_promotions\.arbih_1st_corps\.corps_id must be a non-empty string[\s\S]*military\.og_promotions\.arbih_1st_corps\.faction must be one of: RBiH, RS, HRHB[\s\S]*military\.og_promotions\.arbih_1st_corps\.og_ordinal must be a non-negative integer[\s\S]*military\.og_promotions\.arbih_1st_corps\.division_number must be a non-negative integer[\s\S]*military\.og_promotions\.arbih_1st_corps\.division_display_name must be a non-empty string[\s\S]*military\.og_promotions\.arbih_1st_corps\.promoted_on_turn must be a non-negative integer[\s\S]*military\.og_promotions\.bad must be an object[\s\S]*military\.army_hq_last_op_turn\.RBiH must be a non-negative integer[\s\S]*military\.army_hq_last_op_turn\.bad must use a canonical faction id key[\s\S]*military\.army_hq_op_count_by_year\.RBiH\.1992 must be a non-negative integer[\s\S]*military\.army_hq_op_count_by_year\.bad must use a canonical faction id key[\s\S]*military\.army_hq_op_count_by_year\.bad must be an object[\s\S]*military\.elite_brigade_tracker\.arbih_elite\.brigade_id must be a non-empty string[\s\S]*military\.elite_brigade_tracker\.arbih_elite\.total_loans must be a finite non-negative number[\s\S]*military\.elite_brigade_tracker\.arbih_elite\.total_turns_deployed must be a finite non-negative number[\s\S]*military\.elite_brigade_tracker\.arbih_elite\.episodes must be an array[\s\S]*military\.elite_brigade_tracker\.bad must be an object[\s\S]*military\.tg_recent_compositions\.hash_a must be a non-negative integer[\s\S]*military\.tg_formations_by_corps\.rs_1st must be a non-negative integer/
+        );
+    });
+
+    it('rejects current-version saves when TG / Army-HQ-op surfaces are wrong root types', () => {
+        const cases: Array<[string, unknown, string]> = [
+            ['guerrilla_threats', {}, 'military\\.guerrilla_threats must be an array when present'],
+            ['og_promotions', [], 'military\\.og_promotions must be an object when present'],
+            ['army_hq_last_op_turn', [], 'military\\.army_hq_last_op_turn must be an object when present'],
+            ['army_hq_op_count_by_year', [], 'military\\.army_hq_op_count_by_year must be an object when present'],
+            ['elite_brigade_tracker', [], 'military\\.elite_brigade_tracker must be an object when present'],
+            ['tg_recent_compositions', [], 'military\\.tg_recent_compositions must be an object when present'],
+            ['tg_formations_by_corps', [], 'military\\.tg_formations_by_corps must be an object when present'],
+        ];
+        for (const [field, value, pattern] of cases) {
+            const state = currentVersionState();
+            (state.military as Record<string, unknown>)[field] = value;
+            expect(() => deserializeState(JSON.stringify(state))).toThrow(
+                new RegExp(`Save schema validation failed after migration[\\s\\S]*${pattern}`)
+            );
+        }
+    });
+
+    it('accepts current-version saves with well-formed optional military batch surfaces present', () => {
+        const state = currentVersionState();
+        state.military.war_militia_strength = { op_sarajevo: { RBiH: 80, RS: 20 } };
+        state.military.front_edges = [{ edge_id: 'e1', a: 's1', b: 's2', side_a: 'RBiH', side_b: 'RS' }];
+        state.military.war_front_edges_osid = [{ edge_id: 'e2', a: 'o1', b: 'o2', side_a: null, side_b: 'HRHB' }];
+        state.military.assignable_front_segments = [{
+            front_id: 'f1',
+            edge_ids: ['e1', 'e2'],
+            side_a: 'RBiH',
+            side_b: 'RS',
+            length_edges: 2,
+            name: 'Sarajevo line',
+            theatre_id: 'th1',
+        }];
+        state.military.brigade_front_assignment = { arbih_1st: 'f1', arbih_2nd: null };
+        state.military.guerrilla_threats = [{ faction: 'RS', municipalities: ['op_foca'], intensity: 0.5, expires_turn: 30 }];
+        state.military.og_promotions = {
+            arbih_1st_corps: {
+                corps_id: 'arbih_1st_corps',
+                faction: 'RBiH',
+                og_ordinal: 1,
+                division_number: 21,
+                division_display_name: '21. Division',
+                promoted_on_turn: 40,
+            },
+        };
+        state.military.army_hq_last_op_turn = { RBiH: 12, RS: 0 };
+        state.military.army_hq_op_count_by_year = { RBiH: { 1992: 1, 1993: 2 } };
+        state.military.elite_brigade_tracker = {
+            arbih_elite: {
+                brigade_id: 'arbih_elite',
+                total_loans: 2,
+                total_turns_deployed: 8,
+                total_battles: 3,
+                total_casualties_taken: 120,
+                total_osids_captured: 4,
+                episodes: [],
+            },
+        };
+        state.military.tg_recent_compositions = { hash_a: 50 };
+        state.military.tg_formations_by_corps = { arbih_1st_corps: 3 };
+
+        expect(() => deserializeState(JSON.stringify(state))).not.toThrow();
+    });
 });
