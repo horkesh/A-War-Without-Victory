@@ -7984,6 +7984,16 @@
           "headline": "Sarajevo issues a broad army citation",
           "body": "The RBiH presidency honours the regular army as a whole. Pale sees a unifying but modest morale move."
         }
+      },
+      "decorate_decline_rbih": {
+        "HRHB": {
+          "headline": "Sarajevo withholds decorations",
+          "body": "The RBiH presidency holds back unit citations amid heavy losses. Mostar reads a leadership judging that honours would ring hollow for now."
+        },
+        "RS": {
+          "headline": "Sarajevo withholds decorations",
+          "body": "The RBiH presidency declines to decorate any formation. Pale notes the restraint and the strain it implies."
+        }
       }
     }
   },
@@ -8137,6 +8147,16 @@
           "headline": "Pale issues a broad VRS citation",
           "body": "The RS presidency honours the regular VRS as a whole. Sarajevo sees a unifying but modest morale move."
         }
+      },
+      "decorate_decline_rs": {
+        "HRHB": {
+          "headline": "Pale withholds decorations",
+          "body": "The RS presidency holds back unit citations amid heavy losses. Mostar reads a leadership judging that honours would ring hollow for now."
+        },
+        "RBiH": {
+          "headline": "Pale withholds decorations",
+          "body": "The RS presidency declines to decorate any formation. Sarajevo notes the restraint and the strain it implies."
+        }
       }
     }
   },
@@ -8289,6 +8309,16 @@
         "RS": {
           "headline": "Mostar issues a broad HVO citation",
           "body": "The Herceg-Bosna presidency honours the regular HVO as a whole. Pale sees a unifying but modest morale move."
+        }
+      },
+      "decorate_decline_hrhb": {
+        "RBiH": {
+          "headline": "Mostar withholds decorations",
+          "body": "The Herceg-Bosna presidency holds back unit citations amid heavy losses. Sarajevo reads a leadership judging that honours would ring hollow for now."
+        },
+        "RS": {
+          "headline": "Mostar withholds decorations",
+          "body": "The Herceg-Bosna presidency declines to decorate any formation. Pale notes the restraint and the strain it implies."
         }
       }
     }
