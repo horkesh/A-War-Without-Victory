@@ -1,8 +1,9 @@
 # AWWV Calibration Master Reference
 
-## CURRENT BASELINE OF RECORD — 188w 614/712, hash `0abca945388ddb59` (2026-06-07)
+## CURRENT BASELINE OF RECORD — 188w 614/712, hash `09c63bc0f06def46` (2026-06-07)
 
-- **188w: OSID 614/712 (86.24%), anchors 28/30, benchmarks 6/6, 0 critical anomalies. Hash `0abca945388ddb59`. HEAD `77265108b`.** Per-faction: HRHB 104 / RBiH 281 / RS 327.
+- **188w: OSID 614/712 (86.24%), anchors 28/30, benchmarks 6/6, 0 critical anomalies. Hash `09c63bc0f06def46`.** Per-faction: HRHB 104 / RBiH 281 / RS 327.
+- **CALIBRATION-FLAT re-floor `0abca945388ddb59` → `09c63bc0f06def46` (Ring-3 informational events).** PROVEN flat: the full 188w flips list + all three factions' control sets are BIT-IDENTICAL to the prior floor; the ONLY state delta is `military.event_fire_counts` gaining `srebrenica_column_breakout_1995: 1` + `un_safe_area_enforcement_1995: 1` (two inert `narrative`-effect timeline records that fire in the 1995 window). OSID/anchors/benchmarks/critical ALL unchanged. 40w stays `bb0462f4d37dab2d` byte-identical (events fire turn≥160, outside 40w/52w).
 - **40w: OSID 653/712 (91.71%), anchors 30/30, 6/6, 0 critical. Hash `bb0462f4d37dab2d`** — restored by the COMBAT-P14 revert (#257); this CORRECTS the stale `e086afbefcef01e6` / 655 figure carried in the prior header.
 - **52w: re-floored green through #260.**
 - **Two failing 188w anchors:**

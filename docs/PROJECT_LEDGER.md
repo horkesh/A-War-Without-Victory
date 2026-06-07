@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-07] feat(events): Ring-3 informational records — Srebrenica column (C9) + UN safe area (C11)
+
+**Type:** §6 Ring-3 sensitive-history content (owner-cleared, informational-record only). Two timeline/codex events with inert `narrative`-only effects — no `control_change`, dimension shifts, flags, or `response_options`. **Calibration-flat.**
+
+**Change:** Added `srebrenica_column_breakout_1995` (the column from Šušnjari toward Tuzla; ICTY Krstić/Popović/Mladić genocide findings) + `un_safe_area_enforcement_1995` (the under-resourced UNPROFOR safe-area regime fails; UNSCR 819/824, UN A/54/549) to `data/scenarios/events/war_1995.json`. Mechanical triggers (`requires_events: [srebrenica_falls_1995]` + `flag srebrenica_fell` + 1995 window), ICTY-first provenance `source_note`s with the standard boundary clause. No player agency over the atrocity; record-only.
+
+**Calibration:** 40w `bb0462f4d37dab2d` byte-identical (events fire turn≥160, outside 40w/52w → CI baseline gate unaffected). 188w re-floor `0abca945388ddb59` → `09c63bc0f06def46` — **PROVEN calibration-flat**: full flips list + all three faction control sets bit-identical to prior floor; only `event_fire_counts` gains the two entries. OSID 614 / anchors 28/30 / benchmarks 6/6 / 0 critical all unchanged.
+
+**Verification:** §6 suite green (`codex_sensitive_history_source_notes`, `sensitive_history_canon_gate_audit` 0 critical/0 warning, claim-inventory); canon-gate audit strict 0/0; additive count-pin ratchets only (catalog 287→289, no_choice 208→210; choice_events 79 unchanged). `tsc` clean. Prose orchestrator-reviewed before merge.
+
 ## [2026-06-07] feat(siege): Sarajevo lifeline substrate (B7 Phases 0–3, default-OFF, byte-identical)
 
 **Type:** Feature scaffold behind a default-OFF env flag. Flag-OFF ⇒ BYTE-IDENTICAL (40w `bb0462f4d37dab2d`, 188w `0abca945388ddb59` both UNCHANGED vs current main floors; `test:baselines` "all scenarios match", no re-floor). No OOB / combat-resolution-data / scenario-data / baseline-manifest touched. Determinism intact (event-flag+control inputs only; no Date.now/Math.random; monotonic siege_duration preserved). NO §6 surface (Markale stays Ring-2; no relief score / brutality lever / days-survived counter). Defers plan Phases 4–5 (player read-model UI + default-flip — §6/user-gated).

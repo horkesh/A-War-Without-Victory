@@ -84,10 +84,10 @@ function assertCatalogRowsThrow(rows: unknown[], expected: RegExp): void {
     );
 }
 
-test('loadEventDefinitions(0) returns the current 287-row catalog', () => {
+test('loadEventDefinitions(0) returns the current 289-row catalog', () => {
     const loaded = loadEventDefinitions(0);
 
-    assert.strictEqual(loaded.length, 287);
+    assert.strictEqual(loaded.length, 289);
 });
 
 test('loadEventDefinitions(0) returns deterministic order by trigger turn_min then id', () => {
