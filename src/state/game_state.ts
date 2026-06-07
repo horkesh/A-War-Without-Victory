@@ -1776,6 +1776,15 @@ export interface EndgameSnapshot {
     cost_ledger?: unknown;
     /** Historical comparison from `compareToHistorical` at freeze time. */
     historical_comparison?: unknown;
+    /**
+     * Peace dysfunction index (D3, 0-100) computed at freeze for Dayton outcomes.
+     * Frozen here so the keystone metric survives save/load round-trip even if
+     * post-Dayton bot drift mutates live state. Absent for non-Dayton endings
+     * and on pre-D3 saves. See src/sim/negotiation/peace_dysfunction.ts.
+     */
+    peace_dysfunction_index?: number;
+    /** Full deterministic PeaceDysfunctionBreakdown of the index (D3). */
+    peace_dysfunction?: unknown;
 }
 
 export interface NegotiationLedgerEntry {

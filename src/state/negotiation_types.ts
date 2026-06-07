@@ -247,6 +247,52 @@ export interface DaytonResult {
     final_territory_split: Record<string, number>;
     /** Items where patron override forced acceptance. */
     patron_overrides_applied: string[];
+    /**
+     * Brčko outcome (D1, owner ruling Opt 2a). Historically Brčko was deferred
+     * to international arbitration at Dayton (Annex 2) and became the Brčko
+     * District condominium of both Entities in 1999 — a THIRD state, neither
+     * RBiH nor RS. When the brcko_district package is left unresolved (neither
+     * cleanly demanded-and-won nor conceded), it resolves to 'arbitration'.
+     * Optional/back-compat: absent on pre-D1 saves.
+     */
+    brcko_status?: 'federation' | 'rs' | 'arbitration';
+    /** True when Brčko resolved to the international arbitration district (third state). */
+    brcko_arbitration?: boolean;
+    /**
+     * Derived entity-autonomy index (D2, 0-100): weighted mean of the 6
+     * institutional choices, where decentralized = high autonomy. 100 = maximally
+     * decentralized (historical Dayton default). Read-only display + verdict input.
+     * Optional/back-compat: absent on pre-D2 saves.
+     */
+    entity_autonomy_index?: number;
+    /**
+     * Peace dysfunction index (D3, 0-100): the gap between a functional
+     * settlement and what was signed. Caps outcome_class. Optional/back-compat.
+     */
+    peace_dysfunction_index?: number;
+    /** Structural dysfunction flags raised by the signed settlement (D3). */
+    peace_dysfunction_flags?: string[];
+}
+
+/**
+ * Deterministic breakdown of the peace_dysfunction_index (D3). Pure read of the
+ * frozen settlement + endgame state; never mutates. Exposed for display / tests.
+ */
+export interface PeaceDysfunctionBreakdown {
+    /** Composite 0-100. Higher = more dysfunctional (further from a functional peace). */
+    index: number;
+    /** Sub-component 0-100: entity autonomy (decentralization) above a functional floor. */
+    autonomy_component: number;
+    /** Sub-component 0-100: territorial fragmentation of the signed map. */
+    fragmentation_component: number;
+    /** Sub-component 0-100: Brčko left unresolved (arbitration) rather than cleanly assigned. */
+    brcko_component: number;
+    /** Sub-component 0-100: refugees created during the war and not returned. */
+    refugees_component: number;
+    /** Sub-component 0-100: condemnation flags (locked ruptures) entrenched by the settlement. */
+    condemnation_component: number;
+    /** Structural flags raised (e.g. frozen_partition, gridlock_by_design). */
+    flags: string[];
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

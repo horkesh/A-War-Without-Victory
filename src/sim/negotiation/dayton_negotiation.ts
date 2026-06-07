@@ -21,6 +21,7 @@ import { getAllInstitutionalPackages } from './institutional_packages.js';
 import { evaluateBotResponse, getCompositeCapital, computeProposalCostToFaction } from './bot_negotiation.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
+import { computePeaceDysfunctionBreakdown } from './peace_dysfunction.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -269,6 +270,18 @@ export function resolveDaytonNegotiation(
 
     // Store result on state
     neg.dayton_result = result;
+
+    // Comprehensive Dayton D3 (2026-06-07): compute the peace_dysfunction_index +
+    // breakdown from the just-signed settlement and stamp it onto the result for
+    // display / verdict. Pure read of the result we just assigned to state.
+    // Returns null in historical/unset mode (emergent-gated) and is then a no-op,
+    // keeping back-compat with pre-D3 outcomes. The same breakdown is independently
+    // frozen onto the endgame snapshot below (survives save/load round-trip).
+    const dysfunction = computePeaceDysfunctionBreakdown(state);
+    if (dysfunction) {
+        result.peace_dysfunction_index = dysfunction.index;
+        result.peace_dysfunction_flags = dysfunction.flags;
+    }
 
     // Mark game as over
     state.meta.game_over = true;

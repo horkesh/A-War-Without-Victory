@@ -19,6 +19,7 @@ import type { GameState, FactionId } from '../../state/game_state.js';
 import type { NegotiationBreakdown, OutcomeClass } from '../../state/negotiation_types.js';
 import type { FactionVerdict, GameVerdict, DimensionGrade } from '../../state/negotiation_types.js';
 import { collectCondemnationFlags } from './rupture_consequences.js';
+import { computePeaceDysfunctionIndex, capOutcomeByPeaceDysfunction } from './peace_dysfunction.js';
 import { DIMENSION_WEIGHTS, computeNegotiatingCapital } from '../events/strategic_dimensions.js';
 import type { DimensionStore } from '../events/strategic_dimensions.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -659,7 +660,18 @@ export function computeFactionVerdict(
 
     // Collect condemnation flags from rupture consequences (Ring 2)
     const condemnationFlags = collectCondemnationFlags(state, faction);
-    const outcomeClass = classifyOutcome(faction, displayBreakdown, dimStore, grade, pyrrhicScore, condemnationFlags);
+    const baseOutcomeClass = classifyOutcome(faction, displayBreakdown, dimStore, grade, pyrrhicScore, condemnationFlags);
+
+    // Comprehensive Dayton D3 (2026-06-07): a high-dysfunction peace can never read
+    // as a clean settlement, regardless of territory. capOutcomeByPeaceDysfunction
+    // pulls a clean-win class (strategic_success / survival / negotiated_escape)
+    // down to hollow_victory when the index crosses the threshold; it never improves
+    // an outcome. Pure read of the frozen Dayton result. EMERGENT-GATED: the index
+    // is null in historical/unset mode (and for non-Dayton endings), so this is a
+    // no-op there and the historical baselines stay byte-identical. Mirrors the
+    // existing condemnation-flag cap inside classifyOutcome.
+    const dysfunctionIndex = computePeaceDysfunctionIndex(state);
+    const outcomeClass = capOutcomeByPeaceDysfunction(baseOutcomeClass, dysfunctionIndex);
 
     return {
         faction,
