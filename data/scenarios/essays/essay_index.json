@@ -4869,6 +4869,600 @@
                     "content": "Bosanskohrvatski ratni napor 1993. bio je uhvaćen između dvije nespojive strategije, a pregled držanja nametnuo je izbor među njima. Jedan put — maksimalistički projekat zabilježen u presudi ICTY-a u predmetu Prlić i drugi (IT-04-74-T) — slijedio je teritorijalnu kontrolu nad područjima koja je Vance-Owenova karta označila kao područja s hrvatskom većinom, uključujući srednjobosanske općine u kojima je presuda u predmetu Kordić i Čerkez (IT-95-14/2-T) utvrdila kampanju progona protiv bošnjačkog stanovništva. Drugi put upućivao je nazad ka koaliciji s vladom u Sarajevu protiv zajedničkog srpskog protivnika.\n\nPritisnuti hrvatske teritorijalne ciljeve značilo je udvostručiti rat protiv ARBiH — rat koji je trošio snagu HVO-a, crnio međunarodni ugled Herceg-Bosne i otvarao drugi front koji je koristio samo bosanskim Srbima. Koordinacija s Bošnjacima značila je podrediti maksimalističku kartu partnerstvu nužde.\n\nStrateška nesuvislost bila je strukturna. Projekat Herceg-Bosne crpio je oružje i smjer iz Zagreba, ali su vlastiti interesi Zagreba sve više upućivali ka partnerstvu sa Sarajevom koje će se iskristalisati u Washingtonskom sporazumu 1994. Lokalno vodstvo koje pritisće maksimalističko osvajanje vodilo je, zapravo, rat koji se njegov patron spremao napustiti.\n\nPregled držanja postavio je tako određujuću protivrječnost projekta u operativnom obliku. Pritisnuti hrvatske ciljeve značilo je slijediti teritorij po cijenu saveza. Prihvatiti okvir Federacije značilo je ustupiti maksimalističku ambiciju za koaliciju koja se zaista mogla održati. Historijski zapis se, nakon godine pogubnih borbi, savio ka drugom.\n\nU igrinom toku ovaj zapis povezuje otključani dogadjaj s većim ratnim lukom. Ako se kampanja razvije drugačije od historijskog slijeda, Codex i dalje čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u simulaciji."
                 }
             }
+        },
+        {
+            "id": "essay_visit_to_front_rbih",
+            "event_id": "visit_to_front_rbih",
+            "title": "The President at the Line: Command Presence in Besieged Sarajevo",
+            "year": 1993,
+            "category": "command",
+            "sources": [
+                "ICTY Galić Trial Judgment (IT-98-29-T), Sarajevo-Romanija Corps siege findings",
+                "Balkan Battlegrounds, Vol. I (CIA, 2002), ARBiH command and siege organisation"
+            ],
+            "generated": true,
+            "content": "A presidential visit to the front was never only a morale errand. For the RBiH leadership in Sarajevo the gesture was bound up in the geography of the siege itself: to be seen with the 1st Corps inside the ring, or to travel out through the Butmir tunnel to Tuzla and the corridor, or to reach the isolated 5th Corps in the Bihać pocket, each said something different about what Sarajevo was willing to spend itself on. The act steadied a line. It could also read, to the soldiers and to the watching world, as theatre staged over a war that was not going well.\n\nThe historical record frames Alija Izetbegović's wartime leadership as one conducted under siege, where presence and absence both carried weight. A leader who shared the danger of the trenches earned a kind of standing that no order could manufacture; a leader who stayed at the Presidency while the diplomatic calendar filled risked the quiet judgement of men who fought without seeing him. Neither choice was free. Time at the front was time away from the negotiations that might end the war; time in the capital was a signal the army could read as distance.\n\nThe doubled edge runs through every variant. To enter Sarajevo's lines was to claim solidarity with the besieged and to invite the international press to record it — a diplomatic asset, but one that traded command focus for spectacle. To tour the northeast was to commit publicly to holding Tuzla and the corridor, hardening expectations the army then had to meet. To reach Bihać was to tell General Dudaković's encircled command that it had not been forgotten, at a real logistic cost the pocket could ill afford. To stay in the capital preserved the diplomatic ground at the price of a grumble in the ranks.\n\nThis is a recurring decision rather than a single historical trip; the Codex records the leadership's most recent choice. It is a leadership gesture, not a battlefield order — its currency is morale, cohesion, and standing, not territory. Read it as authorship of tone: the question was never whether the president could win the war by appearing, but what the appearing, or the not appearing, told the people fighting it about the value placed on their endurance.",
+            "dynamic_sections": [
+                {
+                    "id": "arc_visit_to_front_rbih_stay_capital_rbih",
+                    "condition": "RESPONSE:visit_to_front_rbih:stay_capital_rbih",
+                    "variant": "note",
+                    "content": "Recorded choice (the typical, staff-recommended posture). In this campaign the president stayed in Sarajevo while staff handled front-line contact — the diplomatic calendar kept ahead of the gesture, at the price of a grumble in the ranks.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (uobičajeni stav koji štab preporučuje). U ovoj kampanji predsjednik je ostao u Sarajevu dok je štab vodio kontakt s linijom — diplomatski kalendar ispred geste, uz cijenu nezadovoljstva u redovima."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_visit_to_front_rbih_visit_sarajevo",
+                    "condition": "RESPONSE:visit_to_front_rbih:visit_sarajevo",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The president entered the Sarajevo lines and shared the siege with the 1st Corps, inviting the international press — solidarity bought with command focus traded for spectacle.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Predsjednik je ušao u sarajevske linije i podijelio opsadu s 1. korpusom, uz prisustvo strane štampe — solidarnost plaćena fokusom komande zamijenjenim spektaklom."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_visit_to_front_rbih_visit_eastern_front",
+                    "condition": "RESPONSE:visit_to_front_rbih:visit_eastern_front",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The president toured Tuzla and the corridor, committing publicly to the northeast and hardening the expectations the army then had to meet.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Predsjednik je obišao Tuzlu i koridor, javno se obavezujući sjeveroistoku i učvršćujući očekivanja koja je vojska potom morala ispuniti."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_visit_to_front_rbih_visit_bihac",
+                    "condition": "RESPONSE:visit_to_front_rbih:visit_bihac",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The president reached Dudaković’s encircled 5th Corps in Bihać — a message that the pocket was not forgotten, paid for in logistics it could ill afford.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Predsjednik je stigao do opkoljenog 5. korpusa generala Dudakovića u Bihaću — poruka da džep nije zaboravljen, plaćena snabdijevanjem koje je džep teško podnosio."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_visit_to_front_rbih_visit_press_rbih",
+                    "condition": "RESPONSE:visit_to_front_rbih:visit_press_rbih",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The president turned the visit into a press event, foregrounding the siege’s human cost for the world — international standing gained, command presence diluted.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Predsjednik je posjetu pretvorio u medijski događaj, ističući ljudsku cijenu opsade pred svijetom — dobijen međunarodni ugled, razrijeđeno prisustvo komande."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Predsjednik na liniji: prisustvo komande u opkoljenom Sarajevu",
+                    "category": "komanda",
+                    "content": "Ovaj Codex zapis obrađuje predsjedničku posjetu fronti kao gestu vodstva RBiH tokom opsade. Posjeta je mogla učvrstiti liniju ili djelovati kao predstava nad ratom koji nije išao dobro: ulazak u sarajevski obruč, put ka Tuzli i koridoru, ili dolazak izoliranom 5. korpusu u Bihaću — svaka je odluka govorila nešto drugo o tome na šta je Sarajevo spremno da troši sebe.\n\nGesta je dvosjekla. Vrijeme na fronti bilo je vrijeme daleko od pregovora; vrijeme u gradu vojska je mogla čitati kao udaljenost. Zapis se odnosi na moral, koheziju i ugled, ne na teritoriju. Codex čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u ovoj kampanji."
+                }
+            }
+        },
+        {
+            "id": "essay_visit_to_front_rs",
+            "event_id": "visit_to_front_rs",
+            "title": "Pale at the Front: The Politics of Showing Up",
+            "year": 1993,
+            "category": "command",
+            "sources": [
+                "ICTY Karadžić Trial Judgment (IT-95-5/18-T, 2016), RS political-military command structure",
+                "Balkan Battlegrounds, Vol. I (CIA, 2002), VRS corps organisation and the Posavina corridor"
+            ],
+            "generated": true,
+            "content": "For Republika Srpska's leadership the front visit was a transaction in loyalty, a currency long campaigns and thin rations steadily spent. The VRS soldier held his ground, but the political authority at Pale knew that holding was not the same as believing, and that a president seen among the troops bought something a directive could not. Where to be seen — the Posavina corridor under constant pressure, the Sarajevo siege lines of the Sarajevo-Romanija Corps, or the Drina Corps holding the east — was itself a statement about which front Pale judged most fragile, and which it could afford to leave to its officers.\n\nThe ICTY record of the RS command describes a political leadership tightly entwined with its generals, where the line between civilian authority and military direction was deliberately thin. In that structure a visit was never neutral. Radovan Karadžić's appearances at the front projected the unity of the project; they also exposed the leadership to the same risk the troops carried, and to the international scrutiny that followed the Bosnian Serb side everywhere by 1993. To stay at Pale, pleading the demands of governance, kept the leadership safe and the diplomacy centralised, but let the soldier wonder whether his sacrifice registered above him.\n\nThe gesture cuts both ways. To tour the corridor was to honour the men holding the thread that kept the western Serb-held territories connected to Serbia, while drawing attention to how thin that thread was. To walk the siege lines around Sarajevo was to associate the leadership openly with the most internationally damning front. To visit the Drina was to reassure the east at the cost of signalling priority away from the corridor. None of it added ground; all of it shaped how the rank and file read the worth Pale placed on their war.\n\nThis is a recurring leadership choice, not a sourced single trip, and the Codex reflects the most recent one. It belongs to the register of morale and cohesion, not operations — the question Pale faced was whether presence would steady a strained army or merely advertise the strain. A visit could harden resolve; it could equally look like a leadership inspecting a war it was no longer sure it controlled.",
+            "dynamic_sections": [
+                {
+                    "id": "arc_visit_to_front_rs_stay_pale_rs",
+                    "condition": "RESPONSE:visit_to_front_rs:stay_pale_rs",
+                    "variant": "note",
+                    "content": "Recorded choice (the typical, staff-recommended posture). In this campaign the leadership stayed at Pale, pleading the demands of governance — safety and centralised diplomacy bought at the cost of the soldier’s sense of being seen.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (uobičajeni stav koji štab preporučuje). U ovoj kampanji vodstvo je ostalo na Palama, pozivajući se na zahtjeve vlasti — sigurnost i centralizovana diplomatija plaćene osjećajem vojnika da nije viđen."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_visit_to_front_rs_visit_posavina",
+                    "condition": "RESPONSE:visit_to_front_rs:visit_posavina",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The leadership toured the Posavina corridor, honouring the men holding the thread to Serbia while drawing attention to how thin that thread was.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Vodstvo je obišlo posavski koridor, odajući počast ljudima koji drže nit ka Srbiji, dok je istovremeno skrenulo pažnju na to koliko je ta nit tanka."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_visit_to_front_rs_visit_sarajevo_lines",
+                    "condition": "RESPONSE:visit_to_front_rs:visit_sarajevo_lines",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The leadership walked the Sarajevo siege lines — associating itself openly with the most internationally damning front.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Vodstvo je obišlo sarajevske opsadne linije — otvoreno se vezujući za front koji je međunarodno najviše osuđivao."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_visit_to_front_rs_visit_drina_front",
+                    "condition": "RESPONSE:visit_to_front_rs:visit_drina_front",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The leadership visited the Drina Corps area, reassuring the east at the cost of signalling priority away from the corridor.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Vodstvo je posjetilo područje Drinskog korpusa, umirujući istok uz cijenu signala da prioritet nije koridor."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_visit_to_front_rs_visit_press_rs",
+                    "condition": "RESPONSE:visit_to_front_rs:visit_press_rs",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The leadership brought international press to the front, trading command focus for diplomatic messaging.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Vodstvo je dovelo stranu štampu na frontu, mijenjajući fokus komande za diplomatsku poruku."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Pale na fronti: politika pojavljivanja",
+                    "category": "komanda",
+                    "content": "Ovaj Codex zapis obrađuje predsjedničku posjetu fronti kao gestu vodstva Republike Srpske. Posjeta je trošila lojalnost koju su duge kampanje i oskudna sljedovanja postepeno trošili: koridor u Posavini, sarajevske linije Sarajevsko-romanijskog korpusa, ili Drinski korpus na istoku — izbor je govorio koju liniju Pale smatra najkrhkijom.\n\nGesta je dvosjekla. Pojavljivanje je projektovalo jedinstvo projekta i izlagalo vodstvo riziku i međunarodnoj pažnji; ostanak na Palama čuvao je vodstvo i centralizovao diplomatiju, ali je vojnik mogao posumnjati da li njegova žrtva registruje iznad njega. Zapis se odnosi na moral i koheziju, ne na teritoriju. Codex čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u ovoj kampanji."
+                }
+            }
+        },
+        {
+            "id": "essay_visit_to_front_hrhb",
+            "event_id": "visit_to_front_hrhb",
+            "title": "Mostar's Dilemma: The HVO Front Visit",
+            "year": 1993,
+            "category": "command",
+            "sources": [
+                "ICTY Prlić et al. Trial Judgment (IT-04-74-T), 29 May 2013, Herceg-Bosna command structure",
+                "ICTY Kordić & Čerkez Trial Judgment (IT-95-14/2-T), HVO organisation in central Bosnia"
+            ],
+            "generated": true,
+            "content": "Herceg-Bosna's leadership faced the front visit as a problem of attention divided across a war fought on two fronts at once. By 1993 the HVO was pressed against the ARBiH in central Bosnia even as it held its own lines around Mostar, and the Posavina positions in the north hung apart from the Herzegovinian heartland. A presidential appearance had to choose among them, and the choice declared a priority the rest of the front would notice. To show up was to steady the men who saw the leadership share their ground; to stay in Mostar, citing urgent diplomatic contacts with Zagreb, was to keep the political channel open at the cost of the soldier's sense of being seen.\n\nThe Prlić judgment records a Herceg-Bosna command tightly directed from Mostar and, behind it, from Zagreb — a structure in which leadership presence carried political as much as military meaning. An appearance at the central Bosnia garrisons associated the leadership with the most contested and least defensible front, where the HVO held embattled pockets among a hostile population. A visit to the Mostar front tied the leadership to the Herzegovinian core it could most plausibly hold. A turn toward the Posavina honoured the isolated northern HVO at the price of signalling that Mostar's eyes were elsewhere.\n\nEach variant carries its own shadow. The gesture that steadies a garrison can also expose how exposed that garrison is; the press visit that wins sympathy abroad spends command focus to get it; the decision to remain in Mostar protects the Zagreb channel but lets the line read the leadership's absence as indifference. For Herceg-Bosna, whose legitimacy was itself contested, the optics of presence were never separable from the optics of the project it served.\n\nThis is a recurring leadership gesture rather than a documented single trip, and the Codex holds the most recent choice. It moves morale, cohesion, and standing, not the map. The honest reading is that an HVO front visit could rally a strained command or merely dramatise a strain the leadership could not resolve — and that for a contested authority, even genuine solidarity was watched for what it admitted.",
+            "dynamic_sections": [
+                {
+                    "id": "arc_visit_to_front_hrhb_stay_mostar_hrhb",
+                    "condition": "RESPONSE:visit_to_front_hrhb:stay_mostar_hrhb",
+                    "variant": "note",
+                    "content": "Recorded choice (the typical, staff-recommended posture). In this campaign the leadership stayed in Mostar, citing urgent diplomatic contacts with Zagreb — the channel kept open at the price of the soldier’s sense of being seen.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (uobičajeni stav koji štab preporučuje). U ovoj kampanji vodstvo je ostalo u Mostaru, pozivajući se na hitne diplomatske kontakte sa Zagrebom — kanal otvoren uz cijenu osjećaja vojnika da nije viđen."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_visit_to_front_hrhb_visit_mostar_front",
+                    "condition": "RESPONSE:visit_to_front_hrhb:visit_mostar_front",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The leadership visited the Mostar front, tying itself to the Herzegovinian core it could most plausibly hold.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Vodstvo je posjetilo mostarsku frontu, vezujući se za hercegovačku jezgru koju je najuvjerljivije moglo držati."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_visit_to_front_hrhb_visit_central_bosnia",
+                    "condition": "RESPONSE:visit_to_front_hrhb:visit_central_bosnia",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The leadership reached the embattled central Bosnia garrisons, associating itself with the most contested and least defensible front.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Vodstvo je stiglo do napadnutih garnizona u srednjoj Bosni, vezujući se za najspornije i najmanje branjivo poprište."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_visit_to_front_hrhb_visit_posavina_hrhb",
+                    "condition": "RESPONSE:visit_to_front_hrhb:visit_posavina_hrhb",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The leadership turned toward the isolated northern HVO in the Posavina, at the price of signalling that Mostar’s eyes were elsewhere.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Vodstvo se okrenulo izolovanom sjevernom HVO-u u Posavini, uz cijenu signala da je pažnja Mostara drugdje."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_visit_to_front_hrhb_visit_press_hrhb",
+                    "condition": "RESPONSE:visit_to_front_hrhb:visit_press_hrhb",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The leadership made the visit a press event, winning sympathy abroad while spending command focus to get it.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Vodstvo je posjetu pretvorilo u medijski događaj, osvajajući naklonost u svijetu trošeći fokus komande da je dobije."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Mostarska dilema: posjeta HVO fronti",
+                    "category": "komanda",
+                    "content": "Ovaj Codex zapis obrađuje predsjedničku posjetu fronti kao gestu vodstva Herceg-Bosne. Pažnja je bila podijeljena: HVO je bio pritisnut uz ARBiH u srednjoj Bosni dok je držao linije oko Mostara, a posavske položaje na sjeveru odvojene od hercegovačke jezgre. Pojavljivanje je biralo među njima i objavljivalo prioritet.\n\nGesta je dvosjekla. Pojava koja učvrsti garnizon takođe može otkriti koliko je taj garnizon izložen; ostanak u Mostaru čuvao je kanal prema Zagrebu, ali je liniju mogao navesti da odsustvo čita kao ravnodušnost. Zapis se odnosi na moral, koheziju i ugled, ne na teritoriju. Codex čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u ovoj kampanji."
+                }
+            }
+        },
+        {
+            "id": "essay_address_to_nation_rbih",
+            "event_id": "address_to_nation_rbih",
+            "title": "The Address: What a Wartime Leader Says, and Does Not",
+            "year": 1993,
+            "category": "political",
+            "sources": [
+                "ICTY Galić Trial Judgment (IT-98-29-T), conditions of the Sarajevo population under siege",
+                "Balkan Battlegrounds, Vol. I (CIA, 2002), RBiH political leadership and wartime morale"
+            ],
+            "generated": true,
+            "content": "An address to the nation is the cheapest and most dangerous instrument a wartime leader holds. It costs nothing to broadcast and can cost everything to mean. For the RBiH leadership, speaking to a population enduring siege and a long winter, the words carried weight far beyond their occasion: a defiant message could harden a people for sacrifice or set an expectation the war could not meet; a call for endurance could steady or could read as resignation; an appeal to the world could win sympathy or expose dependence; and silence could preserve options or abandon a people waiting to be addressed.\n\nThe historical practice of Alija Izetbegović's leadership turned on this calculus. To name the siege before an international audience was to convert suffering into diplomatic pressure — a real lever, but one that raised hopes of intervention that did not come, and the gap between the appeal and the rescue was itself a cost paid later in disillusion. To call for endurance through the winter was honest about the war's grinding character but offered no horizon, and a people told only to bear it may bear it less. Defiance rallied, then bound the leadership to a posture it had to sustain.\n\nThe doubled edge is the point. Raising morale and raising expectation are the same act seen from two distances; what steadies a population this week can indict the leadership next week when the promised relief fails to arrive. Saying nothing avoids the trap and pays for it in a different coin — the sense, among people who looked to the Presidency for a voice, that none came. There was no costless register.\n\nThis is a recurring choice, not a single broadcast, and the Codex records the leadership's most recent words to its people. It is a morale and standing gesture, not a military order; it changes how a nation holds itself, not where the lines run. The honest frame is that an address is authorship of expectation — and that for a besieged people, the distance between what was promised and what arrived was a wound the words could open as easily as close.",
+            "dynamic_sections": [
+                {
+                    "id": "arc_address_to_nation_rbih_address_endurance_rbih",
+                    "condition": "RESPONSE:address_to_nation_rbih:address_endurance_rbih",
+                    "variant": "note",
+                    "content": "Recorded choice (the typical, staff-recommended posture). In this campaign the leadership called for endurance through the winter — honest about the war’s grinding character, but offering no horizon to a people told only to bear it.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (uobičajeni stav koji štab preporučuje). U ovoj kampanji vodstvo je pozvalo na izdržljivost kroz zimu — iskreno o mučnoj prirodi rata, ali bez vidika za narod kojem je rečeno samo da izdrži."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_address_to_nation_rbih_address_defiance_rbih",
+                    "condition": "RESPONSE:address_to_nation_rbih:address_defiance_rbih",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the steady default). A defiant address rallied the people for sacrifice and bound the leadership to a posture it then had to sustain.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od smirenog izbora). Prkosno obraćanje okupilo je narod za žrtvu i vezalo vodstvo za stav koji je potom moralo održati."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_address_to_nation_rbih_address_appeal_world_rbih",
+                    "condition": "RESPONSE:address_to_nation_rbih:address_appeal_world_rbih",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the steady default). An appeal to the world named the siege and converted suffering into pressure — but raised hopes of intervention whose absence was paid for later in disillusion.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od smirenog izbora). Apel svijetu imenovao je opsadu i pretvorio patnju u pritisak — ali je podigao nadu u intervenciju čije se izostajanje kasnije platilo razočaranjem."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_address_to_nation_rbih_address_stay_silent_rbih",
+                    "condition": "RESPONSE:address_to_nation_rbih:address_stay_silent_rbih",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the steady default). The leadership said nothing and let the staff speak — options preserved, at the price of a people who looked to the Presidency for a voice and heard none.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od smirenog izbora). Vodstvo nije reklo ništa i pustilo je štab da govori — opcije sačuvane, uz cijenu naroda koji je od Predsjedništva očekivao glas, a nije ga čuo."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Obraćanje: šta ratni vođa kaže, a šta prešuti",
+                    "category": "političko",
+                    "content": "Ovaj Codex zapis obrađuje obraćanje naciji kao gestu vodstva RBiH. Riječi su nosile težinu daleko iznad svoje prilike: prkos je mogao učvrstiti narod za žrtvu ili postaviti očekivanje koje rat nije mogao ispuniti; poziv na izdržljivost mogao je smiriti ili djelovati kao predaja; apel svijetu mogao je dobiti naklonost ili otkriti zavisnost; a šutnja je čuvala opcije ili napuštala narod koji čeka da mu se obrate.\n\nPodizanje morala i podizanje očekivanja isti su čin viđen s dvije udaljenosti. Zapis se odnosi na moral i ugled, ne na vojnu naredbu. Codex čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u ovoj kampanji."
+                }
+            }
+        },
+        {
+            "id": "essay_address_to_nation_rs",
+            "event_id": "address_to_nation_rs",
+            "title": "Speaking for the Project: The RS Address to the Nation",
+            "year": 1993,
+            "category": "political",
+            "sources": [
+                "ICTY Karadžić Trial Judgment (IT-95-5/18-T, 2016), RS political leadership and public messaging",
+                "ICTY Milošević transcripts (IT-02-54-T), Belgrade-Pale relations and sponsor sensitivity"
+            ],
+            "generated": true,
+            "content": "When the leadership of Republika Srpska addressed its people, it spoke into a particular geometry: a population mobilised behind a territorial project, an army worn by campaigning, and a sponsor in Belgrade whose patience was a resource that could be spent. The register chosen — defiance that the project endures, a call to hold what had been taken, a signal of restraint meant to reassure the sponsor, or silence left to the staff at Pale — set the leadership's posture toward all three audiences at once, and what reassured one could unsettle another.\n\nThe ICTY record places Radovan Karadžić's public messaging at the centre of the RS war effort, an instrument of cohesion that also bound the leadership to the maximalist claims it voiced. By 1993 Belgrade's tolerance was conditional, sensitive to international pressure, and a defiant address that rallied the home front could read in Belgrade as a liability that drew sanctions and scrutiny. A signal of restraint might buy the sponsor's continued backing at the price of looking, to the army and the assembly, like a retreat from the project's stated aims.\n\nThe edge is sharp in both directions. Defiance hardens the base and hardens the leadership's commitments; a call for endurance is honest about exhaustion but offers a war without an end; reassurance to the sponsor protects the lifeline and risks the appearance of weakness; silence preserves room to manoeuvre and forfeits the leadership's claim to speak for the moment. Each word adjusts the relationship with Belgrade as much as with the front.\n\nThis is a recurring leadership gesture, not a documented single speech, and the Codex holds the most recent address. It moves morale, cohesion, and the standing of the project, not the lines on the map. The honest reading is that an RS address was a balancing act between a base that wanted defiance and a patron that wanted restraint — and that the leader who satisfied one audience routinely paid for it with the other.",
+            "dynamic_sections": [
+                {
+                    "id": "arc_address_to_nation_rs_address_endurance_rs",
+                    "condition": "RESPONSE:address_to_nation_rs:address_endurance_rs",
+                    "variant": "note",
+                    "content": "Recorded choice (the typical, staff-recommended posture). In this campaign the leadership called to hold what had been taken — honest about exhaustion, but offering a war without an end.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (uobičajeni stav koji štab preporučuje). U ovoj kampanji vodstvo je pozvalo da se zadrži ono što je uzeto — iskreno o iscrpljenosti, ali nudeći rat bez kraja."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_address_to_nation_rs_address_defiance_rs",
+                    "condition": "RESPONSE:address_to_nation_rs:address_defiance_rs",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the steady default). A defiant address that the project endures hardened the base and could read in Belgrade as a liability drawing sanctions and scrutiny.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od smirenog izbora). Prkosno obraćanje da projekat opstaje učvrstilo je bazu, a u Beogradu se moglo čitati kao teret koji privlači sankcije i pažnju."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_address_to_nation_rs_address_reassure_patron_rs",
+                    "condition": "RESPONSE:address_to_nation_rs:address_reassure_patron_rs",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the steady default). A signal of restraint reassured the sponsor and protected the lifeline — at the price of looking, to the army and the assembly, like a retreat from the project’s aims.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od smirenog izbora). Signal suzdržanosti umirio je pokrovitelja i zaštitio liniju opstanka — uz cijenu da vojsci i skupštini izgleda kao odustajanje od ciljeva projekta."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_address_to_nation_rs_address_stay_silent_rs",
+                    "condition": "RESPONSE:address_to_nation_rs:address_stay_silent_rs",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the steady default). The leadership said nothing and let Pale’s staff speak — room to manoeuvre preserved, the claim to speak for the moment forfeited.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od smirenog izbora). Vodstvo nije reklo ništa i pustilo je štab na Palama da govori — sačuvan prostor za manevar, izgubljeno pravo da se govori za trenutak."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Glas projekta: obraćanje naciji u RS",
+                    "category": "političko",
+                    "content": "Ovaj Codex zapis obrađuje obraćanje naciji kao gestu vodstva Republike Srpske. Vodstvo je govorilo trima publikama odjednom: narodu mobilisanom iza teritorijalnog projekta, vojsci iznurenoj kampanjom, i pokrovitelju u Beogradu čije je strpljenje resurs koji se mogao potrošiti. Ono što je smirivalo jednu publiku moglo je uznemiriti drugu.\n\nPrkos je učvršćivao bazu i obaveze vodstva; suzdržanost je mogla kupiti podršku pokrovitelja, ali izgledati kao slabost. Zapis se odnosi na moral i koheziju, ne na vojnu naredbu. Codex čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u ovoj kampanji."
+                }
+            }
+        },
+        {
+            "id": "essay_address_to_nation_hrhb",
+            "event_id": "address_to_nation_hrhb",
+            "title": "Herceg-Bosna Speaks: Defiance, Endurance, or the Open Door",
+            "year": 1993,
+            "category": "political",
+            "sources": [
+                "ICTY Prlić et al. Trial Judgment (IT-04-74-T), 29 May 2013, Herceg-Bosna leadership and Zagreb direction",
+                "Balkan Battlegrounds, Vol. II (CIA, 2002), Croat-Bosniak war and the road to the Washington Agreement"
+            ],
+            "generated": true,
+            "content": "For the leadership of Herceg-Bosna, the address to the nation was complicated by the fact that the nation it addressed was contested — a Croat community in Bosnia whose political project drew its direction from Zagreb and whose war against the ARBiH had, by late 1993, turned diplomatically costly. The register chosen carried unusual stakes: defiance that Herceg-Bosna stands, a call to hold the embattled pockets, a signal of conciliation opening the door to Sarajevo, or silence left to the staff. Each spoke not only to the Croat population and the HVO but, over their shoulder, to Zagreb and to the watching mediators.\n\nThe Prlić judgment records Herceg-Bosna's posture as steered from Zagreb, recalibrated as the costs of the parallel-state project — isolation, the indictment exposure of the HVO command, military reverses in central Bosnia — began to exceed its benefits. In that setting a defiant address rallied the base and deepened the leadership's commitment to a course growing untenable. A signal of conciliation toward Sarajevo anticipated the convergence that history fixed at Washington in March 1994, but risked looking, to the hardliners, like surrender of the project's claims.\n\nThe ambivalence runs through every line. Defiance steadies the community and binds the leadership to maximalism; endurance is honest about the pockets' plight and offers them no relief; conciliation opens an exit and exposes the leadership to the charge of abandonment; silence preserves room and forfeits the moment's voice. For a contested authority, even the choice to speak was read for what it conceded.\n\nThis is a recurring leadership gesture rather than a single sourced broadcast, and the Codex reflects the most recent words. It shifts morale, cohesion, and the standing of the project, not the territory it claimed. The honest frame is that an HRHB address balanced a base wanting defiance against a strategic reality pulling toward Sarajevo — and that the conciliatory word that pointed to the war's negotiated end was also the word most easily cast as retreat.",
+            "dynamic_sections": [
+                {
+                    "id": "arc_address_to_nation_hrhb_address_endurance_hrhb",
+                    "condition": "RESPONSE:address_to_nation_hrhb:address_endurance_hrhb",
+                    "variant": "note",
+                    "content": "Recorded choice (the typical, staff-recommended posture). In this campaign the leadership called to hold the embattled pockets — honest about their plight, but offering them no relief.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (uobičajeni stav koji štab preporučuje). U ovoj kampanji vodstvo je pozvalo da se zadrže napadnuti džepovi — iskreno o njihovoj nevolji, ali bez olakšanja za njih."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_address_to_nation_hrhb_address_defiance_hrhb",
+                    "condition": "RESPONSE:address_to_nation_hrhb:address_defiance_hrhb",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the steady default). A defiant address that Herceg-Bosna stands rallied the community and deepened the leadership’s commitment to a course growing untenable.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od smirenog izbora). Prkosno obraćanje da Herceg-Bosna stoji okupilo je zajednicu i produbilo opredjeljenje vodstva za kurs koji je postajao neodrživ."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_address_to_nation_hrhb_address_conciliation_hrhb",
+                    "condition": "RESPONSE:address_to_nation_hrhb:address_conciliation_hrhb",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the steady default). A signal of conciliation opened the door to Sarajevo — anticipating the convergence history fixed at Washington, yet read by hardliners as surrender of the project’s claims.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od smirenog izbora). Signal pomirenja otvorio je vrata prema Sarajevu — nagovještavajući konvergenciju koju je historija učvrstila u Washingtonu, a koju su tvrdolinijaši čitali kao odustajanje od zahtjeva projekta."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_address_to_nation_hrhb_address_stay_silent_hrhb",
+                    "condition": "RESPONSE:address_to_nation_hrhb:address_stay_silent_hrhb",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the steady default). The leadership said nothing and let the staff speak — room preserved, the moment’s voice forfeited.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od smirenog izbora). Vodstvo nije reklo ništa i pustilo je štab da govori — sačuvan prostor, izgubljen glas trenutka."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Herceg-Bosna govori: prkos, izdržljivost ili otvorena vrata",
+                    "category": "političko",
+                    "content": "Ovaj Codex zapis obrađuje obraćanje naciji kao gestu vodstva Herceg-Bosne. Nacija kojoj se obraćalo bila je sporna — hrvatska zajednica u Bosni čiji je projekat usmjeravan iz Zagreba i čiji je rat protiv ARBiH do kraja 1993. postao diplomatski skup. Svaka riječ govorila je i Zagrebu i posrednicima preko ramena zajednice.\n\nPrkos je učvršćivao zajednicu i obaveze vodstva; pomirenje je nagovještavalo konvergenciju koju je historija učvrstila u Washingtonu, ali je tvrdolinijašima moglo izgledati kao predaja. Zapis se odnosi na moral i ugled, ne na teritoriju. Codex čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u ovoj kampanji."
+                }
+            }
+        },
+        {
+            "id": "essay_decorate_a_unit_rbih",
+            "event_id": "decorate_a_unit_rbih",
+            "title": "Honours and Their Cost: Decorating an ARBiH Formation",
+            "year": 1993,
+            "category": "command",
+            "sources": [
+                "Balkan Battlegrounds, Vol. I (CIA, 2002), ARBiH formation organisation and morale",
+                "ICTY Halilović Trial Judgment (IT-01-48-T), ARBiH command structure and unit accountability"
+            ],
+            "generated": true,
+            "content": "A decoration is a leadership gesture that spends nothing material and risks a great deal symbolic. For the RBiH leadership, the question of whether to single out one steadfast formation, to issue a broad citation across the regular corps, or to decline altogether amid heavy losses was never simply a matter of recognising service. To name one unit was to imply a ranking of all the others; to honour everyone was to honour no one in particular; to withhold honours when the casualty lists were long could read either as sober restraint or as a leadership that no longer noticed.\n\nThe wartime practice of recognition cut against the grain of an army still consolidating its formations. Singling out a regular brigade rewarded discipline and the chain of command, but it could breed resentment among units that had bled equally without the citation, and it raised the awkward question of which formations were being held up as exemplary. A leadership recognising service had to be sure of what it was recognising; the ARBiH's accountability record, examined at the ICTY, is a reminder that not every formation's conduct stood up to scrutiny, and that an honour misplaced is harder to retract than to award.\n\nThe ambivalence is structural. The citation that lifts one command's morale lowers another's; the broad gesture that offends no one inspires no one; the refusal that reads as honesty to the leadership reads as coldness to the men who expected acknowledgement. Honours ring hollow amid losses, and they ring loudest when they land on the wrong shoulders.\n\nThis is a recurring leadership choice rather than a single decorated event, and the Codex holds the most recent decision; the engine binds the shared families — honour one, honour broadly, or decline — not any particular unit. It moves cohesion and morale, not the front. The honest reading is that for the RBiH leadership a decoration was authorship of who the war's example would be, and that the gesture meant to dignify service could as easily seed the resentment it sought to soothe.",
+            "dynamic_sections": [
+                {
+                    "id": "arc_decorate_a_unit_rbih_decorate_decline_rbih",
+                    "condition": "RESPONSE:decorate_a_unit_rbih:decorate_decline_rbih",
+                    "variant": "note",
+                    "content": "Recorded choice (the typical, staff-recommended posture). In this campaign the leadership declined — honours can ring hollow amid heavy losses, and the unawarded honour seeds no resentment.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (uobičajeni stav koji štab preporučuje). U ovoj kampanji vodstvo je odbilo — odlikovanja mogu zvučati šuplje uz teške gubitke, a nedato odlikovanje ne sije netrpeljivost."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_decorate_a_unit_rbih_decorate_steadfast_rbih",
+                    "condition": "RESPONSE:decorate_a_unit_rbih:decorate_steadfast_rbih",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The leadership singled out one steadfast regular formation — rewarding discipline, but implying a ranking that could breed resentment among units that had bled equally.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Vodstvo je izdvojilo jednu postojanu redovnu formaciju — nagrađujući disciplinu, ali natuknuvši rang koji je mogao izazvati netrpeljivost među jedinicama koje su jednako krvarile."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_decorate_a_unit_rbih_decorate_broadly_rbih",
+                    "condition": "RESPONSE:decorate_a_unit_rbih:decorate_broadly_rbih",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The leadership issued a broad citation across the regular corps — offending no one, and elevating no single command as the war’s example.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Vodstvo je izdalo široko priznanje redovnom korpusu — ne vrijeđajući nikoga i ne uzdižući nijednu komandu kao primjer rata."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Odlikovanja i njihova cijena: odlikovanje formacije ARBiH",
+                    "category": "komanda",
+                    "content": "Ovaj Codex zapis obrađuje odlikovanje formacije kao gestu vodstva RBiH. Izdvojiti jednu postojanu formaciju, izdati široko priznanje korpusu ili odbiti uz teške gubitke — nijedan izbor nije bio samo priznanje službe. Imenovati jednu jedinicu značilo je natuknuti rang svih ostalih; odlikovati sve značilo je ne odlikovati nikoga posebno.\n\nGesta je dvosmislena. Priznanje koje podiže moral jedne komande spušta moral druge; odbijanje koje vodstvu izgleda kao trezvenost vojnicima izgleda kao hladnoća. Zapis se odnosi na koheziju i moral, ne na frontu. Codex čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u ovoj kampanji."
+                }
+            }
+        },
+        {
+            "id": "essay_decorate_a_unit_rs",
+            "event_id": "decorate_a_unit_rs",
+            "title": "The Citation Problem: Decorating a VRS Formation",
+            "year": 1993,
+            "category": "command",
+            "sources": [
+                "ICTY Karadžić Trial Judgment (IT-95-5/18-T, 2016), VRS command structure and conduct findings",
+                "Balkan Battlegrounds, Vol. I (CIA, 2002), VRS corps organisation and morale"
+            ],
+            "generated": true,
+            "content": "For the leadership of Republika Srpska, decorating a formation was a gesture freighted with a danger the act itself disguised. To single out one steadfast regular formation, to cite the regular corps broadly, or to decline amid heavy losses looked like a routine question of recognition; in the context of the VRS it was anything but. The ICTY record of the Bosnian Serb war effort documents that conduct across the VRS was deeply uneven, and that some of what passed for battlefield achievement was bound up with acts that the tribunals later named as crimes. An honour, once attached, attaches to all of that.\n\nThis essay treats decoration strictly as a morale instrument and refuses the register of glory. A leadership that singles out a unit must answer for what that unit did; the citation that rewards steadfastness can, if carelessly aimed, dignify conduct that ought to be condemned rather than honoured. Where there is the least doubt about a formation's record, the responsible gesture is restraint. The broad citation spreads recognition thin and avoids elevating any single command's example; the refusal acknowledges that, with the casualty lists long and the record contested, honours can ring hollow or worse.\n\nThe ambivalence is unavoidable and, here, morally weighted. The citation that lifts one command's morale lowers another's and risks lending the leadership's name to acts it should disown; the broad gesture inspires little; the refusal reads as coldness to soldiers who expected acknowledgement. For the RS leadership the safest honour was often the one not given.\n\nThis is a recurring leadership choice rather than a single decorated event; the Codex holds the most recent decision and the engine binds the shared families — honour one, honour broadly, or decline — not any particular unit. It moves cohesion and morale, not the front. The honest reading is that an RS decoration was a gesture whose symbolic cost could exceed its morale benefit, and that the leadership which honoured without scrutiny risked honouring what history would judge.",
+            "dynamic_sections": [
+                {
+                    "id": "arc_decorate_a_unit_rs_decorate_decline_rs",
+                    "condition": "RESPONSE:decorate_a_unit_rs:decorate_decline_rs",
+                    "variant": "note",
+                    "content": "Recorded choice (the typical, staff-recommended posture). In this campaign the leadership declined — with the record contested and the casualty lists long, the safest honour was the one not given.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (uobičajeni stav koji štab preporučuje). U ovoj kampanji vodstvo je odbilo — uz sporan zapis i duge spiskove gubitaka, najsigurnije odlikovanje bilo je ono koje nije dato."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_decorate_a_unit_rs_decorate_steadfast_rs",
+                    "condition": "RESPONSE:decorate_a_unit_rs:decorate_steadfast_rs",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The leadership singled out one formation — a citation that, if carelessly aimed, risks lending the leadership’s name to conduct that ought to be condemned rather than honoured.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Vodstvo je izdvojilo jednu formaciju — priznanje koje, ako je neoprezno usmjereno, riskira da veže ime vodstva za postupke koje bi trebalo osuditi, a ne odlikovati."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_decorate_a_unit_rs_decorate_broadly_rs",
+                    "condition": "RESPONSE:decorate_a_unit_rs:decorate_broadly_rs",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The leadership issued a broad citation across the regular corps — spreading recognition thin and avoiding the elevation of any single command’s contested example.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Vodstvo je izdalo široko priznanje redovnom korpusu — razrjeđujući priznanje i izbjegavajući uzdizanje spornog primjera bilo koje komande."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Problem priznanja: odlikovanje formacije VRS",
+                    "category": "komanda",
+                    "content": "Ovaj Codex zapis obrađuje odlikovanje formacije kao gestu vodstva Republike Srpske, i odbija registar slave. Ponašanje širom VRS bilo je neujednačeno, a dio onoga što je prolazilo kao bojni uspjeh bio je vezan za djela koja su sudovi kasnije imenovali zločinima. Odlikovanje, jednom dato, vezuje se za sve to.\n\nGdje postoji i najmanja sumnja u zapis formacije, odgovorna gesta je suzdržanost. Zapis se odnosi na koheziju i moral, ne na frontu, i tretira odlikovanje strogo kao instrument morala. Codex čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u ovoj kampanji."
+                }
+            }
+        },
+        {
+            "id": "essay_decorate_a_unit_hrhb",
+            "event_id": "decorate_a_unit_hrhb",
+            "title": "Whom to Honour: Decorating an HVO Formation",
+            "year": 1993,
+            "category": "command",
+            "sources": [
+                "ICTY Prlić et al. Trial Judgment (IT-04-74-T), 29 May 2013, HVO command and conduct findings",
+                "ICTY Kordić & Čerkez Trial Judgment (IT-95-14/2-T), HVO organisation in central Bosnia"
+            ],
+            "generated": true,
+            "content": "For the leadership of Herceg-Bosna, a decoration was a leadership gesture that carried more risk than its modest occasion suggested. To single out one steadfast formation, to issue a broad citation across the regular HVO, or to decline amid heavy losses appeared to be a simple matter of recognising service. But the HVO's record, examined in detail at the ICTY, was uneven, and some units associated with the central Bosnia fighting were implicated in conduct the tribunals named as crimes. An honour does not discriminate; it lands on the whole of a formation's history.\n\nThis essay treats the decoration as a morale instrument and declines the language of glory. A leadership that honours a unit makes itself answerable for that unit's conduct; the citation meant to reward steadfastness can, if aimed without care, dignify what should be condemned. Where a formation's record is in the least doubt, restraint is the responsible posture. The broad citation distributes recognition without elevating any single command as the war's example; the refusal admits that, with losses heavy and the record contested, honours can ring hollow — and that for Herceg-Bosna, whose legitimacy was itself disputed, a misplaced honour compounded the doubt.\n\nThe ambivalence is real and morally charged. The citation that raises one command's morale lowers another's and risks attaching the leadership's name to acts it should disavow; the broad gesture inspires little; the refusal reads as coldness to soldiers who expected acknowledgement. The safest honour was often the one withheld.\n\nThis is a recurring leadership choice rather than a single decorated event; the Codex holds the most recent decision and the engine binds the shared families — honour one, honour broadly, or decline — not any particular unit. It moves cohesion and morale, not the territory. The honest reading is that an HVO decoration was a gesture whose symbolic cost could outrun its morale benefit, and that to honour without scrutiny was to risk honouring what the record would not bear.",
+            "dynamic_sections": [
+                {
+                    "id": "arc_decorate_a_unit_hrhb_decorate_decline_hrhb",
+                    "condition": "RESPONSE:decorate_a_unit_hrhb:decorate_decline_hrhb",
+                    "variant": "note",
+                    "content": "Recorded choice (the typical, staff-recommended posture). In this campaign the leadership declined — with losses heavy and the record contested, a misplaced honour would only compound the doubt around a disputed authority.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (uobičajeni stav koji štab preporučuje). U ovoj kampanji vodstvo je odbilo — uz teške gubitke i sporan zapis, pogrešno dato odlikovanje samo bi pojačalo sumnju oko osporene vlasti."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_decorate_a_unit_hrhb_decorate_steadfast_hrhb",
+                    "condition": "RESPONSE:decorate_a_unit_hrhb:decorate_steadfast_hrhb",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The leadership singled out one formation — a citation that, aimed without care, risks dignifying conduct that should be condemned.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Vodstvo je izdvojilo jednu formaciju — priznanje koje, usmjereno bez pažnje, riskira da dostojanstvo da postupcima koje bi trebalo osuditi."
+                        }
+                    }
+                },
+                {
+                    "id": "arc_decorate_a_unit_hrhb_decorate_broadly_hrhb",
+                    "condition": "RESPONSE:decorate_a_unit_hrhb:decorate_broadly_hrhb",
+                    "variant": "divergence",
+                    "content": "Recorded choice (divergence from the cautious default). The leadership issued a broad citation across the regular HVO — distributing recognition without elevating any single command as the war’s example.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "Zabilježena odluka (odstupanje od opreznog izbora). Vodstvo je izdalo široko priznanje redovnom HVO-u — raspoređujući priznanje bez uzdizanja bilo koje komande kao primjera rata."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Koga odlikovati: odlikovanje formacije HVO",
+                    "category": "komanda",
+                    "content": "Ovaj Codex zapis obrađuje odlikovanje formacije kao gestu vodstva Herceg-Bosne, i odbija jezik slave. Zapis HVO bio je neujednačen, a neke jedinice vezane za borbe u srednjoj Bosni bile su umiješane u postupke koje su sudovi imenovali zločinima. Odlikovanje ne razlikuje; pada na cijelu historiju formacije.\n\nGdje je zapis formacije i najmanje sporan, suzdržanost je odgovoran stav. Zapis se odnosi na koheziju i moral, ne na teritoriju, i tretira odlikovanje kao instrument morala. Codex čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u ovoj kampanji."
+                }
+            }
         }
     ]
 }
