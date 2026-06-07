@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-07] fix(calibration): HVO western liberation robustness (+2 OSID) + documented hollow-corps suppressor
+
+**Type:** Calibration-moving (188w re-floor) + diagnostic-only anomaly suppressor. 40w byte-identical.
+
+**Change:** Added `pribelja`, `kovacevci_2`, `gubin_2` to `MISTRAL_1_GLAMOC_OBJECTIVES` (`src/sim/combat/operation_opportunity_catalog_federation_western_bosnia.ts`) — routes the Glamoč/Livno shoulder through the deterministic Mistral 1 catalog op instead of fragile idle-brigade opportunism (historically Operation Summer '95 / Ljeto '95, HV Split Corps OG Rujani under Gotovina, Jul 1995; ICTY Gotovina IT-06-90-T). This makes the western liberation perturbation-independent, unblocking the clean Zvornik garrison lane.
+
+**Suppressor:** `anomaly_detector.ts` `STRUCTURALLY_HOLLOW_CORPS_FROM_TURN` downgrades `combat_ineffective_concentration` on `vrs_2nd_krajina` from `critical` to `info` at turn≥160 (documented historical artifact — the 2nd Krajina Corps was a hollow shell shattered by Storm/Maestral by late 1995; the fix made the sim MORE faithful by attriting it). Turn-gated so an early-war regression is not masked. Owner-approved.
+
+**Calibration:** 40w `bb0462f4d37dab2d` byte-identical (ops fire t≥160). 188w re-floor `09c63bc0f06def46` → `deab3c26f13c3e17`, OSID **614→616 (+2** = `op:sipovo:pribeljci_2` + `op:sipovo:volari_2`, RS→HRHB painted-match; 0 lost), anchors 28/30 (both prior fails carry over, no new break), benchmarks 6/6, 0 critical (post-suppressor), Srebrenica/Žepa still fall (§6 intact). Scenario-tester GO.
+
 ## [2026-06-07] feat(events): Ring-3 informational records — Srebrenica column (C9) + UN safe area (C11)
 
 **Type:** §6 Ring-3 sensitive-history content (owner-cleared, informational-record only). Two timeline/codex events with inert `narrative`-only effects — no `control_change`, dimension shifts, flags, or `response_options`. **Calibration-flat.**

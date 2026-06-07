@@ -1320,8 +1320,25 @@ function detectUndefendedFrontSubsegments(state: GameState): AnomalyReport[] {
 }
 
 /**
+ * Corps historically reduced to combat-ineffective shells by the 1995 Federation
+ * offensives — flagging them `critical` at the late-war run endpoint is a documented
+ * FALSE POSITIVE, not a bug. Keyed to the turn from which the historical collapse makes
+ * the hollow state correct; BEFORE that turn a hollow corps still flags `critical` (so a
+ * genuine early-war regression is NOT masked). At/after it, downgraded to `info`.
+ *   vrs_2nd_krajina: 2nd Krajina Corps — a low-manpower formation shattered by Operation
+ *     Storm (Aug 1995) + Operation Maestral / Summer '95 (Jul–Sep 1995). By the 188w
+ *     endpoint its surviving brigades (rs_11th_krupa ~235, rs_9th_grahovo ~100) are
+ *     correctly hollow. Surfaced when the HVO Glamoč liberation was routed through the
+ *     deterministic Mistral 1 op — i.e. the sim became MORE historically faithful.
+ */
+const STRUCTURALLY_HOLLOW_CORPS_FROM_TURN: Record<string, number> = {
+    vrs_2nd_krajina: 160,
+};
+
+/**
  * 20. combat_ineffective_concentration (critical)
  * Corps where too many brigades are below combat effectiveness threshold (personnel < 400).
+ * Known late-war historical shells (STRUCTURALLY_HOLLOW_CORPS_FROM_TURN) downgrade to info.
  */
 function detectCombatIneffectiveConcentration(state: GameState): AnomalyReport[] {
     const reports: AnomalyReport[] = [];
@@ -1368,12 +1385,15 @@ function detectCombatIneffectiveConcentration(state: GameState): AnomalyReport[]
         }
     }
 
+    const turn = state.meta.turn;
     for (const f of flagged.sort((a, b) => strictCompare(a.corpsId, b.corpsId))) {
+        const hollowFromTurn = STRUCTURALLY_HOLLOW_CORPS_FROM_TURN[f.corpsId];
+        const isKnownHollow = hollowFromTurn !== undefined && turn >= hollowFromTurn;
         reports.push({
             category: 'combat',
-            severity: 'critical',
+            severity: isKnownHollow ? 'info' : 'critical',
             type: 'combat_ineffective_concentration',
-            description: `Corps ${f.corpsId} (${f.faction}): ${f.ineffective}/${f.total} brigades (${(f.pct * 100).toFixed(0)}%) are below combat effectiveness (personnel < 400).`,
+            description: `Corps ${f.corpsId} (${f.faction}): ${f.ineffective}/${f.total} brigades (${(f.pct * 100).toFixed(0)}%) are below combat effectiveness (personnel < 400).${isKnownHollow ? ' [known structural artifact — historically combat-ineffective by late 1995; see STRUCTURALLY_HOLLOW_CORPS_FROM_TURN]' : ''}`,
             entities: [f.corpsId],
         });
     }
