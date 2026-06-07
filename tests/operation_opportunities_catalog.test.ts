@@ -1025,7 +1025,7 @@ describe('entry-specific: sana_95 family', () => {
             .toBe(true);
     });
 
-    it('axis shape: parent has Krupa 3/7 + Bihac-Petrovac 5/10 (no Sanski-Most/Kljuc); follow-on owns Sanski-Most/Kljuc 9/13', () => {
+    it('axis shape: parent has Krupa 3/7 + Bihac-Petrovac 5/10 + folded Sanski-Most/Kljuc 2/13 third axis', () => {
         const krupa = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_krupa')!;
         expect(krupa.brigades).toHaveLength(3);
         expect(krupa.objectives).toHaveLength(7);
@@ -1033,15 +1033,26 @@ describe('entry-specific: sana_95 family', () => {
         const bp = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_bihac_petrovac')!;
         expect(bp.brigades).toHaveLength(5);
         expect(bp.objectives).toHaveLength(10);
-        expect(SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_sanski_most_kljuc'))
-            .toBeUndefined();
-        // Follow-on shape.
+        // 2026-06-07 (lever (b) launch-timing fix): the Sanski Most + Ključ
+        // interior is now folded into the INITIAL Sana op as a third axis so it
+        // launches at w175 at full strength instead of being corridor-gated into
+        // a late, recovery-phase follow-on. It commits the two 5th Corps brigades
+        // NOT used by the Krupa/Bihać-Petrovac axes (506th + 517th) and stages at
+        // the Krupa-axis tail jasenica_2. See operation_opportunity_catalog_5th_corps.ts.
+        const skParent = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_sanski_most_kljuc')!;
+        expect(skParent).toBeDefined();
+        expect(skParent.brigades).toEqual([
+            'arbih_506th_mountain',
+            'arbih_517th_light',
+        ]);
+        expect(skParent.objectives).toHaveLength(13);
+        expect(skParent.staging_osid).toBe('op:bosanska_krupa:jasenica_2');
+        // Follow-on entry is retained as a backstop owner of the same interior
+        // (its corridor gate still surfaces it if the third axis stalls); shape
+        // unchanged: 9-brigade roster, 13 objectives, jasenica_2 staging.
         expect(SANA_95_FOLLOW_ON_OPPORTUNITY.opportunity_id).toBe('sana_95_follow_on');
         expect(SANA_95_FOLLOW_ON_OPPORTUNITY.staging_osid).toBe('op:bosanska_krupa:jasenica_2');
         const sk = SANA_95_FOLLOW_ON_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_sanski_most_kljuc')!;
-        // 2026-06-07: roster expanded 4 → 9 to concentrate the historically-
-        // attested 5th Corps mass on the Sanski Most + Ključ interior drive
-        // (BB1 pp.417, 419-420). See operation_opportunity_catalog_5th_corps.ts.
         expect(sk.brigades).toHaveLength(9);
         expect(sk.objectives).toHaveLength(13);
     });
