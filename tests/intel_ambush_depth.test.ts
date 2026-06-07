@@ -277,6 +277,41 @@ describe('getAmbushDepthFactor — pure derivation from state', () => {
         expect(blind).toBeGreaterThan(shallow);
     });
 
+    it('treats a MISSING per-OSID intel entry as unscouted, not as the sector-confidence fallback (#247)', () => {
+        // Front-adjacent (no adjacency-depth floor) so the result is driven purely by the
+        // per-OSID scouting component. A high sector confidence MUST NOT mask an absent
+        // per-OSID estimate: the unscouted target reads as deep (blind), not shallow.
+        const missingEntryHighSector = getAmbushDepthFactor(
+            makeState({ attackerFaction: 'RBiH', frontEdgeCount: 3, sectorConfidence: 0.95 }),
+            'osid:atk', 'sector:enemy', 'osid:target',
+        );
+        // Same shape, but the per-OSID estimate IS present and explicitly blind (0.0).
+        // Contract: a missing entry behaves identically to a present-but-zero estimate.
+        const presentZeroEntry = getAmbushDepthFactor(
+            makeState({ attackerFaction: 'RBiH', frontEdgeCount: 3, sectorConfidence: 0.95, osidConfidence: 0.0 }),
+            'osid:atk', 'sector:enemy', 'osid:target',
+        );
+        expect(missingEntryHighSector).toBe(presentZeroEntry);
+        expect(missingEntryHighSector).toBeGreaterThan(0); // unscouted ⇒ non-trivial depth
+
+        // And a missing entry must read as DEEPER than a present, high-confidence per-OSID
+        // estimate at the same front — proving the fallback no longer borrows sector confidence.
+        const presentHighEntry = getAmbushDepthFactor(
+            makeState({ attackerFaction: 'RBiH', frontEdgeCount: 3, sectorConfidence: 0.95, osidConfidence: 1.0 }),
+            'osid:atk', 'sector:enemy', 'osid:target',
+        );
+        expect(missingEntryHighSector).toBeGreaterThan(presentHighEntry);
+    });
+
+    it('uses the present per-OSID estimate value (not the sector confidence) when an entry exists (#247)', () => {
+        // High per-OSID estimate over a LOW sector confidence ⇒ shallow (uses the entry, not sector).
+        const shallowFromEntry = getAmbushDepthFactor(
+            makeState({ attackerFaction: 'RBiH', frontEdgeCount: 3, sectorConfidence: 0.1, osidConfidence: 1.0 }),
+            'osid:atk', 'sector:enemy', 'osid:target',
+        );
+        expect(shallowFromEntry).toBe(0); // fully observed target ⇒ no scouting depth
+    });
+
     it('is bounded to [0,1] and deterministic across repeated calls', () => {
         const state = makeState({
             attackerFaction: 'RS', frontEdgeCount: 0, sectorConfidence: 0.1,
