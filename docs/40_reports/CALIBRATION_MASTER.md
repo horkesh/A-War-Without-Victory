@@ -1,12 +1,20 @@
 # AWWV Calibration Master Reference
 
-## CURRENT BASELINE OF RECORD — 188w 618/712, hash `a1a7c167f0b05411` (2026-05-31)
+## CURRENT BASELINE OF RECORD — 188w 614/712, hash `0abca945388ddb59` (2026-06-07)
 
-- **188w: OSID 618/712 (86.8%), anchors 29/30, benchmarks 6/6, 0 critical anomalies. Hash `a1a7c167f0b05411`.** Combined hash after the TG-correctness batch (PRs #73 #48 AAR-telemetry-snapshot, #74 #47 cascade-after-revert, #75 #46 zero-donor-no-phantom-TG) on top of the event-system fix (PR #66). **All three were calibration-FLAT** — OSID/anchors/benchmarks/per-faction identical; only the final-state hash composes (telemetry + phantom-TG-removal change combat/operation_history state without moving any tracked outcome). Prior single-point hash was `b6c9507e7c045a6c` (event-fix #66, pre-batch).
-- **40w: OSID 655/712, anchors 30/30, 6/6, 0 critical. Hash `e086afbefcef01e6`** (shifted by #46; #47 byte-identical, #48 40w-byte-identical). Prior `85ae31578378c707`.
-- Lineage: TG (ADR-0005) activation baseline was 188w 615/712 (hash `0a36b1090f5f902e`, PR #65); the event-fix added +3 OSID (618) and made the enclaves fall. The lone failing 188w anchor is `brijesnica_donja_2` (Spreča gain — separate lane). RS sim ~338 vs Oct1995 ref 315 (+23) = the pre-existing HRHB Mistral-2 SW-belt + Sana-pocket lanes, NOT event-caused.
-- Golden-baseline manifest (`data/derived/scenario/baselines/manifest.json`) re-floored for `apr1992_52w` accordingly (`npm run test:baselines` green on main).
-- NOTE: the dated sections below (R15 → n2003 → R-series) are HISTORICAL — superseded by the above. Full R-series ↔ TG ↔ event-fix reconciliation is a separate cleanup lane; this header is the current pointer.
+- **188w: OSID 614/712 (86.24%), anchors 28/30, benchmarks 6/6, 0 critical anomalies. Hash `0abca945388ddb59`. HEAD `77265108b`.** Per-faction: HRHB 104 / RBiH 281 / RS 327.
+- **40w: OSID 653/712 (91.71%), anchors 30/30, 6/6, 0 critical. Hash `bb0462f4d37dab2d`** — restored by the COMBAT-P14 revert (#257); this CORRECTS the stale `e086afbefcef01e6` / 655 figure carried in the prior header.
+- **52w: re-floored green through #260.**
+- **Two failing 188w anchors:**
+  1. `brijesnica_donja_2` — chronic / known (Spreča-gain lane, long-standing separate lane).
+  2. `op:zvornik:zvornik` — **NEW since the 618 baseline = a REGRESSION.** Three dual-horizon fix attempts were NO-GO'd (a surgical OOB change, a `must_hold` change, and an event `control_change`). Root cause: `arbih_245th_mountain` recaptures it at ~w85 (a 2.03:1 decisive victory) and holds to w188. This is NOT a #200 side-effect (disproven) and NOT a missing initial flip — the `zvornik_takeover_1992` event DOES flip it RS at w10, but it is retaken. The fix is on the bot-AI / OOB side (245th too strong / RS Drina defender too weak / bot mis-targets); tracked open. See `docs/plans/2026-06-07-owner-decision-backlog.md`.
+- **PROVENANCE — the 618 → 614 drift is AUTHORIZED v0.9.x OOB-fidelity work, not an unexplained regression.** Lineage:
+  - #180 / #199 / #200 / #208 — each verified 40w-ONLY at merge (the 188w tail was never measured at the time) — landed the baseline at 613 / `2669bd0eecce5013`.
+  - #256 (COMBAT-P14) moved 613 → 609; #257 reverted it byte-identical back to 613.
+  - #260 (Sana) moved 613 → 614 (`0abca945388ddb59`; `budimlic_japra` recovered).
+  - #261-#267 are byte-identical.
+- Golden-baseline manifest (`data/derived/scenario/baselines/manifest.json`) re-floored accordingly (`npm run test:baselines` green on main).
+- NOTE: the dated sections below — including the prior `618` / `a1a7c167f0b05411` header (2026-05-31), the R15 → n2003 → R-series, and the Free War / Presidential Command notes that still cite the old `a1a7c167` / `e086afbefcef01e6` baseline — are HISTORICAL / superseded by the above. This header is the current pointer.
 
 ## Free War Model — calibration is now the SIM-HEALTH check (2026-06-01)
 

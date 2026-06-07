@@ -1,4 +1,20 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-07] docs: reconcile stale baseline/board/ADR docs + owner decision backlog + D5/D6 rulings
+
+**Type:** Documentation-only reconciliation. No simulation behavior, save schema, migration, scenario data, baseline manifest, generated artifact, randomness, timestamps, or persisted-output ordering changed. No canon-tier files touched (FORAWWV / SENSITIVE_HISTORY_DESIGN_GATE / Game Bible / Systems Manual untouched).
+
+**Change:**
+- NEW `docs/plans/2026-06-07-owner-decision-backlog.md` — consolidated 10-item owner decision register from the 2026-06-07 Pyrrhic decision-packet round (Decision / Options / Recommendation / Flags / Build-lane / Status each), plus a cross-cutting doc-staleness section and the `op:zvornik:zvornik` 188w anchor regression item.
+- NEW `docs/40_reports/design/20260607_D5_MULTIPLAYER.md` — D5 RULED Option A (explicit post-2.0 deferral; zero 1.0 MP work).
+- NEW `docs/40_reports/design/20260607_D6_PLAY_LENGTH.md` — D6 RULED Option A (single full April-1992 campaign for 1.0; quick/speed modes deferred to the post-1.0 historical-scenario-starts lane; 3-5h target session expectation).
+- `docs/40_reports/CALIBRATION_MASTER.md` — top baseline-of-record header reconciled to **188w 614/712 `0abca945388ddb59`** (anchors 28/30, benchmarks 6/6, HEAD `77265108b`; per-faction HRHB 104 / RBiH 281 / RS 327) and **40w 653/712 `bb0462f4d37dab2d`** (corrects the stale `e086afbefcef01e6`/655 via the COMBAT-P14 revert #257); 52w green through #260. Two failing 188w anchors documented (`brijesnica_donja_2` chronic; `op:zvornik:zvornik` NEW regression). Provenance lineage (#180/#199/#200/#208 → 613/`2669bd0eecce5013`; #256→#257 byte-identical revert; #260 → 614) recorded as AUTHORIZED OOB-fidelity work. Old header marked HISTORICAL.
+- `docs/plans/COMMAND_BOARD.md` — Board owner changed from Codex to orchestrator/owner (Codex = prompt/art only); Free-War Phase-1 (Slice A.2) marked CLOSED/fossil (PR #98 owner-closed); ADR-0005 / TG row corrected from OWNED-ELSEWHERE/not-started to ACTIVE Sept-1995 tuning (v3.0 ACTIVATED via PR #65 `2d1ab9117`); 2026-06-07 reconciliation note added covering shipped lanes #245-#267 and verify-stale closures (Standing-OG #79/#81, BRIEF-GAP-1/6, ARMY-GAP-1, COMBAT-P14 audit items, settlement-picker #241); pointer to the new owner decision backlog added.
+- `docs/20_engineering/ADR/ADR-0005-tactical-groups-as-primary-ops-path.md` — Status block gains a CURRENT STATUS note: v3.0 ACTIVATED on `main` (PR #65 `2d1ab9117`); flag-OFF gold hashes `78e231e35b08cf53` / `940251e4acaff3d4` marked SUPERSEDED; history retained as-written.
+
+**Verification:** `git diff --check` clean; no canon-tier files in the diff; no code, baseline, or manifest files touched (docs-only).
+
+---
+
 ## [2026-06-06] fix(ui): focus decision consequence records from desk routes
 
 **Type:** UI/read-model route cohesion. No command authority behavior, simulation behavior, save schema, migration, scenario data, baseline manifest, replay writer, generated artifact, randomness, timestamps, or persisted output ordering changed.

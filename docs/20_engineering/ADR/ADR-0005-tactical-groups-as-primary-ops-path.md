@@ -3,6 +3,17 @@
 ## Status
 Accepted (2026-05-28) — initial proposal 2026-05-28; major sync after Pyrrhic specialist convening 2026-05-28.
 
+**CURRENT STATUS (2026-06-07): v3.0 ACTIVATED on `main`.** This ADR body (and the §Phased Rollout
+table below) was written when v3.0 shipped flag-OFF / dormant. That is now stale: **v3.0 Army-HQ
+operations are ACTIVATED on `main` via PR #65 (`2d1ab9117`, 2026-05-30); all TG / Army-HQ flags are
+`true`.** The live baseline-of-record is the ACTIVATED one — **188w 614/712 `0abca945388ddb59`,
+40w 653/712 `bb0462f4d37dab2d`** (see `docs/40_reports/CALIBRATION_MASTER.md` header). The
+**flag-OFF gold hashes cited throughout this doc (40w `78e231e35b08cf53`, 188w
+`940251e4acaff3d4`) are SUPERSEDED** — they were the dormant flag-off proof and no longer describe
+`main`. The live tuning lane is the Sept-1995 188w window (see COMMAND_BOARD TG row and
+`docs/plans/2026-06-07-owner-decision-backlog.md` §7). History below is retained as-written; do not
+treat its "NOT activated / flag-OFF" language as current.
+
 ## Companion ADR
 
 **ADR-0006: Sectors as Standing Operational Groups** — naming-layer reconciliation establishing that the engine's `corps_front_sectors` ARE the canonical standing-OG implementation. ADR-0005 (this doc) handles **temporary** OGs / TGs for offensive operations; ADR-0006 handles the **standing** OGs that own defensive AORs. Read together for the complete operational-group picture.
