@@ -570,21 +570,29 @@ describe('strict null inventory progress', () => {
         // So 508 → 509 / sim 328 → 329. OPTIONAL append-only → absent in old saves and all
         // headless/historical scenarios (written only inside decision_mode === 'emergent' on a
         // non-zero cut) → byte-identical baseline by construction.
+        // B7 Sarajevo lifeline substrate (PR #271) added +1 optional GameState field on
+        // SarajevoState (classifyDomain → `state` via game_state.ts path): `lifeline`
+        // (SiegeLifelineState). So 507 → 508 / state 172 → 173. OPTIONAL + re-derived each
+        // turn → absent on every flag-OFF run (ENABLE_SARAJEVO_LIFELINE default-OFF) and on
+        // legacy saves → byte-identical baseline by construction (40w bb0462f4d37dab2d / 188w
+        // 0abca945388ddb59 unchanged). No new type-escape cast: as_factionid_casts / as_any_casts /
+        // as_unknown_casts / non_null_assertions all UNCHANGED — this bump is purely the
+        // optional-field ratchet recording the contract-mandated new persisted field.
         expect(current.counts).toMatchObject({
             as_factionid_casts: 1,
             as_unknown_casts: 3,
             as_any_casts: 0,
             non_null_assertions_dot: 7,
             non_null_assertions_index: 0,
-            optional_fields_game_state: 507,
+            optional_fields_game_state: 508,
         });
-        expect(current.optional_field_domains.total).toBe(507);
+        expect(current.optional_field_domains.total).toBe(508);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 8,
             ipc: 0,
             scenario: 0,
             sim: 327,
-            state: 172,
+            state: 173,
             ui_adapter: 0,
             unknown: 0,
         });

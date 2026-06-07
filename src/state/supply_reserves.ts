@@ -51,6 +51,7 @@ import {
     HEAVY_MAINTENANCE_PER_WEAPON,
 } from './supply_reserve_constants.js';
 import { ensureInternationalVisibilityPressure, ensurePatronState } from './patron_pressure.js';
+import { getActiveSarajevoLifeline, isSarajevoCoreSiegeCounterKey } from './sarajevo_lifeline.js';
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 
@@ -301,6 +302,8 @@ export function updateSupplyReserves(
     const siegeDrainByFaction: Record<string, { general: number; heavy: number }> = {};
     for (const fid of factionIds) siegeDrainByFaction[fid] = { general: 0, heavy: 0 };
     if (state.military.siege_turn_counters) {
+        // B7: shared lifeline scalar (undefined ⇒ flag OFF ⇒ identical pre-change path).
+        const lifeline = getActiveSarajevoLifeline(state);
         const counterKeys = Object.keys(state.military.siege_turn_counters).sort((a, b) => a.localeCompare(b));
         for (const key of counterKeys) {
             const colonIdx = key.indexOf(':');
@@ -308,7 +311,13 @@ export function updateSupplyReserves(
             const fid = key.substring(0, colonIdx);
             if (!siegeDrainByFaction[fid]) continue;
             const counter = state.military.siege_turn_counters[key];
-            const drain = Math.min(MAX_SIEGE_PRESSURE_RATE, SIEGE_BASE_RATE * (1 + SIEGE_ESCALATION_RATE * counter));
+            let drain = Math.min(MAX_SIEGE_PRESSURE_RATE, SIEGE_BASE_RATE * (1 + SIEGE_ESCALATION_RATE * counter));
+            // B7: a working lifeline offsets the Sarajevo-core reserve burn (less
+            // strangulation when airlift/tunnel are carrying). No-op when lifeline
+            // is undefined (flag OFF) — byte-identical.
+            if (lifeline && isSarajevoCoreSiegeCounterKey(key)) {
+                drain = drain * (1 - lifeline.throughput);
+            }
             siegeDrainByFaction[fid].general += drain * 0.7;
             siegeDrainByFaction[fid].heavy += drain * 0.3;
         }

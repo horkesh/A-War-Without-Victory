@@ -3,8 +3,10 @@ import {
     SARAJEVO_CITY_CORE_MUN_IDS,
     SARAJEVO_PRESSURE_MULTIPLIER
 } from './enclave_integrity.js';
-import type { GameState, SarajevoState } from './game_state.js';
+import type { GameState, SarajevoState, SiegeLifelineState } from './game_state.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from './supply_state_derivation.js';
+import { isSarajevoLifelineEnabled } from '../sim/combat/sarajevo_siege_params.js';
+import { deriveSarajevoLifeline } from './sarajevo_lifeline.js';
 
 const BASE_IMPORTANCE = 1.0;
 
@@ -106,7 +108,6 @@ export function updateSarajevoState(
         }
     }
     const internalSupply = count > 0 ? clamp01(supplyScoreSum / count) : 0;
-    const externalSupply = internalSupply;
     const siegeStatus =
         controller === 'RBiH' && isSarajevoSiegeCanonicallyActive(state)
             ? 'BESIEGED'
@@ -115,6 +116,19 @@ export function updateSarajevoState(
                 : internalSupply < 0.8
                     ? 'PARTIAL'
                     : 'OPEN';
+
+    // B7 lifeline (default-OFF). FLAG-OFF: externalSupply aliases internalSupply
+    // exactly as before and `lifeline` stays undefined — byte-identical. FLAG-ON:
+    // the airlift+tunnel lifeline mediates external supply (closing the
+    // `externalSupply = internalSupply` fidelity bug) so the tunnel becomes a
+    // CONTINUOUS relief rather than the discrete one-shot +10 supply_delta.
+    let externalSupply = internalSupply;
+    let lifeline: SiegeLifelineState | undefined;
+    if (isSarajevoLifelineEnabled()) {
+        lifeline = deriveSarajevoLifeline(state, siegeStatus === 'BESIEGED', turn);
+        externalSupply = lifeline.throughput;
+    }
+
     const siegeDuration =
         siegeStatus === 'OPEN' ? 0 : (prev?.siege_duration ?? 0) + 1;
     const siegeIntensity =
@@ -138,6 +152,9 @@ export function updateSarajevoState(
         humanitarian_pressure: humanitarianPressure,
         last_updated_turn: turn
     };
+    // Only attach `lifeline` when derived (flag ON) so the serialized shape and
+    // hash are byte-identical when the flag is OFF.
+    if (lifeline) sarajevo.lifeline = lifeline;
 
     state.political.sarajevo_state = sarajevo;
     return sarajevo;

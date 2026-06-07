@@ -29,6 +29,7 @@
 
 import type { FormationState, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { getActiveSarajevoLifeline, isSarajevoCoreSiegeCounterKey } from '../../state/sarajevo_lifeline.js';
 
 // --- Constants ---
 
@@ -141,6 +142,9 @@ export function applySiegeMoraleDrain(state: GameState): SiegeDrainDiagnostic {
     // Env flag gate (default OFF per FORAWWV §XIV.1).
     const flagEnabled = process.env.SIEGE_MORALE_DRAIN_ENABLED === 'true';
 
+    // B7: shared lifeline scalar (undefined ⇒ flag OFF ⇒ identical pre-change path).
+    const lifeline = getActiveSarajevoLifeline(state);
+
     // Iterate counters in deterministic sorted order.
     const counterKeys = Object.keys(counters).sort(strictCompare);
     for (const key of counterKeys) {
@@ -152,8 +156,14 @@ export function applySiegeMoraleDrain(state: GameState): SiegeDrainDiagnostic {
         const besiegedFaction = key.substring(0, colonIdx);
         const osid = key.substring(colonIdx + 1);
 
-        const coefficient = getSiegeDrainCoefficient(counter);
+        let coefficient = getSiegeDrainCoefficient(counter);
         if (coefficient === 0.0) continue;
+        // B7: a working lifeline (flag ON, Sarajevo-core pocket) softens the
+        // graduated morale decrement toward 0; SEVERED leaves it unchanged.
+        // No-op when lifeline is undefined (flag OFF) — byte-identical.
+        if (lifeline && isSarajevoCoreSiegeCounterKey(key)) {
+            coefficient = coefficient * (1 - 0.5 * lifeline.throughput);
+        }
 
         const brigadesAtOsid = formationsByOsid[osid];
         if (!brigadesAtOsid || brigadesAtOsid.length === 0) continue;

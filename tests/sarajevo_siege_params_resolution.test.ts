@@ -49,7 +49,7 @@ describe('getSarajevoSiegeParams', () => {
         }
     });
 
-    it('applies all five overrides deterministically', () => {
+    it('applies all five overrides deterministically (lifeline fields keep defaults)', () => {
         const overrides = {
             defense_bonus: 0.5,
             attacker_casualty_mult: 2.25,
@@ -58,6 +58,11 @@ describe('getSarajevoSiegeParams', () => {
             integrity_floor: 0.2,
         };
 
-        expect(getSarajevoSiegeParams(stateWith(overrides))).toEqual(overrides);
+        // The five legacy overrides resolve verbatim; the B7 lifeline fields
+        // (default-OFF tuning, not overridden here) keep their code defaults.
+        expect(getSarajevoSiegeParams(stateWith(overrides))).toEqual({
+            ...DEFAULT_SARAJEVO_SIEGE_PARAMS,
+            ...overrides,
+        });
     });
 });
