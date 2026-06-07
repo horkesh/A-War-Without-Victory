@@ -721,6 +721,13 @@ export function computeFullVerdict(state: GameState): GameVerdict {
         factionVerdicts[faction] = computeFactionVerdict(state, faction);
     }
 
+    // D2/D3 (2026-06-07): surface the settlement-level autonomy + dysfunction
+    // metrics at the top of the verdict for display. The dysfunction index is the
+    // live (emergent-gated) computation — null in historical/unset mode and for
+    // non-Dayton endings, so non-emergent verdicts carry undefined (back-compat).
+    const daytonResult = neg?.dayton_result;
+    const dysfunctionIndex = computePeaceDysfunctionIndex(state);
+
     return {
         outcome_type: outcomeType,
         outcome_label: outcomeLabel,
@@ -728,7 +735,10 @@ export function computeFullVerdict(state: GameState): GameVerdict {
         date,
         duration_weeks: turn,
         faction_verdicts: factionVerdicts,
-        dayton_result: neg?.dayton_result,
+        dayton_result: daytonResult,
+        entity_autonomy_index: daytonResult?.entity_autonomy_index,
+        peace_dysfunction_index: dysfunctionIndex ?? daytonResult?.peace_dysfunction_index,
+        peace_dysfunction_flags: daytonResult?.peace_dysfunction_flags,
     };
 }
 

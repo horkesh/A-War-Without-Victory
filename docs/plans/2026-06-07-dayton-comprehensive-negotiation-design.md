@@ -1,8 +1,18 @@
 # Dayton Endgame — Comprehensive Negotiation Package (Design)
 
-**Status:** DESIGN PROPOSAL, owner-requested 2026-06-07. Read-only research + design; no code yet.
+**Status:** APPROVED + Phases 1-3 SHIPPED (2026-06-07, branch `claude/dayton-build-p1-3`). Phase 4 (player-agency UI) is the remaining follow-up.
 **Owner direction:** the Dayton endgame should negotiate not only the **map** but the **detailed state structure** — entity autonomy, jurisdictions/competencies, constitutional architecture, return/justice.
 **Convening:** Pyrrhic Historian + Game-Designer + Tech-Architect. **Recommendation: Option 2.**
+
+---
+
+## Decision record — owner rulings (2026-06-07, built exactly as below)
+
+- **D1 = Opt 2.** Keep the 8 territorial packages. (a) Brčko gets a DISTINCT international-arbitration/condominium outcome — a THIRD state, neither RBiH nor RS (historically accurate, Annex 2), exposed via `DaytonResult.brcko_status` (`federation | rs | arbitration`) + `brcko_arbitration` flag; its area is removed from the three-faction split when it goes to arbitration. (b) The fabricated `estimatePackageTerritoryPct` hardcoded table is REPLACED by a real OSID-keyword → `data/derived/operational/osid_areas.json` area resolver (`src/sim/negotiation/package_area_resolver.ts`). (c) The `computeTerritorySplit` "RS→RBiH (simplified)" mis-attribution is FIXED — gains accrue to the demanding faction, so HRHB gains are correct.
+- **D2 = Opt B.** Keep the 6 granular institutional choices; ADD a derived, read-only `entity_autonomy_index` (0-100, weighted mean of the 6 choices where decentralized = high autonomy) for display + as a verdict / dysfunction input. No new authored content. Default (all-decentralized) = historical Dayton. Impl: `computeEntityAutonomyIndex` in `institutional_packages.ts`; surfaced on `DaytonResult` and `GameVerdict`.
+- **D3 = Opt 2.** Add `peace_dysfunction_index` (0-100) scoring the gap between a functional settlement and what was signed — a deterministic blend of entity_autonomy_index, territorial fragmentation, unresolved Brčko, refugees-not-returned, and condemnation_flags (`src/sim/negotiation/peace_dysfunction.ts`). It CAPS `outcome_class`: a high-dysfunction peace can never grade above hollow_victory regardless of territory (mirrors the condemnation-flags cap in `scoring.ts:classifyOutcome`). The player CAN sign a dysfunctional peace; it never reads as a clean win.
+
+**Determinism / calibration:** all Ring-1, emergent-gated (the dysfunction index is null in historical/unset mode), no §6. Verified 40w `final_state_hash` == `bb0462f4d37dab2d` (unchanged) after each phase. The D3 outcome_class cap changes a player-facing verdict rule → flagged for canon-compliance review.
 
 ---
 

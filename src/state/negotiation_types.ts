@@ -346,6 +346,19 @@ export interface GameVerdict {
     duration_weeks: number;
     faction_verdicts: Record<string, FactionVerdict>;
     dayton_result?: DaytonResult;
+    /**
+     * Derived entity-autonomy index (D2, 0-100) of the signed settlement, surfaced
+     * at the top level for display. Mirror of dayton_result.entity_autonomy_index;
+     * absent for non-Dayton endings and pre-D2 saves.
+     */
+    entity_autonomy_index?: number;
+    /**
+     * Peace dysfunction index (D3, 0-100) of the signed settlement, surfaced at the
+     * top level for display. Mirror of dayton_result.peace_dysfunction_index.
+     */
+    peace_dysfunction_index?: number;
+    /** Structural dysfunction flags (D3) of the signed settlement. */
+    peace_dysfunction_flags?: string[];
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
