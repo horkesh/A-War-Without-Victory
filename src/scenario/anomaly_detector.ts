@@ -1322,25 +1322,31 @@ function detectUndefendedFrontSubsegments(state: GameState): AnomalyReport[] {
 /**
  * Corps historically reduced to combat-ineffective shells by the 1995 Federation
  * offensives — flagging them `critical` at the late-war run endpoint is a documented
- * FALSE POSITIVE, not a bug. Keyed to the turn from which the historical collapse makes
- * the hollow state correct; BEFORE that turn a hollow corps still flags `critical` (so a
- * genuine early-war regression is NOT masked). At/after it, downgraded to `info`.
+ * FALSE POSITIVE, not a bug. Keyed to the ABSOLUTE war week (weeks since Jan 1992) from
+ * which the historical collapse makes the hollow state correct; BEFORE that week a hollow
+ * corps still flags `critical` (so a genuine early-war regression is NOT masked). At/after
+ * it, downgraded to `info`.
+ *
+ * Absolute week (not scenario-relative meta.turn) is used so a non-apr1992 start (e.g. a
+ * jan1993 scenario whose turn 0 is absolute week 39) gates at the correct historical point.
+ * For an apr1992 start scenario_start_week is 0, so absolute week == meta.turn and the
+ * existing behavior is unchanged.
  *   vrs_2nd_krajina: 2nd Krajina Corps — a low-manpower formation shattered by Operation
  *     Storm (Aug 1995) + Operation Maestral / Summer '95 (Jul–Sep 1995). By the 188w
  *     endpoint its surviving brigades (rs_11th_krupa ~235, rs_9th_grahovo ~100) are
  *     correctly hollow. Surfaced when the HVO Glamoč liberation was routed through the
  *     deterministic Mistral 1 op — i.e. the sim became MORE historically faithful.
  */
-const STRUCTURALLY_HOLLOW_CORPS_FROM_TURN: Record<string, number> = {
+const STRUCTURALLY_HOLLOW_CORPS_FROM_WEEK: Record<string, number> = {
     vrs_2nd_krajina: 160,
 };
 
 /**
  * 20. combat_ineffective_concentration (critical)
  * Corps where too many brigades are below combat effectiveness threshold (personnel < 400).
- * Known late-war historical shells (STRUCTURALLY_HOLLOW_CORPS_FROM_TURN) downgrade to info.
+ * Known late-war historical shells (STRUCTURALLY_HOLLOW_CORPS_FROM_WEEK) downgrade to info.
  */
-function detectCombatIneffectiveConcentration(state: GameState): AnomalyReport[] {
+function detectCombatIneffectiveConcentration(state: GameState, scenarioStartWeek: number = 0): AnomalyReport[] {
     const reports: AnomalyReport[] = [];
     const formations = state.military.formations;
     const sectors = state.military.corps_front_sectors ?? {};
@@ -1385,15 +1391,19 @@ function detectCombatIneffectiveConcentration(state: GameState): AnomalyReport[]
         }
     }
 
-    const turn = state.meta.turn;
+    // Absolute war week (weeks since Jan 1992) = scenario start anchor + scenario-relative turn.
+    // scenarioStartWeek is threaded in (not read from persisted state) so this does not perturb
+    // final_state_hash. For an apr1992 start the anchor is 0, so this equals meta.turn (unchanged
+    // behavior); for a jan1993 start (anchor 39) it correctly advances the gate to the historical week.
+    const absoluteWeek = scenarioStartWeek + state.meta.turn;
     for (const f of flagged.sort((a, b) => strictCompare(a.corpsId, b.corpsId))) {
-        const hollowFromTurn = STRUCTURALLY_HOLLOW_CORPS_FROM_TURN[f.corpsId];
-        const isKnownHollow = hollowFromTurn !== undefined && turn >= hollowFromTurn;
+        const hollowFromWeek = STRUCTURALLY_HOLLOW_CORPS_FROM_WEEK[f.corpsId];
+        const isKnownHollow = hollowFromWeek !== undefined && absoluteWeek >= hollowFromWeek;
         reports.push({
             category: 'combat',
             severity: isKnownHollow ? 'info' : 'critical',
             type: 'combat_ineffective_concentration',
-            description: `Corps ${f.corpsId} (${f.faction}): ${f.ineffective}/${f.total} brigades (${(f.pct * 100).toFixed(0)}%) are below combat effectiveness (personnel < 400).${isKnownHollow ? ' [known structural artifact — historically combat-ineffective by late 1995; see STRUCTURALLY_HOLLOW_CORPS_FROM_TURN]' : ''}`,
+            description: `Corps ${f.corpsId} (${f.faction}): ${f.ineffective}/${f.total} brigades (${(f.pct * 100).toFixed(0)}%) are below combat effectiveness (personnel < 400).${isKnownHollow ? ' [known structural artifact — historically combat-ineffective by late 1995; see STRUCTURALLY_HOLLOW_CORPS_FROM_WEEK]' : ''}`,
             entities: [f.corpsId],
         });
     }
@@ -1500,8 +1510,14 @@ function detectCrossCorpsSectorAssignment(state: GameState): AnomalyReport[] {
 /**
  * Run all anomaly detections on the final GameState.
  * Returns a deterministically-ordered array of AnomalyReport.
+ *
+ * @param scenarioStartWeek Absolute war-week anchor (weeks since Jan 1992) for scenario
+ *   turn 0 — i.e. scenario.scenario_start_week (apr1992 = 0, jan1993 = 39, …). Threaded
+ *   in (NOT read from persisted state) so absolute-week-keyed suppressors resolve correctly
+ *   for non-apr1992 starts WITHOUT mutating GameState (which would change final_state_hash).
+ *   Defaults to 0 (apr1992 / unit-test fixtures), preserving existing behavior.
  */
-export function runAnomalyDetection(state: GameState): AnomalyReport[] {
+export function runAnomalyDetection(state: GameState, scenarioStartWeek: number = 0): AnomalyReport[] {
     // Load OSID adjacency graph once for checks that need it (#13, #17).
     const adjacency = loadOsidAdjacency();
 
@@ -1522,10 +1538,11 @@ export function runAnomalyDetection(state: GameState): AnomalyReport[] {
         detectUnassignedFrontlineBrigades,
         detectRearBrigadesInSector,
         detectBrigadeStacking,
-        // #18, #19, #20 — standard signature
+        // #18, #19 — standard signature
         detectFrontlineDensityImbalance,
         detectUndefendedFrontSubsegments,
-        detectCombatIneffectiveConcentration,
+        // #20 — needs scenarioStartWeek; wrapped to preserve standard signature + output ordering
+        (s: GameState) => detectCombatIneffectiveConcentration(s, scenarioStartWeek),
         // #21, #22, #23 — extended checks (anomaly_checks_extended.ts)
         checkMoraleCollapseCluster,
         checkZeroCombatCorps,
