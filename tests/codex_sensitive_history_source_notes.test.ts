@@ -44,6 +44,11 @@ const SOURCE_NOTE_EVENT_IDS = [
     'keraterm_camp_1992',
     'trnopolje_camp_1992',
     'hvo_detention_camps_1993',
+    // §6 Ring-3 informational timeline records (Srebrenica column C9 + UN
+    // safe-area enforcement-failure C11). Provenance-only source notes; no
+    // response options, no hashed-state effects (narrative effect only).
+    'srebrenica_column_breakout_1995',
+    'un_safe_area_enforcement_1995',
 ] as const;
 
 const REQUIRED_BOUNDARY_PHRASES = [
