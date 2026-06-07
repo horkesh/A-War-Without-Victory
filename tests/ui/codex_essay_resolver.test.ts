@@ -262,6 +262,57 @@ describe('codexEssayResolver — comparison condition atoms', () => {
     });
 });
 
+// ─── #263: RESPONSE atom — per-unit expanded ids ─────────────────────────
+
+describe('codexEssayResolver — RESPONSE atom matching', () => {
+    it('matches an exact (un-expanded) decision response', () => {
+        const ctx = context({
+            decisionResponses: new Set(['decorate_a_unit_rbih:decorate_decline_rbih']),
+        });
+        expect(evaluateEssayCondition('RESPONSE:decorate_a_unit_rbih:decorate_decline_rbih', ctx)).toBe(true);
+    });
+
+    it('matches a per-unit EXPANDED steadfast branch via the `__` suffix (#263)', () => {
+        // Runtime expands `decorate_steadfast_rbih` into `<base>__<formationId>`
+        // (src/desktop/decorate_unit_contract.cjs). The authored essay condition
+        // lists only the un-suffixed base id; it must still fire.
+        const ctx = context({
+            decisionResponses: new Set([
+                'decorate_a_unit_rbih:decorate_steadfast_rbih__arbih_1st_corps',
+            ]),
+        });
+        expect(
+            evaluateEssayCondition('RESPONSE:decorate_a_unit_rbih:decorate_steadfast_rbih', ctx),
+        ).toBe(true);
+    });
+
+    it('does not match a sibling branch that merely shares a prefix without the `__` boundary', () => {
+        // `decorate_steadfast` must not match the exact base `decorate_steadfast_rbih`
+        // chosen response (single-underscore sibling, not a `__` expansion).
+        const ctx = context({
+            decisionResponses: new Set(['decorate_a_unit_rbih:decorate_steadfast_rbih']),
+        });
+        expect(
+            evaluateEssayCondition('RESPONSE:decorate_a_unit_rbih:decorate_steadfast', ctx),
+        ).toBe(false);
+    });
+
+    it('returns false when the decision was not taken', () => {
+        const ctx = context({
+            decisionResponses: new Set(['decorate_a_unit_rbih:decorate_broadly_rbih']),
+        });
+        expect(
+            evaluateEssayCondition('RESPONSE:decorate_a_unit_rbih:decorate_steadfast_rbih', ctx),
+        ).toBe(false);
+    });
+
+    it('returns false when no decisionResponses set is present', () => {
+        expect(
+            evaluateEssayCondition('RESPONSE:decorate_a_unit_rbih:decorate_decline_rbih', context()),
+        ).toBe(false);
+    });
+});
+
 // ─── v0.9.1: template interpolation tokens ───────────────────────────────
 
 describe('codexEssayResolver — template interpolation tokens', () => {
