@@ -206,10 +206,43 @@ const SANA_FOLLOW_ON_AXES: readonly OpportunityAxisDef[] = [
         axis_id: 'sana_sanski_most_kljuc',
         name: 'Sanski Most + Ključ Liberation',
         corps: PRIMARY_CORPS,
+        // 2026-06-07 (Sana follow-on concentration): the interior Sanski Most +
+        // Ključ liberation is the BULK of the historical Una-Sana drive (BB1
+        // pp.417, 419-420: "rapid Petrovac/Ključ/Krupa gains, Sanski Most /
+        // Prijedor reserve fight" — the 5th Corps committed its operational
+        // groups en masse, Sanski Most fell 10 Oct 1995). The prior 4-brigade
+        // roster materially under-committed against 13 deep objectives: at 188w
+        // the follow-on spawns turn 182 (corridor-gated by the initial breakout)
+        // and reaches execution ~turn 185, leaving only ~3 turns before the
+        // war-end horizon. Worse, 503rd + 510th were also rostered on the INITIAL
+        // Sana axes and stayed locked there in recovery phase, so the follow-on
+        // executed with ~2 live brigades and captured only 1 of 13 OSIDs
+        // (run apr1992_definitive_188w__3a26ccdf831ca525). The remaining 12
+        // Sanski Most/Ključ OSIDs are RBiH in the oct1995 reference — a genuine
+        // historical under-capture, NOT an over-reach.
+        //
+        // Fix = concentrate the historically-attested force on this one
+        // under-launching axis. The five added brigades (501st/502nd/504th/505th/
+        // 511th) are the SAME 5th Corps line brigades that captured the initial
+        // Krupa + Bihać-Petrovac axes; by the time the follow-on launches they
+        // sit idle at op:bosanski_petrovac:* / op:bosanska_krupa:* OSIDs directly
+        // on the Sanski/Ključ approach corridor (verified t188 positions). They
+        // are NOT double-booked here (the initial Sana axes are complete by
+        // launch), so all twelve concentrate. This is the historical mass, not
+        // force inflation: each fights at real strength through the existing
+        // launch-feasibility + combat pipeline. No global threshold touched; the
+        // EXISTING VICTORY_THRESHOLD_COSTLY gate is unchanged — concentration is
+        // exactly the missing element per audit 20260523_SANA_95_COMBAT_BALANCE.md
+        // ("ARBiH needs 3+ brigades concentrated on one OSID").
         brigades: [
+            'arbih_501st_slavna_mountain' as FormationId,
+            'arbih_502nd_vitezka_mountain' as FormationId,
             'arbih_503rd_slavna_mountain' as FormationId,
+            'arbih_504th_cazin_light' as FormationId,
+            'arbih_505th_vitezka_mountain' as FormationId,
             'arbih_506th_mountain' as FormationId,
             'arbih_510th_bosnian_liberation' as FormationId,
+            'arbih_511th_slavna_mountain' as FormationId,
             'arbih_517th_light' as FormationId,
         ],
         objectives: SANSKI_KLJUC_OBJECTIVES,
