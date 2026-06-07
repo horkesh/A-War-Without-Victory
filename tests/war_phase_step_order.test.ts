@@ -199,6 +199,10 @@ describe('war-phase step ordering', () => {
         // +1 from observe-threshold-flags (observer-flag writer, decision #3, 2026-06-07).
         //        After evaluate-events; writes only informational observer flags, gated by the
         //        default-off ENABLE_OBSERVER_THRESHOLD_FLAGS — calibration-flat (OSID-identical).
-        expect(stepNames.length).toBe(186);
+        // +1 from refresh-sarajevo-lifeline-cache (#271 stale-cache fix, 2026-06-07).
+        //        After supply resolution, before the first lifeline consumer; rewrites only
+        //        sarajevo_state.lifeline, gated by default-off ENABLE_SARAJEVO_LIFELINE —
+        //        byte-identical-inert on all flag-off baselines.
+        expect(stepNames.length).toBe(187);
     });
 });

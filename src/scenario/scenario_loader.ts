@@ -169,6 +169,13 @@ function normalizeSarajevoOverrides(raw: unknown): Scenario['sarajevo_overrides'
         'rbih_exhaustion_per_turn',
         'rs_exhaustion_per_turn',
         'integrity_floor',
+        // B7 lifeline tuning (#271): without these, a scenario's lifeline
+        // overrides were silently dropped here so the lifeline could not be
+        // configured. Only consulted when ENABLE_SARAJEVO_LIFELINE is ON.
+        'lifeline_base_throughput',
+        'lifeline_airlift_throughput',
+        'lifeline_tunnel_throughput',
+        'lifeline_severed_attrition_mult',
     ] as const;
     for (const field of fields) {
         const value = o[field];
