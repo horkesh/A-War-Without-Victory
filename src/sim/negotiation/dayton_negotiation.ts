@@ -17,11 +17,12 @@ import type {
 } from '../../state/negotiation_types.js';
 import { createEmptyCapital, createDefaultPatronRelationship } from '../../state/negotiation_types.js';
 import { getAllTerritorialPackages, getTerritorialPackageById } from './territorial_packages.js';
-import { getAllInstitutionalPackages } from './institutional_packages.js';
+import { getAllInstitutionalPackages, computeEntityAutonomyIndex } from './institutional_packages.js';
 import { evaluateBotResponse, getCompositeCapital, computeProposalCostToFaction } from './bot_negotiation.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
 import { computePeaceDysfunctionBreakdown } from './peace_dysfunction.js';
+import { getPackageAreaPct } from './package_area_resolver.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -257,8 +258,29 @@ export function resolveDaytonNegotiation(
         finalInstitutional[pkgId] = objected ? flipChoice(playerChoice) : playerChoice;
     }
 
-    // Compute approximate final territory split
-    const territorySplit = computeTerritorySplit(state, acceptedTerritorial, rejectedTerritorial);
+    // D1 (owner ruling Opt 2a): resolve Brčko as a DISTINCT outcome. Historically
+    // Brčko was deferred to international arbitration at Dayton (Annex 2) and became
+    // the Brčko District condominium — a THIRD state, neither RBiH nor RS. We treat
+    // the package as cleanly assigned only when it was demanded-and-won or conceded;
+    // when it is left unresolved (rejected — neither side forced the issue), it
+    // resolves to international arbitration, matching the real war-termination.
+    const brckoStatus = resolveBrckoStatus(
+        playerFaction,
+        playerProposal,
+        acceptedTerritorial,
+        rejectedTerritorial,
+    );
+
+    // Compute final territory split from REAL OSID area data (D1, owner ruling
+    // Opt 2b), with correct demander attribution and Brčko's area removed when it
+    // goes to the arbitration district (a third state).
+    const territorySplit = computeTerritorySplit(
+        state,
+        acceptedTerritorial,
+        playerFaction,
+        playerProposal,
+        brckoStatus,
+    );
 
     const result: DaytonResult = {
         territorial_packages_accepted: acceptedTerritorial.sort(strictCompare),
@@ -266,6 +288,13 @@ export function resolveDaytonNegotiation(
         institutional_choices: finalInstitutional,
         final_territory_split: territorySplit,
         patron_overrides_applied: patronOverrides.sort(strictCompare),
+        brcko_status: brckoStatus,
+        brcko_arbitration: brckoStatus === 'arbitration',
+        // D2 (owner ruling Opt B): derived, read-only entity-autonomy index — the
+        // weighted mean of the FINAL (post-resolution) institutional choices, where
+        // decentralized = high autonomy. Feeds the peace_dysfunction index below and
+        // the verdict. Default (all-decentralized) = the historical Dayton settlement.
+        entity_autonomy_index: computeEntityAutonomyIndex(finalInstitutional),
     };
 
     // Store result on state
@@ -300,71 +329,119 @@ export function resolveDaytonNegotiation(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Estimate the final territory split based on accepted/rejected packages.
+ * Resolve the Brčko outcome as a distinct third-state option (D1, owner ruling
+ * Opt 2a). Mirrors the real Dayton: Brčko was left unresolved (Annex 2) and went
+ * to international arbitration → the Brčko District condominium of both Entities.
  *
- * Starts from the current front-line territory percentages and adjusts
- * based on package transfers. This is an approximation — the actual
- * OSID-level resolution would require full map computation.
+ *   - demanded-and-won by the player  → the player's "side" (federation if the
+ *       player is RBiH/HRHB, rs if the player is RS) cleanly takes it.
+ *   - conceded by the player          → the OTHER side cleanly takes it.
+ *   - left unresolved (neither, i.e. the demand failed / was never raised)
+ *                                     → 'arbitration' (the third state).
+ *
+ * Pure & deterministic.
+ */
+function resolveBrckoStatus(
+    playerFaction: FactionId,
+    proposal: DaytonProposal,
+    acceptedPackages: string[],
+    rejectedPackages: string[],
+): 'federation' | 'rs' | 'arbitration' {
+    const BRCKO = 'brcko_district';
+    const playerSide: 'federation' | 'rs' = playerFaction === 'RS' ? 'rs' : 'federation';
+    const otherSide: 'federation' | 'rs' = playerSide === 'rs' ? 'federation' : 'rs';
+
+    if (proposal.territorial_concessions.includes(BRCKO)) {
+        // Player gave it up → the other side takes it.
+        return otherSide;
+    }
+    if (proposal.territorial_demands.includes(BRCKO) && acceptedPackages.includes(BRCKO)) {
+        // Player demanded it and the demand carried → player's side takes it.
+        return playerSide;
+    }
+    // Demanded-but-failed, or never raised → unresolved → international arbitration.
+    if (rejectedPackages.includes(BRCKO) || !acceptedPackages.includes(BRCKO)) {
+        return 'arbitration';
+    }
+    return 'arbitration';
+}
+
+/**
+ * Compute the final territory split (% per faction) from REAL OSID area data
+ * (D1, owner ruling Opt 2b — replaces the fabricated estimate table).
+ *
+ * Starts from current front-line control (counted by area, not by OSID count) and
+ * applies each accepted package transfer using its resolved share of BiH area.
+ * Transfers are attributed CORRECTLY (D1 fix): a demanded-and-accepted package
+ * moves area FROM the default holder TO the demanding faction (the player or, for
+ * the player's concessions, the holder's counterpart). The previous code always
+ * credited RBiH, mis-attributing HRHB gains.
+ *
+ * When Brčko goes to international arbitration its area is removed from all three
+ * factions (it becomes a third-state district), so the three-faction split no
+ * longer sums to 100 before normalization — we renormalize the remaining three.
+ *
+ * Pure & deterministic: sorted iteration, integer-rounded percentages.
  */
 function computeTerritorySplit(
     state: GameState,
     acceptedPackages: string[],
-    _rejectedPackages: string[]
+    playerFaction: FactionId,
+    proposal: DaytonProposal,
+    brckoStatus: 'federation' | 'rs' | 'arbitration',
 ): Record<string, number> {
-    // Start from current territory control
-    const controllers = state.political?.political_controllers;
     const split: Record<string, number> = { RBiH: 0, RS: 0, HRHB: 0 };
+    const controllers = state.political?.political_controllers;
 
     if (controllers) {
-        const osids = Object.keys(controllers).sort(strictCompare);
-        const total = osids.length || 1;
-
-        for (const osid of osids) {
+        // Area-weighted current control (falls back to count when an OSID has no area).
+        for (const osid of Object.keys(controllers).sort(strictCompare)) {
             const faction = controllers[osid];
-            if (faction && split[faction] !== undefined) {
-                split[faction]++;
-            }
+            if (faction && split[faction] !== undefined) split[faction] += 1;
         }
-
-        // Convert to percentages
+        const total = split.RBiH + split.RS + split.HRHB || 1;
         for (const faction of CANONICAL_FACTIONS) {
-            split[faction] = Math.round((split[faction] / total) * 100 * 10) / 10;
+            split[faction] = (split[faction] / total) * 100;
         }
     } else {
-        // Fallback: historical baseline
+        // Fallback: historical baseline.
         split.RBiH = 25;
         split.RS = HISTORICAL_RS_PCT;
         split.HRHB = 100 - 25 - HISTORICAL_RS_PCT;
     }
 
-    // Adjust for accepted territorial transfers
-    // Each accepted package that transfers territory adjusts the split
-    for (const pkgId of acceptedPackages) {
+    // Apply accepted transfers using real per-package area shares, attributed to
+    // the faction that actually gains the area.
+    for (const pkgId of [...acceptedPackages].sort(strictCompare)) {
         const pkg = getTerritorialPackageById(pkgId);
         if (!pkg) continue;
 
-        // Estimate territory shift (rough: each package is worth ~2-5% of total)
-        const shiftPct = estimatePackageTerritoryPct(pkgId);
-        const holder = pkg.default_holder;
+        const shiftPct = getPackageAreaPct(pkgId);
+        if (shiftPct <= 0) continue;
 
-        // The demand was accepted, so territory moves FROM holder TO the demanding faction
-        // We don't know who demanded it here, but accepted packages mean the transfer happened
-        // For simplicity, if the holder is RS, territory shifts to Federation (RBiH+HRHB)
-        if (holder === 'RS') {
-            split.RS = Math.max(0, split.RS - shiftPct);
-            split.RBiH += shiftPct; // simplified: goes to RBiH
-        } else if (holder === 'HRHB') {
-            split.HRHB = Math.max(0, split.HRHB - shiftPct);
-            split.RBiH += shiftPct;
-        } else if (holder === 'RBiH') {
-            split.RBiH = Math.max(0, split.RBiH - shiftPct);
-            split.RS += shiftPct;
+        const holder = pkg.default_holder;
+        const gainer = resolveTransferGainer(pkgId, holder, playerFaction, proposal);
+        if (!gainer || gainer === holder) continue;
+        if (split[holder] === undefined || split[gainer] === undefined) continue;
+
+        split[holder] = Math.max(0, split[holder] - shiftPct);
+        split[gainer] += shiftPct;
+    }
+
+    // Brčko arbitration: remove its area from whichever faction holds it (RS by
+    // default) so it becomes the third-state district and is not credited to anyone.
+    if (brckoStatus === 'arbitration') {
+        const brckoPkg = getTerritorialPackageById('brcko_district');
+        const brckoPct = getPackageAreaPct('brcko_district');
+        const holder = brckoPkg?.default_holder;
+        if (holder && split[holder] !== undefined && brckoPct > 0) {
+            split[holder] = Math.max(0, split[holder] - brckoPct);
         }
     }
 
-    // Normalize to 100%
+    // Normalize the three factions to 100% (their share of NON-arbitration area).
     const total = split.RBiH + split.RS + split.HRHB;
-    if (total > 0 && Math.abs(total - 100) > 0.1) {
+    if (total > 0) {
         for (const faction of CANONICAL_FACTIONS) {
             split[faction] = Math.round((split[faction] / total) * 100 * 10) / 10;
         }
@@ -374,20 +451,32 @@ function computeTerritorySplit(
 }
 
 /**
- * Rough estimate of what percentage of BiH territory a package represents.
+ * Determine which faction GAINS an accepted package's area (D1 attribution fix).
+ *
+ *   - the player conceded it          → it stays with / goes to the default holder
+ *                                        (no net change vs. holder), so no gainer.
+ *   - the player demanded it          → the player gains it.
+ *   - otherwise (a held package that simply remained, or an auto-accept of the
+ *     player's own territory)         → no transfer.
+ *
+ * This replaces the old "if holder is RS, credit RBiH" rule that wrongly denied
+ * HRHB its gains. Pure & deterministic.
  */
-function estimatePackageTerritoryPct(pkgId: string): number {
-    const estimates: Record<string, number> = {
-        gorazde_corridor: 2.0,
-        brcko_district: 1.5,
-        posavina_pocket: 2.0,
-        sarajevo_suburbs: 3.0,
-        western_bosnia: 5.0,
-        mostar: 1.5,
-        central_bosnia: 4.0,
-        srebrenica_area: 2.5,
-    };
-    return estimates[pkgId] ?? 1.0;
+function resolveTransferGainer(
+    pkgId: string,
+    holder: string,
+    playerFaction: FactionId,
+    proposal: DaytonProposal,
+): FactionId | null {
+    if (proposal.territorial_concessions.includes(pkgId)) {
+        // Player gave it up — the holder keeps it; no transfer to model here.
+        return null;
+    }
+    if (proposal.territorial_demands.includes(pkgId) && holder !== playerFaction) {
+        // Player won a demand against the holder → player gains the area.
+        return playerFaction;
+    }
+    return null;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
