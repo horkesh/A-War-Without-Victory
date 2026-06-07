@@ -19,6 +19,14 @@ import { createEmptyCapital, createDefaultPatronRelationship } from '../../state
 import { getAllTerritorialPackages, getTerritorialPackageById } from './territorial_packages.js';
 import { getAllInstitutionalPackages, computeEntityAutonomyIndex } from './institutional_packages.js';
 import { evaluateBotResponse, getCompositeCapital, computeProposalCostToFaction } from './bot_negotiation.js';
+import {
+    finalCompetencyCost,
+    finalConstitutionalCost,
+    finalReturnJusticeCost,
+    getDialDeclarationCost,
+} from './dayton_dial_cost.js';
+import type { CompetencyOwner } from './competency_packages.js';
+import type { CompetencyOwnerChoice, EntityAutonomySetting } from '../../state/negotiation_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
 import { computePeaceDysfunctionBreakdown } from './peace_dysfunction.js';
@@ -282,6 +290,15 @@ export function resolveDaytonNegotiation(
         brckoStatus,
     );
 
+    // ── Institutional-architecture expansion (Phase 2): resolve + PERSIST the new
+    //    Dim-2/3/4/5 dimensions onto the result so the dysfunction index/flags + the
+    //    verdict cap actually SEE the player's deviations. At the historical default
+    //    (absent fields) these resolve to the canonical baseline (dayton-historical
+    //    dial, empty allocations) so the all-default settlement is BYTE-IDENTICAL:
+    //    an empty competency map leaves the autonomy reading on the legacy D2 index,
+    //    empty constitutional choices read as the historical maximal-gridlock=100.
+    const finalDimensions = resolveInstitutionalDimensions(neg, playerProposal, botFactions, patronOverrides);
+
     const result: DaytonResult = {
         territorial_packages_accepted: acceptedTerritorial.sort(strictCompare),
         territorial_packages_rejected: rejectedTerritorial.sort(strictCompare),
@@ -295,6 +312,9 @@ export function resolveDaytonNegotiation(
         // decentralized = high autonomy. Feeds the peace_dysfunction index below and
         // the verdict. Default (all-decentralized) = the historical Dayton settlement.
         entity_autonomy_index: computeEntityAutonomyIndex(finalInstitutional),
+        // Phase 2 verdict feed — the signed Dim-2/3/4/5 dimensions (omitted entirely
+        // at the historical default to keep the result shape byte-identical).
+        ...finalDimensions,
     };
 
     // Store result on state
@@ -514,6 +534,124 @@ function resolveOtherEntityFaction(holder: string): FactionId {
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers
 // ═══════════════════════════════════════════════════════════════════════════
+
+/** The signed Dim-2/3/4/5 dimensions to persist on the result (only when deviated). */
+interface ResolvedDimensions {
+    entity_autonomy?: EntityAutonomySetting;
+    competency_allocation?: Record<string, CompetencyOwnerChoice>;
+    constitutional_choices?: Record<string, string>;
+    return_justice?: Record<string, string>;
+}
+
+/** Patron-override threshold (mirrors the territorial/institutional ≥75 rule). */
+const PATRON_OVERRIDE_THRESHOLD = 75;
+
+/**
+ * Resolve + persist the Phase-2 institutional dimensions (Dim 2 dial, Dim 3
+ * competencies, Dim 4 constitutional, Dim 5 return/justice).
+ *
+ * For each deviating sub-choice we test whether ANY bot faction objects (its
+ * post-dial+ideological cost exceeds 30% of its composite capital). An objection is
+ * overridden when the objecting faction's patron authority is ≥75 (recorded as a
+ * `dial:<setting>:<faction>` / `competency:<id>:<faction>` / `constitutional:<id>:
+ * <faction>` / `return_justice:<id>:<faction>` patron-override entry, same convention
+ * as the shipped `institutional:<id>:<faction>`). An un-overridden objection drops
+ * the sub-choice back to its historical default (it never enters the signed result).
+ *
+ * BYTE-IDENTITY: at the historical default the proposal carries none of these fields,
+ * so every branch is skipped and an EMPTY object is returned — the result shape is
+ * unchanged. Pure aside from pushing override entries; deterministic (sorted).
+ */
+function resolveInstitutionalDimensions(
+    neg: NegotiationState,
+    proposal: DaytonProposal,
+    botFactions: FactionId[],
+    patronOverrides: string[],
+): ResolvedDimensions {
+    const out: ResolvedDimensions = {};
+
+    const capitalOf = (faction: string): number =>
+        neg.capital[faction]
+            ? getCompositeCapital(neg.capital[faction], faction, neg.strategic_dimensions)
+            : 0;
+    const patronForces = (faction: string): boolean =>
+        (neg.patron_relationships[faction]?.override_authority ?? 0) >= PATRON_OVERRIDE_THRESHOLD;
+
+    // Returns true if the sub-choice survives (no un-overridden objection). Records a
+    // patron override when an objection is forced through.
+    const survives = (cost: (botFaction: FactionId) => number, overrideKey: (botFaction: FactionId) => string): boolean => {
+        let survived = true;
+        for (const bot of [...botFactions].sort(strictCompare)) {
+            const c = cost(bot);
+            if (c <= 0) continue;
+            if (c > capitalOf(bot) * 0.3) {
+                if (patronForces(bot)) {
+                    patronOverrides.push(overrideKey(bot));
+                } else {
+                    survived = false;
+                }
+            }
+        }
+        return survived;
+    };
+
+    // DIMENSION 2 — the master dial.
+    const dial: EntityAutonomySetting = proposal.entity_autonomy ?? 'dayton-historical';
+    if (dial !== 'dayton-historical') {
+        const survived = survives(
+            bot => getDialDeclarationCost(dial, bot),
+            bot => `dial:${dial}:${bot}`,
+        );
+        if (survived) out.entity_autonomy = dial;
+    }
+
+    // DIMENSION 3 — competency allocation (each deviating competency independently).
+    if (proposal.competency_allocation) {
+        const kept: Record<string, CompetencyOwnerChoice> = {};
+        for (const compId of Object.keys(proposal.competency_allocation).sort(strictCompare)) {
+            const owner = proposal.competency_allocation[compId] as CompetencyOwner;
+            if (!owner) continue;
+            const survived = survives(
+                bot => finalCompetencyCost(compId, owner, bot, dial),
+                bot => `competency:${compId}:${bot}`,
+            );
+            if (survived) kept[compId] = owner;
+        }
+        if (Object.keys(kept).length > 0) out.competency_allocation = kept;
+    }
+
+    // DIMENSION 4 — constitutional choices.
+    if (proposal.constitutional_choices) {
+        const kept: Record<string, string> = {};
+        for (const slotId of Object.keys(proposal.constitutional_choices).sort(strictCompare)) {
+            const optionId = proposal.constitutional_choices[slotId];
+            if (!optionId) continue;
+            const survived = survives(
+                bot => finalConstitutionalCost(slotId, optionId, bot, dial),
+                bot => `constitutional:${slotId}:${bot}`,
+            );
+            if (survived) kept[slotId] = optionId;
+        }
+        if (Object.keys(kept).length > 0) out.constitutional_choices = kept;
+    }
+
+    // DIMENSION 5 — return/justice choices.
+    if (proposal.return_justice) {
+        const kept: Record<string, string> = {};
+        for (const slotId of Object.keys(proposal.return_justice).sort(strictCompare)) {
+            const optionId = proposal.return_justice[slotId];
+            if (!optionId) continue;
+            const survived = survives(
+                bot => finalReturnJusticeCost(slotId, optionId, bot, dial),
+                bot => `return_justice:${slotId}:${bot}`,
+            );
+            if (survived) kept[slotId] = optionId;
+        }
+        if (Object.keys(kept).length > 0) out.return_justice = kept;
+    }
+
+    return out;
+}
 
 function ensureNegotiationState(state: GameState): void {
     if (!state.military.negotiation) {
