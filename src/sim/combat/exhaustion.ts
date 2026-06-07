@@ -14,6 +14,7 @@ import { hasLiveSectorFrontlineTruth } from './front_assignment.js';
 import { getSarajevoSiegeParams } from './sarajevo_siege_params.js';
 import { isSectorColdFront } from './sector_utils.js';
 import { getFactionLiveSupplyPressure } from './supply_condition.js';
+import { getActiveSarajevoLifeline } from '../../state/sarajevo_lifeline.js';
 
 /** Exhaustion per static front (Engine Invariants §6, §8). */
 const EXHAUSTION_PER_STATIC_FRONT = 2;
@@ -50,6 +51,8 @@ export function updateExhaustion(
     const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
     const legitimacyByFaction = getFactionLegitimacyAverages(state);
     const sarajevo = state.political.sarajevo_state;
+    // B7: shared lifeline scalar (undefined ⇒ flag OFF ⇒ identical pre-change path).
+    const sarajevoLifeline = getActiveSarajevoLifeline(state);
     const staticFrontCountByFaction = new Map<FactionId, number>();
     for (const fid of factionIds) {
         staticFrontCountByFaction.set(fid, 0);
@@ -88,7 +91,7 @@ export function updateExhaustion(
         const legitimacy = legitimacyByFaction[fid] ?? 0.5;
         const legitimacyMod = (1 - legitimacy) * EXHAUSTION_LEGITIMACY_MULTIPLIER;
         const sarajevoParams = getSarajevoSiegeParams(state);
-        const sarajevoExtra =
+        let sarajevoExtra =
             sarajevo?.siege_status === 'BESIEGED'
                 ? fid === 'RBiH'
                     ? sarajevoParams.rbih_exhaustion_per_turn
@@ -96,6 +99,12 @@ export function updateExhaustion(
                         ? sarajevoParams.rs_exhaustion_per_turn
                         : 0
                 : 0;
+        // B7: a working lifeline (flag ON) slows — never reverses (§8) — RBiH's
+        // besieged exhaustion growth. RS (besieger) extra is unchanged. No-op
+        // when lifeline is undefined (flag OFF) — byte-identical.
+        if (sarajevoLifeline && fid === 'RBiH' && sarajevoExtra > 0) {
+            sarajevoExtra = sarajevoExtra * (1 - 0.5 * sarajevoLifeline.throughput);
+        }
         const effectiveDelta = Math.min(MAX_DELTA_PER_TURN, delta * multiplier * (1 + externalMod + legitimacyMod) + sarajevoExtra);
         // Phase C: enclave resilience reduces exhaustion growth (only RBiH has enclaves)
         const enclaveResilience = getMaxEnclaveResilienceForFaction(state, fid);

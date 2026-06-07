@@ -15,6 +15,12 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
 import { ensureBrigadeHistory } from './brigade_history_recorder.js';
+import {
+    getActiveSarajevoLifeline,
+    isSarajevoCoreSiegeCounterKey,
+    lifelineAttritionMultiplier,
+} from '../../state/sarajevo_lifeline.js';
+import { getSarajevoSiegeParams } from './sarajevo_siege_params.js';
 
 // --- Constants ---
 
@@ -60,6 +66,10 @@ export function applySiegeBombardmentAttrition(state: GameState): SiegeAttrition
 
     const counters = state.military.siege_turn_counters;
     if (!counters) return report;
+
+    // B7: shared lifeline scalar (undefined ⇒ flag OFF ⇒ identical pre-change path).
+    const lifeline = getActiveSarajevoLifeline(state);
+    const lifelineSeveredMult = getSarajevoSiegeParams(state).lifeline_severed_attrition_mult;
 
     const formations = state.military.formations ?? {};
     const pools = (state.military.militia_pools ?? {}) as Record<string, MilitiaPoolState>;
@@ -125,6 +135,15 @@ export function applySiegeBombardmentAttrition(state: GameState): SiegeAttrition
         // Firepower ratio scales casualties (capped at 3x)
         const fpRatio = Math.min(3.0, Math.max(0.1, enemyFP / Math.max(1, ownFP)));
 
+        // B7: lifeline factor — only for the RBiH Sarajevo-core pocket and only
+        // when the lifeline is derived (flag ON). SEVERED ⇒ ≥1 (harder),
+        // OPEN ⇒ <1 (working tunnel/airlift damps shelling attrition).
+        // `1` everywhere else, so the flag-OFF path is byte-identical.
+        const lifelineFactor =
+            lifeline && isSarajevoCoreSiegeCounterKey(key)
+                ? lifelineAttritionMultiplier(lifeline, lifelineSeveredMult)
+                : 1;
+
         for (const fid of brigadesAtOsid) {
             const f = formations[fid];
             if (!f || f.status !== 'active') continue;
@@ -135,7 +154,7 @@ export function applySiegeBombardmentAttrition(state: GameState): SiegeAttrition
 
             // Calculate casualties
             const available = personnel - MIN_COMBAT_PERSONNEL;
-            const rawCas = Math.round(personnel * BASE_SIEGE_ATTRITION_RATE * escalation * fpRatio);
+            const rawCas = Math.round(personnel * BASE_SIEGE_ATTRITION_RATE * escalation * fpRatio * lifelineFactor);
             const casualties = Math.min(rawCas, available);
             if (casualties <= 0) continue;
 

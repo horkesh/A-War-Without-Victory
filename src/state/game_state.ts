@@ -1881,6 +1881,36 @@ export interface EnclaveState {
 
 export type SarajevoSiegeStatus = 'OPEN' | 'PARTIAL' | 'BESIEGED';
 
+/**
+ * B7 lifeline status band. Derived from airlift + tunnel availability.
+ *   OPEN      — lifeline carrying significant relief (working tunnel/airlift).
+ *   STRANGLED — partial lifeline (one channel, or degraded).
+ *   SEVERED   — no functioning lifeline (total blockade).
+ */
+export type SiegeLifelineStatus = 'OPEN' | 'STRANGLED' | 'SEVERED';
+
+/**
+ * B7 continuous siege-condition lifeline substrate (default-OFF, gated by
+ * `ENABLE_SARAJEVO_LIFELINE`). Derived per-turn from event truth (the
+ * Dobrinja–Butmir tunnel completion + UN airlift window), NOT calendar.
+ * OPTIONAL: absent on every flag-OFF run and on legacy saves (re-derived each
+ * turn, so safe to default `undefined`). When present, `throughput` (0..1) is
+ * the single shared scalar the four siege fragments read instead of
+ * self-deriving siege state.
+ */
+export interface SiegeLifelineState {
+    /** Derived band from `throughput`. */
+    status: SiegeLifelineStatus;
+    /** UN airlift (Operation Provide Promise) window active this turn. */
+    airlift_active: boolean;
+    /** Dobrinja–Butmir tunnel completed (event truth, post sarajevo_tunnel_completed_1993). */
+    tunnel_active: boolean;
+    /** 0..1 derived throughput multiplier — the consolidation scalar. */
+    throughput: number;
+    /** Turn this lifeline state was last derived. */
+    last_updated_turn: number;
+}
+
 export interface SarajevoState {
     mun_id: MunicipalityId;
     mun_ids?: MunicipalityId[];
@@ -1893,6 +1923,12 @@ export interface SarajevoState {
     international_focus: number;
     humanitarian_pressure: number; // 0..1
     last_updated_turn: number;
+    /**
+     * B7 (default-OFF): continuous lifeline substrate. Present only when
+     * `ENABLE_SARAJEVO_LIFELINE` is set; absent (and inert) otherwise, so
+     * flag-OFF runs and legacy saves remain byte-identical.
+     */
+    lifeline?: SiegeLifelineState;
 }
 
 // Phase 12C.2: Negotiated control overrides (treaty-based control assignments)

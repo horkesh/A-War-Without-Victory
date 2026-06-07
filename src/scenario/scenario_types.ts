@@ -35,6 +35,14 @@ export interface SarajevoSiegeOverrides {
     rbih_exhaustion_per_turn?: number;
     rs_exhaustion_per_turn?: number;
     integrity_floor?: number;
+    /**
+     * B7 lifeline tuning (default-OFF; only read when ENABLE_SARAJEVO_LIFELINE).
+     * Defaults preserve current behavior when the flag is OFF (throughput unread).
+     */
+    lifeline_base_throughput?: number;
+    lifeline_airlift_throughput?: number;
+    lifeline_tunnel_throughput?: number;
+    lifeline_severed_attrition_mult?: number;
 }
 
 export interface Scenario {
