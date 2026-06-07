@@ -196,6 +196,9 @@ describe('war-phase step ordering', () => {
         //        commander loop; DETERMINISM EARLY-OUT — performs ZERO state mutation when no
         //        corps has a pending_co_replacement (never set in headless scenarios), so the
         //        step is byte-identical-inert on all baselines.
-        expect(stepNames.length).toBe(185);
+        // +1 from observe-threshold-flags (observer-flag writer, decision #3, 2026-06-07).
+        //        After evaluate-events; writes only informational observer flags, gated by the
+        //        default-off ENABLE_OBSERVER_THRESHOLD_FLAGS — calibration-flat (OSID-identical).
+        expect(stepNames.length).toBe(186);
     });
 });

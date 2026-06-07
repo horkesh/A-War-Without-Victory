@@ -72,7 +72,8 @@ export const EQUIPMENT_QUALITY_COLLAPSE_THRESHOLD = 0.75;
 export const NEGOTIATION_CAPITAL_EXHAUSTED_THRESHOLD = 0;
 
 /** Canonical faction id list, iterated in `strictCompare` order. */
-const FACTION_IDS: readonly FactionId[] = (['HRHB', 'RBiH', 'RS'] as FactionId[])
+const FACTION_LITERALS: readonly FactionId[] = ['HRHB', 'RBiH', 'RS'];
+const FACTION_IDS: readonly FactionId[] = FACTION_LITERALS
     .slice()
     .sort(strictCompare);
 
