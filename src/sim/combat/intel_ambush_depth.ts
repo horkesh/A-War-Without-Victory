@@ -115,10 +115,12 @@ export function getAmbushDepthFactor(
     const frontAdjacent = (record.front_edge_count ?? 0) > 0;
 
     // Per-OSID scouting component: an established per-OSID estimate means the specific
-    // target has been individually observed (shallow). Falling back to the coarse sector
-    // confidence means the OSID itself is unscouted (deeper reach).
+    // target has been individually observed (shallow). A MISSING per-OSID estimate means
+    // the OSID itself is unscouted — by contract that target reads as blind (confidence 0,
+    // deepest reach), NOT as inheriting the coarser sector-level confidence. Falling back to
+    // record.confidence would let an unscouted OSID masquerade as well-scouted.
     const osidEntry = record.osid_confidence?.find(entry => entry.osid === targetOsid);
-    const targetConfidence = osidEntry?.confidence ?? record.confidence;
+    const targetConfidence = osidEntry ? osidEntry.confidence : 0;
 
     // Depth grows as (a) the target is non-front-adjacent and (b) the attacker's
     // confidence in the specific target falls short of what its recon reach implies.
