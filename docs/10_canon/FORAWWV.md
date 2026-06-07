@@ -148,11 +148,9 @@ The items below are flagged in `docs/PROJECT_LEDGER.md` as potential addenda. Th
 - H1.2.1: Provenance/maintenance rule for `data/source/municipality_political_controllers.json` (source location + regeneration process).
 - H1.2.2: Canonical location of 1990 winners input and regeneration workflow (DOCX/Excel source and extraction steps).
 - H1.2.3: Municipality alias normalization for post-1995 renames in remap pipelines.
-- H1.8: Consequence pathways require explicit operations/events; adjacency/activity alone is insufficient.
-- H1.9: Whether any autonomous degradation exists without player intent (baseline_ops is harness-only; not canon without validation).
 - H1.10: If exhaustion bounds/units are formalized, document the bounds and downstream assumptions.
-- H2.1: Mechanism attribution for control flips is underdetermined without explicit event logs.
-- H2.4: Agency (control flips, formation creation) requires explicit orders or harness directives.
+
+> **H1.8, H1.9, H2.1, H2.4 were PROMOTED to canon on 2026-06-07 (owner-authorized). They are no longer pending — see §IX.6.**
 
 ### IX.5 Ledger-flagged addenda (legacy, pending validation)
 Legacy ledger flags that should be reviewed against existing sections before promotion:
@@ -162,6 +160,14 @@ Legacy ledger flags that should be reviewed against existing sections before pro
 - Reference geometry sources: if SVG outlines are consistently “cleaner” and used operationally, define acceptable reference geometry sources.
 - Coordinate regimes: if fit checks show SVG outlines vs projected-space mismatch, canonize coordinate regime rules for reference geometries.
 - Municipality reference geometry: if unified geography muni features are incomplete, state that muni geometry is always fabric-derived.
+
+### IX.6 Promoted invariants (validated and promoted to canon 2026-06-07, owner-authorized)
+The following were promoted from §IX.4 by explicit owner ruling. They codify behavior already enforced in the engine and are now canon.
+
+- **H1.8 — Consequences require explicit cause.** Consequence pathways require explicit operations or events; adjacency or activity alone is insufficient to flip control or trigger a consequence. (Enforced in practice: enclave falls such as Srebrenica/Žepa occur only via explicit events, never via proximity or accumulated activity.)
+- **H2.1 — Control flips are attributable.** Every control flip must be attributable to an explicit cause — a recorded control event, a resolved operation outcome, or a harness directive. A control flip with no logged explicit cause is a defect, not a sanctioned outcome.
+- **H2.4 — Agency requires explicit orders.** Agency — control flips and formation creation — requires explicit orders, operations, events, or harness directives. No control flip or formation comes into being without an explicit triggering cause.
+- **H1.9 — No autonomous degradation (ruled).** The world does not decay autonomously absent player or AI intent. All change — control, formations, exhaustion, supply — traces to explicit operations, events, or directives; there is no background world-decay process. `baseline_ops` is a harness-only calibration scaffold, never a canonical autonomous-degradation mechanism.
 - Shared-edge cancellation: if insufficient due to coordinate jitter, require fabric-oracle segment classification follow-up.
 - Municipality borders: must never be produced by boolean union; derive by shared-edge cancellation over settlement fabric.
 - Derived artifacts freshness: “always run derivations before viewing” as a canonical workflow rule.

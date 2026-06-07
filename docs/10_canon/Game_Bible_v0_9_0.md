@@ -210,6 +210,10 @@ These boundaries are non-negotiable and define what this game is and what it is 
 
 **Scope (modding surface, ruling D4, 2026-06-05):** Scenario/event JSON and Lua data formats are internal and unsupported for 1.0 — they may change without notice, and no formal editor or Steam Workshop ships with 1.0. Mods never bypass the §22 sensitive-history gate. A formal editor / Workshop is deferred post-1.0 (v1.7 candidate). See `docs/40_reports/design/20260605_D4_MODDING_SURFACE_DECISION.md`.
 
+**Scope (multiplayer, ruling D5, 2026-06-07):** 1.0 is single-player only. Hot-seat and network multiplayer are explicitly deferred to **post-2.0** — network play in a deterministic asymmetric-information sim is a 2.0+ architecture project (per-faction fog/intel hiding + save-format turn-handoff), out of scope for 1.0. No multiplayer scaffolding ships in 1.0. See `docs/40_reports/design/20260607_D5_MULTIPLAYER.md`.
+
+**Scope (play length, ruling D6, 2026-06-07):** 1.0 ships the single full **April-1992 campaign** (target session ~3–5 hours). Quick-battle / short scenarios and speed/auto-resolve controls are deferred to the post-1.0 **historical-scenario-starts** lane (April 1993/94/95), which is their natural home. 1.0 sets a turn-pacing/onboarding expectation via the existing tutorial lane rather than a separate quick mode. See `docs/40_reports/design/20260607_D6_PLAY_LENGTH.md`.
+
 ## 19. v0.4 Design Additions (Systems 1-11)
 
 ### Negative-sum conflict reinforced
