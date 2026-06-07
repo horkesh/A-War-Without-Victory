@@ -3002,7 +3002,7 @@ export const enMessages = {
     'deskAuthority.caValue': '{current} / {max}',
     'deskAuthority.spentThisTurn': 'Spent this turn: {spent}',
     'deskAuthority.lowHint': 'Authority is low — some levers are out of reach.',
-    'deskAuthority.recovers': 'Recovers +{rate} each turn.',
+    'deskAuthority.recovers': 'Recovers up to +{rate}/turn (less under friction).',
     'deskAuthority.legendHeading': 'Lever costs',
     'deskAuthority.lever.authorOp': 'Author operation',
     'deskAuthority.lever.requestOp': 'Request operation',

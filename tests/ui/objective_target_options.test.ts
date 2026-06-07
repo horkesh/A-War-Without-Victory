@@ -19,6 +19,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { buildObjectiveTargetOptions } from '../../src/ui/map/utils/objectiveTargetOptions.js';
+import { buildControlLookup } from '../../src/ui/map/data/ControlLookup.js';
 import { strictCompare } from '../../src/state/validateGameState.js';
 
 describe('buildObjectiveTargetOptions — settlement/front picker contract', () => {
@@ -60,6 +61,43 @@ describe('buildObjectiveTargetOptions — settlement/front picker contract', () 
     expect(byOsid.get('op:foca:gornja_2')).toBe('Gornja (op:foca:gornja_2)');
     // A unique label is shown plain (no OSID noise).
     expect(byOsid.get('op:tuzla:tuzla_1')).toBe('Tuzla');
+  });
+
+  it('filters out S<census> compatibility-alias keys injected by buildControlLookup (#241)', () => {
+    // buildControlLookup mirrors every `mun:census` control key into a bare
+    // `S<census>` compatibility alias. Those aliases are colon-free duplicates and
+    // must never surface as bogus picker rows (e.g. a phantom "Sbanja_luka").
+    const control = buildControlLookup({
+      '10014:banja_luka': 'RS',
+      '10002:tuzla': 'RBiH',
+    });
+    // Sanity: the alias keys really are present in the lookup the picker consumes.
+    expect(Object.keys(control)).toContain('Sbanja_luka');
+    expect(Object.keys(control)).toContain('Stuzla');
+
+    const options = buildObjectiveTargetOptions(control, {
+      '10014:banja_luka': 'Banja Luka',
+      '10002:tuzla': 'Tuzla',
+    });
+    const osids = options.map((o) => o.osid);
+    // Only the canonical OSID-set keys survive — never the S-prefixed aliases.
+    expect(osids).toContain('10014:banja_luka');
+    expect(osids).toContain('10002:tuzla');
+    expect(osids).not.toContain('Sbanja_luka');
+    expect(osids).not.toContain('Stuzla');
+    expect(osids.some((id) => id.startsWith('S'))).toBe(false);
+    expect(options).toHaveLength(2);
+  });
+
+  it('preserves a legitimate S-prefixed control key when the display-name map knows it', () => {
+    // Some saves carry S-prefixed control keys directly (dual key formats). Such a
+    // key is canonical when the OSID-set (display-name map) independently lists it,
+    // so it must be kept even though it lacks a ':'.
+    const options = buildObjectiveTargetOptions(
+      { 'S100013': 'RS' },
+      { 'S100013': 'Doboj' },
+    );
+    expect(options.map((o) => o.osid)).toEqual(['S100013']);
   });
 
   it('returns an empty list when no control/display state is loaded', () => {
