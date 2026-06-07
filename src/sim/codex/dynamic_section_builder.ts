@@ -379,6 +379,99 @@ function predNegotiationCapitalExhausted(state: GhostEntryStateView): boolean {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Wave 3 ghost-entry predicates
+// (LANE-NIGHTSHIFT-CODEX-CONTENT-EXPANSION-WAVE-3, content authored 2026-05-05;
+//  builder wiring 2026-06-07)
+//
+// Wave 3 authored 6 counterfactual/divergence ghost-entry bodies (EN + BCS)
+// under data/codex/ghost_entries/ but left them unwired. These predicates
+// connect that authored content to `buildGhostEntries`, mirroring the Wave 2
+// pattern exactly:
+//   - Each gates on a POSITIVE faction-agnostic observer flag (`*_through_turn`)
+//     written by an upstream observation lane (same contract as Wave 2's
+//     winter_held_through_turn / corridor_blocked_through_turn etc.). Until that
+//     lane lands the flag is unset, so the predicate is dormant (always false)
+//     and emission is byte-identical to the pre-wiring sim. No new state is
+//     written here.
+//   - Per-faction EXCLUSION guards substitute `state.meta.player_faction` so the
+//     predicates stay faction-agnostic.
+//   - All are Ring 2 narrative observations, AUDIT-ONLY, variant 'context'. None
+//     cross a §6 surface (rupture-flip, genocide-recording, atrocity reward
+//     framing). The recovery/discipline/containment framing never rewards
+//     atrocity; the authored bodies explicitly state they do not displace
+//     Tribunal findings.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// — Ghost 15: ceasefire_streak_held —
+//   The declared cessation held across the audit window without a violation
+//   being attributed to the player faction. Requires the upstream observer to
+//   set `ceasefire_held_through_turn` AND no ceasefire-violation attribution
+//   flag for the player faction. turn >= 80 observes a post-window streak.
+function predCeasefireStreakHeld(state: GhostEntryStateView, currentTurn: number): boolean {
+    if (currentTurn < 80) return false;
+    if (!flag(state, 'ceasefire_held_through_turn')) return false;
+    const faction = playerFaction(state);
+    return !flag(state, `ceasefire_violation_attributed_${faction}`);
+}
+
+// — Ghost 16: mediator_trust_sustained —
+//   The trust channel to the active mediation phase was not repudiated within
+//   the window. Requires `mediator_trust_held_through_turn` AND no
+//   mediator-denounced attribution for the player faction. turn >= 80.
+function predMediatorTrustSustained(state: GhostEntryStateView, currentTurn: number): boolean {
+    if (currentTurn < 80) return false;
+    if (!flag(state, 'mediator_trust_held_through_turn')) return false;
+    const faction = playerFaction(state);
+    return !flag(state, `mediator_denounced_${faction}`);
+}
+
+// — Ghost 17: rear_pocket_sustained —
+//   Rear-area discipline held: the observer streak flag is set AND the
+//   war_crimes_events counter on the player faction's negotiation capital
+//   remains at zero. Reuses the real war_crimes_events accumulator (the same
+//   counter cleansing_refused reads), so this is grounded on live substrate.
+//   turn >= 80.
+function predRearPocketSustained(state: GhostEntryStateView, currentTurn: number): boolean {
+    if (currentTurn < 80) return false;
+    if (!flag(state, 'rear_pocket_discipline_held_through_turn')) return false;
+    const faction = playerFaction(state);
+    const breakdown = state.military?.negotiation?.capital?.[faction];
+    const warCrimes = breakdown?.war_crimes_events ?? 0;
+    return warCrimes === 0;
+}
+
+// — Ghost 18: civilian_displacement_contained —
+//   The displacement-counter trajectory stayed below the canonical baseline by
+//   the audit turn. Requires `civilian_displacement_contained_through_turn` AND
+//   no mass-displacement attribution for the player faction. turn >= 80.
+function predCivilianDisplacementContained(state: GhostEntryStateView, currentTurn: number): boolean {
+    if (currentTurn < 80) return false;
+    if (!flag(state, 'civilian_displacement_contained_through_turn')) return false;
+    const faction = playerFaction(state);
+    return !flag(state, `mass_displacement_attributed_${faction}`);
+}
+
+// — Ghost 19: equipment_quality_recovered —
+//   Divergence note: equipment quality bent upward from the canonical baseline.
+//   Single-flag gate on `equipment_quality_recovered` (mirrors the
+//   equipment_quality_collapse single-flag predicate; the two are mutually
+//   exclusive by construction upstream).
+function predEquipmentQualityRecovered(state: GhostEntryStateView): boolean {
+    if (!flag(state, 'equipment_quality_recovered')) return false;
+    return !flag(state, 'equipment_quality_collapsed');
+}
+
+// — Ghost 20: negotiation_capital_recovered —
+//   Divergence note: negotiation capital bent upward against the historical
+//   one-way-drain baseline. Requires `negotiation_capital_recovered` AND NOT
+//   `negotiation_capital_exhausted` (mutually exclusive readings of the same
+//   ledger).
+function predNegotiationCapitalRecovered(state: GhostEntryStateView): boolean {
+    if (!flag(state, 'negotiation_capital_recovered')) return false;
+    return !flag(state, 'negotiation_capital_exhausted');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Ghost-entry registry — fixed declaration order, deterministic
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -520,6 +613,65 @@ const GHOST_ENTRIES: readonly GhostRegistryEntry[] = [
             'NOT dayton_signed_1995',
         ],
         predicate: predNegotiationCapitalExhausted,
+    },
+    // ─── Wave 3 entries (LANE-NIGHTSHIFT-CODEX-CONTENT-EXPANSION-WAVE-3) ──
+    {
+        ghost_id: 'ceasefire_streak_held',
+        path: 'data/codex/ghost_entries/ceasefire_streak_held.md',
+        variant: 'context',
+        conditional_on: [
+            'ceasefire_held_through_turn',
+            'NOT ceasefire_violation_attributed_<player>',
+            'turn>=80',
+        ],
+        predicate: predCeasefireStreakHeld,
+    },
+    {
+        ghost_id: 'mediator_trust_sustained',
+        path: 'data/codex/ghost_entries/mediator_trust_sustained.md',
+        variant: 'context',
+        conditional_on: [
+            'mediator_trust_held_through_turn',
+            'NOT mediator_denounced_<player>',
+            'turn>=80',
+        ],
+        predicate: predMediatorTrustSustained,
+    },
+    {
+        ghost_id: 'rear_pocket_sustained',
+        path: 'data/codex/ghost_entries/rear_pocket_sustained.md',
+        variant: 'context',
+        conditional_on: [
+            'rear_pocket_discipline_held_through_turn',
+            'war_crimes_events=0',
+            'turn>=80',
+        ],
+        predicate: predRearPocketSustained,
+    },
+    {
+        ghost_id: 'civilian_displacement_contained',
+        path: 'data/codex/ghost_entries/civilian_displacement_contained.md',
+        variant: 'context',
+        conditional_on: [
+            'civilian_displacement_contained_through_turn',
+            'NOT mass_displacement_attributed_<player>',
+            'turn>=80',
+        ],
+        predicate: predCivilianDisplacementContained,
+    },
+    {
+        ghost_id: 'equipment_quality_recovered',
+        path: 'data/codex/ghost_entries/equipment_quality_recovered.md',
+        variant: 'context',
+        conditional_on: ['equipment_quality_recovered', 'NOT equipment_quality_collapsed'],
+        predicate: predEquipmentQualityRecovered,
+    },
+    {
+        ghost_id: 'negotiation_capital_recovered',
+        path: 'data/codex/ghost_entries/negotiation_capital_recovered.md',
+        variant: 'context',
+        conditional_on: ['negotiation_capital_recovered', 'NOT negotiation_capital_exhausted'],
+        predicate: predNegotiationCapitalRecovered,
     },
 ];
 
