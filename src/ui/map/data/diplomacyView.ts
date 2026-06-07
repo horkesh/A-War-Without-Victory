@@ -360,6 +360,12 @@ export function buildDiplomacyView(state: unknown, playerFaction?: string | null
     const patronStance = actorFaction
         ? externalActors.find((actor) => actor.faction === actorFaction)
         : undefined;
+    // The player's own patron is surfaced separately as `patronStance`; it must not
+    // also appear under "Other Patrons". Filter the player faction's actor out of the
+    // returned external-actor list so the current patron is never duplicated (#124).
+    const otherActors = actorFaction
+        ? externalActors.filter((actor) => actor.faction !== actorFaction)
+        : externalActors;
     const activeProposals = buildActiveProposals(s);
     const pressureReasons = buildPressureReasons(s);
     const activeConsequences = buildConsequences(s);
@@ -379,7 +385,7 @@ export function buildDiplomacyView(state: unknown, playerFaction?: string | null
         patronConfidence,
         patronDefianceCuts,
         activeProposals,
-        externalActors,
+        externalActors: otherActors,
         pressureReasons,
         activeConsequences,
         negotiationTimeline,

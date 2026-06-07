@@ -3031,7 +3031,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'deskAuthority.caValue': '{current} / {max}',
     'deskAuthority.spentThisTurn': 'Potrošeno ovog poteza: {spent}',
     'deskAuthority.lowHint': 'Vlast je niska — neke poluge su van domašaja.',
-    'deskAuthority.recovers': 'Obnavlja se +{rate} svaki potez.',
+    'deskAuthority.recovers': 'Obnavlja se do +{rate}/potez (manje uz trenja).',
     'deskAuthority.legendHeading': 'Cijena poluga',
     'deskAuthority.lever.authorOp': 'Odobri operaciju',
     'deskAuthority.lever.requestOp': 'Zatraži operaciju',
