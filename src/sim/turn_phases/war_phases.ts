@@ -78,6 +78,7 @@ import { updateLossOfControlTrends } from '../../state/loss_of_control_trends.js
 import { calculateFactionProductionBonus, ensureProductionFacilities } from '../../state/production_facilities.js';
 import { computeSupplyReachability } from '../../state/supply_reachability.js';
 import { computeSupplyReachabilityOsid } from '../../state/supply_reachability_osid.js';
+import { buildContainDiagnostic } from '../combat/contain_diagnostic.js';
 import {
     deriveCorridors,
     deriveCorridorsOsid,
@@ -1111,6 +1112,14 @@ export const warPhases: NamedPhase[] = [
                 }
             }
             context.state.political.last_supply_state_by_osid = flatSupply;
+
+            // contain Lane 1 (byte-identical): per-turn enclave-containment
+            // diagnostic. PURE observation over osidReach + enclave defs —
+            // written ONLY to the per-turn report, NOT to state, and read by
+            // NO sim/combat/targeting path. Wired into nothing. Lane A/V will
+            // later consume the predicate for stance/suppression; Lane 1 only
+            // proves the predicate fires on the right pockets at the right turns.
+            context.report.contain_diagnostic = buildContainDiagnostic(context.state, osidReach);
         }
     },
     {

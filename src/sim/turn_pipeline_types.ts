@@ -61,6 +61,7 @@ import type { BotOrderDiagnosticsSnapshot } from '../scenario/combat_causality.j
 import type { CorpsAiReportEntry } from './combat/bot_corps_ai.js';
 import type { CohesionDriftReport } from './combat/cohesion_drift.js';
 import type { EnclaveResilienceReport } from './combat/enclave_resilience.js';
+import type { ContainDiagnosticReport } from './combat/contain_diagnostic.js';
 import type { EquipmentProgressionReport } from './combat/faction_progression.js';
 import type { FrontlineAttritionReport } from './combat/frontline_attrition.js';
 import type { SiegeAttritionReport } from './combat/siege_attrition.js';
@@ -232,6 +233,10 @@ export interface TurnReport {
     equipment_update?: { formations: number };
     equipment_progression?: EquipmentProgressionReport;
     enclave_resilience?: EnclaveResilienceReport;
+    /** contain Lane 1: per-turn enclave-containment diagnostic. Pure observation —
+     *  NOT read by any sim/combat/targeting path; feeds no stance or outcome.
+     *  Byte-identity gate. See contain_diagnostic.ts. */
+    contain_diagnostic?: ContainDiagnosticReport;
     supply_reserves?: SupplyReservesReport;
     siege_turn_counters?: SiegeTurnCounterReport;
     corps_ai_report?: CorpsAiReportEntry[];
