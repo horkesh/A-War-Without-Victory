@@ -805,6 +805,26 @@ export interface CorpsCommandState {
      * (one entry per applied replacement). Surfaced to the UI and consumed by any
      * follow-up consequence wiring. Optional — absent in headless scenarios. */
     co_replacement_record?: { relieved_officer_id: string; replacement_officer_id: string | null; turn: number }[];
+    /**
+     * Append-only log of faction-asymmetric COMMAND-LEVER CONSEQUENCES (Presidential
+     * Command Model §4) applied to this corps: the deferred political fallout of a
+     * REPLACE-CO that triggered an officer-corps revolt, or a FORCE-OP forced past a
+     * commander objection. Each entry carries the lever, the faction, the
+     * patron_confidence / internal_cohesion deltas applied, and (replace-CO only) whether
+     * a revolt fired. Structurally matches `CommandFrictionRecord`
+     * (sim/combat/command_lever_consequences.ts) — declared inline to avoid a state→sim
+     * import. Written ONLY by player-only apply steps (gated on pending_co_replacement /
+     * pending_op_directive.forced_over_objection) → absent in headless scenarios, so
+     * baselines stay byte-identical. Surfaced by the consequence-receipt read-model. */
+    command_friction_record?: {
+        lever: 'replace_co' | 'force_op';
+        faction: FactionId;
+        corps_id: string;
+        turn: number;
+        patron_confidence_delta: number;
+        cohesion_delta: number;
+        revolt: boolean;
+    }[];
 }
 
 /** Operational group activation order. */
