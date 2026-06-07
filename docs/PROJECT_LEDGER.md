@@ -19650,3 +19650,19 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Process lesson (banked to memory `feedback_188w_validate_combat_changes_before_merge`):** calibration-moving COMBAT/predictor/launch changes MUST validate at **188w before merge** — 40w + CI is a false-green; 188w is in no CI gate. Correction: the "618/29-30 188w baseline of record" is stale; ground-truth pre-P14 188w is **613/28** (`2669bd0eecce5013`); `op:zvornik:zvornik` + `brijesnica_donja_2` are pre-existing failures, not P14-introduced.
 
 **Also:** earlier #244 (Codex's command-route-cohesion UI) merged at owner direction to unblock warroom — which on inspection was already fully shipped (Presidential Command Surface design build-order 0–4 + §9 image cards + §10 front-visit + DeskAuthorityHeader; 95 command-surface tests green). 9 merged session worktrees pruned; 3 unrecognized worktrees + Codex's left untouched (zero-work-loss).
+
+---
+
+## [2026-06-07] Command-card faction art — full 33-asset set + faction-aware resolver
+
+**Type:** UI art + presentation wiring (branch `feat/command-card-faction-art`). No engine/state/sim/scenario touch; no `Math.random`/`Date.now`; calibration-irrelevant (presentation layer only).
+
+**Shipped:**
+- **33 command-card images** (11 per faction × RBiH/RS/HRHB) generated from the rev-2 prompt pack and placed in `src/ui/map/assets/command_cards/` — per faction: 6 category cards (1024×768) + 5 action cards (1280×720), cropped to exact dimensions and webp-encoded (q82). Supersedes the earlier shared desk-asset reuse for these ids.
+- **Faction-aware art resolver**: `resolveCommandCardOverride(id, faction?)` now prefers `command_cards/<id>_<faction>.webp`, then falls back to faction-agnostic `<id>.webp`, then the mapped shared desk asset. Threaded through `resolvePresidentialCommandArt` → `CommandCard` (`playerFaction` prop) and `resolveDirectiveActArt` → `DirectiveCard` (`gameState.player_faction`). Generic lookup uses exact-suffix match so it never collides with faction-suffixed files; backward compatible (no faction → prior behavior).
+- **Prompt pack rev 2** (`docs/40_reports/handovers/20260607_COMMAND_CARD_FACTION_PROMPT_PACK.md`): Category Identity System (distinct space/subject/camera/light per card); army insignia on organic objects only (folder emboss / brass desk-standard / pečat stamp / cap-badge — never wall-framed); RBiH+HRHB faction marker = flat wall-mounted coat-of-arms, no cloth flag (sidesteps the shield-cant/decal failure mode); RS keeps its plain tricolor; strengthened photographic-realism guard.
+- **+4 tests** in `tests/ui/directive_card_act_art.test.ts`: every category×faction and action×faction override resolves to its `command_cards/<id>_<faction>.webp`; unknown faction falls back to the desk asset; directive act art prefers the faction override.
+
+**Files:** `src/ui/map/data/presidentialCommandArt.ts`, `src/ui/map/components/warroom/CommandCard.tsx`, `src/ui/map/data/directiveActArt.ts`, `src/ui/map/components/army_hq/DirectiveCard.tsx`, `tests/ui/directive_card_act_art.test.ts`, 33× `src/ui/map/assets/command_cards/*.webp`, prompt-pack doc.
+
+**Verification:** focused UI vitest 26/26 green; `tsc --noEmit` exit 0; `desktop:map:build` exit 0 with all 33 webps hashed into `dist/tactical-map/assets/`.

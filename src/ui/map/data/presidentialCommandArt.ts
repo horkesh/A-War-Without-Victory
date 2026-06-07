@@ -47,8 +47,19 @@ function resolveGlobBySuffix(glob: Record<string, string>, suffix: string): stri
   return null;
 }
 
-/** Resolve a per-card override (`command_cards/<id>.webp`) if one exists. */
-export function resolveCommandCardOverride(id: string): string | null {
+/**
+ * Resolve a per-card override (`command_cards/<id>.webp`) if one exists.
+ *
+ * Faction-aware: when a faction is supplied, a faction-specific override
+ * (`command_cards/<id>_<faction>.webp`) wins; otherwise the faction-agnostic
+ * `<id>.webp` is used. The generic lookup uses an exact suffix match, so it never
+ * accidentally resolves a faction-suffixed file — the two namespaces stay separate.
+ */
+export function resolveCommandCardOverride(id: string, faction?: string | null): string | null {
+  if (faction) {
+    const factioned = resolveGlobBySuffix(COMMAND_CARD_OVERRIDE_ART, `/${id}_${faction}.webp`);
+    if (factioned) return factioned;
+  }
   return resolveGlobBySuffix(COMMAND_CARD_OVERRIDE_ART, `/${id}.webp`);
 }
 
@@ -66,9 +77,11 @@ export function resolveDeskAssetByBasename(basename: string): string | null {
 export function resolvePresidentialCommandArt(
   id: string,
   deskAssetMap: Readonly<Record<string, string>>,
+  faction?: string | null,
 ): string | null {
-  // 1. Per-id override always wins.
-  const override = resolveCommandCardOverride(id);
+  // 1. Per-id override always wins (faction-specific `<id>_<faction>.webp` first,
+  //    then the faction-agnostic `<id>.webp`).
+  const override = resolveCommandCardOverride(id, faction);
   if (override) return override;
   // 2. Shared desk asset for this id, if mapped.
   const deskBasename = deskAssetMap[id];

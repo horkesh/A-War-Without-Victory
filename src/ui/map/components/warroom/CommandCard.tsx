@@ -68,8 +68,8 @@ export const COMMAND_CARD_DESK_ASSET: Readonly<Record<string, string>> = {
  * (`command_cards/<id>.webp`) → mapped shared desk asset → null (caller renders
  * the faction-tinted placeholder).
  */
-export function resolveCommandCardArt(categoryId: string): string | null {
-  return resolvePresidentialCommandArt(categoryId, COMMAND_CARD_DESK_ASSET);
+export function resolveCommandCardArt(categoryId: string, faction?: string | null): string | null {
+  return resolvePresidentialCommandArt(categoryId, COMMAND_CARD_DESK_ASSET, faction);
 }
 
 /** Faction ink tint for the CSS fallback placeholder (RBiH green / RS red / HRHB blue). */
@@ -86,7 +86,7 @@ export interface CommandCardProps {
 }
 
 export function CommandCard({ category, playerFaction, onSelect }: CommandCardProps) {
-  const art = resolveCommandCardArt(category.id);
+  const art = resolveCommandCardArt(category.id, playerFaction);
   const tint = factionInkColor(playerFaction);
 
   return (
