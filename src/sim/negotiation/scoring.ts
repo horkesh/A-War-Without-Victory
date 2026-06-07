@@ -19,6 +19,7 @@ import type { GameState, FactionId } from '../../state/game_state.js';
 import type { NegotiationBreakdown, OutcomeClass } from '../../state/negotiation_types.js';
 import type { FactionVerdict, GameVerdict, DimensionGrade } from '../../state/negotiation_types.js';
 import { collectCondemnationFlags } from './rupture_consequences.js';
+import { computePeaceDysfunctionIndex, capOutcomeByPeaceDysfunction } from './peace_dysfunction.js';
 import { DIMENSION_WEIGHTS, computeNegotiatingCapital } from '../events/strategic_dimensions.js';
 import type { DimensionStore } from '../events/strategic_dimensions.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -659,7 +660,18 @@ export function computeFactionVerdict(
 
     // Collect condemnation flags from rupture consequences (Ring 2)
     const condemnationFlags = collectCondemnationFlags(state, faction);
-    const outcomeClass = classifyOutcome(faction, displayBreakdown, dimStore, grade, pyrrhicScore, condemnationFlags);
+    const baseOutcomeClass = classifyOutcome(faction, displayBreakdown, dimStore, grade, pyrrhicScore, condemnationFlags);
+
+    // Comprehensive Dayton D3 (2026-06-07): a high-dysfunction peace can never read
+    // as a clean settlement, regardless of territory. capOutcomeByPeaceDysfunction
+    // pulls a clean-win class (strategic_success / survival / negotiated_escape)
+    // down to hollow_victory when the index crosses the threshold; it never improves
+    // an outcome. Pure read of the frozen Dayton result. EMERGENT-GATED: the index
+    // is null in historical/unset mode (and for non-Dayton endings), so this is a
+    // no-op there and the historical baselines stay byte-identical. Mirrors the
+    // existing condemnation-flag cap inside classifyOutcome.
+    const dysfunctionIndex = computePeaceDysfunctionIndex(state);
+    const outcomeClass = capOutcomeByPeaceDysfunction(baseOutcomeClass, dysfunctionIndex);
 
     return {
         faction,
@@ -709,6 +721,13 @@ export function computeFullVerdict(state: GameState): GameVerdict {
         factionVerdicts[faction] = computeFactionVerdict(state, faction);
     }
 
+    // D2/D3 (2026-06-07): surface the settlement-level autonomy + dysfunction
+    // metrics at the top of the verdict for display. The dysfunction index is the
+    // live (emergent-gated) computation — null in historical/unset mode and for
+    // non-Dayton endings, so non-emergent verdicts carry undefined (back-compat).
+    const daytonResult = neg?.dayton_result;
+    const dysfunctionIndex = computePeaceDysfunctionIndex(state);
+
     return {
         outcome_type: outcomeType,
         outcome_label: outcomeLabel,
@@ -716,7 +735,10 @@ export function computeFullVerdict(state: GameState): GameVerdict {
         date,
         duration_weeks: turn,
         faction_verdicts: factionVerdicts,
-        dayton_result: neg?.dayton_result,
+        dayton_result: daytonResult,
+        entity_autonomy_index: daytonResult?.entity_autonomy_index,
+        peace_dysfunction_index: dysfunctionIndex ?? daytonResult?.peace_dysfunction_index,
+        peace_dysfunction_flags: daytonResult?.peace_dysfunction_flags,
     };
 }
 

@@ -36,6 +36,7 @@ import type { GameState, EndgameSnapshot } from '../../state/game_state.js';
 import { computeFullVerdict } from '../negotiation/scoring.js';
 import { buildCostLedger } from './cost_ledger.js';
 import { compareToHistorical } from './endgame_comparison.js';
+import { computePeaceDysfunctionBreakdown } from '../negotiation/peace_dysfunction.js';
 import historicalBaseline from '../../../data/reference/historical_baseline.json';
 
 /**
@@ -68,11 +69,19 @@ export function freezeEndgameSnapshot(state: GameState): void {
         ))
         : undefined;
 
+    // Comprehensive Dayton D3 (2026-06-07): freeze the peace_dysfunction_index +
+    // breakdown so the keystone metric survives save/load round-trip even if
+    // post-Dayton bot drift mutates live state. Returns null for non-Dayton endings
+    // and in historical/unset mode (emergent-gated → baselines byte-identical).
+    const peaceDysfunction = tryDerive(() => computePeaceDysfunctionBreakdown(state)) ?? undefined;
+
     meta.endgame_snapshot = {
         frozen_turn: typeof meta.turn === 'number' ? meta.turn : 0,
         outcome: typeof meta.outcome === 'string' ? meta.outcome : '',
         verdict,
         cost_ledger: costLedger,
         historical_comparison: historicalComparison,
+        peace_dysfunction_index: peaceDysfunction ? peaceDysfunction.index : undefined,
+        peace_dysfunction: peaceDysfunction,
     };
 }

@@ -122,3 +122,60 @@ export function getInstitutionalCost(
         return 0; // RS benefits
     }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Entity Autonomy Index (D2, owner ruling Opt B)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Derived, read-only entity-autonomy index (0-100): the weighted mean of the 6
+ * granular institutional choices, where a *decentralized* choice means more entity
+ * autonomy. 100 = every dimension decentralized = the historical Dayton default
+ * (a residual-powers-to-the-Entities, highly-decentralized constitution). 0 = a
+ * fully centralized (unitary) state.
+ *
+ * Per-dimension weights reflect how much each competency drives real entity
+ * sovereignty (defense/economy/police weigh most; education least). Weights sum to
+ * 1.0. No new authored content — this is a pure derivation over the existing 6
+ * choices, exposed for display and as a verdict / peace-dysfunction input.
+ *
+ * DEFAULT: an unspecified or missing dimension is treated as decentralized (the
+ * historical Dayton default), so an empty/partial choice map reads as maximally
+ * autonomous — matching how dayton_negotiation defaults unmade choices.
+ *
+ * Pure & deterministic: sorted iteration via strictCompare, integer-rounded output.
+ */
+const AUTONOMY_DIMENSION_WEIGHTS: Readonly<Record<string, number>> = Object.freeze({
+    military: 0.25,
+    economy: 0.20,
+    police: 0.18,
+    judiciary: 0.15,
+    presidency: 0.12,
+    education: 0.10,
+});
+
+export function computeEntityAutonomyIndex(
+    institutionalChoices: Record<string, 'centralized' | 'decentralized'>,
+): number {
+    let weighted = 0;
+    let totalWeight = 0;
+    // Iterate the canonical package set (sorted) so the result is independent of
+    // input key order and of which keys the caller happened to populate.
+    const ids = INSTITUTIONAL_PACKAGES.map(p => p.id).slice().sort(strictCompareLocal);
+    for (const id of ids) {
+        const weight = AUTONOMY_DIMENSION_WEIGHTS[id] ?? 0;
+        if (weight <= 0) continue;
+        // Default unspecified dimensions to decentralized (historical Dayton default).
+        const choice = institutionalChoices?.[id] ?? 'decentralized';
+        const autonomy = choice === 'decentralized' ? 100 : 0;
+        weighted += autonomy * weight;
+        totalWeight += weight;
+    }
+    if (totalWeight <= 0) return 100;
+    return Math.round((weighted / totalWeight) * 10) / 10;
+}
+
+/** Local stable string comparator (avoids a cross-module import cycle). */
+function strictCompareLocal(a: string, b: string): number {
+    return a < b ? -1 : a > b ? 1 : 0;
+}
