@@ -2808,7 +2808,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
               );
 
         let endDiagnosticsStart = timingStart(emitTimingJson);
-        const anomalyReports: AnomalyReport[] = runAnomalyDetection(state);
+        // Pass the absolute war-week anchor (apr1992 = 0, jan1993 = 39, …) so absolute-week-keyed
+        // anomaly suppressors resolve correctly for non-apr1992 starts. Threaded as an argument
+        // (not persisted to state.meta) so final_state_hash stays byte-identical.
+        const anomalyReports: AnomalyReport[] = runAnomalyDetection(state, scenario.scenario_start_week ?? 0);
 
         let breachDiagnostic: { max_abs_pressure: number; breach_count_last_turn: number } | undefined;
         if (postureAllPushAndApplyBreaches && state.military.front_pressure && typeof state.military.front_pressure === 'object') {

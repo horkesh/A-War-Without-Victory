@@ -125,6 +125,10 @@ function dirtyStoreState(): void {
             nextActions: { actionableCount: 0, blockingCount: 0, opportunityCount: 0, reserveCount: 0, officerCount: 0, eventDecisionCount: 0, peaceCount: 0, topItems: [] },
         },
         turnAftermathOpen: true,
+        // #244: stale focused-record ids from the previous save.
+        focusedAftermathTurn: 5,
+        focusedOperationHistoryId: 'op_aar_prev',
+        focusedDecisionConsequenceId: 'decision_prev_save',
     });
 }
 
@@ -188,6 +192,12 @@ describe('gameStore.loadSave — post-load UI state reset', () => {
         // Turn-after-action reports belong to the prior save payload.
         expect(s.turnAftermath).toBeNull();
         expect(s.turnAftermathOpen).toBe(false);
+        // #244: stale focused-record ids must clear on save-load/replay reset.
+        // A stale focusedDecisionConsequenceId makes DecisionConsequenceRecordsPanel
+        // fall back to the unbounded (MAX_SAFE_INTEGER) ledger build.
+        expect(s.focusedAftermathTurn).toBeNull();
+        expect(s.focusedOperationHistoryId).toBeNull();
+        expect(s.focusedDecisionConsequenceId).toBeNull();
     });
 
     it('resets openingBriefDismissed after first loading a save', async () => {

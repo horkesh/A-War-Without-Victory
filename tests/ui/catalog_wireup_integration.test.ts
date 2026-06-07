@@ -160,10 +160,11 @@ describe('Phase H Packet 7 — Catalog Wire-Up Integration', () => {
     });
 
     it('CodexPanel renders Unlock State section when supplied catalog + state', () => {
-        // The Unlock State block is a developer-only diagnostic gated behind
-        // the `devMode` store flag, so enable DEV mode before asserting it
-        // renders (player default hides it — covered in the dedicated unit suite).
-        useGameStore.setState({ devMode: true });
+        // The Unlock State block is a developer-only diagnostic gated behind the
+        // dedicated `diagMode` store flag (#130 — separate from generic devMode so
+        // dev:map never leaks raw IDs), so enable DIAG mode before asserting it
+        // renders (player + dev:map default hides it — covered in the dedicated unit suite).
+        useGameStore.setState({ diagMode: true });
         const catalog = new Map<string, EventDefinition>([
             [FAKE_FOUNDATIONAL_EVENT.id, FAKE_FOUNDATIONAL_EVENT],
         ]);

@@ -93,10 +93,12 @@ describe('buildDiplomacyView', () => {
             'Dayton negotiation menu',
             'Vance-Owen Peace Plan',
         ]);
+        // #124: the player's own patron (Serbia, surfaced as patronStance) must NOT
+        // be duplicated under "Other Patrons" — only the non-player actors remain.
         expect(view.externalActors.map((actor) => actor.patronLabel)).toEqual([
             'International Community',
-            'Serbia',
         ]);
+        expect(view.externalActors.map((actor) => actor.faction)).not.toContain('RS');
         expect(view.pressureReasons.map((reason) => reason.label).slice(0, 2)).toEqual([
             'Sarajevo siege visibility',
             'Enclave humanitarian pressure',
@@ -109,6 +111,18 @@ describe('buildDiplomacyView', () => {
         expect(view.negotiationTimeline.map((entry) => entry.label)).toContain('International sanctions');
         expect(view.needleHints.map((hint) => hint.label)).toContain('Ease Serbia constraint');
         expect(view.needleHints.map((hint) => hint.label)).toContain('Reduce Sarajevo siege visibility');
+    });
+
+    it('does not duplicate the current patron under externalActors (#124)', () => {
+        const view = buildDiplomacyView(makeDiplomacyState(), 'RS');
+        // patronStance carries the player's own patron (Serbia / RS faction)...
+        expect(view.patronStance?.faction).toBe('RS');
+        // ...so the "Other Patrons" list must exclude that same actor.
+        const otherFactions = view.externalActors.map((actor) => actor.faction);
+        expect(otherFactions).not.toContain('RS');
+        expect(otherFactions).toEqual(['RBiH']);
+        // The non-player actors are still fully present.
+        expect(view.externalActors).toHaveLength(1);
     });
 
     it('routes raw faction slugs and snake_case event ids through player-safe resolvers in the timeline', () => {

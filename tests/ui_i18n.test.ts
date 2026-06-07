@@ -93,6 +93,22 @@ describe('UI localization substrate', () => {
         }
     });
 
+    it('softens the authority-recovery copy so it never promises an unconditional gain (#127)', () => {
+        // The engine applies max(0, RECOVERY - friction), so the per-turn gain is a
+        // ceiling, not a guarantee. The copy must say "up to" and acknowledge friction.
+        const en = t('deskAuthority.recovers', { rate: 2 }, 'en');
+        expect(en).toBe('Recovers up to +2/turn (less under friction).');
+        expect(en).toMatch(/up to/i);
+        expect(en).toMatch(/friction/i);
+        // Must not read as an unconditional "+N each turn" promise.
+        expect(en).not.toMatch(/\+2 each turn/);
+
+        const bcs = t('deskAuthority.recovers', { rate: 2 }, 'bcs');
+        expect(bcs).toBe('Obnavlja se do +2/potez (manje uz trenja).');
+        expect(bcs).toMatch(/do \+/);
+        expect(bcs).toMatch(/trenja/);
+    });
+
     it('keeps BCS copy free of common Serbian ekavian and Croatian lexical forms', () => {
         const bcsCopy = Object.values(bcsMessages).join('\n').toLowerCase();
         const forbiddenPatterns = [

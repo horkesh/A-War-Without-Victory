@@ -12,8 +12,18 @@ export function buildObjectiveTargetOptions(
   osidDisplayNames: Record<string, string> | null,
 ): ObjectiveTargetOption[] {
   const ids = new Set<string>();
-  for (const osid of Object.keys(controlBySettlement ?? {})) ids.add(osid);
-  for (const osid of Object.keys(osidDisplayNames ?? {})) ids.add(osid);
+  // `controlBySettlement` is the post-`buildControlLookup` map, which injects
+  // `S<census>` compatibility-alias keys alongside the canonical OSID-set keys.
+  // Those aliases are colon-free duplicates of a real `mun:census` entry and must
+  // not surface as bogus picker rows (e.g. a phantom "Sbanja_luka"). Canonical
+  // OSID-set keys always contain a ':'. We therefore keep a control key only when
+  // it is a canonical OSID (contains ':') OR it is independently known to the
+  // display-name map (the authoritative OSID-set), which never holds aliases.
+  const displayNameKeys = new Set(Object.keys(osidDisplayNames ?? {}));
+  for (const osid of Object.keys(controlBySettlement ?? {})) {
+    if (osid.includes(':') || displayNameKeys.has(osid)) ids.add(osid);
+  }
+  for (const osid of displayNameKeys) ids.add(osid);
 
   const options = [...ids].map((osid) => {
     const label = getOsidDisplayName(osid, osidDisplayNames);

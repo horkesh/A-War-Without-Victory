@@ -52,10 +52,20 @@ export function openArmyHQTab(state: ShellNavigationState, tab: ArmyHQTab): bool
 
 export function openArmyHQRecordsSubTab(state: ShellNavigationState, subTab: ArmyHQRecordsSubTab): boolean {
   const faction = getPlayerFaction(state);
-  if (!faction) return false;
-  state.setSelectedArmyId(faction);
+  // The War's Record (RECORDS tab) is read-only campaign history sourced entirely
+  // from loadedGameState — it is faction-agnostic. Observer / no-faction saves must
+  // still reach it (#122). When there is no player faction we leave selectedArmyId
+  // null; ArmyHQModal renders a records-only observer view in that case.
+  if (faction) {
+    state.setSelectedArmyId(faction);
+  }
   state.setArmyHQOpen(true);
   state.setArmyHQRecordsSubTab(subTab);
+  // Force the RECORDS tab for observers so the (faction-dependent) default tab
+  // does not leave the modal blank when no army is selected.
+  if (!faction) {
+    state.setArmyHQTab('records');
+  }
   return true;
 }
 
