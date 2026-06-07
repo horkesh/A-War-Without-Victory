@@ -222,6 +222,51 @@ describe('pinGarrisonToMustHoldFrontEdge', () => {
         expect(onMustHold).toEqual(['brig_a']); // lexicographically first, exactly one
     });
 
+    // Codex #279 — garrison double-use: a single idle brigade must satisfy at
+    // most ONE must-hold OSID per pass. The direct-move branch (dist<=1) used to
+    // leave no movement marker, so the same brigade could be pinned to multiple
+    // undefended must-hold OSIDs. With one idle brigade and two undefended
+    // adjacent must-hold OSIDs, exactly one is garrisoned by it; the other
+    // remains undefended (it needs a different brigade).
+    it('does not let one brigade satisfy two must-hold OSIDs (direct-move branch)', () => {
+        const SECOND = 'op:zvornik:second_hold'; // also adjacent to NEAR → dist 1
+        const ADJ2 = makeAdjacency([
+            [MUST_HOLD, NEAR],
+            [SECOND, NEAR],
+            [NEAR, FAR],
+        ]);
+        // Single idle brigade at NEAR (adjacent to both must-hold OSIDs).
+        const state = makeState(
+            { lone_brig: makeBrigade({ location_osid: NEAR }) },
+            {
+                mustHold: { [CORPS]: [MUST_HOLD, SECOND] },
+                controllers: {
+                    [MUST_HOLD]: 'RS',
+                    [SECOND]: 'RS',
+                    [NEAR]: 'RS',
+                    [FAR]: 'RS',
+                },
+            },
+        );
+        // Register SECOND in the sector territory so corps-boundary BFS resolves.
+        state.military.corps_front_sectors['sector:vrs_drina:0'].territory_osids = [
+            MUST_HOLD, SECOND, NEAR, FAR,
+        ];
+        distributeBrigadesToFront(state, NO_OP_SECTORS, ADJ2);
+
+        // The lone brigade lands on exactly ONE must-hold OSID — the
+        // strictCompare-first target, which is SECOND ('op:zvornik:second_hold'
+        // sorts before 'op:zvornik:zvornik') — and is NOT also given a movement
+        // order toward the other must-hold OSID (the pre-fix bug: the direct-move
+        // branch left no marker, so the same brigade got an order to MUST_HOLD).
+        expect(state.military.formations.lone_brig.location_osid).toBe(SECOND);
+        expect(state.military.brigade_movement_orders.lone_brig).toBeFalsy();
+        // The other must-hold OSID is left for a DIFFERENT brigade (undefended here).
+        const onMustHold = Object.values(state.military.formations)
+            .filter((f: any) => f.location_osid === MUST_HOLD);
+        expect(onMustHold).toHaveLength(0);
+    });
+
     it('GUARD 7: prefers the closest candidate, then highest personnel', () => {
         const state = makeState({
             far_big: makeBrigade({ location_osid: FAR, personnel: 5000 }),
