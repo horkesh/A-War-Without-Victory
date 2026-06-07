@@ -671,6 +671,12 @@ function pinGarrisonToMustHoldFrontEdge(
     const activeCounts = countActiveBrigadesByOsid(formations);
     const movementState = state.military.brigade_movement_state;
 
+    // Each brigade may satisfy at most ONE must-hold OSID per pass. The move-order
+    // branch is protected by the brigade_movement_orders filter below; the
+    // direct-move branch (dist≤1) relocates in place and leaves no movement order,
+    // so we track directly-pinned brigades here to prevent double-use.
+    const pinnedBrigades = new Set<string>();
+
     // Determine each corps's faction from its first own brigade (deterministic).
     const corpsFaction = (corpsId: string): FactionId | undefined => {
         let resolved: FactionId | undefined;
@@ -715,6 +721,7 @@ function pinGarrisonToMustHoldFrontEdge(
                 .filter((e) => (e.f.entrenchment_turns ?? 0) < ENTRENCHMENT_REDISTRIBUTION_THRESHOLD) // Guard 5
                 .filter((e) => movementState?.[e.bid]?.status !== 'in_transit')
                 .filter((e) => !state.military.brigade_movement_orders?.[e.bid])
+                .filter((e) => !pinnedBrigades.has(e.bid))                                 // one must-hold per brigade per pass
                 .filter((e) => e.f.location_osid !== target)
                 .map((e) => ({
                     bid: e.bid,
@@ -735,6 +742,10 @@ function pinGarrisonToMustHoldFrontEdge(
                 best.f.location_osid = target;
                 best.f.entrenchment_turns = 0;
                 activeCounts.set(target, (activeCounts.get(target) ?? 0) + 1);
+                // Consume this brigade so it cannot also satisfy a later must-hold
+                // OSID in this pass (the move-order branch is protected by the
+                // brigade_movement_orders filter; the direct-move branch is not).
+                pinnedBrigades.add(best.bid);
             } else {
                 if (!state.military.brigade_movement_orders) {
                     state.military.brigade_movement_orders = {};
