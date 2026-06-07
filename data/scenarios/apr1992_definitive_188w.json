@@ -70,6 +70,11 @@
   "init_alliance_rbih_hrhb": 0.75,
   "enable_rbih_hrhb_dynamics": true,
   "rbih_hrhb_war_earliest_week": 26,
+  "must_hold_osids_by_corps": {
+    "vrs_drina": [
+      "op:zvornik:zvornik"
+    ]
+  },
   "comms_override_by_corps": {
     "arbih_1st_corps": {
       "before_turn": 18,
