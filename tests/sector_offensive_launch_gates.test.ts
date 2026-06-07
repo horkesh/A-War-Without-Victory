@@ -129,6 +129,112 @@ describe('LANE-NIGHTSHIFT-A2 minimum launch force-ratio floor', () => {
     });
 });
 
+// ── Fall-1995 E-A5: offensive-ops suppression launch gate ───────────────────
+
+describe('E-A5 offensive-ops suppression launch gate', () => {
+    function makeE5Op(overrides: Partial<CorpsOperation>): CorpsOperation {
+        return {
+            name: 'Op Sana',
+            type: 'sector_attack',
+            phase: 'planning',
+            started_turn: 1,
+            phase_started_turn: 1,
+            participating_brigades: ['rbih_brigade_a'],
+            objectives: ['op:target:objective'],
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            preparation_sub_phase: 'ready',
+            preparation_turns_elapsed: 5,
+            preparation_max_turns: 5,
+            force_ratio_estimate: 0.9, // above launch floor — does not trip the A2 gate
+            ...overrides,
+        } as CorpsOperation;
+    }
+
+    function makeE5State(turn: number, op: CorpsOperation, suppressions: Array<{ faction: string; expires_turn: number; reason?: string }>): GameState {
+        const cmd: CorpsCommandState = {
+            command_span: 1,
+            subordinate_count: 1,
+            og_slots: 0,
+            active_ogs: [],
+            corps_exhaustion: 0,
+            stance: 'offensive',
+            active_operations: [op],
+        };
+        return {
+            schema_version: CURRENT_SCHEMA_VERSION,
+            meta: { turn, phase: 'war', seed: 'e-a5-test' } as any,
+            military: {
+                formations: {
+                    rbih_corps: {
+                        id: 'rbih_corps', faction: 'RBiH', name: '5th Corps', created_turn: 1,
+                        status: 'active', assignment: null, kind: 'corps',
+                    } as any,
+                    rbih_brigade_a: {
+                        id: 'rbih_brigade_a', faction: 'RBiH', name: 'Brigade A', created_turn: 1,
+                        status: 'active', assignment: null, kind: 'brigade', corps_id: 'rbih_corps',
+                        location_osid: 'op:target:approach', personnel: 1500,
+                    } as any,
+                },
+                front_segments: {},
+                front_posture: {},
+                front_posture_regions: {},
+                front_pressure: {},
+                militia_pools: {},
+                corps_command: { rbih_corps: cmd },
+                offensive_ops_suppressions: suppressions,
+            } as any,
+            political: {
+                political_controllers: {
+                    'op:target:objective': 'RS',
+                    'op:target:approach': 'RBiH',
+                },
+            } as any,
+        } as unknown as GameState;
+    }
+
+    it('T1 — active suppression for the launching faction records offensive_ops_suppressed', () => {
+        const op = makeE5Op({});
+        const state = makeE5State(182, op, [{ faction: 'RBiH', expires_turn: 188, reason: 'us_halts_federation_advance_1995' }]);
+        advanceSectorOffensives(state, null);
+        const result = state.military.corps_command?.rbih_corps?.active_operations?.[0];
+        expect(result?.phase).toBe('recovery');
+        expect(result?.recovery_reason).toBe('offensive_ops_suppressed');
+    });
+
+    it('T2 — force_launch bypasses the suppression (player "push for Banja Luka")', () => {
+        const op = makeE5Op({ force_launch: true });
+        const state = makeE5State(182, op, [{ faction: 'RBiH', expires_turn: 188, reason: 'us_halts_federation_advance_1995' }]);
+        advanceSectorOffensives(state, null);
+        const result = state.military.corps_command?.rbih_corps?.active_operations?.[0];
+        expect(result?.recovery_reason).not.toBe('offensive_ops_suppressed');
+    });
+
+    it('T3 — expired suppression does NOT trip the gate (no-op after window)', () => {
+        const op = makeE5Op({});
+        const state = makeE5State(190, op, [{ faction: 'RBiH', expires_turn: 188, reason: 'us_halts_federation_advance_1995' }]);
+        advanceSectorOffensives(state, null);
+        const result = state.military.corps_command?.rbih_corps?.active_operations?.[0];
+        expect(result?.recovery_reason).not.toBe('offensive_ops_suppressed');
+    });
+
+    it('T4 — suppression for a DIFFERENT faction does not affect this corps', () => {
+        const op = makeE5Op({});
+        const state = makeE5State(182, op, [{ faction: 'HRHB', expires_turn: 188, reason: 'us_halts_federation_advance_1995' }]);
+        advanceSectorOffensives(state, null);
+        const result = state.military.corps_command?.rbih_corps?.active_operations?.[0];
+        expect(result?.recovery_reason).not.toBe('offensive_ops_suppressed');
+    });
+
+    it('T5 — no suppression array (byte-identical default) does not trip the gate', () => {
+        const op = makeE5Op({});
+        const state = makeE5State(182, op, []);
+        advanceSectorOffensives(state, null);
+        const result = state.military.corps_command?.rbih_corps?.active_operations?.[0];
+        expect(result?.recovery_reason).not.toBe('offensive_ops_suppressed');
+    });
+});
+
 // ── LANE-2026-05-02-B1: planning_invalidated cooldown ───────────────────────
 
 describe('LANE-B1 planning_invalidated cooldown', () => {

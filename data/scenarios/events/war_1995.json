@@ -2035,12 +2035,14 @@
     "narrative": "Banja Luka is within reach. Federation forces have driven the VRS from a third of its territory in six weeks. But the phone rings from Washington. Holbrooke is blunt: take Banja Luka and you will have 200,000 Serb refugees, a humanitarian catastrophe, and no peace agreement. Zagreb backs down immediately. Sarajevo follows reluctantly. The front lines freeze. The 51/49 line that has defined every peace plan since July 1994 becomes reality not through negotiation, but through the calculated halt of a military advance.",
     "category": "diplomatic",
     "trigger": {
-      "turn_min": 182,
-      "turn_max": 184,
       "phase": "war",
       "requires_events": [
         "federation_ground_offensive_1995"
-      ]
+      ],
+      "faction_area_ratio": {
+        "faction": "RS",
+        "max_share": 0.51
+      }
     },
     "once": true,
     "requires_player_response": true,
@@ -2052,16 +2054,16 @@
     },
     "effects": [
       {
-        "kind": "aggression_modifier",
+        "kind": "offensive_ops_suppression",
         "faction": "RBiH",
-        "delta": -0.2,
-        "duration_turns": 12
+        "duration_turns": 6,
+        "reason": "us_halts_federation_advance_1995"
       },
       {
-        "kind": "aggression_modifier",
+        "kind": "offensive_ops_suppression",
         "faction": "HRHB",
-        "delta": -0.2,
-        "duration_turns": 12
+        "duration_turns": 6,
+        "reason": "us_halts_federation_advance_1995"
       }
     ],
     "response_options": [

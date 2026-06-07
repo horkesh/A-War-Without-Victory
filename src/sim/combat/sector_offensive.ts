@@ -93,6 +93,7 @@ import type { PreparationEvent } from '../turn_pipeline_types.js';
 import { checkLoanedArrivals, areLoanedBrigadesReady, cleanupDissolvedLoans } from './operation_reinforcement.js';
 import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_reinforcement_constants.js';
 import { hasActiveOperation, removeOperation } from './corps_operation_helpers.js';
+import { isFactionOffensiveOpsSuppressed } from '../events/active_modifiers.js';
 import { MIN_ATTACK_PERSONNEL, MAX_BRIGADE_PERSONNEL } from '../../state/formation_constants.js';
 import {
     allAxesTerminal,
@@ -1271,6 +1272,21 @@ export function advanceSectorOffensives(
                 && op.force_ratio_estimate < launchFloorForOp(op)
             ) {
                 beginRecovery(op, turn, 'defender_power_too_high', state);
+                continue;
+            }
+            // Fall-1995 E-A5: externally-imposed offensive-ops halt (the Holbrooke
+            // 51:49 freeze at Banja Luka, Oct 1995). When an event has pushed an
+            // active `offensive_ops_suppressions` entry for this faction, refuse to
+            // launch any new offensive op for the window — block it at the
+            // planning→execution transition before reconcile/staging. No-op
+            // (byte-identical) until such an entry exists. `op.force_launch` (the
+            // player's "push for Banja Luka" override) bypasses the halt.
+            // See `docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md` §3 E-A5.
+            if (
+                op.force_launch !== true
+                && isFactionOffensiveOpsSuppressed(state, faction, turn)
+            ) {
+                beginRecovery(op, turn, 'offensive_ops_suppressed', state);
                 continue;
             }
             const planningObjectiveState = reconcilePlanningObjectives(state, corpsId, op, faction, operationStaticAdjacency);

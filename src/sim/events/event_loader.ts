@@ -442,6 +442,19 @@ function validateEventRow(row: unknown, filename: string, rowIndex: number): voi
     if (hasOwn(row.trigger, 'condition')) {
         validateCondition(row.trigger.condition, 'trigger.condition', filename, rowIndex);
     }
+    if (hasOwn(row.trigger, 'faction_area_ratio')) {
+        const far = row.trigger.faction_area_ratio;
+        if (!isObject(far)) {
+            failRow(filename, rowIndex, 'trigger.faction_area_ratio must be a non-null object when present');
+        } else {
+            if (!isNonEmptyString(far.faction) || !VALID_EVENT_FACTION_SET.has(far.faction)) {
+                failRow(filename, rowIndex, `trigger.faction_area_ratio.faction must be a valid event faction: ${String(far.faction)}`);
+            }
+            if (typeof far.max_share !== 'number' || !Number.isFinite(far.max_share) || far.max_share < 0 || far.max_share > 1) {
+                failRow(filename, rowIndex, 'trigger.faction_area_ratio.max_share must be a finite number in [0, 1]');
+            }
+        }
+    }
 
     validateKindedObject(row.effect, 'effect', filename, rowIndex);
     if (hasOwn(row, 'effects')) {

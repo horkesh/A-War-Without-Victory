@@ -1,4 +1,24 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-07] feat(events): Fall-1995 E-A5 — 51:49 launch-halt consumer (wired, fires, ZERO OSID delta at current baseline)
+
+**Type:** Combat-launch-gate + event-trigger feature. 40w byte-identical. 188w hash moves (suppression state persisted) but **ZERO OSID-outcome change** — no calibration movement at the #278/main baseline.
+
+**Change (3 parts, per `docs/plans/2026-05-29-fall-1995-deferrals-ea5-ea6-eb1-plan.md` §3.1 + proposal §3 E-A5):**
+1. New `faction_area_ratio` event-trigger predicate (`EventTrigger.faction_area_ratio` + `factionAreaShare()` helper + `triggerMatches` branch in `src/sim/events/event_types.ts`; loader validation in `event_loader.ts`). Fires only when a faction's controlled-OSID area share ≤ `max_share`, computed from the SAME deterministic source calibration scoring uses (`getOsidAreas()` over `political_controllers`, sorted via strictCompare).
+2. Wired the pre-shipped reader `isFactionOffensiveOpsSuppressed` into the op-launch transition in `src/sim/combat/sector_offensive.ts` (guard before the planning→execution `reconcilePlanningObjectives`, adjacent to the force-ratio floor), with a `force_launch` bypass + new `beginRecovery(..., 'offensive_ops_suppressed')` reason (added to the `recovery_reason` union in `game_state.ts`).
+3. Edited the live event `us_halts_federation_advance_1995` (`data/scenarios/events/war_1995.json`): replaced the fixed `turn_min:182/turn_max:184` + soft `aggression_modifier −0.2` with a `faction_area_ratio` trigger (RS `max_share:0.51`) + `offensive_ops_suppression` effect on RBiH+HRHB, `duration_turns:6`. Player-response (comply/push_further) structure preserved; `push_further` = the in-fiction force-launch.
+
+**Calibration (dual-horizon):**
+- **40w `bb0462f4d37dab2d` BYTE-IDENTICAL** (clean pre == post). Event is turn-≥182-gated → outside the 40w window. Anchors 30/30, benchmarks 6/6.
+- **188w**: pre `deab3c26f13c3e17` → post `e09326c3a1757914`. **OSID 616/712 (86.5%) UNCHANGED** — mismatch sets byte-identical pre vs post (verified by diff). Anchors **28/30** (same two pre-existing fails `op:lukavac:brijesnica_donja_2` + `op:zvornik:zvornik`; NO new break). Benchmarks 6/6. Srebrenica/Žepa still fall. Per-faction totals identical (RS 325/+10, RBiH 281/−9, HRHB 106/−1). Hash moves ONLY because the suppression entries persist in `state.military.offensive_ops_suppressions`.
+- **Event verified firing**: `us_halts_federation_advance_1995` in `fired_event_ids`; suppression entries persisted (RBiH+HRHB, `expires_turn:193`); **7 `offensive_ops_suppressed` op-launch recoveries** at weeks ~186-187.
+
+**Honest finding — INERT at this baseline:** RS area-share only drops to ≤0.51 at week ~186 in-sim, so the halt fires in the final 1-2 weeks of the 188w run — too late for the suppressed launches to have changed the t188 endpoint. E-A5 was specced to CAP RBiH over-capture past the Banja Luka approach, but at the current baseline the sim's Krajina problem is the OPPOSITE (RS *over*-holds Krajina: KRAJINA RS_sim=80 vs painted 64; the only RBiH-over-into-RS is skender_vakuf×3, which a launch-suppression cannot reverse). The change is correct, safe, deterministic, and fully tested; it is the bounding-cap infrastructure the plan sequences FIRST so E-A6 (Sloboda) / E-B1 (coherence decay) are later measured against a 51:49-bounded endgame — it will bind once the endgame advance deepens. **No standalone calibration win; landed as no-regression infrastructure.**
+
+**Tests:** +5 `tests/events_evaluate.test.ts` (`factionAreaShare` full/zero, trigger above/at-or-below `max_share`, combine with `requires_events`); +5 `tests/sector_offensive_launch_gates.test.ts` (E-A5 gate: active-suppression→`offensive_ops_suppressed`, `force_launch` bypass, expired/other-faction/empty no-op). tsc clean; `event_loader`/`events_evaluate`/`sector_offensive_launch_gates` green.
+
+**Sacred rules:** no initial-OSID override; no `avoided_osids_by_faction`; deterministic (pure sorted area sum, no RNG/timestamps); ops-only-attacks (gate only BLOCKS launches); FORAWWV untouched.
+
 ## [2026-06-07] fix(calibration): HVO western liberation robustness (+2 OSID) + documented hollow-corps suppressor
 
 **Type:** Calibration-moving (188w re-floor) + diagnostic-only anomaly suppressor. 40w byte-identical.

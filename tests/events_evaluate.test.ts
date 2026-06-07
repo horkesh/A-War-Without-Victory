@@ -9,7 +9,8 @@ import { test } from 'vitest';
 import { compareEventCandidates, evaluateEvents, filterMutexCandidates } from '../src/sim/events/evaluate_events.js';
 import { loadEventDefinitions } from '../src/sim/events/event_loader.js';
 import type { EventDefinition, Rng } from '../src/sim/events/event_types.js';
-import { triggerMatches } from '../src/sim/events/event_types.js';
+import { triggerMatches, factionAreaShare } from '../src/sim/events/event_types.js';
+import { getOsidAreas } from '../src/sim/osid_areas.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
@@ -597,4 +598,77 @@ test('triggerMatches: requires ALL listed events in requires_events (not just on
     const rng = createRng('partial-prereq');
     const result = evaluateEvents(state, rng, 6, [dependent]);
     assert.ok(!result.fired.some(f => f.id === 'multi_dep_event'), 'should not fire with only one of two prerequisites');
+});
+
+// ── Fall-1995 E-A5: faction_area_ratio trigger predicate ────────────────────
+
+/** Build a controllers map assigning a fraction of total area to `faction`.
+ *  Iterates real osid_areas keys in sorted order, assigning to `faction` until
+ *  the cumulative share reaches `targetShare`; the rest go to a filler faction. */
+function controllersForShare(faction: string, targetShare: number): Record<string, string> {
+    const { total, areas } = getOsidAreas();
+    const controllers: Record<string, string> = {};
+    let acc = 0;
+    for (const osid of Object.keys(areas).sort()) {
+        if (acc / total < targetShare) {
+            controllers[osid] = faction;
+            acc += areas[osid];
+        } else {
+            controllers[osid] = 'RBiH';
+        }
+    }
+    return controllers;
+}
+
+test('factionAreaShare: full control = 1.0, no control = 0.0', () => {
+    const { areas } = getOsidAreas();
+    const all: Record<string, string> = {};
+    for (const osid of Object.keys(areas)) all[osid] = 'RS';
+    const stateFull = minimalState('war', 182);
+    (stateFull.political as { political_controllers: Record<string, string> }).political_controllers = all;
+    assert.ok(Math.abs(factionAreaShare(stateFull, 'RS') - 1.0) < 1e-9, 'RS controls everything → share 1.0');
+    assert.strictEqual(factionAreaShare(stateFull, 'HRHB'), 0, 'HRHB controls nothing → share 0');
+});
+
+test('triggerMatches: faction_area_ratio does NOT fire when RS share is above max_share', () => {
+    const state = minimalState('war', 182);
+    (state.political as { political_controllers: Record<string, string> }).political_controllers =
+        controllersForShare('RS', 0.70); // ~70% > 0.51
+    const ev: EventDefinition = {
+        id: 'us_halt_test',
+        trigger: { phase: 'war', faction_area_ratio: { faction: 'RS', max_share: 0.51 } },
+        effect: { kind: 'narrative', text: 'Halt.' },
+        once: true,
+    };
+    assert.strictEqual(triggerMatches(ev, state, 182), false);
+});
+
+test('triggerMatches: faction_area_ratio fires when RS share has fallen to/below max_share', () => {
+    const state = minimalState('war', 182);
+    (state.political as { political_controllers: Record<string, string> }).political_controllers =
+        controllersForShare('RS', 0.40); // ~40% <= 0.51
+    const ev: EventDefinition = {
+        id: 'us_halt_test',
+        trigger: { phase: 'war', faction_area_ratio: { faction: 'RS', max_share: 0.51 } },
+        effect: { kind: 'narrative', text: 'Halt.' },
+        once: true,
+    };
+    assert.strictEqual(triggerMatches(ev, state, 182), true);
+});
+
+test('triggerMatches: faction_area_ratio combines with requires_events (both must hold)', () => {
+    const state = minimalState('war', 182);
+    (state.political as { political_controllers: Record<string, string> }).political_controllers =
+        controllersForShare('RS', 0.40); // share gate satisfied
+    const ev: EventDefinition = {
+        id: 'us_halt_test',
+        trigger: { phase: 'war', requires_events: ['federation_ground_offensive_1995'], faction_area_ratio: { faction: 'RS', max_share: 0.51 } },
+        effect: { kind: 'narrative', text: 'Halt.' },
+        once: true,
+    };
+    // Prerequisite NOT fired → no match even though share gate passes.
+    assert.strictEqual(triggerMatches(ev, state, 182), false);
+    // Prerequisite fired → both gates pass.
+    (state.military as { fired_event_ids: string[] }).fired_event_ids = ['federation_ground_offensive_1995'];
+    assert.strictEqual(triggerMatches(ev, state, 182), true);
 });

@@ -8,6 +8,8 @@ import type { FactionId, GameState } from '../../state/game_state.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
 import type { EventConstraints } from './event_constraints.js';
+import { getOsidAreas } from '../osid_areas.js';
+import { strictCompare } from '../../state/validateGameState.js';
 
 /** State-based condition for conditional event triggers. */
 export type EventCondition =
@@ -92,6 +94,36 @@ export interface EventTrigger {
     requires_events?: string[];
     /** State-based condition that must be true for the event to fire. */
     condition?: EventCondition;
+    /**
+     * Fall-1995 E-A5: fires only when `faction`'s controlled-OSID area share has
+     * fallen to or below `max_share` (e.g. RS ≤ 0.51 — the Holbrooke 51:49 freeze
+     * line). Area share is summed from the SAME deterministic source calibration
+     * scoring uses (`getOsidAreas()` over `political_controllers`), so the gate is
+     * emergent from live battlefield state, not a fixed calendar turn.
+     * See `docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md` §3 E-A5.
+     */
+    faction_area_ratio?: { faction: FactionId; max_share: number };
+}
+
+/**
+ * Fall-1995 E-A5 helper: the faction's controlled-OSID area share in [0, 1].
+ * Deterministic — sums `getOsidAreas().areas[osid]` over sorted OSIDs whose
+ * `political_controllers[osid] === faction`, divided by total area. Returns 0
+ * when controllers or area total are absent. Mirrors `computeTerritoryData`
+ * in `src/sim/negotiation/compute_capital.ts`.
+ */
+export function factionAreaShare(state: GameState, faction: FactionId): number {
+    const controllers = state.political?.political_controllers;
+    if (!controllers) return 0;
+    const osidAreas = getOsidAreas();
+    if (osidAreas.total <= 0) return 0;
+    let factionKm2 = 0;
+    for (const osid of Object.keys(controllers).sort(strictCompare)) {
+        if (controllers[osid] === faction) {
+            factionKm2 += osidAreas.areas[osid] ?? 0;
+        }
+    }
+    return factionKm2 / osidAreas.total;
 }
 
 /** Effect: narrative only (no mechanical mutation). */
@@ -649,6 +681,12 @@ export function triggerMatches(def: EventDefinition, state: GameState, currentTu
     // State-based condition check
     if (t.condition) {
         if (!evaluateCondition(t.condition, state, edges)) return false;
+    }
+    // Fall-1995 E-A5: faction area-share gate. Fires only once the faction's
+    // controlled area share has fallen to or below max_share.
+    if (t.faction_area_ratio != null) {
+        const share = factionAreaShare(state, t.faction_area_ratio.faction);
+        if (share > t.faction_area_ratio.max_share) return false;
     }
     return true;
 }
