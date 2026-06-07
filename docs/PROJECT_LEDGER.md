@@ -1,4 +1,12 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-07] feat(calibration): Sana follow-on folded into initial op (+6 OSID)
+
+**Type:** Calibration-moving (188w re-floor). 40w byte-identical.
+
+**Change:** `src/sim/combat/operation_opportunity_catalog_5th_corps.ts` — folded the Sanski Most/Ključ interior objectives into the INITIAL Operation Sana as a 3rd axis (committing the two 5th-Corps brigades NOT used by the working Krupa/Petrovac axes, 506th + 517th, staged at `jasenica_2` on a contiguous front-edge walk). Replaces the corridor-gated follow-on that reached execution ~w185 with ~3 turns left and captured only 2/13. Lever (a) (follow-on `planning_duration` 3→1) proved timing alone insufficient (the follow-on shares 7 line-brigades with the initial axes, in recovery when the corridor opens) — reverted; lever (b) shipped.
+
+**Calibration:** 188w re-floor `32a6967b2387d065` → `42e16dc0affec1c4`, OSID **628→634 (+6** Sanski Most cluster RS→RBiH toward painted; the 4 Ključ OSIDs remain RS — a future micro-axis lane). Anchors 29/30 (only `brijesnica_donja_2`), benchmarks 6/6, 0 critical. `op:zvornik:zvornik` stays RS; Srebrenica/Žepa fall. Initial Sana Krupa 7/7 unchanged; Petrovac 9/10 (jasenovac_2 HRHB-ally, −1 paint not a regression). 40w `8270ad3ceaee702a` byte-identical (Sana fires t≥175). Scenario-tester GO.
+
 ## [2026-06-07] feat(calibration): Zvornik garrison pin — sacred anchor recovered (+12 OSID)
 
 **Type:** Calibration-moving (188w + 40w re-floor). CI baseline scenarios (52w/baseline_ops/noop) unchanged.
