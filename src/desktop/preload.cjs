@@ -114,6 +114,8 @@ contextBridge.exposeInMainWorld('awwv', {
   submitCounterOffer: (payload) => ipcRenderer.invoke('submit-counter-offer', payload),
   resolveParamilitaryRequests: (decisions) => ipcRenderer.invoke('resolve-paramilitary-requests', { decisions }),
   resolveDayton: (proposal) => ipcRenderer.invoke('resolve-dayton', proposal),
+  // Read-only Dayton preview (Dayton Phase-4): bot responses + authoritative readouts, no mutation.
+  previewDayton: (proposal) => ipcRenderer.invoke('preview-dayton', proposal),
   acknowledgeFrictionEvent: (payload) => ipcRenderer.invoke('acknowledge-friction-event', payload),
   stabilizeCommandRelationship: (payload) => ipcRenderer.invoke('stabilize-command-relationship', payload),
   // Presidential FRONT VISIT (Command Surface §10): read-only availability + initiate.

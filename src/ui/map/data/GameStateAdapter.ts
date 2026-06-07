@@ -3067,7 +3067,7 @@ function derivePatronOverrideAuthority(state: any): LoadedGameState['patronOverr
 }
 
 /** Read persisted pending_dayton packet from state. Pipeline owns trigger; adapter only shapes. */
-function derivePendingDayton(state: any): LoadedGameState['pendingDayton'] {
+export function derivePendingDayton(state: any): LoadedGameState['pendingDayton'] {
     if (state.meta?.game_over) return undefined;
     const neg = state.military?.negotiation;
     if (!neg?.pending_dayton) return undefined;
