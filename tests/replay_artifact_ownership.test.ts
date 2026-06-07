@@ -72,6 +72,26 @@ test('replay sidecar generated artifact ownership stays documented and untracked
         'replay_timeline.json should be gated by emitWeeklySavesForVideo',
     );
 
+    // Source-anchor the replay.jsonl emitter (the --video weekly-save replay
+    // sidecar). Its owner is mapped in the matrix, but unlike its siblings the
+    // actual emit call site was previously unverified — pin path gating, stream
+    // open, and the per-turn write so a refactor cannot silently re-own it.
+    assert.match(
+        scenarioRunner,
+        /const replayPath = emitWeeklySavesForVideo \? join\(outDir, 'replay\.jsonl'\) : null;/,
+        'replay.jsonl path should be gated by emitWeeklySavesForVideo and owned by the scenario runner',
+    );
+    assert.match(
+        scenarioRunner,
+        /const replayStream = replayPath\s*\?[^]*createWriteStream\(replayPath, \{ flags: 'w' \}\)[^]*: null;/,
+        'replay.jsonl stream should open only when the video weekly-save path is set',
+    );
+    assert.match(
+        scenarioRunner,
+        /if \(replayStream\) \{[^]*replayStream\.write\(stableStringify\(replayLine\) \+ '\\n'\);[^]*\}/,
+        'replay.jsonl rows should stream only when the video weekly-save stream is open',
+    );
+
     const { stdout } = await execFileAsync('git', ['ls-files', 'runs'], {
         cwd: repoRoot,
         encoding: 'utf8',
