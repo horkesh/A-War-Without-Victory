@@ -20,6 +20,7 @@
 
 import type { EnclaveResilienceEntry, FactionId, GameState } from '../../state/game_state.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
+import type { SupplyReachabilityOsidReport } from '../../state/supply_reachability_osid.js';
 import {
     HARDENING_DEFENSE_BONUS,
     HARDENING_THRESHOLD,
@@ -548,6 +549,75 @@ export function getEnclaveIdForOsid(osid: string): string | null {
         if (osidBelongsToEnclave(osid, enclave)) return enclave.id;
     }
     return null;
+}
+
+/**
+ * Map an OSID to its full enclave definition, or null if not in any enclave.
+ * Like getEnclaveIdForOsid but returns faction/capital/resilience_start_turn too —
+ * needed by the contain predicate (which keys off enclave.faction).
+ */
+export function getEnclaveDefForOsid(osid: string): EnclaveDefinition | null {
+    for (const enclave of ENCLAVE_DEFINITIONS) {
+        if (osidBelongsToEnclave(osid, enclave)) return enclave;
+    }
+    return null;
+}
+
+// ── Contain predicate (faction-agnostic enclave-containment) ─────────────────
+
+/**
+ * `isEnclaveContainable(state, osid, besiegingFaction, supplyReach)` — the
+ * unified faction-agnostic enclave-containment predicate (contain Lane 1).
+ *
+ * Design: docs/plans/2026-06-07-contain-enclave-faction-agnostic-design.md §1.
+ *
+ * Returns true when ALL of the following hold (reads ONLY existing data —
+ * ENCLAVE_DEFINITIONS geometry + the already-computed BFS isolation report;
+ * no new fields, no scenario tuning, no OSID override):
+ *
+ *   (a) `osid` belongs to an enclave whose `faction` ≠ `besiegingFaction`
+ *       (faction-agnostic by construction: reads enclave.faction, takes
+ *       besiegingFaction → identical path serves (RS, srebrenica_2) and
+ *       (RBiH, zepce_2));
+ *   (b) the enclave faction's BFS report lists THIS pocket OSID as isolated
+ *       (the encirclement signal — already computed by
+ *       computeSupplyReachabilityOsid, currently unread by targeting);
+ *   (c) the current turn is past the enclave's `resilience_start_turn`
+ *       (Žepče t30, Srebrenica/Žepa t16, Kiseljak/Lašva t40);
+ *   (d) [release predicate] — for Lane 1 this is treated as NEVER-released,
+ *       i.e. only (a)+(b)+(c) are evaluated. Lane A/V add the release gate.
+ *
+ * PURE: takes the BFS report as a parameter (no recompute, no state mutation).
+ * Deterministic: no RNG, no wall-clock; set membership only.
+ *
+ * Lane 1 contract: this predicate is wired into NOTHING that affects sim
+ * output. It feeds only the per-turn contain diagnostic (contain_diagnostic.ts).
+ */
+export function isEnclaveContainable(
+    state: GameState,
+    osid: string,
+    besiegingFaction: FactionId,
+    supplyReach: SupplyReachabilityOsidReport | undefined | null,
+): boolean {
+    // (a) OSID belongs to an enclave whose faction is NOT the besieger.
+    const enclave = getEnclaveDefForOsid(osid);
+    if (!enclave) return false;
+    if (enclave.faction === besiegingFaction) return false;
+
+    // (c) Past the enclave's historical formation turn (resilience_start_turn).
+    //     Default 0 (always active) when unspecified.
+    const currentTurn = state.meta?.turn ?? 0;
+    const startTurn = enclave.resilience_start_turn ?? 0;
+    if (currentTurn < startTurn) return false;
+
+    // (b) The enclave faction's BFS report lists this OSID as isolated.
+    if (!supplyReach?.factions) return false;
+    const facEntry = supplyReach.factions.find((f) => f.faction_id === enclave.faction);
+    if (!facEntry) return false;
+    if (!facEntry.isolated_osids.includes(osid)) return false;
+
+    // (d) Release predicate — Lane 1: never released. (a)+(b)+(c) suffice.
+    return true;
 }
 
 /**
