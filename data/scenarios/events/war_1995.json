@@ -520,6 +520,59 @@
     ]
   },
   {
+    "id": "srebrenica_column_breakout_1995",
+    "title": "The Column Leaves Srebrenica",
+    "narrative": "As the safe area falls, a column of Bosniak men and boys gathers near Susnjari and sets out on foot through the forests toward the front lines at Tuzla. The route is ambushed along its length. ICTY judgments in the Krstic, Popovic et al., and Mladic cases establish the column's flight and the killings that followed as part of the genocide at Srebrenica. The fate of the column is recorded here as historical fact.",
+    "source_note": "This row is an informational timeline record. The ICTY Krstic (IT-98-33), Popovic et al. (IT-05-88), and Mladic (IT-09-92) judgments and the UN Secretary-General's Srebrenica report (A/54/549) ground the row's provenance and institutional context. This sensitive genocide subject is canon-gated: it is a record only and must not be re-authored as a player choice, a prevent-or-save mechanic, or an alternate-outcome path. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "category": "humanitarian",
+    "source_tier": "icty_icj_un",
+    "trigger": {
+      "turn_min": 160,
+      "turn_max": 190,
+      "phase": "war",
+      "requires_events": [
+        "srebrenica_falls_1995"
+      ],
+      "condition": {
+        "type": "flag_equals",
+        "flag": "srebrenica_fell",
+        "value": true
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "The column out of Srebrenica is recorded as historical fact. ICTY judgments (Krstic, Popovic et al., Mladic) establish its flight and the killings along the route as part of the genocide."
+    }
+  },
+  {
+    "id": "un_safe_area_enforcement_1995",
+    "title": "The Safe Areas Cannot Be Held",
+    "narrative": "The United Nations safe areas declared for Srebrenica, Sarajevo, Tuzla, Zepa, Gorazde, and Bihac rested on a mandate UNPROFOR was never resourced to enforce. With Srebrenica and Zepa overrun in July 1995, the safe-area regime is recorded as having failed. The UN Secretary-General's 1999 report on the fall of Srebrenica documents the institutional failure of the international protection guarantee.",
+    "source_note": "This row is an informational timeline record of an institutional failure. UN Security Council Resolutions 819 (16 April 1993) and 824 (6 May 1993), the UN Secretary-General's Srebrenica report (A/54/549, 15 November 1999), and ICTY siege case law ground the row's provenance and institutional context. This Ring-3 sensitive-history row is canon-gated: its safe-area-collapse framing, which is adjacent to the genocide and forced-displacement record, must not be re-authored as a player choice or a prevent-the-fall mechanic. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "category": "diplomatic",
+    "family": "un_safe_area_enforcement",
+    "source_tier": "icty_icj_un",
+    "trigger": {
+      "turn_min": 160,
+      "turn_max": 195,
+      "phase": "war",
+      "requires_events": [
+        "srebrenica_falls_1995"
+      ],
+      "condition": {
+        "type": "flag_equals",
+        "flag": "srebrenica_fell",
+        "value": true
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "The UN safe-area regime is recorded as having failed. The 1999 UN Secretary-General report (A/54/549) documents the institutional failure of the safe-area guarantee after the fall of Srebrenica and Zepa."
+    }
+  },
+  {
     "id": "second_markale_massacre_1995",
     "title": "Second Markale Massacre",
     "narrative": "A second mortar attack strikes the Markale marketplace in Sarajevo, killing 43 civilians. Coming after Srebrenica and Zepa, the massacre triggers the decisive Western response that has been building for months. NATO Secretary General Willy Claes declares that the threshold for intervention has been crossed.",
