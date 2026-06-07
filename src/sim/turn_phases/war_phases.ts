@@ -905,6 +905,27 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        // LANE-OBSERVER-FLAG-WRITER (owner decision #3): default-OFF threshold
+        // observer that writes the two non-Srebrenica positive observer flags
+        // (equipment_quality_collapsed, negotiation_capital_exhausted) read by
+        // the dormant Ring-2 ghost-codex entries. Gated behind
+        // ENABLE_OBSERVER_THRESHOLD_FLAGS (default false) → byte-identical in
+        // calibration. Even when on it only writes two booleans onto
+        // event_flags; never touches OSID control. The Srebrenica
+        // enclave_held_through_turn threshold flag is §6-gated and is NOT
+        // written here. Runs after evaluate-events so it reads the same-turn
+        // event-driven equipment-quality modifiers.
+        name: 'observe-threshold-flags',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const { observeThresholdFlags } = await import('../codex/observer_threshold_flags.js');
+            context.report.observer_threshold_flags = observeThresholdFlags(
+                context.state,
+                context.state.meta.turn,
+            );
+        }
+    },
+    {
         name: 'compute-dimension-bases',
         run: (context) => {
             const neg = context.state.military.negotiation;

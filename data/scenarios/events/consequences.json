@@ -5706,5 +5706,154 @@
       "doctrine_drift_active_RS": true
     },
     "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-18 (Wave-10/Wave-11 mirror — RS variant of csq_doctrine_drift; closes the doctrine-drift triad). Predicate structurally mirrors the RBiH and HRHB variants with the RS reorganization flag. Mirrors documented late-war VRS institutional strain under officer rotation, casualty pressure, and Pale/Banja Luka command friction (Balkan Battlegrounds Vol. II Ch.34, Ch.49; Burg & Shoup 2000). Ring 1 command consequence; no §6 surface."
+  },
+  {
+    "id": "csq_winter_held_audit",
+    "title": "The Lines Hold Through Winter",
+    "narrative": "The accountants of the war keep a quieter ledger than the front does. By the late-war audit, no faction had been logged crossing the winter supply-attrition threshold this season: the stockpiles, the wood details, and the requisition runs held the cold at bay. It is not a victory. It is the absence of one more collapse.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 80,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_not_set",
+            "flag": "winter_supply_attrition_active_RBiH"
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "winter_supply_attrition_active_RS"
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "winter_supply_attrition_active_HRHB"
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 90,
+    "effect": {
+      "kind": "narrative",
+      "text": "Late-war audit: no faction crossed the winter supply-attrition threshold this season. Observer flag winter_held_through_turn recorded; no mechanical effect."
+    },
+    "sets_flags": {
+      "winter_held_through_turn": true
+    },
+    "historical_source": "LANE-OBSERVER-FLAG-WRITER (owner decision #3, 2026-06-07). Deadline audit event: writes a POSITIVE observer flag, mirroring the existing negative-flag consequence pattern (csq_enclave_held_alt_intervention writes un_safe_areas_intact under flag_not_set guards). Pure flag-setter — narrative effect only, no control_change / dimension / morale / supply effect; calibration-flat by construction. Lights the corresponding dormant Wave-2 ghost-codex entry (src/sim/codex/dynamic_section_builder.ts). Faction-agnostic; no §6 surface."
+  },
+  {
+    "id": "csq_corridor_blocked_audit",
+    "title": "The Posavina Throat Stays Shut",
+    "narrative": "Past the operational window for the northern breakthrough, the audit records the corridor still severed: no link reopened across the Posavina, and the breakthrough operation never closed its objective. The convoys still take the long road. The map's narrow throat remains a chokepoint, not a highway.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 30,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_not_set",
+            "flag": "corridor_secured"
+          },
+          {
+            "type": "event_fire_count",
+            "event_id": "operation_corridor_1992",
+            "max_count": 0
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 90,
+    "effect": {
+      "kind": "narrative",
+      "text": "Post-window audit: the Posavina corridor remained severed and operation_corridor_1992 did not close its objective. Observer flag corridor_blocked_through_turn recorded; no mechanical effect."
+    },
+    "sets_flags": {
+      "corridor_blocked_through_turn": true
+    },
+    "historical_source": "LANE-OBSERVER-FLAG-WRITER (owner decision #3, 2026-06-07). Deadline audit event: writes a POSITIVE observer flag, mirroring the existing negative-flag consequence pattern (csq_enclave_held_alt_intervention writes un_safe_areas_intact under flag_not_set guards). Pure flag-setter — narrative effect only, no control_change / dimension / morale / supply effect; calibration-flat by construction. Lights the corresponding dormant Wave-2 ghost-codex entry (src/sim/codex/dynamic_section_builder.ts). Faction-agnostic; no §6 surface."
+  },
+  {
+    "id": "csq_arms_embargo_compliance_audit",
+    "title": "No Channel Opened",
+    "narrative": "The embargo held, on paper and in the warehouses. By the late-war audit no faction had a third-party arms channel or an attenuation arrangement logged against its name. The shortages were felt at every front. The ledger of where the shells came from stayed clean.",
+    "category": "economic",
+    "trigger": {
+      "turn_min": 100,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_not_set",
+            "flag": "third_party_arms_channel_active_RBiH"
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "third_party_arms_channel_active_HRHB"
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "iran_arms_channel_attenuation_active_RBiH"
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "iran_arms_channel_attenuation_active_HRHB"
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 90,
+    "effect": {
+      "kind": "narrative",
+      "text": "Late-war audit: no third-party arms channel or attenuation arrangement was logged for any faction. Observer flag arms_embargo_compliant_through_turn recorded; no mechanical effect."
+    },
+    "sets_flags": {
+      "arms_embargo_compliant_through_turn": true
+    },
+    "historical_source": "LANE-OBSERVER-FLAG-WRITER (owner decision #3, 2026-06-07). Deadline audit event: writes a POSITIVE observer flag, mirroring the existing negative-flag consequence pattern (csq_enclave_held_alt_intervention writes un_safe_areas_intact under flag_not_set guards). Pure flag-setter — narrative effect only, no control_change / dimension / morale / supply effect; calibration-flat by construction. Lights the corresponding dormant Wave-2 ghost-codex entry (src/sim/codex/dynamic_section_builder.ts). Faction-agnostic; no §6 surface."
+  },
+  {
+    "id": "csq_political_unity_audit",
+    "title": "The Coalition Does Not Split",
+    "narrative": "Factions fracture under the weight of a long war as often as armies do. The late-war audit records that none of the three had logged a temporary political split this far into the fighting — the internal arrangements, fragile as they were, did not come apart. The cost stayed external. The house, for now, still stands.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 100,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_not_set",
+            "flag": "political_split_temporary_active_RBiH"
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "political_split_temporary_active_RS"
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "political_split_temporary_active_HRHB"
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 90,
+    "effect": {
+      "kind": "narrative",
+      "text": "Late-war audit: no faction logged a temporary political split this far into the war. Observer flag political_unity_held_through_turn recorded; no mechanical effect."
+    },
+    "sets_flags": {
+      "political_unity_held_through_turn": true
+    },
+    "historical_source": "LANE-OBSERVER-FLAG-WRITER (owner decision #3, 2026-06-07). Deadline audit event: writes a POSITIVE observer flag, mirroring the existing negative-flag consequence pattern (csq_enclave_held_alt_intervention writes un_safe_areas_intact under flag_not_set guards). Pure flag-setter — narrative effect only, no control_change / dimension / morale / supply effect; calibration-flat by construction. Lights the corresponding dormant Wave-2 ghost-codex entry (src/sim/codex/dynamic_section_builder.ts). Faction-agnostic; no §6 surface."
   }
 ]
