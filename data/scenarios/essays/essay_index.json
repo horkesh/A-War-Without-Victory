@@ -4519,7 +4519,7 @@
                     "id": "wave3_milosevic_vopp_pressure_branch_accepted",
                     "insert_after_paragraph": 3,
                     "condition": "RESPONSE:milosevic_vopp_pressure:acknowledge_pressure",
-                    "variant": "note",
+                    "variant": "divergence",
                     "content": "In this campaign, the Pale leadership acknowledged Belgrade’s pressure and accepted the Vance-Owen framework — a divergence from the historical record, in which the assembly defied Belgrade and rejected the plan in May 1993. The lifeline was preserved at the cost of a map the leadership detested.",
                     "localizations": {
                         "bcs": {
@@ -4531,7 +4531,7 @@
                     "id": "wave3_milosevic_vopp_pressure_branch_rejected",
                     "insert_after_paragraph": 3,
                     "condition": "RESPONSE:milosevic_vopp_pressure:resist_patron",
-                    "variant": "divergence",
+                    "variant": "note",
                     "content": "In this campaign, the Pale leadership resisted Belgrade’s pressure and held to its own war aim — the posture the historical record attributes to the assembly’s May 1993 defiance. Autonomy was asserted; the cost, isolation, arrived later.",
                     "localizations": {
                         "bcs": {

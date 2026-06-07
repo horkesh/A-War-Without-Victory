@@ -40,6 +40,7 @@
  * The builder never hard-codes RBiH/RS/HRHB-specific behaviour.
  */
 import { strictCompare } from '../../state/validateGameState.js';
+import { CANONICAL_FACTIONS } from '../../state/game_state.js';
 import type { GameState, FactionId } from '../../state/game_state.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -453,12 +454,25 @@ function predCivilianDisplacementContained(state: GhostEntryStateView, currentTu
 
 // — Ghost 19: equipment_quality_recovered —
 //   Divergence note: equipment quality bent upward from the canonical baseline.
-//   Single-flag gate on `equipment_quality_recovered` (mirrors the
-//   equipment_quality_collapse single-flag predicate; the two are mutually
-//   exclusive by construction upstream).
+//   The recovery consequence substrate (csq_equipment_quality_recovery_streak_*
+//   in data/scenarios/events/consequences.json) sets PER-FACTION streak flags
+//   `equipment_quality_recovery_streak_active_<FACTION>` — it never sets a bare
+//   `equipment_quality_recovered`. Gating on the bare flag meant this ghost
+//   could never emit from a live run (#267). Re-gated on any-faction-active over
+//   the canonical faction set (faction-agnostic; the recovery is an observable
+//   campaign-wide audit reading, not a player-faction-only one). The legacy
+//   `equipment_quality_recovered` flag is still honoured for back-compat with
+//   any upstream that writes the aggregate name directly. Mutual exclusion with
+//   the equipment_quality_collapse reading is preserved.
 function predEquipmentQualityRecovered(state: GhostEntryStateView): boolean {
-    if (!flag(state, 'equipment_quality_recovered')) return false;
-    return !flag(state, 'equipment_quality_collapsed');
+    if (flag(state, 'equipment_quality_collapsed')) return false;
+    // Deterministic iteration over the canonical faction set.
+    const anyStreakActive = CANONICAL_FACTIONS.some((f) =>
+        flag(state, `equipment_quality_recovery_streak_active_${f}`),
+    );
+    if (anyStreakActive) return true;
+    // Back-compat: honour the aggregate flag if some upstream sets it directly.
+    return flag(state, 'equipment_quality_recovered');
 }
 
 // — Ghost 20: negotiation_capital_recovered —
@@ -663,7 +677,10 @@ const GHOST_ENTRIES: readonly GhostRegistryEntry[] = [
         ghost_id: 'equipment_quality_recovered',
         path: 'data/codex/ghost_entries/equipment_quality_recovered.md',
         variant: 'context',
-        conditional_on: ['equipment_quality_recovered', 'NOT equipment_quality_collapsed'],
+        conditional_on: [
+            'equipment_quality_recovery_streak_active_<any-faction> (or legacy equipment_quality_recovered)',
+            'NOT equipment_quality_collapsed',
+        ],
         predicate: predEquipmentQualityRecovered,
     },
     {

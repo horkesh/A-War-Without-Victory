@@ -223,11 +223,36 @@ describe('WAVE-3 builder — W5: equipment_quality_recovered gating', () => {
         });
         expect(findGhost(buildGhostEntries(s, 100), 'equipment_quality_recovered')).toBeUndefined();
     });
-    it('fires on the single flag', () => {
+    it('fires on the legacy aggregate flag (back-compat)', () => {
         const s = makeState({ event_flags: { equipment_quality_recovered: true } });
         const got = findGhost(buildGhostEntries(s, 50), 'equipment_quality_recovered');
         expect(got).toBeDefined();
         expect(got?.path).toBe('data/codex/ghost_entries/equipment_quality_recovered.md');
+    });
+    // #267: the recovery consequence sets PER-FACTION streak flags, not the
+    // aggregate. The ghost must emit when any per-faction streak flag is set.
+    it('fires when the RBiH per-faction recovery streak flag is set (#267)', () => {
+        const s = makeState({ event_flags: { equipment_quality_recovery_streak_active_RBiH: true } });
+        const got = findGhost(buildGhostEntries(s, 50), 'equipment_quality_recovered');
+        expect(got).toBeDefined();
+        expect(got?.path).toBe('data/codex/ghost_entries/equipment_quality_recovered.md');
+    });
+    it('fires when the RS per-faction recovery streak flag is set (#267)', () => {
+        const s = makeState({ event_flags: { equipment_quality_recovery_streak_active_RS: true } });
+        expect(findGhost(buildGhostEntries(s, 50), 'equipment_quality_recovered')).toBeDefined();
+    });
+    it('fires when the HRHB per-faction recovery streak flag is set (#267)', () => {
+        const s = makeState({ event_flags: { equipment_quality_recovery_streak_active_HRHB: true } });
+        expect(findGhost(buildGhostEntries(s, 50), 'equipment_quality_recovered')).toBeDefined();
+    });
+    it('does not fire when a per-faction streak flag is set but collapse is also set (mutual exclusion)', () => {
+        const s = makeState({
+            event_flags: {
+                equipment_quality_recovery_streak_active_RBiH: true,
+                equipment_quality_collapsed: true,
+            },
+        });
+        expect(findGhost(buildGhostEntries(s, 100), 'equipment_quality_recovered')).toBeUndefined();
     });
 });
 

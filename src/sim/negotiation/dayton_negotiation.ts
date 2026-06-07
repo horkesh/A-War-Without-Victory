@@ -416,6 +416,11 @@ function computeTerritorySplit(
         const pkg = getTerritorialPackageById(pkgId);
         if (!pkg) continue;
 
+        // Brčko-to-arbitration is removed from all factions below (third-state
+        // district); never attribute it to an entity here. A cleanly-assigned
+        // Brčko (federation/rs) is handled by the normal demand/concession path.
+        if (pkgId === 'brcko_district' && brckoStatus === 'arbitration') continue;
+
         const shiftPct = getPackageAreaPct(pkgId);
         if (shiftPct <= 0) continue;
 
@@ -451,13 +456,20 @@ function computeTerritorySplit(
 }
 
 /**
- * Determine which faction GAINS an accepted package's area (D1 attribution fix).
+ * Determine which faction GAINS an accepted package's area (D1 attribution fix;
+ * concession-transfer fix #277).
  *
- *   - the player conceded it          → it stays with / goes to the default holder
- *                                        (no net change vs. holder), so no gainer.
+ *   - the player conceded a package they hold → the area moves OUT of the player
+ *     (the holder) and TO the opposing entity (the gainer). The previous code
+ *     returned null here, leaving the conceded area in the player's split so the
+ *     final split contradicted the signed settlement (#277).
  *   - the player demanded it          → the player gains it.
  *   - otherwise (a held package that simply remained, or an auto-accept of the
  *     player's own territory)         → no transfer.
+ *
+ * Brčko-to-arbitration is resolved separately (its area is removed from all three
+ * factions) and never reaches this path; a cleanly-assigned Brčko (demanded-and-won
+ * or conceded) is attributed here like any other package.
  *
  * This replaces the old "if holder is RS, credit RBiH" rule that wrongly denied
  * HRHB its gains. Pure & deterministic.
@@ -469,14 +481,34 @@ function resolveTransferGainer(
     proposal: DaytonProposal,
 ): FactionId | null {
     if (proposal.territorial_concessions.includes(pkgId)) {
-        // Player gave it up — the holder keeps it; no transfer to model here.
-        return null;
+        // Player gave up territory they hold → it leaves the holder and goes to
+        // the opposing entity's faction (the gainer). A concession only carries a
+        // cost when the player IS the holder, so the holder is the conceding side.
+        if (holder !== playerFaction) {
+            // Defensive: a concession of territory the player does not hold has no
+            // well-defined transfer here; leave it to the holder.
+            return null;
+        }
+        return resolveOtherEntityFaction(holder);
     }
     if (proposal.territorial_demands.includes(pkgId) && holder !== playerFaction) {
         // Player won a demand against the holder → player gains the area.
         return playerFaction;
     }
     return null;
+}
+
+/**
+ * The faction on the OPPOSING entity that gains a conceded package. Mirrors the
+ * inter-entity "other side takes it" rule used for Brčko: a concession crosses
+ * the IEBL, so an RS concession goes to the Federation (represented by RBiH, the
+ * dominant Federation entity) and a Federation (RBiH/HRHB) concession goes to RS.
+ *
+ * Pure & deterministic — no state, no ordering.
+ */
+function resolveOtherEntityFaction(holder: string): FactionId {
+    // RS is the only faction on the RS entity; RBiH and HRHB are the Federation.
+    return holder === 'RS' ? 'RBiH' : 'RS';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

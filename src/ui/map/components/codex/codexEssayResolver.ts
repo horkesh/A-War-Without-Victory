@@ -285,8 +285,29 @@ function evaluateAtom(token: string, context: CodexRenderContext): boolean {
 
     // Phase 3 Thread 1: RESPONSE:<event_id>:<response_id> — true iff the player/bot
     // chose that response (persisted in state.military.event_decision_log).
+    //
+    // #263: some authored branches are EXPANDED PER-UNIT at runtime before they
+    // are logged. The decorate-a-unit `decorate_steadfast_<faction>` template is
+    // cloned into one branch per eligible formation with id
+    // `<base>__<formationId>` (see src/desktop/decorate_unit_contract.cjs), so the
+    // logged response is e.g. `decorate_a_unit_rbih:decorate_steadfast_rbih__arbih_1st_corps`.
+    // An exact `.has()` on the un-suffixed authored id `RESPONSE:decorate_a_unit_rbih:decorate_steadfast_rbih`
+    // could therefore never be true. Match the base id exactly OR any per-unit
+    // expansion that begins with `<base>__`. The `__` boundary is unambiguous:
+    // base response ids use single underscores, so this never matches a sibling
+    // branch (e.g. `decorate_steadfast` does not match `decorate_steadfast_rbih`
+    // because the latter is the exact base, and `decorate_broadly` shares no `__`
+    // prefix). Set membership / iteration is order-independent → deterministic.
     if (token.startsWith('RESPONSE:')) {
-        return context.decisionResponses?.has(token.slice('RESPONSE:'.length)) ?? false;
+        const responses = context.decisionResponses;
+        if (!responses) return false;
+        const key = token.slice('RESPONSE:'.length);
+        if (responses.has(key)) return true;
+        const expandedPrefix = `${key}__`;
+        for (const chosen of responses) {
+            if (chosen.startsWith(expandedPrefix)) return true;
+        }
+        return false;
     }
 
     return isTruthyValue(context.eventFlags?.[token]);
