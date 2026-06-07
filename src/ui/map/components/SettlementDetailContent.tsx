@@ -18,6 +18,14 @@ import {
 } from '../utils/playerSafeText';
 import { t, useLocale } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
+import { buildOsidSupplyExplanation, type OsidSupplyTone } from '../data/osidSupplyExplanation';
+
+/** Player-legible color per supply tone (no raw enum surfaced). */
+const SUPPLY_TONE_CLASS: Record<OsidSupplyTone, string> = {
+  good: 'text-emerald-400',
+  caution: 'text-amber-400',
+  danger: 'text-red-400',
+};
 
 function num(v: unknown): number {
   return typeof v === 'number' && Number.isFinite(v) ? v : 0;
@@ -144,6 +152,12 @@ export interface SettlementDetailContentProps {
   historicalEventsByTurn?: Array<{ turn: number; id: string; text: string }>;
   /** Initial political controllers at scenario start (for timeline provenance). */
   initialControlBySettlement?: Record<string, string | null> | null;
+  /**
+   * Player-faction-scoped current supply level per controlled OSID
+   * (already derived by the sim; only the player's own settlements appear).
+   * Surfaced as a player-legible status line in the overview tab.
+   */
+  supplyStateByOsid?: Record<string, 'adequate' | 'strained' | 'critical'>;
 }
 
 export function SettlementDetailContent({
@@ -178,12 +192,17 @@ export function SettlementDetailContent({
   supplyTransitionsByOsid,
   historicalEventsByTurn,
   initialControlBySettlement,
+  supplyStateByOsid,
 }: SettlementDetailContentProps) {
   const [locale] = useLocale();
   const name = getOsidDisplayName(osid, osidDisplayNames);
   const props = osidPropertiesMap?.[osid] ?? {};
   const municipality = str(props.mun1990_name || props.mun1990_id);
   const controller = getByOsid(controlBySettlement, osid);
+  // Current supply status for this settlement. `supplyStateByOsid` is already
+  // player-faction-scoped by the adapter, so an entry exists only for the
+  // player's own settlements — no enemy supply truth is surfaced here.
+  const supplyExplanation = buildOsidSupplyExplanation(getByOsid(supplyStateByOsid, osid));
   const popOriginal = num(props.population_total) || (num(props.population_bosniaks) + num(props.population_serbs) + num(props.population_croats) + num(props.population_others));
 
   const terrain = toTitleCase(str(props.terrain || props.zone_type));
@@ -374,6 +393,23 @@ export function SettlementDetailContent({
           <div className="flex justify-between items-center text-[11px]">
             <span className="text-text-secondary">{t('settlement.status')}</span>
             <span className="text-amber-400 font-semibold uppercase tracking-wide">{statusLabel}</span>
+          </div>
+        )}
+
+        {isPanel && activeTab === 'overview' && supplyExplanation && (
+          <div
+            data-testid="settlement-supply-status"
+            className="flex justify-between items-start gap-3 text-[11px]"
+          >
+            <span className="text-text-secondary shrink-0">{t('settlement.supply.label')}</span>
+            <span className="text-right">
+              <span className={`font-semibold ${SUPPLY_TONE_CLASS[supplyExplanation.tone]}`}>
+                {t(supplyExplanation.labelKey)}
+              </span>
+              <span className="block text-[10px] text-text-secondary/80 mt-0.5">
+                {t(supplyExplanation.explanationKey)}
+              </span>
+            </span>
           </div>
         )}
 
