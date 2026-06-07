@@ -123,7 +123,7 @@ describe('Decision Room request-op + force-launch directives', () => {
     expect(view.cards.find((c) => c.id === 'command:request-op:arbih_4th_corps')).toBeUndefined();
   });
 
-  it('emits a force-launch directive (cost 15, opName payload) for an override-available proposal', () => {
+  it('emits a force-launch directive (cost 15, proposalId payload) for an override-available proposal', () => {
     const state = makeState({
       opProposalCards: [
         makeOpProposalCard(),
@@ -145,7 +145,9 @@ describe('Decision Room request-op + force-launch directives', () => {
       lever: 'force_launch',
       corpsId: 'arbih_3rd_corps',
       cost: 15,
-      payload: { opName: 'Operation Alpha' },
+      // proposalId routes DirectiveCard through forceLaunchProposal (resolves the
+      // pending review); opName retained for the caption only.
+      payload: { opName: 'Operation Alpha', proposalId: 'APPROVE_OP:arbih_3rd_corps:plan_alpha' },
     });
     // override_available === false carries no force-launch card.
     expect(

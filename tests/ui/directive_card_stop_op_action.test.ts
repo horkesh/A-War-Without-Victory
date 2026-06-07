@@ -93,6 +93,8 @@ function installIpc(overrides: Record<string, unknown> = {}) {
     })),
     stageOpDirectiveOrder: vi.fn(async () => ({ ok: true })),
     stageOperationForceLaunch: vi.fn(async () => ({ ok: true })),
+    forceLaunchProposal: vi.fn(async () => ({ ok: true })),
+    proactiveForceLaunchOp: vi.fn(async () => ({ ok: true })),
     stageCoReplacementOrder: vi.fn(async () => ({ ok: true })),
     approveReserveRequest: vi.fn(async () => ({ ok: true })),
     getFrontVisitAvailability: vi.fn(async () => ({
@@ -463,6 +465,114 @@ describe('DirectiveCard stop-op action host', () => {
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
       'Directive staged for next turn',
     );
+  });
+
+  // Batch A — command-card routing (#126 / #119 / #274). Force-launch directives
+  // carry a payload discriminator so each of the three flows reaches its OWN IPC at
+  // the OWN cost; the legacy opName-only path (asserted above) is the fallback.
+  it('routes a proposal-override force-launch through forceLaunchProposal (not the legacy name lookup)', async () => {
+    const bridge = installIpc();
+    const directive: PresidentialDecisionRoomDirective = {
+      lever: 'force_launch',
+      corpsId: 'arbih_3rd_corps',
+      cost: 15,
+      payload: { opName: 'Operation Holdfast', proposalId: 'APPROVE_OP:arbih_3rd_corps:plan_alpha' },
+    };
+
+    render(React.createElement(DirectiveCard, { directive, gameState: baseGameState }));
+    fireEvent.click(screen.getByRole('button', { name: 'Issue (15)' }));
+
+    await waitFor(() => {
+      expect(bridge.forceLaunchProposal).toHaveBeenCalledWith('APPROVE_OP:arbih_3rd_corps:plan_alpha');
+    });
+    expect(bridge.stageOperationForceLaunch).not.toHaveBeenCalled();
+    expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
+      'Directive staged for next turn',
+    );
+  });
+
+  it('routes a proactive (held-ready) force-launch through proactiveForceLaunchOp at 25 CA', async () => {
+    const bridge = installIpc();
+    const directive: PresidentialDecisionRoomDirective = {
+      lever: 'force_launch',
+      corpsId: 'arbih_3rd_corps',
+      cost: 25,
+      payload: { opName: 'Operation Held Alpha', planId: 'plan_alpha' },
+    };
+
+    render(React.createElement(DirectiveCard, { directive, gameState: baseGameState }));
+    fireEvent.click(screen.getByRole('button', { name: 'Issue (25)' }));
+
+    await waitFor(() => {
+      expect(bridge.proactiveForceLaunchOp).toHaveBeenCalledWith('arbih_3rd_corps', 'plan_alpha');
+    });
+    expect(bridge.stageOperationForceLaunch).not.toHaveBeenCalled();
+    expect(bridge.forceLaunchProposal).not.toHaveBeenCalled();
+    expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
+      'Directive staged for next turn',
+    );
+  });
+
+  it('does NOT advertise a friction cost for force-launch, but does for request-op (#274)', () => {
+    const gameStateWithFaction = { ...baseGameState, player_faction: 'RBiH' } as unknown as LoadedGameState;
+
+    installIpc();
+    const { unmount } = render(React.createElement(DirectiveCard, {
+      directive: forceLaunchDirective,
+      gameState: gameStateWithFaction,
+    }));
+    // force-launch never sets forced_over_objection, so the engine applies no patron
+    // cost — the preview must stay hidden rather than lie to the player.
+    expect(screen.queryByTestId('directive-card-stakes')).toBeNull();
+    unmount();
+
+    render(React.createElement(DirectiveCard, {
+      directive: requestOpDirective,
+      gameState: gameStateWithFaction,
+    }));
+    // request-op's forced path DOES set forced_over_objection → real consequence.
+    expect(screen.getByTestId('directive-card-stakes')).toBeTruthy();
+  });
+
+  it('keeps the request-op target input available to retry after a cannot-issue banner (#119)', async () => {
+    let calls = 0;
+    const { stageOpDirectiveOrder } = installIpc({
+      queryDirectiveObjection: vi.fn(async () => {
+        calls += 1;
+        return calls === 1
+          ? {
+              ok: true,
+              data: {
+                forceRatio: 0,
+                estimatedCasualties: 0,
+                recommendedAction: 'abort',
+                rejectionReason: 'objective_unreachable',
+              },
+            }
+          : { ok: true, data: { forceRatio: 1.4, estimatedCasualties: 120, recommendedAction: 'launch' } };
+      }),
+    });
+
+    render(React.createElement(DirectiveCard, { directive: requestOpDirective, gameState: gameStateWithCommander }));
+
+    fireEvent.change(screen.getByLabelText('Objective settlement'), { target: { value: 'unreachable_osid' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Issue (25)' }));
+
+    // Cannot-issue banner appears, but the input AND the Issue button survive so the
+    // president can correct the target and retry from the same card.
+    expect(await screen.findByRole('alert', { name: 'Directive cannot be issued' })).toBeTruthy();
+    const input = screen.getByLabelText('Objective settlement');
+    expect(input).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Issue (25)' })).toBeTruthy();
+
+    // Editing clears the banner; retrying with a valid target now stages.
+    fireEvent.change(input, { target: { value: 'zenica' } });
+    expect(screen.queryByRole('alert', { name: 'Directive cannot be issued' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Issue (25)' }));
+
+    await waitFor(() => {
+      expect(stageOpDirectiveOrder).toHaveBeenCalledWith({ corpsId: 'arbih_3rd_corps', targetOsid: 'zenica' });
+    });
   });
 
   it('shows a receipt after front visit initiation succeeds', async () => {

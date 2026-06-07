@@ -378,6 +378,9 @@ interface WindowAwwv {
     rejectProposal: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
     // Phase 2 slice 1 "Back the Officer": Level 3 Direct Intervention on an op proposal.
     forceLaunchProposal: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
+    // Proactive presidential force-launch of a HELD-ready plan the officer never
+    // surfaced (resolves commander_state.current_plan; debits PROACTIVE_FORCE_LAUNCH_COST).
+    proactiveForceLaunchOp: (corpsId: string, planId: string) => Promise<{ ok: boolean; error?: string }>;
     resolveOperationOpportunityDecision: (payload: OperationOpportunityDecisionPayload) => Promise<{ ok: boolean; error?: string }>;
     // v0.9.2 tutorial onboarding (LANE-NIGHTSHIFT-ROUND2-TUTORIAL-ONBOARDING-SKELETON
     // + LANE-NIGHTSHIFT-TUTORIAL-CONTENT-V1)
@@ -762,6 +765,10 @@ export function useIPC() {
 
             forceLaunchProposal: awwv
                 ? (proposalId: string) => awwv.forceLaunchProposal(proposalId)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            proactiveForceLaunchOp: awwv
+                ? (corpsId: string, planId: string) => awwv.proactiveForceLaunchOp(corpsId, planId)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
             resolveOperationOpportunityDecision: awwv
