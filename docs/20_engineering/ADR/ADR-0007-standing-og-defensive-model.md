@@ -1,9 +1,11 @@
 # ADR-0007: Standing OG Defensive Model — shared-attrition combat, reserve commitment, persistent membership
 
 ## Status
-**Proposed (DRAFT) — revised post-panel 2026-06-02.** For owner acceptance. Not yet accepted.
+**Accepted 2026-06-07 (owner-authorized).** Revised post-panel 2026-06-02; accepted as doctrine by the owner.
 **Supersedes** the earlier ADR-0007 draft ("Persistent standing-OG membership"), absorbed here as Pillar A.
 **Pyrrhic panel (5 specialists: Historian / Game-Designer / Tech-Architect / Ops-Expert / Corps-Commander)** returned a unanimous *Endorse-with-changes*; this revision folds their findings — re-sequenced phases, Pillar 2 reframed from "abolish the rear pool" to "commit the reserve," and six guardrails added. Panel findings are cited inline.
+
+**Governance note (acceptance 2026-06-07).** Owner acceptance ratifies (a) the standing-OG defensive doctrine described below — a depletable second echelon and shared sector-defense attrition — and (b) the already-shipped default-path hardening (preplanned-op / column-movement delivery repairs + repulse-memory + standing-OG morale-floor) as the **baseline of record**. Acceptance is doctrinal: it does **not** flip any `ENABLE_*` phase flag. All `ENABLE_*` flags (`ENABLE_SHARED_SECTOR_DEFENSE`, `ENABLE_STANDING_OG_RESERVE_COMMIT`, `ENABLE_STANDING_OG_PERSISTENCE`) remain **default-OFF**; any future Phase-D default-flip stays gated on **Guardrail-1 (war-cost conservation)** and the health invariant, per owner sign-off. The doctrine keeps the **SECTOR** as the defensive entity (ADR-0006, 3-1 verdict): ADR-0007 adds doctrine + wiring, **not** an entity change or sector-removal — that decision is inherited and not re-litigated.
 
 ## Context
 
@@ -83,7 +85,7 @@ With the model on (40w): the 7th Viteška no longer holds `brnjic_2` alone for 3
 | P1 | Standing OG Defensive Model (ADR-0007) | OPEN | TBD | Owner accept ADR → Phase C MVS (`ENABLE_SHARED_SECTOR_DEFENSE`, 3 fns) | flag-off byte-identical 40w/52w/188w; health-invariant test; flag-on war-cost ≥ flag-off + `formation_integrity` → 0 + re-floor at D | No default-flip / re-floor without owner sign-off; Guardrail-1 war-cost gate must pass |
 
 ## Governance
-Pyrrhic panel complete (Endorse-with-changes, folded above). Next: owner acceptance, then Phase C. This ADR does not auto-edit canon; on acceptance Rulebook §5.7 / Systems Manual §6.3 gain a clarifying paragraph (manual edit) on the standing-OG defensive doctrine (depletable second echelon; shared attrition).
+Pyrrhic panel complete (Endorse-with-changes, folded above). Owner acceptance recorded 2026-06-07; next operational step is Phase C (still gated, default-off). On acceptance the clarifying canon paragraphs were added (manual edit) to the standing-OG defensive sections: **Rulebook §6.3 (Reactive sector defense)** and **Systems Manual §6.7 (Reactive Sector Defense)** — depletable second echelon + shared sector-defense attrition + Guardrail-1. *(The pre-acceptance pointer here read "Rulebook §5.7 / Systems Manual §6.3"; those are the Operational-Group coordination-construct sections, not the defensive-mechanics sections, so the paragraphs landed in the reactive-sector-defense sections instead.)*
 
 ## References
 - ADR-0005 (ephemeral offensive TGs; flag-gated discipline); ADR-0006 (sectors = standing OGs; 3-1 verdict; v0.10 deferral clause this ADR redeems).
