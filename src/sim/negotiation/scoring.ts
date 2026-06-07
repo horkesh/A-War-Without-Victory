@@ -19,7 +19,7 @@ import type { GameState, FactionId } from '../../state/game_state.js';
 import type { NegotiationBreakdown, OutcomeClass } from '../../state/negotiation_types.js';
 import type { FactionVerdict, GameVerdict, DimensionGrade } from '../../state/negotiation_types.js';
 import { collectCondemnationFlags } from './rupture_consequences.js';
-import { computePeaceDysfunctionIndex, capOutcomeByPeaceDysfunction } from './peace_dysfunction.js';
+import { computePeaceDysfunctionBreakdown, computePeaceDysfunctionIndex, capOutcomeByPeaceDysfunction } from './peace_dysfunction.js';
 import { DIMENSION_WEIGHTS, computeNegotiatingCapital } from '../events/strategic_dimensions.js';
 import type { DimensionStore } from '../events/strategic_dimensions.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -670,8 +670,17 @@ export function computeFactionVerdict(
     // is null in historical/unset mode (and for non-Dayton endings), so this is a
     // no-op there and the historical baselines stay byte-identical. Mirrors the
     // existing condemnation-flag cap inside classifyOutcome.
-    const dysfunctionIndex = computePeaceDysfunctionIndex(state);
-    const outcomeClass = capOutcomeByPeaceDysfunction(baseOutcomeClass, dysfunctionIndex);
+    // Graduated cap (institutional-architecture expansion 2026-06-07): the
+    // breakdown's structural flags feed the ≥80 ratified_cleansing → failure band.
+    // computePeaceDysfunctionBreakdown is the SAME emergent-gated pure read; null
+    // in historical/unset mode and for non-Dayton endings, so this stays a no-op
+    // there and the historical baselines remain byte-identical.
+    const dysfunctionBreakdown = computePeaceDysfunctionBreakdown(state);
+    const outcomeClass = capOutcomeByPeaceDysfunction(
+        baseOutcomeClass,
+        dysfunctionBreakdown?.index ?? null,
+        dysfunctionBreakdown?.flags,
+    );
 
     return {
         faction,

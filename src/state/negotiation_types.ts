@@ -212,6 +212,21 @@ export interface InstitutionalPackage {
     decentralized_cost: number;
 }
 
+/**
+ * The master entity-autonomy dial (DIMENSION 2). Sets how much sovereignty RS
+ * retains; in Phase 2 it scales the competency/constitutional deviation cost.
+ * Default 'dayton-historical'. Mirror of EntityAutonomySetting in
+ * institutional_packages.ts (kept here to avoid a sim→state import).
+ */
+export type EntityAutonomySetting =
+    | 'confederation'
+    | 'dayton-historical'
+    | 'federalized'
+    | 'unitary';
+
+/** Competency owner (DIMENSION 3): who exercises a competency in the settlement. */
+export type CompetencyOwnerChoice = 'state' | 'entity' | 'shared';
+
 /** A proposal containing territorial demands and institutional choices. */
 export interface DaytonProposal {
     /** Territorial package IDs the proposing faction demands. */
@@ -220,6 +235,17 @@ export interface DaytonProposal {
     territorial_concessions: string[];
     /** Institutional choices: package id -> 'centralized' | 'decentralized'. */
     institutional_choices: Record<string, 'centralized' | 'decentralized'>;
+    // ── Institutional-architecture expansion (2026-06-07) — all OPTIONAL, ──────
+    //    backward-compatible (mirror the brcko_status?/entity_autonomy_index?
+    //    optional pattern). Phase 1 declares them; Phase 2 wires resolution/cost.
+    /** DIMENSION 2 master dial. Absent ⇒ 'dayton-historical'. */
+    entity_autonomy?: EntityAutonomySetting;
+    /** DIMENSION 3: competency id -> owner. Absent/partial ⇒ historical Annex-4 default. */
+    competency_allocation?: Record<string, CompetencyOwnerChoice>;
+    /** DIMENSION 4: constitutional choice id -> option id. Absent ⇒ historical default. */
+    constitutional_choices?: Record<string, string>;
+    /** DIMENSION 5: return/justice choice id -> option id. Absent ⇒ historical default. */
+    return_justice?: Record<string, string>;
 }
 
 /** Bot response to a Dayton proposal. */
@@ -270,8 +296,24 @@ export interface DaytonResult {
      * settlement and what was signed. Caps outcome_class. Optional/back-compat.
      */
     peace_dysfunction_index?: number;
-    /** Structural dysfunction flags raised by the signed settlement (D3). */
+    /**
+     * Structural dysfunction flags raised by the signed settlement (D3). The
+     * institutional-architecture expansion (2026-06-07) adds 'ohr_dependency' and
+     * 'sejdic_finci_fault' to the existing five (7 total).
+     */
     peace_dysfunction_flags?: string[];
+    // ── Institutional-architecture expansion (2026-06-07) — all OPTIONAL. ──────
+    //    Persisted mirrors of the proposal's new dimensions so the dysfunction
+    //    index sees deviations after resolution (Phase 2 writes these; Phase 1
+    //    only declares them). Absent ⇒ historical Annex-4 default.
+    /** DIMENSION 2 master dial that was signed. Absent ⇒ 'dayton-historical'. */
+    entity_autonomy?: EntityAutonomySetting;
+    /** DIMENSION 3: final competency id -> owner allocation. */
+    competency_allocation?: Record<string, CompetencyOwnerChoice>;
+    /** DIMENSION 4: final constitutional choice id -> option id. */
+    constitutional_choices?: Record<string, string>;
+    /** DIMENSION 5: final return/justice choice id -> option id. */
+    return_justice?: Record<string, string>;
 }
 
 /**
@@ -285,6 +327,8 @@ export interface PeaceDysfunctionBreakdown {
     autonomy_component: number;
     /** Sub-component 0-100: territorial fragmentation of the signed map. */
     fragmentation_component: number;
+    /** Sub-component 0-100: constitutional gridlock-by-design (DIMENSION 4, 2026-06-07). */
+    gridlock_component: number;
     /** Sub-component 0-100: Brčko left unresolved (arbitration) rather than cleanly assigned. */
     brcko_component: number;
     /** Sub-component 0-100: refugees created during the war and not returned. */

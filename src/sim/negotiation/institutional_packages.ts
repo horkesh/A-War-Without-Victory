@@ -13,6 +13,11 @@
  */
 
 import type { InstitutionalPackage } from '../../state/negotiation_types.js';
+import {
+    COMPETENCY_PACKAGES,
+    type CompetencyOwner,
+    type CompetencyWeightClass,
+} from './competency_packages.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Package definitions
@@ -178,4 +183,107 @@ export function computeEntityAutonomyIndex(
 /** Local stable string comparator (avoids a cross-module import cycle). */
 function strictCompareLocal(a: string, b: string): number {
     return a < b ? -1 : a > b ? 1 : 0;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Entity-Autonomy Dial (DIMENSION 2 master dial — Phase 1: type + default only)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * The master entity-autonomy dial declared at the Dayton table. Sets how much
+ * sovereignty RS retains; in Phase 2 it sets the cost multiplier + deviation
+ * cost for the competency/constitutional dimensions. Phase 1 ships the type +
+ * default only — the cost-dial logic is Phase 2.
+ */
+export type EntityAutonomySetting =
+    | 'confederation'
+    | 'dayton-historical'
+    | 'federalized'
+    | 'unitary';
+
+/** Historical 1995 Dayton default for the master dial (free baseline). */
+export const ENTITY_AUTONOMY_DEFAULT: EntityAutonomySetting = 'dayton-historical';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Extended Entity-Autonomy Index — folds the 16 competencies (DIMENSION 3)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Per-competency autonomy weight by weight-class. Sovereign-core weighs heaviest
+ * (defense/foreign policy/monetary/trade drive real entity sovereignty); connective
+ * weighs least. These are RELATIVE class weights — the extended index re-normalizes
+ * across whatever dimensions are present, so the absolute scale need not sum to 1.
+ */
+const COMPETENCY_CLASS_WEIGHT: Readonly<Record<CompetencyWeightClass, number>> = Object.freeze({
+    'sovereign-core': 0.25,
+    coercive: 0.18,
+    fiscal: 0.15,
+    'rule-of-law': 0.12,
+    social: 0.08,
+    connective: 0.06,
+});
+
+/**
+ * How much each competency owner reads as ENTITY autonomy (0-100):
+ *   - entity → 100 (fully devolved = maximally autonomous).
+ *   - shared → 50  (split between state and entities).
+ *   - state  → 0   (centralized = no entity autonomy).
+ */
+function ownerAutonomy(owner: CompetencyOwner): number {
+    if (owner === 'entity') return 100;
+    if (owner === 'shared') return 50;
+    return 0;
+}
+
+/**
+ * Extended entity-autonomy index (0-100) folding the 16-competency allocation
+ * (DIMENSION 3) into the legacy 6-toggle index. Re-normalized over the union of
+ * the 6 institutional toggles and the 16 competencies; entity-ward = high autonomy.
+ *
+ * BYTE-IDENTITY: an unspecified competency defaults to its historical 1995 owner
+ * (Annex 4), so an EMPTY competency map reproduces the historical Dayton default
+ * autonomy contribution and the all-default settlement is unchanged. The legacy
+ * single-arg `computeEntityAutonomyIndex` is left untouched for callers that pass
+ * only the 6 toggles (and for the existing tests).
+ *
+ * NOTE: this is NOT the same number as the legacy 6-toggle 100/0 — adding the 16
+ * historical-default competencies (a mix of state/entity/shared owners) pulls the
+ * "all-decentralized 6 toggles" reading below 100. That is intended: the dysfunction
+ * index's byte-identity is pinned on the *gridlock=100 + this extended index at the
+ * historical default*, not on the bare legacy 100. The historical-default index is a
+ * fixed constant by construction (no overrides) and is pinned by test.
+ *
+ * Pure & deterministic: sorted iteration, integer-rounded output.
+ */
+export function computeExtendedEntityAutonomyIndex(
+    institutionalChoices: Record<string, 'centralized' | 'decentralized'>,
+    competencyAllocation?: Record<string, CompetencyOwner>,
+): number {
+    let weighted = 0;
+    let totalWeight = 0;
+
+    // Legacy 6 institutional toggles (unchanged weights/semantics).
+    const ids = INSTITUTIONAL_PACKAGES.map(p => p.id).slice().sort(strictCompareLocal);
+    for (const id of ids) {
+        const weight = AUTONOMY_DIMENSION_WEIGHTS[id] ?? 0;
+        if (weight <= 0) continue;
+        const choice = institutionalChoices?.[id] ?? 'decentralized';
+        const autonomy = choice === 'decentralized' ? 100 : 0;
+        weighted += autonomy * weight;
+        totalWeight += weight;
+    }
+
+    // 16 competencies (DIMENSION 3). Unspecified → historical 1995 default owner,
+    // so an empty allocation reproduces the historical settlement deterministically.
+    const comps = [...COMPETENCY_PACKAGES].sort((a, b) => strictCompareLocal(a.id, b.id));
+    for (const comp of comps) {
+        const weight = COMPETENCY_CLASS_WEIGHT[comp.weight_class] ?? 0;
+        if (weight <= 0) continue;
+        const owner = competencyAllocation?.[comp.id] ?? comp.default_owner;
+        weighted += ownerAutonomy(owner) * weight;
+        totalWeight += weight;
+    }
+
+    if (totalWeight <= 0) return 100;
+    return Math.round((weighted / totalWeight) * 10) / 10;
 }
