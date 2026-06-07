@@ -149,6 +149,34 @@ interface IpcBattleEventsResult {
     events?: IpcBattleEventEntry[];
 }
 
+/** A single bot faction's response in a Dayton preview (Dayton Phase-4). */
+export interface IpcDaytonBotResponse {
+    decision: 'accept' | 'reject' | 'counter';
+    reason: string;
+    proposal_cost: number;
+    available_capital: number;
+    counter_proposal?: {
+        territorial_demands: string[];
+        territorial_concessions: string[];
+        institutional_choices: Record<string, 'centralized' | 'decentralized'>;
+    };
+}
+
+/**
+ * Read-only Dayton preview result (Dayton Phase-4). `result` is the authoritative
+ * DaytonResult the real resolver would produce (entity_autonomy_index,
+ * peace_dysfunction_index/flags, brcko_status, final_territory_split) computed on a
+ * throwaway clone; `botResponses` carries each non-player faction's accept/reject/
+ * counter-offer. Nothing in game state is mutated by producing this.
+ */
+export interface IpcDaytonPreviewResult {
+    ok: boolean;
+    result?: Record<string, unknown>;
+    botResponses?: Record<string, IpcDaytonBotResponse>;
+    playerFaction?: string;
+    error?: string;
+}
+
 /** Shape of window.awwv as exposed by preload.cjs. */
 interface WindowAwwv {
     startNewCampaign: (payload: StartNewCampaignPayload) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
@@ -237,6 +265,8 @@ interface WindowAwwv {
     }) => Promise<{ ok: boolean; counter_offer_id?: string; error?: string }>;
     resolveParamilitaryRequests: (decisions: Array<{ target_osid: string; decision: 'allow' | 'deny' }>) => Promise<{ ok: boolean; stateJson?: string; report?: unknown; error?: string }>;
     resolveDayton: (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => Promise<{ ok: boolean; result?: Record<string, unknown>; error?: string }>;
+    /** Read-only Dayton preview (Dayton Phase-4): bot responses + authoritative readouts, no state mutation. */
+    previewDayton: (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => Promise<IpcDaytonPreviewResult>;
     /** Level 2: Presidential acknowledgement of a warlord friction event. Sets resolved: true, reducing command strain. */
     acknowledgeFrictionEvent: (payload: { corpsId: string; officerId: string; eventTurn: number; eventType: string }) => Promise<{ ok: boolean; error?: string }>;
     /** Level 2: Resolve ALL unresolved friction events for a corps at once. Costs CA (10 if strained, 15 if compromised). 3-turn cooldown. */
@@ -633,6 +663,10 @@ export function useIPC() {
             resolveDayton: awwv
                 ? (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => awwv.resolveDayton(proposal)
                 : makeNoop<{ ok: boolean; result?: Record<string, unknown>; error?: string }>(),
+
+            previewDayton: awwv
+                ? (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => awwv.previewDayton(proposal)
+                : makeNoop<IpcDaytonPreviewResult>(),
 
             acknowledgeFrictionEvent: awwv
                 ? (payload: { corpsId: string; officerId: string; eventTurn: number; eventType: string }) => awwv.acknowledgeFrictionEvent(payload)

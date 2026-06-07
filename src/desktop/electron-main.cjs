@@ -2829,6 +2829,45 @@ app.whenReady().then(() => {
     }
   });
 
+  // Read-only Dayton PREVIEW (Dayton Phase-4): runs the real resolver + bot
+  // evaluation on a THROWAWAY deserialized clone so the negotiation modal can show
+  // the authoritative peace_dysfunction_index / entity_autonomy_index / Brčko
+  // outcome and each bot faction's accept/reject/COUNTER-OFFER, then discards the
+  // clone. NEVER assigns back to currentGameStateJson and NEVER pushes to the
+  // renderer → zero state mutation. Surfaces the already-built counter-offer
+  // generator + dysfunction read-models that are otherwise only seen post-resolution.
+  ipcMain.handle('preview-dayton', async (_event, payload) => {
+    const { territorial_demands, territorial_concessions, institutional_choices } = payload || {};
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
+    }
+    try {
+      const sim = getDesktopSim();
+      // Fresh clone from the canonical JSON — the resolver mutates this clone only.
+      const clone = sim.deserializeState(currentGameStateJson);
+      const proposal = {
+        territorial_demands: territorial_demands || [],
+        territorial_concessions: territorial_concessions || [],
+        institutional_choices: institutional_choices || {},
+      };
+      const { evaluateBotResponse } = require('../sim/negotiation/bot_negotiation.js');
+      const playerFaction = (clone.meta && clone.meta.player_faction) || 'RBiH';
+      const canonical = ['HRHB', 'RBiH', 'RS'];
+      const botResponses = {};
+      for (const faction of canonical) {
+        if (faction === playerFaction) continue;
+        botResponses[faction] = evaluateBotResponse(clone, faction, proposal);
+      }
+      // Resolve on the clone to surface the authoritative readouts (mutates the
+      // clone only — the clone is then garbage-collected; nothing is written back).
+      const { resolveDaytonNegotiation } = require('../sim/negotiation/dayton_negotiation.js');
+      const result = resolveDaytonNegotiation(clone, proposal);
+      return { ok: true, result, botResponses, playerFaction };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   // --- Read-only query handlers (UI previews; no state mutation) ---
   ipcMain.handle('query-movement-range', async (_event, payload) => {
     const { brigadeId } = payload || {};
