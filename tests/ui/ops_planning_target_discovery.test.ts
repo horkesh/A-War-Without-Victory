@@ -292,7 +292,7 @@ describe('ops planning target discovery', () => {
         expect(screen.getByText('Datum')).toBeTruthy();
         expect(screen.getByRole('button', { name: /procjena/i })).toBeTruthy();
         expect(screen.getByRole('button', { name: /legenda karte/i })).toBeTruthy();
-        expect(screen.getByText('Dovrsite plan za izradu procjene')).toBeTruthy();
+        expect(screen.getByText('Dovršite plan za izradu procjene')).toBeTruthy();
         expect(screen.getByRole('button', { name: /nastavi na odobrenje/i })).toBeTruthy();
         expect(screen.queryByText('G2 Snapshot')).toBeNull();
     });
@@ -369,10 +369,10 @@ describe('ops planning target discovery', () => {
         expect(screen.getByText('Brzina naspram gubitaka')).toBeTruthy();
         expect(screen.getByText('Tolerancija')).toBeTruthy();
         expect(screen.getByText('Kada brigade prestaju napadati?')).toBeTruthy();
-        expect(screen.getByText('Podrska')).toBeTruthy();
-        expect(screen.getByText('Prednapadna vatrena podrska')).toBeTruthy();
+        expect(screen.getByText('Podrška')).toBeTruthy();
+        expect(screen.getByText('Prednapadna vatrena podrška')).toBeTruthy();
         expect(screen.getByText('Sektorski napad')).toBeTruthy();
-        expect(screen.getByText('Uravnotezen pristup')).toBeTruthy();
+        expect(screen.getByText('Uravnotežen pristup')).toBeTruthy();
         expect(screen.queryByText('What kind of operation?')).toBeNull();
     });
 
@@ -389,7 +389,7 @@ describe('ops planning target discovery', () => {
         expect(screen.getByText('Komanduje:')).toBeTruthy();
         expect(screen.getByText('ljudstva')).toBeTruthy();
         expect(screen.getByText('sektora')).toBeTruthy();
-        expect(screen.getAllByText('Maticni korpus').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Matični korpus').length).toBeGreaterThan(0);
         expect(screen.getAllByText('Kompetencija').length).toBeGreaterThan(0);
         expect(screen.getAllByText('Agresivnost').length).toBeGreaterThan(0);
         expect(screen.getAllByText('Vrijeme pripreme:').length).toBeGreaterThan(0);
@@ -412,7 +412,7 @@ describe('ops planning target discovery', () => {
             osidDisplayNames: { enemy_front: 'Enemy Front' },
         }));
 
-        expect(screen.getByText(/ZADACA/)).toBeTruthy();
+        expect(screen.getByText(/ZADAĆA/)).toBeTruthy();
         expect(screen.getByText(/Sektorski napad/)).toBeTruthy();
         expect(screen.getByText(/Tempo: Standardno/)).toBeTruthy();
         expect(screen.getByText(/Minimalni ishod: Prihvati skupo/)).toBeTruthy();

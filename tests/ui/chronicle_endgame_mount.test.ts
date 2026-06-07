@@ -74,7 +74,7 @@ describe('chronicle endgame narrative mounts', () => {
             }),
         );
         expect(cardHtml).not.toContain('War lasted 18 weeks shorter than the historical 188 weeks');
-        expect(cardHtml).toContain('Rat je trajao 18 sedmica krace od historijskih 188 sedmica.');
+        expect(cardHtml).toContain('Rat je trajao 18 sedmica kraće od historijskih 188 sedmica.');
 
         const wrappedHtml = renderToStaticMarkup(
             React.createElement(WrappedSlideComponent, {
@@ -101,7 +101,7 @@ describe('chronicle endgame narrative mounts', () => {
         );
         expect(wrappedHtml).not.toContain('War lasted 18 weeks shorter than the historical 188 weeks');
         expect(wrappedHtml).not.toContain('Federation controlled 54.0% territory vs historical 51%');
-        expect(wrappedHtml).toContain('Rat je trajao 18 sedmica krace od historijskih 188 sedmica.');
+        expect(wrappedHtml).toContain('Rat je trajao 18 sedmica kraće od historijskih 188 sedmica.');
         expect(wrappedHtml).toContain('Federacija je kontrolisala 54.0% teritorije naspram historijskih 51%.');
     });
 });

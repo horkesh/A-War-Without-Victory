@@ -251,8 +251,8 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         const warCost = within(warCostSection as HTMLElement);
 
         expect(screen.getByRole('button', { name: 'Izvještaj' })).toBeDefined();
-        expect(screen.getByRole('button', { name: 'Obracun' })).toBeDefined();
-        expect(screen.getByText('Najmanje losa verzija tragedije')).toBeDefined();
+        expect(screen.getByRole('button', { name: 'Obračun' })).toBeDefined();
+        expect(screen.getByText('Najmanje loša verzija tragedije')).toBeDefined();
         expect(screen.getByRole('button', { name: 'Pogledaj svoj rat' })).toBeDefined();
         expect(screen.getByRole('button', { name: 'Nova igra' })).toBeDefined();
         expect(screen.getByText('Pirov rezultat')).toBeDefined();
@@ -262,9 +262,9 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('Teritorijalni legitimitet')).toBeDefined();
         expect(screen.getByText('Međunarodni položaj')).toBeDefined();
         expect(screen.getByText('Povjerenje patrona')).toBeDefined();
-        expect(screen.getByText('Unutrasnja kohezija')).toBeDefined();
-        expect(screen.getByText('Pregovaracka poluga')).toBeDefined();
-        expect(screen.getAllByText('Zavrsna statistika').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByText('Unutrašnja kohezija')).toBeDefined();
+        expect(screen.getByText('Pregovaračka poluga')).toBeDefined();
+        expect(screen.getAllByText('Završna statistika').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('Teritorija')).toBeDefined();
         expect(screen.getByText('Ukupna cijena rata')).toBeDefined();
         expect(screen.getAllByText('Trajanje rata').length).toBeGreaterThanOrEqual(1);
@@ -281,7 +281,7 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.queryByText('Survival')).toBeNull();
         expect(screen.getAllByText('Opstanak').length).toBeGreaterThanOrEqual(2);
         expect(screen.getAllByText('Daytonski sporazum').length).toBeGreaterThanOrEqual(1);
-        expect(screen.getByText('Poredjenje prekretnica')).toBeDefined();
+        expect(screen.getByText('Poređenje prekretnica')).toBeDefined();
         expect(screen.getByText('Historija')).toBeDefined();
         expect(screen.getByText('Ti')).toBeDefined();
         expect(screen.getByText('Razlika')).toBeDefined();
@@ -290,13 +290,13 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('S188')).toBeDefined();
         expect(screen.getByText('6s kasno')).toBeDefined();
         expect(screen.getByText('Kasno')).toBeDefined();
-        expect(screen.getByText('Kampanja je zavrsila 6 sedmica kasnije od historijske reference.')).toBeDefined();
+        expect(screen.getByText('Kampanja je završila 6 sedmica kasnije od historijske reference.')).toBeDefined();
 
         fireEvent.click(screen.getByText('VRS'));
 
         expect(screen.getByText('Međunarodna osuda')).toBeDefined();
         expect(screen.queryByText(/Condemned for genocide/i)).toBeNull();
-        expect(screen.getByText('Osuđeno zbog genocida - međunarodni sudski postupci su neizbjezni')).toBeDefined();
+        expect(screen.getByText('Osuđeno zbog genocida - međunarodni sudski postupci su neizbježni')).toBeDefined();
     });
 });
 
@@ -345,7 +345,7 @@ describe('VerdictScreen route — endgame reachability', () => {
         renderVS();
 
         expect(screen.getByText('Pat pozicija')).toBeDefined();
-        expect(screen.getByText('Konacni poredak')).toBeDefined();
+        expect(screen.getByText('Konačni poredak')).toBeDefined();
         expect(screen.getByText('1 OSID pod kontrolom')).toBeDefined();
         expect(screen.getByText('Kampanja je trajala 188 sedmica (3 godina, 32 sedmica)')).toBeDefined();
         expect(screen.getByRole('button', { name: 'Pogledaj svoj rat' })).toBeDefined();

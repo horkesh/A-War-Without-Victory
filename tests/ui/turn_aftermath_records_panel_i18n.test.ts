@@ -83,7 +83,7 @@ describe('TurnAftermathRecordsPanel localization', () => {
         expect(screen.getAllByText('Sve').length).toBeGreaterThan(0);
         expect(screen.getByText('Puls kampanje')).toBeTruthy();
         expect(screen.getByText('Dosadasnja cijena kampanje')).toBeTruthy();
-        expect(screen.getByText('Strateski signali')).toBeTruthy();
+        expect(screen.getByText('Strateški signali')).toBeTruthy();
         expect(screen.getAllByText('Arhiva').length).toBeGreaterThan(0);
         expect(screen.queryByText('Campaign pulse')).toBeNull();
     });

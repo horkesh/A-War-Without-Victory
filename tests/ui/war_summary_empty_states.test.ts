@@ -74,7 +74,7 @@ describe('War Summary empty states', () => {
 
     it.each([
         ['convoys', 'Nema konvojskih odluka na čekanju.'],
-        ['support', 'Nema lokalne naredbe podrske za ovaj potez.'],
+        ['support', 'Nema lokalne naredbe podrške za ovaj potez.'],
         ['capital', 'Diplomatski kapital nije dostupan u ovom prikazu.'],
     ] as const)('localizes the empty %s section in BCS mode', (section, message) => {
         setLocale('bcs');
