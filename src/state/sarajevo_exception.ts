@@ -84,18 +84,28 @@ function isSarajevoSiegeCanonicallyActive(state: GameState): boolean {
     return (resilience?.isolation_turns ?? 0) > 0 || resilience?.hardening_active === true;
 }
 
-export function updateSarajevoState(
+/**
+ * Shared derivation of the Sarajevo pocket OSIDs, defender controller, internal
+ * supply score and banded siege status. Pure read over state + the per-turn
+ * supply report. Used by both `updateSarajevoState` (the authoritative writer)
+ * and `refreshSarajevoLifelineCache` (the early, lifeline-only refresh) so the
+ * two paths can never drift on what "besieged" means.
+ */
+function deriveSarajevoSiegeContext(
     state: GameState,
     supplyByOsid: SupplyStateByOsidReport | undefined
-): SarajevoState {
+): {
+    controller: string | null;
+    pocketOsids: string[];
+    internalSupply: number;
+    siegeStatus: SarajevoState['siege_status'];
+} {
     const sarajevoOsids = getSarajevoOsids(state);
     const controller = getSarajevoDefenderController(state, sarajevoOsids);
     const pocketOsids =
         controller == null
             ? sarajevoOsids
             : sarajevoOsids.filter((osid) => state.political.political_controllers?.[osid] === controller);
-    const prev = state.political.sarajevo_state;
-    const turn = state.meta.turn;
 
     let supplyScoreSum = 0;
     let count = 0;
@@ -116,6 +126,64 @@ export function updateSarajevoState(
                 : internalSupply < 0.8
                     ? 'PARTIAL'
                     : 'OPEN';
+    return { controller, pocketOsids, internalSupply, siegeStatus };
+}
+
+/**
+ * B7 STALE-CACHE FIX (#271): the authoritative `updateSarajevoState` runs LATE in
+ * the war pipeline (after the bombardment/morale/supply-reserve/exhaustion
+ * consumers), so those consumers would otherwise read the PREVIOUS turn's cached
+ * lifeline. This refresh derives ONLY the lifeline scalar from current-turn event
+ * truth + supply and writes it to `state.political.sarajevo_state.lifeline` early
+ * (right after supply resolution), so consumers see a current-turn value.
+ *
+ * It deliberately does NOT touch siege_duration or any other sarajevo_state field
+ * (which would double-increment if computed twice per turn) — the late
+ * `updateSarajevoState` remains the authoritative writer and recomputes an
+ * identical lifeline from the same inputs.
+ *
+ * FLAG-GATED: a no-op (returns undefined, writes nothing) when
+ * `ENABLE_SARAJEVO_LIFELINE` is OFF, so the flag-OFF path is byte-identical.
+ */
+export function refreshSarajevoLifelineCache(
+    state: GameState,
+    supplyByOsid: SupplyStateByOsidReport | undefined
+): SiegeLifelineState | undefined {
+    if (!isSarajevoLifelineEnabled()) return undefined;
+    const { siegeStatus } = deriveSarajevoSiegeContext(state, supplyByOsid);
+    const lifeline = deriveSarajevoLifeline(state, siegeStatus === 'BESIEGED', state.meta.turn);
+    // Attach to the existing cache without disturbing other fields. If no
+    // sarajevo_state exists yet this turn, the late writer will create the full
+    // object; we still seed a minimal carrier so early consumers read the value.
+    if (state.political.sarajevo_state) {
+        state.political.sarajevo_state.lifeline = lifeline;
+    } else {
+        state.political.sarajevo_state = {
+            mun_id: 'sarajevo_cluster_1990',
+            mun_ids: SARAJEVO_CITY_CORE_MUN_IDS.slice(),
+            settlement_ids: [],
+            siege_status: siegeStatus,
+            siege_duration: 0,
+            external_supply: lifeline.throughput,
+            internal_supply: 0,
+            siege_intensity: 0,
+            international_focus: BASE_IMPORTANCE,
+            humanitarian_pressure: 0,
+            last_updated_turn: state.meta.turn,
+            lifeline,
+        };
+    }
+    return lifeline;
+}
+
+export function updateSarajevoState(
+    state: GameState,
+    supplyByOsid: SupplyStateByOsidReport | undefined
+): SarajevoState {
+    const { controller, pocketOsids, internalSupply, siegeStatus } =
+        deriveSarajevoSiegeContext(state, supplyByOsid);
+    const prev = state.political.sarajevo_state;
+    const turn = state.meta.turn;
 
     // B7 lifeline (default-OFF). FLAG-OFF: externalSupply aliases internalSupply
     // exactly as before and `lifeline` stays undefined — byte-identical. FLAG-ON:

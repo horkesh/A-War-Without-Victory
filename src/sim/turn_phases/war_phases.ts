@@ -73,7 +73,7 @@ import {
     updatePatronState
 } from '../../state/patron_pressure.js';
 import { migratePoliticalControllersToOsidIfNeeded } from '../../state/political_control_init.js';
-import { updateSarajevoState } from '../../state/sarajevo_exception.js';
+import { updateSarajevoState, refreshSarajevoLifelineCache } from '../../state/sarajevo_exception.js';
 import { updateSustainability } from '../../state/sustainability.js';
 import { updateLossOfControlTrends } from '../../state/loss_of_control_trends.js';
 import { calculateFactionProductionBonus, ensureProductionFacilities } from '../../state/production_facilities.js';
@@ -1200,6 +1200,22 @@ export const warPhases: NamedPhase[] = [
                 allianceForZones,
             );
             setSpatialContextCache(context, { preCombat: spatial });
+        }
+    },
+    {
+        // B7 STALE-CACHE FIX (#271): refresh the Sarajevo lifeline scalar from
+        // current-turn event truth + supply BEFORE the siege/morale/exhaustion/
+        // supply-reserve consumers read it. The authoritative full-state writer
+        // (`update-sarajevo-exception`) still runs late; this step only refreshes
+        // `sarajevo_state.lifeline` so consumers never read a previous-turn value.
+        // FLAG-GATED: a no-op when ENABLE_SARAJEVO_LIFELINE is OFF → byte-identical.
+        name: 'refresh-sarajevo-lifeline-cache',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            refreshSarajevoLifelineCache(
+                context.state,
+                context.report.supply_resolution?.supply_state_by_osid
+            );
         }
     },
     {

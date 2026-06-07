@@ -33,6 +33,32 @@ describe('scenario sarajevo_overrides schema', () => {
         });
     });
 
+    it('passes B7 lifeline override keys through scenario load (#271)', () => {
+        // Regression: the normalizer previously whitelisted only the 5 LEGACY
+        // numeric keys, silently dropping the new lifeline tuning fields so a
+        // scenario could never configure the lifeline. All four must survive.
+        const withLifeline = normalizeScenario({
+            scenario_id: 'sarajevo_with_lifeline_overrides',
+            weeks: 1,
+            turns: [],
+            sarajevo_overrides: {
+                defense_bonus: 0.5,
+                lifeline_base_throughput: 0.1,
+                lifeline_airlift_throughput: 0.3,
+                lifeline_tunnel_throughput: 0.4,
+                lifeline_severed_attrition_mult: 1.5,
+            } satisfies SarajevoSiegeOverrides,
+        });
+
+        expect(withLifeline.sarajevo_overrides).toEqual({
+            defense_bonus: 0.5,
+            lifeline_base_throughput: 0.1,
+            lifeline_airlift_throughput: 0.3,
+            lifeline_tunnel_throughput: 0.4,
+            lifeline_severed_attrition_mult: 1.5,
+        });
+    });
+
     it('drops invalid or empty override values instead of manufacturing defaults', () => {
         const scenario = normalizeScenario({
             scenario_id: 'sarajevo_invalid_overrides',
