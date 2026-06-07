@@ -111,3 +111,59 @@ describe('shared presidentialCommandArt resolver (no glob duplication)', () => {
     expect(resolveCommandCardOverride('totally_unmapped_id')).toBeNull();
   });
 });
+
+describe('faction-aware command-card override resolution', () => {
+  const FACTIONS = ['RBiH', 'RS', 'HRHB'] as const;
+  const CAT_IDS = [
+    'cat_war_direction',
+    'cat_command',
+    'cat_diplomacy',
+    'cat_home_front',
+    'cat_conscience',
+    'cat_record',
+  ];
+  const ACT_IDS = [
+    'act_authorize_op',
+    'act_replace_commander',
+    'act_patron_relations',
+    'act_convoy',
+    'act_front_visit',
+  ];
+
+  it('resolves the faction-specific override for every category card × faction', () => {
+    for (const faction of FACTIONS) {
+      for (const id of CAT_IDS) {
+        const url = resolveCommandCardArt(id, faction);
+        expect(url, `${id} (${faction}) must resolve to a faction override`).not.toBeNull();
+        expect(url!.endsWith(`${id}_${faction}.webp`)).toBe(true);
+        expect(url).toContain('command_cards');
+      }
+    }
+  });
+
+  it('resolves the faction-specific override for every action card × faction', () => {
+    for (const faction of FACTIONS) {
+      for (const id of ACT_IDS) {
+        const url = resolveCommandCardOverride(id, faction);
+        expect(url, `${id} (${faction}) must resolve to a faction override`).not.toBeNull();
+        expect(url!.endsWith(`${id}_${faction}.webp`)).toBe(true);
+        expect(url).toContain('command_cards');
+      }
+    }
+  });
+
+  it('falls back to the shared desk asset when no faction override exists', () => {
+    // An unknown faction has no `<id>_<faction>.webp`, and no faction-agnostic
+    // `<id>.webp` ships, so resolution falls through to the mapped desk thumbnail.
+    const url = resolveCommandCardArt('cat_war_direction', 'ZZ');
+    expect(url).not.toBeNull();
+    expect(url!.endsWith('packet_thumb_reserve_request.webp')).toBe(true);
+  });
+
+  it('directive act art prefers the faction-specific override', () => {
+    const url = resolveDirectiveActArt('replace_co', 'HRHB');
+    expect(url).not.toBeNull();
+    expect(url!.endsWith('act_replace_commander_HRHB.webp')).toBe(true);
+    expect(url).toContain('command_cards');
+  });
+});

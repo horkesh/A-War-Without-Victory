@@ -452,7 +452,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   // lever (reusing the existing consequence_stills art via the shared resolver).
   // When nothing resolves the card renders its text-only header below — the act
   // surface always works with zero art.
-  const headerArt = resolveDirectiveActArt(directive.lever);
+  const headerArt = resolveDirectiveActArt(directive.lever, gameState.player_faction);
 
   return (
     <section

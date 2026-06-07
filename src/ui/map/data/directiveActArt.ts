@@ -61,11 +61,12 @@ export const DIRECTIVE_LEVER_TO_ACT_ID: Readonly<Record<DirectiveLever, string>>
  * Precedence: per-id override (`command_cards/<act_id>.webp`) → mapped
  * consequence-still → null (caller renders its text-only header).
  */
-export function resolveDirectiveActArt(lever: DirectiveLever): string | null {
+export function resolveDirectiveActArt(lever: DirectiveLever, faction?: string | null): string | null {
   const actId = DIRECTIVE_LEVER_TO_ACT_ID[lever];
   if (!actId) return null;
-  // 1. Per-id override wins (drop a command_cards/<act_id>.webp in).
-  const override = resolveCommandCardOverride(actId);
+  // 1. Per-id override wins (faction-specific command_cards/<act_id>_<faction>.webp first,
+  //    then the faction-agnostic command_cards/<act_id>.webp).
+  const override = resolveCommandCardOverride(actId, faction);
   if (override) return override;
   // 2. Mapped consequence-still basename for this act id.
   const basename = COMMAND_CARD_DESK_ASSET[actId];
