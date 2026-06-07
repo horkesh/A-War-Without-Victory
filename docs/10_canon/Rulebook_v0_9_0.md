@@ -262,6 +262,8 @@ When a sector is attacked, the defense is not limited to brigades physically pre
 
 **Casualty distribution:** When reserves contribute to defense, casualties are distributed proportionally to each brigade's contribution weight. Brigades closer to the fight and with home-municipality motivation absorb more casualties. A casualty engagement cap (1.5x attacker personnel) prevents defenders from taking disproportionate losses when they have overwhelming local superiority.
 
+**Standing-OG defensive doctrine (accepted 2026-06-07, ADR-0007).** A standing Operational Group defends as a single body, not as a string of lone outposts. When one of its sectors comes under attack, the threatened front edge is not left to bleed alone: the OG draws on a **depletable second echelon** — same-OG sectormates that reinforce the contested point and **share the defensive cost (fatigue as well as casualties)** rather than dumping all the exhaustion onto the lone brigade holding the line. The reserve is real but finite: it commits forward under pressure and is used up, so a sector can still break once the depth behind it is spent. This is the defensive twin of the offensive task-organization doctrine: the sector remains the defensive entity (§5.7; ADR-0006), and the doctrine governs how a sector's brigades bear the grind together, not which brigade owns which ground.
+
 **Sector stances (Layer B):** Each sector can adopt one of five independent defensive stances that modify reactive defense effectiveness and entrenchment growth:
 
 | Stance | Reactive Bonus | Entrenchment Rate | Description |
