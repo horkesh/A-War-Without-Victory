@@ -84,10 +84,13 @@ function assertCatalogRowsThrow(rows: unknown[], expected: RegExp): void {
     );
 }
 
-test('loadEventDefinitions(0) returns the current 289-row catalog', () => {
+test('loadEventDefinitions(0) returns the current 293-row catalog', () => {
     const loaded = loadEventDefinitions(0);
 
-    assert.strictEqual(loaded.length, 289);
+    // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events in
+    // consequences.json (csq_winter_held_audit, csq_corridor_blocked_audit,
+    // csq_arms_embargo_compliance_audit, csq_political_unity_audit).
+    assert.strictEqual(loaded.length, 293);
 });
 
 test('loadEventDefinitions(0) returns deterministic order by trigger turn_min then id', () => {

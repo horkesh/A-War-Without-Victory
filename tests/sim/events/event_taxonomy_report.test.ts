@@ -13,7 +13,8 @@ describe('event taxonomy diagnostic report', () => {
     it('loads the fixed five-file catalog in deterministic order', () => {
         const rows = loadCatalogRows();
 
-        expect(rows).toHaveLength(289);
+        // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events.
+        expect(rows).toHaveLength(293);
         expect([...new Set(rows.map((row) => row.file))]).toEqual([
             'data/scenarios/events/war_1992.json',
             'data/scenarios/events/war_1993.json',
@@ -31,9 +32,9 @@ describe('event taxonomy diagnostic report', () => {
     it('reports one row per current event id and no duplicate ids', () => {
         const report = buildEventTaxonomyReport(loadCatalogRows());
 
-        expect(report.summary.total_events).toBe(289);
+        expect(report.summary.total_events).toBe(293);
         expect(report.summary.duplicate_event_ids).toEqual([]);
-        expect(new Set(report.rows.map((row) => row.id)).size).toBe(289);
+        expect(new Set(report.rows.map((row) => row.id)).size).toBe(293);
     });
 
     it('classifies trigger emergence from phase, prerequisites, pressure, and condition types', () => {
@@ -51,7 +52,9 @@ describe('event taxonomy diagnostic report', () => {
         const report = buildEventTaxonomyReport(loadCatalogRows());
 
         expect(report.summary.choice_events).toBe(79);
-        expect(report.summary.no_choice_events).toBe(210);
+        // 210 → 214: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events are
+        // pure flag-setters (no response_options), so they are no-choice events.
+        expect(report.summary.no_choice_events).toBe(214);
         expect(report.summary.required_response_events).toBe(71);
         expect(report.summary.choice_rows_with_title_and_narrative).toBe(79);
         expect(report.summary.choice_rows_with_source).toBe(71);

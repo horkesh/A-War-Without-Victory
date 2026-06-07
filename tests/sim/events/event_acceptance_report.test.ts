@@ -109,7 +109,8 @@ describe('event acceptance diagnostic report', () => {
         const second = buildEventAcceptanceReport();
 
         expect(JSON.stringify(first)).toBe(JSON.stringify(second));
-        expect(first.summary.total_events).toBe(289);
+        // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events.
+        expect(first.summary.total_events).toBe(293);
         expect(first.summary.required_response_events).toBe(71);
         expect(first.summary.production_modal_authoring_ready_events).toBe(45);
         expect(first.summary.acceptance_status).toBe('NOT_READY');

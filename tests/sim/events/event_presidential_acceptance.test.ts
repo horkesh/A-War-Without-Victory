@@ -11,7 +11,8 @@ describe('event presidential acceptance diagnostic', () => {
         const catalog = buildEventAcceptanceReport();
 
         expect(stableStringify(first, 2)).toBe(stableStringify(second, 2));
-        expect(first.summary.catalog_total_events).toBe(289);
+        // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events.
+        expect(first.summary.catalog_total_events).toBe(293);
         expect(first.summary.catalog_required_response_events).toBe(71);
         expect(first.summary.catalog_production_modal_authoring_ready_events).toBe(catalog.production_modal_authoring_ready_rows.length);
         expect(first.summary.catalog_acceptance_status).toBe('NOT_READY');

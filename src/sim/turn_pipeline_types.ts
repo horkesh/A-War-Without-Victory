@@ -66,6 +66,7 @@ import type { EquipmentProgressionReport } from './combat/faction_progression.js
 import type { FrontlineAttritionReport } from './combat/frontline_attrition.js';
 import type { SiegeAttritionReport } from './combat/siege_attrition.js';
 import type { SiegeDrainDiagnostic } from './combat/siege_morale_drain.js';
+import type { ObserverThresholdReport } from './codex/observer_threshold_flags.js';
 import type { MoraleDriftReport } from './combat/morale_drift.js';
 import type { OngoingMobilizationReport } from './combat/ongoing_mobilization.js';
 import type { PoolDecayReport } from './combat/pool_decay.js';
@@ -204,6 +205,13 @@ export interface TurnReport {
      * `drain_pending_count` field increments unconditionally for shadow-flag
      * visibility per N4 morale-collapse override precedent. */
     siege_morale_drain?: SiegeDrainDiagnostic;
+    /** LANE-OBSERVER-FLAG-WRITER (owner decision #3): per-turn diagnostic for
+     * the default-OFF threshold observer that writes the two non-Srebrenica
+     * positive observer flags read by the dormant Ring-2 ghost-codex entries.
+     * `*_observed` counters reflect the live reading regardless of the write
+     * gate (N4 shadow-flag visibility precedent); `flags_written` is empty
+     * while ENABLE_OBSERVER_THRESHOLD_FLAGS is false. */
+    observer_threshold_flags?: ObserverThresholdReport;
     takeover_displacement?: TakeoverDisplacementReport;
     ongoing_mobilization?: OngoingMobilizationReport;
     pool_war_weariness_decay?: PoolDecayReport;
