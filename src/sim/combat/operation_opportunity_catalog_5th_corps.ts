@@ -113,20 +113,34 @@ const BIHAC_PETROVAC_OBJECTIVES = [
     'op:bosanski_petrovac:jasenovac_2',
 ];
 
+// 2026-06-07: re-ordered into a single verified front-edge adjacency walk
+// rooted at the Krupa-axis tail (jasenica_2). Every step below is adjacent to
+// its predecessor per data/derived/operational/operational_contact_graph.json
+// (validated walk: jasenica_2 → budimlic_japra_2 → lusci_palanka_2 →
+// jelasinovci → skucani_vakuf_2 → stari_majdan → sanski_most_2 → ostra_luka →
+// ilidza_2 → kljevci → sanica_2 → hadzici → kljuc_2 → krasulje_2). The prior
+// order opened with lusci_palanka_2 then jumped to non-adjacent sanski_most_2,
+// which stalled the chain on a broken intermediate link. A contiguous walk lets
+// the axis advance one front-edge hop per capture without spurious skip-fires.
+// jelasinovci is taken EARLY (right after lusci_palanka_2, both adjacent) rather
+// than late: in the first lever-(b) run it was the last Sanski-Most objective
+// and got stranded as a 1-OSID RS island once the axis fanned past it into the
+// town center, tripping a disconnected_sector_territory critical on
+// vrs_1st_krajina:2. Pulling it forward keeps the captured belt contiguous.
 const SANSKI_KLJUC_OBJECTIVES = [
-    'op:sanski_most:lusci_palanka_2',
     'op:sanski_most:budimlic_japra_2',
-    'op:sanski_most:sanski_most_2',
-    'op:sanski_most:ilidza_2',
+    'op:sanski_most:lusci_palanka_2',
     'op:sanski_most:jelasinovci',
-    'op:sanski_most:kljevci',
-    'op:sanski_most:ostra_luka',
     'op:sanski_most:skucani_vakuf_2',
     'op:sanski_most:stari_majdan',
+    'op:sanski_most:sanski_most_2',
+    'op:sanski_most:ostra_luka',
+    'op:sanski_most:ilidza_2',
+    'op:sanski_most:kljevci',
+    'op:kljuc:sanica_2',
     'op:kljuc:hadzici',
     'op:kljuc:kljuc_2',
     'op:kljuc:krasulje_2',
-    'op:kljuc:sanica_2',
 ];
 
 /** Sana pocket-survival anchors. If any one is RS-controlled, the pocket
@@ -198,6 +212,39 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
         ],
         objectives: BIHAC_PETROVAC_OBJECTIVES,
         staging_osid: STAGING_BIHAC,
+    },
+    {
+        // 2026-06-07 (Sana follow-on timing fix — lever (b)): the Sanski Most +
+        // Ključ interior is folded into the INITIAL Sana op as a third axis so it
+        // launches with the op at w175 instead of being corridor-gated into a
+        // separate follow-on that only reached execution ~w184 with the shared
+        // 5th Corps brigades already in recovery (→ 2/13). Root cause proven in
+        // 188w n2: the follow-on's 9-brigade roster was 7 of the SAME line
+        // brigades that captured Krupa+Petrovac; by the time the corridor opened
+        // they were recovery-phase exhausted, so pulling planning_duration 3→1
+        // (execution t186→t184) still delivered only 2/13.
+        //
+        // This third axis instead commits the TWO 5th Corps brigades NOT used by
+        // the initial Krupa (3) / Bihać-Petrovac (5) axes — 506th + 517th — so it
+        // fights at full strength. 5th Corps holds exactly 10 line brigades; 8 are
+        // on the two working axes (16/16), leaving 506th/517th free. The axis
+        // stages at jasenica_2 (the Krupa-axis tail) and is front-edge-blocked
+        // (no_approach_osid) until the Krupa axis captures jasenica_2 — then it
+        // rolls down the verified contiguous adjacency walk (SANSKI_KLJUC_
+        // OBJECTIVES) without ever entering a recovery break, because it lives
+        // inside the one continuously-active Sana op. No global threshold, no
+        // combat math, and no corridor predicate touched. Historical mass: the
+        // 5th Corps committed its operational groups en masse Sep-Oct 1995
+        // (Ključ ~17 Sep, Sanski Most ~10 Oct; BB1 pp.417, 419-420).
+        axis_id: 'sana_sanski_most_kljuc',
+        name: 'Sanski Most + Ključ Liberation',
+        corps: PRIMARY_CORPS,
+        brigades: [
+            'arbih_506th_mountain' as FormationId,
+            'arbih_517th_light' as FormationId,
+        ],
+        objectives: SANSKI_KLJUC_OBJECTIVES,
+        staging_osid: STAGING_JASENICA,
     },
 ];
 
