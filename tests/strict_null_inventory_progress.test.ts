@@ -583,20 +583,24 @@ describe('strict null inventory progress', () => {
         // 327 → 328. OPTIONAL + written ONLY by the two player-only apply paths
         // (replace-CO / force-op consequences) → absent on every headless/historical
         // run → byte-identical baseline by construction (40w bb0462f4d37dab2d / 188w
-        // 0abca945388ddb59 unchanged). No new type-escape: as_factionid_casts /
-        // as_any_casts / as_unknown_casts / non_null_assertions all UNCHANGED — purely
-        // the optional-field ratchet recording the contract-mandated new persisted field.
+        // 0abca945388ddb59 unchanged).
+        // Dayton build P1-3 (#277): +2 optional GameState-reachable fields
+        // (peace_dysfunction_index / entity_autonomy_index on the Dayton/verdict path —
+        // post-w188, so 40w/52w byte-identical) → 509→511 / derived 8→10. +1 as_unknown:
+        // one contained JSON-import double-cast `osidAreas as unknown as OsidAreaData`
+        // (package_area_resolver.ts), the established typed-JSON-import idiom (joins the
+        // existing 3). non_null_assertions / as_factionid / as_any UNCHANGED.
         expect(current.counts).toMatchObject({
             as_factionid_casts: 1,
-            as_unknown_casts: 3,
+            as_unknown_casts: 4,
             as_any_casts: 0,
             non_null_assertions_dot: 7,
             non_null_assertions_index: 0,
-            optional_fields_game_state: 509,
+            optional_fields_game_state: 511,
         });
-        expect(current.optional_field_domains.total).toBe(509);
+        expect(current.optional_field_domains.total).toBe(511);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
-            derived: 8,
+            derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 328,
