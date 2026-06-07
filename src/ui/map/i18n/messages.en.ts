@@ -259,6 +259,7 @@ export const enMessages = {
     'armyHq.emergency.offensiveOption': 'ALL OFFENSIVE',
     'armyHq.emergency.reorganizeOption': 'ALL REORGANIZE',
     'armyHq.strategicSituation': 'STRATEGIC SITUATION',
+    'armyHq.observerLabel': 'THE WAR’S RECORD — OBSERVER',
     'armyHq.week': 'Week {turn}',
     'armyHq.confirmAria': 'Confirm emergency posture order',
     'armyHq.confirmBulk': 'Confirm Bulk Order',

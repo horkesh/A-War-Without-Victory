@@ -91,7 +91,9 @@ function formatUnlockRow(
 
 export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
-    const devMode = useGameStore((s) => s.devMode);
+    // Diagnostics gate (NOT generic dev mode): raw event IDs / unlock diagnostics
+    // must never surface in dev:map for playtesters. Requires explicit ?diag=1.
+    const diagMode = useGameStore((s) => s.diagMode);
     const [locale] = useLocale();
     const [selectedEssayId, setSelectedEssayId] = useState<string | null>(null);
     const [expandedYear, setExpandedYear] = useState<number | null>(1992);
@@ -363,11 +365,13 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                     closed). Sub-list rows capped at
                     UNLOCK_STATE_MAX_ROWS_PER_LIST; the section heading
                     always shows the full count. Developer diagnostic ONLY:
-                    gated behind the `devMode` store flag so the raw internal
-                    event IDs never leak into the player-facing Codex (hidden
-                    by default for players AND dev:map playtesters; shown only
-                    when a developer explicitly enables DEV mode). */}
-                {unlockState && devMode && (
+                    gated behind the dedicated `diagMode` store flag (explicit
+                    `?diag=1` opt-in) so the raw internal event IDs never leak
+                    into the player-facing Codex — hidden by default for players
+                    AND for dev:map playtesters (dev:map runs with generic dev
+                    mode auto-enabled, which deliberately does NOT include this
+                    diagnostics surface). */}
+                {unlockState && diagMode && (
                     <div
                         data-testid="codex-unlock-state-section"
                         className="border-b border-neutral-700/40 bg-[#0d0f16] px-3 py-2"

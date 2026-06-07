@@ -61,9 +61,25 @@ export function isDevMode(): boolean {
   return params.get('dev') === '1';
 }
 
+/** Diagnostics mode: surfaces raw internal IDs and unlock diagnostics that must
+ *  NEVER leak to players or dev:map playtesters. Distinct from {@link isDevMode}:
+ *  it is NOT auto-enabled by the Vite dev server. Requires an explicit `?diag=1`
+ *  URL opt-in so the legit developer-diagnostics path stays available while
+ *  `dev:map` (which runs with import.meta.env.DEV true) does not expose raw IDs. */
+export function isDiagMode(): boolean {
+  if (typeof window === 'undefined') return false;
+  const params = new URLSearchParams(window.location.search);
+  return params.get('diag') === '1';
+}
+
 export interface GameStore {
   /** Dev mode flag — unlocks save loaders, run-ID input, and all-faction inspection tools. */
   devMode: boolean;
+
+  /** Diagnostics flag — surfaces raw internal IDs / unlock diagnostics. Requires explicit
+   *  `?diag=1` opt-in; NOT auto-enabled by dev:map. Keep separate from devMode so dev:map
+   *  playtesters never see raw event IDs. */
+  diagMode: boolean;
 
   selectedOsid: string | null;
   setSelectedOsid: (osid: string | null) => void;
@@ -322,6 +338,7 @@ export interface GameStore {
 
 export const useGameStore = create<GameStore>((set, get) => ({
   devMode: isDevMode(),
+  diagMode: isDiagMode(),
 
   selectedOsid: null,
   setSelectedOsid: (osid) => set({ selectedOsid: osid, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedCorpsId: null, selectedArmyId: null, selectedArmyHqId: null, selectedOrbatCorpsId: null }),
@@ -762,6 +779,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
               turnAftermathOpen: false,
               focusedAftermathTurn: null,
               focusedOperationHistoryId: null,
+              // #244: a stale focused-decision id from the previous save makes
+              // DecisionConsequenceRecordsPanel fall back to the unbounded
+              // (MAX_SAFE_INTEGER) ledger build. The id is cleared on tab/subtab/
+              // close but NOT on save-load/replay reset — clear it here too.
+              focusedDecisionConsequenceId: null,
             });
             console.log(`[gameStore] Loaded save: ${state.label} — ${state.formations.length} formations, ${Object.keys(state.controlBySettlement).length} control entries`);
             resolve();
