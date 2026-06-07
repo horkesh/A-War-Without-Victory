@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-07] feat(calibration): Zvornik garrison pin — sacred anchor recovered (+12 OSID)
+
+**Type:** Calibration-moving (188w + 40w re-floor). CI baseline scenarios (52w/baseline_ops/noop) unchanged.
+
+**Change:** New `pinGarrisonToMustHoldFrontEdge` in `src/sim/combat/brigade_front_distribution.ts` — pins ONE idle, same-corps, ≥400-pers brigade onto an undefended friendly `must_hold` OSID (7 guards: must_hold-scoped, corps-gated, idle-only, ≥400, no-uproot-of-entrenched, deterministic). `must_hold vrs_drina=["op:zvornik:zvornik"]` added to `apr1992_definitive_188w.json`. The prior 3-part bundle's Part 1 (removing `rs_1st_zvornik` from the Cerska-Kamenica axis) was DROPPED — it was the southeast-cascade detonator (it reshuffled the Drina Corps brigade-availability ledger → starved Herzegovina-Corps ops → Foča/Gacko/Kalinovik collapse, −40 OSID). Pin-only is the clean single change.
+
+**Calibration:** 188w re-floor `deab3c26f13c3e17` → `32a6967b2387d065`, OSID **616→628 (+12)**, **`op:zvornik:zvornik` SACRED ANCHOR RECOVERED** (anchors 28→29/30; only `brijesnica_donja_2` remains), benchmarks 6/6, 0 critical, NO southeast cascade, west-5 held. Gains = NE Drina/Birač corridor (RS-correct, Zvornik was an early/complete VRS takeover Apr 1992). 40w `bb0462f4d37dab2d` → `8270ad3ceaee702a` (OSID-map + anchors 30/30 identical; internal-position drift only — the pin also garrisons pre-existing 40w vrs must_holds).
+
+**Watch-item (non-blocking):** 2 Srebrenica-periphery cells (`srebrenica:ljeskovik_2`, `luka_2`) flip RS→RBiH — non-anchor, mildly ahistorical for the post-Jul-1995 pocket, dwarfed 7:1 by gains. §6 core invariant intact (enclave still falls RS, genocide event fires). Re-check if a future change touches Drina Corps brigade allocation.
+
 ## [2026-06-07] fix(calibration): HVO western liberation robustness (+2 OSID) + documented hollow-corps suppressor
 
 **Type:** Calibration-moving (188w re-floor) + diagnostic-only anomaly suppressor. 40w byte-identical.

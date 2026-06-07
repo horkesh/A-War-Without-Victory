@@ -625,6 +625,128 @@ function deconflictSharedFrontOsidStacks(
     }
 }
 
+/**
+ * Minimum personnel for a brigade to be eligible as a must-hold garrison pin.
+ * Sub-400 formations are too small to credibly garrison a contested must-hold OSID;
+ * pinning them would strip a token force from the rear without holding the objective.
+ */
+const MUST_HOLD_GARRISON_MIN_PERSONNEL = 400;
+
+/**
+ * Pin ONE idle, same-corps, ≥MUST_HOLD_GARRISON_MIN_PERSONNEL brigade onto each
+ * UNDEFENDED friendly scenario-authored must-hold OSID.
+ *
+ * This is the narrow garrison-repair lane: when a scenario flags an OSID as
+ * `must_hold_osids_by_corps[corpsId]` but that OSID is currently friendly-controlled
+ * AND has zero active brigades standing on it, the responsible corps has left its
+ * own must-hold front edge undefended. We pin a single idle reserve brigade from
+ * the SAME corps onto it (direct move if adjacent, column march otherwise).
+ *
+ * STRICT GUARDS (all unit-tested):
+ *   1. Scoped to `must_hold_osids_by_corps` ONLY — never touches any other OSID.
+ *   2. Corps-gated — candidate brigade's `corps_id` must equal the must-hold corps.
+ *   3. Idle-only — candidate must NOT be an active-operation participant.
+ *   4. ≥400 personnel — sub-threshold brigades are not eligible.
+ *   5. Never uproots an entrenched brigade — candidates with
+ *      entrenchment_turns ≥ ENTRENCHMENT_REDISTRIBUTION_THRESHOLD are excluded,
+ *      and an already-defended must-hold OSID (≥1 active occupant) is skipped.
+ *   6. Friendly + undefended only — the must-hold OSID must be controlled by the
+ *      corps's faction and currently have zero active brigade occupants.
+ *   7. Deterministic — corps, OSIDs, and candidates iterated in strictCompare order;
+ *      no Date.now(), no Math.random(). Tie-break by personnel desc then bid.
+ *
+ * Mutates state.military.formations (location_osid, entrenchment_turns) and
+ * state.military.brigade_movement_orders. One brigade per undefended must-hold OSID.
+ */
+function pinGarrisonToMustHoldFrontEdge(
+    state: GameState,
+    adjacency: Map<string, string[]>,
+    friendlyByFaction: Map<FactionId, Set<string>>,
+    opParticipants: Set<string>,
+): void {
+    const mustHoldByCorps = state.military.must_hold_osids_by_corps;
+    if (!mustHoldByCorps) return;
+
+    const formations = state.military.formations ?? {};
+    const activeCounts = countActiveBrigadesByOsid(formations);
+    const movementState = state.military.brigade_movement_state;
+
+    // Determine each corps's faction from its first own brigade (deterministic).
+    const corpsFaction = (corpsId: string): FactionId | undefined => {
+        let resolved: FactionId | undefined;
+        for (const bid of Object.keys(formations).sort(strictCompare)) {
+            const f = formations[bid];
+            if (f?.corps_id === corpsId && f.faction) { resolved = f.faction; break; }
+        }
+        return resolved;
+    };
+
+    for (const corpsId of Object.keys(mustHoldByCorps).sort(strictCompare)) {
+        const mustHoldOsids = [...(mustHoldByCorps[corpsId] ?? [])].sort(strictCompare);
+        if (mustHoldOsids.length === 0) continue;
+
+        const faction = corpsFaction(corpsId);
+        if (!faction) continue;
+        const friendlySet = friendlyByFaction.get(faction);
+
+        // Guard 2: corps-scoped BFS friendly set, built once per corps.
+        const corpsAllowed = getCorpsAllowedOsids(corpsId, state);
+        const bfsFriendly = (corpsAllowed.size > 0 && friendlySet)
+            ? new Set([...friendlySet].filter((o) => corpsAllowed.has(o)))
+            : friendlySet;
+
+        for (const target of mustHoldOsids) {
+            // Guard 1 + 6: only friendly-controlled, currently-undefended must-hold OSIDs.
+            if (friendlySet && !friendlySet.has(target)) continue;
+            if ((activeCounts.get(target) ?? 0) > 0) continue;
+
+            // Build eligible candidate brigades for THIS corps (guards 2,3,4,5).
+            const candidates = Object.keys(formations)
+                .sort(strictCompare)
+                .map((bid) => ({ bid, f: formations[bid] }))
+                .filter((e): e is { bid: string; f: FormationState } => !!e.f)
+                .filter((e) => e.f.corps_id === corpsId)                                  // Guard 2
+                .filter((e) => e.f.status === 'active')
+                .filter((e) => e.f.kind === 'brigade' || e.f.kind === 'og' || e.f.kind === 'operational_group')
+                .filter((e) => !!e.f.location_osid)
+                .filter((e) => !opParticipants.has(e.bid))                                // Guard 3 (idle)
+                .filter((e) => (e.f.personnel ?? 0) >= MUST_HOLD_GARRISON_MIN_PERSONNEL)  // Guard 4
+                .filter((e) => (e.f.disrupted_turns ?? 0) === 0)
+                .filter((e) => (e.f.entrenchment_turns ?? 0) < ENTRENCHMENT_REDISTRIBUTION_THRESHOLD) // Guard 5
+                .filter((e) => movementState?.[e.bid]?.status !== 'in_transit')
+                .filter((e) => !state.military.brigade_movement_orders?.[e.bid])
+                .filter((e) => e.f.location_osid !== target)
+                .map((e) => ({
+                    bid: e.bid,
+                    f: e.f,
+                    dist: bfsDistance(e.f.location_osid as string, target, adjacency, bfsFriendly),
+                }))
+                .filter((e) => Number.isFinite(e.dist) && e.dist <= MAX_REDISTRIBUTION_DISTANCE)
+                .sort((a, b) =>
+                    a.dist - b.dist
+                    || (b.f.personnel ?? 0) - (a.f.personnel ?? 0)
+                    || strictCompare(a.bid, b.bid)
+                );
+
+            const best = candidates[0];
+            if (!best) continue;
+
+            if (best.dist <= 1) {
+                best.f.location_osid = target;
+                best.f.entrenchment_turns = 0;
+                activeCounts.set(target, (activeCounts.get(target) ?? 0) + 1);
+            } else {
+                if (!state.military.brigade_movement_orders) {
+                    state.military.brigade_movement_orders = {};
+                }
+                state.military.brigade_movement_orders[best.bid] = createColumnMovementOrder(target);
+                // Reserve the target so a later must-hold OSID in this loop does not double-book.
+                activeCounts.set(target, (activeCounts.get(target) ?? 0) + 1);
+            }
+        }
+    }
+}
+
 export function distributeBrigadesToFront(
     state: GameState,
     sectors: CorpsFrontSector[],
@@ -833,4 +955,8 @@ export function distributeBrigadesToFront(
     }
 
     deconflictSharedFrontOsidStacks(state, sectors, adjacency, friendlyByFaction, opParticipants);
+
+    // Scenario-authored garrison repair: pin an idle same-corps brigade onto any
+    // friendly, currently-undefended must-hold OSID. Narrowly scoped; see guards above.
+    pinGarrisonToMustHoldFrontEdge(state, adjacency, friendlyByFaction, opParticipants);
 }
