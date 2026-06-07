@@ -104,6 +104,11 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
         return () => window.removeEventListener('keydown', handler);
     }, [open, expandedCorpsId, setExpandedCorpsId, setOpen]);
 
+    // Observer / no-faction saves can still reach the read-only RECORDS tab (#122).
+    // In that case there is no selected army, so the faction-derived `data` below
+    // stays null and only the records-only observer view renders.
+    const isObserver = !faction;
+
     const data = useMemo(() => {
         if (!open || !state || !faction) return null;
 
@@ -213,6 +218,59 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
         setActiveTab(nextTab.id);
         tabRefs.current[nextTab.id]?.focus();
     }, [setActiveTab]);
+
+    // Observer / no-faction read-only view (#122): there is no army to command,
+    // so we host only The War's Record (campaign history sourced from loadedGameState).
+    if (open && state && isObserver) {
+        return (
+            <div className="fixed inset-0 flex overflow-hidden font-mono" style={{ zIndex: Z.MODAL }} role="dialog" aria-modal="true" aria-label={t('armyHq.dialogTitle')}>
+                <button
+                    type="button"
+                    aria-label={t('armyHq.dismissBackdrop')}
+                    className="absolute inset-0 bg-black/85 cursor-default"
+                    onClick={() => setOpen(false)}
+                />
+                <div className="relative flex-1 flex flex-col h-full overflow-hidden bg-panel-bg text-text-primary">
+                    <div className="flex items-center justify-between px-3 py-1 shrink-0 border-b border-panel-border bg-panel-card">
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setOpen(false)}
+                                className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-text-secondary border border-panel-border rounded-md hover:bg-panel-hover hover:text-text-primary transition-colors"
+                                title={t('armyHq.returnFieldTitle')}
+                            >
+                                ← FIELD
+                            </button>
+                            <div>
+                                <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold">
+                                    {t('armyHq.observerLabel')}
+                                </div>
+                                <div className="text-[14px] font-bold uppercase tracking-[0.04em] text-text-primary leading-tight">
+                                    {t('armyHq.tab.records')}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold">
+                                {t('armyHq.strategicSituation')}
+                            </div>
+                            <div className="text-[12px] font-bold text-text-primary tabular-nums">
+                                {t('armyHq.week', { turn: state.turn })} {`— ${turnToDateString(state.turn ?? 0)}`}
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        className="relative flex-1 overflow-y-auto px-3 pt-2 pb-3"
+                        role="tabpanel"
+                        id="army-hq-tabpanel-records"
+                        aria-label={t('armyHq.tab.records')}
+                    >
+                        <RecordsContent />
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (!open || !faction || !state || !data) return null;
 

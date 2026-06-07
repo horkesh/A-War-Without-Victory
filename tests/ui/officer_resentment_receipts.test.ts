@@ -2,9 +2,12 @@
  * Officer-Resentment Receipt read-model test suite.
  *
  * Proves the force-op HUMAN-COST projection of `buildOfficerResentmentReceipts`:
- *   - A CO with override/cowed substrate (last_override_turn set) yields a receipt
- *     with the right fields + the newly-cowed signal.
+ *   - A CO with override/cowed substrate (last_override_turn set) AND a
+ *     force-launched op for his corps yields a receipt with the right fields +
+ *     the newly-cowed signal.
  *   - A clean CO (no override substrate) yields no receipt.
+ *   - #125: a CO overridden ONLY via order-interpretation (override substrate set
+ *     but NO force-launched op for his corps) yields no receipt.
  *   - `officerResentmentReceiptsRealizedOnTurn` filters by override turn.
  *   - Bot/historical (no overrides) → [].
  *
@@ -69,12 +72,36 @@ function buildOfficerData(id: string, name: string): NamedOfficer {
     };
 }
 
+/**
+ * Build a minimal GameState. `forceLaunchCorps` lists corps IDs that have a
+ * force-launched operation in `operation_history` — the read-side discriminator
+ * for #125 (only force-LAUNCH overrides emit such an op; order-interpretation
+ * overrides do not). Defaults to every overridden officer's corps so the
+ * genuine-force-op cases read naturally; pass `[]` to model an
+ * order-interpretation-only override.
+ */
 function buildState(
     officers: Record<string, NamedOfficerState>,
     officerData: NamedOfficer[],
+    forceLaunchCorps?: string[],
 ): GameState {
+    const corpsIds =
+        forceLaunchCorps ??
+        Object.values(officers)
+            .filter((os) => os.last_override_turn !== undefined && os.assigned_corps_id)
+            .map((os) => os.assigned_corps_id as string);
+
+    const operation_history = corpsIds.map((corpsId, i) => ({
+        operation_id: `op_${corpsId}_${i}`,
+        operation_name: `Forced Op ${i}`,
+        corps_id: corpsId,
+        force_launched: true,
+        ended_turn: 1,
+    }));
+
     return {
         military: { named_officers: officers, named_officer_data: officerData },
+        operation_history,
     } as unknown as GameState;
 }
 
@@ -124,6 +151,48 @@ describe('buildOfficerResentmentReceipts', () => {
             [buildOfficerData('clean', 'Gen. Clean')],
         );
         expect(buildOfficerResentmentReceipts(state)).toEqual([]);
+    });
+
+    it('#125: yields NO receipt for an order-interpretation-only override (no force-launched op)', () => {
+        // The CO carries the SAME override substrate (last_override_turn set) that a
+        // force-launch would produce, but his corps has NO force-launched operation —
+        // i.e. the override came from overrideInterpretation, not a forced op. The
+        // read-side discriminator must drop it.
+        const state = buildState(
+            { kadic: buildOfficerState('kadic', { override: true, overrideTurn: 14, corpsId: '2_corps' }) },
+            [buildOfficerData('kadic', 'Gen. Kadić')],
+            [], // no corps has a force-launched op
+        );
+        expect(buildOfficerResentmentReceipts(state)).toEqual([]);
+    });
+
+    it('#125: keeps the force-op CO and drops the order-interpretation CO when both overrode', () => {
+        const state = buildState(
+            {
+                forced: buildOfficerState('forced', { override: true, overrideTurn: 9, corpsId: '1_corps' }),
+                interp: buildOfficerState('interp', { override: true, overrideTurn: 9, corpsId: '3_corps' }),
+            },
+            [buildOfficerData('forced', 'Gen. Forced'), buildOfficerData('interp', 'Gen. Interp')],
+            ['1_corps'], // only 1_corps force-launched
+        );
+        const receipts = buildOfficerResentmentReceipts(state);
+        expect(receipts.map((r) => r.id)).toEqual(['forced']);
+    });
+
+    it('#125: counts an ACTIVE force-launched op (not yet resolved into history)', () => {
+        const state = {
+            military: {
+                named_officers: {
+                    live: buildOfficerState('live', { override: true, overrideTurn: 6, corpsId: '4_corps' }),
+                },
+                named_officer_data: [buildOfficerData('live', 'Gen. Live')],
+                corps_command: {
+                    '4_corps': { active_operations: [{ was_force_launched: true }] },
+                },
+            },
+        } as unknown as GameState;
+        const receipts = buildOfficerResentmentReceipts(state);
+        expect(receipts.map((r) => r.id)).toEqual(['live']);
     });
 
     it('returns [] for bot/historical runs (no overrides anywhere)', () => {

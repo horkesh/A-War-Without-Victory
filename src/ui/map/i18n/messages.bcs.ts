@@ -260,6 +260,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'armyHq.emergency.offensiveOption': 'SVE U NAPAD',
     'armyHq.emergency.reorganizeOption': 'SVE REORGANIZUJ',
     'armyHq.strategicSituation': 'STRATEŠKA SITUACIJA',
+    'armyHq.observerLabel': 'RATNI ZAPIS — POSMATRAČ',
     'armyHq.week': 'Sedmica {turn}',
     'armyHq.confirmAria': 'Potvrdi hitnu naredbu položaja',
     'armyHq.confirmBulk': 'Potvrdi masovnu naredbu',

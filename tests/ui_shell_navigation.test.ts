@@ -125,13 +125,33 @@ describe('shellNavigation', () => {
     ]);
   });
 
-  it('refuses to navigate when no player faction is loaded', () => {
+  it('refuses faction-command navigation when no player faction is loaded', () => {
+    // Command surfaces (summary / corps briefing) require a commanded army; an
+    // observer save has none. The read-only RECORDS path is covered separately.
     const state = createState(null);
 
     expect(openArmyHQTab(state, 'summary')).toBe(false);
-    expect(openArmyHQRecordsSubTab(state, 'aar')).toBe(false);
     expect(openArmyHQBriefingForCorps(state, 'arbih_3rd_corps')).toBe(false);
     expect(state.calls).toEqual([]);
+  });
+
+  it('#122: observer/no-faction saves still reach the read-only RECORDS chart', () => {
+    // The War's Record (territory-over-time chart + AAR/ops/decisions archive) is
+    // faction-agnostic — it reads only loadedGameState. Observer saves must reach
+    // it: the helper opens Army HQ on the records sub-tab WITHOUT selecting an army
+    // (no setSelectedArmyId) and forces the RECORDS tab so the modal is not blank.
+    const state = createState(null);
+
+    const ok = openArmyHQRecordsSubTab(state, 'aftermath');
+
+    expect(ok).toBe(true);
+    expect(state.calls).toEqual([
+      ['setArmyHQOpen', true],
+      ['setArmyHQRecordsSubTab', 'aftermath'],
+      ['setArmyHQTab', 'records'],
+    ]);
+    // Crucially: no army was selected for an observer.
+    expect(state.calls.some(([fn]) => fn === 'setSelectedArmyId')).toBe(false);
   });
 
   it('applies Warroom shell handoff commands through canonical Army HQ navigation', () => {
