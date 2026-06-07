@@ -4409,6 +4409,466 @@
                     "content": "Ovaj Codex zapis obradjuje temu \"Holbrookeovo primirje: zamah protiv karte\" kao diplomatsko pitanje rata u Bosni i Hercegovini 1995. Bosanska lokalizacija sazimava isti historijski okvir koji nosi izvorni esej: uzroke, glavne aktere, neposredni tok dogadjaja i posljedice za komandovanje, diplomatiju, civile i ratnu legitimnost. Fokus ostaje na razumijevanju historije i odgovornosti, ne na pretvaranju patnje u igracku nagradu.\n\nU igrinom toku ovaj zapis pomaze igracu da poveze otkljucani dogadjaj s vecim ratnim lukom. Ako se kampanja razvije drugacije od historijskog slijeda, Codex i dalje cuva razliku izmedju onoga sto se dogodilo u stvarnosti i onoga sto je nastalo u simulaciji. Izvorni aparat navodi: Richard Holbrooke, To End a War (Random House, 1998); UN Security Council Resolution 1021 (1995)."
                 }
             }
+        },
+        {
+            "id": "essay_ic_pressure_vopp_engagement",
+            "event_id": "ic_pressure_vopp_engagement",
+            "title": "The Patron’s Leash: Washington Presses Sarajevo on Vance-Owen",
+            "year": 1993,
+            "category": "diplomatic",
+            "sources": [
+                "UN Doc S/25479 (Report of the Co-Chairmen on the Vance-Owen plan, 8 April 1993)",
+                "ICTY Karadžić Trial Judgment (IT-95-5/18-T), diplomatic-context findings"
+            ],
+            "generated": true,
+            "content": "No belligerent in the Bosnian War acted without a patron looking over its shoulder. For the Sarajevo government, the patron was the Western diplomatic coalition — the United States, the European Community, and the United Nations machinery at Geneva — whose recognition, humanitarian airlift, and eventual military backing the Bosnian Presidency depended upon and could not afford to forfeit. That dependence was also a leash. When the Co-Chairmen of the International Conference on the Former Yugoslavia pressed the Bosnian government to engage seriously with the Vance-Owen Peace Plan in the spring of 1993, the message carried the unstated weight of everything Sarajevo needed from the powers delivering it.\n\nThe Vance-Owen framework, unveiled in January 1993, proposed to reorganize Bosnia into ten semi-autonomous provinces. For the Bosnian government the plan was deeply unwelcome: it appeared to ratify, in cartographic form, much of the territory seized through a year of ethnic cleansing, and it rested on the premise that Bosnia’s communities required territorial separation — the very logic the Sarajevo government had defined itself against. Yet rejecting the plan outright risked being blamed for prolonging the war, alienating the patrons whose support was the government’s strategic oxygen, and ceding the moral initiative to a Bosnian Serb leadership that the international community was already inclined to treat as the principal obstacle.\n\nThe pressure to “engage” was therefore not a request to surrender but a demand for procedural compliance — to sit, to negotiate, to be seen as constructive. The government’s eventual signature at Athens in March 1993 was extracted under precisely this kind of leverage, documented in the Co-Chairmen’s reporting to the Security Council (UN Doc S/25479). It bought Sarajevo diplomatic cover while costing it little on the ground, since the plan ultimately foundered on the Bosnian Serb assembly’s rejection rather than on any Bosniak refusal.\n\nThe episode distilled the structural predicament of a government waging a war of survival under the supervision of patrons whose interests overlapped with, but did not coincide with, its own. To acknowledge the pressure was to preserve the alliance and accept a constraint on autonomy. To resist it was to assert sovereignty at the risk of the relationship that made the war survivable at all. Neither path was free; the choice was over which price to pay.",
+            "dynamic_sections": [
+                {
+                    "id": "wave3_ic_pressure_vopp_engagement_branch_accepted",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:ic_pressure_vopp_engagement:acknowledge_pressure",
+                    "variant": "note",
+                    "content": "In this campaign, Sarajevo acknowledged the Western mediators’ message and accepted procedural engagement with the Vance-Owen framework — the posture the historical record attributes to the pressured Athens signature of March 1993 (UN Doc S/25479). The patron alliance was preserved at the cost of autonomy.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Sarajevo je prihvatilo poruku zapadnih posrednika i pristalo na proceduralno učešće u Vance-Owenovom okviru — stav koji historijski zapis vezuje uz potpis pod pritiskom u Atini u martu 1993. (UN S/25479). Savez s patronima je očuvan, a cijena je plaćena u autonomiji."
+                        }
+                    }
+                },
+                {
+                    "id": "wave3_ic_pressure_vopp_engagement_branch_rejected",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:ic_pressure_vopp_engagement:resist_patron",
+                    "variant": "divergence",
+                    "content": "In this campaign, Sarajevo resisted the mediators’ pressure and held its own position — a procedural divergence from the historical record, in which the government signed under pressure at Athens. Sovereignty was asserted at the cost of the relationship that made the war survivable.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Sarajevo je odbilo pritisak posrednika i zadržalo vlastiti stav — proceduralno odstupanje od historijskog zapisa, u kojem je vlada pod pritiskom potpisala u Atini. Suverenitet je potvrđen, ali na račun odnosa koji je rat činio izdrživim."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Patronova uzda: Washington pritiska Sarajevo zbog Vance-Owena",
+                    "category": "diplomatsko",
+                    "content": "Nijedan zaraćeni akter u ratu u Bosni i Hercegovini nije djelovao bez patrona koji mu gleda preko ramena. Za vladu u Sarajevu patron je bila zapadna diplomatska koalicija — Sjedinjene Države, Evropska zajednica i mehanizam Ujedinjenih nacija u Ženevi — čiju je podršku vlada trebala i nije smjela izgubiti. Ta ovisnost bila je i uzda. Kada su supredsjedavajući Međunarodne konferencije o bivšoj Jugoslaviji u proljeće 1993. zatražili da se Sarajevo ozbiljno uključi u Vance-Owenov plan, poruka je nosila težinu svega što je vladi bilo potrebno od onih koji su je upućivali.\n\nVance-Owenov okvir predlagao je podjelu Bosne na deset poluautonomnih provincija. Za vladu je plan bio teško prihvatljiv: činilo se da kartografski potvrđuje teritorij oduzet godinom etničkog čišćenja i počivao je na pretpostavci da zajednice u Bosni zahtijevaju teritorijalno razdvajanje — logici protiv koje se vlada definisala. Ipak, otvoreno odbijanje nosilo je rizik da Sarajevo bude okrivljeno za produžavanje rata i da otuđi patrone čija je podrška bila strateški kisik.\n\nPritisak da se “uključi” nije bio zahtjev za predajom nego za proceduralnim pristankom — da se sjedne, pregovara i bude viđeno kao konstruktivno. Potpis vlade u Atini u martu 1993. iznuđen je upravo takvom polugom, zabilježenom u izvještajima supredsjedavajućih Vijeću sigurnosti (UN S/25479). Donio je Sarajevu diplomatsku zaštitu uz malu cijenu na terenu, jer je plan na kraju propao na odbijanju skupštine bosanskih Srba.\n\nEpizoda je sažela strukturni položaj vlade koja vodi rat za opstanak pod nadzorom patrona čiji se interesi preklapaju s njenima, ali se ne podudaraju. Prihvatiti pritisak značilo je očuvati savez i prihvatiti ograničenje autonomije. Odbiti ga značilo je potvrditi suverenitet uz rizik za odnos koji je rat činio izdrživim. Nijedan put nije bio besplatan; biralo se koju cijenu platiti.\n\nU igrinom toku ovaj zapis povezuje otključani dogadjaj s većim ratnim lukom. Ako se kampanja razvije drugačije od historijskog slijeda, Codex i dalje čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u simulaciji."
+                }
+            }
+        },
+        {
+            "id": "essay_zagreb_restrains_boban_vopp",
+            "event_id": "zagreb_restrains_boban_vopp",
+            "title": "Zagreb’s Hand on Boban: Croatia and the Herceg-Bosna Leash",
+            "year": 1993,
+            "category": "diplomatic",
+            "sources": [
+                "ICTY Prlić et al. Trial Judgment (IT-04-74-T), joint criminal enterprise findings",
+                "UN Doc S/25479 (Report of the Co-Chairmen on the Vance-Owen plan, 8 April 1993)"
+            ],
+            "generated": true,
+            "content": "Of the three Bosnian belligerents, the Croat self-styled polity of Herceg-Bosna was the most openly tethered to an external sponsor. The ICTY Prlić et al. Trial Judgment (IT-04-74-T) found that the leadership of the self-proclaimed Croatian Republic of Herceg-Bosna operated within a joint criminal enterprise whose ultimate political authority ran to Zagreb and, specifically, to Croatian President Franjo Tuđman. Mate Boban, the Herceg-Bosna leader, was in practice an instrument of Croatian state policy as much as the head of a Bosnian Croat project. That subordination meant that the decisive levers over HVO conduct often lay not in western Herzegovina but in the Croatian capital.\n\nDuring the Vance-Owen window of early 1993, this dependence cut in a particular direction. The plan’s provincial map assigned substantial territory to Croat-majority provinces, and HVO commanders read it as international licence to consolidate control over those areas — a reading the Trial Judgment found was exploited to justify the forcible removal of Bosniaks. Yet Zagreb also had reasons of its own to modulate Boban’s aggression at sensitive diplomatic moments: Croatia’s international standing, its own unresolved war with the Serbs over the Krajina, and its dependence on the same Western powers brokering the plan all argued for periodic restraint.\n\nWhen Zagreb signalled Boban to hold back during the Vance-Owen window, it exposed the seam in the Herceg-Bosna project. A local leadership that derived its territorial ambitions from a Croatian patron could not pursue those ambitions whenever the patron judged the diplomatic cost too high. The leash that supplied Herceg-Bosna with arms, officers, and political cover could also be pulled tight.\n\nThe dilemma was thus one of obedience versus initiative. To acknowledge Zagreb’s restraint was to confirm that Herceg-Bosna’s war was an extension of Croatian policy, conducted at Croatian sufferance. To resist it was to assert an autonomous Bosnian Croat agenda — at the risk of forfeiting the sponsorship without which the project could not be sustained. The historical record runs through the first; the constraint defined the polity either way.",
+            "dynamic_sections": [
+                {
+                    "id": "wave3_zagreb_restrains_boban_vopp_branch_accepted",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:zagreb_restrains_boban_vopp:acknowledge_pressure",
+                    "variant": "note",
+                    "content": "In this campaign, the Herceg-Bosna leadership acknowledged the restraint imposed from Zagreb — confirming, as the historical record holds, that its war was an extension of Croatian policy conducted at Croatian sufferance.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vodstvo Herceg-Bosne prihvatilo je suzdržanost koju je naložio Zagreb — potvrđujući da je rat bio produžetak hrvatske politike, vođen uz hrvatski pristanak, kako to opisuje historijski zapis."
+                        }
+                    }
+                },
+                {
+                    "id": "wave3_zagreb_restrains_boban_vopp_branch_rejected",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:zagreb_restrains_boban_vopp:resist_patron",
+                    "variant": "divergence",
+                    "content": "In this campaign, the Herceg-Bosna leadership resisted Zagreb’s restraint and pursued its own line — a divergence from the historical record, at the risk of forfeiting the sponsorship without which the project could not be sustained.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vodstvo Herceg-Bosne odbilo je Zagrebovu suzdržanost i nastavilo vlastitu liniju — odstupanje od historijskog zapisa, uz rizik gubitka pokroviteljstva bez kojeg projekat nije mogao opstati."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Zagrebačka ruka na Bobanu: Hrvatska i uzda Herceg-Bosne",
+                    "category": "diplomatsko",
+                    "content": "Od tri bosanska zaraćena aktera, hrvatska tvorevina Herceg-Bosna bila je najotvorenije vezana za vanjskog pokrovitelja. Presuda ICTY-a u predmetu Prlić i drugi (IT-04-74-T) utvrdila je da je vodstvo samoproglašene Hrvatske Republike Herceg-Bosne djelovalo u okviru udruženog zločinačkog poduhvata čija je krajnja politička vlast vodila do Zagreba i, konkretno, do predsjednika Franje Tuđmana. Mate Boban bio je u praksi instrument hrvatske državne politike koliko i čelnik bosanskohrvatskog projekta.\n\nTokom Vance-Owenovog prozora početkom 1993. ta ovisnost djelovala je u određenom smjeru. Karta provincija dodjeljivala je značajan teritorij provincijama s hrvatskom većinom, a komandanti HVO-a to su čitali kao međunarodnu dozvolu za učvršćivanje kontrole — čitanje za koje je presuda utvrdila da je iskorišteno za opravdanje prisilnog uklanjanja Bošnjaka. Ipak, i Zagreb je imao razloge da ublaži Bobanovu agresiju u osjetljivim diplomatskim trenucima.\n\nKada je Zagreb dao znak Bobanu da se suzdrži tokom Vance-Owenovog prozora, otkrio je šav u projektu Herceg-Bosne. Lokalno vodstvo čije su teritorijalne ambicije izvirale iz hrvatskog patrona nije moglo te ambicije provoditi kad god je patron procijenio diplomatsku cijenu previsokom.\n\nDilema je bila pitanje poslušnosti naspram inicijative. Prihvatiti Zagrebovu suzdržanost značilo je potvrditi da je rat Herceg-Bosne produžetak hrvatske politike. Odbiti je značilo je potvrditi samostalnu bosanskohrvatsku agendu — uz rizik gubitka pokroviteljstva bez kojeg projekat nije mogao opstati. Historijski zapis teče kroz prvo; ograničenje je definisalo tvorevinu u svakom slučaju.\n\nU igrinom toku ovaj zapis povezuje otključani dogadjaj s većim ratnim lukom. Ako se kampanja razvije drugačije od historijskog slijeda, Codex i dalje čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u simulaciji."
+                }
+            }
+        },
+        {
+            "id": "essay_milosevic_vopp_pressure",
+            "event_id": "milosevic_vopp_pressure",
+            "title": "Belgrade Commands Pale: Milošević Presses Karadžić on Vance-Owen",
+            "year": 1993,
+            "category": "diplomatic",
+            "sources": [
+                "ICTY Karadžić Trial Judgment (IT-95-5/18-T), Belgrade-Pale relationship findings",
+                "UN Doc S/25479 (Report of the Co-Chairmen on the Vance-Owen plan, 8 April 1993)"
+            ],
+            "generated": true,
+            "content": "The Bosnian Serb war effort was sustained from Belgrade. Personnel, fuel, ammunition, pay for officers of the Bosnian Serb army, and the diplomatic shelter of the rump Yugoslav state all flowed from Serbia under President Slobodan Milošević. The ICTY Karadžić Trial Judgment (IT-95-5/18-T) examined this dependence at length. It made the relationship between Belgrade and the Pale leadership the single most consequential lever in the entire Bosnian Serb project — and the one most prone to rupture, because the interests of the patron and the client were not identical.\n\nBy the spring of 1993, Milošević had concluded that the Vance-Owen Plan, whatever its defects from a Serb maximalist standpoint, offered a path to lifting the international sanctions that were strangling Serbia’s economy. He therefore pressed Radovan Karadžić to accept it. Karadžić signed the plan in Athens at the end of March under this pressure, then carried it back to the Bosnian Serb assembly at Pale. There the bond between patron and client snapped: on 5–6 May 1993 the assembly defied Belgrade and rejected the plan, submitting it to a referendum that confirmed the rejection.\n\nThe episode is one of the clearest demonstrations in the war that patron leverage had limits. Milošević controlled the supply lines, but he did not control the assembly’s vote, and the Bosnian Serb leadership proved willing to absorb Belgrade’s displeasure rather than surrender the territory the plan would have cost them. The rejection deepened Serbia’s sanctions ordeal and began the slow estrangement that would culminate in Belgrade’s formal embargo on the Bosnian Serbs in 1994.\n\nFor the Pale leadership the choice was therefore between deference and defiance. To acknowledge Belgrade’s pressure was to preserve the lifeline at the cost of accepting a map the leadership detested. To resist it was to assert an independent war aim at the risk of the patron relationship that armed and fed the entire enterprise. History took the path of defiance; the cost arrived later, in isolation.",
+            "dynamic_sections": [
+                {
+                    "id": "wave3_milosevic_vopp_pressure_branch_accepted",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:milosevic_vopp_pressure:acknowledge_pressure",
+                    "variant": "note",
+                    "content": "In this campaign, the Pale leadership acknowledged Belgrade’s pressure and accepted the Vance-Owen framework — a divergence from the historical record, in which the assembly defied Belgrade and rejected the plan in May 1993. The lifeline was preserved at the cost of a map the leadership detested.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vodstvo u Palama prihvatilo je pritisak Beograda i pristalo na Vance-Owenov okvir — odstupanje od historijskog zapisa, u kojem je skupština prkosila Beogradu i odbila plan u maju 1993. Životna linija je očuvana po cijenu karte koju je vodstvo preziralo."
+                        }
+                    }
+                },
+                {
+                    "id": "wave3_milosevic_vopp_pressure_branch_rejected",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:milosevic_vopp_pressure:resist_patron",
+                    "variant": "divergence",
+                    "content": "In this campaign, the Pale leadership resisted Belgrade’s pressure and held to its own war aim — the posture the historical record attributes to the assembly’s May 1993 defiance. Autonomy was asserted; the cost, isolation, arrived later.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vodstvo u Palama odbilo je pritisak Beograda i zadržalo vlastiti ratni cilj — stav koji historijski zapis vezuje uz prkos skupštine u maju 1993. Suverenitet je potvrđen, a cijena — izolacija — stigla je kasnije."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Beograd naređuje Palama: Milošević pritiska Karadžića zbog Vance-Owena",
+                    "category": "diplomatsko",
+                    "content": "Ratni napor bosanskih Srba održavan je iz Beograda. Ljudstvo, gorivo, municija, plata za oficire vojske bosanskih Srba i diplomatski zaklon krnje jugoslavenske države — sve je dolazilo iz Srbije pod predsjednikom Slobodanom Miloševićem. Presuda ICTY-a u predmetu Karadžić (IT-95-5/18-T) opširno je ispitala tu ovisnost i učinila odnos između Beograda i vodstva u Palama najvažnijom polugom u cijelom projektu bosanskih Srba.\n\nDo proljeća 1993. Milošević je zaključio da Vance-Owenov plan, kakve god mane imao iz srpske maksimalističke perspektive, nudi put ka ukidanju međunarodnih sankcija koje su gušile privredu Srbije. Zato je pritiskao Radovana Karadžića da ga prihvati. Karadžić je potpisao plan u Atini krajem marta, a zatim ga odnio skupštini bosanskih Srba u Palama. Tu je veza između patrona i klijenta pukla: 5–6. maja 1993. skupština je prkosila Beogradu i odbila plan.\n\nEpizoda je jedan od najjasnijih dokaza u ratu da poluga patrona ima granice. Milošević je kontrolisao linije snabdijevanja, ali nije kontrolisao glasanje skupštine, a vodstvo bosanskih Srba pokazalo je spremnost da podnese beogradsko nezadovoljstvo radije nego da preda teritorij.\n\nZa vodstvo u Palama izbor je bio između poslušnosti i prkosa. Prihvatiti beogradski pritisak značilo je očuvati životnu liniju po cijenu mrske karte. Odbiti ga značilo je potvrditi samostalan ratni cilj uz rizik za odnos s patronom koji je naoružavao i hranio cijeli poduhvat. Historija je krenula putem prkosa; cijena je stigla kasnije, u izolaciji.\n\nU igrinom toku ovaj zapis povezuje otključani dogadjaj s većim ratnim lukom. Ako se kampanja razvije drugačije od historijskog slijeda, Codex i dalje čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u simulaciji."
+                }
+            }
+        },
+        {
+            "id": "essay_milosevic_owen_stoltenberg_distancing",
+            "event_id": "milosevic_owen_stoltenberg_distancing",
+            "title": "Belgrade Grows Distant: Milošević Signals Exhaustion",
+            "year": 1993,
+            "category": "diplomatic",
+            "sources": [
+                "ICTY Martić Trial Judgment (IT-95-11-T), Serbia–RSK–RS coordination findings",
+                "UN Security Council Resolution 820 (1993)"
+            ],
+            "generated": true,
+            "content": "By the late summer of 1993, the calculus in Belgrade had begun to shift. The Vance-Owen Plan had collapsed on the Bosnian Serb assembly’s rejection, and its successor, the Owen-Stoltenberg “Union of Three Republics,” was on the table. Serbia under Slobodan Milošević was by now deep in the grip of the comprehensive sanctions tightened by UN Security Council Resolution 820 (1993): hyperinflation was destroying the dinar, fuel was scarce, and the economic cost of underwriting two Serb war efforts — in Bosnia and in the Croatian Krajina — was becoming unsustainable. Milošević began to signal exhaustion, distancing Belgrade from the maximalist positions of the Pale leadership.\n\nThis distancing was not a moral conversion but a strategic recalculation. Milošević’s overriding aim had narrowed to relief from sanctions and the rehabilitation of Serbia’s international position; the territorial ambitions of the Bosnian Serbs were increasingly a liability to that aim. The ICTY Martić Trial Judgment (IT-95-11-T), addressing the wider architecture of Serbian coordination across the Republika Srpska Krajina and Republika Srpska, documented how decisions taken in Belgrade shaped the room for manoeuvre of the dependent Serb leaderships — and how Belgrade could withdraw cover when its own interests required.\n\nFor the Pale leadership, a patron signalling exhaustion was a graver problem than a patron issuing orders. An order could be defied at a contained cost; a sponsor losing the will to sustain the war threatened the material basis of the entire project. The distancing that began in 1993 foreshadowed the open rupture of 1994, when Belgrade would formally close the border to all but humanitarian traffic.\n\nThe decision facing the leadership was whether to read Belgrade’s fatigue as a warning to be heeded or as a bluff to be resisted. To acknowledge the signal was to begin adjusting war aims toward what the patron could still underwrite. To resist it was to gamble that Belgrade’s commitment would outlast its complaints — a gamble whose terms grew worse with every month of sanctions.",
+            "dynamic_sections": [
+                {
+                    "id": "wave3_milosevic_owen_stoltenberg_distancing_branch_accepted",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:milosevic_owen_stoltenberg_distancing:acknowledge_pressure",
+                    "variant": "note",
+                    "content": "In this campaign, the Bosnian Serb leadership read Belgrade’s fatigue as a warning and began adjusting war aims toward what the patron could still underwrite — an earlier foreshadowing of the rupture the historical record escalates to in 1994.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vodstvo bosanskih Srba pročitalo je beogradski umor kao upozorenje i počelo prilagođavati ratne ciljeve onome što je patron još mogao podržati — raniji nagovještaj raskola koji će u historijskom zapisu eskalirati 1994."
+                        }
+                    }
+                },
+                {
+                    "id": "wave3_milosevic_owen_stoltenberg_distancing_branch_rejected",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:milosevic_owen_stoltenberg_distancing:resist_patron",
+                    "variant": "divergence",
+                    "content": "In this campaign, the Bosnian Serb leadership dismissed Belgrade’s signal and gambled that Belgrade’s commitment would outlast its complaints — a posture whose cost, in the historical record, worsened with every month of sanctions.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vodstvo bosanskih Srba odbacilo je beogradski signal i kockalo se da će predanost Beograda nadživjeti njegove pritužbe — stav čija se cijena u historijskom zapisu povećavala sa svakim mjesecom sankcija."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Beograd se udaljava: Milošević daje znak iscrpljenosti",
+                    "category": "diplomatsko",
+                    "content": "Do kasnog ljeta 1993. računica u Beogradu počela se mijenjati. Vance-Owenov plan propao je na odbijanju skupštine bosanskih Srba, a njegov nasljednik, Owen-Stoltenbergova “Unija tri republike,” bio je na stolu. Srbija pod Slobodanom Miloševićem bila je do tada duboko u stisku sveobuhvatnih sankcija pooštrenih Rezolucijom 820 (1993) Vijeća sigurnosti: hiperinflacija je uništavala dinar, goriva je bilo malo, a ekonomska cijena finansiranja dva srpska ratna napora postajala je neodrživa.\n\nTo udaljavanje nije bilo moralno preobraćenje nego strateški preupit. Miloševićev glavni cilj suzio se na olakšanje od sankcija i rehabilitaciju međunarodnog položaja Srbije; teritorijalne ambicije bosanskih Srba sve su više bile teret tom cilju. Presuda ICTY-a u predmetu Martić (IT-95-11-T) zabilježila je kako su odluke donesene u Beogradu oblikovale prostor za manevar ovisnih srpskih vodstava.\n\nZa vodstvo u Palama, patron koji daje znak iscrpljenosti bio je teži problem od patrona koji izdaje naredbe. Naredba se mogla odbiti uz ograničenu cijenu; pokrovitelj koji gubi volju za održavanjem rata prijetio je materijalnoj osnovi cijelog projekta. Udaljavanje koje je počelo 1993. nagovijestilo je otvoreni raskol 1994.\n\nOdluka pred vodstvom bila je da li beogradski umor pročitati kao upozorenje koje treba uvažiti ili kao blef kojem se treba oduprijeti. Prihvatiti signal značilo je početi prilagođavati ratne ciljeve. Oduprijeti se značilo je kockati se da će predanost Beograda nadmašiti njegove pritužbe — kockanje čiji su uslovi postajali gori sa svakim mjesecom sankcija.\n\nU igrinom toku ovaj zapis povezuje otključani dogadjaj s većim ratnim lukom. Ako se kampanja razvije drugačije od historijskog slijeda, Codex i dalje čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u simulaciji."
+                }
+            }
+        },
+        {
+            "id": "essay_zagreb_orders_hrhb_ceasefire",
+            "event_id": "zagreb_orders_hrhb_ceasefire",
+            "title": "Zagreb Orders the Guns Silent: The Washington Turn for Herceg-Bosna",
+            "year": 1994,
+            "category": "diplomatic",
+            "sources": [
+                "Washington Agreement on the Federation of Bosnia and Herzegovina (1 March 1994)",
+                "ICTY Prlić et al. Trial Judgment (IT-04-74-T), end-of-conflict findings"
+            ],
+            "generated": true,
+            "content": "In the late winter of 1994, the Croat-Bosniak war that had ravaged central Bosnia and Herzegovina for a year was brought to an abrupt close — not primarily by the exhaustion of the combatants, but by a decision taken in Zagreb. Under intense American pressure, and with Croatia’s own strategic interests pointing toward partnership with the Bosnian government against the Serbs, President Franjo Tuđman agreed to the framework that became the Washington Agreement of 1 March 1994, establishing the Federation of Bosnia and Herzegovina. The order to the HVO to cease fire against the ARBiH came down from the Croatian capital.\n\nThat the war could be switched off by a directive from Zagreb confirmed what the ICTY Prlić et al. Trial Judgment (IT-04-74-T) found about the structure of the Herceg-Bosna project: its centre of gravity lay outside Bosnia. The HVO field commanders who had prosecuted the campaign in the Lašva Valley and around Mostar did not negotiate themselves out of the war; they were instructed out of it by the patron whose policy the campaign had served.\n\nFor the Herceg-Bosna leadership the directive was a moment of reckoning. Washington offered Croatia a path back toward international respectability and an eventual green light, the following year, for the Krajina operations that would reverse Serb gains. The price was the abandonment of the maximalist Herceg-Bosna project and the integration of Croat forces into a federation with the Bosniaks they had just been fighting. The local leadership’s preferences were, in the end, subordinate to the patron’s grand strategy.\n\nThe choice was therefore obedience or defiance at the moment the patron called the war off. To acknowledge Zagreb’s ceasefire order was to accept the Federation and the end of the independent Herceg-Bosna ambition — the path the historical record took. To resist it was to insist on a Bosnian Croat war that Croatia itself no longer wished to fund, a posture that could not be sustained once the sponsor had turned.",
+            "dynamic_sections": [
+                {
+                    "id": "wave3_zagreb_orders_hrhb_ceasefire_branch_accepted",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:zagreb_orders_hrhb_ceasefire:acknowledge_pressure",
+                    "variant": "note",
+                    "content": "In this campaign, the Herceg-Bosna leadership acknowledged Zagreb’s ceasefire order and entered the Federation — the path the historical record took after the Washington Agreement of 1 March 1994.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vodstvo Herceg-Bosne prihvatilo je Zagrebovu naredbu o prekidu vatre i pristupilo Federaciji — put kojim je krenuo i historijski zapis nakon Washingtonskog sporazuma 1. marta 1994."
+                        }
+                    }
+                },
+                {
+                    "id": "wave3_zagreb_orders_hrhb_ceasefire_branch_rejected",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:zagreb_orders_hrhb_ceasefire:resist_patron",
+                    "variant": "divergence",
+                    "content": "In this campaign, the Herceg-Bosna leadership resisted Zagreb’s order and persisted in a Bosnian Croat war that Croatia itself no longer wished to fund — a divergence from the historical record that could not be sustained once the sponsor had turned.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vodstvo Herceg-Bosne odbilo je Zagrebovu naredbu i ustrajalo na bosanskohrvatskom ratu koji sama Hrvatska više nije željela finansirati — odstupanje od historijskog zapisa koje se nije moglo održati kad se pokrovitelj okrenuo."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Zagreb naređuje tišinu oružja: washingtonski zaokret za Herceg-Bosnu",
+                    "category": "diplomatsko",
+                    "content": "U kasnu zimu 1994. hrvatsko-bošnjački rat koji je godinu dana pustošio srednju Bosnu naglo je okončan — ne prvenstveno iscrpljenošću boraca, nego odlukom donesenom u Zagrebu. Pod snažnim američkim pritiskom, i sa vlastitim strateškim interesima Hrvatske koji su upućivali na partnerstvo s bosanskom vladom protiv Srba, predsjednik Franjo Tuđman pristao je na okvir koji je postao Washingtonski sporazum 1. marta 1994. i uspostavio Federaciju Bosne i Hercegovine. Naredba HVO-u da prekine vatru protiv ARBiH stigla je iz hrvatske prijestolnice.\n\nTo što se rat mogao isključiti direktivom iz Zagreba potvrdilo je ono što je presuda ICTY-a u predmetu Prlić i drugi (IT-04-74-T) utvrdila o strukturi projekta Herceg-Bosne: njegovo težište ležalo je izvan Bosne. Komandanti HVO-a na terenu nisu se pregovorima izvukli iz rata; izvukla ih je naredba patrona čijoj je politici kampanja služila.\n\nZa vodstvo Herceg-Bosne direktiva je bila trenutak obračuna. Washington je Hrvatskoj nudio put nazad ka međunarodnoj poštovanosti i, sljedeće godine, zeleno svjetlo za operacije u Krajini. Cijena je bila napuštanje maksimalističkog projekta Herceg-Bosne i integracija hrvatskih snaga u federaciju s Bošnjacima protiv kojih su upravo ratovali.\n\nIzbor je dakle bio poslušnost ili prkos u trenutku kada je patron prekinuo rat. Prihvatiti Zagrebovu naredbu o prekidu vatre značilo je prihvatiti Federaciju i kraj samostalne ambicije Herceg-Bosne. Oduprijeti se značilo je ustrajati na ratu koji Hrvatska više nije željela finansirati — stav koji se nije mogao održati kad se pokrovitelj okrenuo.\n\nU igrinom toku ovaj zapis povezuje otključani dogadjaj s većim ratnim lukom. Ako se kampanja razvije drugačije od historijskog slijeda, Codex i dalje čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u simulaciji."
+                }
+            }
+        },
+        {
+            "id": "essay_ic_rbih_restraint_post_washington",
+            "event_id": "ic_rbih_restraint_post_washington",
+            "title": "Don’t Exploit the Window: Washington Asks Sarajevo for Restraint",
+            "year": 1994,
+            "category": "diplomatic",
+            "sources": [
+                "Washington Agreement on the Federation of Bosnia and Herzegovina (1 March 1994)",
+                "UN Security Council Resolution 900 (1994)"
+            ],
+            "generated": true,
+            "content": "The Washington Agreement of 1 March 1994 did more than end the Croat-Bosniak war; it transformed the military balance. With the HVO no longer a hostile front and Croatian supply routes reopening, the ARBiH gained, for the first time, the prospect of concentrating its strength against the Bosnian Serb army rather than fighting on two fronts. The Sarajevo government saw, in the months after Washington, a genuine military window — an opportunity to convert the new Federation’s combined weight into territorial recovery.\n\nThe same Western patrons who had brokered the Federation moved quickly to discourage Sarajevo from exploiting it. Their priority was a negotiated settlement that would freeze the lines and end the war on terms the international community could manage — not a Bosniak-Croat offensive that might widen the conflict, draw in Belgrade, or undercut the diplomacy of the newly forming Contact Group. The message to Sarajevo was, in effect, that the military window the patrons had just helped open should not be walked through.\n\nThis placed the Bosnian government in a familiar bind in sharpened form. The patrons had delivered a real strategic gain, then asked the beneficiary not to use it. To the Sarajevo leadership, after two years of besiegement and arms embargo, the request to hold back at the precise moment of advantage could look like the international community managing the war toward a frozen partition rather than a just outcome. Yet defying the patrons risked the very support that had made the Federation — and the new military potential — possible.\n\nThe decision was thus whether to bank the patron relationship or spend the military opportunity. To acknowledge the call for restraint was to subordinate battlefield possibility to the diplomatic timetable of the powers. To resist it was to assert the government’s right to pursue its war aims with its own newly consolidated forces — at the cost of straining the alliance on which everything still depended.",
+            "dynamic_sections": [
+                {
+                    "id": "wave3_ic_rbih_restraint_post_washington_branch_accepted",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:ic_rbih_restraint_post_washington:acknowledge_pressure",
+                    "variant": "note",
+                    "content": "In this campaign, the Sarajevo government heeded the call for restraint and subordinated its battlefield opportunity to the diplomatic timetable of the powers — preserving the alliance that had made the Federation possible.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vlada u Sarajevu uvažila je poziv na suzdržanost i podredila bojničku priliku diplomatskom rasporedu sila — čuvajući savez koji je učinio Federaciju mogućom."
+                        }
+                    }
+                },
+                {
+                    "id": "wave3_ic_rbih_restraint_post_washington_branch_rejected",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:ic_rbih_restraint_post_washington:resist_patron",
+                    "variant": "divergence",
+                    "content": "In this campaign, the Sarajevo government refused the call for restraint and asserted its right to pursue its own war aims with newly consolidated forces — a divergence that strained the alliance on which everything still depended.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vlada u Sarajevu odbila je poziv na suzdržanost i potvrdila pravo da slijedi vlastite ratne ciljeve novokonsolidovanim snagama — odstupanje koje je opterećivalo savez o kojem je sve još ovisilo."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Ne iskorištavaj prozor: Washington traži suzdržanost od Sarajeva",
+                    "category": "diplomatsko",
+                    "content": "Washingtonski sporazum od 1. marta 1994. učinio je više nego što je okončao hrvatsko-bošnjački rat; preobrazio je vojnu ravnotežu. Kako HVO više nije bio neprijateljski front, a hrvatske linije snabdijevanja su se otvarale, ARBiH je prvi put dobila izgled da koncentriše snagu protiv vojske bosanskih Srba umjesto da se bori na dva fronta. Vlada u Sarajevu vidjela je, u mjesecima nakon Washingtona, stvarni vojni prozor.\n\nIsti zapadni patroni koji su posredovali u Federaciji brzo su odvraćali Sarajevo od iskorištavanja tog prozora. Njihov prioritet bio je pregovarački sporazum koji bi zamrznuo linije i okončao rat pod uslovima kojima je međunarodna zajednica mogla upravljati — a ne bošnjačko-hrvatska ofanziva koja bi mogla proširiti sukob ili uvući Beograd.\n\nTo je vladu stavilo u poznati škripac u zašiljenom obliku. Patroni su isporučili stvarni strateški dobitak, a zatim zatražili od korisnika da ga ne upotrijebi. Vodstvu u Sarajevu, nakon dvije godine opsade i embarga na oružje, zahtjev da se suzdrži u tački prednosti mogao je izgledati kao upravljanje rata ka zamrznutoj podjeli.\n\nOdluka je dakle bila da li sačuvati odnos s patronom ili potrošiti vojnu priliku. Prihvatiti poziv na suzdržanost značilo je podrediti bojničku mogućnost diplomatskom rasporedu sila. Oduprijeti se značilo je potvrditi pravo vlade da slijedi vlastite ratne ciljeve — po cijenu opterećenja saveza o kojem je sve još ovisilo.\n\nU igrinom toku ovaj zapis povezuje otključani dogadjaj s većim ratnim lukom. Ako se kampanja razvije drugačije od historijskog slijeda, Codex i dalje čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u simulaciji."
+                }
+            }
+        },
+        {
+            "id": "essay_holbrooke_us_belgrade_channel_1995",
+            "event_id": "holbrooke_us_belgrade_channel_1995",
+            "title": "Holbrooke Routes Pressure Through Belgrade",
+            "year": 1995,
+            "category": "diplomatic",
+            "sources": [
+                "General Framework Agreement for Peace in Bosnia and Herzegovina (Dayton, 1995)",
+                "ICTY Karadžić Trial Judgment (IT-95-5/18-T), 1995 negotiations findings"
+            ],
+            "generated": true,
+            "content": "When the United States, under the direction of Richard Holbrooke, assembled the diplomatic push that would end the war in late 1995, it made a deliberate procedural choice: it negotiated the Bosnian Serb position through Belgrade rather than directly with the Pale leadership. Slobodan Milošević was given authority to speak for the Bosnian Serbs in the talks that culminated at Dayton. The leadership in Pale, including Radovan Karadžić, by then indicted by the ICTY, was sidelined.\n\nFor the Bosnian Serb leadership this was a profound humiliation and a strategic trap. Routing the negotiations through Belgrade confirmed, before the world and in the structure of the peace process itself, that Republika Srpska was a dependency of Serbia rather than a sovereign actor. Milošević, motivated above all by the lifting of sanctions and the salvaging of Serbia’s position, had every incentive to settle on terms the Pale leadership found intolerable — and the authority, as the patron, to do so over their objections. The ICTY Karadžić Trial Judgment (IT-95-5/18-T) recorded the friction this arrangement generated within the Bosnian Serb leadership during the 1995 endgame.\n\nThe choice for Pale was whether to accept the Belgrade channel — and with it Milošević’s authority to negotiate away their war aims — or to repudiate the framework and insist that Pale alone spoke for Republika Srpska. The first path led, by way of the General Framework Agreement signed at Dayton, to a settlement that preserved a Serb entity but on terms dictated through the patron. The second meant defying both Belgrade and Washington at the moment the war was being concluded, with no sponsor left to underwrite the defiance.\n\nIt was the final iteration of the war’s recurring structural problem for the Bosnian Serbs: the same Belgrade dependence that had armed and sustained the project now held the pen at its conclusion. To comply was to let the patron end the war on the patron’s terms. To defy was to assert a sovereignty the process had already designed out of existence.",
+            "dynamic_sections": [
+                {
+                    "id": "wave3_holbrooke_us_belgrade_channel_1995_branch_accepted",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:holbrooke_us_belgrade_channel_1995:comply_with_belgrade",
+                    "variant": "note",
+                    "content": "In this campaign, the Pale leadership accepted the Belgrade channel and Milošević’s authority to negotiate — the path that, by way of the General Framework Agreement at Dayton, preserved a Serb entity on terms dictated through the patron.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vodstvo u Palama prihvatilo je beogradski kanal i Miloševićevo ovlaštenje da pregovara — put koji je, kroz Opći okvirni sporazum u Daytonu, sačuvao srpski entitet pod uslovima diktiranim preko patrona."
+                        }
+                    }
+                },
+                {
+                    "id": "wave3_holbrooke_us_belgrade_channel_1995_branch_rejected",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:holbrooke_us_belgrade_channel_1995:defy_us_framework",
+                    "variant": "divergence",
+                    "content": "In this campaign, the Pale leadership rejected the US framework and insisted that Pale alone spoke for Republika Srpska — defiance of both Belgrade and Washington at the moment the war was being concluded, with no sponsor left to underwrite it.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vodstvo u Palama odbacilo je američki okvir i inzistiralo da Pale jedino govore za Republiku Srpsku — prkos i Beogradu i Washingtonu u trenutku kad se rat zaključivao, bez pokrovitelja koji bi ga podržao."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Holbrooke usmjerava pritisak kroz Beograd",
+                    "category": "diplomatsko",
+                    "content": "Kada su Sjedinjene Države, pod vodstvom Richarda Holbrookea, sklopile diplomatski pritisak koji će okončati rat krajem 1995, načinile su namjeran proceduralni izbor: o poziciji bosanskih Srba pregovarale su preko Beograda, a ne izravno s vodstvom u Palama. Slobodanu Miloševiću dato je ovlaštenje da govori za bosanske Srbe u razgovorima koji su kulminirali u Daytonu. Vodstvo u Palama, uključujući Radovana Karadžića, do tada optuženog pred ICTY-em, bilo je odgurnuto na stranu.\n\nZa vodstvo bosanskih Srba to je bilo duboko poniženje i strateška zamka. Usmjeravanje pregovora kroz Beograd potvrdilo je, pred svijetom i u samoj strukturi mirovnog procesa, da je Republika Srpska ovisnost Srbije, a ne suvereni akter. Milošević, vođen prije svega ukidanjem sankcija, imao je svaki poticaj da se nagodi pod uslovima koje je vodstvo u Palama smatralo nepodnošljivim. Presuda ICTY-a u predmetu Karadžić (IT-95-5/18-T) zabilježila je trvenja koja je taj aranžman izazvao.\n\nIzbor za Pale bio je da li prihvatiti beogradski kanal — i s njim Miloševićevo ovlaštenje da otpregovara njihove ratne ciljeve — ili odbaciti okvir i inzistirati da Pale jedino govore za Republiku Srpsku. Prvi put vodio je, kroz Opći okvirni sporazum potpisan u Daytonu, do rješenja koje je sačuvalo srpski entitet, ali pod uslovima diktiranim preko patrona.\n\nBila je to posljednja iteracija stalnog strukturnog problema rata za bosanske Srbe: ista beogradska ovisnost koja je naoružala i održavala projekat sada je držala pero pri njegovom zaključenju. Pristati značilo je dopustiti patronu da okonča rat pod patronovim uslovima. Prkositi značilo je potvrditi suverenitet koji je proces već isključio iz postojanja.\n\nU igrinom toku ovaj zapis povezuje otključani dogadjaj s većim ratnim lukom. Ako se kampanja razvije drugačije od historijskog slijeda, Codex i dalje čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u simulaciji."
+                }
+            }
+        },
+        {
+            "id": "essay_strategic_posture_review_rbih",
+            "event_id": "strategic_posture_review_rbih",
+            "title": "The Posture Review: Sarajevo Weighs Offensive Against Endurance",
+            "year": 1993,
+            "category": "military",
+            "sources": [
+                "ICTY Hadžihasanović & Kubura Trial Judgment (IT-01-47-T), ARBiH command findings",
+                "UN Security Council Resolution 836 (1993)"
+            ],
+            "generated": true,
+            "content": "A war fought without a clear path to victory still demands periodic decisions about how to fight it. For the Sarajevo government, whose army the ICTY Hadžihasanović & Kubura Trial Judgment (IT-01-47-T) describes as a force assembling its command structures under fire, the recurring question was one of posture: whether to press offensives that might recover ground but bleed scarce manpower, or to consolidate and endure in the expectation that time, attrition, and shifting international opinion favoured a state defending its recognized borders.\n\nEach option carried a distinct logic and a distinct cost. To press the offensive was to assert that the war could be moved toward a better outcome by force — a posture that suited a government refusing to accept territorial losses as permanent, but one that spent lives and ammunition the arms embargo made nearly irreplaceable. To consolidate and defend was to husband strength behind the lines the safe-area regime of UN Security Council Resolution 836 (1993) nominally protected, accepting a static map in exchange for survival. To signal openness to negotiation, or to accept ceasefire terms, was to convert military restraint into diplomatic position — buying time and international goodwill at the price of momentum.\n\nFor the ARBiH, the calculus was shaped by a structural asymmetry the army could not escape. Against a Bosnian Serb force richly supplied with the artillery and armour of the former Yugoslav army, offensive action was costly out of all proportion to the ground it gained. Endurance, by contrast, played to the one advantage the government held: a cause the international community was increasingly disposed to defend, and a population for whom the war was existential rather than territorial.\n\nThe posture review was therefore less a choice of strategy than a choice of which scarce resource to spend — lives now, in pursuit of recovery, or time, in the hope that the war’s terms would improve. Pressing the offensive gambled on force; settling toward negotiation gambled on patience. Both were wagers; neither was free.",
+            "dynamic_sections": [
+                {
+                    "id": "wave3_strategic_posture_review_rbih_branch_accepted",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:strategic_posture_review_rbih:press_offensive",
+                    "variant": "note",
+                    "content": "In this campaign, the Sarajevo government wagered on force and pressed the offensive — spending lives and ammunition the embargo made nearly irreplaceable in pursuit of territorial recovery.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vlada u Sarajevu kockala se na silu i pritisnula ofanzivu — trošeći živote i municiju koje je embargo činio gotovo nezamjenjivim u potrazi za povratom teritorija."
+                        }
+                    }
+                },
+                {
+                    "id": "wave3_strategic_posture_review_rbih_branch_rejected",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:strategic_posture_review_rbih:accept_ceasefire_terms",
+                    "variant": "divergence",
+                    "content": "In this campaign, the Sarajevo government turned toward endurance and negotiation — husbanding strength behind the lines and converting military restraint into diplomatic position.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vlada u Sarajevu okrenula se izdržljivosti i pregovorima — čuvajući snagu iza linija i pretvarajući vojnu suzdržanost u diplomatsku poziciju."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Pregled držanja: Sarajevo vaga ofanzivu naspram izdržljivosti",
+                    "category": "vojno",
+                    "content": "Rat vođen bez jasnog puta do pobjede ipak zahtijeva periodične odluke o tome kako ga voditi. Za vladu u Sarajevu, čiju vojsku presuda ICTY-a u predmetu Hadžihasanović i Kubura (IT-01-47-T) opisuje kao snagu koja sklapa svoje komandne strukture pod vatrom, stalno pitanje bilo je pitanje držanja: pritisnuti ofanzive koje bi mogle vratiti teren ali iscijediti oskudno ljudstvo, ili se konsolidovati i izdržati u očekivanju da vrijeme i pomjeranje međunarodnog mnijenja idu u prilog državi koja brani priznate granice.\n\nSvaka opcija nosila je vlastitu logiku i vlastitu cijenu. Pritisnuti ofanzivu značilo je tvrditi da se rat silom može pomjeriti ka boljem ishodu — držanje koje je odgovaralo vladi koja odbija prihvatiti teritorijalne gubitke kao trajne, ali koje je trošilo živote i municiju koje je embargo činio gotovo nezamjenjivim. Konsolidovati se i braniti značilo je štedjeti snagu iza linija koje je režim sigurnih zona iz Rezolucije 836 (1993) nominalno štitio.\n\nZa ARBiH računicu je oblikovala strukturna asimetrija kojoj vojska nije mogla pobjeći. Protiv snage bosanskih Srba bogato snabdjevene artiljerijom i oklopom bivše jugoslavenske vojske, ofanzivno djelovanje bilo je skupo nesrazmjerno terenu koji je dobivalo. Izdržljivost je, naprotiv, igrala na jednu prednost koju je vlada imala.\n\nPregled držanja bio je dakle manje izbor strategije, a više izbor koji oskudni resurs potrošiti — živote sada, u potrazi za povratom, ili vrijeme, u nadi da će se uslovi rata popraviti. Pritisak ofanzive kockao se na silu; okretanje pregovorima kockalo se na strpljenje. Oboje su bile opklade; nijedna nije bila besplatna.\n\nU igrinom toku ovaj zapis povezuje otključani dogadjaj s većim ratnim lukom. Ako se kampanja razvije drugačije od historijskog slijeda, Codex i dalje čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u simulaciji."
+                }
+            }
+        },
+        {
+            "id": "essay_strategic_posture_review_rs",
+            "event_id": "strategic_posture_review_rs",
+            "title": "The Posture Review: Pale Between the Maximalist Map and the Sustainable One",
+            "year": 1993,
+            "category": "military",
+            "sources": [
+                "ICTY Karadžić Trial Judgment (IT-95-5/18-T), strategic-objectives findings",
+                "UN Security Council Resolution 820 (1993)"
+            ],
+            "generated": true,
+            "content": "By 1993 the Bosnian Serb army held roughly two-thirds of Bosnia’s territory, the high-water mark of a campaign launched in the spring of 1992 to secure the “strategic objectives” the ICTY Karadžić Trial Judgment (IT-95-5/18-T) traces to the Bosnian Serb assembly’s decisions of that year. Holding so much ground with a finite population, however, posed its own strategic problem. The posture review for the Pale leadership was a recurring reckoning between the maximalist map their forces had seized and the sustainable map their resources, manpower, and patron could actually maintain.\n\nTo press further territorial gains was to pursue the original ambition of a contiguous, ethnically consolidated Serb space — but every additional kilometre of front thinned an army already stretched and deepened the international isolation that UN Security Council Resolution 820 (1993) was tightening around Serbia and its dependents. To consolidate what was held was to trade ambition for defensibility, accepting that the war’s purpose had shifted from conquest to retention. To negotiate from strength, or to accept a partition framework, was to attempt to convert battlefield dominance into a settlement before the costs of holding it became ruinous.\n\nThe strategic trap was that the Bosnian Serb position was strongest precisely when it was least sustainable. The territory seized in 1992 could be defended for a time, but the manpower to garrison it was finite, the economy underwriting it was collapsing under sanctions, and the patron in Belgrade was beginning to count the cost. Every month spent pressing for more was a month the underlying foundation eroded.\n\nThe choice was therefore between the war’s founding ambition and its arithmetic. To press gains was to bet that more territory now would translate into a better settlement later, before exhaustion set in. To negotiate or accept partition was to lock in the gains while they could still be defended — conceding the maximalist dream in exchange for a durable, if smaller, reality.",
+            "dynamic_sections": [
+                {
+                    "id": "wave3_strategic_posture_review_rs_branch_accepted",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:strategic_posture_review_rs:press_gains",
+                    "variant": "note",
+                    "content": "In this campaign, the Pale leadership pressed for further territorial gains — betting that more territory now would translate into a better settlement later, before exhaustion set in.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vodstvo u Palama pritisnulo je dalje teritorijalne dobitke — kockajući se da će više teritorija sada značiti bolji sporazum kasnije, prije nego što iscrpljenost nastupi."
+                        }
+                    }
+                },
+                {
+                    "id": "wave3_strategic_posture_review_rs_branch_rejected",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:strategic_posture_review_rs:accept_partition_framework",
+                    "variant": "divergence",
+                    "content": "In this campaign, the Pale leadership consolidated its gains and turned toward a partition framework — conceding the maximalist dream in exchange for a durable, if smaller, reality.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vodstvo u Palama učvrstilo je dobitke i okrenulo se okviru podjele — ustupajući maksimalistički san za trajniju, makar manju, stvarnost."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Pregled držanja: Pale između maksimalističke i održive karte",
+                    "category": "vojno",
+                    "content": "Do 1993. vojska bosanskih Srba držala je otprilike dvije trećine teritorija Bosne, vrhunac kampanje pokrenute u proljeće 1992. radi osiguranja “strateških ciljeva” koje presuda ICTY-a u predmetu Karadžić (IT-95-5/18-T) vezuje uz odluke skupštine bosanskih Srba iz te godine. Držanje tolikog terena s ograničenim stanovništvom, međutim, postavljalo je vlastiti strateški problem. Pregled držanja za vodstvo u Palama bio je stalni obračun između maksimalističke karte koju su snage osvojile i održive karte koju su resursi, ljudstvo i patron zaista mogli održati.\n\nPritisnuti dalje teritorijalne dobitke značilo je slijediti izvornu ambiciju povezanog, etnički učvršćenog srpskog prostora — ali svaki dodatni kilometar fronta razrijeđivao je već rastegnutu vojsku i produbljivao izolaciju koju je Rezolucija 820 (1993) zatezala oko Srbije i njenih ovisnika. Konsolidovati ono što se drži značilo je zamijeniti ambiciju braniljivošću.\n\nStrateška zamka bila je u tome što je položaj bosanskih Srba bio najjači upravo onda kada je bio najmanje održiv. Teritorij osvojen 1992. mogao se braniti neko vrijeme, ali ljudstvo za njegovo čuvanje bilo je konačno, privreda koja ga je finansirala urušavala se pod sankcijama, a patron u Beogradu počinjao je računati cijenu.\n\nIzbor je dakle bio između osnivačke ambicije rata i njegove aritmetike. Pritisnuti dobitke značilo je kladiti se da će više teritorija sada donijeti bolji sporazum kasnije. Pregovarati ili prihvatiti podjelu značilo je učvrstiti dobitke dok su se još mogli braniti — ustupajući maksimalistički san za trajniju, makar manju, stvarnost.\n\nU igrinom toku ovaj zapis povezuje otključani dogadjaj s većim ratnim lukom. Ako se kampanja razvije drugačije od historijskog slijeda, Codex i dalje čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u simulaciji."
+                }
+            }
+        },
+        {
+            "id": "essay_strategic_posture_review_hrhb",
+            "event_id": "strategic_posture_review_hrhb",
+            "title": "The Posture Review: Herceg-Bosna Between Conquest and Coalition",
+            "year": 1993,
+            "category": "military",
+            "sources": [
+                "ICTY Prlić et al. Trial Judgment (IT-04-74-T), territorial-control findings",
+                "ICTY Kordić & Čerkez Trial Judgment (IT-95-14/2-T), central Bosnia findings"
+            ],
+            "generated": true,
+            "content": "The Bosnian Croat war effort of 1993 was caught between two incompatible strategies, and the posture review forced a choice between them. One path — the maximalist project documented in the ICTY Prlić et al. Trial Judgment (IT-04-74-T) — pursued territorial control over the areas the Vance-Owen map had designated Croat-majority, including the central Bosnian municipalities where the ICTY Kordić & Čerkez Trial Judgment (IT-95-14/2-T) found a campaign of persecution against the Bosniak population. The other path pointed back toward coalition with the Sarajevo government against the common Serb adversary.\n\nPressing Croat territorial objectives meant doubling down on the war against the ARBiH in the Lašva Valley and Herzegovina — a war that consumed HVO strength, blackened Herceg-Bosna’s international standing, and opened a second front that benefited only the Bosnian Serbs. Coordinating with the Bosniaks meant subordinating the maximalist map to a partnership of necessity, trading the dream of a consolidated Croat space for the security of a shared front. Consolidating supply, or suing for the Federation framework, were way-stations between these poles — buying time or accepting the eventual logic of coalition.\n\nThe strategic incoherence was structural. The Herceg-Bosna project drew its arms and direction from Zagreb, but Zagreb’s own interests increasingly pointed toward the American-brokered partnership with Sarajevo that would crystallize in the 1994 Washington Agreement. A local leadership pressing for maximalist conquest was, in effect, fighting a war its patron was preparing to abandon.\n\nThe posture review thus posed the project’s defining contradiction in operational form. To press Croat objectives was to pursue the territory at the cost of the alliance — and ultimately at the cost of the patron’s patience. To accept the Federation framework was to surrender the maximalist ambition for a coalition that could actually be sustained. The historical record bent, after a year of ruinous fighting, toward the second.",
+            "dynamic_sections": [
+                {
+                    "id": "wave3_strategic_posture_review_hrhb_branch_accepted",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:strategic_posture_review_hrhb:press_croat_objectives",
+                    "variant": "note",
+                    "content": "In this campaign, the Herceg-Bosna leadership pressed its Croat territorial objectives — pursuing territory at the cost of the alliance and, ultimately, of the patron’s patience.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vodstvo Herceg-Bosne pritisnulo je hrvatske teritorijalne ciljeve — slijedeći teritorij po cijenu saveza i, na koncu, po cijenu strpljenja patrona."
+                        }
+                    }
+                },
+                {
+                    "id": "wave3_strategic_posture_review_hrhb_branch_rejected",
+                    "insert_after_paragraph": 3,
+                    "condition": "RESPONSE:strategic_posture_review_hrhb:sue_for_peace_hrhb",
+                    "variant": "divergence",
+                    "content": "In this campaign, the Herceg-Bosna leadership accepted the Federation framework — surrendering the maximalist ambition for a coalition that could actually be sustained, as the historical record eventually did.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji vodstvo Herceg-Bosne prihvatilo je okvir Federacije — ustupajući maksimalističku ambiciju za koaliciju koja se zaista mogla održati, kako je na kraju krenuo i historijski zapis."
+                        }
+                    }
+                }
+            ],
+            "localizations": {
+                "bcs": {
+                    "title": "Pregled držanja: Herceg-Bosna između osvajanja i koalicije",
+                    "category": "vojno",
+                    "content": "Bosanskohrvatski ratni napor 1993. bio je uhvaćen između dvije nespojive strategije, a pregled držanja nametnuo je izbor među njima. Jedan put — maksimalistički projekat zabilježen u presudi ICTY-a u predmetu Prlić i drugi (IT-04-74-T) — slijedio je teritorijalnu kontrolu nad područjima koja je Vance-Owenova karta označila kao područja s hrvatskom većinom, uključujući srednjobosanske općine u kojima je presuda u predmetu Kordić i Čerkez (IT-95-14/2-T) utvrdila kampanju progona protiv bošnjačkog stanovništva. Drugi put upućivao je nazad ka koaliciji s vladom u Sarajevu protiv zajedničkog srpskog protivnika.\n\nPritisnuti hrvatske teritorijalne ciljeve značilo je udvostručiti rat protiv ARBiH — rat koji je trošio snagu HVO-a, crnio međunarodni ugled Herceg-Bosne i otvarao drugi front koji je koristio samo bosanskim Srbima. Koordinacija s Bošnjacima značila je podrediti maksimalističku kartu partnerstvu nužde.\n\nStrateška nesuvislost bila je strukturna. Projekat Herceg-Bosne crpio je oružje i smjer iz Zagreba, ali su vlastiti interesi Zagreba sve više upućivali ka partnerstvu sa Sarajevom koje će se iskristalisati u Washingtonskom sporazumu 1994. Lokalno vodstvo koje pritisće maksimalističko osvajanje vodilo je, zapravo, rat koji se njegov patron spremao napustiti.\n\nPregled držanja postavio je tako određujuću protivrječnost projekta u operativnom obliku. Pritisnuti hrvatske ciljeve značilo je slijediti teritorij po cijenu saveza. Prihvatiti okvir Federacije značilo je ustupiti maksimalističku ambiciju za koaliciju koja se zaista mogla održati. Historijski zapis se, nakon godine pogubnih borbi, savio ka drugom.\n\nU igrinom toku ovaj zapis povezuje otključani dogadjaj s većim ratnim lukom. Ako se kampanja razvije drugačije od historijskog slijeda, Codex i dalje čuva razliku između onoga što se dogodilo u stvarnosti i onoga što je nastalo u simulaciji."
+                }
+            }
         }
     ]
 }
