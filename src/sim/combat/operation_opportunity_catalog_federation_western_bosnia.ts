@@ -569,10 +569,30 @@ const MISTRAL_1_GRAHOVO_OBJECTIVES: readonly string[] = [
 // no_approach_osid every turn for the unreachable head of the list (same bug
 // class Wave 22 fixed for Cincar). New order targets reachable Glamoč shoulder
 // first, then chains inward.
+//
+// Wave 31 (2026-06-07): the full Glamoč/Livno shoulder (Operation Summer '95 /
+// "Ljeto '95", HV Split Corps OG Rujani under Gotovina, 25-29 Jul 1995 —
+// captured Glamoč + Bosansko Grahovo + the Livanjsko Polje shoulder) was only
+// reaching pribelja/kovacevci_2/gubin_2 via OPPORTUNISTIC free-HV-brigade
+// captures (hv_1st_guards_tigers, hv_5th_guards_karlovac) at wk164/wk180 on the
+// 188w floor — a determinism-fragile path that evaporates under unrelated global
+// perturbations (e.g. the Drina-Corps/Zvornik garrison hold). Making these three
+// historically-Glamoč/Livno OSIDs explicit Mistral 1 objectives routes their
+// capture through the deterministic catalog op instead. OSID-adjacency order
+// (operational_contact_graph.json): pribelja adj glamoc_2 + vidimlije_2;
+// kovacevci_2 adj glamoc_2 + pribelja; gubin_2 (Livno) adj glamoc_2 + halapic +
+// pre-existing livno:priluka_2. Inserted reachable-first so the brigade brain
+// never heads an unreachable objective.
+// Sources: Wikipedia "Operation Summer '95" (OG Rujani, Gotovina, 8,500 HV/HVO
+// vs VRS 2nd Krajina Corps, captured Glamoč + B. Grahovo 25-29 Jul 1995),
+// cross-checked; ICTY Gotovina §44-58 (Mistral 1 / Storm precondition arc).
 const MISTRAL_1_GLAMOC_OBJECTIVES: readonly string[] = [
     'op:glamoc:vidimlije_2',
     'op:glamoc:glamoc_2',
+    'op:glamoc:pribelja',
+    'op:glamoc:kovacevci_2',
     'op:glamoc:halapic',
+    'op:livno:gubin_2',
     'op:glamoc:stekerovci_2',
 ];
 
