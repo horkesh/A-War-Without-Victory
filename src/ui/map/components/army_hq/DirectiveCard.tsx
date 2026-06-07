@@ -40,7 +40,6 @@ import {
   buildCommandFrictionStakes,
   type CommandFrictionStakes,
 } from '../../../../sim/combat/command_lever_consequences.js';
-import type { FactionId } from '../../../../state/game_state.js';
 
 interface DirectiveCardProps {
   directive: PresidentialDecisionRoomDirective;
@@ -201,7 +200,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   // that carry a deferred political consequence (replace_co / request_op /
   // force_launch) and only when the player's faction is known.
   const frictionStakes = useMemo<CommandFrictionStakes | null>(() => {
-    const faction = (gameState.player_faction ?? null) as FactionId | null;
+    const faction = gameState.player_faction ?? null;
     if (!faction) return null;
     if (directive.lever === 'replace_co') {
       return buildCommandFrictionStakes(faction, 'replace_co', corpsCommander?.political_reliability);
