@@ -1,4 +1,15 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-07] fix(codex): Batch E — ghost predicate flag (#267) + essay variant labels (#262) + per-unit response match (#263)
+
+**Type:** Codex/essay read-model + data only. Sim byte-identical (40w `8270ad3ceaee702a` unchanged). Non-§6 (no sensitive prose touched — labels/gating only).
+
+**Changes:**
+- **#267** `src/sim/codex/dynamic_section_builder.ts` — `predEquipmentQualityRecovered` gated on the bare flag `equipment_quality_recovered`, which NO consequence sets. The recovery substrate (`csq_equipment_quality_recovery_streak_*` in `consequences.json`) writes PER-FACTION flags `equipment_quality_recovery_streak_active_{RBiH,RS,HRHB}`, so the ghost could never emit from a live run. Re-gated on any-faction-active over `CANONICAL_FACTIONS` (deterministic iteration), legacy aggregate flag retained for back-compat, mutual-exclusion with `equipment_quality_collapsed` preserved.
+- **#262** `data/scenarios/essays/essay_index.json` — `essay_milosevic_vopp_pressure` had `note`/`divergence` variant labels swapped: the historical path was DEFIANCE (assembly rejected Vance-Owen, May 1993), so the `resist_patron` branch (historical) was wrongly `divergence` and the `acknowledge_pressure` branch (counterfactual) wrongly `note`. Swapped to match the convention (note=historical, divergence=counterfactual) confirmed against the two sibling Vance-Owen essays. Prose unchanged.
+- **#263** `src/ui/map/components/codex/codexEssayResolver.ts` — `RESPONSE:` atom used exact `.has()` set-membership, but the decorate-a-unit `decorate_steadfast_<faction>` branch is expanded per-unit at runtime to `<base>__<formationId>` (`decorate_unit_contract.cjs`), so the authored un-suffixed essay condition could never fire. Added `__`-boundary prefix match (exact OR per-unit expansion); single-underscore sibling ids never collide. The `~4885` stale recurring-action accumulation (multiple "Recorded choice" sections rendering together) is a read-model RECENCY gap — `decisionResponses` is a cumulative set with no "most recent per event_id" — coupled to the recurring-leadership-action lane (#255); left as-is (no safe data-only de-dup; the branches are legitimately distinct render targets).
+
+**Tests:** `tests/codex_ghost_entries_wave_3_builder.test.ts` (+4: per-faction streak emits + collapse mutex), `tests/ui/codex_essay_resolver.test.ts` (+5: RESPONSE exact / per-unit `__` / no-false-prefix / not-chosen / absent-set). tsc clean. Codex builder+resolver+localization+vocab+response+spine suites GREEN (176 + 41). 40w hash byte-identical.
+
 ## [2026-06-07] feat(calibration): Sana follow-on folded into initial op (+6 OSID)
 
 **Type:** Calibration-moving (188w re-floor). 40w byte-identical.
