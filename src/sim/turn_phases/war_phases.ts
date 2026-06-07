@@ -38,6 +38,7 @@ import { buildSidToMunFromSettlements, buildOsidToMunFromReverseMap } from '../.
 import { updateCapabilityProfiles } from '../../state/capability_progression.js';
 import { computeDimensionBaseValues, applyDimensionShift } from '../events/strategic_dimensions.js';
 import { relieveOfficer, recordPresidentialOverride } from '../combat/order_interpretation.js';
+import { applyReplaceCoConsequence, applyForceOpConsequence } from '../combat/command_lever_consequences.js';
 import { clamp } from '../../utils/math.js';
 import { updateDisplacement } from '../../state/displacement.js';
 import { processDisplacementTakeover } from '../../state/displacement_takeover.js';
@@ -545,6 +546,26 @@ function applyCoReplacements(state: GameState): void {
             applyDimensionShift(dims, coFaction, 'internal_cohesion', CO_REPLACEMENT_COHESION_COST);
         }
 
+        // FACTION-ASYMMETRIC consequence (Presidential Command Model §4): the deferred
+        // officer-corps-revolt fallout the comment marked MECHANICAL-ONLY. Fires only when
+        // the faction's patron-dependence × the relieved officer's political standing crosses
+        // the revolt threshold (RS-shaped from DATA — COMMAND_FRICTION_FACTION_WEIGHT — never
+        // `if faction===`). Applies extra patron_confidence/cohesion + corps-paralysis (cows
+        // the successor via the EXISTING cowed_until_turn surface) on top of the baseline
+        // cohesion cost above. Player-only (gated on pending_co_replacement) → byte-identical
+        // in headless. No new §6 surface.
+        if (coFaction) {
+            applyReplaceCoConsequence(
+                state,
+                corpsId,
+                coFaction,
+                coData?.political_reliability ?? 3,
+                relief.replacement_officer_id,
+                turn,
+                cmd,
+            );
+        }
+
         // Append the replacement record for the UI / follow-up consequence.
         const record = {
             relieved_officer_id: relief.relieved_officer_id,
@@ -767,6 +788,13 @@ function injectOpDirectives(state: GameState, adjacency?: Map<string, string[]>)
         // The CO was warned and overridden — bump override tracking + cow on threshold.
         if (forcedOverObjection) {
             recordPresidentialOverride(state, corpsId, turn);
+            // FACTION-ASYMMETRIC consequence (Presidential Command Model §4): the deferred
+            // patron_confidence price the comment marked MECHANICAL-ONLY. Scaled by the
+            // faction's patron-dependence (RS Directive-7-era culpability weighting) from DATA
+            // (COMMAND_FRICTION_FACTION_WEIGHT) — never `if faction===`. Player-only (gated on
+            // pending_op_directive.forced_over_objection) → byte-identical in headless. Maps to
+            // the EXISTING patron_confidence dimension; no new §6 surface.
+            applyForceOpConsequence(state, corpsId, plan.corpsFaction, turn, cmd);
         }
     }
 }

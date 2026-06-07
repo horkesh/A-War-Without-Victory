@@ -36,6 +36,10 @@ import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { buildObjectiveTargetOptions } from '../../utils/objectiveTargetOptions';
 import { t } from '../../i18n';
 import { strictCompare } from '../../../../state/validateGameState.js';
+import {
+  buildCommandFrictionStakes,
+  type CommandFrictionStakes,
+} from '../../../../sim/combat/command_lever_consequences.js';
 
 interface DirectiveCardProps {
   directive: PresidentialDecisionRoomDirective;
@@ -187,6 +191,32 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       (o) => o.assigned_corps_id === directive.corpsId && o.status === 'active',
     );
   }, [gameState.namedOfficerData, directive.corpsId]);
+
+  // FACTION-ASYMMETRIC stakes preview (Presidential Command Model §4): the
+  // "what this will cost you" line shown BEFORE commit on the two friction
+  // levers. Fully DATA-DRIVEN — buildCommandFrictionStakes derives the severity +
+  // patron-at-risk from COMMAND_FRICTION_FACTION_WEIGHT for the PLAYER's faction;
+  // this component never branches on the faction id. Only rendered for the levers
+  // that carry a deferred political consequence (replace_co / request_op /
+  // force_launch) and only when the player's faction is known.
+  const frictionStakes = useMemo<CommandFrictionStakes | null>(() => {
+    const faction = gameState.player_faction ?? null;
+    if (!faction) return null;
+    if (directive.lever === 'replace_co') {
+      return buildCommandFrictionStakes(faction, 'replace_co', corpsCommander?.political_reliability);
+    }
+    if (directive.lever === 'request_op' || directive.lever === 'force_launch') {
+      return buildCommandFrictionStakes(faction, 'force_op');
+    }
+    return null;
+  }, [gameState.player_faction, directive.lever, corpsCommander]);
+
+  const stakesSeverityLabel = (severity: CommandFrictionStakes['severity']): string =>
+    severity === 'severe'
+      ? t('directive.stakes.severe')
+      : severity === 'moderate'
+        ? t('directive.stakes.moderate')
+        : t('directive.stakes.minimal');
 
   const refreshGesture = useCallback(async () => {
     if (!ipc.isAvailable || !isLeadershipGesture) return;
@@ -582,6 +612,38 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
           <p className="mt-0.5 text-[10px] text-text-primary">
             {t('directive.targetInput.ambiguousBody', { matches: ambiguousTargetMatches.join(', ') })}
           </p>
+        </div>
+      )}
+
+      {/* FACTION-ASYMMETRIC stakes preview — the "what this will cost you" line shown
+          before commit on the friction levers. Data-driven from the player's faction
+          weight; no faction branch in this view. Hidden while an objection / cannot-issue
+          banner is up (those carry their own consequence framing). */}
+      {!pendingObjection && !impossibleReason && frictionStakes && (
+        <div
+          role="note"
+          aria-label={t('directive.stakes.aria')}
+          data-testid="directive-card-stakes"
+          className={`mt-2 rounded border p-2 ${
+            frictionStakes.severity === 'severe'
+              ? 'border-red-500/40 bg-red-500/5'
+              : frictionStakes.severity === 'moderate'
+                ? 'border-amber-500/40 bg-amber-500/5'
+                : 'border-panel-border/60 bg-panel-bg/60'
+          }`}
+        >
+          <p className="text-[8px] font-bold uppercase tracking-wider text-text-secondary">
+            {t('directive.stakes.heading')}
+          </p>
+          <p className="mt-0.5 text-[10px] text-text-primary">{stakesSeverityLabel(frictionStakes.severity)}</p>
+          {frictionStakes.revoltLikely && (
+            <p className="mt-0.5 text-[10px] text-red-300">{t('directive.stakes.revoltLikely')}</p>
+          )}
+          {frictionStakes.patronConfidenceAtRisk < 0 && (
+            <p className="mt-0.5 text-[9px] font-mono text-text-secondary">
+              {t('directive.stakes.patronAtRisk', { delta: frictionStakes.patronConfidenceAtRisk })}
+            </p>
+          )}
         </div>
       )}
 
