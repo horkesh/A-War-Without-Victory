@@ -623,8 +623,8 @@ describe('buildPresidentialDecisionRoomView', () => {
 
     const cardsById = Object.fromEntries(view.cards.map((card) => [card.id, card]));
 
-    expect(cardsById['review:pending'].title).toBe('Predsjednicki pregledi na čekanju');
-    expect(cardsById['review:pending'].sourceOwner).toBe('Predsjednicki red pregleda');
+    expect(cardsById['review:pending'].title).toBe('Predsjednički pregledi na čekanju');
+    expect(cardsById['review:pending'].sourceOwner).toBe('Predsjednički red pregleda');
     expect(cardsById['review:pending'].evidence).toContain('2 na čekanju');
     expect(cardsById['paramilitary:pending'].title).toBe('Odobrenje paravojske na čekanju');
     expect(cardsById['paramilitary:pending'].evidence).toContain('rizik ratnih zločina');

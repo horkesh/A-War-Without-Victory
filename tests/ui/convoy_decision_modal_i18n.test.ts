@@ -36,13 +36,13 @@ describe('Convoy decision modal localization', () => {
         expect(screen.getByText('Zalihe')).toBeTruthy();
         expect(screen.getByText('Pripremljeno')).toBeTruthy();
         expect(screen.getByText('Nista')).toBeTruthy();
-        expect(screen.getByText('Kontrolor rute mora odluciti da li pomoc stize u enklavu, biva zaustavljena ili preusmjerena. Ova naredba je pripremljena za sljedeći potez i može se promijeniti prije nastavka.')).toBeTruthy();
+        expect(screen.getByText('Kontrolor rute mora odluciti da li pomoć stiže u enklavu, biva zaustavljena ili preusmjerena. Ova naredba je pripremljena za sljedeći potez i može se promijeniti prije nastavka.')).toBeTruthy();
         expect(screen.getByText('Dozvoli konvoj')).toBeTruthy();
-        expect(screen.getByText('Pusti kolonu pomoci kroz ovu rutu.')).toBeTruthy();
+        expect(screen.getByText('Pusti kolonu pomoći kroz ovu rutu.')).toBeTruthy();
         expect(screen.getByText('Blokiraj konvoj')).toBeTruthy();
         expect(screen.getByText('Odbij prolaz i prihvati diplomatsku cijenu.')).toBeTruthy();
         expect(screen.getByText('Preusmjeri konvoj')).toBeTruthy();
-        expect(screen.getByText('Preusmjeri pomoc dalje od tražene enklave.')).toBeTruthy();
+        expect(screen.getByText('Preusmjeri pomoć dalje od tražene enklave.')).toBeTruthy();
         expect(screen.queryByText('Humanitarian Convoy')).toBeNull();
     });
 });

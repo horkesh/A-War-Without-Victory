@@ -66,7 +66,7 @@ describe('War Summary OPSEC reconciliation', () => {
         render(createElement(SituationTab, { state: stateWithFilteredOpsecOperations(), focusSection: 'opsec' }));
 
         expect(screen.getByText('Operativni položaj')).toBeTruthy();
-        expect(screen.getByText('Oznaceno zdravlje operacija (2 od 5 aktivnih operacija)')).toBeTruthy();
+        expect(screen.getByText('Označeno zdravlje operacija (2 od 5 aktivnih operacija)')).toBeTruthy();
         expect(screen.getByText('Una Push')).toBeTruthy();
         expect(screen.getByText('Vrbas Hold')).toBeTruthy();
         expect(screen.queryByText('Operational Posture')).toBeNull();

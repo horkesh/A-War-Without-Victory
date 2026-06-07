@@ -59,10 +59,10 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
 
     render(createElement(PresidentialDecisionRoomPanel));
 
-    expect(screen.getAllByText('Strateski prioriteti').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Strateški prioriteti').length).toBeGreaterThan(0);
     expect(screen.getByRole('button', { name: 'Prikaži napredno' })).toBeTruthy();
     expect(screen.getByText('Obavezne odluke i najsigurniji sljedeći pregledi')).toBeTruthy();
-    expect(screen.getByText('Šta se ocekuje od mene?')).toBeTruthy();
+    expect(screen.getByText('Šta se očekuje od mene?')).toBeTruthy();
     expect(screen.getByText('Prioritetne trake')).toBeTruthy();
     expect(screen.getByText('Pregled prije nastavka')).toBeTruthy();
     expect(screen.queryByText('Strategic Priorities')).toBeNull();

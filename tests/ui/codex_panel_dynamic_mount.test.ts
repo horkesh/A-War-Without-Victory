@@ -140,7 +140,7 @@ describe('CodexPanel dynamic essay proof', () => {
         fireEvent.click(screen.getByText('1995'));
         fireEvent.click(screen.getByText('Daytonski sporazum: kraj rata, zamrznuta pitanja'));
 
-        expect(screen.getAllByText('Odstupanje igracevog rata').length).toBeGreaterThanOrEqual(2);
+        expect(screen.getAllByText('Odstupanje igračevog rata').length).toBeGreaterThanOrEqual(2);
         expect(screen.queryByText('Player War Divergence')).toBeNull();
         expect(screen.getByText('Historijski kontekst')).toBeTruthy();
         expect(screen.queryByText('War lasted 6 weeks longer than the historical 182 weeks')).toBeNull();

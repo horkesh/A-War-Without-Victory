@@ -73,7 +73,7 @@ describe('GameOverModal localization', () => {
 
         expect(screen.getByRole('dialog', { name: 'Pat pozicija' })).toBeTruthy();
         expect(screen.getByText('Pat pozicija')).toBeTruthy();
-        expect(screen.getByText('Konacni poredak')).toBeTruthy();
+        expect(screen.getByText('Konačni poredak')).toBeTruthy();
         expect(screen.getByText('1 OSID-a pod kontrolom')).toBeTruthy();
         expect(screen.getAllByText('1 aktivnih brigada')).toHaveLength(2);
         expect(screen.getByText('Kampanja je trajala 65 sedmica (1 godina, 13 sedmica)')).toBeTruthy();

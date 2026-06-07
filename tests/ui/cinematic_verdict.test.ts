@@ -127,6 +127,6 @@ describe('CinematicVerdict', () => {
         expect(html).toContain('Signal cijene');
         expect(html).toContain('Podijeli sažetak');
         expect(html).toContain('Kopiraj');
-        expect(html).toContain('Nije zabiljezeno');
+        expect(html).toContain('Nije zabilježeno');
     });
 });

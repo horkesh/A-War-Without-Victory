@@ -203,7 +203,7 @@ describe('ADVANCE_TURN gated feedback', () => {
     fireEvent.click(screen.getByText('PRIORITETI'));
 
     expect(screen.getByText('Pregled prije nastavka')).toBeTruthy();
-    expect(screen.getByText('Nijedna ziva stavka stola nece biti zakopana sljedećim potezom.')).toBeTruthy();
+    expect(screen.getByText('Nijedna živa stavka stola neće biti zakopana sljedećim potezom.')).toBeTruthy();
     expect(screen.getByText('Predaje izvora')).toBeTruthy();
   });
 
@@ -225,9 +225,9 @@ describe('ADVANCE_TURN gated feedback', () => {
       pressureWarning: false,
     }));
 
-    const button = screen.getByRole('button', { name: /rijesite 2 odluke na čekanju za nastavak/i });
+    const button = screen.getByRole('button', { name: /riješite 2 odluke na čekanju za nastavak/i });
 
-    expect(button.getAttribute('title')).toBe('Rijesite 2 odluke na čekanju za nastavak. Otvara pregled sobe odluka.');
+    expect(button.getAttribute('title')).toBe('Riješite 2 odluke na čekanju za nastavak. Otvara pregled sobe odluka.');
     expect(screen.queryByText(/Resolve 2 pending decisions to continue/i)).toBeNull();
   });
 
