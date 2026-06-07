@@ -186,9 +186,16 @@ describe('capOutcomeByPeaceDysfunction', () => {
         }
     });
 
-    it('does not touch clean-win classes below threshold', () => {
-        expect(capOutcomeByPeaceDysfunction('strategic_success', PEACE_DYSFUNCTION_CAP_THRESHOLD - 1)).toBe('strategic_success');
+    it('does not touch clean-win classes below the graduated soft band (< 45)', () => {
+        // Graduated cap (institutional-architecture expansion 2026-06-07): a 45-59
+        // soft band now drops strategic_success → survival, so the "no cap" case
+        // must sit BELOW 45. The existing 60 hard cap (above) is unchanged.
+        expect(capOutcomeByPeaceDysfunction('strategic_success', 44)).toBe('strategic_success');
         expect(capOutcomeByPeaceDysfunction('survival', 10)).toBe('survival');
+        // 45-59 soft band: strategic_success → survival (one notch), others untouched.
+        expect(capOutcomeByPeaceDysfunction('strategic_success', PEACE_DYSFUNCTION_CAP_THRESHOLD - 1)).toBe('survival');
+        expect(capOutcomeByPeaceDysfunction('survival', PEACE_DYSFUNCTION_CAP_THRESHOLD - 1)).toBe('survival');
+        expect(capOutcomeByPeaceDysfunction('negotiated_escape', 50)).toBe('negotiated_escape');
     });
 
     it('never improves a worse outcome', () => {
