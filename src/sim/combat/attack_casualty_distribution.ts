@@ -27,7 +27,6 @@ import type { DefenderContribution } from './attack_resolution_types.js';
 export const KIA_FRACTION = 0.22;
 export const WIA_FRACTION = 0.74;
 export const MIA_FRACTION = 0.04;
-export const SHARED_NON_PRIMARY_DEFENDER_CASUALTY_CAP_FRACTION = 0.15;
 
 function removablePersonnel(formation: FormationState): number {
     return Math.max(0, (formation.personnel ?? 0) - MIN_COMBAT_PERSONNEL);
@@ -100,9 +99,8 @@ export function computeDefenderCasualtyShares(params: {
     sectorDefenseBrigades: FormationState[] | null;
     sectorBrigadeWeights: Map<FormationId, number> | null;
     finalDefenderCas: number;
-    capNonPrimaryDefenders?: boolean;
 }): Map<FormationId, number> {
-    const { defenderFormation, sectorDefenseBrigades, sectorBrigadeWeights, finalDefenderCas, capNonPrimaryDefenders = false } = params;
+    const { defenderFormation, sectorDefenseBrigades, sectorBrigadeWeights, finalDefenderCas } = params;
     const defBrigades = sectorDefenseBrigades && sectorDefenseBrigades.length > 1
         ? sectorDefenseBrigades
         : [defenderFormation];
@@ -124,13 +122,7 @@ export function computeDefenderCasualtyShares(params: {
             primaryShare += rawShare;
             continue;
         }
-        const nonPrimaryCap = capNonPrimaryDefenders
-            ? Math.min(
-                removablePersonnel(b),
-                Math.round(Math.max(0, b.personnel ?? 0) * SHARED_NON_PRIMARY_DEFENDER_CASUALTY_CAP_FRACTION)
-            )
-            : removablePersonnel(b);
-        const cappedShare = Math.min(rawShare, nonPrimaryCap);
+        const cappedShare = Math.min(rawShare, removablePersonnel(b));
         shares.set(b.id, cappedShare);
         cappedRemainder += rawShare - cappedShare;
     }
@@ -149,15 +141,13 @@ export function distributeDefenderCasualties(params: {
     sectorBrigadeWeights: Map<FormationId, number> | null;
     finalDefenderCas: number;
     casualtyLedger: CasualtyLedger;
-    capNonPrimaryDefenders?: boolean;
 }): void {
-    const { defenderFormation, sectorDefenseBrigades, sectorBrigadeWeights, finalDefenderCas, casualtyLedger, capNonPrimaryDefenders } = params;
+    const { defenderFormation, sectorDefenseBrigades, sectorBrigadeWeights, finalDefenderCas, casualtyLedger } = params;
     const shares = computeDefenderCasualtyShares({
         defenderFormation,
         sectorDefenseBrigades,
         sectorBrigadeWeights,
         finalDefenderCas,
-        capNonPrimaryDefenders,
     });
     const formationById = new Map<FormationId, FormationState>();
     for (const b of sectorDefenseBrigades ?? []) formationById.set(b.id, b);
@@ -177,9 +167,8 @@ export function buildDefenderContributions(params: {
     sectorBrigadeMeta: Map<FormationId, { hops: number; isHome: boolean }>;
     finalDefenderCas: number;
     primaryDefenderId?: FormationId;
-    capNonPrimaryDefenders?: boolean;
 }): DefenderContribution[] {
-    const { sectorDefenseBrigades, sectorBrigadeWeights, sectorBrigadeMeta, finalDefenderCas, primaryDefenderId, capNonPrimaryDefenders } = params;
+    const { sectorDefenseBrigades, sectorBrigadeWeights, sectorBrigadeMeta, finalDefenderCas, primaryDefenderId } = params;
     const totalWeight = sectorDefenseBrigades.reduce((s, b) => s + (sectorBrigadeWeights.get(b.id) ?? 0), 0);
     const primaryDefender = primaryDefenderId
         ? sectorDefenseBrigades.find((b) => b.id === primaryDefenderId)
@@ -190,7 +179,6 @@ export function buildDefenderContributions(params: {
             sectorDefenseBrigades,
             sectorBrigadeWeights,
             finalDefenderCas,
-            capNonPrimaryDefenders,
         })
         : undefined;
     const contributions: DefenderContribution[] = [];

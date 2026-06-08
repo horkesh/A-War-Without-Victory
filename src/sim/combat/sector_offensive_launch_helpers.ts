@@ -25,11 +25,7 @@ import { estimateConcentratedOutcome, isOutcomeSufficientForAttack } from './bot
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { getAllAxisObjectives, getCurrentLaunchObjectives, isMultiAxis } from './sector_offensive_axis_helpers.js';
-import {
-    ENABLE_SHARED_SECTOR_DEFENSE,
-    getStandingOgDefenseBrigadeIds,
-    isStandingOgDefenseBrigadeAvailable,
-} from './standing_og_defense.js';
+import { getStandingOgDefenseBrigadeIds } from './standing_og_defense.js';
 import { ENABLE_TACTICAL_GROUPS, ENABLE_TG_FORMATION, DONATION_READINESS_FRACTION, DONATION_READINESS_FRACTION_HRHB, getAnchorBrigade } from './tactical_group_config.js';
 // ADR-0005 v2.2c #3: donation-readiness gate recomputes the donor pool here.
 import { selectDonors } from './tactical_group_selection.js';
@@ -157,12 +153,9 @@ export function evaluateLaunchFeasibility(
             };
         }
 
-        const defenderIds = getStandingOgDefenseBrigadeIds(sector, ENABLE_SHARED_SECTOR_DEFENSE);
+        const defenderIds = getStandingOgDefenseBrigadeIds(sector);
         const defenders: FormationState[] = [];
         for (const defBid of defenderIds) {
-            if (ENABLE_SHARED_SECTOR_DEFENSE
-                && !isStandingOgDefenseBrigadeAvailable(state, defBid, ENABLE_SHARED_SECTOR_DEFENSE)
-            ) continue;
             const defender = formations[defBid];
             if (!defender || defender.status !== 'active') continue;
             defenders.push(defender);

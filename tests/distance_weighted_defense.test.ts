@@ -10,10 +10,6 @@ import {
     REACTIVE_DISTANCE_BASE,
     REACTIVE_DISTANCE_MAX_HOPS,
     HOME_DEFENSE_REACTIVE_BONUS,
-    getSectorReactiveDefensePredictionRatio,
-    getSectorReactiveDefenseResolutionRatio,
-    REACTIVE_DEFENSE_RATIO,
-    SHARED_SECTOR_REACTIVE_DEFENSE_RATIO,
 } from '../src/sim/combat/combat_math.js';
 import { munFromOsid } from '../src/sim/combat/osid_adjacency.js';
 
@@ -53,22 +49,6 @@ describe('getReactiveDistanceWeight', () => {
         for (let h = 1; h <= REACTIVE_DISTANCE_MAX_HOPS; h++) {
             expect(getReactiveDistanceWeight(h)).toBeLessThan(getReactiveDistanceWeight(h - 1));
         }
-    });
-});
-
-describe('sector reactive defense ratios', () => {
-    it('preserves the legacy prediction cap when shared sector defense is disabled', () => {
-        expect(getSectorReactiveDefensePredictionRatio(false)).toBe(REACTIVE_DEFENSE_RATIO);
-    });
-
-    it('uses a lower prediction cap for widened shared-sector rosters', () => {
-        expect(SHARED_SECTOR_REACTIVE_DEFENSE_RATIO).toBeLessThan(REACTIVE_DEFENSE_RATIO);
-        expect(getSectorReactiveDefensePredictionRatio(true)).toBe(SHARED_SECTOR_REACTIVE_DEFENSE_RATIO);
-    });
-
-    it('keeps battle resolution on the legacy cap for byte-stable defender cost', () => {
-        expect(getSectorReactiveDefenseResolutionRatio(false)).toBe(REACTIVE_DEFENSE_RATIO);
-        expect(getSectorReactiveDefenseResolutionRatio(true)).toBe(REACTIVE_DEFENSE_RATIO);
     });
 });
 

@@ -68,7 +68,7 @@ import {
     getPowerRatioCasualtyMult,
     MIN_DEFENSE_FLOOR_FRACTION,
     MAX_EDGES_PER_BRIGADE,
-    getSectorReactiveDefensePredictionRatio,
+    REACTIVE_DEFENSE_RATIO,
     DEFENDER_CASUALTY_ENGAGEMENT_CAP,
     bfsDistanceFriendly,
     getReactiveDistanceWeight,
@@ -80,7 +80,6 @@ import { getEnclaveGarrisonPower } from './enclave_resilience.js';
 import { getSectorPairIntelConfidence } from './sector_intel.js';
 import { buildLocalFrontDensityModifierByFormationIdForSector } from './local_front_defense.js';
 import {
-    ENABLE_SHARED_SECTOR_DEFENSE,
     getStandingOgDefenseBrigadeIds,
     isStandingOgDefenseBrigadeAvailable,
 } from './standing_og_defense.js';
@@ -338,12 +337,12 @@ export function predictCombatOutcome(
             profilePrefix,
             '.sectorBrigades',
             () => sector
-                ? getStandingOgDefenseBrigadeIds(sector, ENABLE_SHARED_SECTOR_DEFENSE)
+                ? getStandingOgDefenseBrigadeIds(sector)
                     .map(id => state.military.formations?.[id])
                     .filter((f): f is FormationState =>
                         f != null
                         && f.status === 'active'
-                        && isStandingOgDefenseBrigadeAvailable(state, f.id, ENABLE_SHARED_SECTOR_DEFENSE)
+                        && isStandingOgDefenseBrigadeAvailable(state, f.id)
                     )
                 : [],
         );
@@ -399,12 +398,10 @@ export function predictCombatOutcome(
             const stanceReactiveBonus = SECTOR_STANCE_REACTIVE_BONUS[sector?.sector_stance ?? 'defend'];
             const boostedReserves = effectiveReserves * stanceReactiveBonus;
 
-            const avgReactivePower = ENABLE_SHARED_SECTOR_DEFENSE && contributingBrigadeCount > 0
-                ? (physicalPower + effectiveReserves) / contributingBrigadeCount
-                : avgBrigadePower;
+            const avgReactivePower = avgBrigadePower;
             const reactiveResponse = Math.min(
                 boostedReserves,
-                attackerCount * avgReactivePower * getSectorReactiveDefensePredictionRatio(ENABLE_SHARED_SECTOR_DEFENSE)
+                attackerCount * avgReactivePower * REACTIVE_DEFENSE_RATIO
             );
             const baseDef = physicalPower + reactiveResponse;
             const minFloor = avgReactivePower * MIN_DEFENSE_FLOOR_FRACTION;

@@ -273,45 +273,17 @@ describe('applyCombatFatigue', () => {
         expect(def.ops!.fatigue).toBe(8 + FATIGUE_DEFENDER);
     });
 
-    it('keeps defender fatigue primary-only when shared sector defense is disabled', () => {
+    it('applies defender fatigue to the primary defender only', () => {
         const primary = makeFormation({ id: 'def-a', ops: { fatigue: 8, last_supplied_turn: null } });
         const reserve = makeFormation({ id: 'def-b', ops: { fatigue: 4, last_supplied_turn: null } });
 
         applyCombatFatigue({
             attackerFormations: [],
             defenderFormation: primary,
-            sectorDefenseBrigades: [primary, reserve],
-            sectorBrigadeWeights: new Map([
-                [primary.id, 1],
-                [reserve.id, 3],
-            ]),
-            enableSharedSectorDefense: false,
         });
 
         expect(primary.ops!.fatigue).toBe(8 + FATIGUE_DEFENDER);
         expect(reserve.ops!.fatigue).toBe(4);
-    });
-
-    it('distributes defender fatigue across weighted sector defenders when shared sector defense is enabled', () => {
-        const primary = makeFormation({ id: 'def-a', ops: { fatigue: 8, last_supplied_turn: null } });
-        const reserve = makeFormation({ id: 'def-b', ops: { fatigue: 4, last_supplied_turn: null } });
-        const zeroWeight = makeFormation({ id: 'def-c', ops: { fatigue: 2, last_supplied_turn: null } });
-
-        applyCombatFatigue({
-            attackerFormations: [],
-            defenderFormation: primary,
-            sectorDefenseBrigades: [primary, reserve, zeroWeight],
-            sectorBrigadeWeights: new Map([
-                [primary.id, 1],
-                [reserve.id, 3],
-                [zeroWeight.id, 0],
-            ]),
-            enableSharedSectorDefense: true,
-        });
-
-        expect(primary.ops!.fatigue).toBeCloseTo(8.25, 6);
-        expect(reserve.ops!.fatigue).toBeCloseTo(4.75, 6);
-        expect(zeroWeight.ops!.fatigue).toBe(2);
     });
 
     it('initializes ops if missing', () => {
