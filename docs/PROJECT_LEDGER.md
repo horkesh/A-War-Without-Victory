@@ -19769,3 +19769,24 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Tests:** `tests/operation_opportunities_catalog.test.ts` — dropped the `SANA_95_FOLLOW_ON_OPPORTUNITY` import; flipped the catalog-identity existence assertion to absent (#284 note); replaced the axis-shape backstop assertions with a catalog-absence check; replaced the "follow-on surfaces with live corridor" test with one asserting the retired follow-on never surfaces (even with the approach corridor controlled).
 
 **Verification:** `node tsc.js --noEmit` exit 0; catalog suite 44/44 green; 188w hash `2fdbff2fdba1b9c2` / 634/712 / anchors 29/30 / benchmarks 6/6 / 0 critical (run `apr1992_definitive_188w__acb538b04d79af3c__w188_n0`); 40w `2221700edf20621e`; `test:baselines` "all scenarios match". Doc-of-record re-floored in `docs/40_reports/CALIBRATION_MASTER.md` (prior `b3b18e2154824cfb` floor kept as superseded lineage).
+
+---
+
+## [2026-06-08] LQA — unambiguous Bosnian (bs) diacritic/spelling typos in tactical-map i18n
+
+**Type:** i18n string-value fix (branch `fix/i18n-bcs-diacritic-typos-lqa`). UI string VALUES only in `src/ui/map/i18n/messages.bcs.ts` — no keys added/removed (EN↔BCS parity preserved), no EN file change, no sim/state/scenario/save-schema/baseline change; no `Math.random`/`Date.now`. Calibration-irrelevant and byte-identical to all baselines.
+
+**Change:** Corrected 7 flagged strings (6 missing-diacritic/spelling fixes + 1 untranslated English leftover):
+- `onboarding.02.body` — `ploca` → `ploča`
+- `advanceTurn.warning` — `ponistiti` → `poništiti`
+- `turnAftermath.narrative.mixed` — `ostavljajuci` → `ostavljajući`
+- `advanceTurn.blockedSummary` — `stabne` → `štabne`
+- `inbox.quiet.body` — `štapski` → `štabski` (p→b typo only; -ski form preserved)
+- `onboarding.05.body` — `sto` → `što` ×2 (relative-pronoun "what" only; `predsjednički sto` "desk" left untouched)
+- `warSummary.campaignDrag.commandStrainDetail` — removed the English fragment `Army HQ -> Command Relationship`; `Army HQ` rendered with the established dominant term `Štab armije` (`Command Relationship` kept untranslated as the panel proper-name, consistent with `chiefOfStaff.exhaustion.precise`).
+
+Out of scope and intentionally untouched: the `štabni` vs `štabski` standardization, the broader Army-HQ rendering inconsistency (~other instances), and adjacent typos not on the list (`odluciti`, `stabilizovati`).
+
+**Files:** `src/ui/map/i18n/messages.bcs.ts` (7 string values; +7/−7).
+
+**Verification:** `tsc --noEmit -p tsconfig.json` exit 0; `tests/ui_i18n.test.ts` 12/12 green (EN↔BCS parity + no-leakage guard); `desktop:map` vite build exit 0.
