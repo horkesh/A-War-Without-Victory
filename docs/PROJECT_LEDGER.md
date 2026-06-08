@@ -1,4 +1,21 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-08] feat(faction-ai): VRS strangle-not-capture contain-posture (§6, default-off, release-reliability proven)
+
+**Type:** new bot-AI posture behind a DEFAULT-OFF flag. Branch `feat/vrs-contain-posture` off `origin/main`. Owner-backlog #4; owner §6 approval granted 2026-06-08 (non-delegable). Builds on contain Lane 1 (`isEnclaveContainable` predicate, #273). This is **Lane V** (VRS-side, full §6 gate) of the faction-agnostic contain design (`docs/plans/2026-06-07-contain-enclave-faction-agnostic-design.md`). Calibration-LAST: flag OFF ⇒ byte-identical to the floor.
+
+**Mechanism:** when `AWWV_VRS_CONTAIN_POSTURE` is ON, the war-phase supply step computes the RS containment set via `computeContainedOsidsForFaction(state,'RS',osidReach)` (BFS-isolated enemy enclave cores past `resilience_start_turn`, pre-1995-pivot) and stashes it on `state.political.last_contained_osids_by_faction.RS`. The commander opportunity planner (`createOpportunityPlan`) drops contained OSIDs from organic candidate objectives — withholding the bot's OWN assault target-generation (no `avoided_osids_by_faction`, no OSID/initial-OSID override; safe-by-construction — only ever REMOVES an attack). The **1995-pivot release** (`isEnclaveContainmentReleased`: `event_flags.srebrenica_fell` OR turn ≥ 160) empties the eastern-enclave set before the historical fall window. Krivaja-95/Stupčanica-95 (triggered ops, inject objectives directly) + the scripted `*_falls_1995` `control_change` events are INDEPENDENT paths the posture never touches → the fall and rupture are safe.
+
+**Changes:** new `src/sim/combat/contain_posture_gate.ts` (env flag, default-off); `enclave_resilience.ts` (+`isEnclaveContainmentReleased`, `computeContainedOsidsForFaction`, `CONTAIN_RELEASE_TURN_BACKSTOP=160`); `war_phases.ts` (flag-gated containment-set compute at supply step); `commander/plan.ts` (containment filter, no-fallback, in `createOpportunityPlan`); `game_state.ts` (`last_contained_osids_by_faction` field); new test `tests/contain_posture_release_laneV.test.ts` (12).
+
+**§6 RELEASE-RELIABILITY PROOF (the #1 gate) — INVARIANT HOLDS:** flag-ON 188w (`cb00dd310cc04a29`): `srebrenica_falls_1995` fires **w162** → `op:srebrenica:srebrenica_2`=**RS**; `zepa_falls_1995` fires **w164** → `op:rogatica:zepa_2`=**RS**; `srebrenica_genocide_1995` rupture **RECORDED @t162 (RS)**; `op:gorazde:gorazde_2`=RBiH (held — historically correct). Fall turns + rupture turn **IDENTICAL flag-off vs flag-on**; end-state OSID control IDENTICAL (RS 321/RBiH 285/HRHB 106). The posture cannot delay or prevent the historical fall.
+
+**Verification:** `tsc --noEmit` exit 0. Flag-OFF 40w `235c61f408dc3d95` + 188w `d311eeac18492683` — **BYTE-IDENTICAL to the floor**. 55 contain/rupture tests + 358 commander/enclave/opportunity tests + determinism static scan green.
+
+| run | hash | Srebrenica | Žepa | Goražde | rupture |
+| --- | --- | --- | --- | --- | --- |
+| flag-OFF 188w | `d311eeac18492683` (== floor) | RS w162 | RS w164 | RBiH | @t162 |
+| flag-ON 188w | `cb00dd310cc04a29` | RS w162 | RS w164 | RBiH | @t162 |
+
 ## [2026-06-08] feat(political+scenario): activate PDP patron+milcred (guarded) + E-A5 launch-halt — combined, calibration-flat
 
 **Type:** activation/config change (default-flag flip + scenario turn_max). Branch `feat/activate-pdp-ea5-combined` off `origin/main` (`4b64d21a5`). The convergence step that supersedes #322 (PDP guards) + #324 (E-A5) **by inclusion** — both merged here via `--no-ff`, then the gate defaults flipped. Sweep evidence (trusted): patron+milcred = calibration-FLAT (188w 649); intl+cohesion = −10 even guarded → kept OFF; E-A5 alone = 649 flat. This run is the real test of the E-A5 × PDP **interaction** — confirmed flat.
