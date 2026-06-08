@@ -78,7 +78,16 @@ export type EventCondition =
      * `state.displacement.displacement_state[*].displaced_in_by_faction[faction]`.
      * Faction-agnostic predicate; integer comparison; deterministic.
      */
-    | { type: 'displaced_in_aggregate'; faction: FactionId; threshold: number };
+    | { type: 'displaced_in_aggregate'; faction: FactionId; threshold: number }
+    /**
+     * Fall-1995 E-A5 trigger. True when `faction`'s area-weighted territory share is
+     * `at_most` / `at_least` `value` (fractional 0..1). Reads the latest
+     * `state.turn_summaries[0].territory_snapshot[faction]` (area-weighted, 0..1).
+     * Returns false (conservative miss) when no snapshot exists. Deterministic.
+     * Used to gate `us_halts_federation_advance_1995` on RS area-share ≤ 0.51
+     * (the Holbrooke 51:49 halt line). Faction-agnostic predicate.
+     */
+    | { type: 'faction_area_ratio'; faction: FactionId; comparator: 'at_most' | 'at_least'; value: number };
 
 /** Trigger: when to consider firing (turn range + optional prerequisites). */
 export interface EventTrigger {
@@ -870,6 +879,17 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
                 if (typeof v === 'number' && Number.isFinite(v)) total += v;
             }
             return total >= condition.threshold;
+        }
+        case 'faction_area_ratio': {
+            // Fall-1995 E-A5: area-weighted territory share from the latest turn summary.
+            // turn_summaries are stored most-recent-first; index 0 = latest snapshot.
+            const summaries = state.turn_summaries ?? [];
+            if (summaries.length === 0) return false;
+            const snap = summaries[0].territory_snapshot?.[condition.faction];
+            if (typeof snap !== 'number' || !Number.isFinite(snap)) return false;
+            return condition.comparator === 'at_most'
+                ? snap <= condition.value
+                : snap >= condition.value;
         }
         case 'corridor_severed': {
             // BFS from from_osid to to_osid through faction-controlled territory
