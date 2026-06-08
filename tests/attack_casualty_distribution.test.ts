@@ -47,11 +47,11 @@ function makeLedger(): CasualtyLedger {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('splitKiaWiaMia', () => {
-    it('totalCasualties = 100: canonical 30/55/15 split', () => {
+    it('totalCasualties = 100: canonical 22/74/4 split', () => {
         const result = splitKiaWiaMia(100);
-        expect(result.killed).toBe(30);
-        expect(result.wounded).toBe(55);
-        expect(result.missing_captured).toBe(15);
+        expect(result.killed).toBe(22);
+        expect(result.wounded).toBe(74);
+        expect(result.missing_captured).toBe(4);
     });
 
     it('totalCasualties = 0: all zero', () => {
@@ -63,18 +63,18 @@ describe('splitKiaWiaMia', () => {
 
     it('totalCasualties = 1: floor rounds kia and wia to 0, mia absorbs all', () => {
         const result = splitKiaWiaMia(1);
-        // floor(1 * 0.30) = 0, floor(1 * 0.55) = 0, remainder = 1
+        // floor(1 * 0.22) = 0, floor(1 * 0.74) = 0, remainder = 1
         expect(result.killed).toBe(0);
         expect(result.wounded).toBe(0);
         expect(result.missing_captured).toBe(1);
     });
 
-    it('totalCasualties = 10: kia=3, wia=5, mia=2', () => {
+    it('totalCasualties = 10: kia=2, wia=7, mia=1', () => {
         const result = splitKiaWiaMia(10);
-        // floor(10 * 0.30) = 3, floor(10 * 0.55) = 5, remainder = 2
-        expect(result.killed).toBe(3);
-        expect(result.wounded).toBe(5);
-        expect(result.missing_captured).toBe(2);
+        // floor(10 * 0.22) = 2, floor(10 * 0.74) = 7, remainder = 1
+        expect(result.killed).toBe(2);
+        expect(result.wounded).toBe(7);
+        expect(result.missing_captured).toBe(1);
     });
 
     it('mia absorbs rounding remainder: kia + wia + mia = total always', () => {
@@ -87,10 +87,10 @@ describe('splitKiaWiaMia', () => {
 
     it('large number: totalCasualties = 1000', () => {
         const result = splitKiaWiaMia(1000);
-        // floor(1000 * 0.30) = 300, floor(1000 * 0.55) = 550, remainder = 150
-        expect(result.killed).toBe(300);
-        expect(result.wounded).toBe(550);
-        expect(result.missing_captured).toBe(150);
+        // floor(1000 * 0.22) = 220, floor(1000 * 0.74) = 740, remainder = 40
+        expect(result.killed).toBe(220);
+        expect(result.wounded).toBe(740);
+        expect(result.missing_captured).toBe(40);
     });
 });
 
@@ -488,16 +488,16 @@ describe('distributeDefenderCasualties', () => {
             casualtyLedger: ledger,
         });
         const factionLedger = ledger['RBiH']!;
-        // splitKiaWiaMia(100): killed=30, wounded=55, missing_captured=15
-        expect(factionLedger.killed).toBe(30);
-        expect(factionLedger.wounded).toBe(55);
-        expect(factionLedger.missing_captured).toBe(15);
+        // splitKiaWiaMia(100): killed=22, wounded=74, missing_captured=4
+        expect(factionLedger.killed).toBe(22);
+        expect(factionLedger.wounded).toBe(74);
+        expect(factionLedger.missing_captured).toBe(4);
         // Check per-formation record
         const formationRecord = factionLedger.per_formation['def_1'];
         expect(formationRecord).toBeDefined();
-        expect(formationRecord!.killed).toBe(30);
-        expect(formationRecord!.wounded).toBe(55);
-        expect(formationRecord!.missing_captured).toBe(15);
+        expect(formationRecord!.killed).toBe(22);
+        expect(formationRecord!.wounded).toBe(74);
+        expect(formationRecord!.missing_captured).toBe(4);
     });
 });
 

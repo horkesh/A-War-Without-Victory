@@ -2,11 +2,15 @@ import type { CorpsFrontSector, FormationId, FormationState, GameState } from '.
 import { strictCompare } from '../../state/validateGameState.js';
 
 /**
- * ADR-0007 Phase C flag. Default off: callers preserve existing assigned-only
- * defensive fatigue and reactive-defense behavior byte-for-byte.
+ * ADR-0007 Phase C flag. Default off (deferred): callers preserve existing
+ * assigned-only defensive fatigue and reactive-defense behavior byte-for-byte.
  */
 export const ENABLE_SHARED_SECTOR_DEFENSE = false;
-export const ENABLE_STANDING_OG_RESERVE_COMMIT = false;
+/**
+ * ADR-0007 Phase B flag. Enabled (PR-1): standing OGs commit sector reserves
+ * to defense, so reserve brigades absorb attrition alongside assigned brigades.
+ */
+export const ENABLE_STANDING_OG_RESERVE_COMMIT = true;
 
 export function getStandingOgDefenseBrigadeIds(
     sector: Pick<CorpsFrontSector, 'assigned_brigade_ids' | 'reserve_brigade_ids' | 'rear_brigade_ids'>,
