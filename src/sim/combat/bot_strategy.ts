@@ -440,6 +440,16 @@ export interface ArmyOperationPriority {
      * Use for siege rings and critical terrain that must be held even by offensive corps.
      */
     hold_municipalities?: string[];
+    /**
+     * #335 (emergent-only) — the composed live-signal multiplier that produced this
+     * priority's effective `weight`, carried so downstream consumers can tell a GENUINELY
+     * AMPLIFIED priority (boost > 1.0, real signal confluence) apart from a static-high
+     * priority whose effective weight merely happens to clear a threshold after a QUIET
+     * decay (boost ≤ 1.0). Populated ONLY by getCorpsArmyPriorities in emergent mode;
+     * absent (undefined) on the static/historical path → byte-identical there.
+     * `weight === round2(staticWeight * emergent_boost)`.
+     */
+    emergent_boost?: number;
 }
 
 /**
@@ -731,10 +741,23 @@ function priorityTrendMultiplier(
  * priority weight — an objective whose own ground cannot be kept supplied is a worse bet.
  * Areas with no supply rating (no OSID matched) → neutral 1.0 (byte-stable for empty areas).
  *
+ * #330 CORRECTNESS FIX (emergent-only): `last_supply_state_by_osid[osid]` is the supply
+ * state of whichever faction CONTROLS that OSID (it is flattened in war_phases.ts from each
+ * faction's `by_osid` slice — every faction reports supply only for ground IT holds). The
+ * decay is legitimate for FRIENDLY-held objectives (a hold/defense/siege-ring priority over
+ * our own ground: if OUR supply there is failing, we should push that area less). But for an
+ * OFFENSIVE priority aimed at ENEMY-held OSIDs, the persisted value is the ENEMY's supply —
+ * a strangled enemy enclave would WRONGLY decay our priority, making the bot LESS likely to
+ * attack a weak enemy (backwards: a starved enemy position is MORE attractive). So we count
+ * ONLY OSIDs we do NOT cede to an enemy controller — friendly-held or uncontrolled/unknown.
+ * Enemy-controller supply never participates. When controller info is absent we treat the
+ * OSID as not-enemy (preserves the byte-stable no-controller path).
+ *
  * Quantized to 2 decimals. Deterministic: persisted state only.
  */
 function prioritySupplyMultiplier(
     state: GameState,
+    faction: FactionId,
     priority: ArmyOperationPriority,
 ): number {
     const supplyByOsid = state.political?.last_supply_state_by_osid;
@@ -742,6 +765,8 @@ function prioritySupplyMultiplier(
     const muns = new Set(priority.target_municipalities ?? []);
     const osids = new Set(priority.target_osids ?? []);
     if (muns.size === 0 && osids.size === 0) return 1.0;
+
+    const controllers = state.political?.political_controllers;
 
     let rated = 0;
     let strained = 0;
@@ -753,6 +778,12 @@ function prioritySupplyMultiplier(
             osids.has(osid) ||
             muns.has(munFromOsid(osid) ?? '');
         if (!inArea) continue;
+        // #330: skip OSIDs an enemy controls — their supply state is the ENEMY's, and an
+        // enemy's poor supply must not decay OUR push toward that objective. Friendly-held
+        // and uncontrolled/unknown OSIDs still count (our own supply legitimately constrains
+        // a hold/approach priority).
+        const ctrl = controllers?.[osid];
+        if (ctrl && ctrl !== faction) continue;
         const level = supplyByOsid[osid];
         if (level === 'strained') { rated++; strained++; }
         else if (level === 'critical') { rated++; critical++; }
@@ -801,7 +832,7 @@ function priorityEmergentMultiplier(
     priority: ArmyOperationPriority,
 ): number {
     const trend = priorityTrendMultiplier(state, faction, priority);
-    const supply = prioritySupplyMultiplier(state, priority);
+    const supply = prioritySupplyMultiplier(state, faction, priority);
     const plan = priorityCampaignPlanMultiplier(state, faction, priority);
     return round2(trend * supply * plan);
 }
@@ -838,21 +869,31 @@ export function getCorpsArmyPriorities(
     // modulator (territory-trend × supply × campaign-plan-role), then sort by the quantized
     // effective weight with the existing NAME tie-break. A losing/under-supplied/plan-primary
     // area can out-rank a quiet higher-static objective.
-    const scored = active.map(p => ({
-        p,
-        eff: round2(p.weight * priorityEmergentMultiplier(state, faction, p)),
-    }));
+    const scored = active.map(p => {
+        const boost = priorityEmergentMultiplier(state, faction, p);
+        return {
+            p,
+            boost,
+            eff: round2(p.weight * boost),
+        };
+    });
     // Codex P2 (#93): return priorities carrying the EFFECTIVE weight, not just the
     // sort order — downstream consumers read `p.weight` directly (generateArmyHQOverrides'
     // probe/full-override thresholds, commanderReviewAssignment's mission weights), so a
     // boosted losing area must also carry the higher weight or it gets reordered up yet
     // skipped/under-allocated. Quantized; historical path above is untouched (byte-identical).
+    //
+    // #335: also carry `emergent_boost` (the composed multiplier). A QUIET static-high
+    // priority (e.g. the static-150 'Central Corridor Counter') × the quiet decay 0.80 lands
+    // at effective 120 — clearing weight thresholds without any genuine live-signal urgency.
+    // Consumers that relax behaviour on confluence (army-HQ idle-wall relaxation) must gate on
+    // boost > 1.0 (an ACTUAL amplification), not on the effective weight alone.
     return scored
         .sort((a, b) => {
             if (b.eff !== a.eff) return b.eff - a.eff;
             return a.p.name < b.p.name ? -1 : a.p.name > b.p.name ? 1 : 0;
         })
-        .map(s => ({ ...s.p, weight: s.eff }));
+        .map(s => ({ ...s.p, weight: s.eff, emergent_boost: s.boost }));
 }
 
 /**
