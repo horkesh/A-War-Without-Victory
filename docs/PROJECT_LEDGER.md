@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-08] fix(ui): persist relieved-commander resentment receipts (#282)
+
+**Type:** Ring-3 UI read-model only, BYTE-IDENTICAL to calibration. No sim/save/scenario/baseline change; pure projection over already-persisted officer + force-launched-op substrate. 40w/52w/188w hashes untouched (read-model is never invoked in headless calibration). Faction-agnostic.
+
+**Root cause (Codex review #282, confirmed real — distinct from the merged #125 force-launch guard):** `buildOfficerResentmentReceipts` (`src/ui/map/data/officerResentmentReceipts.ts`) keyed each receipt's corps off the officer's CURRENT `assigned_corps_id` and dropped any officer whose `corpsId === null`. The override substrate (`last_override_turn`/`override_count`/`recent_overrides`/`cowed_until_turn`) records WHEN/HOW-MANY but NOT the corps the override happened on — the only corps signal on officer state is the current assignment. When a force-overridden CO is later RELIEVED, `relieveOfficer` (`order_interpretation.ts`) clears `assigned_corps_id` → null, so his persisted force-override resentment receipt silently vanished from the Turn-Aftermath/records read-model even though the receipt type already permits `corpsId: null`. A force-override resentment should PERSIST after the commander is relieved.
+
+**Fix (minimal, read-side only):** Replace the corps-set discriminator `corpsWithForceLaunchedOp` (returned `Set<corpsId>`, has-checked against the officer's current corps) with `forceLaunchCorpsByOfficer` returning `Map<officer_id, corps_id>`, built by scanning the SAME force-launched substrate (active `was_force_launched` ops + resolved `force_launched` AARs) — both of which already record `commander_officer_id` alongside `corps_id`. The builder now (1) keeps a receipt iff the officer commanded a force-launched op (the #125 order-interpretation-vs-forced-op discriminator, now keyed per-officer instead of per-current-corps — strictly more precise), and (2) keys the receipt's corps off `os.assigned_corps_id ?? forceLaunchCorpsId` so a relieved CO (current corps null) still yields a receipt tied to the corps he commanded WHEN force-launched. The `corpsId === null` drop is removed; the "no override history" guard is preserved (no force-launched op → no map entry → no receipt). No user-facing strings touched (the Turn-Aftermath UI renders `officerName`/`overrideCount`/`newlyCowed`/`cowedUntilTurn`, never `corpsId`) → no EN/BCS edit needed.
+
+**Determinism:** unchanged — strictCompare-sorted corps iteration then history order; first force-launched op per officer wins; no Math.random/Date.now/timestamps.
+
+**Verification:** `tsc --noEmit` exit 0; `tests/ui/officer_resentment_receipts.test.ts` 13/13 green (11 existing + 2 new #282: a relieved force-overridden CO STILL produces a receipt keyed to the op's historical corps; an officer with no force-launched op — relieved or not — produces none); `tests/ui_map_game_state_adapter.test.ts` 28/28 green; map build (`vite build`) exit 0.
+
 ## [2026-06-08] fix(events): Review-backlog Batch D — Žepa out-of-order safe-area record text (#276); #272 fossil; #255 calibration-routed
 
 **Type:** Ring-3 informational event-data, BYTE-IDENTICAL. 40w `final_state_hash` = `2221700edf20621e` UNCHANGED (verified post-edit). No §6 prose touched (canon-gate framing preserved).

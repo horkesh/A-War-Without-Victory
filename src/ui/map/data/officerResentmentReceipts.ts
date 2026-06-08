@@ -42,25 +42,39 @@
 // so keying on `last_override_turn` alone over-counts ordinary order-interpretation
 // overrides as forced-op resentment. We discriminate READ-SIDE (no new sim
 // substrate field): only the force-LAUNCH path (#1) ever produces a
-// `was_force_launched` operation for the officer's corps. We therefore keep a
-// resentment receipt only when the officer's corps has at least one force-launched
-// operation in state (active `was_force_launched` op OR a resolved
-// `force_launched` AAR). An order-interpretation-only override produces no such
-// op → it yields no resentment receipt.
+// `was_force_launched` operation, and that operation records BOTH its `corps_id`
+// and the `commander_officer_id` it was launched under. We therefore keep a
+// resentment receipt only when the officer commanded at least one force-launched
+// operation (active `was_force_launched` op OR a resolved `force_launched` AAR).
+// An order-interpretation-only override produces no such op → no receipt.
+//
+// RELIEF PERSISTENCE (#282): the override substrate records `last_override_turn`
+// but NOT the corps the override happened on — the only corps signal on officer
+// state is the CURRENT `assigned_corps_id`. When a force-overridden CO is later
+// RELIEVED, `relieveOfficer` clears `assigned_corps_id` → null, so keying the
+// receipt's corps off the officer's current corps would drop the receipt entirely
+// (the old `corpsId === null` guard masked the loss). We instead key the corps off
+// the force-launched op's recorded history: the op/AAR carries the corps the
+// officer commanded WHEN force-launched, which survives relief. A relieved CO
+// (current corps null) therefore still yields a receipt tied to the corps he held
+// at override time.
 
 import type { GameState } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 
 /**
- * Read-side set of corps IDs that have at least one force-launched operation —
- * active (`was_force_launched === true`) or resolved (`force_launched === true`
- * AAR). Used to discriminate genuine force-op overrides from ordinary
- * order-interpretation overrides (#125): the latter never produce a force-launched
- * operation, so an officer whose corps is absent from this set was overridden only
- * via order-interpretation and must NOT surface a forced-op resentment receipt.
+ * Read-side map of `officer_id` → the corps the officer commanded on a
+ * force-launched operation — active (`was_force_launched === true`) or resolved
+ * (`force_launched === true` AAR). Used both to discriminate genuine force-op
+ * overrides from ordinary order-interpretation overrides (#125: the latter never
+ * produce a force-launched op, so an officer absent from this map was overridden
+ * only via order-interpretation and must NOT surface a receipt) AND to recover the
+ * historical corps for a since-RELIEVED CO whose current `assigned_corps_id` was
+ * cleared (#282). Deterministic: first force-launched op encountered in sorted
+ * iteration wins (active ops by corps id, then resolved AARs in history order).
  */
-function corpsWithForceLaunchedOp(state: GameState): Set<string> {
-    const out = new Set<string>();
+function forceLaunchCorpsByOfficer(state: GameState): Map<string, string> {
+    const out = new Map<string, string>();
 
     const corpsCommand = state.military?.corps_command;
     if (corpsCommand) {
@@ -68,14 +82,20 @@ function corpsWithForceLaunchedOp(state: GameState): Set<string> {
             const cmd = corpsCommand[corpsId];
             const ops = cmd?.active_operations;
             if (!ops) continue;
-            if (ops.some((op) => op.was_force_launched === true)) out.add(corpsId);
+            for (const op of ops) {
+                if (op.was_force_launched !== true) continue;
+                const officerId = op.commander_officer_id;
+                if (officerId && !out.has(officerId)) out.set(officerId, corpsId);
+            }
         }
     }
 
     const aars = state.operation_history;
     if (aars) {
         for (const aar of aars) {
-            if (aar.force_launched === true) out.add(aar.corps_id);
+            if (aar.force_launched !== true) continue;
+            const officerId = aar.commander_officer_id;
+            if (officerId && !out.has(officerId)) out.set(officerId, aar.corps_id);
         }
     }
 
@@ -89,7 +109,10 @@ export interface OfficerResentmentReceipt {
     id: string;
     /** Display name of the overridden commander (falls back to a generic label). */
     officerName: string;
-    /** Corps the officer commands (null when unassigned in state). */
+    /** Corps the officer commanded when force-launched. Recovered from the
+     *  force-launched op's recorded history so it survives the CO being relieved
+     *  (relief clears `assigned_corps_id` → null) (#282). Falls back to the current
+     *  `assigned_corps_id`; null only when neither is known. */
     corpsId: string | null;
     /** Turn of the most recent override the president authored against this CO. */
     overrideTurn: number;
@@ -122,9 +145,10 @@ export function buildOfficerResentmentReceipts(
     if (!officers) return [];
 
     const officerData = state?.military?.named_officer_data ?? [];
-    // Corps with a force-launched op — used to drop order-interpretation-only
-    // overrides that the engine records on the SAME officer fields (#125).
-    const forceLaunchCorps = corpsWithForceLaunchedOp(state);
+    // Officer → corps he commanded on a force-launched op. Used to drop
+    // order-interpretation-only overrides (#125) AND to recover the historical
+    // corps for a since-relieved CO whose assigned_corps_id was cleared (#282).
+    const forceLaunchCorps = forceLaunchCorpsByOfficer(state);
 
     const out: OfficerResentmentReceipt[] = [];
     const officerIds = Object.keys(officers).sort(strictCompare);
@@ -133,12 +157,15 @@ export function buildOfficerResentmentReceipts(
         if (!os) continue;
         // Only the president overriding a CO sets last_override_turn (player-origin).
         if (os.last_override_turn === undefined) continue;
-        // #125: a genuine forced-op override emits a force-launched operation for
-        // the officer's corps. An override recorded without one came from ordinary
-        // order-interpretation (overrideInterpretation) — not a forced op — so it
-        // must NOT surface a resentment receipt.
-        const corpsId = os.assigned_corps_id ?? null;
-        if (corpsId === null || !forceLaunchCorps.has(corpsId)) continue;
+        // #125: a genuine forced-op override emits a force-launched operation
+        // commanded by this officer. An override recorded without one came from
+        // ordinary order-interpretation (overrideInterpretation) — not a forced op
+        // — so it must NOT surface a resentment receipt.
+        const forceLaunchCorpsId = forceLaunchCorps.get(id);
+        if (forceLaunchCorpsId === undefined) continue;
+        // #282: prefer the force-launched op's recorded corps (survives relief);
+        // fall back to the officer's current corps for parity with the op record.
+        const corpsId = os.assigned_corps_id ?? forceLaunchCorpsId;
 
         const data = officerData.find((o) => o.id === id);
         const cowedUntilTurn = os.cowed_until_turn ?? null;
