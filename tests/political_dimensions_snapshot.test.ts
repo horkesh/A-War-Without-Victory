@@ -45,7 +45,9 @@ function mockSave(overrides: Record<string, Partial<Record<string, { base_value:
         }
     }
     return {
-        meta: { turn: 12, scenario_id: 'apr1992_test', seed: 'test-seed' },
+        // turn 120 ≥ INTL_STANDING_OPS_HESITATION_MIN_TURN (100), so the diagnostic
+        // reports the intl_standing penalty zone as live (the channel is turn-gated).
+        meta: { turn: 120, scenario_id: 'apr1992_test', seed: 'test-seed' },
         military: {
             negotiation: { strategic_dimensions: dims },
         },
@@ -63,7 +65,7 @@ describe('buildPoliticalDimensionsSnapshot', () => {
             rawSave: mockSave(),
             envOverride: ALL_FLAGS_OFF,
         });
-        expect(snapshot.turn).toBe(12);
+        expect(snapshot.turn).toBe(120);
         expect(snapshot.scenario_id).toBe('apr1992_test');
         expect(snapshot.seed).toBe('test-seed');
         expect(snapshot.factions.length).toBe(3);
@@ -115,7 +117,7 @@ describe('buildPoliticalDimensionsSnapshot', () => {
         const snapshot = buildPoliticalDimensionsSnapshot({
             rawSave: mockSave({
                 RS: {
-                    internal_cohesion: { base_value: 40, event_modifier: -20, effective_value: 20 },
+                    internal_cohesion: { base_value: 40, event_modifier: -30, effective_value: 10 },
                 },
             }),
             envOverride: ALL_FLAGS_OFF,
@@ -131,7 +133,7 @@ describe('buildPoliticalDimensionsSnapshot', () => {
             rawSave: mockSave({
                 RBiH: {
                     international_standing: { base_value: 30, event_modifier: -10, effective_value: 20 },
-                    internal_cohesion: { base_value: 30, event_modifier: -10, effective_value: 20 },
+                    internal_cohesion: { base_value: 20, event_modifier: -10, effective_value: 10 },
                 },
             }),
             envOverride: ALL_FLAGS_OFF,
@@ -148,7 +150,7 @@ describe('buildPoliticalDimensionsSnapshot', () => {
             rawSave: mockSave({
                 HRHB: {
                     international_standing: { base_value: 30, event_modifier: -10, effective_value: 20 },
-                    internal_cohesion: { base_value: 30, event_modifier: -10, effective_value: 20 },
+                    internal_cohesion: { base_value: 20, event_modifier: -10, effective_value: 10 },
                 },
             }),
             envOverride: ALL_FLAGS_ON,
@@ -169,7 +171,7 @@ describe('buildPoliticalDimensionsSnapshot', () => {
             rawSave: mockSave({
                 RBiH: {
                     international_standing: { base_value: 30, event_modifier: -10, effective_value: 20 },
-                    internal_cohesion: { base_value: 30, event_modifier: -10, effective_value: 20 },
+                    internal_cohesion: { base_value: 20, event_modifier: -10, effective_value: 10 },
                 },
             }),
             envOverride: partialEnv,

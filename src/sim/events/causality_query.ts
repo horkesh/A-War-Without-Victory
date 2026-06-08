@@ -423,9 +423,13 @@ export function getActivePhaseEFlags(): readonly string[] {
 
 /** Returns the multiplier each Phase E sub-flag WOULD apply to bot ops
  *  eligibility for the given faction, given the current dimension values.
- *  Projection is unconditional — does NOT gate on flag activation. This is
- *  the canonical "if you flipped the flag right now, your bot ops scoring
- *  would scale by this factor" reader for UI HUDs.
+ *  Projection does NOT gate on flag activation (it answers "if you flipped the
+ *  flag right now, your bot ops scoring would scale by this factor"), but it
+ *  DOES honor the intl_standing turn-gate — the channel is inert before
+ *  mid-1994 (INTL_STANDING_OPS_HESITATION_MIN_TURN) even with the flag ON, so a
+ *  truthful HUD must reflect that. The current turn is read from
+ *  `state.meta.turn` and passed to the intl helper. This is the canonical
+ *  HUD reader for UI surfaces.
  *
  *  Returns 1.0 / 1.0 / 1.0 when the negotiation substrate has no dimension
  *  values for the faction (consistent with the helper-level no-op
@@ -437,8 +441,10 @@ export function getProjectedDimensionMultiplier(
     const dims = state.military?.negotiation?.strategic_dimensions?.[faction];
     const intlValue = dims?.international_standing?.effective_value;
     const cohValue = dims?.internal_cohesion?.effective_value;
+    const currentTurn = state.meta?.turn;
     const intl = getIntlStandingOpsHesitationMultiplier(
         typeof intlValue === 'number' ? intlValue : undefined,
+        typeof currentTurn === 'number' ? currentTurn : undefined,
     );
     const coh = getCohesionCautionBiasMultiplier(
         typeof cohValue === 'number' ? cohValue : undefined,

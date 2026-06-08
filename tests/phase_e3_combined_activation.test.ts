@@ -206,8 +206,9 @@ function computeEffectiveMinForOp(
     baseMinForOp: number,
     intlStanding: number | undefined,
     cohesion: number | undefined,
+    currentTurn = 120, // default ≥ intl_standing turn-gate so the dimension is live in this matrix
 ): number {
-    const hesitationMult = getIntlStandingOpsHesitationMultiplier(intlStanding);
+    const hesitationMult = getIntlStandingOpsHesitationMultiplier(intlStanding, currentTurn);
     const cohesionMult = getCohesionCautionBiasMultiplier(cohesion);
     const combinedMult = hesitationMult * cohesionMult;
     return combinedMult !== 1.0
@@ -238,17 +239,24 @@ describe('Phase E Packet 3 — combined-flag-ON activation matrix', () => {
     // -----------------------------------------------------------------------
 
     describe('A. multiplier-product math', () => {
+        // NOTE (activation guards 2026-06-08): intl_standing is now turn-gated
+        // (engages only at turn >= 100), so all intl_standing calls below pass an
+        // explicit live turn (120). Cohesion threshold was recalibrated 40 → 15,
+        // so penalty-zone cohesion fixtures use values < 15 (e.g. 10) and
+        // above-threshold fixtures use >= 15.
+        const LIVE_TURN = 120;
+
         // A1: Byte-stability sentinel — both helpers idle → product is exactly 1.0.
         it('A1: both dimensions absent → product is exactly 1.0 (byte-stable sentinel)', () => {
-            const product = getIntlStandingOpsHesitationMultiplier(undefined)
+            const product = getIntlStandingOpsHesitationMultiplier(undefined, LIVE_TURN)
                 * getCohesionCautionBiasMultiplier(undefined);
             expect(product).toBe(1.0);
         });
 
         // A2: Both penalties active — the canonical worked example.
-        it('A2: intl_standing=20 + cohesion=30 → product is exactly 0.7 × 0.85 = 0.595', () => {
-            const product = getIntlStandingOpsHesitationMultiplier(20)
-                * getCohesionCautionBiasMultiplier(30);
+        it('A2: intl_standing=20 + cohesion=10 (turn live) → product is exactly 0.7 × 0.85 = 0.595', () => {
+            const product = getIntlStandingOpsHesitationMultiplier(20, LIVE_TURN)
+                * getCohesionCautionBiasMultiplier(10);
             // Floating-point exact value — both 0.7 and 0.85 are constants and
             // their product is representable. expect(...).toBe enforces strict
             // equality (no toBeCloseTo tolerance).
@@ -257,30 +265,30 @@ describe('Phase E Packet 3 — combined-flag-ON activation matrix', () => {
         });
 
         // A3: Only intl_standing in penalty zone, cohesion above threshold.
-        it('A3: intl_standing=20 + cohesion=50 → product is 0.7 (cohesion no-op)', () => {
-            const product = getIntlStandingOpsHesitationMultiplier(20)
+        it('A3: intl_standing=20 + cohesion=50 (turn live) → product is 0.7 (cohesion no-op)', () => {
+            const product = getIntlStandingOpsHesitationMultiplier(20, LIVE_TURN)
                 * getCohesionCautionBiasMultiplier(50);
             expect(product).toBe(0.7);
         });
 
         // A4: Only cohesion in penalty zone, intl_standing above threshold.
-        it('A4: intl_standing=50 + cohesion=30 → product is 0.85 (intl_standing no-op)', () => {
-            const product = getIntlStandingOpsHesitationMultiplier(50)
-                * getCohesionCautionBiasMultiplier(30);
+        it('A4: intl_standing=50 + cohesion=10 (turn live) → product is 0.85 (intl_standing no-op)', () => {
+            const product = getIntlStandingOpsHesitationMultiplier(50, LIVE_TURN)
+                * getCohesionCautionBiasMultiplier(10);
             expect(product).toBe(0.85);
         });
 
         // A5: Both above thresholds — full baseline preservation.
-        it('A5: intl_standing=50 + cohesion=50 → product is exactly 1.0 (baseline preserved)', () => {
-            const product = getIntlStandingOpsHesitationMultiplier(50)
+        it('A5: intl_standing=50 + cohesion=50 (turn live) → product is exactly 1.0 (baseline preserved)', () => {
+            const product = getIntlStandingOpsHesitationMultiplier(50, LIVE_TURN)
                 * getCohesionCautionBiasMultiplier(50);
             expect(product).toBe(1.0);
         });
 
         // A6: Inside-band off-by-one cell — values one unit below each threshold.
-        it('A6: boundary intl_standing=29 + cohesion=39 → both penalties apply', () => {
-            const hesitation = getIntlStandingOpsHesitationMultiplier(29);
-            const caution = getCohesionCautionBiasMultiplier(39);
+        it('A6: boundary intl_standing=29 + cohesion=14 (turn live) → both penalties apply', () => {
+            const hesitation = getIntlStandingOpsHesitationMultiplier(29, LIVE_TURN);
+            const caution = getCohesionCautionBiasMultiplier(14);
             expect(hesitation).toBe(0.7);
             expect(caution).toBe(0.85);
             expect(hesitation * caution).toBe(0.595);
@@ -288,13 +296,22 @@ describe('Phase E Packet 3 — combined-flag-ON activation matrix', () => {
 
         // A7: At-threshold off-by-one cell — thresholds are STRICT-LESS-THAN.
         // intl_standing < 30 fires; intl_standing === 30 does NOT.
-        // cohesion < 40 fires; cohesion === 40 does NOT.
-        it('A7: boundary intl_standing=30 + cohesion=40 → NEITHER penalty applies (off-by-one safety)', () => {
-            const hesitation = getIntlStandingOpsHesitationMultiplier(30);
-            const caution = getCohesionCautionBiasMultiplier(40);
+        // cohesion < 15 fires; cohesion === 15 does NOT (recalibrated).
+        it('A7: boundary intl_standing=30 + cohesion=15 (turn live) → NEITHER penalty applies (off-by-one safety)', () => {
+            const hesitation = getIntlStandingOpsHesitationMultiplier(30, LIVE_TURN);
+            const caution = getCohesionCautionBiasMultiplier(15);
             expect(hesitation).toBe(1.0);
             expect(caution).toBe(1.0);
             expect(hesitation * caution).toBe(1.0);
+        });
+
+        // A8: ACTIVATION GUARD — intl_standing turn-gate. Below turn 100 the
+        // intl_standing channel is inert even with intl_standing < 30, so the only
+        // live penalty is cohesion (when < 15).
+        it('A8: turn-gate — intl_standing=20 + cohesion=10 BEFORE turn 100 → only cohesion fires (0.85)', () => {
+            const product = getIntlStandingOpsHesitationMultiplier(20, 40)
+                * getCohesionCautionBiasMultiplier(10);
+            expect(product).toBe(0.85);
         });
     });
 
@@ -440,8 +457,8 @@ describe('Phase E Packet 3 — combined-flag-ON activation matrix', () => {
         // C1: All flags ON + both dimensions in penalty zones.
         //   combinedMult = 0.7 × 0.85 = 0.595
         //   effectiveMinForOp = Math.ceil(10 / 0.595) = Math.ceil(16.806...) = 17
-        it('C1: all flags ON + intl_standing=20 + cohesion=30 + base=10 → effective=17', () => {
-            const effective = computeEffectiveMinForOp(10, 20, 30);
+        it('C1: all flags ON + intl_standing=20 + cohesion=10 + base=10 → effective=17', () => {
+            const effective = computeEffectiveMinForOp(10, 20, 10);
             expect(effective).toBe(17);
             // Reconfirm the worked-example arithmetic in isolation, so a
             // future floating-point quirk would be diagnosed at the right
@@ -471,8 +488,8 @@ describe('Phase E Packet 3 — combined-flag-ON activation matrix', () => {
         // C4: Partial activation — only cohesion in penalty zone.
         //   combinedMult = 1.0 × 0.85 = 0.85
         //   effectiveMinForOp = Math.ceil(10 / 0.85) = Math.ceil(11.764...) = 12
-        it('C4: intl_standing undefined + cohesion=30 + base=10 → effective=12', () => {
-            const effective = computeEffectiveMinForOp(10, undefined, 30);
+        it('C4: intl_standing undefined + cohesion=10 + base=10 → effective=12', () => {
+            const effective = computeEffectiveMinForOp(10, undefined, 10);
             expect(effective).toBe(12);
             expect(Math.ceil(10 / 0.85)).toBe(12);
         });
@@ -489,8 +506,8 @@ describe('Phase E Packet 3 — combined-flag-ON activation matrix', () => {
         // case in emit.ts uses baseMinForOp = 2).
         //   combinedMult = 0.595
         //   effectiveMinForOp = Math.ceil(2 / 0.595) = Math.ceil(3.361...) = 4
-        it('C6: all flags ON + intl_standing=20 + cohesion=30 + base=2 → effective=4', () => {
-            const effective = computeEffectiveMinForOp(2, 20, 30);
+        it('C6: all flags ON + intl_standing=20 + cohesion=10 + base=2 → effective=4', () => {
+            const effective = computeEffectiveMinForOp(2, 20, 10);
             expect(effective).toBe(4);
         });
     });
