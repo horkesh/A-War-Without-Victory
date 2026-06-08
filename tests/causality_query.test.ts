@@ -352,9 +352,10 @@ describe('getProjectedDimensionMultiplier', () => {
         expect(out.combined).toBe(1.0);
     });
 
-    it('projects 0.7 × 0.85 = 0.595 when intl=20 and cohesion=30 (Phase E3 math)', () => {
+    it('projects 0.7 × 0.85 = 0.595 when intl=20 and cohesion=10 in-window (turn 120, Phase E3 math)', () => {
         const state = buildState({
-            dimensions: { ['RBiH' as FactionId]: { international_standing: 20, internal_cohesion: 30 } },
+            turn: 120, // ≥ intl_standing turn-gate (100); cohesion threshold recalibrated to < 15
+            dimensions: { ['RBiH' as FactionId]: { international_standing: 20, internal_cohesion: 10 } },
         });
         const out = getProjectedDimensionMultiplier(state, 'RBiH' as FactionId);
         expect(out.intl_standing).toBe(0.7);
@@ -364,6 +365,7 @@ describe('getProjectedDimensionMultiplier', () => {
 
     it('returns 1.0 multipliers when values are above thresholds', () => {
         const state = buildState({
+            turn: 120,
             dimensions: { ['RS' as FactionId]: { international_standing: 50, internal_cohesion: 60 } },
         });
         const out = getProjectedDimensionMultiplier(state, 'RS' as FactionId);
@@ -372,13 +374,27 @@ describe('getProjectedDimensionMultiplier', () => {
         expect(out.combined).toBe(1.0);
     });
 
-    it('projection is unconditional (does NOT gate on flag activation)', () => {
-        // Gates remain OFF; multiplier still projects 0.7 × 0.85.
+    it('projection does NOT gate on flag activation (gates OFF, still projects in-window)', () => {
+        // Gates remain OFF; multiplier still projects 0.7 × 0.85 when in-window.
         const state = buildState({
-            dimensions: { ['HRHB' as FactionId]: { international_standing: 10, internal_cohesion: 20 } },
+            turn: 120,
+            dimensions: { ['HRHB' as FactionId]: { international_standing: 10, internal_cohesion: 10 } },
         });
         const out = getProjectedDimensionMultiplier(state, 'HRHB' as FactionId);
         expect(out.combined).toBeCloseTo(0.595, 10);
+    });
+
+    it('ACTIVATION GUARD: intl_standing projection is inert before turn 100 (turn-gate)', () => {
+        // Default buildState turn is 1 (before the gate). intl_standing channel is
+        // turn-gated, so it projects 1.0 even though intl=10 is sub-threshold; only
+        // cohesion (< 15) fires.
+        const state = buildState({
+            dimensions: { ['HRHB' as FactionId]: { international_standing: 10, internal_cohesion: 10 } },
+        });
+        const out = getProjectedDimensionMultiplier(state, 'HRHB' as FactionId);
+        expect(out.intl_standing).toBe(1.0);
+        expect(out.cohesion).toBe(0.85);
+        expect(out.combined).toBeCloseTo(0.85, 10);
     });
 });
 

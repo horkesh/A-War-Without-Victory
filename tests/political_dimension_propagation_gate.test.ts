@@ -265,14 +265,33 @@ describe('Phase E MVS — political-dimension propagation gate', () => {
             .toBe(1.0);
     });
 
-    it('multiplier returns 0.7 when intl_standing < 30', () => {
-        expect(getIntlStandingOpsHesitationMultiplier(29)).toBe(0.7);
-        expect(getIntlStandingOpsHesitationMultiplier(0)).toBe(0.7);
+    it('multiplier returns 0.7 when intl_standing < 30 AND turn >= gate (>=100)', () => {
+        expect(getIntlStandingOpsHesitationMultiplier(29, 100)).toBe(0.7);
+        expect(getIntlStandingOpsHesitationMultiplier(0, 150)).toBe(0.7);
     });
 
     it('multiplier returns 1.0 when intl_standing >= 30 (no hesitation)', () => {
-        expect(getIntlStandingOpsHesitationMultiplier(30)).toBe(1.0);
-        expect(getIntlStandingOpsHesitationMultiplier(50)).toBe(1.0);
-        expect(getIntlStandingOpsHesitationMultiplier(100)).toBe(1.0);
+        expect(getIntlStandingOpsHesitationMultiplier(30, 120)).toBe(1.0);
+        expect(getIntlStandingOpsHesitationMultiplier(50, 120)).toBe(1.0);
+        expect(getIntlStandingOpsHesitationMultiplier(100, 120)).toBe(1.0);
+    });
+
+    // ACTIVATION GUARD (turn-gate): the intl_standing channel is historically
+    // inert before mid-1994 (turn 100) even with low intl_standing — avoids
+    // back-dating the 1994–95 diplomatic-isolation dynamic onto the 1992–93 war.
+    it('turn-gate: multiplier is 1.0 below the gate turn even when intl_standing < 30', () => {
+        expect(getIntlStandingOpsHesitationMultiplier(0, 0)).toBe(1.0);
+        expect(getIntlStandingOpsHesitationMultiplier(29, 40)).toBe(1.0);
+        expect(getIntlStandingOpsHesitationMultiplier(10, 99)).toBe(1.0);
+    });
+
+    it('turn-gate: unknown turn (undefined/NaN) is treated as before the gate (1.0)', () => {
+        expect(getIntlStandingOpsHesitationMultiplier(0)).toBe(1.0);
+        expect(getIntlStandingOpsHesitationMultiplier(29, NaN)).toBe(1.0);
+    });
+
+    it('turn-gate: engages exactly at the gate turn (boundary)', () => {
+        expect(getIntlStandingOpsHesitationMultiplier(29, 99)).toBe(1.0);
+        expect(getIntlStandingOpsHesitationMultiplier(29, 100)).toBe(0.7);
     });
 });

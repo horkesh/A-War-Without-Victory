@@ -64,7 +64,10 @@ function mockSave(overrides: Partial<Record<string, Partial<Record<string, numbe
         }
     }
     return {
-        meta: { turn: 40, scenario_id: 'phase_e_sim_test', seed: 'test-seed' },
+        // turn 120 ≥ INTL_STANDING_OPS_HESITATION_MIN_TURN (100): the intl_standing
+        // channel is turn-gated, so the projection only reports intl hesitation when
+        // the save turn is in-window. cohesion threshold recalibrated to < 15.
+        meta: { turn: 120, scenario_id: 'phase_e_sim_test', seed: 'test-seed' },
         military: { negotiation: { strategic_dimensions: store } },
     };
 }
@@ -150,7 +153,7 @@ describe('Phase E activation simulator — Tier 1 (math-only)', () => {
     it('cohesion_only triggers 0.85× on sub-threshold cohesion and 1.0× on intl_standing', () => {
         const result = buildTier1Projection({
             rawSave: mockSave({
-                HRHB: { international_standing: 20, internal_cohesion: 20 },
+                HRHB: { international_standing: 20, internal_cohesion: 10 },
             }),
         });
         const combo = result.combos.find((c) => c.combo === 'cohesion_only')!;

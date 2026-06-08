@@ -186,6 +186,7 @@ function buildCell(
     faction: SnapshotFaction,
     dimension: string,
     store: DimensionStore | null,
+    turn: number | null,
 ): DimensionCell {
     const block = store?.[faction]?.[dimension] ?? null;
     const baseValue = block ? numberOrNull(block.base_value) : null;
@@ -197,7 +198,11 @@ function buildCell(
     let activeMult = 1.0;
 
     if (dimension === 'international_standing' && typeof effectiveValue === 'number') {
-        activeMult = getIntlStandingOpsHesitationMultiplier(effectiveValue);
+        // ACTIVATION GUARD: pass the save's turn so the diagnostic honors the
+        // intl_standing turn-gate (channel inert before mid-1994). When the save
+        // has no turn, the helper treats it as before-the-gate (1.0) — i.e. the
+        // diagnostic reports the channel as inert, which is the truthful signal.
+        activeMult = getIntlStandingOpsHesitationMultiplier(effectiveValue, turn ?? undefined);
         if (activeMult !== 1.0) {
             penaltyZone = 'intl_standing_hesitation';
             penaltyReason = `effective_value ${effectiveValue} in penalty zone; WOULD-TRIGGER hesitation (×${activeMult}) if AWWV_PDP_INTL_STANDING_OPS_HESITATION ON`;
@@ -226,9 +231,10 @@ function buildFactionSnapshot(
     faction: SnapshotFaction,
     store: DimensionStore | null,
     gate: GateActivationSnapshot,
+    turn: number | null,
 ): FactionSnapshot {
     const sortedDims = [...DIMENSION_IDS].sort(strictCompare);
-    const cells = sortedDims.map((dim) => buildCell(faction, dim, store));
+    const cells = sortedDims.map((dim) => buildCell(faction, dim, store, turn));
 
     // Cumulative if both flags were ON: product of every cell's
     // active_multiplier_if_flag_on. Dimensions without a wired sub-flag
@@ -304,7 +310,7 @@ export function buildPoliticalDimensionsSnapshot(
         scenario_id: meta.scenario_id,
         seed: meta.seed,
         gate_activation: gate,
-        factions: factions.map((faction) => buildFactionSnapshot(faction, store, gate)),
+        factions: factions.map((faction) => buildFactionSnapshot(faction, store, gate, meta.turn)),
     };
 }
 

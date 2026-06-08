@@ -19894,3 +19894,19 @@ Out of scope and intentionally untouched: the `štabni` vs `štabski` standardiz
 | war_exhaustion (per faction) | RBiH/RS/HRHB all ~10000.001 (no asymmetric collapse) | — |
 
 Military killed dropped ~30% (143,980→101,513), toward the ~80-90k target; zvornik sacred anchor held; no critical anomalies; exhaustion symmetric (Guardrail-1 not tripped). Count slipped 634→629 (−5) — orchestrator decides GO/NO-GO + re-floor.
+
+## [2026-06-08] PDP activation guards — intl turn-gate + cohesion threshold recalibration (gate still OFF, byte-identical)
+
+Readies two Political-Dimension-Propagation (PDP) channels for owner activation by adding behavior-when-active guards. The global gate + all per-channel sub-flags STAY OFF (default); with everything off behavior is byte-identical (40w `235c61f408dc3d95`, unchanged from floor). The guards only change behavior WHEN a channel is later flipped ON.
+
+**Changes (`src/sim/combat/sector_offensive.ts`):**
+1. **intl_standing turn-gate** — `getIntlStandingOpsHesitationMultiplier(intlStanding, currentTurn?)` gains a turn parameter and returns 1.0 (inert) when `currentTurn` is missing/NaN or `< INTL_STANDING_OPS_HESITATION_MIN_TURN` (new constant = **100**, ≈ mid-1994). Rationale (historian): an ungated `<30` op-hesitation back-dates the 1994–95 Serb diplomatic-isolation dynamic onto 1992, where the binding constraint was the arms embargo (which hurt the Bosnian Muslims). Consumer `commander/emit.ts buildOperations` now passes `briefing.turn`.
+2. **internal_cohesion threshold recalibration** — `COHESION_CAUTION_BIAS_THRESHOLD` **40 → 15**. Post-#63 (cohesion-divisor rescale) the dimension compressed to ~[0..50]; a 40w turn-40 sample read RBiH 0.78 / RS 29.74 / HRHB 20.91, so `<40` fired for ALL factions (universal penalty). `<15` flags only the genuinely-fraying bottom band (RBiH-only in the sample), preserving the original design intent.
+
+Both constants are named + owner-adjustable. patron_confidence + military_credibility channels left AS-IS (no guard per historian).
+
+**Diagnostics/HUD updated to honor the turn-gate (truthful WOULD-TRIGGER reporting):** `tools/diagnostics/political_dimensions_snapshot.ts`, `tools/diagnostics/phase_e_activation_simulator.ts`, and `src/sim/events/causality_query.ts getProjectedDimensionMultiplier` now thread the save/state turn into the intl helper.
+
+**Verification:** `tsc --noEmit` exit 0; full vitest 0 failed (8 PDP suites / 130 tests green); 40w `235c61f408dc3d95` byte-identical to floor (gate OFF). Tests updated to encode the guarded thresholds.
+
+**Ready to activate:** intl_standing — turn-gated, set `AWWV_POLITICAL_DIMENSION_PROPAGATION=1` + `AWWV_PDP_INTL_STANDING_OPS_HESITATION=1` (fires only from turn 100+). internal_cohesion — recalibrated, set the global flag + `AWWV_PDP_COHESION_CAUTION_BIAS=1` (fires only below 15).

@@ -311,15 +311,23 @@ describe('Phase E Packet 2 — internal_cohesion → bot caution-bias gate', () 
         expect(getCohesionCautionBiasMultiplier(NaN as unknown as number)).toBe(1.0);
     });
 
-    it('multiplier returns 1.0 when cohesion >= 40 (no caution bias)', () => {
+    // ACTIVATION GUARD (threshold recalibration 40 → 15): post-#63 the
+    // internal_cohesion effective_value distribution compressed to ~[0..50], so
+    // `< 40` fired for ALL factions. Recalibrated to `< 15` so only genuinely-low
+    // cohesion (bottom band) trips the caution-bias. These cases pin the new
+    // threshold: values in the OLD [15..40) band must now be NO-OP.
+    it('multiplier returns 1.0 when cohesion >= 15 (no caution bias, recalibrated)', () => {
+        expect(getCohesionCautionBiasMultiplier(15)).toBe(1.0);
+        expect(getCohesionCautionBiasMultiplier(20)).toBe(1.0); // was 0.85 pre-recalibration
+        expect(getCohesionCautionBiasMultiplier(39)).toBe(1.0); // was 0.85 pre-recalibration
         expect(getCohesionCautionBiasMultiplier(40)).toBe(1.0);
         expect(getCohesionCautionBiasMultiplier(50)).toBe(1.0);
         expect(getCohesionCautionBiasMultiplier(100)).toBe(1.0);
     });
 
-    it('multiplier returns 0.85 when cohesion < 40 (caution bias active)', () => {
-        expect(getCohesionCautionBiasMultiplier(39)).toBe(0.85);
-        expect(getCohesionCautionBiasMultiplier(20)).toBe(0.85);
+    it('multiplier returns 0.85 when cohesion < 15 (caution bias active, recalibrated)', () => {
+        expect(getCohesionCautionBiasMultiplier(14)).toBe(0.85);
+        expect(getCohesionCautionBiasMultiplier(5)).toBe(0.85);
         expect(getCohesionCautionBiasMultiplier(0)).toBe(0.85);
     });
 
