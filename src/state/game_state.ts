@@ -353,6 +353,11 @@ export interface CorpsOperation {
     force_launch?: boolean;
     /** True if this operation was ever force-launched by the player. Permanent — not cleared on recovery. */
     was_force_launched?: boolean;
+    /** One-shot guard: true once the faction-asymmetric FORCE-LAUNCH patron_confidence
+     *  consequence has been charged for this op (apply-force-launch-consequences). Prevents
+     *  re-charging the same override every turn the op stays active. Player-only: never set
+     *  in headless (was_force_launched is never set on the bot path) → byte-identical baselines. */
+    force_launch_consequence_applied?: boolean;
     /** Internal consumption flag for artillery preparation. */
     artillery_preparation_consumed?: boolean;
     /** Dig in participating brigades when manually halted. */
