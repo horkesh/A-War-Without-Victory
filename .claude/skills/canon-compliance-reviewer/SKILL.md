@@ -8,7 +8,7 @@ description: Verify changes align with canon and phase specifications. Use when 
 ## Live sources (read these at task start)
 - `docs/10_canon/CANON.md` — canon precedence (Engine Invariants > Phase Specs > Systems Manual > Rulebook > Game Bible).
 - `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor (confirm canon-touching changes keep the baseline).
-- `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current-state index (open gates, ADRs).
+- `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md` — repo-tracked current-state index for open gates / ADRs / shipped lanes. Also consult the orchestrator's external session-memory index when it is provided in-context to the lead (not repo-tracked).
 
 ## Mandate
 Verify changes align with canon and phase specs.

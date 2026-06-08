@@ -8,7 +8,7 @@ description: Review and optimize scenario runner and pipeline integrity. Use whe
 ## Live sources (read these at task start)
 - `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor (harness changes must keep baselines byte-identical unless intentionally re-flooring).
 - `docs/20_engineering/DETERMINISM_TEST_MATRIX.md` — determinism gates.
-- `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current-state index.
+- `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md` — repo-tracked current-state index (open/shipped/gated lanes). Also consult the orchestrator's external session-memory index when it is provided in-context to the lead (not repo-tracked).
 
 ## Durable rules
 - **No nondeterminism in the pipeline:** no timestamps or wall-clock in artifact names/content, no `Math.random()`/`Date.now()` (banned across all of `src/`). Stable ordering throughout.

@@ -8,7 +8,7 @@ description: Use when designing, reviewing, or debugging corps and army CO decis
 ## Live sources (read these at task start — do not hardcode floor/lane state)
 - `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor (any CO-logic change must keep the baseline).
 - `docs/40_reports/COMBAT_MASTER.md` — combat-factor decisions (read first for combat-mechanic interactions).
-- `docs/plans/COMMAND_BOARD.md`, `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current open lanes + floor line.
+- `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md` — repo-tracked current open lanes (floor line is in `CALIBRATION_MASTER.md` above). Also consult the orchestrator's external session-memory index when it is provided in-context to the lead (not repo-tracked).
 
 ## Durable rules
 - **Determinism:** no `Math.random()`/`Date.now()`/timestamps; `strictCompare` for all tiebreaks. `home_osid` is a recruitment artifact — never a movement heuristic.

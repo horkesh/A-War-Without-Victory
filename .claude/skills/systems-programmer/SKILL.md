@@ -8,7 +8,7 @@ description: Owns core systems, invariants, and determinism; uses Engine Invaria
 ## Live sources (read these at task start — do not hardcode their contents)
 - `docs/20_engineering/DETERMINISM_TEST_MATRIX.md`, `docs/10_canon/Engine_Invariants_v0_9_0.md` — invariants and determinism gates.
 - `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor (any engine change must keep the baseline; prove byte-identical for cleanups).
-- `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current-state index.
+- `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md` — repo-tracked current-state index (open/shipped/gated lanes). Also consult the orchestrator's external session-memory index when it is provided in-context to the lead (not repo-tracked).
 
 ## Sacred rules (engine core)
 - **No nondeterminism in sim code:** no `Math.random()`, no `Date.now()`, no timestamps, no wall-clock — the static determinism scan bans these across ALL of `src/` including comments and filename labels. Sorted iteration via `strictCompare`.

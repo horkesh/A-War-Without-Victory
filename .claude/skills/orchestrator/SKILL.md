@@ -9,7 +9,7 @@ description: Dispatcher and coordinator. Does NOT analyze, conclude, or implemen
 ## Live sources (read these at task start — do not hardcode floor/lane state)
 - `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md` — single source of truth for open/shipped/gated lanes. Cross-check the closure log before claiming anything is "open."
 - `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor.
-- `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current-floor line + in-flight lanes + feedback notes.
+- Current-floor line is in `CALIBRATION_MASTER.md` and in-flight lanes + feedback notes in `COMMAND_BOARD.md` / `MASTER_ROADMAP.md` (all repo-tracked, above). Also consult the orchestrator's external session-memory index when it is provided in-context to the lead (not repo-tracked).
 - `docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md` — house execution standard.
 
 ## Posture

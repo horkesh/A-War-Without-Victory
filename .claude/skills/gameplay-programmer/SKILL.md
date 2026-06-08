@@ -8,7 +8,7 @@ description: Implements and maintains phase logic, state, and simulation behavio
 ## Live sources (read these at task start — do not hardcode their contents)
 - `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor (count/hash/anchors).
 - `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md` — current open/shipped/gated lanes.
-- `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current-state index.
+- Current-state index lives in the repo-tracked docs above (`CALIBRATION_MASTER.md` floor + `COMMAND_BOARD.md` / `MASTER_ROADMAP.md` lanes). Also consult the orchestrator's external session-memory index when it is provided in-context to the lead (not repo-tracked).
 - `docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md` — house execution standard.
 
 ## Sacred rules
