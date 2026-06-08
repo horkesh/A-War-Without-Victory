@@ -180,11 +180,13 @@ describe('late-1995 triggered operations — objective OSIDs are valid + painted
         const axis = def!.axes[0]!;
         assert.equal(axis.axis_id, 'vozuca_pocket');
         assert.equal(axis.corps, 'arbih_3rd_corps');
-        // Objectives in declared attack order: vozuca_2 → gornja_bocinja → donja_bocinja_2.
+        // Objectives in declared attack order: vozuca_2 → gornja_bocinja → donja_bocinja_2
+        // → brijesnica_donja_2 (PR-3 anchor extension; adjacent to vozuca_2 + gornja_bocinja).
         assert.deepEqual(axis.objectives, [
             'op:zavidovici:vozuca_2',
             'op:maglaj:gornja_bocinja',
             'op:maglaj:donja_bocinja_2',
+            'op:lukavac:brijesnica_donja_2',
         ]);
         // RBiH-direction flip: each objective RS @apr1995 and RBiH @oct1995.
         for (const osid of axis.objectives) {
