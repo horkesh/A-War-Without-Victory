@@ -33,6 +33,14 @@ const MAX_OVERRIDE_TARGET_OSIDS = 5;
  * force action after fewer idle turns, down to URGENT_MIN_IDLE_TURNS. A corps the live war
  * marks as a clear, urgent opportunity launches SOONER than one the calendar alone favours.
  *
+ * #335 CORRECTNESS FIX: "urgent" requires a GENUINE live-signal amplification, not merely a
+ * high effective weight. A static-high priority (e.g. 'Central Corridor Counter' = static 150)
+ * × the QUIET decay 0.80 lands at effective 120 — clearing URGENT_EFFECTIVE_WEIGHT with NO
+ * live urgency, which would relax the idle wall for a calendar-high op the battlefield is
+ * silent about. So the relaxation now also requires `p.emergent_boost > 1.0` (the composed
+ * trend×supply×plan multiplier actually BOOSTED the static weight — real signal confluence),
+ * gated together with the effective-weight threshold.
+ *
  * EMERGENT-ONLY by construction (gated on state.meta.decision_mode === 'emergent'). In
  * historical mode `p.weight` is the authored static weight (capped at its 1992-calendar
  * value, never amplified) AND the relaxation is skipped entirely, so the flat 6-turn wall
@@ -85,14 +93,18 @@ export function generateArmyHQOverrides(
             if (p.weight < PROBE_WEIGHT_THRESHOLD) continue;
 
             // Idle check: corps hasn't operated recently.
-            // Phase 1b: in emergent mode, a priority the live signals have amplified to an
-            // URGENT effective weight (≥ URGENT_EFFECTIVE_WEIGHT) earns a relaxed idle wall
-            // (down to URGENT_MIN_IDLE_TURNS) — HQ acts sooner where the battlefield is loud.
-            // Historical mode (emergent === false) always uses the flat 6-turn wall.
-            const requiredIdle =
-                emergent && p.weight >= URGENT_EFFECTIVE_WEIGHT
-                    ? URGENT_MIN_IDLE_TURNS
-                    : MIN_IDLE_TURNS_FOR_OVERRIDE;
+            // Phase 1b: in emergent mode, a priority the live signals have GENUINELY amplified
+            // to an URGENT effective weight earns a relaxed idle wall (down to
+            // URGENT_MIN_IDLE_TURNS) — HQ acts sooner where the battlefield is loud.
+            // #335: require BOTH (a) the effective weight ≥ URGENT_EFFECTIVE_WEIGHT AND
+            // (b) emergent_boost > 1.0 (the composed multiplier actually boosted the static
+            // weight — real signal confluence). Condition (b) blocks a static-high op that
+            // merely survives a quiet decay (boost ≤ 1.0) from relaxing the wall without
+            // urgency. Historical mode (emergent === false, emergent_boost undefined) always
+            // uses the flat 6-turn wall → byte-identical.
+            const boost = p.emergent_boost ?? 1.0;
+            const urgent = emergent && boost > 1.0 && p.weight >= URGENT_EFFECTIVE_WEIGHT;
+            const requiredIdle = urgent ? URGENT_MIN_IDLE_TURNS : MIN_IDLE_TURNS_FOR_OVERRIDE;
             const lastOpTurn = cc?.last_completed_operation_turn ?? 0;
             if (turn - lastOpTurn < requiredIdle) continue;
 
