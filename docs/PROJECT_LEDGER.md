@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-08] chore(combat): Phase-0 byte-identical cleanup — dedupe KIA split + fix stale TG-flag comments
+
+**Type:** Pure cleanup, BYTE-IDENTICAL to all baselines. 40w `final_state_hash` = `2221700edf20621e` UNCHANGED (verified post-edit, matches gold). No numeric change, no behavioral change. Faction-agnostic, no §6 prose.
+
+**Change 1 — dedupe hardcoded KIA/WIA/MIA casualty split (constant-folding only):** The canonical home is `src/sim/combat/attack_casualty_distribution.ts` (`export const KIA_FRACTION=0.30 / WIA_FRACTION=0.55 / MIA_FRACTION=0.15`). Three local duplicate copies (each `KIA_FRACTION=0.30 / WIA_FRACTION=0.55`, MIA derived as remainder) were deleted and replaced with `import { KIA_FRACTION, WIA_FRACTION } from './attack_casualty_distribution.js'`:
+- `src/sim/combat/battle_resolution.ts` (was lines 89-90; consumed at 651-652, 683)
+- `src/sim/combat/paramilitary_sweep.ts` (was lines 57-58; consumed at 156-157)
+- `src/sim/combat/frontline_attrition.ts` (was lines 95-96; consumed at 345-346)
+Values are identical (0.30/0.55, MIA=1−KIA−WIA=0.15 remainder math unchanged in each consumer) so this is pure deduplication. No file needed a different split.
+
+**Change 2 — correct stale flag comments (comments only, zero code):** All five TG flags (`ENABLE_TACTICAL_GROUPS`, `ENABLE_TG_FORMATION`, `ENABLE_TG_COMBAT_SYNTHESIS`, `ENABLE_TG_COHESION_BLEED`, `ENABLE_TG_RECOVERY_SUPPRESSION`) are currently `true`. The stale "All flags default false" header in `src/sim/combat/tactical_group_config.ts`, the stale "Flag-off (default)" claim in the `ENABLE_TG_RECOVERY_SUPPRESSION` docstring, and the stale "Flag default off — byte-identical to legacy behavior" comment in `src/sim/combat/sector_offensive_launch_helpers.ts` (~line 876) were rewritten to state the flags are ON (default-true) and that the current gold hashes reflect the activated state, so future byte-identity reasoning is correct.
+
+**Verification:** `tsc --noEmit` exit 0; focused combat suites `combat_pipeline`/`attack_resource_aftermath`/`attack_casualty_distribution`/`paramilitary_sweep`/`paramilitary_severity_bands`/`attack_morale_absorption` 114/114 green; 40w `2221700edf20621e` byte-identical to gold baseline.
+
 ## [2026-06-08] fix(ui): persist relieved-commander resentment receipts (#282)
 
 **Type:** Ring-3 UI read-model only, BYTE-IDENTICAL to calibration. No sim/save/scenario/baseline change; pure projection over already-persisted officer + force-launched-op substrate. 40w/52w/188w hashes untouched (read-model is never invoked in headless calibration). Faction-agnostic.

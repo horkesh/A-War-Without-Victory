@@ -22,12 +22,12 @@
  *                                 (donated_fraction × (1 + hops × 0.15) × 15)
  *                                 + cooldown enforcement
  *
- * All flags default false. The v34 migration ships the TG/Army-HQ Records empty.
- * NOTE: serializeState does NOT strip empty Records (it only skips undefined), so the
- * v34 scaffold DOES change the serialized hash vs pre-v34 (40w a969d44719aaa40e →
- * 78e231e35b08cf53) — it is calibration-neutral, not byte-identical. With every flag
- * off the hash holds steady AT the v34 baseline (78e231e35b08cf53). Sub-flag activation
- * is the calibration-shift gate.
+ * All five TG flags are now ON (default true) — the staged rollout is fully
+ * activated. (Historical note: the v34 migration shipped the TG/Army-HQ Records
+ * empty; serializeState does NOT strip empty Records, so the v34 scaffold already
+ * moved the serialized hash vs pre-v34 (40w a969d44719aaa40e → 78e231e35b08cf53).
+ * Flag activation past that point is the calibration-shift gate; the current gold
+ * hashes reflect all flags ON.)
  */
 export const ENABLE_TACTICAL_GROUPS = true;
 
@@ -49,10 +49,10 @@ export const ENABLE_TG_COHESION_BLEED = true;
  * counterpart to the Army-HQ recovery suppression — the consumer branch in cohesion_drift
  * is widened to fire under either flag.
  *
- * Flag-off (default): the field is never written, so the cohesion_drift suppression branch
+ * When OFF: the field is never written, so the cohesion_drift suppression branch
  * can never fire and `tg_recovery_suppressed_until_turn` stays omitted (omitEmpty-safe
- * optional scalar on FormationState). Goal: both gold hashes hold byte-identical
- * (40w 78e231e35b08cf53, 188w 940251e4acaff3d4).
+ * optional scalar on FormationState). This flag is now ON (default true), so the
+ * suppression branch is live; the current gold hashes reflect that activated state.
  */
 export const ENABLE_TG_RECOVERY_SUPPRESSION = true;
 

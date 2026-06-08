@@ -34,6 +34,7 @@ import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
+import { KIA_FRACTION, WIA_FRACTION } from './attack_casualty_distribution.js';
 import { deterministicRandom } from '../../state/deterministic_random.js';
 import { recordBrigadeEngagement, ensureBrigadeHistory } from './brigade_history_recorder.js';
 import {
@@ -91,10 +92,8 @@ const MIN_COUNTERBATTERY_FP = 1.0;
 const ENTRENCHMENT_ATTRITION_REDUCTION_PER_SQRT_TURN = 0.10;
 const ENTRENCHMENT_ATTRITION_FLOOR = 0.40;
 
-/** Fraction of attrition casualties that are KIA (match P9 value). */
-const KIA_FRACTION = 0.30;
-const WIA_FRACTION = 0.55;
-// MIA_FRACTION = 0.15 (remainder)
+// Attrition casualty split (KIA 0.30 / WIA 0.55 / MIA 0.15 remainder) — canonical
+// export from attack_casualty_distribution.ts (matches P9 value).
 
 /** Probability that a frontline friction event is recorded as a skirmish engagement. */
 const FRICTION_RECORD_CHANCE = 0.35;

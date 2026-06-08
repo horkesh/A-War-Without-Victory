@@ -52,10 +52,9 @@ import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.
 import { lookupParamilitaryNamedUnit } from '../../../data/source/oob/paramilitary_named_units.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import type { EdgeRecord } from '../../map/settlements.js';
-
-// Casualty split ratios — consistent with attack_resolution_osid.ts / frontline_attrition.ts
-const KIA_FRACTION = 0.30;
-const WIA_FRACTION = 0.55;
+// Casualty split ratios (KIA 0.30 / WIA 0.55 / MIA 0.15 remainder) — canonical
+// export from attack_casualty_distribution.ts.
+import { KIA_FRACTION, WIA_FRACTION } from './attack_casualty_distribution.js';
 /** Casualty multiplier when paramilitary retreats from defended OSID (heavy losses). */
 const DEFENDED_RETREAT_CASUALTY_MULT = 3;
 /** Casualty multiplier when offensive paramilitary overwhelms light defense. */
