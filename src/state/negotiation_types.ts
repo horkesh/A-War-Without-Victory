@@ -274,15 +274,16 @@ export interface DaytonResult {
     /** Items where patron override forced acceptance. */
     patron_overrides_applied: string[];
     /**
-     * Brčko outcome (D1, owner ruling Opt 2a). Historically Brčko was deferred
-     * to international arbitration at Dayton (Annex 2) and became the Brčko
-     * District condominium of both Entities in 1999 — a THIRD state, neither
-     * RBiH nor RS. When the brcko_district package is left unresolved (neither
-     * cleanly demanded-and-won nor conceded), it resolves to 'arbitration'.
+     * Brčko outcome (D1, owner ruling Opt 2a). Historically the Brčko-area IEBL
+     * was deferred to binding international arbitration at Dayton (Annex 2, Art. V);
+     * the 1999 Final Award created the Brčko District — a self-governing district
+     * held in CONDOMINIUM by both Entities (not a separate/third state, credited to
+     * neither RBiH nor RS). When the brcko_district package is left unresolved
+     * (neither cleanly demanded-and-won nor conceded), it resolves to 'arbitration'.
      * Optional/back-compat: absent on pre-D1 saves.
      */
     brcko_status?: 'federation' | 'rs' | 'arbitration';
-    /** True when Brčko resolved to the international arbitration district (third state). */
+    /** True when Brčko resolved to the arbitration condominium district of both Entities. */
     brcko_arbitration?: boolean;
     /**
      * Derived entity-autonomy index (D2, 0-100): weighted mean of the 6

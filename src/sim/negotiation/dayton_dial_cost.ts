@@ -149,9 +149,10 @@ const CONSTITUTIONAL_OPTION_GRAIN: Readonly<Record<string, Grain>> = Object.free
     bonn_powers: 'neutral', // default
     monitoring_only: 'state_ward',
     none: 'state_ward',
-    // rj_refugee_return
-    voluntary_only: 'neutral', // default
-    full_right_of_return: 'state_ward', // unwinds the frozen ethnic map (un-partitions)
+    // rj_refugee_return — NB: Annex 7 Art. I(1) guaranteed the FULL right of return;
+    // `voluntary_only` is the as-implemented 1995 baseline, NOT the treaty default.
+    voluntary_only: 'neutral', // as-implemented baseline (free)
+    full_right_of_return: 'state_ward', // the Annex-7 guarantee — unwinds the frozen ethnic map (un-partitions)
     frozen_lines: 'entity_ward', // ratifies the partition
     // rj_icty_cooperation
     conditional: 'neutral', // default

@@ -28,7 +28,15 @@ type CostByFaction = Readonly<Partial<Record<'RBiH' | 'RS' | 'HRHB', number>>>;
 export interface ConstitutionalOption {
     id: string;
     label: string;
-    /** True for the historical 1995 Dayton default (always free). */
+    /**
+     * True for the free in-game BASELINE option an untouched proposal resolves to —
+     * the AS-IMPLEMENTED 1995 outcome. For the Annex-4 constitutional slots this
+     * baseline IS the treaty text. For refugee return (Dim 5) it is NOT: Annex 7
+     * Art. I guaranteed the FULL right of return; voluntary-only is the as-implemented
+     * reality, so `full_right_of_return` is the treaty guarantee while `voluntary_only`
+     * (the baseline here) is the outcome on the ground. See the `rj_refugee_return`
+     * options below.
+     */
     is_default: boolean;
     /** Base (pre-dial) cost per faction for choosing this option. Empty = free. */
     base_cost: CostByFaction;
@@ -100,12 +108,19 @@ export const CONSTITUTIONAL_CHOICES: readonly ConstitutionalChoice[] = [
 
 export const RETURN_JUSTICE_CHOICES: readonly ConstitutionalChoice[] = [
     {
+        // Annex 7 Art. I(1) GUARANTEED the full right of return: "All refugees and
+        // displaced persons have the right freely to return to their homes of origin"
+        // + property restitution/compensation. `full_right_of_return` is therefore the
+        // TREATY option, not a deviation; `voluntary_only` is the AS-IMPLEMENTED 1995
+        // reality (returns happened only voluntarily, the ethnic map stayed largely
+        // frozen) and is the free in-game baseline — NOT the Annex-7 default.
+        // (Verified against OHR primary text, Dayton Annex 7, Art. I(1).)
         id: 'rj_refugee_return',
         label: 'Refugee Return',
-        citation: 'Annex 7 — right of return',
+        citation: 'Annex 7 Art. I(1) guaranteed full right of return; baseline = as-implemented voluntary return',
         options: [
-            { id: 'full_right_of_return', label: 'Full Right of Return', is_default: false, base_cost: { RS: 12, HRHB: 6 } },
-            { id: 'voluntary_only', label: 'Voluntary Return Only', is_default: true, base_cost: {} },
+            { id: 'full_right_of_return', label: 'Full Right of Return (Annex 7 guarantee)', is_default: false, base_cost: { RS: 12, HRHB: 6 } },
+            { id: 'voluntary_only', label: 'Voluntary Return Only (as implemented)', is_default: true, base_cost: {} },
             { id: 'frozen_lines', label: 'Frozen Lines', is_default: false, base_cost: { RBiH: 8 } },
         ],
     },

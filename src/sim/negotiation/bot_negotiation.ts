@@ -16,7 +16,7 @@ import type {
 } from '../../state/negotiation_types.js';
 import { computeNegotiatingCapital } from '../events/strategic_dimensions.js';
 import type { DimensionStore } from '../events/strategic_dimensions.js';
-import { getTerritorialPackageById } from './territorial_packages.js';
+import { getTerritorialPackageById, getDemandCost, getConcessionCost } from './territorial_packages.js';
 import { getInstitutionalPackageById, getInstitutionalCost } from './institutional_packages.js';
 import {
     finalCompetencyCost,
@@ -163,6 +163,228 @@ export function computeProposalCostToFaction(
     }
 
     return totalCost;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Player budget — engine-level enforcement (defense-in-depth)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Compute what the PROPOSING (player) faction actually SPENDS on a proposal.
+ *
+ * This is the asymmetric, faction-conditioned cost-to-self — the same model the
+ * canon cost data encodes (a demand costs the demander; a concession costs the
+ * holder; a centralized/decentralized institutional choice costs only the side it
+ * extracts from; a Dim-2/3/4/5 deviation costs per its declaration/owner table).
+ * It is the engine-truth counterpart of the DaytonNegotiationModal `capitalSpent`
+ * readout and is used to enforce the player's negotiation budget at the sim
+ * boundary (NOT just in the UI). Pure & deterministic: sorted iteration, integer
+ * costs, no RNG/clock. The bot's IDEOLOGICAL adjustment is deliberately NOT applied
+ * here — that surcharge prices a bot's willingness to accept, not what the player
+ * pays out of their own earned capital.
+ *
+ * 0 for the all-historical default proposal (every branch resolves to base 0), so
+ * the within-budget / default path is byte-identical.
+ */
+export function computePlayerProposalSpend(
+    proposal: DaytonProposal,
+    playerFaction: string,
+): number {
+    let spend = 0;
+
+    // Territorial: the player pays to DEMAND territory they do not hold and to
+    // CONCEDE territory they do hold (getDemandCost/getConcessionCost are already
+    // faction-conditioned — 0 for the holder's own demand / a non-holder's concession).
+    for (const pkgId of [...proposal.territorial_demands].sort(strictCompare)) {
+        const pkg = getTerritorialPackageById(pkgId);
+        if (pkg) spend += getDemandCost(pkg, playerFaction);
+    }
+    for (const pkgId of [...proposal.territorial_concessions].sort(strictCompare)) {
+        const pkg = getTerritorialPackageById(pkgId);
+        if (pkg) spend += getConcessionCost(pkg, playerFaction);
+    }
+
+    // Legacy institutional toggles — asymmetric cost to the player's side only.
+    for (const pkgId of Object.keys(proposal.institutional_choices).sort(strictCompare)) {
+        const choice = proposal.institutional_choices[pkgId];
+        const pkg = getInstitutionalPackageById(pkgId);
+        if (pkg && choice) spend += getInstitutionalCost(pkg, choice, playerFaction);
+    }
+
+    // Dim-2/3/4/5 structural dimensions — raw (non-ideological) post-dial cost to
+    // the player. dayton-historical ⇒ 0 declaration + ×1.0 multipliers ⇒ base 0.
+    const dial = proposalDial(proposal);
+    if (dial !== 'dayton-historical') spend += getDialDeclarationCost(dial, playerFaction);
+    const comp = proposal.competency_allocation;
+    if (comp) {
+        for (const compId of Object.keys(comp).sort(strictCompare)) {
+            const owner = comp[compId] as CompetencyOwner;
+            if (owner) spend += finalCompetencyCost(compId, owner, playerFaction, dial);
+        }
+    }
+    const cc = proposal.constitutional_choices;
+    if (cc) {
+        for (const slotId of Object.keys(cc).sort(strictCompare)) {
+            const optionId = cc[slotId];
+            if (optionId) spend += finalConstitutionalCost(slotId, optionId, playerFaction, dial);
+        }
+    }
+    const rj = proposal.return_justice;
+    if (rj) {
+        for (const slotId of Object.keys(rj).sort(strictCompare)) {
+            const optionId = rj[slotId];
+            if (optionId) spend += finalReturnJusticeCost(slotId, optionId, playerFaction, dial);
+        }
+    }
+
+    return spend;
+}
+
+/** One charged line-item of a player proposal, for deterministic over-budget clamping. */
+interface PlayerSpendItem {
+    kind: 'demand' | 'concession' | 'institutional' | 'competency' | 'constitutional' | 'return_justice';
+    id: string;
+    cost: number;
+}
+
+/**
+ * Enumerate the player's charged line-items (cost > 0), sorted MOST-EXPENSIVE first
+ * (tie-break by stable id) so the clamp drops the dearest items first — mirroring the
+ * UI's "reduce demands" guidance. Deterministic.
+ */
+function playerSpendItems(proposal: DaytonProposal, playerFaction: string): PlayerSpendItem[] {
+    const items: PlayerSpendItem[] = [];
+    for (const pkgId of [...proposal.territorial_demands].sort(strictCompare)) {
+        const pkg = getTerritorialPackageById(pkgId);
+        if (!pkg) continue;
+        const cost = getDemandCost(pkg, playerFaction);
+        if (cost > 0) items.push({ kind: 'demand', id: pkgId, cost });
+    }
+    for (const pkgId of [...proposal.territorial_concessions].sort(strictCompare)) {
+        const pkg = getTerritorialPackageById(pkgId);
+        if (!pkg) continue;
+        const cost = getConcessionCost(pkg, playerFaction);
+        if (cost > 0) items.push({ kind: 'concession', id: pkgId, cost });
+    }
+    for (const pkgId of Object.keys(proposal.institutional_choices).sort(strictCompare)) {
+        const choice = proposal.institutional_choices[pkgId];
+        const pkg = getInstitutionalPackageById(pkgId);
+        if (!pkg || !choice) continue;
+        const cost = getInstitutionalCost(pkg, choice, playerFaction);
+        if (cost > 0) items.push({ kind: 'institutional', id: pkgId, cost });
+    }
+    const dial = proposalDial(proposal);
+    const comp = proposal.competency_allocation;
+    if (comp) {
+        for (const compId of Object.keys(comp).sort(strictCompare)) {
+            const owner = comp[compId] as CompetencyOwner;
+            if (!owner) continue;
+            const cost = finalCompetencyCost(compId, owner, playerFaction, dial);
+            if (cost > 0) items.push({ kind: 'competency', id: compId, cost });
+        }
+    }
+    const cc = proposal.constitutional_choices;
+    if (cc) {
+        for (const slotId of Object.keys(cc).sort(strictCompare)) {
+            const optionId = cc[slotId];
+            if (!optionId) continue;
+            const cost = finalConstitutionalCost(slotId, optionId, playerFaction, dial);
+            if (cost > 0) items.push({ kind: 'constitutional', id: slotId, cost });
+        }
+    }
+    const rj = proposal.return_justice;
+    if (rj) {
+        for (const slotId of Object.keys(rj).sort(strictCompare)) {
+            const optionId = rj[slotId];
+            if (!optionId) continue;
+            const cost = finalReturnJusticeCost(slotId, optionId, playerFaction, dial);
+            if (cost > 0) items.push({ kind: 'return_justice', id: slotId, cost });
+        }
+    }
+    // Dearest first; stable id tie-break for determinism.
+    items.sort((a, b) => (b.cost !== a.cost ? b.cost - a.cost : strictCompare(a.id, b.id)));
+    return items;
+}
+
+/** Result of clamping a player proposal to its available negotiation budget. */
+export interface ClampedPlayerProposal {
+    /** The proposal after dropping over-budget items (===input when within budget). */
+    proposal: DaytonProposal;
+    /** Player spend BEFORE clamping. */
+    originalSpend: number;
+    /** Player spend AFTER clamping (≤ availableCapital). */
+    finalSpend: number;
+    /** The line-item ids dropped to fit the budget (empty when within budget). */
+    dropped: string[];
+    /** True when at least one item was dropped. */
+    clamped: boolean;
+}
+
+/**
+ * ENGINE-LEVEL player budget enforcement (defense-in-depth). The UI disables Submit
+ * when over-budget, but a non-UI path (bot, headless scenario, a future API) could
+ * still hand `resolveDaytonNegotiation` a proposal that spends more than the player's
+ * earned capital. This clamps such a proposal DETERMINISTICALLY by dropping the
+ * dearest charged items (most-expensive first, stable id tie-break) until the spend
+ * fits `availableCapital` — the engine counterpart of the UI's "reduce demands". A
+ * within-budget proposal is returned UNCHANGED (byte-identical), so the default /
+ * affordable path is untouched.
+ *
+ * Pure & deterministic: no RNG/clock, sorted iteration.
+ */
+export function clampPlayerProposalToBudget(
+    proposal: DaytonProposal,
+    playerFaction: string,
+    availableCapital: number,
+): ClampedPlayerProposal {
+    const budget = Math.max(0, availableCapital);
+    const originalSpend = computePlayerProposalSpend(proposal, playerFaction);
+    if (originalSpend <= budget) {
+        return { proposal, originalSpend, finalSpend: originalSpend, dropped: [], clamped: false };
+    }
+
+    const drop = new Set<string>();
+    const dropped: string[] = [];
+    let spend = originalSpend;
+    for (const item of playerSpendItems(proposal, playerFaction)) {
+        if (spend <= budget) break;
+        drop.add(`${item.kind}:${item.id}`);
+        dropped.push(`${item.kind}:${item.id}`);
+        spend -= item.cost;
+    }
+
+    const next: DaytonProposal = {
+        ...proposal,
+        territorial_demands: proposal.territorial_demands.filter(id => !drop.has(`demand:${id}`)),
+        territorial_concessions: proposal.territorial_concessions.filter(id => !drop.has(`concession:${id}`)),
+        institutional_choices: filterRecord(proposal.institutional_choices, id => !drop.has(`institutional:${id}`)),
+    };
+    if (proposal.competency_allocation) {
+        next.competency_allocation = filterRecord(proposal.competency_allocation, id => !drop.has(`competency:${id}`));
+    }
+    if (proposal.constitutional_choices) {
+        next.constitutional_choices = filterRecord(proposal.constitutional_choices, id => !drop.has(`constitutional:${id}`));
+    }
+    if (proposal.return_justice) {
+        next.return_justice = filterRecord(proposal.return_justice, id => !drop.has(`return_justice:${id}`));
+    }
+
+    return {
+        proposal: next,
+        originalSpend,
+        finalSpend: computePlayerProposalSpend(next, playerFaction),
+        dropped,
+        clamped: dropped.length > 0,
+    };
+}
+
+/** Drop the keys for which `keep` is false. Pure; preserves value types. */
+function filterRecord<V>(rec: Record<string, V>, keep: (key: string) => boolean): Record<string, V> {
+    const out: Record<string, V> = {};
+    for (const key of Object.keys(rec).sort(strictCompare)) {
+        if (keep(key)) out[key] = rec[key];
+    }
+    return out;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
