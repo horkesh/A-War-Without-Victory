@@ -476,6 +476,30 @@
                             "content": "Dodatna napomena povezuje ovaj zapis s vidljivim ishodima vase kampanje. Uporedite kanonski dogadjaj s kampanjskim dokazima prije nego sto iz toga izvedete politicki ili vojni zakljucak.\n\nPodaci iz zavrsnog zapisa: {cost_human_findings} {cost_finding_sources}"
                         }
                     }
+                },
+                {
+                    "id": "a1c_london_branch_accept_principles",
+                    "condition": "RESPONSE:london_conference_1992:accept_principles",
+                    "insert_after_paragraph": 6,
+                    "variant": "note",
+                    "content": "In this campaign, Sarajevo recorded its subscription to the London Statement of Principles — the historical line, in which the Bosnian government endorsed the conference framework alongside the other delegations in August 1992 (London Conference, 26-27 August 1992; subsequently the basis for the Geneva International Conference on the Former Yugoslavia). The principles affirmed the inviolability of borders and the non-recognition of gains made by force; their enforcement, as the historical record shows, never followed.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Sarajevo je zabiljezilo pristupanje Londonskoj izjavi o principima — historijska linija, u kojoj je bosanska vlada podrzala okvir konferencije uz ostale delegacije u augustu 1992. (Londonska konferencija, 26-27. august 1992). Principi su potvrdili nepovredivost granica i nepriznavanje teritorijalnih dobitaka stecenih silom; njihova provedba, kako pokazuje historijski zapis, nikada nije uslijedila."
+                        }
+                    }
+                },
+                {
+                    "id": "a1c_london_branch_reject",
+                    "condition": "RESPONSE:london_conference_1992:reject",
+                    "insert_after_paragraph": 6,
+                    "variant": "divergence",
+                    "content": "In this campaign, Sarajevo recorded a rejection of the London terms as inadequate — a procedural divergence from the historical record, in which the Bosnian government subscribed to the Statement of Principles rather than denouncing it. The recorded refusal preserves freedom of action at the cost of the international standing the conference conferred; whether that trade served the campaign is a question for the cost ledger, not for this entry.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Sarajevo je zabiljezilo odbijanje londonskih uslova kao nedovoljnih — proceduralno odstupanje od historijskog zapisa, u kojem je bosanska vlada pristupila Izjavi o principima umjesto da je osudi. Zabiljezeno odbijanje cuva slobodu djelovanja po cijenu medjunarodnog ugleda koji je konferencija donijela; da li je ta razmjena posluzila kampanji, pitanje je za registar troskova, a ne za ovaj zapis."
+                        }
+                    }
                 }
             ],
             "localizations": {
@@ -3188,6 +3212,30 @@
                             "content": "Odstupanje u vasem ratu mijenja nacin na koji se ovaj historijski zapis cita. Uporedite kanonski dogadjaj s kampanjskim dokazima prije nego sto iz toga izvedete politicki ili vojni zakljucak.\n\nPodaci iz zavrsnog zapisa: {milestone_dayton_accords_summary} {milestone_dayton_accords_delta_weeks}"
                         }
                     }
+                },
+                {
+                    "id": "a1c_dayton_branch_accept",
+                    "condition": "RESPONSE:dayton_talks_begin_1995:accept",
+                    "insert_after_paragraph": 5,
+                    "variant": "note",
+                    "content": "In this campaign, Sarajevo recorded acceptance of the General Framework Agreement — the historical line, in which the Bosnian government signed at Dayton on 21 November 1995 (initialled) and in Paris on 14 December 1995, ratifying the dual-entity structure and the 51:49 Inter-Entity Boundary Line. The settlement froze the front into a constitutional order; the eastern-enclave territorial outcomes the line encoded were, in the historical record, accepted as the price of ending the war.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Sarajevo je zabiljezilo prihvatanje Opceg okvirnog sporazuma — historijsku liniju, u kojoj je bosanska vlada potpisala u Daytonu 21. novembra 1995. (parafirano) i u Parizu 14. decembra 1995, potvrdjujuci dvoentitetsku strukturu i medjuentitetsku liniju razgranicenja 51:49. Sporazum je zamrznuo front u ustavni poredak; teritorijalni ishodi istocnih enklava koje je linija upisala bili su, u historijskom zapisu, prihvaceni kao cijena okoncanja rata."
+                        }
+                    }
+                },
+                {
+                    "id": "a1c_dayton_branch_hardline",
+                    "condition": "RESPONSE:dayton_talks_begin_1995:hardline",
+                    "insert_after_paragraph": 5,
+                    "variant": "divergence",
+                    "content": "In this campaign, Sarajevo recorded a repudiation of the framework rather than the signature — a divergence from the historical record, in which the Bosnian government signed despite the Inter-Entity Boundary Line ratifying the eastern-enclave losses. The recorded refusal declines to constitutionalise a partition drawn in part by force; it also declines the cessation that the historical signature delivered. Which cost weighed heavier is recorded in the campaign’s ledger, not adjudicated here.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Sarajevo je zabiljezilo odbacivanje okvira umjesto potpisa — odstupanje od historijskog zapisa, u kojem je bosanska vlada potpisala uprkos tome sto je medjuentitetska linija razgranicenja potvrdila gubitke istocnih enklava. Zabiljezeno odbijanje odbija da ustavno ozakoni podjelu djelimicno povucenu silom; istovremeno odbija i prekid neprijateljstava koji je historijski potpis donio. Koji je trosak bio tezi, zabiljezeno je u registru kampanje, a ne presudjeno ovdje."
+                        }
+                    }
                 }
             ],
             "localizations": {
@@ -3840,6 +3888,30 @@
                             "content": "Odstupanje u vasem ratu mijenja nacin na koji se ovaj historijski zapis cita. Uporedite kanonski dogadjaj s kampanjskim dokazima prije nego sto iz toga izvedete politicki ili vojni zakljucak.\n\nPodaci iz zavrsnog zapisa: {cost_war_crimes_findings_RS} {cost_finding_sources}"
                         }
                     }
+                },
+                {
+                    "id": "a1c_un_hostage_branch_maintain",
+                    "condition": "RESPONSE:un_hostage_crisis_1995:maintain_hostages",
+                    "insert_after_paragraph": 6,
+                    "variant": "divergence",
+                    "content": "In this campaign, the Bosnian Serb leadership recorded a decision to hold the seized UNPROFOR personnel as leverage rather than release them — a divergence from the historical line, in which the hostages taken after the late-May 1995 NATO strikes on Pale were released in stages by mid-June under Belgrade-brokered pressure. Prolonged detention of peacekeepers as human shields is addressed in the ICTY record (Karadžić Trial Judgement, IT-95-5/18-T); this entry records the procedural choice, not its tribunal characterisation.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji rukovodstvo bosanskih Srba zabiljezilo je odluku da zaplijenjeno osoblje UNPROFOR-a zadrzi kao polugu umjesto da ga oslobodi — odstupanje od historijske linije, u kojoj su taoci uzeti nakon NATO udara na Pale krajem maja 1995. oslobodjeni u etapama do sredine juna pod pritiskom posredovanim iz Beograda. Produzeno zadrzavanje mirovnjaka kao zivih stitova obradjeno je u zapisu MKSJ-a (presuda Karadzicu, IT-95-5/18-T); ovaj zapis biljezi proceduralni izbor, a ne njegovu karakterizaciju pred tribunalom."
+                        }
+                    }
+                },
+                {
+                    "id": "a1c_un_hostage_branch_release_gradually",
+                    "condition": "RESPONSE:un_hostage_crisis_1995:release_gradually",
+                    "insert_after_paragraph": 6,
+                    "variant": "note",
+                    "content": "In this campaign, the Bosnian Serb leadership recorded a staged release of the seized UNPROFOR personnel in exchange for guarantees — the historical line, in which the peacekeepers detained after the May 1995 Pale strikes were freed by mid-June under pressure transmitted through Belgrade. The release contained some of the diplomatic damage; it did not undo the precedent of peacekeepers taken as leverage.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji rukovodstvo bosanskih Srba zabiljezilo je postepeno oslobadjanje zaplijenjenog osoblja UNPROFOR-a u zamjenu za garancije — historijsku liniju, u kojoj su mirovnjaci zadrzani nakon udara na Pale u maju 1995. oslobodjeni do sredine juna pod pritiskom prenesenim preko Beograda. Oslobadjanje je ublazilo dio diplomatske stete; nije ponistilo presedan mirovnjaka uzetih kao poluga."
+                        }
+                    }
                 }
             ],
             "localizations": {
@@ -3873,6 +3945,30 @@
                     "localizations": {
                         "bcs": {
                             "content": "Dodatna napomena povezuje ovaj zapis s vidljivim ishodima vase kampanje. Uporedite kanonski dogadjaj s kampanjskim dokazima prije nego sto iz toga izvedete politicki ili vojni zakljucak.\n\nPodaci iz zavrsnog zapisa: {milestone_dayton_accords_summary} {milestone_dayton_accords_delta_weeks}"
+                        }
+                    }
+                },
+                {
+                    "id": "a1c_us_halts_branch_comply",
+                    "condition": "RESPONSE:us_halts_federation_advance_1995:comply",
+                    "insert_after_paragraph": 5,
+                    "variant": "note",
+                    "content": "In this campaign, Sarajevo recorded compliance with the American halt — the historical line, in which the Federation offensive of autumn 1995 was stopped short of Banja Luka under pressure from Richard Holbrooke’s negotiating team, trading further ground for a seat at Dayton. The territorial map carried into the talks was, in the historical record, the map produced by that stop.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Sarajevo je zabiljezilo postupanje po americkom zahtjevu za zaustavljanjem — historijsku liniju, u kojoj je federalna ofanziva u jesen 1995. zaustavljena pred Banjom Lukom pod pritiskom pregovarackog tima Richarda Holbrookea, mijenjajuci dalji teritorij za mjesto u Daytonu. Teritorijalna karta unesena u pregovore bila je, u historijskom zapisu, karta nastala tim zaustavljanjem."
+                        }
+                    }
+                },
+                {
+                    "id": "a1c_us_halts_branch_push_further",
+                    "condition": "RESPONSE:us_halts_federation_advance_1995:push_further",
+                    "insert_after_paragraph": 5,
+                    "variant": "divergence",
+                    "content": "In this campaign, Sarajevo recorded a decision to press the advance rather than halt at Washington’s request — a divergence from the historical record, in which the Federation offensive stopped short of Banja Luka and the parties moved to Dayton on the resulting line. The recorded choice pursues maximum battlefield position at the risk of the American backing that carried the Federation to the table; the territorial line entering any negotiation is correspondingly altered.",
+                    "localizations": {
+                        "bcs": {
+                            "content": "U ovoj kampanji Sarajevo je zabiljezilo odluku da nastavi napredovanje umjesto da se zaustavi na zahtjev Washingtona — odstupanje od historijskog zapisa, u kojem se federalna ofanziva zaustavila pred Banjom Lukom, a strane su presle na Dayton po nastaloj liniji. Zabiljezeni izbor tezi maksimalnoj poziciji na bojistu uz rizik americke podrske koja je Federaciju dovela za sto; teritorijalna linija koja ulazi u bilo kakve pregovore shodno tome je izmijenjena."
                         }
                     }
                 }
