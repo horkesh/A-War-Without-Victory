@@ -16,7 +16,13 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore.js';
 import essayIndex from '../../../../data/scenarios/essays/essay_index.json';
-import { resolveCodexEssay, type EssayEntry } from './codex/codexEssayResolver.js';
+import {
+    resolveCodexEssayIndex,
+    effectiveTier,
+    CodexTier,
+    type EssayEntry,
+    type CodexLockReason,
+} from './codex/codexEssayResolver.js';
 import { t, useLocale } from '../i18n';
 import { Z } from '../../shared/zIndex.js';
 import type { EventDefinition } from '../../../sim/events/event_types.js';
@@ -45,6 +51,62 @@ function formatAvailableCount(count: number): string {
     return count === 1
         ? t('codex.available.one')
         : t('codex.available.many', { count });
+}
+
+/** A1a: tier order for grouping/sorting within a year (FIXED → AHISTORICAL). */
+const TIER_ORDER: readonly CodexTier[] = [
+    CodexTier.FIXED,
+    CodexTier.CONDITIONAL,
+    CodexTier.SHAPEABLE,
+    CodexTier.AHISTORICAL,
+];
+
+/** A1a: localized tier label. */
+function tierLabel(tier: CodexTier): string {
+    switch (tier) {
+        case CodexTier.CONDITIONAL: return t('codex.tier.conditional');
+        case CodexTier.SHAPEABLE: return t('codex.tier.shapeable');
+        case CodexTier.AHISTORICAL: return t('codex.tier.ahistorical');
+        case CodexTier.FIXED:
+        default: return t('codex.tier.fixed');
+    }
+}
+
+/** A1b: soft "unlocks after X" hint for a graph-gated locked essay. Returns
+ *  null for the plain not-yet-experienced case (lockReason kind 'event_fire')
+ *  so the panel only surfaces actual dependency-graph gates. */
+function lockHint(lockReason: CodexLockReason | null): string | null {
+    if (!lockReason) return null;
+    switch (lockReason.kind) {
+        case 'event': return t('codex.unlocksAfterEvent', { event: lockReason.detail ?? '' });
+        case 'essay': return t('codex.unlocksAfterEssay');
+        case 'turn': return t('codex.unlocksAfterTurn', { turn: lockReason.turn ?? 0 });
+        case 'event_fire':
+        default: return null;
+    }
+}
+
+/** A sidebar row: an unlocked essay, or a graph-gated locked essay with a hint. */
+interface CodexRow {
+    essay: EssayEntry;
+    unlocked: boolean;
+    hint: string | null;
+    tier: CodexTier;
+    /** Original essay-index position; stable secondary sort key within a tier. */
+    index: number;
+}
+
+/** Tier badge for the sidebar list. */
+function TierBadge({ tier }: { tier: CodexTier }) {
+    return (
+        <span
+            data-testid="codex-tier-badge"
+            data-tier={tier}
+            className="px-1 py-0.5 text-[7px] font-bold uppercase tracking-[0.1em] rounded bg-neutral-500/15 text-neutral-400"
+        >
+            {tierLabel(tier)}
+        </span>
+    );
 }
 
 interface CodexPanelProps {
@@ -131,6 +193,10 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
     const distanceFromHistory = loadedGameState?.distanceFromHistory ?? null;
 
     const essays = (Array.isArray(essayIndex) ? essayIndex : (essayIndex as { essays: EssayEntry[] }).essays ?? []) as EssayEntry[];
+    // A1a/A1b: index-level resolution. `resolveCodexEssayIndex` runs the
+    // deterministic transitive fixpoint for `requires_essays` and supplies
+    // `currentTurn` for `unlock_turn_min`. Existing event-fire/ghost unlock is
+    // unchanged — tiers + the dependency graph layer on top.
     const resolvedEssays = useMemo(() => {
         const context = {
             firedEventIds,
@@ -139,17 +205,36 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
             historicalComparison: loadedGameState?.historicalComparison,
             costLedger: loadedGameState?.costLedger,
             gameOver: loadedGameState?.gameOver,
+            currentTurn: loadedGameState?.turn,
         };
-        return new Map(essays.map((essay) => [essay.id, resolveCodexEssay(essay, context, locale)]));
-    }, [essays, firedEventIds, locale, loadedGameState?.eventFlags, loadedGameState?.decisionResponses, loadedGameState?.historicalComparison, loadedGameState?.costLedger, loadedGameState?.gameOver]);
+        return resolveCodexEssayIndex(essays, context, locale);
+    }, [essays, firedEventIds, locale, loadedGameState?.eventFlags, loadedGameState?.decisionResponses, loadedGameState?.historicalComparison, loadedGameState?.costLedger, loadedGameState?.gameOver, loadedGameState?.turn]);
 
-    const visibleEssaysByYear = useMemo(() => {
-        const grouped = new Map<number, EssayEntry[]>();
+    // A1a/A1b: per-year rows sorted by tier (FIXED → AHISTORICAL), then by the
+    // essay's original index for stability. Each row carries the unlocked flag
+    // and a soft dependency-graph hint. Unlocked essays always show; locked
+    // essays show ONLY when graph-gated (lockHint non-null) — plain
+    // not-yet-experienced essays stay hidden, preserving prior behavior.
+    const rowsByYear = useMemo(() => {
+        const tierRank = new Map<CodexTier, number>(TIER_ORDER.map((tier, i) => [tier, i]));
+        const grouped = new Map<number, CodexRow[]>();
         for (const year of YEARS) grouped.set(year, []);
-        for (const essay of essays) {
-            if (!resolvedEssays.get(essay.id)?.isUnlocked) continue;
-            const yearGroup = grouped.get(essay.year);
-            if (yearGroup) yearGroup.push(essay);
+        essays.forEach((essay, index) => {
+            const resolved = resolvedEssays.get(essay.id);
+            const unlocked = Boolean(resolved?.isUnlocked);
+            const tier = resolved?.tier ?? effectiveTier(essay);
+            const hint = unlocked ? null : lockHint(resolved?.lockReason ?? null);
+            if (!unlocked && hint === null) return; // hidden (plain not-yet-experienced)
+            grouped.get(essay.year)?.push({ essay, unlocked, hint, tier, index });
+        });
+        for (const year of YEARS) {
+            grouped.get(year)?.sort((a, b) => {
+                const ta = tierRank.get(a.tier) ?? 0;
+                const tb = tierRank.get(b.tier) ?? 0;
+                if (ta !== tb) return ta - tb;
+                if (a.unlocked !== b.unlocked) return a.unlocked ? -1 : 1; // unlocked before locked-hint
+                return a.index - b.index;
+            });
         }
         return grouped;
     }, [essays, resolvedEssays]);
@@ -477,9 +562,10 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                 <div className="flex flex-1 min-h-0">
                     <div className="w-[220px] border-r border-neutral-700/30 overflow-y-auto bg-[#0d0f16]">
                         {YEARS.map((year) => {
-                            const yearEssays = visibleEssaysByYear.get(year) ?? [];
-                            if (yearEssays.length === 0) return null;
+                            const yearRows = rowsByYear.get(year) ?? [];
+                            if (yearRows.length === 0) return null;
                             const isExpanded = expandedYear === year;
+                            const unlockedCount = yearRows.filter((row) => row.unlocked).length;
 
                             return (
                                 <div key={year}>
@@ -492,37 +578,64 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                                             {year}
                                         </span>
                                         <span className="text-[9px] text-neutral-500">
-                                            {yearEssays.length}
+                                            {unlockedCount}
                                         </span>
                                     </button>
-                                    {isExpanded && yearEssays.map((essay) => {
-                                        const ghost = Boolean(resolvedEssays.get(essay.id)?.isGhost);
+                                    {isExpanded && yearRows.map((row, rowIndex) => {
+                                        const { essay } = row;
+                                        const resolved = resolvedEssays.get(essay.id);
+                                        const ghost = Boolean(resolved?.isGhost);
                                         const isSelected = selectedEssayId === essay.id;
+                                        // A1a: tier sub-header when the tier changes from the prior row.
+                                        const showTierHeader = rowIndex === 0 || yearRows[rowIndex - 1].tier !== row.tier;
 
                                         return (
-                                            <button
-                                                key={essay.id}
-                                                type="button"
-                                                onClick={() => setSelectedEssayId(essay.id)}
-                                                data-awwv-codex-state={ghost ? 'ghost' : 'unlocked'}
-                                                className={`w-full text-left px-2.5 py-1.5 border-b border-neutral-800/30 transition-all ${
-                                                    isSelected
-                                                        ? 'bg-amber-400/10 border-l-2 border-l-amber-400'
-                                                        : 'hover:bg-white/3 border-l-2 border-l-transparent'
-                                                }`}
-                                            >
-                                                <div className="flex items-center gap-2 mb-0.5">
-                                                    <CategoryBadge category={resolvedEssays.get(essay.id)?.category ?? essay.category} />
-                                                    {ghost && (
-                                                        <span className="text-[7px] text-amber-500 uppercase tracking-wider">
-                                                            {t('codex.ghost')}
-                                                        </span>
+                                            <div key={essay.id}>
+                                                {showTierHeader && (
+                                                    <div
+                                                        data-testid="codex-tier-header"
+                                                        data-tier={row.tier}
+                                                        className="px-2.5 pt-1.5 pb-0.5 text-[7px] font-bold uppercase tracking-[0.14em] text-neutral-500 bg-[#0b0d13]"
+                                                    >
+                                                        {tierLabel(row.tier)}
+                                                    </div>
+                                                )}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { if (row.unlocked) setSelectedEssayId(essay.id); }}
+                                                    disabled={!row.unlocked}
+                                                    data-awwv-codex-state={row.unlocked ? (ghost ? 'ghost' : 'unlocked') : 'locked-hint'}
+                                                    data-tier={row.tier}
+                                                    className={`w-full text-left px-2.5 py-1.5 border-b border-neutral-800/30 transition-all ${
+                                                        !row.unlocked
+                                                            ? 'opacity-50 cursor-default border-l-2 border-l-transparent'
+                                                            : isSelected
+                                                                ? 'bg-amber-400/10 border-l-2 border-l-amber-400'
+                                                                : 'hover:bg-white/3 border-l-2 border-l-transparent'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-center gap-2 mb-0.5">
+                                                        <CategoryBadge category={resolved?.category ?? essay.category} />
+                                                        <TierBadge tier={row.tier} />
+                                                        {ghost && (
+                                                            <span className="text-[7px] text-amber-500 uppercase tracking-wider">
+                                                                {t('codex.ghost')}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className={`text-[10px] leading-snug ${row.unlocked ? 'text-neutral-200' : 'text-neutral-400'}`}>
+                                                        {row.unlocked ? (resolved?.title ?? essay.title) : essay.title}
+                                                    </div>
+                                                    {!row.unlocked && row.hint && (
+                                                        <div
+                                                            data-testid="codex-unlock-hint"
+                                                            className="text-[8px] text-neutral-500 italic mt-0.5"
+                                                        >
+                                                            {row.hint}
+                                                        </div>
                                                     )}
-                                                </div>
-                                                <div className="text-[10px] leading-snug text-neutral-200">
-                                                    {resolvedEssays.get(essay.id)?.title ?? essay.title}
-                                                </div>
-                                            </button>
+                                                </button>
+                                            </div>
                                         );
                                     })}
                                 </div>
