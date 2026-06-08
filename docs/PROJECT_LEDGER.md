@@ -23,6 +23,24 @@ Values are identical (0.30/0.55, MIA=1−KIA−WIA=0.15 remainder math unchanged
 
 **Verification:** `tsc --noEmit` exit 0; focused combat suites `combat_pipeline`/`attack_resource_aftermath`/`attack_casualty_distribution`/`paramilitary_sweep`/`paramilitary_severity_bands`/`attack_morale_absorption` 114/114 green; 40w `2221700edf20621e` byte-identical to gold baseline.
 
+## [2026-06-08] feat(calibration): western/endgame — Farz anchor + E-A5 launch-halt CAP (PR-3)
+
+**Type:** Calibration anchor extension + Fall-1995 E-A5 engine wiring (owner-approved PR-3, branched off main `726036780` / #304). Touches `triggered_operations.ts`, `sector_offensive.ts`, `events/{event_types,event_vocabulary}.ts`, `state/game_state.ts`, `data/scenarios/events/war_1995.json`. No `Math.random`/`Date.now`; sorted iteration preserved. 188w **+2 OSID** above floor; 40w byte-identical.
+
+**Change (commit 1 — Farz anchor extension):** Operation Farz 95 (RBiH 3rd Corps, Vozuća pocket, trigger t≥160) gains a 4th objective `op:lukavac:brijesnica_donja_2` — the chronic last-failing 188w anchor (Spreča pocket, painted RS@apr1995→RBiH@oct1995, verified). It is directly adjacent to BOTH `op:zavidovici:vozuca_2` and `op:maglaj:gornja_bocinja` (verified via `buildOsidAdjacency`), so it is the natural follow-on once the pocket collapses — no new staging, no extra brigade donation.
+
+**Change (commit 2 — E-A5 launch-halt CAP):** The built-but-unconsumed `isFactionOffensiveOpsSuppressed` reader is now wired into the op-launch gate in `sector_offensive.ts` (at the single planning→execution transition, before `op.phase='execution'`, with `force_launch` bypass + `beginRecovery(op, turn, 'offensive_ops_suppressed', state)`). New event-condition type `faction_area_ratio` (area-weighted share from `turn_summaries[0].territory_snapshot`, registered in `KNOWN_EVENT_CONDITION_TYPES` + `evaluateCondition`). Live event `us_halts_federation_advance_1995` gains a trigger condition (RS area-share ≤ 0.51, the Holbrooke 51:49 halt line) and two `offensive_ops_suppression` effects (RBiH + HRHB, duration 6 turns). New `recovery_reason` member `offensive_ops_suppressed`. It is a CAP that bounds RBiH/HRHB endgame overshoot; flips no currently-RS OSID.
+
+**Behavioral delta:** **188w 634→636/712 (+2)**, hash `2fdbff2fdba1b9c2`→`a-of-record-set-by-orchestrator` (branch run `2fe…`-superseded; the retained two-commit branch measured 636/712), anchors **29/30→30/30** (`op:lukavac:brijesnica_donja_2` now PASS; sacred `op:zvornik:zvornik` still RS PASS), benchmarks 6/6, 0 critical. **Srebrenica still falls (11/13 RS, unchanged base vs branch — E-A5 did NOT suppress the historical enclave fall; §6-safe).** Bisection: Farz alone = +2 (634→636); E-A5 adds **0 OSID change** at 188w (calibration-neutral — its CAP purpose is latent in this run; the historical halt already lands via existing aggression modifiers). 40w stays **`2221700edf20621e`** byte-identical (both fire t≥160 / t182, outside 40w).
+
+**Dropped from this PR:** A third change (enclave-resilience denominator: `1 - resilience/100` → per-enclave `max_resilience`) was implemented, verified to typecheck/test-pass, but **reverted** — it regressed 188w by −20 (636→616) via an unintended political-dimension cascade collapsing the western HVO Mistral-2 arc (Drvar/Glamoč/Grahovo/Kupres/Šipovo) HRHB→RS, and moved the 40w hash. Preserved on branch `pr3-enclave-followup` for a dedicated calibration lane.
+
+**Files:** `src/sim/combat/triggered_operations.ts`, `src/sim/combat/sector_offensive.ts`, `src/sim/events/event_types.ts`, `src/sim/events/event_vocabulary.ts`, `src/state/game_state.ts`, `data/scenarios/events/war_1995.json`, `tests/triggered_operations_late_1995.test.ts`.
+
+**Verification:** `tsc --noEmit -p tsconfig.json` exit 0; focused tests 127/127 (triggered_operations_late_1995, event_loader/conditions/effects/evaluate, sector_offensive launch-gates + core, event_state_shape); 188w 636/712 anchors 30/30 brijesnica+zvornik PASS benchmarks 6/6 Srebrenica falls; 40w `2221700edf20621e`. Orchestrator to review + re-floor CALIBRATION_MASTER (do-not-merge handed off).
+
+---
+
 ## [2026-06-08] fix(ui): persist relieved-commander resentment receipts (#282)
 
 **Type:** Ring-3 UI read-model only, BYTE-IDENTICAL to calibration. No sim/save/scenario/baseline change; pure projection over already-persisted officer + force-launched-op substrate. 40w/52w/188w hashes untouched (read-model is never invoked in headless calibration). Faction-agnostic.
