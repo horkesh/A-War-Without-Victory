@@ -17,6 +17,34 @@ const MIN_IDLE_TURNS_FOR_OVERRIDE = 6;
 const MAX_OVERRIDE_TARGET_OSIDS = 5;
 
 /**
+ * Free War Phase 1b — emergent SIGNAL-RESPONSIVE idle gate (the behavioral payoff
+ * for the A2a signal substrate wired in #330).
+ *
+ * #330 folds the live battlefield signals (territory-trend × supply × campaign-plan-role)
+ * into the EFFECTIVE `p.weight` returned by getCorpsArmyPriorities in emergent mode. Until
+ * now those signals only re-ordered priorities and nudged the probe/full-override thresholds;
+ * the offensive-op-LAUNCH path stayed starved by the flat MIN_IDLE_TURNS_FOR_OVERRIDE wall,
+ * so a corps the battlefield is screaming at could still sit idle for the full 6 turns.
+ *
+ * Phase 1b CONSUMES those signals at the launch gate: when the composed signals have
+ * AMPLIFIED a priority's effective weight to an URGENT level (≥ URGENT_EFFECTIVE_WEIGHT —
+ * comfortably above the 80 full-override threshold, so it only fires when a high-static
+ * objective is ALSO losing ground / plan-primary / well-supplied), army HQ is willing to
+ * force action after fewer idle turns, down to URGENT_MIN_IDLE_TURNS. A corps the live war
+ * marks as a clear, urgent opportunity launches SOONER than one the calendar alone favours.
+ *
+ * EMERGENT-ONLY by construction (gated on state.meta.decision_mode === 'emergent'). In
+ * historical mode `p.weight` is the authored static weight (capped at its 1992-calendar
+ * value, never amplified) AND the relaxation is skipped entirely, so the flat 6-turn wall
+ * stands → byte-identical calibration. Deterministic: reads persisted state + p.weight only;
+ * no RNG, no clock. Bounded: never below URGENT_MIN_IDLE_TURNS, still one override per corps
+ * per turn, still skip-if-active-op — no op-spam.
+ */
+const URGENT_EFFECTIVE_WEIGHT = 120;
+/** Floor on the relaxed idle requirement — urgent never drops below this (anti-spam). */
+const URGENT_MIN_IDLE_TURNS = 3;
+
+/**
  * Generate army HQ overrides for this turn.
  * Examines each corps: if a high-weight priority exists, the corps has no active
  * operation, and it hasn't operated recently, army HQ forces action.
@@ -29,6 +57,10 @@ export function generateArmyHQOverrides(
 ): ArmyHQOverride[] {
     const overrides: ArmyHQOverride[] = [];
     const turn = state.meta.turn;
+    // Phase 1b: the signal-responsive idle relaxation is emergent-only. In historical mode
+    // this stays false, so every corps faces the flat MIN_IDLE_TURNS_FOR_OVERRIDE wall and
+    // the gate is byte-identical to pre-Phase-1b behaviour.
+    const emergent = state.meta.decision_mode === 'emergent';
     const corpsCommand = state.military.corps_command ?? {};
     const formations = state.military.formations;
     const pc = state.political.political_controllers ?? {};
@@ -52,9 +84,17 @@ export function generateArmyHQOverrides(
         for (const p of priorities) {
             if (p.weight < PROBE_WEIGHT_THRESHOLD) continue;
 
-            // Idle check: corps hasn't operated recently
+            // Idle check: corps hasn't operated recently.
+            // Phase 1b: in emergent mode, a priority the live signals have amplified to an
+            // URGENT effective weight (≥ URGENT_EFFECTIVE_WEIGHT) earns a relaxed idle wall
+            // (down to URGENT_MIN_IDLE_TURNS) — HQ acts sooner where the battlefield is loud.
+            // Historical mode (emergent === false) always uses the flat 6-turn wall.
+            const requiredIdle =
+                emergent && p.weight >= URGENT_EFFECTIVE_WEIGHT
+                    ? URGENT_MIN_IDLE_TURNS
+                    : MIN_IDLE_TURNS_FOR_OVERRIDE;
             const lastOpTurn = cc?.last_completed_operation_turn ?? 0;
-            if (turn - lastOpTurn < MIN_IDLE_TURNS_FOR_OVERRIDE) continue;
+            if (turn - lastOpTurn < requiredIdle) continue;
 
             // Build target OSIDs
             const targetOsids: string[] = [];
