@@ -40,6 +40,7 @@ import type { BrigadePosture, FactionId, GameState } from '../../state/game_stat
 import type { DoctrinePhase, StandingOrder, WarTimeline } from '../../state/war_timeline.js';
 import { getActiveBotObjectiveShifts } from '../events/active_modifiers.js';
 import { computeRecentTerritoryChange } from './army_hq_gathering.js';
+import type { FrontPriority } from './army_hq_gathering_types.js';
 import { munFromOsid } from './osid_adjacency.js';
 import {
     RS_EARLY_WAR_END_WEEK,
@@ -615,6 +616,49 @@ const TERRITORY_TREND_MODULATOR = {
     WINDOW: 6,
 } as const;
 
+/**
+ * Free War Phase 1 (A2a) — emergent SUPPLY modulator.
+ *
+ * Consumes the persisted per-OSID supply state (`state.political.last_supply_state_by_osid`,
+ * written each turn from deriveSupplyStateByOsid) scoped to the OSIDs in this priority's
+ * target area. A priority whose own area is supply-strained/critical is DECAYED: you cannot
+ * push an objective you cannot supply. Adequately-supplied / supply-silent areas are neutral.
+ *
+ * Faction-symmetric, emergent-gated, deterministic (persisted state only). Quantized below.
+ */
+const SUPPLY_MODULATOR = {
+    /** Multiplier subtracted per unit of strained-supply fraction in the area. */
+    K_STRAINED: 0.20,
+    /** Multiplier subtracted per unit of critical-supply fraction in the area (heavier). */
+    K_CRITICAL: 0.40,
+    /** Lower clamp — a fully critically-supplied objective decays to 0.70×. */
+    LO: 0.70,
+    /** Upper clamp — supply never BOOSTS a priority above 1.00× (it only constrains). */
+    HI: 1.0,
+} as const;
+
+/**
+ * Free War Phase 1 (A2a) — emergent CAMPAIGN-PLAN modulator (closes ARMY-GAP-1 at the
+ * priority-weight layer).
+ *
+ * The Army HQ gathering's `CampaignPlan.front_priorities[].role` is derived from the LIVE
+ * battlefield (opportunity score over `recent_territory_change`, strength, threat,
+ * exhaustion) rather than the 1992 calendar. Here we feed that role back into the live
+ * per-priority weight: a corps the plan marks `primary` BOOSTS its army priorities; a corps
+ * marked `economy`/`contain` (hold-only / no fresh offensive) DECAYS them. `secondary` is
+ * mildly boosted; absent/expired plan or corps not in plan → neutral (1.0).
+ *
+ * This is the same plan that briefing.collectCampaignIntent already consumes for the corps
+ * commander's role — wiring it here makes the army-level priority ordering AGREE with the
+ * plan instead of ignoring it. Emergent-gated, faction-symmetric, deterministic.
+ */
+const CAMPAIGN_PLAN_MODULATOR: Record<FrontPriority['role'], number> = {
+    primary: 1.25,
+    secondary: 1.1,
+    economy: 0.85,
+    contain: 0.8,
+} as const;
+
 /** Deterministic 2-decimal quantizer. Keeps near-ties from flipping the argmax. */
 function round2(x: number): number {
     return Math.round(x * 100) / 100;
@@ -678,14 +722,100 @@ function priorityTrendMultiplier(
 }
 
 /**
+ * Emergent SUPPLY multiplier for one priority's target area (A2a — consumes
+ * `state.political.last_supply_state_by_osid`).
+ *
+ * Scans the persisted per-OSID supply state for the OSIDs in this priority's target area
+ * (explicit target_osids + any OSID whose municipality is in target_municipalities). The
+ * fraction of the area's supply-rated OSIDs that are `strained` / `critical` DECAYS the
+ * priority weight — an objective whose own ground cannot be kept supplied is a worse bet.
+ * Areas with no supply rating (no OSID matched) → neutral 1.0 (byte-stable for empty areas).
+ *
+ * Quantized to 2 decimals. Deterministic: persisted state only.
+ */
+function prioritySupplyMultiplier(
+    state: GameState,
+    priority: ArmyOperationPriority,
+): number {
+    const supplyByOsid = state.political?.last_supply_state_by_osid;
+    if (!supplyByOsid) return 1.0;
+    const muns = new Set(priority.target_municipalities ?? []);
+    const osids = new Set(priority.target_osids ?? []);
+    if (muns.size === 0 && osids.size === 0) return 1.0;
+
+    let rated = 0;
+    let strained = 0;
+    let critical = 0;
+    // Sorted iteration for determinism (Object.keys order is insertion order in V8 but we
+    // only accumulate counts — order does not affect the sum; sort kept for strict hygiene).
+    for (const osid of Object.keys(supplyByOsid).sort()) {
+        const inArea =
+            osids.has(osid) ||
+            muns.has(munFromOsid(osid) ?? '');
+        if (!inArea) continue;
+        const level = supplyByOsid[osid];
+        if (level === 'strained') { rated++; strained++; }
+        else if (level === 'critical') { rated++; critical++; }
+        else if (level === 'adequate') { rated++; }
+    }
+    if (rated === 0) return 1.0;
+
+    const strainedFrac = strained / rated;
+    const criticalFrac = critical / rated;
+    const raw = 1
+        - SUPPLY_MODULATOR.K_STRAINED * strainedFrac
+        - SUPPLY_MODULATOR.K_CRITICAL * criticalFrac;
+    return round2(clamp(raw, SUPPLY_MODULATOR.LO, SUPPLY_MODULATOR.HI));
+}
+
+/**
+ * Emergent CAMPAIGN-PLAN multiplier for one priority's corps (A2a — closes ARMY-GAP-1 at
+ * the priority-weight layer). Reads the persisted `state.military.campaign_plans[faction]`
+ * front-priority role for this priority's corps and maps it through CAMPAIGN_PLAN_MODULATOR.
+ * No plan, expired plan, or corps absent from the plan → neutral 1.0.
+ * Deterministic: persisted state only.
+ */
+function priorityCampaignPlanMultiplier(
+    state: GameState,
+    faction: FactionId,
+    priority: ArmyOperationPriority,
+): number {
+    const plan = state.military?.campaign_plans?.[faction];
+    if (!plan) return 1.0;
+    const turn = state.meta?.turn ?? 0;
+    if (plan.valid_until_turn < turn) return 1.0;
+    const fp = plan.front_priorities.find(p => p.corps_id === priority.corps_id);
+    if (!fp) return 1.0;
+    return CAMPAIGN_PLAN_MODULATOR[fp.role] ?? 1.0;
+}
+
+/**
+ * Composed emergent multiplier (A2a): territory-trend × supply × campaign-plan-role, each
+ * quantized then the product quantized again. Bounded by the per-term clamps; the existing
+ * NAME tie-break in getCorpsArmyPriorities still guards FP near-ties. Historical/unset mode
+ * never reaches here (the caller gates on decision_mode === 'emergent').
+ */
+function priorityEmergentMultiplier(
+    state: GameState,
+    faction: FactionId,
+    priority: ArmyOperationPriority,
+): number {
+    const trend = priorityTrendMultiplier(state, faction, priority);
+    const supply = prioritySupplyMultiplier(state, priority);
+    const plan = priorityCampaignPlanMultiplier(state, faction, priority);
+    return round2(trend * supply * plan);
+}
+
+/**
  * Get active army-level priorities for a corps at a given turn.
  * Returns priorities sorted by weight descending (highest first).
  * Deterministic: weight sort, then name sort for tie-break.
  *
  * `state` is OPTIONAL. Without it (or in historical/unset mode) the result is the
  * static-weight ordering — byte-identical to the original. Only when
- * `state.meta.decision_mode === 'emergent'` is the per-area territory-trend modulator
- * applied, so the argmax responds to the battlefield instead of the 1992 calendar.
+ * `state.meta.decision_mode === 'emergent'` are the live-signal modulators applied
+ * (A2a: territory-trend × supply × campaign-plan-role), so the argmax responds to the
+ * battlefield instead of the 1992 calendar.
  */
 export function getCorpsArmyPriorities(
     faction: FactionId,
@@ -704,12 +834,13 @@ export function getCorpsArmyPriorities(
         });
     }
 
-    // Emergent mode: scale each static weight by the deterministic per-area
-    // territory-trend modulator, then sort by the quantized effective weight with the
-    // existing NAME tie-break. A losing area can out-rank a quiet higher-static objective.
+    // Emergent mode: scale each static weight by the deterministic composed live-signal
+    // modulator (territory-trend × supply × campaign-plan-role), then sort by the quantized
+    // effective weight with the existing NAME tie-break. A losing/under-supplied/plan-primary
+    // area can out-rank a quiet higher-static objective.
     const scored = active.map(p => ({
         p,
-        eff: round2(p.weight * priorityTrendMultiplier(state, faction, p)),
+        eff: round2(p.weight * priorityEmergentMultiplier(state, faction, p)),
     }));
     // Codex P2 (#93): return priorities carrying the EFFECTIVE weight, not just the
     // sort order — downstream consumers read `p.weight` directly (generateArmyHQOverrides'
