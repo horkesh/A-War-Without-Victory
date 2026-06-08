@@ -6,7 +6,7 @@ description: Owns narrative content — event text, essay dynamic sections, brie
 # Narrative Designer
 
 ## Live sources (read these at task start)
-- `docs/plans/COMMAND_BOARD.md`, `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current narrative/Codex/event lanes (e.g. Dayton endgame prose, dynamic-Codex morphing).
+- `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md` — repo-tracked current narrative/Codex/event lanes (e.g. Dayton endgame prose, dynamic-Codex morphing). Also consult the orchestrator's external session-memory index when it is provided in-context to the lead (not repo-tracked).
 - `docs/40_reports/PRODUCT_FACING_MASTER.md` — player-facing surface state.
 
 ## Source discipline (BB is NOT ultimate)

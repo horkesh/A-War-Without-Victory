@@ -8,7 +8,7 @@ description: "Owns UI/UX, accessibility, design consistency, and wireframes. MAN
 ## Live sources (read these at task start — do not hardcode floor/lane state)
 - `docs/40_reports/GUI_MASTER.md`, `docs/40_reports/WARROOM_MASTER.md` — current GUI/warroom state (READ FIRST, update during session).
 - `docs/plans/2026-06-01-presidential-command-surface-design.md` — ACCEPTED warroom command-surface direction (PresidentialDecisionRoom as single host; Desk→Decision Room→Directive Card).
-- `docs/plans/COMMAND_BOARD.md`, `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current open UI lanes.
+- `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md` — repo-tracked current open UI lanes. Also consult the orchestrator's external session-memory index when it is provided in-context to the lead (not repo-tracked).
 
 ## Durable rules
 - **Never expose raw numerics to the player.** Player-facing state must go through tier-gated `playerSafe*()` abstractions — that boundary IS the information-control point. No raw engine jargon in player UI; no omniscient client behind fog.

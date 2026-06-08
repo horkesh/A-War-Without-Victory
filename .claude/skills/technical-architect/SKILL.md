@@ -9,7 +9,7 @@ description: Owns architecture, entrypoints, ADR, CODE_CANON, and REPO_MAP. Use 
 - `docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md` — house execution standard (read-first contract, ownership rule, merge standard).
 - `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md` — current open/shipped/gated lanes.
 - `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor.
-- `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current-state index (ADRs, in-flight bands).
+- Current-state index (ADRs, in-flight bands) lives in the repo-tracked docs above (`MASTER_ROADMAP.md` / `COMMAND_BOARD.md` lanes + `CALIBRATION_MASTER.md` floor). Also consult the orchestrator's external session-memory index when it is provided in-context to the lead (not repo-tracked).
 
 ## Durable rules
 - **Determinism is sacred** for sim code: no `Math.random()`, no `Date.now()`, no timestamps; sorted iteration via `strictCompare`.

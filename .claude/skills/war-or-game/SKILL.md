@@ -8,7 +8,7 @@ description: Realism auditor. Investigates sim outputs, AARs, battle logs, and c
 ## Live sources (read these at task start — do not hardcode floor/lane state)
 - `docs/40_reports/REAL_WAR_MASTER.md` — your master realism doc (READ first, WRITE findings).
 - `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor (count/hash/anchors). Never quote a floor from memory.
-- `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current-floor line + in-flight lanes.
+- Current-floor line is in `CALIBRATION_MASTER.md` (above) and in-flight lanes in `docs/plans/COMMAND_BOARD.md` / `docs/plans/MASTER_ROADMAP.md` (repo-tracked). Also consult the orchestrator's external session-memory index when it is provided in-context to the lead (not repo-tracked).
 
 ## Posture
 - **CALIBRATION-LAST:** the current 188w floor is a **regression GUARD**, not a target — flag realism breaks, but don't push anyone to chase match-%.

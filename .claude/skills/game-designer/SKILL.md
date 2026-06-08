@@ -8,7 +8,7 @@ description: Ensures design intent, mechanic consistency with Game Bible and Rul
 ## Live sources (read these at task start — do not hardcode their contents)
 - `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md` — current open/shipped/gated lanes (single source of truth for "what's left").
 - `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor (count/hash/anchors).
-- `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current-floor line + design-direction index.
+- Current-floor line lives in `CALIBRATION_MASTER.md` and the design-direction index in `COMMAND_BOARD.md` / `MASTER_ROADMAP.md` (all repo-tracked, above). Also consult the orchestrator's external session-memory index when it is provided in-context to the lead (not repo-tracked).
 - `docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md` — house execution standard.
 
 ## Strategy posture (CALIBRATION-LAST)

@@ -8,7 +8,7 @@ description: Creates historical BiH war scenario starting points, runs and tests
 ## Live sources (read these at task start — do not hardcode floor/lane state)
 - `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor (count/hash/anchors). Never quote a floor from memory.
 - `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md` — current open/shipped/gated calibration lanes.
-- `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current-floor line + in-flight lanes.
+- Current-floor line is in `CALIBRATION_MASTER.md` and in-flight lanes in `COMMAND_BOARD.md` / `MASTER_ROADMAP.md` (all repo-tracked, above). Also consult the orchestrator's external session-memory index when it is provided in-context to the lead (not repo-tracked).
 
 ## Calibration posture (CALIBRATION-LAST + one-change-per-run)
 - The current 188w floor is a **regression GUARD**, not a target to push higher. The floor protects the soul-systems being built in parallel; do not chase match-%.

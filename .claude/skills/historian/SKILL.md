@@ -7,7 +7,7 @@ description: Use when discussing historical events, BiH war scenarios, citation-
 
 ## Live sources (read these at task start — do not hardcode their contents)
 - `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor (count/hash/anchors). Never quote a floor from memory.
-- `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current-floor line + research-source hierarchy + in-flight lanes.
+- Current-floor line is in `CALIBRATION_MASTER.md` (above) and in-flight lanes in `COMMAND_BOARD.md` / `MASTER_ROADMAP.md` (below); the research-source hierarchy is in the "Source discipline" section of this skill. Also consult the orchestrator's external session-memory index when it is provided in-context to the lead (not repo-tracked).
 - `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md` — what is open / shipped / gated.
 - `docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md` — house execution standard.
 
