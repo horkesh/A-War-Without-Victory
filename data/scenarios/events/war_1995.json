@@ -548,7 +548,7 @@
   {
     "id": "un_safe_area_enforcement_1995",
     "title": "The Safe Areas Cannot Be Held",
-    "narrative": "The United Nations safe areas declared for Srebrenica, Sarajevo, Tuzla, Zepa, Gorazde, and Bihac rested on a mandate UNPROFOR was never resourced to enforce. With Srebrenica and Zepa overrun in July 1995, the safe-area regime is recorded as having failed. The UN Secretary-General's 1999 report on the fall of Srebrenica documents the institutional failure of the international protection guarantee.",
+    "narrative": "The United Nations safe areas declared for Srebrenica, Sarajevo, Tuzla, Zepa, Gorazde, and Bihac rested on a mandate UNPROFOR was never resourced to enforce. With Srebrenica overrun in July 1995 and the eastern enclaves no longer defensible, the safe-area regime is recorded as having failed. The UN Secretary-General's 1999 report on the fall of Srebrenica documents the institutional failure of the international protection guarantee.",
     "source_note": "This row is an informational timeline record of an institutional failure. UN Security Council Resolutions 819 (16 April 1993) and 824 (6 May 1993), the UN Secretary-General's Srebrenica report (A/54/549, 15 November 1999), and ICTY siege case law ground the row's provenance and institutional context. This Ring-3 sensitive-history row is canon-gated: its safe-area-collapse framing, which is adjacent to the genocide and forced-displacement record, must not be re-authored as a player choice or a prevent-the-fall mechanic. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "diplomatic",
     "family": "un_safe_area_enforcement",
@@ -569,7 +569,7 @@
     "once": true,
     "effect": {
       "kind": "narrative",
-      "text": "The UN safe-area regime is recorded as having failed. The 1999 UN Secretary-General report (A/54/549) documents the institutional failure of the safe-area guarantee after the fall of Srebrenica and Zepa."
+      "text": "The UN safe-area regime is recorded as having failed. The 1999 UN Secretary-General report (A/54/549) documents the institutional failure of the safe-area guarantee after the fall of Srebrenica."
     }
   },
   {
