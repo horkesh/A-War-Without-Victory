@@ -161,23 +161,13 @@ const VRS_HELD_TARGETS_FOR_WEAKNESS: readonly string[] = [
     'op:kljuc:kljuc_2',
 ];
 
-/** Live corridor anchors that make the Sanski Most / Kljuc interior axis
- *  reachable. In n1605 these are all enemy-held, so the interior axis has no
- *  front-edge approach and should not be bundled into the initial Sana offer. */
-const SANA_FOLLOW_ON_APPROACH_OSIDS: readonly string[] = [
-    'op:bosanska_krupa:jasenica_2',
-    'op:bosanski_petrovac:vrtoce',
-    'op:bosanski_petrovac:dobro_selo_2',
-];
-
-const SANA_FOLLOW_ON_TARGETS: readonly string[] = [
-    'op:sanski_most:lusci_palanka_2',
-    'op:sanski_most:sanski_most_2',
-    'op:kljuc:kljuc_2',
-];
-
-// ─── Axis definitions. Initial Sana owns the reachable breakthrough axes;
-//     the interior Sanski/Kljuc axis is authored as a live-corridor follow-on.
+// ─── Axis definitions. Initial Sana owns all reachable breakthrough axes,
+//     including the interior Sanski Most + Ključ liberation as its third axis
+//     (staged at the Krupa-axis tail jasenica_2, front-edge-gated until the
+//     Krupa axis captures it). The redundant `sana_95_follow_on` duplicate of
+//     this axis was retired 2026-06-08 (#284, owner-approved): it was a latent
+//     corridor-gated copy that never surfaced once the third axis folded the
+//     interior into the initial op.
 const SANA_AXES: readonly OpportunityAxisDef[] = [
     {
         axis_id: 'sana_krupa',
@@ -248,55 +238,6 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
     },
 ];
 
-const SANA_FOLLOW_ON_AXES: readonly OpportunityAxisDef[] = [
-    {
-        axis_id: 'sana_sanski_most_kljuc',
-        name: 'Sanski Most + Ključ Liberation',
-        corps: PRIMARY_CORPS,
-        // 2026-06-07 (Sana follow-on concentration): the interior Sanski Most +
-        // Ključ liberation is the BULK of the historical Una-Sana drive (BB1
-        // pp.417, 419-420: "rapid Petrovac/Ključ/Krupa gains, Sanski Most /
-        // Prijedor reserve fight" — the 5th Corps committed its operational
-        // groups en masse, Sanski Most fell 10 Oct 1995). The prior 4-brigade
-        // roster materially under-committed against 13 deep objectives: at 188w
-        // the follow-on spawns turn 182 (corridor-gated by the initial breakout)
-        // and reaches execution ~turn 185, leaving only ~3 turns before the
-        // war-end horizon. Worse, 503rd + 510th were also rostered on the INITIAL
-        // Sana axes and stayed locked there in recovery phase, so the follow-on
-        // executed with ~2 live brigades and captured only 1 of 13 OSIDs
-        // (run apr1992_definitive_188w__3a26ccdf831ca525). The remaining 12
-        // Sanski Most/Ključ OSIDs are RBiH in the oct1995 reference — a genuine
-        // historical under-capture, NOT an over-reach.
-        //
-        // Fix = concentrate the historically-attested force on this one
-        // under-launching axis. The five added brigades (501st/502nd/504th/505th/
-        // 511th) are the SAME 5th Corps line brigades that captured the initial
-        // Krupa + Bihać-Petrovac axes; by the time the follow-on launches they
-        // sit idle at op:bosanski_petrovac:* / op:bosanska_krupa:* OSIDs directly
-        // on the Sanski/Ključ approach corridor (verified t188 positions). They
-        // are NOT double-booked here (the initial Sana axes are complete by
-        // launch), so all twelve concentrate. This is the historical mass, not
-        // force inflation: each fights at real strength through the existing
-        // launch-feasibility + combat pipeline. No global threshold touched; the
-        // EXISTING VICTORY_THRESHOLD_COSTLY gate is unchanged — concentration is
-        // exactly the missing element per audit 20260523_SANA_95_COMBAT_BALANCE.md
-        // ("ARBiH needs 3+ brigades concentrated on one OSID").
-        brigades: [
-            'arbih_501st_slavna_mountain' as FormationId,
-            'arbih_502nd_vitezka_mountain' as FormationId,
-            'arbih_503rd_slavna_mountain' as FormationId,
-            'arbih_504th_cazin_light' as FormationId,
-            'arbih_505th_vitezka_mountain' as FormationId,
-            'arbih_506th_mountain' as FormationId,
-            'arbih_510th_bosnian_liberation' as FormationId,
-            'arbih_511th_slavna_mountain' as FormationId,
-            'arbih_517th_light' as FormationId,
-        ],
-        objectives: SANSKI_KLJUC_OBJECTIVES,
-        staging_osid: STAGING_JASENICA,
-    },
-];
-
 // ─── Predicates (read live state only) ──────────────────────────────────────
 
 /** date_window: late summer / autumn 1995. Wide enough that delay is meaningful. */
@@ -325,18 +266,6 @@ const stagingAccessSana: AxisPredicate = (state) => {
         }
     }
     return { green: true, reason: 'Bihać pocket staging anchors held by 5th Corps' };
-};
-
-const stagingAccessSanaFollowOn: AxisPredicate = (state, turn, def) => {
-    const pocket = stagingAccessSana(state, turn, def);
-    if (!pocket.green) return pocket;
-    for (const osid of SANA_FOLLOW_ON_APPROACH_OSIDS) {
-        const ctrl = getPoliticalControllerOSID(state, osid, undefined);
-        if (ctrl === 'RBiH') {
-            return { green: true, reason: 'western breakthrough has opened an approach corridor' };
-        }
-    }
-    return { green: false, reason: 'Sanski/Kljuc interior axis has no live approach corridor' };
 };
 
 /** corps_readiness: 5th Corps operation_readiness clears the soft floor. */
@@ -386,26 +315,6 @@ const enemyWeaknessSana: AxisPredicate = (state, turn) => {
         green: true,
         reason: 'enemy western posture stretched — exploitation targets still in enemy hands',
     };
-};
-
-const enemyWeaknessSanaFollowOn: AxisPredicate = (state, turn) => {
-    for (const osid of SANA_FOLLOW_ON_TARGETS) {
-        const ctrl = getPoliticalControllerOSID(state, osid, undefined);
-        if (ctrl === 'RS') {
-            const trajectory = evaluateDefenderTrajectoryWeakness(state, {
-                defenderCorpsId: VRS_KRAJINA_DEFENDER_CORPS,
-                defenderFaction: 'RS',
-                currentTurn: turn,
-                weaknessFloor: SANA_DEFENDER_WEAKNESS_FLOOR,
-                label: 'VRS Krajina',
-            });
-            if (trajectory.available) {
-                return { green: trajectory.green, reason: trajectory.reason };
-            }
-            return { green: true, reason: 'interior liberation targets remain in enemy hands' };
-        }
-    }
-    return { green: false, reason: 'no Sanski/Kljuc follow-on targets remain in enemy hands' };
 };
 
 /** logistics: optional. 5th Corps faction supply pressure not in the bottom band. */
@@ -476,50 +385,14 @@ export const SANA_95_OPPORTUNITY: OperationOpportunityDef = {
     staff_recommendation: 'approve',
 };
 
-export const SANA_95_FOLLOW_ON_OPPORTUNITY: OperationOpportunityDef = {
-    opportunity_id: 'sana_95_follow_on',
-    name: 'Operation Sana Follow-On',
-    tier: 'T1',
-    faction: 'RBiH',
-    primary_corps: PRIMARY_CORPS,
-    family: 'fifth_corps',
-    axes: SANA_FOLLOW_ON_AXES,
-    staging_osid: STAGING_JASENICA,
-    planning_duration: 3,
-    min_attack_outcome: 'repulsed',
-    citations: [
-        'BB1 pp.417, 419-420 - Sana 95 follow-on toward Sanski Most and Kljuc',
-        'docs/40_reports/implemented/20260501_LATE_WAR_OPERATION_COMBAT_DELIVERY_MEGA_LANE.md - n1605 axis C no-contact-path evidence',
-        'docs/plans/late-war-5th-corps-opportunities-design.md §4.7 (Sana 95)',
-    ],
-    historical_exit_class: 'partial_success',
-    prerequisites: {
-        date_window: 'required',
-        political_authorization: 'n_a',
-        corps_readiness: 'required',
-        logistics: 'optional',
-        staging_access: 'required',
-        weather_season: 'n_a',
-        commander_confidence: 'optional',
-        enemy_weakness: 'required',
-        alliance_context: 'required',
-        force_quality: 'n_a',
-        min_optional_axes: 1,
-    },
-    evaluators: {
-        date_window: dateWindowSana,
-        political_authorization: alwaysGreen,
-        corps_readiness: corpsReadinessSana,
-        logistics: logisticsSana,
-        staging_access: stagingAccessSanaFollowOn,
-        weather_season: alwaysGreen,
-        commander_confidence: commanderConfidenceSana,
-        enemy_weakness: enemyWeaknessSanaFollowOn,
-        alliance_context: allianceContextSana,
-        force_quality: alwaysGreen,
-    },
-    staff_recommendation: 'approve',
-};
+// NOTE (#284, 2026-06-08, owner-approved): the redundant
+// `SANA_95_FOLLOW_ON_OPPORTUNITY` was retired here. It was a latent
+// corridor-gated duplicate of the interior Sanski Most + Ključ axis that
+// `sana_95` now carries as its third axis (`sana_sanski_most_kljuc`, staged at
+// jasenica_2). Proven territory-flat at 188w: OSID 634/712 unchanged,
+// control_delta byte-identical; the only behavioral delta was ~5 casualties on
+// VRS rs_17th_klju before its turn-186 destruction (plus the hash-of-record).
+// 40w stays byte-identical (`2221700edf20621e`).
 
 // ═════════════════════════════════════════════════════════════════════════════
 // Operation Tigar-Sloboda 94 — LANE C Phase 2.
@@ -1747,7 +1620,6 @@ export const GRMEC_94_OPPORTUNITY: OperationOpportunityDef = {
  *  (LANE C Phase 5) are live. */
 export const FIFTH_CORPS_OPPORTUNITIES: readonly OperationOpportunityDef[] = [
     SANA_95_OPPORTUNITY,
-    SANA_95_FOLLOW_ON_OPPORTUNITY,
     TIGAR_SLOBODA_94_OPPORTUNITY,
     APWB_PRESSURE_94_OPPORTUNITY,
     UNA_94_OPPORTUNITY,

@@ -19755,3 +19755,17 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Files:** `src/ui/map/data/presidentialDecisionRoom.ts`, `src/ui/map/components/army_hq/DirectiveCard.tsx`, `src/ui/map/desktop/useIPC.ts`, `tests/ui/directive_card_stop_op_action.test.ts` (+4 routing/stakes/retry cases), `tests/ui/presidential_decision_room_request_force.test.ts`, `tests/ui/presidential_decision_room.test.ts` (payload-shape assertions).
 
 **Verification:** focused UI vitest 66/66 green; `tsc --noEmit` exit 0; `desktop:map:build` exit 0.
+
+---
+
+## [2026-06-08] Retire redundant `SANA_95_FOLLOW_ON_OPPORTUNITY` + re-floor 188w (#284)
+
+**Type:** Ops-catalog cleanup / calibration re-floor (owner-approved). Touches `src/sim/combat/operation_opportunity_catalog_5th_corps.ts` + its catalog test + CALIBRATION_MASTER. No `Math.random`/`Date.now`. TERRITORY-FLAT at 188w.
+
+**Change:** Removed the standalone `SANA_95_FOLLOW_ON_OPPORTUNITY` opportunity (Codex #284) — a latent corridor-gated duplicate of the Sanski Most + Ključ interior that the live `sana_95` op already carries as its third axis (`sana_sanski_most_kljuc`, staged at `jasenica_2`, front-edge-gated until the Krupa axis captures it). Once that third axis folded the interior into the initial op (2026-06-07 lever-(b) fix), the follow-on never surfaced. Deleted symbols (all exclusively the follow-on's): the `SANA_95_FOLLOW_ON_OPPORTUNITY` def + its `FIFTH_CORPS_OPPORTUNITIES` registry entry, `SANA_FOLLOW_ON_AXES`, `SANA_FOLLOW_ON_APPROACH_OSIDS`, `SANA_FOLLOW_ON_TARGETS`, and predicates `stagingAccessSanaFollowOn` / `enemyWeaknessSanaFollowOn`. KEPT (shared with `sana_95`): `STAGING_JASENICA`, `SANSKI_KLJUC_OBJECTIVES`, `SANA_DEFENDER_WEAKNESS_FLOOR`, `evaluateDefenderTrajectoryWeakness` (grep-verified still referenced by the live op).
+
+**Behavioral delta:** TERRITORY-FLAT. 188w OSID **634/712 unchanged**, `control_delta.json` byte-identical, anchors **29/30** (only `op:lukavac:brijesnica_donja_2` failing), benchmarks 6/6, 0 critical. The sole state delta is ~5 casualties on VRS `rs_17th_klju` before its turn-186 destruction, which moves the hash-of-record `b3b18e2154824cfb` → **`2fdbff2fdba1b9c2`**. 40w stays **`2221700edf20621e`** (byte-identical — the op fires t≥175, outside 40w). CI baselines ("all scenarios match") unchanged (40w/52w/4w goldens never reach the firing window).
+
+**Tests:** `tests/operation_opportunities_catalog.test.ts` — dropped the `SANA_95_FOLLOW_ON_OPPORTUNITY` import; flipped the catalog-identity existence assertion to absent (#284 note); replaced the axis-shape backstop assertions with a catalog-absence check; replaced the "follow-on surfaces with live corridor" test with one asserting the retired follow-on never surfaces (even with the approach corridor controlled).
+
+**Verification:** `node tsc.js --noEmit` exit 0; catalog suite 44/44 green; 188w hash `2fdbff2fdba1b9c2` / 634/712 / anchors 29/30 / benchmarks 6/6 / 0 critical (run `apr1992_definitive_188w__acb538b04d79af3c__w188_n0`); 40w `2221700edf20621e`; `test:baselines` "all scenarios match". Doc-of-record re-floored in `docs/40_reports/CALIBRATION_MASTER.md` (prior `b3b18e2154824cfb` floor kept as superseded lineage).

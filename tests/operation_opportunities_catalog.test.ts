@@ -47,7 +47,6 @@ import {
     FIFTH_CORPS_OPPORTUNITIES,
     GRMEC_94_OPPORTUNITY,
     PAUK_94_95_OPPORTUNITY,
-    SANA_95_FOLLOW_ON_OPPORTUNITY,
     SANA_95_OPPORTUNITY,
     TIGAR_SLOBODA_94_OPPORTUNITY,
     UNA_94_OPPORTUNITY,
@@ -967,13 +966,16 @@ describe('entry-specific: pauk_94_95 post-Oluja predicate hedge', () => {
 describe('entry-specific: sana_95 family', () => {
     const entry = ENTRIES.find(e => e.opportunity_id === 'sana_95')!;
 
-    it('catalog identity: exactly one Sana entry; follow-on exposed separately; staging + citations + historical_exit_class bound', () => {
+    it('catalog identity: exactly one Sana entry; retired follow-on absent (#284); staging + citations + historical_exit_class bound', () => {
         const sanaEntries = OPERATION_OPPORTUNITY_CATALOG.filter(
             d => d.opportunity_id === 'sana_95');
         expect(sanaEntries).toHaveLength(1);
         expect(sanaEntries[0]).toBe(SANA_95_OPPORTUNITY);
-        expect(FIFTH_CORPS_OPPORTUNITIES.some(d => d.opportunity_id === 'sana_95_follow_on')).toBe(true);
-        expect(SANA_95_FOLLOW_ON_OPPORTUNITY.family).toBe('fifth_corps');
+        // #284 (2026-06-08, owner-approved): the redundant `sana_95_follow_on`
+        // duplicate of the interior Sanski Most + Ključ axis was retired. It must
+        // no longer exist in either catalog surface.
+        expect(FIFTH_CORPS_OPPORTUNITIES.some(d => d.opportunity_id === 'sana_95_follow_on')).toBe(false);
+        expect(OPERATION_OPPORTUNITY_CATALOG.some(d => d.opportunity_id === 'sana_95_follow_on')).toBe(false);
         expect(SANA_95_OPPORTUNITY.faction).toBe('RBiH');
         expect(SANA_95_OPPORTUNITY.primary_corps).toBe('arbih_5th_corps');
         expect(SANA_95_OPPORTUNITY.staging_osid).toBe('op:bihac:bihac_2');
@@ -1047,18 +1049,14 @@ describe('entry-specific: sana_95 family', () => {
         ]);
         expect(skParent.objectives).toHaveLength(13);
         expect(skParent.staging_osid).toBe('op:bosanska_krupa:jasenica_2');
-        // Follow-on entry is retained as a backstop owner of the same interior
-        // (its corridor gate still surfaces it if the third axis stalls); shape
-        // unchanged: 9-brigade roster, 13 objectives, jasenica_2 staging.
-        expect(SANA_95_FOLLOW_ON_OPPORTUNITY.opportunity_id).toBe('sana_95_follow_on');
-        expect(SANA_95_FOLLOW_ON_OPPORTUNITY.staging_osid).toBe('op:bosanska_krupa:jasenica_2');
-        const sk = SANA_95_FOLLOW_ON_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_sanski_most_kljuc')!;
-        expect(sk.brigades).toHaveLength(9);
-        expect(sk.objectives).toHaveLength(13);
+        // #284 (2026-06-08): the standalone `sana_95_follow_on` backstop was
+        // retired — the third axis above is now the sole owner of the interior.
+        // The retired duplicate must be absent from the catalog.
+        expect(FIFTH_CORPS_OPPORTUNITIES.some(d => d.opportunity_id === 'sana_95_follow_on')).toBe(false);
     });
 
-    it('follow-on surfaces only with live approach corridor; parent expires past autumn window; follow-on does NOT leak on happy-path main run', () => {
-        // Happy-path main run — parent surfaces, follow-on does NOT.
+    it('retired follow-on (#284) NEVER surfaces — not on the happy path, not even with a live approach corridor; parent expires past autumn window', () => {
+        // Happy-path main run — parent surfaces, retired follow-on does NOT.
         const state = buildState({ entry, turn: 180, operationStormTriggered: true });
         runOpportunityEvaluationStep(state, 180);
         expect((state.military.operation_opportunities ?? [])
@@ -1070,25 +1068,16 @@ describe('entry-specific: sana_95 family', () => {
         const after = state.military.operation_opportunities!
             .find(p => p.opportunity_id === 'sana_95')!;
         expect(after.status).toBe('expired');
-        // Follow-on requires the approach corridor.
-        const stateNoApproach = buildState({
-            entry, turn: 180, operationStormTriggered: true,
-            followOnApproachControlled: false,
-        });
-        runOpportunityEvaluationStep(stateNoApproach, 180);
-        expect((stateNoApproach.military.operation_opportunities ?? [])
-            .find(p => p.opportunity_id === 'sana_95_follow_on')).toBeUndefined();
-        // Approach controlled → follow-on surfaces.
+        // #284: even with the approach corridor controlled (the condition that
+        // formerly surfaced the standalone follow-on), the retired duplicate must
+        // never surface — it no longer exists in the catalog.
         const stateApproach = buildState({
             entry, turn: 180, operationStormTriggered: true,
             followOnApproachControlled: true,
         });
         runOpportunityEvaluationStep(stateApproach, 180);
-        const followOn = (stateApproach.military.operation_opportunities ?? [])
-            .find(p => p.opportunity_id === 'sana_95_follow_on');
-        expect(followOn).toBeDefined();
-        expect(followOn!.proposal_id).toBe('OPP_180_sana_95_follow_on');
-        expect(followOn!.last_axis_evaluation.find(a => a.axis === 'staging_access')?.green).toBe(true);
+        expect((stateApproach.military.operation_opportunities ?? [])
+            .find(p => p.opportunity_id === 'sana_95_follow_on')).toBeUndefined();
     });
 });
 
