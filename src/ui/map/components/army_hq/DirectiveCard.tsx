@@ -203,7 +203,9 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   // Fully DATA-DRIVEN — buildCommandFrictionStakes derives the severity +
   // patron-at-risk from COMMAND_FRICTION_FACTION_WEIGHT for the PLAYER's faction;
   // this component never branches on the faction id. Only rendered for the levers
-  // that ACTUALLY apply a deferred political consequence: replace_co, and request_op
+  // that ACTUALLY apply a deferred political consequence: replace_co (revolt OR the HRHB
+  // Zagreb-gate patron-override on a sub-threshold sacking), stop_op (applyStopOpConsequence
+  // — halting a live op always costs patron standing), and request_op
   // (whose forced path sets pending_op_directive.forced_over_objection, the input to
   // applyForceOpConsequence). force_launch is DELIBERATELY excluded — it routes
   // through forceLaunchProposal / proactiveForceLaunchOp / stageOperationForceLaunch,
@@ -214,6 +216,9 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
     if (!faction) return null;
     if (directive.lever === 'replace_co') {
       return buildCommandFrictionStakes(faction, 'replace_co', corpsCommander?.political_reliability);
+    }
+    if (directive.lever === 'stop_op') {
+      return buildCommandFrictionStakes(faction, 'stop_op');
     }
     if (directive.lever === 'request_op') {
       return buildCommandFrictionStakes(faction, 'force_op');
