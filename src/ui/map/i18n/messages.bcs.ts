@@ -2954,6 +2954,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'officerResentment.overrode': 'Pregazili ste {officer}, primoravši operaciju uprkos njegovom protivljenju.',
     'officerResentment.resents': '{officer} zamjera nametanje ({count} puta u ovom ratu); sporije će djelovati na vlastitu inicijativu.',
     'officerResentment.cowed': '{officer} će sada bez odstupanja izvršavati naredbe do sedmice {turn} — inicijativa je slomljena, a ne zaslužena.',
+    'commandFriction.stopOp.realized': 'Obustavili ste {op}; povjerenje pokrovitelja prema {faction} palo je za {delta}.',
     'turnAftermath.opOutcome.success': 'uspjeh',
     'turnAftermath.opOutcome.partial': 'djelimično',
     'turnAftermath.opOutcome.failure': 'neuspjeh',

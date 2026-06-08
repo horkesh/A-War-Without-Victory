@@ -20,9 +20,12 @@ import { describe, it, expect } from 'vitest';
 import {
   applyReplaceCoConsequence,
   applyForceOpConsequence,
+  applyStopOpConsequence,
   buildCommandFrictionStakes,
   COMMAND_FRICTION_FACTION_WEIGHT,
   REVOLT_THRESHOLD,
+  STOP_OP_PATRON_BASE,
+  FORCE_OP_PATRON_BASE,
 } from '../src/sim/combat/command_lever_consequences.js';
 import { buildCommandFrictionReceipts } from '../src/ui/map/data/commandFrictionReceipts.js';
 import { initializeStrategicDimensions } from '../src/sim/events/strategic_dimensions.js';
@@ -135,6 +138,62 @@ describe('FORCE-OP faction-asymmetric consequence', () => {
   });
 });
 
+describe('STOP-OP faction-asymmetric consequence', () => {
+  function makeStopState(): any {
+    return {
+      meta: { turn: 18 },
+      military: { negotiation: { strategic_dimensions: initializeStrategicDimensions() } },
+    };
+  }
+
+  it('RS pays strictly more patron_confidence than HRHB for halting an op (weight 1.0 vs 0.25)', () => {
+    const rs = makeStopState();
+    const rsRec = applyStopOpConsequence(rs, 'RS_corps', 'RS', 18, {} as any);
+    const hrhb = makeStopState();
+    const hrhbRec = applyStopOpConsequence(hrhb, 'HRHB_corps', 'HRHB', 18, {} as any);
+
+    expect(rsRec!.lever).toBe('stop_op');
+    expect(rsRec!.revolt).toBe(false);
+    expect(rsRec!.patron_confidence_delta).toBeLessThan(hrhbRec!.patron_confidence_delta);
+    expect(rsRec!.patron_confidence_delta).toBeLessThan(0);
+    expect(rs.military.negotiation.strategic_dimensions.RS.patron_confidence.event_modifier).toBeLessThan(
+      hrhb.military.negotiation.strategic_dimensions.HRHB.patron_confidence.event_modifier,
+    );
+  });
+
+  it('a halt is less culpable than forcing an op (STOP_OP base above FORCE_OP base)', () => {
+    // -8 > -10 → a halt costs less than forcing an op past an objection.
+    expect(STOP_OP_PATRON_BASE).toBeGreaterThan(FORCE_OP_PATRON_BASE);
+    const rsStop = applyStopOpConsequence(makeStopState(), 'c', 'RS', 18, {} as any);
+    const rsForce = applyForceOpConsequence(
+      { meta: { turn: 18 }, military: { negotiation: { strategic_dimensions: initializeStrategicDimensions() } } } as any,
+      'c', 'RS', 18, {} as any,
+    );
+    expect(rsStop!.patron_confidence_delta).toBeGreaterThan(rsForce!.patron_confidence_delta);
+  });
+
+  it('PLAYER-ONLY EARLY-OUT: apply-op-halts step is byte-identical when nothing is staged', () => {
+    const STOP_STEP = warPhases.find((p) => p.name === 'apply-op-halts')!;
+    const state: any = {
+      meta: { turn: 18, phase: 'war' },
+      military: {
+        formations: { RS_corps: { id: 'RS_corps', faction: 'RS', kind: 'corps', status: 'active' } },
+        corps_command: { RS_corps: { active_operations: [] } }, // no pending_op_halt
+        negotiation: { strategic_dimensions: initializeStrategicDimensions() },
+      },
+    };
+    const before = JSON.stringify(state);
+    STOP_STEP.run({ state } as any);
+    expect(JSON.stringify(state)).toBe(before);
+  });
+
+  it('DETERMINISM: repeated identical stop-op calls produce identical deltas', () => {
+    const a = applyStopOpConsequence(makeStopState(), 'c', 'RS', 18, {} as any);
+    const b = applyStopOpConsequence(makeStopState(), 'c', 'RS', 18, {} as any);
+    expect(a).toEqual(b);
+  });
+});
+
 describe('command-friction receipt read-model', () => {
   it('surfaces a persisted replace-CO revolt consequence', () => {
     const rs = makeReplaceState('RS', 4);
@@ -175,6 +234,17 @@ describe('faction-asymmetric STAKES preview (pre-commit card)', () => {
     const hrhb = buildCommandFrictionStakes('HRHB', 'force_op');
     expect(rs.patronConfidenceAtRisk).toBeLessThan(hrhb.patronConfidenceAtRisk);
     expect(rs.revoltLikely).toBe(false);
+  });
+
+  it('stop-op stakes scale patron-at-risk by faction weight and never flag a revolt', () => {
+    const rs = buildCommandFrictionStakes('RS', 'stop_op');
+    const hrhb = buildCommandFrictionStakes('HRHB', 'stop_op');
+    expect(rs.patronConfidenceAtRisk).toBeLessThan(hrhb.patronConfidenceAtRisk);
+    expect(rs.revoltLikely).toBe(false);
+    // A halt is less culpable than forcing — RS stop-op risk is shallower than force-op risk.
+    expect(rs.patronConfidenceAtRisk).toBeGreaterThan(
+      buildCommandFrictionStakes('RS', 'force_op').patronConfidenceAtRisk,
+    );
   });
 
   it('the revolt threshold is the documented constant (owner-adjustable)', () => {

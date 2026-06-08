@@ -512,6 +512,9 @@ export const enMessages = {
     'officerResentment.overrode': 'You overrode {officer}, forcing the operation past his objection.',
     'officerResentment.resents': '{officer} resents the override ({count} this war); he will be slower to act on his own initiative.',
     'officerResentment.cowed': '{officer} will now comply without deviation until week {turn} — initiative broken, not earned.',
+    // Command-friction STOP-OP receipt (Presidential Command Model §4). Calling off a live
+    // operation spends patron standing — sober, factual, never celebratory.
+    'commandFriction.stopOp.realized': 'You halted {op}; {faction}’s patron confidence fell {delta}.',
     'turnAftermath.opOutcome.success': 'success',
     'turnAftermath.opOutcome.partial': 'partial',
     'turnAftermath.opOutcome.failure': 'failure',

@@ -29,7 +29,7 @@ export interface CommandFrictionReceipt {
     /** Stable id for keying/dedupe (corps + turn + lever). */
     id: string;
     /** Which lever produced the consequence. */
-    lever: 'replace_co' | 'force_op';
+    lever: 'replace_co' | 'force_op' | 'stop_op';
     /** Faction that paid the price. */
     faction: string;
     /** Corps the consequence landed on. */
