@@ -4,10 +4,16 @@
  * ISSUES directives, not just navigates).
  *
  * Lifted from the proven OperationsSection.tsx act-flow:
- *   - request_op / force_launch: confirm → queryDirectiveObjection → render the
- *     disposition-tinted commander objection (buildDirectiveObjection) → "Force
- *     anyway" → stageOpDirectiveOrder({ forced_over_objection: true }). Honors the
- *     IMPOSSIBLE / rejectionReason "cannot issue" path (never stages / debits CA).
+ *   - request_op: confirm → queryDirectiveObjection → render the disposition-tinted
+ *     commander objection (buildDirectiveObjection) → "Force anyway" →
+ *     stageOpDirectiveOrder({ forced_over_objection: true }). Honors the IMPOSSIBLE /
+ *     rejectionReason "cannot issue" path (never stages / debits CA).
+ *   - force_launch: no objection re-query — the officer already surfaced (or never
+ *     surfaced) the plan. stageForceLaunch routes by payload discriminator:
+ *     proposalId → forceLaunchProposal (resolves the pending review, 15 CA);
+ *     planId → proactiveForceLaunchOp (held-ready plan, 25 CA); else opName →
+ *     stageOperationForceLaunch (legacy active-op). The card-declared cost matches
+ *     the IPC that its discriminator selects.
  *   - stop_op / authorize_op: no objection — confirm calls stageOpHaltOrder /
  *     acceptProposal directly.
  *
@@ -193,19 +199,23 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   }, [gameState.namedOfficerData, directive.corpsId]);
 
   // FACTION-ASYMMETRIC stakes preview (Presidential Command Model §4): the
-  // "what this will cost you" line shown BEFORE commit on the two friction
-  // levers. Fully DATA-DRIVEN — buildCommandFrictionStakes derives the severity +
+  // "what this will cost you" line shown BEFORE commit on the friction levers.
+  // Fully DATA-DRIVEN — buildCommandFrictionStakes derives the severity +
   // patron-at-risk from COMMAND_FRICTION_FACTION_WEIGHT for the PLAYER's faction;
   // this component never branches on the faction id. Only rendered for the levers
-  // that carry a deferred political consequence (replace_co / request_op /
-  // force_launch) and only when the player's faction is known.
+  // that ACTUALLY apply a deferred political consequence: replace_co, and request_op
+  // (whose forced path sets pending_op_directive.forced_over_objection, the input to
+  // applyForceOpConsequence). force_launch is DELIBERATELY excluded — it routes
+  // through forceLaunchProposal / proactiveForceLaunchOp / stageOperationForceLaunch,
+  // none of which set forced_over_objection, so the engine applies no patron cost;
+  // advertising one here would lie to the player.
   const frictionStakes = useMemo<CommandFrictionStakes | null>(() => {
     const faction = gameState.player_faction ?? null;
     if (!faction) return null;
     if (directive.lever === 'replace_co') {
       return buildCommandFrictionStakes(faction, 'replace_co', corpsCommander?.political_reliability);
     }
-    if (directive.lever === 'request_op' || directive.lever === 'force_launch') {
+    if (directive.lever === 'request_op') {
       return buildCommandFrictionStakes(faction, 'force_op');
     }
     return null;
@@ -313,15 +323,31 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
     else { resetTransient(); setTargetOsidInput(''); markIssued(); }
   };
 
-  /** Force-launch an existing held/ready op (no objection query — the officer
-   *  never surfaced a no-go; the president overrides silence). */
+  /** Force-launch an operation (no objection query — the officer never surfaced a
+   *  no-go, or already offered an override). Routes by the payload discriminator so
+   *  each of the three distinct force-launch flows reaches its OWN IPC + cost:
+   *    - proposalId → forceLaunchProposal (proposal-override; resolves the pending
+   *      review so it does not reappear; debits FORCE_LAUNCH_COST/15),
+   *    - planId → proactiveForceLaunchOp (held-ready plan with no proposal; resolves
+   *      from commander_state.current_plan; debits PROACTIVE_FORCE_LAUNCH_COST/25),
+   *    - else opName → stageOperationForceLaunch (legacy active_operations-by-name). */
   const stageForceLaunch = async () => {
-    const opName = typeof directive.payload.opName === 'string' ? directive.payload.opName : '';
-    if (!directive.corpsId || !opName) {
+    if (!directive.corpsId) {
       setLoadError('Directive is missing its corps/operation context.');
       return;
     }
-    const result = await ipc.stageOperationForceLaunch({ corpsId: directive.corpsId, operationName: opName });
+    const proposalId = typeof directive.payload.proposalId === 'string' ? directive.payload.proposalId : '';
+    const planId = typeof directive.payload.planId === 'string' ? directive.payload.planId : '';
+    let result: { ok: boolean; error?: string };
+    if (proposalId) {
+      result = await ipc.forceLaunchProposal(proposalId);
+    } else if (planId) {
+      result = await ipc.proactiveForceLaunchOp(directive.corpsId, planId);
+    } else {
+      const opName = typeof directive.payload.opName === 'string' ? directive.payload.opName : '';
+      if (!opName) { setLoadError('Directive is missing its corps/operation context.'); return; }
+      result = await ipc.stageOperationForceLaunch({ corpsId: directive.corpsId, operationName: opName });
+    }
     if (!result.ok) markFailed(result.error ?? 'Failed to force-launch operation.');
     else { resetTransient(); markIssued(); }
   };
@@ -578,8 +604,10 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       {/* REQUEST-OP target input — the president names the objective settlement
           (OSID). Mirrors the proven OperationsSection free-text surface; the
           objection / "cannot issue" flow above handles invalid / unreachable
-          targets. Shown only when the directive carries no fixed target. */}
-      {!pendingObjection && !impossibleReason && showTargetInput && (
+          targets. Shown whenever the directive carries no fixed target — INCLUDING
+          after a "cannot issue" banner, so the president can edit the bad target and
+          retry from the same card (editing clears impossibleReason via onChange). */}
+      {!pendingObjection && showTargetInput && (
         <div className="mt-2 space-y-1.5">
           {targetPickerOptions.length > 0 && (
             <select
@@ -649,8 +677,10 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
 
       {/* Confirm / ISSUE — disabled when CA short (still renders for scan-without-spend),
           for a leadership gesture that is unavailable (cut-off / cap / cooldown),
-          or for a request-op with no target named yet. */}
-      {!pendingObjection && !impossibleReason && (() => {
+          or for a request-op with no target named yet. Kept available after a
+          "cannot issue" banner WHEN there is a target input to retry from, so the
+          president can re-name the objective and try again without re-opening the card. */}
+      {!pendingObjection && (!impossibleReason || showTargetInput) && (() => {
         const blockedGesture = isLeadershipGesture && gestureReady && gestureUnavailableReason !== null;
         const blockedNoTarget = showTargetInput && targetOsidInput.trim().length === 0;
         const blockedAmbiguousTarget = ambiguousTargetMatches.length > 0;

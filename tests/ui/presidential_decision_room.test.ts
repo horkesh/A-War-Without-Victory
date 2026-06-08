@@ -1297,7 +1297,8 @@ describe('buildPresidentialDecisionRoomView — proactive force-launch (override
       lever: 'force_launch',
       corpsId: 'arbih_1st_corps',
       cost: PROACTIVE_FORCE_LAUNCH_COST,
-      payload: { opName: 'Operation Held Alpha' },
+      // planId routes DirectiveCard through proactiveForceLaunchOp (held-plan path, 25 CA).
+      payload: { opName: 'Operation Held Alpha', planId: 'plan_alpha' },
     });
     // Distinct title from the proposal-override card.
     expect(card?.title).toContain('unrequested');
