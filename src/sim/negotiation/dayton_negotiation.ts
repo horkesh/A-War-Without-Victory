@@ -18,7 +18,7 @@ import type {
 import { createEmptyCapital, createDefaultPatronRelationship } from '../../state/negotiation_types.js';
 import { getAllTerritorialPackages, getTerritorialPackageById } from './territorial_packages.js';
 import { getAllInstitutionalPackages, computeEntityAutonomyIndex } from './institutional_packages.js';
-import { evaluateBotResponse, getCompositeCapital, computeProposalCostToFaction } from './bot_negotiation.js';
+import { evaluateBotResponse, getCompositeCapital, computeProposalCostToFaction, clampPlayerProposalToBudget } from './bot_negotiation.js';
 import {
     finalCompetencyCost,
     finalConstitutionalCost,
@@ -148,10 +148,16 @@ export function initiateDaytonNegotiation(state: GameState): {
  * Resolve the Dayton negotiation given the player's proposal.
  *
  * Steps:
- * 1. Validate the player's proposal (costs within capital budget).
+ * 1. ENGINE-ENFORCE the player budget: clamp the proposal to the player faction's
+ *    available negotiation capital (defense-in-depth — the UI disables Submit when
+ *    over-budget, but a bot / headless / future-API path could overspend, so the
+ *    sim boundary re-checks). Within-budget proposals pass through UNCHANGED.
  * 2. Evaluate bot responses for each non-player faction.
  * 3. For rejected/countered items, apply patron overrides.
  * 4. Build final DaytonResult and store in state.
+ *
+ * The clamp is deterministic (drops the dearest charged items first, stable id
+ * tie-break) so an over-budget non-UI proposal degrades gracefully and reproducibly.
  *
  * @param state - Current game state
  * @param playerProposal - Player's selected territorial demands, concessions, and institutional choices
@@ -167,10 +173,19 @@ export function resolveDaytonNegotiation(
     const playerFaction = state.meta.player_faction ?? 'RBiH';
     const botFactions = CANONICAL_FACTIONS.filter(f => f !== playerFaction).sort(strictCompare);
 
+    // ── Step 1: engine-level player-budget enforcement (defense-in-depth) ──────
+    // Mirror the DaytonNegotiationModal `capitalSpent`/`overBudget` check at the sim
+    // boundary so a non-UI caller cannot overspend the player's earned capital. The
+    // player's available capital is the SAME composite reading the UI surfaces.
+    const playerCapital = neg.capital[playerFaction]
+        ? getCompositeCapital(neg.capital[playerFaction], playerFaction, neg.strategic_dimensions)
+        : 0;
+    const proposal = clampPlayerProposalToBudget(playerProposal, playerFaction, playerCapital).proposal;
+
     // Collect bot responses
     const botResponses: Record<string, DaytonBotResponse> = {};
     for (const faction of botFactions) {
-        botResponses[faction] = evaluateBotResponse(state, faction, playerProposal);
+        botResponses[faction] = evaluateBotResponse(state, faction, proposal);
     }
 
     // Build the final agreement by resolving each package
@@ -182,8 +197,8 @@ export function resolveDaytonNegotiation(
     const allTerritorialIds = getAllTerritorialPackages().map(p => p.id).sort(strictCompare);
 
     for (const pkgId of allTerritorialIds) {
-        const isDemanded = playerProposal.territorial_demands.includes(pkgId);
-        const isConceded = playerProposal.territorial_concessions.includes(pkgId);
+        const isDemanded = proposal.territorial_demands.includes(pkgId);
+        const isConceded = proposal.territorial_concessions.includes(pkgId);
 
         if (!isDemanded && !isConceded) {
             // Not part of the negotiation — stays with default holder
@@ -235,7 +250,7 @@ export function resolveDaytonNegotiation(
     const allInstitutionalIds = getAllInstitutionalPackages().map(p => p.id).sort(strictCompare);
 
     for (const pkgId of allInstitutionalIds) {
-        const playerChoice = playerProposal.institutional_choices[pkgId];
+        const playerChoice = proposal.institutional_choices[pkgId];
 
         if (!playerChoice) {
             // No choice made — default to historical (decentralized)
@@ -273,27 +288,29 @@ export function resolveDaytonNegotiation(
         finalInstitutional[pkgId] = objected ? flipChoice(playerChoice) : playerChoice;
     }
 
-    // D1 (owner ruling Opt 2a): resolve Brčko as a DISTINCT outcome. Historically
-    // Brčko was deferred to international arbitration at Dayton (Annex 2) and became
-    // the Brčko District condominium — a THIRD state, neither RBiH nor RS. We treat
-    // the package as cleanly assigned only when it was demanded-and-won or conceded;
-    // when it is left unresolved (rejected — neither side forced the issue), it
-    // resolves to international arbitration, matching the real war-termination.
+    // D1 (owner ruling Opt 2a): resolve Brčko as a DISTINCT outcome. Historically the
+    // Inter-Entity Boundary Line in the Brčko area could not be agreed at Dayton and
+    // was deferred to binding international arbitration (Annex 2, Art. V). The 1999
+    // Final Award created the Brčko District — a self-governing district held in
+    // CONDOMINIUM by BOTH Entities (NOT a separate/third state, and not assigned to
+    // either RBiH or RS). We treat the package as cleanly assigned only when it was
+    // demanded-and-won or conceded; when it is left unresolved (rejected — neither
+    // side forced the issue), it resolves to arbitration, matching the real outcome.
     const brckoStatus = resolveBrckoStatus(
         playerFaction,
-        playerProposal,
+        proposal,
         acceptedTerritorial,
         rejectedTerritorial,
     );
 
     // Compute final territory split from REAL OSID area data (D1, owner ruling
     // Opt 2b), with correct demander attribution and Brčko's area removed when it
-    // goes to the arbitration district (a third state).
+    // goes to the arbitration district (the condominium district of both Entities).
     const territorySplit = computeTerritorySplit(
         state,
         acceptedTerritorial,
         playerFaction,
-        playerProposal,
+        proposal,
         brckoStatus,
     );
 
@@ -304,7 +321,7 @@ export function resolveDaytonNegotiation(
     //    dial, empty allocations) so the all-default settlement is BYTE-IDENTICAL:
     //    an empty competency map leaves the autonomy reading on the legacy D2 index,
     //    empty constitutional choices read as the historical maximal-gridlock=100.
-    const finalDimensions = resolveInstitutionalDimensions(neg, playerProposal, botFactions, patronOverrides);
+    const finalDimensions = resolveInstitutionalDimensions(neg, proposal, botFactions, patronOverrides);
 
     const result: DaytonResult = {
         territorial_packages_accepted: acceptedTerritorial.sort(strictCompare),
@@ -356,15 +373,16 @@ export function resolveDaytonNegotiation(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Resolve the Brčko outcome as a distinct third-state option (D1, owner ruling
- * Opt 2a). Mirrors the real Dayton: Brčko was left unresolved (Annex 2) and went
- * to international arbitration → the Brčko District condominium of both Entities.
+ * Resolve the Brčko outcome as a distinct condominium-district option (D1, owner
+ * ruling Opt 2a). Mirrors the real Dayton: the Brčko-area IEBL was left unresolved
+ * (Annex 2, Art. V) and went to binding arbitration → the 1999 Final Award's Brčko
+ * District, held in CONDOMINIUM by both Entities (not a separate/third state).
  *
  *   - demanded-and-won by the player  → the player's "side" (federation if the
  *       player is RBiH/HRHB, rs if the player is RS) cleanly takes it.
  *   - conceded by the player          → the OTHER side cleanly takes it.
  *   - left unresolved (neither, i.e. the demand failed / was never raised)
- *                                     → 'arbitration' (the third state).
+ *                                     → 'arbitration' (the condominium district).
  *
  * Pure & deterministic.
  */
@@ -404,9 +422,10 @@ function resolveBrckoStatus(
  * the player's concessions, the holder's counterpart). The previous code always
  * credited RBiH, mis-attributing HRHB gains.
  *
- * When Brčko goes to international arbitration its area is removed from all three
- * factions (it becomes a third-state district), so the three-faction split no
- * longer sums to 100 before normalization — we renormalize the remaining three.
+ * When Brčko goes to arbitration its area is removed from all three factions (it
+ * becomes the condominium district of both Entities, credited to neither RBiH/RS/
+ * HRHB), so the three-faction split no longer sums to 100 before normalization —
+ * we renormalize the remaining three.
  *
  * Pure & deterministic: sorted iteration, integer-rounded percentages.
  */
@@ -443,9 +462,10 @@ function computeTerritorySplit(
         const pkg = getTerritorialPackageById(pkgId);
         if (!pkg) continue;
 
-        // Brčko-to-arbitration is removed from all factions below (third-state
-        // district); never attribute it to an entity here. A cleanly-assigned
-        // Brčko (federation/rs) is handled by the normal demand/concession path.
+        // Brčko-to-arbitration is removed from all factions below (the condominium
+        // district of both Entities); never attribute it to a single entity here. A
+        // cleanly-assigned Brčko (federation/rs) is handled by the normal demand/
+        // concession path.
         if (pkgId === 'brcko_district' && brckoStatus === 'arbitration') continue;
 
         const shiftPct = getPackageAreaPct(pkgId);
@@ -461,7 +481,8 @@ function computeTerritorySplit(
     }
 
     // Brčko arbitration: remove its area from whichever faction holds it (RS by
-    // default) so it becomes the third-state district and is not credited to anyone.
+    // default) so it becomes the condominium district of both Entities and is not
+    // credited to any single faction.
     if (brckoStatus === 'arbitration') {
         const brckoPkg = getTerritorialPackageById('brcko_district');
         const brckoPct = getPackageAreaPct('brcko_district');

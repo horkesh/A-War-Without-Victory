@@ -56,7 +56,9 @@ describe('DaytonInstitutionalDimensions — render + interaction (EN)', () => {
         expect(screen.getAllByText('State').length).toBeGreaterThan(0);
         // Constitutional + return/justice options.
         expect(screen.getByText('Single Elected President')).toBeTruthy();
-        expect(screen.getByText('Full Right of Return')).toBeTruthy();
+        // Annex 7 Art. I(1) guaranteed the FULL right of return; the label now marks it
+        // as the treaty guarantee (vs the as-implemented voluntary-only baseline).
+        expect(screen.getByText('Full Right of Return (Annex 7 guarantee)')).toBeTruthy();
     });
 
     it('records a non-default dial pick via onChange', () => {

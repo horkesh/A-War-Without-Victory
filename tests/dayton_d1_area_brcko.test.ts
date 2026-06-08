@@ -96,7 +96,7 @@ describe('Brčko international-arbitration outcome (D1)', () => {
         'op:mostar:mostar_1': 'HRHB',
     };
 
-    it('leaving Brčko unresolved → arbitration (third state) + flag set', () => {
+    it('leaving Brčko unresolved → arbitration (condominium district of both entities) + flag set', () => {
         const state = makeState({ political_controllers: controllers });
         const proposal: DaytonProposal = { territorial_demands: [], territorial_concessions: [], institutional_choices: {} };
         const result = resolveDaytonNegotiation(state, proposal);

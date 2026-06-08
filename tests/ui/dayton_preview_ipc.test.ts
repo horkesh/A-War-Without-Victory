@@ -90,7 +90,7 @@ describe('preview-dayton: no-mutation guarantee (run on a clone)', () => {
         const result = resolveDaytonNegotiation(clone, {
             territorial_demands: [], territorial_concessions: [], institutional_choices: {},
         });
-        // Unraised Brčko → arbitration district (Annex-2 third state).
+        // Unraised Brčko → arbitration district (Annex-2 condominium of both entities).
         expect(result.brcko_status).toBe('arbitration');
         expect(result.brcko_arbitration).toBe(true);
         // Emergent-mode → dysfunction index is computed and stamped.

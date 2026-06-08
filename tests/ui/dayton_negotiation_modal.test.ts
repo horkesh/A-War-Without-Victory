@@ -49,10 +49,10 @@ describe('DaytonNegotiationModal — Phase-4 player-agency surface', () => {
         expect(screen.getByText('Institutional Architecture')).toBeTruthy();
     });
 
-    it('surfaces the Brčko tri-state, defaulting to the international arbitration district', () => {
+    it('surfaces the Brčko outcome, defaulting to the international arbitration district', () => {
         render(createElement(DaytonNegotiationModal, { dayton: PENDING }));
         expect(screen.getByText('Brčko Corridor (Annex 2)')).toBeTruthy();
-        // Default (Brčko unraised) previews as the third-state arbitration district.
+        // Default (Brčko unraised) previews as the arbitration condominium district.
         expect(screen.getByText('International Arbitration District')).toBeTruthy();
         expect(screen.getByText(/Left unresolved/)).toBeTruthy();
     });

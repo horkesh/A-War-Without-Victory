@@ -593,6 +593,12 @@ describe('Dayton Resolution', () => {
                 HRHB: highCapital(),
             },
             patron: { RS: { override_authority: 80 } },
+            // Player (RBiH) gets ample composite capital so the new engine-level player
+            // budget guard does NOT clamp this 75-cost demand stack — the test exercises
+            // the PATRON-override path (RS holds firm; its patron forces acceptance),
+            // which is independent of the player's own budget. RS stays low so the bot
+            // must rely on the override, not affordability.
+            dimStore: makeDimStore({ RBiH: 100, RS: 25, HRHB: 100 }),
         });
 
         // Demand all RS-held packages — RS low capital but patron overrides

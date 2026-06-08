@@ -1593,12 +1593,12 @@ export const enMessages = {
     'dayton.central': 'Central ({cost})',
     'dayton.decentral': 'Decentral ({cost})',
     'dayton.leaveOpen': 'Leave to arbitration',
-    // Brčko tri-state (Annex 2)
+    // Brčko condominium outcome (Annex 2)
     'dayton.brckoTitle': 'Brčko Corridor (Annex 2)',
     'dayton.brckoFederation': 'Federation',
     'dayton.brckoRs': 'Republika Srpska',
     'dayton.brckoArbitration': 'International Arbitration District',
-    'dayton.brckoArbitrationNote': 'Left unresolved — a third state, neither side. The hardest knot at Dayton.',
+    'dayton.brckoArbitrationNote': 'Left unresolved — a self-governing district held in condominium by both entities. The hardest knot at Dayton.',
     // Live readouts
     'dayton.readoutsTitle': 'Live Settlement Readouts',
     'dayton.entityAutonomy': 'Entity Autonomy',

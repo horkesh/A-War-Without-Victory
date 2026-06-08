@@ -9,8 +9,8 @@
  *
  * Dayton Phase-4 (2026-06-07) — player-agency negotiation surface. Exposes the
  * shipped P1-3 read-models so the player AUTHORS the settlement, not just the map:
- *   (a) Brčko tri-state (demand → your side / concede → other side / leave →
- *       international arbitration district, the Annex-2 third state);
+ *   (a) Brčko outcome (demand → your side / concede → other side / leave →
+ *       international arbitration → the Annex-2 condominium district of both entities);
  *   (b) the 6 institutional centralized/decentralized choices (unchanged);
  *   (c) LIVE readouts — entity_autonomy_index + a peace_dysfunction FLOOR (with the
  *       outcome-class cap consequence shown honestly: a dysfunctional peace can never
@@ -384,7 +384,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                         })}
                     </div>
 
-                    {/* Brčko tri-state — the Annex-2 third-state outcome */}
+                    {/* Brčko — the Annex-2 condominium-district outcome */}
                     {hasBrckoPackage && (
                         <div className="mt-3 p-3 rounded border border-[#8a7a60]/40 bg-[#e8dcc4]/40">
                             <div className="flex items-center justify-between mb-1">

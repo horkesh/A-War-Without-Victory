@@ -1512,12 +1512,12 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'dayton.central': 'Centralno ({cost})',
     'dayton.decentral': 'Decentralno ({cost})',
     'dayton.leaveOpen': 'Prepusti arbitraži',
-    // Brčko tri-državni ishod (Aneks 2)
+    // Brčko kondominijum (Aneks 2)
     'dayton.brckoTitle': 'Brčanski koridor (Aneks 2)',
     'dayton.brckoFederation': 'Federacija',
     'dayton.brckoRs': 'Republika Srpska',
     'dayton.brckoArbitration': 'Distrikt međunarodne arbitraže',
-    'dayton.brckoArbitrationNote': 'Ostavljeno neriješeno — treća strana, ničija. Najteži čvor u Dejtonu.',
+    'dayton.brckoArbitrationNote': 'Ostavljeno neriješeno — samoupravni distrikt u kondominijumu oba entiteta. Najteži čvor u Dejtonu.',
     // Živi prikazi
     'dayton.readoutsTitle': 'Živi prikaz sporazuma',
     'dayton.entityAutonomy': 'Autonomija entiteta',
