@@ -110,6 +110,12 @@ const SUBSTRATE_OWNERS = {
     consumer: 'treaty acceptance / endgame negotiation surfaces',
     status: 'live',
   },
+  offensive_ops_suppression: {
+    class: 'mechanical',
+    writer: 'applyEventEffects -> state.military.offensive_ops_suppressions',
+    consumer: 'sector_offensive launch-gate via isFactionOffensiveOpsSuppressed',
+    status: 'live',
+  },
   patron_pressure: {
     class: 'mechanical',
     writer: 'applyEventEffects -> patron pressure',
