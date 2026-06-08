@@ -197,7 +197,12 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
         setProbing(false);
     };
 
-    /** Adopt a bot's counter-offer: fold its terms back into the player's proposal. */
+    /** Adopt a bot's counter-offer: fold its terms back into the player's proposal.
+     *  Mirrors the inverse of `buildInstitutionalProposalFields` — the counter can move
+     *  the autonomy dial or flip a competency / constitutional / return-justice slot,
+     *  so we must reconstruct `instArch` from those structural fields too, not just the
+     *  territorial demands/concessions and legacy institutional toggles. Omitting them
+     *  made "Adopt counter-offer" a no-op for any institutional-only counter (#297). */
     const adoptCounter = (resp: IpcDaytonBotResponse) => {
         const counter = resp.counter_proposal;
         if (!counter) return;
@@ -205,6 +210,14 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
         setDemands(new Set(counter.territorial_demands ?? []));
         setConcessions(new Set(counter.territorial_concessions ?? []));
         setInstitutions({ ...(counter.institutional_choices ?? {}) });
+        const nextInstArch: InstitutionalSelections = {
+            ...defaultInstitutionalSelections(),
+            dial: counter.entity_autonomy ?? 'dayton-historical',
+            competency: { ...(counter.competency_allocation ?? {}) } as InstitutionalSelections['competency'],
+            constitutional: { ...(counter.constitutional_choices ?? {}) },
+            returnJustice: { ...(counter.return_justice ?? {}) },
+        };
+        setInstArch(nextInstArch);
     };
 
     const handleSubmit = async () => {

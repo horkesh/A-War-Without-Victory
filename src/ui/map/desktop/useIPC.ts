@@ -159,6 +159,16 @@ export interface IpcDaytonBotResponse {
         territorial_demands: string[];
         territorial_concessions: string[];
         institutional_choices: Record<string, 'centralized' | 'decentralized'>;
+        // Phase-3 structural dimensions. The sim-side `generateCounterProposal`
+        // (bot_negotiation.ts) attaches these on a counter when the bot moves the
+        // autonomy dial or flips a competency / constitutional / return-justice slot,
+        // and the Electron main handler returns the bot response object verbatim — so
+        // these fields cross the IPC boundary intact. They were previously omitted
+        // from this type, which hid them from `adoptCounter` (#297).
+        entity_autonomy?: 'confederation' | 'dayton-historical' | 'federalized' | 'unitary';
+        competency_allocation?: Record<string, string>;
+        constitutional_choices?: Record<string, string>;
+        return_justice?: Record<string, string>;
     };
 }
 

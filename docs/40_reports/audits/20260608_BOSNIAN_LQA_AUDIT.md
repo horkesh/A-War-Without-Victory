@@ -76,9 +76,9 @@ The same English concept **"Army HQ" / "Army Headquarters"** is rendered three d
 | Rendering | Count | Examples |
 |---|---|---|
 | `Štab armije` (translated — preferred) | 13 | `armyHq.dialogTitle`, `decisionRoom.source.armyHqBriefing`, `toolbar.armyHqTitle` |
-| `Armijski HQ` / `Armijskog HQ-a` (hybrid) | 4 | `operationsPanel.subtitle`, `presidentialToolbar.armyHq`, `corpsDetail.fieldSnapshotHelp`, `corpsFront.fieldSnapshotHelp` |
+| `Armijski HQ` / `Armijskog HQ-a` / `Armijskom HQ-u` (hybrid) | 7 | `operationsPanel.subtitle`, `presidentialToolbar.armyHq`, `corpsDetail.fieldSnapshotHelp`, `corpsFront.fieldSnapshotHelp`, `presidentialToolbar.openRecordsTitle` (`Armijskog HQ-a`), `presidentialToolbar.openAttentionQueue` (`Armijskom HQ-u`), `presidentialToolbar.visitArmyHq` (`Posjeti Armijski HQ [H]`) |
 | left as `Army HQ` (untranslated) | 1 | `warSummary.campaignDrag.commandStrainDetail` ("...prati se u **Army HQ -> Command Relationship**.") |
-| bare `HQ` | 3 | `operationsPanel.hqReview`, `corpsDetail.prepareOperationInHq`, `corpsFront.draftNewDirective` |
+| bare `HQ` (incl. `{army} HQ [H]` toolbar labels) | 5 | `operationsPanel.hqReview`, `corpsDetail.prepareOperationInHq`, `corpsFront.draftNewDirective`, `presidentialToolbar.armyHqLabel` (`{army} HQ [H]`), `toolbar.armyHqAriaLabel` (`{army} HQ [H]`) |
 
 - **Issue:** Mixed register — full translation vs. English acronym vs. untranslated.
 - **Bosnian-preferred:** Standardize on **`Štab armije`** (already the majority and the canonical military term). `warSummary.campaignDrag.commandStrainDetail` notably still carries the **fully English** tail `Army HQ -> Command Relationship` while its sibling `warSummary.note.commandStrain` is correctly translated to `Štab armije -> Komandni odnos`.
@@ -148,7 +148,7 @@ No action needed, but a native reviewer may wish to localize a few borderline UI
 | # | Sev | Key(s) | Issue | Suggested (native-confirm) |
 |---|---|---|---|---|
 | 1 | MED | `warSummary.campaignDrag.commandStrainDetail` | English `Army HQ -> Command Relationship` left untranslated | translate to `Štab armije -> Komandni odnos` (match sibling) |
-| 2 | MED | 4 `Armijski HQ` + 3 bare `HQ` keys | "Army HQ" rendered 3 ways | standardize on `Štab armije` (UX may keep clipped form for buttons) |
+| 2 | MED | 7 hybrid (`Armijski/Armijskog/Armijskom HQ…`) + 5 bare `HQ` keys (incl. `presidentialToolbar.openRecordsTitle/openAttentionQueue/visitArmyHq` and the two `{army} HQ [H]` labels `presidentialToolbar.armyHqLabel`/`toolbar.armyHqAriaLabel`) | "Army HQ" rendered 3 ways | standardize on `Štab armije` (UX may keep clipped form for buttons) |
 | 3 | MED | `inbox.quiet.body` | `štapskog` typo | `štabskog` / `štabnog` |
 | 4 | MED | `štabni` vs `štabski` (6 keys) | inconsistent staff adjective | harmonize on one |
 | 5 | MED | `onboarding.05.body` | `sto` → relative pronoun | `što` (×2) |
