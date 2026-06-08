@@ -2896,6 +2896,20 @@ phase0_relationships?: {
 control_events?: ControlEvent[];
 /** Last computed supply state per OSID. Persisted for supply transition tracking in the settlement timeline. */
 last_supply_state_by_osid?: Record<string, string>;
+/**
+     * Per-turn enclave-containment set per besieging faction (contain Lane V,
+     * §6 VRS strangle-not-capture posture). Maps a besieging FactionId to the
+     * sorted list of enemy enclave OSIDs it should CONTAIN (withhold organic
+     * assault target-generation against) this turn. Consumed by the commander
+     * opportunity planner to drop these OSIDs from candidate objectives.
+     *
+     * ONLY written when `AWWV_VRS_CONTAIN_POSTURE` is enabled; the field is
+     * absent (and the calibration baselines byte-identical) when the flag is
+     * off. The 1995-pivot release empties the eastern-enclave entries before the
+     * historical fall window so Srebrenica/Žepa STILL FALL and the genocide
+     * rupture STILL RECORDS. See contain_posture_gate.ts + enclave_resilience.ts.
+     */
+last_contained_osids_by_faction?: Partial<Record<FactionId, string[]>>;
 // --- Local Truces (Graz Accords, 6 May 1992) ---
 /**
      * Turn at which the Graz Accords fired (RS-HRHB non-aggression).

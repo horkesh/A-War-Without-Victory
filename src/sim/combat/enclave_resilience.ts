@@ -620,6 +620,110 @@ export function isEnclaveContainable(
     return true;
 }
 
+// ── Contain-posture release predicate + contained-OSID set (contain Lane V) ──
+
+/**
+ * Turn-number BACKSTOP for the VRS contain-posture release. Once the war reaches
+ * this turn, RS-vs-eastern-enclave containment is LIFTED unconditionally — even
+ * if the scripted `srebrenica_falls_1995` event has not yet fired — so the bot's
+ * own Krivaja-95 / organic targeting is NEVER throttled inside the historical
+ * 1995 fall window. Aligned to the `srebrenica_falls_1995` event window floor
+ * (turn_min 160) so contain releases BEFORE the fall window opens.
+ *
+ * §6: this backstop is the guarantee that contain can only ever delay an
+ * AHISTORICAL early fall, never prevent the historical one.
+ */
+export const CONTAIN_RELEASE_TURN_BACKSTOP = 160;
+
+/**
+ * `isEnclaveContainmentReleased(state, enclave)` — has the 1995-pivot release
+ * fired for this enclave's containment? When true, the besieger is free to
+ * target the enclave again (the historical fall proceeds through the normal
+ * paths the rupture predicate keys on).
+ *
+ * Release fires when EITHER (deterministic, event-preferred over turn-number):
+ *   1. the scripted Srebrenica fall has fired (`event_flags.srebrenica_fell`) —
+ *      the canonical pivot signal; OR
+ *   2. the war has reached `CONTAIN_RELEASE_TURN_BACKSTOP` (the event-window
+ *      floor) — a turn-number backstop guaranteeing release inside the fall
+ *      window regardless of event timing.
+ *
+ * Goražde has no `*_falls_1995` event; the turn backstop still releases its
+ * containment at t≥160 (it then stays held by ordinary resilience defence +
+ * the absence of any Goražde-fall op/event — historically correct: Goražde did
+ * not fall). The release only LIFTS the assault suppression; it does not itself
+ * flip control.
+ *
+ * PURE: reads only event_flags + turn. No mutation, no RNG, no wall-clock.
+ */
+export function isEnclaveContainmentReleased(
+    state: GameState,
+    _enclave: EnclaveDefinition,
+): boolean {
+    const eventFlags = state.military?.event_flags ?? {};
+    if (eventFlags.srebrenica_fell === true) return true;
+    const turn = state.meta?.turn ?? 0;
+    return turn >= CONTAIN_RELEASE_TURN_BACKSTOP;
+}
+
+/**
+ * Compute the set of OSIDs that `besiegingFaction` should CONTAIN (withhold its
+ * organic assault target-generation against) this turn — contain Lane V.
+ *
+ * An OSID is contained when `isEnclaveContainable(...)` holds (enemy enclave +
+ * BFS-isolated + past resilience_start_turn) AND the 1995-pivot release has NOT
+ * fired for that enclave. This is the consumer-facing set; the suppression site
+ * (commander/plan.ts) drops these OSIDs from organic opportunity candidates.
+ *
+ * §6 SAFETY: because the release fires at the latest by t160 (the event-window
+ * floor) and the historical fall is driven at t160–190 by the scripted events
+ * AND the Krivaja-95/Stupčanica-95 triggered ops (which inject objectives
+ * directly, bypassing organic targeting entirely), this set is EMPTY for the
+ * eastern enclaves throughout the fall window — the historical fall and the
+ * `srebrenica_genocide_1995` rupture proceed exactly as without the posture.
+ *
+ * Deterministic: sorted iteration (enclave id, then OSID); set membership only.
+ *
+ * @returns sorted array of contained OSIDs, or `[]` when nothing is contained.
+ */
+export function computeContainedOsidsForFaction(
+    state: GameState,
+    besiegingFaction: FactionId,
+    supplyReach: SupplyReachabilityOsidReport | undefined | null,
+): string[] {
+    if (!supplyReach?.factions) return [];
+
+    const contained: string[] = [];
+    const sortedEnclaves = [...ENCLAVE_DEFINITIONS].sort((a, b) => strictCompare(a.id, b.id));
+
+    for (const enclave of sortedEnclaves) {
+        // Only enemy enclaves are containable by this besieger.
+        if (enclave.faction === besiegingFaction) continue;
+        // 1995-pivot release: once fired, the enclave is no longer contained —
+        // the bot is free to target it so the historical fall proceeds.
+        if (isEnclaveContainmentReleased(state, enclave)) continue;
+
+        const facEntry = supplyReach.factions.find((f) => f.faction_id === enclave.faction);
+        if (!facEntry) continue;
+
+        // Candidate OSIDs: explicit list, else the BFS-isolated members under the
+        // enclave's prefixes (Sarajevo/Bihać are prefix-scoped).
+        const memberOsids = enclave.osid_list ?? [];
+        const candidateOsids = memberOsids.length > 0
+            ? memberOsids
+            : facEntry.isolated_osids.filter((osid) => osidBelongsToEnclave(osid, enclave));
+
+        for (const osid of [...candidateOsids].sort(strictCompare)) {
+            if (isEnclaveContainable(state, osid, besiegingFaction, supplyReach)) {
+                contained.push(osid);
+            }
+        }
+    }
+
+    contained.sort(strictCompare);
+    return contained;
+}
+
 /**
  * Get max enclave resilience across all enclaves for a faction.
  * Used by exhaustion system: higher enclave resilience reduces exhaustion growth.
