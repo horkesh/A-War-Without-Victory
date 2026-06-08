@@ -159,11 +159,22 @@ describe('Phase E MVS — political-dimension propagation gate', () => {
         restorePdpEnv(envSnap);
     });
 
-    // Test 1: Default (no env, no override) → both gates report false.
-    it('test 1: defaults to OFF when env unset and no overrides', () => {
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+    // Test 1: Default activation contract (no env, no override).
+    //   - Global propagation switch is DEFAULT-ON (PDP activation lane).
+    //   - intl_standing sub-flag stays DEFAULT-OFF (guard rides dormant).
+    //   - Combined intl_standing gate therefore still reports false.
+    it('test 1: global DEFAULT-ON, intl_standing sub-flag DEFAULT-OFF when env unset', () => {
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
         expect(isIntlStandingOpsHesitationEnabled()).toBe(false);
         expect(isIntlStandingOpsHesitationActive()).toBe(false);
+    });
+
+    // Test 1b: explicit opt-out restores the legacy OFF default for the global switch.
+    it('test 1b: global switch opt-out via "0"/"false" forces OFF', () => {
+        process.env.AWWV_POLITICAL_DIMENSION_PROPAGATION = '0';
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+        process.env.AWWV_POLITICAL_DIMENSION_PROPAGATION = 'false';
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
     });
 
     // Test 2: Global override true + sub-flag override false → combined false.
@@ -188,7 +199,10 @@ describe('Phase E MVS — political-dimension propagation gate', () => {
         setIntlStandingOpsHesitationOverride(true);
         expect(isIntlStandingOpsHesitationActive()).toBe(true);
         resetPoliticalDimensionGates();
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+        // After reset, env falls through. With env cleared, the global switch is
+        // DEFAULT-ON but the intl_standing sub-flag is DEFAULT-OFF, so the
+        // combined intl_standing gate is still inactive.
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
         expect(isIntlStandingOpsHesitationEnabled()).toBe(false);
         expect(isIntlStandingOpsHesitationActive()).toBe(false);
     });

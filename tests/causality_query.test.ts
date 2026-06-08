@@ -333,9 +333,11 @@ describe('getActivePhaseEFlags', () => {
     });
 
     it('returns empty when sub-flags ON but global propagation OFF', () => {
+        // Global switch is DEFAULT-ON now, so opt it out explicitly to exercise
+        // the global-OFF short-circuit.
+        setPoliticalDimensionPropagationOverride(false);
         setIntlStandingOpsHesitationOverride(true);
         setCohesionCautionBiasOverride(true);
-        // global propagation override is null → env OFF → combined false
         expect(getActivePhaseEFlags()).toEqual([]);
     });
 });

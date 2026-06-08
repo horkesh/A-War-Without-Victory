@@ -176,9 +176,11 @@ describe('Phase E Packet 2 — internal_cohesion → bot caution-bias gate', () 
         restorePdpEnv(envSnap);
     });
 
-    // Test 1: Default OFF when env unset and no overrides.
-    it('test 1: defaults to OFF when env unset and no overrides', () => {
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+    // Test 1: The cohesion channel stays DEFAULT-OFF (its guard rides dormant)
+    // even though the global propagation switch is now DEFAULT-ON. So the
+    // combined cohesion gate is still inactive when env is unset.
+    it('test 1: cohesion sub-flag DEFAULT-OFF (global DEFAULT-ON) when env unset', () => {
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
         expect(isCohesionCautionBiasEnabled()).toBe(false);
         expect(isCohesionCautionBiasActive()).toBe(false);
     });

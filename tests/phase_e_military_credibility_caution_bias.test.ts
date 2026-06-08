@@ -178,11 +178,22 @@ describe('Phase E extension — military_credibility → bot caution-bias gate',
         restorePdpEnv(envSnap);
     });
 
-    // Test 1: Default OFF when env unset and no overrides.
-    it('test 1: defaults to OFF when env unset and no overrides', () => {
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+    // Test 1: Default-ON activation contract (PDP activation lane). With env
+    // unset and no overrides, the global switch AND the credibility sub-flag are
+    // both DEFAULT-ON, so the combined credibility gate is active.
+    it('test 1: defaults to ON (global + credibility sub-flag) when env unset', () => {
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
+        expect(isMilitaryCredibilityCautionBiasEnabled()).toBe(true);
+        expect(isMilitaryCredibilityCautionBiasActive()).toBe(true);
+    });
+
+    // Test 1b: explicit opt-out ("0"/"false") restores the legacy OFF path.
+    it('test 1b: credibility sub-flag opt-out forces the channel OFF', () => {
+        process.env.AWWV_PDP_MILITARY_CREDIBILITY_CAUTION_BIAS = '0';
         expect(isMilitaryCredibilityCautionBiasEnabled()).toBe(false);
         expect(isMilitaryCredibilityCautionBiasActive()).toBe(false);
+        process.env.AWWV_PDP_MILITARY_CREDIBILITY_CAUTION_BIAS = 'false';
+        expect(isMilitaryCredibilityCautionBiasEnabled()).toBe(false);
     });
 
     // Test 2: Sub-flag override true + global false → combined false.
@@ -216,8 +227,10 @@ describe('Phase E extension — military_credibility → bot caution-bias gate',
         setMilitaryCredibilityCautionBiasOverride(true);
         expect(isMilitaryCredibilityCautionBiasActive()).toBe(true);
         resetPoliticalDimensionGates();
-        expect(isMilitaryCredibilityCautionBiasEnabled()).toBe(false);
-        expect(isMilitaryCredibilityCautionBiasActive()).toBe(false);
+        // After reset, env falls through. With env cleared the credibility channel
+        // is DEFAULT-ON (both tiers default-on), so it is active again.
+        expect(isMilitaryCredibilityCautionBiasEnabled()).toBe(true);
+        expect(isMilitaryCredibilityCautionBiasActive()).toBe(true);
     });
 
     // Test 6: Integration — briefing carries military_credibility when gate ON.
@@ -248,13 +261,17 @@ describe('Phase E extension — military_credibility → bot caution-bias gate',
         expect(briefing.political_dimensions?.patron_confidence).toBeUndefined();
     });
 
-    // Test 7: Byte-stability — briefing OMITS political_dimensions when gate OFF.
-    it('test 7: briefing OMITS political_dimensions when credibility gate OFF', () => {
+    // Test 7: Byte-stability — briefing OMITS political_dimensions when the
+    // substrate is OFF. Since patron + milcred are now DEFAULT-ON, force the
+    // legacy no-op path via the global opt-out override.
+    it('test 7: briefing OMITS political_dimensions when gate OFF', () => {
+        setPoliticalDimensionPropagationOverride(false);
+
         const corpsId = 'test_corps' as FormationId;
         const faction = 'RBiH' as FactionId;
         const state = buildMinimalState(corpsId, faction, 25);
 
-        // Sanity-check all gates are OFF.
+        // Sanity-check all gates are OFF (global opt-out forces every channel off).
         expect(isMilitaryCredibilityCautionBiasActive()).toBe(false);
         expect(isIntlStandingOpsHesitationActive()).toBe(false);
         expect(isCohesionCautionBiasActive()).toBe(false);

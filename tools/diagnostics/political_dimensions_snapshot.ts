@@ -144,11 +144,23 @@ function readEnvFlag(env: NodeJS.ProcessEnv, key: string): boolean {
     return raw === 'true' || raw === '1';
 }
 
+/** Default-ON reader (mirrors the gate module's DEFAULT-ON channels): unset =>
+ *  ON; explicit opt-out is '0' or 'false'. Used for the global propagation
+ *  switch (and any other channel activated DEFAULT-ON). */
+function readEnvFlagDefaultOn(env: NodeJS.ProcessEnv, key: string): boolean {
+    const raw = env[key];
+    return raw !== 'false' && raw !== '0';
+}
+
 /** Build the gate-activation snapshot from current process.env (or override
  *  for tests). Reads env directly — does NOT consult the gate module's
- *  override slots (which are tests-only). */
+ *  override slots (which are tests-only).
+ *
+ *  NOTE: the global propagation switch is DEFAULT-ON (PDP activation lane);
+ *  intl_standing + internal_cohesion sub-flags remain DEFAULT-OFF (guards
+ *  dormant). Mirrors political_dimension_propagation_gate.ts. */
 export function buildGateActivation(env: NodeJS.ProcessEnv = process.env): GateActivationSnapshot {
-    const global = readEnvFlag(env, 'AWWV_POLITICAL_DIMENSION_PROPAGATION');
+    const global = readEnvFlagDefaultOn(env, 'AWWV_POLITICAL_DIMENSION_PROPAGATION');
     const intl = readEnvFlag(env, 'AWWV_PDP_INTL_STANDING_OPS_HESITATION');
     const cohesion = readEnvFlag(env, 'AWWV_PDP_COHESION_CAUTION_BIAS');
     return {

@@ -278,8 +278,10 @@ describe('Phase E activation simulator — Tier 2 (real-scenario shape)', () => 
         expect(bothObs.intlActive).toBe(true);
         expect(bothObs.cohesionActive).toBe(true);
 
-        // After the simulator returns, all overrides must be cleared.
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+        // After the simulator returns, all overrides must be cleared (env-fallback).
+        // The global switch is DEFAULT-ON, but intl + cohesion remain DEFAULT-OFF
+        // (guards dormant), so their combined gates are still inactive.
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
         expect(isIntlStandingOpsHesitationActive()).toBe(false);
         expect(isCohesionCautionBiasActive()).toBe(false);
 
@@ -393,8 +395,9 @@ describe('Phase E activation simulator — Tier 2 (real-scenario shape)', () => 
             }),
         ).rejects.toThrow(/synthetic runner failure/);
         // Gates MUST be reset even after a throw — Tier 2's try/finally
-        // contract.
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+        // contract. After reset (env-fallback): global is DEFAULT-ON, intl +
+        // cohesion remain DEFAULT-OFF (guards dormant).
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
         expect(isIntlStandingOpsHesitationActive()).toBe(false);
         expect(isCohesionCautionBiasActive()).toBe(false);
     });

@@ -1,4 +1,27 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-08] feat(political+scenario): activate PDP patron+milcred (guarded) + E-A5 launch-halt — combined, calibration-flat
+
+**Type:** activation/config change (default-flag flip + scenario turn_max). Branch `feat/activate-pdp-ea5-combined` off `origin/main` (`4b64d21a5`). The convergence step that supersedes #322 (PDP guards) + #324 (E-A5) **by inclusion** — both merged here via `--no-ff`, then the gate defaults flipped. Sweep evidence (trusted): patron+milcred = calibration-FLAT (188w 649); intl+cohesion = −10 even guarded → kept OFF; E-A5 alone = 649 flat. This run is the real test of the E-A5 × PDP **interaction** — confirmed flat.
+
+**Changes:**
+- **Merged guards** (`origin/feat/pdp-activation-guards`): intl turn-gate (`MIN_TURN=100`) + cohesion threshold (=15) — kept in code, **dormant** (their channels stay default-OFF).
+- **Merged E-A5** (`origin/feat/activate-ea5-launch-halt`): `data/scenarios/events/war_1995.json` `us_halts_federation_advance_1995` `turn_max` 184→**188** (so it can fire in the 188w horizon).
+- **Gate defaults** (`src/sim/political/political_dimension_propagation_gate.ts`): the global propagation switch + `patron_confidence` + `military_credibility` are now **DEFAULT-ON** (unset ⇒ on; explicit `'0'`/`'false'` opt-out preserved). `international_standing` + `internal_cohesion` remain **DEFAULT-OFF** (unset ⇒ off, explicit `=1` opt-in) — their guards ride dormant for a future faction-asymmetric tuning lane.
+- Diagnostics tool `tools/diagnostics/political_dimensions_snapshot.ts`: global reader switched to default-on (`readEnvFlagDefaultOn`) to stay truthful to runtime.
+- Test contract updates (defaults flipped): `political_dimension_propagation_gate.test.ts`, `phase_e_patron_confidence_ops_hesitation.test.ts`, `phase_e_military_credibility_caution_bias.test.ts`, `phase_e2_cohesion_caution_bias.test.ts`, `phase_e_activation_simulator.test.ts`, `political_dimensions_snapshot.test.ts`, `causality_query.test.ts`.
+
+**Verification — combined 188w (the E-A5 × PDP interaction test):** `tsc --noEmit` exit 0.
+
+| run | matched | hash | anchors (Zvornik / brijesnica) | bench | crit | per-faction sim (RS/RBiH/HRHB) |
+| --- | --- | --- | --- | --- | --- | --- |
+| **188w** | **649/712** (0.911517) | `d311eeac18492683` | **30/30** (Zvornik=RS PASS / brijesnica=RBiH PASS) | 6/6 | 0 | 321 / 285 / 106 |
+| 40w | — | `235c61f408dc3d95` | — | — | — | (== floor, byte-identical) |
+| 52w | — | `515e0e07ab32db82` | — | — | — | (== floor, byte-identical) |
+
+**FLOOR-FLAT confirmed:** OSID 649 = floor 649; anchors 30/30; `op:zvornik:zvornik`=RS; benchmarks 6/6; 0 critical anomalies (23 total: 5 warn / 18 info). **Srebrenica (`op:srebrenica:srebrenica_2`) + Žepa (`op:rogatica:zepa_2`) both flip RBiH→RS — enclaves FALL (§6 intact).** 188w hash moves `89ef697dfb27c989`→`d311eeac18492683` **legitimately** — E-A5's `us_halts` fires + PDP patron/milcred multipliers fire — the OSID outcome is identical. 40w/52w byte-identical (E-A5 is late-war; patron/milcred multipliers net-zero on the OSID map). Casualties: attacker 113,738 / defender 157,969; civilian killed RBiH 36,287 / RS 3,549 / HRHB 4,000.
+
+**Dormant follow-up:** `international_standing` + `internal_cohesion` stay default-OFF (guards present but inert) — activating them needs a faction-asymmetric tuning lane (sweep showed −10 even guarded, +6 RS over-hold, sub-additive).
+
 ## [2026-06-08] chore(combat): retire ADR-0007 Phase C (delete predictor/resolver split + shared-sector cap; Phase B untouched; byte-identical)
 
 **Type:** dead-code deletion, BYTE-IDENTICAL to the 649 floor. Owner decision honoring the unanimous Pyrrhic 3-lens panel ("retire it — delete the code path, don't just park it disabled"). Phase C was canon-silent and flag-on probes returned a Guardrail-1 wrong-sign (~−2% aggregate war-cost dip — sharing attrition made the war *cheaper*, eroding the negative-sum soul-lock). Branch `chore/retire-adr0007-phase-c` off `origin/main`.

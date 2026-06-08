@@ -21,7 +21,11 @@ import {
 } from '../tools/diagnostics/political_dimensions_snapshot.js';
 import { DIMENSION_IDS } from '../src/sim/events/strategic_dimensions.js';
 
-const ALL_FLAGS_OFF: NodeJS.ProcessEnv = {};
+// The global propagation switch is DEFAULT-ON, so a truly-OFF env must
+// explicitly opt the global switch out. Sub-flags stay default-OFF (absent).
+const ALL_FLAGS_OFF: NodeJS.ProcessEnv = {
+    AWWV_POLITICAL_DIMENSION_PROPAGATION: '0',
+};
 
 const ALL_FLAGS_ON: NodeJS.ProcessEnv = {
     AWWV_POLITICAL_DIMENSION_PROPAGATION: 'true',
@@ -205,8 +209,10 @@ describe('buildPoliticalDimensionsSnapshot', () => {
         expect(offAll.intl_standing_combined_active).toBe(false);
         expect(offAll.cohesion_combined_active).toBe(false);
 
-        // Sub-flag ON but global OFF must NOT report combined active.
+        // Sub-flag ON but global explicitly OFF must NOT report combined active.
+        // (Global is DEFAULT-ON, so the off state must be opted-out explicitly.)
         const subOnly = buildGateActivation({
+            AWWV_POLITICAL_DIMENSION_PROPAGATION: '0',
             AWWV_PDP_INTL_STANDING_OPS_HESITATION: 'true',
         });
         expect(subOnly.intl_standing_ops_hesitation).toBe('ACTIVE');
