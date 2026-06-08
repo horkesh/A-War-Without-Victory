@@ -19730,3 +19730,17 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 **Verification:** `tsc --noEmit` exit 0; `desktop:map:build` exit 0; vitest 49/49 across the 2 new files + `dayton_negotiation_modal` + `dayton_readouts` + `dayton_preview_ipc` + `ui_i18n` (EN↔BCS parity intact). `computeInstitutionalCost` pinned to engine cost functions; default selection proves 0-cost byte-identity for all three factions.
 
 **Context:** Completes the institutional-architecture expansion (Phase 1 #290 data+types, Phase 2 #295 cost dials+bot eval, Phase 3 UI). Build spec `docs/plans/2026-06-07-dayton-institutional-expansion-build-spec.md`.
+
+---
+
+## [2026-06-08] Review-backlog Batch A — command-card (force-launch) routing cohesion
+
+**Type:** UI/IPC routing fix (branch `fix/command-card-routing-batch-a`). No engine/state/sim/scenario touch; no `Math.random`/`Date.now`; calibration-irrelevant (presentation + IPC dispatch only). Closes the four Codex review threads behind Batch A (PRs #126/#119/#274), all re-verified open against current main before implementing.
+
+**Problem:** every Decision-Room `force_launch` directive carried only `{ corpsId, opName }`, so `DirectiveCard` always dispatched the legacy `stageOperationForceLaunch` (active_operations-by-name, 15 CA). The two newer flows therefore mis-routed: a **proposal-override** card left its pending review unresolved (so the same blocker reappeared) and a **proactive held-ready** card (cost shown 25) hit the wrong handler — `Operation not found`, or in a stale-name overlap a 15-CA debit against a 25-CA card. Separately, the friction-stakes preview advertised a patron-confidence cost on `force_launch` that the engine never applies (force-launch never sets `forced_over_objection`), and an invalid request-op target hid both the input and the Issue button so the player could not retry from the card.
+
+**Change:** (1) `presidentialDecisionRoom.ts` — proposal-override directive payload now carries `proposalId`; proactive directive payload now carries `planId` (opName retained for the player-safe caption only). (2) `DirectiveCard.tsx` `stageForceLaunch` routes by discriminator: `proposalId → forceLaunchProposal` (resolves the pending review, 15 CA), `planId → proactiveForceLaunchOp` (held-plan path, 25 CA), else `opName → stageOperationForceLaunch` (legacy fallback) — card-declared cost now matches the IPC its discriminator selects. (3) friction-stakes preview limited to `replace_co` + `request_op` (dropped `force_launch`, which applies no engine consequence). (4) request-op target input + Issue button stay available after a "cannot issue" banner so the president can correct the target and retry. (5) `useIPC.ts` — exposed the already-preloaded `proactiveForceLaunchOp` on the IPC surface (it existed in `preload.cjs` + `electron-main.cjs` but was unreachable from the renderer).
+
+**Files:** `src/ui/map/data/presidentialDecisionRoom.ts`, `src/ui/map/components/army_hq/DirectiveCard.tsx`, `src/ui/map/desktop/useIPC.ts`, `tests/ui/directive_card_stop_op_action.test.ts` (+4 routing/stakes/retry cases), `tests/ui/presidential_decision_room_request_force.test.ts`, `tests/ui/presidential_decision_room.test.ts` (payload-shape assertions).
+
+**Verification:** focused UI vitest 66/66 green; `tsc --noEmit` exit 0; `desktop:map:build` exit 0.

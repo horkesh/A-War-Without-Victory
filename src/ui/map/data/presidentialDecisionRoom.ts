@@ -944,8 +944,9 @@ function addRequestOpDirectiveCards(state: LoadedGameState, cards: CandidateCard
  * FORCE-LAUNCH directives (headline War-Direction lever): one `command`-category
  * card per pending op proposal whose commander withheld approval but offers a
  * presidential override (`override_available === true`). The DirectiveCard's
- * force_launch branch consumes `{ corpsId, opName }` end-to-end with NO objection
- * re-query — the president overrides a known no-go directly (stageOperationForceLaunch).
+ * force_launch branch routes the `proposalId` through the proposal-override IPC
+ * (`forceLaunchProposal`) — overriding a known no-go AND marking the pending
+ * review resolved, so the same blocking proposal does not reappear next turn.
  *
  * Deterministic: proposals are iterated in a stable strictCompare order by
  * proposal id. No nondeterministic or time-based sources.
@@ -977,7 +978,9 @@ function addForceLaunchDirectiveCards(state: LoadedGameState, cards: CandidateCa
         lever: 'force_launch',
         corpsId: proposal.corps_id,
         cost: FORCE_LAUNCH_COST,
-        payload: { opName: proposal.op_name },
+        // proposalId routes DirectiveCard through forceLaunchProposal (resolves the
+        // pending review); opName retained for the player-safe caption only.
+        payload: { opName: proposal.op_name, proposalId: proposal.proposal_id },
       },
       urgencySort: 5,
       sourceSort: `command:force-launch:${proposal.proposal_id}`,
@@ -998,6 +1001,12 @@ function addForceLaunchDirectiveCards(state: LoadedGameState, cards: CandidateCa
  * De-dup: buildForceableReadyPlans already excludes any plan that carries an
  * APPROVE_OP proposal, so a plan with a proposal-override card never produces a
  * proactive card here. Player-faction gating is enforced inside the projection.
+ *
+ * The directive carries `planId` (not just opName) so DirectiveCard routes it
+ * through the proactive IPC (`proactiveForceLaunchOp({ corpsId, planId })`), which
+ * resolves the HELD plan from `commander_state.current_plan` and debits
+ * PROACTIVE_FORCE_LAUNCH_COST — the legacy active_operations-by-name handler can
+ * neither find a held plan nor debit the right cost.
  *
  * Deterministic: the projection returns plans in a stable order (corps id then
  * plan id). No nondeterministic or time-based sources.
@@ -1041,7 +1050,9 @@ function addProactiveForceLaunchDirectiveCards(
         lever: 'force_launch',
         corpsId: plan.corps_id,
         cost: PROACTIVE_FORCE_LAUNCH_COST,
-        payload: { opName: plan.op_name },
+        // planId routes DirectiveCard through proactiveForceLaunchOp (held-plan
+        // path, 25 CA); opName retained for the player-safe caption only.
+        payload: { opName: plan.op_name, planId: plan.plan_id },
       },
       urgencySort: 6,
       sourceSort: `command:proactive-force-launch:${plan.corps_id}:${plan.plan_id}`,
