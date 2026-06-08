@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-06-08: Casualty-Model Realism — military deaths ~2.4× too high (research, no code change)
+
+**Finding:** 188w sim military killed = **143,980 vs historical RDC ~57–62k (~2.4×)**; killed:wounded = **1:1.9 vs ~1:3**; military missing/captured = **106,153 vs ~2–4k durable (~30×)**. Civilian killed (43,164) is near-historical.
+
+**Root cause (ranked):**
+1. **Passive front-attrition dominates** — `src/sim/combat/frontline_attrition.ts` drains every active front-edge brigade **0.5%/turn with no battle** (`BASE_ATTRITION_RATE 0.005`, `:62`/`:313`) plus a bombardment-exposure term (`BOMBARDMENT_EXPOSURE_RATE 0.008 × ln(incoming_FP/own_FP)`, `:315-333`) that hits the firepower-inferior side hardest. = **~55% of gross casualties / ~60% of killed**; RBiH 74% of its casualties are non-battle. **This dial was tuned to hit KIA totals (`n303`/`n553`) → entangled with territory calibration.**
+2. **KIA split too lethal** — `KIA_FRACTION 0.30` hardcoded + duplicated in `attack_casualty_distribution.ts:27-29`, `battle_resolution.ts:89-90`, `paramilitary_sweep.ts:57-58`. Should be ~0.18 for 1:3. Reporting-only (no territory cascade — `applyPersonnelLoss` uses the total).
+3. **Missing/captured over-production** — 0.15 MIA on inflated gross + no POW-exchange; surrender-cascade `battle_resolution.ts:651-658` may co-inflate.
+
+**Targets, lanes, sequencing, and gates:** `docs/40_reports/proposals/20260608_CASUALTY_MODEL_REALISM.md`. Realism verdict: `REAL_WAR_MASTER.md`. Tracked as Command-Board P1 "Combat casualty-model realism" + roadmap v0.9.2 balance note. **Owner rejected the Tabeau per-army split** (ethnicity-of-dead ≠ army-of-service; use RDC by-formation ~31k/21-25k/6k). One-change-per-run; front-attrition-volume lane is 188w-gated.
+
+---
+
 ## 2026-05-23: Combat Evaluator BFS Queue Cursor
 
 **Change:** `evaluateReturnToCorps(...)` in `src/sim/combat/bot_brigade_eval_front.ts` now uses a head cursor for its friendly-territory BFS back to own-corps territory.

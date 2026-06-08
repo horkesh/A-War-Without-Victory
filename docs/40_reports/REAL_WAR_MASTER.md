@@ -1,5 +1,68 @@
 # Real War Master
 
+## Latest Review: 188w casualty output — KIA x2.2 too high, killed:wounded inverted, missing/captured x10 absurd; civilian model the one bright spot (2026-06-08)
+
+**Run:** `apr1992_definitive_188w__3a26ccdf831ca525__w188_n2018` | end week 188 (Apr 1992 → Nov 1995)
+
+**Mandate:** Realism + history pass on the casualty magnitudes/ratios/shape. (Pipeline-code root-causing handled by a parallel agent on `attack_resolution_osid.ts` / `attack_resource_aftermath.ts`.)
+
+### Sim figures under audit
+
+| Faction | KIA | Missing/Captured | WIA | Civilian KIA |
+|---|---:|---:|---:|---:|
+| RBiH | 81,514 | 60,520 | 154,784 | 36,325 |
+| RS | 50,729 | 37,786 | 97,634 | 2,858 |
+| HRHB | 11,737 | 7,847 | 22,066 | 3,981 |
+| **TOTAL** | **143,980** | **106,153** | **274,484** | **43,164** |
+
+Internal displaced RBiH 599,808 / RS 216,332 / HRHB 124,963; fled abroad 268,838.
+
+### Historical anchors (CORRECTED — source hierarchy ICTY-DU > RDC > Wikipedia)
+
+The owner's working anchor ("~60k military total, ARBiH 30k / VRS 25k / HVO 5k") is **right on the total magnitude but wrong on the faction shape.** The authoritative count is the RDC *Bosnian Book of the Dead* (final results, Jan 2013), evaluated by the ICTY Demographic Unit (Ewa Tabeau, "the largest existing database on Bosnian war victims"):
+
+- **Total deaths/missing ~97,207** (min; +~5,100 unconfirmed). **~60% military (~58–65k), ~40% civilian (~39.5k).**
+- **Military deaths by side (ICTY Demographic Unit): Bosniak/ARBiH ~42,501 · Serb/VRS ~15,299 · Croat/HVO ~7,183** = **~64,983 total military.** This is the load-bearing correction: real ARBiH military deaths were **~2.8× VRS**, not roughly equal. The sim's RBiH-killed > RS-killed *direction* is therefore HISTORICALLY CORRECT — the error is in the magnitudes, and the worst inflator is **RS, not RBiH** (see item 4).
+- **Civilian deaths by ethnicity: ~83% Bosniak (~33,071) · ~10% Serb (~4,000) · ~5% Croat (~2,000).**
+- **Still-missing (unresolved fate): ~10,500.** (NOT the same as wartime POW/MIA flux, but the only durable "missing" anchor.)
+
+Citations: [RDC Bosnian Book of the Dead — RFE/RL](https://www.rferl.org/a/Bosnian_Researcher_Counts_The_Dead_And_Faces_Threats_For_His_Objectivity/1350799.html); [Over 97,000 killed — ReliefWeb](https://reliefweb.int/report/bosnia-and-herzegovina/over-97000-bosnians-killed-civil-war-study); [ICTY-DU military-deaths-by-ethnicity, via Bosnian War / Bosnian genocide — Wikipedia](https://en.wikipedia.org/wiki/Bosnian_genocide); [ICTY OTP War Demographics casualty paper (Tabeau)](https://www.icty.org/x/file/About/OTP/War_Demographics/en/bih_casualty_undercount_conf_paper_100201.pdf).
+
+### Item-by-item verdict
+
+**1. Aggregate military KIA 143,980 vs real ~65,000 — ABSURD (x2.22).** Per-faction overshoot on KIA alone:
+
+| Faction | sim KIA | real mil deaths | overshoot | +excess |
+|---|---:|---:|---:|---:|
+| RBiH | 81,514 | ~42,501 | **x1.92** | +39,013 |
+| RS | 50,729 | ~15,299 | **x3.32** | +35,430 |
+| HRHB | 11,737 | ~7,183 | **x1.63** | +4,554 |
+
+The sim already over-kills before you even count missing/captured. Add the sim's separate missing/captured bucket (real wars don't cleanly separate these, and the RDC "deaths/missing" total folds them in) and the picture is far worse: **KIA+MC = 250,133 = x3.85 the entire real military death toll.** RS KIA+MC alone (88,515) is **x5.79** the ~15,299 real VRS military deaths. A VRS that lost 88k men killed-or-captured did not fight the war Mladić fought — the VRS was a ~80–100k force; this is near-total destruction of the army twice over.
+
+**2. Killed:wounded ~1:1.9 vs real ~1:3–1:4 — ABSURD; the split is far too lethal.** All three factions land at ~1:1.9 (RBiH 1:1.90, RS 1:1.92, HRHB 1:1.88). Modern infantry war — and the Bosnian War specifically — runs ~3–4 wounded per killed; ICRC/standard combat-medicine ratios are 1:3 to 1:4, and irregular wars with poor evac trend *higher* WIA:KIA, not lower. A 1:1.9 split means the model is converting men who would historically have been wounded-and-survived into dead. If WIA were re-anchored to 1:3.5, the same wounded pool (274,484) implies ~78k KIA — still high, but the lethality split alone accounts for roughly **half the KIA overshoot.** This is a primary culprit, not a rounding issue.
+
+**3. Missing/captured 106,153 vs ~10,500 durable-missing — ABSURD (x10.1).** Missing/captured is **42% of the sim's killed-or-captured total.** In the real war, POWs were exchanged in their thousands (not tens of thousands), and the durable unresolved-missing figure is ~10,500. A war that ends with 106k men in the missing/captured column is generating a phantom category at ten times historical scale. This bucket is the single most over-inflated figure in the run and the easiest "tell" that the casualty pipeline is over-producing losses (likely a destroyed-brigade → MC reclassification or a per-turn attrition leak feeding this column).
+
+**4. Faction shape — owner premise PARTLY WRONG; RS is the over-attrited faction, not RBiH.** Sim KIA shares: RBiH 56.6% / RS 35.2% / HRHB 8.2%. Real military-death shares (RDC/ICTY-DU): RBiH **65.4%** / RS **23.5%** / HRHB 11.1%. So the sim actually **under-weights** RBiH's share of the dead and **over-weights** RS by ~12pp. RBiH's *absolute* KIA is the largest (correct — ARBiH really did suffer the most), but its overshoot multiplier (x1.92) is the *lowest* of the three; **RS carries the worst overshoot (x3.32 KIA, x5.79 KIA+MC).** 
+
+The ADR-0007 shared-attrition fault (lone front-edge holder eats all fatigue → morale0/coh0 spiral; `attack_resource_aftermath.ts:101` dumps defender fatigue on the single primary defender while reserves lend power for free) IS a real RBiH-specific inflator — ARBiH spends far more of the war as the contested *defender* holding hot OSIDs (Doboj, Sarajevo ring, the enclaves), exactly where that bug bites. It explains why RBiH absolute losses are highest and why the meat-grinder pattern (Issue #46: fresh brigades fed into Doboj/Bihać at 0.12–0.40 PR) compounds RBiH KIA. **But it does NOT explain the RS over-attrition**, which is the larger *proportional* error here. The RS inflation is more consistent with a faction-agnostic over-production in the casualty math (lethality split per item 2 + the MC leak per item 3) hitting the attacker side, plus VRS being the contested defender in the 1995 Federation cascade (Krajina collapse) where the same lone-holder fatigue spiral now bites VRS. Net: ADR-0007 is a contributor but **not** the dominant lever — items 2 and 3 are.
+
+**5. Civilian killed distribution — PLAUSIBLE, the one bright spot.** Sim civilian shares: RBiH 84% / RS 7% / HRHB 9%; real (RDC): Bosniak 83% / Serb 10% / Croat 5%. The *shape* is within a few points of the historical record — the overwhelming Bosniak-civilian victim concentration is correctly reproduced. Total magnitude (43,164 vs ~39,500) is only ~9% high — by far the best-calibrated casualty figure in the run. Minor notes: sim slightly under-weights Serb civilian share (7% vs 10%) and over-weights Croat (9% vs 5%), but both are within tolerance for a strategic model. **Do not touch the civilian model to fix the military numbers** — it is calibrated and the two pipelines must stay decoupled.
+
+### Ranked most-likely mechanism culprits (for the pipeline-code agent)
+
+1. **Killed:wounded split too lethal (1:1.9 vs 1:3.5).** Faction-agnostic, explains ~half the KIA overshoot. Re-anchoring the WIA:KIA conversion is the highest-leverage single fix and is calibration-orthogonal to territory (deaths/wounded don't move OSIDs). **P0.**
+2. **Missing/captured over-production (x10).** A 106k MC column at 42% of losses is a phantom category. Suspect destroyed-brigade reclassification and/or a per-turn attrition leak into MC. **P0.**
+3. **RS attacker-side casualty over-production (x3.3 KIA).** The proportional shape error. Not ADR-0007 (that's a defender/RBiH bug); look at attacker casualty scaling in the contested-battle path. **P1.**
+4. **ADR-0007 shared-attrition lone-holder spiral (RBiH defender inflator) + Issue #46 meat-grinder.** Real but secondary to 1–3. Phase C (`ENABLE_SHARED_SECTOR_DEFENSE`) is the standing fix; Guardrail-1 (war-cost conservation) means fixing this must not silently *lower* aggregate cost — but here aggregate cost is already x2.2–3.8 too high, so the guardrail tension is favorable. **P1.**
+
+### Verdict
+
+**WAR-OR-GAME: WITHHOLDS APPROVAL on the casualty model.** A 188-week run that kills 144k soldiers (x2.2), parks another 106k in a missing/captured column at ten times historical scale, and does so with a killed:wounded ratio that converts survivable wounds into deaths, is not representing the Bosnian War — it is representing an attritional bloodbath roughly 2–4× more lethal than the real thing. The total death toll the war actually produced (~97k including civilians, ~65k military) is *exceeded by the sim's military KIA alone.* The civilian model, by contrast, is calibrated and should be left alone. Fix order: lethality split → MC leak → RS attacker scaling → ADR-0007 Phase C.
+
+---
+
 ## Latest Review: HRHB "sue for peace" was historically anachronistic in mid-1993; Washington Agreement = Federation military integration reset (2026-05-23)
 
 **Change:** The decision event `strategic_posture_review_hrhb` (fires turn ≥ 84, mid-1993) was producing bot picks of `sue_for_peace_hrhb` (the "Accept the Federation framework" branch) — historically anachronistic. HRHB leadership under Boban in mid-1993 was hardening, not seeking Federation. The actual historical sequence:
