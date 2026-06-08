@@ -590,20 +590,29 @@ describe('strict null inventory progress', () => {
         // one contained JSON-import double-cast `osidAreas as unknown as OsidAreaData`
         // (package_area_resolver.ts), the established typed-JSON-import idiom (joins the
         // existing 3). non_null_assertions / as_factionid / as_any UNCHANGED.
+        // FORCE-LAUNCH patron-cost lane (#327): +1 optional field
+        // `force_launch_consequence_applied` on CorpsOperation (game_state.ts, sim domain) —
+        // the one-shot guard that marks an op's force-launch-over-objection patron cost as
+        // charged. So 511 → 512 / sim 328 → 329. OPTIONAL + set ONLY on the player-only
+        // force-launch apply path (was_force_launched is never set on the bot/headless path)
+        // → absent on every headless/historical run → byte-identical baseline by construction
+        // (40w 235c61f408dc3d95 unchanged). No new type-escape: the apply step narrows via an
+        // `if (!cmd ...) continue` guard, so as_factionid / as_unknown / as_any /
+        // non_null_assertions are ALL UNCHANGED — this bump is purely the optional-field ratchet.
         expect(current.counts).toMatchObject({
             as_factionid_casts: 1,
             as_unknown_casts: 4,
             as_any_casts: 0,
             non_null_assertions_dot: 7,
             non_null_assertions_index: 0,
-            optional_fields_game_state: 511,
+            optional_fields_game_state: 512,
         });
-        expect(current.optional_field_domains.total).toBe(511);
+        expect(current.optional_field_domains.total).toBe(512);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 328,
+            sim: 329,
             state: 173,
             ui_adapter: 0,
             unknown: 0,

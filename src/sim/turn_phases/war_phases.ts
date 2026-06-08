@@ -474,14 +474,15 @@ function applyOpHalts(state: GameState): void {
  * consequence — Presidential Command Model §4. Single owner of the
  * apply-force-launch-consequences step.
  *
- * THE GAP THIS CLOSES: the force-launch IPC handlers (electron-main.cjs
- * stage-operation-force-launch / force-launch-proposal / proactive-force-launch-op, and
- * commander_loop.ts via player_op_response.force_launched) tag an op
- * `was_force_launched` + snapshot `commander_assessment_at_launch`, but — unlike the
+ * THE GAP THIS CLOSES: the human-only force-launch IPC handlers in src/desktop
+ * (electron-main.cjs) and commander_loop.ts (via player_op_response.force_launched) tag an
+ * op `was_force_launched` + snapshot `commander_assessment_at_launch`, but — unlike the
  * REQUEST-OP path (injectOpDirectives, which calls applyForceOpConsequence) — applied NO
  * command-lever consequence. The player could override a SHOWN commander objection for
  * free, breaking the faction-asymmetric command-friction model. This step charges that
- * deferred patron_confidence price.
+ * deferred patron_confidence price. (The IPC channel names live in src/desktop only — the
+ * back-the-officer human-only-determinism guard keeps them out of src/sim; this step keys
+ * solely off the op tags those handlers set, never the channels.)
  *
  * "SHOWN OBJECTION" ONLY: the cost fires ONLY when commander_assessment_at_launch is a
  * no-go ('postpone' / 'abort'). A force-launch over a commander who recommended 'launch'
@@ -524,15 +525,15 @@ function applyForceLaunchConsequences(state: GameState): void {
 
     for (const corpsId of corpsIds) {
         const cmd = corpsCommand[corpsId];
-        const ops = Array.isArray(cmd?.active_operations) ? cmd!.active_operations : [];
+        if (!cmd || !Array.isArray(cmd.active_operations)) continue;
         const faction = formations[corpsId]?.faction ?? null;
-        for (const op of ops) {
+        for (const op of cmd.active_operations) {
             if (!isUnchargedForcedObjection(op)) continue;
             // Mark charged regardless of whether the faction resolves, so an op missing a
             // faction is never retried every subsequent turn (one-shot intent preserved).
             op.force_launch_consequence_applied = true;
             if (faction) {
-                applyForceOpConsequence(state, corpsId, faction, turn, cmd!);
+                applyForceOpConsequence(state, corpsId, faction, turn, cmd);
             }
         }
     }
