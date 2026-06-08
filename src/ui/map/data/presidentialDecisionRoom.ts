@@ -663,25 +663,12 @@ function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void 
 
   for (const item of items.slice(0, 4)) {
     const action = actionForBriefingItem(item);
-    // STOP-OP directive: a briefing item targeting a live operation carries the
-    // (corpsId, opName) pair as `operationKey` ("corpsId|opName"). The president
-    // can HALT it inline (stageOpHaltOrder). Only populate when BOTH parts parse.
-    const directive: PresidentialDecisionRoomDirective | undefined = (() => {
-      if (item.target.type !== 'operation') return undefined;
-      const key = item.target.operationKey;
-      if (!key) return undefined;
-      const sep = key.indexOf('|');
-      if (sep <= 0 || sep >= key.length - 1) return undefined;
-      const corpsId = key.slice(0, sep);
-      const opName = key.slice(sep + 1);
-      return {
-        lever: 'stop_op',
-        corpsId,
-        cost: STOP_OP_COST,
-        payload: { corpsId, opName },
-      };
-    })();
-
+    // NOTE: briefing items do NOT carry a stop-op directive. The sim briefing target
+    // (collect_briefing.ts) never emits a per-operation (corpsId, opName) pair, and the
+    // shared `toTargetView` collapses targets to corps/enclave/settlement/none — so a
+    // `type:'operation'` briefing target never reaches here. The STOP-OP lever is issued
+    // from `addStopOpDirectiveCards`, keyed off the live executing-operations list
+    // (`state.operations`), which IS the data the Army-HQ Stand-Down button used.
     cards.push({
       id: `briefing:${item.id}`,
       category: 'briefing',
@@ -693,9 +680,62 @@ function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void 
       actionLabel: action.actionLabel,
       evidence: [item.category ? humanize(item.category) : humanize(item.kind)],
       navigationTarget: action.navigationTarget,
-      ...(directive ? { directive } : {}),
       urgencySort: 0,
       sourceSort: `${item.title}:${item.id}`,
+    });
+  }
+}
+
+/**
+ * STOP-OP directives (War-Direction lever): one `command`-category card per PLAYER-faction
+ * EXECUTING operation, keyed off the live operation list (`state.operations`, already
+ * player-faction filtered by the adapter). This is the canonical, reachable home of the
+ * stop-op lever — it replaces the briefing-derived path, which never fired because the
+ * sim briefing target carries no per-operation (corpsId, opName) pair and `toTargetView`
+ * collapses operation targets (see `addBriefingCards`). `op.name` is the RAW engine name
+ * the IPC (`stageOpHaltOrder`) expects; `op.display_name` is the player-safe caption.
+ *
+ * Deterministic: operations are iterated in a stable strictCompare order (corps id then
+ * raw op name). No nondeterministic or time-based sources.
+ */
+function addStopOpDirectiveCards(state: LoadedGameState, cards: CandidateCard[]): void {
+  const playerFaction = state.player_faction ?? null;
+  if (!playerFaction) return;
+
+  const executing = [...(state.operations ?? [])]
+    .filter((op) => op.faction === playerFaction && op.phase === 'execution')
+    .sort((a, b) => {
+      const corpsDelta = strictCompare(a.corps_id, b.corps_id);
+      if (corpsDelta !== 0) return corpsDelta;
+      return strictCompare(a.name, b.name);
+    });
+
+  for (const op of executing) {
+    cards.push({
+      id: `command:stop-op:${op.corps_id}:${op.name}`,
+      category: 'command',
+      severity: 'warning',
+      title: t('decisionRoom.card.stopOp.title', { opName: op.display_name }),
+      explanation: t('decisionRoom.card.stopOp.explanation', {
+        opName: op.display_name,
+        corps: op.corps_name,
+      }),
+      sourceOwner: t('decisionRoom.card.command.sourceOwner'),
+      sourceLabel: t('decisionRoom.card.stopOp.sourceLabel'),
+      actionLabel: t('decisionRoom.action.inspectCorps'),
+      evidence: [
+        t('decisionRoom.card.stopOp.evidence.corps', { corps: op.corps_name }),
+        t('decisionRoom.card.stopOp.evidence.executing'),
+      ],
+      navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: op.corps_id },
+      directive: {
+        lever: 'stop_op',
+        corpsId: op.corps_id,
+        cost: STOP_OP_COST,
+        payload: { corpsId: op.corps_id, opName: op.name },
+      },
+      urgencySort: 7,
+      sourceSort: `command:stop-op:${op.corps_id}:${op.name}`,
     });
   }
 }
@@ -1843,6 +1883,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   addBriefingCards(state, candidates);
   addCommandPersonnelCards(state, candidates);
   addRequestOpDirectiveCards(state, candidates);
+  addStopOpDirectiveCards(state, candidates);
   addForceLaunchDirectiveCards(state, candidates);
   addProactiveForceLaunchDirectiveCards(state, candidates);
   addHardTurnCards(state, osidNameMap, candidates);
