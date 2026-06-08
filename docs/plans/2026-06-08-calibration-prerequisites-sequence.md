@@ -1,7 +1,7 @@
 # Calibration-Affecting Prerequisites — Master Execution Sequence
 
-**Status:** PLAN (owner directive 2026-06-08 — finish these before further calibration tuning, so calibration runs ONCE on final mechanics).
-**Authoritative floor of record:** 188w 634/712 hash `2fdbff2fdba1b9c2`, anchors 29/30 (only `op:lukavac:brijesnica_donja_2` + `op:zvornik:zvornik` fail); 40w `2221700edf20621e`; 52w `9991ff2d29ebbbcd` (`docs/40_reports/CALIBRATION_MASTER.md`).
+**Status:** PLAN — **LARGELY EXECUTED (2026-06-08).** Phase 0 ✅, Phase-2 casualty Lanes 1b/2/3 + ADR-0007 Phase B ✅ (PR-1 v2 #316), Phase-3 Farz `brijesnica_donja_2` ✅ + E-A5 wired ✅ (PR-3 #312). **REMAINING:** E-B1 (in flight, last spine item); ADR-0007 Phase C (deferred/§6-canon-blocked); Phase-4 PDP activations (built-but-off, owner-gated); E-A5 emitter activation + intel-ambush (owner-gated experiments); #170 enclave-resilience (parked); E-A6 (deferred). See `CALIBRATION_MASTER.md` for the live floor.
+**Authoritative floor of record:** ~~188w 634/712 hash `2fdbff2fdba1b9c2`, anchors 29/30~~ → **SUPERSEDED: 188w 649/712 hash `89ef697dfb27c989`, anchors 30/30, 0 criticals; 40w `235c61f408dc3d95`** (PR-3 #312 → PR-1 v2 #316). 52w `9991ff2d29ebbbcd`. Authoritative = `docs/40_reports/CALIBRATION_MASTER.md`.
 **Marking:** see the "⚠️ CALIBRATION-AFFECTING PREREQUISITES" note in `docs/plans/COMMAND_BOARD.md`.
 
 This sequence is the synthesis of six parallel read-only scoping passes (2026-06-08). It supersedes the ad-hoc ordering implied by the individual proposals.
