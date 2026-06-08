@@ -206,12 +206,9 @@ function OperationBriefingModalWrapper() {
     close(null);
   };
 
-  const handleForceLaunch = async () => {
-    const result = await ipc.stageOperationForceLaunch({ corpsId: ctx.corpsId, operationName: ctx.operationName });
-    if (!result.ok) useGameStore.getState().setLoadError(result.error ?? 'Failed to force-launch operation.');
-    close(null);
-  };
-
+  // Force-launch (Level 3 Direct Intervention) is issued ONLY from the Presidential
+  // Decision Room (DirectiveCard, force_launch directive). This review modal stays
+  // read-only — it surfaces the commander's go/no-go callbacks but no override.
   return (
     <OperationBriefingModal
       isOpen
@@ -220,7 +217,6 @@ function OperationBriefingModalWrapper() {
       onPostpone={() => handleDecision('postpone')}
       onAbort={() => handleDecision('abort')}
       onOrderProbe={() => handleDecision('probe')}
-      onForceLaunch={() => void handleForceLaunch()}
     />
   );
 }

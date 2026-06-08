@@ -44,6 +44,7 @@ export interface PresidentialDecisionRoomDirective {
     | 'authorize_op'
     | 'replace_co'
     | 'elite_deploy'
+    | 'review_proposal'
     | 'front_visit'
     | 'address_nation'
     | 'decorate_unit';
@@ -736,6 +737,64 @@ function addStopOpDirectiveCards(state: LoadedGameState, cards: CandidateCard[])
       },
       urgencySort: 7,
       sourceSort: `command:stop-op:${op.corps_id}:${op.name}`,
+    });
+  }
+}
+
+/**
+ * PROPOSAL-REVIEW directives (autonomy Level-1 Assisted review queue → War-Direction
+ * lever): one ISSUE-ABLE `command`-category card per unresolved player-faction entry in
+ * the autonomy proposal-review queue. Sourced from `state.pendingProposalReviews`, which
+ * the adapter (`derivePendingProposalReviews`) has ALREADY filtered to unresolved
+ * (`accepted == null`) AND player-faction — the exact actionable set the AutonomyPanel
+ * used to render accept/withhold buttons for.
+ *
+ * FULL DECISION-ROOM CONVERGENCE: this is the canonical, single-surface home of the
+ * "approve / deny a general's proposal" decision. The AutonomyPanel keeps showing the
+ * autonomy STATE (level + pending count) but no longer ISSUES the approval — the accept
+ * (`acceptProposal`) and withhold (`rejectProposal`) actions are both wired in
+ * DirectiveCard's `review_proposal` branch, routing through the SAME IPC.
+ *
+ * Cost 0 — reviewing the officer's own proposal (accept = agreeing; withhold = holding
+ * the current stance) spends no command authority, exactly as the AutonomyPanel path did.
+ * `description` is the adapter's player-safe prose; `proposed_action` is NOT surfaced
+ * (it can carry a raw corps id). `id` is the proposalId the IPC expects.
+ *
+ * Deterministic: reviews are iterated in a stable strictCompare order by proposal id.
+ * No nondeterministic or time-based sources.
+ */
+function addProposalReviewDirectiveCards(state: LoadedGameState, cards: CandidateCard[]): void {
+  const playerFaction = state.player_faction ?? null;
+  if (!playerFaction) return;
+
+  const reviews = [...(state.pendingProposalReviews ?? [])].sort((a, b) =>
+    strictCompare(a.id, b.id),
+  );
+
+  for (const review of reviews) {
+    cards.push({
+      id: `command:review-proposal:${review.id}`,
+      category: 'command',
+      severity: 'warning',
+      title: t('decisionRoom.card.reviewProposal.title', {
+        domain: humanize(review.domain),
+      }),
+      explanation: review.description,
+      sourceOwner: t('decisionRoom.card.command.sourceOwner'),
+      sourceLabel: t('decisionRoom.card.reviewProposal.sourceLabel'),
+      actionLabel: t('decisionRoom.action.personnel'),
+      evidence: [
+        t('decisionRoom.card.reviewProposal.evidence.domain', { domain: humanize(review.domain) }),
+        t('decisionRoom.card.reviewProposal.evidence.review'),
+      ],
+      navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
+      directive: {
+        lever: 'review_proposal',
+        cost: 0,
+        payload: { proposalId: review.id },
+      },
+      urgencySort: 8,
+      sourceSort: `command:review-proposal:${review.id}`,
     });
   }
 }
@@ -1884,6 +1943,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   addCommandPersonnelCards(state, candidates);
   addRequestOpDirectiveCards(state, candidates);
   addStopOpDirectiveCards(state, candidates);
+  addProposalReviewDirectiveCards(state, candidates);
   addForceLaunchDirectiveCards(state, candidates);
   addProactiveForceLaunchDirectiveCards(state, candidates);
   addHardTurnCards(state, osidNameMap, candidates);

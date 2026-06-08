@@ -38,6 +38,9 @@ describe('DirectiveCard act-layer lever → art map', () => {
       stop_op: 'act_authorize_op',
       elite_deploy: 'act_authorize_op',
       replace_co: 'act_replace_commander',
+      // review_proposal (approve/withhold a general's autonomy proposal) reuses the
+      // personnel-change still — it is a command-staff personnel decision.
+      review_proposal: 'act_replace_commander',
       front_visit: 'act_front_visit',
       // Leadership gestures (§10) carry their own per-faction command-card art,
       // resolved via the faction-aware override layer (act_address_nation_<faction>.webp
@@ -58,6 +61,7 @@ describe('DirectiveCard act-layer lever → art map', () => {
       'stop_op',
       'elite_deploy',
       'replace_co',
+      'review_proposal',
       'front_visit',
     ];
     const expectedBasename: Partial<Record<Lever, string>> = {
@@ -67,6 +71,7 @@ describe('DirectiveCard act-layer lever → art map', () => {
       stop_op: 'consequence_reserve_deployment.webp',
       elite_deploy: 'consequence_reserve_deployment.webp',
       replace_co: 'consequence_personnel_change.webp',
+      review_proposal: 'consequence_personnel_change.webp',
       front_visit: 'consequence_public_pressure.webp',
     };
     for (const lever of STILL_LEVERS) {

@@ -13,11 +13,9 @@ import { OrderInterpretationSection } from './army_hq/OrderInterpretationSection
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { t } from '../i18n';
-import { deriveOperationOutcomeCategory, deriveRecommendationExplanation, deriveDelegationContext, deriveOrderInterpretation, deriveInterventionRisk } from '../data/command_strain';
+import { deriveOperationOutcomeCategory, deriveRecommendationExplanation, deriveDelegationContext } from '../data/command_strain';
 import type { RecommendationExplanation, ReadinessTrend, DelegationContext } from '../data/command_strain';
-import { COMMAND_AUTHORITY_RECOVERY_PER_TURN, FORCE_LAUNCH_COST } from '../utils/commandAuthority';
-
-const RECOVERY_PER_TURN = COMMAND_AUTHORITY_RECOVERY_PER_TURN;
+import { FORCE_LAUNCH_COST } from '../utils/commandAuthority';
 
 interface OperationBriefingModalProps {
     isOpen: boolean;
@@ -27,8 +25,6 @@ interface OperationBriefingModalProps {
     onPostpone?: () => void;
     onAbort?: () => void;
     onOrderProbe?: () => void;
-    /** Level 3 Direct Intervention — force-launch overriding the commander's recommendation. */
-    onForceLaunch?: () => void;
 }
 
 function ReadinessBar({ label, value, thresholdLabel }: { label: string; value: number; thresholdLabel?: string }) {
@@ -318,71 +314,15 @@ function OperationConstraintContext({ assessment }: {
     );
 }
 
-/** Direct Intervention section — shown when the commander does NOT recommend launch. */
-function DirectInterventionSection({ assessment, currentAuth, corpsStrain, corpsStrainLabel, interventionRisk, onForceLaunch }: {
-    assessment: string;
-    currentAuth: number;
-    /** Existing command strain on this corps — triggers compound-risk notice when > 0. */
-    corpsStrain: number;
-    corpsStrainLabel: 'healthy' | 'strained' | 'compromised';
-    /** Category-aware consequence sentence from deriveInterventionRisk(). null = use generic fallback. */
-    interventionRisk?: string | null;
-    onForceLaunch?: () => void;
-}) {
-    const canAfford = currentAuth >= FORCE_LAUNCH_COST;
-    const remaining = currentAuth - FORCE_LAUNCH_COST;
+// FULL DECISION-ROOM CONVERGENCE: the force-launch (Level 3 Direct Intervention) lever
+// is issued ONLY from the Presidential Decision Room (DirectiveCard, force_launch
+// directive). This modal is a read-only commander-decision review — it shows the
+// commander's go/no-go assessment, intel/supply/force context, and the player's
+// passive go/no-go callbacks (launch/postpone/abort/probe), but it no longer renders
+// a force-launch / override-command-chain affordance. The override lives in the
+// Decision Room so presidential command stays single-surface.
 
-    // Wave 3: category-differentiated copy; falls back to generic when null.
-    const explanation = interventionRisk
-        ?? (assessment === 'abort'
-            ? t('operationBriefing.fallbackAbortRisk')
-            : t('operationBriefing.fallbackPostponeRisk'));
-
-    return (
-        <div className="mx-4 my-3 border border-amber-400/40 bg-amber-950/30">
-            <div className="px-3 py-2 border-b border-amber-400/50 bg-amber-950/40 flex items-center justify-between">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-amber-200">{t('operationBriefing.directIntervention')}</span>
-                <span className="text-[9px] uppercase font-bold tracking-wider text-amber-300">{t('operationBriefing.level3')}</span>
-            </div>
-            <div className="px-3 py-2 space-y-2">
-                {/* Compound-risk notice — silence = healthy (no notice at strain 0). */}
-                {corpsStrain > 0 && (
-                    <p className="text-[10px] text-amber-100 leading-relaxed border-l-2 border-amber-500/60 pl-2 bg-amber-950/40 py-1">
-                        {t('operationBriefing.compoundRisk', { strain: t(corpsStrainLabel === 'compromised' ? 'operationBriefing.compromised' : 'operationBriefing.strained') })}
-                    </p>
-                )}
-                <p className="text-[10px] text-amber-100 leading-relaxed">{explanation}</p>
-                <div className="flex items-center gap-4 text-[10px] font-mono tabular-nums">
-                    <span className="text-neutral-600">
-                        {t('operationBriefing.commandAuthority')} <b className="text-text-primary">{currentAuth}</b> → <b className={canAfford ? 'text-amber-200' : 'text-red-300'}>{canAfford ? remaining : currentAuth}</b> {t('operationBriefing.after')}
-                    </span>
-                    <span className="text-neutral-500">{t('operationBriefing.costRecovery', { cost: FORCE_LAUNCH_COST, recovery: RECOVERY_PER_TURN })}</span>
-                </div>
-                <button
-                    type="button"
-                    onClick={onForceLaunch}
-                    disabled={!canAfford}
-                    className={`w-full mt-1 px-3 py-1.5 text-[10px] uppercase font-bold tracking-wider border transition-colors ${
-                        canAfford
-                            ? 'bg-amber-950/50 hover:bg-amber-900/60 text-amber-100 border-amber-400 cursor-pointer'
-                            : 'bg-panel-card text-neutral-400 border-panel-border cursor-not-allowed'
-                    }`}
-                    title={canAfford
-                        ? t('operationBriefing.forceLaunchTitle', { cost: FORCE_LAUNCH_COST })
-                        : t('operationBriefing.insufficientAuthority', { current: currentAuth, cost: FORCE_LAUNCH_COST })
-                    }
-                >
-                    {canAfford
-                        ? t('operationBriefing.overrideCommandChain')
-                        : t('operationBriefing.insufficientAuthority', { current: currentAuth, cost: FORCE_LAUNCH_COST })
-                    }
-                </button>
-            </div>
-        </div>
-    );
-}
-
-export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, onAbort, onOrderProbe, onForceLaunch }: OperationBriefingModalProps) {
+export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, onAbort, onOrderProbe }: OperationBriefingModalProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const context = useGameStore((s) => s.operationBriefingContext);
 
@@ -426,22 +366,6 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
             corpsStrain,
         );
     }, [operation.phase, assessment, corpsStrain]);
-
-    // Wave 3: Derive category-aware intervention risk copy for DirectInterventionSection.
-    // deriveOrderInterpretation is called here (not inside OrderInterpretationSection) so
-    // the category is available at modal level. Only meaningful in planning phase when the
-    // player is about to override a reluctant commander.
-    const interventionRisk = useMemo(() => {
-        if (operation.phase !== 'planning' || !assessment || assessment === 'launch') return null;
-        const { category, severity } = deriveOrderInterpretation(
-            corpsStrain,
-            assessment as 'launch' | 'postpone' | 'abort',
-            situationAssessment?.primaryConstraint,
-            operation.readinessTrend?.direction,
-            postponements,
-        );
-        return deriveInterventionRisk(category, assessment as 'postpone' | 'abort', severity);
-    }, [operation.phase, assessment, corpsStrain, situationAssessment, operation.readinessTrend?.direction, postponements]);
 
     // Wave 5: Derive recommendation explanation from assessment snapshot + commander personality
     const recommendationExplanation = useMemo(() => {
@@ -573,17 +497,9 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                     />
                 )}
 
-                {/* Direct Intervention — only when commander does NOT recommend launch */}
-                {assessment !== 'launch' && onForceLaunch && (
-                    <DirectInterventionSection
-                        assessment={assessment ?? 'postpone'}
-                        currentAuth={loadedGameState?.commandAuthority?.current ?? 0}
-                        corpsStrain={corpsStrain}
-                        corpsStrainLabel={corpsStrainLabel}
-                        interventionRisk={interventionRisk}
-                        onForceLaunch={onForceLaunch}
-                    />
-                )}
+                {/* Force-launch (Level 3 Direct Intervention) is issued from the Presidential
+                    Decision Room (DirectiveCard, force_launch directive), not from this review
+                    modal. This surface is read-only commander-decision review. */}
 
                 {/* Action buttons */}
                 <div className="px-4 py-3 border-t-2 border-panel-border bg-panel-card/70 flex gap-2 flex-wrap">

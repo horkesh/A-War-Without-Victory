@@ -5,13 +5,16 @@
  *  1. Autonomy Slider — 4-button selector for levels 0–3 (Full Control / Assisted /
  *     Delegated / Observer). Levels 2–3 show "(not yet unlocked)" when the backend
  *     returns level_2_plus_not_yet_enabled.
- *  2. Proposal Review — visible only when autonomy_level === 1 and there are pending
- *     proposals. Renders Accept / Reject cards for unresolved PendingProposalReview
- *     items.
+ *  2. Proposal Review (READ-ONLY) — visible only when autonomy_level === 1 and there
+ *     are pending proposals. Renders unresolved PendingProposalReview items for SCAN;
+ *     the accept (commit) / withhold approval decision is issued from the Presidential
+ *     Decision Room (DirectiveCard, review_proposal directive), not here. FULL
+ *     DECISION-ROOM CONVERGENCE — every "approve/deny a general's proposal" happens at
+ *     the one command desk.
  *
  * State management: local React state only — no global store.
- * IPC: calls window.awwv.getAutonomyState / setAutonomyLevel / acceptProposal /
- *      rejectProposal directly (methods exposed by v0.8.4 Phase B/C preload).
+ * IPC: calls window.awwv.getAutonomyState / setAutonomyLevel (the proposal accept/reject
+ *      IPC now lives in the Decision Room's DirectiveCard via useIPC).
  */
 import { useEffect, useState, useCallback } from 'react';
 import { GlassPanel } from './GlassPanel';
@@ -76,8 +79,9 @@ export function filterPendingProposalsForPlayer(
 interface AutonomyBridge {
     getAutonomyState: () => Promise<AutonomyState>;
     setAutonomyLevel: (level: number) => Promise<{ ok: boolean; error?: string }>;
-    acceptProposal?: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
-    rejectProposal?: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
+    // accept/reject-proposal IPC moved to the Presidential Decision Room
+    // (DirectiveCard, review_proposal directive via useIPC). This panel is read-only
+    // for the proposal queue; it keeps only the autonomy-level state bridge.
 }
 
 function getAutonomyBridge(): AutonomyBridge | undefined {
@@ -115,8 +119,6 @@ interface ProposalCardProps {
     proposal: PendingProposalReview;
     /** Phase 2 slice 1: named-officer decision card for an 'ops' proposal (joined main-side). */
     opCard?: OpProposalCard;
-    onAccept: (id: string) => void;
-    onReject: (id: string) => void;
     /**
      * Phase 2 "Officer Dossier": open the dossier for the proposing officer by id.
      * Only wired when the officer can be resolved in namedOfficerData; otherwise the
@@ -125,7 +127,6 @@ interface ProposalCardProps {
     onInspectOfficer?: (officerId: string) => void;
     /** True when the proposing officer has a dossier available (clickable name). */
     inspectable?: boolean;
-    busy: boolean;
 }
 
 /** Force ratio → label colour. <1 is unfavourable (defender stronger). */
@@ -135,7 +136,7 @@ function ratioClass(ratio: number): string {
     return 'text-red-300';
 }
 
-function ProposalCard({ proposal, opCard, onAccept, onReject, onInspectOfficer, inspectable, busy }: ProposalCardProps) {
+function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: ProposalCardProps) {
     const resolved = proposal.accepted !== undefined;
 
     // Parse a readable corps label from proposed_action.
@@ -240,26 +241,14 @@ function ProposalCard({ proposal, opCard, onAccept, onReject, onInspectOfficer, 
                     {statusIndicator.label}
                 </div>
             ) : (
-                <div className="space-y-2 pt-0.5">
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => onAccept(proposal.id)}
-                            disabled={busy}
-                            className="flex-1 py-1 text-[9px] font-mono uppercase tracking-[0.15em] rounded border border-green-500/25 bg-green-900/15 text-green-300 hover:bg-green-900/30 hover:border-green-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                        >
-                            {isOp ? t('autonomy.proposal.commit') : t('autonomy.proposal.accept')}
-                        </button>
-                        <button
-                            onClick={() => onReject(proposal.id)}
-                            disabled={busy}
-                            className="flex-1 py-1 text-[9px] font-mono uppercase tracking-[0.15em] rounded border border-red-500/25 bg-red-900/10 text-red-400 hover:bg-red-900/25 hover:border-red-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                        >
-                            {isOp ? t('autonomy.proposal.withhold') : t('autonomy.proposal.reject')}
-                        </button>
-                    </div>
-                    {/* Override (force-launch) moved to the Presidential Decision Room
-                        (DirectiveCard, force_launch directive). The Level-1 Assisted
-                        proposal review keeps only accept (commit) / withhold here. */}
+                // FULL DECISION-ROOM CONVERGENCE: the accept (commit) / withhold approval
+                // actions moved to the Presidential Decision Room (DirectiveCard,
+                // review_proposal directive). This card is now read-only/inspect — it shows
+                // the pending proposal so the player can READ it, but the approve/deny
+                // decision is issued at the one command desk. (Mirrors how OperationsSection
+                // was reduced to read-only "Review Command Decision".)
+                <div className="inline-flex items-center px-2 py-0.5 rounded border border-[#c4a04a]/25 bg-[#c4a04a]/[0.06] text-[9px] font-mono uppercase tracking-[0.15em] text-[#c4a04a]/80">
+                    {t('autonomy.proposal.decideInDecisionRoom')}
                 </div>
             )}
         </div>
@@ -331,35 +320,13 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
         }
     };
 
-    const handleAccept = async (proposalId: string) => {
-        if (!bridge?.acceptProposal) return;
-        setBusy(true);
-        try {
-            await bridge.acceptProposal(proposalId);
-            await refresh();
-        } catch (err) {
-            console.warn('[AutonomyPanel] acceptProposal failed:', err);
-        } finally {
-            setBusy(false);
-        }
-    };
-
-    const handleReject = async (proposalId: string) => {
-        if (!bridge?.rejectProposal) return;
-        setBusy(true);
-        try {
-            await bridge.rejectProposal(proposalId);
-            await refresh();
-        } catch (err) {
-            console.warn('[AutonomyPanel] rejectProposal failed:', err);
-        } finally {
-            setBusy(false);
-        }
-    };
-
-    // Force-launch (proposal override + proactive held-ready override) moved to the
-    // Presidential Decision Room (DirectiveCard, force_launch directive). This panel
-    // hosts only the autonomy-level selector + the Level-1 Assisted accept/withhold review.
+    // FULL DECISION-ROOM CONVERGENCE: the proposal accept (acceptProposal) / withhold
+    // (rejectProposal) approval actions moved to the Presidential Decision Room
+    // (DirectiveCard, review_proposal directive). Force-launch (proposal override +
+    // proactive held-ready override) likewise lives there (force_launch directive). This
+    // panel now hosts only the autonomy-level selector + a READ-ONLY Level-1 review list
+    // (pending proposals are shown for scan; the approve/deny decision is issued at the
+    // Decision Room command desk).
 
     const currentLevel = autonomyState?.autonomy_level ?? 0;
     const pendingLevel = autonomyState?.autonomy_level_pending;
@@ -484,11 +451,8 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
                                             key={proposal.id}
                                             proposal={proposal}
                                             opCard={card}
-                                            onAccept={handleAccept}
-                                            onReject={handleReject}
                                             onInspectOfficer={inspectOfficer}
                                             inspectable={inspectable}
-                                            busy={busy}
                                         />
                                     );
                                 })}
