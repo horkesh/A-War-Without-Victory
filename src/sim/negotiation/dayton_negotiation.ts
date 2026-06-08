@@ -25,6 +25,13 @@ import {
     finalReturnJusticeCost,
     getDialDeclarationCost,
 } from './dayton_dial_cost.js';
+import {
+    adjustedCost,
+    dialPrefDelta,
+    competencyPrefDelta,
+    constitutionalPrefDelta,
+} from './bot_preferences.js';
+import { getConstitutionalChoiceById } from './constitutional_packages.js';
 import type { CompetencyOwner } from './competency_packages.js';
 import type { CompetencyOwnerChoice, EntityAutonomySetting } from '../../state/negotiation_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -551,8 +558,16 @@ const PATRON_OVERRIDE_THRESHOLD = 75;
  * competencies, Dim 4 constitutional, Dim 5 return/justice).
  *
  * For each deviating sub-choice we test whether ANY bot faction objects (its
- * post-dial+ideological cost exceeds 30% of its composite capital). An objection is
- * overridden when the objecting faction's patron authority is ≥75 (recorded as a
+ * post-dial IDEOLOGICALLY-ADJUSTED cost exceeds 30% of its composite capital). The
+ * adjusted cost is the SAME the bot uses in computeProposalCostToFaction /
+ * evaluateBotResponse (base × preference-lerp + an 8-pt objection floor for an
+ * anathema choice), so the resolution objection test is consistent with how the bot
+ * actually prices the proposal: a free-in-capital but ideologically-anathema choice
+ * (e.g. a domestic-only court that bills HRHB nothing yet runs against its ideal) is
+ * objected to here exactly as the bot would object to it — closing the gap where the
+ * raw asymmetric base (cost 0) silently let such a choice through unchallenged. An
+ * objection is overridden when the objecting faction's patron authority is ≥75
+ * (recorded as a
  * `dial:<setting>:<faction>` / `competency:<id>:<faction>` / `constitutional:<id>:
  * <faction>` / `return_justice:<id>:<faction>` patron-override entry, same convention
  * as the shipped `institutional:<id>:<faction>`). An un-overridden objection drops
@@ -595,11 +610,11 @@ function resolveInstitutionalDimensions(
         return survived;
     };
 
-    // DIMENSION 2 — the master dial.
+    // DIMENSION 2 — the master dial. Ideologically-adjusted (same as the bot prices it).
     const dial: EntityAutonomySetting = proposal.entity_autonomy ?? 'dayton-historical';
     if (dial !== 'dayton-historical') {
         const survived = survives(
-            bot => getDialDeclarationCost(dial, bot),
+            bot => adjustedCost(getDialDeclarationCost(dial, bot), dialPrefDelta(bot, dial)),
             bot => `dial:${dial}:${bot}`,
         );
         if (survived) out.entity_autonomy = dial;
@@ -612,7 +627,7 @@ function resolveInstitutionalDimensions(
             const owner = proposal.competency_allocation[compId] as CompetencyOwner;
             if (!owner) continue;
             const survived = survives(
-                bot => finalCompetencyCost(compId, owner, bot, dial),
+                bot => adjustedCost(finalCompetencyCost(compId, owner, bot, dial), competencyPrefDelta(bot, compId, owner)),
                 bot => `competency:${compId}:${bot}`,
             );
             if (survived) kept[compId] = owner;
@@ -626,8 +641,9 @@ function resolveInstitutionalDimensions(
         for (const slotId of Object.keys(proposal.constitutional_choices).sort(strictCompare)) {
             const optionId = proposal.constitutional_choices[slotId];
             if (!optionId) continue;
+            const order = getConstitutionalChoiceById(slotId)?.options.map(o => o.id) ?? [];
             const survived = survives(
-                bot => finalConstitutionalCost(slotId, optionId, bot, dial),
+                bot => adjustedCost(finalConstitutionalCost(slotId, optionId, bot, dial), constitutionalPrefDelta(bot, slotId, optionId, order)),
                 bot => `constitutional:${slotId}:${bot}`,
             );
             if (survived) kept[slotId] = optionId;
@@ -641,8 +657,9 @@ function resolveInstitutionalDimensions(
         for (const slotId of Object.keys(proposal.return_justice).sort(strictCompare)) {
             const optionId = proposal.return_justice[slotId];
             if (!optionId) continue;
+            const order = getConstitutionalChoiceById(slotId)?.options.map(o => o.id) ?? [];
             const survived = survives(
-                bot => finalReturnJusticeCost(slotId, optionId, bot, dial),
+                bot => adjustedCost(finalReturnJusticeCost(slotId, optionId, bot, dial), constitutionalPrefDelta(bot, slotId, optionId, order)),
                 bot => `return_justice:${slotId}:${bot}`,
             );
             if (survived) kept[slotId] = optionId;

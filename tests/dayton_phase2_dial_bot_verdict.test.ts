@@ -259,10 +259,16 @@ describe('dayton_negotiation: patron override over new dims', () => {
     it('records a dial:/competency: override when the objecting faction patron forces it', () => {
         // Player RBiH pushes a unitary dial + defense→state. RS objects (expensive),
         // but RS patron override ≥75 forces it through → override entries recorded and
-        // the dimensions survive onto the result.
+        // the dimensions survive onto the result. HRHB ALSO ideologically objects to
+        // centralizing defense to the state (its ideal is entity defense), so HRHB's
+        // patron must force it too — the resolution objection test now prices each
+        // sub-choice with the same ideologically-adjusted cost the bot uses
+        // (computeProposalCostToFaction), so a bot objects to an anathema choice even
+        // when the raw asymmetric base bills it less. Forcing BOTH objectors lets the
+        // dimensions survive (this verifies the override-records-and-persists path).
         const state = makeState({
             player_faction: 'RBiH',
-            patron: { RS: { override_authority: 80 } },
+            patron: { RS: { override_authority: 80 }, HRHB: { override_authority: 80 } },
             dimStore: lowCapitalDimStore('RS'), // RS composite ~1 → objects to any deviation
         });
         const proposal: DaytonProposal = {
