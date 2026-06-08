@@ -193,13 +193,22 @@ export function buildCommandFrictionStakes(
         };
     }
 
-    // replace_co: revolt (and its patron cost) only when weight × pol_rel crosses threshold.
+    // replace_co: revolt (and its full patron cost) only when weight × pol_rel crosses the
+    // threshold. A SUB-threshold sacking is normally free — EXCEPT for a PATRON-GATED faction
+    // (one present in PATRON_OVERRIDE_FLOOR), whose patron asserts control over the relief
+    // ("Zagreb confirms/overrides the sacking"), costing the small PATRON_OVERRIDE_FLOOR shift.
+    // Mirrors the apply path (applyReplaceCoConsequence) EXACTLY so the preview and the realised
+    // consequence cannot drift: revolt → REVOLT_PATRON_BASE × weight; sub-threshold + patron-gated
+    // → PATRON_OVERRIDE_FLOOR[faction]; sub-threshold + not patron-gated → 0.
     const polRel = targetPoliticalReliability ?? 3;
     const revoltLikely = weight * polRel >= REVOLT_THRESHOLD;
+    const subThresholdPatronOverride = PATRON_OVERRIDE_FLOOR[faction] ?? 0;
     return {
         weight,
         severity,
-        patronConfidenceAtRisk: revoltLikely ? Math.round(REVOLT_PATRON_BASE * weight) : 0,
+        patronConfidenceAtRisk: revoltLikely
+            ? Math.round(REVOLT_PATRON_BASE * weight)
+            : subThresholdPatronOverride,
         revoltLikely,
     };
 }

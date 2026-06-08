@@ -263,7 +263,10 @@ describe('faction-asymmetric STAKES preview (pre-commit card)', () => {
     expect(hrhb.revoltLikely).toBe(false);
     expect(hrhb.severity).toBe('minimal');
     expect(rs.patronConfidenceAtRisk).toBeLessThan(0);
-    expect(hrhb.patronConfidenceAtRisk).toBe(0);
+    // HRHB does NOT revolt, but it is PATRON-GATED — its sub-threshold sacking previews the
+    // small Zagreb-gate patron-override floor (#314 Codex follow-up), not 0.
+    expect(hrhb.patronConfidenceAtRisk).toBe(PATRON_OVERRIDE_FLOOR.HRHB);
+    expect(hrhb.patronConfidenceAtRisk).toBeLessThan(0);
   });
 
   it('force-op stakes scale patron-at-risk by faction weight (RS steeper than HRHB)', () => {
@@ -286,5 +289,51 @@ describe('faction-asymmetric STAKES preview (pre-commit card)', () => {
 
   it('the revolt threshold is the documented constant (owner-adjustable)', () => {
     expect(REVOLT_THRESHOLD).toBe(3.5);
+  });
+
+  it('stop-op stakes: RS pays strictly more than HRHB, matching the apply path (data, not branch)', () => {
+    // #314 Codex follow-up: the directive card must PREVIEW the stop-op patron cost.
+    const rs = buildCommandFrictionStakes('RS', 'stop_op');
+    const hrhb = buildCommandFrictionStakes('HRHB', 'stop_op');
+    expect(rs.patronConfidenceAtRisk).toBeLessThan(hrhb.patronConfidenceAtRisk);
+    expect(rs.patronConfidenceAtRisk).toBeLessThan(0);
+    expect(rs.revoltLikely).toBe(false);
+    // The PREVIEW must equal what applyStopOpConsequence actually applies (no drift).
+    const applied = applyStopOpConsequence(
+      { meta: { turn: 1 }, military: { negotiation: { strategic_dimensions: initializeStrategicDimensions() } } } as any,
+      'c', 'RS', 1, {} as any,
+    );
+    expect(rs.patronConfidenceAtRisk).toBe(applied!.patron_confidence_delta);
+    const appliedHrhb = applyStopOpConsequence(
+      { meta: { turn: 1 }, military: { negotiation: { strategic_dimensions: initializeStrategicDimensions() } } } as any,
+      'c', 'HRHB', 1, {} as any,
+    );
+    expect(hrhb.patronConfidenceAtRisk).toBe(appliedHrhb!.patron_confidence_delta);
+  });
+
+  it('replace-CO SUB-threshold stakes: HRHB Zagreb-gate previews the patron-override floor (not 0)', () => {
+    // #314 Codex follow-up: a sub-threshold HRHB sacking still costs the PATRON_OVERRIDE_FLOOR
+    // shift, and the preview must surface it (previously projected 0, drifting from the apply path).
+    const hrhb = buildCommandFrictionStakes('HRHB', 'replace_co', 4); // 0.25 × 4 = 1.0 < 3.5 → no revolt
+    expect(hrhb.revoltLikely).toBe(false);
+    expect(hrhb.patronConfidenceAtRisk).toBe(PATRON_OVERRIDE_FLOOR.HRHB);
+    expect(hrhb.patronConfidenceAtRisk).toBeLessThan(0);
+
+    // The preview must equal what applyReplaceCoConsequence actually applies on a sub-threshold
+    // HRHB sacking (the Zagreb-gate branch) — no drift between card and realised consequence.
+    const state: any = {
+      meta: { turn: 5 },
+      military: { negotiation: { strategic_dimensions: initializeStrategicDimensions() } },
+    };
+    const applied = applyReplaceCoConsequence(state, 'HRHB_corps', 'HRHB', 4, null, 5, {} as any);
+    expect(applied?.revolt).toBe(false);
+    expect(hrhb.patronConfidenceAtRisk).toBe(applied!.patron_confidence_delta);
+  });
+
+  it('replace-CO SUB-threshold stakes: RBiH (not patron-gated) still previews 0 (unchanged)', () => {
+    const rbih = buildCommandFrictionStakes('RBiH', 'replace_co', 5); // 0.5 × 5 = 2.5 < 3.5
+    expect(rbih.revoltLikely).toBe(false);
+    expect(rbih.patronConfidenceAtRisk).toBe(0);
+    expect(PATRON_OVERRIDE_FLOOR.RBiH).toBeUndefined();
   });
 });
