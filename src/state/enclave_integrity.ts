@@ -1,5 +1,6 @@
 import { buildAdjacencyMap } from '../map/adjacency_map.js';
 import { getSarajevoSiegeParams } from '../sim/combat/sarajevo_siege_params.js';
+import { getEnclaveMaxResilience } from './enclave_config_constants.js';
 import type { EdgeRecord, LoadedSettlementGraph } from '../map/settlements.js';
 import { clamp01 } from '../utils/math.js';
 import type { EnclaveState, FactionId, GameState, MunicipalityId, SettlementId } from './game_state.js';
@@ -268,7 +269,13 @@ export function computeEnclaveResilienceFallbackPressure(state: GameState): numb
         if (entry.hardening_active !== true) continue;
         if ((entry.isolation_turns ?? 0) <= 0) continue;
         const resilience = entry.resilience ?? 0;
-        const inverseResilience = clamp01(1 - resilience / 100);
+        // Measure residual humanitarian pressure against each enclave's OWN
+        // hardening ceiling (ENCLAVE_CONFIG.max_resilience), not a flat 100.
+        // A fully-hardened enclave (resilience == its max) now reads ≈0 residual
+        // pressure instead of an artificial floor of (1 - max/100). Unconfigured
+        // ids fall back to 100 → identical to the prior behaviour. PR-3.
+        const maxResilience = getEnclaveMaxResilience(id);
+        const inverseResilience = clamp01(1 - resilience / maxResilience);
         const isCapital = id === 'sarajevo';
         const pressureMult = isCapital ? SARAJEVO_PRESSURE_MULTIPLIER : HUMANITARIAN_PRESSURE_MULTIPLIER;
         const visibilityMult = isCapital ? CAPITAL_ENCLAVE_VISIBILITY : 1.0;

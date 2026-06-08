@@ -30,6 +30,7 @@ import {
     RESILIENCE_GROWTH_STRAINED,
 } from '../../state/supply_reserve_constants.js';
 import { ENCLAVE_MAX_PERSONNEL } from '../../state/formation_constants.js';
+import { ENCLAVE_CONFIG } from '../../state/enclave_config_constants.js';
 import { SARAJEVO_CITY_CORE_MUN_IDS } from '../../state/enclave_integrity.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
@@ -201,25 +202,9 @@ export const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
     },
 ] as const;
 
-/**
- * Per-enclave max resilience and growth rate modifiers.
- * Differentiates enclaves based on historical factors:
- *   - Size, terrain, UN presence, supply corridors, internal organization.
- * Zepa was most vulnerable (smallest, most isolated).
- * Sarajevo was most resilient (largest, tunnel, international attention).
- */
-const ENCLAVE_CONFIG: Record<string, { max_resilience: number; growth_mult: number; max_personnel: number }> = {
-    bihac_pocket: { max_resilience: 40, growth_mult: 0.55, max_personnel: 1500 },  // Large pocket, supply routes
-    srebrenica: { max_resilience: 25, growth_mult: 0.35, max_personnel: 600 },     // Small, isolated, ~8k pop in enclave
-    zepa: { max_resilience: 20, growth_mult: 0.30, max_personnel: 400 },           // Tiny, most isolated, ~3k pop
-    teocak: { max_resilience: 20, growth_mult: 0.30, max_personnel: 400 },         // Lone Bosniak holdout near Ugljevik, ~3–5k pop, 255th Slavna garrison
-    gorazde: { max_resilience: 35, growth_mult: 0.45, max_personnel: 800 },        // Medium, besieged, ~37k prewar but under siege
-    sarajevo: { max_resilience: 45, growth_mult: 0.60, max_personnel: 1500 },      // Largest, tunnel supply, 300k pop
-    // HRHB enclaves — smaller, less organized than RBiH equivalents, but held until Washington Agreement
-    kiseljak: { max_resilience: 20, growth_mult: 0.30, max_personnel: 500 },      // ~25k Croat pop, isolated, Nikola Subic-Zrinski + Ban Jelacic
-    lasva_valley: { max_resilience: 25, growth_mult: 0.35, max_personnel: 700 },  // Vitez/Busovaca, HVO command hub, ~30k Croat pop
-    zepce: { max_resilience: 15, growth_mult: 0.25, max_personnel: 400 },         // Smallest, most isolated northern pocket
-};
+// Per-enclave max resilience / growth / personnel config now lives in the
+// dependency-free leaf module `state/enclave_config_constants.ts` (single source
+// of truth, shared with state/enclave_integrity.ts without an import cycle).
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
