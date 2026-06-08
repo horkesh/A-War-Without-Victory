@@ -691,12 +691,44 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
             const controlled2 = munOsids2.filter(osid => pc2[osid] === condition.faction).length;
             return (controlled2 / munOsids2.length) >= threshold2;
         }
-        case 'siege_active':
-            // TODO: integrate with enclave/siege system when state fields are available
+        case 'siege_active': {
+            // A position is under active siege when its consecutive-critical-supply
+            // counter is present and > 0. This mirrors the besieged-position detection
+            // used by combat (siege_attrition.ts / siege_morale_drain.ts), which read
+            // the same `state.military.siege_turn_counters` map. Keys are
+            // `${factionId}:${osid}` where osid is `op:municipality:settlement`, so the
+            // faction prefix is split on the FIRST colon (OSIDs contain colons too).
+            // `osid_or_municipality` may be either a full OSID or a municipality name.
+            const counters = state.military?.siege_turn_counters;
+            if (!counters) return false;
+            const target = condition.osid_or_municipality;
+            for (const key of Object.keys(counters)) {
+                if ((counters[key] ?? 0) <= 0) continue;
+                const colonIdx = key.indexOf(':');
+                if (colonIdx < 0) continue;
+                const osid = key.substring(colonIdx + 1);
+                if (osid === target) return true; // full-OSID match
+                if (osid.split(':')[1] === target) return true; // municipality match
+            }
             return false;
-        case 'operation_completed':
-            // TODO: integrate with operation tracking when state fields are available
+        }
+        case 'operation_completed': {
+            // True when a completed operation in operation_history matches the pattern.
+            // operation_history holds AARs only for operations that have ended, so any
+            // matching entry is by definition "completed". The pattern is matched as a
+            // case-sensitive substring against both operation_id and operation_name so
+            // authors can target either the canonical id or the display name. Existence
+            // check → order-independent → deterministic.
+            const history = state.operation_history;
+            if (!history || history.length === 0) return false;
+            const pattern = condition.operation_name_pattern;
+            for (const aar of history) {
+                if (!aar) continue;
+                if (aar.operation_id?.includes(pattern)) return true;
+                if (aar.operation_name?.includes(pattern)) return true;
+            }
             return false;
+        }
         case 'and':
             return condition.conditions.every(c => evaluateCondition(c, state, edges));
         case 'or':
