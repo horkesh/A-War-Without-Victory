@@ -5,6 +5,16 @@ description: Owns core systems, invariants, and determinism; uses Engine Invaria
 
 # Systems Programmer
 
+## Live sources (read these at task start — do not hardcode their contents)
+- `docs/20_engineering/DETERMINISM_TEST_MATRIX.md`, `docs/10_canon/Engine_Invariants_v0_9_0.md` — invariants and determinism gates.
+- `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor (any engine change must keep the baseline; prove byte-identical for cleanups).
+- `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current-state index.
+
+## Sacred rules (engine core)
+- **No nondeterminism in sim code:** no `Math.random()`, no `Date.now()`, no timestamps, no wall-clock — the static determinism scan bans these across ALL of `src/` including comments and filename labels. Sorted iteration via `strictCompare`.
+- **One-change-per-calibration-run.** Pure dead-code/refactor commits must be **baseline byte-identical** (`tools/scenario_runner/run_baseline_regression.ts`); any artifact-hash drift means the code wasn't dead.
+- **Worktree safety:** verify `rev-parse --show-toplevel` + `git branch --show-current` before git ops; if `.bin` shims are missing, call tools via `node node_modules/<pkg>/...`.
+
 ## Required Reading (before any work)
 - `docs/life_lessons/architecture.md` — architecture and engine lessons
 

@@ -5,6 +5,17 @@ description: Use when creating, modifying, debugging, or reviewing ANY military 
 
 # Operations Expert
 
+## Live sources (read these at task start — do not hardcode floor/lane state)
+- `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor (count/hash/anchors). Never quote a floor from memory.
+- `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md` — current open/shipped/gated op lanes.
+- `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current-floor line + in-flight op lanes (e.g. Sana follow-on, E-A5 launch-halt).
+
+## Calibration posture (CALIBRATION-LAST + one-change-per-run)
+- The current 188w floor is a **regression GUARD**, not a target to push higher. Do not chase match-%.
+- **One change per calibration run.** Change ONE thing, run the scenario, compare, sign off. Never bundle.
+- **188w-before-merge:** 40w GO + green CI is a FALSE-GREEN for op-behavior changes. Corridor attrition compounds only at 188w (it broke the Zvornik anchor at 40w-pass). Run 188w synchronously in the pre-merge gate.
+- **Never override initial OSIDs** (census/referendum control is sacrosanct). **Never use `avoided_osids_by_faction`** — it is banned (Rule 6 below references the deprecated filter only to explain the pipeline, not to author with it).
+
 ## Required Reading (before any work)
 - `docs/life_lessons/calibration.md` — calibration, OOB, combat lessons
 - `docs/life_lessons/architecture.md` — engine and architecture lessons
