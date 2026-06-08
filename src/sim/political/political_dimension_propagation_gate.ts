@@ -141,16 +141,25 @@ let _militaryCredibilityCautionBiasOverride: boolean | null = null;
 
 /** Returns true when the military_credibility → caution-bias sub-flag is
  *  enabled. Reads `process.env.AWWV_PDP_MILITARY_CREDIBILITY_CAUTION_BIAS`
- *  ('true' or '1') unless an override has been set via the setter. Mirrors the
- *  internal_cohesion sub-flag pattern; default off until the flag is flipped.
- *  Semantic: low military credibility (failing ops + bleeding exchange ratio)
- *  → op-launch caution, same DIRECTION as internal_cohesion. */
+ *  unless an override has been set via the setter.
+ *
+ *  Default ON as of PR-4: the Pyrrhic historian cleared this channel for
+ *  activation, so it is enabled-by-default for headless calibration (the
+ *  umbrella must also be on, which it now is by default). Set the env var to
+ *  'false'/'0' to force this channel off. The consumer's no-data evidence guard
+ *  (no ops launched + no casualty exchange ⇒ field omitted) is unchanged — this
+ *  flag only governs whether the channel may fire at all. Semantic: low military
+ *  credibility (failing ops + bleeding exchange ratio) → op-launch caution, same
+ *  DIRECTION as internal_cohesion. */
 export function isMilitaryCredibilityCautionBiasEnabled(): boolean {
     if (_militaryCredibilityCautionBiasOverride !== null) {
         return _militaryCredibilityCautionBiasOverride;
     }
     const raw = process.env.AWWV_PDP_MILITARY_CREDIBILITY_CAUTION_BIAS;
-    return raw === 'true' || raw === '1';
+    if (raw === 'false' || raw === '0') {
+        return false;
+    }
+    return true;
 }
 
 /** Set the military_credibility → caution-bias sub-flag override.

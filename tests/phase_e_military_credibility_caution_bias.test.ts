@@ -178,12 +178,23 @@ describe('Phase E extension — military_credibility → bot caution-bias gate',
         restorePdpEnv(envSnap);
     });
 
-    // Test 1: Default (no env, no override). As of PR-4 the umbrella defaults
-    // ON; the credibility sub-flag default is updated in the credibility
-    // activation commit (see below).
-    it('test 1: umbrella defaults ON; credibility sub-flag default', () => {
+    // Test 1: Default ON when env unset and no overrides (PR-4 activation).
+    // The umbrella + military_credibility sub-flag now default ON so headless
+    // calibration picks up the cleared channel without env vars.
+    it('test 1: defaults to ON when env unset and no overrides (PR-4)', () => {
         expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
+        expect(isMilitaryCredibilityCautionBiasEnabled()).toBe(true);
+        expect(isMilitaryCredibilityCautionBiasActive()).toBe(true);
+    });
+
+    // Test 1b: explicit env 'false' forces the credibility channel back OFF.
+    it('test 1b: env false forces credibility channel OFF', () => {
+        process.env.AWWV_PDP_MILITARY_CREDIBILITY_CAUTION_BIAS = 'false';
         expect(isMilitaryCredibilityCautionBiasEnabled()).toBe(false);
+        expect(isMilitaryCredibilityCautionBiasActive()).toBe(false);
+        delete process.env.AWWV_PDP_MILITARY_CREDIBILITY_CAUTION_BIAS;
+        process.env.AWWV_POLITICAL_DIMENSION_PROPAGATION = 'false';
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
         expect(isMilitaryCredibilityCautionBiasActive()).toBe(false);
     });
 
@@ -212,14 +223,18 @@ describe('Phase E extension — military_credibility → bot caution-bias gate',
         expect(isMilitaryCredibilityCautionBiasActive()).toBe(true);
     });
 
-    // Test 5: Reset clears the credibility override.
+    // Test 5: Reset clears the credibility override → env-fallback. As of PR-4
+    // the credibility channel defaults ON, so after reset the env-fallback
+    // reports ON (env-driven OFF is tested in test 1b). The point is that the
+    // override is dropped, returning to the env-default.
     it('test 5: resetPoliticalDimensionGates clears credibility override', () => {
-        setPoliticalDimensionPropagationOverride(true);
-        setMilitaryCredibilityCautionBiasOverride(true);
-        expect(isMilitaryCredibilityCautionBiasActive()).toBe(true);
-        resetPoliticalDimensionGates();
-        expect(isMilitaryCredibilityCautionBiasEnabled()).toBe(false);
+        setPoliticalDimensionPropagationOverride(false);
+        setMilitaryCredibilityCautionBiasOverride(false);
         expect(isMilitaryCredibilityCautionBiasActive()).toBe(false);
+        resetPoliticalDimensionGates();
+        // Override dropped → env-fallback default ON.
+        expect(isMilitaryCredibilityCautionBiasEnabled()).toBe(true);
+        expect(isMilitaryCredibilityCautionBiasActive()).toBe(true);
     });
 
     // Test 6: Integration — briefing carries military_credibility when gate ON.
