@@ -19826,3 +19826,32 @@ Out of scope and intentionally untouched: the `štabni` vs `štabski` standardiz
 **Files:** `src/ui/map/i18n/messages.bcs.ts` (7 string values; +7/−7).
 
 **Verification:** `tsc --noEmit -p tsconfig.json` exit 0; `tests/ui_i18n.test.ts` 12/12 green (EN↔BCS parity + no-leakage guard); `desktop:map` vite build exit 0.
+
+## [2026-06-08] PR-1 — casualty-model realism cluster + ADR-0007 Phase B
+
+**Type:** combat-behavior change (branch `feat/pr1-casualty-model-adr0007-phaseb`, off `chore/phase0-byte-identical-cleanup`). Four owner-approved sub-changes, each a separate commit for cheap 188w bisection. Determinism preserved (no `Math.random`/`Date.now`). NOT merged — orchestrator reviews 188w numbers for GO/NO-GO + re-floor.
+
+**Changes:**
+1. **KIA split** (`src/sim/combat/attack_casualty_distribution.ts`): `KIA_FRACTION` 0.30→0.22, `WIA_FRACTION` 0.55→0.74, `MIA_FRACTION` 0.15→0.04. Tests in `tests/attack_casualty_distribution.test.ts` updated to new canonical split (22/74/4, 2/7/1, 220/740/40).
+2. **Surrender-cascade re-split** (`src/sim/combat/battle_resolution.ts:653-654`): `defenderKiaFrac` 0.05→0.10, `defenderWiaFrac` 0.10→0.40 (cascade MIA 0.85→0.50). ≥50%-garrison floor UNCHANGED (load-bearing for enclaves falling).
+3. **Front-attrition** (`src/sim/combat/frontline_attrition.ts`): `BOMBARDMENT_EXPOSURE_RATE` 0.008→0.006, `BASE_ATTRITION_RATE` 0.005→0.004.
+4. **ADR-0007 Phase B** (`src/sim/combat/standing_og_defense.ts`): `ENABLE_STANDING_OG_RESERVE_COMMIT` false→true (wired in `brigade_front_distribution.ts`). Phase C (`ENABLE_SHARED_SECTOR_DEFENSE`) stays FALSE — deferred.
+
+**Verification:** `tsc --noEmit` exit 0; focused combat suite 71/71 (`combat_pipeline`, `attack_resource_aftermath`, `attack_casualty_distribution`, `standing_og_defense`).
+
+**40w:** final_state_hash `0f589bdcac31c8ca` (moved, expected).
+
+**188w gate (run `acb538b04d79af3c`):**
+| metric | this run | prior floor |
+|---|---|---|
+| matched_osids | 629/712 (0.8834) | 634/712 |
+| final_state_hash | `881b8abf82b2acb8` | `2fdbff2fdba1b9c2` |
+| anchors | 29/30 | 29/30 |
+| `op:zvornik:zvornik` | PASS (RS) | PASS |
+| `op:lukavac:brijesnica_donja_2` | FAIL (RS, chronic Spreča) | FAIL |
+| benchmarks | 6/6 | 6/6 |
+| critical anomalies | 0 | — |
+| total military killed | 101,513 | 143,980 |
+| war_exhaustion (per faction) | RBiH/RS/HRHB all ~10000.001 (no asymmetric collapse) | — |
+
+Military killed dropped ~30% (143,980→101,513), toward the ~80-90k target; zvornik sacred anchor held; no critical anomalies; exhaustion symmetric (Guardrail-1 not tripped). Count slipped 634→629 (−5) — orchestrator decides GO/NO-GO + re-floor.

@@ -650,8 +650,8 @@ function computeBattleCasualties(
     let defenderKiaFrac = KIA_FRACTION;
     let defenderWiaFrac = WIA_FRACTION;
     if (snapMults.isSurrenderCascade && defenderFormation) {
-        defenderKiaFrac = 0.05;
-        defenderWiaFrac = 0.10;
+        defenderKiaFrac = 0.10;
+        defenderWiaFrac = 0.40;
         defenderTotal = Math.max(defenderTotal, Math.round(defenderPersonnel * 0.5));
         defenderTotal = Math.min(defenderTotal, Math.max(0, defenderPersonnel - MIN_COMBAT_PERSONNEL));
     }

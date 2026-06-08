@@ -24,9 +24,9 @@ import { recordBattleCasualties } from '../../state/casualty_ledger.js';
 import { applyPersonnelLoss } from './attack_retreat_displacement.js';
 import type { DefenderContribution } from './attack_resolution_types.js';
 
-export const KIA_FRACTION = 0.30;
-export const WIA_FRACTION = 0.55;
-export const MIA_FRACTION = 0.15;
+export const KIA_FRACTION = 0.22;
+export const WIA_FRACTION = 0.74;
+export const MIA_FRACTION = 0.04;
 export const SHARED_NON_PRIMARY_DEFENDER_CASUALTY_CAP_FRACTION = 0.15;
 
 function removablePersonnel(formation: FormationState): number {
