@@ -159,9 +159,12 @@ describe('Phase E MVS — political-dimension propagation gate', () => {
         restorePdpEnv(envSnap);
     });
 
-    // Test 1: Default (no env, no override) → both gates report false.
-    it('test 1: defaults to OFF when env unset and no overrides', () => {
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+    // Test 1: Default (no env, no override).
+    // As of PR-4 the umbrella defaults ON (patron_confidence +
+    // military_credibility channel activation), but intl_standing remains a
+    // default-OFF sub-flag, so the intl_standing combined gate stays inactive.
+    it('test 1: umbrella defaults ON but intl_standing sub-flag stays OFF', () => {
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
         expect(isIntlStandingOpsHesitationEnabled()).toBe(false);
         expect(isIntlStandingOpsHesitationActive()).toBe(false);
     });
@@ -188,7 +191,9 @@ describe('Phase E MVS — political-dimension propagation gate', () => {
         setIntlStandingOpsHesitationOverride(true);
         expect(isIntlStandingOpsHesitationActive()).toBe(true);
         resetPoliticalDimensionGates();
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+        // After reset, env-fallback applies: umbrella default ON (PR-4), but
+        // intl_standing sub-flag default OFF → intl_standing combined inactive.
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
         expect(isIntlStandingOpsHesitationEnabled()).toBe(false);
         expect(isIntlStandingOpsHesitationActive()).toBe(false);
     });

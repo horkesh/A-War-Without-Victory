@@ -176,9 +176,11 @@ describe('Phase E Packet 2 — internal_cohesion → bot caution-bias gate', () 
         restorePdpEnv(envSnap);
     });
 
-    // Test 1: Default OFF when env unset and no overrides.
-    it('test 1: defaults to OFF when env unset and no overrides', () => {
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+    // Test 1: Default (no env, no override). As of PR-4 the umbrella defaults
+    // ON, but the cohesion sub-flag remains default-OFF (held back: needs
+    // threshold recal), so the cohesion combined gate stays inactive.
+    it('test 1: umbrella defaults ON but cohesion sub-flag stays OFF', () => {
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
         expect(isCohesionCautionBiasEnabled()).toBe(false);
         expect(isCohesionCautionBiasActive()).toBe(false);
     });

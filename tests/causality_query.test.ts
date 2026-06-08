@@ -333,9 +333,11 @@ describe('getActivePhaseEFlags', () => {
     });
 
     it('returns empty when sub-flags ON but global propagation OFF', () => {
+        // PR-4 made the umbrella default ON, so force it OFF via override to
+        // assert the "global tier dominates every sub-flag" contract.
+        setPoliticalDimensionPropagationOverride(false);
         setIntlStandingOpsHesitationOverride(true);
         setCohesionCautionBiasOverride(true);
-        // global propagation override is null → env OFF → combined false
         expect(getActivePhaseEFlags()).toEqual([]);
     });
 });

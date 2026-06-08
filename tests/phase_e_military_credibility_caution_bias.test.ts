@@ -178,9 +178,11 @@ describe('Phase E extension — military_credibility → bot caution-bias gate',
         restorePdpEnv(envSnap);
     });
 
-    // Test 1: Default OFF when env unset and no overrides.
-    it('test 1: defaults to OFF when env unset and no overrides', () => {
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+    // Test 1: Default (no env, no override). As of PR-4 the umbrella defaults
+    // ON; the credibility sub-flag default is updated in the credibility
+    // activation commit (see below).
+    it('test 1: umbrella defaults ON; credibility sub-flag default', () => {
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
         expect(isMilitaryCredibilityCautionBiasEnabled()).toBe(false);
         expect(isMilitaryCredibilityCautionBiasActive()).toBe(false);
     });
@@ -249,7 +251,11 @@ describe('Phase E extension — military_credibility → bot caution-bias gate',
     });
 
     // Test 7: Byte-stability — briefing OMITS political_dimensions when gate OFF.
+    // PR-4 made the umbrella + patron + credibility channels default ON, so this
+    // test forces the umbrella OFF via override to exercise the no-op path
+    // (which dominates every sub-flag).
     it('test 7: briefing OMITS political_dimensions when credibility gate OFF', () => {
+        setPoliticalDimensionPropagationOverride(false);
         const corpsId = 'test_corps' as FormationId;
         const faction = 'RBiH' as FactionId;
         const state = buildMinimalState(corpsId, faction, 25);

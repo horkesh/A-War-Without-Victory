@@ -163,10 +163,23 @@ describe('Phase E extension — patron_confidence → bot patron-hesitation gate
         restorePdpEnv(envSnap);
     });
 
-    // Test 1: Default OFF when env unset and no overrides.
-    it('test 1: defaults to OFF when env unset and no overrides', () => {
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+    // Test 1: Default ON when env unset and no overrides (PR-4 activation).
+    // The umbrella + patron_confidence sub-flag now default ON so headless
+    // calibration picks up the cleared channel without env vars.
+    it('test 1: defaults to ON when env unset and no overrides (PR-4)', () => {
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
+        expect(isPatronConfidenceOpsHesitationEnabled()).toBe(true);
+        expect(isPatronConfidenceOpsHesitationActive()).toBe(true);
+    });
+
+    // Test 1b: explicit env 'false' forces the patron channel back OFF.
+    it('test 1b: env false forces patron channel OFF', () => {
+        process.env.AWWV_PDP_PATRON_CONFIDENCE_OPS_HESITATION = 'false';
         expect(isPatronConfidenceOpsHesitationEnabled()).toBe(false);
+        expect(isPatronConfidenceOpsHesitationActive()).toBe(false);
+        delete process.env.AWWV_PDP_PATRON_CONFIDENCE_OPS_HESITATION;
+        process.env.AWWV_POLITICAL_DIMENSION_PROPAGATION = 'false';
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
         expect(isPatronConfidenceOpsHesitationActive()).toBe(false);
     });
 
@@ -195,14 +208,19 @@ describe('Phase E extension — patron_confidence → bot patron-hesitation gate
         expect(isPatronConfidenceOpsHesitationActive()).toBe(true);
     });
 
-    // Test 5: Reset clears the patron override.
+    // Test 5: Reset clears the patron override → env-fallback. As of PR-4 the
+    // patron channel defaults ON, so after reset the env-fallback reports ON
+    // (env-driven OFF is tested in test 1b). The point of this test is that the
+    // override is dropped, i.e. reset returns to the env-default, not that the
+    // channel goes OFF.
     it('test 5: resetPoliticalDimensionGates clears patron override', () => {
-        setPoliticalDimensionPropagationOverride(true);
-        setPatronConfidenceOpsHesitationOverride(true);
-        expect(isPatronConfidenceOpsHesitationActive()).toBe(true);
-        resetPoliticalDimensionGates();
-        expect(isPatronConfidenceOpsHesitationEnabled()).toBe(false);
+        setPoliticalDimensionPropagationOverride(false);
+        setPatronConfidenceOpsHesitationOverride(false);
         expect(isPatronConfidenceOpsHesitationActive()).toBe(false);
+        resetPoliticalDimensionGates();
+        // Override dropped → env-fallback default ON.
+        expect(isPatronConfidenceOpsHesitationEnabled()).toBe(true);
+        expect(isPatronConfidenceOpsHesitationActive()).toBe(true);
     });
 
     // Test 6: Integration — briefing carries patron_confidence when gate ON.
@@ -235,7 +253,10 @@ describe('Phase E extension — patron_confidence → bot patron-hesitation gate
     });
 
     // Test 7: Byte-stability — briefing OMITS political_dimensions when gate OFF.
+    // PR-4 made the umbrella + patron channel default ON, so this test forces
+    // the umbrella OFF via override to exercise the byte-stable no-op path.
     it('test 7: briefing OMITS political_dimensions when patron gate OFF', () => {
+        setPoliticalDimensionPropagationOverride(false);
         const corpsId = 'test_corps' as FormationId;
         const faction = 'RS' as FactionId;
         const state = buildMinimalState(corpsId, faction, 20);
