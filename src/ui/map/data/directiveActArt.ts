@@ -31,10 +31,16 @@ type DirectiveLever = PresidentialDecisionRoomDirective['lever'];
 /**
  * Explicit, owner-editable lever → command-card `act_*` id map.
  *
- * Each id resolves (via the shared resolver) to its mapped 16:9 consequence-still:
+ * The op / replace / front-visit ids resolve (via the shared resolver) to their
+ * mapped 16:9 consequence-still:
  *   - act_authorize_op    → consequence_reserve_deployment (reserve / op art)
  *   - act_replace_commander → consequence_personnel_change (officer art)
  *   - act_front_visit     → consequence_public_pressure (public-pressure art)
+ *
+ * The §10 leadership-gesture ids carry their own per-faction command-card art and
+ * resolve through the faction-aware override layer instead of a shared still:
+ *   - act_address_nation  → command_cards/act_address_nation_<faction>.webp
+ *   - act_decorate_unit   → command_cards/act_decorate_unit_<faction>.webp
  *
  * Operation levers (request/force/authorize/stop/elite-deploy) all read as
  * "commit forces" → the reserve-deployment still. replace_co → personnel change.
@@ -49,10 +55,13 @@ export const DIRECTIVE_LEVER_TO_ACT_ID: Readonly<Record<DirectiveLever, string>>
   elite_deploy: 'act_authorize_op',
   replace_co: 'act_replace_commander',
   front_visit: 'act_front_visit',
-  // Leadership gestures (design §10 deferred actions) reuse the public-pressure
-  // still — same "presidential leadership presence" register as the front visit.
-  address_nation: 'act_front_visit',
-  decorate_unit: 'act_front_visit',
+  // Leadership gestures (design §10 deferred actions) carry their own per-faction
+  // command-card art (act_address_nation_<faction>.webp / act_decorate_unit_<faction>.webp,
+  // resolved via the faction-aware override layer). Until the final generated art
+  // lands, these files are temporary byte-identical copies of the front_visit art,
+  // so the runtime image is unchanged while the wiring is correct.
+  address_nation: 'act_address_nation',
+  decorate_unit: 'act_decorate_unit',
 };
 
 /**

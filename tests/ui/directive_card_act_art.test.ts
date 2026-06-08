@@ -29,18 +29,6 @@ import type { PresidentialDecisionRoomDirective } from '../../src/ui/map/data/pr
 
 type Lever = PresidentialDecisionRoomDirective['lever'];
 
-const ALL_LEVERS: Lever[] = [
-  'request_op',
-  'stop_op',
-  'force_launch',
-  'authorize_op',
-  'replace_co',
-  'elite_deploy',
-  'front_visit',
-  'address_nation',
-  'decorate_unit',
-];
-
 describe('DirectiveCard act-layer lever → art map', () => {
   it('maps every lever to the owner-locked act id', () => {
     expect(DIRECTIVE_LEVER_TO_ACT_ID).toEqual({
@@ -51,13 +39,28 @@ describe('DirectiveCard act-layer lever → art map', () => {
       elite_deploy: 'act_authorize_op',
       replace_co: 'act_replace_commander',
       front_visit: 'act_front_visit',
-      address_nation: 'act_front_visit',
-      decorate_unit: 'act_front_visit',
+      // Leadership gestures (§10) carry their own per-faction command-card art,
+      // resolved via the faction-aware override layer (act_address_nation_<faction>.webp
+      // / act_decorate_unit_<faction>.webp). Until the final art lands these files
+      // are temporary byte-identical copies of the front_visit art.
+      address_nation: 'act_address_nation',
+      decorate_unit: 'act_decorate_unit',
     });
   });
 
-  it('resolves each lever to its mapped 16:9 consequence-still', () => {
-    const expectedBasename: Record<Lever, string> = {
+  it('resolves each consequence-still lever to its mapped 16:9 still', () => {
+    // The op / replace / front-visit levers map to act ids whose only art is the
+    // shared consequence-still family (no per-faction command-card override ships).
+    const STILL_LEVERS: Lever[] = [
+      'request_op',
+      'force_launch',
+      'authorize_op',
+      'stop_op',
+      'elite_deploy',
+      'replace_co',
+      'front_visit',
+    ];
+    const expectedBasename: Partial<Record<Lever, string>> = {
       request_op: 'consequence_reserve_deployment.webp',
       force_launch: 'consequence_reserve_deployment.webp',
       authorize_op: 'consequence_reserve_deployment.webp',
@@ -65,15 +68,32 @@ describe('DirectiveCard act-layer lever → art map', () => {
       elite_deploy: 'consequence_reserve_deployment.webp',
       replace_co: 'consequence_personnel_change.webp',
       front_visit: 'consequence_public_pressure.webp',
-      address_nation: 'consequence_public_pressure.webp',
-      decorate_unit: 'consequence_public_pressure.webp',
     };
-    for (const lever of ALL_LEVERS) {
+    for (const lever of STILL_LEVERS) {
       const url = resolveDirectiveActArt(lever);
       expect(url, `lever ${lever} must resolve art`).not.toBeNull();
-      expect(url!.endsWith(expectedBasename[lever])).toBe(true);
+      expect(url!.endsWith(expectedBasename[lever]!)).toBe(true);
       // The art is the shared 16:9 consequence-still family (not a 4:3 thumbnail).
       expect(url).toContain('consequence_stills');
+    }
+  });
+
+  it('resolves the §10 leadership gestures to their per-faction command-card art', () => {
+    // address_nation / decorate_unit carry their own per-faction command-card art
+    // (act_address_nation_<faction>.webp / act_decorate_unit_<faction>.webp). The
+    // DirectiveCard always passes the player faction, so these resolve via the
+    // faction-aware override layer rather than a shared consequence-still.
+    const GESTURE_ACT: Partial<Record<Lever, string>> = {
+      address_nation: 'act_address_nation',
+      decorate_unit: 'act_decorate_unit',
+    };
+    for (const faction of ['RBiH', 'RS', 'HRHB'] as const) {
+      for (const lever of ['address_nation', 'decorate_unit'] as Lever[]) {
+        const url = resolveDirectiveActArt(lever, faction);
+        expect(url, `lever ${lever} (${faction}) must resolve art`).not.toBeNull();
+        expect(url!.endsWith(`${GESTURE_ACT[lever]}_${faction}.webp`)).toBe(true);
+        expect(url).toContain('command_cards');
+      }
     }
   });
 
