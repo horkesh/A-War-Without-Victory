@@ -66,6 +66,7 @@ function leverLabel(lever: PresidentialDecisionRoomDirective['lever']): string {
     case 'authorize_op': return t('directive.lever.authorize_op');
     case 'replace_co': return t('directive.lever.replace_co');
     case 'elite_deploy': return t('directive.lever.elite_deploy');
+    case 'review_proposal': return t('directive.lever.review_proposal');
     case 'front_visit': return t('directive.lever.front_visit');
     case 'address_nation': return t('directive.lever.address_nation');
     case 'decorate_unit': return t('directive.lever.decorate_unit');
@@ -165,6 +166,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   const isFrontVisit = directive.lever === 'front_visit';
   const isAddressNation = directive.lever === 'address_nation';
   const isDecorateUnit = directive.lever === 'decorate_unit';
+  const isReviewProposal = directive.lever === 'review_proposal';
   // The three initiatable presidential leadership gestures share an async
   // availability query + single CA-cost confirm.
   const isLeadershipGesture = isFrontVisit || isAddressNation || isDecorateUnit;
@@ -303,6 +305,23 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
     setReceipt({ kind: 'cancelled', message: t('directive.receipt.cancelled') });
   };
 
+  // REVIEW-PROPOSAL withhold — deny a general's autonomy Level-1 proposal. Routes
+  // through the SAME rejectProposal IPC the AutonomyPanel used. The accept path is
+  // the primary ISSUE button (handleConfirm, review_proposal branch).
+  const handleWithhold = async () => {
+    if (busy || directive.lever !== 'review_proposal') return;
+    const proposalId = typeof directive.payload.proposalId === 'string' ? directive.payload.proposalId : '';
+    if (!proposalId) { setLoadError('Directive is missing its proposal context.'); return; }
+    setBusy(true);
+    try {
+      const result = await ipc.rejectProposal(proposalId);
+      if (!result.ok) markFailed(result.error ?? 'Failed to withhold approval.');
+      else { resetTransient(); markIssued(); }
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const markIssued = () => {
     setReceipt({ kind: 'success', message: t('directive.receipt.stagedNextTurn') });
   };
@@ -380,6 +399,18 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         if (!directive.corpsId || !opName) { setLoadError('Directive is missing its corps/operation context.'); return; }
         const result = await ipc.stageOpHaltOrder({ corpsId: directive.corpsId, opName });
         if (!result.ok) markFailed(result.error ?? 'Failed to halt operation.');
+        else { resetTransient(); markIssued(); }
+        return;
+      }
+
+      // REVIEW-PROPOSAL — accept a general's autonomy Level-1 proposal. Routes through
+      // the SAME acceptProposal IPC the AutonomyPanel used; the withhold action is a
+      // separate button wired to handleWithhold (rejectProposal). Cost 0.
+      if (directive.lever === 'review_proposal') {
+        const proposalId = typeof directive.payload.proposalId === 'string' ? directive.payload.proposalId : '';
+        if (!proposalId) { setLoadError('Directive is missing its proposal context.'); return; }
+        const result = await ipc.acceptProposal(proposalId);
+        if (!result.ok) markFailed(result.error ?? 'Failed to approve proposal.');
         else { resetTransient(); markIssued(); }
         return;
       }
@@ -702,7 +733,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
               : t('directive.issue.costTitle', { cost, current: authCurrent }))
             : t('directive.issue.insufficientTitle', { cost, current: authCurrent });
         return (
-          <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
+          <div className={`mt-2 grid gap-2 ${isReviewProposal ? 'grid-cols-[1fr_1fr_auto]' : 'grid-cols-[1fr_auto]'}`}>
             <button
               type="button"
               onClick={handleConfirm}
@@ -712,8 +743,23 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
             >
               {busy
                 ? (needsObjection ? t('directive.button.consulting') : t('directive.button.issuing'))
-                : (cost === 0 ? t('directive.button.authorize') : t('directive.button.issue', { cost }))}
+                : isReviewProposal
+                  ? t('directive.button.accept')
+                  : (cost === 0 ? t('directive.button.authorize') : t('directive.button.issue', { cost }))}
             </button>
+            {/* REVIEW-PROPOSAL withhold — denies the proposal (rejectProposal). Mirrors
+                the AutonomyPanel "Withhold" action so the approval decision lives here. */}
+            {isReviewProposal && (
+              <button
+                type="button"
+                onClick={() => { void handleWithhold(); }}
+                disabled={busy}
+                title={t('directive.issue.freeTitle')}
+                className="h-7 min-w-0 truncate rounded border border-panel-border/60 bg-panel-bg/50 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-text-secondary transition hover:border-text-secondary/70 hover:text-text-primary disabled:opacity-40"
+              >
+                {busy ? t('directive.button.withholding') : t('directive.button.withhold')}
+              </button>
+            )}
             <button
               type="button"
               onClick={handleCancel}

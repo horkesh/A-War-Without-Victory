@@ -282,7 +282,11 @@ describe('DirectiveCard stop-op action host', () => {
     expect(stageOpDirectiveOrder).not.toHaveBeenCalled();
   });
 
-  it('offers the same known-objective picker in the Army HQ operations request row', async () => {
+  it('no longer issues request-op from the Army HQ operations section (Decision-Room convergence)', () => {
+    // FULL DECISION-ROOM CONVERGENCE: the request-op lever (and force-launch /
+    // stand-down) is issued ONLY from the Presidential Decision Room (DirectiveCard).
+    // The Army HQ OperationsSection is now scan/deep-drill only — it must NOT render
+    // the request-op picker / input / button anymore.
     useGameStore.setState({
       osidDisplayNames: {
         'op:zenica:zenica_1': 'Zenica',
@@ -298,20 +302,12 @@ describe('DirectiveCard stop-op action host', () => {
     }));
 
     fireEvent.click(screen.getByRole('button', { name: /Operations/i }));
-    const picker = screen.getByLabelText('Known request-operation objective') as HTMLSelectElement;
-    fireEvent.change(picker, { target: { value: 'op:zenica:zenica_1' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Request op (25)' }));
 
-    await waitFor(() => {
-      expect(queryDirectiveObjection).toHaveBeenCalledWith({
-        corpsId: 'arbih_3rd_corps',
-        targetOsid: 'op:zenica:zenica_1',
-      });
-      expect(stageOpDirectiveOrder).toHaveBeenCalledWith({
-        corpsId: 'arbih_3rd_corps',
-        targetOsid: 'op:zenica:zenica_1',
-      });
-    });
+    // The lever affordances are gone from Army HQ.
+    expect(screen.queryByLabelText('Known request-operation objective')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Request op (25)' })).toBeNull();
+    expect(queryDirectiveObjection).not.toHaveBeenCalled();
+    expect(stageOpDirectiveOrder).not.toHaveBeenCalled();
   });
 
   it('resolves fixed request-op target captions to display names', () => {

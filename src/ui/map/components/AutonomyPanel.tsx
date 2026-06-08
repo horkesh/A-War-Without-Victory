@@ -5,13 +5,16 @@
  *  1. Autonomy Slider — 4-button selector for levels 0–3 (Full Control / Assisted /
  *     Delegated / Observer). Levels 2–3 show "(not yet unlocked)" when the backend
  *     returns level_2_plus_not_yet_enabled.
- *  2. Proposal Review — visible only when autonomy_level === 1 and there are pending
- *     proposals. Renders Accept / Reject cards for unresolved PendingProposalReview
- *     items.
+ *  2. Proposal Review (READ-ONLY) — visible only when autonomy_level === 1 and there
+ *     are pending proposals. Renders unresolved PendingProposalReview items for SCAN;
+ *     the accept (commit) / withhold approval decision is issued from the Presidential
+ *     Decision Room (DirectiveCard, review_proposal directive), not here. FULL
+ *     DECISION-ROOM CONVERGENCE — every "approve/deny a general's proposal" happens at
+ *     the one command desk.
  *
  * State management: local React state only — no global store.
- * IPC: calls window.awwv.getAutonomyState / setAutonomyLevel / acceptProposal /
- *      rejectProposal directly (methods exposed by v0.8.4 Phase B/C preload).
+ * IPC: calls window.awwv.getAutonomyState / setAutonomyLevel (the proposal accept/reject
+ *      IPC now lives in the Decision Room's DirectiveCard via useIPC).
  */
 import { useEffect, useState, useCallback } from 'react';
 import { GlassPanel } from './GlassPanel';
@@ -55,36 +58,12 @@ export interface OpProposalCard {
     override_ca_cost: number;
 }
 
-/**
- * "Override without proposal": a corps plan the officer holds at 'ready' but
- * never surfaced as a proposal. Built main-side by buildForceableReadyPlanData.
- * The president may PROACTIVELY force-launch it for force_ca_cost command authority.
- */
-export interface ForceableReadyPlan {
-    corps_id: string;
-    corps_name: string;
-    plan_id: string;
-    op_name: string;
-    commander: { officer_id: string; name: string; rank?: string; display: string } | null;
-    commander_assessment: string | null;
-    force_ca_cost: number;
-}
-
-interface CommandAuthorityState {
-    current: number;
-    max: number;
-    spent_this_turn: number;
-    lifetime_spent: number;
-}
-
 interface AutonomyState {
     autonomy_level: number;
     autonomy_level_pending?: number;
     autonomy_overrides?: Record<string, unknown>;
     pending_proposal_reviews?: PendingProposalReview[];
     op_proposal_cards?: OpProposalCard[];
-    forceable_ready_plans?: ForceableReadyPlan[];
-    command_authority?: CommandAuthorityState | null;
 }
 
 export function filterPendingProposalsForPlayer(
@@ -100,10 +79,9 @@ export function filterPendingProposalsForPlayer(
 interface AutonomyBridge {
     getAutonomyState: () => Promise<AutonomyState>;
     setAutonomyLevel: (level: number) => Promise<{ ok: boolean; error?: string }>;
-    acceptProposal?: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
-    rejectProposal?: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
-    forceLaunchProposal?: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
-    proactiveForceLaunchOp?: (corpsId: string, planId: string) => Promise<{ ok: boolean; error?: string }>;
+    // accept/reject-proposal IPC moved to the Presidential Decision Room
+    // (DirectiveCard, review_proposal directive via useIPC). This panel is read-only
+    // for the proposal queue; it keeps only the autonomy-level state bridge.
 }
 
 function getAutonomyBridge(): AutonomyBridge | undefined {
@@ -141,11 +119,6 @@ interface ProposalCardProps {
     proposal: PendingProposalReview;
     /** Phase 2 slice 1: named-officer decision card for an 'ops' proposal (joined main-side). */
     opCard?: OpProposalCard;
-    /** Current command authority, for the Override (force-launch) affordability gate. */
-    commandAuthorityCurrent?: number;
-    onAccept: (id: string) => void;
-    onReject: (id: string) => void;
-    onForceLaunch: (id: string) => void;
     /**
      * Phase 2 "Officer Dossier": open the dossier for the proposing officer by id.
      * Only wired when the officer can be resolved in namedOfficerData; otherwise the
@@ -154,7 +127,6 @@ interface ProposalCardProps {
     onInspectOfficer?: (officerId: string) => void;
     /** True when the proposing officer has a dossier available (clickable name). */
     inspectable?: boolean;
-    busy: boolean;
 }
 
 /** Force ratio → label colour. <1 is unfavourable (defender stronger). */
@@ -164,7 +136,7 @@ function ratioClass(ratio: number): string {
     return 'text-red-300';
 }
 
-function ProposalCard({ proposal, opCard, commandAuthorityCurrent, onAccept, onReject, onForceLaunch, onInspectOfficer, inspectable, busy }: ProposalCardProps) {
+function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: ProposalCardProps) {
     const resolved = proposal.accepted !== undefined;
 
     // Parse a readable corps label from proposed_action.
@@ -193,12 +165,6 @@ function ProposalCard({ proposal, opCard, commandAuthorityCurrent, onAccept, onR
             ? { label: t('autonomy.proposal.accepted'), cls: 'text-green-400 border-green-500/30 bg-green-900/10' }
             : { label: t('autonomy.proposal.rejected'), cls: 'text-red-400 border-red-500/30 bg-red-900/10' }
         : null;
-
-    // Phase 2 slice 1: Override (force-launch) only when the commander recommends
-    // NOT launching (postpone | abort). Disabled when CA can't cover the cost.
-    const overrideOffered = isOp && !!opCard?.override_available;
-    const overrideCost = opCard?.override_ca_cost ?? 0;
-    const canAffordOverride = (commandAuthorityCurrent ?? 0) >= overrideCost;
 
     return (
         <div
@@ -275,39 +241,14 @@ function ProposalCard({ proposal, opCard, commandAuthorityCurrent, onAccept, onR
                     {statusIndicator.label}
                 </div>
             ) : (
-                <div className="space-y-2 pt-0.5">
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => onAccept(proposal.id)}
-                            disabled={busy}
-                            className="flex-1 py-1 text-[9px] font-mono uppercase tracking-[0.15em] rounded border border-green-500/25 bg-green-900/15 text-green-300 hover:bg-green-900/30 hover:border-green-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                        >
-                            {isOp ? t('autonomy.proposal.commit') : t('autonomy.proposal.accept')}
-                        </button>
-                        <button
-                            onClick={() => onReject(proposal.id)}
-                            disabled={busy}
-                            className="flex-1 py-1 text-[9px] font-mono uppercase tracking-[0.15em] rounded border border-red-500/25 bg-red-900/10 text-red-400 hover:bg-red-900/25 hover:border-red-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                        >
-                            {isOp ? t('autonomy.proposal.withhold') : t('autonomy.proposal.reject')}
-                        </button>
-                    </div>
-                    {/* Override (Level 3 Direct Intervention) — only when the commander
-                        recommends NOT launching. Disabled when CA can't cover the cost. */}
-                    {overrideOffered && (
-                        <button
-                            onClick={() => onForceLaunch(proposal.id)}
-                            disabled={busy || !canAffordOverride}
-                            title={canAffordOverride
-                                ? t('autonomy.proposal.overrideCost', { cost: overrideCost })
-                                : t('autonomy.proposal.overrideInsufficient', { current: commandAuthorityCurrent ?? 0, cost: overrideCost })}
-                            className="w-full py-1 text-[9px] font-mono uppercase tracking-[0.15em] rounded border border-amber-500/30 bg-amber-900/15 text-amber-300 hover:bg-amber-900/30 hover:border-amber-500/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                        >
-                            {canAffordOverride
-                                ? t('autonomy.proposal.override', { cost: overrideCost })
-                                : t('autonomy.proposal.overrideInsufficient', { current: commandAuthorityCurrent ?? 0, cost: overrideCost })}
-                        </button>
-                    )}
+                // FULL DECISION-ROOM CONVERGENCE: the accept (commit) / withhold approval
+                // actions moved to the Presidential Decision Room (DirectiveCard,
+                // review_proposal directive). This card is now read-only/inspect — it shows
+                // the pending proposal so the player can READ it, but the approve/deny
+                // decision is issued at the one command desk. (Mirrors how OperationsSection
+                // was reduced to read-only "Review Command Decision".)
+                <div className="inline-flex items-center px-2 py-0.5 rounded border border-[#c4a04a]/25 bg-[#c4a04a]/[0.06] text-[9px] font-mono uppercase tracking-[0.15em] text-[#c4a04a]/80">
+                    {t('autonomy.proposal.decideInDecisionRoom')}
                 </div>
             )}
         </div>
@@ -379,59 +320,13 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
         }
     };
 
-    const handleAccept = async (proposalId: string) => {
-        if (!bridge?.acceptProposal) return;
-        setBusy(true);
-        try {
-            await bridge.acceptProposal(proposalId);
-            await refresh();
-        } catch (err) {
-            console.warn('[AutonomyPanel] acceptProposal failed:', err);
-        } finally {
-            setBusy(false);
-        }
-    };
-
-    const handleReject = async (proposalId: string) => {
-        if (!bridge?.rejectProposal) return;
-        setBusy(true);
-        try {
-            await bridge.rejectProposal(proposalId);
-            await refresh();
-        } catch (err) {
-            console.warn('[AutonomyPanel] rejectProposal failed:', err);
-        } finally {
-            setBusy(false);
-        }
-    };
-
-    // Phase 2 slice 1: Override (Level 3 Direct Intervention) on an op proposal.
-    const handleForceLaunch = async (proposalId: string) => {
-        if (!bridge?.forceLaunchProposal) return;
-        setBusy(true);
-        try {
-            await bridge.forceLaunchProposal(proposalId);
-            await refresh();
-        } catch (err) {
-            console.warn('[AutonomyPanel] forceLaunchProposal failed:', err);
-        } finally {
-            setBusy(false);
-        }
-    };
-
-    // "Override without proposal": proactively force a held-ready plan to launch.
-    const handleProactiveForceLaunch = async (corpsId: string, planId: string) => {
-        if (!bridge?.proactiveForceLaunchOp) return;
-        setBusy(true);
-        try {
-            await bridge.proactiveForceLaunchOp(corpsId, planId);
-            await refresh();
-        } catch (err) {
-            console.warn('[AutonomyPanel] proactiveForceLaunchOp failed:', err);
-        } finally {
-            setBusy(false);
-        }
-    };
+    // FULL DECISION-ROOM CONVERGENCE: the proposal accept (acceptProposal) / withhold
+    // (rejectProposal) approval actions moved to the Presidential Decision Room
+    // (DirectiveCard, review_proposal directive). Force-launch (proposal override +
+    // proactive held-ready override) likewise lives there (force_launch directive). This
+    // panel now hosts only the autonomy-level selector + a READ-ONLY Level-1 review list
+    // (pending proposals are shown for scan; the approve/deny decision is issued at the
+    // Decision Room command desk).
 
     const currentLevel = autonomyState?.autonomy_level ?? 0;
     const pendingLevel = autonomyState?.autonomy_level_pending;
@@ -440,10 +335,6 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
     // Index op decision cards by proposal id (Phase 2 slice 1).
     const opCardsById = new Map<string, OpProposalCard>();
     for (const card of autonomyState?.op_proposal_cards ?? []) opCardsById.set(card.proposal_id, card);
-    const commandAuthorityCurrent = autonomyState?.command_authority?.current;
-    // "Override without proposal": plans the officer holds at 'ready' but never surfaced.
-    const forceablePlans = autonomyState?.forceable_ready_plans ?? [];
-
     // Officer Dossier: index officers by id so a proposing officer can be resolved.
     const officerById = new Map<string, NamedOfficerView>();
     for (const officer of namedOfficerData ?? []) officerById.set(officer.id, officer);
@@ -560,13 +451,8 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
                                             key={proposal.id}
                                             proposal={proposal}
                                             opCard={card}
-                                            commandAuthorityCurrent={commandAuthorityCurrent}
-                                            onAccept={handleAccept}
-                                            onReject={handleReject}
-                                            onForceLaunch={handleForceLaunch}
                                             onInspectOfficer={inspectOfficer}
                                             inspectable={inspectable}
-                                            busy={busy}
                                         />
                                     );
                                 })}
@@ -580,61 +466,9 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
                         </div>
                     )}
 
-                    {/* ── Force an Operation (Level 1 only — "override without proposal") ──
-                        Plans the officer holds at 'ready' but never surfaced. Render
-                        nothing when there are none. */}
-                    {currentLevel === 1 && forceablePlans.length > 0 && (
-                        <div className="space-y-2">
-                            <div className="text-[9px] font-mono text-[#8a8578] uppercase tracking-[0.2em]">
-                                {t('autonomy.forceOp.title')}
-                            </div>
-                            <div className="space-y-2">
-                                {forceablePlans.map((plan) => {
-                                    const canAfford = (commandAuthorityCurrent ?? 0) >= plan.force_ca_cost;
-                                    return (
-                                        <div
-                                            key={`${plan.corps_id}:${plan.plan_id}`}
-                                            className="rounded border border-white/10 bg-black/25 px-3 py-2.5 space-y-1.5"
-                                        >
-                                            <div className="flex items-center justify-between gap-2">
-                                                <span className="text-[11px] font-mono text-[#c4a04a] font-semibold tracking-wide truncate">
-                                                    {plan.corps_name}
-                                                </span>
-                                                <span className="text-[9px] font-mono text-[#8a8578] uppercase tracking-[0.12em] shrink-0">
-                                                    {t('autonomy.forceOp.heldReady')}
-                                                </span>
-                                            </div>
-                                            <div className="text-[10px] font-mono text-[#d4d0c8] truncate">
-                                                {plan.op_name}
-                                            </div>
-                                            {plan.commander && (
-                                                <div className="text-[9px] font-mono text-[#8a8578] truncate">
-                                                    {t('autonomy.forceOp.commander', { commander: plan.commander.display })}
-                                                </div>
-                                            )}
-                                            {plan.commander_assessment && (
-                                                <p className="text-[9px] text-[#8a8578] leading-snug line-clamp-2">
-                                                    {plan.commander_assessment}
-                                                </p>
-                                            )}
-                                            <button
-                                                onClick={() => void handleProactiveForceLaunch(plan.corps_id, plan.plan_id)}
-                                                disabled={busy || !canAfford}
-                                                title={canAfford
-                                                    ? t('autonomy.forceOp.cost', { cost: plan.force_ca_cost })
-                                                    : t('autonomy.forceOp.insufficient', { current: commandAuthorityCurrent ?? 0, cost: plan.force_ca_cost })}
-                                                className="w-full py-1 text-[9px] font-mono uppercase tracking-[0.15em] rounded border border-amber-500/30 bg-amber-900/15 text-amber-300 hover:bg-amber-900/30 hover:border-amber-500/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                                            >
-                                                {canAfford
-                                                    ? t('autonomy.forceOp.launch', { cost: plan.force_ca_cost })
-                                                    : t('autonomy.forceOp.insufficient', { current: commandAuthorityCurrent ?? 0, cost: plan.force_ca_cost })}
-                                            </button>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
+                    {/* Force-an-operation (proactive override of a held-ready plan) moved to
+                        the Presidential Decision Room (DirectiveCard, force_launch directive
+                        via the proactive-force-launch cards). */}
 
                     {/* Refresh button */}
                     {bridge && (

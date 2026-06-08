@@ -44,6 +44,7 @@ export interface PresidentialDecisionRoomDirective {
     | 'authorize_op'
     | 'replace_co'
     | 'elite_deploy'
+    | 'review_proposal'
     | 'front_visit'
     | 'address_nation'
     | 'decorate_unit';
@@ -663,25 +664,12 @@ function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void 
 
   for (const item of items.slice(0, 4)) {
     const action = actionForBriefingItem(item);
-    // STOP-OP directive: a briefing item targeting a live operation carries the
-    // (corpsId, opName) pair as `operationKey` ("corpsId|opName"). The president
-    // can HALT it inline (stageOpHaltOrder). Only populate when BOTH parts parse.
-    const directive: PresidentialDecisionRoomDirective | undefined = (() => {
-      if (item.target.type !== 'operation') return undefined;
-      const key = item.target.operationKey;
-      if (!key) return undefined;
-      const sep = key.indexOf('|');
-      if (sep <= 0 || sep >= key.length - 1) return undefined;
-      const corpsId = key.slice(0, sep);
-      const opName = key.slice(sep + 1);
-      return {
-        lever: 'stop_op',
-        corpsId,
-        cost: STOP_OP_COST,
-        payload: { corpsId, opName },
-      };
-    })();
-
+    // NOTE: briefing items do NOT carry a stop-op directive. The sim briefing target
+    // (collect_briefing.ts) never emits a per-operation (corpsId, opName) pair, and the
+    // shared `toTargetView` collapses targets to corps/enclave/settlement/none — so a
+    // `type:'operation'` briefing target never reaches here. The STOP-OP lever is issued
+    // from `addStopOpDirectiveCards`, keyed off the live executing-operations list
+    // (`state.operations`), which IS the data the Army-HQ Stand-Down button used.
     cards.push({
       id: `briefing:${item.id}`,
       category: 'briefing',
@@ -693,9 +681,120 @@ function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void 
       actionLabel: action.actionLabel,
       evidence: [item.category ? humanize(item.category) : humanize(item.kind)],
       navigationTarget: action.navigationTarget,
-      ...(directive ? { directive } : {}),
       urgencySort: 0,
       sourceSort: `${item.title}:${item.id}`,
+    });
+  }
+}
+
+/**
+ * STOP-OP directives (War-Direction lever): one `command`-category card per PLAYER-faction
+ * EXECUTING operation, keyed off the live operation list (`state.operations`, already
+ * player-faction filtered by the adapter). This is the canonical, reachable home of the
+ * stop-op lever — it replaces the briefing-derived path, which never fired because the
+ * sim briefing target carries no per-operation (corpsId, opName) pair and `toTargetView`
+ * collapses operation targets (see `addBriefingCards`). `op.name` is the RAW engine name
+ * the IPC (`stageOpHaltOrder`) expects; `op.display_name` is the player-safe caption.
+ *
+ * Deterministic: operations are iterated in a stable strictCompare order (corps id then
+ * raw op name). No nondeterministic or time-based sources.
+ */
+function addStopOpDirectiveCards(state: LoadedGameState, cards: CandidateCard[]): void {
+  const playerFaction = state.player_faction ?? null;
+  if (!playerFaction) return;
+
+  const executing = [...(state.operations ?? [])]
+    .filter((op) => op.faction === playerFaction && op.phase === 'execution')
+    .sort((a, b) => {
+      const corpsDelta = strictCompare(a.corps_id, b.corps_id);
+      if (corpsDelta !== 0) return corpsDelta;
+      return strictCompare(a.name, b.name);
+    });
+
+  for (const op of executing) {
+    cards.push({
+      id: `command:stop-op:${op.corps_id}:${op.name}`,
+      category: 'command',
+      severity: 'warning',
+      title: t('decisionRoom.card.stopOp.title', { opName: op.display_name }),
+      explanation: t('decisionRoom.card.stopOp.explanation', {
+        opName: op.display_name,
+        corps: op.corps_name,
+      }),
+      sourceOwner: t('decisionRoom.card.command.sourceOwner'),
+      sourceLabel: t('decisionRoom.card.stopOp.sourceLabel'),
+      actionLabel: t('decisionRoom.action.inspectCorps'),
+      evidence: [
+        t('decisionRoom.card.stopOp.evidence.corps', { corps: op.corps_name }),
+        t('decisionRoom.card.stopOp.evidence.executing'),
+      ],
+      navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: op.corps_id },
+      directive: {
+        lever: 'stop_op',
+        corpsId: op.corps_id,
+        cost: STOP_OP_COST,
+        payload: { corpsId: op.corps_id, opName: op.name },
+      },
+      urgencySort: 7,
+      sourceSort: `command:stop-op:${op.corps_id}:${op.name}`,
+    });
+  }
+}
+
+/**
+ * PROPOSAL-REVIEW directives (autonomy Level-1 Assisted review queue → War-Direction
+ * lever): one ISSUE-ABLE `command`-category card per unresolved player-faction entry in
+ * the autonomy proposal-review queue. Sourced from `state.pendingProposalReviews`, which
+ * the adapter (`derivePendingProposalReviews`) has ALREADY filtered to unresolved
+ * (`accepted == null`) AND player-faction — the exact actionable set the AutonomyPanel
+ * used to render accept/withhold buttons for.
+ *
+ * FULL DECISION-ROOM CONVERGENCE: this is the canonical, single-surface home of the
+ * "approve / deny a general's proposal" decision. The AutonomyPanel keeps showing the
+ * autonomy STATE (level + pending count) but no longer ISSUES the approval — the accept
+ * (`acceptProposal`) and withhold (`rejectProposal`) actions are both wired in
+ * DirectiveCard's `review_proposal` branch, routing through the SAME IPC.
+ *
+ * Cost 0 — reviewing the officer's own proposal (accept = agreeing; withhold = holding
+ * the current stance) spends no command authority, exactly as the AutonomyPanel path did.
+ * `description` is the adapter's player-safe prose; `proposed_action` is NOT surfaced
+ * (it can carry a raw corps id). `id` is the proposalId the IPC expects.
+ *
+ * Deterministic: reviews are iterated in a stable strictCompare order by proposal id.
+ * No nondeterministic or time-based sources.
+ */
+function addProposalReviewDirectiveCards(state: LoadedGameState, cards: CandidateCard[]): void {
+  const playerFaction = state.player_faction ?? null;
+  if (!playerFaction) return;
+
+  const reviews = [...(state.pendingProposalReviews ?? [])].sort((a, b) =>
+    strictCompare(a.id, b.id),
+  );
+
+  for (const review of reviews) {
+    cards.push({
+      id: `command:review-proposal:${review.id}`,
+      category: 'command',
+      severity: 'warning',
+      title: t('decisionRoom.card.reviewProposal.title', {
+        domain: humanize(review.domain),
+      }),
+      explanation: review.description,
+      sourceOwner: t('decisionRoom.card.command.sourceOwner'),
+      sourceLabel: t('decisionRoom.card.reviewProposal.sourceLabel'),
+      actionLabel: t('decisionRoom.action.personnel'),
+      evidence: [
+        t('decisionRoom.card.reviewProposal.evidence.domain', { domain: humanize(review.domain) }),
+        t('decisionRoom.card.reviewProposal.evidence.review'),
+      ],
+      navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
+      directive: {
+        lever: 'review_proposal',
+        cost: 0,
+        payload: { proposalId: review.id },
+      },
+      urgencySort: 8,
+      sourceSort: `command:review-proposal:${review.id}`,
     });
   }
 }
@@ -1843,6 +1942,8 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   addBriefingCards(state, candidates);
   addCommandPersonnelCards(state, candidates);
   addRequestOpDirectiveCards(state, candidates);
+  addStopOpDirectiveCards(state, candidates);
+  addProposalReviewDirectiveCards(state, candidates);
   addForceLaunchDirectiveCards(state, candidates);
   addProactiveForceLaunchDirectiveCards(state, candidates);
   addHardTurnCards(state, osidNameMap, candidates);

@@ -929,36 +929,30 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(noActionCard?.directive).toBeUndefined();
   });
 
-  it('populates a stop-op directive (cost 25) on a briefing card targeting a live operation', () => {
+  it('populates a stop-op directive (cost 25) for a player-faction executing operation', () => {
+    // The stop-op lever is keyed off the live operation list (`state.operations`), NOT
+    // the briefing target — the briefing pipeline never carries a per-operation
+    // (corpsId, opName) pair (see addStopOpDirectiveCards / addBriefingCards). The raw
+    // engine name lands in the payload; the player-safe display name is the caption.
     const state = makeState({
-      commandBriefing: {
-        headline: 'Operation friction.',
-        criticalCount: 1,
-        pendingCount: 1,
-        items: [
-          {
-            id: 'op_halt',
-            kind: 'military',
-            severity: 'warning',
-            title: 'Operation stalling at the line',
-            detail: 'The push has lost momentum.',
-            target: { type: 'operation', operationKey: 'arbih_3rd_corps|operation_breakthrough' },
-          },
-          {
-            id: 'plain_summary',
-            kind: 'military',
-            severity: 'info',
-            title: 'Theater overview',
-            detail: 'General situation report.',
-            target: { type: 'summary' },
-          },
-        ],
-      },
+      operations: [
+        {
+          corps_id: 'arbih_3rd_corps', corps_name: '3rd Corps', faction: 'RBiH',
+          name: 'operation_breakthrough', display_name: 'Operation Breakthrough',
+          type: 'offensive', phase: 'execution', participating_brigade_count: 3, started_turn: 20,
+        },
+        {
+          corps_id: 'arbih_2nd_corps', corps_name: '2nd Corps', faction: 'RBiH',
+          name: 'operation_staging', display_name: 'Operation Staging',
+          type: 'offensive', phase: 'planning', participating_brigade_count: 2, started_turn: 22,
+        },
+      ] as LoadedGameState['operations'],
     });
 
     const view = buildPresidentialDecisionRoomView({ state });
-    const opCard = view.cards.find((card) => card.id === 'briefing:op_halt');
-    const summaryCard = view.cards.find((card) => card.id === 'briefing:plain_summary');
+    const opCard = view.cards.find(
+      (card) => card.id === 'command:stop-op:arbih_3rd_corps:operation_breakthrough',
+    );
 
     expect(opCard?.directive).toEqual({
       lever: 'stop_op',
@@ -966,8 +960,10 @@ describe('buildPresidentialDecisionRoomView', () => {
       cost: 25,
       payload: { corpsId: 'arbih_3rd_corps', opName: 'operation_breakthrough' },
     });
-    // A non-operation briefing card carries no directive.
-    expect(summaryCard?.directive).toBeUndefined();
+    // A non-executing (planning) operation carries no stop-op directive.
+    expect(
+      view.cards.find((card) => card.id === 'command:stop-op:arbih_2nd_corps:operation_staging'),
+    ).toBeUndefined();
   });
 
   it('propagates a directive through buildActiveDossier for the selected card', () => {
