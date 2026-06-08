@@ -520,6 +520,14 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                     'op:zavidovici:vozuca_2',
                     'op:maglaj:gornja_bocinja',
                     'op:maglaj:donja_bocinja_2',
+                    // PR-3 western/endgame anchor extension: brijesnica_donja_2 is the
+                    // chronic last-failing 188w anchor (op:lukavac:brijesnica_donja_2,
+                    // Spreča pocket). Painted RS@apr1995 → RBiH@oct1995. It is directly
+                    // adjacent to BOTH vozuca_2 and gornja_bocinja (verified via
+                    // buildOsidAdjacency), so it is the natural follow-on objective once
+                    // the Vozuća pocket collapses — no new staging or brigade donation
+                    // required. Goal: 188w 29/30 → 30/30 anchors.
+                    'op:lukavac:brijesnica_donja_2',
                 ],
                 staging_osid: 'op:zavidovici:hajderovici_2',
             },

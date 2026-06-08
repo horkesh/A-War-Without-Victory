@@ -40,6 +40,7 @@ export const KNOWN_EVENT_CONDITION_TYPES = [
     'enclave_resilience_aggregate',
     'enclave_supply_status',
     'event_fire_count',
+    'faction_area_ratio',
     'faction_controls_municipality',
     'flag_at_least',
     'flag_equals',
