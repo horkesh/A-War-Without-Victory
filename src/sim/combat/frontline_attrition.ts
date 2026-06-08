@@ -60,7 +60,7 @@ import { getFormationCorpsId } from './corps_sector_partition.js';
  * brigades (8→15). Reverted: attrition reduction cascades negatively.
  * Enclave brigades protected via local reinforcement + dissolution protection.
  */
-const BASE_ATTRITION_RATE = 0.005;
+const BASE_ATTRITION_RATE = 0.004;
 
 /**
  * Bombardment exposure: additional attrition for brigades facing superior
@@ -74,8 +74,8 @@ const BASE_ATTRITION_RATE = 0.005;
  *   - HVO (own FP ~5, incoming ~13) → ratio 2.6, ln=0.96 → half effect
  *   - VRS (own FP ~17, incoming ~2) → ratio 0.13, ln<0 → zero effect
  */
-/** Reduced from 0.012 to 0.008 (n159 audit: background losses too dominant vs active combat). */
-const BOMBARDMENT_EXPOSURE_RATE = 0.008;
+/** Reduced 0.012→0.008 (n159 audit), then 0.008→0.006 (PR-1 casualty-model: background losses still inflate total military killed vs ~80-90k target). */
+const BOMBARDMENT_EXPOSURE_RATE = 0.006;
 /** ln(firepower ratio) divisor for full bombardment effect. ln(7)≈2.0 */
 const BOMBARDMENT_RATIO_SCALE = 2.0;
 /** Minimum own firepower floor (prevents division by zero). */
