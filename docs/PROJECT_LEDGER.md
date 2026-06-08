@@ -1,4 +1,26 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-08] feat(combat): casualty-model realism + ADR-0007 Phase B — Path A attrition retune (PR-1 v2)
+
+**Type:** combat-behavior change. Branch `retune/pr1-pathA` = `origin/main` (636 floor, `40dc636fc9506dbb`) + merge of PR-1 (`feat/pr1-casualty-model-adr0007-phaseb`) + a Path A attrition retune. PR-1 solo regressed 188w by −5 (over-captured the Sarajevo inner siege ring + a few western RS over-holds); Path A partially restores the attrition rates so marginal late-war brigades thin out again, while KEEPING the killed-reduction realism (KIA 0.22 / WIA 0.74 / MIA 0.04, surrender-cascade re-split, `ENABLE_STANDING_OG_RESERVE_COMMIT=true`). Determinism preserved (no `Math.random`/`Date.now`; strictCompare iteration unchanged). Only `src/sim/combat/frontline_attrition.ts` differs from `PR-1 ∪ main`.
+
+**Change (`src/sim/combat/frontline_attrition.ts`):** `BASE_ATTRITION_RATE` 0.004→**0.0045**; `BOMBARDMENT_EXPOSURE_RATE` 0.006→**0.007**. (PR-1 had cut these from 0.005/0.008; Path A restores them ~halfway.)
+
+**Iteration (one change per run — Step A landed GO on the first setting, no further iteration needed):**
+
+| BASE | BOMB | 188w matched | 188w hash | killed (188w) | anchors | bench | crit | Zvornik |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 0.0045 | 0.007 | **649/712** (0.9115) | `89ef697dfb27c989` | **102,817** | 30/30 | 6/6 | 0 | RS PASS |
+
+**Behavioral delta:** **188w 636→649/712 (+13)**, hash `40dc636fc9506dbb`→**`89ef697dfb27c989`**, anchors **30/30** (`op:zvornik:zvornik`=RS PASS sacred; `op:lukavac:brijesnica_donja_2`=RBiH PASS), benchmarks **6/6**, **0 critical**. Control RBiH 285 / RS 321 / HRHB 106. **Total military killed 102,817** (RBiH 57,766 / RS 36,559 / HRHB 8,492) vs the pre-PR-1 143,980 baseline = **−29%** — the casualty-realism win survives (well under the ~152k floor and the ≤125k aim). **Srebrenica `op:srebrenica:srebrenica_2` = RS (FALLS); Žepa `op:rogatica:zepa_2` = RS (FALLS)** — §6 intact, no enclave-fall suppression. **Sarajevo inner-ring recovery: of the 22 painted-RS inner-ring OSIDs (`op:ilidza:*`/`op:vogosca:*`/`op:ilijas:*`/`op:pale:*`/`op:novo_sarajevo:*`), 19 are now correctly RS** (incl. `op:ilidza:sarajevo_dio_ilidza_2`, `op:pale:gornje_pale`, `op:novo_sarajevo:lukavica`, `op:vogosca:vogosca_3`); only 3 remain ARBiH (`op:ilijas:podlugovi`, `op:pale:podgrab`, `op:pale:praca`).
+
+**40w:** matched 655/712, hash `235c61f408dc3d95` (legitimately moves off the floor's `2221700edf20621e` — Path A attrition fires within 40w; 40w is informational, the 188w gate is authoritative), anchors 30/30, benchmarks 6/6.
+
+**New floor to record:** 188w **649/712**, hash **`89ef697dfb27c989`**, anchors 30/30, benchmarks 6/6, 0 criticals. 40w hash **`235c61f408dc3d95`**.
+
+**Files:** `src/sim/combat/attack_casualty_distribution.ts`, `src/sim/combat/battle_resolution.ts`, `src/sim/combat/frontline_attrition.ts`, `src/sim/combat/standing_og_defense.ts`, `src/sim/combat/brigade_front_distribution.ts` (the latter four from PR-1; only `frontline_attrition.ts` carries the Path A retune on top).
+
+**Verification:** `tsc --noEmit` exit 0; 188w 649/712 `89ef697dfb27c989` anchors 30/30 (Zvornik RS, brijesnica RBiH) benchmarks 6/6 0-crit, Srebrenica+Žepa fall, killed 102,817; 40w 655/712 `235c61f408dc3d95`.
+
 ## [2026-06-08] fix: Codex follow-ups — #303 resentment-receipt corps keying + #304 REAL_WAR_MASTER army-of-service framing
 
 **Type:** Ring-3 UI read-model + docs only, BYTE-IDENTICAL to all calibration baselines. No sim/save/scenario change; no Math.random/Date.now. 40w/52w/188w hashes untouched (the read-model is never invoked in headless calibration; the doc is non-code). Faction-agnostic, no §6 prose.
