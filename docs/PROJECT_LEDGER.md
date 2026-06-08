@@ -1,4 +1,22 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-08] chore(combat): retire ADR-0007 Phase C (delete predictor/resolver split + shared-sector cap; Phase B untouched; byte-identical)
+
+**Type:** dead-code deletion, BYTE-IDENTICAL to the 649 floor. Owner decision honoring the unanimous Pyrrhic 3-lens panel ("retire it — delete the code path, don't just park it disabled"). Phase C was canon-silent and flag-on probes returned a Guardrail-1 wrong-sign (~−2% aggregate war-cost dip — sharing attrition made the war *cheaper*, eroding the negative-sum soul-lock). Branch `chore/retire-adr0007-phase-c` off `origin/main`.
+
+**Deleted (Phase-C-only):**
+- `ENABLE_SHARED_SECTOR_DEFENSE` flag (`standing_og_defense.ts`) + all branches gated by it across `attack_resolution_osid.ts`, `combat_predictor.ts`, `attack_resource_aftermath.ts` (`applyCombatFatigue`), `operation_preparation.ts`, `sector_offensive_launch_helpers.ts`.
+- The predictor/resolver reactive-cap split: `SHARED_SECTOR_REACTIVE_DEFENSE_RATIO` + `getSectorReactiveDefensePredictionRatio` + `getSectorReactiveDefenseResolutionRatio` (`combat_math.ts`) — call sites inline `REACTIVE_DEFENSE_RATIO`.
+- The non-primary defender casualty cap: `SHARED_NON_PRIMARY_DEFENDER_CASUALTY_CAP_FRACTION` + the `capNonPrimaryDefenders` parameter on `computeDefenderCasualtyShares` / `distributeDefenderCasualties` / `buildDefenderContributions` (`attack_casualty_distribution.ts`).
+- The shared-sector solo-defender diagnostic `detectStandingOgSoloDefenderHotspots` + its interfaces/helpers (`standing_og_defense.ts`) — never wired into the sim.
+- The three helper functions (`getStandingOgDefenseBrigadeIds` / `getStandingOgEngagedDefenseBrigadeIds` / `isStandingOgDefenseBrigadeAvailable`) lost their `enableSharedSectorDefense` parameter; they now return the flag-off (assigned-only / primary-only / always-available) behavior.
+- Phase-C-only test `tests/operation_launch_feasibility_shared_defense_flag.test.ts` deleted; Phase-C assertions removed/reworked in `standing_og_defense.test.ts`, `distance_weighted_defense.test.ts`, `attack_casualty_distribution.test.ts`, `attack_resource_aftermath.test.ts`, `bot_orders_perf_profile.test.ts`.
+
+**KEPT intact:** **ADR-0007 Phase B (`ENABLE_STANDING_OG_RESERVE_COMMIT = true`, LIVE)** in the same file; the pre-Phase-C distance-weighted reactive-defense base behavior (multi-brigade casualty weighting + `DefenderContribution` Layer-C records, which predate Phase C and run on the live path when a sector has >1 assigned brigade).
+
+**Verification (deletion of inert code → MUST be byte-identical):** `tsc --noEmit` exit 0; full vitest 0 failed; **40w hash `235c61f408dc3d95`** (matches floor); **188w hash `89ef697dfb27c989`, 649/712, anchors 30/30 (Zvornik RS), 0 critical, Srebrenica+Žepa fall** (matches floor). Both hashes byte-identical → Phase C was provably inert.
+
+**Docs:** ADR-0007 design doc Phase C marked RETIRED (Phase B noted shipped). `docs/10_canon/FORAWWV.md` untouched (no canon amendment — removing a mechanic, not blessing one).
+
 ## [2026-06-08] feat(combat): casualty-model realism + ADR-0007 Phase B — Path A attrition retune (PR-1 v2)
 
 **Type:** combat-behavior change. Branch `retune/pr1-pathA` = `origin/main` (636 floor, `40dc636fc9506dbb`) + merge of PR-1 (`feat/pr1-casualty-model-adr0007-phaseb`) + a Path A attrition retune. PR-1 solo regressed 188w by −5 (over-captured the Sarajevo inner siege ring + a few western RS over-holds); Path A partially restores the attrition rates so marginal late-war brigades thin out again, while KEEPING the killed-reduction realism (KIA 0.22 / WIA 0.74 / MIA 0.04, surrender-cascade re-split, `ENABLE_STANDING_OG_RESERVE_COMMIT=true`). Determinism preserved (no `Math.random`/`Date.now`; strictCompare iteration unchanged). Only `src/sim/combat/frontline_attrition.ts` differs from `PR-1 ∪ main`.

@@ -93,7 +93,7 @@ import {
     rankDefendersByPower,
     MIN_DEFENSE_FLOOR_FRACTION,
     MAX_EDGES_PER_BRIGADE,
-    getSectorReactiveDefenseResolutionRatio,
+    REACTIVE_DEFENSE_RATIO,
     DEFENDER_CASUALTY_ENGAGEMENT_CAP,
     bfsDistanceFriendly,
     getReactiveDistanceWeight,
@@ -114,7 +114,6 @@ import { SUPPORT_POWER_MULT } from './bot_constants.js';
 import { ENABLE_TG_COMBAT_SYNTHESIS } from './tactical_group_config.js';
 import { distributeCasualtiesAcrossTg } from './tactical_group_casualties.js';
 import {
-    ENABLE_SHARED_SECTOR_DEFENSE,
     getStandingOgDefenseBrigadeIds,
     getStandingOgEngagedDefenseBrigadeIds,
     isStandingOgDefenseBrigadeAvailable,
@@ -192,74 +191,6 @@ import {
     applyPostBattleMorale,
     COMMANDER_EXP_LOSS,
 } from './attack_post_battle_effects.js';
-
-function recordDefenderCombatFatigue(params: {
-    defenderFormation: FormationState;
-    sectorDefenseBrigades: FormationState[] | null;
-    sectorBrigadeWeights: Map<FormationId, number> | null;
-}): void {
-    const {
-        defenderFormation,
-        sectorDefenseBrigades,
-        sectorBrigadeWeights,
-    } = params;
-    if (ENABLE_SHARED_SECTOR_DEFENSE && sectorDefenseBrigades && sectorDefenseBrigades.length > 1 && sectorBrigadeWeights) {
-        const weightedDefenders = sectorDefenseBrigades
-            .map((formation) => ({ formation, weight: Math.max(0, sectorBrigadeWeights.get(formation.id) ?? 0) }))
-            .filter(({ weight }) => weight > 0)
-            .sort((a, b) => strictCompare(a.formation.id, b.formation.id));
-        const totalWeight = weightedDefenders.reduce((sum, { weight }) => sum + weight, 0);
-        if (totalWeight > 0) {
-            for (const { formation, weight } of weightedDefenders) {
-                recordFormationFatigue(formation, weight / totalWeight);
-            }
-            return;
-        }
-    }
-    recordFormationFatigue(defenderFormation, 1);
-}
-
-function getDefenderAftermathEntries(params: {
-    defenderFormation: FormationState;
-    sectorDefenseBrigades: FormationState[] | null;
-    sectorBrigadeWeights: Map<FormationId, number> | null;
-    finalDefenderCas: number;
-}): Array<{ formation: FormationState; casualties: number }> {
-    const {
-        defenderFormation,
-        sectorDefenseBrigades,
-        sectorBrigadeWeights,
-        finalDefenderCas,
-    } = params;
-    if (ENABLE_SHARED_SECTOR_DEFENSE && sectorDefenseBrigades && sectorDefenseBrigades.length > 1 && sectorBrigadeWeights) {
-        const shares = computeDefenderCasualtyShares({
-            defenderFormation,
-            sectorDefenseBrigades,
-            sectorBrigadeWeights,
-            finalDefenderCas,
-            capNonPrimaryDefenders: ENABLE_SHARED_SECTOR_DEFENSE,
-        });
-        const weightedDefenders = sectorDefenseBrigades
-            .map((formation) => ({ formation, weight: Math.max(0, sectorBrigadeWeights.get(formation.id) ?? 0) }))
-            .sort((a, b) => strictCompare(a.formation.id, b.formation.id));
-        const totalWeight = weightedDefenders.reduce((sum, { weight }) => sum + weight, 0);
-        if (totalWeight > 0) {
-            return weightedDefenders
-                .filter(({ weight }) => weight > 0)
-                .map(({ formation }) => ({
-                    formation,
-                    casualties: shares.get(formation.id) ?? 0,
-                }));
-        }
-        if (shares.size > 0) {
-            return weightedDefenders.map(({ formation }) => ({
-                formation,
-                casualties: shares.get(formation.id) ?? 0,
-            }));
-        }
-    }
-    return [{ formation: defenderFormation, casualties: finalDefenderCas }];
-}
 
 // Backward-compat re-exports (types)
 export type AttackOutcome = CombatOutcome;
@@ -711,12 +642,12 @@ export function resolveAttackOrdersOsid(
             const defendingSubSeg = sector ? findSubSegmentForOsid(sector, targetOsid) : undefined;
             defendingSubSegmentId = defendingSubSeg?.sub_segment_id;
             const sectorBrigades = sector
-                ? getStandingOgDefenseBrigadeIds(sector, ENABLE_SHARED_SECTOR_DEFENSE)
+                ? getStandingOgDefenseBrigadeIds(sector)
                     .map(id => state.military.formations?.[id])
                     .filter((f): f is FormationState =>
                         f != null
                         && f.status === 'active'
-                        && isStandingOgDefenseBrigadeAvailable(state, f.id, ENABLE_SHARED_SECTOR_DEFENSE)
+                        && isStandingOgDefenseBrigadeAvailable(state, f.id)
                     )
                 : [];
             if (sectorBrigades.length > 0) {
@@ -760,12 +691,10 @@ export function resolveAttackOrdersOsid(
                 const boostedReserves = effectiveReserves * stanceReactiveBonus;
 
                 // Cap reactive response proportional to attack size
-                const avgReactivePower = ENABLE_SHARED_SECTOR_DEFENSE && contributingBrigadeCount > 0
-                    ? (physicalPower + effectiveReserves) / contributingBrigadeCount
-                    : avgBrigadePower;
+                const avgReactivePower = avgBrigadePower;
                 const reactiveResponse = Math.min(
                     boostedReserves,
-                    attackerFormations.length * avgReactivePower * getSectorReactiveDefenseResolutionRatio(ENABLE_SHARED_SECTOR_DEFENSE)
+                    attackerFormations.length * avgReactivePower * REACTIVE_DEFENSE_RATIO
                 );
                 defenderPower = physicalPower + reactiveResponse;
                 const minFloor = avgReactivePower * MIN_DEFENSE_FLOOR_FRACTION;
@@ -963,12 +892,7 @@ export function resolveAttackOrdersOsid(
 
         report.orders_processed += attackerIds.length;
         for (const a of attackerFormations) report.engaged_formation_ids.push(a.id);
-        for (const defenderId of getStandingOgEngagedDefenseBrigadeIds(
-            defenderFormation,
-            sectorDefenseBrigades,
-            sectorBrigadeWeights,
-            ENABLE_SHARED_SECTOR_DEFENSE,
-        )) {
+        for (const defenderId of getStandingOgEngagedDefenseBrigadeIds(defenderFormation)) {
             report.engaged_formation_ids.push(defenderId);
         }
 
@@ -1016,7 +940,6 @@ export function resolveAttackOrdersOsid(
                 sectorDefenseBrigades,
                 sectorBrigadeWeights,
                 finalDefenderCas,
-                capNonPrimaryDefenders: ENABLE_SHARED_SECTOR_DEFENSE,
             })
             : undefined;
         const appliedDefenderCas = defenderCasualtyShares
@@ -1031,7 +954,6 @@ export function resolveAttackOrdersOsid(
                 sectorBrigadeMeta,
                 finalDefenderCas,
                 primaryDefenderId: defenderFormation?.id,
-                capNonPrimaryDefenders: ENABLE_SHARED_SECTOR_DEFENSE,
             })
             : undefined;
 
@@ -1134,15 +1056,9 @@ export function resolveAttackOrdersOsid(
                 sectorBrigadeWeights,
                 finalDefenderCas,
                 casualtyLedger: state.military.casualty_ledger!,
-                capNonPrimaryDefenders: ENABLE_SHARED_SECTOR_DEFENSE,
             });
 
-            defenderAftermathEntries = getDefenderAftermathEntries({
-                defenderFormation,
-                sectorDefenseBrigades,
-                sectorBrigadeWeights,
-                finalDefenderCas,
-            });
+            defenderAftermathEntries = [{ formation: defenderFormation, casualties: finalDefenderCas }];
             defenderAftermathFormations = defenderAftermathEntries.map((entry) => entry.formation);
             applyDefenderBattleAftermath({
                 defenderFormations: defenderAftermathFormations,
@@ -1150,7 +1066,7 @@ export function resolveAttackOrdersOsid(
                 primaryDefenderId: defenderFormation.id,
                 corpsFrontSectors: state.military.corps_front_sectors,
             });
-            recordDefenderCombatFatigue({ defenderFormation, sectorDefenseBrigades, sectorBrigadeWeights });
+            recordFormationFatigue(defenderFormation, 1);
 
             // Record battle outcome for morale drift — defender's perspective is inverted
             // Defender equipment losses (extracted to attack_equipment_effects.ts)
@@ -1500,9 +1416,6 @@ export function resolveAttackOrdersOsid(
         applyCombatFatigue({
             attackerFormations,
             defenderFormation,
-            sectorDefenseBrigades,
-            sectorBrigadeWeights,
-            enableSharedSectorDefense: ENABLE_SHARED_SECTOR_DEFENSE,
         });
     }
 

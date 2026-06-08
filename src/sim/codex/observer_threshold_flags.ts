@@ -21,8 +21,7 @@
  * written here. It is deferred for separate §6 historian handling.
  *
  * Substrate discipline (mirrors the ENABLE_* default-off pattern used by
- * ENABLE_SHARED_SECTOR_DEFENSE / ENABLE_TG_COMBAT_SYNTHESIS /
- * SIEGE_MORALE_DRAIN_ENABLED): the observer is gated behind
+ * ENABLE_TG_COMBAT_SYNTHESIS / SIEGE_MORALE_DRAIN_ENABLED): the observer is gated behind
  * `ENABLE_OBSERVER_THRESHOLD_FLAGS`, which is `false` by default. With the flag
  * off, `observeThresholdFlags` returns an inert report and writes NOTHING, so
  * the 40w / 188w calibration runs are byte-identical. The threshold predicates

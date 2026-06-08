@@ -174,24 +174,6 @@ export const SECTOR_RESERVE_RESPONSE_FRACTION = 0.45;
  */
 export const REACTIVE_DEFENSE_RATIO = 1.5;
 
-/**
- * Phase C shared-sector defense cap.
- * Widening the reactive roster to assigned+reserve+rear should not also keep
- * the legacy 1.5x cap; otherwise rear depth can suppress operation throughput
- * before it proves war-cost conservation.
- */
-export const SHARED_SECTOR_REACTIVE_DEFENSE_RATIO = 1.0;
-
-export function getSectorReactiveDefensePredictionRatio(enableSharedSectorDefense: boolean): number {
-    return enableSharedSectorDefense ? SHARED_SECTOR_REACTIVE_DEFENSE_RATIO : REACTIVE_DEFENSE_RATIO;
-}
-
-// Resolution intentionally stays on the legacy cap until ADR-0007 activation
-// review accepts a shared-sector cap as doctrine, not just planning calibration.
-export function getSectorReactiveDefenseResolutionRatio(_enableSharedSectorDefense: boolean): number {
-    return REACTIVE_DEFENSE_RATIO;
-}
-
 // ── Distance-weighted reactive defense constants ────────────────────────────
 // Per-brigade reserve contribution decays exponentially with BFS distance.
 // Home-municipality brigades get a motivation bonus.
