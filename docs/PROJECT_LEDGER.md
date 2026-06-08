@@ -19717,6 +19717,22 @@ H9 current turn_min/turn_max: 102/102 (March 1994 ≈ week 102 from April 1992 t
 
 ---
 
+## [2026-06-08] Dayton institutional-expansion Phase 3 — 5-dimension negotiation surface
+
+**Type:** UI / read-model only (branch `feat/dayton-institutional-expansion-p3-ui`, PR #297). No sim, negotiation-logic, scenario, OOB, save-schema, or baseline change; no `Math.random`/`Date.now`. Calibration-irrelevant — the all-historical default settlement spends 0 capital and is byte-identical (40w `2221700edf20621e`).
+
+**Change:** Surfaces the shipped Phase 1/2 institutional-architecture engine in `DaytonNegotiationModal` so the player authors the full structural settlement, not just the map. New `DaytonInstitutionalDimensions` sub-component renders the four structural dimensions: the entity-autonomy master dial (Dim 2: confederation/dayton-historical/federalized/unitary), the 16-competency Annex-4 jurisdiction grid (Dim 3: state/entity/shared), the 5 constitutional sub-choices (Dim 4), and the 2 return/justice choices (Dim 5).
+
+**Costs are authoritative by construction:** the component imports the engine cost functions directly (`finalCompetencyCost`/`finalConstitutionalCost`/`finalReturnJusticeCost`/`getDialDeclarationCost`/`isOptionReachable` from `dayton_dial_cost.ts`) rather than re-mirroring them — no client/engine drift. The anti-power-fantasy gate locks options beyond the faction's earned capital via `isOptionReachable`. The modal folds the new costs into the capital budget and spreads `buildInstitutionalProposalFields` into the proposal (new fields attached ONLY when non-default → byte-identical all-historical proposal), clearing any stale probe on change. EN+BCS i18n parity for all new chrome (13 keys).
+
+**Files:** `src/ui/map/components/DaytonInstitutionalDimensions.tsx` (new), `src/ui/map/components/DaytonNegotiationModal.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/dayton_institutional_dimensions.test.ts` (new), `tests/ui/dayton_institutional_dimensions_render.test.ts` (new).
+
+**Verification:** `tsc --noEmit` exit 0; `desktop:map:build` exit 0; vitest 49/49 across the 2 new files + `dayton_negotiation_modal` + `dayton_readouts` + `dayton_preview_ipc` + `ui_i18n` (EN↔BCS parity intact). `computeInstitutionalCost` pinned to engine cost functions; default selection proves 0-cost byte-identity for all three factions.
+
+**Context:** Completes the institutional-architecture expansion (Phase 1 #290 data+types, Phase 2 #295 cost dials+bot eval, Phase 3 UI). Build spec `docs/plans/2026-06-07-dayton-institutional-expansion-build-spec.md`.
+
+---
+
 ## [2026-06-08] Review-backlog Batch A — command-card (force-launch) routing cohesion
 
 **Type:** UI/IPC routing fix (branch `fix/command-card-routing-batch-a`). No engine/state/sim/scenario touch; no `Math.random`/`Date.now`; calibration-irrelevant (presentation + IPC dispatch only). Closes the four Codex review threads behind Batch A (PRs #126/#119/#274), all re-verified open against current main before implementing.

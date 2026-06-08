@@ -57,6 +57,13 @@ import {
     type InstitutionChoice,
     type BrckoOutcome,
 } from '../data/daytonReadouts';
+import {
+    DaytonInstitutionalDimensions,
+    computeInstitutionalCost,
+    buildInstitutionalProposalFields,
+    defaultInstitutionalSelections,
+    type InstitutionalSelections,
+} from './DaytonInstitutionalDimensions';
 
 type DaytonData = NonNullable<LoadedGameState['pendingDayton']>;
 
@@ -86,6 +93,9 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
     const [demands, setDemands] = useState<Set<string>>(new Set());
     const [concessions, setConcessions] = useState<Set<string>>(new Set());
     const [institutions, setInstitutions] = useState<Record<string, InstitutionChoice>>({});
+    // Institutional-architecture expansion (Phase 3): the 4 structural dimensions
+    // (autonomy dial + competencies + constitutional + return/justice).
+    const [instArch, setInstArch] = useState<InstitutionalSelections>(defaultInstitutionalSelections());
     const [submitting, setSubmitting] = useState(false);
     const [probing, setProbing] = useState(false);
     const [botResponses, setBotResponses] = useState<Record<string, IpcDaytonBotResponse> | null>(null);
@@ -103,6 +113,10 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
         if (choice === 'centralized') capitalSpent += pkg.centralizedCost;
         else if (choice === 'decentralized') capitalSpent += pkg.decentralizedCost;
     }
+    // Institutional-architecture expansion (Phase 3): dial declaration + Dim-3/4/5
+    // deviation costs to the player (authoritative engine cost functions; 0 at the
+    // all-historical default so an untouched settlement is byte-identical).
+    capitalSpent += computeInstitutionalCost(instArch, playerFaction);
     const capitalAvailable = playerFaction ? (dayton.factionCapital[playerFaction] ?? 0) : 0;
     const overBudget = capitalSpent > capitalAvailable;
 
@@ -154,10 +168,18 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
         setInstitutions(prev => ({ ...prev, [id]: choice }));
     };
 
+    const setInstArchAndClear = (next: InstitutionalSelections) => {
+        clearProbe();
+        setInstArch(next);
+    };
+
     const buildProposal = () => ({
         territorial_demands: [...demands],
         territorial_concessions: [...concessions],
         institutional_choices: institutions,
+        // Phase 3 structural dimensions — only attached when non-default, so an
+        // all-historical proposal is byte-identical to the pre-expansion shape.
+        ...buildInstitutionalProposalFields(instArch),
     });
 
     // ── Probe Positions — read-only counter-offer preview (no mutation) ────────
@@ -405,6 +427,16 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                         })}
                     </div>
                 </div>
+
+                {/* Institutional-architecture expansion (Phase 3): the 4 structural
+                    dimensions the player authors — autonomy dial, competency matrix,
+                    constitutional architecture, return & justice. */}
+                <DaytonInstitutionalDimensions
+                    selections={instArch}
+                    onChange={setInstArchAndClear}
+                    playerFaction={playerFaction}
+                    capitalAvailable={capitalAvailable}
+                />
 
                 {/* Probe Positions — bot counter-offer preview */}
                 <div className="px-8 py-4 border-b border-[#c8b898]/40">
