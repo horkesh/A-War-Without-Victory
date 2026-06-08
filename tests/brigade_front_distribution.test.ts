@@ -1017,6 +1017,54 @@ describe('distributeBrigadesToFront', () => {
         expect(state.military.formations.brig_reserve.location_osid).toBe('op:test:front');
         expect(state.military.brigade_movement_orders?.brig_reserve).toBeUndefined();
         expect(state.military.formations.brig_reserve.entrenchment_turns).toBe(0);
+        // ADR-0007 Phase B defect fix: the committed reserve is now physically on the
+        // front OSID, so it must be promoted into the sector defender roster
+        // (assigned_brigade_ids) and removed from reserve_brigade_ids — otherwise it
+        // would feed defense power but absorb zero attrition (it would "cheat death").
+        expect(sectors[0].assigned_brigade_ids).toContain('brig_reserve');
+        expect(sectors[0].assigned_brigade_ids).toContain('brig_front');
+        expect(sectors[0].reserve_brigade_ids).not.toContain('brig_reserve');
+    });
+
+    it('does NOT promote an in-transit (multi-hop march) standing-OG reserve to the defender roster', () => {
+        // A reserve two hops behind the front gets a column-march order, not a direct
+        // move. It is still in transit this turn, so it must NOT take frontline attrition:
+        // it stays in reserve_brigade_ids and out of assigned_brigade_ids.
+        const state = makeState({
+            brig_front: makeFormation({ location_osid: 'op:test:front', entrenchment_turns: 12 }),
+            brig_reserve: makeFormation({ location_osid: 'op:test:deep_rear', entrenchment_turns: 12 }),
+        });
+
+        const sectors = [
+            makeSector({
+                assigned_brigade_ids: ['brig_front'],
+                reserve_brigade_ids: ['brig_reserve'],
+                rear_brigade_ids: [],
+                threat_ratio: 2.2,
+                territory_osids: ['op:test:front', 'op:test:rear', 'op:test:deep_rear'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:hot',
+                    friendly_osids: ['op:test:front'],
+                    enemy_osids: ['op:enemy:x', 'op:enemy:y'],
+                    primary_brigade_ids: ['brig_front'],
+                    edge_ids: ['edge:1'],
+                    length_edges: 1,
+                }],
+            }),
+        ];
+
+        const adjacency = makeAdjacency([
+            ['op:test:front', 'op:test:rear'],
+            ['op:test:rear', 'op:test:deep_rear'],
+        ]);
+
+        distributeBrigadesToFront(state, sectors, adjacency, { enableStandingOgReserveCommit: true });
+
+        // Two hops away → column march issued, brigade still off the front this turn.
+        expect(state.military.brigade_movement_orders?.brig_reserve).toBeDefined();
+        expect(state.military.formations.brig_reserve.location_osid).toBe('op:test:deep_rear');
+        expect(sectors[0].assigned_brigade_ids).not.toContain('brig_reserve');
+        expect(sectors[0].reserve_brigade_ids).toContain('brig_reserve');
     });
 
     it('avoids committing a standing-OG reserve to a low-affinity front target', () => {

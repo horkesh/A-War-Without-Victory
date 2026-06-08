@@ -310,6 +310,39 @@ function disperseStackedRearBrigadesForSector(
  * Mutates state.military.formations (location_osid, entrenchment_turns) and
  * state.military.brigade_movement_orders.
  */
+/**
+ * ADR-0007 Phase B defect fix: when a reserve/rear brigade is physically committed
+ * FORWARD onto a sector front OSID this turn, promote it into the sector's
+ * `assigned_brigade_ids` (and remove it from the reserve/rear buckets).
+ *
+ * Why: the Standing-OG defender roster (`getStandingOgDefenseBrigadeIds`, consumed by
+ * `attack_casualty_distribution.ts`) is built from `assigned_brigade_ids` only. A reserve
+ * that is moved onto the front (location_osid set to a front OSID) feeds the sector's
+ * defense power yet — without this promotion — never enters the casualty roster, so it
+ * absorbs zero attrition. Promoting it on commit scopes attrition to exactly the brigades
+ * that actually moved forward (idle rear/reserve brigades that never moved are untouched),
+ * and matches what the next-turn `buildCorpsFrontSectors` rebuild would classify it as
+ * (front-located → assigned). ONLY called on the direct-move (arrives-now) path; brigades
+ * issued a multi-hop column-march order are still in transit and must NOT take frontline
+ * attrition this turn.
+ *
+ * Deterministic: pure list filter + sorted push (strictCompare); no Math.random / Date.now.
+ */
+function promoteCommittedReserveToAssigned(
+    sector: CorpsFrontSector,
+    brigadeId: string,
+): void {
+    if (sector.reserve_brigade_ids) {
+        sector.reserve_brigade_ids = sector.reserve_brigade_ids.filter((bid) => bid !== brigadeId);
+    }
+    if (sector.rear_brigade_ids) {
+        sector.rear_brigade_ids = sector.rear_brigade_ids.filter((bid) => bid !== brigadeId);
+    }
+    if (!sector.assigned_brigade_ids.includes(brigadeId)) {
+        sector.assigned_brigade_ids = [...sector.assigned_brigade_ids, brigadeId].sort(strictCompare);
+    }
+}
+
 function commitReserveToThreatenedFront(
     state: GameState,
     sector: CorpsFrontSector,
@@ -395,10 +428,16 @@ function commitReserveToThreatenedFront(
     if (best.dist <= 1) {
         best.formation.location_osid = best.target;
         best.formation.entrenchment_turns = 0;
+        // ADR-0007 Phase B defect fix: this reserve is now physically on the front
+        // OSID, so register it in the defender roster (assigned_brigade_ids) — otherwise
+        // it feeds defense power but takes zero attrition this turn.
+        promoteCommittedReserveToAssigned(sector, best.bid);
         activeCounts.set(best.target, (activeCounts.get(best.target) ?? 0) + 1);
         return;
     }
 
+    // Multi-hop march: brigade is still in transit (arrives a later turn) — it is NOT
+    // on the front this turn, so it is intentionally NOT promoted to the defender roster.
     if (!state.military.brigade_movement_orders) {
         state.military.brigade_movement_orders = {};
     }
@@ -499,6 +538,10 @@ function fillEmptyFrontSubsegmentsFromSectorReserve(
         if (best.dist === 1) {
             best.formation.location_osid = best.target;
             best.formation.entrenchment_turns = 0;
+            // ADR-0007 Phase B defect fix: a reserve/rear brigade filled directly onto
+            // an empty front OSID this turn must enter the defender roster so it takes
+            // attrition (idempotent for already-assigned brigades).
+            promoteCommittedReserveToAssigned(sector, best.bid);
             activeCounts.set(best.target, (activeCounts.get(best.target) ?? 0) + 1);
         } else {
             if (!state.military.brigade_movement_orders) {
