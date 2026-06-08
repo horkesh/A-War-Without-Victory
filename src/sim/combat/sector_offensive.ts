@@ -94,6 +94,7 @@ import { checkLoanedArrivals, areLoanedBrigadesReady, cleanupDissolvedLoans } fr
 import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_reinforcement_constants.js';
 import { hasActiveOperation, removeOperation } from './corps_operation_helpers.js';
 import { MIN_ATTACK_PERSONNEL, MAX_BRIGADE_PERSONNEL } from '../../state/formation_constants.js';
+import { isFactionOffensiveOpsSuppressed } from '../events/active_modifiers.js';
 import {
     allAxesTerminal,
     assignBrigadeRoles,
@@ -1357,6 +1358,18 @@ export function advanceSectorOffensives(
                     && op.force_ratio_estimate < launchFloorForOp(op)
                 ) {
                     beginRecovery(op, turn, 'defender_power_too_high', state);
+                    continue;
+                }
+                // Fall-1995 E-A5 launch-halt CAP: when an active
+                // offensive_ops_suppression entry covers this faction (e.g. the
+                // Holbrooke "halt the Federation advance" pressure via
+                // us_halts_federation_advance_1995), refuse new offensive launches.
+                // This is a CAP that bounds RBiH/HRHB endgame overshoot; it flips
+                // no currently-RS OSID. Already-executing ops are untouched (gate is
+                // only at the planning→execution transition). force_launch (player
+                // override) bypasses, matching every other launch gate here.
+                if (!forcedLaunch && isFactionOffensiveOpsSuppressed(state, faction, turn)) {
+                    beginRecovery(op, turn, 'offensive_ops_suppressed', state);
                     continue;
                 }
                 op.phase = 'execution';

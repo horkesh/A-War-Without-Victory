@@ -2040,7 +2040,13 @@
       "phase": "war",
       "requires_events": [
         "federation_ground_offensive_1995"
-      ]
+      ],
+      "condition": {
+        "type": "faction_area_ratio",
+        "faction": "RS",
+        "comparator": "at_most",
+        "value": 0.51
+      }
     },
     "once": true,
     "requires_player_response": true,
@@ -2062,6 +2068,18 @@
         "faction": "HRHB",
         "delta": -0.2,
         "duration_turns": 12
+      },
+      {
+        "kind": "offensive_ops_suppression",
+        "faction": "RBiH",
+        "duration_turns": 6,
+        "reason": "us_halts_federation_advance_1995"
+      },
+      {
+        "kind": "offensive_ops_suppression",
+        "faction": "HRHB",
+        "duration_turns": 6,
+        "reason": "us_halts_federation_advance_1995"
       }
     ],
     "response_options": [
