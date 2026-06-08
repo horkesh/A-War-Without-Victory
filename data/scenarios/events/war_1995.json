@@ -2036,7 +2036,7 @@
     "category": "diplomatic",
     "trigger": {
       "turn_min": 182,
-      "turn_max": 184,
+      "turn_max": 188,
       "phase": "war",
       "requires_events": [
         "federation_ground_offensive_1995"
