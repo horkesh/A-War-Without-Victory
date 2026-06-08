@@ -38,6 +38,8 @@ import type { Osid } from './osid_adjacency.js';
 import { getHomeDistanceMult } from './home_distance.js';
 import { getActiveEquipmentQualityMultiplier, getCascadePenaltyForOsid } from '../events/active_modifiers.js';
 import { getStrategicDepth, getKrajinaCollapseMult } from './strategic_depth.js';
+import { getCoordinationCoherence } from './coordination_coherence.js';
+import { getOsidPriority } from './strategic_priorities.js';
 import { isIntelAmbushFrictionEnabled, isIntelAmbushDepthEnabled } from './intel_ambush_depth_gate.js';
 import {
     INTEL_EXECUTION_AMBUSH_DEPTH_GAIN,
@@ -89,6 +91,16 @@ export interface DefenderPowerBreakdown {
      *  quality suppression (distinct mechanism: rear-area vs C2/ammo damage).
      *  Source: `getKrajinaCollapseMult` from strategic_depth.ts. */
     krajinaCollapseMult: number;
+    /** Fall-1995 mechanic E-B1 consumer (Consumer-1, periphery brittleness):
+     *  1.0× by default (byte-stable historical path). 0.80× when the target OSID
+     *  is `periphery` priority for the DEFENDER faction AND the defending corps's
+     *  coordination_coherence has decayed below PERIPHERY_ABANDONMENT_THRESHOLD.
+     *  Models the post-Storm VRS-Krajina corps abandoning marginal periphery
+     *  sectors once operational coordination collapses (the corps holds its core
+     *  but cannot coordinate a coherent line across its outer AOR). Source:
+     *  `getCoordinationCoherence` (coordination_coherence.ts) + `getOsidPriority`
+     *  (strategic_priorities.ts). See synthesis §3 E-B1 / E-B4. */
+    peripheryAbandonmentMult: number;
     power: number;
 }
 
@@ -370,6 +382,22 @@ export const DEFENSE_ENV_CAP_THRESHOLD = 0.5;
 export const DEFENSE_ENV_COMPRESSION = 0.35;  // Was 0.5 — tighter compression above threshold
 /** Hard cap on total defensive environmental multiplier. Prevents impenetrable late-war walls. */
 export const DEFENSE_ENV_HARD_CAP = 2.5;
+
+/**
+ * Fall-1995 mechanic E-B1 (Consumer-1) tuning.
+ *
+ * PERIPHERY_ABANDONMENT_THRESHOLD: a defending corps's coordination_coherence
+ * must fall strictly below this for its PERIPHERY-priority sectors to become
+ * brittle. Variant 1 starts at 0.6 per the iteration plan; if a 188w run is
+ * < floor, the iteration lowers it to 0.5 to confine the penalty to genuine
+ * 2KK-collapse-grade incoherence (magnitude is NOT the lever — scope is).
+ *
+ * PERIPHERY_ABANDONMENT_DEFENDER_MULT: the defender-power multiplier applied to
+ * an abandoned periphery OSID (synthesis §3 E-B1 / E-B4 ×0.80). Do NOT soften
+ * this; the lever is the threshold/scope, not the magnitude.
+ */
+export const PERIPHERY_ABANDONMENT_THRESHOLD = 0.6;
+export const PERIPHERY_ABANDONMENT_DEFENDER_MULT = 0.80;
 
 /** Base experience multiplier — even green troops have some combat effectiveness. */
 export const EXPERIENCE_BASE = 0.6;
@@ -1661,6 +1689,36 @@ export function computeDefenderPowerBreakdown(
     );
     if (krajinaCollapseMult !== 1.0) power *= krajinaCollapseMult;
 
+    // ── Fall-1995 mechanic E-B1 (Consumer-1): periphery-abandonment penalty ──
+    // Once a corps's coordination_coherence (coordination_coherence.ts) decays
+    // below PERIPHERY_ABANDONMENT_THRESHOLD, its PERIPHERY-priority sectors
+    // become brittle: the corps holds its core but can no longer coordinate a
+    // coherent defensive line across its outer AOR. Defender power on those
+    // periphery OSIDs is reduced ×0.80, letting the war's most marginal
+    // western-Krajina captures emerge rather than be forced.
+    //
+    // Scope: coherence only decays for the post-Storm KRAJINA_COLLAPSE_CORPS
+    // (computeCoordinationCoherence returns 1.0 everywhere else), so this
+    // consumer is byte-stable for every non-Krajina defender and for all
+    // defenders pre-Storm. The periphery classification is per-DEFENDER-faction
+    // (getOsidPriority(targetOsid, formation.faction)); a defender's core/
+    // corridor OSIDs are never penalised.
+    //
+    // v2 NOTE: the first-build all-corps faction-symmetric `<0.7` launch-block
+    // (Consumer-2) is intentionally OMITTED — it gagged the attacker and its
+    // collateral landed on the marginal western captures E-B1 should ENABLE.
+    // Source: getCoordinationCoherence + getOsidPriority. ICTY Mladić
+    // MICT-13-56 §3437-3450; BB v2 ch 28.
+    let peripheryAbandonmentMult = combatMathProfileTime(profileTime, '.peripheryAbandonment', () => {
+        if (!formation.corps_id) return 1.0;
+        const defenderCorps = state.military.formations?.[formation.corps_id];
+        if (!defenderCorps) return 1.0;
+        if (getCoordinationCoherence(defenderCorps) >= PERIPHERY_ABANDONMENT_THRESHOLD) return 1.0;
+        if (getOsidPriority(targetOsid, formation.faction) !== 'periphery') return 1.0;
+        return PERIPHERY_ABANDONMENT_DEFENDER_MULT;
+    });
+    if (peripheryAbandonmentMult !== 1.0) power *= peripheryAbandonmentMult;
+
     return {
         base,
         postureMult,
@@ -1685,6 +1743,7 @@ export function computeDefenderPowerBreakdown(
         cascadeMult,
         strategicDepthMult,
         krajinaCollapseMult,
+        peripheryAbandonmentMult,
         power,
     };
 }

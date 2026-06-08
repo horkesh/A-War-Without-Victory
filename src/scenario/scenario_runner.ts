@@ -24,6 +24,11 @@ import { updateMilitiaEmergence } from '../sim/early_war/militia_emergence.js';
 import { applyRsJnaInheritanceBonus, runPoolPopulation } from '../sim/early_war/pool_population.js';
 import { initializeCorpsCommand } from '../sim/combat/corps_command.js';
 import { initStrategicDepth } from '../sim/combat/strategic_depth.js';
+// Side-effect: register the node-only strategic-priorities disk loader so
+// getOsidPriority reads the canonical JSON on the engine side. combat_math
+// (browser-bundled) imports getOsidPriority but NOT this loader, keeping the
+// tactical-map bundle free of node:fs (tests/ui_map_browser_safe_imports.test.ts).
+import '../sim/combat/strategic_priorities_node.js';
 import { findBrigadeOperation } from '../sim/combat/corps_operation_helpers.js';
 import { injectPrePlannedOperations } from '../sim/combat/pre_planned_operations.js';
 import { spawnJnaPhantomBrigades } from '../sim/combat/jna_phantom_brigades.js';
@@ -1789,6 +1794,12 @@ export async function buildScenarioStartupState(
         // load so the first turn's combat / coherence reads see real depth
         // values rather than the default 1.0.
         initStrategicDepth(state);
+        // Fall-1995 mechanic E-B1: coordination_coherence is intentionally NOT
+        // seeded at scenario load. Pre-Storm it is a constant 1.0 (the consumer
+        // is inert), and the per-turn `update-coordination-coherence` war step
+        // computes it before the first combat resolves. Omitting the init write
+        // keeps the baked April-1992 startup snapshot byte-identical (the field
+        // would otherwise serialize 1.0 onto every corps and stale the artifact).
         let prePlannedAdjacency;
         try {
             const preEdges = await loadOperationalEdges(baseDir);

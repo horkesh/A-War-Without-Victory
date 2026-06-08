@@ -196,6 +196,7 @@ import { warPhaseReconciliationSteps } from './war_phase_reconciliation_steps.js
 import { warPhaseNegotiationSteps } from './war_phase_negotiation_steps.js';
 import { warPhaseBriefingSteps } from './war_phase_briefing_steps.js';
 import { reconcileFinalOperationTruth } from '../combat/final_operation_truth_reconciliation.js';
+import { updateCoordinationCoherence } from '../combat/coordination_coherence.js';
 
 // --- Pipeline infrastructure imports ---
 import type { NamedPhase, TurnContext, TurnReport } from '../turn_pipeline_types.js';
@@ -1559,6 +1560,19 @@ export const warPhases: NamedPhase[] = [
             if (strandedReport.updated > 0) {
                 context.report.stranded_brigade_lifecycle = strandedReport;
             }
+        }
+    },
+    {
+        // Fall-1995 mechanic E-B1: recompute per-corps coordination_coherence
+        // from live state (Storm onset + Krajina-collapse subject + strategic_depth
+        // + NATO C2 suppression) BEFORE combat resolves, so the periphery-
+        // abandonment defender penalty (combat_math Consumer-1) reads the current
+        // turn's coherence. Byte-stable pre-Storm and for every non-Krajina corps
+        // (computeCoordinationCoherence returns 1.0 there). Sorted iteration.
+        name: 'update-coordination-coherence',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            updateCoordinationCoherence(context.state);
         }
     },
     {

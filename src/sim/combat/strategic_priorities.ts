@@ -19,9 +19,35 @@
  * classification at runtime. Do not duplicate the lookup logic elsewhere.
  */
 
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import type { FactionId } from '../../state/game_state.js';
+
+// Browser-safety: `combat_math.ts` (browser-bundled via the tactical map) now
+// imports getOsidPriority for the Fall-1995 E-B1 periphery consumer. A static
+// `import ... from 'node:fs'` here would pull node builtins into the browser
+// bundle (tests/ui_map_browser_safe_imports.test.ts). The disk read lives in
+// the node-only loader `strategic_priorities_node.ts`; this module is browser-
+// safe and only does cache lookups. On the node engine side the cache is seeded
+// by `loadStrategicPriorities()` (which lazily pulls in the node loader); in the
+// browser the cache is either seeded via `_setStrategicPrioritiesForTesting` or
+// absent, in which case lookups return the conservative 'periphery' default.
+//
+// Lazy node-loader resolution: a function-scoped `await import()` would break the
+// synchronous combat hot path, so the node loader is required indirectly via
+// createRequire-free `globalThis`-guarded dynamic access. We expose a setter the
+// node loader calls at module-eval time so the sync read stays a pure cache hit.
+type StrategicPrioritiesDiskLoader = (baseDir?: string) => RawJson;
+let diskLoader: StrategicPrioritiesDiskLoader | null = null;
+
+/**
+ * Node-only: register the disk loader. Called by `strategic_priorities_node.ts`
+ * (imported only from node entrypoints). Browser bundles never import that
+ * module, so `diskLoader` stays null and lookups use the conservative default.
+ */
+export function _registerStrategicPrioritiesDiskLoader(
+    loader: StrategicPrioritiesDiskLoader,
+): void {
+    diskLoader = loader;
+}
 
 export type StrategicPriority = 'core' | 'corridor' | 'periphery';
 
@@ -54,18 +80,25 @@ let cached: StrategicPriorityIndex | null = null;
 /** Allow tests / browser to seed the cache without file I/O. */
 let cachedRawForReload: RawJson | null = null;
 
+/** Empty index — the conservative fallback (every lookup → 'periphery'). */
+const EMPTY_INDEX: StrategicPriorityIndex = { byFaction: new Map() };
+
 /**
  * Load strategic priorities from the canonical JSON file.
  * Cached after first call. Re-use the same index for every lookup.
+ *
+ * The disk read lives in the node-only loader (`strategic_priorities_node.ts`),
+ * registered via `_registerStrategicPrioritiesDiskLoader`. Node entrypoints
+ * import that loader (directly or transitively) so `diskLoader` is set before
+ * first use. In the browser the loader is never imported (keeping this module
+ * free of `node:fs`), so we return the EMPTY_INDEX — every lookup falls back to
+ * the conservative 'periphery' classification, identical to the prior
+ * "unknown faction / unlisted OSID → periphery" semantics.
  */
 export function loadStrategicPriorities(baseDir?: string): StrategicPriorityIndex {
     if (cached) return cached;
-    const path = resolve(
-        baseDir ?? process.cwd(),
-        'data/source/strategic_priorities.json',
-    );
-    const text = readFileSync(path, 'utf8');
-    const raw = JSON.parse(text) as RawJson;
+    if (!diskLoader) return EMPTY_INDEX; // browser / loader not registered
+    const raw = diskLoader(baseDir);
     cached = buildIndex(raw);
     cachedRawForReload = raw;
     return cached;

@@ -35,6 +35,9 @@ import type { FormationState, GameState, MilitiaPoolState } from '../../state/ga
 import { strictCompare } from '../../state/validateGameState.js';
 import { ensureBrigadeHistory } from './brigade_history_recorder.js';
 import { getOsidPriority, priorityRank } from './strategic_priorities.js';
+// Side-effect: register the node-only disk loader (strategic_reserve runs only
+// on the node engine). Keeps strategic_priorities.ts browser-safe for combat_math.
+import './strategic_priorities_node.js';
 
 /**
  * Pool.available above this flows to faction reserve after reinforcement.

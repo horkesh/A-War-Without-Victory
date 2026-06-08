@@ -27,6 +27,10 @@ import {
     getOsidPriority,
     _setStrategicPrioritiesForTesting,
 } from '../src/sim/combat/strategic_priorities.js';
+// Register the node-only disk loader so the "re-reads from disk after cache
+// clear" assertions still hit real JSON (strategic_priorities.ts is now
+// browser-safe and delegates the fs read to this node loader).
+import '../src/sim/combat/strategic_priorities_node.js';
 import type { FormationId, FormationState, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 

@@ -203,6 +203,11 @@ describe('war-phase step ordering', () => {
         //        After supply resolution, before the first lifeline consumer; rewrites only
         //        sarajevo_state.lifeline, gated by default-off ENABLE_SARAJEVO_LIFELINE —
         //        byte-identical-inert on all flag-off baselines.
-        expect(stepNames.length).toBe(187);
+        // +1 from update-coordination-coherence (Fall-1995 E-B1 v2 corps coherence decay, 2026-06-08).
+        //        Before advance-sector-offensives; recomputes per-corps coordination_coherence.
+        //        Returns 1.0 for every corps pre-Storm and for every non-KRAJINA_COLLAPSE_CORPS
+        //        post-Storm, so the periphery-abandonment defender penalty it feeds is inert
+        //        (byte-identical) until the VRS Krajina corps decay in autumn 1995.
+        expect(stepNames.length).toBe(188);
     });
 });
