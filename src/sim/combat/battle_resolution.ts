@@ -44,6 +44,7 @@ import { computeResilienceModifier } from './faction_resilience.js';
 import { isBrigadeAssignedToFront } from './front_assignment.js';
 import { findBrigadeOperation } from './corps_operation_helpers.js';
 import { DEFAULT_SARAJEVO_SIEGE_PARAMS, getSarajevoSiegeParams } from './sarajevo_siege_params.js';
+import { KIA_FRACTION, WIA_FRACTION } from './attack_casualty_distribution.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -85,10 +86,8 @@ const MIN_CASUALTIES_PER_BATTLE = 15;
 const UNDEFENDED_DEFENDER_CASUALTY_SCALE = 0.5;
 const MIN_UNDEFENDED_DEFENDER_CASUALTIES = 1;
 
-/** Casualty category fractions (must sum to 1). */
-const KIA_FRACTION = 0.30;
-const WIA_FRACTION = 0.55;
-// MIA = remainder (0.15)
+// Casualty category fractions (KIA 0.30 / WIA 0.55 / MIA 0.15 remainder) are
+// imported from attack_casualty_distribution.ts (canonical export).
 
 /** Experience multiplier: floor + scale × experience. */
 const EXPERIENCE_MULT_BASE = 0.6;

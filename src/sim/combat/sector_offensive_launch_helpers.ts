@@ -873,8 +873,9 @@ function classifyAxisOpeningAttack(
     // Non-anchor brigades stay in assigned_brigades for downstream combat math
     // (existing main/support_brigades SUPPORT_POWER_MULT path is unchanged in
     // v1); they simply no longer block the planning→execution transition by
-    // failing to march to the objective. Flag default off — byte-identical to
-    // legacy behavior. See src/sim/combat/tactical_group_config.ts.
+    // failing to march to the objective. ENABLE_TACTICAL_GROUPS is now ON
+    // (default true), so this anchor-only gate path is the active behavior; the
+    // current gold hashes reflect it. See src/sim/combat/tactical_group_config.ts.
     const gateBrigades = ENABLE_TACTICAL_GROUPS
         ? resolveOpeningAttackGateBrigades(state, axis)
         : axis.assigned_brigades;
