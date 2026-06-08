@@ -82,6 +82,22 @@ export const REVOLT_PARALYSIS_TURNS = 4;
 export const FORCE_OP_PATRON_BASE = -10;
 
 /**
+ * PATRON-OVERRIDE FLOOR — the small patron_confidence shift a PATRON-GATED faction takes
+ * when its president sacks a CO that does NOT cross the revolt threshold. A patron-gated
+ * faction (one present in this table) is barely autonomous: its patron asserts control over
+ * the sacking ("Zagreb confirms/overrides the relief") rather than leaving it a clean
+ * internal act. Mirrors the patron-ceiling framing in patron_directive_scope.ts (the patron
+ * places a ceiling on the faction's own command choices).
+ *
+ * DATA, not a branch: a faction is patron-gated iff it appears here. HRHB (Zagreb) does; RS
+ * and RBiH do not, so their REPLACE-CO paths (RS revolt / RBiH clean-replace) are untouched.
+ * The shift is small and NEGATIVE (a patron reasserting control still costs the faction
+ * standing — the patron's confidence in the faction's autonomy dips). Owner-adjustable. */
+export const PATRON_OVERRIDE_FLOOR: Partial<Record<FactionId, number>> = {
+    HRHB: -2,
+};
+
+/**
  * Base patron_confidence penalty (pre-weight) for HALTING a live op past the front. A halt
  * is LESS culpable than forcing an op against a commander's judgement — calling off an
  * attack reads to a patron as caution, not insubordination — so this sits below FORCE_OP's
@@ -219,7 +235,33 @@ export function applyReplaceCoConsequence(
     // political standing. Crosses only for high-dependence factions sacking an entrenched
     // officer — the asymmetry is the data, not a branch.
     const revoltScore = weight * relievedPoliticalReliability;
-    if (revoltScore < REVOLT_THRESHOLD) return null;
+    if (revoltScore < REVOLT_THRESHOLD) {
+        // PATRON-OVERRIDE (Zagreb-gate): a PATRON-GATED faction's sub-threshold sacking is
+        // not a clean internal act — the patron asserts control ("Zagreb confirms/overrides
+        // the relief"), costing a small patron_confidence shift. DATA-gated: a faction is
+        // patron-gated iff it appears in PATRON_OVERRIDE_FLOOR (HRHB does; RS/RBiH do not, so
+        // the RS revolt path and the RBiH clean-replace path stay byte-identical). No revolt,
+        // no cohesion/morale cost — only the patron's standing shift. Reuses the EXISTING
+        // patron_confidence dimension; no new §6 surface.
+        const floor = PATRON_OVERRIDE_FLOOR[faction];
+        if (floor === undefined || floor === 0) return null;
+
+        const dims = state.military.negotiation?.strategic_dimensions;
+        if (dims) {
+            applyDimensionShift(dims, faction, 'patron_confidence', floor);
+        }
+        const overrideRecord: CommandFrictionRecord = {
+            lever: 'replace_co',
+            faction,
+            corps_id: corpsId,
+            turn,
+            patron_confidence_delta: floor,
+            cohesion_delta: 0,
+            revolt: false,
+        };
+        pushRecord(cmd, overrideRecord);
+        return overrideRecord;
+    }
 
     const dims = state.military.negotiation?.strategic_dimensions;
     const patronDelta = Math.round(REVOLT_PATRON_BASE * weight);

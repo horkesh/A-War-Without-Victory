@@ -26,6 +26,7 @@ import {
   REVOLT_THRESHOLD,
   STOP_OP_PATRON_BASE,
   FORCE_OP_PATRON_BASE,
+  PATRON_OVERRIDE_FLOOR,
 } from '../src/sim/combat/command_lever_consequences.js';
 import { buildCommandFrictionReceipts } from '../src/ui/map/data/commandFrictionReceipts.js';
 import { initializeStrategicDimensions } from '../src/sim/events/strategic_dimensions.js';
@@ -79,9 +80,16 @@ describe('REPLACE-CO faction-asymmetric consequence', () => {
     const hrhb = makeReplaceState('HRHB', 4);
     REPLACE_STEP.run({ state: hrhb } as any);
     const hrhbCmd = hrhb.military.corps_command.HRHB_corps;
-    // Below threshold (0.25 × 4 = 1.0 < 3.5) → no revolt record, no extra patron hit.
-    expect(hrhbCmd.command_friction_record).toBeUndefined();
-    expect(hrhb.military.negotiation.strategic_dimensions.HRHB.patron_confidence.event_modifier).toBe(0);
+    // Below the revolt threshold (0.25 × 4 = 1.0 < 3.5) → NO revolt. But HRHB is PATRON-GATED
+    // (Zagreb-gate): the sub-threshold sacking is confirmed by the patron, producing a
+    // non-revolt record with the small PATRON_OVERRIDE_FLOOR patron shift.
+    const hrhbRecord = (hrhbCmd.command_friction_record ?? [])[0];
+    expect(hrhbRecord?.revolt).toBe(false);
+    expect(hrhbRecord?.patron_confidence_delta).toBe(PATRON_OVERRIDE_FLOOR.HRHB);
+    expect(hrhbRecord?.cohesion_delta).toBe(0);
+    expect(hrhb.military.negotiation.strategic_dimensions.HRHB.patron_confidence.event_modifier).toBe(
+      PATRON_OVERRIDE_FLOOR.HRHB,
+    );
   });
 
   it('ASYMMETRY: RS revolt patron penalty is strictly steeper than RBiH would be (data, not branch)', () => {
@@ -135,6 +143,35 @@ describe('FORCE-OP faction-asymmetric consequence', () => {
     const a = applyForceOpConsequence(makeForceState(), 'c', 'RS', 12, {} as any);
     const b = applyForceOpConsequence(makeForceState(), 'c', 'RS', 12, {} as any);
     expect(a).toEqual(b);
+  });
+});
+
+describe('HRHB Zagreb-gate (patron-override on a sub-revolt sacking)', () => {
+  it('HRHB now produces a non-revolt patron-override record where it previously produced none', () => {
+    const hrhb = makeReplaceState('HRHB', 4); // 0.25 × 4 = 1.0 < 3.5 → no revolt
+    REPLACE_STEP.run({ state: hrhb } as any);
+    const rec = (hrhb.military.corps_command.HRHB_corps.command_friction_record ?? [])[0];
+    expect(rec).toBeDefined();
+    expect(rec.lever).toBe('replace_co');
+    expect(rec.revolt).toBe(false);
+    expect(rec.patron_confidence_delta).toBe(PATRON_OVERRIDE_FLOOR.HRHB);
+    expect(PATRON_OVERRIDE_FLOOR.HRHB).toBeLessThan(0);
+  });
+
+  it('RS path is UNCHANGED: a crossing sacking still revolts (not a patron-override)', () => {
+    const rs = makeReplaceState('RS', 4); // 1.0 × 4 = 4.0 ≥ 3.5 → revolt
+    REPLACE_STEP.run({ state: rs } as any);
+    const rec = (rs.military.corps_command.RS_corps.command_friction_record ?? [])[0];
+    expect(rec.revolt).toBe(true);
+    // RS is not patron-gated; its sub-threshold path would still be a clean no-op (null).
+    expect(PATRON_OVERRIDE_FLOOR.RS).toBeUndefined();
+  });
+
+  it('RBiH path is UNCHANGED: a sub-threshold sacking produces NO record (not patron-gated)', () => {
+    const rbih = makeReplaceState('RBiH', 5); // 0.5 × 5 = 2.5 < 3.5, and RBiH not patron-gated
+    REPLACE_STEP.run({ state: rbih } as any);
+    expect(rbih.military.corps_command.RBiH_corps.command_friction_record).toBeUndefined();
+    expect(PATRON_OVERRIDE_FLOOR.RBiH).toBeUndefined();
   });
 });
 

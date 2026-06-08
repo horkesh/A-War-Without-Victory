@@ -515,6 +515,9 @@ export const enMessages = {
     // Command-friction STOP-OP receipt (Presidential Command Model §4). Calling off a live
     // operation spends patron standing — sober, factual, never celebratory.
     'commandFriction.stopOp.realized': 'You halted {op}; {faction}’s patron confidence fell {delta}.',
+    // Command-friction PATRON-OVERRIDE receipt (Zagreb-gate). A patron-gated faction's
+    // sub-revolt sacking is confirmed by the patron, not owned outright — a small price.
+    'commandFriction.patronOverride.realized': 'Zagreb confirmed the sacking; {faction}’s patron confidence fell {delta}.',
     'turnAftermath.opOutcome.success': 'success',
     'turnAftermath.opOutcome.partial': 'partial',
     'turnAftermath.opOutcome.failure': 'failure',
