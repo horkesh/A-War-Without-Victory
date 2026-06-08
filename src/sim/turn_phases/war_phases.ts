@@ -38,7 +38,7 @@ import { buildSidToMunFromSettlements, buildOsidToMunFromReverseMap } from '../.
 import { updateCapabilityProfiles } from '../../state/capability_progression.js';
 import { computeDimensionBaseValues, applyDimensionShift } from '../events/strategic_dimensions.js';
 import { relieveOfficer, recordPresidentialOverride } from '../combat/order_interpretation.js';
-import { applyReplaceCoConsequence, applyForceOpConsequence } from '../combat/command_lever_consequences.js';
+import { applyReplaceCoConsequence, applyForceOpConsequence, applyStopOpConsequence } from '../combat/command_lever_consequences.js';
 import { clamp } from '../../utils/math.js';
 import { updateDisplacement } from '../../state/displacement.js';
 import { processDisplacementTakeover } from '../../state/displacement_takeover.js';
@@ -409,8 +409,10 @@ function injectAuthoredOperations(state: GameState): void {
  *  3. Append a halted_op_record (op_name + turn) for the UI / follow-up consequence.
  *  4. ALWAYS clear cc.pending_op_halt (consumed-once), even if no live op matched.
  *
- * MECHANICAL ONLY: no dimension/consequence effects (patron_confidence etc.) are
- * wired here — that is a deliberate FOLLOW-UP, not this slice.
+ * CONSEQUENCE NOW WIRED: after the halted_op_record push, the faction-asymmetric STOP-OP
+ * patron_confidence consequence (applyStopOpConsequence) fires — the deferred political
+ * price this comment previously marked MECHANICAL-ONLY. Player-only (gated on
+ * pending_op_halt) → byte-identical in headless.
  */
 function applyOpHalts(state: GameState): void {
     const corpsCommand = state.military.corps_command;
@@ -421,6 +423,7 @@ function applyOpHalts(state: GameState): void {
     if (!corpsIds.some((id) => corpsCommand[id]?.pending_op_halt)) return;
 
     const turn = state.meta?.turn ?? 0;
+    const formations = state.military.formations ?? {};
 
     for (const corpsId of corpsIds) {
         const cmd = corpsCommand[corpsId];
@@ -450,6 +453,18 @@ function applyOpHalts(state: GameState): void {
             const record = { op_name: op.name ?? staged.op_name ?? 'Operation', turn };
             if (Array.isArray(cmd.halted_op_record)) cmd.halted_op_record.push(record);
             else cmd.halted_op_record = [record];
+
+            // FACTION-ASYMMETRIC consequence (Presidential Command Model §4): the deferred
+            // patron_confidence price the comment marked MECHANICAL-ONLY. Halting a live op
+            // past the front costs patron standing scaled by the faction's patron-dependence
+            // (STOP_OP base -8, below FORCE_OP's -10 — a halt reads as caution, not
+            // insubordination) from DATA (COMMAND_FRICTION_FACTION_WEIGHT) — never
+            // `if faction===`. Player-only (gated on pending_op_halt) → byte-identical in
+            // headless. Maps to the EXISTING patron_confidence dimension; no new §6 surface.
+            const haltFaction = formations[corpsId]?.faction ?? null;
+            if (haltFaction) {
+                applyStopOpConsequence(state, corpsId, haltFaction, turn, cmd);
+            }
         }
     }
 }
@@ -1677,9 +1692,11 @@ export const warPhases: NamedPhase[] = [
         // state mutation (early-out below). pending_op_halt is OPTIONAL and is never set
         // in headless/historical scenarios → byte-identical by construction.
         //
-        // MECHANICAL ONLY: release commander → remove op via the canonical clean-removal
-        // path → append halted_op_record → clear. No dimension/consequence effects
-        // (patron_confidence etc.) — that is a deliberate FOLLOW-UP, not this slice.
+        // CONSEQUENCE NOW WIRED: release commander → remove op via the canonical clean-removal
+        // path → append halted_op_record → apply the faction-asymmetric STOP-OP
+        // patron_confidence consequence (applyStopOpConsequence) → clear. The dimension
+        // effect this comment previously marked MECHANICAL-ONLY now fires (player-only,
+        // gated on pending_op_halt → byte-identical in headless).
         name: 'apply-op-halts',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;

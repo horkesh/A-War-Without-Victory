@@ -81,13 +81,37 @@ export const REVOLT_PARALYSIS_TURNS = 4;
 /** Base patron_confidence penalty (pre-weight) for forcing an op past a shown objection. */
 export const FORCE_OP_PATRON_BASE = -10;
 
+/**
+ * PATRON-OVERRIDE FLOOR — the small patron_confidence shift a PATRON-GATED faction takes
+ * when its president sacks a CO that does NOT cross the revolt threshold. A patron-gated
+ * faction (one present in this table) is barely autonomous: its patron asserts control over
+ * the sacking ("Zagreb confirms/overrides the relief") rather than leaving it a clean
+ * internal act. Mirrors the patron-ceiling framing in patron_directive_scope.ts (the patron
+ * places a ceiling on the faction's own command choices).
+ *
+ * DATA, not a branch: a faction is patron-gated iff it appears here. HRHB (Zagreb) does; RS
+ * and RBiH do not, so their REPLACE-CO paths (RS revolt / RBiH clean-replace) are untouched.
+ * The shift is small and NEGATIVE (a patron reasserting control still costs the faction
+ * standing — the patron's confidence in the faction's autonomy dips). Owner-adjustable. */
+export const PATRON_OVERRIDE_FLOOR: Partial<Record<FactionId, number>> = {
+    HRHB: -2,
+};
+
+/**
+ * Base patron_confidence penalty (pre-weight) for HALTING a live op past the front. A halt
+ * is LESS culpable than forcing an op against a commander's judgement — calling off an
+ * attack reads to a patron as caution, not insubordination — so this sits below FORCE_OP's
+ * -10. Scaled by the same COMMAND_FRICTION_FACTION_WEIGHT table, so RS pays the full price
+ * and HRHB barely registers — asymmetry from DATA, never `if faction===`. Owner-adjustable. */
+export const STOP_OP_PATRON_BASE = -8;
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Consequence record (append-only, surfaced by the consequence-receipt read-model)
 // ═══════════════════════════════════════════════════════════════════════════
 
 export interface CommandFrictionRecord {
     /** Which lever produced this consequence. */
-    lever: 'replace_co' | 'force_op';
+    lever: 'replace_co' | 'force_op' | 'stop_op';
     /** Faction that paid the political price. */
     faction: FactionId;
     /** Corps the consequence landed on. */
@@ -141,7 +165,7 @@ export interface CommandFrictionStakes {
  */
 export function buildCommandFrictionStakes(
     faction: FactionId,
-    lever: 'replace_co' | 'force_op',
+    lever: 'replace_co' | 'force_op' | 'stop_op',
     targetPoliticalReliability?: number,
 ): CommandFrictionStakes {
     const weight = COMMAND_FRICTION_FACTION_WEIGHT[faction] ?? 0;
@@ -153,6 +177,18 @@ export function buildCommandFrictionStakes(
             weight,
             severity,
             patronConfidenceAtRisk: Math.round(FORCE_OP_PATRON_BASE * weight),
+            revoltLikely: false,
+        };
+    }
+
+    if (lever === 'stop_op') {
+        // A halt always costs patron standing, scaled by the faction weight (RS pays the
+        // full STOP_OP price, HRHB barely registers). No revolt path — calling off an op
+        // never triggers an officer-corps revolt, only patron displeasure.
+        return {
+            weight,
+            severity,
+            patronConfidenceAtRisk: Math.round(STOP_OP_PATRON_BASE * weight),
             revoltLikely: false,
         };
     }
@@ -199,7 +235,33 @@ export function applyReplaceCoConsequence(
     // political standing. Crosses only for high-dependence factions sacking an entrenched
     // officer — the asymmetry is the data, not a branch.
     const revoltScore = weight * relievedPoliticalReliability;
-    if (revoltScore < REVOLT_THRESHOLD) return null;
+    if (revoltScore < REVOLT_THRESHOLD) {
+        // PATRON-OVERRIDE (Zagreb-gate): a PATRON-GATED faction's sub-threshold sacking is
+        // not a clean internal act — the patron asserts control ("Zagreb confirms/overrides
+        // the relief"), costing a small patron_confidence shift. DATA-gated: a faction is
+        // patron-gated iff it appears in PATRON_OVERRIDE_FLOOR (HRHB does; RS/RBiH do not, so
+        // the RS revolt path and the RBiH clean-replace path stay byte-identical). No revolt,
+        // no cohesion/morale cost — only the patron's standing shift. Reuses the EXISTING
+        // patron_confidence dimension; no new §6 surface.
+        const floor = PATRON_OVERRIDE_FLOOR[faction];
+        if (floor === undefined || floor === 0) return null;
+
+        const dims = state.military.negotiation?.strategic_dimensions;
+        if (dims) {
+            applyDimensionShift(dims, faction, 'patron_confidence', floor);
+        }
+        const overrideRecord: CommandFrictionRecord = {
+            lever: 'replace_co',
+            faction,
+            corps_id: corpsId,
+            turn,
+            patron_confidence_delta: floor,
+            cohesion_delta: 0,
+            revolt: false,
+        };
+        pushRecord(cmd, overrideRecord);
+        return overrideRecord;
+    }
 
     const dims = state.military.negotiation?.strategic_dimensions;
     const patronDelta = Math.round(REVOLT_PATRON_BASE * weight);
@@ -270,6 +332,49 @@ export function applyForceOpConsequence(
 
     const record: CommandFrictionRecord = {
         lever: 'force_op',
+        faction,
+        corps_id: corpsId,
+        turn,
+        patron_confidence_delta: patronDelta,
+        cohesion_delta: 0,
+        revolt: false,
+    };
+    pushRecord(cmd, record);
+    return record;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STOP-OP consequence
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Evaluate + apply the faction-asymmetric STOP-OP consequence AFTER a live op has been
+ * halted past a commander (war_phases.ts apply-op-halts, gated on the player-only
+ * pending_op_halt). Deterministic; returns the record it appended. Always fires (calling
+ * off an op always costs some patron standing); the MAGNITUDE is the data — RS pays the
+ * full STOP_OP price, HRHB barely registers. A halt is less culpable than forcing an op,
+ * so STOP_OP_PATRON_BASE (-8) sits below FORCE_OP_PATRON_BASE (-10). No revolt, no
+ * cohesion cost — only patron displeasure. Maps to the EXISTING patron_confidence
+ * dimension; no new §6 surface.
+ */
+export function applyStopOpConsequence(
+    state: GameState,
+    corpsId: string,
+    faction: FactionId,
+    turn: number,
+    cmd: { command_friction_record?: CommandFrictionRecord[] },
+): CommandFrictionRecord | null {
+    const weight = COMMAND_FRICTION_FACTION_WEIGHT[faction];
+    if (weight === undefined) return null;
+
+    const patronDelta = Math.round(STOP_OP_PATRON_BASE * weight);
+    const dims = state.military.negotiation?.strategic_dimensions;
+    if (dims && patronDelta !== 0) {
+        applyDimensionShift(dims, faction, 'patron_confidence', patronDelta);
+    }
+
+    const record: CommandFrictionRecord = {
+        lever: 'stop_op',
         faction,
         corps_id: corpsId,
         turn,

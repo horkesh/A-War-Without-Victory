@@ -817,7 +817,7 @@ export interface CorpsCommandState {
      * pending_op_directive.forced_over_objection) → absent in headless scenarios, so
      * baselines stay byte-identical. Surfaced by the consequence-receipt read-model. */
     command_friction_record?: {
-        lever: 'replace_co' | 'force_op';
+        lever: 'replace_co' | 'force_op' | 'stop_op';
         faction: FactionId;
         corps_id: string;
         turn: number;
