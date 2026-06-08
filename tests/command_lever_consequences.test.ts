@@ -146,6 +146,95 @@ describe('FORCE-OP faction-asymmetric consequence', () => {
   });
 });
 
+describe('FORCE-LAUNCH (authorize-op override) faction-asymmetric consequence', () => {
+  const FORCE_LAUNCH_STEP = warPhases.find((p) => p.name === 'apply-force-launch-consequences')!;
+
+  /** Minimal state for apply-force-launch-consequences: one corps with a single active op
+   *  carrying the force-launch tags an IPC handler / commander_loop would have set. */
+  function makeForceLaunchState(
+    faction: string,
+    assessmentAtLaunch: 'launch' | 'postpone' | 'abort' | undefined,
+    opts?: { wasForceLaunched?: boolean; alreadyCharged?: boolean },
+  ): any {
+    const corpsId = `${faction}_corps`;
+    return {
+      meta: { turn: 30, phase: 'war' },
+      military: {
+        formations: { [corpsId]: { id: corpsId, faction, kind: 'corps', status: 'active' } },
+        corps_command: {
+          [corpsId]: {
+            active_operations: [
+              {
+                name: 'Op Override',
+                type: 'sector_attack',
+                was_force_launched: opts?.wasForceLaunched ?? true,
+                commander_assessment_at_launch: assessmentAtLaunch,
+                force_launch_consequence_applied: opts?.alreadyCharged ?? undefined,
+              },
+            ],
+          },
+        },
+        negotiation: { strategic_dimensions: initializeStrategicDimensions() },
+      },
+    };
+  }
+
+  it('RS pays strictly more than HRHB when force-launching past a SHOWN objection (abort)', () => {
+    const rs = makeForceLaunchState('RS', 'abort');
+    FORCE_LAUNCH_STEP.run({ state: rs } as any);
+    const hrhb = makeForceLaunchState('HRHB', 'abort');
+    FORCE_LAUNCH_STEP.run({ state: hrhb } as any);
+
+    const rsRec = (rs.military.corps_command.RS_corps.command_friction_record ?? [])[0];
+    const hrhbRec = (hrhb.military.corps_command.HRHB_corps.command_friction_record ?? [])[0];
+    expect(rsRec?.lever).toBe('force_op');
+    expect(rsRec?.patron_confidence_delta).toBeLessThan(hrhbRec.patron_confidence_delta);
+    expect(rsRec?.patron_confidence_delta).toBeLessThan(0);
+    // Charged once — the one-shot marker is now set on the op.
+    expect(rs.military.corps_command.RS_corps.active_operations[0].force_launch_consequence_applied).toBe(true);
+    expect(rs.military.negotiation.strategic_dimensions.RS.patron_confidence.event_modifier).toBeLessThan(
+      hrhb.military.negotiation.strategic_dimensions.HRHB.patron_confidence.event_modifier,
+    );
+  });
+
+  it('postpone (a no-go) is also a SHOWN objection and costs patron_confidence', () => {
+    const rs = makeForceLaunchState('RS', 'postpone');
+    FORCE_LAUNCH_STEP.run({ state: rs } as any);
+    const rec = (rs.military.corps_command.RS_corps.command_friction_record ?? [])[0];
+    expect(rec?.patron_confidence_delta).toBeLessThan(0);
+  });
+
+  it('UNCONTESTED launch costs nothing: commander recommended launch → no override, no record', () => {
+    const rs = makeForceLaunchState('RS', 'launch');
+    const before = JSON.stringify(rs);
+    FORCE_LAUNCH_STEP.run({ state: rs } as any);
+    // No SHOWN objection → byte-identical (no charge, no marker, no record).
+    expect(JSON.stringify(rs)).toBe(before);
+  });
+
+  it('no commander_assessment_at_launch snapshot → no objection was shown → no charge', () => {
+    const rs = makeForceLaunchState('RS', undefined);
+    const before = JSON.stringify(rs);
+    FORCE_LAUNCH_STEP.run({ state: rs } as any);
+    expect(JSON.stringify(rs)).toBe(before);
+  });
+
+  it('ONE-SHOT: an already-charged op is not re-charged (idempotent across turns)', () => {
+    const rs = makeForceLaunchState('RS', 'abort', { alreadyCharged: true });
+    const before = JSON.stringify(rs);
+    FORCE_LAUNCH_STEP.run({ state: rs } as any);
+    expect(JSON.stringify(rs)).toBe(before);
+  });
+
+  it('PLAYER-ONLY EARLY-OUT: headless (no was_force_launched) is byte-identical', () => {
+    // Bots never set was_force_launched; the step must leave such state untouched.
+    const headless = makeForceLaunchState('RS', 'abort', { wasForceLaunched: false });
+    const before = JSON.stringify(headless);
+    FORCE_LAUNCH_STEP.run({ state: headless } as any);
+    expect(JSON.stringify(headless)).toBe(before);
+  });
+});
+
 describe('HRHB Zagreb-gate (patron-override on a sub-revolt sacking)', () => {
   it('HRHB now produces a non-revolt patron-override record where it previously produced none', () => {
     const hrhb = makeReplaceState('HRHB', 4); // 0.25 × 4 = 1.0 < 3.5 → no revolt

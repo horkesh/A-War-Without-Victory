@@ -470,6 +470,76 @@ function applyOpHalts(state: GameState): void {
 }
 
 /**
+ * Apply the faction-asymmetric FORCE-LAUNCH (authorize-op override) patron_confidence
+ * consequence — Presidential Command Model §4. Single owner of the
+ * apply-force-launch-consequences step.
+ *
+ * THE GAP THIS CLOSES: the human-only force-launch IPC handlers in src/desktop
+ * (electron-main.cjs) and commander_loop.ts (via player_op_response.force_launched) tag an
+ * op `was_force_launched` + snapshot `commander_assessment_at_launch`, but — unlike the
+ * REQUEST-OP path (injectOpDirectives, which calls applyForceOpConsequence) — applied NO
+ * command-lever consequence. The player could override a SHOWN commander objection for
+ * free, breaking the faction-asymmetric command-friction model. This step charges that
+ * deferred patron_confidence price. (The IPC channel names live in src/desktop only — the
+ * back-the-officer human-only-determinism guard keeps them out of src/sim; this step keys
+ * solely off the op tags those handlers set, never the channels.)
+ *
+ * "SHOWN OBJECTION" ONLY: the cost fires ONLY when commander_assessment_at_launch is a
+ * no-go ('postpone' / 'abort'). A force-launch over a commander who recommended 'launch'
+ * (uncontested) — or with no snapshot — costs nothing: the president overrode nobody.
+ * Reuses the existing applyForceOpConsequence (FORCE_OP_PATRON_BASE × the
+ * COMMAND_FRICTION_FACTION_WEIGHT table) — RS pays full, RBiH 0.5×, HRHB 0.25× — never
+ * `if faction===`. Pushes a command_friction_record(lever:'force_op') — semantically
+ * identical to the REQUEST-OP forced-over-objection cost.
+ *
+ * ONE-SHOT: gated on op.force_launch_consequence_applied so the override is charged once,
+ * not every turn the op stays active. The marker is set here (and in injectOpDirectives,
+ * which charges its own forced ops) so the two force paths never double-charge.
+ *
+ * DETERMINISM EARLY-OUT: returns with ZERO mutation when no active op carries an
+ * un-charged force-launch-over-objection. was_force_launched is never set on the
+ * bot/headless path (the IPC handlers + autonomy-level-1 commander_loop branch are
+ * human-only; headless stays at autonomy_level 0) → byte-identical baselines by
+ * construction. Maps to the EXISTING patron_confidence dimension; no new §6 surface.
+ */
+function applyForceLaunchConsequences(state: GameState): void {
+    const corpsCommand = state.military.corps_command;
+    if (!corpsCommand) return;
+
+    const isUnchargedForcedObjection = (op: CorpsOperation): boolean =>
+        op.was_force_launched === true &&
+        op.force_launch_consequence_applied !== true &&
+        (op.commander_assessment_at_launch === 'postpone' ||
+            op.commander_assessment_at_launch === 'abort');
+
+    // DETERMINISM GATE — early-out with zero mutation if nothing qualifies.
+    const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
+    const hasCandidate = corpsIds.some((id) => {
+        const ops = corpsCommand[id]?.active_operations;
+        return Array.isArray(ops) && ops.some(isUnchargedForcedObjection);
+    });
+    if (!hasCandidate) return;
+
+    const turn = state.meta?.turn ?? 0;
+    const formations = state.military.formations ?? {};
+
+    for (const corpsId of corpsIds) {
+        const cmd = corpsCommand[corpsId];
+        if (!cmd || !Array.isArray(cmd.active_operations)) continue;
+        const faction = formations[corpsId]?.faction ?? null;
+        for (const op of cmd.active_operations) {
+            if (!isUnchargedForcedObjection(op)) continue;
+            // Mark charged regardless of whether the faction resolves, so an op missing a
+            // faction is never retried every subsequent turn (one-shot intent preserved).
+            op.force_launch_consequence_applied = true;
+            if (faction) {
+                applyForceOpConsequence(state, corpsId, faction, turn, cmd);
+            }
+        }
+    }
+}
+
+/**
  * Cohesion cost of a presidential CO sacking, applied to the faction's
  * internal_cohesion dimension via applyDimensionShift (a persistent event_modifier
  * delta that SURVIVES the per-turn compute-dimension-bases recompute — that step only
@@ -810,6 +880,9 @@ function injectOpDirectives(state: GameState, adjacency?: Map<string, string[]>)
             // pending_op_directive.forced_over_objection) → byte-identical in headless. Maps to
             // the EXISTING patron_confidence dimension; no new §6 surface.
             applyForceOpConsequence(state, corpsId, plan.corpsFaction, turn, cmd);
+            // Mark charged so apply-force-launch-consequences (which also charges
+            // was_force_launched + no-go ops) never double-charges this REQUEST-OP op.
+            op.force_launch_consequence_applied = true;
         }
     }
 }
@@ -1586,6 +1659,26 @@ export const warPhases: NamedPhase[] = [
             if (prepEvents.length > 0) {
                 context.report.preparation_events = prepEvents;
             }
+        }
+    },
+    {
+        // AUTHORIZE-OP FORCE-LAUNCH presidential lever (Presidential Command Model §4):
+        // charge the faction-asymmetric patron_confidence price for a force-launch that
+        // overrode a SHOWN commander objection. Closes the gap where force-launch (unlike
+        // REQUEST-OP / STOP-OP) applied no command-lever consequence — the player could
+        // override a no-go for free. Placed immediately AFTER advance-sector-offensives so a
+        // just-force-launched op's permanent was_force_launched + commander_assessment_at_launch
+        // snapshot are settled. One-shot via op.force_launch_consequence_applied.
+        //
+        // DETERMINISM GATE: if no active op carries an un-charged force-launch-over-objection,
+        // this step performs ZERO state mutation (early-out). was_force_launched is never set on
+        // the bot/headless path (the force-launch IPC handlers + the autonomy-level-1
+        // commander_loop branch are human-only; headless stays at autonomy_level 0) →
+        // byte-identical baselines by construction.
+        name: 'apply-force-launch-consequences',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            applyForceLaunchConsequences(context.state);
         }
     },
     {

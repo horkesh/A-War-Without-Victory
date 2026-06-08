@@ -203,6 +203,12 @@ describe('war-phase step ordering', () => {
         //        After supply resolution, before the first lifeline consumer; rewrites only
         //        sarajevo_state.lifeline, gated by default-off ENABLE_SARAJEVO_LIFELINE —
         //        byte-identical-inert on all flag-off baselines.
-        expect(stepNames.length).toBe(187);
+        // +1 from apply-force-launch-consequences (FORCE-LAUNCH presidential lever patron cost, #327, 2026-06-08).
+        //        After advance-sector-offensives; charges the faction-asymmetric patron_confidence
+        //        price for a force-launch over a SHOWN commander objection. DETERMINISM EARLY-OUT —
+        //        performs ZERO state mutation when no active op carries an un-charged
+        //        force-launch-over-objection (was_force_launched is never set on the bot/headless
+        //        path), so the step is byte-identical-inert on all baselines.
+        expect(stepNames.length).toBe(188);
     });
 });
