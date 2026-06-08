@@ -22,11 +22,22 @@ function makeState(opts: {
     turn: number;
     mode?: 'historical' | 'emergent';
     controlEvents?: ControlEvent[];
+    /** A2a: persisted per-OSID supply state (state.political.last_supply_state_by_osid). */
+    supplyByOsid?: Record<string, string>;
+    /** A2a: persisted campaign plan (state.military.campaign_plans[faction]). */
+    campaignPlans?: Record<string, unknown>;
 }): GameState {
     return {
         meta: { turn: opts.turn, decision_mode: opts.mode } as GameState['meta'],
-        military: { formations: {}, corps_front_sectors: {} } as unknown as GameState['military'],
-        political: { control_events: opts.controlEvents ?? [] } as unknown as GameState['political'],
+        military: {
+            formations: {},
+            corps_front_sectors: {},
+            ...(opts.campaignPlans ? { campaign_plans: opts.campaignPlans } : {}),
+        } as unknown as GameState['military'],
+        political: {
+            control_events: opts.controlEvents ?? [],
+            ...(opts.supplyByOsid ? { last_supply_state_by_osid: opts.supplyByOsid } : {}),
+        } as unknown as GameState['political'],
     } as unknown as GameState;
 }
 
@@ -143,5 +154,110 @@ describe('Free War Slice A — territory-trend priority multiplier', () => {
         // different corps; within one corps, confirm sort stability by re-running.
         const again = getCorpsArmyPriorities(FACTION, CORPS, TURN, state).map(p => p.name);
         expect(again).toEqual(names);
+    });
+});
+
+// ── A2a — supply + campaign-plan signal modulators ────────────────────────────
+
+describe('Free War A2a — supply + campaign-plan priority modulators', () => {
+    const FACTION = 'RS' as const;
+    const CORPS = 'vrs_1st_krajina';
+    const TURN = 6;
+
+    it('(supply) absent supply state → neutral: emergent ordering matches the trend-only path', () => {
+        // No last_supply_state_by_osid and no campaign_plans → supply=1.0, plan=1.0, so the
+        // composed multiplier reduces to the territory-trend term. With no control events the
+        // ordering is the static ordering (every area quiet). This pins the byte-stable
+        // no-signal path for the two new modulators.
+        const state = makeState({ turn: TURN, mode: 'emergent', controlEvents: [] });
+        const names = getCorpsArmyPriorities(FACTION, CORPS, TURN, state).map(p => p.name);
+        expect(names).toEqual(staticOrdering(FACTION, CORPS, TURN));
+    });
+
+    it('(supply) a critically-supplied target area DECAYS that priority below a fully-supplied one', () => {
+        // '1KK Rear Security' (static 20) targets prijedor/banja_luka/etc. Make its whole
+        // OSID set critical → ×0.70 → eff 14. 'Central Corridor' (static 30) area
+        // (kotor_varos/teslic/doboj) adequate → ×1.0 → eff 30. Rear already < Central
+        // statically; this widens the gap and must NOT invert. The new lever's sign is the
+        // point: bad supply pushes a priority DOWN.
+        const supplyByOsid: Record<string, string> = {
+            'op:prijedor:prijedor_2': 'critical',
+            'op:banja_luka:banja_luka_2': 'critical',
+            'op:kotor_varos:kotor_varos_2': 'adequate',
+        };
+        const decayed = getCorpsArmyPriorities(FACTION, CORPS, TURN,
+            makeState({ turn: TURN, mode: 'emergent', controlEvents: [], supplyByOsid }))
+            .find(p => p.name === '1KK Rear Security')!;
+        // Baseline: same emergent state with NO supply data → supply-neutral quiet weight (16).
+        const neutral = getCorpsArmyPriorities(FACTION, CORPS, TURN,
+            makeState({ turn: TURN, mode: 'emergent', controlEvents: [] }))
+            .find(p => p.name === '1KK Rear Security')!;
+        // Critical supply in 1KK Rear's own area must push its weight strictly DOWN.
+        expect(decayed.weight).toBeLessThan(neutral.weight);
+    });
+
+    it('(plan) a campaign-plan PRIMARY role BOOSTS the corps priorities; CONTAIN decays', () => {
+        const primaryPlan = {
+            RS: {
+                issued_turn: 0,
+                valid_until_turn: 999,
+                front_priorities: [{ corps_id: CORPS, role: 'primary' }],
+                synchronized_operations: [],
+            },
+        };
+        const containPlan = {
+            RS: {
+                issued_turn: 0,
+                valid_until_turn: 999,
+                front_priorities: [{ corps_id: CORPS, role: 'contain' }],
+                synchronized_operations: [],
+            },
+        };
+        const base = getCorpsArmyPriorities(FACTION, CORPS, TURN,
+            makeState({ turn: TURN, mode: 'emergent' })).find(p => p.name === 'Corridor 92 (1KK)')!;
+        const boosted = getCorpsArmyPriorities(FACTION, CORPS, TURN,
+            makeState({ turn: TURN, mode: 'emergent', campaignPlans: primaryPlan })).find(p => p.name === 'Corridor 92 (1KK)')!;
+        const decayed = getCorpsArmyPriorities(FACTION, CORPS, TURN,
+            makeState({ turn: TURN, mode: 'emergent', campaignPlans: containPlan })).find(p => p.name === 'Corridor 92 (1KK)')!;
+        expect(boosted.weight).toBeGreaterThan(base.weight);
+        expect(decayed.weight).toBeLessThan(base.weight);
+    });
+
+    it('(plan) an EXPIRED plan is ignored (neutral)', () => {
+        const expiredPlan = {
+            RS: {
+                issued_turn: 0,
+                valid_until_turn: TURN - 1, // expired
+                front_priorities: [{ corps_id: CORPS, role: 'primary' }],
+                synchronized_operations: [],
+            },
+        };
+        const base = getCorpsArmyPriorities(FACTION, CORPS, TURN,
+            makeState({ turn: TURN, mode: 'emergent' })).map(p => `${p.name}:${p.weight}`);
+        const withExpired = getCorpsArmyPriorities(FACTION, CORPS, TURN,
+            makeState({ turn: TURN, mode: 'emergent', campaignPlans: expiredPlan })).map(p => `${p.name}:${p.weight}`);
+        expect(withExpired).toEqual(base);
+    });
+
+    it('(historical) supply + plan signals are IGNORED in historical mode (byte-identical contract)', () => {
+        const supplyByOsid: Record<string, string> = { 'op:prijedor:prijedor_2': 'critical' };
+        const campaignPlans = {
+            RS: { issued_turn: 0, valid_until_turn: 999, front_priorities: [{ corps_id: CORPS, role: 'primary' }], synchronized_operations: [] },
+        };
+        const hist = getCorpsArmyPriorities(FACTION, CORPS, TURN,
+            makeState({ turn: TURN, mode: 'historical', supplyByOsid, campaignPlans }));
+        // Static weights + ordering, unchanged by either signal.
+        expect(hist.map(p => p.name)).toEqual(staticOrdering(FACTION, CORPS, TURN));
+        expect(hist.find(p => p.name === '1KK Rear Security')!.weight).toBe(20);
+    });
+
+    it('(determinism) supply + plan signals deterministic on repeat', () => {
+        const supplyByOsid: Record<string, string> = { 'op:prijedor:prijedor_2': 'strained', 'op:banja_luka:banja_luka_2': 'critical' };
+        const campaignPlans = {
+            RS: { issued_turn: 0, valid_until_turn: 999, front_priorities: [{ corps_id: CORPS, role: 'secondary' }], synchronized_operations: [] },
+        };
+        const a = getCorpsArmyPriorities(FACTION, CORPS, TURN, makeState({ turn: TURN, mode: 'emergent', supplyByOsid, campaignPlans })).map(p => `${p.name}:${p.weight}`);
+        const b = getCorpsArmyPriorities(FACTION, CORPS, TURN, makeState({ turn: TURN, mode: 'emergent', supplyByOsid, campaignPlans })).map(p => `${p.name}:${p.weight}`);
+        expect(a).toEqual(b);
     });
 });
