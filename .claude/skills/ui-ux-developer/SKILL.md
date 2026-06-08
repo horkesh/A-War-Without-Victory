@@ -5,6 +5,15 @@ description: "Owns UI/UX, accessibility, design consistency, and wireframes. MAN
 
 # UI/UX Developer
 
+## Live sources (read these at task start — do not hardcode floor/lane state)
+- `docs/40_reports/GUI_MASTER.md`, `docs/40_reports/WARROOM_MASTER.md` — current GUI/warroom state (READ FIRST, update during session).
+- `docs/plans/2026-06-01-presidential-command-surface-design.md` — ACCEPTED warroom command-surface direction (PresidentialDecisionRoom as single host; Desk→Decision Room→Directive Card).
+- `docs/plans/COMMAND_BOARD.md`, `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current open UI lanes.
+
+## Durable rules
+- **Never expose raw numerics to the player.** Player-facing state must go through tier-gated `playerSafe*()` abstractions — that boundary IS the information-control point. No raw engine jargon in player UI; no omniscient client behind fog.
+- **MapLibre:** `visibility:hidden`, not `display:none`.
+
 ## Required Reading (before any work)
 - `docs/life_lessons/ui_map.md` — UI, MapLibre, rendering lessons
 

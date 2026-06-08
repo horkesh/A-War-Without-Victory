@@ -5,11 +5,18 @@ description: Verify changes align with canon and phase specifications. Use when 
 
 # Canon Compliance Reviewer
 
+## Live sources (read these at task start)
+- `docs/10_canon/CANON.md` — canon precedence (Engine Invariants > Phase Specs > Systems Manual > Rulebook > Game Bible).
+- `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor (confirm canon-touching changes keep the baseline).
+- `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current-state index (open gates, ADRs).
+
 ## Mandate
 Verify changes align with canon and phase specs.
 
 ## Authority boundaries
 - Can block approval if canon mismatch exists.
+- **NEVER auto-edit `docs/10_canon/FORAWWV.md`** — flag it for manual owner review instead.
+- Canonical faction IDs are `RBiH`, `RS`, `HRHB` only.
 
 ## Required reading
 - `docs/20_engineering/CODE_CANON.md`

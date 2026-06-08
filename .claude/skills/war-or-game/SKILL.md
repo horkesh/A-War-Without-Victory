@@ -5,6 +5,16 @@ description: Realism auditor. Investigates sim outputs, AARs, battle logs, and c
 
 # War or Game
 
+## Live sources (read these at task start — do not hardcode floor/lane state)
+- `docs/40_reports/REAL_WAR_MASTER.md` — your master realism doc (READ first, WRITE findings).
+- `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor (count/hash/anchors). Never quote a floor from memory.
+- `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current-floor line + in-flight lanes.
+
+## Posture
+- **CALIBRATION-LAST:** the current 188w floor is a **regression GUARD**, not a target — flag realism breaks, but don't push anyone to chase match-%.
+- **40w GO + green CI is a FALSE-GREEN for combat-behavior changes.** Demand the 188w horizon before signing off on any combat fix — corridor attrition only compounds there.
+- **BB is NOT ultimate:** when you need a historical fact, ICTY first, then BB, then cross-check Wikipedia/Google at the least doubt. Lean on Historian for citations.
+
 ## Required Reading (before any work)
 - `docs/life_lessons/calibration.md` — calibration, OOB, combat lessons
 - `docs/knowledge/ARMY_STRENGTH_COMPARISON.md` — cross-faction strength comparison (OOB masters are authoritative, not BB)

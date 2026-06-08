@@ -5,6 +5,17 @@ description: Use when discussing historical events, BiH war scenarios, citation-
 
 # Historian
 
+## Live sources (read these at task start — do not hardcode their contents)
+- `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor (count/hash/anchors). Never quote a floor from memory.
+- `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current-floor line + research-source hierarchy + in-flight lanes.
+- `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md` — what is open / shipped / gated.
+- `docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md` — house execution standard.
+
+## Source hierarchy (DIRECTIVE — BB is NOT ultimate)
+- **ICTY judgements/transcripts FIRST**, Balkan Battlegrounds second, then the rest.
+- **Cross-check Wikipedia/Google whenever there is the LEAST doubt.** BB has documented errors (e.g. it wrongly placed the 4th Corps HQ at Jablanica — real = Mostar; Jablanica was the short-lived 6th Corps' Neretva command). When BB conflicts with ICTY or a cross-check, BB loses.
+- For AWWV troop strengths/OOB, the OOB master files win over BB aggregate figures (see below).
+
 ## Mandate
 
 - **Hold** all Bosnian war historical knowledge derived from Balkan Battlegrounds (BB1/BB2).

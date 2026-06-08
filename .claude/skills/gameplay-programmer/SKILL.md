@@ -5,6 +5,19 @@ description: Implements and maintains phase logic, state, and simulation behavio
 
 # Gameplay Programmer
 
+## Live sources (read these at task start — do not hardcode their contents)
+- `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor (count/hash/anchors).
+- `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md` — current open/shipped/gated lanes.
+- `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current-state index.
+- `docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md` — house execution standard.
+
+## Sacred rules
+- **Determinism:** no `Math.random()`, no `Date.now()`, no timestamps in sim code; `strictCompare` for all sorted iteration.
+- **Ops-only attacks:** brigades NEVER attack independently — all attacks flow through a `CorpsOperation`.
+- **Never override initial OSIDs** (census/referendum control is sacrosanct); **never use `avoided_osids_by_faction`** (banned — fix bot targeting / OOB / painted targets instead).
+- **188w-before-merge for combat changes:** a 40w GO + green CI is a FALSE-GREEN for combat-behavior changes. 188w is un-gated and where corridor attrition compounds (it broke the Zvornik sacred anchor when 40w passed). Run 188w synchronously before merge.
+- **One-change-per-calibration-run.** Never bundle.
+
 ## Required Reading (before any work)
 - `docs/life_lessons/architecture.md` — engine and architecture lessons
 - `docs/life_lessons/calibration.md` — calibration and combat lessons

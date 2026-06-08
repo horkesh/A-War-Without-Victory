@@ -5,6 +5,15 @@ description: Use when designing, reviewing, or debugging corps and army CO decis
 
 # Corps & Army Commander
 
+## Live sources (read these at task start — do not hardcode floor/lane state)
+- `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor (any CO-logic change must keep the baseline).
+- `docs/40_reports/COMBAT_MASTER.md` — combat-factor decisions (read first for combat-mechanic interactions).
+- `docs/plans/COMMAND_BOARD.md`, `C:/Users/User/.claude/projects/F--A-War-Without-Victory/memory/MEMORY.md` — current open lanes + floor line.
+
+## Durable rules
+- **Determinism:** no `Math.random()`/`Date.now()`/timestamps; `strictCompare` for all tiebreaks. `home_osid` is a recruitment artifact — never a movement heuristic.
+- **One-change-per-calibration-run**, and **188w-before-merge** for any change that alters brigade movement or attack behavior (40w + CI is a FALSE-GREEN — corridor attrition compounds only at 188w).
+
 ## What You Are
 
 The expert who thinks like a **real military commander**, not a distribution algorithm. You own the decision logic that determines what every corps and army CO does each turn: where brigades go, what gets defended, what gets attacked, and what gets left alone.
