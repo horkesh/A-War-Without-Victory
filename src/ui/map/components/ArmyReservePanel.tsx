@@ -97,23 +97,15 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
         return getPlayerFacingCorpsName(corpsId, corpsNameById, 'Assigned command');
     }
 
-    // ELITE-DEPLOY presidential command-authority cost. Approving a reserve request
-    // releases an elite formation from the strategic reserve and debits ELITE_DEPLOY_COST
-    // (charged server-side in approveReserveRequest). When command_authority is absent
-    // (pre-Phase-2 saves), default to affordable so the affordance is not falsely disabled.
+    // ELITE-DEPLOY presidential command-authority cost (scan-only). Releasing an elite
+    // formation from the strategic reserve debits ELITE_DEPLOY_COST (charged server-side
+    // in approveReserveRequest). The APPROVE action — the elite-deploy lever — is issued
+    // ONLY from the Presidential Decision Room (DirectiveCard, elite_deploy directive);
+    // this panel surfaces the cost as scan context. When command_authority is absent
+    // (pre-Phase-2 saves), default to affordable so the cost line reads as available.
     const commandAuthorityCurrent = loadedGameState.commandAuthority?.current;
     const canAffordEliteDeploy =
         commandAuthorityCurrent === undefined || commandAuthorityCurrent >= ELITE_DEPLOY_COST;
-
-    async function handleApprove(requestId: string, brigadeId: string | null) {
-        if (!brigadeId) return;
-        const result = await ipc.approveReserveRequest(
-            requestId,
-            brigadeId,
-            'Army CO accepts this request: mission rationale and employment plan are credible.'
-        );
-        if (!result.ok) setLoadError(result.error ?? 'Approval failed');
-    }
 
     async function handleDecline(requestId: string) {
         const result = await ipc.declineReserveRequest(
@@ -391,22 +383,16 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                         />
                                     </div>
 
-                                    {/* Presidential command-authority cost of releasing the strategic reserve. */}
+                                    {/* Presidential command-authority cost of releasing the strategic reserve
+                                        (scan context). The APPROVE action — elite-deploy — is issued from the
+                                        Presidential Decision Room. Decline remains here: it dismisses the
+                                        request (no Decision-Room decline path). */}
                                     <div className={`text-[10px] ${canAffordEliteDeploy ? 'text-text-secondary' : 'text-[#d45555]'}`}>
                                         {t('armyReserve.commandAuthorityCost', { cost: ELITE_DEPLOY_COST })}
                                         {!canAffordEliteDeploy && ` — ${t('armyReserve.insufficientAuthority')}`}
                                     </div>
 
                                     <div className="flex gap-1.5">
-                                        <button
-                                            type="button"
-                                            disabled={!req.suggested_brigade_id || !canAffordEliteDeploy}
-                                            title={!canAffordEliteDeploy ? t('armyReserve.insufficientAuthority') : undefined}
-                                            onClick={() => void handleApprove(req.request_id, req.suggested_brigade_id)}
-                                            className="flex-1 px-2 py-1 bg-[#55d48a]/20 border border-[#55d48a]/40 rounded text-[10px] text-[#55d48a] font-bold hover:bg-[#55d48a]/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                                        >
-                                            {t('armyReserve.approve')} ({ELITE_DEPLOY_COST})
-                                        </button>
                                         <button
                                             type="button"
                                             onClick={() => {

@@ -5,19 +5,15 @@
  */
 import { useMemo, useState } from 'react';
 import type { OperationView, FormationView, LoadedGameState, NamedOfficerView } from '../../data/types';
-import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 import { turnToDateString, toTitleCase } from '../../utils/formatters';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
-import { buildObjectiveTargetOptions } from '../../utils/objectiveTargetOptions';
 import { getPlayerSafeBrigadeName } from '../../utils/playerSafeText';
 import { getPlayerSafeOperationBalancePresentation } from '../../../../shared/playerSafeOperationBalance';
 import { CollapsibleSection } from './CollapsibleSection';
 import { deriveOperationOutcomeCategory } from '../../data/command_strain';
 import { EmptyState } from '../EmptyState';
 import { t, type MessageKey } from '../../i18n';
-import { FORCE_LAUNCH_COST, REQUEST_OP_COST } from '../../utils/commandAuthority';
-import { buildDirectiveObjection, plainReason, type DirectiveObjectionView } from '../../data/opDirectiveObjection';
 
 type CompletedOp = NonNullable<LoadedGameState['operationHistory']>[number];
 
@@ -530,232 +526,16 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
 
 export function OperationsSection({ corpsId, operations, gameState, commandStrain = 0, commandStrainLabel = 'healthy' }: OperationsSectionProps) {
     const [expandedOp, setExpandedOp] = useState<string | null>(null);
-    // REQUEST-OP presidential lever (minimal affordance). The president types a target
-    // OSID; the engine auto-selects the force + axis and builds the op. Full map-target
-    // selection UX is an explicit FOLLOW-UP (see PR notes) — this is the minimal entry.
-    const [requestTargetOsid, setRequestTargetOsid] = useState('');
-    // Force-op PUSHBACK: when the commander objects to a requested op, hold his
-    // disposition-tinted objection here so the player can Force anyway / Stand down.
-    // NOTE: this minimal card lives on the Request-op affordance for now; the read-model
-    // (buildDirectiveObjection) + consequence wiring are surface-agnostic and will later
-    // migrate to the Decision Room directive card.
-    const [pendingObjection, setPendingObjection] = useState<{ view: DirectiveObjectionView; targetOsid: string } | null>(null);
-    // IMPOSSIBLE directive: the candidate op cannot be built (no force / unreachable /
-    // already owned) or the corps has no free operation slot. Such a directive is NOT
-    // issuable — we surface "cannot issue: <reason>" and never stage / debit CA.
-    const [impossibleReason, setImpossibleReason] = useState<string | null>(null);
-    const [objectionLoading, setObjectionLoading] = useState(false);
-    const ipc = useIPC();
-    const setLoadError = useGameStore((s) => s.setLoadError);
-    const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
     const setOperationBriefingContext = useGameStore((s) => s.setOperationBriefingContext);
 
-    const authCurrent = gameState.commandAuthority?.current ?? 100;
-    const canForceLaunch = authCurrent >= FORCE_LAUNCH_COST;
-    const targetPickerOptions = useMemo(
-        () => buildObjectiveTargetOptions(gameState.controlBySettlement, osidDisplayNames),
-        [gameState.controlBySettlement, osidDisplayNames],
-    );
-    const targetPickerValue = targetPickerOptions.some((option) => option.osid === requestTargetOsid.trim())
-        ? requestTargetOsid.trim()
-        : '';
-
-    const handleForceLaunch = async (opName: string) => {
-        if (!ipc.isAvailable) return;
-        if (!canForceLaunch) {
-            setLoadError(t('operationsSection.insufficientAuthority', { current: authCurrent, cost: FORCE_LAUNCH_COST }));
-            return;
-        }
-        const result = await ipc.stageOperationForceLaunch({ corpsId, operationName: opName });
-        if (!result.ok) setLoadError(result.error ?? t('operationsSection.error.forceLaunch'));
-    };
-
-    const handleStandDown = async (opName: string) => {
-        if (!ipc.isAvailable) return;
-        const result = await ipc.stageOpHaltOrder({ corpsId, opName });
-        if (!result.ok) setLoadError(result.error ?? t('operationsSection.error.standDown'));
-    };
-
-    const canRequestOp = authCurrent >= REQUEST_OP_COST;
-
-    // Resolve this corps's active commanding officer (for the disposition-tinted objection).
-    const corpsCommander = useMemo(
-        () => (gameState.namedOfficerData ?? []).find(
-            (o) => o.assigned_corps_id === corpsId && o.status === 'active',
-        ),
-        [gameState.namedOfficerData, corpsId],
-    );
-
-    /** Stage the directive (optionally forced past a shown objection). Shared by the
-     *  no-objection path and the "Force anyway" button. */
-    const stageDirective = async (target: string, forced: boolean) => {
-        const result = await ipc.stageOpDirectiveOrder({
-            corpsId,
-            targetOsid: target,
-            ...(forced ? { forced_over_objection: true } : {}),
-        });
-        if (!result.ok) setLoadError(result.error ?? 'Failed to request operation.');
-        else {
-            setRequestTargetOsid('');
-            setPendingObjection(null);
-            setImpossibleReason(null);
-        }
-    };
-
-    const handleRequestOp = async () => {
-        if (!ipc.isAvailable) return;
-        const target = requestTargetOsid.trim();
-        if (!target) return;
-        if (!canRequestOp) {
-            setLoadError(t('operationsSection.insufficientAuthority', { current: authCurrent, cost: REQUEST_OP_COST }));
-            return;
-        }
-        setImpossibleReason(null);
-        // Ask the commander first. If he objects (recommendedAction !== 'launch'), surface
-        // his disposition-tinted pushback BEFORE committing — the president decides whether
-        // to force it. If he agrees (or the query is unavailable), stage directly.
-        setObjectionLoading(true);
-        try {
-            const objection = await ipc.queryDirectiveObjection({ corpsId, targetOsid: target });
-            if (objection.ok && objection.data) {
-                // IMPOSSIBLE (checked FIRST, independent of cowed state / CO presence): the
-                // candidate op could not be built or the corps has no free slot. This is NOT
-                // forceable — injectOpDirectives would reject it with the same reason. Surface
-                // "cannot issue" and do NOT stage / debit command authority.
-                if (objection.data.rejectionReason) {
-                    setImpossibleReason(objection.data.rejectionReason);
-                    return;
-                }
-                if (objection.data.recommendedAction !== 'launch' && corpsCommander) {
-                    const view = buildDirectiveObjection(
-                        {
-                            name: corpsCommander.name,
-                            rank: corpsCommander.rank,
-                            competence: corpsCommander.competence,
-                            political_reliability: corpsCommander.political_reliability,
-                            is_cowed: corpsCommander.is_cowed,
-                        },
-                        objection.data,
-                    );
-                    // Only a genuine, forceable objection (issuable) shows the Force-anyway card.
-                    if (view.shows_objection && view.issuable) {
-                        setPendingObjection({ view, targetOsid: target });
-                        return;
-                    }
-                }
-            }
-        } finally {
-            setObjectionLoading(false);
-        }
-        // No objection (commander agrees, is cowed, or no CO/query) → stage directly.
-        await stageDirective(target, false);
-    };
-
-    const handleForceAnyway = async () => {
-        if (!pendingObjection) return;
-        await stageDirective(pendingObjection.targetOsid, true);
-    };
-
-    const handleStandDownObjection = () => {
-        setPendingObjection(null);
-    };
+    // FULL DECISION-ROOM CONVERGENCE: the request-op / force-launch / stand-down levers
+    // are issued ONLY from the Presidential Decision Room (DirectiveCard); this Army-HQ
+    // section is scan/deep-drill only — it lists operations, their ORBAT/AAR detail, and
+    // the read-only "Review Command Decision" inspection. No lever-issuing affordances live
+    // here anymore.
 
     return (
         <CollapsibleSection sectionKey={`ops-${corpsId}`} title={t('operationsSection.title')} count={operations.length}>
-            {/* REQUEST-OP presidential lever (minimal affordance). Name a strategic objective
-                (target OSID); the engine builds the op a commander would — auto-selecting the
-                force + axis. The president does NOT pick brigades/axes. Full map-target picker
-                is a FOLLOW-UP. */}
-            {ipc.isAvailable && (
-                <div className="mb-3 space-y-2 px-1">
-                    {targetPickerOptions.length > 0 && (
-                        <select
-                            value={targetPickerValue}
-                            onChange={(e) => { setRequestTargetOsid(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
-                            aria-label={t('operationsSection.requestOp.pickerAria')}
-                            className="w-full rounded border border-panel-border/50 bg-panel-bg px-2 py-1 text-[11px] text-text-primary"
-                        >
-                            <option value="">{t('operationsSection.requestOp.pickerPlaceholder')}</option>
-                            {targetPickerOptions.map((option) => (
-                                <option key={option.osid} value={option.osid}>{option.display}</option>
-                            ))}
-                        </select>
-                    )}
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="text"
-                            value={requestTargetOsid}
-                            onChange={(e) => { setRequestTargetOsid(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
-                            placeholder={t('operationsSection.requestOp.placeholder')}
-                            aria-label={t('operationsSection.requestOp.aria')}
-                            className="flex-1 text-[11px] font-mono bg-panel-bg border border-panel-border/50 rounded px-2 py-1 text-text-primary"
-                        />
-                        <button
-                            type="button"
-                            onClick={handleRequestOp}
-                            disabled={!canRequestOp || requestTargetOsid.trim().length === 0 || objectionLoading || pendingObjection !== null}
-                            title={canRequestOp
-                                ? t('operationsSection.requestOp.title', { cost: REQUEST_OP_COST, current: authCurrent })
-                                : t('operationsSection.requestOp.insufficientTitle', { cost: REQUEST_OP_COST, current: authCurrent })}
-                            className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-panel-border/50 text-text-primary disabled:opacity-40 hover:bg-panel-bg">
-                            {objectionLoading ? t('operationsSection.requestOp.consulting') : t('operationsSection.requestOp.button', { cost: REQUEST_OP_COST })}
-                        </button>
-                    </div>
-                </div>
-            )}
-            {/* CANNOT ISSUE banner: the directive is IMPOSSIBLE (unbuildable target / no
-                force / no free slot). It is not forceable — there is no objection to
-                override and no order to stage. Nothing was committed; no command authority
-                was spent. */}
-            {impossibleReason && (
-                <div
-                    role="alert"
-                    aria-label={t('operationsSection.requestOp.cannotIssueAria')}
-                    className="mb-3 mx-1 p-3 rounded border border-panel-border/60 bg-panel-bg/60">
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-text-secondary mb-1">
-                        {t('operationsSection.requestOp.cannotIssueHeading')}
-                    </p>
-                    <p className="text-[11px] text-text-primary">
-                        {t('operationsSection.requestOp.cannotIssueBody', { reason: plainReason(impossibleReason) })}
-                    </p>
-                </div>
-            )}
-            {/* Force-op PUSHBACK card: the commander objected. Show his disposition-tinted
-                judgment (the SOURCE, not a clean %) and let the president Force anyway
-                (pays CA + cows/relieves the CO over time) or Stand down. */}
-            {pendingObjection && (
-                <div
-                    role="alertdialog"
-                    aria-label={t('operationsSection.requestOp.objectionAria')}
-                    className={`mb-3 mx-1 p-3 rounded border ${
-                        pendingObjection.view.severity === 'abort'
-                            ? 'border-red-500/50 bg-red-500/5'
-                            : 'border-amber-500/50 bg-amber-500/5'
-                    }`}>
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-amber-400 mb-1">
-                        {pendingObjection.view.severity === 'abort' ? t('operationsSection.requestOp.recommendsAgainst') : t('operationsSection.requestOp.urgesDelay')}
-                    </p>
-                    <p className="text-[11px] italic text-text-primary mb-2">{pendingObjection.view.prose}</p>
-                    <div className="flex items-center gap-2">
-                        <button
-                            type="button"
-                            onClick={handleForceAnyway}
-                            disabled={pendingObjection.view.rejection_reason !== undefined}
-                            title={pendingObjection.view.rejection_reason !== undefined
-                                ? t('operationsSection.requestOp.forceAnywayDisabledTitle')
-                                : t('operationsSection.requestOp.forceAnywayTitle')}
-                            className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-red-500/50 text-red-400 disabled:opacity-40 hover:bg-red-500/10">
-                            {t('operationsSection.requestOp.forceAnyway')}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handleStandDownObjection}
-                            className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-panel-border/50 text-text-primary hover:bg-panel-bg">
-                            {t('operationsSection.requestOp.standDown')}
-                        </button>
-                    </div>
-                </div>
-            )}
             {operations.length === 0 ? (
                 <EmptyState
                     message={t('operationsSection.empty')}
@@ -846,35 +626,18 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                                 {isExpanded && (
                                     <div className="flex flex-col">
                                         <OperationExpandedDetail op={op} gameState={gameState} />
-                                        <div className="flex gap-3 px-5 py-3 bg-panel-bg border-t border-panel-border/50">
-                                            {(op.preparation_sub_phase === 'assessment' || op.preparation_sub_phase === 'ready') && (
-                                                <button type="button"
-                                                    onClick={(e) => { e.stopPropagation(); void handleForceLaunch(op.name); }}
-                                                    disabled={!canForceLaunch}
-                                                    className={`text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 border font-mono transition-all ${canForceLaunch ? 'border-panel-border text-text-primary hover:bg-panel-bg' : 'border-panel-border/30 text-text-secondary/40 cursor-not-allowed'}`}
-                                                    title={canForceLaunch
-                                                        ? t('operationsSection.directInterventionTitle', { cost: FORCE_LAUNCH_COST, current: authCurrent })
-                                                        : t('operationsSection.insufficientAuthority', { current: authCurrent, cost: FORCE_LAUNCH_COST })}>
-                                                    {t('operationsSection.directInterventionButton', { cost: FORCE_LAUNCH_COST })}
-                                                </button>
-                                            )}
-                                            {/* Review Command Decision — opens OperationBriefingModal for executing/recovery ops.
-                                                Only shown when a launch snapshot exists (commander_assessment_at_launch set). */}
-                                            {(op.phase === 'execution' || op.phase === 'recovery') && op.commander_assessment_at_launch != null && (
+                                        {/* Scan/deep-drill footer: only the read-only "Review Command Decision"
+                                            inspection remains. Force-launch + stand-down are issued from the
+                                            Presidential Decision Room (DirectiveCard), not from Army HQ. */}
+                                        {(op.phase === 'execution' || op.phase === 'recovery') && op.commander_assessment_at_launch != null && (
+                                            <div className="flex gap-3 px-5 py-3 bg-panel-bg border-t border-panel-border/50">
                                                 <button type="button"
                                                     onClick={(e) => { e.stopPropagation(); setOperationBriefingContext({ corpsId: op.corps_id, operationName: op.name }); }}
                                                     className="text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 border border-panel-border/40 text-text-secondary/70 hover:bg-panel-bg hover:text-text-secondary transition-all font-mono">
                                                     {t('operationsSection.reviewCommandDecision')}
                                                 </button>
-                                            )}
-                                            {op.phase === 'execution' && (
-                                                <button type="button"
-                                                    onClick={(e) => { e.stopPropagation(); void handleStandDown(op.name); }}
-                                                    className="text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 border border-red-500/40 text-red-500 hover:bg-red-500/20 transition-all font-mono">
-                                                    {t('operationsSection.standDown')}
-                                                </button>
-                                            )}
-                                        </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>

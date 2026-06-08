@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { buildOpordDisplayModel } from '../src/ui/map/components/ops_modal/opordDisplay';
-import { enMessages } from '../src/ui/map/i18n/messages.en';
 import { readFileSync } from 'node:fs';
 import type { OpsPlanState } from '../src/ui/map/components/ops_modal/types';
 import { formatPosture, toTitleCase } from '../src/ui/map/utils/formatters';
@@ -147,13 +146,13 @@ describe('Army-HQ raw enum + faction-slug resolution (QA Batch F)', () => {
         expect(opsSource).not.toContain("op.recovery_reason.toUpperCase().replace(/_/g, ' ')");
         expect(opsSource).toContain('AXIS_STATUS_LABELS[axis.status]');
         expect(opsSource).toContain('GRADE_FACTOR_LABELS[key]');
-        // Request-op input no longer surfaces the "OSID" slug to the player.
-        // The placeholder literal is now i18n-keyed (i18n Car 2); the player-safe
-        // wording is pinned on the EN message value below so it can't silently regress.
+        // FULL DECISION-ROOM CONVERGENCE: the request-op input moved OUT of Army HQ
+        // into the Presidential Decision Room (DirectiveCard). OperationsSection no
+        // longer hosts the request-op affordance, so its player-safe placeholder is no
+        // longer pinned here — DirectiveCard's directive.targetInput.placeholder owns
+        // the player-safe "settlement, not OSID" wording (see directive_card tests).
         expect(opsSource).not.toContain('Objective OSID (e.g. bihac_1)');
-        expect(opsSource).toContain("t('operationsSection.requestOp.placeholder')");
-        expect(enMessages['operationsSection.requestOp.placeholder']).toContain('settlement');
-        expect(enMessages['operationsSection.requestOp.placeholder']).not.toContain('OSID');
+        expect(opsSource).not.toContain("t('operationsSection.requestOp.placeholder')");
     });
 
     it('humanizes battle/engagement outcome chips in Sectors/Orbat sections', () => {
