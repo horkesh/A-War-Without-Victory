@@ -28,16 +28,23 @@
 let _politicalDimensionPropagationOverride: boolean | null = null;
 
 /** Returns true when the global political-dimension propagation switch is
- *  enabled. Reads `process.env.AWWV_POLITICAL_DIMENSION_PROPAGATION` ('true'
- *  or '1') unless an override has been set via the setter (tests). Default
- *  off: production simulation paths remain byte-identical to pre-Phase-E
- *  baselines until the flag is flipped. */
+ *  enabled. Reads `process.env.AWWV_POLITICAL_DIMENSION_PROPAGATION` unless an
+ *  override has been set via the setter (tests).
+ *
+ *  Default ON as of PR-4 (patron_confidence + military_credibility channel
+ *  activation). The umbrella is now enabled-by-default so headless calibration
+ *  picks up the cleared channels without env vars; per-channel sub-flags still
+ *  gate which consumers actually fire (intl_standing + cohesion remain
+ *  default-OFF). Set the env var to 'false'/'0' to force the umbrella off. */
 export function isPoliticalDimensionPropagationEnabled(): boolean {
     if (_politicalDimensionPropagationOverride !== null) {
         return _politicalDimensionPropagationOverride;
     }
     const raw = process.env.AWWV_POLITICAL_DIMENSION_PROPAGATION;
-    return raw === 'true' || raw === '1';
+    if (raw === 'false' || raw === '0') {
+        return false;
+    }
+    return true;
 }
 
 /** Set the global political-dimension propagation override.
@@ -101,16 +108,23 @@ let _patronConfidenceOpsHesitationOverride: boolean | null = null;
 
 /** Returns true when the patron_confidence → ops-hesitation sub-flag is
  *  enabled. Reads `process.env.AWWV_PDP_PATRON_CONFIDENCE_OPS_HESITATION`
- *  ('true' or '1') unless an override has been set via the setter. Mirrors the
- *  intl_standing sub-flag pattern; default off until the flag is flipped.
- *  Semantic: low patron confidence (sponsor withholding) → op-launch
- *  hesitation, same DIRECTION as intl_standing. */
+ *  unless an override has been set via the setter.
+ *
+ *  Default ON as of PR-4: the Pyrrhic historian cleared this channel for
+ *  activation, so it is enabled-by-default for headless calibration (the
+ *  umbrella must also be on, which it now is by default). Set the env var to
+ *  'false'/'0' to force this channel off. Semantic: low patron confidence
+ *  (sponsor withholding) → op-launch hesitation, same DIRECTION as
+ *  intl_standing. */
 export function isPatronConfidenceOpsHesitationEnabled(): boolean {
     if (_patronConfidenceOpsHesitationOverride !== null) {
         return _patronConfidenceOpsHesitationOverride;
     }
     const raw = process.env.AWWV_PDP_PATRON_CONFIDENCE_OPS_HESITATION;
-    return raw === 'true' || raw === '1';
+    if (raw === 'false' || raw === '0') {
+        return false;
+    }
+    return true;
 }
 
 /** Set the patron_confidence → ops-hesitation sub-flag override.
@@ -127,16 +141,25 @@ let _militaryCredibilityCautionBiasOverride: boolean | null = null;
 
 /** Returns true when the military_credibility → caution-bias sub-flag is
  *  enabled. Reads `process.env.AWWV_PDP_MILITARY_CREDIBILITY_CAUTION_BIAS`
- *  ('true' or '1') unless an override has been set via the setter. Mirrors the
- *  internal_cohesion sub-flag pattern; default off until the flag is flipped.
- *  Semantic: low military credibility (failing ops + bleeding exchange ratio)
- *  → op-launch caution, same DIRECTION as internal_cohesion. */
+ *  unless an override has been set via the setter.
+ *
+ *  Default ON as of PR-4: the Pyrrhic historian cleared this channel for
+ *  activation, so it is enabled-by-default for headless calibration (the
+ *  umbrella must also be on, which it now is by default). Set the env var to
+ *  'false'/'0' to force this channel off. The consumer's no-data evidence guard
+ *  (no ops launched + no casualty exchange ⇒ field omitted) is unchanged — this
+ *  flag only governs whether the channel may fire at all. Semantic: low military
+ *  credibility (failing ops + bleeding exchange ratio) → op-launch caution, same
+ *  DIRECTION as internal_cohesion. */
 export function isMilitaryCredibilityCautionBiasEnabled(): boolean {
     if (_militaryCredibilityCautionBiasOverride !== null) {
         return _militaryCredibilityCautionBiasOverride;
     }
     const raw = process.env.AWWV_PDP_MILITARY_CREDIBILITY_CAUTION_BIAS;
-    return raw === 'true' || raw === '1';
+    if (raw === 'false' || raw === '0') {
+        return false;
+    }
+    return true;
 }
 
 /** Set the military_credibility → caution-bias sub-flag override.

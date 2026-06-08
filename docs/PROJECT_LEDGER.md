@@ -41,6 +41,37 @@ Values are identical (0.30/0.55, MIA=1−KIA−WIA=0.15 remainder math unchanged
 
 ---
 
+## [2026-06-08] feat(political): activate PDP patron_confidence + military_credibility (PR-4)
+
+**Type:** Ring-1 calibration-moving (hash moves at 188w; calibration-FLAT). Activates two Political-Dimension-Propagation op-launch-hesitation channels by flipping their gate DEFAULTS to ON; no multiplier curves or thresholds changed; the two held channels (intl_standing, cohesion) stay default-OFF per historian clearance. Faction-agnostic mechanism, faction-asymmetric outcome.
+
+**Change (2 separate commits):** In `src/sim/political/political_dimension_propagation_gate.ts`, flip the env-fallback semantics of three gate getters from default-OFF (`raw === 'true' || raw === '1'`) to default-ON (return true unless `raw === 'false' || raw === '0'`): (commit 1) the umbrella `isPoliticalDimensionPropagationEnabled` + `isPatronConfidenceOpsHesitationEnabled`; (commit 2) `isMilitaryCredibilityCautionBiasEnabled`. Both tiers must be ON for a channel to fire (`isXxxActive = umbrella && subflag`); the umbrella now defaults ON so headless calibration picks the channels up without env vars. `isIntlStandingOpsHesitationEnabled` and `isCohesionCautionBiasEnabled` are LEFT default-OFF (1992 intl-standing anachronism / cohesion threshold-recal pending). The military_credibility no-data evidence guard (no ops + no casualty exchange ⇒ field omitted) is UNCHANGED. Consumer math untouched (`src/sim/combat/commander/emit.ts` `effectiveMinForOp = combinedMult !== 1.0 ? Math.ceil(baseMinForOp / combinedMult) : baseMinForOp`).
+
+**Behavioral effect (scenario-tester GO, 188w A/B):** The PDP-OFF path (`AWWV_POLITICAL_DIMENSION_PROPAGATION=false`) reproduces the documented baseline `2fdbff2fdba1b9c2` byte-for-byte (no-op contract verified). PDP-ON moves the 188w hash to `f4e20b471435971a` — the ONLY divergence in the persisted state is `operation_history` (RS **34→31, −3 ops**; RBiH 8→8; HRHB 4→4) and the derived `used_operation_names`. RS patron_confidence collapses to 4 (deep in the <30 penalty zone, mirroring Belgrade's late-war withdrawal of support) → patron-hesitation mult 0.75 → `effectiveMinForOp = ceil(2/0.75) = 3` brigades → 3 marginal late-war RS ops gated out. RBiH (patron 31, just above threshold) and HRHB (patron 100) see zero effect (correct). military_credibility stayed ≥80 for all factions this trajectory so its caution-bias did not bind (wired, will act when credibility erodes elsewhere). The −3 suppressed RS ops were NON-flip-producing: every calibration metric is unchanged.
+
+**188w delta table (ON vs documented baseline):**
+
+| Metric | Baseline (PDP OFF) | PR-4 (PDP ON) | Δ |
+| --- | --- | --- | --- |
+| final_state_hash | `2fdbff2fdba1b9c2` | `f4e20b471435971a` | moved |
+| matched_osids | 634/712 | 634/712 | 0 |
+| anchors passed | 29/30 | 29/30 | 0 |
+| `op:zvornik:zvornik` | RS (hold) | RS (hold) | hold |
+| only failing anchor | `op:lukavac:brijesnica_donja_2` | same | — |
+| benchmarks | 6/6 | 6/6 | 0 |
+| critical anomalies | 0 | 0 | 0 |
+| orders_by_faction (HRHB/RBiH/RS) | 168/264/147 | 168/264/147 | 0 |
+| operation_history (RS) | 34 | 31 | −3 |
+| control counts (HRHB/RBiH/RS) | 108/279/325 | 108/279/325 | 0 |
+
+**40w:** byte-identical — `2221700edf20621e` (both ON and OFF) — patron/credibility stay above threshold in the early-war window, so the multipliers are 1.0 and the no-op fast-path holds.
+
+**Known divergence (follow-up, not a blocker):** the read-only diagnostic `tools/diagnostics/political_dimensions_snapshot.ts` keeps its own `raw === 'true' || raw === '1'` env reader (default-OFF) and only tracks intl_standing+cohesion; it now under-reports the umbrella as INACTIVE when env is unset. Out of scope for this activation (would touch the snapshot test contract); flag for a follow-up sync.
+
+**Verification:** `tsc --noEmit` exit 0; focused phase-E/PDP suites 93/93 + snapshot/causality 34/34 green; 40w `2221700edf20621e`; 188w ON `f4e20b471435971a` / OFF `2fdbff2fdba1b9c2`. DO-NOT-MERGE — orchestrator reviews + re-floors.
+
+---
+
 ## [2026-06-08] fix(ui): persist relieved-commander resentment receipts (#282)
 
 **Type:** Ring-3 UI read-model only, BYTE-IDENTICAL to calibration. No sim/save/scenario/baseline change; pure projection over already-persisted officer + force-launched-op substrate. 40w/52w/188w hashes untouched (read-model is never invoked in headless calibration). Faction-agnostic.

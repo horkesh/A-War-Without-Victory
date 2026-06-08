@@ -275,8 +275,11 @@ describe('Phase E activation simulator — Tier 2 (real-scenario shape)', () => 
         expect(bothObs.intlActive).toBe(true);
         expect(bothObs.cohesionActive).toBe(true);
 
-        // After the simulator returns, all overrides must be cleared.
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+        // After the simulator returns, all overrides must be cleared (back to
+        // env-fallback). PR-4 made the umbrella default ON, but the intl_standing
+        // and cohesion sub-flags remain default-OFF, so their combined predicates
+        // stay inactive.
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
         expect(isIntlStandingOpsHesitationActive()).toBe(false);
         expect(isCohesionCautionBiasActive()).toBe(false);
 
@@ -390,8 +393,9 @@ describe('Phase E activation simulator — Tier 2 (real-scenario shape)', () => 
             }),
         ).rejects.toThrow(/synthetic runner failure/);
         // Gates MUST be reset even after a throw — Tier 2's try/finally
-        // contract.
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+        // contract. After reset, env-fallback applies: umbrella default ON
+        // (PR-4), intl_standing + cohesion sub-flags default OFF.
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
         expect(isIntlStandingOpsHesitationActive()).toBe(false);
         expect(isCohesionCautionBiasActive()).toBe(false);
     });
