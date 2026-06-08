@@ -163,11 +163,22 @@ describe('Phase E extension — patron_confidence → bot patron-hesitation gate
         restorePdpEnv(envSnap);
     });
 
-    // Test 1: Default OFF when env unset and no overrides.
-    it('test 1: defaults to OFF when env unset and no overrides', () => {
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+    // Test 1: Default-ON activation contract (PDP activation lane). With env
+    // unset and no overrides, the global switch AND the patron sub-flag are both
+    // DEFAULT-ON, so the combined patron gate is active.
+    it('test 1: defaults to ON (global + patron sub-flag) when env unset', () => {
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
+        expect(isPatronConfidenceOpsHesitationEnabled()).toBe(true);
+        expect(isPatronConfidenceOpsHesitationActive()).toBe(true);
+    });
+
+    // Test 1b: explicit opt-out ("0"/"false") restores the legacy OFF path.
+    it('test 1b: patron sub-flag opt-out forces the channel OFF', () => {
+        process.env.AWWV_PDP_PATRON_CONFIDENCE_OPS_HESITATION = '0';
         expect(isPatronConfidenceOpsHesitationEnabled()).toBe(false);
         expect(isPatronConfidenceOpsHesitationActive()).toBe(false);
+        process.env.AWWV_PDP_PATRON_CONFIDENCE_OPS_HESITATION = 'false';
+        expect(isPatronConfidenceOpsHesitationEnabled()).toBe(false);
     });
 
     // Test 2: Sub-flag override true + global false → combined false.
@@ -201,8 +212,10 @@ describe('Phase E extension — patron_confidence → bot patron-hesitation gate
         setPatronConfidenceOpsHesitationOverride(true);
         expect(isPatronConfidenceOpsHesitationActive()).toBe(true);
         resetPoliticalDimensionGates();
-        expect(isPatronConfidenceOpsHesitationEnabled()).toBe(false);
-        expect(isPatronConfidenceOpsHesitationActive()).toBe(false);
+        // After reset, env falls through. With env cleared the patron channel is
+        // DEFAULT-ON (both tiers default-on), so it is active again.
+        expect(isPatronConfidenceOpsHesitationEnabled()).toBe(true);
+        expect(isPatronConfidenceOpsHesitationActive()).toBe(true);
     });
 
     // Test 6: Integration — briefing carries patron_confidence when gate ON.
@@ -234,13 +247,17 @@ describe('Phase E extension — patron_confidence → bot patron-hesitation gate
         expect(briefing.political_dimensions?.military_credibility).toBeUndefined();
     });
 
-    // Test 7: Byte-stability — briefing OMITS political_dimensions when gate OFF.
-    it('test 7: briefing OMITS political_dimensions when patron gate OFF', () => {
+    // Test 7: Byte-stability — briefing OMITS political_dimensions when the
+    // substrate is OFF. Since patron + milcred are now DEFAULT-ON, force the
+    // legacy no-op path via the global opt-out override.
+    it('test 7: briefing OMITS political_dimensions when gate OFF', () => {
+        setPoliticalDimensionPropagationOverride(false);
+
         const corpsId = 'test_corps' as FormationId;
         const faction = 'RS' as FactionId;
         const state = buildMinimalState(corpsId, faction, 20);
 
-        // Sanity-check all gates are OFF.
+        // Sanity-check all gates are OFF (global opt-out forces every channel off).
         expect(isPatronConfidenceOpsHesitationActive()).toBe(false);
         expect(isIntlStandingOpsHesitationActive()).toBe(false);
         expect(isCohesionCautionBiasActive()).toBe(false);

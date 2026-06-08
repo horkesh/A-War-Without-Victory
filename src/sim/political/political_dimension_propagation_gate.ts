@@ -28,16 +28,20 @@
 let _politicalDimensionPropagationOverride: boolean | null = null;
 
 /** Returns true when the global political-dimension propagation switch is
- *  enabled. Reads `process.env.AWWV_POLITICAL_DIMENSION_PROPAGATION` ('true'
- *  or '1') unless an override has been set via the setter (tests). Default
- *  off: production simulation paths remain byte-identical to pre-Phase-E
- *  baselines until the flag is flipped. */
+ *  enabled. Reads `process.env.AWWV_POLITICAL_DIMENSION_PROPAGATION` unless an
+ *  override has been set via the setter (tests).
+ *
+ *  DEFAULT-ON as of the PDP activation lane: unset (or any value other than an
+ *  explicit opt-out) => ON. Explicit opt-out is `'false'` or `'0'`. The global
+ *  switch being on does NOT by itself activate any channel — each per-dimension
+ *  sub-flag still gates its own consumer, and intl_standing + internal_cohesion
+ *  remain default-OFF (their guards ride dormant). */
 export function isPoliticalDimensionPropagationEnabled(): boolean {
     if (_politicalDimensionPropagationOverride !== null) {
         return _politicalDimensionPropagationOverride;
     }
     const raw = process.env.AWWV_POLITICAL_DIMENSION_PROPAGATION;
-    return raw === 'true' || raw === '1';
+    return raw !== 'false' && raw !== '0';
 }
 
 /** Set the global political-dimension propagation override.
@@ -101,8 +105,10 @@ let _patronConfidenceOpsHesitationOverride: boolean | null = null;
 
 /** Returns true when the patron_confidence → ops-hesitation sub-flag is
  *  enabled. Reads `process.env.AWWV_PDP_PATRON_CONFIDENCE_OPS_HESITATION`
- *  ('true' or '1') unless an override has been set via the setter. Mirrors the
- *  intl_standing sub-flag pattern; default off until the flag is flipped.
+ *  unless an override has been set via the setter.
+ *
+ *  DEFAULT-ON as of the PDP activation lane (sweep-verified calibration-flat,
+ *  188w 649). Unset => ON; explicit opt-out is `'false'` or `'0'`.
  *  Semantic: low patron confidence (sponsor withholding) → op-launch
  *  hesitation, same DIRECTION as intl_standing. */
 export function isPatronConfidenceOpsHesitationEnabled(): boolean {
@@ -110,7 +116,7 @@ export function isPatronConfidenceOpsHesitationEnabled(): boolean {
         return _patronConfidenceOpsHesitationOverride;
     }
     const raw = process.env.AWWV_PDP_PATRON_CONFIDENCE_OPS_HESITATION;
-    return raw === 'true' || raw === '1';
+    return raw !== 'false' && raw !== '0';
 }
 
 /** Set the patron_confidence → ops-hesitation sub-flag override.
@@ -127,8 +133,10 @@ let _militaryCredibilityCautionBiasOverride: boolean | null = null;
 
 /** Returns true when the military_credibility → caution-bias sub-flag is
  *  enabled. Reads `process.env.AWWV_PDP_MILITARY_CREDIBILITY_CAUTION_BIAS`
- *  ('true' or '1') unless an override has been set via the setter. Mirrors the
- *  internal_cohesion sub-flag pattern; default off until the flag is flipped.
+ *  unless an override has been set via the setter.
+ *
+ *  DEFAULT-ON as of the PDP activation lane (sweep-verified calibration-flat,
+ *  188w 649). Unset => ON; explicit opt-out is `'false'` or `'0'`.
  *  Semantic: low military credibility (failing ops + bleeding exchange ratio)
  *  → op-launch caution, same DIRECTION as internal_cohesion. */
 export function isMilitaryCredibilityCautionBiasEnabled(): boolean {
@@ -136,7 +144,7 @@ export function isMilitaryCredibilityCautionBiasEnabled(): boolean {
         return _militaryCredibilityCautionBiasOverride;
     }
     const raw = process.env.AWWV_PDP_MILITARY_CREDIBILITY_CAUTION_BIAS;
-    return raw === 'true' || raw === '1';
+    return raw !== 'false' && raw !== '0';
 }
 
 /** Set the military_credibility → caution-bias sub-flag override.

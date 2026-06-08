@@ -232,23 +232,50 @@ function launchFloorForOp(op: { min_attack_outcome?: string }): number {
  * commander whose faction has < 30 international_standing hesitates to
  * launch fresh offensives (UN scrutiny, embargo risk, patron pressure).
  *
+ * ACTIVATION GUARD (turn-gate) — historian verdict 2026-06-08:
+ * An UNGATED `< 30` op-hesitation is a 1992 ANACHRONISM. Diplomatic-isolation
+ * pressure on the Serb side (the faction that bottoms out international_standing)
+ * was a 1994–95 phenomenon (NATO ultimatums, the contact-group plan, the threat
+ * of decisive air power); in 1992 the binding international constraint was the
+ * arms embargo, which hurt the Bosnian Muslims, NOT op-launch hesitation for the
+ * better-armed side. To avoid back-dating that 1994 dynamic onto the opening of
+ * the war, this channel is turn-gated: it only engages from
+ * `INTL_STANDING_OPS_HESITATION_MIN_TURN` onward. Before that turn (or when the
+ * turn is unknown) the multiplier is 1.0 — i.e. the channel is a no-op even when
+ * the propagation flags are flipped ON. This keeps the dimension wired but
+ * historically inert through the early war.
+ *
  * Soft consumer contract: the multiplier MAY be applied to any op-launch
  * scoring variable (force-ratio estimate, brigade-count floor, etc). The
  * canonical consumer is `buildOperations` in commander/emit.ts which scales
- * the `minForOp` threshold upward by `1/mult` when hesitation is active.
+ * the `minForOp` threshold upward by `1/mult` when hesitation is active. That
+ * consumer passes `briefing.turn` as `currentTurn`.
  *
  * Inputs:
  * - `intlStanding`: faction's effective international_standing
  *   (0..100), or `undefined` when the propagation gate is off / the
  *   briefing field is absent. Undefined → returns 1.0 (no-op).
+ * - `currentTurn`: the current sim turn (week index). When omitted/NaN or below
+ *   `INTL_STANDING_OPS_HESITATION_MIN_TURN`, the channel is inert (1.0). All
+ *   callers (emit.ts buildOperations, the two diagnostics, and the HUD reader
+ *   getProjectedDimensionMultiplier) pass the save/state turn so the turn-gate
+ *   is honored consistently; omitting it yields the inert (pre-gate) signal.
  *
- * Determinism: pure function of one numeric input. No state, no randomness,
+ * Determinism: pure function of its numeric inputs. No state, no randomness,
  * no save-state field.
  */
 export function getIntlStandingOpsHesitationMultiplier(
     intlStanding: number | undefined,
+    currentTurn?: number,
 ): number {
     if (typeof intlStanding !== 'number') return 1.0;
+    // Turn-gate guard: inert before mid-1994 (see INTL_STANDING_OPS_HESITATION_MIN_TURN).
+    // Unknown turn (undefined/NaN) is treated as "before the gate" → no-op, so the
+    // channel can never fire without a confirmed turn ≥ the threshold.
+    if (typeof currentTurn !== 'number' || Number.isNaN(currentTurn)
+        || currentTurn < INTL_STANDING_OPS_HESITATION_MIN_TURN) {
+        return 1.0;
+    }
     if (intlStanding < INTL_STANDING_OPS_HESITATION_THRESHOLD) {
         return INTL_STANDING_OPS_HESITATION_MULTIPLIER;
     }
@@ -258,6 +285,16 @@ export function getIntlStandingOpsHesitationMultiplier(
 /** Phase E MVS: international_standing threshold below which a faction's corps
  *  COs hesitate on op launch. Orchestrator-accepted Architect default. */
 const INTL_STANDING_OPS_HESITATION_THRESHOLD = 30;
+
+/** ACTIVATION GUARD (historian verdict 2026-06-08): earliest sim turn (week
+ *  index) at which the international_standing op-hesitation channel engages.
+ *  The scenario opens April 1992 at turn 0 and runs ~1 turn/week, so turn 100
+ *  ≈ mid-1994 — the point at which diplomatic-isolation pressure on the Serb
+ *  side became a real constraint on offensive tempo (NATO ultimatums, contact-
+ *  group leverage). Before this turn the channel is inert even with the flags
+ *  ON, so the 1994–95 dynamic is never back-dated onto the 1992–93 war.
+ *  Owner-adjustable: raise to delay, lower to extend the window earlier. */
+const INTL_STANDING_OPS_HESITATION_MIN_TURN = 100;
 
 /** Phase E MVS: hesitation multiplier applied to op-launch scoring when
  *  international_standing < threshold. Orchestrator-accepted Architect default.
@@ -276,8 +313,22 @@ const INTL_STANDING_OPS_HESITATION_MULTIPLIER = 0.7;
  * Magnitude (0.85×) is more conservative than the 0.7× intl_standing
  * hesitation — cohesion is a slower-moving political signal (faction
  * legitimacy / mobilization frictions / internal dissent) and the bot should
- * only become modestly more cautious, not dramatically so. Threshold (< 40)
- * matches the "fraying cohesion" band in scoring.ts cohesion reads.
+ * only become modestly more cautious, not dramatically so.
+ *
+ * ACTIVATION GUARD (threshold recalibration) — historian verdict 2026-06-08:
+ * The original `< 40` threshold was authored against an assumed [0..100]
+ * effective_value distribution. AFTER #63 (cohesion-divisor rescale, commit
+ * 16c1a249b) the `internal_cohesion` dimension compressed to roughly [0..50]:
+ * its base formula (strategic_dimensions.ts) is
+ * `clamp(allianceVal + avgCohesion/2 - exhaustion/300, 0, 100)`, whose realised
+ * ceiling is ~65 early-war (RBiH/HRHB, allied bonus) / ~45 (RS, fixed allianceVal
+ * 20) and collapses into the 0–30 band by mid-war. A 40w sample (turn 40,
+ * hash 235c61f4) read RBiH 0.78 / RS 29.74 / HRHB 20.91 — i.e. `< 40` fires for
+ * ALL THREE factions, so the original threshold no longer discriminates
+ * genuinely-low cohesion: it is a universal caution penalty. Recalibrated to
+ * `< 15` so only the bottom band of the post-#63 effective range trips the
+ * caution-bias (in the sample: RBiH-only), preserving the original design INTENT
+ * — flag the genuinely-fraying faction, not every faction.
  *
  * Soft consumer contract: the multiplier MAY be applied to any op-launch
  * scoring variable. The canonical consumer is `buildOperations` in
@@ -304,9 +355,14 @@ export function getCohesionCautionBiasMultiplier(
 }
 
 /** Phase E Packet 2: internal_cohesion threshold below which a faction's
- *  corps COs become more cautious on op launch. Orchestrator-accepted
- *  Architect default. */
-const COHESION_CAUTION_BIAS_THRESHOLD = 40;
+ *  corps COs become more cautious on op launch. RECALIBRATED 2026-06-08 from
+ *  40 → 15 (ACTIVATION GUARD): post-#63 the internal_cohesion effective_value
+ *  distribution compressed to ~[0..50] (40w turn-40 sample: RBiH 0.78 / RS 29.74
+ *  / HRHB 20.91), so the original `< 40` fired for ALL factions and no longer
+ *  discriminated genuinely-low cohesion. `< 15` flags only the bottom band of
+ *  the post-#63 range — owner-adjustable. See the helper doc-comment above for
+ *  the full recalibration basis. */
+const COHESION_CAUTION_BIAS_THRESHOLD = 15;
 
 /** Phase E Packet 2: caution-bias multiplier applied to op-launch scoring
  *  when internal_cohesion < threshold. Orchestrator-accepted Architect

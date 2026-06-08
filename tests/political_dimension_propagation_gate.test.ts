@@ -159,11 +159,22 @@ describe('Phase E MVS — political-dimension propagation gate', () => {
         restorePdpEnv(envSnap);
     });
 
-    // Test 1: Default (no env, no override) → both gates report false.
-    it('test 1: defaults to OFF when env unset and no overrides', () => {
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+    // Test 1: Default activation contract (no env, no override).
+    //   - Global propagation switch is DEFAULT-ON (PDP activation lane).
+    //   - intl_standing sub-flag stays DEFAULT-OFF (guard rides dormant).
+    //   - Combined intl_standing gate therefore still reports false.
+    it('test 1: global DEFAULT-ON, intl_standing sub-flag DEFAULT-OFF when env unset', () => {
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
         expect(isIntlStandingOpsHesitationEnabled()).toBe(false);
         expect(isIntlStandingOpsHesitationActive()).toBe(false);
+    });
+
+    // Test 1b: explicit opt-out restores the legacy OFF default for the global switch.
+    it('test 1b: global switch opt-out via "0"/"false" forces OFF', () => {
+        process.env.AWWV_POLITICAL_DIMENSION_PROPAGATION = '0';
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+        process.env.AWWV_POLITICAL_DIMENSION_PROPAGATION = 'false';
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
     });
 
     // Test 2: Global override true + sub-flag override false → combined false.
@@ -188,7 +199,10 @@ describe('Phase E MVS — political-dimension propagation gate', () => {
         setIntlStandingOpsHesitationOverride(true);
         expect(isIntlStandingOpsHesitationActive()).toBe(true);
         resetPoliticalDimensionGates();
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+        // After reset, env falls through. With env cleared, the global switch is
+        // DEFAULT-ON but the intl_standing sub-flag is DEFAULT-OFF, so the
+        // combined intl_standing gate is still inactive.
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
         expect(isIntlStandingOpsHesitationEnabled()).toBe(false);
         expect(isIntlStandingOpsHesitationActive()).toBe(false);
     });
@@ -265,14 +279,33 @@ describe('Phase E MVS — political-dimension propagation gate', () => {
             .toBe(1.0);
     });
 
-    it('multiplier returns 0.7 when intl_standing < 30', () => {
-        expect(getIntlStandingOpsHesitationMultiplier(29)).toBe(0.7);
-        expect(getIntlStandingOpsHesitationMultiplier(0)).toBe(0.7);
+    it('multiplier returns 0.7 when intl_standing < 30 AND turn >= gate (>=100)', () => {
+        expect(getIntlStandingOpsHesitationMultiplier(29, 100)).toBe(0.7);
+        expect(getIntlStandingOpsHesitationMultiplier(0, 150)).toBe(0.7);
     });
 
     it('multiplier returns 1.0 when intl_standing >= 30 (no hesitation)', () => {
-        expect(getIntlStandingOpsHesitationMultiplier(30)).toBe(1.0);
-        expect(getIntlStandingOpsHesitationMultiplier(50)).toBe(1.0);
-        expect(getIntlStandingOpsHesitationMultiplier(100)).toBe(1.0);
+        expect(getIntlStandingOpsHesitationMultiplier(30, 120)).toBe(1.0);
+        expect(getIntlStandingOpsHesitationMultiplier(50, 120)).toBe(1.0);
+        expect(getIntlStandingOpsHesitationMultiplier(100, 120)).toBe(1.0);
+    });
+
+    // ACTIVATION GUARD (turn-gate): the intl_standing channel is historically
+    // inert before mid-1994 (turn 100) even with low intl_standing — avoids
+    // back-dating the 1994–95 diplomatic-isolation dynamic onto the 1992–93 war.
+    it('turn-gate: multiplier is 1.0 below the gate turn even when intl_standing < 30', () => {
+        expect(getIntlStandingOpsHesitationMultiplier(0, 0)).toBe(1.0);
+        expect(getIntlStandingOpsHesitationMultiplier(29, 40)).toBe(1.0);
+        expect(getIntlStandingOpsHesitationMultiplier(10, 99)).toBe(1.0);
+    });
+
+    it('turn-gate: unknown turn (undefined/NaN) is treated as before the gate (1.0)', () => {
+        expect(getIntlStandingOpsHesitationMultiplier(0)).toBe(1.0);
+        expect(getIntlStandingOpsHesitationMultiplier(29, NaN)).toBe(1.0);
+    });
+
+    it('turn-gate: engages exactly at the gate turn (boundary)', () => {
+        expect(getIntlStandingOpsHesitationMultiplier(29, 99)).toBe(1.0);
+        expect(getIntlStandingOpsHesitationMultiplier(29, 100)).toBe(0.7);
     });
 });

@@ -21,7 +21,11 @@ import {
 } from '../tools/diagnostics/political_dimensions_snapshot.js';
 import { DIMENSION_IDS } from '../src/sim/events/strategic_dimensions.js';
 
-const ALL_FLAGS_OFF: NodeJS.ProcessEnv = {};
+// The global propagation switch is DEFAULT-ON, so a truly-OFF env must
+// explicitly opt the global switch out. Sub-flags stay default-OFF (absent).
+const ALL_FLAGS_OFF: NodeJS.ProcessEnv = {
+    AWWV_POLITICAL_DIMENSION_PROPAGATION: '0',
+};
 
 const ALL_FLAGS_ON: NodeJS.ProcessEnv = {
     AWWV_POLITICAL_DIMENSION_PROPAGATION: 'true',
@@ -45,7 +49,9 @@ function mockSave(overrides: Record<string, Partial<Record<string, { base_value:
         }
     }
     return {
-        meta: { turn: 12, scenario_id: 'apr1992_test', seed: 'test-seed' },
+        // turn 120 ≥ INTL_STANDING_OPS_HESITATION_MIN_TURN (100), so the diagnostic
+        // reports the intl_standing penalty zone as live (the channel is turn-gated).
+        meta: { turn: 120, scenario_id: 'apr1992_test', seed: 'test-seed' },
         military: {
             negotiation: { strategic_dimensions: dims },
         },
@@ -63,7 +69,7 @@ describe('buildPoliticalDimensionsSnapshot', () => {
             rawSave: mockSave(),
             envOverride: ALL_FLAGS_OFF,
         });
-        expect(snapshot.turn).toBe(12);
+        expect(snapshot.turn).toBe(120);
         expect(snapshot.scenario_id).toBe('apr1992_test');
         expect(snapshot.seed).toBe('test-seed');
         expect(snapshot.factions.length).toBe(3);
@@ -115,7 +121,7 @@ describe('buildPoliticalDimensionsSnapshot', () => {
         const snapshot = buildPoliticalDimensionsSnapshot({
             rawSave: mockSave({
                 RS: {
-                    internal_cohesion: { base_value: 40, event_modifier: -20, effective_value: 20 },
+                    internal_cohesion: { base_value: 40, event_modifier: -30, effective_value: 10 },
                 },
             }),
             envOverride: ALL_FLAGS_OFF,
@@ -131,7 +137,7 @@ describe('buildPoliticalDimensionsSnapshot', () => {
             rawSave: mockSave({
                 RBiH: {
                     international_standing: { base_value: 30, event_modifier: -10, effective_value: 20 },
-                    internal_cohesion: { base_value: 30, event_modifier: -10, effective_value: 20 },
+                    internal_cohesion: { base_value: 20, event_modifier: -10, effective_value: 10 },
                 },
             }),
             envOverride: ALL_FLAGS_OFF,
@@ -148,7 +154,7 @@ describe('buildPoliticalDimensionsSnapshot', () => {
             rawSave: mockSave({
                 HRHB: {
                     international_standing: { base_value: 30, event_modifier: -10, effective_value: 20 },
-                    internal_cohesion: { base_value: 30, event_modifier: -10, effective_value: 20 },
+                    internal_cohesion: { base_value: 20, event_modifier: -10, effective_value: 10 },
                 },
             }),
             envOverride: ALL_FLAGS_ON,
@@ -169,7 +175,7 @@ describe('buildPoliticalDimensionsSnapshot', () => {
             rawSave: mockSave({
                 RBiH: {
                     international_standing: { base_value: 30, event_modifier: -10, effective_value: 20 },
-                    internal_cohesion: { base_value: 30, event_modifier: -10, effective_value: 20 },
+                    internal_cohesion: { base_value: 20, event_modifier: -10, effective_value: 10 },
                 },
             }),
             envOverride: partialEnv,
@@ -203,8 +209,10 @@ describe('buildPoliticalDimensionsSnapshot', () => {
         expect(offAll.intl_standing_combined_active).toBe(false);
         expect(offAll.cohesion_combined_active).toBe(false);
 
-        // Sub-flag ON but global OFF must NOT report combined active.
+        // Sub-flag ON but global explicitly OFF must NOT report combined active.
+        // (Global is DEFAULT-ON, so the off state must be opted-out explicitly.)
         const subOnly = buildGateActivation({
+            AWWV_POLITICAL_DIMENSION_PROPAGATION: '0',
             AWWV_PDP_INTL_STANDING_OPS_HESITATION: 'true',
         });
         expect(subOnly.intl_standing_ops_hesitation).toBe('ACTIVE');

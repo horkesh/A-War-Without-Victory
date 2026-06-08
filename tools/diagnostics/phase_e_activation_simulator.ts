@@ -352,6 +352,7 @@ function buildFactionReadout(
     faction: SimFaction,
     store: Record<string, Record<string, { effective_value?: unknown }>> | null,
     gate: ComboGateState,
+    turn: number | null,
 ): FactionDimensionReadout {
     const intl = readDimEffective(store, faction, 'international_standing');
     const cohesion = readDimEffective(store, faction, 'internal_cohesion');
@@ -361,8 +362,10 @@ function buildFactionReadout(
     const intlEligible = gate.global && gate.intl_standing;
     const cohesionEligible = gate.global && gate.cohesion;
 
+    // ACTIVATION GUARD: pass the save's turn so the projection honors the
+    // intl_standing turn-gate (channel inert before mid-1994 / turn 100).
     const intlMult = intlEligible
-        ? getIntlStandingOpsHesitationMultiplier(intl ?? undefined)
+        ? getIntlStandingOpsHesitationMultiplier(intl ?? undefined, turn ?? undefined)
         : 1.0;
     const cohesionMult = cohesionEligible
         ? getCohesionCautionBiasMultiplier(cohesion ?? undefined)
@@ -384,12 +387,13 @@ function buildComboProjection(
     combo: SimCombo,
     store: Record<string, Record<string, { effective_value?: unknown }>> | null,
     factionFilter: SimFaction | null,
+    turn: number | null,
 ): ComboProjection {
     const gate = COMBO_GATES[combo];
     const factions: SimFaction[] = (factionFilter
         ? [factionFilter]
         : [...SIM_FACTIONS]).slice().sort(strictCompare) as SimFaction[];
-    const readouts = factions.map((f) => buildFactionReadout(f, store, gate));
+    const readouts = factions.map((f) => buildFactionReadout(f, store, gate, turn));
     const nontrivialCount = readouts.reduce((acc, r) => acc + (r.nontrivial ? 1 : 0), 0);
     return {
         combo,
@@ -429,7 +433,7 @@ export function buildTier1Projection(options: SimulatorOptions = {}): Tier1Resul
         turn: meta.turn,
         scenario_id: meta.scenario_id,
         seed: meta.seed,
-        combos: combos.map((c) => buildComboProjection(c, store, factionFilter)),
+        combos: combos.map((c) => buildComboProjection(c, store, factionFilter, meta.turn)),
     };
 }
 

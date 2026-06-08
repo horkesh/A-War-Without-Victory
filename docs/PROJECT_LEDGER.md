@@ -1,4 +1,27 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-08] feat(political+scenario): activate PDP patron+milcred (guarded) + E-A5 launch-halt — combined, calibration-flat
+
+**Type:** activation/config change (default-flag flip + scenario turn_max). Branch `feat/activate-pdp-ea5-combined` off `origin/main` (`4b64d21a5`). The convergence step that supersedes #322 (PDP guards) + #324 (E-A5) **by inclusion** — both merged here via `--no-ff`, then the gate defaults flipped. Sweep evidence (trusted): patron+milcred = calibration-FLAT (188w 649); intl+cohesion = −10 even guarded → kept OFF; E-A5 alone = 649 flat. This run is the real test of the E-A5 × PDP **interaction** — confirmed flat.
+
+**Changes:**
+- **Merged guards** (`origin/feat/pdp-activation-guards`): intl turn-gate (`MIN_TURN=100`) + cohesion threshold (=15) — kept in code, **dormant** (their channels stay default-OFF).
+- **Merged E-A5** (`origin/feat/activate-ea5-launch-halt`): `data/scenarios/events/war_1995.json` `us_halts_federation_advance_1995` `turn_max` 184→**188** (so it can fire in the 188w horizon).
+- **Gate defaults** (`src/sim/political/political_dimension_propagation_gate.ts`): the global propagation switch + `patron_confidence` + `military_credibility` are now **DEFAULT-ON** (unset ⇒ on; explicit `'0'`/`'false'` opt-out preserved). `international_standing` + `internal_cohesion` remain **DEFAULT-OFF** (unset ⇒ off, explicit `=1` opt-in) — their guards ride dormant for a future faction-asymmetric tuning lane.
+- Diagnostics tool `tools/diagnostics/political_dimensions_snapshot.ts`: global reader switched to default-on (`readEnvFlagDefaultOn`) to stay truthful to runtime.
+- Test contract updates (defaults flipped): `political_dimension_propagation_gate.test.ts`, `phase_e_patron_confidence_ops_hesitation.test.ts`, `phase_e_military_credibility_caution_bias.test.ts`, `phase_e2_cohesion_caution_bias.test.ts`, `phase_e_activation_simulator.test.ts`, `political_dimensions_snapshot.test.ts`, `causality_query.test.ts`.
+
+**Verification — combined 188w (the E-A5 × PDP interaction test):** `tsc --noEmit` exit 0.
+
+| run | matched | hash | anchors (Zvornik / brijesnica) | bench | crit | per-faction sim (RS/RBiH/HRHB) |
+| --- | --- | --- | --- | --- | --- | --- |
+| **188w** | **649/712** (0.911517) | `d311eeac18492683` | **30/30** (Zvornik=RS PASS / brijesnica=RBiH PASS) | 6/6 | 0 | 321 / 285 / 106 |
+| 40w | — | `235c61f408dc3d95` | — | — | — | (== floor, byte-identical) |
+| 52w | — | `515e0e07ab32db82` | — | — | — | (== floor, byte-identical) |
+
+**FLOOR-FLAT confirmed:** OSID 649 = floor 649; anchors 30/30; `op:zvornik:zvornik`=RS; benchmarks 6/6; 0 critical anomalies (23 total: 5 warn / 18 info). **Srebrenica (`op:srebrenica:srebrenica_2`) + Žepa (`op:rogatica:zepa_2`) both flip RBiH→RS — enclaves FALL (§6 intact).** 188w hash moves `89ef697dfb27c989`→`d311eeac18492683` **legitimately** — E-A5's `us_halts` fires + PDP patron/milcred multipliers fire — the OSID outcome is identical. 40w/52w byte-identical (E-A5 is late-war; patron/milcred multipliers net-zero on the OSID map). Casualties: attacker 113,738 / defender 157,969; civilian killed RBiH 36,287 / RS 3,549 / HRHB 4,000.
+
+**Dormant follow-up:** `international_standing` + `internal_cohesion` stay default-OFF (guards present but inert) — activating them needs a faction-asymmetric tuning lane (sweep showed −10 even guarded, +6 RS over-hold, sub-additive).
+
 ## [2026-06-08] chore(combat): retire ADR-0007 Phase C (delete predictor/resolver split + shared-sector cap; Phase B untouched; byte-identical)
 
 **Type:** dead-code deletion, BYTE-IDENTICAL to the 649 floor. Owner decision honoring the unanimous Pyrrhic 3-lens panel ("retire it — delete the code path, don't just park it disabled"). Phase C was canon-silent and flag-on probes returned a Guardrail-1 wrong-sign (~−2% aggregate war-cost dip — sharing attrition made the war *cheaper*, eroding the negative-sum soul-lock). Branch `chore/retire-adr0007-phase-c` off `origin/main`.
@@ -19912,3 +19935,19 @@ Out of scope and intentionally untouched: the `štabni` vs `štabski` standardiz
 | war_exhaustion (per faction) | RBiH/RS/HRHB all ~10000.001 (no asymmetric collapse) | — |
 
 Military killed dropped ~30% (143,980→101,513), toward the ~80-90k target; zvornik sacred anchor held; no critical anomalies; exhaustion symmetric (Guardrail-1 not tripped). Count slipped 634→629 (−5) — orchestrator decides GO/NO-GO + re-floor.
+
+## [2026-06-08] PDP activation guards — intl turn-gate + cohesion threshold recalibration (gate still OFF, byte-identical)
+
+Readies two Political-Dimension-Propagation (PDP) channels for owner activation by adding behavior-when-active guards. The global gate + all per-channel sub-flags STAY OFF (default); with everything off behavior is byte-identical (40w `235c61f408dc3d95`, unchanged from floor). The guards only change behavior WHEN a channel is later flipped ON.
+
+**Changes (`src/sim/combat/sector_offensive.ts`):**
+1. **intl_standing turn-gate** — `getIntlStandingOpsHesitationMultiplier(intlStanding, currentTurn?)` gains a turn parameter and returns 1.0 (inert) when `currentTurn` is missing/NaN or `< INTL_STANDING_OPS_HESITATION_MIN_TURN` (new constant = **100**, ≈ mid-1994). Rationale (historian): an ungated `<30` op-hesitation back-dates the 1994–95 Serb diplomatic-isolation dynamic onto 1992, where the binding constraint was the arms embargo (which hurt the Bosnian Muslims). Consumer `commander/emit.ts buildOperations` now passes `briefing.turn`.
+2. **internal_cohesion threshold recalibration** — `COHESION_CAUTION_BIAS_THRESHOLD` **40 → 15**. Post-#63 (cohesion-divisor rescale) the dimension compressed to ~[0..50]; a 40w turn-40 sample read RBiH 0.78 / RS 29.74 / HRHB 20.91, so `<40` fired for ALL factions (universal penalty). `<15` flags only the genuinely-fraying bottom band (RBiH-only in the sample), preserving the original design intent.
+
+Both constants are named + owner-adjustable. patron_confidence + military_credibility channels left AS-IS (no guard per historian).
+
+**Diagnostics/HUD updated to honor the turn-gate (truthful WOULD-TRIGGER reporting):** `tools/diagnostics/political_dimensions_snapshot.ts`, `tools/diagnostics/phase_e_activation_simulator.ts`, and `src/sim/events/causality_query.ts getProjectedDimensionMultiplier` now thread the save/state turn into the intl helper.
+
+**Verification:** `tsc --noEmit` exit 0; full vitest 0 failed (8 PDP suites / 130 tests green); 40w `235c61f408dc3d95` byte-identical to floor (gate OFF). Tests updated to encode the guarded thresholds.
+
+**Ready to activate:** intl_standing — turn-gated, set `AWWV_POLITICAL_DIMENSION_PROPAGATION=1` + `AWWV_PDP_INTL_STANDING_OPS_HESITATION=1` (fires only from turn 100+). internal_cohesion — recalibrated, set the global flag + `AWWV_PDP_COHESION_CAUTION_BIAS=1` (fires only below 15).

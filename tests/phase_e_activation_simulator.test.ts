@@ -64,7 +64,10 @@ function mockSave(overrides: Partial<Record<string, Partial<Record<string, numbe
         }
     }
     return {
-        meta: { turn: 40, scenario_id: 'phase_e_sim_test', seed: 'test-seed' },
+        // turn 120 ≥ INTL_STANDING_OPS_HESITATION_MIN_TURN (100): the intl_standing
+        // channel is turn-gated, so the projection only reports intl hesitation when
+        // the save turn is in-window. cohesion threshold recalibrated to < 15.
+        meta: { turn: 120, scenario_id: 'phase_e_sim_test', seed: 'test-seed' },
         military: { negotiation: { strategic_dimensions: store } },
     };
 }
@@ -150,7 +153,7 @@ describe('Phase E activation simulator — Tier 1 (math-only)', () => {
     it('cohesion_only triggers 0.85× on sub-threshold cohesion and 1.0× on intl_standing', () => {
         const result = buildTier1Projection({
             rawSave: mockSave({
-                HRHB: { international_standing: 20, internal_cohesion: 20 },
+                HRHB: { international_standing: 20, internal_cohesion: 10 },
             }),
         });
         const combo = result.combos.find((c) => c.combo === 'cohesion_only')!;
@@ -275,8 +278,10 @@ describe('Phase E activation simulator — Tier 2 (real-scenario shape)', () => 
         expect(bothObs.intlActive).toBe(true);
         expect(bothObs.cohesionActive).toBe(true);
 
-        // After the simulator returns, all overrides must be cleared.
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+        // After the simulator returns, all overrides must be cleared (env-fallback).
+        // The global switch is DEFAULT-ON, but intl + cohesion remain DEFAULT-OFF
+        // (guards dormant), so their combined gates are still inactive.
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
         expect(isIntlStandingOpsHesitationActive()).toBe(false);
         expect(isCohesionCautionBiasActive()).toBe(false);
 
@@ -390,8 +395,9 @@ describe('Phase E activation simulator — Tier 2 (real-scenario shape)', () => 
             }),
         ).rejects.toThrow(/synthetic runner failure/);
         // Gates MUST be reset even after a throw — Tier 2's try/finally
-        // contract.
-        expect(isPoliticalDimensionPropagationEnabled()).toBe(false);
+        // contract. After reset (env-fallback): global is DEFAULT-ON, intl +
+        // cohesion remain DEFAULT-OFF (guards dormant).
+        expect(isPoliticalDimensionPropagationEnabled()).toBe(true);
         expect(isIntlStandingOpsHesitationActive()).toBe(false);
         expect(isCohesionCautionBiasActive()).toBe(false);
     });

@@ -850,12 +850,17 @@ function buildOperations(
         // The multiplier reads the briefing-surfaced intl_standing (which is
         // populated only when the two-tier propagation gate is ON; see
         // briefing.ts §11). When the gate is OFF, `political_dimensions` is
-        // undefined → `getIntlStandingOpsHesitationMultiplier(undefined)` ===
+        // undefined → `getIntlStandingOpsHesitationMultiplier(undefined, ...)` ===
         // 1.0 → `effectiveMinForOp === baseMinForOp` → byte-identical to
         // pre-Phase-E launch behavior. Gated `!== 1.0` mirrors the canonical
         // equipment-quality-modifier consumer pattern in combat_math.ts:1305-1310.
+        // ACTIVATION GUARD: `briefing.turn` is passed as the turn-gate input so the
+        // channel stays inert before mid-1994 (INTL_STANDING_OPS_HESITATION_MIN_TURN)
+        // even when the flags are flipped ON — avoids back-dating the 1994–95
+        // diplomatic-isolation dynamic onto the 1992–93 war.
         const hesitationMult = getIntlStandingOpsHesitationMultiplier(
             briefing.political_dimensions?.international_standing,
+            briefing.turn,
         );
         // Phase E Packet 2: internal_cohesion → op-launch caution bias.
         // Chained alongside the MVS hesitation multiplier; same byte-stability
