@@ -3,11 +3,14 @@
  *
  * Proves the force-op HUMAN-COST projection of `buildOfficerResentmentReceipts`:
  *   - A CO with override/cowed substrate (last_override_turn set) AND a
- *     force-launched op for his corps yields a receipt with the right fields +
+ *     force-launched op he commanded yields a receipt with the right fields +
  *     the newly-cowed signal.
  *   - A clean CO (no override substrate) yields no receipt.
  *   - #125: a CO overridden ONLY via order-interpretation (override substrate set
- *     but NO force-launched op for his corps) yields no receipt.
+ *     but NO force-launched op he commanded) yields no receipt.
+ *   - #282: a force-overridden CO later RELIEVED (assigned_corps_id → null) STILL
+ *     yields a receipt keyed to the corps recorded on the force-launched op he
+ *     commanded; an officer with no force-launched op still yields none.
  *   - `officerResentmentReceiptsRealizedOnTurn` filters by override turn.
  *   - Bot/historical (no overrides) → [].
  *
@@ -75,26 +78,45 @@ function buildOfficerData(id: string, name: string): NamedOfficer {
 /**
  * Build a minimal GameState. `forceLaunchCorps` lists corps IDs that have a
  * force-launched operation in `operation_history` — the read-side discriminator
- * for #125 (only force-LAUNCH overrides emit such an op; order-interpretation
- * overrides do not). Defaults to every overridden officer's corps so the
- * genuine-force-op cases read naturally; pass `[]` to model an
- * order-interpretation-only override.
+ * (only force-LAUNCH overrides emit such an op; order-interpretation overrides do
+ * not). Each synthetic AAR carries the `commander_officer_id` of the overridden
+ * officer whose corps matches — mirroring the real engine, where the AAR records
+ * the corps AND the officer it was force-launched under (#125/#282). Defaults to
+ * every overridden officer's corps so the genuine-force-op cases read naturally;
+ * pass `[]` to model an order-interpretation-only override (no force-launched op).
  */
 function buildState(
     officers: Record<string, NamedOfficerState>,
     officerData: NamedOfficer[],
     forceLaunchCorps?: string[],
 ): GameState {
-    const corpsIds =
-        forceLaunchCorps ??
-        Object.values(officers)
-            .filter((os) => os.last_override_turn !== undefined && os.assigned_corps_id)
-            .map((os) => os.assigned_corps_id as string);
+    // Each (corps, commander) pair that gets a synthetic force-launched AAR.
+    const opSpecs: { corpsId: string; officerId: string | undefined }[] = [];
 
-    const operation_history = corpsIds.map((corpsId, i) => ({
-        operation_id: `op_${corpsId}_${i}`,
+    if (forceLaunchCorps !== undefined) {
+        // Explicit corps list: stamp each with the first overridden officer whose
+        // current corps matches (mirrors the AAR's recorded commander).
+        for (const corpsId of forceLaunchCorps) {
+            const officerId = Object.entries(officers).find(
+                ([, os]) => os.last_override_turn !== undefined && os.assigned_corps_id === corpsId,
+            )?.[0];
+            opSpecs.push({ corpsId, officerId });
+        }
+    } else {
+        // Default: one force-launched op per overridden officer, keyed to his corps
+        // and his id — exactly what the engine records at force-launch.
+        for (const [officerId, os] of Object.entries(officers)) {
+            if (os.last_override_turn !== undefined && os.assigned_corps_id) {
+                opSpecs.push({ corpsId: os.assigned_corps_id, officerId });
+            }
+        }
+    }
+
+    const operation_history = opSpecs.map((spec, i) => ({
+        operation_id: `op_${spec.corpsId}_${i}`,
         operation_name: `Forced Op ${i}`,
-        corps_id: corpsId,
+        corps_id: spec.corpsId,
+        commander_officer_id: spec.officerId,
         force_launched: true,
         ended_turn: 1,
     }));
@@ -187,12 +209,75 @@ describe('buildOfficerResentmentReceipts', () => {
                 },
                 named_officer_data: [buildOfficerData('live', 'Gen. Live')],
                 corps_command: {
-                    '4_corps': { active_operations: [{ was_force_launched: true }] },
+                    '4_corps': {
+                        active_operations: [
+                            { was_force_launched: true, commander_officer_id: 'live' },
+                        ],
+                    },
                 },
             },
         } as unknown as GameState;
         const receipts = buildOfficerResentmentReceipts(state);
         expect(receipts.map((r) => r.id)).toEqual(['live']);
+    });
+
+    it('#282: keeps a RELIEVED force-overridden CO, keyed to the op\'s historical corps', () => {
+        // The CO was force-overridden while commanding 2_corps, then RELIEVED:
+        // relieveOfficer cleared assigned_corps_id → null and flipped status to
+        // retired, but the override substrate (last_override_turn) persists and the
+        // resolved AAR still records corps_id + the commander_officer_id it ran
+        // under. The receipt must survive and key the corps off the op history.
+        const relieved = buildOfficerState('siber', {
+            override: true,
+            overrideTurn: 22,
+            overrideCount: 1,
+            corpsId: null, // relieved: assigned_corps_id cleared
+        });
+        relieved.status = 'retired';
+        const state = {
+            military: {
+                named_officers: { siber: relieved },
+                named_officer_data: [buildOfficerData('siber', 'Gen. Šiber')],
+            },
+            operation_history: [
+                {
+                    operation_id: 'op_2_corps_relieved',
+                    operation_name: 'Forced Op (pre-relief)',
+                    corps_id: '2_corps',
+                    commander_officer_id: 'siber',
+                    force_launched: true,
+                    ended_turn: 21,
+                },
+            ],
+        } as unknown as GameState;
+
+        const receipts = buildOfficerResentmentReceipts(state);
+        expect(receipts).toHaveLength(1);
+        const r = receipts[0];
+        expect(r.id).toBe('siber');
+        expect(r.officerName).toBe('Gen. Šiber');
+        // Corps recovered from the force-launched op, NOT the now-null current corps.
+        expect(r.corpsId).toBe('2_corps');
+        expect(r.overrideTurn).toBe(22);
+    });
+
+    it('#282: an officer with NO force-launched op still yields no receipt (relieved or not)', () => {
+        // Override substrate set + relieved, but the officer never commanded a
+        // force-launched op (order-interpretation-only). Must NOT resurface.
+        const relieved = buildOfficerState('no_op', {
+            override: true,
+            overrideTurn: 13,
+            corpsId: null,
+        });
+        relieved.status = 'retired';
+        const state = {
+            military: {
+                named_officers: { no_op: relieved },
+                named_officer_data: [buildOfficerData('no_op', 'Gen. NoOp')],
+            },
+            operation_history: [],
+        } as unknown as GameState;
+        expect(buildOfficerResentmentReceipts(state)).toEqual([]);
     });
 
     it('returns [] for bot/historical runs (no overrides anywhere)', () => {
