@@ -221,6 +221,75 @@ describe('buildOfficerResentmentReceipts', () => {
         expect(receipts.map((r) => r.id)).toEqual(['live']);
     });
 
+    it('#303: keys off the corps, NOT the op commander — receipt goes to the overridden CORPS CO, not the reserve op-leader', () => {
+        // Models the REAL injectOpDirectives engine flow: recordPresidentialOverride
+        // bumps the SEATED corps CO (getCorpsCommander → active, assigned to the corps),
+        // while assignOperationCommander stamps op.commander_officer_id with a DIFFERENT
+        // RESERVE officer (selectOperationCommander only picks status==='reserve'). The
+        // overridden corps CO is therefore NOT the op's commander_officer_id. Keying off
+        // commander_officer_id (the old bug) matched the override against the reserve
+        // leader — who has no override substrate — and DROPPED the genuine corps-CO
+        // receipt. Keying by corps keeps it.
+        const state = {
+            military: {
+                named_officers: {
+                    // Seated, OVERRIDDEN corps CO of 4_corps.
+                    corps_co: buildOfficerState('corps_co', { override: true, overrideTurn: 6, corpsId: '4_corps' }),
+                    // Reserve officer the op was actually launched under — NO override.
+                    reserve_leader: buildOfficerState('reserve_leader', { override: false, corpsId: null }),
+                },
+                named_officer_data: [
+                    buildOfficerData('corps_co', 'Gen. Corps-CO'),
+                    buildOfficerData('reserve_leader', 'Gen. Reserve'),
+                ],
+                corps_command: {
+                    '4_corps': {
+                        active_operations: [
+                            // commander_officer_id is the RESERVE leader, not the corps CO.
+                            { was_force_launched: true, commander_officer_id: 'reserve_leader' },
+                        ],
+                    },
+                },
+            },
+        } as unknown as GameState;
+        const receipts = buildOfficerResentmentReceipts(state);
+        // Exactly one receipt — for the overridden corps CO, keyed to his corps.
+        expect(receipts).toHaveLength(1);
+        expect(receipts[0].id).toBe('corps_co');
+        expect(receipts[0].corpsId).toBe('4_corps');
+    });
+
+    it('#303: resolved-AAR variant — overridden corps CO keeps a receipt though the AAR names the reserve op-leader', () => {
+        // Same #303 mismatch, but the force-launched op has resolved into an AAR whose
+        // commander_officer_id is the reserve leader. The corps_id on the AAR is the
+        // durable join key back to the overridden corps CO.
+        const state = {
+            military: {
+                named_officers: {
+                    corps_co: buildOfficerState('corps_co', { override: true, overrideTurn: 9, corpsId: '5_corps' }),
+                    reserve_leader: buildOfficerState('reserve_leader', { override: false, corpsId: null }),
+                },
+                named_officer_data: [
+                    buildOfficerData('corps_co', 'Gen. Corps-CO'),
+                    buildOfficerData('reserve_leader', 'Gen. Reserve'),
+                ],
+            },
+            operation_history: [
+                {
+                    operation_id: 'op_5_corps_forced',
+                    operation_name: 'Forced Op',
+                    corps_id: '5_corps',
+                    commander_officer_id: 'reserve_leader', // reserve leader, NOT the CO
+                    force_launched: true,
+                    ended_turn: 10,
+                },
+            ],
+        } as unknown as GameState;
+        const receipts = buildOfficerResentmentReceipts(state);
+        expect(receipts.map((r) => r.id)).toEqual(['corps_co']);
+        expect(receipts[0].corpsId).toBe('5_corps');
+    });
+
     it('#282: keeps a RELIEVED force-overridden CO, keyed to the op\'s historical corps', () => {
         // The CO was force-overridden while commanding 2_corps, then RELIEVED:
         // relieveOfficer cleared assigned_corps_id → null and flipped status to
