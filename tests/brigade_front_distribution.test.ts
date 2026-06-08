@@ -975,7 +975,10 @@ describe('distributeBrigadesToFront', () => {
             ['op:test:front', 'op:test:rear'],
         ]);
 
-        distributeBrigadesToFront(state, sectors, adjacency);
+        // PR-1 (ADR-0007 Phase B) flipped the ENABLE_STANDING_OG_RESERVE_COMMIT
+        // default to true. This test covers the disabled branch, so it must opt
+        // out explicitly rather than rely on the (now-enabled) constant default.
+        distributeBrigadesToFront(state, sectors, adjacency, { enableStandingOgReserveCommit: false });
 
         expect(state.military.formations.brig_reserve.location_osid).toBe('op:test:rear');
         expect(state.military.brigade_movement_orders?.brig_reserve).toBeUndefined();
