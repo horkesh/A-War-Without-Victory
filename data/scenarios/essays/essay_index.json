@@ -2,6 +2,7 @@
     "essays": [
         {
             "id": "essay_arms_embargo_impact_1992",
+            "tier": 2,
             "event_id": "arms_embargo_impact_1992",
             "title": "The Arms Embargo: How the UN Disarmed Bosnia's Defenders",
             "year": 1992,
@@ -37,6 +38,7 @@
         },
         {
             "id": "essay_battle_of_the_barracks_sarajevo",
+            "tier": 0,
             "event_id": "battle_of_the_barracks_sarajevo",
             "title": "Storming the Barracks: How Sarajevo Armed Itself",
             "year": 1992,
@@ -57,6 +59,7 @@
         },
         {
             "id": "essay_battle_of_the_barracks_tuzla",
+            "tier": 0,
             "event_id": "battle_of_the_barracks_tuzla",
             "title": "The Tuzla Column: Ambush, Seizure, and the Birth of 2nd Corps",
             "year": 1992,
@@ -77,6 +80,7 @@
         },
         {
             "id": "essay_battle_of_the_barracks_visoko",
+            "tier": 0,
             "event_id": "battle_of_the_barracks_visoko",
             "title": "Visoko Depot: A Small Victory on the Sarajevo Approaches",
             "year": 1992,
@@ -97,6 +101,7 @@
         },
         {
             "id": "essay_battle_of_the_barracks_zenica",
+            "tier": 0,
             "event_id": "battle_of_the_barracks_zenica",
             "title": "The Zenica Seizure: Arming 3rd Corps from JNA Stores",
             "year": 1992,
@@ -116,6 +121,7 @@
         },
         {
             "id": "essay_bijeljina_massacre_1992",
+            "tier": 0,
             "event_id": "bijeljina_massacre_1992",
             "title": "The Bijeljina Massacre: The War's Opening Act",
             "year": 1992,
@@ -135,6 +141,7 @@
         },
         {
             "id": "essay_concentration_camps_revealed_1992",
+            "tier": 2,
             "event_id": "concentration_camps_revealed_1992",
             "title": "Omarska and Trnopolje: The Camps That Shocked the World",
             "year": 1992,
@@ -183,6 +190,7 @@
         },
         {
             "id": "essay_drina_cleansing_decision_1992",
+            "tier": 0,
             "event_id": "drina_cleansing_decision_1992",
             "title": "The Drina Valley Question: Strategic Goal Three and Its Consequences",
             "year": 1992,
@@ -204,6 +212,7 @@
         },
         {
             "id": "essay_drina_valley_ethnic_cleansing_1992",
+            "tier": 2,
             "event_id": "drina_valley_ethnic_cleansing_1992",
             "title": "Ethnic Cleansing Along the Drina: Visegrad, Foca, Zvornik",
             "year": 1992,
@@ -264,6 +273,7 @@
         },
         {
             "id": "essay_foca_1992",
+            "tier": 0,
             "event_id": "foca_1992",
             "title": "Foca: The Takeover and Its Aftermath",
             "year": 1992,
@@ -287,6 +297,7 @@
         },
         {
             "id": "essay_hrhb_political_goal",
+            "tier": 2,
             "event_id": "hrhb_political_goal",
             "title": "Herceg-Bosna: Zagreb's Project and the Croat Dilemma",
             "year": 1992,
@@ -321,6 +332,7 @@
         },
         {
             "id": "essay_hvo_arbih_tensions_rise_1992",
+            "tier": 0,
             "event_id": "hvo_arbih_tensions_rise_1992",
             "title": "Prozor and Novi Travnik: The Alliance Begins to Crack",
             "year": 1992,
@@ -341,6 +353,7 @@
         },
         {
             "id": "essay_independence_referendum_1992",
+            "tier": 0,
             "event_id": "independence_referendum_1992",
             "title": "The Independence Referendum: Two Legitimacies, One War",
             "year": 1992,
@@ -361,6 +374,7 @@
         },
         {
             "id": "essay_jajce_falls_1992",
+            "tier": 0,
             "event_id": "jajce_falls_1992",
             "title": "The Fall of Jajce: A Shared Defeat That Split an Alliance",
             "year": 1992,
@@ -380,6 +394,7 @@
         },
         {
             "id": "essay_jna_withdrawal_1992",
+            "tier": 2,
             "event_id": "jna_withdrawal_1992",
             "title": "The JNA Withdrawal: A Handover, Not a Retreat",
             "year": 1992,
@@ -415,6 +430,7 @@
         },
         {
             "id": "essay_keraterm_camp_1992",
+            "tier": 0,
             "event_id": "keraterm_camp_1992",
             "title": "The Keraterm Camp",
             "year": 1992,
@@ -438,6 +454,7 @@
         },
         {
             "id": "essay_london_conference_1992",
+            "tier": 2,
             "event_id": "london_conference_1992",
             "title": "The London Conference: Declarations Without Enforcement",
             "year": 1992,
@@ -471,6 +488,7 @@
         },
         {
             "id": "essay_mostar_liberation_1992",
+            "tier": 0,
             "event_id": "mostar_liberation_1992",
             "title": "Mostar Liberated: A Shared Victory, A Divided City",
             "year": 1992,
@@ -491,6 +509,7 @@
         },
         {
             "id": "essay_omarska_camp_1992",
+            "tier": 0,
             "event_id": "omarska_camp_1992",
             "title": "The Omarska Camp",
             "year": 1992,
@@ -514,6 +533,7 @@
         },
         {
             "id": "essay_operation_corridor_1992",
+            "tier": 2,
             "event_id": "operation_corridor_1992",
             "title": "Operation Corridor: The Lifeline Through Brcko",
             "year": 1992,
@@ -548,6 +568,7 @@
         },
         {
             "id": "essay_prijedor_takeover_1992",
+            "tier": 0,
             "event_id": "prijedor_takeover_1992",
             "title": "Prijedor: The Takeover and the Counterattack",
             "year": 1992,
@@ -572,6 +593,7 @@
         },
         {
             "id": "essay_rbih_state_identity",
+            "tier": 0,
             "event_id": "rbih_state_identity",
             "title": "Civic Republic or National State: The Bosnian Identity Dilemma",
             "year": 1992,
@@ -591,6 +613,7 @@
         },
         {
             "id": "essay_rs_strategic_goals",
+            "tier": 2,
             "event_id": "rs_strategic_goals",
             "title": "The Six Strategic Goals: How the Bosnian Serb Assembly Chose War",
             "year": 1992,
@@ -625,6 +648,7 @@
         },
         {
             "id": "essay_sarajevo_siege_begins_1992",
+            "tier": 2,
             "event_id": "sarajevo_siege_begins_1992",
             "title": "The Siege Begins: Sarajevo Under the Guns",
             "year": 1992,
@@ -659,6 +683,7 @@
         },
         {
             "id": "essay_srebrenica_enclave_forms_1992",
+            "tier": 0,
             "event_id": "srebrenica_enclave_forms_1992",
             "title": "The Srebrenica Pocket: Oric's Desperate Enclave",
             "year": 1992,
@@ -680,6 +705,7 @@
         },
         {
             "id": "essay_trnopolje_camp_1992",
+            "tier": 0,
             "event_id": "trnopolje_camp_1992",
             "title": "The Trnopolje Camp",
             "year": 1992,
@@ -703,6 +729,7 @@
         },
         {
             "id": "essay_visegrad_1992",
+            "tier": 0,
             "event_id": "visegrad_1992",
             "title": "Visegrad: The Bridge on the Drina, 1992",
             "year": 1992,
@@ -726,6 +753,7 @@
         },
         {
             "id": "essay_zvornik_takeover_1992",
+            "tier": 0,
             "event_id": "zvornik_takeover_1992",
             "title": "The Takeover of Zvornik",
             "year": 1992,
@@ -749,6 +777,7 @@
         },
         {
             "id": "essay_abdic_apwb_declared_1993",
+            "tier": 0,
             "event_id": "abdic_apwb_declared_1993",
             "title": "Abdic's Rebellion: The Autonomous Province of Western Bosnia",
             "year": 1993,
@@ -768,6 +797,7 @@
         },
         {
             "id": "essay_abdic_karadzic_pact_1993",
+            "tier": 0,
             "event_id": "abdic_karadzic_pact_1993",
             "title": "The Abdic-Karadzic Pact: Formalizing the Bihac Split",
             "year": 1993,
@@ -787,6 +817,7 @@
         },
         {
             "id": "essay_ahmici_massacre_1993",
+            "tier": 1,
             "event_id": "ahmici_massacre_1993",
             "title": "Ahmici: The Lasva Valley Massacre",
             "year": 1993,
@@ -837,6 +868,7 @@
         },
         {
             "id": "essay_battle_of_bugojno_1993",
+            "tier": 0,
             "event_id": "battle_of_bugojno_1993",
             "title": "The Battle of Bugojno: ARBiH Ascendant in the Vrbas Valley",
             "year": 1993,
@@ -856,6 +888,7 @@
         },
         {
             "id": "essay_battle_of_travnik_1993",
+            "tier": 0,
             "event_id": "battle_of_travnik_1993",
             "title": "The Fall of Travnik: ARBiH Ascendancy in Central Bosnia",
             "year": 1993,
@@ -876,6 +909,7 @@
         },
         {
             "id": "essay_bosnian_assembly_rejects_os_1993",
+            "tier": 2,
             "event_id": "bosnian_assembly_rejects_os_1993",
             "title": "The Bosnian Parliament Rejects Owen-Stoltenberg",
             "year": 1993,
@@ -910,6 +944,7 @@
         },
         {
             "id": "essay_central_bosnia_fighting_1993",
+            "tier": 0,
             "event_id": "central_bosnia_fighting_1993",
             "title": "Central Bosnia: The Three-Way War",
             "year": 1993,
@@ -930,6 +965,7 @@
         },
         {
             "id": "essay_croat_bosniak_war_begins_1993",
+            "tier": 0,
             "event_id": "croat_bosniak_war_begins_1993",
             "title": "The War Within the War: How the Croat-Bosniak Alliance Collapsed",
             "year": 1993,
@@ -950,6 +986,7 @@
         },
         {
             "id": "essay_croatia_herceg_bosna_control_1993",
+            "tier": 0,
             "event_id": "croatia_herceg_bosna_control_1993",
             "title": "Zagreb's Grip: Croatia and Herceg-Bosna",
             "year": 1993,
@@ -969,6 +1006,7 @@
         },
         {
             "id": "essay_east_mostar_siege_1993",
+            "tier": 0,
             "event_id": "east_mostar_siege_1993",
             "title": "The Siege of East Mostar: A City Divided by Its Liberators",
             "year": 1993,
@@ -988,6 +1026,7 @@
         },
         {
             "id": "essay_gornji_vakuf_clashes_1993",
+            "tier": 0,
             "event_id": "gornji_vakuf_clashes_1993",
             "title": "Gornji Vakuf: The First Battles of the Croat-Bosniak War",
             "year": 1993,
@@ -1008,6 +1047,7 @@
         },
         {
             "id": "essay_grabovica_uzdol_massacres_1993",
+            "tier": 2,
             "event_id": "grabovica_uzdol_massacres_1993",
             "title": "Grabovica and Uzdol: ARBiH Atrocities During Operation Neretva 93",
             "year": 1993,
@@ -1041,6 +1081,7 @@
         },
         {
             "id": "essay_hrhb_federation_overture_1993",
+            "tier": 2,
             "event_id": "hrhb_federation_overture_1993",
             "title": "Federation Backchannel: Boban Tests the Language",
             "year": 1993,
@@ -1107,6 +1148,7 @@
         },
         {
             "id": "essay_hrhb_territorial_scope_1993",
+            "tier": 2,
             "event_id": "hrhb_territorial_scope_1993",
             "title": "Mostar Records the Scope of Croat Territorial Claims",
             "year": 1993,
@@ -1173,6 +1215,7 @@
         },
         {
             "id": "essay_hvo_detention_camps_1993",
+            "tier": 2,
             "event_id": "hvo_detention_camps_1993",
             "title": "Dretelj, Gabela, Heliodrom: The HVO Camp System",
             "year": 1993,
@@ -1208,6 +1251,7 @@
         },
         {
             "id": "essay_icty_established_1993",
+            "tier": 0,
             "event_id": "icty_established_1993",
             "title": "Resolution 827: The Court That Would Judge a War",
             "year": 1993,
@@ -1229,6 +1273,7 @@
         },
         {
             "id": "essay_kravica_attack_1993",
+            "tier": 0,
             "event_id": "kravica_attack_1993",
             "title": "The Kravica Raid: Orthodox Christmas and the Spiral of Retribution",
             "year": 1993,
@@ -1249,6 +1294,7 @@
         },
         {
             "id": "essay_maglaj_enclave_blockade_1993",
+            "tier": 0,
             "event_id": "maglaj_enclave_blockade_1993",
             "title": "Maglaj Under Siege: The Joint Blockade",
             "year": 1993,
@@ -1268,6 +1314,7 @@
         },
         {
             "id": "essay_markale_area_shelling_1993",
+            "tier": 2,
             "event_id": "markale_area_shelling_1993",
             "title": "Shelling Sarajevo: The SRK Campaign Against Civilians",
             "year": 1993,
@@ -1302,6 +1349,7 @@
         },
         {
             "id": "essay_morillon_enters_srebrenica_1993",
+            "tier": 0,
             "event_id": "morillon_enters_srebrenica_1993",
             "title": "Morillon's Promise: The UN's Pledge and Its Hollow Echo",
             "year": 1993,
@@ -1323,6 +1371,7 @@
         },
         {
             "id": "essay_mostar_bridge_destroyed_1993",
+            "tier": 0,
             "event_id": "mostar_bridge_destroyed_1993",
             "title": "The Destruction of Stari Most: Cultural Annihilation in Mostar",
             "year": 1993,
@@ -1343,6 +1392,7 @@
         },
         {
             "id": "essay_nato_air_strike_threat_1993",
+            "tier": 2,
             "event_id": "nato_air_strike_threat_1993",
             "title": "NATO's First Ultimatum: The August 1993 Air Strike Threat",
             "year": 1993,
@@ -1389,6 +1439,7 @@
         },
         {
             "id": "essay_operation_lukavac_93",
+            "tier": 0,
             "event_id": "operation_lukavac_93",
             "title": "Operation Lukavac 93: The Battle for Igman and the First NATO Ultimatum",
             "year": 1993,
@@ -1408,6 +1459,7 @@
         },
         {
             "id": "essay_operation_neretva_93_1993",
+            "tier": 0,
             "event_id": "operation_neretva_93_1993",
             "title": "Operation Neretva '93: The ARBiH Strikes Back in Herzegovina",
             "year": 1993,
@@ -1427,6 +1479,7 @@
         },
         {
             "id": "essay_operation_sharp_guard_1993",
+            "tier": 2,
             "event_id": "operation_sharp_guard_1993",
             "title": "Operation Sharp Guard: The Adriatic Blockade",
             "year": 1993,
@@ -1462,6 +1515,7 @@
         },
         {
             "id": "essay_os_rbih_tactical_acceptance_1993",
+            "tier": 2,
             "event_id": "os_rbih_tactical_acceptance_1993",
             "title": "Owen-Stoltenberg: Accept or Resist?",
             "year": 1993,
@@ -1506,6 +1560,7 @@
         },
         {
             "id": "essay_owen_stoltenberg_plan_1993",
+            "tier": 2,
             "event_id": "owen_stoltenberg_plan_1993",
             "title": "Owen-Stoltenberg: Partitioning Bosnia Into Three Republics",
             "year": 1993,
@@ -1564,6 +1619,7 @@
         },
         {
             "id": "essay_rbih_arms_embargo_lift_advocacy_1993",
+            "tier": 2,
             "event_id": "rbih_arms_embargo_lift_advocacy_1993",
             "title": "Sarajevo Records Its Arms-Embargo Posture",
             "year": 1993,
@@ -1630,6 +1686,7 @@
         },
         {
             "id": "essay_rbih_reintegration_offers_1993",
+            "tier": 2,
             "event_id": "rbih_reintegration_offers_1993",
             "title": "Reintegration Offers to Serb and Croat Communities",
             "year": 1993,
@@ -1696,6 +1753,7 @@
         },
         {
             "id": "essay_rs_assembly_rejects_voplan_1993",
+            "tier": 0,
             "event_id": "rs_assembly_rejects_voplan_1993",
             "title": "Pale Says No: The Rejection That Killed Vance-Owen",
             "year": 1993,
@@ -1715,6 +1773,7 @@
         },
         {
             "id": "essay_rs_autonomy_path_decision_1993",
+            "tier": 2,
             "event_id": "rs_autonomy_path_decision_1993",
             "title": "Independence or Autonomy: Pale Crystallizes Its Path",
             "year": 1993,
@@ -1781,6 +1840,7 @@
         },
         {
             "id": "essay_sarajevo_tunnel_completed_1993",
+            "tier": 0,
             "event_id": "sarajevo_tunnel_completed_1993",
             "title": "The Tunnel of Hope: Sarajevo's Underground Lifeline",
             "year": 1993,
@@ -1801,6 +1861,7 @@
         },
         {
             "id": "essay_sovici_doljani_attack_1993",
+            "tier": 0,
             "event_id": "sovici_doljani_attack_1993",
             "title": "Sovici-Doljani: The Herzegovina Front",
             "year": 1993,
@@ -1820,6 +1881,7 @@
         },
         {
             "id": "essay_srebrenica_demilitarization_1993",
+            "tier": 0,
             "event_id": "srebrenica_demilitarization_1993",
             "title": "Disarming Srebrenica: The Agreement That Satisfied No One",
             "year": 1993,
@@ -1840,6 +1902,7 @@
         },
         {
             "id": "essay_srebrenica_shelling_1993",
+            "tier": 0,
             "event_id": "srebrenica_shelling_1993",
             "title": "Srebrenica Under Bombardment: Morillon's Promise",
             "year": 1993,
@@ -1860,6 +1923,7 @@
         },
         {
             "id": "essay_stupni_do_massacre_1993",
+            "tier": 2,
             "event_id": "stupni_do_massacre_1993",
             "title": "Stupni Do: The Massacre Near Vares",
             "year": 1993,
@@ -1893,6 +1957,7 @@
         },
         {
             "id": "essay_trusina_killings_1993",
+            "tier": 0,
             "event_id": "trusina_killings_1993",
             "title": "The Trusina Killings: ARBiH Crimes in the Konjic Valley",
             "year": 1993,
@@ -1912,6 +1977,7 @@
         },
         {
             "id": "essay_turajlic_assassination_1993",
+            "tier": 0,
             "event_id": "turajlic_assassination_1993",
             "title": "The Assassination of Hakija Turajlic: Murder Under the Blue Flag",
             "year": 1993,
@@ -1932,6 +1998,7 @@
         },
         {
             "id": "essay_un_nfz_enforcement_1993",
+            "tier": 2,
             "event_id": "un_nfz_enforcement_1993",
             "title": "Resolution 816: Enforcing the No-Fly Zone",
             "year": 1993,
@@ -1966,6 +2033,7 @@
         },
         {
             "id": "essay_un_resolution_808_tribunal_1993",
+            "tier": 2,
             "event_id": "un_resolution_808_tribunal_1993",
             "title": "Resolution 808: The Decision to Establish an International Tribunal",
             "year": 1993,
@@ -2013,6 +2081,7 @@
         },
         {
             "id": "essay_un_resolution_819_srebrenica_1993",
+            "tier": 2,
             "event_id": "un_resolution_819_srebrenica_1993",
             "title": "Resolution 819: Srebrenica Declared a Safe Area",
             "year": 1993,
@@ -2047,6 +2116,7 @@
         },
         {
             "id": "essay_un_resolution_820_sanctions_1993",
+            "tier": 2,
             "event_id": "un_resolution_820_sanctions_1993",
             "title": "Resolution 820: Tightening the Sanctions Regime",
             "year": 1993,
@@ -2082,6 +2152,7 @@
         },
         {
             "id": "essay_un_resolution_836_force_1993",
+            "tier": 2,
             "event_id": "un_resolution_836_force_1993",
             "title": "Resolution 836: Authority Without Will",
             "year": 1993,
@@ -2117,6 +2188,7 @@
         },
         {
             "id": "essay_un_safe_areas_declared_1993",
+            "tier": 2,
             "event_id": "un_safe_areas_declared_1993",
             "title": "Safe Areas: The UN's Hollow Promise",
             "year": 1993,
@@ -2152,6 +2224,7 @@
         },
         {
             "id": "essay_us_envoy_appointed_1993",
+            "tier": 0,
             "event_id": "us_envoy_appointed_1993",
             "title": "The American Envoy: Washington Enters the Bosnian Arena",
             "year": 1993,
@@ -2172,6 +2245,7 @@
         },
         {
             "id": "essay_vance_owen_plan_1993",
+            "tier": 2,
             "event_id": "vance_owen_plan_1993",
             "title": "The Vance-Owen Plan: Peace Through Partition",
             "year": 1993,
@@ -2253,6 +2327,7 @@
         },
         {
             "id": "essay_vitez_kiseljak_pockets_1993",
+            "tier": 0,
             "event_id": "vitez_kiseljak_pockets_1993",
             "title": "The Vitez and Kiseljak Pockets: Enclaves Within an Enclave",
             "year": 1993,
@@ -2273,6 +2348,7 @@
         },
         {
             "id": "essay_vrs_cerska_offensive_1993",
+            "tier": 0,
             "event_id": "vrs_cerska_offensive_1993",
             "title": "The Cerska Offensive: Crushing the Eastern Pockets",
             "year": 1993,
@@ -2294,6 +2370,7 @@
         },
         {
             "id": "essay_anti_sniping_agreement_1994",
+            "tier": 0,
             "event_id": "anti_sniping_agreement_1994",
             "title": "The Anti-Sniping Agreement: Small Mercies on Sniper Alley",
             "year": 1994,
@@ -2314,6 +2391,7 @@
         },
         {
             "id": "essay_belgrade_embargo_rs_1994",
+            "tier": 0,
             "event_id": "belgrade_embargo_rs_1994",
             "title": "Belgrade Breaks with Pale: Milosevic Cuts the Lifeline",
             "year": 1994,
@@ -2334,6 +2412,7 @@
         },
         {
             "id": "essay_bihac_5th_corps_offensive_1994",
+            "tier": 2,
             "event_id": "bihac_5th_corps_offensive_1994",
             "title": "The 5th Corps Breaks Out: Dudakovic's Gamble at Bihac",
             "year": 1994,
@@ -2369,6 +2448,7 @@
         },
         {
             "id": "essay_bihac_crisis_1994",
+            "tier": 2,
             "event_id": "bihac_crisis_1994",
             "title": "The Bihac Crisis: The Pocket That Nearly Fell",
             "year": 1994,
@@ -2426,6 +2506,7 @@
         },
         {
             "id": "essay_carter_ceasefire_1994",
+            "tier": 0,
             "event_id": "carter_ceasefire_1994",
             "title": "Carter's Ceasefire: Four Months of Armed Pause",
             "year": 1994,
@@ -2445,6 +2526,7 @@
         },
         {
             "id": "essay_contact_group_plan_1994",
+            "tier": 2,
             "event_id": "contact_group_plan_1994",
             "title": "The Contact Group Plan: 51/49 and the Isolation of Pale",
             "year": 1994,
@@ -2502,6 +2584,7 @@
         },
         {
             "id": "essay_gorazde_crisis_1994",
+            "tier": 2,
             "event_id": "gorazde_crisis_1994",
             "title": "The Gorazde Crisis: Safe Areas Under Fire",
             "year": 1994,
@@ -2536,6 +2619,7 @@
         },
         {
             "id": "essay_hrhb_contact_group_response_1994",
+            "tier": 2,
             "event_id": "hrhb_contact_group_response_1994",
             "title": "Contact Group 51/49: Mostar's Response",
             "year": 1994,
@@ -2591,6 +2675,7 @@
         },
         {
             "id": "essay_markale_massacre_1994",
+            "tier": 0,
             "event_id": "markale_massacre_1994",
             "title": "The First Markale Massacre: 68 Dead and the Road to NATO Action",
             "year": 1994,
@@ -2611,6 +2696,7 @@
         },
         {
             "id": "essay_nato_shoots_down_planes_1994",
+            "tier": 0,
             "event_id": "nato_shoots_down_planes_1994",
             "title": "Banja Luka Incident: NATO's First Combat Action",
             "year": 1994,
@@ -2630,6 +2716,7 @@
         },
         {
             "id": "essay_nato_ultimatum_sarajevo_1994",
+            "tier": 0,
             "event_id": "nato_ultimatum_sarajevo_1994",
             "title": "NATO's Ultimatum: The Sarajevo Exclusion Zone",
             "year": 1994,
@@ -2649,6 +2736,7 @@
         },
         {
             "id": "essay_operation_cincar_1994",
+            "tier": 0,
             "event_id": "operation_cincar_1994",
             "title": "Operation Cincar: The Washington Agreement's First Military Dividend",
             "year": 1994,
@@ -2669,6 +2757,7 @@
         },
         {
             "id": "essay_rbih_contact_group_response_1994",
+            "tier": 2,
             "event_id": "rbih_contact_group_response_1994",
             "title": "Contact Group 51/49: Sarajevo's Response",
             "year": 1994,
@@ -2724,6 +2813,7 @@
         },
         {
             "id": "essay_rbih_federation_army_integration_1994",
+            "tier": 2,
             "event_id": "rbih_federation_army_integration_1994",
             "title": "Federation Army: How Much to Merge?",
             "year": 1994,
@@ -2790,6 +2880,7 @@
         },
         {
             "id": "essay_rs_contact_group_response_1994",
+            "tier": 2,
             "event_id": "rs_contact_group_response_1994",
             "title": "Contact Group 51/49: Pale's Response",
             "year": 1994,
@@ -2845,6 +2936,7 @@
         },
         {
             "id": "essay_sarajevo_exclusion_zone_1994",
+            "tier": 0,
             "event_id": "sarajevo_exclusion_zone_1994",
             "title": "The Exclusion Zone: Sarajevo's First Day Without Death",
             "year": 1994,
@@ -2865,6 +2957,7 @@
         },
         {
             "id": "essay_washington_agreement_1994",
+            "tier": 2,
             "event_id": "hrhb_washington_agreement_1994",
             "title": "The Washington Agreement: Ending the War Within the War",
             "year": 1994,
@@ -2899,6 +2992,7 @@
         },
         {
             "id": "essay_ceasefire_1995",
+            "tier": 0,
             "event_id": "ceasefire_1995",
             "title": "Ceasefire: The Guns Fall Silent",
             "year": 1995,
@@ -2918,6 +3012,7 @@
         },
         {
             "id": "essay_coha_ceasefire_begins_1995",
+            "tier": 2,
             "event_id": "coha_ceasefire_begins_1995",
             "title": "The Cessation of Hostilities: A Winter to Rearm",
             "year": 1995,
@@ -2952,6 +3047,7 @@
         },
         {
             "id": "essay_coha_expires_1995",
+            "tier": 2,
             "event_id": "coha_expires_1995",
             "title": "The Ceasefire Expires: Prelude to the Final Act",
             "year": 1995,
@@ -2986,6 +3082,7 @@
         },
         {
             "id": "essay_dayton_signed_1995",
+            "tier": 2,
             "event_id": "dayton_signed_1995",
             "title": "The Dayton Agreement: Ending the War, Freezing the Questions",
             "year": 1995,
@@ -3069,6 +3166,7 @@
         },
         {
             "id": "essay_dayton_talks_begin_1995",
+            "tier": 2,
             "event_id": "dayton_talks_begin_1995",
             "title": "Dayton: The Peace That Froze a War",
             "year": 1995,
@@ -3102,6 +3200,7 @@
         },
         {
             "id": "essay_federation_ground_offensive_1995",
+            "tier": 2,
             "event_id": "federation_ground_offensive_1995",
             "title": "The Federation Offensive: From 70% to 49% in Weeks",
             "year": 1995,
@@ -3135,6 +3234,7 @@
         },
         {
             "id": "essay_hrhb_dayton_acceptance_1995",
+            "tier": 2,
             "event_id": "hrhb_dayton_acceptance_1995",
             "title": "The Croat Delegation at Dayton",
             "year": 1995,
@@ -3179,6 +3279,7 @@
         },
         {
             "id": "essay_hv_hvo_cooperation_1995",
+            "tier": 2,
             "event_id": "hv_hvo_cooperation_1995",
             "title": "The Croatian Army Crosses the Border",
             "year": 1995,
@@ -3245,6 +3346,7 @@
         },
         {
             "id": "essay_karadzic_mladic_split_1995",
+            "tier": 0,
             "event_id": "karadzic_mladic_split_1995",
             "title": "The Karadžić-Mladić Split: Command Crisis at the Worst Moment",
             "year": 1995,
@@ -3265,6 +3367,7 @@
         },
         {
             "id": "essay_nato_deliberate_force_1995",
+            "tier": 2,
             "event_id": "nato_deliberate_force_1995",
             "title": "Operation Deliberate Force: NATO's Air War Against the VRS",
             "year": 1995,
@@ -3298,6 +3401,7 @@
         },
         {
             "id": "essay_operation_flash_1995",
+            "tier": 0,
             "event_id": "operation_flash_1995",
             "title": "Operation Flash: The Dress Rehearsal for Storm",
             "year": 1995,
@@ -3318,6 +3422,7 @@
         },
         {
             "id": "essay_operation_mistral_2_1995",
+            "tier": 2,
             "event_id": "operation_mistral_2_1995",
             "title": "Operation Mistral 2: The Recapture of Jajce",
             "year": 1995,
@@ -3351,6 +3456,7 @@
         },
         {
             "id": "essay_operation_sana_1995",
+            "tier": 2,
             "event_id": "operation_sana_1995",
             "title": "Operation Sana: The 5th Corps Breaks South and East",
             "year": 1995,
@@ -3386,6 +3492,7 @@
         },
         {
             "id": "essay_operation_storm_1995",
+            "tier": 2,
             "event_id": "operation_storm_1995",
             "title": "Operation Storm: Croatia Destroys the Krajina Serb Entity",
             "year": 1995,
@@ -3419,6 +3526,7 @@
         },
         {
             "id": "essay_operation_summer_95",
+            "tier": 2,
             "event_id": "operation_summer_95",
             "title": "Operation Summer '95: The Fall of Grahovo and Glamoč",
             "year": 1995,
@@ -3452,6 +3560,7 @@
         },
         {
             "id": "essay_rapid_reaction_force_1995",
+            "tier": 0,
             "event_id": "rapid_reaction_force_1995",
             "title": "The Rapid Reaction Force: Teeth for a Toothless Mission",
             "year": 1995,
@@ -3472,6 +3581,7 @@
         },
         {
             "id": "essay_rbih_late_war_offensive_1995",
+            "tier": 2,
             "event_id": "rbih_late_war_offensive_1995",
             "title": "The Final Offensive: Liberate or Negotiate?",
             "year": 1995,
@@ -3538,6 +3648,7 @@
         },
         {
             "id": "essay_rs_dayton_acceptance_1995",
+            "tier": 2,
             "event_id": "rs_dayton_acceptance_1995",
             "title": "Pale Ratifies the Dayton Framework",
             "year": 1995,
@@ -3582,6 +3693,7 @@
         },
         {
             "id": "essay_second_markale_massacre_1995",
+            "tier": 2,
             "event_id": "second_markale_massacre_1995",
             "title": "The Second Markale Massacre: The Trigger for Deliberate Force",
             "year": 1995,
@@ -3616,6 +3728,7 @@
         },
         {
             "id": "essay_srebrenica_falls_1995",
+            "tier": 1,
             "event_id": "srebrenica_falls_1995",
             "title": "The Fall of Srebrenica: Europe's Worst Atrocity Since 1945",
             "year": 1995,
@@ -3668,6 +3781,7 @@
         },
         {
             "id": "essay_tuzla_gate_massacre_1995",
+            "tier": 2,
             "event_id": "tuzla_gate_massacre_1995",
             "title": "The Tuzla Gate Massacre: Seventy-One Dead on Youth Day",
             "year": 1995,
@@ -3702,6 +3816,7 @@
         },
         {
             "id": "essay_un_hostage_crisis_1995",
+            "tier": 2,
             "event_id": "un_hostage_crisis_1995",
             "title": "The UN Hostage Crisis: Blue Helmets in Chains",
             "year": 1995,
@@ -3737,6 +3852,7 @@
         },
         {
             "id": "essay_us_halts_federation_advance_1995",
+            "tier": 2,
             "event_id": "us_halts_federation_advance_1995",
             "title": "Washington Halts the Advance: Diplomacy Overrides the Battlefield",
             "year": 1995,
@@ -3771,6 +3887,7 @@
         },
         {
             "id": "essay_zepa_falls_1995",
+            "tier": 2,
             "event_id": "zepa_falls_1995",
             "title": "The Fall of Zepa: The Second Safe Area Lost",
             "year": 1995,
@@ -3805,6 +3922,7 @@
         },
         {
             "id": "essay_hrhb_vance_owen_acceptance_1993",
+            "tier": 2,
             "event_id": "hrhb_vance_owen_acceptance_1993",
             "title": "Vance-Owen and Herceg-Bosna: The Province Map as a Claim",
             "year": 1993,
@@ -3876,6 +3994,7 @@
         },
         {
             "id": "essay_hrhb_owen_stoltenberg_response_1993",
+            "tier": 2,
             "event_id": "hrhb_owen_stoltenberg_response_1993",
             "title": "The Union of Three Republics: Mostar’s Posture Aboard Invincible",
             "year": 1993,
@@ -3935,6 +4054,7 @@
         },
         {
             "id": "essay_rs_owen_stoltenberg_response_1993",
+            "tier": 2,
             "event_id": "rs_owen_stoltenberg_response_1993",
             "title": "The Union of Three Republics: Pale Reads the Invincible Map",
             "year": 1993,
@@ -3994,6 +4114,7 @@
         },
         {
             "id": "essay_hrhb_central_bosnia_defense_1993",
+            "tier": 2,
             "event_id": "hrhb_central_bosnia_defense_1993",
             "title": "The Central Bosnia Pockets: Holding the Indefensible",
             "year": 1993,
@@ -4064,6 +4185,7 @@
         },
         {
             "id": "essay_rs_belgrade_pressure_response_1993",
+            "tier": 2,
             "event_id": "rs_belgrade_pressure_response_1993",
             "title": "Belgrade Calls Pale: The Limits of the Patron’s Leverage",
             "year": 1993,
@@ -4134,6 +4256,7 @@
         },
         {
             "id": "essay_rbih_washington_agreement_1994",
+            "tier": 2,
             "event_id": "rbih_washington_agreement_1994",
             "title": "The Washington Agreement: Ending the Two-Front War",
             "year": 1994,
@@ -4180,6 +4303,7 @@
         },
         {
             "id": "essay_rs_washington_rejection_1994",
+            "tier": 2,
             "event_id": "rs_washington_rejection_1994",
             "title": "The Washington Agreement: Pale’s Non-Engagement",
             "year": 1994,
@@ -4250,6 +4374,7 @@
         },
         {
             "id": "essay_hrhb_federation_army_integration_1994",
+            "tier": 2,
             "event_id": "hrhb_federation_army_integration_1994",
             "title": "The Federation Army on Paper: How Far Zagreb Would Let Go",
             "year": 1994,
@@ -4320,6 +4445,7 @@
         },
         {
             "id": "essay_rbih_nato_ultimatum_compliance_1994",
+            "tier": 2,
             "event_id": "rbih_nato_ultimatum_compliance_1994",
             "title": "The Sarajevo Exclusion Zone: Symmetry and the Defender",
             "year": 1994,
@@ -4366,6 +4492,7 @@
         },
         {
             "id": "essay_holbrooke_ceasefire_demand_oct95",
+            "tier": 2,
             "event_id": "holbrooke_ceasefire_demand_oct95",
             "title": "Holbrooke’s Ceasefire: Momentum Against the Map",
             "year": 1995,
@@ -4412,6 +4539,7 @@
         },
         {
             "id": "essay_ic_pressure_vopp_engagement",
+            "tier": 2,
             "event_id": "ic_pressure_vopp_engagement",
             "title": "The Patron’s Leash: Washington Presses Sarajevo on Vance-Owen",
             "year": 1993,
@@ -4458,6 +4586,7 @@
         },
         {
             "id": "essay_zagreb_restrains_boban_vopp",
+            "tier": 2,
             "event_id": "zagreb_restrains_boban_vopp",
             "title": "Zagreb’s Hand on Boban: Croatia and the Herceg-Bosna Leash",
             "year": 1993,
@@ -4504,6 +4633,7 @@
         },
         {
             "id": "essay_milosevic_vopp_pressure",
+            "tier": 2,
             "event_id": "milosevic_vopp_pressure",
             "title": "Belgrade Commands Pale: Milošević Presses Karadžić on Vance-Owen",
             "year": 1993,
@@ -4550,6 +4680,7 @@
         },
         {
             "id": "essay_milosevic_owen_stoltenberg_distancing",
+            "tier": 2,
             "event_id": "milosevic_owen_stoltenberg_distancing",
             "title": "Belgrade Grows Distant: Milošević Signals Exhaustion",
             "year": 1993,
@@ -4596,6 +4727,7 @@
         },
         {
             "id": "essay_zagreb_orders_hrhb_ceasefire",
+            "tier": 2,
             "event_id": "zagreb_orders_hrhb_ceasefire",
             "title": "Zagreb Orders the Guns Silent: The Washington Turn for Herceg-Bosna",
             "year": 1994,
@@ -4642,6 +4774,7 @@
         },
         {
             "id": "essay_ic_rbih_restraint_post_washington",
+            "tier": 2,
             "event_id": "ic_rbih_restraint_post_washington",
             "title": "Don’t Exploit the Window: Washington Asks Sarajevo for Restraint",
             "year": 1994,
@@ -4688,6 +4821,7 @@
         },
         {
             "id": "essay_holbrooke_us_belgrade_channel_1995",
+            "tier": 2,
             "event_id": "holbrooke_us_belgrade_channel_1995",
             "title": "Holbrooke Routes Pressure Through Belgrade",
             "year": 1995,
@@ -4734,6 +4868,7 @@
         },
         {
             "id": "essay_strategic_posture_review_rbih",
+            "tier": 2,
             "event_id": "strategic_posture_review_rbih",
             "title": "The Posture Review: Sarajevo Weighs Offensive Against Endurance",
             "year": 1993,
@@ -4780,6 +4915,7 @@
         },
         {
             "id": "essay_strategic_posture_review_rs",
+            "tier": 2,
             "event_id": "strategic_posture_review_rs",
             "title": "The Posture Review: Pale Between the Maximalist Map and the Sustainable One",
             "year": 1993,
@@ -4826,6 +4962,7 @@
         },
         {
             "id": "essay_strategic_posture_review_hrhb",
+            "tier": 2,
             "event_id": "strategic_posture_review_hrhb",
             "title": "The Posture Review: Herceg-Bosna Between Conquest and Coalition",
             "year": 1993,
@@ -4872,6 +5009,7 @@
         },
         {
             "id": "essay_visit_to_front_rbih",
+            "tier": 2,
             "event_id": "visit_to_front_rbih",
             "title": "The President at the Line: Command Presence in Besieged Sarajevo",
             "year": 1993,
@@ -4949,6 +5087,7 @@
         },
         {
             "id": "essay_visit_to_front_rs",
+            "tier": 2,
             "event_id": "visit_to_front_rs",
             "title": "Pale at the Front: The Politics of Showing Up",
             "year": 1993,
@@ -5026,6 +5165,7 @@
         },
         {
             "id": "essay_visit_to_front_hrhb",
+            "tier": 2,
             "event_id": "visit_to_front_hrhb",
             "title": "Mostar's Dilemma: The HVO Front Visit",
             "year": 1993,
@@ -5103,6 +5243,7 @@
         },
         {
             "id": "essay_address_to_nation_rbih",
+            "tier": 2,
             "event_id": "address_to_nation_rbih",
             "title": "The Address: What a Wartime Leader Says, and Does Not",
             "year": 1993,
@@ -5169,6 +5310,7 @@
         },
         {
             "id": "essay_address_to_nation_rs",
+            "tier": 2,
             "event_id": "address_to_nation_rs",
             "title": "Speaking for the Project: The RS Address to the Nation",
             "year": 1993,
@@ -5235,6 +5377,7 @@
         },
         {
             "id": "essay_address_to_nation_hrhb",
+            "tier": 2,
             "event_id": "address_to_nation_hrhb",
             "title": "Herceg-Bosna Speaks: Defiance, Endurance, or the Open Door",
             "year": 1993,
@@ -5301,6 +5444,7 @@
         },
         {
             "id": "essay_decorate_a_unit_rbih",
+            "tier": 2,
             "event_id": "decorate_a_unit_rbih",
             "title": "Honours and Their Cost: Decorating an ARBiH Formation",
             "year": 1993,
@@ -5356,6 +5500,7 @@
         },
         {
             "id": "essay_decorate_a_unit_rs",
+            "tier": 2,
             "event_id": "decorate_a_unit_rs",
             "title": "The Citation Problem: Decorating a VRS Formation",
             "year": 1993,
@@ -5411,6 +5556,7 @@
         },
         {
             "id": "essay_decorate_a_unit_hrhb",
+            "tier": 2,
             "event_id": "decorate_a_unit_hrhb",
             "title": "Whom to Honour: Decorating an HVO Formation",
             "year": 1993,

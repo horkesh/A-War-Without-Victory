@@ -17,6 +17,50 @@ export interface DynamicSection {
     };
 }
 
+/**
+ * Codex tier classification (A1a). Drives panel grouping/sorting and is the
+ * subject of the event-dependency-graph gate (A1b). 0-based so the previously
+ * dead `EssayEntry.tier?` field defaults to FIXED when absent (`tier ?? FIXED`).
+ *
+ *   FIXED       — international scaffold; visible once its event fires.
+ *   CONDITIONAL — binary: fires in the player's war, or surfaces as a ghost.
+ *   SHAPEABLE   — fires but its detail paragraphs morph with player actions.
+ *   AHISTORICAL — counterfactual / player-only; exists only in this war.
+ *
+ * The mapping is owner-tunable DATA: each essay's `tier` lives in
+ * `essay_index.json`. `deriveDefaultTier()` is the rule used to seed that data
+ * and the runtime fallback when an entry omits `tier`.
+ */
+export const CodexTier = {
+    FIXED: 0,
+    CONDITIONAL: 1,
+    SHAPEABLE: 2,
+    AHISTORICAL: 3,
+} as const;
+export type CodexTier = (typeof CodexTier)[keyof typeof CodexTier];
+
+/** Default tier derivation from an essay's existing structure. Data-driven seed
+ *  for `essay_index.json` and the runtime fallback when `tier` is absent.
+ *    - has `ghost_when`               → CONDITIONAL (binary fired-or-ghost)
+ *    - has non-empty dynamic_sections → SHAPEABLE (morphs with player actions)
+ *    - otherwise                      → FIXED (international scaffold)
+ *  AHISTORICAL is reserved for owner hand-assignment (never auto-derived). */
+export function deriveDefaultTier(essay: Pick<EssayEntry, 'ghost_when' | 'dynamic_sections'>): CodexTier {
+    if (essay.ghost_when && essay.ghost_when.trim().length > 0) return CodexTier.CONDITIONAL;
+    if (Array.isArray(essay.dynamic_sections) && essay.dynamic_sections.length > 0) return CodexTier.SHAPEABLE;
+    return CodexTier.FIXED;
+}
+
+/** Effective tier for an essay: its declared `tier` (owner data) when a valid
+ *  0..3 integer, else the derived default. */
+export function effectiveTier(essay: EssayEntry): CodexTier {
+    const t = essay.tier;
+    if (typeof t === 'number' && Number.isInteger(t) && t >= CodexTier.FIXED && t <= CodexTier.AHISTORICAL) {
+        return t as CodexTier;
+    }
+    return deriveDefaultTier(essay);
+}
+
 export interface EssayEntry {
     id: string;
     event_id: string;
@@ -29,7 +73,27 @@ export interface EssayEntry {
     /** Provenance-only sensitive-history note (Ring 2). Not rendered to the
      *  player; pinned by tests/codex_sensitive_history_source_notes.test.ts. */
     source_note?: string;
+    /** Codex tier (A1a). 0=FIXED 1=CONDITIONAL 2=SHAPEABLE 3=AHISTORICAL.
+     *  Owner-tunable data; `effectiveTier()` falls back to `deriveDefaultTier()`
+     *  when absent/invalid. */
     tier?: number;
+    /** Event-dependency-graph gate (A1b). Upstream EVENT ids (raw event ids,
+     *  the same ids that appear in `firedEventIds`) that must ALL have fired
+     *  before this essay can unlock. Layered ON TOP of the existing
+     *  event-fire/ghost unlock — never relaxes it. Empty/absent = no event
+     *  gate. */
+    requires_events?: string[];
+    /** Event-dependency-graph gate (A1b). Upstream ESSAY ids that must each be
+     *  unlocked (transitively) before this essay can unlock. Enables chains
+     *  (essay C unlocks only after essay B, which unlocks after A). Cycles are
+     *  broken deterministically. Empty/absent = no essay gate. */
+    requires_essays?: string[];
+    /** Event-dependency-graph gate (A1b). Minimum turn (week index) before this
+     *  essay can unlock. Absent = no turn floor. Compared against
+     *  `CodexRenderContext.currentTurn`; when currentTurn is unknown the floor
+     *  is treated as satisfied (panels without a turn handle never hide an
+     *  otherwise-unlocked essay). */
+    unlock_turn_min?: number;
     ghost_when?: string;
     ghost_summary?: string;
     dynamic_sections?: DynamicSection[];
@@ -52,12 +116,34 @@ export interface CodexRenderContext {
     historicalComparison?: ComparisonResult;
     costLedger?: CostLedger;
     gameOver?: boolean;
+    /** A1b: current turn (week index) for `unlock_turn_min` gating. Absent =
+     *  the turn floor is treated as satisfied (no over-hiding). */
+    currentTurn?: number;
+    /** A1b: transitive `requires_essays` resolution. Predicate returning whether
+     *  an UPSTREAM essay (by id) is itself unlocked. Injected by
+     *  `resolveCodexEssayIndex`, which performs the deterministic fixpoint;
+     *  absent for single-essay callers (then essay-graph gates are treated as
+     *  satisfied — a lone `resolveCodexEssay` call never under-resolves). */
+    essayUnlockedById?: (essayId: string) => boolean;
 }
 
 export interface ResolvedEssayParagraph {
     kind: 'canonical' | 'dynamic' | 'ghost';
     text: string;
     variant?: DynamicSection['variant'];
+}
+
+/** Why a not-yet-unlocked essay is gated. `null` for unlocked essays. Used by
+ *  the panel to surface a soft "unlocks after X" hint without leaking the
+ *  canonical body. `event`/`essay` carry the first unmet upstream dependency id
+ *  (deterministic: strictCompare-min over the unmet set); `turn` carries the
+ *  unmet `unlock_turn_min`; `event_fire` is the plain "experience this event"
+ *  case (no graph dependency). */
+export interface CodexLockReason {
+    kind: 'event_fire' | 'event' | 'essay' | 'turn';
+    /** Upstream event/essay id (kind 'event'|'essay') or the turn floor (kind 'turn'). */
+    detail?: string;
+    turn?: number;
 }
 
 export interface ResolvedEssay {
@@ -67,6 +153,10 @@ export interface ResolvedEssay {
     category: string;
     sources?: string[];
     paragraphs: ResolvedEssayParagraph[];
+    /** A1a: effective tier (declared or derived). Always present. */
+    tier: CodexTier;
+    /** A1b: gate explanation when `isUnlocked` is false; `null` otherwise. */
+    lockReason: CodexLockReason | null;
 }
 
 type EssayBcsLocalization = NonNullable<EssayEntry['localizations']>['bcs'];
@@ -541,16 +631,73 @@ function ghostSummary(essay: EssayEntry, locale: Locale): string {
         : 'This historical entry remained unrealized in your war.';
 }
 
+/** Deterministic-min over a string set via strictCompare. Returns undefined for
+ *  an empty list. Used to pick a single stable "unlocks after X" dependency. */
+function strictMin(values: readonly string[]): string | undefined {
+    let min: string | undefined;
+    for (const v of values) {
+        if (min === undefined || strictCompare(v, min) < 0) min = v;
+    }
+    return min;
+}
+
+/**
+ * A1b dependency-graph gate. Evaluates the THREE gate fields layered ON TOP of
+ * the base event-fire/ghost unlock. Returns `null` when all gates pass (essay
+ * may unlock), or the FIRST unmet `CodexLockReason` in a fixed precedence:
+ * requires_events → requires_essays → unlock_turn_min. Pure & deterministic
+ * (strictCompare-min over unmet ids; no Date/RNG).
+ *
+ * Tolerant by design: a missing `essayUnlockedById` resolver (single-essay
+ * caller) treats requires_essays as satisfied; a missing `currentTurn` treats
+ * unlock_turn_min as satisfied. These never HIDE an otherwise-unlocked essay
+ * for a caller that lacks the relevant handle — graceful degradation matching
+ * the existing comparison-atom convention.
+ */
+function evaluateDependencyGate(essay: EssayEntry, context: CodexRenderContext): CodexLockReason | null {
+    const requiredEvents = Array.isArray(essay.requires_events) ? essay.requires_events : [];
+    const unmetEvents = requiredEvents.filter((id) => !context.firedEventIds.has(id));
+    if (unmetEvents.length > 0) {
+        return { kind: 'event', detail: strictMin(unmetEvents) };
+    }
+
+    const requiredEssays = Array.isArray(essay.requires_essays) ? essay.requires_essays : [];
+    if (requiredEssays.length > 0 && context.essayUnlockedById) {
+        const resolver = context.essayUnlockedById;
+        // Self-reference is ignored so a cyclic edge cannot deadlock a node.
+        const unmetEssays = requiredEssays.filter((id) => id !== essay.id && !resolver(id));
+        if (unmetEssays.length > 0) {
+            return { kind: 'essay', detail: strictMin(unmetEssays) };
+        }
+    }
+
+    if (typeof essay.unlock_turn_min === 'number' && typeof context.currentTurn === 'number'
+        && context.currentTurn < essay.unlock_turn_min) {
+        return { kind: 'turn', turn: essay.unlock_turn_min };
+    }
+
+    return null;
+}
+
 export function resolveCodexEssay(essay: EssayEntry, context: CodexRenderContext, locale: Locale = 'en'): ResolvedEssay {
     const localized = localizedEssay(essay, locale);
     const title = localized?.title?.trim() || essay.title;
     const category = localized?.category?.trim() || essay.category;
     const sources = localized?.sources && localized.sources.length > 0 ? localized.sources : essay.sources;
+    const tier = effectiveTier(essay);
     const eventUnlocked = context.firedEventIds.has(essay.event_id);
     const isGhost = !eventUnlocked && evaluateEssayCondition(essay.ghost_when, context);
-    const isUnlocked = eventUnlocked || isGhost;
+    const baseUnlocked = eventUnlocked || isGhost;
+
+    // A1b: the dependency graph gates ON TOP of the base unlock — it can only
+    // KEEP an otherwise-unlocked essay locked, never force one open. An essay
+    // whose base unlock has not fired stays locked regardless of the graph.
+    const dependencyGate = baseUnlocked ? evaluateDependencyGate(essay, context) : null;
+    const isUnlocked = baseUnlocked && dependencyGate === null;
+
     if (!isUnlocked) {
-        return { isUnlocked: false, isGhost: false, title, category, sources, paragraphs: [] };
+        const lockReason: CodexLockReason = dependencyGate ?? { kind: 'event_fire' };
+        return { isUnlocked: false, isGhost: false, title, category, sources, paragraphs: [], tier, lockReason };
     }
 
     const canonicalParagraphs = splitParagraphs(localized?.content ?? essay.content);
@@ -601,5 +748,63 @@ export function resolveCodexEssay(essay: EssayEntry, context: CodexRenderContext
         category,
         sources,
         paragraphs,
+        tier,
+        lockReason: null,
     };
+}
+
+/**
+ * Index-level resolver (A1b). Resolves an ENTIRE essay set with transitive
+ * `requires_essays` support via a deterministic fixpoint:
+ *
+ *   1. Seed every essay's unlock state to false.
+ *   2. Repeatedly re-resolve each essay (sorted by `strictCompare` on id) with
+ *      an `essayUnlockedById` resolver backed by the current pass's results.
+ *   3. Stop when a full pass produces no change (monotone — unlock state only
+ *      flips false→true because gates are AND-of-upstream-unlocked), or after
+ *      `essays.length` passes (the longest possible acyclic chain). The pass
+ *      cap also guarantees termination on cyclic `requires_essays` graphs:
+ *      self-edges are ignored in the gate, and a mutual cycle simply never
+ *      satisfies (both stay locked) rather than looping forever.
+ *
+ * Pure & deterministic: identical input map + context → identical output map.
+ * Returns a `Map<essayId, ResolvedEssay>` for the panel to consume.
+ */
+export function resolveCodexEssayIndex(
+    essays: readonly EssayEntry[],
+    context: CodexRenderContext,
+    locale: Locale = 'en',
+): Map<string, ResolvedEssay> {
+    // Stable iteration order (deterministic resolution regardless of input order).
+    const ordered = essays.slice().sort((a, b) => strictCompare(a.id, b.id));
+
+    // Pass 0 working set: unlock booleans only (cheap; full resolve happens once
+    // the fixpoint settles).
+    const unlocked = new Map<string, boolean>();
+    for (const essay of ordered) unlocked.set(essay.id, false);
+
+    const passContext: CodexRenderContext = {
+        ...context,
+        essayUnlockedById: (id: string) => unlocked.get(id) === true,
+    };
+
+    const maxPasses = Math.max(1, ordered.length);
+    for (let pass = 0; pass < maxPasses; pass++) {
+        let changed = false;
+        for (const essay of ordered) {
+            const next = resolveCodexEssay(essay, passContext, locale).isUnlocked;
+            if (next !== unlocked.get(essay.id)) {
+                unlocked.set(essay.id, next);
+                changed = true;
+            }
+        }
+        if (!changed) break;
+    }
+
+    // Final pass: produce full ResolvedEssay records against the settled set.
+    const result = new Map<string, ResolvedEssay>();
+    for (const essay of ordered) {
+        result.set(essay.id, resolveCodexEssay(essay, passContext, locale));
+    }
+    return result;
 }
