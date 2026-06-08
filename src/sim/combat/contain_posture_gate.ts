@@ -54,3 +54,48 @@ export function setVrsContainPostureOverride(value: boolean | null): void {
 export function resetVrsContainPostureGate(): void {
     _vrsContainPostureOverride = null;
 }
+
+// ── ARBiH contain-posture (contain Lane A, Washington-release, DEFAULT-OFF) ────
+//
+// Mirror of the VRS gate for the SYMMETRIC ARBiH-side problem: ARBiH (RBiH)
+// historically CONTAINED the isolated HVO pockets (Žepče / Lašva / Kiseljak)
+// rather than overrunning them, until the Washington Agreement froze the
+// RBiH↔HRHB war. The sim instead over-captures them (the documented 13-OSID
+// Central-Bosnia ceiling: 3 Žepče cores + 10 over-captures). When ON, the RBiH
+// bot withholds its own organic assault target-generation against BFS-isolated
+// HVO enclave cores until `washington_signed` — at which point the existing
+// alliance/ceasefire machinery freezes the war and the pockets stay HVO-held,
+// matching painted Oct-1995.
+//
+// SEPARATE FLAG from the VRS gate so the two lanes activate INDEPENDENTLY (the
+// design requires one-change-per-run calibration attribution). DEFAULT-OFF →
+// flag-off keeps the sim byte-identical to the calibration floor.
+
+let _arbihContainPostureOverride: boolean | null = null;
+
+/**
+ * Returns true when the ARBiH contain-posture is enabled.
+ * Reads `process.env.AWWV_ARBIH_CONTAIN_POSTURE` ('true' or '1' => ON) unless an
+ * override has been set via the setter (tests). DEFAULT-OFF: unset / any other
+ * value => OFF (the calibration-LAST byte-identity contract).
+ */
+export function isArbihContainPostureEnabled(): boolean {
+    if (_arbihContainPostureOverride !== null) {
+        return _arbihContainPostureOverride;
+    }
+    const raw = process.env.AWWV_ARBIH_CONTAIN_POSTURE;
+    return raw === 'true' || raw === '1';
+}
+
+/**
+ * Set the ARBiH contain-posture override. Pass `null` to clear and fall back to
+ * env. Tests-only.
+ */
+export function setArbihContainPostureOverride(value: boolean | null): void {
+    _arbihContainPostureOverride = value;
+}
+
+/** Reset the override to null (env-fallback). For test cleanup between cases. */
+export function resetArbihContainPostureGate(): void {
+    _arbihContainPostureOverride = null;
+}
