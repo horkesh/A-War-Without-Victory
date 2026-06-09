@@ -4,38 +4,26 @@ name: Full Suite + Structural Fingerprint
 # baselines job (removed 2026-05-04 for Win/Linux platform divergence;
 # LANE-NIGHTSHIFT-PLATFORM-STABLE-MANIFEST).
 #
-# Path-aware per the 2026-06-05 CI/PR batching policy (COMMAND_BOARD.md): heavy gates
-# run only on PRs that touch code which can move a pin or the calibration contract, so
-# doc-only PRs stay fast. These jobs are REQUIRED status checks (configure in branch
-# protection) — when they DO run they must pass; a PR that does not touch these paths
-# does not trigger them.
+# ALWAYS-REPORT shim (2026-06-09, task #76): these two jobs (full-suite,
+# structural-fingerprint) are intended to be REQUIRED status checks in branch
+# protection. A workflow-level `paths:` filter (the original PR #343 design) makes a
+# REQUIRED check that NEVER REPORTS on a PR that doesn't match the paths — GitHub then
+# blocks that PR forever on a "pending" required check (the classic
+# "required + path-filtered" gotcha). So we do NOT filter at the workflow level.
+# Instead the workflow ALWAYS triggers on PRs to main (and the existing main pushes),
+# each job ALWAYS reports its check name, and a per-job changed-files detection step
+# short-circuits the HEAVY steps to a fast no-op (success in seconds) when the PR
+# touches no calibration/code-contract paths. Result: green-fast on doc-only PRs,
+# full-run on code PRs — safe to mark both checks REQUIRED without jamming doc PRs.
+#
+# The detected path set below is IDENTICAL to the old workflow-level `paths:` filter
+# (src, tools, tests, data/scenarios, data/calibration, scripts, package.json,
+# vitest.config.ts, tsconfig.json, plus this workflow file) so coverage does not shrink.
 on:
   push:
     branches: [main]
-    paths:
-      - 'src/**'
-      - 'tools/**'
-      - 'tests/**'
-      - 'data/scenarios/**'
-      - 'data/calibration/**'
-      - 'scripts/**'
-      - 'package.json'
-      - 'vitest.config.ts'
-      - 'tsconfig.json'
-      - '.github/workflows/full-suite-and-fingerprint.yml'
   pull_request:
     branches: [main]
-    paths:
-      - 'src/**'
-      - 'tools/**'
-      - 'tests/**'
-      - 'data/scenarios/**'
-      - 'data/calibration/**'
-      - 'scripts/**'
-      - 'package.json'
-      - 'vitest.config.ts'
-      - 'tsconfig.json'
-      - '.github/workflows/full-suite-and-fingerprint.yml'
 
 jobs:
   # The single gate that runs the COMPLETE vitest suite (`npm run test:vitest` ==
@@ -48,7 +36,8 @@ jobs:
   # job runs everything the config discovers, so full-suite-only pins
   # (strict_null_inventory_progress, war_phase_step_order, consequence/substrate
   # inventory) can NO LONGER reach main green. fetch-depth: 0 because the suite includes
-  # release_notes_generator.test.ts (HEAD~5..HEAD git range).
+  # release_notes_generator.test.ts (HEAD~5..HEAD git range) AND the changed-files
+  # detection step needs the base commit in history.
   full-suite:
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -57,19 +46,34 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Always-report shim: decide whether the heavy step runs. The job itself always
+      # completes (and reports the `full-suite` check) regardless of this output.
+      - name: Detect calibration/code-contract changes
+        id: changes
+        run: bash .github/scripts/detect-full-suite-changes.sh
+
       - uses: actions/setup-node@v5
+        if: steps.changes.outputs.relevant == 'true'
         with:
           node-version: 22
           cache: npm
 
       - run: npm install --legacy-peer-deps
+        if: steps.changes.outputs.relevant == 'true'
       - run: npm install --legacy-peer-deps --prefix src/ui/map
+        if: steps.changes.outputs.relevant == 'true'
 
       - name: Rebuild startup snapshot for this platform
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run desktop:startup-snapshot:build
 
       - name: Full vitest suite (all slices — no stale pin can hide)
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run test:vitest
+
+      - name: No relevant changes — full suite skipped (green-fast)
+        if: steps.changes.outputs.relevant != 'true'
+        run: echo "No src/tools/tests/scenario/calibration/scripts/config changes — full vitest suite skipped. Job reports success so branch protection stays unblocked."
 
   # Platform-stable structural fingerprint — the determinism regression signal that
   # replaces the removed byte-hash baselines job. Fingerprints only MEANINGFUL,
@@ -88,17 +92,34 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      # Always-report shim (see full-suite job): the job always reports the
+      # `structural-fingerprint` check; only the fresh-40w compare is gated.
+      - name: Detect calibration/code-contract changes
+        id: changes
+        run: bash .github/scripts/detect-full-suite-changes.sh
 
       - uses: actions/setup-node@v5
+        if: steps.changes.outputs.relevant == 'true'
         with:
           node-version: 22
           cache: npm
 
       - run: npm install --legacy-peer-deps
+        if: steps.changes.outputs.relevant == 'true'
       - run: npm install --legacy-peer-deps --prefix src/ui/map
+        if: steps.changes.outputs.relevant == 'true'
 
       - name: Rebuild startup snapshot for this platform
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run desktop:startup-snapshot:build
 
       - name: Fresh 40w run + structural-fingerprint compare
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run ci:structural-fingerprint:check
+
+      - name: No relevant changes — fingerprint compare skipped (green-fast)
+        if: steps.changes.outputs.relevant != 'true'
+        run: echo "No src/tools/tests/scenario/calibration/scripts/config changes — structural fingerprint compare skipped. Job reports success so branch protection stays unblocked."
