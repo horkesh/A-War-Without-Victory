@@ -770,11 +770,14 @@ describe('T2-C — FIXED tier-0 essay with no backing event unlocks as canonical
         expect(resolved.isGhost).toBe(true);
     });
 
-    it('a FIXED essay whose event_id has no backing event AND no ghost_when stays permanently locked (§6 bijeljina invariant)', () => {
-        // Mirrors bijeljina_massacre_1992: tier-0, no backing event, no
-        // ghost_when → never reachable. The T2-C fix must NOT change this.
+    it('a FIXED essay whose event_id has no backing event AND no ghost_when stays permanently locked (§6 invariant)', () => {
+        // Synthetic invariant: a tier-0 essay with no backing event and no
+        // ghost_when is never reachable. (The former orphaned
+        // bijeljina_massacre_1992 index/essay that exhibited this was removed in
+        // PR #377 and replaced by the wired bijeljina_killings_1992; this
+        // resolver-level invariant is retained as a general guard.)
         const resolved = resolveCodexEssay(
-            essay({ id: 'essay_bijeljina', event_id: 'bijeljina_massacre_1992', tier: 0 }),
+            essay({ id: 'essay_bijeljina', event_id: 'unbacked_orphan_example', tier: 0 }),
             context({ firedEventIds: new Set(['rs_strategic_goals', 'rbih_state_identity']) }),
         );
         expect(resolved.isUnlocked).toBe(false);

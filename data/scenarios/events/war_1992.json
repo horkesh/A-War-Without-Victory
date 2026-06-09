@@ -3876,6 +3876,35 @@
     }
   },
   {
+    "id": "bijeljina_killings_1992",
+    "title": "Bijeljina: The First Days of April 1992",
+    "narrative": "The historical record of the takeover of Bijeljina, in the northeastern Semberija plain near the Drina, is documented here. On 1-2 April 1992 — among the first ethnic-cleansing actions of the war — the town was seized by Bosnian Serb forces alongside the Serb Volunteer Guard (the paramilitary led by Zeljko Raznatovic, known as Arkan). The International Criminal Tribunal for the former Yugoslavia, in the Krajisnik and Plavsic judgments, found that the killings and the forcible displacement of the non-Serb population fell within the persecutory campaign across the Bosnian Serb-claimed municipalities. The pre-war Bosniak community of the municipality was reduced to a residual presence over the months that followed.",
+    "source_note": "ICTY findings in Prosecutor v. Krajisnik (IT-00-39-T), Prosecutor v. Plavsic (IT-00-39&40/1-S), and Prosecutor v. Karadzic (IT-95-5/18-T), together with the indictment in Prosecutor v. Raznatovic (IT-97-27), ground this row's provenance for the takeover of Bijeljina and the deployment of the Serb Volunteer Guard. This is a representation-only historical-record row with no player response options; per Sensitive History Design Gate §1.3 Ring 3 #1/#2/#8: cleansing, forced-displacement, civilian-targeting, paramilitary deployment, and victim selection are canon-refused and must not be re-authored as player decisions. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing. FLAGGED: factual ICTY-grounded stub — final wording pending owner review.",
+    "category": "humanitarian",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 6,
+      "turn_max": 20,
+      "phase": "war",
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RS",
+        "municipality": "bijeljina",
+        "threshold": 0.5
+      }
+    },
+    "once": true,
+    "sets_flags": {
+      "bijeljina_takeover_documented": true
+    },
+    "historical_source": "ICTY Krajisnik IT-00-39-T (persecution of non-Serbs in scheduled municipalities incl. Bijeljina); ICTY Plavsic IT-00-39&40/1-S (sentencing on persecution count); ICTY Karadzic IT-95-5/18-T (Bijeljina scheduled municipality); ICTY Raznatovic IT-97-27 (Serb Volunteer Guard, Bijeljina indictment); BB Vol. I, Semberija and the Drina, April 1992.",
+    "effect": {
+      "kind": "narrative",
+      "text": "The historical record of the Bijeljina takeover is documented in the Codex."
+    }
+  },
+  {
     "id": "drina_cleansing_decision_1992",
     "title": "The Drina Valley Question",
     "narrative": "Your forces control much of the Drina valley. Reports from the field describe paramilitary units conducting operations against the civilian population. Zvornik, Višegrad, Foča — the names are becoming synonymous with displacement and worse. Your commanders await guidance. How the Drina valley is secured will define how the world sees your cause.",
