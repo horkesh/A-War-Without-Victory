@@ -748,6 +748,12 @@ const GHOST_ENTRIES: readonly GhostRegistryEntry[] = [
 // keyed on `srebrenica_genocide_1995` is a §6 sensitive-history item DEFERRED
 // to the gated lane (SENSITIVE_HISTORY_DESIGN_GATE.md §6); it is intentionally
 // absent here and must NOT be added without the sensitive-history gate.
+//
+// TODO(§6-sensitive-history): surface the Srebrenica rupture
+// (`srebrenica_genocide_1995`) as a codex/decision receipt at the moment it
+// lands (the w140-160 decision void from the A3 audit) — REQUIRES the
+// sensitive-history gate + /historian + ICTY sourcing + owner sign-off. Do NOT
+// add a registry entry for it here without that lane.
 // ═══════════════════════════════════════════════════════════════════════════
 
 interface LoadBearingSectionSpec {
