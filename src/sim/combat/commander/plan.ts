@@ -34,7 +34,7 @@
  * ═══════════════════════════════════════════════════════════════
  */
 
-import type { FormationId } from '../../../state/game_state.js';
+import type { FactionId, FormationId } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_context.js';
 
@@ -60,6 +60,24 @@ import {
     buildCorpsOperationReadinessInputSnapshot,
     computeCorpsOperationReadiness,
 } from '../corps_operation_readiness.js';
+import {
+    isVrsContainPostureEnabled,
+    isArbihContainPostureEnabled,
+} from '../contain_posture_gate.js';
+
+/**
+ * Is the contain-posture suppression ACTIVE for this besieging faction? Gates
+ * the planner's read of `last_contained_osids_by_faction[faction]` on the
+ * faction's OWN flag — so a save serialized with a contain flag ON, then resumed
+ * with the flag OFF, does NOT honor the stale serialized set (default-off must be
+ * a TRUE no-op for resumed saves, not just fresh runs). RS→Lane V flag, RBiH→
+ * Lane A flag; any other faction is never contained.
+ */
+export function isContainSuppressionActiveFor(faction: FactionId): boolean {
+    if (faction === 'RS') return isVrsContainPostureEnabled();
+    if (faction === 'RBiH') return isArbihContainPostureEnabled();
+    return false;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -1336,8 +1354,17 @@ function createOpportunityPlan(
     // fall window, so Krivaja-95 (which injects objectives directly and bypasses
     // this path anyway) + the scripted *_falls_1995 events still flip control and
     // the genocide rupture still records.
+    // DEFAULT-OFF PURITY: only honor the contained set when THIS faction's contain
+    // flag is enabled. A save written with a contain flag ON serializes
+    // `last_contained_osids_by_faction`; if the flag is then OFF on resume, the
+    // supply phase no longer updates/clears it, but without this gate the planner
+    // would still read the stale set and suppress objectives — so default-off
+    // would NOT be a true no-op for resumed saves. Gating the read makes a
+    // flag-off resume byte-identical to never-flagged.
     const containedSet = new Set(
-        briefing.state_ref?.political?.last_contained_osids_by_faction?.[briefing.faction] ?? [],
+        isContainSuppressionActiveFor(briefing.faction)
+            ? (briefing.state_ref?.political?.last_contained_osids_by_faction?.[briefing.faction] ?? [])
+            : [],
     );
     const containFiltered = containedSet.size > 0
         ? effectiveOsids.filter(osid => !containedSet.has(osid))

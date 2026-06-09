@@ -81,7 +81,7 @@ import { computeSupplyReachability } from '../../state/supply_reachability.js';
 import { computeSupplyReachabilityOsid } from '../../state/supply_reachability_osid.js';
 import { buildContainDiagnostic } from '../combat/contain_diagnostic.js';
 import { computeContainedOsidsForFaction } from '../combat/enclave_resilience.js';
-import { isVrsContainPostureEnabled } from '../combat/contain_posture_gate.js';
+import { isVrsContainPostureEnabled, isArbihContainPostureEnabled } from '../combat/contain_posture_gate.js';
 import {
     deriveCorridors,
     deriveCorridorsOsid,
@@ -1279,6 +1279,32 @@ export const warPhases: NamedPhase[] = [
                     // Clear a stale set once nothing is contained (e.g. after release)
                     // so the suppression site never reads a leftover.
                     delete context.state.political.last_contained_osids_by_faction.RS;
+                }
+            }
+
+            // contain Lane A (ARBiH strangle-not-capture of HVO enclaves,
+            // DEFAULT-OFF): symmetric to Lane V. Compute the RBiH containment set
+            // (BFS-isolated HVO enclave cores — Žepče/Lašva/Kiseljak — past
+            // resilience_start_turn, pre-Washington) from the SAME osidReach BFS
+            // report and stash it under .RBiH for the commander opportunity
+            // planner. Independent flag from Lane V so the lanes activate
+            // separately (one-change-per-run). Only written when the flag is ON →
+            // flag-off keeps state (and the hashed final_save.json) byte-identical.
+            // The Washington release (isEnclaveContainmentReleased keys off
+            // enclave.faction==='HRHB' → washington_signed) empties the set at
+            // Washington, after which the existing alliance/ceasefire machinery
+            // freezes the RBiH↔HRHB war so the pockets stay HVO-held.
+            if (isArbihContainPostureEnabled()) {
+                const containedRBiH = computeContainedOsidsForFaction(context.state, 'RBiH', osidReach);
+                if (containedRBiH.length > 0) {
+                    if (!context.state.political.last_contained_osids_by_faction) {
+                        context.state.political.last_contained_osids_by_faction = {};
+                    }
+                    context.state.political.last_contained_osids_by_faction.RBiH = containedRBiH;
+                } else if (context.state.political.last_contained_osids_by_faction?.RBiH) {
+                    // Clear a stale set once nothing is contained (e.g. after the
+                    // Washington release) so the suppression site never reads a leftover.
+                    delete context.state.political.last_contained_osids_by_faction.RBiH;
                 }
             }
         }

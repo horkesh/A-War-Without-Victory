@@ -1,4 +1,27 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-09] feat(faction-ai): contain Lane A — ARBiH strangle-not-capture of HVO enclaves (Washington-release, default-off)
+
+**Type:** new bot-AI posture behind a DEFAULT-OFF flag. Branch `feat/contain-lane-a-arbih` off `origin/feat/vrs-contain-posture` (rebase onto main once #339 merges). **Lane A** (ARBiH-side, light gate) of the faction-agnostic contain design (`docs/plans/2026-06-07-contain-enclave-faction-agnostic-design.md §2b`). Builds on Lane V (#339): reuses `computeContainedOsidsForFaction` (already faction-parameterized), the gate pattern, the per-faction `last_contained_osids_by_faction` field, and the faction-generic planner consumer.
+
+**Mechanism:** new SEPARATE flag `AWWV_ARBIH_CONTAIN_POSTURE` (independent of the VRS flag — one-change-per-run). When ON, the war-phase supply step computes the RBiH containment set via `computeContainedOsidsForFaction(state,'RBiH',osidReach)` (BFS-isolated HVO enclave cores — Žepče/Lašva/Kiseljak — past `resilience_start_turn`, pre-Washington) and stashes it on `last_contained_osids_by_faction.RBiH`; the planner withholds the RBiH bot's organic assault target-generation against those OSIDs. **The release is faction/enclave-pair-aware** (`isEnclaveContainmentReleased` now switches on `enclave.faction`): HRHB enclaves release on `state.political.rbih_hrhb_state.washington_signed` (the existing alliance/ceasefire machinery then freezes the war → pockets stay HVO-held); RBiH enclaves keep the Lane-V VRS turn≥160 / `srebrenica_fell` backstop — UNCHANGED. No `avoided_osids_by_faction`, no OSID/initial-OSID override; safe-by-construction.
+
+**Default-off PURITY fix (Codex P2):** the planner read of `last_contained_osids_by_faction[faction]` is now gated on the faction's OWN flag (`isContainSuppressionActiveFor` in `plan.ts`: RS→Lane-V flag, RBiH→Lane-A flag). A save serialized with a contain flag ON, resumed flag-OFF, no longer honors the stale set → default-off is a TRUE no-op for resumed saves, not just fresh runs.
+
+**Changes:** `contain_posture_gate.ts` (+`isArbihContainPostureEnabled`/setter/reset); `enclave_resilience.ts` (`isEnclaveContainmentReleased` faction/enclave-pair-aware); `war_phases.ts` (flag-gated RBiH containment-set compute, mirrors RS block); `commander/plan.ts` (per-faction read-gate + exported `isContainSuppressionActiveFor`); new test `tests/contain_posture_release_laneA.test.ts` (15).
+
+**FLAG-ON 188w MEASUREMENT (the calibration result) — NET ZERO at the calibration horizon:** flag-ON 188w `cb00dd310cc04a29`. Painted oct1995 match **649/712 — IDENTICAL to flag-off (649)**. `control_delta` is **byte-identical** (0/712 OSID control diffs); CENTRAL_BOSNIA mismatch list + faction totals (RS 321 / RBiH 285 / HRHB 106) unchanged. **The 13-OSID Central-Bosnia ceiling does NOT close at the oct1995 horizon** — the Žepče cores (`ozimica_2`/`viniste_2`/`zepce_2`) and the documented over-captures (kiseljak/kresevo/novi_travnik …) are ALREADY at their painted-HRHB end-state in the flag-off baseline; the over-capture the spec targets is a PRE-Washington mid-game transient that the existing Washington-freeze machinery already resolves by end-state. The posture removes that mid-game transient (AAR/path fidelity) but it is invisible to the end-state calibration snapshot.
+
+**SCOPE-RISK / western-cascade verdict: SAFE — zero western regression.** The flag-on vs flag-off mismatch-set diff is EMPTY in both directions (no OSID closed, none regressed; KRAJINA/HERZEGOVINA/western rows unchanged). The freed ARBiH brigades did NOT tip the western cascade. The hash delta (`cb00dd31` vs `d311eeac`) is driven only by the structural presence of `last_contained_osids_by_faction={}` (initialized then emptied at Washington release) + within-contained-window attrition micro-deltas that do not change end-state control.
+
+**Verification:** `tsc --noEmit` exit 0. Flag-OFF (both flags off) 40w `235c61f408dc3d95` + 188w `d311eeac18492683` — **BYTE-IDENTICAL to the floor** (re-confirmed AFTER the purity fix). 40 contain tests + 548 commander/plan/enclave/opportunity tests green.
+
+| run | hash | oct1995 match | western cascade |
+| --- | --- | --- | --- |
+| flag-OFF 188w | `d311eeac18492683` (== floor) | 649/712 | — |
+| flag-ON 188w | `cb00dd310cc04a29` | 649/712 (Δ0; control byte-identical) | no regression |
+
+**Owner decision needed:** Lane A is INERT at the calibration horizon (net 0). It is correct + safe + historically faithful (removes ahistorical pre-Washington HVO-pocket over-capture during the run) but does NOT move the 649 floor. Keep as default-off path fidelity, or shelve pending a mid-game (pre-Washington) calibration target.
+
 ## [2026-06-08] feat(faction-ai): VRS strangle-not-capture contain-posture (§6, default-off, release-reliability proven)
 
 **Type:** new bot-AI posture behind a DEFAULT-OFF flag. Branch `feat/vrs-contain-posture` off `origin/main`. Owner-backlog #4; owner §6 approval granted 2026-06-08 (non-delegable). Builds on contain Lane 1 (`isEnclaveContainable` predicate, #273). This is **Lane V** (VRS-side, full §6 gate) of the faction-agnostic contain design (`docs/plans/2026-06-07-contain-enclave-faction-agnostic-design.md`). Calibration-LAST: flag OFF ⇒ byte-identical to the floor.

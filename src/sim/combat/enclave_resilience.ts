@@ -636,30 +636,49 @@ export function isEnclaveContainable(
 export const CONTAIN_RELEASE_TURN_BACKSTOP = 160;
 
 /**
- * `isEnclaveContainmentReleased(state, enclave)` — has the 1995-pivot release
- * fired for this enclave's containment? When true, the besieger is free to
- * target the enclave again (the historical fall proceeds through the normal
- * paths the rupture predicate keys on).
+ * `isEnclaveContainmentReleased(state, enclave)` — has the pivot release fired
+ * for this enclave's containment? When true, the besieger is free to target the
+ * enclave again (the historical fall — or freeze — proceeds through the normal
+ * paths the rupture/alliance predicates key on).
  *
- * Release fires when EITHER (deterministic, event-preferred over turn-number):
- *   1. the scripted Srebrenica fall has fired (`event_flags.srebrenica_fell`) —
- *      the canonical pivot signal; OR
- *   2. the war has reached `CONTAIN_RELEASE_TURN_BACKSTOP` (the event-window
- *      floor) — a turn-number backstop guaranteeing release inside the fall
- *      window regardless of event timing.
+ * THE RELEASE IS FACTION/ENCLAVE-PAIR-AWARE (the §6 split, design §2):
  *
- * Goražde has no `*_falls_1995` event; the turn backstop still releases its
- * containment at t≥160 (it then stays held by ordinary resilience defence +
- * the absence of any Goražde-fall op/event — historically correct: Goražde did
- * not fall). The release only LIFTS the assault suppression; it does not itself
- * flip control.
+ * - **RBiH enclaves** (Srebrenica/Žepa/Goražde/… besieged by VRS — contain
+ *   Lane V): the 1995-PIVOT release fires when EITHER (deterministic,
+ *   event-preferred over turn-number):
+ *     1. the scripted Srebrenica fall has fired (`event_flags.srebrenica_fell`)
+ *        — the canonical pivot signal; OR
+ *     2. the war has reached `CONTAIN_RELEASE_TURN_BACKSTOP` (the event-window
+ *        floor) — a turn-number backstop guaranteeing release inside the fall
+ *        window regardless of event timing.
+ *   §6: this guarantees Srebrenica/Žepa STILL FALL and the genocide rupture
+ *   STILL RECORDS. Goražde has no `*_falls_1995` event; the backstop releases
+ *   it at t≥160 but it then stays held by ordinary resilience defence + the
+ *   absence of any Goražde-fall op/event (historically correct).
  *
- * PURE: reads only event_flags + turn. No mutation, no RNG, no wall-clock.
+ * - **HRHB enclaves** (Žepče/Lašva/Kiseljak besieged by ARBiH — contain Lane A):
+ *   the WASHINGTON-AGREEMENT release fires when
+ *   `state.political.rbih_hrhb_state.washington_signed` is true. Before
+ *   Washington, ARBiH contains the HVO pockets; at Washington the existing
+ *   alliance/ceasefire machinery FREEZES the RBiH↔HRHB war so the pockets stay
+ *   HVO-held — matching painted Oct-1995. NOT keyed on the VRS turn≥160 /
+ *   srebrenica_fell backstop (that pivot is irrelevant to the Bosniak-Croat war).
+ *
+ * The release only LIFTS the assault suppression; it does not itself flip
+ * control.
+ *
+ * PURE: reads only event_flags + turn + washington_signed. No mutation, no RNG,
+ * no wall-clock.
  */
 export function isEnclaveContainmentReleased(
     state: GameState,
-    _enclave: EnclaveDefinition,
+    enclave: EnclaveDefinition,
 ): boolean {
+    // HRHB enclaves (ARBiH besieger): Washington-Agreement freeze release.
+    if (enclave.faction === 'HRHB') {
+        return state.political?.rbih_hrhb_state?.washington_signed === true;
+    }
+    // RBiH enclaves (VRS besieger): 1995-pivot release (event flag OR backstop).
     const eventFlags = state.military?.event_flags ?? {};
     if (eventFlags.srebrenica_fell === true) return true;
     const turn = state.meta?.turn ?? 0;
