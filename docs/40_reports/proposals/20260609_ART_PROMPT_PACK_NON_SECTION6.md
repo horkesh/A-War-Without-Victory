@@ -25,9 +25,11 @@ These keys match the resolvers that the event-image pipeline + command-card art 
 
 ---
 
-# CATEGORY 1 — Peace-Plan Maps (5)
+# CATEGORY 1 — Peace-Plan Maps (4)
 
 Cartographic / diagrammatic territorial-division maps — the ONE exception to the photograph aesthetic. **For every map in this category you will ATTACH a reference photo** of the actual historical proposed map for that plan. Each prompt below tells the generator to use the attached photo as the exact reference for the territorial boundaries and faithfully redraw it in a neutral period-accurate 1990s cartographic style. The brief historical note under each tells you which map to attach.
+
+> **Note — the Washington Agreement is NOT a peace-plan map.** It was not a territorial-division proposal and had no map: the Washington Agreement (March 1994) ended the ARBiH–HVO war and created the Federation of Bosnia and Herzegovina. It is represented in this pack by the event still `event_washington_agreement.webp` (Category 4) — the signing of a ceasefire/alliance — not by a plan map.
 
 ### 1.1 Vance-Owen Plan — `plan_vance_owen.webp`
 - **Drop path:** `src/ui/map/assets/plans/plan_vance_owen.webp`
@@ -43,21 +45,14 @@ Cartographic / diagrammatic territorial-division maps — the ONE exception to t
 - **Prompt:** Generate a `600 x 400` px image. Export final as `plan_owen_stoltenberg.webp` and later drop it in `src/ui/map/assets/plans/`. Using the ATTACHED historical map of the Owen-Stoltenberg plan as the exact reference for the territorial boundaries, faithfully recreate and redraw it as a neutral, period-accurate 1990s diplomatic territorial-division map of Bosnia and Herzegovina. Printed-paper cartographic look as if reproduced from a peace-conference annex: flat matte print, restrained muted ink colours, fine cartographic linework, faint paper grain. Keep the recognisable BiH outline. Render the three contiguous republics from the reference as three distinct muted tints (a Serb-majority union, a Bosniak-majority union, a Croat-majority union) reading as three large solid regions with a constricted Sarajevo district between them — visibly fewer, larger blocks than the ten-province version. NOT a glossy digital infographic, NOT a painting, NOT oil/sepia, NOT 3D. No readable place labels, no legend text, no flags.
 - **Negative prompt:** United States map, U.S. state map, any national map other than Bosnia, glossy 3D globe, satellite photo, video-game minimap, colourful tourist map, neon colours, readable place names, legend, title block, ten provinces, checkerboard cantons, single 51/49 dividing line, oil painting, sepia, watermark, signature, text.
 
-### 1.3 Washington Agreement — `plan_washington.webp`
-- **Drop path:** `src/ui/map/assets/plans/plan_washington.webp`
-- **Dimensions:** 600×400
-- **Attach:** a photo/scan of a historical **Washington Agreement (March 1994)** map — the Bosniak-Croat Federation as one unified entity across government-held territory, with the remaining Serb-held territory separate.
-- **Prompt:** Generate a `600 x 400` px image. Export final as `plan_washington.webp` and later drop it in `src/ui/map/assets/plans/`. Using the ATTACHED historical map of the Washington Agreement as the exact reference for the territorial boundaries, faithfully recreate and redraw it as a neutral, period-accurate 1990s diplomatic territorial-division map of Bosnia and Herzegovina. Printed-paper cartographic look as if reproduced from a peace-conference annex: flat matte print, restrained muted ink colours, fine cartographic linework, faint paper grain. Keep the recognisable BiH outline. Following the reference, show the Bosniak-Croat FEDERATION as a single unified tint across central, western and northern government-held territory (the former two-way internal line dissolved into one federation colour, with at most a faint dotted ghost line where it used to run), and the remaining Serb-held territory in a separate contrasting muted tint — the story is two former adversaries unified into one entity facing a third. NOT a glossy digital infographic, NOT a painting, NOT oil/sepia, NOT 3D. No readable place labels, no legend text, no flags.
-- **Negative prompt:** United States map, U.S. state map, any national map other than Bosnia, glossy 3D globe, satellite photo, video-game minimap, colourful tourist map, neon colours, readable place names, legend, title block, three equal blocks, ten provinces, single clean 51/49 line, oil painting, sepia, watermark, signature, text.
-
-### 1.4 Contact Group Plan — `plan_contact_group.webp`
+### 1.3 Contact Group Plan — `plan_contact_group.webp`
 - **Drop path:** `src/ui/map/assets/plans/plan_contact_group.webp`
 - **Dimensions:** 600×400
 - **Attach:** a photo/scan of a historical **Contact Group plan (July 1994)** map — Bosnia split 51/49 between the Federation and the Bosnian-Serb entity by a single decisive boundary.
 - **Prompt:** Generate a `600 x 400` px image. Export final as `plan_contact_group.webp` and later drop it in `src/ui/map/assets/plans/`. Using the ATTACHED historical map of the Contact Group plan as the exact reference for the territorial boundaries, faithfully recreate and redraw it as a neutral, period-accurate 1990s diplomatic territorial-division map of Bosnia and Herzegovina. Printed-paper cartographic look as if reproduced from a peace-conference annex: flat matte print, restrained muted ink colours, fine cartographic linework, faint paper grain. Keep the recognisable BiH outline. Following the reference, divide the country by a single clear printed dividing line into TWO shares — a larger Federation share (~51 percent) in one muted tint and a smaller Serb-entity share (~49 percent) in a contrasting tint — the composition's defining feature being one decisive boundary partitioning the country into two near-equal halves, clean and almost administrative. NOT a glossy digital infographic, NOT a painting, NOT oil/sepia, NOT 3D. No readable place labels, no legend text, no percentage numbers, no flags.
 - **Negative prompt:** United States map, U.S. state map, any national map other than Bosnia, glossy 3D globe, satellite photo, video-game minimap, colourful tourist map, neon colours, readable place names, legend, title block, ten provinces, three blocks, checkerboard, readable percentage numbers, oil painting, sepia, watermark, signature, text.
 
-### 1.5 Dayton Map — `plan_dayton.webp`
+### 1.4 Dayton Map — `plan_dayton.webp`
 - **Drop path:** `src/ui/map/assets/plans/plan_dayton.webp`
 - **Dimensions:** 600×400 (a 1920×1080 endgame variant of this division mood is covered in Category 2)
 - **Attach:** a photo/scan of the historical **Dayton Agreement (December 1995)** map — the final Federation (~51%) / Republika Srpska (~49%) division along the convoluted Inter-Entity Boundary Line, with the Brčko corridor pinching the north and the Goražde corridor reaching east.
@@ -261,11 +256,11 @@ These require explicit owner + §6 sign-off before any prompt is authored or any
 
 | Category | Prompts authored |
 |---|---:|
-| 1. Peace-plan maps (attached-reference redraw) | 5 |
+| 1. Peace-plan maps (attached-reference redraw) | 4 |
 | 2. Dayton endgame / verdict backgrounds | 4 |
 | 3. A4 onboarding teaching-deck imagery | 8 |
 | 4. NON-§6 event stills | 12 |
-| **Total NON-§6 prompts** | **29** |
+| **Total NON-§6 prompts** | **28** |
 | §6 prompts authored | **0** (8 items deferred, listed only) |
 
 Every prompt is fully self-contained and copy-paste-ready: the style, the scene, the UI-reservation, the dimensions, and the negative prompt are all inlined into each block (no prefix assembly). All are documentary-realism (war-correspondent photograph aesthetic, except Category 1's neutral cartographic style redrawn from an attached reference photo), explicitly no oil-paint / no sepia / no dramatic-painting. Filenames/keys match the live resolvers (`EventDisplayData.image`, and the strategy doc's `event_{id}` / `plan_{id}` / `verdict_{tone}` conventions). The command-card `address_nation` / `decorate_unit` leadership gestures are intentionally NOT in this pack — they already ship real per-faction art (PR #317) that the faction-aware resolver hits first. Generation happens after owner review.
