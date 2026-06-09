@@ -37,12 +37,15 @@ interface MakeStateOptions {
     paramilitary_policy?: 'always_allow' | 'always_deny' | 'ask';
     /** Top-level player_faction. */
     player_faction?: FactionId;
+    /** Lifted onto state.military.event_decision_log. */
+    event_decision_log?: Array<{ event_id: string; response_id: string }>;
 }
 
 function makeState(options: MakeStateOptions = {}): GameState {
     const military = {
         event_flags: options.event_flags ?? {},
         event_fire_counts: options.event_fire_counts ?? {},
+        event_decision_log: options.event_decision_log ?? [],
         negotiation: {
             capital: options.negotiation_capital ?? {},
             patron_relationships: {},
@@ -278,9 +281,90 @@ describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T5: integration with CostLedge
         expect(Array.isArray(result.ghosts)).toBe(true);
     });
 
-    it('buildDynamicSections returns an empty array on Phase 0 inputs', () => {
+    it('buildDynamicSections returns an empty array when no load-bearing decision is logged', () => {
         const state = makeState();
         expect(buildDynamicSections(input(state, 50))).toEqual([]);
+    });
+});
+
+// ─── A3: dynamic-section morphing for load-bearing decisions ───────────────
+// docs/40_reports/playtest/20260609_INSTRUMENTED_CAMPAIGN_AUDIT.md §A3 punch-list #2.
+
+describe('A3 — buildDynamicSections surfaces load-bearing authored choices', () => {
+    it('emits a RESPONSE-keyed section for a fired Vance-Owen acceptance', () => {
+        const state = makeState({
+            event_decision_log: [{ event_id: 'vance_owen_plan_1993', response_id: 'accept' }],
+        });
+        const sections = buildDynamicSections(input(state, 60));
+        const vopp = sections.find((s) => s.target_essay_event_id === 'vance_owen_plan_1993');
+        expect(vopp).toBeDefined();
+        expect(vopp?.conditional_on).toContain('RESPONSE:vance_owen_plan_1993:accept');
+        expect(vopp?.ring_classification).toBe(2);
+        // Never an 'outcome'/'context'-pinned framing — Ring 2 note/divergence only.
+        expect(['note', 'divergence']).toContain(vopp?.variant);
+    });
+
+    it('keys the section on the ACTUAL recorded branch (reject vs accept)', () => {
+        const rejected = makeState({
+            event_decision_log: [{ event_id: 'owen_stoltenberg_plan_1993', response_id: 'reject' }],
+        });
+        const sections = buildDynamicSections(input(rejected, 80));
+        const os = sections.find((s) => s.target_essay_event_id === 'owen_stoltenberg_plan_1993');
+        expect(os?.conditional_on).toContain('RESPONSE:owen_stoltenberg_plan_1993:reject');
+    });
+
+    it('emits nothing for non-load-bearing decisions', () => {
+        const state = makeState({
+            event_decision_log: [{ event_id: 'some_flavor_event_1993', response_id: 'noted' }],
+        });
+        expect(buildDynamicSections(input(state, 60))).toEqual([]);
+    });
+
+    it('is deterministic and strictCompare-sorted across calls', () => {
+        const state = makeState({
+            event_decision_log: [
+                { event_id: 'owen_stoltenberg_plan_1993', response_id: 'accept' },
+                { event_id: 'vance_owen_plan_1993', response_id: 'accept' },
+                { event_id: 'london_conference_1992', response_id: 'accept_principles' },
+            ],
+        });
+        const a = buildDynamicSections(input(state, 90)).map((s) => s.id);
+        const b = buildDynamicSections(input(state, 90)).map((s) => s.id);
+        expect(b).toEqual(a);
+        expect(a).toEqual([...a].sort());
+    });
+
+    it('uses only the FIRST recorded response per once-only event', () => {
+        const state = makeState({
+            event_decision_log: [
+                { event_id: 'vance_owen_plan_1993', response_id: 'accept' },
+                { event_id: 'vance_owen_plan_1993', response_id: 'reject' },
+            ],
+        });
+        const sections = buildDynamicSections(input(state, 60))
+            .filter((s) => s.target_essay_event_id === 'vance_owen_plan_1993');
+        expect(sections).toHaveLength(1);
+        expect(sections[0]?.conditional_on).toContain('RESPONSE:vance_owen_plan_1993:accept');
+    });
+});
+
+// ─── A3: dead-bridge — accept sets the flag the early-peace ghost reads ─────
+// The event-data fix lives in war_1993.json (accept branches set
+// vance_owen_accepted / owen_stoltenberg_accepted). This pins the codex side:
+// once the flag is set, the early_peace_accepted ghost becomes unlockable.
+
+describe('A3 — dead-bridge: peace-plan acceptance unlocks the early_peace_accepted ghost', () => {
+    it('early_peace_accepted ghost fires once vance_owen_accepted is set', () => {
+        const before = makeState({ event_flags: {} });
+        expect(buildGhostEntries(before, 60).find((g) => g.ghost_id === 'early_peace_accepted')).toBeUndefined();
+
+        const after = makeState({ event_flags: { vance_owen_accepted: true } });
+        expect(buildGhostEntries(after, 60).find((g) => g.ghost_id === 'early_peace_accepted')).toBeDefined();
+    });
+
+    it('early_peace_accepted ghost fires once owen_stoltenberg_accepted is set', () => {
+        const after = makeState({ event_flags: { owen_stoltenberg_accepted: true } });
+        expect(buildGhostEntries(after, 80).find((g) => g.ghost_id === 'early_peace_accepted')).toBeDefined();
     });
 });
 
