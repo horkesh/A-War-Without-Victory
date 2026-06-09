@@ -79,6 +79,7 @@ import {
     autoResolveOpportunityProposalReviews,
 } from '../sim/combat/operation_opportunities.js';
 import { loadInitialFormations } from './initial_formations_loader.js';
+import { resolvePendingDaytonCloseOut } from '../sim/negotiation/dayton_negotiation.js';
 import { applyPoliticalLeaderDataInit } from '../sim/political/political_leader_data_loader.js';
 import {
     loadMunicipalityHqSettlement,
@@ -1477,6 +1478,13 @@ export async function buildScenarioStartupState(
     // else: leave undefined — event evaluator's `playerFaction != null` gate then
     // routes every event with `requires_player_response: true` through the bot
     // auto-respond path, as a headless harness run requires.
+    // A2 Dayton close-out (task #71): default-off flag; only set on meta when the
+    // scenario explicitly opts in. Pulls the Dayton trigger to w180 and arms the
+    // post-loop terminal resolution below. Omitted by calibration scenarios so their
+    // 188w/40w baselines (and the t188 pending_dayton snapshot) stay byte-identical.
+    if (scenario.dayton_close_out === true) {
+        state.meta.dayton_close_out = true;
+    }
     state.meta.headless_scenario_auto_control = true;
 
     // After state creation, political_controllers may have been promoted to OSID keys
@@ -2707,6 +2715,17 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 }
             }
         }
+
+        // A2 Dayton close-out (task #71): the campaign has reached its horizon. If a
+        // Dayton menu was opened (trigger fired) but never resolved — the freeze-frame
+        // the instrumented-campaign audit flagged — resolve it now via the
+        // deterministic historical-default proposal so the campaign CLOSES on a
+        // terminal Pyrrhic verdict (meta.game_over=true, endgame_snapshot frozen)
+        // instead of an open menu. No-op unless `meta.dayton_close_out` is on AND a
+        // pending menu exists, so the calibration scenarios (which never set the flag)
+        // are byte-identical. resolveDaytonNegotiation computes only a split %, never
+        // repaints OSID control — the territorial baseline is untouched.
+        resolvePendingDaytonCloseOut(state);
 
         // Batch 38: post-loop `if (!final_state_hash)` fallback removed —
         // structurally redundant with the unconditional final-save block at
