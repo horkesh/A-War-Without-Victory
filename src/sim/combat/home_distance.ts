@@ -30,6 +30,20 @@ const PER_HOP_PENALTY = 0.04;
 /** Per-hop penalty for elite brigades. Reaches floor at ~10 hops. */
 const PER_HOP_PENALTY_ELITE = 0.02;
 
+/**
+ * Finite sentinel hop count stored in the cache when home is graph-unreachable
+ * (a brigade displaced across a severed corridor). `computeOsidGraphDistance`
+ * returns `Infinity` for disconnected pairs, but the serializer requires a
+ * finite non-negative number (validateGameState `home_distance_cache`).
+ *
+ * Both home-distance curves are already floored well below this value
+ * (non-elite floor 0.70 at hops ≥ 10.5; elite floor 0.85 at hops ≥ 10.5), so
+ * substituting this sentinel for Infinity leaves the in-sim multiplier
+ * (`getHomeDistanceMult`) identical to the Infinite case — behaviorally inert,
+ * it only keeps the save serializable on divergent games.
+ */
+export const HOME_DISTANCE_UNREACHABLE_HOPS = 99;
+
 // ═══════════════════════════════════════════════════════════════════════════
 // BFS distance computation
 // ═══════════════════════════════════════════════════════════════════════════
@@ -126,7 +140,10 @@ export function buildHomeDistanceCache(
             continue;
         }
         const dist = computeOsidGraphDistance(f.home_osid as Osid, f.location_osid as Osid, adjacency);
-        cache[fid] = dist;
+        // Clamp Infinity (graph-unreachable home) to a finite sentinel so the
+        // save serializes on divergent games. Inert: both mult curves are
+        // already floored at this distance (see HOME_DISTANCE_UNREACHABLE_HOPS).
+        cache[fid] = Number.isFinite(dist) ? dist : HOME_DISTANCE_UNREACHABLE_HOPS;
     }
     return cache;
 }
