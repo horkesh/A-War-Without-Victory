@@ -509,7 +509,7 @@ describe('DirectiveCard stop-op action host', () => {
     );
   });
 
-  it('does NOT advertise a friction cost for force-launch, but does for request-op (#274)', () => {
+  it('does NOT advertise a friction cost for a legacy/silent force-launch, but does for request-op (#274)', () => {
     const gameStateWithFaction = { ...baseGameState, player_faction: 'RBiH' } as unknown as LoadedGameState;
 
     installIpc();
@@ -517,7 +517,8 @@ describe('DirectiveCard stop-op action host', () => {
       directive: forceLaunchDirective,
       gameState: gameStateWithFaction,
     }));
-    // force-launch never sets forced_over_objection, so the engine applies no patron
+    // A force-launch that does NOT override a shown objection (legacy opName-only payload,
+    // overridesShownObjection absent) sets no no-go snapshot, so the engine applies no patron
     // cost — the preview must stay hidden rather than lie to the player.
     expect(screen.queryByTestId('directive-card-stakes')).toBeNull();
     unmount();
@@ -528,6 +529,90 @@ describe('DirectiveCard stop-op action host', () => {
     }));
     // request-op's forced path DOES set forced_over_objection → real consequence.
     expect(screen.getByTestId('directive-card-stakes')).toBeTruthy();
+  });
+
+  // #327 Codex follow-up (task #54): a force-launch that overrides a SHOWN commander
+  // no-go (the proposal-override card, overridesShownObjection=true) is charged the SAME
+  // faction-asymmetric patron_confidence cost as a forced request-op by the engine's
+  // apply-force-launch-consequences step. The DirectiveCard must PREVIEW that cost — and
+  // ONLY for that case, never for a proactive (silence-override) force-launch.
+  it('previews the patron cost for a force-launch over a shown objection, not for a proactive one (#327)', () => {
+    const gameStateWithFaction = { ...baseGameState, player_faction: 'RBiH' } as unknown as LoadedGameState;
+    installIpc();
+
+    // Proposal-override force-launch (commander surfaced a no-go) → stakes shown, with the
+    // patron-confidence delta the engine actually charges: FORCE_OP_PATRON_BASE(-10) ×
+    // COMMAND_FRICTION_FACTION_WEIGHT.RBiH(0.5) = -5.
+    const overrideDirective: PresidentialDecisionRoomDirective = {
+      lever: 'force_launch',
+      corpsId: 'arbih_3rd_corps',
+      cost: 15,
+      payload: {
+        opName: 'Operation Holdfast',
+        proposalId: 'APPROVE_OP:arbih_3rd_corps:plan_alpha',
+        overridesShownObjection: true,
+      },
+    };
+    const { unmount } = render(React.createElement(DirectiveCard, {
+      directive: overrideDirective,
+      gameState: gameStateWithFaction,
+    }));
+    const stakes = screen.getByTestId('directive-card-stakes');
+    expect(stakes).toBeTruthy();
+    expect(stakes.textContent).toContain('Patron confidence at risk: -5.');
+    expect(stakes.textContent).toMatch(/Forcing this launch over .* objection/);
+    unmount();
+
+    // Proactive (held-ready) force-launch overrides commander SILENCE — no shown no-go,
+    // engine charges nothing → no stakes preview.
+    const proactiveDirective: PresidentialDecisionRoomDirective = {
+      lever: 'force_launch',
+      corpsId: 'arbih_3rd_corps',
+      cost: 25,
+      payload: {
+        opName: 'Operation Held Alpha',
+        planId: 'plan_alpha',
+        overridesShownObjection: false,
+      },
+    };
+    render(React.createElement(DirectiveCard, {
+      directive: proactiveDirective,
+      gameState: gameStateWithFaction,
+    }));
+    expect(screen.queryByTestId('directive-card-stakes')).toBeNull();
+  });
+
+  // Faction-asymmetry of the previewed cost must match the engine's per-faction weight:
+  // RS pays the full -10 (1.0×), HRHB only -2 (Math.round(-10 × 0.25) = Math.round(-2.5) = -2,
+  // JS rounds .5 toward +∞). Same overrides-shown-objection force-launch directive, different
+  // player faction — proving the preview tracks the engine charge exactly, not an approximation.
+  it('previews the faction-asymmetric force-launch patron cost (RS -10 vs HRHB -2) (#327)', () => {
+    installIpc();
+    const overrideDirective: PresidentialDecisionRoomDirective = {
+      lever: 'force_launch',
+      corpsId: 'arbih_3rd_corps',
+      cost: 15,
+      payload: {
+        opName: 'Operation Holdfast',
+        proposalId: 'APPROVE_OP:arbih_3rd_corps:plan_alpha',
+        overridesShownObjection: true,
+      },
+    };
+
+    const rsState = { ...baseGameState, player_faction: 'RS' } as unknown as LoadedGameState;
+    const { unmount } = render(React.createElement(DirectiveCard, {
+      directive: overrideDirective,
+      gameState: rsState,
+    }));
+    expect(screen.getByTestId('directive-card-stakes').textContent).toContain('Patron confidence at risk: -10.');
+    unmount();
+
+    const hrhbState = { ...baseGameState, player_faction: 'HRHB' } as unknown as LoadedGameState;
+    render(React.createElement(DirectiveCard, {
+      directive: overrideDirective,
+      gameState: hrhbState,
+    }));
+    expect(screen.getByTestId('directive-card-stakes').textContent).toContain('Patron confidence at risk: -2.');
   });
 
   it('keeps the request-op target input available to retry after a cannot-issue banner (#119)', async () => {
