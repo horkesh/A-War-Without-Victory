@@ -78,7 +78,7 @@ import { updateSustainability } from '../../state/sustainability.js';
 import { updateLossOfControlTrends } from '../../state/loss_of_control_trends.js';
 import { calculateFactionProductionBonus, ensureProductionFacilities } from '../../state/production_facilities.js';
 import { computeSupplyReachability } from '../../state/supply_reachability.js';
-import { computeSupplyReachabilityOsid } from '../../state/supply_reachability_osid.js';
+import { computeSupplyReachabilityOsid, type SupplyReachabilityOsidReport } from '../../state/supply_reachability_osid.js';
 import { buildContainDiagnostic } from '../combat/contain_diagnostic.js';
 import { computeContainedOsidsForFaction } from '../combat/enclave_resilience.js';
 import { isVrsContainPostureEnabled, isArbihContainPostureEnabled } from '../combat/contain_posture_gate.js';
@@ -118,7 +118,7 @@ import {
     loadEnrichedContactGraph
 } from '../pressure/phase3a_pressure_eligibility.js';
 import { applyPhase3BPressureExhaustion } from '../pressure/phase3b_pressure_exhaustion.js';
-import { applyPhase3CExhaustionCollapseGating } from '../pressure/phase3c_exhaustion_collapse_gating.js';
+import { applyPhase3CExhaustionCollapseGating, getEnablePhase3C } from '../pressure/phase3c_exhaustion_collapse_gating.js';
 import { deriveFrontsFromPressureEligible } from '../emergence/front_emergence.js';
 import { diffusePressure } from '../emergence/pressure_diffusion.js';
 import { applySettlementDisplacementDeltas } from '../displacement_pipeline/displacement_accumulation.js';
@@ -3760,7 +3760,30 @@ export const warPhases: NamedPhase[] = [
                 return;
             }
             const derivedFrontEdges = computeFrontEdges(context.state, edges);
-            const result = applyPhase3CExhaustionCollapseGating(context.state, derivedFrontEdges);
+            // Phase 3C spatial gate (spec C8) reads the BFS supply-reachability report —
+            // the same isolation BFS the supply-osid step + isEnclaveContainable use. Compute
+            // it from the loaded operational data when available; pass null otherwise
+            // (checkSpatialDegradation then conservatively reports no spatial degradation).
+            // The BFS supply-reachability report is ONLY consumed by Phase 3C's spatial gate,
+            // and Phase 3C is gated OFF in normal play (getEnablePhase3C() === false) — in which
+            // case applyPhase3CExhaustionCollapseGating returns `feature_flag_disabled` and never
+            // reads supplyReach. Guard the BFS behind the same flag so a DISABLED turn pays ZERO
+            // extra cost (no per-turn reachability BFS / edge fingerprint / controller bucketing).
+            // When disabled the report was discarded anyway, so this stays byte-identical; the
+            // report is computed only when the flag is on (audit harness / future enable).
+            let supplyReach: SupplyReachabilityOsidReport | null = null;
+            if (getEnablePhase3C()) {
+                const od = getOperationalData(context);
+                if (od?.opData?.operationalToCanonical && od?.opData?.canonicalToOperational && od?.edges?.length) {
+                    supplyReach = computeSupplyReachabilityOsid(
+                        context.state,
+                        od.edges,
+                        od.opData.canonicalToOperational,
+                        od.opData.operationalToCanonical
+                    );
+                }
+            }
+            const result = applyPhase3CExhaustionCollapseGating(context.state, derivedFrontEdges, supplyReach);
             context.report.phase3c_exhaustion_collapse_gating = result;
         }
     },
