@@ -277,12 +277,25 @@ function CodexPanelWrapper({
 function OnboardingOverlayWrapper() {
   const tutorialState = useGameStore((s) => s.loadedGameState?.tutorial_state);
   const ipc = useIPC();
+  // Codex #347 (P2) — preserve dismissal when IPC is unavailable. In
+  // browser/dev-map builds (or when the tutorial ipcMain handlers are not
+  // registered) `ipc.isAvailable` is false but `useIPC()` still exposes noop
+  // `dismissTutorial`/`advanceTutorialStep`. Passing that non-null bridge made
+  // `OnboardingOverlay` take its persisted-state path: Skip/Next only resolved
+  // the noops while `loadedGameState.tutorial_state` stayed undefined, so the
+  // HARD_MODAL deck stayed stuck over the game. Mirror `SettingsScreen` and
+  // pass `null` unless IPC is available, so the overlay uses its in-memory
+  // `previewTutorialState` fallback (dismissal/advance take effect for the
+  // current session). Default Electron-with-IPC behavior is unchanged.
   const onboardingBridge = useMemo(
-    () => ({
-      dismissTutorial: () => ipc.dismissTutorial(),
-      advanceStep: (stepId: string) => ipc.advanceTutorialStep(stepId),
-      restartTutorial: () => ipc.restartTutorial(),
-    }),
+    () =>
+      ipc.isAvailable
+        ? {
+            dismissTutorial: () => ipc.dismissTutorial(),
+            advanceStep: (stepId: string) => ipc.advanceTutorialStep(stepId),
+            restartTutorial: () => ipc.restartTutorial(),
+          }
+        : null,
     [ipc],
   );
   return <OnboardingOverlay tutorialState={tutorialState} ipc={onboardingBridge} />;
@@ -1820,8 +1833,13 @@ function App() {
           menu / side picker / warroom. The overlay's own `shouldShowOnboarding`
           predicate handles the first-run-vs-dismissed branch off the existing
           persisted `meta.tutorial_state` (no new field). Restart still flows
-          via Settings → OnboardingRestartButton. */}
-      {appScreen === 'game' && loadedGameState && <OnboardingOverlayWrapper />}
+          via Settings → OnboardingRestartButton.
+          Codex #347 (P2) — also exclude `sidePickerOpen`: the deck renders at
+          `Z.HARD_MODAL` above `SidePickerOverlay` (`Z.OVERLAY_LIGHT`); a fresh
+          turn-0 save already loaded while the picker is open would otherwise
+          cover the faction picker and block choosing/cancelling the new-game
+          flow. Defer the deck until a side is chosen (picker closed). */}
+      {appScreen === 'game' && loadedGameState && !sidePickerOpen && <OnboardingOverlayWrapper />}
       {/* LANE-V094-LOADING-AND-ERROR — first-paint scenario-load skeleton.
           Shown when the in-game shell has been requested but no save has
           loaded yet. Auto-dismisses when `loadedGameState` resolves. We

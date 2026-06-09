@@ -60,7 +60,9 @@ describe('Track D onboarding consolidation', () => {
     // save. (Task #77 re-enabled the auto-mount the prior Track-D consolidation
     // removed; the deck was previously reachable only via Settings → Restart.)
     expect(source).toContain('<OnboardingOverlayWrapper />');
-    expect(source).toContain("appScreen === 'game' && loadedGameState && <OnboardingOverlayWrapper />");
+    // Codex #347 (P2): the mount gate also excludes `sidePickerOpen` so the
+    // HARD_MODAL deck never covers the faction picker.
+    expect(source).toContain("appScreen === 'game' && loadedGameState && !sidePickerOpen && <OnboardingOverlayWrapper />");
 
     // The legacy first-turn orientation surfaces stay retired — no resurrection.
     expect(source).not.toContain('<CoachmarkLayer');
