@@ -20,19 +20,19 @@ import { getLatestSchemaVersion } from '../src/state/save_migration.js';
 import { serializeState, deserializeState } from '../src/state/serialize.js';
 
 describe('schema v34/v35 freeze guard', () => {
-    it('CURRENT_SCHEMA_VERSION is pinned at 35', () => {
+    it('CURRENT_SCHEMA_VERSION is pinned at 36', () => {
         // If this fails, a renumber happened. Confirm the bump is intentional
         // (new migration step appended), then update this guard + the
         // save_migration v34 one-way contract comment together.
-        expect(CURRENT_SCHEMA_VERSION).toBe(35);
+        expect(CURRENT_SCHEMA_VERSION).toBe(36);
     });
 
-    it('the latest registered migration version equals CURRENT_SCHEMA_VERSION (35)', () => {
-        // Guards against a migration being appended at a number > 34 without
+    it('the latest registered migration version equals CURRENT_SCHEMA_VERSION (36)', () => {
+        // Guards against a migration being appended at a number > 35 without
         // bumping CURRENT_SCHEMA_VERSION (or vice-versa) — the classic
         // collide-renumber footgun ADR-0005 §Determinism Impact warns about.
         expect(getLatestSchemaVersion()).toBe(CURRENT_SCHEMA_VERSION);
-        expect(getLatestSchemaVersion()).toBe(35);
+        expect(getLatestSchemaVersion()).toBe(36);
     });
 
     it('v34 ships the four TG/Army-HQ Records as the only non-undefined scaffold (omitEmpty shape)', () => {
@@ -109,6 +109,6 @@ describe('schema v34/v35 freeze guard', () => {
             displacement: {} as any,
         } as GameState;
         const hydrated = deserializeState(serializeState(state));
-        expect(hydrated.schema_version).toBe(35);
+        expect(hydrated.schema_version).toBe(36);
     });
 });
