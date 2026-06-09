@@ -2,6 +2,7 @@ import type { CostLedger } from '../../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult } from '../../../../sim/endgame/endgame_comparison.js';
 import type { GameVerdict } from '../../../../state/negotiation_types.js';
 import { buildVerdictScene, type VerdictSceneTone } from '../../data/verdictScene.js';
+import { resolveVerdictBackground } from '../../data/verdictArt.js';
 import { formatHistoricalDivergenceNote } from '../../data/historicalDivergenceNotes.js';
 import { buildVerdictShareSummary } from '../../data/verdictShareSummary.js';
 import { t, useLocale } from '../../i18n';
@@ -55,6 +56,11 @@ export function CinematicVerdict({
         focusFaction,
     });
     const accent = TONE_ACCENT[scene.tone];
+    // Graceful-fallback art: a tone-mapped documentary background renders behind
+    // the gradient when its asset is present; absent → null and the gradient
+    // alone shows (never a broken image). A scrim over the image preserves the
+    // reserved text-band legibility built into each 1920×1080 plate.
+    const backgroundUrl = resolveVerdictBackground(scene.tone);
     const comparisonCallouts = (historicalComparison?.divergence_notes ?? [])
         .filter(note => note.trim().length > 0)
         .slice(0, 3);
@@ -67,7 +73,26 @@ export function CinematicVerdict({
         <section
             className={`relative shrink-0 overflow-hidden bg-gradient-to-br ${TONE_CLASSES[scene.tone]}`}
             data-awwv-cinematic-verdict={scene.tone}
+            data-awwv-verdict-bg={backgroundUrl ? 'image' : 'gradient'}
         >
+            {/* Tone-mapped documentary background (graceful fallback): renders
+                behind the content only when its asset resolves; otherwise the
+                gradient above stands alone. A scrim keeps the reserved text band
+                legible over the 1920×1080 plate. */}
+            {backgroundUrl && (
+                <>
+                    <div
+                        aria-hidden="true"
+                        data-awwv-verdict-bg-image
+                        className="absolute inset-0 bg-cover bg-center"
+                        style={{ backgroundImage: `url(${backgroundUrl})` }}
+                    />
+                    <div
+                        aria-hidden="true"
+                        className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/55 to-black/80"
+                    />
+                </>
+            )}
             <div
                 className="absolute inset-x-0 top-0 h-px opacity-80"
                 style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}

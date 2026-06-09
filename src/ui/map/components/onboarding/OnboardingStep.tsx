@@ -9,6 +9,7 @@
  */
 
 import type { OnboardingStepDef } from './onboardingSteps';
+import { resolveTutorialSlideArt } from '../../data/tutorialDeckArt';
 import { t } from '../../i18n';
 
 export interface OnboardingStepProps {
@@ -28,6 +29,10 @@ export interface OnboardingStepProps {
 export function OnboardingStep(props: OnboardingStepProps): JSX.Element {
     const { step, indexOneBased, total, disabled, onAdvance, onSkip } = props;
     const isLast = indexOneBased >= total;
+    // Graceful-fallback art: the per-slide 600×400 still renders above the copy
+    // only when `tutorial_<step.id>.webp` resolves; absent → null and the slide
+    // renders copy-only exactly as before (never a broken image, never a crash).
+    const slideArt = resolveTutorialSlideArt(step.id);
 
     return (
         <div
@@ -55,6 +60,24 @@ export function OnboardingStep(props: OnboardingStepProps): JSX.Element {
             >
                 {t('onboarding.stepCount', { index: indexOneBased, total })}
             </div>
+            {slideArt && (
+                <img
+                    data-testid="onboarding-step-art"
+                    src={slideArt}
+                    alt=""
+                    aria-hidden="true"
+                    style={{
+                        display: 'block',
+                        width: '100%',
+                        height: 'auto',
+                        aspectRatio: '600 / 400',
+                        objectFit: 'cover',
+                        borderRadius: 4,
+                        marginBottom: 16,
+                        border: '1px solid rgba(255, 215, 130, 0.25)',
+                    }}
+                />
+            )}
             <h2 style={{ margin: '0 0 12px 0', fontSize: 18 }}>{t(step.titleKey)}</h2>
             <p style={{ margin: '0 0 20px 0', lineHeight: 1.5, fontSize: 14 }}>{t(step.bodyKey)}</p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
