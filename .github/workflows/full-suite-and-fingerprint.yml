@@ -114,9 +114,25 @@ jobs:
 
       # Always-report shim (see full-suite job): the job always reports the
       # `structural-fingerprint` check; only the fresh-40w compare is gated.
+      #
+      # INTEGRITY (task #354 followup): like the full-suite job, the skip decision
+      # must run a TRUSTED (base-branch) copy of the detection script, NOT the PR's
+      # working-copy script — otherwise a PR could edit detect-full-suite-changes.sh
+      # to always emit relevant=false and BYPASS this REQUIRED gate. On pull_request
+      # we restore the script from origin/$GITHUB_BASE_REF before running it. (On push
+      # to main the checked-out copy already IS the trusted base, so no restore needed.)
       - name: Detect calibration/code-contract changes
         id: changes
-        run: bash .github/scripts/detect-full-suite-changes.sh
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            base_ref="${GITHUB_BASE_REF:-main}"
+            git fetch --no-tags origin "${base_ref}:refs/remotes/origin/${base_ref}" >/dev/null 2>&1 || \
+              git fetch --no-tags origin "${base_ref}" >/dev/null 2>&1 || true
+            # Restore the trusted (base-branch) skip-decision script over the PR copy.
+            git checkout "origin/${base_ref}" -- .github/scripts/detect-full-suite-changes.sh
+          fi
+          bash .github/scripts/detect-full-suite-changes.sh
 
       - uses: actions/setup-node@v5
         if: steps.changes.outputs.relevant == 'true'
