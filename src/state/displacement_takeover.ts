@@ -327,6 +327,34 @@ function getBilateralRoutingOrder(sourceMun: MunicipalityId, faction: FactionId,
 }
 
 /**
+ * T2-B (orphaned-wiring audit S6/N6): resolve a deterministic representative
+ * destination OSID for a cross-municipality routed cohort, so the receive-side
+ * attribution (`displacement_event_log.ts`) can credit `refugees_received` to
+ * the faction that actually receives the displaced civilians. Picks the
+ * strictCompare-first `op:<destMun>:*` OSID controlled by the receiving faction
+ * (civilians route only to FRIENDLY municipalities, so such an OSID exists when
+ * routing succeeds). Returns undefined when no controlled OSID is found, in
+ * which case the event keeps `dest_osid` unset and the receive-side drops the
+ * contribution exactly as before (graceful, no behavior change).
+ */
+export function resolveRepresentativeDestOsid(
+    state: GameState,
+    destMun: MunicipalityId,
+    faction: FactionId,
+): string | undefined {
+    const pc = state.political?.political_controllers as Record<string, string> | undefined;
+    if (!pc) return undefined;
+    const prefix = `op:${destMun}:`;
+    let best: string | undefined;
+    for (const osid of Object.keys(pc)) {
+        if (!osid.startsWith(prefix)) continue;
+        if (pc[osid] !== faction) continue;
+        if (best === undefined || strictCompare(osid, best) < 0) best = osid;
+    }
+    return best;
+}
+
+/**
  * Shared routing helper for displaced cohorts. Routes population from sourceMunId
  * to friendly municipalities in routing order, respecting capacity constraints.
  *
@@ -406,6 +434,9 @@ function routeDisplacedCohort(
                 turn: currentTurn,
                 origin_mun: sourceMunId,
                 dest_mun: targetMunId,
+                // T2-B: attribute the received cohort to the faction that
+                // controls the destination municipality (refugees_received).
+                dest_osid: resolveRepresentativeDestOsid(state, targetMunId, faction),
                 ethnicity: faction,
                 displaced: 0,
                 killed: 0,
