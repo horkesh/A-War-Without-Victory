@@ -13,10 +13,12 @@ describe('presidential toolbar summary action', () => {
     expect(toolbarProps).not.toContain('onOpenSummary={openSummary}');
   });
 
-  it('keeps tutorial onboarding removed from the live shell', () => {
+  it('auto-mounts the onboarding deck but keeps the legacy first-turn surfaces retired (task #77)', () => {
     const source = readFileSync('src/ui/map/App.tsx', 'utf8');
 
-    expect(source).not.toContain('OnboardingOverlayWrapper');
+    // Task #77 re-enabled the first-run auto-mount of the onboarding deck.
+    expect(source).toContain('<OnboardingOverlayWrapper />');
+    // The legacy first-turn orientation surfaces stay retired.
     expect(source).not.toContain('FirstTurnOrientationWrapper');
     expect(source).not.toContain('FirstTurnOrientationCard');
   });

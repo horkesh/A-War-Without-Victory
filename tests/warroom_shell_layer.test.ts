@@ -404,12 +404,17 @@ describe('AdvanceTurnModal state contract', () => {
   });
 });
 
-describe('live campaign tutorial render suppression', () => {
-  it('does not mount tutorial or coachmark overlays from App', () => {
+describe('live campaign tutorial render', () => {
+  it('auto-mounts the onboarding deck but keeps the legacy coachmark overlay retired (task #77)', () => {
     const source = readFileSync('src/ui/map/App.tsx', 'utf8');
+    // Task #77 re-enabled the first-run auto-mount of the onboarding deck,
+    // gated on the in-game screen + a loaded save. The deck's own
+    // `shouldShowOnboarding` predicate handles the first-run-vs-dismissed
+    // branch off the existing persisted `meta.tutorial_state`.
+    expect(source).toContain('<OnboardingOverlayWrapper />');
+    expect(source).toContain("appScreen === 'game' && loadedGameState && <OnboardingOverlayWrapper />");
+    // The legacy first-hover coachmark overlay stays retired — only the
+    // onboarding deck mount is intended.
     expect(source).not.toContain('CoachmarkLayer');
-    expect(source).not.toContain('OnboardingOverlayWrapper');
-    expect(source).not.toContain('OnboardingOverlay');
-    expect(source).not.toContain('shouldShowOnboarding');
   });
 });
