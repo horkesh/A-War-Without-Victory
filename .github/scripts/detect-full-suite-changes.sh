@@ -9,12 +9,14 @@
 # The workflow gates its HEAVY steps on this so doc-only PRs report success fast while
 # the check name still always reports (so branch protection can mark it REQUIRED).
 #
-# The path set here MUST stay identical to the old workflow-level `paths:` filter
-# (PR #343) so coverage never shrinks. Keep PATTERNS in sync with that list.
+# The path set here is a SUPERSET of the old workflow-level `paths:` filter (PR #343)
+# so coverage never shrinks. Keep PATTERNS in sync with (or broader than) that list.
+# Addition (task #351): package-lock.json — a lockfile-only dep/security bump must run
+# the full suite (otherwise it would match no path and skip every heavy gate).
 set -euo pipefail
 
 # Glob prefixes (directory trees) and exact files that trigger the heavy gate.
-# Identical to the original `paths:` filter plus this workflow + this script.
+# Superset of the original `paths:` filter plus this workflow + this script.
 PREFIXES=(
   "src/"
   "tools/"
@@ -25,6 +27,7 @@ PREFIXES=(
 )
 EXACT_FILES=(
   "package.json"
+  "package-lock.json"
   "vitest.config.ts"
   "tsconfig.json"
   ".github/workflows/full-suite-and-fingerprint.yml"

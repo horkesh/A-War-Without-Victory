@@ -53,6 +53,7 @@ case "${PATH_SET}" in
     )
     EXACT_FILES=(
       "package.json"
+      "package-lock.json"
       "vitest.config.ts"
       "tsconfig.json"
       ".github/workflows/baseline-regression.yml"
@@ -81,10 +82,18 @@ case "${PATH_SET}" in
     )
     EXACT_FILES=(
       "package.json"
+      "package-lock.json"
       "vitest.config.ts"
       "tsconfig.json"
       ".github/workflows/baseline-regression.yml"
       ".github/scripts/detect-changed-paths.sh"
+      # Scenario TEST files the `scenario-anchors` gate actually executes
+      # (npm run test:vitest:scenario:anchors). Without these, a PR that edits ONLY
+      # an anchor test would match no `sim` prefix and skip the anchor gate.
+      "tests/scenario_anchor_contract.test.ts"
+      "tests/integration_deployment_health.test.ts"
+      "tests/scenario_harness_contracts.test.ts"
+      "tests/integration_run_summary.test.ts"
     )
     ;;
   *)
