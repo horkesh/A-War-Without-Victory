@@ -617,15 +617,18 @@ describe('strict null inventory progress', () => {
             as_any_casts: 0,
             non_null_assertions_dot: 7,
             non_null_assertions_index: 0,
-            optional_fields_game_state: 513,
+            // A2 close-out (#71): +1 optional field `StateMeta.dayton_close_out` (the
+            // default-off scenario flag arming the Dayton terminal verdict). state domain,
+            // player/scenario-gated → byte-identical when unset. 513→514 / state 174→175.
+            optional_fields_game_state: 514,
         });
-        expect(current.optional_field_domains.total).toBe(513);
+        expect(current.optional_field_domains.total).toBe(514);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 329,
-            state: 174,
+            state: 175,
             ui_adapter: 0,
             unknown: 0,
         });
