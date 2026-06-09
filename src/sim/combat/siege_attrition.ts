@@ -21,6 +21,7 @@ import {
     lifelineAttritionMultiplier,
 } from '../../state/sarajevo_lifeline.js';
 import { getSarajevoSiegeParams } from './sarajevo_siege_params.js';
+import { getSiegeCasualtySplit } from './casualty_realism_v2_gate.js';
 
 // --- Constants ---
 
@@ -33,10 +34,14 @@ export const SIEGE_ATTRITION_ESCALATION = 0.05;
 /** Maximum siege escalation multiplier. */
 export const SIEGE_ATTRITION_CAP = 2.0;
 
-/** KIA fraction of siege bombardment casualties (lower than combat — more WIA from shelling). */
+/** KIA fraction of siege bombardment casualties (lower than combat — more WIA from shelling).
+ * SHIPPED (flag-OFF) value. The live split is sourced from getSiegeCasualtySplit()
+ * (casualty_realism_v2_gate.ts); this const documents the flag-OFF baseline and is kept
+ * as the gate's SHIPPED_SIEGE.kia. */
 export const SIEGE_KIA_FRACTION = 0.20;
 
-/** WIA fraction of siege bombardment casualties. */
+/** WIA fraction of siege bombardment casualties. SHIPPED (flag-OFF) value; B1 V2 raises
+ * this to 0.78 (MIA 0.15→0.02) via getSiegeCasualtySplit(). */
 export const SIEGE_WIA_FRACTION = 0.65;
 
 // --- Types ---
@@ -77,6 +82,11 @@ export function applySiegeBombardmentAttrition(state: GameState): SiegeAttrition
         const factionIds = (state.factions ?? []).map(f => f.id);
         state.military.casualty_ledger = initializeCasualtyLedger(factionIds);
     }
+
+    // B1 casualty-realism V2 gate (default OFF ⇒ SIEGE_KIA/WIA_FRACTION exactly).
+    const siegeSplit = getSiegeCasualtySplit();
+    const siegeKiaFrac = siegeSplit.kia;
+    const siegeWiaFrac = siegeSplit.wia;
 
     // Build map: osid → list of formation IDs located there
     const formationsByOsid: Record<string, string[]> = {};
@@ -161,8 +171,8 @@ export function applySiegeBombardmentAttrition(state: GameState): SiegeAttrition
             // Apply
             f.personnel = personnel - casualties;
 
-            const killed = Math.floor(casualties * SIEGE_KIA_FRACTION);
-            const wounded = Math.floor(casualties * SIEGE_WIA_FRACTION);
+            const killed = Math.floor(casualties * siegeKiaFrac);
+            const wounded = Math.floor(casualties * siegeWiaFrac);
             const missing = casualties - killed - wounded;
 
             recordBattleCasualties(state.military.casualty_ledger!, besiegedFaction, fid, {

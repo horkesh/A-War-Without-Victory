@@ -52,9 +52,9 @@ import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.
 import { lookupParamilitaryNamedUnit } from '../../../data/source/oob/paramilitary_named_units.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import type { EdgeRecord } from '../../map/settlements.js';
-// Casualty split ratios (KIA 0.30 / WIA 0.55 / MIA 0.15 remainder) — canonical
-// export from attack_casualty_distribution.ts.
-import { KIA_FRACTION, WIA_FRACTION } from './attack_casualty_distribution.js';
+// Casualty split routed through the B1 casualty-realism V2 gate. Flag-OFF returns the
+// shipped main-path split (KIA 0.22 / WIA 0.74 / MIA 0.04), byte-identical to before.
+import { getMainCasualtySplit } from './casualty_realism_v2_gate.js';
 /** Casualty multiplier when paramilitary retreats from defended OSID (heavy losses). */
 const DEFENDED_RETREAT_CASUALTY_MULT = 3;
 /** Casualty multiplier when offensive paramilitary overwhelms light defense. */
@@ -150,10 +150,12 @@ function makeParamilitaryId(faction: FactionId, turn: number, index: number): Fo
     return `para_${faction.toLowerCase()}_t${turn}_${index}`;
 }
 
-/** Split total casualties into KIA/WIA/MIA using standard fractions. */
+/** Split total casualties into KIA/WIA/MIA using the main-path split.
+ * Routed through the B1 casualty-realism V2 gate (default OFF ⇒ KIA/WIA_FRACTION exactly). */
 function splitCasualties(total: number): { killed: number; wounded: number; missing_captured: number } {
-    const killed = Math.floor(total * KIA_FRACTION);
-    const wounded = Math.floor(total * WIA_FRACTION);
+    const { kia, wia } = getMainCasualtySplit();
+    const killed = Math.floor(total * kia);
+    const wounded = Math.floor(total * wia);
     return { killed, wounded, missing_captured: Math.max(0, total - killed - wounded) };
 }
 

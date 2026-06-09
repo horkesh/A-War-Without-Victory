@@ -34,7 +34,7 @@ import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
-import { KIA_FRACTION, WIA_FRACTION } from './attack_casualty_distribution.js';
+import { getMainCasualtySplit } from './casualty_realism_v2_gate.js';
 import { deterministicRandom } from '../../state/deterministic_random.js';
 import { recordBrigadeEngagement, ensureBrigadeHistory } from './brigade_history_recorder.js';
 import {
@@ -270,6 +270,11 @@ export function applyFrontlineAttrition(
     const turn = state.meta?.turn ?? 0;
     const seed = state.meta?.seed ?? 'awwv';
 
+    // B1 casualty-realism V2 gate (default OFF ⇒ KIA_FRACTION/WIA_FRACTION exactly).
+    const split = getMainCasualtySplit();
+    const kiaFrac = split.kia;
+    const wiaFrac = split.wia;
+
     for (const { fid, formation, sector } of frontlineBrigades) {
         // Graz Accords: skip attrition on cold (truce-covered) fronts
         if (isColdFront(state, formation, sector)) continue;
@@ -343,9 +348,9 @@ export function applyFrontlineAttrition(
         // Apply personnel loss
         formation.personnel = Math.max(MIN_COMBAT_PERSONNEL, personnel - casualties);
 
-        // Record in casualty ledger
-        const killed = Math.floor(casualties * KIA_FRACTION);
-        const wounded = Math.floor(casualties * WIA_FRACTION);
+        // Record in casualty ledger (split via B1 gate; flag-OFF == KIA/WIA_FRACTION).
+        const killed = Math.floor(casualties * kiaFrac);
+        const wounded = Math.floor(casualties * wiaFrac);
         const mia = Math.max(0, casualties - killed - wounded);
         recordBattleCasualties(state.military.casualty_ledger!, factionId, fid, {
             killed, wounded, missing_captured: mia
