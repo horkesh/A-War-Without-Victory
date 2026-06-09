@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { applyMigrations, getLatestSchemaVersion } from '../src/state/save_migration.js';
+import { deserializeState, serializeState } from '../src/state/serialize.js';
 
 function minimalLegacyState(schemaVersion = 2): any {
     return {
@@ -984,5 +985,36 @@ describe('versioned save migration steps', () => {
 
         expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
         expect(state.displacement.displacement_flows_by_osid).toEqual({});
+    });
+
+    // Regression (Codex P1, validateGameState.ts:3278): the v36 validator
+    // HARD-REQUIRES displacement.displacement_flows_by_osid, but applyMigrations
+    // skips the v36 step for a state already AT v36 — so a same-version v36 save
+    // built without the field (current-version factories / in-memory states /
+    // any constructor outside the updated path) was REJECTED on load. The
+    // canonicalize-on-load seed (serialize.ts canonicalizeCurrentFields) must
+    // default the absent field to {} on EVERY load regardless of version, so the
+    // exact bug case loads cleanly. (serializeState forces version 0 and re-runs
+    // all migrations, so its OWN output always carries the field — this asserts
+    // the same-version-v36 load path, which is the real break.)
+    it('loads a same-version v36 save missing displacement_flows_by_osid cleanly (Codex P1)', () => {
+        // Build a full, valid v36 state, then drop the additive field to mimic a
+        // same-version save serialized without it.
+        const built = minimalLegacyState(1);
+        applyMigrations(built);
+        expect(built.schema_version).toBe(36);
+        delete built.displacement.displacement_flows_by_osid;
+        built.schema_version = 36;
+
+        const payload = JSON.stringify(built);
+
+        // Must NOT throw "v36 required field missing or invalid" — the canonicalize
+        // seed restores it.
+        const loaded = deserializeState(payload);
+        expect(loaded.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(loaded.displacement.displacement_flows_by_osid).toEqual({});
+
+        // And the canonicalized save round-trips byte-identically.
+        expect(serializeState(loaded)).toBe(serializeState(loaded));
     });
 });

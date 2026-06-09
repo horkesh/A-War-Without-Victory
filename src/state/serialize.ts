@@ -320,4 +320,18 @@ function canonicalizeCurrentFields(
         }
     }
 
+    // v36 additive read-model substrate: displacement_flows_by_osid is lazily
+    // initialized (appendDisplacementEvent does `??= {}`) and the UI adapter
+    // tolerates its absence. The validator HARD-REQUIRES it for schema_version
+    // >= 36, but applyMigrations only runs the v36 migration for states BELOW
+    // v36 — so any same-version v36 state built without the field (current-version
+    // factories, in-memory states) would be rejected on load/validate. Seed an
+    // empty record here on EVERY load (this runs post-migration regardless of
+    // version) so absence canonicalizes to {} and the field stays present for
+    // the UI. Mirrors the lazy-default pattern above. Load-side only — the empty
+    // record is calibration-flat (verified control_delta byte-identical 40w+188w).
+    if (disp && typeof disp === 'object' && !Array.isArray(disp) && disp.displacement_flows_by_osid === undefined) {
+        disp.displacement_flows_by_osid = {};
+    }
+
 }
