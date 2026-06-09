@@ -77,6 +77,19 @@ export interface Scenario {
     peace_war_start_control?: string;
     /** Optional max-turn override copied into GameState metadata for harness/runtime limits. */
     max_turns?: number;
+    /**
+     * A2 Dayton close-out (task #71). When true, the harness (a) pulls the Dayton
+     * trigger week forward (188 → 180, the Nov-1995 proximity-talks window so the
+     * negotiation has turns to run before the horizon) and (b) after the week loop
+     * RESOLVES any still-pending Dayton menu via the deterministic historical-default
+     * proposal — producing a terminal Pyrrhic verdict + meta.game_over instead of a
+     * freeze-frame open menu. DEFAULT OFF: the calibration scenarios omit it, so the
+     * 188w / 40w baselines (and the t188 pending_dayton snapshot) stay byte-identical.
+     * resolveDaytonNegotiation never repaints OSID control (it only computes a split
+     * %), so even flag-ON the territorial baseline is untouched — this is an inert
+     * verdict layer over the final state.
+     */
+    dayton_close_out?: boolean;
     weeks: number;
     turns?: ScenarioTurn[];
     /** Phase H2.4: When true, harness injects baseline_ops for each week that has none (harness-only; off by default). */

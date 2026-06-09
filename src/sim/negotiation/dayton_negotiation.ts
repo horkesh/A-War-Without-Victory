@@ -45,10 +45,35 @@ import { getPackageAreaPct } from './package_area_resolver.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 
-/** Week (from April 1992 start) when Dayton fires: ~188 weeks = November 1995. */
+/**
+ * Default week (from April 1992 start) when Dayton fires: ~188 weeks = November
+ * 1995. On a 188-week horizon this lands on the FINAL turn, so the menu opens but
+ * there is no turn left to negotiate across — the campaign freeze-frames on an open
+ * menu (see 20260609 instrumented-campaign audit, Dimension 3 / A2).
+ */
 export const DAYTON_TRIGGER_WEEK = 188;
 
-/** Patron override level at which Dayton is forced even before week 188. */
+/**
+ * A2 close-out (task #71): when `meta.dayton_close_out` is on, the trigger is pulled
+ * forward to week 180. Historically the Dayton story is the autumn-1995 sequence —
+ * the 8 Sept Geneva agreed-principles, the 26 Sept New York further-principles, the
+ * 5 Oct nationwide cease-fire, then the 1–21 Nov Wright-Patterson (Dayton) proximity
+ * talks that ran for WEEKS and initialled on 21 Nov 1995. Week 180 of an April-1992
+ * start ≈ late September 1995 (cease-fire / proximity-talks run-up), giving the
+ * negotiation ~8 turns of air before the 188-week horizon instead of a single
+ * final-turn snapshot. Default (flag off) keeps 188 → calibration byte-identical.
+ */
+export const DAYTON_TRIGGER_WEEK_CLOSE_OUT = 180;
+
+/**
+ * The trigger week in effect for this state: the pulled-forward close-out week when
+ * `meta.dayton_close_out` is on, else the default. Pure read of meta.
+ */
+export function effectiveDaytonTriggerWeek(state: GameState): number {
+    return state.meta.dayton_close_out === true ? DAYTON_TRIGGER_WEEK_CLOSE_OUT : DAYTON_TRIGGER_WEEK;
+}
+
+/** Patron override level at which Dayton is forced even before the trigger week. */
 const FORCED_DAYTON_OVERRIDE_THRESHOLD = 95;
 
 /** Historical territory split baseline: Federation 51%, RS 49%. */
@@ -78,8 +103,8 @@ export function shouldInitiateDayton(state: GameState): boolean {
     const warStart = state.meta.war_start_turn ?? 0;
     const warWeek = state.meta.turn - warStart;
 
-    // Trigger 1: reached the Dayton date
-    if (warWeek >= DAYTON_TRIGGER_WEEK) return true;
+    // Trigger 1: reached the Dayton date (pulled forward to w180 under close-out).
+    if (warWeek >= effectiveDaytonTriggerWeek(state)) return true;
 
     // Trigger 2: all patrons forcing acceptance
     const neg = state.military.negotiation;
@@ -138,6 +163,71 @@ export function initiateDaytonNegotiation(state: GameState): {
         faction_capital: factionCapital,
         patron_override: patronOverride,
     };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Terminal close-out (A2, task #71)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * The deterministic historical-default Dayton proposal — what a headless /
+ * historical-mode run signs when no human spends negotiation capital.
+ *
+ * It is intentionally EMPTY: no territorial demands, no concessions, no
+ * institutional/dial/competency/constitutional/return-justice deviations. Per the
+ * resolver, an empty proposal leaves every package with its default holder and
+ * every institutional choice at the historical (decentralized / Annex-4) baseline —
+ * i.e. the real Dayton settlement's structural shape, the maximal-gridlock peace the
+ * negative-sum thesis grades as Pyrrhic. The player faction spends nothing, so the
+ * budget clamp is a no-op and the outcome is reproducible regardless of capital.
+ *
+ * This mirrors the calibration "bots replay historical defaults" contract: the
+ * close-out is the negotiation's options[0]/AI-default analogue.
+ */
+export function buildHistoricalDefaultDaytonProposal(): DaytonProposal {
+    return {
+        territorial_demands: [],
+        territorial_concessions: [],
+        institutional_choices: {},
+    };
+}
+
+/**
+ * A2 terminal close-out: resolve a still-PENDING Dayton menu to a verdict.
+ *
+ * Called once, after the campaign reaches its horizon, when a `pending_dayton`
+ * menu was opened (trigger fired) but nothing resolved it — the freeze-frame the
+ * instrumented-campaign audit flagged. In headless / historical mode no human
+ * proposal exists, so we resolve via the deterministic historical-default proposal
+ * (`buildHistoricalDefaultDaytonProposal`). resolveDaytonNegotiation then:
+ *   - signs the all-default settlement,
+ *   - sets `meta.game_over = true` + `meta.outcome = 'dayton'`,
+ *   - freezes the endgame snapshot (the Pyrrhic verdict + cost ledger),
+ * so the campaign CLOSES on a coherent verdict instead of an open menu.
+ *
+ * Idempotent + safe: a no-op when close-out is not armed, when there is no pending
+ * menu, when Dayton already resolved, or when the game is already over. Returns the
+ * signed DaytonResult when it resolved this call, else null. Pure-deterministic
+ * (delegates to the deterministic resolver; no RNG / wall-clock).
+ *
+ * CALIBRATION: only runs when `meta.dayton_close_out` is on — the calibration
+ * scenarios never set it, so this is never reached on the byte-identical baselines.
+ */
+export function resolvePendingDaytonCloseOut(state: GameState): DaytonResult | null {
+    if (state.meta.dayton_close_out !== true) return null;
+    if (state.meta.game_over) return null;
+    const neg = state.military.negotiation;
+    if (!neg) return null;
+    if (neg.dayton_result) return null;     // already resolved
+    if (!neg.pending_dayton) return null;   // no menu to close
+
+    const result = resolveDaytonNegotiation(state, buildHistoricalDefaultDaytonProposal());
+    // The menu has been consumed into a signed result; drop the stale pending packet
+    // so the terminal state carries the verdict, not a half-open menu.
+    if (state.military.negotiation) {
+        delete state.military.negotiation.pending_dayton;
+    }
+    return result;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

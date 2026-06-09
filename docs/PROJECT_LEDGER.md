@@ -22,6 +22,29 @@
 
 **Owner decision needed:** Lane A is INERT at the calibration horizon (net 0). It is correct + safe + historically faithful (removes ahistorical pre-Washington HVO-pocket over-capture during the run) but does NOT move the 649 floor. Keep as default-off path fidelity, or shelve pending a mid-game (pre-Washington) calibration target.
 
+## [2026-06-09] feat(endgame): A2 — Dayton close-out (earlier trigger + Pyrrhic verdict + game_over + headless terminal proxy)
+
+**Type:** new endgame terminal-resolution behind a DEFAULT-OFF scenario flag (`dayton_close_out`). Branch `feat/a2-dayton-endgame-close` off `origin/main`. Task #71 (Pyrrhic panel A2, the climax-close). Closes the gap the 20260609 instrumented-campaign audit flagged: the 5-D Dayton menu opened at t188 but the campaign **terminated as an OPEN, unresolved menu** — `game_over:false`, no verdict (a freeze-frame), and `DAYTON_TRIGGER_WEEK=188` fired on the FINAL turn so there were no turns left to negotiate. Calibration-LAST: flag OFF ⇒ byte-identical to the floor.
+
+**Mechanism (all gated on `meta.dayton_close_out`):**
+- **Earlier trigger.** `effectiveDaytonTriggerWeek(state)` returns **180** when close-out is on, else the default **188**. `shouldInitiateDayton` reads it. Historical justification: Dayton is the autumn-1995 sequence — 8 Sep Geneva agreed-principles, 26 Sep New York further-principles, 5 Oct nationwide cease-fire, **1–21 Nov Wright-Patterson (Dayton) proximity talks** (ran ~3 weeks, initialled 21 Nov 1995). Week 180 of an Apr-1992 start ≈ late Sep 1995 (cease-fire / proximity-talks run-up), giving the negotiation **~8 turns of air** before the 188-week horizon instead of a single final-turn snapshot.
+- **Resolve to a verdict.** After the week loop, `resolvePendingDaytonCloseOut(state)` signs the deterministic **historical-default (empty) proposal** via the existing `resolveDaytonNegotiation` → sets `dayton_result`, `meta.game_over=true`, `meta.outcome='dayton'`, and freezes the endgame snapshot (Pyrrhic verdict + cost-ledger). Deterministic in headless/historical mode — no human proposal required; the empty proposal leaves every package at its default holder and every institutional choice at the historical (decentralized/Annex-4) baseline (the maximal-gridlock peace the negative-sum thesis grades as Pyrrhic). Idempotent + a no-op when the flag is off, no menu is pending, or the game is already over.
+- **Headless terminal proxy.** New scenario `data/scenarios/apr1992_definitive_188w_dayton_close.json` (188w, `decision_mode: emergent`, `dayton_close_out: true`) runs the campaign to a real terminal verdict. New test `tests/dayton_headless_close_out.test.ts` (12 tests) pins the close-out contract (trigger pull-forward, resolution → verdict+game_over, determinism, and the no-op guards) without a human.
+
+**CALIBRATION — byte-identical (flag OFF), inert verdict LAYER:** `resolveDaytonNegotiation` never repaints OSID control (it computes only a `final_territory_split` %), so even flag-ON the territorial baseline is untouched — there is NO control-repaint to gate for D1. The calibration scenarios never set `dayton_close_out`, so the post-loop call + the trigger pull-forward are both skipped and the t188 `pending_dayton` snapshot is unchanged.
+
+| run | hash | result |
+| --- | --- | --- |
+| 40w (flag OFF) | `235c61f408dc3d95` | **BYTE-IDENTICAL** to floor |
+| 188w (flag OFF) | `d311eeac18492683` | **BYTE-IDENTICAL** to floor |
+| 188w_dayton_close (flag ON) | `d1c3f3081f259889` | game_over=true, `outcome='dayton'`, terminal Pyrrhic verdict produced |
+
+**Terminal verdict reads (flag-ON 188w_dayton_close, emergent):** all three factions graded **C → outcome `failure`** (war-cost cap — nobody won the negative-sum war); **RS carries `genocide_condemnation`** (Srebrenica rupture → verdict); `peace_dysfunction_index 98.1` (maximal-gridlock Dayton), `entity_autonomy_index 100` (decentralized — the historical shape), Brčko → `arbitration` (matches the 1999 Final Award), split RBiH 40.2 / RS 45.4 / HRHB 14.3. "Win the battles, lose the peace." Dayton triggered at **w180** (pull-forward), resolved post-loop at the horizon.
+
+**Changes:** `src/scenario/scenario_types.ts` (+`dayton_close_out?`), `src/state/game_state.ts` (+`meta.dayton_close_out?`), `src/scenario/scenario_runner.ts` (plumb flag + post-loop `resolvePendingDaytonCloseOut`), `src/sim/negotiation/dayton_negotiation.ts` (+`DAYTON_TRIGGER_WEEK_CLOSE_OUT=180`, `effectiveDaytonTriggerWeek`, `buildHistoricalDefaultDaytonProposal`, `resolvePendingDaytonCloseOut`), new scenario file, new test (12). The existing UI adapter already prefers `meta.endgame_snapshot` when `game_over` and reads `dayton_result`, so `VerdictScreen`/`GameOverModal`/`WarCostSummary` light up on the closed state with no UI change.
+
+**Verification:** `tsc --noEmit` exit 0. 204 dayton/scoring/peace/rupture + 12 new close-out tests pass; full vitest + 188w-before-merge gate run pre-merge (NOT merged — C1 lane hardens this).
+
 ## [2026-06-08] feat(faction-ai): VRS strangle-not-capture contain-posture (§6, default-off, release-reliability proven)
 
 **Type:** new bot-AI posture behind a DEFAULT-OFF flag. Branch `feat/vrs-contain-posture` off `origin/main`. Owner-backlog #4; owner §6 approval granted 2026-06-08 (non-delegable). Builds on contain Lane 1 (`isEnclaveContainable` predicate, #273). This is **Lane V** (VRS-side, full §6 gate) of the faction-agnostic contain design (`docs/plans/2026-06-07-contain-enclave-faction-agnostic-design.md`). Calibration-LAST: flag OFF ⇒ byte-identical to the floor.
