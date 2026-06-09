@@ -116,6 +116,7 @@ const baseState: GameState = {
         displacement_humanitarian_aggregates: {},
         displacement_origin_dest_arrivals: {},
         displacement_recent_by_turn: {},
+        displacement_flows_by_osid: {},
         displacement_camp_state: {},
         civilian_casualties: {},
         displacement_state: {},
