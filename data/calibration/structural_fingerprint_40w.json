@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "fingerprint": "78af6fc7a3278a3e",
+  "fields": {
+    "schema_version": 1,
+    "scenario_id": "apr1992_definitive_40w",
+    "weeks": 40,
+    "final_turn": 40,
+    "control_counts": {
+      "HRHB": 89,
+      "RBiH": 250,
+      "RS": 373
+    },
+    "anchors_passed": 30,
+    "anchors_total": 30,
+    "anchor_checks": {
+      "op:banja_luka:banja_luka_2": true,
+      "op:bihac:bihac_2": true,
+      "op:bijeljina:bijeljina_2": true,
+      "op:brcko:brcko": true,
+      "op:brcko:brka_2": true,
+      "op:bugojno:kopcic_2": true,
+      "op:cazin:cazin_2": true,
+      "op:centar_sarajevo:sarajevo_dio_centar_sajarevo": true,
+      "op:derventa:derventa_2": true,
+      "op:doboj:boljanic_2": true,
+      "op:foca:foca_3": true,
+      "op:gorazde:gorazde_2": true,
+      "op:gracanica:petrovo_2": true,
+      "op:gradacac:gradacac_2": true,
+      "op:jajce:jajce_3": true,
+      "op:lukavac:brijesnica_donja_2": true,
+      "op:mostar:mostar_zapad_2": true,
+      "op:orasje:orasje": true,
+      "op:prijedor:prijedor_2": true,
+      "op:rogatica:zepa_2": true,
+      "op:srebrenica:srebrenica_2": true,
+      "op:travnik:travnik_2": true,
+      "op:tuzla:tuzla_2": true,
+      "op:ugljevik:teocak_krstac_2": true,
+      "op:velika_kladusa:velika_kladusa_2": true,
+      "op:visegrad:visegrad_2": true,
+      "op:zavidovici:vozuca_2": true,
+      "op:zenica:zenica_2": true,
+      "op:zvornik:sapna": true,
+      "op:zvornik:zvornik": true
+    },
+    "benchmark": {
+      "evaluated": 6,
+      "passed": 6,
+      "failed": 0,
+      "not_reached": 0
+    }
+  }
+}

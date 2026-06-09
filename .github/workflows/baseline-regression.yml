@@ -95,5 +95,8 @@ jobs:
   # is also test.skip'd. Regression detection signal preserved in
   # tests/integration_run_summary.test.ts, tests/integration_deployment_health.test.ts,
   # tests/scenario_harness_contracts.test.ts, and per-anchor controller checks.
-  # Follow-up lane: LANE-NIGHTSHIFT-PLATFORM-STABLE-MANIFEST (replace byte-hash
-  # with structural fingerprint of meaningful fields).
+  #
+  # SUPERSEDED 2026-06-09 (C1): the platform-stable structural fingerprint that the
+  # LANE-NIGHTSHIFT-PLATFORM-STABLE-MANIFEST follow-up called for now lives in the
+  # dedicated `full-suite-and-fingerprint.yml` workflow (path-aware required gate),
+  # together with the full-vitest-suite gate that closes the stale-pin false-green.
