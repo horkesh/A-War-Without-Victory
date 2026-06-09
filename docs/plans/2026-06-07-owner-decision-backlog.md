@@ -1,5 +1,19 @@
 # Owner Decision Backlog — consolidated (2026-06-07)
 
+> **⚠️ RECONCILED 2026-06-09 (D4 beta-gate sweep) — read this first.** Many items below have
+> SHIPPED or changed disposition since 2026-06-07. Quick map (authoritative state = the alpha-band
+> session; floor 188w `5f57d17287b87dfb` / 40w `be76e56dd9d288c2` / 52w golden `9b426732…`,
+> territory UNCHANGED at 649/712, anchors 30/30):
+> - **§1 Presidential Command Model** — Option 1 (faction-asymmetric command friction) SHIPPED (#274/#313/#319); force-launch cost preview SHIPPED (#349/#54).
+> - **§3 Event-system observer-flag writer** — SHIPPED (#285); the A3 authorship/dead-bridge fix + dynamic codex morphing SHIPPED (#348 A3; #334 A1c).
+> - **§4 §6 VRS strangle-not-capture** — BUILT as contain Lane V (#339, default-off, §6 release-reliability proven); measured **calibration-INERT** on the historical path (eastern enclaves fall via Krivaja triggered ops). D1 draft recommends SHELVE.
+> - **§5 Political-Dimension Propagation** — patron_confidence + military_credibility ACTIVATED (#325); intl_standing + internal_cohesion stay guarded-OFF (task #48). `intl_only`/`cohesion_only` activation = D1-time.
+> - **§7 TG Sept-1995** — HVO western robustness (#278) + Sana (#284) shipped; Mistral SW-belt + Ključ PARKED.
+> - **§10 Fall-1995 combat-math** — E-A5 launch-halt ACTIVATED + firing (#312/#325); E-B1 still the keystone, D1-time.
+> - **Contain Lane A (ARBiH→HVO enclaves)** — BUILT (#341, default-off); measured **calibration-INERT** (the over-capture is a pre-Washington transient already resolved at the 649 end-state). The Central-Bosnia 13-OSID ceiling's real lever is **HVO-side OOB** (#66 scoping), NOT contain. D1 draft recommends SHELVE.
+> - **`op:zvornik:zvornik` (tracked item below)** — **RECOVERED by #279 garrison-pin; floor is 30/30 anchors. NO LONGER OPEN** — corrected in that section.
+> - **ALPHA BAND COMPLETE (2026-06-09)** + **1.0 Definition-of-Done RATIFIED** (`docs/plans/2026-06-08-v1.0-definition-of-done.md`); we are at the **0.9.9-beta gate**. **B1 casualty missing-fix** (#344) HELD for D1; the **D1 finalization sequence** is drafted (`docs/plans/2026-06-09-d1-finalization-sequence-DRAFT.md`). Version: package.json = **0.9.6-alpha.1**.
+
 **Purpose:** A single place for the owner to pick up the ten open decisions distilled from the
 2026-06-07 Pyrrhic decision-packet round, plus two tracked open items (a cross-cutting
 doc-staleness sweep and the `op:zvornik:zvornik` 188w anchor regression). One section per item:
@@ -217,17 +231,26 @@ this batch + the parallel canon batch:
 
 ---
 
-## Open tracked item — `op:zvornik:zvornik` 188w anchor regression
+## ~~Open~~ RESOLVED tracked item — `op:zvornik:zvornik` 188w anchor regression
 
-- **Decision:** How to resolve the new failing 188w anchor.
-- **Symptom:** `op:zvornik:zvornik` is a REGRESSION since the 618 baseline. Three dual-horizon fix
-  attempts were NO-GO'd: a surgical OOB change, a `must_hold` change, and an event `control_change`.
-- **Root cause:** `arbih_245th_mountain` recaptures `op:zvornik:zvornik` at ~w85 (a 2.03:1
-  decisive victory) and holds it to w188. The `zvornik_takeover_1992` event DOES flip it RS at w10,
-  but it is retaken. This is NOT a #200 side-effect (disproven) and NOT a missing initial flip.
-- **Recommendation:** This is a bot-AI / OOB lane — the 245th Mountain is too strong and/or the RS
-  Drina defender is too weak and/or the bot mis-targets. Fix on the bot-AI / OOB side, not via
-  event control-change.
-- **Flags:** §6 none · canon none · calibration yes · effort medium · risk medium.
-- **Build-lane:** Bot-AI / OOB lane.
-- **Status:** **OPEN — 3 dual-horizon fixes NO-GO'd; tracked.**
+> **✅ RESOLVED 2026-06-08 (#279 garrison-pin); confirmed by the D4 sweep 2026-06-09.** The sacred
+> anchor `op:zvornik:zvornik` was RECOVERED by the **#279 garrison-pin engine fix**
+> (`pinGarrisonToMustHoldFrontEdge` in `brigade_front_distribution.ts` + `must_hold vrs_drina=[op:zvornik:zvornik]`
+> in the 188w scenario): it pins one idle ≥400-pers same-corps brigade onto the undefended friendly
+> `must_hold` OSID so the 245th Mountain's ~w85 recapture is blocked. The 188w floor of record is
+> now **30/30 anchors** (`5f57d17287b87dfb`), Zvornik RS. **This item is NO LONGER OPEN.** The
+> bot-AI/OOB framing below is HISTORICAL context only.
+
+- **Decision:** ~~How to resolve the new failing 188w anchor.~~ RESOLVED (#279).
+- **Symptom (historical):** `op:zvornik:zvornik` was a REGRESSION since the 618 baseline. Three early
+  dual-horizon fix attempts were NO-GO'd: a surgical OOB change, a `must_hold` change, and an event
+  `control_change`.
+- **Root cause (historical):** `arbih_245th_mountain` recaptured `op:zvornik:zvornik` at ~w85 (a 2.03:1
+  decisive victory) and held it to w188. The `zvornik_takeover_1992` event DOES flip it RS at w10,
+  but it was retaken. This is NOT a #200 side-effect (disproven) and NOT a missing initial flip.
+- **Resolution:** the **#279 garrison-pin** (a reusable engine mechanic) — NOT a bot-AI strength
+  retune or an event control-change — pins a friendly garrison onto the undefended `must_hold` Drina
+  front edge, holding Zvornik RS through w188 (+12 OSID net, NE Drina/Birač corridor).
+- **Flags:** §6 none · canon none · calibration yes (delivered +12) · effort medium · risk medium.
+- **Build-lane:** Bot-AI / OOB / engine garrison-pin lane.
+- **Status:** **RESOLVED — recovered by #279 garrison-pin; 188w 30/30 anchors, Zvornik RS.**
