@@ -1,7 +1,7 @@
 # §6 HISTORIAN-GATE REVIEW PACKET — Collapse Pipeline (G3 prep)
 
 **Type:** READ-ONLY assembly. No engine/sim/scenario/state/test code touched. No §6 content authored, reinterpreted, softened, or altered. No rupture timing changed. This packet QUOTES existing canon verbatim and CITES exact file+section; it does not decide anything.
-**Purpose:** Supports **G3** (historian acknowledgment) of the three-part §6 guard for the pressure→exhaustion→political-collapse pipeline. G1 (enclave-OSID exclusion at the Phase-3D write site) and G2 (188-week invariant test) are engineering work, gated separately; this packet is the evidence the OWNER (non-delegable) and a historian sign off on.
+**Purpose:** Supports **G3** (historian acknowledgment) of the three-part §6 guard for the pressure→exhaustion→political-collapse pipeline. G1 (enclave-OSID exclusion at the Phase-3D `collapse_damage` write root) and G2 (188-week invariant test) are engineering work, gated separately; this packet is the evidence the OWNER (non-delegable) and a historian sign off on.
 **Predecessors (read first):**
 - `docs/40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md` (§4 = the §6 guard design)
 - `docs/40_reports/proposals/20260609_SCOPE_collapse_pipeline.md` (§3 = the §6 surface)
@@ -9,9 +9,11 @@
 
 ---
 
-## 0. The single load-bearing mechanical fact (verified in code)
+## 0. The single load-bearing mechanical fact (verified in code; corrected per Codex review on PR #368 P1)
 
-Phase 3D (`src/sim/collapse/phase3d_collapse_resolution.ts`) writes **only** `state.political.capacity_modifiers.by_sid[osid]` — four multipliers in `[0,1]` (`authority_mult`, `cohesion_mult`, `supply_mult`, `pressure_cap_mult`). It **never** writes `political_controllers`. The downstream consumers (`front_pressure.ts`, `formation_fatigue.ts`, `loss_of_control_trends.ts`) only scale pressure generation / formation supply / diagnostic flags.
+> **Correction (Codex #368 P1):** an earlier draft of this packet stated 3D writes *only* `capacity_modifiers`. That is **false**. Verified in `src/sim/collapse/phase3d_collapse_resolution.ts`: 3D writes `state.political.collapse_damage.by_entity[entityId]` at the damage-write root (`getOrInitCollapseDamage`, `:103`); `updateCapacityModifiers` (`:169–188`) and `recomputePhase3DCapacityModifiersFromDamage` (`:197`) **derive** `capacity_modifiers` *from* that damage; and `src/state/loss_of_control_trends.ts:132` reads the damage entry directly to set `will_not_recover`. The corrected statement is below. The safety-critical point — **it never flips `political_controllers`** — is unchanged and is what carries the §6 guarantee.
+
+Phase 3D (`src/sim/collapse/phase3d_collapse_resolution.ts`) writes `state.political.collapse_damage.by_entity[entityId]` (monotonic damage tracks) **and derives** `state.political.capacity_modifiers.by_sid[osid]` from it — four multipliers in `[0,1]` (`authority_mult`, `cohesion_mult`, `supply_mult`, `pressure_cap_mult`). The damage entry is also read directly by `loss_of_control_trends.ts:132` to set the `will_not_recover` diagnostic. It **never** writes `political_controllers`. The downstream consumers (`front_pressure.ts`, `formation_fatigue.ts`, `loss_of_control_trends.ts`) only scale pressure generation / formation supply / diagnostic flags.
 
 **Consequence for §6:** collapse can only *indirectly soften a defender* (degrade RBiH's own pressure/supply at a settlement); combat then resolves control through the existing authorized mechanisms. Collapse therefore:
 - **CAN** accelerate a defender's fall (by weakening the defender);
@@ -157,11 +159,11 @@ Derived **strictly** from §1–§2 above. This is the checklist G2 must encode;
 - [ ] **G2.5 — Žepa still falls.** `political_controllers['op:rogatica:zepa_2'] === 'RS'` by Dayton, on the `zepa_falls_1995` window (160–190), unchanged vs baseline.
 - [ ] **G2.6 — Goražde still HELD.** Every Goražde OSID in §1.1 remains `RBiH` at war's end (anchors: `historical_anchors.ts` Goražde rows), unchanged vs baseline.
 - [ ] **G2.7 — Bihać still HELD.** Every OSID under the Bihać prefix set remains `RBiH` at war's end, unchanged vs baseline.
-- [ ] **G2.8 — No capacity_modifier written for any §6 enclave OSID (G1 proof).** For every OSID where `getEnclaveDefForOsid(osid)` returns an RBiH enclave, `capacity_modifiers.by_sid[osid]` is **absent / untouched** (default 1.0) on every turn of the 188w run, even when that OSID is Tier-1 collapse-eligible. (This is the direct assertion that G1 holds; G2.1–G2.7 are the downstream guarantees it buys.)
+- [ ] **G2.8 — No collapse_damage entry AND no capacity_modifier written for any §6 enclave OSID (G1 proof; strengthened per Codex review on PR #368 P1).** For every OSID where `getEnclaveDefForOsid(osid)` returns an RBiH enclave, on every turn of the 188w run, even when that OSID is Tier-1 collapse-eligible: (i) **`state.political.collapse_damage.by_entity[osid]` is absent** (no entry created) — this is the *true* proof of inertness, because the modifier and the `will_not_recover` flag are both derived from this entry; AND (ii) `capacity_modifiers.by_sid[osid]` is **absent / untouched** (default 1.0); AND (iii) `loss_of_control_trends` does not set `will_not_recover` for the OSID. (Asserting only (ii), as an earlier draft did, would miss the case where collapse_damage accumulates but the modifier write is skipped — which would still feed the recompute-from-damage path and mark `will_not_recover`. The G1 root-write guard makes all three hold; (i) is the load-bearing assertion. G2.1–G2.7 are the downstream guarantees it buys.)
 - [ ] **G2.9 — Sarajevo + Teočak unchanged.** Sarajevo siege-ring OSIDs and `op:ugljevik:teocak_krstac_2` hold as in baseline (these are also RBiH enclaves excluded by G1).
 - [ ] **G2.10 — Determinism.** Two identical 188w runs with collapse ON produce byte-identical rupture records and enclave control maps (Engine Invariants §4 / §9.9).
 
-**Pass relationship:** if G1 (§6 OSID exclusion at the 3D write site) holds, G2.1–G2.9 pass *trivially* because collapse never touches an enclave's pressure/supply. G2 is therefore the **proof that G1 is sufficient** and the regression sentinel against any future change that lets collapse reach an enclave OSID.
+**Pass relationship:** if G1 (§6 OSID exclusion at the **3D collapse_damage write root** — see §4 / BUILD_SPEC §4.3) holds, G2.1–G2.9 pass *trivially* because collapse never creates a `collapse_damage` entry for an enclave OSID, so it never touches that OSID's derived modifiers, pressure/supply, or `will_not_recover` flag. G2 is therefore the **proof that G1 is sufficient** and the regression sentinel against any future change that lets collapse reach an enclave OSID.
 
 ---
 
@@ -169,9 +171,9 @@ Derived **strictly** from §1–§2 above. This is the checklist G2 must encode;
 
 > **Statement under review:**
 > With the collapse pipeline (Phase 3A→3D) enabled, the §6 enclave outcomes and the Srebrenica genocide-rupture timing are provably unchanged from the collapse-disabled baseline, because:
-> **(a)** Phase 3D writes **only** `capacity_modifiers` (four `[0,1]` multipliers) and **never** `political_controllers` — so collapse can only soften a defender, never flip control, throttle an attacker, save an enclave, or alter a rupture trigger (verified in code; consistent with Engine Invariants §9.6 "no passive pressure flip");
-> **(b)** Guard **G1** excludes **every RBiH enclave OSID** (Srebrenica, Žepa, Goražde, Bihać, Sarajevo, Teočak — via `getEnclaveDefForOsid`) entirely from the Phase-3D `capacity_modifiers` write, so collapse damage is provably inert on those OSIDs — it can neither accelerate Srebrenica/Žepa's fall nor weaken Goražde/Bihać's hold;
-> **(c)** Guard **G2** asserts the §3 invariant checklist in CI on the 188-week horizon (rupture still records at turn ≥ 140 and on unchanged timing; Žepa falls; Goražde + Bihać held; no modifier written for any enclave OSID), and must be GREEN before and on every collapse-enabled run.
+> **(a)** Phase 3D writes `collapse_damage` and *derives* `capacity_modifiers` from it (and that damage entry also drives the `will_not_recover` diagnostic), but it **never** writes `political_controllers` — so collapse can only soften a defender, never flip control, throttle an attacker, save an enclave, or alter a rupture trigger (verified in code; consistent with Engine Invariants §9.6 "no passive pressure flip");
+> **(b)** Guard **G1** excludes **every RBiH enclave OSID** (Srebrenica, Žepa, Goražde, Bihać, Sarajevo, Teočak — via `getEnclaveDefForOsid`) at the Phase-3D **`collapse_damage` write root** — not merely the modifier write — so no collapse_damage entry is created for those OSIDs, which transitively blocks the derived modifier, the recompute-from-damage path, AND the `will_not_recover` marking. Collapse is therefore provably inert on those OSIDs — it can neither accelerate Srebrenica/Žepa's fall nor weaken Goražde/Bihać's hold;
+> **(c)** Guard **G2** asserts the §3 invariant checklist in CI on the 188-week horizon (rupture still records at turn ≥ 140 and on unchanged timing; Žepa falls; Goražde + Bihać held; for every enclave OSID, no collapse_damage entry AND no capacity_modifier), and must be GREEN before and on every collapse-enabled run.
 >
 > The Srebrenica genocide rupture remains a **consequence, not a lever** (SENSITIVE_HISTORY_DESIGN_GATE.md §0, §3 #10): collapse cannot be used to prevent it, accelerate it, or trade it away. The rupture continues to fire **only** on emergent satisfaction of the discrete OSID/flag/turn predicate (Gate §2 criterion 3), never on a calendar heuristic.
 
@@ -210,5 +212,5 @@ ____________________________   Date: __________
 - Canon — Exhaustion: `docs/10_canon/Engine_Invariants_v0_9_0.md` §8
 - Canon — Authorized control change / no passive pressure flip: `docs/10_canon/Engine_Invariants_v0_9_0.md` §9.6
 - Canon — Collapse delayed/contingent: `docs/10_canon/Systems_Manual_v0_9_0.md` §7.2, §7.3, §7.4 area
-- Guard design under review: `docs/40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md` §4 (G1/G2/G3); 3D write site `src/sim/collapse/phase3d_collapse_resolution.ts:169–188,350–384`
+- Guard design under review: `docs/40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md` §4 (G1/G2/G3); 3D damage-write root `src/sim/collapse/phase3d_collapse_resolution.ts:103` (`getOrInitCollapseDamage`); modifier derivation `:169–188` (`updateCapacityModifiers`), `:197` (`recomputePhase3DCapacityModifiersFromDamage`), `:350–384`; `will_not_recover` from damage `src/state/loss_of_control_trends.ts:132`
 - Build/scope predecessors: `docs/40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md`, `docs/40_reports/proposals/20260609_SCOPE_collapse_pipeline.md`
