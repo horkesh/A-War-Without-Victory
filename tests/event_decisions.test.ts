@@ -621,4 +621,68 @@ describe('Event Decisions', () => {
 
         expect(() => resolveEventDecision(state, 'test_decision_event', 'nonexistent')).toThrow('No response option');
     });
+
+    // ── A3 dead-bridge pin ────────────────────────────────────────────────
+    // The peace-plan acceptances must SET the codex/ghost flags
+    // (`vance_owen_accepted` / `owen_stoltenberg_accepted`) that the
+    // early_peace_accepted / negotiation_capital_exhausted ghost predicates read.
+    // Before this fix the accept branches carried `effects` but no `sets_flags`,
+    // so the codex ghost layer could never see the acceptance (the "dead bridge"
+    // in docs/40_reports/playtest/20260609_INSTRUMENTED_CAMPAIGN_AUDIT.md §A3).
+    // These flags feed ONLY the codex read-model — no sim/calibration consumer.
+    it('A3: vance_owen_plan_1993 accept sets vance_owen_accepted flag', () => {
+        const event = loadEventFromFile('data/scenarios/events/war_1993.json', 'vance_owen_plan_1993');
+        const state = makeMinimalState('RBiH');
+        state.military.pending_event_decisions = [
+            {
+                event_id: 'vance_owen_plan_1993',
+                event_title: event.title ?? 'Vance-Owen',
+                turn_fired: 39,
+                faction: 'RBiH',
+                response_options: event.response_options!,
+            },
+        ];
+
+        resolveEventDecision(state, 'vance_owen_plan_1993', 'accept');
+
+        expect(state.military.event_flags).toBeDefined();
+        expect(state.military.event_flags!['vance_owen_accepted']).toBe(true);
+    });
+
+    it('A3: owen_stoltenberg_plan_1993 accept sets owen_stoltenberg_accepted flag', () => {
+        const event = loadEventFromFile('data/scenarios/events/war_1993.json', 'owen_stoltenberg_plan_1993');
+        const state = makeMinimalState('RBiH');
+        state.military.pending_event_decisions = [
+            {
+                event_id: 'owen_stoltenberg_plan_1993',
+                event_title: event.title ?? 'Owen-Stoltenberg',
+                turn_fired: 70,
+                faction: 'RBiH',
+                response_options: event.response_options!,
+            },
+        ];
+
+        resolveEventDecision(state, 'owen_stoltenberg_plan_1993', 'accept');
+
+        expect(state.military.event_flags).toBeDefined();
+        expect(state.military.event_flags!['owen_stoltenberg_accepted']).toBe(true);
+    });
+
+    it('A3: reject branches do NOT set the acceptance flag (bridge is acceptance-only)', () => {
+        const event = loadEventFromFile('data/scenarios/events/war_1993.json', 'vance_owen_plan_1993');
+        const state = makeMinimalState('RBiH');
+        state.military.pending_event_decisions = [
+            {
+                event_id: 'vance_owen_plan_1993',
+                event_title: event.title ?? 'Vance-Owen',
+                turn_fired: 39,
+                faction: 'RBiH',
+                response_options: event.response_options!,
+            },
+        ];
+
+        resolveEventDecision(state, 'vance_owen_plan_1993', 'reject');
+
+        expect(state.military.event_flags?.['vance_owen_accepted']).toBeUndefined();
+    });
 });

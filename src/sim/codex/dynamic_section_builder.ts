@@ -113,6 +113,15 @@ interface GhostEntryNegotiationCapitalView {
  * adapter snapshot. Keep this narrow so UI code does not need to pretend it
  * owns raw engine state.
  */
+export interface GhostEntryDecisionLogEntry {
+    event_id: string;
+    response_id: string;
+    /** Diagnostic only; not read by the section builder. */
+    decision_source?: string;
+    faction?: FactionId | null;
+    turn?: number;
+}
+
 export interface GhostEntryStateView {
     meta?: {
         player_faction?: FactionId;
@@ -122,6 +131,11 @@ export interface GhostEntryStateView {
     military?: {
         event_flags?: Record<string, GhostEntryFlagValue>;
         event_fire_counts?: Record<string, number | undefined>;
+        /** Append-only audit trail of resolved decisions (bot or player). The
+         *  dynamic-section builder reads `(event_id, response_id)` pairs here to
+         *  surface authored-choice morphing for load-bearing events via the A1c
+         *  `RESPONSE:<event>:<branch>` mechanism. */
+        event_decision_log?: GhostEntryDecisionLogEntry[];
         negotiation?: {
             capital?: Partial<Record<FactionId, GhostEntryNegotiationCapitalView>>;
         };
@@ -710,6 +724,113 @@ const GHOST_ENTRIES: readonly GhostRegistryEntry[] = [
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Load-bearing dynamic-section registry (A3 — authorship loop legibility)
+//
+// `buildDynamicSections` was a Phase-0 stub returning []. The instrumented
+// campaign audit (docs/40_reports/playtest/20260609_INSTRUMENTED_CAMPAIGN_AUDIT.md
+// §A3) identifies the LOAD-BEARING decision events whose authored-choice
+// morphing the codex never surfaced. This registry connects those decisions —
+// the ones that actually FIRE and are narratively central — to the dynamic
+// codex by emitting `BuiltDynamicSection` records keyed on the SAME A1c
+// `RESPONSE:<event>:<branch>` mechanism shipped in #334 (essay_index.json
+// `dynamic_sections`). It is NOT a parallel prose system: each emitted record
+// is a thin pointer (target essay + the `RESPONSE:` condition that gated it)
+// that the renderer joins to the authored essay_index sections. The builder
+// owns only the (event → essay) routing and the deterministic synthesis from
+// frozen `event_decision_log`; the prose stays in essay_index.json.
+//
+// Calibration: this reads `state.military.event_decision_log` (already
+// persisted) and emits read-model records. It writes NO state and is consumed
+// only by codex/Verdict surfaces — calibration-inert by construction.
+//
+// Ring boundary: every record is Ring 2 (narrative). The registry deliberately
+// contains NO rupture/atrocity-keyed entry — the Srebrenica-fall codex surface
+// keyed on `srebrenica_genocide_1995` is a §6 sensitive-history item DEFERRED
+// to the gated lane (SENSITIVE_HISTORY_DESIGN_GATE.md §6); it is intentionally
+// absent here and must NOT be added without the sensitive-history gate.
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface LoadBearingSectionSpec {
+    /** Decision `event_id` as it appears in `event_decision_log`. */
+    event_id: string;
+    /** Target canonical essay (event id, no `essay_` prefix). */
+    target_essay_event_id: string;
+    /** Stable summary text for the synthesized record. The full authored prose
+     *  per branch lives in essay_index.json `dynamic_sections`; this is the
+     *  builder-side legend the Verdict codex panel can render directly when it
+     *  consumes the sim-side build result without re-reading essay_index. */
+    summary: string;
+    /** Render variant. Ring 2 narrative — `note` or `divergence`. Never
+     *  `outcome` (reserved for non-audit player-driven sections) and never
+     *  `context`-pinned audit framing. */
+    variant: Extract<SectionVariant, 'note' | 'divergence'>;
+}
+
+/**
+ * The load-bearing decision events from the A3 audit punch-list. Declaration
+ * order is fixed and the emitted output is additionally `strictCompare`-sorted
+ * on `id`, so synthesis is deterministic. Each entry surfaces whichever branch
+ * the campaign actually recorded.
+ */
+const LOAD_BEARING_SECTIONS: readonly LoadBearingSectionSpec[] = [
+    {
+        event_id: 'vance_owen_plan_1993',
+        target_essay_event_id: 'vance_owen_plan_1993',
+        summary: 'Sarajevo’s recorded posture on the Vance-Owen Peace Plan in this campaign.',
+        variant: 'note',
+    },
+    {
+        event_id: 'owen_stoltenberg_plan_1993',
+        target_essay_event_id: 'owen_stoltenberg_plan_1993',
+        summary: 'Sarajevo’s recorded posture on the Owen-Stoltenberg framework in this campaign.',
+        variant: 'note',
+    },
+    {
+        event_id: 'os_rbih_tactical_acceptance_1993',
+        target_essay_event_id: 'os_rbih_tactical_acceptance_1993',
+        summary: 'The Sarajevo Assembly’s recorded vote on the Owen-Stoltenberg Invincible package.',
+        variant: 'note',
+    },
+    {
+        event_id: 'london_conference_1992',
+        target_essay_event_id: 'london_conference_1992',
+        summary: 'The recorded posture taken at the London Conference in this campaign.',
+        variant: 'note',
+    },
+    {
+        event_id: 'rbih_state_identity',
+        target_essay_event_id: 'rbih_state_identity',
+        summary: 'The recorded state-identity course in this campaign.',
+        variant: 'divergence',
+    },
+];
+
+/** Index for O(1) event_id lookup. Declaration order preserved for diagnostics. */
+const LOAD_BEARING_BY_EVENT: ReadonlyMap<string, LoadBearingSectionSpec> = new Map(
+    LOAD_BEARING_SECTIONS.map((s) => [s.event_id, s]),
+);
+
+/**
+ * First recorded response for each load-bearing event in
+ * `event_decision_log`. The log is append-only and a load-bearing event is
+ * `once: true`, so the first entry is the canonical resolution; we still scan
+ * deterministically (array order is insertion/turn order, which is stable
+ * across replays of identical input).
+ */
+function firstResponseByEvent(
+    log: readonly GhostEntryDecisionLogEntry[],
+): ReadonlyMap<string, string> {
+    const out = new Map<string, string>();
+    for (const entry of log) {
+        if (!entry || typeof entry.event_id !== 'string' || typeof entry.response_id !== 'string') continue;
+        if (!LOAD_BEARING_BY_EVENT.has(entry.event_id)) continue;
+        if (out.has(entry.event_id)) continue;
+        out.set(entry.event_id, entry.response_id);
+    }
+    return out;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Public API
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -750,21 +871,50 @@ export function buildGhostEntries(state: GhostEntryStateView, currentTurn: numbe
 }
 
 /**
- * Build dynamic essay sections. For Phase 0 of the slice, dynamic-section
- * production is delegated to existing essay-side machinery (the resolver in
- * `codexEssayResolver.ts` handles `dynamic_sections` declared on essay
- * entries). The builder reserves this surface for sections that must be
- * synthesised from frozen end-game state — none in Phase 0.
+ * Build dynamic essay sections from frozen end-game state (A3).
  *
- * The function is provided so consumers can call a single API; it returns an
- * empty array on Phase 0 inputs and is shaped for future expansion.
+ * For each LOAD-BEARING decision event that the campaign actually recorded
+ * (`state.military.event_decision_log`), emit one `BuiltDynamicSection` keyed
+ * on the A1c `RESPONSE:<event>:<branch>` mechanism (essay_index.json
+ * `dynamic_sections`, #334). The record is a thin sim-side pointer — target
+ * essay + the exact `RESPONSE:` condition that gated it — so a single-call
+ * Verdict consumer can surface authored-choice morphing without re-deriving
+ * the decision log, while the authored prose stays in essay_index.json.
  *
- * Determinism: deterministic empty-list emission today; future sections will
- * be sorted by `strictCompare` on `id`.
+ * Pure & deterministic:
+ *   - reads only frozen state; writes nothing (calibration-inert).
+ *   - iterates the fixed `LOAD_BEARING_SECTIONS` declaration order, then sorts
+ *     the emitted records by `strictCompare` on `id`.
+ *
+ * Phase-0 compatibility: a state with no recorded load-bearing decisions emits
+ * `[]` exactly as before.
+ *
+ * Throws if the input state carries any §6 refused flag; see `assertRingGuard`.
  */
 export function buildDynamicSections(input: BuilderInput): BuiltDynamicSection[] {
     assertRingGuard(input.state);
-    return [];
+
+    const log = input.state.military?.event_decision_log ?? [];
+    const chosenByEvent = firstResponseByEvent(log);
+
+    const emitted: BuiltDynamicSection[] = [];
+    for (const spec of LOAD_BEARING_SECTIONS) {
+        const branch = chosenByEvent.get(spec.event_id);
+        if (branch === undefined) continue;
+        const responseCondition = `RESPONSE:${spec.event_id}:${branch}`;
+        emitted.push({
+            id: `dynsec_${spec.event_id}_${branch}`,
+            target_essay_event_id: spec.target_essay_event_id,
+            content: spec.summary,
+            variant: spec.variant,
+            ring_classification: 2,
+            // `conditional_on` carries the A1c join key so the renderer can pull
+            // the authored per-branch prose from essay_index `dynamic_sections`.
+            conditional_on: [responseCondition],
+        });
+    }
+
+    return emitted.slice().sort((a, b) => strictCompare(a.id, b.id));
 }
 
 /**
