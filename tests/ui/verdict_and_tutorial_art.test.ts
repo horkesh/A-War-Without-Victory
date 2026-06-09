@@ -3,12 +3,13 @@
  *
  * Verdict-background + tutorial-deck art resolvers (graceful fallback).
  *
- * UI/data-only, calibration-INERT. The .webp assets ship via a separate art PR,
- * so against the resolver's real (possibly-empty) glob every lookup degrades to
- * `null` and the caller keeps its existing background / renders copy-only. This
- * suite proves both halves of the contract:
- *   - present asset → the mapped basename resolves to its URL (injected glob);
- *   - absent asset  → `null` (the real glob today, and any non-matching key).
+ * UI/data-only, calibration-INERT. The .webp assets shipped via #378, so the
+ * resolvers' real eager glob is populated. This suite proves both halves of the
+ * graceful-fallback contract:
+ *   - present asset → the mapped basename resolves to its hashed URL (the real
+ *     glob for the public resolvers; an injected glob for the pure core);
+ *   - absent asset  → `null` (an INJECTED empty glob via the pure core, plus any
+ *     non-matching / empty / nullish key).
  *
  * Both resolvers mirror the eventIllustrationArt idiom (eager import.meta.glob +
  * basename suffix resolve + graceful null).
@@ -63,11 +64,16 @@ describe('resolveVerdictBackground — tone → file mapping', () => {
     expect(resolveVerdictBackgroundFrom({}, 'not_a_tone' as unknown as VerdictSceneTone)).toBeNull();
   });
 
-  it('against the real (asset-PR-pending) glob, every tone degrades to null', () => {
-    // The verdict .webp files ship via a separate art PR; on this base the glob
-    // is empty, so the cinematic header keeps its gradient background.
+  it('against the real (#378-merged) glob, every tone resolves to its mapped plate', () => {
+    // The verdict .webp files shipped via #378, so the eager glob is populated:
+    // every tone resolves to a hashed URL ending in its mapped basename, and
+    // `somber` folds onto the pyrrhic plate.
     for (const tone of Object.keys(VERDICT_TONE_TO_BASENAME) as VerdictSceneTone[]) {
-      expect(resolveVerdictBackground(tone)).toBeNull();
+      const url = resolveVerdictBackground(tone);
+      expect(url).not.toBeNull();
+      const basename = VERDICT_TONE_TO_BASENAME[tone].replace(/\.webp$/, '');
+      // Hashed dist URL: <basename>-<hash>.webp (the build content-hashes assets).
+      expect(url).toMatch(new RegExp(`${basename}[^/]*\\.webp$`));
     }
   });
 });
@@ -103,9 +109,14 @@ describe('resolveTutorialSlideArt — step id → tutorial_<id>.webp', () => {
     }
   });
 
-  it('against the real (asset-PR-pending) glob, every step degrades to null', () => {
+  it('against the real (#378-merged) glob, every step resolves to its slide still', () => {
+    // The tutorial_01..08 .webp slides shipped via #378, so the eager glob is
+    // populated: every step id resolves to a hashed URL ending in
+    // tutorial_<id>(-<hash>).webp.
     for (const step of ONBOARDING_STEPS) {
-      expect(resolveTutorialSlideArt(step.id)).toBeNull();
+      const url = resolveTutorialSlideArt(step.id);
+      expect(url).not.toBeNull();
+      expect(url).toMatch(new RegExp(`tutorial_${step.id}[^/]*\\.webp$`));
     }
   });
 });
