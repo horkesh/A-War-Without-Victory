@@ -315,6 +315,8 @@ The AI feature is genuinely novel — no other game does this. It could get pres
 
 ## Anthropic Partnership Strategy
 
+> **CONSOLIDATED (2026-06-09):** the live outreach pitch — updated for the v0.9.6 reality (the AI command chain is real, with measured per-campaign costs and a shipped safety substrate) plus a readiness verdict — now lives in `docs/30_planning/design/2026-06-09-anthropic-partnership-pitch.md`. The section below is the original 2026-03-16 strategy, retained for history; use the consolidated doc for any actual outreach.
+
 ### Why Not a Patent
 The AI Commander technique (LLM with historical personality as opposing commander, multi-model routing by command level) is not worth patenting:
 - **Prior art everywhere** — AI opponents in games, LLM-powered NPCs (Inworld AI, Nvidia ACE), model-tier routing all exist
