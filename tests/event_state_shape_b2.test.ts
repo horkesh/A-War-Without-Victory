@@ -131,6 +131,7 @@ function currentVersionState(): any {
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},
             displacement_recent_by_turn: {},
+            displacement_flows_by_osid: {},
         },
     };
 }
@@ -488,7 +489,7 @@ describe('Phase B Sub-slice B2 — state shape + save migration', () => {
                 fields: Array<{ field: string }>;
             };
 
-            expect(report.latest_schema_version).toBe(35);
+            expect(report.latest_schema_version).toBe(36);
             expect(report.anonymous_default_count).toBe(0);
             expect(report.fields).toEqual([]);
         });
