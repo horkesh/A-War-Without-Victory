@@ -17,6 +17,41 @@ import { pathToFileURL } from 'node:url';
 import { checkDataPrereqs, formatMissingRemediation } from '../../src/data_prereq/check_data_prereqs.js';
 import { runScenario } from '../../src/scenario/scenario_runner.js';
 import { dumpBotOrdersPerfProfile } from '../../src/sim/combat/_perf_profile_bot_orders_node.js';
+import { setEnablePhase3A } from '../../src/sim/pressure/phase3a_pressure_eligibility.js';
+import { setEnablePhase3ADiffusion } from '../../src/sim/pressure/phase3a_pressure_diffusion.js';
+import { setEnablePhase3B } from '../../src/sim/pressure/phase3b_pressure_exhaustion.js';
+import { setEnablePhase3C } from '../../src/sim/pressure/phase3c_exhaustion_collapse_gating.js';
+import { setEnablePhase3D } from '../../src/sim/collapse/phase3d_collapse_resolution.js';
+
+/**
+ * Collapse-pipeline enable gate (DEFAULT OFF — matches the per-phase feature flags).
+ *
+ * The Phase 3A→3D pressure/collapse pipeline is gated entirely by the runtime
+ * setEnablePhase3*() flags (all default false). The scenario runner has no other
+ * enable surface, so this CLI honors a single env var `COLLAPSE_PIPELINE_ENABLE=true`
+ * (or `=1`) that flips the WHOLE dependency chain on together — 3A eligibility (builds
+ * the effective pressure edges), 3A diffusion, 3B exhaustion coupling (needs 3A edges),
+ * 3C exhaustion→collapse gating (returns `phase3b_exhaustion_disabled` if 3B is off),
+ * and 3D collapse resolution (returns `phase3c_eligibility_disabled` if 3C is off).
+ *
+ * §6: the genocide-rupture floor is protected at the engine level by Phase 3D's G1
+ * enclave guard (isPhase3DEnclaveGuarded → all 9 ENCLAVE_DEFINITIONS OSIDs), not here.
+ *
+ * Determinism: the env var is read ONCE at process start (no per-turn read, no clock,
+ * no RNG). When unset/false this is a strict no-op (the flags stay at their false
+ * defaults) so a normal calibration run is byte-identical to before this change.
+ */
+function applyCollapsePipelineEnableFromEnv(): boolean {
+  const raw = (process.env.COLLAPSE_PIPELINE_ENABLE ?? '').trim().toLowerCase();
+  const enabled = raw === 'true' || raw === '1' || raw === 'on' || raw === 'yes';
+  if (!enabled) return false;
+  setEnablePhase3A(true);
+  setEnablePhase3ADiffusion(true);
+  setEnablePhase3B(true);
+  setEnablePhase3C(true);
+  setEnablePhase3D(true);
+  return true;
+}
 
 /** Default scenario when user asks to "run scenarios" without specifying one (historical 52w, full OOB). */
 const DEFAULT_SCENARIO = 'data/scenarios/apr1992_historical_52w.json';
@@ -105,6 +140,11 @@ async function main(): Promise<void> {
     process.stderr.write(formatMissingRemediation(prereqResult));
     process.exitCode = 1;
     return;
+  }
+
+  const collapseEnabled = applyCollapsePipelineEnableFromEnv();
+  if (collapseEnabled) {
+    process.stdout.write('collapse_pipeline: ENABLED (3A+3A-diffusion+3B+3C+3D via COLLAPSE_PIPELINE_ENABLE)\n');
   }
 
   const result = await runScenario({
