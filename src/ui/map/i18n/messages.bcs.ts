@@ -3242,6 +3242,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'directive.stakes.minimal': 'Minimalan — vaš pokrovitelj nosi ovu odluku.',
     'directive.stakes.patronAtRisk': 'Povjerenje pokrovitelja na kocki: {delta}.',
     'directive.stakes.revoltLikely': 'Smjena ovog komandanta rizikuje pobunu oficirskog kora i zastoj korpusa.',
+    'directive.stakes.forceLaunchObjection': 'Forsiranje ovog napada uprkos protivljenju komandanta {commander} koštat će vas povjerenja pokrovitelja.',
+    'directive.stakes.forceLaunchObjectionGeneric': 'Forsiranje ovog napada uprkos protivljenju vašeg komandanta koštat će vas povjerenja pokrovitelja.',
     'directive.frontVisit.unavailableAria': 'Posjeta frontu nedostupna',
     'directive.frontVisit.cannotVisit': 'Nije moguća posjeta',
     'directive.frontVisit.unknown': 'Dostupnost posjete frontu nije poznata.',

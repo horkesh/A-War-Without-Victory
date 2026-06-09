@@ -3258,6 +3258,8 @@ export const enMessages = {
     'directive.stakes.minimal': 'Minimal — your patron carries this decision.',
     'directive.stakes.patronAtRisk': 'Patron confidence at risk: {delta}.',
     'directive.stakes.revoltLikely': 'Sacking this commander risks an officer-corps revolt and a corps stall.',
+    'directive.stakes.forceLaunchObjection': 'Forcing this launch over {commander}’s objection will cost you patron confidence.',
+    'directive.stakes.forceLaunchObjectionGeneric': 'Forcing this launch over your commander’s objection will cost you patron confidence.',
     'directive.frontVisit.unavailableAria': 'Front visit unavailable',
     'directive.frontVisit.cannotVisit': 'Cannot visit',
     'directive.frontVisit.unknown': 'Front-visit availability is unknown.',
