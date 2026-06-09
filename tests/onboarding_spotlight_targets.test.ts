@@ -60,18 +60,38 @@ function findSpotlightEmitters(token: string): string[] {
 }
 
 describe('onboarding spotlight targets', () => {
-    it('fixes the round-two audit copy defects', () => {
+    it('fixes the round-two audit copy defects (03/05 fixes preserved through the A4 rewrite)', () => {
         const byId = new Map(ONBOARDING_STEPS.map(step => [step.id, step]));
 
-        expect(byId.get('01_welcome')?.body).toContain('opening presidential brief');
+        // 03/05 round-two audit fixes are still in force after the A4 thesis rewrite.
         expect(byId.get('03_brief')?.body).toContain('RECORDS opens the Army HQ records view');
         expect(byId.get('03_brief')?.body).toContain('CODEX keeps historical context close');
         expect(byId.get('05_decide')?.body).toBe(
             "Before you advance the turn, the President's Desk surfaces every pending choice. Each row opens its resolver or the staff panel it came from -- open it, decide, return. Resolve what you can; defer what you must.",
         );
-        expect(byId.get('06_execute')?.body).toBe(
-            "Your corps commanders propose operations and present them for your decision when they're ready to launch. Approve to authorize, decline to refuse, or force-launch to override their judgment at the cost of command authority. Brigades never attack alone -- every assault flows through a corps operation.",
-        );
+    });
+
+    it('teaches the A4 negative-sum thesis in the load-bearing steps', () => {
+        const byId = new Map(ONBOARDING_STEPS.map(step => [step.id, step]));
+
+        // Beat 1 — negative-sum, no conquest win (step 01 welcome).
+        const welcome = byId.get('01_welcome')?.body ?? '';
+        expect(welcome).toContain('negative-sum');
+        expect(welcome.toLowerCase()).toContain('no victory screen');
+
+        // Beat 1 — the map is not the score (step 02 map).
+        expect((byId.get('02_map')?.body ?? '').toLowerCase()).toContain('not the scoreboard');
+
+        // Beat 2 — president commanding through generals (step 06 execute).
+        const execute = byId.get('06_execute')?.body ?? '';
+        expect(execute.toLowerCase()).toContain('command through your generals');
+        expect(execute).toContain('every assault flows through a corps operation');
+
+        // Beat 3 — war-cost ledger is the scoreboard; atrocity taints; Dayton climax (step 08 judge).
+        const judge = byId.get('08_judge')?.body ?? '';
+        expect(judge.toLowerCase()).toContain('scoreboard');
+        expect(judge.toLowerCase()).toContain('atrocity');
+        expect(judge).toContain('Dayton');
     });
 
     it('has a rendered data-tutorial-step emitter for every non-null step target', () => {

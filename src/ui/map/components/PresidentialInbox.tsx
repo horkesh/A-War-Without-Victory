@@ -152,6 +152,14 @@ function OpeningBrief({
                     </li>
                 ))}
             </ul>
+            {/* A4 onboarding — negative-sum thesis framing. Faction-agnostic
+                footer so the very first surface the player reads names the
+                real win/lose axis: there is no conquest victory; the war is
+                judged at Dayton by its human cost. Mirrors the deck's beats
+                1+3 at first contact. */}
+            <p className="mt-2 border-t border-accent-gold/15 pt-2 text-[9px] italic leading-snug text-text-secondary/90">
+                {t('inbox.openingBrief.thesis')}
+            </p>
             <div className="mt-2.5 flex items-center justify-between gap-3">
                 <button
                     type="button"
