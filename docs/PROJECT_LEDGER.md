@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-09] chore(release): version → 0.9.9-beta.1 (feature-complete beta entry)
+
+**Type:** version bump only — no behavioral/calibration change. Branch `chore/version-0.9.9-beta` off `origin/main`. Task #82.
+
+**What it declares:** package.json `0.9.6-alpha.1` → **`0.9.9-beta.1`**, formally entering the feature-complete **beta** band per the ratified 1.0 Definition-of-Done (`docs/plans/2026-06-08-v1.0-definition-of-done.md`). The alpha band — A2 Dayton close-out, A3 authorship-loop, A4 onboarding, C1 CI gate — is complete. The remaining in-beta work is D1 finalization / D2 playtest / D3 operator.
+
+**Files touched:** `package.json` (root `version`); `package-lock.json` (top-level `version` + `packages[""].version`; dependency versions untouched); `src/ui/map/utils/appVersion.ts` (`AWWV_APP_VERSION` UI display constant); `src/ui/map/services/telemetry/crashCapture.ts` (`CRASH_DIAGNOSTICS_APP_VERSION`); current-version statements in `docs/10_canon/CANON.md`, `docs/00_start_here/docs_index.md`, `docs/50_launch/marketing/press_kit.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`.
+
+**Not rewritten:** historical changelog/ledger/roadmap/audit/report/playtest entries citing the old `0.9.6-alpha.1` (PROJECT_LEDGER history, MASTER_ROADMAP closure narrative, `docs/40_reports/audits|implemented|release|playtest/*`, dated plan snapshots) — these are point-in-time records and stay as-is. Telemetry-test fixture literals (`tests/telemetry_queue.test.ts` etc.) are decoupled fixture inputs, not assertions of the source constant, so left unchanged; CI stays green.
+
+**Verification:** `node -e "require('./package.json').version"` ⇒ `0.9.9-beta.1`. `tsc --noEmit` exit 0 (two `.ts` constants touched).
+
 ## [2026-06-09] feat(faction-ai): contain Lane A — ARBiH strangle-not-capture of HVO enclaves (Washington-release, default-off)
 
 **Type:** new bot-AI posture behind a DEFAULT-OFF flag. Branch `feat/contain-lane-a-arbih` off `origin/feat/vrs-contain-posture` (rebase onto main once #339 merges). **Lane A** (ARBiH-side, light gate) of the faction-agnostic contain design (`docs/plans/2026-06-07-contain-enclave-faction-agnostic-design.md §2b`). Builds on Lane V (#339): reuses `computeContainedOsidsForFaction` (already faction-parameterized), the gate pattern, the per-faction `last_contained_osids_by_faction` field, and the faction-generic planner consumer.
