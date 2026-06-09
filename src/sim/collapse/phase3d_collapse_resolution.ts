@@ -17,6 +17,7 @@ import type { GameState } from '../../state/game_state.js';
 import type { CollapseDomain } from '../pressure/phase3c_exhaustion_collapse_gating.js';
 import { getEnablePhase3C } from '../pressure/phase3c_exhaustion_collapse_gating.js';
 import type { EntityId } from '../pressure/pressure_exposure.js';
+import { getEnclaveDefForOsid } from '../combat/enclave_resilience.js';
 
 
 // Feature flag (OFF by default)
@@ -37,17 +38,63 @@ export function resetEnablePhase3D(): void {
 // Legacy const export for backward compatibility (uses getter)
 export const ENABLE_PHASE3D_COLLAPSE_RESOLUTION = false; // Default, but use getEnablePhase3D() for runtime value
 
-// Phase 3D severity computation constants (conservative defaults - SPEC VALUE REQUIRED)
-const STRAIN_THRESHOLD = 20; // SPEC VALUE REQUIRED: minimum local_strain to consider severity
-const STRAIN_MAX = 100; // SPEC VALUE REQUIRED: maximum local_strain value (from Phase 3C)
-const SEVERITY_MIN = 0.25; // SPEC VALUE REQUIRED: minimum severity [0,1] to apply collapse damage
+// Phase 3D severity computation constants.
+// RATIFIED Phase-I starting defaults — owner-ratified per
+// docs/40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md §3.
+// NOT canon citations: Engine Invariants §8 / Systems Manual §7.1–7.3 are prose-only
+// (the frozen Appendix A/B/C numeric tables were archived in the v0.4→v0.9 fold), so
+// each value is an owner/design decision with a proposed default tuned in Phase III.
+const STRAIN_THRESHOLD = 40; // spec C13 — MUST equal Phase 3C TIER1_*_THRESHOLD (C9). Consistency invariant C13==C9.
+const STRAIN_MAX = 100;      // spec C12 — clamp ceiling; identical to Phase 3C STRAIN_MAX.
+const SEVERITY_MIN = 0.25;   // spec C14 — floor below which no damage applies (enforces delayed/contingent collapse).
 
-// Phase 3D impact constants (conservative defaults - SPEC VALUE REQUIRED)
-// These control how much collapse damage affects capacity multipliers
-const AUTHORITY_IMPACT = 0.5; // SPEC VALUE REQUIRED: authority_mult = 1 - AUTHORITY_IMPACT * damage.authority
-const COHESION_IMPACT = 0.5;  // SPEC VALUE REQUIRED: cohesion_mult = 1 - COHESION_IMPACT * damage.cohesion
-const SPATIAL_IMPACT = 0.5;   // SPEC VALUE REQUIRED: supply_mult = 1 - SPATIAL_IMPACT * damage.spatial
+// Phase 3D impact constants — RATIFIED Phase-I defaults (spec §3).
+// These control how much collapse damage degrades capacity multipliers.
+// Chronic-not-catastrophic (Systems Manual §7.2): at full damage authority/cohesion
+// capacity → 0.7 (−30%), supply → 0.6 (−40%, the most historically load-bearing —
+// siege starvation). All ∈ (0,1) so multipliers stay in [0,1] even at damage=1.
+const AUTHORITY_IMPACT = 0.3; // spec C15 — authority_mult = 1 - AUTHORITY_IMPACT * damage.authority
+const COHESION_IMPACT = 0.3;  // spec C16 — cohesion_mult = 1 - COHESION_IMPACT * damage.cohesion
+const SPATIAL_IMPACT = 0.4;   // spec C17 — supply_mult = 1 - SPATIAL_IMPACT * damage.spatial
 // pressure_cap_mult uses conservative combination of all three domains
+
+/**
+ * §6 GUARD G1 — protected-enclave predicate (RATIFIED — owner + /historian + Pyrrhic
+ * §6 panel, packet #368; G3 signed off, zero blockers).
+ *
+ * Spec: docs/40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md §4.3.
+ *
+ * Identifies EVERY enclave OSID from `getEnclaveDefForOsid` (`ENCLAVE_DEFINITIONS` in
+ * enclave_resilience.ts) — 6 RBiH (Srebrenica, Žepa, Goražde, Bihać pocket, Sarajevo,
+ * Teočak) + 3 HRHB (kiseljak, lasva_valley, zepce); no RS enclaves exist. These are the
+ * OSIDs MOST likely to register Tier-1 spatial/authority strain (isolated + supply-fragile),
+ * and the genocide-rupture floor (`srebrenica_genocide_1995`, turn ≥ 160) is a §6 invariant.
+ *
+ * The predicate is enforced at TWO sites: the PRIMARY chokepoint in
+ * getOrInitCollapseDamage (keeps the OSID out of collapse_damage.by_entity → blocks the
+ * recompute path AND the loss_of_control will_not_recover marking, and makes the CLI
+ * harness seed path honor the guard), plus a loop-skip before updateCapacityModifiers
+ * (keeps the OSID out of capacity_modifiers). Together the enclave is provably absent
+ * from BOTH maps → collapse is inert on every §6 OSID.
+ *
+ * Phase 3D never flips `political_controllers`; the only §6 risk is INDIRECT
+ * ACCELERATION (a degraded supply_mult softening a defender so a scripted fall lands
+ * before turn 160 → rupture fails to record). With G1, fall timing is driven exclusively
+ * by the existing enclave/event/triggered-op machinery (Krivaja-95 / Stupčanica-95).
+ *
+ * Broad PREFIX exclusion of Bihać + Sarajevo is the ratified first-build choice (panel
+ * O-4 = confirm-broad). Velika Kladuša (`op:velika_kladusa:*`) is the top "relax-later
+ * with evidence" candidate (real Abdić / AP Zapadna Bosna territorial movement) — see
+ * build spec.
+ */
+function isPhase3DEnclaveGuarded(osid: EntityId): boolean {
+    // ALL enclaves (panel O-1 = include-HRHB): 6 RBiH (Srebrenica/Žepa/Goražde/Bihać/
+    // Sarajevo/Teočak) + 3 HRHB (kiseljak/lasva_valley/zepce). No RS enclaves exist.
+    // HRHB pockets are the same besieged-holdout mechanical class; an RBiH-only exemption
+    // would seed a faction-asymmetric collapse distortion into the later re-floor.
+    // Broad-now / narrow-later is the safe direction.
+    return getEnclaveDefForOsid(osid) !== null;
+}
 
 export interface Phase3DCollapseResolutionResult {
     applied: boolean;
@@ -56,6 +103,8 @@ export interface Phase3DCollapseResolutionResult {
         entities_evaluated: number;
         collapses_applied_count: number;
         collapses_max_severity: number;
+        /** §6 GUARD G1: count of enclave OSIDs whose capacity_modifier write was withheld. */
+        enclave_guarded_count: number;
         damage_sum_by_domain: {
             authority: number;
             cohesion: number;
@@ -66,6 +115,8 @@ export interface Phase3DCollapseResolutionResult {
         sid: string;
         domain: CollapseDomain;
         severity: number;
+        /** §6 GUARD G1: true when this OSID is a guarded RBiH enclave (capacity_modifier NOT written). */
+        enclave_guarded: boolean;
         effects: {
             damage_before: number;
             damage_after: number;
@@ -79,11 +130,41 @@ export interface Phase3DCollapseResolutionResult {
 
 /**
  * Get or initialize collapse damage state for an entity.
+ *
+ * §6 GUARD G1 (RATIFIED — owner + /historian + Pyrrhic §6 panel, packet #368).
+ * Spec: docs/40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md §4.3.
+ *
+ * This is the SOLE production write site for `collapse_damage.by_entity` (panel
+ * grep-verified). Guarding it here is the single chokepoint: for any protected enclave
+ * OSID we return a DETACHED zero-damage object WITHOUT writing it to state, so the OSID
+ * is provably ABSENT from collapse_damage.by_entity. That absence transitively guarantees:
+ *   • the capacity_modifier derivation never runs for it (updateCapacityModifiers is
+ *     only called on the returned object's owner in the resolution loop, which skips it),
+ *   • recomputePhase3DCapacityModifiersFromDamage() iterates collapse_damage.by_entity →
+ *     never sees the OSID, and
+ *   • loss_of_control_trends.ts:132 `will_not_recover = !!collapse_damage.by_entity[sid]`
+ *     stays false (presence ALONE, even at damage 0, would trip it — hence the guard
+ *     must prevent the ENTRY, not just zero the values).
+ * Guarding the chokepoint also makes the CLI harness seed path
+ * (phase3abc_audit_harness.ts seedPhase3DDamage) honor the guard automatically.
+ *
+ * EDGE-MULTIPLIER RESIDUAL (red-team #2 — Phase-III review item, inert today):
+ * getEdgeCapacityMultiplier() returns min(mult_a, mult_b), so an edge between a protected
+ * OSID and a COLLAPSED non-protected neighbor would carry the collapsed value. G1 is
+ * own-OSID-only and does NOT neutralize that edge. Today ALL consumers (front_pressure,
+ * formation_fatigue commit_points, front_breaches) are report-only/scaffolding, so it is
+ * inert. If any is ever wired into attack-launch / defender-strength, this must be
+ * revisited (flagged in the build spec).
  */
 function getOrInitCollapseDamage(
     state: GameState,
     entityId: EntityId
 ): { authority: number; cohesion: number; spatial: number } {
+    // §6 GUARD G1: protected enclave OSID → detached zero object, never written to state.
+    if (isPhase3DEnclaveGuarded(entityId)) {
+        return { authority: 0, cohesion: 0, spatial: 0 };
+    }
+
     if (!state.political.collapse_damage) {
         state.political.collapse_damage = { by_entity: {} };
     }
@@ -201,6 +282,13 @@ export function recomputePhase3DCapacityModifiersFromDamage(state: GameState): v
     for (const entityId of entityIds) {
         const damage = byEntity[entityId];
         if (!damage || typeof damage !== 'object') continue;
+        // §6 GUARD G1 (defense-in-depth): never derive a capacity_modifier for an RBiH
+        // enclave OSID, even via the harness/seed recompute path. The primary guard at
+        // the live Phase 3D write site already prevents a protected OSID from ever
+        // receiving a collapse_damage entry, so this branch is normally moot — but it
+        // keeps the recompute helper correct in isolation (e.g. if a test seeds
+        // collapse_damage directly), so NO code path can produce an enclave modifier.
+        if (isPhase3DEnclaveGuarded(entityId)) continue;
         updateCapacityModifiers(state, entityId, {
             authority: Number.isFinite(damage.authority) ? damage.authority : 0,
             cohesion: Number.isFinite(damage.cohesion) ? damage.cohesion : 0,
@@ -232,6 +320,7 @@ export function applyPhase3DCollapseResolution(
                 entities_evaluated: 0,
                 collapses_applied_count: 0,
                 collapses_max_severity: 0,
+                enclave_guarded_count: 0,
                 damage_sum_by_domain: {
                     authority: 0,
                     cohesion: 0,
@@ -250,6 +339,7 @@ export function applyPhase3DCollapseResolution(
                 entities_evaluated: 0,
                 collapses_applied_count: 0,
                 collapses_max_severity: 0,
+                enclave_guarded_count: 0,
                 damage_sum_by_domain: {
                     authority: 0,
                     cohesion: 0,
@@ -268,6 +358,7 @@ export function applyPhase3DCollapseResolution(
                 entities_evaluated: 0,
                 collapses_applied_count: 0,
                 collapses_max_severity: 0,
+                enclave_guarded_count: 0,
                 damage_sum_by_domain: {
                     authority: 0,
                     cohesion: 0,
@@ -286,6 +377,7 @@ export function applyPhase3DCollapseResolution(
                 entities_evaluated: 0,
                 collapses_applied_count: 0,
                 collapses_max_severity: 0,
+                enclave_guarded_count: 0,
                 damage_sum_by_domain: {
                     authority: 0,
                     cohesion: 0,
@@ -306,10 +398,12 @@ export function applyPhase3DCollapseResolution(
         cohesion: 0,
         spatial: 0
     };
+    let enclaveGuardedCount = 0;
     const appliedEvents: Array<{
         sid: string;
         domain: CollapseDomain;
         severity: number;
+        enclave_guarded: boolean;
         effects: {
             damage_before: number;
             damage_after: number;
@@ -326,6 +420,30 @@ export function applyPhase3DCollapseResolution(
     for (const entityId of entityIds) {
         const tier1State = tier1Eligibility[entityId];
         if (!tier1State) continue;
+
+        // §6 GUARD G1 (RATIFIED — owner + /historian + Pyrrhic §6 panel #368).
+        // Skip a protected enclave OSID (ALL enclaves — see isPhase3DEnclaveGuarded)
+        // ENTIRELY before any capacity_modifier is written. This pairs with the PRIMARY
+        // guard at the collapse_damage chokepoint (getOrInitCollapseDamage): the chokepoint
+        // keeps the OSID out of collapse_damage.by_entity (→ no recompute, no
+        // will_not_recover marking); this loop-skip keeps it out of capacity_modifiers.
+        // Together: the enclave is provably absent from BOTH maps. Damage is NOT accumulated
+        // for guarded OSIDs (a will_not_recover false-positive on a §6 enclave is not worth a
+        // diagnostic). Fall timing is driven solely by the existing enclave/event/triggered-op
+        // machinery (Krivaja-95 / Stupčanica-95).
+        if (isPhase3DEnclaveGuarded(entityId)) {
+            // Count once per guarded OSID that WOULD have collapsed in ≥1 domain.
+            let wouldCollapse = false;
+            for (const domain of ['authority', 'cohesion', 'spatial'] as CollapseDomain[]) {
+                if (!tier1State.domains[domain]) continue;
+                if (computeSeverity(localStrain[entityId] ?? 0, tier1State.persistence[domain]) > 0) {
+                    wouldCollapse = true;
+                    break;
+                }
+            }
+            if (wouldCollapse) enclaveGuardedCount++;
+            continue;
+        }
 
         const strain = localStrain[entityId] ?? 0;
 
@@ -346,18 +464,16 @@ export function applyPhase3DCollapseResolution(
             const severity = computeSeverity(strain, persistence);
             if (severity <= 0) continue; // Below threshold, skip
 
-            // Get current damage
+            // Get current damage (non-enclave OSIDs only — enclaves short-circuited above)
             const damage = getOrInitCollapseDamage(state, entityId);
             const damageBefore = damage[domain];
 
-            // Apply monotonic damage (max of current and new severity)
+            // Apply monotonic damage (max of current and new severity).
             const damageAfter = Math.max(damageBefore, severity);
             damage[domain] = damageAfter;
 
-            // Update capacity modifiers
+            // Update capacity modifiers derived from damage.
             updateCapacityModifiers(state, entityId, damage);
-
-            // Get updated modifiers for event reporting
             const modifiers = getOrInitCapacityModifiers(state, entityId);
 
             // Record event
@@ -365,6 +481,7 @@ export function applyPhase3DCollapseResolution(
                 sid: entityId,
                 domain,
                 severity,
+                enclave_guarded: false,
                 effects: {
                     damage_before: damageBefore,
                     damage_after: damageAfter,
@@ -400,6 +517,7 @@ export function applyPhase3DCollapseResolution(
             entities_evaluated: entitiesEvaluated,
             collapses_applied_count: collapsesAppliedCount,
             collapses_max_severity: collapsesMaxSeverity,
+            enclave_guarded_count: enclaveGuardedCount,
             damage_sum_by_domain: damageSumByDomain
         },
         applied_events: appliedEvents.length > 0 ? appliedEvents : undefined

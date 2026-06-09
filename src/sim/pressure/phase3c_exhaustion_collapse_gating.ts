@@ -10,6 +10,7 @@
 
 import type { FrontEdge } from '../../map/front_edges.js';
 import type { CollapseEligibilityState, FactionId, GameState, Tier1EntityEligibilityState } from '../../state/game_state.js';
+import type { SupplyReachabilityOsidReport } from '../../state/supply_reachability_osid.js';
 import { getEnablePhase3B } from './phase3b_pressure_exhaustion.js';
 import { computePressureExposureByEntity, type EntityId } from './pressure_exposure.js';
 
@@ -35,43 +36,44 @@ export const ENABLE_PHASE3C_EXHAUSTION_COLLAPSE_GATING = false; // Default, but 
 /**
  * PHASE 3C CONSTANTS VERIFICATION FLAG
  *
- * This flag MUST remain `false` until all Phase 3C constants below have been:
- * 1. Verified against Engine Invariants v0.2.7
- * 2. Verified against Systems Manual v0.2.7
- * 3. Approved via design review
+ * TRUE as of the collapse Phase-I build: all constants below carry their
+ * owner-RATIFIED Phase-I starting defaults (the placeholders are gone) and the
+ * spatial gate is the real BFS-isolation implementation. The fail-fast throw is
+ * removed. Phase 3C remains gated OFF at runtime (getEnablePhase3C() === false);
+ * only the CLI audit harness flips the flag. Constants are tuned in Phase III
+ * calibration; this flag asserts they are no longer unverified placeholders.
  *
- * If Phase 3C is enabled (via setEnablePhase3C(true)) while this flag is false,
- * the system will throw a deterministic error to prevent simulation with
- * unverified placeholder values.
- *
- * To enable Phase 3C for production:
- * 1. Replace all "SPEC VALUE REQUIRED" constants with verified values
- * 2. Set PHASE3C_CONSTANTS_VERIFIED = true
- * 3. Remove "SPEC VALUE REQUIRED" comments
- *
- * Ref: docs/Engine_Invariants_v0_2_7.md, docs/Systems_Manual_v0_2_7.md
+ * Provenance: docs/40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md §3.
+ * NOT canon citations — Engine Invariants §8 / Systems Manual §7.1–7.3 are prose-only
+ * (frozen Appendix A/B/C numeric tables archived in the v0.4→v0.9 fold), so each value
+ * is an owner/design decision with a proposed default.
  */
-const PHASE3C_CONSTANTS_VERIFIED = false;
+const PHASE3C_CONSTANTS_VERIFIED = true;
 
-// Phase 3C Tier-0 constants (conservative placeholders - SPEC VALUE REQUIRED)
-// WARNING: These are UNVERIFIED placeholder values. Do not enable Phase 3C until verified.
-const EXHAUSTION_THRESHOLD_AUTHORITY = 50; // SPEC VALUE REQUIRED
-const EXHAUSTION_THRESHOLD_COHESION = 50; // SPEC VALUE REQUIRED
-const EXHAUSTION_THRESHOLD_SPATIAL = 50; // SPEC VALUE REQUIRED
-const PERSISTENCE_REQUIRED_TURNS = 3; // SPEC VALUE REQUIRED: N consecutive turns above threshold
+// Phase 3C Tier-0 constants — RATIFIED Phase-I defaults (spec §3).
+const EXHAUSTION_THRESHOLD_AUTHORITY = 70; // spec C2 — keys collapse to the late-war exhaustion plateau (50 reached mid-war by static fronts → premature).
+const EXHAUSTION_THRESHOLD_COHESION = 70;  // spec C3 — same band as authority; cohesion gate differentiates, not the threshold.
+const EXHAUSTION_THRESHOLD_SPATIAL = 65;   // spec C4 — slightly lower: supply isolation historically precedes authority collapse (a pocket starves before its government dissolves).
+const PERSISTENCE_REQUIRED_TURNS = 4;      // spec C5 — ≈ a month of sustained over-threshold exhaustion before eligibility (Engine Invariants §7 multi-turn persistence).
 
-// Coherence gate thresholds (conservative placeholders)
-const AUTHORITY_DEGRADATION_THRESHOLD = 30; // SPEC VALUE REQUIRED: authority below this indicates degradation
-const COHESION_DEGRADATION_THRESHOLD = 30; // SPEC VALUE REQUIRED: formation readiness/cohesion below this
-const SPATIAL_DEGRADATION_THRESHOLD = 0.5; // SPEC VALUE REQUIRED: supply connectivity ratio below this
+// Coherence gate thresholds — RATIFIED Phase-I defaults (spec §3).
+const AUTHORITY_DEGRADATION_THRESHOLD = 30; // spec C6 — faction.profile.authority < 30 = institutional distress.
+const COHESION_DEGRADATION_THRESHOLD = 30;  // spec C7 — formation ops.fatigue > 30, consistent with existing fatigue bands.
+// spec C8 — SPATIAL_DEGRADATION_THRESHOLD removed: the old supply_sources.size/controlled.size
+// ratio proxy was unsound. checkSpatialDegradation now uses the BFS SupplyReachabilityOsidReport
+// (isolated_osids); a faction is spatially degraded when ≥ this fraction of its controlled OSIDs are isolated.
+const SPATIAL_ISOLATION_FRACTION = 0.1; // spec C8 — ≥10% of controlled OSIDs BFS-isolated from supply = spatially degraded.
 
-// Phase 3C Tier-1 constants (conservative placeholders - SPEC VALUE REQUIRED)
-const TIER1_AUTH_THRESHOLD = 20; // SPEC VALUE REQUIRED: local strain threshold for authority domain
-const TIER1_COH_THRESHOLD = 20; // SPEC VALUE REQUIRED: local strain threshold for cohesion domain
-const TIER1_SPA_THRESHOLD = 20; // SPEC VALUE REQUIRED: local strain threshold for spatial domain
-const TIER1_PERSIST_TURNS = 3; // SPEC VALUE REQUIRED: N consecutive turns above threshold
-const STRAIN_FRACTION = 0.1; // SPEC VALUE REQUIRED: fraction of exposure that converts to strain per turn
-const STRAIN_MAX = 100; // SPEC VALUE REQUIRED: maximum local strain value (clamp)
+// Phase 3C Tier-1 constants — RATIFIED Phase-I defaults (spec §3).
+// local_strain on [0,100]. With STRAIN_FRACTION=0.05, strain 40 = sustained high
+// per-OSID pressure exposure over many turns. CONSISTENCY INVARIANT: these MUST equal
+// Phase 3D STRAIN_THRESHOLD (C13==C9) so Tier-1-eligible OSIDs can produce non-zero severity.
+const TIER1_AUTH_THRESHOLD = 40; // spec C9
+const TIER1_COH_THRESHOLD = 40;  // spec C9
+const TIER1_SPA_THRESHOLD = 40;  // spec C9
+const TIER1_PERSIST_TURNS = 4;   // spec C10 — match C5 (Tier-1 not faster than Tier-0).
+const STRAIN_FRACTION = 0.05;    // spec C11 — slower accrual → only chronically-exposed OSIDs (besieged pockets, cut corridors) reach Tier-1.
+const STRAIN_MAX = 100;          // spec C12 — clamp ceiling; identical to Phase 3D STRAIN_MAX.
 
 export type CollapseDomain = 'authority' | 'cohesion' | 'spatial';
 
@@ -179,43 +181,61 @@ function checkCohesionDegradation(state: GameState, factionId: FactionId): boole
 }
 
 /**
- * Check if spatial degradation exists (coherence gate).
- * Simplified: check supply connectivity ratio.
+ * Check if spatial degradation exists (coherence gate) — REAL BFS implementation (spec C8).
+ *
+ * Replaces the old supply_sources.size/controlled.size ratio proxy (unsound — it never
+ * measured reachability). Uses the already-computed BFS supply-reachability report
+ * (`computeSupplyReachabilityOsid`, the same isolation BFS `isEnclaveContainable` reads):
+ * a faction is spatially degraded when ≥ SPATIAL_ISOLATION_FRACTION (C8, 10%) of its
+ * controlled OSIDs are listed as BFS-isolated from supply.
+ *
+ * §6 note (spec G3): for RBiH this will fire whenever the eastern enclaves are isolated
+ * (i.e. ~always). That is historically defensible — a state losing its eastern pockets is
+ * institutionally strained elsewhere — and is harmless because Phase 3D's G1 guard excludes
+ * the enclave OSIDs themselves from the capacity_modifier write; only NON-enclave RBiH OSIDs
+ * can receive modifiers.
+ *
+ * Determinism: reads only the deterministically-sorted report arrays; no RNG/clock.
+ * If no report is available (e.g. operational data not loaded), returns false — conservative
+ * (no spatial eligibility), never throws.
  */
-function checkSpatialDegradation(state: GameState, factionId: FactionId): boolean {
-    const faction = state.factions.find(f => f.id === factionId);
-    if (!faction) return false;
+function checkSpatialDegradation(
+    state: GameState,
+    factionId: FactionId,
+    supplyReach: SupplyReachabilityOsidReport | undefined | null
+): boolean {
+    if (!supplyReach?.factions) return false;
 
-    const controlledSids = new Set(faction.areasOfResponsibility ?? []);
-    if (controlledSids.size === 0) return false;
+    const facEntry = supplyReach.factions.find(f => f.faction_id === factionId);
+    if (!facEntry) return false;
 
-    const supplySources = new Set(faction.supply_sources ?? []);
-    if (supplySources.size === 0) {
-        // No supply sources = spatial degradation
-        return true;
-    }
+    const controlledCount = facEntry.controlled.length;
+    if (controlledCount === 0) return false;
 
-    // Simplified: if less than threshold of controlled settlements have supply, consider degraded
-    // This is a placeholder - actual implementation would use supply reachability
-    const suppliedRatio = supplySources.size / Math.max(1, controlledSids.size);
-    return suppliedRatio < SPATIAL_DEGRADATION_THRESHOLD;
+    const isolatedCount = facEntry.isolated_osids.length;
+    return isolatedCount >= controlledCount * SPATIAL_ISOLATION_FRACTION;
 }
 
 /**
  * Check if faction is suppressed (temporary suppression rules).
+ *
+ * RATIFIED Phase-I decision (spec §1, §3): NO Tier-0 suppression for 1.0. The
+ * state-machine hooks remain (suppression would pause persistence counters without
+ * erasing exhaustion) but the rule set is intentionally empty. Returns false —
+ * deterministic, no brake. A later phase may add minimal rules (e.g. suppression
+ * during an active ceasefire) without touching the call sites.
  */
 function checkSuppression(state: GameState, factionId: FactionId): boolean {
-    // Placeholder: no suppression logic implemented yet
-    // Suppression would pause persistence counters but not erase exhaustion
     return false;
 }
 
 /**
  * Check if faction is immune (immunity conditions).
+ *
+ * RATIFIED Phase-I decision (spec §1, §3): NO Tier-0 immunity for 1.0. Hook retained
+ * (immunity would block eligibility even when conditions are met) but empty.
  */
 function checkImmunity(state: GameState, factionId: FactionId): boolean {
-    // Placeholder: no immunity logic implemented yet
-    // Immunity would prevent eligibility even if conditions are met
     return false;
 }
 
@@ -287,7 +307,13 @@ function updateLocalStrain(state: GameState, entityId: EntityId, exposure: numbe
  * Check if entity has local degradation (coherence gate for Tier-1).
  * Simplified: check if entity is in a degraded faction context.
  */
-function checkTier1Degradation(state: GameState, entityId: EntityId, domain: CollapseDomain, factionId: FactionId): boolean {
+function checkTier1Degradation(
+    state: GameState,
+    entityId: EntityId,
+    domain: CollapseDomain,
+    factionId: FactionId,
+    supplyReach: SupplyReachabilityOsidReport | undefined | null
+): boolean {
     // For Tier-1, we use the faction-level degradation check as a proxy
     // This is conservative and avoids inventing new mechanics
     if (domain === 'authority') {
@@ -295,24 +321,24 @@ function checkTier1Degradation(state: GameState, entityId: EntityId, domain: Col
     } else if (domain === 'cohesion') {
         return checkCohesionDegradation(state, factionId);
     } else if (domain === 'spatial') {
-        return checkSpatialDegradation(state, factionId);
+        return checkSpatialDegradation(state, factionId, supplyReach);
     }
     return false;
 }
 
 /**
  * Check if entity is suppressed (Tier-1).
+ * RATIFIED Phase-I decision (spec §1): NO Tier-1 suppression for 1.0. Hook retained, empty.
  */
 function checkTier1Suppression(state: GameState, entityId: EntityId): boolean {
-    // Placeholder: no suppression logic implemented yet
     return false;
 }
 
 /**
  * Check if entity is immune (Tier-1).
+ * RATIFIED Phase-I decision (spec §1): NO Tier-1 immunity for 1.0. Hook retained, empty.
  */
 function checkTier1Immunity(state: GameState, entityId: EntityId): boolean {
-    // Placeholder: no immunity logic implemented yet
     return false;
 }
 
@@ -340,7 +366,8 @@ function checkTier1Immunity(state: GameState, entityId: EntityId): boolean {
  */
 export function applyPhase3CExhaustionCollapseGating(
     state: GameState,
-    derivedFrontEdges?: FrontEdge[]
+    derivedFrontEdges?: FrontEdge[],
+    supplyReach?: SupplyReachabilityOsidReport | null
 ): Phase3CEligibilityResult {
     // Feature gate check
     if (!getEnablePhase3C()) {
@@ -361,15 +388,16 @@ export function applyPhase3CExhaustionCollapseGating(
         };
     }
 
-    // SAFETY GUARD: Fail-fast if Phase 3C is enabled but constants are unverified.
-    // This prevents simulation with placeholder values that may produce incorrect results.
-    // Ref: docs/Engine_Invariants_v0_2_7.md, docs/Systems_Manual_v0_2_7.md
+    // SAFETY GUARD: defense-in-depth. PHASE3C_CONSTANTS_VERIFIED is now true (the
+    // ratified Phase-I defaults replaced the placeholders + the spatial gate is real).
+    // The guard is retained so that if a future edit ever re-introduces unverified
+    // placeholders by flipping the flag back to false, Phase 3C fails fast rather than
+    // silently simulating with bad constants. Deterministic; no RNG/clock.
     if (!PHASE3C_CONSTANTS_VERIFIED) {
         throw new Error(
             'Phase 3C FREEZE VIOLATION: Cannot execute Phase 3C with unverified constants. ' +
-            'All constants marked "SPEC VALUE REQUIRED" must be verified against ' +
-            'Engine Invariants v0.2.7 and Systems Manual v0.2.7 before enabling Phase 3C. ' +
-            'Set PHASE3C_CONSTANTS_VERIFIED = true only after verification is complete.'
+            'Set PHASE3C_CONSTANTS_VERIFIED = true only after the constants are ratified ' +
+            '(see docs/40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md §3).'
         );
     }
 
@@ -504,7 +532,7 @@ export function applyPhase3CExhaustionCollapseGating(
                     eligibilityState.persistence_spatial = eligibilityState.persistence_spatial + 1;
                 }
                 if (eligibilityState.persistence_spatial >= PERSISTENCE_REQUIRED_TURNS) {
-                    const degradationExists = checkSpatialDegradation(state, factionId);
+                    const degradationExists = checkSpatialDegradation(state, factionId, supplyReach);
                     if (degradationExists) {
                         eligibilityState.eligible_spatial = true;
                         if (!wasEligible) newlyEligibleSpatial++;
@@ -611,7 +639,7 @@ export function applyPhase3CExhaustionCollapseGating(
                     maxPersistenceAuthority = tier1State.persistence.authority;
                 }
                 if (tier1State.persistence.authority >= TIER1_PERSIST_TURNS) {
-                    const degradationExists = checkTier1Degradation(state, entityId, 'authority', factionId);
+                    const degradationExists = checkTier1Degradation(state, entityId, 'authority', factionId, supplyReach);
                     if (degradationExists) {
                         tier1State.domains.authority = true;
                         if (!wasEligible) tier1NewlyEligibleAuthority++;
@@ -642,7 +670,7 @@ export function applyPhase3CExhaustionCollapseGating(
                     maxPersistenceCohesion = tier1State.persistence.cohesion;
                 }
                 if (tier1State.persistence.cohesion >= TIER1_PERSIST_TURNS) {
-                    const degradationExists = checkTier1Degradation(state, entityId, 'cohesion', factionId);
+                    const degradationExists = checkTier1Degradation(state, entityId, 'cohesion', factionId, supplyReach);
                     if (degradationExists) {
                         tier1State.domains.cohesion = true;
                         if (!wasEligible) tier1NewlyEligibleCohesion++;
@@ -673,7 +701,7 @@ export function applyPhase3CExhaustionCollapseGating(
                     maxPersistenceSpatial = tier1State.persistence.spatial;
                 }
                 if (tier1State.persistence.spatial >= TIER1_PERSIST_TURNS) {
-                    const degradationExists = checkTier1Degradation(state, entityId, 'spatial', factionId);
+                    const degradationExists = checkTier1Degradation(state, entityId, 'spatial', factionId, supplyReach);
                     if (degradationExists) {
                         tier1State.domains.spatial = true;
                         if (!wasEligible) tier1NewlyEligibleSpatial++;

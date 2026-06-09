@@ -78,7 +78,7 @@ import { updateSustainability } from '../../state/sustainability.js';
 import { updateLossOfControlTrends } from '../../state/loss_of_control_trends.js';
 import { calculateFactionProductionBonus, ensureProductionFacilities } from '../../state/production_facilities.js';
 import { computeSupplyReachability } from '../../state/supply_reachability.js';
-import { computeSupplyReachabilityOsid } from '../../state/supply_reachability_osid.js';
+import { computeSupplyReachabilityOsid, type SupplyReachabilityOsidReport } from '../../state/supply_reachability_osid.js';
 import { buildContainDiagnostic } from '../combat/contain_diagnostic.js';
 import { computeContainedOsidsForFaction } from '../combat/enclave_resilience.js';
 import { isVrsContainPostureEnabled, isArbihContainPostureEnabled } from '../combat/contain_posture_gate.js';
@@ -3760,7 +3760,23 @@ export const warPhases: NamedPhase[] = [
                 return;
             }
             const derivedFrontEdges = computeFrontEdges(context.state, edges);
-            const result = applyPhase3CExhaustionCollapseGating(context.state, derivedFrontEdges);
+            // Phase 3C spatial gate (spec C8) reads the BFS supply-reachability report —
+            // the same isolation BFS the supply-osid step + isEnclaveContainable use. Compute
+            // it from the loaded operational data when available; pass null otherwise
+            // (checkSpatialDegradation then conservatively reports no spatial degradation).
+            // Phase 3C is gated OFF (getEnablePhase3C() === false) so this is inert in
+            // normal play; the report is only consumed when the audit harness flips the flag.
+            let supplyReach: SupplyReachabilityOsidReport | null = null;
+            const od = getOperationalData(context);
+            if (od?.opData?.operationalToCanonical && od?.opData?.canonicalToOperational && od?.edges?.length) {
+                supplyReach = computeSupplyReachabilityOsid(
+                    context.state,
+                    od.edges,
+                    od.opData.canonicalToOperational,
+                    od.opData.operationalToCanonical
+                );
+            }
+            const result = applyPhase3CExhaustionCollapseGating(context.state, derivedFrontEdges, supplyReach);
             context.report.phase3c_exhaustion_collapse_gating = result;
         }
     },
