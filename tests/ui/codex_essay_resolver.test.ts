@@ -714,3 +714,69 @@ describe('codexEssayResolver - cost-ledger annotation atoms and tokens', () => {
         ]);
     });
 });
+
+describe('T2-C — FIXED tier-0 essay with no backing event unlocks as canonical (orphaned-wiring audit)', () => {
+    // independence_referendum_1992: tier-0 FIXED, no backing event in the
+    // catalog, now `ghost_when`-anchored on an always-firing campaign-opening
+    // event. It must unlock as full canonical prose — NOT a "path not taken"
+    // ghost — because tier-0 is canonical history that always happened.
+    function fixedReferendumEssay(overrides: Partial<EssayEntry> = {}): EssayEntry {
+        return essay({
+            id: 'essay_independence_referendum_1992',
+            event_id: 'independence_referendum_1992',
+            tier: 0,
+            ghost_when: 'EVENT:rs_strategic_goals OR EVENT:rbih_state_identity',
+            content: 'The referendum.\n\nTwo legitimacies.',
+            ...overrides,
+        });
+    }
+
+    it('unlocks as canonical (non-ghost) when its always-fired anchor event has fired', () => {
+        const resolved = resolveCodexEssay(
+            fixedReferendumEssay(),
+            context({ firedEventIds: new Set(['rs_strategic_goals']) }),
+        );
+        expect(resolved.isUnlocked).toBe(true);
+        // The key assertion: a FIXED essay is NEVER a ghost, even when it
+        // unlocked via ghost_when rather than a direct event_id fire.
+        expect(resolved.isGhost).toBe(false);
+        expect(resolved.paragraphs.every((p) => p.kind !== 'ghost')).toBe(true);
+        expect(resolved.paragraphs.map((p) => p.text)).toEqual([
+            'The referendum.',
+            'Two legitimacies.',
+        ]);
+    });
+
+    it('also unlocks via the RBiH-side anchor event (cross-faction reachability)', () => {
+        const resolved = resolveCodexEssay(
+            fixedReferendumEssay(),
+            context({ firedEventIds: new Set(['rbih_state_identity']) }),
+        );
+        expect(resolved.isUnlocked).toBe(true);
+        expect(resolved.isGhost).toBe(false);
+    });
+
+    it('stays locked when no anchor event has fired', () => {
+        const resolved = resolveCodexEssay(fixedReferendumEssay(), context());
+        expect(resolved.isUnlocked).toBe(false);
+    });
+
+    it('a CONDITIONAL essay with the same ghost_when still surfaces AS a ghost (FIXED-only rule)', () => {
+        const resolved = resolveCodexEssay(
+            fixedReferendumEssay({ tier: 1, ghost_summary: 'A path not taken.' }),
+            context({ firedEventIds: new Set(['rs_strategic_goals']) }),
+        );
+        expect(resolved.isUnlocked).toBe(true);
+        expect(resolved.isGhost).toBe(true);
+    });
+
+    it('a FIXED essay whose event_id has no backing event AND no ghost_when stays permanently locked (§6 bijeljina invariant)', () => {
+        // Mirrors bijeljina_massacre_1992: tier-0, no backing event, no
+        // ghost_when → never reachable. The T2-C fix must NOT change this.
+        const resolved = resolveCodexEssay(
+            essay({ id: 'essay_bijeljina', event_id: 'bijeljina_massacre_1992', tier: 0 }),
+            context({ firedEventIds: new Set(['rs_strategic_goals', 'rbih_state_identity']) }),
+        );
+        expect(resolved.isUnlocked).toBe(false);
+    });
+});
