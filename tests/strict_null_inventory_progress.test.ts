@@ -141,7 +141,6 @@ const STATE_SIM_DESKTOP_BATCH_44_FILES = [
     'src/sim/negotiation/compute_combat_effective.ts',
     'src/sim/turn_phases/early_war_phases.ts',
     'src/state/assignable_front_segments.ts',
-    'src/state/minority_flight.ts',
     'src/state/seed_organizational_penetration_from_control.ts',
 ];
 
@@ -620,15 +619,19 @@ describe('strict null inventory progress', () => {
             // A2 close-out (#71): +1 optional field `StateMeta.dayton_close_out` (the
             // default-off scenario flag arming the Dayton terminal verdict). state domain,
             // player/scenario-gated → byte-identical when unset. 513→514 / state 174→175.
-            optional_fields_game_state: 514,
+            // Displacement v36 (per-OSID flow tally): +1 optional field
+            // `DisplacementDomainState.displacement_flows_by_osid[].by_ethnicity` (the
+            // optional per-OSID per-ethnicity breakdown inside the new read-model substrate).
+            // state domain; read-model only → calibration byte-identical. 514→515 / state 175→176.
+            optional_fields_game_state: 515,
         });
-        expect(current.optional_field_domains.total).toBe(514);
+        expect(current.optional_field_domains.total).toBe(515);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 329,
-            state: 175,
+            state: 176,
             ui_adapter: 0,
             unknown: 0,
         });

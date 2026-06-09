@@ -317,6 +317,12 @@ export function SettlementDetailContent({
       ? Math.max(0, currentPop - popOriginal + outSettlement + lostSettlement)
       : 0);
 
+  // Item 3: distinguish "no displacement yet" (e.g. turns 0-3, before flight/
+  // takeover delays mature) from a genuine bug. When mun displacement state
+  // exists but every flow is zero, the panel legitimately shows now == pre-war.
+  const noDisplacementYet =
+    !!disp && outSettlement === 0 && inSettlement === 0 && lostSettlement === 0;
+
   const maxShow = variant === 'tooltip' ? 3 : 12;
   const showFormations = formationsAtOsid.slice(0, maxShow);
   const restCount = formationsAtOsid.length - maxShow;
@@ -524,9 +530,15 @@ export function SettlementDetailContent({
                     })()}
                   </div>
                 </div>
-                <div className="text-[10px] text-text-secondary/80 mb-1.5" aria-label={t('settlement.populationFormulaAria')}>
-                  {t('settlement.populationFormula')}
-                </div>
+                {noDisplacementYet ? (
+                  <div className="text-[10px] text-text-secondary/70 italic mb-1.5">
+                    {t('settlement.noDisplacementYet')}
+                  </div>
+                ) : (
+                  <div className="text-[10px] text-text-secondary/80 mb-1.5" aria-label={t('settlement.populationFormulaAria')}>
+                    {t('settlement.populationFormula')}
+                  </div>
+                )}
                 <div className="grid grid-cols-3 gap-2 text-[10px] mb-1.5">
                   {outSettlement > 0 && (
                     <div className="bg-black/20 rounded px-2 py-1 text-center">

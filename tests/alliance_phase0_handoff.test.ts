@@ -38,6 +38,7 @@ function makeState(phase0Value?: number): GameState {
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},
             displacement_recent_by_turn: {},
+            displacement_flows_by_osid: {},
             settlement_displacement: {},
             settlement_displacement_started_turn: {},
             municipality_displacement: {},

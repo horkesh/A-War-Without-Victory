@@ -1,6 +1,6 @@
 /**
  * Shared helpers for displacement state and settlement→municipality mapping.
- * Used by displacement_takeover, minority_flight, and displacement modules.
+ * Used by displacement_takeover and displacement modules (minority_flight removed 2026-06-09).
  */
 
 import type { SettlementRecord } from '../map/settlements.js';

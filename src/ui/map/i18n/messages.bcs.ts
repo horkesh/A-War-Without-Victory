@@ -3349,4 +3349,25 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'paramilitaryReview.submitting': 'Slanje...',
     'paramilitaryReview.error.ipcUnavailable': 'Desktop IPC nije dostupan za pregled paravojnih jedinica.',
     'paramilitaryReview.error.resolveFailed': 'Nije uspjelo razrješavanje paravojnih zahtjeva.',
+
+    // --- Settlement panel: early-game displacement hint (Item 3) ---
+    'settlement.noDisplacementYet': 'Još nema zabilježenog raseljavanja',
+
+    // --- National Humanitarian Ledger (Item 2; tone pending owner sign-off) ---
+    'humanitarianLedger.title': 'Humanitarni registar',
+    'humanitarianLedger.subtitle': 'Ljudska cijena rata, kako je zabilježena.',
+    'humanitarianLedger.empty': 'Još nema zabilježenog raseljavanja ni žrtava.',
+    'humanitarianLedger.section.byPeople': 'Ubijeni i izbjegli u inozemstvo, po narodu',
+    'humanitarianLedger.section.byPerpetrator': 'Prisilno raseljavanje, po odgovornoj strani',
+    'humanitarianLedger.section.overTime': 'Raseljeni po sedmici',
+    'humanitarianLedger.col.people': 'Narod',
+    'humanitarianLedger.col.killed': 'Ubijeni',
+    'humanitarianLedger.col.fledAbroad': 'Izbjegli u inozemstvo',
+    'humanitarianLedger.col.perpetrator': 'Odgovorni',
+    'humanitarianLedger.col.victims': 'Protiv',
+    'humanitarianLedger.col.displaced': 'Raseljeni',
+    'humanitarianLedger.col.killedShort': 'Ubijeni',
+    'humanitarianLedger.label.total': 'Ukupno',
+    'humanitarianLedger.label.week': 'Sedmica {turn}',
+    'humanitarianLedger.note.verbatim': 'Brojke su prikazane tačno onako kako ih je zabilježila simulacija.',
 };

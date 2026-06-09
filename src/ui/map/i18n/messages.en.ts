@@ -3374,6 +3374,27 @@ export const enMessages = {
     'paramilitaryReview.submitting': 'Submitting...',
     'paramilitaryReview.error.ipcUnavailable': 'Desktop IPC not available for paramilitary review.',
     'paramilitaryReview.error.resolveFailed': 'Failed to resolve paramilitary requests.',
+
+    // --- Settlement panel: early-game displacement hint (Item 3) ---
+    'settlement.noDisplacementYet': 'No displacement recorded yet',
+
+    // --- National Humanitarian Ledger (Item 2; §6-adjacent, tone pending owner sign-off) ---
+    'humanitarianLedger.title': 'Humanitarian Ledger',
+    'humanitarianLedger.subtitle': 'The human cost of the war, as recorded.',
+    'humanitarianLedger.empty': 'No displacement or casualties recorded yet.',
+    'humanitarianLedger.section.byPeople': 'Killed and fled abroad, by people',
+    'humanitarianLedger.section.byPerpetrator': 'Forced displacement, by responsible side',
+    'humanitarianLedger.section.overTime': 'Displaced per week',
+    'humanitarianLedger.col.people': 'People',
+    'humanitarianLedger.col.killed': 'Killed',
+    'humanitarianLedger.col.fledAbroad': 'Fled abroad',
+    'humanitarianLedger.col.perpetrator': 'Responsible',
+    'humanitarianLedger.col.victims': 'Against',
+    'humanitarianLedger.col.displaced': 'Displaced',
+    'humanitarianLedger.col.killedShort': 'Killed',
+    'humanitarianLedger.label.total': 'Total',
+    'humanitarianLedger.label.week': 'Week {turn}',
+    'humanitarianLedger.note.verbatim': 'Figures are reported exactly as recorded by the simulation.',
 } as const;
 
 export type MessageKey = keyof typeof enMessages;

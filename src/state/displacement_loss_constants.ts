@@ -1,6 +1,6 @@
 /**
  * Shared displacement loss parameters (canon: same policy as displacement.ts).
- * Single source for displacement_takeover and minority_flight.
+ * Single source for displacement_takeover (and formerly minority_flight, removed 2026-06-09).
  */
 
 import type { FactionId } from './game_state.js';

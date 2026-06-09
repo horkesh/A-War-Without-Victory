@@ -155,6 +155,15 @@ interface VersionRequiredField {
     version: number;
     path: string;
     check: (value: unknown) => boolean;
+    /**
+     * When true, ABSENCE of the field is tolerated (it canonicalizes to its
+     * empty default on load — see serialize.ts canonicalizeCurrentFields). A
+     * value that IS present must still pass `check`. Used for additive, lazily
+     * initialized read-model substrates that the engine seeds on demand and the
+     * UI tolerates missing, so they must not be a hard load-time requirement on
+     * same-version states (which skip the seeding migration). Default false.
+     */
+    optionalWhenAbsent?: boolean;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -3275,6 +3284,12 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 31, path: 'military.bot_priority_shifts', check: Array.isArray },
     { version: 32, path: 'military.closed_event_ids', check: isStringArray },
     { version: 33, path: 'military.event_causality_log', check: Array.isArray },
+    // Additive v36 read-model substrate: lazily initialized by appendDisplacementEvent
+    // (`??= {}`) and tolerated-absent by the UI adapter. applyMigrations seeds it
+    // only for sub-v36 saves; serialize.ts canonicalizeCurrentFields seeds it on
+    // every load. Absence must NOT hard-reject a same-version v36 state (the Codex
+    // P1 load-break); a present value is still type-checked.
+    { version: 36, path: 'displacement.displacement_flows_by_osid', check: isRecord, optionalWhenAbsent: true },
 ];
 
 /**
@@ -3310,7 +3325,14 @@ export function validateGameStateShape(
         for (const field of VERSION_REQUIRED_FIELDS) {
             if (stateVersion < field.version || field.version > options.requireVersion) continue;
             const value = getPathValue(s, field.path);
-            if (value === undefined || !field.check(value)) {
+            if (value === undefined) {
+                // optionalWhenAbsent additive read-models canonicalize to their
+                // empty default on load — absence is not a load break.
+                if (field.optionalWhenAbsent) continue;
+                errors.push(`v${field.version} required field missing or invalid: ${field.path}`);
+                continue;
+            }
+            if (!field.check(value)) {
                 errors.push(`v${field.version} required field missing or invalid: ${field.path}`);
             }
         }
