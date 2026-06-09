@@ -77,6 +77,6 @@ Canon v0.9 is the active canon. As of 2026-05-05 (LANE-NIGHTSHIFT-CANON-DOCS-TO-
 
 ## Game Versioning
 
-**Current software milestone: v0.9.6-alpha.1** (see `package.json`). Format: `MAJOR.MINOR.PATCH` with prerelease suffixes when applicable. 1.0.0 = gold/shipping product. See `docs/20_engineering/VERSIONING.md` for full milestone map and bump protocol.
+**Current software milestone: v0.9.9-beta.1** (feature-complete beta; see `package.json`). Format: `MAJOR.MINOR.PATCH` with prerelease suffixes when applicable. 1.0.0 = gold/shipping product. See `docs/20_engineering/VERSIONING.md` for full milestone map and bump protocol.
 
 One game turn equals one week.

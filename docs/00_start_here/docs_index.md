@@ -85,7 +85,7 @@
 
 ## Versioning
 
-See [docs/20_engineering/VERSIONING.md](../20_engineering/VERSIONING.md) for the game versioning system (MAJOR.MINOR.PATCH). Current package version: **v0.9.6-alpha.1**. Canon document versions are independent of the game/package version; active canon is **v0.9.0**.
+See [docs/20_engineering/VERSIONING.md](../20_engineering/VERSIONING.md) for the game versioning system (MAJOR.MINOR.PATCH). Current package version: **v0.9.9-beta.1**. Canon document versions are independent of the game/package version; active canon is **v0.9.0**.
 
 ---
 

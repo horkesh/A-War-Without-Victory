@@ -16,7 +16,7 @@ interface RecordCrashDiagnosticOptions extends InstallCrashCaptureOptions {
     stack: unknown;
 }
 
-export const CRASH_DIAGNOSTICS_APP_VERSION = '0.9.6-alpha.1';
+export const CRASH_DIAGNOSTICS_APP_VERSION = '0.9.9-beta.1';
 
 export function recordCrashDiagnostic(options: RecordCrashDiagnosticOptions) {
     const target = options.target ?? (typeof window !== 'undefined' ? window : undefined);

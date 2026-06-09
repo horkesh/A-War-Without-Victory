@@ -8,7 +8,7 @@
 | Developer | Pyrrhic Games |
 | Genre | Historical grand strategy / operational wargame |
 | Setting | Bosnia and Herzegovina, 1992-1995 |
-| Current version | v0.9.6-alpha.1 roadmap band |
+| Current version | v0.9.9-beta.1 roadmap band |
 | Platforms | Windows desktop target; other platforms not launch-claimed |
 | Mode | Single-player deterministic campaign simulation |
 
