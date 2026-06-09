@@ -24,6 +24,16 @@ check NEVER reports on a non-matching PR, so GitHub blocks that PR forever on a
 "pending" required check (the "required + path-filtered" gotcha). The shim instead lets
 the workflow ALWAYS trigger and each job ALWAYS report — only the heavy steps are gated.
 
+**Integrity (task #346):** the skip decision runs a TRUSTED copy of the detection
+logic, NOT the PR's working copy. On `pull_request` each detect step first
+`git checkout origin/$GITHUB_BASE_REF -- .github/scripts/detect-*.sh` before running it,
+so a PR that edits a `detect-*.sh` script to always emit `relevant=false` CANNOT
+force-skip a REQUIRED gate — the base-branch logic decides. (On push to `main` the
+checked-out copy already IS the trusted base, so no restore is needed.) The only
+remaining surface is editing the restore line in the workflow YAML itself, which is
+conspicuous in a workflow-file diff at review time — the standard GitHub trust boundary
+for `pull_request` (not `pull_request_target`) workflows.
+
 | Job | Required? | `PATH_SET` | Heavy steps gated |
 |---|---|---|---|
 | `test` (Baseline Regression) | yes | `code` | `npm install` + `test:vitest:fast` |
@@ -38,9 +48,9 @@ the workflow ALWAYS trigger and each job ALWAYS report — only the heavy steps 
 
 Path sets (a changed file matching ANY entry => heavy steps run):
 
-- **code** — `src/ tools/ tests/ data/scenarios/ data/calibration/ scripts/` + `package.json vitest.config.ts tsconfig.json` + the Baseline workflow + the shim script. Identical to the full-suite set, so the `test` slice never shrinks coverage vs the full-vitest gate.
+- **code** — `src/ tools/ tests/ data/scenarios/ data/calibration/ scripts/` + `package.json package-lock.json vitest.config.ts tsconfig.json` + the Baseline workflow + the shim script. Identical to the full-suite set, so the `test` slice never shrinks coverage vs the full-vitest gate. `package-lock.json` (task #351) ensures a lockfile-only dep/security bump still runs the full suite.
 - **desktop** — `src/desktop/ src/ui/ tools/` + `package.json` (electron-builder `build` block + `desktop:*` scripts) + the Desktop workflow + the shim script. Per the 2026-06-05 CI/PR-batching policy ("desktop packaging required only for desktop/package/UI/runtime paths").
-- **sim** — `src/sim/ src/state/ src/scenario/ data/scenarios/ data/calibration/` + `package.json vitest.config.ts tsconfig.json` + the Baseline workflow + the shim script.
+- **sim** — `src/sim/ src/state/ src/scenario/ data/scenarios/ data/calibration/` + `package.json package-lock.json vitest.config.ts tsconfig.json` + the Baseline workflow + the shim script + the scenario TEST files the anchor gate executes (`tests/scenario_anchor_contract.test.ts`, `tests/integration_deployment_health.test.ts`, `tests/scenario_harness_contracts.test.ts`, `tests/integration_run_summary.test.ts`). The scenario test files (task #351) ensure a scenario-test-only PR still runs the anchor gate.
 
 Fail-safe: an unresolved PR/push base, or an unknown `PATH_SET`, forces `relevant=true`
 (run the heavy gate) — coverage is never silently dropped.

@@ -33,7 +33,18 @@ jobs:
         id: changes
         env:
           PATH_SET: desktop
-        run: bash .github/scripts/detect-changed-paths.sh
+        # shell: bash — desktop-packaged-runtime-probe runs on windows-latest where the
+        # default run shell is pwsh; force bash so the restore + detect logic parses.
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            base_ref="${GITHUB_BASE_REF:-main}"
+            git fetch --no-tags origin "${base_ref}:refs/remotes/origin/${base_ref}" >/dev/null 2>&1 || \
+              git fetch --no-tags origin "${base_ref}" >/dev/null 2>&1 || true
+            git checkout "origin/${base_ref}" -- .github/scripts/detect-changed-paths.sh
+          fi
+          bash .github/scripts/detect-changed-paths.sh
 
       - uses: actions/setup-node@v5
         if: steps.changes.outputs.relevant == 'true'
@@ -105,7 +116,18 @@ jobs:
         id: changes
         env:
           PATH_SET: desktop
-        run: bash .github/scripts/detect-changed-paths.sh
+        # shell: bash — desktop-packaged-runtime-probe runs on windows-latest where the
+        # default run shell is pwsh; force bash so the restore + detect logic parses.
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            base_ref="${GITHUB_BASE_REF:-main}"
+            git fetch --no-tags origin "${base_ref}:refs/remotes/origin/${base_ref}" >/dev/null 2>&1 || \
+              git fetch --no-tags origin "${base_ref}" >/dev/null 2>&1 || true
+            git checkout "origin/${base_ref}" -- .github/scripts/detect-changed-paths.sh
+          fi
+          bash .github/scripts/detect-changed-paths.sh
 
       - uses: actions/setup-node@v5
         if: steps.changes.outputs.relevant == 'true'

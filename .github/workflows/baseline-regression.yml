@@ -49,11 +49,23 @@ jobs:
 
       # Always-report shim: decide whether the heavy anchor run executes. The job
       # itself always completes (and reports the `scenario-anchors` check).
+      # INTEGRITY (task #346): run a TRUSTED (base-branch) copy of the detection
+      # script, not the PR's working copy, so a PR cannot edit detect-changed-paths.sh
+      # to force relevant=false and bypass this REQUIRED gate. See the restore comment
+      # in full-suite-and-fingerprint.yml.
       - name: Detect sim/scenario changes
         id: changes
         env:
           PATH_SET: sim
-        run: bash .github/scripts/detect-changed-paths.sh
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            base_ref="${GITHUB_BASE_REF:-main}"
+            git fetch --no-tags origin "${base_ref}:refs/remotes/origin/${base_ref}" >/dev/null 2>&1 || \
+              git fetch --no-tags origin "${base_ref}" >/dev/null 2>&1 || true
+            git checkout "origin/${base_ref}" -- .github/scripts/detect-changed-paths.sh
+          fi
+          bash .github/scripts/detect-changed-paths.sh
 
       - uses: actions/setup-node@v5
         if: steps.changes.outputs.relevant == 'true'
@@ -98,7 +110,15 @@ jobs:
         id: changes
         env:
           PATH_SET: code
-        run: bash .github/scripts/detect-changed-paths.sh
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            base_ref="${GITHUB_BASE_REF:-main}"
+            git fetch --no-tags origin "${base_ref}:refs/remotes/origin/${base_ref}" >/dev/null 2>&1 || \
+              git fetch --no-tags origin "${base_ref}" >/dev/null 2>&1 || true
+            git checkout "origin/${base_ref}" -- .github/scripts/detect-changed-paths.sh
+          fi
+          bash .github/scripts/detect-changed-paths.sh
 
       - uses: actions/setup-node@v5
         if: steps.changes.outputs.relevant == 'true'
@@ -141,7 +161,15 @@ jobs:
         id: changes
         env:
           PATH_SET: sim
-        run: bash .github/scripts/detect-changed-paths.sh
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            base_ref="${GITHUB_BASE_REF:-main}"
+            git fetch --no-tags origin "${base_ref}:refs/remotes/origin/${base_ref}" >/dev/null 2>&1 || \
+              git fetch --no-tags origin "${base_ref}" >/dev/null 2>&1 || true
+            git checkout "origin/${base_ref}" -- .github/scripts/detect-changed-paths.sh
+          fi
+          bash .github/scripts/detect-changed-paths.sh
 
       - uses: actions/setup-node@v5
         if: steps.changes.outputs.relevant == 'true'
