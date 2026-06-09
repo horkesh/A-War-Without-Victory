@@ -15,6 +15,7 @@ import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import type { EventEffect } from '../../../sim/events/event_types';
 import { getPlayerSafeDisplayLabel, getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
+import { resolveEventIllustration } from '../data/eventIllustrationArt';
 import { t, type MessageKey } from '../i18n';
 
 /** Display-ready event data for the modal. */
@@ -98,6 +99,10 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
     const cat = CATEGORY_CONFIG[event.category] ?? { bg: '#444', color: '#aaa', labelKey: 'event.category.unknown', icon: 'star' as IconName };
     const factions = extractFactions(event.effects);
     const mechanicalEffects = event.effects.filter(e => !e.description.startsWith('[narrative]'));
+    // Optional documentary-realism illustration. Resolves to null when the event
+    // authors no `image` key (every shipped event today) OR the asset is not yet
+    // on disk — in both cases the text-only layout below is unchanged.
+    const illustration = resolveEventIllustration(event.image);
 
     return (
         <Modal
@@ -142,6 +147,29 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                     boxShadow: 'inset 0 0 30px rgba(0,0,0,0.05)',
                 }}
             >
+                {/* Documentary-realism illustration — rendered ONLY when the event
+                    authors an `image` and the asset resolves. Absent → nothing here,
+                    so the text-only dispatch layout is byte-identical to before. */}
+                {illustration && (
+                    <div className="relative w-full" data-testid="event-modal-illustration">
+                        <img
+                            src={illustration}
+                            alt=""
+                            aria-hidden="true"
+                            className="block w-full object-cover"
+                            style={{ aspectRatio: '16 / 9' }}
+                        />
+                        {/* Bottom fade into the paper so the still seats into the dispatch. */}
+                        <div
+                            aria-hidden="true"
+                            className="absolute inset-x-0 bottom-0 h-1/4 pointer-events-none"
+                            style={{
+                                background: 'linear-gradient(to top, rgba(224,216,192,0.9), rgba(224,216,192,0))',
+                            }}
+                        />
+                    </div>
+                )}
+
                 {/* Subtle paper noise */}
                 <div
                     className="absolute inset-0 pointer-events-none opacity-[0.03]"

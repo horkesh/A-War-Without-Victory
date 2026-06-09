@@ -1,8 +1,13 @@
+> ⚠ **SUPERSEDED 2026-06-09 (owner)** — this prompt sheet is the companion to the retired
+> oil-paint art direction and carries the same `sepia(0.15)` filter (the "sepia mistake"). It is
+> NOT canon. Documentary-realism is the sole register; see `docs/plans/2026-05-24-gui-ai-asset-brief.md`
+> + `docs/30_planning/design/VISUAL_ASSET_STRATEGY.md`. Do NOT generate from these prompts as-is.
+
 # Image Generation Prompts -- A War Without Victory
 
 **Date:** 2026-03-25
-**Art Direction:** See `ART_DIRECTION_OIL_PAINT_EVENTS.md`
-**Status:** DRAFT -- ready for generation
+**Art Direction:** SUPERSEDED — see `docs/30_planning/_legacy/ART_DIRECTION_OIL_PAINT_EVENTS.md` (retired)
+**Status:** SUPERSEDED 2026-06-09 (was "DRAFT -- ready for generation"; oil-paint/sepia, not canon)
 
 All prompts are self-sufficient for Midjourney v6.1 `--style raw` or Flux Pro. Every prompt enforces: no identifiable faces, no flags or insignia, no specific real people, no glorification.
 
