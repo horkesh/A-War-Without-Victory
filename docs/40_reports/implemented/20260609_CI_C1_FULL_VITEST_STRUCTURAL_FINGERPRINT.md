@@ -80,7 +80,18 @@ determinism authority.
 - `--check` passes on match (exit 0), fails with legible field-diff on mismatch (exit 1).
 - `tests/structural_fingerprint.test.ts`: 7/7 pass.
 - Both workflow YAMLs parse valid (yaml package).
-- Full vitest suite green on origin/main + new files (see commit verification).
+- **CI `full-suite` job: PASS on Linux (20m6s), exit 0** — the authoritative full-suite
+  validation on the reference platform.
+- **CI `structural-fingerprint` job: PASS on Linux (1m49s)** — a fresh Linux 40w matched
+  the Windows-generated committed expected `78af6fc7a3278a3e`, proving the structural
+  fields are platform-stable (DoD C2 confirmed empirically across platforms).
+- Local Windows full-suite run reported 3 files / 6 tests failing
+  (`political_control_audit_cli.test.ts` and siblings). These are a WORKTREE-ENVIRONMENT
+  artifact, NOT a regression: the worktree junctions the main repo's `node_modules` but
+  the junction lacks the platform `.bin/tsx` shims, so those tests' spawned tsx-CLI child
+  processes fail to resolve and return the wrong exit status. The clean Linux CI checkout
+  (real `npm install` with `.bin` shims) runs all of them green — see the `full-suite`
+  PASS above. My changes are additive CI/tooling only and touch none of those tests.
 
 ## Operability note (required-check + path filter)
 GitHub treats a required check that did not run (path-skipped) as pending, which can block
