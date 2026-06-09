@@ -4,7 +4,7 @@
 
 **Updated:** 2026-06-09 (Pyrrhic panel re-grade — see "2026-06-09 Re-grade" section immediately below) · prior full pass 2026-05-24
 
-**Studio:** Pyrrhic Games · **Project:** A War Without Victory (AWWV) · **Version:** v0.9.9-beta.1 · **Last baselines:** 40w n1740 hash `86ebf26ae0271465` (26/27 anchors, 6/6 benchmarks); 188w n1741 hash `a4bf8b8095050881`. **(2026-06-09: current 188w floor moved to 649/712, anchors 30/30; casualty-realism fix in flight.)**
+**Studio:** Pyrrhic Games · **Project:** A War Without Victory (AWWV) · **Version:** v0.9.9-beta.1 · **Last baselines:** 40w n1740 hash `86ebf26ae0271465` (26/27 anchors, 6/6 benchmarks); 188w n1741 hash `a4bf8b8095050881`. **(2026-06-09: current 188w floor = 649/712 hash `5f57d17287b87dfb`, anchors 30/30, 0 critical. Combat casualty-realism (Lane-3) was investigated and CLOSED-by-HOLD at the 649 floor by owner — the realism arc is not adopted for 1.0; the over-magnitude stays a documented engine-health observation. 1.0 RE-SEQUENCED: collapse pipeline builds BEFORE the D2 playtest.)**
 
 ---
 
@@ -18,7 +18,7 @@ Four-panel re-grade vs the 2026-05-24 pass below. **Observation-only.** Per §7.
 
 | # | System | 2026-05-24 | 2026-06-09 | Δ | Driver |
 |---|--------|-----------|-----------|---|--------|
-| 2 | Combat resolution | A- | **B+** | ↓ | casualty model lost realism approval (KIA ~2.4× historical, killed:wounded 1:1.9, missing/captured ~30×); ~55% of casualties from passive front-attrition. Fix in flight (`docs/40_reports/proposals/20260608_CASUALTY_MODEL_REALISM.md`). |
+| 2 | Combat resolution | A- | **B+** | ↓ | casualty model over-magnitude (military killed ~1.78× RDC; K:W now 1:3.74 ≈ real after PR-1 v2; missing/captured high); ~55.8% from battle-resolution, 43.4% frontline. **Lane-3 investigated + CLOSED-by-HOLD at 649 (owner, 2026-06-09)** — base-rate cuts collapsed territory −63 OSID at 188w (war compensates via battle frequency; owner constraint = keep battle count), realism arc NOT adopted for 1.0. Stays B+. Refs: `20260609_CASUALTY_SOURCE_BREAKDOWN.md`, `20260609_CASUALTY_REALISM_TARGETS.md`, `20260609_combat-realism-lane3-RUN1.md`. |
 | 3 | Bot AI — Corps commander | A- | **A** | ↑ | ARMY-GAP-1 closed — `CampaignPlan`/`supply_by_osid`/`recent_losses` now consumed by corps briefing. |
 | 4 | Bot AI — Army HQ / political | B+ | **A-** | ↑ | 5 presidential levers (faction-asymmetric) + emergent-signal HQ override; territory-trend drives posture. |
 | 11 | Diplomacy / international | B | **B+** | ↑ | Dayton comprehensive negotiation Phases 1-3 (~5.9k LOC: peace_dysfunction, area resolver, Brčko arbitration, entity_autonomy). |
@@ -40,7 +40,7 @@ Four-panel re-grade vs the 2026-05-24 pass below. **Observation-only.** Per §7.
 | +N1 | **AI command chain / officers (real)** | — | **A-** | NEW | v0.9.6 deterministic political→army→corps substrate, now wired end-to-end; opt-in LLM persona harness off the determinism path. |
 | +N2 | **Presidential Command Model + Surface** | — | **A** | NEW | 10 levers issuable from one DirectiveCard host; faction-asymmetric stakes preview; commander pushback; CA-cost gating; command-card art wired. |
 
-**Known loose end (not a graded row):** 6 `act_convoy_*` / `act_patron_relations_*` command-card art assets ship but **no lever renders them** (`DIRECTIVE_LEVER_TO_ACT_ID` has no convoy/patron entry) — "ready but unrendered."
+**Known loose end (not a graded row):** 6 `act_convoy_*` / `act_patron_relations_*` command-card art assets ship but **no lever renders them** (`DIRECTIVE_LEVER_TO_ACT_ID` has no convoy/patron entry) — "ready but unrendered." (Still open as of 2026-06-09. SEPARATE orphan — the **event-illustration** pipeline, also previously declared-but-unrendered, was WIRED this session (#362, graceful fallback, currently inert because no event JSON carries an `image` key). Per the orphaned-wiring audit `20260609_ORPHANED_WIRING_AUDIT_MASTER.md`: Tier-2 all shipped (#365); Tier-1 = replay-in-live-play (WIRE for 1.0, scoped), collapse (now pre-D2, building), AI Advisor (DEFER post-1.0, fog-leak).)
 
 **Updated aggregate (2026-06-09):**
 
