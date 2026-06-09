@@ -12,7 +12,8 @@ describe('event presidential acceptance diagnostic', () => {
 
         expect(stableStringify(first, 2)).toBe(stableStringify(second, 2));
         // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events.
-        expect(first.summary.catalog_total_events).toBe(293);
+        // 293 → 294: +1 §6 atrocity-record event bijeljina_killings_1992 (no response options).
+        expect(first.summary.catalog_total_events).toBe(294);
         expect(first.summary.catalog_required_response_events).toBe(71);
         expect(first.summary.catalog_production_modal_authoring_ready_events).toBe(catalog.production_modal_authoring_ready_rows.length);
         expect(first.summary.catalog_acceptance_status).toBe('NOT_READY');

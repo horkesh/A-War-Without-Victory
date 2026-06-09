@@ -942,5 +942,6 @@ test('existing 293-row production catalog loads cleanly through all B1 passes', 
     const { loadEventDefinitions } = await import('../src/sim/events/event_loader.js');
     const loaded = loadEventDefinitions(0);
     // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events.
-    assert.strictEqual(loaded.length, 293);
+    // 293 → 294: +1 §6 atrocity-record event bijeljina_killings_1992.
+    assert.strictEqual(loaded.length, 294);
 });

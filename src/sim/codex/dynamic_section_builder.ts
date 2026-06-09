@@ -107,6 +107,20 @@ interface GhostEntryNegotiationCapitalView {
     war_crimes_events?: number;
 }
 
+/** Narrow read shape for a recorded rupture consequence. Mirrors
+ *  `RuptureConsequence` (src/state/negotiation_types.ts) but kept local so the
+ *  read-model builder does not import the negotiation-state surface. The
+ *  Srebrenica receipt (#78) reads `id` + `recorded_turn` only; it never writes
+ *  and never alters the rupture trigger/timing — it observes off the already
+ *  recorded array. */
+export interface RuptureConsequenceView {
+    id: string;
+    recorded_turn?: number;
+    perpetrator_faction?: string;
+    description?: string;
+    condemnation_flag?: string;
+}
+
 /**
  * Minimal read shape required for ghost-entry predicates. The sim passes full
  * `GameState`; renderer consumers pass the flattened `LoadedGameState`
@@ -138,6 +152,11 @@ export interface GhostEntryStateView {
         event_decision_log?: GhostEntryDecisionLogEntry[];
         negotiation?: {
             capital?: Partial<Record<FactionId, GhostEntryNegotiationCapitalView>>;
+            /** Locked, append-only record of rupture consequences (owned by
+             *  `evaluateRuptureConsequences`). The Srebrenica codex-receipt (#78)
+             *  reads this array; it never mutates it and never influences whether
+             *  or when a rupture is recorded. */
+            rupture_consequences?: RuptureConsequenceView[];
         };
     };
 }
@@ -743,17 +762,24 @@ const GHOST_ENTRIES: readonly GhostRegistryEntry[] = [
 // persisted) and emits read-model records. It writes NO state and is consumed
 // only by codex/Verdict surfaces — calibration-inert by construction.
 //
-// Ring boundary: every record is Ring 2 (narrative). The registry deliberately
-// contains NO rupture/atrocity-keyed entry — the Srebrenica-fall codex surface
-// keyed on `srebrenica_genocide_1995` is a §6 sensitive-history item DEFERRED
-// to the gated lane (SENSITIVE_HISTORY_DESIGN_GATE.md §6); it is intentionally
-// absent here and must NOT be added without the sensitive-history gate.
+// Ring boundary: every record in the LOAD_BEARING registry is Ring 2
+// (narrative). The Srebrenica-fall codex surface keyed on
+// `srebrenica_genocide_1995` is a §6 sensitive-history item and is handled
+// SEPARATELY below by `buildRuptureReceiptSections` — NOT via the load-bearing
+// decision registry (it is a locked consequence, not a player decision).
 //
-// TODO(§6-sensitive-history): surface the Srebrenica rupture
-// (`srebrenica_genocide_1995`) as a codex/decision receipt at the moment it
-// lands (the w140-160 decision void from the A3 audit) — REQUIRES the
-// sensitive-history gate + /historian + ICTY sourcing + owner sign-off. Do NOT
-// add a registry entry for it here without that lane.
+// §6 codex-receipt (#78, owner-signed): the Srebrenica rupture
+// (`srebrenica_genocide_1995`) is surfaced as a read-only codex receipt at the
+// moment the rupture is ALREADY recorded by `evaluateRuptureConsequences`
+// (src/sim/negotiation/rupture_consequences.ts). This builder ONLY observes the
+// recorded `state.military.negotiation.rupture_consequences` array — it never
+// records, flips, re-times, or prevents a rupture, and it adds no player choice.
+// The emitted record is a thin pointer whose `conditional_on` join key
+// (`FINDING:rupture_srebrenica_genocide_1995`) matches the already-authored,
+// already-ICTY-sourced dynamic section in essay_index.json
+// (`essay_srebrenica_falls_1995` / `v091_cost_ledger_srebrenica_finding`).
+// No new prose is introduced here. Ring 1 (the rupture itself + its
+// condemnation flag) stays owned by the rupture system.
 // ═══════════════════════════════════════════════════════════════════════════
 
 interface LoadBearingSectionSpec {
@@ -840,6 +866,108 @@ function firstResponseByEvent(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// §6 rupture-receipt registry (#78, owner-signed sensitive-history lane)
+//
+// A rupture receipt is surfaced when a LOCKED rupture consequence is ALREADY
+// present in `state.military.negotiation.rupture_consequences` (recorded by
+// `evaluateRuptureConsequences`). The builder observes the recorded array and
+// emits a Ring-2 read-model pointer to the already-authored, ICTY-sourced
+// dynamic section in essay_index.json. It introduces NO new prose, NO player
+// choice, and does NOT influence whether/when the rupture records.
+//
+// Each spec maps a recorded rupture `id` → the target essay + the existing
+// `FINDING:rupture_<id>` join key the essay's `dynamic_sections` already gate
+// on. The receipt never carries `variant: 'outcome'` (that would frame the
+// genocide as a player-induced outcome — a §6 refused surface); it is a
+// `divergence`/`note` record consumed only by codex/Verdict read surfaces.
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface RuptureReceiptSpec {
+    /** Recorded rupture `id` (matches RuptureConsequence.id). */
+    rupture_id: string;
+    /** Target canonical essay (event id, no `essay_` prefix). */
+    target_essay_event_id: string;
+    /** Stable, restrained summary for the synthesized receipt record. The full
+     *  authored prose lives in essay_index.json `dynamic_sections`; this is the
+     *  builder-side legend the Verdict codex panel can render directly. It states
+     *  a recorded fact and never frames the rupture as a player choice/reward. */
+    summary: string;
+    /** Render variant. Ring 2 narrative — `divergence` only. NEVER `outcome`
+     *  (would frame a recorded rupture as a player-induced outcome — §6 refused)
+     *  and never `context` (reserved for AUDIT-ONLY counterfactual ghosts). */
+    variant: Extract<SectionVariant, 'divergence'>;
+}
+
+/**
+ * Rupture receipts. Declaration order is fixed; emitted output is additionally
+ * `strictCompare`-sorted on `id`. Only the Srebrenica rupture is wired (#78);
+ * the join key matches the authored `v091_cost_ledger_srebrenica_finding`
+ * section already present on `essay_srebrenica_falls_1995`.
+ */
+const RUPTURE_RECEIPTS: readonly RuptureReceiptSpec[] = [
+    {
+        rupture_id: 'srebrenica_genocide_1995',
+        target_essay_event_id: 'srebrenica_falls_1995',
+        summary:
+            'This campaign recorded the fall of the Srebrenica safe area and the genocide that followed — a locked consequence established by the Tribunal, surfaced here as a permanent entry in the historical record.',
+        variant: 'divergence',
+    },
+];
+
+/** O(1) lookup of a receipt spec by recorded rupture id. */
+const RUPTURE_RECEIPT_BY_ID: ReadonlyMap<string, RuptureReceiptSpec> = new Map(
+    RUPTURE_RECEIPTS.map((s) => [s.rupture_id, s]),
+);
+
+/**
+ * Build codex receipts for ruptures ALREADY recorded on the input state.
+ *
+ * Pure & deterministic, READ-ONLY:
+ *   - reads only `state.military.negotiation.rupture_consequences` (written by
+ *     `evaluateRuptureConsequences`); writes nothing.
+ *   - does NOT decide whether/when a rupture records and does NOT alter its
+ *     trigger or timing — it observes the recorded array after the fact.
+ *   - emits at most one record per known rupture id, keyed on the existing
+ *     `FINDING:rupture_<id>` essay-index join key (no new prose introduced).
+ *
+ * A state with no recorded ruptures (or only unknown ones) emits `[]`.
+ */
+function buildRuptureReceiptSections(state: GhostEntryStateView): BuiltDynamicSection[] {
+    const recorded = state.military?.negotiation?.rupture_consequences ?? [];
+    const emitted: BuiltDynamicSection[] = [];
+    const seen = new Set<string>();
+    for (const r of recorded) {
+        if (!r || typeof r.id !== 'string') continue;
+        const spec = RUPTURE_RECEIPT_BY_ID.get(r.id);
+        if (!spec) continue;
+        if (seen.has(spec.rupture_id)) continue;
+        seen.add(spec.rupture_id);
+        emitted.push({
+            id: `rupture_receipt_${spec.rupture_id}`,
+            target_essay_event_id: spec.target_essay_event_id,
+            content: spec.summary,
+            variant: spec.variant,
+            ring_classification: 2,
+            // Join key matches the already-authored essay_index dynamic section
+            // (`FINDING:rupture_<id>`); the renderer pulls the ICTY-sourced prose
+            // from there. Defence in depth: never emit an `outcome`-framed record.
+            conditional_on: [`FINDING:rupture_${spec.rupture_id}`],
+        });
+    }
+    // Defence in depth — a rupture receipt must never be framed as a player
+    // outcome. Mirrors the enclave_defended variant guard.
+    for (const e of emitted) {
+        if (e.variant === 'outcome') {
+            throw new Error(
+                "[dynamic_section_builder] rupture receipt MUST NOT emit variant='outcome'. " +
+                'See SENSITIVE_HISTORY_DESIGN_GATE.md §6: framing a recorded rupture as a player-induced outcome is a refused surface.',
+            );
+        }
+    }
+    return emitted;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Public API
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -895,8 +1023,13 @@ export function buildGhostEntries(state: GhostEntryStateView, currentTurn: numbe
  *   - iterates the fixed `LOAD_BEARING_SECTIONS` declaration order, then sorts
  *     the emitted records by `strictCompare` on `id`.
  *
- * Phase-0 compatibility: a state with no recorded load-bearing decisions emits
- * `[]` exactly as before.
+ * In addition (#78), any rupture ALREADY recorded on
+ * `state.military.negotiation.rupture_consequences` is surfaced as a Ring-2
+ * codex receipt via `buildRuptureReceiptSections` — read-only; it never records,
+ * flips, or re-times a rupture.
+ *
+ * Phase-0 compatibility: a state with no recorded load-bearing decisions and no
+ * recorded ruptures emits `[]` exactly as before.
  *
  * Throws if the input state carries any §6 refused flag; see `assertRingGuard`.
  */
@@ -923,13 +1056,20 @@ export function buildDynamicSections(input: BuilderInput): BuiltDynamicSection[]
         });
     }
 
+    // §6 rupture receipts (#78): observe ruptures ALREADY recorded on the state
+    // (read-only; does not record/flip/re-time any rupture) and emit a Ring-2
+    // pointer to the already-authored `FINDING:rupture_<id>` essay section.
+    for (const receipt of buildRuptureReceiptSections(input.state)) {
+        emitted.push(receipt);
+    }
+
     return emitted.slice().sort((a, b) => strictCompare(a.id, b.id));
 }
 
 /**
- * Combined Phase 0 entry point: emit both dynamic sections (currently empty)
- * and ghost entries. Useful for VerdictScreen-side consumption that wants a
- * single read-only call.
+ * Combined entry point: emit both dynamic sections (load-bearing decision
+ * morphing + §6 rupture receipts) and ghost entries. Useful for VerdictScreen-
+ * side consumption that wants a single read-only call.
  */
 export interface DynamicCodexBuildResult {
     sections: BuiltDynamicSection[];
