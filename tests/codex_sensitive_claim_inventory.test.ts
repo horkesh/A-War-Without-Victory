@@ -183,9 +183,13 @@ test('inventory covers essay_index dynamic_sections (A1c morphing prose) the run
         assert.deepStrictEqual(hostage.matched_terms, ['detention']);
         assert.strictEqual(hostage.risk_class, 'sensitive_history_gated');
         assert.strictEqual(hostage.stop_gate, 'sensitive_history');
-        // Source attribution falls back to the parent essay's `sources` (the
-        // ICTY citation) — the claim is cited, not uncited.
-        assert.strictEqual(hostage.source_status, 'cited');
+        // Codex #338 P2: the parent essay is `diplomatic` (floor 2) but carries
+        // only ONE source, so the dynamic-section claim must inherit the same
+        // two-source editorial floor exception as the canonical essay body —
+        // NOT report `cited` off the lone parent citation. (Before the #338 fix
+        // `sourceStatusFor` only ran the floor check for surface === 'essay',
+        // so this claim wrongly reported `cited` and bypassed the gate.)
+        assert.strictEqual(hostage.source_status, 'source_floor_exception');
         // field_path is keyed by the parent essay id for human traceability.
         assert.strictEqual(
             hostage.field_path.startsWith('$.essay_un_hostage_crisis_1995.dynamic_sections'),
@@ -197,6 +201,46 @@ test('inventory covers essay_index dynamic_sections (A1c morphing prose) the run
             (claim: { file: string }) => claim.file === 'data/scenarios/essays/un_hostage_crisis_1995.json',
         );
         assert.strictEqual(bodyClaims.every((c: { surface: string }) => c.surface === 'essay'), true);
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
+});
+
+test('dynamic_section claims clear the source floor when the parent has enough sources (#338)', async () => {
+    // Codex #338 P2 positive case: the floor exception is conditional on the
+    // PARENT essay's source count, not a blanket downgrade. A diplomatic parent
+    // (floor 2) carrying TWO sources keeps its dynamic-section claims `cited`.
+    const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-claims-'));
+
+    try {
+        await mkdir(join(root, 'data', 'scenarios', 'essays'), { recursive: true });
+        await writeJson(join(root, 'data', 'scenarios', 'essays', 'essay_index.json'), {
+            essays: [
+                {
+                    id: 'essay_two_source',
+                    category: 'diplomatic',
+                    title: 'Two Source',
+                    content: 'Canonical body.',
+                    sources: ['ICTY source A', 'UN source B'],
+                    dynamic_sections: [
+                        {
+                            id: 'a1c_two_source_branch',
+                            condition: 'RESPONSE:two_source:branch',
+                            insert_after_paragraph: 1,
+                            variant: 'divergence',
+                            content: 'Prolonged detention of peacekeepers as human shields.',
+                        },
+                    ],
+                },
+            ],
+        });
+
+        const result = await inventory.scanSensitiveClaimInventory({ rootDir: root });
+        const indexClaims = result.claims.filter(
+            (claim: { surface: string }) => claim.surface === 'essay_dynamic_section',
+        );
+        assert.strictEqual(indexClaims.length, 1);
+        assert.strictEqual(indexClaims[0].source_status, 'cited');
     } finally {
         await rm(root, { recursive: true, force: true });
     }
