@@ -62,8 +62,14 @@ import { getFormationCorpsId } from './corps_sector_partition.js';
  * PR-1 v2 Path A retune: 0.004→0.0045 (partial restore from the PR-1 0.005→0.004
  * cut) so marginal late-war brigades thin out again at 188w while preserving the
  * killed-reduction realism (the regression only surfaces past turn 40).
+ * D1 combat-realism Lane-3 R2 (2026-06-09): 0.0045→0.0035 — cut the equipment-BLIND
+ * flat term so total military killed falls toward the ~57-62k real-war target AND the
+ * equipment-DRIVEN bombardment-exposure term carries a larger share (sharpening the
+ * VRS-front-loaded / ARBiH-rising faction arcs). Milder step than the reverted n553
+ * 0.003 to avoid its destroyed-brigade cascade (8→15). Paired with BOMBARDMENT_RATIO_SCALE
+ * 2.0→1.7 (below) as one coordinated re-weight. Territory-coupled → owner-signed re-floor.
  */
-const BASE_ATTRITION_RATE = 0.0045;
+const BASE_ATTRITION_RATE = 0.0035;
 
 /**
  * Bombardment exposure: additional attrition for brigades facing superior
@@ -79,8 +85,13 @@ const BASE_ATTRITION_RATE = 0.0045;
  */
 /** Reduced 0.012→0.008 (n159 audit), then 0.008→0.006 (PR-1 casualty-model: background losses still inflate total military killed vs ~80-90k target), then 0.006→0.007 (PR-1 v2 Path A retune: partially restore so marginal late-war brigades thin out again — recovers 188w territory while keeping the killed-reduction realism). */
 const BOMBARDMENT_EXPOSURE_RATE = 0.007;
-/** ln(firepower ratio) divisor for full bombardment effect. ln(7)≈2.0 */
-const BOMBARDMENT_RATIO_SCALE = 2.0;
+/** ln(firepower ratio) divisor for full bombardment effect. ln(7)≈2.0
+ * D1 Lane-3 R2 (2026-06-09): 2.0→1.7 — the equipment-driven bombardment term
+ * saturates faster (more punishing at moderate FP gaps), so the rifle-vs-artillery
+ * divergence dominates the (reduced) total and the faction arcs diverge more sharply.
+ * BOMBARDMENT_EXPOSURE_RATE (0.007) intentionally UNCHANGED — not cut proportionally
+ * with the base rate, so the equipment term gains relative weight. */
+const BOMBARDMENT_RATIO_SCALE = 1.7;
 /** Minimum own firepower floor (prevents division by zero). */
 const MIN_COUNTERBATTERY_FP = 1.0;
 
