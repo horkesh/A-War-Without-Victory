@@ -2,9 +2,60 @@
 
 **Purpose:** Single living "where is the game today, honestly" master. Per-system rating against an AAA+++ / Paradox-tier reference bar, with the exact remaining gap and what work would close it. **Observation-only — no code changes.**
 
-**Updated:** 2026-05-24
+**Updated:** 2026-06-09 (Pyrrhic panel re-grade — see "2026-06-09 Re-grade" section immediately below) · prior full pass 2026-05-24
 
-**Studio:** Pyrrhic Games · **Project:** A War Without Victory (AWWV) · **Version:** v0.9.9-beta.1 · **Last baselines:** 40w n1740 hash `86ebf26ae0271465` (26/27 anchors, 6/6 benchmarks); 188w n1741 hash `a4bf8b8095050881`.
+**Studio:** Pyrrhic Games · **Project:** A War Without Victory (AWWV) · **Version:** v0.9.9-beta.1 · **Last baselines:** 40w n1740 hash `86ebf26ae0271465` (26/27 anchors, 6/6 benchmarks); 188w n1741 hash `a4bf8b8095050881`. **(2026-06-09: current 188w floor moved to 649/712, anchors 30/30; casualty-realism fix in flight.)**
+
+---
+
+## 2026-06-09 Re-grade (Pyrrhic panel — current `main`)
+
+Four-panel re-grade vs the 2026-05-24 pass below. **Observation-only.** Per §7.2 this annotates rather than rewrites: only **changed rows + new systems + the updated aggregate** are listed here; unchanged rows keep their 2026-05-24 grade in §2. Remediation steps to lift every sub-A system to **A** live in `docs/plans/2026-06-09-path-to-A-system-remediation.md`.
+
+**Headline:** Still **B+ overall — but now broad-based, not engine-carried.** Product shell and content each rose ~half a grade (command-surface convergence + command-card art + reactive-narrative/sensitive-history A-band); engine held A- with the strategic→corps severance (ARMY-GAP-1) closed; **one regression** — Combat A-→B+ on the casualty-realism finding (fix already in flight). Production/go-to-market remains the lone anchor and is operator-owned.
+
+**Changed rows + new systems:**
+
+| # | System | 2026-05-24 | 2026-06-09 | Δ | Driver |
+|---|--------|-----------|-----------|---|--------|
+| 2 | Combat resolution | A- | **B+** | ↓ | casualty model lost realism approval (KIA ~2.4× historical, killed:wounded 1:1.9, missing/captured ~30×); ~55% of casualties from passive front-attrition. Fix in flight (`docs/40_reports/proposals/20260608_CASUALTY_MODEL_REALISM.md`). |
+| 3 | Bot AI — Corps commander | A- | **A** | ↑ | ARMY-GAP-1 closed — `CampaignPlan`/`supply_by_osid`/`recent_losses` now consumed by corps briefing. |
+| 4 | Bot AI — Army HQ / political | B+ | **A-** | ↑ | 5 presidential levers (faction-asymmetric) + emergent-signal HQ override; territory-trend drives posture. |
+| 11 | Diplomacy / international | B | **B+** | ↑ | Dayton comprehensive negotiation Phases 1-3 (~5.9k LOC: peace_dysfunction, area resolver, Brčko arbitration, entity_autonomy). |
+| 15 | Endgame / Verdict | A- | **A** | ↑ | Dayton 5-dimension player-authored peace; verdict consumes negotiation outcomes, not territory-only. |
+| 17 | Tactical map (info design) | B+ | **A-** | ↑ | Track C overlays (contested bands, front stability, supply reach, authority/legitimacy modes). |
+| 18 | Warroom (React shell) | B | **A-** | ↑ | Converged toolbar IA; native-overlay residue cleaned; StrategicDashboard/EventLog retired. |
+| 19 | Warroom (hero art) | A- | **A** | ↑ | Command-card faction art (33 assets) adds period-photo texture. |
+| 20 | Army HQ modal | B+ | **A-** | ↑ | Levers removed → clean inspection/records owner (Decision-Room convergence). |
+| 21 | Inbox + Decision Room loop | A- | **A** | ↑ | Single lever-issuing host; priority dossier; command-card lens deep-link. |
+| 22 | Chronicle / Codex UI | B+ | **A-** | ↑ | Codex tier system + event-dependency-graph unlock + per-response morphing. |
+| 29 | Essay / Codex corpus | B+ | **A-** | ↑ | Indexed corpus 96→146; camp/atrocity deposit essays now indexed w/ provenance. |
+| 30 | Dynamic Codex / reactive | B+ | **A** | ↑ | Tier system + dependency graph + per-response morph + comparison-atom grammar. |
+| 32 | Sensitive-history handling | A- | **A** | ↑ | Ring-3 informational records; source remediation; atrocity essays w/ Ring-2 provenance. |
+| 33 | Music / soundscape / VO | D+ | **C-** | ↑ | Real SFX `.ogg` binaries + clean bus shipped — but still silent-by-default, no music/ambient/VO. |
+| 36 | CI/CD | B+ | **A-** | ↑ | `release.yml` (tag→Release) + dual-platform packaging matrix with smoke-verify. |
+| 37 | Build system | B+ | **A-** | ↑ | Reproducible packaging matrix; determinism static scan tightened. |
+| 41 | Localization | C | **C+** | ↑ | Rigorous Bosnian LQA audit + deterministic CI leakage guard (native sign-off still gates B). |
+| 42 | Packaging / installer | B | **B+** | ↑ | NSIS+AppImage in CI; `RELEASE_PROCESS.md` + `PLATFORM_TEST_MATRIX.md` landed. |
+| +N1 | **AI command chain / officers (real)** | — | **A-** | NEW | v0.9.6 deterministic political→army→corps substrate, now wired end-to-end; opt-in LLM persona harness off the determinism path. |
+| +N2 | **Presidential Command Model + Surface** | — | **A** | NEW | 10 levers issuable from one DirectiveCard host; faction-asymmetric stakes preview; commander pushback; CA-cost gating; command-card art wired. |
+
+**Known loose end (not a graded row):** 6 `act_convoy_*` / `act_patron_relations_*` command-card art assets ship but **no lever renders them** (`DIRECTIVE_LEVER_TO_ACT_ID` has no convoy/patron entry) — "ready but unrendered."
+
+**Updated aggregate (2026-06-09):**
+
+| Category | 2026-05-24 | 2026-06-09 | Note |
+|----------|-----------|-----------|------|
+| Simulation core | ~A- | **~A-** | held; +command-chain integration, −combat realism |
+| Frontend / shell | ~B+ | **~A-/B+** | biggest gain — 7 rows up + 1 strong new system |
+| Content / lore | ~B+ | **~A-** | reactive narrative + sensitive-history crossed into A-band |
+| Code / engineering | ~A- | **~B+/A-** | CI/build up; god-files + telemetry still drag |
+| Production / shipping | ~C+ | **~C+** | localization/packaging up; store/trailer/playtest (F/F/C) operator-owned anchor |
+| **Weighted overall** | **B+** | **B+ (firm)** | same letter, materially broader base; shell+content caught up to the engine |
+
+**13 rows up · 1 down · 2 strong new systems · 0 other downgrades** since 2026-05-24.
+
+---
 
 ---
 
