@@ -44,7 +44,7 @@ export const UNKNOWN_CAUSER_BUCKET = '_unknown';
  * sites:
  *   - src/state/displacement.ts:441
  *   - src/state/displacement_takeover.ts:386, 725, 850
- *   - src/state/minority_flight.ts:365
+ *   - (former src/state/minority_flight.ts:365 — module removed 2026-06-09, dead/unwired)
  *   - src/sim/combat/paramilitary_sweep.ts:568
  *
  * The legacy log is still pushed (D-PRE substrate-only; consumers untouched).
@@ -128,6 +128,30 @@ export function appendDisplacementEvent(state: GameState, event: DisplacementEve
         const compositeKey = `${event.origin_mun}|${event.ethnicity}`;
         const destBucket = (odMap[compositeKey] ??= {});
         destBucket[event.dest_mun] = (destBucket[event.dest_mun] ?? 0) + settled;
+    }
+
+    // 4. Per-OSID flow tally (schema v36 read-model substrate). Survives the
+    //    per-turn event-log clear so the desktop settlement panel can show
+    //    exact per-OSID departed / killed-or-fled / arrived figures instead of
+    //    the coarse municipality-scaled approximation. Semantics mirror the
+    //    event-log adapter (GameStateAdapter): out = displaced (killed + fled
+    //    are subsets, not additional); lost = killed + fled_abroad; in = settled.
+    //    Order-insensitive (sums commute); O(1) per event; bounded (~744 OSIDs).
+    const flows = (state.displacement.displacement_flows_by_osid ??= {});
+    const displaced = event.displaced ?? 0;
+    const killedPlusFled = (event.killed ?? 0) + (event.fled_abroad ?? 0);
+    if (event.origin_osid && (displaced > 0 || killedPlusFled > 0)) {
+        const originFlow = (flows[event.origin_osid] ??= { out: 0, lost: 0, in: 0 });
+        originFlow.out += displaced;
+        originFlow.lost += killedPlusFled;
+        if (displaced > 0) {
+            const byEth = (originFlow.by_ethnicity ??= {});
+            byEth[event.ethnicity] = (byEth[event.ethnicity] ?? 0) + displaced;
+        }
+    }
+    if (event.dest_osid && settled > 0) {
+        const destFlow = (flows[event.dest_osid] ??= { out: 0, lost: 0, in: 0 });
+        destFlow.in += settled;
     }
 }
 

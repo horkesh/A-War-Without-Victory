@@ -1049,6 +1049,32 @@ export interface LoadedGameState {
     departedByMun?: Record<string, Record<string, number>>;
     /** Per-OSID displacement totals from event log (exact out/lost/in so numbers add up). */
     displacementByOsid?: Record<string, { out: number; lost: number; in: number }>;
+    /**
+     * National humanitarian ledger — war-wide displacement / casualty aggregates,
+     * exposed verbatim from persisted state for the Humanitarian Ledger surface.
+     *
+     * §6-ADJACENT: this DISPLAYS atrocity magnitudes. Figures are reported exactly
+     * as the engine recorded them (no derivation, no rounding, no editorialization).
+     * The surface must use a tragic/factual register — a ledger of human cost, never
+     * a scoreboard. User-facing copy/tone pending owner sign-off.
+     *
+     * - civilianCasualtiesByEthnicity: killed + fled_abroad by ethnicity-aligned
+     *   faction (state.displacement.civilian_casualties).
+     * - humanitarianAggregates: perpetrator (caused_by) x victim-ethnicity ->
+     *   { refugeesCreated, refugeesReceived, civilianCasualtiesCaused }
+     *   (state.displacement.displacement_humanitarian_aggregates).
+     * - refugeesByTurn: per-turn refugees-created time series, turn-sorted
+     *   (state.displacement.displacement_recent_by_turn).
+     */
+    nationalDisplacement?: {
+        civilianCasualtiesByEthnicity: Record<string, { killed: number; fledAbroad: number }>;
+        humanitarianAggregates: Record<string, Record<string, {
+            refugeesCreated: number;
+            refugeesReceived: number;
+            civilianCasualtiesCaused: number;
+        }>>;
+        refugeesByTurn: Array<{ turn: number; refugeesCreated: number }>;
+    };
     /** Presidential command authority (Level 3 override resource). */
     commandAuthority?: { current: number; max: number; spentThisTurn: number; lifetimeSpent: number };
     fogOfWar?: FogOfWarView;

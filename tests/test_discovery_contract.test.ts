@@ -90,7 +90,6 @@ describe('test discovery contracts', () => {
             'tests/local_truces.test.ts',
             'tests/morale_combat.test.ts',
             'tests/migration_nested_ownership.test.ts',
-            'tests/minority_flight.test.ts',
             'tests/multi_axis_operations.test.ts',
             'tests/negotiation_offers.test.ts',
             'tests/officer_quality.test.ts',

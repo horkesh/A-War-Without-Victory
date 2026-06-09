@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 35 as const;
+export const CURRENT_SCHEMA_VERSION = 36 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -3021,4 +3021,38 @@ displacement_origin_dest_arrivals: Record<string, Record<string, number>>;
  * Value: sum of displaced + killed + fled_abroad for events on that turn.
  */
 displacement_recent_by_turn: Record<number, number>;
+/**
+ * Per-OSID cumulative displacement flow tally (schema v36 read-model substrate).
+ *
+ * Restores per-OSID departed / killed-or-fled / arrived precision to the live
+ * desktop UI. The per-turn `displacement_event_log` is drained and cleared each
+ * turn (war_phases.ts clear-displacement-event-log), so the desktop adapter's
+ * per-OSID `displacementByOsid` is otherwise always empty and the settlement
+ * panel can only show the coarse municipality-scaled approximation. This bounded
+ * aggregate survives the per-turn clear so the panel can show exact per-OSID
+ * flows live, mirroring the displacement_humanitarian_aggregates precedent.
+ *
+ * Updated at append-time alongside displacement_event_log via
+ * `appendDisplacementEvent` (see src/state/displacement_event_log.ts). O(1) per
+ * event, order-insensitive (sums commute), bounded (~744 OSIDs).
+ *
+ * Read by the UI adapter (GameStateAdapter) as a fallback for displacementByOsid
+ * /departedByOsid when the event log is empty. NOT read by any sim consumer.
+ *
+ * Outer key: origin/dest OSID.
+ * Value:
+ *   - out: cumulative `displaced` from this OSID (total removals; killed + fled
+ *     are subsets, NOT additional — matches the event-log adapter semantics).
+ *   - lost: cumulative `killed + fled_abroad` from this OSID (subset of out).
+ *   - in: cumulative `settled` arrivals to this OSID.
+ *   - by_ethnicity: optional cumulative `displaced` from this OSID keyed by the
+ *     departing ethnicity-aligned faction (drives the per-OSID "fled here"
+ *     breakdown without the event log).
+ */
+displacement_flows_by_osid: Record<string, {
+    out: number;
+    lost: number;
+    in: number;
+    by_ethnicity?: Record<string, number>;
+}>;
 }

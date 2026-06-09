@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(35);
+        expect(getLatestSchemaVersion()).toBe(36);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -128,6 +128,7 @@ describe('versioned save migration steps', () => {
         expect(state.displacement.settlement_displacement_started_turn).toEqual({});
         expect(state.displacement.municipality_displacement).toEqual({});
         expect(state.displacement.civilian_casualties).toEqual({});
+        expect(state.displacement.displacement_flows_by_osid).toEqual({});
     });
 
     it('materializes v8 displacement aggregate defaults for v7 saves', () => {
@@ -152,6 +153,7 @@ describe('versioned save migration steps', () => {
             displacement_state: {},
             displacement_camp_state: {},
             displacement_event_log: [],
+            displacement_flows_by_osid: {},
             displacement_humanitarian_aggregates: {},
             displacement_origin_dest_arrivals: {},
             displacement_recent_by_turn: {},
@@ -972,5 +974,15 @@ describe('versioned save migration steps', () => {
         expect(state.military.alliance_locks.map((entry: any) => entry.mode)).toEqual(['floor', 'ceiling']);
         expect(state.military.bot_priority_shifts.map((entry: any) => entry.faction)).toEqual(['RBiH', 'HRHB']);
         expect(state.military.bot_priority_shifts[0].add_objectives).toEqual(['obj_b', 'obj_a']);
+    });
+
+    it('materializes v36 per-OSID displacement flow tally default for v35 saves', () => {
+        const state = minimalLegacyState(35);
+        delete state.displacement.displacement_flows_by_osid;
+
+        applyMigrations(state);
+
+        expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(state.displacement.displacement_flows_by_osid).toEqual({});
     });
 });

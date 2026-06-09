@@ -800,3 +800,22 @@ registerMigration({
         }
     },
 });
+
+registerMigration({
+    version: 36,
+    description: 'Persist displacement.displacement_flows_by_osid (per-OSID flow tally) read-model '
+        + 'substrate. Restores per-OSID departed/killed/arrived precision to the live desktop '
+        + 'settlement panel (the per-turn displacement_event_log is cleared each turn, so the '
+        + 'adapter\'s displacementByOsid was always empty live). Written at append-time by '
+        + 'appendDisplacementEvent; read only by the UI adapter as a fallback. Sensitive: no '
+        + '(empty-record default). NOTE: serializeState does NOT strip empty Records, so the empty '
+        + 'Record this migration adds DOES change the serialized state hash for a freshly-migrated '
+        + 'save — but calibration scenarios (scenario_runner) build state at CURRENT_SCHEMA_VERSION '
+        + 'and populate the field during the run, so the calibration CONTROL map is unchanged. '
+        + 'Verified control_delta byte-identical at 40w + 188w. Back-compat: old saves (< v36) load '
+        + 'and get an empty record; forward-only (no downgrade path needed — purely additive read-model).',
+    migrate: (state) => {
+        const disp = ensureDisplacementRoot(state);
+        ensureRecord(disp, 'displacement_flows_by_osid');
+    },
+});

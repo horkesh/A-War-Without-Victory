@@ -25,6 +25,7 @@ import { CommanderSelectionModal } from './components/CommanderSelectionModal';
 import { OperationBriefingModal } from './components/OperationBriefingModal';
 import { SupplyPanel } from './components/SupplyPanel';
 import { EconomyPanel } from './components/EconomyPanel';
+import { HumanitarianLedgerPanel } from './components/HumanitarianLedgerPanel';
 import { EnclaveDashboard } from './components/EnclaveDashboard';
 import { EventModal } from './components/EventModal';
 import { AiAdvisorPanel } from './components/AiAdvisorPanel';
@@ -483,6 +484,8 @@ function App() {
   const [summaryFocus, setSummaryFocus] = useState<SummaryFocusSection>('overview');
   const [enclaveDashboardOpen, setEnclaveDashboardOpen] = useState(false);
   const [economyOpen, setEconomyOpen] = useState(false);
+  // Item 2: National Humanitarian Ledger surface (read-model; 'U' hotkey toggle).
+  const [humanitarianLedgerOpen, setHumanitarianLedgerOpen] = useState(false);
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
   const [autonomyPanelOpen, setAutonomyPanelOpen] = useState(false);
   const [diplomacyOpen, setDiplomacyOpen] = useState(false);
@@ -959,6 +962,11 @@ function App() {
         // path so the player can dismiss via the same key they opened with.
         e.preventDefault();
         setIsDecisionHistoryOpen((prev) => !prev);
+      } else if (e.key === 'u' || e.key === 'U') {
+        // Item 2 — National Humanitarian Ledger. Toggle mirrors Codex (X) /
+        // Chronicle (C) / Decision History (D). Read-model only.
+        e.preventDefault();
+        setHumanitarianLedgerOpen((prev) => !prev);
       }
     };
     window.addEventListener('keydown', handler);
@@ -1507,6 +1515,13 @@ function App() {
       )}
       {economyOpen && loadedGameState && (
         <EconomyPanel state={loadedGameState} onClose={() => setEconomyOpen(false)} />
+      )}
+      {loadedGameState && (
+        <HumanitarianLedgerPanel
+          state={loadedGameState}
+          open={humanitarianLedgerOpen}
+          onClose={() => setHumanitarianLedgerOpen(false)}
+        />
       )}
       {aiSettingsOpen && (
         <AiSettingsPanel onClose={() => setAiSettingsOpen(false)} />

@@ -1843,6 +1843,89 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         }
     }
 
+    // Schema v36 fallback: the per-turn displacement_event_log is drained and
+    // cleared every turn (war_phases.ts clear-displacement-event-log), so in a
+    // LIVE desktop session the loop above produces nothing and per-OSID
+    // precision is lost. The persisted `displacement_flows_by_osid` aggregate
+    // survives the clear, so when the event log yielded no per-OSID rows we
+    // rebuild displacementByOsid / departedByOsid from it. Deterministic
+    // (localeCompare-sorted iteration; the aggregate itself is order-insensitive).
+    if (Object.keys(displacementByOsid).length === 0) {
+        const rawFlows = state.displacement?.displacement_flows_by_osid;
+        if (rawFlows && typeof rawFlows === 'object' && !Array.isArray(rawFlows)) {
+            for (const [osid, flow] of Object.entries(rawFlows as Record<string, Record<string, unknown>>).sort((a, b) => a[0].localeCompare(b[0]))) {
+                if (!flow || typeof flow !== 'object') continue;
+                const out = finiteNumber(flow.out);
+                const lost = finiteNumber(flow.lost);
+                const inn = finiteNumber(flow.in);
+                if (out !== 0 || lost !== 0 || inn !== 0) {
+                    displacementByOsid[osid] = { out, lost, in: inn };
+                }
+                const byEth = flow.by_ethnicity;
+                if (byEth && typeof byEth === 'object' && !Array.isArray(byEth)) {
+                    for (const [eth, val] of Object.entries(byEth as Record<string, unknown>).sort((a, b) => a[0].localeCompare(b[0]))) {
+                        const n = finiteNumber(val);
+                        if (n > 0) {
+                            if (!departedByOsid[osid]) departedByOsid[osid] = {};
+                            departedByOsid[osid][eth] = (departedByOsid[osid][eth] ?? 0) + n;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // National humanitarian ledger (read-model only; §6-adjacent — verbatim from
+    // persisted state, no derivation). Mirrors the engine aggregates exactly.
+    let nationalDisplacement: LoadedGameState['nationalDisplacement'];
+    {
+        const civilianCasualtiesByEthnicity: Record<string, { killed: number; fledAbroad: number }> = {};
+        const rawCivCas = state.displacement?.civilian_casualties;
+        if (rawCivCas && typeof rawCivCas === 'object' && !Array.isArray(rawCivCas)) {
+            for (const [faction, row] of Object.entries(rawCivCas as Record<string, Record<string, unknown>>).sort((a, b) => a[0].localeCompare(b[0]))) {
+                if (!row || typeof row !== 'object') continue;
+                civilianCasualtiesByEthnicity[faction] = {
+                    killed: finiteNumber(row.killed),
+                    fledAbroad: finiteNumber(row.fled_abroad),
+                };
+            }
+        }
+        const humanitarianAggregates: Record<string, Record<string, { refugeesCreated: number; refugeesReceived: number; civilianCasualtiesCaused: number }>> = {};
+        const rawHumAgg = state.displacement?.displacement_humanitarian_aggregates;
+        if (rawHumAgg && typeof rawHumAgg === 'object' && !Array.isArray(rawHumAgg)) {
+            for (const [causer, victims] of Object.entries(rawHumAgg as Record<string, Record<string, Record<string, unknown>>>).sort((a, b) => a[0].localeCompare(b[0]))) {
+                if (!victims || typeof victims !== 'object') continue;
+                const victimMap: Record<string, { refugeesCreated: number; refugeesReceived: number; civilianCasualtiesCaused: number }> = {};
+                for (const [victim, agg] of Object.entries(victims).sort((a, b) => a[0].localeCompare(b[0]))) {
+                    if (!agg || typeof agg !== 'object') continue;
+                    victimMap[victim] = {
+                        refugeesCreated: finiteNumber(agg.refugees_created),
+                        refugeesReceived: finiteNumber(agg.refugees_received),
+                        civilianCasualtiesCaused: finiteNumber(agg.civilian_casualties_caused),
+                    };
+                }
+                if (Object.keys(victimMap).length > 0) humanitarianAggregates[causer] = victimMap;
+            }
+        }
+        const refugeesByTurn: Array<{ turn: number; refugeesCreated: number }> = [];
+        const rawRecent = state.displacement?.displacement_recent_by_turn;
+        if (rawRecent && typeof rawRecent === 'object' && !Array.isArray(rawRecent)) {
+            for (const [turnKey, val] of Object.entries(rawRecent as Record<string, unknown>)) {
+                const turnNum = Number(turnKey);
+                if (!Number.isFinite(turnNum)) continue;
+                refugeesByTurn.push({ turn: turnNum, refugeesCreated: finiteNumber(val) });
+            }
+            refugeesByTurn.sort((a, b) => a.turn - b.turn);
+        }
+        if (
+            Object.keys(civilianCasualtiesByEthnicity).length > 0 ||
+            Object.keys(humanitarianAggregates).length > 0 ||
+            refugeesByTurn.length > 0
+        ) {
+            nationalDisplacement = { civilianCasualtiesByEthnicity, humanitarianAggregates, refugeesByTurn };
+        }
+    }
+
     const frontEdges: LoadedGameState['frontEdges'] = Array.isArray(state.military.front_edges)
         ? (state.military.front_edges as Array<Record<string, unknown>>)
             .map((edge) => {
@@ -2206,6 +2289,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         departedByOsid: departedByOsid && Object.keys(departedByOsid).length > 0 ? departedByOsid : undefined,
         departedByMun: departedByMun && Object.keys(departedByMun).length > 0 ? departedByMun : undefined,
         displacementByOsid: Object.keys(displacementByOsid).length > 0 ? displacementByOsid : undefined,
+        nationalDisplacement,
         fogOfWar,
         sectorIntel: sectorIntelRecords.length > 0 ? sectorIntelRecords : undefined,
         movementOrdersSettlement: movementOrdersSettlement.length > 0 ? movementOrdersSettlement : undefined,

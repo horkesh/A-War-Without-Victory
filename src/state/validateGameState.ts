@@ -3275,6 +3275,7 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 31, path: 'military.bot_priority_shifts', check: Array.isArray },
     { version: 32, path: 'military.closed_event_ids', check: isStringArray },
     { version: 33, path: 'military.event_causality_log', check: Array.isArray },
+    { version: 36, path: 'displacement.displacement_flows_by_osid', check: isRecord },
 ];
 
 /**
