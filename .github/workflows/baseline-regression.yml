@@ -1,5 +1,20 @@
 name: Baseline Regression
 
+# ALWAYS-REPORT path-filter shim (2026-06-09, task #81): the `test` and
+# `scenario-anchors` jobs are REQUIRED status checks in branch protection. A
+# workflow- or job-level `paths:` filter on a REQUIRED check that NEVER REPORTS on a
+# non-matching PR jams that PR forever on a "pending" required check (the classic
+# "required + path-filtered" gotcha). So we do NOT filter at the workflow level.
+# Instead the workflow ALWAYS triggers, each job ALWAYS reports its check name, and a
+# per-job changed-files detection step short-circuits the HEAVY steps to a fast no-op
+# (success in seconds) when the PR touches no relevant paths:
+#   - `test`             gates on the CODE path set (identical to full-suite — coverage
+#                        does not shrink vs the full-vitest gate).
+#   - `scenario-anchors` gates on the SIM/scenario path set (anchor-moving surfaces).
+# `typecheck` is intentionally LEFT ALWAYS-RUN (fast ~1-2 min, broad type signal) and
+# is the `needs:` parent for the gated jobs, so their check names always report even
+# when their heavy steps short-circuit. See .github/scripts/detect-changed-paths.sh.
+
 on:
   push:
     branches: [main]
@@ -28,20 +43,40 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v5
+        with:
+          # detect-changed-paths.sh needs the base commit in history.
+          fetch-depth: 0
+
+      # Always-report shim: decide whether the heavy anchor run executes. The job
+      # itself always completes (and reports the `scenario-anchors` check).
+      - name: Detect sim/scenario changes
+        id: changes
+        env:
+          PATH_SET: sim
+        run: bash .github/scripts/detect-changed-paths.sh
 
       - uses: actions/setup-node@v5
+        if: steps.changes.outputs.relevant == 'true'
         with:
           node-version: 22
           cache: npm
 
       - run: npm install --legacy-peer-deps
+        if: steps.changes.outputs.relevant == 'true'
       - run: npm install --legacy-peer-deps --prefix src/ui/map
+        if: steps.changes.outputs.relevant == 'true'
 
       - name: Rebuild startup snapshot for this platform
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run desktop:startup-snapshot:build
 
       - name: Focused scenario anchor tests
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run test:vitest:scenario:anchors
+
+      - name: No sim/scenario changes — anchor tests skipped (green-fast)
+        if: steps.changes.outputs.relevant != 'true'
+        run: echo "No src/sim, src/state, src/scenario, data/scenarios or data/calibration changes — scenario anchor tests skipped. Job reports success so branch protection stays unblocked."
 
   test:
     needs: typecheck
@@ -52,42 +87,84 @@ jobs:
           # tests/release_notes_generator.test.ts uses HEAD~5..HEAD git ranges
           # which require full history. Default fetch-depth=1 (shallow clone)
           # makes the generator's git log fail with "ambiguous argument 'HEAD~5..HEAD'".
+          # detect-changed-paths.sh also needs the base commit in history.
           fetch-depth: 0
 
+      # Always-report shim: decide whether the heavy fast-vitest slice runs. The job
+      # itself always completes (and reports the `test` check) regardless of this
+      # output. CODE path set is identical to the full-suite gate — coverage does not
+      # shrink vs the full-vitest gate.
+      - name: Detect calibration/code-contract changes
+        id: changes
+        env:
+          PATH_SET: code
+        run: bash .github/scripts/detect-changed-paths.sh
+
       - uses: actions/setup-node@v5
+        if: steps.changes.outputs.relevant == 'true'
         with:
           node-version: 22
           cache: npm
 
       - run: npm install --legacy-peer-deps
+        if: steps.changes.outputs.relevant == 'true'
       - run: npm install --legacy-peer-deps --prefix src/ui/map
+        if: steps.changes.outputs.relevant == 'true'
 
       - name: Rebuild startup snapshot for this platform
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run desktop:startup-snapshot:build
 
       - name: Fast unit tests
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run test:vitest:fast
 
+      - name: No relevant changes — fast tests skipped (green-fast)
+        if: steps.changes.outputs.relevant != 'true'
+        run: echo "No src/tools/tests/scenario/calibration/scripts/config changes — fast vitest slice skipped. Job reports success so branch protection stays unblocked."
+
+  # `scenarios` is NOT a required check, but it `needs: test` and runs the heavy
+  # scenario slice — leaving it un-gated would re-introduce a multi-minute cost on
+  # doc-only PRs that the `test` gate was just shaved off of. Same SIM path set as
+  # scenario-anchors; no coverage shrink on code PRs.
   scenarios:
     needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
+        with:
+          # detect-changed-paths.sh needs the base commit in history.
+          fetch-depth: 0
+
+      - name: Detect sim/scenario changes
+        id: changes
+        env:
+          PATH_SET: sim
+        run: bash .github/scripts/detect-changed-paths.sh
 
       - uses: actions/setup-node@v5
+        if: steps.changes.outputs.relevant == 'true'
         with:
           node-version: 22
           cache: npm
 
       - run: npm install --legacy-peer-deps
+        if: steps.changes.outputs.relevant == 'true'
       - run: npm install --legacy-peer-deps --prefix src/ui/map
+        if: steps.changes.outputs.relevant == 'true'
 
       - name: Rebuild startup snapshot for this platform
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run desktop:startup-snapshot:build
 
       - name: Scenario tests
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run test:vitest:scenario
+
+      - name: No sim/scenario changes — scenario tests skipped (green-fast)
+        if: steps.changes.outputs.relevant != 'true'
+        run: echo "No src/sim, src/state, src/scenario, data/scenarios or data/calibration changes — scenario tests skipped."
 
   # baselines job removed 2026-05-04: byte-hash baseline comparison is
   # platform-bound (run_summary.json hashes diverge between Windows dev and
