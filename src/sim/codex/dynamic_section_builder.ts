@@ -803,12 +803,15 @@ const LOAD_BEARING_SECTIONS: readonly LoadBearingSectionSpec[] = [
         summary: 'The recorded posture taken at the London Conference in this campaign.',
         variant: 'note',
     },
-    {
-        event_id: 'rbih_state_identity',
-        target_essay_event_id: 'rbih_state_identity',
-        summary: 'The recorded state-identity course in this campaign.',
-        variant: 'divergence',
-    },
+    // NOTE: `rbih_state_identity` was removed here (Codex #348 P2). It is a
+    // once-only turn 2-5 decision with branches civic/bosniak_national/pragmatic,
+    // but the matching `essay_rbih_state_identity` entry in essay_index.json has
+    // NO `dynamic_sections` for any `RESPONSE:rbih_state_identity:*` key. Since
+    // `conditional_on` is the join key to the authored essay-index prose, a
+    // registry entry here would emit a dynsec whose join key resolves to nothing
+    // — all three identity choices would collapse to the same generic summary
+    // with no per-branch morphing. Re-add this entry ONLY once the authored
+    // per-branch `dynamic_sections` exist in essay_index.json.
 ];
 
 /** Index for O(1) event_id lookup. Declaration order preserved for diagnostics. */
