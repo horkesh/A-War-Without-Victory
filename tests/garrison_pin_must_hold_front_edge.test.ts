@@ -155,14 +155,18 @@ describe('pinGarrisonToMustHoldFrontEdge', () => {
         expect(state.military.formations.edge_brig.location_osid).toBe(MUST_HOLD);
     });
 
-    // Guard 5: never uproots an entrenched brigade.
-    it('GUARD 5: does not uproot an entrenched candidate brigade', () => {
+    // Lane-3 (b) 2026-06-09: the entrenchment exclusion was DROPPED for the must-hold
+    // backfill. When a must-hold OSID has ZERO active defenders it is the corps's highest
+    // priority, so an entrenched same-corps reserve IS now eligible to re-garrison it.
+    // (Phase-A front dispersion still respects ENTRENCHMENT_REDISTRIBUTION_THRESHOLD.)
+    it('LANE-3 b: an entrenched candidate IS pinned to an undefended must-hold OSID', () => {
         const state = makeState({
             dug_in_brig: makeBrigade({ location_osid: NEAR, entrenchment_turns: 5 }),
         });
         distributeBrigadesToFront(state, NO_OP_SECTORS, ADJ);
-        expect(state.military.formations.dug_in_brig.location_osid).toBe(NEAR);
-        expect(state.military.brigade_movement_orders.dug_in_brig).toBeFalsy();
+        // NEAR is adjacent to MUST_HOLD (dist ≤ 1) ⇒ direct relocation onto the objective.
+        expect(state.military.formations.dug_in_brig.location_osid).toBe(MUST_HOLD);
+        expect(state.military.formations.dug_in_brig.entrenchment_turns).toBe(0);
     });
 
     // Guard 6a: must-hold OSID already defended (>=1 active occupant) ⇒ no pin.

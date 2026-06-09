@@ -647,9 +647,11 @@ const MUST_HOLD_GARRISON_MIN_PERSONNEL = 400;
  *   2. Corps-gated — candidate brigade's `corps_id` must equal the must-hold corps.
  *   3. Idle-only — candidate must NOT be an active-operation participant.
  *   4. ≥400 personnel — sub-threshold brigades are not eligible.
- *   5. Never uproots an entrenched brigade — candidates with
- *      entrenchment_turns ≥ ENTRENCHMENT_REDISTRIBUTION_THRESHOLD are excluded,
- *      and an already-defended must-hold OSID (≥1 active occupant) is skipped.
+ *   5. An already-defended must-hold OSID (≥1 active occupant) is skipped.
+ *      NOTE (Lane-3 b, 2026-06-09): the prior entrenchment exclusion was DROPPED here —
+ *      a must-hold OSID with zero active defenders is the corps's highest-priority
+ *      position, so an entrenched same-corps rear reserve IS eligible to re-garrison it.
+ *      Phase-A front dispersion still respects ENTRENCHMENT_REDISTRIBUTION_THRESHOLD.
  *   6. Friendly + undefended only — the must-hold OSID must be controlled by the
  *      corps's faction and currently have zero active brigade occupants.
  *   7. Deterministic — corps, OSIDs, and candidates iterated in strictCompare order;
@@ -718,7 +720,18 @@ function pinGarrisonToMustHoldFrontEdge(
                 .filter((e) => !opParticipants.has(e.bid))                                // Guard 3 (idle)
                 .filter((e) => (e.f.personnel ?? 0) >= MUST_HOLD_GARRISON_MIN_PERSONNEL)  // Guard 4
                 .filter((e) => (e.f.disrupted_turns ?? 0) === 0)
-                .filter((e) => (e.f.entrenchment_turns ?? 0) < ENTRENCHMENT_REDISTRIBUTION_THRESHOLD) // Guard 5
+                // Lane-3 (b) Zvornik-protect (2026-06-09): the entrenchment exclusion
+                // (Guard 5, ENTRENCHMENT_REDISTRIBUTION_THRESHOLD) is INTENTIONALLY dropped
+                // for the must-hold backfill. A scenario-authored must-hold OSID with ZERO
+                // active defenders is the single highest-priority position the corps owns;
+                // an entrenched rear reserve is exactly what should redeploy to re-garrison it.
+                // Under Lever A (cheaper ARBiH attacks) the original Zvornik garrison
+                // (rs_1st_vlasenica) was attritted to 0/inactive at ~wk88, leaving
+                // op:zvornik:zvornik undefended; every eligible vrs_drina reserve had
+                // entrenched in the deep south (Srebrenica/Rogatica), so Guard 5 starved the
+                // pin of candidates and ARBiH walked into a null-defender objective at wk91.
+                // Dropping Guard 5 HERE ONLY (Phase-A dispersion still respects it) lets the
+                // pin un-park an entrenched same-corps reserve to hold the must-hold edge.
                 .filter((e) => movementState?.[e.bid]?.status !== 'in_transit')
                 .filter((e) => !state.military.brigade_movement_orders?.[e.bid])
                 .filter((e) => !pinnedBrigades.has(e.bid))                                 // one must-hold per brigade per pass

@@ -367,8 +367,13 @@ export const HONOR_DEFENSE_BONUS: Record<string, number> = { slavna: 0.10, vites
 // n536: decisive_victory raised 1.0→1.3 — even clean victories cost blood.
 // VRS paid for every village in Bosnia, even when they won overwhelmingly.
 // stalemate raised 1.0→1.2 — stalemated attacks still produce friction casualties.
+// Lane-3 (b) Lever A (2026-06-09): decisive_victory 1.3→1.0, victory 1.4→1.2.
+// Cheaper clean-victory attacker casualties pull per-faction killed shares toward the
+// historical ~52% ARBiH / ~38% VRS / ~10% HVO arc (RUN4 measured solo: 56.3→52.3 ARBiH,
+// 35.5→39.0 VRS, §6 held, K:W flat). Paired with a Zvornik must-hold garrison-pin recovery
+// because the cheaper ARBiH pressure over-advances the Drina corridor at op:zvornik:zvornik.
 export const OUTCOME_ATTACKER_MOD: Record<string, number> = {
-    decisive_victory: 1.3, victory: 1.4, costly_victory: 1.8,
+    decisive_victory: 1.0, victory: 1.2, costly_victory: 1.8,
     stalemate: 1.2, repulsed: 2.0, catastrophic: 3.0
 };
 // catastrophic raised 0.3→0.7 — even a doomed assault inflicts casualties on the defender.
