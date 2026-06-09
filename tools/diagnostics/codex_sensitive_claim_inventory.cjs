@@ -404,7 +404,15 @@ function essayFloorStatus(rootValue) {
 }
 
 function sourceStatusFor(surface, rootValue, ancestors) {
-  if (surface === 'essay') {
+  // Codex #338 P2: dynamic-section claims (`essay_dynamic_section`) are scanned
+  // with their PARENT essay seeded as `rootValue` (see scanJsonFile), so the
+  // same two-source editorial floor that gates the canonical essay body must
+  // also gate the runtime morphing prose. Without this, a one-source
+  // diplomatic/military/etc. parent in essay_index.json would report its
+  // dynamic-section claims as `cited` (via the parent's `sources` fallback),
+  // silently bypassing the floor exception — and no other source-quality audit
+  // scans the index dynamic sections.
+  if (surface === 'essay' || surface === 'essay_dynamic_section') {
     const floorStatus = essayFloorStatus(rootValue);
     if (floorStatus) {
       return {
