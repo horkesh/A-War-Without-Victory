@@ -353,8 +353,9 @@
         },
         {
             "id": "essay_independence_referendum_1992",
-            "tier": 0,
+            "tier": 1,
             "event_id": "independence_referendum_1992",
+            "ghost_when": "EVENT:rs_strategic_goals OR EVENT:rbih_state_identity",
             "title": "The Independence Referendum: Two Legitimacies, One War",
             "year": 1992,
             "category": "political",

@@ -686,8 +686,16 @@ export function resolveCodexEssay(essay: EssayEntry, context: CodexRenderContext
     const sources = localized?.sources && localized.sources.length > 0 ? localized.sources : essay.sources;
     const tier = effectiveTier(essay);
     const eventUnlocked = context.firedEventIds.has(essay.event_id);
-    const isGhost = !eventUnlocked && evaluateEssayCondition(essay.ghost_when, context);
-    const baseUnlocked = eventUnlocked || isGhost;
+    // T2-C / content C2 (orphaned-wiring audit): a FIXED (tier-0) essay is
+    // canonical history that always happened — it is NEVER a counterfactual
+    // "path not taken" ghost. So when a FIXED essay unlocks via its
+    // `ghost_when` (its `event_id` has no backing event, e.g.
+    // `independence_referendum_1992` — the war's pre-history origin), it base-
+    // unlocks and renders its full canonical prose WITHOUT the ghost framing.
+    // CONDITIONAL/SHAPEABLE/AHISTORICAL keep the binary fired-or-ghost behavior.
+    const conditionMet = !eventUnlocked && evaluateEssayCondition(essay.ghost_when, context);
+    const isGhost = conditionMet && tier !== CodexTier.FIXED;
+    const baseUnlocked = eventUnlocked || conditionMet;
 
     // A1b: the dependency graph gates ON TOP of the base unlock — it can only
     // KEEP an otherwise-unlocked essay locked, never force one open. An essay

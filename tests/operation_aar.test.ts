@@ -362,12 +362,13 @@ describe('attributeOperationCasualties', () => {
         expect(op.pending_casualties).toBeDefined();
         const pc = op.pending_casualties!;
         expect(pc.attacks).toBe(1);
-        // Attacker suffered losses: 24 total -> killed=Math.round(24*0.30)=7, wounded=Math.round(24*0.55)=13
-        expect(pc.suffered.killed).toBe(7);
-        expect(pc.suffered.wounded).toBe(13);
-        // Attacker inflicted on defender: 27 total -> killed=Math.round(27*0.30)=8, wounded=Math.round(27*0.55)=15
-        expect(pc.inflicted.killed).toBe(8);
-        expect(pc.inflicted.wounded).toBe(15);
+        // T2-D: canonical KIA 0.22 / WIA 0.74 (was 0.30/0.55).
+        // Attacker suffered losses: 24 total -> killed=Math.round(24*0.22)=5, wounded=Math.round(24*0.74)=18
+        expect(pc.suffered.killed).toBe(5);
+        expect(pc.suffered.wounded).toBe(18);
+        // Attacker inflicted on defender: 27 total -> killed=Math.round(27*0.22)=6, wounded=Math.round(27*0.74)=20
+        expect(pc.inflicted.killed).toBe(6);
+        expect(pc.inflicted.wounded).toBe(20);
         // Equipment lost: lossFraction=24/1000=0.024, tanks=round(10*0.08*0.024*1.0*10)=0, art=round(5*0.04*0.024*1.0*10)=0
         expect(pc.equipment_lost.tanks).toBe(0);
         expect(pc.equipment_lost.artillery).toBe(0);
@@ -558,13 +559,13 @@ describe('attributeOperationCasualties', () => {
         expect(pc.by_axis!['axis_south']).toBeDefined();
         expect(pc.by_axis!['axis_north'].attacks).toBe(1);
         expect(pc.by_axis!['axis_south'].attacks).toBe(1);
-        // North axis: victory mod (att 0.6)
-        // North: 1000*0.04*0.6=24 -> killed=7, wounded=13
-        expect(pc.by_axis!['axis_north'].suffered.killed).toBe(7);
-        // South: 800*0.04*1.0=32 -> killed=10, wounded=18
-        expect(pc.by_axis!['axis_south'].suffered.killed).toBe(10);
+        // T2-D: canonical KIA 0.22 (was 0.30).
+        // North: attacker_casualties=24 -> killed=Math.round(24*0.22)=5
+        expect(pc.by_axis!['axis_north'].suffered.killed).toBe(5);
+        // South: attacker_casualties=32 -> killed=Math.round(32*0.22)=7
+        expect(pc.by_axis!['axis_south'].suffered.killed).toBe(7);
         // Aggregate: both axes
-        expect(pc.suffered.killed).toBe(7 + 10);
+        expect(pc.suffered.killed).toBe(5 + 7);
     });
 
     it('skips brigades not in a sector_attack operation', () => {
