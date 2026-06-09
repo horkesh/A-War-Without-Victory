@@ -1,0 +1,104 @@
+name: Full Suite + Structural Fingerprint
+
+# C1 (2026-06-09): closes the stale-pin false-green leak and replaces the byte-hash
+# baselines job (removed 2026-05-04 for Win/Linux platform divergence;
+# LANE-NIGHTSHIFT-PLATFORM-STABLE-MANIFEST).
+#
+# Path-aware per the 2026-06-05 CI/PR batching policy (COMMAND_BOARD.md): heavy gates
+# run only on PRs that touch code which can move a pin or the calibration contract, so
+# doc-only PRs stay fast. These jobs are REQUIRED status checks (configure in branch
+# protection) — when they DO run they must pass; a PR that does not touch these paths
+# does not trigger them.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'tools/**'
+      - 'tests/**'
+      - 'data/scenarios/**'
+      - 'data/calibration/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'vitest.config.ts'
+      - 'tsconfig.json'
+      - '.github/workflows/full-suite-and-fingerprint.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'tools/**'
+      - 'tests/**'
+      - 'data/scenarios/**'
+      - 'data/calibration/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'vitest.config.ts'
+      - 'tsconfig.json'
+      - '.github/workflows/full-suite-and-fingerprint.yml'
+
+jobs:
+  # The single gate that runs the COMPLETE vitest suite (`npm run test:vitest` ==
+  # `vitest run` over vitest.config.ts == ALL discovered vitest files), NOT a slice.
+  #
+  # WHY: the Baseline Regression `test` job runs only the `fast` slice and `scenarios`
+  # runs only the `scenario` slice. Slice membership is decided by
+  # tools/test/discover_test_files.mjs heuristics, so a test those heuristics MIS-BUCKET
+  # or fail to discover can silently drop from BOTH slices with no machine signal. This
+  # job runs everything the config discovers, so full-suite-only pins
+  # (strict_null_inventory_progress, war_phase_step_order, consequence/substrate
+  # inventory) can NO LONGER reach main green. fetch-depth: 0 because the suite includes
+  # release_notes_generator.test.ts (HEAD~5..HEAD git range).
+  full-suite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm install --legacy-peer-deps
+      - run: npm install --legacy-peer-deps --prefix src/ui/map
+
+      - name: Rebuild startup snapshot for this platform
+        run: npm run desktop:startup-snapshot:build
+
+      - name: Full vitest suite (all slices — no stale pin can hide)
+        run: npm run test:vitest
+
+  # Platform-stable structural fingerprint — the determinism regression signal that
+  # replaces the removed byte-hash baselines job. Fingerprints only MEANINGFUL,
+  # platform-stable fields (per-faction OSID control map + anchor pass/fail + bot
+  # benchmark tallies — all integers/strings/booleans, verified identical across
+  # same-territory runs) of a fresh 40w run and compares against the committed expected
+  # (data/calibration/structural_fingerprint_40w.json). A structural move without a
+  # deliberate `npm run ci:structural-fingerprint:update` fails the gate.
+  #
+  # Reference platform = Linux/Node 22 (DoD C2). Windows==Linux byte-hashes are NOT
+  # promised — the OLD byte-hash baseline diverged by platform float serialization and
+  # was removed for exactly that reason. The STRUCTURAL fields here ARE platform-stable
+  # by construction; this job is the determinism authority on the reference platform.
+  structural-fingerprint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm install --legacy-peer-deps
+      - run: npm install --legacy-peer-deps --prefix src/ui/map
+
+      - name: Rebuild startup snapshot for this platform
+        run: npm run desktop:startup-snapshot:build
+
+      - name: Fresh 40w run + structural-fingerprint compare
+        run: npm run ci:structural-fingerprint:check
