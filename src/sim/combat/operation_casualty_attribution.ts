@@ -15,11 +15,17 @@ import type { GameState, FormationId, CorpsOperation } from '../../state/game_st
 import type { AttackResolutionOsidReport } from './attack_resolution_osid.js';
 import { emptyPendingCasualties, type PendingOperationCasualties } from './operation_aar.js';
 import { findBrigadeOperation } from './corps_operation_helpers.js';
+import { KIA_FRACTION, WIA_FRACTION } from './attack_casualty_distribution.js';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const KIA_FRACTION = 0.30;
-const WIA_FRACTION = 0.55;
+// T2-D (orphaned-wiring audit): the AAR KIA/WIA split now uses the SAME
+// canonical fractions the battle engine applies (attack_casualty_distribution:
+// KIA 0.22 / WIA 0.74 / MIA 0.04) instead of the legacy hardcoded 0.30/0.55,
+// so operation After-Action Reports report a KIA/WIA mix that matches the
+// casualties the sim actually booked. The AAR is a read/report layer
+// (op.pending_casualties → op.weekly_log), so this re-labels how a total is
+// split, not the total combat outcome.
 const TANK_LOSS_RATE = 0.08;
 const ARTILLERY_LOSS_RATE = 0.04;
 const DEFENDER_EQUIPMENT_LOSS_SCALE = 0.5;
