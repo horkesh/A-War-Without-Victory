@@ -724,6 +724,7 @@ function App() {
             description: eff.text ?? (eff.faction ? `${getPlayerSafeMilitaryFactionName(eff.faction)} ${eff.kind} ${(eff.delta ?? 0) > 0 ? '+' : ''}${eff.delta ?? ''}` : eff.kind),
           })) ?? e.effects,
           isDecision: false,
+          image: def?.image,
         };
       });
 

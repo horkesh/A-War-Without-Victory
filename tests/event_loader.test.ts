@@ -540,6 +540,38 @@ test('loadEventDefinitionsFromDir accepts a response option without effects', ()
 });
 
 // ════════════════════════════════════════════════════════════════════════════
+// Event-illustration pipeline — optional `image` key (EventModal wiring).
+// UI/data-only, calibration-INERT: the field is purely presentational and no
+// shipped event carries it (asserted below), so loading is byte-identical today.
+// ════════════════════════════════════════════════════════════════════════════
+
+test('loadEventDefinitionsFromDir accepts and preserves an optional image key', () => {
+    const dir = makeTempEventsDir();
+    writeCatalogRows(dir, [
+        validCatalogRow({ image: 'jna_withdrawal_1992.webp' }),
+    ]);
+
+    const loaded = loadEventDefinitionsFromDir(0, dir);
+
+    assert.strictEqual(loaded.length, 1);
+    assert.strictEqual(loaded[0]?.id, 'valid_event');
+    assert.strictEqual(loaded[0]?.image, 'jna_withdrawal_1992.webp');
+});
+
+test('loadEventDefinitionsFromDir throws on an empty image key', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({ image: '' })],
+        /image must be a non-empty string when present/,
+    );
+});
+
+test('no shipped event carries an image key (pipeline is inert for all current content)', () => {
+    const loaded = loadEventDefinitions(0);
+    const withImage = loaded.filter((event) => event.image != null);
+    assert.deepStrictEqual(withImage.map((event) => event.id), []);
+});
+
+// ════════════════════════════════════════════════════════════════════════════
 // Phase D Packet 44 — vocabulary validation tests for dimension_shifts &
 // effect.kind / effects[].kind. Pass A and Pass B are catalog-level static
 // defenses against DEAD-write authoring errors (e.g., naming an EffectKind

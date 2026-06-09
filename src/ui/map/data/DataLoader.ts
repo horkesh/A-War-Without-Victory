@@ -59,6 +59,8 @@ export interface EventDefinitionView {
   category: string;
   effects?: Array<{ kind: string; faction?: string; delta?: number; text?: string }>;
   decision?: { options: Array<{ id: string; label: string; description?: string }> };
+  /** Optional documentary-realism illustration key (basename or path). */
+  image?: string;
 }
 
 let _eventDefCache: Map<string, EventDefinitionView> | null = null;
@@ -90,6 +92,7 @@ export async function loadEventDefinitions(): Promise<Map<string, EventDefinitio
         category: ev.category ?? 'military',
         effects: Array.isArray(ev.effects) ? ev.effects : ev.effect ? [ev.effect] : [],
         decision: ev.decision,
+        image: typeof ev.image === 'string' ? ev.image : undefined,
       });
     }
   }

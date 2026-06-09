@@ -407,6 +407,12 @@ function validateEventRow(row: unknown, filename: string, rowIndex: number): voi
     if (hasOwn(row, 'requires_player_response')) {
         validateOptionalBoolean(row.requires_player_response, 'requires_player_response', filename, rowIndex);
     }
+    // Optional documentary-realism illustration key (EventModal renders it when an
+    // asset resolves; absent → text-only). Validated as a non-empty string only —
+    // the asset itself need not exist on disk yet (the UI degrades gracefully).
+    if (hasOwn(row, 'image') && !isNonEmptyString(row.image)) {
+        failRow(filename, rowIndex, 'image must be a non-empty string when present');
+    }
     if (!isObject(row.trigger)) {
         failRow(filename, rowIndex, 'trigger must be a non-null object');
     }
