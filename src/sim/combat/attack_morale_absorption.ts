@@ -23,7 +23,7 @@ import { getCoEthnicShare } from './ethnic_defense.js';
 import { isEnclaveCapital } from './enclave_resilience.js';
 import { applyPersonnelLoss } from './attack_retreat_displacement.js';
 import { recordBattleCasualties } from '../../state/casualty_ledger.js';
-import { KIA_FRACTION, WIA_FRACTION } from './attack_casualty_distribution.js';
+import { splitKiaWiaMia } from './attack_casualty_distribution.js';
 import { MIN_COMBAT_PERSONNEL } from '../../state/formation_constants.js';
 import { pushSnapEvent } from './attack_resolution_types.js';
 
@@ -154,11 +154,7 @@ export function evaluateAndApplyMoraleAbsorption(params: {
                 if (extraCas > 0) {
                     applyPersonnelLoss(a, extraCas);
                     report.casualty_attacker += extraCas;
-                    recordBattleCasualties(casualtyLedger, a.faction, a.id, {
-                        killed: Math.floor(extraCas * KIA_FRACTION),
-                        wounded: Math.floor(extraCas * WIA_FRACTION),
-                        missing_captured: Math.max(0, extraCas - Math.floor(extraCas * KIA_FRACTION) - Math.floor(extraCas * WIA_FRACTION))
-                    });
+                    recordBattleCasualties(casualtyLedger, a.faction, a.id, splitKiaWiaMia(extraCas));
                 }
             }
         }
@@ -169,11 +165,7 @@ export function evaluateAndApplyMoraleAbsorption(params: {
         if (extraDefenderTotal > 0) {
             applyPersonnelLoss(defenderFormation, extraDefenderTotal);
             report.casualty_defender += extraDefenderTotal;
-            recordBattleCasualties(casualtyLedger, defenderFormation.faction, defenderFormation.id, {
-                killed: Math.floor(extraDefenderTotal * KIA_FRACTION),
-                wounded: Math.floor(extraDefenderTotal * WIA_FRACTION),
-                missing_captured: Math.max(0, extraDefenderTotal - Math.floor(extraDefenderTotal * KIA_FRACTION) - Math.floor(extraDefenderTotal * WIA_FRACTION))
-            });
+            recordBattleCasualties(casualtyLedger, defenderFormation.faction, defenderFormation.id, splitKiaWiaMia(extraDefenderTotal));
         }
     }
 

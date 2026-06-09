@@ -23,7 +23,11 @@ import type { CasualtyLedger } from '../../state/casualty_ledger.js';
 import { recordBattleCasualties } from '../../state/casualty_ledger.js';
 import { applyPersonnelLoss } from './attack_retreat_displacement.js';
 import type { DefenderContribution } from './attack_resolution_types.js';
+import { getMainCasualtySplit } from './casualty_realism_v2_gate.js';
 
+/** Shipped (flag-OFF) main-path split. The live split is sourced from
+ * getMainCasualtySplit() (casualty_realism_v2_gate.ts); these consts document the
+ * flag-OFF baseline and are mirrored as the gate's SHIPPED_MAIN fractions. */
 export const KIA_FRACTION = 0.22;
 export const WIA_FRACTION = 0.74;
 export const MIA_FRACTION = 0.04;
@@ -37,8 +41,11 @@ function removablePersonnel(formation: FormationState): number {
  * using the canonical fractions. Remainder goes to MIA.
  */
 export function splitKiaWiaMia(totalCasualties: number): FormationCasualties {
-    const killed = Math.floor(totalCasualties * KIA_FRACTION);
-    const wounded = Math.floor(totalCasualties * WIA_FRACTION);
+    // Routed through the B1 casualty-realism V2 gate. Flag-OFF returns the shipped
+    // main-path split (KIA 0.22 / WIA 0.74 / MIA 0.04), byte-identical to before.
+    const { kia, wia } = getMainCasualtySplit();
+    const killed = Math.floor(totalCasualties * kia);
+    const wounded = Math.floor(totalCasualties * wia);
     const missing_captured = Math.max(0, totalCasualties - killed - wounded);
     return { killed, wounded, missing_captured };
 }

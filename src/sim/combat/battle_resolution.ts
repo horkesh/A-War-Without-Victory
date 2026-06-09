@@ -44,7 +44,11 @@ import { computeResilienceModifier } from './faction_resilience.js';
 import { isBrigadeAssignedToFront } from './front_assignment.js';
 import { findBrigadeOperation } from './corps_operation_helpers.js';
 import { DEFAULT_SARAJEVO_SIEGE_PARAMS, getSarajevoSiegeParams } from './sarajevo_siege_params.js';
-import { KIA_FRACTION, WIA_FRACTION } from './attack_casualty_distribution.js';
+import {
+    getMainCasualtySplit,
+    getUndefendedCasualtySplit,
+    getSurrenderCascadeCasualtySplit,
+} from './casualty_realism_v2_gate.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -621,9 +625,10 @@ function computeBattleCasualties(
             MIN_UNDEFENDED_DEFENDER_CASUALTIES,
             Math.round(BASE_CASUALTY_PER_INTENSITY * UNDEFENDED_DEFENDER_CASUALTY_SCALE * undefendedIntensityFactor)
         );
+        const undefSplit = getUndefendedCasualtySplit();
         return {
             attacker: { killed: 0, wounded: 2, missing_captured: 0, tanks_lost: 0, artillery_lost: 0 },
-            defender: splitCasualties(defenderTotal, 0.15, 0.5, 0, 0)
+            defender: splitCasualties(defenderTotal, undefSplit.kia, undefSplit.wia, 0, 0)
         };
     }
 
@@ -647,11 +652,16 @@ function computeBattleCasualties(
     attackerTotal = Math.min(attackerTotal, Math.max(0, attackerPersonnel - MIN_COMBAT_PERSONNEL));
     defenderTotal = Math.min(defenderTotal, Math.max(0, defenderPersonnel));
 
-    let defenderKiaFrac = KIA_FRACTION;
-    let defenderWiaFrac = WIA_FRACTION;
+    // B1 casualty-realism V2 gate (default OFF ⇒ KIA/WIA_FRACTION exactly).
+    const mainSplit = getMainCasualtySplit();
+    let defenderKiaFrac = mainSplit.kia;
+    let defenderWiaFrac = mainSplit.wia;
     if (snapMults.isSurrenderCascade && defenderFormation) {
-        defenderKiaFrac = 0.10;
-        defenderWiaFrac = 0.40;
+        // Split-only re-anchor. The forced `defenderTotal = 50% personnel` below is a
+        // TOTAL (territory-coupled) knob and is intentionally LEFT UNCHANGED by B1.
+        const surrSplit = getSurrenderCascadeCasualtySplit();
+        defenderKiaFrac = surrSplit.kia;
+        defenderWiaFrac = surrSplit.wia;
         defenderTotal = Math.max(defenderTotal, Math.round(defenderPersonnel * 0.5));
         defenderTotal = Math.min(defenderTotal, Math.max(0, defenderPersonnel - MIN_COMBAT_PERSONNEL));
     }
@@ -679,7 +689,7 @@ function computeBattleCasualties(
     }
 
     return {
-        attacker: splitCasualties(attackerTotal, KIA_FRACTION, WIA_FRACTION, aTanksLost, aArtLost),
+        attacker: splitCasualties(attackerTotal, mainSplit.kia, mainSplit.wia, aTanksLost, aArtLost),
         defender: splitCasualties(defenderReported, defenderKiaFrac, defenderWiaFrac, dTanksLost, dArtLost)
     };
 }
