@@ -23,6 +23,10 @@ import type { ComparisonResult, MilestoneComparison, MilestoneComparisonStatus }
 // path-not-taken records for the Codex tab. Builder is pure/deterministic
 // and refuses §6 sensitive-history flags via its own Ring guard.
 import { buildGhostEntries, type BuiltGhostEntry } from '../../../sim/codex/dynamic_section_builder.js';
+// T2-A / content C5 (orphaned-wiring audit): resolve the authored ghost-entry
+// markdown body (EN/BCS) instead of rendering the raw repo path. §6-adjacent
+// bodies are gated out inside the resolver.
+import { resolveGhostEntryProse } from '../data/ghostEntryProse.js';
 // LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER: read-only turn scrubber for the
 // Replay tab. Renders only when gameOver === true AND a save sequence has
 // been plumbed into the loaded adapter. Consumes byte-identical save
@@ -291,7 +295,7 @@ export function VerdictScreen() {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const startReplayInspection = useGameStore((s) => s.startReplayInspection);
     const ipc = useIPC();
-    useLocale();
+    const [locale] = useLocale();
     const [selectedFaction, setSelectedFaction] = useState<string>('RBiH');
     const [activeLowerSection, setActiveLowerSection] = useState<VerdictLowerSection>('report');
 
@@ -505,16 +509,29 @@ export function VerdictScreen() {
                         <div className="text-[9px] uppercase tracking-[0.3em] text-text-secondary font-semibold mb-2">
                             Codex &mdash; Paths Not Taken
                         </div>
-                        <ul className="space-y-1">
-                            {codexGhosts.map((g) => (
+                        <ul className="space-y-3">
+                            {codexGhosts.map((g) => {
+                                // T2-A / content C5: render the authored EN/BCS
+                                // narrative body. §6-adjacent bodies resolve to
+                                // null and fall back to the label only — never
+                                // the raw repo path that was shown before.
+                                const prose = resolveGhostEntryProse(g.ghost_id, locale);
+                                return (
                                 <li key={g.ghost_id} className="text-[10px] text-text-secondary"
                                     data-awwv-ghost-id={g.ghost_id}
                                     data-awwv-ghost-variant={g.variant}
-                                    data-awwv-ghost-ring={g.ring_classification}>
-                                    <span className="text-text-primary">{getPlayerSafeDisplayLabel(g.ghost_id, 'Path not taken')}</span>
-                                    <span className="text-text-secondary/70"> &mdash; {g.path}</span>
+                                    data-awwv-ghost-ring={g.ring_classification}
+                                    data-awwv-ghost-has-prose={prose !== null ? 'true' : 'false'}>
+                                    <div className="text-text-primary font-semibold">{getPlayerSafeDisplayLabel(g.ghost_id, 'Path not taken')}</div>
+                                    {prose !== null && (
+                                        <div className="mt-1 whitespace-pre-wrap text-text-secondary/90 leading-relaxed"
+                                             data-awwv-ghost-prose>
+                                            {prose}
+                                        </div>
+                                    )}
                                 </li>
-                            ))}
+                                );
+                            })}
                         </ul>
                     </section>
                 )}
