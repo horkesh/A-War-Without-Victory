@@ -7,6 +7,26 @@
 
 ---
 
+## GENERATION STATUS (updated 2026-06-10)
+
+Owner generated + delivered a first batch; QC'd, cropped to exact dims (`fit:cover`), converted to webp, placed in the wired/spec'd dirs.
+
+**✅ DONE — generated, QC-passed, cropped→webp, placed (13):**
+
+| Asset | Dims | Placed in |
+|---|---|---|
+| `tutorial_01_welcome` … `tutorial_08_judge` (all 8) | 600×400 | `src/ui/map/assets/tutorial/` |
+| `verdict_dayton_close` / `verdict_pyrrhic` / `verdict_catastrophic` | 1920×1080 | `src/ui/map/assets/verdicts/` |
+| `event_diplomatic_negotiation` / `event_dayton_signed_1995` | 800×450 | `src/ui/map/assets/event_illustrations/` (live-wired dir) |
+
+- **Event stills** land in the live-wired `event_illustrations/` (resolved by `eventIllustrationArt.ts` `import.meta.glob`) — they render once an event carries the matching `image` key.
+- **Verdict + tutorial** dirs are NOT yet globbed by any resolver → placement done, but a small WIRING follow-up is needed for them to render (VerdictScreen / onboarding-deck import).
+- **Verdicts upscaled** 1672×941 → 1920×1080 (same 16:9, ~15% upscale; acceptable for full-screen bg). Reserved text bands preserved (no crop on matching aspect).
+
+**⚠️ HELD — needs regen (4):** `plan_vance_owen` / `plan_owen_stoltenberg` / `plan_contact_group` / `plan_dayton`. The delivered images were atmospheric desk/document scenes, NOT the cartographic territorial-division maps these slots require — the historical reference maps were not attached. Re-generate WITH the attached historical map per each prompt's "ATTACHED reference" instruction.
+
+---
+
 # PROVEN STYLE & LESSONS — distilled from the SHIPPED assets
 
 > This section is the inherited contract for every prompt below (and for any future AWWV image prompt). It is distilled from the prompts that actually produced the 56 shipped presidential-desk / decision-header / consequence-still assets (`docs/plans/2026-05-24-gui-ai-asset-brief.md`), the 33+6 shipped faction command-card assets (`docs/40_reports/handovers/20260607_COMMAND_CARD_FACTION_PROMPT_PACK.md`, PRs #294 / #311 / #317), and the explicitly-RETIRED oil-paint/sepia direction (`docs/30_planning/_legacy/ART_DIRECTION_OIL_PAINT_EVENTS.md` + `docs/30_planning/design/IMAGE_GENERATION_PROMPTS.md`, both SUPERSEDED 2026-06-09). Read it once; every block below already conforms.
