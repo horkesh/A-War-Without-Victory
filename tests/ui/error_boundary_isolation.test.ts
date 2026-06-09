@@ -6,6 +6,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
 import { RootErrorBoundary } from '../../src/ui/map/components/RootErrorBoundary.js';
 import { createCrashDiagnosticsQueue } from '../../src/ui/map/services/telemetry/telemetryQueue.js';
+import { CRASH_DIAGNOSTICS_APP_VERSION } from '../../src/ui/map/services/telemetry/crashCapture.js';
 
 function ThrowingPanel(): never {
   throw new Error('right rail render failed');
@@ -55,7 +56,7 @@ describe('RootErrorBoundary panel isolation', () => {
     expect(queue.listReports()).toMatchObject([
       {
         schemaVersion: 1,
-        appVersion: '0.9.6-alpha.1',
+        appVersion: CRASH_DIAGNOSTICS_APP_VERSION,
         platform: 'browser',
         osFamily: expect.any(String),
         uiSurface: 'army hq',

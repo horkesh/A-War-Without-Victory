@@ -5,7 +5,8 @@ import {
     buildHomeDistanceCache,
     HOME_DISTANCE_FREE_RANGE,
     HOME_DISTANCE_FLOOR,
-    HOME_DISTANCE_FLOOR_ELITE
+    HOME_DISTANCE_FLOOR_ELITE,
+    HOME_DISTANCE_UNREACHABLE_HOPS
 } from '../src/sim/combat/home_distance.js';
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
 
@@ -128,5 +129,26 @@ describe('buildHomeDistanceCache', () => {
         };
         const cache = buildHomeDistanceCache(formations, adj, ['no_home']);
         expect('no_home' in cache).toBe(false);
+    });
+
+    it('clamps graph-unreachable home to a finite sentinel (no Infinity in cache)', () => {
+        // Two disconnected chains: brigade home is in chain A, location in chain B.
+        const adj = new Map<Osid, Osid[]>();
+        adj.set('op:a:0' as Osid, ['op:a:1' as Osid]);
+        adj.set('op:a:1' as Osid, ['op:a:0' as Osid]);
+        adj.set('op:b:0' as Osid, ['op:b:1' as Osid]);
+        adj.set('op:b:1' as Osid, ['op:b:0' as Osid]);
+        const formations: Record<string, { home_osid?: string; location_osid?: string; status?: string; kind?: string }> = {
+            severed: { home_osid: 'op:a:0', location_osid: 'op:b:0', status: 'active', kind: 'brigade' },
+        };
+        const cache = buildHomeDistanceCache(formations, adj, ['severed']);
+        // The raw graph distance is Infinity (severed corridor); cache must be finite.
+        expect(Number.isFinite(cache['severed'])).toBe(true);
+        expect(cache['severed']).toBe(HOME_DISTANCE_UNREACHABLE_HOPS);
+        // Behaviorally inert: the sentinel yields the same floored multiplier as Infinity.
+        expect(getHomeDistanceMult(cache['severed']!)).toBe(HOME_DISTANCE_FLOOR);
+        expect(getHomeDistanceMult(Infinity)).toBe(HOME_DISTANCE_FLOOR);
+        expect(getHomeDistanceMult(cache['severed']!, true)).toBe(HOME_DISTANCE_FLOOR_ELITE);
+        expect(getHomeDistanceMult(Infinity, true)).toBe(HOME_DISTANCE_FLOOR_ELITE);
     });
 });

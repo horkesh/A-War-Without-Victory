@@ -329,7 +329,10 @@
             "faction": "RBiH",
             "delta": -5
           }
-        ]
+        ],
+        "sets_flags": {
+          "vance_owen_accepted": true
+        }
       },
       {
         "id": "reject",
@@ -3418,7 +3421,10 @@
             "faction": "RBiH",
             "delta": -5
           }
-        ]
+        ],
+        "sets_flags": {
+          "owen_stoltenberg_accepted": true
+        }
       },
       {
         "id": "reject",

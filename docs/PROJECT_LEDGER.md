@@ -1,4 +1,79 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-09] chore(release): version → 0.9.9-beta.1 (feature-complete beta entry)
+
+**Type:** version bump only — no behavioral/calibration change. Branch `chore/version-0.9.9-beta` off `origin/main`. Task #82.
+
+**What it declares:** package.json `0.9.6-alpha.1` → **`0.9.9-beta.1`**, formally entering the feature-complete **beta** band per the ratified 1.0 Definition-of-Done (`docs/plans/2026-06-08-v1.0-definition-of-done.md`). The alpha band — A2 Dayton close-out, A3 authorship-loop, A4 onboarding, C1 CI gate — is complete. The remaining in-beta work is D1 finalization / D2 playtest / D3 operator.
+
+**Files touched:** `package.json` (root `version`); `package-lock.json` (top-level `version` + `packages[""].version`; dependency versions untouched); `src/ui/map/utils/appVersion.ts` (`AWWV_APP_VERSION` UI display constant); `src/ui/map/services/telemetry/crashCapture.ts` (`CRASH_DIAGNOSTICS_APP_VERSION`); current-version statements in `docs/10_canon/CANON.md`, `docs/00_start_here/docs_index.md`, `docs/50_launch/marketing/press_kit.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`.
+
+**Not rewritten:** historical changelog/ledger/roadmap/audit/report/playtest entries citing the old `0.9.6-alpha.1` (PROJECT_LEDGER history, MASTER_ROADMAP closure narrative, `docs/40_reports/audits|implemented|release|playtest/*`, dated plan snapshots) — these are point-in-time records and stay as-is. Telemetry-test fixture literals (`tests/telemetry_queue.test.ts` etc.) are decoupled fixture inputs, not assertions of the source constant, so left unchanged; CI stays green.
+
+**Verification:** `node -e "require('./package.json').version"` ⇒ `0.9.9-beta.1`. `tsc --noEmit` exit 0 (two `.ts` constants touched).
+
+## [2026-06-09] feat(faction-ai): contain Lane A — ARBiH strangle-not-capture of HVO enclaves (Washington-release, default-off)
+
+**Type:** new bot-AI posture behind a DEFAULT-OFF flag. Branch `feat/contain-lane-a-arbih` off `origin/feat/vrs-contain-posture` (rebase onto main once #339 merges). **Lane A** (ARBiH-side, light gate) of the faction-agnostic contain design (`docs/plans/2026-06-07-contain-enclave-faction-agnostic-design.md §2b`). Builds on Lane V (#339): reuses `computeContainedOsidsForFaction` (already faction-parameterized), the gate pattern, the per-faction `last_contained_osids_by_faction` field, and the faction-generic planner consumer.
+
+**Mechanism:** new SEPARATE flag `AWWV_ARBIH_CONTAIN_POSTURE` (independent of the VRS flag — one-change-per-run). When ON, the war-phase supply step computes the RBiH containment set via `computeContainedOsidsForFaction(state,'RBiH',osidReach)` (BFS-isolated HVO enclave cores — Žepče/Lašva/Kiseljak — past `resilience_start_turn`, pre-Washington) and stashes it on `last_contained_osids_by_faction.RBiH`; the planner withholds the RBiH bot's organic assault target-generation against those OSIDs. **The release is faction/enclave-pair-aware** (`isEnclaveContainmentReleased` now switches on `enclave.faction`): HRHB enclaves release on `state.political.rbih_hrhb_state.washington_signed` (the existing alliance/ceasefire machinery then freezes the war → pockets stay HVO-held); RBiH enclaves keep the Lane-V VRS turn≥160 / `srebrenica_fell` backstop — UNCHANGED. No `avoided_osids_by_faction`, no OSID/initial-OSID override; safe-by-construction.
+
+**Default-off PURITY fix (Codex P2):** the planner read of `last_contained_osids_by_faction[faction]` is now gated on the faction's OWN flag (`isContainSuppressionActiveFor` in `plan.ts`: RS→Lane-V flag, RBiH→Lane-A flag). A save serialized with a contain flag ON, resumed flag-OFF, no longer honors the stale set → default-off is a TRUE no-op for resumed saves, not just fresh runs.
+
+**Changes:** `contain_posture_gate.ts` (+`isArbihContainPostureEnabled`/setter/reset); `enclave_resilience.ts` (`isEnclaveContainmentReleased` faction/enclave-pair-aware); `war_phases.ts` (flag-gated RBiH containment-set compute, mirrors RS block); `commander/plan.ts` (per-faction read-gate + exported `isContainSuppressionActiveFor`); new test `tests/contain_posture_release_laneA.test.ts` (15).
+
+**FLAG-ON 188w MEASUREMENT (the calibration result) — NET ZERO at the calibration horizon:** flag-ON 188w `cb00dd310cc04a29`. Painted oct1995 match **649/712 — IDENTICAL to flag-off (649)**. `control_delta` is **byte-identical** (0/712 OSID control diffs); CENTRAL_BOSNIA mismatch list + faction totals (RS 321 / RBiH 285 / HRHB 106) unchanged. **The 13-OSID Central-Bosnia ceiling does NOT close at the oct1995 horizon** — the Žepče cores (`ozimica_2`/`viniste_2`/`zepce_2`) and the documented over-captures (kiseljak/kresevo/novi_travnik …) are ALREADY at their painted-HRHB end-state in the flag-off baseline; the over-capture the spec targets is a PRE-Washington mid-game transient that the existing Washington-freeze machinery already resolves by end-state. The posture removes that mid-game transient (AAR/path fidelity) but it is invisible to the end-state calibration snapshot.
+
+**SCOPE-RISK / western-cascade verdict: SAFE — zero western regression.** The flag-on vs flag-off mismatch-set diff is EMPTY in both directions (no OSID closed, none regressed; KRAJINA/HERZEGOVINA/western rows unchanged). The freed ARBiH brigades did NOT tip the western cascade. The hash delta (`cb00dd31` vs `d311eeac`) is driven only by the structural presence of `last_contained_osids_by_faction={}` (initialized then emptied at Washington release) + within-contained-window attrition micro-deltas that do not change end-state control.
+
+**Verification:** `tsc --noEmit` exit 0. Flag-OFF (both flags off) 40w `235c61f408dc3d95` + 188w `d311eeac18492683` — **BYTE-IDENTICAL to the floor** (re-confirmed AFTER the purity fix). 40 contain tests + 548 commander/plan/enclave/opportunity tests green.
+
+| run | hash | oct1995 match | western cascade |
+| --- | --- | --- | --- |
+| flag-OFF 188w | `d311eeac18492683` (== floor) | 649/712 | — |
+| flag-ON 188w | `cb00dd310cc04a29` | 649/712 (Δ0; control byte-identical) | no regression |
+
+**Owner decision needed:** Lane A is INERT at the calibration horizon (net 0). It is correct + safe + historically faithful (removes ahistorical pre-Washington HVO-pocket over-capture during the run) but does NOT move the 649 floor. Keep as default-off path fidelity, or shelve pending a mid-game (pre-Washington) calibration target.
+
+## [2026-06-09] feat(endgame): A2 — Dayton close-out (earlier trigger + Pyrrhic verdict + game_over + headless terminal proxy)
+
+**Type:** new endgame terminal-resolution behind a DEFAULT-OFF scenario flag (`dayton_close_out`). Branch `feat/a2-dayton-endgame-close` off `origin/main`. Task #71 (Pyrrhic panel A2, the climax-close). Closes the gap the 20260609 instrumented-campaign audit flagged: the 5-D Dayton menu opened at t188 but the campaign **terminated as an OPEN, unresolved menu** — `game_over:false`, no verdict (a freeze-frame), and `DAYTON_TRIGGER_WEEK=188` fired on the FINAL turn so there were no turns left to negotiate. Calibration-LAST: flag OFF ⇒ byte-identical to the floor.
+
+**Mechanism (all gated on `meta.dayton_close_out`):**
+- **Earlier trigger.** `effectiveDaytonTriggerWeek(state)` returns **180** when close-out is on, else the default **188**. `shouldInitiateDayton` reads it. Historical justification: Dayton is the autumn-1995 sequence — 8 Sep Geneva agreed-principles, 26 Sep New York further-principles, 5 Oct nationwide cease-fire, **1–21 Nov Wright-Patterson (Dayton) proximity talks** (ran ~3 weeks, initialled 21 Nov 1995). Week 180 of an Apr-1992 start ≈ late Sep 1995 (cease-fire / proximity-talks run-up), giving the negotiation **~8 turns of air** before the 188-week horizon instead of a single final-turn snapshot.
+- **Resolve to a verdict.** After the week loop, `resolvePendingDaytonCloseOut(state)` signs the deterministic **historical-default (empty) proposal** via the existing `resolveDaytonNegotiation` → sets `dayton_result`, `meta.game_over=true`, `meta.outcome='dayton'`, and freezes the endgame snapshot (Pyrrhic verdict + cost-ledger). Deterministic in headless/historical mode — no human proposal required; the empty proposal leaves every package at its default holder and every institutional choice at the historical (decentralized/Annex-4) baseline (the maximal-gridlock peace the negative-sum thesis grades as Pyrrhic). Idempotent + a no-op when the flag is off, no menu is pending, or the game is already over.
+- **Headless terminal proxy.** New scenario `data/scenarios/apr1992_definitive_188w_dayton_close.json` (188w, `decision_mode: emergent`, `dayton_close_out: true`) runs the campaign to a real terminal verdict. New test `tests/dayton_headless_close_out.test.ts` (12 tests) pins the close-out contract (trigger pull-forward, resolution → verdict+game_over, determinism, and the no-op guards) without a human.
+
+**CALIBRATION — byte-identical (flag OFF), inert verdict LAYER:** `resolveDaytonNegotiation` never repaints OSID control (it computes only a `final_territory_split` %), so even flag-ON the territorial baseline is untouched — there is NO control-repaint to gate for D1. The calibration scenarios never set `dayton_close_out`, so the post-loop call + the trigger pull-forward are both skipped and the t188 `pending_dayton` snapshot is unchanged.
+
+| run | hash | result |
+| --- | --- | --- |
+| 40w (flag OFF) | `235c61f408dc3d95` | **BYTE-IDENTICAL** to floor |
+| 188w (flag OFF) | `d311eeac18492683` | **BYTE-IDENTICAL** to floor |
+| 188w_dayton_close (flag ON) | `d1c3f3081f259889` | game_over=true, `outcome='dayton'`, terminal Pyrrhic verdict produced |
+
+**Terminal verdict reads (flag-ON 188w_dayton_close, emergent):** all three factions graded **C → outcome `failure`** (war-cost cap — nobody won the negative-sum war); **RS carries `genocide_condemnation`** (Srebrenica rupture → verdict); `peace_dysfunction_index 98.1` (maximal-gridlock Dayton), `entity_autonomy_index 100` (decentralized — the historical shape), Brčko → `arbitration` (matches the 1999 Final Award), split RBiH 40.2 / RS 45.4 / HRHB 14.3. "Win the battles, lose the peace." Dayton triggered at **w180** (pull-forward), resolved post-loop at the horizon.
+
+**Changes:** `src/scenario/scenario_types.ts` (+`dayton_close_out?`), `src/state/game_state.ts` (+`meta.dayton_close_out?`), `src/scenario/scenario_runner.ts` (plumb flag + post-loop `resolvePendingDaytonCloseOut`), `src/sim/negotiation/dayton_negotiation.ts` (+`DAYTON_TRIGGER_WEEK_CLOSE_OUT=180`, `effectiveDaytonTriggerWeek`, `buildHistoricalDefaultDaytonProposal`, `resolvePendingDaytonCloseOut`), new scenario file, new test (12). The existing UI adapter already prefers `meta.endgame_snapshot` when `game_over` and reads `dayton_result`, so `VerdictScreen`/`GameOverModal`/`WarCostSummary` light up on the closed state with no UI change.
+
+**Verification:** `tsc --noEmit` exit 0. 204 dayton/scoring/peace/rupture + 12 new close-out tests pass; full vitest + 188w-before-merge gate run pre-merge (NOT merged — C1 lane hardens this).
+
+## [2026-06-08] feat(faction-ai): VRS strangle-not-capture contain-posture (§6, default-off, release-reliability proven)
+
+**Type:** new bot-AI posture behind a DEFAULT-OFF flag. Branch `feat/vrs-contain-posture` off `origin/main`. Owner-backlog #4; owner §6 approval granted 2026-06-08 (non-delegable). Builds on contain Lane 1 (`isEnclaveContainable` predicate, #273). This is **Lane V** (VRS-side, full §6 gate) of the faction-agnostic contain design (`docs/plans/2026-06-07-contain-enclave-faction-agnostic-design.md`). Calibration-LAST: flag OFF ⇒ byte-identical to the floor.
+
+**Mechanism:** when `AWWV_VRS_CONTAIN_POSTURE` is ON, the war-phase supply step computes the RS containment set via `computeContainedOsidsForFaction(state,'RS',osidReach)` (BFS-isolated enemy enclave cores past `resilience_start_turn`, pre-1995-pivot) and stashes it on `state.political.last_contained_osids_by_faction.RS`. The commander opportunity planner (`createOpportunityPlan`) drops contained OSIDs from organic candidate objectives — withholding the bot's OWN assault target-generation (no `avoided_osids_by_faction`, no OSID/initial-OSID override; safe-by-construction — only ever REMOVES an attack). The **1995-pivot release** (`isEnclaveContainmentReleased`: `event_flags.srebrenica_fell` OR turn ≥ 160) empties the eastern-enclave set before the historical fall window. Krivaja-95/Stupčanica-95 (triggered ops, inject objectives directly) + the scripted `*_falls_1995` `control_change` events are INDEPENDENT paths the posture never touches → the fall and rupture are safe.
+
+**Changes:** new `src/sim/combat/contain_posture_gate.ts` (env flag, default-off); `enclave_resilience.ts` (+`isEnclaveContainmentReleased`, `computeContainedOsidsForFaction`, `CONTAIN_RELEASE_TURN_BACKSTOP=160`); `war_phases.ts` (flag-gated containment-set compute at supply step); `commander/plan.ts` (containment filter, no-fallback, in `createOpportunityPlan`); `game_state.ts` (`last_contained_osids_by_faction` field); new test `tests/contain_posture_release_laneV.test.ts` (12).
+
+**§6 RELEASE-RELIABILITY PROOF (the #1 gate) — INVARIANT HOLDS:** flag-ON 188w (`cb00dd310cc04a29`): `srebrenica_falls_1995` fires **w162** → `op:srebrenica:srebrenica_2`=**RS**; `zepa_falls_1995` fires **w164** → `op:rogatica:zepa_2`=**RS**; `srebrenica_genocide_1995` rupture **RECORDED @t162 (RS)**; `op:gorazde:gorazde_2`=RBiH (held — historically correct). Fall turns + rupture turn **IDENTICAL flag-off vs flag-on**; end-state OSID control IDENTICAL (RS 321/RBiH 285/HRHB 106). The posture cannot delay or prevent the historical fall.
+
+**Verification:** `tsc --noEmit` exit 0. Flag-OFF 40w `235c61f408dc3d95` + 188w `d311eeac18492683` — **BYTE-IDENTICAL to the floor**. 55 contain/rupture tests + 358 commander/enclave/opportunity tests + determinism static scan green.
+
+| run | hash | Srebrenica | Žepa | Goražde | rupture |
+| --- | --- | --- | --- | --- | --- |
+| flag-OFF 188w | `d311eeac18492683` (== floor) | RS w162 | RS w164 | RBiH | @t162 |
+| flag-ON 188w | `cb00dd310cc04a29` | RS w162 | RS w164 | RBiH | @t162 |
+
 ## [2026-06-08] feat(political+scenario): activate PDP patron+milcred (guarded) + E-A5 launch-halt — combined, calibration-flat
 
 **Type:** activation/config change (default-flag flip + scenario turn_max). Branch `feat/activate-pdp-ea5-combined` off `origin/main` (`4b64d21a5`). The convergence step that supersedes #322 (PDP guards) + #324 (E-A5) **by inclusion** — both merged here via `--no-ff`, then the gate defaults flipped. Sweep evidence (trusted): patron+milcred = calibration-FLAT (188w 649); intl+cohesion = −10 even guarded → kept OFF; E-A5 alone = 649 flat. This run is the real test of the E-A5 × PDP **interaction** — confirmed flat.
@@ -19993,3 +20068,17 @@ Consolidated ledger close for the mechanics-activation session. Net behavioral/o
 **Emergent-gating proof (historical byte-identical by construction):** the relaxation is double-gated. The load-bearing guard (confirmed by code-review #335) is the **`emergent` boolean short-circuit** in `generateArmyHQOverrides` — it gates the relaxation BEFORE the weight is read, so the URGENT comparison is simply never evaluated on the historical/calibration path. (The protection is NOT that 120 is unreachable in historical mode — authored static weights DO exceed 120, e.g. `Drina Sweep`=130, `Central Corridor Counter`=150 — it is the mode gate firing first.) `getCorpsArmyPriorities` also returns the static authored weight verbatim when `decision_mode !== 'emergent'`, so the #330 amplification path is itself unreachable in historical mode. Historical/unset mode therefore always faces the flat 6-turn wall → no behavioral change on the calibration path.
 
 **Verification:** `tsc --noEmit` exit 0; new suite 7/7 + #330 priority suite 13/13 + army_hq_gathering 68/68 + a1_army_hq_campaign_plan_wired 7/7 green. **40w `235c61f408dc3d95` byte-identical** to floor; **188w `d311eeac18492683` byte-identical** to floor (649/712 + 30/30 anchors unchanged by hash identity). Emergent-mode behavior change covered by the new unit suite (urgent-amplified corps launches at idle 3; non-amplified / historical stays gated at 6; idle-2 floor holds). Code-reviewed GO (#335, code-review + tech-architect lens): determinism, ops-only invariant, must_hold/garrison-pin untouched, off-by-one clear, historical-path threshold-unreachability confirmed by reading code.
+
+---
+
+## [2026-06-09] CI C1 — full-vitest gate + platform-stable structural fingerprint (close the stale-pin false-green)
+
+**Type:** CI/tooling/infra (task #68, Pyrrhic Tech-Architect). NO sim/scenario/calibration byte changes — the 649 floor and the three horizon hashes (40w `235c61f408dc3d95`, 52w, 188w `d311eeac18492683`) are untouched. New files only: `.github/workflows/full-suite-and-fingerprint.yml`, `tools/diagnostics/structural_fingerprint.cjs`, `tools/diagnostics/ci_structural_fingerprint.cjs`, `tests/structural_fingerprint.test.ts`, `data/calibration/structural_fingerprint_40w.json` + npm scripts + docs. PR #343.
+
+**Root cause:** the CI `test` job runs only the fast vitest slice and `scenarios` only the scenario slice; slice membership is decided by `tools/test/discover_test_files.mjs` heuristics. With no single required job running the FULL suite, a test those heuristics mis-bucket or fail to discover can drop from BOTH slices with no machine signal — how full-suite-relevant pins (`strict_null_inventory_progress`, `war_phase_step_order`, consequence/substrate inventory) slip to main green. Separately, the byte-hash baselines CI job was removed 2026-05-04 (Win/Linux `final_save.json` divergence; `LANE-NIGHTSHIFT-PLATFORM-STABLE-MANIFEST`) and never replaced.
+
+**Change:** (1) new path-aware `full-suite` CI job runs `npm run test:vitest` (the COMPLETE suite, not a slice) so a stale pin can no longer reach main green regardless of slice classification; path-filtered per the 2026-06-05 CI/PR batching policy so doc-only PRs stay fast. (2) `structural-fingerprint` job replaces the byte-hash baseline with a fingerprint of platform-stable fields only — per-faction OSID control map + anchor pass/fail + bot-benchmark tallies (integers/strings/booleans). It excludes the `final_save` byte-hash AND brigade/formation counts (empirically vary run-to-run at identical territory — three same-hash 40w runs gave identical control/anchors/benchmarks but different `brigades_active`). Fresh 40w compared vs committed expected `78af6fc7a3278a3e`; structural move without deliberate `--update` fails the gate.
+
+**Reference platform = Linux/Node 22 (DoD C2):** Win==Linux byte-hashes are NOT promised; the structural fingerprint IS the cross-platform determinism authority.
+
+**Verification:** fingerprint tool deterministic + stable across 3 same-territory runs; `tests/structural_fingerprint.test.ts` 7/7; both workflow YAMLs valid; root `tsc --noEmit` clean; fresh 40w `final_state_hash 235c61f408dc3d95` (canonical). Existing required checks kept; these ADD to them.

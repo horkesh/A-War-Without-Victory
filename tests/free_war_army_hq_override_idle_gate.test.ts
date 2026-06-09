@@ -172,3 +172,85 @@ describe('Free War Phase 1b — signal-responsive army-HQ override idle gate', (
         expect(a).toEqual(b);
     });
 });
+
+/**
+ * #335 regression — a QUIET static-high priority must NOT relax the idle wall.
+ *
+ * The relaxation must require a GENUINE live-signal amplification (emergent_boost > 1.0), not
+ * merely an effective weight that clears URGENT_EFFECTIVE_WEIGHT. The canonical trap: ARBiH
+ * 'Central Corridor Counter' has STATIC weight 150. With no live signals it takes the quiet
+ * decay (×0.80) → effective weight EXACTLY 120 = URGENT_EFFECTIVE_WEIGHT. Before the fix that
+ * cleared the threshold and relaxed the wall (6→3) for a calendar-high op the battlefield is
+ * silent about; after the fix `boost = 0.80 ≤ 1.0` blocks the relaxation, so it stays gated.
+ */
+describe('#335 — quiet static-high priority does not bypass the idle confluence gate', () => {
+    const RBIH: FactionId = 'RBiH';
+    const CB_CORPS = 'arbih_3rd_corps';
+    // 'Central Corridor Counter' (static 150) is active in weeks 12..56.
+    const CB_TURN = 20;
+
+    /**
+     * Minimal RBiH state for the 3rd Corps. QUIET by construction: no control_events (trend
+     * quiet ×0.80), no campaign plan (plan neutral), no supply data (supply neutral). The
+     * 'Central Corridor Counter' priority therefore decays to effective 150×0.80 = 120, which
+     * EQUALS URGENT_EFFECTIVE_WEIGHT but with boost 0.80 ≤ 1.0 (no real amplification).
+     */
+    function makeQuietCbState(opts: { mode: 'historical' | 'emergent'; lastOpTurn: number }): GameState {
+        const formations: Record<string, FormationState> = {
+            [CB_CORPS]: {
+                id: CB_CORPS,
+                faction: RBIH,
+                name: CB_CORPS,
+                kind: 'corps',
+                status: 'active',
+                created_turn: 0,
+                assignment: null,
+                personnel: 5000,
+                corps_id: CB_CORPS,
+            } as unknown as FormationState,
+        };
+        // Enemy-held OSIDs in the Counter's municipalities so an override has live targets.
+        const political_controllers: Record<string, FactionId> = {
+            'op:maglaj:maglaj_2': 'RS',
+            'op:tesanj:tesanj_2': 'RS',
+        };
+        return {
+            meta: { turn: CB_TURN, decision_mode: opts.mode } as GameState['meta'],
+            military: {
+                formations,
+                corps_command: {
+                    [CB_CORPS]: { active_operations: [], last_completed_operation_turn: opts.lastOpTurn },
+                },
+            } as unknown as GameState['military'],
+            political: {
+                political_controllers,
+                control_events: [],
+            } as unknown as GameState['political'],
+        } as unknown as GameState;
+    }
+
+    function hasFullOverride(state: GameState): boolean {
+        return generateArmyHQOverrides(state, RBIH).some(
+            o => o.corps_id === CB_CORPS && o.type === 'offensive',
+        );
+    }
+
+    it('emergent: quiet static-150 (effective 120, boost 0.80) stays gated at idle = 3', () => {
+        // idle distance = CB_TURN - lastOpTurn = 20 - 17 = 3 (< flat 6). Effective weight is
+        // exactly 120 but boost ≤ 1.0 → NOT urgent → flat 6-turn wall → no early launch.
+        const state = makeQuietCbState({ mode: 'emergent', lastOpTurn: 17 });
+        expect(hasFullOverride(state)).toBe(false);
+    });
+
+    it('emergent: the same quiet op still launches once idle reaches the flat 6', () => {
+        // idle distance = 20 - 14 = 6 ≥ 6 → launches via the normal wall. Confirms the gate
+        // blocks only the EARLY (relaxed) launch, not the priority itself.
+        const state = makeQuietCbState({ mode: 'emergent', lastOpTurn: 14 });
+        expect(hasFullOverride(state)).toBe(true);
+    });
+
+    it('historical: byte-identical — quiet static-150 stays gated at idle = 3', () => {
+        const state = makeQuietCbState({ mode: 'historical', lastOpTurn: 17 });
+        expect(hasFullOverride(state)).toBe(false);
+    });
+});

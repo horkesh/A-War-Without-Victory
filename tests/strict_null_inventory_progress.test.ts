@@ -599,21 +599,36 @@ describe('strict null inventory progress', () => {
         // (40w 235c61f408dc3d95 unchanged). No new type-escape: the apply step narrows via an
         // `if (!cmd ...) continue` guard, so as_factionid / as_unknown / as_any /
         // non_null_assertions are ALL UNCHANGED — this bump is purely the optional-field ratchet.
+        // VRS contain-posture lane (#339): +1 optional field
+        // `last_contained_osids_by_faction` on PoliticalState (game_state.ts → `state`
+        // domain via the "Political" interface-name match). So 512 → 513 / state 173 → 174.
+        // OPTIONAL + written ONLY when `AWWV_VRS_CONTAIN_POSTURE` is enabled (the war_phases
+        // compute block early-skips via `if (isVrsContainPostureEnabled())`, and the §6
+        // strangle-not-capture posture is default-OFF) → absent on every headless/historical
+        // run → byte-identical baseline by construction (40w 235c61f408dc3d95 unchanged). No
+        // new type-escape: the contain build's new src code (contain_posture_gate.ts /
+        // enclave_resilience.ts / commander/plan.ts / war_phases.ts compute block) uses the
+        // `'RS'` string literal, NOT an `as FactionId` cast, so as_factionid (still 1) /
+        // as_unknown / as_any / non_null_assertions are ALL UNCHANGED — this bump is purely
+        // the optional-field ratchet recording the contract-mandated new persisted field.
         expect(current.counts).toMatchObject({
             as_factionid_casts: 1,
             as_unknown_casts: 4,
             as_any_casts: 0,
             non_null_assertions_dot: 7,
             non_null_assertions_index: 0,
-            optional_fields_game_state: 512,
+            // A2 close-out (#71): +1 optional field `StateMeta.dayton_close_out` (the
+            // default-off scenario flag arming the Dayton terminal verdict). state domain,
+            // player/scenario-gated → byte-identical when unset. 513→514 / state 174→175.
+            optional_fields_game_state: 514,
         });
-        expect(current.optional_field_domains.total).toBe(512);
+        expect(current.optional_field_domains.total).toBe(514);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 329,
-            state: 173,
+            state: 175,
             ui_adapter: 0,
             unknown: 0,
         });

@@ -112,6 +112,126 @@ test('inventory scans bounded surfaces with stable ordering, ids, and source sta
     }
 });
 
+test('inventory covers essay_index dynamic_sections (A1c morphing prose) the runtime serves', async () => {
+    // Regression for the #334 §6-governance gap: the runtime Codex panel imports
+    // essay_index.json and serves its dynamic_sections to the player, but the
+    // per-essay JSON files have NO dynamic_sections. The inventory must scan the
+    // index's dynamic_sections slice (and ONLY that slice) so sensitive
+    // morphing-prose claims are inventoried + source-checked.
+    const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-claims-'));
+
+    try {
+        await mkdir(join(root, 'data', 'scenarios', 'essays'), { recursive: true });
+
+        // Per-essay body file: canonical body only, no dynamic_sections (the
+        // real-world shape). This is what carries the body claim.
+        await writeJson(join(root, 'data', 'scenarios', 'essays', 'un_hostage_crisis_1995.json'), {
+            id: 'essay_un_hostage_crisis_1995',
+            category: 'diplomatic',
+            title: 'UN Hostage Crisis',
+            content: 'The crisis unfolded over weeks.',
+            sources: ['Per-essay source A', 'Per-essay source B'],
+        });
+
+        // Index: canonical body duplicated PLUS the A1c morphing branch. Only the
+        // dynamic_sections must be scanned here; the duplicated body must NOT be
+        // (it is covered by the per-essay file above — no double-count).
+        await writeJson(join(root, 'data', 'scenarios', 'essays', 'essay_index.json'), {
+            essays: [
+                {
+                    id: 'essay_un_hostage_crisis_1995',
+                    category: 'diplomatic',
+                    title: 'UN Hostage Crisis',
+                    content: 'The crisis unfolded over weeks.',
+                    sources: [
+                        'ICTY Karadzic Trial Judgment (IT-95-5/18-T), Count 11 (hostage-taking)',
+                    ],
+                    dynamic_sections: [
+                        {
+                            id: 'v091_index_only_body_clone',
+                            insert_after_paragraph: 0,
+                            // Body-flavored prose with NO sensitive term: must not produce a claim.
+                            content: 'The conference record is read against the war that followed.',
+                        },
+                        {
+                            id: 'a1c_un_hostage_branch_maintain',
+                            condition: 'RESPONSE:un_hostage_crisis_1995:maintain_hostages',
+                            insert_after_paragraph: 6,
+                            variant: 'divergence',
+                            content: 'Prolonged detention of peacekeepers as human shields is addressed in the ICTY record (Karadzic Trial Judgement, IT-95-5/18-T).',
+                        },
+                    ],
+                },
+            ],
+        });
+
+        const result = await inventory.scanSensitiveClaimInventory({ rootDir: root });
+
+        // The index now appears in scan scope BECAUSE it carries dynamic_sections.
+        assert.strictEqual(result.scan_scope.files.includes('data/scenarios/essays/essay_index.json'), true);
+
+        const indexClaims = result.claims.filter(
+            (claim: { surface: string }) => claim.surface === 'essay_dynamic_section',
+        );
+        // Exactly one claim: the sensitive `detention` branch. The body-clone
+        // dynamic section has no sensitive vocabulary → no claim (no double-count
+        // of the canonical body).
+        assert.strictEqual(indexClaims.length, 1);
+
+        const hostage = indexClaims[0];
+        assert.strictEqual(hostage.file, 'data/scenarios/essays/essay_index.json');
+        assert.deepStrictEqual(hostage.matched_terms, ['detention']);
+        assert.strictEqual(hostage.risk_class, 'sensitive_history_gated');
+        assert.strictEqual(hostage.stop_gate, 'sensitive_history');
+        // Source attribution falls back to the parent essay's `sources` (the
+        // ICTY citation) — the claim is cited, not uncited.
+        assert.strictEqual(hostage.source_status, 'cited');
+        // field_path is keyed by the parent essay id for human traceability.
+        assert.strictEqual(
+            hostage.field_path.startsWith('$.essay_un_hostage_crisis_1995.dynamic_sections'),
+            true,
+        );
+
+        // The per-essay body claim is still present and classified as a plain essay.
+        const bodyClaims = result.claims.filter(
+            (claim: { file: string }) => claim.file === 'data/scenarios/essays/un_hostage_crisis_1995.json',
+        );
+        assert.strictEqual(bodyClaims.every((c: { surface: string }) => c.surface === 'essay'), true);
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
+});
+
+test('inventory keeps a dynamic_sections-free essay_index out of scan scope', async () => {
+    // A body-only index (no essay carries dynamic_sections) contributes nothing
+    // and must stay excluded — preserving the original body-duplication exclusion.
+    const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-claims-'));
+
+    try {
+        await mkdir(join(root, 'data', 'scenarios', 'essays'), { recursive: true });
+        await writeJson(join(root, 'data', 'scenarios', 'essays', 'essay_index.json'), {
+            essays: [
+                {
+                    id: 'essay_plain',
+                    category: 'diplomatic',
+                    title: 'Plain',
+                    content: 'The VRS captured the town after a forced displacement campaign.',
+                    sources: ['Source A'],
+                },
+            ],
+        });
+
+        const result = await inventory.scanSensitiveClaimInventory({ rootDir: root });
+        assert.strictEqual(result.scan_scope.files.includes('data/scenarios/essays/essay_index.json'), false);
+        assert.strictEqual(
+            result.claims.some((claim: { surface: string }) => claim.surface === 'essay_dynamic_section'),
+            false,
+        );
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
+});
+
 test('inventory detects forbidden scaffold tokens and reports deterministic policy', async () => {
     const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-claims-'));
 

@@ -37,7 +37,7 @@ import {
   type DirectiveObjectionView,
 } from '../../data/opDirectiveObjection';
 import { resolveDirectiveActArt } from '../../data/directiveActArt';
-import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
+import { getPlayerSafeCorpsName, getPlayerSafeOfficerName } from '../../utils/playerSafeText';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { buildObjectiveTargetOptions } from '../../utils/objectiveTargetOptions';
 import { t } from '../../i18n';
@@ -207,12 +207,21 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   // this component never branches on the faction id. Only rendered for the levers
   // that ACTUALLY apply a deferred political consequence: replace_co (revolt OR the HRHB
   // Zagreb-gate patron-override on a sub-threshold sacking), stop_op (applyStopOpConsequence
-  // — halting a live op always costs patron standing), and request_op
-  // (whose forced path sets pending_op_directive.forced_over_objection, the input to
-  // applyForceOpConsequence). force_launch is DELIBERATELY excluded — it routes
-  // through forceLaunchProposal / proactiveForceLaunchOp / stageOperationForceLaunch,
-  // none of which set forced_over_objection, so the engine applies no patron cost;
-  // advertising one here would lie to the player.
+  // — halting a live op always costs patron standing), request_op (whose forced path sets
+  // pending_op_directive.forced_over_objection, the input to applyForceOpConsequence), and
+  // force_launch ONLY WHEN it overrides a SHOWN commander objection (#327 Codex follow-up).
+  //
+  // force_launch is CONDITIONAL: the proposal-override card (forceLaunchProposal) overrides
+  // a no-go the commander already surfaced — its IPC snapshots commander_assessment_at_launch
+  // as a no-go (postpone/abort), so the engine's apply-force-launch-consequences step charges
+  // the SAME FORCE_OP_PATRON_BASE × weight cost as a forced request_op. The directive payload
+  // carries overridesShownObjection=true for that card and false for the PROACTIVE card
+  // (overriding commander silence — a held-ready plan with no surfaced no-go, which the engine
+  // never charges). We preview the cost iff overridesShownObjection === true, matching the
+  // engine's "SHOWN OBJECTION ONLY" trigger exactly — never advertising a cost the engine
+  // will not levy.
+  const forceLaunchOverridesObjection =
+    directive.lever === 'force_launch' && directive.payload.overridesShownObjection === true;
   const frictionStakes = useMemo<CommandFrictionStakes | null>(() => {
     const faction = gameState.player_faction ?? null;
     if (!faction) return null;
@@ -225,8 +234,12 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
     if (directive.lever === 'request_op') {
       return buildCommandFrictionStakes(faction, 'force_op');
     }
+    if (forceLaunchOverridesObjection) {
+      // SAME applyForceOpConsequence the engine charges for a force-launch-over-no-go.
+      return buildCommandFrictionStakes(faction, 'force_op');
+    }
     return null;
-  }, [gameState.player_faction, directive.lever, corpsCommander]);
+  }, [gameState.player_faction, directive.lever, corpsCommander, forceLaunchOverridesObjection]);
 
   const stakesSeverityLabel = (severity: CommandFrictionStakes['severity']): string =>
     severity === 'severe'
@@ -699,6 +712,18 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
           <p className="text-[8px] font-bold uppercase tracking-wider text-text-secondary">
             {t('directive.stakes.heading')}
           </p>
+          {/* FORCE-LAUNCH OVER A SHOWN NO-GO (#327): name the objection the president is about
+              to override, so the patron cost reads as a consequence of overruling the commander,
+              not an arbitrary charge. Only on the proposal-override path (overridesShownObjection). */}
+          {forceLaunchOverridesObjection && (
+            <p className="mt-0.5 text-[10px] text-text-primary">
+              {corpsCommander
+                ? t('directive.stakes.forceLaunchObjection', {
+                    commander: getPlayerSafeOfficerName(corpsCommander.name),
+                  })
+                : t('directive.stakes.forceLaunchObjectionGeneric')}
+            </p>
+          )}
           <p className="mt-0.5 text-[10px] text-text-primary">{stakesSeverityLabel(frictionStakes.severity)}</p>
           {frictionStakes.revoltLikely && (
             <p className="mt-0.5 text-[10px] text-red-300">{t('directive.stakes.revoltLikely')}</p>

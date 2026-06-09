@@ -80,6 +80,8 @@ import { calculateFactionProductionBonus, ensureProductionFacilities } from '../
 import { computeSupplyReachability } from '../../state/supply_reachability.js';
 import { computeSupplyReachabilityOsid } from '../../state/supply_reachability_osid.js';
 import { buildContainDiagnostic } from '../combat/contain_diagnostic.js';
+import { computeContainedOsidsForFaction } from '../combat/enclave_resilience.js';
+import { isVrsContainPostureEnabled, isArbihContainPostureEnabled } from '../combat/contain_posture_gate.js';
 import {
     deriveCorridors,
     deriveCorridorsOsid,
@@ -1257,6 +1259,54 @@ export const warPhases: NamedPhase[] = [
             // later consume the predicate for stance/suppression; Lane 1 only
             // proves the predicate fires on the right pockets at the right turns.
             context.report.contain_diagnostic = buildContainDiagnostic(context.state, osidReach);
+
+            // contain Lane V (§6 VRS strangle-not-capture, DEFAULT-OFF): compute
+            // the RS containment set from the SAME osidReach BFS report and stash
+            // it on state for the commander opportunity planner to consume. Only
+            // written when the flag is ON → flag-off keeps state (and the hashed
+            // final_save.json) byte-identical. The 1995-pivot release empties the
+            // eastern-enclave entries before the historical fall window, so the
+            // scripted *_falls_1995 events + Krivaja-95/Stupčanica-95 ops still
+            // flip Srebrenica/Žepa to RS and the genocide rupture still records.
+            if (isVrsContainPostureEnabled()) {
+                const containedRs = computeContainedOsidsForFaction(context.state, 'RS', osidReach);
+                if (containedRs.length > 0) {
+                    if (!context.state.political.last_contained_osids_by_faction) {
+                        context.state.political.last_contained_osids_by_faction = {};
+                    }
+                    context.state.political.last_contained_osids_by_faction.RS = containedRs;
+                } else if (context.state.political.last_contained_osids_by_faction?.RS) {
+                    // Clear a stale set once nothing is contained (e.g. after release)
+                    // so the suppression site never reads a leftover.
+                    delete context.state.political.last_contained_osids_by_faction.RS;
+                }
+            }
+
+            // contain Lane A (ARBiH strangle-not-capture of HVO enclaves,
+            // DEFAULT-OFF): symmetric to Lane V. Compute the RBiH containment set
+            // (BFS-isolated HVO enclave cores — Žepče/Lašva/Kiseljak — past
+            // resilience_start_turn, pre-Washington) from the SAME osidReach BFS
+            // report and stash it under .RBiH for the commander opportunity
+            // planner. Independent flag from Lane V so the lanes activate
+            // separately (one-change-per-run). Only written when the flag is ON →
+            // flag-off keeps state (and the hashed final_save.json) byte-identical.
+            // The Washington release (isEnclaveContainmentReleased keys off
+            // enclave.faction==='HRHB' → washington_signed) empties the set at
+            // Washington, after which the existing alliance/ceasefire machinery
+            // freezes the RBiH↔HRHB war so the pockets stay HVO-held.
+            if (isArbihContainPostureEnabled()) {
+                const containedRBiH = computeContainedOsidsForFaction(context.state, 'RBiH', osidReach);
+                if (containedRBiH.length > 0) {
+                    if (!context.state.political.last_contained_osids_by_faction) {
+                        context.state.political.last_contained_osids_by_faction = {};
+                    }
+                    context.state.political.last_contained_osids_by_faction.RBiH = containedRBiH;
+                } else if (context.state.political.last_contained_osids_by_faction?.RBiH) {
+                    // Clear a stale set once nothing is contained (e.g. after the
+                    // Washington release) so the suppression site never reads a leftover.
+                    delete context.state.political.last_contained_osids_by_faction.RBiH;
+                }
+            }
         }
     },
     {

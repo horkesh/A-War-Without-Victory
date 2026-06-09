@@ -7,10 +7,53 @@ This directory contains the GitHub Actions workflow definitions for A War Withou
 | Workflow | File | Trigger | Purpose |
 |---|---|---|---|
 | Typecheck | `typecheck.yml` | PR to `main` | Fast standalone `tsc --noEmit` gate (cheap signal on PRs that touch types only). |
-| Baseline Regression | `baseline-regression.yml` | push to `main`, PR to `main` | Multi-job broad gate: typecheck, focused scenario anchor tests, `test:vitest:fast` (137 fast suites, includes the event-system tests via auto-discovery), `test:vitest:scenario`. |
-| Desktop Release Guard | `desktop-release-guard.yml` | push to `main`, PR to `main` | Builds + smoke-tests the Linux AppImage and Windows NSIS desktop packages; uploads the artifacts on every run. |
+| Baseline Regression | `baseline-regression.yml` | push to `main`, PR to `main` | Multi-job broad gate: typecheck, focused scenario anchor tests, `test:vitest:fast` (137 fast suites, includes the event-system tests via auto-discovery), `test:vitest:scenario`. The `test`/`scenarios` heavy steps are path-filtered (CODE set) and `scenario-anchors`/`scenarios` (SIM set) via the always-report shim — see "Always-report path-filter shim" below. |
+| Desktop Release Guard | `desktop-release-guard.yml` | push to `main`, PR to `main` | Builds + smoke-tests the Linux AppImage and Windows NSIS desktop packages; uploads the artifacts on every run. The packaging/probe heavy steps are path-filtered (DESKTOP set) via the always-report shim — see below. |
 | Release | `release.yml` | (see file) | Tagged-release publication pipeline. |
 | **Event System CI** | **`event-system-ci.yml`** | **push to `main` / `codex/**` / `feature/**`, PR to `main`** | **Named, explicit CI surface for event-system validation. Wraps the Phase G3 F2 strict canon-compliance gate so it is visible at PR-review time as a discrete check rather than buried inside the broader fast-test slice. Phase H Packet 10 extended the test gate with 7 Phase H suites (74 tests) for the consequence-visualization layer.** |
+
+## Always-report path-filter shim
+
+`.github/scripts/detect-changed-paths.sh` (task #81, 2026-06-09) lets REQUIRED status
+checks short-circuit their HEAVY steps to a fast success on doc-only PRs while STILL
+ALWAYS reporting their check name. It generalizes the proven full-suite shim
+(`detect-full-suite-changes.sh`, task #76).
+
+Why a step-level gate, not a workflow `paths:` filter: a `paths:` filter on a REQUIRED
+check NEVER reports on a non-matching PR, so GitHub blocks that PR forever on a
+"pending" required check (the "required + path-filtered" gotcha). The shim instead lets
+the workflow ALWAYS trigger and each job ALWAYS report — only the heavy steps are gated.
+
+**Integrity (task #346):** the skip decision runs a TRUSTED copy of the detection
+logic, NOT the PR's working copy. On `pull_request` each detect step first
+`git checkout origin/$GITHUB_BASE_REF -- .github/scripts/detect-*.sh` before running it,
+so a PR that edits a `detect-*.sh` script to always emit `relevant=false` CANNOT
+force-skip a REQUIRED gate — the base-branch logic decides. (On push to `main` the
+checked-out copy already IS the trusted base, so no restore is needed.) The only
+remaining surface is editing the restore line in the workflow YAML itself, which is
+conspicuous in a workflow-file diff at review time — the standard GitHub trust boundary
+for `pull_request` (not `pull_request_target`) workflows.
+
+| Job | Required? | `PATH_SET` | Heavy steps gated |
+|---|---|---|---|
+| `test` (Baseline Regression) | yes | `code` | `npm install` + `test:vitest:fast` |
+| `scenario-anchors` (Baseline Regression) | yes | `sim` | `npm install` + `test:vitest:scenario:anchors` |
+| `scenarios` (Baseline Regression) | no | `sim` | `npm install` + `test:vitest:scenario` |
+| `desktop-release-check` (Desktop Release Guard) | no | `desktop` | Linux AppImage package + smoke |
+| `desktop-packaged-runtime-probe` (Desktop Release Guard) | yes | `desktop` | Windows NSIS package + runtime probe |
+
+`typecheck` is intentionally left ALWAYS-RUN (fast, broad type signal) and is the
+`needs:` parent that keeps the gated Baseline jobs reporting. `full-suite` and
+`structural-fingerprint` use the sibling `detect-full-suite-changes.sh` shim.
+
+Path sets (a changed file matching ANY entry => heavy steps run):
+
+- **code** — `src/ tools/ tests/ data/scenarios/ data/calibration/ scripts/` + `package.json package-lock.json vitest.config.ts tsconfig.json` + the Baseline workflow + the shim script. Identical to the full-suite set, so the `test` slice never shrinks coverage vs the full-vitest gate. `package-lock.json` (task #351) ensures a lockfile-only dep/security bump still runs the full suite.
+- **desktop** — `src/desktop/ src/ui/ tools/` + `package.json` (electron-builder `build` block + `desktop:*` scripts) + the Desktop workflow + the shim script. Per the 2026-06-05 CI/PR-batching policy ("desktop packaging required only for desktop/package/UI/runtime paths").
+- **sim** — `src/sim/ src/state/ src/scenario/ data/scenarios/ data/calibration/` + `package.json package-lock.json vitest.config.ts tsconfig.json` + the Baseline workflow + the shim script + the scenario TEST files the anchor gate executes (`tests/scenario_anchor_contract.test.ts`, `tests/integration_deployment_health.test.ts`, `tests/scenario_harness_contracts.test.ts`, `tests/integration_run_summary.test.ts`). The scenario test files (task #351) ensure a scenario-test-only PR still runs the anchor gate.
+
+Fail-safe: an unresolved PR/push base, or an unknown `PATH_SET`, forces `relevant=true`
+(run the heavy gate) — coverage is never silently dropped.
 
 ## Event System CI — what it runs
 

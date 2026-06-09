@@ -1079,7 +1079,17 @@ function addForceLaunchDirectiveCards(state: LoadedGameState, cards: CandidateCa
         cost: FORCE_LAUNCH_COST,
         // proposalId routes DirectiveCard through forceLaunchProposal (resolves the
         // pending review); opName retained for the player-safe caption only.
-        payload: { opName: proposal.op_name, proposalId: proposal.proposal_id },
+        // overridesShownObjection=true: this card exists ONLY because the commander
+        // surfaced a no-go (addForceLaunchDirectiveCards filters override_available,
+        // which is set iff commander_assessment ∈ {postpone, abort}). The
+        // forceLaunchProposal IPC snapshots that no-go as commander_assessment_at_launch,
+        // so the engine's apply-force-launch-consequences step WILL charge the
+        // faction-asymmetric patron_confidence cost — the DirectiveCard previews it.
+        payload: {
+          opName: proposal.op_name,
+          proposalId: proposal.proposal_id,
+          overridesShownObjection: true,
+        },
       },
       urgencySort: 5,
       sourceSort: `command:force-launch:${proposal.proposal_id}`,
@@ -1151,7 +1161,17 @@ function addProactiveForceLaunchDirectiveCards(
         cost: PROACTIVE_FORCE_LAUNCH_COST,
         // planId routes DirectiveCard through proactiveForceLaunchOp (held-plan
         // path, 25 CA); opName retained for the player-safe caption only.
-        payload: { opName: plan.op_name, planId: plan.plan_id },
+        // overridesShownObjection=false: this card overrides commander SILENCE — a
+        // plan the officer held ready but never surfaced as a no-go proposal
+        // (buildForceableReadyPlans excludes any plan carrying an APPROVE_OP proposal).
+        // The president overrode nobody's shown objection, so the engine's
+        // apply-force-launch-consequences step charges NO patron cost (it fires only
+        // when commander_assessment_at_launch ∈ {postpone, abort}). No stakes preview.
+        payload: {
+          opName: plan.op_name,
+          planId: plan.plan_id,
+          overridesShownObjection: false,
+        },
       },
       urgencySort: 6,
       sourceSort: `command:proactive-force-launch:${plan.corps_id}:${plan.plan_id}`,

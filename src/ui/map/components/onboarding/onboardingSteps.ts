@@ -60,18 +60,18 @@ export interface OnboardingStepDef {
 const AUTHORED_STEPS: ReadonlyArray<OnboardingStepDef> = [
     {
         id: '01_welcome',
-        title: 'You Are the President',
+        title: 'A War You Cannot Win',
         titleKey: 'onboarding.01.title',
         bodyKey: 'onboarding.01.body',
-        body: "The opening presidential brief gives your starting position in three scan points. Read it, then use the President's Desk and Army HQ to inspect what needs attention. This tutorial covers the loop: brief, inspect, decide, execute, report, judge, then advance into consequences.",
+        body: "You are the president of a country at war, not a conqueror chasing a map. There is no victory screen here. This war is negative-sum: it can only be survived, ended, or made worse. Your task is to author how the tragedy unfolds — and how heavy a price it leaves behind.",
         target_ui_element: null,
     },
     {
         id: '02_map',
-        title: 'Reading the Map',
+        title: 'The Map Is Not the Score',
         titleKey: 'onboarding.02.title',
         bodyKey: 'onboarding.02.body',
-        body: 'Faction colors show political control. Front edges mark where your forces meet the enemy. Click a settlement to inspect it; click a front edge to inspect the sector. The map is a record, not a control panel — orders flow through your staff.',
+        body: 'Faction colors show political control; front edges mark where your forces meet the enemy. But do not play for the map. Over years of fighting the front can barely move while the country empties out — hundreds of thousands displaced to shift the line a few settlements. Land is not the scoreboard.',
         target_ui_element: 'map-container',
     },
     {
@@ -103,7 +103,7 @@ const AUTHORED_STEPS: ReadonlyArray<OnboardingStepDef> = [
         title: 'Operations',
         titleKey: 'onboarding.06.title',
         bodyKey: 'onboarding.06.body',
-        body: 'Your corps commanders propose operations and present them for your decision when they\'re ready to launch. Approve to authorize, decline to refuse, or force-launch to override their judgment at the cost of command authority. Brigades never attack alone -- every assault flows through a corps operation.',
+        body: "You command through your generals, not over individual units. You never push brigades yourself — every assault flows through a corps operation. Your commanders propose operations; you approve, decline, or force-launch over their judgment at the cost of command authority. You set direction and bear the consequences; they fight the battle.",
         target_ui_element: 'army-hq-tab-briefing',
     },
     {
@@ -111,15 +111,15 @@ const AUTHORED_STEPS: ReadonlyArray<OnboardingStepDef> = [
         title: 'Advance and Read the Aftermath',
         titleKey: 'onboarding.07.title',
         bodyKey: 'onboarding.07.body',
-        body: 'When you advance the turn, the war moves forward by one week. The aftermath panel reports what changed: battles fought, ground gained or lost, casualties, command outcomes. Read it. The next turn begins with the consequences of this one.',
+        body: 'When you advance the turn, the war moves forward by one week. The aftermath panel reports what changed: battles fought, ground won or lost, casualties, the displaced, command outcomes. Read it — the human cost is part of the record, not a footnote. The next turn begins with the consequences of this one.',
         target_ui_element: 'advance-turn-button',
     },
     {
         id: '08_judge',
-        title: 'The Cost Ledger',
+        title: 'The Cost Ledger Is the Scoreboard',
         titleKey: 'onboarding.08.title',
         bodyKey: 'onboarding.08.body',
-        body: 'The Cost Ledger remembers. Every approved operation, every override, every refusal accrues. At the end of the war, the verdict compares your choices against history. There is no winner here — only how heavy the cost, and on whom it fell.',
+        body: 'The war-cost ledger is your real scoreboard, not the map. Seizing territory can lower your final grade; the displaced and the exhausted weigh against you, and atrocity taints the verdict permanently — it is never rewarded. The war climaxes at the Dayton table, where you spend hard-won leverage across the peace. That settlement is where you are judged.',
         target_ui_element: 'cost-ledger',
     },
 ];

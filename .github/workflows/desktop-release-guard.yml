@@ -1,5 +1,17 @@
 name: Desktop Release Guard
 
+# ALWAYS-REPORT path-filter shim (2026-06-09, task #81): `desktop-packaged-runtime-probe`
+# is a REQUIRED status check in branch protection. A `paths:` filter on a REQUIRED check
+# that NEVER REPORTS on a non-matching PR jams that PR forever on a "pending" required
+# check (the classic "required + path-filtered" gotcha). So we do NOT filter at the
+# workflow level. Instead the workflow ALWAYS triggers, each job ALWAYS reports its
+# check name, and a per-job changed-files detection step short-circuits the HEAVY
+# packaging steps to a fast no-op (success in seconds) on a DESKTOP path miss, per the
+# blessed 2026-06-05 CI/PR-batching policy ("desktop packaging required only for
+# desktop/package/UI/runtime paths"). `desktop-release-check` is gated on the same set
+# so the `needs:`-dependent probe can start (and report) fast on a doc-only PR. See
+# .github/scripts/detect-changed-paths.sh (PATH_SET=desktop).
+
 on:
   push:
     branches: [main]
@@ -11,19 +23,46 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          # detect-changed-paths.sh needs the base commit in history.
+          fetch-depth: 0
+
+      # Always-report shim: decide whether the heavy package/probe steps run. The job
+      # itself always completes (and reports the `desktop-release-check` check).
+      - name: Detect desktop/package/UI/runtime changes
+        id: changes
+        env:
+          PATH_SET: desktop
+        # shell: bash — desktop-packaged-runtime-probe runs on windows-latest where the
+        # default run shell is pwsh; force bash so the restore + detect logic parses.
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            base_ref="${GITHUB_BASE_REF:-main}"
+            git fetch --no-tags origin "${base_ref}:refs/remotes/origin/${base_ref}" >/dev/null 2>&1 || \
+              git fetch --no-tags origin "${base_ref}" >/dev/null 2>&1 || true
+            git checkout "origin/${base_ref}" -- .github/scripts/detect-changed-paths.sh
+          fi
+          bash .github/scripts/detect-changed-paths.sh
 
       - uses: actions/setup-node@v5
+        if: steps.changes.outputs.relevant == 'true'
         with:
           node-version: 22
           cache: npm
 
       - run: npm install --legacy-peer-deps
+        if: steps.changes.outputs.relevant == 'true'
       - run: npm install --legacy-peer-deps --prefix src/ui/map
+        if: steps.changes.outputs.relevant == 'true'
 
       - name: Rebuild startup snapshot for this platform
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run desktop:startup-snapshot:build
 
       - name: Verify baked startup snapshot and desktop build artifacts
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run desktop:release:check
 
       # ---- LANE-V095-CI-PACKAGE-MATRIX (P1-G5, partial QW-4) ----
@@ -31,6 +70,7 @@ jobs:
       # re-fetch ~150-300 MiB on every PR. Key derived from runner OS and the
       # locked package.json (which pins electron-builder).
       - name: Cache electron-builder and Electron downloads (Linux)
+        if: steps.changes.outputs.relevant == 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -41,13 +81,15 @@ jobs:
             electron-builder-${{ runner.os }}-
 
       - name: Package Linux AppImage
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run desktop:package:linux:appimage
 
       - name: Smoke-verify Linux AppImage artifact
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run desktop:package:linux:appimage:smoke -- --report-only
 
       - name: Upload Linux AppImage artifact
-        if: always()
+        if: steps.changes.outputs.relevant == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: desktop-linux-appimage
@@ -55,24 +97,55 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+      - name: No desktop/package/UI/runtime changes — packaging skipped (green-fast)
+        if: steps.changes.outputs.relevant != 'true'
+        run: echo "No src/desktop, src/ui, tools, package.json or workflow changes — desktop packaging skipped. Job reports success so the dependent probe can report fast."
+
   desktop-packaged-runtime-probe:
     needs: desktop-release-check
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          # detect-changed-paths.sh needs the base commit in history.
+          fetch-depth: 0
+
+      # Always-report shim: the job always reports the `desktop-packaged-runtime-probe`
+      # check; only the package+probe steps are gated on the DESKTOP path set.
+      - name: Detect desktop/package/UI/runtime changes
+        id: changes
+        env:
+          PATH_SET: desktop
+        # shell: bash — desktop-packaged-runtime-probe runs on windows-latest where the
+        # default run shell is pwsh; force bash so the restore + detect logic parses.
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            base_ref="${GITHUB_BASE_REF:-main}"
+            git fetch --no-tags origin "${base_ref}:refs/remotes/origin/${base_ref}" >/dev/null 2>&1 || \
+              git fetch --no-tags origin "${base_ref}" >/dev/null 2>&1 || true
+            git checkout "origin/${base_ref}" -- .github/scripts/detect-changed-paths.sh
+          fi
+          bash .github/scripts/detect-changed-paths.sh
 
       - uses: actions/setup-node@v5
+        if: steps.changes.outputs.relevant == 'true'
         with:
           node-version: 22
           cache: npm
 
       - run: npm install --legacy-peer-deps
+        if: steps.changes.outputs.relevant == 'true'
       - run: npm install --legacy-peer-deps --prefix src/ui/map
+        if: steps.changes.outputs.relevant == 'true'
 
       - name: Rebuild startup snapshot for this platform
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run desktop:startup-snapshot:build
 
       - name: Probe packaged desktop runtime contract
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run desktop:package:probe
 
       # ---- LANE-V095-CI-PACKAGE-MATRIX (P1-G6) ----
@@ -80,6 +153,7 @@ jobs:
       # profile, so actions/cache@v4 expands these correctly under
       # %USERPROFILE%\.cache\electron-builder and %USERPROFILE%\.electron.
       - name: Cache electron-builder and Electron downloads (Windows)
+        if: steps.changes.outputs.relevant == 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -90,16 +164,22 @@ jobs:
             electron-builder-${{ runner.os }}-
 
       - name: Package Windows NSIS installer
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run desktop:package:win:nsis
 
       - name: Smoke-verify Windows NSIS installer artifact
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run desktop:package:win:nsis:smoke -- --report-only
 
       - name: Upload Windows NSIS installer artifact
-        if: always()
+        if: steps.changes.outputs.relevant == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: desktop-win-nsis
           path: dist-packaged/*.exe
           if-no-files-found: warn
           retention-days: 14
+
+      - name: No desktop/package/UI/runtime changes — probe skipped (green-fast)
+        if: steps.changes.outputs.relevant != 'true'
+        run: echo "No src/desktop, src/ui, tools, package.json or workflow changes — packaged-runtime probe skipped. Job reports success so branch protection stays unblocked."

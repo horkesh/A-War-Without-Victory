@@ -34,7 +34,7 @@
  * ═══════════════════════════════════════════════════════════════
  */
 
-import type { FormationId } from '../../../state/game_state.js';
+import type { FactionId, FormationId } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_context.js';
 
@@ -60,6 +60,24 @@ import {
     buildCorpsOperationReadinessInputSnapshot,
     computeCorpsOperationReadiness,
 } from '../corps_operation_readiness.js';
+import {
+    isVrsContainPostureEnabled,
+    isArbihContainPostureEnabled,
+} from '../contain_posture_gate.js';
+
+/**
+ * Is the contain-posture suppression ACTIVE for this besieging faction? Gates
+ * the planner's read of `last_contained_osids_by_faction[faction]` on the
+ * faction's OWN flag — so a save serialized with a contain flag ON, then resumed
+ * with the flag OFF, does NOT honor the stale serialized set (default-off must be
+ * a TRUE no-op for resumed saves, not just fresh runs). RS→Lane V flag, RBiH→
+ * Lane A flag; any other faction is never contained.
+ */
+export function isContainSuppressionActiveFor(faction: FactionId): boolean {
+    if (faction === 'RS') return isVrsContainPostureEnabled();
+    if (faction === 'RBiH') return isArbihContainPostureEnabled();
+    return false;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -1320,8 +1338,44 @@ function createOpportunityPlan(
     const cooledCandidates = reachableEnemyOsids.filter(osid => !cooldownSet.has(osid));
     const effectiveOsids = cooledCandidates.length > 0 ? cooledCandidates : reachableEnemyOsids;
 
+    // contain Lane V (§6 VRS strangle-not-capture, DEFAULT-OFF): withhold the
+    // bot's OWN organic assault target-generation against CONTAINED enclave OSIDs
+    // (BFS-isolated enemy enclave cores past resilience_start_turn, pre-1995-
+    // pivot). The contained set is computed once per turn from the same BFS
+    // report (war_phases.ts supply step) and read here from state; it is empty
+    // when the flag is OFF (field absent) → byte-identical no-op. Unlike the
+    // cooldown filter, containment has NO fallback: a contained OSID stays
+    // suppressed — if every candidate is contained the plan simply does not form
+    // and the corps SCREENS the ring instead of assaulting (exactly the contain
+    // posture). This is safe-by-construction: it only ever REMOVES an attack the
+    // bot would have generated. It is NOT an OSID blacklist override and NOT
+    // `avoided_osids_by_faction` (banned) — it filters target generation. The
+    // 1995-pivot release empties the eastern-enclave set before the historical
+    // fall window, so Krivaja-95 (which injects objectives directly and bypasses
+    // this path anyway) + the scripted *_falls_1995 events still flip control and
+    // the genocide rupture still records.
+    // DEFAULT-OFF PURITY: only honor the contained set when THIS faction's contain
+    // flag is enabled. A save written with a contain flag ON serializes
+    // `last_contained_osids_by_faction`; if the flag is then OFF on resume, the
+    // supply phase no longer updates/clears it, but without this gate the planner
+    // would still read the stale set and suppress objectives — so default-off
+    // would NOT be a true no-op for resumed saves. Gating the read makes a
+    // flag-off resume byte-identical to never-flagged.
+    const containedSet = new Set(
+        isContainSuppressionActiveFor(briefing.faction)
+            ? (briefing.state_ref?.political?.last_contained_osids_by_faction?.[briefing.faction] ?? [])
+            : [],
+    );
+    const containFiltered = containedSet.size > 0
+        ? effectiveOsids.filter(osid => !containedSet.has(osid))
+        : effectiveOsids;
+    if (containFiltered.length === 0) {
+        // Every reachable objective is contained → no organic offensive forms.
+        return null;
+    }
+
     // Wrap as a ZoneAssessment-like object with filtered enemy OSIDs for selectOpportunityTargets.
-    const filteredZone: ZoneAssessment = { ...stagingZone, enemy_adjacent_osids: effectiveOsids };
+    const filteredZone: ZoneAssessment = { ...stagingZone, enemy_adjacent_osids: containFiltered };
 
     const brigadesAlreadyAtStaging = countBrigadesInZone(assignedBrigades, surplusPool, stagingZone.zone_id);
     const brigadesToMove = Math.max(0, requiredBrigades - brigadesAlreadyAtStaging);

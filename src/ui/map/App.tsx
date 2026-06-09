@@ -34,6 +34,7 @@ import { PresidentialInbox } from './components/PresidentialInbox';
 import type { EventDisplayData } from './components/EventModal';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
 import { PeacePlanModal } from './components/PeacePlanModal';
+import { OnboardingOverlay } from './components/onboarding/OnboardingOverlay';
 import { ParamilitaryReviewModal } from './components/ParamilitaryReviewModal';
 import { EventDecisionModal } from './components/EventDecisionModal';
 import { ConvoyDecisionModal } from './components/ConvoyDecisionModal';
@@ -241,6 +242,49 @@ function CodexPanelWrapper({
       state={rawGameState}
     />
   );
+}
+
+/**
+ * Task #77 — first-run auto-mount of the 8-step teaching deck.
+ *
+ * Re-enables auto-show of `OnboardingOverlay` on a fresh campaign's first run.
+ * (A prior "Track-D" consolidation removed the `<OnboardingOverlay>` mount, so
+ * the deck was reachable only via "Restart Tutorial" in Settings — a new player
+ * never saw the thesis lesson.)
+ *
+ * First-run / dismissal / reload semantics are driven ENTIRELY by the existing
+ * persisted `meta.tutorial_state` (surfaced as `loadedGameState.tutorial_state`
+ * by `normalizeTutorialState` in GameStateAdapter). NO new persisted field:
+ *   - Fresh campaign (turn 0, no `meta.tutorial_state`) → adapter returns
+ *     `undefined` → `shouldShowOnboarding(undefined) === true` → deck shows.
+ *   - Player dismisses/completes → IPC writes `tutorial_state.dismissed = true`
+ *     → deck hidden, and not re-shown on reload of the same campaign.
+ *   - Continue on a progressed save (turn > 0, no field) → adapter defaults to
+ *     `{ dismissed: true }` → deck does NOT replay.
+ * The overlay's own `shouldShowOnboarding` predicate is the single visibility
+ * gate; this wrapper only supplies state + the IPC bridge and the screen gate.
+ *
+ * Ordering vs the opening brief: the deck is a full-screen HARD_MODAL teaching
+ * surface; the opening brief is a non-modal footer card inside the inbox panel.
+ * The deck takes the foreground first (the thesis lesson is the first thing a
+ * new player sees); once dismissed/completed the brief remains underneath in
+ * the inbox. They do not visually stack — the deck overlays the brief — so no
+ * explicit cross-gate is required.
+ *
+ * Faction-agnostic (mirrors the overlay + restart-button single-owner contract).
+ */
+function OnboardingOverlayWrapper() {
+  const tutorialState = useGameStore((s) => s.loadedGameState?.tutorial_state);
+  const ipc = useIPC();
+  const onboardingBridge = useMemo(
+    () => ({
+      dismissTutorial: () => ipc.dismissTutorial(),
+      advanceStep: (stepId: string) => ipc.advanceTutorialStep(stepId),
+      restartTutorial: () => ipc.restartTutorial(),
+    }),
+    [ipc],
+  );
+  return <OnboardingOverlay tutorialState={tutorialState} ipc={onboardingBridge} />;
 }
 
 function PeaceWarTransitionOverlay() {
@@ -1755,10 +1799,13 @@ function App() {
       )}
       {settingsOpen && <SettingsScreen onClose={() => setSettingsOpen(false)} />}
       {creditsOpen && <CreditsScreen onClose={() => setCreditsOpen(false)} />}
-      {/* v0.9.2 tutorial onboarding skeleton — mounted at app root.
-          Only visible on the in-game screen with a loaded save; hidden during
-          main menu / side picker. The overlay's own predicate handles the
-          dismissed-state branch. */}
+      {/* v0.9.2 tutorial onboarding deck — auto-mounted at app root (task #77).
+          Only on the in-game screen with a loaded save; hidden during main
+          menu / side picker / warroom. The overlay's own `shouldShowOnboarding`
+          predicate handles the first-run-vs-dismissed branch off the existing
+          persisted `meta.tutorial_state` (no new field). Restart still flows
+          via Settings → OnboardingRestartButton. */}
+      {appScreen === 'game' && loadedGameState && <OnboardingOverlayWrapper />}
       {/* LANE-V094-LOADING-AND-ERROR — first-paint scenario-load skeleton.
           Shown when the in-game shell has been requested but no save has
           loaded yet. Auto-dismisses when `loadedGameState` resolves. We

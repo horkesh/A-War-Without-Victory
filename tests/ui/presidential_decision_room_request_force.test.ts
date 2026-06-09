@@ -146,8 +146,14 @@ describe('Decision Room request-op + force-launch directives', () => {
       corpsId: 'arbih_3rd_corps',
       cost: 15,
       // proposalId routes DirectiveCard through forceLaunchProposal (resolves the
-      // pending review); opName retained for the caption only.
-      payload: { opName: 'Operation Alpha', proposalId: 'APPROVE_OP:arbih_3rd_corps:plan_alpha' },
+      // pending review); opName retained for the caption only. overridesShownObjection=true:
+      // the proposal-override card exists only because the commander surfaced a no-go, so the
+      // engine charges the patron cost and the DirectiveCard previews it (#327).
+      payload: {
+        opName: 'Operation Alpha',
+        proposalId: 'APPROVE_OP:arbih_3rd_corps:plan_alpha',
+        overridesShownObjection: true,
+      },
     });
     // override_available === false carries no force-launch card.
     expect(

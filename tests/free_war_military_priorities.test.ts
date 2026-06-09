@@ -26,6 +26,8 @@ function makeState(opts: {
     supplyByOsid?: Record<string, string>;
     /** A2a: persisted campaign plan (state.military.campaign_plans[faction]). */
     campaignPlans?: Record<string, unknown>;
+    /** #330: per-OSID controllers (state.political.political_controllers). */
+    controllers?: Record<string, string>;
 }): GameState {
     return {
         meta: { turn: opts.turn, decision_mode: opts.mode } as GameState['meta'],
@@ -37,6 +39,7 @@ function makeState(opts: {
         political: {
             control_events: opts.controlEvents ?? [],
             ...(opts.supplyByOsid ? { last_supply_state_by_osid: opts.supplyByOsid } : {}),
+            ...(opts.controllers ? { political_controllers: opts.controllers } : {}),
         } as unknown as GameState['political'],
     } as unknown as GameState;
 }
@@ -194,6 +197,54 @@ describe('Free War A2a — supply + campaign-plan priority modulators', () => {
             .find(p => p.name === '1KK Rear Security')!;
         // Critical supply in 1KK Rear's own area must push its weight strictly DOWN.
         expect(decayed.weight).toBeLessThan(neutral.weight);
+    });
+
+    it('(#330) an ENEMY-held poorly-supplied target area does NOT decay our priority', () => {
+        // 'Corridor 92 (1KK)' (static 100) targets corridor municipalities. Mark its OSIDs
+        // ENEMY-controlled (RBiH) and CRITICAL: the persisted supply value is the ENEMY's
+        // supply, so it must NOT decay OUR push (a strangled enemy enclave is MORE attractive,
+        // not less). Compare against the supply-neutral baseline — weight must be UNCHANGED.
+        const supplyByOsid: Record<string, string> = {
+            'op:brcko:brcko_2': 'critical',
+            'op:odzak:odzak_2': 'critical',
+            'op:derventa:derventa_2': 'critical',
+        };
+        const enemyControllers: Record<string, string> = {
+            'op:brcko:brcko_2': 'RBiH',
+            'op:odzak:odzak_2': 'RBiH',
+            'op:derventa:derventa_2': 'RBiH',
+        };
+        const enemyHeld = getCorpsArmyPriorities(FACTION, CORPS, TURN,
+            makeState({ turn: TURN, mode: 'emergent', controlEvents: [], supplyByOsid, controllers: enemyControllers }))
+            .find(p => p.name === 'Corridor 92 (1KK)')!;
+        const neutral = getCorpsArmyPriorities(FACTION, CORPS, TURN,
+            makeState({ turn: TURN, mode: 'emergent', controlEvents: [] }))
+            .find(p => p.name === 'Corridor 92 (1KK)')!;
+        // Enemy supply ignored → no decay → weight identical to the no-supply-data baseline.
+        expect(enemyHeld.weight).toBe(neutral.weight);
+    });
+
+    it('(#330) a FRIENDLY-held poorly-supplied target area STILL decays our priority', () => {
+        // Same OSIDs/critical supply, but now WE (RS) control them: our own supply legitimately
+        // constrains a hold/approach priority, so the decay MUST still fire (regression guard
+        // that the #330 fix did not disable the legitimate friendly-side decay).
+        const supplyByOsid: Record<string, string> = {
+            'op:brcko:brcko_2': 'critical',
+            'op:odzak:odzak_2': 'critical',
+            'op:derventa:derventa_2': 'critical',
+        };
+        const friendlyControllers: Record<string, string> = {
+            'op:brcko:brcko_2': FACTION,
+            'op:odzak:odzak_2': FACTION,
+            'op:derventa:derventa_2': FACTION,
+        };
+        const friendlyHeld = getCorpsArmyPriorities(FACTION, CORPS, TURN,
+            makeState({ turn: TURN, mode: 'emergent', controlEvents: [], supplyByOsid, controllers: friendlyControllers }))
+            .find(p => p.name === 'Corridor 92 (1KK)')!;
+        const neutral = getCorpsArmyPriorities(FACTION, CORPS, TURN,
+            makeState({ turn: TURN, mode: 'emergent', controlEvents: [] }))
+            .find(p => p.name === 'Corridor 92 (1KK)')!;
+        expect(friendlyHeld.weight).toBeLessThan(neutral.weight);
     });
 
     it('(plan) a campaign-plan PRIMARY role BOOSTS the corps priorities; CONTAIN decays', () => {

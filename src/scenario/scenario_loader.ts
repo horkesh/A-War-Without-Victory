@@ -212,6 +212,9 @@ export function normalizeScenario(raw: unknown): Scenario {
         }
         decision_mode = o.decision_mode;
     }
+    // A2 Dayton close-out (task #71): default-off boolean flag. The loader whitelists
+    // fields, so this must be parsed explicitly (an unknown JSON key is dropped).
+    const dayton_close_out = o.dayton_close_out === true ? true : undefined;
     const weeks = typeof o.weeks === 'number' ? Math.floor(o.weeks) : undefined;
     const scenario_start_week =
         typeof o.scenario_start_week === 'number' && Number.isInteger(o.scenario_start_week)
@@ -463,6 +466,7 @@ export function normalizeScenario(raw: unknown): Scenario {
             scenario_id,
             ...(player_faction !== undefined ? { player_faction } : {}),
             ...(decision_mode !== undefined ? { decision_mode } : {}),
+            ...(dayton_close_out !== undefined ? { dayton_close_out } : {}),
             scenario_start_week,
             start_lifecycle_phase,
             peace_referendum_held_at_start,
@@ -514,6 +518,7 @@ export function normalizeScenario(raw: unknown): Scenario {
         scenario_id,
         ...(player_faction !== undefined ? { player_faction } : {}),
         ...(decision_mode !== undefined ? { decision_mode } : {}),
+        ...(dayton_close_out !== undefined ? { dayton_close_out } : {}),
         scenario_start_week,
         start_lifecycle_phase,
         peace_referendum_held_at_start,

@@ -4,7 +4,7 @@
 
 **Updated:** 2026-06-09 (Pyrrhic panel re-grade — see "2026-06-09 Re-grade" section immediately below) · prior full pass 2026-05-24
 
-**Studio:** Pyrrhic Games · **Project:** A War Without Victory (AWWV) · **Version:** v0.9.6-alpha.1 · **Last baselines:** 40w n1740 hash `86ebf26ae0271465` (26/27 anchors, 6/6 benchmarks); 188w n1741 hash `a4bf8b8095050881`. **(2026-06-09: current 188w floor moved to 649/712, anchors 30/30; casualty-realism fix in flight.)**
+**Studio:** Pyrrhic Games · **Project:** A War Without Victory (AWWV) · **Version:** v0.9.9-beta.1 · **Last baselines:** 40w n1740 hash `86ebf26ae0271465` (26/27 anchors, 6/6 benchmarks); 188w n1741 hash `a4bf8b8095050881`. **(2026-06-09: current 188w floor moved to 649/712, anchors 30/30; casualty-realism fix in flight.)**
 
 ---
 

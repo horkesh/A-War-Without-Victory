@@ -7,6 +7,20 @@ const path = require('node:path');
 
 const SCHEMA_VERSION = 1;
 const EXCERPT_CHARS = 160;
+
+// The runtime Codex panel (src/ui/map/components/CodexPanel.tsx) imports
+// data/scenarios/essays/essay_index.json and serves its `dynamic_sections`
+// (the A1c response-morphing prose) directly to the player. The per-essay
+// JSON files carry the canonical body but NOT the dynamic morphing sections,
+// so the index's dynamic_sections are the only place that runtime-served
+// morphing prose lives. We scan that ONE slice of the index — the
+// dynamic_sections arrays only — so sensitive claims in morphing prose are
+// covered by this inventory, while the canonical body (already covered via the
+// per-essay files) is not double-counted. The rest of essay_index.json stays
+// excluded (it duplicates the per-essay bodies).
+const ESSAY_INDEX_RELATIVE = toPosixPath(
+  path.join('data', 'scenarios', 'essays', 'essay_index.json'),
+);
 const SOURCE_FLOORS = Object.freeze({
   diplomatic: 2,
   humanitarian: 2,
@@ -159,6 +173,23 @@ async function walkFiles(rootDir, relativeDir) {
   return files.sort(compareText);
 }
 
+async function indexHasDynamicSections(rootDir) {
+  const absolute = path.join(rootDir, ESSAY_INDEX_RELATIVE);
+  if (!(await pathExists(absolute))) {
+    return false;
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(await fs.readFile(absolute, 'utf8'));
+  } catch {
+    return false;
+  }
+  const essays = Array.isArray(parsed?.essays) ? parsed.essays : [];
+  return essays.some((essay) => (
+    essay && Array.isArray(essay.dynamic_sections) && essay.dynamic_sections.length > 0
+  ));
+}
+
 async function listInputFiles(rootDir) {
   const essayFiles = await listFilesInDir(
     rootDir,
@@ -189,16 +220,30 @@ async function listInputFiles(rootDir) {
         && SRC_PATH_KEYWORDS.some((keyword) => lower.includes(keyword));
     });
 
+  // essay_index.json is included ONLY for its dynamic_sections slice (see
+  // ESSAY_INDEX_RELATIVE comment). scanJsonFile() restricts the walk for this
+  // file to dynamic_sections; the per-essay files above cover the bodies. The
+  // file is listed only when at least one essay actually carries a non-empty
+  // dynamic_sections array — an index without morphing prose contributes
+  // nothing and stays out of scan_scope (matching its body-only exclusion).
+  const indexFiles = (await indexHasDynamicSections(rootDir))
+    ? [ESSAY_INDEX_RELATIVE]
+    : [];
+
   return [
     ...ghostFiles,
     ...ghostBcsFiles,
     ...essayFiles,
+    ...indexFiles,
     ...eventFiles,
     ...srcFiles,
   ].sort(compareText);
 }
 
 function classifySurface(relativeFile) {
+  if (relativeFile === ESSAY_INDEX_RELATIVE) {
+    return 'essay_dynamic_section';
+  }
   if (relativeFile.startsWith('data/scenarios/essays/')) {
     return 'essay';
   }
@@ -527,12 +572,12 @@ async function scanJsonFile(rootDir, relativeFile, surface) {
   const parsed = JSON.parse(raw);
   const claims = [];
 
-  walkJsonStrings(parsed, (text, fieldPath, ancestors) => {
+  const collect = (text, fieldPath, ancestors, rootValue) => {
     const matchedTerms = findMatchedTerms(text);
     if (matchedTerms.length === 0) {
       return;
     }
-    const sourceInfo = sourceStatusFor(surface, parsed, ancestors);
+    const sourceInfo = sourceStatusFor(surface, rootValue, ancestors);
     claims.push(makeClaim({
       surface,
       file: relativeFile,
@@ -543,6 +588,37 @@ async function scanJsonFile(rootDir, relativeFile, surface) {
       sourceInfo,
       dateWindow: dateWindowFor(relativeFile, ancestors),
     }));
+  };
+
+  // essay_index.json is scanned for its dynamic_sections slice only — the
+  // runtime morphing prose the Codex panel serves. Each section's source
+  // status falls back to its parent essay's `sources` via nearestSourceObject
+  // (the essay object is seeded as an ancestor). The canonical essay bodies are
+  // covered by the per-essay files and are deliberately NOT re-scanned here.
+  if (surface === 'essay_dynamic_section') {
+    const essays = Array.isArray(parsed?.essays) ? parsed.essays : [];
+    essays.forEach((essay, essayIndex) => {
+      const sections = essay && Array.isArray(essay.dynamic_sections)
+        ? essay.dynamic_sections
+        : null;
+      if (!sections) {
+        return;
+      }
+      const essayKey = typeof essay.id === 'string' && essay.id.length > 0
+        ? essay.id
+        : `[${essayIndex}]`;
+      walkJsonStrings(
+        sections,
+        (text, fieldPath, ancestors) => collect(text, fieldPath, ancestors, essay),
+        [parsed, essay],
+        ['$', `.${essayKey}`, '.dynamic_sections'],
+      );
+    });
+    return claims;
+  }
+
+  walkJsonStrings(parsed, (text, fieldPath, ancestors) => {
+    collect(text, fieldPath, ancestors, parsed);
   }, [parsed], ['$']);
 
   return claims;
