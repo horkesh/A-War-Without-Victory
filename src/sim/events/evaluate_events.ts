@@ -574,6 +574,11 @@ export function evaluateEvents(
                 if (!state.military.pending_event_decisions) {
                     state.military.pending_event_decisions = [];
                 }
+                // CALIBRATION GUARD: this persisted payload is an explicit field whitelist.
+                // `def.image` is intentionally UI-display-only (read in DataLoader.ts -> resolveEventIllustration)
+                // and MUST NOT be added here — persisting it would move the save hash / structural
+                // fingerprint and require a dual-horizon re-floor (scenario-tester GO, event-illustration
+                // wiring, 2026-06-10). Keep image out of persisted sim state.
                 state.military.pending_event_decisions.push({
                     event_id: def.id,
                     event_title: text,
