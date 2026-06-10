@@ -95,6 +95,10 @@ import {
     spreadBrigadesToFrontOsids
 } from './oob_early_war_entry.js';
 import { buildOpsCompareConclusion, formatOpsCompareMarkdown } from './ops_compare.js';
+import { setEnablePhase3A } from '../sim/pressure/phase3a_pressure_eligibility.js';
+import { setEnablePhase3B } from '../sim/pressure/phase3b_pressure_exhaustion.js';
+import { setEnablePhase3C } from '../sim/pressure/phase3c_exhaustion_collapse_gating.js';
+import { setEnablePhase3D } from '../sim/collapse/phase3d_collapse_resolution.js';
 import {
     buildCombatCausalitySummary,
     buildOperationCombatDiagnostics,
@@ -1881,6 +1885,23 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     } = options;
     if (replayPayloadMode !== 'manifest_only' && replayPayloadMode !== 'full') {
         throw new Error(`Unsupported replayPayloadMode: ${String(replayPayloadMode)}`);
+    }
+
+    // COLLAPSE PHASE IV-a (2026-06-10) — env-gated collapse-pipeline enable. HELD / EXPLORATORY.
+    // The collapse pipeline (Phase 3A→3D) is feature-gated OFF by default (every getEnablePhase3*()
+    // returns false); only the CLI audit harness flips it. There is no production enable path yet —
+    // Phase IV finalizes the enable + re-floor under owner sign-off. This env gate lets the
+    // first-fire measurement run collapse-ON over a real 188w campaign WITHOUT touching any default
+    // or scenario file. `ENABLE_COLLAPSE=true` turns on the whole serial chain (3A required by 3B
+    // required by 3C required by 3D). When unset, this block is a no-op and the run is byte-identical
+    // to the collapse-OFF baseline (the setters are only called when the env var is exactly 'true').
+    // Determinism: reads only an env var at run start; no RNG/clock; identical across two runs with
+    // the same env. Do NOT wire this into a default scenario — it is the Phase IV exploration switch.
+    if (process.env.ENABLE_COLLAPSE === 'true') {
+        setEnablePhase3A(true);
+        setEnablePhase3B(true);
+        setEnablePhase3C(true);
+        setEnablePhase3D(true);
     }
     const emitFullReplayPayload = replayPayloadMode === 'full';
     const timingTotals = createScenarioTimingTotals();

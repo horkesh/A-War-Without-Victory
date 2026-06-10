@@ -49,6 +49,17 @@ function baseState(): GameState {
     } as unknown as GameState;
 }
 
+// PHASE IV-a reconciliation: Phase 3C Tier-0 now reads `state.political.war_exhaustion / 100`
+// (the open-ended 0..10000 accumulator, rescaled to the 0..100 percentage scale the constants
+// were authored on) rather than the legacy 0..1 `profile.exhaustion`. These tests express
+// exhaustion on the constants' 0..100 scale, so set the raw accumulator field accordingly.
+function setExhaustion0to100(state: GameState, factionId: string, value0to100: number): void {
+    if (!state.political.war_exhaustion) {
+        (state.political as { war_exhaustion: Record<string, number> }).war_exhaustion = {};
+    }
+    (state.political.war_exhaustion as Record<string, number>)[factionId] = value0to100 * 100;
+}
+
 describe('collapse Phase I — sanity: enclave defs', () => {
     it('the chosen enclave OSID is an RBiH enclave; the non-enclave OSID is not', () => {
         const e = getEnclaveDefForOsid(ENCLAVE_OSID);
@@ -88,7 +99,7 @@ describe('collapse Phase I — Phase 3C gating', () => {
         setEnablePhase3C(true);
         const state = baseState();
         // RBiH exhaustion 80 (> C2=70) and authority 10 (< C6=30 → degradation).
-        state.factions[0].profile.exhaustion = 80;
+        setExhaustion0to100(state, 'RBiH', 80);
         state.factions[0].profile.authority = 10;
 
         // 3 turns: persistence accrues but < C5=4 → not yet eligible.
@@ -107,12 +118,12 @@ describe('collapse Phase I — Phase 3C gating', () => {
         setEnablePhase3B(true);
         setEnablePhase3C(true);
         const state = baseState();
-        state.factions[0].profile.exhaustion = 80;
+        setExhaustion0to100(state, 'RBiH', 80);
         state.factions[0].profile.authority = 10;
         applyPhase3CExhaustionCollapseGating(state, []);
         expect(state.political.collapse_eligibility?.RBiH.persistence_authority).toBe(1);
         // Drop below threshold → reset.
-        state.factions[0].profile.exhaustion = 50;
+        setExhaustion0to100(state, 'RBiH', 50);
         applyPhase3CExhaustionCollapseGating(state, []);
         expect(state.political.collapse_eligibility?.RBiH.persistence_authority).toBe(0);
         expect(state.political.collapse_eligibility?.RBiH.eligible_authority).toBe(false);
@@ -123,7 +134,7 @@ describe('collapse Phase I — Phase 3C gating', () => {
         setEnablePhase3B(true);
         setEnablePhase3C(true);
         const state = baseState();
-        state.factions[0].profile.exhaustion = 80; // > C4=65 spatial threshold
+        setExhaustion0to100(state, 'RBiH', 80); // > C4=65 spatial threshold
 
         // 20 controlled, 3 isolated = 15% ≥ 10% → spatially degraded.
         const degradedReport: SupplyReachabilityOsidReport = {
@@ -145,7 +156,7 @@ describe('collapse Phase I — Phase 3C gating', () => {
 
         // Fresh state: 1/20 isolated = 5% < 10% → NOT degraded.
         const state2 = baseState();
-        state2.factions[0].profile.exhaustion = 80;
+        setExhaustion0to100(state2, 'RBiH', 80);
         const healthyReport: SupplyReachabilityOsidReport = {
             schema: 1,
             turn: 150,
@@ -170,7 +181,7 @@ describe('collapse Phase I — Phase 3C gating', () => {
         setEnablePhase3C(true);
         const run = () => {
             const s = baseState();
-            s.factions[0].profile.exhaustion = 90;
+            setExhaustion0to100(s, 'RBiH', 90);
             s.factions[0].profile.authority = 5;
             for (let i = 0; i < 5; i++) applyPhase3CExhaustionCollapseGating(s, []);
             return JSON.stringify(s.political.collapse_eligibility);

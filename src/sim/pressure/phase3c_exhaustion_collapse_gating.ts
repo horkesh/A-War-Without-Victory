@@ -455,8 +455,33 @@ export function applyPhase3CExhaustionCollapseGating(
         const factionId = faction.id;
         const eligibilityState = getOrInitEligibilityState(state, factionId);
 
-        // Get current exhaustion
-        const exhaustion = Number.isFinite(faction.profile?.exhaustion) ? faction.profile.exhaustion : 0;
+        // Get current exhaustion.
+        //
+        // PHASE IV-a UNIT RECONCILIATION (2026-06-10) — the load-bearing fix.
+        // The Tier-0 thresholds (EXHAUSTION_THRESHOLD_AUTHORITY/COHESION = 70, SPATIAL = 65,
+        // E_collapse = 100) were authored on the engine's ORIGINAL 0..100 percentage
+        // exhaustion scale (build spec §3 C2–C4: "70 keys collapse to the late-war exhaustion
+        // plateau"; E_collapse=100 = "fully collapsed"). But `faction.profile.exhaustion` is the
+        // legacy NORMALIZED 0..1 field — it plateaus at ~0.265 across a full 188w campaign, so
+        // comparing it against 70 (a ~260× unit/scale mismatch) made Tier-0 unreachable and the
+        // whole pipeline INERT (Phase III: 649→649 byte-identical).
+        //
+        // The field that actually carries the open-ended late-war exhaustion the constants
+        // assume is `state.political.war_exhaustion` — which src/sim/combat/exhaustion.ts:113–124
+        // documents was rescaled 100× (the original 0..100 percentage scale → 0..10000, cap
+        // 10000) with EVERY downstream gate (WASH_COMBINED_EXHAUSTION, CEASEFIRE_*, combat tempo)
+        // rescaled in lockstep. So `war_exhaustion / 100` recovers the original 0..100 scale —
+        // exactly the scale these constants live on. It climbs through early-war and crosses 65
+        // in early-mid 1993 (~w38–55), never in 1992, and saturates ~100 by ~w80, giving Tier-0
+        // the intended "late-war exhaustion plateau" semantics. (Faction-level Tier-0 is a coarse
+        // war-weariness gate; spatial/front discrimination is Tier-1 local_strain + coherence
+        // gates — see checkSpatialDegradation.)
+        //
+        // HELD FOR OWNER (Phase IV re-floor): this is the deliberate first-fire reconciliation.
+        const warExhaustionRaw = Number.isFinite(state.political?.war_exhaustion?.[factionId])
+            ? (state.political.war_exhaustion as Record<FactionId, number>)[factionId]
+            : 0;
+        const exhaustion = warExhaustionRaw / 100; // 0..10000 (cap) → 0..100 percentage scale
 
         // Check suppression/immunity first
         const suppressed = checkSuppression(state, factionId);
