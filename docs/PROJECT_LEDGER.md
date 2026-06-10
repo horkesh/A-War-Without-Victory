@@ -20111,3 +20111,25 @@ Consolidated ledger close for the mechanics-activation session. Net behavioral/o
 **Held / parked:** PR #344 (B1 missing/captured casualty target, ICTY ~10,500) + #329 (reserve-attrition NO-GO −18) intentionally held; §6 art (8 items) + §6 codex (bijeljina, Srebrenica codex-receipt, 2 atrocity-essay BCS) await owner sign-off; Ključ micro-lane parked (operational-sequencing root cause — Ključ should be a prerequisite to the Sanski Most drive).
 
 **Determinism:** No `Math.random`/`Date.now`/timestamps on the sim path; sorted iteration preserved; initial OSIDs untouched; no `avoided_osids_by_faction`. The save-schema bump (v35→v36) is forward-only additive with an empty-record default. The floor moved only via legitimate additive read-model fields (manifest re-bless), never via OSID overrides.
+
+---
+
+## [2026-06-10] Collapse IV-a merged + IV-b D1 built under panel governance; owner signature delegated to Pyrrhic sign-off; #374 BCS corrected via panel; tree unification
+
+**Type:** session summary — collapse-pipeline progression + standing governance change + §6 content correction + repo hygiene. Floor UNCHANGED: **188w 649/712 territory (CALIBRATION_MASTER authoritative); 40w current-main run hash `e246e8529d4244d8` post-#381 (self-run, supersedes stale literals)**.
+
+**★ STANDING DELEGATION (owner, 2026-06-10): owner signature is ASSUMED wherever the Pyrrhic team signs off** ("Assume you have my signature, as long as the Pyrrhic team signs-off. Assume this for all future decisions."). Mechanism persisted to memory: §6/sensitive = unanimous 4-lens panel (#368 precedent); re-floors = scenario-tester + calibration GO with §6 intact; implementer ≠ reviewer binds; panel BLOCK/split → STOP and surface to owner.
+
+**Collapse pipeline (the 1.0 critical path):**
+- **#381 Phase IV-a MERGED** (`1dc7c5434`) — unit reconciliation (Tier-0 reads `war_exhaustion/100`; 3B `Math.floor` quantization removed; `ENABLE_COLLAPSE` env gate). Collapse now fires Tier-0 (HRHB eligible_spatial ~t60); Phase 3D still inert pending the OSID-substrate re-route. §6 PASS (rupture t162 identical ON/OFF; 0/9 enclaves accrue state); territory 649→649 byte-identical; collapse-OFF proof `ad190ed644972150` pre==post.
+- **Phase IV-b scoped + §6 red-teamed + D1 built (PR #383, review GO-WITH-NOTES, merging on green).** Scope (Option 2 adapter + M1 uniform magnitude, spatial-only; Option 3 FORBIDDEN without fresh §6 review — edge-min residual would go live) and the independent §6 review (§6-SAFE-TO-BUILD CONDITIONAL; key finding: the G2 test was a collapse-OFF false-green) are committed via #385. D1 = `computePressureExposureByEntityOsid` (NOT wired; transient; no save field) + G2-A collapse-ON sidecar pin (skip-not-pass) + G2-B ON-vs-OFF rupture-timing identity + G2-C edge-min all-1.0 pin + G2-D doc note. Byte-identical 40w proven (clean-main == branch `e246e8529d4244d8`); 30/30 anchors, 6/6 benchmarks, 0 critical (scenario-tester-verified). Review flagged ONE blocking-before-D2 defect: stale-marker false-positive on OFF reruns (fix rides in D2) .
+- **#379 (Phase III enable PR) CLOSED superseded** by #381's gate (duplicate divergent enable surface; it also flipped `setEnablePhase3ADiffusion` — that decision moves to D2 panel ratification). Still-valuable assets extracted via **#382 MERGED**: `tools/verify_collapse_section6.cjs` (standalone §6 verifier; `--compare` implements the timing-identity check) + the Phase III diagnosis report (provenance of the ~260× unit-mismatch finding).
+
+**§6 content (#374 Omarska/Višegrad BCS essays) — panel-governed correction cycle:**
+4-lens panel BLOCKED (not unanimous): **the Drina-bank clause said "seven killed"; ICTY Vasiljević (IT-98-32-T) = FIVE killed, TWO survived — error inherited from the ENGLISH source essay** (CI was fully green; only the human panel caught it) + 2 BCS grammar errors. Fixes applied verbatim from the panel report in BOTH languages (`f89f6b269`); focused re-review (Historian + Language) = GO → unanimous sign-off complete; PR un-drafted, merging on green. Panel report committed via #385.
+
+**Repo hygiene:** tree-unification lane dispatched (43 worktrees in 3 roots / 135 local branches / 17 stashes → classify, junction-safe prune of merged+pushed only, never-dirty never-stash rules, standing policy doc + report PR to follow).
+
+**Parallel inert lanes dispatched (byte-identical gates each):** #95 robustness (serializer non-finite fail-loud guard, apply_effects NaN hold-prior, validateGameState additive tolerance) · quick-wins #59/#65/#86/#73 (verify-first; some may be already-resolved by #361/#365) · #49 E-A5 comply-response agency (data-only, 188w-gated — bots pick comply ⇒ historical path byte-identical).
+
+**Determinism:** no `Math.random`/`Date.now` on any new path; sorted iteration (`strictCompare`) verified by the #383 determinism review; initial OSIDs untouched; no `avoided_osids_by_faction`; all calibration movement today = NONE (every merged change proven byte-identical or read-model-only).
