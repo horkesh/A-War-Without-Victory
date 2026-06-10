@@ -115,8 +115,10 @@ diffusion ON or OFF (build-spec Phase II lists 3A coupling as optional).
 ```bash
 # baseline (collapse OFF)
 node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario.ts --scenario data/scenarios/apr1992_definitive_188w.json --unique --out runs
-# collapse ON
-COLLAPSE_PIPELINE_ENABLE=true node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario.ts --scenario data/scenarios/apr1992_definitive_188w.json --unique --out runs
+# collapse ON — live gate is ENABLE_COLLAPSE (src/scenario/scenario_runner.ts, merged #381).
+# The COLLAPSE_PIPELINE_ENABLE gate described above was intentionally never landed (see Disposition);
+# using it would silently produce a collapse-OFF run.
+ENABLE_COLLAPSE=true node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario.ts --scenario data/scenarios/apr1992_definitive_188w.json --unique --out runs
 # §6 gate
 node tools/verify_collapse_section6.cjs <on>/final_save.json --compare <off>/final_save.json
 # territory + anchors
