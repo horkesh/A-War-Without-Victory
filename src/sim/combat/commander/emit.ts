@@ -73,6 +73,7 @@ import type {
 import type { AllocationResult } from './allocate.js';
 import type { PlanDecision } from './plan.js';
 import { MIN_BRIGADES_FOR_PLAN } from './plan.js';
+import { COMMITMENT_RATIO_UNBOUNDED_PERSISTED } from './zone_detection.js';
 import type { DecisionResult } from './decide.js';
 import { augmentOffensiveTargetsWithShifts } from './bot_priority_shift_augmentation.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
@@ -1442,7 +1443,7 @@ function buildUpdatedState(
         : undefined;
 
     return {
-        zone_assessments: zones,
+        zone_assessments: sanitizeZoneAssessmentsForPersistence(zones),
         threat_assessment: threats,
         force_assessment: forces,
         current_plan: planDecision.plan,
@@ -1460,6 +1461,34 @@ function buildUpdatedState(
         lessons: buildUpdatedLessons(briefing, cappedHistory, planDecision),
         decision_trace: mergedTrace,
     };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// sanitizeZoneAssessmentsForPersistence — finite-only persisted copies (#95)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Robustness fix (task #95, audit P1-A/P2-D): the CommanderState returned here is
+ * assigned verbatim into `corps_command[*].commander_state` (commander_loop.ts) and
+ * serialized — non-finite numbers would silently become `null` in the save (pre-#95)
+ * or throw the P1-A serializer guard (post-#95).
+ *
+ * `commitment_ratio` is Infinity for a zone with front edges and zero brigades
+ * (computeCommitmentRatio) and MUST stay Infinity in memory (see
+ * COMMITMENT_RATIO_UNBOUNDED_PERSISTED in zone_detection.ts for the reader audit).
+ * This boundary swap replaces it with the documented finite sentinel in the
+ * persisted copy ONLY. The cross-turn previous-state readers (assess.ts/decide.ts)
+ * read only zone_id/osids, so the sanitized copy is sim-inert.
+ *
+ * Finite zones are passed through by reference (no copy) — the persisted bytes for
+ * a fully-finite assessment are unchanged.
+ */
+export function sanitizeZoneAssessmentsForPersistence(zones: ZoneAssessment[]): ZoneAssessment[] {
+    return zones.map(zone =>
+        Number.isFinite(zone.commitment_ratio)
+            ? zone
+            : { ...zone, commitment_ratio: COMMITMENT_RATIO_UNBOUNDED_PERSISTED }
+    );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

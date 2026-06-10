@@ -2720,6 +2720,21 @@ bot_priority_shifts?: Array<{
     remove_objectives?: string[];
     expires_turn: number;
 }>;
+/** Robustness audit P1-B (task #95): append-only diagnostic log of non-finite
+ *  numeric event-effect payloads (NaN/±Infinity) that were REJECTED before
+ *  reaching persisted morale/cohesion/supply/alliance state. Pure observability —
+ *  never read by sim logic. Absent on every well-formed run (the historical
+ *  calibration path only carries hand-authored finite deltas, so nothing ever
+ *  appends → serialized state byte-identical by construction). Writer:
+ *  `recordNonFiniteEffectAnomaly` in src/sim/events/apply_effects.ts.
+ *  Deterministic: append order follows the sorted effect-application order;
+ *  `faction` is null for faction-agnostic effects (alliance_change); no timestamps. */
+event_effect_anomalies?: Array<{
+    turn: number;
+    effect_kind: string;
+    faction: FactionId | null;
+    value_repr: string;
+}>;
 // v0.6.0 emergent event system state
 /** Pressure system readiness counters per event ID. */
 event_readiness: Record<string, number>;
@@ -2823,6 +2838,17 @@ export interface CommandAuthority {
     lifetime_spent: number;
 }
 
+/**
+ * War-weariness FEEL bands that warrant a Chronicle beat (steady is the baseline
+ * and never recorded). Ordered lowest → highest. Canonical definition + the
+ * numeric thresholds live in the BROWSER-SAFE leaf module
+ * src/state/war_weariness_bands.ts (zero Node imports). Imported type-only
+ * (erased at runtime — no runtime import edge) so it is in local scope below AND
+ * re-exported, without duplicating the union or adding a Node dependency.
+ */
+import type { WarWearinessBand } from './war_weariness_bands.js';
+export type { WarWearinessBand };
+
 export interface PoliticalState {
 negotiation_status?: NegotiationStatus;
 ceasefire?: Record<string, CeasefireFreezeEntry>;
@@ -2880,6 +2906,25 @@ war_supply_pressure: Record<FactionId, number>;
 war_supply_condition: Record<FactionId, number>;
 /** Faction-level exhaustion (monotonic, irreversible). Engine Invariants §8. */
 war_exhaustion: Record<FactionId, number>;
+/**
+ * OBSERVATIONAL read-model anchor: the turn each faction FIRST reached a given
+ * war-weariness feel-band (strained/cracking/collapsing — thresholds in
+ * src/ui/map/data/warWeariness.ts). Written once per (faction, band) when the
+ * band is first crossed and NEVER overwritten (monotonic, like war_exhaustion).
+ *
+ * PURELY OBSERVATIONAL — no sim code reads this; it does not feed combat,
+ * control, ops, or any decision. Its sole consumer is the War-Weariness
+ * Chronicle beat, which pins each one-time threshold-crossing beat to the turn
+ * the band was first crossed (so the UI shows it ONCE at that week instead of
+ * re-emitting it dated at the latest turn every render). war_exhaustion is
+ * monotonic, so the current band is the highest ever reached — but the CURRENT
+ * value cannot recover WHEN a band was first crossed; this map records it.
+ *
+ * Absent on legacy saves and whenever no faction has crossed a band — a faction
+ * below the strained floor writes nothing, so the no-crossing path is
+ * byte-identical. Optional; no migration needed (read defensively).
+ */
+war_weariness_band_first_reached?: Partial<Record<FactionId, Partial<Record<WarWearinessBand, number>>>>;
 /** Optional local (per-settlement) exhaustion accumulator; monotonic when present. */
 war_exhaustion_local: Record<SettlementId, number>;
 /** Enclave resilience per enclave ID. Phase C: EnclaveResilienceEntry; old saves: bare number. */

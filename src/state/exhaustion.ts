@@ -1,10 +1,76 @@
 import { FrontEdge } from '../map/front_edges.js';
-import { GameState } from './game_state.js';
+import type { FactionId, GameState } from './game_state.js';
 import { getFactionLegitimacyAverages } from './legitimacy.js';
 import { getExhaustionExternalModifier } from './patron_pressure.js';
+// Band thresholds + derivation live in a BROWSER-SAFE leaf module (zero Node
+// imports, zero runtime game_state import) so the UI read-model can share them
+// without dragging Node-only code into the vite/rollup bundle. (Codex #402.)
+import {
+    WAR_WEARINESS_BAND_THRESHOLDS,
+    WAR_WEARINESS_BANDS_ASCENDING,
+    recoveredExhaustionLevel,
+    warWearinessBandForExhaustion,
+} from './war_weariness_bands.js';
 
 export const EXHAUSTION_WORK_DIVISOR = 10;
 export const EXHAUSTION_LEGITIMACY_MULTIPLIER = 0.05;
+
+// Re-export the band surface from the browser-safe module so existing importers
+// of these symbols from `state/exhaustion.ts` keep working unchanged.
+export {
+    WAR_WEARINESS_BAND_THRESHOLDS,
+    WAR_WEARINESS_BANDS_ASCENDING,
+    recoveredExhaustionLevel,
+    warWearinessBandForExhaustion,
+};
+
+/**
+ * Record the FIRST turn each faction crosses each war-weariness FEEL band into
+ * the OBSERVATIONAL `political.war_weariness_band_first_reached` map. Idempotent
+ * and monotonic: an existing (faction, band) entry is NEVER overwritten, and a
+ * faction below the strained floor writes nothing (so the no-crossing path stays
+ * byte-identical and the map is absent on a steady-only run).
+ *
+ * PURELY OBSERVATIONAL — nothing in the sim reads this map; it exists only so the
+ * War-Weariness Chronicle beat can be pinned to the true crossing turn (the
+ * monotonic current value cannot recover WHEN a band was first reached). Because
+ * no sim decision consumes it, simulation behavior (control, territory, ops,
+ * casualties) is byte-identical; only the serialized save gains this anchor once
+ * a crossing occurs (a clean, honest ratchet of newly-realized information).
+ *
+ * Deterministic: factions iterated in sorted order; bands in fixed ascending
+ * order; no RNG, no clock.
+ */
+export function recordWarWearinessBandCrossings(state: GameState): void {
+    const exhaustion = state.political?.war_exhaustion;
+    if (!exhaustion || typeof exhaustion !== 'object') return;
+
+    const factionIds = (state.factions ?? []).map((f) => f.id).sort((a, b) => a.localeCompare(b));
+    for (const fid of factionIds) {
+        const raw = Number((exhaustion as Partial<Record<FactionId, number>>)[fid] ?? 0);
+        const band = warWearinessBandForExhaustion(raw);
+        if (!band) continue; // steady — nothing to record
+
+        // Lazily allocate the observational map only once a crossing exists.
+        if (!state.political.war_weariness_band_first_reached) {
+            state.political.war_weariness_band_first_reached = {};
+        }
+        const byFaction = state.political.war_weariness_band_first_reached;
+        const existing = byFaction[fid] ?? {};
+
+        const currentTurn = Number(state.meta?.turn ?? 0);
+        // Record every band crossed up to (and including) the current band, each
+        // pinned to the FIRST turn it is observed crossed. Monotonic ⇒ once set,
+        // never moved (guards against a re-run/replay re-stamping a later turn).
+        for (const b of WAR_WEARINESS_BANDS_ASCENDING) {
+            if (WAR_WEARINESS_BAND_THRESHOLDS[b] > recoveredExhaustionLevel(raw)) break;
+            if (existing[b] === undefined) {
+                existing[b] = currentTurn;
+            }
+        }
+        byFaction[fid] = existing;
+    }
+}
 
 export interface ExhaustionStats {
     per_faction: Array<{

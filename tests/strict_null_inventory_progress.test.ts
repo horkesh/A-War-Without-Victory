@@ -623,15 +623,34 @@ describe('strict null inventory progress', () => {
             // `DisplacementDomainState.displacement_flows_by_osid[].by_ethnicity` (the
             // optional per-OSID per-ethnicity breakdown inside the new read-model substrate).
             // state domain; read-model only → calibration byte-identical. 514→515 / state 175→176.
-            optional_fields_game_state: 515,
+            // Robustness audit P1-B (task #95): +1 optional field
+            // `MilitaryState.event_effect_anomalies` (append-only diagnostic log of REJECTED
+            // non-finite event-effect payloads; writer recordNonFiniteEffectAnomaly in
+            // apply_effects.ts). sim domain (/Military/ match). Written ONLY when an effect
+            // carries a NaN/±Infinity payload — never on hand-authored finite historical data
+            // → absent on every calibration run → byte-identical baseline by construction.
+            // 515→516 / sim 329→330. No new type-escape casts.
+            // War-weariness Chronicle #402: +1 optional field
+            // `PoliticalState.war_weariness_band_first_reached` (the OBSERVATIONAL
+            // first-crossing turn anchor per faction/FEEL-band, recorded by
+            // recordWarWearinessBandCrossings in src/state/exhaustion.ts). state domain
+            // (PoliticalState → "Political" interface match). Written ONLY once a faction
+            // crosses a band; PURELY OBSERVATIONAL (no sim code reads it → control/
+            // territory/ops byte-identical). Absent on a steady-only/legacy save → the
+            // no-crossing path is byte-identical. The 40w final save gains this anchor
+            // once crossings occur (a clean, honest ratchet of newly-realized info, NOT a
+            // behavior change). No new type-escape casts (uses sorted localeCompare, the
+            // 'strained'|'cracking'|'collapsing' literals, and the WarWearinessBand alias).
+            // 516→517 / state 176→177.
+            optional_fields_game_state: 517,
         });
-        expect(current.optional_field_domains.total).toBe(515);
+        expect(current.optional_field_domains.total).toBe(517);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 329,
-            state: 176,
+            sim: 330,
+            state: 177,
             ui_adapter: 0,
             unknown: 0,
         });

@@ -1,4 +1,23 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-10] fix(robustness): #95 non-finite guards — serializer fail-loud + effect-delta rejection + #360 factory guard + 3 live-corruption producer fixes (TERRITORY-FLAT RE-FLOOR CANDIDATE, HELD)
+
+**Type:** 1.0 robustness build (task #95) implementing the merged audit `docs/40_reports/proposals/20260609_1.0_ROBUSTNESS_LANDMINE_AUDIT.md` (P1-A, P1-B/P2-B, P2-A) + an owner-directive add-on (corridor_width producer fix). Branch `fix/robustness-95-nonfinite-guards` off origin/main (ec70ddd19). **PR opened, NOT merged — HELD as a territory-flat re-floor candidate for the re-floor panel** (collapse Phase-IV bundling or standalone sign-off). No floor literal / golden manifest touched.
+
+**P1-A (serializer fail-loud):** `serializeGameState.toDeterministicJsonValue` now THROWS with the named key-path on any NaN/±Infinity instead of silently serializing it to `null` (the #358 class: silent save corruption + untraceable hash move). Shared mutable path-stack — no allocation on the finite fast path. The guard immediately caught a third live corruption during verification (below).
+
+**P1-B/P2-B (apply_effects):** `clamp()` hardened (non-finite → min, mirrors `computeMustHoldMultiplier`); every numeric event-effect writer (morale/cohesion/supply/humanitarian/patron/alliance/negotiation-capital/aggression/equipment-quality) now REJECTS a non-finite payload — prior persisted value kept — and appends to the new observability-only `military.event_effect_anomalies` (append-only, never read by sim, absent on every well-formed run → byte-identical by construction). Strict-null optional-field ratchet 515→516 / sim 329→330 (honest pin bump).
+
+**P2-A (#360-class guard):** new `tests/current_version_factory_shape.test.ts` — canonical new-game birth state (createInitialGameState → canonicalizeStartupState) + a same-version save round-trip (serializeGameState → parse, NO migration backfill) must pass `validateGameStateShape({requireVersion: CURRENT_SCHEMA_VERSION})`. A future hard-required lazily-initialized field without `optionalWhenAbsent`+load-seeding or birth-path writing goes red before merge.
+
+**Three LIVE corruptions fixed (all verified in real saves before the fix):**
+1. `measureCorridorWidth` main-body sentinel `Infinity` → **`CORRIDOR_WIDTH_UNBOUNDED = 99`** (was 15× `"corridor_width": null` per save). Reader audit: every reader is a `<= 1` besieged check (plan.ts:1811, derivePosture); persisted copy read by nobody — 99 ≡ Infinity behaviorally.
+2. `commitment_ratio` `Infinity` (front edges, zero brigades) — **CANNOT be producer-fixed** (computeMustHoldMultiplier floor-clamps non-finite→2.0× but any finite ≥6.67 hits the 5.0× cap; assess/decide thresholds `>4/6/8` need the opposite — no finite value preserves both). Sanitized ONLY at the persistence boundary (`emit.ts sanitizeZoneAssessmentsForPersistence` → `COMMITMENT_RATIO_UNBOUNDED_PERSISTED = 99`); in-memory consumers untouched; persisted copy read by nobody (sim re-derives zones each turn, reads only zone_id/osids from previous state).
+3. `defender_contributions[].distance_hops` `Infinity` (bfsDistanceFriendly unreachable reserve; `getReactiveDistanceWeight` already floor-handles it) → clamped at the storage boundary (`buildDefenderContributions` → `DEFENDER_DISTANCE_UNREACHABLE_HOPS = 99`). **Found BY the new P1-A guard** when the candidate 40w threw at `turn_summaries.39.battles.2.defender_contributions.0.distance_hops`.
+
+**40w gate (self-run, dual):** control = clean origin/main worktree → `final_state_hash e246e8529d4244d8`, anchors 30/30, benchmarks 6/6. Candidate = branch → **`ace1395d12c1b1fa`**, anchors 30/30, benchmarks 6/6. **`control_delta.json` SHA256 BYTE-IDENTICAL (9E47DF18…)**. Full `git diff --no-index` of the two final saves = **exactly 19 lines**: 15× `corridor_width: null→99`, 2× `commitment_ratio: null→99`, 2× `distance_hops: null→99` — the hash move is 100% accounted for by de-corrupting the save; everything else byte-identical. 188w/52w re-bless = re-floor panel's call.
+
+**Determinism:** no Math.random/Date.now/timestamps; sorted iteration preserved; initial OSIDs untouched; `String(NaN)`/`String(Infinity)` reprs deterministic; anomaly log appends in sorted effect order.
+
 ## [2026-06-09] chore(release): version → 0.9.9-beta.1 (feature-complete beta entry)
 
 **Type:** version bump only — no behavioral/calibration change. Branch `chore/version-0.9.9-beta` off `origin/main`. Task #82.
@@ -20158,6 +20177,37 @@ Consolidated ledger close for the mechanics-activation session. Net behavioral/o
 - **#73 AAR split residuals (primary ALREADY-RESOLVED by #365 T2-D, verified; 2 residual display sites BUILT):** `letter_home.ts` (UI-render-only consumer) + `FormationDetail.tsx` campaign-losses fallback both re-hardcoded the legacy 0.30/0.55/0.15 split; now reuse canonical `splitKiaWiaMia()` (KIA 0.22 / WIA 0.74 / MIA remainder) so displayed mixes agree with the casualty ledger. `operation_aar.ts:262` 0.30 = grading threshold, not a split (untouched).
 - **Proof:** 40w clean-main (1761a6d0c) vs branch BYTE-IDENTICAL — final_state_hash `e246e8529d4244d8` both; control_delta/formation_delta/final_save sha256-identical. tsc clean; 9 focused suites green (228 tests incl. strict-null + step-order pins); desktop:map:build green; live sensitive-claim inventory row-identical (9 essay_dynamic_section rows).
 - **Determinism:** no RNG/clock; no sim-path change; no event/scenario file touched; no new persisted state.
+
+---
+
+## [2026-06-10] Task #49 (Codex #324) — E-A5 `us_halts` launch-halt moved into the `comply` response (player agency, historical path byte-identical)
+
+**Branch:** `feat/ea5-comply-response-49` (PR, not merged). **Triage of record:** `docs/40_reports/proposals/20260609_CODEX_BACKLOG_TRIAGE_49_53.md` (Task #49, classified calibration-INERT).
+
+- **Data-only** edit in `data/scenarios/events/war_1995.json`: the two `offensive_ops_suppression` entries (RBiH + HRHB, 6 turns, reason `us_halts_federation_advance_1995`) relocated from the event-level `effects[]` (applied unconditionally on fire) into `response_options[0]` (`comply`) `effects`. The two event-level `aggression_modifier` entries stay event-level per triage scope.
+- **Historical/bot path identical:** `bot_response_logic: accept_first` → `selectAIDefaultResponse` returns `options[0]` = `comply` → same `applyEventEffects` writes the same two `state.military.offensive_ops_suppressions` entries on the same turn (stable kind-sort preserves RBiH→HRHB order). Consumer `isFactionOffensiveOpsSuppressed` is origin-agnostic. Proof: self-run 188w clean-main vs branch byte-identical (hashes in PR body).
+- **Emergent/player delta:** a president choosing `push_further` ("Defy Washington") is no longer launch-frozen — the front stays open and the defiance costs authored on the option (morale +5, international_credibility −20, patron_pressure +15, international_standing −15, territorial_legitimacy +10) apply as before. The hollow choice is now real.
+- New focused test `tests/sim/events/ea5_us_halts_comply_suppression.test.ts` (7 tests: data shape + accept_first pin + comply-writes/push_further-does-not behavioral proof).
+
+## 2026-06-10 — Art: peace-plan stills approved + placed (NO-MAP route, owner decision)
+
+**Owner decision:** the four `plan_*` slots go the NO-MAP route — the cartographic territorial-division requirement (Category 1 of `20260609_ART_PROMPT_PACK_NON_SECTION6.md`) is DROPPED. The previously-HELD atmospheric document-scene stills are approved as-is; plan semantics carry through object language (folder mosaic = Vance-Owen ten provinces; three folders = Owen-Stoltenberg three republics; ruler dividing two stacks = Contact Group 51/49; empty signing table = Dayton).
+
+**Output:** `plan_vance_owen` / `plan_owen_stoltenberg` / `plan_contact_group` / `plan_dayton` — QC-passed (no people, no readable text, no flags, documentary palette), resized 1536×1024→600×400 (same 3:2, no crop), webp q82, placed in `src/ui/map/assets/plans/`. Non-§6 batch 1 now 17/17 complete. Pack doc GENERATION STATUS + Category 1 updated (blocks retained as historical record, marked DO-NOT-GENERATE).
+
+**Wiring gap (open):** nothing globs `assets/plans/` yet — same follow-up class as the verdict/tutorial wiring (#380); a peace-plan surface import is needed before these render. Calibration-inert (binary assets + docs only).
+
+## 2026-06-10 — UI: peace-plan still wiring (assets/plans resolver)
+
+`peacePlanArt.ts` resolver (mirrors verdictArt/eventIllustrationArt idiom: eager `import.meta.glob` over `assets/plans/*.webp`, explicit planId→basename map, injectable core for tests, null on absence — never a broken image). `PeacePlanModal` renders the documentary still between header and narrative when the plan id resolves; `cutileiro` (no still) and asset-less ids keep the prior layout byte-identical. 8 new tests (`tests/ui/peace_plan_art.test.ts`) incl. end-to-end glob resolution of the four committed stills + catalog-mapping integrity vs `PEACE_PLANS`. UI presentation only — no engine/state touch, calibration-inert. Closes the assets/plans wiring gap from #384.
+
+## 2026-06-10 — Art: 13 faction-specific event stills placed (batch 2, inert)
+
+Owner delivered the 15 faction stills (5 SPLIT families × 3 factions per `20260609_ART_PROMPT_PACK_NON_SECTION6.md`). QC-passed (faction differentiation strong; guards held — no readable text/flags/insignia, no identifiable faces, no bodies/gore, documentary palette). 13 resized 1672×941→800×450 (`fit:cover`, same 16:9 → no crop), webp q82, placed in `src/ui/map/assets/event_illustrations/`: `event_mobilization_{RBiH,RS,HRHB}`, `event_supply_convoy_{RBiH,RS,HRHB}`, `event_supply_shortage_{RBiH,RS,HRHB}`, `event_siege_city_{RBiH,RS,HRHB}`, `event_patron_relations_RBiH`. **INERT** — dir globbed by `eventIllustrationArt.ts` but no event JSON carries a matching `image` key yet (test-asserted) → render unchanged; wiring is a separate follow-up. **HELD for regen (2):** `event_patron_relations_{RS,HRHB}` used a digital face-blur instead of the prompt's natural silhouette (since shipped in batch 3). Calibration-inert (binary assets + docs only).
+
+## 2026-06-10 — Art: final 8 event stills placed → NON-§6 pack COMPLETE (batch 3, inert)
+
+Owner delivered the last 8: the 6 remaining shared Category-4 stills (`event_washington_agreement`, `event_referendum`, `event_political_session`, `event_ceasefire`, `event_displacement_column`, `event_un_presence`) + the 2 patron regens (`event_patron_relations_{RS,HRHB}` — now natural shallow-DOF silhouettes, the held digital pixelation-blur fixed). QC-passed (guards held; displacement column distant/anonymous NON-atrocity). Resized 1672×941→800×450 (`fit:cover`, no crop), webp q82, placed in `src/ui/map/assets/event_illustrations/`. INERT (dir globbed by `eventIllustrationArt.ts`; no event JSON sets a matching `image` key yet → render unchanged). **NON-§6 generation COMPLETE across the art PR set** — only the 5 generic faction-agnostic fallback stills remain ungenerated, intentionally skipped as redundant. Remaining art work is WIRING (event `image` keys), not generation; gated on the asset PRs landing on main first. Calibration-inert (binary + docs only).
 
 ## 2026-06-10 — §6 art: sign-off chain run + 6 stills placed inert (gated)
 

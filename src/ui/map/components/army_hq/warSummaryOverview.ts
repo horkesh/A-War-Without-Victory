@@ -1,5 +1,9 @@
 import osidAreas from '../../../../../data/derived/operational/osid_areas.json';
 import type { LoadedGameState } from '../../data/types';
+import {
+    deriveWarWeariness,
+    type WarWearinessDescriptor,
+} from '../../data/warWeariness';
 
 export const WAR_SUMMARY_FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -20,6 +24,15 @@ export interface WarSummaryOverviewModel {
      * Army HQ → Command Relationship. WarSummary advertises and hands off.
      */
     warExhaustionByFaction: Partial<Record<(typeof WAR_SUMMARY_FACTIONS)[number], number>>;
+    /**
+     * Collapse Repurpose Design A — derived war-weariness descriptor per faction
+     * (steady → strained → cracking → collapsing) off the same war_exhaustion
+     * signal. PURE READ-MODEL (warWeariness.ts): no sim state touched, no
+     * persisted field, byte-identical sim. Populated only where
+     * warExhaustionByFaction is (i.e. fog-of-war scoped to the player faction);
+     * the feel layer shares the one source of truth with the raw passthrough.
+     */
+    warWearinessByFaction: Partial<Record<(typeof WAR_SUMMARY_FACTIONS)[number], WarWearinessDescriptor>>;
 }
 
 export function buildWarSummaryOverviewModel(state: LoadedGameState): WarSummaryOverviewModel {
@@ -82,12 +95,17 @@ export function buildWarSummaryOverviewModel(state: LoadedGameState): WarSummary
         : null;
 
     const warExhaustionByFaction: WarSummaryOverviewModel['warExhaustionByFaction'] = {};
+    const warWearinessByFaction: WarSummaryOverviewModel['warWearinessByFaction'] = {};
     const rawExhaustion = state.warPhaseExhaustion;
     if (rawExhaustion) {
         for (const f of WAR_SUMMARY_FACTIONS) {
             const v = rawExhaustion[f];
             if (typeof v === 'number' && Number.isFinite(v)) {
                 warExhaustionByFaction[f] = v;
+                // Derive the war-weariness band off the same raw signal. The
+                // collapse_eligibility echo is unavailable on the adapter view
+                // (gated/default-off), so the descriptor is signal-only here.
+                warWearinessByFaction[f] = deriveWarWeariness(v);
             }
         }
     }
@@ -102,5 +120,6 @@ export function buildWarSummaryOverviewModel(state: LoadedGameState): WarSummary
         totalDisplaced,
         displacedByFaction,
         warExhaustionByFaction,
+        warWearinessByFaction,
     };
 }
