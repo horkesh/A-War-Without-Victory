@@ -799,3 +799,42 @@ Live exhaustion build (agent-aa39, feat/exhaustion-feel-surface) HEAD advanced m
 - Image-enrichment path App.tsx:728-741 looks up def by id from loadEventDefinitions() (DataLoader.ts:78-80) which loads ONLY war_1992/1993/1994/1995.json — NOT consequences.json. image not persisted on firedEvents. → csq_* image resolves undefined → NO still renders.
 - TO WIRE mobilization/supply/shortage stills to csq_* requires: (a) add '/data/scenarios/events/consequences.json' to DataLoader files + full-catalog loader (UI change, additive), (b) wire image keys on the per-faction csq_* events, (c) verify csq_* actually flash EventModal (firedEvents !isDecision path). Bounded follow-up but touches UI display → owner + ui-ux call.
 - siege_RS (besieger, no event) + displacement_column remain homeless regardless. ENCLAVE 3 images already in hand at F:\tmp\section6_art (held on feature). Prompts re-sent to owner.
+
+## 2026-06-10 — Design B SHELVED + next lane = Tier-1 Replay-wire
+- **Design B (exhaustion-drag → territorial teeth): SHELVED.** Scenario-tester panel STOP (4th inert 188w result). Closeout `docs/40_reports/20260610_DESIGN_B_SHELVED.md` (`33b223e80` → main `ef63db77f`). Closed #411/#408/#407; deleted 3 remote+local branches; 3 worktrees de-registered (→15). Memory pinned (`design_b_exhaustion_drag_dead_end.md`) — do NOT re-attempt; post-1.0 lane = gate the INJECTION pipeline, not the scorer. Design A (feel-only) is the 1.0 exhaustion deliverable.
+- **Collapse settled for 1.0:** repurpose-scope confirms (c) feel-only shipped (Design A), (a) C-drag = dead-end, IV-b territory path = post-1.0. Enable flags stay default-off. No owner-gated enable decision dangling.
+- **GitHub sweep:** only #409/#410 (parallel art session) failing — real `tests/sector_frontline_truth.test.ts` Wave-4 break, NOT stale-manifest → stale branch, needs rebase (art session's lane). No new Codex comments anywhere. #344/#329 intentionally held.
+- **Floor:** 649 held throughout.
+- **NEXT (in flight):** Tier-1 Replay-wire scoping dispatched (task #7) — D2-enabling, 1.0-blocking, not §6-gated.
+
+## csq_* WIRING VALIDATED → IMPLEMENTING (2026-06-10)
+- CONFIRMED: csq_ events fire→fired_event_ids→deriveFiredEvents (GameStateAdapter:2872, isDecision:false)→App.tsx acknowledge-flash. Runtime proof: 188w 27 csq_ fired, 40w 7 (incl csq_refugee_labor_mobilization). They ALREADY flash text-only; just need image in def-map.
+- FIX: add consequences.json to DataLoader loaders (loadEventDefinitions ~line78 + full-catalog loader) so csq_ defs carry image. Then wire 9 keys:
+  csq_industrial_conscription_wave[/_RS/_HRHB]→event_mobilization_{RBiH,RS,HRHB}; csq_supply_corridor_chronic_strain_{RBiH,RS,HRHB}→event_supply_convoy_{...}; csq_winter_supply_attrition_{RBiH,RS,HRHB}→event_supply_shortage_{...}.
+- Separate PR (UI DataLoader + data). Byte-identity gate. siege_RS + displacement still homeless.
+
+## csq_* WIRING BUILT + verifying (2026-06-10) — worktree art-wiring-csq (branch feat/art-csq-wiring from main ef63db77f)
+- DataLoader: added consequences.json to trimmed loadEventDefinitions (full loader already had it). 9 csq_ image keys wired. tsc OK, event_illustration_art green, map build green.
+- 40w WITH csq wiring: final_state_hash f1d283155a696424 (raw). Running baseline (revert consequences.json) → scenario-tester verdict per enforcement.
+
+## csq_* WIRING — byte-identity raw + expert pending (2026-06-10)
+- 40w: baseline f1d283155a696424 == with-csq-wiring f1d283155a696424 (raw, this worktree main ef63db77f). Wiring restored (9 lines). scenario-tester dispatched a3dec97a (csq events fire in-window so 40w is in-scope, not out-of-window). Awaiting GO → commit + PR (DataLoader UI + consequences.json data). NOT yet committed.
+- After this: homes 9/14 stranded stills; only siege_RS + displacement remain.
+
+## csq_* WIRING SHIPPED → PR #412 (2026-06-10) — scenario-tester GO
+- PR #412 (feat/art-csq-wiring): DataLoader + 9 csq_ image keys. GO (40w byte-identical f1d283155a696424; image not persisted; DataLoader render-only; 188w not required). tsc/event-test/map-build green.
+- WIRING COVERAGE now: 25/28 event stills homed = 10 named (#409) + 6 §6 (#410) + 9 csq_ (#412). Homeless: event_siege_city_RS + event_displacement_column (no fitting event).
+- THREE wiring PRs all OPEN, HELD for owner merge decision: #409 (NON-§6), #410 (§6 gated), #412 (csq UI+data). All scenario-tester GO, byte-identical.
+- MISSING ART unchanged: 3 enclave-decision images (in hand at F:\tmp\section6_art, held on feature) + 5 optional fallbacks (skipped).
+
+## MERGING 3 WIRING PRs (owner: merge all) (2026-06-10)
+- Order #409 → #410 → #412. #410/#412 currently MERGEABLE+BLOCKED(CI); #409 UNKNOWN (older base, needs ledger resync). Serial resync between merges (ledger tail). #409/#410 both touch war_*.json but different events → 3-way clean. #412 = consequences.json+DataLoader (no war overlap).
+
+## WIRING MERGE — CI guard test fixed (2026-06-10/11)
+- #409 CI "Event system validation" FAILED: tests/event_loader.test.ts "no shipped event carries an image key (pipeline inert)" — obsolete guard now that wiring is live. FIXED (2837bd228): inverted to validate every image is a non-empty .webp + >=1 wired. 35/35 local pass.
+- SEQUENCE: #409 carries the test fix → must merge FIRST. #410/#412 add images too → will hit same guard until they resync from main AFTER #409 merges (gets fix). Then they pass. Order locked: #409 → #410 → #412.
+- Re-watching #409 CI (push 2837bd228).
+
+### Sweep update (later 2026-06-10)
+- **Tier-1 Replay-wire:** scoped (Technical Architect, `proposals/20260610_TIER1_REPLAY_WIRE_SCOPE.md`) = calibration-INERT, no §6, producer-side orphan in `electron-main.cjs` (~12 lines/3 files). Builder dispatched in worktree (branch `feat/tier1-replay-wire`, DRAFT PR pending). Reviewer to follow (implementer≠reviewer).
+- **Art-session PRs #409/#412 RED = REAL regression, NOT stale** — both 0 commits behind main; failing `tests/event_loader.test.ts` strict-deep-equal (their art→event wiring alters event defs that the loader integrity test rejects). #410 additionally 2 behind (rebase). NOT my lane — flag for the art session to fix event wiring before merge. Do not touch their branches.
