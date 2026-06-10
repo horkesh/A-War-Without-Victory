@@ -1684,6 +1684,18 @@ app.whenReady().then(() => {
       sendGameStateToRenderer(currentGameStateJson, _event.sender);
       if (result.report) sendTurnReportToRenderer(result.report);
       autoSave();
+      // TIER1-REPLAY-LIVE: accumulate sparse replay summary for the live-play
+      // manifest so the VerdictScreen Replay tab works for campaigns played in-app.
+      // buildReplayFrameSummary is a pure read-only projection (no Math.random /
+      // Date.now). Does NOT store full GameState[] (memory safety).
+      if (typeof sim.buildReplayFrameSummary === 'function') {
+        const liveSummaryFrame = sim.buildReplayFrameSummary(result.state);
+        if (liveSummaryFrame) {
+          liveReplayManifestFrames.push(liveSummaryFrame);
+          const liveManifest = sim.buildReplaySaveManifest(liveReplayManifestFrames);
+          sendReplayManifestToRenderer(JSON.stringify(liveManifest));
+        }
+      }
       return { ok: true, stateJson: currentGameStateJson, report: result.report ?? null };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
