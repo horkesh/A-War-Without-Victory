@@ -25,6 +25,14 @@ Owner generated + delivered a first batch; QC'd, cropped to exact dims (`fit:cov
 
 **⚠️ HELD — needs regen (4):** `plan_vance_owen` / `plan_owen_stoltenberg` / `plan_contact_group` / `plan_dayton`. The delivered images were atmospheric desk/document scenes, NOT the cartographic territorial-division maps these slots require — the historical reference maps were not attached. Re-generate WITH the attached historical map per each prompt's "ATTACHED reference" instruction.
 
+### Batch 2 — faction-specific event stills (updated 2026-06-10)
+
+Owner delivered the 15 faction stills (the 5 SPLIT families × 3 factions). All delivered at 1672×941 (16:9), QC-passed (faction differentiation strong; guards held — no readable text, no legible flags/insignia, no close-up/identifiable faces, no bodies/gore, documentary palette), resized 800×450 (`fit:cover`, same aspect → no crop), webp.
+
+**✅ DONE — QC-passed, webp, placed (13):** `event_mobilization_{RBiH,RS,HRHB}` · `event_supply_convoy_{RBiH,RS,HRHB}` · `event_supply_shortage_{RBiH,RS,HRHB}` · `event_siege_city_{RBiH,RS,HRHB}` · `event_patron_relations_RBiH` → all in `src/ui/map/assets/event_illustrations/` (live-wired dir; INERT until a faction-tagged event sets its `image` key to the matching basename — wiring is a separate follow-up).
+
+**⚠️ HELD — needs regen (2):** `event_patron_relations_RS` / `event_patron_relations_HRHB`. The delivered pair obscured faces with a digital pixelation-blur rather than the prompt's natural out-of-focus silhouette (as the RBiH one correctly used). Owner: regenerate the two with the amended prompts (silhouette/shallow-DOF, explicit no-pixelation guard).
+
 ---
 
 # PROVEN STYLE & LESSONS — distilled from the SHIPPED assets
