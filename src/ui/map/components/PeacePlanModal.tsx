@@ -25,6 +25,7 @@ import { Modal } from '../../shared/Modal';
 import { playCue } from '../audio/audio_engine';
 import { t } from '../i18n';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
+import { resolvePeacePlanStill } from '../data/peacePlanArt';
 
 const INSTITUTIONAL_LABELS: Record<string, string> = {
     cantonization: 'Ethnic Cantonization',
@@ -69,6 +70,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
     const setLoadError = useGameStore((s) => s.setLoadError);
     const playerFaction = useGameStore((s) => s.loadedGameState?.player_faction ?? null);
     const headerImage = getDecisionHeaderForFamily('peace_plan');
+    const planStill = resolvePeacePlanStill(plan.planId);
     const proposedFactionLabels = {
         RBiH: getPlayerSafePoliticalFactionName('RBiH'),
         RS: getPlayerSafePoliticalFactionName('RS'),
@@ -150,6 +152,30 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                         Proposed: Week {plan.turnOffered}
                     </div>
                 </div>
+
+                {/* Documentary plan still — rendered ONLY when the plan id maps
+                    to a committed asset under assets/plans/ (resolver returns
+                    null otherwise, e.g. cutileiro). Absent → nothing here, so
+                    the still-less layout is byte-identical to before. */}
+                {planStill && (
+                    <div className="relative w-full border-b border-[#c8b898]/40" data-testid="peace-plan-still">
+                        <img
+                            src={planStill}
+                            alt=""
+                            aria-hidden="true"
+                            className="block w-full object-cover"
+                            style={{ aspectRatio: '3 / 2', maxHeight: '280px' }}
+                        />
+                        {/* Bottom fade into the paper so the still seats into the document. */}
+                        <div
+                            aria-hidden="true"
+                            className="absolute inset-x-0 bottom-0 h-1/4 pointer-events-none"
+                            style={{
+                                background: 'linear-gradient(to top, rgba(224,216,192,0.9), rgba(224,216,192,0))',
+                            }}
+                        />
+                    </div>
+                )}
 
                 {/* Narrative */}
                 <div className="px-8 py-5 text-[13px] text-[#2a2016] leading-relaxed border-b border-[#c8b898]/40">

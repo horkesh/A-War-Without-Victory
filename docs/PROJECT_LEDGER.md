@@ -20119,3 +20119,7 @@ Consolidated ledger close for the mechanics-activation session. Net behavioral/o
 **Output:** `plan_vance_owen` / `plan_owen_stoltenberg` / `plan_contact_group` / `plan_dayton` — QC-passed (no people, no readable text, no flags, documentary palette), resized 1536×1024→600×400 (same 3:2, no crop), webp q82, placed in `src/ui/map/assets/plans/`. Non-§6 batch 1 now 17/17 complete. Pack doc GENERATION STATUS + Category 1 updated (blocks retained as historical record, marked DO-NOT-GENERATE).
 
 **Wiring gap (open):** nothing globs `assets/plans/` yet — same follow-up class as the verdict/tutorial wiring (#380); a peace-plan surface import is needed before these render. Calibration-inert (binary assets + docs only).
+
+## 2026-06-10 — UI: peace-plan still wiring (assets/plans resolver)
+
+`peacePlanArt.ts` resolver (mirrors verdictArt/eventIllustrationArt idiom: eager `import.meta.glob` over `assets/plans/*.webp`, explicit planId→basename map, injectable core for tests, null on absence — never a broken image). `PeacePlanModal` renders the documentary still between header and narrative when the plan id resolves; `cutileiro` (no still) and asset-less ids keep the prior layout byte-identical. 8 new tests (`tests/ui/peace_plan_art.test.ts`) incl. end-to-end glob resolution of the four committed stills + catalog-mapping integrity vs `PEACE_PLANS`. UI presentation only — no engine/state touch, calibration-inert.
