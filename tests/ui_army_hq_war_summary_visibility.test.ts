@@ -93,4 +93,24 @@ describe('ui army hq war summary visibility', () => {
     const model = buildWarSummaryOverviewModel(makeLoadedGameStateNoExhaustion());
     expect(model.warExhaustionByFaction).toEqual({});
   });
+
+  // Collapse Repurpose Design A — derived war-weariness descriptor passthrough.
+  it('derives a war-weariness band descriptor off the same exhaustion signal', () => {
+    const model = buildWarSummaryOverviewModel(makeLoadedGameState());
+    // raw 620 → 6.2 on the 0..100 scale → steady
+    expect(model.warWearinessByFaction.RBiH?.band).toBe('steady');
+    expect(model.warWearinessByFaction.RBiH?.level).toBeCloseTo(6.2, 5);
+  });
+
+  it('reports a cracking band for a late-war exhaustion value', () => {
+    const base = makeLoadedGameState();
+    const state = { ...base, warPhaseExhaustion: { RBiH: 7000 } } as unknown as Parameters<typeof buildWarSummaryOverviewModel>[0];
+    const model = buildWarSummaryOverviewModel(state);
+    expect(model.warWearinessByFaction.RBiH?.band).toBe('cracking');
+  });
+
+  it('omits the descriptor when warPhaseExhaustion is absent', () => {
+    const model = buildWarSummaryOverviewModel(makeLoadedGameStateNoExhaustion());
+    expect(model.warWearinessByFaction).toEqual({});
+  });
 });

@@ -137,6 +137,7 @@ import { degradeEquipment, ensureBrigadeComposition } from '../combat/equipment_
 import { getRSMaintenanceCapacityMult, runEquipmentProgression } from '../combat/faction_progression.js';
 import { updateEnclaveResilience } from '../combat/enclave_resilience.js';
 import { updateExhaustion } from '../combat/exhaustion.js';
+import { recordWarWearinessBandCrossings } from '../../state/exhaustion.js';
 import { detectFronts } from '../combat/front_emergence.js';
 import { buildCorpsFrontSectors, assignBrigadesToSubSegments, REASSIGNMENT_ENTRENCHMENT_RETAIN } from '../combat/corps_front_sectors.js';
 import { ENABLE_TG_OG_PROMOTION } from '../combat/tactical_group_config.js';
@@ -3398,6 +3399,15 @@ export const warPhases: NamedPhase[] = [
                 context.report.supply_resolution?.supply_state_by_osid
             );
             updateExhaustion(context.state, fronts, frictionMultipliers);
+            // OBSERVATIONAL: stamp the first turn each faction crosses a
+            // war-weariness FEEL band, so the Chronicle beat can pin its
+            // one-time threshold-crossing card to the true crossing turn. Reads
+            // nothing back into the sim (control/territory/ops byte-identical);
+            // writes only the political.war_weariness_band_first_reached anchor
+            // and only once a band is actually crossed (steady-only run = absent
+            // map = byte-identical save). Runs right after updateExhaustion so it
+            // observes this turn's monotonic value. (Codex #402.)
+            recordWarWearinessBandCrossings(context.state);
         }
     },
     {

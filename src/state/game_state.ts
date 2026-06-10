@@ -2838,6 +2838,17 @@ export interface CommandAuthority {
     lifetime_spent: number;
 }
 
+/**
+ * War-weariness FEEL bands that warrant a Chronicle beat (steady is the baseline
+ * and never recorded). Ordered lowest → highest. Canonical definition + the
+ * numeric thresholds live in the BROWSER-SAFE leaf module
+ * src/state/war_weariness_bands.ts (zero Node imports). Imported type-only
+ * (erased at runtime — no runtime import edge) so it is in local scope below AND
+ * re-exported, without duplicating the union or adding a Node dependency.
+ */
+import type { WarWearinessBand } from './war_weariness_bands.js';
+export type { WarWearinessBand };
+
 export interface PoliticalState {
 negotiation_status?: NegotiationStatus;
 ceasefire?: Record<string, CeasefireFreezeEntry>;
@@ -2895,6 +2906,25 @@ war_supply_pressure: Record<FactionId, number>;
 war_supply_condition: Record<FactionId, number>;
 /** Faction-level exhaustion (monotonic, irreversible). Engine Invariants §8. */
 war_exhaustion: Record<FactionId, number>;
+/**
+ * OBSERVATIONAL read-model anchor: the turn each faction FIRST reached a given
+ * war-weariness feel-band (strained/cracking/collapsing — thresholds in
+ * src/ui/map/data/warWeariness.ts). Written once per (faction, band) when the
+ * band is first crossed and NEVER overwritten (monotonic, like war_exhaustion).
+ *
+ * PURELY OBSERVATIONAL — no sim code reads this; it does not feed combat,
+ * control, ops, or any decision. Its sole consumer is the War-Weariness
+ * Chronicle beat, which pins each one-time threshold-crossing beat to the turn
+ * the band was first crossed (so the UI shows it ONCE at that week instead of
+ * re-emitting it dated at the latest turn every render). war_exhaustion is
+ * monotonic, so the current band is the highest ever reached — but the CURRENT
+ * value cannot recover WHEN a band was first crossed; this map records it.
+ *
+ * Absent on legacy saves and whenever no faction has crossed a band — a faction
+ * below the strained floor writes nothing, so the no-crossing path is
+ * byte-identical. Optional; no migration needed (read defensively).
+ */
+war_weariness_band_first_reached?: Partial<Record<FactionId, Partial<Record<WarWearinessBand, number>>>>;
 /** Optional local (per-settlement) exhaustion accumulator; monotonic when present. */
 war_exhaustion_local: Record<SettlementId, number>;
 /** Enclave resilience per enclave ID. Phase C: EnclaveResilienceEntry; old saves: bare number. */

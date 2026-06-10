@@ -34,6 +34,7 @@ export interface ChronicleEntry {
 import { buildDecisionConsequenceLedger, type DecisionConsequenceRecord } from '../../data/decisionConsequenceLedger.js';
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets.js';
 import { buildConsequenceReceipts } from '../../data/consequenceReceipts.js';
+import { buildWarWearinessChronicleEntries } from './warWearinessChronicle.js';
 import type { EventDefinition } from '../../../../sim/events/event_types.js';
 import type { GameState } from '../../../../state/game_state.js';
 
@@ -504,6 +505,17 @@ export function generateChronicleEntries(
     entries.push(...buildOfficerSpotlightEntries(state, playerFaction));
     entries.push(...buildDecisionLedgerEntries(state));
     entries.push(...buildConsequenceReceiptEntries(state, eventCatalog));
+
+    // War-weariness feel surface (Collapse Repurpose Design A) — somber beats
+    // when any faction has crossed an exhaustion threshold. Pure read of the
+    // live war_exhaustion accumulator; monotonic ⇒ no history field needed.
+    // Dated at the latest recorded turn.
+    const latestTurn = state.turnSummaries.reduce(
+        (max: number, s: any) => Math.max(max, Number(s?.turn ?? 0)),
+        Number(state.turn ?? 0),
+    );
+    entries.push(...buildWarWearinessChronicleEntries(state.rawGameState as GameState | undefined, latestTurn));
+
     entries.sort((a, b) => a.turn - b.turn);
     return entries;
 }
