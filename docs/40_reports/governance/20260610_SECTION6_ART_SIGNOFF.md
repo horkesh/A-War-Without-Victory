@@ -11,8 +11,13 @@
 
 **All 7 reviewed stills: APPROVED-WITH-NOTES by all three reviewers. No rejections.**
 
-- **6 cleared unconditionally** (non-blocking refinement notes only) → placed inert this PR: `event_concentration_camps_revealed_1992`, `event_srebrenica_falls_1995`, `event_zepa_falls_1995`, `event_markale_shelling`, `event_drina_valley_ethnic_cleansing_1992`, `codex_atrocity_essay_header`.
-- **1 carries a conditional** → **HELD** for an owner decision: `event_ahmici_massacre_1993` (8.4) — `/historian` approves *conditional on the minaret-legibility fix being carried forward*; the toppled minaret is the documented signature of Ahmići (Blaškić IT-95-14 / Kordić IT-95-14/2 / Kupreškić IT-95-16) and in the delivered render reads ambiguously as a chimney. Recommend a regeneration that makes the felled minaret unmistakable before placement.
+- **7 placed inert** (the conditional and the recommended refinement are now resolved — see Update below): `event_concentration_camps_revealed_1992`, `event_srebrenica_falls_1995`, `event_zepa_falls_1995`, `event_markale_shelling`, `event_drina_valley_ethnic_cleansing_1992`, `codex_atrocity_essay_header`, `event_ahmici_massacre_1993`.
+
+### Update 2026-06-10 (regens) — `/historian` conditional CLEARED
+
+Owner regenerated the two `/historian`-flagged stills; both re-QC'd (dignity guards held) and placed:
+- **8.4 `event_ahmici_massacre_1993` — conditional CLEARED + placed.** The regen renders an unmistakable felled minaret — slender white shaft, decorated şerefe balcony ring, conical cap, lying intact across the rubble with the broken base stump on the gutted mosque. This satisfies the historian's "minaret-legibility carried forward" condition; the documented religious-targeting signature (Blaškić IT-95-14 / Kordić IT-95-14/2 / Kupreškić IT-95-16) now reads correctly. Moved from HELD → placed.
+- **8.5 `event_markale_shelling` — refinement applied (swap).** The regen replaces the deep blast crater with a shallow radial "Sarajevo rose" surface scar, matching the forensic record (Galić IT-98-29 / D. Milošević IT-98-29/1). The prior version (already approved) is overwritten.
 
 All placements are **INERT** — the `event_illustrations/` dir is globbed by `eventIllustrationArt.ts`, but no event/codex JSON sets a matching `image` key yet, so in-product render is unchanged. This sign-off authorizes **placement only**, not wiring; wiring the `image` keys is a later step.
 
@@ -46,16 +51,15 @@ All 10 delivered §6 stills (including the 3 held enclave-decision images) passe
 
 | Asset | Reason |
 |---|---|
-| `event_ahmici_massacre_1993` (8.4) | `/historian` conditional — minaret-legibility regen recommended; owner decision pending |
 | `decision_header_enclave_overrun` (8.7) | Enclave-decision art; feature build pending owner + §6 sign-off; owner approval non-delegable |
 | `decision_overrun_aftermath` (8.9) | Enclave-decision branch; held with the feature |
 | `decision_contain_siege` (8.10) | Enclave-decision branch; held with the feature |
 
 ---
 
-## Follow-ups (recorded, non-blocking for the 6 placed)
+## Follow-ups (recorded)
 
-1. **8.4 Ahmići** — regenerate for an unmistakable felled minaret; re-run dignity-QC; place on the same inert basis.
-2. **8.5 Markale** — optional refinement to a shallow "Sarajevo rose" impact scar; current render is approved, refinement recommended.
-3. **8.3 Žepa** — confirm desaturated grey-green grade at integration.
-4. **Wiring** (separate, later) — set the `image` keys on the matching atrocity event / codex rows; that is itself §6 content work and routes back through this chain for the wiring change.
+1. ~~**8.4 Ahmići** — regenerate for an unmistakable felled minaret.~~ **DONE 2026-06-10** (regen placed; conditional cleared — see Update above).
+2. ~~**8.5 Markale** — refine to a shallow "Sarajevo rose" impact scar.~~ **DONE 2026-06-10** (regen swapped in — see Update above).
+3. **8.3 Žepa** — confirm desaturated grey-green grade at integration (non-blocking; placed version stands).
+4. **Wiring** (separate, later) — set the `image` keys on the matching atrocity event / codex rows; that is itself §6 content work and routes back through this chain for the wiring change. Must not run until the assets are merged to main.

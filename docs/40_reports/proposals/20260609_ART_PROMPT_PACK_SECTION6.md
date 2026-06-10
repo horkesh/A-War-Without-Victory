@@ -6,8 +6,8 @@
 **Canon authority:** `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` (Tier 2 canon — above Rulebook, below Engine Invariants). Every prompt below is bound by it.
 
 > **GENERATION / SIGN-OFF STATUS (updated 2026-06-10).** Owner delivered all 10 stills; dignity-QC passed on all. The §6 sign-off chain (`/historian` + `/narrative-designer` + `/game-designer`) ran on the 7 non-enclave subjects (8.1–8.6, 8.8) — **all APPROVE-WITH-NOTES, no rejections**. Record: `docs/40_reports/governance/20260610_SECTION6_ART_SIGNOFF.md`.
-> - **PLACED inert (6):** 8.1 camps, 8.2 Srebrenica, 8.3 Žepa, 8.5 Markale, 8.6 Drina, 8.8 codex header → `src/ui/map/assets/event_illustrations/` (globbed but no event/codex `image` key set yet → render unchanged; wiring is a later §6-gated step).
-> - **HELD (4):** 8.4 Ahmići (`/historian` conditional — minaret reads as a chimney; regen for an unmistakable felled minaret, then place); 8.7 / 8.9 / 8.10 enclave-decision art (feature build pending owner + §6 sign-off; owner approval non-delegable).
+> - **PLACED inert (7):** 8.1 camps, 8.2 Srebrenica, 8.3 Žepa, 8.4 Ahmići, 8.5 Markale, 8.6 Drina, 8.8 codex header → `src/ui/map/assets/event_illustrations/` (globbed but no event/codex `image` key set yet → render unchanged; wiring is a later §6-gated step). 8.4 + 8.5 were regenerated 2026-06-10 (8.4 unmistakable felled minaret → `/historian` conditional cleared; 8.5 shallow "Sarajevo rose" → refinement applied).
+> - **HELD (3):** 8.7 / 8.9 / 8.10 enclave-decision art (feature build pending owner + §6 sign-off; owner approval non-delegable).
 **How to use (after sign-off only):** Each block is fully self-contained and copy-paste-ready: subject, composition, mood, lighting, palette, dimensions, drop path, and negative prompt are inlined — identical workflow to the shipped presidential-desk cards. Do NOT paste any block into a generator until the §6 gate clears it.
 
 ---
