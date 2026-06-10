@@ -2822,6 +2822,25 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             await writeFile(finalSavePath, finalSerialized, 'utf8');
         });
 
+        // COLLAPSE PHASE IV-b D1 (G2-A marker, 2026-06-10) — §6 review BLOCKING gap fix.
+        // Review: docs/40_reports/proposals/20260610_COLLAPSE_PHASE4B_S6_REVIEW.md (G2-A).
+        // Collapse-ON runs (the IV-a ENABLE_COLLAPSE env gate above) write a SIDECAR
+        // marker so the G2 §6 invariant test can verify an artifact was genuinely
+        // produced with the collapse pipeline enabled — without it, G2-GREEN against a
+        // collapse-OFF artifact is a false-green for §6. Sidecar file (NOT embedded in
+        // final_save.json, NOT persisted game state): the canonical save hash and the
+        // save schema are untouched, so there is no save-version bump and the
+        // collapse-OFF default path (this block does not execute) stays byte-identical.
+        // Content is constant — no timestamps, no RNG (determinism).
+        if (process.env.ENABLE_COLLAPSE === 'true') {
+            const collapseMarkerPath = join(outDir, 'collapse_enabled.json');
+            await writeFile(
+                collapseMarkerPath,
+                stableStringify({ collapse_enabled: true, gate: 'ENABLE_COLLAPSE' }, 2),
+                'utf8'
+            );
+        }
+
         // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: consolidated end-of-run
         // artifact. Separate file (NOT embedded in final_save.json) so canonical
         // save hash invariance holds and existing loaders continue working
