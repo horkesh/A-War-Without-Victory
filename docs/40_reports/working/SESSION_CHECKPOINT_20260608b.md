@@ -501,3 +501,15 @@ CI + Codex sweep · doc-sync · dispatch to NAMED specialists · code-review/QA 
 
 ## ART: PEACE-PLAN STILL WIRING (2026-06-10, follow-up to PR #384)
 - PR #386 (feat/art-plan-wiring, worktree plan-art-wiring): peacePlanArt.ts resolver (verdictArt idiom; planId→basename; cutileiro=null) + PeacePlanModal still render (EventModal-style fade; absent→byte-identical) + 8 tests (real-glob e2e of the 4 stills + PEACE_PLANS mapping integrity). Triad green (tsc / 8/8 / map build — 4 plan_*.webp in dist). STACKED on #384 (branch = main+384+wiring; shrinks if 384 merges first). assets/plans wiring gap CLOSED on merge.
+
+## ★ AUTONOMOUS DAY-RUN OPENED (owner directive, 2026-06-10): "get ALL of the game done today"
+- Owner off at work; full autonomous drive under the standing delegation. Task list (8 tasks, deps): T1 D2 wire-in (blocked on #383) → T2 D3+Phase-IV tuning+panel re-floor → T6 enclave build + T7 replay-wire+playtest-proxy (blocked on T2). Parallel inert: T3 #95 robustness · T4 quick-wins · T5 #49 E-A5 comply.
+- DISPATCHED 3 inert builders (byte-identical gates, no collapse-file overlap): robustness-95 (a08369c0) · quickwins-bundle (ace4c222) · ea5-comply-49 (a6b850ac, 188w-gated).
+- Ledger 2026-06-10 + board reconcile + checkpoint → **PR #387** (01b2bacf0, watcher bur5ub2ef). **#385 MERGED.** GIT NOTE: `checkout main` had reverted this working-tree checkpoint to main's old version — restored from the docs branch (`git checkout docs/ledger-board-20260610 -- <file>`); parallel session beware.
+
+## ⟲ TREE-UNIFY DONE (2026-06-10) → PR #388 (watcher b1ika8grt)
+- **43→30 worktrees (17 removed, junction-safe, main node_modules verified intact) · 135→67 branches (74 deleted, every SHA origin-recoverable, -d-first) · 17 stashes UNTOUCHED (triage report-only, 8 candidate-drop pending owner).**
+- RESIDUE (owner eyes, non-blocking): 21 unpushed transient branches (ship/confirm/bisect/measure/pr3-enclave-followup + 16 orphan worktree-agent-*) — exact SHAs NOT on origin (squash-merged under other names) → recoverability rule forbids -D; one owner-approved bulk pass would clear. 2 real-WIP unknown-owner worktrees (agent-ab58ee9b: apply_effects/serialize mods+3 tests; agent-a474bbfd: 5 modified src/test) preserved. 7 dirty F:/awwv-* outside-root trees = remaining sprawl (per-tree unblock conditions in report).
+- Standing policy (7-point) in `20260610_TREE_UNIFICATION_REPORT.md`: single root .claude/worktrees/, clean-on-merge, push-before-park, weekly prune.
+- INCIDENTAL: main node_modules/.bin EMPTY since 2026-06-08 (pre-existing C1 ".bin-shim" artifact) — `node_modules/.bin/tsx` fails until npm install restores shims; use `node node_modules/<pkg>/...` invocation.
+- Board: MERGED today #381/#382/#385. Merging: #374 · #383 · #387 · #388. Building: robustness-95 · quickwins · ea5-comply. Parallel session: #384/#386 art lanes.
