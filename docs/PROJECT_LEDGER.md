@@ -20188,3 +20188,11 @@ Consolidated ledger close for the mechanics-activation session. Net behavioral/o
 - **Historical/bot path identical:** `bot_response_logic: accept_first` → `selectAIDefaultResponse` returns `options[0]` = `comply` → same `applyEventEffects` writes the same two `state.military.offensive_ops_suppressions` entries on the same turn (stable kind-sort preserves RBiH→HRHB order). Consumer `isFactionOffensiveOpsSuppressed` is origin-agnostic. Proof: self-run 188w clean-main vs branch byte-identical (hashes in PR body).
 - **Emergent/player delta:** a president choosing `push_further` ("Defy Washington") is no longer launch-frozen — the front stays open and the defiance costs authored on the option (morale +5, international_credibility −20, patron_pressure +15, international_standing −15, territorial_legitimacy +10) apply as before. The hollow choice is now real.
 - New focused test `tests/sim/events/ea5_us_halts_comply_suppression.test.ts` (7 tests: data shape + accept_first pin + comply-writes/push_further-does-not behavioral proof).
+
+## 2026-06-10 — Art: peace-plan stills approved + placed (NO-MAP route, owner decision)
+
+**Owner decision:** the four `plan_*` slots go the NO-MAP route — the cartographic territorial-division requirement (Category 1 of `20260609_ART_PROMPT_PACK_NON_SECTION6.md`) is DROPPED. The previously-HELD atmospheric document-scene stills are approved as-is; plan semantics carry through object language (folder mosaic = Vance-Owen ten provinces; three folders = Owen-Stoltenberg three republics; ruler dividing two stacks = Contact Group 51/49; empty signing table = Dayton).
+
+**Output:** `plan_vance_owen` / `plan_owen_stoltenberg` / `plan_contact_group` / `plan_dayton` — QC-passed (no people, no readable text, no flags, documentary palette), resized 1536×1024→600×400 (same 3:2, no crop), webp q82, placed in `src/ui/map/assets/plans/`. Non-§6 batch 1 now 17/17 complete. Pack doc GENERATION STATUS + Category 1 updated (blocks retained as historical record, marked DO-NOT-GENERATE).
+
+**Wiring gap (open):** nothing globs `assets/plans/` yet — same follow-up class as the verdict/tutorial wiring (#380); a peace-plan surface import is needed before these render. Calibration-inert (binary assets + docs only).
