@@ -159,7 +159,7 @@ Update:
 - `docs/PROJECT_LEDGER.md` — behavior-change entry with hash drift attribution.
 - `docs/PROJECT_LEDGER_KNOWLEDGE.md` — append fatigue mechanism note if Owner D (cross-system coupling) was chosen.
 
-FORAWWV is not auto-edited; flag any canon impact for manual review.
+FORAWWV / canon edits require Pyrrhic-panel sign-off; route any canon impact through the appropriate panel.
 
 ## Determinism Statement
 

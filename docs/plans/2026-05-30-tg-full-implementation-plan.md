@@ -22,7 +22,7 @@ Default-ON primary ops path for bots; **every offensive forms a TG**; full donor
 - Farz-95 uses `arbih_7th_vitezka_muslim_liberation` as El-Mujahid stand-in (real El-Mujahid has no OOB id — flagged for OOB authors).
 - No TG surface in `src/ui/` or `src/desktop/`.
 
-Phases are strict dependency order. **FLAG-OFF-SAFE** = lands with no re-floor (hash stays `78e231e35b08cf53`). **FORCES-CALIBRATION** = owner-gated.
+Phases are strict dependency order. **FLAG-OFF-SAFE** = lands with no re-floor (hash stays `78e231e35b08cf53`). **FORCES-CALIBRATION** = panel-approved (Pyrrhic-panel sign-off).
 
 ---
 
@@ -62,7 +62,7 @@ This is the phase that turns the donor-model plumbing into a *game*: emergent se
   - **CO rank + link:** `game_state.ts` / officer model (new `tactical_commander` rank, corps-deputy grade); `CorpsOperation` gains optional `tg_commander_officer_id?: string` (scalar, omitEmpty-safe — **no schema bump**); `tactical_group_selection.ts` / `tactical_group_lifecycle.ts` assign/derive the CO when a TG forms.
   - **anchor combat-mod:** combat synthesis at the anchor consumes TG-CO competence/aggression as a bounded modifier (deterministic, gated by `ENABLE_TG_COMBAT_SYNTHESIS`).
   - **faction naming + promotion:** new per-faction naming generator (`tactical_group_naming.ts` or sim helper): VRS geographic OG names, ARBiH numbered OGs, HVO operational zones; **ARBiH OG→Division promotion** mechanic (eligibility + state transition mirroring 1st OG→21st Div) in the formation/lifecycle layer; sets the sector `display_name`.
-- **(d) Proof:** unit tests for deterministic naming (same inputs → same name), CO assignment + anchor-mod bounds, OG→Division promotion eligibility/transition; `display_name` round-trips through save/load; B-lite seed-priority determinism (BFS/growth frozen). Flag-off byte-identity at the v34 baseline; B-lite seed-priority gets **one owner-gated calibration run** when its flag flips (tracked to Phase 6, not landed hot).
+- **(d) Proof:** unit tests for deterministic naming (same inputs → same name), CO assignment + anchor-mod bounds, OG→Division promotion eligibility/transition; `display_name` round-trips through save/load; B-lite seed-priority determinism (BFS/growth frozen). Flag-off byte-identity at the v34 baseline; B-lite seed-priority gets **one panel-approved calibration run** when its flag flips (tracked to Phase 6, not landed hot).
 - **(e) Deps:** Phases 1-2 (donor model + routing produce the op-TGs that carry CO + bind to sectors).
 - **(f) Stop-gates:** sector `display_name` must stay pure-display (no growth influence) — growth determinism owned solely by B-lite seed-priority; naming + CO derivation must be deterministic (no `Math.random`); promotion must be a real state transition, not a cosmetic relabel; CO link stays an optional scalar (**schema must NOT leave v34**). **FLAG-OFF-SAFE** for A + CO + naming + promotion (all omitEmpty / gated); **B-lite seed-priority FORCES one calibration run** at its flag flip (Phase 6).
 
@@ -93,13 +93,13 @@ This is the phase that turns the donor-model plumbing into a *game*: emergent se
 - **(e) Deps:** Phases 0-4 (all schema-touching work landed, incl. Phase 3A identity/CO + 3B surfaces).
 - **(f) Stop-gates:** any nondeterminism (Math.random/Date.now/unsorted Record/unfrozen seed-priority or naming) blocks; schema must read **v34** (no v35). **FLAG-OFF-SAFE**.
 
-### Phase 6 — ACTIVATION (LAST, owner-gated) — FORCES CALIBRATION
+### Phase 6 — ACTIVATION (LAST, panel-approved) — FORCES CALIBRATION
 - **(a) Goal:** Flip flags to default-ON and re-floor baselines, **one flag at a time**.
 - **(b) Owner:** orchestrator dispatches /scenario-creator-runner-tester per flag; **owner** signs UPDATE_BASELINES; war-or-game realism pass on the 188w HRHB −24 swing **and an HRHB-texture pass on the operational-zone naming**.
 - **(c) Files:** `tactical_group_config.ts` (one flag flip per run, in sub-stage order: B-lite **sector anchor seed-priority flag** → `ENABLE_TG_FORMATION` → `_COMBAT_SYNTHESIS` → `_COHESION_BLEED` → `ENABLE_TACTICAL_GROUPS` umbrella → `ENABLE_TG_ARMY_HQ_OPS` → `ENABLE_TG_RECOVERY_SUPPRESSION`); baseline files post-sign-off only. **The B-lite seed-priority flip is its own dedicated calibration run** (it changes deterministic sector growth around anchors — the one Phase-3A behavioral lever that is NOT flag-off-safe).
 - **(d) Proof per flag:** flip ONE flag → 40w → 188w → /scenario-creator-runner-tester GO (anchors ≥26/27, benchmarks 6/6, count within band) → war-or-game realism pass on combat-synthesis HRHB −24 swing → owner UPDATE_BASELINES. Never bundle. The B-lite seed-priority flag gets the same single-flag treatment first (sector-growth delta isolated).
 - **(e) Deps:** Phases 0-5 ALL green.
-- **(f) Stop-gates:** **owner-gated baselines**; **one-change-per-run sacred rule**; HRHB −24 must pass realism (a real commander's plausibility) before the new baseline locks. **FORCES CALIBRATION — every step (incl. the B-lite seed-priority flip).**
+- **(f) Stop-gates:** **panel-approved baselines**; **one-change-per-run sacred rule**; HRHB −24 must pass realism (a real commander's plausibility) before the new baseline locks. **FORCES CALIBRATION — every step (incl. the B-lite seed-priority flip).**
 
 ---
 
@@ -108,19 +108,19 @@ This is the phase that turns the donor-model plumbing into a *game*: emergent se
 
 **Flag-off-safe (land with NO re-floor; hash stays at v34 baseline):** Phase 0 (done), Phase 1, Phase 2, **Phase 3A except B-lite** (sector `display_name`, `tactical_commander` rank, `tg_commander_officer_id` scalar, anchor combat-mod [gated], faction naming, OG→Division promotion), Phase 3B (UI inert when flags off), Phase 4, Phase 5.
 
-**Calibration-forcing (owner-gated runs):**
+**Calibration-forcing (panel-approved runs):**
 - **Phase 3A B-lite anchor seed-priority** — ONE dedicated calibration run (changes deterministic sector growth around the anchor). Flag-gated; tracked to Phase 6 for its flip.
 - **Phase 6 activation** — full per-flag re-floor (every flag flip is a calibration run), plus the war-or-game HRHB −24 realism pass and HRHB operational-zone-naming texture pass.
 
-Everything else ships flag-off-safe. The only behavioral levers that move calibration are the B-lite seed-priority flip and the Phase 6 flag activations — each isolated to its own owner-gated single-change run.
+Everything else ships flag-off-safe. The only behavioral levers that move calibration are the B-lite seed-priority flip and the Phase 6 flag activations — each isolated to its own panel-approved single-change run.
 
 ## Risk summary
-The dominant risk is the **effectivePersonnel cascade** (~40+ silent read-sites): a single missed migration double-counts lent manpower and corrupts every downstream system — mitigated by making the type-checked ESLint guard + invariant test the literal first deliverable. Secondary risk is the **v2.2 combat-synthesis calibration cascade** (late-war ops flip "fires-and-fails" → "fires-and-fights", projected 188w RS +21/RBiH +3/**HRHB −24**); this is isolated to one flag flip and gated behind a war-or-game realism pass plus owner baseline sign-off. Schema is the lowest risk (**the hybrid-persistence decision keeps it at v34** — no new standing-TG entity; the CO link is an optional scalar and the sector identity is a `display_name` field, both omitEmpty-safe and one-way). A third, smaller cascade is the **B-lite anchor seed-priority** (deterministic sector growth shifts around anchors) — isolated to one flag-gated calibration run, not a hot landing. Faction asymmetry (VRS has more donor candidates) may need per-faction cap tuning post-activation. **Phases 0-5 are FLAG-OFF-SAFE and land without a re-floor — except the Phase-3A B-lite seed-priority flip and all of Phase 6, which force owner-gated calibration runs.** The product risk the panel guarded against — a donor-portfolio optimization minigame fighting the negative-sum identity — is closed by Decision 2: command stays at the intent/"back the officer" altitude on existing surfaces, with donor/BFS/readiness as invisible defaults and NO new panel.
+The dominant risk is the **effectivePersonnel cascade** (~40+ silent read-sites): a single missed migration double-counts lent manpower and corrupts every downstream system — mitigated by making the type-checked ESLint guard + invariant test the literal first deliverable. Secondary risk is the **v2.2 combat-synthesis calibration cascade** (late-war ops flip "fires-and-fails" → "fires-and-fights", projected 188w RS +21/RBiH +3/**HRHB −24**); this is isolated to one flag flip and gated behind a war-or-game realism pass plus Pyrrhic-panel baseline sign-off. Schema is the lowest risk (**the hybrid-persistence decision keeps it at v34** — no new standing-TG entity; the CO link is an optional scalar and the sector identity is a `display_name` field, both omitEmpty-safe and one-way). A third, smaller cascade is the **B-lite anchor seed-priority** (deterministic sector growth shifts around anchors) — isolated to one flag-gated calibration run, not a hot landing. Faction asymmetry (VRS has more donor candidates) may need per-faction cap tuning post-activation. **Phases 0-5 are FLAG-OFF-SAFE and land without a re-floor — except the Phase-3A B-lite seed-priority flip and all of Phase 6, which force panel-approved calibration runs.** The product risk the panel guarded against — a donor-portfolio optimization minigame fighting the negative-sum identity — is closed by Decision 2: command stays at the intent/"back the officer" altitude on existing surfaces, with donor/BFS/readiness as invisible defaults and NO new panel.
 
-## What needs user/owner sign-off
+## What needs Pyrrhic-panel sign-off
 0. **(RATIFIED 2026-05-30)** The four locked design decisions (hybrid persistence / intent+back-the-officer command / faction asymmetry+ARBiH promotion / sectors A+B-lite) are panel-decided and user-ratified — no longer open questions; listed here for traceability.
-1. **Every Phase-6 baseline re-floor** (UPDATE_BASELINES) — owner-gated, one flag per run, **including the B-lite anchor seed-priority flip** (its own dedicated run).
+1. **Every Phase-6 baseline re-floor** (UPDATE_BASELINES) — panel-approved, one flag per run, **including the B-lite anchor seed-priority flip** (its own dedicated run).
 2. **HRHB −24 realism verdict** — war-or-game pass must be accepted before locking the combat-synthesis baseline (plus the HRHB operational-zone-naming texture pass).
 3. **El-Mujahid OOB hole** (Farz-95) — owner decides: author a real El-Mujahid OOB id, or ratify the `arbih_7th_vitezka_muslim_liberation` stand-in.
-4. **Op-definition anchor edits** (Podrinje/Višegrad/Prsten/bratunac) — canon-adjacent; operations-expert reviews the migration diff, owner ratifies before apply.
+4. **Op-definition anchor edits** (Podrinje/Višegrad/Prsten/bratunac) — canon-adjacent; operations-expert reviews the migration diff, Pyrrhic-panel signs off before apply.
 5. **Default-ON decision** — flipping the umbrella `ENABLE_TACTICAL_GROUPS` to default-true is the point of no return (one-way schema, new baseline becomes canonical).

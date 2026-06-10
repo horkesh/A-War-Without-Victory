@@ -199,7 +199,7 @@ Bring the flag-ON path to the user for §6 sign-off (enclave-mechanics change to
 ## 8. Determinism, Canon & Sensitive-History Compliance
 
 - **Determinism:** no `Math.random`/`Date.now`/timestamps; sorted iteration via `strictCompare`; event-flag + control + supply inputs only; `siege_duration` monotonic (Engine Invariants §8). New persisted field gets migration/default/validator/fixture (the §4-cited engine-quality contract).
-- **Canon hierarchy:** Engine Invariants §8 (monotonic) > Branch-B numeric/ID-set split (ID-sets untouched, numerics via overrides) > this design. NEVER override initial OSIDs (control comes from existing derivation). Ops-only-attacks intact (no op-layer code). Faction-symmetric mechanism. Do NOT auto-edit `FORAWWV.md` — flag a manual-review note if a canonical "siege = continuous condition" clause is wanted.
+- **Canon hierarchy:** Engine Invariants §8 (monotonic) > Branch-B numeric/ID-set split (ID-sets untouched, numerics via overrides) > this design. NEVER override initial OSIDs (control comes from existing derivation). Ops-only-attacks intact (no op-layer code). Faction-symmetric mechanism. Edits to `FORAWWV.md` require Pyrrhic-panel sign-off — route a note through the appropriate panel if a canonical "siege = continuous condition" clause is wanted.
 - **Sensitive-history (Gate):**
   - Ring placement: the continuous condition is **Ring 1** (mechanical, like enclaves) for *its own* state; civilian suffering surfaces via existing Ring-1 displacement/casualty ledgers and Ring-2 narrative events. No new Ring-3 surface.
   - **The Ring-3 boundary this plan draws:** the siege is modeled as an **accruing cost the player endures**, never a **lever the player (or besieger) pulls**. Specifically refused: a relieve-the-siege score/victory, a besieger shelling-intensity control, a days-survived/prevented-massacre reward, a numeric civilian-death surface. (Gate §3 #1/#4/#5/#10; §8 lesson "atrocity is a consequence, not a lever".)
@@ -246,7 +246,7 @@ Bring the flag-ON path to the user for §6 sign-off (enclave-mechanics change to
 - Read-model banded, public-state-only, no raw civilian counts, surfaced in Situation panel.
 - Flag default-OFF; 40w + 188w byte-identical OFF; deterministic-only shift ON.
 - All new tests green; migration + validator + fixture green; smoke triad green.
-- §6 sign-offs recorded; FORAWWV manual-review note flagged if a canon clause is wanted (not auto-edited).
+- §6 sign-offs recorded; FORAWWV edit routed through Pyrrhic-panel sign-off if a canon clause is wanted.
 - Ledger entry appended; implemented report written; this plan + MASTER_ROADMAP B7 row updated. Default-ON flip deferred to an explicit user decision.
 
 ---

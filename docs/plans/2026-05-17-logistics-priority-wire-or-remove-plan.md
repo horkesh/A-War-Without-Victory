@@ -169,7 +169,7 @@ Update on landing (not in this lane — separate finishing-a-development-branch 
 - `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md` (Task 7)
 - `docs/plans/MASTER_ROADMAP.md` (lever now WIRED, not partially)
 - `docs/PROJECT_LEDGER.md` (behavioral change: combat consumers now see lever)
-- Do NOT touch `docs/10_canon/FORAWWV.md` — flag for manual review if any wording change is needed there.
+- Edits to `docs/10_canon/FORAWWV.md` require Pyrrhic-panel sign-off — route any wording change through the appropriate panel.
 
 ## Determinism Statement
 

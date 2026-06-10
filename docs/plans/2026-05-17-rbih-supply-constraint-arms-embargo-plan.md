@@ -175,7 +175,7 @@ Update under the executing-plans skill — NOT in this plan-writing pass:
 - `docs/PROJECT_LEDGER.md` (behavioral entry under `LANE-V09X-EMBARGO`).
 - `docs/plans/MASTER_ROADMAP.md` (only after execution lane reports closure).
 
-**DO NOT** auto-edit `docs/10_canon/FORAWWV.md` — flag for manual review if any phase cap touches canon.
+Edits to `docs/10_canon/FORAWWV.md` require Pyrrhic-panel sign-off — route any phase cap that touches canon through the appropriate panel.
 
 ## Closeout
 

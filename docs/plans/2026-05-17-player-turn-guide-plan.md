@@ -26,7 +26,7 @@ Out of scope:
 - Cinematic intro / verdict screen (separate cinematic plan).
 - Any change to engine, pipeline ordering, scenario data, save schema, or canon hierarchy doc set.
 - Any new tactical lever, posture, or operation type. The six valid levers are fixed by canon.
-- Edits to `docs/10_canon/FORAWWV.md`. Flag for manual review only.
+- Edits to `docs/10_canon/FORAWWV.md` require Pyrrhic-panel sign-off.
 
 ## Canon Hygiene Pre-Read
 
@@ -178,7 +178,7 @@ Update at the **end** of the task chain only:
 
 Do **not** edit:
 
-- `docs/10_canon/FORAWWV.md` (flag for manual review only).
+- `docs/10_canon/FORAWWV.md` (edits require Pyrrhic-panel sign-off).
 - Any Rulebook / Phase Specs / Systems Manual / Engine Invariants / Game Bible canon file. The Guide cites them; it does not modify them.
 
 ## Stop Gates and Closeout
