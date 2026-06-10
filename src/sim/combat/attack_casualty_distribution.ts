@@ -161,6 +161,18 @@ export function distributeDefenderCasualties(params: {
     }
 }
 
+/** Robustness fix (task #95, the #358 class): `bfsDistanceFriendly` returns Infinity
+ *  for a reserve brigade with no friendly path to the battle OSID. The in-memory
+ *  consumer (`getReactiveDistanceWeight`) already floor-handles non-finite (weight 0),
+ *  but the raw hops were persisted verbatim into
+ *  `turn_summaries[].battles[].defender_contributions[].distance_hops` —
+ *  `JSON.stringify(Infinity)` emits `null` (2× `"distance_hops": null` verified in
+ *  latest_run_final_save.json) and the #95 P1-A serializer guard now throws on it.
+ *  Clamp at this single storage boundary; weights/casualty math are computed from the
+ *  raw hops upstream and are untouched. Only reader of the persisted value is the
+ *  AAR panel display. Convention: 99 = unreachable (#358 HOME_DISTANCE_UNREACHABLE_HOPS). */
+export const DEFENDER_DISTANCE_UNREACHABLE_HOPS = 99;
+
 export function buildDefenderContributions(params: {
     sectorDefenseBrigades: FormationState[];
     sectorBrigadeWeights: Map<FormationId, number>;
@@ -186,9 +198,11 @@ export function buildDefenderContributions(params: {
         const w = sectorBrigadeWeights.get(b.id) ?? 0;
         const meta = sectorBrigadeMeta.get(b.id);
         const frac = totalWeight > 0 ? w / totalWeight : 1 / sectorDefenseBrigades.length;
+        const rawHops = meta?.hops ?? 0;
         contributions.push({
             brigade_id: b.id,
-            distance_hops: meta?.hops ?? 0,
+            // #95: persisted copy must be finite (see DEFENDER_DISTANCE_UNREACHABLE_HOPS).
+            distance_hops: Number.isFinite(rawHops) ? rawHops : DEFENDER_DISTANCE_UNREACHABLE_HOPS,
             is_home_municipality: meta?.isHome ?? false,
             reactive_weight: Math.round(w * 100) / 100,
             casualties_taken: cappedShares?.get(b.id) ?? Math.round(finalDefenderCas * frac),
