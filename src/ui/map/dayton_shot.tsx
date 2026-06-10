@@ -17,13 +17,18 @@ import './styles/globals.css';
 import { DaytonNegotiationModal } from './components/DaytonNegotiationModal';
 import { useGameStore } from './store/gameStore';
 import { setLocale } from './i18n';
+import { makeMockLoadedGameState } from './__mocks__/loadedGameState';
 import type { LoadedGameState } from './data/types';
 
 const params = new URLSearchParams(window.location.search);
 
 // ── Deterministic bot counter-offer stub (mirrors the unit test) ───────────────
 if (params.get('mock') === '1') {
-    (window as unknown as { awwv: Record<string, unknown> }).awwv = {
+    // Dev-only screenshot bridge: install a deterministic window.awwv.previewDayton
+    // stub before React mounts. The `Window & { awwv?: ... }` intersection cast
+    // mirrors the established warroom.ts idiom and stays out of the strict-null
+    // type-escape inventory.
+    (window as Window & { awwv?: Record<string, unknown> }).awwv = {
         previewDayton: async () => ({
             ok: true,
             playerFaction: 'RBiH',
@@ -67,10 +72,12 @@ const PENDING: NonNullable<LoadedGameState['pendingDayton']> = {
     ],
     factionCapital: { RBiH: 80, RS: 60, HRHB: 40 },
     patronOverride: { RBiH: 5, RS: 10, HRHB: 25 },
-} as unknown as NonNullable<LoadedGameState['pendingDayton']>;
+};
+
+const loadedGameState: LoadedGameState = { ...makeMockLoadedGameState(), player_faction: 'RBiH' };
 
 useGameStore.setState({
-    loadedGameState: { player_faction: 'RBiH' } as unknown as LoadedGameState,
+    loadedGameState,
     loadError: null,
 });
 
