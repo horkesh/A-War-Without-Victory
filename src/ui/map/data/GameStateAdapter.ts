@@ -48,6 +48,7 @@ import { classifyArmyReserveSeverity } from '../utils/armyReserveSeverity.js';
 import { deriveWarFrontVisibleEnemyOsids } from '../utils/deriveWarFrontVisibleEnemyOsids.js';
 import { buildControlLookup, buildStatusLookup } from './ControlLookup.js';
 import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_support.js';
+import { splitKiaWiaMia } from '../../../sim/combat/attack_casualty_distribution.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
@@ -972,6 +973,27 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 }
             }
             fv.combatSummary = combatSummary; // Assign the potentially synthesized combatSummary
+
+            // Campaign KIA/WIA/MIA fallback (#73): when the casualty ledger carries no
+            // per-formation breakdown (campaignKia/Wia/Mia unset above), derive the split
+            // from the combat-summary total using the canonical engine fractions
+            // (attack_casualty_distribution.splitKiaWiaMia → KIA 0.22 / WIA 0.74 / MIA rem),
+            // NOT the legacy 0.30/0.55/0.15. Done in the adapter so UI components never
+            // runtime-import from src/sim/combat/ (boundary kept clean — see
+            // tests/ui_adapter_boundary.test.ts).
+            if (
+                (f.kind === 'brigade' || f.kind === 'operational_group') &&
+                fv.campaignKia === undefined
+            ) {
+                const totalTaken = combatSummary?.total_casualties_taken ?? 0;
+                if (totalTaken > 0) {
+                    const split = splitKiaWiaMia(totalTaken);
+                    fv.campaignKia = split.killed;
+                    fv.campaignWia = split.wounded;
+                    fv.campaignMia = split.missing_captured;
+                }
+            }
+
             formations.push(fv);
         }
     }
