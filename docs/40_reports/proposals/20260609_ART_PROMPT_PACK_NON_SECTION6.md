@@ -34,6 +34,16 @@ Owner delivered the 15 faction stills (the 5 SPLIT families × 3 factions). All 
 
 **⚠️ HELD — needs regen (2):** `event_patron_relations_RS` / `event_patron_relations_HRHB`. The delivered pair obscured faces with a digital pixelation-blur rather than the prompt's natural out-of-focus silhouette (as the RBiH one correctly used). Owner: regenerate the two with the amended prompts (silhouette/shallow-DOF, explicit no-pixelation guard).
 
+### Batch 3 — final shared event stills + patron regen → NON-§6 COMPLETE (updated 2026-06-10)
+
+Owner delivered the last 8 (the 6 remaining shared Category-4 stills + the 2 patron regens). All 1672×941 (16:9), QC-passed (guards held — no readable text, no legible flags/insignia, no identifiable faces, no bodies/gore, documentary palette; displacement column is distant/anonymous NON-atrocity), resized 800×450 (`fit:cover`, no crop), webp, placed in `src/ui/map/assets/event_illustrations/`.
+
+**✅ DONE — QC-passed, webp, placed (8):** `event_washington_agreement` · `event_referendum` · `event_political_session` · `event_ceasefire` · `event_displacement_column` · `event_un_presence` (the 6 shared) + `event_patron_relations_RS` · `event_patron_relations_HRHB` (regens — now natural shallow-DOF silhouettes, the digital pixelation-blur is gone).
+
+**NON-§6 PACK COMPLETE — across the art PR set (not yet all on `main`).** All needed assets have been *generated and committed*: 4 plans + 4 Category-2 (3 verdicts + Dayton signing) + 8 tutorial + 21 event stills (13 faction batch-2 + this batch-3's 8). The ONLY ungenerated prompts are the 5 generic faction-agnostic *fallback* stills (4.3/4.4/4.5/4.11/4.12 shared default) — intentionally SKIPPED as redundant since all three faction variants exist for each family and the resolver hits the faction basename first.
+
+> **⚠️ Completeness spans MULTIPLE UNMERGED PRs — wiring guard.** These assets are split across separate art PRs: plans (#384), this batch-3's 8 shared/patron stills (#400), and — critically — the 13 faction stills (`event_mobilization_*`, `event_supply_convoy_*`, `event_supply_shortage_*`, `event_siege_city_*`, `event_patron_relations_RBiH`) live in **#395**, NOT in this PR's tree. Until #384 + #395 + #400 are all merged to `main`, those basenames are absent. **Do NOT run the wiring pass (authoring event `image` keys) until the referenced assets are present on `main`** — `eventIllustrationArt.ts` resolves a missing basename to `null` and renders text-only *silently*, so a premature wiring pass would look wired but show no art. Remaining work is WIRING (event `image` keys + the verdict/tutorial/plan resolver imports), not generation — gated on the asset PRs landing first.
+
 ---
 
 # PROVEN STYLE & LESSONS — distilled from the SHIPPED assets
