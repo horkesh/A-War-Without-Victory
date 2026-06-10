@@ -20177,3 +20177,14 @@ Consolidated ledger close for the mechanics-activation session. Net behavioral/o
 - **#73 AAR split residuals (primary ALREADY-RESOLVED by #365 T2-D, verified; 2 residual display sites BUILT):** `letter_home.ts` (UI-render-only consumer) + `FormationDetail.tsx` campaign-losses fallback both re-hardcoded the legacy 0.30/0.55/0.15 split; now reuse canonical `splitKiaWiaMia()` (KIA 0.22 / WIA 0.74 / MIA remainder) so displayed mixes agree with the casualty ledger. `operation_aar.ts:262` 0.30 = grading threshold, not a split (untouched).
 - **Proof:** 40w clean-main (1761a6d0c) vs branch BYTE-IDENTICAL — final_state_hash `e246e8529d4244d8` both; control_delta/formation_delta/final_save sha256-identical. tsc clean; 9 focused suites green (228 tests incl. strict-null + step-order pins); desktop:map:build green; live sensitive-claim inventory row-identical (9 essay_dynamic_section rows).
 - **Determinism:** no RNG/clock; no sim-path change; no event/scenario file touched; no new persisted state.
+
+---
+
+## [2026-06-10] Task #49 (Codex #324) — E-A5 `us_halts` launch-halt moved into the `comply` response (player agency, historical path byte-identical)
+
+**Branch:** `feat/ea5-comply-response-49` (PR, not merged). **Triage of record:** `docs/40_reports/proposals/20260609_CODEX_BACKLOG_TRIAGE_49_53.md` (Task #49, classified calibration-INERT).
+
+- **Data-only** edit in `data/scenarios/events/war_1995.json`: the two `offensive_ops_suppression` entries (RBiH + HRHB, 6 turns, reason `us_halts_federation_advance_1995`) relocated from the event-level `effects[]` (applied unconditionally on fire) into `response_options[0]` (`comply`) `effects`. The two event-level `aggression_modifier` entries stay event-level per triage scope.
+- **Historical/bot path identical:** `bot_response_logic: accept_first` → `selectAIDefaultResponse` returns `options[0]` = `comply` → same `applyEventEffects` writes the same two `state.military.offensive_ops_suppressions` entries on the same turn (stable kind-sort preserves RBiH→HRHB order). Consumer `isFactionOffensiveOpsSuppressed` is origin-agnostic. Proof: self-run 188w clean-main vs branch byte-identical (hashes in PR body).
+- **Emergent/player delta:** a president choosing `push_further` ("Defy Washington") is no longer launch-frozen — the front stays open and the defiance costs authored on the option (morale +5, international_credibility −20, patron_pressure +15, international_standing −15, territorial_legitimacy +10) apply as before. The hollow choice is now real.
+- New focused test `tests/sim/events/ea5_us_halts_comply_suppression.test.ts` (7 tests: data shape + accept_first pin + comply-writes/push_further-does-not behavioral proof).
