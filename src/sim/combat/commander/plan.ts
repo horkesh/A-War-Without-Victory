@@ -57,6 +57,10 @@ import { BESIEGED_SURPLUS_HOP_LIMIT } from './allocate.js';
 import { CRITICAL_MORALE_THRESHOLD } from '../combat_math.js';
 import { MAX_EXHAUSTION_FOR_OPERATION } from '../bot_constants.js';
 import {
+    recoveredExhaustionLevel,
+    WAR_WEARINESS_BAND_THRESHOLDS,
+} from '../../../state/war_weariness_bands.js';
+import {
     buildCorpsOperationReadinessInputSnapshot,
     computeCorpsOperationReadiness,
 } from '../corps_operation_readiness.js';
@@ -77,6 +81,73 @@ export function isContainSuppressionActiveFor(faction: FactionId): boolean {
     if (faction === 'RS') return isVrsContainPostureEnabled();
     if (faction === 'RBiH') return isArbihContainPostureEnabled();
     return false;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Exhaustion-drag V2 feature flag (Design B — collapse repurpose)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// AWWV_EXHAUSTION_DRAG_V2 — default OFF. When OFF, `factionExhaustionDrag`
+// computes the EXACT legacy degenerate expression (`max(0.3, 1 - raw/600)`),
+// so a flag-off build is BYTE-IDENTICAL to the current 649 floor. When ON,
+// the drag is re-scaled onto the recovered 0..100 war_exhaustion scale as a
+// late-war ramp (1.0 below the `cracking` band, floor 0.55 at/above
+// `collapsing`), reusing Design A's band thresholds as the single source of
+// truth. Mirrors the phase3c override pattern (set/get/reset).
+//
+// Scope: this lever ONLY weights the offensive op-launch WILLINGNESS (commander
+// intent score for `stage_operation` / `launch_opportunity`). It never enters
+// combat resolution, never touches a defender, never writes political_controllers,
+// and the §6 rupture ops (Srebrenica/Žepa) are TRIGGERED operations that never
+// route through intent scoring — so this lever cannot suppress them. Symmetric
+// across all three factions; deterministic (pure function of a persisted numeric).
+let _enableExhaustionDragV2Override: boolean | null = null;
+
+export function getEnableExhaustionDragV2(): boolean {
+    return _enableExhaustionDragV2Override !== null ? _enableExhaustionDragV2Override : false;
+}
+
+export function setEnableExhaustionDragV2(enable: boolean): void {
+    _enableExhaustionDragV2Override = enable;
+}
+
+export function resetEnableExhaustionDragV2(): void {
+    _enableExhaustionDragV2Override = null;
+}
+
+/**
+ * Floor of the V2 late-war drag multiplier: a spent faction is hampered, not
+ * paralyzed. Hard launch-blocks remain the separate corps_exhaustion / fatigue /
+ * campaign_role guards. Single calibration knob — raise toward 0.7 if late-war
+ * `launch_opportunity` anchors regress in the re-floor run.
+ */
+export const EXHAUSTION_DRAG_V2_FLOOR = 0.55;
+/** Ramp start (recovered level) — = WAR_WEARINESS_BAND_THRESHOLDS.cracking (65). Early-war unaffected. */
+export const EXHAUSTION_DRAG_V2_RAMP_START = WAR_WEARINESS_BAND_THRESHOLDS.cracking;
+/** Ramp full (recovered level) — = WAR_WEARINESS_BAND_THRESHOLDS.collapsing (85). Full drag at/above. */
+export const EXHAUSTION_DRAG_V2_RAMP_FULL = WAR_WEARINESS_BAND_THRESHOLDS.collapsing;
+
+/**
+ * Faction strategic-exhaustion drag on offensive op-launch willingness.
+ *
+ * Pure, deterministic, symmetric across factions. `rawFactionWarExhaustion` is
+ * the raw 0..10000 accumulator (`briefing.faction_war_exhaustion`).
+ *
+ * - Flag OFF (default): EXACT legacy degenerate form `max(0.3, 1 - raw/600)` —
+ *   byte-identical to the current 649 floor.
+ * - Flag ON: late-war ramp on the recovered 0..100 scale — 1.0 below `cracking`
+ *   (65), linear down to `EXHAUSTION_DRAG_V2_FLOOR` (0.55) at `collapsing` (85+).
+ */
+export function computeFactionExhaustionDrag(rawFactionWarExhaustion: number): number {
+    if (!getEnableExhaustionDragV2()) {
+        // Legacy path — DO NOT alter (byte-identical to current floor).
+        return Math.max(0.3, 1.0 - rawFactionWarExhaustion / 600);
+    }
+    const level = recoveredExhaustionLevel(rawFactionWarExhaustion);
+    if (level <= EXHAUSTION_DRAG_V2_RAMP_START) return 1.0;
+    if (level >= EXHAUSTION_DRAG_V2_RAMP_FULL) return EXHAUSTION_DRAG_V2_FLOOR;
+    const span = EXHAUSTION_DRAG_V2_RAMP_FULL - EXHAUSTION_DRAG_V2_RAMP_START; // 20
+    return 1.0 - ((level - EXHAUSTION_DRAG_V2_RAMP_START) / span) * (1.0 - EXHAUSTION_DRAG_V2_FLOOR);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -274,11 +345,13 @@ export function selectWinningIntent(
         1.0 - briefing.corps_exhaustion / MAX_EXHAUSTION_FOR_OPERATION,
     );
     // Faction strategic exhaustion drag: nation's accumulated suffering throttles
-    // even fresh corps' offensive appetite. At 0: full willingness (1.0).
-    // At 600+: floor 0.3 — never fully zero, corps exhaustion handles hard block.
-    const factionExhaustionDrag: number = Math.max(
-        0.3,
-        1.0 - briefing.faction_war_exhaustion / 600,
+    // even fresh corps' offensive appetite. Offense-only, faction-scoped, never
+    // enters combat resolution. Flag OFF (default) = legacy degenerate `1-raw/600`
+    // floor 0.3 (byte-identical to current floor); flag ON = late-war ramp
+    // (1.0 below cracking·65 → floor 0.55 at collapsing·85+). See
+    // computeFactionExhaustionDrag / AWWV_EXHAUSTION_DRAG_V2.
+    const factionExhaustionDrag: number = computeFactionExhaustionDrag(
+        briefing.faction_war_exhaustion,
     );
     const exhaustionPenalty: number = corpsExhaustionCapacity * factionExhaustionDrag;
 
