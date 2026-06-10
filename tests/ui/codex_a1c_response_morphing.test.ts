@@ -45,12 +45,16 @@ function context(overrides: Partial<CodexRenderContext> = {}): CodexRenderContex
     };
 }
 
-// The four essays this slice wired, each with its two authored response branches.
+// The essays wired with authored response branches: the four from the A1c
+// slice, plus rbih_state_identity (#86 — authored per-branch sections added
+// so the tier-0 identity choice morphs; also satisfies the re-add condition
+// documented in dynamic_section_builder.ts LOAD_BEARING_SECTIONS).
 const WIRED: Array<{ eventId: string; branches: string[] }> = [
     { eventId: 'london_conference_1992', branches: ['accept_principles', 'reject'] },
     { eventId: 'un_hostage_crisis_1995', branches: ['maintain_hostages', 'release_gradually'] },
     { eventId: 'us_halts_federation_advance_1995', branches: ['comply', 'push_further'] },
     { eventId: 'dayton_talks_begin_1995', branches: ['accept', 'hardline'] },
+    { eventId: 'rbih_state_identity', branches: ['civic', 'bosniak_national', 'pragmatic'] },
 ];
 
 describe('A1c per-response codex morphing (authored data)', () => {

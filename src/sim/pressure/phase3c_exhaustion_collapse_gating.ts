@@ -11,8 +11,9 @@
 import type { FrontEdge } from '../../map/front_edges.js';
 import type { CollapseEligibilityState, FactionId, GameState, Tier1EntityEligibilityState } from '../../state/game_state.js';
 import type { SupplyReachabilityOsidReport } from '../../state/supply_reachability_osid.js';
+import { strictCompare } from '../../state/validateGameState.js';
 import { getEnablePhase3B } from './phase3b_pressure_exhaustion.js';
-import { computePressureExposureByEntity, type EntityId } from './pressure_exposure.js';
+import { computePressureExposureByEntity, computePressureExposureByEntityOsid, type EntityId } from './pressure_exposure.js';
 
 
 // Feature flag (OFF by default)
@@ -72,7 +73,7 @@ const TIER1_AUTH_THRESHOLD = 40; // spec C9
 const TIER1_COH_THRESHOLD = 40;  // spec C9
 const TIER1_SPA_THRESHOLD = 40;  // spec C9
 const TIER1_PERSIST_TURNS = 4;   // spec C10 — match C5 (Tier-1 not faster than Tier-0).
-const STRAIN_FRACTION = 0.05;    // spec C11 — slower accrual → only chronically-exposed OSIDs (besieged pockets, cut corridors) reach Tier-1.
+const STRAIN_FRACTION = 0.15;    // spec C11 (Phase IV-c Lever 1: 0.05→0.15) — ×3 accrual lifts max strain ~28.2→~84.6 so chronically-exposed OSIDs clear the real 55 severity floor (40 + SEVERITY_MIN 0.25 × range 60). A threshold drop alone is a no-op (SEVERITY_MIN scales with the range); magnitude is the honest lever.
 const STRAIN_MAX = 100;          // spec C12 — clamp ceiling; identical to Phase 3D STRAIN_MAX.
 
 export type CollapseDomain = 'authority' | 'cohesion' | 'spatial';
@@ -599,14 +600,57 @@ export function applyPhase3CExhaustionCollapseGating(
     let maxPersistenceSpatial = 0;
     const exposureEntities: Array<{ entity_id: EntityId; exposure: number }> = [];
 
-    // Compute pressure exposure per entity
-    const exposureByEntity = computePressureExposureByEntity(state, derivedFrontEdges);
+    // Compute pressure exposure per entity.
+    // COLLAPSE PHASE IV-b D2 (scope §A.3 Option 2 + M1): in OSID-native scenarios the
+    // settlement-level front_pressure is structurally empty (edge-universe mismatch),
+    // so prefer the OSID exposure adapter when the live OSID front topology is
+    // populated; else keep the settlement variant (harness/settlement-scenario path
+    // byte-identical). Reached only via the existing collapse flags (3C gating runs
+    // only when getEnablePhase3C() — defaults OFF), so the default path is inert.
+    const exposureByEntity = (state.military.war_front_edges_osid?.length ?? 0) > 0
+        ? computePressureExposureByEntityOsid(state)
+        : computePressureExposureByEntity(state, derivedFrontEdges);
 
-    // Build map of entity -> faction (for Tier-0 gating)
+    // Build map of entity -> faction (for Tier-0 gating).
+    //
+    // COLLAPSE PHASE IV-d (sits on IV-c's STRAIN_FRACTION 0.15): in OSID-native 188w
+    // runs `faction.areasOfResponsibility` is EMPTY at runtime — it is only populated by
+    // applyControlFlipProposals when a front-breach FLIP is applied, whereas the historical
+    // path establishes control via init/census + event control_changes. Empirically the
+    // IV-c ON 188w final_save shows all 3 factions AoR len=0 while political_controllers
+    // holds all 712 OSIDs. With the empty AoR map every entity hit `if(!factionId)
+    // continue`, so Tier-1 never evaluated → Phase 3D inert despite max strain ~84.6.
+    //
+    // Reroute: derive each OSID-entity's faction from the live political_controllers map
+    // (the canonical 712-OSID control surface, Engine Invariants §9.1), mirroring D2's
+    // computePressureExposureByEntityOsid (which keys off political_controllers /
+    // war_front_edges_osid). The local_strain.by_entity keys ARE OSIDs (D2 wire-in), so
+    // map osid → political_controllers[osid] → factionId. AoR is kept as a fallback for
+    // any entity not present in political_controllers (settlement-scenario / harness path).
+    //
+    // §6 NOTE: enclave OSIDs intentionally reach Tier-1 here (ratified #368 guard-by-
+    // exclusion model lives at the Phase 3D WRITE / G1, not at this map). Behind the
+    // existing collapse flags (3C runs only when getEnablePhase3C() — default OFF), so the
+    // default / settlement path is unchanged. Deterministic: sorted OSID iteration via
+    // strictCompare, no RNG/clock.
     const entityToFaction = new Map<EntityId, FactionId>();
+    const politicalControllers = state.political?.political_controllers;
+    if (politicalControllers && typeof politicalControllers === 'object') {
+        const controlledOsids = Object.keys(politicalControllers).sort(strictCompare);
+        for (const osid of controlledOsids) {
+            const factionId = politicalControllers[osid];
+            if (factionId) {
+                entityToFaction.set(osid, factionId);
+            }
+        }
+    }
+    // Fallback: AoR-keyed entities (settlement-scenario / harness path, or OSIDs absent
+    // from political_controllers). Does not overwrite a live political-control mapping.
     for (const faction of factions) {
         for (const sid of faction.areasOfResponsibility ?? []) {
-            entityToFaction.set(sid, faction.id);
+            if (!entityToFaction.has(sid)) {
+                entityToFaction.set(sid, faction.id);
+            }
         }
     }
 
