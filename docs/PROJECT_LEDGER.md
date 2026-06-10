@@ -20111,3 +20111,11 @@ Consolidated ledger close for the mechanics-activation session. Net behavioral/o
 **Held / parked:** PR #344 (B1 missing/captured casualty target, ICTY ~10,500) + #329 (reserve-attrition NO-GO −18) intentionally held; §6 art (8 items) + §6 codex (bijeljina, Srebrenica codex-receipt, 2 atrocity-essay BCS) await owner sign-off; Ključ micro-lane parked (operational-sequencing root cause — Ključ should be a prerequisite to the Sanski Most drive).
 
 **Determinism:** No `Math.random`/`Date.now`/timestamps on the sim path; sorted iteration preserved; initial OSIDs untouched; no `avoided_osids_by_faction`. The save-schema bump (v35→v36) is forward-only additive with an empty-record default. The floor moved only via legitimate additive read-model fields (manifest re-bless), never via OSID overrides.
+
+## 2026-06-10 — Art: peace-plan stills approved + placed (NO-MAP route, owner decision)
+
+**Owner decision:** the four `plan_*` slots go the NO-MAP route — the cartographic territorial-division requirement (Category 1 of `20260609_ART_PROMPT_PACK_NON_SECTION6.md`) is DROPPED. The previously-HELD atmospheric document-scene stills are approved as-is; plan semantics carry through object language (folder mosaic = Vance-Owen ten provinces; three folders = Owen-Stoltenberg three republics; ruler dividing two stacks = Contact Group 51/49; empty signing table = Dayton).
+
+**Output:** `plan_vance_owen` / `plan_owen_stoltenberg` / `plan_contact_group` / `plan_dayton` — QC-passed (no people, no readable text, no flags, documentary palette), resized 1536×1024→600×400 (same 3:2, no crop), webp q82, placed in `src/ui/map/assets/plans/`. Non-§6 batch 1 now 17/17 complete. Pack doc GENERATION STATUS + Category 1 updated (blocks retained as historical record, marked DO-NOT-GENERATE).
+
+**Wiring gap (open):** nothing globs `assets/plans/` yet — same follow-up class as the verdict/tutorial wiring (#380); a peace-plan surface import is needed before these render. Calibration-inert (binary assets + docs only).
