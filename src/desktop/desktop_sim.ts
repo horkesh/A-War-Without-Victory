@@ -442,12 +442,6 @@ export {
     listBlockingPlayerDecisions,
 } from '../state/player_decision_manifest.js';
 
-// TIER1-REPLAY-LIVE: browser-safe pure functions — no Node imports.
-// Re-exported so electron-main.cjs can call sim.buildReplayFrameSummary /
-// sim.buildReplaySaveManifest without an additional bundle entry.
-export { buildReplayFrameSummary } from '../sim/replay/replay_frame_summary.js';
-export { buildReplaySaveManifest } from '../sim/replay/replay_manifest.js';
-
 function getReserveRequestId(request: {
     request_id?: string;
     turn_requested?: number;

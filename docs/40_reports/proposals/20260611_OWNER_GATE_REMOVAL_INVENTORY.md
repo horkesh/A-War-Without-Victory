@@ -1,6 +1,6 @@
 # Owner-Gate Removal Inventory — 2026-06-11
 
-**Status:** DRAFT for orchestrator execution  
+**Status:** EXECUTED 2026-06-11 on branch `docs/remove-owner-gate` (see Execution Log at end)  
 **Directive:** Owner standing directive 2026-06-11 — remove the owner gate from docs, including FORAWWV.md and all canon docs. Replace with **Pyrrhic-panel sign-off** (unanimous = signature; BLOCK/split = surface to owner).  
 **Scope:** `CLAUDE.md`, `docs/10_canon/`, `docs/20_engineering/`, `docs/plans/`, `docs/40_reports/` (live governance surfaces only — not archived reports).  
 **Author:** Documentation Specialist (scoping pass — NO edits made here)
@@ -782,5 +782,44 @@ Edits to `docs/10_canon/FORAWWV.md` require Pyrrhic-panel sign-off.
 
 ---
 
+---
+
+## EXECUTION LOG (2026-06-11)
+
+Executed on branch `docs/remove-owner-gate` (isolated git worktree at `.claude/worktrees/owner-gate-wt` to avoid colliding with a concurrent agent in the main checkout). Owner rulings on the 6 class-(C) items applied as directed:
+
+- **C1 (SHDG:207 atrocity-reward row)** — panelized to §6 Pyrrhic panel, **preserved the values bright line**: "the atrocity-is-never-rewarded principle, if ever in question, surfaces to the owner."
+- **C2 (EVENT_GUIDE:449 ASCII label)** — "non-delegable" → "panel-gated."
+- **C3 & C4 (enclave-overrun art HOLD)** — HOLD preserved; sign-off reworded to §6 Pyrrhic panel (Historian + scenario-tester/calibration + Engine/systems + Red-team, unanimous).
+- **C5 (`_backups_pre_v09_20260505/`)** — LEFT AS-IS (historical snapshot).
+- **C6 (`.claude/worktrees/`)** — LEFT AS-IS (stale branch snapshots).
+- **Class-(B) historical records** — LEFT AS-IS (V082/V083 checklist PASS rows, ENGINE_SYNTHESIS:313 ✅ row, completed-closeout "never auto-edited" rows, prior-dated owner-action logs, SESSION_CHECKPOINT entries).
+
+### Standard replacement applied
+> "Pyrrhic-panel sign-off — convene the appropriate panel (for §6: Historian + scenario-tester/calibration + Engine/systems + Red-team); unanimous GO = signature; BLOCK or split surfaces to the owner; implementer ≠ reviewer."
+
+### DEVIATIONS FROM INVENTORY (flagged for canon reviewer)
+
+1. **Generic "Architect flags decisions for user review" boilerplate (~40 plan files) — NOT touched.** A grep surfaced this standard planning-role convention across ~40 dated plan files. It is a different, broader pattern than the FORAWWV/§6 owner-gate this directive targets, and was not in the accepted inventory. Left untouched to avoid scope creep; flag if the reviewer wants it included.
+2. **Additional live class-A gates found beyond the inventory — INCLUDED (added):** `docs/plans/MASTER_ROADMAP.md` (canon-status header + FORAWWV row → PANEL-GATED), `docs/plans/COMMAND_BOARD.md` (P3 lane gate + 3 "owner-gated" refs), `docs/plans/2026-06-08-v1.0-definition-of-done.md` (B2 §6 dispositions), `docs/plans/2026-06-09-d1-finalization-sequence-DRAFT.md` (Krivaja §6 rows), `docs/plans/2026-06-09-presidential-enclave-decision-DESIGN.md` (canon-tier + Lane-1 §6 rows), `docs/40_reports/proposals/20260529_ENGINE_SIMPLIFICATION_AUDIT.md` (CLAUDE.md banned-patterns description refreshed). These are live governance surfaces (MASTER_ROADMAP is the roadmap source of truth) carrying the same class-A language; converting them was within directive intent.
+3. **Descriptive "owner" references in 4B/4C collapse scope docs — NOT touched.** Phrases like "data artifact for the owner", "owner-confirmed REJECTION", "Recommended framing for the owner", "STOP if owner picks Option 3" are descriptive (naming the ultimate steering authority / recording a past adjudication), not gating PROCESS. Left as-is — consistent with the owner retaining escalation authority over §6 bright lines and steering decisions.
+4. **`docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md:313`** ("Never auto-edit FORAWWV.md | ✅ | ...") — classified (B) completed-checklist PASS row, LEFT AS-IS (matches the V082/V083 implemented-checklist treatment).
+
+### Commits (branch `docs/remove-owner-gate`)
+1. `5ab5fa4bc` — CLAUDE.md + canon tier (CANON.md, SENSITIVE_HISTORY_DESIGN_GATE.md)
+2. `66a06518e` — add this inventory doc
+3. `6093936d5` — engineering docs (PYRRHIC_PROCESS_RULES, EVENT_SYSTEM_AUTHORING_GUIDE, ADR-0007) + 4 `.claude` skill/roster surfaces
+4. `8759324f7` — plans directory (FORAWWV-ban bulk + §6 non-delegable + calibration gating)
+5. `d52a5ba99` — proposals/governance/CALIBRATION_MASTER
+6. `a48dc681b` — supplemental live governance (MASTER_ROADMAP, COMMAND_BOARD, DoD, D1, enclave DESIGN)
+7. (+ this execution-log commit)
+
+### Verification
+- Core live governance files (CLAUDE.md, CANON.md, SHDG, PYRRHIC_PROCESS_RULES, EVENT_SYSTEM_AUTHORING_GUIDE, AGENT_TEAM_ROSTER, 3 skills): **zero** remaining "auto-edit ban" strings.
+- `docs/plans/` + `docs/40_reports/proposals/`: zero remaining class-A `owner-gated`/`non-delegable`/`auto-edit` (excluding class-B historical records and this inventory's quoted examples).
+- `npx tsc --noEmit`: docs-only change, unaffected (see PR notes).
+
+---
+
 *Report path: `docs/40_reports/proposals/20260611_OWNER_GATE_REMOVAL_INVENTORY.md`*  
-*Produced: 2026-06-11 — Documentation Specialist scoping pass. No edits made to any other file.*
+*Produced: 2026-06-11 — Documentation Specialist. Inventory + execution. FORAWWV.md substance untouched (process-gate only).*

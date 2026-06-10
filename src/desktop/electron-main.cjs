@@ -80,11 +80,6 @@ let currentGameStateJson = null;
 let mainWindow = null;
 let tacticalMapWindow = null;
 
-// TIER1-REPLAY-LIVE: sparse manifest accumulator for live-play sessions.
-// Reset on campaign start or state load; appended per advance-turn.
-// Never read by advanceTurn() or any sim function — purely observational.
-let liveReplayManifestFrames = [];
-
 /**
  * Lazy-load + cache the authored `visit_to_front_<faction>` event definition
  * from data/scenarios/events/war_1993.json. Read-only; the file ships as
@@ -771,7 +766,6 @@ function createMainWindow(options = {}) {
               const sim = getDesktopSim();
               const { state } = await sim.loadScenarioFromPath(result.filePaths[0], getBaseDir());
               currentGameStateJson = sim.serializeState(state);
-              liveReplayManifestFrames = [];
               sendGameStateToRenderer(currentGameStateJson);
             } catch (e) { console.error('Load scenario failed:', e); }
           }
@@ -784,7 +778,6 @@ function createMainWindow(options = {}) {
               const sim = getDesktopSim();
               const { state } = await sim.loadStateFromPath(result.filePaths[0]);
               currentGameStateJson = sim.serializeState(state);
-              liveReplayManifestFrames = [];
               sendGameStateToRenderer(currentGameStateJson);
               // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: optional sidecar.
               const sequenceJson = readReplaySaveSequenceSidecar(result.filePaths[0]);
@@ -1612,7 +1605,6 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       const { state } = await sim.loadScenarioFromPath(result.filePaths[0], getBaseDir());
       currentGameStateJson = sim.serializeState(state);
-      liveReplayManifestFrames = [];
       sendGameStateToRenderer(currentGameStateJson, _event.sender);
       return { ok: true, stateJson: currentGameStateJson };
     } catch (e) {
@@ -1633,7 +1625,6 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       const { state } = await sim.startNewCampaign(getBaseDir(), playerFaction, scenarioKey ?? 'apr_1992');
       currentGameStateJson = sim.serializeState(state);
-      liveReplayManifestFrames = [];
       sendGameStateToRenderer(currentGameStateJson, _event.sender);
       return { ok: true, stateJson: currentGameStateJson };
     } catch (e) {
@@ -1648,7 +1639,6 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       const { state } = await sim.loadStateFromPath(result.filePaths[0]);
       currentGameStateJson = sim.serializeState(state);
-      liveReplayManifestFrames = [];
       // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: optional sidecar.
       // Carried alongside the state so the VerdictScreen Replay tab works
       // when the user loads a final_save.json that has a sibling
@@ -1708,18 +1698,6 @@ app.whenReady().then(() => {
       sendGameStateToRenderer(currentGameStateJson, _event.sender);
       if (result.report) sendTurnReportToRenderer(result.report);
       autoSave();
-      // TIER1-REPLAY-LIVE: accumulate sparse replay summary for the live-play
-      // manifest so the VerdictScreen Replay tab works for campaigns played in-app.
-      // buildReplayFrameSummary is a pure read-only projection (no Math.random /
-      // Date.now). Does NOT store full GameState[] (memory safety).
-      if (typeof sim.buildReplayFrameSummary === 'function') {
-        const liveSummaryFrame = sim.buildReplayFrameSummary(result.state);
-        if (liveSummaryFrame) {
-          liveReplayManifestFrames.push(liveSummaryFrame);
-          const liveManifest = sim.buildReplaySaveManifest(liveReplayManifestFrames);
-          sendReplayManifestToRenderer(JSON.stringify(liveManifest));
-        }
-      }
       return { ok: true, stateJson: currentGameStateJson, report: result.report ?? null };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
