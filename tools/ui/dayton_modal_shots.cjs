@@ -8,7 +8,7 @@
  * with the unit test's PENDING packet), and captures the design's notable
  * surfaces to PNG for owner review. Captures nothing committed.
  *
- * Output dir: F:\A-War-Without-Victory\.tmp_dayton_shots
+ * Output dir: <repo-root>/.tmp_dayton_shots (override with AWWV_DAYTON_SHOT_OUT_DIR)
  */
 const fs = require('node:fs');
 const path = require('node:path');
@@ -18,7 +18,7 @@ const ROOT = process.cwd();
 const PORT = Number(process.env.AWWV_DAYTON_SHOT_PORT || 3331);
 const BASE = `http://127.0.0.1:${PORT}/dayton_shot.html`;
 const OUT_DIR = process.env.AWWV_DAYTON_SHOT_OUT_DIR
-  || 'F:\\A-War-Without-Victory\\.tmp_dayton_shots';
+  || path.join(ROOT, '.tmp_dayton_shots');
 
 function ensureDir(dir) { fs.mkdirSync(dir, { recursive: true }); }
 
@@ -154,6 +154,18 @@ async function captureBanner(page, text, name) {
 // to that box, padded slightly so borders aren't sheared.
 async function captureSection(page, header, name, altHeaders = []) {
   const out = path.join(OUT_DIR, name);
+  // First, scroll the section's header into view so its box is inside the
+  // visible overflow container (sections below the fold — e.g. counter-offer
+  // after the institutional-dimensions matrix — would otherwise clip blank).
+  await page.evaluate((headerArg, alts) => {
+    const needles = [headerArg, ...alts].map((s) => s.toLowerCase());
+    const hdr = Array.from(document.querySelectorAll('div')).find((d) => {
+      const txt = (d.textContent || '').trim().toLowerCase();
+      return needles.some((n) => txt.startsWith(n)) && (d.children.length === 0 || txt.length < 60);
+    });
+    if (hdr) hdr.scrollIntoView({ block: 'start' });
+  }, header, altHeaders);
+  await delay(200);
   const clip = await page.evaluate((headerArg, alts) => {
     const needles = [headerArg, ...alts].map((s) => s.toLowerCase());
     const headers = Array.from(document.querySelectorAll('div'))
