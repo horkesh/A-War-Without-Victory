@@ -164,6 +164,51 @@ describe('computeFactionExhaustionDrag — Design B v2 casualty-load drag', () =
         });
     });
 
+    describe('(d) gate stale-ON fix — reset flips the gate back to false (#407 P2 mirror)', () => {
+        // The scenario_runner gate (`process.env.AWWV_EXHAUSTION_DRAG_V2 === 'true'`)
+        // sets a module-level override that PERSISTS across runScenario() calls in a
+        // long-lived Node process. Before the fix, an `=true` run left the override
+        // stale-ON and silently contaminated a subsequent flag-off (intended-byte-
+        // identical) run. The runner now calls resetEnableExhaustionDragV2() on the
+        // else branch (env not exactly 'true'). These tests assert that contract at
+        // the gate level: reset must always return the gate to the false default.
+        it('flips back to false after an ON run when the env is cleared (reset path)', () => {
+            // Simulate runScenario with the env === 'true'.
+            setEnableExhaustionDragV2(true);
+            expect(getEnableExhaustionDragV2()).toBe(true);
+            // Simulate a SECOND runScenario in the SAME process with the env unset:
+            // the runner's else branch calls reset → the gate must read false again.
+            resetEnableExhaustionDragV2();
+            expect(getEnableExhaustionDragV2()).toBe(false);
+            // And the drag function must compute the legacy OFF expression again,
+            // ignoring the (deep-in-ramp) casualty-load arg → byte-identical floor.
+            expect(computeFactionExhaustionDrag(420, 2.6)).toBe(legacyDrag(420));
+        });
+
+        it('reset is idempotent — repeated reset keeps the gate false', () => {
+            setEnableExhaustionDragV2(true);
+            resetEnableExhaustionDragV2();
+            resetEnableExhaustionDragV2();
+            expect(getEnableExhaustionDragV2()).toBe(false);
+        });
+
+        it('survives an ON→OFF→ON→OFF cycle in one process (no stale carry-over)', () => {
+            // ON
+            setEnableExhaustionDragV2(true);
+            expect(computeFactionExhaustionDrag(0, 2.6)).toBe(0.20); // ramp floor
+            // OFF (env-cleared → reset)
+            resetEnableExhaustionDragV2();
+            expect(computeFactionExhaustionDrag(0, 2.6)).toBe(legacyDrag(0)); // legacy → 1.0
+            expect(computeFactionExhaustionDrag(5000, 2.6)).toBe(0.3);        // legacy saturated
+            // ON again
+            setEnableExhaustionDragV2(true);
+            expect(computeFactionExhaustionDrag(0, 2.6)).toBe(0.20);
+            // OFF again
+            resetEnableExhaustionDragV2();
+            expect(getEnableExhaustionDragV2()).toBe(false);
+        });
+    });
+
     describe('(c) symmetric across factions + deterministic', () => {
         it('is a pure function of the numerics (identical for all factions at equal load)', () => {
             for (const flag of [false, true]) {

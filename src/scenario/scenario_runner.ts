@@ -99,7 +99,7 @@ import { setEnablePhase3A } from '../sim/pressure/phase3a_pressure_eligibility.j
 import { setEnablePhase3B } from '../sim/pressure/phase3b_pressure_exhaustion.js';
 import { setEnablePhase3C } from '../sim/pressure/phase3c_exhaustion_collapse_gating.js';
 import { setEnablePhase3D } from '../sim/collapse/phase3d_collapse_resolution.js';
-import { setEnableExhaustionDragV2 } from '../sim/combat/commander/plan.js';
+import { setEnableExhaustionDragV2, resetEnableExhaustionDragV2 } from '../sim/combat/commander/plan.js';
 import {
     buildCombatCausalitySummary,
     buildOperationCombatDiagnostics,
@@ -1947,8 +1947,22 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     // resolution; the triggered Srebrenica/Žepa ops are structurally exempt). This is the
     // Phase-IV exploration switch for the re-floor measurement run.
     // Determinism: reads only an env var at run start; no RNG/clock.
+    //
+    // STALE-ON FIX (#407 Codex P2 mirror): the module-level gate override
+    // (`_enableExhaustionDragV2Override`) persists across runScenario() calls in a
+    // long-lived Node process (e.g. the vitest worker, or a harness that runs OFF
+    // then ON then OFF in one process). Re-read the env on EVERY invocation and
+    // explicitly RESET the override when the var is not exactly 'true', so the gate
+    // flips back to false (default) when the env is cleared/changed — matching how a
+    // fresh process behaves. Without the else-reset, a prior `=true` run would leave
+    // the gate stale-ON and silently contaminate a subsequent flag-off (intended-
+    // byte-identical) run. The else branch calls reset (→ override null → getEnable
+    // returns the false default) rather than setEnable(false) so the scaffold stays
+    // single-sourced on its default.
     if (process.env.AWWV_EXHAUSTION_DRAG_V2 === 'true') {
         setEnableExhaustionDragV2(true);
+    } else {
+        resetEnableExhaustionDragV2();
     }
     const emitFullReplayPayload = replayPayloadMode === 'full';
     const timingTotals = createScenarioTimingTotals();
