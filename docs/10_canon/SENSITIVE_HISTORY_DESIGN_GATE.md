@@ -105,8 +105,8 @@ A new rupture requires:
 2. A concrete trigger condition that fits into `evaluateRuptureConsequences()` as a pure predicate on `GameState`.
 3. Grade-anchor impact analysis — how does the new condemnation flag interact with existing faction grades?
 4. Cost Ledger wording draft for the rupture description.
-5. `/historian` + `/war-or-game` + `/game-designer` sign-off.
-6. User approval.
+5. Pyrrhic §6-panel sign-off: `/historian` + scenario-tester/calibration + Engine/systems + Red-team (Historian/war-or-game/game-designer seats), unanimous GO = signature.
+6. A BLOCK or split panel verdict surfaces to the owner.
 
 Adding a rupture is a capital-R Decision. The default is: do not add one.
 
@@ -195,16 +195,16 @@ Changes that touch sensitive history require explicit multi-party review. No exc
 
 | Change type | Required sign-off |
 |---|---|
-| New rupture added | `/historian` + `/war-or-game` + `/game-designer` + user approval |
+| New rupture added | Pyrrhic §6-panel: Historian + scenario-tester/calibration + Engine/systems + Red-team (incl. `/historian` + `/war-or-game` + `/game-designer`), unanimous GO = signature; BLOCK or split surfaces to the owner |
 | Change to rupture trigger or description | `/historian` + `/game-designer` |
 | New atrocity event | `/historian` + `/narrative-designer` |
 | Change to atrocity event content | `/historian` + `/narrative-designer` |
-| New condemnation flag | `/historian` + `/game-designer` + user approval |
-| Change to paramilitary policy surface | `/game-designer` + `/ui-ux-developer` + user review before implementation |
+| New condemnation flag | `/historian` + `/game-designer`, Pyrrhic §6-panel sign-off (unanimous GO = signature; BLOCK or split surfaces to the owner) |
+| Change to paramilitary policy surface | `/game-designer` + `/ui-ux-developer`, Pyrrhic §6-panel sign-off before implementation (BLOCK or split surfaces to the owner) |
 | Cost Ledger wording change | `/narrative-designer` + `/historian` |
 | New essay touching atrocity | `/historian` + `/narrative-designer` |
 | Change to enclave mechanics | `/gameplay-programmer` + `/historian` (for Srebrenica/Žepa specifically) |
-| Any change that could produce a "reward for atrocity" effect | User approval required; not delegable |
+| Any change that could produce a "reward for atrocity" effect | Pyrrhic §6-panel sign-off (Historian + scenario-tester/calibration + Engine/systems + Red-team), unanimous GO required. This is a values bright line, not merely a gate: the atrocity-is-never-rewarded principle, if ever in question, surfaces to the owner. |
 
 ### Evidence required for each sign-off
 
@@ -215,7 +215,7 @@ Changes that touch sensitive history require explicit multi-party review. No exc
 
 ### Escalation
 
-Any sign-off dispute escalates to the user. Do not resolve sensitive-history disputes inside role review without explicit user authorization. When in doubt, the answer is "no, not yet, bring it to the user."
+Any sign-off dispute escalates to the Pyrrhic §6-panel for a formal vote. A BLOCK verdict or any split — and any question touching the atrocity-is-never-rewarded bright line — surfaces to the owner. Do not resolve sensitive-history disputes inside role review without panel sign-off. When in doubt, the answer is "no, not yet, bring it to the panel."
 
 ---
 

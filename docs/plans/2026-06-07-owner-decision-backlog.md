@@ -96,9 +96,9 @@ risk = primary downside if mishandled.
   enclaves until an emergent 1995-pivot release). Safe by construction: it REMOVES aggression and
   grants no reward. **CRITICAL risk:** the release must reliably fire so Srebrenica / Žepa still
   fall and the genocide rupture is recorded — suppressing the fall would be a WORSE §6 failure than
-  not building this. Requires non-delegable user approval. Fallback if approval is withheld: a
+  not building this. Requires Pyrrhic §6-panel sign-off (unanimous GO; the atrocity-is-never-rewarded bright line surfaces to the owner). Fallback if approval is withheld: a
   documented ceiling (no engine change).
-- **Flags:** §6 YES (non-delegable user approval) · canon none · calibration yes (changes enclave
+- **Flags:** §6 YES (Pyrrhic §6-panel sign-off; bright line surfaces to owner) · canon none · calibration yes (changes enclave
   timing) · effort medium · risk HIGH (a stuck release suppresses the historical fall).
 - **Build-lane:** Faction-AI posture lane, under the §6 chain.
 - **Status:** **§6-GATED — needs user approval; documented-ceiling fallback.**

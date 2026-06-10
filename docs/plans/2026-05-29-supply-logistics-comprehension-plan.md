@@ -7,7 +7,7 @@
 **Reviewers:** gameplay-programmer, QA engineer, determinism-auditor
 **Expands:** `docs/plans/2026-05-24-p2-p3-readiness-execution-plan.md` Phase 2 (lines 70-86) — does NOT contradict it
 **Authority (hierarchy order):**
-- `CLAUDE.md` — Determinism SACRED; GameState single source of truth; no `Math.random`/`Date.now`/timestamps; sorted iteration via `strictCompare`; never auto-edit `docs/10_canon/FORAWWV.md`.
+- `CLAUDE.md` — Determinism SACRED; GameState single source of truth; no `Math.random`/`Date.now`/timestamps; sorted iteration via `strictCompare`; FORAWWV.md edits require Pyrrhic-panel sign-off.
 - COMMAND_BOARD row constraint: **"read-model/docs clarity only"**; **STOP GATE = "New command authority, new sim rule, or GUI branch collision."**
 - Source-phase allowed work (`2026-05-24-...:76`): "read-model clarity, docs/tooltips/diagnostics, and existing-state explanation."
 - Depth exemplar: `docs/plans/2026-05-29-b7-sarajevo-siege-continuous-condition-plan.md` (player-surface read-model section §6).

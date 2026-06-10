@@ -155,7 +155,7 @@ All 25 test files testing Phase 0 systems. These should be archived, not deleted
 | 6.5 | `docs/10_canon/Rulebook_v0_7_0.md:491,605` | Section 17.1 "Peace phase (Pre-War)", stability-based control | REVISE | Remove or rewrite Section 17.1. Update stability reference. |
 | 6.6 | `docs/10_canon/Engine_Invariants_v0_7_0.md:404,414,419` | "Peace/War model" changelog entries | REVISE | Update changelog to reflect v0.7.2 single-phase. |
 | 6.7 | `docs/10_canon/context.md:37,43,98,274,312,315,317,338,359` | Peace phase fatigue, early_war directory description, peace_phases.ts listing, Phase 1 contact graph | REVISE | Update directory tree, remove peace_phases.ts entry, update descriptions. |
-| 6.8 | `docs/10_canon/FORAWWV.md:216-217` | "Canonical adjacency (Phase 1)" | FLAG | **Do not auto-edit per sacred rules.** Flag for manual review. This "Phase 1" refers to contact graph phase, not game phase. |
+| 6.8 | `docs/10_canon/FORAWWV.md:216-217` | "Canonical adjacency (Phase 1)" | FLAG | **Edits require Pyrrhic-panel sign-off per sacred rules.** Route through the appropriate panel. This "Phase 1" refers to contact graph phase, not game phase. |
 
 ## Priority 7: Engineering Documentation
 
@@ -216,7 +216,7 @@ All 25 test files testing Phase 0 systems. These should be archived, not deleted
 3. **Phase C — Remove peace branches from pipelines** (1.3, 1.5, 1.6, 1.7): Remove `if (phase === 'peace')` from both pipeline orchestrators. Remove sep_1991 from desktop_sim. Run smoke-test triad.
 4. **Phase D — Clean warroom UI** (3.1-3.22): Remove all peace-phase branches from warroom components. Run smoke-test triad.
 5. **Phase E — Update type system** (1.1, 1.2, 1.10, 1.11): Change `PhaseName` to `'war'` only (or remove type entirely). Fix all type errors. Run smoke-test triad.
-6. **Phase F — Update documentation** (6.2-6.8, 7.1-7.9, 7.12): Rewrite canon docs and engineering docs. Flag FORAWWV.md for manual review.
+6. **Phase F — Update documentation** (6.2-6.8, 7.1-7.9, 7.12): Rewrite canon docs and engineering docs. Route FORAWWV.md edits through Pyrrhic-panel sign-off.
 7. **Phase G — Update remaining tests** (5.16-5.25): Revise tests that reference peace phase but test war-phase behavior.
 
 **Estimated scope:** ~100 files touched, ~3000 lines removed, ~200 lines revised.
@@ -228,7 +228,7 @@ All 25 test files testing Phase 0 systems. These should be archived, not deleted
 | File/Directory | Reason |
 |----------------|--------|
 | `src/sim/early_war/` (18 files) | Still needed for war-phase early weeks. "Early war" != "peace phase". |
-| `docs/10_canon/FORAWWV.md` | Sacred rule: never auto-edit. Flag only. |
+| `docs/10_canon/FORAWWV.md` | Sacred rule: edits require Pyrrhic-panel sign-off. |
 | `docs/40_reports/` (most files) | Historical records of past development. |
 | `src/_archived/` (existing) | Already archived code. |
 | `data/scenarios/essays/` | Essay files mentioning "pre-war" in historical context — correct usage. |

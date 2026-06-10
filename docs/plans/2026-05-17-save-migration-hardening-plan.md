@@ -199,7 +199,7 @@ Update:
 - `docs/PROJECT_LEDGER.md` — append behavioral/output statement. Required determinism statement: "Save migration registry now versions all `serialize.ts:migrateState` defaults. 40w calibration hash unchanged vs pre-plan baseline (`<hash>`). Sensitive-classified defaults: `<list or none>`. Schema version bumped from 2 to `<N>`."
 - `docs/PROJECT_LEDGER_KNOWLEDGE.md` — append a Save Schema Evolution entry pointing at `docs/20_engineering/SAVE_SCHEMA_EVOLUTION.md`.
 
-Do not auto-edit `docs/10_canon/FORAWWV.md` — flag for manual review if any canon-level claim about save compatibility changes.
+Edits to `docs/10_canon/FORAWWV.md` require Pyrrhic-panel sign-off — route any canon-level claim about save compatibility through the appropriate panel.
 
 ## Stop Gates And Closeout
 

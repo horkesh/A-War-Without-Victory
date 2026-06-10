@@ -93,7 +93,7 @@ Reuse the existing capital→cost→bot/patron→verdict spine. Three extensions
 2. **D2 — resolution + verdict wiring:** `dayton_negotiation.ts` (resolve new dims via existing bot/patron path), `bot_negotiation.ts` (cost them), `scoring.ts` (fold dysfunction into grade cap + classifyOutcome, emergent-gated). `endgame_snapshot.ts` auto-freezes.
 3. **D3 — counter-offer envelopes for Dayton (Option 2 depth):** add cited Dayton-table envelopes to `counter_offer_generator.ts` + `historical_envelopes.ts` (chain-depth 2). *Historian sign-off mandatory — each bot position cites a real 1994–95 negotiating position.*
 4. **D4 — UI:** `DaytonNegotiationModal.tsx` → 5-dim structured layout (autonomy dial → competency grid → constitutional choices → return/justice → live IEBL/dysfunction readout) + multi-round panel. *narrative-designer: the verdict must narrate the authored dysfunction in player-legible prose.*
-5. **D5 — canon propagation:** `VICTORY_AND_PYRRHIC_SCORING.md` (dysfunction term), Systems Manual (Dayton mechanic), `WAR_TERMINATION_SPEC.md`. **Never auto-edit FORAWWV.md** — flag for manual review.
+5. **D5 — canon propagation:** `VICTORY_AND_PYRRHIC_SCORING.md` (dysfunction term), Systems Manual (Dayton mechanic), `WAR_TERMINATION_SPEC.md`. **FORAWWV.md edits require Pyrrhic-panel sign-off** — route through the appropriate panel.
 
 ### E. Owner sign-off required before build
 1. Pick Option 1/2/3 (recommend 2).

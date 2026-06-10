@@ -39,7 +39,7 @@ Owner question: the art event-illustration pipeline was "planned then never wire
 
 ---
 
-## §6-GATED — owner sign-off required (do NOT auto-build)
+## §6-GATED — Pyrrhic §6-panel sign-off required (do NOT auto-build)
 - **T1-A-adjacent / content C1:** `bijeljina_massacre_1992` essay never unlocks — its trigger framing is §6 (named 1992 atrocity).
 - **BCS + trigger** for the 2 atrocity-adjacent unindexed deposit essays (Vase Miskina breadline, Sarajevo JNA column).
 - Surfacing the §6-adjacent ghost bodies (`cleansing_refused`, `enclave_defended`) if the ghost-prose display (T2-A) is wired.

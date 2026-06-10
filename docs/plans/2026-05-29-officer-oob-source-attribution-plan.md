@@ -14,7 +14,7 @@
 
 ## 0. Required reading (cite before any work)
 
-- `CLAUDE.md` Sacred Rules — determinism (no `Math.random`/`Date.now`/timestamps in sim/tooling); canonical faction IDs **`RBiH` / `RS` / `HRHB`** only; "Never auto-edit `docs/10_canon/FORAWWV.md`"; "NEVER override initial OSIDs."
+- `CLAUDE.md` Sacred Rules — determinism (no `Math.random`/`Date.now`/timestamps in sim/tooling); canonical faction IDs **`RBiH` / `RS` / `HRHB`** only; "FORAWWV.md edits require Pyrrhic-panel sign-off"; "NEVER override initial OSIDs."
 - `docs/plans/2026-05-24-p2-p3-readiness-execution-plan.md` Phase 3 (the row this plan expands) + its "Historical and Sensitive-History Gates" section.
 - `docs/plans/COMMAND_BOARD.md` line 42 (Verification/Proof + Stop Gate) and the Dispatch Rules.
 - Source hierarchy (project memory `historical_research_sources.md`; Gate §6 evidence rule): **ICTY/ICJ verdicts FIRST → museum B/C/S primary → Balkan Battlegrounds (BB) → Wikipedia LAST (never the sole basis; not acceptable for `/historian` sign-off).**

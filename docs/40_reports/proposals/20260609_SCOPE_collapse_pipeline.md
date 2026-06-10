@@ -33,7 +33,7 @@
 - **Effort: finish-unbuilt-logic + heavy recalibrate**, NOT flip+recalibrate.
   Estimate **~150–300 LOC of net-new/replacement engine logic + spec
   derivation**, **≥8–15 serial 188w runs** (likely a multi-session calibration
-  campaign), plus a **§6 historian/owner gate** and new test surface.
+  campaign), plus a **§6 Pyrrhic-panel gate** (Historian + scenario-tester/calibration + Engine/systems + Red-team; bright line surfaces to the owner) and new test surface.
 - **Recommendation: POST-1.0 (v1.x).** It is the thesis pillar, but it is a
   §6-touching, calibration-moving, partially-unbuilt system landing during
   calibration-LAST. The DoD already classifies it there. Keep the inert steps;
@@ -151,8 +151,8 @@ Two §6 failure modes:
 
 Per the DoD: §6 mechanics are **v1.x by definition — they cannot land after the
 final re-floor.** Wiring collapse ON is a §6-mechanic change to enclave-bearing
-settlements → owner + historian gate, default-off, historian-verified before any
-flip. Non-delegable.
+settlements → §6 Pyrrhic-panel gate, default-off, historian-verified before any
+flip. The atrocity-is-never-rewarded bright line surfaces to the owner.
 
 ---
 
@@ -188,7 +188,7 @@ canon constant-derivation**, any of which can stall the lane independently.
    per `feedback_calibrate_a_healthy_engine_not_the_floor`, a healthier engine that
    moves the floor is acceptable IF owner-signed).
 4. **§6 proven**: Srebrenica/Žepa fall + rupture record still fire reliably and at
-   correct timing with collapse ON — historian + owner sign-off.
+   correct timing with collapse ON — §6 Pyrrhic-panel sign-off (bright line surfaces to the owner).
 5. Collapse is **player-legible** (the negative-sum "your faction is breaking"
    signal surfaced — the `loss_of_control_trends` flags exist but have no
    player-facing surface today).

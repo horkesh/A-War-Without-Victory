@@ -246,9 +246,9 @@ If the calibration team prefers minimum-code-change path: Option A standalone (i
 
 If the calibration team is risk-averse mid-arc: Option D (defer both) is acceptable and preserves all gate substrate for the next calibration cycle.
 
-## 9. Open questions for user
+## 9. Open questions for the Pyrrhic panel
 
-Per CLAUDE.md merge-coordination and the non-delegable-on-activation-impact rule:
+Per CLAUDE.md merge-coordination and the panel-sign-off-on-activation-impact rule (bright lines surface to the owner):
 
 1. **Approve threshold recalibration on `internal_cohesion`?** If yes, what value? Architect recommendation: 10. Sub-questions:
    - Re-sample across canonical scenarios first, or trust the turn-40 snapshot?

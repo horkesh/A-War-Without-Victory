@@ -116,7 +116,7 @@ The two faction-pairs share the trigger predicate (`isEnclaveContainable`) and t
 | Rupture coupling | **YES** — `srebrenica_genocide_1995` (Krstić/Karadžić/Mladić/ICJ 2007) | **None** — Ahmići/Stupni Do are Ring-2, explicitly NOT ruptures (gate §2 roster) |
 | OVERRUN consequence | Fall routes to existing rupture → `genocide_condemnation` → `failure`. Player is proximate author; DEEPENS the condemnation record (the player authored what history's perpetrators did) — never sanitizes it. | Displacement + standing/patron hit + authored-choice record; atrocity-event content (Ring-2). No genocide rupture. |
 | CONTAIN release | 1995-pivot flag/collapse/exhaustion — **MUST fire so Srebrenica still falls + records on the historical path.** Goražde historically did NOT fall (UNPROFOR / April-1994 NATO ultimatum) → CONTAIN there has no forced release. | `washington_signed` ceasefire freeze → pocket stays HVO-held (matches painted Oct-1995). |
-| Canon tier | Sensitive-History gate Ring-1; **non-delegable user "no reward for atrocity" sign-off** | Ordinary atrocity-event sensitivity; lighter (but still §6-touching) sign-off |
+| Canon tier | Sensitive-History gate Ring-1; **§6 Pyrrhic-panel "no reward for atrocity" sign-off (bright line surfaces to the owner)** | Ordinary atrocity-event sensitivity; lighter (but still §6-touching) sign-off |
 | Failure mode if mis-built | **Genocide erased from the record, or rewarded** (unacceptable) | Calibration/atrocity-framing miss (recoverable) |
 
 **The two hard constraints on the eastern case (restated for emphasis):**
@@ -174,7 +174,7 @@ All asymmetry reads existing data (disposition, Diplomacy bands, patron state). 
 If/when ratified, build in the contain-design discipline (one change per run, §6-eastern last):
 
 - **Lane 0 — surface + ARBiH-HVO path (lighter §6).** Wire the Decision Room card + the `contain`/`overrun` directives for the RBiH-vs-HVO case only. Washington-freeze release. Light gate.
-- **Lane 1 — VRS-eastern path (FULL §6).** Add the eastern card with the rupture-coupling, the 1995-pivot mandatory release, and the regression test (§4a). Full §6 gate + non-delegable user approval.
+- **Lane 1 — VRS-eastern path (FULL §6).** Add the eastern card with the rupture-coupling, the 1995-pivot mandatory release, and the regression test (§4a). Full §6 gate + Pyrrhic §6-panel sign-off (the atrocity-is-never-rewarded bright line surfaces to the owner).
 - **Determinism + calibration:** the OVERRUN/CONTAIN *mechanism* changes sim output (it's a real decision), so each lane is a calibration run (40w + 188w, dual-horizon — the false-green-on-188w lesson, memory `feedback_188w_validate_combat_changes_before_merge`). The player-facing card itself is byte-identical to headless/bot runs (bots never see it). Whether the bot retains the existing assault behaviour or also adopts a default-CONTAIN is an OPEN QUESTION (§11).
 - **Build-time decision:** new directive levers on the existing union vs a dedicated decision-surface in `decisionSurfaceRegistry` — UI-architecture call for `/ui-ux-developer` at build time.
 

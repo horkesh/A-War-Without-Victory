@@ -571,4 +571,4 @@ Each batch: implement → test → /simplify → docs → commit.
 | REPO_MAP | New Files | brigade_dissolution.ts, siege_attrition.ts |
 | SUPPLY_DESIGN.md | Embargo | Add embargo cap design |
 
-**Note**: No FORAWWV changes — all changes are within existing systems, not new design philosophy. Flag for manual review if any change touches core design intent.
+**Note**: No FORAWWV changes — all changes are within existing systems, not new design philosophy. Route through Pyrrhic-panel sign-off if any change touches core design intent.

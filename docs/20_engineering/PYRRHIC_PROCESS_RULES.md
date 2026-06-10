@@ -103,7 +103,7 @@ Before starting each phase, scan `docs/life_lessons.md` for lessons relevant to 
 - **Ops-only attacks**: Brigades NEVER attack independently.
 - **One change per calibration run**: Change ONE thing, run scenario, compare, sign off.
 - **GameState is single source of truth**: `src/state/game_state.ts`.
-- **Never auto-edit FORAWWV.md**: Flag for manual review.
+- **FORAWWV.md / canon edits require Pyrrhic-panel sign-off**: convene the appropriate panel; unanimous GO = signature; BLOCK or split surfaces to the owner; implementer ≠ reviewer.
 
 ### 3.4 Commit Discipline
 - One commit per phase (or per logical unit within a phase).

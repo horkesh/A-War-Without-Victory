@@ -469,9 +469,9 @@ The war's texture WITHOUT graphic atrocity: diplomacy, mobilisation, supply, the
 
 ---
 
-# §6 DEFERRED — OWNER SIGN-OFF REQUIRED
+# §6 DEFERRED — PYRRHIC §6-PANEL SIGN-OFF REQUIRED
 
-The following assets are §6 (owner-gated, sensitive camp/atrocity/enclave-fall/decision-header content). **No generation prompts are authored for these.** They are listed ONLY to confirm they exist in the art surface and are deferred to owner §6 sign-off:
+The following assets are §6 (panel-gated, sensitive camp/atrocity/enclave-fall/decision-header content). **No generation prompts are authored for these.** They are listed ONLY to confirm they exist in the art surface and are deferred to §6 Pyrrhic panel sign-off (Historian + scenario-tester/calibration + Engine/systems + Red-team, unanimous):
 
 1. **Detention camps** — Omarska, Keraterm, Trnopolje (and any camp codex essay header).
 2. **Srebrenica fall** (July 1995) — `srebrenica_falls_1995` event still / codex header.
@@ -482,7 +482,7 @@ The following assets are §6 (owner-gated, sensitive camp/atrocity/enclave-fall/
 7. **The enclave OVERRUN / CONTAIN decision header** — the presidential moral-choice header art for the never-fell-enclave overrun decision.
 8. **Any camp / atrocity codex essay header** — the 13 unindexed deposit essays (Foča, Višegrad, Prijedor, Zvornik 1992, etc.) and any future atrocity codex headers.
 
-These require explicit owner + §6 sign-off before any prompt is authored or any image generated.
+These require explicit §6 Pyrrhic panel sign-off (Historian + scenario-tester/calibration + Engine/systems + Red-team, unanimous) before any prompt is authored or any image generated.
 
 ---
 

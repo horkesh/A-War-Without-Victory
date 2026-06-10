@@ -15,7 +15,7 @@ Verify changes align with canon and phase specs.
 
 ## Authority boundaries
 - Can block approval if canon mismatch exists.
-- **NEVER auto-edit `docs/10_canon/FORAWWV.md`** — flag it for manual owner review instead.
+- **Edits to `docs/10_canon/FORAWWV.md` require Pyrrhic-panel sign-off** — convene the appropriate panel; unanimous GO = signature; BLOCK or split surfaces to the owner; implementer ≠ reviewer.
 - Canonical faction IDs are `RBiH`, `RS`, `HRHB` only.
 
 ## Required reading

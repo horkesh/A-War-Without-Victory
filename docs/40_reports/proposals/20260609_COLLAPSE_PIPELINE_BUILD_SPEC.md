@@ -1,10 +1,10 @@
 # BUILD SPEC — Phase 3A→3D Pressure / Exhaustion / Collapse Pipeline
 
 **Type:** READ-ONLY build specification. No engine code, no flag flips, no canon edits in producing this.
-**Status:** DRAFT for owner ratification. Engine work is blocked on the §6 sign-off (§4) and the constants ratification (§3).
+**Status:** DRAFT for Pyrrhic-panel ratification. Engine work is blocked on the §6 sign-off (§4) and the constants ratification (§3).
 **Predecessor:** `docs/40_reports/proposals/20260609_SCOPE_collapse_pipeline.md` (effort/risk/recommendation). This doc extends that scope into a buildable plan; it does not re-derive its findings.
 **Re-sequencing context:** Owner has moved collapse from POST-1.0 to the **next major engine build — BEFORE the D2 full-campaign playtest and BEFORE the final calibration**. Rationale: collapse moves territory, so the single finalization re-floor must follow it, and D2 must validate the complete engine. The scope doc's "POST-1.0" recommendation is therefore **overridden by owner re-sequencing**; this spec assumes collapse ships pre-1.0.
-**§6-SENSITIVE.** Collapse fires per-settlement and can reach the eastern genocide-rupture enclaves. The §6 guard (§4) is non-delegable owner + historian sign-off. This document FLAGS; it does not DECIDE.
+**§6-SENSITIVE.** Collapse fires per-settlement and can reach the eastern genocide-rupture enclaves. The §6 guard (§4) requires §6 Pyrrhic panel sign-off (Historian + scenario-tester/calibration + Engine/systems + Red-team, unanimous). This document FLAGS; it does not DECIDE.
 
 ---
 
@@ -137,7 +137,7 @@ The chain is strictly serial (3D requires 3C requires 3B requires 3A). All four 
 
 ---
 
-## 4. The §6 guard (CRITICAL — owner + historian sign-off, NON-DELEGABLE)
+## 4. The §6 guard (CRITICAL — Pyrrhic §6-panel sign-off: Historian + scenario-tester/calibration + Engine/systems + Red-team)
 
 ### 4.1 The exact §6 surface (verified)
 
@@ -188,7 +188,7 @@ The eastern enclaves are RBiH-held, isolated, supply-fragile (`enclave_resilienc
 
 ## 6. Calibration-campaign plan (one-change-per-run, 188w)
 
-Enabling moves territory via the `pressure_cap_mult`/`supply_mult` feedback at degraded **non-enclave** OSIDs. The 649 floor and 30/30 anchors are pressure-driven and near margins (Zvornik garrison-pin, Sana cluster, Sarajevo ring) — the new multiplicative term lands hardest there. Per `feedback_calibrate_a_healthy_engine_not_the_floor`, a healthier engine that moves the floor is acceptable if owner-signed; 649 is a guard, not a target.
+Enabling moves territory via the `pressure_cap_mult`/`supply_mult` feedback at degraded **non-enclave** OSIDs. The 649 floor and 30/30 anchors are pressure-driven and near margins (Zvornik garrison-pin, Sana cluster, Sarajevo ring) — the new multiplicative term lands hardest there. Per `feedback_calibrate_a_healthy_engine_not_the_floor`, a healthier engine that moves the floor is acceptable if panel-signed; 649 is a guard, not a target.
 
 | Run | Change (ONE) | Gate |
 |---|---|---|
@@ -197,7 +197,7 @@ Enabling moves territory via the `pressure_cap_mult`/`supply_mult` feedback at d
 | 2 | Enable 3D + §6 guard (G1). First live territory run. | 30/30 anchors; **G2 §6 invariant GREEN** (Srebrenica rupture records ≥t140; Žepa falls; Goražde/Bihać held); OSID count recorded (may differ from 649). |
 | 3 | Tune `*_IMPACT` (C15–C17) toward the desired chronic-not-catastrophic shock. | anchors + §6 + floor delta within owner tolerance. |
 | 4 | Tune `STRAIN_FRACTION`/`TIER1_THRESHOLD` pair (C9/C11) for which OSIDs reach Tier-1. | same. |
-| 5–N | Reconcile anchors knocked out by collapse; re-floor candidate. | 30/30 + §6 + owner-signed OSID count. |
+| 5–N | Reconcile anchors knocked out by collapse; re-floor candidate. | 30/30 + §6 + panel-signed OSID count. |
 
 **Estimated runs: 10–16** (probe + 4 structural + 5–11 reconciliation), plausibly 2–3 sessions. Each is a synchronous 188w (per `feedback_188w_validate_combat_changes_before_merge` — 40w + CI is a false-green for combat-behavior changes).
 
@@ -209,7 +209,7 @@ Enabling moves territory via the `pressure_cap_mult`/`supply_mult` feedback at d
 
 ```
 GATE 0 — RATIFICATION (no code)
-  ├─ Owner ratifies the §3 constants table (or amends defaults).
+  ├─ Pyrrhic panel ratifies the §3 constants table (or amends defaults).
   └─ Owner + /historian + /gameplay-programmer ratify the §4 §6 guard design (G1/G2/G3). NON-DELEGABLE.
         ▼
 PHASE I — Build the guard + constants (calibration-flat, flags still OFF)
@@ -226,13 +226,13 @@ PHASE III — Enable + calibrate (the territory-moving work)
   ├─ Thread setEnablePhase3A/B/C/D into scenario_runner behind a scenario flag (default OFF) (~20–40 LOC).
   ├─ Run 0 probe → set C1–C4 → runs 1–N (§6).
   └─ §6 G2 invariant GREEN on EVERY territory-moving run.
-        ▼  [GATE: 30/30 anchors + §6 invariant + owner-signed OSID floor]
+        ▼  [GATE: 30/30 anchors + §6 invariant + panel-signed OSID floor]
 PHASE IV — Re-floor + finalize
   ├─ New baseline of record (188w hash, 40w, 52w golden); update CALIBRATION_MASTER + MEMORY.
   └─ Hand to D2 full-campaign playtest with collapse live.
 ```
 
-**Owner gates (hard stops):** GATE 0 §6 ratification before any 3D guard code merges to main; the §6 G2 invariant must be GREEN before AND on every run after `setEnablePhase3D(true)` reaches a non-harness path; the final re-floor OSID count is owner-signed (not auto-accepted as "must equal 649").
+**Panel gates (hard stops):** GATE 0 §6-panel ratification before any 3D guard code merges to main; the §6 G2 invariant must be GREEN before AND on every run after `setEnablePhase3D(true)` reaches a non-harness path; the final re-floor OSID count requires Pyrrhic-panel sign-off (not auto-accepted as "must equal 649").
 
 ---
 
