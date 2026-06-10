@@ -1445,13 +1445,13 @@ These need design sessions before implementation. Preserved from the original ro
 
 ## Canon Documentation Status
 
-Single rollup of every doc in `docs/10_canon/`. Maintained as a living section — update whenever a canon doc is amended. **Do NOT auto-edit `FORAWWV.md`** (per CLAUDE.md ledger protocol; flag for manual review only).
+Single rollup of every doc in `docs/10_canon/`. Maintained as a living section — update whenever a canon doc is amended. **Edits to `FORAWWV.md` require Pyrrhic-panel sign-off** (per CLAUDE.md ledger protocol; convene the appropriate panel — unanimous GO = signature; BLOCK or split surfaces to the owner).
 
 | Doc | Filename version | Internal canon version | Last touch | Last commit subject | Status |
 |---|---|---|---|---|---|
 | `CANON.md` | (index) | n/a | 2026-05-05 | LANE-NIGHTSHIFT-CANON-DOCS-TO-V09 — index updated for renamed docs + v0.9.0 gate refs | CURRENT — points to authoritative v0.9.0 docs below |
 | `Engine_Invariants_v0_9_0.md` | v0.9.0 | v0.9.0 | 2026-05-05 | LANE-NIGHTSHIFT-CANON-DOCS-TO-V09 — bumped from v0.7.0 with morale_low_streak + equipment substrate amendments | CURRENT |
-| `FORAWWV.md` | (extension) | n/a | 2026-03-01 | Phase M refactor + canon v0.6 propagation | **MANUAL-ONLY** — Claude must NEVER auto-edit; flag for human review when proposed |
+| `FORAWWV.md` | (extension) | n/a | 2026-03-01 | Phase M refactor + canon v0.6 propagation | **PANEL-GATED** — edits require Pyrrhic-panel sign-off (unanimous GO = signature; BLOCK or split surfaces to the owner) |
 | `Game_Bible_v0_9_0.md` | v0.9.0 | v0.9.0 | 2026-05-05 | LANE-NIGHTSHIFT-CANON-DOCS-TO-V09 — bumped from v0.6.0 with §§22-25 sensitive-history gate + scoring + Command Chain + product spine | CURRENT |
 | `HISTORICAL_TIMELINE_MASTER.md` | (master) | n/a | 2026-03-13 | knowledge base extractions | HISTORIAN-OWNED — BB1/BB2-cited; updated as new pages extracted |
 | `Phase_Specifications_v0_9_0.md` | v0.9.0 | v0.9.0 | 2026-05-05 | LANE-NIGHTSHIFT-CANON-DOCS-TO-V09 — bumped from v0.6.0/v0.7.3 (resolved name drift) | CURRENT |
