@@ -1,4 +1,23 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-10] fix(robustness): #95 non-finite guards — serializer fail-loud + effect-delta rejection + #360 factory guard + 3 live-corruption producer fixes (TERRITORY-FLAT RE-FLOOR CANDIDATE, HELD)
+
+**Type:** 1.0 robustness build (task #95) implementing the merged audit `docs/40_reports/proposals/20260609_1.0_ROBUSTNESS_LANDMINE_AUDIT.md` (P1-A, P1-B/P2-B, P2-A) + an owner-directive add-on (corridor_width producer fix). Branch `fix/robustness-95-nonfinite-guards` off origin/main (ec70ddd19). **PR opened, NOT merged — HELD as a territory-flat re-floor candidate for the re-floor panel** (collapse Phase-IV bundling or standalone sign-off). No floor literal / golden manifest touched.
+
+**P1-A (serializer fail-loud):** `serializeGameState.toDeterministicJsonValue` now THROWS with the named key-path on any NaN/±Infinity instead of silently serializing it to `null` (the #358 class: silent save corruption + untraceable hash move). Shared mutable path-stack — no allocation on the finite fast path. The guard immediately caught a third live corruption during verification (below).
+
+**P1-B/P2-B (apply_effects):** `clamp()` hardened (non-finite → min, mirrors `computeMustHoldMultiplier`); every numeric event-effect writer (morale/cohesion/supply/humanitarian/patron/alliance/negotiation-capital/aggression/equipment-quality) now REJECTS a non-finite payload — prior persisted value kept — and appends to the new observability-only `military.event_effect_anomalies` (append-only, never read by sim, absent on every well-formed run → byte-identical by construction). Strict-null optional-field ratchet 515→516 / sim 329→330 (honest pin bump).
+
+**P2-A (#360-class guard):** new `tests/current_version_factory_shape.test.ts` — canonical new-game birth state (createInitialGameState → canonicalizeStartupState) + a same-version save round-trip (serializeGameState → parse, NO migration backfill) must pass `validateGameStateShape({requireVersion: CURRENT_SCHEMA_VERSION})`. A future hard-required lazily-initialized field without `optionalWhenAbsent`+load-seeding or birth-path writing goes red before merge.
+
+**Three LIVE corruptions fixed (all verified in real saves before the fix):**
+1. `measureCorridorWidth` main-body sentinel `Infinity` → **`CORRIDOR_WIDTH_UNBOUNDED = 99`** (was 15× `"corridor_width": null` per save). Reader audit: every reader is a `<= 1` besieged check (plan.ts:1811, derivePosture); persisted copy read by nobody — 99 ≡ Infinity behaviorally.
+2. `commitment_ratio` `Infinity` (front edges, zero brigades) — **CANNOT be producer-fixed** (computeMustHoldMultiplier floor-clamps non-finite→2.0× but any finite ≥6.67 hits the 5.0× cap; assess/decide thresholds `>4/6/8` need the opposite — no finite value preserves both). Sanitized ONLY at the persistence boundary (`emit.ts sanitizeZoneAssessmentsForPersistence` → `COMMITMENT_RATIO_UNBOUNDED_PERSISTED = 99`); in-memory consumers untouched; persisted copy read by nobody (sim re-derives zones each turn, reads only zone_id/osids from previous state).
+3. `defender_contributions[].distance_hops` `Infinity` (bfsDistanceFriendly unreachable reserve; `getReactiveDistanceWeight` already floor-handles it) → clamped at the storage boundary (`buildDefenderContributions` → `DEFENDER_DISTANCE_UNREACHABLE_HOPS = 99`). **Found BY the new P1-A guard** when the candidate 40w threw at `turn_summaries.39.battles.2.defender_contributions.0.distance_hops`.
+
+**40w gate (self-run, dual):** control = clean origin/main worktree → `final_state_hash e246e8529d4244d8`, anchors 30/30, benchmarks 6/6. Candidate = branch → **`ace1395d12c1b1fa`**, anchors 30/30, benchmarks 6/6. **`control_delta.json` SHA256 BYTE-IDENTICAL (9E47DF18…)**. Full `git diff --no-index` of the two final saves = **exactly 19 lines**: 15× `corridor_width: null→99`, 2× `commitment_ratio: null→99`, 2× `distance_hops: null→99` — the hash move is 100% accounted for by de-corrupting the save; everything else byte-identical. 188w/52w re-bless = re-floor panel's call.
+
+**Determinism:** no Math.random/Date.now/timestamps; sorted iteration preserved; initial OSIDs untouched; `String(NaN)`/`String(Infinity)` reprs deterministic; anomaly log appends in sorted effect order.
+
 ## [2026-06-09] chore(release): version → 0.9.9-beta.1 (feature-complete beta entry)
 
 **Type:** version bump only — no behavioral/calibration change. Branch `chore/version-0.9.9-beta` off `origin/main`. Task #82.
@@ -20111,6 +20130,64 @@ Consolidated ledger close for the mechanics-activation session. Net behavioral/o
 **Held / parked:** PR #344 (B1 missing/captured casualty target, ICTY ~10,500) + #329 (reserve-attrition NO-GO −18) intentionally held; §6 art (8 items) + §6 codex (bijeljina, Srebrenica codex-receipt, 2 atrocity-essay BCS) await owner sign-off; Ključ micro-lane parked (operational-sequencing root cause — Ključ should be a prerequisite to the Sanski Most drive).
 
 **Determinism:** No `Math.random`/`Date.now`/timestamps on the sim path; sorted iteration preserved; initial OSIDs untouched; no `avoided_osids_by_faction`. The save-schema bump (v35→v36) is forward-only additive with an empty-record default. The floor moved only via legitimate additive read-model fields (manifest re-bless), never via OSID overrides.
+
+---
+
+## [2026-06-10] Collapse IV-a merged + IV-b D1 built under panel governance; owner signature delegated to Pyrrhic sign-off; #374 BCS corrected via panel; tree unification
+
+**Type:** session summary — collapse-pipeline progression + standing governance change + §6 content correction + repo hygiene. Floor UNCHANGED: **188w 649/712 territory (CALIBRATION_MASTER authoritative); 40w current-main run hash `e246e8529d4244d8` post-#381 (self-run, supersedes stale literals)**.
+
+**★ STANDING DELEGATION (owner, 2026-06-10): owner signature is ASSUMED wherever the Pyrrhic team signs off** ("Assume you have my signature, as long as the Pyrrhic team signs-off. Assume this for all future decisions."). Mechanism persisted to memory: §6/sensitive = unanimous 4-lens panel (#368 precedent); re-floors = scenario-tester + calibration GO with §6 intact; implementer ≠ reviewer binds; panel BLOCK/split → STOP and surface to owner.
+
+**Collapse pipeline (the 1.0 critical path):**
+- **#381 Phase IV-a MERGED** (`1dc7c5434`) — unit reconciliation (Tier-0 reads `war_exhaustion/100`; 3B `Math.floor` quantization removed; `ENABLE_COLLAPSE` env gate). Collapse now fires Tier-0 (HRHB eligible_spatial ~t60); Phase 3D still inert pending the OSID-substrate re-route. §6 PASS (rupture t162 identical ON/OFF; 0/9 enclaves accrue state); territory 649→649 byte-identical; collapse-OFF proof `ad190ed644972150` pre==post.
+- **Phase IV-b scoped + §6 red-teamed + D1 built (PR #383, review GO-WITH-NOTES, merging on green).** Scope (Option 2 adapter + M1 uniform magnitude, spatial-only; Option 3 FORBIDDEN without fresh §6 review — edge-min residual would go live) and the independent §6 review (§6-SAFE-TO-BUILD CONDITIONAL; key finding: the G2 test was a collapse-OFF false-green) are committed via #385. D1 = `computePressureExposureByEntityOsid` (NOT wired; transient; no save field) + G2-A collapse-ON sidecar pin (skip-not-pass) + G2-B ON-vs-OFF rupture-timing identity + G2-C edge-min all-1.0 pin + G2-D doc note. Byte-identical 40w proven (clean-main == branch `e246e8529d4244d8`); 30/30 anchors, 6/6 benchmarks, 0 critical (scenario-tester-verified). Review flagged ONE blocking-before-D2 defect: stale-marker false-positive on OFF reruns (fix rides in D2) .
+- **#379 (Phase III enable PR) CLOSED superseded** by #381's gate (duplicate divergent enable surface; it also flipped `setEnablePhase3ADiffusion` — that decision moves to D2 panel ratification). Still-valuable assets extracted via **#382 MERGED**: `tools/verify_collapse_section6.cjs` (standalone §6 verifier; `--compare` implements the timing-identity check) + the Phase III diagnosis report (provenance of the ~260× unit-mismatch finding).
+
+**§6 content (#374 Omarska/Višegrad BCS essays) — panel-governed correction cycle:**
+4-lens panel BLOCKED (not unanimous): **the Drina-bank clause said "seven killed"; ICTY Vasiljević (IT-98-32-T) = FIVE killed, TWO survived — error inherited from the ENGLISH source essay** (CI was fully green; only the human panel caught it) + 2 BCS grammar errors. Fixes applied verbatim from the panel report in BOTH languages (`f89f6b269`); focused re-review (Historian + Language) = GO → unanimous sign-off complete; PR un-drafted, merging on green. Panel report committed via #385.
+
+**Repo hygiene:** tree-unification lane dispatched (43 worktrees in 3 roots / 135 local branches / 17 stashes → classify, junction-safe prune of merged+pushed only, never-dirty never-stash rules, standing policy doc + report PR to follow).
+
+**Parallel inert lanes dispatched (byte-identical gates each):** #95 robustness (serializer non-finite fail-loud guard, apply_effects NaN hold-prior, validateGameState additive tolerance) · quick-wins #59/#65/#86/#73 (verify-first; some may be already-resolved by #361/#365) · #49 E-A5 comply-response agency (data-only, 188w-gated — bots pick comply ⇒ historical path byte-identical).
+
+**Determinism:** no `Math.random`/`Date.now` on any new path; sorted iteration (`strictCompare`) verified by the #383 determinism review; initial OSIDs untouched; no `avoided_osids_by_faction`; all calibration movement today = NONE (every merged change proven byte-identical or read-model-only).
+
+---
+
+## [2026-06-10] Collapse Phase IV-b D1 — OSID exposure adapter (NOT wired) + G2 §6-test hardening
+
+**Type:** unwired engine adapter + §6 test hardening + collapse-ON-only run marker. Branch `feat/collapse-phase4b-d1-osid-exposure` (PR pending owner review; D2 wire-in is a separate gated step). Scope: `docs/40_reports/proposals/20260610_COLLAPSE_PHASE4B_OSID_SUBSTRATE_SCOPE.md` §A.3 Option 2 + M1, step D1 only; binding conditions from `docs/40_reports/proposals/20260610_COLLAPSE_PHASE4B_S6_REVIEW.md`.
+
+- **`computePressureExposureByEntityOsid(state)`** (`src/sim/pressure/pressure_exposure.ts`) — OSID-native sibling of the settlement exposure: iterates `war_front_edges_osid` topology, M1 uniform presence magnitude (1.0 per edge, 0.5 half-split per endpoint), strictCompare-sorted, transient-only (NO persisted field, NO save bump). **NOT wired into Phase 3C** — `phase3c_exhaustion_collapse_gating.ts` exposure call unchanged. Bridges the canonical/operational edge-universe mismatch (napkin life-lesson #5) that left the collapse substrate empty in OSID-native scenarios.
+- **G2-A (BLOCKING §6-review gap):** `ENABLE_COLLAPSE=true` runs now write a `collapse_enabled.json` sidecar marker into the run dir (`scenario_runner.ts`; sidecar — final_save.json + save schema untouched; collapse-OFF path executes nothing → byte-identical). `tests/collapse_phase1_g2_section6_invariant.test.ts` now runs the collapse-ON §6 proof ONLY against a marker-verified artifact, SKIPS visibly otherwise, and keeps the latest-artifact assertions as the collapse-OFF regression sentinel.
+- **G2-B (BLOCKING):** rupture-timing IDENTITY (gate-packet G2.3) — `srebrenica_genocide_1995.recorded_turn`, scripted-fall `event_last_fired_turn`s, and trigger event-flags must be IDENTICAL collapse-ON vs collapse-OFF (skips until D2's two-run harness produces the pair). **G2-C:** `getSidCapacityModifiers` all-1.0 pin per protected enclave OSID (edge-min residual loud). **G2-D:** enclave `local_strain`/`collapse_eligibility_tier1` entries documented as expected-by-design (guard-by-exclusion-at-write, #368); only `collapse_damage`/`capacity_modifiers`/`will_not_recover` are §6-protected. **Option 3 (`war_front_pressure_osid` accumulator) FORBIDDEN without a fresh §6 review** (Condition 4).
+- **Verification:** `tsc --noEmit` clean; full vitest green; new unit tests (half-split exactness, determinism + permuted-input invariance, enclave-presence-by-design) + synthetic-fixture positive/negative controls on the hardened G2 suite (tampered timing + enclave capacity_modifier breach both FAIL it). 40w clean-main vs branch byte-identical proof recorded in the PR.
+- **Determinism:** no RNG/clock; sorted iteration via strictCompare; no flag default flipped; no scenario/canon file touched; no new persisted state.
+
+---
+
+## [2026-06-10] Quick-wins batch #59/#65/#86/#73 — codex content polish + residual AAR-split alignment
+
+**Type:** content/data/test + display-read-model only; calibration-inert (40w byte-identity proven). Branch `chore/quickwins-59-65-86-73` (PR for review, NOT merged).
+
+- **#59 hostage-377 (BUILT, wording):** independently verified the 377 UN-hostage count against the historical record (372 seized 27-28 May 1995 + 5 on 2 June = 377 — count CORRECT; PR #361's "already resolved" check was circular). Wording precision fix "approximately 377" -> "377" + accumulation detail in `un_hostage_crisis_1995.json` + the `essay_index.json` runtime copy (sync-verified). US-halt "Croat-led" framing VERIFIED already present (essay + event narrative) — no change. `war_1995.json` deliberately untouched (event source_note/narrative persist into state via `evaluate_events.ts:588` — would move the 188w floor hash).
+- **#65 two-source floor for dynamic sections (ALREADY-RESOLVED, verified):** shipped on main by PR #361 (`sourceStatusFor` applies `essayFloorStatus` to `essay_dynamic_section`); regression tests in place. No build.
+- **#86 rbih_state_identity branch prose (BUILT, data/index + test):** authored the three missing per-branch `dynamic_sections` (civic=note/historical, bosniak_national + pragmatic=divergence; EN+BCS) for `essay_rbih_state_identity` in `essay_index.json` — satisfies the re-add condition #361 documented in `dynamic_section_builder.ts` LOAD_BEARING_SECTIONS (the src re-add itself = follow-up). `codex_a1c_response_morphing.test.ts` WIRED list extended: per-branch sections render non-empty, no cross-branch leak, headless-inert, deterministic.
+- **#73 AAR split residuals (primary ALREADY-RESOLVED by #365 T2-D, verified; 2 residual display sites BUILT):** `letter_home.ts` (UI-render-only consumer) + `FormationDetail.tsx` campaign-losses fallback both re-hardcoded the legacy 0.30/0.55/0.15 split; now reuse canonical `splitKiaWiaMia()` (KIA 0.22 / WIA 0.74 / MIA remainder) so displayed mixes agree with the casualty ledger. `operation_aar.ts:262` 0.30 = grading threshold, not a split (untouched).
+- **Proof:** 40w clean-main (1761a6d0c) vs branch BYTE-IDENTICAL — final_state_hash `e246e8529d4244d8` both; control_delta/formation_delta/final_save sha256-identical. tsc clean; 9 focused suites green (228 tests incl. strict-null + step-order pins); desktop:map:build green; live sensitive-claim inventory row-identical (9 essay_dynamic_section rows).
+- **Determinism:** no RNG/clock; no sim-path change; no event/scenario file touched; no new persisted state.
+
+---
+
+## [2026-06-10] Task #49 (Codex #324) — E-A5 `us_halts` launch-halt moved into the `comply` response (player agency, historical path byte-identical)
+
+**Branch:** `feat/ea5-comply-response-49` (PR, not merged). **Triage of record:** `docs/40_reports/proposals/20260609_CODEX_BACKLOG_TRIAGE_49_53.md` (Task #49, classified calibration-INERT).
+
+- **Data-only** edit in `data/scenarios/events/war_1995.json`: the two `offensive_ops_suppression` entries (RBiH + HRHB, 6 turns, reason `us_halts_federation_advance_1995`) relocated from the event-level `effects[]` (applied unconditionally on fire) into `response_options[0]` (`comply`) `effects`. The two event-level `aggression_modifier` entries stay event-level per triage scope.
+- **Historical/bot path identical:** `bot_response_logic: accept_first` → `selectAIDefaultResponse` returns `options[0]` = `comply` → same `applyEventEffects` writes the same two `state.military.offensive_ops_suppressions` entries on the same turn (stable kind-sort preserves RBiH→HRHB order). Consumer `isFactionOffensiveOpsSuppressed` is origin-agnostic. Proof: self-run 188w clean-main vs branch byte-identical (hashes in PR body).
+- **Emergent/player delta:** a president choosing `push_further` ("Defy Washington") is no longer launch-frozen — the front stays open and the defiance costs authored on the option (morale +5, international_credibility −20, patron_pressure +15, international_standing −15, territorial_legitimacy +10) apply as before. The hollow choice is now real.
+- New focused test `tests/sim/events/ea5_us_halts_comply_suppression.test.ts` (7 tests: data shape + accept_first pin + comply-writes/push_further-does-not behavioral proof).
 
 ## 2026-06-10 — Art: peace-plan stills approved + placed (NO-MAP route, owner decision)
 

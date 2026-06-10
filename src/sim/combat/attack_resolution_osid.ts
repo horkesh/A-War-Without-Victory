@@ -123,6 +123,7 @@ import { dissolveTacticalGroup, TG_ANCHOR_DISSOLVE_COHESION_FLOOR } from './tact
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import { getEnclaveGarrisonPower, isEnclaveCapital } from './enclave_resilience.js';
+import { getCollapseDefenderMultiplier } from '../collapse/capacity_modifiers.js';
 import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
 // frontDensityModifier import removed — no longer used in sector defense
 
@@ -763,6 +764,17 @@ export function resolveAttackOrdersOsid(
             state, targetOsid, osidPopulationMap?.get(targetOsid) ?? 0
         );
         defenderPower += garrisonPower;
+        // COLLAPSE PHASE IV-e — combat consumer (own-OSID-only defender degradation).
+        // A chronically-collapsed defender OSID is materially weaker on its OWN ground:
+        // scale the assembled defenderPower by this OSID's collapse supply_mult floor
+        // (read from capacity_modifiers.by_sid[targetOsid] — own-OSID only, NO edge
+        // read, so the §6 edge-min residual stays inert). This DEGRADES the collapsing
+        // faction's own defender so its OSID can fall through the normal one-flip
+        // combat path; it never aids the attacker and never flips control directly.
+        // Default 1.0 (no-op) when collapse is OFF (nothing written) or for any
+        // enclave OSID (G1 keeps enclaves out of by_sid) → byte-identical baseline.
+        // Applied ONCE per battle here (per-OSID), not per-brigade. Stacks on IV-c+IV-d.
+        defenderPower *= getCollapseDefenderMultiplier(state, targetOsid);
         defenderPower *= getPostWashingtonJointPressureMultiplier(state, controller, attackerFaction, targetOsid);
 
         const battleSnapEvents: AttackResolutionOsidSnapEvent[] = [];

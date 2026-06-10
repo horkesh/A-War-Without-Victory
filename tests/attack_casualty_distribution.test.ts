@@ -13,6 +13,7 @@ import {
     computeDefenderCasualtyShares,
     distributeDefenderCasualties,
     buildDefenderContributions,
+    DEFENDER_DISTANCE_UNREACHABLE_HOPS,
     KIA_FRACTION,
     WIA_FRACTION,
 } from '../src/sim/combat/attack_casualty_distribution.js';
@@ -494,6 +495,25 @@ describe('buildDefenderContributions', () => {
         });
         expect(contributions[0].distance_hops).toBe(3);
         expect(contributions[0].is_home_municipality).toBe(true);
+    });
+
+    it('clamps Infinity hops (unreachable reserve) to the finite persisted sentinel (#95, the #358 class)', () => {
+        // bfsDistanceFriendly returns Infinity when a reserve has no friendly path to
+        // the battle OSID; the raw value used to persist into turn_summaries as
+        // "distance_hops": null. The storage boundary now clamps it.
+        const bde1 = makeFormation({ id: 'bde_1' });
+        const weights = new Map<string, number>([['bde_1', 0]]); // unreachable reserve's reactive weight is 0
+        const meta = new Map<string, { hops: number; isHome: boolean }>([
+            ['bde_1', { hops: Infinity, isHome: false }],
+        ]);
+        const contributions = buildDefenderContributions({
+            sectorDefenseBrigades: [bde1],
+            sectorBrigadeWeights: weights,
+            sectorBrigadeMeta: meta,
+            finalDefenderCas: 50,
+        });
+        expect(contributions[0].distance_hops).toBe(DEFENDER_DISTANCE_UNREACHABLE_HOPS);
+        expect(Number.isFinite(contributions[0].distance_hops)).toBe(true);
     });
 
     it('reactive_weight is rounded to 2 decimal places', () => {
