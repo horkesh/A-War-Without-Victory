@@ -62,7 +62,7 @@
 |------|------------|----------------|
 | Build Engineer | build-engineer | Build config, CI build steps, reproducible builds. |
 | DevOps Specialist | devops-specialist | Pipeline changes, deployment, CI/CD. |
-| Documentation Specialist | documentation-specialist | Docs updates, release notes; respect docs-only-ledger-handling and no auto-edit of FORAWWV. |
+| Documentation Specialist | documentation-specialist | Docs updates, release notes; respect docs-only-ledger-handling; edits to FORAWWV.md require Pyrrhic-panel sign-off. |
 
 ### Process and ledger
 
