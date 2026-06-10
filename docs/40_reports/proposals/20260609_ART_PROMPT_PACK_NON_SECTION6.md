@@ -26,6 +26,14 @@ Owner generated + delivered a first batch; QC'd, cropped to exact dims (`fit:cov
 
 **✅ OWNER DECISION (2026-06-10) — peace-plan slots go the NO-MAP route.** The previously-HELD `plan_*` images (atmospheric desk/document scenes, delivered without the attached historical reference maps) were **approved as-is by the owner**: the cartographic territorial-division requirement in Category 1 is DROPPED. The four delivered scenes carry each plan's semantics through object language instead — a fragmented mosaic of scattered folders/maps (Vance-Owen's ten provinces), three folders at a round table (Owen-Stoltenberg's three republics), a ruler dividing two document stacks (Contact Group 51/49), and the empty pre-signing conference table (Dayton). QC-passed (no people, no readable text, no flags, period-accurate, documentary palette), resized 1536×1024 → 600×400 (same 3:2, no crop), webp, placed. The Category 1 prompt blocks below are retained for the historical record only — do NOT regenerate against them.
 
+### Batch 2 — faction-specific event stills (updated 2026-06-10)
+
+Owner delivered the 15 faction stills (the 5 SPLIT families × 3 factions). All delivered at 1672×941 (16:9), QC-passed (faction differentiation strong; guards held — no readable text, no legible flags/insignia, no close-up/identifiable faces, no bodies/gore, documentary palette), resized 800×450 (`fit:cover`, same aspect → no crop), webp.
+
+**✅ DONE — QC-passed, webp, placed (13):** `event_mobilization_{RBiH,RS,HRHB}` · `event_supply_convoy_{RBiH,RS,HRHB}` · `event_supply_shortage_{RBiH,RS,HRHB}` · `event_siege_city_{RBiH,RS,HRHB}` · `event_patron_relations_RBiH` → all in `src/ui/map/assets/event_illustrations/` (live-wired dir; INERT until a faction-tagged event sets its `image` key to the matching basename — wiring is a separate follow-up).
+
+**⚠️ HELD — needs regen (2):** `event_patron_relations_RS` / `event_patron_relations_HRHB`. The delivered pair obscured faces with a digital pixelation-blur rather than the prompt's natural out-of-focus silhouette (as the RBiH one correctly used). Owner: regenerate the two with the amended prompts (silhouette/shallow-DOF, explicit no-pixelation guard).
+
 ---
 
 # PROVEN STYLE & LESSONS — distilled from the SHIPPED assets
