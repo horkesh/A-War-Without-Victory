@@ -2720,6 +2720,21 @@ bot_priority_shifts?: Array<{
     remove_objectives?: string[];
     expires_turn: number;
 }>;
+/** Robustness audit P1-B (task #95): append-only diagnostic log of non-finite
+ *  numeric event-effect payloads (NaN/±Infinity) that were REJECTED before
+ *  reaching persisted morale/cohesion/supply/alliance state. Pure observability —
+ *  never read by sim logic. Absent on every well-formed run (the historical
+ *  calibration path only carries hand-authored finite deltas, so nothing ever
+ *  appends → serialized state byte-identical by construction). Writer:
+ *  `recordNonFiniteEffectAnomaly` in src/sim/events/apply_effects.ts.
+ *  Deterministic: append order follows the sorted effect-application order;
+ *  `faction` is null for faction-agnostic effects (alliance_change); no timestamps. */
+event_effect_anomalies?: Array<{
+    turn: number;
+    effect_kind: string;
+    faction: FactionId | null;
+    value_repr: string;
+}>;
 // v0.6.0 emergent event system state
 /** Pressure system readiness counters per event ID. */
 event_readiness: Record<string, number>;

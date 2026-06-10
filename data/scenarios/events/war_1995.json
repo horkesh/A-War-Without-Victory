@@ -2068,18 +2068,6 @@
         "faction": "HRHB",
         "delta": -0.2,
         "duration_turns": 12
-      },
-      {
-        "kind": "offensive_ops_suppression",
-        "faction": "RBiH",
-        "duration_turns": 6,
-        "reason": "us_halts_federation_advance_1995"
-      },
-      {
-        "kind": "offensive_ops_suppression",
-        "faction": "HRHB",
-        "duration_turns": 6,
-        "reason": "us_halts_federation_advance_1995"
       }
     ],
     "response_options": [
@@ -2098,6 +2086,18 @@
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": -3
+          },
+          {
+            "kind": "offensive_ops_suppression",
+            "faction": "RBiH",
+            "duration_turns": 6,
+            "reason": "us_halts_federation_advance_1995"
+          },
+          {
+            "kind": "offensive_ops_suppression",
+            "faction": "HRHB",
+            "duration_turns": 6,
+            "reason": "us_halts_federation_advance_1995"
           }
         ],
         "dimension_shifts": [

@@ -78,6 +78,8 @@ runs_perf/
 handoffs/inbox/*.json
 runs_ops_compare/
 runs_probe/
+runs_ivd_off/
+runs_ivd_on/
 data/derived/scenario/_baseline_tmp/
 data/derived/scenario/_*/
 

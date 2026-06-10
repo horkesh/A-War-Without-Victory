@@ -3,7 +3,7 @@
 **Date:** 2026-06-09
 **Status:** Generation-ready prompt pack — READ-ONLY authoring deliverable. No images generated here; generation (Canva/external) happens after owner review.
 **How to use:** Each asset below is a fully self-contained block. Copy ONE block and paste it straight into your image generator — the style, the scene, the UI-reservation, the dimensions, and the negative prompt are all inlined. No prefix assembly required (same workflow as the shipped presidential-desk cards). Each block is: a one-line **Filename** + **Drop path** + **Dimensions**, then a self-contained **Prompt:** paragraph, then a self-contained **Negative prompt:** line. The format mirrors the card prompts in `docs/plans/2026-05-24-gui-ai-asset-brief.md`.
-**Canon:** DOCUMENTARY REALISM. The oil-paint / sepia direction is RETIRED. Every prompt is a war-correspondent photograph aesthetic — desaturated, film grain, period-accurate 1990s Balkans, institutional/archival light. Explicitly NO oil-paint, NO sepia filter, NO dramatic-painting style, NO heroic composition, NO video-game concept art. (Category 1 peace-plan maps are the one exception: a neutral period-accurate cartographic style, redrawn faithfully from an ATTACHED reference photo.)
+**Canon:** DOCUMENTARY REALISM. The oil-paint / sepia direction is RETIRED. Every prompt is a war-correspondent photograph aesthetic — desaturated, film grain, period-accurate 1990s Balkans, institutional/archival light. Explicitly NO oil-paint, NO sepia filter, NO dramatic-painting style, NO heroic composition, NO video-game concept art. (Category 1 peace-plan maps were originally the one exception — a cartographic style redrawn from an ATTACHED reference photo — but the owner dropped that route 2026-06-10; the shipped plan stills are atmospheric document scenes in the standard photograph aesthetic. See GENERATION STATUS.)
 
 ---
 
@@ -11,19 +11,28 @@
 
 Owner generated + delivered a first batch; QC'd, cropped to exact dims (`fit:cover`), converted to webp, placed in the wired/spec'd dirs.
 
-**✅ DONE — generated, QC-passed, cropped→webp, placed (13):**
+**✅ DONE — generated, QC-passed, cropped→webp, placed (17):**
 
 | Asset | Dims | Placed in |
 |---|---|---|
 | `tutorial_01_welcome` … `tutorial_08_judge` (all 8) | 600×400 | `src/ui/map/assets/tutorial/` |
 | `verdict_dayton_close` / `verdict_pyrrhic` / `verdict_catastrophic` | 1920×1080 | `src/ui/map/assets/verdicts/` |
 | `event_diplomatic_negotiation` / `event_dayton_signed_1995` | 800×450 | `src/ui/map/assets/event_illustrations/` (live-wired dir) |
+| `plan_vance_owen` / `plan_owen_stoltenberg` / `plan_contact_group` / `plan_dayton` | 600×400 | `src/ui/map/assets/plans/` |
 
 - **Event stills** land in the live-wired `event_illustrations/` (resolved by `eventIllustrationArt.ts` `import.meta.glob`) — they render once an event carries the matching `image` key.
-- **Verdict + tutorial** dirs are NOT yet globbed by any resolver → placement done, but a small WIRING follow-up is needed for them to render (VerdictScreen / onboarding-deck import).
+- **Verdict + tutorial + plans** dirs are NOT yet globbed by any resolver → placement done, but a small WIRING follow-up is needed for them to render (VerdictScreen / onboarding-deck / peace-plan surface import).
 - **Verdicts upscaled** 1672×941 → 1920×1080 (same 16:9, ~15% upscale; acceptable for full-screen bg). Reserved text bands preserved (no crop on matching aspect).
 
-**⚠️ HELD — needs regen (4):** `plan_vance_owen` / `plan_owen_stoltenberg` / `plan_contact_group` / `plan_dayton`. The delivered images were atmospheric desk/document scenes, NOT the cartographic territorial-division maps these slots require — the historical reference maps were not attached. Re-generate WITH the attached historical map per each prompt's "ATTACHED reference" instruction.
+**✅ OWNER DECISION (2026-06-10) — peace-plan slots go the NO-MAP route.** The previously-HELD `plan_*` images (atmospheric desk/document scenes, delivered without the attached historical reference maps) were **approved as-is by the owner**: the cartographic territorial-division requirement in Category 1 is DROPPED. The four delivered scenes carry each plan's semantics through object language instead — a fragmented mosaic of scattered folders/maps (Vance-Owen's ten provinces), three folders at a round table (Owen-Stoltenberg's three republics), a ruler dividing two document stacks (Contact Group 51/49), and the empty pre-signing conference table (Dayton). QC-passed (no people, no readable text, no flags, period-accurate, documentary palette), resized 1536×1024 → 600×400 (same 3:2, no crop), webp, placed. The Category 1 prompt blocks below are retained for the historical record only — do NOT regenerate against them.
+
+### Batch 2 — faction-specific event stills (updated 2026-06-10)
+
+Owner delivered the 15 faction stills (the 5 SPLIT families × 3 factions). All delivered at 1672×941 (16:9), QC-passed (faction differentiation strong; guards held — no readable text, no legible flags/insignia, no close-up/identifiable faces, no bodies/gore, documentary palette), resized 800×450 (`fit:cover`, same aspect → no crop), webp.
+
+**✅ DONE — QC-passed, webp, placed (13):** `event_mobilization_{RBiH,RS,HRHB}` · `event_supply_convoy_{RBiH,RS,HRHB}` · `event_supply_shortage_{RBiH,RS,HRHB}` · `event_siege_city_{RBiH,RS,HRHB}` · `event_patron_relations_RBiH` → all in `src/ui/map/assets/event_illustrations/` (live-wired dir; INERT until a faction-tagged event sets its `image` key to the matching basename — wiring is a separate follow-up).
+
+**⚠️ HELD — needs regen (2):** `event_patron_relations_RS` / `event_patron_relations_HRHB`. The delivered pair obscured faces with a digital pixelation-blur rather than the prompt's natural out-of-focus silhouette (as the RBiH one correctly used). Owner: regenerate the two with the amended prompts (silhouette/shallow-DOF, explicit no-pixelation guard).
 
 ### Batch 3 — final shared event stills + patron regen → NON-§6 COMPLETE (updated 2026-06-10)
 
@@ -95,7 +104,9 @@ These keys match the resolvers that the event-image pipeline + command-card art 
 
 ---
 
-# CATEGORY 1 — Peace-Plan Maps (4)
+# CATEGORY 1 — Peace-Plan Maps (4) — SUPERSEDED 2026-06-10 (owner went the NO-MAP route)
+
+> **⚠️ DO NOT GENERATE FROM THESE BLOCKS.** The owner approved the delivered atmospheric document-scene stills for all four `plan_*` slots and dropped the cartographic requirement (see GENERATION STATUS above). The blocks below are retained for the historical record only.
 
 Cartographic / diagrammatic territorial-division maps — the ONE exception to the photograph aesthetic. **For every map in this category you will ATTACH a reference photo** of the actual historical proposed map for that plan. Each prompt below tells the generator to use the attached photo as the exact reference for the territorial boundaries and faithfully redraw it in a neutral period-accurate 1990s cartographic style. The brief historical note under each tells you which map to attach.
 
