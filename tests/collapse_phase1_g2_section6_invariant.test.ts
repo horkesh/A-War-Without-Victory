@@ -54,7 +54,7 @@ import { describe, it, expect } from 'vitest';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { getSidCapacityModifiers } from '../src/sim/collapse/capacity_modifiers.js';
-import { getEnclaveDefForOsid } from '../src/sim/combat/enclave_resilience.js';
+import { ENCLAVE_DEFINITIONS, getEnclaveDefForOsid } from '../src/sim/combat/enclave_resilience.js';
 import type { GameState } from '../src/state/game_state.js';
 
 const RUNS_DIR = join(process.cwd(), 'runs');
@@ -138,12 +138,20 @@ function asCapacityReaderState(finalSave: Record<string, unknown>): GameState {
 
 // Protected enclave OSID capitals (every ENCLAVE_DEFINITIONS family — 6 RBiH + 3 HRHB).
 // Panel O-1 = include-HRHB: the guard covers EVERY enclave from getEnclaveDefForOsid.
+// IV-b D2 KEY-SPACE FIX (Codex review on #382): the Sarajevo LOGICAL capital
+// 'op:centar_sarajevo:centar_sarajevo' is not a painted OSID and can never appear as a
+// 3D writer key (Tier-1 entities are painted OSIDs from the exposure substrate) — an
+// inertness assertion on it alone is vacuous for Sarajevo. The PAINTED core cell
+// 'op:centar_sarajevo:sarajevo_dio_centar_sajarevo' (guarded via the enclave's
+// osid_prefixes) is therefore ALSO pinned, and the full-keyspace scan below closes the
+// rest of the prefix/list space.
 const PROTECTED_ENCLAVE_OSIDS = [
     'op:srebrenica:srebrenica_2',
     'op:rogatica:zepa_2',
     'op:gorazde:gorazde_2',
     'op:bihac:bihac_2',
     'op:centar_sarajevo:centar_sarajevo',
+    'op:centar_sarajevo:sarajevo_dio_centar_sajarevo',
     'op:ugljevik:teocak_krstac_2',
     'op:kiseljak:kiseljak_2',
     'op:vitez:vitez_2',
@@ -193,6 +201,24 @@ function assertSection6Invariants(finalSave: Record<string, unknown>): void {
         expect(trends[osid]?.will_not_recover ?? false, `will_not_recover must be false for ${osid}`).toBe(false);
     }
 
+    // FULL-KEYSPACE inertness scan (IV-b D2, Codex review on #382): the exact-pin list
+    // above cannot enumerate every guarded OSID (Sarajevo + Bihać are PREFIX enclaves
+    // covering whole municipalities; the eastern enclaves carry multi-OSID lists). The
+    // 3D writer keys ARE OSIDs, and the G1 guard predicate IS getEnclaveDefForOsid —
+    // so assert in the writer's own key space: NO key actually written into any of the
+    // three §6-protected fields may resolve to an enclave definition.
+    for (const key of Object.keys(collapseDamage)) {
+        expect(getEnclaveDefForOsid(key), `collapse_damage key ${key} must not belong to any enclave (G1 breach)`).toBeNull();
+    }
+    for (const key of Object.keys(capacityMods)) {
+        expect(getEnclaveDefForOsid(key), `capacity_modifiers key ${key} must not belong to any enclave (G1 breach)`).toBeNull();
+    }
+    for (const [key, rec] of Object.entries(trends)) {
+        if (rec?.will_not_recover === true) {
+            expect(getEnclaveDefForOsid(key), `will_not_recover=true key ${key} must not belong to any enclave (G1 breach)`).toBeNull();
+        }
+    }
+
     // G2-C — positive pin on the edge-min residual (§6 review Condition 4 corollary):
     // the safe reader must return all-1.0 for every protected enclave OSID. This is what
     // keeps getEdgeCapacityMultiplier's min(a, b) from ever importing a collapsed
@@ -219,6 +245,26 @@ describe('collapse §6 GUARD G2 invariant (188w rupture floor)', () => {
         for (const osid of PROTECTED_ENCLAVE_OSIDS) {
             expect(getEnclaveDefForOsid(osid), `${osid} must resolve to an enclave definition`).not.toBeNull();
         }
+    });
+
+    // IV-b D2: the standalone .cjs verifier (tools/verify_collapse_section6.cjs) cannot
+    // import the live G1 predicate, so it REPLICATES the enclave geometry (prefixes +
+    // osid lists). Pin that replication against ENCLAVE_DEFINITIONS so any future
+    // geometry change fails loudly here instead of silently de-fanging the verifier.
+    it('verify_collapse_section6.cjs replicated enclave geometry stays in sync with ENCLAVE_DEFINITIONS', () => {
+        const verifierSrc = readFileSync(join(process.cwd(), 'tools', 'verify_collapse_section6.cjs'), 'utf8');
+
+        // Every osid_list member of every enclave definition must appear verbatim.
+        for (const def of ENCLAVE_DEFINITIONS) {
+            for (const osid of def.osid_list ?? []) {
+                expect(verifierSrc.includes(`'${osid}'`), `verifier must list ${osid} (enclave ${def.id})`).toBe(true);
+            }
+            for (const prefix of def.osid_prefixes ?? []) {
+                expect(verifierSrc.includes(`'${prefix}'`), `verifier must carry prefix ${prefix} (enclave ${def.id})`).toBe(true);
+            }
+        }
+        // The painted Sarajevo core cell pin (the Codex #382 key-space fix) must stay.
+        expect(verifierSrc.includes(`'op:centar_sarajevo:sarajevo_dio_centar_sajarevo'`)).toBe(true);
     });
 
     // ---------------------------------------------------------------------------
