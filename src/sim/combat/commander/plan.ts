@@ -112,6 +112,22 @@ export const EXHAUSTION_DRAG_V2_FLOOR = 0.20;
 export const EXHAUSTION_DRAG_V2_LOAD_START = 1.0;
 /** Casualty-load at/above this: fully spent → drag floor. */
 export const EXHAUSTION_DRAG_V2_LOAD_FULL = 2.5;
+/**
+ * Design B v3 — bounded multiplier floor (haircut). When the V2 flag is ON, the
+ * faction casualty-load drag is applied as a MULTIPLIER on an OFFENSIVE candidate's
+ * total launch score (in place of the weak v2 additive `e`-term), so a spent
+ * faction's drag can actually flip a launch:
+ *
+ *   score *= EXHAUSTION_DRAG_V2_HAIRCUT_FLOOR
+ *            + (1 - EXHAUSTION_DRAG_V2_HAIRCUT_FLOOR) * factionExhaustionDrag
+ *
+ * At drag 1.0 (fresh faction, load<=1.0) the multiplier is exactly 1.0 → NO effect.
+ * At drag 0.20 (fully spent, load>=2.5) the multiplier is 0.6 + 0.4*0.20 = 0.68 →
+ * a real ~32% haircut on launch appetite (vs the v2 additive term's max ~3.7%).
+ * Multiplier ∈ [FLOOR, 1.0] is monotone in drag; offense-only; flag-gated. The
+ * floor (0.6) is the single calibration knob — lower = harsher late-war drag.
+ */
+export const EXHAUSTION_DRAG_V2_HAIRCUT_FLOOR = 0.6;
 
 /**
  * Faction strategic-exhaustion drag on offensive op-launch willingness.
@@ -366,6 +382,16 @@ export function selectWinningIntent(
     );
     const exhaustionPenalty: number = corpsExhaustionCapacity * factionExhaustionDrag;
 
+    // Design B v3: when the V2 flag is ON, the faction drag is applied as a bounded
+    // MULTIPLIER on the OFFENSIVE candidate's total score (below, near the return),
+    // REPLACING the weak v2 additive `e = 0.15·exhaustionPenalty` term — so we do
+    // NOT double-count. Flag OFF (default) keeps the additive term exactly →
+    // byte-identical to the 649 floor. `exhaustionTermWeight` zeroes the additive
+    // term ONLY on the ON path; the legacy degenerate drag still flows through
+    // `exhaustionPenalty` into the OFF-path additive term unchanged.
+    const exhaustionDragV2On: boolean = getEnableExhaustionDragV2();
+    const exhaustionTermWeight: number = exhaustionDragV2On ? 0.0 : 0.15;
+
     const fatigueReadiness: number = Math.max(
         0.0,
         1.0 - briefing.avg_fatigue_pct / HIGH_AVG_FATIGUE_PCT_FOR_NEW_PLAN,
@@ -533,7 +559,9 @@ export function selectWinningIntent(
                 const r = 0.25 * supplyReadiness;
                 const s = 0.25 * surplusRatio;
                 const t = 0.20 * (1 - threatRatio);
-                const e = 0.15 * exhaustionPenalty;
+                // v3: additive exhaustion term zeroed when flag ON (replaced by the
+                // multiplier near the return); flag OFF keeps 0.15·exhaustionPenalty.
+                const e = exhaustionTermWeight * exhaustionPenalty;
                 const f = 0.10 * fatigueReadiness;
                 const c = 0.05 * campaignAlignment;
                 score = r + s + t + e + f + c;
@@ -557,7 +585,9 @@ export function selectWinningIntent(
                 const s = 0.30 * surplusRatio;
                 const r = 0.25 * supplyReadiness;
                 const t = 0.20 * (1 - threatRatio);
-                const e = 0.15 * exhaustionPenalty;
+                // v3: additive exhaustion term zeroed when flag ON (replaced by the
+                // multiplier near the return); flag OFF keeps 0.15·exhaustionPenalty.
+                const e = exhaustionTermWeight * exhaustionPenalty;
                 const f = 0.10 * fatigueReadiness;
                 score = s + r + t + e + f;
                 score_breakdown = {
@@ -713,6 +743,29 @@ export function selectWinningIntent(
         }
 
         for (const k of appliedRelationshipKeys) appliedRelationshipIds.add(k);
+
+        // ─── Design B v3: bounded faction-exhaustion haircut (offense-only) ───────
+        // When the V2 flag is ON, apply the faction casualty-load drag as a BOUNDED
+        // MULTIPLIER on the OFFENSIVE candidate's total score (after all additive
+        // deltas), giving the drag real authority to flip a late-war launch. This
+        // REPLACES the v2 additive `e`-term (zeroed above when the flag is ON) — no
+        // double-count. Offense-only (stage_operation / launch_opportunity); never
+        // touches defensive/support intents, never enters combat resolution, never
+        // writes political_controllers. §6 rupture ops are TRIGGERED and never route
+        // through this scorer → structurally exempt. Multiplier ∈ [FLOOR, 1.0],
+        // monotone in drag: 1.0 at drag=1.0 (fresh → no effect), 0.68 at drag=0.20
+        // (fully spent → ~32% haircut). Flag OFF: this block is skipped entirely →
+        // byte-identical to the 649 floor.
+        if (exhaustionDragV2On && isOffensiveIntent) {
+            const haircut =
+                EXHAUSTION_DRAG_V2_HAIRCUT_FLOOR +
+                (1 - EXHAUSTION_DRAG_V2_HAIRCUT_FLOOR) * factionExhaustionDrag;
+            score *= haircut;
+            score_breakdown = {
+                ...score_breakdown,
+                exhaustion_drag_v2_haircut: haircut,
+            };
+        }
 
         // ─── Hard-block rules ─────────────────────────────────────────────
         const blockedBy: string[] = [];

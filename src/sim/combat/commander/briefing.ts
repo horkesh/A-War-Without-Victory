@@ -716,10 +716,24 @@ export function buildBriefing(
     // ÷ current fielded personnel. Un-saturated late-war signal driving the
     // AWWV_EXHAUSTION_DRAG_V2 op-launch willingness drag (inert when flag OFF).
     // Numerator: already-persisted, live-combat-written casualty_ledger totals.
-    // Denominator: personnel summed over this faction's active formations that
-    // bear troops (default 1000 when personnel absent, per FormationState).
+    // Denominator: personnel summed over this faction's active troop-bearing field
+    // formations (default 1000 when personnel absent, per FormationState).
     // Deterministic (pure read of persisted integers); guarded for div-by-zero
     // (no fielded personnel → load 0 → drag 1.0 = no drag, the correct no-op).
+    //
+    // v3 DENOMINATOR FIX (Codex P2 on #408): active OG / operational_group
+    // formations ARE counted here. OG personnel is a CONSERVATIVE TRANSFER from
+    // donor brigades — `operational_groups.ts` activation DEDUCTS the contribution
+    // from each donor brigade's `personnel` (line ~170) and dissolution RETURNS it
+    // (line ~254). The personnel is moved, never duplicated, so excluding OGs (the
+    // original v2 behavior) UNDERCOUNTED a faction's fielded personnel by exactly
+    // the troops sitting in an active OG → INFLATED the casualty-load ratio →
+    // OVER-dragged any faction with a live OG. Counting OGs is correct and does NOT
+    // double-count (the donor brigades no longer hold that personnel). Still
+    // excluded: `corps` / `army_hq` (HQ command shells, no field troops) and
+    // `corps_asset` (non-combat asset shell — not a maneuver formation in
+    // battle_resolution / brigade_assignment). Flag-OFF is unaffected: this
+    // denominator feeds ONLY the ON-path casualty-load drag.
     const factionCasualtyLoad = (() => {
         const cumCasualties = getFactionTotalCasualties(
             state.military.casualty_ledger ?? {},
@@ -730,10 +744,10 @@ export function buildBriefing(
         for (const formation of Object.values(state.military.formations ?? {})) {
             if (!formation || formation.status !== 'active') continue;
             if (formation.faction !== faction) continue;
-            // Personnel-bearing field formations only (exclude command/phantom shells).
+            // Personnel-bearing field formations only (exclude HQ/asset shells).
+            // OG / operational_group ARE counted (conservative donor transfer; see above).
             const kind = formation.kind ?? 'brigade';
-            if (kind === 'corps' || kind === 'army_hq' || kind === 'og' ||
-                kind === 'operational_group' || kind === 'corps_asset') continue;
+            if (kind === 'corps' || kind === 'army_hq' || kind === 'corps_asset') continue;
             fielded += formation.personnel ?? 1000;
         }
         if (fielded <= 0) return 0; // div-by-zero guard → no drag
