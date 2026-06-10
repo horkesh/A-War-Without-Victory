@@ -72,7 +72,7 @@ const TIER1_AUTH_THRESHOLD = 40; // spec C9
 const TIER1_COH_THRESHOLD = 40;  // spec C9
 const TIER1_SPA_THRESHOLD = 40;  // spec C9
 const TIER1_PERSIST_TURNS = 4;   // spec C10 — match C5 (Tier-1 not faster than Tier-0).
-const STRAIN_FRACTION = 0.05;    // spec C11 — slower accrual → only chronically-exposed OSIDs (besieged pockets, cut corridors) reach Tier-1.
+const STRAIN_FRACTION = 0.15;    // spec C11 (Phase IV-c Lever 1: 0.05→0.15) — ×3 accrual lifts max strain ~28.2→~84.6 so chronically-exposed OSIDs clear the real 55 severity floor (40 + SEVERITY_MIN 0.25 × range 60). A threshold drop alone is a no-op (SEVERITY_MIN scales with the range); magnitude is the honest lever.
 const STRAIN_MAX = 100;          // spec C12 — clamp ceiling; identical to Phase 3D STRAIN_MAX.
 
 export type CollapseDomain = 'authority' | 'cohesion' | 'spatial';
