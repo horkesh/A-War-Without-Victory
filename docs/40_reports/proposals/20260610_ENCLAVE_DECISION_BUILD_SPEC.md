@@ -1,7 +1,7 @@
 # BUILD SPEC — Presidential Enclave Decision (OVERRUN vs CONTAIN)
 
 **Type:** READ-ONLY build specification. No engine/sim/state/UI/data/test code written in producing this. No canon edited. No `FORAWWV.md` touched. This document QUOTES existing canon + code (file:line) and FLAGS decisions; it DECIDES nothing.
-**Status:** ⚠️ **DRAFT — HELD for owner + §6 ratification.** Authorizes NO code. This is a §6-sensitive combat feature in the highest tier of the canon hierarchy (Sensitive History gate, Tier 2). Engine work is BLOCKED on the §10 sign-off of the ratified DESIGN and on this spec.
+**Status:** ⚠️ **DRAFT — HELD for Pyrrhic §6-panel ratification.** Authorizes NO code. This is a §6-sensitive combat feature in the highest tier of the canon hierarchy (Sensitive History gate, Tier 2). Engine work is BLOCKED on the §10 sign-off of the ratified DESIGN and on this spec.
 **Predecessors (read first):**
 - Ratified design: `docs/plans/2026-06-09-presidential-enclave-decision-DESIGN.md` (owner intent; this spec is its buildable form).
 - §6 gate: `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` (§1 rings, §2 rupture rule, §3 player-authorized war-crime surface + Ring-3 refusals, §4 wording, §5 ghost entries, §6 sign-off).
@@ -22,7 +22,7 @@
 - **Serializer-collision flag (§1.4):** the new idempotency field would live at `state.political.enclave_decisions`, in the SAME `PoliticalState` (`game_state.ts:2826`) and the SAME `save_migration` registry collapse-phase1 is editing for `collapse_damage` / `capacity_modifiers` (`game_state.ts:2837–2838`). Both add a new `state.political.*` Record + a new migration version + an empty-Record-changes-the-hash effect (the v34/v36 lesson). **Sequence after collapse so the migration version is allocated without a collide-renumber.**
 - **Default-OFF + byte-identical-while-disabled gate:** the whole feature is behind a default-OFF flag; with it OFF, 40w must stay `be76e56dd9d288c2` and 188w `5f57d17287b87dfb` byte-identical. Bots never see the card → headless/calibration runs are inert by construction.
 - **§6 guard:** (a) the Srebrenica/Žepa rupture + its timing are UNTOUCHED; (b) atrocity is NEVER net-positive (score does not invert, gate §3 #4); (c) with the feature default-OFF all protected outcomes are byte-identical; (d) OVERRUN cannot record a rupture *before* turn 140 (it routes through the same predicate, which floors at 140).
-- **Build order:** spec → owner ratify → build default-OFF (ARBiH-HVO lighter §6 first, then VRS-eastern full §6) → §6 invariant test green → enable + calibrate.
+- **Build order:** spec → Pyrrhic-panel ratify → build default-OFF (ARBiH-HVO lighter §6 first, then VRS-eastern full §6) → §6 invariant test green → enable + calibrate.
 
 ---
 
@@ -184,9 +184,9 @@ Build in the contain-design discipline (one change per run, §6-eastern LAST). E
 
 ```
 GATE 0 — RATIFICATION (no code)
-  ├─ Owner ratifies this spec + the DESIGN §10 sign-off table.
-  ├─ Owner ratifies the §1.2 new state field (or directs derive-from-receipts, O-1/§11).
-  └─ §6 sign-off (NON-DELEGABLE for the eastern case):
+  ├─ Pyrrhic panel ratifies this spec + the DESIGN §10 sign-off table.
+  ├─ Pyrrhic panel ratifies the §1.2 new state field (or directs derive-from-receipts, O-1/§11).
+  └─ §6 sign-off (§6 Pyrrhic panel sign-off (Historian + scenario-tester/calibration + Engine/systems + Red-team, unanimous); the atrocity-is-never-rewarded bright line surfaces to the owner — for the eastern case):
         /historian + /war-or-game + /game-designer + USER approval (design §10).
         ▼  [HARD STOP — no code merges to main before this]
 PHASE I — Build default-OFF (calibration-flat, flag OFF)
@@ -200,18 +200,18 @@ PHASE I — Build default-OFF (calibration-flat, flag OFF)
 PHASE II — Lane 0: ARBiH-HVO path (LIGHTER §6) — enable for RBiH-vs-HVO only
   ├─ Surface the card + directives for the RBiH-vs-HVO case; Washington-freeze release.
   ├─ §6 invariant tests T-1..T-10 GREEN (the HVO subset has no rupture coupling).
-  └─ 40w + 188w calibration run; anchors 30/30; OSID floor recorded (may differ; owner-signed).
-        ▼  [GATE: light §6 + 30/30 anchors + owner-signed floor]
+  └─ 40w + 188w calibration run; anchors 30/30; OSID floor recorded (may differ; panel-signed).
+        ▼  [GATE: light §6 + 30/30 anchors + panel-signed floor]
 PHASE III — Lane 1: VRS-eastern path (FULL §6) — enable for RS-vs-eastern-enclave
   ├─ Add the eastern card with rupture-coupling + the 1995-pivot mandatory release.
-  ├─ §6 invariant tests (esp. T-2..T-7) GREEN; FULL §6 gate + NON-DELEGABLE user approval.
+  ├─ §6 invariant tests (esp. T-2..T-7) GREEN; FULL §6 gate + Pyrrhic §6-panel sign-off (bright line surfaces to owner).
   └─ 40w + 188w calibration run; 30/30 anchors; §6 invariant GREEN on EVERY run.
-        ▼  [GATE: full §6 + 30/30 + §6 invariant GREEN + owner-signed floor]
+        ▼  [GATE: full §6 + 30/30 + §6 invariant GREEN + panel-signed floor]
 PHASE IV — Re-floor + finalize
   └─ New baseline of record; update CALIBRATION_MASTER + MEMORY + ledger.
 ```
 
-**Owner gates (hard stops):** GATE 0 §6 ratification before ANY code merges to main; the §6 invariant tests GREEN before AND on every territory-moving run; the re-floor OSID count is owner-signed (NOT auto-accepted as "must equal the current floor" — 649 is a guard, not a target).
+**Panel gates (hard stops):** GATE 0 §6-panel ratification before ANY code merges to main; the §6 invariant tests GREEN before AND on every territory-moving run; the re-floor OSID count requires Pyrrhic-panel sign-off (NOT auto-accepted as "must equal the current floor" — 649 is a guard, not a target).
 
 **Sequencing vs collapse (§1.4):** PHASE I's migration is built ONLY after collapse's serializer work has merged + re-floored, so the migration version is allocated without a collide-renumber and the byte-identical proof is unambiguous.
 

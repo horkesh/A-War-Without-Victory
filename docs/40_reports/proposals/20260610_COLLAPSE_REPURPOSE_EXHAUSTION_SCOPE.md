@@ -1,7 +1,7 @@
 # Collapse Repurpose — Exhaustion / Political-Collapse FEEL (READ-ONLY SCOPE)
 
 **Type:** READ-ONLY scoping / design document. No engine code, no flag flips, no canon edits produced in writing this. Claims are file:line-cited against the working tree (`main` @ `b7d7d58fd`).
-**Status:** DRAFT for a fast panel / owner ratify.
+**Status:** DRAFT for a fast Pyrrhic-panel sign-off.
 **Owner decision (2026-06-10) that motivates this doc:** collapse-as-territory is redundant — the sim already reproduces the one historical collapse (western Bosnia 1995) via operations, and collapse moves **0 territory** (IV-a: 649→649, 0 OSIDs differ ON vs OFF). Repurpose the (already-built, §6-safe, default-off) collapse pipeline to represent **war-weariness / will-to-fight breaking** — the game's stated identity (CLAUDE.md): *"exhaustion, political collapse, constrained agency — not conquest."*
 
 **Predecessors (do not re-derive — superseded framing where noted):**
@@ -58,7 +58,7 @@ Re-aim away from territory. The existing 3D output (`collapse_damage` → `capac
 
 - **C-drag (FLOOR-MOVING):** the same war-exhaustion gate, when sustained, applies a **bounded faction-wide multiplier** to soft levers — recruitment/replacement rate, op-launch willingness (commander posture), and combat tempo — *not* defender supply at contested OSIDs. This is the negative-sum tax with teeth. It moves the hash and therefore **requires a re-floor**, but because it degrades *the exhausted faction's own offensive capacity* (it makes a spent faction launch fewer/weaker ops) rather than handing the enemy territory, it is far less likely to perturb the sacred anchors than the IV-b defender-softening path. The territory effect is *emergent and indirect* (a faction too exhausted to launch Op X simply doesn't), never a scripted control flip.
 
-**RECOMMENDATION: ship C-feel-only FIRST (calibration-inert, no re-floor, immediate "soul" payoff), then C-drag as a SEPARATE owner-gated, re-floored step** if the panel wants mechanical teeth. Do **not** reuse the per-SID `capacity_modifiers`/`getEdgeCapacityMultiplier` consumer path for framing (a) — it is the wrong granularity (per-edge supply, a territory lever) and it carries the inert edge-min §6 residual (3D §EDGE-MULTIPLIER RESIDUAL); a faction-level multiplier is cleaner and §6-trivial (faction-scalar, never per-enclave-OSID).
+**RECOMMENDATION: ship C-feel-only FIRST (calibration-inert, no re-floor, immediate "soul" payoff), then C-drag as a SEPARATE panel-gated, re-floored step** if the panel wants mechanical teeth. Do **not** reuse the per-SID `capacity_modifiers`/`getEdgeCapacityMultiplier` consumer path for framing (a) — it is the wrong granularity (per-edge supply, a territory lever) and it carries the inert edge-min §6 residual (3D §EDGE-MULTIPLIER RESIDUAL); a faction-level multiplier is cleaner and §6-trivial (faction-scalar, never per-enclave-OSID).
 
 **Does it move territory?** Primary answer: **no** (owner's directive). C-feel-only: never. C-drag: only *emergently/indirectly* via the exhausted faction's own reduced agency, never by a scripted flip.
 

@@ -187,9 +187,9 @@ Summary: Q4 and Q5 are now resolvable (diagnosis done / follow-up packet scoped)
 
 **What is safe WITHOUT a baseline change:** Nothing in the active-flag set. The global tier-1 alone (`global_only`) is byte-identical (Tier 1 shows 0/3 non-trivial; both short scenarios FLAT and the 52w would be too since no sub-flag fires), so flipping ONLY `AWWV_POLITICAL_DIMENSION_PROPAGATION` with no sub-flag is safe and confirms plumbing — but it has zero behavioral effect.
 
-## 8. Open questions remaining for user
+## 8. Open questions remaining for the Pyrrhic panel
 
-Genuinely non-delegable:
+Genuinely panel-gated (bright lines surface to the owner):
 
 1. **Activate any Phase E sub-flag now, or defer to a dedicated activation window?** Given intl_only is bot-military-DRIFT and requires a baseline refresh, this is a scheduling + risk-appetite decision the user/calibration team must make. Recommendation: defer to an explicit window.
 2. **Approve the cohesion threshold recalibration to 10** (code change + eventual baseline impact)? Required before cohesion can be activated discriminatingly.

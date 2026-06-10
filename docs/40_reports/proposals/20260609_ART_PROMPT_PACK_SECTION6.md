@@ -1,13 +1,13 @@
 # Art Prompt Pack — §6 SENSITIVE QUEUE (Documentary Realism) — HELD FOR OWNER REVIEW
 
 **Date:** 2026-06-09
-**Status:** **HELD — NOT cleared for generation.** These prompts are §6 (sensitive camp/atrocity/enclave-fall/moral-decision content) — the original eight subjects below plus the two owner-approved enclave-decision branch images (§8.9 OVERRUN / §8.10 CONTAIN, appended 2026-06-09). They are authored as text ONLY and require **explicit owner + §6 sign-off** before any image is generated or wired. No images are produced by this document.
+**Status:** **HELD — NOT cleared for generation.** These prompts are §6 (sensitive camp/atrocity/enclave-fall/moral-decision content) — the original eight subjects below plus the two owner-approved enclave-decision branch images (§8.9 OVERRUN / §8.10 CONTAIN, appended 2026-06-09). They are authored as text ONLY and require **explicit §6 Pyrrhic panel sign-off (Historian + scenario-tester/calibration + Engine/systems + Red-team, unanimous)** before any image is generated or wired. No images are produced by this document.
 **Companion:** `docs/40_reports/proposals/20260609_ART_PROMPT_PACK_NON_SECTION6.md` — the 28 shared + 15 per-faction NON-§6 prompts. Those eight §6 subjects were *listed-only-and-deferred* there (its "§6 DEFERRED" section). This document authors the deferred eight to the same documentary-realism contract, but holds them behind the gate.
 **Canon authority:** `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` (Tier 2 canon — above Rulebook, below Engine Invariants). Every prompt below is bound by it.
 
 > **GENERATION / SIGN-OFF STATUS (updated 2026-06-10).** Owner delivered all 10 stills; dignity-QC passed on all. The §6 sign-off chain (`/historian` + `/narrative-designer` + `/game-designer`) ran on the 7 non-enclave subjects (8.1–8.6, 8.8) — **all APPROVE-WITH-NOTES, no rejections**. Record: `docs/40_reports/governance/20260610_SECTION6_ART_SIGNOFF.md`.
 > - **PLACED inert (7):** 8.1 camps, 8.2 Srebrenica, 8.3 Žepa, 8.4 Ahmići, 8.5 Markale, 8.6 Drina, 8.8 codex header → `src/ui/map/assets/event_illustrations/` (globbed but no event/codex `image` key set yet → render unchanged; wiring is a later §6-gated step). 8.4 + 8.5 were regenerated 2026-06-10 (8.4 unmistakable felled minaret → `/historian` conditional cleared; 8.5 shallow "Sarajevo rose" → refinement applied).
-> - **HELD (3):** 8.7 / 8.9 / 8.10 enclave-decision art (feature build pending owner + §6 sign-off; owner approval non-delegable).
+> - **HELD (3):** 8.7 / 8.9 / 8.10 enclave-decision art (feature build remains HELD pending §6 Pyrrhic panel sign-off (Historian + scenario-tester/calibration + Engine/systems + Red-team, unanimous); the atrocity-is-never-rewarded bright line surfaces to the owner).
 **How to use (after sign-off only):** Each block is fully self-contained and copy-paste-ready: subject, composition, mood, lighting, palette, dimensions, drop path, and negative prompt are inlined — identical workflow to the shipped presidential-desk cards. Do NOT paste any block into a generator until the §6 gate clears it.
 
 ---
@@ -29,7 +29,7 @@ This is Srebrenica/Žepa/camp/atrocity-adjacent imagery for a serious historical
 
 # THE EIGHT DEFERRED §6 SUBJECTS
 
-These are exactly the eight enumerated in the NON-§6 pack's "§6 DEFERRED — OWNER SIGN-OFF REQUIRED" section (cross-referenced against the authored exemplar event IDs in `docs/plans/2026-05-29-ring3-sensitive-event-authoring-plan.md` §0/§3.1 and the rupture roster in the Design Gate). None invented.
+These are exactly the eight enumerated in the NON-§6 pack's "§6 DEFERRED — PYRRHIC §6-PANEL SIGN-OFF REQUIRED" section (cross-referenced against the authored exemplar event IDs in `docs/plans/2026-05-29-ring3-sensitive-event-authoring-plan.md` §0/§3.1 and the rupture roster in the Design Gate). None invented.
 
 | # | Subject | Wired surface (event ID / family) | Asset kind |
 |---|---|---|---|
@@ -116,7 +116,7 @@ These are exactly the eight enumerated in the NON-§6 pack's "§6 DEFERRED — O
 
 - **Drop path:** `src/ui/map/assets/presidential_desk/decision_headers/decision_header_enclave_overrun.webp`
 - **Dimensions:** 1536×512 (modal header strip)
-- **Wires to:** the presidential moral-choice header for the never-fell-enclave OVERRUN vs CONTAIN decision (owner-authored, §6-gated; build pending owner + §6 sign-off). This is the gravest single decision header in the game.
+- **Wires to:** the presidential moral-choice header for the never-fell-enclave OVERRUN vs CONTAIN decision (owner-authored, §6-gated; build remains HELD pending §6 Pyrrhic panel sign-off (Historian + scenario-tester/calibration + Engine/systems + Red-team, unanimous)). This is the gravest single decision header in the game.
 - **§6 framing:** THE WEIGHT OF THE CHOICE, NOT THE DEED. This is the *desk before the order* — an operational map of a surrounded enclave under a lamp, the unmade decision rendered as the burden it is. It must NOT depict the act, glorify the assault, or frame overrun as a reward (Gate §1 Ring-3 #1/#5/#9). Reserve a calm dark lower-third band for the modal title/body, matching the shipped `decision_header_*` strips.
 - **Prompt:** Generate a `1536 x 512` px modal header strip. Export final as `decision_header_enclave_overrun.webp` and later drop it in `src/ui/map/assets/presidential_desk/decision_headers/`. Scene: a darkened wartime command desk seen from above — an operational staff map showing a small surrounded enclave ringed in faded grease pencil, a single lamp throwing a cold pool of light across it, an unmoved field telephone handset resting beside the map, a closed folder, an ashtray, the long shadows of a decision not yet taken. The mood is dread and moral weight: an order that has not been given, a line on a map that means lives. No soldiers, no combat, no enclave depicted as a target reticle, nothing triumphant. Keep contrast restrained and leave a quiet dark band across the lower third so white/amber modal text remains legible. Style: documentary war-correspondent photograph, 1990s, desaturated colour, fine film grain, muted grey-amber office palette, restrained contrast, low natural lamp light. No people, no soldiers, no weapons, no readable map labels, no legible insignia, no flags. NOT oil painting, NOT sepia, NOT a dramatic painting, NOT concept art, NOT heroic, NOT a clean glossy stock photo.
 - **Negative prompt:** soldiers, combat, explosions, an enclave shown as a target or crosshair, assault imagery, triumphant tone, glorified command pose, bodies, gore, bright colour, readable map labels, legible insignia, flags, oil painting, sepia tone, dramatic painting, concept art, heroic poster, clean glossy stock photo, HUD, UI overlay, readable text, captions, watermark, logo, signature, identifiable face.
@@ -183,4 +183,4 @@ These are exactly the eight enumerated in the NON-§6 pack's "§6 DEFERRED — O
 
 **No reference attachments are expected for any of these ten** (unlike the Category-1 peace-plan maps in the companion pack, which require an attached historical map). If the owner wishes to ground a specific still on a particular ICTY-published or museum reference photograph, note it at sign-off; otherwise these are generated from the text prompt alone.
 
-**HELD. These prompts must NOT be pasted into any generator until the owner and the §6 sign-off chain (`/historian` + `/narrative-designer` + `/game-designer`, per Design Gate §6, with owner approval non-delegable for the enclave-overrun decision) explicitly clear them.**
+**HELD. These prompts must NOT be pasted into any generator until the §6 Pyrrhic panel (`/historian` + `/narrative-designer` + `/game-designer` + Red-team, per Design Gate §6) explicitly clears them; unanimous GO = signature, and the atrocity-is-never-rewarded bright line for the enclave-overrun decision surfaces to the owner.**
