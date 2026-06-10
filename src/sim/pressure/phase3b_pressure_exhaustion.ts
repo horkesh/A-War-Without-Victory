@@ -224,12 +224,14 @@ export function applyPhase3BPressureExhaustion(
             continue;
         }
 
-        // Round deterministically (use integer exhaustion like existing accumulateExhaustion)
-        // Exhaustion is stored as integer, so we floor the delta
-        const deltaRounded = Math.floor(delta);
-
+        // PHASE IV-a (2026-06-10): removed the `Math.floor(delta)` quantization. With
+        // COUPLE_FRACTION=0.02 the per-faction per-turn increment is almost always < 1, so
+        // flooring zeroed ALL sub-unit accrual — the 3B coupling could never move
+        // profile.exhaustion off zero (scenario-tester read: "remove the Math.floor in 3B
+        // that zeroes sub-unit accrual; the constants are too COLD not too hot"). The field is
+        // a float (0..1 normalized), so a fractional increment is correct and monotonic.
         const before = Number.isFinite(f.profile?.exhaustion) ? f.profile.exhaustion : 0;
-        const after = before + deltaRounded;
+        const after = before + delta;
 
         // Irreversible: never decrease (monotonic non-decreasing)
         f.profile.exhaustion = Math.max(before, after);
