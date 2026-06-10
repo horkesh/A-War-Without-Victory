@@ -9,6 +9,7 @@
  */
 
 import type { TurnBattle } from '../state/turn_summary.js';
+import { splitKiaWiaMia } from './combat/attack_casualty_distribution.js';
 
 // ── Template & name pool types ──────────────────────────────────────
 
@@ -170,10 +171,10 @@ export function generateLetterHome(input: LetterHomeInput): string | null {
         const casualties = isAttacker ? battle.attacker_casualties : battle.defender_casualties;
         if (casualties <= 0) continue;
 
-        // Approximate KIA/WIA/MIA split from total casualties (KIA=0.30, WIA=0.55, MIA=0.15)
-        const kia = Math.round(casualties * 0.30);
-        const wia = Math.round(casualties * 0.55);
-        const mia = casualties - kia - wia;
+        // KIA/WIA/MIA split mirrors the canonical ledger fractions the battle
+        // engine books (attack_casualty_distribution.ts: KIA 0.22 / WIA 0.74 /
+        // MIA remainder) so the vignette agrees with the casualty ledger (#73).
+        const { killed: kia, wounded: wia, missing_captured: mia } = splitKiaWiaMia(casualties);
         turnKilled += kia;
         turnWounded += wia;
         turnMissing += mia;
