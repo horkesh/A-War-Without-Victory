@@ -55,11 +55,11 @@ War begins only when the mandatory EC-coerced RBiH independence referendum has b
 - Deterministic serialization (reproducible outputs)
 
 ### Systemic Design Insights Rule
-Systemic design insights discovered during implementation must be flagged for `docs/10_canon/FORAWWV.md` addendum. **Do not auto-edit FORAWWV.md.** Flag with note:
+Systemic design insights discovered during implementation should be incorporated into `docs/10_canon/FORAWWV.md` as an addendum. Addendum edits require **Pyrrhic-panel sign-off** — convene the appropriate panel; a unanimous GO is the signature; a BLOCK or split verdict surfaces to the owner; implementer ≠ reviewer. Flag with note:
 
 ```
 **docs/10_canon/FORAWWV.md may require an addendum** about [insight].
-Do NOT edit FORAWWV automatically.
+Apply addendum only after Pyrrhic-panel sign-off.
 ```
 
 ## See Also
