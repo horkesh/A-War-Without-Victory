@@ -256,6 +256,7 @@
   },
   {
     "id": "rbih_nato_ultimatum_compliance_1994",
+    "image": "event_patron_relations_RBiH.webp",
     "title": "NATO Ultimatum — Sarajevo HWEZ Compliance",
     "narrative": "Following the North Atlantic Council decision of 9 February 1994, NATO demands the withdrawal of all heavy weapons from a 20-kilometer exclusion zone around Sarajevo by 0001Z on 21 February 1994 or face air strikes. The Heavy Weapons Exclusion Zone regime is symmetric: it applies to VRS positions and to any ARBiH heavy weapons inside the perimeter. The Sarajevo Presidency must record its posture toward the symmetric framing — cooperation with UNPROFOR collection-point inventories, or refusal of the moral-equivalence of withdrawal demands on the besieging army and the defenders.",
     "category": "diplomatic",
@@ -766,6 +767,7 @@
   },
   {
     "id": "hrhb_washington_agreement_1994",
+    "image": "event_washington_agreement.webp",
     "title": "Washington Agreement Signed",
     "narrative": "Under heavy American pressure, Bosniak and Bosnian Croat leaders sign the Washington Agreement, ending the Croat-Bosniak war and establishing the Federation of Bosnia and Herzegovina. The agreement changes the military balance by creating a Federation framework against the VRS, though trust, command integration, and supply coordination remain uneven.",
     "category": "diplomatic",
@@ -909,6 +911,7 @@
   },
   {
     "id": "rbih_washington_agreement_1994",
+    "image": "event_washington_agreement.webp",
     "title": "Washington Agreement — Sarajevo's Acceptance",
     "narrative": "Under cumulative US shuttle diplomacy (Christopher, Galbraith, Redman) and the post-Markale NATO ultimatum, the Sarajevo Presidency receives the Washington framework. Izetbegovic and Prime Minister Silajdzic delegate to Washington; the 1 March 1994 framework agreement and the 18 March 1994 constitutional agreement establish the Federation of Bosnia and Herzegovina, with a parallel Preliminary Agreement on Confederation with Croatia witnessed by Tudjman. Acceptance ends the two-front Croat-Bosniak war and reopens Croatian supply lines, but Assembly hardliners and the Silajdzic-track skepticism record the acceptance as instrumental rather than ideological.",
     "category": "diplomatic",
@@ -2555,6 +2558,7 @@
   },
   {
     "id": "belgrade_embargo_rs_1994",
+    "image": "event_patron_relations_RS.webp",
     "title": "Belgrade Breaks with Pale",
     "narrative": "Milosevic has had enough. After the Bosnian Serb assembly rejects the Contact Group plan, Belgrade imposes sanctions on Republika Srpska, closing the border to military supplies and severing the political lifeline that has sustained the war effort. Your army's supply lines from Serbia are now severed. The international community watches to see if this is real or theater.",
     "category": "political",
@@ -3226,6 +3230,7 @@
   },
   {
     "id": "carter_ceasefire_1994",
+    "image": "event_ceasefire.webp",
     "title": "Carter Brokers Winter Ceasefire",
     "narrative": "Jimmy Carter arrives in Sarajevo. The former president, acting as private mediator, shuttles between the warring parties and extracts a commitment to a complete cessation of hostilities effective New Year's Day. Humanitarian corridors will reopen. Behind the scenes, both sides know the ceasefire is a breathing space — time to rearm, resupply, and prepare for whatever comes next.",
     "category": "diplomatic",
