@@ -32,12 +32,12 @@ The central finding (from `docs/plans/2026-06-08-calibration-prerequisites-seque
 | **Reserve-attrition Phase B pairing** (#50/#329) | front-attrition (paired with a frontline_attrition retune) | **SERIAL — solo, PAIRED** | NO-GO −18 solo; needs a paired retune → on the spine if attempted |
 | **Contain V** (#339, VRS §6) + **Contain A** (#341, ARBiH) | faction-AI posture (enclave timing) | **§6-gated (V) / measured-INERT (both)** | **RECOMMEND DON'T ACTIVATE** — see §4 |
 | **Durable-missing target band** | reporting magnitude (casualty ledger) | **Owner-decision (orthogonal to OSID)** | Resolve number BEFORE Lane-2/B1 land |
-| **Krivaja / Srebrenica suppression** | enclave timing | **§6 non-delegable** | NOT on D1 (v1.x by definition) |
+| **Krivaja / Srebrenica suppression** | enclave timing | **§6 Pyrrhic-panel (bright line surfaces to owner)** | NOT on D1 (v1.x by definition) |
 
 **Three buckets:**
 - **SPINE (serial, solo, 188w re-floor each):** Lane-3 → E-B1 → (intel-ambush + reserve-attrition pairing, if activated). B1 rides this file family but is measured-orthogonal.
 - **INDEPENDENT (interleave anytime, still one-change-per-run + 188w):** Central-Bosnia OOB (A→A+B), PDP per-channel (#48).
-- **GATED / SHELVE:** Contain V+A (recommend shelve), Krivaja (§6 non-delegable, OFF the sequence), durable-missing-target (resolve the number, not a run).
+- **GATED / SHELVE:** Contain V+A (recommend shelve), Krivaja (§6 Pyrrhic-panel; bright line surfaces to owner; OFF the sequence), durable-missing-target (resolve the number, not a run).
 
 ---
 

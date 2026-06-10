@@ -157,7 +157,7 @@ Delete `concentration_orders` from `PlanDecision`. Zero calibration risk (comman
 
 ## Section 7: Cross-references
 
-- **CLAUDE.md.** Top-level project doc — "Sacred Rules" lists banned patterns (Math.random, `avoided_osids_by_faction`, AoR overrides, FORAWWV auto-edits). Simplification roadmap directive: repo-wide cleanup between v0.8 and v0.9.
+- **CLAUDE.md.** Top-level project doc — "Sacred Rules" lists banned patterns (Math.random, `avoided_osids_by_faction`, AoR overrides) and the canon/FORAWWV Pyrrhic-panel sign-off requirement. Simplification roadmap directive: repo-wide cleanup between v0.8 and v0.9.
 - **MEMORY.md simplification roadmap.** `versioning_roadmap_location.md` → `docs/plans/MASTER_ROADMAP.md` is single source of truth.
 - **Napkin entries** (`.claude/napkin.md`):
   - Line 291 — "legacy `TUTORIAL_OBJECTIVES` is dead code (zero importers)" (UI scope; flagged but not in audit boundary)

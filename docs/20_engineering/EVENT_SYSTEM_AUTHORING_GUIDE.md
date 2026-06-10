@@ -161,7 +161,7 @@ Per canon §6, sensitive-adjacent events require a 4-specialist panel before aut
 | `/canon-compliance-reviewer` | §3.6 forward-looking guard enforcement; `RING3_SENSITIVE_FAMILIES` exact-match; `validateRing3EnablingRejection` pass |
 | `/narrative-designer` | Canon §4 prosecutorial wording; no reward language; consequence framing |
 
-Per canon §6.3, user approval is non-delegable on any change that could produce a "reward for atrocity" effect. Packets 40, 41, 42 all required user sign-off because every one of them touched that risk.
+Per canon §6.3, any change that could produce a "reward for atrocity" effect requires Pyrrhic §6-panel sign-off (Historian + scenario-tester/calibration + Engine/systems + Red-team; unanimous GO = signature; the atrocity-is-never-rewarded bright line, if ever in question, surfaces to the owner). Packets 40, 41, 42 all required this review because every one of them touched that risk.
 
 Reference precedent (read these before drafting a new sensitive packet):
 - Packet 40 — R4 `concentration_camps_revealed_1992` — ICRC/Roy Gutman/Penny Marshall reporting; `historical_default: "deny"`; `cooperate_investigation` counterfactual carries maximum punitive cost floor.
@@ -376,7 +376,7 @@ The F3 tool is the entrypoint for new authoring — it answers "what does the ch
 - Do NOT author a Ring 3 family event with upstream `enables_events_runtime[]` references. `validateRing3EnablingRejection` throws.
 - Do NOT author positive `territorial_legitimacy` deltas on sensitive counterfactuals. Crosses the Ring 3 boundary.
 - Do NOT add foreclosure entries for `srebrenica_falls_1995` or `srebrenica_genocide_1995` without explicit Gate §6 sign-off with a citation comment.
-- Do NOT auto-edit `docs/10_canon/FORAWWV.md` per CLAUDE.md. Flag for manual review.
+- Edits to `docs/10_canon/FORAWWV.md` require Pyrrhic-panel sign-off per CLAUDE.md.
 - Do NOT run `UPDATE_BASELINES=1` without first explaining the expected drift in your ledger entry.
 - Do NOT bundle multiple packets into one commit. One packet, one commit, one ledger entry.
 - Do NOT use the `requires_enabled` bypass in `event_presidential_acceptance.test.ts` as a model for production code. It is a diagnostic probe carve-out (Packet 22).
@@ -445,8 +445,8 @@ The F3 tool is the entrypoint for new authoring — it answers "what does the ch
                  v          +---------------+ +-------------+
        +--------------------+ §3.6 guard    | | Standard    |
        | 4-specialist panel | text required | | authoring   |
-       | + user approval    | in source_note| | (§2.1-§2.6) |
-       | non-delegable      | + cost-floor  | +------+------+
+       | + §6 panel sign-off| in source_note| | (§2.1-§2.6) |
+       | panel-gated        | + cost-floor  | +------+------+
        +---------+----------+ punitive on   |        |
                  |            counterfactuals       v
                  v          +-------+-------+ +-------------+

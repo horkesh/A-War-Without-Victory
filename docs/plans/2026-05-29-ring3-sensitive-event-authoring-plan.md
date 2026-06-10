@@ -13,7 +13,7 @@
 
 ## 0. Required reading (cite before any drafting)
 
-- `CLAUDE.md` Sacred Rules — determinism; "Never auto-edit `docs/10_canon/FORAWWV.md`".
+- `CLAUDE.md` Sacred Rules — determinism; "FORAWWV.md edits require Pyrrhic-panel sign-off".
 - `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` — the binding gate. Key sections used by this plan:
   - §1 Three Rings (Ring 1 modeled / Ring 2 narrative / Ring 3 refused).
   - **§1.3 — the eleven Ring-3 refusals** (no genocide decision tree #1; no camp subsystem #2; no negotiable condemnation #3; no body-count optimization #4; no atrocity-efficiency metric #5; no alternate-history minimization #6; no faction-atrocity ranking #7; no granular victim attribution #8; no justified-atrocity framing #9; **no gamified "prevent genocide" mechanic #10**; no calendar-driven atrocity recording #11).

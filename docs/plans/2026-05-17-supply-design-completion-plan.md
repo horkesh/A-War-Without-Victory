@@ -27,7 +27,7 @@ Out of scope (owned by sibling plans):
 - RBiH arms-embargo cap effects on reserves and airdrops — owned by `docs/plans/2026-05-17-rbih-supply-constraint-arms-embargo-plan.md`. This plan does not touch `EMBARGO_SUPPLY_CAP.RBiH`, airdrop math, or `supply_reserve_constants.ts` faction caps.
 - Tarjan retry / region-keyed cache invalidation for `deriveCorridorsOsid` performance — covered separately in `docs/40_reports/audits/20260504_SUPPLY_OSID_RETRY_RECOMMENDATION.md`. This plan must not regress the captured active baseline from a perf change.
 - Banned canon rails: `avoided_osids_by_faction`, initial OSID overrides, paint anchors. None are touched.
-- Any auto-edit of `docs/10_canon/FORAWWV.md`. Cascade wording recommendations (§2) are flagged for manual canon review only.
+- Edits to `docs/10_canon/FORAWWV.md` require Pyrrhic-panel sign-off. Cascade wording recommendations (§2) are routed through the appropriate panel.
 
 ## Task 1: Spec-vs-Code Audit Diagnostic
 
@@ -51,7 +51,7 @@ Out of scope (owned by sibling plans):
    - `§7 minimum supply UX panel + IPC corridor summary` → PARTIAL (`SupplyPanel.tsx` exists; verify IPC contract).
    - `§8 bot supply awareness in target/defense scoring` → MISSING / PARTIAL (`bot_corps_directives.ts` has 6 supply references; verify none read `war_supply_condition` or per-OSID state).
    - `§9 Phase 1 OSID trace` → DONE.
-   - `§9 Phase 2 cascade canon wording` → flagged DRIFTED (canon review only, not auto-edit).
+   - `§9 Phase 2 cascade canon wording` → flagged DRIFTED (Pyrrhic-panel sign-off required to apply).
 3. Do not flip any status row by changing the engine in this task. Diagnostic-only.
 4. Run `npx.cmd vitest run tests/supply_design_completion_diagnostic.test.ts`.
 
@@ -137,7 +137,7 @@ Out of scope (owned by sibling plans):
 1. Add a deterministic test: a small synthetic graph where one bridge edge is flipped between two factions. Run the derivation twice with shuffled adjacency-insertion order. Assert the resulting `by_osid` list is byte-identical.
 2. If the test is already green (engine is already deterministic on this case), keep the test as a regression guard and proceed.
 3. If the test is red, the fix is local: sort the propagation queue by `strictCompare(osid)` and the outer faction loop by `strictCompare(faction_id)`. Do not change cascade *threshold* semantics in this plan — that is a canon recommendation flagged in Task 1, not a code change.
-4. Flag for manual canon review: append the Engine Invariants §4 wording recommendation from `SUPPLY_DESIGN.md` §5 (last paragraph) into a new entry under `docs/40_reports/CANON_REVIEW_QUEUE.md` (create the file if it does not exist). Do not auto-edit `docs/10_canon/`.
+4. Flag for manual canon review: append the Engine Invariants §4 wording recommendation from `SUPPLY_DESIGN.md` §5 (last paragraph) into a new entry under `docs/40_reports/CANON_REVIEW_QUEUE.md` (create the file if it does not exist). Edits to `docs/10_canon/` require Pyrrhic-panel sign-off.
 
 **Acceptance:**
 - Cascade ordering test green.
@@ -186,7 +186,7 @@ Update on green:
 - `docs/PROJECT_LEDGER.md` (one entry per behavior commit — Task 2 reconciliation, Task 3 bot supply awareness, Task 4 UX contract)
 - `docs/PROJECT_LEDGER_KNOWLEDGE.md` (thematic note: "Dual-source supply state — cumulative `war_supply_pressure` vs live `war_supply_condition` — readers must go through `getFactionLiveSupplyPressure`")
 
-Do not auto-edit `docs/10_canon/FORAWWV.md`. Do not auto-edit `docs/10_canon/Engine_Invariants_v0_5_0.md` or `Systems_Manual_v0_5_0.md` — cascade and per-OSID wording changes are queued for manual canon review only.
+Edits to `docs/10_canon/FORAWWV.md`, `docs/10_canon/Engine_Invariants_v0_5_0.md`, and `Systems_Manual_v0_5_0.md` require Pyrrhic-panel sign-off — cascade and per-OSID wording changes are routed through the appropriate panel.
 
 ## Determinism Statement
 

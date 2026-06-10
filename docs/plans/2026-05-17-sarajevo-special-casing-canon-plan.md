@@ -213,7 +213,7 @@ Update on landing (not in this plan execution — recorded for the executor):
 - `docs/plans/MASTER_ROADMAP.md` — mark Sarajevo special-casing item resolved.
 - `docs/40_reports/working/SARAJEVO_CONSTANT_INVENTORY.md` — committed inventory artifact.
 
-Do not auto-edit `docs/10_canon/FORAWWV.md`. Flag for manual review if the canonical statement needs an explicit "ID-set vs numeric tuning" boundary clause.
+Edits to `docs/10_canon/FORAWWV.md` require Pyrrhic-panel sign-off. Route through the appropriate panel if the canonical statement needs an explicit "ID-set vs numeric tuning" boundary clause.
 
 Determinism statement required in the implemented report: 40w no-override hash byte-identical to the captured active baseline; deterministic shift only when override present.
 

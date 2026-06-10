@@ -142,7 +142,7 @@ Update after each phase commit:
 
 Determinism statement required per phase. Phase 2 must explicitly state "renderer-only, byte-stable" and prove it with the 40w hash. Phases 1 and 3 must explicitly state hash-changing and capture user sign-off in the report.
 
-Never auto-edit `docs/10_canon/FORAWWV.md` — flag for manual review if any phase implies a canon update.
+Edits to `docs/10_canon/FORAWWV.md` require Pyrrhic-panel sign-off — route any canon update through the appropriate panel.
 
 ## Stop Gates And Closeout
 

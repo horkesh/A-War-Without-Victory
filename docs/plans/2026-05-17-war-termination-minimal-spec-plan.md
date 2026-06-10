@@ -25,7 +25,7 @@ Out of scope:
 - Engine implementation of negotiation windows, acceptance computation, peace-plan event firing, or new rupture predicates. **All engine wiring is deferred to a follow-on plan** that consumes this spec.
 - Cinematic Verdict / VerdictScreen UI surface work (already owned by its own plan).
 - Numeric tuning of precondition thresholds, initiative timing windows, capital weights, grade anchors, or dimension weights. Spec names the levers conceptually; numeric calibration follows in a separate design pass.
-- Edits to `docs/10_canon/FORAWWV.md` (per project rule: never auto-edit; flag for manual review only).
+- Edits to `docs/10_canon/FORAWWV.md` (per project rule: require Pyrrhic-panel sign-off).
 - Edits to `VICTORY_AND_PYRRHIC_SCORING.md` or `SENSITIVE_HISTORY_DESIGN_GATE.md` (this spec aligns to them, never amends them; any required amendment is flagged as a separate sign-off task).
 - Engine `Math.random()` / determinism audits (this is a design doc — code-level determinism is enforced by existing canon).
 
@@ -58,7 +58,7 @@ Touch only if review requires (each is a stop-gate, see §Stop Gates):
 - `docs/plans/MASTER_ROADMAP.md` — add a single line under the v0.9.x design-debt section pointing at the new spec.
 - `docs/PROJECT_LEDGER.md` — docs-only entry at the end (no behavioral change).
 
-**Never auto-edit:**
+**Pyrrhic-panel sign-off required to edit:**
 - `docs/10_canon/FORAWWV.md` (flag any conflict for manual review).
 - `docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md`, `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`, Engine Invariants, Phase Specs, Systems Manual, Rulebook — this spec **binds to** them; amendments are out of scope.
 
@@ -337,7 +337,7 @@ Determinism statement: this is a docs-only lane. Scenario hashes must remain byt
 - **Stop before user sign-off** if any of the four expert sign-offs is missing or conditional.
 - **Stop if `canon:check` fails** after the spec is placed. Do not bypass canon checks.
 - **Stop if any edit lands outside the four target files** (the spec, the advisory pack, the one-line roadmap entry, the one-line ledger entry). This is a docs-only plan; broader edits indicate scope creep.
-- **Stop if `FORAWWV.md` shows any diff.** Per project rule, never auto-edit; flag for manual review.
+- **`FORAWWV.md` edits require Pyrrhic-panel sign-off.** Per project rule, route any diff through the appropriate panel.
 
 ---
 

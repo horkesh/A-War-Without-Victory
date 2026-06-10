@@ -154,7 +154,7 @@ Update on success:
 - `docs/PROJECT_LEDGER.md` (one entry; behavioral change only if Task 4 modified JSON).
 - `docs/plans/MASTER_ROADMAP.md` (mark the n292 P0 row complete).
 
-Do NOT auto-edit `docs/10_canon/FORAWWV.md`.
+Edits to `docs/10_canon/FORAWWV.md` require Pyrrhic-panel sign-off.
 
 Determinism statement required: this lane is data-only or audit-only. Any 40w hash drift must be confined to the late-war window of a documented step-curve override. Mechanism remains faction-symmetric; no code branches on faction. No `Math.random`, no `Date.now`, no timestamps in source; sorted iteration via `strictCompare`.
 

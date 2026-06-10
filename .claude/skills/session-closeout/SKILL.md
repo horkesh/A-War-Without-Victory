@@ -59,7 +59,7 @@ Run each check. For each FAIL, fix it before closing. Report status as a table.
 **Check**: Did any mechanics change that canon docs describe?
 **How**: Review changes to `src/sim/`, `src/state/`, constants, pipeline steps. Cross-reference with `docs/10_canon/` (Systems Manual, Phase Specs, Rulebook).
 **FAIL if**: A mechanic changed (e.g., supply filter behavior, counter-attack scope, planning duration) and the relevant canon doc still describes the old behavior.
-**Fix**: Either update the canon doc directly OR flag it with `propagate-to-canon` skill. NEVER auto-edit `FORAWWV.md`.
+**Fix**: Either update the canon doc directly (edits to `FORAWWV.md` require Pyrrhic-panel sign-off) OR flag it with `propagate-to-canon` skill.
 
 ### 8. CALIBRATION_MASTER.md
 **Check**: Were calibration runs performed this session?

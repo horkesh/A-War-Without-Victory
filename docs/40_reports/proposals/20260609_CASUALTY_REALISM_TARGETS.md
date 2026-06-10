@@ -1,7 +1,7 @@
 # Casualty-Realism Targets — Ratification Doc (D1 Lane-3)
 
 **Date:** 2026-06-09
-**Status:** PROPOSAL / RESEARCH + RECONCILIATION ONLY. **No code, constants, levers, scenario data, or baselines changed.** PROPOSED locked numbers below require **owner ratification** before any Lane-3 run scores against them.
+**Status:** PROPOSAL / RESEARCH + RECONCILIATION ONLY. **No code, constants, levers, scenario data, or baselines changed.** PROPOSED locked numbers below require **Pyrrhic-panel sign-off** before any Lane-3 run scores against them.
 **Source hierarchy (mandatory):** ICTY OTP Demographic Unit (Tabeau) → RDC *Bosnian Book of the Dead* (Tokača) → Wikipedia/Google cross-check. Every figure cited.
 **§6 note:** Srebrenica/Žepa victims are real people. Figures below are reported verbatim from the demographic record; nothing is minimized or rounded away.
 **Supersedes nothing; reconciles:** `20260608_CASUALTY_MODEL_REALISM.md`, `20260609_CASUALTY_SOURCE_BREAKDOWN.md`, `REAL_WAR_MASTER.md` top review (which audited the *older* 143,980-killed run, NOT the current floor).
@@ -105,7 +105,7 @@ Read of `src/state/casualty_ledger.ts`, `src/sim/combat/attack_casualty_distribu
 
 ---
 
-# PART C — PROPOSED LOCKED TARGETS (for owner ratification)
+# PART C — PROPOSED LOCKED TARGETS (for Pyrrhic-panel sign-off)
 
 ### C1. Target table
 
@@ -150,7 +150,7 @@ Read of `src/state/casualty_ledger.ts`, `src/sim/combat/attack_casualty_distribu
 - Volume levers (battle-resolution rates; frontline attrition) move brigade strength → **188w-validate synchronously before any merge** (per `feedback_188w_validate_combat_changes_before_merge`); 40w + CI is a false-green for combat-volume changes.
 - **Civilian model is calibrated — leave it alone**; military and civilian pipelines stay decoupled.
 - §6: Srebrenica + Žepa must continue to FALL; sacred anchors (`op:zvornik:zvornik`=RS, `op:lukavac:brijesnica_donja_2`=RBiH) must hold. Lane-3 RUN1 confirmed both intact under a −25% cut.
-- **These numbers are PROPOSED — owner ratifies before any scoring run.** This is calibration-owned; do not close from the docs/tracking lane.
+- **These numbers are PROPOSED — the Pyrrhic panel signs off before any scoring run.** This is calibration-owned; do not close from the docs/tracking lane.
 
 ## Sources
 

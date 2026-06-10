@@ -1,7 +1,7 @@
 # §6 HISTORIAN-GATE REVIEW PACKET — Collapse Pipeline (G3 prep)
 
 **Type:** READ-ONLY assembly. No engine/sim/scenario/state/test code touched. No §6 content authored, reinterpreted, softened, or altered. No rupture timing changed. This packet QUOTES existing canon verbatim and CITES exact file+section; it does not decide anything.
-**Purpose:** Supports **G3** (historian acknowledgment) of the three-part §6 guard for the pressure→exhaustion→political-collapse pipeline. G1 (enclave-OSID exclusion at the Phase-3D `collapse_damage` write root) and G2 (188-week invariant test) are engineering work, gated separately; this packet is the evidence the OWNER (non-delegable) and a historian sign off on.
+**Purpose:** Supports **G3** (historian acknowledgment) of the three-part §6 guard for the pressure→exhaustion→political-collapse pipeline. G1 (enclave-OSID exclusion at the Phase-3D `collapse_damage` write root) and G2 (188-week invariant test) are engineering work, gated separately; this packet is the evidence the §6 Pyrrhic panel (Historian + scenario-tester/calibration + Engine/systems + Red-team) signs off on; the atrocity-is-never-rewarded bright line surfaces to the owner.
 **Predecessors (read first):**
 - `docs/40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md` (§4 = the §6 guard design)
 - `docs/40_reports/proposals/20260609_SCOPE_collapse_pipeline.md` (§3 = the §6 surface)
@@ -177,7 +177,7 @@ Derived **strictly** from §1–§2 above. This is the checklist G2 must encode;
 >
 > The Srebrenica genocide rupture remains a **consequence, not a lever** (SENSITIVE_HISTORY_DESIGN_GATE.md §0, §3 #10): collapse cannot be used to prevent it, accelerate it, or trade it away. The rupture continues to fire **only** on emergent satisfaction of the discrete OSID/flag/turn predicate (Gate §2 criterion 3), never on a calendar heuristic.
 
-**Owner sign-off (non-delegable — "reward for atrocity" + enclave-mechanics rows, Gate §6):**
+**Pyrrhic §6-panel sign-off ("reward for atrocity" + enclave-mechanics rows, Gate §6 — unanimous GO; the atrocity-is-never-rewarded bright line surfaces to the owner):**
 
 ```
 Owner acknowledgment: ____________________________   Date: __________

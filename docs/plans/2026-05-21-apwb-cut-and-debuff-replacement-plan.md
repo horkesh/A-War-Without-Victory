@@ -116,7 +116,7 @@ Subject to the precondition grep above; commit each touched file as its own comm
 | `docs/40_reports/REAL_WAR_MASTER.md` | Update any Bihać-pocket-civil-war section to point at the debuff-events instead of the deleted ops. |
 | `docs/PROJECT_LEDGER.md` | Append entry per ledger protocol. |
 
-**Not touched**: `docs/10_canon/FORAWWV.md` (never auto-edit), `src/state/identity.ts` (no faction change), `data/source/oob_brigades.json` (no formation change — APWB never had units), painted control JSONs (Velika Kladuša stays RBiH everywhere).
+**Not touched**: `docs/10_canon/FORAWWV.md` (edits require Pyrrhic-panel sign-off), `src/state/identity.ts` (no faction change), `data/source/oob_brigades.json` (no formation change — APWB never had units), painted control JSONs (Velika Kladuša stays RBiH everywhere).
 
 ---
 

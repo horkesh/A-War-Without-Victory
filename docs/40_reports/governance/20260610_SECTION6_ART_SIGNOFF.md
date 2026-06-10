@@ -3,7 +3,7 @@
 **Date:** 2026-06-10
 **Gate:** `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` §6 (atrocity event content → `/historian` + `/narrative-designer`; `/game-designer` added for the Ring-3 boundary check, per the §6 art-pack chain).
 **Scope:** the 7 NON-enclave §6 documentary stills authored in `docs/40_reports/proposals/20260609_ART_PROMPT_PACK_SECTION6.md` (8.1–8.6 + 8.8). Owner-delivered, dignity-QC'd, then formally reviewed by the three-party chain.
-**Owner authorization:** owner directed the sign-off chain to run and to place the cleared assets inert on green (2026-06-10). Owner approval remains **non-delegable** for the enclave-overrun decision branch (8.7/8.9/8.10) — those are **NOT** in scope here and stay HELD.
+**Owner authorization:** owner directed the sign-off chain to run and to place the cleared assets inert on green (2026-06-10). The enclave-overrun decision branch (8.7/8.9/8.10) is gated on **§6 Pyrrhic-panel sign-off** (Historian + scenario-tester/calibration + Engine/systems + Red-team, unanimous; the atrocity-is-never-rewarded bright line surfaces to the owner) — those are **NOT** in scope here and stay HELD.
 
 ---
 
@@ -51,7 +51,7 @@ All 10 delivered §6 stills (including the 3 held enclave-decision images) passe
 
 | Asset | Reason |
 |---|---|
-| `decision_header_enclave_overrun` (8.7) | Enclave-decision art; feature build pending owner + §6 sign-off; owner approval non-delegable |
+| `decision_header_enclave_overrun` (8.7) | Enclave-decision art; feature build remains HELD pending §6 Pyrrhic-panel sign-off (Historian + scenario-tester/calibration + Engine/systems + Red-team, unanimous; bright line surfaces to owner) |
 | `decision_overrun_aftermath` (8.9) | Enclave-decision branch; held with the feature |
 | `decision_contain_siege` (8.10) | Enclave-decision branch; held with the feature |
 

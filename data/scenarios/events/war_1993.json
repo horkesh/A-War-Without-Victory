@@ -540,6 +540,7 @@
   },
   {
     "id": "ahmici_massacre_1993",
+    "image": "event_ahmici_massacre_1993.webp",
     "title": "Ahmici Massacre",
     "narrative": "HVO forces, supported by the Jokers special police unit, launch a coordinated attack on the Bosniak village of Ahmici in the Lasva Valley. Over 100 civilians are killed, including women and children, and the village is systematically burned. The massacre becomes one of the most documented war crimes of the conflict and a defining atrocity of the Croat-Bosniak war.",
     "source_note": "Existing ICTY/UN and same-id essay sources ground the row's provenance and institutional context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
@@ -692,6 +693,7 @@
   },
   {
     "id": "east_mostar_siege_1993",
+    "image": "event_siege_city_HRHB.webp",
     "title": "HVO Besieges East Mostar",
     "narrative": "HVO forces impose a complete blockade on the eastern bank of Mostar, cutting off the Bosniak population from food, water, and medical supplies. Systematic shelling targets the densely populated old town. An estimated 55,000 Bosniaks are trapped in increasingly desperate conditions as the HVO seeks to drive them from the city entirely.",
     "category": "military",
@@ -806,6 +808,7 @@
   },
   {
     "id": "zagreb_restrains_boban_vopp",
+    "image": "event_patron_relations_HRHB.webp",
     "title": "Zagreb Restrains Boban: Hold Back During VOPP Window",
     "narrative": "Tuđman quietly orders Boban to restrain HVO offensive operations. The Vance-Owen provincial map is favorable to Croat Herzegovina — Zagreb needs HRHB to accept the plan, not derail it through military escalation. Boban signed the plan in Geneva on 2 January 1993 on Tudjman's direction, making HZ HB the first party to accept the ten-province framework.",
     "category": "diplomatic",
@@ -1989,6 +1992,7 @@
   },
   {
     "id": "un_safe_areas_declared_1993",
+    "image": "event_un_presence.webp",
     "title": "UN Declares Safe Areas",
     "narrative": "The UN Security Council passes Resolution 819, declaring Srebrenica a safe area, followed by Resolution 824 extending protection to Sarajevo, Tuzla, Zepa, Gorazde, and Bihac. The resolutions promise protection without committing adequate military force to deliver it — a fatal gap between mandate and means that will have catastrophic consequences.",
     "category": "diplomatic",
@@ -2137,6 +2141,7 @@
   },
   {
     "id": "rs_assembly_rejects_voplan_1993",
+    "image": "event_political_session.webp",
     "title": "Bosnian Serb Assembly Rejects Vance-Owen Plan",
     "narrative": "Despite Karadzic's signature on the Vance-Owen plan at Athens on May 2 (under Greek and FRY pressure, with the explicit condition of RS Assembly ratification), the Republika Srpska National Assembly convenes at Bijeljina on May 5-6 and votes to reject the plan. General Mladic presents maps arguing the territorial allocation is militarily unacceptable. Despite Milosevic's personal intervention (with Bulatovic, Cosic, and Greek Prime Minister Mitsotakis), the Assembly refers the decision to a referendum. The 15-16 May referendum produces a 96% rejection. Lord Owen declares the plan dead on June 18 — the last comprehensive peace proposal that preserved a unified Bosnia has failed.",
     "category": "political",
@@ -3223,6 +3228,7 @@
   },
   {
     "id": "markale_area_shelling_1993",
+    "image": "event_markale_shelling.webp",
     "title": "Sarajevo Market Areas Under Fire",
     "narrative": "Repeated mortar and artillery strikes target civilian areas in Sarajevo, including crowded marketplaces. Each incident draws international condemnation and edges the international community closer to considering military intervention against VRS positions. The SRK maintains its bombardment despite cease-fire agreements.",
     "source_note": "Existing ICTY/UN and Sarajevo shelling sources ground the row's provenance and institutional context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",

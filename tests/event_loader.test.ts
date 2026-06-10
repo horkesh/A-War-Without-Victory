@@ -566,10 +566,23 @@ test('loadEventDefinitionsFromDir throws on an empty image key', () => {
     );
 });
 
-test('no shipped event carries an image key (pipeline is inert for all current content)', () => {
+test('shipped events that carry an image key reference a valid .webp basename', () => {
+    // Event-illustration wiring is now LIVE: named historical, faction
+    // mobilization/supply, and (gated) §6 atrocity stills are wired to their
+    // events via an `image` key (2026-06-10). This guard formerly asserted the
+    // pipeline was inert (no event carried an image); it now validates that
+    // every authored image is a non-empty `.webp` basename the UI resolver
+    // (`resolveEventIllustration`) can match. The field is UI-display-only and
+    // never persisted (see CALIBRATION GUARD at evaluate_events.ts).
     const loaded = loadEventDefinitions(0);
     const withImage = loaded.filter((event) => event.image != null);
-    assert.deepStrictEqual(withImage.map((event) => event.id), []);
+    assert.ok(withImage.length > 0, 'expected at least one wired event image (pipeline is live)');
+    for (const event of withImage) {
+        assert.ok(
+            typeof event.image === 'string' && /^[\w./-]+\.webp$/.test(event.image),
+            `event ${event.id} has an invalid image key: ${JSON.stringify(event.image)}`,
+        );
+    }
 });
 
 // ════════════════════════════════════════════════════════════════════════════
