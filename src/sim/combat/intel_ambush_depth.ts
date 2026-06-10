@@ -33,8 +33,18 @@ import { FACTION_RECON_PROFILES } from './sector_intel_constants.js';
 
 // ── Constants (packet §4 step 1) ────────────────────────────────────────────
 /** How much depth can amplify the effective friction WITHIN the new clamp. d=1 raises the
- *  per-confidence friction by up to +50% — friction/exhaustion, never a win-lever. */
-export const INTEL_EXECUTION_AMBUSH_DEPTH_GAIN = 0.5;
+ *  per-confidence friction by up to +6% — friction/exhaustion, never a win-lever.
+ *
+ *  Calibration-tuned (2026-06-08): the original 0.5 over-bit — flag-ON 188w fell to 617/712
+ *  (-32 vs the 649 floor) because the heavier attacker-casualty amplifier compounded into
+ *  corridor attrition that BLOCKED historically-real Federation captures (RS over-held +21,
+ *  HRHB collapsed -20), moving AWAY from painted oct1995. At 0.06 the amplifier is bounded
+ *  enough that flag-ON 188w holds the floor exactly (649/712, 30/30 anchors, 0 crit, Zvornik
+ *  RS, Srebrenica/Žepa fall) while the final-state hash still differs from flag-OFF — i.e. the
+ *  ambush still produces emergent texture, it is not a neutered no-op. Intermediate 0.12
+ *  recovered to 634 but tripped a fragile unassigned-brigade critical anomaly.
+ *  Flag-OFF (default) is unaffected: the gain is never read unless AWWV_INTEL_AMBUSH_DEPTH=1. */
+export const INTEL_EXECUTION_AMBUSH_DEPTH_GAIN = 0.06;
 /** Hard ceiling on the attacker ambush casualty multiplier once depth is folded in.
  *  Only modestly above today's 1.12 base cap. */
 export const INTEL_EXECUTION_AMBUSH_ATTACKER_CASUALTY_MAX = 1.18;
