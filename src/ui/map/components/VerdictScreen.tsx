@@ -22,7 +22,7 @@ import type { ComparisonResult, MilestoneComparison, MilestoneComparisonStatus }
 // LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE: read-only consumption of ghost-entry
 // path-not-taken records for the Codex tab. Builder is pure/deterministic
 // and refuses §6 sensitive-history flags via its own Ring guard.
-import { buildGhostEntries, type BuiltGhostEntry } from '../../../sim/codex/dynamic_section_builder.js';
+import { buildGhostEntries, buildDynamicSections, type BuiltGhostEntry, type BuiltDynamicSection } from '../../../sim/codex/dynamic_section_builder.js';
 // T2-A / content C5 (orphaned-wiring audit): resolve the authored ghost-entry
 // markdown body (EN/BCS) instead of rendering the raw repo path. §6-adjacent
 // bodies are gated out inside the resolver.
@@ -313,6 +313,28 @@ export function VerdictScreen() {
         }
     }, [loadedGameState, turnForCodex]);
 
+    // §6 rupture-receipt un-hold (#78, panel-approved 2026-06-10): surface the
+    // already-recorded Srebrenica genocide rupture as a somber, ICTY-grounded
+    // entry at campaign close. READ-MODEL ONLY — `buildDynamicSections` observes
+    // the locked `military.negotiation.rupture_consequences` array off the raw
+    // GameState handle and writes nothing; it never records/flips/re-times the
+    // rupture (owned by rupture_consequences.ts). The receipt emits ONLY when the
+    // rupture is actually recorded (keyed on `srebrenica_genocide_1995`); unknown
+    // ids emit nothing. The builder pins the receipt to `variant: 'divergence'`
+    // and throws on any `outcome`-framed record — the genocide can never read as
+    // a player-induced "win". useMemo MUST run before any early return (hooks).
+    const ruptureReceipts: BuiltDynamicSection[] = useMemo(() => {
+        const rawState = loadedGameState?.rawGameState;
+        if (!rawState) return [];
+        try {
+            return buildDynamicSections({ state: rawState, currentTurn: turnForCodex }).filter(
+                (s) => s.id.startsWith('rupture_receipt_'),
+            );
+        } catch {
+            return [];
+        }
+    }, [loadedGameState, turnForCodex]);
+
     if (!loadedGameState?.gameOver) return null;
 
     const verdict = loadedGameState.gameVerdict;
@@ -367,6 +389,7 @@ export function VerdictScreen() {
     );
     const hasReckoning = Boolean(loadedGameState?.costLedger && loadedGameState?.historicalComparison);
     const hasCodex = codexGhosts.length > 0;
+    const hasRuptureReceipts = ruptureReceipts.length > 0;
     const hasReplay = Boolean((loadedGameState.replaySaveSequence && loadedGameState.replaySaveSequence.length > 0)
         || (loadedGameState.replaySaveManifest && loadedGameState.replaySaveManifest.frame_count > 0));
     const lowerSections: VerdictLowerSection[] = [
@@ -485,6 +508,34 @@ export function VerdictScreen() {
                     )}
                 </div>
                         </section>
+
+                {/* §6 Historical Record — rupture receipt (#78, panel-approved).
+                    READ-MODEL ONLY: surfaces the already-recorded Srebrenica
+                    genocide rupture as a somber, ICTY-grounded permanent entry
+                    at campaign close. Renders ONLY when the rupture is actually
+                    recorded (buildDynamicSections keys it on the locked finding;
+                    unknown ids emit nothing). It is a CONSEQUENCE / record — never
+                    a score, badge, or reward. Shown on the report tab on mobile so
+                    the gravest event in the war is never buried behind a sub-tab. */}
+                {hasRuptureReceipts && (
+                    <section className={`border-t border-red-900/40 px-6 py-4 bg-red-950/20 sm:block ${mobileSectionClass('report')}`}
+                             data-awwv-mobile-section="report"
+                             data-awwv-rupture-receipts={ruptureReceipts.length}>
+                        <div className="text-[9px] uppercase tracking-[0.3em] text-red-300/70 font-semibold mb-2">
+                            Historical Record
+                        </div>
+                        <ul className="space-y-3">
+                            {ruptureReceipts.map((r) => (
+                                <li key={r.id} className="text-[11px] text-text-secondary leading-relaxed"
+                                    data-awwv-rupture-receipt-id={r.id}
+                                    data-awwv-rupture-receipt-variant={r.variant}
+                                    data-awwv-rupture-receipt-essay={r.target_essay_event_id}>
+                                    {r.content}
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+                )}
 
                 {/* War Reckoning — per-war cost ledger and historical comparison */}
                 {hasReckoning && (

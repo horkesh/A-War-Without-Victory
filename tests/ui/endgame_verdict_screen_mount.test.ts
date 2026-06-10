@@ -257,6 +257,86 @@ describe('VerdictScreen mount — fallback', () => {
     });
 });
 
+// ── §6 Srebrenica rupture-receipt un-hold (#78) ──────────────────────────────
+//
+// The receipt is built by buildDynamicSections off the RAW GameState handle
+// (`rawGameState.military.negotiation.rupture_consequences`), NOT off the
+// flattened LoadedGameState view. It surfaces at campaign close ONLY when the
+// Srebrenica genocide rupture is actually recorded; unknown / absent ruptures
+// emit nothing. Read-model only — the builder mutates no state.
+
+function rawStateWithRuptures(ruptureIds: string[]): any {
+    return {
+        meta: { player_faction: 'RBiH', game_over: true, turn: 188 },
+        paramilitary_policy: 'ask',
+        military: {
+            event_flags: {},
+            event_fire_counts: {},
+            event_decision_log: [],
+            negotiation: {
+                capital: {},
+                rupture_consequences: ruptureIds.map((id) => ({
+                    id,
+                    recorded_turn: 142,
+                    perpetrator_faction: 'RS',
+                    description: 'Fall of the Srebrenica safe area and subsequent genocide',
+                    condemnation_flag: 'genocide_condemnation',
+                })),
+            },
+        },
+        political: {},
+    };
+}
+
+describe('VerdictScreen mount — §6 Srebrenica rupture-receipt (#78)', () => {
+    beforeEach(() => { storeState = { loadedGameState: endgame() }; });
+
+    it('renders the Historical Record receipt when the Srebrenica rupture is recorded', () => {
+        storeState = {
+            loadedGameState: endgame({
+                rawGameState: rawStateWithRuptures(['srebrenica_genocide_1995']),
+            }),
+        };
+        const h = render();
+        expect(h).toContain('Historical Record');
+        expect(h).toContain('data-awwv-rupture-receipt-id="rupture_receipt_srebrenica_genocide_1995"');
+        // Panel-approved somber summary surfaces verbatim.
+        expect(h).toContain('genocide that followed');
+        expect(h).toContain('permanent entry in the historical record');
+        // §6: the receipt is NEVER framed as a player outcome.
+        expect(h).toContain('data-awwv-rupture-receipt-variant="divergence"');
+        expect(h).not.toContain('data-awwv-rupture-receipt-variant="outcome"');
+    });
+
+    it('does NOT render the Historical Record when no rupture is recorded', () => {
+        storeState = {
+            loadedGameState: endgame({ rawGameState: rawStateWithRuptures([]) }),
+        };
+        const h = render();
+        expect(h).not.toContain('Historical Record');
+        expect(h).not.toContain('data-awwv-rupture-receipt-id');
+    });
+
+    it('does NOT render the Historical Record for an unwired rupture id', () => {
+        storeState = {
+            loadedGameState: endgame({
+                rawGameState: rawStateWithRuptures(['some_unwired_rupture']),
+            }),
+        };
+        const h = render();
+        expect(h).not.toContain('Historical Record');
+        expect(h).not.toContain('data-awwv-rupture-receipt-id');
+    });
+
+    it('does NOT render the Historical Record when the raw GameState handle is absent', () => {
+        // Older saves / adapters without the runtime rawGameState handle degrade
+        // gracefully to nothing (the in-Codex essay-resolver path still covers it).
+        storeState = { loadedGameState: endgame({ rawGameState: undefined }) };
+        const h = render();
+        expect(h).not.toContain('Historical Record');
+    });
+});
+
 // ── Absorbed: endgame_mount_proof.test.ts ────────────────────────────────────
 //
 // Direct component mount proof for FactionReport and WarCostSummary.
