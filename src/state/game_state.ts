@@ -2840,12 +2840,14 @@ export interface CommandAuthority {
 
 /**
  * War-weariness FEEL bands that warrant a Chronicle beat (steady is the baseline
- * and never recorded). Ordered lowest → highest. The numeric thresholds on the
- * recovered 0..100 exhaustion scale live in src/ui/map/data/warWeariness.ts; this
- * state-layer alias exists only so war_weariness_band_first_reached can be typed
- * without the state layer importing from the UI layer.
+ * and never recorded). Ordered lowest → highest. Canonical definition + the
+ * numeric thresholds live in the BROWSER-SAFE leaf module
+ * src/state/war_weariness_bands.ts (zero Node imports). Imported type-only
+ * (erased at runtime — no runtime import edge) so it is in local scope below AND
+ * re-exported, without duplicating the union or adding a Node dependency.
  */
-export type WarWearinessBand = 'strained' | 'cracking' | 'collapsing';
+import type { WarWearinessBand } from './war_weariness_bands.js';
+export type { WarWearinessBand };
 
 export interface PoliticalState {
 negotiation_status?: NegotiationStatus;

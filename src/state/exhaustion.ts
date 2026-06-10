@@ -1,53 +1,28 @@
 import { FrontEdge } from '../map/front_edges.js';
-import type { FactionId, GameState, WarWearinessBand } from './game_state.js';
+import type { FactionId, GameState } from './game_state.js';
 import { getFactionLegitimacyAverages } from './legitimacy.js';
 import { getExhaustionExternalModifier } from './patron_pressure.js';
+// Band thresholds + derivation live in a BROWSER-SAFE leaf module (zero Node
+// imports, zero runtime game_state import) so the UI read-model can share them
+// without dragging Node-only code into the vite/rollup bundle. (Codex #402.)
+import {
+    WAR_WEARINESS_BAND_THRESHOLDS,
+    WAR_WEARINESS_BANDS_ASCENDING,
+    recoveredExhaustionLevel,
+    warWearinessBandForExhaustion,
+} from './war_weariness_bands.js';
 
 export const EXHAUSTION_WORK_DIVISOR = 10;
 export const EXHAUSTION_LEGITIMACY_MULTIPLIER = 0.05;
 
-/**
- * CANONICAL war-weariness FEEL-band thresholds, on the recovered 0..100
- * exhaustion scale (`war_exhaustion / 100`). Single source of truth shared by
- * the UI descriptor (src/ui/map/data/warWeariness.ts re-exports/delegates) and
- * the sim-side first-crossing recorder. A faction is "at" a band when its
- * recovered level is >= that band's floor. These are narrative cuts, NOT the
- * engine's collapse-eligibility gates (those live in phase3c, unchanged).
- */
-export const WAR_WEARINESS_BAND_THRESHOLDS: Readonly<Record<WarWearinessBand, number>> = {
-    strained: 40,
-    cracking: 65,
-    collapsing: 85,
-} as const;
-
-/** Recover the 0..100 exhaustion level from the raw 0..10000 accumulator (clamped). */
-export function recoveredExhaustionLevel(rawExhaustion: number): number {
-    if (!Number.isFinite(rawExhaustion)) return 0;
-    const scaled = rawExhaustion / 100;
-    if (scaled < 0) return 0;
-    if (scaled > 100) return 100;
-    return scaled;
-}
-
-/**
- * Map a raw war_exhaustion accumulator value (0..10000 scale) to its highest
- * crossed FEEL band, or null when still steady (below the strained floor).
- * Deterministic, pure. Shared by UI + sim so the band cuts never drift.
- */
-export function warWearinessBandForExhaustion(rawExhaustion: number): WarWearinessBand | null {
-    const level = recoveredExhaustionLevel(rawExhaustion);
-    if (level >= WAR_WEARINESS_BAND_THRESHOLDS.collapsing) return 'collapsing';
-    if (level >= WAR_WEARINESS_BAND_THRESHOLDS.cracking) return 'cracking';
-    if (level >= WAR_WEARINESS_BAND_THRESHOLDS.strained) return 'strained';
-    return null;
-}
-
-/** Ordered FEEL bands, lowest → highest (steady excluded — it warrants no beat). */
-export const WAR_WEARINESS_BANDS_ASCENDING: readonly WarWearinessBand[] = [
-    'strained',
-    'cracking',
-    'collapsing',
-];
+// Re-export the band surface from the browser-safe module so existing importers
+// of these symbols from `state/exhaustion.ts` keep working unchanged.
+export {
+    WAR_WEARINESS_BAND_THRESHOLDS,
+    WAR_WEARINESS_BANDS_ASCENDING,
+    recoveredExhaustionLevel,
+    warWearinessBandForExhaustion,
+};
 
 /**
  * Record the FIRST turn each faction crosses each war-weariness FEEL band into

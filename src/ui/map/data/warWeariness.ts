@@ -35,11 +35,15 @@
  */
 
 import type { CollapseEligibilityState, FactionId } from '../../../state/game_state.js';
+// BROWSER-SAFE: import the band thresholds + derivation from the leaf module, NOT
+// from state/exhaustion.ts — the latter transitively imports game_state.ts which
+// pulls in Node-only data modules (municipality_population.ts uses node:fs/path),
+// which broke the vite/rollup browser bundle. (Codex #402.)
 import {
     WAR_WEARINESS_BAND_THRESHOLDS,
     recoveredExhaustionLevel,
     warWearinessBandForExhaustion,
-} from '../../../state/exhaustion.js';
+} from '../../../state/war_weariness_bands.js';
 
 /** Ordered war-weariness bands, lowest → highest. */
 export type WarWearinessLevel = 'steady' | 'strained' | 'cracking' | 'collapsing';
