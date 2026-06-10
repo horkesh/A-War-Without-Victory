@@ -25,6 +25,14 @@ Owner generated + delivered a first batch; QC'd, cropped to exact dims (`fit:cov
 
 **⚠️ HELD — needs regen (4):** `plan_vance_owen` / `plan_owen_stoltenberg` / `plan_contact_group` / `plan_dayton`. The delivered images were atmospheric desk/document scenes, NOT the cartographic territorial-division maps these slots require — the historical reference maps were not attached. Re-generate WITH the attached historical map per each prompt's "ATTACHED reference" instruction.
 
+### Batch 3 — final shared event stills + patron regen → NON-§6 COMPLETE (updated 2026-06-10)
+
+Owner delivered the last 8 (the 6 remaining shared Category-4 stills + the 2 patron regens). All 1672×941 (16:9), QC-passed (guards held — no readable text, no legible flags/insignia, no identifiable faces, no bodies/gore, documentary palette; displacement column is distant/anonymous NON-atrocity), resized 800×450 (`fit:cover`, no crop), webp, placed in `src/ui/map/assets/event_illustrations/`.
+
+**✅ DONE — QC-passed, webp, placed (8):** `event_washington_agreement` · `event_referendum` · `event_political_session` · `event_ceasefire` · `event_displacement_column` · `event_un_presence` (the 6 shared) + `event_patron_relations_RS` · `event_patron_relations_HRHB` (regens — now natural shallow-DOF silhouettes, the digital pixelation-blur is gone).
+
+**NON-§6 PACK COMPLETE.** All needed assets generated: 4 plans + 4 Category-2 (3 verdicts + Dayton signing) + 8 tutorial + 21 event stills (13 faction batch-2 + this batch-3's 8). The ONLY ungenerated prompts are the 5 generic faction-agnostic *fallback* stills (4.3/4.4/4.5/4.11/4.12 shared default) — intentionally SKIPPED as redundant since all three faction variants exist for each family and the resolver hits the faction basename first. Remaining work is WIRING (event `image` keys + the verdict/tutorial/plan resolver imports), not generation.
+
 ---
 
 # PROVEN STYLE & LESSONS — distilled from the SHIPPED assets
