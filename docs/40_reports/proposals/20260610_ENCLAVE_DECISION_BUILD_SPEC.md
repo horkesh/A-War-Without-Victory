@@ -187,7 +187,7 @@ GATE 0 — RATIFICATION (no code)
   ├─ Pyrrhic panel ratifies this spec + the DESIGN §10 sign-off table.
   ├─ Pyrrhic panel ratifies the §1.2 new state field (or directs derive-from-receipts, O-1/§11).
   └─ §6 sign-off (§6 Pyrrhic panel sign-off (Historian + scenario-tester/calibration + Engine/systems + Red-team, unanimous); the atrocity-is-never-rewarded bright line surfaces to the owner — for the eastern case):
-        /historian + /war-or-game + /game-designer + USER approval (design §10).
+        (Panel seats for the eastern case: /historian + /war-or-game + /game-designer + Red-team; see DESIGN §10 sign-off table. Unanimous GO = signature; a BLOCK/split — or any doubt on the atrocity-is-never-rewarded bright line — surfaces to the owner.)
         ▼  [HARD STOP — no code merges to main before this]
 PHASE I — Build default-OFF (calibration-flat, flag OFF)
   ├─ Add `enclave_decisions` to PoliticalState + the new save_migration version
