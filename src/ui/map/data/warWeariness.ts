@@ -35,6 +35,11 @@
  */
 
 import type { CollapseEligibilityState, FactionId } from '../../../state/game_state.js';
+import {
+    WAR_WEARINESS_BAND_THRESHOLDS,
+    recoveredExhaustionLevel,
+    warWearinessBandForExhaustion,
+} from '../../../state/exhaustion.js';
 
 /** Ordered war-weariness bands, lowest → highest. */
 export type WarWearinessLevel = 'steady' | 'strained' | 'cracking' | 'collapsing';
@@ -63,11 +68,7 @@ export const WAR_WEARINESS_RANK: Record<WarWearinessLevel, number> = {
  * gates (those live in phase3c and are unchanged). Kept here so a designer can
  * retune the narrative bands without touching sim constants.
  */
-export const WAR_WEARINESS_THRESHOLDS = {
-    strained: 40,
-    cracking: 65,
-    collapsing: 85,
-} as const;
+export const WAR_WEARINESS_THRESHOLDS = WAR_WEARINESS_BAND_THRESHOLDS;
 
 export interface WarWearinessDescriptor {
     /** Recovered 0..100 exhaustion scale (war_exhaustion / 100), clamped. */
@@ -108,21 +109,18 @@ export const WAR_WEARINESS_GLOSS: Record<WarWearinessLevel, string> = {
     collapsing: 'Spent. The army runs on empty — what holds the front now is inertia, not resolve.',
 };
 
-/** Clamp a raw war_exhaustion (0..10000 scale) to the recovered 0..100 scale. */
+/** Clamp a raw war_exhaustion (0..10000 scale) to the recovered 0..100 scale.
+ *  Delegates to the canonical state-layer helper (single source of truth). */
 export function exhaustionLevel(rawExhaustion: number): number {
-    if (!Number.isFinite(rawExhaustion)) return 0;
-    const scaled = rawExhaustion / 100;
-    if (scaled < 0) return 0;
-    if (scaled > 100) return 100;
-    return scaled;
+    return recoveredExhaustionLevel(rawExhaustion);
 }
 
-/** Map a recovered 0..100 exhaustion level to its narrative band. */
+/** Map a recovered 0..100 exhaustion level to its narrative band (steady baseline).
+ *  Delegates to the canonical state-layer band cut so UI + sim never drift. */
 export function bandForLevel(level: number): WarWearinessLevel {
-    if (level >= WAR_WEARINESS_THRESHOLDS.collapsing) return 'collapsing';
-    if (level >= WAR_WEARINESS_THRESHOLDS.cracking) return 'cracking';
-    if (level >= WAR_WEARINESS_THRESHOLDS.strained) return 'strained';
-    return 'steady';
+    // recoveredExhaustionLevel is idempotent on an already-recovered 0..100 value
+    // (it only clamps), so passing `level * 100` round-trips the same cut.
+    return warWearinessBandForExhaustion(level * 100) ?? 'steady';
 }
 
 /**
