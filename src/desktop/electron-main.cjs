@@ -286,6 +286,10 @@ function getDataSourceDir() {
   return resourcePath('data', 'source');
 }
 
+function getDataScenariosDir() {
+  return resourcePath('data', 'scenarios');
+}
+
 function getRunsDir() {
   return resourcePath('runs');
 }
@@ -1406,6 +1410,7 @@ function registerProtocol() {
   const warroomAppDir = getWarroomAppDir();
   const dataDerivedDir = getDataDerivedDir();
   const dataSourceDir = getDataSourceDir();
+  const dataScenariosDir = getDataScenariosDir();
 
   protocol.handle('awwv', (request) => {
     const u = request.url.replace(/^awwv:\/\//, '');
@@ -1432,6 +1437,25 @@ function registerProtocol() {
       const rel = segs.slice(3).join(path.sep);
       const filePath = path.join(dataSourceDir, rel);
       if (!path.resolve(filePath).startsWith(path.resolve(dataSourceDir))) return new Response(null, { status: 403 });
+      try {
+        const ext = path.extname(rel).toLowerCase();
+        const contentType = DATA_MIME_TYPES[ext] || 'application/octet-stream';
+        return serveFileResponse(request, filePath, contentType);
+      } catch (e) {
+        if (e.code === 'ENOENT') return new Response('Not Found', { status: 404 });
+        throw e;
+      }
+    }
+
+    // Tactical map data/scenarios route (event/consequence JSON for EventModal
+    // illustration enrichment — loadEventDefinitions fetches
+    // /data/scenarios/events/*.json). Bundled via electron-builder extraResources
+    // (data/scenarios/events). Without this route the fetch 404s in the packaged
+    // desktop and event-illustration stills never render (dev/vite served it).
+    if (segs[0] === 'app' && segs[1] === 'data' && segs[2] === 'scenarios') {
+      const rel = segs.slice(3).join(path.sep);
+      const filePath = path.join(dataScenariosDir, rel);
+      if (!path.resolve(filePath).startsWith(path.resolve(dataScenariosDir))) return new Response(null, { status: 403 });
       try {
         const ext = path.extname(rel).toLowerCase();
         const contentType = DATA_MIME_TYPES[ext] || 'application/octet-stream';
