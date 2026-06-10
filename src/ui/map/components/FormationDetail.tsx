@@ -19,6 +19,7 @@ import { getPlayerFacingCorpsName, getPlayerFacingSectorName } from '../../share
 import { getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
 import { t, useLocale } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
+import { splitKiaWiaMia } from '../../../sim/combat/attack_casualty_distribution.js';
 
 
 /** Zero combat summary for brigades that have not yet been in combat (so Combat Record always shows). */
@@ -580,7 +581,10 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
         {/* ────────── RECORD TAB ────────── */}
         {activeTab === 'record' && (
           <>
-            {/* Campaign Losses — top of Record tab */}
+            {/* Campaign Losses — top of Record tab. Fallback split (when the
+                adapter carries no campaignKia/Wia/Mia) mirrors the canonical
+                ledger fractions (attack_casualty_distribution.ts: KIA 0.22 /
+                WIA 0.74 / MIA remainder), not the legacy 0.30/0.55/0.15 (#73). */}
             {isBrigade && (
               <div className="p-2 bg-black/20 rounded border border-panel-border/40 space-y-1.5">
                 <div className="text-[10px] text-text-secondary uppercase font-bold tracking-widest">{t('formationDetail.campaignLosses')}</div>
@@ -588,19 +592,19 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   <div>
                     <div className="text-[10px] text-text-secondary uppercase">{t('formationDetail.kia')}</div>
                     <div className="text-sm font-mono font-bold" style={{ color: '#d45555' }}>
-                      {(formation.campaignKia ?? Math.round((formation.combatSummary?.total_casualties_taken ?? 0) * 0.30)).toLocaleString()}
+                      {(formation.campaignKia ?? splitKiaWiaMia(formation.combatSummary?.total_casualties_taken ?? 0).killed).toLocaleString()}
                     </div>
                   </div>
                   <div>
                     <div className="text-[10px] text-text-secondary uppercase">{t('formationDetail.wia')}</div>
                     <div className="text-sm font-mono font-bold" style={{ color: '#d4d455' }}>
-                      {(formation.campaignWia ?? Math.round((formation.combatSummary?.total_casualties_taken ?? 0) * 0.55)).toLocaleString()}
+                      {(formation.campaignWia ?? splitKiaWiaMia(formation.combatSummary?.total_casualties_taken ?? 0).wounded).toLocaleString()}
                     </div>
                   </div>
                   <div>
                     <div className="text-[10px] text-text-secondary uppercase">{t('formationDetail.miaPow')}</div>
                     <div className="text-sm font-mono font-bold text-text-secondary">
-                      {(formation.campaignMia ?? Math.round((formation.combatSummary?.total_casualties_taken ?? 0) * 0.15)).toLocaleString()}
+                      {(formation.campaignMia ?? splitKiaWiaMia(formation.combatSummary?.total_casualties_taken ?? 0).missing_captured).toLocaleString()}
                     </div>
                   </div>
                 </div>
