@@ -77,6 +77,11 @@ export async function loadEventDefinitions(): Promise<Map<string, EventDefinitio
     '/data/scenarios/events/war_1993.json',
     '/data/scenarios/events/war_1994.json',
     '/data/scenarios/events/war_1995.json',
+    // Consequence events (csq_*) fire as non-decision notifications and flash
+    // an acknowledge EventModal (deriveFiredEvents → isDecision:false). Include
+    // them here so their documentary `image` (e.g. mobilization/supply stills)
+    // resolves in the modal — matches loadEventDefinitionsFull's file set.
+    '/data/scenarios/events/consequences.json',
   ];
 
   const map = new Map<string, EventDefinitionView>();
