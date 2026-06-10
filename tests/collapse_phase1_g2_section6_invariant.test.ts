@@ -38,6 +38,16 @@
  * any pre-marker collapse-ON artifact is simply not accepted as ON proof). The ON/OFF
  * pair assertions bite for real at D2's two-run harness.
  *
+ * IV-b D2 MARKER HYGIENE (review-383 defect fix): pre-marker artifacts (IV-a era —
+ * produced before the sidecar existed) classify as collapse-OFF BY DESIGN; they can
+ * never be accepted as ON proof, and a stale IV-a collapse-ON artifact on the OFF side
+ * of the G2-B pair is the reason D2 measurement runs MUST use unique run dirs.
+ * Symmetrically, scenario_runner.ts (syncCollapseEnabledMarker) now DELETES any stale
+ * `collapse_enabled.json` on the collapse-OFF path at save-write time, so an OFF rerun
+ * of a REUSED run dir cannot leave a stale ON marker (the false-positive vector where
+ * G2-A would assert the §6 collapse-ON proof against an OFF artifact). Regression test:
+ * tests/collapse_run_marker_hygiene.test.ts.
+ *
  * Determinism: reads persisted artifacts + pure helpers; no RNG/clock.
  */
 import { describe, it, expect } from 'vitest';
