@@ -6,7 +6,7 @@
 
 import { createHash } from 'node:crypto';
 import { createWriteStream } from 'node:fs';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { loadSettlementEthnicityData } from '../data/settlement_ethnicity.js';
@@ -898,6 +898,40 @@ async function writeFailureReport(
 
 async function ensureRunOutputDir(outDir: string): Promise<void> {
     await mkdir(outDir, { recursive: true });
+}
+
+/**
+ * COLLAPSE PHASE IV-b — G2-A collapse-ON run marker (§6 review BLOCKING gap fix,
+ * docs/40_reports/proposals/20260610_COLLAPSE_PHASE4B_S6_REVIEW.md).
+ *
+ * Collapse-ON runs (ENABLE_COLLAPSE=true, the IV-a env gate) write a SIDECAR marker
+ * `collapse_enabled.json` into the run dir so the G2 §6 invariant test can verify an
+ * artifact was genuinely produced with the collapse pipeline enabled — without it,
+ * G2-GREEN against a collapse-OFF artifact is a false-green for §6. Sidecar file (NOT
+ * embedded in final_save.json, NOT persisted game state): the canonical save hash and
+ * the save schema are untouched. Content is constant — no timestamps, no RNG.
+ *
+ * IV-b D2 (review-383 BLOCKING defect fix): the marker must never survive a
+ * collapse-OFF rerun of a REUSED run dir (uniqueRunFolder defaults to false), or G2-A
+ * would assert the §6 collapse-ON proof against an OFF artifact — exactly the
+ * false-green G2-A exists to kill. On the OFF path, delete any stale marker at
+ * save-write time. Fresh OFF runs have no marker → rm is a no-op (force: true) and the
+ * OFF path's final_save bytes are untouched either way. Pre-marker artifacts (IV-a era,
+ * no sidecar) classify as collapse-OFF by design.
+ *
+ * Exported for the marker-hygiene regression test (collapse run-dir reuse).
+ */
+export async function syncCollapseEnabledMarker(outDir: string): Promise<void> {
+    const collapseMarkerPath = join(outDir, 'collapse_enabled.json');
+    if (process.env.ENABLE_COLLAPSE === 'true') {
+        await writeFile(
+            collapseMarkerPath,
+            stableStringify({ collapse_enabled: true, gate: 'ENABLE_COLLAPSE' }, 2),
+            'utf8'
+        );
+    } else {
+        await rm(collapseMarkerPath, { force: true });
+    }
 }
 
 type ScenarioTimingBucket =
@@ -2822,24 +2856,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             await writeFile(finalSavePath, finalSerialized, 'utf8');
         });
 
-        // COLLAPSE PHASE IV-b D1 (G2-A marker, 2026-06-10) — §6 review BLOCKING gap fix.
-        // Review: docs/40_reports/proposals/20260610_COLLAPSE_PHASE4B_S6_REVIEW.md (G2-A).
-        // Collapse-ON runs (the IV-a ENABLE_COLLAPSE env gate above) write a SIDECAR
-        // marker so the G2 §6 invariant test can verify an artifact was genuinely
-        // produced with the collapse pipeline enabled — without it, G2-GREEN against a
-        // collapse-OFF artifact is a false-green for §6. Sidecar file (NOT embedded in
-        // final_save.json, NOT persisted game state): the canonical save hash and the
-        // save schema are untouched, so there is no save-version bump and the
-        // collapse-OFF default path (this block does not execute) stays byte-identical.
-        // Content is constant — no timestamps, no RNG (determinism).
-        if (process.env.ENABLE_COLLAPSE === 'true') {
-            const collapseMarkerPath = join(outDir, 'collapse_enabled.json');
-            await writeFile(
-                collapseMarkerPath,
-                stableStringify({ collapse_enabled: true, gate: 'ENABLE_COLLAPSE' }, 2),
-                'utf8'
-            );
-        }
+        // COLLAPSE PHASE IV-b — G2-A collapse-ON marker write (ON path) + stale-marker
+        // cleanup (OFF path, review-383 defect fix). See syncCollapseEnabledMarker docs.
+        await syncCollapseEnabledMarker(outDir);
 
         // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: consolidated end-of-run
         // artifact. Separate file (NOT embedded in final_save.json) so canonical
