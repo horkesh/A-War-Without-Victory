@@ -115,12 +115,32 @@ export const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
     {
         id: 'teocak',
         faction: 'RBiH',
-        // Lone Bosniak holdout in Ugljevik municipality near the Drina.
-        // 255th Slavna Mountain Brigade "Hajrudin Mesić" (home Teočak)
-        // held against VRS East Bosnian Corps pressure throughout
-        // 1992–1995 (BB1 p.509). Mechanically analogous to Žepa:
-        // small, isolated, surrounded by VRS, historically held.
-        // Single painted RBiH OSID.
+        // Teočak (op:ugljevik:teocak_krstac_2) is the tip of the ARBiH-held
+        // Sapna salient — NOT an isolated enclave. It is CONNECTED overland to
+        // the 2nd Corps / Tuzla landmass through the `op:zvornik:rastosnica_2`
+        // corridor, which the scenario's `osid_control_overrides` paints RBiH
+        // (the deliberate corridor bridge). The in-game supply/collapse BFS
+        // reaches the ~81-OSID RBiH component via rastosnica_2 → kalesija →
+        // tuzla, so the salient is topologically attached, not surrounded.
+        // Historically held overland by the 255th Slavna ("Hajrudin Mesić")
+        // Mountain Brigade — a brigade of the 25th Division (HQ Tuzla),
+        // reinforced from the divisional pool (BB1 p.439 fn.141). The Žepa
+        // analogy is wrong: Žepa was a genuinely surrounded Drina enclave;
+        // Teočak was a reinforced salient tip.
+        //
+        // CALIBRATION-PIN, NOT A TRUE ENCLAVE:
+        // This entry currently uses the enclave-resilience mechanics purely as
+        // a PIN to hold the Teočak 188w anchor (which regressed to RS after the
+        // headless player_faction change; see
+        // tests/teocak_enclave_singleton.test.ts header). Applying Žepa-class
+        // enclave-resilience bonuses here is topologically UNJUSTIFIED while the
+        // rastosnica_2 corridor is open — the salient should be held by ordinary
+        // garrison/defense over corridor supply, not enclave isolation bonuses.
+        // The proper (calibration-coupled) remodel is scoped in
+        // docs/40_reports/proposals/20260610_TEOCAK_SALIENT_REMODEL_SCOPE.md.
+        // The prior "(BB1 p.509)" citation was a miscitation: p.509 is an OOB
+        // table that says nothing about isolation; the narrative is p.439.
+        // Single painted RBiH OSID (singleton pin).
         osid_list: ['op:ugljevik:teocak_krstac_2'],
         resilience_start_turn: 16,  // Formed during 1992 VRS Drina/Majevica offensives
         capital_osid: 'op:ugljevik:teocak_krstac_2',
@@ -212,7 +232,7 @@ const ENCLAVE_CONFIG: Record<string, { max_resilience: number; growth_mult: numb
     bihac_pocket: { max_resilience: 40, growth_mult: 0.55, max_personnel: 1500 },  // Large pocket, supply routes
     srebrenica: { max_resilience: 25, growth_mult: 0.35, max_personnel: 600 },     // Small, isolated, ~8k pop in enclave
     zepa: { max_resilience: 20, growth_mult: 0.30, max_personnel: 400 },           // Tiny, most isolated, ~3k pop
-    teocak: { max_resilience: 20, growth_mult: 0.30, max_personnel: 400 },         // Lone Bosniak holdout near Ugljevik, ~3–5k pop, 255th Slavna garrison
+    teocak: { max_resilience: 20, growth_mult: 0.30, max_personnel: 400 },         // CALIBRATION-PIN (not a true enclave): tip of the connected Sapna salient, held overland by the 255th Slavna via the rastosnica_2 corridor; values pin the 188w anchor — remodel scoped in docs/40_reports/proposals/20260610_TEOCAK_SALIENT_REMODEL_SCOPE.md
     gorazde: { max_resilience: 35, growth_mult: 0.45, max_personnel: 800 },        // Medium, besieged, ~37k prewar but under siege
     sarajevo: { max_resilience: 45, growth_mult: 0.60, max_personnel: 1500 },      // Largest, tunnel supply, 300k pop
     // HRHB enclaves — smaller, less organized than RBiH equivalents, but held until Washington Agreement

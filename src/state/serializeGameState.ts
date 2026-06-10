@@ -32,12 +32,29 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
 /**
  * Recursively normalize a value for deterministic JSON: sort object keys, preserve array order,
  * reject Map/Set. Does not mutate input.
+ *
+ * Robustness audit P1-A (task #95): non-finite numbers (NaN/Infinity/-Infinity) THROW with the
+ * offending key-path instead of silently serializing to "null" (which corrupts the save and moves
+ * the byte-hash with no trace — the #358 home_distance class). `pathStack` is a shared mutable
+ * stack (push key → recurse → pop) so the well-formed fast path allocates no path strings; the
+ * full dotted path is only joined at throw time.
  */
-function toDeterministicJsonValue(value: unknown): unknown {
+function toDeterministicJsonValue(value: unknown, pathStack: (string | number)[]): unknown {
     if (value === null || value === undefined) {
         return value;
     }
-    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    if (typeof value === 'number') {
+        if (!Number.isFinite(value)) {
+            throw new Error(
+                `serializeGameState: non-finite number (${String(value)}) at "${pathStack.join('.')}" — ` +
+                'refusing to serialize: JSON.stringify would silently emit null, corrupting the save and ' +
+                'moving the byte-hash (#358 class; robustness audit P1-A). Fix the producer (clamp to a ' +
+                'finite sentinel, e.g. HOME_DISTANCE_UNREACHABLE_HOPS) before the value reaches GameState.'
+            );
+        }
+        return value;
+    }
+    if (typeof value === 'string' || typeof value === 'boolean') {
         return value;
     }
     if (typeof value === 'object') {
@@ -47,18 +64,30 @@ function toDeterministicJsonValue(value: unknown): unknown {
             const mapObj: Record<string, unknown> = {};
             const mapKeys = [...value.keys()].map(String).sort(strictCompare);
             for (const k of mapKeys) {
-                mapObj[k] = toDeterministicJsonValue(value.get(k));
+                pathStack.push(k);
+                mapObj[k] = toDeterministicJsonValue(value.get(k), pathStack);
+                pathStack.pop();
             }
             return mapObj;
         }
         if (value instanceof Set) {
             // Serialize Set as a deterministically sorted array.
-            return [...value].map(v => toDeterministicJsonValue(v)).sort((a, b) =>
+            return [...value].map((v, i) => {
+                pathStack.push(i);
+                const out = toDeterministicJsonValue(v, pathStack);
+                pathStack.pop();
+                return out;
+            }).sort((a, b) =>
                 strictCompare(String(a), String(b))
             );
         }
         if (Array.isArray(value)) {
-            return value.map((item) => toDeterministicJsonValue(item));
+            return value.map((item, i) => {
+                pathStack.push(i);
+                const out = toDeterministicJsonValue(item, pathStack);
+                pathStack.pop();
+                return out;
+            });
         }
         const obj = value as Record<string, unknown>;
         const keys = Object.keys(obj).slice().sort(strictCompare);
@@ -68,7 +97,9 @@ function toDeterministicJsonValue(value: unknown): unknown {
             if (v === undefined) {
                 continue;
             }
-            out[k] = toDeterministicJsonValue(v);
+            pathStack.push(k);
+            out[k] = toDeterministicJsonValue(v, pathStack);
+            pathStack.pop();
         }
         return out;
     }
@@ -114,7 +145,7 @@ export function toSerializableGameState(state: GameState): unknown {
     if (!result.ok) {
         throw new Error(`serializeGameState: shape validation failed: ${result.errors.join('; ')}`);
     }
-    const out = toDeterministicJsonValue(state) as Record<string, unknown>;
+    const out = toDeterministicJsonValue(state, []) as Record<string, unknown>;
     return out;
 }
 
