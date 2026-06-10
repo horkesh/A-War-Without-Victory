@@ -361,6 +361,7 @@
   },
   {
     "id": "srebrenica_falls_1995",
+    "image": "event_srebrenica_falls_1995.webp",
     "title": "Srebrenica Falls",
     "narrative": "The VRS overruns the Srebrenica safe area in a carefully planned operation. Dutch UNPROFOR peacekeepers are unable to prevent the advance. In the days that follow, over 8,000 Bosniak men and boys are systematically executed in the worst massacre in Europe since World War II. The fall of Srebrenica becomes a defining moment of the war and of international failure.",
     "source_note": "Existing Srebrenica arc sources, including ICTY/ICJ and UN reporting, ground the row's provenance. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
@@ -466,6 +467,7 @@
   },
   {
     "id": "zepa_falls_1995",
+    "image": "event_zepa_falls_1995.webp",
     "title": "Zepa Enclave Overrun",
     "narrative": "Following the fall of Srebrenica, the VRS turns its attention to the neighboring Zepa enclave. Despite desperate resistance by the small garrison, the enclave falls within two weeks. The civilian population is forcibly expelled. The international community, still reeling from Srebrenica, watches another safe area collapse.",
     "source_note": "Existing safe-area and Srebrenica/Zepa sources ground the row's provenance and institutional context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
@@ -574,6 +576,7 @@
   },
   {
     "id": "second_markale_massacre_1995",
+    "image": "event_markale_shelling.webp",
     "title": "Second Markale Massacre",
     "narrative": "A second mortar attack strikes the Markale marketplace in Sarajevo, killing 43 civilians. Coming after Srebrenica and Zepa, the massacre triggers the decisive Western response that has been building for months. NATO Secretary General Willy Claes declares that the threshold for intervention has been crossed.",
     "source_note": "Existing ICTY/UN and same-id essay sources ground the row's provenance and institutional context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
