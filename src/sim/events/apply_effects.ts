@@ -36,8 +36,39 @@ const EFFECT_KIND_ORDER: Record<string, number> = {
     supply_delta: 18,
 };
 
+/** Robustness audit P1-B (task #95): clamp traps non-finite input (NaN/±Infinity)
+ *  to `min` instead of passing it through (`Math.max(min, Math.min(max, NaN)) === NaN`).
+ *  Mirrors `computeMustHoldMultiplier` in commander/allocate.ts. Backstop only —
+ *  the per-writer guards below reject non-finite deltas BEFORE arithmetic, keeping
+ *  the prior persisted value; this trap covers any residual path. Finite input is
+ *  unchanged (calibration-inert). */
 function clamp(value: number, min: number, max: number): number {
+    if (!Number.isFinite(value)) return min;
     return Math.max(min, Math.min(max, value));
+}
+
+/** Robustness audit P1-B (task #95): record a rejected non-finite event-effect
+ *  payload into the append-only `military.event_effect_anomalies` diagnostic log
+ *  (same observability-only pattern as `op_injection_warnings` /
+ *  `operation_opportunity_diagnostics`). Deterministic: keyed by current turn and
+ *  effect kind, appended in sorted effect-application order; no timestamps.
+ *  Never fires on well-formed (finite) effect data, so the historical calibration
+ *  path never allocates the array and serialized state is byte-identical. */
+function recordNonFiniteEffectAnomaly(
+    state: GameState,
+    effectKind: string,
+    faction: FactionId | null,
+    value: number,
+): void {
+    if (!state.military.event_effect_anomalies) {
+        state.military.event_effect_anomalies = [];
+    }
+    state.military.event_effect_anomalies.push({
+        turn: state.meta.turn ?? 0,
+        effect_kind: effectKind,
+        faction,
+        value_repr: String(value),
+    });
 }
 
 /**
@@ -142,8 +173,13 @@ function applyOffensiveOpsSuppression(
     });
 }
 
-/** Apply morale delta to all active brigades of the given faction. Clamped [0, 100]. */
+/** Apply morale delta to all active brigades of the given faction. Clamped [0, 100].
+ *  Non-finite delta is rejected (prior morale kept) + logged — NaN must never persist (P1-B). */
 function applyMoraleChange(state: GameState, faction: FactionId, delta: number): void {
+    if (!Number.isFinite(delta)) {
+        recordNonFiniteEffectAnomaly(state, 'morale_change', faction, delta);
+        return;
+    }
     const formations = state.military.formations;
     for (const fid of Object.keys(formations).sort()) {
         const f = formations[fid];
@@ -153,8 +189,13 @@ function applyMoraleChange(state: GameState, faction: FactionId, delta: number):
     }
 }
 
-/** Apply cohesion delta to all active brigades of the given faction. Clamped [0, 100]. */
+/** Apply cohesion delta to all active brigades of the given faction. Clamped [0, 100].
+ *  Non-finite delta is rejected (prior cohesion kept) + logged — NaN must never persist (P1-B). */
 function applyCohesionChange(state: GameState, faction: FactionId, delta: number): void {
+    if (!Number.isFinite(delta)) {
+        recordNonFiniteEffectAnomaly(state, 'cohesion_change', faction, delta);
+        return;
+    }
     const formations = state.military.formations;
     for (const fid of Object.keys(formations).sort()) {
         const f = formations[fid];
@@ -164,24 +205,40 @@ function applyCohesionChange(state: GameState, faction: FactionId, delta: number
     }
 }
 
-/** Add delta to faction's general supply reserve. Floor at 0. */
+/** Add delta to faction's general supply reserve. Floor at 0.
+ *  Un-clamped accumulator: non-finite delta is rejected (prior reserve kept) + logged
+ *  — `Math.max(0, NaN)` is NaN and would persist (P1-B). */
 function applySupplyDelta(state: GameState, faction: FactionId, delta: number): void {
+    if (!Number.isFinite(delta)) {
+        recordNonFiniteEffectAnomaly(state, 'supply_delta', faction, delta);
+        return;
+    }
     if (!state.military.general_supply_reserve) return;
     const current = state.military.general_supply_reserve[faction] ?? 0;
     state.military.general_supply_reserve[faction] = Math.max(0, current + delta);
 }
 
-/** Adjust war_crimes_events in faction's negotiation capital. */
+/** Adjust war_crimes_events in faction's negotiation capital.
+ *  Un-clamped accumulator: non-finite delta is rejected (prior value kept) + logged (P1-B). */
 function applyHumanitarianImpact(state: GameState, faction: FactionId, warCrimesDelta?: number): void {
     if (warCrimesDelta == null) return;
+    if (!Number.isFinite(warCrimesDelta)) {
+        recordNonFiniteEffectAnomaly(state, 'humanitarian_impact', faction, warCrimesDelta);
+        return;
+    }
     const neg = state.military.negotiation;
     if (!neg?.capital?.[faction]) return;
     const cap = neg.capital[faction];
     cap.war_crimes_events = (cap.war_crimes_events ?? 0) + warCrimesDelta;
 }
 
-/** Adjust patron support_level for faction's patron relationship. */
+/** Adjust patron support_level for faction's patron relationship.
+ *  Non-finite delta is rejected (prior support kept) + logged (P1-B). */
 function applyPatronPressure(state: GameState, faction: FactionId, delta: number): void {
+    if (!Number.isFinite(delta)) {
+        recordNonFiniteEffectAnomaly(state, 'patron_pressure', faction, delta);
+        return;
+    }
     const neg = state.military.negotiation;
     if (!neg?.patron_relationships?.[faction]) return;
     const rel = neg.patron_relationships[faction];
@@ -199,6 +256,13 @@ function applyPatronPressure(state: GameState, faction: FactionId, delta: number
  *  a minimum that must hold — so a contradictory ceiling cannot pull the
  *  value below it. */
 function applyAllianceChange(state: GameState, delta: number): void {
+    // P2-B: war_alliance_rbih_hrhb is a persisted FLOAT and the lock-bound
+    // comparisons below are false for NaN, so a non-finite delta would persist.
+    // Reject (prior value kept) + log (P1-B/P2-B).
+    if (!Number.isFinite(delta)) {
+        recordNonFiniteEffectAnomaly(state, 'alliance_change', null, delta);
+        return;
+    }
     const current = state.political.war_alliance_rbih_hrhb ?? 0;
     let next = clamp(current + delta, -1, 1);
     const currentTurn = state.meta.turn ?? 0;
@@ -260,13 +324,19 @@ function applyEquipmentGrant(
     }
 }
 
-/** Apply a temporary aggression modifier to a faction. Stored on state for consumption by bot AI. */
+/** Apply a temporary aggression modifier to a faction. Stored on state for consumption by bot AI.
+ *  Non-finite delta is rejected (no entry pushed) + logged — the raw payload number is
+ *  persisted verbatim and would otherwise reach the serializer non-finite (P1-B). */
 function applyAggressionModifier(
     state: GameState,
     faction: FactionId,
     delta: number,
     durationTurns: number
 ): void {
+    if (!Number.isFinite(delta)) {
+        recordNonFiniteEffectAnomaly(state, 'aggression_modifier', faction, delta);
+        return;
+    }
     if (!state.military.event_aggression_modifiers) {
         state.military.event_aggression_modifiers = [];
     }
@@ -295,13 +365,18 @@ function applyControlChange(state: GameState, faction: FactionId, osids: string[
     }
 }
 
-/** Adjust a specific negotiation capital dimension for a faction. */
+/** Adjust a specific negotiation capital dimension for a faction.
+ *  Un-clamped accumulator: non-finite delta is rejected (prior value kept) + logged (P1-B). */
 function applyNegotiationBreakdown(
     state: GameState,
     faction: FactionId,
     dimension: string,
     delta: number
 ): void {
+    if (!Number.isFinite(delta)) {
+        recordNonFiniteEffectAnomaly(state, 'negotiation_capital', faction, delta);
+        return;
+    }
     const neg = state.military.negotiation;
     if (!neg?.capital?.[faction]) return;
     const cap = neg.capital[faction] as typeof neg.capital[typeof faction] & Record<string, unknown>;
@@ -354,6 +429,10 @@ function applyRecruitmentModifier(
     // Defensive: malformed event data (e.g. a missing/non-numeric pool_multiplier)
     // must never push a non-finite value, which validateGameState rejects and which
     // would break serialization. Coerce to the identity multiplier (1.0). Deterministic.
+    // P1-B (task #95): coercion is now also logged to event_effect_anomalies.
+    if (!Number.isFinite(poolMultiplier)) {
+        recordNonFiniteEffectAnomaly(state, 'recruitment_modifier', faction, poolMultiplier);
+    }
     const safeMultiplier = Number.isFinite(poolMultiplier) ? poolMultiplier : 1.0;
     state.military.recruitment_modifiers.push({
         faction,
@@ -373,6 +452,12 @@ function applyEquipmentQualityModifier(
     multiplier: number,
     durationTurns: number
 ): void {
+    // P1-B (task #95): the raw multiplier is persisted verbatim — reject non-finite
+    // (no entry pushed; consumer treats absence as the 1.0 identity) + log.
+    if (!Number.isFinite(multiplier)) {
+        recordNonFiniteEffectAnomaly(state, 'equipment_quality_modifier', faction, multiplier);
+        return;
+    }
     if (!state.military.equipment_quality_modifiers) {
         state.military.equipment_quality_modifiers = [];
     }

@@ -333,11 +333,43 @@ export function detectZones(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
+ * Robustness fix (task #95, audit P2-D → live corruption): the main-body
+ * "unbounded corridor" sentinel must be FINITE because `corridor_width` is
+ * persisted verbatim into `corps_command[*].commander_state.zone_assessments`
+ * — `JSON.stringify(Infinity)` emits `null`, silently corrupting every save
+ * (15× `"corridor_width": null` verified in latest_run_final_save.json) and
+ * tripping the #95 P1-A serializer guard. Precedent: #358
+ * HOME_DISTANCE_UNREACHABLE_HOPS = 99.
+ *
+ * Reader audit (all magnitude-insensitive for any value >= 2, so 99 ≡ Infinity):
+ * - derivePosture (this file): `corridorWidth <= 1` → besieged.
+ * - plan.ts isBesiegedCorps: `mainBody.corridor_width <= 1`.
+ * - assess.ts / decide.ts read ONLY zone_id/osids from persisted previous-state zones.
+ * - UI (GameStateAdapter/command_strain) declares the field in types but never reads it.
+ */
+export const CORRIDOR_WIDTH_UNBOUNDED = 99;
+
+/**
+ * Persisted-copy sentinel for a non-finite `commitment_ratio`
+ * (computeCommitmentRatio returns Infinity for front edges with zero brigades).
+ * Used ONLY at the persistence boundary (emit.ts sanitizeZoneAssessmentsForPersistence)
+ * — the IN-MEMORY value must stay Infinity because no finite value preserves both
+ * in-memory consumer behaviors:
+ * - allocate.ts computeMustHoldMultiplier floor-clamps non-finite → 2.0×, but any
+ *   finite value >= 6.67 would hit the 5.0× cap instead;
+ * - assess.ts/decide.ts threat thresholds (`> 4 / > 6 / > 8`) need a LARGE value.
+ * The persisted copy has no readers (sim re-derives zones each turn; UI never reads
+ * commitment_ratio), so a documented finite sentinel is stored instead of `null`
+ * corruption (3× `"commitment_ratio": null` verified in latest_run_final_save.json).
+ */
+export const COMMITMENT_RATIO_UNBOUNDED_PERSISTED = 99;
+
+/**
  * BFS corridor width detection.
  * Measures the narrowest connection from a zone to the faction main body.
  * Width <= 1 OSID = besieged, = 2 pressured, >= 3 open.
  *
- * For main body: returns Infinity unless fully encircled (0 exits to friendly territory).
+ * For main body: returns CORRIDOR_WIDTH_UNBOUNDED (finite "not besieged" sentinel; see above).
  * For non-main-body zones: counts boundary OSIDs that connect to friendly-but-not-in-zone OSIDs.
  * That count is the corridor width (narrowest cross-section at the zone boundary).
  */
@@ -364,8 +396,9 @@ export function measureCorridorWidth(
         // Main body with exits to friendly territory is not encircled
         // Main body with no external friendly connections: could be the entire faction territory
         // (which is normal, not besieged) — only return 0 if zone is small subset
-        // Since main body IS the largest component, return Infinity
-        return Infinity;
+        // Since main body IS the largest component, return the finite unbounded sentinel
+        // (#95: was `Infinity`, which serialized to null — see CORRIDOR_WIDTH_UNBOUNDED).
+        return CORRIDOR_WIDTH_UNBOUNDED;
     }
 
     // Non-main-body zone: count boundary OSIDs connecting to friendly-but-not-in-zone territory
@@ -391,6 +424,13 @@ export function measureCorridorWidth(
 /**
  * Compute commitment ratio for a zone.
  * SRK example: 80 edges / 9 brigades = 8.9 = fully committed.
+ *
+ * DELIBERATELY still returns Infinity for front edges with zero brigades — the
+ * in-memory consumers depend on the non-finite sentinel and NO finite value is
+ * behavior-preserving (see COMMITMENT_RATIO_UNBOUNDED_PERSISTED). The value is
+ * made finite ONLY at the persistence boundary
+ * (emit.ts sanitizeZoneAssessmentsForPersistence), per the audit P2-D convention:
+ * clamp where the value could be STORED, not where it is computed.
  */
 export function computeCommitmentRatio(frontEdges: number, brigadeCount: number): number {
     if (brigadeCount <= 0) return frontEdges > 0 ? Infinity : 0;

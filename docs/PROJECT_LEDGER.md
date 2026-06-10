@@ -1,4 +1,23 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-10] fix(robustness): #95 non-finite guards — serializer fail-loud + effect-delta rejection + #360 factory guard + 3 live-corruption producer fixes (TERRITORY-FLAT RE-FLOOR CANDIDATE, HELD)
+
+**Type:** 1.0 robustness build (task #95) implementing the merged audit `docs/40_reports/proposals/20260609_1.0_ROBUSTNESS_LANDMINE_AUDIT.md` (P1-A, P1-B/P2-B, P2-A) + an owner-directive add-on (corridor_width producer fix). Branch `fix/robustness-95-nonfinite-guards` off origin/main (ec70ddd19). **PR opened, NOT merged — HELD as a territory-flat re-floor candidate for the re-floor panel** (collapse Phase-IV bundling or standalone sign-off). No floor literal / golden manifest touched.
+
+**P1-A (serializer fail-loud):** `serializeGameState.toDeterministicJsonValue` now THROWS with the named key-path on any NaN/±Infinity instead of silently serializing it to `null` (the #358 class: silent save corruption + untraceable hash move). Shared mutable path-stack — no allocation on the finite fast path. The guard immediately caught a third live corruption during verification (below).
+
+**P1-B/P2-B (apply_effects):** `clamp()` hardened (non-finite → min, mirrors `computeMustHoldMultiplier`); every numeric event-effect writer (morale/cohesion/supply/humanitarian/patron/alliance/negotiation-capital/aggression/equipment-quality) now REJECTS a non-finite payload — prior persisted value kept — and appends to the new observability-only `military.event_effect_anomalies` (append-only, never read by sim, absent on every well-formed run → byte-identical by construction). Strict-null optional-field ratchet 515→516 / sim 329→330 (honest pin bump).
+
+**P2-A (#360-class guard):** new `tests/current_version_factory_shape.test.ts` — canonical new-game birth state (createInitialGameState → canonicalizeStartupState) + a same-version save round-trip (serializeGameState → parse, NO migration backfill) must pass `validateGameStateShape({requireVersion: CURRENT_SCHEMA_VERSION})`. A future hard-required lazily-initialized field without `optionalWhenAbsent`+load-seeding or birth-path writing goes red before merge.
+
+**Three LIVE corruptions fixed (all verified in real saves before the fix):**
+1. `measureCorridorWidth` main-body sentinel `Infinity` → **`CORRIDOR_WIDTH_UNBOUNDED = 99`** (was 15× `"corridor_width": null` per save). Reader audit: every reader is a `<= 1` besieged check (plan.ts:1811, derivePosture); persisted copy read by nobody — 99 ≡ Infinity behaviorally.
+2. `commitment_ratio` `Infinity` (front edges, zero brigades) — **CANNOT be producer-fixed** (computeMustHoldMultiplier floor-clamps non-finite→2.0× but any finite ≥6.67 hits the 5.0× cap; assess/decide thresholds `>4/6/8` need the opposite — no finite value preserves both). Sanitized ONLY at the persistence boundary (`emit.ts sanitizeZoneAssessmentsForPersistence` → `COMMITMENT_RATIO_UNBOUNDED_PERSISTED = 99`); in-memory consumers untouched; persisted copy read by nobody (sim re-derives zones each turn, reads only zone_id/osids from previous state).
+3. `defender_contributions[].distance_hops` `Infinity` (bfsDistanceFriendly unreachable reserve; `getReactiveDistanceWeight` already floor-handles it) → clamped at the storage boundary (`buildDefenderContributions` → `DEFENDER_DISTANCE_UNREACHABLE_HOPS = 99`). **Found BY the new P1-A guard** when the candidate 40w threw at `turn_summaries.39.battles.2.defender_contributions.0.distance_hops`.
+
+**40w gate (self-run, dual):** control = clean origin/main worktree → `final_state_hash e246e8529d4244d8`, anchors 30/30, benchmarks 6/6. Candidate = branch → **`ace1395d12c1b1fa`**, anchors 30/30, benchmarks 6/6. **`control_delta.json` SHA256 BYTE-IDENTICAL (9E47DF18…)**. Full `git diff --no-index` of the two final saves = **exactly 19 lines**: 15× `corridor_width: null→99`, 2× `commitment_ratio: null→99`, 2× `distance_hops: null→99` — the hash move is 100% accounted for by de-corrupting the save; everything else byte-identical. 188w/52w re-bless = re-floor panel's call.
+
+**Determinism:** no Math.random/Date.now/timestamps; sorted iteration preserved; initial OSIDs untouched; `String(NaN)`/`String(Infinity)` reprs deterministic; anomaly log appends in sorted effect order.
+
 ## [2026-06-09] chore(release): version → 0.9.9-beta.1 (feature-complete beta entry)
 
 **Type:** version bump only — no behavioral/calibration change. Branch `chore/version-0.9.9-beta` off `origin/main`. Task #82.

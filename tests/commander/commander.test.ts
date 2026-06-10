@@ -31,6 +31,7 @@ import type { SupplyStateByOsidReport } from '../../src/state/supply_state_deriv
 import {
     measureCorridorWidth,
     computeCommitmentRatio,
+    CORRIDOR_WIDTH_UNBOUNDED,
 } from '../../src/sim/combat/commander/zone_detection.js';
 import {
     evaluateBrigade,
@@ -109,7 +110,7 @@ describe('zone_detection', () => {
         expect(width).toBe(0);
     });
 
-    it('identifies main body corridor_width as Infinity', () => {
+    it('identifies main body corridor_width as the FINITE unbounded sentinel (#95: was Infinity → "null" in saves)', () => {
         const zoneOsids = new Set(['op:a:a1']);
         const allFriendly = new Set(['op:a:a1']);
         const adjacency = new Map<string, readonly string[]>([
@@ -117,7 +118,23 @@ describe('zone_detection', () => {
         ]);
 
         const width = measureCorridorWidth(zoneOsids, allFriendly, adjacency, true);
-        expect(width).toBe(Infinity);
+        expect(width).toBe(CORRIDOR_WIDTH_UNBOUNDED);
+        expect(Number.isFinite(width)).toBe(true);
+        // Behavioral identity with the old Infinity sentinel: every reader is a
+        // `<= 1` besieged check, so the sentinel must stay comfortably above it.
+        expect(width).toBeGreaterThan(1);
+    });
+
+    it('measureCorridorWidth never returns a non-finite value (#95 robustness pin)', () => {
+        const zoneOsids = new Set(['op:a:a1']);
+        const allFriendly = new Set(['op:a:a1', 'op:b:b1']);
+        const adjacency = new Map<string, readonly string[]>([
+            ['op:a:a1', ['op:b:b1']],
+        ]);
+        for (const isMainBody of [true, false]) {
+            const width = measureCorridorWidth(zoneOsids, allFriendly, adjacency, isMainBody);
+            expect(Number.isFinite(width)).toBe(true);
+        }
     });
 
     it('computes commitment ratio correctly (edges / brigades)', () => {
@@ -125,7 +142,7 @@ describe('zone_detection', () => {
         expect(computeCommitmentRatio(10, 5)).toBe(2);
     });
 
-    it('commitment ratio is Infinity when 0 brigades with front edges', () => {
+    it('commitment ratio is Infinity when 0 brigades with front edges (in-memory sentinel; finite-swapped ONLY at the emit persistence boundary, #95)', () => {
         expect(computeCommitmentRatio(10, 0)).toBe(Infinity);
     });
 
