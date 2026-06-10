@@ -65,6 +65,86 @@ import {
     isArbihContainPostureEnabled,
 } from '../contain_posture_gate.js';
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Exhaustion-drag V2 feature flag (Design B v2 — collapse repurpose)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// AWWV_EXHAUSTION_DRAG_V2 — default OFF. When OFF, `computeFactionExhaustionDrag`
+// computes the EXACT legacy degenerate expression (`max(0.3, 1 - raw/600)`),
+// so a flag-off build is BYTE-IDENTICAL to the current 649 floor. When ON, the
+// drag is driven by a per-faction CASUALTY-LOAD signal — cumulative military
+// casualties (`casualty_ledger`) ÷ current fielded personnel — which (unlike the
+// saturated `war_exhaustion` field the abandoned v1 used) keeps RISING late-war.
+// The drag FALLS as load rises: 1.0 at load<=1.0 down to floor 0.20 at load>=2.5.
+// Higher load → lower drag → smaller additive op-launch term → fewer late-war
+// opportunistic launches. The floor 0.20 sits BELOW the legacy saturated 0.3, so
+// it is a genuine NET drag (v1's 0.55 floor above 0.3 was sign-inverted).
+//
+// Scope: this lever ONLY weights the offensive op-launch WILLINGNESS (commander
+// intent score for `stage_operation` / `launch_opportunity`). It never enters
+// combat resolution, never touches a defender, never writes political_controllers,
+// and the §6 rupture ops (Srebrenica/Žepa) are TRIGGERED operations that never
+// route through intent scoring — so this lever cannot suppress them. Symmetric
+// across all three factions; deterministic (pure function of persisted numerics).
+let _enableExhaustionDragV2Override: boolean | null = null;
+
+export function getEnableExhaustionDragV2(): boolean {
+    return _enableExhaustionDragV2Override !== null ? _enableExhaustionDragV2Override : false;
+}
+
+export function setEnableExhaustionDragV2(enable: boolean): void {
+    _enableExhaustionDragV2Override = enable;
+}
+
+export function resetEnableExhaustionDragV2(): void {
+    _enableExhaustionDragV2Override = null;
+}
+
+/**
+ * Floor of the V2 late-war drag multiplier: a spent faction is hampered, not
+ * paralyzed. Hard launch-blocks remain the separate corps_exhaustion / fatigue /
+ * campaign_role guards. Single calibration knob — raise toward 0.30 if late-war
+ * `launch_opportunity` anchors regress in the re-floor run. Set BELOW the legacy
+ * saturated 0.3 so the term is a genuine NET drag (the v1 sign correction).
+ */
+export const EXHAUSTION_DRAG_V2_FLOOR = 0.20;
+/** Casualty-load below this (casualties-per-fielded-soldier): early/mid war → no drag (1.0). */
+export const EXHAUSTION_DRAG_V2_LOAD_START = 1.0;
+/** Casualty-load at/above this: fully spent → drag floor. */
+export const EXHAUSTION_DRAG_V2_LOAD_FULL = 2.5;
+
+/**
+ * Faction strategic-exhaustion drag on offensive op-launch willingness.
+ *
+ * Pure, deterministic, symmetric across factions.
+ *
+ * - Flag OFF (default): EXACT legacy degenerate form `max(0.3, 1 - raw/600)` on
+ *   the raw 0..10000 `war_exhaustion` accumulator — byte-identical to the current
+ *   649 floor. `factionCasualtyLoad` is IGNORED on this path.
+ * - Flag ON: late-war ramp driven by the casualty-load ratio — 1.0 at load<=1.0,
+ *   linear DOWN to `EXHAUSTION_DRAG_V2_FLOOR` (0.20) at load>=2.5. As load rises,
+ *   the multiplier falls → the additive op-launch term shrinks → fewer launches.
+ *   `factionCasualtyLoad` is guarded non-negative; a 0 load (no battles yet, or
+ *   div-by-zero personnel guarded upstream to 0) yields drag 1.0 (no drag).
+ *
+ * @param rawFactionWarExhaustion raw 0..10000 war_exhaustion (legacy OFF path only)
+ * @param factionCasualtyLoad     cumulative casualties ÷ fielded personnel (ON path)
+ */
+export function computeFactionExhaustionDrag(
+    rawFactionWarExhaustion: number,
+    factionCasualtyLoad: number = 0,
+): number {
+    if (!getEnableExhaustionDragV2()) {
+        // Legacy path — DO NOT alter (byte-identical to current floor).
+        return Math.max(0.3, 1.0 - rawFactionWarExhaustion / 600);
+    }
+    const load = factionCasualtyLoad > 0 ? factionCasualtyLoad : 0;
+    if (load <= EXHAUSTION_DRAG_V2_LOAD_START) return 1.0;
+    if (load >= EXHAUSTION_DRAG_V2_LOAD_FULL) return EXHAUSTION_DRAG_V2_FLOOR;
+    const span = EXHAUSTION_DRAG_V2_LOAD_FULL - EXHAUSTION_DRAG_V2_LOAD_START; // 1.5
+    return 1.0 - ((load - EXHAUSTION_DRAG_V2_LOAD_START) / span) * (1.0 - EXHAUSTION_DRAG_V2_FLOOR);
+}
+
 /**
  * Is the contain-posture suppression ACTIVE for this besieging faction? Gates
  * the planner's read of `last_contained_osids_by_faction[faction]` on the
@@ -274,11 +354,15 @@ export function selectWinningIntent(
         1.0 - briefing.corps_exhaustion / MAX_EXHAUSTION_FOR_OPERATION,
     );
     // Faction strategic exhaustion drag: nation's accumulated suffering throttles
-    // even fresh corps' offensive appetite. At 0: full willingness (1.0).
-    // At 600+: floor 0.3 — never fully zero, corps exhaustion handles hard block.
-    const factionExhaustionDrag: number = Math.max(
-        0.3,
-        1.0 - briefing.faction_war_exhaustion / 600,
+    // even fresh corps' offensive appetite. Offense-only, faction-scoped, never
+    // enters combat resolution. Flag OFF (default) = legacy degenerate `1-raw/600`
+    // floor 0.3 (byte-identical to current floor); flag ON = late-war casualty-load
+    // ramp (1.0 at load<=1.0 → floor 0.20 at load>=2.5). Higher load → lower drag →
+    // smaller additive launch term → fewer late-war launches. See
+    // computeFactionExhaustionDrag / AWWV_EXHAUSTION_DRAG_V2.
+    const factionExhaustionDrag: number = computeFactionExhaustionDrag(
+        briefing.faction_war_exhaustion,
+        briefing.faction_casualty_load ?? 0,
     );
     const exhaustionPenalty: number = corpsExhaustionCapacity * factionExhaustionDrag;
 

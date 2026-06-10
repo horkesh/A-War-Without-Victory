@@ -99,6 +99,7 @@ import { setEnablePhase3A } from '../sim/pressure/phase3a_pressure_eligibility.j
 import { setEnablePhase3B } from '../sim/pressure/phase3b_pressure_exhaustion.js';
 import { setEnablePhase3C } from '../sim/pressure/phase3c_exhaustion_collapse_gating.js';
 import { setEnablePhase3D } from '../sim/collapse/phase3d_collapse_resolution.js';
+import { setEnableExhaustionDragV2 } from '../sim/combat/commander/plan.js';
 import {
     buildCombatCausalitySummary,
     buildOperationCombatDiagnostics,
@@ -1936,6 +1937,18 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         setEnablePhase3B(true);
         setEnablePhase3C(true);
         setEnablePhase3D(true);
+    }
+    // COLLAPSE REPURPOSE Design B v2 (2026-06-10) — env-gated exhaustion-drag V2 enable.
+    // Default OFF: when unset this block is a no-op and the run is byte-identical to
+    // the current 649 floor (the legacy `1-raw/600` drag path is preserved exactly).
+    // `AWWV_EXHAUSTION_DRAG_V2=true` re-points the existing faction-exhaustion op-launch
+    // willingness drag onto a per-faction casualty-load ramp (cumulative casualties ÷
+    // fielded personnel; offense-only, intent-layer only, §6-inert — never enters combat
+    // resolution; the triggered Srebrenica/Žepa ops are structurally exempt). This is the
+    // Phase-IV exploration switch for the re-floor measurement run.
+    // Determinism: reads only an env var at run start; no RNG/clock.
+    if (process.env.AWWV_EXHAUSTION_DRAG_V2 === 'true') {
+        setEnableExhaustionDragV2(true);
     }
     const emitFullReplayPayload = replayPayloadMode === 'full';
     const timingTotals = createScenarioTimingTotals();

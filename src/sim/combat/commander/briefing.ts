@@ -58,6 +58,7 @@ import { getCorpsCommander } from '../officer_system.js';
 import { analyzeFrontGeometry, type FrontGeometryAssessment } from '../front_geometry_analysis.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { FATIGUE_MAX } from '../../../state/formation_constants.js';
+import { getFactionTotalCasualties } from '../../../state/casualty_ledger.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 import {
     isCohesionCautionBiasActive,
@@ -711,6 +712,33 @@ export function buildBriefing(
     const activeOperations = getActiveOperations(state, corpsId);
     const corpsExhaustion = getCorpsExhaustion(state, corpsId);
     const factionWarExhaustion = state.political?.war_exhaustion?.[faction] ?? 0;
+    // Faction casualty-load ratio (Design B v2): cumulative military casualties
+    // ÷ current fielded personnel. Un-saturated late-war signal driving the
+    // AWWV_EXHAUSTION_DRAG_V2 op-launch willingness drag (inert when flag OFF).
+    // Numerator: already-persisted, live-combat-written casualty_ledger totals.
+    // Denominator: personnel summed over this faction's active formations that
+    // bear troops (default 1000 when personnel absent, per FormationState).
+    // Deterministic (pure read of persisted integers); guarded for div-by-zero
+    // (no fielded personnel → load 0 → drag 1.0 = no drag, the correct no-op).
+    const factionCasualtyLoad = (() => {
+        const cumCasualties = getFactionTotalCasualties(
+            state.military.casualty_ledger ?? {},
+            faction,
+        );
+        if (cumCasualties <= 0) return 0;
+        let fielded = 0;
+        for (const formation of Object.values(state.military.formations ?? {})) {
+            if (!formation || formation.status !== 'active') continue;
+            if (formation.faction !== faction) continue;
+            // Personnel-bearing field formations only (exclude command/phantom shells).
+            const kind = formation.kind ?? 'brigade';
+            if (kind === 'corps' || kind === 'army_hq' || kind === 'og' ||
+                kind === 'operational_group' || kind === 'corps_asset') continue;
+            fielded += formation.personnel ?? 1000;
+        }
+        if (fielded <= 0) return 0; // div-by-zero guard → no drag
+        return cumCasualties / fielded;
+    })();
     const fatigueSummary = botOrdersPerfTime(
         'commander.runCommanderForCorps.buildBriefing.collectFatigueSummary',
         () => collectFatigueSummary(brigades),
@@ -819,6 +847,7 @@ export function buildBriefing(
         corps_stance: corpsStance,
         corps_exhaustion: corpsExhaustion,
         faction_war_exhaustion: factionWarExhaustion,
+        faction_casualty_load: factionCasualtyLoad,
         avg_fatigue_pct: fatigueSummary.avgFatiguePct,
         brigades_above_fatigue_threshold: fatigueSummary.brigadesAboveFatigueThreshold,
         enemy_equipment_summary: enemyEquipmentSummary,
