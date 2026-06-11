@@ -404,6 +404,11 @@ export function reconstituteBrigades(state: GameState): ReconstitutionReport {
 
             f.status = 'active';
             f.lifecycle_status = undefined;
+            // EH-3 fix(a): clear stale stranded metadata so this reconstituted brigade does not
+            // re-enter the stranded lifecycle carrying a stranded_since_turn from its prior incarnation.
+            f.stranded_status = undefined;
+            f.stranded_since_turn = undefined;
+            f.last_reachable_turn = undefined;
             f.personnel = reserveDraw;
             const reconHistC = ensureBrigadeHistory(f);
             if (reserveDraw > reconHistC.peak_personnel) reconHistC.peak_personnel = reserveDraw;
@@ -453,6 +458,11 @@ export function reconstituteBrigades(state: GameState): ReconstitutionReport {
         // Reactivate formation
         f.status = 'active';
         f.lifecycle_status = undefined;
+        // EH-3 fix(a): clear stale stranded metadata so this reconstituted brigade does not
+        // re-enter the stranded lifecycle carrying a stranded_since_turn from its prior incarnation.
+        f.stranded_status = undefined;
+        f.stranded_since_turn = undefined;
+        f.last_reachable_turn = undefined;
         f.personnel = poolDraw;
         // Track peak personnel after reconstitution
         const reconHist = ensureBrigadeHistory(f);

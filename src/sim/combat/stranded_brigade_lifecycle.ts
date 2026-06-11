@@ -171,8 +171,14 @@ export function updateStrandedBrigadeLifecycle(
 
         // --- Phase 2: Handle collapsed brigades (dissolve) ---
         if (f.stranded_status === 'collapsed') {
-            // Already processed — dissolution happened on the turn it collapsed.
-            // Skip further processing.
+            // EH-3 fix(a): the collapse already set status='inactive'/lifecycle_status='destroyed'
+            // on the turn it fired. Clear the zombie stranded_status so the dead record stops
+            // carrying stale stranded metadata for the rest of the run (the inactive/destroyed
+            // record itself must persist — it is reconstitution's re-entry path). Calibration-inert.
+            if (f.status === 'inactive') {
+                f.stranded_status = undefined;
+                f.stranded_since_turn = undefined;
+            }
             continue;
         }
 
