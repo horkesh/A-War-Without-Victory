@@ -973,3 +973,9 @@ Live exhaustion build (agent-aa39, feat/exhaustion-feel-surface) HEAD advanced m
 - **Agent-orchestration fragility cost real time** on EH-2 (builder stalls ×3, builder/orchestrator double-worked the same branch, near double-push). EH-1 tooling hardening is the priority enabler.
 - **NEXT: EH-1** — per-run engine-health CI gate (stranded brigades/zero-eligible ops/dead ops) + tooling hardening (worktree npm-death fix, one-agent-per-checkout). Then EH-3 state-integrity, then D2 on a healthy engine.
 - Floor 658 held throughout the pivot. P1 strategic decision still pending (accept freeze + un-postpone DoD, vs post-1.0 injection program).
+
+### 2026-06-11 — P1 resolved + EH-1 Part A shipped
+- **P1 RESOLVED (A):** freeze accepted as historically correct, DoD UN-postponed (finish-work restored), injection-pipeline lever = post-1.0 only. Do NOT re-chase scorer / re-postpone DoD / re-open floor for organic territory. Memory updated.
+- **EH-1 Part A SHIPPED (62d9b68cb): `.puppeteerrc.cjs` skipDownload** — ENDS the worktree npm-install agent deaths (puppeteer v24 reads cosmiconfig, not the .npmrc key). Verified: getConfiguration().skipDownload=true. puppeteer only in manual UI tools → zero agent-work impact. Highest-leverage fix of the session (the deaths cost hours + forced main-checkout-only work + the EH-2 double-work).
+- **EH-1 Part B in flight:** engine-health CI gate (a13c9aab) — vitest test vs the committed data/derived/latest_run_final_save.json, fails on stranded-brigades/zero-eligible-ops/dead-ops/K:W-band regressions, thresholds at current reality. The guard that makes EH-3 (state-integrity) measurable.
+- Floor 658. EH-2 (casualty MC −22%) merged. Next after EH-1: EH-3 state-integrity → D2 on a healthy engine.
