@@ -350,7 +350,7 @@ export const SANA_95_OPPORTUNITY: OperationOpportunityDef = {
     family: 'fifth_corps',
     axes: SANA_AXES,
     staging_osid: STAGING_BIHAC,
-    planning_duration: 5,
+    planning_duration: 3,
     min_attack_outcome: 'repulsed',
     citations: [
         'BB1 pp.417, 419-420 — Sana 95 mission, operational groups, rapid Petrovac/Kljuc/Krupa gains',
