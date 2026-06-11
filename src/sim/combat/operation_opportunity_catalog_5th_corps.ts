@@ -100,6 +100,34 @@ const KRUPA_VALLEY_OBJECTIVES = [
 // Petrovac corridor adjacency chain (all ✓):
 //   orasac_2 → vrtoce → prkosi → vodjenica → kolonic_2 →
 //   bosanski_petrovac_2 → dobro_selo_2 → jasenovac_2
+// ─── AWWV_KLJUC_REROOT ──────────────────────────────────────────────────────
+// FLAG: process.env.AWWV_KLJUC_REROOT === 'true'
+//
+// Historical ground truth (ICTY / BB1 Ch.91-93):
+//   Ključ town fell 17 Sep 1995 to 5th Corps 501st + 510th, advancing FROM
+//   Bosanski Petrovac (south) via a 17-segment border at jasenovac_2 → hadzici.
+//   The interior-3 OSIDs are geometrically a Petrovac-axis extension (1-hop
+//   from jasenovac_2), not a Sanski-Most tail (2-3 hops from jelasinovci).
+//
+// Prior failures: axis-split sana_sanski_most_kljuc (506th/517th) arrived
+//   recovery-depleted ~W184 via the long Krupa→Sanski-Most belt; the 5-brigade
+//   Petrovac axis (501/502/503/504/101st) sat idle at jasenovac_2 with no
+//   further objectives while the interior remained RS-held.
+//
+// Fix: append interior-3 to END of sana_bihac_petrovac objectives (after
+//   jasenovac_2) and drop them from sana_sanski_most_kljuc (retaining only
+//   the Sanski-Most belt, where 506th/517th already deliver sanica_2).
+//
+// Default OFF = byte-identical to prior behaviour (both const arrays unchanged).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Interior-3 Ključ OSIDs: jasenovac_2→hadzici (seg=17, 1 hop) then interior. */
+const KLJUC_INTERIOR_EXTENSION = [
+    'op:kljuc:hadzici',
+    'op:kljuc:kljuc_2',
+    'op:kljuc:krasulje_2',
+] as const;
+
 const BIHAC_PETROVAC_OBJECTIVES = [
     'op:bihac:ripac',
     'op:bihac:racic',
@@ -111,6 +139,9 @@ const BIHAC_PETROVAC_OBJECTIVES = [
     'op:bosanski_petrovac:bosanski_petrovac_2',
     'op:bosanski_petrovac:dobro_selo_2',
     'op:bosanski_petrovac:jasenovac_2',
+    // AWWV_KLJUC_REROOT: extend with interior-3 when flag ON (evaluated at
+    // module load time; default OFF produces the same 10-element array).
+    ...(process.env.AWWV_KLJUC_REROOT === 'true' ? KLJUC_INTERIOR_EXTENSION : []),
 ];
 
 // 2026-06-07: re-ordered into a single verified front-edge adjacency walk
@@ -127,6 +158,11 @@ const BIHAC_PETROVAC_OBJECTIVES = [
 // and got stranded as a 1-OSID RS island once the axis fanned past it into the
 // town center, tripping a disconnected_sector_territory critical on
 // vrs_1st_krajina:2. Pulling it forward keeps the captured belt contiguous.
+// AWWV_KLJUC_REROOT: when flag ON, the interior-3 (hadzici/kljuc_2/krasulje_2)
+// are owned by the Petrovac axis above; retain only the Sanski-Most belt here
+// (budimlic_japra_2 → sanica_2).  506th/517th continue to deliver sanica_2 via
+// the Krupa→Sanski-Most belt and need no new objectives.
+// Default OFF = same 13-element array as before (no behavioral change).
 const SANSKI_KLJUC_OBJECTIVES = [
     'op:sanski_most:budimlic_japra_2',
     'op:sanski_most:lusci_palanka_2',
@@ -138,9 +174,8 @@ const SANSKI_KLJUC_OBJECTIVES = [
     'op:sanski_most:ilidza_2',
     'op:sanski_most:kljevci',
     'op:kljuc:sanica_2',
-    'op:kljuc:hadzici',
-    'op:kljuc:kljuc_2',
-    'op:kljuc:krasulje_2',
+    // Interior-3 dropped when AWWV_KLJUC_REROOT=true (re-rooted to Petrovac axis).
+    ...(process.env.AWWV_KLJUC_REROOT === 'true' ? [] : KLJUC_INTERIOR_EXTENSION),
 ];
 
 /** Sana pocket-survival anchors. If any one is RS-controlled, the pocket
