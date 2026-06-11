@@ -965,3 +965,11 @@ Live exhaustion build (agent-aa39, feat/exhaustion-feel-surface) HEAD advanced m
 - **TODAY'S FLOOR ARC: 649 → 651 (Ključ #419) → 658 (batch-2 #420) = +9**, all bundle+track panel-signed western-Krajina '95 catalog fixes.
 - **3rd builder death recovered** (re-floor builder died after un-gate commit → I fixed the Krupa-axis-7→9 test + ran 188w confirm + re-blessed + PR). Commit-first salvage is now routine.
 - **Productive western-Krajina catalog batch EXHAUSTED of high-value wins.** Remaining: matavazi_2 (deeper Krupa axis), donji_vrbljani_2 (MEDIUM +1), krasulje_2 (depth ceiling), Jajce ring (faction-ceiling, post-1.0). Diminishing returns — recommend PAUSE the heavy grind pending the P1 strategic decision + owner availability.
+
+### 2026-06-11 — ENGINE-HEALTH PIVOT (owner: engine health always priority; is it AAA++++?)
+- **Pyrrhic debate: AWWV NOT AAA++++ (unanimous).** Casualty model lies 2-5×; state-integrity leaks (stranded brigades/ghost POWs); the 658 floor is partly CATALOG-FORCED (calibration-% masking). PIVOT off catalog grind → engine-health. Memory: aaa_quality_engine_health_pivot.md.
+- **EH-2 MERGED (#421): MC-leak ledger fix.** MC 54k→42k (−22%), killed unchanged, K:W 1:3.84, control_delta BYTE-IDENTICAL (territory 658 held), §6 intact, deterministic, manifest re-blessed (casualty artifacts only). Hash 3e68b23e→f08f40522afff835. Activated held #344 + surrender-cascade tightening; undefended-path left KIA-correct per historian.
+- **HISTORIAN-BY-DEFAULT (owner directive):** include historians much more — Bosnian war is specific. On EH-2 it CAUGHT: K:W already on-target 1:3.74 (don't fix), and the "missing" are ~75-80% mass-grave KIA (don't convert to WIA — post-1.0 POW-decay lane). Memory: historian_lens_by_default.md. Standing Pyrrhic member now.
+- **Agent-orchestration fragility cost real time** on EH-2 (builder stalls ×3, builder/orchestrator double-worked the same branch, near double-push). EH-1 tooling hardening is the priority enabler.
+- **NEXT: EH-1** — per-run engine-health CI gate (stranded brigades/zero-eligible ops/dead ops) + tooling hardening (worktree npm-death fix, one-agent-per-checkout). Then EH-3 state-integrity, then D2 on a healthy engine.
+- Floor 658 held throughout the pivot. P1 strategic decision still pending (accept freeze + un-postpone DoD, vs post-1.0 injection program).
