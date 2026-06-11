@@ -194,6 +194,84 @@ jobs:
         if: steps.changes.outputs.relevant != 'true'
         run: echo "No src/sim, src/state, src/scenario, data/scenarios or data/calibration changes — scenario tests skipped."
 
+  # engine-health-188w (2026-06-11, EH-1 Part B): ADVISORY (continue-on-error) 188w
+  # engine-health gate. Runs a fresh 188w scenario, resolves the runner's printed
+  # `outDir:`, and asserts the state-integrity + casualty-health thresholds in
+  # data/calibration/engine_health_thresholds.json (188w band already seeded) via
+  # tools/engine_health_gate.cjs. The gate exits 1 on a HARD regression
+  # (stranded/zero-eligible/dead ops, ghost-destroyed, consistency, matched_osids floor);
+  # `continue-on-error: true` turns that into a YELLOW (advisory) result, not a RED gate —
+  # this is NOT a required check. Panel verdict GO; SIM-path-gated with the always-report
+  # shim so it stays a fast green no-op on non-sim PRs (same path set as `scenarios`).
+  engine-health-188w:
+    needs: scenarios
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # detect-changed-paths.sh needs the base commit in history.
+          fetch-depth: 0
+
+      # Always-report shim: decide whether the heavy 188w run executes. The job itself
+      # always completes (and reports the `engine-health-188w` check). INTEGRITY: run a
+      # TRUSTED (base-branch) copy of the detection script, not the PR's working copy.
+      - name: Detect sim/scenario changes
+        id: changes
+        env:
+          PATH_SET: sim
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            base_ref="${GITHUB_BASE_REF:-main}"
+            git fetch --no-tags origin "${base_ref}:refs/remotes/origin/${base_ref}" >/dev/null 2>&1 || \
+              git fetch --no-tags origin "${base_ref}" >/dev/null 2>&1 || true
+            git checkout "origin/${base_ref}" -- .github/scripts/detect-changed-paths.sh
+          fi
+          bash .github/scripts/detect-changed-paths.sh
+
+      - uses: actions/setup-node@v5
+        if: steps.changes.outputs.relevant == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm install --legacy-peer-deps
+        if: steps.changes.outputs.relevant == 'true'
+      - run: npm install --legacy-peer-deps --prefix src/ui/map
+        if: steps.changes.outputs.relevant == 'true'
+
+      - name: Rebuild startup snapshot for this platform
+        if: steps.changes.outputs.relevant == 'true'
+        run: npm run desktop:startup-snapshot:build
+
+      - name: Fresh 188w run + engine-health gate (advisory)
+        if: steps.changes.outputs.relevant == 'true'
+        run: |
+          set -euo pipefail
+          # Run the 188w scenario into a dedicated CI out-root; the preflight runner
+          # prints `outDir: <path>` to stdout (the same contract ci_structural_fingerprint
+          # relies on). Capture stdout, parse the LAST outDir line, and feed THAT dir to
+          # the gate. The runner writes runs/eh_ci/apr1992_definitive_188w__<hash>__w188/.
+          npm run sim:scenario:run:188w -- --out runs/eh_ci | tee /tmp/eh_188w_run.log
+          out_dir="$(grep -oE '^outDir:[[:space:]]*.+$' /tmp/eh_188w_run.log | tail -n1 | sed -E 's/^outDir:[[:space:]]*//')"
+          if [[ -z "${out_dir}" ]]; then
+            echo "Could not parse 'outDir:' from runner stdout; falling back to glob." >&2
+            out_dir="$(ls -1d runs/eh_ci/apr1992_definitive_188w__*__w188 2>/dev/null | tail -n1)"
+          fi
+          if [[ -z "${out_dir}" || ! -f "${out_dir}/run_summary.json" ]]; then
+            echo "Resolved 188w out-dir '${out_dir}' has no run_summary.json" >&2
+            exit 1
+          fi
+          echo "Resolved 188w out-dir: ${out_dir}"
+          # ADVISORY: a hard regression here exits 1; continue-on-error keeps the job yellow.
+          node tools/engine_health_gate.cjs "${out_dir}" --horizon 188w --json
+
+      - name: No sim/scenario changes — engine-health gate skipped (green-fast)
+        if: steps.changes.outputs.relevant != 'true'
+        run: echo "No src/sim, src/state, src/scenario, data/scenarios or data/calibration changes — 188w engine-health gate skipped."
+
   # baselines job removed 2026-05-04: byte-hash baseline comparison is
   # platform-bound (run_summary.json hashes diverge between Windows dev and
   # Linux CI). Vitest variant of this check (tests/scenario_golden_baselines_h2_3.test.ts)
