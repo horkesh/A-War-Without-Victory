@@ -61,32 +61,33 @@ describe('B1 casualty-realism V2 gate', () => {
         resetCasualtyRealismV2Override();
     });
 
-    it('defaults OFF when env unset and no override (preserves the floor)', () => {
-        expect(isCasualtyRealismV2Enabled()).toBe(false);
+    it('defaults ON when env unset and no override (EH-2 MC-leak fix is standard)', () => {
+        expect(isCasualtyRealismV2Enabled()).toBe(true);
     });
 
-    it('enables only on explicit truthy env values', () => {
-        for (const on of ['1', 'true', 'on', 'yes', 'TRUE', 'On']) {
-            process.env[ENV_KEY] = on;
-            expect(isCasualtyRealismV2Enabled()).toBe(true);
-        }
-        for (const off of ['0', 'false', 'off', 'no', '', 'maybe']) {
+    it('disables only on explicit falsy env values (default ON otherwise)', () => {
+        for (const off of ['0', 'false', 'off', 'no', 'OFF', 'False']) {
             process.env[ENV_KEY] = off;
             expect(isCasualtyRealismV2Enabled()).toBe(false);
         }
+        for (const on of ['1', 'true', 'on', 'yes', '', 'maybe']) {
+            process.env[ENV_KEY] = on;
+            expect(isCasualtyRealismV2Enabled()).toBe(true);
+        }
     });
 
-    it('module-local override wins over env, and reset reverts', () => {
-        process.env[ENV_KEY] = '1';
-        setCasualtyRealismV2Override(false);
-        expect(isCasualtyRealismV2Enabled()).toBe(false);
-
-        delete process.env[ENV_KEY];
+    it('module-local override wins over env, and reset reverts to default-ON', () => {
+        process.env[ENV_KEY] = '0';
         setCasualtyRealismV2Override(true);
         expect(isCasualtyRealismV2Enabled()).toBe(true);
 
-        resetCasualtyRealismV2Override();
+        delete process.env[ENV_KEY];
+        setCasualtyRealismV2Override(false);
         expect(isCasualtyRealismV2Enabled()).toBe(false);
+
+        resetCasualtyRealismV2Override();
+        // env unset + override cleared → default ON.
+        expect(isCasualtyRealismV2Enabled()).toBe(true);
     });
 
     describe('flag-OFF byte-identity (split == shipped fractions)', () => {
@@ -125,7 +126,7 @@ describe('B1 casualty-realism V2 gate', () => {
     describe('flag-ON re-anchor (KIA held, MIA collapsed into WIA)', () => {
         beforeEach(() => setCasualtyRealismV2Override(true));
 
-        it('holds KIA and strictly reduces MIA on every path vs shipped', () => {
+        it('holds KIA everywhere and never raises MIA on any path vs shipped', () => {
             const paths: Array<[() => { kia: number; wia: number }, { kia: number; wia: number }]> = [
                 [getMainCasualtySplit, { kia: 0.22, wia: 0.74 }],
                 [getSiegeCasualtySplit, { kia: 0.20, wia: 0.65 }],
@@ -134,12 +135,26 @@ describe('B1 casualty-realism V2 gate', () => {
             ];
             for (const [getOn, shipped] of paths) {
                 const on = getOn();
-                // KIA unchanged (don't disturb the ~1:3.4 killed:wounded the #316 work set).
+                // KIA unchanged on EVERY path (K:W already on the RDC/ICTY 1:3-3.5 target).
                 expect(on.kia).toBe(shipped.kia);
-                // WIA raised, MIA strictly lower.
-                expect(on.wia).toBeGreaterThan(shipped.wia);
-                expect(mia(on)).toBeLessThan(mia(shipped));
+                // MIA never increases; WIA never decreases.
+                expect(mia(on)).toBeLessThanOrEqual(mia(shipped));
+                expect(on.wia).toBeGreaterThanOrEqual(shipped.wia);
             }
+        });
+
+        it('reduces MIA on main / siege / surrender; leaves undefended UNCHANGED (historian)', () => {
+            // EH-2 historian correction: undefended MIA stays 0.35 (excess there was KILLED,
+            // not wounded — MIA->WIA would be the most wrong move; reserved for post-1.0 MIA->KIA).
+            const undef = getUndefendedCasualtySplit();
+            expect(undef.kia).toBe(0.15);
+            expect(undef.wia).toBe(0.50); // == shipped → MIA 0.35 unchanged
+            // The other three paths strictly reduce MIA.
+            expect(mia(getMainCasualtySplit())).toBeLessThan(0.04);
+            expect(mia(getSiegeCasualtySplit())).toBeLessThan(0.15);
+            const surr = getSurrenderCascadeCasualtySplit();
+            expect(surr.kia).toBe(0.10); // KIA held
+            expect(mia(surr)).toBeCloseTo(0.15, 10); // 0.50 -> 0.15
         });
 
         it('keeps the main killed:wounded ratio within the historical ~1:3.5 band', () => {
