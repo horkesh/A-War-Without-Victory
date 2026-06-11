@@ -141,9 +141,12 @@ export function assessSituation(
     );
 
     // 5. Assess threats
+    // AWWV_BRIEF_GAP_6: pass recent_territory_change (populated by buildBriefing
+    // when flag ON) so assessThreats can escalate zone threat from real-time
+    // territory-loss signal without waiting for the army HQ gathering cadence.
     const threats = botOrdersPerfTime(
         'commander.runCommanderForCorps.decide.assessSituation.assessThreats',
-        () => assessThreats(zones, briefing.previous_state, briefing.turn, concentrationZoneIds),
+        () => assessThreats(zones, briefing.previous_state, briefing.turn, concentrationZoneIds, briefing.recent_territory_change),
     );
 
     return { zones, forces, threats };
@@ -167,6 +170,7 @@ export function assessThreats(
     previousState: CommanderState | null,
     turn: number,
     concentrationZoneIds: readonly ZoneId[] = [],
+    recentTerritoryChange?: number,
 ): ThreatAssessment {
     // Build set of previously held OSIDs per zone for loss detection
     const previousOsidsByZone = new Map<string, Set<string>>();
@@ -228,7 +232,13 @@ export function assessThreats(
                 osids_lost: osidsLost,
                 turn,
             });
-        } else if (zone.deficit > HIGH_THREAT_DEFICIT) {
+        } else if (zone.deficit > HIGH_THREAT_DEFICIT
+            // AWWV_BRIEF_GAP_6: escalate to 'high' when corps has been losing
+            // ground (≤ -2 net OSID change in last 6 turns), even before per-zone
+            // previous-state comparison detects a zone-level loss.  This gives
+            // the corps commander a real-time territory-trend signal to defend
+            // faster, rather than waiting one army HQ gathering cadence window.
+            || (recentTerritoryChange !== undefined && recentTerritoryChange <= -2)) {
             threatLevel = 'high';
         } else if (zone.commitment_ratio > MEDIUM_THREAT_COMMITMENT) {
             threatLevel = 'medium';

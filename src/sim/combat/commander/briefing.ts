@@ -65,6 +65,7 @@ import {
     isMilitaryCredibilityCautionBiasActive,
     isPatronConfidenceOpsHesitationActive,
 } from '../../political/political_dimension_propagation_gate.js';
+import { computeRecentTerritoryChange } from '../army_hq_gathering.js';
 
 // ---------------------------------------------------------------------------
 // Default officer personality (used when no named officer is assigned)
@@ -842,6 +843,14 @@ export function buildBriefing(
         // byte-identical briefing shape vs pre-Phase-E baselines.
         ...(politicalDimensions !== undefined
             ? { political_dimensions: politicalDimensions }
+            : {}),
+        // AWWV_BRIEF_GAP_6: wire computeRecentTerritoryChange directly into
+        // the per-corps briefing so assessThreats can escalate zone threat on
+        // real-time territory loss without waiting for the army HQ gathering
+        // cadence to propagate a stale campaign_role change.
+        // Field is OMITTED when flag OFF — byte-identical to pre-GAP-6 shape.
+        ...(process.env.AWWV_BRIEF_GAP_6 === 'true'
+            ? { recent_territory_change: computeRecentTerritoryChange(state, faction, corpsId) }
             : {}),
     };
     return briefing;

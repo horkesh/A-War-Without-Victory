@@ -535,6 +535,16 @@ export interface CommanderBriefing {
     readonly campaign_sync_targets: readonly string[];
     /** Canonical A3/C1 directive deviation reason when this corps received a deviated campaign role. */
     readonly campaign_role_deviation_reason?: 'aggressive_preference' | 'cautious_preference' | 'compliance_score_low';
+    // ─── AWWV_BRIEF_GAP_6 ─────────────────────────────────────────────────
+    // FLAG: process.env.AWWV_BRIEF_GAP_6 === 'true'
+    // Net OSID change near this corps's front in the last 6 turns.
+    // Positive = net gains; negative = net losses.  Populated by buildBriefing
+    // via computeRecentTerritoryChange (army_hq_gathering.ts) when flag is ON.
+    // Field is OMITTED when flag is OFF — byte-identical to pre-GAP-6 briefings.
+    // Consumer: assessThreats escalates zone threat to 'high' when value ≤ -2.
+    // ─────────────────────────────────────────────────────────────────────
+    /** Net OSID change near this corps front in the last 6 turns (positive=gains, negative=losses). */
+    readonly recent_territory_change?: number;
     /** Phase E MVS: optional propagation of strategic-dimension values into the
      *  commander briefing surface. Populated by `buildBriefing` only when the
      *  two-tier political-dimension propagation gate
