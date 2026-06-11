@@ -377,29 +377,20 @@ const SOUTHERN_MOVE_AXIS_COORDINATION_FLOOR = 0.35;
 const SOUTHERN_MOVE_SUPPLY_PRESSURE_CEILING = 90;
 const SOUTHERN_MOVE_DEFENDER_WEAKNESS_FLOOR = 0.20;
 
-// AWWV_MRKONJIC_FIX flag: substitute the broken roster (3 hvo_main_staff brigades
-// + 3 phantoms not in OOB) with verified hvo_tomislavgrad-resident brigades.
-// Root cause (same class as Wave 19A / Wave 28): hvo_1st_guard_abb,
-// hvo_2nd_guard_mechanized, hvo_3rd_guard_jastrebovi are all corps=hvo_main_staff
-// in the OOB; hv_4th_guards_brigade_1995, hv_7th_guards_brigade_1995,
-// hv_134th_hgr_1995 are jna_phantom_brigades with wrong corps assignments (not
-// hvo_tomislavgrad). reconcileOperationRoster drops any brigade whose sector
-// claim ≠ axis host corps → zero_eligible_axis at t182. Substitutes confirmed
-// hvo_tomislavgrad in oob_brigades.json: hrhb_kralj_petar_kreimir_iv_brigade,
-// hrhb_kralj_tomislav_brigade, hvo_rama_brigade + HV loans (hv_4th_guards_split,
-// hv_1st_guards_tigers, hv_5th_guards_karlovac) which spawn into HV_CORPS_ID =
-// hvo_tomislavgrad via hv_integration.ts. Default OFF = current broken roster.
+// Mrkonjić roster fix (panel-GO 2026-06-11, re-floor 651→658):
+// Replaces the broken roster (3 hvo_main_staff brigades + 3 phantoms not in OOB)
+// with verified hvo_tomislavgrad-resident brigades.
+// Root cause: hvo_1st_guard_abb, hvo_2nd_guard_mechanized, hvo_3rd_guard_jastrebovi
+// are all corps=hvo_main_staff in the OOB; hv_4th_guards_brigade_1995,
+// hv_7th_guards_brigade_1995, hv_134th_hgr_1995 are jna_phantom_brigades with wrong
+// corps assignments (not hvo_tomislavgrad). reconcileOperationRoster drops any brigade
+// whose sector claim ≠ axis host corps → zero_eligible_axis at t182 → 6 Mrkonjić
+// OSIDs stay RS. Fix: substitutes confirmed hvo_tomislavgrad in oob_brigades.json:
+// hrhb_kralj_petar_kreimir_iv_brigade, hrhb_kralj_tomislav_brigade, hvo_rama_brigade
+// + HV loans (hv_4th_guards_split, hv_1st_guards_tigers, hv_5th_guards_karlovac)
+// which spawn into HV_CORPS_ID = hvo_tomislavgrad via hv_integration.ts.
 // Proposal: docs/40_reports/proposals/20260611_western_krajina_next_levers.md §A.
-const _SOUTHERN_MOVE_BRIGADES_DEFAULT: readonly FormationId[] = [
-    'hvo_1st_guard_abb' as FormationId,
-    'hvo_2nd_guard_mechanized' as FormationId,
-    'hvo_3rd_guard_jastrebovi' as FormationId,
-    'hv_4th_guards_brigade_1995' as FormationId,
-    'hv_7th_guards_brigade_1995' as FormationId,
-    // HV OG West 1995 phantom — corps=hvo_tomislavgrad matches axis host.
-    'hv_134th_hgr_1995' as FormationId,
-];
-const _SOUTHERN_MOVE_BRIGADES_FIX: readonly FormationId[] = [
+const _SOUTHERN_MOVE_BRIGADES: readonly FormationId[] = [
     // hvo_tomislavgrad OOB brigades (oob_brigades.json confirmed):
     'hrhb_kralj_petar_kreimir_iv_brigade' as FormationId,
     'hrhb_kralj_tomislav_brigade' as FormationId,
@@ -409,10 +400,6 @@ const _SOUTHERN_MOVE_BRIGADES_FIX: readonly FormationId[] = [
     'hv_1st_guards_tigers' as FormationId,
     'hv_5th_guards_karlovac' as FormationId,
 ];
-const _SOUTHERN_MOVE_BRIGADES =
-    process.env['AWWV_MRKONJIC_FIX'] === 'true'
-        ? _SOUTHERN_MOVE_BRIGADES_FIX
-        : _SOUTHERN_MOVE_BRIGADES_DEFAULT;
 
 const SOUTHERN_MOVE_AXES: readonly OpportunityAxisDef[] = [
     {

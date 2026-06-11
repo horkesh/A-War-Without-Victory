@@ -76,18 +76,18 @@ const STAGING_JASENICA = 'op:bosanska_krupa:jasenica_2';
 // ─── Sana objectives (BB1 pp.417, 419-420; identical roster to legacy
 //     scripted Sana in triggered_operations.ts so painted-truth comparison
 //     remains apples-to-apples). ────────────────────────────────────────────
-// AWWV_BNOVI_EXTEND flag: append krslje_2 and matavazi_2 (Bosanski Novi, +2 OSID).
-// Root cause: both OSIDs have no catalog op owner. They are directly adjacent to
-// donji_dubovik_2 (confirmed from operational_contact_graph.json edges:
+// Bosanski Novi Krupa-axis extension (panel-GO 2026-06-11, re-floor 651→658):
+// Appends krslje_2 and matavazi_2 to the sana_krupa axis objectives.
+// Both OSIDs had no catalog op owner. They are directly adjacent to donji_dubovik_2
+// (confirmed from operational_contact_graph.json edges:
 //   donji_dubovik_2 adj krslje_2: YES, donji_dubovik_2 adj matavazi_2: YES,
 //   krslje_2 adj matavazi_2: YES). The Krupa axis captures donji_dubovik_2 giving
 // a live front edge into Bosanski Novi territory. Historical: 5th Corps swept the
 // Una-Sana valley to Bosanski Novi by ~10 Oct 1995 (BB1 p.420); krslje_2 and
 // matavazi_2 are the strip between Bosanska Krupa and Bosanski Novi that passed to
 // Federation control. oct1995 painted=RBiH. §6 risk: none (western).
-// Default OFF = current objectives (byte-identical, 40w unaffected, fires t≥175).
 // Proposal: docs/40_reports/proposals/20260611_western_krajina_next_levers.md §B.
-const _KRUPA_VALLEY_OBJECTIVES_BASE = [
+const KRUPA_VALLEY_OBJECTIVES = [
     'op:bosanska_krupa:ivanjska_2',
     'op:bosanska_krupa:arapusa_2',
     'op:bosanska_krupa:donji_dubovik_2',
@@ -95,16 +95,10 @@ const _KRUPA_VALLEY_OBJECTIVES_BASE = [
     'op:bosanska_krupa:jasenica_2',
     'op:bosanska_krupa:gornja_suvaja',
     'op:bosanski_petrovac:krnjeusa',
+    // Bosanski Novi extension — adjacent to donji_dubovik_2 (live axis terminus):
+    'op:bosanski_novi:krslje_2',   // adj donji_dubovik_2 ✓
+    'op:bosanski_novi:matavazi_2', // adj donji_dubovik_2 + krslje_2 ✓
 ];
-const KRUPA_VALLEY_OBJECTIVES =
-    process.env['AWWV_BNOVI_EXTEND'] === 'true'
-        ? [
-              ..._KRUPA_VALLEY_OBJECTIVES_BASE,
-              // Bosanski Novi extension — adjacent to donji_dubovik_2 (live axis terminus):
-              'op:bosanski_novi:krslje_2',   // adj donji_dubovik_2 ✓
-              'op:bosanski_novi:matavazi_2', // adj donji_dubovik_2 + krslje_2 ✓
-          ]
-        : _KRUPA_VALLEY_OBJECTIVES_BASE;
 
 // R15 (2026-05-25): removed trubar from the sequence — trubar is NOT adjacent
 // to vrtoce (confirmed from operational_contact_graph.json), so the prior chain
