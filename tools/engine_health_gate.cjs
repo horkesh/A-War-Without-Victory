@@ -141,11 +141,17 @@ const consistency = spawnSync(
 // baseline's known ones are tolerated.
 const consistencyOut = (consistency.stdout || '') + '\n' + (consistency.stderr || '');
 const consistencyMatch = consistencyOut.match(/(\d+)\s+failure\(s\)\s+detected/i);
+// If the validator exited non-zero WITHOUT a parseable "N failure(s) detected" summary
+// (crash / truncated output / bad cwd / unhandled exception), we cannot trust the count.
+// Recording a tolerable "1" here would let the gate PASS (ceilings tolerate 3/6) while the
+// validator never actually counted the state-integrity issues — a false green. So flag it
+// and HARD-FAIL the consistency check regardless of ceiling. (Codex P2, 2026-06-11.)
+const consistencyParseError = !consistencyMatch && consistency.status !== 0;
 const consistencyFailures = consistencyMatch
   ? parseInt(consistencyMatch[1], 10)
   : consistency.status === 0
   ? 0
-  : 1; // exited non-zero but no parseable count → treat as >=1
+  : NaN; // unparseable non-zero exit → NaN sentinel; consistencyParseError forces a hard fail
 
 const measured = {
   horizon,
@@ -197,6 +203,15 @@ let thresholds = {};
 if (fs.existsSync(THRESH_PATH)) thresholds = JSON.parse(fs.readFileSync(THRESH_PATH, 'utf8'));
 
 if (flags.update) {
+  // Never seed thresholds from a run whose validator failed to report a count — the
+  // consistency_failures_max would become NaN (→ null) and silently disable the check.
+  if (consistencyParseError) {
+    die(
+      `cannot --update: validate_run_consistency exited ${consistency.status} with no ` +
+        `parseable failure count. Fix the validator/run before seeding thresholds.`,
+      2
+    );
+  }
   // N3: never let --update silently LOWER the territory floor (that would defeat its
   // purpose — a degraded run could quietly ratchet the floor down). Require --force.
   const existingFloor = thresholds[horizon] && thresholds[horizon].matched_osids_min;
@@ -233,7 +248,13 @@ hard('dead_ops', measured.dead_ops <= band.dead_ops_max, `${measured.dead_ops} <
 hard('ghost_destroyed', measured.ghost_destroyed <= band.ghost_destroyed_max, `${measured.ghost_destroyed} <= ${band.ghost_destroyed_max}`);
 hard('stranded_brigades', measured.stranded_brigades <= band.stranded_brigades_max, `${measured.stranded_brigades} <= ${band.stranded_brigades_max}`);
 hard('matched_osids', measured.matched_osids >= band.matched_osids_min, `${measured.matched_osids} >= ${band.matched_osids_min}`);
-hard('consistency_failures', measured.consistency_failures <= band.consistency_failures_max, `${measured.consistency_failures} <= ${band.consistency_failures_max} (validate_run_consistency)`);
+hard(
+  'consistency_failures',
+  !consistencyParseError && measured.consistency_failures <= band.consistency_failures_max,
+  consistencyParseError
+    ? `validate_run_consistency exited ${consistency.status} with no parseable "N failure(s) detected" summary — cannot trust count (hard fail)`
+    : `${measured.consistency_failures} <= ${band.consistency_failures_max} (validate_run_consistency)`,
+);
 soft('kw_ratio', measured.kw_ratio >= band.kw_ratio_lo && measured.kw_ratio <= band.kw_ratio_hi, `${measured.kw_ratio} in [${band.kw_ratio_lo}, ${band.kw_ratio_hi}]`);
 
 const hardFail = checks.some((c) => c.hard && !c.ok);
