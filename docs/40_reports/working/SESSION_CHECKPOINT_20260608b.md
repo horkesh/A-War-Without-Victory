@@ -838,3 +838,58 @@ Live exhaustion build (agent-aa39, feat/exhaustion-feel-surface) HEAD advanced m
 ### Sweep update (later 2026-06-10)
 - **Tier-1 Replay-wire:** scoped (Technical Architect, `proposals/20260610_TIER1_REPLAY_WIRE_SCOPE.md`) = calibration-INERT, no §6, producer-side orphan in `electron-main.cjs` (~12 lines/3 files). Builder dispatched in worktree (branch `feat/tier1-replay-wire`, DRAFT PR pending). Reviewer to follow (implementer≠reviewer).
 - **Art-session PRs #409/#412 RED = REAL regression, NOT stale** — both 0 commits behind main; failing `tests/event_loader.test.ts` strict-deep-equal (their art→event wiring alters event defs that the loader integrity test rejects). #410 additionally 2 behind (rebase). NOT my lane — flag for the art session to fix event wiring before merge. Do not touch their branches.
+
+### GitHub sweep (2026-06-11, autonomous)
+- **Failures:** all 9 confined to art-session branches (#409/#410/#412). NONE on main, NONE on `feat/tier1-replay-wire`.
+- **Root cause (shared, REAL not stale):** `tests/event_loader.test.ts:572` "no shipped event carries an image key (pipeline inert)" is an INERTNESS GUARD; the three art PRs wire stills by adding `image` keys to event JSON → break the guard by design. Fix = update/retire that guard as part of the wiring lane. #410 also 4 behind main (rebase). Posted consolidated triage in-thread on #409/#410/#412.
+- **Codex comments:** #412 has 2 unaddressed P2 on `DataLoader.ts:84` (sanitize consequence effects before display; serve scenario event JSON in built desktop) — relayed to art session via the PR. #344 P2 (06-09, surrender-cascade split) on a HELD PR. #409/#410/#329 clean.
+- **Dead watchers:** none. Art PRs red; #344 CONFLICTING-HELD; #329 NO-GO-HELD (all intentionally open).
+- All art items = parallel art session's lane; did NOT touch their branches.
+
+## GITHUB SWEEP + 2 VALID CODEX P2 (2026-06-11)
+- FAILURES: #409 BLOCKED/0-fail (CI running clean post-resync). #410/#412 DIRTY/3-fail = the SAME obsolete guard test (event_loader "no image"); they inherit the fix on resync from main after #409 merges. Not separate bugs. (#413/#344/#329 = other agents' PRs, not mine.)
+- CODEX P2 #1 (#412): adding consequences.json to the view loader makes App.tsx render csq_* RAW audit effects (recruitment_modifier, cost_ledger_annotation) in EventModal. Before my change csq_ fell back to e.effects=[] (empty). REGRESSION (dev/web). Fix: sanitize/filter audit-only effect kinds for display.
+- CODEX P2 #2 (affects ALL 3): electron-main.cjs map server routes app/data/derived + app/data/source only — NO /data/scenarios. loadEventDefinitions fetches /data/scenarios/events/*.json → 404 in PACKAGED DESKTOP → event images never show in shipped app (graceful text-only; web/dev works). Pre-existing gap (since #362 pipeline) now load-bearing. Fix: add app/data/scenarios route to electron-main.cjs (mirror data/source w/ path-traversal guard).
+- DECISION NEEDED: pause merges; do 2 fixes (desktop /data/scenarios route [benefits all 3] + #412 effects sanitization), then merge. OR merge #409/#410 web-only now + route fix later. Surfacing to owner.
+
+## AUTONOMOUS (owner asleep 2026-06-11): fixing 2 codex P2 then merging all 3
+- FIX 1 DONE: desktop /data/scenarios route added to electron-main.cjs (#409, commit 129901438) — mirrors data/source route + path guard; files already bundled (extraResources data/scenarios/events). node --check OK. Makes event stills render in packaged desktop (was 404).
+- FIX 2 in progress (#412): consequence effect kinds are mostly text-less mechanical/audit (cost_ledger_annotation 120, recruitment_modifier 53, cohesion_change 59, etc.) → render as raw labels in EventModal. Filter engine/audit kinds in EventModal mechanicalEffects (display layer, single ownership).
+- THEN: resume merges #409→#410→#412 (each resyncs to inherit test-guard fix + route). Sweep GH at checkpoints. Autonomy until all merged.
+
+## BOTH CODEX P2 FIXED + replied (2026-06-11 autonomous)
+- FIX1 desktop /data/scenarios route → #409 (129901438). FIX2 effects filter NON_DISPLAY_EFFECT_KINDS + test → #412 (81f2ec85f). Codex resolution comment posted on #412.
+- #409 commits now: wiring + test-guard fix + ledger resync + desktop route. #412: csq wiring + effects fix.
+- RESUMING MERGE TRAIN: #409 (carries test-guard fix + desktop route) → #410 (resync inherits) → #412 (resync inherits). Watching #409 CI now.
+
+### 2026-06-11 overnight — owner expanded authority + parallel lanes
+- **OWNER DIRECTIVES (persisted to memory):** (1) §6 work AUTHORIZED — may build/merge §6 lanes, but MUST assemble the full Pyrrhic panel before any decision (mandatory precondition). (2) Owner gate REMOVED from docs incl FORAWWV.md + all canon docs — canon/FORAWWV now editable with panel sign-off; lifts CLAUDE.md "Never auto-edit FORAWWV" + Ledger Protocol ban. Full doc-sync to reality = POST-D2. Memory: `owner_gate_removal_and_canon_edit_authorized.md` + updated `feedback_owner_signature_delegated_to_pyrrhic.md`.
+- **Tier-1 #413 builder DONE:** DRAFT PR #413, 4 commits (da18694e7/f14ecd192/96d8976f3/d485f3506), smoke triad PASS (tsc + scoped 104 tests + desktop:map:build clean), inert (unreachable from scenario_runner) + no-§6 proven. Full parallel vitest crashed on worker-pool startup (environmental). Independent reviewer a5f89254 in flight (running real full suite to close the gap).
+- **Owner-gate removal:** inventory complete (ac3ba081, `proposals/20260611_OWNER_GATE_REMOVAL_INVENTORY.md`) = ~59 class-A edits/29 files; FORAWWV.md = pure substance, NO edits (ban lived in pointer files; CLAUDE.md:37/68 headline). 6 class-C ruled by orchestrator (atrocity-reward keeps owner-escalation soft-trigger; enclave-overrun hold stays but → §6-panel sign-off; backups/worktrees untouched). Executor applying on branch docs/remove-owner-gate + PR; Canon Compliance review to follow.
+- **Instrumented start→Dayton audit (a715f0e7):** running — D2 de-risk on current main.
+- 3 agents concurrent; floor 649 untouched (all lanes inert/docs).
+
+## MERGE: #409 LANDED (2026-06-11 autonomous) → main fb48be7b3
+- #409 (NON-§6 wiring + test-guard fix + desktop /data/scenarios route) MERGED. test-guard fix + desktop route now on main. Resyncing #410 §6 (inherits both), then #412 csq.
+
+## MERGE: #410 LANDED (2026-06-11) → main 22c37428b
+- #410 §6 wiring MERGED. 2/3. Resyncing #412 csq (already has effects fix; inherits test-guard fix + desktop route from main). Last one.
+
+## ✅ ALL 3 WIRING PRs MERGED (2026-06-11 autonomous) → main de5ea6c12
+- #409 (NON-§6, 10 stills + test-guard fix + desktop /data/scenarios route), #410 (§6, 6 stills), #412 (csq, 9 stills + effects filter) — ALL MERGED. Wiring confirmed on main (war_1995 has 4 image keys, etc.).
+- 2 codex P2 on #412 both FIXED pre-merge (effects filter 81f2ec85f + desktop route in #409) + reply posted. No new codex comments. CI green on all 3.
+- WIRING COVERAGE FINAL: 25/28 event stills wired (10 named + 6 §6 + 9 csq). Homeless (2): event_siege_city_RS, event_displacement_column (no fitting event). Plus held: 3 enclave-decision images (in hand F:\tmp\section6_art, feature-gated) + 5 optional fallbacks (skipped).
+- Worktrees cleaned (art-wiring, art-wiring-s6, art-wiring-csq removed).
+- NOT MINE / left alone: #413 (replay, other agent), #344/#329 (combat, held).
+- TASK COMPLETE.
+
+### 2026-06-11 overnight — wave landed (batched main work)
+- **#413 Tier-1 replay-wire MERGED** (833e2675x): D2-enabling live-play replay producer. Reviewer GO (full suite 9859 pass; 3 fails pre-existing). Inert + no-§6. Worktree cleaned.
+- **#415 §6 Trusina symmetry fix:** panel-unanimous, 188w byte-identical (hash 345e044b unchanged), merging on green via watcher bpg3cwxdg. Closes DoD §6 must-fix #6. Headline event + essay found ALREADY compliant.
+- **#414 owner-gate removal MERGED:** Pyrrhic-panel sign-off replaces owner-gate across 51 docs; FORAWWV byte-identical; canon-reviewed.
+- **Startup-snapshot refresh:** schema 35→36 regen, fixes 3 local false-red tests (CI was green). Committing with this batch.
+- **Art lane:** #409/#410/#412 all merged by art session (my event_loader:572 triage actioned).
+- **Design B shelved.** §6 authority + canon-edit authority now live (exercised twice tonight).
+- **Still running:** instrumented D2 audit (a715f0e7). On landing → triage punch-list = D2 go/no-go.
+- **Remaining for 1.0 = owner gates:** D2 playthrough, D3 operator VM, C3 freeze, post-D2 doc-sync. Machine-doable 1.0 work essentially exhausted.
+- Floor 649 untouched all night.

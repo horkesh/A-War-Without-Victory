@@ -3,6 +3,7 @@
     "civilian_casualties": {},
     "displacement_camp_state": {},
     "displacement_event_log": [],
+    "displacement_flows_by_osid": {},
     "displacement_humanitarian_aggregates": {},
     "displacement_origin_dest_arrivals": {},
     "displacement_recent_by_turn": {},
@@ -43072,5 +43073,5 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 35
+  "schema_version": 36
 }
