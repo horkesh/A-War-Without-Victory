@@ -1027,14 +1027,21 @@ describe('entry-specific: sana_95 family', () => {
             .toBe(true);
     });
 
-    it('axis shape: parent has Krupa 3/7 + Bihac-Petrovac 5/10 + folded Sanski-Most/Kljuc 2/13 third axis', () => {
+    it('axis shape: parent has Krupa 3/7 + Bihac-Petrovac 5/13 + folded Sanski-Most/Kljuc 2/10 third axis', () => {
+        // 2026-06-11 (panel-GO Ključ re-root, +2 OSID 649→651): interior-3
+        // (hadzici/kljuc_2/krasulje_2) moved from sana_sanski_most_kljuc to
+        // sana_bihac_petrovac (Petrovac extension, 1-hop from jasenovac_2).
+        // sana_bihac_petrovac: 10→13. sana_sanski_most_kljuc: 13→10.
         const krupa = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_krupa')!;
         expect(krupa.brigades).toHaveLength(3);
         expect(krupa.objectives).toHaveLength(7);
         expect(krupa.objectives).toContain('op:bosanski_petrovac:krnjeusa');
         const bp = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_bihac_petrovac')!;
         expect(bp.brigades).toHaveLength(5);
-        expect(bp.objectives).toHaveLength(10);
+        expect(bp.objectives).toHaveLength(13);
+        expect(bp.objectives).toContain('op:kljuc:hadzici');
+        expect(bp.objectives).toContain('op:kljuc:kljuc_2');
+        expect(bp.objectives).toContain('op:kljuc:krasulje_2');
         // 2026-06-07 (lever (b) launch-timing fix): the Sanski Most + Ključ
         // interior is now folded into the INITIAL Sana op as a third axis so it
         // launches at w175 at full strength instead of being corridor-gated into
@@ -1047,7 +1054,11 @@ describe('entry-specific: sana_95 family', () => {
             'arbih_506th_mountain',
             'arbih_517th_light',
         ]);
-        expect(skParent.objectives).toHaveLength(13);
+        expect(skParent.objectives).toHaveLength(10);
+        // interior-3 now owned by Petrovac axis — must be absent from this axis:
+        expect(skParent.objectives).not.toContain('op:kljuc:hadzici');
+        expect(skParent.objectives).not.toContain('op:kljuc:kljuc_2');
+        expect(skParent.objectives).not.toContain('op:kljuc:krasulje_2');
         expect(skParent.staging_osid).toBe('op:bosanska_krupa:jasenica_2');
         // #284 (2026-06-08): the standalone `sana_95_follow_on` backstop was
         // retired — the third axis above is now the sole owner of the interior.

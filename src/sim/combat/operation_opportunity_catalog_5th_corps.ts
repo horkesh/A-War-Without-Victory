@@ -100,6 +100,14 @@ const KRUPA_VALLEY_OBJECTIVES = [
 // Petrovac corridor adjacency chain (all ✓):
 //   orasac_2 → vrtoce → prkosi → vodjenica → kolonic_2 →
 //   bosanski_petrovac_2 → dobro_selo_2 → jasenovac_2
+// 2026-06-11 (panel-GO Ključ re-root, +2 OSID 649→651): the interior-3 Ključ
+// OSIDs (hadzici/kljuc_2/krasulje_2) are appended here as a direct extension of
+// the Petrovac axis (jasenovac_2 → hadzici is a 17-segment border, 1 hop).
+// Historical basis (ICTY / BB1 Ch.91-93): Ključ fell 17 Sep 1995 to the 5th
+// Corps 501st+510th advancing FROM Bosanski Petrovac (south), not from the
+// Sanski Most belt (2-3 hops via jelasinovci, used by the depleted 506th/517th).
+// Prior axis (sana_sanski_most_kljuc) retained only the Sanski-Most belt — the
+// 506th/517th continue to deliver sanica_2 there without needing these targets.
 const BIHAC_PETROVAC_OBJECTIVES = [
     'op:bihac:ripac',
     'op:bihac:racic',
@@ -111,6 +119,10 @@ const BIHAC_PETROVAC_OBJECTIVES = [
     'op:bosanski_petrovac:bosanski_petrovac_2',
     'op:bosanski_petrovac:dobro_selo_2',
     'op:bosanski_petrovac:jasenovac_2',
+    // Ključ interior extension — Petrovac axis (1-hop from jasenovac_2):
+    'op:kljuc:hadzici',
+    'op:kljuc:kljuc_2',
+    'op:kljuc:krasulje_2',
 ];
 
 // 2026-06-07: re-ordered into a single verified front-edge adjacency walk
@@ -138,9 +150,8 @@ const SANSKI_KLJUC_OBJECTIVES = [
     'op:sanski_most:ilidza_2',
     'op:sanski_most:kljevci',
     'op:kljuc:sanica_2',
-    'op:kljuc:hadzici',
-    'op:kljuc:kljuc_2',
-    'op:kljuc:krasulje_2',
+    // hadzici/kljuc_2/krasulje_2 re-routed to sana_bihac_petrovac axis
+    // (Petrovac extension, panel-GO 2026-06-11). 506th/517th deliver sanica_2.
 ];
 
 /** Sana pocket-survival anchors. If any one is RS-controlled, the pocket
