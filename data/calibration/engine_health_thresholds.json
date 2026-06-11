@@ -1,0 +1,12 @@
+{
+  "40w": {
+    "zero_eligible_ops_max": 4,
+    "dead_ops_max": 4,
+    "ghost_destroyed_max": 4,
+    "stranded_brigades_max": 4,
+    "matched_osids_min": 655,
+    "kw_ratio_lo": 3.369,
+    "kw_ratio_hi": 4.559
+  },
+  "_note": "Engine-health gate thresholds (EH-1 Part B). Counts = ratcheting ceilings (+15%/+3 headroom); matched_osids = floor (no headroom); kw_ratio = advisory band. Re-bless via: node tools/engine_health_gate.cjs <run_dir> --horizon <h> --update"
+}
