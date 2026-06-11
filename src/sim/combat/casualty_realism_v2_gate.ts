@@ -76,19 +76,23 @@ const V2_SURRENDER: CasualtySplitFractions = { kia: 0.10, wia: 0.55 };
 let _casualtyRealismV2Override: boolean | null = null;
 
 function readEnvCasualtyRealismV2(): boolean {
+    // EH-2 (2026-06-11): DEFAULT-ON. The MC-leak ledger fix is now the standard
+    // casualty-split behavior (territory-orthogonal: control_delta byte-identical,
+    // KIA + all casualty TOTALS untouched — only the MIA→WIA partition moves).
+    // Explicit OFF values still disable it (rollback / flag-OFF byte-identity test).
     const raw = process.env.AWWV_CASUALTY_REALISM_V2;
-    if (raw === undefined) return false; // default OFF — preserves the shipped baseline
+    if (raw === undefined) return true; // default ON — EH-2 MC-leak fix is standard behavior
     const normalized = raw.trim().toLowerCase();
-    if (normalized === '1' || normalized === 'true' || normalized === 'on' || normalized === 'yes') {
-        return true;
+    if (normalized === '0' || normalized === 'false' || normalized === 'off' || normalized === 'no') {
+        return false;
     }
-    return false;
+    return true;
 }
 
 /**
  * Whether the B1 casualty-realism V2 re-anchor is active.
- * Default: FALSE (preserves the shipped calibration floor byte-identically).
- * Module-local override wins over env.
+ * Default: TRUE (EH-2 — the MC-leak ledger fix is the standard split; territory-orthogonal).
+ * Explicit env OFF ("0"/"false"/"off"/"no") disables it. Module-local override wins over env.
  */
 export function isCasualtyRealismV2Enabled(): boolean {
     return _casualtyRealismV2Override !== null
