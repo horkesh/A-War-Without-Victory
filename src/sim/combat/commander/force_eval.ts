@@ -59,6 +59,34 @@ function supplyMult(supplyStatus: string | undefined): number {
     }
 }
 
+// ─── AWWV_BRIEF_GAP_1 ───────────────────────────────────────────────────────
+// FLAG: process.env.AWWV_BRIEF_GAP_1 === 'true'
+// When a brigade's location_osid is absent from the supply report's per-OSID
+// array, return the faction-wide modal supply state instead of falling through
+// to the generic 0.8 default in supplyMult().
+//
+// Root cause: brigades at rear-area or staging OSIDs not covered by the
+// corridor-BFS supply derivation silently get 0.8 ("unknown") even when their
+// faction is broadly strained or critical.  The modal fallback propagates the
+// faction's dominant supply posture to those brigades.
+//
+// Default OFF = byte-identical to prior behaviour.
+// ────────────────────────────────────────────────────────────────────────────
+
+/** Derive the modal SupplyStateLevel across all by_osid entries for a faction entry. */
+function modalSupplyState(
+    byOsid: Array<{ osid: string; state: SupplyStateLevel } | null | undefined>,
+): SupplyStateLevel | undefined {
+    const counts: Partial<Record<SupplyStateLevel, number>> = {};
+    for (const e of byOsid) {
+        if (e?.state) counts[e.state] = (counts[e.state] ?? 0) + 1;
+    }
+    const entries = Object.entries(counts) as Array<[SupplyStateLevel, number]>;
+    if (entries.length === 0) return undefined;
+    entries.sort((a, b) => b[1] - a[1]);
+    return entries[0][0];
+}
+
 function getBrigadeSupplyState(
     brigade: FormationState,
     supplyByOsid: SupplyStateByOsidReport | null | undefined,
@@ -70,7 +98,15 @@ function getBrigadeSupplyState(
     const factionEntry = factions.find(entry => entry?.faction_id === brigade.faction);
     if (!factionEntry || !Array.isArray(factionEntry.by_osid)) return undefined;
     const osidEntry = factionEntry.by_osid.find(entry => entry?.osid === brigade.location_osid);
-    return osidEntry?.state;
+    if (osidEntry?.state) return osidEntry.state;
+
+    // AWWV_BRIEF_GAP_1: fall back to faction-wide modal state instead of
+    // returning undefined (which triggers the 0.8 "unknown" default in supplyMult).
+    if (process.env.AWWV_BRIEF_GAP_1 === 'true') {
+        return modalSupplyState(factionEntry.by_osid);
+    }
+
+    return undefined;
 }
 
 function getFatigueMult(brigade: FormationState, mode: 'attack' | 'defend'): number {
