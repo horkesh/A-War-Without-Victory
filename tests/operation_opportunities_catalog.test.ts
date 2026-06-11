@@ -1027,7 +1027,7 @@ describe('entry-specific: sana_95 family', () => {
             .toBe(true);
     });
 
-    it('axis shape: parent has Krupa 3/7 + Bihac-Petrovac 5/10 + folded Sanski-Most/Kljuc 2/13 third axis', () => {
+    it('axis shape: Krupa 3/7 + Bihac-Petrovac 5/10 + SPLIT Sanski-Most(517th 9) + Kljuc-interior(506th 4) parallel axes', () => {
         const krupa = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_krupa')!;
         expect(krupa.brigades).toHaveLength(3);
         expect(krupa.objectives).toHaveLength(7);
@@ -1035,23 +1035,33 @@ describe('entry-specific: sana_95 family', () => {
         const bp = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_bihac_petrovac')!;
         expect(bp.brigades).toHaveLength(5);
         expect(bp.objectives).toHaveLength(10);
-        // 2026-06-07 (lever (b) launch-timing fix): the Sanski Most + Ključ
-        // interior is now folded into the INITIAL Sana op as a third axis so it
-        // launches at w175 at full strength instead of being corridor-gated into
-        // a late, recovery-phase follow-on. It commits the two 5th Corps brigades
-        // NOT used by the Krupa/Bihać-Petrovac axes (506th + 517th) and stages at
-        // the Krupa-axis tail jasenica_2. See operation_opportunity_catalog_5th_corps.ts.
-        const skParent = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_sanski_most_kljuc')!;
-        expect(skParent).toBeDefined();
-        expect(skParent.brigades).toEqual([
-            'arbih_506th_mountain',
-            'arbih_517th_light',
-        ]);
-        expect(skParent.objectives).toHaveLength(13);
-        expect(skParent.staging_osid).toBe('op:bosanska_krupa:jasenica_2');
-        // #284 (2026-06-08): the standalone `sana_95_follow_on` backstop was
-        // retired — the third axis above is now the sole owner of the interior.
-        // The retired duplicate must be absent from the catalog.
+        // 2026-06-11 (axis-split): the single 13-objective single-file Sanski Most +
+        // Ključ axis was split into two PARALLEL axes. getCurrentLaunchObjectives()
+        // advances one objective per axis per turn, so a 13-deep single axis reached
+        // the Ključ tail only ~W194 (past the W188 budget). Splitting lets the Ključ
+        // interior run in parallel off jelasinovci (~W181). See
+        // operation_opportunity_catalog_5th_corps.ts.
+        // Axis A — Sanski Most (517th, 9 OSIDs, stages at the Krupa-axis tail jasenica_2).
+        const sm = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_sanski_most')!;
+        expect(sm).toBeDefined();
+        expect(sm.brigades).toEqual(['arbih_517th_light']);
+        expect(sm.objectives).toHaveLength(9);
+        expect(sm.staging_osid).toBe('op:bosanska_krupa:jasenica_2');
+        // jelasinovci stays on Axis A (disconnected_sector_territory guard) and is the
+        // contact-edge anchor that Axis B stages from.
+        expect(sm.objectives).toContain('op:sanski_most:jelasinovci');
+        // Axis B — Ključ interior (506th, 4 OSIDs, stages forward at jelasinovci).
+        const kljuc = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_kljuc_interior')!;
+        expect(kljuc).toBeDefined();
+        expect(kljuc.brigades).toEqual(['arbih_506th_mountain']);
+        expect(kljuc.objectives).toHaveLength(4);
+        expect(kljuc.staging_osid).toBe('op:sanski_most:jelasinovci');
+        expect(kljuc.objectives).toEqual(expect.arrayContaining([
+            'op:kljuc:sanica_2', 'op:kljuc:hadzici', 'op:kljuc:kljuc_2', 'op:kljuc:krasulje_2',
+        ]));
+        // The pre-split combined axis must no longer exist.
+        expect(SANA_95_OPPORTUNITY.axes.some(a => a.axis_id === 'sana_sanski_most_kljuc')).toBe(false);
+        // #284 (2026-06-08): the standalone `sana_95_follow_on` backstop stays retired.
         expect(FIFTH_CORPS_OPPORTUNITIES.some(d => d.opportunity_id === 'sana_95_follow_on')).toBe(false);
     });
 
