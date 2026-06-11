@@ -1,8 +1,34 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 243 lessons across 9 topic files.
+> Last restructured: 2026-04-11. 254 lessons across 9 topic files. Last updated: 2026-06-11.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-06-11)
+
+### [Process] Worktree-isolated agents die silently on npm install — run scenario/test agents in MAIN checkout — see `docs/life_lessons/process.md`
+- 3 D2-audit/build agents died at puppeteer download in fresh worktrees, 0 output bytes, no error. Fresh worktrees have no node_modules. Rule: scenario/test/build agents → MAIN checkout (708 pkgs intact); isolate ONLY artifact-reading docs/JSON agents. Re-validates "worktree agents are code generators" (2026-04-15) at a new fatal failure mode.
+
+### [Process] `.bin` shims are empty — invoke packages directly via `node node_modules/<pkg>/dist/...` — see `docs/life_lessons/process.md`
+- `node_modules/.bin/tsx` and `.bin/vitest` are empty shims in this environment. Use: tsx = `node node_modules/tsx/dist/cli.mjs`, vitest = `node node_modules/vitest/vitest.mjs run`. Prefer `npm run test:vitest`.
+
+### [Process] Exclusive checkout ownership extends to the git WORKING TREE — one agent owns main at a time — see `docs/life_lessons/process.md` (promotes 2026-03-29)
+- Multiple agents with git-write authority to the same checkout caused branch-HEAD drift and commit confusion. Rule: one main-checkout agent at a time; others use worktrees or wait; every branching agent restores HEAD to `main` before yielding. Promotes "exclusive file ownership" (2026-03-29) to working-tree level.
+
+### [Calibration] Byte-identical hash when territory was expected to move = lever is INERT — instant NO-GO, don't theorize — see `docs/life_lessons/calibration.md`
+- `planning_duration 5→3` returned hash == floor `345e044b` because op launch is Storm-trigger-bound, not planning-clock-bound. Hash equality is the fastest rejection signal. Close as NO-GO immediately; investigate the code path, then pivot to a different lever.
+
+### [Process/Calibration] Memory briefs decay in ~48h under active development — re-diagnose against current main before running — see `docs/life_lessons/process.md` (promotes 2026-04-24)
+- A 2-day-old brief misdirected two runs today: retired "follow-on" framing, stale "deep ceiling" conclusion, and an inert `planning_duration` lever. Write the assumed floor hash at the top of every brief; if current hash ≠ stated hash, the brief is stale. Re-validates "Verify inherited session-summary premises" (2026-04-24) at calibration-brief scope.
+
+### [Operations] `planning_duration` is fully inert when op launch is event-trigger-bound + staging-gated — see `docs/life_lessons/calibration.md` (extends 2026-04-02)
+- Op Sana fires at W175 via Storm trigger; `planning_duration` is not on that gate path. To shift a triggered op's timing, target the event `turn_min` or staging adjacency — not `planning_duration`. Extends the 2026-04-02 "parallel timers" lesson.
+
+### [Operations] `getCurrentLaunchObjectives()` returns ONE objective per axis per turn — deep tails require parallel axes — see `docs/life_lessons/calibration.md`
+- A single deep axis is depth-capped at 1 OSID/turn regardless of brigade count. To land a tail objective in-budget, SPLIT at a mid-chain OSID that is adjacent to the tail's head — each parallel axis advances independently. From the 506th-brigade Ključ investigation.
+
+### [Process] Verify agent liveness before waiting — 0-byte output past expected window = dead → re-dispatch — see `docs/life_lessons/process.md`
+- Orchestrator held for a dead audit agent (died at npm install, 0 output bytes) across multiple turns. Rule: check output growth at the expected completion time; if 0-byte past the window, re-dispatch as a main-checkout artifact-reading analyst immediately.
 
 ## New Lessons (2026-05-26)
 
@@ -244,6 +270,9 @@
 ---
 
 ## Recently Violated (always read these)
+
+### [Process] Orchestrator must not analyze scenario results — dispatch experts — VIOLATED 2026-06-11 (with mitigation) — see `docs/life_lessons/process.md`
+- After 3 dispatched analysis agents died (worktree npm-install deaths), the orchestrator directly analyzed the D2 audit run (byte-identical interpretation, §6 OSID checks, NaN scan) and the `planning_duration` calibration result; the orchestrator-enforcement hook fired. Mitigation: experts WERE dispatched first and died; self-analysis was a fallback of last resort. **Nuanced lesson**: when an expert dispatch dies, the correct recovery is a NON-worktree artifact-reading analyst (reads existing JSON files, no npm install → no death) — not self-analysis. The orchestrator may gather RAW data (hash, exit code), but the verdict goes to an expert. See `process.md` for the full entry.
 
 ### [Process] Validate expert diagnosis against run data BEFORE implementing the fix — VIOLATED 2026-04-07 (second instance) — see `docs/life_lessons/process.md`
 - Phase F DRINA investigation: subagent claimed "Op Teočak deleted" as the root cause — Op Teočak had NOT been deleted. Claim was deferred rather than immediately verified in code. Also violated in 2026-03-31 (trimming diagnosis). Two instances in two weeks: this pattern is an active threat. Require mechanistic verification ("what diagnostic field would change if this fix is correct?") before accepting any subagent root-cause claim.
@@ -488,12 +517,12 @@
 
 | File | Topics | Lessons | Load when... |
 |------|--------|---------|-------------|
-| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 50 | Running calibration scenarios, tuning parameters, OOB changes |
+| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 53 | Running calibration scenarios, tuning parameters, OOB changes |
 | [combat.md](life_lessons/combat.md) | Combat, Brigade Distribution, March System | 4 | Combat resolution, brigade movement, march/distribution system |
 | [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 59 | Changing engine structure, state, pipeline, adding systems |
 | [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 10 | Modifying derived data, running data scripts, geometry work |
 | [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 14 | Frontend, map, tactical overlay, modal work |
-| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 58 | General development process (skim at session start) |
+| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 65 | General development process (skim at session start) |
 | [sectors.md](life_lessons/sectors.md) | Sectors, Design | 9 | Sector system, front lines, territory assignment, sub-segments |
 | [platform.md](life_lessons/platform.md) | Platform, Tooling | 4 | Build issues, platform-specific bugs, tooling |
 | [events.md](life_lessons/events.md) | Events | 2 | Event system, flag gates, triggers |
