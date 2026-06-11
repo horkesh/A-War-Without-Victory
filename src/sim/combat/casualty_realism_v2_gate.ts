@@ -37,15 +37,21 @@
 //   undefended-OSID defender:                KIA 0.15 / WIA 0.50  → MIA 0.35
 //   surrender cascade defender:              KIA 0.10 / WIA 0.40  → MIA 0.50
 //
-// V2 (flag-ON) fractions: hold KIA where the realism work already put it (keeps the
-// ~1:3.4 killed:wounded the #316 re-anchor achieved), and collapse the inflated MIA
-// fractions into WIA. The surrender cascade is the ONE path where capture is
-// genuinely real (a surrounded garrison IS taken prisoner), so it keeps a meaningful
-// — but trimmed — MIA share. We do NOT touch any *total* casualty count here (e.g.
-// the surrender-cascade forced `defenderTotal = 50% personnel`), only the split:
-// changing a total would couple to territory; the split is reporting-only except for
-// the `pool.exhausted += (killed+mia)*0.75` demographic feed, whose OSID impact is
-// the explicit measured deliverable of this lane.
+// V2 (flag-ON, EH-2 DEFAULT-ON) fractions: hold KIA EVERYWHERE (never touched — the
+// ~1:3.74 killed:wounded is already on the RDC/ICTY target), and collapse the inflated
+// MIA into WIA on the paths where capture is historically nonsensical:
+//   main      0.04 → 0.02 MIA   (small-contact losses; mostly KIA-body-unrecovered)
+//   siege     0.15 → 0.02 MIA   (encircled defenders are not captured en masse)
+//   undefended 0.35 → 0.35 MIA  (UNCHANGED — historian: excess here was predominantly
+//                                KILLED, not wounded; MIA→WIA would be the most wrong
+//                                move. Reserved for a post-1.0 MIA→KIA rebalance.)
+//   surrender 0.50 → 0.15 MIA   (organized surrender DOES produce real captures, so it
+//                                keeps a trimmed durable-POW share, not ~0.02.)
+// We do NOT touch any *total* casualty count (e.g. the surrender-cascade forced
+// `defenderTotal = 50% personnel`), only the K/W/M split: changing a total would couple
+// to territory; the split is reporting-only except for the
+// `pool.exhausted += (killed+mia)*0.75` demographic feed, whose OSID impact is proven
+// byte-identical (control_delta unchanged) — the explicit measured deliverable.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface CasualtySplitFractions {
@@ -68,10 +74,29 @@ const SHIPPED_SURRENDER: CasualtySplitFractions = { kia: 0.10, wia: 0.40 };
 const V2_MAIN: CasualtySplitFractions = { kia: 0.22, wia: 0.76 };
 /** V2 siege split: KIA 0.20 / WIA 0.78 / MIA 0.02 (0.15→0.02 MIA, shelling rarely captures). */
 const V2_SIEGE: CasualtySplitFractions = { kia: 0.20, wia: 0.78 };
-/** V2 undefended split: KIA 0.15 / WIA 0.83 / MIA 0.02 (0.35→0.02; an undefended OSID has no garrison to capture). */
-const V2_UNDEFENDED: CasualtySplitFractions = { kia: 0.15, wia: 0.83 };
-/** V2 surrender-cascade split: KIA 0.10 / WIA 0.55 / MIA 0.35 (0.50→0.35; real capture, trimmed). */
-const V2_SURRENDER: CasualtySplitFractions = { kia: 0.10, wia: 0.55 };
+/**
+ * V2 undefended split: KIA 0.15 / WIA 0.50 / MIA 0.35 — UNCHANGED from shipped.
+ *
+ * EH-2 historian correction (20260611_casualty_historian_validation.md §5.2, §6):
+ * collapsing the undefended-OSID MIA into WIA is "the single most historically wrong
+ * move" — the excess "missing" on early-war undefended village takeovers (Prijedor /
+ * Foča / Višegrad / Zvornik, 1992) was predominantly KILLED, not wounded. The
+ * historically-ideal destination is KIA (~0.20–0.25), but raising KIA is territory-
+ * coupled (feeds `pool.exhausted += (killed+mia)*0.75`) and is forbidden at 1.0. So we
+ * leave the undefended split UNCHANGED rather than over-convert mass-grave-KIA "missing"
+ * into "wounded". Post-1.0 lane: split this ~70% KIA / ~30% WIA once Lane-3 volume lands.
+ */
+const V2_UNDEFENDED: CasualtySplitFractions = { kia: 0.15, wia: 0.50 };
+/**
+ * V2 surrender-cascade split: KIA 0.10 / WIA 0.75 / MIA 0.15 (0.50→0.15; split-only).
+ *
+ * Organized surrender genuinely produces captures, so this path KEEPS a real (but
+ * trimmed) MIA share rather than collapsing to ~0.02. 0.50 over-booked a *durable*
+ * capture with no POW-return/exchange model; 0.15 is a realistic durable-POW share
+ * (diagnosis 20260611_mc_leak_diagnosis.md §3). KIA + the forced
+ * `defenderTotal = 0.5 × personnel` total knob are LEFT UNCHANGED (territory-coupled).
+ */
+const V2_SURRENDER: CasualtySplitFractions = { kia: 0.10, wia: 0.75 };
 
 let _casualtyRealismV2Override: boolean | null = null;
 
