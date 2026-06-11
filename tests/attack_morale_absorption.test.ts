@@ -10,7 +10,7 @@ import {
     evaluateAndApplyMoraleAbsorption,
     MORALE_ABSORPTION_CAS_MULT,
 } from '../src/sim/combat/attack_morale_absorption.js';
-import { KIA_FRACTION, WIA_FRACTION } from '../src/sim/combat/attack_casualty_distribution.js';
+import { splitKiaWiaMia } from '../src/sim/combat/attack_casualty_distribution.js';
 import { MIN_COMBAT_PERSONNEL } from '../src/state/formation_constants.js';
 import { initializeCasualtyLedger } from '../src/state/casualty_ledger.js';
 import type { FactionId, FormationState, BrigadeComposition } from '../src/state/game_state.js';
@@ -471,22 +471,19 @@ describe('evaluateAndApplyMoraleAbsorption', () => {
                 battleSnapEvents: [],
             });
 
-            // Defender: extraDefenderTotal = min(900, 60) = 60
-            const defKia = Math.floor(60 * KIA_FRACTION);    // 18
-            const defWia = Math.floor(60 * WIA_FRACTION);    // 33
-            const defMia = 60 - defKia - defWia;              // 9
-            expect(ledger['RBiH'].killed).toBe(defKia);
-            expect(ledger['RBiH'].wounded).toBe(defWia);
-            expect(ledger['RBiH'].missing_captured).toBe(defMia);
+            // Defender: extraDefenderTotal = min(900, 60) = 60. Morale absorption now
+            // records via splitKiaWiaMia (EH-2 gate, default-ON main split 0.22/0.76/0.02).
+            const defSplit = splitKiaWiaMia(60);
+            expect(ledger['RBiH'].killed).toBe(defSplit.killed);
+            expect(ledger['RBiH'].wounded).toBe(defSplit.wounded);
+            expect(ledger['RBiH'].missing_captured).toBe(defSplit.missing_captured);
 
             // Attacker: extraAttackerTotal = round(100*0.6) = 60, single attacker frac=1.0
             // extraCas = min(900, 60) = 60
-            const atkKia = Math.floor(60 * KIA_FRACTION);
-            const atkWia = Math.floor(60 * WIA_FRACTION);
-            const atkMia = 60 - atkKia - atkWia;
-            expect(ledger['RS'].killed).toBe(atkKia);
-            expect(ledger['RS'].wounded).toBe(atkWia);
-            expect(ledger['RS'].missing_captured).toBe(atkMia);
+            const atkSplit = splitKiaWiaMia(60);
+            expect(ledger['RS'].killed).toBe(atkSplit.killed);
+            expect(ledger['RS'].wounded).toBe(atkSplit.wounded);
+            expect(ledger['RS'].missing_captured).toBe(atkSplit.missing_captured);
         });
 
         it('report.casualty_attacker and report.casualty_defender updated', () => {

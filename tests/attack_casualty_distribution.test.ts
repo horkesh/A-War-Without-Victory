@@ -47,11 +47,12 @@ function makeLedger(): CasualtyLedger {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('splitKiaWiaMia', () => {
-    it('totalCasualties = 100: canonical 22/74/4 split', () => {
+    it('totalCasualties = 100: EH-2 default-ON V2 main split 22/76/2', () => {
         const result = splitKiaWiaMia(100);
+        // 0.22/0.76/0.02 (MC-leak fix default-ON; was 22/74/4 flag-OFF).
         expect(result.killed).toBe(22);
-        expect(result.wounded).toBe(74);
-        expect(result.missing_captured).toBe(4);
+        expect(result.wounded).toBe(76);
+        expect(result.missing_captured).toBe(2);
     });
 
     it('totalCasualties = 0: all zero', () => {
@@ -87,10 +88,10 @@ describe('splitKiaWiaMia', () => {
 
     it('large number: totalCasualties = 1000', () => {
         const result = splitKiaWiaMia(1000);
-        // floor(1000 * 0.22) = 220, floor(1000 * 0.74) = 740, remainder = 40
+        // EH-2 default-ON: floor(1000 * 0.22) = 220, floor(1000 * 0.76) = 760, remainder = 20.
         expect(result.killed).toBe(220);
-        expect(result.wounded).toBe(740);
-        expect(result.missing_captured).toBe(40);
+        expect(result.wounded).toBe(760);
+        expect(result.missing_captured).toBe(20);
     });
 });
 
@@ -442,16 +443,17 @@ describe('distributeDefenderCasualties', () => {
             casualtyLedger: ledger,
         });
         const factionLedger = ledger['RBiH']!;
-        // splitKiaWiaMia(100): killed=22, wounded=74, missing_captured=4
+        // splitKiaWiaMia(100), EH-2 default-ON V2 main split 0.22/0.76/0.02:
+        // killed=22, wounded=76, missing_captured=2.
         expect(factionLedger.killed).toBe(22);
-        expect(factionLedger.wounded).toBe(74);
-        expect(factionLedger.missing_captured).toBe(4);
+        expect(factionLedger.wounded).toBe(76);
+        expect(factionLedger.missing_captured).toBe(2);
         // Check per-formation record
         const formationRecord = factionLedger.per_formation['def_1'];
         expect(formationRecord).toBeDefined();
         expect(formationRecord!.killed).toBe(22);
-        expect(formationRecord!.wounded).toBe(74);
-        expect(formationRecord!.missing_captured).toBe(4);
+        expect(formationRecord!.wounded).toBe(76);
+        expect(formationRecord!.missing_captured).toBe(2);
     });
 });
 
