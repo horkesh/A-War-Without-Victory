@@ -1034,8 +1034,12 @@ describe('entry-specific: sana_95 family', () => {
         // sana_bihac_petrovac: 10→13. sana_sanski_most_kljuc: 13→10.
         const krupa = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_krupa')!;
         expect(krupa.brigades).toHaveLength(3);
-        expect(krupa.objectives).toHaveLength(7);
+        // 2026-06-11 (batch-2): Bosanski Novi krslje_2 + matavazi_2 appended to the
+        // Krupa axis (KRUPA_VALLEY_OBJECTIVES 7→9, adjacent to the already-RBiH donji_dubovik_2).
+        expect(krupa.objectives).toHaveLength(9);
         expect(krupa.objectives).toContain('op:bosanski_petrovac:krnjeusa');
+        expect(krupa.objectives).toContain('op:bosanski_novi:krslje_2');
+        expect(krupa.objectives).toContain('op:bosanski_novi:matavazi_2');
         const bp = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_bihac_petrovac')!;
         expect(bp.brigades).toHaveLength(5);
         expect(bp.objectives).toHaveLength(13);
