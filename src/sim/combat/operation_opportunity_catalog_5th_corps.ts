@@ -127,7 +127,18 @@ const BIHAC_PETROVAC_OBJECTIVES = [
 // and got stranded as a 1-OSID RS island once the axis fanned past it into the
 // town center, tripping a disconnected_sector_territory critical on
 // vrs_1st_krajina:2. Pulling it forward keeps the captured belt contiguous.
-const SANSKI_KLJUC_OBJECTIVES = [
+//
+// 2026-06-11 (axis-split): The original 13-objective single-file chain was split
+// into two parallel axes. Axis A (517th) keeps the 9 Sanski Most OSIDs including
+// jelasinovci (must stay here — see disconnected_sector_territory note above).
+// Axis B (506th) branches off jelasinovci (~W181) and drives the 4 Ključ-interior
+// OSIDs in parallel. Contact-graph edge jelasinovci ↔ sanica_2 confirmed
+// (8 shared segments). With the original single axis, getCurrentLaunchObjectives()
+// returns 1 objective/turn regardless of brigade count, so the 13-step chain
+// could not complete in the W178-W188 budget (10 turns). Splitting into two
+// 9-step and 4-step parallel chains reduces the critical path to 9 turns,
+// within budget.
+const SANSKI_MOST_OBJECTIVES = [
     'op:sanski_most:budimlic_japra_2',
     'op:sanski_most:lusci_palanka_2',
     'op:sanski_most:jelasinovci',
@@ -137,6 +148,13 @@ const SANSKI_KLJUC_OBJECTIVES = [
     'op:sanski_most:ostra_luka',
     'op:sanski_most:ilidza_2',
     'op:sanski_most:kljevci',
+];
+
+// Ključ-interior objectives for Axis B (506th). Staged at jelasinovci which
+// has a direct contact-graph edge to sanica_2 (8 shared segments, confirmed).
+// Order: sanica_2 first (adjacent to jelasinovci), then the internally-connected
+// Ključ cluster (sanica_2 ↔ hadzici ↔ kljuc_2 ↔ krasulje_2).
+const KLJUC_INTERIOR_OBJECTIVES = [
     'op:kljuc:sanica_2',
     'op:kljuc:hadzici',
     'op:kljuc:kljuc_2',
@@ -214,27 +232,40 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
         // they were recovery-phase exhausted, so pulling planning_duration 3→1
         // (execution t186→t184) still delivered only 2/13.
         //
-        // This third axis instead commits the TWO 5th Corps brigades NOT used by
-        // the initial Krupa (3) / Bihać-Petrovac (5) axes — 506th + 517th — so it
-        // fights at full strength. 5th Corps holds exactly 10 line brigades; 8 are
-        // on the two working axes (16/16), leaving 506th/517th free. The axis
-        // stages at jasenica_2 (the Krupa-axis tail) and is front-edge-blocked
-        // (no_approach_osid) until the Krupa axis captures jasenica_2 — then it
-        // rolls down the verified contiguous adjacency walk (SANSKI_KLJUC_
-        // OBJECTIVES) without ever entering a recovery break, because it lives
-        // inside the one continuously-active Sana op. No global threshold, no
-        // combat math, and no corridor predicate touched. Historical mass: the
-        // 5th Corps committed its operational groups en masse Sep-Oct 1995
-        // (Ključ ~17 Sep, Sanski Most ~10 Oct; BB1 pp.417, 419-420).
-        axis_id: 'sana_sanski_most_kljuc',
-        name: 'Sanski Most + Ključ Liberation',
+        // 2026-06-11 (axis-split): was a single 13-objective axis (SANSKI_KLJUC_
+        // OBJECTIVES) assigned to both 506th + 517th. Because getCurrentLaunch-
+        // Objectives() returns ONE objective/turn per axis regardless of brigade
+        // count, the 13-step chain needed ≥13 turns starting ~W181 → completion
+        // W194, 6 turns past budget. Split into Axis A (517th, 9 Sanski Most
+        // OSIDs) + Axis B (506th, 4 Ključ-interior OSIDs) running in parallel.
+        // jelasinovci stays on Axis A (disconnected_sector_territory guard — see
+        // constant comment above). Axis B stages at jelasinovci (contact edge
+        // to sanica_2 confirmed, 8 shared segments). Critical path: 9 turns
+        // (Axis A) vs 4 turns (Axis B, after jelasinovci ~W181) → completes
+        // within W188 budget.
+        axis_id: 'sana_sanski_most',
+        name: 'Sanski Most Liberation',
+        corps: PRIMARY_CORPS,
+        brigades: [
+            'arbih_517th_light' as FormationId,
+        ],
+        objectives: SANSKI_MOST_OBJECTIVES,
+        staging_osid: STAGING_JASENICA,
+    },
+    {
+        // Axis B: Ključ-interior parallel drive. 506th branches off jelasinovci
+        // once Axis A captures it (~W181) and drives the 4-OSID Ključ cluster
+        // in parallel with Axis A's remaining Sanski Most objectives.
+        // staging_osid = jelasinovci (contact edge to sanica_2: 8 shared segs).
+        // This axis is front-edge-blocked until jelasinovci is RBiH-controlled.
+        axis_id: 'sana_kljuc_interior',
+        name: 'Ključ Interior Liberation',
         corps: PRIMARY_CORPS,
         brigades: [
             'arbih_506th_mountain' as FormationId,
-            'arbih_517th_light' as FormationId,
         ],
-        objectives: SANSKI_KLJUC_OBJECTIVES,
-        staging_osid: STAGING_JASENICA,
+        objectives: KLJUC_INTERIOR_OBJECTIVES,
+        staging_osid: 'op:sanski_most:jelasinovci',
     },
 ];
 
