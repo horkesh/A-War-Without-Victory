@@ -13,13 +13,20 @@
  * is a separate, owner-gated step.
  *
  * USAGE:
- *   node tools/engine_health_gate.cjs <run_dir> [--horizon 40w|188w] [--update] [--strict] [--json]
+ *   node tools/engine_health_gate.cjs <run_dir> [--horizon 40w|188w] [--update] [--force] [--strict] [--json]
  *
  *   <run_dir>     a dir containing run_summary.json AND final_save.json
- *   --horizon     which threshold band to check against (default: inferred from run_summary.weeks)
+ *   --horizon     which threshold band to check against. Default inferred from weeks
+ *                 (<=60 -> 40w, else 188w). Only '40w' and '188w' bands are seeded today;
+ *                 a 52w run would infer '40w' — pass --horizon explicitly for other lengths.
  *   --update      write the CURRENT measured values (+ headroom) into the thresholds file and exit 0
+ *   --force       with --update, allow LOWERING the matched_osids floor (otherwise refused)
  *   --strict      treat ADVISORY metrics (K:W band, casualty totals) as hard-fail too
  *   --json        emit a machine-readable JSON result line
+ *
+ * NOTE on ratchet drift: count ceilings get +15%/+3 headroom, so an --update on a slightly
+ * worse run can creep a ceiling up ~3/cycle. The gate catches sudden spikes better than slow
+ * drift; periodically re-seed from a known-good run rather than chained --updates.
  *
  * EXIT: 0 = pass (or --update); 1 = a HARD metric regressed; 2 = bad input.
  *
@@ -44,13 +51,14 @@ function die(msg, code) {
 
 // ---- args ----
 const args = process.argv.slice(2);
-const flags = { update: false, strict: false, json: false, horizon: null };
+const flags = { update: false, strict: false, json: false, force: false, horizon: null };
 const positionals = [];
 for (let i = 0; i < args.length; i++) {
   const a = args[i];
   if (a === '--update') flags.update = true;
   else if (a === '--strict') flags.strict = true;
   else if (a === '--json') flags.json = true;
+  else if (a === '--force') flags.force = true;
   else if (a === '--horizon') flags.horizon = args[++i];
   else positionals.push(a);
 }
@@ -71,7 +79,13 @@ let horizon = flags.horizon;
 if (!horizon) horizon = weeks != null && weeks <= 60 ? '40w' : '188w';
 
 // ---- measure ----
-const cc = summary.combat_causality || {};
+// M1: combat_causality is hoisted to the top level only when weeks_at_war > 0; the
+// always-populated copy lives under behavioral_health. Fall back so a no-combat run
+// doesn't silently report 0/0 (masking issues) instead of the real figures.
+const cc =
+  summary.combat_causality ||
+  (summary.behavioral_health && summary.behavioral_health.combat_causality) ||
+  {};
 const destroyed = Array.isArray(summary.destroyed_brigades) ? summary.destroyed_brigades : [];
 const ghostDestroyed = destroyed.filter(
   (b) => (b.battles_fought || 0) === 0 && (b.total_casualties_taken || 0) === 0
@@ -80,8 +94,12 @@ const ghostDestroyed = destroyed.filter(
 const mil = save.military || {};
 const formationsRaw = mil.formations || {};
 const formations = Array.isArray(formationsRaw) ? formationsRaw : Object.values(formationsRaw);
+// M3: count only GENUINELY-stranded-alive brigades ('holding', plus the transient
+// 'reconnected'). 'collapsed' is the TERMINAL dead-stranded marker (load-bearing
+// permanent-death state per EH-3 2026-06-11) — those are intentional, numerous, and
+// counting them would saturate the metric. We want the live cut-off-from-front signal.
 const stranded = formations.filter(
-  (f) => f && f.stranded_status && f.stranded_status !== 'none'
+  (f) => f && (f.stranded_status === 'holding' || f.stranded_status === 'reconnected')
 ).length;
 
 // K:W from faction-level casualty_ledger (fall back to summing per_formation).
@@ -122,8 +140,9 @@ const measured = {
 };
 
 // ---- state-integrity delegation (hard) ----
+// T2: use process.execPath so the child runs the same Node as the parent.
 const consistency = spawnSync(
-  'node',
+  process.execPath,
   [path.join('tools', 'validate_run_consistency.cjs'), runDir],
   { cwd: REPO_ROOT, encoding: 'utf8' }
 );
@@ -163,6 +182,17 @@ let thresholds = {};
 if (fs.existsSync(THRESH_PATH)) thresholds = JSON.parse(fs.readFileSync(THRESH_PATH, 'utf8'));
 
 if (flags.update) {
+  // N3: never let --update silently LOWER the territory floor (that would defeat its
+  // purpose — a degraded run could quietly ratchet the floor down). Require --force.
+  const existingFloor = thresholds[horizon] && thresholds[horizon].matched_osids_min;
+  if (existingFloor != null && measured.matched_osids < existingFloor && !flags.force) {
+    die(
+      `refusing to lower matched_osids floor ${existingFloor} -> ${measured.matched_osids} ` +
+        `for ${horizon}. This run is WORSE than the blessed floor. Pass --force only if you ` +
+        `deliberately intend to drop the floor.`,
+      2
+    );
+  }
   thresholds[horizon] = withHeadroom(defaultBand());
   thresholds._note =
     'Engine-health gate thresholds (EH-1 Part B). Counts = ratcheting ceilings (+15%/+3 headroom); ' +
@@ -205,9 +235,10 @@ if (flags.json) {
     console.log(`  [${tag}] ${c.name.padEnd(18)} ${c.detail}`);
   }
   console.log(`  metrics: ${JSON.stringify(measured)}`);
-  if (!consistencyOk && consistency.stdout) {
+  if (!consistencyOk) {
     console.log('  --- validate_run_consistency output (tail) ---');
-    console.log(consistency.stdout.split('\n').slice(-12).join('\n'));
+    if (consistency.stdout) console.log(consistency.stdout.split('\n').slice(-12).join('\n'));
+    if (consistency.stderr) console.log('  [stderr] ' + consistency.stderr.split('\n').slice(-6).join('\n'));
   }
   console.log(`[engine_health_gate] ${fail ? 'FAIL' : 'PASS'}${softFail && !flags.strict ? ' (advisory K:W warning, non-fatal)' : ''}`);
 }

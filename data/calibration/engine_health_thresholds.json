@@ -3,7 +3,7 @@
     "zero_eligible_ops_max": 4,
     "dead_ops_max": 4,
     "ghost_destroyed_max": 4,
-    "stranded_brigades_max": 4,
+    "stranded_brigades_max": 3,
     "matched_osids_min": 655,
     "kw_ratio_lo": 3.369,
     "kw_ratio_hi": 4.559
