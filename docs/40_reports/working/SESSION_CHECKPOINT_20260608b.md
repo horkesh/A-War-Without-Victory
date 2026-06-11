@@ -893,3 +893,62 @@ Live exhaustion build (agent-aa39, feat/exhaustion-feel-surface) HEAD advanced m
 - **Still running:** instrumented D2 audit (a715f0e7). On landing → triage punch-list = D2 go/no-go.
 - **Remaining for 1.0 = owner gates:** D2 playthrough, D3 operator VM, C3 freeze, post-D2 doc-sync. Machine-doable 1.0 work essentially exhausted.
 - Floor 649 untouched all night.
+
+### Sweep (post-wave, 2026-06-11 ~00:1x)
+- Active-PR board CLEAN: only held #344 (CONFLICTING) + #329 (NO-GO) open. All tonight's lanes merged.
+- Main CI: snapshot commit 88d101188 = ALL GREEN (Baseline Regression success → calibration-neutral confirmed on CI). Post-#415 HEAD 0589ccafe run in_progress, expected-green (byte-identical proven). Desktop Release Guard already success.
+- No failures last 40 runs; no new Codex comments; no dead watchers.
+- Only running task: instrumented D2 audit (a715f0e7).
+
+### Sweep + D2-audit approach change (2026-06-11)
+- Sweep CLEAN: no failures (last 40), no new Codex, no dead watchers. Open = held #344 (DIRTY/CONFLICTING) + #329 (BLOCKED/NO-GO) only.
+- **TWO worktree-isolated D2-audit agents DIED** (a715f0e7, a2e8ddcb) — both at fresh-worktree npm install (puppeteer download fail). Stop using isolated worktrees for scenario-run agents.
+- **New approach:** run the D2 audit DIRECTLY in main checkout (node_modules intact, tsx via `node node_modules/tsx/dist/cli.mjs`). Launched 188w `apr1992_definitive_188w_dayton_close` (bg bu9lf97dl). Then `tools/audit_campaign_proof.cjs <rundir>` + a determinism 2nd run.
+- KEY: the standard-188w floor/anchors/clean-completion is ALREADY validated by main CI Baseline Regression (green on 0589ccafe). Audit's unique value = Dayton terminal-verdict close + long-game serializer/NaN health + determinism.
+
+### D2 audit — RUN 1 results (188w dayton-close, main checkout, HEAD 0589ccafe)
+- final_state_hash: b18bde2d9dc141bd · EXIT 0 · **188 weeks, NO crash**
+- **game_over: TRUE** — campaign CLOSES to Dayton terminal state (A2 confirmed live)
+- §6 INTACT: srebrenica_genocide_1995 rupture records t162, perpetrator=RS, genocide_condemnation flag
+- Verdict inputs present (territory HRHB 19.1/RBiH 28.9/RS 52.0, casualties, war_crimes, civilian_cas); cost-ledger present; strategic dimensions present
+- **P2 anomaly:** hrhb_travnik_brigade stranded_status=collapsed "since t1" while cohesion=100/morale=100/personnel=1500 — stranded-flag set at init, never cleared (cosmetic lifecycle bookkeeping; brigade DID fight: killed 213/wounded 762). NON-BLOCKING. hv_* guards collapsed t92 likely legit HV withdrawal.
+- PENDING: determinism RUN 2 (bqwenqfpm) hash compare.
+- PRELIM VERDICT: GO (pending determinism) — engine reaches + closes Dayton, §6 holds, verdict pipeline populated.
+
+### D2 audit — determinism CONFIRMED
+- RUN1 hash b18bde2d9dc141bd == RUN2 hash b18bde2d9dc141bd — IDENTICAL (deterministic across full 188w dayton-close).
+- Dispatching /scenario-creator-runner-tester to analyze run dir + issue formal D2 GO/NO-GO + write audit report (raw data gathered by orchestrator; verdict to the expert).
+
+## PUPPETEER RENDER VERIFICATION (2026-06-11) — owner asked to verify stills render in running app
+- Infra exists: tools/ui/event_modal_browser_smoke.cjs (vite dev map + puppeteer + window.handleManualSaveLoad). It loads a DECISION modal; image stills are in non-decision EventModal (firedEvents acknowledge-flash). Adapting: inject save w/ military.fired_event_ids=[wired event] → EventModal flashes still. Assert <img naturalWidth>0 (asset loaded, not 404) + screenshot.
+- Worktree art-verify @ origin/main de5ea6c12 (has wiring). EventModal illustration = data-testid="event-modal-illustration" img.
+
+## ✅ PUPPETEER RENDER VERIFICATION PASS (2026-06-11)
+- Mounted the REAL EventModal in the live dev map (vite) via temp helper src/ui/map/__still_proof_mount.tsx, driven by puppeteer (tools/ui/event_still_render_proof.cjs). For 7 representative wired stills across all batches (named: dayton_signed/siege_city_RBiH/patron_relations_RS; §6: srebrenica_falls/markale_shelling; csq: mobilization_RBiH/supply_shortage_RS):
+  ALL 7 PASS — resolveEventIllustration glob resolved each basename to /assets/event_illustrations/<name>.webp, the <img> LOADED at 800x450 (naturalWidth>0, not 404/broken), correct src. Visual screenshot confirms the still renders above the dispatch text in the modal.
+- This proves the runtime-critical wiring pieces in the actual running app: resolver + asset serving + EventModal render. (The full game-flow firedEvents→EventModal flash path hit an unrelated AdvanceTurnModal crash when hand-loading a Turn-0 save — app fragility, not wiring; bypassed by mounting the real component.)
+- Temp helper + harness were in the throwaway art-verify worktree (now removed) — NOT committed (never meant to ship). Screenshots sent to owner.
+- ART PROGRAM FULLY DONE: generation → QC → §6 sign-off → wiring (3 PRs merged) → codex P2 fixes → desktop route → RENDER-VERIFIED.
+
+### Ključ/Sana calibration lane (2026-06-11, owner re-opened during trip)
+- Scoping (ops a6e9fed7 + historian aeddde98): current mismatch = 4 Ključ OSIDs still RS (hadzici/kljuc_2/krasulje_2 → RBiH target; donji_vrbljani_2 → HRHB, off-chain). Op Sana fires W175→exec W178, 26/28 obj by W188; Ključ-interior lands W188-189 (1 turn past end). June-7 "launch earlier" hypothesis STALE (follow-on retired #284). Historian ground truth locked (BB1 Ch91-93): Ključ fell 17 Sept to 5th Corps; Sana must deliver Sanski Most+Ključ to RBiH but NOT Šipovo/Jajce/Mrkonjić/Drvar (=HRHB). RBiH+37/HRHB-33 miscount = catalog over-firing onto HRHB-axis OSIDs.
+- **LEVER #1 planning_duration 5→3 (op_opportunity_catalog_5th_corps.ts:353) = INERT/NO-GO** (#416 closed). 188w byte-identical to floor 345e044b — field is read-inert/clamped (op launch bound by Storm W175 trigger, not this field). 4 Ključ OSIDs still RS. §6 intact.
+- **PIVOT → LEVER #2:** only arbih_517th_light issues attack orders on the 3rd Sana axis; arbih_506th_mountain not attacking. If 506th attacked → 2 brigades → capture all Ključ obj. Investigating the 506th attack-order gap (front-edge / brigade-role / axis-assignment).
+
+### Axis-split builder DIED — orchestrator take-over (2026-06-11)
+- Builder ae1b162a (non-worktree, main checkout) made a complete 65-line axis-split edit on cal/kljuc-sana-axis-split but DIED/stalled ~114min ago: uncommitted edit, no commit/push/PR, 0 output. (Liveness lesson applied — took over rather than wait.)
+- Edit looks sane: Axis A (517th, 9 Sanski Most) + Axis B (506th, 4 Ključ-interior, staged jelasinovci, contact edge to sanica_2 confirmed 8 shared segments). jelasinovci kept on Axis A.
+- Its run n8 (114min old, may not match current edit) = hash 4f08c4b728badd67 (≠ floor 345e044b → NON-inert), RBiH 285/HRHB 106/RS 321. NOT trusted — re-measuring fresh on the committed edit.
+- Plan: tsc-verify → commit edit → fresh 188w → dispatch scenario-tester panel for GO/NO-GO (no self-analysis).
+
+### Axis-split take-over progress (2026-06-11)
+- Salvaged dead builder ae1b162a's 65-line edit: SANSKI_KLJUC single axis → sana_sanski_most (517th, 9 obj, stage jasenica_2) + sana_kljuc_interior (506th, 4 obj [sanica_2/hadzici/kljuc_2/krasulje_2], stage jelasinovci). tsc clean.
+- Updated the sana_95 axis-shape test for the split (44/44 pass). Commits 4f01c540b (lever) + 4c72b0350 (test) on cal/kljuc-sana-axis-split.
+- Fresh 188w measuring (b57taov1o) — re-measure since the dead builder's n8 (4f08c4b, ≠floor → non-inert) may not match committed code.
+- NEXT: on 188w complete → push branch + open PR + dispatch scenario-tester panel (non-worktree, reads artifacts) for GO/NO-GO. NO self-analysis of the result (per today's violation lesson).
+
+### Daily Pyrrhic Standup (2026-06-11) — board delivered
+- Axis-split lever NO-GO (panel #418 closed, reverted clean): byte-identical territory, 3 Ključ OSIDs still RS. Ключ lane = deep-objective ceiling, 2 levers NO-GO → owner decision (structural redesign vs park). Memory brief updated.
+- War-or-Game assessment: D2-GO; BIGGEST GAP = P0-B 100-week front freeze (RS 52.7%→51.8% w40-w140, then scripted cliff) from corps-AI supply/theater blindness (BRIEF-GAP-1/ARMY-GAP-1/BRIEF-GAP-6). KIA 1.74× (owner-HELD), missing/captured 5×, 26 stranded brigades, Op Trnovo t184 misfire.
+- 5 priorities set: P1 organic mid-war territory (flagship, floor-moving), P2 casualty/deployment engine-health, P3 Ključ decision, P4 Trnovo OOB, P5 hygiene+doc-sync.
+- Board: ~/.agent/diagrams/awwv-standup-20260611.html (delivered to owner).
