@@ -1320,26 +1320,32 @@ export const warPhases: NamedPhase[] = [
             // directly, bypasses this organic-targeting suppression path).
             if (isSrkStranglePostureEnabled()) {
                 const srkOsids = computeSrkStrangleOsids(context.state);
-                if (srkOsids.length > 0) {
+                // ADDITIVE MERGE: union with Lane V's CURRENT set only.
+                // When Lane V is OFF, do NOT inherit a possibly-stale serialized .RS
+                // from a prior session — base = [] — so a now-off Lane V's stale set
+                // is dropped (Codex P1 #426). When Lane V is ON, its block ran just
+                // above and wrote a fresh set, so reading .RS here is the current state.
+                // Computed UNCONDITIONALLY (even when srkOsids is empty) so the stale
+                // set is also cleared in the SRK-on/Lane-V-off/empty-core case (Codex
+                // P2 #427) — otherwise the plan.ts gate (active via the SRK flag) would
+                // keep reading leftover eastern-enclave entries.
+                const base = isVrsContainPostureEnabled()
+                    ? (context.state.political.last_contained_osids_by_faction?.RS ?? [])
+                    : [];
+                const merged = [...new Set([...base, ...srkOsids])];
+                merged.sort(strictCompare);
+                if (merged.length > 0) {
                     if (!context.state.political.last_contained_osids_by_faction) {
                         context.state.political.last_contained_osids_by_faction = {};
                     }
-                    // ADDITIVE MERGE: union with Lane V's CURRENT set only.
-                    // When Lane V is OFF, do NOT inherit a possibly-stale serialized
-                    // .RS from a prior session — use [] as the base instead. This
-                    // preserves flag-independence on resumed saves (Codex P1 #426).
-                    // When Lane V is ON, its block ran just above and wrote a fresh
-                    // set, so reading .RS here yields the correct current state.
-                    const base = isVrsContainPostureEnabled()
-                        ? (context.state.political.last_contained_osids_by_faction.RS ?? [])
-                        : [];
-                    const merged = [...new Set([...base, ...srkOsids])];
-                    merged.sort(strictCompare);
                     context.state.political.last_contained_osids_by_faction.RS = merged;
+                } else if (context.state.political.last_contained_osids_by_faction?.RS) {
+                    // Nothing to contain (Lane V off + no RBiH-held urban core) → clear
+                    // any stale serialized set so the suppression site reads nothing.
+                    delete context.state.political.last_contained_osids_by_faction.RS;
                 }
-                // No else-delete: SRK strangle is permanent (no release). If the flag
-                // is toggled OFF mid-save the plan.ts gate (isContainSuppressionActiveFor)
-                // ignores the stale set, preserving default-off byte-identity.
+                // No release predicate: SRK strangle is permanent. Flag-off keeps this
+                // block unentered → default-off byte-identity.
             }
         }
     },
