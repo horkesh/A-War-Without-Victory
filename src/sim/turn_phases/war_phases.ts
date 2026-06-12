@@ -81,7 +81,8 @@ import { computeSupplyReachability } from '../../state/supply_reachability.js';
 import { computeSupplyReachabilityOsid, type SupplyReachabilityOsidReport } from '../../state/supply_reachability_osid.js';
 import { buildContainDiagnostic } from '../combat/contain_diagnostic.js';
 import { computeContainedOsidsForFaction } from '../combat/enclave_resilience.js';
-import { isVrsContainPostureEnabled, isArbihContainPostureEnabled } from '../combat/contain_posture_gate.js';
+import { isVrsContainPostureEnabled, isArbihContainPostureEnabled, isSrkStranglePostureEnabled } from '../combat/contain_posture_gate.js';
+import { computeSrkStrangleOsids } from '../combat/srk_strangle.js';
 import {
     deriveCorridors,
     deriveCorridorsOsid,
@@ -1307,6 +1308,32 @@ export const warPhases: NamedPhase[] = [
                     // Washington release) so the suppression site never reads a leftover.
                     delete context.state.political.last_contained_osids_by_faction.RBiH;
                 }
+            }
+
+            // SRK strangle-not-capture (§6 Sarajevo urban core, DEFAULT-OFF): suppress
+            // SRK organic CAPTURE intent against the four urban-core municipalities
+            // (centar/novi_grad/novo/stari_grad sarajevo). MERGES ADDITIVELY into the
+            // .RS contained set — does NOT overwrite Lane V's enclave containment.
+            // No release predicate: the SRK never pivoted to assault the city.
+            // Only written when the flag is ON → flag-off keeps state byte-identical.
+            // Player ahistorical assault still possible via authorize_op (injects
+            // directly, bypasses this organic-targeting suppression path).
+            if (isSrkStranglePostureEnabled()) {
+                const srkOsids = computeSrkStrangleOsids(context.state);
+                if (srkOsids.length > 0) {
+                    if (!context.state.political.last_contained_osids_by_faction) {
+                        context.state.political.last_contained_osids_by_faction = {};
+                    }
+                    // ADDITIVE MERGE: union with whatever Lane V wrote (or [] when Lane V
+                    // is OFF) so the two lanes are independent and cumulative.
+                    const existing = context.state.political.last_contained_osids_by_faction.RS ?? [];
+                    const merged = [...new Set([...existing, ...srkOsids])];
+                    merged.sort(strictCompare);
+                    context.state.political.last_contained_osids_by_faction.RS = merged;
+                }
+                // No else-delete: SRK strangle is permanent (no release). If the flag
+                // is toggled OFF mid-save the plan.ts gate (isContainSuppressionActiveFor)
+                // ignores the stale set, preserving default-off byte-identity.
             }
         }
     },

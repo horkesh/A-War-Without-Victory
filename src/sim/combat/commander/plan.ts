@@ -63,6 +63,7 @@ import {
 import {
     isVrsContainPostureEnabled,
     isArbihContainPostureEnabled,
+    isSrkStranglePostureEnabled,
 } from '../contain_posture_gate.js';
 
 /**
@@ -70,11 +71,17 @@ import {
  * the planner's read of `last_contained_osids_by_faction[faction]` on the
  * faction's OWN flag — so a save serialized with a contain flag ON, then resumed
  * with the flag OFF, does NOT honor the stale serialized set (default-off must be
- * a TRUE no-op for resumed saves, not just fresh runs). RS→Lane V flag, RBiH→
- * Lane A flag; any other faction is never contained.
+ * a TRUE no-op for resumed saves, not just fresh runs).
+ *
+ * RS → Lane V (VRS enclave contain) OR SRK strangle (Sarajevo urban core):
+ *   both write into `.RS` — the read gate must honor either flag so that when
+ *   only one is ON the suppression still takes effect, and when both are OFF
+ *   the stale serialized set is ignored (byte-identity preserved).
+ * RBiH → Lane A flag (HVO enclave contain).
+ * Any other faction → never contained.
  */
 export function isContainSuppressionActiveFor(faction: FactionId): boolean {
-    if (faction === 'RS') return isVrsContainPostureEnabled();
+    if (faction === 'RS') return isVrsContainPostureEnabled() || isSrkStranglePostureEnabled();
     if (faction === 'RBiH') return isArbihContainPostureEnabled();
     return false;
 }
