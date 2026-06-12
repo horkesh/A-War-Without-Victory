@@ -99,3 +99,49 @@ export function setArbihContainPostureOverride(value: boolean | null): void {
 export function resetArbihContainPostureGate(): void {
     _arbihContainPostureOverride = null;
 }
+
+// ── SRK strangle-not-capture posture (§6 Sarajevo urban-core, DEFAULT-OFF) ──
+//
+// Models the historically accurate VRS Sarajevo-Romanija Corps (SRK) doctrine:
+// the SRK STRANGLED the Sarajevo urban core, never assaulted it (Galić Appeal
+// §389). The four urban-core municipalities (centar_sarajevo / novi_grad_sarajevo
+// / novo_sarajevo / stari_grad_sarajevo) are suppressed from organic SRK CAPTURE
+// intent when this flag is ON. The outer ring (ilidza/vogosca/ilijas/hadzici/
+// pale/sokolac) is NOT suppressed — those remain legitimate SRK objectives.
+//
+// The player can still order the ahistorical assault via the existing
+// `authorize_op` presidential lever (which injects an op directly, bypassing the
+// organic plan path — no extra work needed for the override).
+//
+// SEPARATE FLAG from the VRS/ARBiH contain gates so the lane activates
+// INDEPENDENTLY (one-change-per-run calibration attribution). DEFAULT-OFF →
+// flag-off keeps the sim byte-identical to the calibration floor.
+
+let _srkStranglePostureOverride: boolean | null = null;
+
+/**
+ * Returns true when the SRK strangle-posture is enabled.
+ * Reads `process.env.AWWV_SRK_STRANGLE_POSTURE` ('true' or '1' => ON) unless an
+ * override has been set via the setter (tests). DEFAULT-OFF: unset / any other
+ * value => OFF (the calibration-LAST byte-identity contract).
+ */
+export function isSrkStranglePostureEnabled(): boolean {
+    if (_srkStranglePostureOverride !== null) {
+        return _srkStranglePostureOverride;
+    }
+    const raw = process.env.AWWV_SRK_STRANGLE_POSTURE;
+    return raw === 'true' || raw === '1';
+}
+
+/**
+ * Set the SRK strangle-posture override. Pass `null` to clear and fall back to
+ * env. Tests-only.
+ */
+export function setSrkStranglePostureOverride(value: boolean | null): void {
+    _srkStranglePostureOverride = value;
+}
+
+/** Reset the override to null (env-fallback). For test cleanup between cases. */
+export function resetSrkStranglePostureGate(): void {
+    _srkStranglePostureOverride = null;
+}
