@@ -1324,10 +1324,16 @@ export const warPhases: NamedPhase[] = [
                     if (!context.state.political.last_contained_osids_by_faction) {
                         context.state.political.last_contained_osids_by_faction = {};
                     }
-                    // ADDITIVE MERGE: union with whatever Lane V wrote (or [] when Lane V
-                    // is OFF) so the two lanes are independent and cumulative.
-                    const existing = context.state.political.last_contained_osids_by_faction.RS ?? [];
-                    const merged = [...new Set([...existing, ...srkOsids])];
+                    // ADDITIVE MERGE: union with Lane V's CURRENT set only.
+                    // When Lane V is OFF, do NOT inherit a possibly-stale serialized
+                    // .RS from a prior session — use [] as the base instead. This
+                    // preserves flag-independence on resumed saves (Codex P1 #426).
+                    // When Lane V is ON, its block ran just above and wrote a fresh
+                    // set, so reading .RS here yields the correct current state.
+                    const base = isVrsContainPostureEnabled()
+                        ? (context.state.political.last_contained_osids_by_faction.RS ?? [])
+                        : [];
+                    const merged = [...new Set([...base, ...srkOsids])];
                     merged.sort(strictCompare);
                     context.state.political.last_contained_osids_by_faction.RS = merged;
                 }
