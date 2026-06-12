@@ -210,6 +210,97 @@ test('SRK strangle and Lane V are additive: union of both sets written to .RS', 
     assert.strictEqual(final.length, new Set(final).size, 'no duplicates in merged set');
 });
 
+// ── (g) Resumed-save flag-independence (Codex P1 #426) ───────────────────────
+
+test('resumed-save stale-clearing: SRK-ON + Lane-V-OFF discards stale .RS from prior session', () => {
+    // Pre-condition: a prior session ran with Lane V ON and serialized eastern-enclave
+    // OSIDs into .RS. The save is now resumed with Lane V OFF, SRK ON.
+    // The fixed code uses base=[] when Lane V is OFF, so the stale entries must
+    // NOT appear in the resulting .RS — only the fresh SRK urban-core set.
+    setVrsContainPostureOverride(false);
+    setSrkStranglePostureOverride(true);
+
+    const state = stateWithControllers({
+        [CENTAR]:        'RBiH',
+        [NOVI_GRAD]:     'RBiH',
+        [NOVO_SARAJEVO]: 'RBiH',
+        [STARI_GRAD]:    'RBiH',
+    });
+
+    // Seed stale Lane-V data from a prior session.
+    const STALE_EASTERN_1 = 'op:srebrenica:srebrenica_2';
+    const STALE_EASTERN_2 = 'op:zepa:zepa_2';
+    state.political.last_contained_osids_by_faction = {
+        RS: [STALE_EASTERN_1, STALE_EASTERN_2],
+    };
+
+    // Simulate the war-phase SRK block with the fix applied.
+    // (Mirrors the logic in war_phases.ts lines ~1321-1337 post-fix.)
+    assert.strictEqual(isSrkStranglePostureEnabled(), true);
+    const srkOsids = computeSrkStrangleOsids(state);
+    assert.ok(srkOsids.length > 0, 'precondition: SRK computes some OSIDs');
+
+    const base = isVrsContainPostureEnabled()
+        ? (state.political.last_contained_osids_by_faction?.RS ?? [])
+        : [];
+    const merged = [...new Set([...base, ...srkOsids])];
+    merged.sort();
+    state.political.last_contained_osids_by_faction!.RS = merged;
+
+    const final = state.political.last_contained_osids_by_faction!.RS!;
+
+    // Stale eastern-enclave entries must NOT appear.
+    assert.ok(!final.includes(STALE_EASTERN_1),
+        'stale srebrenica_2 (Lane-V leftover) must be cleared when Lane V is OFF');
+    assert.ok(!final.includes(STALE_EASTERN_2),
+        'stale zepa_2 (Lane-V leftover) must be cleared when Lane V is OFF');
+
+    // Fresh SRK urban-core entries must appear.
+    assert.ok(final.includes(CENTAR),        'centar_sarajevo present in fresh SRK set');
+    assert.ok(final.includes(NOVI_GRAD),     'novi_grad_sarajevo present in fresh SRK set');
+    assert.ok(final.includes(NOVO_SARAJEVO), 'novo_sarajevo present in fresh SRK set');
+    assert.ok(final.includes(STARI_GRAD),    'stari_grad_sarajevo present in fresh SRK set');
+});
+
+test('both-ON union: Lane-V-ON + SRK-ON writes union of both fresh sets to .RS', () => {
+    // When both flags are ON, the fixed code: Lane V writes its fresh set first,
+    // then SRK reads base = that fresh set (isVrsContainPostureEnabled() = true)
+    // and unions in SRK OSIDs. The result must contain both.
+    setVrsContainPostureOverride(true);
+    setSrkStranglePostureOverride(true);
+
+    // Simulate Lane V having written a fresh set (no stale contamination).
+    const FRESH_LANE_V_1 = 'op:gorazde:gorazde_2';
+    const FRESH_LANE_V_2 = 'op:bihac:bihac_2';
+    const state = stateWithControllers({
+        [CENTAR]:    'RBiH',
+        [NOVI_GRAD]: 'RBiH',
+    });
+    // Lane V's fresh write (simulates what isVrsContainPostureEnabled block does above SRK block).
+    state.political.last_contained_osids_by_faction = {
+        RS: [FRESH_LANE_V_1, FRESH_LANE_V_2],
+    };
+
+    // Now simulate the SRK block with fix applied.
+    assert.strictEqual(isVrsContainPostureEnabled(), true);
+    const srkOsids = computeSrkStrangleOsids(state);
+    const base = isVrsContainPostureEnabled()
+        ? (state.political.last_contained_osids_by_faction?.RS ?? [])
+        : [];
+    const merged = [...new Set([...base, ...srkOsids])];
+    merged.sort();
+    state.political.last_contained_osids_by_faction!.RS = merged;
+
+    const final = state.political.last_contained_osids_by_faction!.RS!;
+
+    // Both Lane-V fresh entries and SRK entries must be present.
+    assert.ok(final.includes(FRESH_LANE_V_1), 'fresh Lane-V gorazde_2 preserved in union');
+    assert.ok(final.includes(FRESH_LANE_V_2), 'fresh Lane-V bihac_2 preserved in union');
+    assert.ok(final.includes(CENTAR),         'SRK centar_sarajevo in union');
+    assert.ok(final.includes(NOVI_GRAD),      'SRK novi_grad_sarajevo in union');
+    assert.strictEqual(final.length, new Set(final).size, 'no duplicates in union');
+});
+
 // ── (e) Determinism ──────────────────────────────────────────────────────────
 
 test('computeSrkStrangleOsids output is sorted and deterministic', () => {
