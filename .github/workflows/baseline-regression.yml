@@ -207,7 +207,11 @@ jobs:
     needs: scenarios
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    continue-on-error: true
+    # REQUIRED (promoted from advisory 2026-06-13, owner-authorized): a hard
+    # engine-health regression at 188w (matched_osids < 658, stranded/dead-op/ghost
+    # ceilings, K:W band) fails this job RED and blocks merge. The 3-5-clean-cycle
+    # criterion was met (#424/#426/#427/#428/#429 all green). Path-gated: non-sim PRs
+    # report success via the always-report shim, so only sim-touching PRs pay the run.
     steps:
       - uses: actions/checkout@v5
         with:
@@ -265,7 +269,9 @@ jobs:
             exit 1
           fi
           echo "Resolved 188w out-dir: ${out_dir}"
-          # ADVISORY: a hard regression here exits 1; continue-on-error keeps the job yellow.
+          # REQUIRED: a hard engine-health regression here exits 1 and FAILS the job
+          # (no continue-on-error). A deliberate threshold move re-blesses via
+          # `node tools/engine_health_gate.cjs <run> --horizon 188w --update` in the PR.
           node tools/engine_health_gate.cjs "${out_dir}" --horizon 188w --json
 
       - name: No sim/scenario changes — engine-health gate skipped (green-fast)
