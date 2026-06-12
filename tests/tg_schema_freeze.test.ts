@@ -18,8 +18,10 @@ import type { GameState, MilitaryState, FormationState } from '../src/state/game
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { getLatestSchemaVersion } from '../src/state/save_migration.js';
 import { serializeState, deserializeState } from '../src/state/serialize.js';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
-describe('schema v34/v35 freeze guard', () => {
+describe('C3 schema freeze guard (v36)', () => {
     it('CURRENT_SCHEMA_VERSION is pinned at 36', () => {
         // If this fails, a renumber happened. Confirm the bump is intentional
         // (new migration step appended), then update this guard + the
@@ -110,5 +112,29 @@ describe('schema v34/v35 freeze guard', () => {
         } as GameState;
         const hydrated = deserializeState(serializeState(state));
         expect(hydrated.schema_version).toBe(36);
+    });
+
+    it('C3 freeze: canonical startup save (schema 36) keeps the frozen persisted key-sets', () => {
+        // C3 schema-freeze sentinel. A new PERSISTED field added to the initial
+        // GameState (military/political/displacement) without a deliberate schema
+        // bump + migration changes these key-sets and trips a RED test — the
+        // "added a field, forgot the migration" footgun. Pairs with
+        // tests/startup_snapshot_contract.test.ts (byte-level). When a bump IS
+        // intentional, update CURRENT_SCHEMA_VERSION + the migration + these
+        // literals together (and re-bless the startup snapshot).
+        const save = JSON.parse(
+            readFileSync(join(process.cwd(), 'data', 'derived', 'startup', 'apr_1992_initial_save.json'), 'utf8'),
+        ) as { schema_version: number; military: Record<string, unknown>; political: Record<string, unknown>; displacement: Record<string, unknown> };
+        expect(save.schema_version).toBe(36);
+        const keys = (o: Record<string, unknown>): string => Object.keys(o).sort().join(',');
+        expect(keys(save.military)).toBe(
+            'alliance_locks,army_co_decision_traces,army_corps_directives_by_faction,army_hq_last_op_turn,army_hq_op_count_by_year,army_hq_operations,army_theatre_assignment,assignable_front_segments,bot_priority_shifts,brigade_front_assignment,cascade_penalties,closed_event_ids,command_authority,convoy_decision_history,corps_command,corps_front_sectors,cost_ledger_annotations,declined_operations,enabled_event_ids,equipment_quality_modifiers,event_aggression_modifiers,event_causality_log,event_decision_log,event_fire_counts,event_flags,event_last_fired_turn,event_overflow_queue,event_readiness,fired_event_ids,formation_spawn_directive,formations,front_posture,front_posture_regions,front_pressure,front_segments,militia_pools,named_officer_data,named_officers,negotiation,offensive_ops_suppressions,officer_decision_history,pending_convoy_decisions,pending_event_decisions,pending_event_notifications,pending_officer_events,pending_reserve_requests,phantoms_spawned,political_leader_data,political_leaders,recruitment_modifiers,recruitment_state,reserve_request_history,tactical_groups,theatres,triggered_operations_accepted,unresolved_sector_brigades,used_operation_names,war_front_edges_osid,war_jna,war_militia_strength,war_timeline',
+        );
+        expect(keys(save.political)).toBe(
+            'ceasefire,coercion_pressure_by_municipality,contested_control,control_events,initial_political_controllers,municipalities,negotiation_ledger,negotiation_status,political_controllers,rbih_hrhb_state,supply_rights,war_alliance_rbih_hrhb,war_consolidation_until,war_control_strain,war_exhaustion,war_exhaustion_local,war_supply_condition,war_supply_pressure',
+        );
+        expect(keys(save.displacement)).toBe(
+            'civilian_casualties,displacement_camp_state,displacement_event_log,displacement_flows_by_osid,displacement_humanitarian_aggregates,displacement_origin_dest_arrivals,displacement_recent_by_turn,displacement_state,hostile_takeover_timers,minority_flight_state,municipality_displacement,settlement_displacement,settlement_displacement_started_turn,sustainability_state,war_displacement_initiated',
+        );
     });
 });
