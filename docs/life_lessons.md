@@ -4,6 +4,26 @@
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
+## New Lessons (2026-06-11) — engine-health pivot
+
+### [Calibration] Named-anchor + §6 green ≠ floor-flat — always diff `matched_osids` — see `docs/life_lessons/calibration.md`
+- EH-3 fix(a) (clear `stranded_status='collapsed'`) passed **30/30 scenario anchors AND every §6 invariant** (Srebrenica/Žepa fall, Goražde/Bihać/Teočak hold) yet was a **−39 floor regression** (`matched_osids` 658→619) — the loss was entirely in NON-anchor western-Krajina HRHB OSIDs (Glamoč/Bos.Grahovo). The ~30 anchors are a sacred SUBSET, not the floor. Rule: for any sim-touching change, diff `run_summary.historical_fit.osid_pair_match.matched_osids` against baseline — a 30/30-anchor + §6-clean run can still be a −39 NO-GO. This is WHY the EH-1b `engine_health_gate.cjs` exists and why a 188w gate (not just 40w anchors) was wired to CI (#424).
+
+### [Architecture] A lingering "zombie" state field can be LOAD-BEARING — measure before cleaning — see `docs/life_lessons/architecture.md`
+- `stranded_status='collapsed'` LOOKED like a harmless never-cleared bookkeeping field on dead brigades (logged as task #15). Clearing it = **−39 floor** (#22): the field is the de-facto permanent-death marker — removing it re-admits collapsed-stranded brigades to reconstitution Path C (strategic-reserve respawn), and they overrun historically-Croat western Krajina. This is the INVERSE of "secondary checks that duplicate primary logic are dead code" (2026-04-01): a field that looks dead can be the only thing holding a behavior. Rule: before "cleaning up" any seemingly-inert state field, run a 188w and diff `matched_osids` — never assume metadata-only = calibration-inert. (Pairs with the EH-3 doc + `memory/eh3_stranded_status_load_bearing.md`.)
+
+### [Process] Route technical/calibration/sequencing decisions to the Pyrrhic panel, NOT the owner — see `docs/life_lessons/process.md`
+- VIOLATED 2x this session (see Recently Violated). The standing delegation: panel sign-off IS the owner's signature. Both decisions I wrongly queued for the owner (CI-wire the gate; next engine-health lane) were panel-resolved in minutes — and the panel verdict surfaced that one of them (EH-4 Fix B) wasn't even worth building. TELL: any time you're about to write "decision for the owner / which would you prefer", STOP and convene the panel.
+
+### [Process] A panel/builder "near-zero risk" claim is a HYPOTHESIS — code-check the premise before building — see `docs/life_lessons/process.md`
+- The Pyrrhic panel GO'd EH-4 Fix B as "near-zero risk, these ops already do nothing." Reading the code FIRST showed the premise was wrong: fully-owned ops are ALREADY blocked by `op_empty` (severity error) and below-floor ops by the launch-time `reject()`, so promoting the per-axis warnings to errors would add nothing for dead ops and OVER-BLOCK partially-valid multi-axis ops (the EH-3 trap). Dropped before building. Extends "don't trust an expert hypothesis without empirical verification" UP to the panel level — even a panel verdict's risk premise needs a code/data check before you spend a build cycle. The builder stall that preceded this was, in hindsight, a verify-the-premise save.
+
+### [Platform] Integer-valued metrics are platform-stable where byte-hashes aren't — you CAN 188w-gate on them — see `docs/life_lessons/platform.md`
+- The byte-hash baseline CI gate was deleted 2026-05-04 because full-save hashes (float-serialized fields) diverge between Windows dev and Linux CI. But `matched_osids` (string-equality count), op/brigade counts, and consistency-failure counts are INTEGER-valued → identical cross-platform. That resolved the decisive objection to wiring a 188w engine-health gate to CI (#424): assert on integer metrics (hard-fail) and keep float-derived ones (K:W ratio) advisory. Rule: a metric's platform-stability is determined by whether it's integer/discrete vs float-serialized — classify before deciding what CI can gate on.
+
+### [Tooling] A delegated sub-check that fails on TOLERATED-baseline conditions must be ratcheted (count), not binary — and an unparseable failure must hard-fail — see `docs/life_lessons/process.md`
+- `engine_health_gate.cjs` delegates state-integrity to `validate_run_consistency.cjs`, which exits non-zero (3 failures) even on the BLESSED 658 baseline (known-tolerated sector-floor/undefended-subseg conditions). Binary delegation would red the baseline → useless. Fix: parse + RATCHET the failure COUNT (baseline 3 → ceiling 6) so only NEW failures fail the gate. Corollary (Codex P2, #425): if the delegated tool exits non-zero WITHOUT a parseable count (crash/truncation), recording a tolerable default (`1`) is a false-green — treat an unparseable non-zero result as a HARD failure. Rule: when one gate wraps another that's noisy-on-baseline, ratchet its quantitative output and hard-fail on unparseable error; never reduce a wrapped failure to a tolerable constant.
+
 ## New Lessons (2026-05-26)
 
 ### [Calibration] Rule 4 violations are NOT uniformly safe to remove — wrong-capture vs attrition-sink distinction — see `docs/life_lessons/calibration.md`
@@ -245,7 +265,11 @@
 
 ## Recently Violated (always read these)
 
-### [Process] Validate expert diagnosis against run data BEFORE implementing the fix — VIOLATED 2026-04-07 (second instance) — see `docs/life_lessons/process.md`
+### [Process] Route decisions to the Pyrrhic panel, not the owner — VIOLATED 2026-06-11 (2nd instance) — see `docs/life_lessons/process.md`
+- The standing delegation (2026-06-10): panel sign-off IS the owner's signature; only genuine values/scope/§6-bright-line choices or a panel SPLIT go to the owner. I twice ended a turn by listing "decisions queued for you (owner)" — CI-wiring the engine-health gate, and the next engine-health lane. Owner pushback (verbatim): *"You are again asking me questions when you should be asking it from Pyrrhic team."* Both were panel-resolved in minutes (SHIP-CI-188w advisory; SHIP/then-drop EH-4 Fix B → declare D2-ready), and acting on the panel verdict is what surfaced that Fix B was redundant. **TELL: about to write "decision for the owner / which would you prefer / let me know"? → STOP, convene the panel, act on its verdict.** Active threat — second instance; `memory/feedback_owner_signature_delegated_to_pyrrhic.md` carries the full rail.
+
+### [Process] Validate expert diagnosis against run data BEFORE implementing the fix — VIOLATED 2026-04-07 (second instance) + RE-VALIDATED 2026-06-11 — see `docs/life_lessons/process.md`
+- 2026-06-11 strong compliance: EH-3 fix(a) builder asserted "calibration-inert" without measuring → a synchronous 188w diff caught the −39 before merge; EH-4 Fix B "near-zero risk" panel premise was code-checked and refuted before building. The discipline held this session, but only because the orchestrator ran the verification rather than trusting the claim. Promote: ANY "inert / byte-identical / near-zero-risk" claim on a sim-touching change is unproven until a 188w `matched_osids` diff says so.
 - Phase F DRINA investigation: subagent claimed "Op Teočak deleted" as the root cause — Op Teočak had NOT been deleted. Claim was deferred rather than immediately verified in code. Also violated in 2026-03-31 (trimming diagnosis). Two instances in two weeks: this pattern is an active threat. Require mechanistic verification ("what diagnostic field would change if this fix is correct?") before accepting any subagent root-cause claim.
 
 ### [Architecture] When a guard is added to one pipeline path, audit ALL paths — CONFIRMED STRONG PATTERN (promoted 2026-04-11) — see `docs/life_lessons/architecture.md`
@@ -488,9 +512,9 @@
 
 | File | Topics | Lessons | Load when... |
 |------|--------|---------|-------------|
-| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 50 | Running calibration scenarios, tuning parameters, OOB changes |
+| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 51 | Running calibration scenarios, tuning parameters, OOB changes |
 | [combat.md](life_lessons/combat.md) | Combat, Brigade Distribution, March System | 4 | Combat resolution, brigade movement, march/distribution system |
-| [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 59 | Changing engine structure, state, pipeline, adding systems |
+| [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 60 | Changing engine structure, state, pipeline, adding systems |
 | [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 10 | Modifying derived data, running data scripts, geometry work |
 | [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 14 | Frontend, map, tactical overlay, modal work |
 | [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 58 | General development process (skim at session start) |
