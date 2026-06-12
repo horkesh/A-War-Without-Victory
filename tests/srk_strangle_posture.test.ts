@@ -262,6 +262,44 @@ test('resumed-save stale-clearing: SRK-ON + Lane-V-OFF discards stale .RS from p
     assert.ok(final.includes(STARI_GRAD),    'stari_grad_sarajevo present in fresh SRK set');
 });
 
+test('resumed-save empty-core: SRK-ON + Lane-V-OFF + no RBiH-held urban core clears stale .RS', () => {
+    // Edge case (Codex P2 #427): SRK is ON, Lane V OFF, the save carries a stale
+    // Lane-V .RS, AND the current urban core is NOT RBiH-held (computeSrkStrangleOsids
+    // returns []). The base/merged compute must run UNCONDITIONALLY so the empty merged
+    // result clears the stale set — otherwise the plan.ts gate (active via the SRK flag)
+    // keeps reading leftover eastern-enclave entries.
+    setVrsContainPostureOverride(false);
+    setSrkStranglePostureOverride(true);
+
+    // No RBiH-held urban core → SRK computes nothing to suppress.
+    const state = stateWithControllers({
+        [CENTAR]:        'RS',
+        [NOVI_GRAD]:     'RS',
+        [NOVO_SARAJEVO]: 'RS',
+        [STARI_GRAD]:    'RS',
+    });
+    state.political.last_contained_osids_by_faction = { RS: [SREBRENICA_2, 'op:zepa:zepa_2'] };
+
+    // Mirror the post-P2-fix war-phase logic (war_phases.ts ~1321-1343).
+    const srkOsids = computeSrkStrangleOsids(state);
+    assert.strictEqual(srkOsids.length, 0, 'precondition: no RBiH-held urban core → SRK set empty');
+    const base = isVrsContainPostureEnabled()
+        ? (state.political.last_contained_osids_by_faction?.RS ?? [])
+        : [];
+    const merged = [...new Set([...base, ...srkOsids])];
+    merged.sort();
+    if (merged.length > 0) {
+        state.political.last_contained_osids_by_faction!.RS = merged;
+    } else if (state.political.last_contained_osids_by_faction?.RS) {
+        delete state.political.last_contained_osids_by_faction.RS;
+    }
+
+    assert.ok(
+        !state.political.last_contained_osids_by_faction?.RS,
+        'stale .RS must be CLEARED when SRK contributes nothing and Lane V is OFF',
+    );
+});
+
 test('both-ON union: Lane-V-ON + SRK-ON writes union of both fresh sets to .RS', () => {
     // When both flags are ON, the fixed code: Lane V writes its fresh set first,
     // then SRK reads base = that fresh set (isVrsContainPostureEnabled() = true)
