@@ -243,10 +243,10 @@ const output = { data: processedData, generated_at: Date.now() };
 - Validation of assumptions (e.g., settlement adjacency definitions)
 - Detection of mismatches between design intent and data reality
 
-**NEVER edit automatically** - Flag with note:
+**Do not blindly auto-append** — canon edits (incl. `docs/10_canon/FORAWWV.md`) require **Pyrrhic-panel sign-off** (owner-gate lifted 2026-06-11): convene the appropriate panel, a unanimous GO is the owner's signature, a BLOCK/split surfaces to the owner; implementer ≠ reviewer; the canon hierarchy + §6 bright lines remain invariant. Flag with note:
 ```
 **docs/10_canon/FORAWWV.md may require an addendum** about [insight].
-Do NOT edit FORAWWV automatically.
+Convene the appropriate Pyrrhic panel before editing canon (unanimous GO = signature).
 ```
 
 ### 6. Process QA â€” Who Validates Process
@@ -606,12 +606,12 @@ if (!isValid(polygon)) {
 
 ### âŒ Don't Edit FORAWWV.md Automatically
 ```typescript
-// BAD: Modify FORAWWV.md
+// BAD: Blindly auto-append to FORAWWV.md without review
 fs.appendFileSync('docs/10_canon/FORAWWV.md', newInsight);
 
-// GOOD: Flag for manual review
+// GOOD: Flag the insight, then edit canon only via a convened Pyrrhic panel
 console.log('**docs/10_canon/FORAWWV.md may require an addendum** about [insight].');
-console.log('Do NOT edit FORAWWV automatically.');
+console.log('Convene the appropriate Pyrrhic panel (unanimous GO = signature; implementer != reviewer).');
 ```
 
 ## Quick Reference Card
