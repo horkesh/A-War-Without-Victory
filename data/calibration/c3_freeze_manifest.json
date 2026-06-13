@@ -34,7 +34,7 @@
     "kw_ratio_lo": 3.27,
     "kw_ratio_hi": 4.424,
     "source": "data/calibration/engine_health_thresholds.json (tools/engine_health_gate.cjs)",
-    "enforced_by": "engine-health-188w CI job — ADVISORY (continue-on-error) as of 2026-06-12. C3 follow-up DECISION (owner/panel): promote to REQUIRED (per-PR blocking + ~10-15min cost); the earlier 'after 3-5 clean cycles' criterion is now met (#424/#426/#427/#428 all green on the gate)."
+    "enforced_by": "engine-health-188w CI job — REQUIRED + blocking (promoted from advisory 2026-06-13, owner-authorized: continue-on-error removed #430 + added to main branch-protection required checks). A hard 188w regression now BLOCKS merge on sim-touching PRs; doc/CI PRs pass via the always-report green-fast shim (verified: #431 reported green-fast pass on a CI-only PR)."
   },
   "golden_manifest": {
     "source": "data/derived/scenario/baselines/manifest.json",
