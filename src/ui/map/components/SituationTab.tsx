@@ -33,6 +33,7 @@ import {
     sortIvpConsequenceIds,
 } from '../../../state/patron_pressure.js';
 import { EmptyState } from './EmptyState';
+import { resolveWarroomActivityArt } from '../data/warroomActivityArt';
 import { t } from '../i18n';
 
 const FACTIONS: Array<'RS' | 'RBiH' | 'HRHB'> = ['RS', 'RBiH', 'HRHB'];
@@ -174,6 +175,13 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   const focusedMode = !!focusSection && focusSection !== 'overview';
   const showSection = (section: SummaryFocusSection): boolean => !focusedMode || focusSection === section;
 
+  // Faction-tagged documentary stills for the convoy + patron activity lanes
+  // ("Car 4" §4 activity art). Resolve to null when no asset matches — the lane
+  // then renders text-only exactly as before (graceful fallback, never a broken
+  // image). Read-model/UI only; calibration-inert.
+  const convoyArt = resolveWarroomActivityArt('convoy', playerFaction);
+  const patronArt = resolveWarroomActivityArt('patron', playerFaction);
+
   if (alliance < -0.25) alerts.push(t('situation.alertAllianceStrain'));
   if (ivpScore >= 60) alerts.push(t('situation.alertIvpElevated'));
 
@@ -308,6 +316,18 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
       {showSection('convoys') && (
         <section data-summary-section="convoys" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
           <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.humanitarianConvoys')}</div>
+          {convoyArt && (
+            <figure className="m-0">
+              <img
+                src={convoyArt}
+                alt=""
+                aria-hidden="true"
+                data-testid="convoy-activity-art"
+                className="h-20 w-full rounded border border-panel-border object-cover"
+              />
+              <figcaption className="sr-only">{t('situation.convoyArtCaption')}</figcaption>
+            </figure>
+          )}
           {state.pendingConvoyDecisions && state.pendingConvoyDecisions.length > 0 ? (
             state.pendingConvoyDecisions.map((convoy) => (
               <div key={convoy.id} className="rounded border border-panel-border bg-panel-bg/60 p-2 space-y-1">
@@ -411,6 +431,18 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
       {showSection('capital') && (
         <section data-summary-section="capital" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
           <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.diplomacy')}</div>
+          {patronArt && (
+            <figure className="m-0">
+              <img
+                src={patronArt}
+                alt=""
+                aria-hidden="true"
+                data-testid="patron-activity-art"
+                className="h-20 w-full rounded border border-panel-border object-cover"
+              />
+              <figcaption className="sr-only">{t('situation.patronArtCaption')}</figcaption>
+            </figure>
+          )}
           {state.strategicDimensions || state.patronOverrideAuthority ? (
             <DiplomacyOverview
               strategicDimensions={state.strategicDimensions}
