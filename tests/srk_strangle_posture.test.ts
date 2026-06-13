@@ -1,9 +1,11 @@
 /**
- * SRK strangle-not-capture posture (§6 Sarajevo urban core, DEFAULT-OFF).
+ * SRK strangle-not-capture posture (§6 Sarajevo urban core, DEFAULT-ON since
+ * 2026-06-13, task #34 — explicitly disableable via env=false/0).
  *
  * Covers:
- *   (a) flag-OFF → `computeSrkStrangleOsids` returns [] and the .RS contained
- *       set is unaffected (war-phase block is never entered → byte-identical).
+ *   (a) gate default-ON / explicit-disable; flag-OFF (override) →
+ *       `computeSrkStrangleOsids` returns [] and the .RS contained set is
+ *       unaffected (war-phase block is never entered → byte-identical).
  *   (b) flag-ON via `setSrkStranglePostureOverride(true)` → SRK plan does NOT
  *       target any urban-core OSID (they appear in the suppressed set);
  *       outer-ring municipalities (ilidza etc.) are NOT suppressed.
@@ -78,16 +80,30 @@ afterEach(() => {
     resetVrsContainPostureGate();
 });
 
-// ── (a) flag DEFAULT-OFF ─────────────────────────────────────────────────────
+// ── (a) flag DEFAULT-ON (activated 2026-06-13, task #34) ─────────────────────
 
-test('SRK strangle gate is DEFAULT-OFF (env unset)', () => {
+test('SRK strangle gate is DEFAULT-ON (env unset)', () => {
     resetSrkStranglePostureGate();
     const prev = process.env.AWWV_SRK_STRANGLE_POSTURE;
     delete process.env.AWWV_SRK_STRANGLE_POSTURE;
     try {
+        assert.strictEqual(isSrkStranglePostureEnabled(), true);
+    } finally {
+        if (prev !== undefined) process.env.AWWV_SRK_STRANGLE_POSTURE = prev;
+    }
+});
+
+test('SRK strangle gate is explicitly disableable (env=false / env=0)', () => {
+    resetSrkStranglePostureGate();
+    const prev = process.env.AWWV_SRK_STRANGLE_POSTURE;
+    try {
+        process.env.AWWV_SRK_STRANGLE_POSTURE = 'false';
+        assert.strictEqual(isSrkStranglePostureEnabled(), false);
+        process.env.AWWV_SRK_STRANGLE_POSTURE = '0';
         assert.strictEqual(isSrkStranglePostureEnabled(), false);
     } finally {
         if (prev !== undefined) process.env.AWWV_SRK_STRANGLE_POSTURE = prev;
+        else delete process.env.AWWV_SRK_STRANGLE_POSTURE;
     }
 });
 
@@ -123,11 +139,11 @@ test('gate override controls the flag (tests)', () => {
     setSrkStranglePostureOverride(false);
     assert.strictEqual(isSrkStranglePostureEnabled(), false);
     setSrkStranglePostureOverride(null);
-    // Falls back to env (unset in test env → false).
+    // Falls back to env (unset in test env → DEFAULT-ON since 2026-06-13).
     const prev = process.env.AWWV_SRK_STRANGLE_POSTURE;
     delete process.env.AWWV_SRK_STRANGLE_POSTURE;
     try {
-        assert.strictEqual(isSrkStranglePostureEnabled(), false);
+        assert.strictEqual(isSrkStranglePostureEnabled(), true);
     } finally {
         if (prev !== undefined) process.env.AWWV_SRK_STRANGLE_POSTURE = prev;
     }
