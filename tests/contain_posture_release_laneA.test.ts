@@ -39,6 +39,8 @@ import {
     isVrsContainPostureEnabled,
     setVrsContainPostureOverride,
     resetVrsContainPostureGate,
+    setSrkStranglePostureOverride,
+    resetSrkStranglePostureGate,
 } from '../src/sim/combat/contain_posture_gate.js';
 import { isContainSuppressionActiveFor } from '../src/sim/combat/commander/plan.js';
 
@@ -115,6 +117,7 @@ function reachWithIsolatedRbih(isolated: string[], turn = 0): SupplyReachability
 afterEach(() => {
     resetArbihContainPostureGate();
     resetVrsContainPostureGate();
+    resetSrkStranglePostureGate();
 });
 
 // ── gate default-off + independence from the VRS gate ─────────────────────────
@@ -247,6 +250,10 @@ test('REGRESSION: RS still contains Srebrenica pre-pivot, releases at backstop',
 test('PURITY: with both flags OFF, the planner contain-gate is INACTIVE for both factions', () => {
     setArbihContainPostureOverride(false);
     setVrsContainPostureOverride(false);
+    // SRK strangle is DEFAULT-ON (2026-06-13, task #34) and is the third RS-side
+    // contributor to isContainSuppressionActiveFor('RS'). Disable it explicitly to
+    // isolate the Lane-A/Lane-V purity property (all RS-side contain inputs OFF).
+    setSrkStranglePostureOverride(false);
     // This is the EXACT predicate the planner reads before honoring a serialized
     // last_contained_osids_by_faction set. OFF → false for both → a save written
     // with a contain flag ON (field serialized), resumed flag-OFF, is ignored →
@@ -258,6 +265,8 @@ test('PURITY: with both flags OFF, the planner contain-gate is INACTIVE for both
 test('PURITY: planner contain-gate is INDEPENDENT per faction (RBiH on, RS off)', () => {
     setArbihContainPostureOverride(true);
     setVrsContainPostureOverride(false);
+    // SRK strangle is DEFAULT-ON; disable it so "RS off" means all RS-side inputs off.
+    setSrkStranglePostureOverride(false);
     assert.strictEqual(isContainSuppressionActiveFor('RBiH'), true, 'RBiH lane active → honor RBiH set');
     assert.strictEqual(isContainSuppressionActiveFor('RS'), false, 'RS lane inactive → stale RS set NOT honored');
     // HRHB is never a contain besieger.
