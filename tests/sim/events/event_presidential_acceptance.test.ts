@@ -13,8 +13,11 @@ describe('event presidential acceptance diagnostic', () => {
         expect(stableStringify(first, 2)).toBe(stableStringify(second, 2));
         // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events.
         // 293 → 294: +1 §6 atrocity-record event bijeljina_killings_1992 (no response options).
-        expect(first.summary.catalog_total_events).toBe(294);
-        expect(first.summary.catalog_required_response_events).toBe(71);
+        // 294 → 297: +3 HRHB Jul–Sep 1992 decision events (war_1992_hrhb_summer.json).
+        // The probed/surfaced subset (44) is unchanged — the new events are not in
+        // the production-modal-authoring-ready probe set yet.
+        expect(first.summary.catalog_total_events).toBe(297);
+        expect(first.summary.catalog_required_response_events).toBe(74);
         expect(first.summary.catalog_production_modal_authoring_ready_events).toBe(catalog.production_modal_authoring_ready_rows.length);
         expect(first.summary.catalog_acceptance_status).toBe('NOT_READY');
         expect(first.summary.probed_event_count).toBe(44);

@@ -1,0 +1,425 @@
+[
+  {
+    "id": "hrhb_herceg_bosna_consolidation_1992",
+    "title": "Herceg-Bosna Takes Shape",
+    "narrative": "Mostar, summer 1992. The Croatian Community of Herceg-Bosna — proclaimed back in November 1991 — is being put on a statutory footing. The HVO is to be declared its supreme defence body; an executive, courts, and a civilian administration are taking form across the Herzegovinian heartland, the Banovina-1939 frame quietly underwriting the territorial claim. Zagreb's hand is visible behind Boban's rise. The joint HV-HVO command has just relieved Mostar from the JNA in Operation Jackal, so the Croat-Bosniak front against the Serbs still holds. But every institution you stand up is also a fact on the ground when the political map is finally drawn. The Presidency files require a posture on how far to formalize Herceg-Bosna this summer.",
+    "category": "political",
+    "family": "hrhb_political_goal",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 13,
+      "turn_max": 18,
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          { "type": "flag_equals", "flag": "hrhb_political_goal", "value": "croat_republic" },
+          { "type": "flag_equals", "flag": "hrhb_political_goal", "value": "united_front" },
+          { "type": "flag_equals", "flag": "hrhb_political_goal", "value": "strategic_ambiguity" }
+        ]
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "The HZ HB Presidency records how far to formalize Herceg-Bosna's institutions over summer 1992."
+    },
+    "requires_player_response": true,
+    "responding_faction": "HRHB",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "formalize_institutions",
+    "source_note": "HZ HB first proclaimed November 1991 (Balkan Battlegrounds I p.180: 'the first overt steps toward Bosnian Croat political autonomy came in November 1991 with the formation of the Croatian Community of Herceg-Bosna'); statutory consolidation on 3 July 1992 declared the HVO the supreme defence body of HZ HB and established its executive (ICTY Prlic et al. IT-04-74 Trial Judgement Vol. 1 §§490-525). Mate Boban rose to political dominance over HZ HB 'through the workings of Tudjman's visible hand' (BB1 p.194). Mostar = seat; 1939 Banovina territorial template (Prlic Appeals §§601-650). Operation Jackal (June 1992) relieved Mostar from the JNA under joint HV-HVO command (BB1 p.192), so the anti-VRS alliance held through summer 1992. Historical bot formalizes the institutions per the documented HZ HB statutory record.",
+    "staff_assessment": "Standing up Herceg-Bosna's institutions this summer matches the documented 3 July 1992 statutory record and raises the political ceiling for the Croat project, at the cost of harder questions later about parallel institutions inside Bosnia. A dual-track posture preserves more room with Sarajevo; a minimal entity keeps the joint front cleanest but forfeits the institutional fact-on-the-ground.",
+    "trigger_evidence": [
+      "The HZ HB statutory decision of 3 July 1992 is on the table; the HVO is to be named its supreme defence body.",
+      "The joint HV-HVO command has relieved Mostar from the JNA (Operation Jackal, June 1992) — the anti-VRS alliance still holds."
+    ],
+    "response_options": [
+      {
+        "id": "formalize_institutions",
+        "branch_tag": "hrhb_hzhb_formalize_institutions",
+        "historical_marker": "historical_default",
+        "label": "Formalize the institutions — HVO as supreme defence body",
+        "description": "Adopt the 3 July statute. The HVO becomes the supreme defence body of Herceg-Bosna; an executive, courts, and a civil administration consolidate across Herzegovina under the Banovina frame. The anti-Serb front holds for now, but Herceg-Bosna is now an institutional fact, not an aspiration.",
+        "sets_flags": {
+          "hrhb_1992_institutionalization": "formalized"
+        },
+        "effects": [
+          {
+            "kind": "cost_ledger_annotation",
+            "tag": "hzhb_institutions_formalized_1992",
+            "text": "Summer 1992: Herceg-Bosna's institutions formalized on the 3 July statute; the HVO declared its supreme defence body. An institutional fact for the political map to come.",
+            "faction": "HRHB"
+          }
+        ],
+        "future_consequences": [
+          {
+            "id": "hzhb_formalization_recorded",
+            "label": "Herceg-Bosna institutionalization recorded",
+            "timing": "future",
+            "certainty": "guaranteed",
+            "opens_flags": [ "hrhb_1992_institutionalization" ],
+            "material_effect_refs": [ "cost_ledger_annotation.hzhb_institutions_formalized_1992" ],
+            "explanation": "Recording hrhb_1992_institutionalization=formalized marks the documented 3 July 1992 HZ HB statutory consolidation (Prlic IT-04-74 Vol. 1 §§490-525; BB1 p.180, p.194). Calibration-inert: the historical default carries only an audit-only cost-ledger annotation and a read-model flag — no control, supply, morale, or alliance change on the historical path. The institutional fact informs the diplomatic-scope and Vance-Owen/Owen-Stoltenberg branches authored elsewhere (hrhb_territorial_scope_1993, hrhb_vance_owen_acceptance_1993) without opening or closing them here."
+          }
+        ],
+        "dimension_shifts": [
+          { "faction": "HRHB", "dimension": "patron_confidence", "delta": 6 },
+          { "faction": "HRHB", "dimension": "territorial_legitimacy", "delta": 4 },
+          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": 4 }
+        ],
+        "aggression_affinity": 0.4,
+        "risk_level": 0.4
+      },
+      {
+        "id": "dual_track_institutions",
+        "branch_tag": "hrhb_hzhb_dual_track_institutions",
+        "historical_marker": "counterfactual",
+        "label": "Dual-track — build quietly, keep Sarajevo in the room",
+        "description": "Stand up the administration where it is uncontested, but keep the institutions provisional and the door to Sarajevo open. Zagreb tolerates the hedge; the joint front is preserved; but the Croat-nationalist wing inside Herceg-Bosna reads it as hesitation.",
+        "sets_flags": {
+          "hrhb_1992_institutionalization": "dual_track"
+        },
+        "effects": [
+          { "kind": "alliance_change", "delta": 0.05 },
+          { "kind": "cost_ledger_annotation", "tag": "hzhb_institutions_dual_track_1992", "text": "Summer 1992: Herceg-Bosna's institutions kept provisional; Sarajevo kept in the room at the cost of internal Croat-nationalist friction.", "faction": "HRHB" }
+        ],
+        "future_consequences": [
+          {
+            "id": "hzhb_dual_track_recorded",
+            "label": "Provisional institutionalization recorded",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_flags": [ "hrhb_1992_institutionalization" ],
+            "material_effect_refs": [ "alliance_change", "cost_ledger_annotation.hzhb_institutions_dual_track_1992" ],
+            "explanation": "Counterfactual hedge: keeping HZ HB institutions provisional is structurally consistent with the united-front and strategic-ambiguity H1 lines. A small positive alliance_change reflects Sarajevo kept in the room; the internal Croat-nationalist cost is narrative-only here. Never fires on the historical default path (bot picks formalize_institutions)."
+          }
+        ],
+        "dimension_shifts": [
+          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -4 },
+          { "faction": "HRHB", "dimension": "international_standing", "delta": 4 },
+          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": 3 }
+        ],
+        "aggression_affinity": -0.2,
+        "risk_level": 0.5
+      },
+      {
+        "id": "minimal_entity",
+        "branch_tag": "hrhb_hzhb_minimal_entity",
+        "historical_marker": "counterfactual",
+        "label": "Minimal entity — defer the statute, hold the front",
+        "description": "Defer the statutory consolidation. Herceg-Bosna stays a wartime coordinating body, nothing more; the HVO answers locally. The joint anti-VRS front is at its cleanest — but Zagreb is displeased, and the Croat project loses its institutional anchor.",
+        "sets_flags": {
+          "hrhb_1992_institutionalization": "minimal"
+        },
+        "effects": [
+          { "kind": "alliance_change", "delta": 0.1 },
+          { "kind": "patron_pressure", "faction": "HRHB", "delta": -10 },
+          { "kind": "cost_ledger_annotation", "tag": "hzhb_institutions_minimal_1992", "text": "Summer 1992: HZ HB statutory consolidation deferred; the joint front held at the cost of Zagreb's displeasure and a weaker Croat institutional anchor.", "faction": "HRHB" }
+        ],
+        "future_consequences": [
+          {
+            "id": "hzhb_minimal_recorded",
+            "label": "Deferred institutionalization recorded",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_flags": [ "hrhb_1992_institutionalization" ],
+            "material_effect_refs": [ "alliance_change", "patron_pressure" ],
+            "explanation": "Counterfactual: deferring the HZ HB statute keeps the anti-VRS front cleanest but ruptures the Zagreb patron channel (patron_pressure -10). Structurally consistent with the united-front H1 line. Never fires on the historical default path."
+          }
+        ],
+        "dimension_shifts": [
+          { "faction": "HRHB", "dimension": "patron_confidence", "delta": -12 },
+          { "faction": "HRHB", "dimension": "territorial_legitimacy", "delta": -6 },
+          { "faction": "HRHB", "dimension": "international_standing", "delta": 6 }
+        ],
+        "aggression_affinity": -0.5,
+        "risk_level": 0.3
+      }
+    ]
+  },
+  {
+    "id": "hrhb_summer_alliance_strain_1992",
+    "title": "Barracks, Factories, and Friction",
+    "narrative": "July 1992. The fights are not yet about the war against the Serbs — they are about who owns the guns. Croat and Bosniak forces clash over the Kaonik barracks at Busovaca, over the 'Bratstvo' arms factory at Novi Travnik, over the contents of the Ljuta Territorial Defense depot. The disputes spread to Vares and Vitez. None of it is open war — the joint front against the VRS still holds — but local HVO commanders are asserting Herceg-Bosna's jurisdiction over checkpoints, factories, and depots faster than the Presidency can discipline them. Sarajevo is watching. The files require a posture on the summer frictions.",
+    "category": "political",
+    "family": "hrhb_political_goal",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 14,
+      "turn_max": 24,
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          { "type": "flag_equals", "flag": "hrhb_political_goal", "value": "croat_republic" },
+          { "type": "flag_equals", "flag": "hrhb_political_goal", "value": "united_front" },
+          { "type": "flag_equals", "flag": "hrhb_political_goal", "value": "strategic_ambiguity" }
+        ]
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "The HZ HB Presidency records its posture toward the July 1992 arms-and-barracks frictions with the ARBiH."
+    },
+    "requires_player_response": true,
+    "responding_faction": "HRHB",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "accept_local_consolidation",
+    "source_note": "Balkan Battlegrounds I p.194: 'Muslims and Croats first clashed over control over the Kaonik Barracks at Busovaca, then at the Novi Travnik Bratstvo arms factory, and over the contents of the Ljuta Territorial Defense depot. In July the disputes escalated and confrontations spread to Vares and Vitez.' These are LOCAL, arms-and-barracks frictions in July 1992 — NOT open war. Open Croat-Muslim war is a 1993 phenomenon (Gornji Vakuf Jan 1993, Ahmici Apr 1993); the major Prozor escalation is late October 1992 (BB1 p.195) and is OUT of this Jul-Sep scope. Per docs/.../ARBIH_HVO_HOSTILITIES_TIMING.md the engine gates open RBiH-HRHB war to >= week 26 (Oct 1992); this event depicts tension only. Historical bot lets local consolidation stand.",
+    "staff_assessment": "Letting the local consolidations stand matches the documented summer-1992 drift — the joint front degrades through dispute, not through a central decision to break — and raises the institutional ceiling for Herceg-Bosna, at the cost of the anti-VRS alliance fraying. Disciplining the commanders preserves the alliance floor but cedes the barracks and depots. Negotiating local arms-sharing is the hardest needle to thread.",
+    "trigger_evidence": [
+      "Local clashes over the Kaonik barracks (Busovaca), the Novi Travnik 'Bratstvo' factory, and the Ljuta depot are documented for July 1992.",
+      "The frictions are spreading to Vares and Vitez, but the joint anti-VRS front still holds."
+    ],
+    "response_options": [
+      {
+        "id": "accept_local_consolidation",
+        "branch_tag": "hrhb_summer_accept_local_consolidation",
+        "historical_marker": "historical_default",
+        "label": "Let local consolidation stand",
+        "description": "The Presidency does not intervene. Local HVO commanders keep the barracks, the factory, and the depots; the joint anti-VRS front degrades through dispute, not through a decision to break. International monitors begin to note the HVO-ARBiH fracture, but no shot crosses the line that summer.",
+        "sets_flags": {
+          "hrhb_1992_summer_friction": "consolidation_stands"
+        },
+        "effects": [
+          {
+            "kind": "cost_ledger_annotation",
+            "tag": "hrhb_summer_friction_1992",
+            "text": "July 1992: local HVO consolidation over the Kaonik/Novi Travnik/Ljuta arms sites allowed to stand; the joint anti-VRS front frays through dispute, short of open war.",
+            "faction": "HRHB"
+          }
+        ],
+        "future_consequences": [
+          {
+            "id": "summer_friction_recorded",
+            "label": "Summer friction recorded; the joint front frays short of war",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_flags": [ "hrhb_1992_summer_friction" ],
+            "material_effect_refs": [ "cost_ledger_annotation.hrhb_summer_friction_1992" ],
+            "explanation": "Recording hrhb_1992_summer_friction=consolidation_stands marks the documented July 1992 arms-and-barracks frictions (BB1 p.194). Calibration-inert: the historical default carries only an audit-only annotation and a read-model flag — no control flip, no morale/supply/alliance change. Per ARBIH_HVO_HOSTILITIES_TIMING.md open RBiH-HRHB war is engine-gated to >= week 26; this event cannot and does not produce a bilateral flip. The accumulating friction informs the existing 1993 Graz-collapse and Gornji-Vakuf branches (hrhb_1992_graz_cooperation_collapse, gornji_vakuf_clashes_1993) without opening or closing them here."
+          }
+        ],
+        "dimension_shifts": [
+          { "faction": "HRHB", "dimension": "patron_confidence", "delta": 4 },
+          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": 3 },
+          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": -3 }
+        ],
+        "aggression_affinity": 0.3,
+        "risk_level": 0.5
+      },
+      {
+        "id": "discipline_commanders",
+        "branch_tag": "hrhb_summer_discipline_commanders",
+        "historical_marker": "counterfactual",
+        "label": "Discipline the commanders — preserve the joint front",
+        "description": "The Presidency intervenes at command level. Local HVO commanders are pulled off the disputed barracks and depots; the arms sites are returned to joint or TD control; the anti-VRS alliance is held together by hand. Zagreb's logistical leverage over the HVO order of battle tightens in response, and the Croat-nationalist wing seethes.",
+        "sets_flags": {
+          "hrhb_1992_summer_friction": "commanders_disciplined"
+        },
+        "effects": [
+          { "kind": "alliance_change", "delta": 0.1 },
+          { "kind": "patron_pressure", "faction": "HRHB", "delta": -8 },
+          { "kind": "cost_ledger_annotation", "tag": "hrhb_summer_discipline_1992", "text": "July 1992: Presidency intervened to suppress local arms-site frictions; the joint front held at the cost of Zagreb's logistical leverage and internal Croat-nationalist friction.", "faction": "HRHB" }
+        ],
+        "future_consequences": [
+          {
+            "id": "summer_discipline_recorded",
+            "label": "Command intervention recorded; the joint front preserved",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_flags": [ "hrhb_1992_summer_friction" ],
+            "material_effect_refs": [ "alliance_change", "patron_pressure" ],
+            "explanation": "Counterfactual: a Presidency intervention to suppress the July frictions is structurally consistent with the united-front H1 line — it preserves the alliance floor (positive alliance_change) at the cost of the Zagreb patron channel (patron_pressure -8). Never fires on the historical default path (bot lets consolidation stand)."
+          }
+        ],
+        "dimension_shifts": [
+          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -4 },
+          { "faction": "HRHB", "dimension": "international_standing", "delta": 5 },
+          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": 4 }
+        ],
+        "aggression_affinity": -0.4,
+        "risk_level": 0.4
+      },
+      {
+        "id": "negotiate_arms_sharing",
+        "branch_tag": "hrhb_summer_negotiate_arms_sharing",
+        "historical_marker": "counterfactual",
+        "label": "Negotiate local arms-sharing",
+        "description": "Neither cede the sites nor seize them outright — broker a local arms-sharing arrangement over the contested barracks and depots. It buys time and keeps the front intact, but pleases no one fully: the commanders feel restrained, Sarajevo stays wary, and Zagreb watches for signs of drift.",
+        "sets_flags": {
+          "hrhb_1992_summer_friction": "arms_sharing_brokered"
+        },
+        "effects": [
+          { "kind": "alliance_change", "delta": 0.05 },
+          { "kind": "cost_ledger_annotation", "tag": "hrhb_summer_arms_sharing_1992", "text": "July 1992: local arms-sharing brokered over the contested sites; the front held, but the arrangement satisfied neither the commanders nor Sarajevo fully.", "faction": "HRHB" }
+        ],
+        "future_consequences": [
+          {
+            "id": "summer_arms_sharing_recorded",
+            "label": "Local arms-sharing recorded",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_flags": [ "hrhb_1992_summer_friction" ],
+            "material_effect_refs": [ "alliance_change", "cost_ledger_annotation.hrhb_summer_arms_sharing_1992" ],
+            "explanation": "Counterfactual middle path: brokering arms-sharing keeps the alliance value mildly positive without fully resolving the friction. Structurally available on the strategic-ambiguity H1 line. Never fires on the historical default path."
+          }
+        ],
+        "dimension_shifts": [
+          { "faction": "HRHB", "dimension": "negotiating_leverage", "delta": 4 },
+          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -2 },
+          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": 2 }
+        ],
+        "aggression_affinity": -0.1,
+        "risk_level": 0.5
+      }
+    ]
+  },
+  {
+    "id": "hrhb_zagreb_supply_channel_1992",
+    "title": "Zagreb's Two-Track Hand",
+    "narrative": "August-September 1992. The HVO does not arm itself. Croatian Army 'volunteers' have been organizing and equipping indigenous Bosnian Croat units since 1991, and regular HV and MUP troops deploy across the border under Zagreb's control. Defence Minister Susak runs the channel; Tudjman's hand is behind it. The guns, the fuel, the seconded officers — they flow from Zagreb, and with them flows Zagreb's agenda for the Bosnian Croats. Your commanders want more of it. But every crate deepens the dependence, and the more the HVO is Zagreb's instrument, the less it is your own. The files require a posture on the patron channel.",
+    "category": "diplomatic",
+    "family": "hrhb_political_goal",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 16,
+      "turn_max": 24,
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          { "type": "flag_equals", "flag": "hrhb_political_goal", "value": "croat_republic" },
+          { "type": "flag_equals", "flag": "hrhb_political_goal", "value": "united_front" },
+          { "type": "flag_equals", "flag": "hrhb_political_goal", "value": "strategic_ambiguity" }
+        ]
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "The HZ HB Presidency records its posture toward the Zagreb arming and officer-secondment channel."
+    },
+    "requires_player_response": true,
+    "responding_faction": "HRHB",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "deepen_patron_channel",
+    "source_note": "Balkan Battlegrounds I p.180: Zagreb pursued 'a two-track plan to organize and arm indigenous Bosnian Croat military units — begun in 1991 by Croatian Army volunteers under Zagreb's control — while deploying regular Croatian Army (HV) and MUP troops to the republic.' The HVO is described as 'the Zagreb-controlled HVO' (BB1 p.180). Gojko Susak (Croatian Defence Minister) ran the arming/officer-secondment channel; Tudjman's directives transmitted via Susak are documented in the Tudjman Presidential Transcripts admitted at ICTY Prlic et al. IT-04-74 (Vol. 2 §§220-260 on logistical support; Vol. 3 on the Tudjman-Susak channel). Historical bot deepens the patron channel — the documented summer-1992 posture.",
+    "staff_assessment": "Deepening the Zagreb channel is the documented posture: the guns, fuel, and seconded officers that keep the HVO in the field flow from Susak's logistics, and with them comes patron confidence and a clearer order of battle — at the cost of binding the HVO ever more tightly to Zagreb's agenda. Diversifying the supply base buys autonomy at a real material cost. Asserting full HVO autonomy is the cleanest break and the most expensive one.",
+    "trigger_evidence": [
+      "Zagreb's two-track arming plan — Croatian Army volunteers plus regular HV/MUP deployments — is operative across summer 1992 (BB1 p.180).",
+      "The HVO depends on Susak's logistics channel for arms, fuel, and seconded officers."
+    ],
+    "response_options": [
+      {
+        "id": "deepen_patron_channel",
+        "branch_tag": "hrhb_zagreb_deepen_channel",
+        "historical_marker": "historical_default",
+        "label": "Deepen the Zagreb channel",
+        "description": "Take what Susak offers. More arms, more fuel, more seconded HV officers into the HVO order of battle. The HVO fights better-supplied and Zagreb's confidence in Herceg-Bosna grows — and the HVO becomes, more than ever, Zagreb's instrument in Bosnia.",
+        "sets_flags": {
+          "hrhb_1992_patron_posture": "channel_deepened"
+        },
+        "effects": [
+          {
+            "kind": "cost_ledger_annotation",
+            "tag": "hrhb_zagreb_channel_deepened_1992",
+            "text": "Summer 1992: the HVO deepened its dependence on Zagreb's two-track arming and officer-secondment channel (Susak/Tudjman); better-supplied, but more tightly bound to Zagreb's agenda.",
+            "faction": "HRHB"
+          }
+        ],
+        "future_consequences": [
+          {
+            "id": "zagreb_channel_recorded",
+            "label": "Zagreb patron channel deepened",
+            "timing": "future",
+            "certainty": "guaranteed",
+            "opens_flags": [ "hrhb_1992_patron_posture" ],
+            "material_effect_refs": [ "cost_ledger_annotation.hrhb_zagreb_channel_deepened_1992" ],
+            "explanation": "Recording hrhb_1992_patron_posture=channel_deepened marks the documented Zagreb two-track arming channel (BB1 p.180; Prlic IT-04-74 Vol. 2 §§220-260, Vol. 3 Tudjman-Susak transcripts). Calibration-inert: the historical default carries only an audit-only annotation, a read-model flag, and political dimension shifts — NO supply_delta, equipment_grant, control, morale, or alliance change on the historical path, so the HVO order of battle and territory are byte-identical to the floor. The deepened patron dependence informs the 1993-94 Zagreb-direction branches (zagreb_restrains_boban_vopp, zagreb_orders_hrhb_ceasefire) without opening or closing them here."
+          }
+        ],
+        "dimension_shifts": [
+          { "faction": "HRHB", "dimension": "patron_confidence", "delta": 10 },
+          { "faction": "HRHB", "dimension": "military_credibility", "delta": 5 },
+          { "faction": "HRHB", "dimension": "international_standing", "delta": -4 }
+        ],
+        "aggression_affinity": 0.4,
+        "risk_level": 0.4
+      },
+      {
+        "id": "diversify_supply",
+        "branch_tag": "hrhb_zagreb_diversify_supply",
+        "historical_marker": "counterfactual",
+        "label": "Diversify the supply base",
+        "description": "Keep the Zagreb channel open, but build alternatives — local production, battlefield recovery, quiet arrangements with the ARBiH over shared depots. It costs you materiel now and irritates Susak, but it buys the HVO a measure of independence from Zagreb's agenda.",
+        "sets_flags": {
+          "hrhb_1992_patron_posture": "supply_diversified"
+        },
+        "effects": [
+          { "kind": "patron_pressure", "faction": "HRHB", "delta": -6 },
+          { "kind": "supply_delta", "faction": "HRHB", "delta": -5 },
+          { "kind": "alliance_change", "delta": 0.05 },
+          { "kind": "cost_ledger_annotation", "tag": "hrhb_zagreb_diversify_1992", "text": "Summer 1992: the HVO diversified its supply base away from sole Zagreb dependence; a measure of autonomy bought at a material cost and Susak's irritation.", "faction": "HRHB" }
+        ],
+        "future_consequences": [
+          {
+            "id": "supply_diversify_recorded",
+            "label": "Supply diversification recorded",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_flags": [ "hrhb_1992_patron_posture" ],
+            "material_effect_refs": [ "patron_pressure", "supply_delta", "alliance_change" ],
+            "explanation": "Counterfactual: diversifying away from sole Zagreb dependence costs materiel now (supply_delta -5) and patron confidence (patron_pressure -6) but buys autonomy and a small ARBiH-cooperation alliance gain. Structurally consistent with the united-front H1 line. Never fires on the historical default path."
+          }
+        ],
+        "dimension_shifts": [
+          { "faction": "HRHB", "dimension": "patron_confidence", "delta": -8 },
+          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": 3 },
+          { "faction": "HRHB", "dimension": "international_standing", "delta": 5 }
+        ],
+        "aggression_affinity": -0.3,
+        "risk_level": 0.5
+      },
+      {
+        "id": "assert_autonomy",
+        "branch_tag": "hrhb_zagreb_assert_autonomy",
+        "historical_marker": "counterfactual",
+        "label": "Assert HVO autonomy from Zagreb",
+        "description": "Tell Susak the HVO answers to Mostar, not Zagreb. Refuse the seconded officers; insist on Bosnian Croat command of Bosnian Croat units. It is the cleanest assertion of independence — and the most expensive: Zagreb throttles the channel, and the HVO order of battle pays for it.",
+        "sets_flags": {
+          "hrhb_1992_patron_posture": "autonomy_asserted"
+        },
+        "effects": [
+          { "kind": "patron_pressure", "faction": "HRHB", "delta": -18 },
+          { "kind": "supply_delta", "faction": "HRHB", "delta": -12 },
+          { "kind": "alliance_change", "delta": 0.1 },
+          { "kind": "cost_ledger_annotation", "tag": "hrhb_zagreb_autonomy_1992", "text": "Summer 1992: the HVO asserted command autonomy from Zagreb; the cleanest break, paid for by a throttled supply channel and a thinned order of battle.", "faction": "HRHB" }
+        ],
+        "future_consequences": [
+          {
+            "id": "autonomy_recorded",
+            "label": "HVO command-autonomy assertion recorded",
+            "timing": "future",
+            "certainty": "conditional",
+            "opens_flags": [ "hrhb_1992_patron_posture" ],
+            "material_effect_refs": [ "patron_pressure", "supply_delta", "alliance_change" ],
+            "explanation": "Counterfactual maximum-autonomy posture: refusing the Zagreb channel ruptures the patron relationship (patron_pressure -18) and thins the order of battle (supply_delta -12) for the cleanest independence. Structurally consistent with the united-front H1 line at maximum patron cost. Never fires on the historical default path."
+          }
+        ],
+        "dimension_shifts": [
+          { "faction": "HRHB", "dimension": "patron_confidence", "delta": -20 },
+          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": 6 },
+          { "faction": "HRHB", "dimension": "international_standing", "delta": 7 }
+        ],
+        "aggression_affinity": -0.6,
+        "risk_level": 0.6
+      }
+    ]
+  }
+]

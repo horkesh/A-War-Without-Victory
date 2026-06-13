@@ -45,6 +45,14 @@ const EVENTS_DIR = resolve(getModuleDir(), '../../../data/scenarios/events');
  *  historical path). */
 const EVENT_FILES = [
     'war_1992.json',
+    // Jul–Sep 1992 HRHB (Herceg-Bosna / HVO) decision-event content. Separate
+    // file (additive hook) so it does not collide with the RS-events lane that
+    // edits war_1992.json in parallel. Loaded after war_1992.json so its
+    // hrhb_political_goal-gated rows resolve in the same chronological band.
+    // Calibration-inert: every historical-default option carries only
+    // narrative / cost_ledger_annotation / read-model flags / political
+    // dimension_shifts — no control/territory effect on the historical path.
+    'war_1992_hrhb_summer.json',
     'war_1993.json',
     'war_1994.json',
     'war_1995.json',

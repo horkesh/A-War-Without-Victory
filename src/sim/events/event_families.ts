@@ -111,14 +111,24 @@ export const HRHB_BRANCH_TAGS = [
     'hrhb_hv_support_declined',
     'hrhb_hv_support_full',
     'hrhb_hv_support_limited',
+    // ── Jul–Sep 1992 summer content (calibration-inert; gated on hrhb_political_goal) ──
+    'hrhb_hzhb_dual_track_institutions',
+    'hrhb_hzhb_formalize_institutions',
+    'hrhb_hzhb_minimal_entity',
     'hrhb_strategic_ambiguity',
+    'hrhb_summer_accept_local_consolidation',
+    'hrhb_summer_discipline_commanders',
+    'hrhb_summer_negotiate_arms_sharing',
     'hrhb_united_front',
     'hrhb_vopp_acknowledge',
     'hrhb_vopp_resist',
     'hrhb_washington_accept',
     'hrhb_washington_reluctant',
+    'hrhb_zagreb_assert_autonomy',
     'hrhb_zagreb_ceasefire_acknowledge',
     'hrhb_zagreb_ceasefire_resist',
+    'hrhb_zagreb_deepen_channel',
+    'hrhb_zagreb_diversify_supply',
 ] as const;
 
 /** Carrier flags (non-branch identifiers that appear in flag-condition trees). */

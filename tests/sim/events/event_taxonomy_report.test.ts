@@ -15,9 +15,11 @@ describe('event taxonomy diagnostic report', () => {
 
         // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events.
         // 293 → 294: +1 §6 atrocity-record event bijeljina_killings_1992.
-        expect(rows).toHaveLength(294);
+        // 294 → 297: +3 HRHB Jul–Sep 1992 decision events (war_1992_hrhb_summer.json).
+        expect(rows).toHaveLength(297);
         expect([...new Set(rows.map((row) => row.file))]).toEqual([
             'data/scenarios/events/war_1992.json',
+            'data/scenarios/events/war_1992_hrhb_summer.json',
             'data/scenarios/events/war_1993.json',
             'data/scenarios/events/war_1994.json',
             'data/scenarios/events/war_1995.json',
@@ -33,9 +35,9 @@ describe('event taxonomy diagnostic report', () => {
     it('reports one row per current event id and no duplicate ids', () => {
         const report = buildEventTaxonomyReport(loadCatalogRows());
 
-        expect(report.summary.total_events).toBe(294);
+        expect(report.summary.total_events).toBe(297);
         expect(report.summary.duplicate_event_ids).toEqual([]);
-        expect(new Set(report.rows.map((row) => row.id)).size).toBe(294);
+        expect(new Set(report.rows.map((row) => row.id)).size).toBe(297);
     });
 
     it('classifies trigger emergence from phase, prerequisites, pressure, and condition types', () => {
@@ -52,18 +54,23 @@ describe('event taxonomy diagnostic report', () => {
     it('pins current choice and required-response inventory without changing catalog behavior', () => {
         const report = buildEventTaxonomyReport(loadCatalogRows());
 
-        expect(report.summary.choice_events).toBe(79);
+        // 79 → 82: +3 HRHB Jul–Sep 1992 decision events (all carry response_options).
+        expect(report.summary.choice_events).toBe(82);
         // 210 → 214: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events are
         // pure flag-setters (no response_options), so they are no-choice events.
         // 214 → 215: +1 §6 atrocity-record event bijeljina_killings_1992
-        // (representation-only, no response_options).
+        // (representation-only, no response_options). The +3 HRHB summer-1992
+        // events are choice events, so no_choice_events is unchanged at 215.
         expect(report.summary.no_choice_events).toBe(215);
-        expect(report.summary.required_response_events).toBe(71);
-        expect(report.summary.choice_rows_with_title_and_narrative).toBe(79);
+        // 71 → 74: the +3 HRHB summer-1992 events are required-response.
+        expect(report.summary.required_response_events).toBe(74);
+        // 79 → 82: the +3 HRHB summer-1992 events all carry title + narrative.
+        expect(report.summary.choice_rows_with_title_and_narrative).toBe(82);
         expect(report.summary.choice_rows_with_source).toBe(71);
         expect(report.summary.required_response_rows_with_source).toBe(67);
-        expect(report.summary.historical_default_markers).toBe(56);
-        expect(report.summary.historical_default_ids).toBe(56);
+        // 56 → 59: the +3 HRHB summer-1992 events each carry a historical_default_response_id.
+        expect(report.summary.historical_default_markers).toBe(59);
+        expect(report.summary.historical_default_ids).toBe(59);
         expect(report.summary.modal_ready_events).toBe(45);
         expect(new Map(report.rows
             .filter((row) => row.future_consequence_count > 0)
@@ -74,6 +81,12 @@ describe('event taxonomy diagnostic report', () => {
             ['hrhb_political_goal', 40],
             ['rbih_paramilitary_policy_1992', 3],
             ['hrhb_1992_graz_cooperation_collapse', 2],
+            // +3 HRHB Jul–Sep 1992 decision events (war_1992_hrhb_summer.json):
+            // each has 3 options × 1 future_consequence (opens_flags only — no
+            // opens_events/closes_events, so the open/close lists are unchanged).
+            ['hrhb_herceg_bosna_consolidation_1992', 3],
+            ['hrhb_summer_alliance_strain_1992', 3],
+            ['hrhb_zagreb_supply_channel_1992', 3],
             ['rs_assembly_rejects_voplan_1993', 2],
             ['rbih_nato_ultimatum_compliance_1994', 2],
             ['rbih_washington_agreement_1994', 2],
@@ -291,7 +304,8 @@ describe('event taxonomy diagnostic report', () => {
         const report = buildEventTaxonomyReport(loadCatalogRows());
         const requiredRows = report.rows.filter((row) => row.requires_player_response);
 
-        expect(requiredRows).toHaveLength(71);
+        // 71 → 74: +3 HRHB Jul–Sep 1992 required-response decision events.
+        expect(requiredRows).toHaveLength(74);
         expect(requiredRows.filter((row) => row.modal_ready).map((row) => row.id)).toEqual([
             'rbih_state_identity',
             'hrhb_political_goal',

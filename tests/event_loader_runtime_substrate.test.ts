@@ -18,6 +18,7 @@ import { loadEventDefinitionsFromDir } from '../src/sim/events/event_loader.js';
 
 const REQUIRED_EVENT_FILES = [
     'war_1992.json',
+    'war_1992_hrhb_summer.json',
     'war_1993.json',
     'war_1994.json',
     'war_1995.json',
@@ -938,10 +939,11 @@ test.skip('TODO B2/B3: R11 remove_mladic forward-looking guard — needs evaluat
 
 // ─── Gate 1, 3 spirit: production catalog loads cleanly with B1 passes ──────
 
-test('existing 293-row production catalog loads cleanly through all B1 passes', async () => {
+test('existing 297-row production catalog loads cleanly through all B1 passes', async () => {
     const { loadEventDefinitions } = await import('../src/sim/events/event_loader.js');
     const loaded = loadEventDefinitions(0);
     // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events.
     // 293 → 294: +1 §6 atrocity-record event bijeljina_killings_1992.
-    assert.strictEqual(loaded.length, 294);
+    // 294 → 297: +3 HRHB Jul–Sep 1992 decision events (war_1992_hrhb_summer.json).
+    assert.strictEqual(loaded.length, 297);
 });

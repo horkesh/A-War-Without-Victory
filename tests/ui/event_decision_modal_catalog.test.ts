@@ -91,7 +91,8 @@ describe('production modal-ready event catalog rendering', () => {
     const report = buildEventAcceptanceReport();
 
     expect(report.summary.production_modal_authoring_ready_events).toBe(45);
-    expect(report.summary.required_response_events).toBe(71);
+    // 71 → 74: +3 HRHB Jul–Sep 1992 required-response decision events.
+    expect(report.summary.required_response_events).toBe(74);
 
     for (const row of report.production_modal_authoring_ready_rows) {
       const event = loadEvent(row.file, row.id);

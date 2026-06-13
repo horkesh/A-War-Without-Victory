@@ -8,6 +8,7 @@ import type { EventDefinition } from '../src/sim/events/event_types.js';
 
 const REQUIRED_EVENT_FILES = [
     'war_1992.json',
+    'war_1992_hrhb_summer.json',
     'war_1993.json',
     'war_1994.json',
     'war_1995.json',
@@ -84,14 +85,18 @@ function assertCatalogRowsThrow(rows: unknown[], expected: RegExp): void {
     );
 }
 
-test('loadEventDefinitions(0) returns the current 294-row catalog', () => {
+test('loadEventDefinitions(0) returns the current 297-row catalog', () => {
     const loaded = loadEventDefinitions(0);
 
     // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events in
     // consequences.json (csq_winter_held_audit, csq_corridor_blocked_audit,
     // csq_arms_embargo_compliance_audit, csq_political_unity_audit).
     // 293 → 294: +1 §6 atrocity-record event bijeljina_killings_1992 (war_1992.json).
-    assert.strictEqual(loaded.length, 294);
+    // 294 → 297: +3 HRHB Jul–Sep 1992 decision events (war_1992_hrhb_summer.json):
+    //   hrhb_herceg_bosna_consolidation_1992, hrhb_summer_alliance_strain_1992,
+    //   hrhb_zagreb_supply_channel_1992. Calibration-inert (historical-default
+    //   path carries only narrative / cost_ledger_annotation / read-model flags).
+    assert.strictEqual(loaded.length, 297);
 });
 
 test('loadEventDefinitions(0) returns deterministic order by trigger turn_min then id', () => {
