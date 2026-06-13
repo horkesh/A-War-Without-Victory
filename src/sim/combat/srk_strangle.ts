@@ -29,9 +29,14 @@
  * penalty (raises war_cost_index, lowers verdict grade, forces hollow_victory
  * or worse via condemnation flags). The bright line is intact.
  *
- * DEFAULT-OFF contract: when `AWWV_SRK_STRANGLE_POSTURE` is unset (or any
- * value other than 'true'/'1'), `computeSrkStrangleOsids` is never called and
- * nothing is written to state → 40w + 188w BYTE-IDENTICAL to the floor.
+ * DEFAULT-ON (activated 2026-06-13, task #34, Pyrrhic-panel GO): the posture is
+ * ON unless `AWWV_SRK_STRANGLE_POSTURE` is explicitly `'false'`/`'0'`. Activation
+ * is TERRITORY-FLAT — the SRK already strangled emergently, so control_delta +
+ * formation_delta stay BYTE-IDENTICAL at 40w/52w/188w (40w structural fingerprint
+ * `78af6fc7a3278a3e` unchanged); only the persisted observer field
+ * `last_contained_osids_by_faction.RS` moves the full-save hash (golden manifest
+ * re-blessed: final_save + run_summary for apr1992_52w / baseline_ops_4w / noop_4w).
+ * Setting env=`'false'`/`'0'` restores the byte-identical-OFF diagnostic path.
  *
  * Deterministic: sorted iteration via strictCompare; pure read of
  * `political_controllers`; no Math.random(), no timestamps.

@@ -121,16 +121,21 @@ let _srkStranglePostureOverride: boolean | null = null;
 
 /**
  * Returns true when the SRK strangle-posture is enabled.
- * Reads `process.env.AWWV_SRK_STRANGLE_POSTURE` ('true' or '1' => ON) unless an
- * override has been set via the setter (tests). DEFAULT-OFF: unset / any other
- * value => OFF (the calibration-LAST byte-identity contract).
+ * DEFAULT-ON (activated 2026-06-13, task #34, Pyrrhic-panel GO): the VRS
+ * Sarajevo-Romanija Corps strangles the urban core rather than assaulting it
+ * (Galić Appeal §389). Reads `process.env.AWWV_SRK_STRANGLE_POSTURE` and is ON
+ * unless explicitly disabled (`'false'` or `'0'`, for diagnostics) or overridden
+ * via the setter (tests). Activation is TERRITORY-FLAT: the SRK already strangled
+ * emergently, so this codifies/guards the pattern (control_delta + formation_delta
+ * byte-identical at 40w/52w/188w; only the persisted `last_contained_osids_by_faction.RS`
+ * observer field moves the full-save hash — golden manifest re-blessed accordingly).
  */
 export function isSrkStranglePostureEnabled(): boolean {
     if (_srkStranglePostureOverride !== null) {
         return _srkStranglePostureOverride;
     }
     const raw = process.env.AWWV_SRK_STRANGLE_POSTURE;
-    return raw === 'true' || raw === '1';
+    return raw !== 'false' && raw !== '0';
 }
 
 /**
