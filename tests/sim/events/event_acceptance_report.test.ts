@@ -111,8 +111,11 @@ describe('event acceptance diagnostic report', () => {
         expect(JSON.stringify(first)).toBe(JSON.stringify(second));
         // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events.
         // 293 → 294: +1 §6 atrocity-record event bijeljina_killings_1992 (no response options).
-        expect(first.summary.total_events).toBe(294);
-        expect(first.summary.required_response_events).toBe(71);
+        // 294 → 297: +3 HRHB Jul–Sep 1992 decision events (war_1992_hrhb_summer.json).
+        // Each carries a historical_default_response_id + markers + source_note,
+        // so the debt counts below (missing_*) are unchanged — only the totals move.
+        expect(first.summary.total_events).toBe(297);
+        expect(first.summary.required_response_events).toBe(74);
         expect(first.summary.production_modal_authoring_ready_events).toBe(45);
         expect(first.summary.acceptance_status).toBe('NOT_READY');
         expect(first.summary.full_catalog_accepted).toBe(false);

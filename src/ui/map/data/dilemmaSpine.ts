@@ -34,6 +34,7 @@ import { strictCompare } from '../../../state/validateGameState.js';
 // at engine runtime; they are a pure label lookup. Importing the raw JSON keeps
 // the spine in sync with canon labels (no duplicated label strings to drift).
 import war1992 from '../../../../data/scenarios/events/war_1992.json';
+import war1992HrhbSummer from '../../../../data/scenarios/events/war_1992_hrhb_summer.json';
 import war1993 from '../../../../data/scenarios/events/war_1993.json';
 import war1994 from '../../../../data/scenarios/events/war_1994.json';
 import war1995 from '../../../../data/scenarios/events/war_1995.json';
@@ -187,7 +188,7 @@ interface RawEventRowForLabels {
 function buildKeystoneLabelMap(): ReadonlyMap<string, string> {
     const wanted = new Set(DILEMMA_SPINE.map((d) => d.decisionEventId));
     const out = new Map<string, string>();
-    const files: unknown[] = [war1992, war1993, war1994, war1995];
+    const files: unknown[] = [war1992, war1992HrhbSummer, war1993, war1994, war1995];
     for (const file of files) {
         if (!Array.isArray(file)) continue;
         for (const rawRow of file as RawEventRowForLabels[]) {

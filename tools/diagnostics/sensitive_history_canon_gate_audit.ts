@@ -49,6 +49,7 @@ import {
 
 const CATALOG_FILES = [
     'data/scenarios/events/war_1992.json',
+    'data/scenarios/events/war_1992_hrhb_summer.json',
     'data/scenarios/events/war_1993.json',
     'data/scenarios/events/war_1994.json',
     'data/scenarios/events/war_1995.json',
