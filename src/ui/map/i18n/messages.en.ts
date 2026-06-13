@@ -2205,6 +2205,10 @@ export const enMessages = {
     'situation.none': 'none',
     'situation.sarajevoTunnel': 'Sarajevo tunnel operational.',
     'situation.humanitarianConvoys': 'Humanitarian Convoys',
+    // Activity-art alt/caption strings ("Car 4" — the §4 convoy/patron activity
+    // stills). The image is decorative (aria-hidden) so the alt is empty by
+    // contract; the caption is the screen-readable description of the lane art.
+    'situation.convoyArtCaption': 'A humanitarian aid column on a contested route.',
     'situation.convoyLine': '{target} via {route}, {supply} supply',
     'situation.allow': 'Allow',
     'situation.block': 'Block',
@@ -2223,6 +2227,9 @@ export const enMessages = {
     'situation.flaggedHealth': 'Flagged operation health ({flagged} of {total} active operations)',
     'situation.operationHealthLine': 'Supply {supply}% · Failures {failures}',
     'situation.diplomacy': 'Diplomacy',
+    // Patron activity-art caption ("Car 4" §4.12 patron-relations still). Decorative
+    // image (aria-hidden, empty alt); this is the screen-readable lane description.
+    'situation.patronArtCaption': 'A meeting with the faction’s foreign patron.',
     'situation.emptyCapital': 'Diplomacy capital is not available in this view.',
     'situation.alerts': 'Alerts',
     'situation.noAlerts': 'No active alerts.',
