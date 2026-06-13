@@ -33,3 +33,8 @@
 
 ### [Platform] Windows shell uses semicolons (2026-02-07)
 - PowerShell: `;` not `&&`. No recent violations.
+
+### [Platform] Before promoting a path-gated CI job to REQUIRED, verify it reports SUCCESS (not "skipped") on out-of-path PRs (2026-06-12) — NEW
+- **Context**: Promoting `engine-health-188w` advisory→required risked blocking EVERY doc/CI PR. A *required* status check that resolves to "skipped" (job skipped via a job-level `if:` or a skipped `needs:` dependency) is treated as not-success by GitHub branch protection → blocks merge.
+- **Right approach**: The always-report shim must be: job ALWAYS runs (no job-level `if`), heavy steps gated by `if: steps.changes.outputs.relevant == 'true'`, and a green-fast SUCCESS step for the non-relevant case. Verify the `needs:` chain also always-runs (a skipped `needs` job skips the dependent). Then empirically confirm a real out-of-path PR goes green BEFORE adding the check to branch protection.
+- **Do instead**: For `engine-health-188w` this was confirmed by inspection (scenarios + engine-health-188w have no job-level `if`) and empirically on #431 (`engine-health-188w pass, 4m58s` green-fast on a CI-only PR). Never flip a path-gated check to required without that confirmation.

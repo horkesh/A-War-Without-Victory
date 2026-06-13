@@ -4,6 +4,23 @@
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
+## New Lessons (2026-06-12) — SRK strangle + C3 freeze + CI-gate promotion
+
+### [Process] Worktree builders stall mid-investigation — build small precise specs directly; salvage stalls via patch-extraction — see `docs/life_lessons/process.md`
+- DOMINANT pattern of the day: 4–5 dispatched worktree builders stalled mid-task (EH-4 Fix B, C3 freeze, the SRK fix builders). Two failure modes: (a) **auto-removed-unchanged** = the agent stalled during *reading* before writing/committing → the worktree is gone, nothing salvageable; (b) **dirty-uncommitted** = the agent edited files but stalled before `git commit` → the work is in the worktree, salvageable. Rule: for a SMALL, precisely-specified change (≤ ~15 LOC + 1 test, full spec in hand), the orchestrator should build it DIRECTLY rather than dispatch — dispatch overhead + stall risk exceeds the value of separation. When a builder DOES stall dirty, salvage via **patch-extraction** (`git -C <wt> diff > /tmp/x.patch` → apply on a fresh main-checkout branch), NOT by operating git inside the worktree (see the cwd-drift lesson). Reserve dispatch for genuinely large or parallelizable work.
+
+### [Process] Verify PWD, not just `rev-parse --show-toplevel`, before any worktree git op — see `docs/life_lessons/process.md`
+- A `git cherry-pick` was run while the shell's cwd had silently drifted INTO a half-removed worktree dir. `git rev-parse --show-toplevel` returned the MAIN repo (because the worktree's `.git` link was already removed), so the standard worktree-safety check passed — but the cherry-pick applied onto the worktree's HEAD (= the commit itself → "empty"), and `docs/plans/MASTER_ROADMAP.md` read as "missing" (the relative path resolved against the broken worktree). **The tell was `pwd`, not `--show-toplevel`.** Rule: before any worktree-adjacent git op, check `pwd` AND `git branch --show-current` AND `--show-toplevel` together; if pwd is inside `.claude/worktrees/`, `cd` back to the main checkout first. Recovery was clean (the work was committed+pushed; the cherry-pick onto main applied fine) — but it cost a diagnostic cycle.
+
+### [Testing] Flag-interaction lanes need RESUMED-save validation — fresh-run + the CI gate can't see stale-serialized-state leaks — see `docs/life_lessons/process.md`
+- Codex caught TWO real bugs (P1 #427, P2 #428) in the SRK strangle doctrine that BOTH my fresh-run 188w validation AND the engine-health-188w CI gate passed clean. The class: two independent flags (Lane V + SRK) write to a SHARED serialized field (`last_contained_osids_by_faction.RS`); on a RESUMED save, stale data from a now-OFF flag leaks through the shared field. Fresh runs (flag off from t0 → no stale serialization) structurally cannot surface it. Rule: when a change adds a flag that reads/writes a shared PERSISTED field also used by another flag, add a test that simulates the RESUMED-save cross-flag state (pre-seed the field as if the other flag wrote it, then toggle). Don't trust fresh-run + territory-flat as sufficient for flag-INTERACTION correctness.
+
+### [Platform] Before promoting a path-gated CI job to REQUIRED, verify it reports SUCCESS (not "skipped") on out-of-path PRs — see `docs/life_lessons/platform.md`
+- Promoting `engine-health-188w` advisory→required risked blocking EVERY doc/CI PR: a *required* status check that resolves to "skipped" (job skipped via job-level `if:` or a skipped `needs:` dependency) is treated as not-success by branch protection → blocks merge. Verified BEFORE flipping: the job (and its `needs: scenarios`) have NO job-level `if` (always run) + a green-fast skip *step* → they produce a `success` status on non-sim PRs. Then empirically confirmed on a real CI-only PR (#431: `engine-health-188w pass, 4m58s` green-fast). Rule: the always-report shim must be job-always-runs + step-level gating + a green-fast SUCCESS step (never a job-level `if`), and you must confirm a real out-of-path PR goes green before the required-flip is safe.
+
+### [Process] Verify-the-premise saved a redundant lane TWICE in one day — re-validated, promote — see `docs/life_lessons/process.md`
+- (1) The "§6 symmetry-sentence remediation" gate was scoped before any FORAWWV edit — the panel found it was ALREADY DONE (two event-text fixes #272/#415, merged + remediated), so no canon edit was needed. (2) EH-4 Fix B was scoped before building — the code showed both conditions were already engine-blocked (redundant + over-block risk), so it was dropped. Both Codex catches (#427/#428) are the same discipline applied to shipped code. ANY "we need to build/edit X" is a hypothesis until the current code/state is read — read first, build second. Strong 3× compliance this 24h.
+
 ## New Lessons (2026-06-11) — engine-health pivot
 
 ### [Calibration] Named-anchor + §6 green ≠ floor-flat — always diff `matched_osids` — see `docs/life_lessons/calibration.md`
@@ -265,6 +282,12 @@
 
 ## Recently Violated (always read these)
 
+### [Process] Worktree builders stall mid-task — ACTIVE PATTERN (4–5 instances 2026-06-12) — see `docs/life_lessons/process.md`
+- Dispatched worktree builders repeatedly stalled (EH-4 Fix B, C3 freeze, SRK fix builders) — either auto-removed-unchanged (no work) or dirty-uncommitted (work stuck in the worktree). Each cost a takeover/salvage cycle. NOT a single bad agent — a recurring dispatch failure mode. **Mitigation now standing:** for small precise specs (≤ ~15 LOC + 1 test, full spec in hand) the orchestrator builds DIRECTLY; salvage a dirty stall via patch-extraction (never git-inside-the-worktree); reserve dispatch for large/parallel work. Watch whether direct-build reduces the churn.
+
+### [Process] Verify PWD before worktree git ops — NEW 2026-06-12 (near-miss) — see `docs/life_lessons/process.md`
+- A `git cherry-pick` ran from a stale cwd inside a half-removed worktree; `rev-parse --show-toplevel` falsely reported main, so the worktree-safety check passed but the op misfired (empty cherry-pick + a "missing" file via relative-path resolution). The tell was `pwd`, not `--show-toplevel`. Add `pwd` to the pre-git-op worktree check. Recovery clean; cost a diagnostic cycle.
+
 ### [Process] Route decisions to the Pyrrhic panel, not the owner — VIOLATED 2026-06-11 (2nd instance) — see `docs/life_lessons/process.md`
 - The standing delegation (2026-06-10): panel sign-off IS the owner's signature; only genuine values/scope/§6-bright-line choices or a panel SPLIT go to the owner. I twice ended a turn by listing "decisions queued for you (owner)" — CI-wiring the engine-health gate, and the next engine-health lane. Owner pushback (verbatim): *"You are again asking me questions when you should be asking it from Pyrrhic team."* Both were panel-resolved in minutes (SHIP-CI-188w advisory; SHIP/then-drop EH-4 Fix B → declare D2-ready), and acting on the panel verdict is what surfaced that Fix B was redundant. **TELL: about to write "decision for the owner / which would you prefer / let me know"? → STOP, convene the panel, act on its verdict.** Active threat — second instance; `memory/feedback_owner_signature_delegated_to_pyrrhic.md` carries the full rail.
 
@@ -517,7 +540,7 @@
 | [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 60 | Changing engine structure, state, pipeline, adding systems |
 | [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 10 | Modifying derived data, running data scripts, geometry work |
 | [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 14 | Frontend, map, tactical overlay, modal work |
-| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 58 | General development process (skim at session start) |
+| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 62 | General development process (skim at session start) |
 | [sectors.md](life_lessons/sectors.md) | Sectors, Design | 9 | Sector system, front lines, territory assignment, sub-segments |
-| [platform.md](life_lessons/platform.md) | Platform, Tooling | 4 | Build issues, platform-specific bugs, tooling |
+| [platform.md](life_lessons/platform.md) | Platform, Tooling | 5 | Build issues, platform-specific bugs, tooling |
 | [events.md](life_lessons/events.md) | Events | 2 | Event system, flag gates, triggers |

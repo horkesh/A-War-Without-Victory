@@ -402,3 +402,22 @@
 - **Wrong approach**: Assigning files to agents without checking for overlaps. Trusting agents to do bulk find-replace without reading context.
 - **Right approach**: Create a file ownership table before dispatch. No two agents touch the same file. Each agent runs tsc after edits.
 - **Do instead**: Before parallel dispatch: (1) list all files, (2) assign each to exactly one agent, (3) verify no overlaps, (4) add "run tsc after edits" to every prompt.
+
+### [Process] Worktree builders stall mid-investigation — build small precise specs directly; salvage stalls via patch-extraction (2026-06-12) — NEW
+- **Context**: 4–5 dispatched worktree builders stalled mid-task in one day (EH-4 Fix B, C3 freeze, SRK fix builders). Two modes: auto-removed-unchanged (stalled during reading → no commit → nothing to salvage) and dirty-uncommitted (edited but stalled before `git commit` → work is in the worktree, salvageable).
+- **Right approach**: For a SMALL, precisely-specified change (≤ ~15 LOC + 1 test, with the full diff/spec already in hand), the orchestrator builds it DIRECTLY — dispatch overhead + stall risk exceeds the value of implementer/reviewer separation (CI + Codex are the reviewers). When a builder stalls dirty, salvage via patch-extraction: `git -C <worktree> diff > /tmp/x.patch`, then `git checkout -b fix/... && git apply /tmp/x.patch` in the MAIN checkout — never run git ops inside the worktree.
+- **Do instead**: Reserve dispatch for genuinely large or parallelizable work. For a one-file surgical fix you've fully diagnosed, build it yourself and let CI/Codex review.
+
+### [Process] Verify PWD (not just rev-parse --show-toplevel) before any worktree git op (2026-06-12) — NEW
+- **Context**: A `git cherry-pick` ran while the shell cwd had drifted into a half-removed worktree dir (`.claude/worktrees/agent-...`). `git rev-parse --show-toplevel` returned the MAIN repo (the worktree's `.git` link was already gone), so the standard worktree-safety check passed — but the cherry-pick applied onto the worktree HEAD (→ empty) and `MASTER_ROADMAP.md` read as "missing" (relative path resolved against the broken worktree).
+- **Right approach**: Before any worktree-adjacent git op, check `pwd` AND `git branch --show-current` AND `--show-toplevel`. If pwd is inside `.claude/worktrees/`, `cd` to the main checkout first (or use `git -C <main>`).
+- **Do instead**: Treat `pwd` as the ground truth for which tree you're operating on — `--show-toplevel` can lie when a worktree is mid-removal. Recovery was clean (work was committed+pushed) but cost a diagnostic cycle.
+
+### [Testing] Flag-interaction lanes need RESUMED-save validation — fresh-run + CI gate can't see stale-serialized-state leaks (2026-06-12) — NEW
+- **Context**: Codex caught two bugs (P1 #427, P2 #428) in the SRK strangle doctrine that BOTH a fresh-run 188w AND the engine-health-188w CI gate passed clean. Class: two flags (Lane V + SRK) write a SHARED persisted field (`last_contained_osids_by_faction.RS`); on a RESUMED save, stale data from a now-OFF flag leaks through the shared field. Fresh runs (flag off from t0) never serialize the stale state, so they can't surface it.
+- **Right approach**: When a change adds a flag that reads/writes a shared persisted field also used by another flag, add a unit test simulating the RESUMED-save cross-flag state — pre-seed the field as if the other flag wrote it, then toggle and assert the now-off flag's stale entries are dropped.
+- **Do instead**: Don't accept fresh-run + territory-flat as sufficient for flag-INTERACTION correctness. Enumerate the {flagA, flagB} × {fresh, resumed} matrix for any shared-persisted-field flag.
+
+### [Process] Verify-the-premise saved a redundant lane twice in one day (2026-06-12) — PROMOTED
+- **Context**: (1) the "§6 symmetry-sentence remediation" gate was scoped before any FORAWWV edit — already done (two event-text fixes #272/#415 merged), no canon edit needed. (2) EH-4 Fix B scoped before building — code showed both conditions already engine-blocked (redundant + over-block risk), dropped. Plus both Codex catches (#427/#428) are the same discipline on shipped code.
+- **Do instead**: ANY "we need to build/edit X" is a hypothesis until the current code/state is read. Read first, build second. Re-validated 3× this 24h — promote to a standing default.
