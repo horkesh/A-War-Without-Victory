@@ -194,15 +194,16 @@ jobs:
         if: steps.changes.outputs.relevant != 'true'
         run: echo "No src/sim, src/state, src/scenario, data/scenarios or data/calibration changes — scenario tests skipped."
 
-  # engine-health-188w (2026-06-11, EH-1 Part B): ADVISORY (continue-on-error) 188w
-  # engine-health gate. Runs a fresh 188w scenario, resolves the runner's printed
-  # `outDir:`, and asserts the state-integrity + casualty-health thresholds in
-  # data/calibration/engine_health_thresholds.json (188w band already seeded) via
+  # engine-health-188w (EH-1 Part B): REQUIRED (promoted from advisory 2026-06-13,
+  # owner-authorized) 188w engine-health gate. Runs a fresh 188w scenario, resolves the
+  # runner's printed `outDir:`, and asserts the state-integrity + casualty-health
+  # thresholds in data/calibration/engine_health_thresholds.json (188w band) via
   # tools/engine_health_gate.cjs. The gate exits 1 on a HARD regression
-  # (stranded/zero-eligible/dead ops, ghost-destroyed, consistency, matched_osids floor);
-  # `continue-on-error: true` turns that into a YELLOW (advisory) result, not a RED gate —
-  # this is NOT a required check. Panel verdict GO; SIM-path-gated with the always-report
-  # shim so it stays a fast green no-op on non-sim PRs (same path set as `scenarios`).
+  # (stranded/zero-eligible/dead ops, ghost-destroyed, consistency, matched_osids floor),
+  # which now FAILS the job RED and BLOCKS merge (no continue-on-error). A deliberate
+  # threshold move re-blesses via `engine_health_gate.cjs <run> --horizon 188w --update`
+  # in the PR. SIM-path-gated with the always-report shim so it stays a fast green no-op
+  # on non-sim PRs (same path set as `scenarios`) — so doc/CI PRs are never blocked.
   engine-health-188w:
     needs: scenarios
     runs-on: ubuntu-latest
