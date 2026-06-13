@@ -25,11 +25,11 @@
         "activity_summary.json": "8227672e505ae88c1790fa0aa5d3b2866c7012db31637534861e37d3b79b9b76",
         "control_delta.json": "7f5efef7c9e538ba56fe9b3d30d3208695b01a801918f1893a19e3772230a119",
         "end_report.md": "98a4f1940ca9ff842af810eb077ef07cc328544911b048fcb42d52095b2d3bc1",
-        "final_save.json": "c6e93a99a9bbe5adf3b1e089f6c40bdb723fa51027ac5cb09d3177f184ad1d2f",
+        "final_save.json": "cfdadbed0c0c1b6441c1f07b01d2ba53591aae65331932d305ba7e64c1824db8",
         "formation_delta.json": "f08b22197c0aa3705cbdb88b8cfe9d965610d0a0e733dcc7e88bbefde8add97b",
-        "run_summary.json": "ecb2121752ab6d404585012d165f568f0443e4b48c51d2eac2e22e9e97549310",
+        "run_summary.json": "534bc45a6f555941a67a2f98d150f2c28b565e0969c19bd63aa654356e433701",
         "watched_operations.json": "4e89944e05e431335349978f1f0a251aa5a8ea232611010dc546cb8fd7cde063",
-        "weekly_report.jsonl": "ab8206287d9e855254f6bdc534e6e74eb43cfaa7e6e5dd7ab429131324fcb804"
+        "weekly_report.jsonl": "b8f49aee8e1aee6718c74b5391ea30cf82f4f8f95810ec04a4a07de17f4b998b"
       },
       "id": "apr1992_52w",
       "scenario_path": "data/scenarios/apr1992_definitive_52w.json",
