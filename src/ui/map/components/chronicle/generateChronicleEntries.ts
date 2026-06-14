@@ -35,6 +35,7 @@ import { buildDecisionConsequenceLedger, type DecisionConsequenceRecord } from '
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets.js';
 import { buildConsequenceReceipts } from '../../data/consequenceReceipts.js';
 import { buildWarWearinessChronicleEntries } from './warWearinessChronicle.js';
+import { buildRefugeeFlowChronicleEntries } from './refugeeFlowChronicle.js';
 import type { EventDefinition } from '../../../../sim/events/event_types.js';
 import type { GameState } from '../../../../state/game_state.js';
 
@@ -515,6 +516,13 @@ export function generateChronicleEntries(
         Number(state.turn ?? 0),
     );
     entries.push(...buildWarWearinessChronicleEntries(state.rawGameState as GameState | undefined, latestTurn));
+
+    // Refugee-flow cadence surface (D2 mid-1995 void fill) — somber humanitarian
+    // beats keyed off the persisted per-turn displacement tally: cumulative
+    // milestone crossings + single-turn surges, each pinned to the week it
+    // occurred. Fills the silent stretches (incl. w140-160) with ambient cadence
+    // AROUND the §6 rupture; never the rupture receipt itself. Pure read.
+    entries.push(...buildRefugeeFlowChronicleEntries(state.rawGameState as GameState | undefined, latestTurn));
 
     entries.sort((a, b) => a.turn - b.turn);
     return entries;
