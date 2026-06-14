@@ -250,6 +250,43 @@ describe('generals-digest Chronicle beats (D2 task #42)', () => {
         expect(() => assertDigestProseClean('a clean military week')).not.toThrow();
     });
 
+    it('§6 RUNTIME scrub: a live op named with a forbidden token never renders it', () => {
+        // Inject a corps op whose live name carries a forbidden token (the failure mode
+        // the synthetic-prose guard alone would miss). The runtime digest must SCRUB it
+        // to the neutral placeholder, not interpolate it verbatim — and the emitted
+        // prose must pass assertDigestProseClean (the bright line is code-enforced).
+        for (const dirty of ['Operation Srebrenica Ring', 'zepa_pocket_assault', 'operation_genocide_x']) {
+            const cmd = corpsCommandWith({
+                arbih_drina_sector: [{ name: dirty, phase: 'execution' }],
+            });
+            // Derivation-level: the op name is scrubbed before it reaches prose.
+            const ops = deriveActiveOps(cmd, 'RBiH');
+            expect(ops).toHaveLength(1);
+            expect(ops[0].opName).toBe('an operation');
+            expect(ops[0].opName).not.toMatch(DIGEST_FORBIDDEN_VOCAB);
+
+            // Chronicle-level: the emitted beat carries no forbidden token and passes
+            // the loud tripwire on its actual runtime output (not synthetic prose).
+            const entries = buildGeneralsDigestChronicleEntries([summary(175)], 'RBiH', cmd, 175);
+            expect(entries).toHaveLength(1);
+            expect(entries[0].detail).toContain('pressed an operation');
+            expect(entries[0].detail).not.toMatch(DIGEST_FORBIDDEN_VOCAB);
+            expect(entries[0].title).not.toMatch(DIGEST_FORBIDDEN_VOCAB);
+            expect(() => assertDigestProseClean(entries[0].detail)).not.toThrow();
+            expect(() => assertDigestProseClean(entries[0].title)).not.toThrow();
+        }
+    });
+
+    it('§6 RUNTIME scrub: a §6-clean op name (the real rupture op) renders verbatim', () => {
+        // "Operation Krivaja-95" is the actual top-level name of the Srebrenica rupture
+        // op — §6-clean, so it must NOT be scrubbed (the guard is precise, not blunt).
+        const cmd = corpsCommandWith({
+            vrs_drina: [{ name: 'Operation Krivaja-95', phase: 'execution' }],
+        });
+        const ops = deriveActiveOps(cmd, 'RS');
+        expect(ops[0].opName).toBe('Operation Krivaja-95');
+    });
+
     it('integrates into generateChronicleEntries via turnSummaries + rawGameState', () => {
         const state = {
             turn: 40,

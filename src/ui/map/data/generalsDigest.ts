@@ -88,18 +88,60 @@ export interface GeneralsDigestTurn {
     notableLosses: number;
 }
 
-/** Humanize an operation name. Op records carry display names; slugs get title-cased. */
+/**
+ * §6 forbidden-vocabulary guard. The digest is a military order-of-battle account; it
+ * must never carry atrocity / perpetrator / enclave-by-name vocabulary in its prose
+ * (that belongs to the separately-gated §6 rupture receipt, never here). Used two ways:
+ *   - `scrubForbiddenTokens` (RUNTIME, production-safe) strips a forbidden token from a
+ *     live op name before interpolation, so the digest never renders it.
+ *   - `assertDigestProseClean` (TEST-only tripwire) throws so a future prose edit or a
+ *     scrub-bypass surfaces loudly in dev/test rather than silently drifting the digest
+ *     toward the §6 record.
+ * `i`-flag only (stateless `.test()` — safe to reuse across calls; no `g` flag).
+ */
+export const DIGEST_FORBIDDEN_VOCAB =
+    /srebrenica|žepa|zepa|genocide|massacre|atrocit|cleans|mladic|mladić|karadzic|karadžić/i;
+
+export function assertDigestProseClean(text: string): void {
+    if (DIGEST_FORBIDDEN_VOCAB.test(text)) {
+        throw new Error(`generals' digest prose contains §6-sensitive vocabulary: ${text}`);
+    }
+}
+
+/**
+ * Humanize an operation name. Op records carry display names; slugs get title-cased.
+ *
+ * §6 RUNTIME SCRUB: the op name is live, author-supplied data interpolated VERBATIM
+ * into the digest prose. Today no top-level `CorpsOperation.name` carries a forbidden
+ * token (the Srebrenica rupture op is "Operation Krivaja-95"; the sensitive
+ * "Srebrenica Enclave/Ring" / "Žepa Pocket" strings live only in AXIS names the digest
+ * never reads). But this surface fires on turns ≥170 (the rupture window), so the
+ * bright line must be CODE-enforced, not naming-dependent: any forbidden token in a
+ * live op name is scrubbed to a neutral placeholder BEFORE interpolation, so production
+ * never renders it. `assertDigestProseClean` (test-only) is the loud tripwire for drift.
+ */
 function formatOpName(raw: string | null | undefined): string {
     const name = (raw ?? '').trim();
     if (!name) return 'an operation';
-    // Already a human label (has spaces / mixed case) → keep verbatim.
-    if (/\s/.test(name) || /[A-Z]/.test(name)) return name;
-    return name
-        .replace(/^operation_/, '')
-        .split(/[_-]/)
-        .filter((w) => w.length > 0)
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ');
+    const humanized = /\s/.test(name) || /[A-Z]/.test(name)
+        // Already a human label (has spaces / mixed case) → keep verbatim.
+        ? name
+        : name
+            .replace(/^operation_/, '')
+            .split(/[_-]/)
+            .filter((w) => w.length > 0)
+            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(' ');
+    return scrubForbiddenTokens(humanized);
+}
+
+/**
+ * Deterministically strip any §6-forbidden token from live op-name text, replacing the
+ * whole name with a neutral placeholder if any token is present. Production-safe: never
+ * throws (a render-path scrub, not a crash), never renders the token. Pure; no clock/RNG.
+ */
+function scrubForbiddenTokens(text: string): string {
+    return DIGEST_FORBIDDEN_VOCAB.test(text) ? 'an operation' : text;
 }
 
 /**
@@ -302,18 +344,3 @@ export function generalsDigestGloss(digest: GeneralsDigestTurn): string {
     return `${sentence}. This was your generals' week — the war fought in your name along the front.`;
 }
 
-/**
- * §6 forbidden-vocabulary guard. The digest is a military order-of-battle account; it
- * must never carry atrocity / perpetrator / enclave-by-name vocabulary in its prose
- * (that belongs to the separately-gated §6 rupture receipt, never here). Throws if a
- * forbidden token appears — used by the unit test to pin the bright line so a future
- * prose edit cannot silently drift the digest toward the §6 record.
- */
-export const DIGEST_FORBIDDEN_VOCAB =
-    /srebrenica|žepa|zepa|genocide|massacre|atrocit|cleans|mladic|mladić|karadzic|karadžić/i;
-
-export function assertDigestProseClean(text: string): void {
-    if (DIGEST_FORBIDDEN_VOCAB.test(text)) {
-        throw new Error(`generals' digest prose contains §6-sensitive vocabulary: ${text}`);
-    }
-}
