@@ -143,6 +143,40 @@ describe('generals-digest Chronicle beats (D2 task #42)', () => {
         expect(entries.every((e) => e.type === 'military')).toBe(true);
     });
 
+    it('SILENT-TURN GATE: skips any turn already carrying another chronicle entry', () => {
+        // Turns 12 + 40 are "occupied" (an AAR / event / rupture lives there); only the
+        // truly silent turn 30 earns a digest beat. The digest is dead-air filler.
+        const occupied = new Set<number>([12, 40]);
+        const entries = buildGeneralsDigestChronicleEntries(
+            [summary(12), summary(30), summary(40)],
+            'RBiH',
+            undefined,
+            40,
+            occupied,
+        );
+        expect(entries.map((e) => e.turn)).toEqual([30]);
+        expect(entries[0].id).toBe('generals-digest-30');
+    });
+
+    it('SILENT-TURN GATE: an empty/omitted occupied set leaves every turn eligible', () => {
+        const a = buildGeneralsDigestChronicleEntries([summary(10), summary(20)], 'RBiH', undefined, 20);
+        const b = buildGeneralsDigestChronicleEntries([summary(10), summary(20)], 'RBiH', undefined, 20, new Set());
+        expect(a.map((e) => e.turn)).toEqual([10, 20]);
+        expect(b.map((e) => e.turn)).toEqual([10, 20]);
+    });
+
+    it('SILENT-TURN GATE: when every turn is occupied, emits nothing', () => {
+        const occupied = new Set<number>([5, 6, 7]);
+        const entries = buildGeneralsDigestChronicleEntries(
+            [summary(5), summary(6), summary(7)],
+            'RBiH',
+            undefined,
+            7,
+            occupied,
+        );
+        expect(entries).toEqual([]);
+    });
+
     it('only the LATEST turn reads the live corps_command snapshot', () => {
         const cmd = corpsCommandWith({
             arbih_2nd_corps: [{ name: 'Operation Olovo', phase: 'execution' }],
@@ -318,5 +352,45 @@ describe('generals-digest Chronicle beats (D2 task #42)', () => {
         };
         const entries = generateChronicleEntries(state as any);
         expect(entries.some((e) => typeof e.id === 'string' && e.id.startsWith('generals-digest-'))).toBe(false);
+    });
+
+    it('SILENT-TURN GATE end-to-end: a turn with a completed-operation AAR gets NO digest beat', () => {
+        // Turn 15 carries a player operation AAR (the ui_chronicle_operation_aar_link
+        // regression); turn 14 is silent. The digest must fill only turn 14, never
+        // competing with — and burying — the AAR on turn 15.
+        const state = {
+            turn: 15,
+            player_faction: 'RS',
+            turnSummaries: [summary(14), summary(15)],
+            firedEvents: [],
+            operationHistory: [
+                {
+                    operation_id: 'rs-op-1',
+                    operation_name: 'Operation Iron Corridor',
+                    corps_id: 'rs_1st_krajina',
+                    faction: 'RS',
+                    started_turn: 12,
+                    ended_turn: 15,
+                    outcome: 'partial',
+                    objectives_targeted: ['a', 'b', 'c'],
+                    objectives_captured: ['a', 'b'],
+                    total_attacks: 6,
+                    casualties_suffered: { killed: 18, wounded: 64 },
+                    casualties_inflicted: { killed: 22, wounded: 75 },
+                    grade: { stars: 3 },
+                },
+            ],
+        };
+        const entries = generateChronicleEntries(state as any);
+        const digestTurns = entries
+            .filter((e) => typeof e.id === 'string' && e.id.startsWith('generals-digest-'))
+            .map((e) => e.turn);
+        // No digest on the AAR turn (15); the silent turn (14) is filled.
+        expect(digestTurns).not.toContain(15);
+        expect(digestTurns).toContain(14);
+        // The AAR itself still renders exactly once in the entry set (not displaced).
+        expect(entries.filter((e) => e.title === 'Operation Iron Corridor concluded')).toHaveLength(1);
+        // Turn 15 is occupied solely by the AAR (no competing digest) → single entry.
+        expect(entries.filter((e) => e.turn === 15)).toHaveLength(1);
     });
 });

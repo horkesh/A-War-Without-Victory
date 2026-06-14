@@ -52,11 +52,23 @@ function asDigestFaction(fid: string | null | undefined): DigestFaction | null {
 /**
  * Build the per-turn generals'-digest Chronicle beats.
  *
+ * SILENT-TURN GATE: the digest is DEAD-AIR filler — its whole purpose is to speak only
+ * on a week the chronicle would otherwise leave blank. A turn that already carries ANY
+ * other chronicle entry (a completed-operation AAR, a decision/event, a rupture, the
+ * #439 cadence beats, the #440 siege beat, a cost card, …) is NOT dead air, so it gets
+ * NO competing digest beat. The caller passes the set of turns already occupied by every
+ * other surface; this builder emits ONLY for turns absent from that set. This keeps the
+ * digest from displacing existing content (the ChronicleOverlay groups by turn and
+ * collapses a multi-entry turn behind an expander — a digest beat on an AAR turn would
+ * bury the AAR), and makes the feature do exactly what it is for.
+ *
  * @param turnSummaries the parsed per-turn TurnSummary history (state.turnSummaries).
  * @param playerFaction the viewing player's faction (the digest is their chair), or null.
  * @param corpsCommand  the live corps_command snapshot (state.rawGameState.corps_command);
  *                      only the LATEST turn's digest reads it (it is current-state, not history).
  * @param latestTurn    the newest recorded turn — the only turn enriched with live ops.
+ * @param occupiedTurns turns already carrying another chronicle entry; skipped (no digest).
+ *                      Omit/empty ⇒ every recorded turn is eligible (legacy/standalone use).
  *
  * Returns [] when there is no player faction (observer) or no turn history. Never throws.
  */
@@ -65,12 +77,14 @@ export function buildGeneralsDigestChronicleEntries(
     playerFaction: string | null | undefined,
     corpsCommand: unknown,
     latestTurn: number,
+    occupiedTurns?: ReadonlySet<number>,
 ): ChronicleEntry[] {
     const faction = asDigestFaction(playerFaction);
     if (!faction) return [];
     if (!Array.isArray(turnSummaries) || turnSummaries.length === 0) return [];
 
     const upper = Number.isFinite(latestTurn) ? latestTurn : Number.POSITIVE_INFINITY;
+    const occupied = occupiedTurns ?? new Set<number>();
 
     // Sort summaries ascending by turn for deterministic, in-order emission.
     const ordered = [...turnSummaries]
@@ -86,6 +100,8 @@ export function buildGeneralsDigestChronicleEntries(
 
     for (const summary of ordered) {
         const turn = Number((summary as { turn?: unknown }).turn ?? 0) || 0;
+        // Dead-air filler only: skip any turn that already has another chronicle entry.
+        if (occupied.has(turn)) continue;
         // Live ops are a current-state snapshot → only the newest turn reads them.
         const cmd = turn === latestRecorded ? corpsCommand : undefined;
         const digest = deriveDigestTurn(summary, faction, cmd);

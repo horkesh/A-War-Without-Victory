@@ -537,18 +537,22 @@ export function generateChronicleEntries(
         playerFaction,
     ));
 
-    // Generals' digest surface (D2 task #42) — "what your generals did this week". One
-    // factual military beat per recorded turn from the player faction's chair: corps
-    // operations under way, ground held/taken/lost, own attrition; a genuinely silent
-    // week earns a quiet "fronts quiet" beat. Fills the dead air on no-decision turns —
-    // the war continuing through the player's generals. Per-turn ground reads the parsed
-    // TurnSummary history; the latest turn is enriched with live in-execution ops off the
-    // corps_command snapshot. Military-factual only — never the §6 rupture record. Pure read.
+    // Generals' digest surface (D2 task #42) — "what your generals did this week". A
+    // factual military beat from the player faction's chair: corps operations under way,
+    // ground held/taken/lost, own attrition; a genuinely silent week earns a quiet
+    // "fronts quiet" beat. It is DEAD-AIR FILLER — emitted ONLY on a turn that carries no
+    // other chronicle entry (so it never displaces an AAR / event / rupture / the #439
+    // cadence or #440 siege beats; ChronicleOverlay collapses multi-entry turns behind an
+    // expander, which would bury the existing card). Built last, so `entries` already
+    // holds every other surface — their turns are the occupied set. Military-factual only,
+    // never the §6 rupture record. Pure read.
+    const occupiedTurns = new Set<number>(entries.map((e) => e.turn));
     entries.push(...buildGeneralsDigestChronicleEntries(
         state.turnSummaries,
         playerFaction,
         (state.rawGameState as GameState | undefined)?.military?.corps_command,
         latestTurn,
+        occupiedTurns,
     ));
 
     entries.sort((a, b) => a.turn - b.turn);
