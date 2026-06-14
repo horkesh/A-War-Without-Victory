@@ -36,6 +36,7 @@ import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets.
 import { buildConsequenceReceipts } from '../../data/consequenceReceipts.js';
 import { buildWarWearinessChronicleEntries } from './warWearinessChronicle.js';
 import { buildRefugeeFlowChronicleEntries } from './refugeeFlowChronicle.js';
+import { buildSarajevoSiegeChronicleEntries } from './sarajevoSiegeChronicle.js';
 import type { EventDefinition } from '../../../../sim/events/event_types.js';
 import type { GameState } from '../../../../state/game_state.js';
 
@@ -523,6 +524,17 @@ export function generateChronicleEntries(
     // occurred. Fills the silent stretches (incl. w140-160) with ambient cadence
     // AROUND the §6 rupture; never the rupture receipt itself. Pure read.
     entries.push(...buildRefugeeFlowChronicleEntries(state.rawGameState as GameState | undefined, latestTurn));
+
+    // Sarajevo-siege legibility surface (D2 task #41) — one somber, faction-aware
+    // beat while the SRK strangles the urban core (encirclement + bombardment, the
+    // city NOT stormed; Galić §389). Pure read of the per-turn strangle field
+    // (last_contained_osids_by_faction.RS ∩ Sarajevo core); the core HOLDING is the
+    // §6-correct outcome. Names the historical siege, never an atrocity-achievement.
+    entries.push(...buildSarajevoSiegeChronicleEntries(
+        state.rawGameState as GameState | undefined,
+        latestTurn,
+        playerFaction,
+    ));
 
     entries.sort((a, b) => a.turn - b.turn);
     return entries;

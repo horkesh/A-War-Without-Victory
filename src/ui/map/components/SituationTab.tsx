@@ -34,6 +34,12 @@ import {
 } from '../../../state/patron_pressure.js';
 import { EmptyState } from './EmptyState';
 import { resolveWarroomActivityArt } from '../data/warroomActivityArt';
+import {
+  deriveSarajevoSiegeState,
+  sarajevoSiegeGloss,
+  sarajevoSiegeTitle,
+  type SiegeFaction,
+} from '../data/sarajevoSiege';
 import { t } from '../i18n';
 
 const FACTIONS: Array<'RS' | 'RBiH' | 'HRHB'> = ['RS', 'RBiH', 'HRHB'];
@@ -182,6 +188,20 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   const convoyArt = resolveWarroomActivityArt('convoy', playerFaction);
   const patronArt = resolveWarroomActivityArt('patron', playerFaction);
 
+  // Sarajevo-siege legibility (D2 task #41): while the SRK strangles the urban
+  // core (encirclement + bombardment, the city NOT stormed; Galić §389), surface a
+  // somber, faction-aware "besieged, not captured" indicator. Pure read of the
+  // per-turn strangle field (last_contained_osids_by_faction.RS ∩ Sarajevo core)
+  // off the raw GameState. Null when the posture is off / the core isn't strangled
+  // → no indicator. The core HOLDING is the §6-correct outcome; read-model only.
+  const sarajevoSiege = deriveSarajevoSiegeState(
+    state.rawGameState?.political?.last_contained_osids_by_faction?.RS,
+  );
+  const siegePlayerFaction: SiegeFaction | null =
+    playerFaction === 'RBiH' || playerFaction === 'RS' || playerFaction === 'HRHB'
+      ? playerFaction
+      : null;
+
   if (alliance < -0.25) alerts.push(t('situation.alertAllianceStrain'));
   if (ivpScore >= 60) alerts.push(t('situation.alertIvpElevated'));
 
@@ -309,6 +329,17 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         </div>
         {state.sarajevoTunnelOperational && (
           <div className="text-text-secondary">{t('situation.sarajevoTunnel')}</div>
+        )}
+        {sarajevoSiege && (
+          <div
+            data-testid="sarajevo-siege-indicator"
+            className="mt-1 rounded border border-panel-border bg-panel-bg/60 p-2 space-y-1"
+          >
+            <div className="text-[10px] uppercase tracking-wide text-accent-gold">
+              {sarajevoSiegeTitle()}
+            </div>
+            <div className="text-text-secondary">{sarajevoSiegeGloss(siegePlayerFaction)}</div>
+          </div>
         )}
       </section>
       )}
