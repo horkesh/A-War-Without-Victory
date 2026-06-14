@@ -37,6 +37,7 @@ import { buildConsequenceReceipts } from '../../data/consequenceReceipts.js';
 import { buildWarWearinessChronicleEntries } from './warWearinessChronicle.js';
 import { buildRefugeeFlowChronicleEntries } from './refugeeFlowChronicle.js';
 import { buildSarajevoSiegeChronicleEntries } from './sarajevoSiegeChronicle.js';
+import { buildGeneralsDigestChronicleEntries } from './generalsDigestChronicle.js';
 import type { EventDefinition } from '../../../../sim/events/event_types.js';
 import type { GameState } from '../../../../state/game_state.js';
 
@@ -534,6 +535,20 @@ export function generateChronicleEntries(
         state.rawGameState as GameState | undefined,
         latestTurn,
         playerFaction,
+    ));
+
+    // Generals' digest surface (D2 task #42) — "what your generals did this week". One
+    // factual military beat per recorded turn from the player faction's chair: corps
+    // operations under way, ground held/taken/lost, own attrition; a genuinely silent
+    // week earns a quiet "fronts quiet" beat. Fills the dead air on no-decision turns —
+    // the war continuing through the player's generals. Per-turn ground reads the parsed
+    // TurnSummary history; the latest turn is enriched with live in-execution ops off the
+    // corps_command snapshot. Military-factual only — never the §6 rupture record. Pure read.
+    entries.push(...buildGeneralsDigestChronicleEntries(
+        state.turnSummaries,
+        playerFaction,
+        (state.rawGameState as GameState | undefined)?.military?.corps_command,
+        latestTurn,
     ));
 
     entries.sort((a, b) => a.turn - b.turn);
