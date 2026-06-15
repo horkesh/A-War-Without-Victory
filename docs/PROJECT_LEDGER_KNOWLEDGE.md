@@ -1,3 +1,7 @@
+## 2026-06-15 - Docs consolidation must preserve tracked history and links
+
+**Active planning truth should be compact, but historical links are still contracts:** `docs/plans/README.md`, `COMMAND_BOARD.md`, `MASTER_ROADMAP.md`, the 1.0 DoD, and `POST_D2_RESIDUALS.md` are the current planning entrypoints. Older dated execution packets are historical unless the command board points to them. Do instead: before moving tracked plan/report files, scan for inbound references and archive only no-inbound files, or update links/leave redirect stubs in the same batch. Ignored local legacy doc folders can be quarantined outside the repo with a manifest because they are not tracked history.
+
 ## 2026-06-06 - Records route targets must validate and focus their concrete subtab rows
 
 **Shell handoff validators must mirror declared route unions:** `ArmyHQRecordsSubTab` already included `decisions`, but shell handoff validation rejected it. Durable rule: when adding or repurposing a route union member, update the runtime validator and add a route test for that exact value; type declarations alone are not enough for deep links or Warroom handoffs. Applied in `[2026-06-06] fix(ui): focus decision consequence records from desk routes`; report `docs/40_reports/implemented/20260606_DECISION_CONSEQUENCE_RECORD_FOCUS.md`.

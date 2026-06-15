@@ -47,7 +47,9 @@
 - [Night Shift Skill](../../.claude/skills/nightshift/SKILL.md) — autonomous implementation manager protocol
 - [PYRRHIC_PLANNING_RULES.md](../20_engineering/PYRRHIC_PLANNING_RULES.md) — mandatory plan compliance rules (includes night shift handoff requirements)
 
-## Planning (docs/30_planning/)
+## Planning (docs/plans/)
+
+**2026-06-15 supersession:** current planning truth lives in [docs/plans/README.md](../plans/README.md), [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md), [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md), [2026-06-08-v1.0-definition-of-done.md](../plans/2026-06-08-v1.0-definition-of-done.md), and [POST_D2_RESIDUALS.md](../plans/POST_D2_RESIDUALS.md). The older `docs/30_planning/` links below are historical/design-reference only unless the command board points to them.
 
 - [ROADMAP_v1_0.md](../30_planning/ROADMAP_v1_0.md) — implementation roadmap to v1.0
 - [EXECUTIVE_ROADMAP.md](../30_planning/EXECUTIVE_ROADMAP.md) — executive phases (1–7)

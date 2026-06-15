@@ -47,7 +47,13 @@ data/derived/municipalities_viewer_v1.geojson.gz
 data/derived/municipalities_mun1990_viewer_v1.geojson
 data/derived/municipalities_mun1990_viewer_v1.geojson.gz
 # Archived/deprecated docs (kept locally, not committed)
-docs/_old/
+docs/_old/*
+!docs/_old/
+!docs/_old/README.md
+!docs/_old/plans/
+docs/_old/plans/*
+!docs/_old/plans/superseded/
+!docs/_old/plans/superseded/**
 docs/cleanup/
 docs/40_reports/convenes/_archived_feb2026/
 docs/40_reports/implemented/_archived_feb2026/

@@ -48,7 +48,7 @@ Owner delivered the last 8 (the 6 remaining shared Category-4 stills + the 2 pat
 
 # PROVEN STYLE & LESSONS — distilled from the SHIPPED assets
 
-> This section is the inherited contract for every prompt below (and for any future AWWV image prompt). It is distilled from the prompts that actually produced the 56 shipped presidential-desk / decision-header / consequence-still assets (`docs/plans/2026-05-24-gui-ai-asset-brief.md`), the 33+6 shipped faction command-card assets (`docs/40_reports/handovers/20260607_COMMAND_CARD_FACTION_PROMPT_PACK.md`, PRs #294 / #311 / #317), and the explicitly-RETIRED oil-paint/sepia direction (`docs/30_planning/_legacy/ART_DIRECTION_OIL_PAINT_EVENTS.md` + `docs/30_planning/design/IMAGE_GENERATION_PROMPTS.md`, both SUPERSEDED 2026-06-09). Read it once; every block below already conforms.
+> This section is the inherited contract for every prompt below (and for any future AWWV image prompt). It is distilled from the prompts that actually produced the 56 shipped presidential-desk / decision-header / consequence-still assets (`docs/plans/2026-05-24-gui-ai-asset-brief.md`), the 33+6 shipped faction command-card assets (`docs/40_reports/handovers/20260607_COMMAND_CARD_FACTION_PROMPT_PACK.md`, PRs #294 / #311 / #317), and the explicitly-RETIRED oil-paint/sepia direction (`docs/_old/plans/superseded/ART_DIRECTION_OIL_PAINT_EVENTS.md` + `docs/30_planning/design/IMAGE_GENERATION_PROMPTS.md`, both SUPERSEDED 2026-06-09). Read it once; every block below already conforms.
 
 ## 1. The five recurring conventions (every prompt must carry these)
 

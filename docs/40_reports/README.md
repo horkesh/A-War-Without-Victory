@@ -2,6 +2,8 @@
 
 **Purpose:** Single entrypoint for implementation reports, handovers, convenes, investigations, and audits. Use consolidated summaries for quick reference; use individual reports for detail.
 
+**2026-06-15 compact entrypoint:** for current work, start with [CONSOLIDATED_IMPLEMENTED.md](CONSOLIDATED_IMPLEMENTED.md), [CONSOLIDATED_BACKLOG.md](CONSOLIDATED_BACKLOG.md), [CONSOLIDATED_LESSONS_LEARNED.md](CONSOLIDATED_LESSONS_LEARNED.md), and [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md). The long per-report listings below are historical lookup material, not the active dispatch surface.
+
 **Last reorg:** 2026-03-01 (report audit: moved 10 completed + 6 archived to implemented/, updated indices).
 
 ---

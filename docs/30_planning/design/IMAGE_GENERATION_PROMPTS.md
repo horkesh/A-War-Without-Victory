@@ -6,7 +6,7 @@
 # Image Generation Prompts -- A War Without Victory
 
 **Date:** 2026-03-25
-**Art Direction:** SUPERSEDED — see `docs/30_planning/_legacy/ART_DIRECTION_OIL_PAINT_EVENTS.md` (retired)
+**Art Direction:** SUPERSEDED — see `docs/_old/plans/superseded/ART_DIRECTION_OIL_PAINT_EVENTS.md` (retired)
 **Status:** SUPERSEDED 2026-06-09 (was "DRAFT -- ready for generation"; oil-paint/sepia, not canon)
 
 All prompts are self-sufficient for Midjourney v6.1 `--style raw` or Flux Pro. Every prompt enforces: no identifiable faces, no flags or insignia, no specific real people, no glorification.
