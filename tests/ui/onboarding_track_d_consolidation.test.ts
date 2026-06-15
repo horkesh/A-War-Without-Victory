@@ -115,6 +115,13 @@ describe('Track D onboarding consolidation', () => {
     expect(block.indexOf('setPeaceWarTransitionSeen(false)')).toBeLessThan(block.indexOf("setAppScreen('game')"));
   });
 
+  it('honors the Warroom fresh-campaign intro query flag', () => {
+    const source = readFileSync('src/ui/map/App.tsx', 'utf8');
+
+    expect(source).toContain("params.get('intro') === 'war_start'");
+    expect(source).toContain('setPeaceWarTransitionSeen(false)');
+  });
+
   it('defines the first-hover coachmarks and their stable localStorage keys', () => {
     expect(COACHMARKS.map((coachmark) => coachmark.id)).toEqual([
       'decision-room',

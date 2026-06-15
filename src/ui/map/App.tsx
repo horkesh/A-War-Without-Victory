@@ -532,6 +532,18 @@ function App() {
   const recruitmentCatalogRequestId = useRef(0);
   const initialShellHandoffApplied = useRef(false);
 
+  useEffect(() => {
+    if (!loadedGameState || typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('intro') === 'war_start') {
+      useGameStore.getState().setPeaceWarTransitionSeen(false);
+      params.delete('intro');
+      const nextQuery = params.toString();
+      const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ''}${window.location.hash}`;
+      window.history.replaceState(null, '', nextUrl);
+    }
+  }, [loadedGameState]);
+
   /**
    * Phase H Packet 7 — runtime catalog of full canonical `EventDefinition`
    * records, loaded once at app boot from

@@ -18,6 +18,22 @@ describe('warroom new campaign flow truth', () => {
     expect(warroomSource).toContain('this.desktopBridge.startNewCampaign');
   });
 
+  it('passes a one-shot war-start intro flag from fresh Warroom campaigns into the React shell', () => {
+    const warroomSource = readRepoFile('src', 'ui', 'warroom', 'warroom.ts');
+
+    expect(warroomSource).toContain('freshCampaignIntroPending');
+    expect(warroomSource).toContain('this.freshCampaignIntroPending = true;');
+    expect(warroomSource).toContain("intro=war_start");
+    const start = warroomSource.indexOf('if (result.stateJson) {');
+    const end = warroomSource.indexOf('} catch (error)', start);
+    expect(start).toBeGreaterThanOrEqual(0);
+    expect(end).toBeGreaterThan(start);
+    const desktopStartBlock = warroomSource.slice(start, end);
+    expect(desktopStartBlock.indexOf('this.freshCampaignIntroPending = true;')).toBeLessThan(
+      desktopStartBlock.indexOf("this.applyGameStateFromJson(result.stateJson);"),
+    );
+  });
+
   it('does not render a dead scenario-selection overlay when only apr_1992 is live', () => {
     const html = readRepoFile('src', 'ui', 'warroom', 'index.html');
 

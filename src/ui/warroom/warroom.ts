@@ -46,6 +46,7 @@ class WarroomApp {
     private unsubscribeDesktopGameState: (() => void) | null = null;
     private unsubscribeDesktopTurnReport: (() => void) | null = null;
     private pendingShellHandoff: ShellHandoffCommand | null = null;
+    private freshCampaignIntroPending = false;
     /** True once the user has navigated away from the initial main menu (prevents init race). */
     private userNavigatedFromMenu = false;
 
@@ -464,6 +465,7 @@ class WarroomApp {
                         return;
                     }
                     if (result.stateJson) {
+                        this.freshCampaignIntroPending = true;
                         this.applyGameStateFromJson(result.stateJson);
                         this.showScreen('none');
                     }
@@ -487,6 +489,7 @@ class WarroomApp {
                 faction,
             });
         }
+        this.freshCampaignIntroPending = true;
         this.showScreen('none');
     }
 
@@ -634,15 +637,17 @@ class WarroomApp {
         mapBaseUrl = mapBaseUrl || 'awwv://warroom/tactical-map';
 
         const cacheBuster = `v=${Date.now()}`;
+        const introQuery = this.freshCampaignIntroPending ? '&intro=war_start' : '';
         let targetSrc: string;
         if (mode === 'sandbox') {
-            targetSrc = `${mapBaseUrl}/tactical_sandbox.html?embedded=1&${cacheBuster}`;
+            targetSrc = `${mapBaseUrl}/tactical_sandbox.html?embedded=1&${cacheBuster}${introQuery}`;
         } else if (mode === 'warroom') {
             // React shell owns room navigation — load with view=warroom so React renders WarroomShellLayer.
-            targetSrc = `${mapBaseUrl}/index.html?embedded=1&view=warroom&${cacheBuster}`;
+            targetSrc = `${mapBaseUrl}/index.html?embedded=1&view=warroom&${cacheBuster}${introQuery}`;
         } else {
-            targetSrc = `${mapBaseUrl}/index.html?embedded=1&${cacheBuster}`;
+            targetSrc = `${mapBaseUrl}/index.html?embedded=1&${cacheBuster}${introQuery}`;
         }
+        this.freshCampaignIntroPending = false;
 
         // Track whether the iframe is currently in React warroom mode.
         const nextWarroomMode = mode === 'warroom';
