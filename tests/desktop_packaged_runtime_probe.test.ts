@@ -50,8 +50,8 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
     );
     assert.match(
         source,
-        /app\.whenReady\(\)\.then\(\s*\(\)\s*=>\s*\{\s*registerProtocol\(\);[\s\S]*if \(RUNTIME_PROBE_MODE\)/,
-        'probe mode must register the awwv protocol before trying to load the packaged main window',
+        /app\.whenReady\(\)\.then\(\s*\(\)\s*=>\s*\{\s*alignPackagedProcessCwdWithResources\(\);\s*registerProtocol\(\);[\s\S]*if \(RUNTIME_PROBE_MODE\)/,
+        'probe mode must align packaged cwd and register the awwv protocol before trying to load the packaged main window',
     );
     assert.match(
         source,
@@ -262,6 +262,26 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
         source,
         /endgamePush\.player_faction/,
         'packaged runtime probe endgame should record player faction from the state push proof',
+    );
+});
+
+test('packaged electron aligns process cwd with resource base before runtime handlers', async () => {
+    const source = await readFile(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
+
+    assert.match(
+        source,
+        /function alignPackagedProcessCwdWithResources\(\)/,
+        'electron main should centralize packaged cwd alignment for legacy process.cwd()-relative data loaders',
+    );
+    assert.match(
+        source,
+        /if \(app\.isPackaged\)[\s\S]*process\.chdir\(getBaseDir\(\)\)/,
+        'packaged Electron must chdir to getBaseDir() so legacy resolve("data/...") loaders read resources/data instead of the user profile',
+    );
+    assert.match(
+        source,
+        /app\.whenReady\(\)\.then\(\s*\(\)\s*=>\s*\{\s*alignPackagedProcessCwdWithResources\(\);[\s\S]*registerProtocol\(\);/,
+        'cwd alignment must run before protocol registration, map server startup, IPC handlers, and runtime probe work',
     );
 });
 

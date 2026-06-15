@@ -898,6 +898,7 @@ function App() {
     const ok = await startCampaignFromSidePicker({ ipc, loadSave, setLoadError }, faction, 'apr_1992');
     setCampaignStarting(false);
     if (ok) {
+      useGameStore.getState().setPeaceWarTransitionSeen(false);
       setAppScreen('game');
       setSidePickerOpen(false);
       setSidePickerDismissed(false);

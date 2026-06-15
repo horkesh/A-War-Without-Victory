@@ -59,6 +59,12 @@ function getBaseDir() {
   return path.join(__dirname, '..', '..');
 }
 
+function alignPackagedProcessCwdWithResources() {
+  if (app.isPackaged) {
+    process.chdir(getBaseDir());
+  }
+}
+
 /**
  * Resolve the application icon path for BrowserWindow `icon:` wiring.
  *
@@ -1589,6 +1595,7 @@ if (process.platform === 'win32' && typeof app.setAppUserModelId === 'function')
 }
 
 app.whenReady().then(() => {
+  alignPackagedProcessCwdWithResources();
   registerProtocol();
   registerProbeSafeIpcHandlers();
 

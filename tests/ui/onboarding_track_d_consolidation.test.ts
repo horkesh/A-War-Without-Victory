@@ -103,6 +103,18 @@ describe('Track D onboarding consolidation', () => {
     expect(shouldShowPeaceWarTransition(peace, false)).toBe(false);
   });
 
+  it('re-arms the war-start intro after a fresh campaign start', () => {
+    const source = readFileSync('src/ui/map/App.tsx', 'utf8');
+    const start = source.indexOf('const handleSelectFaction = async');
+    const end = source.indexOf('const handleMainMenuLoadGame', start);
+    expect(start).toBeGreaterThanOrEqual(0);
+    expect(end).toBeGreaterThan(start);
+
+    const block = source.slice(start, end);
+    expect(block).toContain('useGameStore.getState().setPeaceWarTransitionSeen(false)');
+    expect(block.indexOf('setPeaceWarTransitionSeen(false)')).toBeLessThan(block.indexOf("setAppScreen('game')"));
+  });
+
   it('defines the first-hover coachmarks and their stable localStorage keys', () => {
     expect(COACHMARKS.map((coachmark) => coachmark.id)).toEqual([
       'decision-room',
