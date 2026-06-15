@@ -99,6 +99,12 @@
           subscribeTurnReportUpdated(cb) {
             return subscribe('turn-report-updated', cb);
           },
+          subscribeReplaySequenceUpdated(cb) {
+            return subscribe('replay-sequence-updated', cb);
+          },
+          subscribeReplayManifestUpdated(cb) {
+            return subscribe('replay-manifest-updated', cb);
+          },
         };
 
         window.awwv = new Proxy(baseBridge, {

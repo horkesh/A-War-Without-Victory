@@ -9,6 +9,8 @@
 
 **Verification:** `npx.cmd vitest run tests\desktop_campaign_start_contract.test.ts`; `npx.cmd vitest run tests\startup_snapshot_contract.test.ts tests\ui\event_decision_auto_launch_contract.test.ts tests\warroom_new_campaign_flow_truth.test.ts`; `npx.cmd tsc --noEmit`; `npm.cmd run desktop:package:win:nsis`; `npm.cmd run desktop:package:win:nsis:smoke`; `node tools\desktop_packaged_runtime_probe.mjs`; direct bundled-sim assertion produced `{"turn":0,"faction":"RS","pending":["rs_strategic_goals"],"fired":["rs_strategic_goals"]}`. New installer: `dist-packaged\A War Without Victory Setup 0.9.9-beta.1.exe`, SHA-256 `70964e0c2df9189f774ee3b071ed854806c8180af79b3bcc0b3e8bd229c138b5`.
 
+**Browser follow-up (2026-06-16):** Chromium/Playwright was used against live local Warroom + tactical-map servers with an injected desktop bridge returning the bundled `startNewCampaign('RS')` state. Verified: Warroom New Campaign -> RS first shows the `WAR HAS STARTED` splash, then after `Acknowledge` shows the `DECISION REQUIRED` modal for `The Assembly Speaks` with `Adopt all six goals`. The browser pass also exposed an embedded tactical-map bridge gap: replay sidecar subscriptions (`subscribeReplaySequenceUpdated`, `subscribeReplayManifestUpdated`) were falling through the generic `postMessage` proxy and trying to clone callback functions. `src/ui/map/index.html` now handles those subscriptions locally like game-state/turn-report subscriptions; `tests/warroom_new_campaign_flow_truth.test.ts` guards it. Re-verified with Chromium: `cloneErrorCount: 0`, `bridgeMissingErrorCount: 0`.
+
 ---
 
 ## [2026-06-11] fix(EH-2): activate MC-leak casualty-ledger fix (MIA→WIA, DEFAULT-ON) — MC ~54k→42k, territory byte-identical, historian-certified

@@ -43,4 +43,19 @@ describe('warroom new campaign flow truth', () => {
     expect(html).toContain('id="side-picker"');
     expect(html).toContain('Choose Your Side');
   });
+
+  it('keeps embedded tactical-map replay sidecar subscriptions local to avoid cloning callbacks', () => {
+    const html = readRepoFile('src', 'ui', 'map', 'index.html');
+
+    const bridgeStart = html.indexOf('const baseBridge = {');
+    const bridgeEnd = html.indexOf('window.awwv = new Proxy', bridgeStart);
+    expect(bridgeStart).toBeGreaterThanOrEqual(0);
+    expect(bridgeEnd).toBeGreaterThan(bridgeStart);
+    const baseBridge = html.slice(bridgeStart, bridgeEnd);
+
+    expect(baseBridge).toContain('subscribeReplaySequenceUpdated(cb)');
+    expect(baseBridge).toContain('subscribeReplayManifestUpdated(cb)');
+    expect(baseBridge).toContain("return subscribe('replay-sequence-updated', cb);");
+    expect(baseBridge).toContain("return subscribe('replay-manifest-updated', cb);");
+  });
 });
