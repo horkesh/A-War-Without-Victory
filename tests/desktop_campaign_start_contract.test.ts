@@ -64,6 +64,65 @@ test('startNewCampaign returns canonicalized state before the first manual save'
     );
 }, 120_000);
 
+test('startNewCampaign queues the selected faction foundational decision at campaign birth', async () => {
+    const cases = [
+        { faction: 'RBiH' as const, eventId: 'rbih_state_identity' },
+        { faction: 'RS' as const, eventId: 'rs_strategic_goals' },
+        { faction: 'HRHB' as const, eventId: 'hrhb_political_goal' },
+    ];
+    const allFoundationalIds = cases.map((entry) => entry.eventId);
+    const gatedFollowUpIds = [
+        'rbih_paramilitary_policy_1992',
+        'rs_paramilitary_policy_1992',
+        'hrhb_1992_graz_cooperation_collapse',
+    ];
+
+    for (const { faction, eventId } of cases) {
+        const { state } = await startNewCampaign(process.cwd(), faction, 'apr_1992');
+        const pending = state.military.pending_event_decisions ?? [];
+
+        assert.strictEqual(
+            pending.length,
+            1,
+            `${faction} campaign birth should queue exactly one opening foundational decision`,
+        );
+        assert.strictEqual(pending[0]?.event_id, eventId);
+        assert.strictEqual(pending[0]?.faction, faction);
+        assert.strictEqual(pending[0]?.requires_player_response, true);
+        assert.ok(
+            (pending[0]?.response_options ?? []).length >= 2,
+            `${eventId} should carry authored response options for the player`,
+        );
+        assert.ok(
+            state.military.fired_event_ids.includes(eventId),
+            `${eventId} should be marked fired when queued so once-only gating holds`,
+        );
+        for (const otherEventId of allFoundationalIds.filter((id) => id !== eventId)) {
+            assert.ok(
+                !state.military.fired_event_ids.includes(otherEventId),
+                `${faction} startup should not fire another faction's foundational decision`,
+            );
+        }
+        for (const followUpId of gatedFollowUpIds) {
+            assert.ok(
+                !pending.some((decision) => decision.event_id === followUpId),
+                `${followUpId} should remain gated behind the player's foundational response`,
+            );
+            assert.ok(
+                !state.military.fired_event_ids.includes(followUpId),
+                `${followUpId} should not be fired at campaign birth`,
+            );
+        }
+
+        const payload = serializeState(state);
+        assert.strictEqual(
+            serializeState(deserializeState(payload)),
+            payload,
+            `${faction} startup decision state should remain canonical after save/load`,
+        );
+    }
+}, 120_000);
+
 test('desktop startup path uses the in-memory startup builder instead of harness artifacts by default', async () => {
     const source = await readFile(
         resolve(process.cwd(), 'src', 'scenario', 'scenario_runner.ts'),

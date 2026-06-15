@@ -1212,6 +1212,8 @@ After EVERY scenario run, the orchestrator:
     Do instead: Brigade AoR highlight uses 2 dedicated layers (`brigade-aor-pos`/`brigade-aor-neg`) on `front-edges-hover` source. Completely independent of sector/corps highlight. White icon via `FORMATION_WHITE_OVERLAY` + `SECTOR_UNIT_PULSE`. Filter by `sub_segment_id`. NEVER share layers between sector highlight and brigade highlight — use dedicated layers. Shared layers cause last-writer-wins race between useEffects.
 
 ## Desktop & Electron
+1. **[2026-06-15] Baked startup snapshot is not player-start truth**
+   Do instead: Test live New Game behavior through `src/desktop/desktop_sim.ts` `startNewCampaign`; it overlays player faction, recruitment resources, emergent decision mode, and the selected faction's foundational opening decision after loading `data/derived/startup/apr_1992_initial_save.json`.
 1. **[2026-03-02] One map app: desktop uses dev when running**
    Do instead: Single codebase `src/ui/map/`. Electron tries ports 3002-3005 for dev map; otherwise serves built bundle.
 2. **[2026-03-03] Desktop map: HTTP server + routes**

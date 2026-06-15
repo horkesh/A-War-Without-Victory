@@ -20,7 +20,13 @@ import { computeFrontWidthMetrics } from '../sim/combat/front_width_metrics.js';
 import { applyRecruitment, initializeRecruitmentResources, recruitBrigade } from '../sim/recruitment_engine.js';
 import { runTurn } from '../sim/turn_pipeline.js';
 import { loadEventDefinitionsFromDir } from '../sim/events/event_loader.js';
-import type { EventDefinition } from '../sim/events/event_types.js';
+import { applyEventEffects } from '../sim/events/apply_effects.js';
+import {
+    applyDefinitionDimensionShifts,
+    applyDefinitionFlags,
+} from '../sim/events/evaluate_events.js';
+import { isTwoLevelNotificationsEnabled } from '../sim/events/emit_notifications.js';
+import type { EventDefinition, EventEffect, PendingEventDecision } from '../sim/events/event_types.js';
 import {
     queryMovementPath as computeMovementPathQuery,
     queryMovementRange as computeMovementRangeQuery,
@@ -92,10 +98,109 @@ const DEFAULT_DESKTOP_SCENARIO_KEY: DesktopScenarioKey = 'apr_1992';
 const SCENARIO_KEY_TO_PATH: Record<DesktopScenarioKey, string> = {
     apr_1992: NEW_GAME_SCENARIO_RELATIVE,
 };
+const OPENING_FOUNDATIONAL_EVENT_BY_FACTION: Record<'RBiH' | 'RS' | 'HRHB', string> = {
+    RBiH: 'rbih_state_identity',
+    RS: 'rs_strategic_goals',
+    HRHB: 'hrhb_political_goal',
+};
 
 /** April 1992 game start: initial recruitment capital and equipment for desktop recruitment UI (from apr1992_definitive_52w). */
 const NEW_GAME_RECRUITMENT_CAPITAL: Record<string, number> = { HRHB: 300, RBiH: 400, RS: 600 };
 const NEW_GAME_EQUIPMENT_POINTS: Record<string, number> = { HRHB: 350, RBiH: 100, RS: 800 };
+
+function collectEventDefinitionEffects(def: EventDefinition): EventEffect[] {
+    return [def.effect, ...(def.effects ?? [])];
+}
+
+function getOpeningDecisionTitle(def: EventDefinition): string {
+    if (def.title) return def.title;
+    if (def.narrative) return def.narrative;
+    const narrativeEffects = collectEventDefinitionEffects(def)
+        .filter((effect) => effect.kind === 'narrative')
+        .map((effect) => effect.text);
+    return narrativeEffects.length > 0 ? narrativeEffects.join(' ') : def.id;
+}
+
+function recordOpeningEventFiring(state: GameState, eventId: string, turn: number): void {
+    if (!state.military.fired_event_ids.includes(eventId)) {
+        state.military.fired_event_ids.push(eventId);
+    }
+    state.military.event_fire_counts[eventId] = (state.military.event_fire_counts[eventId] ?? 0) + 1;
+    state.military.event_last_fired_turn[eventId] = turn;
+    state.military.event_readiness[eventId] = 0;
+}
+
+function buildOpeningPendingDecision(
+    def: EventDefinition,
+    playerFaction: 'RBiH' | 'RS' | 'HRHB',
+    turn: number,
+): PendingEventDecision {
+    const responseOptions = def.response_options ?? [];
+    return {
+        event_id: def.id,
+        event_title: getOpeningDecisionTitle(def),
+        ...(def.narrative ? { narrative: def.narrative } : {}),
+        ...(def.category ? { category: def.category } : {}),
+        ...(def.situation ? { situation: def.situation } : {}),
+        ...(def.staff_assessment ? { staff_assessment: def.staff_assessment } : {}),
+        ...(def.trigger_evidence && def.trigger_evidence.length > 0
+            ? { trigger_evidence: [...def.trigger_evidence] }
+            : {}),
+        ...(def.historical_source ? { historical_source: def.historical_source } : {}),
+        ...(def.source_note ? { source_note: def.source_note } : {}),
+        ...(def.source ? { source: def.source } : {}),
+        turn_fired: turn,
+        response_options: responseOptions,
+        faction: playerFaction,
+        requires_player_response: def.requires_player_response,
+        ...(def.historical_default_response_id
+            ? { historical_default_response_id: def.historical_default_response_id }
+            : {}),
+        ...(def.staff_recommended_response_id
+            ? { staff_recommended_response_id: def.staff_recommended_response_id }
+            : {}),
+        ...(isTwoLevelNotificationsEnabled()
+            ? { notifications_to_other_factions: def.notifications_to_other_factions }
+            : {}),
+    };
+}
+
+function queueOpeningFoundationalDecision(
+    state: GameState,
+    eventDefinitions: EventDefinition[],
+    playerFaction: 'RBiH' | 'RS' | 'HRHB',
+): void {
+    const eventId = OPENING_FOUNDATIONAL_EVENT_BY_FACTION[playerFaction];
+    if ((state.military.pending_event_decisions ?? []).some((decision) => decision.event_id === eventId)) {
+        return;
+    }
+    if (state.military.fired_event_ids.includes(eventId)) {
+        return;
+    }
+
+    const def = eventDefinitions.find((entry) => entry.id === eventId);
+    if (!def) {
+        throw new Error(`Missing opening foundational event definition: ${eventId}`);
+    }
+    if (def.responding_faction !== playerFaction) {
+        throw new Error(`Opening foundational event ${eventId} is authored for ${def.responding_faction ?? 'unknown'}, not ${playerFaction}`);
+    }
+    if (!def.response_options || def.response_options.length === 0) {
+        throw new Error(`Opening foundational event ${eventId} has no response options`);
+    }
+    if (def.requires_player_response !== true) {
+        throw new Error(`Opening foundational event ${eventId} must require player response`);
+    }
+
+    const turn = state.meta?.turn ?? 0;
+    applyEventEffects(state, collectEventDefinitionEffects(def));
+    applyDefinitionDimensionShifts(state, def.dimension_shifts);
+    applyDefinitionFlags(state, def.sets_flags);
+    recordOpeningEventFiring(state, eventId, turn);
+
+    state.military.pending_event_decisions ??= [];
+    state.military.pending_event_decisions.push(buildOpeningPendingDecision(def, playerFaction, turn));
+}
 
 /** Load a scenario file and return initial GameState. */
 export async function loadScenarioFromPath(
@@ -145,7 +250,11 @@ export async function startNewCampaign(
         // through this entry, so it stays unset = historical = byte-identical.
         state.meta.decision_mode = 'emergent';
     }
-    return { state: canonicalizeStartupState(state).state };
+    const canonicalState = canonicalizeStartupState(state).state;
+    if (key === 'apr_1992') {
+        queueOpeningFoundationalDecision(canonicalState, loadDesktopEventDefinitions(baseDir), playerFaction);
+    }
+    return { state: canonicalizeStartupState(canonicalState).state };
 }
 
 /** Load a saved state file (final_save.json or any GameState JSON). */

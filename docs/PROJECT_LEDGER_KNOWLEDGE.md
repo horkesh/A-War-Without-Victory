@@ -1,3 +1,7 @@
+## 2026-06-15 - Desktop campaign birth must overlay player-start events
+
+**The baked startup snapshot is not the full live new-campaign contract:** `data/derived/startup/apr_1992_initial_save.json` intentionally has no player faction and no pending player decisions. The desktop `startNewCampaign` path must apply player-specific overlays after loading that snapshot, including recruitment resources, emergent decision mode, and the selected faction's opening foundational decision. Do instead: when testing player-start UX or event availability, assert through `src/desktop/desktop_sim.ts` `startNewCampaign`, not only the baked artifact or `createStateFromScenario`. Applied in `[2026-06-15] fix(desktop): queue faction foundational decision at campaign birth`.
+
 ## 2026-06-15 - Docs consolidation must preserve tracked history and links
 
 **Active planning truth should be compact, but historical links are still contracts:** `docs/plans/README.md`, `COMMAND_BOARD.md`, `MASTER_ROADMAP.md`, the 1.0 DoD, and `POST_D2_RESIDUALS.md` are the current planning entrypoints. Older dated execution packets are historical unless the command board points to them. Do instead: before moving tracked plan/report files, scan for inbound references and archive only no-inbound files, or update links/leave redirect stubs in the same batch. Ignored local legacy doc folders can be quarantined outside the repo with a manifest because they are not tracked history.

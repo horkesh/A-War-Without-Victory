@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-15] fix(desktop): queue faction foundational decision at campaign birth
+
+**Type:** desktop player-start/event-system fix. Root cause: the packaged/live "New Game" path loaded the baked April 1992 startup snapshot and returned it at turn 0; authored foundational events existed in `data/scenarios/events/war_1992.json`, but `evaluate-events` only materialized pending decisions during turn advancement. Result: a real player could begin the war with no RS/RBiH/HRHB foundational choice, despite Game Bible §21.3, Rulebook §17.5, and Systems Manual §7.10.4 defining those decisions as the event tree foundation.
+
+**Fix:** `startNewCampaign` now loads the validated desktop event registry and queues exactly the selected player's opening foundational decision at campaign birth: RBiH `rbih_state_identity`, RS `rs_strategic_goals`, HRHB `hrhb_political_goal`. It mirrors the evaluator's persisted pending-decision whitelist, applies only event-level fire effects/flags/dimension shifts, records the once-only event firing/readiness reset, and leaves response effects/flags/enabled-events to the player's actual response. Other factions' foundational decisions and gated follow-ups remain unfired at startup. Headless/scenario-runner calibration startup remains untouched.
+
+**Tests:** Added `tests/desktop_campaign_start_contract.test.ts` coverage for all three player factions, including canonical save/load stability and no early follow-up firing. Verified red first (`0 !== 1` pending decisions), then green.
+
+**Verification:** `npx.cmd vitest run tests\desktop_campaign_start_contract.test.ts`; `npx.cmd vitest run tests\startup_snapshot_contract.test.ts tests\ui\event_decision_auto_launch_contract.test.ts tests\warroom_new_campaign_flow_truth.test.ts`; `npx.cmd tsc --noEmit`; `npm.cmd run desktop:package:win:nsis`; `npm.cmd run desktop:package:win:nsis:smoke`; `node tools\desktop_packaged_runtime_probe.mjs`; direct bundled-sim assertion produced `{"turn":0,"faction":"RS","pending":["rs_strategic_goals"],"fired":["rs_strategic_goals"]}`. New installer: `dist-packaged\A War Without Victory Setup 0.9.9-beta.1.exe`, SHA-256 `70964e0c2df9189f774ee3b071ed854806c8180af79b3bcc0b3e8bd229c138b5`.
+
+---
+
 ## [2026-06-11] fix(EH-2): activate MC-leak casualty-ledger fix (MIA→WIA, DEFAULT-ON) — MC ~54k→42k, territory byte-identical, historian-certified
 
 **Type:** engine-health #1 fix (Pyrrhic-agreed) — the missing/captured (MC) over-count. TERRITORY-FLAT re-floor (territory 658 UNCHANGED). Branch `eh2/mc-leak-fix`. Implements diagnosis `docs/40_reports/proposals/20260611_mc_leak_diagnosis.md`; historian-certified by `docs/40_reports/proposals/20260611_casualty_historian_validation.md`.
