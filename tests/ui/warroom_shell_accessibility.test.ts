@@ -259,7 +259,8 @@ describe('WarroomShellLayer accessibility proof', () => {
         expect(diplomacyBranch).toContain('setDiplomacyOpen(true)');
         expect(diplomacyBranch).not.toContain('setWarroomOverlaySurface(surface)');
         expect(openWarroomOverlayBody).toContain("if (surface === 'chronicle')");
-        expect(chronicleBranch).toContain('setIsDecisionHistoryOpen(true)');
+        expect(chronicleBranch).toContain('setIsDecisionHistoryOpen(false)');
+        expect(chronicleBranch).toContain('openChronicle(useGameStore.getState())');
         expect(chronicleBranch).not.toContain('setWarroomOverlaySurface(surface)');
     });
 });

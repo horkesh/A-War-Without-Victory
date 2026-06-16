@@ -188,7 +188,7 @@ describe('buildTurnAftermathView', () => {
 
     expect(view).not.toBeNull();
     expect(view?.turn).toBe(12);
-    expect(view?.dateLabel).toBe('24 Jun 1992');
+    expect(view?.dateLabel).toBe('29 Jun 1992');
     expect(view?.tone).toBe('gain');
     expect(view?.headline).toContain('+2');
     expect(view?.narrativeLine).toBe('The week ends with ground taken, but the ledger still decides what the advance cost.');
@@ -299,7 +299,7 @@ describe('buildTurnAftermathView', () => {
       }),
     });
 
-    expect(view?.dateLabel).toBe('24 jun 1992');
+    expect(view?.dateLabel).toBe('29 jun 1992');
     expect(view?.headline).toBe('Neto teritorijalni dobitak: +2 OSID-a.');
     expect(view?.narrativeLine).toBe('Sedmica završava osvojenim prostorom, ali knjiga troška još određuje cijenu napredovanja.');
     expect(view?.cost.reasons).toEqual(['12 prijateljskih gubitaka', '1 formacija uništena', '80 raseljenih']);

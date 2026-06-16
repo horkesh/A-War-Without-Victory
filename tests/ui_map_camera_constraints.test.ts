@@ -25,7 +25,10 @@ describe('tactical map camera constraints', () => {
 
   it('direct map formation clicks clear OSID and sector rail context', () => {
     expect(source).toContain('function selectFormationFromMap(formationId: string)');
-    expect(source).toContain('selectedOsid: null');
-    expect(source).toContain('selectedCorpsFrontSectorId: null');
+    expect(source).toContain('useGameStore.getState().setSelectedFormationId(formationId)');
+    const storeSource = readFileSync('src/ui/map/store/gameStore.ts', 'utf8');
+    expect(storeSource).toContain('setSelectedFormationId: (id) => set(id == null');
+    expect(storeSource).toContain('selectedOsid: null');
+    expect(storeSource).toContain('selectedCorpsFrontSectorId: null');
   });
 });
