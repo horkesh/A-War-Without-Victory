@@ -6,6 +6,7 @@ import { getPlayerFacingFaction } from '../../../shared/playerFacingLabels.js';
 import { Z } from '../../../shared/zIndex.js';
 import { t } from '../../i18n';
 import type { EventDefinition } from '../../../../sim/events/event_types.js';
+import { openChronicle } from '../../utils/shellNavigation.js';
 
 /**
  * Phase H Packet 7 — accepts optional `eventCatalog`. When provided (App-level
@@ -22,7 +23,6 @@ export function WrappedOverlay({ eventCatalog }: WrappedOverlayProps = {}) {
     const open = useGameStore(s => s.wrappedOpen);
     const setOpen = useGameStore(s => s.setWrappedOpen);
     const state = useGameStore(s => s.loadedGameState);
-    const setChronicleOpen = useGameStore(s => s.setChronicleOpen);
     const [currentSlide, setCurrentSlide] = useState(0);
 
     const slides = useMemo(
@@ -48,8 +48,8 @@ export function WrappedOverlay({ eventCatalog }: WrappedOverlayProps = {}) {
     const handleViewChronicle = useCallback(() => {
         setOpen(false);
         setCurrentSlide(0);
-        setChronicleOpen(true);
-    }, [setOpen, setChronicleOpen]);
+        openChronicle(useGameStore.getState());
+    }, [setOpen]);
 
     // Keyboard navigation
     useEffect(() => {

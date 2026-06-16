@@ -27,6 +27,8 @@ export interface ShellNavigationState {
   setChronicleOpen: (open: boolean) => void;
   /** Optional: set by gameStore when advance-turn handoff is received from the Warroom shell. */
   setAdvanceTurnPending?: (v: boolean) => void;
+  /** Optional: close the map-local field operations snapshot when returning to desk-owned surfaces. */
+  setIsOperationsPanelOpen?: (open: boolean) => void;
   /** Optional: clear tactical selections to return to Presidential Inbox. */
   setSelectedOsid?: (id: string | null) => void;
   setSelectedFormationId?: (id: string | null) => void;

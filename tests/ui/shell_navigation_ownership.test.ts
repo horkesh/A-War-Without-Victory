@@ -177,11 +177,14 @@ describe('field toolbar navigation ownership', () => {
   it('routes Army HQ reference links through shared shell helpers', () => {
     const recordsContentSource = readFileSync('src/ui/map/components/army_hq/RecordsContent.tsx', 'utf8');
     const consequenceRecordsSource = readFileSync('src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.tsx', 'utf8');
+    const wrappedOverlaySource = readFileSync('src/ui/map/components/chronicle/WrappedOverlay.tsx', 'utf8');
 
     expect(recordsContentSource).not.toContain('setCodexOpen(true)');
     expect(consequenceRecordsSource).not.toContain('setChronicleOpen(true)');
+    expect(wrappedOverlaySource).not.toContain('setChronicleOpen(true)');
     expect(recordsContentSource).toContain('openCodex(useGameStore.getState())');
     expect(consequenceRecordsSource).toContain('openChronicle(useGameStore.getState())');
+    expect(wrappedOverlaySource).toContain('openChronicle(useGameStore.getState())');
   });
 
   it('does not report advance-turn handoff success without an advance modal surface', () => {

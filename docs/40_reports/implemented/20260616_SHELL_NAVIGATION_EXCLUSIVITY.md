@@ -53,6 +53,20 @@ Live browser verification on `http://127.0.0.1:4196/tactical_map.html?dev=1`:
 
 Browser logs showed no route/runtime errors. The existing coordinate-validation warnings for specific OSID damage/force-quality overlay polygons remain a separate map-data/rendering polish backlog item.
 
+## 2026-06-17 App-Level Follow-Up
+
+A second live/player sweep found that the shared `shellNavigation` fix did not cover App-local surfaces. Decision History could open over the wrong shell, Warroom exits could leave Warroom-owned overlay state hidden behind game shells, Presidential Inbox return routes could leave field/reference panels active, and Wrapped's final-slide Chronicle action still used a raw `setChronicleOpen(true)` setter.
+
+The follow-up hardening centralizes these App transitions:
+
+- `leaveWarroomForGame(...)` closes Warroom desk, decision-room host, native overlays, command strip, diplomacy, and Decision History before entering game-owned shells.
+- `openWarroomDeskFromField(...)` closes Army HQ, Codex, Chronicle, Operations, Summary, and Decision History before opening the President's Desk.
+- Decision History opens only from the game shell, closes Army HQ/Codex/Chronicle/field panels first, and owns Escape in capture phase so Pause cannot open behind it.
+- Inbox-return routes close Codex/Chronicle/Army HQ/Operations and force the game shell.
+- Wrapped's `View Chronicle` action now routes through `openChronicle(...)`.
+
+Focused route and Escape tests cover the new App-level helpers. Live browser verification on `http://127.0.0.1:4197/tactical_map.html?dev=1` repeated the RS first-hour path, Decision History Escape, Records -> Codex, Codex Escape, Chronicle, and DESK/foundational-decision checks. Final strict browser smoke produced only known dev fallback/WebGL/invalid-coordinate warnings and no unexpected page/runtime errors.
+
 ## Follow-Up
 
-Continue the separate DeckGL/coordinate-validation polish lane for invalid OSID overlay polygons; do not fold that into shell-route ownership.
+Continue the separate DeckGL/coordinate-validation polish lane for invalid OSID overlay polygons; do not fold that into shell-route ownership. Also continue the separate turn-0 OOB/content-polish lane for commander gaps observed during live play, including Drina Corps still rendering `Command forming`.

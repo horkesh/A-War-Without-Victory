@@ -106,6 +106,41 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(effect).toContain('diplomacyOpen, warroomOverlaySurface');
     });
 
+    it('clears Warroom-local overlays before leaving the Warroom for game-owned shells', () => {
+        const app = read('src/ui/map/App.tsx');
+
+        expect(app).toContain('const leaveWarroomForGame =');
+        expect(app).toMatch(/const leaveWarroomForGame = \(\) => \{[\s\S]*setWarroomDeskOpen\(false\);[\s\S]*setWarroomDecisionRoomOpen\(false\);[\s\S]*setWarroomOverlaySurface\(null\);[\s\S]*closeCommandStrip\(false\);[\s\S]*setDiplomacyOpen\(false\);[\s\S]*setAppScreen\('game'\);[\s\S]*\};/);
+        expect(app).not.toContain("onOpenMap={() => setAppScreen('game')}");
+        expect(app).not.toContain("onOpenDesk={() => setAppScreen('warroom')}");
+    });
+
+    it('makes Decision History a mutually exclusive top-level overlay', () => {
+        const app = read('src/ui/map/App.tsx');
+
+        expect(app).toContain('const openDecisionHistoryOverlay =');
+        expect(app).toMatch(/const openDecisionHistoryOverlay = \(\) => \{[\s\S]*if \(appScreen !== 'game'\) return;/);
+        expect(app).toMatch(/const openDecisionHistoryOverlay = \(\) => \{[\s\S]*gs\.setArmyHQOpen\(false\);[\s\S]*gs\.setChronicleOpen\(false\);[\s\S]*gs\.setCodexOpen\(false\);[\s\S]*gs\.setIsOperationsPanelOpen\(false\);[\s\S]*setIsDecisionHistoryOpen\(true\);[\s\S]*\};/);
+        expect(app).not.toContain('setIsDecisionHistoryOpen((prev) => {');
+        expect(app).toContain('}, [appScreen, isDecisionHistoryOpen]);');
+    });
+
+    it('returns aftermath inbox handoffs to the visible game-shell inbox', () => {
+        const app = read('src/ui/map/App.tsx');
+        const inboxStart = app.indexOf('const openInboxHome = () => {');
+        const inboxEnd = app.indexOf('\n  useEffect(() => {', inboxStart);
+
+        expect(inboxStart).toBeGreaterThanOrEqual(0);
+        expect(inboxEnd).toBeGreaterThan(inboxStart);
+
+        const inboxRoute = app.slice(inboxStart, inboxEnd);
+        expect(inboxRoute).toContain("setAppScreen('game');");
+        expect(inboxRoute).toContain('gs.setCodexOpen(false);');
+        expect(inboxRoute).toContain('gs.setChronicleOpen(false);');
+        expect(inboxRoute).toContain('gs.setArmyHQOpen(false);');
+        expect(inboxRoute).toContain('gs.setIsOperationsPanelOpen(false);');
+    });
+
     it('routes the Warroom Chronicle hotspot to ChronicleOverlay instead of Authored Choices', () => {
         const app = read('src/ui/map/App.tsx');
         const routeStart = app.indexOf("if (surface === 'chronicle') {");

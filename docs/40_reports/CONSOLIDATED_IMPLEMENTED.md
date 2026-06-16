@@ -2,7 +2,7 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
-**Latest shell navigation exclusivity:** [implemented/20260616_SHELL_NAVIGATION_EXCLUSIVITY.md](implemented/20260616_SHELL_NAVIGATION_EXCLUSIVITY.md) - Army HQ routes now close Codex/Chronicle centrally, Records routes force the Records tab, and Codex Escape/reference links no longer stack Pause/Army HQ behind top-level surfaces.
+**Latest shell navigation exclusivity:** [implemented/20260616_SHELL_NAVIGATION_EXCLUSIVITY.md](implemented/20260616_SHELL_NAVIGATION_EXCLUSIVITY.md) - Army HQ routes now close Codex/Chronicle centrally, Records routes force the Records tab, Codex/Decision History Escape no longer stack Pause, and App-level Warroom/Inbox/Wrapped handoffs now clear competing shells before opening the next top-level surface.
 
 **Latest issue #170 fingerprint/cache hardening:** [implemented/20260616_ISSUE170_FINGERPRINT_CACHE_HARDENING.md](implemented/20260616_ISSUE170_FINGERPRINT_CACHE_HARDENING.md) - Structural fingerprint v2 now pins sorted OSID control flips, final-sector cache keys include front-edge content, and operation-roster cache invalidation has dynamic coverage.
 

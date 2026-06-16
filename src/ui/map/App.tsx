@@ -1000,6 +1000,25 @@ function App() {
     setSummaryOpen(true);
   };
 
+  const openDecisionHistoryOverlay = () => {
+    if (appScreen !== 'game') return;
+    const gs = useGameStore.getState();
+    gs.setArmyHQOpen(false);
+    gs.setChronicleOpen(false);
+    gs.setCodexOpen(false);
+    gs.setIsOperationsPanelOpen(false);
+    setSummaryOpen(false);
+    setIsDecisionHistoryOpen(true);
+  };
+
+  const toggleDecisionHistoryOverlay = () => {
+    if (isDecisionHistoryOpen) {
+      setIsDecisionHistoryOpen(false);
+      return;
+    }
+    openDecisionHistoryOverlay();
+  };
+
   // Keyboard shortcuts for Army HQ tabs + orphaned modals
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -1022,15 +1041,7 @@ function App() {
       } else if (e.key === 'e' || e.key === 'E') {
         // Authored Choices ledger shortcut. Mirrors the 'D' hotkey.
         e.preventDefault();
-        const gs = useGameStore.getState();
-        setIsDecisionHistoryOpen((prev) => {
-          const next = !prev;
-          if (next) {
-            gs.setChronicleOpen(false);
-            gs.setCodexOpen(false);
-          }
-          return next;
-        });
+        toggleDecisionHistoryOverlay();
       } else if (e.key === 'c' || e.key === 'C') {
         e.preventDefault();
         const gs = useGameStore.getState();
@@ -1055,15 +1066,7 @@ function App() {
         // ESC handler is the canonical close path; this is the second-open
         // path so the player can dismiss via the same key they opened with.
         e.preventDefault();
-        const gs = useGameStore.getState();
-        setIsDecisionHistoryOpen((prev) => {
-          const next = !prev;
-          if (next) {
-            gs.setChronicleOpen(false);
-            gs.setCodexOpen(false);
-          }
-          return next;
-        });
+        toggleDecisionHistoryOverlay();
       } else if (e.key === 'u' || e.key === 'U') {
         // Item 2 — National Humanitarian Ledger. Toggle mirrors Codex (X) /
         // Chronicle (C) / Decision History (D). Read-model only.
@@ -1073,7 +1076,7 @@ function App() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, []);
+  }, [appScreen, isDecisionHistoryOpen]);
 
   const openOrbat = () => {
     // If no corps selected for orbat, pick the first player corps
@@ -1092,43 +1095,43 @@ function App() {
   const reviewPreAdvancePriorities = () => {
     const gs = useGameStore.getState();
     openArmyHQTab(gs, 'briefing');
-    setAppScreen('game');
+    leaveWarroomForGame();
     setSummaryOpen(false);
   };
 
   const reviewPreAdvanceItem = (item: PreAdvanceCommandReviewItem) => {
     if (item.navigationTarget.kind === 'counter-offer') {
       setSelectedCounterOfferId(item.navigationTarget.counterOfferId);
-      setAppScreen('game');
+      leaveWarroomForGame();
       setSummaryOpen(false);
       return;
     }
     if (item.navigationTarget.kind === 'enclave-dashboard') {
       setEnclaveDashboardOpen(true);
-      setAppScreen('game');
+      leaveWarroomForGame();
       setSummaryOpen(false);
       return;
     }
     openPresidentialDecisionRoomNavigationTarget(item.navigationTarget, useGameStore.getState());
-    setAppScreen('game');
+    leaveWarroomForGame();
     setSummaryOpen(false);
   };
 
   const reviewPreAdvanceTarget = (target: PresidentialDecisionRoomNavigationTarget) => {
     if (target.kind === 'counter-offer') {
       setSelectedCounterOfferId(target.counterOfferId);
-      setAppScreen('game');
+      leaveWarroomForGame();
       setSummaryOpen(false);
       return;
     }
     if (target.kind === 'enclave-dashboard') {
       setEnclaveDashboardOpen(true);
-      setAppScreen('game');
+      leaveWarroomForGame();
       setSummaryOpen(false);
       return;
     }
     openPresidentialDecisionRoomNavigationTarget(target, useGameStore.getState());
-    setAppScreen('game');
+    leaveWarroomForGame();
     setSummaryOpen(false);
   };
 
@@ -1179,16 +1182,16 @@ function App() {
     closeCommandStrip(false);
     if (surface === 'staff') {
       openArmyHQTab(useGameStore.getState(), 'personnel');
-      setAppScreen('game');
+      leaveWarroomForGame();
       return;
     }
     if (surface === 'intelligence') {
       openArmyHQRecordsSubTab(useGameStore.getState(), 'aar');
-      setAppScreen('game');
+      leaveWarroomForGame();
       return;
     }
     openArmyHQTab(useGameStore.getState(), 'summary');
-    setAppScreen('game');
+    leaveWarroomForGame();
   };
   const openCommandStrip = (categoryId: PresidentialCommandCategoryId | null, preserveFocusTarget = true) => {
     if (preserveFocusTarget) rememberWarroomFocus();
@@ -1201,6 +1204,30 @@ function App() {
     setCommandStripOpen(false);
     setCommandStripCategoryId(null);
     if (restoreFocus) restoreWarroomFocus();
+  };
+  const leaveWarroomForGame = () => {
+    setWarroomDeskOpen(false);
+    setWarroomDecisionRoomOpen(false);
+    setWarroomOverlaySurface(null);
+    closeCommandStrip(false);
+    setDiplomacyOpen(false);
+    setIsDecisionHistoryOpen(false);
+    setAppScreen('game');
+  };
+  const openWarroomDeskFromField = () => {
+    const gs = useGameStore.getState();
+    gs.setArmyHQOpen(false);
+    gs.setCodexOpen(false);
+    gs.setChronicleOpen(false);
+    gs.setIsOperationsPanelOpen(false);
+    setSummaryOpen(false);
+    setIsDecisionHistoryOpen(false);
+    setWarroomOverlaySurface(null);
+    setWarroomDeskOpen(true);
+    setWarroomDecisionRoomOpen(false);
+    closeCommandStrip(false);
+    setDiplomacyOpen(false);
+    setAppScreen('warroom');
   };
   const openCommandCategory = () => {
     setCommandStripOpen(false);
@@ -1242,7 +1269,7 @@ function App() {
       setDiplomacyOpen(false);
       setIsDecisionHistoryOpen(false);
       openChronicle(useGameStore.getState());
-      setAppScreen('game');
+      leaveWarroomForGame();
       return;
     }
     setWarroomDeskOpen(false);
@@ -1293,14 +1320,14 @@ function App() {
         : 'arbih_general_staff';
     useGameStore.getState().setSelectedArmyHqId(hqId);
     setSelectedReserveRequestId(null);
-    setAppScreen('game');
+    leaveWarroomForGame();
     setSummaryOpen(false);
   };
 
   const openPersonnelFromDesk = () => {
     openArmyHQTab(useGameStore.getState(), 'personnel');
     setSelectedOfficerMatterId(null);
-    setAppScreen('game');
+    leaveWarroomForGame();
     setSummaryOpen(false);
   };
 
@@ -1319,18 +1346,14 @@ function App() {
     }
     if (action === 'army_hq_opportunity') {
       openArmyHQTab(gs, 'briefing');
-      setAppScreen('game');
+      leaveWarroomForGame();
     }
     if (action === 'army_hq_briefing') {
       openArmyHQTab(gs, 'briefing');
-      setAppScreen('game');
+      leaveWarroomForGame();
     }
     if (action === 'decision_room') {
-      setWarroomOverlaySurface(null);
-      setWarroomDeskOpen(true);
-      closeCommandStrip(false);
-      setWarroomDecisionRoomOpen(false);
-      setAppScreen('warroom');
+      openWarroomDeskFromField();
     }
     if (action === 'peace_plan_modal') {
       setDismissedPeacePlanKey(null);
@@ -1346,7 +1369,7 @@ function App() {
     }
     if (action === 'autonomy_panel') {
       setAutonomyPanelOpen(true);
-      setAppScreen('game');
+      leaveWarroomForGame();
     }
     if (action === 'dismiss_intelligence_notification') {
       setSelectedIntelligenceBriefId(itemId);
@@ -1356,7 +1379,13 @@ function App() {
   const openInboxHome = () => {
     const gs = useGameStore.getState();
     setTurnAftermathOpen(false);
+    setAppScreen('game');
     setSummaryOpen(false);
+    setIsDecisionHistoryOpen(false);
+    gs.setCodexOpen(false);
+    gs.setChronicleOpen(false);
+    gs.setArmyHQOpen(false);
+    gs.setIsOperationsPanelOpen(false);
     gs.setSelectedOsid(null);
     gs.setSelectedFormationId(null);
     gs.setSelectedCorpsId(null);
@@ -1475,7 +1504,7 @@ function App() {
               }
               : null}
             pressureWarning={loadedGameState?.pressureWarning ?? false}
-            onOpenDesk={() => setAppScreen('warroom')}
+            onOpenDesk={openWarroomDeskFromField}
             onOpenSummary={() => openSummary()}
             onOpenRecords={() => openArmyHQRecords('aar')}
             onOpenOpsHistory={() => useGameStore.getState().setIsOperationsPanelOpen(true)}
@@ -1801,7 +1830,7 @@ function App() {
         <div className="fixed inset-0 z-50 bg-black">
           <WarroomShellLayer
             onOpenSidePicker={() => {
-              setAppScreen('game');
+              leaveWarroomForGame();
               setSidePickerOpen(true);
               setSidePickerDismissed(false);
             }}
@@ -1820,11 +1849,7 @@ function App() {
                   return;
                 }
                 if (command.kind === 'war-map') {
-                  setWarroomOverlaySurface(null);
-                  setWarroomDeskOpen(false);
-                  setWarroomDecisionRoomOpen(false);
-                  closeCommandStrip(false);
-                  setAppScreen('game');
+                  leaveWarroomForGame();
                 }
                 return;
               }
@@ -1839,7 +1864,7 @@ function App() {
                 applyShellHandoffCommand(useGameStore.getState(), command);
               }
               if (!warroomCommandStaysInRoom(command)) {
-                setAppScreen('game');
+                leaveWarroomForGame();
               }
             }}
           />
@@ -1851,20 +1876,20 @@ function App() {
               onAdvance={() => useGameStore.getState().setAdvanceTurnPending(true)}
               onOpenArmyHQ={() => {
                 openArmyHQTab(useGameStore.getState(), 'briefing');
-                setAppScreen('game');
+                leaveWarroomForGame();
               }}
-              onOpenMap={() => setAppScreen('game')}
+              onOpenMap={leaveWarroomForGame}
               onOpenRecords={() => {
                 openArmyHQRecordsSubTab(useGameStore.getState(), 'aftermath');
-                setAppScreen('game');
+                leaveWarroomForGame();
               }}
               onOpenDecisionRecords={(recordId) => {
                 openArmyHQDecisionConsequenceRecord(useGameStore.getState(), recordId);
-                setAppScreen('game');
+                leaveWarroomForGame();
               }}
               onOpenChronicle={() => {
                 openChronicle(useGameStore.getState());
-                setAppScreen('game');
+                leaveWarroomForGame();
               }}
               onClose={() => {
                 closeWarroomDesk();

@@ -29,12 +29,15 @@ export function openPresidentialDecisionRoomNavigationTarget(
     return false;
   }
   if (target.kind === 'inbox') {
+    state.setCodexOpen(false);
+    state.setChronicleOpen(false);
+    state.setArmyHQOpen(false);
+    state.setIsOperationsPanelOpen?.(false);
     state.setSelectedOsid?.(null);
     state.setSelectedFormationId?.(null);
     state.setSelectedCorpsId?.(null);
     state.setSelectedCorpsFrontSectorId?.(null);
     state.setSelectedArmyId(null);
-    state.setArmyHQOpen(false);
     state.setSelectedArmyHqId?.(null);
     state.setSelectedOperationKey?.(null);
     state.setSelectedOrbatCorpsId?.(null);

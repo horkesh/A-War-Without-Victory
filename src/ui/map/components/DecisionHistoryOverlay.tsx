@@ -317,11 +317,13 @@ export function DecisionHistoryOverlay({
         const handler = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
                 e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
                 onClose();
             }
         };
-        window.addEventListener('keydown', handler);
-        return () => window.removeEventListener('keydown', handler);
+        window.addEventListener('keydown', handler, true);
+        return () => window.removeEventListener('keydown', handler, true);
     }, [isOpen, onClose]);
 
     // Reset expansion when overlay closes — prevents stale expansion state

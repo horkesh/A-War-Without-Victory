@@ -31,6 +31,14 @@ function createState(playerFaction: string | null = 'RBiH'): ShellNavigationStat
     setFocusedDecisionConsequenceId: (id) => { calls.push(['setFocusedDecisionConsequenceId', id]); },
     setCodexOpen: (open) => { calls.push(['setCodexOpen', open]); },
     setChronicleOpen: (open) => { calls.push(['setChronicleOpen', open]); },
+    setIsOperationsPanelOpen: (open) => { calls.push(['setIsOperationsPanelOpen', open]); },
+    setSelectedOsid: (id) => { calls.push(['setSelectedOsid', id]); },
+    setSelectedFormationId: (id) => { calls.push(['setSelectedFormationId', id]); },
+    setSelectedCorpsId: (id) => { calls.push(['setSelectedCorpsId', id]); },
+    setSelectedCorpsFrontSectorId: (id) => { calls.push(['setSelectedCorpsFrontSectorId', id]); },
+    setSelectedArmyHqId: (id) => { calls.push(['setSelectedArmyHqId', id]); },
+    setSelectedOperationKey: (key) => { calls.push(['setSelectedOperationKey', key]); },
+    setSelectedOrbatCorpsId: (id) => { calls.push(['setSelectedOrbatCorpsId', id]); },
   };
 }
 
@@ -277,6 +285,27 @@ describe('shellNavigation', () => {
       ['setCodexOpen', false],
       ['setArmyHQOpen', false],
       ['setChronicleOpen', true],
+    ]);
+  });
+
+  it('routes Presidential Decision Room inbox returns to a clean desk-owned field', () => {
+    const state = createState('RBiH');
+
+    expect(openPresidentialDecisionRoomNavigationTarget({ kind: 'inbox' }, state)).toBe(true);
+
+    expect(state.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
+      ['setArmyHQOpen', false],
+      ['setIsOperationsPanelOpen', false],
+      ['setSelectedOsid', null],
+      ['setSelectedFormationId', null],
+      ['setSelectedCorpsId', null],
+      ['setSelectedCorpsFrontSectorId', null],
+      ['setSelectedArmyId', null],
+      ['setSelectedArmyHqId', null],
+      ['setSelectedOperationKey', null],
+      ['setSelectedOrbatCorpsId', null],
     ]);
   });
 
