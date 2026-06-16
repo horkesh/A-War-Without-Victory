@@ -32,6 +32,28 @@ it('derivePanelRailState keeps sector as primary when a brigade drills in from i
     expect(rail).toEqual({ primary: 'sector', secondary: 'formation' });
 });
 
+it('derivePanelRailState shows standalone brigade selection without stale parent context', () => {
+    const rail = (panelRail as typeof panelRail & {
+        derivePanelRailState?: (state: {
+            selectedOsid: string | null;
+            selectedArmyId: string | null;
+            selectedCorpsId: string | null;
+            selectedCorpsFrontSectorId: string | null;
+            selectedFormationId: string | null;
+            selectedOperationKey: string | null;
+        }) => { primary: string | null; secondary: string | null; };
+    }).derivePanelRailState?.({
+        selectedOsid: null,
+        selectedArmyId: null,
+        selectedCorpsId: null,
+        selectedCorpsFrontSectorId: null,
+        selectedFormationId: 'brigade:standalone',
+        selectedOperationKey: null,
+    });
+
+    expect(rail).toEqual({ primary: 'formation', secondary: null });
+});
+
 it('derivePanelRailState keeps army as primary when corps drills in from it', () => {
     const rail = (panelRail as typeof panelRail & {
         derivePanelRailState?: (state: {

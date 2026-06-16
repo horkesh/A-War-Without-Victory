@@ -103,6 +103,8 @@ describe('buildOpordDisplayModel', () => {
         expect(sectorPanelSource).toContain('getPlayerSafeMilitaryFactionName(sector.faction)');
         expect(sectorPanelSource).toContain('filterPlayerFacingOperations');
         expect(sectorPanelSource).not.toContain('loadedGameState?.operations ?? []');
+        expect(sectorPanelSource).toContain('getOsidDisplayName(objective, osidDisplayNames)');
+        expect(sectorPanelSource).not.toContain('osidDisplayNames?.[objective] ?? objective');
         expect(oobSource).toContain('filterPlayerFacingOperations');
         expect(authorizeSource).toContain('findPlayerFacingOperationByKey');
         expect(authorizeSource).not.toContain('loadedGameState.operations ?? []).find');

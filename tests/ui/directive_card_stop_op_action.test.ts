@@ -274,7 +274,10 @@ describe('DirectiveCard stop-op action host', () => {
     fireEvent.change(screen.getByLabelText('Objective settlement'), { target: { value: 'Kamenica' } });
 
     const alert = screen.getByRole('alert', { name: 'Ambiguous objective settlement' });
-    expect(alert.textContent).toContain('op:alpha:kamenica_1, op:beta:kamenica_1');
+    expect(alert.textContent).toContain('Kamenica - option 1');
+    expect(alert.textContent).toContain('Kamenica - option 2');
+    expect(alert.textContent).not.toContain('op:');
+    expect(alert.textContent).not.toContain('OSID');
     const issue = screen.getByRole('button', { name: 'Issue (25)' });
     expect(issue.hasAttribute('disabled')).toBe(true);
     fireEvent.click(issue);

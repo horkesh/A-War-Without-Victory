@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-16] fix(ui): clear stale brigade context and remove objective raw IDs
+
+**Type:** tactical-map UI/player-facing copy hardening. This closes Pyrrhic specialist findings that standalone brigade selection could inherit stale corps/army/HQ context, and request-operation / Corps front objective surfaces could expose raw OSIDs in normal player-facing copy.
+
+**Fix:** `setSelectedFormationId(non-null)` now clears stale entity and operation owners before selecting the formation. `FormationDetail` parent navigation routes army-HQ parents through `selectedArmyHqId` and corps parents through `selectedCorpsId` without also selecting the parent as a formation. Objective picker duplicate labels now use deterministic safe ordinal text (`Label - option N`) while preserving raw OSIDs only as hidden option values for IPC. Ambiguous typed-target warnings use those safe labels and English copy no longer asks for an exact OSID. `CorpsFrontPanel` objective focus copy resolves through `getOsidDisplayName(...)` instead of falling back directly to raw objective IDs.
+
+**Tests:** Added/updated selection-store, panel-rail, objective-target, DirectiveCard ambiguous-target, and player-safe-label static guards. Red proof failed on the stale context and raw-ID leaks; green proof passed after the fix.
+
+**Verification:** `npx.cmd vitest run tests\ui_map_selection_store.test.ts tests\ui_map_panel_rail.test.ts tests\ui\objective_target_options.test.ts tests\ui\directive_card_stop_op_action.test.ts tests\ui_opord_player_safe_labels.test.ts --pool=forks --reporter=dot` -> 5 files / 51 tests passed. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` -> 11 files / 102 tests passed. Live browser smoke on `http://127.0.0.1:4184/` RS start loaded the first-hour overlay, produced no console/page errors, and did not expose raw `op:` objective copy in the visible first-hour text. No sim/scenario/save-schema/baseline/package artifacts changed.
+
+---
+
 ## [2026-06-16] fix(ui): scope player-facing enclave and supply truth
 
 **Type:** UI/read-model/map hardening. This closes a Pyrrhic specialist sweep finding: player campaigns could receive all-faction enclave resilience and supply summary rows through tactical-map/read-model surfaces, and the Supply map legend still advertised stale global surplus thresholds instead of the player-visible known-friendly supply classes.

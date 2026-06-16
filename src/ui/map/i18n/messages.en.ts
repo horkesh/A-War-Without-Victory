@@ -3288,7 +3288,7 @@ export const enMessages = {
     'directive.targetInput.aria': 'Objective settlement',
     'directive.targetInput.ambiguousAria': 'Ambiguous objective settlement',
     'directive.targetInput.ambiguousHeading': 'Ambiguous objective',
-    'directive.targetInput.ambiguousBody': 'Several settlements share that name. Use a more specific staff label or exact OSID: {matches}.',
+    'directive.targetInput.ambiguousBody': 'Several settlements share that name. Use a more specific staff label or choose one of these listed objectives: {matches}.',
     'directive.issue.blockedFrontVisitTitle': 'A front visit cannot be made right now.',
     'directive.issue.blockedNoTargetTitle': 'Name an objective settlement for staff review.',
     'directive.issue.blockedAmbiguousTargetTitle': 'Choose a specific objective before issuing this directive.',

@@ -374,12 +374,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setSelectedFormationId: (id) => set(id == null
     ? { selectedFormationId: null }
     : {
-      selectedOsid: null,
-      selectedFormationId: id,
-      selectedCorpsFrontSectorId: null,
-      selectedOperationKey: null,
-      selectedOrbatCorpsId: null,
+      ...CLEARED_ENTITY_SELECTIONS,
       ...CLEARED_OPERATION_CONTEXT,
+      selectedFormationId: id,
     }),
 
   hoveredOsids: [],

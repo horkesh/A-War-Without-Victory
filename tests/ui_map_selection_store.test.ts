@@ -94,18 +94,12 @@ describe('tactical map selection store clearing', () => {
     });
   });
 
-  it('formation selection clears stale settlement, sector, operation, and ORBAT context', () => {
+  it('formation selection clears stale settlement, sector, corps, army, operation, and ORBAT context', () => {
     seedConflictingSelectionState();
 
     useGameStore.getState().setSelectedFormationId('brigade:next');
 
-    expect(useGameStore.getState()).toMatchObject({
-      selectedOsid: null,
-      selectedFormationId: 'brigade:next',
-      selectedCorpsFrontSectorId: null,
-      selectedOperationKey: null,
-      selectedOrbatCorpsId: null,
-    });
+    expectOnlySelection({ selectedFormationId: 'brigade:next' });
   });
 
   it('sector selection clears stale settlement, formation, corps, army, operation, and ORBAT context', () => {

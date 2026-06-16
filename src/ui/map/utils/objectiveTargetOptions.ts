@@ -34,10 +34,15 @@ export function buildObjectiveTargetOptions(
     labelCounts.set(option.label, (labelCounts.get(option.label) ?? 0) + 1);
   }
 
-  return options
-    .map((option) => ({
+  const sortedOptions = options.sort((a, b) => strictCompare(a.label, b.label) || strictCompare(a.osid, b.osid));
+  const labelOrdinals = new Map<string, number>();
+  return sortedOptions.map((option) => {
+    if ((labelCounts.get(option.label) ?? 0) <= 1) return option;
+    const ordinal = (labelOrdinals.get(option.label) ?? 0) + 1;
+    labelOrdinals.set(option.label, ordinal);
+    return {
       ...option,
-      display: (labelCounts.get(option.label) ?? 0) > 1 ? `${option.label} (${option.osid})` : option.label,
-    }))
-    .sort((a, b) => strictCompare(a.label, b.label) || strictCompare(a.osid, b.osid));
+      display: `${option.label} - option ${ordinal}`,
+    };
+  });
 }

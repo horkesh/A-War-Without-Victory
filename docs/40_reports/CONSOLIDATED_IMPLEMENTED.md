@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest selection/raw-ID polish:** [implemented/20260616_SELECTION_AND_RAW_ID_POLISH.md](implemented/20260616_SELECTION_AND_RAW_ID_POLISH.md) - Standalone brigade selection now clears stale corps/army/HQ context, parent drilldowns route to the right owner IDs, and request-operation objective copy uses player-safe ordinal labels instead of visible raw OSIDs.
+
 **Latest player-safe enclave/supply truth:** [implemented/20260616_PLAYER_SAFE_ENCLAVE_SUPPLY_TRUTH.md](implemented/20260616_PLAYER_SAFE_ENCLAVE_SUPPLY_TRUTH.md) - Player campaigns now scope enclave resilience, enclave map overlays, and supply summaries to the loaded player faction; Supply mode names known-friendly classes instead of stale global surplus thresholds.
 
 **Latest decision consequence record focus:** [implemented/20260606_DECISION_CONSEQUENCE_RECORD_FOCUS.md](implemented/20260606_DECISION_CONSEQUENCE_RECORD_FOCUS.md) - President's Desk Records-filed consequence rows now route to the concrete Army HQ Decision Consequences record, and shell handoff validation accepts the existing `decisions` Records subtab.

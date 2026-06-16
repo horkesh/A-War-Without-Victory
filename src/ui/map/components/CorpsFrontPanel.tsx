@@ -14,6 +14,7 @@ import { filterPlayerFacingOperations, findPlayerFacingSectorById } from '../../
 import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { formatPosture, toTitleCase } from '../utils/formatters';
+import { getOsidDisplayName } from '../utils/osidDisplayName';
 
 /** Strength class badge with color coding. */
 function StrengthBadge({ strengthClass }: { strengthClass?: 'fortress' | 'strong' | 'adequate' | 'thin' | 'critical' }) {
@@ -745,11 +746,11 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           <div className="mt-3 pt-2 border-t border-neutral-300 border-dashed">
                             <button
                               type="button"
-                              aria-label={t('corpsFront.focusObjectiveAria', { objective: osidDisplayNames?.[objective] ?? objective })}
+                              aria-label={t('corpsFront.focusObjectiveAria', { objective: getOsidDisplayName(objective, osidDisplayNames) })}
                               onClick={() => panToOsid?.(objective)}
                               className="kbd-focus text-[9px] uppercase font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1"
                             >
-                              <span className="text-[11px]">⌖</span> {t('corpsFront.focusObj')}: {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">{t('corpsFront.redact')}</span> : (osidDisplayNames?.[objective] ?? objective)}
+                              <span className="text-[11px]">⌖</span> {t('corpsFront.focusObj')}: {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">{t('corpsFront.redact')}</span> : getOsidDisplayName(objective, osidDisplayNames)}
                             </button>
                           </div>
                         )}

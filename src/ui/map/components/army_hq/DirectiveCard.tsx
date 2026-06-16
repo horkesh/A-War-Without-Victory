@@ -125,7 +125,10 @@ function resolveTargetOsidInput(
     .sort(strictCompare);
 
   if (matches.length === 1) return { targetOsid: matches[0]!, ambiguousMatches: [] };
-  if (matches.length > 1) return { targetOsid: '', ambiguousMatches: matches };
+  if (matches.length > 1) {
+    const safeMatches = matches.map((osid, index) => `${getOsidDisplayName(osid, osidDisplayNames)} - option ${index + 1}`);
+    return { targetOsid: '', ambiguousMatches: safeMatches };
+  }
   return { targetOsid: trimmed, ambiguousMatches: [] };
 }
 

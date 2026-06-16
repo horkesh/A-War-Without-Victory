@@ -10,8 +10,8 @@
  *     display-name map, still appears);
  *   - ordering is strictCompare on the display label, OSID-tiebroken — never
  *     locale-/Date-/insertion-order-dependent;
- *   - duplicate display labels are disambiguated by appending the raw OSID, so
- *     two settlements that humanize to the same name remain distinguishable.
+ *   - duplicate display labels are disambiguated with deterministic player-safe
+ *     ordinal text; raw OSIDs stay in the option value, not visible copy.
  *
  * Presentation-only; no sim/engine/determinism path. This locks the picker's
  * contract (it shipped untested in PR #241) so a future refactor can't silently
@@ -50,17 +50,18 @@ describe('buildObjectiveTargetOptions — settlement/front picker contract', () 
     expect(options.map((o) => o.osid)).toEqual(expected.map((o) => o.osid));
   });
 
-  it('disambiguates duplicate display labels by appending the OSID', () => {
+  it('disambiguates duplicate display labels without showing raw OSIDs', () => {
     const options = buildObjectiveTargetOptions(
       { 'op:foca:gornja_1': null, 'op:foca:gornja_2': null, 'op:tuzla:tuzla_1': null },
       { 'op:foca:gornja_1': 'Gornja', 'op:foca:gornja_2': 'Gornja', 'op:tuzla:tuzla_1': 'Tuzla' },
     );
     const byOsid = new Map(options.map((o) => [o.osid, o.display]));
-    // Both "Gornja" entries carry their OSID to stay distinguishable in the <select>.
-    expect(byOsid.get('op:foca:gornja_1')).toBe('Gornja (op:foca:gornja_1)');
-    expect(byOsid.get('op:foca:gornja_2')).toBe('Gornja (op:foca:gornja_2)');
+    // Both "Gornja" entries stay distinguishable without visible internal IDs.
+    expect(byOsid.get('op:foca:gornja_1')).toBe('Gornja - option 1');
+    expect(byOsid.get('op:foca:gornja_2')).toBe('Gornja - option 2');
     // A unique label is shown plain (no OSID noise).
     expect(byOsid.get('op:tuzla:tuzla_1')).toBe('Tuzla');
+    expect([...byOsid.values()].join(' ')).not.toContain('op:');
   });
 
   it('filters out S<census> compatibility-alias keys injected by buildControlLookup (#241)', () => {

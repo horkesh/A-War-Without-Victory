@@ -211,21 +211,25 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   onClick={() => {
                     if (isArmyHq) {
                       useGameStore.setState({
-                        selectedArmyId: parent.id,
+                        selectedArmyId: null,
+                        selectedArmyHqId: parent.id,
                         selectedCorpsId: null,
                         selectedFormationId: null,
                         selectedOperationKey: null,
                         selectedOsid: null,
                         selectedCorpsFrontSectorId: null,
+                        selectedOrbatCorpsId: null,
                       });
                     } else {
                       useGameStore.setState({
-                        selectedArmyId,
+                        selectedArmyId: null,
+                        selectedArmyHqId: null,
                         selectedCorpsId: parent.id,
-                        selectedFormationId: parent.id,
+                        selectedFormationId: null,
                         selectedOperationKey: null,
                         selectedOsid: null,
                         selectedCorpsFrontSectorId: null,
+                        selectedOrbatCorpsId: null,
                       });
                     }
                   }}
