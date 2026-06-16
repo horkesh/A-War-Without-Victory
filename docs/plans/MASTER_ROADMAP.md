@@ -1,4 +1,14 @@
 ﻿# AWWV Master Roadmap â€” Pyrrhic Games
+**★★★ Amendment 2026-06-16 (D2 player-polish hardening; first-hour guardrails; UI/read-model only):** The 2026-06-15 roadmap state still holds: technical road closed, C3 complete, SRK default-ON, and D2 owner full-campaign playthrough remains the sole remaining 1.0 go/no-go gate. The 2026-06-16 work is a D2-entry quality hardening layer, not a new technical prerequisite or calibration lane.
+
+1. **Player-journey gate is now explicit.** `qa:player-journeys` covers the first-run/foundational start, onboarding/foundational auto-launch contracts, replay sidecar hydration, tactical deselect, map combat/casualty truth guards, DeckGL formation selection priority, inbox/desk routing, and Army HQ command-card diagnostics.
+
+2. **First-hour sequence is the release-polish contract.** The intended D2 opening is faction start -> war-start briefing -> President's Desk opening brief -> foundational choice -> command map/tutorial. Foundational decisions must not preempt the opening presidential brief.
+
+3. **Scope is calibration-inert.** These changes are UI/read-model/store/test/docs only. No simulation logic, scenario data, save schema, golden baseline, calibration floor, or installer artifact is changed by this hardening lane.
+
+4. **Remaining pre-play polish, not roadmap blockers:** supply/fog truth, brigade/sector selection ergonomics, raw-id copy cleanup, and GitHub issue/comment sweeps should continue autonomously while CI waits, but they do not reopen the closed technical road to 1.0 unless they expose a true D2-blocking defect.
+
 **★★★ Amendment 2026-06-15 (technical road CLOSED; D2 is the sole remaining 1.0 gate; docs-only):** Source: `docs/PROJECT_LEDGER.md` entries for 2026-06-13/14, `docs/40_reports/CALIBRATION_MASTER.md`, and `data/calibration/c3_freeze_manifest.json`. This **supersedes the open C3 / advisory engine-health / pre-SRK-activation language in the 2026-06-12 amendment immediately below** while retaining that history.
 
 1. **C3 is complete.** The freeze manifest + persisted-schema field-count sentinel shipped in #429, and `engine-health-188w` was promoted from advisory to REQUIRED/BLOCKING in #430 plus branch protection. The D2-entry contract is now frozen around platform-stable signals: 40w structural fingerprint, 188w matched-OSID floor, engine-health thresholds, schema v36, golden manifest, and startup snapshot.

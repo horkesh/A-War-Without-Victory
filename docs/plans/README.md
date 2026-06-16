@@ -15,7 +15,7 @@
 
 ## Current State
 
-As of 2026-06-15, the technical road to 1.0 is closed. The remaining 1.0 path is:
+As of 2026-06-16, the technical road to 1.0 is closed. The remaining 1.0 path is:
 
 1. D2 owner full-campaign playthrough.
 2. D3 operator release gate.
@@ -23,6 +23,8 @@ As of 2026-06-15, the technical road to 1.0 is closed. The remaining 1.0 path is
 4. 1.0 tag.
 
 Historical execution packets in this folder are retained for traceability. Do not treat a dated plan as active unless the command board or this index points to it.
+
+The active pre-D2 quality lane is player-polish only: `qa:player-journeys`, first-hour choreography, warroom/Army HQ/map legibility, and live browser checks. These guard the owner playthrough but do not reopen calibration or system-roadmap work.
 
 ## Archive Policy
 

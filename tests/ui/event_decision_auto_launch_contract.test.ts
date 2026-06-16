@@ -41,6 +41,20 @@ describe('event decision modal auto-launch contract', () => {
     );
   });
 
+  it("defers event decision auto-launch until the President's Desk opening brief is cleared", () => {
+    const app = readApp();
+    const autoLaunchEffect = app.slice(
+      app.indexOf('auto-launch the EventDecisionModal'),
+      app.indexOf('// Auto-dismiss non-decision events'),
+    );
+
+    expect(autoLaunchEffect).toContain('if (openingBriefPending) return;');
+    expect(autoLaunchEffect).toContain('openingBriefPending,');
+    expect(autoLaunchEffect.indexOf('if (openingBriefPending) return;')).toBeLessThan(
+      autoLaunchEffect.indexOf('selectNextPendingEventDecision'),
+    );
+  });
+
   it('renders the selected pending event decision payload as the primary modal surface', () => {
     const app = readApp();
     const modalRenderBlock = app.slice(

@@ -10,6 +10,9 @@ describe('player journey QA gate contract', () => {
 
     expect(script).toContain('vitest run');
     expect(script).toContain('tests/browser_campaign_start_fallback.test.ts');
+    expect(script).toContain('tests/ui/event_decision_auto_launch_contract.test.ts');
+    expect(script).toContain('tests/ui/onboarding_automount_edge_cases.test.ts');
+    expect(script).toContain('tests/ui/onboarding_track_d_consolidation.test.ts');
     expect(script).toContain('tests/ui/gamestore_load_reset.test.ts');
     expect(script).toContain('tests/ui_map_selection_store.test.ts');
     expect(script).toContain('tests/ui_map_battle_casualty_truth.test.ts');

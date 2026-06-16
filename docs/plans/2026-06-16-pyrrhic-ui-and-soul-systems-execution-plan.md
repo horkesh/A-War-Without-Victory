@@ -8,6 +8,12 @@ Make the current game playable for a serious D2-style campaign pass by fixing th
 
 This is not a packaging plan. The package build is paused until the live browser flow is coherent.
 
+## 2026-06-16 Landing Status
+
+Phases 1-3 have shipped through the 2026-06-16 player-polish waves and follow-up branches: Presidential Inbox/desk routing, first-turn blocker layering, foundational-decision exposure, browser fallback parity, DeckGL overlay hardening, stale selection cleanup, replay sidecar hydration, Army HQ readiness legibility, turn-0 impossible control/combat/casualty suppression, and the `qa:player-journeys` gate. The current first-hour contract is stricter than the original Phase 2 wording: faction start -> war-start briefing -> President's Desk opening brief -> foundational decision -> command map/tutorial.
+
+Remaining active polish work is Phase 4+ plus follow-up defects from the Pyrrhic sweep: supply/fog truth, brigade/sector selection ergonomics, raw OSID/operation copy cleanup, mobile policy, issue #170 engine/cache triage, and GitHub comment/PR sweeps. Packaging remains paused until the owner accepts the live command-map/warroom/Army HQ experience.
+
 ## Current Truth
 
 The pasted Phase 3 priority list is partly stale against current `main`.
@@ -62,7 +68,7 @@ Tests: route-unit tests, focused UI tests for inbox/opening brief, browser smoke
 
 Make campaign start feel authored instead of stacked.
 
-1. Establish the sequence: war-start splash -> foundational decision -> Presidential Desk / Decision Room -> optional contextual tutorial.
+1. Establish the sequence: war-start splash -> President's Desk opening brief -> foundational decision -> command map / optional contextual tutorial.
 2. Hide or defer left/right command panels while a blocking presidential modal is active.
 3. Ensure RS starts with "The Assembly Speaks", RBiH with its state-identity decision, and HRHB with its political-goal decision.
 4. Add a browser test that clicks through the whole sequence and fails on competing overlays.

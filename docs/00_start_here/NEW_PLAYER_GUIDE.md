@@ -24,11 +24,13 @@ If this framing sounds unusual, it is. Most strategy games reward expansion. Thi
 
 ## 2. The turn loop in one minute
 
+On a new campaign, the first-hour order is deliberate: choose a faction, read the war-start briefing, read the President's Desk opening brief, then resolve your faction's foundational political decision. The tutorial comes after those presidential surfaces.
+
 Every turn is one week of real time. Each turn you:
 
 1. **READ THE BRIEF** — top-right panel "Presidential Inbox" opens with a brief from your Chief of Staff (three scan points). It tells you what your faction's strategic position requires.
 2. **INSPECT** — the left "Command" panel shows your situation. Territory %, exposed front sectors, casualties, alliance state, international pressure. Read it.
-3. **DECIDE** — open the toolbar buttons: `SUMMARY` (war stats), `RECORDS` (Army HQ), `OPS` (operations), `EVENTS` (event log), `CODEX` (history essays), `INBOX` (pending decisions). The Decision Room (opened from Army HQ Briefing tab) is where pending choices live.
+3. **DECIDE** — open the toolbar buttons: `SUMMARY` (war stats), `RECORDS` (Army HQ), `OPS` (operations), `EVENTS` (event log), `CODEX` (history essays), `INBOX` (pending decisions). The President's Desk / Decision Room is where pending presidential choices live; Army HQ supplies staff detail and records.
 4. **EXECUTE** — change corps stances (Defensive / Balanced / Offensive / Reorganize), approve or decline staff-proposed operations, accept or reject peace plans, resolve paramilitary incidents.
 5. **ADVANCE TURN** (button top-right). The simulation runs one week. Your bots, the AI factions' bots, the engine all step forward.
 6. **READ THE AFTERMATH** — a Turn Aftermath modal pops up with what changed: battles fought, ground gained/lost, casualties, command outcomes.
@@ -113,7 +115,7 @@ Your corps commanders also generate their own operation proposals automatically.
 
 ## 6. The Decision Room
 
-Open via Army HQ → BRIEFING tab. This is the central UI for everything that needs your attention.
+Open it from the President's Desk / Inbox flow. This is the central UI for everything that needs your attention.
 
 It shows the **product loop heartbeat** — eight cards in order:
 - **BRIEF** — what your staff has reported.
@@ -162,7 +164,7 @@ And the **command loop lanes** below:
 
 ## 9. When you're stuck
 
-- **"I don't know what to do this turn."** Open the Decision Room (Army HQ → Briefing tab). The Strategic Priorities heartbeat shows you.
+- **"I don't know what to do this turn."** Open the Decision Room from the President's Desk / Inbox flow. The Strategic Priorities heartbeat shows you.
 - **"I don't know how to make an operation."** Click a corps in the Command panel → Ops Snapshot tab → "Prepare Operation in HQ" → Commander phase → Plan phase → click "Suggest Plan" → review → advance phases.
 - **"I don't know what this term means."** (No in-game glossary yet.) Until one ships, this Guide's section 7 covers the most-common jargon. Codex essays explain historical context.
 - **"The map is too zoomed out."** Map controls bottom-right: + / - zoom, recenter button.

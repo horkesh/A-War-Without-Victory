@@ -3,7 +3,7 @@
 ## Core Flow
 
 1. Launch desktop map (`npm run desktop`).
-2. Open `Menu` → **New Campaign** (or **Load Save**). **New Campaign:** a side-picker overlay appears (RBiH, RS, HRHB with flags). Choose a side; the app consumes the baked `apr_1992` startup artifact (`data/derived/startup/apr_1992_initial_save.json`), which is a one-way derived copy of canonical builder truth from `apr1992_definitive_52w.json`, sets your side as the player faction, injects recruitment state for the toolbar and Recruit modal, and applies the state to the map. **Load Save** opens the state-file picker and loads replay summaries from `replay_save_manifest.json` when that file sits beside the selected save.
+2. Open `Menu` -> **New Campaign** (or **Load Save**). **New Campaign:** a side-picker overlay appears (RBiH, RS, HRHB with flags). Choose a side; the app consumes the baked `apr_1992` startup artifact (`data/derived/startup/apr_1992_initial_save.json`), sets your side as the player faction, injects recruitment state for the toolbar and Recruit modal, queues the selected faction's foundational opening decision, and applies the state to the map. First-hour order should be: war-start briefing, President's Desk opening brief, foundational decision, then the ordinary command map/tutorial loop. **Load Save** opens the state-file picker and loads replay summaries from `replay_save_manifest.json` when that file sits beside the selected save.
 3. Use `Advance turn` from the play controls in Layers panel.
 4. Review:
    - Left sidebar `WAR STATUS` + `ORDER OF BATTLE`

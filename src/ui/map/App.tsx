@@ -266,12 +266,10 @@ function CodexPanelWrapper({
  * The overlay's own `shouldShowOnboarding` predicate is the single visibility
  * gate; this wrapper only supplies state + the IPC bridge and the screen gate.
  *
- * Ordering vs the opening brief: the deck is a full-screen HARD_MODAL teaching
- * surface; the opening brief is a non-modal footer card inside the inbox panel.
- * The deck takes the foreground first (the thesis lesson is the first thing a
- * new player sees); once dismissed/completed the brief remains underneath in
- * the inbox. They do not visually stack — the deck overlays the brief — so no
- * explicit cross-gate is required.
+ * Ordering vs the opening brief: the first-hour presidential sequence owns
+ * the foreground before the tutorial deck. War-start briefing, opening brief,
+ * and foundational event decisions must clear before the teaching deck mounts,
+ * so the player's first authored choice is framed before general instruction.
  *
  * Faction-agnostic (mirrors the overlay + restart-button single-owner contract).
  */
@@ -813,6 +811,7 @@ function App() {
   useEffect(() => {
     if (activeEventDecisionId !== null) return;
     if (peaceWarTransitionActive) return;
+    if (openingBriefPending) return;
     if (showPeacePlanModal) return;
     // Task #80 — the boot-to-menu default means an auto-loaded save with a
     // pending decision must NOT auto-pop the (non-dismissible) EventDecisionModal
@@ -830,6 +829,7 @@ function App() {
     playerFaction,
     activeEventDecisionId,
     peaceWarTransitionActive,
+    openingBriefPending,
     showPeacePlanModal,
     recentlyAcceptedEventDecisionId,
     appScreen,

@@ -9,7 +9,7 @@ Scope: browser-driven audit of the current player flow after installer work was 
 
 ## Priority Findings
 
-### P0 - Presidential inbox routes desk actions into Army HQ
+### P0 - Presidential inbox routes desk actions into Army HQ - RESOLVED 2026-06-16
 
 Live result: after dismissing the tutorial on an unblocked campaign state, clicking the opening brief `Open desk` action opens the `Army Headquarters` dialog on the `BRIEFING` tab. It does not open the presidential desk or Warroom Decision Room.
 
@@ -27,7 +27,9 @@ Recommended work:
 2. Route Army HQ only as supporting drill-in for military dossiers, records, and corps detail.
 3. Rename action copy so "Open desk", "Decision Room", "Call Army HQ", and "War summary" each mean one specific shell.
 
-### P0 - First-session surfaces stack and compete
+Resolution: 2026-06-16 player-polish branches routed presidential inbox/desk actions to the Warroom Decision Room instead of Army HQ as the primary action surface, updated comments/docs, and expanded `qa:player-journeys` to cover inbox/decision routing.
+
+### P0 - First-session surfaces stack and compete - RESOLVED 2026-06-16
 
 Live result: on a fresh RS campaign the hard-blocking foundational decision modal intercepts the opening brief. On an unblocked state, the tutorial overlay intercepts the same opening brief. The first player contact can include: war-start intro, foundational decision modal, tutorial overlay, opening brief, inbox, command sidebar, and map.
 
@@ -39,7 +41,9 @@ Recommended work:
 2. Hide or defer the right/left command panels while blocking presidential modals are active.
 3. Make the tutorial contextual after the player reaches the relevant surface, not a global overlay on top of the opening brief.
 
-### P0 - Tactical map DeckGL overlay errors
+Resolution: first-hour choreography is now pinned as faction start -> war-start briefing -> President's Desk opening brief -> foundational decision -> command map/tutorial. `EventDecisionModal` auto-launch waits for `openingBriefPending`, and onboarding remains blocked behind first-hour presidential surfaces.
+
+### P0 - Tactical map DeckGL overlay errors - RESOLVED 2026-06-16
 
 Live console repeatedly logs DeckGL failures:
 
@@ -58,6 +62,8 @@ Recommended work:
 1. Audit geometry passed to these overlay builders for invalid longitude/latitude or nested polygon shape mismatch.
 2. Add a runtime counter/test that fails on DeckGL initialization errors during loaded-map smoke.
 3. Disable the affected overlay data path until bad polygons are filtered deterministically.
+
+Resolution: OSID damage and force-quality overlay builders now split MultiPolygon features and reject non-finite, non-closed, or degenerate polygon rings before DeckGL receives them. Focused overlay tests and live browser smoke passed; controlled geometry-skip warnings remain for known invalid source polygons.
 
 ### P1 - Army HQ is overloaded and duplicates presidential command
 

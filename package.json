@@ -22,7 +22,7 @@
     "test:vitest:fast": "node tools/test/run_vitest_slice.mjs fast",
     "test:vitest:scenario": "node tools/test/run_vitest_slice.mjs scenario",
     "test:vitest:scenario:anchors": "vitest run tests/scenario_anchor_contract.test.ts tests/integration_deployment_health.test.ts -t \"critical OSID anchors are controlled by expected faction|historical scenario anchor contract\"",
-    "qa:player-journeys": "vitest run tests/browser_campaign_start_fallback.test.ts tests/ui/gamestore_load_reset.test.ts tests/ui_map_selection_store.test.ts tests/ui_map_battle_casualty_truth.test.ts tests/deck_click_selection_priority.test.ts tests/ui/gui_audit_dead_controls.test.ts tests/ui/inbox_items.test.ts tests/ui_presidential_toolbar_summary_click.test.ts --pool=forks --reporter=dot",
+    "qa:player-journeys": "vitest run tests/browser_campaign_start_fallback.test.ts tests/ui/event_decision_auto_launch_contract.test.ts tests/ui/onboarding_automount_edge_cases.test.ts tests/ui/onboarding_track_d_consolidation.test.ts tests/ui/gamestore_load_reset.test.ts tests/ui_map_selection_store.test.ts tests/ui_map_battle_casualty_truth.test.ts tests/deck_click_selection_priority.test.ts tests/ui/gui_audit_dead_controls.test.ts tests/ui/inbox_items.test.ts tests/ui_presidential_toolbar_summary_click.test.ts --pool=forks --reporter=dot",
     "qa:all": "npm run typecheck && npm run test:coverage && npm run desktop:map:build && npm run test:baselines",
     "dev": "tsx watch --test \"tests/**/*.ts\"",
     "sim:run": "tsx src/cli/sim_run.ts",

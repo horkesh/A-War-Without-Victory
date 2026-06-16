@@ -45,7 +45,7 @@ The v0.9 product spine is the campaign loop, not any individual shell.
 |---|---|---|---|
 | Brief | What is the situation? | Warroom + Army HQ briefing | Tactical command briefing banner |
 | Inspect | Where is it happening? | Tactical Map | Army HQ links and map highlights |
-| Decide | What can I do? | Presidential Inbox + Army HQ attention | Toolbar badges and Warroom hotspots |
+| Decide | What can I do? | Presidential Inbox + President's Desk / Decision Room | Toolbar badges, Warroom hotspots, Army HQ supporting handoffs |
 | Execute | What happens when I end the turn? | Desktop `advance-turn` + canonical turn pipeline | Warroom calendar and tactical toolbar |
 | Report | What happened this turn? | Turn aftermath surface | Chronicle and Army HQ records |
 | Cost | What did it cost? | Turn aftermath + War Summary; final Cost Ledger at game over | Army HQ records and VerdictScreen |
@@ -54,11 +54,11 @@ The v0.9 product spine is the campaign loop, not any individual shell.
 
 The C0-audit gap is now partially closed: **Turn Aftermath** is live as a tactical-shell modal opened after successful `advance-turn`. It is a composition surface over `LoadedGameState.latestTurnSummary`, the desktop turn report, and unified Inbox obligations. It does not write sim truth; it bridges a completed turn into records, costs, and next reviews.
 
-The next-action gap is also closed at the command-review layer: **Presidential Decision Room / Strategic Priorities** lives at the top of Army HQ BRIEFING. It is a deterministic synthesis over existing read models (`presidentialReviewQueue`, opportunity dossiers, command briefing, operational SITREP, Turn Aftermath records, active cost, and Chronicle availability) and routes cards to existing owners. Its priority lenses, command-loop lanes (`Urgent`, `Decisions`, `Fronts`, `Inspect`, `Advance`), grouped source handoffs, and active priority dossier are local projections over that same card archive, not separate queues. The dossier is an Army HQ inspection affordance for the selected/top card: it shows evidence, source owner, related same-surface items, advance-review status, and the card's existing action target. It is not a second inbox, cost ledger, Chronicle, event log, combat-planning system, priority queue, or dossier ledger.
+The next-action gap is closed through the **President's Desk / Presidential Decision Room / Strategic Priorities** flow. The read model is a deterministic synthesis over existing player-facing DTOs (`presidentialReviewQueue`, opportunity dossiers, command briefing, operational SITREP, Turn Aftermath records, active cost, and Chronicle availability) and routes cards to existing owners. Its priority lenses, command-loop lanes (`Urgent`, `Decisions`, `Fronts`, `Inspect`, `Advance`), grouped source handoffs, and active priority dossier are local projections over that same card archive, not separate queues. Army HQ may provide staff context, records, corps detail, and supporting handoffs, but presidential choices should route through the desk/Decision Room as the primary action surface. The dossier is an inspection affordance for the selected/top card: it shows evidence, source owner, related same-surface items, advance-review status, and the card's existing action target. It is not a second inbox, cost ledger, Chronicle, event log, combat-planning system, priority queue, or dossier ledger.
 
-The advance-turn confirmation now participates in that same loop. The Warroom/tactical `AdvanceTurnModal` consumes a pure pre-advance projection of the Decision Room `advanceReadiness` packet, shows what should be reviewed before the turn advances, carries grouped source handoffs for the items that may be buried, routes `Review Priorities` to Army HQ BRIEFING, and routes individual row actions to their preserved Decision Room source targets. It does not create a new blocker, queue, cost owner, or history owner; the existing advance-turn pipeline remains canonical.
+The advance-turn confirmation now participates in that same loop. The Warroom/tactical `AdvanceTurnModal` consumes a pure pre-advance projection of the Decision Room `advanceReadiness` packet, shows what should be reviewed before the turn advances, carries grouped source handoffs for the items that may be buried, routes `Review Priorities` to the Decision Room, and routes individual row actions to their preserved Decision Room source targets. It does not create a new blocker, queue, cost owner, or history owner; the existing advance-turn pipeline remains canonical.
 
-The Warroom may expose a compact priority docket, but not the priority board itself. `WarroomStatusBar` consumes a small `warroomPriorityDocket` projection over the same pre-advance/Decision Room readiness packet. Its `PRIORITIES` action opens a Warroom tray with top rows and source-handoff buttons, `Open Decision Room` routes to Army HQ BRIEFING through `App`, and each row or source handoff routes to its preserved Decision Room source target. The Warroom summarizes urgency; Army HQ owns review.
+The Warroom may expose a compact priority docket, but not the priority board itself. `WarroomStatusBar` consumes a small `warroomPriorityDocket` projection over the same pre-advance/Decision Room readiness packet. Its `PRIORITIES` action opens a Warroom tray with top rows and source-handoff buttons, `Open Decision Room` routes to the desk/Decision Room through `App`, and each row or source handoff routes to its preserved Decision Room source target. The Warroom summarizes urgency; the Decision Room owns presidential review, while Army HQ owns military staff depth and records.
 
 ## Shell hierarchy
 
@@ -219,11 +219,11 @@ No shell may hide Codex behind an accidental or debug-only path.
 - `active-campaign cost so far`
   - owner: aftermath / War Summary; final historical reckoning stays with VerdictScreen
 - `strategic priorities / next-action board`
-  - owner: Army HQ BRIEFING Presidential Decision Room; source truth remains with review queue, opportunity dossiers, operational SITREP, Turn Aftermath, active cost, and Chronicle; local priority lenses, command-loop lanes, source handoffs, and the active priority dossier may organize the board but must not become source owners
+  - owner: President's Desk / Decision Room; source truth remains with review queue, opportunity dossiers, operational SITREP, Turn Aftermath, active cost, and Chronicle; local priority lenses, command-loop lanes, source handoffs, and the active priority dossier may organize the board but must not become source owners
 - `pre-advance review reminder`
-  - owner: advance-turn confirmation consuming Presidential Decision Room readiness; global review action routes to Army HQ BRIEFING, row actions route to preserved Decision Room source targets, and source truth remains with the Decision Room's underlying owners
+  - owner: advance-turn confirmation consuming Presidential Decision Room readiness; global review action routes to the Decision Room, row actions route to preserved Decision Room source targets, and source truth remains with the Decision Room's underlying owners
 - `Warroom priority docket`
-  - owner: Warroom status strip as a summary affordance only; board action routes to Army HQ BRIEFING, row actions route to preserved Decision Room source targets, and source truth remains with the Decision Room readiness projection
+  - owner: Warroom status strip as a summary affordance only; board action routes to the desk/Decision Room, row actions route to preserved Decision Room source targets, and source truth remains with the Decision Room readiness projection
 
 ## Player-truth rule inside the shell hierarchy
 
@@ -246,7 +246,7 @@ If a debug surface is required, it must be explicit, gated, and documented under
 
 - Warroom stays the primary desktop shell.
 - Tactical Map remains a supported battlespace shell, but it must keep a visible return path to Warroom.
-- Army HQ remains the canonical owner of command review and records.
+- The President's Desk / Decision Room remains the canonical owner of presidential decision review; Army HQ remains the canonical owner of military staff depth and records.
 - Chronicle is the canonical owner of campaign-memory review.
 - Tactical operations panels may summarize field conditions, but must not silently re-own Army HQ command authority.
 - Warroom desk props may launch Chronicle, but they do not become parallel archive owners.
@@ -258,7 +258,7 @@ This hierarchy is being followed when:
 
 1. every major player-facing concept names one canonical shell owner
 2. standalone tactical map always has a visible route back to Warroom
-3. Army HQ owns records and command review without shell duplication elsewhere
+3. the President's Desk / Decision Room owns presidential decision review, while Army HQ owns records and command depth without shell duplication elsewhere
 4. Chronicle owns campaign-memory review without becoming a second records shell
 5. Codex has a visible, intentional entrypoint
 6. future UI work stops inventing overlapping shell ownership
