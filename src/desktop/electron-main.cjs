@@ -791,10 +791,12 @@ function createMainWindow(options = {}) {
               const { state } = await sim.loadStateFromPath(result.filePaths[0]);
               currentGameStateJson = sim.serializeState(state);
               liveReplayManifestFrames = [];
-              sendGameStateToRenderer(currentGameStateJson);
               // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: optional sidecar.
-              const sequenceJson = readReplaySaveSequenceSidecar(result.filePaths[0]);
+              const manifestJson = readReplaySaveManifestSidecar(result.filePaths[0]);
+              if (manifestJson) sendReplayManifestToRenderer(manifestJson);
+              const sequenceJson = manifestJson ? null : readReplaySaveSequenceSidecar(result.filePaths[0]);
               if (sequenceJson) sendReplaySequenceToRenderer(sequenceJson);
+              sendGameStateToRenderer(currentGameStateJson);
             } catch (e) { console.error('Load state failed:', e); }
           }
         },
@@ -874,16 +876,33 @@ async function runPackagedRuntimeProbe() {
 
   await startMapServer();
   const expectedMapServerBaseUrl = await resolveMapServerBaseUrl();
-  const [mapIndexResponse, snapshotResponse] = await Promise.all([
+  const eventCatalogRoutes = [
+    '/data/scenarios/events/war_1992.json',
+    '/data/scenarios/events/war_1992_hrhb_summer.json',
+    '/data/scenarios/events/war_1993.json',
+    '/data/scenarios/events/war_1994.json',
+    '/data/scenarios/events/war_1995.json',
+    '/data/scenarios/events/consequences.json',
+  ];
+  const [mapIndexResponse, snapshotResponse, ...rawEventCatalogResponses] = await Promise.all([
     fetchLocalText(getMapServerUrl('/')),
     fetchLocalText(getMapServerUrl('/data/derived/startup/apr_1992_initial_save.json')),
+    ...eventCatalogRoutes.map((route) => fetchLocalText(getMapServerUrl(route))),
   ]);
+  const eventCatalogResponses = rawEventCatalogResponses.map((response, index) => ({
+    ...response,
+    route: eventCatalogRoutes[index],
+  }));
 
   if (mapIndexResponse.statusCode !== 200) {
     throw new Error(`packaged tactical map server returned ${mapIndexResponse.statusCode} for /`);
   }
   if (snapshotResponse.statusCode !== 200) {
     throw new Error(`packaged tactical map server returned ${snapshotResponse.statusCode} for startup snapshot`);
+  }
+  const failedEventCatalogResponse = eventCatalogResponses.find((response) => response.statusCode !== 200);
+  if (failedEventCatalogResponse) {
+    throw new Error(`packaged tactical map server returned ${failedEventCatalogResponse.statusCode} for event catalog ${failedEventCatalogResponse.route}`);
   }
 
   const probeWindow = createMainWindow({ show: false, openDevTools: false });
@@ -1056,6 +1075,7 @@ async function runPackagedRuntimeProbe() {
     map_server_checks: [
       { route: '/', status: mapIndexResponse.statusCode },
       { route: '/data/derived/startup/apr_1992_initial_save.json', status: snapshotResponse.statusCode },
+      ...eventCatalogResponses.map((response) => ({ route: response.route, status: response.statusCode })),
     ],
     startup: {
       phase: state?.meta?.phase ?? null,
@@ -1163,6 +1183,7 @@ async function runPackagedRuntimeProbe() {
  *   /assets/*              → dist/tactical-map/assets/*
  *   /data/derived/*        → data/derived/*  (with Range support for PMTiles)
  *   /data/source/*         → data/source/*
+ *   /data/scenarios/*      → data/scenarios/*
  *   /data/runs/*           → runs/*  (e.g. final_save.json for "Load run")
  */
 let mapServerPort = 0;
@@ -1171,6 +1192,7 @@ function startMapServer() {
   const mapDir = getMapAppDir();
   const derivedDir = getDataDerivedDir();
   const sourceDir = getDataSourceDir();
+  const scenariosDir = getDataScenariosDir();
   const runsDir = getRunsDir();
 
   const MIME = {
@@ -1194,6 +1216,9 @@ function startMapServer() {
     } else if (segments[0] === 'data' && segments[1] === 'source') {
       filePath = path.join(sourceDir, ...segments.slice(2));
       if (!path.resolve(filePath).startsWith(path.resolve(sourceDir))) { res.writeHead(403); res.end(); return; }
+    } else if (segments[0] === 'data' && segments[1] === 'scenarios') {
+      filePath = path.join(scenariosDir, ...segments.slice(2));
+      if (!path.resolve(filePath).startsWith(path.resolve(scenariosDir))) { res.writeHead(403); res.end(); return; }
     } else if (segments[0] === 'data' && segments[1] === 'runs') {
       filePath = path.join(runsDir, ...segments.slice(2));
       if (!path.resolve(filePath).startsWith(path.resolve(runsDir))) { res.writeHead(403); res.end(); return; }
@@ -1620,7 +1645,7 @@ app.whenReady().then(() => {
       const { state } = await sim.loadScenarioFromPath(result.filePaths[0], getBaseDir());
       currentGameStateJson = sim.serializeState(state);
       liveReplayManifestFrames = [];
-      sendGameStateToRenderer(currentGameStateJson, _event.sender);
+      sendGameStateToRenderer(currentGameStateJson);
       return { ok: true, stateJson: currentGameStateJson };
     } catch (e) {
       return { ok: false, error: classifyLoadError(e) };
@@ -1661,10 +1686,10 @@ app.whenReady().then(() => {
       // when the user loads a final_save.json that has a sibling
       // replay_save_sequence.json (produced by the scenario harness).
       const manifestJson = readReplaySaveManifestSidecar(result.filePaths[0]);
-      if (manifestJson) sendReplayManifestToRenderer(manifestJson, _event.sender);
+      if (manifestJson) sendReplayManifestToRenderer(manifestJson);
       const sequenceJson = manifestJson ? null : readReplaySaveSequenceSidecar(result.filePaths[0]);
-      if (sequenceJson) sendReplaySequenceToRenderer(sequenceJson, _event.sender);
-      sendGameStateToRenderer(currentGameStateJson, _event.sender);
+      if (sequenceJson) sendReplaySequenceToRenderer(sequenceJson);
+      sendGameStateToRenderer(currentGameStateJson);
       return {
         ok: true,
         stateJson: currentGameStateJson,

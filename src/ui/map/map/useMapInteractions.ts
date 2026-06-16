@@ -35,6 +35,17 @@ const SECTOR_EDGE_GLOW_POS_LAYER = 'sector-edge-glow-pos';
 const SECTOR_EDGE_GLOW_NEG_LAYER = 'sector-edge-glow-neg';
 const SECTOR_EDGE_HIT_POS_LAYER = 'sector-edge-hit-pos';
 const SECTOR_EDGE_HIT_NEG_LAYER = 'sector-edge-hit-neg';
+const OSID_INTERACTIVE_FILL_LAYERS = [
+  'osid-control-fill',
+  'osid-ethnic-fill',
+  'osid-supply-fill',
+  'osid-casualties-fill',
+  'osid-morale-fill',
+  'osid-operations-fill',
+  'osid-defense-fill',
+  'political-metric-fill',
+  'osid-density-fill',
+];
 export const FRONT_EDGE_INTERACTIVE_LAYERS = [
   'front-edges-hover-pos',
   'front-edges-hover-neg',
@@ -61,6 +72,9 @@ export const isSelectableFrontFeature = (feature: { layer?: { id?: string }; pro
   && !!feature.layer?.id
   && FRONT_EDGE_INTERACTIVE_LAYERS.includes(feature.layer.id)
   && !!getFrontFeatureSectorId(feature);
+
+const isOsidFillLayer = (layerId: string | undefined): boolean =>
+  !!layerId && OSID_INTERACTIVE_FILL_LAYERS.includes(layerId);
 
 const frontFeatureInteractionPriority = (feature: { layer?: { id?: string } } | undefined): number => {
   const layerId = feature?.layer?.id ?? '';
@@ -403,9 +417,7 @@ export function useMapInteractions(
       SECTOR_EDGE_HIT_POS_LAYER,
       SECTOR_EDGE_HIT_NEG_LAYER,
       'sector-fill',
-      'osid-control-fill',
-      'osid-ethnic-fill',
-      'osid-density-fill',
+      ...OSID_INTERACTIVE_FILL_LAYERS,
     ];
 
     const features = map.queryRenderedFeatures(e.point, { layers: priorityLayers.filter(id => map.getLayer(id)) });
@@ -464,7 +476,7 @@ export function useMapInteractions(
         const edgeId = getFrontFeatureEdgeId(feature as { properties?: Record<string, unknown> }) ?? '';
         const sectorId = getFrontFeatureSectorId(feature as { properties?: Record<string, unknown> });
         if (sectorId) onFrontEdgeClick?.(edgeId, props);
-      } else if (layerId === 'sector-fill' || layerId.startsWith('osid-')) {
+      } else if (layerId === 'sector-fill' || isOsidFillLayer(layerId)) {
         const osid = feature.properties?.osid as string | undefined;
         if (osid) onOsidClick?.(osid, feature.properties as Record<string, unknown>);
       }
@@ -491,7 +503,7 @@ export function useMapInteractions(
       'front-edges-highlight-pos', 'front-edges-highlight-neg',
       SECTOR_EDGE_GLOW_POS_LAYER, SECTOR_EDGE_GLOW_NEG_LAYER,
       SECTOR_EDGE_HIT_POS_LAYER, SECTOR_EDGE_HIT_NEG_LAYER,
-      'osid-control-fill'].filter(id => !!map.getLayer(id));
+      ...OSID_INTERACTIVE_FILL_LAYERS].filter(id => !!map.getLayer(id));
 
     const hits = map.queryRenderedFeatures(e.point, { layers: contextLayerIds });
     const selectableFrontFeature = pickPreferredFrontFeature(
@@ -537,11 +549,11 @@ export function useMapInteractions(
   safeOn('click', 'sector-fill', handleOsidClick);
   safeOn('mousemove', 'sector-fill', handleOsidMouseMove);
   safeOn('mouseleave', 'sector-fill', handleOsidMouseLeave);
-  safeOn('mousemove', 'osid-ethnic-fill', handleOsidMouseMove);
-  safeOn('mouseleave', 'osid-ethnic-fill', handleOsidMouseLeave);
   safeOn('click', 'osid-density-fill', handleOsidClick);
-  safeOn('mousemove', 'osid-density-fill', handleOsidMouseMove);
-  safeOn('mouseleave', 'osid-density-fill', handleOsidMouseLeave);
+  for (const layerId of OSID_INTERACTIVE_FILL_LAYERS.filter((id) => id !== 'osid-control-fill')) {
+    safeOn('mousemove', layerId, handleOsidMouseMove);
+    safeOn('mouseleave', layerId, handleOsidMouseLeave);
+  }
 
   if (onFormationHover) {
     safeOn('mousemove', 'formation-markers', handleFormationMouseMove);
@@ -588,11 +600,11 @@ export function useMapInteractions(
 
     safeOff('mousemove', 'osid-control-fill', handleOsidMouseMove);
     safeOff('mouseleave', 'osid-control-fill', handleOsidMouseLeave);
-    safeOff('mousemove', 'osid-ethnic-fill', handleOsidMouseMove);
-    safeOff('mouseleave', 'osid-ethnic-fill', handleOsidMouseLeave);
     safeOff('click', 'osid-density-fill', handleOsidClick);
-    safeOff('mousemove', 'osid-density-fill', handleOsidMouseMove);
-    safeOff('mouseleave', 'osid-density-fill', handleOsidMouseLeave);
+    for (const layerId of OSID_INTERACTIVE_FILL_LAYERS.filter((id) => id !== 'osid-control-fill')) {
+      safeOff('mousemove', layerId, handleOsidMouseMove);
+      safeOff('mouseleave', layerId, handleOsidMouseLeave);
+    }
     safeOff('click', 'sector-fill', handleOsidClick);
     safeOff('mousemove', 'sector-fill', handleOsidMouseMove);
     safeOff('mouseleave', 'sector-fill', handleOsidMouseLeave);

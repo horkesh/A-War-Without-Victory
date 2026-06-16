@@ -126,7 +126,7 @@ describe('Presidential Inbox officer event dedupe', () => {
         expect(screen.queryByText('No pending decisions.')).toBeNull();
 
         fireEvent.click(screen.getByRole('button', { name: /open desk/i }));
-        expect(onAction).toHaveBeenCalledWith('army_hq_briefing', 'empty:desk');
+        expect(onAction).toHaveBeenCalledWith('decision_room', 'empty:desk');
     });
 
     it('localizes quiet inbox shell copy in BCS mode', () => {
@@ -166,7 +166,7 @@ describe('Presidential Inbox officer event dedupe', () => {
         expect(screen.queryByText('No orders are waiting on your desk.')).toBeNull();
 
         fireEvent.click(screen.getByRole('button', { name: /otvori sto/i }));
-        expect(onAction).toHaveBeenCalledWith('army_hq_briefing', 'empty:desk');
+        expect(onAction).toHaveBeenCalledWith('decision_room', 'empty:desk');
     });
 
     it('localizes opening brief chrome and RBiH scan bullets in BCS mode', () => {

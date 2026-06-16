@@ -943,7 +943,7 @@ export const enMessages = {
     'corpsCard.orbat': 'Orbat',
     'corpsCard.back': '<- Back',
     'corpsCard.commander': 'Commander',
-    'corpsCard.unassigned': 'Unassigned',
+    'corpsCard.unassigned': 'Command forming',
     'corpsCard.frontSectors': 'Front Sectors',
     'corpsCard.sectorCount.one': '{count} sector',
     'corpsCard.sectorCount.many': '{count} sectors',

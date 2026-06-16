@@ -71,6 +71,7 @@ export function OOBSidebar() {
   const selectedCorpsFrontSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const setSelectedCorpsId = useGameStore((s) => s.setSelectedCorpsId);
   const setSelectedArmyId = useGameStore((s) => s.setSelectedArmyId);
+  const setSelectedArmyHqId = useGameStore((s) => s.setSelectedArmyHqId);
   const setSelectedOperationKey = useGameStore((s) => s.setSelectedOperationKey);
   const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
   const setSelectedOrbatCorpsId = useGameStore((s) => s.setSelectedOrbatCorpsId);
@@ -379,9 +380,7 @@ export function OOBSidebar() {
                                 key={hqId}
                                 type="button"
                                 className="w-full text-left ml-2 px-2 py-1.5 rounded border border-accent-gold/20 bg-accent-gold/5 hover:bg-accent-gold/10 transition-colors"
-                                onClick={() => {
-                                  useGameStore.setState({ selectedArmyHqId: hqId, selectedArmyId: null, selectedCorpsId: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOsid: null });
-                                }}
+                                onClick={() => setSelectedArmyHqId(hqId)}
                               >
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-2 min-w-0">
@@ -424,7 +423,7 @@ export function OOBSidebar() {
                                 onMouseLeave={() => setHoveredCorpsId(null)}
                                 onOrbatClick={() => setSelectedOrbatCorpsId(corpsId)}
                                 sectorCount={corpsSectors.length}
-                                activeOperationName={activeOp?.name}
+                                activeOperationName={activeOp?.display_name}
                                 activeOperationPhase={activeOp?.phase}
                                 commanderName={(() => {
                                   if (!loadedGameState?.namedOfficerData || !loadedGameState?.namedOfficerStateById) return undefined;

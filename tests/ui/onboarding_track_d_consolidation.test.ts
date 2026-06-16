@@ -60,9 +60,15 @@ describe('Track D onboarding consolidation', () => {
     // save. (Task #77 re-enabled the auto-mount the prior Track-D consolidation
     // removed; the deck was previously reachable only via Settings → Restart.)
     expect(source).toContain('<OnboardingOverlayWrapper />');
-    // Codex #347 (P2): the mount gate also excludes `sidePickerOpen` so the
-    // HARD_MODAL deck never covers the faction picker.
-    expect(source).toContain("appScreen === 'game' && loadedGameState && !sidePickerOpen && <OnboardingOverlayWrapper />");
+    // Codex #347 (P2) plus first-turn choreography: the mount gate excludes
+    // the side-picker, war-start transition, blocking presidential modals, and
+    // the opening brief so the HARD_MODAL deck never covers the player's
+    // authored first choice or first desk handoff.
+    expect(source).toContain("appScreen === 'game' && loadedGameState && !onboardingBlockingOverlayActive && <OnboardingOverlayWrapper />");
+    expect(source).toContain('activeEventDecisionId !== null ||');
+    expect(source).toContain('const openingBriefPending = loadedGameState != null && playerFaction != null && !openingBriefDismissed;');
+    expect(source).toContain('chronicleOpen ||');
+    expect(source).toContain('codexOpen ||');
 
     // The legacy first-turn orientation surfaces stay retired — no resurrection.
     expect(source).not.toContain('<CoachmarkLayer');
@@ -157,7 +163,7 @@ describe('Track D onboarding consolidation', () => {
     render(createElement(PresidentialInbox, { onAction }));
     fireEvent.click(screen.getByRole('button', { name: /open desk/i }));
 
-    expect(onAction).toHaveBeenCalledWith('army_hq_briefing', 'opening-brief:desk');
+    expect(onAction).toHaveBeenCalledWith('decision_room', 'opening-brief:desk');
     expect(useGameStore.getState().openingBriefDismissed).toBe(true);
   });
 

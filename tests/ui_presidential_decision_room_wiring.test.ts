@@ -152,6 +152,21 @@ describe('Presidential Decision Room wiring', () => {
     expect(panel).not.toContain('setChronicleOpen(true)');
   });
 
+  it("keeps the President's Desk overlay clear of the persistent top toolbar", () => {
+    const shell = read('../src/ui/map/components/presidential_desk/PresidentDeskShell.tsx');
+
+    expect(shell).toContain('top-[var(--awwv-toolbar-clearance,5.5rem)]');
+    expect(shell).toContain('data-testid="desk-close-overlay"');
+  });
+
+  it("uses the shared presidential blocker model for the President's Desk advance status", () => {
+    const shell = read('../src/ui/map/components/presidential_desk/PresidentDeskShell.tsx');
+
+    expect(shell).toContain("from '../../data/presidentialBlockers'");
+    expect(shell).toContain('derivePresidentialBlockers(state, osidNameMap).length > 0');
+    expect(shell).not.toContain('hasBlockingItems(items)');
+  });
+
   it('lets App-owned Decision Room navigation open counter-offer modals', () => {
     const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
     const app = read('../src/ui/map/App.tsx');
@@ -166,6 +181,16 @@ describe('Presidential Decision Room wiring', () => {
     expect(app).toContain('setEnclaveDashboardOpen(true)');
     expect(app).toContain('<PresidentialDecisionRoomPanel onNavigateTarget={openDecisionRoomTarget} />');
     expect(app).toContain('<ArmyHQModal onDecisionRoomNavigateTarget={openDecisionRoomTarget} />');
+  });
+
+  it('does not let the generic Decision Room helper claim App-owned counter-offer targets', () => {
+    const navState = createNavigationState();
+
+    expect(openPresidentialDecisionRoomNavigationTarget({
+      kind: 'counter-offer',
+      counterOfferId: 'offer_1',
+    }, navState)).toBe(false);
+    expect(navState.calls).toEqual([]);
   });
 
   it('renders priority lenses as local filters over the Decision Room card list', () => {
@@ -287,6 +312,9 @@ describe('Presidential Decision Room wiring', () => {
 
     const chronicleState = createNavigationState();
     expect(openPresidentialDecisionRoomNavigationTarget(handoffs.chronicle.navigationTarget, chronicleState)).toBe(true);
-    expect(chronicleState.calls).toEqual([['setChronicleOpen', true]]);
+    expect(chronicleState.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', true],
+    ]);
   });
 });

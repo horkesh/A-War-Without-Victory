@@ -4,8 +4,9 @@ import { readFile, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { test } from 'vitest';
 
-import { startNewCampaign } from '../src/desktop/desktop_sim.js';
+import { queryBattleEvents, startNewCampaign } from '../src/desktop/desktop_sim.js';
 import { createStateFromScenario, runScenario } from '../src/scenario/scenario_runner.js';
+import { selectBotBrigadeOrderFactions } from '../src/sim/turn_phases/war_phases.js';
 import { deserializeState, serializeState } from '../src/state/serialize.js';
 
 async function ensureRemoved(dir: string): Promise<void> {
@@ -63,6 +64,69 @@ test('startNewCampaign returns canonicalized state before the first manual save'
         'desktop new-campaign state should already be in canonical save/load form',
     );
 }, 120_000);
+
+test('startNewCampaign disables headless auto-control for the selected player faction', async () => {
+    const cases = ['RBiH', 'RS', 'HRHB'] as const;
+
+    for (const faction of cases) {
+        const { state } = await startNewCampaign(process.cwd(), faction, 'apr_1992');
+
+        assert.strictEqual(state.meta.player_faction, faction);
+        assert.strictEqual(state.meta.decision_mode, 'emergent');
+        assert.notStrictEqual(
+            state.meta.headless_scenario_auto_control,
+            true,
+            `${faction} new campaign must not keep the scenario harness headless-control flag`,
+        );
+        assert.ok(
+            !selectBotBrigadeOrderFactions(state).includes(faction),
+            `${faction} must be excluded from bot-controlled brigade order factions`,
+        );
+    }
+}, 120_000);
+
+test('startNewCampaign does not expose startup control provenance as turn-zero territory history', async () => {
+    const { state } = await startNewCampaign(process.cwd(), 'RBiH', 'apr_1992');
+
+    assert.deepStrictEqual(
+        state.political.control_events ?? [],
+        [],
+        'live player campaigns should not surface setup-time control deltas as turn-zero territory gains/losses',
+    );
+}, 120_000);
+
+test('queryBattleEvents reads persisted political control events', () => {
+    const state = {
+        meta: { turn: 7 },
+        military: {},
+        political: {
+            control_events: [
+                {
+                    turn: 7,
+                    settlement_id: 'op:test:sector',
+                    from: 'RS',
+                    to: 'RBiH',
+                    mechanism: 'combat',
+                    mun_id: 'test_mun',
+                },
+            ],
+        },
+    } as never;
+
+    assert.deepStrictEqual(queryBattleEvents(state), {
+        turn: 7,
+        events: [
+            {
+                turn: 7,
+                settlement_id: 'op:test:sector',
+                from: 'RS',
+                to: 'RBiH',
+                mechanism: 'combat',
+                mun_id: 'test_mun',
+            },
+        ],
+    });
+});
 
 test('startNewCampaign queues the selected faction foundational decision at campaign birth', async () => {
     const cases = [

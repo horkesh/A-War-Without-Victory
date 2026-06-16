@@ -211,16 +211,7 @@ type TacticalDeckPickObject = { properties?: Record<string, unknown> };
 type TacticalDeckPickingInfo = PickingInfo<TacticalDeckPickObject>;
 
 function selectFormationFromMap(formationId: string) {
-  useGameStore.setState({
-    selectedFormationId: formationId,
-    selectedOsid: null,
-    selectedCorpsFrontSectorId: null,
-    selectedCorpsId: null,
-    selectedArmyId: null,
-    selectedArmyHqId: null,
-    selectedOperationKey: null,
-    selectedOrbatCorpsId: null,
-  });
+  useGameStore.getState().setSelectedFormationId(formationId);
 }
 
 /** Layer IDs for front lines (visibility driven by store frontsVisible). */
@@ -439,6 +430,7 @@ export function MapContainer() {
   const [mapReady, setMapReady] = useState(false);
   const [interactionBindingRevision, setInteractionBindingRevision] = useState(0);
   const setSelectedOsid = useGameStore((s) => s.setSelectedOsid);
+  const setSelectedOsidInSector = useGameStore((s) => s.setSelectedOsidInSector);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
   const setPendingAttackConfirmation = useGameStore((s) => s.setPendingAttackConfirmation);
@@ -994,14 +986,15 @@ export function MapContainer() {
             }
             setOrderModeForFormation(null);
           } else {
-            setSelectedOsid(osid);
             setExpandedStackOsid(null);
             setOverlayAnchor(null);
             // If this settlement belongs to a front sector, select that sector so it's visible on the map.
             const sectorId = osidToSector.get(osid);
             if (sectorId && findPlayerFacingSectorById(useGameStore.getState().loadedGameState, sectorId)) {
               sectorSelectedFromMapRef.current = true;
-              setSelectedCorpsFrontSectorId(sectorId);
+              setSelectedOsidInSector(osid, sectorId);
+            } else {
+              setSelectedOsid(osid);
             }
           }
         },
@@ -1108,7 +1101,7 @@ export function MapContainer() {
       cancelled = true;
       if (cleanup) cleanup();
     };
-  }, [mapReady, loadedGameState, setSelectedOsid, setSelectedFormationId, setSelectedCorpsFrontSectorId, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation, ipc, setLoadError, osidToSector, interactionBindingRevision]);
+  }, [mapReady, loadedGameState, setSelectedOsid, setSelectedOsidInSector, setSelectedFormationId, setSelectedCorpsFrontSectorId, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation, ipc, setLoadError, osidToSector, interactionBindingRevision]);
 
   useEffect(() => {
     const map = mapRef.current;

@@ -70,14 +70,16 @@ function truncateSourceNote(text: string): string {
 }
 
 /** Resolve the player-facing event title from the catalog, defensively. Falls
- *  back to the raw event id when absent. */
+ *  back to a player-safe human label when absent. */
 function resolveDecisionTitle(
     decision: EventDecision,
     eventCatalog: ReadonlyMap<string, EventDefinition> | undefined,
 ): string {
     const def = eventCatalog?.get(decision.event_id);
     const title = def?.title;
-    return typeof title === 'string' && title.trim().length > 0 ? title : decision.event_id;
+    return typeof title === 'string' && title.trim().length > 0
+        ? title
+        : getPlayerSafeDisplayLabel(decision.event_id, 'Recorded decision');
 }
 
 /** Resolve a downstream descendant event id to its player-facing title via the
@@ -93,7 +95,7 @@ function resolveDescendantLabel(
 }
 
 /** Resolve the player-facing chosen-option label (prose) from the catalog,
- *  defensively. Falls back to the raw response id. */
+ *  defensively. Falls back to a player-safe human label. */
 function resolveOptionLabel(
     decision: EventDecision,
     eventCatalog: ReadonlyMap<string, EventDefinition> | undefined,
@@ -101,7 +103,9 @@ function resolveOptionLabel(
     const def = eventCatalog?.get(decision.event_id);
     const option = (def?.response_options ?? []).find((o) => o.id === decision.response_id);
     const label = option?.label;
-    return typeof label === 'string' && label.trim().length > 0 ? label : decision.response_id;
+    return typeof label === 'string' && label.trim().length > 0
+        ? label
+        : getPlayerSafeDisplayLabel(decision.response_id, 'Recorded response');
 }
 
 interface ReceiptStatusCounts {
@@ -143,7 +147,7 @@ function DecisionRow({
     receipts,
     isExpanded,
     onToggle,
-    devMode,
+    diagMode,
 }: {
     decision: EventDecision;
     eventCatalog: ReadonlyMap<string, EventDefinition> | undefined;
@@ -151,7 +155,7 @@ function DecisionRow({
     receipts: readonly ConsequenceReceipt[];
     isExpanded: boolean;
     onToggle: () => void;
-    devMode: boolean;
+    diagMode: boolean;
 }) {
     const def = eventCatalog?.get(decision.event_id);
     const family = def?.family ?? 'unknown';
@@ -208,10 +212,10 @@ function DecisionRow({
                     </span>
                     <span className="block text-[8px] uppercase tracking-[0.1em] text-neutral-500 mt-0.5">
                         {/* Developer diagnostic ONLY: the raw internal `family`
-                            taxonomy is gated behind the `devMode` store flag so it
+                            taxonomy is gated behind the `diagMode` store flag so it
                             never leaks into the player-facing Authored Choices list
                             (mirrors the PR #130 Codex unlock-state dev-gate). */}
-                        {devMode && (
+                        {diagMode && (
                             <span data-testid="decision-history-family">[family={family}]</span>
                         )}
                         {hasReceipts && (
@@ -304,7 +308,7 @@ export function DecisionHistoryOverlay({
     eventCatalog,
     state,
 }: DecisionHistoryOverlayProps) {
-    const devMode = useGameStore((s) => s.devMode);
+    const diagMode = useGameStore((s) => s.diagMode);
     const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
 
     // ESC closes the overlay — matches WrappedOverlay / CodexPanel pattern.
@@ -416,7 +420,7 @@ export function DecisionHistoryOverlay({
                                     eventCatalog={eventCatalog}
                                     state={state!}
                                     receipts={receiptsByEvent.get(decision.event_id) ?? []}
-                                    devMode={devMode}
+                                    diagMode={diagMode}
                                     isExpanded={expandedEventId === decision.event_id}
                                     onToggle={() => setExpandedEventId(
                                         expandedEventId === decision.event_id

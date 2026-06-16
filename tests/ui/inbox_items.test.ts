@@ -445,7 +445,7 @@ describe('deriveInboxItems — opening brief conditions', () => {
         const dateItems = items.filter(i => i.id.startsWith('sit:date:'));
         expect(dateItems).toHaveLength(1);
         expect(dateItems[0].type).toBe('situation');
-        expect(dateItems[0].action).toBe('army_hq_briefing');
+        expect(dateItems[0].action).toBe('decision_room');
     });
 
     it('returns empty array for null state', () => {
@@ -467,8 +467,8 @@ describe('deriveInboxItems — opening brief conditions', () => {
         const gains = items.filter(i => i.id.startsWith('sit:territory_gain'));
         expect(losses).toHaveLength(1);
         expect(gains).toHaveLength(1);
-        expect(losses[0].action).toBe('army_hq_briefing');
-        expect(gains[0].action).toBe('army_hq_briefing');
+        expect(losses[0].action).toBe('decision_room');
+        expect(gains[0].action).toBe('decision_room');
     });
 });
 

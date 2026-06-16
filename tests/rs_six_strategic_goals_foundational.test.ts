@@ -46,6 +46,10 @@ import { describe, it, expect } from 'vitest';
 
 import { DILEMMA_SPINE } from '../src/ui/map/data/dilemmaSpine.js';
 import type { EventDefinition, EventResponseOption } from '../src/sim/events/event_types.js';
+import { selectAIDefaultResponse } from '../src/sim/events/ai_default_response.js';
+import { evaluateEvents } from '../src/sim/events/evaluate_events.js';
+import { updateEventReadiness } from '../src/sim/events/pressure_system.js';
+import type { GameState } from '../src/state/game_state.js';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -55,6 +59,27 @@ function readJson<T>(rel: string): T {
 
 const WAR_1992 = readJson<EventDefinition[]>('data/scenarios/events/war_1992.json');
 const EVENT = WAR_1992.find((e) => e.id === 'rs_strategic_goals');
+
+function makeOpeningState(playerFaction: 'RBiH' | 'RS' | 'HRHB'): GameState {
+    return {
+        schema_version: 1,
+        factions: { RBiH: {} as any, RS: {} as any, HRHB: {} as any },
+        meta: { turn: 2, phase: 'war', player_faction: playerFaction } as any,
+        military: {
+            formations: {},
+            front_segments: {},
+            front_posture: {} as any,
+            front_posture_regions: {} as any,
+            front_pressure: {},
+            militia_pools: {},
+            general_supply_reserve: { RBiH: 50, RS: 50, HRHB: 50 },
+            event_flags: {},
+        },
+        political: { political_controllers: {} } as any,
+        displacement: {} as any,
+        economic: {} as any,
+    } as unknown as GameState;
+}
 
 /** The six strategic goals, as historically adopted (12 May 1992, 16th Session).
  *  Each entry is a (paraphrased) keyword the shipped narrative MUST mention so a
@@ -107,6 +132,31 @@ describe('RS Six Strategic Goals — foundational decision-event §6 guard', () 
         const defaultOpt = e.response_options?.find((o) => o.id === 'all_six');
         expect(defaultOpt, 'all_six option must exist').toBeDefined();
         expect(defaultOpt!.historical_marker ?? 'historical_default').toBe('historical_default');
+        expect(selectAIDefaultResponse(e).id).toBe('all_six');
+    });
+
+    it('queues as an RS player opening decision in-window and not for other player factions', () => {
+        const e = EVENT!;
+        const rsState = makeOpeningState('RS');
+        updateEventReadiness(rsState, [e]);
+        evaluateEvents(rsState, () => 0.5, 2, [e]);
+
+        const pending = rsState.military.pending_event_decisions ?? [];
+        expect(pending.length).toBe(1);
+        expect(pending[0]!.event_id).toBe('rs_strategic_goals');
+        expect(pending[0]!.faction).toBe('RS');
+        expect(pending[0]!.requires_player_response).toBe(true);
+
+        const rbihState = makeOpeningState('RBiH');
+        updateEventReadiness(rbihState, [e]);
+        evaluateEvents(rbihState, () => 0.5, 2, [e]);
+        expect((rbihState.military.pending_event_decisions ?? []).some((p) => p.event_id === 'rs_strategic_goals')).toBe(false);
+
+        const lateState = makeOpeningState('RS');
+        lateState.meta.turn = 4;
+        updateEventReadiness(lateState, [e]);
+        evaluateEvents(lateState, () => 0.5, 4, [e]);
+        expect((lateState.military.pending_event_decisions ?? []).some((p) => p.event_id === 'rs_strategic_goals')).toBe(false);
     });
 
     it('§6 bright line — NO response option rewards atrocity (war_crimes_delta is never negative; never a lever)', () => {

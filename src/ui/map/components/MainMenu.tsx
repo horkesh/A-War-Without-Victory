@@ -8,6 +8,7 @@ import { Z } from '../../shared/zIndex';
 import { SUPPORTED_LOCALES, t, useLocale, type Locale } from '../i18n';
 import type { StartNewCampaignPayload } from '../desktop/types';
 import { getArmyName, getFactionFlag } from '../utils/factionAssets';
+import { AWWV_APP_VERSION } from '../utils/appVersion';
 import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 
 interface MainMenuProps {
@@ -146,7 +147,7 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
             {/* Version */}
             <div className="absolute bottom-4 right-4 text-[10px] text-[#8a7a60]/40"
                  style={{ fontFamily: 'Courier New, monospace' }}>
-                v0.5.0
+                {AWWV_APP_VERSION}
             </div>
         </div>
     );

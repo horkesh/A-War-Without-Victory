@@ -133,7 +133,7 @@ describe('Phase H Packet 7 — Catalog Wire-Up Integration', () => {
         // behind the `devMode` store flag (QA Batch E), so enable DEV mode
         // before asserting it renders (player default hides it — covered in the
         // dedicated decision-context unit suite).
-        useGameStore.setState({ devMode: true });
+        useGameStore.setState({ diagMode: true });
         const catalog = new Map<string, EventDefinition>([
             [FAKE_FOUNDATIONAL_EVENT.id, FAKE_FOUNDATIONAL_EVENT],
         ]);

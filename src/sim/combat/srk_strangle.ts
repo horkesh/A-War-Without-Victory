@@ -72,8 +72,9 @@ const SRK_SUPPRESSED_MUN_SET: ReadonlySet<string> = new Set(
  *
  * Deterministic: sorted via strictCompare; pure read of state; no side-effects.
  *
- * Called only when `isSrkStranglePostureEnabled()` is true — callers MUST gate
- * on the flag before calling this function so DEFAULT-OFF remains a true no-op.
+ * Called for pure derivation and by mutation sites gated on
+ * `isSrkStranglePostureEnabled()`. Explicit env false/0 keeps mutation sites as
+ * a diagnostic no-op while the derivation itself remains deterministic.
  */
 export function computeSrkStrangleOsids(state: GameState): string[] {
     const controllers = state.political?.political_controllers;

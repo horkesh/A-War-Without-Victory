@@ -121,6 +121,36 @@ describe('useMapInteractions', () => {
     expect(onOsidClick).not.toHaveBeenCalled();
   });
 
+  it('routes clicks from current map-mode fill layers to OSID selection', () => {
+    const mapHandlers = new Map<string, (e: MapLayerMouseEvent) => void>();
+    const onOsidClick = vi.fn();
+    const features: TestFeature[] = [
+      {
+        layer: { id: 'political-metric-fill' },
+        properties: { osid: 'op:test:authority' },
+      },
+    ];
+    const queriedLayers: string[][] = [];
+    const mockMap = {
+      on: (event: string, layerOrHandler: string | ((e: MapLayerMouseEvent) => void), handler?: (e: MapLayerMouseEvent) => void) => {
+        if (typeof layerOrHandler === 'function') mapHandlers.set(event, layerOrHandler);
+      },
+      off: () => {},
+      getCanvas: () => ({ style: { cursor: '' }, addEventListener: () => {}, removeEventListener: () => {} }),
+      getLayer: (id: string) => ({ id }),
+      queryRenderedFeatures: (_point: unknown, opts?: { layers?: string[] }) => {
+        queriedLayers.push(opts?.layers ?? []);
+        return features;
+      },
+    };
+
+    useMapInteractions(mockMap as unknown as Parameters<typeof useMapInteractions>[0], { onOsidClick });
+    mapHandlers.get('click')?.({ point: { x: 10, y: 10 }, originalEvent: { clientX: 10, clientY: 10 } });
+
+    expect(queriedLayers[0]).toContain('political-metric-fill');
+    expect(onOsidClick).toHaveBeenCalledWith('op:test:authority', expect.objectContaining({ osid: 'op:test:authority' }));
+  });
+
   it('drives front-edge hover from the canonical map-level feature query when the cursor is over a selectable front hit', () => {
     vi.useFakeTimers();
     const mapHandlers = new Map<string, (e: MapLayerMouseEvent & { lngLat?: { lng: number; lat: number } }) => void>();

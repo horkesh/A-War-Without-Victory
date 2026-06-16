@@ -83,6 +83,7 @@ export interface GameStore {
 
   selectedOsid: string | null;
   setSelectedOsid: (osid: string | null) => void;
+  setSelectedOsidInSector: (osid: string, sectorId: string) => void;
 
   selectedFormationId: string | null;
   setSelectedFormationId: (id: string | null) => void;
@@ -336,15 +337,48 @@ export interface GameStore {
 
 }
 
+const CLEARED_ENTITY_SELECTIONS = {
+  selectedOsid: null,
+  selectedFormationId: null,
+  selectedCorpsFrontSectorId: null,
+  selectedCorpsId: null,
+  selectedArmyId: null,
+  selectedArmyHqId: null,
+  selectedOperationKey: null,
+  selectedOrbatCorpsId: null,
+} as const;
+
+const CLEARED_OPERATION_CONTEXT = {
+  isOperationsPanelOpen: false,
+  operationTargetOsids: [] as string[],
+};
+
 export const useGameStore = create<GameStore>((set, get) => ({
   devMode: isDevMode(),
   diagMode: isDiagMode(),
 
   selectedOsid: null,
-  setSelectedOsid: (osid) => set({ selectedOsid: osid, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedCorpsId: null, selectedArmyId: null, selectedArmyHqId: null, selectedOrbatCorpsId: null }),
+  setSelectedOsid: (osid) => set(osid == null
+    ? { selectedOsid: null }
+    : { ...CLEARED_ENTITY_SELECTIONS, ...CLEARED_OPERATION_CONTEXT, selectedOsid: osid }),
+  setSelectedOsidInSector: (osid, sectorId) => set({
+    ...CLEARED_ENTITY_SELECTIONS,
+    ...CLEARED_OPERATION_CONTEXT,
+    selectedOsid: osid,
+    selectedCorpsFrontSectorId: sectorId,
+  }),
 
   selectedFormationId: null,
-  setSelectedFormationId: (id) => set({ selectedFormationId: id, selectedOperationKey: null, selectedOrbatCorpsId: null }),
+  setSelectedFormationId: (id) => set(id == null
+    ? { selectedFormationId: null }
+    : {
+      selectedOsid: null,
+      selectedFormationId: id,
+      selectedCorpsFrontSectorId: null,
+      selectedOperationKey: null,
+      selectedOrbatCorpsId: null,
+      ...CLEARED_OPERATION_CONTEXT,
+    }),
 
   hoveredOsids: [],
   setHoveredOsids: (osids) => set({ hoveredOsids: [...new Set(osids)].sort((a, b) => a.localeCompare(b)) }),
@@ -400,18 +434,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setPendingAttackConfirmation: (v) => set({ pendingAttackConfirmation: v }),
 
   selectedCorpsFrontSectorId: null,
-  setSelectedCorpsFrontSectorId: (id) => set({ selectedCorpsFrontSectorId: id, selectedFormationId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
+  setSelectedCorpsFrontSectorId: (id) => set(id == null
+    ? { selectedCorpsFrontSectorId: null }
+    : { ...CLEARED_ENTITY_SELECTIONS, ...CLEARED_OPERATION_CONTEXT, selectedCorpsFrontSectorId: id }),
 
   selectedCorpsId: null,
-  setSelectedCorpsId: (id) => set({ selectedCorpsId: id, selectedArmyId: null, selectedArmyHqId: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
+  setSelectedCorpsId: (id) => set(id == null
+    ? { selectedCorpsId: null }
+    : { ...CLEARED_ENTITY_SELECTIONS, ...CLEARED_OPERATION_CONTEXT, selectedCorpsId: id }),
 
   selectedArmyId: null,
-  setSelectedArmyId: (id) => set({
-    selectedArmyId: id,
-    armyHQOpen: !!id,
-    selectedArmyHqId: null, selectedCorpsId: null, selectedFormationId: null,
-    selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOrbatCorpsId: null,
-  }),
+  setSelectedArmyId: (id) => set(id == null
+    ? { selectedArmyId: null, armyHQOpen: false }
+    : { ...CLEARED_ENTITY_SELECTIONS, ...CLEARED_OPERATION_CONTEXT, selectedArmyId: id, armyHQOpen: true }),
 
   armyHQOpen: false,
   armyHQTab: 'briefing',
@@ -479,33 +514,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setArmyHQOfficerSelectionCorpsId: (id) => set({ armyHQOfficerSelectionCorpsId: id }),
 
   selectedArmyHqId: null,
-  setSelectedArmyHqId: (id: string | null) => set({ selectedArmyHqId: id, selectedArmyId: null, selectedCorpsId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
+  setSelectedArmyHqId: (id: string | null) => set(id == null
+    ? { selectedArmyHqId: null }
+    : { ...CLEARED_ENTITY_SELECTIONS, ...CLEARED_OPERATION_CONTEXT, selectedArmyHqId: id }),
 
   selectedOperationKey: null,
-  setSelectedOperationKey: (key) => set((state) => (
+  setSelectedOperationKey: (key) => set((
     key == null
-      ? { selectedOperationKey: null }
+      ? { selectedOperationKey: null, ...CLEARED_OPERATION_CONTEXT }
       : {
+        ...CLEARED_ENTITY_SELECTIONS,
         selectedOperationKey: key,
         isOperationsPanelOpen: true,
-        selectedCorpsId: null,
-        selectedArmyId: null,
-        selectedCorpsFrontSectorId: null,
-        selectedFormationId: null,
-        selectedOrbatCorpsId: null,
       }
   )),
 
   selectedOrbatCorpsId: null,
-  setSelectedOrbatCorpsId: (id) => set({
-    selectedOrbatCorpsId: id,
-    selectedFormationId: null,
-    selectedOsid: null,
-    selectedCorpsId: null,
-    selectedArmyId: null,
-    selectedOperationKey: null,
-    selectedCorpsFrontSectorId: null
-  }),
+  setSelectedOrbatCorpsId: (id) => set(id == null
+    ? { selectedOrbatCorpsId: null }
+    : { ...CLEARED_ENTITY_SELECTIONS, ...CLEARED_OPERATION_CONTEXT, selectedOrbatCorpsId: id }),
 
   isOperationsPanelOpen: false,
   setIsOperationsPanelOpen: (v) => set({ isOperationsPanelOpen: v }),

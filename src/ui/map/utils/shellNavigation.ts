@@ -120,6 +120,7 @@ export function openArmyHQBriefingForCorps(state: ShellNavigationState, corpsId:
  * contract in one place (see `tests/ui_shell_navigation.test.ts`).
  */
 export function openCodex(state: ShellNavigationState): boolean {
+  state.setChronicleOpen(false);
   state.setCodexOpen(true);
   return true;
 }
@@ -134,23 +135,23 @@ export function openCodex(state: ShellNavigationState): boolean {
  * navigation dispatch.
  */
 export function openChronicle(state: ShellNavigationState): boolean {
+  state.setCodexOpen(false);
   state.setChronicleOpen(true);
   return true;
 }
 
 export function applyShellHandoffCommand(state: ShellNavigationState, command: ShellHandoffCommand): boolean {
   if (command.kind === 'codex') {
-    state.setCodexOpen(true);
-    return true;
+    return openCodex(state);
   }
   if (command.kind === 'chronicle') {
-    state.setChronicleOpen(true);
-    return true;
+    return openChronicle(state);
   }
   if (command.kind === 'advance-turn') {
     // Warroom wall calendar hotspot — show the React advance-turn confirmation modal.
     // setAdvanceTurnPending is optional on ShellNavigationState; gameStore always provides it.
-    state.setAdvanceTurnPending?.(true);
+    if (!state.setAdvanceTurnPending) return false;
+    state.setAdvanceTurnPending(true);
     return true;
   }
   if (command.tab === 'records' && command.recordsSubTab) {

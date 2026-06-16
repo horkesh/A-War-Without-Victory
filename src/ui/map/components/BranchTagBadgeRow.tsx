@@ -31,6 +31,28 @@ import React from 'react';
 import { getBranchTagsActive } from '../../../sim/events/causality_query';
 import type { EventDefinition } from '../../../sim/events/event_types';
 import type { FactionId, GameState } from '../../../state/game_state';
+import { toTitleCase } from '../utils/formatters';
+
+const PLAYER_SAFE_BRANCH_TAG_LABELS: Record<string, string> = {
+    rbih_state_identity: 'Civic republic',
+    rbih_civic: 'Civic republic',
+    rbih_civic_identity: 'Civic republic',
+    rbih_dayton_accept: 'Dayton acceptance',
+    rbih_paramilitary_allow: 'Paramilitary authorization',
+    rs_strategic_goals: 'Six strategic goals',
+    rs_assembly_override: 'Assembly override',
+    hrhb_political_goal: 'Herzeg-Bosna posture',
+    hrhb_alliance_sustained: 'Alliance sustained',
+    hrhb_dayton_accept: 'Dayton acceptance',
+};
+
+export function getPlayerSafeBranchTagLabel(tag: string): string {
+    const safeTag = tag.trim();
+    if (!safeTag) return 'Campaign branch';
+    const curated = PLAYER_SAFE_BRANCH_TAG_LABELS[safeTag];
+    if (curated) return curated;
+    return toTitleCase(safeTag.replace(/^(rbih|rs|hrhb)_/i, '').replace(/_/g, ' ')) || 'Campaign branch';
+}
 
 export interface BranchTagBadgeRowProps {
     /** Faction whose branch tags should be surfaced. Filtering uses
@@ -65,7 +87,8 @@ export function BranchTagBadgeRow({
     if (!eventCatalog || !state) return null;
     const tags = getBranchTagsActive(state, faction, eventCatalog);
     if (tags.length === 0) return null;
-    const tooltip = `Active branch tags (${tags.length}): ${tags.join(', ')}`;
+    const labels = tags.map((tag) => ({ tag, label: getPlayerSafeBranchTagLabel(tag) }));
+    const tooltip = `Active strategic branches (${labels.length}): ${labels.map((entry) => entry.label).join(', ')}`;
     return (
         <div
             className="branch-tag-badge-row flex flex-wrap items-center gap-1.5"
@@ -73,14 +96,14 @@ export function BranchTagBadgeRow({
             data-faction={faction}
             title={tooltip}
         >
-            {tags.map((tag) => (
+            {labels.map(({ tag, label }) => (
                 <span
                     key={tag}
                     className="rounded-sm border border-panel-border bg-panel-card px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-text-secondary"
                     data-testid="branch-tag-chip"
                     data-tag={tag}
                 >
-                    [{tag}]
+                    {label}
                 </span>
             ))}
         </div>

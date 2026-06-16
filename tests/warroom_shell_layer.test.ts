@@ -324,9 +324,9 @@ describe('warroom region data contract', () => {
     expect(getWarroomBoardDateLabel({ metadata: { turn: 0, date: '1 Apr 1992 · Turn 0 (War)' }, turn: 0 }))
       .toBe('1 Apr 1992');
     expect(getWarroomBoardDateLabel({ label: 'Turn 0 (war)', metadata: { turn: 0, date: 'UNKNOWN' }, turn: 0 }))
-      .toBe('1 Apr 1992');
+      .toBe('6 Apr 1992');
     expect(getWarroomBoardDateLabel({ metadata: { turn: 7, date: 'UNKNOWN' }, turn: 7 }))
-      .toBe('20 May 1992');
+      .toBe('25 May 1992');
   });
 });
 
@@ -412,9 +412,12 @@ describe('live campaign tutorial render', () => {
     // `shouldShowOnboarding` predicate handles the first-run-vs-dismissed
     // branch off the existing persisted `meta.tutorial_state`.
     expect(source).toContain('<OnboardingOverlayWrapper />');
-    // Codex #347 (P2): the mount gate also excludes `sidePickerOpen` so the
-    // HARD_MODAL deck never covers the faction picker.
-    expect(source).toContain("appScreen === 'game' && loadedGameState && !sidePickerOpen && <OnboardingOverlayWrapper />");
+    // Codex #347 (P2) plus first-turn choreography: the mount gate excludes
+    // presidential blockers and active command overlays such as Chronicle/Codex.
+    expect(source).toContain("appScreen === 'game' && loadedGameState && !onboardingBlockingOverlayActive && <OnboardingOverlayWrapper />");
+    expect(source).toContain('const openingBriefPending = loadedGameState != null && playerFaction != null && !openingBriefDismissed;');
+    expect(source).toContain('chronicleOpen ||');
+    expect(source).toContain('codexOpen ||');
     // The legacy first-hover coachmark overlay stays retired — only the
     // onboarding deck mount is intended.
     expect(source).not.toContain('CoachmarkLayer');

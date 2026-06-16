@@ -11,7 +11,7 @@ import {
     filterPlayerFacingFormations,
     filterPlayerFacingOperationHistory,
 } from '../../shared/playerVisibility';
-import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { getPlayerSafeDisplayLabel, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { deriveOperationOutcomeCategory, buildOperationTrendSummary } from '../data/command_strain';
 import { t } from '../i18n';
 
@@ -64,6 +64,10 @@ const CAPTURE_PROVENANCE_LABEL: Record<string, string | null> = {
     held_without_logged_attack: 'Objectives were held at finalization without any logged attacks. This record shows final control, not confirmed combat capture.',
     mixed: 'Some objectives were logged during the operation; others were only held at finalization.',
 };
+
+function getOperationDisplayName(operationName: string | null | undefined): string {
+    return getPlayerSafeDisplayLabel(operationName, 'Operation');
+}
 
 const CAPTURE_PROVENANCE_SUMMARY: Record<string, string> = {
     no_objectives_held: 'no objective held record',
@@ -291,7 +295,7 @@ function CompletedOpCard({
                     <div className="min-w-0">
                         <div className="flex items-center gap-1.5 mb-0.5">
                             <FactionTag faction={op.faction} />
-                            <span className="text-[11px] text-text-primary font-semibold truncate">{op.operation_name}</span>
+                            <span className="text-[11px] text-text-primary font-semibold truncate">{getOperationDisplayName(op.operation_name)}</span>
                         </div>
                         {op.commander_name && (
                             <div className="text-[9px] text-text-muted">
@@ -540,7 +544,7 @@ function ActiveOpCard({ op, corpsName }: { op: ActiveOp; corpsName: string }) {
                 <div className="min-w-0">
                     <div className="flex items-center gap-1.5 mb-0.5">
                         <FactionTag faction={op.faction} />
-                        <span className="text-[11px] text-text-primary font-semibold truncate">{op.operation_name}</span>
+                        <span className="text-[11px] text-text-primary font-semibold truncate">{getOperationDisplayName(op.operation_name)}</span>
                     </div>
                     {op.commander_name && (
                         <div className="text-[9px] text-text-muted">{t('operationHistory.oic', { commander: op.commander_name })}</div>

@@ -39,6 +39,11 @@ describe('OSID damage overlay coordinate validity', () => {
           [18.1, 44.1],
           [18, 44],
         ]),
+        polygonFeature('op:test:degenerate_damage_coords', [
+          [18.2, 44.2],
+          [18.2, 44.2],
+          [18.2, 44.2],
+        ]),
         polygonFeature('op:test:valid_damage_coords', [
           [18, 44],
           [18.1, 44],
@@ -50,14 +55,21 @@ describe('OSID damage overlay coordinate validity', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const data = buildOsidDamageData(
-      damageSeed(['op:test:bad_damage_coords', 'op:test:valid_damage_coords']),
+      damageSeed([
+        'op:test:bad_damage_coords',
+        'op:test:degenerate_damage_coords',
+        'op:test:valid_damage_coords',
+      ]),
       polygons,
     );
 
     expect(data.map((d) => d.osid)).toEqual(['op:test:valid_damage_coords']);
-    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledTimes(2);
     expect(warn).toHaveBeenCalledWith(
       '[AWWV] Skipping osid-damage-overlay polygon with invalid coordinates: op:test:bad_damage_coords',
+    );
+    expect(warn).toHaveBeenCalledWith(
+      '[AWWV] Skipping osid-damage-overlay polygon with invalid coordinates: op:test:degenerate_damage_coords',
     );
 
     warn.mockRestore();

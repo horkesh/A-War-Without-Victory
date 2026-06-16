@@ -40776,6 +40776,14 @@
       "op:zvornik:sapna": "RBiH",
       "op:zvornik:zvornik": "RBiH"
     },
+    "last_contained_osids_by_faction": {
+      "RS": [
+        "op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
+        "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
+        "op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
+        "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo"
+      ]
+    },
     "municipalities": {
       "banja_luka": {
         "control": "consolidated",

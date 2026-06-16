@@ -100,7 +100,7 @@ export function resetArbihContainPostureGate(): void {
     _arbihContainPostureOverride = null;
 }
 
-// ── SRK strangle-not-capture posture (§6 Sarajevo urban-core, DEFAULT-OFF) ──
+// ── SRK strangle-not-capture posture (§6 Sarajevo urban-core, DEFAULT-ON) ──
 //
 // Models the historically accurate VRS Sarajevo-Romanija Corps (SRK) doctrine:
 // the SRK STRANGLED the Sarajevo urban core, never assaulted it (Galić Appeal
@@ -114,8 +114,9 @@ export function resetArbihContainPostureGate(): void {
 // organic plan path — no extra work needed for the override).
 //
 // SEPARATE FLAG from the VRS/ARBiH contain gates so the lane activates
-// INDEPENDENTLY (one-change-per-run calibration attribution). DEFAULT-OFF →
-// flag-off keeps the sim byte-identical to the calibration floor.
+// INDEPENDENTLY (one-change-per-run calibration attribution). DEFAULT-ON codifies
+// the historically correct Sarajevo strangle; explicit env false/0 restores the
+// diagnostic off path.
 
 let _srkStranglePostureOverride: boolean | null = null;
 

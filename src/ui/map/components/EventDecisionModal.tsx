@@ -208,8 +208,35 @@ function buildFutureReferenceRows(consequence: EventFutureConsequence): string[]
     ].filter((row): row is string => row !== null);
 }
 
-function FutureConsequenceCard({ consequence }: { consequence: EventFutureConsequence }) {
-    const referenceRows = buildFutureReferenceRows(consequence);
+const PLAYER_SAFE_CONSEQUENCE_TERMS: Array<[RegExp, string]> = [
+    [/\brbih_state_identity\b/g, 'state identity posture'],
+    [/\bcsq_bosniak_unity_1993\b/g, 'later Bosniak-national unity consolidation'],
+    [/\bcsq_minority_defections_1992\b/g, 'later minority-officer and recruit defection cascade'],
+    [/\bcsq_pragmatic_coalition_1993\b/g, 'later pragmatic coalition branch'],
+    [/\bbosniak_national\b/g, 'Bosniak national'],
+];
+
+function playerSafeFutureExplanation(text: string, showDiagnostics: boolean): string {
+    if (showDiagnostics) return text;
+    let safe = text.split(/\s*§\d+(?:\.\d+)?\s*/)[0]?.trim() ?? text;
+    safe = safe.split(/\bThese consequence rows\b/)[0]?.trim() ?? safe;
+    for (const [pattern, replacement] of PLAYER_SAFE_CONSEQUENCE_TERMS) {
+        safe = safe.replace(pattern, replacement);
+    }
+    safe = safe.replace(/\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b/g, (token) => humanizeToken(token).toLowerCase());
+    safe = safe.replace(/\s*\((later [^)]+)\)/g, '');
+    return safe.replace(/\s+/g, ' ').trim();
+}
+
+function FutureConsequenceCard({
+    consequence,
+    showDiagnostics,
+}: {
+    consequence: EventFutureConsequence;
+    showDiagnostics: boolean;
+}) {
+    const referenceRows = showDiagnostics ? buildFutureReferenceRows(consequence) : [];
+    const explanation = playerSafeFutureExplanation(consequence.explanation, showDiagnostics);
     return (
         <li className="rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2">
             <div className="flex flex-wrap items-start justify-between gap-2">
@@ -226,7 +253,7 @@ function FutureConsequenceCard({ consequence }: { consequence: EventFutureConseq
                 </div>
             </div>
             <p className="mt-1.5 text-[11px] leading-relaxed text-text-secondary">
-                {consequence.explanation}
+                {explanation}
             </p>
             {referenceRows.length > 0 && (
                 <ul className="mt-2 space-y-1 text-[10px] leading-relaxed text-text-muted">
@@ -239,7 +266,13 @@ function FutureConsequenceCard({ consequence }: { consequence: EventFutureConseq
     );
 }
 
-function FutureConsequencePreview({ option }: { option: EventResponseOption }) {
+function FutureConsequencePreview({
+    option,
+    showDiagnostics,
+}: {
+    option: EventResponseOption;
+    showDiagnostics: boolean;
+}) {
     const consequences = option.future_consequences ?? [];
     if (consequences.length === 0) return null;
     return (
@@ -249,7 +282,7 @@ function FutureConsequencePreview({ option }: { option: EventResponseOption }) {
             </div>
             <ul className="space-y-1.5">
                 {consequences.map((consequence) => (
-                    <FutureConsequenceCard key={consequence.id} consequence={consequence} />
+                    <FutureConsequenceCard key={consequence.id} consequence={consequence} showDiagnostics={showDiagnostics} />
                 ))}
             </ul>
         </div>
@@ -268,11 +301,13 @@ function ResponseButton({
     option,
     decision,
     sourceNote,
+    showDiagnostics,
     onChoose,
 }: {
     option: EventResponseOption;
     decision: EventDecisionDossier;
     sourceNote: string | null;
+    showDiagnostics: boolean;
     onChoose: () => void;
 }) {
     const historical = isHistoricalOption(option, decision);
@@ -322,7 +357,7 @@ function ResponseButton({
                 </p>
             )}
             <EffectPreview option={option} />
-            <FutureConsequencePreview option={option} />
+            <FutureConsequencePreview option={option} showDiagnostics={showDiagnostics} />
         </div>
     );
 }
@@ -338,12 +373,12 @@ function DecisionContextSection({
     decision,
     eventCatalog,
     state,
-    devMode,
+    diagMode,
 }: {
     decision: EventDecisionDossier;
     eventCatalog?: ReadonlyMap<string, EventDefinition>;
     state?: GameState;
-    devMode: boolean;
+    diagMode: boolean;
 }) {
     // Graceful degradation: if neither catalog nor state is available, omit
     // the entire section. The existing modal sidebar already shows the
@@ -366,10 +401,10 @@ function DecisionContextSection({
     if (!eventDef && ancestors.length === 0) return null;
 
     // Family/Source taxonomy and the causal ancestry chain are engine-internal
-    // designer/debug diagnostics — gate them behind the devMode store flag
-    // (mirrors PR #130/#133). The source dossier excerpt below is player-facing
+    // designer/debug diagnostics — gate them behind the explicit diagMode
+    // flag, not generic devMode. The source dossier excerpt below is player-facing
     // historical provenance and stays visible.
-    const showDiagnostics = devMode && (Boolean(eventDef && (family || sourceTier)) || ancestors.length > 0);
+    const showDiagnostics = diagMode && (Boolean(eventDef && (family || sourceTier)) || ancestors.length > 0);
 
     // If the only content this section could render is the (now-gated)
     // diagnostics and the player-facing dossier is absent, omit it entirely.
@@ -421,7 +456,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
     // the assessment block speaks in a named officer's voice; otherwise it falls
     // back to the generic "Staff assessment". (See deriveAssessmentLabel.)
     const assessmentLabel = deriveAssessmentLabel(decision.category, advisor);
-    const devMode = useGameStore((s) => s.devMode);
+    const diagMode = useGameStore((s) => s.diagMode);
 
     return (
         <Modal
@@ -512,7 +547,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                     decision={decision}
                     eventCatalog={eventCatalog}
                     state={state}
-                    devMode={devMode}
+                    diagMode={diagMode}
                 />
 
                 {!hasHistoricalDefault && (
@@ -533,6 +568,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                             option={option}
                             decision={decision}
                             sourceNote={sourceNote}
+                            showDiagnostics={diagMode}
                             onChoose={() => onRespond(decision.event_id, option.id)}
                         />
                     ))}

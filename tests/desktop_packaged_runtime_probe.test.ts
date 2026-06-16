@@ -100,6 +100,16 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
     );
     assert.match(
         source,
+        /const eventCatalogRoutes = \[[\s\S]*\/data\/scenarios\/events\/war_1992\.json[\s\S]*\/data\/scenarios\/events\/war_1992_hrhb_summer\.json[\s\S]*\/data\/scenarios\/events\/war_1993\.json[\s\S]*\/data\/scenarios\/events\/war_1994\.json[\s\S]*\/data\/scenarios\/events\/war_1995\.json[\s\S]*\/data\/scenarios\/events\/consequences\.json[\s\S]*\]/,
+        'packaged runtime probe should verify every React DataLoader event catalog through the real HTTP tactical-map server',
+    );
+    assert.match(
+        source,
+        /packaged tactical map server returned \$\{failedEventCatalogResponse\.statusCode\} for event catalog \$\{failedEventCatalogResponse\.route\}/,
+        'packaged runtime probe should fail loudly when the DataLoader event catalog route is not served',
+    );
+    assert.match(
+        source,
         /getMapServerUrl !== 'function' \|\| typeof bridge\.getCurrentGameState !== 'function'/,
         'packaged tactical-map probe should require the real preload bridge functions',
     );
@@ -250,6 +260,11 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
     );
     assert.match(
         source,
+        /map_server_checks:[\s\S]*eventCatalogResponses\.map/,
+        'packaged runtime probe manifest should record all event catalog HTTP reachability checks',
+    );
+    assert.match(
+        source,
         /surface_type:[\s\S]*outcome_label:[\s\S]*has_pyrrhic_score:[\s\S]*has_war_cost:[\s\S]*has_faction_tabs:[\s\S]*has_awwv_title:/s,
         'packaged runtime probe endgame checks should record verdict surface DOM observations',
     );
@@ -317,6 +332,11 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
         source,
         /window_checks[\s\S]*tactical_sandbox\.html\?desktop_window=sandbox[\s\S]*did-finish-load/s,
         'probe tool should fail if the packaged manifest omits the tactical sandbox route proof',
+    );
+    assert.match(
+        source,
+        /expectedEventCatalogRoutes[\s\S]*\/data\/scenarios\/events\/war_1992\.json[\s\S]*\/data\/scenarios\/events\/war_1992_hrhb_summer\.json[\s\S]*\/data\/scenarios\/events\/war_1993\.json[\s\S]*\/data\/scenarios\/events\/war_1994\.json[\s\S]*\/data\/scenarios\/events\/war_1995\.json[\s\S]*\/data\/scenarios\/events\/consequences\.json[\s\S]*missingEventCatalogRoutes/s,
+        'probe tool should fail if the packaged manifest omits any DataLoader event catalog HTTP proof',
     );
     assert.match(
         source,

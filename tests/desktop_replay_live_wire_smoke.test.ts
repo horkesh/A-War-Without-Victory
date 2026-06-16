@@ -56,6 +56,26 @@ describe('desktop_replay_live_wire_smoke — electron-main.cjs', () => {
         expect(resetIdx).toBeGreaterThan(handlerIdx);
     });
 
+    it('load-state-dialog broadcasts loaded state to the initiating renderer', () => {
+        const handlerStart = electronMain.indexOf("ipcMain.handle('load-state-dialog'");
+        const handlerEnd = electronMain.indexOf('});', handlerStart);
+        const handlerBody = electronMain.slice(handlerStart, handlerEnd);
+
+        expect(handlerBody).toContain('sendGameStateToRenderer(currentGameStateJson);');
+        expect(handlerBody).not.toContain('sendGameStateToRenderer(currentGameStateJson, _event.sender);');
+    });
+
+    it('load-state-dialog broadcasts replay sidecars to the initiating renderer', () => {
+        const handlerStart = electronMain.indexOf("ipcMain.handle('load-state-dialog'");
+        const handlerEnd = electronMain.indexOf('});', handlerStart);
+        const handlerBody = electronMain.slice(handlerStart, handlerEnd);
+
+        expect(handlerBody).toContain('sendReplayManifestToRenderer(manifestJson);');
+        expect(handlerBody).toContain('sendReplaySequenceToRenderer(sequenceJson);');
+        expect(handlerBody).not.toContain('sendReplayManifestToRenderer(manifestJson, _event.sender);');
+        expect(handlerBody).not.toContain('sendReplaySequenceToRenderer(sequenceJson, _event.sender);');
+    });
+
     it('load-scenario-dialog handler resets liveReplayManifestFrames', () => {
         const handlerIdx = electronMain.indexOf("ipcMain.handle('load-scenario-dialog'");
         expect(handlerIdx).toBeGreaterThan(-1);
@@ -76,6 +96,22 @@ describe('desktop_replay_live_wire_smoke — electron-main.cjs', () => {
         expect(menuIdx).toBeGreaterThan(-1);
         const resetIdx = electronMain.indexOf('liveReplayManifestFrames = []', menuIdx);
         expect(resetIdx).toBeGreaterThan(menuIdx);
+    });
+
+    it('menu Load state file sends replay sidecars before loaded state', () => {
+        const menuStart = electronMain.indexOf("label: 'Load state file...'");
+        const menuEnd = electronMain.indexOf("{ type: 'separator' }", menuStart);
+        const menuBody = electronMain.slice(menuStart, menuEnd);
+
+        expect(menuBody).toContain('readReplaySaveManifestSidecar(result.filePaths[0])');
+        expect(menuBody).toContain('sendReplayManifestToRenderer(manifestJson);');
+        expect(menuBody).toContain('sendReplaySequenceToRenderer(sequenceJson);');
+        expect(menuBody.indexOf('sendReplayManifestToRenderer(manifestJson);')).toBeLessThan(
+            menuBody.indexOf('sendGameStateToRenderer(currentGameStateJson);'),
+        );
+        expect(menuBody.indexOf('sendReplaySequenceToRenderer(sequenceJson);')).toBeLessThan(
+            menuBody.indexOf('sendGameStateToRenderer(currentGameStateJson);'),
+        );
     });
 
     it('does not call buildReplayFrameSummary from the load-state-dialog handler (no double accumulation)', () => {

@@ -17,10 +17,10 @@ import type { EventDefinition } from '../../src/sim/events/event_types.js';
 import type { GameState, CausalityLogEntry } from '../../src/state/game_state.js';
 
 // The Decision Context family/source + ancestry rows are engine-internal
-// designer/debug diagnostics, gated behind the `devMode` store flag (mirrors
-// PR #130/#133, QA Batch E). Default `devMode: true` so the diagnostics render;
+// designer/debug diagnostics, gated behind the explicit `diagMode` store flag.
+// Default `diagMode: true` so the diagnostics render in the positive tests;
 // the player-default hidden case flips this to false explicitly.
-let storeState: Record<string, unknown> = { devMode: true };
+let storeState: Record<string, unknown> = { diagMode: true };
 
 vi.mock('../../src/ui/map/store/gameStore', () => ({
     useGameStore: Object.assign(
@@ -36,7 +36,7 @@ vi.mock('../../src/ui/map/store/gameStore', () => ({
 // @ts-expect-error TS1378: top-level await is supported by the vitest runtime.
 const { EventDecisionModal } = await import('../../src/ui/map/components/EventDecisionModal');
 
-beforeEach(() => { storeState = { devMode: true }; });
+beforeEach(() => { storeState = { diagMode: true }; });
 afterEach(() => cleanup());
 
 const BASE_DECISION = {
@@ -161,8 +161,8 @@ describe('EventDecisionModal Decision Context (Phase H Packet 3)', () => {
         expect(ancestryRow.textContent).not.toContain('foundational_event_a');
     });
 
-    it('hides the family/source + ancestry diagnostics when devMode is false (player default — no engine-internal leak)', () => {
-        storeState = { devMode: false };
+    it('hides the family/source + ancestry diagnostics when diagMode is false (player default — no engine-internal leak)', () => {
+        storeState = { devMode: true, diagMode: false };
         const eventDef = buildEventDef();
         const catalog = new Map<string, EventDefinition>([[eventDef.id, eventDef]]);
         const state = buildStateWithAncestry(eventDef.id, ['foundational_event_a', 'foundational_event_b']);

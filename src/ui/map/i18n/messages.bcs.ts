@@ -910,7 +910,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'corpsCard.orbat': 'Orbat',
     'corpsCard.back': '<- Nazad',
     'corpsCard.commander': 'Komandant',
-    'corpsCard.unassigned': 'Nedodijeljeno',
+    'corpsCard.unassigned': 'Komanda u formiranju',
     'corpsCard.frontSectors': 'Frontovski sektori',
     'corpsCard.sectorCount.one': '{count} sektor',
     'corpsCard.sectorCount.many': '{count} sektora',

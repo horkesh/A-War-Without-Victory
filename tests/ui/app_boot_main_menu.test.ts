@@ -70,6 +70,13 @@ describe('App boot - Main Menu first, faction choice menu-only (#80)', () => {
         expect(menu).not.toContain('<Modal');
     });
 
+    it('uses the shared app version constant instead of a stale hardcoded badge', () => {
+        const menu = read('src/ui/map/components/MainMenu.tsx');
+        expect(menu).toContain("import { AWWV_APP_VERSION } from '../utils/appVersion';");
+        expect(menu).toContain('{AWWV_APP_VERSION}');
+        expect(menu).not.toContain('v0.5.0');
+    });
+
     it('enters the game only after a campaign side successfully starts', () => {
         const startIdx = app.indexOf('const handleSelectFaction = async');
         const okIdx = app.indexOf('if (ok) {', startIdx);

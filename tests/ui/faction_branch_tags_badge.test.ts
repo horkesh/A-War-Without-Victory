@@ -86,7 +86,8 @@ describe('BranchTagBadgeRow (Phase H Packet 4)', () => {
         const chips = screen.getAllByTestId('branch-tag-chip');
         expect(chips).toHaveLength(1);
         expect(chips[0].getAttribute('data-tag')).toBe('rbih_civic');
-        expect(chips[0].textContent).toBe('[rbih_civic]');
+        expect(chips[0].textContent).toBe('Civic republic');
+        expect(row.textContent).not.toContain('rbih_civic');
     });
 
     it('omits gracefully when state absent', () => {
@@ -200,7 +201,32 @@ describe('BranchTagBadgeRow (Phase H Packet 4)', () => {
         const row = screen.getByTestId('branch-tag-badge-row');
         const title = row.getAttribute('title') ?? '';
         expect(title).toContain('(2)');
-        expect(title).toContain('hrhb_alliance_sustained');
-        expect(title).toContain('hrhb_dayton_accept');
+        expect(title).toContain('Alliance sustained');
+        expect(title).toContain('Dayton acceptance');
+        expect(title).not.toContain('hrhb_alliance_sustained');
+        expect(title).not.toContain('hrhb_dayton_accept');
+    });
+
+    it('keeps raw machine tags out of player-visible chip text and tooltip', () => {
+        const def = buildEventDef('rbih_state_identity', 'civic', ['rbih_state_identity']);
+        const catalog = new Map<string, EventDefinition>([[def.id, def]]);
+        const state = buildState({
+            fired: [def.id],
+            decisions: [{ event_id: def.id, response_id: 'civic', faction: 'RBiH', turn: 0 }],
+        });
+
+        render(React.createElement(BranchTagBadgeRow, {
+            faction: 'RBiH',
+            eventCatalog: catalog,
+            state,
+        }));
+
+        const row = screen.getByTestId('branch-tag-badge-row');
+        const chip = screen.getByTestId('branch-tag-chip');
+        expect(chip.getAttribute('data-tag')).toBe('rbih_state_identity');
+        expect(chip.textContent).toBe('Civic republic');
+        expect(row.textContent).not.toContain('rbih_state_identity');
+        expect(row.textContent).not.toContain('[');
+        expect(row.getAttribute('title')).not.toContain('rbih_state_identity');
     });
 });

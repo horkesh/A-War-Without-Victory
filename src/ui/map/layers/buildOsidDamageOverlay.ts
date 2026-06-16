@@ -41,8 +41,8 @@ export type OsidDamageSeed = Record<string, OsidDamageRecord>;
 /** Flat datum for the PolygonLayer. */
 export interface OsidDamageDatum {
   osid: string;
-  /** Outer + holes for Polygon, or a list of Polygons for MultiPolygon (deck.gl PolygonLayer accepts Position[][] or Position[][][]). */
-  contour: number[][][] | number[][][][];
+  /** One Polygon contour: outer ring plus optional holes. MultiPolygons are split into one datum per polygon part. */
+  contour: number[][][];
   isMulti: boolean;
   damageScore: number;
 }
@@ -130,12 +130,14 @@ export function buildOsidDamageData(
         damageScore: rec.damage_score,
       });
     } else {
-      out.push({
-        osid,
-        contour: geom.coordinates as number[][][][],
-        isMulti: true,
-        damageScore: rec.damage_score,
-      });
+      for (const contour of geom.coordinates) {
+        out.push({
+          osid,
+          contour: contour as number[][][],
+          isMulti: true,
+          damageScore: rec.damage_score,
+        });
+      }
     }
   }
 

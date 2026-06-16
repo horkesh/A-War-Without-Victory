@@ -102,14 +102,20 @@ describe('shellNavigation', () => {
     const state = createState('RBiH');
 
     expect(openCodex(state)).toBe(true);
-    expect(state.calls).toEqual([['setCodexOpen', true]]);
+    expect(state.calls).toEqual([
+      ['setChronicleOpen', false],
+      ['setCodexOpen', true],
+    ]);
   });
 
   it('openChronicle routes through canonical shellNavigation helper', () => {
     const state = createState('RS');
 
     expect(openChronicle(state)).toBe(true);
-    expect(state.calls).toEqual([['setChronicleOpen', true]]);
+    expect(state.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', true],
+    ]);
   });
 
   it('openArmyHQTab supports personnel tab for inbox army_hq_personnel action', () => {
@@ -182,7 +188,9 @@ describe('shellNavigation', () => {
       ['setArmyHQOpen', true],
       ['setArmyHQTab', 'briefing'],
       ['setArmyHQExpandedCorpsId', 'arbih_3rd_corps'],
+      ['setCodexOpen', false],
       ['setChronicleOpen', true],
+      ['setChronicleOpen', false],
       ['setCodexOpen', true],
     ]);
   });
@@ -203,6 +211,7 @@ describe('shellNavigation', () => {
       ['setArmyHQOpen', true],
       ['setArmyHQTab', 'briefing'],
       ['setArmyHQExpandedCorpsId', 'arbih_3rd_corps'],
+      ['setCodexOpen', false],
       ['setChronicleOpen', true],
     ]);
   });
