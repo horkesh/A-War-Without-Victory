@@ -74,4 +74,50 @@ describe('SupplyPanel adapter contract', () => {
             corridor_cut_count: 1,
         });
     });
+
+    it('scopes supply summary to the player faction when a campaign player is set', () => {
+        const loaded = parseGameState({
+            schema_version: 13,
+            meta: { turn: 1, phase: 'war', seed: 'supply-panel-contract', player_faction: 'RBiH' },
+            factions: [
+                { id: 'RBiH', profile: {}, areasOfResponsibility: [], declared: true },
+                { id: 'RS', profile: {}, areasOfResponsibility: [], declared: true },
+            ],
+            military: {
+                formations: {},
+                militia_pools: {},
+            },
+            political: {
+                political_controllers: {},
+            },
+            displacement: {},
+            supply_state_by_osid: {
+                schema: 1,
+                turn: 1,
+                factions: [
+                    { faction_id: 'RS', by_osid: [{ osid: 'rs:a', state: 'critical' }] },
+                    { faction_id: 'RBiH', by_osid: [{ osid: 'rbih:a', state: 'adequate' }] },
+                ],
+            },
+            supply_corridors_osid: {
+                schema: 1,
+                turn: 1,
+                corridors: [
+                    { faction_id: 'RS', edge_id: 'rs:a__rs:b', state: 'cut' },
+                    { faction_id: 'RBiH', edge_id: 'rbih:a__rbih:b', state: 'open' },
+                ],
+            },
+        });
+
+        expect(Object.keys(loaded.supplySummaryByFaction ?? {})).toEqual(['RBiH']);
+        expect(loaded.supplySummaryByFaction?.RBiH).toEqual({
+            adequate_count: 1,
+            strained_count: 0,
+            critical_count: 0,
+            corridor_open_count: 1,
+            corridor_brittle_count: 0,
+            corridor_cut_count: 0,
+        });
+        expect(loaded.supplySummaryByFaction?.RS).toBeUndefined();
+    });
 });

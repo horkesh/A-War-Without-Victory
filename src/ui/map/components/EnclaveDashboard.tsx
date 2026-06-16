@@ -52,11 +52,12 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const enclaves = useMemo(
     () => Object.entries(state.enclaveResilience ?? {})
+      .filter(([, enclave]) => !state.player_faction || enclave.faction === state.player_faction)
       .sort((a, b) => (
         strictCompare(a[1].display_name ?? a[0], b[1].display_name ?? b[0])
         || strictCompare(a[0], b[0])
       )),
-    [state.enclaveResilience]
+    [state.enclaveResilience, state.player_faction]
   );
   const eligibleEnclaveIds = useMemo(
     () => enclaves

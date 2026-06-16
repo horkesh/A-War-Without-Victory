@@ -132,6 +132,7 @@ export function buildEnclaveGeoJSON(
   allOsidGeoJson: FeatureCollection,
   controlBySettlement: Record<string, string | null>,
   enclaveResilience?: Record<string, EnclaveResilienceView>,
+  playerFaction?: string | null,
 ): {
   polygons: FeatureCollection<Geometry, EnclavePolygonProperties>;
   labels: FeatureCollection<Point, EnclaveLabelProperties>;
@@ -152,6 +153,7 @@ export function buildEnclaveGeoJSON(
   const sortedOsids = Object.keys(controlBySettlement).sort();
 
   for (const def of ENCLAVE_DEFINITIONS_UI) {
+    if (playerFaction && def.faction !== playerFaction) continue;
     const matchingOsids: string[] = [];
     for (const osid of sortedOsids) {
       if (controlBySettlement[osid] !== def.faction) continue;

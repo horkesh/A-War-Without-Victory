@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest player-safe enclave/supply truth** | [implemented/20260616_PLAYER_SAFE_ENCLAVE_SUPPLY_TRUTH.md](implemented/20260616_PLAYER_SAFE_ENCLAVE_SUPPLY_TRUTH.md) - Player campaigns scope enclave resilience, enclave map overlays, and supply summaries to the loaded player faction; Supply mode no longer advertises stale global surplus thresholds. |
 | **Latest decision consequence record focus** | [implemented/20260606_DECISION_CONSEQUENCE_RECORD_FOCUS.md](implemented/20260606_DECISION_CONSEQUENCE_RECORD_FOCUS.md) - President's Desk Records-filed consequence rows now open Army HQ Records on the focused Decision Consequences row, and shell handoff validation accepts the existing decisions subtab. |
 | **Latest optional local military state validate-when-present contract** | [implemented/20260606_OPTIONAL_LOCAL_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260606_OPTIONAL_LOCAL_STATE_VALIDATE_WHEN_PRESENT.md) - Casualty ledger and enclave-state records remain optional but now reject malformed present local payloads without materializing absent fields. |
 | **Latest command objective picker** | [implemented/20260606_COMMAND_OBJECTIVE_PICKER.md](implemented/20260606_COMMAND_OBJECTIVE_PICKER.md) - Request-op directives now offer deterministic known-objective pickers in both Decision Room and Army HQ request rows while preserving the existing commander-objection/staging path. |

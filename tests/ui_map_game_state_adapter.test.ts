@@ -228,6 +228,7 @@ test('parseGameState derives enclave, mobilization, and sector entrenchment summ
     enclave_resilience: {
             gorazde: { resilience: 9, isolation_turns: 5, hardening_active: false },
             sarajevo: { resilience: 12, isolation_turns: 9, hardening_active: true },
+            zepce: { resilience: 7, isolation_turns: 6, hardening_active: false },
         }
   } as any,
 });
@@ -236,6 +237,7 @@ test('parseGameState derives enclave, mobilization, and sector entrenchment summ
     assert.equal(parsed.enclaveResilience?.gorazde?.airdrop_status, 'receiving');
     assert.equal(parsed.enclaveResilience?.gorazde?.faction, 'RBiH');
     assert.equal(parsed.enclaveResilience?.sarajevo?.hardening_active, true);
+    assert.equal(parsed.enclaveResilience?.zepce, undefined);
 
     assert.equal(parsed.mobilizationSummary?.RBiH?.total_available, 3200);
     assert.equal(parsed.mobilizationSummary?.RBiH?.total_committed, 800);
@@ -247,6 +249,22 @@ test('parseGameState derives enclave, mobilization, and sector entrenchment summ
     assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.avgDigIn, 0.4);
     assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.digInCount, 1);
     assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.totalCount, 2);
+});
+
+test('parseGameState hides non-player enclave resilience when no player-owned enclave exists', () => {
+    const parsed = parseGameState({
+        meta: { turn: 16, phase: 'war', player_faction: 'RS' },
+        military: { formations: {}, militia_pools: {} } as any,
+        political: {
+            political_controllers: {},
+            enclave_resilience: {
+                gorazde: { resilience: 9, isolation_turns: 5, hardening_active: false },
+                zepce: { resilience: 7, isolation_turns: 6, hardening_active: false },
+            },
+        } as any,
+    });
+
+    assert.equal(parsed.enclaveResilience, undefined);
 });
 
 test('parseGameState derives player-scoped live supply condition from flat OSID state', () => {

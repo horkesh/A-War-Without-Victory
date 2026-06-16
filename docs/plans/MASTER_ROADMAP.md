@@ -7,7 +7,7 @@
 
 3. **Scope is calibration-inert.** These changes are UI/read-model/store/test/docs only. No simulation logic, scenario data, save schema, golden baseline, calibration floor, or installer artifact is changed by this hardening lane.
 
-4. **Remaining pre-play polish, not roadmap blockers:** supply/fog truth, brigade/sector selection ergonomics, raw-id copy cleanup, and GitHub issue/comment sweeps should continue autonomously while CI waits, but they do not reopen the closed technical road to 1.0 unless they expose a true D2-blocking defect.
+4. **Remaining pre-play polish, not roadmap blockers:** the first supply/enclave truth leak is being closed by scoping player-facing enclave and supply read models to the loaded player faction. Brigade/sector selection ergonomics, raw-id copy cleanup, and GitHub issue/comment sweeps should continue autonomously while CI waits, but they do not reopen the closed technical road to 1.0 unless they expose a true D2-blocking defect.
 
 **★★★ Amendment 2026-06-15 (technical road CLOSED; D2 is the sole remaining 1.0 gate; docs-only):** Source: `docs/PROJECT_LEDGER.md` entries for 2026-06-13/14, `docs/40_reports/CALIBRATION_MASTER.md`, and `data/calibration/c3_freeze_manifest.json`. This **supersedes the open C3 / advisory engine-health / pre-SRK-activation language in the 2026-06-12 amendment immediately below** while retaining that history.
 

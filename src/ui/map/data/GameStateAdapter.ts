@@ -2147,6 +2147,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         for (const key of Object.keys(rawEnclave).sort()) {
             const entry = rawEnclave[key];
             const enclaveDef = ENCLAVE_UI_DEFINITIONS.find((enclave) => enclave.id === key);
+            if (playerFaction && enclaveDef?.faction !== playerFaction) continue;
             if (typeof entry === 'number') {
                 out[key] = {
                     resilience: entry,
@@ -2357,7 +2358,9 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             state.political.political_controllers as Record<string, string | null | undefined> | undefined,
             playerFaction,
         ),
-        supplySummaryByFaction: deriveSupplySummaryByFaction(state),
+        supplySummaryByFaction: playerFaction
+            ? scopeToPlayerFaction(deriveSupplySummaryByFaction(state), playerFaction)
+            : deriveSupplySummaryByFaction(state),
         politicalMetricsByOsid: derivePoliticalMetricsByOsid(state),
         historicalEventsByTurn: deriveHistoricalEvents(state),
         latestTurnSummary: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined)?.[0] ?? null,

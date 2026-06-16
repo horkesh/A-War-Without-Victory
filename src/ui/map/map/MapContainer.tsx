@@ -1575,7 +1575,7 @@ export function MapContainer() {
 
                     // Enclave visualization: dashed faction-colored outline + faint fill + text label
                     const { polygons: enclavePolygons, labels: enclaveLabels } = buildEnclaveGeoJSON(
-                      base, state.controlBySettlement, state.enclaveResilience,
+                      base, state.controlBySettlement, state.enclaveResilience, state.player_faction,
                     );
                     safeEnsureSource(m, ENCLAVE_SOURCE_ID, { type: 'geojson', data: enclavePolygons });
                     safeEnsureLayer(m, {

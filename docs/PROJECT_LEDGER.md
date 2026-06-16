@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-16] fix(ui): scope player-facing enclave and supply truth
+
+**Type:** UI/read-model/map hardening. This closes a Pyrrhic specialist sweep finding: player campaigns could receive all-faction enclave resilience and supply summary rows through tactical-map/read-model surfaces, and the Supply map legend still advertised stale global surplus thresholds instead of the player-visible known-friendly supply classes.
+
+**Fix:** `parseGameState` now filters `enclaveResilience` to the loaded `player_faction` and scopes `supplySummaryByFaction` to the player when a campaign player is set. Null-player diagnostic/tooling output keeps all-faction supply summaries. `buildEnclaveGeoJSON` now accepts the player faction and omits non-player enclave polygons/labels; `MapContainer` passes that faction; `EnclaveDashboard` filters defensively; `MapModeLegend` now names the mode `Known Friendly Supply` and shows Adequate / Strained / Critical / Unknown-not-visible rather than stale surplus thresholds.
+
+**Tests:** Added/expanded focused tests for player-scoped enclave adapter output, player-scoped enclave GeoJSON, player-scoped supply summaries, and supply legend semantics. Red proof failed on unscoped `zepce`, unscoped RS supply summary, unscoped HRHB enclave polygons, and stale legend thresholds; green proof passed after the fix.
+
+**Verification:** `npx.cmd vitest run tests\ui_map_game_state_adapter.test.ts tests\supply_panel_contract.test.ts tests\ui\supply_legend_overlap_contract.test.ts tests\ui_map_enclave_visibility.test.ts --pool=forks --reporter=dot` -> 4 files / 35 tests passed. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` -> 11 files / 102 tests passed. CI-repair guard `npx.cmd vitest run tests\docs_desktop_v09_truth.test.ts --pool=forks --reporter=dot` -> 1 file / 6 tests passed. Live browser smoke on `http://127.0.0.1:4183/` RS start showed the war-start overlay, then the RS opening brief, with corrected `KNOWN FRIENDLY SUPPLY` legend classes and no stale `Surplus` / `Supply Status` text; no console/page errors were observed. No sim/scenario/save-schema/baseline/package artifacts changed.
+
+---
+
 ## [2026-06-15] fix(desktop): queue faction foundational decision at campaign birth
 
 **Type:** desktop player-start/event-system fix. Root cause: the packaged/live "New Game" path loaded the baked April 1992 startup snapshot and returned it at turn 0; authored foundational events existed in `data/scenarios/events/war_1992.json`, but `evaluate-events` only materialized pending decisions during turn advancement. Result: a real player could begin the war with no RS/RBiH/HRHB foundational choice, despite Game Bible §21.3, Rulebook §17.5, and Systems Manual §7.10.4 defining those decisions as the event tree foundation.

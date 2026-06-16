@@ -12,7 +12,7 @@ This is not a packaging plan. The package build is paused until the live browser
 
 Phases 1-3 have shipped through the 2026-06-16 player-polish waves and follow-up branches: Presidential Inbox/desk routing, first-turn blocker layering, foundational-decision exposure, browser fallback parity, DeckGL overlay hardening, stale selection cleanup, replay sidecar hydration, Army HQ readiness legibility, turn-0 impossible control/combat/casualty suppression, and the `qa:player-journeys` gate. The current first-hour contract is stricter than the original Phase 2 wording: faction start -> war-start briefing -> President's Desk opening brief -> foundational decision -> command map/tutorial.
 
-Remaining active polish work is Phase 4+ plus follow-up defects from the Pyrrhic sweep: supply/fog truth, brigade/sector selection ergonomics, raw OSID/operation copy cleanup, mobile policy, issue #170 engine/cache triage, and GitHub comment/PR sweeps. Packaging remains paused until the owner accepts the live command-map/warroom/Army HQ experience.
+Remaining active polish work is Phase 4+ plus follow-up defects from the Pyrrhic sweep. The first supply/enclave truth leak is addressed by the 2026-06-16 player-safe enclave/supply branch: player campaigns scope enclave resilience, enclave map overlays, and supply summaries to the loaded faction, while null-player diagnostics keep all-faction rows. Still-active follow-ups: brigade/sector selection ergonomics, raw OSID/operation copy cleanup, mobile policy, issue #170 engine/cache triage, and GitHub comment/PR sweeps. Packaging remains paused until the owner accepts the live command-map/warroom/Army HQ experience.
 
 ## Current Truth
 

@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest player-safe enclave/supply truth:** [implemented/20260616_PLAYER_SAFE_ENCLAVE_SUPPLY_TRUTH.md](implemented/20260616_PLAYER_SAFE_ENCLAVE_SUPPLY_TRUTH.md) - Player campaigns now scope enclave resilience, enclave map overlays, and supply summaries to the loaded player faction; Supply mode names known-friendly classes instead of stale global surplus thresholds.
+
 **Latest decision consequence record focus:** [implemented/20260606_DECISION_CONSEQUENCE_RECORD_FOCUS.md](implemented/20260606_DECISION_CONSEQUENCE_RECORD_FOCUS.md) - President's Desk Records-filed consequence rows now route to the concrete Army HQ Decision Consequences record, and shell handoff validation accepts the existing `decisions` Records subtab.
 
 **Latest optional local military state validate-when-present contract:** [implemented/20260606_OPTIONAL_LOCAL_STATE_VALIDATE_WHEN_PRESENT.md](implemented/20260606_OPTIONAL_LOCAL_STATE_VALIDATE_WHEN_PRESENT.md) - `military.casualty_ledger` and `military.enclave_state` remain optional but now reject malformed present local payloads without materializing absent fields or resolving ids.

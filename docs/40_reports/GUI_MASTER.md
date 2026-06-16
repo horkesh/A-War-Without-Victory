@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-06-16 (player-polish hardening; first-hour choreography and player-journey gate)
+**Updated:** 2026-06-16 (player-polish hardening; first-hour choreography, player-journey gate, and player-safe supply/enclave truth)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -127,6 +127,7 @@
 
 | Date | Change | Report / spec |
 |------|--------|----------------|
+| 2026-06-16 | **Player-safe enclave/supply truth:** player campaigns now scope enclave resilience, enclave map overlays, and supply summaries to the loaded player faction; the Supply legend now describes known-friendly classes instead of stale surplus thresholds. | [implemented/20260616_PLAYER_SAFE_ENCLAVE_SUPPLY_TRUTH.md](implemented/20260616_PLAYER_SAFE_ENCLAVE_SUPPLY_TRUTH.md) |
 | 2026-06-16 | **Player-journey hardening:** first-hour choreography now gates foundational decisions behind the war-start briefing and President's Desk opening brief; `qa:player-journeys` covers first-run, onboarding, replay, map truth, inbox routing, selection, and Army HQ readiness regressions. | [../plans/2026-06-16-pyrrhic-ui-and-soul-systems-execution-plan.md](../plans/2026-06-16-pyrrhic-ui-and-soul-systems-execution-plan.md) |
 | 2026-06-06 | **Warroom native overlay residue batch:** Intelligence, Staff, and Faction are now the only native Warroom preview overlays with explicit drill-ins to Army HQ Records/AAR, Personnel, and Summary; retired StrategicDashboard/EventLog local command variants and the orphan status-strip i18n key are removed from live source. | [implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md](implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md) |
 | 2026-05-22 | **GUI visual audit retired chrome removal H9** - Unused retired tactical chrome files were deleted after import review, with a guard keeping them off disk. | [implemented/20260522_GUI_AUDIT_RETIRED_CHROME_REMOVAL_H9.md](implemented/20260522_GUI_AUDIT_RETIRED_CHROME_REMOVAL_H9.md) |

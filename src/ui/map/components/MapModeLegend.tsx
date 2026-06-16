@@ -13,10 +13,11 @@ const LEGENDS: Record<string, { title: string; stops: LegendStop[] } | null> = {
     { color: '#378C4B', label: 'Bosniak' },
     { color: '#326EAA', label: 'Croat' },
   ]},
-  supply: { title: 'Supply Status', stops: [
-    { color: '#1a4a1a', label: 'Critical', value: '<20' },
-    { color: '#4aaa4a', label: 'Adequate', value: '20-60' },
-    { color: '#6ddd6d', label: 'Surplus', value: '>60' },
+  supply: { title: 'Known Friendly Supply', stops: [
+    { color: 'rgba(74, 222, 128, 0.45)', label: 'Adequate' },
+    { color: 'rgba(251, 191, 36, 0.50)', label: 'Strained' },
+    { color: 'rgba(248, 113, 113, 0.60)', label: 'Critical' },
+    { color: 'rgba(156, 163, 175, 0.35)', label: 'Unknown / not visible' },
   ]},
   casualties: { title: 'Civilian Casualties', stops: [
     { color: 'rgba(255,220,200,0.3)', label: 'None', value: '0' },
