@@ -7,6 +7,7 @@ import {
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets';
 import { t, type MessageKey } from '../../i18n';
 import { useGameStore } from '../../store/gameStore';
+import { openChronicle } from '../../utils/shellNavigation';
 
 const FAMILY_LABEL_KEYS: Record<DecisionConsequenceRecord['familyId'], MessageKey> = {
   'event-decision': 'decisionConsequences.family.eventDecision',
@@ -32,7 +33,6 @@ function familyLabel(record: DecisionConsequenceRecord): string {
 
 export function DecisionConsequenceRecordsPanel() {
   const state = useGameStore((s) => s.loadedGameState);
-  const setChronicleOpen = useGameStore((s) => s.setChronicleOpen);
   const focusedDecisionConsequenceId = useGameStore((s) => s.focusedDecisionConsequenceId);
   const records = useMemo(() => buildDecisionConsequenceLedger(state, 50), [state]);
   const visibleRecords = useMemo(() => {
@@ -128,7 +128,7 @@ export function DecisionConsequenceRecordsPanel() {
                   {record.recordTarget === 'chronicle' ? (
                     <button
                       type="button"
-                      onClick={() => setChronicleOpen(true)}
+                      onClick={() => openChronicle(useGameStore.getState())}
                       className="rounded border border-panel-border bg-black/20 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
                     >
                       {t('decisionConsequences.openChronicle')}

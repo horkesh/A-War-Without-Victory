@@ -97,11 +97,13 @@ describe('Chronicle completed-operation AAR visibility', () => {
 
     expect(openArmyHQOperationHistory(state, 'rs-op-1')).toBe(true);
     expect(state.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setSelectedArmyId', 'RS'],
       ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'records'],
       ['setArmyHQRecordsSubTab', 'ops'],
       ['setFocusedOperationHistoryId', 'rs-op-1'],
-      ['setChronicleOpen', false],
     ]);
   });
 

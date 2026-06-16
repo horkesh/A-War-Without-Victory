@@ -13,6 +13,7 @@ import { TerritoryOverTimeChart } from '../TerritoryOverTimeChart';
 import { t, type MessageKey } from '../../i18n';
 import { buildDecisionConsequenceLedger, buildDecisionConsequenceLedgerSummary } from '../../data/decisionConsequenceLedger';
 import { buildTurnAftermathRecordViews } from '../../data/turnAftermath';
+import { openCodex } from '../../utils/shellNavigation';
 
 const SUB_TABS = [
     { id: 'aftermath' as const, labelKey: 'recordsContent.tab.aftermath' },
@@ -25,7 +26,6 @@ const SUB_TABS = [
 export function RecordsContent() {
     const subTab = useGameStore((s) => s.armyHQRecordsSubTab);
     const setSubTab = useGameStore((s) => s.setArmyHQRecordsSubTab);
-    const setCodexOpen = useGameStore((s) => s.setCodexOpen);
     const state = useGameStore((s) => s.loadedGameState);
     const osidNameMap = useGameStore((s) => s.osidDisplayNames);
 
@@ -121,7 +121,7 @@ export function RecordsContent() {
                 </div>
                 <button
                     type="button"
-                    onClick={() => setCodexOpen(true)}
+                    onClick={() => openCodex(useGameStore.getState())}
                     className="mt-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] rounded-md border border-panel-border bg-panel-card text-text-secondary transition-all hover:text-text-primary hover:bg-white/5"
                 >
                     {t('recordsContent.openCodex')}

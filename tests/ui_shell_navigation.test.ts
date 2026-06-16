@@ -26,6 +26,9 @@ function createState(playerFaction: string | null = 'RBiH'): ShellNavigationStat
     setArmyHQTab: (tab) => { calls.push(['setArmyHQTab', tab]); },
     setArmyHQRecordsSubTab: (subTab) => { calls.push(['setArmyHQRecordsSubTab', subTab]); },
     setArmyHQExpandedCorpsId: (id) => { calls.push(['setArmyHQExpandedCorpsId', id]); },
+    setFocusedAftermathTurn: (turn) => { calls.push(['setFocusedAftermathTurn', turn]); },
+    setFocusedOperationHistoryId: (id) => { calls.push(['setFocusedOperationHistoryId', id]); },
+    setFocusedDecisionConsequenceId: (id) => { calls.push(['setFocusedDecisionConsequenceId', id]); },
     setCodexOpen: (open) => { calls.push(['setCodexOpen', open]); },
     setChronicleOpen: (open) => { calls.push(['setChronicleOpen', open]); },
   };
@@ -39,6 +42,8 @@ describe('shellNavigation', () => {
 
     expect(ok).toBe(true);
     expect(state.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setSelectedArmyId', 'RS'],
       ['setArmyHQOpen', true],
       ['setArmyHQTab', 'summary'],
@@ -52,9 +57,15 @@ describe('shellNavigation', () => {
 
     expect(ok).toBe(true);
     expect(state.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setSelectedArmyId', 'RBiH'],
       ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'records'],
       ['setArmyHQRecordsSubTab', 'ops'],
+      ['setFocusedAftermathTurn', null],
+      ['setFocusedOperationHistoryId', null],
+      ['setFocusedDecisionConsequenceId', null],
     ]);
   });
 
@@ -65,9 +76,15 @@ describe('shellNavigation', () => {
 
     expect(ok).toBe(true);
     expect(state.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setSelectedArmyId', 'RBiH'],
       ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'records'],
       ['setArmyHQRecordsSubTab', 'opportunities'],
+      ['setFocusedAftermathTurn', null],
+      ['setFocusedOperationHistoryId', null],
+      ['setFocusedDecisionConsequenceId', null],
     ]);
   });
 
@@ -78,9 +95,15 @@ describe('shellNavigation', () => {
 
     expect(ok).toBe(true);
     expect(state.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setSelectedArmyId', 'RBiH'],
       ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'records'],
       ['setArmyHQRecordsSubTab', 'aftermath'],
+      ['setFocusedAftermathTurn', null],
+      ['setFocusedOperationHistoryId', null],
+      ['setFocusedDecisionConsequenceId', null],
     ]);
   });
 
@@ -91,6 +114,8 @@ describe('shellNavigation', () => {
 
     expect(ok).toBe(true);
     expect(state.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setSelectedArmyId', 'HRHB'],
       ['setArmyHQOpen', true],
       ['setArmyHQTab', 'briefing'],
@@ -104,6 +129,7 @@ describe('shellNavigation', () => {
     expect(openCodex(state)).toBe(true);
     expect(state.calls).toEqual([
       ['setChronicleOpen', false],
+      ['setArmyHQOpen', false],
       ['setCodexOpen', true],
     ]);
   });
@@ -114,6 +140,7 @@ describe('shellNavigation', () => {
     expect(openChronicle(state)).toBe(true);
     expect(state.calls).toEqual([
       ['setCodexOpen', false],
+      ['setArmyHQOpen', false],
       ['setChronicleOpen', true],
     ]);
   });
@@ -125,6 +152,8 @@ describe('shellNavigation', () => {
 
     expect(ok).toBe(true);
     expect(state.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setSelectedArmyId', 'HRHB'],
       ['setArmyHQOpen', true],
       ['setArmyHQTab', 'personnel'],
@@ -152,9 +181,14 @@ describe('shellNavigation', () => {
 
     expect(ok).toBe(true);
     expect(state.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setArmyHQOpen', true],
-      ['setArmyHQRecordsSubTab', 'aftermath'],
       ['setArmyHQTab', 'records'],
+      ['setArmyHQRecordsSubTab', 'aftermath'],
+      ['setFocusedAftermathTurn', null],
+      ['setFocusedOperationHistoryId', null],
+      ['setFocusedDecisionConsequenceId', null],
     ]);
     // Crucially: no army was selected for an observer.
     expect(state.calls.some(([fn]) => fn === 'setSelectedArmyId')).toBe(false);
@@ -172,25 +206,49 @@ describe('shellNavigation', () => {
     expect(applyShellHandoffCommand(state, { kind: 'codex' })).toBe(true);
 
     expect(state.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setSelectedArmyId', 'RBiH'],
       ['setArmyHQOpen', true],
       ['setArmyHQTab', 'summary'],
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setSelectedArmyId', 'RBiH'],
       ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'records'],
       ['setArmyHQRecordsSubTab', 'aftermath'],
+      ['setFocusedAftermathTurn', null],
+      ['setFocusedOperationHistoryId', null],
+      ['setFocusedDecisionConsequenceId', null],
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setSelectedArmyId', 'RBiH'],
       ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'records'],
       ['setArmyHQRecordsSubTab', 'ops'],
+      ['setFocusedAftermathTurn', null],
+      ['setFocusedOperationHistoryId', null],
+      ['setFocusedDecisionConsequenceId', null],
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setSelectedArmyId', 'RBiH'],
       ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'records'],
       ['setArmyHQRecordsSubTab', 'opportunities'],
+      ['setFocusedAftermathTurn', null],
+      ['setFocusedOperationHistoryId', null],
+      ['setFocusedDecisionConsequenceId', null],
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setSelectedArmyId', 'RBiH'],
       ['setArmyHQOpen', true],
       ['setArmyHQTab', 'briefing'],
       ['setArmyHQExpandedCorpsId', 'arbih_3rd_corps'],
       ['setCodexOpen', false],
+      ['setArmyHQOpen', false],
       ['setChronicleOpen', true],
       ['setChronicleOpen', false],
+      ['setArmyHQOpen', false],
       ['setCodexOpen', true],
     ]);
   });
@@ -203,15 +261,21 @@ describe('shellNavigation', () => {
     expect(openPresidentialDecisionRoomNavigationTarget({ kind: 'chronicle' }, state)).toBe(true);
 
     expect(state.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setSelectedArmyId', 'RBiH'],
       ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'records'],
       ['setArmyHQRecordsSubTab', 'aftermath'],
+      ['setFocusedAftermathTurn', 31],
+      ['setCodexOpen', false],
       ['setChronicleOpen', false],
       ['setSelectedArmyId', 'RBiH'],
       ['setArmyHQOpen', true],
       ['setArmyHQTab', 'briefing'],
       ['setArmyHQExpandedCorpsId', 'arbih_3rd_corps'],
       ['setCodexOpen', false],
+      ['setArmyHQOpen', false],
       ['setChronicleOpen', true],
     ]);
   });
@@ -258,6 +322,8 @@ describe('shellNavigation', () => {
     const ok = openArmyHQTab(state, 'briefing');
     expect(ok).toBe(true);
     expect(state.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setSelectedArmyId', 'RBiH'],
       ['setArmyHQOpen', true],
       ['setArmyHQTab', 'briefing'],

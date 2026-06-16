@@ -25,11 +25,13 @@ describe('Chronicle to turn-record navigation', () => {
 
     expect(openArmyHQAftermathRecord(state, 113)).toBe(true);
     expect(state.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setSelectedArmyId', 'RBiH'],
       ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'records'],
       ['setArmyHQRecordsSubTab', 'aftermath'],
       ['setFocusedAftermathTurn', 113],
-      ['setChronicleOpen', false],
     ]);
   });
 

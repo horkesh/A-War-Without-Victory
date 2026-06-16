@@ -295,6 +295,8 @@ describe('Presidential Decision Room wiring', () => {
     const summaryState = createNavigationState();
     expect(openPresidentialDecisionRoomNavigationTarget(handoffs['army-hq-summary'].navigationTarget, summaryState)).toBe(true);
     expect(summaryState.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setSelectedArmyId', 'RBiH'],
       ['setArmyHQOpen', true],
       ['setArmyHQTab', 'summary'],
@@ -303,17 +305,20 @@ describe('Presidential Decision Room wiring', () => {
     const turnRecordState = createNavigationState();
     expect(openPresidentialDecisionRoomNavigationTarget(handoffs['turn-aftermath-records'].navigationTarget, turnRecordState)).toBe(true);
     expect(turnRecordState.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
       ['setSelectedArmyId', 'RBiH'],
       ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'records'],
       ['setArmyHQRecordsSubTab', 'aftermath'],
       ['setFocusedAftermathTurn', 24],
-      ['setChronicleOpen', false],
     ]);
 
     const chronicleState = createNavigationState();
     expect(openPresidentialDecisionRoomNavigationTarget(handoffs.chronicle.navigationTarget, chronicleState)).toBe(true);
     expect(chronicleState.calls).toEqual([
       ['setCodexOpen', false],
+      ['setArmyHQOpen', false],
       ['setChronicleOpen', true],
     ]);
   });

@@ -162,14 +162,26 @@ describe('field toolbar navigation ownership', () => {
     expect(openChronicle(chronicleState)).toBe(true);
     expect(chronicleState.calls).toEqual([
       ['setCodexOpen', false],
+      ['setArmyHQOpen', false],
       ['setChronicleOpen', true],
     ]);
 
     expect(openCodex(codexState)).toBe(true);
     expect(codexState.calls).toEqual([
       ['setChronicleOpen', false],
+      ['setArmyHQOpen', false],
       ['setCodexOpen', true],
     ]);
+  });
+
+  it('routes Army HQ reference links through shared shell helpers', () => {
+    const recordsContentSource = readFileSync('src/ui/map/components/army_hq/RecordsContent.tsx', 'utf8');
+    const consequenceRecordsSource = readFileSync('src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.tsx', 'utf8');
+
+    expect(recordsContentSource).not.toContain('setCodexOpen(true)');
+    expect(consequenceRecordsSource).not.toContain('setChronicleOpen(true)');
+    expect(recordsContentSource).toContain('openCodex(useGameStore.getState())');
+    expect(consequenceRecordsSource).toContain('openChronicle(useGameStore.getState())');
   });
 
   it('does not report advance-turn handoff success without an advance modal surface', () => {

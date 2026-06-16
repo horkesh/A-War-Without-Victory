@@ -3,6 +3,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { createElement } from 'react';
+import { CodexPanel } from '../../src/ui/map/components/CodexPanel.js';
 import { useKeyboardShortcuts } from '../../src/ui/map/hooks/useKeyboardShortcuts.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 
@@ -13,6 +14,14 @@ function KeyboardShortcutProbe() {
 
 function mountKeyboardShortcuts() {
     return render(createElement(KeyboardShortcutProbe));
+}
+
+function CodexWithKeyboardShortcuts() {
+    useKeyboardShortcuts();
+    return createElement(CodexPanel, {
+        isOpen: true,
+        onClose: () => useGameStore.getState().setCodexOpen(false),
+    });
 }
 
 describe('Pause Escape shortcuts', () => {
@@ -91,5 +100,19 @@ describe('Pause Escape shortcuts', () => {
 
         expect(useGameStore.getState().pauseMenuOpen).toBe(false);
         expect(useGameStore.getState().armyHQOpen).toBe(true);
+    });
+
+    it('closes the Codex on Escape without opening the pause menu behind it', () => {
+        useGameStore.setState({
+            ...useGameStore.getInitialState(),
+            codexOpen: true,
+            pauseMenuOpen: false,
+        });
+        render(createElement(CodexWithKeyboardShortcuts));
+
+        fireEvent.keyDown(window, { key: 'Escape' });
+
+        expect(useGameStore.getState().codexOpen).toBe(false);
+        expect(useGameStore.getState().pauseMenuOpen).toBe(false);
     });
 });

@@ -41,9 +41,21 @@ function getPlayerFaction(state: ShellNavigationState): string | null {
   return state.loadedGameState?.player_faction ?? null;
 }
 
+function closeReferenceOverlays(state: ShellNavigationState): void {
+  state.setCodexOpen(false);
+  state.setChronicleOpen(false);
+}
+
+function clearFocusedRecords(state: ShellNavigationState): void {
+  state.setFocusedAftermathTurn?.(null);
+  state.setFocusedOperationHistoryId?.(null);
+  state.setFocusedDecisionConsequenceId?.(null);
+}
+
 export function openArmyHQTab(state: ShellNavigationState, tab: ArmyHQTab): boolean {
   const faction = getPlayerFaction(state);
   if (!faction) return false;
+  closeReferenceOverlays(state);
   state.setSelectedArmyId(faction);
   state.setArmyHQOpen(true);
   state.setArmyHQTab(tab);
@@ -56,55 +68,57 @@ export function openArmyHQRecordsSubTab(state: ShellNavigationState, subTab: Arm
   // from loadedGameState — it is faction-agnostic. Observer / no-faction saves must
   // still reach it (#122). When there is no player faction we leave selectedArmyId
   // null; ArmyHQModal renders a records-only observer view in that case.
+  closeReferenceOverlays(state);
   if (faction) {
     state.setSelectedArmyId(faction);
   }
   state.setArmyHQOpen(true);
+  state.setArmyHQTab('records');
   state.setArmyHQRecordsSubTab(subTab);
-  // Force the RECORDS tab for observers so the (faction-dependent) default tab
-  // does not leave the modal blank when no army is selected.
-  if (!faction) {
-    state.setArmyHQTab('records');
-  }
+  clearFocusedRecords(state);
   return true;
 }
 
 export function openArmyHQAftermathRecord(state: ShellNavigationState, turn: number): boolean {
   const faction = getPlayerFaction(state);
   if (!faction) return false;
+  closeReferenceOverlays(state);
   state.setSelectedArmyId(faction);
   state.setArmyHQOpen(true);
+  state.setArmyHQTab('records');
   state.setArmyHQRecordsSubTab('aftermath');
   state.setFocusedAftermathTurn?.(turn);
-  state.setChronicleOpen(false);
   return true;
 }
 
 export function openArmyHQOperationHistory(state: ShellNavigationState, operationAarId?: string | null): boolean {
   const faction = getPlayerFaction(state);
   if (!faction) return false;
+  closeReferenceOverlays(state);
   state.setSelectedArmyId(faction);
   state.setArmyHQOpen(true);
+  state.setArmyHQTab('records');
   state.setArmyHQRecordsSubTab('ops');
   state.setFocusedOperationHistoryId?.(operationAarId ?? null);
-  state.setChronicleOpen(false);
   return true;
 }
 
 export function openArmyHQDecisionConsequenceRecord(state: ShellNavigationState, recordId?: string | null): boolean {
   const faction = getPlayerFaction(state);
   if (!faction) return false;
+  closeReferenceOverlays(state);
   state.setSelectedArmyId(faction);
   state.setArmyHQOpen(true);
+  state.setArmyHQTab('records');
   state.setArmyHQRecordsSubTab('decisions');
   state.setFocusedDecisionConsequenceId?.(recordId ?? null);
-  state.setChronicleOpen(false);
   return true;
 }
 
 export function openArmyHQBriefingForCorps(state: ShellNavigationState, corpsId: string | null): boolean {
   const faction = getPlayerFaction(state);
   if (!faction) return false;
+  closeReferenceOverlays(state);
   state.setSelectedArmyId(faction);
   state.setArmyHQOpen(true);
   state.setArmyHQTab('briefing');
@@ -121,6 +135,7 @@ export function openArmyHQBriefingForCorps(state: ShellNavigationState, corpsId:
  */
 export function openCodex(state: ShellNavigationState): boolean {
   state.setChronicleOpen(false);
+  state.setArmyHQOpen(false);
   state.setCodexOpen(true);
   return true;
 }
@@ -136,6 +151,7 @@ export function openCodex(state: ShellNavigationState): boolean {
  */
 export function openChronicle(state: ShellNavigationState): boolean {
   state.setCodexOpen(false);
+  state.setArmyHQOpen(false);
   state.setChronicleOpen(true);
   return true;
 }

@@ -1,4 +1,22 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-17] continuation: shell route exclusivity live verification
+
+**Type:** continuation ledger pointer for the 2026-06-16 shell-route batch after local time crossed midnight. No additional code, simulation, scenario, save-schema, baseline, calibration, or packaging artifact change beyond the shell-route exclusivity commit.
+
+**Verification:** same evidence as the 2026-06-16 entry below: expanded focused route pack 9 files / 71 tests passed, typecheck passed, `qa:player-journeys` 11 files / 102 tests passed, and live browser RS start/opening/foundational decision plus Records/Codex/Chronicle route checks passed locally.
+
+---
+
+## [2026-06-16] fix(ui): make top-level shell navigation exclusive
+
+**Type:** tactical-map UI shell-route hardening. Live browser smoke found that Chronicle/Records toolbar clicks could leave the player in an ambiguous top-level state, with the tactical map/OOB chrome still visually dominant. The same risk existed for Records deep links from Chronicle, Turn Aftermath, and Decision Room source handoffs because Army HQ routes did not centrally close reference overlays. The follow-up live route pass also found Codex Escape leaked into the global pause shortcut, closing Codex and opening Pause on the same keypress. Pyrrhic read-only follow-up then found that player-faction Records routes did not force the Records top tab, and two Army HQ reference buttons bypassed the shared top-level helpers.
+
+**Fix:** `shellNavigation` now closes Codex and Chronicle before opening any Army HQ route: summary/briefing/personnel, Records subtabs, focused aftermath records, operation-history rows, decision-consequence rows, and corps briefing drill-ins. Records routes now always set `armyHQTab` to `records`, normal Records opens clear stale focused rows, and Codex/Chronicle helpers close Army HQ before opening their top-level surface. Army HQ Records and Decision Consequence buttons now use those helpers rather than raw store setters. `CodexPanel` now owns Escape in capture phase so a single dismiss key cannot leak into the pause menu. The Chronicle decision-ledger CI expectation was updated to the neutral fallback copy used when authored display maps are unavailable.
+
+**Verification:** `node_modules\.bin\vitest.cmd run tests\ui_shell_navigation.test.ts tests\ui\shell_navigation_ownership.test.ts tests\ui_chronicle_operation_aar_link.test.ts tests\ui_chronicle_turn_record_link.test.ts tests\ui_presidential_decision_room_wiring.test.ts tests\ui\decision_consequence_trail.test.ts tests\ui\chronicle_decision_ledger.test.ts tests\ui\records_button_behavior.test.ts tests\ui\pause_escape_shortcuts.test.ts --pool=forks --reporter=dot` -> 9 files / 71 tests passed after red proof. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` -> 11 files / 102 tests passed. Live browser verification on `http://127.0.0.1:4196/tactical_map.html?dev=1` passed RS start/opening/foundational decision, Records direct-to-Records, Codex-from-Records closing Army HQ, Codex Escape without Pause, and Chronicle sole-overlay checks. Browser logs had no route/runtime errors; existing invalid-coordinate overlay warnings remain a separate map-data/rendering polish lane. No sim/scenario/save-schema/baseline/package artifacts changed.
+
+---
+
 ## [2026-06-16] fix(ui/ci/docs): harden stale truth and process sync
 
 **Type:** UI/read-model truth hardening + CI dependency guard + docs/process sync. This closes four Pyrrhic specialist findings from the autonomous comment sweep: `engine-health-188w` could be skipped by an upstream `scenarios` failure, Sarajevo siege UI could trust stale serialized containment data, decision consequence records could derive reserve/officer copy from raw ids, and four June 15 lessons existed only in the life-lessons index.
