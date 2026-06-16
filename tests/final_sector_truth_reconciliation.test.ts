@@ -234,6 +234,62 @@ describe('final sector truth reconciliation', () => {
         expect(raw).toContain('|ops');
     });
 
+    it('rebuilds after active operation participating brigades mutate', () => {
+        const { state, edges } = makeState();
+
+        const corpsCommand: NonNullable<GameState['military']['corps_command']> = {
+            corps_a: {
+                command_span: 4,
+                subordinate_count: 2,
+                og_slots: 0,
+                active_ogs: [],
+                corps_exhaustion: 0,
+                stance: 'balanced',
+                active_operations: [
+                    {
+                        name: 'test_operation',
+                        type: 'sector_attack',
+                        phase: 'execution',
+                        started_turn: 10,
+                        phase_started_turn: 10,
+                        participating_brigades: ['brig_seed'],
+                    },
+                ],
+            },
+        };
+        state.military.corps_command = corpsCommand;
+
+        const firstReport = reconcileFinalSectorTruth(state, edges, null);
+        const firstSector = Object.values(state.military.corps_front_sectors ?? {}).find(
+            (sector) => sector.corps_id === 'corps_a',
+        );
+        expect(firstReport.sectors_rebuilt).toBeGreaterThan(0);
+        expect(firstSector?.assigned_brigade_ids).toContain('brig_seed');
+
+        firstSector!.assigned_brigade_ids = [];
+        firstSector!.reserve_brigade_ids = [];
+        firstSector!.density = 0;
+        firstSector!.defensive_power = 0;
+        firstSector!.threat_ratio = 0;
+
+        corpsCommand.corps_a!.active_operations[0]!.participating_brigades = [
+            'brig_seed',
+            'brig_late_op_roster',
+        ];
+
+        const secondReport = reconcileFinalSectorTruth(state, edges, null);
+        const rebuiltSector = Object.values(state.military.corps_front_sectors ?? {}).find(
+            (sector) => sector.corps_id === 'corps_a',
+        );
+
+        expect(secondReport.sectors_rebuilt).toBeGreaterThan(0);
+        expect(rebuiltSector).toBeDefined();
+        expect(rebuiltSector).not.toBe(firstSector);
+        expect(rebuiltSector?.assigned_brigade_ids).toContain('brig_seed');
+        expect(rebuiltSector?.density ?? 0).toBeGreaterThan(0);
+        expect(rebuiltSector?.defensive_power ?? 0).toBeGreaterThan(0);
+    });
+
     it('rebuilds final sector truth after late brigade writers and clears stale unresolved state', () => {
         const { state, edges } = makeState();
 
