@@ -412,9 +412,10 @@ describe('live campaign tutorial render', () => {
     // `shouldShowOnboarding` predicate handles the first-run-vs-dismissed
     // branch off the existing persisted `meta.tutorial_state`.
     expect(source).toContain('<OnboardingOverlayWrapper />');
-    // Codex #347 (P2): the mount gate also excludes `sidePickerOpen` so the
-    // HARD_MODAL deck never covers the faction picker.
-    expect(source).toContain("appScreen === 'game' && loadedGameState && !sidePickerOpen && <OnboardingOverlayWrapper />");
+    // Codex #347 (P2) plus first-turn choreography: the mount gate excludes
+    // the side-picker, blocking presidential surfaces, and the opening brief.
+    expect(source).toContain("appScreen === 'game' && loadedGameState && !presidentialBlockingSurfaceActive && !openingBriefPending && <OnboardingOverlayWrapper />");
+    expect(source).toContain('const openingBriefPending = loadedGameState != null && playerFaction != null && !openingBriefDismissed;');
     // The legacy first-hover coachmark overlay stays retired — only the
     // onboarding deck mount is intended.
     expect(source).not.toContain('CoachmarkLayer');

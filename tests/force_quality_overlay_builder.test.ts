@@ -40,7 +40,7 @@
  * assertions, no headless renderer required.
  */
 import { describe, it, expect } from 'vitest';
-import type { FeatureCollection, Polygon } from 'geojson';
+import type { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 import {
   buildForceQualityData,
   buildForceQualityOverlay,
@@ -76,6 +76,29 @@ function makeFC(osids: string[]): FeatureCollection {
   return {
     type: 'FeatureCollection',
     features: osids.map((o, i) => makeOsidFeature(o, i)),
+  };
+}
+
+function makeMultiOsidFeature(osid: string): FeatureCollection['features'][number] {
+  const first: number[][][] = [[
+    [10, 10],
+    [11, 10],
+    [11, 11],
+    [10, 11],
+    [10, 10],
+  ]];
+  const second: number[][][] = [[
+    [12, 12],
+    [13, 12],
+    [13, 13],
+    [12, 13],
+    [12, 12],
+  ]];
+  const geom: MultiPolygon = { type: 'MultiPolygon', coordinates: [first, second] };
+  return {
+    type: 'Feature',
+    properties: { osid, area_km2: 2.0 },
+    geometry: geom,
   };
 }
 
@@ -192,6 +215,33 @@ describe('buildForceQualityOverlay', () => {
     // RS mean = 0.80, count = 1.
     expect(rs!.officerQualityMean).toBeCloseTo(0.80);
     expect(rs!.brigadeCount).toBe(1);
+  });
+
+  it('T4b multipolygon-split: MultiPolygon OSIDs emit one PolygonLayer-safe datum per part', () => {
+    const multiFeature = makeMultiOsidFeature('op:foo:multi');
+    const polygons: FeatureCollection = {
+      type: 'FeatureCollection',
+      features: [multiFeature],
+    };
+    const formations: FormationView[] = [
+      makeBrigade({ id: 'b_multi', faction: 'RBiH', location_osid: 'op:foo:multi', officer_quality: 0.45 }),
+    ];
+
+    const data = buildForceQualityData(formations, polygons);
+
+    expect(data.map((d) => `${d.osid}|${d.faction}`)).toEqual([
+      'op:foo:multi|RBiH',
+      'op:foo:multi|RBiH',
+    ]);
+    expect(data.every((d) => d.isMulti)).toBe(true);
+    expect(data[0].contour).toEqual((multiFeature.geometry as MultiPolygon).coordinates[0]);
+    expect(data[1].contour).toEqual((multiFeature.geometry as MultiPolygon).coordinates[1]);
+
+    const layer = buildForceQualityOverlay(data);
+    const getPolygon = layer.props.getPolygon as (d: ForceQualityDatum) => number[][][];
+    expect(getPolygon(data[0])).toEqual((multiFeature.geometry as MultiPolygon).coordinates[0]);
+    expect(Array.isArray(getPolygon(data[0])[0][0])).toBe(true);
+    expect(typeof getPolygon(data[0])[0][0][0]).toBe('number');
   });
 
   it('T5 faction-symmetric: color comes from pure palette lookup; every faction enters the same code path with no asymmetric branching', () => {

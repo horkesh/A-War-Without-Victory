@@ -40,6 +40,11 @@ describe('force-quality overlay coordinate validity', () => {
           [18.1, 44.1],
           [18, 44],
         ]),
+        polygonFeature('op:test:degenerate_force_coords', [
+          [18.2, 44.2],
+          [18.2, 44.2],
+          [18.2, 44.2],
+        ]),
         polygonFeature('op:test:valid_force_coords', [
           [18, 44],
           [18.1, 44],
@@ -53,15 +58,19 @@ describe('force-quality overlay coordinate validity', () => {
     const data = buildForceQualityData(
       [
         brigade('b_bad_force_coords', 'op:test:bad_force_coords'),
+        brigade('b_degenerate_force_coords', 'op:test:degenerate_force_coords'),
         brigade('b_valid_force_coords', 'op:test:valid_force_coords'),
       ],
       polygons,
     );
 
     expect(data.map((d) => d.osid)).toEqual(['op:test:valid_force_coords']);
-    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledTimes(2);
     expect(warn).toHaveBeenCalledWith(
       '[AWWV] Skipping force-quality-glow-overlay polygon with invalid coordinates: op:test:bad_force_coords',
+    );
+    expect(warn).toHaveBeenCalledWith(
+      '[AWWV] Skipping force-quality-glow-overlay polygon with invalid coordinates: op:test:degenerate_force_coords',
     );
 
     warn.mockRestore();

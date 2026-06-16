@@ -101,6 +101,7 @@ import { decodeShellHandoffCommand, isShellHandoffCommand, type ArmyHQRecordsSub
 import {
   applyRecruitmentAndSync,
   fetchRecruitmentCatalog,
+  resolveBrowserEventDecision,
   startCampaignFromSidePicker,
 } from './desktop/campaignRecruitmentActions';
 
@@ -431,6 +432,7 @@ function App() {
   const pendingAttackConfirmation = useGameStore((s) => s.pendingAttackConfirmation);
   const setPendingAttackConfirmation = useGameStore((s) => s.setPendingAttackConfirmation);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
+  const openingBriefDismissed = useGameStore((s) => s.openingBriefDismissed);
   const selectedOsid = useGameStore((s) => s.selectedOsid);
   const selectedArmyId = useGameStore((s) => s.selectedArmyId);
   const selectedArmyHqId = useGameStore((s) => s.selectedArmyHqId);
@@ -764,6 +766,19 @@ function App() {
 
   const pendingPeacePlan = loadedGameState?.pendingPeacePlan;
   const showPeacePlanModal = shouldShowPeacePlanModal(pendingPeacePlan, dismissedPeacePlanKey);
+  const peaceWarTransitionActive = loadedGameState != null && shouldShowPeaceWarTransition(
+    loadedGameState,
+    peaceWarTransitionSeen,
+  );
+  const presidentialBlockingSurfaceActive = (
+    sidePickerOpen ||
+    peaceWarTransitionActive ||
+    activeEventDecisionId !== null ||
+    showPeacePlanModal ||
+    Boolean(loadedGameState?.pendingDayton && !loadedGameState?.gameOver)
+  );
+  const tacticalChromeVisible = !presidentialBlockingSurfaceActive;
+  const openingBriefPending = loadedGameState != null && playerFaction != null && !openingBriefDismissed;
 
   // v0.9 presidential design: auto-launch the EventDecisionModal for the first
   // blocking event decision when a new turn surfaces one. Memory:
@@ -772,6 +787,7 @@ function App() {
   // is dismissible only via response, so the IPC respond path is the only exit.
   useEffect(() => {
     if (activeEventDecisionId !== null) return;
+    if (peaceWarTransitionActive) return;
     if (showPeacePlanModal) return;
     // Task #80 — the boot-to-menu default means an auto-loaded save with a
     // pending decision must NOT auto-pop the (non-dismissible) EventDecisionModal
@@ -784,7 +800,15 @@ function App() {
       recentlyAcceptedEventDecisionId,
     );
     if (nextDecision) setActiveEventDecisionId(nextDecision.event_id);
-  }, [loadedGameState?.pendingEventDecisions, playerFaction, activeEventDecisionId, showPeacePlanModal, recentlyAcceptedEventDecisionId, appScreen]);
+  }, [
+    loadedGameState?.pendingEventDecisions,
+    playerFaction,
+    activeEventDecisionId,
+    peaceWarTransitionActive,
+    showPeacePlanModal,
+    recentlyAcceptedEventDecisionId,
+    appScreen,
+  ]);
 
   useEffect(() => {
     if (activeEventDecisionId === null) return;
@@ -1248,6 +1272,13 @@ function App() {
       openArmyHQTab(gs, 'briefing');
       setAppScreen('game');
     }
+    if (action === 'decision_room') {
+      setWarroomOverlaySurface(null);
+      setWarroomDeskOpen(false);
+      closeCommandStrip(false);
+      setWarroomDecisionRoomOpen(true);
+      setAppScreen('warroom');
+    }
     if (action === 'peace_plan_modal') {
       setDismissedPeacePlanKey(null);
     }
@@ -1399,20 +1430,25 @@ function App() {
           />
         </RootErrorBoundary>
       </header>
-      <CommandBriefingLayer
-        onOpenSummary={openSummary}
-        onOpenEnclaves={() => setEnclaveDashboardOpen(true)}
-      />
-      <aside
-        aria-label="Order of Battle"
-        style={{ display: 'contents' }}
-      >
-        <RootErrorBoundary zone="sidebar">
-          <OOBSidebar />
-        </RootErrorBoundary>
-      </aside>
+      {tacticalChromeVisible && (
+        <>
+          <CommandBriefingLayer
+            onOpenSummary={openSummary}
+            onOpenEnclaves={() => setEnclaveDashboardOpen(true)}
+          />
+          <aside
+            aria-label="Order of Battle"
+            style={{ display: 'contents' }}
+          >
+            <RootErrorBoundary zone="sidebar">
+              <OOBSidebar />
+            </RootErrorBoundary>
+          </aside>
+        </>
+      )}
       {/* Tactical Detail Panels (Nested Rail Architecture) */}
-      <RootErrorBoundary zone="right panel">
+      {tacticalChromeVisible && (
+        <RootErrorBoundary zone="right panel">
         <OperationsPanel />
         <OrderQueue />
         {tacticalDetailRailsVisible && shouldRenderInboxPanel(railState.primary, isOperationsPanelOpen) && (
@@ -1430,7 +1466,8 @@ function App() {
         {tacticalDetailRailsVisible && railState.secondary === 'sector' && <CorpsFrontPanel railSlot="secondary" />}
         {tacticalDetailRailsVisible && railState.secondary === 'corps' && <CorpsDetail railSlot="secondary" />}
         {tacticalDetailRailsVisible && railState.secondary === 'formation' && <FormationDetail railSlot="secondary" />}
-      </RootErrorBoundary>
+        </RootErrorBoundary>
+      )}
       <Tooltip />
       </>
       )}
@@ -1629,7 +1666,20 @@ function App() {
                 }
                 return;
               }
-              setLoadError('Event decisions are available in desktop mode only.');
+              const rawGameState = loadedGameState?.rawGameState;
+              if (!rawGameState) {
+                setLoadError('Cannot record event decision without loaded game state.');
+                return;
+              }
+              try {
+                const nextState = structuredClone(rawGameState);
+                resolveBrowserEventDecision(nextState, eventId, responseId);
+                await loadSave(nextState);
+                setRecentlyAcceptedEventDecisionId(eventId);
+                setActiveEventDecisionId(null);
+              } catch (err) {
+                setLoadError(err instanceof Error ? err.message : String(err));
+              }
             }}
           />
         );
@@ -1841,18 +1891,12 @@ function App() {
       )}
       {settingsOpen && <SettingsScreen onClose={() => setSettingsOpen(false)} />}
       {creditsOpen && <CreditsScreen onClose={() => setCreditsOpen(false)} />}
-      {/* v0.9.2 tutorial onboarding deck — auto-mounted at app root (task #77).
-          Only on the in-game screen with a loaded save; hidden during main
-          menu / side picker / warroom. The overlay's own `shouldShowOnboarding`
-          predicate handles the first-run-vs-dismissed branch off the existing
-          persisted `meta.tutorial_state` (no new field). Restart still flows
-          via Settings → OnboardingRestartButton.
-          Codex #347 (P2) — also exclude `sidePickerOpen`: the deck renders at
-          `Z.HARD_MODAL` above `SidePickerOverlay` (`Z.OVERLAY_LIGHT`); a fresh
-          turn-0 save already loaded while the picker is open would otherwise
-          cover the faction picker and block choosing/cancelling the new-game
-          flow. Defer the deck until a side is chosen (picker closed). */}
-      {appScreen === 'game' && loadedGameState && !sidePickerOpen && <OnboardingOverlayWrapper />}
+      {/* v0.9.2 tutorial onboarding deck - auto-mounted at app root (task #77).
+          Only on the in-game screen with a loaded save and no blocking
+          presidential surface. The overlay's own `shouldShowOnboarding`
+          predicate handles first-run vs dismissed state from existing
+          `meta.tutorial_state`; restart still flows through Settings. */}
+      {appScreen === 'game' && loadedGameState && !presidentialBlockingSurfaceActive && !openingBriefPending && <OnboardingOverlayWrapper />}
       {/* LANE-V094-LOADING-AND-ERROR — first-paint scenario-load skeleton.
           Shown when the in-game shell has been requested but no save has
           loaded yet. Auto-dismisses when `loadedGameState` resolves. We

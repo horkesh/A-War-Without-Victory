@@ -31,7 +31,7 @@ export interface InboxItem {
     /** Source record ids represented by this card, source order preserved. */
     sourceIds?: string[];
     /** Which panel/modal to open when clicked */
-    action: 'event_modal' | 'peace_plan_modal' | 'dayton_modal' | 'paramilitary_review' | 'convoy_decision_modal' | 'army_reserve' | 'army_hq_personnel' | 'army_hq_opportunity' | 'army_hq_briefing' | 'autonomy_panel' | 'dismiss_intelligence_notification' | 'none';
+    action: 'event_modal' | 'peace_plan_modal' | 'dayton_modal' | 'paramilitary_review' | 'convoy_decision_modal' | 'army_reserve' | 'army_hq_personnel' | 'army_hq_opportunity' | 'army_hq_briefing' | 'decision_room' | 'autonomy_panel' | 'dismiss_intelligence_notification' | 'none';
     /** Priority for sorting (lower = higher priority) */
     priority: number;
 }

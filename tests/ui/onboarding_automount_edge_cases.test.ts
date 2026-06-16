@@ -12,9 +12,11 @@
  *       `previewTutorialState` — Skip/Next/ESC must still dismiss the deck for
  *       the current session instead of leaving a stuck HARD_MODAL overlay.
  *
- *   (2) Keep the deck hidden while the side-picker is open. The mount gate in
- *       `App.tsx` excludes `sidePickerOpen` so the HARD_MODAL deck never covers
- *       `SidePickerOverlay`; the deck defers until a side is chosen.
+ *   (2) Keep the deck hidden while a blocking presidential surface is active.
+ *       The mount gate in `App.tsx` excludes the side-picker, war-start
+ *       transition, foundational decisions, negotiation blockers, and the
+ *       opening brief so the HARD_MODAL deck never covers the player's first
+ *       authored choice or first desk handoff.
  *
  * UI-only / calibration-inert: no sim/scenario/state bytes touched.
  */
@@ -54,14 +56,20 @@ describe('Codex #347 (P2) — onboarding auto-mount edge cases (task #85)', () =
     });
   });
 
-  describe('(2) side-picker mount gate', () => {
-    it('App mount gate excludes sidePickerOpen so the deck cannot cover the faction picker', () => {
+  describe('(2) blocking-surface mount gate', () => {
+    it('App mount gate excludes blocking presidential surfaces', () => {
       const source = readFileSync('src/ui/map/App.tsx', 'utf8');
-      // The deck mounts only on the in-game screen, with a loaded save, AND the
-      // side picker closed.
+      // The deck mounts only on the in-game screen, with a loaded save, and no
+      // blocking presidential surface active.
       expect(source).toContain(
-        "appScreen === 'game' && loadedGameState && !sidePickerOpen && <OnboardingOverlayWrapper />",
+        "appScreen === 'game' && loadedGameState && !presidentialBlockingSurfaceActive && !openingBriefPending && <OnboardingOverlayWrapper />",
       );
+      expect(source).toContain('sidePickerOpen ||');
+      expect(source).toContain('peaceWarTransitionActive ||');
+      expect(source).toContain('activeEventDecisionId !== null ||');
+      expect(source).toContain('const openingBriefPending = loadedGameState != null && playerFaction != null && !openingBriefDismissed;');
+      expect(source).toContain('const tacticalChromeVisible = !presidentialBlockingSurfaceActive;');
+      expect(source).toContain('{tacticalChromeVisible && (');
     });
 
     it('OnboardingOverlayWrapper passes a null bridge when IPC is unavailable (mirrors SettingsScreen)', () => {

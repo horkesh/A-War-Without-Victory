@@ -39,7 +39,7 @@
  * LANE-NIGHTSHIFT-MAP-THAT-SCARS-VALIDATION (T5–T8).
  */
 import { describe, it, expect } from 'vitest';
-import type { FeatureCollection, Polygon } from 'geojson';
+import type { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 import {
   buildOsidDamageData,
   buildOsidDamageOverlay,
@@ -73,6 +73,29 @@ function makeFC(osids: string[]): FeatureCollection {
   return {
     type: 'FeatureCollection',
     features: osids.map((o, i) => makeOsidFeature(o, i)),
+  };
+}
+
+function makeMultiOsidFeature(osid: string): FeatureCollection['features'][number] {
+  const first: number[][][] = [[
+    [10, 10],
+    [11, 10],
+    [11, 11],
+    [10, 11],
+    [10, 10],
+  ]];
+  const second: number[][][] = [[
+    [12, 12],
+    [13, 12],
+    [13, 13],
+    [12, 13],
+    [12, 12],
+  ]];
+  const geom: MultiPolygon = { type: 'MultiPolygon', coordinates: [first, second] };
+  return {
+    type: 'Feature',
+    properties: { osid, area_km2: 2.0 },
+    geometry: geom,
   };
 }
 
@@ -217,6 +240,28 @@ describe('buildOsidDamageOverlay', () => {
 
     // Byte-equivalent across two builds (same content, same order).
     expect(JSON.stringify(dataA)).toBe(JSON.stringify(dataB));
+  });
+
+  it('T4b multipolygon-split: MultiPolygon OSIDs emit one PolygonLayer-safe datum per part', () => {
+    const multiFeature = makeMultiOsidFeature('op:foo:multi');
+    const polygons: FeatureCollection = {
+      type: 'FeatureCollection',
+      features: [multiFeature],
+    };
+    const seed = makeSeed([['op:foo:multi', 25]]);
+
+    const data = buildOsidDamageData(seed, polygons);
+
+    expect(data.map((d) => d.osid)).toEqual(['op:foo:multi', 'op:foo:multi']);
+    expect(data.every((d) => d.isMulti)).toBe(true);
+    expect(data[0].contour).toEqual((multiFeature.geometry as MultiPolygon).coordinates[0]);
+    expect(data[1].contour).toEqual((multiFeature.geometry as MultiPolygon).coordinates[1]);
+
+    const layer = buildOsidDamageOverlay(data);
+    const getPolygon = layer.props.getPolygon as (d: OsidDamageDatum) => number[][][];
+    expect(getPolygon(data[0])).toEqual((multiFeature.geometry as MultiPolygon).coordinates[0]);
+    expect(Array.isArray(getPolygon(data[0])[0][0])).toBe(true);
+    expect(typeof getPolygon(data[0])[0][0][0]).toBe('number');
   });
 
   // -------------------------------------------------------------------------

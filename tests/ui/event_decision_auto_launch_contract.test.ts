@@ -27,6 +27,20 @@ describe('event decision modal auto-launch contract', () => {
     expect(autoLaunchEffect).not.toContain('openArmyHQTab');
   });
 
+  it('defers event decision auto-launch while the war-start transition is active', () => {
+    const app = readApp();
+    const autoLaunchEffect = app.slice(
+      app.indexOf('auto-launch the EventDecisionModal'),
+      app.indexOf('// Auto-dismiss non-decision events'),
+    );
+
+    expect(autoLaunchEffect).toContain('if (peaceWarTransitionActive) return;');
+    expect(autoLaunchEffect).toContain('peaceWarTransitionActive,');
+    expect(autoLaunchEffect.indexOf('if (peaceWarTransitionActive) return;')).toBeLessThan(
+      autoLaunchEffect.indexOf('selectNextPendingEventDecision'),
+    );
+  });
+
   it('renders the selected pending event decision payload as the primary modal surface', () => {
     const app = readApp();
     const modalRenderBlock = app.slice(

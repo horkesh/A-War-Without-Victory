@@ -46,8 +46,8 @@ export interface ForceQualityDatum {
   osid: string;
   /** Canonical faction id (RS / RBiH / HRHB). */
   faction: string;
-  /** Outer + holes for Polygon, or list of Polygons for MultiPolygon. */
-  contour: number[][][] | number[][][][];
+  /** One Polygon contour: outer ring plus optional holes. MultiPolygons are split into one datum per polygon part. */
+  contour: number[][][];
   isMulti: boolean;
   /** Mean officer_quality across active brigades at this (osid, faction). */
   officerQualityMean: number;
@@ -195,14 +195,16 @@ export function buildForceQualityData(
         brigadeCount: entry.count,
       });
     } else {
-      out.push({
-        osid: entry.osid,
-        faction: entry.faction,
-        contour: geom.coordinates as number[][][][],
-        isMulti: true,
-        officerQualityMean: mean,
-        brigadeCount: entry.count,
-      });
+      for (const contour of geom.coordinates) {
+        out.push({
+          osid: entry.osid,
+          faction: entry.faction,
+          contour: contour as number[][][],
+          isMulti: true,
+          officerQualityMean: mean,
+          brigadeCount: entry.count,
+        });
+      }
     }
   }
 

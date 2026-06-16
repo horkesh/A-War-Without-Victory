@@ -272,7 +272,7 @@ export function PresidentialInbox({ onAction }: PresidentialInboxProps) {
                     <OpeningBrief
                         faction={playerFaction}
                         onDismiss={() => setBriefDismissed(true)}
-                        onOpenDesk={() => onAction('army_hq_briefing', 'opening-brief:desk')}
+                        onOpenDesk={() => onAction('decision_room', 'opening-brief:desk')}
                     />
                 )}
 
@@ -291,7 +291,7 @@ export function PresidentialInbox({ onAction }: PresidentialInboxProps) {
 
                 {/* Empty state */}
                 {actionableItems.length === 0 && briefDismissed && (
-                    <QuietInboxCapsule onOpenDesk={() => onAction('army_hq_briefing', 'empty:desk')} />
+                    <QuietInboxCapsule onOpenDesk={() => onAction('decision_room', 'empty:desk')} />
                 )}
 
                 {/* Situation divider + items */}
