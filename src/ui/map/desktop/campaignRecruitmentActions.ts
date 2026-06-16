@@ -285,8 +285,21 @@ export async function startCampaignFromSidePicker(
                 setLoadError('Baked startup snapshot is not a valid game state object.');
                 return false;
             }
-            const state = snapshot as { meta?: { player_faction?: StartNewCampaignPayload['playerFaction'] } };
-            state.meta = { ...(state.meta ?? {}), player_faction: faction };
+            const state = snapshot as {
+                meta?: {
+                    player_faction?: StartNewCampaignPayload['playerFaction'];
+                    decision_mode?: string;
+                    headless_scenario_auto_control?: boolean;
+                };
+                political?: { control_events?: unknown[] };
+            };
+            state.meta = {
+                ...(state.meta ?? {}),
+                player_faction: faction,
+                decision_mode: 'emergent',
+                headless_scenario_auto_control: false,
+            };
+            state.political = { ...(state.political ?? {}), control_events: [] };
             const eventResponse = await fetch(BROWSER_EVENT_CATALOG_PATH);
             if (!eventResponse.ok) {
                 setLoadError(`Browser event catalog unavailable (${eventResponse.status}).`);

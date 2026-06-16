@@ -10,6 +10,11 @@ import {
     loadStartupSnapshotState,
     validateStartupSnapshot,
 } from '../src/scenario/startup_snapshot.js';
+import {
+    isSrkStranglePostureEnabled,
+    resetSrkStranglePostureGate,
+} from '../src/sim/combat/contain_posture_gate.js';
+import { computeSrkStrangleOsids } from '../src/sim/combat/srk_strangle.js';
 import { deserializeState, serializeState } from '../src/state/serialize.js';
 
 test('baked April 1992 startup artifact matches canonical builder truth after checkout normalization', async () => {
@@ -69,6 +74,42 @@ test('desktop new campaign overlays remain canonical after loading the baked art
         serializeState(state),
         'desktop overlays over the baked artifact should remain canonical after save/load',
     );
+}, 120_000);
+
+test('baked April 1992 startup materializes default-on SRK strangle containment', async () => {
+    resetSrkStranglePostureGate();
+    const prev = process.env.AWWV_SRK_STRANGLE_POSTURE;
+    delete process.env.AWWV_SRK_STRANGLE_POSTURE;
+    try {
+        const state = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
+        const expected = computeSrkStrangleOsids(state);
+
+        assert.strictEqual(isSrkStranglePostureEnabled(), true);
+        assert.strictEqual(expected.length, 4, 'startup should expose the four RBiH-held Sarajevo urban-core OSIDs');
+        assert.deepStrictEqual(state.political.last_contained_osids_by_faction?.RS, expected);
+    } finally {
+        if (prev !== undefined) process.env.AWWV_SRK_STRANGLE_POSTURE = prev;
+        else delete process.env.AWWV_SRK_STRANGLE_POSTURE;
+        resetSrkStranglePostureGate();
+    }
+}, 120_000);
+
+test('desktop new campaign preserves default-on SRK strangle containment at birth', async () => {
+    resetSrkStranglePostureGate();
+    const prev = process.env.AWWV_SRK_STRANGLE_POSTURE;
+    delete process.env.AWWV_SRK_STRANGLE_POSTURE;
+    try {
+        const { state } = await startNewCampaign(process.cwd(), 'RBiH', 'apr_1992');
+        const expected = computeSrkStrangleOsids(state);
+
+        assert.strictEqual(isSrkStranglePostureEnabled(), true);
+        assert.strictEqual(expected.length, 4, 'desktop birth state should expose the four RBiH-held Sarajevo urban-core OSIDs');
+        assert.deepStrictEqual(state.political.last_contained_osids_by_faction?.RS, expected);
+    } finally {
+        if (prev !== undefined) process.env.AWWV_SRK_STRANGLE_POSTURE = prev;
+        else delete process.env.AWWV_SRK_STRANGLE_POSTURE;
+        resetSrkStranglePostureGate();
+    }
 }, 120_000);
 
 test('startup snapshot validator reports the committed artifact as current', async () => {

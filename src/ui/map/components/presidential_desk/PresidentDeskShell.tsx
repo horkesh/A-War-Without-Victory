@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { InboxItem } from '../../data/inboxItems';
-import { countActionableItems, deriveInboxItems, hasBlockingItems } from '../../data/inboxItems';
+import { countActionableItems, deriveInboxItems } from '../../data/inboxItems';
+import { derivePresidentialBlockers } from '../../data/presidentialBlockers';
 import type { LoadedGameState } from '../../data/types';
 import { t } from '../../i18n';
 import { turnToDateString } from '../../utils/formatters';
@@ -46,7 +47,7 @@ export function PresidentDeskShell({
   const shellRef = useRef<HTMLElement | null>(null);
   const items = deriveInboxItems(state, osidNameMap);
   const actionableCount = countActionableItems(items);
-  const blocked = hasBlockingItems(items);
+  const blocked = derivePresidentialBlockers(state, osidNameMap).length > 0;
 
   useEffect(() => {
     if (onClose) shellRef.current?.focus();
@@ -66,7 +67,7 @@ export function PresidentDeskShell({
           onClose();
         }
       }}
-      className="pointer-events-none absolute right-3 top-4 bottom-16 z-[3] flex w-[min(32rem,calc(100vw-1.5rem))] flex-col gap-3 overflow-y-auto md:right-6 xl:right-10"
+      className="pointer-events-none absolute right-3 top-[var(--awwv-toolbar-clearance,5.5rem)] bottom-16 z-[3] flex w-[min(32rem,calc(100vw-1.5rem))] flex-col gap-3 overflow-y-auto md:right-6 xl:right-10"
     >
       {onClose && (
         <button

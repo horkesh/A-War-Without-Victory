@@ -105,4 +105,18 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(effect).toContain('setDiplomacyOpen(false);');
         expect(effect).toContain('diplomacyOpen, warroomOverlaySurface');
     });
+
+    it('routes the Warroom Chronicle hotspot to ChronicleOverlay instead of Authored Choices', () => {
+        const app = read('src/ui/map/App.tsx');
+        const routeStart = app.indexOf("if (surface === 'chronicle') {");
+        const routeEnd = app.indexOf('\n    setWarroomDeskOpen(false);', routeStart);
+
+        expect(routeStart).toBeGreaterThanOrEqual(0);
+        expect(routeEnd).toBeGreaterThan(routeStart);
+
+        const chronicleRoute = app.slice(routeStart, routeEnd);
+        expect(chronicleRoute).toContain('openChronicle(useGameStore.getState())');
+        expect(chronicleRoute).toContain('setIsDecisionHistoryOpen(false)');
+        expect(chronicleRoute).not.toContain('setIsDecisionHistoryOpen(true)');
+    });
 });

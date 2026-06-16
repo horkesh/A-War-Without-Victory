@@ -244,6 +244,7 @@ export async function startNewCampaign(
 
     if (state.meta) {
         state.meta.player_faction = playerFaction;
+        state.meta.headless_scenario_auto_control = false;
         // Free War Phase 0: the live player campaign is the FREE, emergent war —
         // AI factions choose event responses from battlefield/political signals,
         // not historical replay. Calibration (scenario_runner) never routes
@@ -251,6 +252,7 @@ export async function startNewCampaign(
         state.meta.decision_mode = 'emergent';
     }
     const canonicalState = canonicalizeStartupState(state).state;
+    canonicalState.political.control_events = [];
     if (key === 'apr_1992') {
         queueOpeningFoundationalDecision(canonicalState, loadDesktopEventDefinitions(baseDir), playerFaction);
     }
@@ -420,15 +422,14 @@ export function queryCorpsSectors(
 }
 
 // BATCH C §3.7: control_events is an optional IPC-bridge slot on
-// MilitaryState that is not yet declared at the typed engine state shape.
-// Helper accepts the typed `state.military` slot as `unknown` and walks
+// PoliticalState. Helper accepts the typed `state.political` slot as `unknown` and walks
 // down via `asRecord` / `asArray` from the Batch C0 schema_validators
 // module. Returns an empty array when the parent or the field is missing
 // or not an array — runtime-identical to the prior `Array.isArray(...)
 // ? ... : []` ternary because the inner per-item narrowing inside
 // queryBattleEvents still drops malformed entries.
-function parseOptionalControlEvents(military: unknown): unknown[] {
-    const parent = asRecord(military);
+function parseOptionalControlEvents(political: unknown): unknown[] {
+    const parent = asRecord(political);
     if (parent === null) return [];
     return asArray(parent.control_events) ?? [];
 }
@@ -438,7 +439,7 @@ export function queryBattleEvents(
     state: GameState
 ): { turn: number; events: BattleEventQueryEntry[] } {
     const turn = state.meta?.turn ?? 0;
-    const raw = parseOptionalControlEvents(state.military);
+    const raw = parseOptionalControlEvents(state.political);
     const events: BattleEventQueryEntry[] = [];
     for (const item of raw) {
         if (!item || typeof item !== 'object') continue;

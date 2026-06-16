@@ -64,9 +64,11 @@ describe('Track D onboarding consolidation', () => {
     // the side-picker, war-start transition, blocking presidential modals, and
     // the opening brief so the HARD_MODAL deck never covers the player's
     // authored first choice or first desk handoff.
-    expect(source).toContain("appScreen === 'game' && loadedGameState && !presidentialBlockingSurfaceActive && !openingBriefPending && <OnboardingOverlayWrapper />");
+    expect(source).toContain("appScreen === 'game' && loadedGameState && !onboardingBlockingOverlayActive && <OnboardingOverlayWrapper />");
     expect(source).toContain('activeEventDecisionId !== null ||');
     expect(source).toContain('const openingBriefPending = loadedGameState != null && playerFaction != null && !openingBriefDismissed;');
+    expect(source).toContain('chronicleOpen ||');
+    expect(source).toContain('codexOpen ||');
 
     // The legacy first-turn orientation surfaces stay retired — no resurrection.
     expect(source).not.toContain('<CoachmarkLayer');

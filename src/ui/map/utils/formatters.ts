@@ -7,10 +7,10 @@ const SHORT_MONTHS_BY_LOCALE: Record<Locale, readonly string[]> = {
 
 /**
  * Formats a raw turn number into a human-readable date string (DD MMM YYYY).
- * Baseline: 1 Apr 1992 (Scenario start).
+ * Baseline: 6 Apr 1992 (international recognition and war-opening turn).
  */
 export function turnToDateString(turn: number): string {
-    const startDate = new Date('1992-04-01T00:00:00Z');
+    const startDate = new Date('1992-04-06T00:00:00Z');
     startDate.setDate(startDate.getDate() + turn * 7);
     const month = SHORT_MONTHS_BY_LOCALE[getActiveLocale()][startDate.getUTCMonth()];
     return `${startDate.getUTCDate()} ${month} ${startDate.getUTCFullYear()}`;
@@ -72,10 +72,10 @@ export function formatCombatOutcome(outcome: string | undefined): string {
 
 /**
  * Formats a turn number into ISO date string (YYYY-MM-DD).
- * Baseline: 1 Apr 1992 (Scenario start).
+ * Baseline: 6 Apr 1992 (international recognition and war-opening turn).
  */
 export function turnToISODate(turn: number): string {
-    const d = new Date(Date.UTC(1992, 3, 1));
+    const d = new Date(Date.UTC(1992, 3, 6));
     d.setUTCDate(d.getUTCDate() + turn * 7);
     return d.toISOString().split('T')[0];
 }

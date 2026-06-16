@@ -1310,12 +1310,12 @@ export const warPhases: NamedPhase[] = [
                 }
             }
 
-            // SRK strangle-not-capture (§6 Sarajevo urban core, DEFAULT-OFF): suppress
+            // SRK strangle-not-capture (§6 Sarajevo urban core, DEFAULT-ON): suppress
             // SRK organic CAPTURE intent against the four urban-core municipalities
             // (centar/novi_grad/novo/stari_grad sarajevo). MERGES ADDITIVELY into the
             // .RS contained set — does NOT overwrite Lane V's enclave containment.
             // No release predicate: the SRK never pivoted to assault the city.
-            // Only written when the flag is ON → flag-off keeps state byte-identical.
+            // Written by default; explicit flag-off keeps the diagnostic off path.
             // Player ahistorical assault still possible via authorize_op (injects
             // directly, bypasses this organic-targeting suppression path).
             if (isSrkStranglePostureEnabled()) {
@@ -1344,8 +1344,8 @@ export const warPhases: NamedPhase[] = [
                     // any stale serialized set so the suppression site reads nothing.
                     delete context.state.political.last_contained_osids_by_faction.RS;
                 }
-                // No release predicate: SRK strangle is permanent. Flag-off keeps this
-                // block unentered → default-off byte-identity.
+                // No release predicate: SRK strangle is permanent. Explicit flag-off
+                // keeps this block unentered for the diagnostic off path.
             }
         }
     },

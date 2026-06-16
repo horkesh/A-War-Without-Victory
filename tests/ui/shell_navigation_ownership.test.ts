@@ -6,6 +6,12 @@ import { readFileSync } from 'node:fs';
 import { PresidentialToolbar } from '../../src/ui/map/components/PresidentialToolbar.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import {
+  applyShellHandoffCommand,
+  openChronicle,
+  openCodex,
+  type ShellNavigationState,
+} from '../../src/ui/map/utils/shellNavigation.js';
 
 function makeState(): LoadedGameState {
   return {
@@ -43,6 +49,25 @@ function renderToolbar(props: Partial<React.ComponentProps<typeof PresidentialTo
     onOpenCodex: vi.fn(),
     ...props,
   }));
+}
+
+function createShellState(withAdvanceHandler = true): ShellNavigationState & { calls: Array<[string, unknown]> } {
+  const calls: Array<[string, unknown]> = [];
+  const state: ShellNavigationState & { calls: Array<[string, unknown]> } = {
+    loadedGameState: { player_faction: 'RS' },
+    calls,
+    setSelectedArmyId: (id) => { calls.push(['setSelectedArmyId', id]); },
+    setArmyHQOpen: (open) => { calls.push(['setArmyHQOpen', open]); },
+    setArmyHQTab: (tab) => { calls.push(['setArmyHQTab', tab]); },
+    setArmyHQRecordsSubTab: (subTab) => { calls.push(['setArmyHQRecordsSubTab', subTab]); },
+    setArmyHQExpandedCorpsId: (id) => { calls.push(['setArmyHQExpandedCorpsId', id]); },
+    setCodexOpen: (open) => { calls.push(['setCodexOpen', open]); },
+    setChronicleOpen: (open) => { calls.push(['setChronicleOpen', open]); },
+  };
+  if (withAdvanceHandler) {
+    state.setAdvanceTurnPending = (pending) => { calls.push(['setAdvanceTurnPending', pending]); };
+  }
+  return state;
 }
 
 beforeEach(() => {
@@ -128,5 +153,33 @@ describe('field toolbar navigation ownership', () => {
 
     expect(toolbarSource).not.toContain('false && <InboxBadge');
     expect(toolbarSource).not.toContain('Inbox badge');
+  });
+
+  it('keeps Codex and Chronicle top-level overlays mutually exclusive through shell helpers', () => {
+    const chronicleState = createShellState();
+    const codexState = createShellState();
+
+    expect(openChronicle(chronicleState)).toBe(true);
+    expect(chronicleState.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', true],
+    ]);
+
+    expect(openCodex(codexState)).toBe(true);
+    expect(codexState.calls).toEqual([
+      ['setChronicleOpen', false],
+      ['setCodexOpen', true],
+    ]);
+  });
+
+  it('does not report advance-turn handoff success without an advance modal surface', () => {
+    const stateWithoutModal = createShellState(false);
+    const stateWithModal = createShellState(true);
+
+    expect(applyShellHandoffCommand(stateWithoutModal, { kind: 'advance-turn' })).toBe(false);
+    expect(stateWithoutModal.calls).toEqual([]);
+
+    expect(applyShellHandoffCommand(stateWithModal, { kind: 'advance-turn' })).toBe(true);
+    expect(stateWithModal.calls).toEqual([['setAdvanceTurnPending', true]]);
   });
 });

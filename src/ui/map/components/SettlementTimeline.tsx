@@ -3,7 +3,8 @@
  * Each event is a color-coded card with turn number, icon, and text.
  */
 import type { SettlementTimelineEvent, TimelineEventType } from '../utils/buildSettlementTimeline';
-import { getActiveLocale, t, type Locale } from '../i18n/index.js';
+import { t } from '../i18n/index.js';
+import { turnToDateString } from '../utils/formatters.js';
 
 const EVENT_STYLES: Record<TimelineEventType, { icon: string; color: string; bg: string }> = {
     control_flip:       { icon: '⚑', color: 'text-amber-400',    bg: 'border-amber-400/40' },
@@ -20,16 +21,8 @@ const EVENT_STYLES: Record<TimelineEventType, { icon: string; color: string; bg:
     ethnic_shift:       { icon: '◐', color: 'text-purple-400',   bg: 'border-purple-400/30' },
 };
 
-const SHORT_MONTHS_BY_LOCALE: Record<Locale, readonly string[]> = {
-    en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    bcs: ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'],
-};
-
 export function formatSettlementTimelineTurnDate(turn: number): string {
-    // Turn 0 = April 6, 1992. Each turn = 7 days.
-    const start = new Date(1992, 3, 6); // April 6, 1992
-    const d = new Date(start.getTime() + turn * 7 * 24 * 60 * 60 * 1000);
-    return `${d.getDate()} ${SHORT_MONTHS_BY_LOCALE[getActiveLocale()][d.getMonth()]} ${d.getFullYear()}`;
+    return turnToDateString(turn);
 }
 
 interface Props {

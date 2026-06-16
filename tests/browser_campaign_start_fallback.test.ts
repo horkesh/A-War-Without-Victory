@@ -58,7 +58,12 @@ describe('browser new-campaign fallback', () => {
       expect(setLoadError).not.toHaveBeenCalled();
       expect(loaded).toHaveLength(1);
       const state = loaded[0] as {
-        meta: { player_faction: string };
+        meta: {
+          player_faction: string;
+          decision_mode?: string;
+          headless_scenario_auto_control?: boolean;
+        };
+        political?: { control_events?: unknown[] };
         military: {
           pending_event_decisions?: Array<{ event_id: string; faction: string; requires_player_response?: boolean }>;
           fired_event_ids: string[];
@@ -66,6 +71,9 @@ describe('browser new-campaign fallback', () => {
       };
       const pending = state.military.pending_event_decisions ?? [];
       expect(state.meta.player_faction).toBe(faction);
+      expect(state.meta.decision_mode).toBe('emergent');
+      expect(state.meta.headless_scenario_auto_control).not.toBe(true);
+      expect(state.political?.control_events ?? []).toHaveLength(0);
       expect(pending).toHaveLength(1);
       expect(pending[0]).toMatchObject({
         event_id: eventId,

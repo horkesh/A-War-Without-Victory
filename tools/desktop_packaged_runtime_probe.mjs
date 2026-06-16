@@ -63,6 +63,17 @@ const tacticalMapWindowCheck = manifest?.window_checks?.find?.(
 const tacticalSandboxWindowCheck = manifest?.window_checks?.find?.(
   (entry) => entry?.route?.endsWith?.('/tactical_sandbox.html?desktop_window=sandbox') && entry?.status === 'did-finish-load',
 );
+const expectedEventCatalogRoutes = [
+  '/data/scenarios/events/war_1992.json',
+  '/data/scenarios/events/war_1992_hrhb_summer.json',
+  '/data/scenarios/events/war_1993.json',
+  '/data/scenarios/events/war_1994.json',
+  '/data/scenarios/events/war_1995.json',
+  '/data/scenarios/events/consequences.json',
+];
+const missingEventCatalogRoutes = expectedEventCatalogRoutes.filter((route) => !manifest?.map_server_checks?.some?.(
+  (entry) => entry?.route === route && entry?.status === 200,
+));
 const operationalInteractionCheck = manifest?.tactical_interactions?.find?.(
   (entry) =>
     entry?.route_mode === 'operational' &&
@@ -136,6 +147,12 @@ if (!tacticalMapWindowCheck || tacticalMapWindowCheck.status !== 'did-finish-loa
 if (!tacticalSandboxWindowCheck || tacticalSandboxWindowCheck.status !== 'did-finish-load') {
   throw new Error(
     `Packaged desktop runtime probe manifest is missing the tactical sandbox route proof.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+
+if (missingEventCatalogRoutes.length > 0) {
+  throw new Error(
+    `Packaged desktop runtime probe manifest is missing DataLoader event catalog HTTP proof for: ${missingEventCatalogRoutes.join(', ')}.\n${JSON.stringify(manifest, null, 2)}`,
   );
 }
 

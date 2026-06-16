@@ -4,14 +4,14 @@
  *
  * Two regressions are locked here:
  *   1. The `[family=...]` row diagnostic is a developer-only taxonomy leak and
- *      must be gated behind the `devMode` store flag (mirrors the PR #130
- *      Codex unlock-state dev-gate). Visible when devMode === true; hidden
- *      when devMode === false.
+ *      must be gated behind the `diagMode` store flag (mirrors the PR #130
+ *      Codex unlock-state dev-gate). Visible when diagMode === true; hidden
+ *      when diagMode === false.
  *   2. Expanded "downstream descendants" must render resolved event TITLES
  *      (via the catalog) or a humanized label — never the raw event id.
  *
  * Pattern mirrors tests/ui/codex_panel_unlock_state.test.ts (jsdom +
- * @testing-library/react + a mocked gameStore so `devMode` is controllable).
+ * @testing-library/react + a mocked gameStore so `diagMode` is controllable).
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -20,9 +20,9 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import type { EventDefinition } from '../../src/sim/events/event_types.js';
 import type { GameState, CausalityLogEntry } from '../../src/state/game_state.js';
 
-// `devMode: true` by default so the `[family=]` diagnostic renders; the
+// `diagMode: true` by default so the `[family=]` diagnostic renders; the
 // hidden-for-players case flips this to false explicitly.
-let storeState: Record<string, any> = { devMode: true };
+let storeState: Record<string, any> = { diagMode: true };
 
 vi.mock('../../src/ui/map/store/gameStore', () => ({
     useGameStore: Object.assign(
@@ -90,14 +90,14 @@ function renderOverlay(props: {
 
 describe('DecisionHistoryOverlay — Batch D player-facing hygiene', () => {
     beforeEach(() => {
-        storeState = { devMode: true };
+        storeState = { diagMode: true };
     });
 
     afterEach(() => {
         cleanup();
     });
 
-    it('renders the [family=] diagnostic when devMode is true', () => {
+    it('renders the [family=] diagnostic when diagMode is true', () => {
         const def = buildEventDef('evt_decision', { family: 'rbih_identity' });
         const catalog = new Map<string, EventDefinition>([[def.id, def]]);
         const state = buildState({
@@ -110,8 +110,8 @@ describe('DecisionHistoryOverlay — Batch D player-facing hygiene', () => {
         expect(family.textContent).toContain('[family=rbih_identity]');
     });
 
-    it('hides the [family=] diagnostic when devMode is false (player default — no taxonomy leak)', () => {
-        storeState = { devMode: false };
+    it('hides the [family=] diagnostic when diagMode is false (player default — no taxonomy leak)', () => {
+        storeState = { devMode: true, diagMode: false };
         const def = buildEventDef('evt_decision', { family: 'rbih_identity' });
         const catalog = new Map<string, EventDefinition>([[def.id, def]]);
         const state = buildState({
@@ -172,5 +172,19 @@ describe('DecisionHistoryOverlay — Batch D player-facing hygiene', () => {
         // Humanized (Title Case, no underscores) — never the raw snake_case id.
         expect(descendantRow.textContent).toContain('Srebrenica Falls');
         expect(descendantRow.textContent).not.toContain('srebrenica_falls');
+    });
+
+    it('humanizes decision and response labels absent from the catalog', () => {
+        storeState = { diagMode: false };
+        const state = buildState({
+            decisions: [{ event_id: 'rbih_state_identity', response_id: 'bosniak_national', turn: 1 }],
+        });
+
+        renderOverlay({ eventCatalog: new Map(), state });
+
+        expect(screen.getByTestId('decision-history-event-id').textContent).toBe('Rbih State Identity');
+        expect(screen.getByTestId('decision-history-chosen-option').textContent).toBe('Bosniak National');
+        expect(screen.getByTestId('decision-history-row').textContent).not.toContain('rbih_state_identity');
+        expect(screen.getByTestId('decision-history-row').textContent).not.toContain('bosniak_national');
     });
 });

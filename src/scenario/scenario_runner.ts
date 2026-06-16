@@ -73,6 +73,8 @@ import { backfillFormationLocationOsid, loadOperationalCentroids, loadOperationa
 import { setUrbanOsidSet, setForestOsidSet } from '../sim/combat/combat_math.js';
 import { loadUrbanOsidSet, loadForestOsidSet } from '../sim/combat/combat_terrain_sets_node.js';
 import { displaceFormationsInEnemyTerritory } from '../sim/combat/attack_resolution_osid.js';
+import { isSrkStranglePostureEnabled } from '../sim/combat/contain_posture_gate.js';
+import { computeSrkStrangleOsids } from '../sim/combat/srk_strangle.js';
 import { reconcileFinalSectorTruth, sealFinalSectorTruthFromCurrentSectors } from '../sim/combat/final_sector_truth_reconciliation.js';
 import {
     applyBotOpportunityDecisions,
@@ -293,12 +295,33 @@ export async function createInitialGameState(
  * differently shaped than the first loaded save.
  */
 export function canonicalizeStartupState(state: GameState): { state: GameState; serializedState: string } {
+    materializeStartupSrkStrangleState(state);
     const initialSerialized = serializeState(state);
     const canonicalState = deserializeState(initialSerialized);
     return {
         state: canonicalState,
         serializedState: serializeState(canonicalState)
     };
+}
+
+function materializeStartupSrkStrangleState(state: GameState): void {
+    const srkOsids = computeSrkStrangleOsids(state);
+    const srkSet = new Set(srkOsids);
+    const existingRs = state.political.last_contained_osids_by_faction?.RS ?? [];
+    const nonSrkExisting = existingRs.filter((osid) => !srkSet.has(osid));
+    const nextRs = isSrkStranglePostureEnabled()
+        ? [...new Set([...nonSrkExisting, ...srkOsids])]
+        : nonSrkExisting;
+    nextRs.sort(strictCompare);
+
+    if (nextRs.length > 0) {
+        state.political.last_contained_osids_by_faction ??= {};
+        state.political.last_contained_osids_by_faction.RS = nextRs;
+        return;
+    }
+    if (state.political.last_contained_osids_by_faction?.RS) {
+        delete state.political.last_contained_osids_by_faction.RS;
+    }
 }
 
 export function hasCivilianCasualtyRecords(casualties: unknown): boolean {

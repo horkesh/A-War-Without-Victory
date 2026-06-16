@@ -779,6 +779,31 @@ function App() {
   );
   const tacticalChromeVisible = !presidentialBlockingSurfaceActive;
   const openingBriefPending = loadedGameState != null && playerFaction != null && !openingBriefDismissed;
+  const onboardingBlockingOverlayActive = (
+    presidentialBlockingSurfaceActive ||
+    openingBriefPending ||
+    armyHQOpen ||
+    codexOpen ||
+    chronicleOpen ||
+    warroomDeskOpen ||
+    warroomDecisionRoomOpen ||
+    warroomOverlaySurface !== null ||
+    commandStripOpen ||
+    summaryOpen ||
+    enclaveDashboardOpen ||
+    economyOpen ||
+    humanitarianLedgerOpen ||
+    aiSettingsOpen ||
+    autonomyPanelOpen ||
+    diplomacyOpen ||
+    aiAdvisorOpen ||
+    recruitmentOpen ||
+    paramilitaryReviewOpen ||
+    eventQueue.length > 0 ||
+    pauseOpen ||
+    settingsOpen ||
+    creditsOpen
+  );
 
   // v0.9 presidential design: auto-launch the EventDecisionModal for the first
   // blocking event decision when a new turn surfaces one. Memory:
@@ -997,22 +1022,48 @@ function App() {
       } else if (e.key === 'e' || e.key === 'E') {
         // Authored Choices ledger shortcut. Mirrors the 'D' hotkey.
         e.preventDefault();
-        setIsDecisionHistoryOpen(prev => !prev);
+        const gs = useGameStore.getState();
+        setIsDecisionHistoryOpen((prev) => {
+          const next = !prev;
+          if (next) {
+            gs.setChronicleOpen(false);
+            gs.setCodexOpen(false);
+          }
+          return next;
+        });
       } else if (e.key === 'c' || e.key === 'C') {
         e.preventDefault();
         const gs = useGameStore.getState();
-        gs.setChronicleOpen(!gs.chronicleOpen);
+        if (gs.chronicleOpen) {
+          gs.setChronicleOpen(false);
+        } else {
+          setIsDecisionHistoryOpen(false);
+          openChronicle(gs);
+        }
       } else if (e.key === 'x' || e.key === 'X') {
         e.preventDefault();
         const gs = useGameStore.getState();
-        gs.setCodexOpen(!gs.codexOpen);
+        if (gs.codexOpen) {
+          gs.setCodexOpen(false);
+        } else {
+          setIsDecisionHistoryOpen(false);
+          openCodex(gs);
+        }
       } else if (e.key === 'd' || e.key === 'D') {
         // Phase H Packet 8 — Decision History overlay hotkey. Toggle behaviour
         // mirrors Codex (X) / Chronicle (C) for consistency. The overlay's
         // ESC handler is the canonical close path; this is the second-open
         // path so the player can dismiss via the same key they opened with.
         e.preventDefault();
-        setIsDecisionHistoryOpen((prev) => !prev);
+        const gs = useGameStore.getState();
+        setIsDecisionHistoryOpen((prev) => {
+          const next = !prev;
+          if (next) {
+            gs.setChronicleOpen(false);
+            gs.setCodexOpen(false);
+          }
+          return next;
+        });
       } else if (e.key === 'u' || e.key === 'U') {
         // Item 2 — National Humanitarian Ledger. Toggle mirrors Codex (X) /
         // Chronicle (C) / Decision History (D). Read-model only.
@@ -1189,7 +1240,9 @@ function App() {
       setWarroomOverlaySurface(null);
       closeCommandStrip(false);
       setDiplomacyOpen(false);
-      setIsDecisionHistoryOpen(true);
+      setIsDecisionHistoryOpen(false);
+      openChronicle(useGameStore.getState());
+      setAppScreen('game');
       return;
     }
     setWarroomDeskOpen(false);
@@ -1274,9 +1327,9 @@ function App() {
     }
     if (action === 'decision_room') {
       setWarroomOverlaySurface(null);
-      setWarroomDeskOpen(false);
+      setWarroomDeskOpen(true);
       closeCommandStrip(false);
-      setWarroomDecisionRoomOpen(true);
+      setWarroomDecisionRoomOpen(false);
       setAppScreen('warroom');
     }
     if (action === 'peace_plan_modal') {
@@ -1896,7 +1949,7 @@ function App() {
           presidential surface. The overlay's own `shouldShowOnboarding`
           predicate handles first-run vs dismissed state from existing
           `meta.tutorial_state`; restart still flows through Settings. */}
-      {appScreen === 'game' && loadedGameState && !presidentialBlockingSurfaceActive && !openingBriefPending && <OnboardingOverlayWrapper />}
+      {appScreen === 'game' && loadedGameState && !onboardingBlockingOverlayActive && <OnboardingOverlayWrapper />}
       {/* LANE-V094-LOADING-AND-ERROR — first-paint scenario-load skeleton.
           Shown when the in-game shell has been requested but no save has
           loaded yet. Auto-dismisses when `loadedGameState` resolves. We

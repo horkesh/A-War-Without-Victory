@@ -130,7 +130,7 @@ describe('EventDecisionModal presidential dossier', () => {
                 label: 'Negotiation window preserved',
                 timing: 'future',
                 certainty: 'conditional',
-                explanation: 'This response can keep a later diplomatic review available if battlefield pressure remains manageable.',
+                explanation: 'Recording rbih_state_identity as civic closes csq_bosniak_unity_1993 if battlefield pressure remains manageable. §3.6 STRICT internal review note.',
                 opens_events: ['winter_negotiation_review'],
                 closes_events: ['emergency_retrenchment_review'],
                 opens_flags: ['diplomatic_channel_open'],
@@ -154,11 +154,14 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(screen.getByText('Negotiation window preserved')).toBeTruthy();
     expect(screen.getByText('Future')).toBeTruthy();
     expect(screen.getByText('Conditional')).toBeTruthy();
-    expect(screen.getByText('This response can keep a later diplomatic review available if battlefield pressure remains manageable.')).toBeTruthy();
-    expect(screen.getByText('Later eligible events: winter negotiation review')).toBeTruthy();
-    expect(screen.getByText('Later suppressed events: emergency retrenchment review')).toBeTruthy();
-    expect(screen.getByText('Recorded flag context: diplomatic channel open')).toBeTruthy();
-    expect(screen.getByText('Suppressed flag context: hardline mandate locked')).toBeTruthy();
+    expect(screen.getByText('Recording state identity posture as civic closes later Bosniak-national unity consolidation if battlefield pressure remains manageable.')).toBeTruthy();
+    expect(screen.queryByText(/rbih_state_identity/)).toBeNull();
+    expect(screen.queryByText(/csq_bosniak_unity_1993/)).toBeNull();
+    expect(screen.queryByText(/§3.6 STRICT/)).toBeNull();
+    expect(screen.queryByText('Later eligible events: winter negotiation review')).toBeNull();
+    expect(screen.queryByText('Later suppressed events: emergency retrenchment review')).toBeNull();
+    expect(screen.queryByText('Recorded flag context: diplomatic channel open')).toBeNull();
+    expect(screen.queryByText('Suppressed flag context: hardline mandate locked')).toBeNull();
 
     const pressForward = screen.getByText('Press forward').closest('div');
     expect(pressForward?.textContent).not.toContain('Future consequences');

@@ -101,8 +101,9 @@ function IdentityBlock({ faction }: { faction: IdentityFaction }) {
 
 export function getPeaceWarTransitionDateLabel(state: Pick<LoadedGameState, 'metadata' | 'turn'>): string {
     const metadataDate = state.metadata?.date?.trim();
-    return metadataDate && metadataDate !== 'UNKNOWN'
-        ? metadataDate
+    const normalizedMetadataDate = metadataDate?.split('·')[0]?.trim();
+    return normalizedMetadataDate && normalizedMetadataDate !== 'UNKNOWN'
+        ? normalizedMetadataDate
         : turnToDateString(state.turn ?? 0);
 }
 
@@ -179,7 +180,7 @@ export function PeaceWarTransition({ onDismiss, state }: PeaceWarTransitionProps
             </div>
 
             {/* Begin button */}
-            <div className="flex justify-center pt-2 border-t border-[rgba(180,160,130,0.15)]">
+            <div className="sticky bottom-0 -mx-2.5 flex justify-center border-t border-[rgba(180,160,130,0.15)] bg-panel-bg/95 px-2.5 pt-2 pb-1 backdrop-blur-md">
                 <button
                     onClick={onDismiss}
                     className="px-8 py-2.5 bg-[#c4a04a]/20 hover:bg-[#c4a04a]/30 text-[#c4a04a] border border-[#c4a04a]/40 rounded font-bold uppercase tracking-[0.2em] text-sm transition-all duration-200 hover:shadow-[0_0_12px_rgba(196,160,74,0.2)]"

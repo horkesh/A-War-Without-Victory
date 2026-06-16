@@ -62,12 +62,14 @@ describe('Codex #347 (P2) — onboarding auto-mount edge cases (task #85)', () =
       // The deck mounts only on the in-game screen, with a loaded save, and no
       // blocking presidential surface active.
       expect(source).toContain(
-        "appScreen === 'game' && loadedGameState && !presidentialBlockingSurfaceActive && !openingBriefPending && <OnboardingOverlayWrapper />",
+        "appScreen === 'game' && loadedGameState && !onboardingBlockingOverlayActive && <OnboardingOverlayWrapper />",
       );
       expect(source).toContain('sidePickerOpen ||');
       expect(source).toContain('peaceWarTransitionActive ||');
       expect(source).toContain('activeEventDecisionId !== null ||');
       expect(source).toContain('const openingBriefPending = loadedGameState != null && playerFaction != null && !openingBriefDismissed;');
+      expect(source).toContain('chronicleOpen ||');
+      expect(source).toContain('codexOpen ||');
       expect(source).toContain('const tacticalChromeVisible = !presidentialBlockingSurfaceActive;');
       expect(source).toContain('{tacticalChromeVisible && (');
     });

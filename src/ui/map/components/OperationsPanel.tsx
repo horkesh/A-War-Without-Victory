@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { OperationView } from '../data/types';
+import type { LoadedGameState, NamedOfficerView, OperationView } from '../data/types';
 import { useGameStore } from '../store/gameStore';
 import { DETAIL_PANEL_STYLE } from './panelRail';
 import {
@@ -11,7 +11,6 @@ import {
 import { FACTION_COLORS } from '../utils/theme';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { turnToDateString, formatOperationType, toTitleCase } from '../utils/formatters';
-import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 import { getPlayerSafeBrigadeName, getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
@@ -34,6 +33,12 @@ function getOperationHealthSummary(operation: OperationView): { label: string; c
     return { label: t('operationsPanel.health.strained'), className: 'text-amber-300' };
   }
   return { label: t('operationsPanel.health.stable'), className: 'text-green-300' };
+}
+
+function getOperationCommander(operation: OperationView, state: LoadedGameState): NamedOfficerView | null {
+  const commanderId = operation.commander_officer_id;
+  if (!commanderId) return null;
+  return state.namedOfficerData?.find((officer) => officer.id === commanderId) ?? null;
 }
 
 export function OperationsPanel() {
@@ -207,7 +212,7 @@ export function OperationsPanel() {
   };
 
   const close = () => {
-    setIsOpen(false);
+    setSelectedOperationKey(null);
     setHoveredOsids([]);
     setOperationTargetOsids([]);
   };
@@ -437,8 +442,7 @@ export function OperationsPanel() {
 
                 {/* Commander */}
                 {(() => {
-                  const corpsFormation = loadedGameState.formations.find(f => f.id === selectedOperation.corps_id);
-                  const commander = corpsFormation ? getFormationCommander(corpsFormation, loadedGameState) : null;
+                  const commander = getOperationCommander(selectedOperation, loadedGameState);
                   if (!commander) return null;
                   return (
                     <div className="pt-2 border-t border-panel-border">
