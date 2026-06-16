@@ -13,7 +13,7 @@
  *
  * This tool replaces the byte-hash with a fingerprint over MEANINGFUL, platform-stable
  * fields only — integers, strings, and booleans that are invariant across Win/Linux:
- *   - per-faction OSID control counts (the control map)        <- control_delta.json
+ *   - per-faction OSID control counts + sorted OSID flips      <- control_delta.json
  *   - anchor pass/fail map (the calibration anchors)           <- run_summary.anchor_checks
  *   - bot benchmark pass/fail/not_reached/evaluated            <- run_summary.bot_benchmark_evaluation
  *   - run shape (scenario_id, weeks, final_turn)
@@ -44,7 +44,7 @@ const { createHash } = require('node:crypto');
 const { readFileSync, writeFileSync, existsSync } = require('node:fs');
 const { join } = require('node:path');
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 /** Deterministic JSON: object keys sorted recursively, arrays preserved as given. */
 function stableStringify(value) {
@@ -64,6 +64,32 @@ function sortByKey(arr, key) {
     const bv = String(b[key]);
     return av < bv ? -1 : av > bv ? 1 : 0;
   });
+}
+
+function compareStrings(a, b) {
+  const av = String(a);
+  const bv = String(b);
+  return av < bv ? -1 : av > bv ? 1 : 0;
+}
+
+function normalizeControlFlip(row) {
+  return {
+    settlement_id: row?.settlement_id ?? row?.osid ?? null,
+    municipality_id: row?.municipality_id ?? row?.mun_id ?? null,
+    from: row?.from ?? row?.from_faction ?? null,
+    to: row?.to ?? row?.to_faction ?? null,
+  };
+}
+
+function sortControlFlips(flips) {
+  return flips
+    .map(normalizeControlFlip)
+    .sort((a, b) => (
+      compareStrings(a.settlement_id, b.settlement_id) ||
+      compareStrings(a.municipality_id, b.municipality_id) ||
+      compareStrings(a.from, b.from) ||
+      compareStrings(a.to, b.to)
+    ));
 }
 
 /**
@@ -90,6 +116,7 @@ function buildStructuralFields(runDir) {
   for (const row of sortByKey(rawControl, 'controller')) {
     controlCounts[row.controller] = row.count;
   }
+  const controlFlips = sortControlFlips(Array.isArray(controlDelta.flips) ? controlDelta.flips : []);
 
   // --- Anchor pass/fail map (sorted by anchor_id) ---
   const anchorChecks = {};
@@ -117,6 +144,7 @@ function buildStructuralFields(runDir) {
     weeks: runSummary.weeks ?? null,
     final_turn: runSummary.summary?.final_turn ?? null,
     control_counts: controlCounts,
+    control_flips: controlFlips,
     anchors_passed: anchorsPassed,
     anchors_total: Object.keys(anchorChecks).length,
     anchor_checks: anchorChecks,
@@ -197,6 +225,7 @@ function main(argv) {
       if (as !== bs) diffs.push(`  ${path}: expected ${as} got ${bs}`);
     };
     collect('control_counts', expFields.control_counts, fields.control_counts);
+    collect('control_flips', expFields.control_flips, fields.control_flips);
     collect('anchors_passed', expFields.anchors_passed, fields.anchors_passed);
     collect('anchor_checks', expFields.anchor_checks, fields.anchor_checks);
     collect('benchmark', expFields.benchmark, fields.benchmark);

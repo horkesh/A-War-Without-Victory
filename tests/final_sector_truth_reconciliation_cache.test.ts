@@ -171,6 +171,20 @@ describe('reconcileFinalSectorTruth cache (C5)', () => {
         expect(second).not.toBe(first);
     });
 
+    it('invalidates when same-length war_front_edges_osid content is replaced', () => {
+        const { state, edges } = makeState();
+        const first = reconcileFinalSectorTruth(state, edges, null);
+        const spy = vi.spyOn(corpsFrontSectorsModule, 'buildCorpsFrontSectors');
+
+        state.military.war_front_edges_osid = [
+            { edge_id: 'op:test:rear__op:test:enemy', a: 'op:test:rear', b: 'op:test:enemy', side_a: 'RS', side_b: 'RBiH' },
+        ];
+
+        const second = reconcileFinalSectorTruth(state, edges, null);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(second).not.toBe(first);
+    });
+
     it('invalidates when supply state input changes', () => {
         const { state, edges } = makeState();
         const firstSupply = {

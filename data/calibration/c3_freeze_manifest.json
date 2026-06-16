@@ -9,12 +9,15 @@
     "note": "tg_schema_freeze.test.ts pins CURRENT_SCHEMA_VERSION === getLatestSchemaVersion() === 36 and (C3) the canonical persisted key-sets of military/political/displacement. A new persisted field without a migration + schema bump trips a RED required test (full-suite CI). The startup-snapshot contract (tests/startup_snapshot_contract.test.ts) is the second layer."
   },
   "calibration_40w": {
-    "structural_fingerprint": "78af6fc7a3278a3e",
+    "structural_fingerprint": "f282883abbab76cf",
+    "structural_fingerprint_schema": 2,
     "control_counts": { "HRHB": 89, "RBiH": 250, "RS": 373 },
+    "control_flips": 123,
     "anchors_passed": 30,
     "anchors_total": 30,
     "source": "data/calibration/structural_fingerprint_40w.json",
-    "enforced_by": "structural-fingerprint CI job (REQUIRED) via npm run ci:structural-fingerprint:check; drift = hard fail; deliberate change = npm run ci:structural-fingerprint:update + panel sign-off"
+    "enforced_by": "structural-fingerprint CI job (REQUIRED) via npm run ci:structural-fingerprint:check; drift = hard fail; deliberate change = npm run ci:structural-fingerprint:update + panel sign-off",
+    "note": "Schema v2 fingerprints sorted OSID flip rows as well as per-faction counts, anchors, benchmarks, and run shape; equal-count control swaps are no longer invisible to the CI gate."
   },
   "calibration_188w": {
     "matched_osids_floor": 658,

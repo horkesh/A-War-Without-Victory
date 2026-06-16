@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest issue #170 fingerprint/cache hardening:** [implemented/20260616_ISSUE170_FINGERPRINT_CACHE_HARDENING.md](implemented/20260616_ISSUE170_FINGERPRINT_CACHE_HARDENING.md) - Structural fingerprint v2 now pins sorted OSID control flips, final-sector cache keys include front-edge content, and operation-roster cache invalidation has dynamic coverage.
+
 **Latest stale-truth/process hardening:** [implemented/20260616_STALE_TRUTH_AND_PROCESS_HARDENING.md](implemented/20260616_STALE_TRUTH_AND_PROCESS_HARDENING.md) - Engine-health CI reports upstream scenario failures clearly, Sarajevo siege UI requires current control freshness, decision consequence copy uses authored names or neutral fallbacks, and life-lessons counts/topic files are synced.
 
 **Latest engine-health CI dependency hardening:** [implemented/20260616_ENGINE_HEALTH_CI_DEPENDENCY_HARDENING.md](implemented/20260616_ENGINE_HEALTH_CI_DEPENDENCY_HARDENING.md) - Required `engine-health-188w` now starts under `if: always()` and fails explicitly when `scenarios` does not succeed.

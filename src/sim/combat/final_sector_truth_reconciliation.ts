@@ -34,8 +34,7 @@ export interface FinalSectorTruthReconciliationReport {
  *
  * Cache key is a content fingerprint over every input the pipeline reads:
  *   - turn
- *   - war_front_edges_osid.length (array ref is stable after rederive step,
- *     but length fingerprint lets us catch unexpected replacements too)
+ *   - war_front_edges_osid content (edge_id, endpoints, faction sides; sorted)
  *   - political_controllers entries (sorted)
  *   - active formations (id, location_osid, faction, status-active)
  *   - supply_state_by_osid report entries used by sector combat ratings
@@ -79,9 +78,21 @@ function computeCorpsCommandFingerprint(state: GameState): string {
     return parts.join('|');
 }
 
+function computeFrontEdgeFingerprint(state: GameState): string {
+    const edges = state.military.war_front_edges_osid ?? [];
+    const parts = edges.map((edge) => JSON.stringify([
+        edge.edge_id ?? '',
+        edge.a ?? '',
+        edge.b ?? '',
+        edge.side_a ?? '',
+        edge.side_b ?? '',
+    ]));
+    return parts.sort(strictCompare).join('|');
+}
+
 function computeReconcileFingerprint(state: GameState, supplyStateByOsid?: SupplyStateByOsidReport | null): string {
     const turn = state.meta?.turn ?? 0;
-    const frontEdgeCount = state.military.war_front_edges_osid?.length ?? 0;
+    const frontEdges = computeFrontEdgeFingerprint(state);
 
     const pc = state.political?.political_controllers ?? {};
     const pcKeys = Object.keys(pc).sort(strictCompare);
@@ -101,7 +112,7 @@ function computeReconcileFingerprint(state: GameState, supplyStateByOsid?: Suppl
     }
 
     return 't' + turn
-        + '|fe' + frontEdgeCount
+        + '|fe' + frontEdges
         + '|pc' + pcParts.join('|')
         + '|fm' + fmParts.join('|')
         + '|supply' + computeSupplyFingerprint(supplyStateByOsid)

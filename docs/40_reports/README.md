@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest issue #170 fingerprint/cache hardening** | [implemented/20260616_ISSUE170_FINGERPRINT_CACHE_HARDENING.md](implemented/20260616_ISSUE170_FINGERPRINT_CACHE_HARDENING.md) - Structural fingerprint v2 now pins sorted OSID control flips, final-sector cache keys include front-edge content, and operation-roster cache invalidation has dynamic coverage. |
 | **Latest stale-truth/process hardening** | [implemented/20260616_STALE_TRUTH_AND_PROCESS_HARDENING.md](implemented/20260616_STALE_TRUTH_AND_PROCESS_HARDENING.md) - Engine-health CI reports upstream scenario failures clearly, Sarajevo siege UI requires current control freshness, consequence copy uses authored/neutral labels, and life-lessons topic files/counts are synced. |
 | **Latest engine-health CI dependency hardening** | [implemented/20260616_ENGINE_HEALTH_CI_DEPENDENCY_HARDENING.md](implemented/20260616_ENGINE_HEALTH_CI_DEPENDENCY_HARDENING.md) - Required `engine-health-188w` fails explicitly when its upstream `scenarios` job does not succeed. |
 | **Latest UI copy raw-ID fallback closure** | [implemented/20260616_UI_COPY_RAW_ID_FALLBACKS.md](implemented/20260616_UI_COPY_RAW_ID_FALLBACKS.md) - Command planning, Chief of Staff prose, Warroom hotspot titles, and autonomy proposal values now keep raw ids internal and render neutral/player-safe copy. |

@@ -23,23 +23,26 @@
 - Gate: `tools/scenario_runner/run_baseline_regression.ts`
 - Gate: `tests/scenario_harness_contracts.test.ts` (`H1.1 scenario determinism`)
 
-### Platform-stable structural fingerprint (CI determinism authority, C1 2026-06-09)
+### Platform-stable structural fingerprint (CI determinism authority, C1 2026-06-09; v2 2026-06-16)
 - **Why:** the byte-hash baselines CI job was removed 2026-05-04 because
   `final_save.json` SHA256 diverges between the Windows dev box and the Linux CI runner
   (platform float serialization). That left determinism regression with no machine signal
   on CI (`LANE-NIGHTSHIFT-PLATFORM-STABLE-MANIFEST`).
 - **Replacement:** `tools/diagnostics/structural_fingerprint.cjs` fingerprints only
-  MEANINGFUL, platform-stable fields of a scenario run — per-faction OSID control map,
-  anchor pass/fail map, and bot-benchmark tallies (all integers/strings/booleans). It
-  DELIBERATELY excludes `final_save.json` byte-hash and per-faction brigade/formation
-  counts (the latter vary run-to-run even at identical territory — verified — so they are
-  a run-snapshot artifact, not territory truth).
+  MEANINGFUL, platform-stable fields of a scenario run: per-faction OSID control counts,
+  sorted OSID control flips, anchor pass/fail map, and bot-benchmark tallies
+  (all integers/strings/booleans). Schema v2 explicitly catches equal-count OSID control
+  swaps that would leave faction totals unchanged. It DELIBERATELY excludes
+  `final_save.json` byte-hash and per-faction brigade/formation counts (the latter vary
+  run-to-run even at identical territory, so they are a run-snapshot artifact, not
+  territory truth).
 - **Gate:** CI job `structural-fingerprint` in `.github/workflows/full-suite-and-fingerprint.yml`
   runs a fresh 40w and compares against committed `data/calibration/structural_fingerprint_40w.json`
   via `npm run ci:structural-fingerprint:check`. A structural move without a deliberate
   `npm run ci:structural-fingerprint:update` fails the gate.
 - **Tool self-test:** `tests/structural_fingerprint.test.ts` (determinism, order-independence,
-  formation-exclusion, and positive sensitivity to control/anchor/benchmark changes).
+  formation-exclusion, and positive sensitivity to control-count/OSID-flip/anchor/benchmark
+  changes).
 - **Reference platform = Linux/Node 22 (DoD C2):** Windows==Linux byte-hashes are NOT
   promised; the structural fingerprint IS the cross-platform determinism authority.
 

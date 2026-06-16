@@ -16,6 +16,7 @@ const fp = require('../tools/diagnostics/structural_fingerprint.cjs') as {
 
 function makeRunDir(opts: {
     controlAfter: Array<{ controller: string; count: number }>;
+    flips?: Array<{ settlement_id: string; from: string | null; to: string | null }>;
     anchors: Array<{ anchor_id: string; passed: boolean }>;
     benchmark: { evaluated: number; passed: number; failed: number; not_reached: number };
     formationsActive?: number;
@@ -24,7 +25,7 @@ function makeRunDir(opts: {
     const dir = mkdtempSync(join(tmpdir(), 'fp-'));
     writeFileSync(
         join(dir, 'control_delta.json'),
-        JSON.stringify({ net_control_counts_after: opts.controlAfter }),
+        JSON.stringify({ net_control_counts_after: opts.controlAfter, flips: opts.flips ?? [] }),
         'utf8',
     );
     writeFileSync(
@@ -60,6 +61,10 @@ const BASE = {
         { controller: 'RBiH', count: 250 },
         { controller: 'HRHB', count: 89 },
     ],
+    flips: [
+        { settlement_id: 'op:alpha:one', from: 'RBiH', to: 'RS' },
+        { settlement_id: 'op:bravo:two', from: 'RS', to: 'RBiH' },
+    ],
     anchors: [
         { anchor_id: 'op:b:b', passed: true },
         { anchor_id: 'op:a:a', passed: true },
@@ -84,6 +89,7 @@ describe('structural_fingerprint', () => {
         const b = makeRunDir({
             ...BASE,
             controlAfter: [...BASE.controlAfter].reverse(),
+            flips: [...BASE.flips].reverse(),
             anchors: [...BASE.anchors].reverse(),
         });
         try {
@@ -120,6 +126,24 @@ describe('structural_fingerprint', () => {
             ],
         });
         try {
+            expect(fp.buildFingerprint(a).fingerprint).not.toBe(fp.buildFingerprint(b).fingerprint);
+        } finally {
+            rmSync(a, { recursive: true, force: true });
+            rmSync(b, { recursive: true, force: true });
+        }
+    });
+
+    it('CHANGES when OSID control flips change even if per-faction counts stay equal', () => {
+        const a = makeRunDir(BASE);
+        const b = makeRunDir({
+            ...BASE,
+            flips: [
+                { settlement_id: 'op:charlie:three', from: 'RBiH', to: 'RS' },
+                { settlement_id: 'op:delta:four', from: 'RS', to: 'RBiH' },
+            ],
+        });
+        try {
+            expect(fp.buildStructuralFields(a).control_counts).toEqual(fp.buildStructuralFields(b).control_counts);
             expect(fp.buildFingerprint(a).fingerprint).not.toBe(fp.buildFingerprint(b).fingerprint);
         } finally {
             rmSync(a, { recursive: true, force: true });

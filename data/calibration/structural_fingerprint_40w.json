@@ -1,8 +1,8 @@
 {
-  "schema_version": 1,
-  "fingerprint": "78af6fc7a3278a3e",
+  "schema_version": 2,
+  "fingerprint": "f282883abbab76cf",
   "fields": {
-    "schema_version": 1,
+    "schema_version": 2,
     "scenario_id": "apr1992_definitive_40w",
     "weeks": 40,
     "final_turn": 40,
@@ -11,6 +11,746 @@
       "RBiH": 250,
       "RS": 373
     },
+    "control_flips": [
+      {
+        "settlement_id": "op:banja_luka:dragocaj",
+        "municipality_id": "banja_luka",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:banja_luka:potkozarje_3",
+        "municipality_id": "banja_luka",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:banovici:seona",
+        "municipality_id": "banovici",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bihac:orasac_2",
+        "municipality_id": "bihac",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bijeljina:bijeljina_2",
+        "municipality_id": "bijeljina",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bijeljina:janja_2",
+        "municipality_id": "bijeljina",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bileca:zausje",
+        "municipality_id": "bileca",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bosanska_dubica:kozarska_dubica",
+        "municipality_id": "bosanska_dubica",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bosanska_gradiska:gradiska_3",
+        "municipality_id": "bosanska_gradiska",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bosanska_gradiska:mackovac",
+        "municipality_id": "bosanska_gradiska",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bosanska_gradiska:orahova",
+        "municipality_id": "bosanska_gradiska",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bosanska_krupa:arapusa_2",
+        "municipality_id": "bosanska_krupa",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bosanski_brod:brod",
+        "municipality_id": "bosanski_brod",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bosanski_brod:novo_selo_2",
+        "municipality_id": "bosanski_brod",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bosanski_novi:blagaj_japra",
+        "municipality_id": "bosanski_novi",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bosanski_novi:novi_grad_3",
+        "municipality_id": "bosanski_novi",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bosanski_novi:suhaca_4",
+        "municipality_id": "bosanski_novi",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bosanski_petrovac:bosanski_petrovac_2",
+        "municipality_id": "bosanski_petrovac",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bosanski_samac:novo_selo_2",
+        "municipality_id": "bosanski_samac",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bosanski_samac:samac_2",
+        "municipality_id": "bosanski_samac",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bratunac:bratunac_2",
+        "municipality_id": "bratunac",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bratunac:glogova",
+        "municipality_id": "bratunac",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bratunac:jezestica_2",
+        "municipality_id": "bratunac",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bratunac:pobudje_2",
+        "municipality_id": "bratunac",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bratunac:zapolje_2",
+        "municipality_id": "bratunac",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:brcko:bukvik_gornji_2",
+        "municipality_id": "brcko",
+        "from": "RS",
+        "to": "RBiH"
+      },
+      {
+        "settlement_id": "op:brcko:krepsic",
+        "municipality_id": "brcko",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:brcko:skakava_donja",
+        "municipality_id": "brcko",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bugojno:vucipolje_3",
+        "municipality_id": "bugojno",
+        "from": "HRHB",
+        "to": "RBiH"
+      },
+      {
+        "settlement_id": "op:cajnice:batotici",
+        "municipality_id": "cajnice",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:cajnice:todorovici",
+        "municipality_id": "cajnice",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:capljina:tasovcici_2",
+        "municipality_id": "capljina",
+        "from": "RS",
+        "to": "HRHB"
+      },
+      {
+        "settlement_id": "op:derventa:derventa_2",
+        "municipality_id": "derventa",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:derventa:misinci_2",
+        "municipality_id": "derventa",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:derventa:zivinice",
+        "municipality_id": "derventa",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:doboj:kotorsko_2",
+        "municipality_id": "doboj",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:donji_vakuf:donji_vakuf_2",
+        "municipality_id": "donji_vakuf",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:donji_vakuf:oborci_2",
+        "municipality_id": "donji_vakuf",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:donji_vakuf:prusac_2",
+        "municipality_id": "donji_vakuf",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:donji_vakuf:torlakovac_2",
+        "municipality_id": "donji_vakuf",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:foca:brusna_2",
+        "municipality_id": "foca",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:foca:mazlina",
+        "municipality_id": "foca",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:foca:patkovina",
+        "municipality_id": "foca",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:gacko:bahori",
+        "municipality_id": "gacko",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:gacko:gacko_2",
+        "municipality_id": "gacko",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:glamoc:kovacevci_2",
+        "municipality_id": "glamoc",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:gorazde:glamoc",
+        "municipality_id": "gorazde",
+        "from": "RS",
+        "to": "RBiH"
+      },
+      {
+        "settlement_id": "op:gorazde:kamen",
+        "municipality_id": "gorazde",
+        "from": "RS",
+        "to": "RBiH"
+      },
+      {
+        "settlement_id": "op:gorazde:sopotnica",
+        "municipality_id": "gorazde",
+        "from": "RS",
+        "to": "RBiH"
+      },
+      {
+        "settlement_id": "op:gornji_vakuf:pajic_polje_2",
+        "municipality_id": "gornji_vakuf",
+        "from": "HRHB",
+        "to": "RBiH"
+      },
+      {
+        "settlement_id": "op:hanpijesak:nevacka_3",
+        "municipality_id": "hanpijesak",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:ilidza:rakovica_2",
+        "municipality_id": "ilidza",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:ilidza:sarajevo_dio_ilidza_2",
+        "municipality_id": "ilidza",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:ilijas:dragoradi",
+        "municipality_id": "ilijas",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:ilijas:medojevici",
+        "municipality_id": "ilijas",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:ilijas:sirovine",
+        "municipality_id": "ilijas",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:jajce:barevo_2",
+        "municipality_id": "jajce",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:jajce:divicani_2",
+        "municipality_id": "jajce",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:jajce:jajce_3",
+        "municipality_id": "jajce",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:jajce:jezero_2",
+        "municipality_id": "jajce",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:jajce:kruscica",
+        "municipality_id": "jajce",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:jajce:lupnica",
+        "municipality_id": "jajce",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:jajce:vinac_2",
+        "municipality_id": "jajce",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:kakanj:biljesevo",
+        "municipality_id": "kakanj",
+        "from": "RS",
+        "to": "RBiH"
+      },
+      {
+        "settlement_id": "op:kalinovik:golubici_2",
+        "municipality_id": "kalinovik",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:kalinovik:sela_2",
+        "municipality_id": "kalinovik",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:kladanj:olovci_2",
+        "municipality_id": "kladanj",
+        "from": "RS",
+        "to": "RBiH"
+      },
+      {
+        "settlement_id": "op:kljuc:hadzici",
+        "municipality_id": "kljuc",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:kljuc:kljuc_2",
+        "municipality_id": "kljuc",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:kljuc:krasulje_2",
+        "municipality_id": "kljuc",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:konjic:buturovic_polje_2",
+        "municipality_id": "konjic",
+        "from": "HRHB",
+        "to": "RBiH"
+      },
+      {
+        "settlement_id": "op:konjic:glavaticevo_2",
+        "municipality_id": "konjic",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:konjic:ljuta",
+        "municipality_id": "konjic",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:kotor_varos:kotor_varos_2",
+        "municipality_id": "kotor_varos",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:modrica:garevac_2",
+        "municipality_id": "modrica",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:modrica:modrica",
+        "municipality_id": "modrica",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:mostar:hodbina_2",
+        "municipality_id": "mostar",
+        "from": "RS",
+        "to": "HRHB"
+      },
+      {
+        "settlement_id": "op:mostar:kruzanj_2",
+        "municipality_id": "mostar",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:mostar:vranjevici_2",
+        "municipality_id": "mostar",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:mrkonjic_grad:baljvine_2",
+        "municipality_id": "mrkonjic_grad",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:odzak:donja_dubica",
+        "municipality_id": "odzak",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:odzak:potocani_2",
+        "municipality_id": "odzak",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:olovo:gurdici_2",
+        "municipality_id": "olovo",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:prijedor:kamicani",
+        "municipality_id": "prijedor",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:prijedor:kozarac_2",
+        "municipality_id": "prijedor",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:prijedor:ljubija_2",
+        "municipality_id": "prijedor",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:prijedor:raljas",
+        "municipality_id": "prijedor",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:prnjavor:konjuhovci_2",
+        "municipality_id": "prnjavor",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:prnjavor:lisnja_2",
+        "municipality_id": "prnjavor",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:prozor:lug_2",
+        "municipality_id": "prozor",
+        "from": "RBiH",
+        "to": "HRHB"
+      },
+      {
+        "settlement_id": "op:prozor:paros",
+        "municipality_id": "prozor",
+        "from": "RBiH",
+        "to": "HRHB"
+      },
+      {
+        "settlement_id": "op:prozor:ustirama_3",
+        "municipality_id": "prozor",
+        "from": "RBiH",
+        "to": "HRHB"
+      },
+      {
+        "settlement_id": "op:prozor:uzdol_2",
+        "municipality_id": "prozor",
+        "from": "RBiH",
+        "to": "HRHB"
+      },
+      {
+        "settlement_id": "op:rogatica:kovanj",
+        "municipality_id": "rogatica",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:rogatica:kramer_selo_2",
+        "municipality_id": "rogatica",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:rogatica:rogatica_2",
+        "municipality_id": "rogatica",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:sanski_most:ilidza_2",
+        "municipality_id": "sanski_most",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:sanski_most:sanski_most_2",
+        "municipality_id": "sanski_most",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:sanski_most:skucani_vakuf_2",
+        "municipality_id": "sanski_most",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:sanski_most:stari_majdan",
+        "municipality_id": "sanski_most",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:sipovo:volari_2",
+        "municipality_id": "sipovo",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:skender_vakuf:donji_koricani",
+        "municipality_id": "skender_vakuf",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:srebrenica:obadi",
+        "municipality_id": "srebrenica",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:srebrenica:osmace_2",
+        "municipality_id": "srebrenica",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:stolac:pjesivac_kula_2",
+        "municipality_id": "stolac",
+        "from": "RS",
+        "to": "HRHB"
+      },
+      {
+        "settlement_id": "op:stolac:rotimlja_2",
+        "municipality_id": "stolac",
+        "from": "RS",
+        "to": "HRHB"
+      },
+      {
+        "settlement_id": "op:stolac:stolac_2",
+        "municipality_id": "stolac",
+        "from": "RS",
+        "to": "HRHB"
+      },
+      {
+        "settlement_id": "op:teslic:donji_ruzevic",
+        "municipality_id": "teslic",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:trebinje:trebimlja_2",
+        "municipality_id": "trebinje",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:tuzla:simin_han_2",
+        "municipality_id": "tuzla",
+        "from": "RS",
+        "to": "RBiH"
+      },
+      {
+        "settlement_id": "op:visegrad:drinsko",
+        "municipality_id": "visegrad",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:visegrad:medjedja_2",
+        "municipality_id": "visegrad",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:visegrad:prelovo_2",
+        "municipality_id": "visegrad",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:visegrad:velji_lug",
+        "municipality_id": "visegrad",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:visegrad:visegrad_2",
+        "municipality_id": "visegrad",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:vlasenica:cerska_2",
+        "municipality_id": "vlasenica",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:vlasenica:sebiocina",
+        "municipality_id": "vlasenica",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:vlasenica:vlasenica_2",
+        "municipality_id": "vlasenica",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:vogosca:svrake",
+        "municipality_id": "vogosca",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:zavidovici:cardak_2",
+        "municipality_id": "zavidovici",
+        "from": "RS",
+        "to": "RBiH"
+      },
+      {
+        "settlement_id": "op:zvornik:donja_kamenica",
+        "municipality_id": "zvornik",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:zvornik:novo_selo",
+        "municipality_id": "zvornik",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:zvornik:zvornik",
+        "municipality_id": "zvornik",
+        "from": "RBiH",
+        "to": "RS"
+      }
+    ],
     "anchors_passed": 30,
     "anchors_total": 30,
     "anchor_checks": {
