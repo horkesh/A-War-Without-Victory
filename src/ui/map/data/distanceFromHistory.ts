@@ -47,10 +47,14 @@ export interface DistanceFromHistoryDivergence {
     eventId: string;
     /** Readable event title (from the catalog) or the raw event id when absent. */
     title: string;
-    /** The response id the player/bot actually chose. */
+    /** Player-facing label for the response the player/bot actually chose. */
     chosen: string;
-    /** The historical default response id for this event. */
+    /** Player-facing label for the historical default response. */
     historical: string;
+    /** The raw response id the player/bot actually chose. Internal/debug use only. */
+    chosenResponseId: string;
+    /** The raw historical default response id for this event. Internal/debug use only. */
+    historicalResponseId: string;
     /** Turn the divergent decision was recorded. */
     turn: number;
     /** Faction that owned the decision (may be null on older logs). */
@@ -87,13 +91,18 @@ interface RawEventRowForHistory {
     id?: unknown;
     title?: unknown;
     historical_default_response_id?: unknown;
+    response_options?: Array<{ id?: unknown; label?: unknown }>;
 }
 
 /** Per-event historical-default + title metadata resolved from the catalog. */
 interface EventHistoryMeta {
     historicalDefault: string;
     title: string;
+    responseLabels: ReadonlyMap<string, string>;
 }
+
+const RECORDED_CHOICE_LABEL = 'Recorded choice';
+const HISTORICAL_DEFAULT_LABEL = 'Historical default';
 
 /**
  * Build an `event_id -> { historicalDefault, title }` lookup, restricted to
@@ -119,9 +128,18 @@ function buildEventHistoryMap(): ReadonlyMap<string, EventHistoryMeta> {
                 typeof rawRow.title === 'string' && rawRow.title.trim().length > 0
                     ? rawRow.title.trim()
                     : eventId;
+            const responseLabels = new Map<string, string>();
+            const options = Array.isArray(rawRow.response_options) ? rawRow.response_options : [];
+            for (const opt of options) {
+                const optId = typeof opt?.id === 'string' ? opt.id : undefined;
+                const label = typeof opt?.label === 'string' ? opt.label.trim() : '';
+                if (optId && label.length > 0) {
+                    responseLabels.set(optId, label);
+                }
+            }
             // First definition wins (catalog ids are unique; guard anyway).
             if (!out.has(eventId)) {
-                out.set(eventId, { historicalDefault, title });
+                out.set(eventId, { historicalDefault, title, responseLabels });
             }
         }
     }
@@ -156,6 +174,14 @@ function emptyView(): DistanceFromHistoryView {
         playerDiverged: 0,
         divergences: [],
     };
+}
+
+function resolveResponseLabel(
+    meta: EventHistoryMeta,
+    responseId: string,
+    fallback: string,
+): string {
+    return meta.responseLabels.get(responseId) ?? fallback;
 }
 
 /**
@@ -218,8 +244,10 @@ export function buildDistanceFromHistory(
         divergences.push({
             eventId,
             title: meta.title,
-            chosen: decision.responseId,
-            historical: meta.historicalDefault,
+            chosen: resolveResponseLabel(meta, decision.responseId, RECORDED_CHOICE_LABEL),
+            historical: resolveResponseLabel(meta, meta.historicalDefault, HISTORICAL_DEFAULT_LABEL),
+            chosenResponseId: decision.responseId,
+            historicalResponseId: meta.historicalDefault,
             turn: decision.turn,
             faction: decision.faction,
             source: decision.source,

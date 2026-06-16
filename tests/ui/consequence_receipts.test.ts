@@ -153,6 +153,51 @@ describe('buildConsequenceReceipts', () => {
         expect(byPredicted.get('p_closed')!.firedTurn).toBeNull();
     });
 
+    it('keeps fallback visible labels player-safe while retaining raw ids internally', () => {
+        const catalog = new Map<string, EventDefinition>([
+            ['evt_internal_crisis_1994', buildEventDef('evt_internal_crisis_1994', ['csq_patron_recovery_offer'], {
+                responseId: 'approve_emergency_measure',
+                title: '',
+                label: '   ',
+                consequenceLabel: '   ',
+                explanation: 'Downstream dossier entry.',
+            })],
+            ['csq_patron_recovery_offer', buildTargetDef('csq_patron_recovery_offer', '')],
+        ]);
+        const state = buildState({
+            decisions: [{ event_id: 'evt_internal_crisis_1994', response_id: 'approve_emergency_measure', turn: 6 }],
+            firedEventIds: ['evt_internal_crisis_1994', 'csq_patron_recovery_offer'],
+            lastFiredTurn: { csq_patron_recovery_offer: 10 },
+            causalityLog: [
+                {
+                    turn: 10,
+                    from_event: 'evt_internal_crisis_1994',
+                    to_event: 'csq_patron_recovery_offer',
+                    to_flag: null,
+                    kind: 'enables',
+                    source_response_id: 'approve_emergency_measure',
+                },
+            ],
+        });
+
+        const [receipt] = buildConsequenceReceipts(state, catalog);
+        expect(receipt.id).toBe('evt_internal_crisis_1994::approve_emergency_measure::csq_patron_recovery_offer');
+        expect(receipt.decisionEventId).toBe('evt_internal_crisis_1994');
+        expect(receipt.predictedEventId).toBe('csq_patron_recovery_offer');
+
+        const visibleLabels = [
+            receipt.decisionTitle,
+            receipt.decisionOptionLabel,
+            receipt.predictedLabel,
+        ].join(' | ');
+        expect(visibleLabels).not.toContain('evt_internal_crisis_1994');
+        expect(visibleLabels).not.toContain('approve_emergency_measure');
+        expect(visibleLabels).not.toContain('csq_');
+        expect(receipt.decisionTitle).toBe('Internal Crisis 1994');
+        expect(receipt.decisionOptionLabel).toBe('Approve Emergency Measure');
+        expect(receipt.predictedLabel).toBe('Patron Recovery Offer');
+    });
+
     it('requires the response-tagged enables edge for CONFIRMED (fired alone is not enough)', () => {
         const catalog = new Map<string, EventDefinition>([
             ['E', buildEventDef('E', ['p'])],

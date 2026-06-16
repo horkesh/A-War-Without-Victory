@@ -37,6 +37,7 @@ import type {
     EventResponseOption,
 } from '../../../sim/events/event_types.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { getPlayerSafeDisplayLabel } from '../utils/playerSafeText.js';
 
 /** Realization status of a single predicted downstream event. */
 export type ConsequenceReceiptStatus = 'confirmed' | 'pending' | 'contradicted';
@@ -49,17 +50,17 @@ export interface ConsequenceReceipt {
     /** Originating decision — the event the player responded to. */
     decisionEventId: string;
     /** Player-facing title of the originating event (resolved from catalog;
-     *  falls back to the raw id when the catalog lacks it). */
+     *  falls back to a player-safe label when the catalog lacks it). */
     decisionTitle: string;
     /** Player-facing label of the chosen option (resolved from catalog; falls
-     *  back to the raw response id). */
+     *  back to a player-safe label). */
     decisionOptionLabel: string;
     /** Turn the player made the decision. */
     decisionTurn: number;
     /** The predicted downstream event id. */
     predictedEventId: string;
     /** Player-facing label of the predicted consequence (from the dossier's
-     *  future_consequence entry; falls back to the predicted event title or id). */
+     *  future_consequence entry; falls back to a player-safe predicted event label). */
     predictedLabel: string;
     /** Dossier explanation of the predicted consequence (when authored). */
     predictedExplanation: string;
@@ -102,15 +103,29 @@ function findOption(
     return (def.response_options ?? []).find((o) => o.id === responseId);
 }
 
+function resolveEventFallbackLabel(fallbackId: string): string {
+    const displayId = fallbackId.trim().replace(/^(?:evt|event|csq)_/i, '');
+    return getPlayerSafeDisplayLabel(displayId || fallbackId, 'Recorded event');
+}
+
 /** Resolve a player-facing event title from the catalog, defensively. `title`
- *  is the canonical (typed) display field on EventDefinition; fall back to the
- *  raw id when it is absent/blank. */
+ *  is the canonical (typed) display field on EventDefinition; fall back to a
+ *  generic, human-readable label so raw event/consequence ids stay internal. */
 function resolveEventTitle(
     def: EventDefinition | undefined,
     fallbackId: string,
 ): string {
     const title = def?.title;
-    return typeof title === 'string' && title.trim().length > 0 ? title : fallbackId;
+    return typeof title === 'string' && title.trim().length > 0
+        ? title
+        : resolveEventFallbackLabel(fallbackId);
+}
+
+function resolveOptionLabel(option: EventResponseOption, fallbackId: string): string {
+    const label = option.label;
+    return typeof label === 'string' && label.trim().length > 0
+        ? label
+        : getPlayerSafeDisplayLabel(fallbackId, 'Recorded response');
 }
 
 /** Player-facing label for a faction's coercive patron — sober, factual. */
@@ -214,7 +229,7 @@ export function buildConsequenceReceipts(
         if (futureConsequences.length === 0) continue;
 
         const decisionTitle = resolveEventTitle(def, dec.event_id);
-        const decisionOptionLabel = option.label?.trim() || dec.response_id;
+        const decisionOptionLabel = resolveOptionLabel(option, dec.response_id);
 
         // Dedupe predicted ids within this decision (a predicted id may appear
         // across multiple future_consequence entries).

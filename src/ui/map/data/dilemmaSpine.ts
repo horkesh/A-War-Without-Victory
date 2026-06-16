@@ -79,7 +79,7 @@ export interface DilemmaSpineView {
     /** The chosen response id for the decision event (last-wins), or null. */
     chosenResponseId: string | null;
     /** Human-readable branch label (response-option label) when resolvable,
-     *  else the raw chosen response id, else null when not yet faced. */
+     *  else neutral player-safe copy, else null when not yet faced. */
     chosenBranchLabel: string | null;
     /** Turn the decision was recorded, or null when not yet decided. */
     decisionTurn: number | null;
@@ -208,6 +208,7 @@ function buildKeystoneLabelMap(): ReadonlyMap<string, string> {
 }
 
 const KEYSTONE_LABEL_MAP: ReadonlyMap<string, string> = buildKeystoneLabelMap();
+const RECORDED_CHOICE_LABEL = 'Recorded choice';
 
 /**
  * Resolve the chosen response id + decision turn for a decision event from the
@@ -239,7 +240,7 @@ function resolveDecisionForEvent(
  * (`decisionResponses` carries `${event_id}:${response_id}`). `chosenResponseId`
  * + `decisionTurn` come from the raw event_decision_log entry for the dilemma's
  * decision event (last-wins). `chosenBranchLabel` resolves the canon
- * response-option label, falling back to the raw response id.
+ * response-option label, falling back to neutral player-safe copy.
  *
  * Pure + deterministic; returns one view per spine definition, in canon order.
  * Returns a fully not-yet-faced spine for empty / flag-off states (never []),
@@ -287,7 +288,7 @@ export function buildDilemmaSpine(
         let chosenBranchLabel: string | null = null;
         if (chosenResponseId) {
             chosenBranchLabel =
-                KEYSTONE_LABEL_MAP.get(`${def.decisionEventId}::${chosenResponseId}`) ?? chosenResponseId;
+                KEYSTONE_LABEL_MAP.get(`${def.decisionEventId}::${chosenResponseId}`) ?? RECORDED_CHOICE_LABEL;
         }
 
         return {

@@ -133,7 +133,7 @@ describe('buildDilemmaSpine', () => {
         assert.strictEqual(vopp.chosenBranchLabel, 'Reject the Vance-Owen Plan');
     });
 
-    test('unresolvable response id falls back to the raw response id', () => {
+    test('unresolvable response id falls back to player-safe copy, not the raw response id', () => {
         const views = buildDilemmaSpine(
             fixtureLoaded({
                 decisions: [{ event_id: 'vance_owen_plan_1993', response_id: 'not_a_real_option', turn: 39 }],
@@ -141,7 +141,9 @@ describe('buildDilemmaSpine', () => {
         );
         const vopp = byId(views, 'vance_owen_plan');
         assert.strictEqual(vopp.faced, true);
-        assert.strictEqual(vopp.chosenBranchLabel, 'not_a_real_option');
+        assert.strictEqual(vopp.chosenResponseId, 'not_a_real_option');
+        assert.strictEqual(vopp.chosenBranchLabel, 'Recorded choice');
+        assert.notStrictEqual(vopp.chosenBranchLabel, vopp.chosenResponseId);
     });
 
     test('faced uses the uncapped raw fired_event_ids when the capped view dropped the event (Codex P2 #82)', () => {

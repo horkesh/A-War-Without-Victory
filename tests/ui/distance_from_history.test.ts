@@ -91,8 +91,8 @@ describe('buildDistanceFromHistory', () => {
         assert.strictEqual(view.divergences[0].source, 'player');
         assert.strictEqual(view.divergences[0].faction, 'RBiH');
         assert.strictEqual(view.divergences[1].eventId, 'karadzic_mladic_split_1995');
-        assert.strictEqual(view.divergences[1].chosen, 'purge');
-        assert.strictEqual(view.divergences[1].historical, 'back_down');
+        assert.strictEqual(view.divergences[1].chosenResponseId, 'purge');
+        assert.strictEqual(view.divergences[1].historicalResponseId, 'back_down');
 
         // No divergent row is for the skipped no-default event.
         assert.ok(!view.divergences.some((d) => d.eventId === 'arms_embargo_impact_1992'));
@@ -122,8 +122,33 @@ describe('buildDistanceFromHistory', () => {
         assert.strictEqual(view.matchedHistory, 0);
         assert.strictEqual(view.diverged, 1);
         assert.strictEqual(view.playerDiverged, 1);
-        assert.strictEqual(view.divergences[0].chosen, 'reject');
+        assert.strictEqual(view.divergences[0].chosenResponseId, 'reject');
         assert.strictEqual(view.divergences[0].turn, 41);
+    });
+
+    test('surfaces response labels while preserving raw response ids internally', () => {
+        const view = buildDistanceFromHistory(
+            fixtureInput([
+                { event_id: 'vance_owen_plan_1993', response_id: 'reject', turn: 39 },
+            ]),
+        );
+        assert.strictEqual(view.diverged, 1);
+        assert.strictEqual(view.divergences[0].chosen, 'Reject the Vance-Owen Plan');
+        assert.strictEqual(view.divergences[0].historical, 'Accept the Vance-Owen Plan');
+        assert.strictEqual(view.divergences[0].chosenResponseId, 'reject');
+        assert.strictEqual(view.divergences[0].historicalResponseId, 'accept');
+    });
+
+    test('missing response labels use player-safe fallback copy, not raw ids', () => {
+        const view = buildDistanceFromHistory(
+            fixtureInput([
+                { event_id: 'vance_owen_plan_1993', response_id: 'not_a_real_option', turn: 39 },
+            ]),
+        );
+        assert.strictEqual(view.diverged, 1);
+        assert.strictEqual(view.divergences[0].chosen, 'Recorded choice');
+        assert.notStrictEqual(view.divergences[0].chosen, 'not_a_real_option');
+        assert.strictEqual(view.divergences[0].chosenResponseId, 'not_a_real_option');
     });
 
     test('all-matched run → zero divergence, 0%', () => {

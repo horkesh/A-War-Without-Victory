@@ -237,9 +237,63 @@ describe('generateWrappedSlides — causality slide F2 (your_divergences)', () =
         expect(f2!.bullets).toHaveLength(2);
         // Sorted by turn ascending — vance_owen_signing (T8) first
         expect(f2!.bullets![0]).toContain('Vance-Owen plan');
-        expect(f2!.bullets![0]).toContain('accept');
-        expect(f2!.bullets![0]).toContain('reject');
+        expect(f2!.bullets![0]).toContain('Accept');
+        expect(f2!.bullets![0]).toContain('Reject');
         expect(f2!.bullets![1]).toContain('Washington Agreement');
+    });
+
+    it('uses player-safe labels for divergence bullets while preserving raw ids in data', () => {
+        const catalog = buildCatalog([
+            eventDef('evt_internal_policy_crisis', {
+                title: '',
+                historical_default_response_id: 'historical_default',
+                response_options: [
+                    { id: 'push_forward_anyway', label: '   ', effects: [] } as any,
+                    { id: 'historical_default', label: '   ', effects: [] } as any,
+                ],
+            }),
+        ]);
+        const state = buildMinimalState({
+            player_faction: 'RBiH',
+            military: {
+                fired_event_ids: [],
+                enabled_event_ids: [],
+                closed_event_ids: [],
+                event_causality_log: [],
+                event_decision_log: [
+                    {
+                        event_id: 'evt_internal_policy_crisis',
+                        response_id: 'push_forward_anyway',
+                        decision_source: 'player',
+                        faction: 'RBiH',
+                        turn: 12,
+                    },
+                ],
+                event_last_fired_turn: {},
+            },
+        });
+
+        const slides = generateWrappedSlides(state, catalog);
+        const f2 = slides.find((s) => s.id === 'your_divergences');
+        expect(f2).toBeDefined();
+        expect(f2!.data?.divergences).toEqual([
+            {
+                event_id: 'evt_internal_policy_crisis',
+                turn: 12,
+                chosen_option: 'push_forward_anyway',
+                historical_default: 'historical_default',
+            },
+        ]);
+
+        const bullet = f2!.bullets![0];
+        expect(bullet).not.toContain('evt_internal_policy_crisis');
+        expect(bullet).not.toContain('push_forward_anyway');
+        expect(bullet).not.toContain('historical_default');
+        expect(bullet).not.toContain('Evt Internal Policy Crisis');
+        expect(bullet).toContain('T12 Internal Policy Crisis');
+        expect(bullet).toContain('Internal Policy Crisis');
+        expect(bullet).toContain('Push Forward Anyway');
+        expect(bullet).toContain('Historical Default');
     });
 
     it('does NOT append your_divergences slide when no player decisions in state', () => {

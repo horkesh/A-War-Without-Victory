@@ -1,10 +1,11 @@
-import type { EventDefinition } from '../../../../sim/events/event_types.js';
+import type { EventDefinition, EventResponseOption } from '../../../../sim/events/event_types.js';
 import type { FactionId, GameState } from '../../../../state/game_state.js';
 import {
     getBranchTagsActive,
     getCounterfactualDivergencePoints,
     getEventChainSummary,
 } from '../../../../sim/events/causality_query.js';
+import { getPlayerSafeDisplayLabel } from '../../utils/playerSafeText.js';
 
 export interface WrappedSlide {
     id: string;
@@ -28,6 +29,33 @@ const VALID_FACTION_IDS: ReadonlySet<string> = new Set(['RBiH', 'RS', 'HRHB']);
 function getFactionDisplayLabel(faction: string | undefined): string {
     if (!faction) return 'Unknown';
     return PLAYER_FACTION_LABELS[faction] ?? faction;
+}
+
+function resolveEventFallbackLabel(fallbackId: string): string {
+    const displayId = fallbackId.trim().replace(/^(?:evt|event|csq)_/i, '');
+    return getPlayerSafeDisplayLabel(displayId || fallbackId, 'Recorded event');
+}
+
+function resolveEventDisplayTitle(
+    def: EventDefinition | undefined,
+    fallbackId: string,
+): string {
+    const title = def?.title;
+    return typeof title === 'string' && title.trim().length > 0
+        ? title
+        : resolveEventFallbackLabel(fallbackId);
+}
+
+function resolveResponseDisplayLabel(
+    def: EventDefinition | undefined,
+    responseId: string,
+    fallback: string,
+): string {
+    const option = (def?.response_options ?? []).find((o: EventResponseOption) => o.id === responseId);
+    const label = option?.label;
+    return typeof label === 'string' && label.trim().length > 0
+        ? label
+        : getPlayerSafeDisplayLabel(responseId, fallback);
 }
 
 /**
@@ -367,8 +395,10 @@ export function generateCausalitySlides(
         const topDivergences = divergences.slice(0, 5);
         const bullets = topDivergences.map((d) => {
             const def = eventCatalog.get(d.event_id);
-            const title = def?.title ?? d.event_id;
-            return `T${d.turn} ${title}: ${d.chosen_option} (history: ${d.historical_default})`;
+            const title = resolveEventDisplayTitle(def, d.event_id);
+            const chosenOption = resolveResponseDisplayLabel(def, d.chosen_option, 'Chosen response');
+            const historicalDefault = resolveResponseDisplayLabel(def, d.historical_default, 'Historical response');
+            return `T${d.turn} ${title}: ${chosenOption} (history: ${historicalDefault})`;
         });
         slides.push({
             id: 'your_divergences',
@@ -468,7 +498,7 @@ function pickFoundationalChoice(
         return {
             eventId: dec.event_id,
             optionId: option.id,
-            optionLabel: option.label,
+            optionLabel: resolveResponseDisplayLabel(def, option.id, 'Foundational response'),
             sourceNote: def.source_note,
         };
     }

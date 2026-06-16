@@ -2,6 +2,10 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Chronicle and receipt safe labels:** [implemented/20260616_CHRONICLE_RECEIPT_SAFE_LABELS.md](implemented/20260616_CHRONICLE_RECEIPT_SAFE_LABELS.md) - Consequence receipts and Chronicle Wrapped divergence bullets resolve authored/player-safe labels while preserving raw ids internally.
+
+**Latest Codex response-label copy:** [implemented/20260616_CODEX_RESPONSE_LABEL_COPY_POLISH.md](implemented/20260616_CODEX_RESPONSE_LABEL_COPY_POLISH.md) - Distance from History and Dilemma Spine use authored response labels or neutral fallback copy, with raw response ids kept in internal fields.
+
 **Latest operation and plan-ID command copy:** [implemented/20260616_OPERATION_PLAN_ID_COPY_POLISH.md](implemented/20260616_OPERATION_PLAN_ID_COPY_POLISH.md) - Back-the-Officer TG cards, operation proposal cards, and proactive force-launch ready-plan cards keep raw ids internal and render authored copy or `Unspecified operation`.
 
 **Latest selection/raw-ID polish:** [implemented/20260616_SELECTION_AND_RAW_ID_POLISH.md](implemented/20260616_SELECTION_AND_RAW_ID_POLISH.md) - Standalone brigade selection now clears stale corps/army/HQ context, parent drilldowns route to the right owner IDs, and request-operation objective copy uses player-safe ordinal labels instead of visible raw OSIDs.
