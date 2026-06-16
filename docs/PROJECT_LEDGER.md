@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-17] fix(ui): protect live command truth and decision hierarchy
+
+**Type:** tactical-map UI/player-time truth hardening. Pyrrhic live and data sweeps found that live 1992 command surfaces could expose postwar legal outcomes from `war_crimes_record`, and long future-consequence previews inside `EventDecisionModal` pushed alternate choices far below the first response, making foundational decisions feel like a single-option wall of prose.
+
+**Fix:** `OfficerProfile` now hides war-crimes/legal records by default and requires explicit archival/dossier opt-in. `OfficerDossierPanel` keeps that explicit archival display, while live Army HQ, corps, formation, operation, and officer-event cards no longer expose postwar legal outcomes. `EventDecisionModal` now renders the full response list first and moves detailed future-consequence previews into a post-choice dossier, preserving consequence transparency without burying the available choices.
+
+**Verification:** Red proof failed on default `OfficerProfile` legal-record leakage and response options appearing after future-consequence copy. Green proof: `node_modules\.bin\vitest.cmd run tests\ui\officer_dossier.test.ts tests\ui\officer_event_time_truth.test.ts tests\ui\event_decision_modal_phase3.test.ts tests\ui\event_decision_modal_catalog.test.ts tests\ui\event_decision_modal_decision_context.test.ts --pool=forks --reporter=dot` -> 5 files / 23 tests passed; `npm.cmd run typecheck` passed; `npm.cmd run qa:player-journeys` -> 11 files / 102 tests passed; `git diff --check` passed. Live browser on `http://127.0.0.1:4197/tactical_map.html?dev=1` verified RS start -> opening brief -> command map -> Army HQ, with no future/postwar legal-record text visible and no page/runtime errors; only known dev fallback/WebGL/invalid-coordinate warnings appeared. EventDecisionModal hierarchy is covered by the focused DOM/modal tests because the browser fallback review route does not expose the final modal as a stable role target. No sim/scenario/save-schema/baseline/package artifacts changed.
+
+---
+
 ## [2026-06-17] fix(ui): harden App-level shell ownership
 
 **Type:** tactical-map UI shell ownership hardening. This follow-up closes the App-local shell leaks found after the shared `shellNavigation` pass: Decision History was an App-local overlay outside the shared helper contract, Warroom desk/overlay state could remain hidden after leaving for game-owned shells, Inbox-return routes could leave reference/field panels active, and Wrapped's final-slide Chronicle route bypassed the shared Chronicle helper. Live browser testing also found Decision History Escape closed the overlay and opened Pause on the same keypress.

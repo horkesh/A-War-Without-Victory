@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
-import { WarCrimesBadge } from './WarCrimesBadge';
 import { Z } from '../../shared/zIndex';
 import { t } from '../i18n';
 
@@ -19,12 +18,11 @@ function StatBar({ label, value }: { label: string; value: number }) {
   );
 }
 
-function OfficerCard({ name, competence, aggressiveness, defensiveSkill, warCrimesRecord, highlight }: {
+function OfficerCard({ name, competence, aggressiveness, defensiveSkill, highlight }: {
   name: string;
   competence: number;
   aggressiveness: number;
   defensiveSkill: number;
-  warCrimesRecord?: import('./WarCrimesBadge').WarCrimesRecord;
   highlight?: boolean;
 }) {
   return (
@@ -42,7 +40,6 @@ function OfficerCard({ name, competence, aggressiveness, defensiveSkill, warCrim
         <StatBar label={t('officerProfile.aggression')} value={aggressiveness} />
         <StatBar label={t('officerProfile.defense')} value={defensiveSkill} />
       </div>
-      {warCrimesRecord && <WarCrimesBadge record={warCrimesRecord} className="mt-2" />}
     </div>
   );
 }
@@ -161,7 +158,6 @@ function OfficerEventModal({ events, onClose }: {
                     competence={event.current_commander_competence ?? 3}
                     aggressiveness={event.current_commander_aggressiveness ?? 3}
                     defensiveSkill={event.current_commander_defensive_skill ?? 3}
-                    warCrimesRecord={event.current_commander_war_crimes_record}
                   />
                 </div>
               )}
@@ -173,7 +169,6 @@ function OfficerEventModal({ events, onClose }: {
                   competence={event.officer_competence}
                   aggressiveness={event.officer_aggressiveness}
                   defensiveSkill={event.officer_defensive_skill}
-                  warCrimesRecord={event.war_crimes_record}
                   highlight
                 />
               </div>
@@ -188,7 +183,6 @@ function OfficerEventModal({ events, onClose }: {
                 competence={event.officer_competence}
                 aggressiveness={event.officer_aggressiveness}
                 defensiveSkill={event.officer_defensive_skill}
-                warCrimesRecord={event.war_crimes_record}
               />
             </>
           )}

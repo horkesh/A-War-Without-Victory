@@ -251,6 +251,25 @@ describe('OfficerDossierPanel renders read-only dossier', () => {
         expect(html).toContain('Convicted by the ICTY.');
     });
 
+    it('OfficerProfile hides future legal status unless rendered as an explicit dossier', () => {
+        const liveProfile = renderToStaticMarkup(
+            React.createElement(OfficerProfile, { officer: OFFICER_WAR_CRIMES, label: 'LIVE COMMAND' }),
+        );
+        expect(liveProfile).not.toContain('WAR CRIMES - CONVICTED');
+        expect(liveProfile).not.toContain('Life imprisonment');
+        expect(liveProfile).not.toContain('Convicted by the ICTY.');
+
+        const dossierProfile = renderToStaticMarkup(
+            React.createElement(OfficerProfile, {
+                officer: OFFICER_WAR_CRIMES,
+                label: 'DOSSIER',
+                showWarCrimesRecord: true,
+            }),
+        );
+        expect(dossierProfile).toContain('WAR CRIMES - CONVICTED');
+        expect(dossierProfile).toContain('Life imprisonment');
+    });
+
     it('OfficerProfile renders the combat record block only in non-compact mode', () => {
         const full = renderToStaticMarkup(
             React.createElement(OfficerProfile, { officer: OFFICER_WITH_RECORD, label: 'TEST' }),

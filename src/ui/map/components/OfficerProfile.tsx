@@ -28,11 +28,20 @@ interface OfficerProfileProps {
     compact?: boolean;
     /** Which secondary stat to emphasize in compact mode. Ignored when compact is false. */
     emphasis?: 'aggression' | 'defense';
+    /** Show future/legal case records; keep false for live in-war command surfaces. */
+    showWarCrimesRecord?: boolean;
     /** Additional CSS classes on the root element (e.g. spacing). */
     className?: string;
 }
 
-export function OfficerProfile({ officer, label, compact = false, emphasis = 'aggression', className }: OfficerProfileProps) {
+export function OfficerProfile({
+    officer,
+    label,
+    compact = false,
+    emphasis = 'aggression',
+    showWarCrimesRecord = false,
+    className,
+}: OfficerProfileProps) {
     const origin = getOriginDisplay(officer.origin);
     const archetype = getArchetype(officer);
     const rank = formatRank(officer.rank);
@@ -177,7 +186,7 @@ export function OfficerProfile({ officer, label, compact = false, emphasis = 'ag
             )}
 
             {/* War crimes record */}
-            {officer.war_crimes_record && (
+            {showWarCrimesRecord && officer.war_crimes_record && (
                 <WarCrimesBadge record={officer.war_crimes_record} />
             )}
         </div>

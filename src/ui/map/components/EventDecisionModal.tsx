@@ -289,6 +289,34 @@ function FutureConsequencePreview({
     );
 }
 
+function DecisionFutureConsequenceDossier({
+    options,
+    showDiagnostics,
+}: {
+    options: readonly EventResponseOption[];
+    showDiagnostics: boolean;
+}) {
+    const optionsWithConsequences = options.filter((option) => (option.future_consequences ?? []).length > 0);
+    if (optionsWithConsequences.length === 0) return null;
+    return (
+        <section className="mb-4 rounded border border-panel-border bg-panel-card/70 p-4">
+            <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold">
+                Detailed consequence preview
+            </div>
+            <div className="space-y-3">
+                {optionsWithConsequences.map((option) => (
+                    <div key={option.id} className="rounded border border-panel-border/70 bg-panel-bg/50 p-3">
+                        <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary">
+                            {option.label}
+                        </div>
+                        <FutureConsequencePreview option={option} showDiagnostics={showDiagnostics} />
+                    </div>
+                ))}
+            </div>
+        </section>
+    );
+}
+
 function isHistoricalOption(option: EventResponseOption, decision: EventDecisionDossier): boolean {
     return option.id === decision.historical_default_response_id || option.historical_marker === 'historical_default';
 }
@@ -357,7 +385,6 @@ function ResponseButton({
                 </p>
             )}
             <EffectPreview option={option} />
-            <FutureConsequencePreview option={option} showDiagnostics={showDiagnostics} />
         </div>
     );
 }
@@ -574,6 +601,11 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                     ))}
                     </div>
                 </div>
+
+                <DecisionFutureConsequenceDossier
+                    options={decision.response_options}
+                    showDiagnostics={diagMode}
+                />
 
                 <div className="rounded border border-panel-border bg-panel-card/70 px-4 py-3 text-[11px] leading-relaxed text-text-secondary">
                     Record trail: after your response, this decision appears in the Chronicle decision ledger and Army HQ Records.

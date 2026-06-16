@@ -109,8 +109,8 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(screen.queryByText(/historically attested choice/)).toBeNull();
   });
 
-  it('renders future-consequence cards only for response options that include branch metadata', () => {
-    render(React.createElement(EventDecisionModal, {
+    it('renders future-consequence cards only for response options that include branch metadata', () => {
+        render(React.createElement(EventDecisionModal, {
       decision: {
         event_id: 'branch_visibility_review',
         event_title: 'Branch Visibility Review',
@@ -165,5 +165,59 @@ describe('EventDecisionModal presidential dossier', () => {
 
     const pressForward = screen.getByText('Press forward').closest('div');
     expect(pressForward?.textContent).not.toContain('Future consequences');
+  });
+
+  it('keeps all response choices before detailed future-consequence copy', () => {
+    const { container } = render(React.createElement(EventDecisionModal, {
+      decision: {
+        event_id: 'choice_hierarchy_review',
+        event_title: 'Choice Hierarchy Review',
+        turn_fired: 12,
+        faction: 'RS',
+        historical_default_response_id: 'option_a',
+        response_options: [
+          {
+            id: 'option_a',
+            label: 'Adopt the programme',
+            effects: [],
+            future_consequences: [
+              {
+                id: 'future_a',
+                label: 'Detailed future branch A',
+                timing: 'future',
+                certainty: 'conditional',
+                explanation: 'Long branch consequence for option A.',
+              },
+            ],
+          },
+          {
+            id: 'option_b',
+            label: 'Limit the programme',
+            effects: [],
+            future_consequences: [
+              {
+                id: 'future_b',
+                label: 'Detailed future branch B',
+                timing: 'future',
+                certainty: 'risk',
+                explanation: 'Long branch consequence for option B.',
+              },
+            ],
+          },
+          {
+            id: 'option_c',
+            label: 'Reject the programme',
+            effects: [],
+          },
+        ],
+      },
+      onRespond: () => undefined,
+    }));
+
+    const text = container.textContent ?? '';
+    expect(text.indexOf('Adopt the programme')).toBeLessThan(text.indexOf('Detailed future branch A'));
+    expect(text.indexOf('Limit the programme')).toBeLessThan(text.indexOf('Detailed future branch A'));
+    expect(text.indexOf('Reject the programme')).toBeLessThan(text.indexOf('Detailed future branch A'));
+    expect(text.indexOf('Detailed future branch A')).toBeLessThan(text.indexOf('Detailed future branch B'));
   });
 });

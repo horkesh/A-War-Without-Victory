@@ -39,7 +39,7 @@ export function OfficerDossierPanel({ officer, onClose }: OfficerDossierPanelPro
         <GlassPanel position="overlay" title={t('officerDossier.title')} width="360px" onClose={onClose}>
             <div className="space-y-2">
                 {/* Identity + aptitudes + combat record + war-crimes (full profile). */}
-                <OfficerProfile officer={officer} label={t('officerDossier.identity')} compact={false} />
+                <OfficerProfile officer={officer} label={t('officerDossier.identity')} compact={false} showWarCrimesRecord />
 
                 {/* Command status. */}
                 <div className="p-2 bg-black/20 rounded border border-panel-border/30 space-y-1">
