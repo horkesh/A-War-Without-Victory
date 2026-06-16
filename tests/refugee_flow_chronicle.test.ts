@@ -78,6 +78,13 @@ describe('refugee-flow Chronicle cadence beats (D2 mid-1995 void)', () => {
         expect(surges[0].detail).toContain('3,460');
     });
 
+    it('compares surge flow to the actual prior week, treating missing weeks as zero', () => {
+        const recent = { 1: 1000, 3: 2000 };
+        const entries = buildRefugeeFlowChronicleEntries(rawStateWith(recent), 188);
+        const surges = entries.filter(e => e.id?.startsWith('refugee-surge-'));
+        expect(surges.map(e => e.id)).toEqual(['refugee-surge-1', 'refugee-surge-3']);
+    });
+
     it('does NOT surge on the steady late-war trickle (no false cadence noise)', () => {
         // The void baseline: ~200-300/week, gently declining. No turn is >= floor.
         const recent: Record<number, number> = {};

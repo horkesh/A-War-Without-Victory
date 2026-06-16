@@ -480,7 +480,10 @@ export function VerdictScreen() {
                                                 {v.grade}
                                             </span>
                                         </div>
-                                        <div className={`mt-1 inline-block px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider sm:px-2 ${getOutcomeClassStyle(v.outcome_class)}`}>
+                                        <div
+                                            className={`mt-1 inline-block px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider sm:px-2 ${getOutcomeClassStyle(v.outcome_class)}`}
+                                            data-awwv-faction-tab-outcome={fid}
+                                        >
                                             {formatOutcomeClass(v.outcome_class)}
                                         </div>
                                     </>

@@ -31,6 +31,10 @@ export function CommandTopBar({
     corpsDisplayName,
     factionColor,
 }: CommandTopBarProps) {
+    const commanderLabel = commanderId
+        ? ((commanderName ?? '').trim() || t('planUi.unassignedAuthority'))
+        : t('planUi.selectAuthority');
+
     return (
         <div className="h-16 flex items-center justify-between px-6 bg-[#16191f]/90 border-b border-white/10 relative z-30 shadow-xl backdrop-blur-md" style={{ borderLeft: `3px solid ${factionColor ?? '#c4a35a'}` }}>
             <div className="flex items-center gap-10">
@@ -70,7 +74,7 @@ export function CommandTopBar({
                             className="h-[31px] min-w-[180px] bg-black/40 border border-white/10 rounded px-3 flex items-center justify-between hover:border-accent-gold transition-all group"
                         >
                             <span className="text-xs font-bold text-slate-300 group-hover:text-white">
-                                {commanderId ? (commanderName ?? commanderId) : t('planUi.selectAuthority')}
+                                {commanderLabel}
                             </span>
                             <span className="text-[9px] text-accent-gold opacity-50">&#9660;</span>
                         </button>

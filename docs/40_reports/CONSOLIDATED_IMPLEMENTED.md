@@ -2,6 +2,10 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest UI copy raw-ID fallback closure:** [implemented/20260616_UI_COPY_RAW_ID_FALLBACKS.md](implemented/20260616_UI_COPY_RAW_ID_FALLBACKS.md) - Command planning, Chief of Staff prose, Warroom hotspot titles, and autonomy proposal values now keep raw ids internal and render neutral/player-safe copy.
+
+**Latest comment sweep: Verdict/refugee hardening:** [implemented/20260616_COMMENT_SWEEP_VERDICT_REFUGEE.md](implemented/20260616_COMMENT_SWEEP_VERDICT_REFUGEE.md) - Verdict snapshot tests count exact faction-tab outcome badges, and refugee surge beats compare against the actual prior week.
+
 **Latest Chronicle and receipt safe labels:** [implemented/20260616_CHRONICLE_RECEIPT_SAFE_LABELS.md](implemented/20260616_CHRONICLE_RECEIPT_SAFE_LABELS.md) - Consequence receipts and Chronicle Wrapped divergence bullets resolve authored/player-safe labels while preserving raw ids internally.
 
 **Latest Codex response-label copy:** [implemented/20260616_CODEX_RESPONSE_LABEL_COPY_POLISH.md](implemented/20260616_CODEX_RESPONSE_LABEL_COPY_POLISH.md) - Distance from History and Dilemma Spine use authored response labels or neutral fallback copy, with raw response ids kept in internal fields.

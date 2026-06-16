@@ -263,8 +263,8 @@ describe('VerdictScreen renders the frozen snapshot faithfully (D2 verdict UI)',
         expect(h).toContain('VRS');
         expect(h).toContain('HVO');
         // Three Failure badges (one per faction tab) come straight from the snapshot.
-        const failureCount = (h.match(/Failure/g) ?? []).length;
-        expect(failureCount).toBeGreaterThanOrEqual(3);
+        const failureTabBadges = h.match(/data-awwv-faction-tab-outcome="[^"]+"[^>]*>Failure</g) ?? [];
+        expect(failureTabBadges).toHaveLength(3);
     });
 
     it('renders the selected faction (RBiH) pyrrhic score + grade description from the snapshot', () => {

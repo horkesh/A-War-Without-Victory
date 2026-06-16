@@ -478,7 +478,7 @@ function WarroomHotspot({ region, onClick }: WarroomHotspotProps) {
           pointerEvents: 'auto',
         }}
         aria-label={accessibleLabel}
-        title={tooltip ?? id}
+        title={accessibleLabel}
         onClick={onClick}
         onFocus={() => setHovered(true)}
         onBlur={() => setHovered(false)}

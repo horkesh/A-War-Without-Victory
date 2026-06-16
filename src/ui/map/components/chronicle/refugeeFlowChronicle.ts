@@ -84,7 +84,6 @@ export function buildRefugeeFlowChronicleEntries(
     // --- Family 1: cumulative-displacement milestone crossings ---
     let cumulative = 0;
     let nextRung = 0; // index into REFUGEE_MILESTONE_RUNGS
-    let prevFlow = 0;
     for (const turn of turns) {
         const flow = Number((recentByTurn as Record<number, number>)[turn] ?? 0);
         const safeFlow = Number.isFinite(flow) && flow > 0 ? flow : 0;
@@ -112,11 +111,13 @@ export function buildRefugeeFlowChronicleEntries(
         }
 
         // --- Family 2: single-turn displacement surges ---
-        // A sudden wave standing well above the steady trickle. The very first
-        // turn (prevFlow 0) can still surge against the absolute floor.
+        // A sudden wave standing well above the actual prior week. Missing
+        // weeks are true zero-flow weeks, not aliases for the last recorded key.
+        const priorFlow = Number((recentByTurn as Record<number, number>)[turn - 1] ?? 0);
+        const safePriorFlow = Number.isFinite(priorFlow) && priorFlow > 0 ? priorFlow : 0;
         if (
             safeFlow >= REFUGEE_SURGE_ABSOLUTE_FLOOR
-            && safeFlow >= REFUGEE_SURGE_RATIO * Math.max(prevFlow, 1)
+            && safeFlow >= REFUGEE_SURGE_RATIO * Math.max(safePriorFlow, 1)
         ) {
             entries.push({
                 id: `refugee-surge-${turn}`,
@@ -128,8 +129,6 @@ export function buildRefugeeFlowChronicleEntries(
                 metadata: { displaced: safeFlow },
             });
         }
-
-        prevFlow = safeFlow;
     }
 
     return entries;

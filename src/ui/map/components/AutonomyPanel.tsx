@@ -21,6 +21,7 @@ import { GlassPanel } from './GlassPanel';
 import { OfficerDossierPanel } from './OfficerDossierPanel';
 import { playerFactionMatch } from '../data/playerFactionMatch';
 import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
+import { toTitleCase } from '../utils/formatters';
 import { t, type MessageKey } from '../i18n';
 import type { NamedOfficerView } from '../data/types';
 
@@ -112,6 +113,26 @@ const ASSESSMENT_LABEL_KEYS: Record<'launch' | 'postpone' | 'abort', MessageKey>
     postpone: 'autonomy.proposal.assessment.postpone',
     abort: 'autonomy.proposal.assessment.abort',
 };
+
+const PROPOSAL_VALUE_LABEL_KEYS: Record<string, MessageKey> = {
+    pending: 'autonomy.proposal.value.pending',
+    pending_review: 'autonomy.proposal.value.pendingReview',
+    approve: 'autonomy.proposal.value.approve',
+    approved: 'autonomy.proposal.value.approved',
+    reject: 'autonomy.proposal.value.reject',
+    rejected: 'autonomy.proposal.value.rejected',
+    balanced: 'autonomy.proposal.value.balanced',
+    offensive: 'autonomy.proposal.value.offensive',
+    defensive: 'autonomy.proposal.value.defensive',
+};
+
+function formatProposalValue(value: string | undefined): string {
+    const safeValue = (value ?? '').trim();
+    if (!safeValue) return '—';
+    const labelKey = PROPOSAL_VALUE_LABEL_KEYS[safeValue.toLowerCase()];
+    if (labelKey) return t(labelKey);
+    return toTitleCase(safeValue.replace(/[:\-\s]+/g, '_'));
+}
 
 // ── ProposalCard ───────────────────────────────────────────────────────────
 
@@ -224,9 +245,9 @@ function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: Propo
             {/* Stance change arrow (non-op proposals) */}
             {!isOp && (proposal.current_value || proposal.proposed_value) && (
                 <div className="flex items-center gap-1.5 text-[10px] font-mono">
-                    <span className="text-[#8a8578]">{proposal.current_value ?? '—'}</span>
+                    <span className="text-[#8a8578]">{formatProposalValue(proposal.current_value)}</span>
                     <span className="text-[#c4a04a]/60">→</span>
-                    <span className="text-[#d4d0c8]">{proposal.proposed_value ?? '—'}</span>
+                    <span className="text-[#d4d0c8]">{formatProposalValue(proposal.proposed_value)}</span>
                 </div>
             )}
 

@@ -13,6 +13,7 @@ import type { LetterHomeInput } from '../../../../sim/letter_home.js';
 import letterHomeData from '../../../../../data/templates/letter_home_templates.json';
 import type { CommandStrainLabel } from '../../data/command_strain.js';
 import { getActiveLocale, t, type MessageKey } from '../../i18n';
+import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 
 // ── CoS identity ────────────────────────────────────────────────────
 
@@ -159,7 +160,7 @@ function buildStrainParagraphs(state: LoadedGameState, faction: string, tone: Co
         // Use adapter-derived commandStrainLabel — never cast LoadedGameState to raw GameState
         const label: CommandStrainLabel | undefined = corps.commandStrainLabel;
         if (!label || label === 'healthy') continue;
-        const corpsName = corps.name ?? corps.id;
+        const corpsName = getPlayerSafeCorpsName(corps.name, corps.id, t('chiefOfStaff.corpsCommandFallback'));
         const phrase = t(STRAIN_PHRASES[tone][label], { corpsName });
         paragraphs.push([text(phrase)]);
     }
