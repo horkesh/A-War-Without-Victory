@@ -242,7 +242,7 @@ describe('DecisionHistoryOverlay (Phase H Packet 8)', () => {
         expect(order).toEqual(['evt_early', 'evt_mid', 'evt_late']);
     });
 
-    it('row content surfaces resolved title, option prose, family, and turn', () => {
+    it('row content surfaces resolved title, option prose, and turn without player-facing family taxonomy', () => {
         const catalog = new Map<string, EventDefinition>([
             ['evt_z', buildEventDef('evt_z', { family: 'rbih_civic', title: 'The Sarajevo siege tightens' })],
         ]);
@@ -258,7 +258,7 @@ describe('DecisionHistoryOverlay (Phase H Packet 8)', () => {
         // Raw ids upgraded to resolved player-facing prose (title + option label).
         expect(screen.getByTestId('decision-history-event-id').textContent).toBe('The Sarajevo siege tightens');
         expect(screen.getByTestId('decision-history-event-id').getAttribute('data-event-id')).toBe('evt_z');
-        expect(screen.getByTestId('decision-history-family').textContent).toBe('[family=rbih_civic]');
+        expect(screen.queryByTestId('decision-history-family')).toBeNull();
         // Option prose resolved from catalog (label 'Option B'), not raw 'opt_b'.
         expect(screen.getByTestId('decision-history-chosen-option').textContent).toBe('Option B');
         expect(screen.getByTestId('decision-history-chosen-option').getAttribute('data-response-id')).toBe('opt_b');
