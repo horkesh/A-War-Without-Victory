@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest operation and plan-ID command copy** | [implemented/20260616_OPERATION_PLAN_ID_COPY_POLISH.md](implemented/20260616_OPERATION_PLAN_ID_COPY_POLISH.md) - Back-the-Officer TG cards, operation proposal cards, and proactive force-launch ready-plan cards keep raw ids internal and render authored copy or `Unspecified operation`. |
 | **Latest selection/raw-ID polish** | [implemented/20260616_SELECTION_AND_RAW_ID_POLISH.md](implemented/20260616_SELECTION_AND_RAW_ID_POLISH.md) - Standalone brigade selection clears stale corps/army/HQ context, parent drilldowns route correctly, and objective target copy uses player-safe ordinal labels instead of raw OSIDs. |
 | **Latest player-safe enclave/supply truth** | [implemented/20260616_PLAYER_SAFE_ENCLAVE_SUPPLY_TRUTH.md](implemented/20260616_PLAYER_SAFE_ENCLAVE_SUPPLY_TRUTH.md) - Player campaigns scope enclave resilience, enclave map overlays, and supply summaries to the loaded player faction; Supply mode no longer advertises stale global surplus thresholds. |
 | **Latest decision consequence record focus** | [implemented/20260606_DECISION_CONSEQUENCE_RECORD_FOCUS.md](implemented/20260606_DECISION_CONSEQUENCE_RECORD_FOCUS.md) - President's Desk Records-filed consequence rows now open Army HQ Records on the focused Decision Consequences row, and shell handoff validation accepts the existing decisions subtab. |

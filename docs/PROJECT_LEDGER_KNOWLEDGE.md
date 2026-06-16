@@ -1,5 +1,7 @@
 ## 2026-06-15 - Desktop campaign birth must overlay player-start events
 
+**Operation names must be display copy, not action ids:** Presidential command cards need exact `op_id` and `plan_id` values for actions, but the visible `op_name` must come from an authored name/objective or a safe fallback. Durable rule: Back-the-Officer, force-launch, and operation proposal surfaces must never fall back from missing display copy to raw plan ids, raw op ids, or `APPROVE_OP` action strings. Applied in `[2026-06-16] fix(ui): hide raw operation plan ids from command copy`.
+
 **Standalone brigade selection must clear stale parent owners:** A map click on a brigade is a standalone formation selection unless the caller deliberately uses a contextual drilldown path. Durable rule: `setSelectedFormationId(non-null)` clears stale corps, army, HQ, sector, operation, ORBAT, and settlement selection; contextual sector/corps drilldowns must set their context explicitly. Applied in `[2026-06-16] fix(ui): clear stale brigade context and remove objective raw IDs`.
 
 **Objective target labels keep raw OSIDs as values, not player copy:** Request-operation needs exact OSIDs for IPC, but visible duplicate labels and ambiguous-target warnings must use player-safe disambiguators such as `Label - option N`. Durable rule: raw `op:` IDs and exact-OSID instructions belong in hidden values/debug paths, not normal command copy. Applied in `[2026-06-16] fix(ui): clear stale brigade context and remove objective raw IDs`.

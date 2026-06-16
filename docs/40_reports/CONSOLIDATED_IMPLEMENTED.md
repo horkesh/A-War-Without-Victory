@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest operation and plan-ID command copy:** [implemented/20260616_OPERATION_PLAN_ID_COPY_POLISH.md](implemented/20260616_OPERATION_PLAN_ID_COPY_POLISH.md) - Back-the-Officer TG cards, operation proposal cards, and proactive force-launch ready-plan cards keep raw ids internal and render authored copy or `Unspecified operation`.
+
 **Latest selection/raw-ID polish:** [implemented/20260616_SELECTION_AND_RAW_ID_POLISH.md](implemented/20260616_SELECTION_AND_RAW_ID_POLISH.md) - Standalone brigade selection now clears stale corps/army/HQ context, parent drilldowns route to the right owner IDs, and request-operation objective copy uses player-safe ordinal labels instead of visible raw OSIDs.
 
 **Latest player-safe enclave/supply truth:** [implemented/20260616_PLAYER_SAFE_ENCLAVE_SUPPLY_TRUTH.md](implemented/20260616_PLAYER_SAFE_ENCLAVE_SUPPLY_TRUTH.md) - Player campaigns now scope enclave resilience, enclave map overlays, and supply summaries to the loaded player faction; Supply mode names known-friendly classes instead of stale global surplus thresholds.

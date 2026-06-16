@@ -89,6 +89,16 @@ describe('back-the-officer read-model', () => {
     expect(buildBackTheOfficerViews(null, undefined)).toEqual([]);
   });
 
+  it('does not expose a raw operation id when a TG operation has no display name', () => {
+    const state = makeState();
+    delete (state.military.corps_command['1st_corps'].active_operations[0] as { name?: string }).name;
+    const views = buildBackTheOfficerViews(state, ROSTER);
+    expect(views).toHaveLength(1);
+    expect(views[0].op_id).toBe('op_trnovo');
+    expect(views[0].op_name).toBe('Unspecified operation');
+    expect(views[0].op_name).not.toContain('op_trnovo');
+  });
+
   it('falls back to army HQ donor lineage when participations are sparse', () => {
     const state = {
       military: {
@@ -251,6 +261,16 @@ describe('op-proposal decision cards (Phase 2 slice 1)', () => {
     expect(none[0].override_available).toBe(false);
   });
 
+  it('uses objective copy instead of an opaque operation name when available', () => {
+    const cards = buildOpProposalCards(
+      proposalState({ name: 'op_trnovo', objective_description: 'Seize the approaches to Trnovo' }),
+      ROSTER,
+      [OP_PROPOSAL],
+    );
+    expect(cards[0].op_name).toBe('Seize the approaches to Trnovo');
+    expect(cards[0].op_name).not.toContain('op_trnovo');
+  });
+
   it('is defensive when the op or officer cannot be resolved', () => {
     // Unknown corps — card still renders, op/officer null, donors empty.
     const orphan: OpProposalReviewRow = { ...OP_PROPOSAL, proposed_action: 'APPROVE_OP:9th_corps:ghost' };
@@ -261,8 +281,9 @@ describe('op-proposal decision cards (Phase 2 slice 1)', () => {
     expect(cards[0].force_ratio_estimate).toBeNull();
     expect(cards[0].donors).toEqual([]);
     expect(cards[0].override_available).toBe(false);
-    // op_name falls back to the plan id.
-    expect(cards[0].op_name).toBe('ghost');
+    // op_name must not fall back to the raw plan id.
+    expect(cards[0].op_name).toBe('Unspecified operation');
+    expect(cards[0].op_name).not.toContain('ghost');
   });
 
   it('ignores non-ops proposals and malformed actions; sorts by proposal id', () => {

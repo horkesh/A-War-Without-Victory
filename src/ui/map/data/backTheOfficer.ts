@@ -88,6 +88,43 @@ function str(value: unknown): string | undefined {
   return typeof value === 'string' && value.length > 0 ? value : undefined;
 }
 
+const UNSPECIFIED_OPERATION_LABEL = 'Unspecified operation';
+
+function humanizeInternalOperationName(value: string): string {
+  return value
+    .replace(/^APPROVE_OP:/i, '')
+    .replace(/[:_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b[a-z]/g, (char) => char.toUpperCase());
+}
+
+function isOpaqueOperationIdentifier(value: string): boolean {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return true;
+  if (/^APPROVE_OP:/i.test(trimmed)) return true;
+  if (/^plan[_:-]/i.test(trimmed)) return true;
+  if (/^op[_:-]/i.test(trimmed)) return true;
+  if (/^[a-z0-9]+(?:[_:][a-z0-9]+)+$/i.test(trimmed)) return true;
+  return false;
+}
+
+function playerSafeOperationNameCandidate(value: unknown): string | null {
+  const raw = str(value)?.trim();
+  if (!raw) return null;
+  if (/^operation[_:-]/i.test(raw)) return humanizeInternalOperationName(raw);
+  if (isOpaqueOperationIdentifier(raw)) return null;
+  return raw;
+}
+
+function playerSafeOperationName(...values: unknown[]): string {
+  for (const value of values) {
+    const candidate = playerSafeOperationNameCandidate(value);
+    if (candidate) return candidate;
+  }
+  return UNSPECIFIED_OPERATION_LABEL;
+}
+
 function num(value: unknown): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : 0;
 }
@@ -232,7 +269,7 @@ export function buildBackTheOfficerViews(
       if (!tgId && !commanderId) continue;
 
       const opId = str(op.id) ?? str(op.name) ?? `${anchorCorpsId}:op`;
-      const opName = str(op.name) ?? opId;
+      const opName = playerSafeOperationName(op.name);
 
       // Donor lineage from per-brigade participations (preferred — carries personnel + brigade ids).
       const byCorps = new Map<string, TgDonorLineageView>();
@@ -660,7 +697,7 @@ export function buildOpProposalCards(
     const op = findOpForPlan(cc, planId);
 
     const opId = str(op?.id) ?? null;
-    const opName = str(op?.name) ?? str(op?.objective_description) ?? planId;
+    const opName = playerSafeOperationName(op?.name, op?.objective_description);
     const commanderId = str(op?.tg_commander_officer_id) ?? str(op?.commander_officer_id);
     const commander = resolveCommander(commanderId, rosterById);
     const forceRatio = finiteNumOrNull(op?.force_ratio_estimate);
@@ -854,7 +891,7 @@ export function buildForceableReadyPlans(
       corps_id: corpsId,
       corps_name: corpsName(corpsId, corpsNameById),
       plan_id: planId,
-      op_name: str(plan.objective_description) ?? planId,
+      op_name: playerSafeOperationName(plan.objective_description),
       commander,
       commander_assessment: str(cmdState?.last_plan_reason) ?? null,
       force_ca_cost: PROACTIVE_FORCE_LAUNCH_COST,

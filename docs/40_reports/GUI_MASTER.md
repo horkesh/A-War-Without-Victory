@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-06-16 (player-polish hardening; first-hour choreography, player-journey gate, and player-safe supply/enclave truth)
+**Updated:** 2026-06-16 (player-polish hardening; first-hour choreography, player-journey gate, player-safe supply/enclave truth, and command-copy raw-id cleanup)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,9 @@
 
 | Need | Go to |
 |------|--------|
+| **Operation and plan-ID command copy** | [implemented/20260616_OPERATION_PLAN_ID_COPY_POLISH.md](implemented/20260616_OPERATION_PLAN_ID_COPY_POLISH.md) - Back-the-Officer TG cards, operation proposal cards, and proactive force-launch ready-plan cards keep raw ids internal and render authored copy or `Unspecified operation`. |
+| **Selection/raw-ID polish** | [implemented/20260616_SELECTION_AND_RAW_ID_POLISH.md](implemented/20260616_SELECTION_AND_RAW_ID_POLISH.md) - Standalone brigade selection clears stale corps/army/HQ context, parent drilldowns route correctly, and objective target copy uses player-safe ordinal labels instead of raw OSIDs. |
+| **Player-safe enclave/supply truth** | [implemented/20260616_PLAYER_SAFE_ENCLAVE_SUPPLY_TRUTH.md](implemented/20260616_PLAYER_SAFE_ENCLAVE_SUPPLY_TRUTH.md) - Player campaigns scope enclave resilience, enclave map overlays, and supply summaries to the loaded player faction, while null-player diagnostics retain all-faction truth. |
 | **Decision consequence record focus** | [implemented/20260606_DECISION_CONSEQUENCE_RECORD_FOCUS.md](implemented/20260606_DECISION_CONSEQUENCE_RECORD_FOCUS.md) - Records-filed Desk consequences now open Army HQ Records -> Decision Consequences with the selected row focused, and shell handoff validation accepts the existing decisions subtab. |
 | **Command objective picker** | [implemented/20260606_COMMAND_OBJECTIVE_PICKER.md](implemented/20260606_COMMAND_OBJECTIVE_PICKER.md) - Request-op directives now offer a deterministic known-objective picker in both Decision Room and Army HQ request rows while preserving the existing objection/staging path. |
 | **Warroom native overlay residue batch** | [implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md](implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md) - Intelligence, Staff, and Faction native Warroom previews now drill into existing owner surfaces, while retired StrategicDashboard/EventLog local command variants are removed from live source. |

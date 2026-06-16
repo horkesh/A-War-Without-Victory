@@ -44,6 +44,12 @@ function makeState(status: string, planId = 'plan_a') {
     };
 }
 
+function makeStateWithoutObjectiveDescription(status: string, planId = 'plan_alpha') {
+    const state = makeState(status, planId);
+    delete (state.military.corps_command['1st_corps'].commander_state.current_plan as { objective_description?: string }).objective_description;
+    return state;
+}
+
 const ROSTER: BackTheOfficerRosterRow[] = [
     { id: 'off_x', name: 'Atif Dudaković', rank: 'corps_commander', status: 'active' },
 ];
@@ -79,6 +85,14 @@ describe('buildForceableReadyPlans — proactive force-launch read-model', () =>
         const views = buildForceableReadyPlans(makeState('ready'), ROSTER, proposals);
         expect(views).toHaveLength(1);
         expect(views[0].plan_id).toBe('plan_a');
+    });
+
+    it('does not expose the raw plan id when a ready plan has no objective description', () => {
+        const views = buildForceableReadyPlans(makeStateWithoutObjectiveDescription('ready'), ROSTER, []);
+        expect(views).toHaveLength(1);
+        expect(views[0].plan_id).toBe('plan_alpha');
+        expect(views[0].op_name).toBe('Unspecified operation');
+        expect(views[0].op_name).not.toContain('plan_alpha');
     });
 
     it('EXCLUDES a non-ready plan (concentrating)', () => {
