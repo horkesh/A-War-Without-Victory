@@ -15,6 +15,8 @@ import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../../utils/warr
 import { getFactionArmyCommander } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
 import { ArmyHQCorpsCard } from './ArmyHQCorpsCard';
+import { generateForceReadiness } from './ForceReadiness';
+import { generateThreatAssessment } from './generateThreatAssessment';
 import { SituationBriefing, type BriefingTarget } from './SituationBriefing';
 import { PresidentialDecisionRoomPanel } from './PresidentialDecisionRoomPanel';
 import { PresidentialAttentionPanel } from './PresidentialAttentionPanel';
@@ -150,10 +152,20 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
             list.push(o);
             opsByCorps.set(o.corps_id, list);
         }
+        const threatItems = generateThreatAssessment(state, faction);
+        const threatCorpsIds = new Set(
+            threatItems
+                .map((item) => item.friendlyCorpsId)
+                .filter((id): id is string => typeof id === 'string' && id.length > 0),
+        );
+        const readinessByCorps = new Map(
+            generateForceReadiness(formations, operations, faction, threatCorpsIds)
+                .map((item) => [item.corpsId, item]),
+        );
 
         return {
             formations, brigades, corpsFormations, totalPersonnel, sectors, operations,
-            sectorsByCorps, opsByCorps,
+            sectorsByCorps, opsByCorps, readinessByCorps,
             territoryPct, reserves,
             eff, commander, factionBattles, briefingItems
         };
@@ -521,6 +533,8 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
                                             gameState={state}
                                             isExpanded={expandedCorpsId === corps.id}
                                             isCompressed={expandedCorpsId !== null && expandedCorpsId !== corps.id}
+                                            readinessGrade={data.readinessByCorps.get(corps.id)?.grade}
+                                            hasThreat={data.readinessByCorps.get(corps.id)?.hasThreat ?? false}
                                             onToggleExpand={() => setExpandedCorpsId(expandedCorpsId === corps.id ? null : corps.id)}
                                         />
                                     ))}

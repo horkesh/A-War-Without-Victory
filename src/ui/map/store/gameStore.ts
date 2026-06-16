@@ -360,6 +360,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   selectedOsid: null,
   setSelectedOsid: (osid) => set(osid == null
     ? { selectedOsid: null }
+    : osid.trim().length === 0
+      ? { ...CLEARED_ENTITY_SELECTIONS, ...CLEARED_OPERATION_CONTEXT }
     : { ...CLEARED_ENTITY_SELECTIONS, ...CLEARED_OPERATION_CONTEXT, selectedOsid: osid }),
   setSelectedOsidInSector: (osid, sectorId) => set({
     ...CLEARED_ENTITY_SELECTIONS,
@@ -737,7 +739,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
           });
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
-          set({ loadError: message });
+          set({
+            loadError: message,
+            pendingReplaySaveSequence: null,
+            pendingReplaySaveManifest: null,
+          });
           console.error('[gameStore] Failed to parse save:', e);
           reject(e);
           return;
@@ -754,6 +760,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
               loadedGameState: state,
               replayInspection: null,
               replayInspectionReturnState: null,
+              pendingReplaySaveSequence: null,
+              pendingReplaySaveManifest: null,
               loadError: null,
               lastLoadedStateFingerprint: fingerprint,
               // ── Post-load UI state reset ──
@@ -825,8 +833,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
   loadSaveIfChanged: async (jsonOrText: unknown | string) => {
     const nextFingerprint = buildStateFingerprint(jsonOrText);
-    const currentFingerprint = useGameStore.getState().lastLoadedStateFingerprint;
-    if (nextFingerprint != null && currentFingerprint === nextFingerprint) {
+    const store = useGameStore.getState();
+    const currentFingerprint = store.lastLoadedStateFingerprint;
+    const hasPendingReplaySidecar =
+      store.pendingReplaySaveSequence != null
+      || store.pendingReplaySaveManifest != null;
+    if (nextFingerprint != null && currentFingerprint === nextFingerprint && !hasPendingReplaySidecar) {
       return false;
     }
     await useGameStore.getState().loadSave(jsonOrText);

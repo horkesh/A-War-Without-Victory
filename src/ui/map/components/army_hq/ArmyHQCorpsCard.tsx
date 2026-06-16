@@ -190,7 +190,21 @@ export function ArmyHQCorpsCard({
                     )}
                     <div className="w-1 h-3 border-l border-panel-border" />
                     <span className={`font-bold ${gradeColor}`}>{t('armyHqCorps.effectivenessShort', { grade: data.eff.grade })}</span>
+                    {readinessGrade && (
+                        <>
+                            <div className="w-1 h-3 border-l border-panel-border" />
+                            <span className={`font-bold uppercase ${readinessGrade === 'COMBAT READY' ? 'text-emerald-400' : readinessGrade === 'ADEQUATE' ? 'text-text-primary' : readinessGrade === 'STRAINED' ? 'text-amber-400' : 'text-red-400'}`}>
+                                {readinessGrade}
+                            </span>
+                        </>
+                    )}
                 </div>
+
+                {readinessGrade && (
+                    <div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-text-secondary/80 font-mono">
+                        fatigue {Math.round(data.avgFatigue)} / cohesion {Math.round(data.avgCohesion)}
+                    </div>
+                )}
 
                 {/* Equipment icons */}
                 <div className="flex items-center gap-4 mt-1.5 text-[12px]">

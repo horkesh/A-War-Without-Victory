@@ -169,6 +169,49 @@ describe('GUI audit Batch G dead/no-op controls', () => {
         expect(screen.queryByRole('button', { name: 'Accept' })).toBeNull();
     });
 
+    it('surfaces corps readiness and threat status on Army HQ corps cards', () => {
+        useGameStore.setState({
+            ...useGameStore.getInitialState(),
+            loadedGameState: makeState({
+                formations: [
+                    { id: 'arbih_1st_corps', name: '1st Corps', faction: 'RBiH', kind: 'corps', status: 'active', cohesion: 70, fatigue: 0 },
+                    { id: 'brig_1', name: '101st Brigade', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'arbih_1st_corps', personnel: 1800, cohesion: 42, fatigue: 25 },
+                    { id: 'brig_2', name: '102nd Brigade', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'arbih_1st_corps', personnel: 1700, cohesion: 44, fatigue: 23 },
+                ] as LoadedGameState['formations'],
+                corpsFrontSectors: [
+                    {
+                        sector_id: 'sector:arbih:1',
+                        corps_id: 'arbih_1st_corps',
+                        faction: 'RBiH',
+                        display_name: 'Sarajevo front',
+                        assigned_brigade_ids: ['brig_1', 'brig_2'],
+                        reserve_brigade_ids: [],
+                        length_edges: 12,
+                        density: 0.16,
+                        sub_segments: [{ friendly_osids: ['op:sarajevo:sarajevo_1'] }],
+                    },
+                ] as unknown as LoadedGameState['corpsFrontSectors'],
+                sectorIntel: [
+                    {
+                        friendly_sector_id: 'sector:arbih:1',
+                        offensive_signs: true,
+                        posture_observed: 'offensive_prep',
+                        strength_category: 'dense',
+                        confidence: 0.8,
+                    },
+                ] as unknown as LoadedGameState['sectorIntel'],
+            }),
+            armyHQOpen: true,
+            selectedArmyId: 'RBiH',
+        });
+
+        render(createElement(ArmyHQModal));
+
+        expect(screen.getByText('DEGRADED')).toBeTruthy();
+        expect(screen.getByText(/INCOMING/i)).toBeTruthy();
+        expect(screen.getByText(/fatigue 24/i)).toBeTruthy();
+    });
+
     // Removal regression-guard: the bulk "emergency posture" control was a dead
     // direct-set surface (wrote top-level state.corps_command, which the engine
     // never reads). It was removed — the president now approves CO-proposed stance

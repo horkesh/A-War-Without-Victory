@@ -235,6 +235,47 @@ describe('gameStore.loadSave — post-load UI state reset', () => {
         expect(s.lastLoadedStateFingerprint).not.toBeNull();
     });
 
+    it('consumes replay sidecars once and clears them after later plain loads', async () => {
+        useGameStore.getState().setPendingReplaySaveSequence([JSON.parse(makeMinimalSaveJson(1))]);
+        useGameStore.getState().setPendingReplaySaveManifest({
+            schema_version: 1,
+            frame_count: 1,
+            frames: [],
+        });
+
+        await useGameStore.getState().loadSave(makeMinimalSaveJson(40));
+
+        let s = useGameStore.getState();
+        expect(s.loadedGameState?.replaySaveSequence).toHaveLength(1);
+        expect(s.loadedGameState?.replaySaveManifest?.frame_count).toBe(1);
+        expect(s.pendingReplaySaveSequence).toBeNull();
+        expect(s.pendingReplaySaveManifest).toBeNull();
+
+        await useGameStore.getState().loadSave(makeMinimalSaveJson(41));
+
+        s = useGameStore.getState();
+        expect(s.loadedGameState?.replaySaveSequence).toBeUndefined();
+        expect(s.loadedGameState?.replaySaveManifest).toBeUndefined();
+        expect(s.pendingReplaySaveSequence).toBeNull();
+        expect(s.pendingReplaySaveManifest).toBeNull();
+    });
+
+    it('clears pending replay sidecars after a malformed load attempt', async () => {
+        useGameStore.getState().setPendingReplaySaveSequence([JSON.parse(makeMinimalSaveJson(1))]);
+        useGameStore.getState().setPendingReplaySaveManifest({
+            schema_version: 1,
+            frame_count: 1,
+            frames: [],
+        });
+
+        await expect(useGameStore.getState().loadSave('not json at all'))
+            .rejects.toThrow();
+
+        const s = useGameStore.getState();
+        expect(s.pendingReplaySaveSequence).toBeNull();
+        expect(s.pendingReplaySaveManifest).toBeNull();
+    });
+
     it('updates lastLoadedStateFingerprint on each load', async () => {
         await useGameStore.getState().loadSave(makeMinimalSaveJson(5));
         const fp1 = useGameStore.getState().lastLoadedStateFingerprint;
@@ -350,6 +391,19 @@ describe('gameStore.loadSaveIfChanged — deduplication', () => {
         await useGameStore.getState().loadSave(json);
         const result = await useGameStore.getState().loadSaveIfChanged(json);
         expect(result).toBe(false);
+    });
+
+    it('loads a matching fingerprint when replay sidecars are pending', async () => {
+        const json = makeMinimalSaveJson(40);
+        await useGameStore.getState().loadSave(json);
+
+        useGameStore.getState().setPendingReplaySaveSequence([JSON.parse(makeMinimalSaveJson(1))]);
+
+        const result = await useGameStore.getState().loadSaveIfChanged(json);
+
+        expect(result).toBe(true);
+        expect(useGameStore.getState().loadedGameState?.replaySaveSequence).toHaveLength(1);
+        expect(useGameStore.getState().pendingReplaySaveSequence).toBeNull();
     });
 
     it('returns true when fingerprint differs (new load)', async () => {

@@ -832,7 +832,7 @@ export function MapContainer() {
             return;
           }
 
-          if (clickTarget.kind !== 'formation' || !info?.object?.properties) return;
+          if (clickTarget.kind !== 'formation') return;
 
           // Signal MapLibre's handleMapClick to skip front-edge fallthrough —
           // without this, the hidden formation-markers layer means MapLibre falls

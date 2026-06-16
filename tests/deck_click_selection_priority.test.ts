@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 import {
   getFormationIconScreenSize,
@@ -89,5 +91,12 @@ describe('deck click selection priority', () => {
     });
 
     expect(result?.id).toBe('alpha_brigade');
+  });
+
+  it('MapContainer does not discard a resolved formation fallback when Deck has no object payload', () => {
+    const source = readFileSync(resolve('src/ui/map/map/MapContainer.tsx'), 'utf8');
+
+    expect(source).not.toContain("clickTarget.kind !== 'formation' || !info?.object?.properties");
+    expect(source).toContain('const props = info?.object?.properties ?? formationFallback?.properties;');
   });
 });
