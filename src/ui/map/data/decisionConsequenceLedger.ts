@@ -1,4 +1,5 @@
 import type {
+  FormationView,
   LoadedGameState,
   ConvoyDecisionRecordView,
   OperationOpportunityRecordView,
@@ -88,12 +89,40 @@ function reserveTitle(record: ReserveRequestDecisionRecordView): string {
   return `Reserve request ${outcome}`;
 }
 
-function reserveDetail(record: ReserveRequestDecisionRecordView): string {
-  // Resolve via the corps display helper so a faction-slug-prefixed id
-  // (e.g. `arbih_1st_corps`) renders as "1st Corps" instead of leaking the
-  // faction slug as a word ("Arbih 1st Corps").
-  const corps = getPlayerSafeCorpsName(record.corps_id, record.corps_id, 'corps');
-  const brigade = record.brigade_id ? humanizeToken(record.brigade_id) : null;
+function authoredDisplayName(name: string | null | undefined, id: string | null | undefined): string | null {
+  const trimmed = (name ?? '').trim();
+  if (!trimmed) return null;
+  if (id && trimmed === id) return null;
+  return trimmed;
+}
+
+function buildFormationDisplayMaps(formations: readonly FormationView[] | undefined): {
+  formationNames: ReadonlyMap<string, string>;
+  corpsNames: ReadonlyMap<string, string>;
+} {
+  const formationNames = new Map<string, string>();
+  const corpsNames = new Map<string, string>();
+  for (const formation of formations ?? []) {
+    const name = authoredDisplayName(formation.name, formation.id);
+    if (!name) continue;
+    formationNames.set(formation.id, name);
+    if (formation.kind.includes('corps')) {
+      corpsNames.set(formation.id, getPlayerSafeCorpsName(name, formation.id, name));
+    }
+  }
+  return { formationNames, corpsNames };
+}
+
+function reserveDetail(
+  record: ReserveRequestDecisionRecordView,
+  displayMaps: { formationNames: ReadonlyMap<string, string>; corpsNames: ReadonlyMap<string, string> },
+): string {
+  const corps = record.corps_id
+    ? displayMaps.corpsNames.get(record.corps_id) ?? 'this corps command'
+    : 'this corps command';
+  const brigade = record.brigade_id
+    ? displayMaps.formationNames.get(record.brigade_id) ?? 'the reserve brigade'
+    : null;
   if (record.outcome === 'accepted' && brigade) {
     return `${brigade} assigned to ${corps}. ${record.why_needed || record.reason}`.trim();
   }
@@ -239,7 +268,7 @@ function officerTitle(record: OfficerDecisionRecordView): string {
 }
 
 function officerDetail(record: OfficerDecisionRecordView): string {
-  const corps = record.corps_name || humanizeToken(record.corps_id) || 'the command';
+  const corps = authoredDisplayName(record.corps_name, record.corps_id) || 'the command';
   if (record.decision === 'replacement_accepted') {
     const incoming = record.new_officer_name || record.officer_name || 'New commander';
     const outgoing = record.outgoing_officer_name || record.current_commander_name;
@@ -265,6 +294,7 @@ export function buildDecisionConsequenceLedger(
   if (!state) return [];
 
   const records: DecisionConsequenceRecord[] = [];
+  const formationDisplayMaps = buildFormationDisplayMaps(state.formations);
 
   for (const event of state.firedEvents ?? []) {
     if (!event.isDecision) continue;
@@ -302,7 +332,7 @@ export function buildDecisionConsequenceLedger(
       family: 'Army reserve',
       title: reserveTitle(reserve),
       outcome: reserveOutcome(reserve),
-      detail: reserveDetail(reserve),
+      detail: reserveDetail(reserve, formationDisplayMaps),
       recordTarget: 'records',
     });
   }

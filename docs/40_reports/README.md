@@ -12,6 +12,8 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest stale-truth/process hardening** | [implemented/20260616_STALE_TRUTH_AND_PROCESS_HARDENING.md](implemented/20260616_STALE_TRUTH_AND_PROCESS_HARDENING.md) - Engine-health CI reports upstream scenario failures clearly, Sarajevo siege UI requires current control freshness, consequence copy uses authored/neutral labels, and life-lessons topic files/counts are synced. |
+| **Latest engine-health CI dependency hardening** | [implemented/20260616_ENGINE_HEALTH_CI_DEPENDENCY_HARDENING.md](implemented/20260616_ENGINE_HEALTH_CI_DEPENDENCY_HARDENING.md) - Required `engine-health-188w` fails explicitly when its upstream `scenarios` job does not succeed. |
 | **Latest UI copy raw-ID fallback closure** | [implemented/20260616_UI_COPY_RAW_ID_FALLBACKS.md](implemented/20260616_UI_COPY_RAW_ID_FALLBACKS.md) - Command planning, Chief of Staff prose, Warroom hotspot titles, and autonomy proposal values now keep raw ids internal and render neutral/player-safe copy. |
 | **Latest comment sweep: Verdict/refugee hardening** | [implemented/20260616_COMMENT_SWEEP_VERDICT_REFUGEE.md](implemented/20260616_COMMENT_SWEEP_VERDICT_REFUGEE.md) - Verdict snapshot tests count exact faction-tab outcome badges, and refugee surge beats compare against the actual prior week. |
 | **Latest Chronicle and receipt safe labels** | [implemented/20260616_CHRONICLE_RECEIPT_SAFE_LABELS.md](implemented/20260616_CHRONICLE_RECEIPT_SAFE_LABELS.md) - Consequence receipts and Chronicle Wrapped divergence bullets resolve authored/player-safe labels while preserving raw ids internally. |

@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-16] fix(ui/ci/docs): harden stale truth and process sync
+
+**Type:** UI/read-model truth hardening + CI dependency guard + docs/process sync. This closes four Pyrrhic specialist findings from the autonomous comment sweep: `engine-health-188w` could be skipped by an upstream `scenarios` failure, Sarajevo siege UI could trust stale serialized containment data, decision consequence records could derive reserve/officer copy from raw ids, and four June 15 lessons existed only in the life-lessons index.
+
+**Fix:** Baseline Regression `engine-health-188w` now uses `if: always()` with an explicit upstream-scenario failure step, so required status reporting is red and clear when `scenarios` does not succeed. Sarajevo siege read-models now derive from full `GameState`, requiring the saved RS containment observer set to match current RBiH-held Sarajevo-core political control before Situation/Chronicle surfaces render the siege beat. Decision consequence reserve/officer records now use authored formation/corps names when present and neutral fallback copy when ids are the only available data. Life-lessons topic files and counts are synced to the June 15 index.
+
+**Verification:** `npx.cmd vitest run tests\sarajevo_siege_legibility.test.ts tests\ui\decision_consequence_trail.test.ts tests\ui\decision_consequence_records_panel.test.ts --pool=forks --reporter=dot` -> 3 files / 35 tests passed. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` -> 11 files / 102 tests passed. `npx.cmd prettier --check .github\workflows\baseline-regression.yml` passed. No sim/scenario/save-schema/baseline/package artifacts changed.
+
+---
+
 ## [2026-06-16] fix(ui): clear stale brigade context and remove objective raw IDs
 
 **Type:** tactical-map UI/player-facing copy hardening. This closes Pyrrhic specialist findings that standalone brigade selection could inherit stale corps/army/HQ context, and request-operation / Corps front objective surfaces could expose raw OSIDs in normal player-facing copy.

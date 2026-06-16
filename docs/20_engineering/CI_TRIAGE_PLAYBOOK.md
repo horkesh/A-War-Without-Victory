@@ -22,6 +22,8 @@ npm.cmd run test:vitest:fast
 npm.cmd run test:vitest:scenario
 ```
 
+For `engine-health-188w`, first check whether the failure is its own 188w gate or the explicit `Require upstream scenario gate` step. If the upstream guard failed, triage the `scenarios` job first; the engine-health job is intentionally red so a required check never disappears behind a skipped dependency.
+
 3. If `gh auth status` reports an invalid token, use the GitHub connector to inspect workflow jobs, failed steps, and logs. Public REST metadata can identify run/job status, but failed log download usually needs Actions permission.
 
 ## Desktop Release Guard

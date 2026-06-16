@@ -427,3 +427,15 @@
 - **Root cause**: an isolated worktree builder defaults to running ONLY the file it just wrote (it's the cheapest local signal). A change to a SHARED surface — a chronicle/event list, a capped/sorted/grouped render, a registry the UI or engine iterates, a flag feeding a shared predicate, an in-window persisted/logged field — interacts with OTHER tests the builder never runs.
 - **Right approach**: the CI gate is the backstop (it caught all three), but a local full-suite run is cheaper than a CI round-trip. In the dispatch prompt, for any shared-surface change, explicitly instruct: "grep tests for the host component/predicate (e.g. `ChronicleOverlay`, `contain_posture`, the registry name) and run them ALL, not just your new file; for sim-touching changes also run `test:baselines`."
 - **Do instead**: when scoping a dispatch that adds to a shared render/aggregation/registry surface, name the full test set the builder must run. Don't rely on "I added a passing test" — a passing NEW test says nothing about the EXISTING tests that share the surface. Pairs with the calibration "golden manifest vs structural fingerprint" lesson (same shape: the narrow check passes, the broad check catches the interaction).
+
+### [Process] A "fill the gaps" surface must be gated to only fill gaps (2026-06-15)
+- **Context**: The #441 generals' digest fired on every turn, but its D2-P4 purpose was to fill silent turns. Gating it to emit only on turns with no other substantive chronicle entry both fixed displacement and made the feature match its design.
+- **Do instead**: Any surface whose job is "fill dead air" must compute gaps from real content first and emit only into those gaps; an unconditional per-turn version will compete with the content it was meant to complement.
+
+### [Process] Enforce a Section 6 bright line in the runtime path, not just tests (2026-06-15)
+- **Context**: #441 initially guarded forbidden vocabulary only in tests while runtime prose interpolated live operation names. The fix scrubbed author-supplied names at the single runtime boundary where they entered the digest prose.
+- **Do instead**: Any read-model prose surface near Section 6 content that interpolates author-supplied strings must scrub or guard at runtime, not only through synthetic test assertions or naming discipline.
+
+### [Process] Verify-the-premise: a held item may already be shipped (2026-06-15)
+- **Context**: A standup D2 priority scoped as a Section 6-gated build was already un-held and shipped under a prior delegated panel GO. Reading current state turned a build into a verification.
+- **Do instead**: Treat every "held", "TODO", or "pending" label as a hypothesis until current code, docs, and GitHub state are checked.

@@ -206,6 +206,7 @@ jobs:
   # on non-sim PRs (same path set as `scenarios`) — so doc/CI PRs are never blocked.
   engine-health-188w:
     needs: scenarios
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     # REQUIRED (promoted from advisory 2026-06-13, owner-authorized): a hard
@@ -214,6 +215,12 @@ jobs:
     # criterion was met (#424/#426/#427/#428/#429 all green). Path-gated: non-sim PRs
     # report success via the always-report shim, so only sim-touching PRs pay the run.
     steps:
+      - name: Require upstream scenario gate
+        if: ${{ needs.scenarios.result != 'success' }}
+        run: |
+          echo "::error::scenarios job concluded '${{ needs.scenarios.result }}'; engine-health-188w must not report skipped/green without scenario-gate success."
+          exit 1
+
       - uses: actions/checkout@v5
         with:
           # detect-changed-paths.sh needs the base commit in history.

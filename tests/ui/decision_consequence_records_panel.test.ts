@@ -128,8 +128,34 @@ describe('DecisionConsequenceRecordsPanel', () => {
       why_needed: 'Drina Corps needs a reserve to stabilize the front.',
       how_to_use: 'Anchor the weakest sector.',
     }));
+    const formations = [
+      {
+        id: 'vrs_drina_corps',
+        faction: 'RS',
+        name: 'Drina Corps',
+        kind: 'corps',
+        readiness: 'ready',
+        cohesion: 75,
+        fatigue: 0,
+        status: 'active',
+        createdTurn: 1,
+        tags: [],
+      },
+      ...reserveRequestHistory.map((request, index) => ({
+        id: request.brigade_id,
+        faction: 'RS',
+        name: `Reserve Brigade ${index.toString().padStart(2, '0')}`,
+        kind: 'brigade',
+        readiness: 'ready',
+        cohesion: 75,
+        fatigue: 0,
+        status: 'active',
+        createdTurn: 1,
+        tags: [],
+      })),
+    ];
     useGameStore.setState({
-      loadedGameState: makeState({ reserveRequestHistory } as Partial<LoadedGameState>),
+      loadedGameState: makeState({ formations, reserveRequestHistory } as Partial<LoadedGameState>),
       focusedDecisionConsequenceId: 'reserve:reserve_00',
     });
 

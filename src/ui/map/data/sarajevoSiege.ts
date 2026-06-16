@@ -35,6 +35,7 @@
  */
 
 import { strictCompare } from '../../../state/validateGameState.js';
+import type { GameState } from '../../../state/game_state.js';
 
 /**
  * The four Sarajevo urban-core municipality slugs the SRK historically strangled
@@ -58,6 +59,32 @@ export type SiegeFaction = 'RBiH' | 'RS' | 'HRHB';
 /** Extract the municipality slug from an OSID. Format: `op:municipality:slug`. */
 function munFromOsid(osid: string): string | undefined {
   return osid.split(':')[1];
+}
+
+function isSrkStranglePostureDisplayEnabled(): boolean {
+  const raw = (globalThis as { process?: { env?: Record<string, string | undefined> } })
+    .process?.env?.AWWV_SRK_STRANGLE_POSTURE;
+  return raw !== 'false' && raw !== '0';
+}
+
+function arraysEqual(a: readonly string[], b: readonly string[]): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((value, index) => value === b[index]);
+}
+
+function deriveCurrentRibhSarajevoCoreOsids(state: GameState | undefined | null): string[] {
+  const controllers = state?.political?.political_controllers;
+  if (!controllers || typeof controllers !== 'object') return [];
+
+  const result: string[] = [];
+  for (const [osid, controller] of Object.entries(controllers)) {
+    if (controller !== 'RBiH') continue;
+    const mun = munFromOsid(osid);
+    if (!mun || !SARAJEVO_CORE_MUN_SET.has(mun)) continue;
+    result.push(osid);
+  }
+  result.sort(strictCompare);
+  return result;
 }
 
 /**
@@ -105,6 +132,29 @@ export function deriveSarajevoSiegeState(
     besiegedMunicipalityCount: besiegedMuns.size,
     besiegingFaction: 'RS',
   };
+}
+
+/**
+ * Derive the Sarajevo-siege display state from the full live GameState. Unlike
+ * the low-level set helper above, this treats the persisted observer field as
+ * fresh only when it matches the current RBiH-held Sarajevo-core control truth
+ * and the browser-safe SRK posture gate is active. That prevents stale
+ * save/resume observer data from becoming UI truth.
+ */
+export function deriveSarajevoSiegeStateFromGameState(
+  state: GameState | undefined | null,
+): SarajevoSiegeState | null {
+  if (!state || !isSrkStranglePostureDisplayEnabled()) return null;
+  const siege = deriveSarajevoSiegeState(
+    state.political?.last_contained_osids_by_faction?.RS,
+  );
+  if (!siege) return null;
+
+  const currentCoreOsids = deriveCurrentRibhSarajevoCoreOsids(state);
+  if (currentCoreOsids.length === 0) return null;
+  if (!arraysEqual(siege.strangledCoreOsids, currentCoreOsids)) return null;
+
+  return siege;
 }
 
 /** Short, presentation-ready siege label for a chronicle/situation heading. */

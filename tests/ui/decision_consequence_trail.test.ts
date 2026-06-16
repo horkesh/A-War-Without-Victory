@@ -87,8 +87,46 @@ describe('decision consequence trail', () => {
     });
   });
 
-  it('includes army reserve request decisions from the persisted reserve history', () => {
+  it('includes army reserve request decisions from the persisted reserve history using authored formation names', () => {
     const ledger = buildDecisionConsequenceLedger(makeState({
+      formations: [
+        {
+          id: 'elite_guard_brigade',
+          faction: 'RS',
+          name: 'Elite Guard Brigade',
+          kind: 'brigade',
+          readiness: 'ready',
+          cohesion: 75,
+          fatigue: 0,
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+        },
+        {
+          id: 'vrs_drina_corps',
+          faction: 'RS',
+          name: 'Drina Corps',
+          kind: 'corps',
+          readiness: 'ready',
+          cohesion: 75,
+          fatigue: 0,
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+        },
+        {
+          id: 'vrs_herzegovina_corps',
+          faction: 'RS',
+          name: 'Herzegovina Corps',
+          kind: 'corps',
+          readiness: 'ready',
+          cohesion: 75,
+          fatigue: 0,
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+        },
+      ],
       reserveRequestHistory: [
         {
           request_id: 'reserve:turn_12:vrs_drina_corps',
@@ -138,6 +176,29 @@ describe('decision consequence trail', () => {
       }),
     ]);
     expect(ledger.map((record) => `${record.family} ${record.title} ${record.outcome} ${record.detail}`).join(' ')).not.toMatch(/_/);
+  });
+
+  it('does not derive reserve record display copy from raw brigade or corps ids', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      reserveRequestHistory: [
+        {
+          request_id: 'reserve:turn_12:rbih_internal_corps_slug',
+          turn: 12,
+          faction: 'RBiH',
+          corps_id: 'rbih_internal_corps_slug',
+          brigade_id: 'rbih_internal_brigade_slug',
+          outcome: 'accepted',
+          reason: 'Army CO accepted: request is actionable.',
+          decided_by: 'player',
+          purpose: 'defensive',
+          why_needed: 'Needs a reserve to stabilize the front.',
+          how_to_use: 'Anchor the weakest sector.',
+        },
+      ],
+    } as Partial<LoadedGameState>));
+
+    expect(ledger[0]?.detail).toContain('the reserve brigade assigned to this corps command');
+    expect(ledger[0]?.detail).not.toMatch(/rbih_internal|internal brigade|internal corps|slug|_/i);
   });
 
   it('includes resolved peace-plan decisions from persisted negotiation history', () => {
@@ -292,6 +353,27 @@ describe('decision consequence trail', () => {
       detail: 'Gen. New Commander appointed to Drina Corps; Gen. Old Commander retired.',
     });
     expect(`${ledger[0]?.family} ${ledger[0]?.title} ${ledger[0]?.outcome} ${ledger[0]?.detail}`).not.toMatch(/_/);
+  });
+
+  it('does not derive officer personnel corps copy from raw corps ids', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      officerDecisionHistory: [
+        {
+          id: 'officer:9:evt-a:override_confirmed',
+          turn: 9,
+          faction: 'RBiH',
+          event_id: 'evt-a',
+          event_type: 'override_required',
+          officer_id: 'staff_officer',
+          officer_name: 'Staff officer',
+          corps_id: 'rbih_internal_corps_slug',
+          decision: 'override_confirmed',
+        },
+      ],
+    } as Partial<LoadedGameState>));
+
+    expect(ledger[0]?.detail).toBe('Staff officer was directed to follow the presidential order for the command.');
+    expect(ledger[0]?.detail).not.toMatch(/rbih_internal|internal corps|slug|_/i);
   });
 
   it('includes player-faction patron defiance material receipts from raw state', () => {

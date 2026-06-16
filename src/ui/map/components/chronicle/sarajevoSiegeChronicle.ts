@@ -35,7 +35,7 @@
 
 import type { FactionId, GameState } from '../../../../state/game_state.js';
 import {
-  deriveSarajevoSiegeState,
+  deriveSarajevoSiegeStateFromGameState,
   sarajevoSiegeGloss,
   sarajevoSiegeTitle,
   type SiegeFaction,
@@ -62,8 +62,7 @@ export function buildSarajevoSiegeChronicleEntries(
   latestTurn: number,
   playerFaction: FactionId | string | null | undefined,
 ): ChronicleEntry[] {
-  const rsContained = rawState?.political?.last_contained_osids_by_faction?.RS;
-  const siege = deriveSarajevoSiegeState(rsContained);
+  const siege = deriveSarajevoSiegeStateFromGameState(rawState);
   if (!siege) return [];
 
   const turn = Number.isFinite(latestTurn) ? latestTurn : 0;

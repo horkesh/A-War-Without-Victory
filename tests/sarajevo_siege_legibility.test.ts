@@ -4,6 +4,7 @@ import { SARAJEVO_CITY_CORE_MUN_IDS } from '../src/state/enclave_integrity.js';
 import {
   SARAJEVO_CORE_MUN_IDS,
   deriveSarajevoSiegeState,
+  deriveSarajevoSiegeStateFromGameState,
   sarajevoSiegeGloss,
   sarajevoSiegeTitle,
 } from '../src/ui/map/data/sarajevoSiege.js';
@@ -21,12 +22,34 @@ const CORE_OSIDS = [
 /** Outer-ring OSID (legitimate SRK objective — NOT urban core). */
 const OUTER_RING_OSID = 'op:ilidza:ilidza_2';
 
-function rawStateWithStrangle(rsOsids: string[] | undefined): GameState {
+function rawStateWithStrangle(
+  rsOsids: string[] | undefined,
+  controllers: Record<string, string | null> = Object.fromEntries(CORE_OSIDS.map((osid) => [osid, 'RBiH'])),
+): GameState {
   return {
     political: {
+      political_controllers: controllers,
       last_contained_osids_by_faction: rsOsids === undefined ? {} : { RS: rsOsids },
     },
   } as unknown as GameState;
+}
+
+function withSrkDisplayGate<T>(value: string | undefined, fn: () => T): T {
+  const previous = process.env.AWWV_SRK_STRANGLE_POSTURE;
+  if (value === undefined) {
+    delete process.env.AWWV_SRK_STRANGLE_POSTURE;
+  } else {
+    process.env.AWWV_SRK_STRANGLE_POSTURE = value;
+  }
+  try {
+    return fn();
+  } finally {
+    if (previous === undefined) {
+      delete process.env.AWWV_SRK_STRANGLE_POSTURE;
+    } else {
+      process.env.AWWV_SRK_STRANGLE_POSTURE = previous;
+    }
+  }
 }
 
 function makeTurnSummary(turn: number) {
@@ -56,7 +79,7 @@ describe('Sarajevo-siege legibility (SRK strangle-not-capture, D2 task #41)', ()
   });
 
   it('fires when the strangle set contains the four urban-core OSIDs', () => {
-    const siege = deriveSarajevoSiegeState(CORE_OSIDS);
+    const siege = deriveSarajevoSiegeStateFromGameState(rawStateWithStrangle(CORE_OSIDS));
     expect(siege).not.toBeNull();
     expect(siege!.besiegingFaction).toBe('RS');
     expect(siege!.besiegedMunicipalityCount).toBe(4);
@@ -64,10 +87,21 @@ describe('Sarajevo-siege legibility (SRK strangle-not-capture, D2 task #41)', ()
   });
 
   it('counts only urban-core OSIDs when the set mixes core + outer ring', () => {
-    const siege = deriveSarajevoSiegeState([...CORE_OSIDS, OUTER_RING_OSID]);
+    const siege = deriveSarajevoSiegeStateFromGameState(rawStateWithStrangle([...CORE_OSIDS, OUTER_RING_OSID]));
     expect(siege).not.toBeNull();
     expect(siege!.besiegedMunicipalityCount).toBe(4);
     expect(siege!.strangledCoreOsids).not.toContain(OUTER_RING_OSID);
+  });
+
+  it('returns null for stale serialized core containment when SRK posture display is off', () => {
+    withSrkDisplayGate('false', () => {
+      expect(deriveSarajevoSiegeStateFromGameState(rawStateWithStrangle(CORE_OSIDS))).toBeNull();
+    });
+  });
+
+  it('returns null when serialized core containment no longer matches current RBiH-held core truth', () => {
+    const controllers = Object.fromEntries(CORE_OSIDS.map((osid) => [osid, 'RS']));
+    expect(deriveSarajevoSiegeStateFromGameState(rawStateWithStrangle(CORE_OSIDS, controllers))).toBeNull();
   });
 
   it('is faction-aware: distinct chair-framed prose for RS / RBiH / observer', () => {
@@ -122,6 +156,12 @@ describe('Sarajevo-siege legibility (SRK strangle-not-capture, D2 task #41)', ()
     expect(buildSarajevoSiegeChronicleEntries(rawStateWithStrangle([OUTER_RING_OSID]), 188, 'RBiH')).toEqual([]);
   });
 
+  it('chronicle: emits nothing for stale serialized Sarajevo-core containment on flag-off resume', () => {
+    withSrkDisplayGate('0', () => {
+      expect(buildSarajevoSiegeChronicleEntries(rawStateWithStrangle(CORE_OSIDS), 188, 'RBiH')).toEqual([]);
+    });
+  });
+
   it('is deterministic — identical state yields identical entries', () => {
     const a = buildSarajevoSiegeChronicleEntries(rawStateWithStrangle(CORE_OSIDS), 188, 'RS');
     const b = buildSarajevoSiegeChronicleEntries(rawStateWithStrangle(CORE_OSIDS), 188, 'RS');
@@ -152,6 +192,19 @@ describe('Sarajevo-siege legibility (SRK strangle-not-capture, D2 task #41)', ()
       turnSummaries: [makeTurnSummary(188)],
       firedEvents: [],
       rawGameState: rawStateWithStrangle(undefined),
+    };
+    const entries = generateChronicleEntries(state as any);
+    expect(entries.some(e => e.id === 'sarajevo-siege-active')).toBe(false);
+  });
+
+  it('suppresses stale siege beats from rawGameState when current control no longer supports them', () => {
+    const controllers = Object.fromEntries(CORE_OSIDS.map((osid) => [osid, 'RS']));
+    const state = {
+      turn: 188,
+      player_faction: 'RBiH',
+      turnSummaries: [makeTurnSummary(188)],
+      firedEvents: [],
+      rawGameState: rawStateWithStrangle(CORE_OSIDS, controllers),
     };
     const entries = generateChronicleEntries(state as any);
     expect(entries.some(e => e.id === 'sarajevo-siege-active')).toBe(false);

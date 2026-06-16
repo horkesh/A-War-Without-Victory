@@ -1,6 +1,6 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 243 lessons across 9 topic files.
+> Last restructured: 2026-04-11. 271 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
@@ -572,12 +572,12 @@
 
 | File | Topics | Lessons | Load when... |
 |------|--------|---------|-------------|
-| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 51 | Running calibration scenarios, tuning parameters, OOB changes |
-| [combat.md](life_lessons/combat.md) | Combat, Brigade Distribution, March System | 4 | Combat resolution, brigade movement, march/distribution system |
-| [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 60 | Changing engine structure, state, pipeline, adding systems |
-| [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 10 | Modifying derived data, running data scripts, geometry work |
+| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 60 | Running calibration scenarios, tuning parameters, OOB changes |
+| [combat.md](life_lessons/combat.md) | Combat, Brigade Distribution, March System | 6 | Combat resolution, brigade movement, march/distribution system |
+| [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 77 | Changing engine structure, state, pipeline, adding systems |
+| [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 13 | Modifying derived data, running data scripts, geometry work |
 | [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 14 | Frontend, map, tactical overlay, modal work |
-| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 62 | General development process (skim at session start) |
-| [sectors.md](life_lessons/sectors.md) | Sectors, Design | 9 | Sector system, front lines, territory assignment, sub-segments |
-| [platform.md](life_lessons/platform.md) | Platform, Tooling | 5 | Build issues, platform-specific bugs, tooling |
+| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 76 | General development process (skim at session start) |
+| [sectors.md](life_lessons/sectors.md) | Sectors, Design | 16 | Sector system, front lines, territory assignment, sub-segments |
+| [platform.md](life_lessons/platform.md) | Platform, Tooling | 7 | Build issues, platform-specific bugs, tooling |
 | [events.md](life_lessons/events.md) | Events | 2 | Event system, flag gates, triggers |

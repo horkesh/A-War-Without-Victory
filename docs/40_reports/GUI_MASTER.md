@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Stale-truth/process hardening** | [implemented/20260616_STALE_TRUTH_AND_PROCESS_HARDENING.md](implemented/20260616_STALE_TRUTH_AND_PROCESS_HARDENING.md) - Sarajevo siege UI now requires current control freshness, consequence records use authored names or neutral fallbacks, and the supporting CI/docs process fixes are recorded. |
 | **UI copy raw-ID fallback closure** | [implemented/20260616_UI_COPY_RAW_ID_FALLBACKS.md](implemented/20260616_UI_COPY_RAW_ID_FALLBACKS.md) - Command planning, Chief of Staff prose, Warroom hotspot titles, and autonomy proposal values now keep raw ids internal and render neutral/player-safe copy. |
 | **Comment sweep: Verdict/refugee hardening** | [implemented/20260616_COMMENT_SWEEP_VERDICT_REFUGEE.md](implemented/20260616_COMMENT_SWEEP_VERDICT_REFUGEE.md) - Verdict snapshot tests count exact faction-tab outcome badges, and refugee surge beats compare against the actual prior week. |
 | **Chronicle and receipt safe labels** | [implemented/20260616_CHRONICLE_RECEIPT_SAFE_LABELS.md](implemented/20260616_CHRONICLE_RECEIPT_SAFE_LABELS.md) - Consequence receipts and Chronicle Wrapped divergence bullets resolve authored/player-safe labels while preserving raw ids internally. |
