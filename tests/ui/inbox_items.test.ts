@@ -470,6 +470,23 @@ describe('deriveInboxItems — opening brief conditions', () => {
         expect(losses[0].action).toBe('decision_room');
         expect(gains[0].action).toBe('decision_room');
     });
+
+    it('does not report startup control painting as turn-zero territory gained or lost', () => {
+        const state = makeStub({
+            turn: 0,
+            player_faction: 'RBiH',
+            recentControlEvents: [
+                { turn: 0, settlementId: 'op:bihac:bihac_2', from: 'RBiH', to: 'RS', mechanism: 'initial_control', municipalityId: 'bihac' },
+                { turn: 0, settlementId: 'op:tuzla:tuzla_2', from: 'RS', to: 'RBiH', mechanism: 'initial_control', municipalityId: 'tuzla' },
+            ],
+        });
+
+        const items = deriveInboxItems(state, null);
+
+        expect(items.some(i => i.id.startsWith('sit:territory_loss'))).toBe(false);
+        expect(items.some(i => i.id.startsWith('sit:territory_gain'))).toBe(false);
+        expect(items.filter(i => i.id === 'sit:date:0')).toHaveLength(1);
+    });
 });
 
 // ---------------------------------------------------------------------------

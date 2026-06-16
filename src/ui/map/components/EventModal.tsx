@@ -4,9 +4,8 @@
  * faction impact badges. Renders an "Acknowledged" button and auto-dismisses.
  *
  * Ownership boundary: this modal does NOT execute presidential event decisions.
- * Those are owned by PresidentialAttentionPanel inside Army HQ briefing, which
- * calls ipc.respondToEventDecision directly. Inbox 'event_modal' clicks route
- * the president to that panel; they do not land here.
+ * Those are owned by EventDecisionModal, launched from pending_event_decisions
+ * or President's Desk inbox clicks, and execute the single decision response path.
  *
  * Uses the shared Modal wrapper with dispatch paper inner content.
  */

@@ -12,7 +12,10 @@ describe('player journey QA gate contract', () => {
     expect(script).toContain('tests/browser_campaign_start_fallback.test.ts');
     expect(script).toContain('tests/ui/gamestore_load_reset.test.ts');
     expect(script).toContain('tests/ui_map_selection_store.test.ts');
+    expect(script).toContain('tests/ui_map_battle_casualty_truth.test.ts');
     expect(script).toContain('tests/deck_click_selection_priority.test.ts');
     expect(script).toContain('tests/ui/gui_audit_dead_controls.test.ts');
+    expect(script).toContain('tests/ui/inbox_items.test.ts');
+    expect(script).toContain('tests/ui_presidential_toolbar_summary_click.test.ts');
   });
 });

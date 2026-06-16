@@ -37,6 +37,7 @@ export function buildBattleMarkersGeoJSON(
   baseGeoJson: FeatureCollection,
   currentTurn: number,
   battles?: TurnBattle[],
+  battleSummaryTurn: number | null = currentTurn,
 ): FeatureCollection<Point> {
   const centroidByOsid = new Map<string, [number, number]>();
   for (const feature of baseGeoJson.features) {
@@ -50,13 +51,17 @@ export function buildBattleMarkersGeoJSON(
 
   // Index battles by OSID for enrichment
   const battleByOsid = new Map<string, TurnBattle>();
-  if (battles) {
+  const battlesAreCurrentTurn = currentTurn > 0 && (battleSummaryTurn ?? currentTurn) === currentTurn;
+  if (battles && battlesAreCurrentTurn) {
     for (const b of battles) battleByOsid.set(b.osid, b);
   }
 
   // Filter to combat flips in the last 3 turns
   const combatEvents = recentControlEvents.filter(
-    (e) => e.mechanism === 'combat' && e.turn >= currentTurn - 2,
+    (e) => e.mechanism === 'combat'
+      && e.turn > 0
+      && e.turn <= currentTurn
+      && e.turn >= currentTurn - 2,
   );
 
   const latestByOsid = new Map<string, RecentControlEventView>();
@@ -68,7 +73,7 @@ export function buildBattleMarkersGeoJSON(
   }
 
   // Also include battles from this turn that didn't flip territory
-  if (battles) {
+  if (battles && battlesAreCurrentTurn) {
     for (const b of battles) {
       if (!latestByOsid.has(b.osid) && centroidByOsid.has(b.osid)) {
         latestByOsid.set(b.osid, {

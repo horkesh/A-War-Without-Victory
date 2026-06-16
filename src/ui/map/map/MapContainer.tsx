@@ -1644,6 +1644,7 @@ export function MapContainer() {
                       base,
                       state.turn ?? 0,
                       state.latestTurnSummary?.battles,
+                      state.latestTurnSummary?.turn ?? null,
                     );
                     safeEnsureLayer(m, {
                       id: BATTLE_MARKERS_LAYER_ID,
@@ -2799,7 +2800,7 @@ export function MapContainer() {
     const rafId = requestAnimationFrame(() => {
       if (cancelled || !mapRef.current || !loadedGameState) return;
       const controlGeoJson = buildControlGeoJSON(baseGeoJson, loadedGameState.controlBySettlement);
-      const casualtiesGeoJson = buildCasualtiesGeoJSON(controlGeoJson, loadedGameState.formations);
+      const casualtiesGeoJson = buildCasualtiesGeoJSON(controlGeoJson, loadedGameState.formations, loadedGameState.turn ?? 0);
       if (cancelled || !mapRef.current) return;
       const m = mapRef.current;
       if (!m.getSource(OSID_CASUALTIES_SOURCE_ID)) {

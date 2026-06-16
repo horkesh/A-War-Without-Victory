@@ -18,12 +18,14 @@ const REFERENCE_CASUALTIES = 200;
 export function buildCasualtiesGeoJSON(
   controlGeoJson: FeatureCollection,
   formations: FormationView[],
+  currentTurn: number = Number.MAX_SAFE_INTEGER,
 ): FeatureCollection<Polygon | MultiPolygon, CasualtiesProperties> {
   // Aggregate casualties by OSID from all formations' recent engagements
   const casualtiesByOsid = new Map<string, number>();
   for (const f of formations) {
     if (!f.recent_engagements) continue;
     for (const eng of f.recent_engagements) {
+      if (eng.turn <= 0 || eng.turn > currentTurn) continue;
       if (!eng.osid || eng.casualties_taken <= 0) continue;
       casualtiesByOsid.set(eng.osid, (casualtiesByOsid.get(eng.osid) ?? 0) + eng.casualties_taken);
     }

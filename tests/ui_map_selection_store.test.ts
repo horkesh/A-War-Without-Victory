@@ -78,6 +78,22 @@ describe('tactical map selection store clearing', () => {
     });
   });
 
+  it('null settlement selection is also a full tactical deselect', () => {
+    seedConflictingSelectionState();
+    useGameStore.setState({
+      isOperationsPanelOpen: true,
+      operationTargetOsids: ['op:test:target'],
+    });
+
+    useGameStore.getState().setSelectedOsid(null);
+
+    expectOnlySelection({});
+    expect(useGameStore.getState()).toMatchObject({
+      isOperationsPanelOpen: false,
+      operationTargetOsids: [],
+    });
+  });
+
   it('formation selection clears stale settlement, sector, operation, and ORBAT context', () => {
     seedConflictingSelectionState();
 

@@ -41,4 +41,15 @@ describe('presidential toolbar summary action', () => {
     expect(registry).toContain("actionLabel: \"Open President's Desk\"");
     expect(registry).not.toContain("actionLabel: 'War summary'");
   });
+
+  it('keeps presidential event-decision ownership out of stale Army HQ comments', () => {
+    const app = readFileSync('src/ui/map/App.tsx', 'utf8');
+    const modal = readFileSync('src/ui/map/components/EventModal.tsx', 'utf8');
+    const combined = `${app}\n${modal}`;
+
+    expect(combined).toContain("President's Desk inbox");
+    expect(combined).toContain('EventDecisionModal');
+    expect(combined).not.toContain('PresidentialAttentionPanel inside Army HQ briefing');
+    expect(combined).not.toContain("Inbox 'event_modal' clicks route");
+  });
 });

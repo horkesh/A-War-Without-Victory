@@ -283,8 +283,11 @@ export function deriveInboxItems(
     const turn = state.turn ?? 0;
     const dateStr = turnToDateString(turn);
 
-    // Territory changes from recent control events (current turn only)
-    const recentEvents = (state.recentControlEvents ?? []).filter(e => e.turn === turn);
+    // Territory changes from recent control events (current turn only).
+    // Turn 0 control records are scenario setup, not player-visible wartime gains/losses.
+    const recentEvents = turn > 0
+        ? (state.recentControlEvents ?? []).filter(e => e.turn === turn)
+        : [];
     const losses = recentEvents.filter(e => e.from === playerFaction && e.to !== playerFaction);
     const gains = recentEvents.filter(e => e.to === playerFaction && e.from !== playerFaction);
     if (losses.length > 0) {

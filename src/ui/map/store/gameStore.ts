@@ -359,7 +359,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   selectedOsid: null,
   setSelectedOsid: (osid) => set(osid == null
-    ? { selectedOsid: null }
+    ? { ...CLEARED_ENTITY_SELECTIONS, ...CLEARED_OPERATION_CONTEXT }
     : osid.trim().length === 0
       ? { ...CLEARED_ENTITY_SELECTIONS, ...CLEARED_OPERATION_CONTEXT }
     : { ...CLEARED_ENTITY_SELECTIONS, ...CLEARED_OPERATION_CONTEXT, selectedOsid: osid }),

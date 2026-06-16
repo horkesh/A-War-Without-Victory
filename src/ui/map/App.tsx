@@ -1667,8 +1667,8 @@ function App() {
       {loadedGameState?.phase === 'peace' && <PeaceStatusPanel />}
       {/* v0.4.1 Phase 5: Event modal (queue-based).
           Non-decision fired events only — acknowledgement flash with auto-dismiss.
-          Presidential event DECISIONS are owned by PresidentialAttentionPanel
-          (Army HQ briefing); this modal never executes IPC for them. */}
+          Presidential event decisions are owned by EventDecisionModal below,
+          launched from pending_event_decisions or the President's Desk inbox. */}
       {eventQueue.length > 0 && eventQueue[eventQueueIndex] && (
         <EventModal
           event={eventQueue[eventQueueIndex]}
