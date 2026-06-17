@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest operational geometry invalid-coordinate closeout:** [implemented/20260617_OPERATIONAL_GEOMETRY_INVALID_COORDINATE_CLOSEOUT.md](implemented/20260617_OPERATIONAL_GEOMETRY_INVALID_COORDINATE_CLOSEOUT.md) - Operational settlement generation now drops invalid polygon parts, the committed artifact has an integrity test, and live map smoke no longer emits invalid-coordinate overlay warnings.
+
 **Latest OOB metadata substrate:** [implemented/20260617_HVO_ELITE_COMMANDER_METADATA_SUBSTRATE.md](implemented/20260617_HVO_ELITE_COMMANDER_METADATA_SUBSTRATE.md) - OOB elite commander metadata now round-trips through the loader, preserving existing ARBiH/RS/HVO rows while leaving the Vitezovi identity/modeling decision open.
 
 **Latest opening command/startup history truth:** [implemented/20260617_OPENING_COMMAND_AND_STARTUP_HISTORY.md](implemented/20260617_OPENING_COMMAND_AND_STARTUP_HISTORY.md) - Opening corps now show time-safe acting commanders through the Army HQ/OOB read-model, Army HQ route wiring is live-browser verified, later official commanders are not backdated, JNA synthetic command staff is labeled, and JNA setup control no longer appears as false turn-0 combat history.

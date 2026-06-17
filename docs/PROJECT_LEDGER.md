@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-17] fix(map): remove invalid operational polygon parts
+
+**Type:** map-data generation and derived operational artifact integrity. Nietzsche's sidecar traced live Deck.gl `Skipping ... polygon with invalid coordinates` warnings to committed `data/derived/operational/operational_settlements.geojson` rows with degenerate or too-short MultiPolygon secondary parts.
+
+**Fix:** Hardened `scripts/derive_operational_settlements.ts` to drop invalid MultiPolygon parts and invalid/tiny holes during normalization, then re-normalize after the shared-boundary snap pass before writing outputs. Kept `derive_operational_settlements.ts` and `derive_operational_osid_first.ts` JSON output pretty-printed for reviewable deterministic generated diffs. Regenerated `operational_settlements.geojson`, `operational_contact_graph.json`, and `canonical_to_operational_map.json`. Added an artifact-level geometry integrity test that rejects non-finite, unclosed, too-short, or degenerate operational settlement rings.
+
+**Verification:** Red proof: `npx.cmd vitest run tests\operational_settlement_geometry_integrity.test.ts --pool=forks --reporter=dot` failed against the prior artifact with invalid rings. Green proof: same test passed after regeneration; overlay pack `tests\operational_settlement_geometry_integrity.test.ts tests\ui\osid_damage_overlay_coord_validity.test.ts tests\ui\force_quality_overlay_coord_validity.test.ts tests\osid_damage_overlay_builder.test.ts tests\force_quality_overlay_builder.test.ts tests\refugee_column_overlay_builder.test.ts tests\corridor_heartbeat_overlay_builder.test.ts` passed 7 files / 37 tests; contact/data pack `tests\operational_contact_graph_shared_border_precision.test.ts tests\operational_data_osid.test.ts tests\integration_run_diagnostics.test.ts` passed 3 files / 19 tests; `npm.cmd run typecheck` passed. Live browser smoke on `http://127.0.0.1:4201/tactical_map.html?dev=1` started an RS campaign, mounted map canvases, and produced no invalid-coordinate overlay warnings, page errors, or console errors. Artifact delta: 744 features and 5,797 SID-map keys stable; invalid polygon parts 27 -> 0; MultiPolygon features 67 -> 48; contact graph edges 2,047 -> 2,130 from regenerated cleaned geometry.
+
+---
+
 ## [2026-06-17] fix(data): preserve elite commander OOB metadata
 
 **Type:** OOB loader metadata substrate. Bernoulli's HVO sidecar found that multiple elite OOB rows already carried `elite_commander` source metadata, but `loadOobBrigades(...)` dropped the field, making the current metadata and any future Vitezovi commander row dead data.

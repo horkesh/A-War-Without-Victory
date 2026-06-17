@@ -152,7 +152,7 @@ console.log(`  Edges: ${edges.length}`);
 
 // ─── Write outputs ──────────────────────────────────────────────────────────
 console.log('Writing outputs...');
-writeFileSync(opPath, JSON.stringify(opGeo));
+writeFileSync(opPath, JSON.stringify(opGeo, null, 2));
 
 const mapping: Record<string, string> = {};
 for (const sid of sidKeys) mapping[sid] = canonicalToOperational[sid]!;
@@ -171,6 +171,6 @@ const opContactGraph = {
         shared_segments: countSharedSegments(osidToFeature.get(edge.a)!, osidToFeature.get(edge.b)!),
     })),
 };
-writeFileSync(resolve(OUT_DIR, 'operational_contact_graph.json'), JSON.stringify(opContactGraph));
+writeFileSync(resolve(OUT_DIR, 'operational_contact_graph.json'), JSON.stringify(opContactGraph, null, 2));
 
 console.log('Done (OSID-first pipeline).');

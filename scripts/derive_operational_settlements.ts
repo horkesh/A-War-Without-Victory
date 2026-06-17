@@ -362,35 +362,79 @@ function ringSignedArea(ring: number[][]): number {
     return area / 2;
 }
 
-/** Minimum hole area in square meters — holes smaller than this are artifacts from TopoJSON merge. */
-const MIN_HOLE_AREA_SQM = 50_000; // 50,000 m² = 0.05 km²
+const MIN_RING_ABS_AREA = 1e-14;
+
+function isFiniteLngLatPosition(position: unknown): position is number[] {
+    if (!Array.isArray(position) || position.length < 2) return false;
+    const lng = position[0];
+    const lat = position[1];
+    return typeof lng === 'number'
+        && typeof lat === 'number'
+        && Number.isFinite(lng)
+        && Number.isFinite(lat)
+        && lng >= -180
+        && lng <= 180
+        && lat >= -90
+        && lat <= 90;
+}
+
+function sameLngLat(a: number[], b: number[]): boolean {
+    return a[0] === b[0] && a[1] === b[1];
+}
+
+function isValidNormalizedRing(ring: number[][]): boolean {
+    if (ring.length < 4) return false;
+    if (!ring.every(isFiniteLngLatPosition)) return false;
+    if (!sameLngLat(ring[0]!, ring[ring.length - 1]!)) return false;
+
+    let minLng = Number.POSITIVE_INFINITY;
+    let maxLng = Number.NEGATIVE_INFINITY;
+    let minLat = Number.POSITIVE_INFINITY;
+    let maxLat = Number.NEGATIVE_INFINITY;
+    const unique = new Set<string>();
+    for (const position of ring) {
+        const lng = position[0]!;
+        const lat = position[1]!;
+        minLng = Math.min(minLng, lng);
+        maxLng = Math.max(maxLng, lng);
+        minLat = Math.min(minLat, lat);
+        maxLat = Math.max(maxLat, lat);
+        unique.add(`${lng},${lat}`);
+    }
+
+    return unique.size >= 3
+        && maxLng > minLng
+        && maxLat > minLat
+        && Math.abs(ringSignedArea(ring)) > MIN_RING_ABS_AREA;
+}
+
+/** Minimum hole area in square meters - holes smaller than this are artifacts from TopoJSON merge. */
+const MIN_HOLE_AREA_SQM = 50_000; // 50,000 m2 = 0.05 km2
 
 /**
  * Normalize geometry: minimal cleanup that preserves shared boundary vertices.
- * - Unwrap single-part MultiPolygon → Polygon (keep MultiPolygon if truly multi-part)
+ * - Unwrap single-part MultiPolygon -> Polygon (keep MultiPolygon if truly multi-part)
  * - Close all rings
- * - Remove tiny artifact holes (< MIN_HOLE_AREA_SQM)
+ * - Remove invalid/tiny artifact holes and invalid MultiPolygon parts
  * - Ensure correct winding order (outer CCW, holes CW)
  *
  * IMPORTANT: Does NOT use buffer(0) or any operation that replaces coordinates,
  * because that would destroy shared boundary vertices from topological merge
  * and create inter-polygon gaps.
  */
-function normalizeGeometry(geom: any, _osid: string): any {
+function normalizeGeometry(geom: any, osid: string): any {
     if (!geom || !geom.type) return geom;
 
     if (geom.type === 'MultiPolygon') {
         if (geom.coordinates.length === 1) {
-            // Single-part MultiPolygon → unwrap to Polygon
             geom = { type: 'Polygon', coordinates: geom.coordinates[0]! };
         } else {
-            // True multi-part: normalize each part individually, keep as MultiPolygon
             const parts: number[][][][] = [];
             for (const partCoords of geom.coordinates) {
                 const normalized = normalizePolygonCoords(partCoords);
                 if (normalized && normalized[0]?.length >= 4) parts.push(normalized);
             }
-            if (parts.length === 0) return geom;
+            if (parts.length === 0) throw new Error(`All polygon parts invalid after normalization for ${osid}`);
             if (parts.length === 1) return { type: 'Polygon', coordinates: parts[0]! };
             return { type: 'MultiPolygon', coordinates: parts };
         }
@@ -398,49 +442,39 @@ function normalizeGeometry(geom: any, _osid: string): any {
 
     if (geom.type !== 'Polygon') return geom;
     const coords = normalizePolygonCoords(geom.coordinates);
-    if (!coords || coords[0]?.length < 4) return geom;
+    if (!coords || coords[0]?.length < 4) throw new Error(`Polygon invalid after normalization for ${osid}`);
     return { type: 'Polygon', coordinates: coords };
 }
 
-/** Normalize a single polygon's coordinate rings (close, remove tiny holes, fix winding). */
+/** Normalize a single polygon's coordinate rings (close, remove invalid/tiny holes, fix winding). */
 function normalizePolygonCoords(polyCoords: number[][][]): number[][][] | null {
     if (!polyCoords || polyCoords.length === 0) return null;
 
-    // Close all rings
-    for (let i = 0; i < polyCoords.length; i++) {
-        polyCoords[i] = closeRing(polyCoords[i]!);
-    }
+    const outerRing = closeRing(polyCoords[0]!.map(position => [position[0]!, position[1]!]));
+    if (!isValidNormalizedRing(outerRing)) return null;
 
-    // Remove tiny artifact holes
-    if (polyCoords.length > 1) {
-        const outerRing = polyCoords[0]!;
-        const keptHoles: number[][][] = [];
-        for (let i = 1; i < polyCoords.length; i++) {
-            try {
-                const holeGeom = { type: 'Polygon' as const, coordinates: [polyCoords[i]!] };
-                const holeArea = turf.area(turf.feature(holeGeom));
-                if (holeArea >= MIN_HOLE_AREA_SQM) {
-                    keptHoles.push(polyCoords[i]!);
-                }
-            } catch {
-                // Keep hole if area computation fails
-                keptHoles.push(polyCoords[i]!);
-            }
-        }
-        polyCoords = [outerRing, ...keptHoles];
-    }
-
-    // Ensure winding order — outer ring CCW (negative signed area in lon/lat), holes CW
-    const outerArea = ringSignedArea(polyCoords[0]!);
-    if (outerArea > 0) polyCoords[0] = polyCoords[0]!.slice().reverse();
+    const keptRings: number[][][] = [outerRing];
     for (let i = 1; i < polyCoords.length; i++) {
-        const holeArea = ringSignedArea(polyCoords[i]!);
-        if (holeArea < 0) polyCoords[i] = polyCoords[i]!.slice().reverse();
+        const holeRing = closeRing(polyCoords[i]!.map(position => [position[0]!, position[1]!]));
+        if (!isValidNormalizedRing(holeRing)) continue;
+        try {
+            const holeGeom = { type: 'Polygon' as const, coordinates: [holeRing] };
+            const holeArea = turf.area(turf.feature(holeGeom));
+            if (holeArea >= MIN_HOLE_AREA_SQM) keptRings.push(holeRing);
+        } catch {
+            // Drop holes that cannot be measured; invalid geometry must not reach Deck.gl overlays.
+        }
     }
 
-    return polyCoords;
-}
+    const outerArea = ringSignedArea(keptRings[0]!);
+    if (outerArea > 0) keptRings[0] = keptRings[0]!.slice().reverse();
+    for (let i = 1; i < keptRings.length; i++) {
+        const holeArea = ringSignedArea(keptRings[i]!);
+        if (holeArea < 0) keptRings[i] = keptRings[i]!.slice().reverse();
+    }
 
+    return keptRings;
+}
 // ─── Phase 5+6: Global topology → simplify → merge by cluster ───────────────
 // Build ONE topology from all canonical settlements so that shared boundaries
 // between adjacent settlements are shared arcs. Simplify at this level, then
@@ -670,8 +704,8 @@ console.log('Phase 5d: Snapping shared boundary vertices between clusters...');
         }
     }
 
-    // Re-close rings that were affected by snapping (first == last vertex)
-    for (const [, f] of clusteredFeatures) {
+    // Re-close and re-normalize rings that were affected by snapping.
+    for (const [osid, f] of clusteredFeatures) {
         const rings = f.geometry.type === 'Polygon' ? f.geometry.coordinates
             : f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates.flat()
             : [];
@@ -680,6 +714,7 @@ console.log('Phase 5d: Snapping shared boundary vertices between clusters...');
                 ring[ring.length - 1] = ring[0]; // Ensure ring closure
             }
         }
+        f.geometry = normalizeGeometry(f.geometry, osid);
     }
 
     console.log(`  Snapped ${totalSnaps} vertices across ${pairsFixed} OSID pairs.`);
@@ -692,8 +727,11 @@ let finalMultiCount = 0;
 let finalUnclosedRings = 0;
 for (const f of (smoothedFc as any).features) {
     if (f.geometry.type !== 'Polygon') finalMultiCount++;
-    if (f.geometry.type === 'Polygon') {
-        for (const ring of f.geometry.coordinates) {
+    const polygons = f.geometry.type === 'Polygon' ? [f.geometry.coordinates]
+        : f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates
+        : [];
+    for (const polygon of polygons) {
+        for (const ring of polygon) {
             if (ring.length >= 2) {
                 const first = ring[0];
                 const last = ring[ring.length - 1];
@@ -752,7 +790,7 @@ function countSharedSegments(featureA: any, featureB: any): number {
 
 // ─── Phase 7: Write Outputs ─────────────────────────────────────────────────
 console.log('Phase 7: Writing outputs...');
-writeFileSync(resolve(OUT_DIR, 'operational_settlements.geojson'), JSON.stringify(smoothedFc));
+writeFileSync(resolve(OUT_DIR, 'operational_settlements.geojson'), JSON.stringify(smoothedFc, null, 2));
 
 const mapping = Object.fromEntries([...mergedInto.entries()].sort((a, b) => a[0].localeCompare(b[0])));
 writeFileSync(resolve(OUT_DIR, 'canonical_to_operational_map.json'), JSON.stringify(mapping, null, 2));
@@ -793,7 +831,7 @@ const opContactGraph = {
             shared_segments: countSharedSegments(clusteredFeatures.get(edge.a), clusteredFeatures.get(edge.b)),
         })),
 };
-writeFileSync(resolve(OUT_DIR, 'operational_contact_graph.json'), JSON.stringify(opContactGraph));
+writeFileSync(resolve(OUT_DIR, 'operational_contact_graph.json'), JSON.stringify(opContactGraph, null, 2));
 
 // ─── Summary ────────────────────────────────────────────────────────────────
 const byMunOut = new Map<string, number>();
