@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-17] fix(ui): wire opening command read-model into Army HQ
+
+**Type:** tactical-map UI/read-model follow-up. Kepler's independent code-review sidecar found that the first startup-truth patch wired `resolveCorpsCommanderDisplay(...)` into OOB, but Army HQ corps cards and the expanded Commander section still used active-only `getFormationCommander(...)`. That meant the docs and live intent were ahead of the actual Army HQ implementation.
+
+**Fix:** Army HQ corps cards now use the same display-only opening command resolver as OOB for the summary card and expanded Commander section. Active assigned officers still get the full `OfficerProfile`; opening acting commanders and synthetic JNA command staff render as display-only command labels, preserving the no-sim-mutation contract. The opening fallback is tightened to `rank:"corps_commander"` plus exact home/historical corps matching, so broad compatibility metadata or deputy/staff rows cannot create duplicate or misleading acting corps-command labels.
+
+**Verification:** `npx.cmd vitest run tests\ui\opening_corps_commander_display.test.ts tests\ui\gui_audit_dead_controls.test.ts --pool=forks --reporter=dot` -> 2 files / 12 tests passed; `npx.cmd vitest run tests\startup_snapshot_contract.test.ts tests\ui\opening_corps_commander_display.test.ts tests\ui\gui_audit_dead_controls.test.ts --pool=forks --reporter=dot` -> 3 files / 22 tests passed; `npm.cmd run typecheck` passed; `npm.cmd run qa:player-journeys` -> 11 files / 103 tests passed. Live browser on `http://127.0.0.1:4201/tactical_map.html?dev=1` verified RS Army HQ Drina Corps -> Svetozar Andric (Acting), JNA forward command staff, no vacancy copy, and no console/page errors; RBiH Army HQ verified 3rd Corps -> Selmo Cikotic (Acting), 4th Corps -> Midhad Hujdur "Hujka" (Acting), no vacancy copy, and no console/page errors. No sim/scenario/save-schema/baseline/package artifacts changed.
+
+---
+
 ## [2026-06-17] fix(ui/sim): make opening commanders read-model-only and clean startup control history
 
 **Type:** startup truth + tactical-map read-model hardening for D2 first-hour polish. Pyrrhic OOB/data agents confirmed that active turn-0 corps assets for `vrs_drina`, `arbih_3rd_corps`, and `arbih_4th_corps` rendered as command vacancies, while JNA phantom setup control was persisted as turn-0 `mechanism:"combat"` control history. The first attempted correction seated active startup commanders in simulation state, but 188w proof rejected it (`matched_osids=622`, `consistency_failures=17`), so the final contract keeps opening command display out of sim mutation.

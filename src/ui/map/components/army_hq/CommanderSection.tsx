@@ -9,7 +9,7 @@
  * can READ the corps command picture; the reassign / dismiss ACTIONS moved out.
  */
 import type { FormationView, LoadedGameState } from '../../data/types';
-import { getFormationCommander } from '../../utils/officerUtils';
+import { getFormationCommander, resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
 import { CollapsibleSection } from './CollapsibleSection';
 import { t } from '../../i18n';
@@ -21,6 +21,7 @@ interface CommanderSectionProps {
 
 export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
     const commander = getFormationCommander(corps, gameState);
+    const commanderDisplay = resolveCorpsCommanderDisplay(corps.id, corps.faction, gameState);
     const isActing = commander?.acting_commander;
 
     return (
@@ -43,6 +44,22 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
                         </div>
                     )}
                     <OfficerProfile officer={commander} label="" compact={false} />
+                </div>
+            ) : commanderDisplay ? (
+                <div className="space-y-4">
+                    {commanderDisplay.acting && (
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-amber-500 bg-amber-500/5 px-3 py-1.5 border border-amber-500/20">
+                            {t('commanderSection.actingCommander')}
+                        </div>
+                    )}
+                    <div className="p-3 bg-panel-bg/70 border border-panel-border">
+                        <div className="text-[10px] uppercase tracking-[0.18em] text-text-secondary font-bold">
+                            {commanderDisplay.source === 'synthetic' ? 'Command Staff' : 'Opening Command'}
+                        </div>
+                        <div className="mt-1 text-[14px] text-text-primary font-bold">
+                            {commanderDisplay.name}
+                        </div>
+                    </div>
                 </div>
             ) : (
                 <div className="space-y-4">

@@ -13,6 +13,8 @@ The first attempted fix seated active turn-0 commanders in simulation state. Foc
 
 - Removed the unsafe startup commander seating path from scenario birth; no corps commander is actively assigned into sim state solely to satisfy first-hour display.
 - Added `resolveCorpsCommanderDisplay(...)`, which lets the Army HQ/OOB UI show time-safe acting commanders from the available officer pool without mutating `military.named_officers`.
+- Follow-up code review found the first pass only wired OOB; Army HQ corps cards and the expanded Commander section now consume the same display resolver. Active assigned officers still get the full `OfficerProfile`; opening acting commanders and synthetic command staff render as display-only command labels.
+- Tightened opening fallback eligibility to exact home/historical corps-command matches, preventing broad compatibility metadata or non-corps ranks from creating duplicate or misleading acting corps-command labels.
 - The read model displays Svetozar Andric for Drina Corps, Selmo Cikotic for ARBiH 3rd Corps, and Midhad Hujdur for ARBiH 4th Corps as opening acting commanders.
 - Added a synthetic `JNA forward command staff` display for the JNA Herzegovina command asset so it no longer renders as an empty personal-command vacancy.
 - Kept later official commanders such as Milenko Zivanovic, Enver Hadzihasanovic, and Arif Pasalic absent at turn 0.
@@ -32,6 +34,8 @@ The first attempted fix seated active turn-0 commanders in simulation state. Foc
 - 188w proof: `npm.cmd run sim:scenario:run:188w -- --out runs\eh_local_opening_read_model_final`, then `node tools\engine_health_gate.cjs runs\eh_local_opening_read_model_final\apr1992_definitive_188w__acb538b04d79af3c__w188_n0 --horizon 188w` passed with `matched_osids=658`, `consistency_failures=3`, anchors intact, and K:W `3.847`.
 - Sensitive-history proof on that run: Srebrenica 11/11 RS, Zepa 1/1 RS, Srebrenica falls turn 162, genocide rupture present, Zepa falls turn 164.
 - Live browser on `http://127.0.0.1:4198/tactical_map.html?dev=1` verified RS/RBiH war-start splash, foundational desk route, Army HQ/OOB readiness, Drina/3rd/4th Corps acting commanders, JNA synthetic command label, and no console errors.
+- Follow-up Army HQ proof on `http://127.0.0.1:4201/tactical_map.html?dev=1` verified RS Army HQ Drina Corps -> Svetozar Andric (Acting), JNA forward command staff, no vacancy copy, and no console/page errors; RBiH Army HQ verified 3rd Corps -> Selmo Cikotic (Acting), 4th Corps -> Midhad Hujdur "Hujka" (Acting), no vacancy copy, and no console/page errors.
+- Follow-up focused UI proof: `npx.cmd vitest run tests\ui\opening_corps_commander_display.test.ts tests\ui\gui_audit_dead_controls.test.ts --pool=forks --reporter=dot` -> 2 files / 12 tests passed; startup/UI pack -> 3 files / 22 tests passed; `npm.cmd run typecheck` passed; `npm.cmd run qa:player-journeys` -> 11 files / 103 tests passed.
 
 ## Residuals
 

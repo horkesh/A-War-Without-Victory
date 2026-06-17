@@ -212,6 +212,60 @@ describe('GUI audit Batch G dead/no-op controls', () => {
         expect(screen.getByText(/fatigue 24/i)).toBeTruthy();
     });
 
+    it('shows opening acting corps command in Army HQ without sim-active officer seating', () => {
+        useGameStore.setState({
+            ...useGameStore.getInitialState(),
+            loadedGameState: makeState({
+                turn: 0,
+                player_faction: 'RS',
+                formations: [
+                    { id: 'vrs_drina', name: 'Drina Corps', faction: 'RS', kind: 'corps', status: 'active', cohesion: 70, fatigue: 0 },
+                    { id: 'vrs_drina_brig_1', name: 'Drina Brigade', faction: 'RS', kind: 'brigade', status: 'active', corps_id: 'vrs_drina', personnel: 1200, cohesion: 60, fatigue: 10 },
+                ] as LoadedGameState['formations'],
+                namedOfficerData: [
+                    {
+                        id: 'vrs_andric',
+                        name: 'Svetozar Andric',
+                        faction: 'RS',
+                        rank: 'corps_commander',
+                        competence: 4,
+                        aggressiveness: 4,
+                        defensive_skill: 4,
+                        political_reliability: 4,
+                        home_corps_id: 'vrs_drina',
+                        available_from_turn: 0,
+                        origin: 'jna',
+                        pool_tier: 'tier_b',
+                        status: 'reserve',
+                        assigned_corps_id: null,
+                        acting_commander: false,
+                        turns_in_command: 0,
+                        battles: 0,
+                        victories: 0,
+                    },
+                ],
+                namedOfficerStateById: {
+                    vrs_andric: {
+                        officer_id: 'vrs_andric',
+                        status: 'reserve',
+                        assigned_corps_id: null,
+                        acting_commander: false,
+                        turns_in_command: 0,
+                        battles: 0,
+                        victories: 0,
+                    },
+                },
+            }),
+            armyHQOpen: true,
+            selectedArmyId: 'RS',
+        });
+
+        render(createElement(ArmyHQModal));
+
+        expect(screen.getAllByText(/Svetozar Andric/i).length).toBeGreaterThan(0);
+        expect(screen.queryByText(/No active commander/i)).toBeNull();
+    });
+
     // Removal regression-guard: the bulk "emergency posture" control was a dead
     // direct-set surface (wrote top-level state.corps_command, which the engine
     // never reads). It was removed — the president now approves CO-proposed stance

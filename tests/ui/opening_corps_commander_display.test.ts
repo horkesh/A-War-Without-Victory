@@ -114,6 +114,41 @@ describe('opening corps commander display', () => {
         expect(gameState.namedOfficerStateById?.vrs_andric?.assigned_corps_id).toBeNull();
     });
 
+    it('does not use broad compatibility or non-corps ranks for opening command labels', () => {
+        const gameState = state({
+            namedOfficerData: [
+                officer({
+                    id: 'compatible_only',
+                    name: 'Compatible Only',
+                    compatible_corps_ids: ['vrs_drina'],
+                    pool_tier: 'starter',
+                    competence: 5,
+                }),
+                officer({
+                    id: 'deputy_home',
+                    name: 'Home Deputy',
+                    rank: 'deputy',
+                    home_corps_id: 'vrs_drina',
+                    pool_tier: 'starter',
+                    competence: 5,
+                }),
+                officer({
+                    id: 'home_corps',
+                    name: 'Home Corps Commander',
+                    home_corps_id: 'vrs_drina',
+                    pool_tier: 'tier_b',
+                    competence: 3,
+                }),
+            ],
+        });
+
+        expect(resolveCorpsCommanderDisplay('vrs_drina', 'RS', gameState)).toEqual({
+            name: 'Home Corps Commander',
+            acting: true,
+            source: 'opening_read_model',
+        });
+    });
+
     it('uses a command-staff label for synthetic JNA command formations', () => {
         expect(resolveCorpsCommanderDisplay('jna_herzegovina_command', 'RS', state())).toEqual({
             name: 'JNA forward command staff',

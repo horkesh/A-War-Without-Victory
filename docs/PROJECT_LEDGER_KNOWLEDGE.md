@@ -2,6 +2,8 @@
 
 **First-hour display truth can be read-model-only:** Active turn-0 corps assets may need named command labels for player comprehension, but seating officers into active sim command at scenario birth can change long-horizon outcomes. Durable rule: do not reintroduce startup-only active commander seating; use `resolveCorpsCommanderDisplay(...)` or an equivalent UI read-model for opening acting commanders and synthetic command staffs. Applied in `[2026-06-17] fix(ui/sim): make opening commanders read-model-only and clean startup control history`.
 
+**Read-model fixes must be wired into every claimed surface:** A shared helper is not a shipped UI behavior until each surface uses it. Durable rule: if docs claim "Army HQ/OOB," test and live-check both OOB and Army HQ; component utilities are insufficient for route-level claims. Applied in `[2026-06-17] fix(ui): wire opening command read-model into Army HQ`.
+
 **Setup control is not player-time combat history:** Startup phantoms may need to establish the April 1992 birth map, but those flips must not appear in turn-0 territory/casualty/combat history. Durable rule: scenario birth may suppress control-event emission while still seeding displacement timers and refreshing `initial_political_controllers` to the actual birth map; turn-pipeline phantom captures keep normal combat provenance.
 
 ## 2026-06-15 - Desktop campaign birth must overlay player-start events

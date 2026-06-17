@@ -8,7 +8,7 @@ import type { FormationView, CorpsFrontSectorView, OperationView, LoadedGameStat
 import type { TurnBattle } from '../../../../state/turn_summary';
 import { formatCorpsDisplayName } from '../../utils/formatters';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
-import { getFormationCommander } from '../../utils/officerUtils';
+import { getFormationCommander, resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
 import { Icon } from '../icons/Icon';
 import { CommanderSection } from './CommanderSection';
 import { CommandRelationshipSection } from './CommandRelationshipSection';
@@ -79,6 +79,7 @@ export function ArmyHQCorpsCard({
             : 0;
         const eff = aggregateEffectiveness(brigades);
         const commander = getFormationCommander(corps, gameState);
+        const commanderDisplay = resolveCorpsCommanderDisplay(corps.id, corps.faction, gameState);
         const stance = corps.corpsStance ?? 'balanced';
         const activeOp = operations.find((op) => op.phase === 'execution');
 
@@ -119,12 +120,12 @@ export function ArmyHQCorpsCard({
         const recoveryForecast = corps.recoveryForecast ?? null;
         // Delegation Visibility Wave 1: standing delegation summary from active ops
         const delegationSummary = deriveCorpsDelegationSummary(operations);
-        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, stance, activeOp, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, delegationSummary };
+        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, commanderDisplay, stance, activeOp, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, delegationSummary };
     }, [corps, brigades, sectors, operations, factionBattles, gameState]);
 
     const displayName = formatCorpsDisplayName(corps.name, corps.id);
     const isCritical = data.avgCohesion < COHESION_CRITICAL;
-    const noCommander = !data.commander;
+    const noCommander = !data.commanderDisplay;
     const stanceClass = STANCE_COLORS[data.stance] ?? STANCE_COLORS.balanced;
     const gradeColor = GRADE_COLORS[data.eff.grade] ?? 'text-text-secondary';
 
@@ -183,8 +184,13 @@ export function ArmyHQCorpsCard({
 
                 {/* Line 2: Commander + grade */}
                 <div className="text-[12px] text-text-secondary mt-1.5 flex items-center gap-2.5 font-mono">
-                    {data.commander ? (
-                        <span>{data.commander.name}</span>
+                    {data.commanderDisplay ? (
+                        <span>
+                            {data.commanderDisplay.name}
+                            {data.commanderDisplay.acting && (
+                                <span className="text-amber-400/80"> ({t('commanderSection.actingCommander')})</span>
+                            )}
+                        </span>
                     ) : (
                         <span className="italic text-red-500/60">{t('armyHqCorps.unassigned')}</span>
                     )}

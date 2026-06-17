@@ -43,6 +43,11 @@ function compareOpeningOfficer(a: NamedOfficerView, b: NamedOfficerView): number
     return strictCompare(a.id, b.id);
 }
 
+function isOpeningCorpsMatch(officer: NamedOfficerView, corpsId: string): boolean {
+    return officer.home_corps_id === corpsId
+        || (officer.is_historical_start === true && officer.historical_corps_id === corpsId);
+}
+
 export function resolveCorpsCommanderDisplay(
     corpsId: string,
     faction: string,
@@ -63,14 +68,10 @@ export function resolveCorpsCommanderDisplay(
     const openingCandidate = officers
         .filter((officer) =>
             officer.faction === faction
-            && officer.rank !== 'army_commander'
+            && officer.rank === 'corps_commander'
             && isOfficerAvailableForTurn(loadedGameState, officer)
             && !assignedCorpsFor(loadedGameState, officer)
-            && (
-                officer.home_corps_id === corpsId
-                || officer.compatible_corps_ids?.includes(corpsId)
-                || (officer.is_historical_start === true && officer.historical_corps_id === corpsId)
-            )
+            && isOpeningCorpsMatch(officer, corpsId)
         )
         .sort(compareOpeningOfficer)[0];
 
