@@ -19,6 +19,7 @@ Nietzsche's map-data sidecar traced the live Deck.gl `Skipping ... polygon with 
 - Invalid polygon parts dropped from 27 to 0.
 - MultiPolygon feature count dropped from 67 to 48 after invalid secondary parts were removed.
 - Operational contact graph edge count moved from 2,047 to 2,130 because the graph is regenerated from the cleaned geometry.
+- The 40w structural fingerprint was deliberately re-blessed to `4c5ceebe638bec19` after the cleaned contact graph changed structural fields to HRHB 94 / RBiH 259 / RS 381, 121 control flips, and 30/30 anchors.
 
 ## Verification
 
@@ -28,7 +29,8 @@ Nietzsche's map-data sidecar traced the live Deck.gl `Skipping ... polygon with 
 - `npx.cmd vitest run tests\operational_contact_graph_shared_border_precision.test.ts tests\operational_data_osid.test.ts tests\integration_run_diagnostics.test.ts --pool=forks --reporter=dot` -> 3 files / 19 tests passed.
 - `npm.cmd run typecheck` passed.
 - Live browser smoke on `http://127.0.0.1:4201/tactical_map.html?dev=1` started an RS campaign, mounted map canvases, and produced no invalid-coordinate overlay warnings, page errors, or console errors.
+- `npm.cmd run ci:structural-fingerprint:update` refreshed the expected 40w fingerprint to `4c5ceebe638bec19`; `npm.cmd run ci:structural-fingerprint:check` must pass before merge.
 
 ## Scope
 
-Map-data generation and committed operational artifacts only. No save schema, startup snapshot, calibration baseline, 40w/188w floor, packaging artifact, or gameplay rule changed.
+Map-data generation and committed operational artifacts only. No save schema, startup snapshot, 188w floor, packaging artifact, or gameplay rule changed. The 40w structural fingerprint moved because the cleaned operational contact graph changes map-driven 40w territorial structure.
