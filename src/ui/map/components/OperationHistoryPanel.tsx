@@ -11,7 +11,7 @@ import {
     filterPlayerFacingFormations,
     filterPlayerFacingOperationHistory,
 } from '../../shared/playerVisibility';
-import { getPlayerSafeDisplayLabel, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { getPlayerSafeMilitaryFactionName, getPlayerSafeOperationName } from '../utils/playerSafeText';
 import { deriveOperationOutcomeCategory, buildOperationTrendSummary } from '../data/command_strain';
 import { t } from '../i18n';
 
@@ -65,8 +65,14 @@ const CAPTURE_PROVENANCE_LABEL: Record<string, string | null> = {
     mixed: 'Some objectives were logged during the operation; others were only held at finalization.',
 };
 
-function getOperationDisplayName(operationName: string | null | undefined): string {
-    return getPlayerSafeDisplayLabel(operationName, 'Operation');
+function getOperationDisplayName(
+    operationName: string | null | undefined,
+    corpsId?: string | null,
+    operationDisplayName?: string | null,
+): string {
+    const displayName = operationDisplayName?.trim();
+    if (displayName) return displayName;
+    return getPlayerSafeOperationName(operationName, corpsId, 'Operation');
 }
 
 const CAPTURE_PROVENANCE_SUMMARY: Record<string, string> = {
@@ -295,7 +301,7 @@ function CompletedOpCard({
                     <div className="min-w-0">
                         <div className="flex items-center gap-1.5 mb-0.5">
                             <FactionTag faction={op.faction} />
-                            <span className="text-[11px] text-text-primary font-semibold truncate">{getOperationDisplayName(op.operation_name)}</span>
+                            <span className="text-[11px] text-text-primary font-semibold truncate">{getOperationDisplayName(op.operation_name, op.corps_id, op.operation_display_name)}</span>
                         </div>
                         {op.commander_name && (
                             <div className="text-[9px] text-text-muted">
@@ -544,7 +550,7 @@ function ActiveOpCard({ op, corpsName }: { op: ActiveOp; corpsName: string }) {
                 <div className="min-w-0">
                     <div className="flex items-center gap-1.5 mb-0.5">
                         <FactionTag faction={op.faction} />
-                        <span className="text-[11px] text-text-primary font-semibold truncate">{getOperationDisplayName(op.operation_name)}</span>
+                        <span className="text-[11px] text-text-primary font-semibold truncate">{getOperationDisplayName(op.operation_name, op.corps_id, op.operation_display_name)}</span>
                     </div>
                     {op.commander_name && (
                         <div className="text-[9px] text-text-muted">{t('operationHistory.oic', { commander: op.commander_name })}</div>

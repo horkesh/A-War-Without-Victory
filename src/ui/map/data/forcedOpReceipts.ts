@@ -36,6 +36,7 @@
 import type { GameState } from '../../../state/game_state.js';
 import type { OperationAAR } from '../../../sim/combat/operation_aar.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { getPlayerSafeOperationName } from '../utils/playerSafeText.js';
 
 /** One receipt: a single resolved operation that the president force-launched
  *  over the corps commander's objection. */
@@ -91,7 +92,7 @@ export function buildForcedOpReceipts(
         if (aar.force_launched !== true) continue;
         out.push({
             id: aar.operation_id,
-            opName: aar.operation_name,
+            opName: getPlayerSafeOperationName(aar.operation_name, aar.corps_id, 'Operation'),
             corpsId: aar.corps_id,
             commanderName: aar.commander_name?.trim() || 'the corps commander',
             assessmentAtLaunch: aar.commander_assessment_at_launch ?? null,

@@ -167,6 +167,41 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(pressForward?.textContent).not.toContain('Future consequences');
   });
 
+  it('keeps RS future-consequence explanations free of flag and consequence ids', () => {
+    render(React.createElement(EventDecisionModal, {
+      decision: {
+        event_id: 'rs_strategic_goals',
+        event_title: 'The Assembly Speaks',
+        turn_fired: 0,
+        faction: 'RS',
+        historical_default_response_id: 'all_six',
+        response_options: [
+          {
+            id: 'all_six',
+            label: 'Adopt all six goals',
+            effects: [],
+            future_consequences: [
+              {
+                id: 'foreclose_drina_resistance',
+                label: 'The restrained Drina path closes',
+                timing: 'future',
+                certainty: 'guaranteed',
+                explanation: 'Recording rs_strategic_goals as all_six forecloses csq_drina_partisan_resistance_1992. The target is gated on the counterfactual rs_strategic_goals=selective flag, so on the documented historical all_six path it would never have fired regardless.',
+              },
+            ],
+          },
+        ],
+      },
+      onRespond: () => undefined,
+    }));
+
+    expect(screen.getByText(/Recording the all-six strategic-goals platform forecloses restrained Drina resistance branch/i)).toBeTruthy();
+    expect(screen.getByText(/The restrained branch is closed here, so on the documented historical all six goals path/i)).toBeTruthy();
+    expect(screen.queryByText(/rs_strategic_goals/)).toBeNull();
+    expect(screen.queryByText(/rs strategic goals=selective/i)).toBeNull();
+    expect(screen.queryByText(/csq_drina_partisan_resistance_1992/)).toBeNull();
+  });
+
   it('keeps all response choices before detailed future-consequence copy', () => {
     const { container } = render(React.createElement(EventDecisionModal, {
       decision: {

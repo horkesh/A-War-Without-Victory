@@ -214,6 +214,9 @@ const PLAYER_SAFE_CONSEQUENCE_TERMS: Array<[RegExp, string]> = [
     [/\bcsq_minority_defections_1992\b/g, 'later minority-officer and recruit defection cascade'],
     [/\bcsq_pragmatic_coalition_1993\b/g, 'later pragmatic coalition branch'],
     [/\bbosniak_national\b/g, 'Bosniak national'],
+    [/\brs_strategic_goals\b/g, 'Six Strategic Goals posture'],
+    [/\bcsq_drina_partisan_resistance_1992\b/g, 'restrained Drina resistance branch'],
+    [/\ball_six\b/g, 'all six goals'],
 ];
 
 function playerSafeFutureExplanation(text: string, showDiagnostics: boolean): string {
@@ -224,6 +227,9 @@ function playerSafeFutureExplanation(text: string, showDiagnostics: boolean): st
         safe = safe.replace(pattern, replacement);
     }
     safe = safe.replace(/\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b/g, (token) => humanizeToken(token).toLowerCase());
+    safe = safe.replace(/\bRecording Six Strategic Goals posture as all six goals\b/g, 'Recording the all-six strategic-goals platform');
+    safe = safe.replace(/\bcounterfactual Six Strategic Goals posture\s*=\s*selective flag\b/g, 'counterfactual restrained strategic-goals branch');
+    safe = safe.replace(/\bThe target is gated on the counterfactual restrained strategic-goals branch, so\b/g, 'The restrained branch is closed here, so');
     safe = safe.replace(/\s*\((later [^)]+)\)/g, '');
     return safe.replace(/\s+/g, ' ').trim();
 }

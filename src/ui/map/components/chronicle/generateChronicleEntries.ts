@@ -45,6 +45,7 @@ import {
     getPlayerSafeDisplayLabel,
     getPlayerSafeMilitaryFactionName,
     getPlayerSafeOfficerName,
+    getPlayerSafeOperationName,
     getPlayerSafeSettlementName,
 } from '../../utils/playerSafeText.js';
 
@@ -223,6 +224,16 @@ function sumCasualties(value: any): number {
     return Number(value?.killed ?? 0) + Number(value?.wounded ?? 0);
 }
 
+function getOperationDisplayName(op: any): string {
+    const displayName = typeof op?.operation_display_name === 'string' ? op.operation_display_name.trim() : '';
+    if (displayName) return displayName;
+    return getPlayerSafeOperationName(
+        typeof op?.operation_name === 'string' ? op.operation_name : null,
+        typeof op?.corps_id === 'string' ? op.corps_id : null,
+        'Operation',
+    );
+}
+
 function buildOperationHistoryEntries(state: any, playerFaction: string | null): ChronicleEntry[] {
     if (!playerFaction || !Array.isArray(state?.operationHistory)) return [];
 
@@ -237,7 +248,7 @@ function buildOperationHistoryEntries(state: any, playerFaction: string | null):
         const inflicted = sumCasualties(op.casualties_inflicted);
         const stars = Number(op.grade?.stars ?? 0);
         const outcome = typeof op.outcome === 'string' ? op.outcome : 'unknown';
-        const operationName = getPlayerSafeDisplayLabel(op.operation_name, 'Operation');
+        const operationName = getOperationDisplayName(op);
 
         entries.push({
             id: typeof op.operation_id === 'string' ? `operation-aar-${op.operation_id}` : undefined,
@@ -286,7 +297,7 @@ function buildOfficerSpotlightEntries(state: any, playerFaction: string | null):
         const attacks = Number(op.total_attacks ?? 0);
         const stars = Number(op.grade?.stars ?? 0);
         const outcome = typeof op.outcome === 'string' ? op.outcome : 'unknown';
-        const operationName = getPlayerSafeDisplayLabel(op.operation_name, 'Operation');
+        const operationName = getOperationDisplayName(op);
 
         entries.push({
             id: typeof op.operation_id === 'string' ? `officer-week-${op.operation_id}` : undefined,

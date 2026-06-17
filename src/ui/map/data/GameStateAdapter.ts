@@ -2611,10 +2611,15 @@ function deriveOperationHistory(state: any): LoadedGameState['operationHistory']
             casualties_inflicted: entry.casualties_inflicted as { killed: number; wounded: number } ?? { killed: 0, wounded: 0 },
         }));
         const axisSummaries = aar.axis_summaries as Array<Record<string, unknown>> | undefined;
+        const rawOperationName = typeof aar.operation_name === 'string'
+            ? aar.operation_name
+            : (typeof aar.operation_id === 'string' ? aar.operation_id : '');
+        const corpsId = aar.corps_id as string;
         return {
             operation_id: aar.operation_id as string,
-            operation_name: aar.operation_name as string,
-            corps_id: aar.corps_id as string,
+            operation_name: rawOperationName,
+            operation_display_name: getPlayerSafeOperationName(rawOperationName, corpsId, 'Operation'),
+            corps_id: corpsId,
             faction: aar.faction as string,
             started_turn: aar.started_turn as number,
             ended_turn: aar.ended_turn as number,
@@ -2713,6 +2718,11 @@ function deriveActiveOperations(state: any): LoadedGameState['activeOperations']
         activeOps.push({
             corps_id: corpsId,
             operation_name: (op.name ?? 'Unnamed') as string,
+            operation_display_name: getPlayerSafeOperationName(
+                typeof op.name === 'string' ? op.name : null,
+                corpsId,
+                'Operation',
+            ),
             faction,
             type: op.type as string,
             phase: op.phase as string,

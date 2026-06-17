@@ -1,6 +1,7 @@
 export type ArmyReserveSeverityBand = 'critical' | 'routine';
 
 import { formatPlayerFacingZoneLabel } from '../../../utils/player_facing_zone_label.js';
+import { getPlayerSafeOperationName } from './playerSafeText.js';
 
 interface ArmyReserveCauseSource {
     reason?: string;
@@ -75,6 +76,7 @@ function getArmyReserveProvenanceDetail(source: ArmyReserveProvenanceSource): st
 }
 
 function getArmyReserveEvidenceSummary(source: ArmyReserveProvenanceSource): string | null {
+    const operationName = getPlayerSafeOperationName(source.operation_name, null, 'the operation');
     if (
         source.provenance_driver === 'active_operation'
         && typeof source.operation_name === 'string'
@@ -82,7 +84,7 @@ function getArmyReserveEvidenceSummary(source: ArmyReserveProvenanceSource): str
         && typeof source.operation_momentum === 'number'
         && Number.isFinite(source.operation_momentum)
     ) {
-        return `Operation "${source.operation_name}" is already in execution with momentum ${source.operation_momentum >= 0 ? '+' : ''}${source.operation_momentum.toFixed(1)}, so reserve support is needed now.`;
+        return `Operation "${operationName}" is already in execution with momentum ${source.operation_momentum >= 0 ? '+' : ''}${source.operation_momentum.toFixed(1)}, so reserve support is needed now.`;
     }
 
     if (
@@ -91,7 +93,7 @@ function getArmyReserveEvidenceSummary(source: ArmyReserveProvenanceSource): str
         && source.operation_phase === 'planning'
         && typeof source.operation_preparation_sub_phase === 'string'
     ) {
-        return `Operation "${source.operation_name}" is in ${source.operation_preparation_sub_phase} preparation, so reserve support is being staged before execution begins.`;
+        return `Operation "${operationName}" is in ${source.operation_preparation_sub_phase} preparation, so reserve support is being staged before execution begins.`;
     }
 
     if (
@@ -101,7 +103,7 @@ function getArmyReserveEvidenceSummary(source: ArmyReserveProvenanceSource): str
         && typeof source.operation_objective_capture_count === 'number'
         && Number.isFinite(source.operation_objective_capture_count)
     ) {
-        return `Operation "${source.operation_name}" captured ${source.operation_objective_capture_count} objective${source.operation_objective_capture_count === 1 ? '' : 's'} in execution, opening an exploitation window that needs reserve support now.`;
+        return `Operation "${operationName}" captured ${source.operation_objective_capture_count} objective${source.operation_objective_capture_count === 1 ? '' : 's'} in execution, opening an exploitation window that needs reserve support now.`;
     }
 
     if (

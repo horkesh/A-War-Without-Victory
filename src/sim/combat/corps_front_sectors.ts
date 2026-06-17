@@ -752,6 +752,14 @@ function collectUnresolvedSectorBrigades(
 ): FormationId[] {
     const sectorList = Object.values(sectors);
     const frontEdges = state.military.war_front_edges_osid ?? [];
+    const activeOperationParticipants = new Set<FormationId>();
+    for (const command of Object.values(state.military.corps_command ?? {})) {
+        for (const operation of command?.active_operations ?? []) {
+            for (const brigadeId of operation.participating_brigades ?? []) {
+                activeOperationParticipants.add(brigadeId);
+            }
+        }
+    }
 
     return Object.keys(formations)
         .sort(strictCompare)
@@ -759,6 +767,7 @@ function collectUnresolvedSectorBrigades(
             const formation = formations[formationId];
             if (!formation || formation.status !== 'active') return false;
             if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') return false;
+            if (activeOperationParticipants.has(formationId as FormationId)) return false;
             const corpsId = getFormationCorpsId(formation);
             const loaned = !!formation.elite_loan_state?.on_loan;
             if (isSectorAssignmentExemptCorpsId(corpsId) && !loaned) return false;

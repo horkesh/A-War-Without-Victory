@@ -149,11 +149,12 @@ afterEach(() => {
 });
 
 describe('OOB and operations panel operation labels', () => {
-  it('renders operation history names through the player-safe label helper', () => {
+  it('renders operation history names through the player-safe operation display helper', () => {
     const source = readFileSync('src/ui/map/components/OperationHistoryPanel.tsx', 'utf8');
 
     expect(source).toContain('function getOperationDisplayName');
-    expect(source).toContain("getPlayerSafeDisplayLabel(operationName, 'Operation')");
+    expect(source).toContain('operationDisplayName?: string | null');
+    expect(source).toContain("getPlayerSafeOperationName(operationName, corpsId, 'Operation')");
     expect(source).not.toContain('>{op.operation_name}</span>');
   });
 

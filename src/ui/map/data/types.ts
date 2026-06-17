@@ -1163,7 +1163,10 @@ export interface LoadedGameState {
     /** Completed operation AARs. */
     operationHistory?: Array<{
         operation_id: string;
+        /** Raw engine/catalog operation name. Keep for joins and metadata, not display text. */
         operation_name: string;
+        /** Player-facing operation name with raw generated identifiers humanized. */
+        operation_display_name?: string;
         corps_id: string;
         faction: string;
         started_turn: number;
@@ -1349,7 +1352,10 @@ export interface LoadedGameState {
     /** Active (in-progress) operations. */
     activeOperations?: Array<{
         corps_id: string;
+        /** Raw engine/catalog operation name. Keep for joins and metadata, not display text. */
         operation_name: string;
+        /** Player-facing operation name with raw generated identifiers humanized. */
+        operation_display_name?: string;
         faction: string;
         type: string;
         phase: string;

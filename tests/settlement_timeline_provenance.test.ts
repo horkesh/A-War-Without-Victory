@@ -177,4 +177,37 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
         const disp = events.filter(e => e.type === 'displacement');
         expect(disp.length).toBeGreaterThan(0);
     });
+
+    it('uses operation display names instead of raw identifiers in operation timeline entries', () => {
+        const osid = 'op:bratunac:bratunac_1';
+        const events = buildSettlementTimeline(
+            osid,
+            null,
+            [],
+            [],
+            [
+                {
+                    operation_name: 'cmd_vrs_drinacorps_t45',
+                    operation_display_name: 'Command - Drina Corps',
+                    corps_id: 'vrs_drinacorps',
+                    faction: 'RS',
+                    started_turn: 42,
+                    ended_turn: 45,
+                    outcome: 'partial',
+                    objectives_targeted: [osid],
+                    objectives_captured: [],
+                } as any,
+            ],
+            [],
+            [],
+            [],
+            [],
+            null,
+            null,
+        );
+
+        const text = events.map(e => `${e.title} ${e.detail ?? ''}`).join(' ');
+        expect(text).toContain('Command - Drina Corps');
+        expect(text).not.toMatch(/cmd_|_t45|operation_name|op:/i);
+    });
 });

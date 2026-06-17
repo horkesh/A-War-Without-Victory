@@ -13,6 +13,8 @@
  *   - historical_event → need per-OSID event indexing (currently mun-level)
  */
 
+import { getPlayerSafeOperationName } from './playerSafeText.js';
+
 export type TimelineEventType =
     | 'control_flip'
     | 'battle'
@@ -63,6 +65,7 @@ interface ControlEvent {
 
 interface OperationHistoryEntry {
     operation_name: string;
+    operation_display_name?: string;
     corps_id: string;
     faction: string;
     started_turn: number;
@@ -101,6 +104,12 @@ interface BattleRecord {
 /** Outcome display name. */
 function outcomeName(o: string): string {
     return o.replace(/_/g, ' ');
+}
+
+function operationDisplayName(op: OperationHistoryEntry): string {
+    const displayName = op.operation_display_name?.trim();
+    if (displayName) return displayName;
+    return getPlayerSafeOperationName(op.operation_name, op.corps_id, 'Operation');
 }
 
 export function buildSettlementTimeline(
@@ -300,12 +309,13 @@ export function buildSettlementTimeline(
     for (const op of operationHistory) {
         const targeted = op.objectives_targeted?.includes(osid);
         const captured = op.objectives_captured?.includes(osid);
+        const opName = operationDisplayName(op);
         if (targeted) {
             events.push({
                 turn: op.started_turn,
                 type: 'operation_target',
                 faction: op.faction,
-                title: `${op.operation_name} launched`,
+                title: `${opName} launched`,
                 detail: `${factionName(op.faction)} targeting this area`,
             });
         }
@@ -314,7 +324,7 @@ export function buildSettlementTimeline(
                 turn: op.ended_turn,
                 type: 'operation_resolved',
                 faction: op.faction,
-                title: `${op.operation_name} — objective captured`,
+                title: `${opName} — objective captured`,
                 outcome: op.outcome,
             });
         } else if (targeted && op.ended_turn > 0) {
@@ -322,7 +332,7 @@ export function buildSettlementTimeline(
                 turn: op.ended_turn,
                 type: 'operation_resolved',
                 faction: op.faction,
-                title: `${op.operation_name} — objective not taken`,
+                title: `${opName} — objective not taken`,
                 outcome: op.outcome,
             });
         }

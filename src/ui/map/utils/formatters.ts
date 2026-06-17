@@ -33,9 +33,15 @@ export function formatTurnLabel(label: string): string {
 export function toTitleCase(s: string | undefined): string {
     if (!s) return '';
     return s
+        .replace(/\s+/g, '_')
         .split('_')
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
+}
+
+function normalizeCompactCorpsSlug(value: string): string {
+    if (value.includes('_')) return value;
+    return value.replace(/([a-z])corps$/i, '$1_corps');
 }
 
 /**
@@ -98,7 +104,7 @@ export function formatCorpsDisplayName(
         const stripped = safeName
             .replace(/^(RS|RBiH|HRHB|VRS|ARBIH|HVO|rs|rbih|hrhb|vrs|arbih|hvo)_/i, '')
             .trim();
-        if (stripped && stripped !== safeName) return toTitleCase(stripped);
+        if (stripped && stripped !== safeName) return toTitleCase(normalizeCompactCorpsSlug(stripped));
     }
 
     return fallback;

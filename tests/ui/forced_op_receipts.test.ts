@@ -96,7 +96,7 @@ describe('buildForcedOpReceipts', () => {
         expect(receipts).toHaveLength(1);
         const r = receipts[0];
         expect(r.id).toBe('drina_relief');
-        expect(r.opName).toBe('Operation drina_relief');
+        expect(r.opName).toBe('Operation Drina Relief');
         expect(r.corpsId).toBe('1_corps');
         expect(r.commanderName).toBe('Gen. Halilović');
         expect(r.assessmentAtLaunch).toBe('abort');
@@ -106,6 +106,18 @@ describe('buildForcedOpReceipts', () => {
         expect(r.casualtiesInflicted).toBe(50);
         expect(r.objectivesCaptured).toBe(1);
         expect(r.endedTurn).toBe(17);
+    });
+
+    it('renders player-safe operation names instead of generated force-launch identifiers', () => {
+        const aar = buildAAR('raw_force', { force: true, endedTurn: 19 });
+        aar.operation_name = 'cmd_vrs_drinacorps_t45';
+        aar.corps_id = 'vrs_drinacorps';
+
+        const receipts = buildForcedOpReceipts(buildState([aar]));
+
+        expect(receipts).toHaveLength(1);
+        expect(receipts[0].opName).toBe('Command — Drina Corps');
+        expect(receipts[0].opName).not.toMatch(/cmd_|_t45|operation_name/i);
     });
 
     it('yields NO receipt for a normal (non-force) AAR', () => {

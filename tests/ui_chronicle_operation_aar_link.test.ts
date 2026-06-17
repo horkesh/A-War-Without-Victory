@@ -92,6 +92,41 @@ describe('Chronicle completed-operation AAR visibility', () => {
     expect(entries.some(entry => entry.title.includes('Enemy Hidden Truth'))).toBe(false);
   });
 
+  it('uses operation display names instead of raw history identifiers in Chronicle entries', () => {
+    const entries = generateChronicleEntries({
+      player_faction: 'RS',
+      turnSummaries: [{ turn: 45 }],
+      operationHistory: [
+        {
+          operation_id: 'rs-op-raw',
+          operation_name: 'cmd_vrs_drinacorps_t45',
+          operation_display_name: 'Command - Drina Corps',
+          corps_id: 'vrs_drinacorps',
+          faction: 'RS',
+          started_turn: 42,
+          ended_turn: 45,
+          outcome: 'partial',
+          objectives_targeted: ['op:bratunac:bratunac_1'],
+          objectives_captured: [],
+          total_attacks: 2,
+          casualties_suffered: { killed: 4, wounded: 12 },
+          casualties_inflicted: { killed: 7, wounded: 18 },
+          grade: { stars: 2, verdict: 'Limited', factors: {} },
+          duration_turns: 3,
+          weekly_log: [],
+        },
+      ],
+    });
+
+    const text = entries
+      .filter(entry => entry.metadata?.operationAarId === 'rs-op-raw')
+      .map(entry => `${entry.title} ${entry.detail} ${entry.metadata?.operationName ?? ''}`)
+      .join(' ');
+
+    expect(text).toContain('Command - Drina Corps');
+    expect(text).not.toMatch(/cmd_|_t45|operation_name|op:/i);
+  });
+
   it('routes a Chronicle operation card to the matching Army HQ operation history row', () => {
     const state = createState('RS');
 

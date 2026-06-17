@@ -143,6 +143,30 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.getByText('Not held: Sanski Most')).toBeTruthy();
     });
 
+    it('renders operation display names in Records instead of raw history identifiers', () => {
+        useGameStore.setState({
+            loadedGameState: {
+                ...makeLoadedState(),
+                operationHistory: [
+                    {
+                        ...makeLoadedState().operationHistory![0],
+                        operation_id: 'raw-op-aar',
+                        operation_name: 'probe_arbih_1st_corps_t12',
+                        operation_display_name: 'Probe - 1st Corps',
+                    } as any,
+                ],
+            },
+            focusedOperationHistoryId: 'raw-op-aar',
+        });
+
+        render(createElement(RecordsContent));
+
+        expect(screen.getByRole('button', { name: /Probe - 1st Corps/i })).toBeTruthy();
+        expect(screen.queryByText(/probe_arbih_1st_corps_t12/i)).toBeNull();
+        expect(screen.queryByText(/_t12/i)).toBeNull();
+        expect(screen.queryByText(/operation_name/i)).toBeNull();
+    });
+
     it('shows per-axis objective status labels from existing AAR axis summaries', () => {
         render(createElement(RecordsContent));
 

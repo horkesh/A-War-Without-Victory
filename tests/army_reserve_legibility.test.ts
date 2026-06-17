@@ -215,6 +215,18 @@ describe('Army reserve driver evidence legibility', () => {
     });
   });
 
+  it('uses player-safe operation names in reserve evidence instead of generated identifiers', () => {
+    const copy = getArmyReserveRequestEvidenceCopy({
+      provenance_driver: 'active_operation',
+      operation_name: 'probe_arbih_1st_corps_t12',
+      operation_phase: 'execution',
+      operation_momentum: 1,
+    });
+
+    expect(copy?.summary).toContain('Probe — 1st Corps');
+    expect(copy?.summary).not.toMatch(/probe_|_t12|operation_name/i);
+  });
+
   it('explains the concrete captured-objective signal that opened an exploitation request', () => {
     expect(
       getArmyReserveRequestEvidenceCopy({

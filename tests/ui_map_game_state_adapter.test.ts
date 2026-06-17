@@ -440,6 +440,49 @@ test('parseGameState scopes player-facing operations, operation history, active 
     assert.equal(parsed.operationHistory?.[0]?.capture_provenance, 'no_objectives_held');
 });
 
+test('parseGameState adds player-facing display names for raw operation history identifiers', () => {
+    const parsed = parseGameState({
+        meta: { turn: 45, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {
+                arbih_1st_corps: { id: 'arbih_1st_corps', faction: 'RBiH', name: '1st Corps', kind: 'corps', tags: [] },
+            },
+            corps_command: {},
+        } as any,
+        operation_history: [
+            {
+                operation_id: 'op-aar-raw',
+                operation_name: 'probe_arbih_1st_corps_t12',
+                corps_id: 'arbih_1st_corps',
+                faction: 'RBiH',
+                started_turn: 12,
+                ended_turn: 15,
+                outcome: 'partial',
+                objectives_targeted: [],
+                objectives_captured: [],
+                objectives_logged_captured: [],
+                objectives_held_without_logged_capture: [],
+                capture_provenance: 'no_objectives_held',
+                total_attacks: 1,
+                casualties_suffered: { killed: 0, wounded: 0 },
+                casualties_inflicted: { killed: 0, wounded: 0 },
+                equipment_lost: { tanks: 0, artillery: 0 },
+                equipment_destroyed: { tanks: 0, artillery: 0 },
+                equipment_captured: { tanks: 0, artillery: 0 },
+                grade: { stars: 2, verdict: 'solid', factors: {} },
+                duration_turns: 3,
+                weekly_log: [],
+            },
+        ] as any,
+        political: { political_controllers: {} } as any,
+    });
+
+    const displayName = parsed.operationHistory?.[0]?.operation_display_name;
+    assert.equal(displayName, 'Probe — 1st Corps');
+    assert.doesNotMatch(displayName ?? '', /probe_|_t12|arbih/i);
+    assert.equal(parsed.operationHistory?.[0]?.operation_name, 'probe_arbih_1st_corps_t12');
+});
+
 test('parseGameState derives presidential review queue counts from pending military review owners', () => {
     const parsed = parseGameState({
         meta: { turn: 12, phase: 'war', player_faction: 'RBiH' },
