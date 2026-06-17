@@ -16,6 +16,8 @@ import {
 } from '../src/sim/combat/contain_posture_gate.js';
 import { computeSrkStrangleOsids } from '../src/sim/combat/srk_strangle.js';
 import { deserializeState, serializeState } from '../src/state/serialize.js';
+import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
+import { resolveCorpsCommanderDisplay } from '../src/ui/map/utils/officerUtils.js';
 
 test('baked April 1992 startup artifact matches canonical builder truth after checkout normalization', async () => {
     const baseDir = process.cwd();
@@ -94,7 +96,7 @@ test('baked April 1992 startup materializes default-on SRK strangle containment'
     }
 }, 120_000);
 
-test('baked April 1992 active opening corps assets have named commanders', async () => {
+test('baked April 1992 opening corps command display does not mutate sim officer state', async () => {
     const state = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
     const activeCommandedCorps = new Set(
         Object.values(state.military.named_officers ?? {})
@@ -116,20 +118,35 @@ test('baked April 1992 active opening corps assets have named commanders', async
         assert.ok(corps, `${corpsId} should exist in the baked startup artifact`);
         assert.strictEqual(corps.status, 'active', `${corpsId} should be an active opening corps asset`);
         assert.ok(activeBrigades.length > 0, `${corpsId} should have active opening brigades`);
-        assert.ok(activeCommandedCorps.has(corpsId), `${corpsId} should not render as Command forming at turn 0`);
+        assert.ok(!activeCommandedCorps.has(corpsId), `${corpsId} should not be seated into sim-active command at turn 0`);
     }
 }, 120_000);
 
-test('baked April 1992 startup seats interim commanders without backdating later official corps commanders', async () => {
+test('baked April 1992 UI read model shows opening commanders without backdating official arrivals', async () => {
     const state = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
+    const view = parseGameState(state);
     const officers = state.military.named_officers ?? {};
 
-    assert.strictEqual(officers.vrs_andric?.assigned_corps_id, 'vrs_drina');
-    assert.strictEqual(officers.vrs_andric?.acting_commander, true);
-    assert.strictEqual(officers.arbih_cikotic?.assigned_corps_id, 'arbih_3rd_corps');
-    assert.strictEqual(officers.arbih_cikotic?.acting_commander, true);
-    assert.strictEqual(officers.arbih_hujdur?.assigned_corps_id, 'arbih_4th_corps');
-    assert.strictEqual(officers.arbih_hujdur?.acting_commander, true);
+    assert.deepStrictEqual(resolveCorpsCommanderDisplay('vrs_drina', 'RS', view), {
+        name: 'Svetozar Andrić',
+        acting: true,
+        source: 'opening_read_model',
+    });
+    assert.deepStrictEqual(resolveCorpsCommanderDisplay('arbih_3rd_corps', 'RBiH', view), {
+        name: 'Selmo Cikotić',
+        acting: true,
+        source: 'opening_read_model',
+    });
+    assert.deepStrictEqual(resolveCorpsCommanderDisplay('arbih_4th_corps', 'RBiH', view), {
+        name: 'Midhad Hujdur "Hujka"',
+        acting: true,
+        source: 'opening_read_model',
+    });
+    assert.deepStrictEqual(resolveCorpsCommanderDisplay('jna_herzegovina_command', 'RS', view), {
+        name: 'JNA forward command staff',
+        acting: false,
+        source: 'synthetic',
+    });
 
     assert.strictEqual(officers.vrs_zivanovic, undefined, 'Živanović remains a later Drina arrival, not a turn-0 backdate');
     assert.strictEqual(officers.arbih_hadzihasanovic, undefined, 'Hadžihasanović remains a later 3rd Corps arrival, not a turn-0 backdate');

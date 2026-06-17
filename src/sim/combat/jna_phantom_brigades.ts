@@ -459,7 +459,9 @@ const HV_PHANTOM_DEFS_1995: PhantomDef[] = [
 const ALL_PHANTOM_DEFS: PhantomDef[] = [...JNA_PHANTOM_DEFS, ...HV_PHANTOM_DEFS, ...HV_PHANTOM_DEFS_1995];
 
 export interface SpawnJnaPhantomBrigadesOptions {
-    emitCaptureEvents?: boolean;
+    emitControlEvents?: boolean;
+    controlEventMechanism?: 'combat' | 'setup_control';
+    seedDisplacementTimers?: boolean;
 }
 
 /**
@@ -472,7 +474,9 @@ export interface SpawnJnaPhantomBrigadesOptions {
 export function spawnJnaPhantomBrigades(state: GameState, options: SpawnJnaPhantomBrigadesOptions = {}): void {
     if (!state.military.formations) state.military.formations = {};
     const turn = state.meta?.turn ?? 0;
-    const emitCaptureEvents = options.emitCaptureEvents ?? true;
+    const emitControlEvents = options.emitControlEvents ?? true;
+    const controlEventMechanism = options.controlEventMechanism ?? 'combat';
+    const seedDisplacementTimers = options.seedDisplacementTimers ?? true;
 
     // Phantoms that have ever been spawned. When a phantom withdraws its
     // formation entry is removed entirely, so `formations[def.id]` alone is
@@ -536,14 +540,14 @@ export function spawnJnaPhantomBrigades(state: GameState, options: SpawnJnaPhant
             for (const osid of def.capture_osids) {
                 const previousController = state.political.political_controllers[osid];
                 state.political.political_controllers[osid] = faction;
-                if (emitCaptureEvents && previousController && previousController !== faction) {
+                if (seedDisplacementTimers && previousController && previousController !== faction) {
                     seedDisplacementTimerOnFlip(state, osid, previousController, faction);
                 }
-                if (emitCaptureEvents && previousController !== faction) {
+                if (emitControlEvents && previousController !== faction) {
                     (state.political.control_events ??= []).push({
                         turn: state.meta?.turn ?? 0,
                         settlement_id: osid,
-                        mechanism: 'combat' as const,
+                        mechanism: controlEventMechanism,
                         from: (previousController as string) ?? null,
                         to: faction,
                         mun_id: osid.split(':')[1],

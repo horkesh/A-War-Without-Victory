@@ -45,6 +45,12 @@ export interface NamedOfficerView {
     defensive_skill: number;
     political_reliability: number;
     home_corps_id?: string;
+    compatible_corps_ids?: string[];
+    available_from_turn?: number;
+    available_until_turn?: number;
+    is_historical_start?: boolean;
+    historical_corps_id?: string;
+    pool_tier?: string;
     origin: string;
     /** Short authored service sketch for UI display only. */
     bio_short?: string;
@@ -66,8 +72,6 @@ export interface NamedOfficerView {
     enclave_lock?: { enclave_id: string; locked_until_turn?: number };
     /** Currently assigned to an operation (name). */
     assigned_operation?: string;
-    /** Compatible corps IDs for regional fit display. */
-    compatible_corps_ids?: string[];
     /** Casualty vulnerability (0-1). High = shown as warning. */
     casualty_vulnerability?: number;
     /** War crimes record from historical data (ICTY etc). */

@@ -170,15 +170,17 @@ function compileBattles(
 function compileTerritory(
     turnControlEvents: NonNullable<GameState['political']['control_events']>,
 ): Pick<TurnSummary, 'territory_net' | 'notable_flips'> {
+    const visibleTerritoryEvents = turnControlEvents
+        .filter((e) => e.mechanism !== 'setup_control');
     const territory_net: Partial<Record<FactionId, number>> = {};
-    for (const e of turnControlEvents) {
+    for (const e of visibleTerritoryEvents) {
         if (e.to) territory_net[e.to] = (territory_net[e.to] ?? 0) + 1;
         if (e.from) territory_net[e.from] = (territory_net[e.from] ?? 0) - 1;
     }
 
     // Notable flips: all combat flips for now; significance = generic.
     // Future: cross-reference operational data to classify municipality seats.
-    const notable_flips: NotableFlip[] = turnControlEvents
+    const notable_flips: NotableFlip[] = visibleTerritoryEvents
         .filter((e) => e.mechanism === 'combat')
         .sort((a, b) => strictCompare(a.settlement_id, b.settlement_id))
         .map((e) => ({

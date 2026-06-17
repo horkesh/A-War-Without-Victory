@@ -889,7 +889,92 @@
         "original_population": 81295
       }
     },
-    "hostile_takeover_timers": {},
+    "hostile_takeover_timers": {
+      "op:capljina:tasovcici_2|HRHB": {
+        "from_faction": "HRHB",
+        "mun_id": "capljina",
+        "started_turn": 0,
+        "to_faction": "RS"
+      },
+      "op:capljina:tasovcici_2|RBiH": {
+        "from_faction": "RBiH",
+        "mun_id": "capljina",
+        "started_turn": 0,
+        "to_faction": "RS"
+      },
+      "op:kupres:goravci|HRHB": {
+        "from_faction": "HRHB",
+        "mun_id": "kupres",
+        "started_turn": 0,
+        "to_faction": "RS"
+      },
+      "op:kupres:goravci|RBiH": {
+        "from_faction": "RBiH",
+        "mun_id": "kupres",
+        "started_turn": 0,
+        "to_faction": "RS"
+      },
+      "op:kupres:kupres_2|HRHB": {
+        "from_faction": "HRHB",
+        "mun_id": "kupres",
+        "started_turn": 0,
+        "to_faction": "RS"
+      },
+      "op:kupres:kupres_2|RBiH": {
+        "from_faction": "RBiH",
+        "mun_id": "kupres",
+        "started_turn": 0,
+        "to_faction": "RS"
+      },
+      "op:mostar:hodbina_2|HRHB": {
+        "from_faction": "HRHB",
+        "mun_id": "mostar",
+        "started_turn": 0,
+        "to_faction": "RS"
+      },
+      "op:mostar:hodbina_2|RBiH": {
+        "from_faction": "RBiH",
+        "mun_id": "mostar",
+        "started_turn": 0,
+        "to_faction": "RS"
+      },
+      "op:stolac:pjesivac_kula_2|HRHB": {
+        "from_faction": "HRHB",
+        "mun_id": "stolac",
+        "started_turn": 0,
+        "to_faction": "RS"
+      },
+      "op:stolac:pjesivac_kula_2|RBiH": {
+        "from_faction": "RBiH",
+        "mun_id": "stolac",
+        "started_turn": 0,
+        "to_faction": "RS"
+      },
+      "op:stolac:rotimlja_2|HRHB": {
+        "from_faction": "HRHB",
+        "mun_id": "stolac",
+        "started_turn": 0,
+        "to_faction": "RS"
+      },
+      "op:stolac:rotimlja_2|RBiH": {
+        "from_faction": "RBiH",
+        "mun_id": "stolac",
+        "started_turn": 0,
+        "to_faction": "RS"
+      },
+      "op:stolac:stolac_2|HRHB": {
+        "from_faction": "HRHB",
+        "mun_id": "stolac",
+        "started_turn": 0,
+        "to_faction": "RS"
+      },
+      "op:stolac:stolac_2|RBiH": {
+        "from_faction": "RBiH",
+        "mun_id": "stolac",
+        "started_turn": 0,
+        "to_faction": "RS"
+      }
+    },
     "minority_flight_state": {},
     "municipality_displacement": {},
     "settlement_displacement": {},
@@ -32657,14 +32742,14 @@
         "victories": 0
       },
       "arbih_cikotic": {
-        "acting_commander": true,
-        "assigned_corps_id": "arbih_3rd_corps",
+        "acting_commander": false,
+        "assigned_corps_id": null,
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "arbih_cikotic",
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
-        "status": "active",
+        "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
       },
@@ -32753,14 +32838,14 @@
         "victories": 0
       },
       "arbih_hujdur": {
-        "acting_commander": true,
-        "assigned_corps_id": "arbih_4th_corps",
+        "acting_commander": false,
+        "assigned_corps_id": null,
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "arbih_hujdur",
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
-        "status": "active",
+        "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
       },
@@ -33137,14 +33222,14 @@
         "victories": 0
       },
       "vrs_andric": {
-        "acting_commander": true,
-        "assigned_corps_id": "vrs_drina",
+        "acting_commander": false,
+        "assigned_corps_id": null,
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_andric",
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
-        "status": "active",
+        "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
       },

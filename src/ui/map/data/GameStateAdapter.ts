@@ -1655,6 +1655,12 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 defensive_skill: finiteNumber(data.defensive_skill, 0),
                 political_reliability: finiteNumber(data.political_reliability, 0),
                 home_corps_id: typeof data.home_corps_id === 'string' ? data.home_corps_id : undefined,
+                compatible_corps_ids: Array.isArray(data.compatible_corps_ids) ? (data.compatible_corps_ids as string[]).filter(s => typeof s === 'string') : undefined,
+                available_from_turn: typeof data.available_from_turn === 'number' && Number.isFinite(data.available_from_turn) ? data.available_from_turn : undefined,
+                available_until_turn: typeof data.available_until_turn === 'number' && Number.isFinite(data.available_until_turn) ? data.available_until_turn : undefined,
+                is_historical_start: data.is_historical_start === true,
+                historical_corps_id: typeof data.historical_corps_id === 'string' ? data.historical_corps_id : undefined,
+                pool_tier: typeof data.pool_tier === 'string' ? data.pool_tier : undefined,
                 origin: typeof data.origin === 'string' ? data.origin : 'military',
                 bio_short: typeof data.bio_short === 'string' ? data.bio_short : undefined,
                 command_style: typeof data.command_style === 'string' ? data.command_style : undefined,
@@ -1671,7 +1677,6 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     ? { enclave_id: String((os.enclave_lock as Record<string, unknown>).enclave_id ?? ''), locked_until_turn: typeof (os.enclave_lock as Record<string, unknown>).locked_until_turn === 'number' ? (os.enclave_lock as Record<string, unknown>).locked_until_turn as number : undefined }
                     : undefined,
                 assigned_operation: typeof os?.assigned_operation === 'string' ? os.assigned_operation : undefined,
-                compatible_corps_ids: Array.isArray(data.compatible_corps_ids) ? (data.compatible_corps_ids as string[]).filter(s => typeof s === 'string') : undefined,
                 casualty_vulnerability: finiteNumber(os?.casualty_vulnerability, undefined) as number | undefined,
                 war_crimes_record: (() => {
                     const wcr = data.war_crimes_record;

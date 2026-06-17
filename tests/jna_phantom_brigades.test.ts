@@ -130,11 +130,44 @@ describe('phantom spawn catalog', () => {
             'op:kupres:kupres_2': 'HRHB' as FactionId,
         };
 
-        spawnJnaPhantomBrigades(state, { emitCaptureEvents: false });
+        spawnJnaPhantomBrigades(state, { emitControlEvents: false });
 
         assert.equal(state.political.political_controllers['op:stolac:stolac_2'], 'RS');
         assert.equal(state.political.political_controllers['op:kupres:kupres_2'], 'RS');
         assert.deepEqual(state.political.control_events ?? [], []);
+        assert.ok(state.displacement.hostile_takeover_timers?.['op:stolac:stolac_2|RBiH']);
+        assert.ok(state.displacement.hostile_takeover_timers?.['op:kupres:kupres_2|HRHB']);
+    });
+
+    it('can explicitly suppress setup displacement timers for non-simulation projections', () => {
+        const state = makeState(0);
+        state.political.political_controllers = {
+            'op:stolac:stolac_2': 'RBiH' as FactionId,
+        };
+
+        spawnJnaPhantomBrigades(state, { emitControlEvents: false, seedDisplacementTimers: false });
+
+        assert.equal(state.political.political_controllers['op:stolac:stolac_2'], 'RS');
+        assert.deepEqual(state.political.control_events ?? [], []);
+        assert.deepEqual(state.displacement.hostile_takeover_timers ?? {}, {});
+    });
+
+    it('can record setup control provenance without marking it as combat', () => {
+        const state = makeState(0);
+        state.political.political_controllers = {
+            'op:stolac:stolac_2': 'RBiH' as FactionId,
+        };
+
+        spawnJnaPhantomBrigades(state, { controlEventMechanism: 'setup_control' });
+
+        assert.ok((state.political.control_events ?? []).some((event) =>
+            event.turn === 0
+            && event.settlement_id === 'op:stolac:stolac_2'
+            && event.mechanism === 'setup_control'
+            && event.from === 'RBiH'
+            && event.to === 'RS'
+        ));
+        assert.ok(state.displacement.hostile_takeover_timers?.['op:stolac:stolac_2|RBiH']);
     });
 
     it('keeps default phantom capture events for turn-pipeline spawn history', () => {

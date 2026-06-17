@@ -9,7 +9,7 @@ import { AccordionHeader } from './AccordionHeader';
 import { toTitleCase } from '../utils/formatters';
 import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName, getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
-import { getFactionArmyCommander } from '../utils/officerUtils';
+import { getFactionArmyCommander, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
 import { formatRank } from '../utils/officerCharacter';
 import { getPlayerFacingFaction, getPlayerVisibleFactions } from '../../shared/playerFacingLabels';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
@@ -400,6 +400,9 @@ export function OOBSidebar() {
                             const corpsSectors = loadedGameState?.corpsFrontSectors?.filter((s) => s.corps_id === corpsId) ?? [];
                             const corpsOps = filterPlayerFacingOperations(loadedGameState).filter((op) => op.corps_id === corpsId);
                             const activeOp = corpsOps.find((op) => op.phase === 'execution');
+                            const commander = loadedGameState
+                              ? resolveCorpsCommanderDisplay(corpsId, faction, loadedGameState)
+                              : null;
                             return (
                               <CorpsCard
                                 key={corpsId}
@@ -425,22 +428,8 @@ export function OOBSidebar() {
                                 sectorCount={corpsSectors.length}
                                 activeOperationName={activeOp?.display_name}
                                 activeOperationPhase={activeOp?.phase}
-                                commanderName={(() => {
-                                  if (!loadedGameState?.namedOfficerData || !loadedGameState?.namedOfficerStateById) return undefined;
-                                  for (const entry of loadedGameState.namedOfficerData) {
-                                    const st = loadedGameState.namedOfficerStateById[entry.id];
-                                    if (st?.status === 'active' && st.assigned_corps_id === corpsId) return entry.name;
-                                  }
-                                  return undefined;
-                                })()}
-                                commanderActing={(() => {
-                                  if (!loadedGameState?.namedOfficerData || !loadedGameState?.namedOfficerStateById) return undefined;
-                                  for (const entry of loadedGameState.namedOfficerData) {
-                                    const st = loadedGameState.namedOfficerStateById[entry.id];
-                                    if (st?.status === 'active' && st.assigned_corps_id === corpsId) return st.acting_commander;
-                                  }
-                                  return undefined;
-                                })()}
+                                commanderName={commander?.name}
+                                commanderActing={commander?.acting}
                               />
                             );
                           })}

@@ -1,3 +1,9 @@
+## 2026-06-17 - Opening command truth must not mutate startup simulation state
+
+**First-hour display truth can be read-model-only:** Active turn-0 corps assets may need named command labels for player comprehension, but seating officers into active sim command at scenario birth can change long-horizon outcomes. Durable rule: do not reintroduce startup-only active commander seating; use `resolveCorpsCommanderDisplay(...)` or an equivalent UI read-model for opening acting commanders and synthetic command staffs. Applied in `[2026-06-17] fix(ui/sim): make opening commanders read-model-only and clean startup control history`.
+
+**Setup control is not player-time combat history:** Startup phantoms may need to establish the April 1992 birth map, but those flips must not appear in turn-0 territory/casualty/combat history. Durable rule: scenario birth may suppress control-event emission while still seeding displacement timers and refreshing `initial_political_controllers` to the actual birth map; turn-pipeline phantom captures keep normal combat provenance.
+
 ## 2026-06-15 - Desktop campaign birth must overlay player-start events
 
 **Persisted observer state is not automatically fresh UI truth:** Serialized observer fields such as `political.last_contained_osids_by_faction` can be valid for sim/planner only when gated or refreshed, but unsafe as direct display truth after save/resume. Durable rule: UI read-models for per-turn observer fields must re-derive or freshness-check against current state before rendering. Applied in `[2026-06-16] fix(ui/ci/docs): harden stale truth and process sync`.

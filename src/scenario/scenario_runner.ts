@@ -1852,11 +1852,7 @@ export async function buildScenarioStartupState(
 
     if (scenario.start_lifecycle_phase === 'war') {
         initializeCorpsCommand(state);
-        {
-            const { seatInitialCorpsCommanders } = await import('../sim/combat/officer_system.js');
-            seatInitialCorpsCommanders(state);
-        }
-        spawnJnaPhantomBrigades(state, { emitCaptureEvents: false });
+        spawnJnaPhantomBrigades(state, { emitControlEvents: false });
         state.political.control_events ??= [];
         state.political.initial_political_controllers = { ...state.political.political_controllers };
         initializeCorpsCommand(state);

@@ -18,7 +18,6 @@ import {
     getOfficerCombatMod,
     initializeNamedOfficers,
     processOfficerSuccession,
-    seatInitialCorpsCommanders,
     validateOfficerData,
 } from '../src/sim/combat/officer_system.js';
 import {
@@ -479,51 +478,6 @@ describe('initializeNamedOfficers', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('processOfficerSuccession', () => {
-    it('replaces non-HVO acting startup commanders when the later home commander arrives', () => {
-        const data = [
-            makeOfficer({
-                id: 'interim',
-                faction: 'RS',
-                home_corps_id: 'vrs_drina',
-                pool_tier: 'tier_b',
-            }),
-            makeOfficer({
-                id: 'official',
-                faction: 'RS',
-                home_corps_id: 'vrs_drina',
-                available_from_turn: 5,
-                is_historical_start: true,
-                historical_corps_id: 'vrs_drina',
-                pool_tier: 'starter',
-            }),
-        ];
-        const state = makeMinimalState({ meta: { turn: 0, phase: 'war', scenario_id: 'test' } } as unknown as Partial<GameState>);
-        state.military.formations = {
-            vrs_drina: makeFormation({ id: 'vrs_drina', faction: 'RS', kind: 'corps_asset' as 'brigade' }),
-            drina_brigade: makeFormation({ id: 'drina_brigade', faction: 'RS', corps_id: 'vrs_drina' as never }),
-        };
-        initializeNamedOfficers(state, data);
-
-        assert.deepEqual(seatInitialCorpsCommanders(state), ['interim']);
-        assert.equal(state.military.named_officers!['interim']!.assigned_corps_id, 'vrs_drina');
-        assert.equal(state.military.named_officers!['interim']!.acting_commander, true);
-        assert.equal(state.military.named_officers!['official'], undefined);
-
-        state.meta!.turn = 5;
-        processOfficerSuccession(state, new Set());
-
-        const officersAfterSuccession = state.military.named_officers as Record<string, NamedOfficerState | undefined>;
-        const interimAfterSuccession = officersAfterSuccession['interim'];
-        const officialAfterSuccession = officersAfterSuccession['official'];
-        assert.ok(interimAfterSuccession);
-        assert.ok(officialAfterSuccession);
-        assert.equal(interimAfterSuccession.status, 'retired');
-        assert.equal(interimAfterSuccession.assigned_corps_id, null);
-        assert.equal(officialAfterSuccession.status, 'active');
-        assert.equal(officialAfterSuccession.assigned_corps_id, 'vrs_drina');
-        assert.equal(officialAfterSuccession.acting_commander, false);
-    });
-
     it('retires officers past available_until_turn', () => {
         const data = [
             makeOfficer({ id: 'o1', faction: 'RS', available_until_turn: 5, is_historical_start: true, historical_corps_id: 'vrs_1kk' }),

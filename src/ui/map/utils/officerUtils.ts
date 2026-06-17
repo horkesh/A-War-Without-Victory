@@ -1,5 +1,82 @@
-import type { LoadedGameState, FormationView } from '../data/types';
+import type { LoadedGameState, FormationView, NamedOfficerView } from '../data/types';
 import { getAssignedCommandLabel } from '../../shared/playerFacingLabels';
+import { strictCompare } from '../../../state/validateGameState';
+
+export interface CommanderDisplay {
+    name: string;
+    acting: boolean;
+    source: 'active' | 'opening_read_model' | 'synthetic';
+}
+
+const SYNTHETIC_COMMAND_LABELS: Record<string, string> = {
+    jna_herzegovina_command: 'JNA forward command staff',
+};
+
+const POOL_TIER_ORDER: Record<string, number> = {
+    starter: 0,
+    tier_a: 1,
+    tier_b: 2,
+    tier_c: 3,
+};
+
+function officerStatusFor(state: LoadedGameState, officer: NamedOfficerView): string {
+    return state.namedOfficerStateById?.[officer.id]?.status ?? officer.status;
+}
+
+function assignedCorpsFor(state: LoadedGameState, officer: NamedOfficerView): string | null {
+    return state.namedOfficerStateById?.[officer.id]?.assigned_corps_id ?? officer.assigned_corps_id ?? null;
+}
+
+function isOfficerAvailableForTurn(state: LoadedGameState, officer: NamedOfficerView): boolean {
+    const turn = state.turn ?? 0;
+    if (officer.available_from_turn != null && officer.available_from_turn > turn) return false;
+    if (officer.available_until_turn != null && officer.available_until_turn <= turn) return false;
+    return !['kia', 'killed', 'captured', 'retired'].includes(officerStatusFor(state, officer));
+}
+
+function compareOpeningOfficer(a: NamedOfficerView, b: NamedOfficerView): number {
+    const tierA = POOL_TIER_ORDER[a.pool_tier ?? ''] ?? 99;
+    const tierB = POOL_TIER_ORDER[b.pool_tier ?? ''] ?? 99;
+    if (tierA !== tierB) return tierA - tierB;
+    if (a.competence !== b.competence) return b.competence - a.competence;
+    if (a.defensive_skill !== b.defensive_skill) return b.defensive_skill - a.defensive_skill;
+    return strictCompare(a.id, b.id);
+}
+
+export function resolveCorpsCommanderDisplay(
+    corpsId: string,
+    faction: string,
+    loadedGameState: LoadedGameState,
+): CommanderDisplay | null {
+    const officers = loadedGameState.namedOfficerData ?? [];
+    for (const officer of officers) {
+        if (officerStatusFor(loadedGameState, officer) === 'active' && assignedCorpsFor(loadedGameState, officer) === corpsId) {
+            const st = loadedGameState.namedOfficerStateById?.[officer.id];
+            return { name: officer.name, acting: Boolean(st?.acting_commander ?? officer.acting_commander), source: 'active' };
+        }
+    }
+
+    if (SYNTHETIC_COMMAND_LABELS[corpsId]) {
+        return { name: SYNTHETIC_COMMAND_LABELS[corpsId], acting: false, source: 'synthetic' };
+    }
+
+    const openingCandidate = officers
+        .filter((officer) =>
+            officer.faction === faction
+            && officer.rank !== 'army_commander'
+            && isOfficerAvailableForTurn(loadedGameState, officer)
+            && !assignedCorpsFor(loadedGameState, officer)
+            && (
+                officer.home_corps_id === corpsId
+                || officer.compatible_corps_ids?.includes(corpsId)
+                || (officer.is_historical_start === true && officer.historical_corps_id === corpsId)
+            )
+        )
+        .sort(compareOpeningOfficer)[0];
+
+    if (!openingCandidate) return null;
+    return { name: openingCandidate.name, acting: true, source: 'opening_read_model' };
+}
 
 /**
  * Utility to find the named officer for a formation (Corps or Army level).
@@ -9,7 +86,10 @@ export function getFormationCommander(
     loadedGameState: LoadedGameState
 ) {
     if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
-        return loadedGameState.namedOfficerData?.find(o => o.assigned_corps_id === formation.id) || null;
+        return loadedGameState.namedOfficerData?.find((o) =>
+            officerStatusFor(loadedGameState, o) === 'active'
+            && assignedCorpsFor(loadedGameState, o) === formation.id
+        ) || null;
     }
 
     if (formation.kind === 'army_hq') {
