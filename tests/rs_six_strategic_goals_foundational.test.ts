@@ -82,16 +82,16 @@ function makeOpeningState(playerFaction: 'RBiH' | 'RS' | 'HRHB'): GameState {
 }
 
 /** The six strategic goals, as historically adopted (12 May 1992, 16th Session).
- *  Each entry is a (paraphrased) keyword the shipped narrative MUST mention so a
+ *  Each entry is a distinct term set the shipped narrative MUST mention so a
  *  future edit cannot quietly drop a goal. Sourced from the Official Gazette of
  *  Republika Srpska (1993) / ICTY Karadžić IT-95-5/18-T. */
-const SIX_GOALS_KEYWORDS: ReadonlyArray<{ goal: string; mustMention: string }> = [
-    { goal: '1. Separation from the other two national communities', mustMention: 'separation' },
-    { goal: '2. Corridor between Semberija and Krajina (Posavina corridor)', mustMention: 'corridor' },
-    { goal: '3. Drina valley corridor / eliminate the Drina as a border', mustMention: 'Drina' },
-    { goal: '4. Border on the Una and Neretva rivers', mustMention: 'Una' },
-    { goal: '5. Division of Sarajevo', mustMention: 'Sarajevo' },
-    { goal: '6. Access to the sea', mustMention: 'sea' },
+const SIX_GOALS_TERMS: ReadonlyArray<{ goal: string; mustMention: readonly string[] }> = [
+    { goal: '1. Separation from the other two national communities', mustMention: ['separation'] },
+    { goal: '2. Corridor between Semberija and Krajina (Posavina corridor)', mustMention: ['posavina', 'corridor'] },
+    { goal: '3. Drina valley corridor / eliminate the Drina as a border', mustMention: ['drina', 'border'] },
+    { goal: '4. Border on the Una and Neretva rivers', mustMention: ['una', 'neretva'] },
+    { goal: '5. Division of Sarajevo', mustMention: ['division', 'sarajevo'] },
+    { goal: '6. Access to the sea', mustMention: ['access', 'sea'] },
 ];
 
 describe('RS Six Strategic Goals — foundational decision-event §6 guard', () => {
@@ -110,8 +110,10 @@ describe('RS Six Strategic Goals — foundational decision-event §6 guard', () 
     it('all six strategic goals are represented in the narrative (none silently dropped)', () => {
         const text = (EVENT!.narrative ?? '').toLowerCase();
         expect(text.length).toBeGreaterThan(0);
-        for (const { goal, mustMention } of SIX_GOALS_KEYWORDS) {
-            expect(text.includes(mustMention.toLowerCase()), `goal "${goal}" missing keyword "${mustMention}"`).toBe(true);
+        for (const { goal, mustMention } of SIX_GOALS_TERMS) {
+            for (const term of mustMention) {
+                expect(text.includes(term.toLowerCase()), `goal "${goal}" missing distinct term "${term}"`).toBe(true);
+            }
         }
     });
 
