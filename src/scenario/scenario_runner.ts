@@ -1852,7 +1852,12 @@ export async function buildScenarioStartupState(
 
     if (scenario.start_lifecycle_phase === 'war') {
         initializeCorpsCommand(state);
-        spawnJnaPhantomBrigades(state);
+        {
+            const { seatInitialCorpsCommanders } = await import('../sim/combat/officer_system.js');
+            seatInitialCorpsCommanders(state);
+        }
+        spawnJnaPhantomBrigades(state, { emitCaptureEvents: false });
+        state.political.initial_political_controllers = { ...state.political.political_controllers };
         initializeCorpsCommand(state);
         // Synthesis §3 E-B3: seed initial per-corps strategic_depth at scenario
         // load so the first turn's combat / coherence reads see real depth

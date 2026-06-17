@@ -122,6 +122,38 @@ describe('phantom spawn catalog', () => {
             defsSpawnedByTurn(0).length
         );
     });
+
+    it('can seed startup setup control without emitting combat history', () => {
+        const state = makeState(0);
+        state.political.political_controllers = {
+            'op:stolac:stolac_2': 'RBiH' as FactionId,
+            'op:kupres:kupres_2': 'HRHB' as FactionId,
+        };
+
+        spawnJnaPhantomBrigades(state, { emitCaptureEvents: false });
+
+        assert.equal(state.political.political_controllers['op:stolac:stolac_2'], 'RS');
+        assert.equal(state.political.political_controllers['op:kupres:kupres_2'], 'RS');
+        assert.deepEqual(state.political.control_events ?? [], []);
+    });
+
+    it('keeps default phantom capture events for turn-pipeline spawn history', () => {
+        const state = makeState(0);
+        state.political.political_controllers = {
+            'op:stolac:stolac_2': 'RBiH' as FactionId,
+        };
+
+        spawnJnaPhantomBrigades(state);
+
+        assert.equal(state.political.political_controllers['op:stolac:stolac_2'], 'RS');
+        assert.ok((state.political.control_events ?? []).some((event) =>
+            event.turn === 0
+            && event.settlement_id === 'op:stolac:stolac_2'
+            && event.mechanism === 'combat'
+            && event.from === 'RBiH'
+            && event.to === 'RS'
+        ));
+    });
 });
 
 describe('withdrawal countdowns', () => {

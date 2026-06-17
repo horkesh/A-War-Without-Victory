@@ -458,6 +458,10 @@ const HV_PHANTOM_DEFS_1995: PhantomDef[] = [
 
 const ALL_PHANTOM_DEFS: PhantomDef[] = [...JNA_PHANTOM_DEFS, ...HV_PHANTOM_DEFS, ...HV_PHANTOM_DEFS_1995];
 
+export interface SpawnJnaPhantomBrigadesOptions {
+    emitCaptureEvents?: boolean;
+}
+
 /**
  * Spawn phantom brigades into the game state.
  * Called at scenario start (turn 0) AND each war-phase turn (so spawn_turn-gated
@@ -465,9 +469,10 @@ const ALL_PHANTOM_DEFS: PhantomDef[] = [...JNA_PHANTOM_DEFS, ...HV_PHANTOM_DEFS,
  * Each def is idempotent: spawn check is `if (state.military.formations[def.id])`.
  * Handles both JNA (VRS) and HV (HRHB) phantoms.
  */
-export function spawnJnaPhantomBrigades(state: GameState): void {
+export function spawnJnaPhantomBrigades(state: GameState, options: SpawnJnaPhantomBrigadesOptions = {}): void {
     if (!state.military.formations) state.military.formations = {};
     const turn = state.meta?.turn ?? 0;
+    const emitCaptureEvents = options.emitCaptureEvents ?? true;
 
     // Phantoms that have ever been spawned. When a phantom withdraws its
     // formation entry is removed entirely, so `formations[def.id]` alone is
@@ -531,10 +536,10 @@ export function spawnJnaPhantomBrigades(state: GameState): void {
             for (const osid of def.capture_osids) {
                 const previousController = state.political.political_controllers[osid];
                 state.political.political_controllers[osid] = faction;
-                if (previousController && previousController !== faction) {
+                if (emitCaptureEvents && previousController && previousController !== faction) {
                     seedDisplacementTimerOnFlip(state, osid, previousController, faction);
                 }
-                if (previousController !== faction) {
+                if (emitCaptureEvents && previousController !== faction) {
                     (state.political.control_events ??= []).push({
                         turn: state.meta?.turn ?? 0,
                         settlement_id: osid,

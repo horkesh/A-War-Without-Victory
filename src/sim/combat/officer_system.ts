@@ -527,6 +527,65 @@ export function initializeNamedOfficers(
 // Succession
 // ═══════════════════════════════════════════════════════════════════════════
 
+/**
+ * Seat available reserve officers into active opening corps after OOB formations
+ * exist. This startup-only pass does not backdate later historical commanders
+ * or create generic placeholders for synthetic commands.
+ */
+export function seatInitialCorpsCommanders(state: GameState): string[] {
+    const officers = state.military.named_officers;
+    const officerData = state.military.named_officer_data;
+    const formations = state.military.formations ?? {};
+    if (!officers || !officerData) return [];
+
+    const assigned: string[] = [];
+    const corpsFormationIds = Object.keys(formations)
+        .filter((id) => {
+            const formation = formations[id]!;
+            return formation.kind === 'corps_asset' && formation.status === 'active';
+        })
+        .sort(strictCompare);
+
+    for (const corpsFormId of corpsFormationIds) {
+        if (getCorpsCommander(corpsFormId, state)) continue;
+
+        const corpsFormation = formations[corpsFormId]!;
+        const hasActiveSubordinates = Object.values(formations)
+            .some((formation) =>
+                formation.status === 'active'
+                && formation.corps_id === corpsFormId
+                && (formation.kind === 'brigade' || formation.kind === 'og' || formation.kind === 'operational_group' || formation.kind === 'jna_phantom')
+            );
+        if (!hasActiveSubordinates) continue;
+
+        const replacement = findBestReplacement(officers, officerData, corpsFormation.faction, corpsFormId);
+        if (!replacement) continue;
+
+        const os = officers[replacement.id]!;
+        os.status = 'active';
+        os.assigned_corps_id = corpsFormId;
+        os.turns_in_command = 0;
+        os.acting_commander = !(replacement.is_historical_start === true && replacement.historical_corps_id === corpsFormId);
+
+        const isHome = replacement.home_corps_id === corpsFormId;
+        const isCompatible = replacement.compatible_corps_ids?.includes(corpsFormId) ?? false;
+        if (!isHome && !isCompatible) {
+            os.effective_competence_penalty = INCOMPATIBLE_PENALTY;
+            os.penalty_turns_remaining = INCOMPATIBLE_PENALTY_TURNS;
+        } else if (!isHome && isCompatible) {
+            os.effective_competence_penalty = COMPATIBLE_PENALTY;
+            os.penalty_turns_remaining = COMPATIBLE_PENALTY_TURNS;
+        } else {
+            os.effective_competence_penalty = 0;
+            os.penalty_turns_remaining = 0;
+        }
+
+        assigned.push(replacement.id);
+    }
+
+    return assigned;
+}
+
 export interface OfficerSuccessionReport {
     departures: string[];
     casualties: string[];
@@ -697,18 +756,23 @@ export function processOfficerSuccession(
         const corpsFormation = formations[corpsFormId]!;
         if (corpsFormation.kind !== 'corps_asset') continue;
 
+        const faction = corpsFormation.faction;
         const existingCommander = getCorpsCommander(corpsFormId, state);
         if (existingCommander) {
             // C.3: HVO acting commanders get replaced once their delay is served
-            if (existingCommander.state.acting_commander && existingCommander.data.faction === 'HRHB') {
-                // D.4: Read delays from war_timeline if available, else hardcoded fallback
-                const hvoConfig = state.military.war_timeline?.officer_config?.HRHB;
-                const politicalDelay = hvoConfig?.political_replacement_delay ?? HVO_POLITICAL_REPLACEMENT_DELAY;
-                const combatDelay = hvoConfig?.combat_death_replacement_delay ?? HVO_COMBAT_DEATH_REPLACEMENT_DELAY;
-                // Acting commander: check if enough turns have passed
-                const requiredDelay = existingCommander.data.id.startsWith('generic_combat_')
-                    ? combatDelay : politicalDelay;
-                if (existingCommander.state.turns_in_command < requiredDelay) continue;
+            if (existingCommander.state.acting_commander) {
+                const availableReplacement = findBestReplacement(officers, officerData, faction, corpsFormId);
+                if (!availableReplacement) continue;
+                if (existingCommander.data.faction === 'HRHB') {
+                    // D.4: Read delays from war_timeline if available, else hardcoded fallback
+                    const hvoConfig = state.military.war_timeline?.officer_config?.HRHB;
+                    const politicalDelay = hvoConfig?.political_replacement_delay ?? HVO_POLITICAL_REPLACEMENT_DELAY;
+                    const combatDelay = hvoConfig?.combat_death_replacement_delay ?? HVO_COMBAT_DEATH_REPLACEMENT_DELAY;
+                    // Acting commander: check if enough turns have passed
+                    const requiredDelay = existingCommander.data.id.startsWith('generic_combat_')
+                        ? combatDelay : politicalDelay;
+                    if (existingCommander.state.turns_in_command < requiredDelay) continue;
+                }
                 // Delay served — retire acting, look for pool replacement below
                 existingCommander.state.status = 'retired';
                 existingCommander.state.assigned_corps_id = null;
@@ -718,7 +782,6 @@ export function processOfficerSuccession(
         }
 
         // Find best available replacement from pool
-        const faction = corpsFormation.faction;
         const replacement = findBestReplacement(officers, officerData, faction, corpsFormId);
 
         if (replacement) {

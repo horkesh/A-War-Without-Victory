@@ -94,6 +94,71 @@ test('baked April 1992 startup materializes default-on SRK strangle containment'
     }
 }, 120_000);
 
+test('baked April 1992 active opening corps assets have named commanders', async () => {
+    const state = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
+    const activeCommandedCorps = new Set(
+        Object.values(state.military.named_officers ?? {})
+            .filter((officer) => officer.status === 'active' && officer.assigned_corps_id)
+            .map((officer) => officer.assigned_corps_id!),
+    );
+
+    const openingCorpsIds = [
+        'vrs_drina',
+        'arbih_3rd_corps',
+        'arbih_4th_corps',
+    ];
+
+    for (const corpsId of openingCorpsIds) {
+        const corps = state.military.formations[corpsId];
+        const activeBrigades = Object.values(state.military.formations)
+            .filter((formation) => formation.status === 'active' && formation.corps_id === corpsId);
+
+        assert.ok(corps, `${corpsId} should exist in the baked startup artifact`);
+        assert.strictEqual(corps.status, 'active', `${corpsId} should be an active opening corps asset`);
+        assert.ok(activeBrigades.length > 0, `${corpsId} should have active opening brigades`);
+        assert.ok(activeCommandedCorps.has(corpsId), `${corpsId} should not render as Command forming at turn 0`);
+    }
+}, 120_000);
+
+test('baked April 1992 startup seats interim commanders without backdating later official corps commanders', async () => {
+    const state = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
+    const officers = state.military.named_officers ?? {};
+
+    assert.strictEqual(officers.vrs_andric?.assigned_corps_id, 'vrs_drina');
+    assert.strictEqual(officers.vrs_andric?.acting_commander, true);
+    assert.strictEqual(officers.arbih_cikotic?.assigned_corps_id, 'arbih_3rd_corps');
+    assert.strictEqual(officers.arbih_cikotic?.acting_commander, true);
+    assert.strictEqual(officers.arbih_hujdur?.assigned_corps_id, 'arbih_4th_corps');
+    assert.strictEqual(officers.arbih_hujdur?.acting_commander, true);
+
+    assert.strictEqual(officers.vrs_zivanovic, undefined, 'Živanović remains a later Drina arrival, not a turn-0 backdate');
+    assert.strictEqual(officers.arbih_hadzihasanovic, undefined, 'Hadžihasanović remains a later 3rd Corps arrival, not a turn-0 backdate');
+    assert.strictEqual(officers.arbih_pasalic, undefined, 'Pašalić remains a later 4th Corps arrival, not a turn-0 backdate');
+}, 120_000);
+
+test('baked April 1992 startup has no false turn-0 combat control history', async () => {
+    const state = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
+    const turnZeroCombatEvents = (state.political.control_events ?? [])
+        .filter((event) => event.turn === 0 && event.mechanism === 'combat');
+
+    assert.deepStrictEqual(turnZeroCombatEvents, []);
+
+    const jnaSetupControlOsids = [
+        'op:stolac:stolac_2',
+        'op:stolac:rotimlja_2',
+        'op:stolac:pjesivac_kula_2',
+        'op:capljina:tasovcici_2',
+        'op:mostar:hodbina_2',
+        'op:kupres:goravci',
+        'op:kupres:kupres_2',
+    ];
+
+    for (const osid of jnaSetupControlOsids) {
+        assert.strictEqual(state.political.political_controllers?.[osid], 'RS');
+        assert.strictEqual(state.political.initial_political_controllers?.[osid], 'RS');
+    }
+}, 120_000);
+
 test('desktop new campaign preserves default-on SRK strangle containment at birth', async () => {
     resetSrkStranglePostureGate();
     const prev = process.env.AWWV_SRK_STRANGLE_POSTURE;

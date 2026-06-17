@@ -2,7 +2,7 @@
 
 **Purpose:** Single entrypoint for implementation reports, handovers, convenes, investigations, and audits. Use consolidated summaries for quick reference; use individual reports for detail.
 
-**2026-06-17 compact entrypoint:** for current work, start with [CONSOLIDATED_IMPLEMENTED.md](CONSOLIDATED_IMPLEMENTED.md), [CONSOLIDATED_BACKLOG.md](CONSOLIDATED_BACKLOG.md), [CONSOLIDATED_LESSONS_LEARNED.md](CONSOLIDATED_LESSONS_LEARNED.md), and [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md). The current D2-entry contract remains 188w 658/712, anchors 30/30, schema v36, required/blocking `engine-health-188w`, and 40w structural-fingerprint v2 `f282883abbab76cf`; the long per-report listings below are historical lookup material, not the active dispatch surface.
+**2026-06-17 compact entrypoint:** for current work, start with [CONSOLIDATED_IMPLEMENTED.md](CONSOLIDATED_IMPLEMENTED.md), [CONSOLIDATED_BACKLOG.md](CONSOLIDATED_BACKLOG.md), [CONSOLIDATED_LESSONS_LEARNED.md](CONSOLIDATED_LESSONS_LEARNED.md), and [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md). The current D2-entry contract remains 188w 658/712, anchors 30/30, schema v36, required/blocking `engine-health-188w`, and 40w structural-fingerprint v2 `f282883abbab76cf`; the latest startup-truth slice moves only startup construction plus the generated April 1992 startup snapshot. The long per-report listings below are historical lookup material, not the active dispatch surface.
 
 **Last reorg:** 2026-03-01 (report audit: moved 10 completed + 6 archived to implemented/, updated indices).
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest opening command/startup history truth** | [implemented/20260617_OPENING_COMMAND_AND_STARTUP_HISTORY.md](implemented/20260617_OPENING_COMMAND_AND_STARTUP_HISTORY.md) - Active opening corps now receive time-safe acting commanders, later official commanders are not backdated, and JNA setup control no longer appears as false turn-0 combat history. |
 | **Latest UI truth and decision hierarchy hardening** | [implemented/20260617_UI_TRUTH_AND_DECISION_HIERARCHY.md](implemented/20260617_UI_TRUTH_AND_DECISION_HIERARCHY.md) - Live command surfaces hide future/postwar legal outcomes by default, explicit officer dossiers retain archival access, and decision modals show the full response list before detailed future-consequence previews. |
 | **Latest shell navigation exclusivity** | [implemented/20260616_SHELL_NAVIGATION_EXCLUSIVITY.md](implemented/20260616_SHELL_NAVIGATION_EXCLUSIVITY.md) - Army HQ routes now close Codex/Chronicle centrally, Records routes force the Records tab, Codex/Decision History Escape no longer stack Pause, and App-level Warroom/Inbox/Wrapped handoffs now clear competing shells before opening the next top-level surface. |
 | **Latest issue #170 fingerprint/cache hardening** | [implemented/20260616_ISSUE170_FINGERPRINT_CACHE_HARDENING.md](implemented/20260616_ISSUE170_FINGERPRINT_CACHE_HARDENING.md) - Structural fingerprint v2 now pins sorted OSID control flips, final-sector cache keys include front-edge content, and operation-roster cache invalidation has dynamic coverage. |

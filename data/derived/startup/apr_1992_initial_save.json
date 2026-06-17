@@ -889,92 +889,7 @@
         "original_population": 81295
       }
     },
-    "hostile_takeover_timers": {
-      "op:capljina:tasovcici_2|HRHB": {
-        "from_faction": "HRHB",
-        "mun_id": "capljina",
-        "started_turn": 0,
-        "to_faction": "RS"
-      },
-      "op:capljina:tasovcici_2|RBiH": {
-        "from_faction": "RBiH",
-        "mun_id": "capljina",
-        "started_turn": 0,
-        "to_faction": "RS"
-      },
-      "op:kupres:goravci|HRHB": {
-        "from_faction": "HRHB",
-        "mun_id": "kupres",
-        "started_turn": 0,
-        "to_faction": "RS"
-      },
-      "op:kupres:goravci|RBiH": {
-        "from_faction": "RBiH",
-        "mun_id": "kupres",
-        "started_turn": 0,
-        "to_faction": "RS"
-      },
-      "op:kupres:kupres_2|HRHB": {
-        "from_faction": "HRHB",
-        "mun_id": "kupres",
-        "started_turn": 0,
-        "to_faction": "RS"
-      },
-      "op:kupres:kupres_2|RBiH": {
-        "from_faction": "RBiH",
-        "mun_id": "kupres",
-        "started_turn": 0,
-        "to_faction": "RS"
-      },
-      "op:mostar:hodbina_2|HRHB": {
-        "from_faction": "HRHB",
-        "mun_id": "mostar",
-        "started_turn": 0,
-        "to_faction": "RS"
-      },
-      "op:mostar:hodbina_2|RBiH": {
-        "from_faction": "RBiH",
-        "mun_id": "mostar",
-        "started_turn": 0,
-        "to_faction": "RS"
-      },
-      "op:stolac:pjesivac_kula_2|HRHB": {
-        "from_faction": "HRHB",
-        "mun_id": "stolac",
-        "started_turn": 0,
-        "to_faction": "RS"
-      },
-      "op:stolac:pjesivac_kula_2|RBiH": {
-        "from_faction": "RBiH",
-        "mun_id": "stolac",
-        "started_turn": 0,
-        "to_faction": "RS"
-      },
-      "op:stolac:rotimlja_2|HRHB": {
-        "from_faction": "HRHB",
-        "mun_id": "stolac",
-        "started_turn": 0,
-        "to_faction": "RS"
-      },
-      "op:stolac:rotimlja_2|RBiH": {
-        "from_faction": "RBiH",
-        "mun_id": "stolac",
-        "started_turn": 0,
-        "to_faction": "RS"
-      },
-      "op:stolac:stolac_2|HRHB": {
-        "from_faction": "HRHB",
-        "mun_id": "stolac",
-        "started_turn": 0,
-        "to_faction": "RS"
-      },
-      "op:stolac:stolac_2|RBiH": {
-        "from_faction": "RBiH",
-        "mun_id": "stolac",
-        "started_turn": 0,
-        "to_faction": "RS"
-      }
-    },
+    "hostile_takeover_timers": {},
     "minority_flight_state": {},
     "municipality_displacement": {},
     "settlement_displacement": {},
@@ -32742,14 +32657,14 @@
         "victories": 0
       },
       "arbih_cikotic": {
-        "acting_commander": false,
-        "assigned_corps_id": null,
+        "acting_commander": true,
+        "assigned_corps_id": "arbih_3rd_corps",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "arbih_cikotic",
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
-        "status": "reserve",
+        "status": "active",
         "turns_in_command": 0,
         "victories": 0
       },
@@ -32838,14 +32753,14 @@
         "victories": 0
       },
       "arbih_hujdur": {
-        "acting_commander": false,
-        "assigned_corps_id": null,
+        "acting_commander": true,
+        "assigned_corps_id": "arbih_4th_corps",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "arbih_hujdur",
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
-        "status": "reserve",
+        "status": "active",
         "turns_in_command": 0,
         "victories": 0
       },
@@ -33222,14 +33137,14 @@
         "victories": 0
       },
       "vrs_andric": {
-        "acting_commander": false,
-        "assigned_corps_id": null,
+        "acting_commander": true,
+        "assigned_corps_id": "vrs_drina",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_andric",
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
-        "status": "reserve",
+        "status": "active",
         "turns_in_command": 0,
         "victories": 0
       },
@@ -40004,64 +39919,6 @@
       "op:zvornik:sapna": false,
       "op:zvornik:zvornik": false
     },
-    "control_events": [
-      {
-        "from": "RBiH",
-        "mechanism": "combat",
-        "mun_id": "stolac",
-        "settlement_id": "op:stolac:stolac_2",
-        "to": "RS",
-        "turn": 0
-      },
-      {
-        "from": "HRHB",
-        "mechanism": "combat",
-        "mun_id": "stolac",
-        "settlement_id": "op:stolac:rotimlja_2",
-        "to": "RS",
-        "turn": 0
-      },
-      {
-        "from": "RBiH",
-        "mechanism": "combat",
-        "mun_id": "stolac",
-        "settlement_id": "op:stolac:pjesivac_kula_2",
-        "to": "RS",
-        "turn": 0
-      },
-      {
-        "from": "RBiH",
-        "mechanism": "combat",
-        "mun_id": "capljina",
-        "settlement_id": "op:capljina:tasovcici_2",
-        "to": "RS",
-        "turn": 0
-      },
-      {
-        "from": "RBiH",
-        "mechanism": "combat",
-        "mun_id": "mostar",
-        "settlement_id": "op:mostar:hodbina_2",
-        "to": "RS",
-        "turn": 0
-      },
-      {
-        "from": "HRHB",
-        "mechanism": "combat",
-        "mun_id": "kupres",
-        "settlement_id": "op:kupres:goravci",
-        "to": "RS",
-        "turn": 0
-      },
-      {
-        "from": "HRHB",
-        "mechanism": "combat",
-        "mun_id": "kupres",
-        "settlement_id": "op:kupres:kupres_2",
-        "to": "RS",
-        "turn": 0
-      }
-    ],
     "initial_political_controllers": {
       "op:banja_luka:banja_luka_2": "RS",
       "op:banja_luka:dragocaj": "HRHB",
@@ -40206,7 +40063,7 @@
       "op:cajnice:todorovici": "RBiH",
       "op:cajnice:zaborak": "RS",
       "op:capljina:capljina_2": "HRHB",
-      "op:capljina:tasovcici_2": "RBiH",
+      "op:capljina:tasovcici_2": "RS",
       "op:capljina:visici_2": "HRHB",
       "op:cazin:cazin_2": "RBiH",
       "op:cazin:coralici": "RBiH",
@@ -40443,8 +40300,8 @@
       "op:kresevo:polje_2": "HRHB",
       "op:kupres:bucovaca": "RS",
       "op:kupres:donji_malovan": "RS",
-      "op:kupres:goravci": "HRHB",
-      "op:kupres:kupres_2": "HRHB",
+      "op:kupres:goravci": "RS",
+      "op:kupres:kupres_2": "RS",
       "op:kupres:novo_selo_2": "RS",
       "op:laktasi:drugovici_2": "RS",
       "op:laktasi:laktasi_2": "RS",
@@ -40499,7 +40356,7 @@
       "op:modrica:vranjak_2": "RS",
       "op:mostar:blagaj_2": "RBiH",
       "op:mostar:gornja_dreznica": "RBiH",
-      "op:mostar:hodbina_2": "RBiH",
+      "op:mostar:hodbina_2": "RS",
       "op:mostar:jasenica": "HRHB",
       "op:mostar:kruzanj_2": "RBiH",
       "op:mostar:mostar_istok_2": "RBiH",
@@ -40645,10 +40502,10 @@
       "op:stari_grad_sarajevo:faletici": "RS",
       "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo": "RBiH",
       "op:stolac:hatelji_2": "RS",
-      "op:stolac:pjesivac_kula_2": "RBiH",
+      "op:stolac:pjesivac_kula_2": "RS",
       "op:stolac:prenj": "HRHB",
-      "op:stolac:rotimlja_2": "HRHB",
-      "op:stolac:stolac_2": "RBiH",
+      "op:stolac:rotimlja_2": "RS",
+      "op:stolac:stolac_2": "RS",
       "op:tesanj:kalosevic_2": "RBiH",
       "op:tesanj:lepenica": "RBiH",
       "op:tesanj:novi_miljanovci_2": "RBiH",

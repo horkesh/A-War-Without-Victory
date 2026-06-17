@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest opening command/startup history truth:** [implemented/20260617_OPENING_COMMAND_AND_STARTUP_HISTORY.md](implemented/20260617_OPENING_COMMAND_AND_STARTUP_HISTORY.md) - Active opening corps now receive time-safe acting commanders, later official commanders are not backdated, and JNA setup control no longer appears as false turn-0 combat history.
+
 **Latest UI truth and decision hierarchy hardening:** [implemented/20260617_UI_TRUTH_AND_DECISION_HIERARCHY.md](implemented/20260617_UI_TRUTH_AND_DECISION_HIERARCHY.md) - Live command surfaces hide future/postwar legal outcomes by default, explicit officer dossiers retain archival access, and decision modals show the full response list before detailed future-consequence previews.
 
 **Latest shell navigation exclusivity:** [implemented/20260616_SHELL_NAVIGATION_EXCLUSIVITY.md](implemented/20260616_SHELL_NAVIGATION_EXCLUSIVITY.md) - Army HQ routes now close Codex/Chronicle centrally, Records routes force the Records tab, Codex/Decision History Escape no longer stack Pause, and App-level Warroom/Inbox/Wrapped handoffs now clear competing shells before opening the next top-level surface.
