@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest OOB metadata substrate:** [implemented/20260617_HVO_ELITE_COMMANDER_METADATA_SUBSTRATE.md](implemented/20260617_HVO_ELITE_COMMANDER_METADATA_SUBSTRATE.md) - OOB elite commander metadata now round-trips through the loader, preserving existing ARBiH/RS/HVO rows while leaving the Vitezovi identity/modeling decision open.
+
 **Latest opening command/startup history truth:** [implemented/20260617_OPENING_COMMAND_AND_STARTUP_HISTORY.md](implemented/20260617_OPENING_COMMAND_AND_STARTUP_HISTORY.md) - Opening corps now show time-safe acting commanders through the Army HQ/OOB read-model, Army HQ route wiring is live-browser verified, later official commanders are not backdated, JNA synthetic command staff is labeled, and JNA setup control no longer appears as false turn-0 combat history.
 
 **Latest UI truth and decision hierarchy hardening:** [implemented/20260617_UI_TRUTH_AND_DECISION_HIERARCHY.md](implemented/20260617_UI_TRUTH_AND_DECISION_HIERARCHY.md) - Live command surfaces hide future/postwar legal outcomes by default, explicit officer dossiers retain archival access, and decision modals show the full response list before detailed future-consequence previews.

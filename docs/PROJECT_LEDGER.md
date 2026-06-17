@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-17] fix(data): preserve elite commander OOB metadata
+
+**Type:** OOB loader metadata substrate. Bernoulli's HVO sidecar found that multiple elite OOB rows already carried `elite_commander` source metadata, but `loadOobBrigades(...)` dropped the field, making the current metadata and any future Vitezovi commander row dead data.
+
+**Fix:** Added typed `OobEliteCommander` parsing to `src/scenario/oob_loader.ts`, including nested `war_crimes_record` preservation. Added focused loader coverage for existing ARBiH, RS, and HVO elite commander rows. Left `hrhb_vitezovi_brigade_vitez` unchanged: no Darko Kraljevic assignment, no rename/split, no personnel or `is_elite` movement. The remaining Vitezovi lane is a historian/modeling decision between the regular Vitez brigade and the PPN "Vitezovi" abstraction.
+
+**Verification:** `npx.cmd vitest run tests\oob_loader.test.ts --pool=forks --reporter=dot` -> 1 file / 4 tests passed; `npm.cmd run typecheck` passed. No sim/scenario/save-schema/generated-startup/baseline/calibration/package artifact changed.
+
+---
+
 ## [2026-06-17] fix(ui): wire opening command read-model into Army HQ
 
 **Type:** tactical-map UI/read-model follow-up. Kepler's independent code-review sidecar found that the first startup-truth patch wired `resolveCorpsCommanderDisplay(...)` into OOB, but Army HQ corps cards and the expanded Commander section still used active-only `getFormationCommander(...)`. That meant the docs and live intent were ahead of the actual Army HQ implementation.

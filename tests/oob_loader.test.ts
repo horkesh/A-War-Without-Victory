@@ -25,6 +25,31 @@ test('loadOobBrigades returns stable order (faction then name) and valid home_mu
     }
 });
 
+test('loadOobBrigades preserves elite commander metadata from source rows', async () => {
+    const brigades = await loadOobBrigades(process.cwd());
+    const byId = new Map(brigades.map((brigade) => [brigade.id, brigade]));
+
+    assert.deepStrictEqual(byId.get('arbih_guards_brigade')?.elite_commander, {
+        name: 'Dževad Rađo',
+        competence: 4,
+        aggressiveness: 3,
+        defensive_skill: 3,
+        origin: 'military',
+    });
+    assert.strictEqual(byId.get('rs_65th_protection_motorized_regiment')?.elite_commander?.name, 'Milomir Savčić');
+    assert.strictEqual(
+        byId.get('rs_65th_protection_motorized_regiment')?.elite_commander?.war_crimes_record?.verdict,
+        'indicted',
+    );
+    assert.strictEqual(byId.get('hvo_1st_guard_abb')?.elite_commander?.name, 'Željko Glasnović');
+
+    assert.strictEqual(
+        byId.get('hrhb_vitezovi_brigade_vitez')?.elite_commander,
+        undefined,
+        'Vitezovi commander metadata remains unset until the regular-brigade vs PPN modeling decision is resolved',
+    );
+});
+
 test('loadOobCorps returns stable order (faction then name) and valid hq_mun', async () => {
     const baseDir = process.cwd();
     const corps = await loadOobCorps(baseDir);

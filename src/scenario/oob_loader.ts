@@ -58,6 +58,8 @@ export interface OobBrigade {
     merged_into_id?: string;
     /** Army-level elite unit, eligible for elite loan system. */
     is_elite?: boolean;
+    /** Historical commander metadata for elite units. Informational/read-model source data. */
+    elite_commander?: OobEliteCommander;
     /** Garrison unit — only defends, never attacks. */
     garrison?: boolean;
     /** Pre-assigned historical decorations (loaded from OOB data). */
@@ -73,6 +75,21 @@ export interface OobBrigade {
     displaced_from?: string;
     /** Override initial location_osid for deployment (e.g. elite units deployed away from home). home_osid unchanged. */
     deployment_osid?: string;
+}
+
+export interface OobEliteCommander {
+    name: string;
+    competence?: number;
+    aggressiveness?: number;
+    defensive_skill?: number;
+    origin?: string;
+    war_crimes_record?: {
+        court?: string;
+        verdict?: string;
+        sentence?: string;
+        charges?: string;
+        summary?: string;
+    };
 }
 
 export interface OobCorps {
@@ -122,6 +139,28 @@ async function loadRegistryMunIds(baseDir: string): Promise<Set<string>> {
 function parseOobBrigadeComposition(value: unknown): BrigadeComposition | undefined {
     if (!isRecord(value)) return undefined;
     return value as Partial<BrigadeComposition> as BrigadeComposition;
+}
+
+function parseOobEliteCommander(value: unknown): OobEliteCommander | undefined {
+    if (!isRecord(value) || typeof value.name !== 'string' || value.name.trim().length === 0) return undefined;
+    const warCrimesRecord = isRecord(value.war_crimes_record)
+        ? {
+            ...(typeof value.war_crimes_record.court === 'string' && value.war_crimes_record.court.trim() && { court: value.war_crimes_record.court.trim() }),
+            ...(typeof value.war_crimes_record.verdict === 'string' && value.war_crimes_record.verdict.trim() && { verdict: value.war_crimes_record.verdict.trim() }),
+            ...(typeof value.war_crimes_record.sentence === 'string' && value.war_crimes_record.sentence.trim() && { sentence: value.war_crimes_record.sentence.trim() }),
+            ...(typeof value.war_crimes_record.charges === 'string' && value.war_crimes_record.charges.trim() && { charges: value.war_crimes_record.charges.trim() }),
+            ...(typeof value.war_crimes_record.summary === 'string' && value.war_crimes_record.summary.trim() && { summary: value.war_crimes_record.summary.trim() }),
+        }
+        : undefined;
+
+    return {
+        name: value.name.trim(),
+        ...(typeof value.competence === 'number' && Number.isFinite(value.competence) && { competence: value.competence }),
+        ...(typeof value.aggressiveness === 'number' && Number.isFinite(value.aggressiveness) && { aggressiveness: value.aggressiveness }),
+        ...(typeof value.defensive_skill === 'number' && Number.isFinite(value.defensive_skill) && { defensive_skill: value.defensive_skill }),
+        ...(typeof value.origin === 'string' && value.origin.trim() && { origin: value.origin.trim() }),
+        ...(warCrimesRecord && Object.keys(warCrimesRecord).length > 0 && { war_crimes_record: warCrimesRecord }),
+    };
 }
 
 function isRecord(x: unknown): x is Record<string, unknown> {
@@ -194,6 +233,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         const available_until = typeof r.available_until === 'number' && Number.isFinite(r.available_until) ? r.available_until : undefined;
         const merged_into_id = typeof r.merged_into_id === 'string' && r.merged_into_id.trim() ? r.merged_into_id.trim() : undefined;
         const is_elite = r.is_elite === true ? true : undefined;
+        const elite_commander = parseOobEliteCommander(r.elite_commander);
         const garrison = r.garrison === true ? true : undefined;
         const historical_decorations: HistoricalDecoration[] | undefined = Array.isArray(r.historical_decorations)
             ? r.historical_decorations.filter((d: unknown): d is Record<string, unknown> =>
@@ -234,6 +274,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
             ...(available_until != null && { available_until }),
             ...(merged_into_id && { merged_into_id }),
             ...(is_elite && { is_elite }),
+            ...(elite_commander && { elite_commander }),
             ...(garrison && { garrison }),
             ...(historical_decorations && historical_decorations.length > 0 && { historical_decorations }),
             ...(initial_officer_quality != null && { initial_officer_quality }),
