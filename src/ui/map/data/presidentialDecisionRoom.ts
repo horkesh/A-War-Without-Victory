@@ -392,7 +392,7 @@ function addReviewCard(state: LoadedGameState, cards: CandidateCard[]): void {
       : t('decisionRoom.card.review.explanation.openWork'),
     sourceOwner: t('decisionRoom.card.review.sourceOwner'),
     sourceLabel: 'Presidential Inbox',
-    actionLabel: 'Open Desk',
+    actionLabel: t('decisionRoom.action.openInbox'),
     evidence,
     navigationTarget: { kind: 'inbox' },
     urgencySort: queue.eventDecisionCount > 0 ? 0 : 10,
@@ -1326,11 +1326,10 @@ function buildAdvanceReadiness(
     usedIds.add(card.id);
   }
 
+  const hasBlockingReadinessItem = eligible.some((card) => card.severity === 'blocking');
   const blockedByExistingSystems = state.playerDecisionSummary
-    ? state.playerDecisionSummary.blockingCount > 0
-    : (state.presidentialReviewQueue?.eventDecisionCount ?? 0) > 0
-      || (state.pendingEventDecisions?.length ?? 0) > 0
-      || (state.pendingParamilitaryRequests?.length ?? 0) > 0;
+    ? state.playerDecisionSummary.blockingCount > 0 || hasBlockingReadinessItem
+    : hasBlockingReadinessItem;
 
   return {
     headline: t(
@@ -1422,7 +1421,7 @@ function describeSourceHandoffTarget(
     return {
       id: 'presidential-inbox',
       label: 'Presidential Inbox',
-      actionLabel: 'Open Desk',
+      actionLabel: t('decisionRoom.action.openInbox'),
     };
   }
   if (target.kind === 'chronicle') {

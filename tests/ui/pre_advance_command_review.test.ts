@@ -184,7 +184,7 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.items[0]).toMatchObject({
       severity: 'blocking',
       category: 'decision',
-      actionLabel: 'Open Desk',
+      actionLabel: 'Open Inbox',
       sourceOwner: 'Presidential review queue',
       navigationTarget: { kind: 'inbox' },
     });

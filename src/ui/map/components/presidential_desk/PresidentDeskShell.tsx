@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import type { InboxItem } from '../../data/inboxItems';
 import { countActionableItems, deriveInboxItems } from '../../data/inboxItems';
 import { derivePresidentialBlockers } from '../../data/presidentialBlockers';
+import { buildPreAdvanceCommandReviewView } from '../../data/preAdvanceCommandReview';
 import type { LoadedGameState } from '../../data/types';
 import { t } from '../../i18n';
 import { turnToDateString } from '../../utils/formatters';
@@ -47,7 +48,8 @@ export function PresidentDeskShell({
   const shellRef = useRef<HTMLElement | null>(null);
   const items = deriveInboxItems(state, osidNameMap);
   const actionableCount = countActionableItems(items);
-  const blocked = derivePresidentialBlockers(state, osidNameMap).length > 0;
+  const advanceReview = buildPreAdvanceCommandReviewView({ state, osidNameMap });
+  const blocked = advanceReview.status === 'blocked' || derivePresidentialBlockers(state, osidNameMap).length > 0;
 
   useEffect(() => {
     if (onClose) shellRef.current?.focus();

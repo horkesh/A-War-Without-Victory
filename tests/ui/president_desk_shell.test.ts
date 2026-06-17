@@ -145,6 +145,32 @@ describe('PresidentDeskShell', () => {
     expect(screen.getByRole('img', { name: 'Cabinet crisis response consequence' }).getAttribute('src')).toContain('consequence_public_pressure');
   });
 
+  it('matches Advance Clearance blocking truth for counter-offer reviews', () => {
+    renderDesk({
+      state: makeState({
+        pendingCounterOffers: [
+          {
+            id: 'HRHB_001',
+            author: 'HRHB',
+            parentOfferId: 'owen_stoltenberg',
+            planId: 'owen_stoltenberg',
+            planName: 'Owen-Stoltenberg Plan',
+            chainDepth: 1,
+            createdTurn: 70,
+            response: 'conditional_accept',
+            proposedSplit: { RBiH: 33, RS: 52, HRHB: 15 },
+            institutionalModel: 'union_3_republics',
+            sourceCitation: 'BB1 p.49',
+            rider: 'withdraw territorial concessions',
+          },
+        ],
+      }),
+    });
+
+    expect(screen.getByText('Blocked')).toBeTruthy();
+    expect(screen.queryByText('Ready')).toBeNull();
+  });
+
   it('routes desk consequence rows to their filed surface', () => {
     const onOpenRecords = vi.fn();
     const onOpenDecisionRecords = vi.fn();

@@ -72,12 +72,13 @@ function statusFor(
 
 function countBlockingDecisions(state: LoadedGameState | null): number {
   if (!state) return 0;
-  if (state.playerDecisionSummary) return state.playerDecisionSummary.blockingCount;
+  const counterOfferCount = state.pendingCounterOffers?.length ?? 0;
+  if (state.playerDecisionSummary) return state.playerDecisionSummary.blockingCount + counterOfferCount;
   const eventDecisionCount = Math.max(
     state.presidentialReviewQueue?.eventDecisionCount ?? 0,
     state.pendingEventDecisions?.length ?? 0,
   );
-  return eventDecisionCount + (state.pendingParamilitaryRequests?.length ?? 0);
+  return eventDecisionCount + (state.pendingParamilitaryRequests?.length ?? 0) + counterOfferCount;
 }
 
 export function formatPreAdvanceGateBlockTitle(view: { blockingDecisionCount: number }): string {
