@@ -9,7 +9,7 @@ import { AccordionHeader } from './AccordionHeader';
 import { toTitleCase } from '../utils/formatters';
 import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName, getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
-import { getFactionArmyCommander, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
+import { getFactionArmyCommander, getSyntheticJnaCommandPresentation, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
 import { formatRank } from '../utils/officerCharacter';
 import { getPlayerFacingFaction, getPlayerVisibleFactions } from '../../shared/playerFacingLabels';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
@@ -403,6 +403,10 @@ export function OOBSidebar() {
                             const commander = loadedGameState
                               ? resolveCorpsCommanderDisplay(corpsId, faction, loadedGameState)
                               : null;
+                            const corpsFormation = corpsFormationById.get(corpsId);
+                            const syntheticCommand = commander?.source === 'synthetic' && corpsFormation && loadedGameState
+                              ? getSyntheticJnaCommandPresentation(corpsFormation, corpsOps, loadedGameState)
+                              : null;
                             return (
                               <CorpsCard
                                 key={corpsId}
@@ -428,8 +432,12 @@ export function OOBSidebar() {
                                 sectorCount={corpsSectors.length}
                                 activeOperationName={activeOp?.display_name}
                                 activeOperationPhase={activeOp?.phase}
-                                commanderName={commander?.name}
-                                commanderActing={commander?.acting}
+                                commanderName={syntheticCommand?.commanderName ?? commander?.name}
+                                commanderActing={syntheticCommand ? false : commander?.acting}
+                                commanderLabel={syntheticCommand ? t('corpsCard.operationCommander') : undefined}
+                                commanderDetail={syntheticCommand ? t('corpsCard.syntheticJnaStaff', {
+                                  operation: syntheticCommand.operationName ?? t('corpsCard.syntheticJnaOperationFallback'),
+                                }) : undefined}
                               />
                             );
                           })}

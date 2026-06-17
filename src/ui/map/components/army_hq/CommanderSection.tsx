@@ -8,8 +8,8 @@
  * disposition badges (acting / deferred-compliance / low-loyalty) so the president
  * can READ the corps command picture; the reassign / dismiss ACTIONS moved out.
  */
-import type { FormationView, LoadedGameState } from '../../data/types';
-import { getFormationCommander, resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
+import type { FormationView, LoadedGameState, OperationView } from '../../data/types';
+import { getFormationCommander, getSyntheticJnaCommandPresentation, resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
 import { CollapsibleSection } from './CollapsibleSection';
 import { t } from '../../i18n';
@@ -17,11 +17,15 @@ import { t } from '../../i18n';
 interface CommanderSectionProps {
     corps: FormationView;
     gameState: LoadedGameState;
+    operations?: OperationView[];
 }
 
-export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
+export function CommanderSection({ corps, gameState, operations }: CommanderSectionProps) {
     const commander = getFormationCommander(corps, gameState);
     const commanderDisplay = resolveCorpsCommanderDisplay(corps.id, corps.faction, gameState);
+    const syntheticCommand = commanderDisplay?.source === 'synthetic'
+        ? getSyntheticJnaCommandPresentation(corps, operations ?? gameState.operations, gameState)
+        : null;
     const isActing = commander?.acting_commander;
 
     return (
@@ -44,6 +48,25 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
                         </div>
                     )}
                     <OfficerProfile officer={commander} label="" compact={false} />
+                </div>
+            ) : syntheticCommand ? (
+                <div className="space-y-3">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-amber-400 bg-amber-500/5 px-3 py-1.5 border border-amber-500/20">
+                        {t('commanderSection.syntheticJnaStaff')}
+                    </div>
+                    <div className="text-[12px] text-text-primary font-mono p-3 bg-panel-bg border border-panel-border">
+                        <div className="text-[9px] uppercase tracking-widest text-text-secondary mb-1">
+                            {t('commanderSection.operationCommander')}
+                        </div>
+                        <div className="font-semibold">
+                            {syntheticCommand.commanderName ?? t('commanderSection.syntheticJnaStaffFallback')}
+                        </div>
+                        {syntheticCommand.operationName && (
+                            <div className="mt-1 text-[10px] text-text-secondary">
+                                {syntheticCommand.operationName}
+                            </div>
+                        )}
+                    </div>
                 </div>
             ) : commanderDisplay ? (
                 <div className="space-y-4">

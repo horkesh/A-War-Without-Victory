@@ -1,4 +1,4 @@
-import type { LoadedGameState, FormationView, NamedOfficerView } from '../data/types';
+import type { LoadedGameState, FormationView, NamedOfficerView, OperationView } from '../data/types';
 import { getAssignedCommandLabel } from '../../shared/playerFacingLabels';
 import { strictCompare } from '../../../state/validateGameState';
 
@@ -11,6 +11,13 @@ export interface CommanderDisplay {
 const SYNTHETIC_COMMAND_LABELS: Record<string, string> = {
     jna_herzegovina_command: 'JNA forward command staff',
 };
+
+const SYNTHETIC_JNA_COMMAND_IDS = new Set(Object.keys(SYNTHETIC_COMMAND_LABELS));
+
+export interface SyntheticJnaCommandPresentation {
+    commanderName?: string;
+    operationName?: string;
+}
 
 const POOL_TIER_ORDER: Record<string, number> = {
     starter: 0,
@@ -77,6 +84,49 @@ export function resolveCorpsCommanderDisplay(
 
     if (!openingCandidate) return null;
     return { name: openingCandidate.name, acting: true, source: 'opening_read_model' };
+}
+
+export function isSyntheticJnaCommand(formation: Pick<FormationView, 'id'> | string): boolean {
+    const id = typeof formation === 'string' ? formation : formation.id;
+    return SYNTHETIC_JNA_COMMAND_IDS.has(id);
+}
+
+function compareOperationForPresentation(a: OperationView, b: OperationView): number {
+    const phaseRank: Record<OperationView['phase'], number> = { execution: 0, planning: 1, recovery: 2 };
+    const phaseDelta = phaseRank[a.phase] - phaseRank[b.phase];
+    if (phaseDelta !== 0) return phaseDelta;
+    const turnDelta = (a.started_turn ?? 0) - (b.started_turn ?? 0);
+    if (turnDelta !== 0) return turnDelta;
+    return strictCompare(a.display_name || a.name, b.display_name || b.name);
+}
+
+/**
+ * Synthetic JNA commands are operation containers, not standing corps billets.
+ * This returns presentation detail without mutating command assignment truth.
+ */
+export function getSyntheticJnaCommandPresentation(
+    formation: FormationView,
+    operations: readonly OperationView[] | undefined,
+    loadedGameState: LoadedGameState,
+): SyntheticJnaCommandPresentation | null {
+    if (!isSyntheticJnaCommand(formation)) return null;
+
+    const operation = [...(operations ?? [])]
+        .filter((op) => op.corps_id === formation.id)
+        .sort(compareOperationForPresentation)[0];
+    if (!operation) return {};
+
+    const commander = operation.commander_officer_id
+        ? loadedGameState.namedOfficerData?.find((officer) => officer.id === operation.commander_officer_id)
+        : undefined;
+    const commanderName = commander && isOfficerAvailableForTurn(loadedGameState, commander)
+        ? commander.name
+        : (operation as OperationView & { commander_name?: string }).commander_name;
+
+    return {
+        commanderName,
+        operationName: operation.display_name || operation.name,
+    };
 }
 
 /**

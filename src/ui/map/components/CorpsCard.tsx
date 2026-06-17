@@ -39,6 +39,8 @@ export interface CorpsCardProps {
   onMouseLeave?: () => void;
   commanderName?: string;
   commanderActing?: boolean;
+  commanderLabel?: string;
+  commanderDetail?: string;
   /** Number of front sectors assigned to this corps. */
   sectorCount?: number;
   /** Active operation name (if any). */
@@ -85,6 +87,8 @@ export function CorpsCard({
   onMouseLeave,
   commanderName,
   commanderActing,
+  commanderLabel,
+  commanderDetail,
   sectorCount,
   activeOperationName,
   activeOperationPhase,
@@ -152,8 +156,11 @@ export function CorpsCard({
       >
         {commanderName && (
           <div className="px-3 py-1 text-[10px] bg-panel-bg border-b border-panel-border/50 text-text-secondary">
-            <div>{t('corpsCard.commanderColon')}</div>
+            <div>{commanderLabel ? `${commanderLabel}:` : t('corpsCard.commanderColon')}</div>
             <div className="text-text-primary font-semibold">{commanderName}{commanderActing ? t('corpsCard.actingSuffix') : ''}</div>
+            {commanderDetail && (
+              <div className="mt-0.5 text-[9px] uppercase tracking-[0.08em] text-amber-400/80">{commanderDetail}</div>
+            )}
           </div>
         )}
 
@@ -236,11 +243,16 @@ export function CorpsCard({
       <div className="px-3 py-2 space-y-2">
         {/* Commander profile */}
         <div>
-          <div className="text-[9px] uppercase tracking-wider text-text-secondary font-bold mb-1">{t('corpsCard.commander')}</div>
+          <div className="text-[9px] uppercase tracking-wider text-text-secondary font-bold mb-1">{commanderLabel ?? t('corpsCard.commander')}</div>
           {commanderName ? (
-            <div className="text-[11px] text-text-primary font-semibold">
-              {commanderName}{commanderActing ? t('corpsCard.actingSuffix') : ''}
-            </div>
+            <>
+              <div className="text-[11px] text-text-primary font-semibold">
+                {commanderName}{commanderActing ? t('corpsCard.actingSuffix') : ''}
+              </div>
+              {commanderDetail && (
+                <div className="mt-0.5 text-[10px] text-amber-400/80">{commanderDetail}</div>
+              )}
+            </>
           ) : (
             <div className="text-[11px] text-amber-500/60 italic">{t('corpsCard.unassigned')}</div>
           )}

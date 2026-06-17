@@ -8,7 +8,7 @@ import type { FormationView, CorpsFrontSectorView, OperationView, LoadedGameStat
 import type { TurnBattle } from '../../../../state/turn_summary';
 import { formatCorpsDisplayName } from '../../utils/formatters';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
-import { getFormationCommander, resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
+import { getFormationCommander, getSyntheticJnaCommandPresentation, resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
 import { Icon } from '../icons/Icon';
 import { CommanderSection } from './CommanderSection';
 import { CommandRelationshipSection } from './CommandRelationshipSection';
@@ -80,6 +80,9 @@ export function ArmyHQCorpsCard({
         const eff = aggregateEffectiveness(brigades);
         const commander = getFormationCommander(corps, gameState);
         const commanderDisplay = resolveCorpsCommanderDisplay(corps.id, corps.faction, gameState);
+        const syntheticCommand = commanderDisplay?.source === 'synthetic'
+            ? getSyntheticJnaCommandPresentation(corps, operations, gameState)
+            : null;
         const stance = corps.corpsStance ?? 'balanced';
         const activeOp = operations.find((op) => op.phase === 'execution');
 
@@ -120,12 +123,13 @@ export function ArmyHQCorpsCard({
         const recoveryForecast = corps.recoveryForecast ?? null;
         // Delegation Visibility Wave 1: standing delegation summary from active ops
         const delegationSummary = deriveCorpsDelegationSummary(operations);
-        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, commanderDisplay, stance, activeOp, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, delegationSummary };
+        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, commanderDisplay, syntheticCommand, stance, activeOp, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, delegationSummary };
     }, [corps, brigades, sectors, operations, factionBattles, gameState]);
 
     const displayName = formatCorpsDisplayName(corps.name, corps.id);
     const isCritical = data.avgCohesion < COHESION_CRITICAL;
     const noCommander = !data.commanderDisplay;
+    const displayCommanderName = data.syntheticCommand?.commanderName ?? data.commanderDisplay?.name;
     const stanceClass = STANCE_COLORS[data.stance] ?? STANCE_COLORS.balanced;
     const gradeColor = GRADE_COLORS[data.eff.grade] ?? 'text-text-secondary';
 
@@ -184,10 +188,11 @@ export function ArmyHQCorpsCard({
 
                 {/* Line 2: Commander + grade */}
                 <div className="text-[12px] text-text-secondary mt-1.5 flex items-center gap-2.5 font-mono">
-                    {data.commanderDisplay ? (
+                    {displayCommanderName ? (
                         <span>
-                            {data.commanderDisplay.name}
-                            {data.commanderDisplay.acting && (
+                            {data.syntheticCommand ? `${t('armyHqCorps.operationCommander')}: ` : ''}
+                            {displayCommanderName}
+                            {!data.syntheticCommand && data.commanderDisplay?.acting && (
                                 <span className="text-amber-400/80"> ({t('commanderSection.actingCommander')})</span>
                             )}
                         </span>
@@ -370,7 +375,7 @@ export function ArmyHQCorpsCard({
                 />
                 {/* Corps Situation Assessment — Commander Explanation Surfaces Wave 1 */}
                 <CorpsSituationSection assessment={corps.situationAssessment} />
-                <CommanderSection corps={corps} gameState={gameState} />
+                <CommanderSection corps={corps} gameState={gameState} operations={operations} />
                 <SectorsSection corpsId={corps.id} sectors={sectors} factionBattles={factionBattles} />
                 <OperationsSection corpsId={corps.id} operations={operations} gameState={gameState} commandStrain={data.strain} commandStrainLabel={data.strainLabel} />
                 <OrbatSection corpsId={corps.id} brigades={brigades} />
