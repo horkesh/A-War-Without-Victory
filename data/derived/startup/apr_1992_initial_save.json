@@ -39919,6 +39919,7 @@
       "op:zvornik:sapna": false,
       "op:zvornik:zvornik": false
     },
+    "control_events": [],
     "initial_political_controllers": {
       "op:banja_luka:banja_luka_2": "RS",
       "op:banja_luka:dragocaj": "HRHB",

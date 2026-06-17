@@ -2,7 +2,7 @@
 
 **Purpose:** Single entrypoint for implementation reports, handovers, convenes, investigations, and audits. Use consolidated summaries for quick reference; use individual reports for detail.
 
-**2026-06-17 compact entrypoint:** for current work, start with [CONSOLIDATED_IMPLEMENTED.md](CONSOLIDATED_IMPLEMENTED.md), [CONSOLIDATED_BACKLOG.md](CONSOLIDATED_BACKLOG.md), [CONSOLIDATED_LESSONS_LEARNED.md](CONSOLIDATED_LESSONS_LEARNED.md), and [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md). The current D2-entry contract remains 188w 658/712, anchors 30/30, schema v36, required/blocking `engine-health-188w`, and 40w structural-fingerprint v2 `f282883abbab76cf`; the latest startup-truth slice moves only startup construction plus the generated April 1992 startup snapshot. The long per-report listings below are historical lookup material, not the active dispatch surface.
+**2026-06-17 compact entrypoint:** for current work, start with [CONSOLIDATED_IMPLEMENTED.md](CONSOLIDATED_IMPLEMENTED.md), [CONSOLIDATED_BACKLOG.md](CONSOLIDATED_BACKLOG.md), [CONSOLIDATED_LESSONS_LEARNED.md](CONSOLIDATED_LESSONS_LEARNED.md), and [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md). The current D2-entry contract remains 188w 658/712, anchors 30/30, schema v36, required/blocking `engine-health-188w`, and 40w structural-fingerprint v2 `f282883abbab76cf`; the latest startup-truth slice moves startup construction, the generated April 1992 startup snapshot, and golden baseline manifest hashes for startup commander/history read-model truth. The long per-report listings below are historical lookup material, not the active dispatch surface.
 
 **Last reorg:** 2026-03-01 (report audit: moved 10 completed + 6 archived to implemented/, updated indices).
 

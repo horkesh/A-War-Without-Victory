@@ -16,7 +16,8 @@ This slice fixes both at scenario birth and rebuilds `data/derived/startup/apr_1
 - Kept later official commanders such as Milenko Zivanovic, Enver Hadzihasanovic, and Arif Pasalic absent at turn 0.
 - Extended acting-commander succession so startup acting commanders yield when later home commanders become available.
 - Added a startup setup-control mode to `spawnJnaPhantomBrigades`, preserving default turn-pipeline combat history while suppressing false startup combat events.
-- Refreshed `initial_political_controllers` after setup-control flips so the baked birth map and initial map agree.
+- Preserved `political.control_events` as an empty persisted bus at turn 0, then refreshed `initial_political_controllers` after setup-control flips so the baked birth map and initial map agree.
+- Re-blessed the golden baseline manifest for the resulting startup commander/history read-model movement.
 
 ## Verification
 
@@ -28,6 +29,8 @@ This slice fixes both at scenario birth and rebuilds `data/derived/startup/apr_1
 - `npm.cmd run desktop:startup-snapshot:check` passed.
 - `npm.cmd run qa:player-journeys` -> 11 files / 102 tests passed.
 - `npm.cmd run ci:structural-fingerprint:check` passed with structural fingerprint `f282883abbab76cf`.
+- `node_modules\.bin\vitest.cmd run tests\tg_schema_freeze.test.ts tests\startup_snapshot_contract.test.ts --pool=forks --reporter=dot` -> 2 files / 16 tests passed after preserving the empty `control_events` bus.
+- `npm.cmd run test:baselines` passed after the deliberate manifest re-bless.
 - Live browser on `http://127.0.0.1:4197/tactical_map.html?dev=1` verified RS/RBiH war-start splash, foundational desk route, Army HQ readiness, Drina/3rd/4th Corps acting commanders, and no turn-0 backdating of later official commanders.
 
 ## Residuals

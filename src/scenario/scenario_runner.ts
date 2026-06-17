@@ -1857,6 +1857,7 @@ export async function buildScenarioStartupState(
             seatInitialCorpsCommanders(state);
         }
         spawnJnaPhantomBrigades(state, { emitCaptureEvents: false });
+        state.political.control_events ??= [];
         state.political.initial_political_controllers = { ...state.political.political_controllers };
         initializeCorpsCommand(state);
         // Synthesis §3 E-B3: seed initial per-corps strategic_depth at scenario
