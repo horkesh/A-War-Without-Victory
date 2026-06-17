@@ -22,6 +22,7 @@ Nietzsche's map-data sidecar traced the live Deck.gl `Skipping ... polygon with 
 - Operational contact graph edge count moved from 2,047 to 2,130 because the graph is regenerated from the cleaned geometry.
 - The 40w structural fingerprint was deliberately re-blessed to `dbd82a4719719c55` after the cleaned contact graph plus final-sector seal hardening changed structural fields to HRHB 94 / RBiH 258 / RS 382, 122 control flips, and 30/30 anchors.
 - The scenario baseline manifest was also deliberately refreshed because the cleaned contact graph and final-sector seal hardening change hashed 4w/52w scenario artifacts. A mapped 40w latest-save refresh was run; `data/derived/latest_run_final_save.json` now carries the contiguous final-sector truth.
+- GitHub's Linux Event CI exposed one platform-sensitive baseline hash in `apr1992_52w/control_delta.json`. The simulation output was stable, but report ordering used `localeCompare`; replacing it with `strictCompare` made the control-delta report hash platform-neutral. The affected baseline hash is now `9950073118957a122a91f111d8bbcdb192e724ed593858a53a965a13b9a73c55`.
 
 ## Verification
 
@@ -34,6 +35,7 @@ Nietzsche's map-data sidecar traced the live Deck.gl `Skipping ... polygon with 
 - `npm.cmd run sim:scenario:run:40w` refreshed `data/derived/latest_run_final_save.json`; `npx.cmd vitest run tests\real_save_sector_truth_contracts.test.ts --pool=forks --reporter=dot` passed 5/5.
 - `npm.cmd run ci:structural-fingerprint:update` refreshed the expected 40w fingerprint to `dbd82a4719719c55`; `npm.cmd run ci:structural-fingerprint:check` must pass before merge.
 - `UPDATE_BASELINES=1 npm.cmd run test:baselines`; `npm.cmd run test:baselines`.
+- After the first GitHub push, Event CI failed on Linux with `Baseline mismatch: scenario=apr1992_52w artifact=control_delta.json`; after the strict-order fix, local `npm.cmd run test:baselines` passed with the Linux hash.
 
 ## Scope
 

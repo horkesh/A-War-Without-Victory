@@ -98,7 +98,7 @@ function nullLast(a: string | null, b: string | null): number {
     if (a === null && b === null) return 0;
     if (a === null) return 1;
     if (b === null) return -1;
-    return a.localeCompare(b);
+    return strictCompare(a, b);
 }
 
 /**
@@ -130,7 +130,7 @@ export function computeControlDelta(
     flips.sort((x, y) => {
         const cm = nullLast(x.municipality_id, y.municipality_id);
         if (cm !== 0) return cm;
-        return x.settlement_id.localeCompare(y.settlement_id);
+        return strictCompare(x.settlement_id, y.settlement_id);
     });
 
     const dirCount = new Map<string, number>();
