@@ -20625,3 +20625,9 @@ Verification: `tests/desktop_campaign_start_contract.test.ts` passed 7/7; final-
 Closed the actionable Codex/GitHub review finding on the RS Six Strategic Goals guard. The §6 test now requires distinct term sets for each of the six goals (`Posavina` + `corridor`, `Una` + `Neretva`, `division` + `Sarajevo`, etc.) instead of accepting ambiguous single terms such as `corridor` or `Una` that could pass after one goal was partially dropped from the narrative.
 
 Verification: `npx.cmd vitest run tests\rs_six_strategic_goals_foundational.test.ts --pool=forks --reporter=dot` passed 9/9, and `git diff --check` passed. Scope: test/canon guard only; no event content, simulation behavior, scenario data, save schema, generated artifacts, calibration floor, golden baselines, randomness, timestamps, or persisted output ordering changed.
+
+## 2026-06-17 - Vitezovi elite commander source-review allowlist
+
+Added an executable OOB metadata contract for the HVO Vitez/Vitezovi elite commander residual. The contract requires every elite brigade without an `elite_commander` to be explicitly allowlisted and documents `hrhb_vitezovi_brigade_vitez` as the only current exception pending source/model review, because BB2 distinguishes the company-sized PPN Vitezovi under Darko Kraljevic from the local Vitez brigade under Mario Cerkez. The test also pins the current localization/designation tie so future source-review changes must update data and labels together.
+
+No source OOB data, scenario data, save schema, live command UI, or postwar legal-outcome presentation changed. The knowledge ledger records the time-safe rule: do not assign Darko Kraljevic or Mario Cerkez to the current conflated row until the model decides whether it represents the PPN, the Vitez brigade, or a split. Determinism/scope: test/docs-only source-review guard; no simulation logic, generated artifacts, calibration floor, or baseline outputs changed.
