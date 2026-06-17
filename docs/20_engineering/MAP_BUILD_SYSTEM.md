@@ -64,6 +64,8 @@ For full pipeline and build-process details, see [docs/_old/MAP_BUILD_SYSTEM.md]
 - **OSID-first derive (Phase 2):** `npm run map:derive:operational-osid-first` — reads existing operational_settlements.geojson as OSID-native source; derives canonical_to_operational_map via point-in-polygon (canonical centroids → containing OSID); derives contact graph from OSID geometry (booleanIntersects). No SID geometry used to *build* boundaries. Use after one legacy run to bootstrap, or when OSID GeoJSON is produced by Settlement Merger. Plan: [OSID_AS_BASE_LAYER_PHASE2_IMPLEMENTATION_PLAN.md](../30_planning/OSID_AS_BASE_LAYER_PHASE2_IMPLEMENTATION_PLAN.md).
 - **Operational initial master:** `npm run map:derive:operational-initial-master` — builds `data/derived/operational/operational_initial_master.json` from `data/source/settlements_initial_master.json` + `canonical_to_operational_map.json` (one row per OSID; controller/status/stability). Used by dev runner and political control init when settlement graph is OSID-keyed (712 entries, after 2026-03-21 micro-OSID merge). **Re-run after any OSID merge** so master matches operational_settlements.geojson. See [20260303_AREA_WEIGHTED_TERRITORY_AND_DEGENERATE_MERGE.md](../40_reports/implemented/20260303_AREA_WEIGHTED_TERRITORY_AND_DEGENERATE_MERGE.md).
 
+- **Operational geometry validation:** `npm run map:validate:operational-geometry` validates `operational_settlements.geojson` for finite WGS84 coordinates, closed polygon rings, at least three unique ring positions, and non-zero signed ring area. Run after operational GeoJSON refreshes and before map/browser smoke tests that ingest OSID polygons.
+
 ---
 
 ## Map asset deprecation policy (tactical map canonical)
