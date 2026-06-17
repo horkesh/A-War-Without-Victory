@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "fingerprint": "4c5ceebe638bec19",
+  "fingerprint": "dbd82a4719719c55",
   "fields": {
     "schema_version": 2,
     "scenario_id": "apr1992_definitive_40w",
@@ -8,8 +8,8 @@
     "final_turn": 40,
     "control_counts": {
       "HRHB": 94,
-      "RBiH": 259,
-      "RS": 381
+      "RBiH": 258,
+      "RS": 382
     },
     "control_flips": [
       {
@@ -241,6 +241,12 @@
         "to": "RS"
       },
       {
+        "settlement_id": "op:foca:donje_zesce",
+        "municipality_id": "foca",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
         "settlement_id": "op:foca:patkovina",
         "municipality_id": "foca",
         "from": "RBiH",
@@ -391,6 +397,12 @@
         "to": "RBiH"
       },
       {
+        "settlement_id": "op:kladanj:staric_2",
+        "municipality_id": "kladanj",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
         "settlement_id": "op:kljuc:hadzici",
         "municipality_id": "kljuc",
         "from": "RBiH",
@@ -490,12 +502,6 @@
         "settlement_id": "op:odzak:potocani_2",
         "municipality_id": "odzak",
         "from": "HRHB",
-        "to": "RS"
-      },
-      {
-        "settlement_id": "op:olovo:gurdici_2",
-        "municipality_id": "olovo",
-        "from": "RBiH",
         "to": "RS"
       },
       {

@@ -11,6 +11,7 @@ Nietzsche's map-data sidecar traced the live Deck.gl `Skipping ... polygon with 
 - Kept committed generator outputs reviewable by writing operational GeoJSON/contact graph JSON with stable indentation in both operational derivation scripts.
 - Regenerated `operational_settlements.geojson`, `operational_contact_graph.json`, and `canonical_to_operational_map.json`.
 - Added `tests/operational_settlement_geometry_integrity.test.ts`, which fails if any committed operational settlement polygon ring is non-finite, unclosed, too short, or degenerate.
+- Added a post-side-coverage final sector geometry barrier in `buildCorpsFrontSectors(...)`, because the cleaned graph exposed a late final-save writer that could append edge coverage after the previous contiguity barriers.
 
 ## Artifact Delta
 
@@ -19,7 +20,8 @@ Nietzsche's map-data sidecar traced the live Deck.gl `Skipping ... polygon with 
 - Invalid polygon parts dropped from 27 to 0.
 - MultiPolygon feature count dropped from 67 to 48 after invalid secondary parts were removed.
 - Operational contact graph edge count moved from 2,047 to 2,130 because the graph is regenerated from the cleaned geometry.
-- The 40w structural fingerprint was deliberately re-blessed to `4c5ceebe638bec19` after the cleaned contact graph changed structural fields to HRHB 94 / RBiH 259 / RS 381, 121 control flips, and 30/30 anchors.
+- The 40w structural fingerprint was deliberately re-blessed to `dbd82a4719719c55` after the cleaned contact graph plus final-sector seal hardening changed structural fields to HRHB 94 / RBiH 258 / RS 382, 122 control flips, and 30/30 anchors.
+- The scenario baseline manifest was also deliberately refreshed because the cleaned contact graph and final-sector seal hardening change hashed 4w/52w scenario artifacts. A mapped 40w latest-save refresh was run; `data/derived/latest_run_final_save.json` now carries the contiguous final-sector truth.
 
 ## Verification
 
@@ -29,8 +31,10 @@ Nietzsche's map-data sidecar traced the live Deck.gl `Skipping ... polygon with 
 - `npx.cmd vitest run tests\operational_contact_graph_shared_border_precision.test.ts tests\operational_data_osid.test.ts tests\integration_run_diagnostics.test.ts --pool=forks --reporter=dot` -> 3 files / 19 tests passed.
 - `npm.cmd run typecheck` passed.
 - Live browser smoke on `http://127.0.0.1:4201/tactical_map.html?dev=1` started an RS campaign, mounted map canvases, and produced no invalid-coordinate overlay warnings, page errors, or console errors.
-- `npm.cmd run ci:structural-fingerprint:update` refreshed the expected 40w fingerprint to `4c5ceebe638bec19`; `npm.cmd run ci:structural-fingerprint:check` must pass before merge.
+- `npm.cmd run sim:scenario:run:40w` refreshed `data/derived/latest_run_final_save.json`; `npx.cmd vitest run tests\real_save_sector_truth_contracts.test.ts --pool=forks --reporter=dot` passed 5/5.
+- `npm.cmd run ci:structural-fingerprint:update` refreshed the expected 40w fingerprint to `dbd82a4719719c55`; `npm.cmd run ci:structural-fingerprint:check` must pass before merge.
+- `UPDATE_BASELINES=1 npm.cmd run test:baselines`; `npm.cmd run test:baselines`.
 
 ## Scope
 
-Map-data generation and committed operational artifacts only. No save schema, startup snapshot, 188w floor, packaging artifact, or gameplay rule changed. The 40w structural fingerprint moved because the cleaned operational contact graph changes map-driven 40w territorial structure.
+Map-data generation, committed operational artifacts, and final-sector serialization hardening only. No save schema, startup snapshot, 188w floor, packaging artifact, or new gameplay rule changed. The 40w structural fingerprint moved because the cleaned operational contact graph and stricter final-sector seal change map-driven 40w territorial/sector structure.

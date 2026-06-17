@@ -597,6 +597,13 @@ export function buildCorpsFrontSectors(
         _perfTime('pruneGhostArtifactSectors:post-side-coverage', () => pruneGhostArtifactSectors(result));
         _perfTime('applyFinalSectorOwnerTruthPass:post-side-coverage', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass }));
     }
+    // Side-coverage recovery may append a missing front edge to an otherwise
+    // canonical recipient after the earlier geometry barriers have already run.
+    // Re-split once more before assignment sync so the serialized final save
+    // cannot contain a multi-piece sector packet.
+    _perfTime('enforceFinalSectorGeometryInvariants:post-side-coverage', () => enforceFinalSectorGeometryInvariants(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, formations));
+    _perfTime('pruneGhostArtifactSectors:post-side-coverage-geometry', () => pruneGhostArtifactSectors(result));
+    _perfTime('applyFinalSectorOwnerTruthPass:post-side-coverage-geometry', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass }));
     _perfTime('annotateUnstaffedFrontSectors', () => annotateUnstaffedFrontSectors(result, state, formations, adjacency, spatial));
     _perfTime('recomputeMetricsByFaction:2', () => recomputeMetricsByFaction(Object.values(result), formations, state));
 
