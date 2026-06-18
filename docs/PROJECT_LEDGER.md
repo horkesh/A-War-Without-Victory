@@ -1,11 +1,23 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-18] test(ui): sync Codex integration expectations with player-safe labels
+
+**Type:** CI follow-up and UI/player-copy test-contract hardening.
+
+**Fix:** Followed the red GitHub Baseline Regression after the Codex/replay player-safe label commit. The runtime behavior was correct: dynamic Codex Cost Ledger tokens now render `VRS`, `ARBiH`, and `HVO` labels plus humanized annotation tags. The older broad vocab integration test still pinned raw bracket labels such as `[RS]`, `[HRHB]`, `[RBiH]`, and snake_case annotation tags, so the fast-suite gate failed despite focused resolver coverage passing. Updated the integration assertions to the player-facing labels while preserving the same finding/source rendering checks.
+
+**Verification:** `tests/ui/codex_essay_vocab_integration.test.ts` passed 43/43 after failing 11 assertions on the old raw-label expectations. Combined affected UI/read-model pack passed 7 files / 162 tests. Full fast Vitest slice passed 1065 files / 10021 tests with 3 files skipped. Typecheck passed and `git diff --check` passed.
+
+**Scope/determinism:** Test-contract and docs only; no runtime behavior, simulation logic, scenario data, save schema, serialization, generated artifacts, calibration floor, golden baselines, or packaged installer artifact changed.
+
+---
+
 ## [2026-06-18] fix(ui): label Records reserve reasons and sitrep operation copy
 
 **Type:** UI/read-model player-copy hardening.
 
-**Fix:** Closed two P2 raw-copy leaks from the Pyrrhic UI sweep. Army HQ Records reserve consequence details now label enum-like reserve reasons such as `defensive_gap` before rendering and suppress unknown identifier-like reasons behind neutral fallback copy. Operational sitrep active-operation summaries now render readable operation, phase, and calendar-date copy instead of `Op: ... | Phase: ... (since T...)`, and front labels now use the established OSID humanizer rather than a local ad hoc `op:` formatter. Report: `docs/40_reports/implemented/20260618_RECORDS_SITREP_PLAYER_SAFE_LABELS.md`.
+**Fix:** Closed two P2 raw-copy leaks from the Pyrrhic UI sweep. Army HQ Records reserve consequence details now label enum-like reserve reasons such as `defensive_gap` before rendering and suppress unknown identifier-like reasons behind neutral fallback copy. Operational sitrep active-operation summaries now render readable operation, phase, and deterministic calendar-date copy instead of `Op: ... | Phase: ... (since T...)`, and front labels now use the established OSID humanizer rather than a local ad hoc `op:` formatter. The full fast-suite pre-push check caught and fixed the initial `new Date()` determinism violation in that formatter plus a stale warroom visibility assertion for the new humanized OSID label order. Report: `docs/40_reports/implemented/20260618_RECORDS_SITREP_PLAYER_SAFE_LABELS.md`.
 
-**Verification:** Focused decision-consequence test passed 15/15. Combined decision-consequence/sitrep pack passed 2 files / 18 tests. Typecheck passed and `git diff --check` passed before commit.
+**Verification:** Focused decision-consequence test passed 15/15. Combined decision-consequence/sitrep pack passed 2 files / 18 tests. Determinism/warroom/sitrep focused pack passed 3 files / 20 tests after the first full fast-suite attempt exposed those stale checks. Full fast Vitest slice passed 1065 files / 10021 tests with 3 files skipped. Typecheck passed and `git diff --check` passed before commit.
 
 **Scope/determinism:** UI/read-model presentation only; no simulation logic, scenario data, save schema, serialization, generated artifacts, calibration floor, golden baselines, or packaged installer artifact changed.
 

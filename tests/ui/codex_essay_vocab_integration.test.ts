@@ -218,7 +218,7 @@ describe('v0.9.1 vocab - authored findings breadth wave', () => {
         });
 
         const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
-        expect(dyn.some(p => p.text.includes('HRHB war-crimes record [HRHB]'))).toBe(true);
+        expect(dyn.some(p => p.text.includes('HRHB war-crimes record [HVO]'))).toBe(true);
         expect(dyn.some(p => p.text.includes('Sensitive History Design Gate'))).toBe(true);
     });
 
@@ -236,7 +236,7 @@ describe('v0.9.1 vocab - authored findings breadth wave', () => {
         });
 
         const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
-        expect(dyn.some(p => p.text.includes('HRHB displacement record [HRHB]'))).toBe(true);
+        expect(dyn.some(p => p.text.includes('HRHB displacement record [HVO]'))).toBe(true);
         expect(dyn.some(p => p.text.includes('AWWV displacement ledger'))).toBe(true);
     });
 });
@@ -288,7 +288,7 @@ describe('v0.9.1 vocab - late-war findings breadth wave', () => {
         });
 
         const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
-        expect(dyn.some(p => p.text.includes('Zepa safe area collapse [RS]'))).toBe(true);
+        expect(dyn.some(p => p.text.includes('Zepa safe area collapse [VRS]'))).toBe(true);
         expect(dyn.some(p => p.text.includes('ICTY Tolimir'))).toBe(true);
     });
 
@@ -408,11 +408,11 @@ describe('v0.9.1 vocab - humanitarian/diplomatic findings breadth wave', () => {
             resolveCodexEssay(grabovicaEssay, { firedEventIds: new Set(['grabovica_uzdol_massacres_1993']), gameOver: true, costLedger }),
         ].flatMap(r => r.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text));
 
-        expect(rendered.some(text => text.includes('RS war-crimes record [RS]'))).toBe(true);
+        expect(rendered.some(text => text.includes('RS war-crimes record [VRS]'))).toBe(true);
         expect(rendered.some(text => text.includes('Civilian displacement record: The ledger records 2,400,000'))).toBe(true);
-        expect(rendered.some(text => text.includes('HRHB war-crimes record [HRHB]'))).toBe(true);
+        expect(rendered.some(text => text.includes('HRHB war-crimes record [HVO]'))).toBe(true);
         expect(rendered.some(text => text.includes('Human cost record: The ledger records 56,000'))).toBe(true);
-        expect(rendered.some(text => text.includes('RBiH war-crimes record [RBiH]'))).toBe(true);
+        expect(rendered.some(text => text.includes('RBiH war-crimes record [ARBiH]'))).toBe(true);
     });
 
     it('renders Dayton talks milestone timing from the existing milestone row contract', () => {
@@ -515,7 +515,7 @@ describe('v0.9.1 vocab - late-war humanitarian memory breadth wave', () => {
         });
 
         const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
-        expect(dyn.some(p => p.text.includes('HRHB war-crimes record [HRHB]'))).toBe(true);
+        expect(dyn.some(p => p.text.includes('HRHB war-crimes record [HVO]'))).toBe(true);
         expect(dyn.some(p => p.text.includes('ICTY Prlic'))).toBe(true);
     });
 });
@@ -583,9 +583,9 @@ describe('v0.9.1 vocab - founding constraint findings breadth wave', () => {
             resolveCodexEssay(corridorEssay, { firedEventIds: new Set(['operation_corridor_1992']), gameOver: true, costLedger }),
         ].flatMap(r => r.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text));
 
-        expect(rendered.filter(text => text.includes('RS war-crimes record [RS]')).length).toBe(2);
-        expect(rendered.filter(text => text.includes('HRHB war-crimes record [HRHB]')).length).toBe(1);
-        expect(rendered.some(text => text.includes('HRHB war-crimes record [HRHB]') && text.includes('RS capital records'))).toBe(false);
+        expect(rendered.filter(text => text.includes('RS war-crimes record [VRS]')).length).toBe(2);
+        expect(rendered.filter(text => text.includes('HRHB war-crimes record [HVO]')).length).toBe(1);
+        expect(rendered.some(text => text.includes('HRHB war-crimes record [HVO]') && text.includes('RS capital records'))).toBe(false);
     });
 
     it('renders human-cost findings into the arms embargo essay', () => {
@@ -667,7 +667,7 @@ describe('v0.9.1 vocab — Cost Ledger findings in Codex essays', () => {
         };
         const resolved = resolveCodexEssay(srebrenicaEssay, ctx);
         const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
-        expect(dyn.some(p => p.text.includes('Srebrenica genocide [RS]'))).toBe(true);
+        expect(dyn.some(p => p.text.includes('Srebrenica genocide [VRS]'))).toBe(true);
         expect(dyn.some(p => p.text.includes('ICJ Bosnia v. Serbia'))).toBe(true);
     });
 
@@ -928,7 +928,7 @@ describe('v0.9.1 vocab - diplomatic and siege continuity breadth wave', () => {
             },
         };
 
-        expect(resolveCodexEssay(jnaEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [RS]'))).toBe(true);
+        expect(resolveCodexEssay(jnaEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [VRS]'))).toBe(true);
         expect(resolveCodexEssay(owenStoltenbergEssay, ctx).paragraphs.some(p => p.text.includes('Early negotiated settlement'))).toBe(true);
         expect(resolveCodexEssay(bosnianAssemblyEssay, ctx).paragraphs.some(p => p.text.includes('116 weeks shorter'))).toBe(true);
         expect(resolveCodexEssay(contactGroupEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player week 190'))).toBe(true);
@@ -1064,11 +1064,11 @@ describe('v0.9.1 vocab - late intervention and final offensive breadth wave', ()
         };
 
         expect(resolveCodexEssay(natoEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player week 189'))).toBe(true);
-        expect(resolveCodexEssay(hostageEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [RS]'))).toBe(true);
+        expect(resolveCodexEssay(hostageEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [VRS]'))).toBe(true);
         expect(resolveCodexEssay(gorazdeEssay, ctx).paragraphs.some(p => p.text.includes('Civilian displacement record'))).toBe(true);
         expect(resolveCodexEssay(mistralEssay, ctx).paragraphs.some(p => p.text.includes('Human cost record'))).toBe(true);
         expect(resolveCodexEssay(sanaEssay, ctx).paragraphs.some(p => p.text.includes('Civilian displacement record'))).toBe(true);
-        expect(resolveCodexEssay(summerEssay, ctx).paragraphs.some(p => p.text.includes('HRHB war-crimes record [HRHB]'))).toBe(true);
+        expect(resolveCodexEssay(summerEssay, ctx).paragraphs.some(p => p.text.includes('HRHB war-crimes record [HVO]'))).toBe(true);
         expect(resolveCodexEssay(haltEssay, ctx).paragraphs.some(p => p.text.includes('Delta from historical baseline: +7 weeks'))).toBe(true);
         expect(resolveCodexEssay(washingtonEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player week 189'))).toBe(true);
     });
@@ -1197,13 +1197,13 @@ describe('v0.9.1 vocab - UN mandate and sanctions breadth wave', () => {
         };
 
         expect(resolveCodexEssay(londonEssay, ctx).paragraphs.some(p => p.text.includes('Human cost record'))).toBe(true);
-        expect(resolveCodexEssay(tribunalEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [RS]'))).toBe(true);
+        expect(resolveCodexEssay(tribunalEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [VRS]'))).toBe(true);
         expect(resolveCodexEssay(srebrenicaSafeAreaEssay, ctx).paragraphs.some(p => p.variant === 'ghost' && p.text.includes('Srebrenica Genocide did not occur in this run'))).toBe(true);
         expect(resolveCodexEssay(forceAuthorityEssay, ctx).paragraphs.some(p => p.text.includes('Civilian displacement record'))).toBe(true);
         expect(resolveCodexEssay(noFlyEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player week 187'))).toBe(true);
         expect(resolveCodexEssay(sharpGuardEssay, ctx).paragraphs.some(p => p.text.includes('Human cost record'))).toBe(true);
         expect(resolveCodexEssay(strikeThreatEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player week 187'))).toBe(true);
-        expect(resolveCodexEssay(sanctionsEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [RS]'))).toBe(true);
+        expect(resolveCodexEssay(sanctionsEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [VRS]'))).toBe(true);
     });
 });
 
@@ -1306,11 +1306,11 @@ describe('v0.9.1 vocab - consequence reader annotation follow-through', () => {
             },
         };
 
-        expect(resolveCodexEssay(campsEssay, { ...baseCtx, firedEventIds: new Set(['concentration_camps_revealed_1992']) }).paragraphs.some(p => p.text.includes('accelerated_camps_discovery_1992 [RS, W8]'))).toBe(true);
-        expect(resolveCodexEssay(tribunalEssay, { ...baseCtx, firedEventIds: new Set(['un_resolution_808_tribunal_1993']) }).paragraphs.some(p => p.text.includes('early_war_crimes_tribunal_1993 [RS, W36]'))).toBe(true);
-        expect(resolveCodexEssay(safeAreasEssay, { ...baseCtx, firedEventIds: new Set(['un_safe_areas_declared_1993']) }).paragraphs.some(p => p.text.includes('accelerated_safe_areas_1993 [RBiH, W42]'))).toBe(true);
-        expect(resolveCodexEssay(strikeThreatEssay, { ...baseCtx, firedEventIds: new Set(['nato_air_strike_threat_1993']) }).paragraphs.some(p => p.text.includes('early_nato_threshold_1994 [RS, W90]'))).toBe(true);
-        expect(resolveCodexEssay(bihacEssay, { ...baseCtx, firedEventIds: new Set(['bihac_crisis_1994']) }).paragraphs.some(p => p.text.includes('bihac_pocket_collapse_1994 [RBiH, W130]'))).toBe(true);
-        expect(resolveCodexEssay(bihacEssay, { ...baseCtx, firedEventIds: new Set(['bihac_crisis_1994']) }).paragraphs.some(p => p.text.includes('bihac_refugee_crisis_1994 [RBiH, W132]'))).toBe(true);
+        expect(resolveCodexEssay(campsEssay, { ...baseCtx, firedEventIds: new Set(['concentration_camps_revealed_1992']) }).paragraphs.some(p => p.text.includes('Accelerated Camps Discovery 1992 [VRS, W8]'))).toBe(true);
+        expect(resolveCodexEssay(tribunalEssay, { ...baseCtx, firedEventIds: new Set(['un_resolution_808_tribunal_1993']) }).paragraphs.some(p => p.text.includes('Early War Crimes Tribunal 1993 [VRS, W36]'))).toBe(true);
+        expect(resolveCodexEssay(safeAreasEssay, { ...baseCtx, firedEventIds: new Set(['un_safe_areas_declared_1993']) }).paragraphs.some(p => p.text.includes('Accelerated Safe Areas 1993 [ARBiH, W42]'))).toBe(true);
+        expect(resolveCodexEssay(strikeThreatEssay, { ...baseCtx, firedEventIds: new Set(['nato_air_strike_threat_1993']) }).paragraphs.some(p => p.text.includes('Early NATO Threshold 1994 [VRS, W90]'))).toBe(true);
+        expect(resolveCodexEssay(bihacEssay, { ...baseCtx, firedEventIds: new Set(['bihac_crisis_1994']) }).paragraphs.some(p => p.text.includes('Bihac Pocket Collapse 1994 [ARBiH, W130]'))).toBe(true);
+        expect(resolveCodexEssay(bihacEssay, { ...baseCtx, firedEventIds: new Set(['bihac_crisis_1994']) }).paragraphs.some(p => p.text.includes('Bihac Refugee Crisis 1994 [ARBiH, W132]'))).toBe(true);
     });
 });

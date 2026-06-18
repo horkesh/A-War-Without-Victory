@@ -7,7 +7,7 @@
 ## Summary
 
 - Army HQ Records reserve-decision details now label enum-like reserve reasons before rendering.
-- Operational sitrep active-operation summaries now render readable operation, phase, and calendar-date copy.
+- Operational sitrep active-operation summaries now render readable operation, phase, and deterministic calendar-date copy.
 - Operational sitrep front labels now use the established OSID humanizer rather than a local ad hoc formatter.
 
 ## Changes Made
@@ -21,12 +21,15 @@
 ### Operational Sitrep
 
 - Active operation summaries changed from debug-style `Op: sector_attack | Phase: execution (since T8)` to player-facing summaries such as `Sector Attack in Execution since 1 Jun 1992.`
+- Calendar labels use deterministic turn-to-date arithmetic, not `Date` construction, so the core determinism static scan remains clean.
 - Front-edge labels now use `humanizeOsid(...)`, matching the established OSID display fallback instead of deriving labels from raw `op:` structure locally.
 
 ## Verification
 
 - `npx.cmd vitest run tests\ui\decision_consequence_trail.test.ts --pool=forks --reporter=dot`
 - `npx.cmd vitest run tests\ui\decision_consequence_trail.test.ts tests\operational_sitrep_views.test.ts --pool=forks --reporter=dot`
+- `npx.cmd vitest run tests\determinism_static_scan_r1_5.test.ts tests\warroom_player_visibility.test.ts tests\operational_sitrep_views.test.ts --pool=forks --reporter=dot`
+- `npm.cmd run test:vitest:fast`
 
 ## Files Changed
 
@@ -36,6 +39,7 @@
 | `src/ui/shared/operational_sitrep_views.ts` | Added player-safe operation summary and OSID display fallback usage. |
 | `tests/ui/decision_consequence_trail.test.ts` | Pinned reserve enum reason display. |
 | `tests/operational_sitrep_views.test.ts` | Pinned operation summary and OSID fallback labels. |
+| `tests/warroom_player_visibility.test.ts` | Synced visibility assertion with the shared OSID humanizer's label order. |
 
 ## Scope
 

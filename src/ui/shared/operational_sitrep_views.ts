@@ -99,10 +99,24 @@ function formatLocationLabel(value: string | null | undefined): string {
 
 function turnToDateLabel(turn: number | null | undefined): string {
     if (typeof turn !== 'number' || !Number.isFinite(turn)) return 'an unrecorded turn';
-    const startDate = new Date('1992-04-06T00:00:00Z');
-    startDate.setUTCDate(startDate.getUTCDate() + turn * 7);
-    const month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][startDate.getUTCMonth()];
-    return `${startDate.getUTCDate()} ${month} ${startDate.getUTCFullYear()}`;
+    const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthLengths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    const daysInYear = (year: number): number => (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) ? 366 : 365;
+    const daysInMonth = (year: number, monthIndex: number): number => (
+        monthIndex === 1 && daysInYear(year) === 366 ? 29 : monthLengths[monthIndex]
+    );
+    let year = 1992;
+    let dayOfYear = 31 + 29 + 31 + 5 + Math.max(0, Math.floor(turn)) * 7;
+    while (dayOfYear >= daysInYear(year)) {
+        dayOfYear -= daysInYear(year);
+        year += 1;
+    }
+    let monthIndex = 0;
+    while (dayOfYear >= daysInMonth(year, monthIndex)) {
+        dayOfYear -= daysInMonth(year, monthIndex);
+        monthIndex += 1;
+    }
+    return `${dayOfYear + 1} ${monthLabels[monthIndex]} ${year}`;
 }
 
 function operationSummary(operation: WarDataSnapshot['ownCorpsOps'][number]['operation']): string {

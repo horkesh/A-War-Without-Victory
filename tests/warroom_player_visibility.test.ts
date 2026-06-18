@@ -98,8 +98,8 @@ describe('warroom player visibility', () => {
     ], 4);
     expect(reportBody).toContain('Enemy contact');
     expect(reportBody).not.toContain('Enemy Shock Brigade');
-    expect(reportBody).toContain('Sarajevo Centar');
-    expect(reportBody).toContain('Grbavica South');
+    expect(reportBody).toContain('Centar (Sarajevo)');
+    expect(reportBody).toContain('South (Grbavica)');
     expect(reportBody).toContain('Sarajevo 1');
     expect(reportBody).not.toContain('op:sarajevo:centar');
     expect(reportBody).not.toContain('op:grbavica:south');
