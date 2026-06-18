@@ -64,7 +64,7 @@ function makeNegotiationState(): NegotiationState {
 
 /**
  * Build the Path (d) counterfactual GameState:
- *   - Turn 188 (well past SREBRENICA_MIN_TURN=140; canonical 1995 timeframe).
+ *   - Turn 188 (well past SREBRENICA_MIN_TURN=160; canonical event-owned fall-receipt window).
  *   - srebrenica_enclave_formed = true (c1 satisfied — enclave history exists).
  *   - ARBiH retains the three eastern enclave capital OSIDs at this turn:
  *       op:srebrenica:srebrenica_2, op:zepa:zepa_2, op:gorazde:gorazde_2.

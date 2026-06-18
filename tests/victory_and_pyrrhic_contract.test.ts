@@ -221,7 +221,7 @@ describe('v0.9.0 — rupture_consequences canon', () => {
     }
 
     test('rupture fires when all preconditions met', () => {
-        const state = srebrenicaFallState(145);
+        const state = srebrenicaFallState(160);
         evaluateRuptureConsequences(state);
         const ruptures = state.military!.negotiation!.rupture_consequences ?? [];
         expect(ruptures).toHaveLength(1);
@@ -231,7 +231,7 @@ describe('v0.9.0 — rupture_consequences canon', () => {
     });
 
     test('rupture is idempotent (second call does not duplicate)', () => {
-        const state = srebrenicaFallState(145);
+        const state = srebrenicaFallState(160);
         evaluateRuptureConsequences(state);
         evaluateRuptureConsequences(state);
         evaluateRuptureConsequences(state);
@@ -239,21 +239,21 @@ describe('v0.9.0 — rupture_consequences canon', () => {
         expect(ruptures).toHaveLength(1);
     });
 
-    test('rupture does not fire before 1995 timeframe (turn < 140)', () => {
-        const state = srebrenicaFallState(139);
+    test('rupture does not fire before the event-owned receipt window', () => {
+        const state = srebrenicaFallState(159);
         evaluateRuptureConsequences(state);
         expect(state.military!.negotiation!.rupture_consequences ?? []).toHaveLength(0);
     });
 
     test('rupture does not fire without enclave_formed flag', () => {
-        const state = srebrenicaFallState(145);
+        const state = srebrenicaFallState(160);
         state.military!.event_flags = {} as any;
         evaluateRuptureConsequences(state);
         expect(state.military!.negotiation!.rupture_consequences ?? []).toHaveLength(0);
     });
 
     test('rupture does not fire when Srebrenica OSID is not RS-controlled', () => {
-        const state = srebrenicaFallState(145);
+        const state = srebrenicaFallState(160);
         state.political.political_controllers = {
             'op:srebrenica:srebrenica_2': 'RBiH',
         } as any;
@@ -262,7 +262,7 @@ describe('v0.9.0 — rupture_consequences canon', () => {
     });
 
     test('collectCondemnationFlags returns perpetrator flags sorted', () => {
-        const state = srebrenicaFallState(145);
+        const state = srebrenicaFallState(160);
         evaluateRuptureConsequences(state);
         expect(collectCondemnationFlags(state, 'RS')).toEqual(['genocide_condemnation']);
         expect(collectCondemnationFlags(state, 'RBiH')).toEqual([]);

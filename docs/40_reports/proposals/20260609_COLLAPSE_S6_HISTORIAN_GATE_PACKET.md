@@ -1,5 +1,7 @@
 # §6 HISTORIAN-GATE REVIEW PACKET — Collapse Pipeline (G3 prep)
 
+> **Superseded correction (2026-06-18):** this dated packet predates the event-owned Srebrenica/Zepa receipt correction. Current canon: Srebrenica/Zepa fall receipts are sensitive-history event `control_change` effects, and `srebrenica_genocide_1995` observes the resulting RS control at turn >=160. Treat older turn-140 rupture-floor language below as historical draft context only.
+
 **Type:** READ-ONLY assembly. No engine/sim/scenario/state/test code touched. No §6 content authored, reinterpreted, softened, or altered. No rupture timing changed. This packet QUOTES existing canon verbatim and CITES exact file+section; it does not decide anything.
 **Purpose:** Supports **G3** (historian acknowledgment) of the three-part §6 guard for the pressure→exhaustion→political-collapse pipeline. G1 (enclave-OSID exclusion at the Phase-3D `collapse_damage` write root) and G2 (188-week invariant test) are engineering work, gated separately; this packet is the evidence the §6 Pyrrhic panel (Historian + scenario-tester/calibration + Engine/systems + Red-team) signs off on; the atrocity-is-never-rewarded bright line surfaces to the owner.
 **Predecessors (read first):**
@@ -39,7 +41,7 @@ Source of truth for OSID membership and faction: `src/sim/combat/enclave_resilie
 **Canonical rupture key (verbatim, `src/sim/negotiation/rupture_consequences.ts`):** the Srebrenica genocide rupture (`srebrenica_genocide_1995`) records **iff all three hold**:
 - `state.military.event_flags.srebrenica_enclave_formed === true` (`:54`)
 - `state.political.political_controllers['op:srebrenica:srebrenica_2'] === 'RS'` — constant `SREBRENICA_OSID = 'op:srebrenica:srebrenica_2'` (`:17`, `:58`)
-- `state.meta.turn >= 140` — constant `SREBRENICA_MIN_TURN = 140` (`:20`, `:62`)
+- `state.meta.turn >= 160` — constant `SREBRENICA_MIN_TURN = 160` (`:20`, `:62`)
 
 It is **idempotent / locked / permanent** (`:46–50`, and SENSITIVE_HISTORY_DESIGN_GATE.md §1.5 #36). The proposed G1 guard must keep the *control flip at `op:srebrenica:srebrenica_2`* on its existing combat/event path so this predicate fires unchanged.
 
@@ -144,7 +146,7 @@ These are the canonical fall mechanisms whose timing collapse must leave **uncha
 
 > `"turn_min": 160, "turn_max": 190, "phase": "war"`, `requires_events: ["srebrenica_falls_1995"]`, condition = `flag srebrenica_enclave_formed == true`; `"once": true`; `control_change` to RS over `["op:rogatica:zepa_2"]`.
 
-(Note: the **rupture** floor is turn ≥ 140 in `rupture_consequences.ts`; the **fall event** windows are 160–185 / 160–190. Both numbers are stated here so G2 asserts against the correct ones. The rupture records only after the event-driven control flip at `op:srebrenica:srebrenica_2` to RS.)
+(Note: the **rupture** floor is now turn ≥ 160 in `rupture_consequences.ts`, matching the event-owned fall-receipt window. The **fall event** windows are 160–185 / 160–190. The rupture records only after the event-driven control flip at `op:srebrenica:srebrenica_2` to RS.)
 
 ---
 
@@ -153,7 +155,7 @@ These are the canonical fall mechanisms whose timing collapse must leave **uncha
 Derived **strictly** from §1–§2 above. This is the checklist G2 must encode; this packet does **not** write the test. "Disabled baseline" = the current calibration floor with collapse OFF (per BUILD_SPEC §5.3, 40w manifest hash `be76e56dd9d288c2`).
 
 - [ ] **G2.1 — Rupture still records.** With collapse ON in 188w, `state.military.negotiation.rupture_consequences` contains an entry with `id === 'srebrenica_genocide_1995'`.
-- [ ] **G2.2 — Rupture not premature.** Its `recorded_turn >= 140` (`SREBRENICA_MIN_TURN`). The rupture must never record before turn 140 — the worst §6 failure (RS takes the OSID before the floor → rupture fails to record).
+- [ ] **G2.2 — Rupture not premature.** Its `recorded_turn >= 160` (`SREBRENICA_MIN_TURN`). The rupture must never record before turn 160 — the worst §6 failure (RS takes the OSID before the floor → rupture fails to record).
 - [ ] **G2.3 — Rupture timing unchanged vs disabled baseline.** `recorded_turn` and the three trigger inputs (`srebrenica_enclave_formed`, `political_controllers['op:srebrenica:srebrenica_2']`, the turn it first reads `=== 'RS'`) are **identical** to the collapse-OFF baseline run (i.e. collapse does not move when Srebrenica falls).
 - [ ] **G2.4 — Srebrenica falls on canon timing.** `political_controllers['op:srebrenica:srebrenica_2'] === 'RS'` by Dayton, and the flip occurs within the `srebrenica_falls_1995` window (turn 160–185), unchanged vs baseline.
 - [ ] **G2.5 — Žepa still falls.** `political_controllers['op:rogatica:zepa_2'] === 'RS'` by Dayton, on the `zepa_falls_1995` window (160–190), unchanged vs baseline.
@@ -173,7 +175,7 @@ Derived **strictly** from §1–§2 above. This is the checklist G2 must encode;
 > With the collapse pipeline (Phase 3A→3D) enabled, the §6 enclave outcomes and the Srebrenica genocide-rupture timing are provably unchanged from the collapse-disabled baseline, because:
 > **(a)** Phase 3D writes `collapse_damage` and *derives* `capacity_modifiers` from it (and that damage entry also drives the `will_not_recover` diagnostic), but it **never** writes `political_controllers` — so collapse can only soften a defender, never flip control, throttle an attacker, save an enclave, or alter a rupture trigger (verified in code; consistent with Engine Invariants §9.6 "no passive pressure flip");
 > **(b)** Guard **G1** excludes **every RBiH enclave OSID** (Srebrenica, Žepa, Goražde, Bihać, Sarajevo, Teočak — via `getEnclaveDefForOsid`) at the Phase-3D **`collapse_damage` write root** — not merely the modifier write — so no collapse_damage entry is created for those OSIDs, which transitively blocks the derived modifier, the recompute-from-damage path, AND the `will_not_recover` marking. Collapse is therefore provably inert on those OSIDs — it can neither accelerate Srebrenica/Žepa's fall nor weaken Goražde/Bihać's hold;
-> **(c)** Guard **G2** asserts the §3 invariant checklist in CI on the 188-week horizon (rupture still records at turn ≥ 140 and on unchanged timing; Žepa falls; Goražde + Bihać held; for every enclave OSID, no collapse_damage entry AND no capacity_modifier), and must be GREEN before and on every collapse-enabled run.
+> **(c)** Guard **G2** asserts the §3 invariant checklist in CI on the 188-week horizon (rupture still records at turn ≥ 160 and on unchanged timing; Žepa falls; Goražde + Bihać held; for every enclave OSID, no collapse_damage entry AND no capacity_modifier), and must be GREEN before and on every collapse-enabled run.
 >
 > The Srebrenica genocide rupture remains a **consequence, not a lever** (SENSITIVE_HISTORY_DESIGN_GATE.md §0, §3 #10): collapse cannot be used to prevent it, accelerate it, or trade it away. The rupture continues to fire **only** on emergent satisfaction of the discrete OSID/flag/turn predicate (Gate §2 criterion 3), never on a calendar heuristic.
 
@@ -194,7 +196,7 @@ ____________________________   Date: __________
 
 - **O-1 — HRHB enclaves in G1 scope?** `getEnclaveDefForOsid` also matches the three HRHB pockets (`kiseljak`, `lasva_valley`, `zepce`). BUILD_SPEC §4.3's G1 as written excludes only **RBiH** enclaves. These HRHB pockets are not §6 sensitive-history surfaces (no rupture), so leaving them collapse-eligible is not a §6 risk — but it is a guard-scope decision. **Decide:** does G1 exclude all enclaves, or RBiH only? (No §6 impact either way; calibration-scope only.)
 - **O-2 — Žepa doc-comment string (§1.5).** `dynamic_section_builder.ts:252` comments the Žepa OSID as `op:zepa:zepa_2`, which matches no data OSID (authoritative key is `op:rogatica:zepa_2`). It is a cosmetic comment, not behavioral. **Decide:** fix the comment in a separate non-§6 doc-comment cleanup, or leave it. This packet did not touch it.
-- **O-3 — Rupture floor (≥140) vs fall-event window (160–185) reconciliation.** The genocide rupture records on turn ≥ 140 (`rupture_consequences.ts`), but the `srebrenica_falls_1995` *control flip* fires in the 160–185 window. In practice the rupture cannot record until the OSID is RS-controlled, which the event drives at 160–185, so the effective rupture turn is ≥160. G2.2/G2.3 assert the ≥140 floor AND timing-unchanged-vs-baseline, which covers both. **Confirm** the historian is comfortable asserting the invariant against the *baseline-observed* rupture turn rather than a hardcoded historical week.
+- **O-3 — Rupture floor aligned to fall-event window (160–185).** The genocide rupture now records on turn ≥ 160 (`rupture_consequences.ts`), after the `srebrenica_falls_1995` *control flip* can fire in the 160–185 window. G2.2/G2.3 assert the ≥160 floor AND timing-unchanged-vs-baseline. **Confirm** the historian is comfortable asserting the invariant against the *baseline-observed* rupture turn rather than a hardcoded historical week.
 - **O-4 — Sarajevo broad-exclusion confirmation.** BUILD_SPEC §4.3 ships the broad G1 (Sarajevo + Bihać excluded too) and flags Sarajevo as "a calibration anchor … too sensitive for a first collapse build." This is a calibration/design call, not strictly §6, but it interacts with the siege model. **Confirm** the owner wants the broad exclusion for the first collapse build.
 - **O-5 — `enclave_held_through_turn` observer flag is §6-gated and OFF.** The held-enclave observer flag (Srebrenica AND Žepa AND Goražde) is deliberately not written (`observer_threshold_flags.ts:18–21`; `war_phases.ts:1005`), deferred for separate §6 historian handling. It is **independent** of the collapse guard, but the historian may want to note it is a separate pending §6 item, not covered by this packet.
 
@@ -202,7 +204,7 @@ ____________________________   Date: __________
 
 ## Appendix — citation map (file:line, all READ-ONLY)
 
-- Rupture trigger keys: `src/sim/negotiation/rupture_consequences.ts:17,20,54,58,62` (`op:srebrenica:srebrenica_2`, turn ≥ 140, enclave_formed, idempotent `:46–50`)
+- Rupture trigger keys: `src/sim/negotiation/rupture_consequences.ts:17,20,54,58,62` (`op:srebrenica:srebrenica_2`, turn ≥ 160, enclave_formed, idempotent `:46–50`)
 - Enclave definitions + factions: `src/sim/combat/enclave_resilience.ts:82–202`; resolver `getEnclaveDefForOsid` `:559`, `getEnclaveIdForOsid` `:547`
 - Srebrenica fall event: `data/scenarios/events/war_1995.json:362–466` (window 160–185, control_change to RS)
 - Žepa fall event: `data/scenarios/events/war_1995.json:467–521` (window 160–190, requires `srebrenica_falls_1995`, control_change `op:rogatica:zepa_2`)

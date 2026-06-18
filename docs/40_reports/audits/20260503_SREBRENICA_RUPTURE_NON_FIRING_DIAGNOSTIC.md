@@ -21,7 +21,7 @@ The `srebrenica_genocide_1995` rupture is **canonically silent in n1623** becaus
 |------|---|---|---|---|---|---|
 | c1 | `event_flags.srebrenica_enclave_formed === true` | MET | MET | MET | MET | (e) |
 | c2 | `political_controllers['op:srebrenica:srebrenica_2'] === 'RS'` | UNMET | UNMET | UNMET | UNMET | **(c) + (d)** |
-| c3 | `state.meta.turn >= 140` | MET | MET | MET | MET | (e) |
+| c3 | `state.meta.turn >= 160` (current event-owned receipt contract; supersedes this diagnostic's original 140 floor) | MET | MET | MET | MET | (e) |
 | ALL | rupture would record | NO | NO | NO | NO | — |
 
 (t160/t170/t180 values inferred from final-state controller history: capital is RBiH-held throughout. The tool reports `(no weekly view)` because `weekly_report.jsonl` does not include `political_controllers` deltas; this is a known gap, not a fault of the tool.)
@@ -61,7 +61,7 @@ The `srebrenica_genocide_1995` rupture is **canonically silent in n1623** becaus
   - **(c) bot AI / corps-allocation gap** — Drina Corps committed only 2–3 brigades against the rupture targets. Historical Krivaja-95 used roughly 5 brigades plus heavy artillery and Skorpions police; Stupčanica-95 likewise drew on a corps-scale concentration. The simulation's corps commander is not concentrating force at the rupture moment.
   - **(d) combat math gap** — `getEnclaveDefenseBonus` (resilience 25 × 0.02 = 1.50, then × 1.05 hardening ≈ 1.575) plus `getEnclaveGarrisonPower` (population × 0.05 × 0.15 × 1.50 × 2.0 capital mult) plus baseline P1 defensive fire combine to push the predictor's ratio so far against the attacker that the op aborts in planning. The math is canon-correct in isolation; whether it is correctly *calibrated* against historical July 1995 force levels is the open canon question (§ 5).
 
-### c3 `turn >= 140`
+### c3 `turn >= 160` (superseded current contract)
 
 - **t188 status:** MET (turn 188 ≥ 140).
 - **Classification:** **(e) canon-correct.** No issue.

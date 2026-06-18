@@ -65,7 +65,7 @@ The /war-or-game sign-off **endorses** this scoping. A real-war observer would i
 
 The diagnostic test for §8.3 (b) (lane-tuning specifically to make Srebrenica fall) FAILS for SHAPE B:
 - No string literal `"srebrenica"` or `"zepa"` in the code condition.
-- No `if (turn ≥ 140 && objective === 'op:srebrenica:srebrenica_2')`.
+- No `if (turn ≥ 160 && objective === 'op:srebrenica:srebrenica_2')`.
 - No `srebrenica_force_ratio_boost` flag.
 - No "tune until enclave falls on schedule" calibration loop hidden in the diff.
 

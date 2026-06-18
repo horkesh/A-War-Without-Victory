@@ -3380,7 +3380,7 @@ Consolidated the fragmented endgame surfaces into one coherent canonical present
 ### Proof Findings
 
 **Rupture consequences — LATE-STATE PIPELINE PROOF + SCENARIO NON-FIRING PROOF:**
-Late-state test exercises real `warPhases` steps (update-patron-pressure → evaluate-rupture-consequences) with realistic fixture at turn 140+. Rupture fires correctly when Srebrenica RS-controlled at turn ≥ 140. Idempotent, deterministic.
+Late-state test exercises real `warPhases` steps (update-patron-pressure → evaluate-rupture-consequences) with realistic fixture at the current event-owned receipt window. Superseded 2026-06-18: rupture now fires when Srebrenica is event-receipt RS-controlled at turn >= 160. Idempotent, deterministic.
 
 188w real scenario (n1576): Srebrenica OSID remained RBiH-controlled through all 188 turns. Rupture correctly did NOT fire — system is properly gated on actual enclave fall, not hardcoded to a fixed week. This proves the three-ring boundary: precursors existed (enclave_formed=true) but the military outcome (enclave survival) prevented the rupture from triggering. No railroad.
 
@@ -3586,7 +3586,7 @@ Added smallest honest downstream substrate consuming upstream verdict/consequenc
 Enforced three-ring sensitive-history boundary in code:
 
 1. **Ring 1 (precursors — already existed):** Enclave integrity, displacement tracking, patron pressure, international standing dimension.
-2. **Ring 2 (rupture — NEW):** `evaluateRuptureConsequences()` checks Srebrenica enclave fall conditions (enclave formed + RS controls `op:srebrenica:srebrenica_2` + turn ≥ 140). Records locked `RuptureConsequence` with `genocide_condemnation` flag. Idempotent — once recorded, permanent.
+2. **Ring 2 (rupture — NEW):** `evaluateRuptureConsequences()` checks Srebrenica enclave fall conditions (enclave formed + RS controls `op:srebrenica:srebrenica_2` + turn >= 160 under the current event-owned receipt contract). Records locked `RuptureConsequence` with `genocide_condemnation` flag. Idempotent — once recorded, permanent.
 3. **Ring 3 (reckoning — wired):** `collectCondemnationFlags()` propagates rupture flags to `FactionVerdict.condemnation_flags`. Lane C's `classifyOutcome()` maps `genocide_condemnation` → `failure` outcome class regardless of territorial success.
 
 **Canonical owner:** `evaluateRuptureConsequences()` in `rupture_consequences.ts`. `collectCondemnationFlags()` in same file.

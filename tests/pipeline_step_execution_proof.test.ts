@@ -257,7 +257,7 @@ describe('evaluate-rupture-consequences execution proof', () => {
 
     it('records srebrenica_genocide_1995 when all preconditions met', async () => {
         const state = makeMinimalState({
-            meta: { turn: 145, seed: 'test', phase: 'war' },
+            meta: { turn: 160, seed: 'test', phase: 'war' },
             military: {
                 formations: {},
                 front_segments: {},
@@ -288,14 +288,14 @@ describe('evaluate-rupture-consequences execution proof', () => {
         const ruptures = state.military.negotiation!.rupture_consequences!;
         expect(ruptures).toHaveLength(1);
         expect(ruptures[0].id).toBe('srebrenica_genocide_1995');
-        expect(ruptures[0].recorded_turn).toBe(145);
+        expect(ruptures[0].recorded_turn).toBe(160);
         expect(ruptures[0].perpetrator_faction).toBe('RS');
         expect(ruptures[0].condemnation_flag).toBe('genocide_condemnation');
     });
 
     it('is idempotent — does not double-record', async () => {
         const state = makeMinimalState({
-            meta: { turn: 150, seed: 'test', phase: 'war' },
+            meta: { turn: 160, seed: 'test', phase: 'war' },
             military: {
                 formations: {},
                 front_segments: {},
@@ -309,7 +309,7 @@ describe('evaluate-rupture-consequences execution proof', () => {
                     peace_plan_history: [],
                     rupture_consequences: [{
                         id: 'srebrenica_genocide_1995',
-                        recorded_turn: 145,
+                        recorded_turn: 160,
                         perpetrator_faction: 'RS',
                         description: 'Fall of the Srebrenica safe area and subsequent genocide of Bosniak men and boys',
                         condemnation_flag: 'genocide_condemnation',

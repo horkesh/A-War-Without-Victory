@@ -146,8 +146,8 @@ function runNeighborhood(context: TurnContext): void {
 
 describe('late-state pipeline proof: rupture consequences', () => {
 
-    it('rupture fires when Srebrenica RS-controlled at turn 140', () => {
-        const state = buildLateState(140, 'RS');
+    it('rupture fires when Srebrenica RS-controlled in the event-owned receipt window', () => {
+        const state = buildLateState(160, 'RS');
         const ctx = buildContext(state);
         runNeighborhood(ctx);
 
@@ -156,11 +156,11 @@ describe('late-state pipeline proof: rupture consequences', () => {
         expect(ruptures[0].id).toBe('srebrenica_genocide_1995');
         expect(ruptures[0].perpetrator_faction).toBe('RS');
         expect(ruptures[0].condemnation_flag).toBe('genocide_condemnation');
-        expect(ruptures[0].recorded_turn).toBe(140);
+        expect(ruptures[0].recorded_turn).toBe(160);
     });
 
-    it('rupture does NOT fire at turn 139 (below threshold)', () => {
-        const state = buildLateState(139, 'RS');
+    it('rupture does NOT fire before the event-owned receipt window', () => {
+        const state = buildLateState(159, 'RS');
         const ctx = buildContext(state);
         runNeighborhood(ctx);
 
@@ -178,20 +178,20 @@ describe('late-state pipeline proof: rupture consequences', () => {
     });
 
     it('rupture is idempotent across sequential turns', () => {
-        const state = buildLateState(140, 'RS');
+        const state = buildLateState(160, 'RS');
         const ctx1 = buildContext(state);
         runNeighborhood(ctx1);
         expect((state.military.negotiation!.rupture_consequences ?? []).length).toBe(1);
 
         // Advance turn and run again
-        state.meta.turn = 141;
+        state.meta.turn = 161;
         const ctx2 = buildContext(state);
         runNeighborhood(ctx2);
         expect((state.military.negotiation!.rupture_consequences ?? []).length).toBe(1); // still 1, not 2
     });
 
     it('multiple pipeline steps execute in sequence without error', () => {
-        const state = buildLateState(145, 'RS');
+        const state = buildLateState(160, 'RS');
         const ctx = buildContext(state);
 
         // Run ALL three neighborhood steps — prove they compose
@@ -203,8 +203,8 @@ describe('late-state pipeline proof: rupture consequences', () => {
     });
 
     it('neighborhood execution is deterministic', () => {
-        const state1 = buildLateState(150, 'RS');
-        const state2 = buildLateState(150, 'RS');
+        const state1 = buildLateState(160, 'RS');
+        const state2 = buildLateState(160, 'RS');
         runNeighborhood(buildContext(state1));
         runNeighborhood(buildContext(state2));
 

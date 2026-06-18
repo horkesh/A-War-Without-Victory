@@ -1,5 +1,7 @@
 # BUILD SPEC — Phase 3A→3D Pressure / Exhaustion / Collapse Pipeline
 
+> **Superseded correction (2026-06-18):** this dated collapse draft predates the event-owned Srebrenica/Zepa receipt correction. Current canon: Srebrenica/Zepa fall receipts are sensitive-history event `control_change` effects, and `srebrenica_genocide_1995` observes the resulting RS control at turn >=160. Treat older turn-140 rupture-floor language below as historical draft context only.
+
 **Type:** READ-ONLY build specification. No engine code, no flag flips, no canon edits in producing this.
 **Status:** DRAFT for Pyrrhic-panel ratification. Engine work is blocked on the §6 sign-off (§4) and the constants ratification (§3).
 **Predecessor:** `docs/40_reports/proposals/20260609_SCOPE_collapse_pipeline.md` (effort/risk/recommendation). This doc extends that scope into a buildable plan; it does not re-derive its findings.
@@ -141,7 +143,7 @@ The chain is strictly serial (3D requires 3C requires 3B requires 3A). All four 
 
 ### 4.1 The exact §6 surface (verified)
 
-The Srebrenica rupture (`src/sim/negotiation/rupture_consequences.ts`) records `srebrenica_genocide_1995` **iff all three hold**: `event_flags.srebrenica_enclave_formed === true`, `political_controllers['op:srebrenica:srebrenica_2'] === 'RS'`, and `turn ≥ 140`. The rupture is **locked, idempotent, permanent** (Sensitive History Gate §1.5 #36). Žepa follows the same enclave/fall machinery.
+The Srebrenica rupture (`src/sim/negotiation/rupture_consequences.ts`) records `srebrenica_genocide_1995` **iff all three hold**: `event_flags.srebrenica_enclave_formed === true`, `political_controllers['op:srebrenica:srebrenica_2'] === 'RS'`, and `turn ≥ 160` after the event-owned fall receipt window can write control. The rupture is **locked, idempotent, permanent** (Sensitive History Gate §1.5 #36). Žepa follows the same event-owned receipt machinery.
 
 The eastern enclaves are RBiH-held, isolated, supply-fragile (`enclave_resilience.ts`): Srebrenica/Žepa **MUST FALL** (genocide rupture); Goražde/Bihać **HELD** (no `*_falls_1995` event; held by resilience). These are exactly the OSIDs **most likely** to register Tier-1 spatial/authority strain.
 
@@ -149,7 +151,7 @@ The eastern enclaves are RBiH-held, isolated, supply-fragile (`enclave_resilienc
 
 **Phase 3D does NOT flip `political_controllers`.** Its outputs are `collapse_damage.by_entity` (the monotonic damage tracks) and the `capacity_modifiers` derived from them — multipliers consumed by pressure/supply, plus the `will_not_recover` diagnostic `loss_of_control_trends.ts:132` reads off the damage entry (corrected per Codex review on PR #368 P1; an earlier draft mis-stated `capacity_modifiers` as the "sole output"). None of these flip control. So collapse **cannot directly fall or save an enclave**; it can only degrade RBiH's pressure generation / formation supply at those OSIDs, which combat then resolves through the normal `attack_resolution` / triggered-op path (Krivaja-95 / Stupčanica-95 inject objectives directly). This means:
 
-- **Premature fall risk** is INDIRECT: collapse-damaged supply_mult at Srebrenica could *weaken* the defender so the scripted fall lands early, or the enclave falls *before* turn 140 (the rupture floor) → rupture **fails to record** despite RS taking the OSID — the worst §6 failure.
+- **Premature fall risk** is INDIRECT: collapse-damaged supply_mult at Srebrenica could *weaken* the defender so the scripted fall lands early, or the enclave falls *before* turn 160 (the rupture floor) → rupture **fails to record** despite RS taking the OSID — the worst §6 failure.
 - **Suppressed-fall risk** is also INDIRECT: there is no path by which collapse *stops* RS from taking the OSID (collapse degrades RBiH, the defender, not RS the attacker) — so collapse cannot suppress the fall. It can only accelerate it. **This asymmetry simplifies the guard: we only need to prevent acceleration, not suppression.**
 
 ### 4.3 Proposed guard (mark each line for owner/historian ratification)
@@ -158,7 +160,7 @@ The eastern enclaves are RBiH-held, isolated, supply-fragile (`enclave_resilienc
 
 - *Alternative considered & rejected:* exclude only the four eastern enclaves and let Sarajevo/Bihać collapse. Rejected for 1.0 — Sarajevo siege is a calibration anchor and Bihać is a near-margin pocket; both are too sensitive for a first collapse build. Ship the broad exclusion; relax later if owner wants.
 
-**G2 — Rupture-floor invariant test (SECONDARY, defense-in-depth).** A determinism/regression test that asserts, with collapse ON in 188w: (a) `srebrenica_genocide_1995` rupture STILL records, (b) at `recorded_turn ≥ 140`, (c) Žepa still falls on its historical window, (d) Goražde/Bihać still HELD at Dayton. If G1 holds, these pass trivially — but the test is the proof that G1 is sufficient, and it catches any future regression that lets collapse reach an enclave. **[/historian verifies the historical timing assertions]**
+**G2 — Rupture-floor invariant test (SECONDARY, defense-in-depth).** A determinism/regression test that asserts, with collapse ON in 188w: (a) `srebrenica_genocide_1995` rupture STILL records, (b) at `recorded_turn ≥ 160`, (c) Žepa still falls on its historical window, (d) Goražde/Bihać still HELD at Dayton. If G1 holds, these pass trivially — but the test is the proof that G1 is sufficient, and it catches any future regression that lets collapse reach an enclave. **[/historian verifies the historical timing assertions]**
 
 **G3 — Tier-0 spatial-domain note.** `checkSpatialDegradation` (C8, BFS isolation) will flag RBiH spatially-degraded whenever the eastern enclaves are isolated — which is *always*. With G1, this only affects **non-enclave** RBiH OSIDs (those still get modifiers). Confirm the historian is comfortable that RBiH-wide spatial eligibility (driven partly by the enclaves' isolation) degrading *non-enclave* RBiH settlements is historically defensible (it is — a state losing its eastern pockets is institutionally strained elsewhere). **[/historian acknowledgment]**
 
@@ -194,7 +196,7 @@ Enabling moves territory via the `pressure_cap_mult`/`supply_mult` feedback at d
 |---|---|---|
 | **0 (probe)** | 3A+3B ON only (3C/3D OFF). Measure peak `faction.profile.exhaustion` per faction across 188w. | No territory change expected (3B doesn't write modifiers). Sets C1/C2–C4. **If nobody crosses ~65, raise C1 first.** |
 | 1 | Set C2–C5 from run 0; enable 3C (constants verified, `checkSpatialDegradation`=BFS). 3D still OFF. | No territory change (3C writes eligibility/strain, not modifiers). Inspect: which factions/OSIDs become eligible, and *when* (must be late-war, never 1992). |
-| 2 | Enable 3D + §6 guard (G1). First live territory run. | 30/30 anchors; **G2 §6 invariant GREEN** (Srebrenica rupture records ≥t140; Žepa falls; Goražde/Bihać held); OSID count recorded (may differ from 649). |
+| 2 | Enable 3D + §6 guard (G1). First live territory run. | 30/30 anchors; **G2 §6 invariant GREEN** (Srebrenica rupture records ≥t160 after event-owned receipt; Žepa falls; Goražde/Bihać held); OSID count recorded (may differ from 649). |
 | 3 | Tune `*_IMPACT` (C15–C17) toward the desired chronic-not-catastrophic shock. | anchors + §6 + floor delta within owner tolerance. |
 | 4 | Tune `STRAIN_FRACTION`/`TIER1_THRESHOLD` pair (C9/C11) for which OSIDs reach Tier-1. | same. |
 | 5–N | Reconcile anchors knocked out by collapse; re-floor candidate. | 30/30 + §6 + panel-signed OSID count. |
@@ -273,4 +275,3 @@ PHASE IV — Re-floor + finalize
 - Canon — Phase 3 are frozen subsystems not lifecycle phases: Phase_Specifications_v0_9_0.md:23
 - Canon — sensitive history gate + §6 sign-off table: SENSITIVE_HISTORY_DESIGN_GATE.md §1, §6 (enclave-mechanics row → /gameplay-programmer + /historian)
 ```
-

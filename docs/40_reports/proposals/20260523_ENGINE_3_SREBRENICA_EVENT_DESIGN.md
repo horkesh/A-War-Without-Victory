@@ -63,7 +63,7 @@ These were authored as Ring-2 narrative shells that *react to* a mechanically-pr
 `src/sim/negotiation/rupture_consequences.ts` evaluates the `srebrenica_genocide_1995` rupture and gates on three preconditions:
 1. `event_flags.srebrenica_enclave_formed === true` (c1)
 2. `political_controllers['op:srebrenica:srebrenica_2'] === 'RS'` (c2)
-3. `turn >= 140` (c3)
+3. `turn >= 160` (c3; superseded 2026-06-18 event-owned receipt floor)
 
 The c2 predicate is the binding "modeled war must produce the fall" hook. Per the §6-gated Q-CANON-RUPT-4 Path (d) clause (§1.5 #11): **scripted OSID flips that satisfy c2 by event mechanism rather than combat would qualify as "calendar-driven atrocity recording" and are explicitly forbidden in canon.**
 
