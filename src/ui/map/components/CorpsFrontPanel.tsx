@@ -6,7 +6,7 @@ import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON'
 import { collectSectorFriendlyOsids } from '../utils/sectorUtils';
 import { getOperationId, getOperationPhaseBadgeClass } from '../utils/operations';
 import { getPanelRailStyle } from './panelRail';
-import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { getPlayerSafeMilitaryFactionName, getPlayerSafeOperationPhaseLabel } from '../utils/playerSafeText';
 import { getPlayerSafeOperationBalancePresentation } from '../../../shared/playerSafeOperationBalance';
 import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
 import { useIPC } from '../desktop/useIPC';
@@ -692,12 +692,12 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                       <div key={operationId} className="bg-neutral-100 border-2 border-neutral-300 p-2 relative shadow-sm">
                         {/* Stamp effect */}
                         <div className={`absolute top-1 right-2 opacity-20 font-black text-xl -rotate-12 select-none uppercase ${op.phase === 'execution' ? 'text-red-600' : 'text-amber-600'}`}>
-                          {op.phase}
+                          {getPlayerSafeOperationPhaseLabel(op.phase)}
                         </div>
 
                         <div className="font-bold text-[12px] uppercase tracking-wide mb-1 flex items-center gap-2">
                           <span>{sector.intel_confidence < 0.2 ? <span className="bg-black text-black select-none">{t('corpsFront.opRedacted')}</span> : op.display_name}</span>
-                          <span className={`px-1 rounded text-[8px] text-white ${phaseBg}`}>{op.phase}</span>
+                          <span className={`px-1 rounded text-[8px] text-white ${phaseBg}`}>{getPlayerSafeOperationPhaseLabel(op.phase)}</span>
                         </div>
 
                         <div className="text-[9px] uppercase font-bold text-neutral-500 mb-0.5 mt-2">{t('corpsFront.forcesCommitted')}</div>

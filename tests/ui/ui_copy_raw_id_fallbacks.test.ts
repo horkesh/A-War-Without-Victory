@@ -174,12 +174,17 @@ describe('UI copy raw-id fallbacks', () => {
     const sectorsSource = readFileSync('src/ui/map/components/army_hq/SectorsSection.tsx', 'utf8');
     const operationsSource = readFileSync('src/ui/map/components/army_hq/OperationsSection.tsx', 'utf8');
     const formationSource = readFileSync('src/ui/map/components/FormationDetail.tsx', 'utf8');
+    const recordsSource = readFileSync('src/ui/map/components/army_hq/RecordsContent.tsx', 'utf8');
+    const chronicleSource = readFileSync('src/ui/map/components/chronicle/ChronicleOverlay.tsx', 'utf8');
 
     expect(sectorsSource).toContain('safeSectorLabel');
+    expect(sectorsSource).toContain('getPlayerSafeSectorStanceLabel');
+    expect(sectorsSource).toContain('getPlayerSafeSectorStrengthLabel');
     expect(sectorsSource).toContain("t('sectorsSection.unknownFormation')");
     expect(sectorsSource).not.toContain("unknownFormation', { id }");
 
     expect(operationsSource).toContain('safeOperationDisplayName');
+    expect(operationsSource).toContain('getPlayerSafeOperationPhaseLabel');
     expect(operationsSource).toContain("t('operationsSection.prep.unreported')");
     expect(operationsSource).toContain("t('operationsSection.outcome.unreported')");
     expect(operationsSource).not.toContain('op.preparation_sub_phase.toUpperCase()');
@@ -187,7 +192,15 @@ describe('UI copy raw-id fallbacks', () => {
 
     expect(formationSource).toContain('safeCorpsLabel');
     expect(formationSource).toContain('safeSectorLabel');
+    expect(formationSource).toContain('getPlayerSafeFormationReadinessLabel');
+    expect(formationSource).toContain('getPlayerSafeFormationPostureLabel');
     expect(formationSource).toContain('sanitizeHistoryMoment');
     expect(formationSource).not.toContain('m.description.replace');
+
+    expect(recordsSource).toContain('aria-label={`${archiveCounts[id]} records`}');
+    expect(recordsSource).toContain("{' · '}");
+
+    expect(chronicleSource).toContain('aria-label={`${count} entries`}');
+    expect(chronicleSource).toContain("{' · '}");
   });
 });

@@ -70,6 +70,9 @@ export function GlassPanel({
                 {/* Panel */}
                 <div
                     ref={panelRef}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={title}
                     className={`relative bg-panel-bg/95 backdrop-blur-md border border-[rgba(180,160,130,0.15)] shadow-xl rounded-lg overflow-hidden animate-slideUp ${className}`}
                     style={{ width, maxHeight: '84vh' }}
                 >

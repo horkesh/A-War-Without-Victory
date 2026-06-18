@@ -2888,7 +2888,21 @@ function derivePeacePhaseData(state: any, phase: string): Partial<LoadedGameStat
 
 function deriveFiredEvents(state: any): LoadedGameState['firedEvents'] {
     const firedIds = state.military?.fired_event_ids as string[] | undefined;
-    if (!firedIds || firedIds.length === 0) return undefined;
+    const decisionLog = (state.military?.event_decision_log ?? []) as Array<{
+        event_id?: string;
+        response_id?: string;
+        turn?: number;
+        decision_source?: string;
+    }>;
+    const orderedIds: string[] = [];
+    for (const id of firedIds ?? []) {
+        if (typeof id === 'string' && id.trim() && !orderedIds.includes(id)) orderedIds.push(id);
+    }
+    for (const decision of decisionLog) {
+        const id = decision.event_id;
+        if (typeof id === 'string' && id.trim() && !orderedIds.includes(id)) orderedIds.push(id);
+    }
+    if (orderedIds.length === 0) return undefined;
 
     // We have the list of fired event IDs but not the full definitions at runtime in the UI.
     // Build minimal entries from the IDs. The turn_summaries may contain events_fired with text.
@@ -2908,19 +2922,34 @@ function deriveFiredEvents(state: any): LoadedGameState['firedEvents'] {
             }
         }
     }
+    const decisionInfo = new Map<string, { turn: number; responseId: string; source: string }>();
+    for (const decision of decisionLog) {
+        if (typeof decision.event_id !== 'string' || typeof decision.response_id !== 'string') continue;
+        const turn = typeof decision.turn === 'number' ? decision.turn : 0;
+        const source = typeof decision.decision_source === 'string' ? decision.decision_source : 'recorded';
+        const previous = decisionInfo.get(decision.event_id);
+        if (!previous || turn >= previous.turn) {
+            decisionInfo.set(decision.event_id, { turn, responseId: decision.response_id, source });
+        }
+    }
 
     // Build fired event entries (most recent first, cap at 20)
     const entries: NonNullable<LoadedGameState['firedEvents']> = [];
-    for (const id of firedIds) {
+    for (const id of orderedIds) {
         const info = eventInfo.get(id);
+        const decision = decisionInfo.get(id);
+        const turn = decision?.turn ?? info?.turn ?? 0;
+        const response = decision
+            ? getPlayerSafeDisplayLabel(decision.responseId, 'response recorded')
+            : null;
         entries.push({
             id,
-            turn: info?.turn ?? 0,
-            title: getPlayerSafeDecisionTitle(info?.text ?? id),
-            narrative: '',
-            category: 'military',
-            effects: [],
-            isDecision: false,
+            turn,
+            title: getPlayerSafeDecisionTitle(info?.text ?? getPlayerSafeDisplayLabel(id, 'Recorded decision')),
+            narrative: decision ? 'Presidential response filed in the campaign record.' : '',
+            category: decision ? 'political' : 'military',
+            effects: decision && response ? [{ kind: 'decision', description: `Response recorded: ${response}.` }] : [],
+            isDecision: Boolean(decision),
         });
     }
 

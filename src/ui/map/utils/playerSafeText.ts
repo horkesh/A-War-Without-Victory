@@ -34,6 +34,110 @@ export function getPlayerSafeDisplayLabel(
     return humanizeIdentifierLabel(safeValue) || fallback;
 }
 
+export function looksLikeRawPlayerFacingToken(value: string | null | undefined): boolean {
+    const text = (value ?? '').trim();
+    if (!text) return false;
+    return (
+        /\b(?:op|evt|event|csq|sector|formation|corps|cmd):[a-z0-9_:-]+\b/i.test(text) ||
+        /\b[a-z]{2,}_[a-z0-9_]{2,}\b/i.test(text) ||
+        /\b[A-Z]{2,}_[A-Z0-9_]{2,}\b/.test(text) ||
+        /\.json\b/i.test(text) ||
+        /\/\/|\\/.test(text)
+    );
+}
+
+export function getPlayerSafeRecordDetail(
+    value: string | null | undefined,
+    fallback = 'Decision filed in the campaign record.',
+): string {
+    const text = (value ?? '').trim();
+    if (!text || looksLikeRawPlayerFacingToken(text)) return fallback;
+    return text;
+}
+
+const OPERATION_PHASE_LABELS: Record<string, string> = {
+    planning: 'Planning',
+    execution: 'In execution',
+    recovery: 'Recovering',
+};
+
+export function getPlayerSafeOperationPhaseLabel(
+    phase: string | null | undefined,
+    fallback = 'Status pending',
+): string {
+    const key = (phase ?? '').trim().toLowerCase();
+    return OPERATION_PHASE_LABELS[key] ?? fallback;
+}
+
+const FORMATION_READINESS_LABELS: Record<string, string> = {
+    active: 'Active',
+    ready: 'Ready',
+    mobilizing: 'Mobilizing',
+    degraded: 'Degraded',
+    refitting: 'Refitting',
+    disrupted: 'Disrupted',
+    reserve: 'In reserve',
+};
+
+export function getPlayerSafeFormationReadinessLabel(
+    readiness: string | null | undefined,
+    fallback = 'Readiness pending',
+): string {
+    const key = (readiness ?? '').trim().toLowerCase();
+    return FORMATION_READINESS_LABELS[key] ?? fallback;
+}
+
+const FORMATION_POSTURE_LABELS: Record<string, string> = {
+    hold: 'Holding',
+    defend: 'Defending',
+    fortify: 'Fortifying',
+    attack: 'Attacking',
+    offensive: 'Attacking',
+    reserve: 'In reserve',
+    rest: 'Resting',
+    retreat: 'Withdrawing',
+};
+
+export function getPlayerSafeFormationPostureLabel(
+    posture: string | null | undefined,
+    fallback = 'Posture pending',
+): string {
+    const key = (posture ?? '').trim().toLowerCase();
+    return FORMATION_POSTURE_LABELS[key] ?? fallback;
+}
+
+const SECTOR_STANCE_LABELS: Record<string, string> = {
+    hold: 'hold the line',
+    defend: 'defend in depth',
+    fortify: 'fortify the sector',
+    attack: 'prepare an attack',
+    reserve: 'keep reserves ready',
+};
+
+export function getPlayerSafeSectorStanceLabel(
+    stance: string | null | undefined,
+    fallback = 'review posture',
+): string {
+    const key = (stance ?? '').trim().toLowerCase();
+    return SECTOR_STANCE_LABELS[key] ?? fallback;
+}
+
+const SECTOR_STRENGTH_LABELS: Record<string, string> = {
+    fortress: 'Fortress',
+    strong: 'Strong',
+    adequate: 'Adequate',
+    thin: 'Thin',
+    critical: 'Critical',
+};
+
+export function getPlayerSafeSectorStrengthLabel(
+    strength: string | null | undefined,
+    fallback = 'Unassessed',
+): string {
+    const key = (strength ?? '').trim().toLowerCase();
+    return SECTOR_STRENGTH_LABELS[key] ?? fallback;
+}
+
 export function getPlayerSafeOfficerName(
     name: string | null | undefined,
     fallback = 'An officer',

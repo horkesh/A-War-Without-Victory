@@ -108,8 +108,16 @@ export function RecordsContent() {
                                 : 'bg-panel-card border-panel-border text-text-secondary hover:text-text-primary hover:bg-white/5'
                         }`}
                     >
-                        {t(labelKey as MessageKey)}
-                        <span className="ml-1 tabular-nums opacity-70">{archiveCounts[id]}</span>
+                        <span>{t(labelKey as MessageKey)}</span>
+                        <span aria-hidden="true" className="text-text-secondary/60">
+                            {' · '}
+                        </span>
+                        <span
+                            aria-label={`${archiveCounts[id]} records`}
+                            className="inline-flex min-w-[1.35rem] justify-center rounded border border-current/20 bg-black/20 px-1 tabular-nums opacity-80"
+                        >
+                            {archiveCounts[id]}
+                        </span>
                     </button>
                 ))}
             </div>

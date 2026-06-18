@@ -11,7 +11,11 @@ import {
     filterPlayerFacingFormations,
     filterPlayerFacingOperationHistory,
 } from '../../shared/playerVisibility';
-import { getPlayerSafeMilitaryFactionName, getPlayerSafeOperationName } from '../utils/playerSafeText';
+import {
+    getPlayerSafeMilitaryFactionName,
+    getPlayerSafeOperationName,
+    getPlayerSafeOperationPhaseLabel,
+} from '../utils/playerSafeText';
 import { deriveOperationOutcomeCategory, buildOperationTrendSummary } from '../data/command_strain';
 import { t } from '../i18n';
 
@@ -561,7 +565,7 @@ function ActiveOpCard({ op, corpsName }: { op: ActiveOp; corpsName: string }) {
                 </div>
                 <div className="flex flex-col items-end shrink-0 gap-0.5">
                     <span className={`text-[10px] font-mono uppercase ${PHASE_COLOR[op.phase] ?? 'text-text-secondary'}`}>
-                        {op.phase}
+                        {getPlayerSafeOperationPhaseLabel(op.phase)}
                     </span>
                     <span className="text-[10px] text-text-muted tabular-nums">
                         {t('operationHistory.activeProgress', { objectives: objRate, attacks: op.attacks })}

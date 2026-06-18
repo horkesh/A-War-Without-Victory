@@ -12,6 +12,8 @@
 
 **Roadmap wiring:** `docs/plans/COMMAND_BOARD.md` and `docs/plans/MASTER_ROADMAP.md` now treat this master as the live product-facing audit for the presidential command surface and AAA+++ product-shell work. Use it to derive focused implementation lanes; do not treat it as permission for broad UI rewrites or simulation changes.
 
+**Current first-hour note (2026-06-18):** The browser/dev first-hour route now proves faction start -> war-start splash -> war-begins identity brief -> foundational decision -> Records/Chronicle filing. Browser-fallback foundational decisions enter the same decision ledger as desktop decisions; Records and Chronicle badges render with visible separators; first-hour shell chrome uses `Opening week` instead of `Turn 0`/`Week 0`; and decision-modal ownership prevents Desk/Warroom shells from stacking while a required decision is open. See `docs/40_reports/implemented/20260618_FIRST_HOUR_SHELL_RECORDS_CHRONICLE_POLISH.md`.
+
 **Current route-focus note (2026-06-06):** Records-filed President's Desk consequence rows now route to Army HQ Records -> Decision Consequences with the exact selected row focused, and shell handoff validation accepts the existing Decision Consequences subtab. This tightens BF-07/BF-20 receipt-loop cohesion without changing command authority, simulation, save state, scenario outputs, or generated artifacts.
 
 **Current route/receipt note (2026-06-05):** Patron-defiance material cuts now appear in Patron Relations actor history and file through the shared Records/Chronicle decision consequence ledger. This improves BF-20/BF-32 consequence-route cohesion without changing patron mechanics, save state, or scenario outputs. Browser loaded-campaign proof and broader first-session route polish remain open.

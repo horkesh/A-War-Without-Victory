@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-06-18 (first-hour shell hardening, event/inbox calendar copy, player-safe event dossier boundaries, and Army HQ first-paint/drilldown closeout)
+**Updated:** 2026-06-18 (first-hour shell hardening, Records/Chronicle opening decision filing, event/inbox calendar copy, player-safe event dossier boundaries, and Army HQ first-paint/drilldown closeout)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **First-hour shell/Records/Chronicle polish** | [implemented/20260618_FIRST_HOUR_SHELL_RECORDS_CHRONICLE_POLISH.md](implemented/20260618_FIRST_HOUR_SHELL_RECORDS_CHRONICLE_POLISH.md) - Browser-fallback foundational decisions file into Records and Chronicle during opening week, shell chrome renders `Opening week`, Records/Chronicle badges use readable separators, decision-modal shell ownership is guarded, and Army HQ/raw fallback copy uses player-safe labels. |
 | **Army HQ first-paint/drilldown polish** | [implemented/20260618_ARMY_HQ_FIRST_PAINT_DRILLDOWN_POLISH.md](implemented/20260618_ARMY_HQ_FIRST_PAINT_DRILLDOWN_POLISH.md) - Army HQ opens with a corps Command Access strip, corps drilldowns surface sectors/operations first, Records defaults to the campaign archive, and field inspections use an atomic Tactical Map route. |
 | **P1 raw-copy calendar boundary** | [implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md](implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md) - Event decisions and inbox rows now render calendar dates instead of raw turn copy, source/dossier internals are hidden outside diagnostics, and toolbar load errors use player-facing copy. |
 | **First-hour shell and dev-map hardening** | [implemented/20260618_FIRST_HOUR_SHELL_AND_DEV_MAP_HARDENING.md](implemented/20260618_FIRST_HOUR_SHELL_AND_DEV_MAP_HARDENING.md) - Root map scripts call the map workspace Vite entrypoint directly, Warroom/game shell handoffs clear competing overlays, Warroom staff is labeled `Army HQ`, and future decision branches require explicit reveal. |
@@ -138,6 +139,7 @@
 
 | Date | Change | Report / spec |
 |------|--------|----------------|
+| 2026-06-18 | **First-hour shell/Records/Chronicle polish:** browser-fallback foundational decisions now file immediately into Records and Chronicle, first-hour shell chrome renders `Opening week`, count badges use readable separators, and decision-modal shell ownership is guarded. | [implemented/20260618_FIRST_HOUR_SHELL_RECORDS_CHRONICLE_POLISH.md](implemented/20260618_FIRST_HOUR_SHELL_RECORDS_CHRONICLE_POLISH.md) |
 | 2026-06-18 | **P1 raw-copy calendar boundary:** event decisions and inbox event cards now use calendar dates and non-diagnostic event/dossier internals stay out of player-facing copy; live browser verified the `What Is Bosnia?` modal. | [implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md](implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md) |
 | 2026-06-18 | **First-hour shell/dev-map hardening:** root map scripts, Warroom shell cleanup, Army HQ route labeling, and decision future-branch progressive disclosure were hardened. | [implemented/20260618_FIRST_HOUR_SHELL_AND_DEV_MAP_HARDENING.md](implemented/20260618_FIRST_HOUR_SHELL_AND_DEV_MAP_HARDENING.md) |
 | 2026-06-16 | **Selection/raw-ID polish:** standalone brigade selection now clears stale corps/army/HQ context, parent drilldowns route to the right owner IDs, and objective target surfaces use player-safe ordinal labels instead of visible raw OSIDs. | [implemented/20260616_SELECTION_AND_RAW_ID_POLISH.md](implemented/20260616_SELECTION_AND_RAW_ID_POLISH.md) |

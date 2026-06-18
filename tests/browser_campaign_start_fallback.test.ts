@@ -6,6 +6,7 @@ import {
   resolveBrowserEventDecision,
   startCampaignFromSidePicker,
 } from '../src/ui/map/desktop/campaignRecruitmentActions';
+import { parseGameState } from '../src/ui/map/data/GameStateAdapter';
 import type { IPC } from '../src/ui/map/desktop/useIPC';
 
 const STARTUP = JSON.parse(readFileSync(
@@ -128,5 +129,13 @@ describe('browser new-campaign fallback', () => {
         }),
       ]),
     );
+
+    const parsed = parseGameState(state);
+    const filed = parsed.firedEvents?.find((event) => event.id === 'rs_strategic_goals');
+    expect(filed).toMatchObject({
+      isDecision: true,
+      title: 'Rs Strategic Goals',
+      narrative: 'Presidential response filed in the campaign record.',
+    });
   });
 });

@@ -7,7 +7,12 @@ import { SituationTab } from './SituationTab';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 import { AccordionHeader } from './AccordionHeader';
 import { toTitleCase } from '../utils/formatters';
-import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName, getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
+import {
+  getPlayerSafeCorpsName,
+  getPlayerSafeMilitaryFactionName,
+  getPlayerSafeMunicipalityName,
+  getPlayerSafeOperationPhaseLabel,
+} from '../utils/playerSafeText';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { getFactionArmyCommander, getSyntheticJnaCommandPresentation, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
 import { formatRank } from '../utils/officerCharacter';
@@ -540,7 +545,7 @@ export function OOBSidebar() {
                             </div>
                             <div className="flex items-center gap-2 text-[10px]">
                               <span className={`px-1.5 py-0.5 rounded text-white uppercase font-semibold ${phaseBg}`}>
-                                {toTitleCase(op.phase)}
+                                {getPlayerSafeOperationPhaseLabel(op.phase)}
                               </span>
                               {op.momentum != null && (
                                 <span className="text-text-secondary">{t('operationsSection.momShort')} {op.momentum}</span>

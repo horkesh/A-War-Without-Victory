@@ -248,8 +248,8 @@ export function ChronicleOverlay() {
     }, [open]);
 
     const allEntries = useMemo(() =>
-        turnSummaries.length > 0 ? generateChronicleEntries(state, eventCatalogFull) : [],
-        [state, turnSummaries.length, eventCatalogFull]
+        state ? generateChronicleEntries(state, eventCatalogFull) : [],
+        [state, eventCatalogFull]
     );
 
     const entryCounts = useMemo(() => countChronicleEntriesByFilter(allEntries), [allEntries]);
@@ -556,7 +556,10 @@ export function ChronicleOverlay() {
                                     ].join(' ')}
                                 >
                                     <span>{chronicleFilterLabel(filter)}</span>
-                                    <span className="ml-1 text-stone-500">{count}</span>
+                                    <span aria-hidden="true" className="text-stone-600">
+                                        {' · '}
+                                    </span>
+                                    <span aria-label={`${count} entries`} className="text-stone-500">{count}</span>
                                 </button>
                             );
                         })}

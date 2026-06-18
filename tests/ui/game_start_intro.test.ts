@@ -79,6 +79,8 @@ describe('PeaceWarTransition identity block (game-start intro — step 2)', () =
 
     it('renders the RBiH "who you are" block with the President-of-the-Presidency copy', () => {
         render(createElement(PeaceWarTransition, { onDismiss: vi.fn(), state: playerState('RBiH') }));
+        expect(screen.getByRole('dialog', { name: 'WAR BEGINS' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Begin' })).toBeTruthy();
         expect(screen.getByText('WHO YOU ARE')).toBeTruthy();
         expect(
             screen.getByText(/President of the Presidency of the Republic of Bosnia and Herzegovina/),

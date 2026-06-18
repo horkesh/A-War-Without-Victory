@@ -421,7 +421,9 @@ export function PresidentialToolbar({
                                 ? t('presidentialToolbar.preAdvanceBlocking')
                                 : preAdvanceSeverityTone === 'urgent'
                                     ? t('presidentialToolbar.preAdvanceUrgent')
-                                    : 'No pre-advance alert'
+                                    : !ipc.isAvailable
+                                        ? t('presidentialToolbar.preAdvanceDesktopPreview')
+                                        : t('presidentialToolbar.preAdvanceClear')
                         }
                     />
 

@@ -398,15 +398,16 @@ export function generateChronicleEntries(
     state: any,
     eventCatalog?: ReadonlyMap<string, EventDefinition>,
 ): ChronicleEntry[] {
-    if (!state || !state.turnSummaries || !Array.isArray(state.turnSummaries)) {
+    if (!state) {
         return [];
     }
 
+    const turnSummaries = Array.isArray(state.turnSummaries) ? state.turnSummaries : [];
     const entries: ChronicleEntry[] = [];
     const playerFaction = typeof state.player_faction === 'string' ? state.player_faction : null;
     const decisionEventIds = collectDecisionEventIds(state);
 
-    for (const summary of state.turnSummaries) {
+    for (const summary of turnSummaries) {
         const turn = summary.turn;
 
         if (Array.isArray(summary.battles)) {
@@ -524,7 +525,7 @@ export function generateChronicleEntries(
     // when any faction has crossed an exhaustion threshold. Pure read of the
     // live war_exhaustion accumulator; monotonic ⇒ no history field needed.
     // Dated at the latest recorded turn.
-    const latestTurn = state.turnSummaries.reduce(
+    const latestTurn = turnSummaries.reduce(
         (max: number, s: any) => Math.max(max, Number(s?.turn ?? 0)),
         Number(state.turn ?? 0),
     );
@@ -559,7 +560,7 @@ export function generateChronicleEntries(
     // never the §6 rupture record. Pure read.
     const occupiedTurns = new Set<number>(entries.map((e) => e.turn));
     entries.push(...buildGeneralsDigestChronicleEntries(
-        state.turnSummaries,
+        turnSummaries,
         playerFaction,
         (state.rawGameState as GameState | undefined)?.military?.corps_command,
         latestTurn,
