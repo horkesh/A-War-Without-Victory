@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-18] test(ui): sync command-card lens request expectation
+
+**Type:** CI follow-up and UI route test-contract sync.
+
+**Fix:** GitHub Baseline Regression for the Decision Room routing merge exposed one stale accessibility assertion: `requestDecisionRoomLens(...)` now carries `cardId: null` as part of the one-shot focus payload, but `tests/ui/command_card_strip_accessibility.test.ts` still expected the older two-field request. Updated the assertion to match the shipped route contract.
+
+**Verification:** Focused shell/lens pack passed 3 files / 20 tests.
+
+**Scope/determinism:** Test/docs only; no runtime behavior, simulation logic, scenario data, save schema, serialization, generated artifacts, calibration floor, golden baselines, randomness, timestamps, persisted output ordering, or packaged installer artifact changed.
+
+---
+
 ## [2026-06-18] fix(ui): make command briefing action routes real
 
 **Type:** UI/read-model route ownership, persisted briefing target metadata, and player-copy hardening.
