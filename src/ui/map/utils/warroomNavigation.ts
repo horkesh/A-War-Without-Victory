@@ -74,7 +74,7 @@ export const WARROOM_ROUTE_ENTRIES: readonly WarroomRouteEntry[] = [
   },
   {
     id: 'staff',
-    label: 'Staff',
+    label: 'Army HQ',
     regionIds: ['commander_coatrack'],
     command: { kind: 'warroom-overlay', surface: 'staff' },
   },

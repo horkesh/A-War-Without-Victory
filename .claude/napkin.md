@@ -998,9 +998,11 @@ After EVERY scenario run, the orchestrator:
 7. **[2026-03-20] Nested package installations for Map UI**
    Do instead: The tactical map UI is a completely separate workspace at `src/ui/map` with its own `package.json`. Commands like `npm run dev:map` run `cd src/ui/map && npx vite`. When adding UI dependencies (like `deck.gl`), you MUST run `npm install` inside the `src/ui/map` directory, not the project root. Root `npm install --legacy-peer-deps` can break the inner Vite installation.
 
-8. **[2026-03-21] Deck.gl: formations (IconLayer) + settlement labels (TextLayer)**
+8. **[2026-06-18] Root map scripts must not depend on root Vite shims**
+   Do instead: Keep `npm run dev:map` and `npm run desktop:map:build` routed through `node src/ui/map/node_modules/vite/bin/vite.js --config src/ui/map/vite.config.ts`; do not rely on root `node_modules/.bin/vite.cmd` or nested `npx vite` on Windows.
+9. **[2026-03-21] Deck.gl: formations (IconLayer) + settlement labels (TextLayer)**
    Do instead: **`deckFormationCounters` defaults `true`** — clean NATO IconLayer counters only (enrichments stripped). MapLibre `formation-markers`/`formation-labels` hidden. Zoom-interpolation: `16px` @ Z6 to `40px` @ Z14. **Settlement labels**: Deck.gl TextLayer (27 cities) — MapLibre symbol layers globally broken (0 rendered features). `fontSettings: { sdf: true }`, `characterSet: 'auto'` for Bosnian diacritics. `setSettlementLabelData()` feeds from `buildMajorCityLabelGeoJSON`. Sarajevo 5 muns merged to one label.
-9. **[2026-03-26] UI screenshot automation on Windows uses Edge with puppeteer-core**
+10. **[2026-03-26] UI screenshot automation on Windows uses Edge with puppeteer-core**
    Do instead: For scripted screenshot capture in this repo (root `package.json` has `"type":"module"`), use a temporary `.cjs` script with `puppeteer-core` and `executablePath: "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"`. Avoid `.js` scripts with `require()` because they fail under ESM.
 ## GUI / Map
 1. **[2026-03-27] Command sidebar `top` is global crest clearance — looks empty on the left**

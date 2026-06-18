@@ -346,8 +346,8 @@ const WARROOM_OVERLAY_COPY: Record<NativeWarroomOverlaySurface, {
     drillInLabel: 'Open intelligence records',
   },
   staff: {
-    title: 'Staff',
-    eyebrow: 'Personnel and command',
+    title: 'Army HQ',
+    eyebrow: 'Staff and command',
     body: 'Commanders, vacancies, personnel friction, and replacement actions are reviewed here before entering Army HQ.',
     drillInLabel: 'Open Army HQ personnel',
   },
@@ -1195,6 +1195,7 @@ function App() {
   };
   const openCommandStrip = (categoryId: PresidentialCommandCategoryId | null, preserveFocusTarget = true) => {
     if (preserveFocusTarget) rememberWarroomFocus();
+    setWarroomDeskOpen(false);
     setWarroomOverlaySurface(null);
     setWarroomDecisionRoomOpen(false);
     setCommandStripCategoryId(categoryId);
@@ -1212,7 +1213,31 @@ function App() {
     closeCommandStrip(false);
     setDiplomacyOpen(false);
     setIsDecisionHistoryOpen(false);
+    setSummaryOpen(false);
     setAppScreen('game');
+  };
+  const returnToWarroomShell = () => {
+    const gs = useGameStore.getState();
+    gs.setArmyHQOpen(false);
+    gs.setCodexOpen(false);
+    gs.setChronicleOpen(false);
+    gs.setIsOperationsPanelOpen(false);
+    gs.setSelectedOsid(null);
+    gs.setSelectedFormationId(null);
+    gs.setSelectedCorpsId(null);
+    gs.setSelectedCorpsFrontSectorId(null);
+    gs.setSelectedArmyId(null);
+    gs.setSelectedArmyHqId(null);
+    gs.setSelectedOperationKey(null);
+    gs.setSelectedOrbatCorpsId(null);
+    setSummaryOpen(false);
+    setIsDecisionHistoryOpen(false);
+    setDiplomacyOpen(false);
+    setWarroomDeskOpen(false);
+    setWarroomDecisionRoomOpen(false);
+    setWarroomOverlaySurface(null);
+    closeCommandStrip(false);
+    setAppScreen('warroom');
   };
   const openWarroomDeskFromField = () => {
     const gs = useGameStore.getState();
@@ -1401,7 +1426,7 @@ function App() {
       // warroom.ts posts this when REACT_SHELL_ENABLED and the player clicks "back to HQ"
       // from the game view — React switches back to the warroom screen without an iframe reload.
       if (event.data?.type === 'awwv-shell:show-warroom') {
-        setAppScreen('warroom');
+        returnToWarroomShell();
         return;
       }
 
@@ -1412,8 +1437,7 @@ function App() {
       const handled = applyShellHandoffCommand(useGameStore.getState(), command);
       if (!handled) return;
       // Transition from warroom view to game view when a shell handoff arrives.
-      setAppScreen('game');
-      setSummaryOpen(false);
+      leaveWarroomForGame();
     };
 
     window.addEventListener('message', handleShellHandoff);

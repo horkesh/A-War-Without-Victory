@@ -93,7 +93,7 @@ describe('regionToShellHandoff', () => {
       'Command Surface',
       'Diplomacy',
       'Intelligence',
-      'Staff',
+      'Army HQ',
       'Chronicle',
       'Faction',
       'War Map',

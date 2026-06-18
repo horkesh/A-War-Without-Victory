@@ -19,6 +19,7 @@ import type {
     EventFutureConsequence,
     EventDefinition,
 } from '../../../sim/events/event_types';
+import { useState } from 'react';
 import type { GameState } from '../../../state/game_state';
 import { getCausalAncestors } from '../../../sim/events/causality_query';
 import { getPlayerSafePoliticalFactionName, getPlayerSafeOfficerName } from '../utils/playerSafeText';
@@ -237,6 +238,7 @@ function playerSafeFutureText(text: string, showDiagnostics: boolean): string {
     safe = safe.replace(/\bThis choice sets the all-six strategic-goals platform forecloses\b/g, 'This choice sets the all-six strategic-goals platform and forecloses');
     safe = safe.replace(/\bThis choice sets ([^.]+?) as ([^.]+?) (opens|closes|forecloses)\b/g, 'This choice sets $1 to $2 and $3');
     safe = safe.replace(/\bplatform forecloses\b/g, 'platform and forecloses');
+    safe = safe.replace(/\b(Civic platform) and forecloses\b/g, '$1 forecloses');
     safe = safe.replace(/\bcounterfactual Six Strategic Goals posture\s*=\s*selective flag\b/g, 'counterfactual restrained strategic-goals branch');
     safe = safe.replace(/\bThe target is gated on the counterfactual restrained strategic-goals branch, so\b/g, 'The restrained branch is closed here, so');
     safe = safe.replace(/\s*\((later [^)]+)\)/g, '');
@@ -316,22 +318,55 @@ function DecisionFutureConsequenceDossier({
     options: readonly EventResponseOption[];
     showDiagnostics: boolean;
 }) {
+    const [expandedOptionIds, setExpandedOptionIds] = useState<ReadonlySet<string>>(() => new Set());
     const optionsWithConsequences = options.filter((option) => (option.future_consequences ?? []).length > 0);
     if (optionsWithConsequences.length === 0) return null;
+    const consequenceCount = optionsWithConsequences.reduce(
+        (total, option) => total + (option.future_consequences ?? []).length,
+        0,
+    );
+    const toggleOption = (optionId: string) => {
+        setExpandedOptionIds((current) => {
+            const next = new Set(current);
+            if (next.has(optionId)) next.delete(optionId);
+            else next.add(optionId);
+            return next;
+        });
+    };
     return (
         <section className="mb-4 rounded border border-panel-border bg-panel-card/70 p-4">
             <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold">
-                Detailed consequence preview
+                Downstream impact preview
             </div>
+            <p className="mb-3 text-[11px] leading-relaxed text-text-secondary">
+                {consequenceCount} long-term branch {consequenceCount === 1 ? 'note is' : 'notes are'} available across {optionsWithConsequences.length} response {optionsWithConsequences.length === 1 ? 'option' : 'options'}.
+            </p>
             <div className="space-y-3">
-                {optionsWithConsequences.map((option) => (
+                {optionsWithConsequences.map((option) => {
+                    const optionConsequenceCount = option.future_consequences?.length ?? 0;
+                    const expanded = expandedOptionIds.has(option.id);
+                    return (
                     <div key={option.id} className="rounded border border-panel-border/70 bg-panel-bg/50 p-3">
                         <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary">
                             {option.label}
                         </div>
-                        <FutureConsequencePreview option={option} showDiagnostics={showDiagnostics} />
+                        <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                            <p className="text-[11px] text-text-muted">
+                                {optionConsequenceCount} downstream branch {optionConsequenceCount === 1 ? 'note' : 'notes'}
+                            </p>
+                            <button
+                                type="button"
+                                className="rounded border border-panel-border bg-panel-card px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary transition-colors hover:border-accent-gold/60 hover:text-accent-gold"
+                                aria-expanded={expanded}
+                                onClick={() => toggleOption(option.id)}
+                            >
+                                {expanded ? 'Hide details' : 'Show details'}
+                            </button>
+                        </div>
+                        {expanded && <FutureConsequencePreview option={option} showDiagnostics={showDiagnostics} />}
                     </div>
-                ))}
+                    );
+                })}
             </div>
         </section>
     );

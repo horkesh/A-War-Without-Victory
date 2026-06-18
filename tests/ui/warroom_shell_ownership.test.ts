@@ -110,9 +110,21 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         const app = read('src/ui/map/App.tsx');
 
         expect(app).toContain('const leaveWarroomForGame =');
-        expect(app).toMatch(/const leaveWarroomForGame = \(\) => \{[\s\S]*setWarroomDeskOpen\(false\);[\s\S]*setWarroomDecisionRoomOpen\(false\);[\s\S]*setWarroomOverlaySurface\(null\);[\s\S]*closeCommandStrip\(false\);[\s\S]*setDiplomacyOpen\(false\);[\s\S]*setAppScreen\('game'\);[\s\S]*\};/);
+        expect(app).toMatch(/const leaveWarroomForGame = \(\) => \{[\s\S]*setWarroomDeskOpen\(false\);[\s\S]*setWarroomDecisionRoomOpen\(false\);[\s\S]*setWarroomOverlaySurface\(null\);[\s\S]*closeCommandStrip\(false\);[\s\S]*setDiplomacyOpen\(false\);[\s\S]*setIsDecisionHistoryOpen\(false\);[\s\S]*setSummaryOpen\(false\);[\s\S]*setAppScreen\('game'\);[\s\S]*\};/);
+        expect(app).toMatch(/if \(event\.data\?\.type === 'awwv-shell:show-warroom'\) \{[\s\S]*returnToWarroomShell\(\);[\s\S]*return;[\s\S]*\}/);
+        expect(app).toMatch(/const handled = applyShellHandoffCommand\(useGameStore\.getState\(\), command\);[\s\S]*if \(!handled\) return;[\s\S]*leaveWarroomForGame\(\);/);
         expect(app).not.toContain("onOpenMap={() => setAppScreen('game')}");
         expect(app).not.toContain("onOpenDesk={() => setAppScreen('warroom')}");
+    });
+
+    it('keeps Desk-local Command Surface mutually exclusive with the Desk overlay', () => {
+        const app = read('src/ui/map/App.tsx');
+        const openCommandStripStart = app.indexOf('const openCommandStrip =');
+        const openCommandStripEnd = app.indexOf('\n  const closeCommandStrip =', openCommandStripStart);
+
+        expect(openCommandStripStart).toBeGreaterThanOrEqual(0);
+        expect(openCommandStripEnd).toBeGreaterThan(openCommandStripStart);
+        expect(app.slice(openCommandStripStart, openCommandStripEnd)).toContain('setWarroomDeskOpen(false);');
     });
 
     it('makes Decision History a mutually exclusive top-level overlay', () => {
