@@ -4,6 +4,8 @@
 
 Nietzsche's map-data sidecar traced the live Deck.gl `Skipping ... polygon with invalid coordinates` warnings to committed operational settlement geometry, not to the overlay builders. Several OSID MultiPolygon rows carried degenerate or too-short secondary parts, so damage and force-quality overlays correctly skipped them at render time.
 
+**Supersession note (2026-06-18):** the geometry cleanup remains accepted, but the live post-side-coverage sector geometry barrier described below was rejected after 188w proof. Current mainline uses projection-only final-save sector repair with active structural fingerprint `f282883abbab76cf`; see `docs/40_reports/CALIBRATION_MASTER.md` for the live contract.
+
 ## Implementation
 
 - Hardened `scripts/derive_operational_settlements.ts` so normalization drops invalid MultiPolygon parts and invalid/tiny holes instead of carrying them into `data/derived/operational/operational_settlements.geojson`.

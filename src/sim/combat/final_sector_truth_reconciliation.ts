@@ -22,6 +22,10 @@ export interface FinalSectorTruthReconciliationReport {
     unresolved_brigades: number;
 }
 
+export interface FinalSectorTruthReconciliationOptions {
+    finalSaveGeometryProjection?: boolean;
+}
+
 /**
  * v0.9.3 Lane 4 C5 — skip the rebuild when the step 2 → step 3 pair runs on
  * byte-identical inputs. `reconcile-final-sector-truth-after-ops` re-runs the
@@ -127,18 +131,28 @@ export function reconcileFinalSectorTruth(
     spatial?: SpatialContext,
     supplyStateByOsid?: SupplyStateByOsidReport | null,
     isFinalPass: boolean = false,
+    options?: FinalSectorTruthReconciliationOptions,
 ): FinalSectorTruthReconciliationReport {
     const fingerprint = computeReconcileFingerprint(state, supplyStateByOsid);
     const cached = reconcileCache.get(state);
     const finalPassNeedsRebuild = isFinalPass && !cached?.lastFinalPass;
-    if (cached && cached.fingerprint === fingerprint && !finalPassNeedsRebuild) {
+    const projectionNeedsRebuild = options?.finalSaveGeometryProjection === true;
+    if (cached && cached.fingerprint === fingerprint && !finalPassNeedsRebuild && !projectionNeedsRebuild) {
         // State is byte-identical to the last reconcile run. All outputs
         // (corps_front_sectors, sector_combat_ratings, unresolved_sector_brigades,
         // formation.assigned_sub_segment_id) are still present in state.
         return cached.report;
     }
 
-    const sectors = buildCorpsFrontSectors(state, edges, reverseMap, centroids, spatial, isFinalPass);
+    const sectors = buildCorpsFrontSectors(
+        state,
+        edges,
+        reverseMap,
+        centroids,
+        spatial,
+        isFinalPass,
+        options?.finalSaveGeometryProjection === true,
+    );
     state.military.corps_front_sectors = sectors;
 
     const sectorList = Object.values(sectors);

@@ -2862,6 +2862,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 operationalData.operationalToCanonical,
                 operationalCentroids,
                 finalSpatial,
+                null,
+                false,
+                { finalSaveGeometryProjection: true },
             );
             sealFinalSectorTruthFromCurrentSectors(
                 state,

@@ -324,6 +324,7 @@ export function buildCorpsFrontSectors(
     centroids?: OsidCentroidMap,
     spatial?: SpatialContext,
     isFinalPass: boolean = false,
+    finalSaveGeometryProjection: boolean = false,
 ): Record<string, CorpsFrontSector> {
     const osidFrontEdges = state.military.war_front_edges_osid;
     if (!osidFrontEdges || osidFrontEdges.length === 0) return {};
@@ -596,6 +597,13 @@ export function buildCorpsFrontSectors(
     if (_postCoverageAbsorbed) {
         _perfTime('pruneGhostArtifactSectors:post-side-coverage', () => pruneGhostArtifactSectors(result));
         _perfTime('applyFinalSectorOwnerTruthPass:post-side-coverage', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass }));
+    }
+    if (finalSaveGeometryProjection) {
+        // Final-save projection only: side-coverage recovery may append a missing
+        // front edge after the earlier geometry barriers. Do not run this in the
+        // live turn loop; it changes long-horizon calibration.
+        _perfTime('enforceFinalSectorGeometryInvariants:final-save-projection', () => enforceFinalSectorGeometryInvariants(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, formations));
+        _perfTime('pruneGhostArtifactSectors:final-save-projection', () => pruneGhostArtifactSectors(result));
     }
     _perfTime('annotateUnstaffedFrontSectors', () => annotateUnstaffedFrontSectors(result, state, formations, adjacency, spatial));
     _perfTime('recomputeMetricsByFaction:2', () => recomputeMetricsByFaction(Object.values(result), formations, state));
