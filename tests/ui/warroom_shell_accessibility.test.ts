@@ -75,7 +75,7 @@ describe('WarroomShellLayer accessibility proof', () => {
             'Command Surface',
             'Diplomacy',
             'Intelligence',
-            'Staff',
+            'Army HQ',
             'Chronicle',
             'Faction',
             'War Map',

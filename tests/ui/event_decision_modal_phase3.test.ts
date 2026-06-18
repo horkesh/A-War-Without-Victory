@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { EventDecisionModal } from '../../src/ui/map/components/EventDecisionModal.js';
 
@@ -186,6 +186,13 @@ describe('EventDecisionModal presidential dossier', () => {
       onRespond: () => undefined,
     }));
 
+    expect(screen.getByText('Downstream impact preview')).toBeTruthy();
+    expect(screen.getByText('1 long-term branch note is available across 1 response option.')).toBeTruthy();
+    expect(screen.getByText('1 downstream branch note')).toBeTruthy();
+    expect(screen.queryByText('Negotiation window preserved')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show details' }));
+
     expect(screen.getByText('Future consequences')).toBeTruthy();
     expect(screen.getByText('Negotiation window preserved')).toBeTruthy();
     expect(screen.getByText('Future')).toBeTruthy();
@@ -231,6 +238,9 @@ describe('EventDecisionModal presidential dossier', () => {
       onRespond: () => undefined,
     }));
 
+    expect(screen.queryByText(/This choice sets the all-six strategic-goals platform and forecloses restrained Drina resistance branch/i)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Show details' }));
+
     expect(screen.getByText(/This choice sets the all-six strategic-goals platform and forecloses restrained Drina resistance branch/i)).toBeTruthy();
     expect(screen.getByText(/The restrained branch is closed here, so on the documented historical all six goals path/i)).toBeTruthy();
     expect(screen.queryByText(/rs_strategic_goals/)).toBeNull();
@@ -254,7 +264,7 @@ describe('EventDecisionModal presidential dossier', () => {
             future_consequences: [
               {
                 id: 'raw_branch',
-                label: 'csq_bosniak_unity_1993 recorded from consequences.json',
+                label: 'Civic platform forecloses csq_bosniak_unity_1993 from consequences.json',
                 timing: 'future',
                 certainty: 'conditional',
                 explanation: 'Recording rbih_state_identity as civic opens csq_bosniak_unity_1993 from consequences.json when These consequence rows are active.',
@@ -266,11 +276,19 @@ describe('EventDecisionModal presidential dossier', () => {
       onRespond: () => undefined,
     }));
 
+    expect(container.textContent).toContain('1 long-term branch note is available across 1 response option.');
+    expect(container.textContent).not.toContain('csq_');
+    expect(screen.queryByText(/later Bosniak-national unity consolidation/i)).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show details' }));
+
     expect(screen.getAllByText(/later Bosniak-national unity consolidation/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Civic platform forecloses later Bosniak-national unity consolidation/i)).toBeTruthy();
     expect(container.textContent).not.toContain('csq_');
     expect(container.textContent).not.toContain('.json');
     expect(container.textContent).not.toMatch(/\bRecording\b/i);
     expect(container.textContent).not.toContain('These consequence rows');
+    expect(container.textContent).not.toContain('Civic platform and forecloses');
   });
 
   it('keeps all response choices before detailed future-consequence copy', () => {
@@ -319,6 +337,9 @@ describe('EventDecisionModal presidential dossier', () => {
       },
       onRespond: () => undefined,
     }));
+
+    const buttons = screen.getAllByRole('button', { name: 'Show details' });
+    for (const button of buttons) fireEvent.click(button);
 
     const text = container.textContent ?? '';
     expect(text.indexOf('Adopt the programme')).toBeLessThan(text.indexOf('Detailed future branch A'));
