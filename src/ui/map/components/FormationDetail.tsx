@@ -5,7 +5,7 @@ import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
 import { assignBrigadeToSectorOverrideAction } from '../desktop/orderActions';
 import { getPanelRailStyle } from './panelRail';
-import { turnToDateString, formatCombatOutcome, formatPosture, toTitleCase } from '../utils/formatters';
+import { turnToDateString, formatCombatOutcome } from '../utils/formatters';
 import { getArmyCrest } from '../utils/factionAssets';
 import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
@@ -16,7 +16,13 @@ import { TabBar } from './TabBar';
 import { computeBrigadeEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
 import { getPlayerFacingCorpsName, getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
-import { getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
+import {
+  getPlayerSafeFormationPostureLabel,
+  getPlayerSafeFormationReadinessLabel,
+  getPlayerSafeDisplayLabel,
+  getPlayerSafeMunicipalityName,
+  getPlayerSafeSectorStanceLabel,
+} from '../utils/playerSafeText';
 import { t, useLocale } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { inspectOnField } from '../utils/shellNavigation';
@@ -321,9 +327,9 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             {/* Posture & readiness */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs px-2 py-1 bg-black/20 rounded border border-panel-border/30">
               <span className="text-text-secondary">{t('formationDetail.posture')}</span>
-              <span className="text-text-primary font-semibold">{formatPosture(formation.posture ?? 'hold')}</span>
+              <span className="text-text-primary font-semibold">{getPlayerSafeFormationPostureLabel(formation.posture ?? 'hold')}</span>
               <span className="text-text-secondary ml-1">{t('formationDetail.readiness')}</span>
-              <span className="text-text-primary">{toTitleCase(formation.readiness)}</span>
+              <span className="text-text-primary">{getPlayerSafeFormationReadinessLabel(formation.readiness)}</span>
             </div>
 
             {/* Stranded (Isolated) indicator */}
@@ -557,10 +563,10 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                     ? 'bg-accent-blue/20 text-accent-blue border-accent-blue/40'
                     : 'bg-[#d4a055]/20 text-[#d4a055] border-[#d4a055]/40'
                 }`}>
-                  {toTitleCase(formation.movementStatus)}
+                  {getPlayerSafeDisplayLabel(formation.movementStatus, t('formationDetail.movement'))}
                 </span>
                 {formation.movementStance && (
-                  <span className="text-text-secondary lowercase italic">({formation.movementStance} march)</span>
+                  <span className="text-text-secondary lowercase italic">({getPlayerSafeSectorStanceLabel(formation.movementStance)} march)</span>
                 )}
               </div>
             )}
@@ -920,7 +926,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             {!isBrigade && formation.corpsStance && (
               <div className="text-xs space-y-1">
                 <span className="text-text-secondary">{t('formationDetail.corpsStance')} </span>
-                <span className="text-text-primary font-semibold">{toTitleCase(formation.corpsStance)}</span>
+                <span className="text-text-primary font-semibold">{getPlayerSafeSectorStanceLabel(formation.corpsStance)}</span>
               </div>
             )}
           </>

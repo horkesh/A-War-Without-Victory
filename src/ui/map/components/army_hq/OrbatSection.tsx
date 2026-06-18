@@ -8,6 +8,7 @@ import { useGameStore } from '../../store/gameStore';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { getCohesionColor, OUTCOME_COLORS } from '../../utils/theme';
 import { formatPersonnel, toTitleCase } from '../../utils/formatters';
+import { getPlayerSafeFormationPostureLabel } from '../../utils/playerSafeText';
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
 import { t, useLocale } from '../../i18n';
@@ -291,7 +292,7 @@ export function OrbatSection({ corpsId, brigades }: OrbatSectionProps) {
 
                                 {/* Status posture */}
                                 <span className={`text-[10px] font-bold uppercase w-14 text-right shrink-0 ${statusColor}`}>
-                                    {isDisrupted ? t('orbat.disruptedShort') : (b.posture ?? '—')}
+                                    {isDisrupted ? t('orbat.disruptedShort') : getPlayerSafeFormationPostureLabel(b.posture, 'Pending')}
                                 </span>
                             </button>
                             {isExpanded && <BrigadeExpandedDetail b={b} />}

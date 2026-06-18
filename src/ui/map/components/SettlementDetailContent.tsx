@@ -12,9 +12,11 @@ import { toTitleCase } from '../utils/formatters';
 import { SettlementTimeline } from './SettlementTimeline';
 import { buildSettlementTimeline } from '../utils/buildSettlementTimeline';
 import {
+  getPlayerSafeFormationReadinessLabel,
   getPlayerSafeBrigadeName,
   getPlayerSafeMilitaryFactionName,
   getPlayerSafeMunicipalityName,
+  getPlayerSafeOperationPhaseLabel,
 } from '../utils/playerSafeText';
 import { t, useLocale } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
@@ -450,7 +452,7 @@ export function SettlementDetailContent({
                   <>
                     <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${op.faction === 'RBiH' ? 'bg-green-600' : op.faction === 'RS' ? 'bg-red-600' : 'bg-blue-600'}`} />
                     <span className="text-text-primary font-medium truncate">{op.name}</span>
-                    <span className="text-[9px] text-text-secondary">({op.phase})</span>
+                    <span className="text-[9px] text-text-secondary">({getPlayerSafeOperationPhaseLabel(op.phase)})</span>
                   </>
                 );
                 return (
@@ -748,7 +750,7 @@ export function SettlementDetailContent({
                       <span className="text-[10px] text-text-primary font-medium truncate">{getLocalizedFormationName(f, locale)}</span>
                       {isPanel && f.readiness && (
                         <span className="text-[8px] px-1 py-0.5 rounded bg-white/10 text-text-secondary flex-shrink-0">
-                          {f.readiness}
+                          {getPlayerSafeFormationReadinessLabel(f.readiness)}
                         </span>
                       )}
                     </div>

@@ -8,7 +8,7 @@ import type { OperationView, FormationView, LoadedGameState, NamedOfficerView } 
 import { useGameStore } from '../../store/gameStore';
 import { turnToDateString, toTitleCase } from '../../utils/formatters';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
-import { getPlayerSafeBrigadeName } from '../../utils/playerSafeText';
+import { getPlayerSafeBrigadeName, getPlayerSafeOperationPhaseLabel } from '../../utils/playerSafeText';
 import { getPlayerSafeOperationBalancePresentation } from '../../../../shared/playerSafeOperationBalance';
 import { CollapsibleSection } from './CollapsibleSection';
 import { deriveOperationOutcomeCategory } from '../../data/command_strain';
@@ -254,7 +254,7 @@ function WeeklyLogTimeline({ log, resolveObjectiveLabel }: { log: CompletedOp['w
                     return (
                         <div key={i} className={`flex items-start gap-2 px-2 py-0.5 text-[9px] font-mono tabular-nums ${hasCaptures ? 'bg-emerald-500/5 border-l-2 border-emerald-400/40' : 'border-l-2 border-panel-border/20'}`}>
                             <span className="text-text-secondary/60 w-16 shrink-0">{turnToDateString(entry.turn).split(' ').slice(1, 3).join(' ')}</span>
-                            <span className="text-text-secondary/40 w-10 shrink-0 uppercase">{entry.phase.slice(0, 5)}</span>
+                            <span className="text-text-secondary/40 w-16 shrink-0 uppercase">{getPlayerSafeOperationPhaseLabel(entry.phase)}</span>
                             {entry.attacks_this_turn > 0 && (
                                 <span className="text-red-500/80">{entry.attacks_this_turn} ATK</span>
                             )}
@@ -619,7 +619,7 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                                                 />
                                             )}
                                             <span className={`text-[9px] font-bold uppercase px-2 py-0.5 border leading-none tracking-widest ${badge.bg} ${badge.border} ${badge.text}`}>
-                                                {op.phase}
+                                                {getPlayerSafeOperationPhaseLabel(op.phase)}
                                             </span>
                                         </div>
                                     </div>

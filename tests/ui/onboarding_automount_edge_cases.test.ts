@@ -80,5 +80,16 @@ describe('Codex #347 (P2) — onboarding auto-mount edge cases (task #85)', () =
       // overlay uses its in-memory preview fallback in browser/dev builds.
       expect(source).toContain('ipc.isAvailable');
     });
+
+    it('hoists browser preview dismissal across overlay remounts', () => {
+      const app = readFileSync('src/ui/map/App.tsx', 'utf8');
+      const overlay = readFileSync('src/ui/map/components/onboarding/OnboardingOverlay.tsx', 'utf8');
+
+      expect(app).toContain('browserPreviewTutorialStateMemory');
+      expect(app).toContain('commitBrowserPreviewTutorialState');
+      expect(app).toContain('onPreviewTutorialStateChange={commitBrowserPreviewTutorialState}');
+      expect(overlay).toContain('onPreviewTutorialStateChange?:');
+      expect(overlay).toContain('onPreviewTutorialStateChange?.(nextState)');
+    });
   });
 });

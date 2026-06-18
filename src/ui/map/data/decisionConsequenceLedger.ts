@@ -9,8 +9,9 @@ import type {
   ReserveRequestDecisionRecordView,
 } from './types';
 import {
-  getPlayerSafeCorpsName,
-  getPlayerSafeMilitaryFactionName,
+    getPlayerSafeCorpsName,
+    getPlayerSafeRecordDetail,
+    getPlayerSafeMilitaryFactionName,
 } from '../utils/playerSafeText.js';
 
 export interface DecisionConsequenceRecord {
@@ -125,8 +126,12 @@ function safeReserveReasonCopy(value: string | null | undefined): string | null 
   if (!trimmed) return null;
   const mapped = RESERVE_REASON_LABELS[trimmed];
   if (mapped) return mapped;
-  if (/^[a-z0-9]+(?:_[a-z0-9]+)+$/i.test(trimmed)) return null;
+  if (/^[a-z0-9]+(?:_[a-z0-9]+)+$/i.test(trimmed) || /[:/\\]|\.json\b/i.test(trimmed)) return null;
   return trimmed;
+}
+
+function safeConsequenceDetail(value: string | null | undefined, fallback = 'Decision filed in the campaign record.'): string {
+  return getPlayerSafeRecordDetail(value, fallback);
 }
 
 function reserveDetail(
@@ -140,15 +145,15 @@ function reserveDetail(
     ? displayMaps.formationNames.get(record.brigade_id) ?? 'the reserve brigade'
     : null;
   if (record.outcome === 'accepted' && brigade) {
-    return `${brigade} assigned to ${corps}. ${record.why_needed || safeReserveReasonCopy(record.reason) || 'Decision filed.'}`.trim();
+    return `${brigade} assigned to ${corps}. ${safeConsequenceDetail(record.why_needed, safeReserveReasonCopy(record.reason) || 'Decision filed.')}`.trim();
   }
   if (record.outcome === 'declined') {
-    return `${corps} request declined. ${safeReserveReasonCopy(record.reason) || record.why_needed || 'Reserve decision filed.'}`.trim();
+    return `${corps} request declined. ${safeReserveReasonCopy(record.reason) || safeConsequenceDetail(record.why_needed, 'Reserve decision filed.')}`.trim();
   }
   if (record.outcome === 'terminated' && brigade) {
-    return `${brigade} recalled from ${corps}. ${safeReserveReasonCopy(record.reason) || record.how_to_use || 'Reserve decision filed.'}`.trim();
+    return `${brigade} recalled from ${corps}. ${safeReserveReasonCopy(record.reason) || safeConsequenceDetail(record.how_to_use, 'Reserve decision filed.')}`.trim();
   }
-  return `${corps}: ${safeReserveReasonCopy(record.reason) || record.why_needed || 'Decision filed.'}`.trim();
+  return `${corps}: ${safeReserveReasonCopy(record.reason) || safeConsequenceDetail(record.why_needed, 'Decision filed.')}`.trim();
 }
 
 function peaceOutcome(record: PeacePlanDecisionRecordView): string {
@@ -321,7 +326,10 @@ export function buildDecisionConsequenceLedger(
       family: 'Event decision',
       title: event.title || 'Recorded decision',
       outcome: 'Decision recorded',
-      detail: event.effects?.[0]?.description ?? event.narrative ?? 'Filed in the campaign record.',
+      detail: safeConsequenceDetail(
+        event.effects?.[0]?.description,
+        safeConsequenceDetail(event.narrative, 'Filed in the campaign record.'),
+      ),
       recordTarget: 'chronicle',
     });
   }

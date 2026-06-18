@@ -31,6 +31,13 @@ function getFactionDisplayLabel(faction: string | undefined): string {
     return PLAYER_FACTION_LABELS[faction] ?? faction;
 }
 
+function getPhaseDisplayLabel(phase: string): string {
+    if (phase === 'war') return 'War';
+    if (phase === 'peace') return 'Peace';
+    if (phase === 'postwar') return 'Postwar';
+    return getPlayerSafeDisplayLabel(phase, 'Campaign');
+}
+
 function resolveEventFallbackLabel(fallbackId: string): string {
     const displayId = fallbackId.trim().replace(/^(?:evt|event|csq)_/i, '');
     return getPlayerSafeDisplayLabel(displayId || fallbackId, 'Recorded event');
@@ -98,7 +105,7 @@ export function generateWrappedSlides(
         subtitle: `You led ${playerFactionLabel} through ${currentTurn} weeks of conflict`,
         heroValue: String(currentTurn),
         heroLabel: 'weeks at war',
-        detail: `Phase: ${phase}`,
+        detail: `Campaign phase: ${getPhaseDisplayLabel(phase)}`,
         data: { faction: playerFaction, turn: currentTurn, phase },
     });
 

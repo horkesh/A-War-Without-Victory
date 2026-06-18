@@ -66,6 +66,34 @@ describe('Chronicle decision ledger integration', () => {
     }));
   });
 
+  it('shows opening-week presidential decisions before any turn summaries exist', () => {
+    const entries = generateChronicleEntries({
+      turn: 0,
+      player_faction: 'RBiH',
+      firedEvents: [{
+        id: 'rbih_state_identity',
+        turn: 0,
+        title: 'What Is Bosnia?',
+        narrative: 'The Presidency reaffirmed the civic republic.',
+        category: 'political',
+        effects: [{ kind: 'political', description: 'Civic claim reinforced.' }],
+        isDecision: true,
+      }],
+    });
+
+    expect(entries).toContainEqual(expect.objectContaining({
+      id: 'decision-ledger-event:rbih_state_identity',
+      turn: 0,
+      type: 'political',
+      headline: true,
+      title: 'What Is Bosnia?',
+      detail: 'Civic claim reinforced.',
+      metadata: expect.objectContaining({
+        decisionRecordId: 'event:rbih_state_identity',
+      }),
+    }));
+  });
+
   it('adds patron-defiance material receipts to the Chronicle decision ledger trail', () => {
     const entries = generateChronicleEntries({
       turn: 44,

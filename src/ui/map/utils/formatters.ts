@@ -16,6 +16,12 @@ export function turnToDateString(turn: number): string {
     return `${startDate.getUTCDate()} ${month} ${startDate.getUTCFullYear()}`;
 }
 
+export function formatCampaignWeekLabel(turn: number | null | undefined): string {
+    const safeTurn = Number.isFinite(turn) ? Number(turn) : 0;
+    if (safeTurn <= 0) return t('campaign.openingWeekLabel');
+    return t('campaign.weekLabel', { turn: safeTurn });
+}
+
 /**
  * Humanizes a turn label (e.g., "T32" or "Turn 32") by prepending the calendar date.
  */
@@ -24,7 +30,7 @@ export function formatTurnLabel(label: string): string {
     if (!match) return label;
     const turn = parseInt(match[1], 10);
     const dateStr = turnToDateString(turn);
-    return label.replace(match[0], `${dateStr} \u00B7 ${t('toolbar.turnLabel', { turn })}`);
+    return label.replace(match[0], `${dateStr} \u00B7 ${formatCampaignWeekLabel(turn)}`);
 }
 
 /**

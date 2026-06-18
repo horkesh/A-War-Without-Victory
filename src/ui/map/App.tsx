@@ -35,7 +35,7 @@ import { PresidentialInbox } from './components/PresidentialInbox';
 import type { EventDisplayData } from './components/EventModal';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
 import { PeacePlanModal } from './components/PeacePlanModal';
-import { OnboardingOverlay } from './components/onboarding/OnboardingOverlay';
+import { OnboardingOverlay, type TutorialStateShape } from './components/onboarding/OnboardingOverlay';
 import { ParamilitaryReviewModal } from './components/ParamilitaryReviewModal';
 import { EventDecisionModal } from './components/EventDecisionModal';
 import { ConvoyDecisionModal } from './components/ConvoyDecisionModal';
@@ -274,9 +274,18 @@ function CodexPanelWrapper({
  *
  * Faction-agnostic (mirrors the overlay + restart-button single-owner contract).
  */
+let browserPreviewTutorialStateMemory: TutorialStateShape | null = null;
+
 function OnboardingOverlayWrapper() {
   const tutorialState = useGameStore((s) => s.loadedGameState?.tutorial_state);
   const ipc = useIPC();
+  const [browserPreviewTutorialState, setBrowserPreviewTutorialState] = useState<TutorialStateShape | null>(
+    browserPreviewTutorialStateMemory,
+  );
+  const commitBrowserPreviewTutorialState = (nextState: TutorialStateShape) => {
+    browserPreviewTutorialStateMemory = nextState;
+    setBrowserPreviewTutorialState(nextState);
+  };
   // Codex #347 (P2) — preserve dismissal when IPC is unavailable. In
   // browser/dev-map builds (or when the tutorial ipcMain handlers are not
   // registered) `ipc.isAvailable` is false but `useIPC()` still exposes noop
@@ -298,7 +307,13 @@ function OnboardingOverlayWrapper() {
         : null,
     [ipc],
   );
-  return <OnboardingOverlay tutorialState={tutorialState} ipc={onboardingBridge} />;
+  return (
+    <OnboardingOverlay
+      tutorialState={ipc.isAvailable ? tutorialState : (browserPreviewTutorialState ?? tutorialState)}
+      ipc={onboardingBridge}
+      onPreviewTutorialStateChange={commitBrowserPreviewTutorialState}
+    />
+  );
 }
 
 function PeaceWarTransitionOverlay() {
@@ -1097,6 +1112,7 @@ function App() {
     lens: Parameters<typeof requestDecisionRoomLens>[0] = 'all',
     cardId: string | null = null,
   ) => {
+    if (activeEventDecisionId !== null) return;
     const gs = useGameStore.getState();
     requestDecisionRoomLens(lens, null, cardId);
     gs.setArmyHQOpen(false);
@@ -1271,6 +1287,7 @@ function App() {
     setAppScreen('warroom');
   };
   const openWarroomDeskFromField = () => {
+    if (activeEventDecisionId !== null) return;
     const gs = useGameStore.getState();
     gs.setArmyHQOpen(false);
     gs.setCodexOpen(false);
@@ -1286,6 +1303,7 @@ function App() {
     setAppScreen('warroom');
   };
   const openCommandCategory = () => {
+    if (activeEventDecisionId !== null) return;
     setCommandStripOpen(false);
     setCommandStripCategoryId(null);
     setWarroomDeskOpen(false);
@@ -1293,6 +1311,7 @@ function App() {
     setWarroomDecisionRoomOpen(true);
   };
   const openWarroomOverlay = (surface: WarroomOverlaySurface) => {
+    if (activeEventDecisionId !== null) return;
     rememberWarroomFocus();
     if (surface === 'president-desk') {
       setWarroomDeskOpen(true);

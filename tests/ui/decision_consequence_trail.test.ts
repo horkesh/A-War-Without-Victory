@@ -60,6 +60,74 @@ describe('decision consequence trail', () => {
     expect(JSON.stringify(ledger)).not.toMatch(/pending_required_decisions|_/);
   });
 
+  it('sanitizes raw authored event effect descriptions before filing consequence records', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      firedEvents: [
+        {
+          id: 'raw-effect',
+          turn: 2,
+          title: 'Cabinet line set',
+          narrative: 'A policy line was filed.',
+          category: 'political',
+          effects: [{ kind: 'narrative', description: 'csq_rbih_identity.json // authoring note' }],
+          isDecision: true,
+        },
+      ],
+    }));
+
+    expect(ledger[0].detail).toBe('A policy line was filed.');
+    expect(ledger[0].detail).not.toMatch(/csq_|\.json|\/\//);
+  });
+
+  it('sanitizes reserve request prose fields before filing consequence records', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      formations: [
+        {
+          id: 'elite_guard_brigade',
+          faction: 'RS',
+          name: 'Elite Guard Brigade',
+          kind: 'brigade',
+          readiness: 'ready',
+          cohesion: 75,
+          fatigue: 0,
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+        },
+        {
+          id: 'vrs_drina_corps',
+          faction: 'RS',
+          name: 'Drina Corps',
+          kind: 'corps',
+          readiness: 'ready',
+          cohesion: 75,
+          fatigue: 0,
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+        },
+      ],
+      reserveRequestHistory: [
+        {
+          request_id: 'req1',
+          turn: 4,
+          faction: 'RS',
+          corps_id: 'vrs_drina_corps',
+          brigade_id: 'elite_guard_brigade',
+          outcome: 'accepted',
+          reason: 'sector:drina_gap',
+          purpose: 'defensive_gap',
+          why_needed: 'op:drina:sector_gap // raw note',
+          how_to_use: 'raw',
+          decided_by: 'player',
+        },
+      ],
+    }));
+
+    expect(ledger[0].detail).toBe('Elite Guard Brigade assigned to Drina Corps. Decision filed.');
+    expect(ledger[0].detail).not.toMatch(/op:|sector:|\/\//);
+  });
+
   it('includes resolved operation opportunities with their later AAR status', () => {
     const ledger = buildDecisionConsequenceLedger(makeState({
       operationOpportunityRecords: [

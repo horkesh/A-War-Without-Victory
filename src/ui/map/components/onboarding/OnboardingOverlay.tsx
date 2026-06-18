@@ -66,6 +66,8 @@ export interface OnboardingOverlayProps {
     tutorialState: TutorialStateShape | null | undefined;
     /** IPC bridge. Pass null for local preview-only progression without persisted writes. */
     ipc: OnboardingIpcBridge | null;
+    /** Browser/dev-map owner memory for preview-only dismissal across shell remounts. */
+    onPreviewTutorialStateChange?: (state: TutorialStateShape) => void;
 }
 
 /**
@@ -189,7 +191,7 @@ function getOverlayFocusables(root: HTMLElement | null): HTMLElement[] {
 }
 
 export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | null {
-    const { tutorialState, ipc } = props;
+    const { tutorialState, ipc, onPreviewTutorialStateChange } = props;
     const [pending, setPending] = useState(false);
     const [previewTutorialState, setPreviewTutorialState] = useState<TutorialStateShape | null>(null);
     const [spotlightRect, setSpotlightRect] = useState<TutorialSpotlightRect | null>(null);
@@ -206,6 +208,10 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
     const completed = effectiveTutorialState?.completed_steps ?? [];
     const next = visible ? resolveNextStep(completed) : null;
     const active = visible && next !== null;
+    const commitPreviewTutorialState = (nextState: TutorialStateShape) => {
+        setPreviewTutorialState(nextState);
+        onPreviewTutorialStateChange?.(nextState);
+    };
 
     useEffect(() => {
         if (!active || !next) {
@@ -262,7 +268,7 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
             e.preventDefault();
             e.stopPropagation();
             if (!ipc) {
-                setPreviewTutorialState((prior) => applyDismissPure(prior ?? effectiveTutorialState));
+                commitPreviewTutorialState(applyDismissPure(previewTutorialState ?? effectiveTutorialState));
                 return;
             }
             setPending(true);
@@ -274,7 +280,7 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
         };
         window.addEventListener('keydown', handler);
         return () => window.removeEventListener('keydown', handler);
-    }, [active, pending, ipc, effectiveTutorialState]);
+    }, [active, pending, ipc, effectiveTutorialState, previewTutorialState, onPreviewTutorialStateChange]);
 
     if (!active || !next) return null;
 
@@ -289,10 +295,8 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
     const onAdvance = async () => {
         if (pending) return;
         if (!ipc) {
-            setPreviewTutorialState((prior) => {
-                const advanced = applyAdvanceStepPure(prior ?? effectiveTutorialState, next.id);
-                return isFinalStep(next.id) ? applyDismissPure(advanced) : advanced;
-            });
+            const advanced = applyAdvanceStepPure(previewTutorialState ?? effectiveTutorialState, next.id);
+            commitPreviewTutorialState(isFinalStep(next.id) ? applyDismissPure(advanced) : advanced);
             return;
         }
         setPending(true);
@@ -317,7 +321,7 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
     const onSkip = async () => {
         if (pending) return;
         if (!ipc) {
-            setPreviewTutorialState((prior) => applyDismissPure(prior ?? effectiveTutorialState));
+            commitPreviewTutorialState(applyDismissPure(previewTutorialState ?? effectiveTutorialState));
             return;
         }
         setPending(true);

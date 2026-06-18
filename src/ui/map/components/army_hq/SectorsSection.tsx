@@ -9,6 +9,10 @@ import { useGameStore } from '../../store/gameStore';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { OUTCOME_COLORS } from '../../utils/theme';
 import { formatPersonnel, toTitleCase } from '../../utils/formatters';
+import {
+    getPlayerSafeSectorStanceLabel,
+    getPlayerSafeSectorStrengthLabel,
+} from '../../utils/playerSafeText';
 import { getPlayerSafeThreatPresentation } from '../../utils/playerSafeThreat';
 import { getPlayerFacingSectorName } from '../../../shared/playerFacingLabels';
 import { CollapsibleSection } from './CollapsibleSection';
@@ -72,14 +76,17 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
                 )}
                 {stanceHint !== null && stanceHint !== currentStance && (
                     <div className="text-[9px] text-amber-400/80 uppercase tracking-wider">
-                        {t('sectorsSection.recommend', { stance: stanceHint.toUpperCase(), current: currentStance.toUpperCase() })}
+                        {t('sectorsSection.recommend', {
+                            stance: getPlayerSafeSectorStanceLabel(stanceHint),
+                            current: getPlayerSafeSectorStanceLabel(currentStance),
+                        })}
                     </div>
                 )}
             </div>
 
             {sector.combat_strength_class && (
                 <div className="flex flex-wrap gap-x-5 gap-y-1 text-[10px] text-text-secondary/60 uppercase tracking-wider border-t border-panel-border/30 pt-2">
-                    <span>{t('sectorsSection.class')} <span className={`font-bold ${STRENGTH_CLASS_COLORS[sector.combat_strength_class] ?? 'text-text-secondary'}`}>{sector.combat_strength_class.toUpperCase()}</span></span>
+                    <span>{t('sectorsSection.class')} <span className={`font-bold ${STRENGTH_CLASS_COLORS[sector.combat_strength_class] ?? 'text-text-secondary'}`}>{getPlayerSafeSectorStrengthLabel(sector.combat_strength_class)}</span></span>
                     {sector.combat_defense_per_edge != null && <span>{t('sectorsSection.defPerEdge')} <span className="font-bold text-text-secondary">{Math.round(sector.combat_defense_per_edge)}</span></span>}
                     {sector.combat_morale_avg != null && <span>{t('sectorsSection.morShort')} <span className={`font-bold ${sector.combat_morale_avg >= 60 ? 'text-emerald-400' : sector.combat_morale_avg >= 35 ? 'text-accent-gold' : 'text-red-500'}`}>{Math.round(sector.combat_morale_avg)}</span></span>}
                     {sector.combat_fatigue_avg != null && <span>{t('sectorsSection.fatShort')} <span className={`font-bold ${sector.combat_fatigue_avg <= 8 ? 'text-emerald-400' : sector.combat_fatigue_avg <= 16 ? 'text-accent-gold' : 'text-red-500'}`}>{Math.round(sector.combat_fatigue_avg)}</span></span>}

@@ -13,8 +13,11 @@ import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
 import { BrigadeRow } from './BrigadeRow';
 import { TabBar } from './TabBar';
-import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
-import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
+import {
+  getPlayerSafeCorpsName,
+  getPlayerSafeMilitaryFactionName,
+  getPlayerSafeOperationPhaseLabel,
+} from '../utils/playerSafeText';
 import { aggregateEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
@@ -430,7 +433,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                     <div className="flex justify-between items-start mb-1">
                       <div className="font-semibold text-text-primary text-[12px] uppercase tracking-wide">{op.display_name}</div>
                       <span className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider ${phaseBg}`}>
-                        {op.phase}
+                        {getPlayerSafeOperationPhaseLabel(op.phase)}
                       </span>
                     </div>
 

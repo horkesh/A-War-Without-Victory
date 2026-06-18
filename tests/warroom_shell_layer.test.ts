@@ -23,8 +23,8 @@ describe('regionToShellHandoff', () => {
     expect(regionToShellHandoff('wall_flag_area')).toEqual({ kind: 'warroom-overlay', surface: 'faction' });
   });
 
-  it('commander_coatrack → army-hq summary', () => {
-    expect(regionToShellHandoff('commander_coatrack')).toEqual({ kind: 'warroom-overlay', surface: 'staff' });
+  it('commander_coatrack -> army-hq summary', () => {
+    expect(regionToShellHandoff('commander_coatrack')).toEqual({ kind: 'army-hq', tab: 'summary' });
   });
 
   it('command_briefing_folio → army-hq briefing', () => {
@@ -117,6 +117,8 @@ describe('regionToShellHandoff', () => {
       } else if (entry.id === 'advance') {
         expect(command).toEqual({ kind: 'advance-turn' });
         expect(entry.regionIds).toEqual(expect.arrayContaining(['wall_calendar_area', 'wall_calendar']));
+      } else if (entry.id === 'staff') {
+        expect(command).toEqual({ kind: 'army-hq', tab: 'summary' });
       } else {
         expect(command).toEqual(expect.objectContaining({ kind: 'warroom-overlay' }));
       }

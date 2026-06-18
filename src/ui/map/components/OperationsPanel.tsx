@@ -13,7 +13,12 @@ import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { turnToDateString, formatOperationType, toTitleCase } from '../utils/formatters';
 import { OfficerProfile } from './OfficerProfile';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
-import { getPlayerSafeBrigadeName, getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import {
+  getPlayerSafeBrigadeName,
+  getPlayerSafeCorpsName,
+  getPlayerSafeMilitaryFactionName,
+  getPlayerSafeOperationPhaseLabel,
+} from '../utils/playerSafeText';
 import { openArmyHQBriefingForCorps } from '../utils/shellNavigation';
 import { t } from '../i18n';
 
@@ -307,7 +312,7 @@ export function OperationsPanel() {
                     </div>
                     <div className="mt-0.5 flex items-center justify-between gap-2">
                       <span className={`px-1 py-0.5 rounded text-white text-[10px] uppercase font-semibold ${phaseBadgeClass}`}>
-                        {toTitleCase(op.phase)}
+                        {getPlayerSafeOperationPhaseLabel(op.phase)}
                       </span>
                       <span className={`text-[10px] uppercase tracking-wide ${health.className}`}>
                         {health.label}

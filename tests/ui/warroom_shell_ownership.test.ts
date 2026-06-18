@@ -48,11 +48,20 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(regionToShellHandoff('diplomatic_telephone')).toEqual({ kind: 'warroom-overlay', surface: 'diplomacy' });
     });
 
-    it('routes Intelligence, Staff, and Faction through native Warroom preview overlays', () => {
+    it('routes Intelligence and Faction through native Warroom preview overlays while Army HQ opens directly', () => {
         expect(regionToShellHandoff('intelligence_journal')).toEqual({ kind: 'warroom-overlay', surface: 'intelligence' });
         expect(regionToShellHandoff('desk_radio')).toEqual({ kind: 'warroom-overlay', surface: 'intelligence' });
-        expect(regionToShellHandoff('commander_coatrack')).toEqual({ kind: 'warroom-overlay', surface: 'staff' });
+        expect(regionToShellHandoff('commander_coatrack')).toEqual({ kind: 'army-hq', tab: 'summary' });
         expect(regionToShellHandoff('wall_flag_area')).toEqual({ kind: 'warroom-overlay', surface: 'faction' });
+    });
+
+    it('keeps event decisions as the exclusive presidential modal owner', () => {
+        const app = read('src/ui/map/App.tsx');
+
+        expect(app).toMatch(/const openWarroomDecisionRoomFromField =[\s\S]*if \(activeEventDecisionId !== null\) return;/);
+        expect(app).toMatch(/const openWarroomDeskFromField = \(\) => \{[\s\S]*if \(activeEventDecisionId !== null\) return;/);
+        expect(app).toMatch(/const openCommandCategory = \(\) => \{[\s\S]*if \(activeEventDecisionId !== null\) return;/);
+        expect(app).toMatch(/const openWarroomOverlay = \(surface: WarroomOverlaySurface\) => \{[\s\S]*if \(activeEventDecisionId !== null\) return;/);
     });
 
     it('retires live StrategicDashboard and flat EventLog local command variants', () => {
