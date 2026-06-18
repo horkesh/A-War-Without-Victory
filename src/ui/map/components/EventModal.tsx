@@ -16,6 +16,7 @@ import type { EventEffect } from '../../../sim/events/event_types';
 import { getPlayerSafeDisplayLabel, getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { resolveEventIllustration } from '../data/eventIllustrationArt';
 import { t, type MessageKey } from '../i18n';
+import { isDisplayEventEffectKind } from '../utils/eventEffectDisplay';
 
 /** Display-ready event data for the modal. */
 export interface EventDisplayData {
@@ -75,15 +76,6 @@ const EFFECT_ICONS: Record<string, IconName> = {
  * def-loader); filtered here so consequence notifications show only their
  * narrative + genuinely player-facing state changes.
  */
-const NON_DISPLAY_EFFECT_KINDS = new Set<string>([
-    'cost_ledger_annotation',
-    'recruitment_modifier',
-    'equipment_quality_modifier',
-    'bot_priority_shift',
-    'doctrine_constraint',
-    'alliance_lock',
-]);
-
 /** Extract faction IDs mentioned in effects for impact badges. */
 function extractFactions(effects: EventDisplayData['effects']): string[] {
     const factions = new Set<string>();
@@ -118,7 +110,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
     const cat = CATEGORY_CONFIG[event.category] ?? { bg: '#444', color: '#aaa', labelKey: 'event.category.unknown', icon: 'star' as IconName };
     const factions = extractFactions(event.effects);
     const mechanicalEffects = event.effects.filter(
-        e => !e.description.startsWith('[narrative]') && !NON_DISPLAY_EFFECT_KINDS.has(e.kind),
+        e => !e.description.startsWith('[narrative]') && isDisplayEventEffectKind(e.kind),
     );
     // Optional documentary-realism illustration. Resolves to null when the event
     // authors no `image` key (every shipped event today) OR the asset is not yet

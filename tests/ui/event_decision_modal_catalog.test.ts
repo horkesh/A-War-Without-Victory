@@ -7,6 +7,7 @@ import { EventDecisionModal } from '../../src/ui/map/components/EventDecisionMod
 import type { EventDefinition, EventEffect, EventResponseOption, DimensionShift } from '../../src/sim/events/event_types.js';
 import { buildEventAcceptanceReport } from '../../tools/diagnostics/event_acceptance_report.js';
 import { getPlayerSafePoliticalFactionName } from '../../src/ui/map/utils/playerSafeText.js';
+import { isDisplayEventEffect } from '../../src/ui/map/utils/eventEffectDisplay.js';
 
 afterEach(() => cleanup());
 
@@ -66,6 +67,7 @@ function describeDimensionShift(shift: DimensionShift): string {
 
 function expectedPreviewRows(option: EventResponseOption): string[] {
   const rows = (option.effects ?? [])
+    .filter(isDisplayEventEffect)
     .map(describeEffect)
     .filter((row): row is string => row !== null);
   for (const shift of option.dimension_shifts ?? []) rows.push(describeDimensionShift(shift));
