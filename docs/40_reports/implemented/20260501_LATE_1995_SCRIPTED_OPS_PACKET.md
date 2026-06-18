@@ -1,5 +1,7 @@
 # Late-1995 Scripted Operations Packet (Krivaja-95 / Stupčanica-95 / Mistral 2 / Sana)
 
+**2026-06-18 supersession:** The original Krivaja/Stupcanica fall-delivery framing in this report is historical. Current canon and implementation require `srebrenica_falls_1995` / `zepa_falls_1995` event receipts before the corresponding operation-context rows can trigger; Srebrenica/Zepa control remains event-owned.
+
 **Date:** 2026-05-01
 **Predecessors:**
 - `docs/40_reports/implemented/20260501_TARGET_AWARE_SCENARIO_HEALTH_BASELINE.md` (recommended this packet)
@@ -39,7 +41,7 @@ Every objective OSID was cross-checked against `data/source/calibration/painted_
 **Glamoč scope note:** The Glamoč proper OSIDs (`glamoc_2`, `kovacevci_2`, `pribelja`, `vidimlije_2`) are painted=HRHB at apr1995 — this is the territorial residue of Operation Cincar 1994, which is **explicitly out of scope** for this packet per user prompt. Mistral 2 includes only the Glamoč OSIDs that flipped between apr1995 and oct1995 (`halapic`, `stekerovci_2`). A future Cincar 1994 packet (separate sign-off) would close the apr1995 Glamoč gap.
 
 **Sensitive-history boundary:**
-Krivaja-95 and Stupčanica-95 are **territorial representations** of the operations that captured the Srebrenica and Žepa safe areas in July 1995. They model the territorial control flip only. **Atrocity, narrative, and consequence mechanics are explicitly out of scope** for this packet. Adding them requires `/historian` + `/game-designer` sign-off per `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`.
+Krivaja-95 and Stupčanica-95 are now historical operation-context rows gated behind the event-owned `srebrenica_falls_1995` / `zepa_falls_1995` receipts. They do not model or deliver the territorial control flip. **Atrocity, narrative, and consequence mechanics are explicitly out of scope** for this packet. Adding them requires `/historian` + `/game-designer` sign-off per `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`.
 
 ---
 

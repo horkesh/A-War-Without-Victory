@@ -48,7 +48,7 @@
 - **30 May:** Muslim/Croat counterattack seizes part of Prijedor city before being overwhelmed (BB1 p.181)
 - **12 May:** VRS formally created from JNA Second Military District [GK; BB1 p.177 describes formation]
 
-**Territorial picture:** RS ~45–55% by area. Eastern towns held but Drina valley heavily contested. Srebrenica LOST to VRS. Corridor still severed. Goražde uncaptured. Prijedor area being consolidated through ethnic cleansing.
+**Territorial picture:** RS ~45–55% by area. Eastern towns held but Drina valley heavily contested. Srebrenica was initially seized, then recaptured by ARBiH on 8-10 May; it is not VRS-held in the May end-state. Corridor still severed. Goražde uncaptured. Prijedor area being consolidated through ethnic cleansing.
 
 **Key observation:** The Drina valley was NOT "largely cleared." Orić retook Srebrenica. Goražde held. Multiple ARBiH-held pockets persisted.
 

@@ -5,11 +5,12 @@
  *
  * THE §6 HARD INVARIANT under test: the 1995-pivot RELEASE must reliably fire so
  * the eastern enclaves are NO LONGER contained inside the historical fall window
- * (t160–190). If containment did not lift, the bot's organic targeting would stay
- * suppressed — but the scripted *_falls_1995 events + Krivaja-95/Stupčanica-95
- * ops (separate paths) still flip control; this suite proves the CONTAINMENT SET
- * itself is empty for the eastern pockets once released, so nothing about the
- * posture can interfere with the fall.
+ * (t160-190). If containment did not lift, the bot's organic targeting would stay
+ * suppressed, but the event-owned *_falls_1995 receipts still own the control
+ * transition. Krivaja-95/Stupcanica-95 are separate chronology/AAR context rows,
+ * not fall-delivery mechanics; this suite proves the CONTAINMENT SET itself is
+ * empty for the eastern pockets once released, so nothing about the posture can
+ * interfere with the fall.
  *
  * Covers:
  *   - the gate is DEFAULT-OFF (env-fallback) and override-controllable;

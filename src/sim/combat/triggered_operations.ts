@@ -128,6 +128,22 @@ function opStillHasEnemyObjectives(state: GameState, def: TriggeredOpDef): boole
     return def.axes.some((axis) => hasEnemyObjective(state, def.faction, axis.objectives));
 }
 
+function eventReceiptFired(state: GameState, eventId: string): boolean {
+    const military = state.military ?? {};
+    const fired = military.fired_event_ids;
+    if (Array.isArray(fired) && fired.includes(eventId)) return true;
+    if ((military.event_fire_counts?.[eventId] ?? 0) > 0) return true;
+    return military.event_last_fired_turn?.[eventId] != null;
+}
+
+function srebrenicaFallReceiptFired(state: GameState): boolean {
+    return eventReceiptFired(state, 'srebrenica_falls_1995');
+}
+
+function zepaFallReceiptFired(state: GameState): boolean {
+    return eventReceiptFired(state, 'zepa_falls_1995');
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Definitions
 // ═══════════════════════════════════════════════════════════════════════════
@@ -312,7 +328,12 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         ],
     },
     // ═════════════════════════════════════════════════════════════════════════
-    // Late-1995 historical reversal operations.
+    // Late-1995 historical reversal operation-context rows.
+    //
+    // Current contract: Srebrenica/Zepa fall receipts are event-owned by
+    // `srebrenica_falls_1995` / `zepa_falls_1995`. Krivaja/Stupcanica are
+    // chronology/AAR context only and must not become alternate fall-delivery
+    // mechanics if the event path misses.
     //
     // Source: docs/40_reports/implemented/20260501_TARGET_AWARE_SCENARIO_HEALTH_BASELINE.md
     // identified four missing scripted ops as the dominant Family-1 (missing
@@ -344,7 +365,7 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
     //
     // Sensitive-history note: Krivaja-95 and Stupčanica-95 are TERRITORIAL
     // representations of the operations that captured the Srebrenica and Žepa
-    // safe areas in July 1995. They model the territorial control flip only.
+    // safe areas in July 1995. They require event-owned fall receipts first.
     // Atrocity, narrative, and consequence mechanics are explicitly out of
     // scope for this packet and require a separate /historian + /game-designer
     // sign-off (see docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md).
@@ -437,7 +458,7 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         // LANE-NIGHTSHIFT-KRIVAJA-95-T168-FLOOR-FIX (2026-05-06): bumped 168→170
         // to enforce §6 canonical floor (Engine_Invariants_v0_9_0.md §6 +
         // SENSITIVE_HISTORY_DESIGN_GATE.md). Sign-off precedent: b03333af / bc44ddec.
-        trigger: (_state, turn) => turn >= 170,
+        trigger: (state, turn) => turn >= 170 && srebrenicaFallReceiptFired(state),
         axes: [
             {
                 axis_id: 'srebrenica_enclave',
@@ -553,7 +574,7 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         staging_osid: 'op:vlasenica:grabovica',
         planning_duration: 3,
         min_attack_outcome: 'repulsed',
-        trigger: (_state, turn) => turn >= 172,
+        trigger: (state, turn) => turn >= 172 && zepaFallReceiptFired(state),
         axes: [
             {
                 axis_id: 'zepa_pocket',

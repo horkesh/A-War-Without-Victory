@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-18] fix(canon): gate Krivaja/Stupcanica behind event receipts
+
+**Type:** Canon/simulation trigger hardening, scenario copy, and documentation sync.
+
+**Fix:** Enforced the owner correction that Srebrenica/Zepa fall through the sensitive-history event system, not through Krivaja-95/Stupcanica-95 operation delivery. Triggered-operation and Army HQ injection paths now require the matching `srebrenica_falls_1995` / `zepa_falls_1995` receipt before Krivaja/Stupcanica can appear as chronology/AAR context, preventing operation fallback delivery if the event path misses. Corrected the May 1992 timeline note for Srebrenica's ARBiH recapture, replaced the RS foundational "Drina valley will be cleared" player copy with declared-objective wording, and synced active source comments, Command Board, Master Roadmap, report index, and durable ledger knowledge. Report: `docs/40_reports/implemented/20260618_SREBRENICA_EVENT_RECEIPT_OPERATION_GATE.md`.
+
+**Verification:** Focused final bundle passed 3 files / 30 tests across `event_decision_modal_catalog`, `triggered_operations`, and `triggered_operations_late_1995`; `qa:player-journeys` passed 11 files / 105 tests; TypeScript passed; `ci:structural-fingerprint:check` preserved fingerprint `f282883abbab76cf`; `git diff --check` passed. A local Windows `test:vitest:fast` attempt reached the long noisy suite and ended inconclusive with a console EPIPE after the timeout; GitHub Baseline/Full Suite red on the parent main SHA were traced to the stale catalog-test assertion fixed in this branch.
+
+**Scope/determinism:** Deterministic trigger predicates and player-facing scenario copy changed; no randomness, timestamps, save schema, serialization format, generated artifacts, golden baselines, or packaged installer artifact changed. The 40w window remains before the affected t170/t172 gates; 188w behavior intentionally no longer allows late-operation rows to substitute for missing event fall receipts.
+
+---
+
 ## [2026-06-18] fix(ui): close event-decision and campaign-cost raw-copy leaks
 
 **Type:** UI/read-model player-copy hardening and Pyrrhic specialist integration.
