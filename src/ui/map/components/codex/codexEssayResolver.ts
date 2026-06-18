@@ -474,19 +474,52 @@ function signed(n: number): string {
     return String(n);
 }
 
+const COST_LEDGER_FACTION_LABELS: Record<string, string> = {
+    RS: 'VRS',
+    RBiH: 'ARBiH',
+    HRHB: 'HVO',
+};
+
+const IDENTIFIER_ACRONYMS: Record<string, string> = {
+    nato: 'NATO',
+    vrs: 'VRS',
+    arbih: 'ARBiH',
+    hvo: 'HVO',
+    hrhb: 'HVO',
+    rs: 'VRS',
+    rbih: 'ARBiH',
+};
+
+function formatCostLedgerFaction(faction: string | undefined): string | undefined {
+    if (!faction) return undefined;
+    return COST_LEDGER_FACTION_LABELS[faction] ?? humanizeDynamicIdentifier(faction);
+}
+
+function humanizeDynamicIdentifier(value: string | undefined): string {
+    if (!value) return '';
+    return value
+        .trim()
+        .replace(/[:.-]+/g, '_')
+        .split('_')
+        .filter((part) => part.length > 0)
+        .map((part) => IDENTIFIER_ACRONYMS[part.toLowerCase()] ?? `${part.charAt(0).toUpperCase()}${part.slice(1).toLowerCase()}`)
+        .join(' ');
+}
+
 function formatCostFinding(finding: CostLedgerFinding): string {
-    const faction = finding.faction ? ` [${finding.faction}]` : '';
+    const factionLabel = formatCostLedgerFaction(finding.faction);
+    const faction = factionLabel ? ` [${factionLabel}]` : '';
     return `${finding.title}${faction}: ${finding.text}`;
 }
 
 function formatCostAnnotation(annotation: CostLedgerAnnotation): string {
     const details = [
-        annotation.faction,
+        formatCostLedgerFaction(annotation.faction),
         typeof annotation.turn === 'number' ? `W${annotation.turn}` : undefined,
     ].filter((detail): detail is string => Boolean(detail));
     const suffix = details.length > 0 ? ` [${details.join(', ')}]` : '';
     const text = annotation.text && annotation.text.trim().length > 0 ? `: ${annotation.text.trim()}` : '';
-    return `${annotation.tag}${suffix}${text}`;
+    return `${humanizeDynamicIdentifier(annotation.tag)}${suffix}${text}`;
 }
 
 function costFindingSources(context: CodexRenderContext): string[] {
@@ -592,7 +625,7 @@ function expandToken(token: string, context: CodexRenderContext): string | undef
 
     if (token === 'rupture_list') {
         const raw = context.historicalComparison?.rupture_divergence;
-        return Array.isArray(raw) ? raw.join(', ') : '';
+        return Array.isArray(raw) ? raw.map(humanizeDynamicIdentifier).join(', ') : '';
     }
 
     // territory_<factionKey>_delta — e.g. territory_RS_delta or

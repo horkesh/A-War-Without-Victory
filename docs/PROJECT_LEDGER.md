@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-18] fix(ui): keep Codex and replay raw IDs out of player copy
+
+**Type:** UI/read-model player-copy hardening.
+
+**Fix:** Closed two P1 raw-copy leaks from the Pyrrhic UI sweep. Dynamic Codex essay tokens now render Cost Ledger faction suffixes as player-facing military labels, humanize Cost Ledger annotation tags, and humanize rupture-list entries instead of exposing raw values such as `RS`, `accelerated_safe_areas_1993`, or `srebrenica_genocide_1995`. Verdict Replay sparse-manifest control totals now render readable labels such as `VRS 42 settlements` instead of `RS:42`. Report: `docs/40_reports/implemented/20260618_CODEX_REPLAY_PLAYER_SAFE_LABELS.md`.
+
+**Verification:** Focused Codex resolver test passed 47/47. Combined Codex/replay UI pack passed 4 files / 101 tests. Typecheck passed and `git diff --check` passed before commit.
+
+**Scope/determinism:** UI/read-model presentation only; no simulation logic, scenario data, save schema, serialization, generated artifacts, calibration floor, golden baselines, or packaged installer artifact changed.
+
+---
+
 ## [2026-06-18] test(engine): pin issue #170 TG launch-readiness hybrid
 
 **Type:** engine regression coverage, issue-backlog classification, and docs hygiene.

@@ -198,7 +198,7 @@ describe('VerdictScreen Replay tab — live-play multi-frame manifest', () => {
         expect(html).not.toContain('Active formations');
     });
 
-    it('controlByFaction values from frames are surfaced in the replay scrubber', () => {
+    it('controlByFaction values from frames are surfaced with player-safe labels', () => {
         storeState = {
             loadedGameState: livePlayEndgame({
                 schema_version: 1,
@@ -207,7 +207,7 @@ describe('VerdictScreen Replay tab — live-play multi-frame manifest', () => {
             }),
         };
         const html = render();
-        // The scrubber renders faction:osids in format "RS:420"
-        expect(html).toContain('RS:420');
+        expect(html).not.toContain('RS:420');
+        expect(html).toContain('VRS 420 settlements');
     });
 });

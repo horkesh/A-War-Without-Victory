@@ -365,10 +365,10 @@ describe('codexEssayResolver — template interpolation tokens', () => {
         })).toEqual(['110% / 73%.']);
     });
 
-    it('{rupture_list} joins the rupture_divergence array', () => {
+    it('{rupture_list} renders player-safe rupture labels', () => {
         expect(resolveWith('Ruptures: {rupture_list}.', {
             rupture_divergence: ['srebrenica_genocide_1995', 'xxx_other'],
-        })).toEqual(['Ruptures: srebrenica_genocide_1995, xxx_other.']);
+        })).toEqual(['Ruptures: Srebrenica Genocide 1995, Xxx Other.']);
     });
 
     it('{territory_RS_delta} renders signed one-decimal percentage', () => {
@@ -543,8 +543,8 @@ describe('codexEssayResolver — cost-ledger finding atoms and tokens', () => {
         const dynamic = resolved.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text);
         expect(dynamic).toEqual([
             'Human cost record: The ledger records 46,000 military killed and 38,000 civilian killed.',
-            'Srebrenica genocide [RS]: The ledger records the Srebrenica genocide.',
-            'HRHB war-crimes record [HRHB]: HRHB capital records contain 4 war-crime events.',
+            'Srebrenica genocide [VRS]: The ledger records the Srebrenica genocide.',
+            'HRHB war-crimes record [HVO]: HRHB capital records contain 4 war-crime events.',
             'Early negotiated settlement: The ledger records acceptance of peace plan vance_owen at week 50.',
             'Sources: ICJ Bosnia v. Serbia (2007); ICTY Krstic IT-98-33-T; RDC Sarajevo, Bosnian Book of the Dead (2007); Sensitive History Design Gate §4; Victory Conditions and Pyrrhic Scoring section 1',
         ]);
@@ -570,7 +570,7 @@ describe('codexEssayResolver — cost-ledger finding atoms and tokens', () => {
 
         const dynamic = resolved.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text);
         expect(dynamic).toEqual([
-            'Srebrenica genocide [RS]: The ledger records the Srebrenica genocide.',
+            'Srebrenica genocide [VRS]: The ledger records the Srebrenica genocide.',
         ]);
     });
 
@@ -632,8 +632,65 @@ describe('codexEssayResolver — cost-ledger finding atoms and tokens', () => {
 
         const dynamic = resolved.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text);
         expect(dynamic).toEqual([
-            'HRHB war-crimes record [HRHB]: HRHB capital records contain 4 war-crime events.',
+            'HRHB war-crimes record [HVO]: HRHB capital records contain 4 war-crime events.',
         ]);
+    });
+
+    it('renders dynamic Cost Ledger IDs without raw faction brackets, annotation tags, or rupture IDs', () => {
+        const resolved = resolveCodexEssay(
+            essay({
+                dynamic_sections: [{
+                    id: 'player-safe-cost-ledger',
+                    insert_after_paragraph: -1,
+                    condition: 'GAME_OVER AND FINDING_CATEGORY:war_crimes',
+                    variant: 'divergence',
+                    content: [
+                        '{cost_war_crimes_findings_RS}',
+                        '{cost_annotation_accelerated_safe_areas_1993}',
+                        '{rupture_list}',
+                    ].join('\n\n'),
+                }],
+            }),
+            context({
+                firedEventIds: new Set(['test_event']),
+                gameOver: true,
+                historicalComparison: {
+                    duration_delta_weeks: 0,
+                    territory_divergence: {},
+                    casualty_ratio: 1,
+                    displacement_ratio: 1,
+                    rupture_divergence: ['srebrenica_genocide_1995'],
+                    divergence_notes: [],
+                },
+                costLedger: {
+                    ...costLedger,
+                    findings: [{
+                        id: 'cost_war_crimes_findings_RS',
+                        category: 'war_crimes',
+                        severity: 'grave',
+                        faction: 'RS',
+                        title: 'War-crimes record',
+                        text: 'The ledger records 14 war-crime events.',
+                        sources: [],
+                    }],
+                    annotations: [{
+                        event_id: 'accelerated_safe_areas_1993',
+                        tag: 'accelerated_safe_areas_1993',
+                        text: 'Safe-area diplomacy accelerated.',
+                        turn: 70,
+                        faction: 'RS',
+                    }],
+                },
+            }),
+        );
+
+        const text = resolved.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text).join('\n');
+        expect(text).toContain('War-crimes record [VRS]: The ledger records 14 war-crime events.');
+        expect(text).toContain('Accelerated Safe Areas 1993 [VRS, W70]: Safe-area diplomacy accelerated.');
+        expect(text).toContain('Srebrenica Genocide 1995');
+        expect(text).not.toMatch(/\[(RS|RBiH|HRHB)\]/);
+        expect(text).not.toContain('accelerated_safe_areas_1993');
+        expect(text).not.toContain('srebrenica_genocide_1995');
     });
 
     it('cost-ledger atoms return false when the ledger is absent', () => {
@@ -708,9 +765,9 @@ describe('codexEssayResolver - cost-ledger annotation atoms and tokens', () => {
 
         const dynamic = resolved.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text);
         expect(dynamic).toEqual([
-            'early_nato_threshold_1994 [RS, W100]: NATO intervention threshold lowered; VRS operational freedom constrained.',
-            'early_nato_threshold_1994 [RS, W100]: NATO intervention threshold lowered; VRS operational freedom constrained.',
-            'bihac_refugee_crisis_1994 [RBiH, W124]: A massive refugee wave floods RBiH-held central Bosnia.',
+            'Early NATO Threshold 1994 [VRS, W100]: NATO intervention threshold lowered; VRS operational freedom constrained.',
+            'Early NATO Threshold 1994 [VRS, W100]: NATO intervention threshold lowered; VRS operational freedom constrained.',
+            'Bihac Refugee Crisis 1994 [ARBiH, W124]: A massive refugee wave floods RBiH-held central Bosnia.',
         ]);
     });
 });

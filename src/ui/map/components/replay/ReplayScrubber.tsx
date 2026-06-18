@@ -19,6 +19,7 @@ import { buildReplayFrameSummary } from '../../../../sim/replay/replay_frame_sum
 import { replayPlayer } from '../../../../sim/replay/replay_player.js';
 import { replaySummaryPlayer } from '../../../../sim/replay/replay_summary_player.js';
 import { t } from '../../i18n';
+import { FACTION_MILITARY_LABELS } from '../../utils/theme';
 
 export interface ReplayScrubberProps {
     /** Save sequence (read-only). When empty/null, the scrubber renders an empty notice. */
@@ -29,6 +30,12 @@ export interface ReplayScrubberProps {
 }
 
 const REPLAY_AUTOPLAY_INTERVAL_MS = 650;
+
+function formatControlFactionTotal(faction: string, osids: number): string {
+    const label = FACTION_MILITARY_LABELS[faction] ?? faction;
+    const noun = osids === 1 ? 'settlement' : 'settlements';
+    return `${label} ${osids} ${noun}`;
+}
 
 /**
  * Render a turn-by-turn scrubber for a finished war.
@@ -266,7 +273,7 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
                     <div className="mt-1 break-words font-mono leading-relaxed text-text-primary tabular-nums">
                         {summary.controlByFaction.length === 0
                             ? 'n/a'
-                            : summary.controlByFaction.map((row) => `${row.faction}:${row.osids}`).join(' ')}
+                            : summary.controlByFaction.map((row) => formatControlFactionTotal(row.faction, row.osids)).join(' ')}
                     </div>
                 </div>
             </div>

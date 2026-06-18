@@ -198,7 +198,8 @@ describe('VerdictScreen mount — verdict content', () => {
         expect(h).toContain('Replay');
         expect(h).toContain('Active formations');
         expect(h).toContain('46500');
-        expect(h).toContain('RS:42');
+        expect(h).not.toContain('RS:42');
+        expect(h).toContain('VRS 42 settlements');
     });
 
     it('renders a map inspection action when full replay frames are available', () => {

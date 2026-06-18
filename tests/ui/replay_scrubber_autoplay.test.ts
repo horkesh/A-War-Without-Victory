@@ -60,6 +60,19 @@ describe('ReplayScrubber autoplay controls', () => {
         expect(screen.getByText('1 / 3')).toBeTruthy();
     });
 
+    it('renders sparse manifest control totals with player-safe labels', () => {
+        renderScrubber();
+
+        const surface = screen.getByTestId('replay-scrubber');
+        expect(surface.textContent).not.toContain('RBiH:12');
+        expect(screen.getByText('ARBiH 12 settlements')).toBeTruthy();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Next replay turn' }));
+
+        expect(surface.textContent).not.toContain('RS:14');
+        expect(screen.getByText('VRS 14 settlements')).toBeTruthy();
+    });
+
     it('advances sparse manifest frames on play and pauses on the final frame', () => {
         vi.useFakeTimers();
         renderScrubber();
