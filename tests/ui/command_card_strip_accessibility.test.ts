@@ -69,6 +69,7 @@ describe('CommandCardStrip accessibility', () => {
       expect(peekRequestedDecisionRoomLens()).toEqual({
         lens: expectedLens,
         commandCategoryId: category.id,
+        cardId: null,
       });
     }
 
