@@ -43,6 +43,11 @@ describe('operational SITREP views', () => {
     expect(view.front.edges.map((edge) => edge.id)).toEqual(['edge_a', 'edge_b', 'edge_c']);
     expect(view.readiness.weakestBrigades.map((brigade) => brigade.id)).toEqual(['b2', 'b1', 'b3']);
     expect(view.operations.corps.map((entry) => entry.corpsId)).toEqual(['c1', 'c2']);
+    expect(view.operations.corps[1]?.summary).toBe('Probe in Planning since 22 Jun 1992.');
+    expect(view.operations.corps[1]?.summary).not.toContain('Op:');
+    expect(view.operations.corps[1]?.summary).not.toContain('probe');
+    expect(view.operations.corps[1]?.summary).not.toContain('planning');
+    expect(view.operations.corps[1]?.summary).not.toContain('T11');
     expect(view.alerts.map((alert) => alert.id)).toEqual([
       'brigades-encircled',
       'front-exposed',
@@ -157,7 +162,7 @@ describe('operational SITREP views', () => {
     const view = getOperationalSitrepView(rawState, 'HRHB');
 
     expect(view.front.edges.map((edge) => edge.id)).toEqual(['livno_real']);
-    expect(view.front.edges[0]?.label).toBe('Livno West - Glamoc East');
+    expect(view.front.edges[0]?.label).toBe('West (Livno) - East (Glamoc)');
     expect(view.front.edges[0]?.label).not.toContain('op:');
     expect(view.front.edges[0]?.label).not.toContain('_');
   });

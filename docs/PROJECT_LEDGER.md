@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-18] fix(ui): label Records reserve reasons and sitrep operation copy
+
+**Type:** UI/read-model player-copy hardening.
+
+**Fix:** Closed two P2 raw-copy leaks from the Pyrrhic UI sweep. Army HQ Records reserve consequence details now label enum-like reserve reasons such as `defensive_gap` before rendering and suppress unknown identifier-like reasons behind neutral fallback copy. Operational sitrep active-operation summaries now render readable operation, phase, and calendar-date copy instead of `Op: ... | Phase: ... (since T...)`, and front labels now use the established OSID humanizer rather than a local ad hoc `op:` formatter. Report: `docs/40_reports/implemented/20260618_RECORDS_SITREP_PLAYER_SAFE_LABELS.md`.
+
+**Verification:** Focused decision-consequence test passed 15/15. Combined decision-consequence/sitrep pack passed 2 files / 18 tests. Typecheck passed and `git diff --check` passed before commit.
+
+**Scope/determinism:** UI/read-model presentation only; no simulation logic, scenario data, save schema, serialization, generated artifacts, calibration floor, golden baselines, or packaged installer artifact changed.
+
+---
+
 ## [2026-06-18] fix(ui): keep Codex and replay raw IDs out of player copy
 
 **Type:** UI/read-model player-copy hardening.

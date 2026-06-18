@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Records and sitrep player-safe labels** | [implemented/20260618_RECORDS_SITREP_PLAYER_SAFE_LABELS.md](implemented/20260618_RECORDS_SITREP_PLAYER_SAFE_LABELS.md) - Army HQ Records reserve reasons and operational sitrep operation/front labels now render player-safe copy instead of raw enums, phase strings, turn IDs, or ad hoc OSID-derived labels. |
 | **Latest Codex and replay player-safe labels** | [implemented/20260618_CODEX_REPLAY_PLAYER_SAFE_LABELS.md](implemented/20260618_CODEX_REPLAY_PLAYER_SAFE_LABELS.md) - Dynamic Codex Cost Ledger tokens and Verdict Replay sparse control totals now render player-safe labels instead of raw faction, annotation, rupture, or `faction:osids` debug copy. |
 | **Srebrenica/Zepa event-owned receipt correction** | [proposals/20260617_SREBRENICA_RUPTURE_KRIVAJA_FLOOR_ALIGNMENT.md](proposals/20260617_SREBRENICA_RUPTURE_KRIVAJA_FLOOR_ALIGNMENT.md) - Supersedes the Krivaja/Stupcanica operation-delivery framing; fall receipts are event-owned and rupture observes the resulting control state. |
 | **Latest operational geometry invalid-coordinate closeout** | [implemented/20260617_OPERATIONAL_GEOMETRY_INVALID_COORDINATE_CLOSEOUT.md](implemented/20260617_OPERATIONAL_GEOMETRY_INVALID_COORDINATE_CLOSEOUT.md) - Operational settlement generation now drops invalid polygon parts, the committed artifact has an integrity test, and live map smoke no longer emits invalid-coordinate overlay warnings. |

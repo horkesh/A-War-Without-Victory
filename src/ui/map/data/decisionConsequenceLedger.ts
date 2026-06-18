@@ -113,6 +113,22 @@ function buildFormationDisplayMaps(formations: readonly FormationView[] | undefi
   return { formationNames, corpsNames };
 }
 
+const RESERVE_REASON_LABELS: Record<string, string> = {
+  offensive_support: 'offensive support',
+  defensive_gap: 'defensive gap',
+  exploitation: 'exploitation reserve',
+  enclave_relief: 'enclave relief',
+};
+
+function safeReserveReasonCopy(value: string | null | undefined): string | null {
+  const trimmed = (value ?? '').trim();
+  if (!trimmed) return null;
+  const mapped = RESERVE_REASON_LABELS[trimmed];
+  if (mapped) return mapped;
+  if (/^[a-z0-9]+(?:_[a-z0-9]+)+$/i.test(trimmed)) return null;
+  return trimmed;
+}
+
 function reserveDetail(
   record: ReserveRequestDecisionRecordView,
   displayMaps: { formationNames: ReadonlyMap<string, string>; corpsNames: ReadonlyMap<string, string> },
@@ -124,15 +140,15 @@ function reserveDetail(
     ? displayMaps.formationNames.get(record.brigade_id) ?? 'the reserve brigade'
     : null;
   if (record.outcome === 'accepted' && brigade) {
-    return `${brigade} assigned to ${corps}. ${record.why_needed || record.reason}`.trim();
+    return `${brigade} assigned to ${corps}. ${record.why_needed || safeReserveReasonCopy(record.reason) || 'Decision filed.'}`.trim();
   }
   if (record.outcome === 'declined') {
-    return `${corps} request declined. ${record.reason || record.why_needed}`.trim();
+    return `${corps} request declined. ${safeReserveReasonCopy(record.reason) || record.why_needed || 'Reserve decision filed.'}`.trim();
   }
   if (record.outcome === 'terminated' && brigade) {
-    return `${brigade} recalled from ${corps}. ${record.reason || record.how_to_use}`.trim();
+    return `${brigade} recalled from ${corps}. ${safeReserveReasonCopy(record.reason) || record.how_to_use || 'Reserve decision filed.'}`.trim();
   }
-  return `${corps}: ${record.reason || record.why_needed || 'Decision filed.'}`.trim();
+  return `${corps}: ${safeReserveReasonCopy(record.reason) || record.why_needed || 'Decision filed.'}`.trim();
 }
 
 function peaceOutcome(record: PeacePlanDecisionRecordView): string {

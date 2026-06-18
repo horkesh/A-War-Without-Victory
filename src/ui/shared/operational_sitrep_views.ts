@@ -1,5 +1,7 @@
 import type { FactionId, GameState } from '../../state/game_state.js';
 import { extractWarData, type WarDataSnapshot } from '../warroom/data/war_data_extractor.js';
+import { formatOperationType, toTitleCase } from '../map/utils/formatters.js';
+import { humanizeOsid } from '../map/utils/osidDisplayName.js';
 
 export type OperationalSitrepSeverity = 'critical' | 'warning' | 'info';
 
@@ -92,14 +94,20 @@ function pluralize(count: number, singular: string, plural = `${singular}s`): st
 function formatLocationLabel(value: string | null | undefined): string {
     const raw = (value ?? '').trim();
     if (!raw) return 'Unknown location';
-    const normalized = raw.startsWith('op:')
-        ? raw.split(':').slice(1).join(' ')
-        : raw.replace(/[_:-]/g, ' ');
-    return normalized
-        .split(/\s+/)
-        .filter(Boolean)
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(' ');
+    return humanizeOsid(raw);
+}
+
+function turnToDateLabel(turn: number | null | undefined): string {
+    if (typeof turn !== 'number' || !Number.isFinite(turn)) return 'an unrecorded turn';
+    const startDate = new Date('1992-04-06T00:00:00Z');
+    startDate.setUTCDate(startDate.getUTCDate() + turn * 7);
+    const month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][startDate.getUTCMonth()];
+    return `${startDate.getUTCDate()} ${month} ${startDate.getUTCFullYear()}`;
+}
+
+function operationSummary(operation: WarDataSnapshot['ownCorpsOps'][number]['operation']): string {
+    if (!operation) return 'No active operation';
+    return `${formatOperationType(operation.type)} in ${toTitleCase(operation.phase)} since ${turnToDateLabel(operation.started_turn)}.`;
 }
 
 function toHeadline(view: Omit<OperationalSitrepView, 'headline'>): string {
@@ -177,9 +185,7 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
             operationType: entry.operation?.type ?? null,
             phase: entry.operation?.phase ?? null,
             startedTurn: entry.operation?.started_turn ?? null,
-            summary: entry.operation
-                ? `Op: ${entry.operation.type} | Phase: ${entry.operation.phase} (since T${entry.operation.started_turn})`
-                : 'No active operation',
+            summary: operationSummary(entry.operation),
         }))
         .sort((a, b) => {
             const nameDelta = compareText(a.corpsName, b.corpsName);

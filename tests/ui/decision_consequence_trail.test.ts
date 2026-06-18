@@ -178,6 +178,43 @@ describe('decision consequence trail', () => {
     expect(ledger.map((record) => `${record.family} ${record.title} ${record.outcome} ${record.detail}`).join(' ')).not.toMatch(/_/);
   });
 
+  it('labels reserve-history enum reasons before rendering decision consequence details', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      formations: [
+        {
+          id: 'vrs_drina_corps',
+          faction: 'RS',
+          name: 'Drina Corps',
+          kind: 'corps',
+          readiness: 'ready',
+          cohesion: 75,
+          fatigue: 0,
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+        },
+      ],
+      reserveRequestHistory: [
+        {
+          request_id: 'reserve:raw-reason',
+          turn: 12,
+          faction: 'RS',
+          corps_id: 'vrs_drina_corps',
+          brigade_id: null,
+          outcome: 'declined',
+          reason: 'defensive_gap',
+          decided_by: 'player',
+          purpose: 'defensive',
+          why_needed: '',
+          how_to_use: '',
+        },
+      ],
+    } as Partial<LoadedGameState>));
+
+    expect(ledger[0]?.detail).toContain('defensive gap');
+    expect(ledger[0]?.detail).not.toMatch(/defensive_gap|_/);
+  });
+
   it('does not derive reserve record display copy from raw brigade or corps ids', () => {
     const ledger = buildDecisionConsequenceLedger(makeState({
       reserveRequestHistory: [
