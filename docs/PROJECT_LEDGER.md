@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-19] test(ui): sync BCS campaign-week toolbar expectation
+
+**Type:** CI follow-up and UI copy test-contract sync.
+
+**Fix:** GitHub Baseline Regression on the first-hour shell/Records/Chronicle merge exposed one stale BCS toolbar assertion in `tests/ui/advance_turn_button_gated_feedback.test.ts`. The shipped first-hour copy now renders campaign weeks as `Sedmica {turn}` through `formatCampaignWeekLabel(...)`; the test still expected the older raw turn wording `Potez 40`. Updated the assertion to match the player-facing copy contract.
+
+**Verification:** Focused toolbar localization test passed locally.
+
+**Scope/determinism:** Test/docs only; no runtime behavior, simulation logic, scenario data, save schema, serialization, generated artifacts, calibration floor, golden baselines, randomness, timestamps, persisted output ordering, or packaged installer artifact changed.
+
+---
+
 ## [2026-06-18] test(ui): sync command-card lens request expectation
 
 **Type:** CI follow-up and UI route test-contract sync.
