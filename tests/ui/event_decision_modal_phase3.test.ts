@@ -122,6 +122,39 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(screen.queryByText('Correct choice')).toBeNull();
   });
 
+  it('renders decision timing and dossier text without raw engine/debug tokens', () => {
+    const { container } = render(React.createElement(EventDecisionModal, {
+      decision: {
+        event_id: 'rbih_state_identity',
+        event_title: 'What Is Bosnia?',
+        narrative: 'The cabinet asks how the presidency should describe the state.',
+        staff_assessment: 'Recording rbih_state_identity as retain_minorities opens csq_rbih_minority_retained.',
+        trigger_evidence: [
+          'Backtick note `mandatory_purge` from event_audit.json',
+          'csq_rbih_minority_retained is eligible',
+        ],
+        source_note: 'source_note references rbih_state_identity and consequences.json for audit.',
+        turn_fired: 0,
+        faction: 'RBiH',
+        response_options: [
+          { id: 'retain_minorities', label: 'Keep the civic state', effects: [] },
+        ],
+      },
+      onRespond: () => undefined,
+    }));
+
+    const text = container.textContent ?? '';
+    expect(text).toContain('6 Apr 1992');
+    expect(text).not.toMatch(/\bTurn 0\b/);
+    expect(text).not.toContain('rbih_state_identity');
+    expect(text).not.toContain('retain_minorities');
+    expect(text).not.toContain('mandatory_purge');
+    expect(text).not.toContain('csq_rbih_minority_retained');
+    expect(text).not.toContain('event_audit.json');
+    expect(text).not.toContain('consequences.json');
+    expect(text).not.toContain('`');
+  });
+
   it('renders staff recommendation separately from historical calibration defaults', () => {
     render(React.createElement(EventDecisionModal, {
       decision: {

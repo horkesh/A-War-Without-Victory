@@ -75,6 +75,29 @@ describe('deriveInboxItems — event decisions', () => {
         expect(hasBlockingItems(items)).toBe(true);
     });
 
+    it('labels pending event timing with a calendar date instead of raw turn copy', () => {
+        const state = makeStub({
+            pendingEventDecisions: [
+                {
+                    event_id: 'evt_opening',
+                    event_title: 'What Is Bosnia?',
+                    turn_fired: 0,
+                    faction: 'RBiH',
+                    response_options: [
+                        { id: 'opt_a', label: 'Accept', effects: [] },
+                    ],
+                },
+            ],
+        });
+
+        const items = deriveInboxItems(state, null);
+        const eventItems = items.filter(i => i.type === 'event_decision');
+
+        expect(eventItems).toHaveLength(1);
+        expect(eventItems[0].subtitle).toContain('6 Apr 1992');
+        expect(eventItems[0].subtitle).not.toMatch(/\bturn\s+0\b/i);
+    });
+
     it('returns multiple items for multiple pending decisions', () => {
         const state = makeStub({
             pendingEventDecisions: [

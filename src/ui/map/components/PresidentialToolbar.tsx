@@ -25,6 +25,7 @@ import { formatTurnLabel } from '../utils/formatters';
 import { getArmyReserveToolbarSignal } from '../utils/armyReserveSeverity';
 import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../utils/warroomReturn';
 import { openChronicle } from '../utils/shellNavigation';
+import { playerFacingErrorCopy } from '../utils/errorCopy';
 import { t } from '../i18n/index.js';
 import {
     buildPreAdvanceCommandReviewView,
@@ -521,7 +522,7 @@ export function PresidentialToolbar({
             {loadError && (
                 <div className={`fixed ${devMode ? 'top-[4.5rem]' : 'top-12'} left-0 right-0 z-10 bg-red-900/60 backdrop-blur-md border-b border-red-500/30 px-4 py-1 flex items-center justify-between`}>
                     <span className="text-[10px] font-mono text-red-200 uppercase tracking-widest">
-                        {loadError}
+                        {playerFacingErrorCopy(loadError)}
                     </span>
                     <button onClick={() => setLoadError(null)} className="text-red-200/50 hover:text-red-200 text-[10px] font-mono uppercase">
                         {t('presidentialToolbar.dismiss')}
