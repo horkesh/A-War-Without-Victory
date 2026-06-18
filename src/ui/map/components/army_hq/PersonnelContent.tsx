@@ -8,6 +8,7 @@ import { formatPersonnel } from '../../utils/formatters';
 import { getRatingColor } from '../../utils/officerCharacter';
 import { t, useLocale } from '../../i18n';
 import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
+import { resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
 import { FrontVisitSection } from './FrontVisitSection';
 
 function OfficerQualityChip({ label, value }: { label: string; value: number }) {
@@ -42,14 +43,8 @@ export function PersonnelContent() {
         const reserveOfficers = officers.filter(o => o.status === 'reserve');
         const reserves = state.factionReserves?.[faction];
         const mobilization = state.mobilizationSummary?.[faction];
-        const commanderByCorpsId = new Map(
-            activeOfficers
-                .filter((officer) => officer.assigned_corps_id)
-                .sort((a, b) => strictCompare(a.id, b.id))
-                .map((officer) => [officer.assigned_corps_id!, officer]),
-        );
         const commanderVacancies = corpsFormations
-            .filter((corps) => !commanderByCorpsId.has(corps.id))
+            .filter((corps) => !resolveCorpsCommanderDisplay(corps.id, corps.faction, state))
             .sort((a, b) => strictCompare(a.id, b.id));
         const lowReliabilityCommanders = activeOfficers
             .filter((officer) => officer.assigned_corps_id && typeof officer.political_reliability === 'number' && officer.political_reliability <= 2)
