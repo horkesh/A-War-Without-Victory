@@ -63,7 +63,9 @@ export function GlassPanel({
                     type="button"
                     className="absolute inset-0 border-0 bg-black/50 p-0 backdrop-blur-sm"
                     onClick={onClose}
-                    aria-label={`Close ${title}`}
+                    aria-hidden="true"
+                    tabIndex={-1}
+                    data-testid="glass-panel-backdrop"
                 />
                 {/* Panel */}
                 <div

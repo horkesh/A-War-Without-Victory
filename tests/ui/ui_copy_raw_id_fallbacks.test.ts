@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createElement } from 'react';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
@@ -167,5 +168,26 @@ describe('UI copy raw-id fallbacks', () => {
     expect(screen.getByText('Approve')).toBeTruthy();
     expect(container.textContent).not.toContain('pending_review');
     expect(container.innerHTML).not.toContain('>approve<');
+  });
+
+  it('Army HQ source uses safe fallbacks for raw sector/operation/detail labels', () => {
+    const sectorsSource = readFileSync('src/ui/map/components/army_hq/SectorsSection.tsx', 'utf8');
+    const operationsSource = readFileSync('src/ui/map/components/army_hq/OperationsSection.tsx', 'utf8');
+    const formationSource = readFileSync('src/ui/map/components/FormationDetail.tsx', 'utf8');
+
+    expect(sectorsSource).toContain('safeSectorLabel');
+    expect(sectorsSource).toContain("t('sectorsSection.unknownFormation')");
+    expect(sectorsSource).not.toContain("unknownFormation', { id }");
+
+    expect(operationsSource).toContain('safeOperationDisplayName');
+    expect(operationsSource).toContain("t('operationsSection.prep.unreported')");
+    expect(operationsSource).toContain("t('operationsSection.outcome.unreported')");
+    expect(operationsSource).not.toContain('op.preparation_sub_phase.toUpperCase()');
+    expect(operationsSource).not.toContain(': completedAAR.outcome');
+
+    expect(formationSource).toContain('safeCorpsLabel');
+    expect(formationSource).toContain('safeSectorLabel');
+    expect(formationSource).toContain('sanitizeHistoryMoment');
+    expect(formationSource).not.toContain('m.description.replace');
   });
 });

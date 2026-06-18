@@ -25,9 +25,16 @@ describe('GUI audit Batch H command briefing banner contract', () => {
     it('routes command targets through shell navigation helpers instead of stale selected-army state', () => {
         const source = readFileSync('src/ui/map/components/CommandBriefingLayer.tsx', 'utf8');
 
+        expect(source).toContain('inspectOnField');
         expect(source).toContain('openArmyHQBriefingForCorps');
         expect(source).toContain("openArmyHQTab(useGameStore.getState(), 'summary')");
         expect(source).toContain("openArmyHQTab(useGameStore.getState(), officerTargetTab(item.target.officerFocus))");
+        expect(source).toContain("kind: 'field-operation'");
+        expect(source).toContain("kind: 'field-sector'");
+        expect(source).toContain("kind: 'field-settlement'");
         expect(source).not.toContain('setSelectedArmyId');
+        expect(source).not.toContain('setSelectedOperationKey');
+        expect(source).not.toContain('setSelectedCorpsFrontSectorId');
+        expect(source).not.toContain('setSelectedOsid');
     });
 });

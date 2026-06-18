@@ -100,15 +100,15 @@ describe('PresidentialToolbar RECORDS button', () => {
         useGameStore.setState(useGameStore.getInitialState());
     });
 
-    it('opens Army HQ Records on the AAR subtab in the visible store state', () => {
+    it('opens Army HQ Records on the campaign archive subtab in the visible store state', () => {
         render(createElement(PresidentialToolbar, {
             pendingReviews: 0,
             pressureWarning: false,
-            onOpenRecords: () => openArmyHQRecordsSubTab(useGameStore.getState(), 'aar'),
+            onOpenRecords: () => openArmyHQRecordsSubTab(useGameStore.getState(), 'aftermath'),
         }));
 
         const recordsButton = screen.getByRole('button', { name: 'RECORDS' });
-        expect(recordsButton.getAttribute('title')).toBe('Open Army HQ Records: after-action reports');
+        expect(recordsButton.getAttribute('title')).toBe('Open Army HQ Records: campaign archive');
 
         fireEvent.click(recordsButton);
 
@@ -116,7 +116,7 @@ describe('PresidentialToolbar RECORDS button', () => {
             selectedArmyId: 'RS',
             armyHQOpen: true,
             armyHQTab: 'records',
-            armyHQRecordsSubTab: 'aar',
+            armyHQRecordsSubTab: 'aftermath',
         });
     });
 

@@ -4,6 +4,7 @@ import { parseGameState } from '../data/GameStateAdapter';
 import { shouldMarkPeaceWarTransitionSeenOnLoad } from '../data/peaceWarTransitionGate';
 import type { TurnAftermathView } from '../data/turnAftermath';
 import type { ArmyHQRecordsSubTab } from '../../shared/shellHandoff';
+import type { FieldInspectionTarget } from '../utils/fieldInspectionTarget';
 import type { ReplaySaveManifest } from '../../../sim/replay/replay_manifest';
 import type { GameState as RawGameState } from '../../../state/game_state';
 
@@ -208,6 +209,9 @@ export interface GameStore {
   /** Selected corps for ORBAT view (secondary pullout). */
   selectedOrbatCorpsId: string | null;
   setSelectedOrbatCorpsId: (id: string | null) => void;
+
+  /** Atomic tactical-field drilldown. Used when a route must preserve paired context. */
+  inspectOnFieldTarget: (target: FieldInspectionTarget) => void;
 
   /** Whether the Operations Panel modal is open. */
   isOperationsPanelOpen: boolean;
@@ -449,7 +453,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   armyHQOpen: false,
   armyHQTab: 'briefing',
-  armyHQRecordsSubTab: 'aar',
+  armyHQRecordsSubTab: 'aftermath',
   focusedOperationHistoryId: null,
   focusedDecisionConsequenceId: null,
   armyHQExpandedCorpsId: null,
@@ -479,7 +483,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   }),
   setArmyHQTab: (tab) => set({
     armyHQTab: tab,
-    ...(tab !== 'records' ? { armyHQRecordsSubTab: 'aar' } : {}),
+    ...(tab !== 'records' ? { armyHQRecordsSubTab: 'aftermath' } : {}),
     ...(tab !== 'records' ? { focusedAftermathTurn: null } : {}),
     ...(tab !== 'records' ? { focusedOperationHistoryId: null } : {}),
     ...(tab !== 'records' ? { focusedDecisionConsequenceId: null } : {}),
@@ -532,6 +536,73 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setSelectedOrbatCorpsId: (id) => set(id == null
     ? { selectedOrbatCorpsId: null }
     : { ...CLEARED_ENTITY_SELECTIONS, ...CLEARED_OPERATION_CONTEXT, selectedOrbatCorpsId: id }),
+
+  inspectOnFieldTarget: (target) => {
+    const base = {
+      ...CLEARED_ENTITY_SELECTIONS,
+      armyHQOpen: false,
+      armyHQTab: 'briefing' as const,
+      armyHQExpandedCorpsId: null,
+      armyHQExpandedSections: {},
+      armyHQOfficerSelectionCorpsId: null,
+      focusedAftermathTurn: null,
+      focusedOperationHistoryId: null,
+      focusedDecisionConsequenceId: null,
+      codexOpen: false,
+      chronicleOpen: false,
+      opsPlanningModalOpen: false,
+      operationTargetOsids: [] as string[],
+    };
+    if (target.kind === 'field-settlement') {
+      set({ ...base, isOperationsPanelOpen: false, selectedOsid: target.osid });
+      return;
+    }
+    if (target.kind === 'field-sector') {
+      set({
+        ...base,
+        isOperationsPanelOpen: false,
+        selectedCorpsFrontSectorId: target.sectorId,
+        selectedOsid: target.osid ?? null,
+      });
+      return;
+    }
+    if (target.kind === 'field-formation') {
+      set({ ...base, isOperationsPanelOpen: false, selectedFormationId: target.formationId });
+      return;
+    }
+    if (target.kind === 'field-formation-in-sector') {
+      set({
+        ...base,
+        isOperationsPanelOpen: false,
+        selectedFormationId: target.formationId,
+        selectedCorpsFrontSectorId: target.sectorId,
+      });
+      return;
+    }
+    if (target.kind === 'field-formation-in-corps') {
+      set({
+        ...base,
+        isOperationsPanelOpen: false,
+        selectedFormationId: target.formationId,
+        selectedCorpsId: target.corpsId,
+      });
+      return;
+    }
+    if (target.kind === 'field-formation-in-army-reserve') {
+      set({
+        ...base,
+        isOperationsPanelOpen: false,
+        selectedFormationId: target.formationId,
+        selectedArmyHqId: target.armyHqId,
+      });
+      return;
+    }
+    set({
+      ...base,
+      isOperationsPanelOpen: true,
+      selectedOperationKey: target.operationKey,
+    });
+  },
 
   isOperationsPanelOpen: false,
   setIsOperationsPanelOpen: (v) => set({ isOperationsPanelOpen: v }),

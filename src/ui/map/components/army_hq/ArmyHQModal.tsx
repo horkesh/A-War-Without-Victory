@@ -32,7 +32,7 @@ import { RecordsContent } from './RecordsContent';
 import { RootErrorBoundary } from '../RootErrorBoundary';
 import { PersonnelContent } from './PersonnelContent';
 import { Z } from '../../../shared/zIndex';
-import type { NamedOfficerView } from '../../data/types';
+import type { CorpsFrontSectorView, FormationView, NamedOfficerView, OperationView } from '../../data/types';
 import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presidentialDecisionRoom';
 import osidAreasData from '../../../../../data/derived/operational/osid_areas.json';
 
@@ -75,6 +75,63 @@ function OfficerMiniBio({ officer }: { officer: NamedOfficerView }) {
                     )}
                 </div>
             )}
+        </div>
+    );
+}
+
+function CommandAccessStrip({
+    corpsFormations,
+    sectorsByCorps,
+    opsByCorps,
+    readinessByCorps,
+    onSelect,
+}: {
+    corpsFormations: FormationView[];
+    sectorsByCorps: Map<string, CorpsFrontSectorView[]>;
+    opsByCorps: Map<string, OperationView[]>;
+    readinessByCorps: Map<string, { grade?: string; hasThreat?: boolean }>;
+    onSelect: (corpsId: string) => void;
+}) {
+    if (corpsFormations.length === 0) return null;
+    return (
+        <div data-testid="army-hq-corps-index" className="mb-3 border-y border-panel-border bg-panel-card/70 px-2 py-2">
+            <div className="mb-1.5 flex items-center justify-between gap-2">
+                <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-text-secondary">
+                    {t('armyHq.commandAccess')}
+                </div>
+                <div className="text-[8px] font-bold uppercase tracking-[0.18em] text-text-secondary/70">
+                    {t('armyHq.commandAccessHint')}
+                </div>
+            </div>
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(11rem,1fr))] gap-1.5">
+                {corpsFormations.map((corps) => {
+                    const readiness = readinessByCorps.get(corps.id);
+                    const sectors = sectorsByCorps.get(corps.id) ?? [];
+                    const operations = opsByCorps.get(corps.id) ?? [];
+                    return (
+                        <button
+                            key={corps.id}
+                            type="button"
+                            onClick={() => onSelect(corps.id)}
+                            className="min-w-0 rounded-md border border-panel-border/70 bg-panel-bg px-2 py-1.5 text-left transition-colors hover:border-amber-400/40 hover:bg-amber-400/5"
+                        >
+                            <div className="flex items-center gap-2">
+                                <span className={`h-2 w-2 rounded-full ${readiness?.hasThreat ? 'bg-red-500' : 'bg-emerald-400'}`} />
+                                <span className="min-w-0 flex-1 truncate text-[11px] font-bold uppercase text-text-primary">
+                                    {getPlayerSafeCorpsName(corps.name, corps.id)}
+                                </span>
+                                <span className="rounded border border-panel-border bg-panel-card px-1.5 py-0.5 text-[9px] font-bold text-accent-gold">
+                                    {t('armyHq.commandAccessReadiness', { grade: readiness?.grade ?? '--' })}
+                                </span>
+                            </div>
+                            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[9px] uppercase tracking-[0.12em] text-text-secondary">
+                                <span>{t('armyHq.commandAccessSectors', { count: sectors.length })}</span>
+                                <span>{t('armyHq.commandAccessOps', { count: operations.length })}</span>
+                            </div>
+                        </button>
+                    );
+                })}
+            </div>
         </div>
     );
 }
@@ -442,6 +499,14 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
                              * Summary, OOB summaries, and Command Relationship.
                              */}
                             {!expandedCorpsId && (
+                                <>
+                                <CommandAccessStrip
+                                    corpsFormations={data.corpsFormations}
+                                    sectorsByCorps={data.sectorsByCorps}
+                                    opsByCorps={data.opsByCorps}
+                                    readinessByCorps={data.readinessByCorps}
+                                    onSelect={navigateToCorps}
+                                />
                                 <div className="grid grid-cols-1 gap-3 mb-3 items-start xl:grid-cols-[minmax(0,1.12fr)_minmax(22rem,0.88fr)]">
                                     {/* Briefing band — Chief of Staff (primary document) */}
                                     <div className="min-w-0 space-y-3">
@@ -519,6 +584,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
                                         />
                                     </div>
                                 </div>
+                                </>
                             )}
 
                             {/* Corps Cards */}

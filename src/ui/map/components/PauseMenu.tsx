@@ -23,7 +23,9 @@ export function PauseMenu({ onResume, onSave, onSettings, onMainMenu, onQuit }: 
                 type="button"
                 className="absolute inset-0 cursor-default border-0 bg-transparent p-0"
                 onClick={onResume}
-                aria-label={t('pause.resumeAria')}
+                aria-hidden="true"
+                tabIndex={-1}
+                data-testid="pause-menu-backdrop"
             />
             <div className="w-[320px] rounded-lg border border-[#8a7a60]/35 shadow-2xl p-4 flex flex-col gap-2"
                  style={{

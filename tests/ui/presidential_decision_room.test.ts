@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  buildPresidentialDecisionRoomSourceHandoffs,
   buildPresidentialDecisionRoomView,
   type PresidentialDecisionRoomCard,
 } from '../../src/ui/map/data/presidentialDecisionRoom.js';
@@ -368,6 +369,34 @@ describe('buildPresidentialDecisionRoomView', () => {
       cardIds: ['chronicle:review-memory'],
       navigationTarget: { kind: 'chronicle' },
     });
+  });
+
+  it('labels Decision Records as their own source handoff instead of Opportunity Records', () => {
+    const card: PresidentialDecisionRoomCard = {
+      id: 'decision-record-card',
+      category: 'memory',
+      severity: 'info',
+      title: 'Decision filed',
+      explanation: 'A presidential decision has been filed to records.',
+      sourceOwner: 'Decision consequences',
+      sourceLabel: 'Decision record',
+      actionLabel: 'Open Records',
+      evidence: [],
+      navigationTarget: { kind: 'army-hq-records', recordsSubTab: 'decisions' },
+      sortKey: 10,
+    };
+
+    const handoffs = buildPresidentialDecisionRoomSourceHandoffs([card]);
+
+    expect(handoffs).toEqual([
+      expect.objectContaining({
+        id: 'army-hq-records-decisions',
+        label: 'Army HQ Decision Records',
+        actionLabel: 'Open Records',
+        navigationTarget: { kind: 'army-hq-records', recordsSubTab: 'decisions' },
+        cardIds: ['decision-record-card'],
+      }),
+    ]);
   });
 
   it('builds deterministic priority lenses over the same card archive', () => {

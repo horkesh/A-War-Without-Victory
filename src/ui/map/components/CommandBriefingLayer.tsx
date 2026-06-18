@@ -3,7 +3,7 @@ import type { CommandBriefingItemView, SummaryFocusSection } from '../data/types
 import type { ArmyHQTab } from '../../shared/shellHandoff';
 import { useGameStore } from '../store/gameStore';
 import { t } from '../i18n';
-import { openArmyHQBriefingForCorps, openArmyHQTab } from '../utils/shellNavigation';
+import { inspectOnField, openArmyHQBriefingForCorps, openArmyHQTab } from '../utils/shellNavigation';
 
 interface CommandBriefingLayerProps {
   onOpenSummary: (focus?: SummaryFocusSection) => void;
@@ -37,9 +37,6 @@ const SEVERITY_BG: Record<CommandBriefingItemView['severity'], string> = {
 
 export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves, onOpenPeacePlan }: CommandBriefingLayerProps) {
   const commandBriefing = useGameStore((state) => state.loadedGameState?.commandBriefing);
-  const setSelectedOperationKey = useGameStore((state) => state.setSelectedOperationKey);
-  const setSelectedCorpsFrontSectorId = useGameStore((state) => state.setSelectedCorpsFrontSectorId);
-  const setSelectedOsid = useGameStore((state) => state.setSelectedOsid);
   const setArmyHQExpandedCorpsId = useGameStore((state) => state.setArmyHQExpandedCorpsId);
   const devMode = useGameStore((state) => state.devMode);
   const [dismissed, setDismissed] = useState(false);
@@ -65,17 +62,17 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves, onOpenPeac
         return;
       case 'operation':
         if (item.target.operationKey) {
-          setSelectedOperationKey(item.target.operationKey);
+          inspectOnField(useGameStore.getState(), { kind: 'field-operation', operationKey: item.target.operationKey });
         }
         return;
       case 'sector':
         if (item.target.sectorId) {
-          setSelectedCorpsFrontSectorId(item.target.sectorId);
+          inspectOnField(useGameStore.getState(), { kind: 'field-sector', sectorId: item.target.sectorId });
         }
         return;
       case 'settlement':
         if (item.target.osid) {
-          setSelectedOsid(item.target.osid);
+          inspectOnField(useGameStore.getState(), { kind: 'field-settlement', osid: item.target.osid });
         }
         return;
       case 'corps': {

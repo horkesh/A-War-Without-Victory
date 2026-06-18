@@ -41,4 +41,4 @@ The first attempted fix seated active turn-0 commanders in simulation state. Foc
 
 - HVO Vitezovi elite commander metadata remains a separate content-data lane.
 - Remaining invalid-coordinate/DeckGL warnings remain a map-data/rendering polish lane.
-- Drina/Krivaja long-run consistency residuals are lifecycle/calibration issues around brigade dissolution/attrition during late-war triggered-operation delivery, not startup command or first-hour OOB defects.
+- Srebrenica/Zepa fall receipts are event-owned. Any remaining Krivaja/Stupcanica or Drina-roster diagnostics are operation-health/AAR context only, not a fall-delivery calibration path and not startup command or first-hour OOB defects.

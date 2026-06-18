@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-06-18 (first-hour shell hardening, event/inbox calendar copy, player-safe event dossier boundaries, and queued Army HQ drilldown polish)
+**Updated:** 2026-06-18 (first-hour shell hardening, event/inbox calendar copy, player-safe event dossier boundaries, and Army HQ first-paint/drilldown closeout)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Army HQ first-paint/drilldown polish** | [implemented/20260618_ARMY_HQ_FIRST_PAINT_DRILLDOWN_POLISH.md](implemented/20260618_ARMY_HQ_FIRST_PAINT_DRILLDOWN_POLISH.md) - Army HQ opens with a corps Command Access strip, corps drilldowns surface sectors/operations first, Records defaults to the campaign archive, and field inspections use an atomic Tactical Map route. |
 | **P1 raw-copy calendar boundary** | [implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md](implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md) - Event decisions and inbox rows now render calendar dates instead of raw turn copy, source/dossier internals are hidden outside diagnostics, and toolbar load errors use player-facing copy. |
 | **First-hour shell and dev-map hardening** | [implemented/20260618_FIRST_HOUR_SHELL_AND_DEV_MAP_HARDENING.md](implemented/20260618_FIRST_HOUR_SHELL_AND_DEV_MAP_HARDENING.md) - Root map scripts call the map workspace Vite entrypoint directly, Warroom/game shell handoffs clear competing overlays, Warroom staff is labeled `Army HQ`, and future decision branches require explicit reveal. |
 | **Stale-truth/process hardening** | [implemented/20260616_STALE_TRUTH_AND_PROCESS_HARDENING.md](implemented/20260616_STALE_TRUTH_AND_PROCESS_HARDENING.md) - Sarajevo siege UI now requires current control freshness, consequence records use authored names or neutral fallbacks, and the supporting CI/docs process fixes are recorded. |

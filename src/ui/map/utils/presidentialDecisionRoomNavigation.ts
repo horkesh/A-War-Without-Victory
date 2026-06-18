@@ -7,6 +7,7 @@ import {
   openArmyHQRecordsSubTab,
   openArmyHQTab,
   openChronicle,
+  inspectOnField,
   type ShellNavigationState,
 } from './shellNavigation';
 
@@ -32,6 +33,9 @@ export function openPresidentialDecisionRoomNavigationTarget(
   if (target.kind === 'decision-room') {
     requestDecisionRoomLens(target.lens, null, target.cardId ?? null);
     return true;
+  }
+  if (target.kind === 'field') {
+    return inspectOnField(state, target.target);
   }
   if (target.kind === 'inbox') {
     state.setCodexOpen(false);

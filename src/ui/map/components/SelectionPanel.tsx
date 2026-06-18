@@ -12,6 +12,7 @@ import { getCurrentEthnicForOsid } from '../map/builders/buildEthnicGeoJSON';
 import { getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
 import { useLocale } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
+import { inspectOnField } from '../utils/shellNavigation';
 import {
   filterPlayerFacingFormations,
   filterPlayerFacingMovementsByOsid,
@@ -33,9 +34,6 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setSelectedOsid = useGameStore((s) => s.setSelectedOsid);
-  const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
-  const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
-  const setSelectedOperationKey = useGameStore((s) => s.setSelectedOperationKey);
   const [supportMessage, setSupportMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -270,9 +268,9 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           brigadeCountByFaction={Object.keys(brigadeCountByFaction).length > 0 ? brigadeCountByFaction : undefined}
           pendingOrders={pendingOrders}
           militiaPools={militiaPoolsProp}
-          onFormationClick={setSelectedFormationId}
-          onSectorClick={setSelectedCorpsFrontSectorId}
-          onOperationClick={setSelectedOperationKey}
+          onFormationClick={(formationId) => inspectOnField(useGameStore.getState(), { kind: 'field-formation', formationId })}
+          onSectorClick={(sectorId) => inspectOnField(useGameStore.getState(), { kind: 'field-sector', sectorId, osid: selectedOsid })}
+          onOperationClick={(operationKey) => inspectOnField(useGameStore.getState(), { kind: 'field-operation', operationKey })}
           currentEthnic={currentEthnic ?? undefined}
           displacementEventLog={loadedGameState?.displacementEventLog}
           allControlEvents={loadedGameState?.allControlEvents}
