@@ -110,4 +110,27 @@ describe('TurnAftermathRecordsPanel localization', () => {
         expect(container.textContent).not.toMatch(/\bevent decision\b/i);
         expect(container.textContent).not.toContain('event_decision');
     });
+
+    it('localizes non-event latest desk item types in BCS', () => {
+        setLocale('bcs');
+        useGameStore.setState({
+            ...useGameStore.getInitialState(),
+            loadedGameState: {
+                ...makeState(),
+                pendingConvoyDecisions: [{
+                    id: 'convoy_latest',
+                    target_enclave: 'Srebrenica',
+                    route_faction: 'RBiH',
+                    supply_amount: 120,
+                }],
+            } as LoadedGameState,
+            osidDisplayNames: {},
+        });
+
+        const { container } = render(createElement(TurnAftermathRecordsPanel));
+
+        expect(screen.getByText('Humanitarni konvoj')).toBeTruthy();
+        expect(container.textContent).not.toContain('convoy_decision');
+        expect(container.textContent).not.toContain('Humanitarian convoy');
+    });
 });

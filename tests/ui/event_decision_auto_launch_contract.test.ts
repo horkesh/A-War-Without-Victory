@@ -99,15 +99,11 @@ describe('event decision modal auto-launch contract', () => {
       app.indexOf('<EventDecisionModal'),
       app.indexOf('<ConvoyDecisionModal'),
     );
-    const browserFallbackBlock = modalRenderBlock.slice(
-      modalRenderBlock.indexOf('const rawGameState = loadedGameState?.rawGameState'),
-      modalRenderBlock.indexOf('onRespond={async') === -1 ? modalRenderBlock.length : modalRenderBlock.length,
-    );
 
-    expect(browserFallbackBlock).toContain('resolveBrowserEventDecision(nextState, eventId, responseId)');
-    expect(browserFallbackBlock).toContain('console.warn(\'[EventDecisionModal] browser fallback failed\', err)');
-    expect(browserFallbackBlock).toContain('setLoadError(\'Failed to record event decision.\')');
-    expect(browserFallbackBlock).not.toContain('setLoadError(err instanceof Error ? err.message : String(err))');
+    expect(modalRenderBlock).toContain('resolveBrowserEventDecision(nextState, eventId, responseId)');
+    expect(modalRenderBlock).toContain('console.warn(\'[EventDecisionModal] browser fallback failed\', err)');
+    expect(modalRenderBlock).toContain('setLoadError(\'Failed to record event decision.\')');
+    expect(modalRenderBlock).not.toContain('setLoadError(err instanceof Error ? err.message : String(err))');
   });
 
   it('clears stale active modal state from effects rather than during render', () => {

@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-18] fix(ui): close event-decision and campaign-cost raw-copy leaks
+
+**Type:** UI/read-model player-copy hardening and Pyrrhic specialist integration.
+
+**Fix:** Integrated the Pyrrhic lane-A and lane-B raw-copy fixes. Event decision response previews now share the non-display effect filter with the event modal, hiding engine/audit-only effects such as recruitment modifiers, equipment modifiers, bot-priority shifts, doctrine constraints, alliance locks, and cost-ledger annotations. Future-consequence labels/explanations now sanitize raw consequence IDs, catalog filenames, and "Recording..." diagnostic fragments unless diagnostics are explicitly shown, and the browser fallback path logs raw event-decision failures to the console while showing generic player copy. War Cost Summary now labels opportunity responses and finding badges, Army HQ campaign-cost severity now localizes through the existing aftermath severity vocabulary, visible OSID wording is replaced with territorial-balance copy, and Turn Aftermath latest-desk item types render through localized decision-surface family labels instead of raw inbox types or English registry labels in BCS. Report: `docs/40_reports/implemented/20260618_EVENT_AND_CAMPAIGN_COST_RAW_COPY_CLOSURE.md`.
+
+**Verification:** Worker red/green proofs were preserved in isolated branch commits. Main integration focused pack passed 11 files / 67 tests across event-decision modal/auto-launch/catalog, event-modal effect filtering, load-error copy, War Cost Summary, Turn Aftermath, War Summary campaign cost, and raw-copy fallback guards. Typecheck passed. Fast Vitest passed 1065 files / 10026 tests with 3 files skipped. A Pyrrhic UI review then found a BCS non-event action-type label leak; after fixing it, `tests/ui/turn_aftermath_records_panel_i18n.test.ts` passed 3/3 with new convoy coverage. Final combined/typecheck/diff checks were run before push.
+
+**Scope/determinism:** UI/read-model presentation and tests only; no simulation logic, scenario data, save schema, serialization, generated artifacts, calibration floor, golden baselines, randomness, timestamps, persisted output ordering, or packaged installer artifact changed.
+
+---
+
 ## [2026-06-18] test(ui): sync Codex integration expectations with player-safe labels
 
 **Type:** CI follow-up and UI/player-copy test-contract hardening.
@@ -20709,9 +20721,3 @@ Verification: `npx.cmd vitest run tests\rs_six_strategic_goals_foundational.test
 Added an executable OOB metadata contract for the HVO Vitez/Vitezovi elite commander residual. The contract requires every elite brigade without an `elite_commander` to be explicitly allowlisted and documents `hrhb_vitezovi_brigade_vitez` as the only current exception pending source/model review, because BB2 distinguishes the company-sized PPN Vitezovi under Darko Kraljevic from the local Vitez brigade under Mario Cerkez. The test also pins the current localization/designation tie so future source-review changes must update data and labels together.
 
 No source OOB data, scenario data, save schema, live command UI, or postwar legal-outcome presentation changed. The knowledge ledger records the time-safe rule: do not assign Darko Kraljevic or Mario Cerkez to the current conflated row until the model decides whether it represents the PPN, the Vitez brigade, or a split. Determinism/scope: test/docs-only source-review guard; no simulation logic, generated artifacts, calibration floor, or baseline outputs changed.
-
-## 2026-06-18 - Pyrrhic UI campaign-cost safe labels
-
-Closed the lane-B raw-label leaks in the War Cost Summary and Army HQ campaign-cost surfaces. War Cost Summary now renders opportunity responses and cost-ledger finding badges through player-safe label helpers, so raw `under_resource`, `RS / rupture`, and raw `grave` / `record` / `rupture` badge text stay internal. Army HQ War Summary and Turn Aftermath Records now localize campaign-cost severity labels, replace visible `Net OSIDs`/OSID campaign-cost wording with territorial-balance copy, and render latest desk item types through decision-surface labels instead of raw `event_decision`-style type text.
-
-Focused red/green coverage was added for WarCostSummary findings/opportunity responses, campaign-cost prose, War Summary BCS severity/territory labels, and Turn Aftermath desk-item type labels. Verification: `npx.cmd vitest run tests/ui/war_cost_summary.test.ts tests/ui/turn_aftermath.test.ts tests/ui/turn_aftermath_records_panel_i18n.test.ts tests/ui/war_summary_campaign_cost_i18n.test.ts --pool=forks` passed 31/31 after red; `npx.cmd vitest run tests/ui/war_cost_summary.test.ts tests/ui/turn_aftermath.test.ts tests/ui/turn_aftermath_records_panel_i18n.test.ts tests/ui/war_summary_campaign_cost_i18n.test.ts tests/ui/ui_copy_raw_id_fallbacks.test.ts --pool=forks` passed 36/36; `npm.cmd run typecheck` passed. Determinism/scope: UI/read-model presentation and tests only; no simulation logic, scenario data, save schema, serialization, generated artifacts, calibration floor, golden baselines, randomness, timestamps, or persisted output ordering changed.

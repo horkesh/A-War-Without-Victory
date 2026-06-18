@@ -55,8 +55,8 @@ function enumLabel(prefix: string, value: string): string {
 
 function actionTypeLabel(type: TurnAftermathView['nextActions']['topItems'][number]['type']): string {
     const surface = getDecisionSurfaceForInboxType(type);
-    if (surface?.familyId === 'event_decision') return t('records.actionType.eventDecision');
-    return surface?.playerLabel ?? t('records.actionType.reviewItem');
+    if (!surface) return t('records.actionType.reviewItem');
+    return t(`records.actionType.${surface.familyId}` as MessageKey);
 }
 
 function RecordMetric({ label, value, detail }: { label: string; value: string; detail: string }) {

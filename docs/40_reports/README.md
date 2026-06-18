@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest event and campaign-cost raw-copy closure** | [implemented/20260618_EVENT_AND_CAMPAIGN_COST_RAW_COPY_CLOSURE.md](implemented/20260618_EVENT_AND_CAMPAIGN_COST_RAW_COPY_CLOSURE.md) - Event decision previews/future-consequence copy and War Cost/Army HQ campaign-cost surfaces now keep effect, response, severity, OSID, and inbox-type internals out of player copy. |
 | **Latest Records and sitrep player-safe labels** | [implemented/20260618_RECORDS_SITREP_PLAYER_SAFE_LABELS.md](implemented/20260618_RECORDS_SITREP_PLAYER_SAFE_LABELS.md) - Army HQ Records reserve reasons and operational sitrep operation/front labels now render player-safe copy instead of raw enums, phase strings, turn IDs, or ad hoc OSID-derived labels. |
 | **Latest Codex and replay player-safe labels** | [implemented/20260618_CODEX_REPLAY_PLAYER_SAFE_LABELS.md](implemented/20260618_CODEX_REPLAY_PLAYER_SAFE_LABELS.md) - Dynamic Codex Cost Ledger tokens and Verdict Replay sparse control totals now render player-safe labels instead of raw faction, annotation, rupture, or `faction:osids` debug copy. |
 | **Srebrenica/Zepa event-owned receipt correction** | [proposals/20260617_SREBRENICA_RUPTURE_KRIVAJA_FLOOR_ALIGNMENT.md](proposals/20260617_SREBRENICA_RUPTURE_KRIVAJA_FLOOR_ALIGNMENT.md) - Supersedes the Krivaja/Stupcanica operation-delivery framing; fall receipts are event-owned and rupture observes the resulting control state. |
