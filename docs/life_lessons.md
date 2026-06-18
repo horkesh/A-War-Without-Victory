@@ -156,7 +156,7 @@
 - Investigation agent said `evaluate-patron-events`, actual name was `update-patron-pressure`. Test failed. Always grep `name:` field in war_phases.ts before writing step-name tests.
 
 ### [Architecture] Scenario proof requires turn-threshold analysis before claiming feasibility — see `docs/life_lessons/architecture.md`
-- Rupture needs turn >= 140. 40w/52w scenarios can't reach it. 188w run proved correct non-firing (Srebrenica held). Check precondition thresholds against scenario lengths BEFORE promising proof.
+- Rupture observes the event-owned Srebrenica fall receipt window (turn >= 160), not an operation-delivery calibration target. 40w/52w scenarios cannot prove this late path; 188w proof must check event-owned control receipts plus rupture observation, and must not spend calibration time forcing Krivaja/Stupcanica to capture objectives.
 
 ### [Architecture] Correct non-firing is valid scenario proof for condition-gated behavior — see `docs/life_lessons/architecture.md`
 - 188w: Srebrenica held → rupture correctly did NOT fire. This proves the gate works. Non-firing when conditions aren't met IS proof, not a gap.

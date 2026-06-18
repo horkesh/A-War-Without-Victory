@@ -73,6 +73,25 @@ describe('Event timeline historical integrity', () => {
         expect(zepa.trigger.requires_events).toContain('srebrenica_falls_1995');
     });
 
+    it('Srebrenica and Zepa fall rows are event-authored territorial receipts', () => {
+        const srebrenica = allEvents.find((e: any) => e.id === 'srebrenica_falls_1995');
+        const zepa = allEvents.find((e: any) => e.id === 'zepa_falls_1995');
+
+        expect(srebrenica.trigger.turn_min).toBe(160);
+        expect(srebrenica.pressure?.threshold).toBe(8);
+        const srebrenicaControl = (srebrenica.effects ?? []).find((effect: any) => effect.kind === 'control_change');
+        expect(srebrenicaControl?.faction).toBe('RS');
+        expect(srebrenicaControl?.osids).toContain('op:srebrenica:srebrenica_2');
+        expect(srebrenicaControl?.osids).toContain('op:srebrenica:donji_potocari_2');
+        expect(srebrenicaControl?.osids).toContain('op:srebrenica:bostahovine_2');
+
+        expect(zepa.trigger.turn_min).toBe(160);
+        expect(zepa.pressure?.threshold).toBe(6);
+        const zepaControl = (zepa.effects ?? []).find((effect: any) => effect.kind === 'control_change');
+        expect(zepaControl?.faction).toBe('RS');
+        expect(zepaControl?.osids).toEqual(['op:rogatica:zepa_2']);
+    });
+
     it('ceasefire fires before Dayton talks', () => {
         const ceasefire = allEvents.find((e: any) => e.id === 'ceasefire_1995');
         const dayton = allEvents.find((e: any) => e.id === 'dayton_talks_begin_1995');

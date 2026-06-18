@@ -1,5 +1,7 @@
 # ENGINE-3 — Srebrenica/Žepa Fall: Event Design Memo
 
+> **Superseded 2026-06-18:** This memo's recommendation to restore Srebrenica/Zepa fall receipts through Krivaja-95/Stupcanica-95 operation delivery is superseded. The accepted model is event-owned fall receipt (`control_change` in `srebrenica_falls_1995` / `zepa_falls_1995`) plus rupture observation of the resulting Srebrenica control state. Treat the operation-delivery analysis below as historical audit context only.
+
 - **Date:** 2026-05-23
 - **Lane:** ENGINE-3 (n1992 spatial-metric audit follow-up)
 - **Status:** DESIGN MEMO — READ-ONLY investigation, no edits proposed beyond design space

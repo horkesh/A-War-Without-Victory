@@ -131,7 +131,7 @@ The canonical pattern for counterfactual recording (Q-CANON-RUPT-4 Path (d), com
 
 Rupture consequences (`evaluateRuptureConsequences()`) fire ONLY on emergent satisfaction of a discrete game-state condition (control of a specific OSID + flag + turn predicate). Calendar-window heuristic substitution is forbidden. Counterfactual silence (no rupture in an ahistorical campaign that did not produce the trigger condition) is canonically correct. The historical record (Ring 2: essays + ICTY citations) remains accessible regardless of campaign path.
 
-The single live rupture is `srebrenica_genocide_1995` (RS controls `op:srebrenica:srebrenica_2` + `enclave_formed` flag + turn ≥140). See `SENSITIVE_HISTORY_DESIGN_GATE.md` §1.5 #11, §2 criterion 3, §5.
+The single live rupture is `srebrenica_genocide_1995` (RS controls `op:srebrenica:srebrenica_2` + `enclave_formed` flag + event-owned fall-receipt window turn ≥160). Srebrenica/Zepa fall receipts are authored by the sensitive-history event rows (`control_change` effects); Krivaja-95/Stupcanica-95 remain chronology/AAR context, not the mechanical fall-delivery acceptance criterion. See `SENSITIVE_HISTORY_DESIGN_GATE.md` §1.5 #11, §2 criterion 3, §5.
 
 ### 12.6 Officer-quality observability (Force-Quality Gap 1, commit `0bd5a938`, 2026-05-04)
 
@@ -142,7 +142,7 @@ The single live rupture is `srebrenica_genocide_1995` (RS controls `op:srebrenic
 Items recorded in lane handoffs but not yet integrated into normative pipeline:
 - 188w sensitive-history regression run before promoting `MORALE_OVERRIDE_ENABLED` flag from default-off to default-on.
 - Per-corps `historical_axis_munis` config + off-axis duration counter on `CorpsCommandState` (R2-2 7th event `csq_corps_redeployed_off_axis` is HELD pending this).
-- Stupčanica-95 defender combat-math stack honesty (Phase 4d successor to LANE-NIGHTSHIFT-SREBRENICA-DIAGNOSTIC-V2).
+- Stupčanica-95 defender combat-math stack honesty for operation-health/AAR diagnostics only; not a Srebrenica/Zepa fall-delivery mechanism.
 
 ---
 

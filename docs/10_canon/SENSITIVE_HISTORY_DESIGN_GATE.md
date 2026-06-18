@@ -33,7 +33,7 @@ The game simulates these as structured state:
 - **Displacement** (`src/state/displacement.ts`) — municipalities track `original_population`, `displaced_out`, `displaced_in`, `lost_population`. Triggered by supply starvation, encirclement, front breaches, or paramilitary capture.
 - **Paramilitary sweeps** (`src/sim/combat/paramilitary_sweep.ts`) — rear pocket cleanup and adjacent-offensive modes. Each capture increments `war_crimes_events` and records civilian casualties.
 - **War crimes counter** — `FactionCapital.war_crimes_events` increments with every paramilitary capture. Feeds into grade anchors (see `VICTORY_AND_PYRRHIC_SCORING.md` §3.2).
-- **Rupture consequence** — exactly one: `srebrenica_genocide_1995`, fired when the Srebrenica OSID falls to RS in the 1995 timeframe with enclave formed flag set. Propagates `genocide_condemnation` flag. Locked, idempotent, permanent.
+- **Rupture consequence** — exactly one: `srebrenica_genocide_1995`, fired when the event-owned Srebrenica fall receipt has produced RS control of the Srebrenica OSID in the July 1995 window with the enclave formed flag set. Propagates `genocide_condemnation` flag. Locked, idempotent, permanent.
 
 **Implementation-note (data-not-comment name-pool exclusion, 2026-05-07):** Reserved canonical names — operations, formations, event-IDs, persona-IDs — that bot/AI generators could randomly select MUST be excluded from generator data pools by the data files themselves (e.g., `src/sim/combat/operation_names.ts`), not by source comments. Comment-claims-of-exclusion that the data does not enforce produce phantom canon-violations that masquerade as trigger-predicate bugs. Reference: Stupčanica-95 name-collision incident (`759a35cd`, 2026-05-07) — `Operacija Stupčanica` had appeared at w27 not via the trigger predicate but via the bot operation-name pool. Static tests enforcing the exclusion are mandatory. See `docs/10_canon/FORAWWV.md` §XI.2 for the full canonical statement.
 
@@ -81,7 +81,7 @@ A historical event becomes eligible for rupture status **only if it meets all fo
 
 | Rupture ID | Event | Criteria check |
 |---|---|---|
-| `srebrenica_genocide_1995` | Fall of Srebrenica safe area, July 1995 | 8,000+ killed ✓; Krstić genocide conviction, Karadžić, Mladić, ICJ 2007 ✓; RS controls `op:srebrenica:srebrenica_2` + enclave formed + turn ≥140 ✓; locked ✓ |
+| `srebrenica_genocide_1995` | Fall of Srebrenica safe area, July 1995 | 8,000+ killed ✓; Krstić genocide conviction, Karadžić, Mladić, ICJ 2007 ✓; RS controls `op:srebrenica:srebrenica_2` + enclave formed + event-owned fall-receipt window turn ≥160 ✓; locked ✓ |
 
 ### Events that are **not** ruptures (and why)
 

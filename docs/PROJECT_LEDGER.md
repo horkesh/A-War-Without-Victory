@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-18] fix(canon): align Srebrenica/Zepa fall receipts to the event system
+
+**Type:** sensitive-history canon/process correction, event receipt guard, and calibration hygiene.
+
+**Fix:** Preserved the owner correction that Srebrenica/Zepa fall through the sensitive-history event system, not through a preordered/scripted Krivaja-95 or Stupcanica-95 operation-delivery calibration lane. `srebrenica_genocide_1995` now observes the event-owned fall receipt window (turn >= 160) after the fall event has had the opportunity to write RS control, instead of allowing a pre-receipt turn-140 observation. Added an event timeline integrity guard proving `srebrenica_falls_1995` and `zepa_falls_1995` own `control_change` receipts to RS. Updated command board, master roadmap, calibration master, sensitive-history canon, War spec, life lessons, napkin, and report index so future work does not spend 188w slots forcing Krivaja/Stupcanica capture delivery.
+
+**Verification:** Focused event/rupture/diagnostic suites and typecheck run in this branch before merge. No scenario source content, generated calibration artifacts, packaged installer, or baseline manifests are changed by this correction.
+
+---
+
 ## [2026-06-18] fix(calibration): preserve calibrated operational substrate after geometry repair
 
 **Type:** CI/integration hygiene, map-derived artifact correction, and 188w engine-health repair.

@@ -1,5 +1,7 @@
 # Engine Health Action Plan — n1842 Audit Follow-Up
 
+> **Superseded note (2026-06-18):** The H1 Krivaja/Stupcanica fall-delivery framing in this dated plan is superseded. Srebrenica/Zepa fall receipts are event-owned through `srebrenica_falls_1995` / `zepa_falls_1995` `control_change` effects; Krivaja/Stupcanica are operation-health/AAR context only. Do not use this plan to justify operation-delivery calibration for the Srebrenica/Zepa falls.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` to implement remaining runtime tracks. Use `superpowers:systematic-debugging` for Tracks H1 + H4 + H5 (runtime defects). H2/H3 are closed report-only as of 2026-05-16.
 
 **Goal:** Close the open engine-health gaps surfaced by the 2026-05-16 n1842 188w audit, in priority order, without duplicating existing operations-singularity / formation-life / force-quality work.

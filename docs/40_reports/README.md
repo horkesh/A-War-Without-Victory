@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Srebrenica/Zepa event-owned receipt correction** | [proposals/20260617_SREBRENICA_RUPTURE_KRIVAJA_FLOOR_ALIGNMENT.md](proposals/20260617_SREBRENICA_RUPTURE_KRIVAJA_FLOOR_ALIGNMENT.md) - Supersedes the Krivaja/Stupcanica operation-delivery framing; fall receipts are event-owned and rupture observes the resulting control state. |
 | **Latest operational geometry invalid-coordinate closeout** | [implemented/20260617_OPERATIONAL_GEOMETRY_INVALID_COORDINATE_CLOSEOUT.md](implemented/20260617_OPERATIONAL_GEOMETRY_INVALID_COORDINATE_CLOSEOUT.md) - Operational settlement generation now drops invalid polygon parts, the committed artifact has an integrity test, and live map smoke no longer emits invalid-coordinate overlay warnings. |
 | **Latest startup operation-participant/raw-copy polish** | [implemented/20260617_STARTUP_OPERATION_PARTICIPANT_AND_RAW_COPY_POLISH.md](implemented/20260617_STARTUP_OPERATION_PARTICIPANT_AND_RAW_COPY_POLISH.md) - Startup active operation participants no longer appear as unresolved sector brigades, generated operation names stay internal across Records/Chronicle/timelines/receipts/Army Reserve evidence, and RS future-consequence previews hide non-diagnostic flag/consequence vocabulary. |
 | **Latest OOB metadata substrate** | [implemented/20260617_HVO_ELITE_COMMANDER_METADATA_SUBSTRATE.md](implemented/20260617_HVO_ELITE_COMMANDER_METADATA_SUBSTRATE.md) - OOB elite commander metadata now round-trips through the loader while the Vitezovi identity/modeling decision remains separate. |

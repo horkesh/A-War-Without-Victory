@@ -10,6 +10,8 @@
 
 ---
 
+> **Superseded note (2026-06-18):** The Srebrenica predicate references in this dated design predate the accepted event-owned receipt correction. Current canon: Srebrenica/Zepa fall receipts are authored by sensitive-history event rows (`control_change` effects), and `srebrenica_genocide_1995` observes the event-created Srebrenica control state plus enclave/turn predicates from the fall-receipt window. Do not use this document to reopen Krivaja/Stupcanica fall-delivery calibration.
+
 ## 0. What is being replaced and what is reused
 
 The 2026-06-07 design built a **bot-only** 5th `CorpsStance` `contain` driven by `isEnclaveContainable`. The owner is shelving the two outcome-changing lanes (V/A). What survives intact and is **reused**:
@@ -59,6 +61,8 @@ The fall of an isolated enclave through assault produces displacement and civili
 The card text — in the §4-compliant historical/prosecutorial register (third person, ICTY-cited, no euphemism, no humour) — states plainly what an assault on this specific isolated pocket means, drawing on the relevant ICTY/ICJ record (for the eastern case: the Srebrenica arc, Krstić genocide finding, ICJ 2007). The player cannot OVERRUN *unknowingly*. This is the "authorship of the tragedy" requirement made mechanical: the confirm step is the moment of authorship, recorded.
 
 **2d. The consequence: condemnation + standing/patron hit, NEVER a reward.**
+
+> **2026-06-18 correction for Srebrenica/Zepa:** the Srebrenica-specific predicate wording in this dated subsection is historical context only. Current canon uses event-owned `control_change` fall receipts and a rupture observer keyed to the resulting Srebrenica control state from the receipt window.
 - The OVERRUN authorship is recorded as an **authored choice** (seeds `consequenceReceipts`, surfaces in the Authored-Choices ledger — the repurposed EventLog, Presidential Command Surface §3). This is browsable "what you authored," never celebratory.
 - It carries a **patron-confidence + international-standing hit** through the existing dimension channels (the same channels the paramilitary-policy `always_allow` path and the atrocity events already move). Negative-or-neutral only.
 - **For the §6-eastern Srebrenica case specifically:** the fall flows to the EXISTING `srebrenica_genocide_1995` rupture predicate (`rupture_consequences.ts:66` — RS controls `op:srebrenica:srebrenica_2` + `srebrenica_enclave_formed` + turn ≥140). OVERRUN does NOT bypass, duplicate, or pre-empt that rupture; it makes the player the proximate author of satisfying its mechanical condition. The condemnation is the rupture's existing `genocide_condemnation` flag → `failure` outcome class (scoring §2). **It is never softened by the player having "chosen via a card."**

@@ -106,21 +106,21 @@ describe('evaluateRuptureConsequences', () => {
         expect(ruptures).toHaveLength(0);
     });
 
-    it('does NOT record if turn < 140', () => {
-        const state = makeRuptureReadyState({ turn: 139 });
+    it('does NOT record before the event-owned fall receipt window', () => {
+        const state = makeRuptureReadyState({ turn: 159 });
         evaluateRuptureConsequences(state);
 
         const ruptures = state.military.negotiation!.rupture_consequences ?? [];
         expect(ruptures).toHaveLength(0);
     });
 
-    it('records at exactly turn 140', () => {
-        const state = makeRuptureReadyState({ turn: 140 });
+    it('records at exactly turn 160', () => {
+        const state = makeRuptureReadyState({ turn: 160 });
         evaluateRuptureConsequences(state);
 
         const ruptures = state.military.negotiation!.rupture_consequences!;
         expect(ruptures).toHaveLength(1);
-        expect(ruptures[0].recorded_turn).toBe(140);
+        expect(ruptures[0].recorded_turn).toBe(160);
     });
 
     it('is idempotent — calling twice does not duplicate', () => {

@@ -1,3 +1,7 @@
+## 2026-06-18 - Srebrenica/Zepa fall receipts are event-owned, not Krivaja/Stupcanica delivery targets
+
+**Srebrenica/Zepa event rows own the control receipt:** `srebrenica_falls_1995` and `zepa_falls_1995` carry `control_change` effects and are the accepted fall receipt path. `srebrenica_genocide_1995` observes the resulting Srebrenica control state plus enclave/turn predicates from the event-owned receipt window. Durable rule: do not spend calibration slots forcing Krivaja-95/Stupcanica-95 operation delivery through donor-reach exceptions, defender-power bypasses, current-objective capture policy, one-turn recovery, or participant-movement changes. Those operations can remain chronology/AAR/operation-health context only.
+
 ## 2026-06-17 - Opening command truth must not mutate startup simulation state
 
 **Render guards are not a substitute for generated map-data invariants:** Overlay builders may skip bad polygons safely, but committed operational geometry must still be finite, closed, and non-degenerate. Durable rule: when Deck.gl warns about invalid OSID coordinates, trace back to `data/derived/operational/operational_settlements.geojson`, add an artifact-level geometry contract, regenerate through the owning scripts, and keep render guards as defense-in-depth rather than the primary fix. Applied in `[2026-06-17] fix(map): remove invalid operational polygon parts`.

@@ -1,6 +1,12 @@
 # Life Lessons — Calibration, OOB, Combat, Bot AI
 > Split from docs/life_lessons.md on 2026-03-24. Master index: docs/life_lessons.md
 
+### [Calibration] Srebrenica/Zepa falls are event-owned receipts, not operation-delivery targets (2026-06-18)
+- **Context**: The 2026-06-17 local WIP reframed Srebrenica/Zepa as a Krivaja-95/Stupcanica-95 operation-delivery calibration problem. Owner correction on 2026-06-18 restored the accepted model: `srebrenica_falls_1995` and `zepa_falls_1995` own the `control_change` receipts; `srebrenica_genocide_1995` observes the event-created control state plus enclave/turn predicates.
+- **Wrong approach**: Spending 188w slots on donor-reach exceptions, defender-power bypasses, current-objective capture policy, one-turn recovery, or participant-movement changes solely to make Krivaja/Stupcanica capture objectives.
+- **Right approach**: Keep Krivaja/Stupcanica as chronology/AAR/operation-health context. Harden the event receipt and rupture-observation tests instead, and verify no Ring-3 player lever, no calendar-only genocide rupture, and no reward for atrocity.
+- **Do instead**: Before any Srebrenica/Zepa calibration lane, read `docs/plans/COMMAND_BOARD.md`, `docs/40_reports/CALIBRATION_MASTER.md`, and `tests/event_timeline_integrity.test.ts`; if the task says "make Krivaja deliver the fall," stop and re-scope.
+
 ---
 
 ### [Calibration] Pre-Storm HRHB control_change events (week ≤172) cascade into Sanski Most/Kljuc area (2026-05-26) — NEW

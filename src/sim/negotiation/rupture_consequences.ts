@@ -16,8 +16,8 @@ import type { RuptureConsequence } from '../../state/negotiation_types.js';
 /** Canonical Srebrenica OSID — the urban settlement within the municipality. */
 const SREBRENICA_OSID = 'op:srebrenica:srebrenica_2';
 
-/** Earliest turn for Srebrenica rupture — must be 1995 timeframe (week 140+). */
-const SREBRENICA_MIN_TURN = 140;
+/** Earliest turn for Srebrenica rupture: aligned to the event-owned fall receipt window. */
+const SREBRENICA_MIN_TURN = 160;
 
 /**
  * Check whether Srebrenica rupture conditions are met and record if so.
@@ -25,7 +25,7 @@ const SREBRENICA_MIN_TURN = 140;
  * Preconditions (Ring 1 — mechanical):
  * - Srebrenica enclave has formed (event_flags.srebrenica_enclave_formed)
  * - Enclave has fallen to RS control (political_controllers check)
- * - War has progressed to 1995 timeframe (turn >= 140)
+ * - War has progressed to the event-owned fall receipt window (turn >= 160)
  *
  * Consequence (Ring 2 — locked):
  * - Record rupture with genocide_condemnation flag
@@ -57,7 +57,7 @@ export function evaluateRuptureConsequences(state: GameState): void {
     const controllers = state.political?.political_controllers ?? {};
     if (controllers[SREBRENICA_OSID] !== 'RS') return;
 
-    // Check precondition: must be in 1995 timeframe
+    // Check precondition: must be in the event-owned fall receipt window
     const turn = state.meta?.turn ?? 0;
     if (turn < SREBRENICA_MIN_TURN) return;
 

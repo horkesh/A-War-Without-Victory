@@ -13,7 +13,7 @@
  * Conditions checked (canon copy of evaluateRuptureConsequences):
  *   c1: state.military.event_flags.srebrenica_enclave_formed === true
  *   c2: state.political.political_controllers['op:srebrenica:srebrenica_2'] === 'RS'
- *   c3: state.meta.turn >= 140
+ *   c3: state.meta.turn >= 160
  *
  * Plus diagnostic context (NOT preconditions — informational only):
  *   - controller of every Srebrenica enclave OSID
@@ -51,7 +51,7 @@ const path = require('path');
 //    and src/sim/combat/enclave_resilience.ts to keep the tool self-contained
 //    and read-only against the engine source) ────────────────────────────────
 const SREBRENICA_CAPITAL_OSID = 'op:srebrenica:srebrenica_2';
-const SREBRENICA_MIN_TURN = 140;
+const SREBRENICA_MIN_TURN = 160;
 const ZEPA_CAPITAL_OSID = 'op:rogatica:zepa_2';
 
 const SREBRENICA_OSID_LIST = [

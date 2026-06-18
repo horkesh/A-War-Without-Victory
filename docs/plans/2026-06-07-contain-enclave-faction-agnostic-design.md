@@ -1,5 +1,7 @@
 # Unified Faction-Agnostic `contain` Enclave Posture — Design
 
+> **Superseded note (2026-06-18):** The Srebrenica fall-delivery wording in this dated design is superseded. The accepted model is event-owned fall receipt plus rupture observation of the resulting Srebrenica control state in the event-owned receipt window; the fall is not a Krivaja/Stupcanica operation-delivery calibration target.
+
 **Status:** DESIGN PROPOSAL, sign-off-ready, 2026-06-07. Read-only research+design; no code yet.
 **Owner direction:** the enclave `contain` model is faction-agnostic — it applies not only to VRS-vs-RBiH eastern enclaves but also to **RBiH (ARBiH) containing HVO (HRHB) enclaves.**
 **Convening:** Pyrrhic Historian + Game-Designer + Calibration. Expands the §6 strangle-not-capture packet into its symmetric form.
@@ -35,6 +37,8 @@ Faction-agnostic by construction: takes `besiegingFaction`, reads `enclave.facti
 **Suppression chokepoints** (the same shape as the existing `computeSalientRisk`/`SALIENT_RISK_THRESHOLD` filter that already drops targets with >75% enemy neighbors): filter `buildOffensiveTargets` (`commander/emit.ts:405`) to drop containable OSIDs; and `evaluateSectorStances` (`bot_corps_directives.ts:462`) resolves an all-containable sector to `screening`.
 
 ## 2. Per-faction-pair differential (the §6 split)
+
+> **2026-06-18 correction for Srebrenica/Zepa:** the VRS/eastern-enclave fall-delivery wording below is historical context only. Srebrenica/Zepa falls are event-owned `control_change` receipts; rupture observes the event-created Srebrenica control state from the receipt window. Do not tune contain/Krivaja/Stupcanica operation behavior to deliver those falls.
 Shared predicate, different release condition + canon sensitivity.
 
 **2a. VRS vs eastern enclaves — §6-SENSITIVE (the critical constraint).** `contain` MUST NOT prevent Srebrenica from falling on the historical path. If it did, `srebrenica_genocide_1995` (`rupture_consequences.ts:66`; RS controls `srebrenica_2` + enclave-formed + turn ≥140) would never record — the game would erase the genocide from its own record via a calibration mechanic (a Ring-1 + §6 violation). So the VRS release is a 1995-pivot emergent flag (Directive-7-analog turn≥140 / defender collapse / supply-critical+isolation-exhaustion) that lifts `contain`; the fall then flows through the **normal control-flip combat path** the rupture predicate keys on. The fall is not rewarded (gate Ring-3 #4/#10). **Goražde** (historically didn't fall — UNPROFOR/April-1994 NATO ultimatum) stays contained with NO release — a feature that also stops long-horizon Goražde over-capture.

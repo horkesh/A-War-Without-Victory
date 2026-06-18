@@ -19,7 +19,7 @@
  *    floor: `recorded_turn` and the scripted-fall trigger inputs must be IDENTICAL
  *    between a collapse-ON and a collapse-OFF 188w artifact pair. NOTE on "first turn
  *    controller === RS": evaluateRuptureConsequences runs every turn and records on
- *    the FIRST turn ≥ 140 where `political_controllers['op:srebrenica:srebrenica_2']
+ *    the FIRST turn ≥ 160 where `political_controllers['op:srebrenica:srebrenica_2']
  *    === 'RS'`; combined with the ≥160 assertion, recorded_turn IS the first-RS turn,
  *    so recorded_turn identity ⇒ first-RS-turn identity. Belt-and-braces, the
  *    scripted fall events' `event_last_fired_turn` (the control-flip writers) and the
@@ -297,8 +297,8 @@ describe('collapse §6 GUARD G2 invariant (188w rupture floor)', () => {
     // §6 requires rupture timing MUST NOT change, not merely >= 160. Compares the
     // latest collapse-ON artifact against the latest collapse-OFF artifact.
     // recorded_turn identity ⇒ first-RS-turn identity (see header note: the rupture
-    // records on the FIRST turn >= 140 with controller === 'RS', and both runs assert
-    // recorded_turn >= 160 above, so no flip can hide in [140,160)).
+    // records on the FIRST turn >= 160 with controller === 'RS', and both runs assert
+    // recorded_turn >= 160 above, so no earlier flip can hide in the receipt window.
     // ---------------------------------------------------------------------------
     it.skipIf(onRunDir === null || offRunDir === null)(
         'G2-B rupture-timing identity: srebrenica_genocide_1995 recorded_turn + first-RS-turn + fall-event timing ' +
