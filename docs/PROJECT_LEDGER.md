@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-18] test(engine): pin issue #170 TG launch-readiness hybrid
+
+**Type:** engine regression coverage, issue-backlog classification, and docs hygiene.
+
+**Fix:** Recalled the active Pyrrhic specialist agents and classified the remaining issue #170 residuals. TG launch readiness is now explicitly treated as the intended hybrid contract: the attack-floor gate is anchor-aware, while opening-attack executability still considers the full assigned pool so non-anchor brigades can open a valid attack. Added focused coverage for that contract and corrected the stale "anchor-only" wording in the launch helper. Same-axis concentration support remains calibration-held because the likely stale supporter-count arithmetic changes attack eligibility. The enclave-resilience `/100` IVP fallback remains a domain decision because point-based resilience has no canon denominator yet and alternative denominators materially change pressure.
+
+**Verification:** Focused launch-readiness pack, typecheck, and `git diff --check` run before commit.
+
+---
+
 ## [2026-06-18] test(canon): align Srebrenica rupture proof fixtures with receipt window
 
 **Type:** CI follow-up, sensitive-history test hygiene, and dated-report supersession cleanup.

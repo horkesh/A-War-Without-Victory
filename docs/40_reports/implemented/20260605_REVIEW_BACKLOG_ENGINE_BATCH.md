@@ -33,8 +33,8 @@ The attempted same-axis gate change and final-sector disconnected-territory spli
 
 ## Remaining Issue #170 Work
 
-Still open because they move behavior or need domain decisions:
+Still open or classified because they move behavior or need domain decisions:
 
-- Same-axis concentration support.
-- Enclave-resilience denominator decision.
-- TG anchor-only readiness decision.
+- Same-axis concentration support: likely stale supporter-count arithmetic, but calibration-held because correcting it changes attack eligibility and needs a one-change 40w/188w revalidation.
+- Enclave-resilience denominator decision: point-based resilience has no canon denominator for IVP fallback pressure; `/100`, per-enclave max, or global max normalization are design/calibration choices, not safe mechanical fixes.
+- TG launch readiness: closed as the current hybrid contract, pinned by focused coverage on 2026-06-18. The attack-floor gate is anchor-aware, while opening-attack executability uses the full assigned pool to preserve the Cincar/Kupres regression fix.

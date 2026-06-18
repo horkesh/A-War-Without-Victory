@@ -449,6 +449,34 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T7: stale TG anchor fallback', () => 
             ['synth_support', 'synth_viable'],
         );
     });
+
+    it('uses anchor-aware floor gate but full assigned pool for opening attack executability', () => {
+        const state = buildState({
+            synth_anchor: {
+                location_osid: 'op:test:home_a',
+                personnel: 1500,
+            },
+            synth_support: {
+                location_osid: 'op:test:staging_a',
+                personnel: 1500,
+            },
+        });
+        const op = makeOp(['synth_anchor', 'synth_support'] as FormationId[], { multiAxis: true });
+        op.axes![0].main_brigade = 'synth_anchor' as FormationId;
+
+        const result = evaluateOpeningAttackReadiness(
+            state,
+            'synth_corps' as FormationId,
+            'TEST_FACTION' as never,
+            op,
+        );
+
+        assert.equal(
+            result.executable,
+            true,
+            'TG launch readiness is hybrid: anchor gates the floor, assigned support may satisfy executable opening attack',
+        );
+    });
 });
 
 describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launch gate', () => {
