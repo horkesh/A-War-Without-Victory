@@ -3,8 +3,9 @@ import { useGameStore } from '../store/gameStore';
 import { LEFT_DETAIL_PANEL_STYLE } from './panelRail';
 import { BrigadeRow } from './BrigadeRow';
 import { FACTION_COLORS } from '../utils/theme';
-import { getFormationCommander } from '../utils/officerUtils';
+import { getFormationCommander, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
+import { CommanderDisplayPanel } from './CommanderDisplayPanel';
 import type { CorpsFrontSectorView } from '../data/types';
 import { t } from '../i18n';
 
@@ -38,6 +39,11 @@ export function OrbatPanel() {
         if (!loadedGameState || !corps) return null;
         return getFormationCommander(corps, loadedGameState);
     }, [loadedGameState, corps]);
+
+    const commanderDisplay = useMemo(() => {
+        if (!loadedGameState || !corps || commander) return null;
+        return resolveCorpsCommanderDisplay(corps.id, corps.faction, loadedGameState);
+    }, [loadedGameState, corps, commander]);
 
     const corpsSectors: CorpsFrontSectorView[] = useMemo(() => {
         if (!loadedGameState?.corpsFrontSectors || !selectedOrbatCorpsId) return [];
@@ -97,8 +103,10 @@ export function OrbatPanel() {
 
             <div className="flex-1 overflow-auto p-4 space-y-4">
                 {/* Commander Section */}
-                {commander && (
+                {commander ? (
                     <OfficerProfile officer={commander} label={t('formationDetail.corpsCommander')} />
+                ) : commanderDisplay && (
+                    <CommanderDisplayPanel display={commanderDisplay} label={t('formationDetail.corpsCommander')} />
                 )}
 
                 {/* Corps Stats */}

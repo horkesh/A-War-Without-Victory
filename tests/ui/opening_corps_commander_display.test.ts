@@ -156,4 +156,72 @@ describe('opening corps commander display', () => {
             source: 'synthetic',
         });
     });
+
+    it('shows opening ARBiH corps command without assigning the officers', () => {
+        const gameState = state({
+            namedOfficerData: [
+                officer({
+                    id: 'arbih_hadzihasanovic',
+                    name: 'Enver Hadzihasanovic',
+                    faction: 'RBiH',
+                    home_corps_id: 'arbih_3rd_corps',
+                    available_from_turn: 22,
+                    is_historical_start: true,
+                    historical_corps_id: 'arbih_3rd_corps',
+                    pool_tier: 'starter',
+                    competence: 5,
+                }),
+                officer({
+                    id: 'arbih_cikotic',
+                    name: 'Selmo Cikotic',
+                    faction: 'RBiH',
+                    home_corps_id: 'arbih_3rd_corps',
+                    pool_tier: 'tier_b',
+                    competence: 4,
+                }),
+                officer({
+                    id: 'arbih_hujdur',
+                    name: 'Midhad Hujdur',
+                    faction: 'RBiH',
+                    home_corps_id: 'arbih_4th_corps',
+                    pool_tier: 'tier_b',
+                    competence: 4,
+                    defensive_skill: 4,
+                }),
+            ],
+            namedOfficerStateById: {
+                arbih_cikotic: {
+                    officer_id: 'arbih_cikotic',
+                    status: 'reserve',
+                    assigned_corps_id: null,
+                    acting_commander: false,
+                    turns_in_command: 0,
+                    battles: 0,
+                    victories: 0,
+                },
+                arbih_hujdur: {
+                    officer_id: 'arbih_hujdur',
+                    status: 'reserve',
+                    assigned_corps_id: null,
+                    acting_commander: false,
+                    turns_in_command: 0,
+                    battles: 0,
+                    victories: 0,
+                },
+            },
+        });
+
+        expect(resolveCorpsCommanderDisplay('arbih_3rd_corps', 'RBiH', gameState)).toEqual({
+            name: 'Selmo Cikotic',
+            acting: true,
+            source: 'opening_read_model',
+        });
+        expect(resolveCorpsCommanderDisplay('arbih_4th_corps', 'RBiH', gameState)).toEqual({
+            name: 'Midhad Hujdur',
+            acting: true,
+            source: 'opening_read_model',
+        });
+        expect(gameState.namedOfficerStateById?.arbih_cikotic?.assigned_corps_id).toBeNull();
+        expect(gameState.namedOfficerStateById?.arbih_hujdur?.assigned_corps_id).toBeNull();
+    });
 });

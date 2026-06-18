@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-06-18 (first-hour shell hardening, Records/Chronicle opening decision filing, event/inbox calendar copy, player-safe event dossier boundaries, and Army HQ first-paint/drilldown closeout)
+**Updated:** 2026-06-18 (first-hour shell hardening, Records/Chronicle opening decision filing, event/inbox calendar copy, player-safe event dossier boundaries, Army HQ first-paint/drilldown closeout, and commander read-model surface parity)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Commander read-model surface parity** | [implemented/20260618_COMMANDER_READ_MODEL_SURFACE_PARITY.md](implemented/20260618_COMMANDER_READ_MODEL_SURFACE_PARITY.md) - ORBAT, Corps Detail, and Formation Detail now show display-only opening command labels when turn-0 corps commanders are intentionally not seated in sim state. |
 | **First-hour shell/Records/Chronicle polish** | [implemented/20260618_FIRST_HOUR_SHELL_RECORDS_CHRONICLE_POLISH.md](implemented/20260618_FIRST_HOUR_SHELL_RECORDS_CHRONICLE_POLISH.md) - Browser-fallback foundational decisions file into Records and Chronicle during opening week, shell chrome renders `Opening week`, Records/Chronicle badges use readable separators, decision-modal shell ownership is guarded, and Army HQ/raw fallback copy uses player-safe labels. |
 | **Army HQ first-paint/drilldown polish** | [implemented/20260618_ARMY_HQ_FIRST_PAINT_DRILLDOWN_POLISH.md](implemented/20260618_ARMY_HQ_FIRST_PAINT_DRILLDOWN_POLISH.md) - Army HQ opens with a corps Command Access strip, corps drilldowns surface sectors/operations first, Records defaults to the campaign archive, and field inspections use an atomic Tactical Map route. |
 | **P1 raw-copy calendar boundary** | [implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md](implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md) - Event decisions and inbox rows now render calendar dates instead of raw turn copy, source/dossier internals are hidden outside diagnostics, and toolbar load errors use player-facing copy. |

@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest commander read-model surface parity:** [implemented/20260618_COMMANDER_READ_MODEL_SURFACE_PARITY.md](implemented/20260618_COMMANDER_READ_MODEL_SURFACE_PARITY.md) - ORBAT, Corps Detail, and Formation Detail now share the opening commander read-model, showing display-only turn-0 command labels without seating officers in sim state.
+
 **Latest first-hour shell/Records/Chronicle polish:** [implemented/20260618_FIRST_HOUR_SHELL_RECORDS_CHRONICLE_POLISH.md](implemented/20260618_FIRST_HOUR_SHELL_RECORDS_CHRONICLE_POLISH.md) - Browser-fallback foundational decisions now file into Records and Chronicle during opening week, shell chrome renders `Opening week`, Records/Chronicle badges use readable separators, decision-modal shell ownership is guarded, and Army HQ/raw fallback copy uses player-safe labels.
 
 **Latest Army HQ first-paint/drilldown polish:** [implemented/20260618_ARMY_HQ_FIRST_PAINT_DRILLDOWN_POLISH.md](implemented/20260618_ARMY_HQ_FIRST_PAINT_DRILLDOWN_POLISH.md) - Army HQ first paint now exposes a corps Command Access strip, corps drilldowns surface sectors/operations first, Records defaults to Aftermath/campaign archive, field inspections use an atomic Tactical Map route, and raw-copy fallback guards cover sector/operation/formation details.
