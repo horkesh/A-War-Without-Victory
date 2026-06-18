@@ -66,6 +66,42 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(screen.queryByText('Rationale')).toBeNull();
   });
 
+  it('hides engine and audit-only effect kinds from player-facing response previews', () => {
+    const { container } = render(React.createElement(EventDecisionModal, {
+      decision: {
+        event_id: 'industrial_conscription_review',
+        event_title: 'Industrial Conscription Review',
+        turn_fired: 18,
+        faction: 'RBiH',
+        historical_default_response_id: 'approve',
+        response_options: [
+          {
+            id: 'approve',
+            label: 'Approve the call-up',
+            effects: [
+              { kind: 'morale_change', faction: 'RBiH', delta: -1 },
+              { kind: 'recruitment_modifier', faction: 'RBiH', pool_multiplier: 1.25, duration_turns: 8 },
+              { kind: 'equipment_quality_modifier', faction: 'RBiH', multiplier: 0.9, duration_turns: 8 },
+              { kind: 'bot_priority_shift', faction: 'RBiH', add_objectives: ['defend_core'], remove_objectives: ['probe'], duration_turns: 8 },
+              { kind: 'doctrine_constraint', faction: 'RBiH', constraint: { operation_blocks: [{ faction: 'RBiH', expires_turn: 26, reason: 'test fixture' }] }, duration_turns: 8 },
+              { kind: 'alliance_lock', mode: 'floor', value: 0.4, duration_turns: 8 },
+              { kind: 'cost_ledger_annotation', tag: 'audit_only', text: 'Internal ledger annotation for audit only.' },
+            ],
+          },
+        ],
+      },
+      onRespond: () => undefined,
+    }));
+
+    expect(screen.getByText('Republic of Bosnia and Herzegovina morale -1')).toBeTruthy();
+    expect(container.textContent).not.toContain('recruitment');
+    expect(container.textContent).not.toContain('combat effectiveness');
+    expect(container.textContent).not.toContain('staff priorities');
+    expect(container.textContent).not.toContain('doctrine constraint');
+    expect(container.textContent).not.toContain('Alliance floor');
+    expect(container.textContent).not.toContain('Internal ledger annotation');
+  });
+
   it('does not imply a recommended choice when no historical default is available', () => {
     render(React.createElement(EventDecisionModal, {
       decision: {
@@ -154,7 +190,7 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(screen.getByText('Negotiation window preserved')).toBeTruthy();
     expect(screen.getByText('Future')).toBeTruthy();
     expect(screen.getByText('Conditional')).toBeTruthy();
-    expect(screen.getByText('Recording state identity posture as civic closes later Bosniak-national unity consolidation if battlefield pressure remains manageable.')).toBeTruthy();
+    expect(screen.getByText('This choice sets state identity posture to civic and closes later Bosniak-national unity consolidation if battlefield pressure remains manageable.')).toBeTruthy();
     expect(screen.queryByText(/rbih_state_identity/)).toBeNull();
     expect(screen.queryByText(/csq_bosniak_unity_1993/)).toBeNull();
     expect(screen.queryByText(/§3.6 STRICT/)).toBeNull();
@@ -195,11 +231,46 @@ describe('EventDecisionModal presidential dossier', () => {
       onRespond: () => undefined,
     }));
 
-    expect(screen.getByText(/Recording the all-six strategic-goals platform forecloses restrained Drina resistance branch/i)).toBeTruthy();
+    expect(screen.getByText(/This choice sets the all-six strategic-goals platform and forecloses restrained Drina resistance branch/i)).toBeTruthy();
     expect(screen.getByText(/The restrained branch is closed here, so on the documented historical all six goals path/i)).toBeTruthy();
     expect(screen.queryByText(/rs_strategic_goals/)).toBeNull();
     expect(screen.queryByText(/rs strategic goals=selective/i)).toBeNull();
     expect(screen.queryByText(/csq_drina_partisan_resistance_1992/)).toBeNull();
+  });
+
+  it('sanitizes raw consequence ids, file names, and recording diagnostics from future-consequence copy', () => {
+    const { container } = render(React.createElement(EventDecisionModal, {
+      decision: {
+        event_id: 'raw_future_copy_review',
+        event_title: 'Raw Future Copy Review',
+        turn_fired: 21,
+        faction: 'RBiH',
+        historical_default_response_id: 'approve',
+        response_options: [
+          {
+            id: 'approve',
+            label: 'Approve the memorandum',
+            effects: [],
+            future_consequences: [
+              {
+                id: 'raw_branch',
+                label: 'csq_bosniak_unity_1993 recorded from consequences.json',
+                timing: 'future',
+                certainty: 'conditional',
+                explanation: 'Recording rbih_state_identity as civic opens csq_bosniak_unity_1993 from consequences.json when These consequence rows are active.',
+              },
+            ],
+          },
+        ],
+      },
+      onRespond: () => undefined,
+    }));
+
+    expect(screen.getAllByText(/later Bosniak-national unity consolidation/i).length).toBeGreaterThan(0);
+    expect(container.textContent).not.toContain('csq_');
+    expect(container.textContent).not.toContain('.json');
+    expect(container.textContent).not.toMatch(/\bRecording\b/i);
+    expect(container.textContent).not.toContain('These consequence rows');
   });
 
   it('keeps all response choices before detailed future-consequence copy', () => {

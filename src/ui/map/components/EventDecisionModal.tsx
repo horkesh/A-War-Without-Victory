@@ -25,6 +25,7 @@ import { getPlayerSafePoliticalFactionName, getPlayerSafeOfficerName } from '../
 import { useGameStore } from '../store/gameStore';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
+import { isDisplayEventEffect } from '../utils/eventEffectDisplay';
 
 type EventDecisionDossier = PendingEventDecision & {
     narrative?: string;
@@ -162,7 +163,7 @@ function describeDimensionShift(shift: DimensionShift): string {
 
 function buildPreviewRows(option: EventResponseOption): string[] {
     const rows = (option.effects ?? [])
-        .filter(e => e.kind !== 'narrative')
+        .filter(isDisplayEventEffect)
         .map(describeEffect);
     for (const shift of option.dimension_shifts ?? []) {
         rows.push(describeDimensionShift(shift));
@@ -219,19 +220,31 @@ const PLAYER_SAFE_CONSEQUENCE_TERMS: Array<[RegExp, string]> = [
     [/\ball_six\b/g, 'all six goals'],
 ];
 
-function playerSafeFutureExplanation(text: string, showDiagnostics: boolean): string {
+function playerSafeFutureText(text: string, showDiagnostics: boolean): string {
     if (showDiagnostics) return text;
     let safe = text.split(/\s*§\d+(?:\.\d+)?\s*/)[0]?.trim() ?? text;
-    safe = safe.split(/\bThese consequence rows\b/)[0]?.trim() ?? safe;
+    safe = safe.split(/\bThese consequence rows\b/i)[0]?.trim() ?? safe;
     for (const [pattern, replacement] of PLAYER_SAFE_CONSEQUENCE_TERMS) {
         safe = safe.replace(pattern, replacement);
     }
+    safe = safe.replace(/\bcsq_[a-z0-9_]+\b/g, 'later consequence branch');
+    safe = safe.replace(/\b[\w./-]+\.json\b/gi, 'event catalog');
+    safe = safe.replace(/\s+(?:recorded\s+)?from\s+(?:the\s+)?event catalog\b/gi, '');
+    safe = safe.replace(/\bRecording\b/gi, 'This choice sets');
     safe = safe.replace(/\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b/g, (token) => humanizeToken(token).toLowerCase());
     safe = safe.replace(/\bRecording Six Strategic Goals posture as all six goals\b/g, 'Recording the all-six strategic-goals platform');
+    safe = safe.replace(/\bThis choice sets Six Strategic Goals posture as all six goals\b/g, 'This choice sets the all-six strategic-goals platform');
+    safe = safe.replace(/\bThis choice sets the all-six strategic-goals platform forecloses\b/g, 'This choice sets the all-six strategic-goals platform and forecloses');
+    safe = safe.replace(/\bThis choice sets ([^.]+?) as ([^.]+?) (opens|closes|forecloses)\b/g, 'This choice sets $1 to $2 and $3');
+    safe = safe.replace(/\bplatform forecloses\b/g, 'platform and forecloses');
     safe = safe.replace(/\bcounterfactual Six Strategic Goals posture\s*=\s*selective flag\b/g, 'counterfactual restrained strategic-goals branch');
     safe = safe.replace(/\bThe target is gated on the counterfactual restrained strategic-goals branch, so\b/g, 'The restrained branch is closed here, so');
     safe = safe.replace(/\s*\((later [^)]+)\)/g, '');
     return safe.replace(/\s+/g, ' ').trim();
+}
+
+function playerSafeFutureExplanation(text: string, showDiagnostics: boolean): string {
+    return playerSafeFutureText(text, showDiagnostics);
 }
 
 function FutureConsequenceCard({
@@ -242,12 +255,13 @@ function FutureConsequenceCard({
     showDiagnostics: boolean;
 }) {
     const referenceRows = showDiagnostics ? buildFutureReferenceRows(consequence) : [];
+    const label = playerSafeFutureText(consequence.label, showDiagnostics);
     const explanation = playerSafeFutureExplanation(consequence.explanation, showDiagnostics);
     return (
         <li className="rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2">
             <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="text-[11px] font-semibold text-text-primary">
-                    {consequence.label}
+                    {label}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                     <span className="rounded-sm border border-panel-border bg-panel-card px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-text-secondary">

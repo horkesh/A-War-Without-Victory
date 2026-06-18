@@ -1760,7 +1760,8 @@ function App() {
                 setRecentlyAcceptedEventDecisionId(eventId);
                 setActiveEventDecisionId(null);
               } catch (err) {
-                setLoadError(err instanceof Error ? err.message : String(err));
+                console.warn('[EventDecisionModal] browser fallback failed', err);
+                setLoadError('Failed to record event decision.');
               }
             }}
           />
