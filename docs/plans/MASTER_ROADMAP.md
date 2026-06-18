@@ -1,7 +1,7 @@
 ﻿# AWWV Master Roadmap â€” Pyrrhic Games
 **★★★ Amendment 2026-06-18 (D2 player-polish hardening; first-hour guardrails):** The 2026-06-15 roadmap state still holds: technical road closed, C3 complete, SRK default-ON, and D2 owner full-campaign playthrough remains the sole remaining 1.0 go/no-go gate. The 2026-06-16/18 work is a D2-entry quality hardening layer, not a new technical prerequisite or calibration lane.
 
-1. **Player-journey gate is now explicit.** `qa:player-journeys` covers the first-run/foundational start, onboarding/foundational auto-launch contracts, replay sidecar hydration, tactical deselect, map combat/casualty truth guards, DeckGL formation selection priority, inbox/desk routing, and Army HQ command-card diagnostics.
+1. **Player-journey gates are now explicit.** `qa:player-journeys` covers the first-run/foundational start, onboarding/foundational auto-launch contracts, replay sidecar hydration, tactical deselect, map combat/casualty truth guards, DeckGL formation selection priority, inbox/desk routing, and Army HQ command-card diagnostics. `qa:first-hour:browser` adds a live Puppeteer/Vite RBiH first-hour gate for the war-start splash, `WAR BEGINS`, foundational decision, Desk blocking, Records and Chronicle receipts, raw-label absence, console-error absence, and port cleanup.
 
 2. **First-hour sequence is the release-polish contract.** The intended D2 opening is faction start -> war-start briefing -> President's Desk opening brief -> foundational choice -> command map/tutorial. Foundational decisions must not preempt the opening presidential brief.
 
