@@ -7,8 +7,9 @@ import { assignBrigadeToSectorOverrideAction } from '../desktop/orderActions';
 import { getPanelRailStyle } from './panelRail';
 import { turnToDateString, formatCombatOutcome } from '../utils/formatters';
 import { getArmyCrest } from '../utils/factionAssets';
-import { getFormationCommander } from '../utils/officerUtils';
+import { getFormationCommander, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
+import { CommanderDisplayPanel } from './CommanderDisplayPanel';
 import { CombatSummaryPanel } from './CombatSummaryPanel';
 import type { FormationView } from '../data/types';
 import { getPrestigeTier, getPrestigeTierColor, getHighestTier, getDecorationName } from '../utils/decorationUtils';
@@ -360,6 +361,16 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                     <OfficerProfile officer={commander} label={label} compact emphasis={isArmy ? 'defense' : 'aggression'} />
                   </div>
                 );
+              }
+              if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
+                const commanderDisplay = resolveCorpsCommanderDisplay(formation.id, formation.faction, loadedGameState);
+                if (commanderDisplay) {
+                  return (
+                    <div className="pt-2 border-t border-panel-border">
+                      <CommanderDisplayPanel display={commanderDisplay} label={t('formationDetail.corpsCommander')} compact />
+                    </div>
+                  );
+                }
               }
               if (isBrigade && formation.officer_quality != null) {
                 return (

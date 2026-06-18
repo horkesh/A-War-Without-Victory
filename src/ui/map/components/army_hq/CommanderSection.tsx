@@ -11,6 +11,7 @@
 import type { FormationView, LoadedGameState, OperationView } from '../../data/types';
 import { getFormationCommander, getSyntheticJnaCommandPresentation, resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
+import { CommanderDisplayPanel } from '../CommanderDisplayPanel';
 import { CollapsibleSection } from './CollapsibleSection';
 import { t } from '../../i18n';
 
@@ -75,14 +76,7 @@ export function CommanderSection({ corps, gameState, operations }: CommanderSect
                             {t('commanderSection.actingCommander')}
                         </div>
                     )}
-                    <div className="p-3 bg-panel-bg/70 border border-panel-border">
-                        <div className="text-[10px] uppercase tracking-[0.18em] text-text-secondary font-bold">
-                            {commanderDisplay.source === 'synthetic' ? 'Command Staff' : 'Opening Command'}
-                        </div>
-                        <div className="mt-1 text-[14px] text-text-primary font-bold">
-                            {commanderDisplay.name}
-                        </div>
-                    </div>
+                    <CommanderDisplayPanel display={commanderDisplay} label={t('corpsDetail.corpsCommander')} />
                 </div>
             ) : (
                 <div className="space-y-4">

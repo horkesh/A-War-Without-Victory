@@ -9,8 +9,9 @@ import { getOperationId } from '../utils/operations';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 import { getPanelRailStyle } from './panelRail';
 import { CombatSummaryPanel } from './CombatSummaryPanel';
-import { getFormationCommander } from '../utils/officerUtils';
+import { getFormationCommander, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
+import { CommanderDisplayPanel } from './CommanderDisplayPanel';
 import { BrigadeRow } from './BrigadeRow';
 import { TabBar } from './TabBar';
 import {
@@ -198,8 +199,10 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
 
             {(() => {
               const commander = getFormationCommander(corpsFormation, loadedGameState);
-              if (!commander) return null;
-              return <OfficerProfile officer={commander} label={t('corpsDetail.corpsCommander')} />;
+              if (commander) return <OfficerProfile officer={commander} label={t('corpsDetail.corpsCommander')} />;
+              const commanderDisplay = resolveCorpsCommanderDisplay(corpsFormation.id, corpsFormation.faction, loadedGameState);
+              if (!commanderDisplay) return null;
+              return <CommanderDisplayPanel display={commanderDisplay} label={t('corpsDetail.corpsCommander')} />;
             })()}
 
             <div className="border-t border-panel-border pt-3 space-y-1.5">
