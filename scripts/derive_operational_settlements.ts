@@ -793,6 +793,14 @@ console.log('Phase 7: Writing outputs...');
 writeFileSync(resolve(OUT_DIR, 'operational_settlements.geojson'), JSON.stringify(smoothedFc, null, 2));
 
 const mapping = Object.fromEntries([...mergedInto.entries()].sort((a, b) => a[0].localeCompare(b[0])));
+const operationalTargetCount = new Set(Object.values(mapping)).size;
+const CALIBRATED_OPERATIONAL_TARGET_COUNT = 712;
+if (operationalTargetCount !== CALIBRATED_OPERATIONAL_TARGET_COUNT) {
+    throw new Error(
+        `Operational mapping target count drifted to ${operationalTargetCount}; `
+        + `expected calibrated count ${CALIBRATED_OPERATIONAL_TARGET_COUNT}.`,
+    );
+}
 writeFileSync(resolve(OUT_DIR, 'canonical_to_operational_map.json'), JSON.stringify(mapping, null, 2));
 
 // Rebuild contact graph
