@@ -70,6 +70,61 @@ function makeState(): LoadedGameState {
   } as unknown as LoadedGameState;
 }
 
+function makeOpeningCommanderState(): LoadedGameState {
+  return {
+    label: 'Turn 0',
+    turn: 0,
+    phase: 'war',
+    formations: [
+      { id: 'vrs_drina', name: 'Drina Corps', faction: 'RS', kind: 'corps', status: 'active' },
+      { id: 'jna_herzegovina_command', name: 'JNA Herzegovina Command', faction: 'RS', kind: 'corps_asset', status: 'active' },
+      { id: 'vrs_empty', name: 'Empty Corps', faction: 'RS', kind: 'corps', status: 'active' },
+    ],
+    militiaPools: [],
+    controlBySettlement: {},
+    statusBySettlement: {},
+    brigadeAorByFormationId: {},
+    attackOrders: [],
+    aorOrders: [],
+    recentControlEvents: [],
+    allControlEvents: [],
+    displacementEventLog: [],
+    battlesByOsid: {},
+    movementsByOsid: {},
+    supplyTransitionsByOsid: {},
+    historicalEventsByTurn: [],
+    pressureWarning: false,
+    latestTurnSummary: null,
+    turnSummaries: [],
+    player_faction: 'RS',
+    namedOfficerData: [
+      {
+        id: 'vrs_andric',
+        name: 'Svetozar Andric',
+        faction: 'RS',
+        status: 'reserve',
+        rank: 'corps_commander',
+        home_corps_id: 'vrs_drina',
+        competence: 4,
+        aggressiveness: 3,
+        defensive_skill: 4,
+        political_reliability: 3,
+      },
+    ],
+    namedOfficerStateById: {
+      vrs_andric: {
+        officer_id: 'vrs_andric',
+        status: 'reserve',
+        assigned_corps_id: null,
+        acting_commander: false,
+        turns_in_command: 0,
+        battles: 0,
+        victories: 0,
+      },
+    },
+  } as unknown as LoadedGameState;
+}
+
 afterEach(() => {
   cleanup();
   useGameStore.setState({ loadedGameState: null, selectedArmyId: null });
@@ -101,5 +156,15 @@ describe('PersonnelContent player-facing display', () => {
     expect(container.textContent).toContain('Available: Reserve Officer');
     expect(container.textContent).toContain('Mobilization strain');
     expect(container.textContent).toContain('450 exhausted pool personnel.');
+  });
+
+  it('does not count opening read-model or synthetic command displays as command vacancies', () => {
+    useGameStore.setState({ loadedGameState: makeOpeningCommanderState(), selectedArmyId: 'RS' });
+
+    const { container } = render(React.createElement(PersonnelContent));
+
+    expect(container.textContent).toContain('Command vacancies1No active commander: Empty Corps');
+    expect(container.textContent).not.toContain('Command vacancies3');
+    expect(container.textContent).not.toContain('No active commander: JNA Herzegovina Command, Drina Corps, Empty Corps');
   });
 });

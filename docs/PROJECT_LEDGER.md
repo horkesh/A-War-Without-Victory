@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-18] fix(ui): align Personnel vacancies with opening commander read model
+
+**Type:** UI/read-model Army HQ polish and startup-truth guard.
+
+**Fix:** Personnel's command-vacancy dossier now uses the same `resolveCorpsCommanderDisplay(...)` contract as the Army HQ corps cards and OOB commander display. Opening read-model commanders such as Drina Corps and synthetic command staff such as `jna_herzegovina_command` no longer appear as false "No active commander" vacancies at turn 0, while genuinely empty corps still surface in the dossier. This preserves the no-mutation startup contract: reserve/opening commanders are not seated in sim state and low-loyalty warnings still evaluate only active assigned commanders.
+
+**Verification:** Red/green regression added in `tests/ui/personnel_player_safe_display.test.ts`; focused pack passed 3 files / 17 tests across opening commander display, Personnel rendering, and startup snapshot contracts.
+
+**Scope/determinism:** UI/read-model presentation and tests only; no simulation logic, scenario data, startup artifact bytes, save schema, serialization, generated artifacts, calibration floor, golden baselines, randomness, timestamps, persisted output ordering, or packaged installer artifact changed.
+
+---
+
 ## [2026-06-18] fix(canon): gate Krivaja/Stupcanica behind event receipts
 
 **Type:** Canon/simulation trigger hardening, scenario copy, and documentation sync.
