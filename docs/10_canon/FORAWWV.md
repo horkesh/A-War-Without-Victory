@@ -313,16 +313,16 @@ The mechanism (interpretation, persistence, briefing overlay, corps-role gating)
 
 ---
 
-## XI. Sensitive-history operation trigger floors and name-pool exclusion
+## XI. Sensitive-history operation chronology and name-pool exclusion
 
 Validated 2026-05-06 (Krivaja-95 t168 floor fix `d622b762`) + 2026-05-07 (Stupčanica name-collision fix `759a35cd`).
 
-### XI.1 Canonical floor: Krivaja-95 and Stupčanica-95
+### XI.1 Canonical chronology: Krivaja-95 and Stupčanica-95
 Per ICTY Popović IT-05-88-T + Karadžić IT-95-5/18-T:
-- **Krivaja-95** (Srebrenica fall) is canonically July 6-11, 1995 = w170+. Trigger predicate in `src/sim/combat/triggered_operations.ts` enforces `turn >= 170`.
-- **Stupčanica-95** (Žepa fall) is canonically July 14-25, 1995 = w172+. Trigger predicate enforces `turn >= 172`.
+- **Krivaja-95** is canonically July 6-11, 1995 = w170+. Trigger predicates in `src/sim/combat/triggered_operations.ts` keep any operation/AAR row in its historical chronology.
+- **Stupčanica-95** is canonically July 14-25, 1995 = w172+. Trigger predicates keep any operation/AAR row in its historical chronology.
 
-These predicates are §6 sensitive-history floor protections. Sign-off chain: Stupčanica SHAPE B `b03333af`; Krivaja Phase 1 `bc44ddec`; Krivaja-95 floor enforcement `d622b762`.
+These predicates are chronology/name protections, not fall-delivery acceptance criteria. Srebrenica and Žepa fall receipts are owned by the sensitive-history event rows `srebrenica_falls_1995` and `zepa_falls_1995` through `control_change` effects; `srebrenica_genocide_1995` observes the resulting Srebrenica control state plus enclave/turn predicates. Do not calibrate Krivaja-95 or Stupčanica-95 operation delivery to make those falls happen. Sign-off chain: Stupčanica SHAPE B `b03333af`; Krivaja Phase 1 `bc44ddec`; Krivaja-95 floor enforcement `d622b762`; event-owned receipt correction 2026-06-18.
 
 ### XI.2 Bot/AI generator name-pool exclusion (data, not comments)
 Any reserved canonical name (operation, formation, event_id, persona_id) that bot/AI generators could randomly assign MUST be excluded from generator data pools by the data itself. Comment-claims of exclusion that the data doesn't enforce produce phantom canon-violations that masquerade as trigger bugs.

@@ -29,7 +29,7 @@ Every depiction of sensitive history in AWWV lives in exactly one of three rings
 
 The game simulates these as structured state:
 
-- **Enclaves** (`src/sim/combat/enclave_resilience.ts`) — Sarajevo, Bihać, Srebrenica, Žepa, Goražde, and HRHB pockets have explicit OSIDs, resilience caps, supply-linked decay/growth, and garrison mechanics. Enclaves fall when control flips through combat.
+- **Enclaves** (`src/sim/combat/enclave_resilience.ts`) — Sarajevo, Bihać, Srebrenica, Žepa, Goražde, and HRHB pockets have explicit OSIDs, resilience caps, supply-linked decay/growth, and garrison mechanics. Enclaves generally fall when control flips through combat; the 1995 Srebrenica and Žepa fall receipts are the explicit exception, authored by sensitive-history event `control_change` effects.
 - **Displacement** (`src/state/displacement.ts`) — municipalities track `original_population`, `displaced_out`, `displaced_in`, `lost_population`. Triggered by supply starvation, encirclement, front breaches, or paramilitary capture.
 - **Paramilitary sweeps** (`src/sim/combat/paramilitary_sweep.ts`) — rear pocket cleanup and adjacent-offensive modes. Each capture increments `war_crimes_events` and records civilian casualties.
 - **War crimes counter** — `FactionCapital.war_crimes_events` increments with every paramilitary capture. Feeds into grade anchors (see `VICTORY_AND_PYRRHIC_SCORING.md` §3.2).

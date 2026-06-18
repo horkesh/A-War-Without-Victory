@@ -1,10 +1,12 @@
 # H1 Watched Operation Outcome Implementation Plan
 
+> **Superseded correction (2026-06-18):** this plan's fall-delivery framing is no longer current. Srebrenica and Žepa fall receipts are owned by `srebrenica_falls_1995` / `zepa_falls_1995` event `control_change` effects, and `srebrenica_genocide_1995` observes the resulting Srebrenica control state at turn >=160. Use this plan only for operation-health, watched-operation visibility, blockers, and AAR diagnostics. Do not use it to calibrate Krivaja-95 or Stupčanica-95 to deliver the falls.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Close the remaining H1 gap where Krivaja-95, Stupcanica-95, and Cerska-Kamenica do not appear as watched-operation delivery or blocker outcomes after defender-aware launch feasibility shipped.
+**Goal:** Close the remaining H1 diagnostic gap where Krivaja-95, Stupcanica-95, and Cerska-Kamenica do not appear as watched-operation health, blocker, or AAR outcomes after defender-aware launch feasibility shipped.
 
-**Architecture:** Do not loosen sensitive-history preconditions. First prove whether the watched operations are missing because catalog injection fails, AAR extraction misses them, or delivery remains impossible after launch. Then patch only the failing owner and keep all sensitive-history outcomes behind explicit diagnostics and sign-off.
+**Architecture:** Do not loosen sensitive-history preconditions. First prove whether the watched operations are missing because catalog injection fails, AAR extraction misses them, or operation reporting misses typed blockers after launch. Then patch only the failing owner and keep all sensitive-history outcomes behind explicit diagnostics and sign-off.
 
 **Tech Stack:** TypeScript simulation code, existing diagnostics in `tools/diagnostics/`, Vitest, 188w scenario runner.
 
@@ -17,9 +19,10 @@ This is a follow-up to `docs/plans/2026-05-16-engine-health-n1842-plan.md` Track
 In scope:
 - Watched-operation injection/catalog visibility for Krivaja-95, Stupcanica-95, Cerska-Kamenica.
 - AAR/report visibility for watched operations and typed blockers.
-- Delivery uplift investigation only after visibility is proven.
+- Operation-health/AAR investigation only after visibility is proven.
 
 Out of scope:
+- Treating Krivaja-95 or Stupcanica-95 as Srebrenica/Žepa fall-delivery mechanisms.
 - Relaxing rupture, enclave, or sensitive-history conditions without user sign-off.
 - Generic operation-balance retunes.
 - OOB/paint-anchor edits unless a dedicated canon review authorizes them.

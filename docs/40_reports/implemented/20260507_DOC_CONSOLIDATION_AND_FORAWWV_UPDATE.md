@@ -43,8 +43,8 @@ Added 6 new sections to FORAWWV.md (167 insertions, took it from 263 → 430 lin
 - A4 named-officer roster: VRS Mladić; ARBiH Halilović→Delić w60+; HVO Petković→Praljak w64+→Roso w130+
 - Faction-symmetric mechanism + faction-asymmetric data invariant
 
-### §XI — Sensitive-history operation trigger floors and name-pool exclusion
-- Krivaja-95 t≥170; Stupčanica-95 t≥172 (per ICTY canon)
+### §XI — Sensitive-history operation chronology and name-pool exclusion
+- Krivaja-95 t≥170; Stupčanica-95 t≥172 chronology/name protections (per ICTY canon; fall-delivery framing superseded 2026-06-18)
 - Bot/AI generators MUST exclude canonical names by data, not by comments
 - Sign-off chain: Stupčanica SHAPE B `b03333af`; Krivaja Phase 1 `bc44ddec`; Krivaja-95 floor `d622b762`; name-collision fix `759a35cd`
 
