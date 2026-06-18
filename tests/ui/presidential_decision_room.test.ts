@@ -262,6 +262,34 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
   });
 
+  it('routes peace-plan briefing cards to the inbox owner instead of generic Army HQ briefing', () => {
+    const state = makeState({
+      commandBriefing: {
+        headline: 'Peace plan requires response.',
+        criticalCount: 1,
+        pendingCount: 1,
+        items: [
+          {
+            id: 'dip-peace-plan',
+            kind: 'diplomatic',
+            severity: 'critical',
+            title: 'Peace plan requires response',
+            detail: 'A peace plan has been proposed.',
+            actionLabel: 'Review Plan',
+            target: { type: 'peace_plan', peacePlanId: 'vance_owen', label: 'Peace plan' },
+          },
+        ],
+      },
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+
+    expect(view.cards.find((card) => card.id === 'briefing:dip-peace-plan')).toMatchObject({
+      actionLabel: 'Review Plan',
+      navigationTarget: { kind: 'inbox' },
+    });
+  });
+
   it('groups source handoffs by existing inspection surface without creating a new owner', () => {
     const state = makeState({
       presidentialReviewQueue: {

@@ -38,6 +38,31 @@ describe('assembleCommandBriefing', () => {
         expect(briefing.criticalCount).toBeGreaterThan(0);
     });
 
+    it('assigns routeable targets to command briefing action chips', () => {
+        const state = makeState({
+            negotiation: {
+                pending_peace_plan: { plan_id: 'vance_owen', turn_offered: 40, bot_responses: {} },
+            },
+            pending_officer_events: [
+                { faction: 'RBiH', event_id: 'interp', type: 'order_refused', acknowledged: false },
+                { faction: 'RBiH', event_id: 'personnel', type: 'officer_available', acknowledged: false },
+            ],
+        });
+        state.supply_state_by_osid = {
+            factions: [{ faction_id: 'RBiH', by_osid: [{ osid: 'op:sa:sarajevo_1', state: 'critical' }] }],
+        };
+
+        const briefing = assembleCommandBriefing(state, 'RBiH');
+        const actionItems = briefing.items.filter(item => item.actionLabel);
+
+        expect(actionItems.length).toBeGreaterThanOrEqual(4);
+        expect(actionItems.every(item => item.target?.kind)).toBe(true);
+        expect(briefing.items.find(i => i.id === 'log-supply')?.target).toMatchObject({ kind: 'summary', summaryFocus: 'support' });
+        expect(briefing.items.find(i => i.id === 'dip-peace-plan')?.target).toMatchObject({ kind: 'peace_plan', peacePlanId: 'vance_owen' });
+        expect(briefing.items.find(i => i.id === 'cmd-order-interpretations')?.target).toMatchObject({ kind: 'officer_events', officerFocus: 'interpretations' });
+        expect(briefing.items.find(i => i.id === 'cmd-officer-events')?.target).toMatchObject({ kind: 'officer_events', officerFocus: 'personnel' });
+    });
+
     it('flags low-cohesion corps as warning', () => {
         const state = makeState({
             formations: {
@@ -126,15 +151,17 @@ describe('assembleCommandBriefing', () => {
         const state = makeState();
         state.political = {
             enclave_resilience: {
-                bihac: { resilience: 18, isolation_turns: 16, hardening_active: true },
+                bihac_pocket: { resilience: 18, isolation_turns: 16, hardening_active: true },
                 gorazde: { resilience: 28, isolation_turns: 4, hardening_active: false },
             },
         };
         const briefing = assembleCommandBriefing(state, 'RBiH');
-        const enclave = briefing.items.find(i => i.id === 'hum-enclave-bihac');
+        const enclave = briefing.items.find(i => i.id === 'hum-enclave-bihac_pocket');
         expect(enclave).toBeDefined();
         expect(enclave!.section).toBe('humanitarian');
         expect(enclave!.severity).toBe('critical');
+        expect(enclave!.title).toBe('Bihac Pocket under prolonged siege');
+        expect(enclave!.title).not.toContain('_');
         expect(enclave!.detail).toContain('Isolated for 16 turns');
     });
 

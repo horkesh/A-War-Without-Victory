@@ -1,11 +1,14 @@
 import { useRef, useState } from 'react';
 import type { CommandBriefingItemView, SummaryFocusSection } from '../data/types';
+import type { ArmyHQTab } from '../../shared/shellHandoff';
 import { useGameStore } from '../store/gameStore';
 import { t } from '../i18n';
+import { openArmyHQBriefingForCorps, openArmyHQTab } from '../utils/shellNavigation';
 
 interface CommandBriefingLayerProps {
   onOpenSummary: (focus?: SummaryFocusSection) => void;
   onOpenEnclaves: () => void;
+  onOpenPeacePlan?: () => void;
 }
 
 const SEVERITY_DOT: Record<CommandBriefingItemView['severity'], string> = {
@@ -32,12 +35,11 @@ const SEVERITY_BG: Record<CommandBriefingItemView['severity'], string> = {
   info: 'bg-sky-950/30',
 };
 
-export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandBriefingLayerProps) {
+export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves, onOpenPeacePlan }: CommandBriefingLayerProps) {
   const commandBriefing = useGameStore((state) => state.loadedGameState?.commandBriefing);
   const setSelectedOperationKey = useGameStore((state) => state.setSelectedOperationKey);
   const setSelectedCorpsFrontSectorId = useGameStore((state) => state.setSelectedCorpsFrontSectorId);
   const setSelectedOsid = useGameStore((state) => state.setSelectedOsid);
-  const setSelectedArmyId = useGameStore((state) => state.setSelectedArmyId);
   const setArmyHQExpandedCorpsId = useGameStore((state) => state.setArmyHQExpandedCorpsId);
   const devMode = useGameStore((state) => state.devMode);
   const [dismissed, setDismissed] = useState(false);
@@ -54,7 +56,9 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
   const handleOpenItem = (item: CommandBriefingItemView) => {
     switch (item.target.type) {
       case 'summary':
-        onOpenSummary(item.target.summaryFocus);
+        if (!openArmyHQTab(useGameStore.getState(), 'summary')) {
+          onOpenSummary(item.target.summaryFocus);
+        }
         return;
       case 'enclaves':
         onOpenEnclaves();
@@ -75,18 +79,17 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
         }
         return;
       case 'corps': {
-        const faction = useGameStore.getState().loadedGameState?.player_faction;
-        if (faction) {
-          setSelectedArmyId(faction);
-          if (item.target.corpsId) setArmyHQExpandedCorpsId(item.target.corpsId);
-        }
+        openArmyHQBriefingForCorps(useGameStore.getState(), item.target.corpsId ?? null);
         return;
       }
       case 'officer_events': {
-        const faction = useGameStore.getState().loadedGameState?.player_faction;
-        if (faction) setSelectedArmyId(faction);
+        openArmyHQTab(useGameStore.getState(), officerTargetTab(item.target.officerFocus));
+        if (item.target.officerFocus === 'interpretations') setArmyHQExpandedCorpsId(null);
         return;
       }
+      case 'peace_plan':
+        onOpenPeacePlan?.();
+        return;
       case 'none':
       default:
         return;
@@ -164,4 +167,8 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
       `}</style>
     </div>
   );
+}
+
+function officerTargetTab(focus: CommandBriefingItemView['target']['officerFocus']): ArmyHQTab {
+  return focus === 'personnel' ? 'personnel' : 'briefing';
 }

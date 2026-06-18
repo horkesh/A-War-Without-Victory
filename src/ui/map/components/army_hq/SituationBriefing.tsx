@@ -14,6 +14,9 @@ const TARGET_LABELS: Partial<Record<BriefingTarget['type'], string>> = {
     operation: '-> OP',
     enclaves: '-> ENCLAVES',
     settlement: '-> MAP',
+    summary: '-> SUMMARY',
+    officer_events: '-> PERSONNEL',
+    peace_plan: '-> PLAN',
 };
 
 /**
@@ -76,7 +79,7 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
                                     ? 'border-amber-500/30 hover:border-amber-500/50'
                                     : 'border-panel-border hover:border-panel-border';
                         const hasTarget = item.target.type !== 'none';
-                        const targetLabel = TARGET_LABELS[item.target.type];
+                        const targetLabel = item.actionChipLabel ?? item.target.label ?? TARGET_LABELS[item.target.type];
 
                         return (
                             <button

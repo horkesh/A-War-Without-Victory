@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-18] fix(ui): make command briefing action routes real
+
+**Type:** UI/read-model route ownership, persisted briefing target metadata, and player-copy hardening.
+
+**Fix:** Command briefing action chips now carry routeable targets instead of rendering as no-op review prompts. Supply briefing rows preserve their summary/support target; peace-plan briefing rows route back to the inbox/modal owner; officer interpretation/personnel rows route to Army HQ briefing/personnel; corps targets use the shell-navigation helper instead of stale selected-army state. Army HQ Situation Briefing now renders normalized action-chip labels and routes summary/officer/enclave/peace targets rather than silently dropping them. Humanitarian enclave briefing titles now humanize identifier-like enclave ids before player display. Validator coverage remains permissive/additive for new optional target metadata.
+
+**Verification:** Red/green command-briefing route pack passed 5 files / 65 tests; persisted-state validation pack passed 3 files / 229 tests; TypeScript passed.
+
+**Scope/determinism:** UI/read-model routing plus additive `military.last_briefing.target` metadata and tests. No combat logic, scenario setup, map geometry, startup artifact, save schema version, serialization ordering, calibration floor, golden baselines, randomness, timestamps, or packaged installer artifact changed. Existing saves remain accepted because target metadata is optional.
+
+---
+
 ## [2026-06-18] fix(ui): align Personnel vacancies with opening commander read model
 
 **Type:** UI/read-model Army HQ polish and startup-truth guard.

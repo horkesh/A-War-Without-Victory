@@ -362,6 +362,12 @@ function actionForBriefingItem(item: CommandBriefingItemView): Pick<CandidateCar
       navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
     };
   }
+  if (item.target.type === 'peace_plan') {
+    return {
+      actionLabel: item.actionLabel ?? t('decisionRoom.action.reviewBriefing'),
+      navigationTarget: { kind: 'inbox' },
+    };
+  }
   if (item.target.type === 'enclaves') {
     return {
       actionLabel: item.actionLabel ?? t('decisionRoom.action.reviewEnclaves'),

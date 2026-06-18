@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Command Briefing route contract** | [implemented/20260618_COMMAND_BRIEFING_ROUTE_CONTRACTS.md](implemented/20260618_COMMAND_BRIEFING_ROUTE_CONTRACTS.md) - Command briefing action chips now carry real owner routes, shell helper handoffs, SitRep labels, and humanized enclave titles. |
 | **Latest Personnel vacancy read-model sync** | [implemented/20260618_PERSONNEL_VACANCY_READMODEL_SYNC.md](implemented/20260618_PERSONNEL_VACANCY_READMODEL_SYNC.md) - Army HQ Personnel command-vacancy counts now share the opening commander display resolver, avoiding false turn-0 vacancy alerts for read-model and synthetic command displays. |
 | **Latest Decision Room routing closeout** | [implemented/20260618_DECISION_ROOM_ROUTING_AND_FIXTURE_SYNC.md](implemented/20260618_DECISION_ROOM_ROUTING_AND_FIXTURE_SYNC.md) - Pre-advance review, `1 REVIEW`, and operation opportunities now open Warroom Decision Room routes; player-faction filtering is shared; Krivaja/Stupcanica stale unit fixtures are receipt-aware. |
 | **Latest Srebrenica/Zepa receipt gate** | [implemented/20260618_SREBRENICA_EVENT_RECEIPT_OPERATION_GATE.md](implemented/20260618_SREBRENICA_EVENT_RECEIPT_OPERATION_GATE.md) - Krivaja/Stupcanica operation-context rows now require event-owned Srebrenica/Zepa fall receipts first, with timeline/player-copy corrections and active docs synced. |

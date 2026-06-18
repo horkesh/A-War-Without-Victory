@@ -1577,6 +1577,7 @@ function App() {
           <CommandBriefingLayer
             onOpenSummary={openSummary}
             onOpenEnclaves={() => setEnclaveDashboardOpen(true)}
+            onOpenPeacePlan={() => setDismissedPeacePlanKey(null)}
           />
           <aside
             aria-label="Order of Battle"

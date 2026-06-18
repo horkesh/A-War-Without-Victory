@@ -183,9 +183,18 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
             case 'corps':
                 if (target.corpsId) navigateToCorps(target.corpsId);
                 break;
-            case 'enclaves':
-            case 'officer_events':
             case 'summary':
+                setActiveTab('summary');
+                break;
+            case 'officer_events':
+                setActiveTab(target.officerFocus === 'personnel' ? 'personnel' : 'briefing');
+                break;
+            case 'enclaves':
+                onDecisionRoomNavigateTarget?.({ kind: 'enclave-dashboard' });
+                break;
+            case 'peace_plan':
+                onDecisionRoomNavigateTarget?.({ kind: 'inbox' });
+                break;
             case 'settlement':
             case 'none':
                 break;
