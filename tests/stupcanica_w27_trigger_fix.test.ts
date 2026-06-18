@@ -48,6 +48,20 @@ function trivialState(turn: number): GameState {
     } as unknown as GameState;
 }
 
+function stateWithZepaFallReceipt(turn: number): GameState {
+    return {
+        meta: { turn } as unknown,
+        military: {
+            corps_command: {},
+            formations: {},
+            fired_event_ids: ['zepa_falls_1995'],
+            event_fire_counts: { zepa_falls_1995: 1 },
+            event_last_fired_turn: { zepa_falls_1995: turn },
+        },
+        political: { political_controllers: {} },
+    } as unknown as GameState;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // T1 — Stupčanica-95 trigger evaluates to false at turn=27 (canon floor t≥172).
 // Pin the canonical floor; regression-guards d622b762.
@@ -71,14 +85,14 @@ describe('Stupčanica-95 trigger — canonical floor t≥172', () => {
         }
     });
 
-    it('T2: trigger evaluates to true at turn=174+ (existing behavior preserved)', () => {
+    it('T2: trigger evaluates to true after the Zepa fall receipt at turn=172+', () => {
         const def = _TRIGGERED_OPS.find((d) => d.name === 'Operation Stupčanica-95');
         assert.ok(def);
         // First true at canon floor t=172, then 173, 174, 175, ...
-        assert.equal(def!.trigger(trivialState(172), 172), true);
-        assert.equal(def!.trigger(trivialState(174), 174), true);
-        assert.equal(def!.trigger(trivialState(175), 175), true);
-        assert.equal(def!.trigger(trivialState(200), 200), true);
+        assert.equal(def!.trigger(stateWithZepaFallReceipt(172), 172), true);
+        assert.equal(def!.trigger(stateWithZepaFallReceipt(174), 174), true);
+        assert.equal(def!.trigger(stateWithZepaFallReceipt(175), 175), true);
+        assert.equal(def!.trigger(stateWithZepaFallReceipt(200), 200), true);
     });
 
     it('T3: trigger evaluation is deterministic — re-eval byte-identical', () => {
@@ -86,9 +100,10 @@ describe('Stupčanica-95 trigger — canonical floor t≥172', () => {
         assert.ok(def);
         // Same (state, turn) must return the same boolean every call.
         for (const t of [27, 100, 171, 172, 174, 200]) {
-            const a = def!.trigger(trivialState(t), t);
-            const b = def!.trigger(trivialState(t), t);
-            const c = def!.trigger(trivialState(t), t);
+            const state = t >= 172 ? stateWithZepaFallReceipt(t) : trivialState(t);
+            const a = def!.trigger(state, t);
+            const b = def!.trigger(state, t);
+            const c = def!.trigger(state, t);
             assert.equal(a, b, `non-deterministic trigger at turn=${t}: call1≠call2`);
             assert.equal(b, c, `non-deterministic trigger at turn=${t}: call2≠call3`);
         }

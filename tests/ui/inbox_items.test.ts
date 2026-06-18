@@ -378,7 +378,7 @@ describe('deriveInboxItems — autonomy proposals', () => {
         expect(proposalItems[1].id).toBe('proposal:PROP_5_ops_1');
     });
 
-    it('routes OPPORTUNITY proposals to Army HQ opportunity dossiers', () => {
+    it('routes OPPORTUNITY proposals to the presidential Decision Room', () => {
         const state = makeStub({
             pendingProposalReviews: [
                 {
@@ -398,7 +398,7 @@ describe('deriveInboxItems — autonomy proposals', () => {
         expect(opportunityItems).toHaveLength(1);
         expect(opportunityItems[0].id).toBe('opportunity:PROP_176_opportunity_0');
         expect(opportunityItems[0].severity).toBe('normal');
-        expect(opportunityItems[0].action).toBe('army_hq_opportunity');
+        expect(opportunityItems[0].action).toBe('decision_room');
         expect(opportunityItems[0].title).toBe('Operation Sana');
         expect(opportunityItems[0].subtitle).toBe('staff recommendation: approve');
         expect(items.filter(i => i.type === 'autonomy_proposal')).toHaveLength(0);

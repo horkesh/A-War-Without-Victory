@@ -6,7 +6,7 @@
  * the president uses while observing the battlefield.
  *
  * Layout: date + navigation (left), alert badges + army crest (center), advance turn (right).
- * Deep review routes to Army HQ. Campaign context routes to Warroom.
+ * Deep review routes to the Warroom Decision Room. Campaign context routes to Warroom.
  *
  * Command levels on this bar:
  * - Level 1 (Strategic Guidance): ADVANCE TURN, SUMMARY (map-local briefing)
@@ -117,6 +117,7 @@ interface PresidentialToolbarProps {
     onOpenRecords?: () => void;
     onOpenOpsHistory?: () => void;
     onOpenCodex?: () => void;
+    onReviewPriorities?: () => void;
 }
 
 export function PresidentialToolbar({
@@ -126,6 +127,7 @@ export function PresidentialToolbar({
     onOpenDesk,
     onOpenRecords,
     onOpenCodex,
+    onReviewPriorities,
 }: PresidentialToolbarProps) {
     const ipc = useIPC();
     const loadedGameState = useGameStore((s) => s.loadedGameState);
@@ -253,6 +255,14 @@ export function PresidentialToolbar({
         clearFieldPanels();
         onOpenCodex?.();
     }, [clearFieldPanels, onOpenCodex]);
+
+    const handleReviewPriorities = useCallback(() => {
+        if (onReviewPriorities) {
+            onReviewPriorities();
+            return;
+        }
+        handleOpenHQ();
+    }, [handleOpenHQ, onReviewPriorities]);
 
     const hasAlerts = pendingReviews > 0 || pressureWarning || (reserveAttention?.pendingCount ?? 0) > 0;
 
@@ -418,7 +428,7 @@ export function PresidentialToolbar({
                     {/* Left alert: Pending decisions */}
                     {pendingReviews > 0 && (
                         <button
-                            onClick={handleOpenHQ}
+                            onClick={handleReviewPriorities}
                             className="flex items-center gap-1.5 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wide bg-red-900/30 text-red-400 border border-red-500/30 rounded animate-pulse hover:bg-red-900/50 transition-colors"
                             title={t('presidentialToolbar.openAttentionQueue')}
                         >

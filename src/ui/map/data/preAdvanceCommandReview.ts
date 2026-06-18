@@ -78,7 +78,11 @@ function countBlockingDecisions(state: LoadedGameState | null): number {
     state.presidentialReviewQueue?.eventDecisionCount ?? 0,
     state.pendingEventDecisions?.length ?? 0,
   );
-  return eventDecisionCount + (state.pendingParamilitaryRequests?.length ?? 0) + counterOfferCount;
+  const playerFaction = state.player_faction ?? null;
+  const paramilitaryRequestCount = playerFaction
+    ? (state.pendingParamilitaryRequests ?? []).filter((request) => request.faction === playerFaction).length
+    : 0;
+  return eventDecisionCount + paramilitaryRequestCount + counterOfferCount;
 }
 
 export function formatPreAdvanceGateBlockTitle(view: { blockingDecisionCount: number }): string {

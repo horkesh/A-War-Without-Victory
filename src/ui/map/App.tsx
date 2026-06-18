@@ -95,6 +95,7 @@ import type { PresidentialDecisionRoomNavigationTarget } from './data/presidenti
 import { shouldShowPeaceWarTransition } from './data/peaceWarTransitionGate';
 import { applyShellHandoffCommand, openArmyHQDecisionConsequenceRecord, openArmyHQRecordsSubTab, openArmyHQTab, openChronicle, openCodex, warroomCommandStaysInRoom } from './utils/shellNavigation';
 import { openPresidentialDecisionRoomNavigationTarget } from './utils/presidentialDecisionRoomNavigation';
+import { requestDecisionRoomLens } from './utils/decisionRoomLensRequest';
 import { isWarroomLocalCommand, type WarroomOverlaySurface } from './utils/warroomNavigation';
 import { getPeacePlanDismissalKey, shouldShowPeacePlanModal } from './utils/peacePlanDismissal';
 import { decodeShellHandoffCommand, isShellHandoffCommand, type ArmyHQRecordsSubTab } from '../shared/shellHandoff';
@@ -1092,14 +1093,35 @@ function App() {
     setSummaryOpen(false);
   };
 
-  const reviewPreAdvancePriorities = () => {
+  const openWarroomDecisionRoomFromField = (
+    lens: Parameters<typeof requestDecisionRoomLens>[0] = 'all',
+    cardId: string | null = null,
+  ) => {
     const gs = useGameStore.getState();
-    openArmyHQTab(gs, 'briefing');
-    leaveWarroomForGame();
+    requestDecisionRoomLens(lens, null, cardId);
+    gs.setArmyHQOpen(false);
+    gs.setCodexOpen(false);
+    gs.setChronicleOpen(false);
+    gs.setIsOperationsPanelOpen(false);
+    setWarroomDeskOpen(false);
+    setWarroomOverlaySurface(null);
+    setWarroomDecisionRoomOpen(true);
+    closeCommandStrip(false);
+    setDiplomacyOpen(false);
+    setIsDecisionHistoryOpen(false);
+    setAppScreen('warroom');
     setSummaryOpen(false);
   };
 
+  const reviewPreAdvancePriorities = () => {
+    openWarroomDecisionRoomFromField('all');
+  };
+
   const reviewPreAdvanceItem = (item: PreAdvanceCommandReviewItem) => {
+    if (item.navigationTarget.kind === 'decision-room') {
+      openWarroomDecisionRoomFromField(item.navigationTarget.lens, item.navigationTarget.cardId ?? null);
+      return;
+    }
     if (item.navigationTarget.kind === 'counter-offer') {
       setSelectedCounterOfferId(item.navigationTarget.counterOfferId);
       leaveWarroomForGame();
@@ -1118,6 +1140,10 @@ function App() {
   };
 
   const reviewPreAdvanceTarget = (target: PresidentialDecisionRoomNavigationTarget) => {
+    if (target.kind === 'decision-room') {
+      openWarroomDecisionRoomFromField(target.lens, target.cardId ?? null);
+      return;
+    }
     if (target.kind === 'counter-offer') {
       setSelectedCounterOfferId(target.counterOfferId);
       leaveWarroomForGame();
@@ -1136,6 +1162,11 @@ function App() {
   };
 
   const openDecisionRoomTarget = (target: PresidentialDecisionRoomNavigationTarget) => {
+    if (target.kind === 'decision-room') {
+      requestDecisionRoomLens(target.lens, null, target.cardId ?? null);
+      setSummaryOpen(false);
+      return true;
+    }
     if (target.kind === 'counter-offer') {
       setSelectedCounterOfferId(target.counterOfferId);
       setSummaryOpen(false);
@@ -1378,7 +1409,11 @@ function App() {
       leaveWarroomForGame();
     }
     if (action === 'decision_room') {
-      openWarroomDeskFromField();
+      if (itemId.startsWith('opportunity:')) {
+        openWarroomDecisionRoomFromField('opportunity', itemId);
+      } else {
+        openWarroomDeskFromField();
+      }
     }
     if (action === 'peace_plan_modal') {
       setDismissedPeacePlanKey(null);
@@ -1533,6 +1568,7 @@ function App() {
             onOpenRecords={() => openArmyHQRecords('aar')}
             onOpenOpsHistory={() => useGameStore.getState().setIsOperationsPanelOpen(true)}
             onOpenCodex={() => openCodex(useGameStore.getState())}
+            onReviewPriorities={reviewPreAdvancePriorities}
           />
         </RootErrorBoundary>
       </header>

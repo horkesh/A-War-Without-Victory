@@ -474,8 +474,8 @@ export function PresidentialDecisionRoomPanel({ onNavigateTarget }: Presidential
     if (requested === null) return;
     setActiveLens(requested.lens);
     setActiveCommandCategoryId(requested.commandCategoryId);
-    setActiveCardId(null);
-    if (requested.lens !== 'all' || requested.commandCategoryId !== null) setShowAdvanced(true);
+    setActiveCardId(requested.cardId ?? null);
+    if (requested.lens !== 'all' || requested.commandCategoryId !== null || requested.cardId) setShowAdvanced(true);
   }, [lensRequest]);
 
   const categorySeedCardId = useMemo(() => {

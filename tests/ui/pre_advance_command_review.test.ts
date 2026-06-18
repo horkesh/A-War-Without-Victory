@@ -226,13 +226,13 @@ describe('buildPreAdvanceCommandReviewView', () => {
       state: makeState({
         pendingParamilitaryRequests: [
           { faction: 'RS', strength: 600, target_osid: 'op:zvornik:zvornik_2', estimated_civilian_risk: 42, mode: 'offensive' },
-          { faction: 'RS', strength: 150, target_osid: 'op:bijeljina:bijeljina_2', estimated_civilian_risk: 11 },
+          { faction: 'RBiH', strength: 150, target_osid: 'op:bijeljina:bijeljina_2', estimated_civilian_risk: 11 },
         ],
       }),
     });
 
     expect(view.status).toBe('blocked');
-    expect(view.blockingDecisionCount).toBe(2);
+    expect(view.blockingDecisionCount).toBe(1);
     expect(view.items[0]).toMatchObject({
       id: 'paramilitary:pending',
       severity: 'blocking',
